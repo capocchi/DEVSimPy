@@ -1,0 +1,988 @@
+# French translations for Python package
+# Traductions françaises du paquet Python.
+# Copyright (C) 2010 THE Python'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the Python package.
+# capocchi <capocchi@univ-corse.fr>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Python 2_6\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-07-25 15:49+0200\n"
+"PO-Revision-Date: 2010-02-04 21:56+0100\n"
+"Last-Translator: capocchi <capocchi@univ-corse.fr>\n"
+"Language-Team: French\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: Container.py:109 Container.py:1776 Container.py:1780 main.py:1177
+msgid "Error opening file\n"
+msgstr "Erreur en ouvrant le fichier\n"
+
+#: Container.py:122
+msgid "Import Error !\n"
+msgstr "Erreur d'importation !\n"
+
+#: Container.py:125
+#, python-format
+msgid "Module not imported! %s \n"
+msgstr "Module non importé! %s \n"
+
+#: Container.py:135
+#, python-format
+msgid "SyntaxError in file :%s, %s, %s \n"
+msgstr "Erreur de syntaxe dans le fichier : %s, %s, %s \n"
+
+#: Container.py:138
+#, python-format
+msgid "Error : Model not instantiated! %s \n"
+msgstr "Erreur: modèle non instancié! %s \n"
+
+#: Container.py:146
+msgid "DEVS model not instantiated: Unknown file extention\n"
+msgstr "Modèle DEVS non instancié: format inconnu\n"
+
+#: Container.py:188
+msgid "Error importing model"
+msgstr "Erreur pendant l'importation du modèle"
+
+#: Container.py:188 ImportLibrary.py:131 ImportLibrary.py:135
+#: SimulationGUI.py:64
+msgid "Error"
+msgstr "Erreur"
+
+#: Container.py:212
+msgid "Object not instantiated !"
+msgstr "Objet non instancié !"
+
+#: Container.py:212
+msgid "Exclamation"
+msgstr "Exclamation"
+
+#: Container.py:220
+msgid "Adding DEVSimPy model: \n"
+msgstr "Ajout du modèle DEVSimPy: \n"
+
+#: Container.py:262
+#, python-format
+msgid "problem saving: %s \n"
+msgstr "problème penant la sauvegarde de : %s \n"
+
+#: Container.py:274
+#, python-format
+msgid "problem loading: %s \n"
+msgstr "problème pendant le chargement de : %s \n"
+
+#: Container.py:706
+msgid "Draw error \n"
+msgstr "Erreur de tracé \n"
+
+#: Container.py:721
+msgid "Edit"
+msgstr "Edition"
+
+#: Container.py:721
+msgid "Edit the code"
+msgstr "Edite le code"
+
+#: Container.py:722
+msgid "&Copy\tCtrl+C"
+msgstr "&Copier\tCtrl+C"
+
+#: Container.py:722
+msgid "Copy the Model"
+msgstr "Copie le modèle"
+
+#: Container.py:723 Container.py:813
+msgid "&Paste\tCtrl+V"
+msgstr "&Coller\tCtrl+V"
+
+#: Container.py:723 Container.py:813
+msgid "Paste the Model"
+msgstr "Colle le modèle"
+
+#: Container.py:724
+msgid "&Cut\tCtrl+X"
+msgstr "&Couper\tCtrl+X"
+
+#: Container.py:724
+msgid "Cut the Model"
+msgstr "Coupe le modèle"
+
+#: Container.py:725
+msgid "&Right Rotate\tCtrl+R"
+msgstr "&Rotation droite\tCtrl+R"
+
+#: Container.py:725
+msgid "Rotate on the right"
+msgstr "Rotation vers la droite"
+
+#: Container.py:726
+msgid "&Left Rotate\tCtrl+L"
+msgstr "&Rotation gauche\tCtrl+L"
+
+#: Container.py:726
+msgid "Rotate on the left"
+msgstr "Rotation vers la gauche"
+
+#: Container.py:727 main.py:184
+msgid "Delete"
+msgstr "Supprimer"
+
+#: Container.py:727
+msgid "Delete the Model"
+msgstr "Supprimer le modèle"
+
+#: Container.py:728
+msgid "Export"
+msgstr "Exporter"
+
+#: Container.py:728
+msgid "Export the Model"
+msgstr "Exporter le modèle"
+
+#: Container.py:729 Container.py:994 Container.py:1667 Container.py:1675
+#: Container.py:1960 Container.py:1968 main.py:559 main.py:719
+msgid "Properties"
+msgstr "Propriétés"
+
+#: Container.py:729
+msgid "Edit the attributs"
+msgstr "Editer les attributs"
+
+#: Container.py:758
+msgid "Rotate"
+msgstr "Tourner"
+
+#: Container.py:768
+msgid "Connect to"
+msgstr "Connecter à"
+
+#: Container.py:934
+#, python-format
+msgid " %s can not connect with %s \n"
+msgstr "%s ne peut pas être connecté avec %s \n"
+
+#: Container.py:1011
+msgid "DEVSimPy Models Files (*.md)|*.md|All files (*)|*|"
+msgstr "Fichiers DEVSimPy (*.md)|*.md|All files (*)|*|"
+
+#: Container.py:1012
+msgid "Export file as..."
+msgstr ""
+
+#: Container.py:1017
+msgid " Exported"
+msgstr ""
+
+#: Container.py:1037
+#, python-format
+msgid "Error exported file %s\n"
+msgstr ""
+
+#: Container.py:1132
+msgid "use >= wx-2.8-gtk-unicode library"
+msgstr ""
+
+#: Container.py:1178
+msgid " modified"
+msgstr ""
+
+#: Container.py:1661 Container.py:1954
+msgid "Block Label"
+msgstr ""
+
+#: Container.py:1692
+#, python-format
+msgid "\t Label: %s\n"
+msgstr ""
+
+#: Container.py:1693
+#, python-format
+msgid "\t Input/Output: %s,%s\n"
+msgstr ""
+
+#: Container.py:1752 main.py:403 main.py:1560
+msgid "Not implemented !\n"
+msgstr ""
+
+#: Container.py:1795 Container.py:1819
+#, python-format
+msgid "\t Ad-hoc DEVS Model: %s \n"
+msgstr ""
+
+#: Container.py:2036
+#, python-format
+msgid "Plotting %s"
+msgstr ""
+
+#: Container.py:2041
+#, python-format
+msgid "Plotting %s on port %d"
+msgstr ""
+
+#: Container.py:2045
+msgid ""
+"No data available \n"
+" Go to the simulation process !"
+msgstr ""
+
+#: Container.py:2058
+#, python-format
+msgid "SpreadSheet %s"
+msgstr ""
+
+#: Container.py:2062
+msgid ""
+"No data available\n"
+" Go to the simulation process !"
+msgstr ""
+
+#: Container.py:2072
+msgid "Comma-separated values files (*.csv)|*.csv|All files(*)|*|"
+msgstr ""
+
+#: Container.py:2082
+msgid "Choose a csv file"
+msgstr ""
+
+#: Container.py:2109
+msgid "Attribute"
+msgstr ""
+
+#: Container.py:2109
+msgid "Value"
+msgstr ""
+
+#: Container.py:2109
+msgid "Information"
+msgstr ""
+
+#: Container.py:2110
+msgid "Name"
+msgstr ""
+
+#: Container.py:2110
+msgid "Color and size pen"
+msgstr ""
+
+#: Container.py:2110
+msgid "Background Color"
+msgstr ""
+
+#: Container.py:2110
+msgid "Input port"
+msgstr ""
+
+#: Container.py:2110
+msgid "output port"
+msgstr ""
+
+#: Container.py:2110
+msgid "DEVS specific attribute"
+msgstr ""
+
+#: Container.py:2113
+msgid "Id number"
+msgstr ""
+
+#: Container.py:2307
+msgid "Save file as ..."
+msgstr ""
+
+#: Container.py:2323
+msgid "Class"
+msgstr ""
+
+#: Container.py:2324
+msgid "Constructor"
+msgstr ""
+
+#: Container.py:2325
+msgid "Internal Transition"
+msgstr ""
+
+#: Container.py:2326
+msgid "External Transition"
+msgstr ""
+
+#: Container.py:2327
+msgid "Output Function"
+msgstr ""
+
+#: Container.py:2328
+msgid "Time Advance Function"
+msgstr ""
+
+#: Container.py:2467 main.py:939
+msgid "Save File"
+msgstr ""
+
+#: Container.py:2467 main.py:790 main.py:939
+msgid "Save the current diagram"
+msgstr ""
+
+#: Container.py:2468
+msgid "Save File As"
+msgstr ""
+
+#: Container.py:2468 main.py:791 main.py:940
+msgid "Save the diagram with an another name"
+msgstr ""
+
+#: Container.py:2470 main.py:942
+msgid "Zoom +"
+msgstr ""
+
+#: Container.py:2470 main.py:849
+msgid "Zoom in"
+msgstr ""
+
+#: Container.py:2471 main.py:943
+msgid "Zoom -"
+msgstr ""
+
+#: Container.py:2471 main.py:850
+msgid "Zoom out"
+msgstr ""
+
+#: Container.py:2472 main.py:851 main.py:944
+msgid "AnnuleZoom"
+msgstr ""
+
+#: Container.py:2472
+msgid "Initial view"
+msgstr ""
+
+#: Container.py:2474 main.py:840 main.py:946
+msgid "Simulation"
+msgstr ""
+
+#: Container.py:2474 main.py:946
+msgid "Simulate the diagram"
+msgstr ""
+
+#: Container.py:2520
+msgid "Zoom In"
+msgstr ""
+
+#: Container.py:2526
+msgid "Zoom Out"
+msgstr ""
+
+#: Container.py:2532
+msgid "No Zoom"
+msgstr ""
+
+#: Container.py:2545 main.py:1192 main.py:1207 main.py:1237
+msgid " saved"
+msgstr ""
+
+#: Container.py:2552 Container.py:2579
+#, python-format
+msgid "Error saving file %s\n"
+msgstr ""
+
+#: Container.py:2561
+msgid "DEVSimPy files (*.dsp)|*.dsp|All files (*)|*|"
+msgstr ""
+
+#: Container.py:2563 main.py:1200 main.py:1223
+msgid "Save file as..."
+msgstr ""
+
+#: ImportLibrary.py:62 main.py:714
+msgid "Library"
+msgstr ""
+
+#: ImportLibrary.py:69 main.py:847
+msgid "New"
+msgstr ""
+
+#: ImportLibrary.py:131 ImportLibrary.py:135
+#, python-format
+msgid "Error %s already imported"
+msgstr ""
+
+#: Plot.py:29
+msgid "Numpy module not found !"
+msgstr ""
+
+#: Plot.py:34
+msgid "Scipy module not found !"
+msgstr ""
+
+#: Plot.py:54
+msgid "Page Setup"
+msgstr ""
+
+#: Plot.py:54
+msgid "Setup the printer page"
+msgstr ""
+
+#: Plot.py:55
+msgid "Print Preview"
+msgstr ""
+
+#: Plot.py:55
+msgid "Show the current plot on page"
+msgstr ""
+
+#: Plot.py:56
+msgid "Print"
+msgstr ""
+
+#: Plot.py:56
+msgid "Print the current plot"
+msgstr ""
+
+#: Plot.py:57
+msgid "Save Plot"
+msgstr ""
+
+#: Plot.py:57
+msgid "Save current plot"
+msgstr ""
+
+#: Plot.py:58
+msgid "E&xit"
+msgstr ""
+
+#: Plot.py:58
+msgid "Enough of this already!"
+msgstr ""
+
+#: Plot.py:59 main.py:893
+msgid "&File"
+msgstr ""
+
+#: Plot.py:62
+msgid "&Redraw"
+msgstr ""
+
+#: Plot.py:62
+msgid "Redraw plots"
+msgstr ""
+
+#: Plot.py:63
+msgid "&Scale"
+msgstr ""
+
+#: Plot.py:63
+msgid "Scale canvas"
+msgstr ""
+
+#: Plot.py:64 Plot.py:65 Plot.py:66
+msgid "Enable &Zoom"
+msgstr ""
+
+#: Plot.py:64 Plot.py:65 Plot.py:66
+msgid "Enable Mouse Zoom"
+msgstr ""
+
+#: Plot.py:67
+msgid "Enable &Legend"
+msgstr ""
+
+#: Plot.py:67
+msgid "Turn on Legend"
+msgstr ""
+
+#: Plot.py:68
+msgid "Enable &Point Label"
+msgstr ""
+
+#: Plot.py:68
+msgid "Show Closest Point"
+msgstr ""
+
+#: Plot.py:69
+msgid "Scroll Up 1"
+msgstr ""
+
+#: Plot.py:69
+msgid "Move View Up 1 Unit"
+msgstr ""
+
+#: Plot.py:70
+msgid "Scroll Rt 2"
+msgstr ""
+
+#: Plot.py:70
+msgid "Move View Right 2 Units"
+msgstr ""
+
+#: Plot.py:71
+msgid "&Plot Reset"
+msgstr ""
+
+#: Plot.py:71
+msgid "Reset to original plot"
+msgstr ""
+
+#: Plot.py:72
+msgid "&Plot"
+msgstr ""
+
+#: Plot.py:78
+#, python-format
+msgid "Signal %d"
+msgstr ""
+
+#: Plot.py:78 Plot.py:79 Plot.py:81
+msgid "Spectrum Plot"
+msgstr ""
+
+#: Plot.py:79
+msgid "All"
+msgstr ""
+
+#: Plot.py:81
+msgid "Signal"
+msgstr ""
+
+#: Plot.py:82
+msgid "&Spectrum"
+msgstr ""
+
+#: Plot.py:130
+#, python-format
+msgid "Spectrum of signal %d"
+msgstr ""
+
+#: Plot.py:144 Plot.py:147
+msgid "Spectrum of signal "
+msgstr ""
+
+#: Plot.py:153
+#, python-format
+msgid "Left Mouse Down at Point: (%.4f, %.4f)"
+msgstr ""
+
+#: Plot.py:283 Plot.py:303
+msgid "Frequency [Hz]"
+msgstr ""
+
+#: Plot.py:283 Plot.py:304
+msgid "Amplitude [dB]"
+msgstr ""
+
+#: SimulationGUI.py:64
+msgid "A field must contain some positive numbers!"
+msgstr ""
+
+#: SimulationGUI.py:136
+msgid "Final time"
+msgstr ""
+
+#: SimulationGUI.py:147
+msgid "Run"
+msgstr ""
+
+#: SimulationGUI.py:149
+msgid "Stop"
+msgstr ""
+
+#: SimulationGUI.py:150
+msgid "Suspend"
+msgstr ""
+
+#: SimulationGUI.py:151
+msgid "Log"
+msgstr ""
+
+#: SimulationGUI.py:173
+msgid "Setting"
+msgstr ""
+
+#: SimulationGUI.py:179 main.py:477 main.py:854 main.py:1053
+msgid "Close"
+msgstr ""
+
+#: SimulationGUI.py:191
+msgid "Fault Simulation"
+msgstr ""
+
+#: SimulationGUI.py:192
+msgid "Verbose"
+msgstr ""
+
+#: SimulationGUI.py:315
+msgid "Task Interrupted"
+msgstr ""
+
+#: SimulationGUI.py:337
+msgid "Task in Suspends"
+msgstr ""
+
+#: SimulationGUI.py:353
+msgid "Simulation process"
+msgstr ""
+
+#: SimulationGUI.py:364
+msgid "Simulation Completed"
+msgstr ""
+
+#: SimulationGUI.py:371
+msgid "You want to simulate an empty master model!"
+msgstr ""
+
+#: SimulationGUI.py:371
+msgid "Info"
+msgstr ""
+
+#: SimulationGUI.py:386
+msgid "Empty 2 mode \n"
+msgstr ""
+
+#: SimulationGUI.py:408
+msgid "Empty mode over\n"
+msgstr ""
+
+#: SimulationGUI.py:418
+msgid "Are you sure to stop simulation ?"
+msgstr ""
+
+#: SimulationGUI.py:418
+msgid "Question"
+msgstr ""
+
+#: SimulationGUI.py:470
+#, python-format
+msgid ""
+"\n"
+" **** CLOCK : %f \n"
+msgstr ""
+
+#: SpreadSheet.py:151
+#, python-format
+msgid "Sheet %d"
+msgstr ""
+
+#: SpreadSheet.py:161
+msgid "Plotting "
+msgstr ""
+
+#: main.py:121
+msgid "Missing root"
+msgstr ""
+
+#: main.py:156
+msgid "Import"
+msgstr ""
+
+#: main.py:156
+msgid "Import library"
+msgstr ""
+
+#: main.py:157
+msgid "Refresh"
+msgstr ""
+
+#: main.py:157
+msgid "Refresh library"
+msgstr ""
+
+#: main.py:158
+msgid "Help"
+msgstr ""
+
+#: main.py:158
+msgid "Library description"
+msgstr ""
+
+#: main.py:184
+msgid "Delete selected library"
+msgstr ""
+
+#: main.py:230
+#, python-format
+msgid ""
+"__init__.py file not found in %s \n"
+" I create it !\n"
+msgstr ""
+
+#: main.py:237
+msgid "GetModelList of file\n"
+msgstr ""
+
+#: main.py:266
+msgid "Warning unicode item !"
+msgstr ""
+
+#: main.py:374
+msgid "You trying to update a library that is not present in Domain"
+msgstr ""
+
+#: main.py:477
+msgid "Close Diagram"
+msgstr ""
+
+#: main.py:478 main.py:848
+msgid "Detach"
+msgstr ""
+
+#: main.py:478
+msgid "Detach tab to window"
+msgstr ""
+
+#: main.py:530
+msgid "Save changes?"
+msgstr ""
+
+#: main.py:541
+#, python-format
+msgid " %d not deleted ! \n"
+msgstr ""
+
+#: main.py:549
+#, python-format
+msgid "%d not deleted ! \n"
+msgstr ""
+
+#: main.py:724
+#, python-format
+msgid "Diagram %d"
+msgstr ""
+
+#: main.py:746
+msgid "Welcome to DEVSimPy: The GUI Python DEVS Simulator"
+msgstr ""
+
+#: main.py:787
+msgid "&New\tCtrl+N"
+msgstr ""
+
+#: main.py:787
+msgid "Creates a new diagram"
+msgstr ""
+
+#: main.py:788
+msgid "&Open\tCtrl+O"
+msgstr ""
+
+#: main.py:788 main.py:937
+msgid "Open an existing diagram"
+msgstr ""
+
+#: main.py:790
+msgid "&Save\tCtrl+S"
+msgstr ""
+
+#: main.py:791
+msgid "&SaveAs"
+msgstr ""
+
+#: main.py:792
+msgid "&Import\tCtrl+I"
+msgstr ""
+
+#: main.py:792
+msgid "Import new library"
+msgstr ""
+
+#: main.py:793
+msgid "&Export\tCtrl+E"
+msgstr ""
+
+#: main.py:793
+msgid "Export the diagram into a coupled model"
+msgstr ""
+
+#: main.py:794
+msgid "&Quit\tCtrl+Q"
+msgstr ""
+
+#: main.py:794
+msgid "Quit the DEVSimPy application"
+msgstr ""
+
+#: main.py:820
+msgid "Recent files"
+msgstr ""
+
+#: main.py:839
+msgid "Console"
+msgstr ""
+
+#: main.py:839
+msgid "Show Python Shell console"
+msgstr ""
+
+#: main.py:840
+msgid "Show simulation tab"
+msgstr ""
+
+#: main.py:841
+msgid "Tools Bar"
+msgstr ""
+
+#: main.py:841
+msgid "Show icons tools bar"
+msgstr ""
+
+#: main.py:847
+msgid "Create new diagram in tab"
+msgstr ""
+
+#: main.py:848
+msgid "Detach the tab to a frame window"
+msgstr ""
+
+#: main.py:849 main.py:942
+msgid "Zoom"
+msgstr ""
+
+#: main.py:850 main.py:943
+msgid "UnZoom"
+msgstr ""
+
+#: main.py:851
+msgid "Normal view"
+msgstr ""
+
+#: main.py:852
+msgid "Simulate"
+msgstr ""
+
+#: main.py:852
+msgid "Perform the simulation"
+msgstr ""
+
+#: main.py:853
+msgid "Clear"
+msgstr ""
+
+#: main.py:853
+msgid "Remove all components in diagram"
+msgstr ""
+
+#: main.py:854
+msgid "Close the tab"
+msgstr ""
+
+#: main.py:878
+msgid "Advanced"
+msgstr ""
+
+#: main.py:878
+msgid "Advanced setting options"
+msgstr ""
+
+#: main.py:880
+msgid "French"
+msgstr ""
+
+#: main.py:880
+msgid "French interface"
+msgstr ""
+
+#: main.py:881
+msgid "English"
+msgstr ""
+
+#: main.py:881
+msgid "English interface"
+msgstr ""
+
+#: main.py:884
+msgid "Languages"
+msgstr ""
+
+#: main.py:888
+msgid "&About"
+msgstr ""
+
+#: main.py:888
+msgid "About DEVSimPy"
+msgstr ""
+
+#: main.py:894
+msgid "&Diagram"
+msgstr ""
+
+#: main.py:895
+msgid "&Show"
+msgstr ""
+
+#: main.py:896
+msgid "&Settings"
+msgstr ""
+
+#: main.py:897
+msgid "&Help"
+msgstr ""
+
+#: main.py:936
+msgid "New diagram"
+msgstr ""
+
+#: main.py:936
+msgid "Create a new diagram in tab"
+msgstr ""
+
+#: main.py:937
+msgid "Open File"
+msgstr ""
+
+#: main.py:940
+msgid "Save file as"
+msgstr ""
+
+#: main.py:944
+msgid "Normal size"
+msgstr ""
+
+#: main.py:1052
+msgid "Restore DEVSimPy"
+msgstr ""
+
+#: main.py:1195 main.py:1211 main.py:1240
+msgid "Error saving file\n"
+msgstr ""
+
+#: main.py:1251
+msgid "Import Library"
+msgstr ""
+
+#: main.py:1551 main.py:1556
+msgid "You need to restart DEVSimPy"
+msgstr ""
+
+#: main.py:1567
+msgid ""
+"DEVSimPy is an advanced wxPython framework for the modeling and simulation "
+"of systems based on the DEVS formalism. Features include powerful built-in "
+"editor, advanced modeling approach, powerful discrete event simulation "
+"algorithm, import/export DEVS components library and more.\n"
+"\t\t"
+msgstr ""
+
+#: main.py:1570
+msgid ""
+"DEVSimPy is free software; you can redistribute it and/or modify it \n"
+"\t\tunder the terms of the GNU General Public License as published by the "
+"Free Software Foundation; \n"
+"\t\teither version 2 of the License, or (at your option) any later version.\n"
+"\n"
+"\t\tDEVSimPy is distributed in the hope that it will be useful, but WITHOUT "
+"ANY WARRANTY; \n"
+"\t\twithout even the implied warranty of MERCHANTABILITY or FITNESS FOR A "
+"PARTICULAR PURPOSE.  \n"
+"\t\tSee the GNU General Public License for more details. You should have "
+"received a copy of \n"
+"\t\tthe GNU General Public License along with File Hunter; if not, write "
+"to \n"
+"\t\tthe Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, "
+"MA  02111-1307  USA"
+msgstr ""
+
+#: main.py:1586
+msgid "(C) 2008 dec SPE Laboratory"
+msgstr ""
+
+#: main.py:1589 main.py:1590 main.py:1591 main.py:1592
+msgid "L. Capocchi and all."
+msgstr ""

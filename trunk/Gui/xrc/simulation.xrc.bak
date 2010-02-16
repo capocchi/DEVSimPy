@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF8"?>
+<resource>
+  <object class="wxDialog" name="DIALOG1">
+    <title>Simulation</title>
+    <centered>1</centered>
+    <size>300</size>
+    <style>wxRESIZE_BOX|wxCLOSE_BOX|wxDIALOG_MODAL</style>
+    <object class="wxPanel" name="Panel1">
+      <size>300,50</size>
+      <object class="wxBoxSizer">
+        <orient>wxHORIZONTAL</orient>
+        <object class="sizeritem">
+          <object class="wxStaticText" name="ST1">
+            <label>Final time</label>
+            <style></style>
+          </object>
+          <option>0</option>
+          <flag>wxALL|wxALIGN_CENTRE_VERTICAL|wxALIGN_CENTRE_HORIZONTAL</flag>
+        </object>
+        <object class="spacer">
+          <size>60,30</size>
+          <option>0</option>
+          <flag>wxALL|wxGROW|wxALIGN_CENTRE_VERTICAL|wxALIGN_CENTRE_HORIZONTAL</flag>
+        </object>
+        <object class="sizeritem">
+          <object class="wxTextCtrl"/>
+          <option>1</option>
+          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL|wxALIGN_CENTRE_HORIZONTAL</flag>
+        </object>
+      </object>
+    </object>
+  </object>
+</resource>
