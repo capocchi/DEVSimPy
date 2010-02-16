@@ -1,0 +1,4 @@
+In this page, we can find some videos in order to show the basic use of DEVSimPy.
+
+==General interface==
+<wiki:video url="http://lcapocchi.free.fr/videos/DEVSimPy_general_interface.mpeg"/>
