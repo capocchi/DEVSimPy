@@ -1,5 +1,0 @@
-all = [
-	"Generator",
-	"MythemADEVS",
-	"TransformationADEVS"
- ]
