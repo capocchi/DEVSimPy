@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+	<line>
+		<time>1</time>
+		<temperature>5</temperature>
+		<humidity>100</humidity>
+		<luminosity>0</luminosity>
+	</line>
+
+	<line>
+		<time>2</time>
+		<temperature>10</temperature>
+		<humidity>50</humidity>
+		<luminosity>50</luminosity>
+	</line>
+        
+        <line>
+		<time>3</time>
+		<temperature>60</temperature>
+		<humidity>0</humidity>
+		<luminosity>0</luminosity>
+	</line>
+</data>

@@ -1,0 +1,43 @@
+# _lextab.py.  This file automatically created by PLY. Don't edit.
+_lexre = '(?P<t_FNAME>[a-zA-Z_][a-zA-Z0-9_]*\\w*\\()|(?P<t_RANGE3D_1>[^!(,]+!\\$?[A-I]?[A-Z]\\$?(\\d+)?:\\$?[A-I]?[A-Z]\\$?(\\d+)?)|(?P<t_RANGE3D_2>\'[^\']+\'!\\$?[A-I]?[A-Z]\\$?(\\d+)?:\\$?[A-I]?[A-Z]\\$?(\\d+)?)|(?P<t_RANGE2D>\\$?[A-I]?[A-Z]\\$?(\\d+)?:\\$?[A-I]?[A-Z]\\$?(\\d+)?)|(?P<t_NUMBER>(?=\\d|\\.\\d)\\d*(\\.\\d*)?([Ee]([+-]?\\d+))?)|(?P<t_REF3D_2>\'[^\']+\'!\\$?[A-I]?[A-Z]\\$?\\d+)|(?P<t_REF3D_1>[^!(,]+!\\$?[A-I]?[A-Z]\\$?\\d+)|(?P<t_REF2D>\\$?[A-I]?[A-Z]\\$?\\d+)|(?P<t_STRING>"[^"]*")|(?P<t_FALSE>FALSE)|(?P<t_TRUE>TRUE)|(?P<t_MUL>\\*)|(?P<t_LE><=)|(?P<t_NE><>)|(?P<t_POWER>\\^)|(?P<t_LPAREN>\\()|(?P<t_ADD>\\+)|(?P<t_GE>>=)|(?P<t_RPAREN>\\))|(?P<t_LT><)|(?P<t_CONCAT>&)|(?P<t_COMMA>,)|(?P<t_SUB>-)|(?P<t_DIV>/)|(?P<t_EQ>=)|(?P<t_GT>>)'
+_lextab = [
+  None,
+  ('t_FNAME','FNAME'),
+  (None,'RANGE3D_1'),
+  None,
+  None,
+  (None,'RANGE3D_2'),
+  None,
+  None,
+  (None,'RANGE2D'),
+  None,
+  None,
+  (None,'NUMBER'),
+  None,
+  None,
+  None,
+  (None,'REF3D_2'),
+  (None,'REF3D_1'),
+  (None,'REF2D'),
+  (None,'STRING'),
+  (None,'FALSE'),
+  (None,'TRUE'),
+  (None,'MUL'),
+  (None,'LE'),
+  (None,'NE'),
+  (None,'POWER'),
+  (None,'LPAREN'),
+  (None,'ADD'),
+  (None,'GE'),
+  (None,'RPAREN'),
+  (None,'LT'),
+  (None,'CONCAT'),
+  (None,'COMMA'),
+  (None,'SUB'),
+  (None,'DIV'),
+  (None,'EQ'),
+  (None,'GT'),
+]
+_lextokens = {'SUB': None, 'REF2D': None, 'NUMBER': None, 'MUL': None, 'DIV': None, 'TRUE': None, 'CONCAT': None, 'LE': None, 'RPAREN': None, 'POWER': None, 'NE': None, 'LT': None, 'COMMA': None, 'GT': None, 'STRING': None, 'GE': None, 'LPAREN': None, 'EQ': None, 'FNAME': None, 'FALSE': None, 'RANGE2D': None, 'REF3D_1': None, 'REF3D_2': None, 'ADD': None, 'RANGE3D_2': None, 'RANGE3D_1': None}
+_lexignore = ' \t'
+_lexerrorf = 't_error'
