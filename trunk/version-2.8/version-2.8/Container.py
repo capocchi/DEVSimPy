@@ -826,7 +826,7 @@ class Diagram(Savable, Structurable):
 		else:
 			pass
 
-	def Update(self, concret_subject = None):
+	def update(self, concret_subject = None):
 		""" Update method is invoked by notify method of Subject class
 		"""
 		
@@ -1788,7 +1788,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		elif (  self.dlgConnection._combo_box_tn.StringSelection == _('All') \
 				and self.dlgConnection._combo_box_sn.StringSelection == _('All')) \
 				and len(self.sourceNodeList)==len(self.targetNodeList):
-			for sn,tn in map(lambda a,b: (a,b), self.sourceNodeList ,self.targetNodeList):
+			for sn,tn in map(lambda a,b: (a,b), self.sourceNodeList, self.targetNodeList):
 				self.makeConnectionShape(sn,tn)
 		### else make simple connection between sp and tp port number of source and target
 		else:
@@ -1816,11 +1816,9 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 		else:
 			ci.setInput(targetNode.item,targetNode.index)
-			ci.x[1],ci.y[1] = sourceNode.item.getPort('output',sourceNode.index)
-			ci.x[0],ci.y[0] = targetNode.item.getPort('input',targetNode.index)
+			ci.x[1],ci.y[1] = sourceNode.item.getPort('output', sourceNode.index)
+			ci.x[0],ci.y[0] = targetNode.item.getPort('input', targetNode.index)
 			ci.setOutput(sourceNode.item,sourceNode.index)
-
-		#ci.ChangeForm(ShapeCanvas.CONNECTOR_TYPE)
 
 		# selection de la nouvelle connection
 		self.deselect()
@@ -3011,7 +3009,7 @@ class Attributable:
 
 	def AddAttribute(self, name, typ=""):
 		### add attribute if not exist
-		if not hasattr(self,name):
+		if not hasattr(self, name):
 			setattr(self, name, typ)
 			
 		self.attributes.append(name)
@@ -3361,7 +3359,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		
 		self.AddAttributes(Attributable.GRAPHICAL_ATTR)
 		self.label = label
-		self.label_pos = 'middle'
+		self.label_pos = 'center'
 		self.image_path = ""
 		self.id = 0
 		self.nb_copy = 0        # nombre de fois que le bloc est copié (pour le label des blocks copiés
@@ -3512,7 +3510,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 
 		save_dlg.Destroy()
 
-	def Update(self, concret_subject = None):
+	def update(self, concret_subject = None):
 		"""
 		"""
 
@@ -3706,7 +3704,7 @@ class CodeBlock(Block, Achievable):
 		if 'font' not in state['attributes']:
 			state['attributes'].insert(3,'font')
 		if 'selected' not in state: state['selected'] = False
-		if 'label_pos' not in state: state['label_pos'] = 'middle'
+		if 'label_pos' not in state: state['label_pos'] = 'center'
 		##############################################
 
 		#print "apres "
@@ -3761,10 +3759,10 @@ class CodeBlock(Block, Achievable):
 		"""
 		self.selected = False
 
-	def Update(self, concret_subject = None):
+	def update(self, concret_subject = None):
 		""" Notify has been invocked
 		"""
-		state = Block.Update(self, concret_subject)
+		state = Block.update(self, concret_subject)
 		
 		if isinstance(concret_subject, PropertiesGridCtrl):
 			### table and dico of bad flag field (pink colored)
@@ -3902,7 +3900,7 @@ class ContainerBlock(Block, Diagram, Structurable):
 		if 'font' not in state['attributes']:
 			state['attributes'].insert(3,'font')
 		if 'selected' not in state: state['selected'] = False
-		if 'label_pos' not in state:state['label_pos'] = 'middle'
+		if 'label_pos' not in state:state['label_pos'] = 'center'
 		#####################################
 
 		#print "apres "
@@ -4244,7 +4242,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer
 		Connectable.__init__(self)
 		Attributable.__init__(self)
 
-		self.AddAttributes(Attributable.GRAPHICAL_ATTR[0:4])
+		self.SetAttributes(Attributable.GRAPHICAL_ATTR[0:4])
 		self.label = label
 		self.id = 0
 		self.args = {}
@@ -4265,10 +4263,21 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer
 	def draw(self, dc):
 		CircleShape.draw(self, dc)
 		w,h =  dc.GetTextExtent(self.label)
+		
+		### label position manager
+		if self.label_pos == 'bottom':
+			### bottom
+			my = int(self.y[1])
+		elif self.label_pos == 'top':
+			### top
+			my = int(self.y[1]-(self.r*2)-14)
+		else:
+			my = int((self.y[0] + self.y[1])/2.0)-int(h/2.0)
+			
 		mx = int(self.x[0])+2
-		my = int(self.y[1])
+		
 		dc.DrawText(self.label, mx, my)
-
+			
 		if self.lock_flag:
 			img =  wx.Bitmap(os.path.join(ICON_PATH_16_16, 'lock.png'),wx.BITMAP_TYPE_ANY)
 			dc.DrawBitmap( img, self.x[0]+w/3, self.y[0])
@@ -4307,7 +4316,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer
 		"""
 		self.OnProperties(event)
 
-	def Update(self, concret_subject = None):
+	def update(self, concret_subject = None):
 		"""
 		"""
 		state = concret_subject.GetState()
@@ -4332,11 +4341,13 @@ class iPort(Port):
 		""" Constructor
 		"""
 
-		Port.__init__(self,50,60,100,120, label)
+		Port.__init__(self, 50, 60, 100, 120, label)
 		self.fill= ['#add8e6']          # fill color
 		self.AddAttribute('id')
+		self.label_pos = 'bottom'
 		self.input = 0
 		self.output = 1
+		print dir(self)
 
 	def getDEVSModel(self):
 		return self
@@ -4358,9 +4369,10 @@ class oPort(Port):
 		""" Construcotr
 		"""
 
-		Port.__init__(self,50,60,100,120, label)
+		Port.__init__(self, 50, 60, 100, 120, label)
 		self.fill = ['#90ee90']
 		self.AddAttribute('id')
+		self.label_pos = 'bottom'
 		self.input = 1
 		self.output = 0
 
@@ -5002,8 +5014,8 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 			self.AcceptProp(row, col)
 
 		elif prop == 'label':
-			
-			d = LabelGUI.LabelDialog(self.canvas, self.parent.model)
+	
+			d = LabelGUI.LabelDialog(self.parent, self.parent.model)
 			d.ShowModal()
 			
 			self.SetCellValue(row,1,str(self.parent.model.label))

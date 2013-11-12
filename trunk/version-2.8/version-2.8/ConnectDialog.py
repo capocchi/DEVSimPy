@@ -29,8 +29,8 @@ def function(obj, i):
 ###
 class ConnectDialog(wx.Frame):
 	def __init__(self, parent, id, title, sn="Source", snL=[None,None], tn="Target", tnL=[None,None]):
-		wx.Frame.__init__(self, parent, id, title, size=(240,200), style= wx.CAPTION | wx.CLOSE_BOX | wx.STAY_ON_TOP)
-
+		wx.Frame.__init__(self, parent, id, title, size=(240,200), style= wx.CAPTION | wx.CLOSE_BOX | wx.STAY_ON_TOP| wx.SYSTEM_MENU)
+		
 		# local copy
 		self.sn = sn
 		self.tn = tn
@@ -102,7 +102,7 @@ class TestApp(wx.App):
 		__builtin__.__dict__['ICON_PATH_16_16']=os.path.join(ICON_PATH,'16x16')
 		__builtin__.__dict__['_'] = gettext.gettext
 		
-		self.frame = ConnectDialog(None, -1, '')
+		self.frame = ConnectDialog(None, -1, 'Connect Manager')
 		self.frame.Show()
 		return True
 	

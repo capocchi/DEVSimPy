@@ -403,3 +403,5 @@ invoque rpar un callback lorsque le fichier python est renseigné dans le wizard
 -Fait le 16/04/2013 par LC: ajout: LabelGUI.py basé sur LabelEdito.xrc dans le rep XRC  pour parametter le label des blocks
 -Fait le 10/06/2013 par LC: correction -> dans le fichier savable.py et la méthode Load de DumpZipFile correction de la gestion du label_pos dans les anciens modèles (<2.8)
 -Fait le 24/06/2013 par LC: correction -> valeur par defaut dans le LabelEditorDialog du radio boutton (fonctionnait pas sous windows)
+-Fait le 05/11/2013 par LC: amélioration -> refactoring du LeftNotebook avec la creation de trois fichiers PoprPnale.py, LibPanel et LibraryTree pour l'amélioration du menu Show pour activer ou desactiver les panels (Perspectives).
+-Fait le 05/11/2013 par LC: amélioration -> refactrorisation et creation d'un fichier pour LeftNotebook avec l'intgeration du FlatNoteBook. PAs fini car La méthode uypdate utilisée par Obsrerver porte le meme non que celle utilisé par Core Windows du FlatNoteBook. A régler...

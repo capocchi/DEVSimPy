@@ -24,7 +24,7 @@
 class Observer:
 	""" Observer class (abstract or interface)
 	"""
-	def Update(self, theChangedSubject = None):
+	def update(self, theChangedSubject = None):
 		""" update method with changed subject param
 		"""
 		pass
@@ -54,4 +54,4 @@ class Subject:
 		""" Notify method which invokes the observer's update method
 		"""
 		for observer in self.observerList:
-			observer.Update(self)
+			observer.update(self)

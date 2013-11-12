@@ -59,7 +59,7 @@ class LabelDialog(wx.Dialog):
 		self.block = block
 		self.parent = parent
 
-		self.canvas = self.parent
+		self.canvas = self.parent.canvas
 
 		_xrcName = "LabelEditorFrame"
 		pre = wx.PreDialog()
@@ -113,6 +113,8 @@ class LabelDialog(wx.Dialog):
 
 			### update of block from canvas
 			self.canvas.UpdateShapes([self.block])
+			### update of label filed in propertie dialogue
+			self.parent._list.SetCellValue(0, 1, self.block.label)
 
 		evt.Skip()
 
@@ -128,6 +130,8 @@ class LabelDialog(wx.Dialog):
 
 			### update of block from canvas
 			self.canvas.UpdateShapes([self.block])
+			### update of label_pos filed in propertie dialogue
+			self.parent._list.SetCellValue(1, 1, self.block.label_pos)
 
 	def OnOk(self, evt):
 		""" Ok button has been clicked

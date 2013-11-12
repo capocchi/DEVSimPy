@@ -49,6 +49,8 @@ ID_DELETE_RECENT = wx.NewId()
 ID_SHOW_CONTROL = wx.NewId()
 ID_SHOW_SHELL = wx.NewId()
 ID_SHOW_SIM = wx.NewId()
+ID_SHOW_PROP = wx.NewId()
+ID_SHOW_LIB = wx.NewId()
 ID_SHOW_TOOLBAR = wx.NewId()
 
 # Perspectives menu identifiers
@@ -238,18 +240,25 @@ class ShowMenu(wx.Menu):
 
 		parent = parent.GetParent()
 		
-		self.Append(ID_SHOW_CONTROL, _('Control'), _("Show Control console"), wx.ITEM_CHECK)
+		control = wx.Menu()
+		control.Append(ID_SHOW_SIM, _('Simulation'), _("Show simulation tab"), wx.ITEM_CHECK)
+		control.Append(ID_SHOW_PROP, _('Properties'), _("Show properties tab"), wx.ITEM_CHECK)
+		control.Append(ID_SHOW_LIB, _('Libraries'), _("Show libraries tab"), wx.ITEM_CHECK)
+
+		self.AppendMenu(ID_SHOW_CONTROL, _('Control'), control)
+        
 		self.Append(ID_SHOW_SHELL, _('Console'), _("Show Python Shell console"), wx.ITEM_CHECK)
-		self.Append(ID_SHOW_SIM, _('Simulation'), _("Show simulation tab"), wx.ITEM_CHECK)
 		self.Append(ID_SHOW_TOOLBAR, _('Tools Bar'), _("Show icons tools bar"), wx.ITEM_CHECK)
-		self.Check(ID_SHOW_CONTROL, True)
 		self.Check(ID_SHOW_SHELL, False)
 		self.Check(ID_SHOW_SIM, False)
+		self.Check(ID_SHOW_PROP, True)
+		self.Check(ID_SHOW_LIB, True)
 		self.Check(ID_SHOW_TOOLBAR, True)
 
-		parent.Bind(wx.EVT_MENU, parent.OnShowControl, id = ID_SHOW_CONTROL)
 		parent.Bind(wx.EVT_MENU, parent.OnShowShell, id = ID_SHOW_SHELL)
 		parent.Bind(wx.EVT_MENU, parent.OnShowSimulation, id = ID_SHOW_SIM)
+		parent.Bind(wx.EVT_MENU, parent.OnShowProperties, id = ID_SHOW_PROP)
+		parent.Bind(wx.EVT_MENU, parent.OnShowLibraries, id = ID_SHOW_LIB)
 		parent.Bind(wx.EVT_MENU, parent.OnShowToolBar, id = ID_SHOW_TOOLBAR)
 
 class PerspectiveMenu(wx.Menu):
