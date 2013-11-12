@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-# LeftNoteBook.py ---
+# ControlNotebook.py ---
 #                     --------------------------------
 #                        Copyright (c) 2013
 #                       Laurent CAPOCCHI
@@ -33,6 +33,7 @@ from PropPanel import PropPanel
 class GeneralNotebook(Observer):
 	def __init__(self, *args, **kwargs):
 		"""
+		General Notebook class for Control NoteBook on the left part of DEVSimPy
 		"""
 
 		### label list
@@ -156,25 +157,17 @@ try:
 except:
 	pass
 
-
 MENU_EDIT_DELETE_PAGE = wx.NewId()
 
 if FLATNOTEBOOK:
 	#-------------------------------------------------------------------
-	class LeftNotebook(fnb.FlatNotebook, GeneralNotebook):
+	class ControlNotebook(fnb.FlatNotebook, GeneralNotebook):
 		"""
 		"""
 
 		def __init__(self, *args, **kwargs):
 			"""
-			Notebook class that allows overriding and adding methods for the left pane of DEVSimPy
-
-			@param parent: parent windows
-			@param id: id
-			@param pos: windows position
-			@param size: windows size
-			@param style: windows style
-			@param name: windows name
+			FlatNotebook class that allows overriding and adding methods for the left pane of DEVSimPy
 			"""
 
 			fnb.FlatNotebook.__init__(self, *args, **kwargs)
@@ -227,7 +220,7 @@ if FLATNOTEBOOK:
 else:
 
 	#-------------------------------------------------------------------
-	class LeftNotebook(wx.Notebook, GeneralNotebook):
+	class ControlNotebook(wx.Notebook, GeneralNotebook):
 		"""
 		"""
 
@@ -235,12 +228,6 @@ else:
 			"""
 			Notebook class that allows overriding and adding methods for the left pane of DEVSimPy
 
-			@param parent: parent windows
-			@param id: id
-			@param pos: windows position
-			@param size: windows size
-			@param style: windows style
-			@param name: windows name
 			"""
 
 			wx.Notebook.__init__(self, *args, **kwargs)
