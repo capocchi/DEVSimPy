@@ -111,7 +111,7 @@ ID_TESTING_SHAPE = wx.NewId()
 # Shape canvas popup menu identifiers
 ID_NEW_SHAPE = wx.NewId()
 ID_ADD_CONSTANTS = wx.NewId()
-		
+
 # Library popup menu identifiers
 ID_NEW_LIB = wx.NewId()
 ID_IMPORT_LIB = wx.NewId()
@@ -143,7 +143,7 @@ class TaskBarMenu(wx.Menu):
 class FileMenu(wx.Menu):
 	"""
 	"""
-	def __init__(self, parent):	
+	def __init__(self, parent):
 		wx.Menu.__init__(self)
 
 		openModel=wx.MenuItem(self, ID_OPEN, _('&Open\tCtrl+O'),_('Open an existing diagram'))
@@ -153,7 +153,7 @@ class FileMenu(wx.Menu):
 		printPreviewModel=wx.MenuItem(self, ID_PREVIEW_PRINT, _('Pre&view'),_('Print preview for current diagram'))
 		screenCapture=wx.MenuItem(self, ID_SCREEN_CAPTURE, _('ScreenShot'),_('Capture the screen into a image'))
 		exitModel=wx.MenuItem(self, wx.ID_EXIT, _('&Quit\tCtrl+Q'),_('Quit the DEVSimPy application'))
-		
+
 		openModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'open.png')))
 		saveModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'save.png')))
 		saveAsModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')))
@@ -161,13 +161,13 @@ class FileMenu(wx.Menu):
 		printPreviewModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'print-preview.png')))
 		screenCapture.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'ksnapshot.png')))
 		exitModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'exit.png')))
-	
+
 		self.AppendItem(openModel)
-		
+
 		self.AppendSeparator()
 		self.AppendItem(saveModel)
 		self.AppendItem(saveAsModel)
-		
+
 		self.AppendSeparator()
 		self.AppendItem(printPreviewModel)
 		self.AppendItem(printModel)
@@ -177,7 +177,7 @@ class FileMenu(wx.Menu):
 		self.AppendItem(exitModel)
 
 		parent = parent.GetParent()
-		
+
 		parent.Bind(wx.EVT_MENU, parent.OnNew, id=ID_NEW)
 		parent.Bind(wx.EVT_MENU, parent.OnOpenFile, id=ID_OPEN)
 		parent.Bind(wx.EVT_MENU, parent.OnSaveFile, id=ID_SAVE)
@@ -186,36 +186,36 @@ class FileMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnPrintPreview, id=ID_PREVIEW_PRINT)
 		parent.Bind(wx.EVT_MENU, parent.OnScreenCapture, id=ID_SCREEN_CAPTURE)
 		parent.Bind(wx.EVT_MENU, parent.OnCloseWindow, id=ID_EXIT)
-		
+
 class ProfileFileMenu(wx.Menu):
 	"""
 	"""
-	def __init__(self, parent):	
+	def __init__(self, parent):
 		wx.Menu.__init__(self)
-	
+
 		parent = parent.GetParent()
 
 		for fn in filter(lambda f: f.endswith('.prof'), os.listdir(gettempdir())):
 			id = wx.NewId()
 			self.AppendItem(wx.MenuItem(self, id, fn))
 			parent.Bind(wx.EVT_MENU, parent.OnProfiling, id=id)
-			
+
 		self.AppendSeparator()
 		self.AppendItem(wx.MenuItem(self, ID_DELETE_PROFILES, _("Delete all")))
 		self.Enable(ID_DELETE_PROFILES, self.GetMenuItemCount() > 2)
 		parent.Bind(wx.EVT_MENU, parent.OnDeleteProfiles, id = ID_DELETE_PROFILES)
-	
+
 class RecentFileMenu(wx.Menu):
 	"""
 	"""
-	def __init__(self, parent):	
+	def __init__(self, parent):
 		wx.Menu.__init__(self)
-	
+
 		parent = parent.GetParent()
 
-		# affichage du menu des dernier fichier consulté avec gestion des fichier qui n'existe plus 
+		# affichage du menu des dernier fichier consulté avec gestion des fichier qui n'existe plus
 		for path in filter(lambda p:p!='', parent.openFileList):
-			
+
 			if not os.path.exists(path):
 				index = parent.openFileList.index(path)
 				del parent.openFileList[index]
@@ -230,23 +230,23 @@ class RecentFileMenu(wx.Menu):
 		self.AppendItem(wx.MenuItem(self, ID_DELETE_RECENT, _("Delete all")))
 		self.Enable(ID_DELETE_RECENT, self.GetMenuItemCount() > 2)
 		parent.Bind(wx.EVT_MENU, parent.OnDeleteRecentFiles, id = ID_DELETE_RECENT)
-	
-		   
+
+
 class ShowMenu(wx.Menu):
 	"""
 	"""
-	def __init__(self, parent):	
+	def __init__(self, parent):
 		wx.Menu.__init__(self)
 
 		parent = parent.GetParent()
-		
+
 		control = wx.Menu()
 		control.Append(ID_SHOW_SIM, _('Simulation'), _("Show simulation tab"), wx.ITEM_CHECK)
 		control.Append(ID_SHOW_PROP, _('Properties'), _("Show properties tab"), wx.ITEM_CHECK)
 		control.Append(ID_SHOW_LIB, _('Libraries'), _("Show libraries tab"), wx.ITEM_CHECK)
 
 		self.AppendMenu(ID_SHOW_CONTROL, _('Control'), control)
-        
+
 		self.Append(ID_SHOW_SHELL, _('Console'), _("Show Python Shell console"), wx.ITEM_CHECK)
 		self.Append(ID_SHOW_TOOLBAR, _('Tools Bar'), _("Show icons tools bar"), wx.ITEM_CHECK)
 		self.Check(ID_SHOW_SHELL, False)
@@ -262,7 +262,7 @@ class ShowMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnShowToolBar, id = ID_SHOW_TOOLBAR)
 
 class PerspectiveMenu(wx.Menu):
-	def __init__(self, parent):	
+	def __init__(self, parent):
 		wx.Menu.__init__(self)
 
 		parent = parent.GetParent()
@@ -274,7 +274,7 @@ class PerspectiveMenu(wx.Menu):
 		if _("Default Startup") not in parent.perspectives:
 			self.Append(ID_FIRST_PERSPECTIVE, _("Default Startup"))
 			parent.perspectives.update({_("Default Startup"):parent._mgr.SavePerspective()})
-			
+
 		### default perspective
 		L = parent.perspectives.keys()
 		L.sort()
@@ -290,11 +290,11 @@ class PerspectiveMenu(wx.Menu):
 class DiagramMenu(wx.Menu):
 	"""
 	"""
-	def __init__(self, parent):	
+	def __init__(self, parent):
 		wx.Menu.__init__(self)
 
 		parent = parent.GetParent()
-		
+
 		newDiagram = wx.MenuItem(self, ID_NEW, _('New'), _("Create a new tab diagram"))
 		detachDiagram = wx.MenuItem(self, ID_DETACH_DIAGRAM, _('Detach'), _("Detach the tab to a frame window"))
 		zoomIn = wx.MenuItem(self, ID_ZOOMIN_DIAGRAM, _('Zoom'), _("Zoom in"))
@@ -308,7 +308,7 @@ class DiagramMenu(wx.Menu):
 		clearDiagram = wx.MenuItem(self, ID_CLEAR_DIAGRAM, _('Clear'), _("Remove all components in diagram"))
 		renameDiagram = wx.MenuItem(self, ID_RENAME_DIAGRAM, _('Rename'), _("Rename diagram"))
 		closeDiagram = wx.MenuItem(self, ID_EXIT_DIAGRAM, _('&Close\tCtrl+D'), _("Close the tab"))
-		
+
 		newDiagram.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'new.png')))
 		detachDiagram.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'detach.png')))
 		zoomIn.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'zoom+.png')))
@@ -358,7 +358,7 @@ class DiagramMenu(wx.Menu):
 class SettingsMenu(wx.Menu):
 	"""
 	"""
-	def __init__(self, parent):	
+	def __init__(self, parent):
 		wx.Menu.__init__(self)
 
 		parent = parent.GetParent()
@@ -368,28 +368,28 @@ class SettingsMenu(wx.Menu):
 		pref_item = wx.MenuItem(self, ID_PREFERENCES, _('Preferences'), _("Advanced setting options"))
 		fritem = wx.MenuItem(languagesSubmenu, ID_FRENCH_LANGUAGE, _('French'), _("French interface"))
 		enitem = wx.MenuItem(languagesSubmenu, ID_ENGLISH_LANGUAGE, _('English'), _("English interface"))
-		
+
 		pref_item.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'preferences.png')))
 		fritem.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'french-flag.png')))
 		enitem.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'united-states-flag.png')))
-		
+
 		languagesSubmenu.AppendItem(fritem)
 		languagesSubmenu.AppendItem(enitem)
-		
+
 		self.AppendMenu(wx.NewId(),_('Languages'),languagesSubmenu)
 		self.AppendItem(pref_item)
-		
+
 		fritem.Enable(not parent.language == 'fr')
 		enitem.Enable(not parent.language in ('en','default'))
-		
+
 		parent.Bind(wx.EVT_MENU, parent.OnFrench, id=ID_FRENCH_LANGUAGE)
 		parent.Bind(wx.EVT_MENU, parent.OnEnglish, id=ID_ENGLISH_LANGUAGE)
 		parent.Bind(wx.EVT_MENU, parent.OnAdvancedSettings, id=ID_PREFERENCES)
-				
+
 class HelpMenu(wx.Menu):
 	"""
 	"""
-	def __init__(self, parent):	
+	def __init__(self, parent):
 		wx.Menu.__init__(self)
 
 		parent = parent.GetParent()
@@ -409,16 +409,16 @@ class HelpMenu(wx.Menu):
 		self.AppendSeparator()
 		self.AppendItem(aboutModel)
 		self.AppendItem(contactModel)
-		
+
 		parent.Bind(wx.EVT_MENU, parent.OnHelp, id=ID_HELP)
 		parent.Bind(wx.EVT_MENU, parent.OnAPI, id=ID_API_HELP)
 		parent.Bind(wx.EVT_MENU, parent.OnAbout, id=ID_ABOUT)
 		parent.Bind(wx.EVT_MENU, parent.OnContact, id=ID_CONTACT)
-		
+
 class MainMenuBar(wx.MenuBar):
 	def __init__(self, parent):
 		wx.MenuBar.__init__(self)
-		
+
 		self.parent = parent
 
 		self.Append(FileMenu(self),_("&File"))
@@ -428,45 +428,45 @@ class MainMenuBar(wx.MenuBar):
 		self.Append(self.parent.perspectivesmenu, _("&Perspectives"))
 		self.Append(SettingsMenu(self), _("&Options"))
 		self.Append(HelpMenu(self), _("&Help"))
-		
+
 		self.Bind(wx.EVT_MENU_HIGHLIGHT_ALL, self.OnMenuHighlight)
-		
+
 	def OnOpenMenu(self, event):
-		""" Open menu has been detected. 
-		
+		""" Open menu has been detected.
+
 			Add the recent files menu updated from recentFiles list
 		"""
-	
+
 		menu = event.GetMenu()
-	
+
 		### if the opened menu is the File menu
 		if isinstance(menu, FileMenu):
-			
+
 			### if item exist, we delete him
 			if menu.FindItemById(ID_RECENT):menu.Delete(ID_RECENT)
-			
+
 			### we insert the recent files menu
 			menu.InsertMenu(1, ID_RECENT, _("Recent files"), RecentFileMenu(self))
-	
+
 		elif isinstance(menu, SettingsMenu) and 'hotshot' in sys.modules.keys():
 			### if item exist, we delete him
 			if menu.FindItemById(ID_PROFILE): menu.Delete(ID_PROFILE)
 			### we insert the profile files menu
 			menu.InsertMenu(1, ID_PROFILE, _('Profile'),  ProfileFileMenu(self))
-		
+
 	#def OnCloseMenu(self, event):
 		#""" Close menu has been detected
 		#"""
-		
+
 		#menu = event.GetEventObject()
-		
+
 		#### if the closed menu is FileMenu, we delete the recent menu
-		#if isinstance(menu, FileMenu):		
+		#if isinstance(menu, FileMenu):
 			#wx.CallAfter(menu.Delete, ID_RECENT)
 		#elif isinstance(event.GetEventObject(), SettingsMenu):
 			#wx.CallAfter(menu.Delete, ID_PROFILE)
-		
-	####	
+
+	####
 	def OnMenuHighlight(self, event):
 		# Show how to get menu item info from this event handler
 #		id = event.GetMenuId()
@@ -489,12 +489,12 @@ class DiagramNoTabPopupMenu(wx.Menu):
 		""" Constructor.
 		"""
 		wx.Menu.__init__(self)
-		
+
 		new_tab = wx.MenuItem(self, ID_NEW, _('New'), _("Create a new tab diagram"))
 		new_tab.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'new.png')))
-		
+
 		self.AppendItem(new_tab)
-		
+
 		### Bind is not necessary because ID_EXIT_DAIGRAM and ID_DETACH_DIAGRAM are already binded
 
 class DiagramTabPopupMenu(wx.Menu):
@@ -505,47 +505,53 @@ class DiagramTabPopupMenu(wx.Menu):
 		""" Constructor.
 		"""
 		wx.Menu.__init__(self)
-		
+
 		close = wx.MenuItem(self, ID_EXIT_DIAGRAM, _('Close'), _('Close diagram'))
 		detach = wx.MenuItem(self, ID_DETACH_DIAGRAM, _('Detach'), _('Detach tab to window'))
 		rename = wx.MenuItem(self, ID_RENAME_DIAGRAM, _('Rename...'), _('Rename diagram'))
-		
+		clear = wx.MenuItem(self, ID_CLEAR_DIAGRAM, _('Clear...'), _('Clear diagram'))
+
+
 		close.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'close.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		detach.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'detach.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		rename.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rename.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		
+		clear.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'delete.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+
+
+
 		self.AppendItem(detach)
 		self.AppendItem(rename)
+		self.AppendItem(clear)
 		self.AppendSeparator()
 		self.AppendItem(close)
-		
+
 		### Bind is not necessary because ID_EXIT_DAIGRAM and ID_DETACH_DIAGRAM are already binded
-		
+
 class PropertiesCtrlPopupMenu(wx.Menu):
 	""" PropertiesCtrl popup menu
 	"""
-	
+
 	def __init__(self, parent, row, col):
 		""" Constructor.
 		"""
 		wx.Menu.__init__(self)
-	
+
 		self.parent = parent
 		self.row = row
 		self.col = col
-		
+
 		edit = wx.MenuItem(self, ID_EDIT_ATTR, _('Edit'), _('Edit attribute'))
 		insert = wx.MenuItem(self, ID_INSERT_ATTR, _('Insert'), _('Insert attribute'))
 		clear = wx.MenuItem(self, ID_CLEAR_ATTR, _('Clear'), _('Clear value'))
 		edit.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		insert.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'insert.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		clear.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit-clear.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		
+
 		self.AppendItem(edit)
 		self.AppendItem(insert)
 		self.AppendSeparator()
 		self.AppendItem(clear)
-		
+
 		parent.Bind(wx.EVT_MENU, parent.OnEditCell, id=ID_EDIT_ATTR)
 		parent.Bind(wx.EVT_MENU, parent.OnInsertCell, id=ID_INSERT_ATTR)
 		parent.Bind(wx.EVT_MENU, parent.OnClearCell, id=ID_CLEAR_ATTR)
@@ -555,7 +561,7 @@ class PropertiesCtrlPopupMenu(wx.Menu):
 
 	def GetCol(self):
 		return self.col
-	
+
 class ItemLibraryPopupMenu(wx.Menu):
 	""" Item library popup menu.
 	"""
@@ -564,28 +570,28 @@ class ItemLibraryPopupMenu(wx.Menu):
 		""" Constructor.
 		"""
 		wx.Menu.__init__(self)
-		
+
 		### last child of tree and not empty directory (then, has OnDocumentation method)
 		if not parent.ItemHasChildren(parent.GetSelection()) and hasattr(parent,'OnItemDocumentation'):
-			
+
 			edit = wx.MenuItem(self, ID_EDIT_LIB, _('Edit'), _('Edit selected module'))
 			rename = wx.MenuItem(self, ID_RENAME_LIB, _('Rename...'), _('Rename selected module'))
 			doc = wx.MenuItem(self, wx.NewId(), _('Doc'), _('Documentation of selected library'))
 			update = wx.MenuItem(self, ID_UPDATE_LIB, _('Update'), _('Update selected module'))
-			
+
 			edit.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 			rename.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rename.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 			doc.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'doc.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 			update.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'db_refresh.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-			
+
 			self.AppendItem(edit)
 			self.AppendItem(rename)
 			self.AppendItem(doc)
 			self.AppendItem(update)
-			
+
 			self.Bind(wx.EVT_MENU, parent.OnItemEdit, id = ID_EDIT_LIB)	# attention à le mettre avant le popUpMenu
-			self.Bind(wx.EVT_MENU, parent.OnItemRename, id = ID_RENAME_LIB)	# attention à le mettre avant le popUpMenu			
-			self.Bind(wx.EVT_MENU, parent.OnItemDocumentation, id = doc.GetId())	# attention à le mettre avant le popUpMenu			
+			self.Bind(wx.EVT_MENU, parent.OnItemRename, id = ID_RENAME_LIB)	# attention à le mettre avant le popUpMenu
+			self.Bind(wx.EVT_MENU, parent.OnItemDocumentation, id = doc.GetId())	# attention à le mettre avant le popUpMenu
 			self.Bind(wx.EVT_MENU, parent.OnItemRefresh, id = ID_UPDATE_LIB)	# attention à le mettre avant le popUpMenu
 
 		else:
@@ -594,29 +600,29 @@ class ItemLibraryPopupMenu(wx.Menu):
 			new_model.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16, 'new.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 			self.InsertItem(0,new_model)
 			self.Bind(wx.EVT_MENU, parent.OnNewModel, id=ID_NEW_MODEL_LIB)
-			
+
 		### menu for all item of tree
 		delete = wx.MenuItem(self, ID_DELETE_LIB, _('Delete'), _('Delete selected library'))
 		delete.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16, 'db-.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 
 		self.AppendItem(delete)
-		
-		self.Bind(wx.EVT_MENU, parent.OnDelete, id=ID_DELETE_LIB)	# attention à le mettre avant le popUpMenu		
-		
-		
+
+		self.Bind(wx.EVT_MENU, parent.OnDelete, id=ID_DELETE_LIB)	# attention à le mettre avant le popUpMenu
+
+
 class LibraryPopupMenu(wx.Menu):
-	
+
 	def __init__(self, parent):
 		wx.Menu.__init__(self)
-	
+
 		new = wx.MenuItem(self, ID_NEW_LIB, _('New'), _('New library'))
 		add = wx.MenuItem(self, ID_IMPORT_LIB, _('Import'), _('Import library'))
 		refresh = wx.MenuItem(self, ID_REFRESH_LIB, _('Refresh'), _('Refresh library'))
 		#upgrade = wx.MenuItem(self, ID_UPGRADE_LIB, _('Upgrade'), _('Upgrade library'))
 		info = wx.MenuItem(self, ID_HELP_LIB, _('Help'), _('Library description'))
 
-		new.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'db+.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())			
-		add.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'dbimport.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())			
+		new.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'db+.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		add.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'dbimport.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		refresh.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'db_refresh.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		#upgrade.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'upgrade.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		info.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'dbinfo.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -644,7 +650,7 @@ class ShapeCanvasPopupMenu(wx.Menu):
 		"""
 
 		wx.Menu.__init__(self)
-		
+
 		### make all items
 		new = wx.MenuItem(self, ID_NEW_SHAPE, _('&New'), _('New model'))
 		paste = wx.MenuItem(self, ID_PASTE_SHAPE, _('&Paste\tCtrl+V'), _('Paste the model'))
@@ -662,9 +668,9 @@ class ShapeCanvasPopupMenu(wx.Menu):
 		self.AppendItem(paste)
 		self.AppendItem(add_constants)
 		self.AppendItem(preview_dia)
-		
+
 		self.Enable(ID_PASTE_SHAPE, not Container.clipboard == [])
-		
+
 		### binding
 		parent.Bind(wx.EVT_MENU, parent.OnNewModel, id=ID_NEW_SHAPE)
 		parent.Bind(wx.EVT_MENU, parent.OnPaste, id=ID_PASTE_SHAPE)
@@ -682,12 +688,12 @@ class ShapePopupMenu(wx.Menu):
 		wx.Menu.__init__(self)
 
 		self.__canvas = event.GetEventObject()
-		
+
 		rotate_subMenu = wx.Menu()
 		export_subMenu = wx.Menu()
 		connectable_subMenu = wx.Menu()
 		edit_subMenu = wx.Menu()
-		
+
 		edit=wx.MenuItem(self, ID_EDIT_SHAPE, _("Edit"), _("Edit the code"))
 		editModel=wx.MenuItem(self, ID_EDIT_MODEL_SHAPE, _("Model"), _("Edit the model code"))
 		editTest=wx.MenuItem(self, ID_TESTING_SHAPE, _("Tests"), _("Edit the tests code"))
@@ -707,7 +713,7 @@ class ShapePopupMenu(wx.Menu):
 		exportJS=wx.MenuItem(self, ID_EXPORT_JS_SHAPE, _("JS"), _("Model exported to a js (join) file"))
 		plugin = wx.MenuItem(self, ID_PLUGINS_SHAPE, _("Plugins"), _("Apply plugin to a model"))
 		properties=wx.MenuItem(self, ID_PROPERTIES_SHAPE, _("Properties"), _("Edit the attributs"))
-		
+
 		edit.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		editModel.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		editTest.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16, 'test.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -723,7 +729,7 @@ class ShapePopupMenu(wx.Menu):
 		unlock.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'unlock.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		plugin.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'plugin.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		properties.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'properties.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		
+
 		if isinstance(shape, Container.ConnectionShape):
 			self.AppendItem(delete)
 			self.AppendItem(lock)
@@ -736,12 +742,12 @@ class ShapePopupMenu(wx.Menu):
 		elif isinstance(shape, Container.ResizeableNode):
 			Delete_menu = self.AppendItem(delete)
 		elif isinstance(shape, Container.Node):
-			
-			
+
+
 			pass
 			#port_number=wx.MenuItem(self, wx.NewId(), _("Enable port number"), _("Port number"),wx.ITEM_CHECK)
 			#self.AppendItem(port_number)
-			
+
 			#rename_menu = self.AppendItem(rename)
 			#self.__canvas.Bind(wx.EVT_MENU, shape.OnRename, id=ID_RENAME_SHAPE)
 		else:
@@ -799,13 +805,13 @@ class ShapePopupMenu(wx.Menu):
 						self.AppendSeparator()
 						Plugin_menu = self.AppendItem(plugin)
 						self.__canvas.Bind(wx.EVT_MENU, shape.OnPluginsManager, id=ID_PLUGINS_SHAPE)
-			
+
 			self.AppendSeparator()
 			Properties_menu = self.AppendItem(properties)
-			
+
 			self.Enable(ID_PASTE_SHAPE, not Container.clipboard == [])
 			self.Enable(ID_LOG_SHAPE, shape.getDEVSModel() is not None)
-			
+
 			# binding events
 			self.__canvas.Bind(wx.EVT_MENU, shape.OnRotateR, id=ID_RIGHT_ROTATE_SHAPE)
 			self.__canvas.Bind(wx.EVT_MENU, shape.OnRotateL, id=ID_LEFT_ROTATE_SHAPE)
@@ -835,7 +841,7 @@ class ShapePopupMenu(wx.Menu):
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnExport, id=ID_EXPORT_CMD_SHAPE)
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnExport, id=ID_EXPORT_XML_SHAPE)
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnExport, id=ID_EXPORT_JS_SHAPE)
-					
+
 		if isinstance(shape, Container.ResizeableNode):
 			shape.OnDeleteNode(event)
 

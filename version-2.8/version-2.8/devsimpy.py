@@ -8,7 +8,7 @@
 #                              Laurent CAPOCCHI
 #                        SPE - University of Corsica
 #                     --------------------------------
-# Version 2.7.1                                      last modified:  08/01/13
+# Version 2.8                                      last modified:  12/11/13
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -63,7 +63,7 @@ except ImportError:
 
 from urllib import urlopen
 
-__min_wx_version__ = ['2.8','2.7','2.6','2.5']
+__min_wx_version__ = ['2.9','2.8','2.7','2.6','2.5']
 
 __wxpython_url__ = 'http://wxpython.org'
 __get__wxpython__ = 'Get it from %s'%__wxpython_url__
@@ -139,14 +139,14 @@ from Reporter import ExceptionHook
 from ConnectionThread import UpgradeLibThread
 from PreferencesGUI import PreferencesGUI
 from pluginmanager import load_plugins
-from PrintOut import Printable
 from which import which
 from Utilities import GetMails, IsAllDigits
 from Decorators import redirectStdout, BuzyCursorNotification
 from DetachedFrame import DetachedFrame
 from LibPanel import LibPanel
 from PropPanel import PropPanel
-from LeftNotebook import LeftNotebook
+from ControlNotebook import ControlNotebook
+from DiagramNotebook import DiagramNotebook
 
 ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 
@@ -206,256 +206,6 @@ def DefineScreenSize(percentscreen = None, size = None):
 		l, h = percentscreen * l, percentscreen * h
 	return l, h
 
-
-
-#-------------------------------------------------------------------
-class DiagramNotebook(wx.Notebook, Printable):
-	"""
-	"""
-
-	def __init__(self, *args, **kwargs):
-		"""
-		Notebook class that allows overriding and adding methods.
-
-		@param parent: parent windows
-		@param id: id
-		@param pos: windows position
-		@param size: windows size
-		@param style: windows style
-		@param name: windows name
-		"""
-
-		# for spash screen
-		pub.sendMessage('object.added', 'Loading notebook diagram...\n')
-
-		wx.Notebook.__init__(self, *args, **kwargs)
-		Printable.__init__(self)
-
-		# local copy
-		self.parent = args[0]
-		self.pages = []			# keeps track of pages
-
-		### to propagate the dsp file path in __setstate__ of Block object
-		self.current_dsp_file_path = ""
-
-		#icon under tab
-		imgList = wx.ImageList(16, 16)
-		for img in [os.path.join(ICON_PATH_16_16,'network.png')]:
-			imgList.Add(wx.Image(img, wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.AssignImageList(imgList)
-
-		### binding
-		self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.__PageChanged)
-		#self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self.__OnPageChanging)
-		self.Bind(wx.EVT_RIGHT_DOWN, self.__ShowMenu)
-		self.Bind(wx.EVT_LEFT_DCLICK, self.__AddPage)
-
-	def GetPages(self):
-		return self.pages
-
-	def __AddPage(self, event):
-		self.AddEditPage(_("Diagram%d")%len(self.pages))
-
-	def AddEditPage(self, title, defaultDiagram = None):
-		"""
-		Adds a new page for editing to the notebook and keeps track of it.
-
-		@type title: string
-		@param title: Title for a new page
-		"""
-
-		### title page list
-		title_pages = map(lambda p: p.name, self.pages)
-
-		### occurence of title in existing title pages
-		c = title_pages.count(title)
-
-		title = title+"(%d)"%c if c != 0 else title
-
-		### new page
-		newPage = Container.ShapeCanvas(self, wx.NewId(), name=title)
-
-		### new diagram
-		d = defaultDiagram or Container.Diagram()
-		d.SetParent(newPage)
-
-		### diagram and background newpage setting
-		newPage.SetDiagram(d)
-
-		### print canvas variable setting
-		self.print_canvas = newPage
-		self.print_size = self.GetSize()
-
-		self.pages.append(newPage)
-		self.AddPage(newPage, title, imageId=0)
-		self.SetSelection(self.GetPageCount()-1)
-
-	def GetPageByName(self, name = ''):
-		"""
-		"""
-		for i in xrange(len(self.pages)):
-			if name == self.GetPageText(i):
-				return self.GetPage(i)
-		return None
-
-	#def __OnPageChanging(self, evt):
-		#"""
-		#"""
-		#canvas = self.GetPage(evt.GetSelection())
-		##canvas = self.GetPage(self.GetSelection())
-		#### update the path of current dsp file
-		#self.current_dsp_file_path = canvas.GetDiagram().last_name_saved
-
-	def __PageChanged(self, evt):
-		"""
-		"""
-
-		try:
-			canvas = self.GetPage(self.GetSelection())
-			self.print_canvas = canvas
-			self.print_size = self.GetSize()
-
-			### permet d'activer les redo et undo pour chaque page
-			self.parent.tb.EnableTool(wx.ID_UNDO, not len(canvas.stockUndo) == 0)
-			self.parent.tb.EnableTool(wx.ID_REDO, not len(canvas.stockRedo) == 0)
-
-			canvas.deselect()
-			canvas.Refresh()
-
-		except Exception:
-			pass
-		evt.Skip()
-
-	def __ShowMenu(self, evt):
-		"""	Callback for the right click on a tab. Displays the menu.
-
-			@type   evt: event
-			@param  evt: Event Objet, None by default
-		"""
-
-		### mouse position
-		pos = evt.GetPosition()
-		### pointed page and flag
-		page,flag = self.HitTest(pos)
-
-		### if no where click
-		if flag == wx.BK_HITTEST_NOWHERE:
-			self.PopupMenu(Menu.DiagramNoTabPopupMenu(self), pos)
-		### if tab has been clicked
-		elif flag == wx.BK_HITTEST_ONLABEL:
-			self.PopupMenu(Menu.DiagramTabPopupMenu(self), pos)
-		else:
-			pass
-
-	def OnClearPage(self, evt):
-		""" Clear page.
-
-			@type evt: event
-			@param  evt: Event Objet, None by default
-		"""
-		if self.GetPageCount() > 0:
-			canvas = self.GetPage(self.GetSelection())
-			diagram = canvas.diagram
-
-			diagram.DeleteAllShapes()
-			diagram.modified = True
-
-			canvas.deselect()
-			canvas.Refresh()
-
-	def OnClosePage(self, evt):
-		""" Close current page.
-
-			@type evt: event
-			@param  evt: Event Objet, None by default
-		"""
-
-		if self.GetPageCount() > 0:
-
-			id = self.GetSelection()
-			title = self.GetPageText(id)
-			canvas = self.GetPage(id)
-			diagram = canvas.GetDiagram()
-
-			mainW =  self.GetTopLevelParent()
-
-			if diagram.modify:
-				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram ?')%(title), _('Save'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
-				val = dlg.ShowModal()
-				if val == wx.ID_YES:
-					mainW.OnSaveFile(evt)
-				elif val == wx.ID_NO:
-					self.DeleteBuiltinConstants()
-					self.pages.remove(canvas)
-					if not self.DeletePage(id):
-						sys.stdout.write(_(" %s not deleted ! \n"%(title)))
-				else:
-					dlg.Destroy()
-					return False
-
-				dlg.Destroy()
-
-			else:
-
-				self.DeleteBuiltinConstants()
-				self.pages.remove(canvas)
-
-				if not self.DeletePage(id):
-					sys.stdout.write(_("%s not deleted ! \n"%(title)))
-
-			### effacement du notebook "property"
-			nb1 = mainW.nb1
-			propPanel = nb1.GetPropPanel()
-			### si la page active est celle de "properties" alors la met a jour et on reste dessus
-			if propPanel:
-				propPanel.UpdatePropertiesPage(propPanel.defaultPropertiesPage())
-
-			return True
-
-	def OnRenamePage(self, evt):
-		"""Rename the title of notebook page.
-
-		@type evt: event
-		@param  evt: Event Objet, None by default
-		"""
-		selection = self.GetSelection()
-		dlg = wx.TextEntryDialog(self, _("Enter a new name:"), _("Diagram Manager"))
-		dlg.SetValue(self.GetPageText(selection))
-
-		if dlg.ShowModal() == wx.ID_OK:
-			txt = dlg.GetValue()
-			self.SetPageText(selection,txt)
-
-		dlg.Destroy()
-
-	def OnDetachPage(self, evt):
-		"""
-		Detach the notebook page on frame.
-
-		@type evt: event
-		@param  evt: Event Objet, None by default
-		"""
-
-		mainW = self.GetTopLevelParent()
-		selection = self.GetSelection()
-		canvas = self.GetPage(selection)
-		title = self.GetPageText(selection)
-
-		frame = DetachedFrame(canvas, wx.ID_ANY, title, canvas.GetDiagram())
-		frame.SetIcon(mainW.icon)
-		frame.SetFocus()
-		frame.Show()
-
-	def DeleteBuiltinConstants(self):
-		""" Delete builtin constants for the diagram.
-		"""
-		try:
-			name = self.GetPageText(self.GetSelection())
-			del __builtin__.__dict__[str(os.path.splitext(name)[0])]
-		except Exception:
-			pass
-			#print "Constants builtin not delete for %s : %s"%(name, info)
-
 # -------------------------------------------------------------------
 class MainApplication(wx.Frame):
 	""" DEVSimPy main application.
@@ -502,7 +252,7 @@ class MainApplication(wx.Frame):
 		pub.sendMessage('object.added', 'Loading search tree library...\n')
 
 		# NoteBook
-		self.nb1 = LeftNotebook(self, wx.ID_ANY, style = wx.CLIP_CHILDREN)
+		self.nb1 = ControlNotebook(self, wx.ID_ANY, style = wx.CLIP_CHILDREN)
 		self.tree = self.nb1.GetTree()
 		self.searchTree = self.nb1.GetSearchTree()
 
@@ -655,6 +405,7 @@ class MainApplication(wx.Frame):
 				else:
 					### try to start without error when .devsimpy need update (new version installed)
 					if not os.path.isdir(D['HOME_PATH']):
+						sys.stdout.write('.devsimpy file appear to be not liked with the DEVSimPy source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(self.GetUserConfigDir()))
 						D['HOME_PATH'] = ABS_HOME_PATH
 
 				__builtin__.__dict__.update(D)
@@ -662,6 +413,7 @@ class MainApplication(wx.Frame):
 				sys.stdout.write("DEVSimPy is ready. \n")
 
 			else:
+
 				self.WriteDefaultConfigFile(self.cfg)
 
 		### create a new defaut .devsimpy config file
@@ -936,7 +688,7 @@ class MainApplication(wx.Frame):
 		libraries_item = control_item.GetSubMenu().FindItemByPosition(2)
 
 		### if Libraries tab is not visible in DEVSimPy (in nb1), don't save the configuration of libraries
-		if libraries_item.Check():
+		if libraries_item.IsChecked():
 			# save in config file the opened last library directory
 			L = self.tree.GetItemChildren(self.tree.root)
 			self.cfg.Write("ChargedDomainList", str(filter(lambda k: self.tree.ItemDico[k] in L ,self.tree.ItemDico)))
@@ -966,7 +718,13 @@ class MainApplication(wx.Frame):
 		exit = False
 		### for all pages, we invoke their OnClosePage function
 		for i in xrange(self.nb2.GetPageCount()):
-			self.nb2.ChangeSelection(0)
+			### no problem with FlatNotebook
+			try:
+				self.nb2.SetSelection(i)
+			except:
+				### to correct the exisitng problem with classic NoteBook class
+				self.nb2.SetSelection(0)
+
 			if not self.nb2.OnClosePage(event):
 				exit = True
 				break
