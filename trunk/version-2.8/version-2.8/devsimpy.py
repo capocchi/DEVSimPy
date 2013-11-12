@@ -652,6 +652,10 @@ class MainApplication(wx.Frame):
 				except SyntaxError:
 					sys.stdout.write('Error trying to read the builtin dictionary from config file. So, we load the default builtin \n')
 					D = builtin_dict
+				else:
+					### try to start without error when .devsimpy need update (new version installed)
+					if not os.path.isdir(D['HOME_PATH']):
+						D['HOME_PATH'] = ABS_HOME_PATH
 
 				__builtin__.__dict__.update(D)
 
