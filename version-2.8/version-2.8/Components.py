@@ -5,7 +5,7 @@ Name: Components.py
 Brief descritpion: All classes for components
 Author(s): L. Capocchi <capocchi@univ-corse.fr>
 Version:  1.0
-Last modified: 2012.12.16
+Last modified: 2013.07.04
 GENERAL NOTES AND REMARKS:
 
 GLOBAL VARIABLES AND FUNCTIONS:
@@ -170,6 +170,8 @@ class GenericComponent:
 	"""
 	"""
 	def __init__(self, *argv, **kwargs):
+		"""
+		"""
 		# local copy
 		self._canvas = kwargs['canvas'] if 'id' in kwargs else None
 		self._x = kwargs['x'] if 'x' in kwargs else None

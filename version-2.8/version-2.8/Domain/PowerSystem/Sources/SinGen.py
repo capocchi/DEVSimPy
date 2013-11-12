@@ -58,7 +58,7 @@ class SinGen(DomainBehavior):
 		"""
 		
 		# output value list
-		L = [self.a*2*sin(self.w*self.timeNext+self.phi),0.0,0.0]
+		L = [self.a*sin(self.w*self.timeNext+self.phi),0.0,0.0]
 		
 		if(self.m == "QSS2"):
 			L[1] = self.a*self.w*cos(self.w*self.timeNext+self.phi)

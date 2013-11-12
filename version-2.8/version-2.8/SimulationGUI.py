@@ -511,7 +511,8 @@ class SimulationDialog(wx.Frame, wx.Panel):
 					self.statusbar.SetStatusText(str(100)+"%", 2)
 				
 		elif not self.thread.thread_suspend:
-			self.statusbar.SetBackgroundColour('grey')
+			color =  wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND)
+			self.statusbar.SetBackgroundColour(color)
 			self.statusbar.SetStatusText(_("Processing..."), 0)
 			self.statusbar.SetStatusText("%0.4f s"%(self.thread.cpu_time), 1)
 			if not self.ntl:
