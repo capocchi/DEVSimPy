@@ -37,11 +37,11 @@ class GeneralNotebook(Observer):
 
 		### label list
 		self.labelList = (_("Libraries"), _("Properties"))
-		
+
 		### Create panels with name used for label tab definition...
 		libPanel = LibPanel(self, self.labelList[0])
 		propPanel = PropPanel(self, self.labelList[1])
-		
+
 		### selected model for libPanel managing
 		self.selected_model = None
 
@@ -50,10 +50,10 @@ class GeneralNotebook(Observer):
 		### must be invoked here, at the end of constructor
 		self.AddPage(libPanel, libPanel.GetName(), imageId=0)
 		self.AddPage(propPanel, propPanel.GetName(), imageId=1)
-		
+
 		### binding event
 		self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.__PageChanged)
-		
+
 	def __set_properties(self):
 			"""
 			"""
@@ -61,14 +61,14 @@ class GeneralNotebook(Observer):
 			for img in [os.path.join(ICON_PATH_16_16,'db.png'), os.path.join(ICON_PATH_16_16,'properties.png'), os.path.join(ICON_PATH_16_16,'simulation.png')]:
 				imgList.Add(wx.Image(img, wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 			self.AssignImageList(imgList)
-			
+
 	def __PageChanged(self, evt):
 			"""
 			"""
 			if evt.GetSelection() == 1:
 				pass
 			evt.Skip()
-			
+
 	def GetLibPanel(self):
 			""" Get Libraries panel if exist
 			"""
@@ -83,7 +83,7 @@ class GeneralNotebook(Observer):
 			else:
 				### return the Panel object from the finded index
 				return self.GetPage(index)
-			
+
 	def GetPropPanel(self):
 		""" Get Properties panel ef exist
 		"""
@@ -98,7 +98,7 @@ class GeneralNotebook(Observer):
 		else:
 			### return the Panel object from the finded index
 			return self.GetPage(index)
-	
+
 	def GetTree(self):
 		""" Get tree attribut from librairies panel
 		"""
@@ -116,7 +116,7 @@ class GeneralNotebook(Observer):
 		"""
 		libPanel = self.GetLibPanel()
 		return libPanel.search
-	
+
 	def update(self, concret_subject=None):
 			""" Update method that manages the panel propertie depending of the selected model in the canvas
 			"""
@@ -126,9 +126,9 @@ class GeneralNotebook(Observer):
 			model = state['model']
 
 			propPanel = self.GetPropPanel()
-			
+
 			if propPanel:
-				
+
 				if model:
 					if model != self.selected_model:
 						newContent = Container.AttributeEditor(propPanel, wx.ID_ANY, model, canvas)
@@ -139,7 +139,7 @@ class GeneralNotebook(Observer):
 					propPanel.UpdatePropertiesPage(propPanel.defaultPropertiesPage())
 					self.selected_model = None
 					propPanel.SetToolTipString(propPanel.propToolTip[0])
-	
+
 
 ### ---------------------------------------------
 ### if flatnotebook can be imported, we work with it
@@ -152,7 +152,7 @@ try:
 		import wx.lib.agw.flatnotebook as fnb
 	else:
 		import wx.lib.flatnotebook as fnb
-	FLATNOTEBOOK = True	
+	FLATNOTEBOOK = True
 except:
 	pass
 
@@ -179,25 +179,29 @@ if FLATNOTEBOOK:
 
 			fnb.FlatNotebook.__init__(self, *args, **kwargs)
 			GeneralNotebook.__init__(self)
-			
+
 			### FlatNotebook can be styled
-			#self.SetWindowStyleFlag(fnb.FNB_VC8)
-			
+			self.SetWindowStyleFlag(fnb.FNB_DROPDOWN_TABS_LIST|\
+									fnb.FNB_FF2|\
+									fnb.FNB_SMART_TABS|\
+									fnb.FNB_X_ON_TAB|\
+									fnb.FNB_HIDE_ON_SINGLE_TAB)
+
 			self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.__OnClosingPage)
-			
+
 			self.CreateRightClickMenu()
 			self.SetRightClickMenu(self._rmenu)
-			
+
 		def __OnClosingPage(self, evt):
 			""" The close btutton of FlatNotebook has been invoked
 				We update the Show menu depending on the deleted tab
 			"""
-				
+
 			mainW = wx.GetApp().GetTopWindow()
-			
+
 			### label which will be deleted
 			label = self.GetPageText(evt.GetSelection())
-			
+
 			### find the correspondig submenu in the Show menu and deselect the label
 			### Show meni is in postion 2 on the Menu Bar of DEVSimPy
 			show_menu = mainW.GetMenuBar().GetMenu(2)
@@ -210,18 +214,18 @@ if FLATNOTEBOOK:
 				### if label that will be deleted is equal to the label of current item, we deselect it
 				if item.GetLabel() == label:
 					item.Check(False)
-		
+
 		def __OnClosePage(self, evt):
 			self.DeletePage(self.GetSelection())
-			
+
 		def CreateRightClickMenu(self):
 			self._rmenu = wx.Menu()
 			item = wx.MenuItem(self._rmenu, MENU_EDIT_DELETE_PAGE, _("Close Tab\tCtrl+F4"), _("Close Tab"))
 			self._rmenu.AppendItem(item)
 			self.Bind(wx.EVT_MENU, self.__OnClosePage, item)
-			
+
 else:
-	
+
 	#-------------------------------------------------------------------
 	class LeftNotebook(wx.Notebook, GeneralNotebook):
 		"""
@@ -241,4 +245,3 @@ else:
 
 			wx.Notebook.__init__(self, *args, **kwargs)
 			GeneralNotebook.__init__(self)
-			
