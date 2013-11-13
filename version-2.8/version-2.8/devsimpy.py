@@ -122,7 +122,6 @@ else:
 	from wx.lib.pubsub import setuparg1
 	from wx.lib.pubsub import pub
 
-
 ### here berfore the __main__ function
 if len(sys.argv) >= 2 and sys.argv[1] in ('-ng, -nogui, -js, -javascript'):
 	__builtin__.__dict__['GUI_FLAG'] = False
@@ -179,8 +178,8 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'bitmaps', 'splash.png
 __builtin__.__dict__.update(builtin_dict)
 
 #-------------------------------------------------------------------
-def getIcon(img_file):
-	path = os.path.join(ICON_PATH_16_16, img_file)
+def getIcon(path):
+	#path = os.path.join(ICON_PATH_16_16, img_file)
  	icon = wx.EmptyIcon()
 	#if os.path.exists(path):
 	bmp = wx.Image(path).ConvertToBitmap()
@@ -230,7 +229,7 @@ class MainApplication(wx.Frame):
 		self.stdioWin = None
 
 		# icon setting
-		self.icon = getIcon(DEVSIMPY_PNG)
+		self.icon = getIcon(os.path.join(ICON_PATH, DEVSIMPY_PNG))
 		self.SetIcon(self.icon)
 
 		# tell FrameManager to manage this frame
@@ -1520,7 +1519,7 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
 
 		info = wx.AboutDialogInfo()
 
-		info.SetIcon(getIcon(SPLASH_PNG))
+		info.SetIcon(getIcon(os.path.join(ICON_PATH_16_16, SPLASH_PNG)))
 		info.SetName('DEVSimPy')
 		info.SetVersion(self.GetVersion())
 		info.SetDescription(description)

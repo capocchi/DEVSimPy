@@ -3,6 +3,7 @@
 - N1 : obligé de mettre la premiere ligne du fichier .dat d'un fileGenerator a 0 0 sinon bad synchronisation
 - N3: dnd marche pas sous mac avec wx 2.9 qui n'est pas stable de toute manière.
 - N3: recompile plante lorsque on veux changer le nom d'un amd dans une lib par un clique droit dans le panneau lib
+- N3: icon de DEVSimPy ne s'affiche pas sous windows
 
 --------------------------------------------------------------Amélioration-------------------------------------------------------------
 - N3 : voir la fonction ChangeForm pour améliorer la création de connnection shape en évitant les modèles
@@ -28,7 +29,7 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 ----------------------------------------------------------------Remarques----------------------------------------------------------------
 
 - Ajout d'une librairie:
-	- en ajoutant un rep dans Doamin : attention il faut ajouter le nom dans le fichier __init__.pt de 'Domain'. Cela pour éviter les erreurs d'importation lorsque par exemple un module A doit importer un module B qui se trouve dans la même librairie. L'importation se fera alors de la manière suivante dans le module A (fichier A.py) from Domain.<Nom_Lib> import B
+	- en ajoutant un rep dans Doamin : attention il faut ajouter le nom dans le fichier __init__.py de 'Domain'. Cela pour éviter les erreurs d'importation lorsque par exemple un module A doit importer un module B qui se trouve dans la même librairie. L'importation se fera alors de la manière suivante dans le module A (fichier A.py) from Domain.<Nom_Lib> import B
 	- en passant par le gestionnaire d'importation: si le chemin est externe cela est automatique.
 
 *********************************************************************************************************************************************
