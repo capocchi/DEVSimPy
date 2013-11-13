@@ -373,10 +373,11 @@ class SettingsMenu(wx.Menu):
 		fritem.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'french-flag.png')))
 		enitem.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'united-states-flag.png')))
 
+
 		languagesSubmenu.AppendItem(fritem)
 		languagesSubmenu.AppendItem(enitem)
 
-		self.AppendMenu(wx.NewId(),_('Languages'),languagesSubmenu)
+		self.AppendMenu(wx.NewId(),_('Languages'), languagesSubmenu)
 		self.AppendItem(pref_item)
 
 		fritem.Enable(not parent.language == 'fr')

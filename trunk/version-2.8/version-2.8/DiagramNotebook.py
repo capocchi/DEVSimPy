@@ -76,15 +76,17 @@ class GeneralNotebook(Printable):
 		return self.pages
 
 	def __AddPage(self, event):
+		""" Add page
+		"""
 		self.AddEditPage(_("Diagram%d")%len(self.pages))
 
-	def GetPageByName(self, name = ''):
-		""" Get Page object from ist name
-		"""
-		for i in xrange(len(self.pages)):
-			if name == self.GetPageText(i):
-				return self.GetPage(i)
-		return None
+##	def GetPageByName(self, name = ''):
+##		""" Get Page object from ist name
+##		"""
+##		for i in xrange(len(self.pages)):
+##			if name == self.GetPageText(i):
+##				return self.GetPage(i)
+##		return None
 
 	def OnClearPage(self, evt):
 		""" Clear page.
@@ -197,6 +199,10 @@ except:
 MENU_EDIT_DELETE_PAGE = wx.NewId()
 
 if USE_FLATNOTEBOOK:
+	#
+	# FlatNotebook generalized class
+	#
+
 	class DiagramNotebook(fnb.FlatNotebook, GeneralNotebook):
 		""" Diagram FlatNotebook class
 		"""
@@ -214,40 +220,6 @@ if USE_FLATNOTEBOOK:
 
 			self.CreateRightClickMenu()
 			self.SetRightClickMenu(self._rmenu)
-
-		###
-		def OnClosingPage(self, evt):
-			""" Called when tab is closed.
-				With FlatNoteBokk, this method is used to ask if diagram should be saved and to udpate properties panel
-			"""
-
-			id = self.GetSelection()
-			canvas = self.GetPage(id)
-			diagram = canvas.GetDiagram()
-
-			mainW =  self.GetTopLevelParent()
-
-			if diagram.modify:
-				title = self.GetPageText(id)
-				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram ?')%(title), _('Save'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
-				val = dlg.ShowModal()
-				if val == wx.ID_YES:
-					mainW.OnSaveFile(evt)
-				elif val == wx.ID_NO:
-					self.DeleteBuiltinConstants()
-				else:
-					dlg.Destroy()
-
-				dlg.Destroy()
-
-			else:
-				self.DeleteBuiltinConstants()
-
-			### update (clear) of properties panel (Control notebook)
-			propPanel = mainW.nb1.GetPropPanel()
-			### If properties panel is active, we update it
-			if propPanel:
-				propPanel.UpdatePropertiesPage(propPanel.defaultPropertiesPage())
 
 		###
 		def AddEditPage(self, title, defaultDiagram = None):
@@ -298,6 +270,41 @@ if USE_FLATNOTEBOOK:
 
 			### bind event with new OnDeletePage
 			self.Bind(wx.EVT_MENU, self.OnClosePage, close_item)
+
+		###
+		def OnClosingPage(self, evt):
+			""" Called when tab is closed.
+				With FlatNoteBokk, this method is used to ask if diagram should be saved and to udpate properties panel
+			"""
+
+			id = self.GetSelection()
+			canvas = self.GetPage(id)
+			diagram = canvas.GetDiagram()
+
+			mainW =  self.GetTopLevelParent()
+
+			if diagram.modify:
+				title = self.GetPageText(id)
+				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram ?')%(title), _('Save'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
+				val = dlg.ShowModal()
+				if val == wx.ID_YES:
+					mainW.OnSaveFile(evt)
+				elif val == wx.ID_NO:
+					self.DeleteBuiltinConstants()
+				else:
+					dlg.Destroy()
+
+				dlg.Destroy()
+
+			else:
+				self.DeleteBuiltinConstants()
+
+			### update (clear) of properties panel (Control notebook)
+			propPanel = mainW.nb1.GetPropPanel()
+			### If properties panel is active, we update it
+			if propPanel:
+				propPanel.UpdatePropertiesPage(propPanel.defaultPropertiesPage())
+
 
 		def OnClosePage(self, evt):
 			self.DeletePage(self.GetSelection())
@@ -394,11 +401,10 @@ else:
 				return True
 
 		def AddEditPage(self, title, defaultDiagram = None):
-			"""
-			Adds a new page for editing to the notebook and keeps track of it.
+			""" Adds a new page for editing to the notebook and keeps track of it.
 
-			@type title: string
-			@param title: Title for a new page
+				@type title: string
+				@param title: Title for a new page
 			"""
 
 			### title page list
@@ -406,7 +412,6 @@ else:
 
 			### occurence of title in existing title pages
 			c = title_pages.count(title)
-
 			title = title+"(%d)"%c if c != 0 else title
 
 			### new page

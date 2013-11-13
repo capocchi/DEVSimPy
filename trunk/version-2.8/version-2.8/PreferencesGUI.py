@@ -11,14 +11,14 @@ import wx.lib.filebrowsebutton as filebrowse
 
 from PluginsGUI import PluginsPanel, GeneralPluginsList
 
-#---------------------------------------------------------------------- 
+#----------------------------------------------------------------------
 class GeneralPanel(wx.Panel):
-	""" general Panel
+	""" General preferences panel
 	"""
 
 	def __init__(self, parent):
 		"""
-			Constructor
+			Constructor.
 		"""
 		wx.Panel.__init__(self, parent)
 
@@ -26,7 +26,7 @@ class GeneralPanel(wx.Panel):
 		self.plugin_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Plugins directory"), toolTip=_("Change the plugins directory"))
 		self.domain_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Library directory"), toolTip=_("Change the library directory"))
 		self.out_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Output directory"), toolTip=_("Change the output directory"))
-		
+
 		self.plugin_dir.SetValue(PLUGINS_DIR)
 		self.domain_dir.SetValue(DOMAIN_PATH)
 		self.out_dir.SetValue(OUT_DIR)
@@ -35,13 +35,13 @@ class GeneralPanel(wx.Panel):
 		self.st1 = wx.StaticText(self, wx.ID_ANY, _("Number of recent file"))
 		self.st2 = wx.StaticText(self, wx.ID_ANY, _("Font size"))
 		self.st3 = wx.StaticText(self, wx.ID_ANY, _("Deep of history item"))
-		
+
 		self.st1.SetToolTipString(_("Feel free to change the lenght of list defining the recent opend files."))
 		self.st2.SetToolTipString(_("Feel free to change the font size of DEVSimpy."))
 		self.st3.SetToolTipString(_("Feel free to change the number of item for undo/redo command"))
 
 		### SpinCtrl
-		
+
 		### number of opened file
 		self.nb_opened_file = wx.SpinCtrl(self, wx.ID_ANY, '')
 		self.nb_opened_file.SetRange(2, 20)
@@ -51,7 +51,7 @@ class GeneralPanel(wx.Panel):
 		self.font_size = wx.SpinCtrl(self, wx.ID_ANY, '')
 		self.font_size.SetRange(2, 20)
 		self.font_size.SetValue(FONT_SIZE)
-		
+
 		### number of undo/redo items
 		self.nb_history_undo = wx.SpinCtrl(self, wx.ID_ANY, '')
 		self.nb_history_undo.SetRange(2, 100)
@@ -66,7 +66,7 @@ class GeneralPanel(wx.Panel):
 		box1 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, _('Properties')), orient=wx.VERTICAL)
 		vsizer = wx.BoxSizer(wx.VERTICAL)
 		hsizer = wx.GridSizer(3, 2, 20, 20)
-		
+
 		hsizer.AddMany( [	(self.st1, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
 							(self.nb_opened_file, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
 							(self.st3, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
@@ -95,7 +95,8 @@ class GeneralPanel(wx.Panel):
 		__builtin__.__dict__['PLUGINS_DIR'] = os.path.basename(self.plugin_dir.GetValue())
 		__builtin__.__dict__['OUT_DIR'] = os.path.basename(self.out_dir.GetValue())
 		__builtin__.__dict__['TRANSPARENCY'] = self.cb1.GetValue()
-		
+
+
 class SimulationPanel(wx.Panel):
 	""" Simulation Panel
 	"""
@@ -112,11 +113,11 @@ class SimulationPanel(wx.Panel):
 		hbox4 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox5 = wx.BoxSizer(wx.HORIZONTAL)
 		vbox = wx.BoxSizer(wx.VERTICAL)
-		
+
 		### Buttons
 		self.sim_success_wav_btn = wx.Button(self, wx.ID_ANY, _("Finish.wav"), (25, 105), name='success')
 		self.sim_error_wav_btn = wx.Button(self, wx.ID_ANY, _("Error.wav"), (25, 105), name='error')
-		
+
 		self.sim_success_wav_path = __builtin__.__dict__['SIMULATION_SUCCESS_WAV_PATH']
 		self.sim_success_wav_btn.Enable(self.sim_success_wav_path is not os.devnull)
 		self.sim_success_wav_btn.SetToolTipString(_("Press this button in order to change the song emmited for the end of the simulation."))
@@ -133,7 +134,7 @@ class SimulationPanel(wx.Panel):
 		self.bt6 = wx.CheckBox(self, wx.ID_ANY, _('No Time Limit'))
 		self.bt6.SetValue(__builtin__.__dict__['NTL'])
 		self.bt6.SetToolTipString(_("No Time Limit allow the stop of simulation when all of models are idle."))
-		
+
 		### StaticText
 		self.txt = wx.StaticText(self, wx.ID_ANY, _("Default strategy:"))
 		self.cb = wx.ComboBox(self, wx.ID_ANY, DEFAULT_SIM_STRATEGY, choices=SIM_STRATEGY_LIST, style=wx.CB_READONLY)
@@ -145,11 +146,11 @@ class SimulationPanel(wx.Panel):
 		self.txt2 = wx.StaticText(self, wx.ID_ANY, _("Frequence of plotting refresh:"))
 		self.sc = wx.SpinCtrl(self, wx.ID_ANY, str(self.sim_defaut_plot_dyn_freq), (55, 90), (60, -1), min=10, max=10000)
 		self.sc.SetToolTipString(_("Default frequence for dynamic plotting."))
-		
+
 		### StaticBox and StaticText
 		#information = wx.StaticText(self, wx.ID_ANY, _("Strategy information:"))
 		#self.strategy_info = wx.StaticText(self, wx.ID_ANY, _("Default strategy\ndscdsc\n"),style=wx.ALIGN_CENTRE)
-		
+
 		### Adding sizer
 		hbox1.Add(self.bt5, 0, wx.ALIGN_CENTER_VERTICAL, 15)
 		hbox1.Add(self.sim_success_wav_btn, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND,15)
@@ -162,10 +163,10 @@ class SimulationPanel(wx.Panel):
 
 		hbox4.Add(self.txt2, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT, 15)
 		hbox4.Add(self.sc, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT, 15)
-		
+
 		#hbox4.Add(information, 1, wx.ALIGN_CENTER_VERTICAL, 15)
 		##hbox4.Add(self.strategy_info, 1, wx.ALIGN_CENTER_VERTICAL, 15)
-		
+
 		vbox.Add(hbox1, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 10)
 		vbox.Add(hbox2, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND,10)
 		vbox.Add(hbox3, 0, wx.ALIGN_CENTER_VERTICAL,10)
@@ -175,14 +176,14 @@ class SimulationPanel(wx.Panel):
 		### Set sizer
 		self.SetSizer(vbox)
 		self.SetAutoLayout(True)
-		
+
 		### Binding
 		self.sim_success_wav_btn.Bind(wx.EVT_BUTTON, self.OnSelectSound)
 		self.sim_error_wav_btn.Bind(wx.EVT_BUTTON, self.OnSelectSound)
 		self.bt5.Bind(wx.EVT_CHECKBOX, self.onBt5Check)
 		self.cb.Bind(wx.EVT_COMBOBOX, self.onCb)
 		self.sc.Bind(wx.EVT_SPINCTRL, self.onSc)
-		
+
 	def OnSelectSound(self, evt):
 		"""
 		"""
@@ -190,30 +191,30 @@ class SimulationPanel(wx.Panel):
 							_("Choose a sound file"),
 							wildcard = _("WAV files (*.wav)|*.wav"),
 							style = wx.OPEN)
-							
+
 		if dlg.ShowModal() == wx.ID_OK:
 			val = dlg.GetPath()
 			name = evt.GetEventObject().GetName()
 			try:
 				### test the selected sound
 				wx.Sound.PlaySound(val, wx.SOUND_SYNC)
-				
+
 				if name == 'success':
 					self.sim_success_wav_path = val
 				elif name == 'error':
 					self.sim_error_wav_path = val
 				else:
 					pass
-				
+
 			except NotImplementedError, v:
 				wx.MessageBox(str(v), _("Exception Message"))
-				
+
 		dlg.Destroy()
-			
+
 	def onBt5Check(self, evt):
 		""" CheckBox has been checked
 		"""
-		
+
 		if evt.GetEventObject().GetValue():
 			self.sim_success_wav_btn.Enable(True)
 			self.sim_error_wav_btn.Enable(True)
@@ -224,19 +225,19 @@ class SimulationPanel(wx.Panel):
 			self.sim_error_wav_btn.Enable(False)
 			self.sim_success_wav_path = os.devnull
 			self.sim_error_wav_path = os.devnull
-	
+
 	def onCb(self, evt):
 		""" CheckBox has been checked
 		"""
 		val = evt.GetEventObject().GetValue()
 		self.sim_defaut_strategy = val
-	
+
 	def onSc(self, evt):
 		""" CheckBox has been checked
 		"""
 		val = evt.GetEventObject().GetValue()
 		self.sim_defaut_plot_dyn_freq = val
-		
+
 	def OnApply(self, evt):
 		""" Apply changes
 		"""
@@ -245,7 +246,7 @@ class SimulationPanel(wx.Panel):
 		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = self.sim_defaut_strategy
 		__builtin__.__dict__['DEFAULT_PLOT_DYN_FREQ'] = self.sim_defaut_plot_dyn_freq
 		__builtin__.__dict__['NTL'] = self.bt6.GetValue()
-		
+
 class EditorPanel(wx.Panel):
 	""" Edition Panel
 	"""
@@ -257,7 +258,7 @@ class EditorPanel(wx.Panel):
 		wx.Panel.__init__(self, parent)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
-		
+
 		self.cb = wx.CheckBox(self, wx.ID_ANY, _("Use local programmer software"))
 		self.cb.SetValue(__builtin__.__dict__['LOCAL_EDITOR'])
 		self.cb.SetToolTipString(_("This option dont work for the .amd and .cmd file. \n"
@@ -266,7 +267,7 @@ class EditorPanel(wx.Panel):
 		vbox.Add(self.cb, 0, wx.ALL,10)
 
 		self.SetSizer(vbox)
-		
+
 	def OnApply(self, evt):
 		""" Apply changes
 		"""
@@ -283,10 +284,10 @@ class Preferences(wx.Toolbook):
 		"""
 
 		wx.Toolbook.__init__(self, parent, wx.ID_ANY, style=wx.BK_DEFAULT)
-	
+
 		### dont try to translate this labels with _() because there are used to find png
 		L = [('General',"(self)"),('Simulation',"(self)"), ('Editor',"(self)"), ('Plugins',"(self)")]
-		
+
 		# make an image list using the LBXX images
 		il = wx.ImageList(32, 32)
 		for img in map(lambda a: wx.Image(os.path.join(ICON_PATH, "%s_pref.png"%a[0]), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), L):
@@ -303,7 +304,7 @@ class Preferences(wx.Toolbook):
 		self.pluginPanel.SetPluginsList(self.CheckList)
 
 		lpanel = self.pluginPanel.GetLeftPanel()
-		
+
 		### Buttons for insert or delete plugins
 		self.addBtn = wx.Button(lpanel, wx.ID_ADD, size=(140, -1))
 		self.delBtn = wx.Button(lpanel, wx.ID_DELETE, size=(140, -1))
@@ -311,7 +312,7 @@ class Preferences(wx.Toolbook):
 		self.addBtn.SetToolTipString(_("Add new plugins"))
 		self.delBtn.SetToolTipString(_("Delete all existing plugins"))
 		self.refBtn.SetToolTipString(_("Refresh plugins list"))
-		
+
 		### add widget to plugin panel
 		self.pluginPanel.AddWidget(3, self.addBtn)
 		self.pluginPanel.AddWidget(4, self.delBtn)
@@ -323,7 +324,7 @@ class Preferences(wx.Toolbook):
 		self.Bind(wx.EVT_BUTTON, self.OnAdd, id=self.addBtn.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnDelete, id=self.delBtn.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnRefresh, id=self.refBtn.GetId())
-		
+
 	#----------------------------------------------------------------------
 	def OnPageChanged(self, event):
 		"""
@@ -338,7 +339,7 @@ class Preferences(wx.Toolbook):
 			parent.SetSize((700,500))
 		else:
 			parent.SetSize((700,450))
-		    
+
 		event.Skip()
 
 	def OnPageChanging(self, event):
@@ -366,7 +367,7 @@ class Preferences(wx.Toolbook):
 				basename,ext = os.path.splitext(os.path.basename(filename))
 				root = os.path.dirname(filename)
 				self.CheckList.InsertItem(root, basename)
-				
+
 				### trying to copy file in plugin directory
 				try:
 					shutil.copy2(filename, os.path.join(HOME_PATH, PLUGINS_DIR))
@@ -403,7 +404,7 @@ class Preferences(wx.Toolbook):
 							os.remove(filename)
 					except Exception:
 						sys.stderr.write(_('ERROR: plugin file not deleted!'))
-						
+
 			dial.Destroy()
 		else:
 			sys.stderr.write(_('Select plugins to delete'))
@@ -415,13 +416,13 @@ class Preferences(wx.Toolbook):
 		l = list(os.walk(os.path.join(HOME_PATH, PLUGINS_DIR)))
 		### populate checklist with file in plugins directory
 		wx.CallAfter(self.CheckList.Populate, (l))
-		
+
 	def OnApply(self,evt):
 		""" Apply button has been pressed and we must take into account all changes for each panel
 		"""
 		for page in [self.GetPage(i) for i in xrange(self.GetPageCount())]:
 			page.OnApply(evt)
-		
+
 ########################################################################
 class PreferencesGUI(wx.Frame):
 	""" DEVSimPy Preferences General User Interface class
@@ -436,9 +437,9 @@ class PreferencesGUI(wx.Frame):
 		_icon = wx.EmptyIcon()
 		_icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "preferences.png"), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(_icon)
-		
+
 		self.SetMinSize((400,500))
-		
+
 		### Panel
 		panel = wx.Panel(self, wx.ID_ANY)
 		self.pref = Preferences(panel)
@@ -476,10 +477,10 @@ class PreferencesGUI(wx.Frame):
 		"""
 		self.pref.OnApply(evt)
 		self.Close()
-		
+
 	def OnCancel(self, evt):
 		self.Close()
-		
+
 	def OnClose(self, evt):
 		self.Close()
 
@@ -487,11 +488,11 @@ class PreferencesGUI(wx.Frame):
 class TestApp(wx.App):
 	""" Testing application
 	"""
-	
+
 	def OnInit(self):
-		
+
 		import gettext
-	
+
 		__builtin__.__dict__['HOME_PATH'] = os.getcwd()
 		__builtin__.__dict__['ICON_PATH'] = os.path.join('icons')
 		__builtin__.__dict__['ICON_PATH_16_16'] = os.path.join(ICON_PATH, '16x16')
@@ -509,18 +510,18 @@ class TestApp(wx.App):
 		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = 'Strategy2'
 		__builtin__.__dict__['DEFAULT_PLOT_DYN_FREQ'] = 100
 		__builtin__.__dict__['LOCAL_EDITOR'] = False
-		
+
 		__builtin__.__dict__['_'] = gettext.gettext
-	
-	
+
+
 		frame = PreferencesGUI(None, "Test")
 		frame.Show()
-	
+
 		return True
-	
+
 	def OnQuit(self, event):
 		self.Close()
-		
+
 if __name__ == '__main__':
 
 	app = TestApp(0)
