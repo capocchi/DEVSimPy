@@ -19,7 +19,7 @@
 - N3 : faire le API
 - N3 : faire le OnCheckUpgrade pour DEVSimPy (voir bon exemple dans GUI2exe)
 - N3 : finir la doc sur les plugins dans google.docs
-- N3 : construire une architecture de classe basé sur la statégie mise en place dans la simulation pour repondre à la question suivante: comment faire en sorte que les 
+- N3 : construire une architecture de classe basé sur la statégie mise en place dans la simulation pour repondre à la question suivante: comment faire en sorte que les
 stratégies proposées prennent en compte le type d'algorithme utilisé (mise à plat, distribué, //...) et le type de simulateur DEVS (avec des fonctions de transition particulière comme deta_conv, delta_ext, delta_fault).
 En sachant qu'il faut être capable de simuler des systèmes composé de modèles qui n'appartienne pas au même sous-formalisme DEVS.
 -N3 : reflechir sur le changement facile des icons et changer les icons avec la lib oxygen: http://www.iconfinder.com/search/?q=perspective%20new
@@ -47,7 +47,7 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 -Fait le 30/06/09 par LC: faire la liste des 5 derniers fichiers édités.
 -Fait le 1/07/09 par LC: liste des 5 derniers fichiers dernierement ouvert.
 -Fait le 4/07/09 par LC: introduction de la lister agrs dans Achivable et Structurable pour stocker les arguments du constructeur de Atomic et Coupled. Donc plus de sauvegarde de l'instance DEVS.
--Fait le 7/07/09 par LC:  voir le panel attribut et le refaire avec une Grill(voir le fichier GridSimple.py) 
+-Fait le 7/07/09 par LC:  voir le panel attribut et le refaire avec une Grill(voir le fichier GridSimple.py)
 -Fait le 07/07/09 par LC: Copier et coller renvoie sur le model selectionne.
 -Fait le 07/07/09 par LC: Voir le clique droit sur le panel (notamment pour le copier/coller).
 -Fait le 08/07/09 par LC: rafraichissement automatique de la page correspondante au CodeFrame qui vient d'être sauvé.
@@ -197,7 +197,7 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 -Fait le 10/11/10 par LC: ajout -> possibilité de ranger les propriétés comprtementale par ordrer alphabétique.
 -Fait le 10/11/10 par LC: ajout -> possibilité d'ajouter une image de fond pour les modèles par l'intermédiare de l'attrbit image (à tester à fond et sous win pas fait).
 -Fait le 11/11/10 par LC: correction -> bug dans la mise a jour de python_path et image_path avent de sauver les fichier .amd et .cmd.
--Fait le 11/11/10 par LC: amélioration -> addition du fichier image dans le .amd ou .cmd 
+-Fait le 11/11/10 par LC: amélioration -> addition du fichier image dans le .amd ou .cmd
 -Fait le 12/11/10 par LC: ajout -> menu au clic droit dans les propriétés donnant le clear et l'édition des champs (pour l'instant).
 -Fait le 12/11/10 par LC: amélioration ->  simplification de la fonction UpdateZipFile.
 -Fait le 13/11/10 par LC: amélioration -> ajout du pattern obeserver pour la gestion de la mise a jour du panel propriété à gauce de DEVSimPY en fonction du modèle selectionné dans ShapeCanvas.
@@ -220,7 +220,7 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 -Fait le 2/12/10 par LC : ajout -> possibilité d'ouvrir DEVSimPy en passant en commade des .dsp ou en double clicquant les .dsp dans l'os configuré
 -Fait le 2/12/10 par LC : ajout -> option dans les préférences pour la simulation
 -Fait le 3/12/10 par LC : ajout -> logger dans le code devs qui est accessible par clic droit sur les modèles puis Log (self.debugger('message')). Definition dans DEVSComponent d'une nouvelle méthode OnLog
--Fait le 3/12/10 par LC : amélioration -> possibilité d'ouvrir une liste de fichiers .dsp 
+-Fait le 3/12/10 par LC : amélioration -> possibilité d'ouvrir une liste de fichiers .dsp
 -Fait le 5/12/10 par LC : ajout -> premier ajout de la documentation en francais de l'aide en htmlHelpController et du window Help Workqhop sous windows pour générer un bon .zip
 -Fait le 7/12/10 par LC : correction -> bug lorsque modification des labels et simulation. La priority-list n'est pas mise à jour.
 -Fait le 7/12/10 par LC : correction -> bug avec importation externe d'une lib : chemin de modèles introuvable. ajout dans les __setstate__ de CodeBlock et ContainerBlock de la prise en compte du remplacement des chemins erronés par les chemin externe des lib.
@@ -273,7 +273,7 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 -Fait le 01/06/11 par LC: amélioration -> récuperer le chemin des fileName pour les generator lors du changement des chemins.
 -Fait le 01/06/11 par LC: correction -> lorsque Cancel ne rien faire pour la sauvegarde des dsp.
 -Fait le 8/06/11 par LC: amélioration -> deplacement dans le repertoire d'orginie du fichier python_path lorsque on veut le modifier.
--Fait le 22/06/11 par LC: amélioration -> meilleur retour des erreurs dans le tipstring correspondant au modèle dans l'arbre des lib (ou par clic droit puis Doc) 
+-Fait le 22/06/11 par LC: amélioration -> meilleur retour des erreurs dans le tipstring correspondant au modèle dans l'arbre des lib (ou par clic droit puis Doc)
 -Fait le 22/06/11 par LC: amélioration -> relance de la sim sans refaire le dialogue grace a intro de current_master et deepcopy dans le OnOk de SimualtionGUI.py
 -Fait le 22/06/11 par LC: ajout -> configuration de la police (ajout attribut graphique font) pour les modèles codeBlock et containerBlock.
 -Fait le 22/06/11 par LC: correction -> erreur lorsque simulation d'un model qui n'a pas de generateur et que l'on est en no limit.
@@ -381,7 +381,7 @@ Tour ce passe dans GetFileListFromInit qui a été déplacer dans Container.py
 -Fait le 13/12/2012 par LC: correction -> ajout de bad_flag dans CustomDataTable pour metriser l'update des block notamment pour les bad_filename_path_flag et les logo.
 -Fait le 14/12/2012 par LC: correction -> PrepareDC ajouté dans OnPaint avant OnDrawing pour assurer qu'il y ai pas de problème lorsque qu'on scroll
 -Fait le 16/12/2012 par LC: amélioration-> refactoring avec introduction des classes DSPFile, AMDFile, CMDFile et PythonFile pour meilleur représentation du DropTarget.
--Fait le 16/12/2012 par LC: correction -> dans DSPFile.LoadDiagram correction lorsque Dnd d'un dsp et pas de nouveau tab. 
+-Fait le 16/12/2012 par LC: correction -> dans DSPFile.LoadDiagram correction lorsque Dnd d'un dsp et pas de nouveau tab.
 -Fait le 18/12/2012 par LC et ATL: amélioration -> OnExport déplacé dand block et modifier pour communique évaec les sous menu de l'export dans Menu.py
 -Fait le 18/12/2012 par LC et ATL: ajout -> export en js dispo pour les ContainerBlocks dans Join.py
 -Fait le 18/12/2012 par LC: ajout -> diagram modifié lorsque changement des ports par QuickAttributEditor garace a Pre_Undo
@@ -392,7 +392,7 @@ Tour ce passe dans GetFileListFromInit qui a été déplacer dans Container.py
 -Fait le 19/12/2012 par LC: amélioration -> gestion du undo et suppresion des focus dans Container.py (a voir dans le temps...)
 -Fait le 19/12/2012 par LC: amélioration -> autoSizeColumn dans le SpredSheet.
 -Fait le 18/01/2013 par LC: correction -> Bad Synchronization corrigé en deplacent le clock= dans la strategie2 par le init msg dans Stategy.py
--Fait le 30/01/2013 par LC: correction -> le nom du fichie python comportemental dans les amd ou structurel dans les cmd n'a plus besoin d'avoir le meme nom que le .amd ou .cmd. Par contre maintenant, un test est 
+-Fait le 30/01/2013 par LC: correction -> le nom du fichie python comportemental dans les amd ou structurel dans les cmd n'a plus besoin d'avoir le meme nom que le .amd ou .cmd. Par contre maintenant, un test est
 invoque rpar un callback lorsque le fichier python est renseigné dans le wizard pour le amd ou le cmd. Meme chose pour le fichier plugin qui doit s'appeller oblogatoirtement plugins.py.
 -Fait le 05/02/2013 par LC: amélioration -> dans getPythonModelFileName ajout du test si plusieur fichier py dasn un amd ou cmd alors on cherche le fichier py qui contient le bon comportement cad qui heritre de DomainBehavior ou DomainStructure. Ce test est fait uniquement si on ne trouve pas un fichier py qui possède pas le meme nom que le fichier mad ou cmd.
 -Fait le 11/02/2013 par LC: ajout -> sauvegarde et ouverture possible au format plus lisisble et debuggable yaml (par save as).
@@ -405,3 +405,4 @@ invoque rpar un callback lorsque le fichier python est renseigné dans le wizard
 -Fait le 24/06/2013 par LC: correction -> valeur par defaut dans le LabelEditorDialog du radio boutton (fonctionnait pas sous windows)
 -Fait le 05/11/2013 par LC: amélioration -> refactoring du LeftNotebook avec la creation de trois fichiers PoprPnale.py, LibPanel et LibraryTree pour l'amélioration du menu Show pour activer ou desactiver les panels (Perspectives).
 -Fait le 05/11/2013 par LC: amélioration -> refactrorisation et creation d'un fichier pour LeftNotebook avec l'intgeration du FlatNoteBook. PAs fini car La méthode uypdate utilisée par Obsrerver porte le meme non que celle utilisé par Core Windows du FlatNoteBook. A régler...
+-Fait le 13/11/2013 par LC: amélioration -> refactorisation du right notebook (DiagramNotebook.py).

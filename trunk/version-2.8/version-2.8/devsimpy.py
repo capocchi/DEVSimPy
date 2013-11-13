@@ -718,12 +718,9 @@ class MainApplication(wx.Frame):
 		exit = False
 		### for all pages, we invoke their OnClosePage function
 		for i in xrange(self.nb2.GetPageCount()):
-			### no problem with FlatNotebook
-			try:
-				self.nb2.SetSelection(i)
-			except:
-				### to correct the exisitng problem with classic NoteBook class
-				self.nb2.SetSelection(0)
+
+			### select the first page
+			self.nb2.SetSelection(0)
 
 			if not self.nb2.OnClosePage(event):
 				exit = True

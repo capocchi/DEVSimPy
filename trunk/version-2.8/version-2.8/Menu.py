@@ -517,8 +517,6 @@ class DiagramTabPopupMenu(wx.Menu):
 		rename.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rename.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		clear.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'delete.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 
-
-
 		self.AppendItem(detach)
 		self.AppendItem(rename)
 		self.AppendItem(clear)
