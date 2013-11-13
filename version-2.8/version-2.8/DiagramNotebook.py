@@ -7,7 +7,7 @@
 #                             Laurent CAPOCCHI
 #                          University of Corsica
 #                     --------------------------------
-# Version 1.0                                        last modified: 12/11/2013
+# Version 1.0                                        last modified: 13/11/2013
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -67,8 +67,6 @@ class GeneralNotebook(Printable):
 		self.AssignImageList(imgList)
 
 		### binding
-		self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.__PageChanged)
-
 		self.Bind(wx.EVT_LEFT_DCLICK, self.__AddPage)
 
 	def GetPages(self):
@@ -88,34 +86,16 @@ class GeneralNotebook(Printable):
 				return self.GetPage(i)
 		return None
 
-	def __PageChanged(self, evt):
-		""" Page hase been changed
-		"""
-
-		try:
-			canvas = self.GetPage(self.GetSelection())
-			self.print_canvas = canvas
-			self.print_size = self.GetSize()
-
-			### permet d'activer les redo et undo pour chaque page
-			self.parent.tb.EnableTool(wx.ID_UNDO, not len(canvas.stockUndo) == 0)
-			self.parent.tb.EnableTool(wx.ID_REDO, not len(canvas.stockRedo) == 0)
-
-			canvas.deselect()
-			canvas.Refresh()
-
-		except Exception:
-			pass
-		evt.Skip()
-
 	def OnClearPage(self, evt):
 		""" Clear page.
 
 			@type evt: event
 			@param  evt: Event Objet, None by default
 		"""
+		id = self.GetSelection()
+
 		if self.GetPageCount() > 0:
-			canvas = self.GetPage(self.GetSelection())
+			canvas = self.GetPage(id)
 			diagram = canvas.diagram
 
 			diagram.DeleteAllShapes()
@@ -158,6 +138,37 @@ class GeneralNotebook(Printable):
 		frame.SetFocus()
 		frame.Show()
 
+	def OnPageChanged(self, evt):
+		""" Page hase been changed
+		"""
+
+		id = self.GetSelection()
+
+		### id is -1 when DEVSimPy is starting
+		if id != -1 and self.GetPageCount() > 0:
+
+			canvas = self.GetPage(id)
+			self.print_canvas = canvas
+			self.print_size = self.GetSize()
+
+			### action history
+			if hasattr(self.parent, 'tb'):
+				self.parent.tb.EnableTool(wx.ID_UNDO, not len(canvas.stockUndo) == 0)
+				self.parent.tb.EnableTool(wx.ID_REDO, not len(canvas.stockRedo) == 0)
+
+			### refresh canvas
+			canvas.deselect()
+			canvas.Refresh()
+
+			### update statusbar depending on the diagram modification
+			if hasattr(self.parent, 'statusbar'):
+				diagram = canvas.GetDiagram()
+				txt = _('%s modified')%(self.GetPageText(id)) if diagram.modify else ""
+				self.parent.statusbar.SetStatusText(txt)
+
+		### propagate event also error in OnClosePage becaus GetSelection is wrong
+		evt.Skip()
+
 	def DeleteBuiltinConstants(self):
 		""" Delete builtin constants for the diagram.
 		"""
@@ -166,26 +177,26 @@ class GeneralNotebook(Printable):
 			del __builtin__.__dict__[str(os.path.splitext(name)[0])]
 		except Exception:
 			pass
-			#print "Constants builtin not delete for %s : %s"%(name, info)
+			#sys.stdout.write("Constants builtin not delete for %s : %s"%(name, info))
 
 ### ---------------------------------------------
 ### if flatnotebook can be imported, we work with it
 ### more information about FlatNotebook http://wiki.wxpython.org/Flatnotebook%20(AGW)
 
-FLATNOTEBOOK = False
+USE_FLATNOTEBOOK = False
 
 try:
 	if (wx.VERSION >= (2, 8, 9, 2)):
 		import wx.lib.agw.flatnotebook as fnb
 	else:
 		import wx.lib.flatnotebook as fnb
-	FLATNOTEBOOK = True
+	USE_FLATNOTEBOOK = True
 except:
 	pass
 
 MENU_EDIT_DELETE_PAGE = wx.NewId()
 
-if FLATNOTEBOOK:
+if USE_FLATNOTEBOOK:
 	class DiagramNotebook(fnb.FlatNotebook, GeneralNotebook):
 		""" Diagram FlatNotebook class
 		"""
@@ -198,51 +209,45 @@ if FLATNOTEBOOK:
 			fnb.FlatNotebook.__init__(self, *args, **kwargs)
 			GeneralNotebook.__init__(self,*args, **kwargs)
 
-			self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSED, self.OnClosePage)
+			self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.OnClosingPage)
+			self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
 
 			self.CreateRightClickMenu()
 			self.SetRightClickMenu(self._rmenu)
 
 		###
-		def OnClosePage(self, evt):
+		def OnClosingPage(self, evt):
 			""" Called when tab is closed.
 				With FlatNoteBokk, this method is used to ask if diagram should be saved and to udpate properties panel
 			"""
 
-			### to avoid singulatity closing DEVSimPy
-			if self.GetPageCount() > 0:
+			id = self.GetSelection()
+			canvas = self.GetPage(id)
+			diagram = canvas.GetDiagram()
 
-				id = self.GetSelection()
-				canvas = self.GetPage(id)
-				diagram = canvas.GetDiagram()
+			mainW =  self.GetTopLevelParent()
 
-				mainW =  self.GetTopLevelParent()
-
-				if diagram.modify:
-					title = self.GetPageText(id)
-					dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram ?')%(title), _('Save'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
-					val = dlg.ShowModal()
-					if val == wx.ID_YES:
-						mainW.OnSaveFile(evt)
-					elif val == wx.ID_NO:
-						self.DeleteBuiltinConstants()
-
-					else:
-						dlg.Destroy()
-						return False
-
+			if diagram.modify:
+				title = self.GetPageText(id)
+				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram ?')%(title), _('Save'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
+				val = dlg.ShowModal()
+				if val == wx.ID_YES:
+					mainW.OnSaveFile(evt)
+				elif val == wx.ID_NO:
+					self.DeleteBuiltinConstants()
+				else:
 					dlg.Destroy()
 
-				else:
-					self.DeleteBuiltinConstants()
+				dlg.Destroy()
 
-				### update (clear) of properties panel (Control notebook)
-				propPanel = mainW.nb1.GetPropPanel()
-				### If properties panel is active, we update it
-				if propPanel:
-					propPanel.UpdatePropertiesPage(propPanel.defaultPropertiesPage())
+			else:
+				self.DeleteBuiltinConstants()
 
-				return True
+			### update (clear) of properties panel (Control notebook)
+			propPanel = mainW.nb1.GetPropPanel()
+			### If properties panel is active, we update it
+			if propPanel:
+				propPanel.UpdatePropertiesPage(propPanel.defaultPropertiesPage())
 
 		###
 		def AddEditPage(self, title, defaultDiagram = None):
@@ -292,14 +297,16 @@ if FLATNOTEBOOK:
 			self.Unbind(wx.EVT_MENU, close_item)
 
 			### bind event with new OnDeletePage
-			self.Bind(wx.EVT_MENU, self.OnDeletePage, close_item)
+			self.Bind(wx.EVT_MENU, self.OnClosePage, close_item)
 
-		def OnDeletePage(self, evt):
-			""" Tab has been closed by right-clic menu (not by the cross on the left)
-			"""
-			self.OnClosePage(evt)
+		def OnClosePage(self, evt):
 			self.DeletePage(self.GetSelection())
+			return True
 else:
+
+	#
+	# Notebook classic class
+	#
 
 	class DiagramNotebook(wx.Notebook, GeneralNotebook):
 		""" Diagram NoteBokk class
@@ -313,6 +320,7 @@ else:
 			GeneralNotebook.__init__(self,*args, **kwargs)
 
 			self.Bind(wx.EVT_RIGHT_DOWN, self.__ShowMenu)
+			self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
 
 		def __ShowMenu(self, evt):
 			"""	Callback for the right click on a tab. Displays the menu.
@@ -345,14 +353,14 @@ else:
 
 			if self.GetPageCount() > 0:
 
-				id = self.GetSelection()
-				title = self.GetPageText(id)
+   				id = self.GetSelection()
 				canvas = self.GetPage(id)
 				diagram = canvas.GetDiagram()
 
 				mainW =  self.GetTopLevelParent()
 
 				if diagram.modify:
+   					title = self.GetPageText(id)
 					dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram ?')%(title), _('Save'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
 					val = dlg.ShowModal()
 					if val == wx.ID_YES:
@@ -417,4 +425,5 @@ else:
 
 			self.pages.append(newPage)
 			self.AddPage(newPage, title, imageId=0)
+
 			self.SetSelection(self.GetPageCount()-1)

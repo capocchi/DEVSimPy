@@ -146,20 +146,20 @@ class GeneralNotebook(Observer):
 ### if flatnotebook can be imported, we work with it
 ### more information about FlatNotebook http://wiki.wxpython.org/Flatnotebook%20(AGW)
 
-FLATNOTEBOOK = False
+USE_FLATNOTEBOOK = False
 
 try:
 	if (wx.VERSION >= (2, 8, 9, 2)):
 		import wx.lib.agw.flatnotebook as fnb
 	else:
 		import wx.lib.flatnotebook as fnb
-	FLATNOTEBOOK = True
+	USE_FLATNOTEBOOK = True
 except:
 	pass
 
 MENU_EDIT_DELETE_PAGE = wx.NewId()
 
-if FLATNOTEBOOK:
+if USE_FLATNOTEBOOK:
 	#-------------------------------------------------------------------
 	class ControlNotebook(fnb.FlatNotebook, GeneralNotebook):
 		"""
