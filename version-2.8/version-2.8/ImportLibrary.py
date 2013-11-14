@@ -89,7 +89,7 @@ class DeleteBox(wx.Dialog):
 		wx.Dialog.__init__(self, *args, **kwargs)
 
 		### Widgets
-		txt = wx.StaticText(self, wx.ID_ANY, _('You want to delete:'), (15, 10))
+		txt = wx.StaticText(self, wx.ID_ANY, _('What do you want to delete:'), (15, 10))
 		self.rb1 = wx.RadioButton(self, wx.ID_ANY , _('label'), (20, 30))
 		self.rb2 = wx.RadioButton(self, wx.ID_ANY , _('label and files'), (20, 55))
 		btn_cancel = wx.Button(self, wx.ID_CANCEL, pos = (35, 90), size = (80, -1))

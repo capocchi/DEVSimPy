@@ -92,7 +92,6 @@ class LibraryTree(wx.TreeCtrl):
 		"""
         ### add directory to the sys.path for importing
 		if absdName not in sys.path:
-			print absdName
 			sys.path.append(absdName)
 
 		dirname = os.path.dirname(absdName)
