@@ -409,3 +409,4 @@ invoque rpar un callback lorsque le fichier python est renseigné dans le wizard
 -Fait le 13/11/2013 par LC: amélioration -> refactorisation du right notebook (DiagramNotebook.py).
 -Fait le 14/11/2013 par LC: amélioration -> meilleur test pour savoir si le fichier à transformer est dans DOMAIN_PATH ou pas dans Utilities/PathToModule (avec un startswith).
 -Fait le 14/11/2013 par LC: amélioration -> ajout de la methode de classe AddToSysPath dans LibraryTree pour mieux gérer l'ajout des paths dans sys.path pour l'importation des modules externe. Maitnenant, l'importation de module dans des packages externe peut se faire soit par un NomModule.NomPackage ou NomPackage tout court. Pour les modules interne (dans DOMAIN_PATH) il faut juste précéder de Domain.NomModule... Ou alors form Domain.NomModule import ...
+-Fait le 15/11/2013 par LC: correction -> ajout du pop up de conformation lorsqu'on veut suppurimer un modèle sur le diagramme

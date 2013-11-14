@@ -1989,7 +1989,13 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		"""
 
 		for s in self.select():
-			self.diagram.DeleteShape(s)
+			msg = _("Do you really want to delete %s model?")%(s.label)
+ 			dlg = wx.MessageDialog(self, msg, _("Question"),
+									wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+
+			if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:
+				self.diagram.DeleteShape(s)
+			dlg.Destroy()
 
 		self.DiagramModified()
 		self.deselect()

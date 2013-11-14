@@ -1355,6 +1355,7 @@ class MainApplication(wx.Frame):
 			dlg = wx.MessageDialog(self, _('You need to restart DEVSimPy to take effect.\n\nDo you want to restart now ?'), 'Question', wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 			if dlg.ShowModal() == wx.ID_YES:
 				wx.CallAfter(self.OnRestart())
+			dlg.Destroy()
 		else:
 			wx.MessageBox(_('You need to restart DEVSimPy to take effect.'), _('Info'), wx.OK|wx.ICON_INFORMATION)
 	###
@@ -1365,6 +1366,7 @@ class MainApplication(wx.Frame):
 			dlg = wx.MessageDialog(self, _('You need to restart DEVSimPy to take effect.\n\nDo you want to restart now ?'), 'Question', wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 			if dlg.ShowModal() == wx.ID_YES:
 				wx.CallAfter(self.OnRestart())
+			dlg.Destroy()
 		else:
 			wx.MessageBox(_('You need to restart DEVSimPy to take effect.'), _('Info'), wx.OK|wx.ICON_INFORMATION)
 	###
@@ -1457,7 +1459,7 @@ class MainApplication(wx.Frame):
 			tmp_dir = gettempdir()
 			for fn in filter(lambda f: f.endswith(('.prof','.cachegrind')), os.listdir(tmp_dir)):
 				os.remove(os.path.join(tmp_dir,fn))
-
+		dlg.Destroy()
 	###
 	def OnRestart(self):
 		""" Restart application.
