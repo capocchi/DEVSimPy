@@ -142,6 +142,7 @@ from which import which
 from Utilities import GetMails, IsAllDigits
 from Decorators import redirectStdout, BuzyCursorNotification
 from DetachedFrame import DetachedFrame
+from LibraryTree import LibraryTree
 from LibPanel import LibPanel
 from PropPanel import PropPanel
 from ControlNotebook import ControlNotebook
@@ -1112,9 +1113,7 @@ class MainApplication(wx.Frame):
 				progress_dlg = wx.ProgressDialog(_('Importing library'),_("Loading %s ...")%s, parent=self, style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
 				progress_dlg.Pulse()
 
-				### ajout dans le sys.path si pas deja fait
-				if absdName not in sys.path:
-					sys.path.append(absdName)
+				LibraryTree.AddToSysPath(absdName)
 
 				self.tree.InsertNewDomain(absdName, self.tree.GetRootItem(), self.tree.GetSubDomain(absdName, self.tree.GetDomainList(absdName)).values()[0])
 

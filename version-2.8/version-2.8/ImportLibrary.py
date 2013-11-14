@@ -46,7 +46,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		ListCtrlAutoWidthMixin.__init__(self)
 
 		font = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
-			
+
 		self.InsertColumn(0, _('Name'), width=140)
 		self.InsertColumn(1, _('Size (Ko)'), width=100)
 		self.InsertColumn(2, _('Repository'), width=100)
@@ -55,14 +55,15 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 
 		### for itemData
 		self.map = {}
-		
+
 	def AddItem(self, path, dName):
 		""" Add item to the list
 		"""
+
 		index = self.InsertStringItem(sys.maxint, dName)
 		self.SetStringItem(index, 1, str(getDirectorySize(path)) if os.path.exists(path) else '0')
 		self.SetStringItem(index, 2, 'local' if not path.startswith('http') else 'web' )
-		self.SetStringItem(index, 3, "..%s%s"%(os.sep,os.path.basename(DOMAIN_PATH) if os.path.basename(DOMAIN_PATH) in path else os.path.basename(path)))
+		self.SetStringItem(index, 3, "..%s%s"%(os.sep,os.path.basename(DOMAIN_PATH) if path.startswith(DOMAIN_PATH) else os.path.basename(path)))
 		self.SetData(index, path)
 		self.SetItemData(index, index)
 
@@ -71,14 +72,14 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 
 	def SetData(self, id, data):
 		self.map.update({id:data})
-	
+
 	@BuzyCursorNotification
 	def Populate(self, D={}):
 		""" Populate the list
 		"""
 		for path, dName in D.items():
 			self.AddItem(path, dName)
-			
+
 class DeleteBox(wx.Dialog):
 	""" Delete Box for libraires Manager.
 	"""
@@ -93,7 +94,7 @@ class DeleteBox(wx.Dialog):
 		self.rb2 = wx.RadioButton(self, wx.ID_ANY , _('label and files'), (20, 55))
 		btn_cancel = wx.Button(self, wx.ID_CANCEL, pos = (35, 90), size = (80, -1))
 		btn_ok = wx.Button(self, wx.ID_OK, pos = (135, 90), size = (80, -1))
-		
+
 		### Sizers
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		vbox = wx.BoxSizer(wx.VERTICAL)
@@ -109,29 +110,29 @@ class DeleteBox(wx.Dialog):
 
 		### Set Sizer
 		self.SetSizer(vbox)
-		
+
 		self.Centre()
 
 #-------------------------------------------------------------------
 class ImportLibrary(wx.Dialog):
 	def __init__(self, *args, **kwargs):
 		wx.Dialog.__init__(self, *args, **kwargs)
-		
+
 		#local copy
 		self.parent = args[0]
-		
+
 		###list des item selectionnes
 		self._selectedItem = {}
-		
+
 		### recuperation des lib a partir du dico D du tree (library)
 		lst = filter(lambda s: not self.parent.tree.IsChildRoot(s), self.parent.tree.GetDomainList(DOMAIN_PATH)) if self.parent else []
 
 		exportPathsList = self.parent.exportPathsList if self.parent else []
-		
+
 		### if lst is empty, perhaps DOMAIN_PATH is false
 		if self.parent and lst == []:
 			self.CheckDomainPath()
-		
+
 		### Dico pour correspondance entre nom et path pour les exported path
 		self._d = {}
 		for path in exportPathsList:
@@ -149,7 +150,7 @@ class ImportLibrary(wx.Dialog):
 			if not os.path.exists(path):
 				for s in filter(lambda p : v in p, self.parent.exportPathsList):
 					if os.path.isdir(s):
-						path = v
+						path = s
 					### update the exported path list
 					else:
 						path = None
@@ -157,7 +158,7 @@ class ImportLibrary(wx.Dialog):
 						del self.parent.exportPathsList[i]
 
 			if path: D[path] = v
-		
+
 		### Panels
 		panel = wx.Panel(self, wx.ID_ANY)
 		leftPanel = wx.Panel(panel, wx.ID_ANY)
@@ -181,11 +182,11 @@ class ImportLibrary(wx.Dialog):
 		sel = wx.Button(leftPanel, id = wx.ID_SELECTALL, size=(100, -1))
 		des = wx.Button(leftPanel, wx.ID_ANY, _('Deselect All'), size=(100, -1))
 		apply = wx.Button(leftPanel, id=wx.ID_OK, size=(100, -1))
-		
+
 		### Set Sizer
 		hbox1.Add(self._dbb, 1 ,wx.EXPAND)
 		hbox1.Add(self._btn_Add, 0 ,wx.RIGHT|wx.CENTER, 3)
-		
+
 		vbox2.Add(sel, 0, wx.TOP, 2)
 		vbox2.Add(des, 0, wx.TOP, 2)
 		#vbox2.Add((-1, 300))
@@ -204,17 +205,17 @@ class ImportLibrary(wx.Dialog):
 		leftPanel.SetSizer(vbox2)
 		rightPanel.SetSizer(vbox)
 		panel.SetSizer(hbox)
-		
+
 		##Binding Events
 		self.Bind(wx.EVT_BUTTON, self.OnSelectAll, id = sel.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnDeselectAll, id = des.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnAdd, self._btn_Add)
 		self.Bind(wx.EVT_CHECKLISTBOX, self.EvtCheckListBox, self._cb)
 		self.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnItemRightClick)
-		
+
 		self.Centre()
 		self.Layout()
-		
+
 		### just for windows
 		e = wx.SizeEvent(self.GetSize())
 		self.ProcessEvent(e)
@@ -225,12 +226,12 @@ class ImportLibrary(wx.Dialog):
 			dlg = wx.MessageDialog(self, _("Local domain path is different from the .devsimpy.\nGo to options and preferences to change the domain path."), 'Info', wx.OK|wx.ICON_INFORMATION)
 			dlg.ShowModal()
 			dlg.Destroy()
-		
+
 	def OnSelectAll(self, event):
 		num = self._cb.GetItemCount()
 		for i in range(num):
 			self._cb.CheckItem(i)
-	
+
 	def OnDeselectAll(self, event):
 		num = self._cb.GetItemCount()
 		for i in range(num):
@@ -248,10 +249,10 @@ class ImportLibrary(wx.Dialog):
 		doc.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'doc.png')))
 		menu.AppendItem(doc)
 		wx.EVT_MENU(self, doc.GetId(), self.OnDoc)
-		
+
 		### delete option only for the export path
 		if label in self._d:
-			
+
 			delete = wx.MenuItem(menu, wx.NewId(), _('Delete'), _('Delete item'))
 			delete.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'delete.png')))
 			menu.AppendItem(delete)
@@ -296,7 +297,7 @@ class ImportLibrary(wx.Dialog):
 			### TODO take in charge also amd and cmd !
 
 		return doc
-		
+
 	def OnDoc(self, evt):
 		""" documentation of item has been invocked
 		"""
@@ -316,16 +317,16 @@ class ImportLibrary(wx.Dialog):
 		d = wx.lib.dialogs.ScrolledMessageDialog(self, doc, _("Documentation of %s library")%label)
 		d.CenterOnParent(wx.BOTH)
 		d.ShowModal()
-		
+
 	def OnDelete(self, evt):
 		""" Delete Button has been clicked.
-		""" 
+		"""
 		index = self._cb.GetFocusedItem()
 		label = self._cb.GetItemText(index)
 
 		### box pour choix de suppression du label ou du lable+des fichiers du package
 		db = DeleteBox(self, -1, _("Delete Options"), size=(250, 110))
-		
+
 		if db.ShowModal() == wx.ID_OK:
 
 		    ### suppresion des fichiers sur le disque
@@ -337,7 +338,7 @@ class ImportLibrary(wx.Dialog):
 				shutil.rmtree(self._d[label])
 			    except Exception, info:
 					sys.stdout.write(_("%s not deleted !\n Error : %s")%(label,info))
-				
+
 			dial.Destroy()
 
 		    # mise a jour du fichier .devsimpy
@@ -348,34 +349,34 @@ class ImportLibrary(wx.Dialog):
 				    self.parent.cfg.Write('exportPathsList', str(self.parent.exportPathsList))
 			    except Exception:
 				    pass
-				
+
 		    self._cb.DeleteItem(index)
-	
+
 	def EvtCheckListBox(self, evt):
 		index = self._cb.GetFocusedItem()
 		label = self._cb.GetItemText(index)
-		
+
 		#met a jour le dico des elements selectionnes
 		if self._cb.IsChecked(index) and not self._selectedItem.has_key(label):
 			self._selectedItem.update({str(label):index})
 		elif not self._cb.IsChecked(index) and self._selectedItem.has_key(label):
 			del self._selectedItem[str(label)]
-							
+
 	def OnChange(self, evt):
 		self._btn_Add.Enable(True)
-		
+
 	@staticmethod
 	def CreateInitFile(path):
 		""" Static method to create the __init_.py file which contain the name of accessing models
 		"""
-		
+
 		dial = wx.MessageDialog(None, _('If %s contain python files, do you want to insert it in __all__ variable of __init__.py file?')%os.path.basename(path), 'Question', wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 		if dial.ShowModal() == wx.ID_YES:
 			### if there is python file in the importing directory
 			L = filter(lambda f: f.endswith(".py"), os.listdir(path))
 		else:
 			L = []
-			
+
 		### how many python file to insert on __init__.py file
 		if L != []:
 			dlg = wx.lib.dialogs.MultipleChoiceDialog(None, _('List of python file in %s')%(os.path.dirname(path)), _('Select the python files to insert in the __init__.py file'), L)
@@ -384,7 +385,7 @@ class ImportLibrary(wx.Dialog):
 			else:
 				select = []
 			dlg.Destroy()
-			
+
 		### if path exist, we create the __init__.py file with __all__ empty
 		if os.path.isdir(path):
 			with open(os.path.join(path, '__init__.py'), 'w') as f:
@@ -395,7 +396,7 @@ class ImportLibrary(wx.Dialog):
 				f.write('\t\t ]')
 
 	def DoAdd(self, path, dName):
-		
+
 		### ajout dans la liste box
 		self._cb.AddItem(path, dName)
 
@@ -413,12 +414,12 @@ class ImportLibrary(wx.Dialog):
 			if dial.ShowModal() == wx.ID_YES:
 				self.CreateInitFile(path)
 			dial.Destroy()
-	
+
 	def OnAdd(self, evt):
-		
+
 		path = self._dbb.GetValue()
 		dName = os.path.basename(path) if not path.startswith('http') else filter(lambda a: a!='', path.split('/'))[-1]
-		
+
 		# si la lib n'est pas deja importee
 		if not self.parent.tree.IsChildRoot(dName):
 			if not self._d.has_key(dName) or (self._d.has_key(dName) and self._d[dName] != path):
@@ -445,7 +446,7 @@ class ImportLibrary(wx.Dialog):
 			dial = wx.MessageDialog(self, _('%s is already imported')%dName, _('Info'), wx.OK)
 			dial.ShowModal()
 			self._dbb.SetValue('')
-			
+
 		# on reactive le bouton pour un eventuel autre ajout
 		self._btn_Add.Enable(True)
 
@@ -453,23 +454,23 @@ class ImportLibrary(wx.Dialog):
 class TestApp(wx.App):
 	""" Testing application
 	"""
-	
+
 	def OnInit(self):
-		
+
 		import __builtin__
 		import gettext
-		
+
 		__builtin__.__dict__['HOME_PATH'] = os.getcwd()
 		__builtin__.__dict__['DOMAIN_PATH'] = 'Domain'
 		__builtin__.__dict__['_'] = gettext.gettext
-		
+
 		frame = ImportLibrary(None, size=(600,600), id=-1, title="Test")
 		frame.Show()
 		return True
-	
+
 	def OnQuit(self, event):
 		self.Close()
-		
+
 if __name__ == '__main__':
 
 	app = TestApp(0)
