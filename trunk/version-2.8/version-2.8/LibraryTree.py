@@ -86,6 +86,20 @@ class LibraryTree(wx.TreeCtrl):
 		self.Bind(wx.EVT_MOTION, self.OnMotion)
 
 
+	@classmethod
+	def AddToSysPath(self, absdName):
+		""" Add path to the sys.path module
+		"""
+        ### add directory to the sys.path for importing
+		if absdName not in sys.path:
+			print absdName
+			sys.path.append(absdName)
+
+		dirname = os.path.dirname(absdName)
+		### if external domain we add also the dirname directory
+		if dirname not in sys.path and not dirname.startswith(DOMAIN_PATH):
+			sys.path.append(dirname)
+
 	def Populate(self, chargedDomainList = []):
 		""" Populate the Tree from a list of domain path.
 		"""
@@ -93,7 +107,11 @@ class LibraryTree(wx.TreeCtrl):
 		assert self.root != None, _("Missing root")
 
 		for absdName in chargedDomainList:
-			#print self.GetSubDomain(absdName, self.GetDomainList(absdName)).values()[0]
+
+			### add absdName to sys.path
+			LibraryTree.AddToSysPath(absdName)
+
+			### add new domain
 			self.InsertNewDomain(absdName, self.root, self.GetSubDomain(absdName, self.GetDomainList(absdName)).values()[0])
 
 		self.UnselectAll()
@@ -287,14 +305,14 @@ class LibraryTree(wx.TreeCtrl):
 				try:
 					name_list = getFileListFromInit(os.path.join(dName,'__init__.py'))
 					py_file_list = []
-					
+
 					for s in name_list:
 						python_file = os.path.join(dName,s+'.py')
 						### test if tmp is only composed by python file (case of the user write into the __init__.py file directory name is possible ! then we delete the directory names)
 						if os.path.isfile(python_file):
 
 							cls = GetClass(python_file)
-							
+
 							if cls is not None and not isinstance(cls, tuple):
 								### only model that herite from DomainBehavior is shown in lib
 								if issubclass(cls, DomainBehavior):
@@ -325,7 +343,7 @@ class LibraryTree(wx.TreeCtrl):
 	def InsertNewDomain(self, dName, parent, L = []):
 		""" Recurcive function that insert new Domain on library panel.
 		"""
-		
+
 		### au depard seulement pour le parent de plus haut niveau (comme PowerSystem)
 		if dName not in self.ItemDico.keys():
 			label = os.path.basename(dName) if not dName.startswith('http') else filter(lambda a: a!='', dName.split('/'))[-1]
@@ -417,7 +435,7 @@ class LibraryTree(wx.TreeCtrl):
 					path = os.path.join(parentPath, item+'.py') if not parentPath.startswith('http') else parentPath+'/'+item+'.py'
 
 					info = Container.CheckClass(path)
-					
+
 					error = isinstance(info, tuple)
 					img = self.not_importedidx if error else self.pythonfileidx
 					### insertion dans le tree
@@ -514,7 +532,7 @@ class LibraryTree(wx.TreeCtrl):
 							id = self.InsertItemBefore(p, 0, os.path.splitext(elem)[0], img, img)
 							self.SetPyData(id, path)
 						else:
-							
+
 							path = os.path.join(item.keys()[0],elem+'.py') if not item.keys()[0].startswith('http') else item.keys()[0]+'/'+elem+'.py'
 							info = Container.CheckClass(path)
 
@@ -570,7 +588,7 @@ class LibraryTree(wx.TreeCtrl):
 			### attention il faut que le fichier __init__.py respecte une certain ecriture
 			return {dName:self.GetModelList(dName)}
 		else:
-			
+
 			### on comptabilise les fichiers si il y en a dans le rep courant (la recusion s'occupe des sous domaines)
 			D = {dName: self.GetModelList(dName)}
 			### on lance la recursion sur les repertoires fils
@@ -604,6 +622,7 @@ class LibraryTree(wx.TreeCtrl):
 		file_path = "%s.py"%path
 
 		info = Container.CheckClass(file_path)
+
 		### there is error in file
 		if isinstance(info, tuple):
 			### Until it has parent, we redifine icon to inform user

@@ -18,6 +18,7 @@ GLOBAL VARIABLES AND FUNCTIONS:
 from __future__ import with_statement
 
 from Domain.Generator.Generator import *
+
 import os
 
 class FileGenerator(Generator):

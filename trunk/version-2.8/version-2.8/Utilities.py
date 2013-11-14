@@ -30,9 +30,9 @@ import urllib, urllib2, httplib
 try:
 	from numpy import *
 except ImportError:
-	
+
 	platform_sys = os.name
-	
+
 	if platform_sys in ('nt', 'mac'):
 		sys.stdout.write("Numpy module not found. Go to www.scipy.numpy.org.\n")
 	elif platform_sys == 'posix':
@@ -57,15 +57,15 @@ def vibrate(windowName, distance=15, times=5, speed=0.05, direction='horizontal'
 		windowName.Move(wx.Point(newLoc[0], newLoc[1]))
 		time.sleep(speed)
 		windowName.Move(wx.Point(location[0], location[1]))
-			
+
 def getFileListFromInit(init_file):
 	""" Return list of name composing all variable in __init__.py file
 	"""
-	
+
 	py_file_list = []
 	if os.path.basename(init_file) == "__init__.py":
 		dName = os.path.dirname(init_file)
-		
+
 		with open(init_file,'r') as f:
 			tmp = [s.replace('\n','').replace('\t','').replace(',','').replace('"',"").replace('\'',"").strip() for s in f.readlines()[1:-1] if not s.startswith('#')]
 			for s in tmp:
@@ -73,7 +73,7 @@ def getFileListFromInit(init_file):
 				### test if tmp is only composed by python file (case of the user write into the __init__.py file directory name is possible ! then we delete the directory names)
 				if os.path.isfile(python_file):
 					py_file_list.append(s)
-					
+
 	return py_file_list
 
 def path_to_module(abs_python_filename):
@@ -83,11 +83,12 @@ def path_to_module(abs_python_filename):
 	# delete extention if exist
 	abs_python_filename = os.path.splitext(abs_python_filename)[0]
 
-	dir_name = os.path.basename(DOMAIN_PATH)
 	## si Domain est dans le chemin du module à importer (le fichier .py est dans un sous repertoire du rep Domain)
-	if dir_name in abs_python_filename:
+	if abs_python_filename.startswith(DOMAIN_PATH):
+ 		dir_name = os.path.basename(DOMAIN_PATH)
 		path = str(abs_python_filename[abs_python_filename.index(dir_name):]).strip('[]').replace(os.sep,'.').replace('/','.')
 	else:
+
 		path = os.path.basename(abs_python_filename).replace(os.sep,'.').replace('/','.')
 
 		### Ajout du chemin dans le path pour l'import d'un lib exterieur
@@ -163,37 +164,37 @@ def show_error(parent, msg=None):
 	message = ''.join(traceback.format_exception(*msg))
 	dialog = wx.MessageDialog(parent, message, _('Error!'), wx.OK|wx.ICON_ERROR)
 	dialog.ShowModal()
-   
+
 
 def getTopLevelWindow():
 	return wx.GetApp().GetTopWindow()
-	
+
 def GetActiveWindow(event=None):
 	aW = None
-	
+
 	for win in wx.GetTopLevelWindows():
 		if getattr(win, 'IsActive', lambda:False)():
 			aW = win
-			
+
 	if aW is None:
 		child = wx.Window.FindFocus()
 		aW = wx.GetTopLevelParent(child)
 
 	if aW is None and event is not None:
-	
+
 		obj = event.GetEventObject()
 		#### conditionnal statement only for windows
 		aW = obj.GetInvokingWindow() if isinstance(obj, wx.Menu) else obj
 
 	return aW
-	
+
 def check_connectivity(reference):
 	try:
 		urllib.request.urlopen(reference, timeout=1)
 		return True
 	except urllib.request.URLError:
 		return False
-        
+
 def sendEvent(from_obj, to_obj, evt):
 	""" Send Event 'evt' from 'form_obj' object 'to to_obj'
 	"""
@@ -215,12 +216,12 @@ def GetMails(string):
 	""" Get list of mails from string
 	"""
 	regex = re.compile('([a-zA-Z0-9-_.]+[@][a-zA-Z0-9-_.]+)')
-	return regex.findall(string) 
-					
+	return regex.findall(string)
+
 def MoveFromParent(frame=None, interval=10, direction='right'):
-	
+
 	assert(isinstance(frame, wx.Frame))
-	
+
 	frame.CenterOnParent(wx.BOTH)
 	parent = frame.GetParent()
 	if direction == 'right':
@@ -235,7 +236,7 @@ def MoveFromParent(frame=None, interval=10, direction='right'):
 	else:
 		x = parent.GetScreenPosition()[0]
 		y = parent.GetPositionTuple()[1]+parent.GetSizeTuple()[1] + interval
-		
+
 	frame.MoveXY(x,y)
 
 def getDirectorySize(directory):
@@ -255,7 +256,7 @@ def exists(site, path):
 
 
 class Authentification_Dialog(wx.Dialog):
-	
+
 	def __init__(self, parent, id, title):
 		wx.Dialog.__init__(self, parent, id, title, size=(250, 180))
 
@@ -270,7 +271,7 @@ class Authentification_Dialog(wx.Dialog):
 		btn_cancel = wx.Button(self, wx.ID_CANCEL, pos = (120, 120))
 
 		self.Bind(wx.EVT_BUTTON, self.OnConnect, id=wx.ID_OK)
-		
+
 		self.Centre()
 
 	def OnConnect(self, event):
@@ -279,7 +280,7 @@ class Authentification_Dialog(wx.Dialog):
 		event.Skip()
 
 def checkURL(url):
-	
+
 	if url.startswith('https'):
 		req = urllib2.Request(url)
 		password_manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -318,7 +319,7 @@ def checkURL(url):
 				deadLinkFound = False
 
 		return deadLinkFound
-		
+
 	elif url.startswith('http'):
 		try:
 			urllib2.urlopen(urllib2.Request(url))
@@ -333,13 +334,13 @@ def replaceAll(file,searchExp,replaceExp):
         if searchExp in line:
                 line = line.replace(searchExp,replaceExp)
         sys.stdout.write(line)
-        
+
 def listf(data):
 	buffer = ""
 	for line in data:
 		buffer = buffer + line + "\n"
 	return buffer
-	
+
 def quick_sort(list):
 	''' Sort list in non-decreasing order, using Quick Sort. '''
 	# If list contains at most 1 element, it is already sorted.
@@ -376,7 +377,7 @@ def HEXToRGB(colorstring):
 
 def IsAllDigits(str):
 	""" Is the given string composed entirely of digits? """
-	
+
 	match = string.digits+'.'
 	ok = 1
 	for letter in str:
@@ -400,19 +401,19 @@ def generate(lst, n):
 	"""
 	for indexes in combinations(list(range(1,len(lst))), n - 1):
 		yield list(cut(lst, indexes))
-        
+
 def relpath(path=''):
 	### change sep from platform
 	if wx.Platform in ('__WXGTK__', '__WXMAC__'):
 		return path.replace('\\',os.sep)
 	else:
 		return path.replace('/',os.sep)
-		
+
 def flatten(list):
     """
     Internal function that flattens a N-D list.
 
-    
+
     **Parameters:**
 
     * list: the N-D list that needs to be flattened.
@@ -430,7 +431,7 @@ def unique(list):
     """
     Internal function, returning the unique elements in a list.
 
-    
+
     **Parameters:**
 
     * list: the list for which we want the unique elements.
@@ -447,7 +448,7 @@ def unique(list):
         else:
             res[key] = [value]
 
-    # Return the dictionary values (a list)    
+    # Return the dictionary values (a list)
     return res.items()
 
 
@@ -456,13 +457,13 @@ def now():
 
     t = time.localtime(time.time())
     st = time.strftime("%d %B %Y @ %H:%M:%S", t)
-    
+
     return st
 
 
 def shortNow():
     """ Returns the current time formatted. """
-    
+
     t = time.localtime(time.time())
     st = time.strftime("%H:%M:%S", t)
 
@@ -473,12 +474,12 @@ def FractSec(s):
     """
     Formats time as hh:mm:ss.
 
-    
+
     **Parameters:**
 
     * s: the number of seconds.
     """
-    
+
     min, s = divmod(s, 60)
     h, min = divmod(min, 60)
     return h, min, s
@@ -488,15 +489,15 @@ def GetFolderSize(exePath):
     """
     Returns the size of the executable distribution folder.
 
-    
+
     **Parameters:**
 
     * exePath: the path of the distribution folder.
     """
-    
+
     folderSize = numFiles = 0
     join, getsize = os.path.join, os.path.getsize
-    # Recurse over all the folders and sub-folders    
+    # Recurse over all the folders and sub-folders
     for path, dirs, files in os.walk(exePath):
         for file in files:
             # Get the file size
@@ -507,7 +508,7 @@ def GetFolderSize(exePath):
     if numFiles == 0:
         # No files found, has the executable ever been built?
         return "", ""
-    
+
     folderSize = "%0.2f"%(folderSize/(1024*1024.0))
     numFiles = "%d"%numFiles
 
@@ -518,7 +519,7 @@ def RecurseSubDirs(directory, userDir, extensions):
     """
     Recurse one directory to include all the files and sub-folders in it.
 
-    
+
     **Parameters:**
 
     * directory: the folder on which to recurse;
@@ -531,8 +532,8 @@ def RecurseSubDirs(directory, userDir, extensions):
 
     normpath, join = os.path.normpath, os.path.join
     splitext, match = os.path.splitext, fnmatch.fnmatch
-    
-    # Loop over all the sub-folders in the top folder 
+
+    # Loop over all the sub-folders in the top folder
     for root, dirs, files in os.walk(directory):
         start = root.find(baseStart) + len(baseStart)
         dirName = userDir + root[start:]
@@ -562,49 +563,49 @@ def FormatSizeFile(size):
 
 def FormatTrace(etype, value, trace):
     """Formats the given traceback
-    
+
     **Returns:**
 
     *  Formatted string of traceback with attached timestamp
-    
+
     **Note:**
 
     *  from Editra.dev_tool
     """
-    
+
     exc = traceback.format_exception(etype, value, trace)
     exc.insert(0, "*** %s ***%s" % (now(), os.linesep))
     return "".join(exc)
 
 def smooth(x,window_len=10,window='hanning'):
     """smooth the data using a window with requested size.
-    
+
     This method is based on the convolution of a scaled window with the signal.
-    The signal is prepared by introducing reflected copies of the signal 
+    The signal is prepared by introducing reflected copies of the signal
     (with the window size) in both ends so that transient parts are minimized
     in the begining and end part of the output signal.
-    
+
     input:
-        x: the input signal 
+        x: the input signal
         window_len: the dimension of the smoothing window
         window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
             flat window will produce a moving average smoothing.
 
     output:
         the smoothed signal
-        
+
     example:
 
     t=linspace(-2,2,0.1)
     x=sin(t)+randn(len(t))*0.1
     y=smooth(x)
-    
-    see also: 
-    
+
+    see also:
+
     numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
     scipy.signal.lfilter
- 
-    TODO: the window parameter could be the window itself if an array instead of a string   
+
+    TODO: the window parameter could be the window itself if an array instead of a string
     """
 
     if x.ndim != 1:
@@ -622,7 +623,7 @@ def smooth(x,window_len=10,window='hanning'):
 
 
     s=r_[2*x[0]-x[window_len:1:-1],x,2*x[-1]-x[-1:-window_len:-1]]
-    
+
     if window == 'flat': #moving average
         w=ones(window_len,'d')
     else:
@@ -634,12 +635,12 @@ def smooth(x,window_len=10,window='hanning'):
 def EnvironmentInfo():
     """
     Returns a string of the systems information.
-    
-    
+
+
     **Returns:**
 
     *  System information string
-    
+
     **Note:**
 
     *  from Editra.dev_tool
