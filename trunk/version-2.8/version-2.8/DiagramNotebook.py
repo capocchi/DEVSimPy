@@ -39,7 +39,7 @@ from DetachedFrame import DetachedFrame
 from PrintOut import Printable
 
 #-------------------------------------------------------------------
-class GeneralNotebook(Printable):
+class GeneralFlatNotebook(Printable):
 	"""
 	"""
 
@@ -78,6 +78,7 @@ class GeneralNotebook(Printable):
 	def __AddPage(self, event):
 		""" Add page
 		"""
+
 		self.AddEditPage(_("Diagram%d")%len(self.pages))
 
 ##	def GetPageByName(self, name = ''):
@@ -196,14 +197,12 @@ try:
 except:
 	pass
 
-MENU_EDIT_DELETE_PAGE = wx.NewId()
-
 if USE_FLATNOTEBOOK:
 	#
 	# FlatNotebook generalized class
 	#
 
-	class DiagramNotebook(fnb.FlatNotebook, GeneralNotebook):
+	class DiagramNotebook(fnb.FlatNotebook, GeneralFlatNotebook):
 		""" Diagram FlatNotebook class
 		"""
 
@@ -213,7 +212,7 @@ if USE_FLATNOTEBOOK:
 				FlatNotebook class that allows overriding and adding methods for the right pane of DEVSimPy
 			"""
 			fnb.FlatNotebook.__init__(self, *args, **kwargs)
-			GeneralNotebook.__init__(self,*args, **kwargs)
+			GeneralFlatNotebook.__init__(self,*args, **kwargs)
 
 			self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.OnClosingPage)
 			self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
@@ -315,7 +314,7 @@ else:
 	# Notebook classic class
 	#
 
-	class DiagramNotebook(wx.Notebook, GeneralNotebook):
+	class DiagramNotebook(wx.Notebook, GeneralFlatNotebook):
 		""" Diagram NoteBokk class
 		"""
 
@@ -324,7 +323,7 @@ else:
 			"""
 
 			wx.Notebook.__init__(self, *args, **kwargs)
-			GeneralNotebook.__init__(self,*args, **kwargs)
+			GeneralFlatNotebook.__init__(self,*args, **kwargs)
 
 			self.Bind(wx.EVT_RIGHT_DOWN, self.__ShowMenu)
 			self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageChanged)

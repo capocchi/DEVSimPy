@@ -1073,6 +1073,10 @@ class MainApplication(wx.Frame):
 					if directory not in sys.path:
 						sys.path.append(directory)
 
+                    ### add correct path to sys.path always before InsertNewDomain
+					LibraryTree.AddToSysPath(absdName)
+
+					### add new domain
 					self.tree.InsertNewDomain(directory, self.tree.GetRootItem(), self.tree.GetSubDomain(directory, self.tree.GetDomainList(directory)).values()[0])
 
 					progress_dlg.Destroy()
@@ -1113,8 +1117,9 @@ class MainApplication(wx.Frame):
 				progress_dlg = wx.ProgressDialog(_('Importing library'),_("Loading %s ...")%s, parent=self, style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
 				progress_dlg.Pulse()
 
+    			### add correct path to sys.path (always before InsertNewDomain)
 				LibraryTree.AddToSysPath(absdName)
-
+    			### add NewDomain
 				self.tree.InsertNewDomain(absdName, self.tree.GetRootItem(), self.tree.GetSubDomain(absdName, self.tree.GetDomainList(absdName)).values()[0])
 
 				progress_dlg.Destroy()

@@ -88,14 +88,68 @@ class GeneralPanel(wx.Panel):
 	def OnApply(self, event):
 		""" Apply change
 		"""
-		__builtin__.__dict__['NB_OPENED_FILE'] = self.nb_opened_file.GetValue()		# number of recent files
-		__builtin__.__dict__['NB_HISTORY_UNDO'] = self.nb_history_undo.GetValue()		# number of history undo
-		__builtin__.__dict__['FONT_SIZE'] = self.font_size.GetValue()		# Block font size
-		__builtin__.__dict__['DOMAIN_PATH'] = self.domain_dir.GetValue()
-		__builtin__.__dict__['PLUGINS_DIR'] = os.path.basename(self.plugin_dir.GetValue())
-		__builtin__.__dict__['OUT_DIR'] = os.path.basename(self.out_dir.GetValue())
-		__builtin__.__dict__['TRANSPARENCY'] = self.cb1.GetValue()
+		self.OnNbOpenedFileChanged(event)
+		self.OnNbHistoryUndoChanged(event)
+		self.OnFontSizeChanged(event)
+		self.OnDomainPathChanged(event)
+		self.OnPluginsDirChanged(event)
+		self.OnOutDirChanged(event)
+		self.OnTransparancyChanged(event)
 
+	###
+	def OnNbOpenedFileChanged(self, event):
+		"""
+		"""
+		__builtin__.__dict__['NB_OPENED_FILE'] = self.nb_opened_file.GetValue()		# number of recent files
+
+	###
+	def OnNbHistoryUndoChanged(self, event):
+		"""
+		"""
+		__builtin__.__dict__['NB_HISTORY_UNDO'] = self.nb_history_undo.GetValue()		# number of history undo
+
+	###
+	def OnFontSizeChanged(self, event):
+		"""
+		"""
+
+		__builtin__.__dict__['FONT_SIZE'] = self.font_size.GetValue()		# Block font size
+
+	###
+	def OnDomainPathChanged(self, event):
+		"""
+		"""
+		v = self.domain_dir.GetValue()
+
+		### if value has been changed, we clean the librairie control panel
+		if __builtin__.__dict__['DOMAIN_PATH'] != v:
+			__builtin__.__dict__['DOMAIN_PATH'] = v
+
+			mainW = wx.GetApp().GetTopWindow()
+
+			tree = mainW.nb1.GetTree()
+
+			### update all Domain
+			for item in tree.GetItemChildren(tree.GetRootItem()):
+				tree.RemoveItem(item)
+
+	###
+	def OnPluginsDirChanged(self, event):
+		"""
+		"""
+		__builtin__.__dict__['PLUGINS_DIR'] = os.path.basename(self.plugin_dir.GetValue())
+
+	###
+	def OnOutDirChanged(self, event):
+		"""
+		"""
+		__builtin__.__dict__['OUT_DIR'] = os.path.basename(self.out_dir.GetValue())
+
+	###
+	def OnTransparancyChanged(self, event):
+		"""
+		"""
+		__builtin__.__dict__['TRANSPARENCY'] = self.cb1.GetValue()
 
 class SimulationPanel(wx.Panel):
 	""" Simulation Panel

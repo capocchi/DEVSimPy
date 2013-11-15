@@ -5464,14 +5464,20 @@ class AttributeEditor(wx.Frame, wx.Panel):
 				@type canvas: canvas object
 		"""
 
+		import DiagramNotebook
+
 		# pour gerer l'affichage dans la page de gauche dans le notebook
-		if isinstance(parent, wx.Panel):
-			wx.Panel.__init__(self, parent, ID)
-			self.SetBackgroundColour(wx.WHITE)
-		else:
-			wx.Frame.__init__(self, parent, ID, model.label, size = wx.Size(400, 550), style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN | wx.STAY_ON_TOP)
+		if isinstance(parent, DiagramNotebook.DiagramNotebook):
+ 			wx.Frame.__init__(self, parent, ID, model.label, size = wx.Size(400, 550), style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN | wx.STAY_ON_TOP)
 			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'properties.png'), wx.BITMAP_TYPE_PNG)))
 			self.Bind(wx.EVT_CLOSE, self.OnClose)
+		else:
+			if isinstance(parent, wx.Panel):
+				wx.Panel.__init__(self, parent, ID)
+				self.SetBackgroundColour(wx.WHITE)
+			else:
+				sys.stdout.write(_("Parent not defined for AttributeEditor class"))
+
 
 		#local copy
 		self.model = model
