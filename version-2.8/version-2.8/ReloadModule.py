@@ -19,8 +19,13 @@ def recompile(modulename):
 		return zf.Recompile()
 	else:
 
-		### first, see if the module can be imported at all...
-		tmp = __import__(modulename, globals(), locals(), fromlist = [modulename.split('.')[-1]])
+		try:
+			### first, see if the module can be imported at all...
+			tmp = __import__(modulename, globals(), locals(), fromlist = [modulename.split('.')[-1]])
+
+		except Exception, info:
+			return info
+
 		### Use the imported module to determine its actual path
 		pycfile = tmp.__file__
 		modulepath = string.replace(pycfile, ".pyc", ".py")

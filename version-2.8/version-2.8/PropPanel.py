@@ -27,28 +27,28 @@ class PropPanel(wx.Panel):
 	"""
 	def __init__(self, parent, name):
 		wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY, name=name)
-		
+
 		propSizer = wx.BoxSizer(wx.VERTICAL)
 		propSizer.Add(self.defaultPropertiesPage(), 0, wx.ALL, 10)
-		
+
 		self.SetSizer(propSizer)
 		self.Layout()
-		
+
 		self.SetBackgroundColour(wx.WHITE)
-		
+
 		self.__set_tips()
-		
+
 	def defaultPropertiesPage(self):
 		"""
 		"""
 
-		propContent = wx.StaticText(self, wx.ID_ANY, _("Properties panel"))
+		propContent = wx.StaticText(self, wx.ID_ANY, _("Properties panel"), (10,10))
 		sum_font = propContent.GetFont()
 		sum_font.SetWeight(wx.BOLD)
 		propContent.SetFont(sum_font)
 
 		return propContent
-	
+
 	def UpdatePropertiesPage(self, panel=None):
 		"""	Update the propPanel with teh new panel param of the model
 		"""
@@ -56,7 +56,7 @@ class PropPanel(wx.Panel):
 		sizer.DeleteWindows()
 		sizer.Add(panel, 1, wx.EXPAND|wx.ALL)
 		sizer.Layout()
-		
+
 	def __set_tips(self):
 		"""
 		"""

@@ -90,14 +90,25 @@ class LibraryTree(wx.TreeCtrl):
 	def AddToSysPath(self, absdName):
 		""" Add path to the sys.path module
 		"""
+
         ### add directory to the sys.path for importing
 		if absdName not in sys.path:
 			sys.path.append(absdName)
 
 		dirname = os.path.dirname(absdName)
+
 		### if external domain we add also the dirname directory
-		if dirname not in sys.path and not dirname.startswith(DOMAIN_PATH):
-			sys.path.append(dirname)
+		if not dirname.startswith(DOMAIN_PATH):
+			if dirname not in sys.path:
+				sys.path.append(dirname)
+
+		### if module from Domain we add the DOMAIN_PATH is sys.path
+		elif DOMAIN_PATH not in sys.path:
+            ### Add DOMAIN_PATH and its parent directory to the sys.path
+			### in order to allows the user to import their module using Domain. or directly without the name of domain
+			sys.path.append(DOMAIN_PATH)
+			sys.path.append(os.path.dirname(DOMAIN_PATH))
+
 
 	def Populate(self, chargedDomainList = []):
 		""" Populate the Tree from a list of domain path.
@@ -107,7 +118,7 @@ class LibraryTree(wx.TreeCtrl):
 
 		for absdName in chargedDomainList:
 
-			### add absdName to sys.path
+  			### add absdName to sys.path (always before InsertNewDomain)
 			LibraryTree.AddToSysPath(absdName)
 
 			### add new domain
@@ -620,35 +631,37 @@ class LibraryTree(wx.TreeCtrl):
 		item = self.ItemDico[path]
 		file_path = "%s.py"%path
 
+		### Check the class
 		info = Container.CheckClass(file_path)
 
-		### there is error in file
+		### there is error during the chek of class ?
 		if isinstance(info, tuple):
-			### Until it has parent, we redifine icon to inform user
-			while(item):
-				### change image
-				self.SetItemImage(item, self.not_importedidx, wx.TreeItemIcon_Normal)
-				### next parent item
-				item = self.GetItemParent(item)
-		else:
 			### recompile if no error
 			info = recompile(path_to_module(file_path))
 
-			### if not error
-			if not isinstance(info, (Exception,str)):
-				### change image
-				self.SetItemImage(item, self.pythonfileidx, wx.TreeItemIcon_Normal)
+			### there is error during recompilation ?
+			if isinstance(info, (Exception,str)):
+				### Until it has parent, we redifine icon to inform user
+				while(item):
+					### change image
+					self.SetItemImage(item, self.not_importedidx, wx.TreeItemIcon_Normal)
+					### next parent item
+					item = self.GetItemParent(item)
+			else:
+					### change image
+					self.SetItemImage(item, self.pythonfileidx, wx.TreeItemIcon_Normal)
 
-				#### Until it has parent, we redifine icon to inform user
-				#while(item):
-					#if self.IsExpanded(item):
-						#### change image
-						#self.SetItemImage(item, self.fldropenidx, wx.TreeItemIcon_Normal)
-					#else:
-						#self.SetItemImage(item, self.fldridx, wx.TreeItemIcon_Normal)
+					#### Until it has parent, we redifine icon to inform user
+					while(item):
+						if self.IsExpanded(item):
+							#### change image
+							self.SetItemImage(item, self.fldropenidx, wx.TreeItemIcon_Normal)
+						else:
+							self.SetItemImage(item, self.fldridx, wx.TreeItemIcon_Normal)
 
-					#### next parent item
-					#item = self.GetItemParent(item)
+						#### next parent item
+						item = self.GetItemParent(item)
+
 	###
 	def UpdateDomain(self, path):
 		""" Update the Tree Library with new path of the corresponding domain
@@ -671,7 +684,10 @@ class LibraryTree(wx.TreeCtrl):
 			parent = self.GetItemParent(item)
 
 			### save expanded info before deleting item
-			expanded = self.IsExpanded(item)
+			L = [dName] if self.IsExpanded(item) else []
+			for k,v in self.ItemDico.items():
+				if self.IsExpanded(v):
+					L.append(k)
 
 			### remove for create udpated new item
 			self.RemoveItem(item)
@@ -684,24 +700,25 @@ class LibraryTree(wx.TreeCtrl):
 				if isinstance(d, dict):
 					name_list =  d.values()[0]
 					if name_list != []:
-						path = d.keys()[0]
-						for name in filter(lambda a: not isinstance(a, dict) and not a.endswith(('.cmd','.amd')), name_list):
-							self.CheckItem(os.path.join(path, name))
+						for name in filter(lambda a: not isinstance(a, dict), name_list):
+							path = d.keys()[0]
+							if not name.endswith(('.cmd','.amd')):
+								self.CheckItem(os.path.join(path, name))
 
-			### extend item if it was extended
-			if expanded:
-				self.Expand(self.ItemDico[dName])
+			### restor expanded item
+			for item in map(lambda name: self.ItemDico[name], L):
+				self.Expand(item)
+
 
 	@BuzyCursorNotification
 	def OnUpdateAll(self, event):
+		""" Update all imported domain
+		"""
 		self.UpdateAll()
 
 	def UpdateAll(self):
 		"""
 		"""
-
-		### for expand the updated domain
-		#expanded = [it for it in self.ItemDico if self.IsExpanded(self.ItemDico[it])]
 
 		### update all Domain
 		for item in self.GetItemChildren(self.GetRootItem()):
@@ -709,9 +726,6 @@ class LibraryTree(wx.TreeCtrl):
 
 		### to sort domain
 		self.SortChildren(self.root)
-
-		#for it in expanded:
-			#self.Expand(self.ItemDico[it])
 
 	def UpgradeAll(self, evt):
 		"""
