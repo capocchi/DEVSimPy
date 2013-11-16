@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-# Plot.py --- Plotting class
+# PlotGUI.py --- Plotting class
 #                     --------------------------------
 #                        Copyright (c) 2010
 #                       Laurent CAPOCCHI
 #                      University of Corsica
 #                     --------------------------------
-# Version 1.0                                        last modified: 12/02/10 
+# Version 1.0                                        last modified: 12/02/10
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -32,7 +32,7 @@ try:
 	from numpy import *
 except ImportError:
 	platform_sys = os.name
-	
+
 	if platform_sys in ('nt', 'mac'):
 		sys.stdout.write("Numpy module not found. Go to www.scipy.numpy.org.\n")
 	elif platform_sys == 'posix':
@@ -63,11 +63,11 @@ def get_limit(d):
 	#L1.sort();L2.sort()
 
 	return L1[0],L1[-1],L2[0],L2[-1]
-	
+
 def PlotManager(parent, label, atomicModel, xl, yl):
 	""" Manager for the plotting process which depends of the fusion option of QuickScope.
 	"""
-	
+
 	### there is a active simulation thread ?
 	dyn = True in map(lambda a: 'Simulator' in a.getName(), threading.enumerate()[1:])
 
@@ -89,7 +89,7 @@ def PlotManager(parent, label, atomicModel, xl, yl):
 				frame = StaticPlot(parent, wx.ID_ANY, _("%s on port %s")%(label,str(key)), atomicModel.results[key], xLabel = xl, yLabel = yl, legend = atomicModel.blockModel.label)
 				frame.CenterOnParent()
 				frame.Show()
-	
+
 
 class PlotFrame(wx.Frame):
 	def __init__(self, parent=None, id=wx.ID_ANY, title="Time Plotting"):
@@ -101,12 +101,12 @@ class PlotFrame(wx.Frame):
 		self.type = "PlotLine"
 		self.normalize = False
 
-		self.sldh = wx.Slider(self, wx.ID_ANY, 10, 0, 50, (-1, -1), (250, -1), wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
-		self.sldv = wx.Slider(self, wx.ID_ANY, 10, 0, 50, (-1, -1), (50, 150), wx.SL_AUTOTICKS | wx.SL_VERTICAL | wx.SL_LABELS)
+#		self.sldh = wx.Slider(self, wx.ID_ANY, 10, 0, 50, (-1, -1), (250, -1), wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
+#		self.sldv = wx.Slider(self, wx.ID_ANY, 10, 0, 50, (-1, -1), (50, 150), wx.SL_AUTOTICKS | wx.SL_VERTICAL | wx.SL_LABELS)
 
 		self.client = plot.PlotCanvas(self)
 		self.client.SetPointLabelFunc(self.drawPointLabel)
-		
+
 		##Now Create the menu bar and items
 		self.mainmenu = wx.MenuBar()
 
@@ -122,7 +122,7 @@ class PlotFrame(wx.Frame):
 		menu = wx.Menu()
 		plotRedraw = menu.Append(wx.NewId(), _('&Redraw'), _('Redraw plots'))
 		plotScale = menu.Append(wx.NewId(), _('&Scale'), _('Scale canvas'))
-		
+
 		type_submenu = wx.Menu()
 		line = type_submenu.AppendItem(wx.MenuItem(menu, wx.NewId(), _('Line'), kind=wx.ITEM_RADIO))
 		scatter = type_submenu.AppendItem(wx.MenuItem(menu, wx.NewId(), _('Scatter'), kind=wx.ITEM_RADIO))
@@ -131,15 +131,15 @@ class PlotFrame(wx.Frame):
 		menu.AppendMenu(wx.NewId(), _('Type'), type_submenu)
 
 		enable_submenu = wx.Menu()
-		enableTitle = enable_submenu.Append(wx.NewId(), _('&Title'), _('Enable Title'), kind=wx.ITEM_CHECK)
-		self.enableZoom = enable_submenu.Append(wx.NewId(), _('&Zoom'), _('Enable Mouse Zoom'), kind=wx.ITEM_CHECK)
-		enableGrid = enable_submenu.Append(wx.NewId(), _('Grid'), _('Enable Mouse Zoom'), kind=wx.ITEM_CHECK)
-		self.enableDrag = enable_submenu.Append(wx.NewId(), _('Drag'), _('Enable Mouse Zoom'), kind=wx.ITEM_CHECK)
-		enableLegend = enable_submenu.Append(wx.NewId(), _('&Legend'), _('Turn on Legend'), kind=wx.ITEM_CHECK)
-		enablePointLabel = enable_submenu.Append(wx.NewId(), _('&Point Label'), _('Show Closest Point'), kind=wx.ITEM_CHECK)
-		normalize = enable_submenu.Append(wx.NewId(), _('Normalize'), _('Normalize Y axis'), kind=wx.ITEM_CHECK)
+		self.enableTitle = enable_submenu.Append(wx.NewId(), _('&Title'), _('Enable title'), kind=wx.ITEM_CHECK)
+		self.enableZoom = enable_submenu.Append(wx.NewId(), _('&Zoom'), _('Enable zoom'), kind=wx.ITEM_CHECK)
+		self.enableGrid = enable_submenu.Append(wx.NewId(), _('Grid'), _('Enable grid'), kind=wx.ITEM_CHECK)
+		self.enableDrag = enable_submenu.Append(wx.NewId(), _('Drag'), _('Enable drag'), kind=wx.ITEM_CHECK)
+		self.enableLegend = enable_submenu.Append(wx.NewId(), _('&Legend'), _('Turn on legend'), kind=wx.ITEM_CHECK)
+		self.enablePointLabel = enable_submenu.Append(wx.NewId(), _('&Point Label'), _('Show closest point'), kind=wx.ITEM_CHECK)
+		self.normalize = enable_submenu.Append(wx.NewId(), _('Normalize'), _('Normalize Y axis'), kind=wx.ITEM_CHECK)
 		menu.AppendMenu(wx.NewId(), _('Enable'), enable_submenu)
-		
+
 		setTitle = menu.Append(wx.NewId(), _('Set Title'), _('Define title'))
 		setXLabel = menu.Append(wx.NewId(), _('Set X Label'), _('Define x label'))
 		setYLabel = menu.Append(wx.NewId(), _('Set Y Label'), _('Define y label'))
@@ -162,67 +162,68 @@ class PlotFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU,self.OnPlotBar, bar)
 		self.Bind(wx.EVT_MENU,self.OnPlotSquare, square)
 		self.Bind(wx.EVT_MENU,self.OnPlotScale, plotScale)
-		self.Bind(wx.EVT_MENU,self.OnEnableTitle, enableTitle)
+		self.Bind(wx.EVT_MENU,self.OnEnableTitle, self.enableTitle)
 		self.Bind(wx.EVT_MENU,self.OnEnableZoom, self.enableZoom)
-		self.Bind(wx.EVT_MENU,self.OnEnableGrid,  enableGrid)
+		self.Bind(wx.EVT_MENU,self.OnEnableGrid,  self.enableGrid)
 		self.Bind(wx.EVT_MENU,self.OnEnableDrag, self.enableDrag)
-		self.Bind(wx.EVT_MENU,self.OnEnableLegend, enableLegend)
-		self.Bind(wx.EVT_MENU,self.OnEnablePointLabel, enablePointLabel)
-		self.Bind(wx.EVT_MENU,self.OnEnableNormalize, normalize)
+		self.Bind(wx.EVT_MENU,self.OnEnableLegend, self.enableLegend)
+		self.Bind(wx.EVT_MENU,self.OnEnablePointLabel, self.enablePointLabel)
+		self.Bind(wx.EVT_MENU,self.OnEnableNormalize, self.normalize)
 		self.Bind(wx.EVT_MENU,self.OnTitleSetting, setTitle)
 		self.Bind(wx.EVT_MENU,self.OnXLabelSetting, setXLabel)
 		self.Bind(wx.EVT_MENU,self.OnYLabelSetting, setYLabel)
-		self.Bind(wx.EVT_MENU,self.OnScrUp, scrUp) 
+		self.Bind(wx.EVT_MENU,self.OnScrUp, scrUp)
 		self.Bind(wx.EVT_MENU,self.OnScrRt, scrRt)
 		self.Bind(wx.EVT_MENU,self.OnReset, reset)
-		
-		# A status bar to tell people what's happening
+
+		### A status bar to tell people what's happening
 		self.CreateStatusBar(1)
-	
-		toggleZoom = wx.CheckBox(self, label=self.enableZoom.GetLabel())
-		toggleTitle = wx.CheckBox(self, label=enableTitle.GetLabel())
-		toggleGrid = wx.CheckBox(self, label=enableGrid.GetLabel())
-		toggleLegend = wx.CheckBox(self, label=enableLegend.GetLabel())
-		toggleDrag = wx.CheckBox(self, label=self.enableDrag.GetLabel())
-		togglePointLabel = wx.CheckBox(self, label=enablePointLabel.GetLabel())
-		toggleNormalize = wx.CheckBox(self, label=normalize.GetLabel())
-		
-		toggleTitle.Bind(wx.EVT_CHECKBOX, self.OnEnableTitle)
-		toggleZoom.Bind(wx.EVT_CHECKBOX, self.OnEnableZoom)
-		toggleGrid.Bind(wx.EVT_CHECKBOX, self.OnEnableGrid)
-		toggleLegend.Bind(wx.EVT_CHECKBOX, self.OnEnableLegend)
-		toggleDrag.Bind(wx.EVT_CHECKBOX, self.OnEnableDrag)
-		togglePointLabel.Bind(wx.EVT_CHECKBOX, self.OnEnablePointLabel)
-		toggleNormalize.Bind(wx.EVT_CHECKBOX, self.OnEnableNormalize)
-		
+
+		### create tool bar
+		self.tb = self.BuildToolbar()
+
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
-		hhbox = wx.BoxSizer(wx.HORIZONTAL)
-		
-		hbox.Add(self.sldv, 0, wx.BOTTOM)
+
 		hbox.Add(self.client, 1, wx.EXPAND|wx.ALIGN_CENTRE)
-		
-		hhbox.Add(toggleZoom, 0, wx.BOTTOM)
-		hhbox.Add(toggleTitle, 0, wx.BOTTOM)
-		hhbox.Add(toggleGrid, 0, wx.BOTTOM)
-		hhbox.Add(toggleLegend, 0, wx.BOTTOM)
-		hhbox.Add(toggleDrag, 0, wx.BOTTOM)
-		hhbox.Add(togglePointLabel, 0, wx.BOTTOM)
-		hhbox.Add(toggleNormalize, 0, wx.BOTTOM)
-		
+
+		vbox.Add(self.tb, 0, wx.EXPAND)
 		vbox.Add(hbox, 1, wx.EXPAND|wx.ALIGN_CENTRE)
-		vbox.Add(self.sldh, 0, wx.BOTTOM)
-		vbox.Add(hhbox, 0, wx.BOTTOM)
-		
+
 		self.SetSizer(vbox)
 
 		self.client.canvas.Bind(wx.EVT_LEFT_DOWN, self.OnMouseLeftDown)
 		self.client.canvas.Bind(wx.EVT_MOTION, self.OnMotion)
 
 		self.Bind(wx.EVT_CLOSE, self.OnQuit)
-		self.Bind(wx.EVT_SLIDER, self.sliderUpdate, id = self.sldh.GetId())
-		self.Bind(wx.EVT_SLIDER, self.sliderUpdate, id = self.sldv.GetId())
 		self.Layout()
+
+	def BuildToolbar(self):
+		""" Create ToolBar
+		"""
+
+		tb = wx.ToolBar(self, style=wx.TB_HORIZONTAL|wx.NO_BORDER|wx.TB_FLAT)
+		tb.SetToolBitmapSize((16,16))
+
+		zoomLabel, zoomId = self.enableZoom.GetLabel(), self.enableZoom.GetId()
+		titleLabel, titleId = self.enableTitle.GetLabel(), self.enableTitle.GetId()
+		gridLabel, gridId = self.enableGrid.GetLabel(), self.enableGrid.GetId()
+		legendLabel, legendId = self.enableLegend.GetLabel(), self.enableLegend.GetId()
+		dragLabel, dragId = self.enableDrag.GetLabel(), self.enableDrag.GetId()
+		pointLabel, pointId = self.enablePointLabel.GetLabel(), self.enablePointLabel.GetId()
+		normalizedLabel, normalizedId = self.normalize.GetLabel(), self.normalize.GetId()
+
+		tb.AddCheckLabelTool(zoomId, zoomLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-zoom.png')), shortHelp=_('Enable zoom'), longHelp='')
+		tb.AddCheckLabelTool(titleId, titleLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-title.png')), shortHelp=_('Enable title'), longHelp='')
+		tb.AddCheckLabelTool(gridId, gridLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-grid.png')), shortHelp='Enable grid', longHelp='')
+		tb.AddCheckLabelTool(legendId, legendLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-legend.png')), shortHelp=_('Turn on legend'), longHelp='')
+		tb.AddCheckLabelTool(dragId, dragLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-drag.png')), shortHelp=_('Enable drag'), longHelp='')
+		tb.AddCheckLabelTool(pointId, pointLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-point.png')), shortHelp=_('Show closest point'), longHelp='')
+		tb.AddCheckLabelTool(normalizedId, normalizedLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-norm.png')), shortHelp=_('Normalize'), longHelp=_('Normalize Y axis'))
+
+		tb.Realize()
+
+		return tb
 
 	#def Rescale(self, data, xMin=0,xMax=200):
 		##frequence max et min pour le plot
@@ -237,26 +238,26 @@ class PlotFrame(wx.Frame):
 
 		## formate les donnees pour Plot
 		#return map(lambda a,b:(a,b),x_plot,y_plot)
-     
-	def sliderUpdate(self, event):
-		posh = self.sldh.GetValue()
-		posv = self.sldv.GetValue()
-		
+
+#	def sliderUpdate(self, event):
+#		posh = self.sldh.GetValue()
+#		posv = self.sldv.GetValue()
+
 		#self.client.Redraw(self.Rescale(data,posv,posh))
 		### TODO look sprectum in order to rewrite Rescale and Redraw and rename them
-		pass
+#		pass
 
-	def OnMove(self, event): 
-		#print 'Move event, new pos:' + str(event.Position) 
-		event.Skip() 
-      
+	def OnMove(self, event):
+		#print 'Move event, new pos:' + str(event.Position)
+		event.Skip()
+
 	def OnMouseLeftDown(self,event):
 		self.SetStatusText(_("Left Mouse Down at Point: (%.4f, %.4f)") % self.client._getXY(event))
 		event.Skip()            #allows plotCanvas OnMouseLeftDown to be called
-	
+
 	def drawPointLabel(self, dc, nearest):
-		ptx, pty = nearest["scaledXY"] 
-	
+		ptx, pty = nearest["scaledXY"]
+
 		dc.SetPen(wx.Pen(wx.BLACK))
 		dc.SetBrush(wx.Brush( wx.WHITE, wx.TRANSPARENT ) )
 		dc.SetLogicalFunction(wx.INVERT)
@@ -266,7 +267,7 @@ class PlotFrame(wx.Frame):
 
 		x,y = nearest["pointXY"] # data values
 		self.SetStatusText("%s: x = %.4f, y = %.4f" % (nearest['legend'],x,y))
-            
+
 	def OnMotion(self, event):
 		#show closest point (when enbled)
 		if self.client.GetEnablePointLabel() == True and self.client.GetPointLabelFunc():
@@ -275,25 +276,25 @@ class PlotFrame(wx.Frame):
 			dlst= self.client.GetClosestPoint(self.client._getXY(event), pointScaled= True)
 			if dlst != []:    #returns [] if none
 				curveNum, legend, pIndex, pointXY, scaledXY, distance = dlst
-				#make up dictionary to pass to my user function (see DrawPointLabel) 
+				#make up dictionary to pass to my user function (see DrawPointLabel)
 				mDataDict = {"curveNum":curveNum, "legend":legend, "pIndex":pIndex, "pointXY":pointXY, "scaledXY":scaledXY}
-				#pass dict to update the pointLabel		
+				#pass dict to update the pointLabel
 				self.client.UpdatePointLabel(mDataDict)
-				
+
 		event.Skip()           #go to next handler
 
 	def OnFilePageSetup(self, event):
 		self.client.PageSetup()
-		
+
 	def OnFilePrintPreview(self, event):
 		self.client.PrintPreview()
-		
+
 	def OnFilePrint(self, event):
 		try:
 			self.client.Printout()
 		except AttributeError, info:
 			sys.stderr.write("Error: %s"%info)
-		
+
 	def OnSaveFile(self, event):
 		dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=HOME_PATH, defaultFile='', wildcard="*.jpg*", style=wx.SAVE | wx.OVERWRITE_PROMPT)
 		if dlg.ShowModal() == wx.ID_OK:
@@ -311,11 +312,11 @@ class PlotFrame(wx.Frame):
 	def OnPlotRedraw(self,event):
 		eval("self.On%s(event)"%self.type)
 		self.client.Redraw()
-	
+
 	def OnEnableNormalize(self, event):
-		self.normalize = not self.normalize	
+		self.normalize = not self.normalize
 		self.OnPlotRedraw(event)
-		
+
 	def OnPlotScale(self, event):
 		if self.client.last_draw != None:
 			graphics, xAxis, yAxis= self.client.last_draw
@@ -324,35 +325,35 @@ class PlotFrame(wx.Frame):
 	def OnEnableZoom(self, event):
 		self.client.SetEnableZoom(event.IsChecked())
 		#self.mainmenu.Check(self.enableZoom.GetId(), not event.IsChecked())
-		
+
 	def OnEnableGrid(self, event):
 		self.client.SetEnableGrid(event.IsChecked())
-		
+
 	def OnEnableDrag(self, event):
 		self.client.SetEnableDrag(event.IsChecked())
 		#self.mainmenu.Check(self.enableDrag.GetId(), not event.IsChecked())
-		
+
 	def OnEnableTitle(self, event):
 		self.client.SetEnableTitle(event.IsChecked())
-		
+
 	def OnEnableLegend(self, event):
 		self.client.SetEnableLegend(event.IsChecked())
-		
+
 	def OnEnablePointLabel(self, event):
 		self.client.SetEnablePointLabel(event.IsChecked())
 
 	def OnTitleSetting(self, event):
 		pass
-	
+
 	def OnXLabelSetting(self, event):
 		pass
-	
+
 	def OnYLabelSetting(self, event):
 		pass
-	
+
 	def OnScrUp(self, event):
 		self.client.ScrollUp(1)
-		
+
 	def OnScrRt(self,event):
 		self.client.ScrollRight(2)
 
@@ -377,7 +378,7 @@ class StaticPlot(PlotFrame):
 		"""
 
 		PlotFrame.__init__(self, parent, id, title)
-		
+
 		# local copy
 		self.data = data
 		self.xLabel = xLabel
@@ -385,10 +386,10 @@ class StaticPlot(PlotFrame):
 		self.typ = typ
 		self.title = title
 		self.legend = legend
-		
+
 		menu = wx.Menu()
 		### si mode fusion
-		
+
 		if isinstance(self.data, dict):
 			for i in xrange(len(self.data)):
 				self.Bind(wx.EVT_MENU,self.OnPlotSpectrum, menu.Append(wx.NewId(), _('Signal %d')%i, _('Spectrum Plot')))
@@ -399,11 +400,11 @@ class StaticPlot(PlotFrame):
 
 		### call self.On<PlotLine>()
 		getattr(self,'On%s'%self.typ)()
-		
+
 	def OnPlotLine(self, event=None):
 
 		data = self.data
-		
+
 		## sans fusion
 		if isinstance(data, list):
 			if self.normalize:
@@ -412,7 +413,7 @@ class StaticPlot(PlotFrame):
 			line = plot.PolyLine(data, legend = 'Port 0 %s'%self.legend, colour = 'black', width = 1)
 			self.gc = plot.PlotGraphics([line], self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
-			
+
 		##avec fusion (voir attribut _fusion de QuickScope)
 		else:
 			L=[]
@@ -427,9 +428,9 @@ class StaticPlot(PlotFrame):
 				if self.normalize:
 					m = max(map(lambda a: a[1], d))
 					d = map(lambda b: (b[0], b[1]/m), d)
-				
+
 				L.append(plot.PolyLine(d, legend = 'Port %d %s'%(ind,self.legend), colour = c, width=1))
-				
+
 				a,b,c,d = get_limit(d)
 
 				if a < xMin: xMin=a
@@ -438,45 +439,45 @@ class StaticPlot(PlotFrame):
 				if d > yMax:yMax=d
 
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
-			
+
 		self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
 
 	def OnPlotSquare(self, event=None):
-		
+
 		data = self.data
-		
+
 		## sans fusion
 		if isinstance( data, list):
-			
+
 			### formatage des données spécifique au square
 			data = []
 			for v1,v2 in zip(self.data,[(self.data[i+1][0], self.data[i][1]) for i in xrange(len(self.data)-1)]):
 				data.append(v1)
 				data.append(v2)
-				
+
 			if self.normalize:
 				m = max(map(lambda a: a[1], data))
 				data = map(lambda b: (b[0], b[1]/m), data)
-				
+
 			line = plot.PolyLine(data, legend = 'Port 0 %s'%self.legend, colour = 'black', width = 1)
 			self.gc = plot.PlotGraphics([line], self.title, self.xLabel, self.yLabel)
 			### gestion automatique des bornes
 			xMin,xMax,yMin,yMax = get_limit(data)
-			
+
 		##avec fusion (voir attribut 'fusion' de QuickScope)
 		else:
-			
+
 			L = []
 			xMin, xMax, yMin, yMax = 0,0,0,0
 			data_list = data.values()
 			for ind,d in enumerate(data_list):
-			
+
 				### formatage des données spécifique au square
 				dd = []
 				for v1,v2 in zip(d,[ (d[i+1][0], d[i][1]) for i in xrange(len(d)-1)]):
 					dd.append(v1)
 					dd.append(v2)
-					
+
 				### gestion des couleures
 				try:
 					c = LColour[ind]
@@ -486,21 +487,21 @@ class StaticPlot(PlotFrame):
 				if self.normalize:
 					m = max(map(lambda a: a[1], dd))
 					dd = map(lambda b: (b[0], b[1]/m), dd)
-					
+
 				L.append(plot.PolyLine(dd, legend = 'Port %d %s'%(ind,self.legend), colour = c, width=1))
-				
+
 				### gestion automatique des bornes
 				a,b,c,d = get_limit(dd)
-				
+
 				if a < xMin: xMin=a
 				if b > xMax: xMax=b
 				if c < yMin: yMin=c
 				if d > yMax:yMax=d
 
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
-			
+
 		self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
-		
+
 	def OnPlotScatter(self, event=None):
 
 		data = self.data
@@ -514,7 +515,7 @@ class StaticPlot(PlotFrame):
 			line = plot.PolyLine(data, legend = 'Port 0 %s'%self.legend, colour = LColour[0], width = 1)
 			self.gc = plot.PlotGraphics([line, markers], self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
-			
+
 		##avec fusion (voir attribut _fusion de QuickScope)
 		else:
 			L=[]
@@ -525,7 +526,7 @@ class StaticPlot(PlotFrame):
 					c = LColour[ind]
 				except IndexError:
 					c = LColour[0]
-					
+
 				try:
 					m = Markers[ind]
 				except IndexError:
@@ -534,32 +535,32 @@ class StaticPlot(PlotFrame):
 				if self.normalize:
 					m = max(map(lambda a: a[1], d))
 					d = map(lambda b: (b[0], b[1]/m), d)
-				
+
 				L.append(plot.PolyLine(d, legend = 'Port 0 %s'%self.legend, colour=c, width=1))
 				L.append(plot.PolyMarker(d, colour=c, marker=m, size=1))
 
 				a,b,c,d = get_limit(d)
-				
+
 				if a < xMin: xMin=a
 				if b > xMax: xMax= b
 				if c < yMin: yMin=c
 				if d > yMax:yMax=d
 
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
-			
+
 		self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
 
-		
+
 	def OnPlotBar(self, event=None):
 		data = self.data
 
 		## sans fusion
 		if isinstance( data, list):
-			
+
 			line = [plot.PolyLine([(c[0], 0), (c[0],c[1])], legend='', colour='gray', width=25) for c in data]
 			self.gc = plot.PlotGraphics(line, self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
-			
+
 		##avec fusion (voir attribut _fusion de QuickScope)
 		else:
 			L=[]
@@ -572,16 +573,16 @@ class StaticPlot(PlotFrame):
 					L.append(plot.PolyLine([(c[0], 0), (c[0],c[1])], legend='', colour='gray', width=25))
 
 				a,b,c,d = get_limit(d)
-				
+
 				if a < xMin: xMin=a
 				if b > xMax: xMax= b
 				if c < yMin: yMin=c
 				if d > yMax:yMax=d
 
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
-			
+
 		self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
-		
+
 	def OnPlotAllSpectrum(self, evt=None):
 		for k,s in self.data.items():
 			frame = Spectrum(self,wx.ID_ANY, title= _("Spectrum of signal %d")%k,data=s)
@@ -599,10 +600,10 @@ class StaticPlot(PlotFrame):
 			# permet d'identifier le numero du signal
 			i = int(item.GetLabel().split(' ')[-1])
 			frame = Spectrum(self,wx.ID_ANY, title= _("Spectrum of signal "),data = self.data[i])
-			
+
 		else:
 			frame = Spectrum(self,wx.ID_ANY, title= _("Spectrum of signal "),data = self.data)
-		
+
 		frame.Center()
 		frame.Show()
 
@@ -614,7 +615,7 @@ class StaticPlot(PlotFrame):
 			self.gc.setTitle(self.title)
 			self.client.Redraw()
 		dlg.Destroy()
-		
+
 	def OnXLabelSetting(self, event):
 		dlg = wx.TextEntryDialog(self, _('Enter new X label'),_('Label Entry'))
 		dlg.SetValue(self.xLabel)
@@ -623,7 +624,7 @@ class StaticPlot(PlotFrame):
 			self.gc.setXLabel(self.xLabel)
 			self.client.Redraw()
 		dlg.Destroy()
-		
+
 	def OnYLabelSetting(self, event):
 		dlg = wx.TextEntryDialog(self, _('Enter new Y label'),_('Label Entry'))
 		dlg.SetValue(self.yLabel)
@@ -632,20 +633,20 @@ class StaticPlot(PlotFrame):
 			self.gc.setYLabel(self.yLabel)
 			self.client.Redraw()
 		dlg.Destroy()
-		
+
 class DynamicPlot(PlotFrame):
 	"""
 	"""
 
 	def __init__(self, parent = None, id = wx.ID_ANY, title = "", atomicModel = None, xLabel = "", yLabel = "", iport=None):
-		"""	
+		"""
 			@data : [(x,y)...]
 			@iport: the number of port when the fusion option is disabled.
 			@atomicModel: QuicScope atomic model used for its data
 		"""
 
 		PlotFrame.__init__(self, parent, id, title)
-		
+
 		# local copy
 		self.atomicModel = atomicModel
 		self.xLabel = xLabel
@@ -653,7 +654,7 @@ class DynamicPlot(PlotFrame):
 		self.iport = iport
 
 		self.title = ""
-		
+
 		# simulation thread
 		self.sim_thread = None
 		diagram = parent.diagram
@@ -667,14 +668,14 @@ class DynamicPlot(PlotFrame):
 
 		menu = wx.Menu()
 		### si mode fusion
-		if self.iport is None:			
+		if self.iport is None:
 			for i in self.atomicModel.results:
 				self.Bind(wx.EVT_MENU, self.OnPlotSpectrum, menu.Append(wx.NewId(), _('Signal %s')%str(i), _('Spectrum Plot')))
 			self.Bind(wx.EVT_MENU, self.OnPlotAllSpectrum, menu.Append(wx.NewId(), _('All'), _('Spectrum Plot')))
 		else:
 			self.Bind(wx.EVT_MENU, self.OnPlotSpectrum, menu.Append(wx.NewId(), _('Signal %s')%str(self.iport), _('Spectrum Plot')))
 		self.mainmenu.Append(menu, _('&Spectrum'))
-		
+
 		self.timer = wx.Timer(self)
 		### DEFAULT_PLOT_DYN_FREQ can be configured in preference-> simulation
 		self.timer.Start(milliseconds=DEFAULT_PLOT_DYN_FREQ)
@@ -682,41 +683,41 @@ class DynamicPlot(PlotFrame):
 		self.Bind(wx.EVT_TIMER, self.OnTimerEvent)
 		self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
 		self.Bind(wx.EVT_CLOSE, self.OnQuit)
-        
+
 	def OnTimerEvent(self, event):
 		self.GetEventHandler().ProcessEvent(wx.PaintEvent( ))
-		
+
 	def OnPlotLine(self, event):
 		""" Plot process depends to the timer event.
 		"""
 
 		#if self.timer.IsRunning():
 		### unbinding paint event
-		
+
 		if self.type != "PlotLine":
 			self.type = "PlotLine"
 			self.Unbind(wx.EVT_PAINT)
 			self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
-			
+
 		### without fusion
 		if self.iport is not None:
-		
+
 			data = self.atomicModel.results[self.iport]
 
 			if self.normalize:
 				m = max(map(lambda a: a[1], data))
 				data = map(lambda b: (b[0], b[1]/m), data)
-	
+
 			line = plot.PolyLine(data, legend = 'Port 0 (%s)'%self.atomicModel.getBlockModel().label, colour = 'black', width = 1)
 			self.gc = plot.PlotGraphics([line], self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
-			
+
 		### with fusion (look QuickScope attribut _fusion)
 		else:
-				
+
 			data = self.atomicModel.results
 			label = self.atomicModel.getBlockModel().label
-			
+
 			L = []
 			xMin, xMax, yMin, yMax = 0,0,0,0
 			data_list = data.values()
@@ -730,28 +731,28 @@ class DynamicPlot(PlotFrame):
 				if self.normalize:
 					m = max(map(lambda a: a[1], d))
 					d = map(lambda b: (b[0], b[1]/m), d)
-			
+
 				L.append(plot.PolyLine(d, legend = 'Port %s (%s)'%(str(data.keys()[ind]), label), colour = c, width=1))
 
 				a,b,c,d = get_limit(d)
-				
+
 				if a < xMin: xMin = a
 				if b > xMax: xMax = b
 				if c < yMin: yMin = c
 				if d > yMax: yMax = d
-			
+
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
-		
+
 		try:
 			self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
 		except Exception:
 			sys.stdout.write(_("Error trying to plot"))
-		
+
 		if self.sim_thread is None or not self.sim_thread.isAlive():
 			self.timer.Stop()
 
 	def OnPlotSquare(self, event):
-		
+
 		#if self.timer.IsRunning():
 		### unbinding paint event
 		if self.type != "PlotSquare":
@@ -761,9 +762,9 @@ class DynamicPlot(PlotFrame):
 
 		## sans fusion
 		if self.iport is not None:
-		
+
 			d = self.atomicModel.results[self.iport]
-			
+
 			### formatage des données pour le square
 			data = []
 			for v1,v2 in zip(d,[ (d[i+1][0], d[i][1]) for i in xrange(len(d)-1)]):
@@ -773,32 +774,32 @@ class DynamicPlot(PlotFrame):
 			if self.normalize:
 				m = max(map(lambda a: a[1], data))
 				data = map(lambda b: (b[0], b[1]/m), data)
-			
+
 			line = plot.PolyLine(data, legend='Port 0 (%s)'%self.atomicModel.getBlockModel().label, colour='black', width=1)
 			self.gc = plot.PlotGraphics([line], self.title, self.xLabel, self.yLabel)
 
 			### gestion dynamique des bornes
 			xMin,xMax,yMin,yMax = get_limit(data)
-			
+
 		##avec fusion (voir attribut 'fusion' de QuickScope)
 		else:
-				
+
 			data = self.atomicModel.results
 			label = self.atomicModel.getBlockModel().label
-			
+
 			L = []
 			xMin, xMax = 0,0
 			yMin, yMax = 0,0
-			
+
 			data_list = data.values()
 			for ind,d in enumerate(data_list):
-				
+
 				### formatage des données pour le square
 				dd = []
 				for v1,v2 in zip(d,[ (d[i+1][0], d[i][1]) for i in xrange(len(d)-1)]):
 					dd.append(v1)
 					dd.append(v2)
-				
+
 				### gestion de la couleur
 				try:
 					c = LColour[ind]
@@ -808,61 +809,61 @@ class DynamicPlot(PlotFrame):
 				if self.normalize:
 					m = max(map(lambda a: a[1], dd))
 					dd = map(lambda b: (b[0], b[1]/m), dd)
-			
+
 				### construction des données
 				L.append(plot.PolyLine(dd, legend='Port %s (%s)'%(str(data.keys()[ind]),label), colour=c, width=1))
-				
+
 				###gestion dynamique des bornes
 				a,b,c,d = get_limit(dd)
-				
+
 				if a < xMin: xMin = a
 				if b > xMax: xMax = b
 				if c < yMin: yMin = c
 				if d > yMax: yMax = d
-			
+
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
-		
+
 		try:
 			self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
 		except Exception:
 			sys.stdout.write(_("Error trying to plot"))
-		
+
 		if self.sim_thread is None or not self.sim_thread.isAlive():
 			self.timer.Stop()
 
 	def OnPlotScatter(self, event):
-		
+
 		#if self.timer.IsRunning():
 		### unbinding paint event
 		if self.type != "PlotScatter":
 			self.type = "PlotScatter"
 			self.Unbind(wx.EVT_PAINT)
 			self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
-		
+
 		## sans fusion
 		if self.iport is not None:
-		
+
 			data = self.atomicModel.results[self.iport]
 
 			if self.normalize:
 				m = max(map(lambda a: a[1], data))
 				data = map(lambda b: (b[0], b[1]/m), data)
-			
+
 			markers = plot.PolyMarker(data, colour=LColour[0], marker=Markers[0], size=1)
 			markers = plot.PolyLine(data, legend='Port 0 (%s)'%self.atomicModel.getBlockModel().label, colour=LColour[0], width=1)
 			self.gc = plot.PlotGraphics([line, markers], self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
-			
+
 		##avec fusion (voir attribut _fusion de QuickScope)
 		else:
-			
+
 			data = self.atomicModel.results
 			label = self.atomicModel.getBlockModel().label
-			
+
 			L = []
 			xMin, xMax = 0,0
 			yMin, yMax = 0,0
-			
+
 			data_list = data.values()
 			for ind,d in enumerate(data_list):
 				#ind = data.values().index(d)
@@ -870,7 +871,7 @@ class DynamicPlot(PlotFrame):
 					c = LColour[ind]
 				except IndexError:
 					c = LColour[0]
-					
+
 				try:
 					m = Markers[ind]
 				except IndexError:
@@ -879,30 +880,30 @@ class DynamicPlot(PlotFrame):
 				if self.normalize:
 					m = max(map(lambda a: a[1], d))
 					d = map(lambda b: (b[0], b[1]/m), d)
-				
+
 				L.append(plot.PolyLine(d, colour=c, width=1))
 				L.append(plot.PolyMarker(d, legend='Port %s (%s)'%(str(data.keys()[ind]), label), colour=c, marker=m, size=1))
-				
+
 				a,b,c,d = get_limit(d)
-				
+
 				if a < xMin: xMin=a
 				if b > xMax: xMax=b
 				if c < yMin: yMin=c
 				if d > yMax:yMax=d
 
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
-			
+
 		try:
 			self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
 		except Exception:
 			sys.stdout.write(_("Error trying to plot"))
-	
-			
+
+
 		if self.sim_thread is None or not self.sim_thread.isAlive():
 			self.timer.Stop()
 
 	def OnPlotBar(self,event):
-		
+
 		#if self.timer.IsRunning():
 		### unbinding paint event
 		if self.type != "PlotBar":
@@ -917,11 +918,11 @@ class DynamicPlot(PlotFrame):
 			line = [plot.PolyLine([(c[0], 0), (c[0],c[1])], legend='', colour='gray', width=25) for c in data]
 			self.gc = plot.PlotGraphics(line, self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
-			
+
 		##avec fusion (voir attribut _fusion de QuickScope)
 		else:
 			data = self.atomicModel.results
-			
+
 			L=[]
 			xMin, xMax, yMin, yMax = 0,0,0,0
 			data_list = data.values()
@@ -931,7 +932,7 @@ class DynamicPlot(PlotFrame):
 					c = LColour[ind]
 				except IndexError:
 					c = LColour[0]
-					
+
 				for c in d:
 					L.append(plot.PolyLine([(c[0], 0), (c[0],c[1])], legend='', colour='gray', width=25))
 
@@ -941,18 +942,18 @@ class DynamicPlot(PlotFrame):
 				if b > xMax: xMax = b
 				if c < yMin: yMin = c
 				if d > yMax: yMax = d
-	
+
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
-		
+
 		try:
-			
+
 			self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
 		except Exception:
 			sys.stdout.write(_("Error trying to plot"))
-		
+
 		if self.sim_thread is None or not self.sim_thread.isAlive():
 			self.timer.Stop()
-			
+
 	def OnPlotAllSpectrum(self,evt):
 		""" Plot all spectrum.
 		"""
@@ -981,7 +982,7 @@ class DynamicPlot(PlotFrame):
 			self.gc.setTitle(self.title)
 			self.client.Redraw()
 		dlg.Destroy()
-		
+
 	def OnXLabelSetting(self, event):
 		dlg = wx.TextEntryDialog(self, _('Enter new X label'), _('Label Entry'))
 		dlg.SetValue(self.xLabel)
@@ -990,7 +991,7 @@ class DynamicPlot(PlotFrame):
 			self.gc.setXLabel(self.xLabel)
 			self.client.Redraw()
 		dlg.Destroy()
-		
+
 	def OnYLabelSetting(self, event):
 		dlg = wx.TextEntryDialog(self, _('Enter new Y label'), _('Label Entry'))
 		dlg.SetValue(self.yLabel)
@@ -999,7 +1000,7 @@ class DynamicPlot(PlotFrame):
 			self.gc.setYLabel(self.yLabel)
 			self.client.Redraw()
 		dlg.Destroy()
-		
+
 class Spectrum(StaticPlot):
 	def __init__(self, parent=None, id=wx.ID_ANY, title="", data=[]):
 		"""	@data : [(x,y)...]
@@ -1007,7 +1008,7 @@ class Spectrum(StaticPlot):
 
 		# total time
 		duree = data[-1][0]
-		
+
 		signal=[c[1] for c in data]
 
 		Nb_pts=len(signal)
@@ -1018,7 +1019,7 @@ class Spectrum(StaticPlot):
 		#y=array(self.signal)
 		#newy=cspline1d_eval(cspline1d(y),newx,dx=dx,x0=y[0])
 		#self.signal=newy
-		
+
 		# nombre de points pour la fft
 		p=1
 		while(pow(2,p)<=Nb_pts):
@@ -1028,7 +1029,7 @@ class Spectrum(StaticPlot):
 
 		#application d'une fenetre
 		signal = smooth(array(signal),window_len=10,window="hamming")
-		
+
 		# frequence d'echantillonnage
 		Fe = 1.0/(float(duree)/float(len(signal)))
 
@@ -1048,32 +1049,32 @@ class Spectrum(StaticPlot):
 			if FMin<F[i]<FMax:
 				F_plot.append(F[i])
 				Y_plot.append(Y[i])
-		
+
 		# formate les donnees pour Plot
 		self.data = map(lambda a,b:(a,b),F_plot,Y_plot)
 
 		# invoque la frame
 		StaticPlot.__init__(self, parent, id, title, self.data, xLabel=_('Frequency [Hz]'),yLabel=_('Amplitude [dB]'))
-		
+
 		self.OnPlotLine()
 
 		# range for fred and amplitude
-		self.sldh.SetRange(1, 300)
-		self.sldv.SetRange(0, 150)
-		
+#		self.sldh.SetRange(1, 300)
+#		self.sldv.SetRange(0, 150)
+
 		# start freq 100
-		self.sldh.SetValue(100)
+#		self.sldh.SetValue(100)
 		# start amplitude 0
-		self.sldv.SetValue(0)
+#		self.sldv.SetValue(0)
 
 		# Bind the Sliders
-		self.Bind(wx.EVT_SLIDER, self.sliderUpdate, id=self.sldh.GetId())
-		self.Bind(wx.EVT_SLIDER, self.sliderUpdate, id=self.sldv.GetId())
+#		self.Bind(wx.EVT_SLIDER, self.sliderUpdate, id=self.sldh.GetId())
+#		self.Bind(wx.EVT_SLIDER, self.sliderUpdate, id=self.sldv.GetId())
 
-	def sliderUpdate(self, event):
-		posh = self.sldh.GetValue()
-		posv = self.sldv.GetValue()
-		self.Redraw(self.Rescale(posv,posh))
+#	def sliderUpdate(self, event):
+#		posh = self.sldh.GetValue()
+#		posv = self.sldv.GetValue()
+#		self.Redraw(self.Rescale(posv,posh))
 
 	def Redraw(self,data=[]):
 		""" Redraw the client
@@ -1099,6 +1100,6 @@ class Spectrum(StaticPlot):
 			if FMin<F[i]<FMax:
 				F_plot.append(F[i])
 				Y_plot.append(Y[i])
-		
+
 		# formate les donnees pour Plot
 		return map(lambda a,b:(a,b),F_plot,Y_plot)

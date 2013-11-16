@@ -112,7 +112,6 @@ class GeneralPanel(wx.Panel):
 	def OnFontSizeChanged(self, event):
 		"""
 		"""
-
 		__builtin__.__dict__['FONT_SIZE'] = self.font_size.GetValue()		# Block font size
 
 	###

@@ -97,7 +97,6 @@ class LibPanel(wx.Panel):
 
 		self.SetBackgroundColour(wx.WHITE)
 
-
 		self.__set_tips()
 
 	def BuildToolbar(self):
