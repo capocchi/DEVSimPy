@@ -40,8 +40,6 @@ class GeneralPanel(wx.Panel):
 		self.st2.SetToolTipString(_("Feel free to change the font size of DEVSimpy."))
 		self.st3.SetToolTipString(_("Feel free to change the number of item for undo/redo command"))
 
-		### SpinCtrl
-
 		### number of opened file
 		self.nb_opened_file = wx.SpinCtrl(self, wx.ID_ANY, '')
 		self.nb_opened_file.SetRange(2, 20)
@@ -98,20 +96,14 @@ class GeneralPanel(wx.Panel):
 
 	###
 	def OnNbOpenedFileChanged(self, event):
-		"""
-		"""
 		__builtin__.__dict__['NB_OPENED_FILE'] = self.nb_opened_file.GetValue()		# number of recent files
 
 	###
 	def OnNbHistoryUndoChanged(self, event):
-		"""
-		"""
 		__builtin__.__dict__['NB_HISTORY_UNDO'] = self.nb_history_undo.GetValue()		# number of history undo
 
 	###
 	def OnFontSizeChanged(self, event):
-		"""
-		"""
 		__builtin__.__dict__['FONT_SIZE'] = self.font_size.GetValue()		# Block font size
 
 	###
@@ -134,20 +126,14 @@ class GeneralPanel(wx.Panel):
 
 	###
 	def OnPluginsDirChanged(self, event):
-		"""
-		"""
 		__builtin__.__dict__['PLUGINS_DIR'] = os.path.basename(self.plugin_dir.GetValue())
 
 	###
 	def OnOutDirChanged(self, event):
-		"""
-		"""
 		__builtin__.__dict__['OUT_DIR'] = os.path.basename(self.out_dir.GetValue())
 
 	###
 	def OnTransparancyChanged(self, event):
-		"""
-		"""
 		__builtin__.__dict__['TRANSPARENCY'] = self.cb1.GetValue()
 
 class SimulationPanel(wx.Panel):
@@ -190,7 +176,7 @@ class SimulationPanel(wx.Panel):
 
 		### StaticText
 		self.txt = wx.StaticText(self, wx.ID_ANY, _("Default strategy:"))
-		self.cb = wx.ComboBox(self, wx.ID_ANY, DEFAULT_SIM_STRATEGY, choices=SIM_STRATEGY_LIST, style=wx.CB_READONLY)
+		self.cb = wx.ComboBox(self, wx.ID_ANY, DEFAULT_SIM_STRATEGY, choices=SIM_STRATEGY_LIST.keys(), style=wx.CB_READONLY)
 		self.cb.SetToolTipString(_("Default strategy for the simulation algorithm. Please see the DEVSimPy doc for more information of possible strategy."))
 		self.sim_defaut_strategy = DEFAULT_SIM_STRATEGY
 
@@ -205,25 +191,25 @@ class SimulationPanel(wx.Panel):
 		#self.strategy_info = wx.StaticText(self, wx.ID_ANY, _("Default strategy\ndscdsc\n"),style=wx.ALIGN_CENTRE)
 
 		### Adding sizer
-		hbox1.Add(self.bt5, 0, wx.ALIGN_CENTER_VERTICAL, 15)
-		hbox1.Add(self.sim_success_wav_btn, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND,15)
-		hbox1.Add(self.sim_error_wav_btn, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND,15)
+		hbox1.Add(self.bt5, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 15)
+		hbox1.Add(self.sim_success_wav_btn, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL,15)
+		hbox1.Add(self.sim_error_wav_btn, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL,15)
 
-		hbox2.Add(self.txt, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT, 15)
-		hbox2.Add(self.cb, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT, 15)
+		hbox2.Add(self.txt, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT|wx.ALL, 15)
+		hbox2.Add(self.cb, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL, 15)
 
-		hbox3.Add(self.bt6, 0, wx.ALIGN_CENTER_VERTICAL, 15)
+		hbox3.Add(self.bt6, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 15)
 
-		hbox4.Add(self.txt2, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT, 15)
-		hbox4.Add(self.sc, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT, 15)
+		hbox4.Add(self.txt2, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT|wx.ALL, 15)
+		hbox4.Add(self.sc, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL, 15)
 
 		#hbox4.Add(information, 1, wx.ALIGN_CENTER_VERTICAL, 15)
 		##hbox4.Add(self.strategy_info, 1, wx.ALIGN_CENTER_VERTICAL, 15)
 
-		vbox.Add(hbox1, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 10)
-		vbox.Add(hbox2, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND,10)
-		vbox.Add(hbox3, 0, wx.ALIGN_CENTER_VERTICAL,10)
-		vbox.Add(hbox4, 0, wx.ALIGN_CENTER_VERTICAL,10)
+		vbox.Add(hbox1, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL, 10)
+		vbox.Add(hbox2, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL,10)
+		vbox.Add(hbox3, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL,10)
+		vbox.Add(hbox4, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL,10)
 		#vbox.Add(hbox4, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND,10)
 
 		### Set sizer
@@ -513,7 +499,7 @@ class PreferencesGUI(wx.Frame):
 		hsizer.AddButton(self.apply)
 		hsizer.Realize()
 		vsizer.Add(self.pref, 1, wx.ALL|wx.EXPAND, 5)
-		vsizer.Add(hsizer, 0, wx.CENTER, 5)
+		vsizer.Add(hsizer, 0, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 		panel.SetSizer(vsizer)
 		vsizer.Fit(panel)
 
@@ -555,14 +541,14 @@ class TestApp(wx.App):
 		__builtin__.__dict__['NB_OPENED_FILE'] = 5
 		__builtin__.__dict__['FONT_SIZE'] = 10
 		__builtin__.__dict__['NB_HISTORY_UNDO'] = 10
-		__builtin__.__dict__['SIM_STRATEGY_LIST'] = ['Strategy1']
 		__builtin__.__dict__['TRANSPARENCY'] = False
 		__builtin__.__dict__['SIMULATION_ERROR_WAV_PATH'] = os.path.join(HOME_PATH,'sounds', 'Simulation-Error.wav')
 		__builtin__.__dict__['SIMULATION_SUCCESS_WAV_PATH'] = os.path.join(HOME_PATH,'sounds', 'Simulation-Success.wav')
 		__builtin__.__dict__['NTL'] = False
-		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = 'Strategy2'
+		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = 'Hierarchical'
 		__builtin__.__dict__['DEFAULT_PLOT_DYN_FREQ'] = 100
 		__builtin__.__dict__['LOCAL_EDITOR'] = False
+		__builtin__.__dict__['SIM_STRATEGY_LIST'] = {'PyDEVS':'SimStrategy1', 'Hierarchical':'SimStrategy2', 'Direct Coupling':'SimStrategy3'}
 
 		__builtin__.__dict__['_'] = gettext.gettext
 

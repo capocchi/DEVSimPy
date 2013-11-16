@@ -65,9 +65,13 @@ class LibraryTree(wx.TreeCtrl):
 
 		isz = (16,16)
 		il = wx.ImageList(isz[0], isz[1])
-		self.fldridx = il.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, isz))
-		self.fldropenidx = il.Add(wx.ArtProvider_GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, isz))
+		#self.fldridx = il.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, isz))
+		#self.fldropenidx = il.Add(wx.ArtProvider_GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, isz))
 		self.fileidx = il.Add(wx.ArtProvider_GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, isz))
+
+		self.fldridx = il.Add(wx.Image(os.path.join(ICON_PATH_16_16, 'folder_close.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.fldropenidx = il.Add(wx.Image(os.path.join(ICON_PATH_16_16, 'folder_open.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+
 		self.atomicidx = il.Add(wx.Image(os.path.join(ICON_PATH_16_16, 'atomic3.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		self.coupledidx = il.Add(wx.Image(os.path.join(ICON_PATH_16_16, 'coupled3.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		self.pythonfileidx = il.Add(wx.Image(os.path.join(ICON_PATH_16_16, 'pythonFile.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -175,7 +179,7 @@ class LibraryTree(wx.TreeCtrl):
 		mainW = wx.GetApp().GetTopWindow()
 		mainW.statusbar.SetStatusText('', 0)
 		mainW.statusbar.SetStatusText('', 1)
-		self.SetFocus()
+		#self.SetFocus()
 		evt.Skip()
 
 	def OnMiddleClick(self, evt):
@@ -235,8 +239,11 @@ class LibraryTree(wx.TreeCtrl):
 	def OnDelete(self, evt):
 		""" Delete the item from Tree
 		"""
-
-		self.RemoveItem(self.GetSelection())
+		sel = self.GetSelection()
+		if sel:
+			self.RemoveItem(sel)
+		else:
+			wx.MessageBox(_("No librarie selected!"),_("Delete Manager"))
 
 	def OnNewModel(self, evt):
 		Container.ShapeCanvas.StartWizard(self)
