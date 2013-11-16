@@ -122,13 +122,6 @@ else:
 	from wx.lib.pubsub import setuparg1
 	from wx.lib.pubsub import pub
 
-### here berfore the __main__ function
-if len(sys.argv) >= 2 and sys.argv[1] in ('-ng, -nogui, -js, -javascript'):
-	__builtin__.__dict__['GUI_FLAG'] = False
-	from SimulationNoGUI import makeSimulation, makeJS
-else:
-	__builtin__.__dict__['GUI_FLAG'] = True
-
 ### import Container much faster loading than from Container import ... for os windows only
 import Container
 import Menu
@@ -167,13 +160,21 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'bitmaps', 'splash.png
 				'FONT_SIZE': 12, # Block font size
 				'LOCAL_EDITOR': True, # for the use of local editor
 				'LOG_FILE': os.devnull, # log file (null by default)
-				'DEFAULT_SIM_STRATEGY': 'SimStrategy2', #choose the default simulation strategy
-				'SIM_STRATEGY_LIST' : ['SimStrategy1', 'SimStrategy2', 'SimStrategy3'], # list of available simulation strategy
+				'DEFAULT_SIM_STRATEGY': 'Hierarchical', #choose the default simulation strategy
+				'SIM_STRATEGY_LIST' : {'PyDEVS':'SimStrategy1', 'Hierarchical':'SimStrategy2', 'Direct Coupling':'SimStrategy3'}, # list of available simulation strategy
 				'HELP_PATH' : os.path.join('doc', 'html'), # path of help directory
 				'NTL' : False, # No Time Limit for the simulation
 				'TRANSPARENCY' : True, # Transparancy for DetachedFrame
 				'DEFAULT_PLOT_DYN_FREQ' : 100 # frequence of dynamic plot of QuickScope (to avoid overhead)
 				}
+
+### here berfore the __main__ function
+### warning, some module (like SimulationGUI) initialise GUI_FLAG macro before (import block below)
+if len(sys.argv) >= 2 and sys.argv[1] in ('-ng, -nogui, -js, -javascript'):
+	__builtin__.__dict__['GUI_FLAG'] = False
+	from SimulationNoGUI import makeSimulation, makeJS
+else:
+	__builtin__.__dict__['GUI_FLAG'] = True
 
 # Sets the homepath variable to the directory where your application is located (sys.argv[0]).
 __builtin__.__dict__.update(builtin_dict)
@@ -1052,44 +1053,7 @@ class MainApplication(wx.Frame):
 
 		save_dlg.Destroy()
 
-	def OnNewLib(self, event):
-		dlg1 = wx.TextEntryDialog(self, _('Enter new directory name'), _('New Library'), _("New_lib"))
-		if dlg1.ShowModal() == wx.ID_OK:
-			dName = dlg1.GetValue()
-			directory = os.path.join(DOMAIN_PATH, dName)
-			if not os.path.exists(directory):
-				os.makedirs(directory)
-				f = open(os.path.join(directory,'__init__.py'),'w')
-				f.write("__all__=[\n]")
-				f.close()
 
-				dlg2 = wx.MessageDialog(self, _('Do you want to import it?'), 'Question', wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
-				if dlg2.ShowModal() == wx.ID_YES:
-
-					progress_dlg = wx.ProgressDialog(_('Importing library'), _("Loading %s ...")%dName, parent=self, style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
-					progress_dlg.Pulse()
-
-					### ajout dans le sys.path si pas deja fait
-					if directory not in sys.path:
-						sys.path.append(directory)
-
-                    ### add correct path to sys.path always before InsertNewDomain
-					LibraryTree.AddToSysPath(absdName)
-
-					### add new domain
-					self.tree.InsertNewDomain(directory, self.tree.GetRootItem(), self.tree.GetSubDomain(directory, self.tree.GetDomainList(directory)).values()[0])
-
-					progress_dlg.Destroy()
-					wx.SafeYield()
-
-					self.tree.SortChildren(self.tree.GetRootItem())
-
-				dlg2.Destroy()
-
-			else:
-				wx.MessageBox(_('Directory already exist.\nChoose another name.'), _('Information'), wx.OK | wx.ICON_INFORMATION)
-
-		dlg1.Destroy()
 
 	###
 	def OnImport(self, event):

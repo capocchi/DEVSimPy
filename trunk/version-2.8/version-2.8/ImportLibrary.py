@@ -179,6 +179,7 @@ class ImportLibrary(wx.Dialog):
 		self._dbb = filebrowse.DirBrowseButton(rightPanel, wx.ID_ANY, startDirectory=HOME_PATH, labelText=_("New"), changeCallback=self.OnChange)
 		self._btn_Add = wx.Button(rightPanel, id = wx.ID_ADD)
 		self._btn_Add.Enable(False)
+		new = wx.Button(leftPanel, id = wx.ID_NEW, size=(100, -1))
 		sel = wx.Button(leftPanel, id = wx.ID_SELECTALL, size=(100, -1))
 		des = wx.Button(leftPanel, wx.ID_ANY, _('Deselect All'), size=(100, -1))
 		apply = wx.Button(leftPanel, id=wx.ID_OK, size=(100, -1))
@@ -187,6 +188,7 @@ class ImportLibrary(wx.Dialog):
 		hbox1.Add(self._dbb, 1 ,wx.EXPAND)
 		hbox1.Add(self._btn_Add, 0 ,wx.RIGHT|wx.CENTER, 3)
 
+		vbox2.Add(new, 0, wx.TOP, 2)
 		vbox2.Add(sel, 0, wx.TOP, 2)
 		vbox2.Add(des, 0, wx.TOP, 2)
 		#vbox2.Add((-1, 300))
@@ -207,6 +209,7 @@ class ImportLibrary(wx.Dialog):
 		panel.SetSizer(hbox)
 
 		##Binding Events
+ 		self.Bind(wx.EVT_BUTTON, self.OnNew, id = new.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnSelectAll, id = sel.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnDeselectAll, id = des.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnAdd, self._btn_Add)
@@ -394,6 +397,23 @@ class ImportLibrary(wx.Dialog):
 					name, ext = fn.split('.')
 					f.write("\t\t'%s', \n"%name)
 				f.write('\t\t ]')
+
+	def OnNew(self, event):
+		dlg1 = wx.TextEntryDialog(self, _('Enter new directory name'), _('New Library'), _("New_lib"))
+		if dlg1.ShowModal() == wx.ID_OK:
+			dName = dlg1.GetValue()
+			path = os.path.join(DOMAIN_PATH, dName)
+			if not os.path.exists(path):
+				os.makedirs(path)
+				f = open(os.path.join(path,'__init__.py'),'w')
+				f.write("__all__=[\n]")
+				f.close()
+				self.DoAdd(path, dName)
+
+			else:
+				wx.MessageBox(_('Directory already exist.\nChoose another name.'), _('Information'), wx.OK | wx.ICON_INFORMATION)
+
+		dlg1.Destroy()
 
 	def DoAdd(self, path, dName):
 

@@ -571,17 +571,24 @@ class ItemLibraryPopupMenu(wx.Menu):
 		wx.Menu.__init__(self)
 
 		### last child of tree and not empty directory (then, has OnDocumentation method)
-		if not parent.ItemHasChildren(parent.GetSelection()) and hasattr(parent,'OnItemDocumentation'):
+
+		if parent.IsBold(parent.GetSelection()):
+			new_model = wx.MenuItem(self, ID_NEW_MODEL_LIB, _('New Model'), _('Add new model to the selected library'))
+			new_model.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16, 'new.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+			self.InsertItem(0, new_model)
+			self.Bind(wx.EVT_MENU, parent.OnNewModel, id=ID_NEW_MODEL_LIB)
+
+		else:
 
 			edit = wx.MenuItem(self, ID_EDIT_LIB, _('Edit'), _('Edit selected module'))
-			rename = wx.MenuItem(self, ID_RENAME_LIB, _('Rename...'), _('Rename selected module'))
-			doc = wx.MenuItem(self, wx.NewId(), _('Doc'), _('Documentation of selected library'))
+			rename = wx.MenuItem(self, ID_RENAME_LIB, _('Rename'), _('Rename selected module'))
+			doc = wx.MenuItem(self, wx.NewId(), _('Documentation'), _('Documentation of selected library'))
 			update = wx.MenuItem(self, ID_UPDATE_LIB, _('Update'), _('Update selected module'))
 
 			edit.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 			rename.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rename.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 			doc.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'doc.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-			update.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'db_refresh.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+			update.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'db_refresh2.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 
 			self.AppendItem(edit)
 			self.AppendItem(rename)
@@ -593,16 +600,9 @@ class ItemLibraryPopupMenu(wx.Menu):
 			self.Bind(wx.EVT_MENU, parent.OnItemDocumentation, id = doc.GetId())	# attention à le mettre avant le popUpMenu
 			self.Bind(wx.EVT_MENU, parent.OnItemRefresh, id = ID_UPDATE_LIB)	# attention à le mettre avant le popUpMenu
 
-		else:
-
-			new_model = wx.MenuItem(self, ID_NEW_MODEL_LIB, _('New Model'), _('Add new model to the selected library'))
-			new_model.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16, 'new.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-			self.InsertItem(0,new_model)
-			self.Bind(wx.EVT_MENU, parent.OnNewModel, id=ID_NEW_MODEL_LIB)
-
 		### menu for all item of tree
 		delete = wx.MenuItem(self, ID_DELETE_LIB, _('Delete'), _('Delete selected library'))
-		delete.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16, 'db-.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		delete.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16, 'db-2.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 
 		self.AppendItem(delete)
 
@@ -614,20 +614,17 @@ class LibraryPopupMenu(wx.Menu):
 	def __init__(self, parent):
 		wx.Menu.__init__(self)
 
-		new = wx.MenuItem(self, ID_NEW_LIB, _('New'), _('New library'))
-		add = wx.MenuItem(self, ID_IMPORT_LIB, _('Import'), _('Import library'))
+		new = wx.MenuItem(self, ID_NEW_LIB, _('New/Import'), _('Create or import library'))
 		refresh = wx.MenuItem(self, ID_REFRESH_LIB, _('Refresh'), _('Refresh library'))
 		#upgrade = wx.MenuItem(self, ID_UPGRADE_LIB, _('Upgrade'), _('Upgrade library'))
 		info = wx.MenuItem(self, ID_HELP_LIB, _('Help'), _('Library description'))
 
-		new.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'db+.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		add.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'dbimport.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		refresh.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'db_refresh.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		new.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'db+2.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		refresh.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'db_refresh2.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		#upgrade.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'upgrade.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		info.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'dbinfo.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		info.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'dbinfo2.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 
 		self.AppendItem(new)
-		self.AppendItem(add)
 		self.AppendItem(refresh)
 		#self.AppendItem(upgrade)
 		self.AppendSeparator()
@@ -635,8 +632,7 @@ class LibraryPopupMenu(wx.Menu):
 
 		mainW = parent.GetTopLevelParent()
 
-		wx.EVT_MENU(self, ID_NEW_LIB, mainW.OnNewLib)
-		wx.EVT_MENU(self, ID_IMPORT_LIB, mainW.OnImport)
+		wx.EVT_MENU(self, ID_NEW_LIB, mainW.OnImport)
 		wx.EVT_MENU(self, ID_HELP_LIB, parent.OnInfo)
 		wx.EVT_MENU(self, ID_REFRESH_LIB, parent.OnUpdateAll)
 		#wx.EVT_MENU(self, ID_UPGRADE_LIB, parent.UpgradeAll)

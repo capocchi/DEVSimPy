@@ -7,7 +7,7 @@
 #                       Laurent CAPOCCHI
 #                      University of Corsica
 #                     --------------------------------
-# Version 2.0                                        last modified: 30/11/10
+# Version 2.0                                        last modified: 16/11/13
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -37,7 +37,7 @@ from tempfile import gettempdir
 import __builtin__
 import traceback
 
-__builtin__.__dict__['GUI_FLAG'] = False
+__builtin__.__dict__['GUI_FLAG'] = True
 
 from DEVSKernel.FastSimulator import Simulator
 from DEVSKernel.DEVS import AtomicDEVS
@@ -68,7 +68,7 @@ class TextObjectValidator(wx.PyValidator):
 		text = textCtrl.GetValue()
 
 		if (len(text) == 0) or (not IsAllDigits(text)) or (float(text) <=0.0) :
-			wx.MessageBox(_("The field must contain some positive numbers!"),_("Error"))
+			wx.MessageBox(_("The field must contain some positive numbers!"),_("Error Manager"))
 			textCtrl.SetBackgroundColour("pink")
 			textCtrl.SetFocus()
 			textCtrl.Refresh()
@@ -134,7 +134,7 @@ class CollapsiblePanel(wx.Panel):
 		'''Just make a few controls to put on the collapsible pane'''
 
 		text2 = wx.StaticText(pane, wx.ID_ANY, _("Select algorithm:"))
-		ch1 = wx.Choice(pane, wx.ID_ANY, choices=self.simdia.simulators_dict.keys())
+		ch1 = wx.Choice(pane, wx.ID_ANY, choices=SIM_STRATEGY_LIST.keys())
 		text3 = wx.StaticText(pane, wx.ID_ANY, _("Profiling"))
 		cb1 = wx.CheckBox(pane, wx.ID_ANY, name='check_prof')
 		text4 = wx.StaticText(pane, wx.ID_ANY, _("No time limit"))
@@ -148,19 +148,19 @@ class CollapsiblePanel(wx.Panel):
 		cb2.SetValue(__builtin__.__dict__['NTL'])
 
 		### default strategy
-		ch1.SetSelection(self.simdia.simulators_dict.values().index(self.simdia.selected_strategy))
+		ch1.SetSelection(SIM_STRATEGY_LIST.keys().index(DEFAULT_SIM_STRATEGY))
 
 		ch1.SetToolTipString(_("Select the simulator strategy."))
 		cb1.SetToolTipString(_("For simulation profiling using hotshot"))
 		cb2.SetToolTipString(_("No time limit for the simulation. Simulation is over when childs are no active."))
 
-		grid3 = wx.GridSizer(3, 2)
+		grid3 = wx.GridSizer(3, 2, 1, 1)
 		grid3.Add(text2, 0, wx.ALIGN_LEFT, 19)
-		grid3.Add(ch1, 1, wx.ALIGN_RIGHT)
+		grid3.Add(ch1, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL)
 		grid3.Add(text3, 0, wx.ALIGN_LEFT, 19)
-		grid3.Add(cb1, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL, 19)
+		grid3.Add(cb1, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
 		grid3.Add(text4, 0, wx.ALIGN_LEFT, 19)
-		grid3.Add(cb2, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL, 19)
+		grid3.Add(cb2, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
 
 		pane.SetSizer(grid3)
 
@@ -172,9 +172,8 @@ class CollapsiblePanel(wx.Panel):
 		""" strategy choice has been invoked
 		"""
 		selected_string = event.GetString()
-		if self.simdia.simulators_dict.has_key(selected_string):
-			self.simdia.selected_strategy = self.simdia.simulators_dict[selected_string]
-			__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = self.simdia.selected_strategy
+		self.simdia.selected_strategy = selected_string
+		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = self.simdia.selected_strategy
 
 	def OnNTL(self, event):
 		cb2 = event.GetEventObject()
@@ -237,10 +236,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		self.current_master = None
 
 		# simulator strategy
-		self.simulators_dict = {'PyDEVS':'SimStrategy1','Hierarchical':'SimStrategy2', 'Direct Coupling':'SimStrategy3'}
 		self.selected_strategy = DEFAULT_SIM_STRATEGY
-
-		assert self.selected_strategy in self.simulators_dict.values()
 
 		### profiling simulation with hotshot
 		self.prof = False
@@ -273,7 +269,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 	def __widgets(self):
 
-		self._text1 = wx.StaticText(self.panel, wx.ID_ANY, _('Final time'))
+		self._text1 = wx.StaticText(self.panel, wx.ID_ANY, _('Final time:'))
 		self._value = wx.TextCtrl(self.panel, wx.ID_ANY, str(float(self.master.FINAL_TIME)), validator=TextObjectValidator())
 		self._btn1 = wx.Button(self.panel, wx.NewId(), _('Run'))
 		self._btn2 = wx.Button(self.panel, wx.NewId(), _('Stop'))
@@ -359,7 +355,6 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		"""
 
 		assert(self.master is not None)
-
 
 		if self._value.GetValidator().Validate(self._value) or self.ntl:
 
@@ -612,43 +607,6 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		#else:
 			#raise msg
 
-#class BackSimulationDialog(SimulationDialog):
-	#""" BackSimulationDialog(parent, id, title, master)
-		#An another panel allowing back simulation button
-	#"""
-	#def __init__(self, *args, **kwargs):
-		#SimulationDialog.__init__(self, *args, **kwargs)
-
-	#def __widgets(self):
-
-		#pnl1 = wx.Panel(self.panel, -1)
-        #pnl1.SetBackgroundColour(wx.BLACK)
-        #pnl2 = wx.Panel(self.panel, -1 )
-
-		#slider1 = wx.Slider(pnl2, -1, 0, 0, 1000)
-		#pause = wx.BitmapButton(pnl2, -1, wx.Bitmap('icons/stock_media-pause.png'))
-		#play  = wx.BitmapButton(pnl2, -1, wx.Bitmap('icons/stock_media-play.png'))
-		#next  = wx.BitmapButton(pnl2, -1, wx.Bitmap('icons/stock_media-next.png'))
-		#prev  = wx.BitmapButton(pnl2, -1, wx.Bitmap('icons/stock_media-prev.png'))
-
-		#vbox = wx.BoxSizer(wx.VERTICAL)
-		#hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		#hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-
-		#hbox1.Add(slider1, 1)
-		#hbox2.Add(pause)
-		#hbox2.Add(play, flag=wx.RIGHT, border=5)
-		#hbox2.Add(next, flag=wx.LEFT, border=5)
-		#hbox2.Add(prev)
-
-		#vbox.Add(hbox1, 1, wx.EXPAND | wx.BOTTOM, 10)
-		#vbox.Add(hbox2, 1, wx.EXPAND)
-		#pnl2.SetSizer(vbox)
-
-		#sizer = wx.BoxSizer(wx.VERTICAL)
-		#sizer.Add(pnl1, 1, flag=wx.EXPAND)
-		#sizer.Add(pnl2, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=10)
-
 #--------------------------------------------------------------
 class SimulationThread(threading.Thread, Simulator):
 	""" SimulationThread(model)
@@ -682,7 +640,7 @@ class SimulationThread(threading.Thread, Simulator):
 
 		### define the simulation strategy
 		args = {'simulator':self}
-		cls_str = eval(eval('self.strategy'))
+		cls_str = eval(SIM_STRATEGY_LIST[self.strategy])
 		self.setAlgorithm(apply(cls_str, (), args))
 
 		while not self.end_flag:
@@ -744,9 +702,10 @@ class TestApp(wx.App):
 		import DomainInterface.MasterModel
 
 		__builtin__.__dict__['ICON_PATH_16_16']=os.path.join('icons','16x16')
-		__builtin__.__dict__['DEFAULT_SIM_STRATEGY']='SimStrategy2'
+		__builtin__.__dict__['DEFAULT_SIM_STRATEGY']='Hierarchical'
 		__builtin__.__dict__['NTL'] = False
 		__builtin__.__dict__['_'] = gettext.gettext
+		__builtin__.__dict__['SIM_STRATEGY_LIST'] = {'PyDEVS':'SimStrategy1', 'Hierarchical':'SimStrategy2', 'Direct Coupling':'SimStrategy3'}
 
 		self.frame = SimulationDialog(None, wx.ID_ANY, 'Simulator', DomainInterface.MasterModel.Master())
 		self.frame.Show()

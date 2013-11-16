@@ -412,3 +412,4 @@ invoque rpar un callback lorsque le fichier python est renseigné dans le wizard
 -Fait le 15/11/2013 par LC: correction -> ajout du pop up de conformation lorsqu'on veut suppurimer un modèle sur le diagramme
 -Fait le 15/11/2013 par LC: amélioration -> de CheckItem dans LibraryTree
 -Fait le 16/11/2013 par LC: amélioration -> SimulationGUI et PlotGUI plus adapté a Windows
+-Fait le 16/11/2013 par LC: amélioration -> centralisation des stratégies de sim et la stratégie par défaut de sim dans le builtin

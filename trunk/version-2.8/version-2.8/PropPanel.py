@@ -29,7 +29,7 @@ class PropPanel(wx.Panel):
 		wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY, name=name)
 
 		propSizer = wx.BoxSizer(wx.VERTICAL)
-		propSizer.Add(self.defaultPropertiesPage(), 0, wx.ALL, 10)
+		propSizer.Add(self.defaultPropertiesPage(), 0, wx.EXPAND|wx.ALL|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTRE_VERTICAL, 10)
 
 		self.SetSizer(propSizer)
 		self.Layout()
@@ -42,7 +42,7 @@ class PropPanel(wx.Panel):
 		"""
 		"""
 
-		propContent = wx.StaticText(self, wx.ID_ANY, _("Properties panel"), (10,10))
+		propContent = wx.StaticText(self, wx.ID_ANY, _("Select a model from diagram \n to see their properties"))
 		sum_font = propContent.GetFont()
 		sum_font.SetWeight(wx.BOLD)
 		propContent.SetFont(sum_font)
@@ -54,7 +54,7 @@ class PropPanel(wx.Panel):
 		"""
 		sizer = self.GetSizer()
 		sizer.DeleteWindows()
-		sizer.Add(panel, 1, wx.EXPAND|wx.ALL)
+		sizer.Add(panel, 0, wx.EXPAND|wx.ALL|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTRE_VERTICAL, 10)
 		sizer.Layout()
 
 	def __set_tips(self):

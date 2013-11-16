@@ -646,103 +646,126 @@ class Diagram(Savable, Structurable):
 			if isinstance(m, ContainerBlock):
 				self.checkDEVSInstance(m, D)
 
-	def OnCheck(self, event):
-		""" Create interface
+	def DoCheck(self):
+		""" Ckeck all models for validation
+			Return None if all models are ok, D else
 		"""
-
-		# window that contain the diagram which will be simulate
-		mainW = wx.GetApp().GetTopWindow()
-		window = mainW.GetWindowByEvent(event)
-
 		### dictionary composed by key = label of model and value = None if no error, exc_info() else
 		D = {}
 		self.checkDEVSInstance(self, D)
+		return D if filter(lambda m: m != None, D.values()) != [] else None
 
-		### if there is no error
-		if filter(lambda m: m != None ,D.values()) == []:
-			dial = wx.MessageDialog(window, _('All DEVS model has been instancied without error.\n\nDo you want simulate ?'), _('Question'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
-			if dial.ShowModal() == wx.ID_YES:
-				self.OnSimulation(event)
+	def OnCheck(self, event):
+		""" Check button has been clicked. We chek if models which compose the diagram are valide.
+		"""
+		### if there are models in diagram
+		if self.GetCount() != 0:
+
+            # window that contain the diagram which will be simulate
+			#mainW = wx.GetApp().GetTopWindow()
+			#win = mainW.GetWindowByEvent(event)
+
+			obj = event.GetEventObject()
+			win = obj.GetTopLevelParent()
+
+			D = self.DoCheck()
+            ### if there is no error
+ 			if D is None:
+				dial = wx.MessageDialog(win,
+										_('All DEVS model has been instanciated without error.\n\nDo you want simulate ?'),
+										_('Error Manager'),
+										wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+
+				if dial.ShowModal() == wx.ID_YES:
+					self.OnSimulation(event)
+			else:
+				frame = CheckerGUI.CheckerGUI(win, D)
+				frame.Show()
+
+		### no modles in diagram
 		else:
-			frame = CheckerGUI.CheckerGUI(window, D)
-			frame.Show()
+			wx.MessageBox(_("Diagram is empty.\n\nPlease, drag-and-drop model from libraries control panel to build a diagram."),_('Error Manager'))
 
 	def OnSimulation(self, event):
 		""" Method calling the simulationGUI
 		"""
 
-		## window that contain the diagram which will be simulate
-		mainW = wx.GetApp().GetTopWindow()
-		window = GetActiveWindow()
+        ### if there are models in diagram
+		if self.GetCount() != 0 :
 
-		# diagram which will be simulate
-		diagram = self
-
-		### check if the diagram contain model with error
-		D = {}
-		self.checkDEVSInstance(diagram, D)
-
-		if not filter(lambda m: m != None ,D.values()) == []:
-			playSound(SIMULATION_ERROR_WAV_PATH)
-			dial = wx.MessageDialog(window, _("There is errors in some models.\n\nDo you want to execute the error manager ?"), _('Question'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
-			if dial.ShowModal() == wx.ID_YES:
-				frame = CheckerGUI.CheckerGUI(window, D)
-				frame.Show()
-
-			return False
-
-		### Check if models have the same label
-		L = diagram.GetLabelList([])
-		if len(L)!=len(set(L)):
-			wx.MessageBox(_("It seems that models have same label.\nIf you plan to use Flat simulation algorithm, all model must have a unique label."))
-
-		# set the name of diagram from notebook nb2
-		title  = window.GetTitle() if isinstance(window, DetachedFrame) else mainW.nb2.GetPageText(mainW.nb2.GetSelection()).rstrip()
-		diagram.label = os.path.splitext(os.path.basename(title))[0]
-
-		## delete all attached devs instances
-		diagram.Clean()
-
-		## fabrication du master DEVS à partir du diagramme
-		master = Diagram.makeDEVSInstance(diagram)
-
-		# test pour savoir si le modèle est a simuler est vide (fait aussi sur le bouton run pour le panel)
-		if (master == None) or (master.componentSet == []):
-			dial = wx.MessageDialog(window, _("You want to simulate an empty master model !"), _('Exclamation'), wx.OK | wx.ICON_EXCLAMATION)
-			dial.ShowModal()
-			return False
-		## test pour voir s'il existe des modèles qui possèdent des fileNames incorrects
-		elif all(model.bad_filename_path_flag for model in filter(lambda m: isinstance(m, Block),diagram.GetShapeList()) if hasattr(model, 'bad_filename_path_flag')):
-			dial = wx.MessageDialog(window, _("You dont make the simulation of the Master model.\nSome models have bad fileName path !"), _('Exclamation'), wx.OK | wx.ICON_EXCLAMATION)
-			dial.ShowModal()
-			return False
-		else:
-
-			pluginmanager.trigger_event('START_DIAGRAM', parent = mainW, diagram = diagram)
-
-			### clear all log file
-			for fn in filter(lambda f: f.endswith('.devsimpy.log'), os.listdir(gettempdir())):
-				os.remove(os.path.join(gettempdir(),fn))
-
+			## window that contain the diagram which will be simulate
+##			mainW = wx.GetApp().GetTopWindow()
+##			win = mainW.GetActiveWindow()
 			obj = event.GetEventObject()
-			# si invocation à partir du bouton dans la toolBar (apparition de la frame de simulation dans une fenetre)
-			if isinstance(obj, wx.ToolBar) or 'Diagram' in obj.GetTitle():
-				frame = SimulationGUI.SimulationDialog(window, wx.ID_ANY, _(" %s Simulator"%diagram.label), master)
-				frame.Show()
-			## si invocation par le menu (apparition de la frame de simulation dans le panel)
-			elif isinstance(obj, (wx.Menu, wx.Frame)):
-				sizer3 = wx.BoxSizer(wx.VERTICAL)
-				mainW.panel3.Show()
-				mainW.SimDiag = SimulationGUI.SimulationDialog(mainW.panel3, wx.ID_ANY, _("Simulator"), master)
-				sizer3.Add(mainW.SimDiag, 0, wx.EXPAND)
-				mainW.panel3.SetSizer(sizer3)
-				mainW.panel3.SetAutoLayout(True)
-				mainW.nb1.InsertPage(2, mainW.panel3, _("Simulator"), imageId = 2)
-			else:
-				sys.stdout.write(_("This option has not been implemented yet."))
+			win = obj.GetTopLevelParent()
+
+			# diagram which will be simulate
+			diagram = self
+
+			D = self.DoCheck()
+			### if there is no error in models
+ 			if D is not None:
+				playSound(SIMULATION_ERROR_WAV_PATH)
+				dial = wx.MessageDialog(win, _("There is errors in some models.\n\nDo you want to execute the error manager ?"), _('Simulation Manager'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+				if dial.ShowModal() == wx.ID_YES:
+					frame = CheckerGUI.CheckerGUI(win, D)
+					frame.Show()
+
 				return False
 
-		return True
+			else:
+
+				### Check if models have the same label
+				L = diagram.GetLabelList([])
+				if len(L)!=len(set(L)):
+					wx.MessageBox(_("It seems that models have same label.\nIf you plan to use Flat simulation algorithm, all model must have a unique label."), _("Simulation Manager"))
+
+				### set the name of diagram from notebook nb2
+				title  = win.GetTitle() if isinstance(win, DetachedFrame) else win.nb2.GetPageText(win.nb2.GetSelection()).rstrip()
+				diagram.label = os.path.splitext(os.path.basename(title))[0]
+
+				## delete all attached devs instances
+				diagram.Clean()
+
+				## make DEVS instance from diagram
+				master = Diagram.makeDEVSInstance(diagram)
+
+				## test of filename model attribut
+				if all(model.bad_filename_path_flag for model in filter(lambda m: isinstance(m, Block), diagram.GetShapeList()) if hasattr(model, 'bad_filename_path_flag')):
+					dial = wx.MessageDialog(win, _("You dont make the simulation of the Master model.\nSome models have bad fileName path !"), _('Simulation Manager'), wx.OK | wx.ICON_EXCLAMATION)
+					dial.ShowModal()
+					return False
+				else:
+
+					pluginmanager.trigger_event('START_DIAGRAM', parent = win, diagram = diagram)
+
+					### clear all log file
+					for fn in filter(lambda f: f.endswith('.devsimpy.log'), os.listdir(gettempdir())):
+						os.remove(os.path.join(gettempdir(),fn))
+
+##					obj = event.GetEventObject()
+					# si invocation à partir du bouton dans la toolBar (apparition de la frame de simulation dans une fenetre)
+					if isinstance(obj, wx.ToolBar) or 'Diagram' in obj.GetTitle():
+						frame = SimulationGUI.SimulationDialog(win, wx.ID_ANY, _(" %s Simulator"%diagram.label), master)
+						frame.Show()
+					## si invocation par le menu (apparition de la frame de simulation dans le panel)
+					elif isinstance(obj, (wx.Menu, wx.Frame)):
+						sizer3 = wx.BoxSizer(wx.VERTICAL)
+						win.panel3.Show()
+						win.SimDiag = SimulationGUI.SimulationDialog(win.panel3, wx.ID_ANY, _("Simulation Manager"), master)
+						sizer3.Add(win.SimDiag, 0, wx.EXPAND)
+						win.panel3.SetSizer(sizer3)
+						win.panel3.SetAutoLayout(True)
+						### title is Simulation because it must ne the same of the submenu in toolbar (for checking update)
+						win.nb1.InsertPage(2, win.panel3, _("Simulation"), imageId = 2)
+					else:
+						sys.stdout.write(_("This option has not been implemented yet."))
+						return False
+
+				return True
+		else:
+			wx.MessageBox(_("Diagram is empty. \nPlease, drag-and-drop model from libraries control panel to build a diagram."),_('Simulation Manager'))
+			return False
 
 	def AddShape(self, shape, after = None):
 		""" Method that insert shape into the diagram at the position 'after'
@@ -1989,8 +2012,9 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		"""
 
 		for s in self.select():
-			msg = _("Do you really want to delete %s model?")%(s.label)
- 			dlg = wx.MessageDialog(self, msg, _("Question"),
+   			name = _("Connexion") if isinstance(s, ConnectionShape) else s.label
+			msg = _("Do you really want to delete %s model?")%(name)
+ 			dlg = wx.MessageDialog(self, msg, _("Delete Manager"),
 									wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
 			if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:
@@ -2066,16 +2090,22 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 				self.DiagramModified()
 
 	def OnLeftDown(self,event):
-		"""
+		""" Left Down mouse bouton has been invoked in the canvas instance.
 		"""
 
 		if self.timer.IsRunning():
 			self.timer.Stop()
 
+		### get current shape
 		item = self.getCurrentShape(event)
 
-		if item is None:   #clicked on empty space deselect all
+		### clicked on empty space deselect all
+		if item is None:
 			self.deselect()
+
+			### recover focus
+			if wx.Window.FindFocus() != self:
+				self.SetFocus()
 
 			## Left mouse button down, change cursor to
 			## something else to denote event capture
@@ -2085,7 +2115,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 		else:
 
-			# si element pas encore selectionné alors selectionne et pas les autres
+			### if item is not selected, then we select it without the other
 			if item not in self.getSelectedShapes():
 
 				item.OnLeftDown(event) # send leftdown event to current shape
@@ -2094,7 +2124,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 				self.select(item)
 
-			# sinon les autres aussi participes
+			### else each other are considrered
 			else:
 
 				for s in self.getSelectedShapes():
@@ -2106,11 +2136,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 			self.__state['canvas'] = self
 			self.notify()
 
-		# main windows statusbar update
-		#printOnStatusBar(self.GetTopLevelParent().statusbar, {0:'', 1:''})
-
 		self.Refresh()
-		#wx.CallAfter(self.SetFocus)
 
 	###
 	@Post_Undo
@@ -4353,7 +4379,6 @@ class iPort(Port):
 		self.label_pos = 'bottom'
 		self.input = 0
 		self.output = 1
-		print dir(self)
 
 	def getDEVSModel(self):
 		return self
@@ -5467,7 +5492,7 @@ class AttributeEditor(wx.Frame, wx.Panel):
 		import DiagramNotebook
 
 		# pour gerer l'affichage dans la page de gauche dans le notebook
-		if isinstance(parent, DiagramNotebook.DiagramNotebook):
+		if isinstance(parent, (DiagramNotebook.DiagramNotebook,DetachedFrame)):
  			wx.Frame.__init__(self, parent, ID, model.label, size = wx.Size(400, 550), style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN | wx.STAY_ON_TOP)
 			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'properties.png'), wx.BITMAP_TYPE_PNG)))
 			self.Bind(wx.EVT_CLOSE, self.OnClose)

@@ -109,15 +109,17 @@ class LibPanel(wx.Panel):
 		self.ToolBar = tb
 		tb.SetToolBitmapSize( ( 16, 16 ) )# this required for non-standard size buttons on MSW
 
-		tb.AddTool(Menu.ID_NEW_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db+.png')), shortHelpString=_('New library'), longHelpString=_('Create a new directory in the Domain directory'))
-		tb.AddTool(Menu.ID_IMPORT_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'dbimport.png')), shortHelpString=_('Import library'), longHelpString=_('Call the import manager'))
-		tb.AddTool(Menu.ID_REFRESH_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh.png')), shortHelpString=_('Refresh library'), longHelpString=_('Force the refresh of the loaded libraries'))
-		tb.AddTool(Menu.ID_HELP_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16, 'dbinfo.png')), shortHelpString=_('Help'), longHelpString=_('Information about import manager'))
+		tb.AddTool(Menu.ID_NEW_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db+2.png')), shortHelpString=_('New library'), longHelpString=_('Create or import a new directory'))
+		tb.AddTool(Menu.ID_DELETE_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db-2.png')), shortHelpString=_('Delete library'), longHelpString=_('Delete the selected librarie'))
+		tb.AddTool(Menu.ID_REFRESH_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')), shortHelpString=_('Refresh library'), longHelpString=_('Force the refresh of the loaded libraries'))
+		#tb.AddTool(Menu.ID_IMPORT_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'dbimport2.png')), shortHelpString=_('Import library'), longHelpString=_('Call the import manager'))
+		tb.AddTool(Menu.ID_HELP_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16, 'dbinfo2.png')), shortHelpString=_('Help'), longHelpString=_('Information about import manager'))
 
 		mainW = self.GetTopLevelParent()
 
-		wx.EVT_TOOL(self, Menu.ID_NEW_LIB, mainW.OnNewLib)
-		wx.EVT_TOOL(self, Menu.ID_IMPORT_LIB, mainW.OnImport)
+		wx.EVT_TOOL(self, Menu.ID_NEW_LIB, mainW.OnImport)
+		wx.EVT_TOOL(self, Menu.ID_DELETE_LIB, self.tree.OnDelete)
+		#wx.EVT_TOOL(self, Menu.ID_IMPORT_LIB, mainW.OnImport)
 		wx.EVT_TOOL(self, Menu.ID_REFRESH_LIB, self.tree.OnUpdateAll)
 		wx.EVT_TOOL(self, Menu.ID_HELP_LIB, self.tree.OnInfo)
 
