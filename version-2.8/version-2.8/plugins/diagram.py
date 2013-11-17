@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-""" 
+"""
 	Authors: L. Capocchi (capocchi@univ-corse.fr)
 	Date: 16/10/2012
 	Description:
@@ -48,7 +48,7 @@ except ImportError, info:
 		msg = _("Unknown operating system.\n")
 		sys.stdout.write(msg)
 		raise ImportError, "%s\n%s"%(msg,info)
-		
+
 import pluginmanager
 
 from Container import CodeBlock, ContainerBlock, ConnectionShape, Diagram
@@ -71,7 +71,7 @@ def start_diagram(*args, **kwargs):
 
 	#global G
 	G = getSimulatorTree(dia, nx.Graph(), dia.label)
-	
+
 	### plot the grahp
 	nx.draw(G)
 	pylab.show()
@@ -79,5 +79,5 @@ def start_diagram(*args, **kwargs):
 def Config(parent):
 	""" Plugin settings frame.
 	"""
-	dlg = wx.MessageDialog(parent, _('No settings available for this plugin\n'), _('Exclamation'), wx.OK | wx.ICON_EXCLAMATION)
+	dlg = wx.MessageDialog(parent, _('No settings available for this plugin\n'), _('Diagram plugin configuration'), wx.OK | wx.ICON_EXCLAMATION)
 	dlg.ShowModal()

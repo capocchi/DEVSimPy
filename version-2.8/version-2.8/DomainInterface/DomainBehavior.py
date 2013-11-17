@@ -18,17 +18,7 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-try:
-	# heritage des proprietes de l'AtomicModel par domainBehavior 
-	from DEVSKernel.DEVS import AtomicDEVS
-except:
-	import sys, os
-	for spath in [os.pardir+os.sep+'Lib']:
-		if not spath in sys.path: sys.path.append(spath)
-	from DEVSKernel.DEVS import AtomicDEVS
-
-# composition DomainBehavior est compose d'un Master
-from MasterModel import Master
+from DEVSKernel.PyDEVS.DEVS import AtomicDEVS
 
 #    ======================================================================    #
 
@@ -37,7 +27,7 @@ class DomainBehavior(AtomicDEVS):
 	"""
 
 	###
-	def __init__(self):
+	def __init__(self, name=None):
 		"""	Constructor.
 		"""
 		AtomicDEVS.__init__(self)

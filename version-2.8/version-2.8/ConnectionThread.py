@@ -35,7 +35,7 @@ class unzip:
     def __init__(self, verbose = False, percent = 10):
         self.verbose = verbose
         self.percent = percent
-        
+
     def extract(self, file, dir):
         if not dir.endswith(':') and not os.path.exists(dir):
             os.mkdir(dir)
@@ -97,27 +97,27 @@ class UpgradeLibThread(Thread):
 	def __init__(self, parent):
 		""" Initialize the worker thread.
 		"""
-		
+
 		Thread.__init__(self)
 
 		self._parent = parent
 
 		self.setDaemon(True)
 		self.start()
-		
+
 
 	def LoadZip(self, url):
 		"""
 		"""
-	
+
 		temp = tempfile.NamedTemporaryFile()
 		zip = urllib.urlopen(url).read()
 		try:
 			temp.write(zip)
 			temp.seek(0)
 		finally:
-			
-			dlg = wx.MessageDialog(None, _("Are you sure to upgrade librairies from new version ?"), 'Question', wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+
+			dlg = wx.MessageDialog(None, _("Are you sure to upgrade librairies from new version ?"), _("Upgrade Manager"), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 
 			if dlg.ShowModal() == wx.ID_YES:
 				unzipper = unzip()
@@ -130,10 +130,10 @@ class UpgradeLibThread(Thread):
 	def CheckVersion(self, text):
 		""" Called by a worker thread which check DEVSimPy web page on the internet.
 		"""
-		
+
 		if text is None:
 			# We can't get to the internet?
-			dial = wx.MessageDialog(None, _("Unable to connect to the internet."), _('Error'), wx.OK | wx.ICON_ERROR)
+			dial = wx.MessageDialog(None, _("Unable to connect to the internet."), _('Update Manager'), wx.OK | wx.ICON_ERROR)
 			dial.ShowModal()
 		else:
 			# A bit shaky, but it seems to work...
@@ -144,26 +144,26 @@ class UpgradeLibThread(Thread):
 			indx2 = text[indx:].find(prefix)
 			indx3 = text[indx:].find(suffix)
 			version = text[indx+indx2+len(prefix+suffix):indx+indx3]
-			
+
 			if float(version) > float(__version_lib__):
 				# Time to upgrade maybe?
 				strs = _("A new version of DEVSimPy libraries is available!\n\n Do you want to download and install it ?")
-				dlg = wx.MessageDialog(None, strs, 'Question', wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+				dlg = wx.MessageDialog(None, strs, _("Update Manager"), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 			else:
 				# No upgrade required
 				strs = _("You have the latest version of DEVSimPy libraries.")
-				dlg = wx.MessageDialog(None, strs, _('Info'), wx.OK)
+				dlg = wx.MessageDialog(None, strs, _('Update Manager'), wx.OK|wx.ICON_INFORMATION)
 
 			if dlg.ShowModal() == wx.ID_YES:
 				### update the message of the Progess dialog
 				self._parent.UpdatePulse(_("Downloading new libraries...."))
 				### go to download zip file
 				self.LoadZip(url+prefix+version+suffix)
-	
+
 	def run(self):
-		""" Run worker thread. 
+		""" Run worker thread.
 		"""
-		
+
 		# This is the code executing in the new thread. Simulation of
 		# a long process as a simple urllib2 call
 		try:

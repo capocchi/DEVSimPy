@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-""" 
+"""
 	Authors: T. Ville (tim.ville@me.com)
 	Date: 13/02/2013
 	Description:
@@ -51,7 +51,7 @@ from Container import Block, ConnectionShape, Testable
 import Editor
 from DetachedFrame import DetachedFrame
 import ZipManager
-from DEVSKernel.DEVS import AtomicDEVS
+from DEVSKernel.PyDEVS.DEVS import AtomicDEVS
 
 
 ### ------------------------------------------------------------------------------------------- ###
@@ -153,15 +153,15 @@ def test_manager(**kwargs):
 		main = wx.GetApp().GetTopWindow()
 		nb2 = main.nb2
 		child = main.GetChildren()
-		
+
 		canvas = None
-		
+
 		### find CodeBlock in the nb2
 		for can in nb2.pages:
 			if block in filter(lambda a: not isinstance(a, ConnectionShape), can.diagram.shapes):
 				canvas = can
 				break
-		
+
 		### find CodeBlock in detached_frame
 		if canvas is None:
 			for detached_frame in filter(lambda child: isinstance(child, DetachedFrame) and hasattr(child, 'canvas'), child):
@@ -229,7 +229,7 @@ class TestFrame(wx.Frame):
 
 	# NOTE: TestFrame :: ConfigGUI		=> Configure the user interface
 	def ConfigGUI(self):
-		
+
 		### Menu bar config------------------------------------------------------------------------
 		menubar = wx.MenuBar()
 
@@ -466,7 +466,7 @@ class TestFrame(wx.Frame):
 
 	# NOTE: TestFrame :: OnClose			=> Event when Quit button os clicked
 	def OnClose(self, event):
-		
+
 		### Remove temporary tests files
 		Testable.RemoveTempTests()
 
@@ -631,7 +631,7 @@ class Model(object):
 				tags.append(tag)
 
 		self.tags = tags
-		
+
 
 ### -----------------------------------------------------------------------------------------------
 # NOTE: Interpretor :: Shell interpretor
@@ -716,7 +716,7 @@ class Interpretor(object):
 		# print error
 		self.stderr.write(self.errorThread.getOutput())
 		self.bp.stdin.write("\n")
-	
+
 
 ### -----------------------------------------------------------------------------------------------
 # NOTE: TermProcessThread :: Thread to manage terminal

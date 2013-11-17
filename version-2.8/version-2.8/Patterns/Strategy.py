@@ -35,13 +35,12 @@ import multiprocessing
 #import pp
 
 from pluginmanager import trigger_event
-from DEVSKernel.DEVS import AtomicDEVS, CoupledDEVS, IPort, OPort
-#from Utilities import show_tree
+from DEVSKernel.PyDEVS.DEVS import AtomicDEVS, CoupledDEVS, IPort, OPort
 
 class Traceable:
 	""" for back simulation
 	"""
-	
+
 	def __init__(self):
 		""" Constructor
 		"""
@@ -51,7 +50,7 @@ class Traceable:
 		#s = shelve.open(self._simulator.f.name+'.db')
 		#s['s'] = {}
 		#s.close()
-	
+
 		self.trace = {}
 
 	def Trace(self, time, value):
@@ -59,7 +58,7 @@ class Traceable:
 
 	def GetModel(self, time):
 		return self.trace.get(time, None)
-	
+
 def getFlatImmChildrenList(model, flat_imm_list = []):
 	""" Set priority flat list
 	"""
@@ -76,7 +75,7 @@ def getFlatPriorityList(model, flat_priority_list = []):
 	""" Set priority flat list
 	"""
 
-	### if priority list never edited, priority is componentList order. 
+	### if priority list never edited, priority is componentList order.
 	if hasattr(model, 'PRIORITY_LIST') and model.PRIORITY_LIST != []:
 		L = model.PRIORITY_LIST
 	else:
@@ -98,9 +97,9 @@ def HasActiveChild(L):
 	return L != [] and True in map(lambda a: a.timeNext != INFINITY, L)
 
 class SimStrategy:
-	""" Strategy abstract class or interface 
+	""" Strategy abstract class or interface
 	"""
-	
+
 	def __init__(self, simulator=None):
 		self._simulator = simulator
 
@@ -108,22 +107,22 @@ class SimStrategy:
 		""" Simulate abstract method
 		"""
 		pass
-	
+
 class SimStrategy1(SimStrategy):
 	""" Original strategy for PyDEVS simulation
 	"""
-	
+
 	def __init__(self, simulator = None):
 		SimStrategy.__init__(self, simulator)
-	
+
 	def simulate(self, T = sys.maxint):
 		"""Simulate the model (Root-Coordinator).
 		"""
 
 		clock = 0.0
 		model = self._simulator.getMaster()
-		seld = self._simulator.send
-		
+		send = self._simulator.send
+
 		# Initialize the model --- set the simulation clock to 0.
 		send(model, (0, [], 0))
 
@@ -135,13 +134,13 @@ class SimStrategy1(SimStrategy):
 class SimStrategy2(SimStrategy, Traceable):
 	""" Strategy for DEVSimPy hierarchical simulation.
 
-		This strategy is based on Zeigler's hierarchical simulation algorithm using Atomic and Coupled Solver.
+		This strategy is based on Zeigler's hierarchical simulation algorithm based on atomic and coupled Solver.
 	"""
-		
+
 	def __init__(self, simulator=None):
 		SimStrategy.__init__(self, simulator)
 		Traceable.__init__(self)
-		
+
 	def simulate(self, T = sys.maxint):
 		"""
 		"""
@@ -152,25 +151,25 @@ class SimStrategy2(SimStrategy, Traceable):
 
 		# Initialize the model --- set the simulation clock to 0.
 		send(master, (0, [], 0))
-		
+
 		clock = master.myTimeAdvance
-		
+
 		### ref to cpu time evaluation
 		t_start = time.time()
-		
+
 		### if suspend, we could store the future ref
 		old_cpu_time = 0
 
 		### stoping condition depend on the ntl (no time limit for the simulation)
 		condition = lambda clock: HasActiveChild(getFlatImmChildrenList(master, [])) if self._simulator.ntl else clock <= T
 
-		#self._simulator.s = shelve.open('toto.db',writeback=True)
+ 	#self._simulator.s = shelve.open('toto.db',writeback=True)
 		#self._simulator.s['s'] = {}
 		#self._simulator.s.close()
-		
+
 		# Main loop repeatedly sends $(*,\,t)$ messages to the model's root DEVS.
 		while condition(clock) and self._simulator.end_flag == False:
-			
+
 			##Optional sleep
 			if self._simulator.thread_sleep:
 				time.sleep(self._simulator._sleeptime)
@@ -181,7 +180,7 @@ class SimStrategy2(SimStrategy, Traceable):
 					time.sleep(1.0)
 					old_cpu_time = self._simulator.cpu_time
 					t_start = time.time()
-					
+
 			else:
 				# The SIM_VERBOSE event occurs
 				trigger_event("SIM_VERBOSE", clock = clock)
@@ -192,7 +191,7 @@ class SimStrategy2(SimStrategy, Traceable):
 
 				self._simulator.cpu_time = old_cpu_time + (time.time()-t_start)
 
-				#self.Trace(clock, model)
+   	#self.Trace(clock, model)
 
 				#q.put((clock,self._simulator))
 				### for back simulation process
@@ -201,7 +200,7 @@ class SimStrategy2(SimStrategy, Traceable):
 				#self._simulator.s.close()
 
 		self._simulator.terminate()
-	
+
 ###--------------------------------------------------------------------Strategy
 
 ### decorator for poke
@@ -227,9 +226,9 @@ def parallel_ext_transtion_manager(p):
 		#pool.apply_async(val[2],(val[1],))
 	#pool.close()
 	#pool.join()
-	
+
 	###----------------------------------------------------------------------------------------
-	
+
 	###----------------------------------------------------------------------------------------
 	#print "thread version"
 	### thread version
@@ -244,7 +243,7 @@ def parallel_ext_transtion_manager(p):
 	for thread in threads:
 		thread.join()
 	###-----------------------------------------------------------------------------------------
-	
+
 	### clear output port (then input port of hosts) of model in charge of activate hosts
 	p.weak.SetValue(None)
 
@@ -258,7 +257,7 @@ def serial_ext_transtion_manager(p):
  	"""
 
 	#global job_server
-	
+
 	hosts = p.weak.GetHosts()
 
 	# Submit all jobs to parallel python
@@ -268,7 +267,7 @@ def serial_ext_transtion_manager(p):
 
 	#for i,val in enumerate(hosts):
 		#val[1] = jobs[i]()
-        
+
 	### serial version
 	for val in hosts:
 		apply(val[2],(val[1],))
@@ -280,12 +279,12 @@ def serial_ext_transtion_manager(p):
 @Post_Poke
 def poke(p, v):
 	p.weak.SetValue(v)
-	
+
 	### just for plugin verbose
 	p.host.myOutput[p] = v
-	
+
 ###
-def peek(p):	
+def peek(p):
 	return copy.deepcopy(p.weak.GetValue())
 
 def peek_all(self):
@@ -300,31 +299,31 @@ class WeakValue:
 	def __init__(self, port=None):
 		""" Constructor
 		"""
-		
+
 		### port of weak value
 		self.port = port
-		
+
 		### value and time of msg
 		self._value = None
 		#self._time = 0.0
 		self._host = []
-		
+
 	def SetValue(self, v):
 		""" Set value and time
 		"""
-		
+
 		#if v is not None:
 			#self._time = v.time
-			
+
 		self._value = v
-		
+
 	def GetValue(self):
 		""" Get value at time t
 		"""
-		
+
 		#if t > self._time:
 			#self._value = None
-			
+
 		return self._value
 
 	def AddHosts(self,p):
@@ -335,7 +334,7 @@ class WeakValue:
 		if v not in self._host:
 			if hasattr(model, 'priority'):
 				self._host.append(v)
-		
+
 	def GetHosts(self):
 		return self._host
 
@@ -360,7 +359,7 @@ def FlatConnection(p1, p2):
 
 			## build hosts list in WeakValue class
 			p1.weak.AddHosts(p2)
-			
+
 	elif isinstance(p1.host, AtomicDEVS) and isinstance(p2.host, CoupledDEVS):
 		if isinstance(p1, OPort):
 			### update outLine port list removing ports of coupled model
@@ -368,13 +367,13 @@ def FlatConnection(p1, p2):
 			for p in p2.outLine:
 				if not hasattr(p, 'weak'): setattr(p, 'weak', WeakValue(p))
 				FlatConnection(p1, p)
-				
+
 	elif isinstance(p1.host, CoupledDEVS) and isinstance(p2.host, AtomicDEVS):
 		if isinstance(p1, OPort) and isinstance(p2, IPort):
 			for p in p1.inLine:
 				if not hasattr(p, 'weak'): setattr(p, 'weak', WeakValue(p))
 				FlatConnection(p, p2)
-			
+
 	elif isinstance(p1.host, CoupledDEVS) and isinstance(p2.host, CoupledDEVS):
 		if isinstance(p1, OPort) and isinstance(p2, IPort):
 			for p in p1.inLine:
@@ -413,14 +412,14 @@ def setAtomicModels(atomic_model_list, ts):
 				#p1.weak = p2.weak
 				#print "Connection for ",p1.host.getBlockModel().label, p1.weak, "to", p2.host.getBlockModel().label, p2.weak
 				#FlatConnection(p1,p2)
-	
+
 ###
 def execExtTransition(m):
 	"""
 	"""
 
 	ts =  m.ts.Get()
-	
+
 	m.elapsed =ts - m.timeLast
 
 	m.extTransition()
@@ -435,16 +434,16 @@ def execExtTransition(m):
 	trigger_event("SIM_VERBOSE", model=m, msg=1)
 	trigger_event("SIM_BLINK", model=m, msg=[{}])
 	trigger_event("SIM_TEST", model=m, msg=[{}])
-	
+
 	return m
-	
+
 ###
 def execIntTransition(m):
 	"""
 	"""
 
 	ts =  m.ts.Get()
-	
+
 	if m.timeNext != INFINITY:
 		m.outputFnc()
 
@@ -480,11 +479,11 @@ class SimStrategy3(SimStrategy):
 		The THREAD_LIMIT control the limit of models to thread (default 5).
 		The performance of this alogithm depends on the THREAD_LIMIT number and the number of coupled models.
 	"""
-	
+
 	def __init__(self, simulator=None):
 		""" Cosntructor.
 		"""
-		
+
 		SimStrategy.__init__(self, simulator)
 
 		### simulation time
@@ -496,11 +495,11 @@ class SimStrategy3(SimStrategy):
 
 		### init all atomic model from falt list
 		setAtomicModels(self.flat_priority_list, weakref.ref(self.ts))
-		
+
 	def simulate(self, T = sys.maxint):
 		"""
 		"""
-		
+
 		### ref to cpu time evaluation
 		t_start = time.time()
 		### if suspend, we could store the future ref
@@ -512,22 +511,22 @@ class SimStrategy3(SimStrategy):
 		### simualtion time and list of flat models ordered by devs priority
 		self.ts.Set(min([m.myTimeAdvance for m in self.flat_priority_list if m.myTimeAdvance < INFINITY]))
 		formated_priority_list = [(1+i/10000.0, m, execIntTransition) for i,m in enumerate(self.flat_priority_list)]
-		
+
 		while condition(self.ts.Get()) and self._simulator.end_flag == False:
-			
+
 			### Optional sleep
 			if self._simulator.thread_sleep:
 				time.sleep(self._simulator._sleeptime)
-				
+
 			elif self._simulator.thread_suspend:
 			### Optional suspend
 				while self._simulator.thread_suspend:
 					time.sleep(1.0)
 					old_cpu_time = self._simulator.cpu_time
 					t_start = time.time()
-					
+
 			else:
-				
+
 				### The SIM_VERBOSE event occurs
 				trigger_event("SIM_VERBOSE", self.master, None, clock = self.ts.Get())
 
@@ -547,5 +546,5 @@ class SimStrategy3(SimStrategy):
 				### just for progress bar
 				self.master.timeLast = self.ts.Get() if self.ts.Get() != INFINITY else self.master.timeLast
 				self._simulator.cpu_time = old_cpu_time + (time.time()-t_start)
-			
+
 		self._simulator.terminate()

@@ -18,28 +18,17 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-try:
-	# heritage des propri�t�s du CoupledModel par domainStructure
-	from DEVSKernel.DEVS import CoupledDEVS
-except:
-	import sys, os
-	for spath in [os.pardir+os.sep+'Lib']:
-		if not spath in sys.path: sys.path.append(spath)
-	from DEVSKernel.DEVS import CoupledDEVS
+
+from DEVSKernel.PyDEVS.DEVS import CoupledDEVS
 
 #    ======================================================================    #
 
 class DomainStructure(CoupledDEVS):
 	''' Abstract DomainStructure class.
 	'''
-	
+
 	###
 	def __init__(self):
 	    '''Constructor.
 	    '''
 	    CoupledDEVS.__init__(self)
-
-	    self.dynamicComponentSet = []
-	    self.dynamicIC = []
-	    self.dynamicEIC = []
-	    self.dynamicEOC = []

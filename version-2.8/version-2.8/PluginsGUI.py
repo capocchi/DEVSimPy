@@ -314,7 +314,7 @@ class BlockPluginsList(CheckListCtrl, Populable):
 			if not isinstance(plugins_list, list):
 				msg = ('Error in plugins.py file:\n\n\t%s\n\nDo you want to edit this file?.'%plugins_list)
 
-				dial = wx.MessageDialog(None, msg, _('Error'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_ERROR)
+				dial = wx.MessageDialog(None, msg, _('Plugins Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_ERROR)
 
 				if dial.ShowModal() == wx.ID_YES:
 					### editor frame for text of plugins
@@ -718,7 +718,7 @@ class ModelPluginsManager(wx.Frame):
 		""" Delete plugins
 		"""
 		### delete file from zipfile
-		dial = wx.MessageDialog(self, _('Do You realy want to delete plugins file?'), 'Question', wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		dial = wx.MessageDialog(self, _('Do You realy want to delete plugins file?'), _('Plugin Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 		if dial.ShowModal() == wx.ID_YES:
 			### TODO
 			### first test is for old devsimpy model prresenting plugins at the root of zipfile

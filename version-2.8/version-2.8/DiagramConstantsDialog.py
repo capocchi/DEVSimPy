@@ -11,7 +11,7 @@ import DSV
 _ = wx.GetTranslation
 
 class DiagramConstantsDialog(wx.Dialog):
-	
+
 	def __init__(self, parent, id, title, model):
 		""" Constructor
 		"""
@@ -23,15 +23,15 @@ class DiagramConstantsDialog(wx.Dialog):
 		self.label = title
 
 		self.SetTitle(_("%s - Constants Manager")%(self.label))
-		
+
 		icon = wx.EmptyIcon()
 		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "properties.png"), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(icon)
-		
+
 		self._panel = wx.Panel(self, wx.ID_ANY)
-		
+
 		grid_sizer_1 = wx.GridSizer(1, 2, 0, 0)
-		
+
 		self._grid = wx.grid.Grid(self._panel, wx.ID_ANY, size=(200, 100))
 		self._grid.AutoSizeColumns(True)
 		self._grid.CreateGrid(1, 2)
@@ -44,7 +44,7 @@ class DiagramConstantsDialog(wx.Dialog):
 
 		# chargement des constantes
 		D = self.model.constants_dico if self.model else {}
-		
+
 		row = 0
 		self._grid.DeleteRows(0)
 		for key in D:
@@ -54,16 +54,16 @@ class DiagramConstantsDialog(wx.Dialog):
 			row += 1
 
 		grid_sizer_1.Add(self._grid, 1, wx.EXPAND, 0)
-		
+
 		self._button_add = wx.Button(self._panel, wx.ID_ADD, "")
 		self._button_remove = wx.Button(self._panel, wx.ID_REMOVE, "")
 		self._button_help = wx.Button(self._panel, wx.ID_HELP, "")
-		
+
 		grid_sizer_3 = wx.GridSizer(3, 1, 0, 0)
 		grid_sizer_3.Add(self._button_add, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
 		grid_sizer_3.Add(self._button_remove, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
 		grid_sizer_3.Add((-1,50), 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
-		
+
 		self._button_import = wx.Button(self._panel, wx.ID_ANY, _("Import"))
 		self._button_export = wx.Button(self._panel, wx.ID_ANY, _("Export"))
 		self._button_import.SetDefault()
@@ -72,33 +72,33 @@ class DiagramConstantsDialog(wx.Dialog):
 		sizer_2.Add(self._button_import, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
 		sizer_2.Add(self._button_export, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
 		sizer_2.Add(self._button_help, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
-		
+
 		sizer_1 = wx.BoxSizer(wx.VERTICAL)
 		sizer_1.Add(grid_sizer_3, 1, wx.EXPAND, 0)
 		sizer_1.Add(sizer_2, 1, wx.EXPAND, 0)
-		
+
 		grid_sizer_1.Add(sizer_1, 1, wx.EXPAND, 0)
-		
+
 		self._button_cancel = wx.Button(self._panel, wx.ID_CANCEL, "")
 		self._button_ok = wx.Button(self._panel, wx.ID_OK, "")
-	
+
 		grid_sizer_2 = wx.GridSizer(1, 2, 0, 0)
 		grid_sizer_2.Add(self._button_cancel, 0, wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, 0)
 		grid_sizer_2.Add(self._button_ok, 0, wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, 0)
-		
+
 		sizer_1.Add(grid_sizer_2, 1, wx.EXPAND, 0)
-		
+
 		self._panel.SetSizer(grid_sizer_1)
-		
+
 		self.__set_events()
 
 		### just for windows
 		e = wx.SizeEvent(self.GetSize())
 		self.ProcessEvent(e)
 
-		self.Center()		
+		self.Center()
 
-	
+
 	def __set_events(self):
 		""" Binding
 		"""
@@ -109,7 +109,7 @@ class DiagramConstantsDialog(wx.Dialog):
 		self.Bind(wx.EVT_BUTTON, self.OnHelp, self._button_help)
 		self.Bind(wx.EVT_BUTTON, self.OnOk, self._button_ok)
 		self.Bind(wx.EVT_BUTTON, self.OnCancel, self._button_cancel)
-		
+
 	def OnAdd(self,evt):
 		"""	Add line
 		"""
@@ -120,7 +120,7 @@ class DiagramConstantsDialog(wx.Dialog):
 		"""
 		for row in self._grid.GetSelectedRows():
 			self._grid.DeleteRows(row)
-	
+
 	def OnImport(self, event):
 		""" csv file importing
 		"""
@@ -132,7 +132,7 @@ class DiagramConstantsDialog(wx.Dialog):
                     path = dlg.GetPath()
                     dlg.Destroy()
 
-                    errorLog = open('import_error.log', 'a+') 
+                    errorLog = open('import_error.log', 'a+')
                     def logErrors(oldrow, newrow, expectedColumns, maxColumns, file = errorLog):
                         # log the bad row to a file
                         file.write(oldrow + '\n')
@@ -151,7 +151,7 @@ class DiagramConstantsDialog(wx.Dialog):
 					self._grid.AppendRows()
 					self._grid.SetCellValue(row,0,data[0])
 					self._grid.SetCellValue(row,1,str(data[1]))
-				dial = wx.MessageDialog(self, _('Import completed'), 'Info', wx.OK)
+				dial = wx.MessageDialog(self, _('Import completed'), _('Import Manager'), wx.OK|wx.ICON_INFORMATION)
 				dial.ShowModal()
                     else:
                         dlg.Destroy()
@@ -162,7 +162,7 @@ class DiagramConstantsDialog(wx.Dialog):
 	def OnExport(self,evt):
 		"""	csv file exporting
 		"""
-		
+
 		wcd = _("CSV files (*.csv)|*.csv|Text files (*.txt)|*.txt|All files (*.*)|*.*")
 		home = os.getenv('USERPROFILE') or os.getenv('HOME') or HOME_PATH
 		export_dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=home, defaultFile='data.csv', wildcard=wcd, style=wx.SAVE|wx.OVERWRITE_PROMPT)
@@ -172,12 +172,12 @@ class DiagramConstantsDialog(wx.Dialog):
 				spamWriter = csv.writer(open(fileName, 'w'), delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 				for row in xrange(self._grid.GetNumberRows()):
 					spamWriter.writerow([self._grid.GetCellValue(row,0),self._grid.GetCellValue(row,1)])
-				
+
 			except Exception, info:
-				dlg = wx.MessageDialog(self, _('Error exporting data: %s\n'%info))
+				dlg = wx.MessageDialog(self, _('Error exporting data: %s\n'%info), _('Export Manager'), wx.OK|wx.ICON_ERROR)
 				dlg.ShowModal()
 
-			dial = wx.MessageDialog(self, _('Export completed'), 'Info', wx.OK)
+			dial = wx.MessageDialog(self, _('Export completed'), _('Export Manager'), wx.OK|wx.ICON_ERROR)
 			dial.ShowModal()
 			export_dlg.Destroy()
 
@@ -195,7 +195,7 @@ class DiagramConstantsDialog(wx.Dialog):
 					D[const]=val
 				else:
 					pass
-		
+
 		if D != {}:
 			__builtin__.__dict__[os.path.splitext(self.label)[0]]=D
 		elif os.path.splitext(self.label)[0] in __builtin__.__dict__:
@@ -211,28 +211,28 @@ class DiagramConstantsDialog(wx.Dialog):
 		self.Destroy()
 
 	def OnHelp(self, event):
-		dial = wx.MessageDialog(self, _("In order to use constante:\n\nCall constante by using \"Name of Diagram\"[\'Name of constante\']\n"), 'Info', wx.OK)
+		dial = wx.MessageDialog(self, _("In order to use constante:\n\nCall constante by using \"Name of Diagram\"[\'Name of constante\']\n"), _('Help Manager'), wx.OK|wx.ICON_INFORMATION)
 		dial.ShowModal()
 
 ### ------------------------------------------------------------
 class TestApp(wx.App):
 	""" Testing application
 	"""
-	
+
 	def OnInit(self):
-		
+
 		import gettext
-		
+
 		__builtin__.__dict__['ICON_PATH_16_16']=os.path.join('icons','16x16')
 		__builtin__.__dict__['_'] = gettext.gettext
-		
+
 		self.frame = DiagramConstantsDialog(None, -1, title="Model", model=None)
 		self.frame.Show()
 		return True
-	
+
 	def OnQuit(self, event):
 		self.Close()
-		
+
 if __name__ == '__main__':
 
 	app = TestApp(0)

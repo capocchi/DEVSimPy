@@ -426,7 +426,7 @@ class Preferences(wx.Toolbook):
 
 		if L != []:
 			### Delete query
-			dial = wx.MessageDialog(self, _('Do You realy want to delete selected plugins?'), 'Question', wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			dial = wx.MessageDialog(self, _('Do You realy want to delete selected plugins?'), _('Plugin MAnager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 			if dial.ShowModal() == wx.ID_YES:
 				### for selected plugins
 				for plugin in L:
@@ -438,7 +438,7 @@ class Preferences(wx.Toolbook):
 						### Delete python file
 						name, ext = os.path.splitext(self.CheckList.GetPyData(plugin)[0].__file__)
 						filename = "%s.py"%name
-						dlg = wx.MessageDialog(self, _('Do You realy want to remove %s plugin file?')%os.path.basename(filename), 'Question', wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+						dlg = wx.MessageDialog(self, _('Do You realy want to remove %s plugin file?')%os.path.basename(filename), _('Preference Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 						if dlg.ShowModal() == wx.ID_YES:
 							os.remove(filename)
 					except Exception:
@@ -484,8 +484,8 @@ class PreferencesGUI(wx.Frame):
 		self.pref = Preferences(panel)
 
 		### Buttons
-		self.apply = wx.Button(panel, wx.ID_APPLY)
 		self.cancel = wx.Button(panel, wx.ID_CANCEL)
+		self.apply = wx.Button(panel, wx.ID_OK)
 
 		self.apply.SetToolTipString(_("Apply all changing"))
 		self.cancel.SetToolTipString(_("Cancel without changing"))
@@ -496,7 +496,7 @@ class PreferencesGUI(wx.Frame):
 		hsizer = wx.StdDialogButtonSizer()
 
 		hsizer.AddButton(self.cancel)
-		hsizer.AddButton(self.apply)
+ 		hsizer.AddButton(self.apply)
 		hsizer.Realize()
 		vsizer.Add(self.pref, 1, wx.ALL|wx.EXPAND, 5)
 		vsizer.Add(hsizer, 0, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
@@ -504,7 +504,7 @@ class PreferencesGUI(wx.Frame):
 		vsizer.Fit(panel)
 
 		### Binding
-		self.Bind(wx.EVT_BUTTON, self.OnApply, id=wx.ID_APPLY)
+		self.Bind(wx.EVT_BUTTON, self.OnApply, id=wx.ID_OK)
 		self.Bind(wx.EVT_BUTTON, self.OnCancel, id=wx.ID_CANCEL)
 		self.Bind(wx.EVT_BUTTON, self.OnClose, id=wx.ID_CLOSE)
 

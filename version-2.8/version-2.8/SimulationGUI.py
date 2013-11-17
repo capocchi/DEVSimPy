@@ -39,8 +39,8 @@ import traceback
 
 __builtin__.__dict__['GUI_FLAG'] = True
 
-from DEVSKernel.FastSimulator import Simulator
-from DEVSKernel.DEVS import AtomicDEVS
+from DEVSKernel.PyDEVS.FastSimulator import Simulator
+from DEVSKernel.PyDEVS.DEVS import AtomicDEVS
 
 from Utilities import IsAllDigits, playSound
 from pluginmanager import trigger_event
@@ -524,7 +524,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 	def MsgBoxEmptyModel(self):
 		""" Pop-up alert for empty model
 		"""
-		dial = wx.MessageDialog(self, _('You want to simulate an empty master model!'), _('Info'), wx.OK)
+		dial = wx.MessageDialog(self, _('You want to simulate an empty master model!'), _('Simulation Manager'), wx.OK|wx.ICON_EXCLAMATION)
 		if (dial.ShowModal() == wx.ID_OK) and (isinstance(self.parent, wx.Frame)):
 			self.DestroyWin()
 		else:
@@ -567,7 +567,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 		# if the simulation is running
 		if self.timer.IsRunning():
-			dial = wx.MessageDialog(self, _('Are you sure to stop simulation ?'), _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			dial = wx.MessageDialog(self, _('Are you sure to stop simulation ?'), _('Simulation Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 			self.thread.suspend()
 
 			### if ok

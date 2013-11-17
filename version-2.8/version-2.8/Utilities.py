@@ -162,7 +162,7 @@ def show_error(parent, msg=None):
 	if msg is None:
 		msg = sys.exc_info()
 	message = ''.join(traceback.format_exception(*msg))
-	dialog = wx.MessageDialog(parent, message, _('Error!'), wx.OK|wx.ICON_ERROR)
+	dialog = wx.MessageDialog(parent, message, _('Error Manager'), wx.OK|wx.ICON_ERROR)
 	dialog.ShowModal()
 
 
