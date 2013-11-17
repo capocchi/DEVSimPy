@@ -53,9 +53,9 @@ def printOnStatusBar(statusbar, data={}):
 def getClassMember(python_file = ''):
 	""" Get class member from python file
 	"""
-	
+
 	module  = BlockFactory.GetModule(python_file)
-	
+
 	if inspect.ismodule(module):
 		## classes composing the imported module
 		return dict(inspect.getmembers(module, inspect.isclass))
@@ -66,15 +66,15 @@ def getClassMember(python_file = ''):
 def GetClass(elem):
 	""" Get python class from filename.
 	"""
-	
+
 	clsmembers = getClassMember(elem)
-	
+
 	if isinstance(clsmembers, dict):
 		moduleName = path_to_module(elem)
-		
+
 		for cls in clsmembers.values():
 			#print 'sdf', str(cls.__module__), moduleName, str(cls.__module__) in str(moduleName)
-			
+
 			if str(cls.__module__) in str(moduleName):
 				return cls
 	else:
@@ -96,7 +96,7 @@ def GetArgs(cls = None):
 ### 		GENERAL CLASSES
 ###
 ###########################################################
-		
+
 class DSPComponent:
 	"""
 	"""
@@ -106,66 +106,66 @@ class DSPComponent:
 		"""
 		from Container import Diagram
 		#assert(filename.endswith('.dsp'))
-		
+
 		# its possible to use the orignal copy of the droped diagram
-		dial = wx.MessageDialog(canvas, _('Do you want to open the orignal diagram in a new tab?'), 'Question', wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-		
+		dial = wx.MessageDialog(canvas, _('Do you want to open the orignal diagram in a new tab?'), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+
 		new_tab = dial.ShowModal() == wx.ID_YES
-		
+
 		# load diagram in a new page
 		if new_tab:
 			diagram = Diagram()
 		else:
 			diagram = canvas.GetDiagram()
-			
+
 		### if diagram is instanciated
 		if diagram:
 			load_file_result = diagram.LoadFile(filename)
-			
+
 			### if diagram is loaded
 			if not isinstance(load_file_result, Exception):
-				
+
 				mainW = canvas.GetTopLevelParent()
 				nb2 = mainW.nb2
-				
+
 				### if new tab
 				if new_tab:
 					nb2.AddEditPage(label, diagram)
 				else:
 					selection = nb2.GetSelection()
 					nb2.SetPageText(selection,label)
-					
+
 				# Add as new recent file
 				if filename not in mainW.openFileList:
 					mainW.openFileList.insert(0, filename)
 					del mainW.openFileList[-1]
 					mainW.cfg.Write("openFileList", str(eval("mainW.openFileList")))
 					mainW.cfg.Flush()
-					
+
 				return True
 			else:
 				info = _('Error opening file \n file : %s \n object : %s \n error : %s ')%(filename, load_file_result[1], load_file_result[0])
 				wx.MessageBox(info, _('Error'), wx.OK|wx.ICON_ERROR)
 				return False
-				
+
 class PyComponent:
-	""" Return labeled block from filename at (x,y) postion in canvas 
-		
+	""" Return labeled block from filename at (x,y) postion in canvas
+
 		@filename: filename for loading block
 		@label: label of block
 		@x: horizontal position
 		@y: vertical position
 		@canvas: canvas accepting block
 	"""
-	
+
 	@staticmethod
 	def Load(filename, label):
 		""" Load python file from filename
 		"""
 		assert(filename.endswith('.py'))
-		
+
 		return BlockFactory.CreateBlock( python_file = filename, label = label)
-							
+
 class GenericComponent:
 	"""
 	"""
@@ -177,56 +177,56 @@ class GenericComponent:
 		self._x = kwargs['x'] if 'x' in kwargs else None
 		self._y = kwargs['y'] if 'y' in kwargs else None
 		self._label = kwargs['label'] if 'label' in kwargs else None
-		
+
 		if 'id' in kwargs:
 			self._iid = kwargs['id']
 		elif self._canvas:
 			self._iid = self._canvas.GetDiagram().GetiPortCount()
 		else:
 			self._iid = 0.0
-		
+
 		if 'id' in kwargs:
 			self._oid = kwargs['id']
 		elif self._canvas:
 			self._oid = self._canvas.GetDiagram().GetoPortCount()
 		else:
 			self._oid = 0.0
-			
+
 		#self._iid = kwargs['id'] if 'id' in kwargs else self._canvas.diagram.GetiPortCount()
 		#self._oid = kwargs['id'] if 'id' in kwargs else self._canvas.diagram.GetoPortCount()
-		
+
 		self._inputs = kwargs['inputs'] if 'inputs' in kwargs else 1
 		self._outputs = kwargs['outputs'] if 'outputs' in kwargs else 1
 		self._python_file = kwargs['python_file']
 		self._model_file = kwargs['model_file'] if 'model_file' in kwargs else ''
 		self._specific_behavior = kwargs['specific_behavior'] if 'specific_behavior' in kwargs else ''
-	
+
 	def Create(self):
 		""" Create component from attributes
 		"""
 		pass
-	
+
 	@staticmethod
 	def Load(filename, label, x, y, canvas):
 		""" Load strored component form filename
 		"""
 		pass
-	
+
 class CMDComponent(GenericComponent):
-	""" Return labeled block from filename at (x,y) postion in canvas 
-		
+	""" Return labeled block from filename at (x,y) postion in canvas
+
 		@filename: filename for loading block
 		@label: label of block
 		@x: horizontal position
 		@y: vertical position
 		@canvas: canvas accepting block
 	"""
-	
+
 	def __init__(self, *argv, **kwargs):
 		""" Constructor
 		"""
 		GenericComponent.__init__(self, *argv, **kwargs)
-		
+
 	def Create(self):
 		""" Create CMD from constructor
 		"""
@@ -251,7 +251,7 @@ class CMDComponent(GenericComponent):
 
 		self.__m.python_path = self._python_file
 		self.__m.model_path = self._model_file
-		
+
 		return self.__m
 
 	@staticmethod
@@ -260,12 +260,12 @@ class CMDComponent(GenericComponent):
 		"""
 		from Container import ContainerBlock, iPort, oPort
 		assert(filename.endswith('.cmd'))
-		
+
 		### new ContainerBlock instance
 		m = ContainerBlock()
-		
+
 		load_file_result = m.LoadFile(filename)
-		
+
 		if isinstance(load_file_result, Exception):
 			wx.MessageBox(_('Error loading %s model : %s'%(label, str(load_file_result))), _('Error'), wx.OK | wx.ICON_ERROR)
 			return None
@@ -273,7 +273,7 @@ class CMDComponent(GenericComponent):
 		else:
 			### mandatory due to the LoadFile call before
 			m.label = label
-			
+
 			# coupled input ports
 			m.input=0 ; m.output=0
 			for s in m.shapes:
@@ -281,19 +281,19 @@ class CMDComponent(GenericComponent):
 					m.input +=1
 				elif isinstance(s, oPort):
 					m.output +=1
-			
+
 			return m
-		
+
 class AMDComponent(GenericComponent):
-	""" Return labeled block from filename at (x,y) postion in canvas 
-		
+	""" Return labeled block from filename at (x,y) postion in canvas
+
 		@filename: filename for loading block
 		@label: label of block
 		@x: horizontal position
 		@y: vertical position
 		@canvas: canvas accepting block
 	"""
-	
+
 	def __init__(self, *argv, **kwargs):
 		""" constructor.
 		"""
@@ -302,18 +302,18 @@ class AMDComponent(GenericComponent):
 	def Create(self):
 		""" Create AMD from filename
 		"""
-		
+
 		# associated python class
 		cls = GetClass(self._python_file)
-		
+
 		self.__m = AMDComponent.BlockModelAdapter(cls, self._label, self._specific_behavior)
-		
+
 		self.__m.input = self._inputs
 		self.__m.output = self._outputs
-			
+
 		### flag is visible only if there are a path extension
-		self.__m.bad_filename_path_flag = True in map(lambda v: isinstance(v, basestring) and os.path.isabs(v) and os.path.splitext(v)[-1] != '', self.__m.args.values())	
-	
+		self.__m.bad_filename_path_flag = True in map(lambda v: isinstance(v, basestring) and os.path.isabs(v) and os.path.splitext(v)[-1] != '', self.__m.args.values())
+
 		self.__m.python_path = self._python_file
 		self.__m.model_path = self._model_file
 
@@ -323,26 +323,26 @@ class AMDComponent(GenericComponent):
 	def Load(filename, label):
 		""" Load AMD from constructor.
 		"""
-	
+
 		assert(filename.endswith('.amd'))
-		
+
 		python_path = os.path.join(filename, ZipManager.getPythonModelFileName(filename))
-		
+
 		cls = GetClass(python_path)
-		
+
 		m = AMDComponent.BlockModelAdapter(cls, label)
-		
+
 		load_file_result = m.LoadFile(filename)
-		
+
 		if isinstance(load_file_result, Exception):
 			wx.MessageBox(_('Error loading %s model : %s '%(label, load_file_result)), _('Error'), wx.OK | wx.ICON_ERROR)
 			return None
 		else:
 			### mandatory due to the LoadFile call before
 			m.label = label
-			
+
 			return m
-	
+
 	@staticmethod
 	def BlockModelAdapter(cls, label="", specific_behavior=""):
 		""" Return block model concidering its class hierarchie
@@ -351,15 +351,15 @@ class AMDComponent(GenericComponent):
 		from Container import DiskGUI, ScopeGUI, CodeBlock
 		#from  Domain.Collector import *
 		#if issubclass(cls, QuickScope.QuickScope):
-				#m = ScopeGUI(label)	
+				#m = ScopeGUI(label)
 			#elif issubclass(cls, (To_Disk.To_Disk, Messagecollector.Messagecollector)):
 				#m = DiskGUI(label)
 			#else:
 				## mew CodeBlock instance
-				#m = CodeBlock()		
-		
+				#m = CodeBlock()
+
 		# associated python class membre
-		
+
 		clsmbr = getClassMember(inspect.getfile(cls))
 
 		### args of class
@@ -378,7 +378,7 @@ class AMDComponent(GenericComponent):
 		### find if messagecollector is present in class name
 		match = [re.match('[-_a-zA-z]*collector[-_a-zA-z]*',s, re.IGNORECASE) for s in clsmbr.keys()+[specific_behavior]]
 		messagecollector_model = map(lambda a: a.group(0), filter(lambda s : s is not None, match)) != []
-		
+
 		# new codeBlcok instance
 		if disk_model or messagecollector_model:
 			m = DiskGUI(label)
@@ -389,7 +389,7 @@ class AMDComponent(GenericComponent):
 
 		# define behavioral args from python class
 		m.args = args
-		
+
 		return m
 
 #---------------------------------------------------------
@@ -408,7 +408,7 @@ class DEVSComponent:
 		self.python_path = ''
 
 		# args of constructor
-		
+
 		self.args = {}
 
 	def __getstate__(self):
@@ -419,23 +419,23 @@ class DEVSComponent:
 
 		### delete devs instance (because is generate before the simulation)
 		new_state['devsModel'] = None
-		
+
 		### overriding method (coming from plugins) can't be pickled
 		for name,value in new_state.items():
 			module = inspect.getmodule(value)
 			if isinstance(value, types.MethodType):
 				new_state[name] = None
-				
+
 		return new_state
 
 	@staticmethod
 	def getBlockModel(devs):
 		return devs.blockModel
-		
+
 	@staticmethod
 	def setBlockModel(devs, block):
 		devs.blockModel = block
-		
+
 	@staticmethod
 	def debugger(m, msg):
 		with open(os.path.join(gettempdir(),'%s.devsimpy.log'%str(m.getBlockModel().label)),'a') as f:
@@ -471,14 +471,14 @@ class DEVSComponent:
 	def setDEVSParent(self, p):
 		if self.devsModel != None:
 			self.devsModel.parent = p
-	
+
 	def getDEVSParent(self):
 		return self.devsModel.parent
-		
+
 	def getBlock(self):
 		if self.devsModel is not None:
 			return DEVSComponent.getBlockModel(self.devsModel)
-			
+
 	def setBlock(self, devs):
 		if devs is not None:
 			### define new methods in order to set and get blockModel from devs instance
@@ -493,7 +493,7 @@ class DEVSComponent:
 			### to execute finish method of devs model (look at the SimulationGUI for message interseption)
 			if hasattr(devs, 'finish'):
 				Publisher.subscribe(devs.finish, "%d.finished"%(id(devs)))
-			
+
 			DEVSComponent.setBlockModel(devs, self)
 
 	def setDEVSClassModel(self, classe):
@@ -513,7 +513,7 @@ class DEVSComponent:
 		label = str(devs.getBlockModel().label)
 		log_file = os.path.join(gettempdir(),'%s.devsimpy.log'%label)
 		parent = event.GetClientData()
-		
+
 		if os.path.exists(log_file):
 			### read log file
 			with open(log_file, 'r') as f:
@@ -524,23 +524,23 @@ class DEVSComponent:
 			dlg.ShowModal()
 
 		else:
-			dial = wx.MessageDialog(parent, _("Log is empty. If you want to debug, please use the debugger method."), 'Info', wx.OK)
+			dial = wx.MessageDialog(parent, _("Log is empty. If you want to debug, please use the debugger method."), label, wx.OK|wx.ICON_INFORMATION)
 			dial.ShowModal()
-	
+
 	def updateDEVSPriorityList(self):
 		""" update the componentSet order from priority_list for corresponding diagram
 		"""
 		from Container import ContainerBlock, Diagram, Block
 		assert(isinstance(self, (ContainerBlock, Diagram)))
-		
+
 		coupled_devs = self.getDEVSModel()
-		
+
 		### if devs instance is not none and priority_list has been invocked (else componentSet order is considered)
 		if coupled_devs is not None and self.priority_list != []:
-			
+
 			shape_list = self.GetShapeList()
 			block_list = filter(lambda c: isinstance(c, Block), shape_list)
-			
+
 			label_list = map(lambda m: m.label, block_list)
 
 			### added models
@@ -552,30 +552,30 @@ class DEVSComponent:
 				del self.priority_list[index]
 
 			self.priority_list += added_models
-			
+
 			# si l'utilisateur n'a pas definit d'ordre de priorité pour l'activation des modèles, on la construit
 			coupled_devs.componentSet = map(lambda b: b.getDEVSModel(), map(self.GetShapeByLabel, self.priority_list))
-		
+
 			self.setDEVSModel(coupled_devs)
-				
+
 	###
 	def OnEditor(self, event):
 		""" Method that edit the python code of associated devs model of the Block
 		"""
 		from Container import ShapeCanvas
-		
+
 		python_path = self.python_path
 		model_path = os.path.dirname(python_path)
 		name = os.path.basename(python_path)
-		
+
 		### trying to get parent window
 		mainW = GetActiveWindow(event)
 
 		if isinstance(mainW, ShapeCanvas):
 			mainW = mainW.GetParent()
-		
+
 		if __builtin__.__dict__['LOCAL_EDITOR'] and not zipfile.is_zipfile(model_path) and not python_path.startswith('http'):
-			dial = wx.MessageDialog(mainW, _('Do you want to use your local programmer software?\n\n If you want always use the DEVSimPy code editor\n change the option in Editor panel preferences.'), 'Question', wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			dial = wx.MessageDialog(mainW, _('Do you want to use your local programmer software?\n\n If you want always use the DEVSimPy code editor\n change the option in Editor panel preferences.'), name, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 			val = dial.ShowModal()
 		else:
 			val = wx.ID_NO
@@ -606,13 +606,13 @@ class DEVSComponent:
 						os.system(soft+" openURL " + python_path)
 				else:
 					sys.stdout.write(_("Unknown Windows Manager!\n"))
-					
+
 		elif val != wx.ID_CANCEL:
 			# chargement du fichier dans la fenetre d'edition (self.text)
 			try:
-				
+
 				editorFrame = Editor.GetEditor(mainW, wx.ID_ANY, name, obj=self, file_type='block')
-				
+
 				# if zipfile.is_zipfile(model_path):
 				# 	importer = zipimport.zipimporter(model_path)
 				# 	text = importer.get_source(os.path.splitext(name)[0])
@@ -637,7 +637,7 @@ class DEVSComponent:
 						text = r.read()
 
 					else:
-						
+
 						### if python_path is not found (because have an external origine)
 						if not os.path.exists(python_path):
 							if os.path.basename(DOMAIN_PATH) in python_path.split(os.sep):
@@ -647,25 +647,25 @@ class DEVSComponent:
 						# ### only with python 2.6
 						# with codecs.open(python_path, 'r', 'utf-8') as f:
 						# 	text = f.read()
-	
+
 				name = os.path.basename(python_path)
-				
+
 				editorFrame.AddEditPage(name, python_path)
 				editorFrame.Show()
-				
+
 				printOnStatusBar(editorFrame.statusbar,{1:''})
 
 				return editorFrame
 
 			except Exception, info:
-				dlg = wx.MessageDialog(mainW, _('Editor frame not instanciated: %s\n'%info), _("Error"), wx.OK|wx.ICON_ERROR)
+				dlg = wx.MessageDialog(mainW, _('Editor frame not instanciated: %s\n'%info), name, wx.OK|wx.ICON_ERROR)
 				dlg.ShowModal()
 				return False
 
 class BlockFactory:
-	""" DEVSimPy Block Factory 
+	""" DEVSimPy Block Factory
 	"""
-	
+
 	@staticmethod
 	def GetModule(filename):
 		""" Give module object from python file path. Warning, the name of python_file must be the same of the classe name.
@@ -686,8 +686,8 @@ class BlockFactory:
 			return net.GetModule()
 		### pure python file
 		else:
-		
-			module_name = os.path.basename(filename).split('.py')[0] 
+
+			module_name = os.path.basename(filename).split('.py')[0]
 
 			# find and load module
 			try:
@@ -695,22 +695,22 @@ class BlockFactory:
 				module = imp.load_module(module_name, f, fn, description)
 				f.close()
 				return module
-				
+
 			except Exception, info:
 				return sys.exc_info()
 
 	@staticmethod
 	def GetBlock(filename, label):
 		""" Get Block from filename with (x,y) position in canvas
-		
+
 			@param filename : name of dropped file
 			@param label : name of block
 			@param x,y : position
-			@param canvas: position of block is performed depending on canvas 
+			@param canvas: position of block is performed depending on canvas
 		"""
-		
+
 		ext = os.path.splitext(filename)[-1]
-		
+
 		### catch candidtate class from extention
 		if ext == ".amd":
 			cls = AMDComponent
@@ -718,23 +718,23 @@ class BlockFactory:
 			cls = CMDComponent
 		else:
 			cls = PyComponent
-	
+
 		return cls.Load(filename, label)
-		
+
 	@staticmethod
 	def CreateBlock(*argv, **kwargs):
 		""" Create Block from python_file and other info coming from wizard.
 		"""
 		from Container import iPort, oPort, MsgBoxError
-		
+
 		python_file = kwargs['python_file']
 		canvas = kwargs['canvas'] if 'canvas' in kwargs else None
 		x = kwargs['x'] if 'x' in kwargs else None
 		y = kwargs['y'] if 'y' in kwargs else None
-				
+
 		# associated python class
 		cls = GetClass(python_file)
-	
+
 		if inspect.isclass(cls):
 			# adding devs model on good graphical model
 			if issubclass(cls, DomainBehavior):
@@ -772,13 +772,12 @@ class BlockFactory:
 				m.move(x-70, y-70)
 				return m
 			else:
-				dial = wx.MessageDialog(None, _('Object not instantiated !\n\n Perhaps there is bad imports.'), _('Exclamation'), wx.OK | wx.ICON_EXCLAMATION)
+				dial = wx.MessageDialog(None, _('Object not instantiated !\n\n Perhaps there is bad imports.'), _('Block Manager'), wx.OK | wx.ICON_EXCLAMATION)
 				dial.ShowModal()
 				return False
-		
+
 		### inform user of the existance of error and return None
 		else:
 			MsgBoxError(None, GetActiveWindow(), cls)
 
-		return None	
-		
+		return None

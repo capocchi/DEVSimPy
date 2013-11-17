@@ -10,11 +10,11 @@ GENERAL NOTES AND REMARKS:
 GLOBAL VARIABLES AND FUNCTIONS
 """
 
-from DEVSKernel.DEVS import Port
-	
+from DEVSKernel.PyDEVS.DEVS import Port
+
 class OPort(Port):
 	def __init__(self):
 		Port.__init__(self)
-		self.name="OUT"+str(self.myID)	
+		self.name="OUT"+str(self.myID)
 	def type(self):
 		return "OUTPORT"

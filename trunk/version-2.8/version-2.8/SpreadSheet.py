@@ -7,7 +7,7 @@
 #                       Laurent CAPOCCHI
 #                      University of Corsica
 #                     --------------------------------
-# Version 1.0                                        last modified: 
+# Version 1.0                                        last modified:
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -45,7 +45,7 @@ class MySheet(sheet.CSheet):
 		self.row = len(data)
 		self.col = len(data[-1])
 		self._full_flag = False
-		
+
 		# set the rows and columns of the sheet
 		self.SetNumberRows(self.row)
 		self.SetNumberCols(self.col)
@@ -59,11 +59,11 @@ class MySheet(sheet.CSheet):
 		self.AutoSizeRows()
 
 		wx.CallAfter(self.Populate, (data))
-		
+
 	def UpdateColWidth(self):
 		self.AutoSizeColumns()
 		#self.ForceRefresh()
-		
+
 	def Populate(self, data):
 		"""
 		"""
@@ -82,10 +82,10 @@ class MySheet(sheet.CSheet):
 		self._full_flag = True
 		### infor Frame that table us full for graph icon enabling
 		Publisher.sendMessage(("isfull"), self._full_flag)
-		
+
 	def IsFull(self):
 		return self._full_flag
-		
+
 	##def OnGridSelectCell(self, event):
 		##self.row, self.col = event.GetRow(), event.GetCol()
 		##control = self.GetParent().GetParent().position
@@ -96,12 +96,12 @@ class MySheet(sheet.CSheet):
 ###
 class Newt(wx.Frame):
 	def __init__(self, parent, id, title, aDEVS, separator=" "):
-		
-		wx.Frame.__init__(self, parent, wx.ID_ANY, aDEVS.getBlockModel().label, size = (550, 500),style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE|wx.STAY_ON_TOP)
+
+		wx.Frame.__init__(self, parent, wx.ID_ANY, aDEVS.getBlockModel().label, size = (550, 500), style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE|wx.STAY_ON_TOP)
 
 		self.model = aDEVS
 		self.sep = separator
-		
+
 		### toolbar setting
 		toolbar = wx.ToolBar(self, wx.ID_ANY, style= wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT)
 		toolbar.SetToolBitmapSize((25,25)) # juste for windows
@@ -123,15 +123,15 @@ class Newt(wx.Frame):
 		self.SetToolBar(toolbar)
 
 		self.statusbar = self.CreateStatusBar()
-		
+
 		### notebook setting
 		self.notebook = wx.Notebook(self, wx.ID_ANY)
-		
+
+		### Load data form devs model
 		self.LoadingDataInPage()
 
 		### Layout
 		box = wx.BoxSizer(wx.VERTICAL)
-		box.Add(toolbar)
 		box.Add(self.notebook, 1, wx.EXPAND)
 		self.SetSizer(box)
 
@@ -145,16 +145,16 @@ class Newt(wx.Frame):
 		self.Bind(wx.EVT_TOOL, self.OnDelete, self.delete)
 		self.Bind(wx.EVT_TOOL, self.OnUpdate, update)
 		self.Bind(wx.EVT_TOOL, self.OnGraph, self.chart)
-		
+
 		self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnTab, self.notebook)
-		
+
 		### pubsub
 		### when is sheet is full, graph icon is enabled
 		Publisher.subscribe(self.EnableGraphIcon, ("isfull"))
 		Publisher.subscribe(self.OnProgress, ("progress"))
-		
+
 	def LoadingDataInPage(self):
-		
+
 		### read and load the data in sheet
 		for i in xrange(len(self.model.IPorts)):
 			fn = "%s%d.dat"%(self.model.fileName, i)
@@ -164,13 +164,13 @@ class Newt(wx.Frame):
 				data = self.FileToData(fn, self.sep)
 				label = _('%s (Port %i)')%(host.getBlockModel().label, oPort.myID)
 				self.AddPage(data, label)
-		
+
 	def OnUpdate(self, event):
-		
+
 		### remove all pages
 		while self.notebook.GetPageCount() >= 1:
 			self.notebook.RemovePage(self.notebook.GetSelection())
-		
+
 		### reload all page
 		self.LoadingDataInPage()
 
@@ -184,18 +184,18 @@ class Newt(wx.Frame):
 				L = f.readlines()
 				index = iter(range(len(L)))
 				data = map(lambda a:  (index.next(), a.replace('\n','')), L)
-				
+
 		return data
-			
+
 	def EnableGraphIcon(self, msg):
 		""" Enable graph button when loadin data is finished and clear the statusbar.
 		"""
-		
+
 		### update the column width
 		activePage = self.notebook.GetSelection()
 		sheet = self.notebook.GetPage(activePage)
 		sheet.UpdateColWidth()
-		
+
 		toolbar = self.GetToolBar()
 		toolbar.EnableTool(self.chart.GetId(), msg.data)
 		self.statusbar.SetStatusText("", 0)
@@ -205,24 +205,24 @@ class Newt(wx.Frame):
 		activePage = self.notebook.GetSelection()
 		sheet = self.notebook.GetPage(activePage)
 		sheet.UpdateColWidth()
-	
+
 	def OnProgress(self, msg):
 		""" Update status bar with loading data progression
 		"""
 		pourcent = 100*float(msg.data)
 		self.statusbar.SetStatusText(_("Loading data... (%d %%)")%int(pourcent), 0)
-		
+
 	def AddPage(self, data = [[]], label = ""):
 		""" Add new page to notebook knowing data and label
 		"""
 		sheet = MySheet(self.notebook, data)
 		sheet.SetFocus()
 		self.notebook.AddPage(sheet, label)
-		
+
 		### enable delete button
 		toolbar = self.GetToolBar()
 		toolbar.EnableTool(self.delete.GetId(), True)
-	
+
 	def OnNew(self, event):
 		""" New button bas been pressed.
 		"""
@@ -249,7 +249,7 @@ class Newt(wx.Frame):
 					else:
 						separator = ""
 					dlg.Destroy()
-					
+
 					data = self.FileToData(fn, separator)
 					label = _('New %d'%self.notebook.GetPageCount())
 					self.AddPage(data, label)
@@ -271,7 +271,7 @@ class Newt(wx.Frame):
 			with open(fn,'w') as f:
 				for row in xrange(nbr):
 					f.write("%s %s\n"%(sheet.GetCellValue(row,0),sheet.GetCellValue(row,1)))
-					
+
 	def OnCopy(self, event):
 		""" Copy button has been pressed.
 		"""
@@ -297,20 +297,20 @@ class Newt(wx.Frame):
 	def OnDelete(self, event):
 		""" Delete button has been pressed.
 		"""
-		
+
 		### remove page
 		if self.notebook.GetPageCount() >= 1:
 			self.notebook.RemovePage(self.notebook.GetSelection())
-			
+
 		### disable delete button
 		if self.notebook.GetPageCount() == 0:
 			toolbar = self.GetToolBar()
 			toolbar.EnableTool(self.delete.GetId(), False)
-			
+
 	def OnGraph(self, event):
 		""" Graph button has been pressed.
 		"""
-		
+
 		activePage = self.notebook.GetSelection()
 		sheet = self.notebook.GetPage(activePage)
 		title = self.notebook.GetPageText(activePage)
@@ -324,8 +324,8 @@ class Newt(wx.Frame):
 
 		if a !=[] and b != []:
 			selected_rows = range(a[0][0], b[0][0])
-			
-		nbc = xrange(sheet.GetNumberCols()) 
+
+		nbc = xrange(sheet.GetNumberCols())
 		nbr = xrange(sheet.GetNumberRows()) if selected_rows == [] else selected_rows
 
 		try:
@@ -336,9 +336,13 @@ class Newt(wx.Frame):
 			frame = StaticPlot(self, wx.ID_ANY, title, data)
 			frame.Center()
 			frame.Show()
-			
-#if __name__ == '__main__':
-	#app = wx.App(0)
-	#newt = Newt(None, wx.ID_ANY, 'SpreadSheet')
-	#app.MainLoop()
-	
+
+##if __name__ == '__main__':
+##	import __builtin__
+##	import Container
+##
+##	__builtin__.__dict__['FONT_SIZE'] = 12
+##	#app = wx.App(0)
+##	devs =  Container.DiskGUI()
+##	newt = Newt(None, wx.ID_ANY, 'SpreadSheet', devs)
+##	app.MainLoop()

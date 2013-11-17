@@ -238,7 +238,7 @@ class PythonSTC(stc.StyledTextCtrl):
 		self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:#000000,back:#FF0000,bold")
 
 		# Python styles
-		# Default 
+		# Default
 		self.StyleSetSpec(stc.STC_P_DEFAULT, "fore:#000000,face:%(helv)s,size:%(size)d" % faces)
 		# Comments
 		self.StyleSetSpec(stc.STC_P_COMMENTLINE, "fore:#007F00,face:%(other)s,size:%(size)d" % faces)
@@ -527,7 +527,7 @@ class CodeEditor(PythonSTC):
 	### NOTE: CodeEditor :: SetUpEditor 		=> Configure lexer and color
 	def SetUpEditor(self):
 		"""
-		This method carries out the work of setting up the demo editor.            
+		This method carries out the work of setting up the demo editor.
 		It's seperate so as not to clutter up the init code.
 		"""
 		import keyword
@@ -562,7 +562,7 @@ class CodeEditor(PythonSTC):
 
 		### EOL: Since we are loading/saving ourselves, and the
 		### strings will always have \n's in them, set the STC to
-		### edit them that way.            
+		### edit them that way.
 		self.SetEOLMode(wx.stc.STC_EOL_LF)
 		self.SetViewEOL(False)
 
@@ -588,7 +588,7 @@ class CodeEditor(PythonSTC):
 		if wx.Platform == '__WXMSW__':
 			self.StyleSetSpec(stc.STC_STYLE_DEFAULT, 'fore:#000000,back:#FFFFFF,face:Courier New,size:9')
 		elif wx.Platform == '__WXMAC__':
-		### TODO: if this looks fine on Linux too, remove the Mac-specific case 
+		### TODO: if this looks fine on Linux too, remove the Mac-specific case
 		### and use this whenever OS != MSW.
 			self.StyleSetSpec(stc.STC_STYLE_DEFAULT, 'fore:#000000,back:#FFFFFF,face:Monaco')
 		else:
@@ -768,7 +768,7 @@ class EditionNotebook(wx.Notebook):
 		"""
 		return self.pages
 
-	### NOTE: EditionNotebook :: AddEditPage 	=> Create a new page		
+	### NOTE: EditionNotebook :: AddEditPage 	=> Create a new page
 	def AddEditPage(self, title, path):
 		"""
 		Adds a new page for editing to the notebook and keeps track of it.
@@ -810,7 +810,7 @@ class EditionNotebook(wx.Notebook):
 				return self.GetPage(i)
 		return None
 
-	### NOTE: EditionNotebook :: __PageChanged => Event when page changed	
+	### NOTE: EditionNotebook :: __PageChanged => Event when page changed
 	def __PageChanged(self, evt):
 		"""
 		"""
@@ -1228,7 +1228,7 @@ class Editor(wx.Frame, wx.Panel):
 		"""
 		"""
 		if self.nb.GetCurrentPage().isModified():
-			dlg = wx.MessageDialog(self, _('Save changes?'), '', wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
+			dlg = wx.MessageDialog(self, _('Save changes?'), _('Code Editor'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
 			val = dlg.ShowModal()
 			if val == wx.ID_YES:
 				self.OnSaveFile(event)
@@ -1306,7 +1306,7 @@ class Editor(wx.Frame, wx.Panel):
 		if "indent not equal" in output_checking:
 			dial = wx.MessageDialog(self, _('Tab problem in %s.\n%s \
 				\nYou can try to re-indent it with Edit-> Re-indent sub-menu.' % (fn, output_checking)),
-			                        _('Info'), wx.OK | wx.ICON_INFORMATION)
+			                        _('Code Editor'), wx.OK | wx.ICON_INFORMATION)
 			dial.ShowModal()
 		else:
 			### status bar notification
@@ -1348,7 +1348,7 @@ class Editor(wx.Frame, wx.Panel):
 		"""
 		"""
 		if self.nb.GetCurrentPage().isModified():
-			dlg = wx.MessageDialog(self, _('Save changes?'), '',
+			dlg = wx.MessageDialog(self, _('Save changes?'), _('Code Editor'),
 			                       wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL | wx.ICON_QUESTION)
 			val = dlg.ShowModal()
 			if val == wx.ID_YES:
@@ -1400,9 +1400,9 @@ class Editor(wx.Frame, wx.Panel):
 		if cp.modify:
 			### if no error
 			if not cp.ContainError():
-				dlg = wx.MessageDialog(self, _('Save before Exit?'), '', wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL | wx.ICON_QUESTION)
+				dlg = wx.MessageDialog(self, _('Save before Exit?'), _('Code Editor'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL | wx.ICON_QUESTION)
 			else:
-				dlg = wx.MessageDialog(self, _('File contain errors.\nDo you want to force saving before exit knowing that the file can be corrupts?'), '', wx.YES_NO | wx.NO_DEFAULT | wx.CANCEL | wx.ICON_QUESTION)
+				dlg = wx.MessageDialog(self, _('File contain errors.\nDo you want to force saving before exit knowing that the file can be corrupts?'), _('Code Editor'), wx.YES_NO | wx.NO_DEFAULT | wx.CANCEL | wx.ICON_QUESTION)
 			val = dlg.ShowModal()
 			if val == wx.ID_YES:
 				self.nb.force_saving = cp.ContainError()

@@ -1053,8 +1053,6 @@ class MainApplication(wx.Frame):
 
 		save_dlg.Destroy()
 
-
-
 	###
 	def OnImport(self, event):
 		""" Import DEVSimPy library from Domain directory.
@@ -1078,7 +1076,7 @@ class MainApplication(wx.Frame):
 			for s in dlg._selectedItem:
 
 				absdName = str(os.path.join(DOMAIN_PATH, s)) if s not in dlg._d else str(dlg._d[s])
-				progress_dlg = wx.ProgressDialog(_('Importing library'),_("Loading %s ...")%s, parent=self, style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
+				progress_dlg = wx.ProgressDialog(_('Importing library'), _("Loading %s ...")%s, parent=self, style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
 				progress_dlg.Pulse()
 
     			### add correct path to sys.path (always before InsertNewDomain)
@@ -1321,7 +1319,7 @@ class MainApplication(wx.Frame):
 	def OnFrench(self, event):
 		self.cfg.Write("language", "'fr'")
 		if wx.Platform == '__WXGTK__':
-			dlg = wx.MessageDialog(self, _('You need to restart DEVSimPy to take effect.\n\nDo you want to restart now ?'), 'Question', wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			dlg = wx.MessageDialog(self, _('You need to restart DEVSimPy to take effect.\n\nDo you want to restart now ?'), _('Internationalization'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 			if dlg.ShowModal() == wx.ID_YES:
 				wx.CallAfter(self.OnRestart())
 			dlg.Destroy()
@@ -1332,7 +1330,7 @@ class MainApplication(wx.Frame):
 		self.cfg.Write("language", "'en'")
 
 		if wx.Platform == '__WXGTK__':
-			dlg = wx.MessageDialog(self, _('You need to restart DEVSimPy to take effect.\n\nDo you want to restart now ?'), 'Question', wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			dlg = wx.MessageDialog(self, _('You need to restart DEVSimPy to take effect.\n\nDo you want to restart now ?'), _('Internationalization'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 			if dlg.ShowModal() == wx.ID_YES:
 				wx.CallAfter(self.OnRestart())
 			dlg.Destroy()
@@ -1423,7 +1421,7 @@ class MainApplication(wx.Frame):
 		text = stats.print_stats(100)
 
 	def OnDeleteProfiles(self, event):
-		dlg = wx.MessageDialog(self, _('Do you realy want to delete all files ?'), 'Question', wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		dlg = wx.MessageDialog(self, _('Do you realy want to delete all files ?'), _('Profile Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 		if dlg.ShowModal() == wx.ID_YES:
 			tmp_dir = gettempdir()
 			for fn in filter(lambda f: f.endswith(('.prof','.cachegrind')), os.listdir(tmp_dir)):

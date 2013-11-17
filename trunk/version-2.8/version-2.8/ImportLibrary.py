@@ -226,7 +226,7 @@ class ImportLibrary(wx.Dialog):
 	def CheckDomainPath(self):
 		ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 		if os.path.join(ABS_HOME_PATH, "Domain") != DOMAIN_PATH:
-			dlg = wx.MessageDialog(self, _("Local domain path is different from the .devsimpy.\nGo to options and preferences to change the domain path."), 'Info', wx.OK|wx.ICON_INFORMATION)
+			dlg = wx.MessageDialog(self, _("Local domain path is different from the .devsimpy.\nGo to options and preferences to change the domain path."), _('Import Manager'), wx.OK|wx.ICON_INFORMATION)
 			dlg.ShowModal()
 			dlg.Destroy()
 
@@ -334,7 +334,7 @@ class ImportLibrary(wx.Dialog):
 
 		    ### suppresion des fichiers sur le disque
 		    if db.rb2.GetValue():
-			dial = wx.MessageDialog(None, _('Are you sure to delete python files into the %s directory?')%(label), _('Question'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			dial = wx.MessageDialog(None, _('Are you sure to delete python files into the %s directory?')%(label), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 			if dial.ShowModal() == wx.ID_YES:
 			    try:
 				### delete directory
@@ -373,7 +373,7 @@ class ImportLibrary(wx.Dialog):
 		""" Static method to create the __init_.py file which contain the name of accessing models
 		"""
 
-		dial = wx.MessageDialog(None, _('If %s contain python files, do you want to insert it in __all__ variable of __init__.py file?')%os.path.basename(path), 'Question', wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+		dial = wx.MessageDialog(None, _('If %s contain python files, do you want to insert it in __all__ variable of __init__.py file?')%os.path.basename(path), _('New file Manager'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 		if dial.ShowModal() == wx.ID_YES:
 			### if there is python file in the importing directory
 			L = filter(lambda f: f.endswith(".py"), os.listdir(path))
@@ -430,7 +430,7 @@ class ImportLibrary(wx.Dialog):
 
 		### create the __init__.py file if doesn't exist
 		if not path.startswith('http') and not os.path.exists(os.path.join(path,'__init__.py')):
-			dial = wx.MessageDialog(self, _('%s directory has no __init__.py file.\nDo you want to create it?')%path, 'Question',wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+			dial = wx.MessageDialog(self, _('%s directory has no __init__.py file.\nDo you want to create it?')%path, _('New librarie Manager'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 			if dial.ShowModal() == wx.ID_YES:
 				self.CreateInitFile(path)
 			dial.Destroy()
@@ -455,15 +455,15 @@ class ImportLibrary(wx.Dialog):
 						msg = _('%s is an invalid url')%path
 					else:
 						msg = _('%s directory does not exist')%dName
-					dial = wx.MessageDialog(self, msg, _('Error'), wx.OK | wx.ICON_ERROR)
+					dial = wx.MessageDialog(self, msg, _('New librarie Manager'), wx.OK | wx.ICON_ERROR)
 					dial.ShowModal()
 					self._dbb.SetValue('')
 			else:
-				dial = wx.MessageDialog(self, _('%s is already imported')%dName, _('Info'), wx.OK)
+				dial = wx.MessageDialog(self, _('%s is already imported')%dName, _('New librarie Manager'), wx.OK|wx.ICON_INFORMATION)
 				dial.ShowModal()
 				self._dbb.SetValue('')
 		else:
-			dial = wx.MessageDialog(self, _('%s is already imported')%dName, _('Info'), wx.OK)
+			dial = wx.MessageDialog(self, _('%s is already imported')%dName, _('New librarie Manager'), wx.OK|wx.ICON_INFORMATION)
 			dial.ShowModal()
 			self._dbb.SetValue('')
 

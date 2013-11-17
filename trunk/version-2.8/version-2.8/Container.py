@@ -133,7 +133,7 @@ def MsgBoxError(event, parent, msg):
 
 	### si erreur dans l'importation
 	if isinstance(msg, unicode):
-		dial = wx.MessageDialog(parent, _('Error trying to import module : %s')%msg, _('Error'), wx.OK | wx.ICON_ERROR)
+		dial = wx.MessageDialog(parent, _('Error trying to import module : %s')%msg, _('Error Manager'), wx.OK | wx.ICON_ERROR)
 		dial.ShowModal()
 	### si erreur dans le constructeur (__init__) ou pendant la simulation du .py
 	elif isinstance(msg, tuple):
@@ -168,7 +168,7 @@ def MsgBoxError(event, parent, msg):
 		if path is not None:
 
 			### demande si on veut corriger l'erreur
-			dial = wx.MessageDialog(parent, _("Error: %s\n%s%s%s\nDo you want to remove this error?")%(str(val),str(python_path),str(fct),str(line_number)), _('Error'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_ERROR)
+			dial = wx.MessageDialog(parent, _("Error: %s\n%s%s%s\nDo you want to remove this error?")%(str(val),str(python_path),str(fct),str(line_number)), _('Error Manager'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_ERROR)
 			if dial.ShowModal() == wx.ID_YES:
 				### il faut supprimer les doubles cote de chaque cotée et caster en string
 				python_path = str(path.split(' ')[-1])[1:-1]
@@ -1948,7 +1948,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 					if m.SaveFile(gmwiz.model_path):
 						m.last_name_saved = gmwiz.model_path
 					else:
-						dlg = wx.MessageDialog(self, _('Error saving file %s\n')%os.path.basename(gmwiz.model_path), _('Error'), wx.ID_OK|wx.ICON_ERROR)
+						dlg = wx.MessageDialog(self, _('Error saving file %s\n')%os.path.basename(gmwiz.model_path), gmwiz.label, wx.ID_OK|wx.ICON_ERROR)
 						dlg.ShowModal()
 
 				# Adding graphical model to diagram
@@ -2014,7 +2014,8 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		for s in self.select():
    			name = _("Connexion") if isinstance(s, ConnectionShape) else s.label
 			msg = _("Do you really want to delete %s model?")%(name)
- 			dlg = wx.MessageDialog(self, msg, _("Delete Manager"),
+ 			dlg = wx.MessageDialog(self, msg,
+			 						_("Delete Manager"),
 									wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
 			if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:
@@ -3537,7 +3538,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 				printOnStatusBar(mainW.statusbar, {0:_('%s Exported')%label, 1:''})
 
 			except IOError, error:
-				dlg = wx.MessageDialog(parent, _('Error exported file %s\n')%error, _('Error'), wx.ID_OK|wx.ICON_ERROR)
+				dlg = wx.MessageDialog(parent, _('Error exported file %s\n')%error, label, wx.ID_OK|wx.ICON_ERROR)
 				dlg.ShowModal()
 
 		save_dlg.Destroy()
@@ -4108,7 +4109,7 @@ class INode(ConnectableNode):
 		if not isinstance(self.item, Port):
 			### perapre label position
 			if self.item.direction == 'ouest':
-				xl = x-22
+				xl = x-30
 				yl = y
 			elif self.item.direction == 'est':
 				xl = x+2
@@ -4432,7 +4433,6 @@ class ScopeGUI(CodeBlock):
 		### enable edition on properties panel
 		self.AddAttribute("xlabel")
 		self.AddAttribute("ylabel")
-		#self.AddAttribute("legend", [])
 
 	def OnLeftDClick(self,event):
 		""" Left Double Click has been appeared.
@@ -4443,7 +4443,7 @@ class ScopeGUI(CodeBlock):
 		# If the frame is call before the simulation process, the atomicModel is not instanciate (Instanciation delegate to the makeDEVSconnection after the run of the simulation process)
 		devs = self.getDEVSModel()
 		if devs is None:
-			dial = wx.MessageDialog(None, _('No data available. \n\nGo to the simulation process first !'), _('Info'), wx.OK)
+			dial = wx.MessageDialog(None, _('No data available.\nGo to the simulation process first!'), self.label, wx.OK|wx.ICON_INFORMATION)
 			dial.ShowModal()
 		else:
 			# Call the PlotManager which plot on the canvas depending the atomicModel.fusion option
@@ -4470,7 +4470,7 @@ class DiskGUI(CodeBlock):
 			frame.Center()
 			frame.Show()
 		else:
-			dial = wx.MessageDialog(None, _('No data available \n\nGo to the simulation process first!'), _('Info'), wx.OK)
+			dial = wx.MessageDialog(None, _('No data available.\nGo to the simulation process first!'), self.label, wx.OK|wx.ICON_INFORMATION)
 			dial.ShowModal()
 
 #----------------------------------------------------------------------------------
@@ -5303,7 +5303,7 @@ class DictionaryEditor(wx.Dialog):
 				eval(txt)
 
 		except Exception, info:
-			dial = wx.MessageDialog(self, _("Error editing attribute: %s")%info, _('Error'), wx.OK | wx.ICON_ERROR)
+			dial = wx.MessageDialog(self, _("Error editing attribute: %s")%info, _("Dictionary manager"), wx.OK | wx.ICON_ERROR)
 			dial.ShowModal()
 
 		evt.Skip()
@@ -5374,7 +5374,7 @@ class ListEditor(wx.Dialog):
 				eval(txt)
 
 		except Exception, info:
-			dial = wx.MessageDialog(self, _("Error editing attribute: %s")%info, _('Error'), wx.OK | wx.ICON_ERROR)
+			dial = wx.MessageDialog(self, _("Error editing attribute: %s")%info, _("List manager"), wx.OK | wx.ICON_ERROR)
 			dial.ShowModal()
 
 		evt.Skip()

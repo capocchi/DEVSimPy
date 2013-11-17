@@ -81,13 +81,39 @@ class GeneralFlatNotebook(Printable):
 
 		self.AddEditPage(_("Diagram%d")%len(self.pages))
 
-##	def GetPageByName(self, name = ''):
-##		""" Get Page object from ist name
-##		"""
-##		for i in xrange(len(self.pages)):
-##			if name == self.GetPageText(i):
-##				return self.GetPage(i)
-##		return None
+	def AddEditPage(self, title, defaultDiagram = None):
+		""" Adds a new page for editing to the notebook and keeps track of it.
+
+			@type title: string
+			@param title: Title for a new page
+		"""
+
+		### title page list
+		title_pages = map(lambda p: p.name, self.pages)
+
+		### occurence of title in existing title pages
+		c = title_pages.count(title)
+		title = title+"(%d)"%c if c != 0 else title
+
+		### new page
+		newPage = Container.ShapeCanvas(self, wx.NewId(), name=title)
+
+		### new diagram
+		d = defaultDiagram or Container.Diagram()
+		d.SetParent(newPage)
+
+		### diagram and background newpage setting
+		newPage.SetDiagram(d)
+
+		### print canvas variable setting
+		self.print_canvas = newPage
+		self.print_size = self.GetSize()
+
+		self.pages.append(newPage)
+		self.AddPage(newPage, title, imageId=0)
+
+		self.SetSelection(self.GetPageCount()-1)
+
 
 	def OnClearPage(self, evt):
 		""" Clear page.
@@ -220,40 +246,6 @@ if USE_FLATNOTEBOOK:
 			self.CreateRightClickMenu()
 			self.SetRightClickMenu(self._rmenu)
 
-		###
-		def AddEditPage(self, title, defaultDiagram = None):
-			"""	Adds a new page for editing to the FlatNotebook and keeps track of it.
-
-				@type title: string
-				@param title: Title for a new page
-			"""
-
-			pages = self.GetPages()
-			### title page list
-			title_pages = map(lambda p: p.name, pages)
-
-			### occurence of title in existing title pages
-			c = title_pages.count(title)
-
-			title = title+"(%d)"%c if c != 0 else title
-
-			### new page
-			newPage = Container.ShapeCanvas(self, wx.NewId(), name=title)
-
-			### new diagram
-			d = defaultDiagram or Container.Diagram()
-			d.SetParent(newPage)
-
-			### diagram and background newpage setting
-			newPage.SetDiagram(d)
-
-			### print canvas variable setting
-			self.print_canvas = newPage
-			self.print_size = self.GetSize()
-
-			self.AddPage(newPage, title, imageId=0)
-			self.SetSelection(self.GetPageCount()-1)
-
 		def CreateRightClickMenu(self):
 			""" Right clic has been invoqued and contectual menu is displayed.
 			"""
@@ -284,7 +276,7 @@ if USE_FLATNOTEBOOK:
 
 			if diagram.modify:
 				title = self.GetPageText(id)
-				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram ?')%(title), _('Save'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
+				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram ?')%(title), title, wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
 				val = dlg.ShowModal()
 				if val == wx.ID_YES:
 					mainW.OnSaveFile(evt)
@@ -297,6 +289,8 @@ if USE_FLATNOTEBOOK:
 
 			else:
 				self.DeleteBuiltinConstants()
+
+			self.pages.remove(canvas)
 
 			### update (clear) of properties panel (Control notebook)
 			propPanel = mainW.nb1.GetPropPanel()
@@ -311,11 +305,11 @@ if USE_FLATNOTEBOOK:
 else:
 
 	#
-	# Notebook classic class
+	# Classic Notebook class
 	#
 
 	class DiagramNotebook(wx.Notebook, GeneralFlatNotebook):
-		""" Diagram NoteBokk class
+		""" Diagram classic NoteBook class
 		"""
 
 		def __init__(self, *args, **kwargs):
@@ -339,7 +333,6 @@ else:
 			pos = evt.GetPosition()
 			### pointed page and flag
 			page,flag = self.HitTest(pos)
-
 
 			### if no where click (dont hit with indows)
 			if flag == wx.BK_HITTEST_NOWHERE:
@@ -367,7 +360,7 @@ else:
 
 				if diagram.modify:
    					title = self.GetPageText(id)
-					dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram ?')%(title), _('Save'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
+					dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram ?')%(title), title, wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
 					val = dlg.ShowModal()
 					if val == wx.ID_YES:
 						mainW.OnSaveFile(evt)
@@ -398,36 +391,3 @@ else:
 					propPanel.UpdatePropertiesPage(propPanel.defaultPropertiesPage())
 
 				return True
-
-		def AddEditPage(self, title, defaultDiagram = None):
-			""" Adds a new page for editing to the notebook and keeps track of it.
-
-				@type title: string
-				@param title: Title for a new page
-			"""
-
-			### title page list
-			title_pages = map(lambda p: p.name, self.pages)
-
-			### occurence of title in existing title pages
-			c = title_pages.count(title)
-			title = title+"(%d)"%c if c != 0 else title
-
-			### new page
-			newPage = Container.ShapeCanvas(self, wx.NewId(), name=title)
-
-			### new diagram
-			d = defaultDiagram or Container.Diagram()
-			d.SetParent(newPage)
-
-			### diagram and background newpage setting
-			newPage.SetDiagram(d)
-
-			### print canvas variable setting
-			self.print_canvas = newPage
-			self.print_size = self.GetSize()
-
-			self.pages.append(newPage)
-			self.AddPage(newPage, title, imageId=0)
-
-			self.SetSelection(self.GetPageCount()-1)

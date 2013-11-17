@@ -18,20 +18,20 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-from DEVSKernel.DEVS import CoupledDEVS
+from DomainInterface.DomainStructure import DomainStructure
 
 #    ======================================================================    #
-class Master(CoupledDEVS):
+class Master(DomainStructure):
 	""" Master class represent the hight abstract level DEVS coupled model.
 	"""
 	FINAL_TIME = 10.0
-	
+
 	###
 	def __init__(self):
 		"""	Constructor method.
 		"""
-		CoupledDEVS.__init__(self)
-		
+		DomainStructure.__init__(self)
+
 		### param definition
 		#self.VERBOSE = False
 		#self.FAULT_SIM = False
@@ -47,7 +47,7 @@ class Master(CoupledDEVS):
 			#if model in immList:
 				##print 'chose %s'%model.getBlockModel()
 				#return model
-		
+
 		## si self.PRIORITY_LIST est vide on bascule sur une simulation sans priorité
 		#return immList[0]
 	###

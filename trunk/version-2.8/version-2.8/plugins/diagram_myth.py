@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-""" 
+"""
 	Authors: L. Capocchi (capocchi@univ-corse.fr)
 	Date: 16/10/2012
 	Description:
@@ -165,7 +165,7 @@ def UnConfig():
 
 #--------------------------------------------------
 class MythCollector(ScopeGUI):
-	""" MythCollector(label) 
+	""" MythCollector(label)
 	"""
 
 	def __init__(self, label='MythCollector'):
@@ -185,5 +185,5 @@ class MythCollector(ScopeGUI):
 
 			trigger_event('START_MYTH_DIAGRAM', results=devs.results)
 		else:
-			dial = wx.MessageDialog(None, _('No data available \n Go to the simulation process first !'), 'Info', wx.OK)
+			dial = wx.MessageDialog(None, _('No data available \n Go to the simulation process first !'), _('Myth plugins'), wx.OK|wx.ICON_INFORMATION)
 			dial.ShowModal()
