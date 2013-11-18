@@ -182,7 +182,7 @@ __builtin__.__dict__.update(builtin_dict)
 #-------------------------------------------------------------------
 def getIcon(path):
 	#path = os.path.join(ICON_PATH_16_16, img_file)
- 	icon = wx.EmptyIcon()
+	icon = wx.EmptyIcon()
 	#if os.path.exists(path):
 	bmp = wx.Image(path).ConvertToBitmap()
 	bmp.SetMask(wx.Mask(bmp, wx.WHITE))
