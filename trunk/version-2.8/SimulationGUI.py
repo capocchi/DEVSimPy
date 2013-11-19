@@ -40,7 +40,7 @@ import traceback
 __builtin__.__dict__['GUI_FLAG'] = True
 
 from DEVSKernel.PyDEVS.FastSimulator import Simulator
-from DEVSKernel.PyDEVS.DEVS import AtomicDEVS
+from DomainInterface import DomainBehavior
 
 from Utilities import IsAllDigits, playSound
 from pluginmanager import trigger_event
@@ -134,7 +134,11 @@ class CollapsiblePanel(wx.Panel):
 		'''Just make a few controls to put on the collapsible pane'''
 
 		text2 = wx.StaticText(pane, wx.ID_ANY, _("Select algorithm:"))
-		ch1 = wx.Choice(pane, wx.ID_ANY, choices=SIM_STRATEGY_LIST.keys())
+		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
+			c = PYDEVS_SIM_STRATEGY_DICT.keys()
+		else:
+			c = PYPDEVS_SIM_STRATEGY_DICT.keys()
+		ch1 = wx.Choice(pane, wx.ID_ANY, choices=c)
 		text3 = wx.StaticText(pane, wx.ID_ANY, _("Profiling"))
 		cb1 = wx.CheckBox(pane, wx.ID_ANY, name='check_prof')
 		text4 = wx.StaticText(pane, wx.ID_ANY, _("No time limit"))
@@ -148,7 +152,10 @@ class CollapsiblePanel(wx.Panel):
 		cb2.SetValue(__builtin__.__dict__['NTL'])
 
 		### default strategy
-		ch1.SetSelection(SIM_STRATEGY_LIST.keys().index(DEFAULT_SIM_STRATEGY))
+		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
+			ch1.SetSelection(PYDEVS_SIM_STRATEGY_DICT.keys().index(DEFAULT_SIM_STRATEGY))
+  		else:
+			ch1.SetSelection(PYPDEVS_SIM_STRATEGY_DICT.keys().index(DEFAULT_SIM_STRATEGY))
 
 		ch1.SetToolTipString(_("Select the simulator strategy."))
 		cb1.SetToolTipString(_("For simulation profiling using hotshot"))
@@ -640,7 +647,7 @@ class SimulationThread(threading.Thread, Simulator):
 
 		### define the simulation strategy
 		args = {'simulator':self}
-		cls_str = eval(SIM_STRATEGY_LIST[self.strategy])
+		cls_str = eval(PYDEVS_SIM_STRATEGY_DICT[self.strategy])
 		self.setAlgorithm(apply(cls_str, (), args))
 
 		while not self.end_flag:
@@ -673,7 +680,7 @@ class SimulationThread(threading.Thread, Simulator):
 				### error sound
 				wx.CallAfter(playSound, SIMULATION_ERROR_WAV_PATH)
 			else:
-				for m in filter(lambda a: isinstance(a, AtomicDEVS), self.model.componentSet):
+				for m in filter(lambda a: isinstance(a, DomainBehavior), self.model.componentSet):
 					### call finished method
 					Publisher.sendMessage('%d.finished'%(id(m)))
 
@@ -705,7 +712,7 @@ class TestApp(wx.App):
 		__builtin__.__dict__['DEFAULT_SIM_STRATEGY']='Hierarchical'
 		__builtin__.__dict__['NTL'] = False
 		__builtin__.__dict__['_'] = gettext.gettext
-		__builtin__.__dict__['SIM_STRATEGY_LIST'] = {'PyDEVS':'SimStrategy1', 'Hierarchical':'SimStrategy2', 'Direct Coupling':'SimStrategy3'}
+		__builtin__.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
 
 		self.frame = SimulationDialog(None, wx.ID_ANY, 'Simulator', DomainInterface.MasterModel.Master())
 		self.frame.Show()

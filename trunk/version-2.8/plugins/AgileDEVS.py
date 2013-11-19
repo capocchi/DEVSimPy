@@ -51,7 +51,7 @@ from Container import Block, ConnectionShape, Testable
 import Editor
 from DetachedFrame import DetachedFrame
 import ZipManager
-from DEVSKernel.PyDEVS.DEVS import AtomicDEVS
+from DomainInterface import DomainBehavior, DomainStructure
 
 
 ### ------------------------------------------------------------------------------------------- ###
@@ -97,10 +97,10 @@ def GetFlatModelDict(coupled_devs, d=None):
 	"""
 	if not d: d = dict()
 	for devs in coupled_devs.componentSet:
-		if isinstance(devs, AtomicDEVS):
+		if isinstance(devs, DomainBehavior):
 			model = Model(amd=devs)
 			d[model.label] = model
-		elif isinstance(devs, CoupledDEVS):
+		elif isinstance(devs, DomainStructure):
 			d[devs.getBlockModel().label] = devs
 			GetFlatModelDict(devs,l)
 	return d

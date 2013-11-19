@@ -23,11 +23,10 @@
 import wx
 import os
 
-import Container
-
 from Patterns.Observer import Observer
 from LibPanel import LibPanel
 from PropPanel import PropPanel
+from AttributeEditor import AttributeEditor
 
 ### --------------------------------------------------------------------------
 class GeneralNotebook(Observer):
@@ -132,7 +131,7 @@ class GeneralNotebook(Observer):
 
 				if model:
 					if model != self.selected_model:
-						newContent = Container.AttributeEditor(propPanel, wx.ID_ANY, model, canvas)
+						newContent = AttributeEditor(propPanel, wx.ID_ANY, model, canvas)
 						propPanel.UpdatePropertiesPage(newContent)
 						self.selected_model = model
 						propPanel.SetToolTipString(propPanel.propToolTip[1])

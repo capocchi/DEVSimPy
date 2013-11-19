@@ -29,7 +29,7 @@ class PropPanel(wx.Panel):
 		wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY, name=name)
 
 		propSizer = wx.BoxSizer(wx.VERTICAL)
-		propSizer.Add(self.defaultPropertiesPage(), 0, wx.EXPAND|wx.ALL|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTRE_VERTICAL, 10)
+		propSizer.Add(self.defaultPropertiesPage(), 1, wx.EXPAND|wx.ALL|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTRE_VERTICAL, 10)
 
 		self.SetSizer(propSizer)
 		self.Layout()

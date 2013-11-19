@@ -25,6 +25,8 @@ import os
 import wx
 from wx import xrc
 
+from AttributeEditor import AttributeEditor
+
 __res = None
 
 def __init_resources():
@@ -113,8 +115,9 @@ class LabelDialog(wx.Dialog):
 
 			### update of block from canvas
 			self.canvas.UpdateShapes([self.block])
-			### update of label filed in propertie dialogue
-			self.parent._list.SetCellValue(0, 1, self.block.label)
+			if isinstance(self.parent, AttributeEditor):
+				### update of label filed in propertie dialogue
+				self.parent._list.SetCellValue(0, 1, self.block.label)
 
 		evt.Skip()
 
@@ -130,8 +133,9 @@ class LabelDialog(wx.Dialog):
 
 			### update of block from canvas
 			self.canvas.UpdateShapes([self.block])
-			### update of label_pos filed in propertie dialogue
-			self.parent._list.SetCellValue(1, 1, self.block.label_pos)
+			if isinstance(self.parent, AttributeEditor):
+				### update of label_pos filed in propertie dialogue
+				self.parent._list.SetCellValue(1, 1, self.block.label_pos)
 
 	def OnOk(self, evt):
 		""" Ok button has been clicked

@@ -63,7 +63,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		index = self.InsertStringItem(sys.maxint, dName)
 		self.SetStringItem(index, 1, str(getDirectorySize(path)) if os.path.exists(path) else '0')
 		self.SetStringItem(index, 2, 'local' if not path.startswith('http') else 'web' )
-		self.SetStringItem(index, 3, "..%s%s"%(os.sep,os.path.basename(DOMAIN_PATH) if path.startswith(DOMAIN_PATH) else os.path.basename(path)))
+		self.SetStringItem(index, 3, "..%s%s"%(os.sep,os.path.basename(DOMAIN_PATH) if path.startswith(DOMAIN_PATH) else path))
 		self.SetData(index, path)
 		self.SetItemData(index, index)
 
