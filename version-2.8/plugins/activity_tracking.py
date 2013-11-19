@@ -89,7 +89,7 @@ except ImportError:
 
 import pluginmanager
 from Container import Block, CodeBlock, ContainerBlock
-from DEVSKernel.PyDEVS.DEVS import AtomicDEVS, CoupledDEVS
+from DomainInterface import DomainBehavior, DomainStructure
 from PlotGUI import PlotManager
 
 #import profilehooks
@@ -491,9 +491,9 @@ def GetFlatDEVSList(coupled_devs, l=[]):
 	""" Get the flat list of devs model composing coupled_devs (recursively)
 	"""
 	for devs in coupled_devs.componentSet:
-		if isinstance(devs, AtomicDEVS):
+		if isinstance(devs, DomainBehavior):
 			l.append(devs)
-		elif isinstance(devs, CoupledDEVS):
+		elif isinstance(devs, DomainStructure):
 			l.append(devs)
 			GetFlatDEVSList(devs,l)
 	return l

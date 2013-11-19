@@ -23,18 +23,18 @@ class GeneralPanel(wx.Panel):
 		wx.Panel.__init__(self, parent)
 
 		### FileBrowse
-		self.plugin_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Plugins directory"), toolTip=_("Change the plugins directory"))
-		self.domain_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Library directory"), toolTip=_("Change the library directory"))
-		self.out_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Output directory"), toolTip=_("Change the output directory"))
+		self.plugin_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Plugins directory:"), toolTip=_("Change the plugins directory"))
+		self.domain_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Library directory:"), toolTip=_("Change the library directory"))
+		self.out_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Output directory:"), toolTip=_("Change the output directory"))
 
 		self.plugin_dir.SetValue(PLUGINS_DIR)
 		self.domain_dir.SetValue(DOMAIN_PATH)
 		self.out_dir.SetValue(OUT_DIR)
 
 		### StaticText
-		self.st1 = wx.StaticText(self, wx.ID_ANY, _("Number of recent file"))
-		self.st2 = wx.StaticText(self, wx.ID_ANY, _("Font size"))
-		self.st3 = wx.StaticText(self, wx.ID_ANY, _("Deep of history item"))
+		self.st1 = wx.StaticText(self, wx.ID_ANY, _("Number of recent file:"))
+		self.st2 = wx.StaticText(self, wx.ID_ANY, _("Font size:"))
+		self.st3 = wx.StaticText(self, wx.ID_ANY, _("Deep of history item:"))
 
 		self.st1.SetToolTipString(_("Feel free to change the lenght of list defining the recent opend files."))
 		self.st2.SetToolTipString(_("Feel free to change the font size of DEVSimpy."))
@@ -174,9 +174,19 @@ class SimulationPanel(wx.Panel):
 		self.bt6.SetValue(__builtin__.__dict__['NTL'])
 		self.bt6.SetToolTipString(_("No Time Limit allow the stop of simulation when all of models are idle."))
 
-		### StaticText
+
+		### StaticText for DEVS Kernel directory
+		self.txt3 = wx.StaticText(self, wx.ID_ANY, _("DEVS Kernel Directory:"))
+		self.cb3 = wx.ComboBox(self, wx.ID_ANY, DEFAULT_DEVS_DIRNAME, choices=DEVS_DIR_PATH_DICT.keys(), style=wx.CB_READONLY)
+		self.cb3.SetToolTipString(_("Default DEVS Kernel directory. This directory contain PyDEVS packages."))
+		self.default_devs_dir = DEFAULT_DEVS_DIRNAME
+
+		### StaticText for strategy
 		self.txt = wx.StaticText(self, wx.ID_ANY, _("Default strategy:"))
-		self.cb = wx.ComboBox(self, wx.ID_ANY, DEFAULT_SIM_STRATEGY, choices=SIM_STRATEGY_LIST.keys(), style=wx.CB_READONLY)
+		### choice of combobox depends on the default DEVS package directory
+		c= PYDEVS_SIM_STRATEGY_DICT.keys() 	if DEFAULT_DEVS_DIRNAME == 'PyDEVS' else PYPDEVS_SIM_STRATEGY_DICT.keys()
+
+		self.cb = wx.ComboBox(self, wx.ID_ANY, DEFAULT_SIM_STRATEGY, choices=c, style=wx.CB_READONLY)
 		self.cb.SetToolTipString(_("Default strategy for the simulation algorithm. Please see the DEVSimPy doc for more information of possible strategy."))
 		self.sim_defaut_strategy = DEFAULT_SIM_STRATEGY
 
@@ -195,8 +205,11 @@ class SimulationPanel(wx.Panel):
 		hbox1.Add(self.sim_success_wav_btn, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL,15)
 		hbox1.Add(self.sim_error_wav_btn, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL,15)
 
-		hbox2.Add(self.txt, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT|wx.ALL, 15)
-		hbox2.Add(self.cb, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL, 15)
+		hbox5.Add(self.txt3, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.ALL|wx.EXPAND, 15)
+		hbox5.Add(self.cb3, 1, wx.ALIGN_CENTER_VERTICAL|wx.RIGHT|wx.ALL|wx.EXPAND, 15)
+
+		hbox2.Add(self.txt, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.ALL|wx.EXPAND, 15)
+		hbox2.Add(self.cb, 1, wx.ALIGN_CENTER_VERTICAL|wx.RIGHT|wx.ALL|wx.EXPAND, 15)
 
 		hbox3.Add(self.bt6, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 15)
 
@@ -206,11 +219,12 @@ class SimulationPanel(wx.Panel):
 		#hbox4.Add(information, 1, wx.ALIGN_CENTER_VERTICAL, 15)
 		##hbox4.Add(self.strategy_info, 1, wx.ALIGN_CENTER_VERTICAL, 15)
 
-		vbox.Add(hbox1, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL, 10)
-		vbox.Add(hbox2, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL,10)
-		vbox.Add(hbox3, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL,10)
-		vbox.Add(hbox4, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL,10)
-		#vbox.Add(hbox4, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND,10)
+		vbox.Add(hbox1, 0, wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.ALL, 10)
+		vbox.Add(hbox5, 0, wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.ALL,10)
+		vbox.Add(hbox2, 0, wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.ALL,10)
+		vbox.Add(hbox3, wx.LEFT|0, wx.ALIGN_CENTER_VERTICAL|wx.ALL,10)
+		vbox.Add(hbox4, wx.LEFT|0, wx.ALIGN_CENTER_VERTICAL|wx.ALL,10)
+
 
 		### Set sizer
 		self.SetSizer(vbox)
@@ -221,6 +235,7 @@ class SimulationPanel(wx.Panel):
 		self.sim_error_wav_btn.Bind(wx.EVT_BUTTON, self.OnSelectSound)
 		self.bt5.Bind(wx.EVT_CHECKBOX, self.onBt5Check)
 		self.cb.Bind(wx.EVT_COMBOBOX, self.onCb)
+		self.cb3.Bind(wx.EVT_COMBOBOX, self.onCb3)
 		self.sc.Bind(wx.EVT_SPINCTRL, self.onSc)
 
 	def OnSelectSound(self, evt):
@@ -266,10 +281,31 @@ class SimulationPanel(wx.Panel):
 			self.sim_error_wav_path = os.devnull
 
 	def onCb(self, evt):
-		""" CheckBox has been checked
+		""" ComboBox has been checked
 		"""
 		val = evt.GetEventObject().GetValue()
 		self.sim_defaut_strategy = val
+
+	def onCb3(self, evt):
+		""" ComboBox has been checked
+		"""
+ 		val = evt.GetEventObject().GetValue()
+
+		### update cb below cb3
+		self.cb.Clear()
+		if val == 'PyDEVS':
+			for k in PYDEVS_SIM_STRATEGY_DICT:
+				self.cb.Append(k)
+			self.cb.SetValue('bag-based')
+		else:
+			### PyPDEVS
+			for k in PYPDEVS_SIM_STRATEGY_DICT:
+				self.cb.Append(k)
+     		self.cb.SetValue('original')
+
+		### update default value for devs dir et sim strategy
+		self.default_devs_dir = val
+		self.sim_defaut_strategy = self.cb.GetValue()
 
 	def onSc(self, evt):
 		""" CheckBox has been checked
@@ -283,6 +319,7 @@ class SimulationPanel(wx.Panel):
 		__builtin__.__dict__['SIMULATION_SUCCESS_WAV_PATH'] = self.sim_success_wav_path
 		__builtin__.__dict__['SIMULATION_ERROR_WAV_PATH'] = self.sim_error_wav_path
 		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = self.sim_defaut_strategy
+		__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = self.default_devs_dir
 		__builtin__.__dict__['DEFAULT_PLOT_DYN_FREQ'] = self.sim_defaut_plot_dyn_freq
 		__builtin__.__dict__['NTL'] = self.bt6.GetValue()
 
@@ -545,10 +582,14 @@ class TestApp(wx.App):
 		__builtin__.__dict__['SIMULATION_ERROR_WAV_PATH'] = os.path.join(HOME_PATH,'sounds', 'Simulation-Error.wav')
 		__builtin__.__dict__['SIMULATION_SUCCESS_WAV_PATH'] = os.path.join(HOME_PATH,'sounds', 'Simulation-Success.wav')
 		__builtin__.__dict__['NTL'] = False
-		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = 'Hierarchical'
+		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = 'bag-based'
+		__builtin__.__dict__['DEFAULT_PYPDEVS_SIM_STRATEGY'] = 'original'
 		__builtin__.__dict__['DEFAULT_PLOT_DYN_FREQ'] = 100
 		__builtin__.__dict__['LOCAL_EDITOR'] = False
-		__builtin__.__dict__['SIM_STRATEGY_LIST'] = {'PyDEVS':'SimStrategy1', 'Hierarchical':'SimStrategy2', 'Direct Coupling':'SimStrategy3'}
+		__builtin__.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
+		__builtin__.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy4', 'distribued':'SimStrategy5', 'parallel':'SimStrategy6'}
+		__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyDEVS'
+		__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyPDEVS')}
 
 		__builtin__.__dict__['_'] = gettext.gettext
 

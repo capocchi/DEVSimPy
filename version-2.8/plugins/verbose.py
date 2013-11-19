@@ -15,7 +15,8 @@ import wx
 import sys
 import os
 
-from DEVSKernel.PyDEVS.DEVS import AtomicDEVS, CoupledDEVS
+from DomainInterface import DomainBehavior, DomainStructure
+
 import pluginmanager
 
 global show_ext_trans
@@ -61,7 +62,7 @@ def LongRunningProcess(*args, **kwargs):
 
 			txt = [""]
 
-			if isinstance(model, AtomicDEVS):
+			if isinstance(model, DomainBehavior):
 				if msg == 1 and show_ext_trans:
 					txt = [	_("\n\tEXTERNAL TRANSITION: %s (%s)\n")%(block.label,model.myID),
 							_("\t  New State: %s\n")%(model.state),
@@ -90,7 +91,7 @@ def LongRunningProcess(*args, **kwargs):
 						else:
 							txt.append(_("\t  Next scheduled internal transition at %f\n")%(model.myTimeAdvance))
 
-			elif isinstance(model, CoupledDEVS) and show_coll:
+			elif isinstance(model, DomainStructure) and show_coll:
 				txt = [_("\n\tCollision occured in %s, involving:\n")%(block.label)]
 				txt.extend([_("    \t   %s\n")%(m.__class__.__name__) for m in model.immChildren])
 				txt.append(_("\t  select chooses %s\n")%(kwargs['dstar'].__class__.__name__))

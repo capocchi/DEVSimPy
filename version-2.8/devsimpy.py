@@ -160,12 +160,15 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'bitmaps', 'splash.png
 				'FONT_SIZE': 12, # Block font size
 				'LOCAL_EDITOR': True, # for the use of local editor
 				'LOG_FILE': os.devnull, # log file (null by default)
-				'DEFAULT_SIM_STRATEGY': 'Hierarchical', #choose the default simulation strategy
-				'SIM_STRATEGY_LIST' : {'PyDEVS':'SimStrategy1', 'Hierarchical':'SimStrategy2', 'Direct Coupling':'SimStrategy3'}, # list of available simulation strategy
+				'DEFAULT_SIM_STRATEGY': 'bag-based', #choose the default simulation strategy for PyDEVS
+				'PYDEVS_SIM_STRATEGY_DICT' : {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}, # list of available simulation strategy for PyDEVS package
+                'PYPDEVS_SIM_STRATEGY_DICT' : {'original':'SimStrategy4', 'distribued':'SimStrategy5', 'parallel':'SimStrategy6'}, # list of available simulation strategy for PyPDEVS package
 				'HELP_PATH' : os.path.join('doc', 'html'), # path of help directory
 				'NTL' : False, # No Time Limit for the simulation
 				'TRANSPARENCY' : True, # Transparancy for DetachedFrame
-				'DEFAULT_PLOT_DYN_FREQ' : 100 # frequence of dynamic plot of QuickScope (to avoid overhead)
+				'DEFAULT_PLOT_DYN_FREQ' : 100, # frequence of dynamic plot of QuickScope (to avoid overhead),
+				'DEFAULT_DEVS_DIRNAME':'PyDEVS', # default DEVS Kernel directory
+				'DEVS_DIR_PATH_DICT':{'PyDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS')}
 				}
 
 ### here berfore the __main__ function
@@ -409,9 +412,17 @@ class MainApplication(wx.Frame):
 						sys.stdout.write('.devsimpy file appear to be not liked with the DEVSimPy source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(self.GetUserConfigDir()))
 						D['HOME_PATH'] = ABS_HOME_PATH
 
-				__builtin__.__dict__.update(D)
+				### test if the DEVSimPy source directory has been moved
+				### if icon path exists, then we can update builtin from cfg
+				if os.path.exists(D['ICON_PATH']):
+					__builtin__.__dict__.update(D)
+				### icon path is wrong (generally .devsimpy is wrong because DEVSimPy directory has been moved)
+				### .devsimpy must be rewrite
+				else:
+					sys.stdout.write("It seems that DEVSimPy source directory has been moved.\n")
+					self.WriteDefaultConfigFile(self.cfg)
 
-				sys.stdout.write("DEVSimPy is ready. \n")
+				sys.stdout.write("DEVSimPy is ready.\n")
 
 			else:
 
@@ -1059,7 +1070,7 @@ class MainApplication(wx.Frame):
 		"""
 
 		# dialog pour l'importation de lib DEVSimPy (dans Domain) et le local
-		dlg = ImportLibrary(self, wx.ID_ANY, _('Import Library'), size=(550,400))
+		dlg = ImportLibrary(self, wx.ID_ANY, _('Import Library'), size=(550,400), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 
 		if (dlg.ShowModal() == wx.ID_OK):
 

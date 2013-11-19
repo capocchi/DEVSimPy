@@ -20,7 +20,6 @@ from Container import DetachedFrame, ConnectionShape
 from FindGUI import FindReplace
 from Utilities import MoveFromParent
 from Patterns.Observer import Subject
-from DEVSKernel.PyDEVS.DEVS import AtomicDEVS, CoupledDEVS
 
 def InternalLog(model):
 	txt = [	"\n\tINTERNAL TRANSITION: %s (%s)\n"%(model.__class__.__name__, model.myID),
@@ -60,27 +59,6 @@ def TimeAdvanceLog(model):
 
 def GetState(self):
 	return self.__state
-
-#def extTransition(self):
-	#AtomicDEVS.extTransition(self)
-	#pluginmanager.trigger_event("SIM_BLINK", model=self, msg=0)
-
-#def intTransition(self):
-	#AtomicDEVS.intTransition(self)
-	#pluginmanager.trigger_event("SIM_BLINK", model=self, msg=1)
-
-#def timeAdvance(self):
-	#AtomicDEVS.timeAdvance(self)
-	#pluginmanager.trigger_event("SIM_BLINK", model=self, msg=2)
-
-#def extends_model_for_blink(L):
-	#for m in L:
-		#if isinstance(m, AtomicDEVS):
-			#m.extTransition = MethodType(extTransition,m)
-			#m.intTransition = MethodType(intTransition,m)
-			#m.timeAdvance = MethodType(timeAdvance,m)
-		#elif isinstance(m, CoupledDEVS):
-			#extends_model_for_blink(m.componentSet)
 
 @pluginmanager.register("START_BLINK")
 def start_blink(*args, **kwargs):

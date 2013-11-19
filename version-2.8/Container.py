@@ -24,8 +24,6 @@ from __future__ import with_statement
 
 import wx
 import wx.lib.dragscroller
-import  wx.grid as gridlib
-import  wx.gizmos as gizmos
 import  wx.lib.imagebrowser as ib
 import  wx.lib.dialogs
 
@@ -35,7 +33,6 @@ else:
 	from wx.lib.pubsub import pub as Publisher
 
 from wx.lib.newevent import NewEvent
-from wx.lib import wordwrap
 
 ### wx.color has been removed in wx. 2.9
 if hasattr(wx, "Color"):
@@ -47,12 +44,9 @@ import os
 import sys
 import copy
 import inspect
-#import codecs
 import re
-import string
 import cPickle
 import zipfile
-import zipimport
 import types
 import array
 
@@ -60,17 +54,12 @@ from tempfile import gettempdir
 import __builtin__
 from traceback import format_exception
 
-import linecache
-import imp
 from math import * ### for eval
 
 import gettext
 _ = gettext.gettext
 
 AttrUpdateEvent, EVT_ATTR_UPDATE = NewEvent()
-
-#for root, dirs, files in os.walk(os.pardir+os.sep):
-	#sys.path.append(os.path.abspath(root))
 
 import DomainInterface.MasterModel
 import ConnectDialog
@@ -89,32 +78,21 @@ import Components
 import Menu
 import LabelGUI
 
-#from ConnectDialog import ConnectDialog
-#from PlotGUI import PlotManager
+### Mixin
+from Mixins.Attributable import Attributable
+from Mixins.Achievable import Achievable
+from Mixins.Resizeable import Resizeable
+from Mixins.Rotable import Rotable
+from Mixins.Connectable import Connectable
+from Mixins.Plugable import Plugable
 
-#from SimulationGUI import *
-#from DomainInterface.MasterModel import Master
-#from DomainInterface.DomainBehavior import DomainBehavior
-#from DomainInterface.DomainStructure import DomainStructure
-#from DiagramConstantsDialog import DiagramConstantsDialog
-#from pluginmanager import trigger_event
 from Decorators import BuzyCursorNotification, StatusBarNotification, ProgressNotification, Pre_Undo, Post_Undo, cond_decorator
 from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance
-#from PrintOut import Printable
 from Patterns.Observer import Subject, Observer
-#from which import which
-
-#from Savable import Savable, PickledCollection
 from Savable import Savable
-#from ZipManager import Zip
-#from NetManager import Net
-#from PriorityGUI import PriorityGUI
-#from WizardGUI import ModelGeneratorWizard
-#from CheckerGUI import CheckerGUI
-#from PluginsGUI import ModelPluginsManager
-#from Components import DEVSComponent, BlockFactory, GetClass
-#from DropTarget import DropTarget
 from DetachedFrame import DetachedFrame
+from AttributeEditor import AttributeEditor, QuickAttributeEditor
+from PropertiesGridCtrl import PropertiesGridCtrl
 
 #Global Stuff -------------------------------------------------
 clipboard = []
@@ -285,19 +263,7 @@ class Structurable(Components.DEVSComponent):
 		self.devsModel.IPorts = []
 		self.devsModel.OPorts = []
 
-#---------------------------------------------------------
-class Achievable(Components.DEVSComponent):
-	"""Creates corresponding behavioral model
-	"""
-
-	###
-	def __init__(self):
-		""" Constructor
-		"""
-
-		Components.DEVSComponent.__init__(self)
-
-#---------------------------------------------------------
+#-------------------------------------------------------------------------------
 class FixedList(list):
 	""" List with fixed size (for undo/redo)
 	"""
@@ -315,7 +281,7 @@ class FixedList(list):
 
 		self.insert(len(self),v)
 
-#-------------------------------------------------------------
+#-------------------------------------------------------------------------------
 class Diagram(Savable, Structurable):
 	""" Diagram class.
 	"""
@@ -1026,7 +992,7 @@ class Diagram(Savable, Structurable):
 				m.GetLabelList(l)
 		return l
 
-# Generic Shape Event Handler------------------------------------
+# Generic Shape Event Handler---------------------------------------------------
 class ShapeEvtHandler:
 	""" Handler class
 	"""
@@ -1068,7 +1034,7 @@ class ShapeEvtHandler:
 		pass
 
 
-# Generic Graphic items------------------------------------------
+# Generic Graphic items---------------------------------------------------------
 class Shape(ShapeEvtHandler):
 	""" Shape class
 	"""
@@ -1130,7 +1096,7 @@ class Shape(ShapeEvtHandler):
 		"""
 		return copy.deepcopy(self)
 
-#---------------------------------------------------------
+#-------------------------------------------------------------------------------
 class LineShape(Shape):
 	"""
 	"""
@@ -1167,7 +1133,7 @@ class LineShape(Shape):
 
 		return False if dist > 7 else True
 
-#---------------------------------------------------------
+#-------------------------------------------------------------------------------
 class RoundedRectangleShape(Shape):
 	"""     RoundedRectangleShape class
 	"""
@@ -1205,7 +1171,7 @@ class RoundedRectangleShape(Shape):
 
 		return True
 
-#---------------------------------------------------------
+#-------------------------------------------------------------------------------
 class RectangleShape(Shape):
 	""" RectangleShape class
 	"""
@@ -1235,7 +1201,8 @@ class RectangleShape(Shape):
 		if y > self.y[1]: return False
 
 		return True
-#---------------------------------------------------------
+
+#-------------------------------------------------------------------------------
 class PolygonShape(Shape):
 	""" PolygonShape class
 	"""
@@ -1270,7 +1237,7 @@ class PolygonShape(Shape):
 		if y > self.y[1]: return False
 		return True
 
-#---------------------------------------------------------
+#-------------------------------------------------------------------------------
 class CircleShape(Shape):
 	def __init__(self,x=20, y=20, x2=120, y2=120, r=30.0):
 		Shape.__init__(self, [x,x2], [y,y2])
@@ -1278,7 +1245,6 @@ class CircleShape(Shape):
 
 	def draw(self,dc):
 		Shape.draw(self,dc)
-		#dc.SetFont(wx.Font(FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, False, u'Comic Sans MS'))
 		dc.SetFont(wx.Font(10, self.font[1],self.font[2], self.font[3], False, self.font[4]))
 		dc.DrawCircle(int(self.x[0]+self.x[1])/2, int(self.y[0]+self.y[1])/2, self.r)
 		dc.EndDrawing()
@@ -1290,7 +1256,7 @@ class CircleShape(Shape):
 		if y > self.y[1]: return False
 		return True
 
-#---------------------------------------------------------
+#-------------------------------------------------------------------------------
 class PointShape(Shape):
 	def __init__(self, x=20, y=20, size=4, type='rect'):
 		Shape.__init__(self, [x] , [y])
@@ -1329,7 +1295,7 @@ class PointShape(Shape):
 		self.graphic.fill = self.fill
 		self.graphic.draw(dc)
 
-#-------------------------------------------------------------
+#-------------------------------------------------------------------------------
 class ShapeCanvas(wx.ScrolledWindow, Subject):
 	""" ShapeCanvas class.
 	"""
@@ -1337,7 +1303,14 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 	ID = 0
 	CONNECTOR_TYPE = 'direct'
 
-	def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1,-1), style=wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN, name="", diagram = None):
+	def __init__(self,\
+				 parent,\
+	  			id=wx.ID_ANY, \
+			  	pos=wx.DefaultPosition, \
+		  		size=(-1,-1), \
+			  	style=wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN, \
+			  	name="", \
+			  	diagram = None):
 		""" Construcotr
 		"""
 		wx.ScrolledWindow.__init__(self, parent, id, pos, size, style, name)
@@ -2585,507 +2558,6 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 	def GetState(self):
 		return self.__state
 
-##------------------------------------------
-##class Lockable:
-	#def __init__(self):
-		#self.lock = False                              # lock motion
-
-	#def Lock(self):
-		#self.lock = True
-
-	#def UnLock(self):
-		#self.lock = False
-
-#------------------------------------------
-class Selectable:
-	""" Allows Shape to be selected.
-	"""
-
-	def __init__(self):
-		""" Constructor
-		"""
-		self.selected = False
-
-	def ShowAttributes(self, event):
-		"""
-		"""
-
-		canvas = event.GetEventObject()
-		diagram = canvas.GetDiagram()
-
-		if isinstance(self, (Block, Port)) and event.ControlDown():
-
-			old_label = self.label
-
-			d = LabelGUI.LabelDialog(canvas, self)
-			d.ShowModal()
-
-			### update priority list
-			if self.label in diagram.priority_list and old_label != self.label:
-				### find index of label priority list and replace it
-				i = diagram.priority_list.index(self.label)
-				diagram.priority_list[i] = new_label
-
-				### if block we adapt the font according to the new label size
-				if " " not in new_label and isinstance(self, Block):
-					font  = wx.Font(self.font[0], self.font[1],self.font[2], self.font[3], False, self.font[4])
-					ln = len(self.label)*font.GetPointSize()
-					w = self.x[1]-self.x[0]
-
-					if ln > w:
-						a = ln-w
-						self.x[0] -= a/2
-						self.x[1] += a/2
-
-				### update of panel properties
-				mainW = wx.GetApp().GetTopWindow()
-				nb1 = mainW.nb1
-				if nb1.GetSelection() == 1:
-					newContent = AttributeEditor(nb1.propPanel, wx.ID_ANY, self, canvas)
-					nb1.UpdatePropertiesPage(newContent)
-
-		event.Skip()
-
-#---------------------------------------------------------
-class Plugable:
-	""" Plugable Mixin
-	"""
-
-	@staticmethod
-	def Load_Module(fileName):
-		""" Load module without load_module from importer. In this way, we can change the name of module in the buil-in.
-		"""
-
-		### import zipfile model
-		if zipfile.is_zipfile(fileName):
-			importer = zipimport.zipimporter(fileName)
-
-			### change module name
-			old_plugin_name = 'plugins'
-			new_plugin_name = '%s.%s'%(os.path.basename(os.path.splitext(fileName)[0]),old_plugin_name)
-
-			### get code of plugins
-			code =  importer.get_code(old_plugin_name)
-
-			# Create the new 'temp' module.
-			temp = imp.new_module(new_plugin_name)
-			sys.modules[new_plugin_name] = temp
-
-			### there is syntaxe error ?
-			try:
-				exec code in temp.__dict__
-			except Exception, info:
-				return info
-
-			return sys.modules[new_plugin_name]
-
-		return None
-
-	@BuzyCursorNotification
-	def LoadPlugins(self, fileName):
-		""" Method which load plugins from zip
-			Used for define or redefine method of amd. and .cmd model
-			The name of plugin file must be "plugins.py"
-		"""
-
-		### if list of activated plugins is not empty
-		if self.plugins != []:
-			module = Plugable.Load_Module(fileName)
-
-			if inspect.ismodule(module):
-				for name,m in inspect.getmembers(module, inspect.isfunction):
-					### import only plugins in plugins list (dynamic attribute) and only method
-					if name in self.plugins and 'self' in inspect.getargspec(m).args:
-						setattr(self, name, types.MethodType(m, self, self.__class__))
-			else:
-				return module
-		### restore method which was assigned to None before being pickled
-		else:
-			### for all method in the class of model
-			for method in filter(lambda value: isinstance(value, types.FunctionType), self.__class__.__dict__.values()):
-				name = method.__name__
-				### if method was assigned to None by getstate berfore being pickled
-				if getattr(self, name) is None:
-					### assign to default class method
-					setattr(self, name, types.MethodType(method, self))
-
-		return True
-
-###---------------------------------------------------------------------------------------------------------
-# NOTE: Testable << object :: Testable mixin is needed to manage tests files and tests executions. It add the OnTestEditor event for the tests files edition
-class Testable(object):
-
-	# NOTE: Testable :: OnTestEditor 		=> new event for AMD model. Open tests files in editor
-	def OnTestEditor(self, event):
-		model_path = os.path.dirname(self.python_path)
-
-		# If selected model is AMD
-		if self.isAMD():
-
-			# TODO: Testable :: OnTestEditor => Fix Editor importation
-			import Editor
-
-			# Create tests files is doesn't exist
-			if not ZipManager.Zip.HasTests(model_path):
-				self.CreateTestsFiles()
-
-			### list of BDD files
-			L = ZipManager.Zip.GetTests(model_path)
-
-			### create Editor with BDD files in tab
-			if L != []:
-
-				mainW = wx.GetApp().GetTopWindow()
-				### Editor instanciation and configuration---------------------
-				editorFrame = Editor.GetEditor(
-						mainW,
-						wx.ID_ANY,
-						'Features',
-						file_type="test"
-				)
-
-				for i,s in enumerate(map(lambda l: os.path.join(model_path, l), L)):
-					editorFrame.AddEditPage(L[i], s)
-
-				editorFrame.Show()
-				### -----------------------------------------------------------
-
-	# NOTE: Testable :: isAMD 				=> Test if the model is an AMD and if it's well-formed
-	def isAMD(self):
-		cond = False
-		if zipfile.is_zipfile(os.path.dirname(self.python_path)):
-			cond = True
-		return cond
-
-	# NOTE: Testable :: CreateTestsFiles	=> AMD tests files creation
-	def CreateTestsFiles(self):
-		devsPath = os.path.dirname(self.python_path)
-		name = os.path.splitext(os.path.basename(self.python_path))[0]
-		zf = ZipManager.Zip(devsPath)
-
-		feat, steps, env = self.CreateFeature(), self.CreateSteps(), Testable.CreateEnv()
-
-		zf.Update([os.path.join('BDD', feat), os.path.join('BDD', steps), os.path.join('BDD', env)])
-
-		if os.path.exists(feat): os.remove(feat)
-		if os.path.exists(steps): os.remove(steps)
-		if os.path.exists(env): os.remove(env)
-
-		#if not zf.HasTests():
-
-			#files = zf.GetTests()
-			#if not '%s.feature'%name in files:
-				#feat = self.CreateFeature()
-				#zf.Update([os.path.join('BDD', feat)])
-				#os.remove(feat)
-			#if not 'steps.py' in files:
-				#steps = self.CreateSteps()
-				#zf.Update([os.path.join('BDD',steps)])
-				#os.remove(steps)
-			#if not 'environment.py' in files:
-				#env = self.CreateEnv()
-				#zf.Update([os.path.join('BDD',env)])
-				#os.remove(env)
-
-	# NOTE: Testable :: CreateFeature		=> Feature file creation
-	def CreateFeature(self):
-		name = os.path.splitext(os.path.basename(self.python_path))[0]
-		feature = "%s.feature"%name
-		with open(feature, 'w+') as feat:
-			feat.write("# -*- coding: utf-8 -*-\n")
-
-		return feature
-
-	# NOTE: Testable :: CreateSteps		=> Steps file creation
-	def CreateSteps(self):
-		steps = "steps.py"
-		with open(steps, 'w+') as step:
-			step.write("# -*- coding: utf-8 -*-\n")
-
-		return steps
-
-	# NOTE: Testable :: CreateEnv		=> Environment file creation
-	@staticmethod
-	def CreateEnv(path=None):
-		if path:
-			environment = os.path.join(path, 'environment.py')
-		else:
-			environment = "environment.py"
-		with open(environment, 'w+') as env:
-			env.write("# -*- coding: utf-8 -*-\n")
-
-		return environment
-
-
-
-	# NOTE: Testable :: GetTempTests		=> Create tests on temporary folder for execution
-	def GetTempTests(self, global_env=None):
-		if not global_env: global_env = False
-
-		### Useful vars definition-----------------------------------------------------------------
-		# print self.python_path
-		model_path = os.path.dirname(self.python_path)
-		basename = os.path.basename(self.python_path)
-		name = os.path.splitext(basename)[0]
-		tests_files = ZipManager.Zip.GetTests(model_path)
-		### ---------------------------------------------------------------------------------------
-
-		### Folder hierarchy construction----------------------------------------------------------
-		feat_dir  = os.path.join(gettempdir(), "features")
-		steps_dir = os.path.join(feat_dir, "steps")
-		if not os.path.exists(feat_dir):
-			os.mkdir(feat_dir)
-		if not os.path.exists(steps_dir):
-			os.mkdir(steps_dir)
-		### ---------------------------------------------------------------------------------------
-
-		### AMD unzip------------------------------------------------------------------------------
-		amd_dir = os.path.join(gettempdir(), "AtomicDEVS")
-		if not os.path.exists(amd_dir):
-			os.mkdir(amd_dir)
-		### ---------------------------------------------------------------------------------------
-
-		### Tests code retriever-------------------------------------------------------------------
-		importer = zipfile.ZipFile(model_path)
-
-		feat_name = filter(lambda t: t.endswith('.feature'), tests_files)[0]
-		featInfo = importer.getinfo(feat_name)
-		feat_code = importer.read(featInfo)
-
-		steps_name = filter(lambda t: t.endswith('steps.py'), tests_files)[0]
-		stepsInfo = importer.getinfo(steps_name)
-		steps_code = importer.read(stepsInfo)
-
-		if not global_env:
-			environment_name = filter(lambda t: t.endswith('environment.py'), tests_files)[0]
-			envInfo = importer.getinfo(environment_name)
-			env_code = importer.read(envInfo)
-		else:
-			environment_name = os.path.join(gettempdir(), 'environment.py')
-			with open(environment_name, 'r+') as global_env_code:
-				env_code = global_env_code.read()
-
-		importer.close()
-		### ---------------------------------------------------------------------------------------
-
-		### AMD code retriever---------------------------------------------------------------------
-		importer = zipfile.ZipFile(model_path)
-
-		# amd_name = filter(lambda t: t.endswith('%s.py'%name), importer.namelist())[0]
-		amd_name = ZipManager.getPythonModelFileName(model_path)
-		amd_info = importer.getinfo(amd_name)
-		amd_code = importer.read(amd_info)
-
-		### ---------------------------------------------------------------------------------------
-
-		### Tests files creation in temporary directory--------------------------------------------
-		tempFeature = os.path.join(feat_dir, "%s.feature"%name)
-		tempEnv = os.path.join(feat_dir, "environment.py")
-		tempSteps = os.path.join(steps_dir, "%s_steps.py"%name)
-
-		tempAMD = os.path.join(amd_dir, amd_name)
-
-		with open(tempFeature, 'w+') as feat:
-			feat.write(feat_code)
-		with open(tempSteps, 'w+') as steps:
-			steps.write(steps_code)
-		with open(tempEnv, 'w+') as env:
-			env.write(env_code)
-
-		with open(tempAMD, 'w+') as AMD:
-			AMD.write(amd_code)
-		### ---------------------------------------------------------------------------------------
-
-		return tempFeature, tempSteps, tempEnv
-
-	# NOTE: Testable :: RemoveTempTests		=> Remove tests on temporary folder
-	@staticmethod
-	def RemoveTempTests():
-		feat_dir = os.path.join(gettempdir(), 'features')
-		if os.path.exists(feat_dir):
-			for root, dirs, files in os.walk(feat_dir, topdown=False):
-				for name in files:
-					os.remove(os.path.join(root, name))
-        		for name in dirs:
-    				os.rmdir(os.path.join(root, name))
-
-			os.rmdir(feat_dir)
-
-		amd_dir = os.path.join(gettempdir(), 'AtomicDEVS')
-		if os.path.exists(amd_dir):
-			for root, dirs, files in os.walk(amd_dir, topdown=False):
-				for name in files:
-					os.remove(os.path.join(root, name))
-        		for name in dirs:
-    				os.rmdir(os.path.join(root, name))
-
-			os.rmdir(amd_dir)
-
-
-#---------------------------------------------------------
-class Resizeable:
-	""" Creates resize Nodes that can be drug around the canvas to alter the shape or size of the Shape.
-	"""
-	def __init__(self):
-		pass
-
-#---------------------------------------------------------
-class Rotable:
-	""" Creates rotable Block can rotate under 4 direction (est, ouest, nord, sud)
-	"""
-
-	def __init__(self):
-		""" Constructor.
-		"""
-		self.direction="ouest"
-
-	###
-	def OnRotateR(self, event):
-		if self.direction == "ouest":
-			self.direction = "nord"
-		elif self.direction == "nord":
-			self.direction = "est"
-		elif self.direction == "est":
-			self.direction = "sud"
-		else:
-			self.direction = "ouest"
-
-	###
-	def OnRotateL(self, event):
-		if self.direction == "ouest":
-			self.direction = "sud"
-		elif self.direction == "nord":
-			self.direction = "ouest"
-		elif self.direction == "est":
-			self.direction = "nord"
-		else:
-			self.direction = "est"
-
-#---------------------------------------------------------
-class Connectable:
-	"""Creates connection nodes or ports
-	"""
-
-	def __init__(self, nb_in = 1, nb_out = 3):
-		""" Constructor
-		"""
-
-		self.input = nb_in
-		self.output = nb_out
-		self.direction = "ouest"        # direction of ports (left)
-
-	def getPort(self, type, num):
-
-		# width and height of model
-		w = self.x[1]-self.x[0]
-		h = self.y[1]-self.y[0]
-
-		if type=='input':
-			div = float(self.input)+1.0
-			x=self.x[0]
-
-		elif type=='output':
-			div = float(self.output)+1.0
-			x=self.x[1]
-
-		dx=float(w)/div
-		dy=float(h)/div
-		y= self.y[0]+dy*(num+1)
-
-		# ouest -> nord
-		if self.direction == "nord":
-			if type=='input':
-				x+=dx*(num+1)
-				y-=dy*(num+1)
-			else:
-				x-=dx*(num+1)
-				y+=h-dy*(num+1)
-		# nord -> est
-		elif self.direction == "est":
-			if type=='input':
-				x+=w
-				y+=0
-			else:
-				x-=w
-				y+=0
-		# est -> sud
-		elif self.direction == "sud":
-			if type=='input':
-				x+=dx*(num+1)
-				y+=h-dy*(num+1)
-			else:
-				x-=dx*(num+1)
-				y-=dy*(num+1)
-		# sud -> ouest
-		elif self.direction == "ouest":
-			if type=='input':
-				x+=0
-				y+=0
-			else:
-				x+=0
-				y+=0
-
-		return(x,y)
-
-#---------------------------------------------------------
-class Attributable:
-	"""     Allows AttributeEditor to edit specified properties of the Shape
-	"""
-
-	### Static variable for default graphical properties display
-	GRAPHICAL_ATTR = ['label', 'label_pos', 'pen', 'fill', 'font', 'image_path', 'input', 'output']
-
-	def __init__(self):
-		""" Constructor
-		"""
-		self.attributes = []
-
-	def AddAttribute(self, name, typ=""):
-		### add attribute if not exist
-		if not hasattr(self, name):
-			setattr(self, name, typ)
-
-		self.attributes.append(name)
-
-	def GetAttributes(self):
-		return self.attributes
-
-	def SetAttributes(self, L):
-		""" Set attributes list
-		"""
-		assert(isinstance(L,list))
-		#assert(False not in map(lambda txt: hasattr(self,txt),L))
-
-		### set attribute
-		for name in L:
-			if not hasattr(self, name):
-				setattr(self, name, '')
-
-		### set attributres list
-		self.attributes = L
-
-	def AddAttributes(self, atts):
-		""" Extend attributes list
-		"""
-		self.attributes.extend(atts)
-
-	def RemoveAttribute(self, name):
-		""" Remove attribute name
-		"""
-		### delete the attribute
-		if hasattr(self,name):
-			delattr(self, name)
-
-		### remove name from attributes list
-		if name in self.attributes:
-			self.attributes.remove(name)
-
-	#def IsGraphicalAttribute(self, attr):
-		#return attr in Attributable.GRAPHICAL_ATTR
-
-	#def IsBehavioralAttribute(self, attr):
-		#return not self.IsGraphicalAttribute(attr)
-
 #-----------------------------------------------------------
 class LinesShape(Shape):
 	"""
@@ -3218,60 +2690,263 @@ class LinesShape(Shape):
 				self.unlock()
 				break
 
-#class Convertible:
-	#""" class that allows connection changing
-	#"""
+# Mixins------------------------------------------------------------------------
+class Selectable:
+	""" Allows Shape to be selected.
+	"""
 
-	#def __init__(self, form = 'direct'):
-		#self.connector_type = form
+	def __init__(self):
+		""" Constructor
+		"""
+		self.selected = False
 
-	#def ChangeForm(self, new_form=''):
-		#""" Change form after connexion
+	def ShowAttributes(self, event):
+		"""
+		"""
 
-						#------
-								#|
-								#|
-								#-------
-		#"""
+		canvas = event.GetEventObject()
+		diagram = canvas.GetDiagram()
 
-		#if new_form != self.connector_type:
-			#x = self.x
-			#y = self.y
+		if isinstance(self, (Block, Port)) and event.ControlDown():
 
-			#if new_form == 'direct':
-				#self.x=[x[0],x[1]]
-				#self.y=[y[0],y[1]]
+			old_label = self.label
 
-			#elif new_form == 'square':
-				#len_x = abs(x[1]-x[0])
-				#self.x = array.array('d',[x[0], x[0]+len_x/2,   x[0]+len_x/2,   x[1]])
-				#self.y = array.array('d',[y[0], y[0], y[1], y[1]])
-			#else:
-				#pass
+			d = LabelGUI.LabelDialog(canvas, self)
+			d.ShowModal()
 
-			#self.connector_type = new_form
+			### update priority list
+			if self.label in diagram.priority_list and old_label != self.label:
+				### find index of label priority list and replace it
+				i = diagram.priority_list.index(self.label)
+				diagram.priority_list[i] = new_label
 
-		####TODO gestion de la touch_list :-)
+				### if block we adapt the font according to the new label size
+				if " " not in new_label and isinstance(self, Block):
+					font  = wx.Font(self.font[0], self.font[1],self.font[2], self.font[3], False, self.font[4])
+					ln = len(self.label)*font.GetPointSize()
+					w = self.x[1]-self.x[0]
 
-		##### in order to sort model from x postion
-		##D={}
-		##for s in self.touch_list:
-			##D[s.x[0]] = s
+					if ln > w:
+						a = ln-w
+						self.x[0] -= a/2
+						self.x[1] += a/2
 
-		##### work fine just for model on the right bottom
-		##cpt = 1
-		##for i in sorted(D):
-			##s = D[i]
-			##w = abs(s.x[1]-s.x[0])
-			##point1 = (s.x[0], s.y[0] - 10)
-			##point2 = (s.x[0] + (w + 20), s.y[0] - 10)
+				### update of panel properties
+				mainW = wx.GetApp().GetTopWindow()
+				nb1 = mainW.nb1
+				if nb1.GetSelection() == 1:
+					newContent = AttributeEditor(nb1.propPanel, wx.ID_ANY, self, canvas)
+					nb1.UpdatePropertiesPage(newContent)
 
-			##self.x.insert(cpt,point1[0])
-			##self.y.insert(cpt,point1[1])
-			##self.x.insert(cpt+1,point2[0])
-			##self.y.insert(cpt+1,point2[1])
+		event.Skip()
 
-			##cpt+=2
+###---------------------------------------------------------------------------------------------------------
+# NOTE: Testable << object :: Testable mixin is needed to manage tests files and tests executions. It add the OnTestEditor event for the tests files edition
+class Testable(object):
+
+	# NOTE: Testable :: OnTestEditor 		=> new event for AMD model. Open tests files in editor
+	def OnTestEditor(self, event):
+		model_path = os.path.dirname(self.python_path)
+
+		# If selected model is AMD
+		if self.isAMD():
+
+			# TODO: Testable :: OnTestEditor => Fix Editor importation
+			import Editor
+
+			# Create tests files is doesn't exist
+			if not ZipManager.Zip.HasTests(model_path):
+				self.CreateTestsFiles()
+
+			### list of BDD files
+			L = ZipManager.Zip.GetTests(model_path)
+
+			### create Editor with BDD files in tab
+			if L != []:
+
+				mainW = wx.GetApp().GetTopWindow()
+				### Editor instanciation and configuration---------------------
+				editorFrame = Editor.GetEditor(
+						mainW,
+						wx.ID_ANY,
+						'Features',
+						file_type="test"
+				)
+
+				for i,s in enumerate(map(lambda l: os.path.join(model_path, l), L)):
+					editorFrame.AddEditPage(L[i], s)
+
+				editorFrame.Show()
+				### -----------------------------------------------------------
+
+	# NOTE: Testable :: isAMD 				=> Test if the model is an AMD and if it's well-formed
+	def isAMD(self):
+		cond = False
+		if zipfile.is_zipfile(os.path.dirname(self.python_path)):
+			cond = True
+		return cond
+
+	# NOTE: Testable :: CreateTestsFiles	=> AMD tests files creation
+	def CreateTestsFiles(self):
+		devsPath = os.path.dirname(self.python_path)
+		name = os.path.splitext(os.path.basename(self.python_path))[0]
+		zf = ZipManager.Zip(devsPath)
+
+		feat, steps, env = self.CreateFeature(), self.CreateSteps(), Testable.CreateEnv()
+
+		zf.Update([os.path.join('BDD', feat), os.path.join('BDD', steps), os.path.join('BDD', env)])
+
+		if os.path.exists(feat): os.remove(feat)
+		if os.path.exists(steps): os.remove(steps)
+		if os.path.exists(env): os.remove(env)
+
+		#if not zf.HasTests():
+
+			#files = zf.GetTests()
+			#if not '%s.feature'%name in files:
+				#feat = self.CreateFeature()
+				#zf.Update([os.path.join('BDD', feat)])
+				#os.remove(feat)
+			#if not 'steps.py' in files:
+				#steps = self.CreateSteps()
+				#zf.Update([os.path.join('BDD',steps)])
+				#os.remove(steps)
+			#if not 'environment.py' in files:
+				#env = self.CreateEnv()
+				#zf.Update([os.path.join('BDD',env)])
+				#os.remove(env)
+
+	# NOTE: Testable :: CreateFeature		=> Feature file creation
+	def CreateFeature(self):
+		name = os.path.splitext(os.path.basename(self.python_path))[0]
+		feature = "%s.feature"%name
+		with open(feature, 'w+') as feat:
+			feat.write("# -*- coding: utf-8 -*-\n")
+
+		return feature
+
+	# NOTE: Testable :: CreateSteps		=> Steps file creation
+	def CreateSteps(self):
+		steps = "steps.py"
+		with open(steps, 'w+') as step:
+			step.write("# -*- coding: utf-8 -*-\n")
+
+		return steps
+
+	# NOTE: Testable :: CreateEnv		=> Environment file creation
+	@staticmethod
+	def CreateEnv(path=None):
+		if path:
+			environment = os.path.join(path, 'environment.py')
+		else:
+			environment = "environment.py"
+		with open(environment, 'w+') as env:
+			env.write("# -*- coding: utf-8 -*-\n")
+
+		return environment
+
+	# NOTE: Testable :: GetTempTests		=> Create tests on temporary folder for execution
+	def GetTempTests(self, global_env=None):
+		if not global_env: global_env = False
+
+		### Useful vars definition-----------------------------------------------------------------
+		# print self.python_path
+		model_path = os.path.dirname(self.python_path)
+		basename = os.path.basename(self.python_path)
+		name = os.path.splitext(basename)[0]
+		tests_files = ZipManager.Zip.GetTests(model_path)
+		### ---------------------------------------------------------------------------------------
+
+		### Folder hierarchy construction----------------------------------------------------------
+		feat_dir  = os.path.join(gettempdir(), "features")
+		steps_dir = os.path.join(feat_dir, "steps")
+		if not os.path.exists(feat_dir):
+			os.mkdir(feat_dir)
+		if not os.path.exists(steps_dir):
+			os.mkdir(steps_dir)
+		### ---------------------------------------------------------------------------------------
+
+		### AMD unzip------------------------------------------------------------------------------
+		amd_dir = os.path.join(gettempdir(), "AtomicDEVS")
+		if not os.path.exists(amd_dir):
+			os.mkdir(amd_dir)
+		### ---------------------------------------------------------------------------------------
+
+		### Tests code retriever-------------------------------------------------------------------
+		importer = zipfile.ZipFile(model_path)
+
+		feat_name = filter(lambda t: t.endswith('.feature'), tests_files)[0]
+		featInfo = importer.getinfo(feat_name)
+		feat_code = importer.read(featInfo)
+
+		steps_name = filter(lambda t: t.endswith('steps.py'), tests_files)[0]
+		stepsInfo = importer.getinfo(steps_name)
+		steps_code = importer.read(stepsInfo)
+
+		if not global_env:
+			environment_name = filter(lambda t: t.endswith('environment.py'), tests_files)[0]
+			envInfo = importer.getinfo(environment_name)
+			env_code = importer.read(envInfo)
+		else:
+			environment_name = os.path.join(gettempdir(), 'environment.py')
+			with open(environment_name, 'r+') as global_env_code:
+				env_code = global_env_code.read()
+
+		importer.close()
+		### ---------------------------------------------------------------------------------------
+
+		### AMD code retriever---------------------------------------------------------------------
+		importer = zipfile.ZipFile(model_path)
+
+		# amd_name = filter(lambda t: t.endswith('%s.py'%name), importer.namelist())[0]
+		amd_name = ZipManager.getPythonModelFileName(model_path)
+		amd_info = importer.getinfo(amd_name)
+		amd_code = importer.read(amd_info)
+
+		### ---------------------------------------------------------------------------------------
+
+		### Tests files creation in temporary directory--------------------------------------------
+		tempFeature = os.path.join(feat_dir, "%s.feature"%name)
+		tempEnv = os.path.join(feat_dir, "environment.py")
+		tempSteps = os.path.join(steps_dir, "%s_steps.py"%name)
+
+		tempAMD = os.path.join(amd_dir, amd_name)
+
+		with open(tempFeature, 'w+') as feat:
+			feat.write(feat_code)
+		with open(tempSteps, 'w+') as steps:
+			steps.write(steps_code)
+		with open(tempEnv, 'w+') as env:
+			env.write(env_code)
+
+		with open(tempAMD, 'w+') as AMD:
+			AMD.write(amd_code)
+		### ---------------------------------------------------------------------------------------
+
+		return tempFeature, tempSteps, tempEnv
+
+	# NOTE: Testable :: RemoveTempTests		=> Remove tests on temporary folder
+	@staticmethod
+	def RemoveTempTests():
+		feat_dir = os.path.join(gettempdir(), 'features')
+		if os.path.exists(feat_dir):
+			for root, dirs, files in os.walk(feat_dir, topdown=False):
+				for name in files:
+					os.remove(os.path.join(root, name))
+        		for name in dirs:
+    				os.rmdir(os.path.join(root, name))
+
+			os.rmdir(feat_dir)
+
+		amd_dir = os.path.join(gettempdir(), 'AtomicDEVS')
+		if os.path.exists(amd_dir):
+			for root, dirs, files in os.walk(amd_dir, topdown=False):
+				for name in files:
+					os.remove(os.path.join(root, name))
+        		for name in dirs:
+    				os.rmdir(os.path.join(root, name))
+
+			os.rmdir(amd_dir)
 
 #---------------------------------------------------------
 class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
@@ -3375,7 +3050,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 	def __del__(self):
 		pass
 
-#---------------------------------------------------------
+#Basic Graphical Components-----------------------------------------------------
 class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attributable, Rotable, Plugable, Observer, Testable, Savable):
 	""" Generic Block class.
 	"""
@@ -4472,1132 +4147,3 @@ class DiskGUI(CodeBlock):
 		else:
 			dial = wx.MessageDialog(None, _('No data available.\nGo to the simulation process first!'), self.label, wx.OK|wx.ICON_INFORMATION)
 			dial.ShowModal()
-
-#----------------------------------------------------------------------------------
-class CustomDataTable(gridlib.PyGridTableBase):
-	""" CustomDataTable(model)
-	"""
-
-	def __init__(self):
-		""" Constructor
-		"""
-
-		gridlib.PyGridTableBase.__init__(self)
-
-		### model initialized by Populate
-		self.model = None
-
-		### TODO rendre les keys (ormis la 1) géénrique en fonction des noms des variable
-		self.info = { _('Unknown information') : _("Please get information of DEVS attribut \nthrough its class constructor using @ symbole. \n For example: @attribut_name : informations"),
-						'python_path' : _("This is the path of python file.\nYou can change this path in order to change the behavior of the model."),
-						'label' : _("This is the name of model.\nYou can change this name by clicking on its value field"),
-						'pen' : _("This is the color and size of pen used to trace the model shape.\nYou can change these properies by clicking on its value field."),
-						'fill' : _("This is the background color of the model shape.\nYou can change this properties by clicking on its value filed."),
-						'font': _("This is the font of the label.")
-						}
-
-		self.colLabels = [_('Attribute'),_('Value'),_('Information')]
-
-		### default graphical attribut label
-		self.infoBlockLabelList = [_('Name'), _('Color and size of pen'), _('Background color'), _('Font label'), _('Background image'),_('Input port'), _('Output port')]
-
-		self.nb_graphic_var = len(self.infoBlockLabelList)
-
-		### stock the bad field (pink) to control the bad_filename_path_flag in Update of Block model
-		self.bad_flag = {}
-
-	def Populate(self, model):
-		""" Populate the data and dataTypes lists
-		"""
-
-		self.model = model
-		self.data = []
-		self.dataTypes = []
-		self.nb_behavior_var = 0
-		self.nb_graphic_var = 0
-
-		n = len(model.GetAttributes())             ### graphical attributes number
-		m = len(self.infoBlockLabelList)           ### docstring graphical attributes number
-
-		### if user define new graphical attributes we add their descritpion in infoBlockLabelList
-		if m != n:
-			self.infoBlockLabelList.extend(model.GetAttributes()[m:])
-
-		### default behavioral attributes dictionary
-		infoBlockBehavioralDict = dict(map(lambda attr: (attr, _('Unknown information')), model.args.keys()))
-
-		### if user code the information of behavioral attribute in docstring of class with @ or - symbole, we update the infoBlockBehavioralDict
-		if hasattr(model, 'python_path') and infoBlockBehavioralDict != {}:
-			### cls object from python file
-			cls = Components.GetClass(model.python_path)
-			### if cls is class
-			if inspect.isclass(cls):
-				regex = re.compile('[@|-][param]*[\s]*([a-zA-Z0-9-_\s]*)[=|:]([a-zA-Z0-9-_\s]+)')
-				doc = cls.__init__.__doc__ or ""
-				for attr, val in regex.findall(doc):
-					### attr could be in model.args
-					if string.strip(attr) in model.args:
-						infoBlockBehavioralDict.update({string.strip(attr):string.strip(val)})
-
-		### Port class has specific attribute
-		if isinstance(model, Port):
-			self.infoBlockLabelList.insert(3,_('Id number'))
-
-		### Graphical values fields
-		for i in xrange(n):
-			attr = str(model.GetAttributes()[i])
-			val = getattr(model, attr)
-			if attr == "image_path":
-				val = os.path.basename(val)
-			self.data.append([attr,val,self.infoBlockLabelList[i]])
-			self.dataTypes.append(self.GetTypeList(val))
-
-		### Behavioral sorted values fields
-		for attr_name,info in sorted(infoBlockBehavioralDict.items()):
-			val = model.args[attr_name]
-
-			self.data.append([attr_name, val, info])
-			self.dataTypes.append(self.GetTypeList(val))
-			self.nb_behavior_var += 1
-
-		### Python File Path
-		if hasattr(model, 'python_path'):
-			val = os.path.basename(self.model.python_path)
-			self.data.append(['python_path', val, _("Python file path")])
-			self.dataTypes.append(self.GetTypeList(val))
-			self.nb_behavior_var += 1
-
-	def GetAttr(self, row, col, kind):
-		"""
-		"""
-
-		attr = wx.grid.GridCellAttr()
-		val = self.GetValue(row, col)
-
-		### format font of attr
-		if col == 0:
-			attr.SetReadOnly(True)
-			attr.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
-			#attr.SetBackgroundColour("light blue")
-		elif col == 2:
-			attr.SetReadOnly(True)
-			attr.SetFont(wx.Font(10, wx.SWISS, wx.ITALIC, wx.NORMAL))
-		else:
-			### load color in cell for pen and fill
-			if isinstance(val, list):
-				### if elem in list begin by #. It is color.
-				for s in filter(lambda a: a.startswith('#'), map(str, val)):
-					attr.SetBackgroundColour(s)
-					break
-
-		### TODO : a ameliorer car bad_filename_path_flag ne prend pas en compte python_path. relechir sur comment faire en sorte de ne pas donner la main a la simlation
-		### en fonction de la validite des deux criteres plus bas
-
-		### if the path dont exists, background color is red
-		try:
-
-			### if the type of cell is string
-			if isinstance(val, (str, unicode)):
-
-				if col == 1:
-
-					v = self.GetValue(row, 0)
-
-					### if bad filemane (for instance generator)
-					m = re.match('[a-zA-Z]*(ile)[n|N](ame)[_-a-zA-Z0-9]*', v, re.IGNORECASE)
-
-					### if filename is match and not exist (ensuring that the filename are extention)
-					if m is not None and not os.path.exists(self.GetValue(row, 1)) and os.path.splitext(self.GetValue(row, 1))[-1] != '':
-						self.bad_flag.update({v:False})
-						attr.SetBackgroundColour("pink")
-
-					### if the python path is not found
-					if v == "python_path":
-						### si un le modèle est un fichier python et que le path n'existe pas ou si c'est un amd ou cmd et que le fichier modèle n'existe pas
-						if (not os.path.exists(self.model.python_path) and not zipfile.is_zipfile(self.model.model_path)) or\
-							(not os.path.exists(self.model.model_path) and zipfile.is_zipfile(self.model.model_path)):
-							self.bad_flag.update({v:False})
-							attr.SetBackgroundColour("pink")
-
-			return attr
-
-		except Exception, info:
-			sys.stderr.write(_('Error in GetAttr : %s'%info))
-			return
-
-	def GetTypeList(self, val):
-		"""
-		"""
-
-		if isinstance(val, bool):
-			return [gridlib.GRID_VALUE_STRING, gridlib.GRID_VALUE_BOOL, gridlib.GRID_VALUE_STRING]
-		elif isinstance(val,int):
-			return [gridlib.GRID_VALUE_STRING, gridlib.GRID_VALUE_NUMBER + ':0,1000000', gridlib.GRID_VALUE_STRING]
-		elif isinstance(val,float):
-			return [gridlib.GRID_VALUE_STRING, gridlib.GRID_VALUE_FLOAT + ':10,6', gridlib.GRID_VALUE_STRING]
-		elif isinstance(val,list):
-			return [gridlib.GRID_VALUE_STRING,'list', gridlib.GRID_VALUE_STRING]
-		elif isinstance(val,dict):
-			return [gridlib.GRID_VALUE_STRING,'dict', gridlib.GRID_VALUE_STRING]
-		elif isinstance(val, tuple):
-			if isinstance(val[0], int):
-				return [gridlib.GRID_VALUE_STRING, gridlib.GRID_VALUE_CHOICEINT+':'+str(val)[1:-1].replace(' ',''), gridlib.GRID_VALUE_STRING]
-			else:
-				return [gridlib.GRID_VALUE_STRING, gridlib.GRID_VALUE_CHOICE+':'+str(val)[1:-1].replace(' ','').replace('\'',''), gridlib.GRID_VALUE_STRING]
-		else:
-			return [gridlib.GRID_VALUE_STRING, gridlib.GRID_VALUE_STRING, gridlib.GRID_VALUE_STRING]
-
-	def GetNumberRows(self):
-		return len(self.data)
-
-	def GetNumberCols(self):
-		return len(self.data[0])
-
-	def IsEmptyCell(self, row, col):
-		try:
-			return not self.data[row][col]
-		except IndexError:
-			return True
-
-	# Get/Set values in the table.  The Python version of these
-	# methods can handle any data-type, (as long as the Editor and
-	# Renderer understands the type too,) not just strings as in the
-	# C++ version.
-	def GetValue(self, row, col):
-
-		try:
-			return self.data[row][col][0] if isinstance(self.data[row][col], tuple) else self.data[row][col]
-		except IndexError:
-			return None
-
-	def SetValue(self, row, col, value):
-		"""
-		"""
-		### Attention si value est une expression et qu'elle contient des contantes litterale il faut que celle ci soient def par le ConstanteDialog
-
-		#if wx.Platform == '__WXGTK__':
-		## conserve le type de données dans la table :-)
-		init_type = self.dataTypes[row][1]
-		if value == "":
-			self.data[row][col] = value
-		elif 'double' in init_type:
-			self.data[row][col] = float(value)
-		elif 'list' in init_type:
-			self.data[row][col] = list(eval(str(value)))
-		elif 'dict' in init_type:
-			self.data[row][col] = dict(eval(str(value)))
-		elif 'long' in init_type:
-			self.data[row][col] = int(value)
-		elif 'bool' in init_type:
-			self.data[row][col] = bool(value)
-		elif 'choice' in init_type:
-			### old_value casted in list to manage it
-			old_value = list(self.data[row][col])
-			selected_item = str(value).replace('\'','')
-			### find index of selected item in old list
-			index = old_value.index(selected_item)
-			### delete selected item in old list to insert it in first place
-			del old_value[index]
-			old_value.insert(0, selected_item)
-			### assign new tuple
-			self.data[row][col] = tuple(old_value)
-		else:
-			self.data[row][col] = value
-
-	# Called when the grid needs to display labels
-	def GetColLabelValue(self, col):
-		return self.colLabels[col]
-
-	# Called to determine the kind of editor/renderer to use by
-	# default, doesn't necessarily have to be the same type used
-	# natively by the editor/renderer if they know how to convert.
-	def GetTypeName(self, row, col):
-		return self.dataTypes[row][col]
-
-	# Called to determine how the data can be fetched and stored by the
-	# editor and renderer.  This allows you to enforce some type-safety
-	# in the grid.
-	def CanGetValueAs(self, row, col, typeName):
-		return typeName == self.dataTypes[row][col].split(':')[0]
-
-	def CanSetValueAs(self, row, col, typeName):
-		return self.CanGetValueAs(row, col, typeName)
-
-	def UpdateRowBehavioralData(self, model):
-
-		### delete only behavioral rows
-		m = wx.grid.GridTableMessage(self,  # the table
-								wx.grid.GRIDTABLE_NOTIFY_ROWS_DELETED, # what
-								self.nb_graphic_var,  # from here
-								self.nb_behavior_var) # how many
-
-		self.Populate(model)
-
-		self.GetView().ProcessTableMessage(m)
-
-		msg = wx.grid.GridTableMessage(self, wx.grid.GRIDTABLE_REQUEST_VIEW_GET_VALUES )
-		self.GetView().ProcessTableMessage(msg)
-
-	def GetInformation(self, info):
-		"""
-		"""
-		try:
-			return self.info[info] if info in self.info.keys() else None
-		except :
-			return None
-
-### --------------------------------------------------------------
-class CutomGridCellAutoWrapStringRenderer(wx.grid.PyGridCellRenderer):
-	""" Custom rendere for property grid
-	"""
-	def __init__(self):
-		""" Constructor
-		"""
-		wx.grid.PyGridCellRenderer.__init__(self)
-
-	def Draw(self, grid, attr, dc, rect, row, col, isSelected):
-		text = grid.GetCellValue(row, col)
-
-		### if cell is path
-		if os.path.isdir(os.path.dirname(text)):
-			text = os.path.basename(text)
-
-		dc.SetFont( attr.GetFont() )
-		text = wordwrap.wordwrap(text, grid.GetColSize(col), dc, breakLongWords = False)
-		hAlign, vAlign = attr.GetAlignment()
-		if isSelected:
-			bg = grid.GetSelectionBackground()
-			fg = grid.GetSelectionForeground()
-		else:
-			bg = attr.GetBackgroundColour()
-			fg = attr.GetTextColour()
-		dc.SetTextBackground(bg)
-		dc.SetTextForeground(fg)
-		dc.SetBrush(wx.Brush(bg, wx.SOLID))
-		dc.SetPen(wx.TRANSPARENT_PEN)
-		dc.DrawRectangleRect(rect)
-		grid.DrawTextRectangle(dc, text, rect, hAlign, vAlign)
-
-	def GetBestSize(self, grid, attr, dc, row, col):
-		""" Get best size depending of the colom type
-		"""
-		text = grid.GetCellValue(row, col)
-		dc.SetFont(attr.GetFont())
-		text = wordwrap.wordwrap(text, grid.GetColSize(col), dc, breakLongWords = False)
-		### if colom info (mutliline)
-		if col == 2:
-			w, h, lineHeight = dc.GetMultiLineTextExtent(text)
-			return wx.Size(w, h)
-		### if colom label
-		elif col == 0:
-			w, h, lineHeight, a = dc.GetFullTextExtent(text)
-			return wx.Size(w, h)
-		### if colom choices elem
-		else:
-			return attr.GetSize()
-
-	def Clone(self):
-		return CutomGridCellAutoWrapStringRenderer()
-
-#--------------------------------------------------------------------------
-class PropertiesGridCtrl(gridlib.Grid, Subject):
-	""" wx.Grid of model's properties
-	"""
-
-	def __init__(self, parent):
-		""" Constructor
-		"""
-
-		gridlib.Grid.__init__(self, parent, wx.ID_ANY)
-		Subject.__init__(self)
-
-		# local copy
-		self.parent = parent
-
-		### subject init
-		self.canvas = self.parent.canvas
-		self.__state = {}
-		self.attach(self.parent.model)
-
-		# Table setting
-		table = CustomDataTable()
-		table.Populate(self.parent.model)
-		self.SetTable(table, False)
-
-		### number of row and column from table
-		nb_cols = table.GetNumberCols()
-		nb_rows = table.GetNumberRows()
-
-		self.SetRowLabelSize(0)
-		self.SetMargins(0,0)
-		#self.SetRowMinimalAcceptableHeight(4)
-		self.EnableDragRowSize(False)
-
-		### based on OnSize of AttributeEditor frame
-		### define width of columns from column table number.
-		width, height = self.parent.GetSize()
-		width /= nb_cols
-		for col in range(nb_cols):
-			self.SetColSize(col, width)
-
-		for i in xrange(nb_rows):
-			self.SetReadOnly(i, 0, True)
-			self.SetReadOnly(i, 2, True)
-			self.SetCellBackgroundColour(i, 0, "#f1f1f1")
-
-		### Custom render for display short path name and allows multiline for info
-		self.SetDefaultRenderer(CutomGridCellAutoWrapStringRenderer())
-
-		self.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnAcceptProp)
-		self.Bind(gridlib.EVT_GRID_SELECT_CELL, self.OnSelectProp)
-		self.Bind(wx.EVT_ENTER_WINDOW, self.OnEnterWindow)
-		self.Bind(gridlib.EVT_GRID_CELL_RIGHT_CLICK, self.OnRightClick)
-
-		#self.GetGridWindow().Bind(wx.EVT_MOTION, self.onMouseOver)
-		# put a tooltip on a column label
-		self.GetGridColLabelWindow().Bind(wx.EVT_MOTION,self.onMouseOverColLabel)
-		# put a tooltip on a row label
-		#self.GetGridRowLabelWindow().Bind(wx.EVT_MOTION,self.onMouseOverRowLabel)
-		self.InstallGridHint(self, table.GetInformation)
-
-	def InstallGridHint(self, grid, rowcolhintcallback=None):
-		prev_rowcol = [None, None]
-		def OnMouseMotion(evt):
-			# evt.GetRow() and evt.GetCol() would be nice to have here,
-			# but as this is a mouse event, not a grid event, they are not
-			# available and we need to compute them by hand.
-			x, y = grid.CalcUnscrolledPosition(evt.GetPosition())
-			row = grid.YToRow(y)
-			col = grid.XToCol(x)
-			table = grid.GetTable()
-
-			if (row,col) != prev_rowcol and row >= 0 and col >= 0:
-				prev_rowcol[:] = [row,col]
-				hinttext = rowcolhintcallback(table.GetValue(row, col))
-				if hinttext is None:
-					hinttext = ''
-				grid.GetGridWindow().SetToolTipString(hinttext)
-			evt.Skip()
-
-		wx.EVT_MOTION(grid.GetGridWindow(), OnMouseMotion)
-
-	def OnRightClick(self, event):
-		""" Right click has been invoked
-		"""
-
-		row = event.GetRow()
-		col = event.GetCol()
-		prop = self.GetCellValue(row, col-1)
-
-		### menu popup onlu on the column 1
-		if col == 1:
-			menu = Menu.PropertiesCtrlPopupMenu(self, row, col)
-			self.PopupMenu(menu, event.GetPosition())
-			menu.Destroy()
-
-	def OnEditCell(self, evt):
-		self.SelectProp(evt.GetEventObject())
-
-	def OnInsertCell(self, evt):
-
-		evt = evt.GetEventObject()
-		row, col = evt.GetRow(), evt.GetCol()
-
-		dlg = wx.TextEntryDialog(self, _('Paste new value from clipboard'),_('Paste value'), self.GetCellValue(row,col))
-		if dlg.ShowModal() == wx.ID_OK:
-			self.SetCellValue(row, 1, str(dlg.GetValue()))
-			self.AcceptProp(row, col)
-		dlg.Destroy()
-
-	def OnClearCell(self, event):
-		obj = event.GetEventObject()
-		row = obj.row
-		col = obj.col
-		val = self.GetCellValue(row,col)
-		self.SetCellValue(row,col,"")
-
-		self.AcceptProp(row,col)
-
-	def OnEnterWindow(self, event):
-		#self.parent.SetFocus()
-		pass
-
-	def onMouseOver(self, event):
-		"""
-		Displays a tooltip over any cell in a certain column
-		"""
-		# Use CalcUnscrolledPosition() to get the mouse position within the
-		# entire grid including what's offscreen
-		# This method was suggested by none other than Robin Dunn
-		x, y = self.CalcUnscrolledPosition(event.GetX(),event.GetY())
-		coords = self.XYToCell(x, y)
-		col = coords[1]
-		row = coords[0]
-
-		# Note: This only sets the tooltip for the cells in the column
-		if col == 1:
-			msg = "This is Row %s, Column %s!" % (row, col)
-			event.GetEventObject().SetToolTipString(msg)
-		else:
-			event.GetEventObject().SetToolTipString('')
-
-	#----------------------------------------------------------------------
-	def onMouseOverColLabel(self, event):
-		""" Displays a tooltip when mousing over certain column labels
-		"""
-
-		col = self.XToCol(event.GetX(), event.GetY())
-
-		if col == 0: txt = _('Name of propertie')
-		elif col == 1: txt = _('Value of propertie')
-		else: txt = _('Information about propertie')
-
-		self.GetGridColLabelWindow().SetToolTipString(txt)
-		event.Skip()
-
-	#----------------------------------------------------------------------
-	def onMouseOverRowLabel(self, event):
-		""" Displays a tooltip on a row label
-		"""
-
-		row = self.YToRow(event.GetY())
-
-		if row == 0: txt = ("Row One")
-		elif row == 1: txt = _('Row Two')
-		else: txt = ""
-
-		self.GetGridRowLabelWindow().SetToolTipString(txt)
-		event.Skip()
-
-	def AcceptProp(self, row, col):
-		""" change the value and notify it
-		"""
-		table= self.GetTable()
-		typ = table.dataTypes[row][1]
-		prop = self.GetCellValue(row, 0)
-		val = table.GetValue(row, 1)
-
-		### just to adjust tuple type
-		if 'choice' in typ:
-			val = table.data[row][1]
-
-		self.__state[prop] = val
-		self.notify()
-
-		self.canvas.Undo()
-
-	###
-	def OnAcceptProp(self, evt):
-		"""
-		"""
-		self.AcceptProp(evt.GetRow(),1)
-		evt.Skip()
-
-	def SelectProp(self, evt):
-		"""
-		"""
-
-		row, col = evt.GetRow(), evt.GetCol()
-
-		table = self.GetTable()
-
-		typ = table.dataTypes[row][1]
-		prop = self.GetCellValue(row, 0)
-
-		if prop == 'fill' or re.findall("[.]*color[.]*", prop, flags=re.IGNORECASE):
-			val = self.GetCellValue(row, 1)
-			dlg = wx.ColourDialog(self.parent)
-			dlg.GetColourData().SetChooseFull(True)
-			if dlg.ShowModal() == wx.ID_OK:
-				data = dlg.GetColourData()
-				val = str([RGBToHEX(data.GetColour().Get())])
-				self.SetCellValue(row,1,val)
-			else:
-				dlg.Destroy()
-				return False
-
-			dlg.Destroy()
-
-			self.AcceptProp(row, col)
-
-		elif prop == 'font':
-			val = eval(self.GetCellValue(row, 1))
-			default_font = wx.Font(val[0], val[1] , val[2], val[3], False, val[4])
-			data = wx.FontData()
-			if sys.platform == 'win32':
-				data.EnableEffects(True)
-			data.SetAllowSymbols(False)
-			data.SetInitialFont(default_font)
-			data.SetRange(10, 30)
-			dlg = wx.FontDialog(self.parent, data)
-			if dlg.ShowModal() == wx.ID_OK:
-				data = dlg.GetFontData()
-				font = data.GetChosenFont()
-				color = data.GetColour()
-				val = [font.GetPointSize(), font.GetFamily(), font.GetStyle(), font.GetWeight(), font.GetFaceName()]
-				self.SetCellValue(row,1,str(val))
-			else:
-				dlg.Destroy()
-				return False
-
-			dlg.Destroy()
-
-			self.AcceptProp(row, col)
-
-		elif prop == 'label':
-
-			d = LabelGUI.LabelDialog(self.parent, self.parent.model)
-			d.ShowModal()
-
-			self.SetCellValue(row,1,str(self.parent.model.label))
-			self.AcceptProp(row, col)
-
-		elif prop == 'image_path':
-			dlg = ib.ImageDialog(self, os.path.join(HOME_PATH, 'bitmaps'))
-			dlg.Centre()
-			if dlg.ShowModal() == wx.ID_OK:
-				val = os.path.normpath(dlg.GetFile())
-				if val != self.GetCellValue(row, 1):
-					self.SetCellValue(row, 1, val)
-					self.canvas.UpdateShapes([self.parent.model])
-			else:
-				dlg.Destroy()
-				return False
-
-			dlg.Destroy()
-
-			self.AcceptProp(row, col)
-
-		elif 'filename' in str(prop).lower():
-			wcd = _('Data files All files (*)|*')
-			val = self.GetCellValue(row, 1)
-			default_dir = os.path.dirname(val) if os.path.exists(os.path.dirname(val)) else HOME_PATH
-			dlg = wx.FileDialog(self, message=_("Select file ..."), defaultDir=default_dir, defaultFile="", wildcard=wcd, style=wx.OPEN | wx.CHANGE_DIR)
-			if dlg.ShowModal() == wx.ID_OK:
-				val = os.path.normpath(dlg.GetPath())
-				if val != self.GetCellValue(row, 1):
-					self.SetCellValue(row, 1, val)
-					self.canvas.UpdateShapes([self.parent.model])
-			else:
-				dlg.Destroy()
-				return False
-
-			dlg.Destroy()
-
-			self.AcceptProp(row, col)
-
-		elif prop == 'python_path':
-			wcd = _('Python files (*.py)|*.py|All files (*)|*')
-			model = self.parent.model
-			default_dir = os.path.dirname(model.python_path) if os.path.exists(os.path.dirname(model.python_path)) else DOMAIN_PATH
-			dlg = wx.FileDialog(self, message=_("Select file ..."), defaultDir=default_dir, defaultFile="", wildcard=wcd, style=wx.OPEN | wx.CHANGE_DIR)
-			if dlg.ShowModal() == wx.ID_OK:
-				new_python_path = os.path.normpath(dlg.GetPath())
-
-				### if the user would like to load a compressed python file, he just give the name of compressed file that contain the python file
-				if zipfile.is_zipfile(new_python_path):
-					zf = zipfile.ZipFile(new_python_path, 'r')
-					new_python_path = os.path.join(new_python_path, filter(lambda f: f.endswith('.py'), zf.namelist())[0])
-
-				self.SetCellValue(row, 1, new_python_path)
-
-				# behavioral args update (because depends of the new class coming from new python file)
-				new_cls = Components.GetClass(new_python_path)
-
-				if inspect.isclass(new_cls):
-
-					### update attributes (behavioral ang graphic)
-					model.args = Components.GetArgs(new_cls)
-					model.SetAttributes(Attributable.GRAPHICAL_ATTR)
-
-					### TODO: when ScopeGUI and DiskGUI will be amd models, delete this line)
-					### delete xlabel and ylabel attributes if exist
-					model.RemoveAttribute('xlabel')
-					model.RemoveAttribute('ylabel')
-
-					### Update of DEVSimPy model from new python behavioral file (ContainerBlock is not considered because he did not behavioral)
-					if new_cls.__name__ in ('To_Disk','MessagesCollector'):
-						model.__class__ = DiskGUI
-					elif new_cls.__name__ == 'QuickScope':
-						model.__class__ = ScopeGUI
-						model.AddAttribute("xlabel")
-						model.AddAttribute("ylabel")
-					else:
-						model.__class__ = CodeBlock
-
-					### if we change the python file from zipfile we compresse the new python file and we update the python_path value
-					if zipfile.is_zipfile(model.model_path):
-						zf = Zip(model.model_path)
-						zf.Update([new_python_path])
-
-					### update flag and color if bad filename
-					#if model.bad_filename_path_flag:
-						#model.bad_filename_path_flag = False
-				else:
-					MsgBoxError(evt, self, new_cls)
-					dlg.Destroy()
-					return False
-			else:
-				dlg.Destroy()
-				return False
-
-			dlg.Destroy()
-
-			self.AcceptProp(row, col)
-
-		elif typ == "list":
-			frame = ListEditor(self, wx.ID_ANY,_('List editor'), values=self.GetCellValue(row, 1))
-			if frame.ShowModal() == wx.ID_CANCEL:
-				self.SetCellValue(row, 1, frame.GetValueAsString())
-			else:
-				frame.Destroy()
-
-			self.AcceptProp(row, col)
-
-		elif typ == 'dict':
-			frame = DictionaryEditor(self, wx.ID_ANY,_('List editor'), values=self.GetCellValue(row, 1))
-			if frame.ShowModal() == wx.ID_CANCEL:
-				self.SetCellValue(row, 1, frame.GetValueAsString())
-			else:
-				frame.Destroy()
-
-			self.AcceptProp(row, col)
-		elif 'choice' in typ:
-			self.AcceptProp(row, col)
-		else:
-			pass
-
-		### all properties grid update (because the python classe has been changed)
-		### here, because OnAcceptProp should be executed before
-		if prop == 'python_path':
-
-			### Update table from new model
-			table.UpdateRowBehavioralData(model)
-			self.SetTable(table, False)
-			self.ForceRefresh()
-			self.AutoSizeColumns()
-
-			# code updating
-			if isinstance(model, Achievable):
-				new_code = CodeCB(self.parent, wx.ID_ANY, model)
-				#self.parent.boxH.Remove(0)
-				# DeleteWindows work better in vista
-				self.parent._boxH.DeleteWindows()
-				self.parent._boxH.AddWindow(new_code, 1, wx.EXPAND, userData='code')
-				self.parent._boxH.Layout()
-
-	###
-	def OnSelectProp(self, evt):
-		"""
-		"""
-		self.SelectProp(evt)
-		evt.Skip()
-
-	def GetState(self):
-		return self.__state
-
-	#def OnGridEditorCreated(self, event):
-		#""" Bind the kill focus event to the newly instantiated cell editor """
-		#editor = event.GetControl()
-		#editor.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
-		#event.Skip()
-
-	#def OnKillFocus(self, event):
-		## Cell editor's grandparent, the grid GridWindow's parent, is the grid.
-		#grid = event.GetEventObject().GetGrandParent()
-		#grid.SaveEditControlValue()
-		#grid.HideCellEditControl()
-		#event.Skip()
-
-class CodeCB(wx.Choicebook):
-	def __init__(self, parent, id, model=None):
-		wx.Choicebook.__init__(self, parent, id)
-
-		self.parent  = parent
-
-		cls = Components.GetClass(model.python_path)
-
-		if inspect.isclass(cls):
-			pageTexts = {   _('Doc') : inspect.getdoc(cls),
-											_('Class') : inspect.getsource(cls),
-											_('Constructor') : inspect.getsource(cls.__init__),
-											_('Internal Transition') : inspect.getsource(cls.intTransition),
-											_('External Transition') : inspect.getsource(cls.extTransition),
-											_('Output Function') : inspect.getsource(cls.outputFnc),
-											_('Time Advance Function') : inspect.getsource(cls.timeAdvance),
-											_('Finish Function') : inspect.getsource(cls.finish) if  hasattr(cls, 'finish') else "\tpass"
-									}
-		else:
-			pageTexts = {_("Importing Error"): _("Error trying to import the module: %s.\nChange the python path by cliking in the above 'python_path' cell.\n %s"%(model.python_path,str(cls)))}
-
-		# Now make a bunch of panels for the choice book
-		for nameFunc in pageTexts:
-			win = wx.Panel(self)
-			box = wx.BoxSizer( wx.HORIZONTAL)
-			#st = DemoCodeEditor(self)
-			#st.SetValue(pageTexts[nameFunc])
-			st = wx.TextCtrl(win, wx.NewId(), '', style = wx.TE_MULTILINE)
-			st.AppendText(str(pageTexts[nameFunc]))
-			st.ShowPosition(wx.TOP)
-			st.SetEditable(False)
-			box.Add(st,1,wx.EXPAND)
-			win.SetSizer(box)
-
-			self.AddPage(win, nameFunc)
-
-			#marche pas sous Windows
-			if wx.Platform == '__WXGTK__':
-				self.SetSelection(5)
-
-		#self.Bind(wx.EVT_CHOICEBOOK_PAGE_CHANGED, self.OnPageChanged)
-		#self.Bind(wx.EVT_CHOICEBOOK_PAGE_CHANGING, self.OnPageChanging)
-
-
-	def OnPageChanged(self, event):
-#               old = event.GetOldSelection()
-#               new = event.GetSelection()
-#               sel = self.GetSelection()
-		event.Skip()
-
-	def OnPageChanging(self, event):
-#               old = event.GetOldSelection()
-#               new = event.GetSelection()
-#               sel = self.GetSelection()
-		event.Skip()
-
-
-class DictionaryEditor(wx.Dialog):
-	def __init__(self, parent, id, title, values):
-		wx.Dialog.__init__(self, parent, id, title, pos = (50,50), size = (250, 250), style = wx.DEFAULT_FRAME_STYLE)
-
-		self.parent = parent
-
-		panel = wx.Panel(self, wx.ID_ANY)
-		vbox = wx.BoxSizer(wx.VERTICAL)
-
-		self.elb = gizmos.EditableListBox(panel, wx.ID_ANY, _("Dictionary manager"))
-
-		D = eval(values) if values!='' else {}
-
-		self.elb.SetStrings(map(lambda a,b: "('%s','%s')"%(str(a),str(b)), D.keys(), D.values()))
-
-		vbox.Add(self.elb, 1, wx.EXPAND | wx.ALL)
-		panel.SetSizer(vbox)
-		self.Center()
-
-		self.elb.Bind(wx.EVT_LIST_END_LABEL_EDIT, self.OnExcludesChange)
-
-		### just for window http://wiki.wxpython.org/wxPython%20Platform%20Inconsistencies#New_frames_not_showing_widgets_correctly_under_MS_Windows
-		e = wx.SizeEvent(self.GetSize())
-		self.ProcessEvent(e)
-
-	def OnExcludesChange(self, evt):
-		"""
-		"""
-		### try to catch exception for new expression in the list
-		try:
-			txt = evt.GetText()
-
-			### if val not empty and not color
-			if txt != '' and not txt.startswith('#'):
-				eval(txt)
-
-		except Exception, info:
-			dial = wx.MessageDialog(self, _("Error editing attribute: %s")%info, _("Dictionary manager"), wx.OK | wx.ICON_ERROR)
-			dial.ShowModal()
-
-		evt.Skip()
-
-	def GetValue(self):
-		""" Return the list object
-		"""
-
-		try:
-			return dict(eval, self.elb.GetStrings())
-		except SyntaxError:
-			return dict(eval, dict(repr, eval(str(self.elb.GetStrings()))))
-		except Exception, info:
-			return info
-
-	def GetValueAsString(self):
-		""" Return the list as string
-		"""
-
-		r = {}
-		for elem in self.elb.GetStrings():
-
-			k,v = eval(str(elem))
-
-			### is digit or float
-			if re.match(r"[-+]?[0-9\.]+$", str(v)) is not None:
-				v = float(v)
-
-			r.update({k:v})
-
-		return r if isinstance(r, Exception) else str(r)
-
-###
-class ListEditor(wx.Dialog):
-	def __init__(self, parent, id, title, values):
-		wx.Dialog.__init__(self, parent, id, title, pos = (50,50), size = (250, 250), style = wx.DEFAULT_FRAME_STYLE)
-
-		self.parent = parent
-
-		panel = wx.Panel(self, wx.ID_ANY)
-		vbox = wx.BoxSizer(wx.VERTICAL)
-
-		self.elb = gizmos.EditableListBox(panel, wx.ID_ANY, _("List manager"))
-
-		L = eval(values) if values!='' else []
-
-		self.elb.SetStrings(map(str,L))
-
-		vbox.Add(self.elb, 1, wx.EXPAND | wx.ALL)
-		panel.SetSizer(vbox)
-		self.Center()
-
-		self.elb.Bind(wx.EVT_LIST_END_LABEL_EDIT, self.OnExcludesChange)
-
-		### just for window http://wiki.wxpython.org/wxPython%20Platform%20Inconsistencies#New_frames_not_showing_widgets_correctly_under_MS_Windows
-		e = wx.SizeEvent(self.GetSize())
-		self.ProcessEvent(e)
-
-	def OnExcludesChange(self, evt):
-		"""
-		"""
-		### try to catch exception for new expression in the list
-		try:
-			txt = evt.GetText()
-
-			### if val not empty and not color
-			if txt != '' and not txt.startswith('#'):
-				eval(txt)
-
-		except Exception, info:
-			dial = wx.MessageDialog(self, _("Error editing attribute: %s")%info, _("List manager"), wx.OK | wx.ICON_ERROR)
-			dial.ShowModal()
-
-		evt.Skip()
-
-	def GetValue(self):
-		""" Return the list object
-		"""
-
-		try:
-			return map(eval, self.elb.GetStrings())
-		except SyntaxError:
-			return map(eval, map(repr, eval(str(self.elb.GetStrings()))))
-		except Exception, info:
-			return info
-
-	def GetValueAsString(self):
-		""" Return the list as string
-		"""
-		#r = self.GetValue()
-
-		r = []
-		for elem in self.elb.GetStrings():
-			### is digit or float
-			if re.match(r"[-+]?[0-9\.]+$", elem) is not None:
-				r.append(eval(elem))
-			else:
-				r.append(str(elem))
-
-		if isinstance(r, Exception):
-			return r
-		else:
-			return str(r)
-###
-class QuickAttributeEditor(wx.Frame, Subject):
-	"""
-	"""
-	def __init__(self, parent, id, model):
-		"""
-		"""
-		wx.Frame.__init__(self, parent, id, size=(120, 30) , style=wx.CLIP_CHILDREN|wx.STAY_ON_TOP|wx.FRAME_NO_TASKBAR|wx.NO_BORDER|wx.FRAME_SHAPED)
-		Subject.__init__(self)
-
-		### Subject init
-		self.canvas = self.GetParent()
-		self.__state = {}
-		self.attach(model)
-		self.attach(self.canvas.GetDiagram())
-
-		#spinCtrl for input ans output port numbers
-		self._sb_input = wx.SpinCtrl(self, wx.ID_ANY, size=(60,-1), min=0, max=100)
-		self._sb_output = wx.SpinCtrl(self, wx.ID_ANY, size=(60,-1), min=0, max=100)
-
-		# mouse postions
-		xwindow, ywindow = wx.GetMousePosition()
-		xm,ym = self.ScreenToClientXY(xwindow, ywindow)
-		self.SetPosition((xm,ym))
-
-		#defautl value for spinCtrl
-		self._sb_input.SetValue(model.input)
-		self._sb_output.SetValue(model.output)
-
-		self.__do_layout()
-		self.__set_binding()
-
-	def __do_layout(self):
-		sizer_1 = wx.BoxSizer(wx.HORIZONTAL)
-		sizer_1.Add(self._sb_input, 0, wx.ADJUST_MINSIZE, 0)
-		sizer_1.Add(self._sb_output, 0, wx.ADJUST_MINSIZE, 0)
-		self.SetSizer(sizer_1)
-		sizer_1.Fit(self)
-		self.Layout()
-
-	def __set_binding(self):
-		self._sb_input.Bind(wx.EVT_TEXT, self.OnInput)
-		self._sb_output.Bind(wx.EVT_TEXT, self.OnOuput)
-		self.Bind(wx.EVT_CLOSE, self.OnClose)
-
-	@Post_Undo
-	def OnInput(self, event):
-		self.__state['input'] = self._sb_input.GetValue()
-		self.notify()
-
-	@Post_Undo
-	def OnOuput(self, event):
-		self.__state['output'] = self._sb_output.GetValue()
-		self.notify()
-
-	def GetState(self):
-		return self.__state
-
-	def Undo(self):
-		self.canvas.Undo()
-
-	def OnClose(self, event):
-		self.Destroy()
-###
-class AttributeEditor(wx.Frame, wx.Panel):
-	"""     Model attributes in Frame or Panel
-	"""
-
-	def __init__(self, parent, ID, model, canvas):
-		"""     Constructor.
-
-				@param parent: wxWindows parent
-				@param ID: Id
-				@param model: considered model
-				@param canvas: canvas object
-
-				@type parent: instance
-				@type ID: integer
-				@type title: String
-				@type canvas: canvas object
-		"""
-
-		import DiagramNotebook
-
-		# pour gerer l'affichage dans la page de gauche dans le notebook
-		if isinstance(parent, (DiagramNotebook.DiagramNotebook,DetachedFrame)):
- 			wx.Frame.__init__(self, parent, ID, model.label, size = wx.Size(400, 550), style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN | wx.STAY_ON_TOP)
-			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'properties.png'), wx.BITMAP_TYPE_PNG)))
-			self.Bind(wx.EVT_CLOSE, self.OnClose)
-		else:
-			if isinstance(parent, wx.Panel):
-				wx.Panel.__init__(self, parent, ID)
-				self.SetBackgroundColour(wx.WHITE)
-			else:
-				sys.stdout.write(_("Parent not defined for AttributeEditor class"))
-
-
-		#local copy
-		self.model = model
-		self.parent = parent
-		self.canvas = canvas
-
-		# pour garder la relation entre les propriétés affichier et le model associé (voir OnLeftClick de Block)
-		#self.parent.id = id(self.model)
-
-		# properties list
-		self._list = PropertiesGridCtrl(self)
-
-		# Create a box sizer for self
-		self._box = wx.BoxSizer(wx.VERTICAL)
-		self._box.Add(self._list, 1, wx.EXPAND)
-
-		###linecache module which inspect uses. It caches the file contents and does not reload it accordingly.
-		linecache.clearcache()
-
-		## text doc de la classe
-		#doc=inspect.getdoc(self.model.getDEVSModel().__class__)
-
-		if isinstance(self.model, Achievable):
-			self._boxH = wx.BoxSizer(wx.HORIZONTAL)
-			self._code = CodeCB(self, wx.ID_ANY, self.model)
-			self._boxH.Add(self._code, 1, wx.ALL|wx.EXPAND, userData='code')
-			self._box.Add(self._boxH, 1, wx.ALL|wx.EXPAND, userData='code')
-
-		self.SetSizer(self._box)
-
-		self._box.SetSizeHints(self)
-		self.CenterOnParent()
-		#self.SetFocus()
-
-		self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
-		self._list.Bind(wx.EVT_SIZE, self.OnSize)
-
-	def OnSize(self, event):
-		""" Frame has been resized.
-		"""
-		### widt and weight of frame
-		width, height = self.GetClientSizeTuple()
-		### number of column of wx.grid
-		nb_cols = self._list.GetNumberCols()
-		### width of new column depending of new wx.grid column
-		width /= nb_cols
-		for col in range(nb_cols):
-			self._list.SetColSize(col, width)
-		### refresh grid
-		self._list.Refresh()
-
-	def OnKeyDown(self, event):
-		""" Keyboard has been pressed
-		"""
-		keycode = event.GetKeyCode()
-
-		x, y = self._list.CalcUnscrolledPosition(event.GetPosition())
-		coords = self._list.XYToCell(x, y)
-		row = coords[0]
-		col = coords[1]
-
-		### enter key has been pressed
-		if keycode == wx.WXK_RETURN:
-			### save and exit the cell if it was edited
-			if self._list.IsCellEditControlEnabled():
-				self._list.DisableCellEditControl()
-			### close frame
-			else:
-				if isinstance(self, wx.Frame):
-					self.Close()
-		### circular moving for rows of col 1
-		elif keycode == wx.WXK_TAB:
-			if not self._list.MoveCursorDown(False):
-				self._list.MovePageUp()
-		elif keycode == wx.WXK_DELETE:
-			if not self._list.IsReadOnly(row,col):
-				self._list.SetCellValue(row,col,"")
-		else:
-			event.Skip()
-
-	###
-	def MakeIcon(self, img):
-		"""
-		The various platforms have different requirements for the
-		icon size...
-		"""
-
-		if "wxMSW" in wx.PlatformInfo:
-			img = img.Scale(16, 16)
-		elif "wxGTK" in wx.PlatformInfo:
-			img = img.Scale(22, 22)
-
-		# wxMac can be any size upto 128x128, so leave the source img alone....
-		return wx.IconFromBitmap(img.ConvertToBitmap() )
-
-	def OnClose(self, event):
-		self.canvas.UpdateShapes()
-		self.Destroy()

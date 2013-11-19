@@ -414,3 +414,4 @@ invoque rpar un callback lorsque le fichier python est renseigné dans le wizard
 -Fait le 16/11/2013 par LC: amélioration -> SimulationGUI et PlotGUI plus adapté a Windows
 -Fait le 16/11/2013 par LC: amélioration -> centralisation des stratégies de sim et la stratégie par défaut de sim dans le builtin
 -Fait le 17/11/2013 par LC: amélioration -> début de refactoring du DEVSKernel avec les rep PyDEVS et PyPDEVS
+-Fait le 19/11/2013 par LC: amélioration -> ajout d'un code dans SetConfig de devsimpy.py pour re-écrire le fichier de configuration .devsimpy lorsque le repertoire source de DEVSimPy à été changé de place sur le dique.
