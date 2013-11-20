@@ -49,7 +49,7 @@ class BaseDEVS:
 	"""
 
 	###
-	def __init__(self):
+	def __init__(self, name=""):
 		''' Constructor.
 		'''
 		# Following {\tt if}-clause prevents any attempt to instantiate this
@@ -81,6 +81,7 @@ class BaseDEVS:
 
 		self.parent = None
 		self.myID   = None
+		self.name= name
 
 		# {\sl Specific Attributes\/} --- related to atomic- and coupled-DEVS'
 		# specification:
@@ -182,14 +183,14 @@ class AtomicDEVS(BaseDEVS):
 	AtomicIDCounter = 0
 
 	###
-	def __init__(self):
+	def __init__(self, name=""):
 		"""Constructor.
 		"""
 
 		# The minimal constructor shall {\sl first\/} call the superclass
 		# ({\it i.e.}, {\tt BaseDEVS}') constructor.
 
-		BaseDEVS.__init__(self)
+		BaseDEVS.__init__(self, name)
 
 		# Increment {\tt AtomicIDCounter\/} and setup instance's {\tt myID\/}
 		# attribute.
@@ -276,14 +277,14 @@ class CoupledDEVS(BaseDEVS):
 	CoupledIDCounter = 0
 
 	###
-	def __init__(self):
+	def __init__(self, name=""):
 		"""Constructor.
 		"""
 
 		# The minimal constructor shall {\sl first\/} call the superclass
 		# ({\it i.e.}, {\tt BaseDEVS}') constructor.
 
-		BaseDEVS.__init__(self)
+		BaseDEVS.__init__(self, name)
 
 		# Increment {\tt CoupledIDCounter\/} and setup instance's {\tt myID\/}
 		# attribute.

@@ -18,4 +18,5 @@ __all__ = [	"Container",
 					'DropTarget',
 					'AttributeEditor',
 					'PropertiesGridCtrl',
-					'Mixins']
+					'Mixins',
+                                        'DEVSKernel']

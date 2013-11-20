@@ -39,7 +39,9 @@ import traceback
 
 __builtin__.__dict__['GUI_FLAG'] = True
 
-from DEVSKernel.PyDEVS.FastSimulator import Simulator
+from DEVSKernel.PyDEVS.FastSimulator import Simulator as PyDEVSSimulator
+from DEVSKernel.PyPDEVS.simulator import Simulator as PyPDEVSSimulator
+
 from DomainInterface import DomainBehavior
 
 from Utilities import IsAllDigits, playSound
@@ -134,22 +136,28 @@ class CollapsiblePanel(wx.Panel):
 		'''Just make a few controls to put on the collapsible pane'''
 
 		text2 = wx.StaticText(pane, wx.ID_ANY, _("Select algorithm:"))
+
+		### list of posible strategy depending on the PyDEVS version
 		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
 			c = PYDEVS_SIM_STRATEGY_DICT.keys()
 		else:
 			c = PYPDEVS_SIM_STRATEGY_DICT.keys()
 		ch1 = wx.Choice(pane, wx.ID_ANY, choices=c)
+
 		text3 = wx.StaticText(pane, wx.ID_ANY, _("Profiling"))
 		cb1 = wx.CheckBox(pane, wx.ID_ANY, name='check_prof')
 		text4 = wx.StaticText(pane, wx.ID_ANY, _("No time limit"))
-		cb2 = wx.CheckBox(pane, wx.ID_ANY, name='check_ntl')
+		self.cb2 = wx.CheckBox(pane, wx.ID_ANY, name='check_ntl')
 
 		if not 'hotshot' in sys.modules.keys():
 			text3.Enable(False)
 			cb1.Enable(False)
 			self.parent.prof = False
 
-		cb2.SetValue(__builtin__.__dict__['NTL'])
+		if DEFAULT_SIM_STRATEGY == 'original' and DEFAULT_DEVS_DIRNAME == 'PyDEVS':
+			self.cb2.Enable(False)
+		else:
+			self.cb2.SetValue(__builtin__.__dict__['NTL'])
 
 		### default strategy
 		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
@@ -159,7 +167,7 @@ class CollapsiblePanel(wx.Panel):
 
 		ch1.SetToolTipString(_("Select the simulator strategy."))
 		cb1.SetToolTipString(_("For simulation profiling using hotshot"))
-		cb2.SetToolTipString(_("No time limit for the simulation. Simulation is over when childs are no active."))
+		self.cb2.SetToolTipString(_("No time limit for the simulation. Simulation is over when childs are no active."))
 
 		grid3 = wx.GridSizer(3, 2, 1, 1)
 		grid3.Add(text2, 0, wx.ALIGN_LEFT, 19)
@@ -167,19 +175,23 @@ class CollapsiblePanel(wx.Panel):
 		grid3.Add(text3, 0, wx.ALIGN_LEFT, 19)
 		grid3.Add(cb1, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
 		grid3.Add(text4, 0, wx.ALIGN_LEFT, 19)
-		grid3.Add(cb2, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
+		grid3.Add(self.cb2, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
 
 		pane.SetSizer(grid3)
 
 		self.Bind(wx.EVT_CHOICE, self.OnChoice, ch1)
 		self.Bind(wx.EVT_CHECKBOX, self.OnProfiling, cb1)
-		self.Bind(wx.EVT_CHECKBOX, self.OnNTL, cb2)
+		self.Bind(wx.EVT_CHECKBOX, self.OnNTL, self.cb2)
 	###
 	def OnChoice(self, event):
 		""" strategy choice has been invoked
 		"""
 		selected_string = event.GetString()
 		self.simdia.selected_strategy = selected_string
+
+		### update of ntl checkbox depending on the chosing strategy
+		self.cb2.Enable(not (self.simdia.selected_strategy == 'original' and  DEFAULT_DEVS_DIRNAME == 'PyDEVS'))
+
 		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = self.simdia.selected_strategy
 
 	def OnNTL(self, event):
@@ -615,7 +627,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			#raise msg
 
 #--------------------------------------------------------------
-class SimulationThread(threading.Thread, Simulator):
+class SimulationThread(threading.Thread, PyDEVSSimulator, PyPDEVSSimulator):
 	""" SimulationThread(model)
 
 		Thread for DEVS simulation task
@@ -625,7 +637,9 @@ class SimulationThread(threading.Thread, Simulator):
 		""" Constructor
 		"""
 		threading.Thread.__init__(self)
-		Simulator.__init__(self, model)
+
+		### call super class of Simulator depending on the DEVS package used (PyDEVS ot PyPDEVS)
+		eval('%sSimulator.__init__(self, model)'%DEFAULT_DEVS_DIRNAME)
 
 		### local copy
 		self.strategy = strategy
@@ -647,7 +661,12 @@ class SimulationThread(threading.Thread, Simulator):
 
 		### define the simulation strategy
 		args = {'simulator':self}
-		cls_str = eval(PYDEVS_SIM_STRATEGY_DICT[self.strategy])
+		### TODO: isinstance(self, PyDEVSSimulator)
+		if DEFAULT_DEVS_DIRNAME == "PyDEVS":
+			cls_str = eval(PYDEVS_SIM_STRATEGY_DICT[self.strategy])
+		else:
+			cls_str = eval(PYPDEVS_SIM_STRATEGY_DICT[self.strategy])
+
 		self.setAlgorithm(apply(cls_str, (), args))
 
 		while not self.end_flag:
@@ -709,10 +728,12 @@ class TestApp(wx.App):
 		import DomainInterface.MasterModel
 
 		__builtin__.__dict__['ICON_PATH_16_16']=os.path.join('icons','16x16')
-		__builtin__.__dict__['DEFAULT_SIM_STRATEGY']='Hierarchical'
+		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = 'original'
 		__builtin__.__dict__['NTL'] = False
 		__builtin__.__dict__['_'] = gettext.gettext
 		__builtin__.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
+		__builtin__.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy4', 'distribued':'SimStrategy5', 'parallel':'SimStrategy6'}
+		__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyPDEVS'
 
 		self.frame = SimulationDialog(None, wx.ID_ANY, 'Simulator', DomainInterface.MasterModel.Master())
 		self.frame.Show()

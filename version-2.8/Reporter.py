@@ -15,23 +15,23 @@ class BaseDialog(wx.Dialog):
     def __init__(self, parent):
         """ Constructor.
         """
-            
+
         wx.Dialog.__init__(self, parent, size=(500,600), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
         self.MainFrame = parent
 
     def CreateButtons(self):
         """ Creates the Ok and cancel bitmap buttons. """
-        
-        # Build a couple of fancy and useless buttons        
+
+        # Build a couple of fancy and useless buttons
         self.cancelButton= wx.Button(self.panel, wx.ID_CANCEL, "")
         self.obButton = wx.Button(self.panel, wx.ID_OK, "")
 
     def SetProperties(self, title):
-        """ Sets few properties for the dialog. """        
+        """ Sets few properties for the dialog. """
 
         self.SetTitle(title)
         #self.SetIcon(wx.IconFromBitmap(CreateBitmap("GUI2Exe")))
-        self.okButton.SetDefault()        
+        self.okButton.SetDefault()
 
     def BindEvents(self):
         """ Binds the events to specific methods. """
@@ -56,7 +56,7 @@ class BaseDialog(wx.Dialog):
 
     def OnKeyUp(self, event):
         """ Handles the wx.EVT_CHAR_HOOK event for the dialog. """
-        
+
         if event.GetKeyCode() == wx.WXK_ESCAPE:
             # Close the dialog, no action
             self.OnClose(event)
@@ -70,19 +70,19 @@ def ExceptionHook(exctype, value, trace):
     """
     Handler for all unhandled exceptions.
 
-    
+
     **Parameters:**
 
     * exctype: Exception Type
     * value: Error Value
     * trace: Trace back info
     """
-    
+
     ftrace = FormatTrace(exctype, value, trace)
 
     # Ensure that error gets raised to console as well
     sys.stdout.write(ftrace)
-    
+
     if not ErrorDialog.REPORTER_ACTIVE:
         ErrorDialog(ftrace)
 
@@ -92,7 +92,7 @@ class ErrorReporter(object):
     is implemented as a singleton so that all errors pushed
     onto it are kept in one central location no matter where
     the object is called from.
-    
+
     **Note:**
 
     * from Editra.dev_tool
@@ -104,7 +104,7 @@ class ErrorReporter(object):
 
     def __init__(self):
         """Initialize the reporter
-        
+
         **Note:**
 
         * The ErrorReporter is a singleton.
@@ -120,7 +120,7 @@ class ErrorReporter(object):
 
     def __new__(cls, *args, **kargs):
         """Maintain only a single instance of this object
-        
+
         **Returns:**
 
         * instance of this class
@@ -132,7 +132,7 @@ class ErrorReporter(object):
 
     def AddMessage(self, msg):
         """Adds a message to the reporters list of session errors
-        
+
         **Parameters:**
 
         * msg: The Error Message to save
@@ -143,7 +143,7 @@ class ErrorReporter(object):
 
     def GetErrorStack(self):
         """Returns all the errors caught during this session
-        
+
         **Returns:**
 
         * formatted log message of errors
@@ -153,7 +153,7 @@ class ErrorReporter(object):
 
     def GetLastError(self):
         """Gets the last error from the current session
-        
+
         **Returns:**
 
         * Error Message String
@@ -162,13 +162,13 @@ class ErrorReporter(object):
         if len(self._sessionerr):
             return self._sessionerr[-1]
 
-        
+
 ID_SEND = wx.NewId()
 class ErrorDialog(BaseDialog):
     """
     Dialog for showing errors and and notifying gui2exe-users should the
     user choose so.
-    
+
     **Note:**
 
     * partially from Editra.dev_tool
@@ -178,7 +178,7 @@ class ErrorDialog(BaseDialog):
     def __init__(self, message):
         """
         Initialize the dialog
-        
+
         **Parameters:**
 
         * message: Error message to display
@@ -188,9 +188,9 @@ class ErrorDialog(BaseDialog):
         # Get version from the app since the main window may be dead or
         # not even ready yet.
         #version = wx.GetApp().GetVersion()
-        
+
         BaseDialog.__init__(self, GetActiveWindow())
-        
+
         # Give message to ErrorReporter
         ErrorReporter().AddMessage(message)
 
@@ -202,7 +202,7 @@ class ErrorDialog(BaseDialog):
                                              "---- Traceback Info ----", \
                                              ErrorReporter().GetErrorStack(), \
                                              "---- End Traceback Info ----")
-        
+
         self.textCtrl = wx.TextCtrl(self, value=self.err_msg, style=wx.TE_MULTILINE | wx.TE_READONLY)
         self.abortButton = wx.Button(self, wx.ID_CANCEL, size=(-1, 26))
         self.sendButton = wx.Button(self, ID_SEND, _("Report Error"), size=(-1, 26))
@@ -224,15 +224,15 @@ class ErrorDialog(BaseDialog):
     def DoLayout(self):
         """
         Layout the dialog and prepare it to be shown
-        
-        
+
+
         **Note:**
 
         *  Do not call this method in your code
         """
 
         # Objects
-        mainmsg = wx.StaticText(self, 
+        mainmsg = wx.StaticText(self,
                                 label=_("Error: Help improve DEVSimPy by clicking on "
                                         "Report Error\nto send the Error "
                                         "Traceback shown below."))
@@ -259,19 +259,19 @@ class ErrorDialog(BaseDialog):
 
         self.SetSizer(mainSizer)
         mainSizer.Layout()
-        
+
         self.Fit()
-        
+
 
     def OnButton(self, evt):
         """Handles button events
-        
+
         **Parameters:**
 
         * evt: event that called this handler
 
         **Post-Conditions:**
-        
+
         * Dialog is closed
         * If Report Event then email program is opened
 
@@ -289,7 +289,7 @@ class ErrorDialog(BaseDialog):
         elif e_id == wx.ID_ABORT:
             ErrorDialog.ABORT = True
             # Try a nice shutdown first time through
-            wx.CallLater(500, wx.GetApp().Destroy(), 
+            wx.CallLater(500, wx.GetApp().Destroy(),
                          wx.MenuEvent(wx.wxEVT_MENU_OPEN, wx.ID_EXIT),
                          True)
             self.Close()
@@ -298,7 +298,7 @@ class ErrorDialog(BaseDialog):
 
     def OnClose(self, evt):
         """Cleans up the dialog when it is closed
-        
+
         **Parameters:**
 
         * evt: Event that called this handler
