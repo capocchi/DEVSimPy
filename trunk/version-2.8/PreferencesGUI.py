@@ -9,6 +9,11 @@ import sys
 
 import wx.lib.filebrowsebutton as filebrowse
 
+if __name__ == '__main__':
+	__builtin__.__dict__['HOME_PATH'] = os.getcwd()
+	__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyDEVS'
+	__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyPDEVS')}
+
 from PluginsGUI import PluginsPanel, GeneralPluginsList
 
 #----------------------------------------------------------------------
@@ -569,7 +574,6 @@ class TestApp(wx.App):
 
 		import gettext
 
-		__builtin__.__dict__['HOME_PATH'] = os.getcwd()
 		__builtin__.__dict__['ICON_PATH'] = os.path.join('icons')
 		__builtin__.__dict__['ICON_PATH_16_16'] = os.path.join(ICON_PATH, '16x16')
 		__builtin__.__dict__['PLUGINS_DIR'] = 'plugins'
@@ -588,8 +592,6 @@ class TestApp(wx.App):
 		__builtin__.__dict__['LOCAL_EDITOR'] = False
 		__builtin__.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
 		__builtin__.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy4', 'distribued':'SimStrategy5', 'parallel':'SimStrategy6'}
-		__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyDEVS'
-		__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyPDEVS')}
 
 		__builtin__.__dict__['_'] = gettext.gettext
 

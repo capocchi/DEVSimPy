@@ -10,7 +10,7 @@
 #                     --------------------------------
 # Version 1.0                                        last modified: 01/11/01
 # Version 1.0.1                                      last modified: 04/04/05
-#  - The default "AtomicDEVS.timeAdvance" method returns 
+#  - The default "AtomicDEVS.timeAdvance" method returns
 #    the object "INFINITY" which stands for infinity
 #  - Deal with DeprecationWarning
 # Version 1.0.3                                      last modified: 16/11/05
@@ -41,7 +41,7 @@ from util import *
 #cython from message cimport NetworkMessage, Message
 from message import NetworkMessage, Message #cython-remove
 
-##  CLASS HIERARCHY 
+##  CLASS HIERARCHY
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 IDCounter = 0
@@ -50,7 +50,7 @@ PortCounter = 0
 class BaseDEVS(object):
     """
     Abstract base class for AtomicDEVS and CoupledDEVS classes.
-  
+
     This class provides basic DEVS attributes and query/set methods.
     """
     ###
@@ -60,10 +60,10 @@ class BaseDEVS(object):
         Args:
             name - the name of the DEVS model
         """
-    
+
         # Prevent any attempt to instantiate this abstract class
         if self.__class__ == BaseDEVS:
-            raise DEVSException ("Cannot instantiate abstract class '%s' ... " 
+            raise DEVSException ("Cannot instantiate abstract class '%s' ... "
                                  % (self.__class__.__name__))
 
         # The parent of the current model
@@ -73,7 +73,7 @@ class BaseDEVS(object):
         # The local name of the model
         self.name = name
         # List of all input ports
-        self.IPorts  = []  
+        self.IPorts  = []
         # List of all output ports
         self.OPorts   = []
 
@@ -83,10 +83,10 @@ class BaseDEVS(object):
 
         self.location = None
         self.rootsim = None
-    
+
         # Variables used for optimisations
         self.fullName = self.name
-        self.myInput = {}  
+        self.myInput = {}
         self.myOutput = {}
         self.model_ids = {}
 
@@ -119,7 +119,7 @@ class BaseDEVS(object):
             #print("Fail for " + str(self.rootsim.name))
             raise NestingException("A nested simulation at this level has " +
                                    "already been started, this exception " +
-                                   "should not be catched in user-code but " + 
+                                   "should not be catched in user-code but " +
                                    "should be passed back to the simulator.")
 
     def announceEnd(self):
@@ -165,7 +165,7 @@ class BaseDEVS(object):
         for I in self.IPorts:
             varList.append([self.getModelFullName(), I.getPortName()])
         return varList
-      
+
     def getPortByName(self, name):
         for i in self.IPorts:
             if i.getPortName() == name:
@@ -173,35 +173,35 @@ class BaseDEVS(object):
         for i in self.OPorts:
             if i.getPortName() == name:
                 return i
-        
+
     def addInPort(self, name=None):
         """
         Add an input port to the DEVS model.
-        
+
         addInPort and addOutPort are the only proper way to
         add I/O ports to DEVS. As for the CoupledDEVS.addSubModel method, calls
         to addInPort and addOutPort can appear in any DEVS'
         descriptive class constructor, or the methods can be used with an
         instantiated object.
-    
+
         The methods add a reference to the new port in the DEVS' IPorts or
         OPorts attributes and set the port's hostDEVS attribute. The modeler
         should typically add the returned reference the local dictionary
-        (to be able to refer to the port for peek/poke-ing later).    
+        (to be able to refer to the port for peek/poke-ing later).
         Args:
             name - the name of the port, this name should be unique to the
                    model if None is provided, a unique ID will be generated
         """
         # Instantiate an input port:
-        port = Port(isInput=True, name=name) 
-    
+        port = Port(isInput=True, name=name)
+
         self.IPorts.append(port)
         port.hostDEVS = self
         return port
-      
+
     def addOutPort(self, name=None):
         """Add an output port to the DEVS model.
-        
+
         See comments for addInPort above.
         Args:
             name - the name of the port, this name should be unique to the
@@ -210,11 +210,11 @@ class BaseDEVS(object):
 
         # Instantiate an output port:
         port = Port(isInput=False, name=name)
-            
+
         self.OPorts.append(port)
-        port.hostDEVS = self        
-        return port  
-    
+        port.hostDEVS = self
+        return port
+
     def getModelName(self):
         """
         Get the local model name
@@ -234,24 +234,24 @@ class AtomicDEVS(BaseDEVS):
     """
     Abstract base class for all atomic-DEVS descriptive classes.
     """
-  
+
     def __init__(self, name=None):
         """Constructor.
         """
         # Prevent any attempt to instantiate this abstract class
         if self.__class__ == AtomicDEVS:
-            raise DEVSException("Cannot instantiate abstract class '%s' ... " 
+            raise DEVSException("Cannot instantiate abstract class '%s' ... "
                                 % (self.__class__.__name__))
 
         # The minimal constructor shall first call the superclass
         # (i.e., BaseDEVS) constructor.
         BaseDEVS.__init__(self, name)
-    
+
         # Increment AtomicIDCounter and setup instance's myID
         # attribute.
         self.myID = "A%d" % self.model_id
-    
-        self.elapsed = 0.0 
+
+        self.elapsed = 0.0
         self.state = None
 
         # Used for optimisations
@@ -270,6 +270,7 @@ class AtomicDEVS(BaseDEVS):
             location - the location of the current model
         """
         if parentname != "":
+            print parentname, self.name
             self.fullName = parentname + "." + self.name
         else:
             self.fullName = self.name
@@ -312,7 +313,7 @@ class AtomicDEVS(BaseDEVS):
             time - the time up to which should be reverted
         """
         if self.rootsim.GVT > time[0]:
-            raise DEVSException("Reverting to time (%f) before the GVT (%f)!" 
+            raise DEVSException("Reverting to time (%f) before the GVT (%f)!"
                                 % (time, self.rootsim.GVT))
         counter = 0
         newstate = None
@@ -344,16 +345,16 @@ class AtomicDEVS(BaseDEVS):
     def extTransition(self, inputs): # pragma: no cover
         """
         DEFAULT External Transition Function.
-  
+
         Accesses state and elapsed attributes, as well as inputs
         through peek method. Returns the new state.
         """
         return self.state
-    
+
     def intTransition(self): # pragma: no cover
         """
         DEFAULT Internal Transition Function.
-  
+
         Accesses only state attribute. Returns the new state.
         """
         return self.state
@@ -361,38 +362,38 @@ class AtomicDEVS(BaseDEVS):
     def confTransition(self, inputs): # pragma: no cover
         """
         DEFAULT Confluent Transition Function.
-  
+
         Accesses state and elapsed attributes, as well as inputs
         through peek method. Returns the new state.
         """
         self.state = self.intTransition()
         self.state = self.extTransition(inputs)
         return self.state
-  
+
     def outputFnc(self): # pragma: no cover
         """
         DEFAULT Output Function.
-  
-        Accesses only state attribute. 
+
+        Accesses only state attribute.
         Returns the output on the different ports.
         """
         return {}
-  
+
     def timeAdvance(self): # pragma: no cover
         """
         DEFAULT Time Advance Function.
-    
+
         Accesses only the state attribute. Returns a real number in
         [0, INFINITY].
         """
-        # By default, return infinity 
+        # By default, return infinity
         return float('inf')
-    
+
 class CoupledDEVS(BaseDEVS):
     """
     Abstract base class for all coupled-DEVS descriptive classes.
     """
-  
+
     def __init__(self, name=None):
         """
         Constructor.
@@ -402,28 +403,28 @@ class CoupledDEVS(BaseDEVS):
 
         # Prevent any attempt to instantiate this abstract class
         if self.__class__ == CoupledDEVS:
-            raise DEVSException("Cannot instantiate abstract class '%s' ... " 
+            raise DEVSException("Cannot instantiate abstract class '%s' ... "
                                 % (self.__class__.__name__))
         # The minimal constructor shall first call the superclass
         # (i.e., BaseDEVS) constructor.
         BaseDEVS.__init__(self, name)
-    
+
         # Increment CoupledIDCounter and setup instance's myID
         # attribute.
         self.myID = "C%d" % self.model_id
 
         # All components of this coupled model (the submodels)
         self.componentSet = []
-    
+
         # IC, EIC and EOC describe the couplings at the
-        # coupled-DEVS level (respectively, internal couplings, 
+        # coupled-DEVS level (respectively, internal couplings,
         # external input couplings and external output couplings).
         # Note that although consistent with Zeigler's definition, these sets
         # are not used by the simulator, which relies on ports' inLine and
         # outLine attributes to detect couplings.
         self.IC  = []
         self.EIC = []
-        self.EOC = []  
+        self.EOC = []
 
     def revert(self, time):
         """
@@ -435,7 +436,7 @@ class CoupledDEVS(BaseDEVS):
         for child in self.componentSet:
             if child.timeLast >= time:
                 child.revert(time)
-            # Always clear the inputs, as it is possible that there are only 
+            # Always clear the inputs, as it is possible that there are only
             # partial results, which doesn't get found in the timeLast >= time
             child.myInput = {}
         self.myInput = {}
@@ -500,7 +501,7 @@ class CoupledDEVS(BaseDEVS):
             # Seems to run elsewhere
             # OK, we can ask this server to instantiate the specified model
             remote = getProxy(location)
-            Port.counter = remote.setCoupledModel(model, self.location, 
+            Port.counter = remote.setCoupledModel(model, self.location,
                                                   self.model_id, imports)
             # Provide an interface for this remote model
             entry = RemoteCDEVS(location)
@@ -510,7 +511,7 @@ class CoupledDEVS(BaseDEVS):
             self.model_ids[entry.model_id] = entry
 
         self.model_ids.update(entry.getModelIDs())
-        self.componentSet.append(entry)        
+        self.componentSet.append(entry)
         return entry
 
     def getLocationList(self, cset):
@@ -579,14 +580,14 @@ class CoupledDEVS(BaseDEVS):
                 self.IC.append( ( (p1.hostDEVS, p1), (p2.hostDEVS, p2) ) )
                 p1.outLine.append(p2)
                 p2.inLine.append(p1)
-        
+
         # External input couplings:
         elif ((p1.hostDEVS == self and p2.hostDEVS.parent == self) and
               (p1.type() == p2.type() == 'INPORT')):
             self.EIC.append( ( (p1.hostDEVS, p1), (p2.hostDEVS, p2) ) )
             p1.outLine.append(p2)
             p2.inLine.append(p1)
-   
+
         # Eternal output couplings:
         elif ((p1.hostDEVS.parent == self and p2.hostDEVS == self) and
               (p1.type() == p2.type() == 'OUTPORT')):
@@ -598,9 +599,9 @@ class CoupledDEVS(BaseDEVS):
         else:
             raise DEVSException("Illegal coupling in coupled model '%s' " +
                                 "between ports '%s' and '%s'" % (
-                                self.getModelFullName(), p1.getPortFullName(), 
+                                self.getModelFullName(), p1.getPortFullName(),
                                 p2.getPortFullName()))
-      
+
     def setGVT(self, GVT):
         """
         Sets the GVT of this coupled model
@@ -626,7 +627,7 @@ class CoupledDEVS(BaseDEVS):
 class Port(object):
     """
     Class for DEVS model ports (both input and output).
-  
+
     This class provides basic port attributes and query methods.
     """
 
@@ -640,7 +641,7 @@ class Port(object):
             name - the name of the port, should be UNIQUE. If None is provided
                    a unique ID is used
         """
-    
+
         # Port Attributes:
         # * inLine and outLine represent an alternate way to
         #   describe couplings (and the one actually used by the simulator).
@@ -654,10 +655,10 @@ class Port(object):
         #   attributes;
         # * myID;
         # * hostDEVS: the DEVS model that hosts this port;
-        self.inLine = [] 
+        self.inLine = []
         self.outLine = []
-        self.hostDEVS = None 
-   
+        self.hostDEVS = None
+
         # The name of the port
         self.name = name
 
@@ -669,7 +670,7 @@ class Port(object):
             self.myID = "InPort_%d" % PortCounter
         else:
             self.myID = "OutPort_%d" % PortCounter
-        
+
     def getPortName(self):
         """
         Returns the name of the port
@@ -745,7 +746,7 @@ class RemoteCDEVS(BaseDEVS):
         return cset
 
     def printModel(self, indent=0):
-        print('\t'*indent + "Remote to %s (%s)" % (self.remote_location, 
+        print('\t'*indent + "Remote to %s (%s)" % (self.remote_location,
                                                   self.remote_modelname))
         for i in self.OPorts:
             print('\t'*(indent+1) + "OPort %s" % i.getPortFullName())
@@ -760,32 +761,32 @@ class RemoteCDEVS(BaseDEVS):
         Args:
             msg - the message that must be sent
         """
-        assert debug("Sending message " + str(msg) + " to " + str(self.remote_location))
+        assert logger.debug("Sending message " + str(msg) + " to " + str(self.remote_location))
         #print("Sending " + str(msg))
         if msg.messagetype != 3:
-            # Only forward real messages, the rest (control messages) are 
+            # Only forward real messages, the rest (control messages) are
             # provided locally at the remote model
-            assert debug("message != 3 sent")
+            assert logger.debug("message != 3 sent")
             return
         if self.rootsim.blockOutgoing and (self.rootsim.procTransition) and (not self.rootsim.checkpoint_restored):
         #if self.rootsim.reverted and (self.rootsim.procTransition):
-            # If the model was just reverted, we don't need to sent out these 
+            # If the model was just reverted, we don't need to sent out these
             # messages because they are already in the receivers queues.
-            assert debug("Not sending message for reason (" + str(self.rootsim.reverted) + ", " + str(self.rootsim.procTransition)+ ", " + str(self.rootsim.checkpoint_restored) + "): " + str(msg))
+            assert logger.debug("Not sending message for reason (" + str(self.rootsim.reverted) + ", " + str(self.rootsim.procTransition)+ ", " + str(self.rootsim.checkpoint_restored) + "): " + str(msg))
             return
         self.rootsim.checkpoint_restored = False
-        # Convert the message's keys (the ports), as they are unknown at the 
+        # Convert the message's keys (the ports), as they are unknown at the
         # receiving side and cause problems in Pyro
         modmsg = {}
         for entry in msg.content:
-            # Use the remapping function that was 'negotiated' between 
+            # Use the remapping function that was 'negotiated' between
             # the different representations
             modmsg[self.remapPort2Num[entry]] = msg.content[entry]
         msg.content = modmsg
         msg = NetworkMessage(Message(msg.timestamp, 3, msg.content), False, self.rootsim.genUUID(), self.rootsim.color, self.remote_location)
-        # Make a copy for the outputQueue, this MUST be a copy, as 
+        # Make a copy for the outputQueue, this MUST be a copy, as
         # otherwise we modify the original message.
-        # UNLESS we are irreversible, as this means we will never need 
+        # UNLESS we are irreversible, as this means we will never need
         # these again, so we can save some space and time, when setting GVT
         # Data to know how to route the message in case of invalidation
         self.rootsim.outputQueue.append(msg)

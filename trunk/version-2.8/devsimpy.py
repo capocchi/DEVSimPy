@@ -122,25 +122,6 @@ else:
 	from wx.lib.pubsub import setuparg1
 	from wx.lib.pubsub import pub
 
-### import Container much faster loading than from Container import ... for os windows only
-import Container
-import Menu
-
-from ImportLibrary import ImportLibrary
-from Reporter import ExceptionHook
-from ConnectionThread import UpgradeLibThread
-from PreferencesGUI import PreferencesGUI
-from pluginmanager import load_plugins
-from which import which
-from Utilities import GetMails, IsAllDigits
-from Decorators import redirectStdout, BuzyCursorNotification
-from DetachedFrame import DetachedFrame
-from LibraryTree import LibraryTree
-from LibPanel import LibPanel
-from PropPanel import PropPanel
-from ControlNotebook import ControlNotebook
-from DiagramNotebook import DiagramNotebook
-
 ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 ### specific builtin variables. (dont modify the defautls value. If you want to change it, go tot the PreferencesGUI from devsimpy interface.)
@@ -181,6 +162,25 @@ else:
 
 # Sets the homepath variable to the directory where your application is located (sys.argv[0]).
 __builtin__.__dict__.update(builtin_dict)
+
+### import Container much faster loading than from Container import ... for os windows only
+import Container
+import Menu
+
+from ImportLibrary import ImportLibrary
+from Reporter import ExceptionHook
+from ConnectionThread import UpgradeLibThread
+from PreferencesGUI import PreferencesGUI
+from pluginmanager import load_plugins
+from which import which
+from Utilities import GetMails, IsAllDigits
+from Decorators import redirectStdout, BuzyCursorNotification
+from DetachedFrame import DetachedFrame
+from LibraryTree import LibraryTree
+from LibPanel import LibPanel
+from PropPanel import PropPanel
+from ControlNotebook import ControlNotebook
+from DiagramNotebook import DiagramNotebook
 
 #-------------------------------------------------------------------
 def getIcon(path):
@@ -416,6 +416,7 @@ class MainApplication(wx.Frame):
 				### if icon path exists, then we can update builtin from cfg
 				if os.path.exists(D['ICON_PATH']):
 					__builtin__.__dict__.update(D)
+
 				### icon path is wrong (generally .devsimpy is wrong because DEVSimPy directory has been moved)
 				### .devsimpy must be rewrite
 				else:
