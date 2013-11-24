@@ -687,6 +687,10 @@ class BlockFactory:
 		### pure python file
 		else:
 
+			### add path to sys.path
+			if dir_name not in sys.path:
+				sys.path.append(dir_name)
+
 			module_name = os.path.basename(filename).split('.py')[0]
 
 			# find and load module

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ###############################################################################
-# FastSimulator.py --- Classes and Tools for 'Classic' DEVS Model Spec
+# simulator.py --- Classes and Tools for 'Classic' DEVS Model Spec
 #                     --------------------------------
 #                            Copyright (c) 2011
 #                            Laurent Capocchi
@@ -17,8 +17,8 @@ from itertools import *
 import threading
 import array
 
-from DEVS import AtomicDEVS, CoupledDEVS
-from Patterns.Strategy import SimStrategy1
+from DEVS import CoupledDEVS
+#from Patterns.Strategy import SimStrategy1
 
 import pluginmanager
 
@@ -48,6 +48,7 @@ def Error(message = '', esc = 1):
 class Sender:
 	"""
 	"""
+
 	def t_send(self, X, imm, t):
 		"""
 		"""
@@ -370,7 +371,7 @@ class Simulator(Sender):
 
 		self.model = model
 		self.__augment(self.model)
-		self.__algorithm = SimStrategy1(self)
+#		self.__algorithm = SimStrategy1(self)
 
 	###
 	def __augment(self, d = None):
@@ -389,20 +390,20 @@ class Simulator(Sender):
 			for subd in d.componentSet:
 				self.__augment(subd)
 
-	def simulate(self, T = sys.maxint):
-		return self.__algorithm.simulate(T)
-
-	def getMaster(self):
-		return self.model
-
-	def setMaster(self, model):
-		self.model = model
-
-	def setAlgorithm(self, s):
-		self.__algorithm = s
-
-	def getAlgorithm(self):
-		return self.__algorithm
+##	def simulate(self, T = sys.maxint):
+##		return self.__algorithm.simulate(T)
+##
+##	def getMaster(self):
+##		return self.model
+##
+##	def setMaster(self, model):
+##		self.model = model
+##
+##	def setAlgorithm(self, s):
+##		self.__algorithm = s
+##
+##	def getAlgorithm(self):
+##		return self.__algorithm
 
 ## Set to False to disable the use of CyDEVS...
 #__USE_CYDEVS__ = True
@@ -411,4 +412,4 @@ class Simulator(Sender):
 		#from cydevs import *
 	#except ImportError:
 		#print("Couldn't load CyDEVS, falling back to PyDEVS")
-		#print("To disable this message, run the build.sh script, or set __USE_CYDEVS__ to False in FastSimulator.py")
+		#print("To disable this message, run the build.sh script, or set __USE_CYDEVS__ to False in simulator.py")

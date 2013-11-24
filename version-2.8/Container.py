@@ -77,6 +77,7 @@ import WizardGUI
 import Components
 import Menu
 import LabelGUI
+import ReloadModule
 
 ### Mixin
 from Mixins.Attributable import Attributable
@@ -387,9 +388,13 @@ class Diagram(Savable, Structurable):
 				4. we make the connnection
 		"""
 
+		ReloadModule.recompile("DomainInterface.DomainBehavior")
+		ReloadModule.recompile("DomainInterface.DomainStructure")
+
 		### if devs instance of diagram is not instancied, we make it
 		### else one simulation has been perfromed then we clear all devs port instances
 		if diagram.getDEVSModel() is None:
+			ReloadModule.recompile("DomainInterface.MasterModel")
 			diagram.setDEVSModel(DomainInterface.MasterModel.Master())
 		else:
 			diagram.ClearAllPorts()
@@ -414,11 +419,12 @@ class Diagram(Savable, Structurable):
 				if isinstance(devs, tuple):
 					return devs
 
+   				#print cls.__bases__[0].__bases__
 			if isinstance(m, CodeBlock):
 				### les ports des modeles couples sont pris en charge plus bas dans les iPorts et oPorts
 				## ajout des port par rapport aux ports graphiques
 				for i in xrange(m.input):
-					devs.addInPort()
+					a = devs.addInPort()
 
 				for i in xrange(m.output):
 					devs.addOutPort()
