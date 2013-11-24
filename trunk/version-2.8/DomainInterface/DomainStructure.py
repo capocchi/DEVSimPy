@@ -18,43 +18,42 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-import os
-import imp
-import inspect
-import sys
+import __builtin__
 
 ### jsut for individual test
 if __name__ == '__main__':
+	import os
+	import sys
 
-	### permit correct import (based on fom instruction) in PyPDEVS directory (logger, util...) when this module executed (main)
+	__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
+	__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {\
+	'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),\
+	'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}
+
+    ### permit correct import (based on fom instruction) in PyPDEVS directory (logger, util...) when this module executed (main)
 	d = sys.path.append(os.pardir)
 	if d not in sys.path:
 		sys.path.append(d)
 
-import DEVSKernel.PyDEVS.DEVS as PyDEVS
-import DEVSKernel.PyPDEVS.DEVS as PyPDEVS
+for pydevs_dir in __builtin__.__dict__['DEVS_DIR_PATH_DICT']:
+	if pydevs_dir == __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
+		exec "import DEVSKernel.%s.DEVS as BaseDEVS"%(pydevs_dir)
 
 #    ======================================================================    #
-
-class DomainStructure(PyDEVS.CoupledDEVS, PyPDEVS.CoupledDEVS):
-	""" Abstract DomainStructure class.
+class DomainStructure(BaseDEVS.CoupledDEVS):
+	""" Abstract DomainStrucutre class.
 	"""
 
 	###
 	def __init__(self, name=""):
-		"""Constructor.
+		"""	Constructor.
 		"""
 
-		eval("%s.CoupledDEVS.__init__(self, name)"%DEFAULT_DEVS_DIRNAME)
+		BaseDEVS.CoupledDEVS.__init__(self, name=name)
 
 def main():
-
-	DB= DomainStructure()
-	print inspect.getmodule(DB)
+	DS = DomainStructure()
+	print DS.__class__.__bases__
 
 if __name__ == '__main__':
-	import inspect
-	import __builtin__
-	__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
-
 	main()

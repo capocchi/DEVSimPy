@@ -436,7 +436,7 @@ class Port:
 	# deletion of those ports (deletion not implemented yet).
 
 	###
-	def __init__(self):
+	def __init__(self, name=""):
 		"""Constructor. Creates an input port if {\tt t} evaluates to true, and
 			an output port otherwise.
 		"""
@@ -457,7 +457,7 @@ class Port:
 
 		self.inLine = []; self.outLine = []
 		self.host = None
-		self.name = ""
+		self.name = name
 		self.myID = None
 
 		# Increment {\tt InCounter\/} or {\tt OutCounter\/} depending on type of
@@ -490,10 +490,10 @@ class IPort(Port):
 	""" Input DEVS Port
 	"""
 
-	def __init__(self):
+	def __init__(self, name=""):
 		""" Constructor
 		"""
-		Port.__init__(self)
+		Port.__init__(self, name=name)
 
 		self.name="IN"+str(self.myID)
 
@@ -507,10 +507,10 @@ class OPort(Port):
 	""" Output DEVS Port
 	"""
 
-	def __init__(self):
+	def __init__(self, name=""):
 		""" Constructor
 		"""
-		Port.__init__(self)
+		Port.__init__(self, name=name)
 
 		self.name="OUT"+str(self.myID)
 

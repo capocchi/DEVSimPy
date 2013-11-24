@@ -64,7 +64,7 @@ class MessagesCollector(DomainBehavior):
 		self.state["status"] = 'ACTIF'
 		
 	###
-  	def intTransition(self):
+	def intTransition(self):
 		self.state["status"] = 'IDLE'
 		self.state["sigma"] = INFINITY
 		

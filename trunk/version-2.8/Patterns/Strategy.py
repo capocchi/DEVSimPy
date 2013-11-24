@@ -493,4 +493,8 @@ class SimStrategy4(SimStrategy):
 		"""Simulate the model (Root-Coordinator).
 		"""
 
-		SimStrategy.simulate(self, termination_time=T, verbose=True)
+		from DEVSKernel.PyPDEVS.simulator import Simulator
+
+		S = Simulator(self._simulator.model)
+
+		S.simulate(termination_time=T, verbose=True)
