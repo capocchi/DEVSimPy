@@ -3,5 +3,6 @@ __all__ = [	"Attributable",
 			"Resizeable",
 			"Rotable",
 			"Connectable",
-			"Plugable"
-			    ]
+			"Plugable",
+			"Structurable"
+]

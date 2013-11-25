@@ -9,7 +9,7 @@
 #                     --------------------------------
 # Version 1.1                                        last modified: 09/09/12
 #  - Added VCD record for VCD trace file output
-#    
+#
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 import sys
@@ -35,7 +35,7 @@ class VCDRecord(object):
         # Set to None to make sure that it will be changed
         self.bitSize = None
 
-##### MAIN output functions, these will be called and are used 
+##### MAIN output functions, these will be called and are used
 #                            to delegate all tracing
 
 class Tracers(object):
@@ -399,7 +399,7 @@ class Tracers(object):
                             "VCD exports should carry a binary signal, not: " + str(vcdState))
             char = vcdState[i]
             if char not in ["0", "1", "E", "x"]:
-                raise DEVSException("Port " + portName + " in model " + modelName + " does not carry a binary signal\n" + 
+                raise DEVSException("Port " + portName + " in model " + modelName + " does not carry a binary signal\n" +
                           "VCD exports should carry a binary signal, not: " + str(vcdState))
         # Find the identifier of this wire
         for i in range(len(self.vcd_varList)):
@@ -488,7 +488,7 @@ class Tracers(object):
         self.vcd_file.write(("\t" + date.today().isoformat() + "\n" +
                             "$end\n" +
                             "$version\n" +
-                            "\tPyDEVS VCD export\n" + 
+                            "\tPyDEVS VCD export\n" +
                             "$end\n" +
                             "$comment\n" +
                             "\tGenerated from DEVS-code\n" +

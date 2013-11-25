@@ -16,6 +16,8 @@ if __name__ == '__main__':
 
 from PluginsGUI import PluginsPanel, GeneralPluginsList
 
+import ReloadModule
+
 #----------------------------------------------------------------------
 class GeneralPanel(wx.Panel):
 	""" General preferences panel
@@ -230,7 +232,6 @@ class SimulationPanel(wx.Panel):
 		vbox.Add(hbox3, wx.LEFT|0, wx.ALIGN_CENTER_VERTICAL|wx.ALL,10)
 		vbox.Add(hbox4, wx.LEFT|0, wx.ALIGN_CENTER_VERTICAL|wx.ALL,10)
 
-
 		### Set sizer
 		self.SetSizer(vbox)
 		self.SetAutoLayout(True)
@@ -306,7 +307,7 @@ class SimulationPanel(wx.Panel):
 			### PyPDEVS
 			for k in PYPDEVS_SIM_STRATEGY_DICT:
 				self.cb.Append(k)
-     		self.cb.SetValue('original')
+			self.cb.SetValue('original')
 
 		### update default value for devs dir et sim strategy
 		self.default_devs_dir = val
@@ -321,6 +322,13 @@ class SimulationPanel(wx.Panel):
 	def OnApply(self, evt):
 		""" Apply changes
 		"""
+
+		### Reload DomainBehavior and DomainStructure
+		if __builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] != self.default_devs_dir:
+			ReloadModule.recompile("DomainInterface.DomainBehavior")
+			ReloadModule.recompile("DomainInterface.DomainStructure")
+			ReloadModule.recompile("DomainInterface.MasterModel")
+
 		__builtin__.__dict__['SIMULATION_SUCCESS_WAV_PATH'] = self.sim_success_wav_path
 		__builtin__.__dict__['SIMULATION_ERROR_WAV_PATH'] = self.sim_error_wav_path
 		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = self.sim_defaut_strategy
