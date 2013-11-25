@@ -166,6 +166,7 @@ __builtin__.__dict__.update(builtin_dict)
 ### import Container much faster loading than from Container import ... for os windows only
 import Container
 import Menu
+import ReloadModule
 
 from ImportLibrary import ImportLibrary
 from Reporter import ExceptionHook
@@ -412,10 +413,18 @@ class MainApplication(wx.Frame):
 						sys.stdout.write('.devsimpy file appear to be not liked with the DEVSimPy source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(self.GetUserConfigDir()))
 						D['HOME_PATH'] = ABS_HOME_PATH
 
+				### recompile DomainInterface if DEFAULT_DEVS_DIRNAME != PyDEVS
+				recompile = D['DEFAULT_DEVS_DIRNAME'] != __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']
+
 				### test if the DEVSimPy source directory has been moved
 				### if icon path exists, then we can update builtin from cfg
 				if os.path.exists(D['ICON_PATH']):
 					__builtin__.__dict__.update(D)
+					### recompile DomainInterface
+					if recompile:
+						ReloadModule.recompile("DomainInterface.DomainBehavior")
+						ReloadModule.recompile("DomainInterface.DomainStructure")
+						ReloadModule.recompile("DomainInterface.MasterModel")
 
 				### icon path is wrong (generally .devsimpy is wrong because DEVSimPy directory has been moved)
 				### .devsimpy must be rewrite
@@ -1359,10 +1368,9 @@ class MainApplication(wx.Frame):
 		"""
 
 		### find the prof file name
-		i = event.GetId()
-		menu = event.GetEventObject()
-		fn = menu.FindItemById(i).GetLabel()
-		prof_file_path = os.path.join(gettempdir(),fn)
+		menu_item = self.GetMenuBar().FindItemById(event.GetId())
+		fn = menu_item.GetLabel()
+		prof_file_path = os.path.join(gettempdir(), fn)
 
 		### list of item in single choice dialogue
 		choices = [_('Embedded in DEVSimPy')]

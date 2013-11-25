@@ -498,3 +498,5 @@ class SimStrategy4(SimStrategy):
 		S = Simulator(self._simulator.model)
 
 		S.simulate(termination_time=T, verbose=True)
+
+		self._simulator.terminate()
