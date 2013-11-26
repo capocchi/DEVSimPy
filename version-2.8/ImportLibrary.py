@@ -455,15 +455,15 @@ class ImportLibrary(wx.Dialog):
 						msg = _('%s is an invalid url')%path
 					else:
 						msg = _('%s directory does not exist')%dName
-					dial = wx.MessageDialog(self, msg, _('New librarie Manager'), wx.OK | wx.ICON_ERROR)
+					dial = wx.MessageDialog(self, msg, _('New librarie manager'), wx.OK | wx.ICON_ERROR)
 					dial.ShowModal()
 					self._dbb.SetValue('')
 			else:
-				dial = wx.MessageDialog(self, _('%s is already imported')%dName, _('New librarie Manager'), wx.OK|wx.ICON_INFORMATION)
+				dial = wx.MessageDialog(self, _('%s is already imported!')%dName, _('New librarie manager'), wx.OK|wx.ICON_INFORMATION)
 				dial.ShowModal()
 				self._dbb.SetValue('')
 		else:
-			dial = wx.MessageDialog(self, _('%s is already imported')%dName, _('New librarie Manager'), wx.OK|wx.ICON_INFORMATION)
+			dial = wx.MessageDialog(self, _('%s is already imported!')%dName, _('New librarie manager'), wx.OK|wx.ICON_INFORMATION)
 			dial.ShowModal()
 			self._dbb.SetValue('')
 

@@ -1103,6 +1103,7 @@ class MainApplication(wx.Frame):
     			### add correct path to sys.path (always before InsertNewDomain)
 				LibraryTree.AddToSysPath(absdName)
     			### add NewDomain
+
 				self.tree.InsertNewDomain(absdName, self.tree.GetRootItem(), self.tree.GetSubDomain(absdName, self.tree.GetDomainList(absdName)).values()[0])
 
 				progress_dlg.Destroy()

@@ -16,8 +16,7 @@ from __future__ import with_statement
 import os
 import random
 
-#from DomainInterface.DomainBehavior import DomainBehavior
-import DomainInterface.DomainBehavior as DomainBehavior
+from DomainInterface.DomainBehavior import DomainBehavior
 
 #  ================================================================    #
 class MessagesCollector(DomainBehavior):

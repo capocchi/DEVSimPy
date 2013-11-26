@@ -482,6 +482,13 @@ class SimStrategy3(SimStrategy):
 
 		self._simulator.terminate()
 
+# A. Simulate forever.
+#    The termination_condition function never returns True.
+#
+def terminate_never(model, clock):
+	return False
+
+
 class SimStrategy4(SimStrategy):
 	""" Original strategy for PyPDEVS simulation
 	"""
@@ -497,6 +504,13 @@ class SimStrategy4(SimStrategy):
 
 		S = Simulator(self._simulator.model)
 
-		S.simulate(termination_time=T, verbose=True)
+		kwargs = {'verbose':True}
+
+		if self._simulator.ntl:
+			kwargs['termination_condition']=terminate_never
+		else:
+			kwargs['termination_time']=T
+
+		S.simulate(**kwargs)
 
 		self._simulator.terminate()
