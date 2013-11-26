@@ -35,6 +35,7 @@ import  wx.gizmos as gizmos
 import Components
 import Menu
 import LabelGUI
+import Container
 
 from Mixins.Attributable import Attributable
 from Mixins.Achievable import Achievable
@@ -894,13 +895,13 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 
 					### Update of DEVSimPy model from new python behavioral file (ContainerBlock is not considered because he did not behavioral)
 					if new_cls.__name__ in ('To_Disk','MessagesCollector'):
-						model.__class__ = DiskGUI
+						model.__class__ = Container.DiskGUI
 					elif new_cls.__name__ == 'QuickScope':
-						model.__class__ = ScopeGUI
+						model.__class__ = Container.ScopeGUI
 						model.AddAttribute("xlabel")
 						model.AddAttribute("ylabel")
 					else:
-						model.__class__ = CodeBlock
+						model.__class__ = Container.CodeBlock
 
 					### if we change the python file from zipfile we compresse the new python file and we update the python_path value
 					if zipfile.is_zipfile(model.model_path):
