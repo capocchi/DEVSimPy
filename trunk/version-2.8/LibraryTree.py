@@ -31,8 +31,6 @@ import inspect
 import Container
 import Menu
 
-from ReloadModule import recompile
-from DomainInterface.DomainBehavior import DomainBehavior
 from Utilities import replaceAll, getFileListFromInit, path_to_module
 from Decorators import BuzyCursorNotification
 from Components import BlockFactory, DEVSComponent, GetClass
@@ -295,6 +293,9 @@ class LibraryTree(wx.TreeCtrl):
 		""" Get the list of files from dName directory.
 		"""
 
+		### import are here because the simulator (PyDEVS or PyPDEVS) require it
+		from DomainInterface.DomainBehavior import DomainBehavior
+
 		### list of py file from __init__.py
 		if LibraryTree.EXT_LIB_PYTHON_FLAG:
 
@@ -324,16 +325,20 @@ class LibraryTree(wx.TreeCtrl):
 					py_file_list = []
 
 					for s in name_list:
-						python_file = os.path.join(dName,s+'.py')
+						python_file = os.path.join(dName, s+'.py')
 						### test if tmp is only composed by python file (case of the user write into the __init__.py file directory name is possible ! then we delete the directory names)
 						if os.path.isfile(python_file):
 
 							cls = GetClass(python_file)
 
 							if cls is not None and not isinstance(cls, tuple):
+
 								### only model that herite from DomainBehavior is shown in lib
 								if issubclass(cls, DomainBehavior):
 									py_file_list.append(s)
+								else:
+									sys.stderr.write(_("%s not imported : Class is not DomainBehavior \n"%(s)))
+
 
 							### If cls is tuple, there is an error but we load the model to correct it.
 							### If its not DEVS model, the Dnd don't allows the instantiation and when the error is corrected, it don't appear before a update.
@@ -341,18 +346,19 @@ class LibraryTree(wx.TreeCtrl):
 
 								py_file_list.append(s)
 
-				except Exception:
+				except Exception, info:
 					py_file_list = []
 					# if dName contains a python file, __init__.py is forced
 					for f in os.listdir(dName):
 						if f.endswith('.py'):
-							#sys.stderr.write(_("%s not imported : %s \n"%(dName,info)))
+							sys.stderr.write(_("%s not imported : %s \n"%(dName,info)))
 							break
 		else:
 			py_file_list = []
 
 		# list of amd and cmd files
 		devsimpy_file_list = [f for f in os.listdir(dName) if os.path.isfile(os.path.join(dName, f)) and (f[:2] != '__') and (f.endswith(LibraryTree.EXT_LIB_FILE))]
+
 
 		return py_file_list + devsimpy_file_list
 
@@ -376,7 +382,7 @@ class LibraryTree(wx.TreeCtrl):
 			return
 		else:
 			item = L.pop(0)
-			assert not isinstance(item,unicode), _("Warning unicode item !")
+			assert not isinstance(item, unicode), _("Warning unicode item !")
 			### element à faire remonter dans la liste
 			D = []
 			### si le fils est un modèle construit dans DEVSimPy
@@ -490,7 +496,7 @@ class LibraryTree(wx.TreeCtrl):
 				### pour les fils du sous domain
 				for elem in item.values()[0]:
 					# si elem simple (modèle couple ou atomic)
-					if isinstance(elem,str):
+					if isinstance(elem, str):
 						### remplacement des espaces
 						elem = elem.strip() #replace(' ','')
 						### parent provisoir

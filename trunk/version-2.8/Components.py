@@ -33,8 +33,9 @@ else:
 import Editor
 import ZipManager
 
-from DomainInterface.DomainBehavior import DomainBehavior
-from DomainInterface.DomainStructure import DomainStructure
+#from DomainInterface.DomainBehavior import DomainBehavior
+#from DomainInterface.DomainStructure import DomainStructure
+from ReloadModule import recompile
 from Utilities import GetActiveWindow, path_to_module
 from NetManager import Net
 
@@ -729,7 +730,11 @@ class BlockFactory:
 	def CreateBlock(*argv, **kwargs):
 		""" Create Block from python_file and other info coming from wizard.
 		"""
+
 		from Container import iPort, oPort, MsgBoxError
+		### import are here because the simulator (PyDEVS or PyPDEVS) require it
+		from DomainInterface.DomainBehavior import DomainBehavior
+		from DomainInterface.DomainStructure import DomainStructure
 
 		python_file = kwargs['python_file']
 		canvas = kwargs['canvas'] if 'canvas' in kwargs else None
