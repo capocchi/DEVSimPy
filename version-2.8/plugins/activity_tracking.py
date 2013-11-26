@@ -486,6 +486,7 @@ def view_activity_report(*args, **kwargs):
 	frame = ActivityReport(parent, wx.ID_ANY, size=(560, 300), title="Activity-Tracking Reporter", master = master)
 	frame.CenterOnParent()
 	frame.Show()
+	print frame.GetData()
 
 def GetFlatDEVSList(coupled_devs, l=[]):
 	""" Get the flat list of devs model composing coupled_devs (recursively)
