@@ -51,7 +51,6 @@ import webbrowser
 import platform
 import threading
 import cPickle
-import zipfile
 
 from tempfile import gettempdir
 
@@ -60,8 +59,6 @@ try:
 	import hotshot.stats
 except ImportError:
 	sys.stdout.write("Hotshot module not found. If you want to perform profiling simulation, install it !")
-
-from urllib import urlopen
 
 __min_wx_version__ = ['2.9','2.8','2.7','2.6','2.5']
 
@@ -91,7 +88,7 @@ except ImportError:
 		import wx
 		if wx.VERSION_STRING < __min_wx_version__:
 			sys.stdout.write("You need to updgarde wxPython to v%s (or higer) to run DEVSimPy\n"%__min_wx_version__)
-			sys.stdout.write(__get_wxpython__)
+			sys.stdout.write(__get__wxpython__)
 			sys.exit()
 	except ImportError:
 			sys.stderr.write("Error: DEVSimPy requires wxPython, which doesn't seem to be installed\n")
@@ -170,7 +167,6 @@ import ReloadModule
 
 from ImportLibrary import ImportLibrary
 from Reporter import ExceptionHook
-from ConnectionThread import UpgradeLibThread
 from PreferencesGUI import PreferencesGUI
 from pluginmanager import load_plugins
 from which import which
@@ -861,7 +857,7 @@ class MainApplication(wx.Frame):
 		self.nb2.print_canvas = self.nb2.GetCurrentPage()
 		self.nb2.print_size = self.nb2.GetSize()
 		self.nb2.PrintButton(event)
-
+	###
 	def OnPrintPreview(self, event):
 		""" Print preview of current diagram
 		"""
@@ -869,7 +865,7 @@ class MainApplication(wx.Frame):
 		self.nb2.print_canvas = self.nb2.GetCurrentPage()
 		self.nb2.print_size = self.nb2.GetSize()
 		self.nb2.PrintPreview(event)
-
+	###
 	def OnScreenCapture(self, event):
 		""" Print preview of current diagram
 		"""
@@ -906,7 +902,7 @@ class MainApplication(wx.Frame):
 				wx.MessageBox(_("Screenshot saved in %s.")%fn, _("Success"), wx.OK|wx.ICON_INFORMATION)
 			else:
 				wx.MessageBox(_("Unable to get the screenshot."), _("Error"), wx.OK|wx.ICON_ERROR)
-
+	###
 	def OnUndo(self, event):
 		""" Undo the diagram
 		"""
@@ -1439,7 +1435,7 @@ class MainApplication(wx.Frame):
 		stats = hotshot.stats.load(prof_file_path)
 		stats.strip_dirs()
 		stats.sort_stats('time', 'calls')
-		text = stats.print_stats(100)
+		stats.print_stats(100)
 
 	def OnDeleteProfiles(self, event):
 		dlg = wx.MessageDialog(self, _('Do you realy want to delete all files ?'), _('Profile Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
