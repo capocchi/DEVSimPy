@@ -53,7 +53,7 @@ class LibraryTree(wx.TreeCtrl):
 	EXCLUDE_DOMAIN = ['Basic', '.svn']
 
 	def __init__(self, *args, **kwargs):
-		""" Constructor
+		""" Constructor.
 		"""
 
 		wx.TreeCtrl.__init__(self, *args, **kwargs)
@@ -134,19 +134,18 @@ class LibraryTree(wx.TreeCtrl):
 		"""
 		item, flags = self.HitTest(evt.GetPosition())
 
-		if item and self.IsSelected(item) and (flags & wx.TREE_HITTEST_ONITEMLABEL) and not evt.LeftIsDown():
+		if (flags & wx.TREE_HITTEST_ONITEMLABEL) and not evt.LeftIsDown():
 
 			path = self.GetItemPyData(item)
 
 			if os.path.isdir(path):
 				model_list = self.GetModelList(path)
 				domain_list = self.GetDomainList(path)
-				if domain_list != []:
-					tip = '\n'.join(domain_list)
-				elif model_list != []:
-					tip = '\n'.join(model_list)
-				else:
-					tip = ""
+
+				tip = '\n'.join(model_list) if model_list != [] else ""
+				tip += '\n'
+				tip += '\n'.join(domain_list) if domain_list != [] else ""
+
 			### is last item
 			else:
 				module = BlockFactory.GetModule(path)
@@ -169,8 +168,9 @@ class LibraryTree(wx.TreeCtrl):
 		### else the drag and drop dont run
 		evt.Skip()
 
+	###
 	def OnLeftClick(self, evt):
-		"""
+		""" Left click has been invoked.
 		"""
 
 		self.UnselectAll()
@@ -180,8 +180,9 @@ class LibraryTree(wx.TreeCtrl):
 		#self.SetFocus()
 		evt.Skip()
 
+	###
 	def OnMiddleClick(self, evt):
-		"""
+		""" Middle click has been invoked.
 		"""
 		item_selected = evt.GetItem()
 		if not self.ItemHasChildren(item_selected):
@@ -217,18 +218,23 @@ class LibraryTree(wx.TreeCtrl):
 				sys.stdout.write(_("This option has not been implemented yet. \n"))
 	###
 	def OnRightClick(self, evt):
-		""" Right click has been clicked.
+		""" Right click has been invoked.
 		"""
+		pos = evt.GetPosition()
+		item, flags = self.HitTest(pos)
 
-		# si pas d'item selectionnner, le evt.Skip à la fin propage l'evenement vers OnRightItemClick
+		### select item
+		self.SelectItem(item)
+
+		# if no , le evt.Skip à la fin propage l'evenement vers OnRightItemClick
 		if self.GetSelections() == []:
-			self.PopupMenu(Menu.LibraryPopupMenu(self), evt.GetPosition())
+			self.PopupMenu(Menu.LibraryPopupMenu(self), pos)
 		else:
 			evt.Skip()
 
 	###
 	def OnRightItemClick(self, evt):
-		"""
+		""" Right click on a item has been invoked.
 		"""
 		self.PopupMenu(Menu.ItemLibraryPopupMenu(self), evt.GetPoint())
 		evt.Skip()
@@ -243,7 +249,10 @@ class LibraryTree(wx.TreeCtrl):
 		else:
 			wx.MessageBox(_("No librarie selected!"),_("Delete Manager"))
 
+	###
 	def OnNewModel(self, evt):
+		""" New model action has been invoked.
+		"""
 		Container.ShapeCanvas.StartWizard(self)
 
 	###
@@ -603,8 +612,9 @@ class LibraryTree(wx.TreeCtrl):
 
     ###
 	def GetSubDomain(self, dName, domainSubList = []):
-		""" Get the dico composed by all of the sub domain of dName (like{'../Domain/PowerSystem': ['PSDomainStructure', 'PSDomainBehavior', 'Object', 'PSSDB', {'../Domain/PowerSystem/Rt': []}, {'../Domain/PowerSystem/PowerMachine': ['toto.cmd', 'Integrator.cmd', 'titi.cmd', 'Mymodel.cmd', {'../Domain/PowerSystem/PowerMachine/TOTO': []}]}, {'../Domain/PowerSystem/Sources': ['StepGen', 'SinGen', 'CosGen', 'RampGen', 'PWMGen', 'PulseGen', 'TriphaseGen', 'ConstGen']}, {'../Domain/PowerSystem/Sinks': ['To_Disk', 'QuickScope']}, {'../Domain/PowerSystem/MyLib': ['', 'model.cmd']}, {'../Domain/PowerSystem/Hybrid': []}, {'../Domain/PowerSystem/Continuous': ['WSum', 'Integrator', 'Gain', 'Gain2', 'NLFunction']}]}
-	)
+		""" Get the dico composed by all of the sub domain of dName
+			(like{'../Domain/PowerSystem': ['PSDomainStructure', 'PSDomainBehavior', 'Object', 'PSSDB', {'../Domain/PowerSystem/Rt': []}, {'../Domain/PowerSystem/PowerMachine': ['toto.cmd', 'Integrator.cmd', 'titi.cmd', 'Mymodel.cmd', {'../Domain/PowerSystem/PowerMachine/TOTO': []}]}, {'../Domain/PowerSystem/Sources': ['StepGen', 'SinGen', 'CosGen', 'RampGen', 'PWMGen', 'PulseGen', 'TriphaseGen', 'ConstGen']}, {'../Domain/PowerSystem/Sinks': ['To_Disk', 'QuickScope']}, {'../Domain/PowerSystem/MyLib': ['', 'model.cmd']}, {'../Domain/PowerSystem/Hybrid': []}, {'../Domain/PowerSystem/Continuous': ['WSum', 'Integrator', 'Gain', 'Gain2', 'NLFunction']}]}
+			)
 		"""
 
 		if domainSubList == []:
@@ -628,17 +638,19 @@ class LibraryTree(wx.TreeCtrl):
 
 	###
 	def IsChildRoot(self, dName):
-		"""
+		""" Return True if dName library has child Root
 		"""
 		return (dName in self.GetChildRoot())
 
+	###
 	def HasString(self, s = ""):
-		"""
+		""" Return s parameter if exists in opened libraries
 		"""
 		return s in map(lambda item: str(self.GetItemText(item)), self.ItemDico.values())
 
+	###
 	def CheckItem(self, path):
-		"""
+		""" Check if the model is valide
 		"""
 
 		item = self.ItemDico[path]
@@ -729,8 +741,9 @@ class LibraryTree(wx.TreeCtrl):
 		"""
 		self.UpdateAll()
 
+	###
 	def UpdateAll(self):
-		"""
+		""" Update all loaded libaries.
 		"""
 
 		### update all Domain
@@ -740,25 +753,27 @@ class LibraryTree(wx.TreeCtrl):
 		### to sort domain
 		self.SortChildren(self.root)
 
-	def UpgradeAll(self, evt):
-		"""
-		"""
-		progress_dlg = wx.ProgressDialog(_("DEVSimPy upgrade libraries"),
-								_("Connecting to %s ...")%"code.google.com", parent=self,
-								style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
-		progress_dlg.Pulse()
+	###
+# 	def UpgradeAll(self, evt):
+# 		"""
+# 		"""
+# 		progress_dlg = wx.ProgressDialog(_("DEVSimPy upgrade libraries"),
+# 								_("Connecting to %s ...")%"code.google.com", parent=self,
+# 								style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
+# 		progress_dlg.Pulse()
+#
+# 		thread = UpgradeLibThread(progress_dlg)
+#
+# 		while thread.isAlive():
+# 			time.sleep(0.3)
+# 			progress_dlg.Pulse()
+#
+# 		progress_dlg.Destroy()
+# 		wx.SafeYield()
+#
+# 		return thread.finish()
 
-		thread = UpgradeLibThread(progress_dlg)
-
-		while thread.isAlive():
-			time.sleep(0.3)
-			progress_dlg.Pulse()
-
-		progress_dlg.Destroy()
-		wx.SafeYield()
-
-		return thread.finish()
-
+	###
 	def RemoveItem(self, item):
 		""" Remove item from Tree and also the corresponding elements of ItemDico
 		"""
@@ -770,13 +785,21 @@ class LibraryTree(wx.TreeCtrl):
 
 		self.Delete(item)
 
+	###
 	def OnItemRefresh(self, evt):
+		""" Refresh action has been invoked.
+		"""
+
 		item = self.GetSelection()
 		path = self.GetItemPyData(item)
 
 		self.CheckItem(os.path.splitext(path)[0])
 
+	###
 	def OnItemEdit(self, evt):
+		""" Edition menu has been invoked.
+		"""
+
 		item = self.GetSelection()
 		path = self.GetItemPyData(item)
 
@@ -799,24 +822,33 @@ class LibraryTree(wx.TreeCtrl):
 		### call frame editor
 		DEVSComponent.OnEditor(devscomp, evt)
 
+	###
 	def OnItemRename(self, evt):
+		""" Rename action has been invoked.
+		"""
 		item = self.GetSelection()
-		path = self.GetItemPyData(item)
+		name = self.GetItemText(item)
 
-		bn = os.path.basename(path)
-		dn = os.path.dirname(path)
-		name, ext = os.path.splitext(bn)
-
-		d = wx.TextEntryDialog(self,_('New file name'), defaultValue = name, style=wx.OK)
+		### dialog to ask new label
+		d = wx.TextEntryDialog(self, _('New file name'), defaultValue = name, style=wx.OK)
 		d.ShowModal()
 
 		### new label
 		new_label = d.GetValue()
-		os.rename(path, os.path.join(dn, new_label)+ext)
-		replaceAll(os.path.join(dn,'__init__.py'), os.path.splitext(bn)[0], new_label)
+		### if new and old label are different
+		if new_label != name:
+			path = self.GetItemPyData(item)
+			bn = os.path.basename(path)
+			dn = os.path.dirname(path)
+			name, ext = os.path.splitext(bn)
+			### relace on file system
+			os.rename(path, os.path.join(dn, new_label)+ext)
+			### replace in __init__.py file
+			replaceAll(os.path.join(dn,'__init__.py'), os.path.splitext(bn)[0], new_label)
 
-		self.UpdateAll()
+			self.UpdateAll()
 
+	###
 	def OnItemDocumentation(self, evt):
 		""" Display the item's documentation on miniFrame.
 		"""
