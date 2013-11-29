@@ -223,13 +223,11 @@ class LibraryTree(wx.TreeCtrl):
 		pos = evt.GetPosition()
 		item, flags = self.HitTest(pos)
 
-		### select item
-		self.SelectItem(item)
-
 		# if no , le evt.Skip à la fin propage l'evenement vers OnRightItemClick
-		if self.GetSelections() == []:
+		if not item.IsOk():
 			self.PopupMenu(Menu.LibraryPopupMenu(self), pos)
 		else:
+			self.SelectItem(item)
 			evt.Skip()
 
 	###

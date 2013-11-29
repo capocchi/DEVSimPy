@@ -1076,7 +1076,7 @@ class MainApplication(wx.Frame):
 		"""
 
 		# dialog pour l'importation de lib DEVSimPy (dans Domain) et le local
-		dlg = ImportLibrary(self, wx.ID_ANY, _('Import Library'), size=(550,400), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+		dlg = ImportLibrary(self, wx.ID_ANY, _('New/Import Library manager'), size=(550,400), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 
 		if (dlg.ShowModal() == wx.ID_OK):
 
