@@ -377,7 +377,7 @@ class SettingsMenu(wx.Menu):
 		languagesSubmenu.AppendItem(fritem)
 		languagesSubmenu.AppendItem(enitem)
 
-		self.AppendMenu(wx.NewId(),_('Languages'), languagesSubmenu)
+		self.AppendMenu(wx.NewId(), _('Languages'), languagesSubmenu)
 		self.AppendItem(pref_item)
 
 		fritem.Enable(not parent.language == 'fr')
@@ -734,11 +734,11 @@ class ShapePopupMenu(wx.Menu):
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnLock, id=ID_LOCK_SHAPE)
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnUnLock, id=ID_UNLOCK_SHAPE)
 
+
 		elif isinstance(shape, Container.ResizeableNode):
 			Delete_menu = self.AppendItem(delete)
+
 		elif isinstance(shape, Container.Node):
-
-
 			pass
 			#port_number=wx.MenuItem(self, wx.NewId(), _("Enable port number"), _("Port number"),wx.ITEM_CHECK)
 			#self.AppendItem(port_number)
@@ -780,12 +780,14 @@ class ShapePopupMenu(wx.Menu):
 				#Export_menu = self.AppendItem(export)
 				Export_menu=self.AppendMenu(-1,_("Export"),export_subMenu)
 				Export_SubMenu1 = export_subMenu.AppendItem(exportAMD)
+
 			elif isinstance(shape, Container.ContainerBlock):
 				self.AppendSeparator()
 				Export_menu=self.AppendMenu(-1,_("Export"),export_subMenu)
 				Export_SubMenu1 = export_subMenu.AppendItem(exportCMD)
 				Export_SubMenu2 = export_subMenu.AppendItem(exportXML)
 				Export_SubMenu3 = export_subMenu.AppendItem(exportJS)
+
 			else:
 				self.Enable(ID_EDIT_SHAPE, False)
 

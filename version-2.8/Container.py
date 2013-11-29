@@ -2611,12 +2611,15 @@ class LinesShape(Shape):
 
 		return False
 
+
+
 	def OnLeftDClick(self, event):
 		"""
 		"""
 
 		### canvas containing LinesShape
 		canvas = event.GetEventObject()
+		
 		### coordinates
 		x,y = event.GetPositionTuple()
 		### add point at the position according to the possible zoom (use of getScalledCoordinates)
