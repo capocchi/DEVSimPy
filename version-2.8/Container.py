@@ -113,7 +113,10 @@ def MsgBoxError(event, parent, msg):
 
 	### si erreur dans l'importation
 	if isinstance(msg, unicode):
-		dial = wx.MessageDialog(parent, _('Error trying to import module : %s')%msg, _('Error Manager'), wx.OK | wx.ICON_ERROR)
+		dial = wx.MessageDialog(parent, \
+							_('Error trying to import module : %s')%msg, \
+							_('Error Manager'), \
+							wx.OK | wx.ICON_ERROR)
 		dial.ShowModal()
 	### si erreur dans le constructeur (__init__) ou pendant la simulation du .py
 	elif isinstance(msg, tuple):
@@ -148,7 +151,10 @@ def MsgBoxError(event, parent, msg):
 		if path is not None:
 
 			### demande si on veut corriger l'erreur
-			dial = wx.MessageDialog(parent, _("Error: %s\n%s%s%s\nDo you want to remove this error?")%(str(val),str(python_path),str(fct),str(line_number)), _('Error Manager'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_ERROR)
+			dial = wx.MessageDialog(parent,\
+								 _("Error: %s\n%s%s%s\nDo you want to remove this error?")%(str(val),str(python_path),str(fct),str(line_number)),\
+								 _('Error Manager'), \
+								 wx.YES_NO | wx.YES_DEFAULT | wx.ICON_ERROR)
 			if dial.ShowModal() == wx.ID_YES:
 				### il faut supprimer les doubles cote de chaque cotée et caster en string
 				python_path = str(path.split(' ')[-1])[1:-1]
@@ -632,7 +638,10 @@ class Diagram(Savable, Structurable):
 			### if there is no error in models
  			if D is not None:
 				playSound(SIMULATION_ERROR_WAV_PATH)
-				dial = wx.MessageDialog(win, _("There is errors in some models.\n\nDo you want to execute the error manager ?"), _('Simulation Manager'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+				dial = wx.MessageDialog(win, \
+									_("There is errors in some models.\n\nDo you want to execute the error manager ?"), \
+									_('Simulation Manager'), \
+									wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 				if dial.ShowModal() == wx.ID_YES:
 					frame = CheckerGUI.CheckerGUI(win, D)
 					frame.Show()
@@ -658,7 +667,10 @@ class Diagram(Savable, Structurable):
 
 				## test of filename model attribut
 				if all(model.bad_filename_path_flag for model in filter(lambda m: isinstance(m, Block), diagram.GetShapeList()) if hasattr(model, 'bad_filename_path_flag')):
-					dial = wx.MessageDialog(win, _("You dont make the simulation of the Master model.\nSome models have bad fileName path !"), _('Simulation Manager'), wx.OK | wx.ICON_EXCLAMATION)
+					dial = wx.MessageDialog(win, \
+										_("You dont make the simulation of the Master model.\nSome models have bad fileName path !"),\
+										_('Simulation Manager'), \
+										wx.OK | wx.ICON_EXCLAMATION)
 					dial.ShowModal()
 					return False
 				else:
@@ -1881,7 +1893,10 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 					if m.SaveFile(gmwiz.model_path):
 						m.last_name_saved = gmwiz.model_path
 					else:
-						dlg = wx.MessageDialog(self, _('Error saving file %s\n')%os.path.basename(gmwiz.model_path), gmwiz.label, wx.ID_OK|wx.ICON_ERROR)
+						dlg = wx.MessageDialog(self, \
+											_('Error saving file %s\n')%os.path.basename(gmwiz.model_path), \
+											gmwiz.label, \
+											wx.OK | wx.ICON_ERROR)
 						dlg.ShowModal()
 
 				# Adding graphical model to diagram
@@ -2619,7 +2634,7 @@ class LinesShape(Shape):
 
 		### canvas containing LinesShape
 		canvas = event.GetEventObject()
-		
+
 		### coordinates
 		x,y = event.GetPositionTuple()
 		### add point at the position according to the possible zoom (use of getScalledCoordinates)
@@ -3138,7 +3153,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		canvas = event.GetEventObject()
 		f = PluginsGUI.ModelPluginsManager(	parent=canvas.GetParent(),
 									id=wx.ID_ANY,
-									title =_('Model Plugins Manager'),
+									title =_('%s - plugin manager')%self.label,
 									size = (700,500),
 									style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN,
 									model= self)
@@ -3176,7 +3191,10 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 				printOnStatusBar(mainW.statusbar, {0:_('%s Exported')%label, 1:''})
 
 			except IOError, error:
-				dlg = wx.MessageDialog(parent, _('Error exported file %s\n')%error, label, wx.ID_OK|wx.ICON_ERROR)
+				dlg = wx.MessageDialog(parent, \
+									_('Error exported file %s\n')%error, \
+									label, \
+									wx.OK | wx.ICON_ERROR)
 				dlg.ShowModal()
 
 		save_dlg.Destroy()
@@ -4081,7 +4099,10 @@ class ScopeGUI(CodeBlock):
 		# If the frame is call before the simulation process, the atomicModel is not instanciate (Instanciation delegate to the makeDEVSconnection after the run of the simulation process)
 		devs = self.getDEVSModel()
 		if devs is None:
-			dial = wx.MessageDialog(None, _('No data available.\nGo to the simulation process first!'), self.label, wx.OK|wx.ICON_INFORMATION)
+			dial = wx.MessageDialog(None, \
+								_('No data available.\nGo to the simulation process first!'), \
+								self.label, \
+								wx.OK | wx.ICON_INFORMATION)
 			dial.ShowModal()
 		else:
 			# Call the PlotManager which plot on the canvas depending the atomicModel.fusion option
@@ -4108,5 +4129,8 @@ class DiskGUI(CodeBlock):
 			frame.Center()
 			frame.Show()
 		else:
-			dial = wx.MessageDialog(None, _('No data available.\nGo to the simulation process first!'), self.label, wx.OK|wx.ICON_INFORMATION)
+			dial = wx.MessageDialog(None, \
+								_('No data available.\nGo to the simulation process first!'), \
+								self.label, \
+								wx.OK | wx.ICON_INFORMATION)
 			dial.ShowModal()

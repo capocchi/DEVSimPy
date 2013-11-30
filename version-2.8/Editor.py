@@ -890,7 +890,9 @@ class EditionNotebook(wx.Notebook):
 				currentPage.modify = False
 
 			except Exception, info:
-				wx.MessageBox(_('Error opening file\n') + str(info), _('Error'))
+				wx.MessageBox(_('Error opening file:\n%s\n')%str(info),\
+							"Open file function",\
+							wx.OK | wx.ICON_ERROR)
 
 		open_dlg.Destroy()
 
@@ -1630,29 +1632,36 @@ class BlockEditor(Editor):
 		cp.error_flag = isinstance(info, Exception) or isinstance(info, str)
 
 		if cp.error_flag:
-			wx.MessageBox(_('Error saving file (UpdateModule)\n') + str(info), _('Error'))
+			wx.MessageBox(_('Error saving file:\n%s')%str(info), \
+						"UpdateModule method", \
+						wx.OK | wx.ICON_ERROR)
 		else:
 			import Components
 
 			classe = Components.GetClass(cp.GetFilename())
 
-			if not isinstance(classe, Exception) or not isinstance(clsmembers, tuple):
-				# get behavioral attribute from python file through constructor class
-				constructor = inspect.getargspec(classe.__init__)
+			if not isinstance(classe, Exception):
 
-				if constructor[-1]:
-					for k, v in zip(constructor[0][1:], constructor[-1]):
-						if not self.cb.args.has_key(k):
-							self.cb.args.update({k: v})
+				### for plugins.py file, i is not a class !
+				if inspect.isclass(classe):
+					# get behavioral attribute from python file through constructor class
+					constructor = inspect.getargspec(classe.__init__)
 
-				# code update if it was modified during the simulation (out of constructor code,
-				# because we don't re-instanciated the devs model but only change the class reference)
-				devs = self.cb.getDEVSModel()
-				if devs is not None:
-					self.cb.setDEVSClassModel(classe)
-					self.cb.setBlock(devs)
+					if constructor[-1]:
+						for k, v in zip(constructor[0][1:], constructor[-1]):
+							if not self.cb.args.has_key(k):
+								self.cb.args.update({k: v})
+
+					# code update if it was modified during the simulation (out of constructor code,
+					# because we don't re-instanciated the devs model but only change the class reference)
+					devs = self.cb.getDEVSModel()
+					if devs is not None:
+						self.cb.setDEVSClassModel(classe)
+						self.cb.setBlock(devs)
 			else:
-				wx.MessageBox(_('Error trying to give class (GetClass)\n') + str(classe), _('Error'))
+				wx.MessageBox(_('Error trying to give class: %s\n')%str(classe), \
+							"GetClass Function", \
+							wx.OK | wx.ICON_ERROR)
 
 
 ### Edition of any files with notebook------------------------------

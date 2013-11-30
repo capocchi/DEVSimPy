@@ -135,13 +135,13 @@ class VerboseConfig(wx.Frame):
 		""" Constructor
 		"""
 
-		kwds["style"] = wx.CLOSE_BOX|wx.STAY_ON_TOP|wx.FRAME_NO_TASKBAR|wx.FRAME_FLOAT_ON_PARENT
+		kwds["style"] = wx.STAY_ON_TOP|wx.DEFAULT_FRAME_STYLE
 		wx.Frame.__init__(self, *args, **kwds)
-		self.sizer_3_staticbox = wx.StaticBox(self, -1, _("Display options"))
-		self.checkbox_3 = wx.CheckBox(self, -1, _("Show clock"))
-		self.checkbox_4 = wx.CheckBox(self, -1, _("Show external transition trace"))
-		self.checkbox_5 = wx.CheckBox(self, -1, _("Show internal transition trace"))
-		self.checkbox_6 = wx.CheckBox(self, -1, _("Show collision trace"))
+		self.sizer_3_staticbox = wx.StaticBox(self, wx.ID_ANY, _("Display options"))
+		self.checkbox_3 = wx.CheckBox(self, wx.ID_ANY, _("Show clock"))
+		self.checkbox_4 = wx.CheckBox(self,wx.ID_ANY, _("Show external transition trace"))
+		self.checkbox_5 = wx.CheckBox(self, wx.ID_ANY, _("Show internal transition trace"))
+		self.checkbox_6 = wx.CheckBox(self, wx.ID_ANY, _("Show collision trace"))
 		self.button_2 = wx.Button(self, wx.ID_CANCEL, "")
 		self.button_3 = wx.Button(self, wx.ID_OK, "")
 
@@ -159,9 +159,10 @@ class VerboseConfig(wx.Frame):
 		global show_coll
 
 		_icon = wx.EmptyIcon()
-		_icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,DEVSIMPY_PNG), wx.BITMAP_TYPE_ANY))
+		_icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH, DEVSIMPY_PNG), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(_icon)
-		self.SetSize((433, 148))
+		self.SetSize((433, 168))
+		self.SetBackgroundColour(wx.WHITE)
 		self.SetToolTipString(_("Display options for the plugin verbose"))
 		self.checkbox_3.SetValue(show_clock)
 		self.checkbox_4.SetValue(show_ext_trans)
@@ -170,23 +171,38 @@ class VerboseConfig(wx.Frame):
 		self.button_3.SetDefault()
 		# end wxGlade
 
+	###
 	def __do_layout(self):
-		# begin wxGlade: MyFrame.__do_layout
+		""" Layout of the frame.
+		"""
+
+		### create sizers
 		sizer_3 = wx.StaticBoxSizer(self.sizer_3_staticbox, wx.VERTICAL)
-		sizer_4 = wx.BoxSizer(wx.HORIZONTAL)
-		sizer_3.Add(self.checkbox_3, 0, 0, 0)
-		sizer_3.Add(self.checkbox_4, 0, 0, 0)
-		sizer_3.Add(self.checkbox_5, 0, 0, 0)
-		sizer_3.Add(self.checkbox_6, 0, 0, 0)
-		sizer_4.Add(self.button_2, 1, wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL, 0)
-		sizer_4.Add(self.button_3, 1, wx.ALIGN_BOTTOM, 0)
-		sizer_3.Add(sizer_4, 1, wx.EXPAND, 0)
-		self.SetSizer(sizer_3)
-		self.Layout()
+		sizer_4 = wx.BoxSizer(wx.VERTICAL)
+		sizer_5 = wx.BoxSizer(wx.HORIZONTAL)
+
+		### adding checkbox
+		sizer_3.Add(self.checkbox_3, 0, 2, 2)
+		sizer_3.Add(self.checkbox_4, 0, 2, 2)
+		sizer_3.Add(self.checkbox_5, 0, 2, 2)
+		sizer_3.Add(self.checkbox_6, 0, 2, 2)
+
+		### adding buttons
+		sizer_5.Add(self.button_2, 1, wx.ALIGN_CENTER_HORIZONTAL)
+		sizer_5.Add(self.button_3, 1, wx.ALIGN_CENTER_HORIZONTAL)
+
+		sizer_4.Add(sizer_3, 0, wx.EXPAND,0)
+		sizer_4.Add(sizer_5, 0, wx.EXPAND,0)
+
+		self.SetSizer(sizer_4)
+		self.SetAutoLayout(True)
 		self.Centre()
 		# end wxGlade
 
+	###
 	def OnOk(self, evt):
+		""" Ok butto, has been clicked.
+		"""
 
 		global show_ext_trans
 		global show_int_trans
@@ -200,12 +216,16 @@ class VerboseConfig(wx.Frame):
 
 		self.Close()
 
+	###
 	def OnCancel(self, evt):
+		""" cancel button has been checked.
+		"""
 		self.Close()
 
+###
 def Config(parent):
 	""" Plugin settings frame.
 	"""
 
-	config_frame = VerboseConfig(parent, -1, _("Verbose configuration"))
+	config_frame = VerboseConfig(parent, wx.ID_ANY, _("Verbose plugin"))
 	config_frame.Show()

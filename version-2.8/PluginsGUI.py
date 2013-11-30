@@ -38,12 +38,22 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		self.id = -sys.maxint
 		self.map = {}
 
-		#adding some art
+		images = [	os.path.join(ICON_PATH_16_16,'enable_plugin.png'),
+					os.path.join(ICON_PATH_16_16,'disable_plugin.png'),
+					os.path.join(ICON_PATH_16_16,'no_ok.png')
+					]
+
 		self.il = wx.ImageList(16, 16)
-		a={"idx1":"CROSS_MARK","idx2":"TICK_MARK","idx3":"DELETE"}
-		for k,v in a.items():
-			exec "self.%s= self.il.Add(wx.ArtProvider_GetBitmap(wx.ART_%s,wx.ART_TOOLBAR,(16,16)))" % (k,v)
+		for i in images:
+			self.il.Add(wx.Bitmap(i))
 		self.SetImageList(self.il, wx.IMAGE_LIST_SMALL)
+
+		#adding some art
+		#self.il = wx.ImageList(16, 16)
+		#a={"idx1":"CROSS_MARK","idx2":"TICK_MARK","idx3":"DELETE"}
+		#for k,v in a.items():
+		#	exec "self.%s= self.il.Add(wx.ArtProvider_GetBitmap(wx.ART_%s,wx.ART_TOOLBAR,(16,16)))" % (k,v)
+		#self.SetImageList(self.il, wx.IMAGE_LIST_SMALL)
 
 	def SetPyData(self, item, data):
 		""" Set python object Data
@@ -153,6 +163,7 @@ class GeneralPluginsList(CheckListCtrl, Populable):
 
 			self.is_populate = True
 
+
 	def InsertItem(self, root, basename):
 		""" Insert plugin in list
 		"""
@@ -200,7 +211,7 @@ class GeneralPluginsList(CheckListCtrl, Populable):
 			else:
 				disable_plugin(basename)
 		else:
-			self.SetItemImage(index, self.idx1)
+			self.SetItemImage(index, 2)
 
 		#### pyData setting
 		self.SetPyData(index, (module, None))
@@ -335,7 +346,7 @@ class BlockPluginsList(CheckListCtrl, Populable):
 					### if plugins contian error, error is stored in doc object and icon is changed
 					if isinstance(new, Exception):
 						new.__doc__ = srt(new)
-						self.SetItemImage(index, self.idx1)
+						self.SetItemImage(index, 2)
 
 					#### set the pydata object
 					self.SetPyData(index, (new, old))
@@ -497,10 +508,6 @@ class PluginsPanel(wx.Panel):
 		hbox.Add(self.leftPanel, 0, wx.EXPAND | wx.RIGHT|wx.ALL, 5)
 		hbox.Add((3, -1))
 
-##		hbox.Add(self.leftPanel, 0, wx.EXPAND | wx.RIGHT, 5)
-## 		hbox.Add(self.rightPanel, 1, wx.EXPAND)
-##		hbox.Add((3, -1))
-
 		### Set Sizer
 		self.leftPanel.SetSizer(self.vbox2)
 		self.rightPanel.SetSizer(self.vbox1)
@@ -567,14 +574,14 @@ class PluginsPanel(wx.Panel):
 		"""
 		num = self.check_list.GetItemCount()
 		for i in xrange(num):
-			self.check_list.CheckItem(i)
+			self.check_list.CheckItem(i, False)
 
 	def OnDeselectAll(self, event):
 		""" Deselect All button has been pressed and all plugins are disabled.
 		"""
 		num = self.check_list.GetItemCount()
 		for i in xrange(num):
-			self.check_list.CheckItem(i, False)
+			self.check_list.CheckItem(i, True)
 
 	def OnConfig(self, event):
 		""" Setting button has been pressed and the plugin Config function is call.
@@ -643,6 +650,7 @@ class ModelPluginsManager(wx.Frame):
 		### enable del, add and udpate buttons
 		self.delBtn.Enable(cond)
 		self.addBtn.Enable(not cond)
+		self.editBtn.Enable(cond)
 		self.updateBtn.Enable(False)
 
 		self.Bind(wx.EVT_BUTTON, self.OnAdd, id=self.addBtn.GetId())
@@ -654,12 +662,19 @@ class ModelPluginsManager(wx.Frame):
 		self.Layout()
 
 	@staticmethod
-	def GetEditor(parent, model):
-		### editor frame for text of plugins
-		editorFrame = Editor.GetEditor(parent, wx.ID_ANY, _("Plugins Editor"), model, file_type = 'block')
+	def GetEditor(parent, model, filename=None):
+		"""
+		"""
+		path = os.path.join(model.model_path, ZipManager.Zip.GetPluginFile(model.model_path)) if not filename else filename
+		name = os.path.basename(path)
 
-		name = os.path.basename(model.model_path)
-		editorFrame.AddEditPage(name, os.path.join(model.model_path, ZipManager.Zip.GetPluginFile(model.model_path)))
+		### editor frame for the text of plugins
+		editorFrame = Editor.GetEditor(parent, \
+									wx.ID_ANY, \
+									_("%s - Plugins Editor")%os.path.basename(model.model_path), \
+									model, \
+									file_type = 'block')
+		editorFrame.AddEditPage(name, path)
 
 		return editorFrame
 
@@ -691,6 +706,7 @@ class ModelPluginsManager(wx.Frame):
 	def OnAdd(self, event):
 		""" Add plugin
 		"""
+		filename = None
 		wcd = 'All files (*)|*|Editor files (*.py)|*.py'
 		dir = HOME_PATH
 		open_dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=dir, defaultFile='plugins.py', wildcard=wcd, style=wx.OPEN|wx.CHANGE_DIR)
@@ -699,26 +715,54 @@ class ModelPluginsManager(wx.Frame):
 			### first test is for old devsimpy model prresenting plugins at the root of zipfile
 			### filename handling depending on the existing plugins package in zipfile model
 			if BlockPluginsList.IsInPackage(self.model.model_path):
-				filename= os.path.join('plugins', open_dlg.GetPath())
+				filename = os.path.join('plugins', open_dlg.GetPath())
 			else:
 				filename = open_dlg.GetPath()
 
-			self.zf.Update([filename])
 		open_dlg.Destroy()
 
-		### Clear before populate with new plugins
-		self.CheckList.Clear()
-		wx.CallAfter(self.CheckList.Populate, (self.model))
+ 		if filename:
+ 			source = open(filename, 'r').read() + '\n'
+			code = compile(source, filename, 'exec')
 
-		### Update button access
-		self.addBtn.Enable(False)
-		self.delBtn.Enable(True)
+	 		### try to find error before compressed in the archive model
+	 		try:
+				eval(code)
+			### Error occur
+	 		except Exception, info:
+	 			msg = _('Error trying to load plugin.\nInfo : %s\nDo you want to edit this plugin file?')%info
+	 			dial = wx.MessageDialog(None, msg, self.model.label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_ERROR)
+
+				### user choose to edit plugins.py file
+				if dial.ShowModal() == wx.ID_YES:
+					### Editor instance depends on the location of plugins.py
+					kargs = {'parent':None, 'model':self.model}
+					### plugins.py is not in model ?
+					if not BlockPluginsList.IsInPackage(self.model.model_path):
+						kargs.update({'filename':filename})
+
+					### execute Editor depending on kargs
+					editorFrame = ModelPluginsManager.GetEditor(**kargs)
+					editorFrame.Show()
+
+				dial.Destroy()
+	 		else:
+	 			self.zf.Update([filename])
+
+	 			### Clear before populate with new plugins
+	 			self.CheckList.Clear()
+	 			wx.CallAfter(self.CheckList.Populate, (self.model))
+
+				### Update button access
+				self.addBtn.Enable(False)
+				self.delBtn.Enable(True)
+				self.editBtn.Enable(True)
 
 	def OnDelete(self, event):
 		""" Delete plugins
 		"""
 		### delete file from zipfile
-		dial = wx.MessageDialog(self, _('Do You realy want to delete plugins file?'), _('Plugin Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		dial = wx.MessageDialog(self, _('Do You realy want to delete plugins file?'), self.model.label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 		if dial.ShowModal() == wx.ID_YES:
 			### TODO
 			### first test is for old devsimpy model prresenting plugins at the root of zipfile
@@ -733,6 +777,7 @@ class ModelPluginsManager(wx.Frame):
 		### Update button access
 		self.delBtn.Enable(False)
 		self.addBtn.Enable(True)
+		self.editBtn.Enable(False)
 
 ### ------------------------------------------------------------
 class TestApp(wx.App):

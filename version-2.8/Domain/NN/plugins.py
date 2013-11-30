@@ -3,7 +3,7 @@
 import wx
 
 from matplotlib.pyplot import show
-from hcluster import pdist, linkage, dendrogram
+#from hcluster import pdist, linkage, dendrogram
 
 def OnLeftDClick(self, event):
 #def OnLeftDClick(event):

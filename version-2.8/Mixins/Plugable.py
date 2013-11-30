@@ -25,6 +25,7 @@ import os
 import zipimport
 import imp
 import inspect
+import types
 
 import Decorators
 
