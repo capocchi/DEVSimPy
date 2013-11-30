@@ -706,7 +706,7 @@ class ShapePopupMenu(wx.Menu):
 		exportCMD=wx.MenuItem(self, ID_EXPORT_CMD_SHAPE, _("CMD"), _("Model exported to a cmd file"))
 		exportXML=wx.MenuItem(self, ID_EXPORT_XML_SHAPE, _("XML"), _("Model exported to a xml file"))
 		exportJS=wx.MenuItem(self, ID_EXPORT_JS_SHAPE, _("JS"), _("Model exported to a js (join) file"))
-		plugin = wx.MenuItem(self, ID_PLUGINS_SHAPE, _("Plugins"), _("Apply plugin to a model"))
+		plugin = wx.MenuItem(self, ID_PLUGINS_SHAPE, _("Plugin"), _("Plugin manager"))
 		properties=wx.MenuItem(self, ID_PROPERTIES_SHAPE, _("Properties"), _("Edit the attributs"))
 
 		edit.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -798,10 +798,10 @@ class ShapePopupMenu(wx.Menu):
 			if isinstance(shape, Container.CodeBlock) or isinstance(shape, Container.ContainerBlock):
 				### only for amd or cmd
 				if shape.model_path != "":
-					if ZipManager.Zip.HasPlugin(shape.model_path):
-						self.AppendSeparator()
-						Plugin_menu = self.AppendItem(plugin)
-						self.__canvas.Bind(wx.EVT_MENU, shape.OnPluginsManager, id=ID_PLUGINS_SHAPE)
+					self.AppendSeparator()
+					#if ZipManager.Zip.HasPlugin(shape.model_path):
+					Plugin_menu = self.AppendItem(plugin)
+					self.__canvas.Bind(wx.EVT_MENU, shape.OnPluginsManager, id=ID_PLUGINS_SHAPE)
 
 			self.AppendSeparator()
 			Properties_menu = self.AppendItem(properties)

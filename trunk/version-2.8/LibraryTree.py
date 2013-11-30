@@ -52,6 +52,7 @@ class LibraryTree(wx.TreeCtrl):
 	### exclude rep present into Domain
 	EXCLUDE_DOMAIN = ['Basic', '.svn']
 
+	###
 	def __init__(self, *args, **kwargs):
 		""" Constructor.
 		"""
@@ -111,7 +112,7 @@ class LibraryTree(wx.TreeCtrl):
 			sys.path.append(DOMAIN_PATH)
 			sys.path.append(os.path.dirname(DOMAIN_PATH))
 
-
+	###
 	def Populate(self, chargedDomainList = []):
 		""" Populate the Tree from a list of domain path.
 		"""
@@ -129,6 +130,7 @@ class LibraryTree(wx.TreeCtrl):
 		self.UnselectAll()
 		self.SortChildren(self.root)
 
+	###
 	def OnMotion(self, evt):
 		""" Motion engine over item.
 		"""
@@ -870,8 +872,9 @@ class LibraryTree(wx.TreeCtrl):
 			dlg.CenterOnParent(wx.BOTH)
 			dlg.ShowModal()
 		else:
-			wx.MessageBox(_('No documentation for %s')%name, 'Info', wx.OK)
+			wx.MessageBox(_('No documentation'), name, wx.OK|wx.ICON_INFORMATION)
 
+	###
 	def OnInfo(self, event):
 		"""
 		"""
