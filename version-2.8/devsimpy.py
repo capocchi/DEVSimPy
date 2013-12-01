@@ -466,7 +466,6 @@ class MainApplication(wx.Frame):
 
 		translation.install(unicode = True)
 
-
 	def MakeStatusBar(self):
 		""" Make status bar.
 		"""
@@ -557,6 +556,16 @@ class MainApplication(wx.Frame):
 		self.Bind(wx.EVT_TOOL, self.OnLinearConnector, self.tools[15])
 
 		self.tb.Realize()
+
+	def GetDiagramNotebook(self):
+		""" Return diagram notbook (right)
+		"""
+		return self.nb2
+
+	def GetControlNotebook(self):
+		""" Return control notebook (left)
+		"""
+		return self.nb1
 
 	def OnDirectConnector(self, event):
 		"""

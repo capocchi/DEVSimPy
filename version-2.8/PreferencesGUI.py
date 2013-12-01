@@ -125,8 +125,8 @@ class GeneralPanel(wx.Panel):
 			__builtin__.__dict__['DOMAIN_PATH'] = v
 
 			mainW = wx.GetApp().GetTopWindow()
-
-			tree = mainW.nb1.GetTree()
+			nb1 = mainW.GetControlNotebook()
+			tree = nb1.GetTree()
 
 			### update all Domain
 			for item in tree.GetItemChildren(tree.GetRootItem()):

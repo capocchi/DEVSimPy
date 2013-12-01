@@ -419,4 +419,5 @@ invoque rpar un callback lorsque le fichier python est renseigné dans le wizard
 -Fait le 24/11/2013 par LC: amélioration -> refactoring du code de SimulationGUI et avancé dans l'intégration de PyPDEVS. Apparement bug persistant de la creation d'un thread PyPDEVS dans un thread de DEVSimPy... Sinon la config fonctionnne. Reste à étudier PyPDEVS plus en détail
 -Fait le 25/11/2013 par LC: correction -> Profiling fonctionne maintenant sur windows (menu_item mal géré au départ avec le GetEventObject)
 -Fait le 25/11/2013 par LC: ajout -> test de l'exemple de PyPDEVS du trafficLight fonctionne sur DEVSimPy. Petit prob de chargement dynamique ddans les pref des simulateur mais fonctionne.
--Fait le 26/11/2013 apr LC: correction -> issubclass dans ImportLibrary et Compoenents necessite de faire les import dans les métodes de DomainInterface.DomainBehavior et Structure
+-Fait le 26/11/2013 par LC: correction -> issubclass dans ImportLibrary et Compoenents necessite de faire les import dans les métodes de DomainInterface.DomainBehavior et Structure
+-Fait le 1/12/2013 par LC: correction -> ajout de wx.TE_RICH2 pour avoir la couleur sous windows dans le blink (http://bytes.com/topic/python/answers/635711-wx-textctrl-setdefaultstyle-not-working)

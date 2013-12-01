@@ -190,7 +190,7 @@ class LibraryTree(wx.TreeCtrl):
 		if not self.ItemHasChildren(item_selected):
 			path = self.GetItemPyData(item_selected)
 			mainW = wx.GetApp().GetTopWindow()
-			nb2 = mainW.nb2
+			nb2 = mainW.GetDiagramNotebook()
 			canvas = nb2.GetPage(nb2.GetSelection())
 			### define path for python and model component
 
