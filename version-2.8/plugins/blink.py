@@ -214,7 +214,7 @@ class BlinkFrame(wx.Frame):
 		self.button_step = wx.Button(self.panel, wx.ID_FORWARD)
 		self.button_find = wx.Button(self.panel, wx.ID_FIND)
 		self.button_selectall = wx.Button(self.panel, wx.ID_SELECTALL)
-		self.txt = wx.TextCtrl(self.panel, wx.ID_ANY, style = wx.TE_MULTILINE|wx.TE_READONLY)
+		self.txt = wx.TextCtrl(self.panel, wx.ID_ANY, style = wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_RICH2)
 
 		MoveFromParent(self, interval=10, direction='right')
 
