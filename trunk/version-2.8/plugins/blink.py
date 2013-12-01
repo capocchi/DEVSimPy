@@ -143,31 +143,29 @@ def blink_manager(*args, **kwargs):
 			if type(msg[0]) == type({}):
 			#if msg == 0:
 				color = ["#e90006"]
-				dastyle = wx.TextAttr()
-				dastyle.SetTextColour("#e90006")
-				frame.txt.SetDefaultStyle(dastyle)
-				wx.CallAfter(frame.txt.write,(ExternalLog(d)))
+				f = ExternalLog(d)
 
 			### write ta checking result
 			elif msg[0] == 0:
 			#elif msg == 2:
 				color = ["#0c00ff"]
-				dastyle = wx.TextAttr()
-				dastyle.SetTextColour("#0c00ff")
-				frame.txt.SetDefaultStyle(dastyle)
-				wx.CallAfter(frame.txt.write,(TimeAdvanceLog(d)))
+				f = TimeAdvanceLog(d)
 
 			### write internal transition result
 			elif msg[0] == 1:
 			#elif msg == 1:
 				color = ["#2E8B57"]
-				dastyle = wx.TextAttr()
-				dastyle.SetTextColour("#2E8B57")
-				frame.txt.SetDefaultStyle(dastyle)
-				wx.CallAfter(frame.txt.write,(InternalLog(d)))
+				f = InternalLog(d)
 
 			else:
 				color = old_fill
+
+			dastyle = wx.TextAttr()
+			dastyle.SetTextColour(color[0])
+			frame.txt.SetDefaultStyle(dastyle)
+
+			#wx.CallAfter(frame.txt.write,(f))
+			frame.txt.write(f)
 
 			state = sender.GetState()
 			state['fill'] = color
@@ -274,16 +272,28 @@ class BlinkFrame(wx.Frame):
 		self.flag = True
 		self.button_clear.Enable(True)
 
+	###
 	def OnClear(self, evt):
 		""" Clear selection or all text
 		"""
+
 		s = self.txt.GetSelection()
+		### if no text selected, we select all
+		if s[0] == s[1]:
+			s = self.txt.SelectAll()
+
+		s = self.txt.GetSelection()
+
 		self.txt.Remove(s[0], s[1])
 
+	###
 	def OnSelectAll(self, evt):
-		"""
+		""" Select all text
 		"""
 		self.txt.SelectAll()
 
+	###
 	def OnFindReplace(self, evt):
+		""" Call find and replace dialogue
+		"""
 		FindReplace(self, wx.ID_ANY, _('Find/Replace'))
