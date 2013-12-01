@@ -38,8 +38,8 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		self.id = -sys.maxint
 		self.map = {}
 
-		images = [	os.path.join(ICON_PATH_16_16,'enable_plugin.png'),
-					os.path.join(ICON_PATH_16_16,'disable_plugin.png'),
+		images = [	os.path.join(ICON_PATH_16_16,'disable_plugin.png'),
+					os.path.join(ICON_PATH_16_16,'enable_plugin.png'),
 					os.path.join(ICON_PATH_16_16,'no_ok.png')
 					]
 
@@ -228,7 +228,7 @@ class GeneralPluginsList(CheckListCtrl, Populable):
 				- Write the plugin list in the DEVSimPy config file
 		"""
 
-		### list of plugin names which are to write in DEVSimPy conf file
+		### list of plugin names which are to write in DEVSimPy config file
 		pluginsList = []
 		### all listed plugins
 		for i in xrange(self.GetItemCount()):
