@@ -328,7 +328,8 @@ class ActivityReport(wx.Frame):
 
 		### label of model has been clicked on colon 0 and we plot the quantitative activity
 		main = wx.GetApp().GetTopWindow()
-		currentPage = main.nb2.GetCurrentPage()
+		nb2 = main.GetDiagramNotebook()
+		currentPage = nb2.GetCurrentPage()
 		diagram = currentPage.diagram
 		Plot(diagram, self.ReportGrid.GetCellValue(row,0))
 
@@ -547,7 +548,8 @@ def Config(parent):
 	global diagram
 
 	main = wx.GetApp().GetTopWindow()
-	currentPage = main.nb2.GetCurrentPage()
+	nb2 = main.GetDiagramNotebook()
+	currentPage = nb2.GetCurrentPage()
 	diagram = currentPage.diagram
 	master = None
 
@@ -693,7 +695,8 @@ def UnConfig():
 	global diagram
 
 	main = wx.GetApp().GetTopWindow()
-	currentPage = main.nb2.GetCurrentPage()
+	nb2 = main.GetDiagramNotebook()
+	currentPage = nb2.GetCurrentPage()
 	diagram = currentPage.diagram
 
 	lst  = map(lambda a: a.label, filter(lambda s: isinstance(s, CodeBlock), diagram.GetShapeList()))

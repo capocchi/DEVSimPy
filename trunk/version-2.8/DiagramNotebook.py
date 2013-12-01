@@ -293,7 +293,7 @@ if USE_FLATNOTEBOOK:
 			self.pages.remove(canvas)
 
 			### update (clear) of properties panel (Control notebook)
-			propPanel = mainW.nb1.GetPropPanel()
+			propPanel = mainW.GetDiagramNotebook().GetPropPanel()
 			### If properties panel is active, we update it
 			if propPanel:
 				propPanel.UpdatePropertiesPage(propPanel.defaultPropertiesPage())
@@ -384,7 +384,7 @@ else:
 						sys.stdout.write(_("%s not deleted ! \n"%(title)))
 
 				### effacement du notebook "property"
-				nb1 = mainW.nb1
+				nb1 = mainW.GetControlNotebook()
 				propPanel = nb1.GetPropPanel()
 				### si la page active est celle de "properties" alors la met a jour et on reste dessus
 				if propPanel:

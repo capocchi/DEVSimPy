@@ -341,19 +341,21 @@ class DiagramMenu(wx.Menu):
 		self.AppendSeparator()
 		self.AppendItem(closeDiagram)
 
+		nb2 = parent.GetDiagramNotebook()
+
 		parent.Bind(wx.EVT_MENU, parent.OnNew, id=ID_NEW)
-		parent.Bind(wx.EVT_MENU, parent.nb2.OnDetachPage, id=ID_DETACH_DIAGRAM)
-		parent.Bind(wx.EVT_MENU, parent.nb2.OnRenamePage, id=ID_RENAME_DIAGRAM)
+		parent.Bind(wx.EVT_MENU, nb2.OnDetachPage, id=ID_DETACH_DIAGRAM)
+		parent.Bind(wx.EVT_MENU, nb2.OnRenamePage, id=ID_RENAME_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, parent.OnCheck, id=ID_CHECK_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, parent.OnSimulation, id=ID_SIM_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, parent.OnConstantsLoading, id=ID_CONST_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, parent.OnPriorityGUI, id=ID_PRIORITY_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, parent.OnInfoGUI, id=ID_INFO_DIAGRAM)
-		parent.Bind(wx.EVT_MENU, parent.nb2.OnClearPage, id=ID_CLEAR_DIAGRAM)
+		parent.Bind(wx.EVT_MENU, nb2.OnClearPage, id=ID_CLEAR_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, parent.OnZoom, id=ID_ZOOMIN_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, parent.OnUnZoom, id=ID_ZOOMOUT_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, parent.AnnuleZoom, id=ID_UNZOOM_DIAGRAM)
-		parent.Bind(wx.EVT_MENU, parent.nb2.OnClosePage, id=ID_EXIT_DIAGRAM)
+		parent.Bind(wx.EVT_MENU, nb2.OnClosePage, id=ID_EXIT_DIAGRAM)
 
 class SettingsMenu(wx.Menu):
 	"""

@@ -65,26 +65,36 @@ def start_blink(*args, **kwargs):
 
 	global frame
 	global sender
+	global canvas
 
 	parent = kwargs['parent']
 	master = kwargs['master']
 
-	mainW = wx.GetApp().GetTopWindow()
-	nb = mainW.nb2
-	actuel = nb.GetSelection()
-	diagram = nb.GetPage(actuel).diagram
+	### parent is simulationGUI and parent of it can be wx main app or DetachedFrame
+	mainW = parent.GetParent()
 
+	### find canvas depending on the parent of parent
+	if isinstance(mainW, DetachedFrame):
+		canvas = mainW.GetCanvas()
+	else:
+		nb = mainW.GetDiagramNotebook()
+		actuel = nb.GetSelection()
+		canvas = nb.GetPage(actuel)
+
+	### define diagram
+	diagram = canvas.GetDiagram()
+
+	### define frame
 	frame = BlinkFrame(parent, wx.ID_ANY, _('Blink Logger'))
-	frame.SetIcon(mainW.icon)
+	frame.SetIcon(mainW.GetIcon())
 	frame.SetTitle("%s Blink Logger"%os.path.basename(diagram.last_name_saved))
 	frame.Show()
 
+	### define sender
 	sender = Subject()
+	sender.canvas = canvas
 	sender.__state = {}
-	sender.canvas = None
 	sender.GetState = MethodType(GetState, sender)
-
-	#extends_model_for_blink(master.componentSet)
 
 	### disable suspend and log button
 	parent._btn3.Disable()
@@ -97,6 +107,7 @@ def blink_manager(*args, **kwargs):
 
 	global frame
 	global sender
+	global canvas
 
 	d = kwargs['model']
 	msg = kwargs['msg']
@@ -108,31 +119,9 @@ def blink_manager(*args, **kwargs):
 	### DEVSimPy block
 	if hasattr(d, 'getBlockModel'):
 
-		block = d.getBlockModel()
+		if isinstance(frame, wx.Frame):
 
-		main = wx.GetApp().GetTopWindow()
-		nb2 = main.nb2
-		child = main.GetChildren()
-
-		canvas = None
-
-		### find CodeBlock in the nb2
-		for can in nb2.GetPages():
-			if block in filter(lambda a: not isinstance(a, ConnectionShape), can.diagram.shapes):
-				canvas = can
-				break
-
-		### find CodeBlock in detached_frame
-		if canvas is None:
-			for detached_frame in filter(lambda child: isinstance(child, DetachedFrame) and hasattr(child, 'canvas'), child):
-				can = detached_frame.canvas
-				if block in filter(lambda a: not isinstance(a, ConnectionShape), can.diagram.shapes):
-					canvas = can
-					break
-
-		sender.canvas = canvas
-
-		if canvas is not None and isinstance(frame, wx.Frame):
+			block = d.getBlockModel()
 
 			#### add model d to observer list
 			sender.attach(block)

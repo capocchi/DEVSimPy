@@ -554,7 +554,8 @@ class Diagram(Savable, Structurable):
 				title = win.GetPageText(win.GetSelection())
 		### event come from Main application by the Diagram menu
 		else:
-			title = win.nb2.GetPageText(win.nb2.GetSelection())
+			nb2 = win.GetDiagramNotebook()
+			title = nb2.GetPageText(nb2.GetSelection())
 
 		dlg = DiagramConstantsDialog.DiagramConstantsDialog(win, wx.ID_ANY, title, self)
 		dlg.ShowModal()
@@ -656,7 +657,8 @@ class Diagram(Savable, Structurable):
 					wx.MessageBox(_("It seems that models have same label.\nIf you plan to use Flat simulation algorithm, all model must have a unique label."), _("Simulation Manager"))
 
 				### set the name of diagram from notebook nb2
-				title  = win.GetTitle() if isinstance(win, DetachedFrame) else win.nb2.GetPageText(win.nb2.GetSelection()).rstrip()
+				nb2 = win.GetDiagramNotebook()
+				title  = win.GetTitle() if isinstance(win, DetachedFrame) else nb2.GetPageText(nb2.GetSelection()).rstrip()
 				diagram.label = os.path.splitext(os.path.basename(title))[0]
 
 				## delete all attached devs instances
@@ -695,7 +697,8 @@ class Diagram(Savable, Structurable):
 						win.panel3.SetSizer(sizer3)
 						win.panel3.SetAutoLayout(True)
 						### title is Simulation because it must ne the same of the submenu in toolbar (for checking update)
-						win.nb1.InsertPage(2, win.panel3, _("Simulation"), imageId = 2)
+						nb1 = win.GetControlNotebook()
+						nb1.InsertPage(2, win.panel3, _("Simulation"), imageId = 2)
 					else:
 						sys.stdout.write(_("This option has not been implemented yet."))
 						return False
@@ -1323,7 +1326,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 			mainW = self.GetTopLevelParent()
 			mainW = isinstance(mainW, DetachedFrame) and wx.GetApp().GetTopWindow() or mainW
 
-			self.attach(mainW.nb1)
+			self.attach(mainW.GetDiagramNotebook())
 		except AttributeError:
 			sys.stdout.write(_('ShapeCanvas not attached to notebook 1\n'))
 
@@ -2237,26 +2240,26 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 				mainW = wx.GetApp().GetTopWindow()
 
 				if not isinstance(mainW, DetachedFrame):
-					nb = mainW.nb2
-					canvas = nb.GetPage(nb.GetSelection())
+					nb2 = mainW.GetDiagramNotebook()
+					canvas = nb2.GetPage(nb2.GetSelection())
 					diagram = canvas.GetDiagram()
 					### modifying propagation
 					diagram.modify = True
 					### update general shapes
 					canvas.UpdateShapes()
 
-					label = nb.GetPageText(nb.GetSelection())
+					label = nb2.GetPageText(nb2.GetSelection())
 
 					### modified windows dictionary
 					D = {win.GetTitle(): win, label: mainW}
 				else:
 					D={}
 			else:
-				nb = win.nb2
-				canvas = nb.GetPage(nb.GetSelection())
+				nb2 = win.GetDiagramNotebook()
+				canvas = nb2.GetPage(nb2.GetSelection())
 				diagram = canvas.GetDiagram()
 				diagram.modify = True
-				label = win.nb2.GetPageText(win.nb2.GetSelection())
+				label = nb2.GetPageText(nb2.GetSelection())
 
 				D = {label : win}
 
@@ -2711,7 +2714,7 @@ class Selectable:
 
 				### update of panel properties
 				mainW = wx.GetApp().GetTopWindow()
-				nb1 = mainW.nb1
+				nb1 = mainW.GetControlNotebook()
 				if nb1.GetSelection() == 1:
 					newContent = AttributeEditor(nb1.propPanel, wx.ID_ANY, self, canvas)
 					nb1.UpdatePropertiesPage(newContent)

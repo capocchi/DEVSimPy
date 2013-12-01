@@ -127,7 +127,7 @@ class DSPComponent:
 			if not isinstance(load_file_result, Exception):
 
 				mainW = canvas.GetTopLevelParent()
-				nb2 = mainW.nb2
+				nb2 = mainW.GetDiagramNotebook()
 
 				### if new tab
 				if new_tab:

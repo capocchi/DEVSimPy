@@ -567,18 +567,20 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 		try:
 		## panel gauche inaccessible
-			self.parent.nb1.Enable()
+			nb1 = self.parent.mainW.GetControlNotebook()
+			nb1.Enable()
 
 			## menu inaccessible
 			self.parent.tb.Enable()
 			for i in xrange(self.parent.menuBar.GetMenuCount()):
 				self.parent.menuBar.EnableTop(i,True)
 
+			nb2 = self.parent.GetDiagramNotebook()
 			## autre tab inaccessible
-			for p in xrange(self.parent.nb2.GetPageCount()):
+			for p in xrange(nb2.GetPageCount()):
 				## pour tout les tab non selectionner
-				if p != self.parent.nb2.GetSelection():
-					self.parent.nb2.GetPage(p).Enable()
+				if p != nb2.GetSelection():
+					nb2.GetPage(p).Enable()
 		except Exception:
 			#sys.stdout.write(_("Empty mode over\n"))
 			pass
