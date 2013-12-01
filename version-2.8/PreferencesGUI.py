@@ -15,6 +15,7 @@ if __name__ == '__main__':
 	__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyPDEVS')}
 
 from PluginsGUI import PluginsPanel, GeneralPluginsList
+from Utilities import playSound
 
 import ReloadModule
 
@@ -160,22 +161,22 @@ class SimulationPanel(wx.Panel):
 		hbox5 = wx.BoxSizer(wx.HORIZONTAL)
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
+		self.sim_success_sound_path = __builtin__.__dict__['SIMULATION_SUCCESS_SOUND_PATH']
+		self.sim_error_sound_path = __builtin__.__dict__['SIMULATION_ERROR_SOUND_PATH']
+
 		### Buttons
-		self.sim_success_wav_btn = wx.Button(self, wx.ID_ANY, _("Finish.wav"), (25, 105), name='success')
-		self.sim_error_wav_btn = wx.Button(self, wx.ID_ANY, _("Error.wav"), (25, 105), name='error')
+		self.sim_success_sound_btn = wx.Button(self, wx.ID_ANY, os.path.basename(self.sim_success_sound_path), (25, 105), name='success')
+		self.sim_success_sound_btn.Enable(self.sim_success_sound_path is not os.devnull)
+		self.sim_success_sound_btn.SetToolTipString(_("Press this button in order to change the song emmited for the end of the simulation."))
 
-		self.sim_success_wav_path = __builtin__.__dict__['SIMULATION_SUCCESS_WAV_PATH']
-		self.sim_success_wav_btn.Enable(self.sim_success_wav_path is not os.devnull)
-		self.sim_success_wav_btn.SetToolTipString(_("Press this button in order to change the song emmited for the end of the simulation."))
-
-		self.sim_error_wav_path = __builtin__.__dict__['SIMULATION_ERROR_WAV_PATH']
-		self.sim_error_wav_btn.Enable(self.sim_error_wav_path is not os.devnull)
-		self.sim_error_wav_btn.SetToolTipString(_("Press this button in order to change the song emmited when an error occur in a model during the simulation."))
+		self.sim_error_sound_btn = wx.Button(self, wx.ID_ANY, os.path.basename(self.sim_error_sound_path), (25, 105), name='error')
+		self.sim_error_sound_btn.Enable(self.sim_error_sound_path is not os.devnull)
+		self.sim_error_sound_btn.SetToolTipString(_("Press this button in order to change the song emmited when an error occur in a model during the simulation."))
 
 		### CheckBox
 		self.bt5 = wx.CheckBox(self, wx.ID_ANY, _('Notification'))
 		self.bt5.SetToolTipString(_("Notification song is generate when the simulation is over."))
-		self.bt5.SetValue(self.sim_success_wav_path is not os.devnull)
+		self.bt5.SetValue(self.sim_success_sound_path is not os.devnull)
 
 		self.bt6 = wx.CheckBox(self, wx.ID_ANY, _('No Time Limit'))
 		self.bt6.SetValue(__builtin__.__dict__['NTL'])
@@ -209,8 +210,8 @@ class SimulationPanel(wx.Panel):
 
 		### Adding sizer
 		hbox1.Add(self.bt5, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 15)
-		hbox1.Add(self.sim_success_wav_btn, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL,15)
-		hbox1.Add(self.sim_error_wav_btn, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL,15)
+		hbox1.Add(self.sim_success_sound_btn, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL,15)
+		hbox1.Add(self.sim_error_sound_btn, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL,15)
 
 		hbox5.Add(self.txt3, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.ALL|wx.EXPAND, 15)
 		hbox5.Add(self.cb3, 1, wx.ALIGN_CENTER_VERTICAL|wx.RIGHT|wx.ALL|wx.EXPAND, 15)
@@ -237,8 +238,8 @@ class SimulationPanel(wx.Panel):
 		self.SetAutoLayout(True)
 
 		### Binding
-		self.sim_success_wav_btn.Bind(wx.EVT_BUTTON, self.OnSelectSound)
-		self.sim_error_wav_btn.Bind(wx.EVT_BUTTON, self.OnSelectSound)
+		self.sim_success_sound_btn.Bind(wx.EVT_BUTTON, self.OnSelectSound)
+		self.sim_error_sound_btn.Bind(wx.EVT_BUTTON, self.OnSelectSound)
 		self.bt5.Bind(wx.EVT_CHECKBOX, self.onBt5Check)
 		self.cb.Bind(wx.EVT_COMBOBOX, self.onCb)
 		self.cb3.Bind(wx.EVT_COMBOBOX, self.onCb3)
@@ -249,20 +250,21 @@ class SimulationPanel(wx.Panel):
 		"""
 		dlg = wx.FileDialog(wx.GetTopLevelParent(self),
 							_("Choose a sound file"),
-							wildcard = _("WAV files (*.wav)|*.wav"),
+							defaultDir = os.path.join(HOME_PATH,'sounds'),
+							wildcard = _("MP3 files (*.mp3)|*.mp3| WAV files (*.wav)|*.wav"),
 							style = wx.OPEN)
 
 		if dlg.ShowModal() == wx.ID_OK:
 			val = dlg.GetPath()
 			name = evt.GetEventObject().GetName()
 			try:
-				### test the selected sound
-				wx.Sound.PlaySound(val, wx.SOUND_SYNC)
+
+				playSound(val)
 
 				if name == 'success':
-					self.sim_success_wav_path = val
+					self.sim_success_sound_path = val
 				elif name == 'error':
-					self.sim_error_wav_path = val
+					self.sim_error_sound_path = val
 				else:
 					pass
 
@@ -276,15 +278,15 @@ class SimulationPanel(wx.Panel):
 		"""
 
 		if evt.GetEventObject().GetValue():
-			self.sim_success_wav_btn.Enable(True)
-			self.sim_error_wav_btn.Enable(True)
-			self.sim_success_wav_path = __main__.builtin_dict['SIMULATION_SUCCESS_WAV_PATH']
-			self.sim_error_wav_path = __main__.builtin_dict['SIMULATION_ERROR_WAV_PATH']
+			self.sim_success_sound_btn.Enable(True)
+			self.sim_error_sound_btn.Enable(True)
+			self.sim_success_sound_path = __main__.builtin_dict['SIMULATION_SUCCESS_SOUND_PATH']
+			self.sim_error_sound_path = __main__.builtin_dict['SIMULATION_ERROR_SOUND_PATH']
 		else:
-			self.sim_success_wav_btn.Enable(False)
-			self.sim_error_wav_btn.Enable(False)
-			self.sim_success_wav_path = os.devnull
-			self.sim_error_wav_path = os.devnull
+			self.sim_success_sound_btn.Enable(False)
+			self.sim_error_sound_btn.Enable(False)
+			self.sim_success_sound_path = os.devnull
+			self.sim_error_sound_path = os.devnull
 
 	def onCb(self, evt):
 		""" ComboBox has been checked
@@ -329,8 +331,8 @@ class SimulationPanel(wx.Panel):
 			ReloadModule.recompile("DomainInterface.DomainStructure")
 			ReloadModule.recompile("DomainInterface.MasterModel")
 
-		__builtin__.__dict__['SIMULATION_SUCCESS_WAV_PATH'] = self.sim_success_wav_path
-		__builtin__.__dict__['SIMULATION_ERROR_WAV_PATH'] = self.sim_error_wav_path
+		__builtin__.__dict__['SIMULATION_SUCCESS_SOUND_PATH'] = self.sim_success_sound_path
+		__builtin__.__dict__['SIMULATION_ERROR_SOUND_PATH'] = self.sim_error_sound_path
 		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = self.sim_defaut_strategy
 		__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = self.default_devs_dir
 		__builtin__.__dict__['DEFAULT_PLOT_DYN_FREQ'] = self.sim_defaut_plot_dyn_freq
@@ -591,8 +593,8 @@ class TestApp(wx.App):
 		__builtin__.__dict__['FONT_SIZE'] = 10
 		__builtin__.__dict__['NB_HISTORY_UNDO'] = 10
 		__builtin__.__dict__['TRANSPARENCY'] = False
-		__builtin__.__dict__['SIMULATION_ERROR_WAV_PATH'] = os.path.join(HOME_PATH,'sounds', 'Simulation-Error.wav')
-		__builtin__.__dict__['SIMULATION_SUCCESS_WAV_PATH'] = os.path.join(HOME_PATH,'sounds', 'Simulation-Success.wav')
+		__builtin__.__dict__['SIMULATION_ERROR_SOUND_PATH'] = os.path.join(HOME_PATH,'sounds', 'Simulation-Error.mp3')
+		__builtin__.__dict__['SIMULATION_SUCCESS_SOUND_PATH'] = os.path.join(HOME_PATH,'sounds', 'Simulation-Success.mp3')
 		__builtin__.__dict__['NTL'] = False
 		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = 'bag-based'
 		__builtin__.__dict__['DEFAULT_PYPDEVS_SIM_STRATEGY'] = 'original'

@@ -637,7 +637,7 @@ class Diagram(Savable, Structurable):
 			D = self.DoCheck()
 			### if there is no error in models
  			if D is not None:
-				playSound(SIMULATION_ERROR_WAV_PATH)
+				playSound(SIMULATION_ERROR_SOUND_PATH)
 				dial = wx.MessageDialog(win, \
 									_("There is errors in some models.\n\nDo you want to execute the error manager ?"), \
 									_('Simulation Manager'), \

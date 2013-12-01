@@ -737,13 +737,13 @@ def simulator_factory(model, strategy, prof, ntl):
 					wx.CallAfter(Publisher.sendMessage, "error", msg)
 
 					### error sound
-					wx.CallAfter(playSound, SIMULATION_ERROR_WAV_PATH)
+					wx.CallAfter(playSound, SIMULATION_ERROR_SOUND_PATH)
 				else:
 					for m in filter(lambda a: hasattr(a,'finish'), self.model.componentSet):
 						### call finished method
 						Publisher.sendMessage('%d.finished'%(id(m)))
 
-					wx.CallAfter(playSound, SIMULATION_SUCCESS_WAV_PATH)
+					wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
 
 			self.end_flag = True
 
@@ -882,13 +882,13 @@ def simulator_factory(model, strategy, prof, ntl):
 ##				wx.CallAfter(Publisher.sendMessage, "error", msg)
 ##
 ##				### error sound
-##				wx.CallAfter(playSound, SIMULATION_ERROR_WAV_PATH)
+##				wx.CallAfter(playSound, SIMULATION_ERROR_SOUND_PATH)
 ##			else:
 ##				for m in filter(lambda a: isinstance(a, DomainBehavior), self.model.componentSet):
 ##					### call finished method
 ##					Publisher.sendMessage('%d.finished'%(id(m)))
 ##
-##				wx.CallAfter(playSound, SIMULATION_SUCCESS_WAV_PATH)
+##				wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
 ##
 ##		self.end_flag = True
 ##
@@ -974,13 +974,13 @@ def simulator_factory(model, strategy, prof, ntl):
 ##				wx.CallAfter(Publisher.sendMessage, "error", msg)
 ##
 ##				### error sound
-##				wx.CallAfter(playSound, SIMULATION_ERROR_WAV_PATH)
+##				wx.CallAfter(playSound, SIMULATION_ERROR_SOUND_PATH)
 ##			else:
 ##				for m in filter(lambda a: isinstance(a, DomainBehavior), self.model.componentSet):
 ##					### call finished method
 ##					Publisher.sendMessage('%d.finished'%(id(m)))
 ##
-##				wx.CallAfter(playSound, SIMULATION_SUCCESS_WAV_PATH)
+##				wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
 ##
 ##		self.end_flag = True
 ##
