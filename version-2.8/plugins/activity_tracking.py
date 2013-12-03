@@ -442,8 +442,13 @@ class ActivityReport(wx.Frame):
 
 			### A=Aint+Aext/H
 			H=self._master.timeLast if self._master.timeLast <= self._master.FINAL_TIME else self._master.FINAL_TIME
-			### prepare data to populate grid
-			data = map(lambda a,i,b,c,d,e: (a, i, b/H, d/H, c, e), model_name_list, model_id_list,quantitative_activity_list, cpu_activity_list, weighted_activity_list, mcCabe_activity_list)
+
+			### if models have been simulated during a minimum time H
+			if H > 0.0:
+				### prepare data to populate grid
+				data = map(lambda a,i,b,c,d,e: (a, i, b/H, d/H, c, e), model_name_list, model_id_list,quantitative_activity_list, cpu_activity_list, weighted_activity_list, mcCabe_activity_list)
+			else:
+				data = map(lambda a,i: (a, i, 0, 0, 0, 0), model_name_list,model_id_list)
 
 			return data
 		else:
@@ -487,7 +492,6 @@ def view_activity_report(*args, **kwargs):
 	frame = ActivityReport(parent, wx.ID_ANY, size=(560, 300), title="Activity-Tracking Reporter", master = master)
 	frame.CenterOnParent()
 	frame.Show()
-	print frame.GetData()
 
 def GetFlatDEVSList(coupled_devs, l=[]):
 	""" Get the flat list of devs model composing coupled_devs (recursively)

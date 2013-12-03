@@ -419,6 +419,9 @@ class SimulationDialog(wx.Frame, wx.Panel):
 				### The START_CONCURRENT_SIMULATION event occurs
 				trigger_event("START_CONCURRENT_SIMULATION", parent=self, master=self.current_master)
 
+				### future call is requiered because the simulator is flatened during the execution of the srtategy 3
+				wx.FutureCall(1, trigger_event, 'START_DIAGRAM', parent = self, diagram = self.current_master.getBlockModel())
+
 				### clear all log file
 				for fn in filter(lambda f: f.endswith('.devsimpy.log'), os.listdir(gettempdir())):
 					os.remove(os.path.join(gettempdir(),fn))
