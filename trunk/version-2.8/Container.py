@@ -677,7 +677,7 @@ class Diagram(Savable, Structurable):
 					return False
 				else:
 
-					pluginmanager.trigger_event('START_DIAGRAM', parent = win, diagram = diagram)
+#					pluginmanager.trigger_event('START_DIAGRAM', parent = win, diagram = diagram)
 
 					### clear all log file
 					for fn in filter(lambda f: f.endswith('.devsimpy.log'), os.listdir(gettempdir())):
@@ -1326,7 +1326,8 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 			mainW = self.GetTopLevelParent()
 			mainW = isinstance(mainW, DetachedFrame) and wx.GetApp().GetTopWindow() or mainW
 
-			self.attach(mainW.GetDiagramNotebook())
+			self.attach(mainW.GetControlNotebook())
+
 		except AttributeError:
 			sys.stdout.write(_('ShapeCanvas not attached to notebook 1\n'))
 

@@ -410,7 +410,7 @@ class SimStrategy3(SimStrategy):
 		The simulate methode use heapq tree-like data library to manage model priority for activation
 		and weak library to simplify the connexion algorithm between port.
 		The THREAD_LIMIT control the limit of models to thread (default 5).
-		The performance of this alogithm depends on the THREAD_LIMIT number and the number of coupled models.
+		The performance of this algorithm depends on the THREAD_LIMIT number and the number of coupled models.
 	"""
 
 	def __init__(self, simulator=None):
@@ -426,8 +426,12 @@ class SimStrategy3(SimStrategy):
 		self.master = self._simulator.getMaster()
 		self.flat_priority_list = getFlatPriorityList(self.master, [])
 
-		### init all atomic model from falt list
+		### init all atomic model from flat list
 		setAtomicModels(self.flat_priority_list, weakref.ref(self.ts))
+
+		### udpate the componentSet list of master (that no longer contains coupled model)
+		self.master.componentSet = self.flat_priority_list
+
 
 	def simulate(self, T = sys.maxint):
 		"""
@@ -438,11 +442,12 @@ class SimStrategy3(SimStrategy):
 		### if suspend, we could store the future ref
 		old_cpu_time = 0
 
-		### stoping condition depend on the ntl (no time limit for the simulation)
+		### stopping condition depend on the ntl (no time limit for the simulation)
 		condition = lambda clk: HasActiveChild(getFlatPriorityList(self.master, [])) if self._simulator.ntl else clk <= T
 
-		### simualtion time and list of flat models ordered by devs priority
-		self.ts.Set(min([m.myTimeAdvance for m in self.flat_priority_list if m.myTimeAdvance < INFINITY]))
+		### simulation time and list of flat models ordered by devs priority
+		L = [m.myTimeAdvance for m in self.flat_priority_list if m.myTimeAdvance < INFINITY] or [INFINITY]
+		self.ts.Set(min(L))
 		formated_priority_list = [(1+i/10000.0, m, execIntTransition) for i,m in enumerate(self.flat_priority_list)]
 
 		while condition(self.ts.Get()) and self._simulator.end_flag == False:

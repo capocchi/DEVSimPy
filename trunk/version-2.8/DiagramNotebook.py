@@ -39,7 +39,7 @@ from DetachedFrame import DetachedFrame
 from PrintOut import Printable
 
 #-------------------------------------------------------------------
-class GeneralFlatNotebook(Printable):
+class GeneralNotebook(Printable):
 	"""
 	"""
 
@@ -228,7 +228,7 @@ if USE_FLATNOTEBOOK:
 	# FlatNotebook generalized class
 	#
 
-	class DiagramNotebook(fnb.FlatNotebook, GeneralFlatNotebook):
+	class DiagramNotebook(fnb.FlatNotebook, GeneralNotebook):
 		""" Diagram FlatNotebook class
 		"""
 
@@ -238,7 +238,7 @@ if USE_FLATNOTEBOOK:
 				FlatNotebook class that allows overriding and adding methods for the right pane of DEVSimPy
 			"""
 			fnb.FlatNotebook.__init__(self, *args, **kwargs)
-			GeneralFlatNotebook.__init__(self,*args, **kwargs)
+			GeneralNotebook.__init__(self,*args, **kwargs)
 
 			self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.OnClosingPage)
 			self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
@@ -293,7 +293,7 @@ if USE_FLATNOTEBOOK:
 			self.pages.remove(canvas)
 
 			### update (clear) of properties panel (Control notebook)
-			propPanel = mainW.GetDiagramNotebook().GetPropPanel()
+			propPanel = mainW.GetControlNotebook().GetPropPanel()
 			### If properties panel is active, we update it
 			if propPanel:
 				propPanel.UpdatePropertiesPage(propPanel.defaultPropertiesPage())
@@ -308,7 +308,7 @@ else:
 	# Classic Notebook class
 	#
 
-	class DiagramNotebook(wx.Notebook, GeneralFlatNotebook):
+	class DiagramNotebook(wx.Notebook, GeneralNotebook):
 		""" Diagram classic NoteBook class
 		"""
 
@@ -317,7 +317,7 @@ else:
 			"""
 
 			wx.Notebook.__init__(self, *args, **kwargs)
-			GeneralFlatNotebook.__init__(self,*args, **kwargs)
+			GeneralNotebook.__init__(self,*args, **kwargs)
 
 			self.Bind(wx.EVT_RIGHT_DOWN, self.__ShowMenu)
 			self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
