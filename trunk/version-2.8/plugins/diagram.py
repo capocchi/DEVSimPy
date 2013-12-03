@@ -136,6 +136,7 @@ def start_diagram(*args, **kwargs):
 	### list of edges and color
 	edges,edge_colors = zip(*nx.get_edge_attributes(graph,'color').items())
 
+
 	### list of nodes
 	nodes = []
 	for c1,c2 in edges:
@@ -145,8 +146,8 @@ def start_diagram(*args, **kwargs):
 			nodes.append(c2)
 
 
+	node_colors=[]
 	### list of node colors
-	node_colors = []
 	for block in map(dia.GetShapeByLabel, map(lambda a: a.split('(')[0], nodes)):
 		### SimulatorSolver is blue
 		if isinstance(block, CodeBlock):
@@ -166,7 +167,6 @@ def start_diagram(*args, **kwargs):
 		pos=nx.graphviz_layout(graph, prog='dot')
 	except ValueError:
 		pos=nx.spring_layout(graph)
-
 
 	### draw the graph
 	nx.draw(graph, pos, edgelist=edges, nodelist=nodes, edge_color=edge_colors, node_color=node_colors, node_size = node_sizes, width=2)
