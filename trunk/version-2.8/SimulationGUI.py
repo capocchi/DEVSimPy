@@ -546,7 +546,8 @@ class SimulationDialog(wx.Frame, wx.Panel):
 				if self.statusbar.GetFieldsCount() > 2:
 					self.statusbar.SetStatusText(str(self.count)[:4]+"%", 2)
 
-			wx.Yield()
+			#wx.Yield()
+			wx.YieldIfNeeded()
 	###
 	def MsgBoxEmptyModel(self):
 		""" Pop-up alert for empty model

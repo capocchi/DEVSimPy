@@ -64,13 +64,14 @@ def getSimulatorTree(devs, graph, par):
 	"""
 	"""
 
-	label = DEVSComponent.getBlockModel(devs).label
+	block = DEVSComponent.getBlockModel(devs)
+	label = block.label
 	id = devs.myID
 
 	if isinstance(devs, DomainBehavior):
-		graph.add_edge(par, "%s(%s)"%(label, id), weight=0.0, color='b')
+		graph.add_edge(par, "%s(%s)"%(label, id), color='b')
 	elif isinstance(devs, (DomainStructure, Master)):
-		graph.add_edge(par, "%s(%s)"%(label, id), weight=0.0, color='m')
+		graph.add_edge(par, "%s(%s)"%(label, id), color='m')
 		for c in devs.componentSet:
 			getSimulatorTree(c, graph, "%s(%s)"%(label, id))
 	return graph
@@ -112,6 +113,7 @@ def start_diagram(*args, **kwargs):
 	"""
 
 	dia = kwargs['diagram']
+	parent = kwargs['parent']
 
 	###-------------------------------
 	import matplotlib
@@ -147,6 +149,7 @@ def start_diagram(*args, **kwargs):
 
 
 	node_colors=[]
+	edge_labels = []
 	### list of node colors
 	for block in map(dia.GetShapeByLabel, map(lambda a: a.split('(')[0], nodes)):
 		### SimulatorSolver is blue
@@ -171,18 +174,35 @@ def start_diagram(*args, **kwargs):
 	### draw the graph
 	nx.draw(graph, pos, edgelist=edges, nodelist=nodes, edge_color=edge_colors, node_color=node_colors, node_size = node_sizes, width=2)
 
-	### draw the weights
-	edge_labels=dict([((u,v,),d['weight']) for u,v,d in graph.edges(data=True)])
-	nx.draw_networkx_edge_labels(graph,pos,edge_labels=edge_labels)
+	###
+ 	def getActivity(label, key='cpu'):
+ 		""" Return the activity key from model with label
+ 		"""
+ 		### get block because devs must be get dynamically
+ 		block = dia.GetShapeByLabel(label.split('(')[0])
+ 		### if instance is code block (atomic model)
+ 		if isinstance(block, CodeBlock):
+ 			devs = block.getDEVSModel()
+ 			if devs and hasattr(devs, 'activity'):
+ 				return devs.activity[key]
+ 		 	else:
+ 		 		return 0.0
+ 		### container block or other doesn't have activity
+ 		else:
+ 			return 0.0
+
+ 	### draw activity edge label
+ 	edge_labels=dict([((u,v,),round(getActivity(u)+getActivity(v),3)) for u,v,d in graph.edges(data=True)])
+ 	nx.draw_networkx_edge_labels(graph,pos,edge_labels=edge_labels)
 
 	### Update function binded with the EVT_IDLE event
 	def update(idleevent):
-		""" Update the figure
+		""" Update the figure with the activity value
 		"""
 
-		### simulate the weight evolution
-		edge_labels=dict([((u,v,),round(random.uniform(1, 10),3)) for u,v,d in graph.edges(data=True)])
-		nx.draw_networkx_edge_labels(graph,pos,edge_labels=edge_labels)
+		### weight evolution
+ 		edge_labels=dict([((u,v,),round(getActivity(u)+getActivity(v),3)) for u,v,d in graph.edges(data=True)])
+ 		nx.draw_networkx_edge_labels(graph,pos,edge_labels=edge_labels)
 
 		###---------------------------
 		try:
@@ -191,8 +211,11 @@ def start_diagram(*args, **kwargs):
 			pass
 		###----------------------------
 
+		###
+		idleevent.RequestMore()
+
 	###----------------------------------------
-	wx.EVT_IDLE(wx.GetApp(), update)
+	wx.EVT_IDLE(parent, update)
 	f.autofmt_xdate()
 	f.show()
 	###----------------------------------------
