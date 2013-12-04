@@ -858,7 +858,7 @@ class Diagram(Savable, Structurable):
 			if m.label == label:
 				return m
 
-		sys.stderr.write(_("Block %s not found.\n"%(label)))
+		#sys.stderr.write(_("Block %s not found.\n"%(label)))
 		return False
 
 	def GetShapeList(self):

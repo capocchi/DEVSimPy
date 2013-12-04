@@ -21,6 +21,7 @@ import os
 import inspect
 import tempfile
 import textwrap
+import multiprocessing
 
 #for ploting
 try:
@@ -97,7 +98,7 @@ from PlotGUI import PlotManager
 
 import plugins.codepaths as codepaths
 
-WRITE_DOT_TMP_FILE = True
+WRITE_DOT_TMP_FILE = False
 
 #def profile(func):
 	#def wrapped(*args, **kwargs):
@@ -195,25 +196,27 @@ class ActivityReport(wx.Frame):
 
 		self.ReportGrid = wx.grid.Grid(self, wx.ID_ANY, size=(1, 1))
 
-		#self.timer = wx.Timer(self)
+		self.timer = wx.Timer(self)
 
 		self.__set_properties()
 		self.__do_layout()
 
-		#self.timer.Start(2000, oneShot=False)
+		self.timer.Start(2000, oneShot=False)
 
-		#self.Bind(wx.EVT_TIMER, self.OnTimer)
+		self.Bind(wx.EVT_TIMER, self.OnUpdate)
 		self.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK,self.OnDClick, id=self.ReportGrid.GetId())
 		self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK,self.OnRightClick, id=self.ReportGrid.GetId())
 		self.ReportGrid.GetGridColLabelWindow().Bind(wx.EVT_MOTION, self.onMouseOverColLabel)
+		#self.Bind(wx.EVT_IDLE, self.OnUpdate)
 		# end wxGlade
 
-	#def OnTimer(self, evt):
-		#data = self.GetData()
-		#colLabels = (_("Models"),_("Quantitative"),  _("CPU"), _("Weighted"), _('McCabe Complexity'))
-		#rowLabels = map(lambda a: str(a), range(len(map(lambda b: b[0], data))))
-		#tableBase = GenericTable(data, rowLabels, colLabels)
-		#self.ReportGrid.SetTable(tableBase)
+	def OnUpdate(self, evt):
+
+		table = self.ReportGrid.GetTable()
+		data = self.GetData()
+		table.data = data
+		self.ReportGrid.SetTable(table)
+		self.ReportGrid.Refresh()
 
 	def onMouseOverColLabel(self, event):
 		"""
@@ -305,7 +308,7 @@ class ActivityReport(wx.Frame):
 					pylab.axis('off')
 					pylab.show()
 
-					### TODO make analysis to impement probability based on path length
+					### TODO make analysis to implement probability based on path length
 					#nx.draw(g)
 					#g = nx.Graph(nx.read_dot(path))
 					#distance =nx.all_pairs_shortest_path_length(g)
@@ -349,90 +352,108 @@ class ActivityReport(wx.Frame):
 		for i in range(len(colLabels)):
 			self.ReportGrid.SetColLabelValue(i, colLabels[i])
 
-
 		tableBase = GenericTable(data, rowLabels, colLabels)
 		self.ReportGrid.SetTable(tableBase)
 
 		self.ReportGrid.EnableEditing(0)
 		self.ReportGrid.AutoSize()
 
+	def SetDataToDEVSModel(self, model, quantitative, cpu, weighted, mcCabe):
+		""" Embed all information about activity in a new attribute of model (named 'activity')
+		"""
+
+		d = {'quantitative' : quantitative, \
+			'cpu' : cpu, \
+			'weighted' : weighted, \
+			'mcCabe': mcCabe
+			}
+		if not hasattr(model, 'activity'):
+			setattr(model, 'activity', d)
+		else:
+			model.activity.update(d)
+
 	def GetData(self):
 		"""
 		"""
 
 		if self._master is not None:
-			### list of all label of block models from devs model
+
 			model_name_list = []
 			model_id_list = []
-			model_activity_list = []
 			quantitative_activity_list = []
 			cpu_activity_list = []
 			weighted_activity_list = []
 			mcCabe_activity_list = []
 			data=[]
 
-			for m in GetFlatDEVSList(self._master,[]):
-				if hasattr(m,'texec'):
-					label = m.getBlockModel().label
-					quantitative_activity = 0.0
-					cpu_activity = 0.0
-					weighted_activity = 0.0
-					complexity_int=0.0
-					complexity_ext=0.0
-					complexity_output=0.0
-					complexity_ta=0.0
+			for m in filter(lambda a: hasattr(a,'texec'), GetFlatDEVSList(self._master,[])):
 
-					#min_list = []
-					#max_list = []
-					for fct,d in m.texec.items():
-						#min_list.append(min(map(lambda c: c[0],d)))
-						#max_list.append(max(map(lambda c: c[0],d)))
-						quantitative_activity+=len(d)
-						cpu_activity+=sum(map(lambda c: c[-1],d))
-						### TODO round for b-a ???
-						weighted_activity+=d[-1][0]-d[0][0]
+				label = m.getBlockModel().label
+				cls = m.__class__
+				texec_list = m.texec.values()
 
-					### mcCabe complexity
-					### be carful to use tab for devs code of models
-					source_list = zip(['extTransition', 'intTransition', 'outputFnc', 'timeAdvance'], map(inspect.getsource, [m.__class__.extTransition, m.__class__.intTransition, m.__class__.outputFnc, m.__class__.timeAdvance]))
+				quantitative_activity = 0.0
+				cpu_activity = 0.0
+				weighted_activity = 0.0
+				complexity_int=0.0
+				complexity_ext=0.0
+				complexity_output=0.0
+				complexity_ta=0.0
 
-					for fct, text in source_list:
-						### textwrap for deleting the indentation
-						ast = codepaths.compiler.parse(textwrap.dedent(text))
-						visitor = codepaths.PathGraphingAstVisitor()
-						visitor.preorder(ast, visitor)
+				for d in texec_list:
+					quantitative_activity+=len(d)
+					cpu_activity+=sum(map(lambda c: c[-1],d))
+					### TODO round for b-a ???
+					weighted_activity+=d[-1][0]-d[0][0]
 
-						for graph in visitor.graphs.values():
-							### TODO make this generic
-							if fct == 'extTransition':
-								complexity_ext += graph.complexity()
-							elif fct == 'intTransition':
-								complexity_int += graph.complexity()
-							elif fct == 'outputFnc':
-								complexity_output += graph.complexity()
-							elif fct == 'timeAdvance':
-								complexity_ta += graph.complexity()
-							else:
-								pass
+				### mcCabe complexity
+				### be carful to use tab for devs code of models
 
-							### write dot file
-							if WRITE_DOT_TMP_FILE and fct in ('extTransition'):
+				source_list = map(inspect.getsource, \
+								[cls.extTransition, \
+								cls.intTransition, \
+								cls.outputFnc, \
+								cls.timeAdvance])
 
-								dot_path = os.path.join(tempfile.gettempdir(), "%s(%s)_%s.dot"%(label,str(m.myID),fct))
+				jobs = []
+				for text in source_list:
+					### textwrap for deleting the indentation
+					ast = codepaths.compiler.parse(textwrap.dedent(text))
+					visitor = codepaths.PathGraphingAstVisitor()
+					visitor.preorder(ast, visitor)
 
-								### write file in temp directory
-								with open(dot_path,'w') as f:
-									f.write('graph {\n%s}'%graph.to_dot())
+					for graph in visitor.graphs.values():
+						### TODO make this generic
+						if 'extTransition' in text:
+							complexity_ext += graph.complexity()
+							fct = 'extTransition'
+						elif 'intTransition' in text:
+							complexity_int += graph.complexity()
+							fct = 'intTransition'
+						elif 'outputFnc' in text:
+							complexity_output += graph.complexity()
+							fct = 'outputFnc'
+						elif 'timeAdvance' in text:
+							complexity_ta += graph.complexity()
+							fct = 'timeAdvance'
+						else:
+							pass
 
-					#### TODO make this generic depending on the checked cb2
-					complexity = complexity_ext+complexity_int
+ 						### write dot file
+ 						if WRITE_DOT_TMP_FILE:
+ 							self.worker(label,str(m.myID),fct,str(graph.to_dot()))
 
-					model_name_list.append(label)
-					model_id_list.append(m.myID)
-					quantitative_activity_list.append(quantitative_activity)
-					cpu_activity_list.append(cpu_activity)
-					weighted_activity_list.append(weighted_activity)
-					mcCabe_activity_list.append(complexity)
+				#### TODO make this generic depending on the checked cb2
+				complexity = complexity_ext+complexity_int
+
+				model_name_list.append(label)
+				model_id_list.append(m.myID)
+				quantitative_activity_list.append(quantitative_activity)
+				cpu_activity_list.append(cpu_activity)
+				weighted_activity_list.append(weighted_activity)
+				mcCabe_activity_list.append(complexity)
+
+				self.SetDataToDEVSModel(m, quantitative_activity, cpu_activity, weighted_activity, complexity)
 
 			model_name_list.append(_('Total'))
 			quantitative_activity_list.append(sum(quantitative_activity_list))
@@ -446,11 +467,15 @@ class ActivityReport(wx.Frame):
 			### if models have been simulated during a minimum time H
 			if H > 0.0:
 				### prepare data to populate grid
-				data = map(lambda a,i,b,c,d,e: (a, i, b/H, d/H, c, e), model_name_list, model_id_list,quantitative_activity_list, cpu_activity_list, weighted_activity_list, mcCabe_activity_list)
+				return map(lambda a,i,b,c,d,e: (a, i, b/H, d/H, c, e), \
+							model_name_list, \
+							model_id_list, \
+							quantitative_activity_list, \
+							cpu_activity_list, \
+							weighted_activity_list, \
+							mcCabe_activity_list)
 			else:
-				data = map(lambda a,i: (a, i, 0, 0, 0, 0), model_name_list,model_id_list)
-
-			return data
+				return map(lambda a,i: (a, i, 0, 0, 0, 0), model_name_list,model_id_list)
 		else:
 			sys.stdout.write(_('Please, go to the simulation process before analyse activity !\n'))
 			return False
@@ -461,6 +486,15 @@ class ActivityReport(wx.Frame):
 
 	#def GetTable( self ):
 		#return self.tableRef()
+	def worker(self, label, ID, fct, txt):
+		dot_path = os.path.join(tempfile.gettempdir(), "%s(%s)_%s.dot"%(label,str(ID),fct))
+
+		msg = "Starting write %s" % dot_path
+		print msg
+
+		### write file in temp directory
+		with open(dot_path,'wb') as f:
+			f.write('graph {\n%s}'%txt)
 
 	def __do_layout(self):
 		sizer_1 = wx.BoxSizer(wx.VERTICAL)
@@ -490,7 +524,6 @@ def view_activity_report(*args, **kwargs):
 	parent = kwargs['parent']
 
 	frame = ActivityReport(parent, wx.ID_ANY, size=(560, 300), title="Activity-Tracking Reporter", master = master)
-	frame.CenterOnParent()
 	frame.Show()
 
 def GetFlatDEVSList(coupled_devs, l=[]):
