@@ -21,7 +21,13 @@ import os
 import inspect
 import tempfile
 import textwrap
-import multiprocessing
+
+# to send event
+if wx.VERSION_STRING < '2.9':
+	from wx.lib.pubsub import Publisher as pub
+else:
+	from wx.lib.pubsub import setuparg1
+	from wx.lib.pubsub import pub
 
 #for ploting
 try:
@@ -207,6 +213,9 @@ class ActivityReport(wx.Frame):
 		self.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK,self.OnDClick, id=self.ReportGrid.GetId())
 		self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK,self.OnRightClick, id=self.ReportGrid.GetId())
 		self.ReportGrid.GetGridColLabelWindow().Bind(wx.EVT_MOTION, self.onMouseOverColLabel)
+		self.Bind(wx.EVT_BUTTON, self.OnRefresh, id=self.btn.GetId())
+		self.Bind(wx.EVT_TOGGLEBUTTON, self.OnDynamicRefresh, id=self.tbtn.GetId())
+
 		# end wxGlade
 
 	def __set_properties(self):
@@ -235,6 +244,49 @@ class ActivityReport(wx.Frame):
 		self.ReportGrid.EnableEditing(0)
 		self.ReportGrid.AutoSize()
 
+	###
+	def __do_layout(self):
+		"""
+		"""
+		sizer_1 = wx.BoxSizer(wx.VERTICAL)
+		sizer_2 = wx.BoxSizer(wx.HORIZONTAL)
+
+
+		self.tbtn = wx.ToggleButton(self,  wx.NewId(), _('Auto-Refresh'))
+		self.tbtn.SetValue(True)
+
+		self.btn = wx.Button(self, wx.NewId(), _('Refresh'))
+		self.btn.Enable(False)
+
+		sizer_2.Add(self.tbtn, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 3, 3)
+		sizer_2.Add(self.btn, 0, wx.RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 3, 3)
+
+		sizer_1.Add(self.ReportGrid, 1, wx.EXPAND|wx.ALL, 5)
+		sizer_1.Add(sizer_2, 0, wx.BOTTOM|wx.EXPAND|wx.ALL, 5)
+
+		self.SetSizer(sizer_1)
+		self.Layout()
+
+	def OnDynamicRefresh(self, event):
+		""" Checkbox has been checked
+		"""
+
+		### update the button status
+		self.btn.Enable(not self.tbtn.GetValue())
+
+		### update the timer
+		if not self.tbtn.GetValue():
+			self.timer.Stop()
+		else:
+			self.timer.Start(2000, oneShot=wx.TIMER_CONTINUOUS)
+
+	def OnRefresh(self, event):
+		""" Button Refresh has been pushed
+		"""
+		if not self.timer.IsRunning():
+			self.OnUpdate(event)
+
+	###
 	def OnUpdate(self, evt):
 		"""
 		"""
@@ -257,6 +309,7 @@ class ActivityReport(wx.Frame):
 		self.ReportGrid.SetTable(table)
 		self.ReportGrid.Refresh()
 
+		#pub().sendMessage(('activity', evt)
 
 	def onMouseOverColLabel(self, event):
 		"""
@@ -500,12 +553,6 @@ class ActivityReport(wx.Frame):
 		### write file in temp directory
 		with open(dot_path,'wb') as f:
 			f.write('graph {\n%s}'%txt)
-
-	def __do_layout(self):
-		sizer_1 = wx.BoxSizer(wx.VERTICAL)
-		sizer_1.Add(self.ReportGrid, 1, wx.EXPAND, 0)
-		self.SetSizer(sizer_1)
-		self.Layout()
 
 @pluginmanager.register("START_ACTIVITY_TRACKING")
 def start_activity_tracking(*args, **kwargs):

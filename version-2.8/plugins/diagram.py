@@ -16,6 +16,13 @@ import os
 import wx
 import random
 
+# to send event
+if wx.VERSION_STRING < '2.9':
+	from wx.lib.pubsub import Publisher as pub
+else:
+	from wx.lib.pubsub import setuparg1
+	from wx.lib.pubsub import pub
+
 #for ploting
 try:
 	import pylab
@@ -106,81 +113,77 @@ def dep(arg):
 	    d=dict(((k, v-t) for k, v in d.items() if v))
 	return r
 
-
-@pluginmanager.register("START_DIAGRAM")
-def start_diagram(*args, **kwargs):
-	""" Start the diagram frame.
+###
+class Graph:
+	""" NX Graph class with nx grpah attribut
 	"""
+	def __init__(self, master, parent):
+		""" Constructor.
+		"""
 
-	master = kwargs['master']
-	parent = kwargs['parent']
+		self.master = master
+		self.parent = parent
 
-	dia = master.getBlockModel()
+		self.diagram = self.master.getBlockModel()
 
-	###-------------------------------
-	import matplotlib
-	matplotlib.use('WXAgg')
-	f = pylab.figure()
+		# graph
+		self.graph = getSimulatorTree(self.diagram.getDEVSModel(), nx.DiGraph(), self.diagram.label)
 
-	### title of windows is label
-	fig = pylab.gcf()
-	fig.canvas.set_window_title("%s - Abstract simulator three"%dia.label)
+	def PopulateGraph(self):
+		"""
+		"""
+		label = self.diagram.label
 
-	### title of canvas is given by the user
-	#pylab.title(devs.title)
+		### remove the node corresponding to the master diagram (the first one on the top)
+		self.graph.remove_node(label)
 
-	###-------------------------------
+		### list of edges and color
+		edges,edge_colors = zip(*nx.get_edge_attributes(self.graph,'color').items())
 
-	# graph to plot
-	graph = getSimulatorTree(dia.getDEVSModel(), nx.DiGraph(), dia.label)
+		### list of nodes
+		nodes = []
+		for c1,c2 in edges:
+			if c1 not in nodes and label != c1:
+				nodes.append(c1)
+			if c2 not in nodes and label != c2:
+				nodes.append(c2)
 
-	### remove the node corresponding to the master diagram (the first one on the top)
-	graph.remove_node(dia.label)
-
-	### list of edges and color
-	edges,edge_colors = zip(*nx.get_edge_attributes(graph,'color').items())
-
-	### list of nodes
-	nodes = []
-	for c1,c2 in edges:
-		if c1 not in nodes and dia.label != c1:
-			nodes.append(c1)
-		if c2 not in nodes and dia.label != c2:
-			nodes.append(c2)
-
-
-	node_colors=[]
-	edge_labels = []
-	### list of node colors
-	for block in map(dia.GetShapeByLabel, map(lambda a: a.split('(')[0], nodes)):
-		### SimulatorSolver is blue
-		if isinstance(block, CodeBlock):
-			node_colors.append('b')
-		else:
-			### CoupledSolver is yellow if there is the root red else
-			### test if GetShapeByLabel return False because diagram have not block
-			if isinstance(block, bool):
-				node_colors.append('y')
+		node_colors=[]
+		edge_labels = []
+		### list of node colors
+		for block in map(self.diagram.GetShapeByLabel, map(lambda a: a.split('(')[0], nodes)):
+			### SimulatorSolver is blue
+			if isinstance(block, CodeBlock):
+				node_colors.append('b')
 			else:
-				node_colors.append('r')
+				### CoupledSolver is yellow if there is the root red else
+				### test if GetShapeByLabel return False because diagram have not block
+				if isinstance(block, bool):
+					node_colors.append('y')
+				else:
+					node_colors.append('r')
 
-	### odes size
-	node_sizes = [ 800 for node in nodes]
+		### odes size
+		node_sizes = [ 800 for node in nodes]
 
-	try:
-		pos=nx.graphviz_layout(graph, prog='dot')
-	except ValueError:
-		pos=nx.spring_layout(graph)
+		#try:
+		#	pos=nx.graphviz_layout(graph, prog='dot')
+		#except ValueError:
+		pos=nx.spring_layout(self.graph)
 
-	### draw the graph
-	nx.draw(graph, pos, edgelist=edges, nodelist=nodes, edge_color=edge_colors, node_color=node_colors, node_size = node_sizes, width=2)
+		### draw the graph
+		nx.draw(self.graph, pos, edgelist=edges, nodelist=nodes, edge_color=edge_colors, node_color=node_colors, node_size = node_sizes, width=2)
+
+		### draw activity edge label
+ 		edge_labels=dict([((u,v,),round(self.getActivity(u)+self.getActivity(v),3)) for u,v,d in self.graph.edges(data=True)])
+ 	 	nx.draw_networkx_edge_labels(self.graph,pos,edge_labels=edge_labels)
 
 	###
- 	def getActivity(label, key='cpu'):
+ 	def getActivity(self, label, key='cpu'):
  		""" Return the activity key from model with label
  		"""
  		### get block because devs must be get dynamically
- 		block = dia.GetShapeByLabel(label.split('(')[0])
+ 		block = self.diagram.GetShapeByLabel(label.split('(')[0])
  		### if instance is code block (atomic model)
  		if isinstance(block, CodeBlock):
  			devs = block.getDEVSModel()
@@ -192,48 +195,55 @@ def start_diagram(*args, **kwargs):
  		else:
  			return 0.0
 
- 	### draw activity edge label
- 	edge_labels1=dict([((u,v,),round(getActivity(u)+getActivity(v),3)) for u,v,d in graph.edges(data=True)])
- 	nx.draw_networkx_edge_labels(graph,pos,edge_labels=edge_labels1)
-
-	### Update function binded with the EVT_IDLE event
-	def update(idleevent):
+	def OnUpdate(self, evt):
 		""" Update the figure with the activity value
+			### TODO : test is edge_label have changed
 		"""
 
+ 		if hasattr(self, 'fig'):
+	 		pos=nx.spring_layout(self.graph)
 
-		### weight evolution
- 		edge_labels2=dict([((u,v,),round(getActivity(u)+getActivity(v),3)) for u,v,d in graph.edges(data=True)])
+			### weight evolution
+	 		edge_labels=dict([((u,v,),round(self.getActivity(u)+self.getActivity(v),3)) for u,v,d in self.graph.edges(data=True)])
 
-		###---------------------------
-		try:
-			if edge_labels1 != edge_labels2:
-				nx.draw_networkx_edge_labels(graph,pos,edge_labels=edge_labels2)
-				# redraw the canvas
-				fig.canvas.draw_idle()
+			###---------------------------
+			nx.draw_networkx_edge_labels(self. graph,pos,edge_labels=edge_labels)
+			# redraw the canvas
+			self.fig.canvas.draw_idle()
 
-				print "yes"
-			else:
-				print "No"
-		except:
-			pass
+	def setFig(self, fig):
+		self.fig = fig
 
-		#edge_labels1 = edge_labels2
+@pluginmanager.register("START_DIAGRAM")
+def start_diagram(*args, **kwargs):
+	""" Start the diagram frame.
+	"""
 
-		###----------------------------
+	master = kwargs['master']
+	parent = kwargs['parent']
 
-		###
-		idleevent.RequestMore()
+ 	dia = master.getBlockModel()
+#
+# 	###-------------------------------
+	import matplotlib
+	matplotlib.use('WXAgg')
+	f = pylab.figure()
 
-	###----------------------------------------
-	wx.EVT_IDLE(parent, update)
+	### title of windows is label
+	fig = pylab.gcf()
+	fig.canvas.set_window_title("%s - Abstract simulator three"%dia.label)
+
+	graph = Graph(master, parent)
+	graph.PopulateGraph()
+	graph.setFig(fig)
+
+	#pub().subscribe(graph.OnUpdate, ("activity"))
+	wx.EVT_IDLE(parent, graph.OnUpdate)
 	f.autofmt_xdate()
 	f.show()
-	###----------------------------------------
 
 	### The START_ACTIVITY_TRACKING event occurs
 	pluginmanager.trigger_event("VIEW_ACTIVITY_REPORT", parent=parent, master=dia.getDEVSModel())
-
 
 def Config(parent):
 	""" Plugin settings frame.
