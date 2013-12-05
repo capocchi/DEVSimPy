@@ -209,13 +209,51 @@ class ActivityReport(wx.Frame):
 		self.ReportGrid.GetGridColLabelWindow().Bind(wx.EVT_MOTION, self.onMouseOverColLabel)
 		# end wxGlade
 
+	def __set_properties(self):
+		# begin wxGlade: ActivityReport.__set_properties
+
+		self.SetTitle(self._title)
+
+		self.model_list = filter(lambda a: hasattr(a, 'texec'), GetFlatDEVSList(self._master, []))
+		self.model_name_list, self.model_id_list = zip(*map(lambda m : (m.getBlockModel().label, m.myID), self.model_list))
+		self.mcCabe_list = map(self.GetMacCabe, self.model_list)
+
+		### data used to initialize table
+		data = map(lambda a,b,c,d : [a,b,c[0],c[1],c[2],d], self.model_name_list, self.model_id_list, self.GetData(), self.mcCabe_list)
+
+		### MCC stands for McCabe's Cyclomatic Complexity
+		colLabels = (_("Model"), _("Id"), _("QActivity"), _("WActivity"), _("CPU (user)"), _('MCC'))
+		rowLabels = map(lambda a: str(a), range(len(map(lambda b: b[0], data))))
+
+		tableBase = GenericTable(data, rowLabels, colLabels)
+
+		self.ReportGrid.CreateGrid(10, len(colLabels))
+		for i in range(len(colLabels)):
+			self.ReportGrid.SetColLabelValue(i, colLabels[i])
+
+		self.ReportGrid.SetTable(tableBase)
+		self.ReportGrid.EnableEditing(0)
+		self.ReportGrid.AutoSize()
+
 	def OnUpdate(self, evt):
 		"""
 		"""
 
 		table = self.ReportGrid.GetTable()
 		data = self.GetData()
-		table.data = data
+
+		### update table from data
+		for i,c in enumerate(data):
+			### change value of the cell
+			table.SetValue(i, 2, c[0])
+			table.SetValue(i, 3, c[1])
+			table.SetValue(i, 4, c[2])
+
+			### change the value in the data attribut of the table
+			table.data[i][2] = c[0]
+			table.data[i][3] = c[1]
+			table.data[i][4] = c[2]
+
 		self.ReportGrid.SetTable(table)
 		self.ReportGrid.Refresh()
 
@@ -338,40 +376,72 @@ class ActivityReport(wx.Frame):
 		diagram = currentPage.diagram
 		Plot(diagram, self.ReportGrid.GetCellValue(row,0))
 
-	def __set_properties(self):
-		# begin wxGlade: ActivityReport.__set_properties
-
-		self.SetTitle(self._title)
-
-		data = self.GetData()
-
-		### MCC stands for McCabe's Cyclomatic Complexity
-		colLabels = (_("Model"), _("Id"), _("QActivity"), _("WActivity"), _("CPU (user)"), _('MCC'))
-		rowLabels = map(lambda a: str(a), range(len(map(lambda b: b[0], data))))
-
-		tableBase = GenericTable(data, rowLabels, colLabels)
-
-		self.ReportGrid.CreateGrid(10, len(colLabels))
-		for i in range(len(colLabels)):
-			self.ReportGrid.SetColLabelValue(i, colLabels[i])
-
-		self.ReportGrid.SetTable(tableBase)
-		self.ReportGrid.EnableEditing(0)
-		self.ReportGrid.AutoSize()
-
-	def SetDataToDEVSModel(self, model, quantitative, cpu, weighted, mcCabe):
+	def SetDataToDEVSModel(self, model, quantitative, cpu, weighted):
 		""" Embed all information about activity in a new attribute of model (named 'activity')
 		"""
 
 		d = {'quantitative' : quantitative, \
 			'cpu' : cpu, \
-			'weighted' : weighted, \
-			'mcCabe': mcCabe
+			'weighted' : weighted
 			}
+
 		if not hasattr(model, 'activity'):
 			setattr(model, 'activity', d)
 		else:
 			model.activity.update(d)
+
+	def GetMacCabe(self, m):
+		"""
+		"""
+
+		### Get class of model
+		cls = m.__class__
+
+		complexity_int=0.0
+		complexity_ext=0.0
+		complexity_output=0.0
+		complexity_ta=0.0
+
+		### mcCabe complexity
+		### beware to use tab for devs code of models
+
+		source_list = map(inspect.getsource, \
+						[cls.extTransition, \
+						cls.intTransition, \
+						cls.outputFnc, \
+						cls.timeAdvance])
+
+		for text in source_list:
+			### textwrap for deleting the indentation
+			ast = codepaths.compiler.parse(textwrap.dedent(text))
+			visitor = codepaths.PathGraphingAstVisitor()
+			visitor.preorder(ast, visitor)
+
+			for graph in visitor.graphs.values():
+				### TODO make this generic
+				if 'extTransition' in text:
+					complexity_ext += graph.complexity()
+					fct = 'extTransition'
+				elif 'intTransition' in text:
+					complexity_int += graph.complexity()
+					fct = 'intTransition'
+				elif 'outputFnc' in text:
+					complexity_output += graph.complexity()
+					fct = 'outputFnc'
+				elif 'timeAdvance' in text:
+					complexity_ta += graph.complexity()
+					fct = 'timeAdvance'
+				else:
+					pass
+
+					### write dot file
+					if WRITE_DOT_TMP_FILE:
+						self.worker( m.getBlockModel().label, str(m.myID), fct, str(graph.to_dot()))
+
+		#### TODO make this generic depending on the checked cb2
+		complexity = complexity_ext+complexity_int
+
+		return complexity
 
 	def GetData(self):
 		"""
@@ -379,27 +449,17 @@ class ActivityReport(wx.Frame):
 
 		if self._master:
 
-			model_name_list = []
-			model_id_list = []
 			quantitative_activity_list = []
 			cpu_activity_list = []
 			weighted_activity_list = []
-			mcCabe_activity_list = []
-			data=[]
 
-			for m in filter(lambda a: hasattr(a,'texec'), GetFlatDEVSList(self._master,[])):
-
-				label = m.getBlockModel().label
-				cls = m.__class__
-				texec_list = m.texec.values()
+			for m in self.model_list:
 
 				quantitative_activity = 0.0
 				cpu_activity = 0.0
 				weighted_activity = 0.0
-				complexity_int=0.0
-				complexity_ext=0.0
-				complexity_output=0.0
-				complexity_ta=0.0
+
+				texec_list = m.texec.values()
 
 				for d in texec_list:
 					quantitative_activity+=len(d)
@@ -407,60 +467,11 @@ class ActivityReport(wx.Frame):
 					### TODO round for b-a ???
 					weighted_activity+=d[-1][0]-d[0][0]
 
-				### mcCabe complexity
-				### be carful to use tab for devs code of models
-
-				source_list = map(inspect.getsource, \
-								[cls.extTransition, \
-								cls.intTransition, \
-								cls.outputFnc, \
-								cls.timeAdvance])
-
-				jobs = []
-				for text in source_list:
-					### textwrap for deleting the indentation
-					ast = codepaths.compiler.parse(textwrap.dedent(text))
-					visitor = codepaths.PathGraphingAstVisitor()
-					visitor.preorder(ast, visitor)
-
-					for graph in visitor.graphs.values():
-						### TODO make this generic
-						if 'extTransition' in text:
-							complexity_ext += graph.complexity()
-							fct = 'extTransition'
-						elif 'intTransition' in text:
-							complexity_int += graph.complexity()
-							fct = 'intTransition'
-						elif 'outputFnc' in text:
-							complexity_output += graph.complexity()
-							fct = 'outputFnc'
-						elif 'timeAdvance' in text:
-							complexity_ta += graph.complexity()
-							fct = 'timeAdvance'
-						else:
-							pass
-
- 						### write dot file
- 						if WRITE_DOT_TMP_FILE:
- 							self.worker(label,str(m.myID),fct,str(graph.to_dot()))
-
-				#### TODO make this generic depending on the checked cb2
-				complexity = complexity_ext+complexity_int
-
-				model_name_list.append(label)
-				model_id_list.append(m.myID)
 				quantitative_activity_list.append(quantitative_activity)
 				cpu_activity_list.append(cpu_activity)
 				weighted_activity_list.append(weighted_activity)
-				mcCabe_activity_list.append(complexity)
 
-				self.SetDataToDEVSModel(m, quantitative_activity, cpu_activity, weighted_activity, complexity)
-
-			model_name_list.append(_('Total'))
-			quantitative_activity_list.append(sum(quantitative_activity_list))
-			cpu_activity_list.append(sum(cpu_activity_list))
-			weighted_activity_list.append(sum(weighted_activity_list))
-			mcCabe_activity_list.append(sum(mcCabe_activity_list))
+				self.SetDataToDEVSModel(m, quantitative_activity, cpu_activity, weighted_activity)
 
 			### A=Aint+Aext/H
 			H=self._master.timeLast if self._master.timeLast <= self._master.FINAL_TIME else self._master.FINAL_TIME
@@ -468,26 +479,18 @@ class ActivityReport(wx.Frame):
 			### if models have been simulated during a minimum time H
 			if H > 0.0:
 				### prepare data to populate grid
-				return map(lambda a,i,b,c,d,e: (a, i, b/H, d/H, c, e), \
-							model_name_list, \
-							model_id_list, \
+				return map(lambda b,c,d: (b/H, d/H, c), \
+
 							quantitative_activity_list, \
 							cpu_activity_list, \
-							weighted_activity_list, \
-							mcCabe_activity_list)
+							weighted_activity_list)
 			else:
-				return map(lambda a,i: (a, i, 0, 0, 0, 0), model_name_list,model_id_list)
+				return False
 
 		else:
 			sys.stdout.write(_('Please, go to the simulation process before analyse activity !\n'))
 			return False
 
-	#def SetTable( self, object, *attributes ):
-		#self.tableRef = weakref.ref( object )
-		#return self.ReportGrid.SetTable( self, object, *attributes )
-
-	#def GetTable( self ):
-		#return self.tableRef()
 	def worker(self, label, ID, fct, txt):
 		dot_path = os.path.join(tempfile.gettempdir(), "%s(%s)_%s.dot"%(label,str(ID),fct))
 
