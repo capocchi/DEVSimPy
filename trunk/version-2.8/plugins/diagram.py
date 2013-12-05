@@ -112,8 +112,10 @@ def start_diagram(*args, **kwargs):
 	""" Start the diagram frame.
 	"""
 
-	dia = kwargs['diagram']
+	master = kwargs['master']
 	parent = kwargs['parent']
+
+	dia = master.getBlockModel()
 
 	###-------------------------------
 	import matplotlib
@@ -137,7 +139,6 @@ def start_diagram(*args, **kwargs):
 
 	### list of edges and color
 	edges,edge_colors = zip(*nx.get_edge_attributes(graph,'color').items())
-
 
 	### list of nodes
 	nodes = []
@@ -192,23 +193,33 @@ def start_diagram(*args, **kwargs):
  			return 0.0
 
  	### draw activity edge label
- 	edge_labels=dict([((u,v,),round(getActivity(u)+getActivity(v),3)) for u,v,d in graph.edges(data=True)])
- 	nx.draw_networkx_edge_labels(graph,pos,edge_labels=edge_labels)
+ 	edge_labels1=dict([((u,v,),round(getActivity(u)+getActivity(v),3)) for u,v,d in graph.edges(data=True)])
+ 	nx.draw_networkx_edge_labels(graph,pos,edge_labels=edge_labels1)
 
 	### Update function binded with the EVT_IDLE event
 	def update(idleevent):
 		""" Update the figure with the activity value
 		"""
 
+
 		### weight evolution
- 		edge_labels=dict([((u,v,),round(getActivity(u)+getActivity(v),3)) for u,v,d in graph.edges(data=True)])
- 		nx.draw_networkx_edge_labels(graph,pos,edge_labels=edge_labels)
+ 		edge_labels2=dict([((u,v,),round(getActivity(u)+getActivity(v),3)) for u,v,d in graph.edges(data=True)])
 
 		###---------------------------
 		try:
-			fig.canvas.draw_idle()                 # redraw the canvas
+			if edge_labels1 != edge_labels2:
+				nx.draw_networkx_edge_labels(graph,pos,edge_labels=edge_labels2)
+				# redraw the canvas
+				fig.canvas.draw_idle()
+
+				print "yes"
+			else:
+				print "No"
 		except:
 			pass
+
+		#edge_labels1 = edge_labels2
+
 		###----------------------------
 
 		###
@@ -219,6 +230,10 @@ def start_diagram(*args, **kwargs):
 	f.autofmt_xdate()
 	f.show()
 	###----------------------------------------
+
+	### The START_ACTIVITY_TRACKING event occurs
+	pluginmanager.trigger_event("VIEW_ACTIVITY_REPORT", parent=parent, master=dia.getDEVSModel())
+
 
 def Config(parent):
 	""" Plugin settings frame.

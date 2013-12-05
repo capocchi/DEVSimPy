@@ -365,6 +365,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		"""
 		# The simulation verbose event occurs
 		trigger_event("START_SIM_VERBOSE", parent=self)
+
 		# The simulation verbose event occurs
 		trigger_event("VIEW_ACTIVITY_REPORT", parent=self, master = self.current_master)
 
@@ -420,7 +421,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 				trigger_event("START_CONCURRENT_SIMULATION", parent=self, master=self.current_master)
 
 				### future call is requiered because the simulator is flatened during the execution of the srtategy 3
-				wx.FutureCall(1, trigger_event, 'START_DIAGRAM', parent = self, diagram = self.current_master.getBlockModel())
+				wx.FutureCall(1, trigger_event, 'START_DIAGRAM', parent=self, master=self.current_master)
 
 				### clear all log file
 				for fn in filter(lambda f: f.endswith('.devsimpy.log'), os.listdir(gettempdir())):
@@ -434,6 +435,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 					self.OnTimer(event)
 				else:
 					self.timer.Start(100)
+
 			else:
 				#print self.thread.getAlgorithm().trace
 				### for back simulation
