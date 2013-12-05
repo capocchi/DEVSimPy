@@ -23,7 +23,7 @@ else:
 	from wx.lib.pubsub import setuparg1
 	from wx.lib.pubsub import pub
 
-#for ploting
+#for plotting
 try:
 	import pylab
 except ImportError, info:
@@ -127,7 +127,7 @@ class Graph:
 		self.diagram = self.master.getBlockModel()
 
 		# graph
-		self.graph = getSimulatorTree(self.diagram.getDEVSModel(), nx.DiGraph(), self.diagram.label)
+		self.graph = getSimulatorTree(self.diagram.getDEVSModel(), nx.Graph(), self.diagram.label)
 
 	def PopulateGraph(self):
 		"""
@@ -166,10 +166,7 @@ class Graph:
 		### odes size
 		node_sizes = [ 800 for node in nodes]
 
-		#try:
-		#	pos=nx.graphviz_layout(graph, prog='dot')
-		#except ValueError:
-		pos=nx.spring_layout(self.graph)
+		pos = self.GetPos()
 
 		### draw the graph
 		nx.draw(self.graph, pos, edgelist=edges, nodelist=nodes, edge_color=edge_colors, node_color=node_colors, node_size = node_sizes, width=2)
@@ -178,6 +175,13 @@ class Graph:
  		edge_labels=dict([((u,v,),round(self.getActivity(u)+self.getActivity(v),3)) for u,v,d in self.graph.edges(data=True)])
  	 	nx.draw_networkx_edge_labels(self.graph,pos,edge_labels=edge_labels)
 
+	def GetPos(self):
+		try:
+			pos=nx.graphviz_layout(self.graph, prog='dot')
+		except ValueError:
+			pos=nx.spring_layout(self.graph)
+
+		return pos
 	###
  	def getActivity(self, label, key='cpu'):
  		""" Return the activity key from model with label
@@ -201,15 +205,18 @@ class Graph:
 		"""
 
  		if hasattr(self, 'fig'):
-	 		pos=nx.spring_layout(self.graph)
 
 			### weight evolution
 	 		edge_labels=dict([((u,v,),round(self.getActivity(u)+self.getActivity(v),3)) for u,v,d in self.graph.edges(data=True)])
 
-			###---------------------------
-			nx.draw_networkx_edge_labels(self. graph,pos,edge_labels=edge_labels)
-			# redraw the canvas
-			self.fig.canvas.draw_idle()
+			### draw new weight
+			nx.draw_networkx_edge_labels(self.graph,self.GetPos(),edge_labels=edge_labels)
+
+			try:
+				# redraw the canvas
+				self.fig.canvas.draw_idle()
+			except:
+				pass
 
 	def setFig(self, fig):
 		self.fig = fig
