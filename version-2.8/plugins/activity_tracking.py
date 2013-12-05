@@ -189,7 +189,7 @@ class GenericTable(wx.grid.PyGridTableBase):
 class ActivityReport(wx.Frame):
 	def __init__(self, parent, id, size, title='', style = wx.DEFAULT_FRAME_STYLE, master=None):
 		# begin wxGlade: ActivityReport.__init__
-		wx.Frame.__init__(self, parent, id, size=size, title=title, style=style)
+		wx.Frame.__init__(self, parent, id, size=size, title=title, name = 'Tracking', style=style)
 
 		self._title = title
 		self._master = master
@@ -201,22 +201,24 @@ class ActivityReport(wx.Frame):
 		self.__set_properties()
 		self.__do_layout()
 
-		self.timer.Start(2000, oneShot=False)
+		self.timer.Start(2000, oneShot=wx.TIMER_CONTINUOUS)
 
 		self.Bind(wx.EVT_TIMER, self.OnUpdate)
 		self.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK,self.OnDClick, id=self.ReportGrid.GetId())
 		self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK,self.OnRightClick, id=self.ReportGrid.GetId())
 		self.ReportGrid.GetGridColLabelWindow().Bind(wx.EVT_MOTION, self.onMouseOverColLabel)
-		#self.Bind(wx.EVT_IDLE, self.OnUpdate)
 		# end wxGlade
 
 	def OnUpdate(self, evt):
+		"""
+		"""
 
 		table = self.ReportGrid.GetTable()
 		data = self.GetData()
 		table.data = data
 		self.ReportGrid.SetTable(table)
 		self.ReportGrid.Refresh()
+
 
 	def onMouseOverColLabel(self, event):
 		"""
@@ -341,20 +343,19 @@ class ActivityReport(wx.Frame):
 
 		self.SetTitle(self._title)
 
-		### MCC stands for McCabe's Cyclomatic Complexity
-		colLabels = (_("Model"), _("Id"), _("QActivity"), _("WActivity"), _("CPU (user)"), _('MCC'))
-
 		data = self.GetData()
 
+		### MCC stands for McCabe's Cyclomatic Complexity
+		colLabels = (_("Model"), _("Id"), _("QActivity"), _("WActivity"), _("CPU (user)"), _('MCC'))
 		rowLabels = map(lambda a: str(a), range(len(map(lambda b: b[0], data))))
+
+		tableBase = GenericTable(data, rowLabels, colLabels)
 
 		self.ReportGrid.CreateGrid(10, len(colLabels))
 		for i in range(len(colLabels)):
 			self.ReportGrid.SetColLabelValue(i, colLabels[i])
 
-		tableBase = GenericTable(data, rowLabels, colLabels)
 		self.ReportGrid.SetTable(tableBase)
-
 		self.ReportGrid.EnableEditing(0)
 		self.ReportGrid.AutoSize()
 
@@ -376,7 +377,7 @@ class ActivityReport(wx.Frame):
 		"""
 		"""
 
-		if self._master is not None:
+		if self._master:
 
 			model_name_list = []
 			model_id_list = []
@@ -476,6 +477,7 @@ class ActivityReport(wx.Frame):
 							mcCabe_activity_list)
 			else:
 				return map(lambda a,i: (a, i, 0, 0, 0, 0), model_name_list,model_id_list)
+
 		else:
 			sys.stdout.write(_('Please, go to the simulation process before analyse activity !\n'))
 			return False
