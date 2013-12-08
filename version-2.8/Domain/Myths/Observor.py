@@ -66,7 +66,7 @@ class Observor(MythDomainBehavior):
 		for np in xrange(n):
 
 			msg = self.peek(self.IPorts[np])
-
+			print msg
 			if msg:
 
 				### filename

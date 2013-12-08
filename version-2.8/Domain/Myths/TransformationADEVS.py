@@ -29,12 +29,12 @@ class TransformationADEVS(MythDomainBehavior) :
 
 			transfoList = [(M2, ('h', 'toto', 'titi'))] ordered by the port number.
 		"""
-		
+
 		MythDomainBehavior.__init__(self)
-		
+
 		#local copy
 		self.transfoList = transfoList
-		
+
 		self.state = {'status':'IDLE', 'sigma':INFINITY}
 
 		self.msg = None
@@ -47,7 +47,7 @@ class TransformationADEVS(MythDomainBehavior) :
 
 	###
 	def extTransition(self):
-			
+
 		# multi-port values version
 		for p in range(len(self.IPorts)):
 				msg = self.peek(self.IPorts[p])
@@ -65,9 +65,9 @@ class TransformationADEVS(MythDomainBehavior) :
 #		print "transfolist"
 		#print self.transfoList[self.p]
 		#print self.transfoList[self.p][1]
-		
+
 		for rule in self.transfoList[self.p][1]:
-			
+
 			p1,p2 = rule[1:]
 			a = map(lambda t: t[0], result)
 #			print "a"
@@ -75,7 +75,7 @@ class TransformationADEVS(MythDomainBehavior) :
 			x = map(lambda t: t[1], result)
 #			print "x"
 #			print x
-			
+
 
 			### 'h|i|o|s', p1=a1, p2=a2
 			if rule[0] in ('h','i','o', 's'):
@@ -111,25 +111,25 @@ class TransformationADEVS(MythDomainBehavior) :
 			### 'd', p1=pos
 			elif rule[0] in ('d'):
 				map(lambda p: result.remove(result[p]),p1)
-		
+
 		### TODO:ajouter la reation de rep
-		with open(os.path.join(os.getcwd(),"%s.dat"%new_myth_name),'w') as f:
+		with open(os.path.join(HOME_PATH, OUT_DIR,"%s.dat"%new_myth_name),'w') as f:
 			for t in result:
 				f.write("%s %s \n"%(t[0],t[1]))
 
-		### myth generation  
+		### myth generation
 		self.msg.value[0] = Myth(new_myth_name,current_myth.name,result)
 
 		# changement d'etat
 		self.state['status']='ACTIF'
 		self.state['sigma'] = 0
-			
+
 	###
 	def outputFnc(self):
 		assert(self.msg!=None)
-		
+
 		self.msg.time=self.timeNext
-		
+
 		# envoie du message sur les ports de sortie
 		self.poke(self.OPorts[self.p], self.msg)
 

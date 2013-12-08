@@ -824,19 +824,19 @@ class ShapePopupMenu(wx.Menu):
 
 			# Codeblock specific binding
 			if isinstance(shape, Container.CodeBlock):
-				self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnEditor, id=ID_EDIT_MODEL_SHAPE)
-				self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnLog, id=ID_LOG_SHAPE)
+				self.__canvas.Bind(wx.EVT_MENU, shape.OnEditor, id=ID_EDIT_MODEL_SHAPE)
+				self.__canvas.Bind(wx.EVT_MENU, shape.OnLog, id=ID_LOG_SHAPE)
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnExport, id=ID_EXPORT_AMD_SHAPE)
 
 				# AMD specific binding
 				if shape.isAMD():
 				 	self.__canvas.Bind(wx.EVT_MENU, shape.OnTestEditor, id=ID_TESTING_SHAPE)
 				else:
-					self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnEditor, id=ID_EDIT_SHAPE)
+					self.__canvas.Bind(wx.EVT_MENU, shape.OnEditor, id=ID_EDIT_SHAPE)
 
 			# ContainerBlock specific binding
 			elif isinstance(shape, Container.ContainerBlock):
-				self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnEditor, id=ID_EDIT_SHAPE)
+				self.__canvas.Bind(wx.EVT_MENU, shape.OnEditor, id=ID_EDIT_SHAPE)
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnExport, id=ID_EXPORT_CMD_SHAPE)
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnExport, id=ID_EXPORT_XML_SHAPE)
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnExport, id=ID_EXPORT_JS_SHAPE)

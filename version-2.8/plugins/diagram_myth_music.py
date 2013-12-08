@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-""" 
+"""
 	Authors: L. Capocchi (capocchi@univ-corse.fr)
 	Date: 16/10/2012
 	Description:
@@ -60,7 +60,7 @@ def getMythTree(dico, graph):
 		graph.add_edge(parent, code)
 		for elem in dico[code]:
 			graph.add_edge(parent, elem)
-			parent = elem	
+			parent = elem
 	return graph
 
 @pluginmanager.register("START_MYTH_MUSIC_DIAGRAM")
@@ -69,10 +69,10 @@ def start_myth_music_diagram(*args, **kwargs):
 	"""
 
 	r = kwargs['fn']
-	fn = os.path.join(HOME_PATH,r)
-	
+	fn = os.path.join(HOME_PATH,OUT_DIR,r)
+
 	f = open(fn, 'r')
-	
+
 	D = {}
 	for line in f.readlines():
 		code = line.split(' ')[0]
@@ -81,9 +81,9 @@ def start_myth_music_diagram(*args, **kwargs):
 			D[code].extend(L)
 		else:
 			D[code] = L
-	
+
 	G = getMythTree(D, nx.Graph())
-	
+
 	wx.BeginBusyCursor()
 	wx.SafeYield()
 	### plot the grahp
@@ -94,17 +94,17 @@ def start_myth_music_diagram(*args, **kwargs):
 def Config(parent):
 	""" Plugin settings frame.
 	"""
-	
-	global cb 
+
+	global cb
 	global diagram
-	
+
 	main = wx.GetApp().GetTopWindow()
 	currentPage = main.nb2.GetCurrentPage()
 	diagram = currentPage.diagram
-	
+
 	frame = wx.Frame(parent, wx.ID_ANY, title = _('Myth Music Viewer'), style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN | wx.STAY_ON_TOP)
 	panel = wx.Panel(frame, wx.ID_ANY)
-	
+
 	vbox = wx.BoxSizer(wx.VERTICAL)
 	hbox = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -121,9 +121,9 @@ def Config(parent):
 	vbox.Add(st, 0, wx.ALL, 5)
 	vbox.Add(cb, 1, wx.EXPAND, 5)
 	vbox.Add(hbox, 0, wx.CENTER)
-	
+
 	panel.SetSizer(vbox)
-	
+
 	### si des modèles sont deja activés pour le plugin il faut les checker
 	num = cb.GetCount()
 	cb.SetChecked([index for index in range(num) if diagram.GetShapeByLabel(cb.GetString(index)).__class__ == MythMusicViewer])
@@ -151,30 +151,30 @@ def Config(parent):
 	selBtn.Bind(wx.EVT_BUTTON, OnSelectAll)
 	desBtn.Bind(wx.EVT_BUTTON, OnDeselectAll)
 	okBtn.Bind(wx.EVT_BUTTON, OnOk)
-	
+
 	frame.CenterOnParent(wx.BOTH)
 	frame.Show()
-	
+
 def UnConfig():
 	""" Reset the plugin effects on the Observor model
 	"""
-	
-	global cb 
+
+	global cb
 	global diagram
-	
+
 	main = wx.GetApp().GetTopWindow()
 	currentPage = main.nb2.GetCurrentPage()
 	diagram = currentPage.diagram
-	
+
 	lst = map(lambda a: a.label, filter(lambda s: "Observor" in s.python_path, diagram.GetShapeList()))
-	
+
 	for label in lst:
 		shape = diagram.GetShapeByLabel(label)
 		shape.__class__ = CodeBlock
-		
+
 #--------------------------------------------------
 class MythMusicViewer(CodeBlock):
-	""" MythMusicViewer(label) 
+	""" MythMusicViewer(label)
 	"""
 
 	def __init__(self, label = 'MythMusicViewer'):
@@ -189,10 +189,10 @@ class MythMusicViewer(CodeBlock):
 
 		# If the frame is call before the simulation process, the atomicModel is not instanciate (Instanciation delegate to the makeDEVSconnection after the run of the simulation process)
 		devs = self.getDEVSModel()
-		
+
 		if devs is not None:
-			
-			pluginmanager.trigger_event('START_MYTH_MUSIC_DIAGRAM', fn = devs.fn)
+
+			pluginmanager.trigger_event('START_MYTH_MUSIC_DIAGRAM', fn = devs.fileName)
 		else:
 			dial = wx.MessageDialog(None, _('No data available \n Go to the simulation process first !'), 'Info', wx.OK)
 			dial.ShowModal()

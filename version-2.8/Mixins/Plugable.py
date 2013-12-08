@@ -26,6 +26,7 @@ import zipimport
 import imp
 import inspect
 import types
+import zipfile
 
 import Decorators
 
