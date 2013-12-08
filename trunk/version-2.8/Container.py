@@ -1845,7 +1845,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		for s in self.select():
 			s.OnLog(event)
 
-	def OnEditor(self, event):
+	def On(self, event):
 		""" Edition sub menu has been clicked. Event is transmit to the model
 		"""
 

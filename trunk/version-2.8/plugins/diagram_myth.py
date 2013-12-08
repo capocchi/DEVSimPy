@@ -62,7 +62,7 @@ def getMythTree(r, graph):
 	return graph
 
 
-@register("START_MYTH_DIAGRAM")
+@pluginmanager.register("START_MYTH_DIAGRAM")
 def start_myth_diagram(*args, **kwargs):
 	""" Start the diagram frame.
 	"""
@@ -93,7 +93,7 @@ def Config(parent):
 					 style=wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN | wx.STAY_ON_TOP)
 	panel = wx.Panel(frame, wx.ID_ANY)
 
-	lst = map(lambda a: a.label, filter(lambda s: isinstance(s, ScopeGUI), diagram.GetShapeList()))
+	lst = map(lambda a: a.label, filter(lambda s: isinstance(s, Container.ScopeGUI), diagram.GetShapeList()))
 
 	vbox = wx.BoxSizer(wx.VERTICAL)
 	hbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -134,7 +134,7 @@ def Config(parent):
 		for index in range(cb.GetCount()):
 			label = cb.GetString(index)
 			shape = diagram.GetShapeByLabel(label)
-			shape.__class__ = MythCollector if cb.IsChecked(index) else ScopeGUI
+			shape.__class__ = MythCollector if cb.IsChecked(index) else Container.ScopeGUI
 
 		frame.Destroy()
 
@@ -157,14 +157,14 @@ def UnConfig():
 	currentPage = main.nb2.GetCurrentPage()
 	diagram = currentPage.diagram
 
-	lst = map(lambda a: a.label, filter(lambda s: isinstance(s, ScopeGUI), diagram.GetShapeList()))
+	lst = map(lambda a: a.label, filter(lambda s: isinstance(s, Container.ScopeGUI), diagram.GetShapeList()))
 
 	for label in lst:
 		shape = diagram.GetShapeByLabel(label)
-		shape.__class__ = ScopeGUI
+		shape.__class__ = Container.ScopeGUI
 
 #--------------------------------------------------
-class MythCollector(ScopeGUI):
+class MythCollector(Container.ScopeGUI):
 	""" MythCollector(label)
 	"""
 
@@ -172,7 +172,7 @@ class MythCollector(ScopeGUI):
 		""" Constructor
 		"""
 
-		ScopeGUI.__init__(self, label, 1, 0)
+		Container.ScopeGUI.__init__(self, label, 1, 0)
 
 	def OnLeftDClick(self, event):
 		""" Left Double Click has been appeared.
@@ -183,7 +183,7 @@ class MythCollector(ScopeGUI):
 
 		if devs is not None:
 
-			trigger_event('START_MYTH_DIAGRAM', results=devs.results)
+			pluginmanager.trigger_event('START_MYTH_DIAGRAM', results=devs.results)
 		else:
 			dial = wx.MessageDialog(None, _('No data available \n Go to the simulation process first !'), _('Myth plugins'), wx.OK|wx.ICON_INFORMATION)
 			dial.ShowModal()

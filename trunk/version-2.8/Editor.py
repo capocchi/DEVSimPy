@@ -1673,7 +1673,7 @@ class TestEditor(Editor):
 		Editor.__init__(self, parent, id, title)
 
 		if isinstance(self, wx.Frame):
-			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'iconDEVSimPy.png'), wx.BITMAP_TYPE_PNG)))
+			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH, 'iconDEVSimPy.png'), wx.BITMAP_TYPE_PNG)))
 
 		self.ConfigureGUI()
 
@@ -1779,7 +1779,7 @@ class GeneralEditor(Editor):
 		Editor.__init__(self, parent, id, title)
 
 		if isinstance(self, wx.Frame):
-			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'iconDEVSimPy.png'), wx.BITMAP_TYPE_PNG)))
+			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH, 'iconDEVSimPy.png'), wx.BITMAP_TYPE_PNG)))
 
 		self.ConfigureGUI()
 
