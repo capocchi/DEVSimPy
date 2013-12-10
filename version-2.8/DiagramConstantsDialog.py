@@ -16,7 +16,7 @@ class DiagramConstantsDialog(wx.Dialog):
 		""" Constructor
 		"""
 
-		wx.Dialog.__init__(self, parent, id, title, wx.DefaultPosition, (400, 280))#, style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
+		wx.Dialog.__init__(self, parent, id, title, wx.DefaultPosition, (400, 280), style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
 
 		### local copy
 		self.model = model
@@ -42,7 +42,7 @@ class DiagramConstantsDialog(wx.Dialog):
 		### The label windows will still exist, but they will not be visible.
 		self._grid.SetRowLabelSize(0)
 
-		# chargement des constantes
+		# constants loading
 		D = self.model.constants_dico if self.model else {}
 
 		row = 0
@@ -53,7 +53,9 @@ class DiagramConstantsDialog(wx.Dialog):
 			self._grid.SetCellValue(row, 1, str(D[key]))
 			row += 1
 
-		grid_sizer_1.Add(self._grid, 1, wx.EXPAND, 0)
+		grid_sizer_1.Add(self._grid, 1, wx.EXPAND|wx.ALL, 0)
+
+		self._panel.SetSizer(grid_sizer_1)
 
 		self._button_add = wx.Button(self._panel, wx.ID_ADD, "")
 		self._button_remove = wx.Button(self._panel, wx.ID_REMOVE, "")
@@ -97,7 +99,6 @@ class DiagramConstantsDialog(wx.Dialog):
 		self.ProcessEvent(e)
 
 		self.Center()
-
 
 	def __set_events(self):
 		""" Binding
@@ -169,7 +170,7 @@ class DiagramConstantsDialog(wx.Dialog):
 		if export_dlg.ShowModal() == wx.ID_OK:
 			fileName = export_dlg.GetPath()
 			try:
-				spamWriter = csv.writer(open(fileName, 'w'), delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+				spamWriter = csv.writer(open(fileName, 'w'), delimiter=' ', quotechar='|', lineterminator='\n', quoting=csv.QUOTE_MINIMAL)
 				for row in xrange(self._grid.GetNumberRows()):
 					spamWriter.writerow([self._grid.GetCellValue(row,0),self._grid.GetCellValue(row,1)])
 
