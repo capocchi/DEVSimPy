@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 
 """
-	Authors: L. Capocchi (capocchi@univ-corse.fr), J.F. santucci (santucci@univ-corse.fr)
-	Date: 06/11/2012
+	Authors: L. Capocchi (capocchi@univ-corse.fr),
+			J.F. Santucci (santucci@univ-corse.fr)
+	Date: 12/09/2013
 	Description:
 		Activity tracking for DEVSimPy
-		We add dynamicaly a 'activity' attribut to the Block at the GUI level and 'texec' (which is dico like {'fnc':[(t1,t1'),(t2,t2'),..]} where fnct is the selected transition function, t the simualtion time (or number of event) and t' the execution yime of fcnt.) attribut at the DEVS level. We deduct the tsim doing the sum of texec.
+		We add dynamically a 'activity' attribute to the Block at the GUI level and 'texec'
+		(which is dico like {'fnc':[(t1,t1'),(t2,t2'),..]}
+		where fnct is the selected transition function, t the simulation time
+		(or number of event) and t' the execution yime of fcnt.)
+		attribute at the DEVS level. We deduct the tsim doing the sum of texec.
 	Depends: 'python-psutil' for cpu usage, networkx and pylab for graph
 """
 
@@ -21,6 +26,7 @@ import os
 import inspect
 import tempfile
 import textwrap
+import csv
 
 # to send event
 if wx.VERSION_STRING < '2.9':
@@ -105,6 +111,7 @@ from PlotGUI import PlotManager
 import plugins.codepaths as codepaths
 
 WRITE_DOT_TMP_FILE = False
+WRITE_DYNAMIC_METRICS = False
 
 #def profile(func):
 	#def wrapped(*args, **kwargs):
@@ -200,7 +207,9 @@ class ActivityReport(wx.Frame):
 		self._title = title
 		self._master = master
 
-		self.ReportGrid = wx.grid.Grid(self, wx.ID_ANY, size=(1, 1))
+		self.panel = wx.Panel(self, wx.ID_ANY)
+
+		self.ReportGrid = wx.grid.Grid(self.panel, wx.ID_ANY, size=(1, 1))
 
 		self.timer = wx.Timer(self)
 
@@ -215,6 +224,7 @@ class ActivityReport(wx.Frame):
 		self.ReportGrid.GetGridColLabelWindow().Bind(wx.EVT_MOTION, self.onMouseOverColLabel)
 		self.Bind(wx.EVT_BUTTON, self.OnRefresh, id=self.btn.GetId())
 		self.Bind(wx.EVT_TOGGLEBUTTON, self.OnDynamicRefresh, id=self.tbtn.GetId())
+		self.Bind(wx.EVT_BUTTON, self.OnExport, id=self.ebtn.GetId())
 
 		# end wxGlade
 
@@ -248,24 +258,49 @@ class ActivityReport(wx.Frame):
 	def __do_layout(self):
 		"""
 		"""
+
 		sizer_1 = wx.BoxSizer(wx.VERTICAL)
 		sizer_2 = wx.BoxSizer(wx.HORIZONTAL)
 
-
-		self.tbtn = wx.ToggleButton(self,  wx.NewId(), _('Auto-Refresh'))
+		self.tbtn = wx.ToggleButton(self.panel,  wx.NewId(), _('Auto-Refresh'))
 		self.tbtn.SetValue(True)
 
-		self.btn = wx.Button(self, wx.NewId(), _('Refresh'))
+		self.btn = wx.Button(self.panel, wx.NewId(), _('Refresh'))
 		self.btn.Enable(False)
+
+		self.ebtn = wx.Button(self.panel, wx.NewId(), _('Export'))
 
 		sizer_2.Add(self.tbtn, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 3, 3)
 		sizer_2.Add(self.btn, 0, wx.RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 3, 3)
+		sizer_2.Add(self.ebtn, 0, wx.RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 3, 3)
 
 		sizer_1.Add(self.ReportGrid, 1, wx.EXPAND|wx.ALL, 5)
 		sizer_1.Add(sizer_2, 0, wx.BOTTOM|wx.EXPAND|wx.ALL, 5)
 
-		self.SetSizer(sizer_1)
+		self.panel.SetSizer(sizer_1)
 		self.Layout()
+
+	def OnExport(self, event):
+		"""	csv file exporting
+		"""
+
+		wcd = _("CSV files (*.csv)|*.csv|Text files (*.txt)|*.txt|All files (*.*)|*.*")
+		home = os.getenv('USERPROFILE') or os.getenv('HOME') or HOME_PATH
+		export_dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=home, defaultFile='data.csv', wildcard=wcd, style=wx.SAVE|wx.OVERWRITE_PROMPT)
+		if export_dlg.ShowModal() == wx.ID_OK:
+			fileName = export_dlg.GetPath()
+			try:
+				spamWriter = csv.writer(open(fileName, 'w'), delimiter=' ', quotechar='|', lineterminator='\n', quoting=csv.QUOTE_MINIMAL)
+				for row in xrange(self.ReportGrid.GetNumberRows()):
+					spamWriter.writerow([self.ReportGrid.GetCellValue(row, i) for i in xrange(self.ReportGrid.GetNumberCols())])
+
+			except Exception, info:
+				dlg = wx.MessageDialog(self, _('Error exporting data: %s\n'%info), _('Export Manager'), wx.OK|wx.ICON_ERROR)
+				dlg.ShowModal()
+
+			dial = wx.MessageDialog(self, _('Export completed'), _('Export Manager'), wx.OK|wx.ICON_ERROR)
+			dial.ShowModal()
+			export_dlg.Destroy()
 
 	def OnDynamicRefresh(self, event):
 		""" Checkbox has been checked
@@ -301,10 +336,17 @@ class ActivityReport(wx.Frame):
 			table.SetValue(i, 3, c[1])
 			table.SetValue(i, 4, c[2])
 
-			### change the value in the data attribut of the table
+			### change the value in the data attribute of the table
 			table.data[i][2] = c[0]
 			table.data[i][3] = c[1]
 			table.data[i][4] = c[2]
+
+			if WRITE_DYNAMIC_METRICS:
+				with open(os.path.join(tempfile.gettempdir(),str(table.GetValue(i,0))+"_CPU_.csv"), "a") as file1:
+					file1.write(str(c[2])+"\n")
+
+				with open(os.path.join(tempfile.gettempdir(),str(table.GetValue(i,0))+"_QA_.csv"), "a") as file2:
+					file2.write(str(c[0])+"\n")
 
 		self.ReportGrid.SetTable(table)
 		self.ReportGrid.Refresh()
@@ -487,9 +529,9 @@ class ActivityReport(wx.Frame):
 				else:
 					pass
 
-					### write dot file
-					if WRITE_DOT_TMP_FILE:
-						self.worker( m.getBlockModel().label, str(m.myID), fct, str(graph.to_dot()))
+				### write dot file
+				if WRITE_DOT_TMP_FILE:
+					self.worker( m.getBlockModel().label, str(m.myID), fct, str(graph.to_dot()))
 
 		#### TODO make this generic depending on the checked cb2
 		complexity = complexity_ext+complexity_int
@@ -532,7 +574,7 @@ class ActivityReport(wx.Frame):
 			### if models have been simulated during a minimum time H
 			if H > 0.0:
 				### prepare data to populate grid
-				return map(lambda b,c,d: (b/H, d/H, c), \
+				return map(lambda qa, cpu, wa: (qa/H, wa/H, cpu/H), \
 
 							quantitative_activity_list, \
 							cpu_activity_list, \
@@ -548,7 +590,6 @@ class ActivityReport(wx.Frame):
 		dot_path = os.path.join(tempfile.gettempdir(), "%s(%s)_%s.dot"%(label,str(ID),fct))
 
 		msg = "Starting write %s" % dot_path
-		print msg
 
 		### write file in temp directory
 		with open(dot_path,'wb') as f:
@@ -653,7 +694,7 @@ def Config(parent):
 	hbox = wx.BoxSizer(wx.HORIZONTAL)
 	hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 
-	st = wx.StaticText(panel, wx.ID_ANY, _("Select models and functions to track:"),(10,10))
+	st = wx.StaticText(panel, wx.ID_ANY, _("Select models and functions to track:"), (10,10))
 
 	cb1 = wx.CheckListBox(panel, wx.ID_ANY, (10, 30), wx.DefaultSize, lst_1, style=wx.LB_SORT)
 	cb2 = wx.CheckListBox(panel, wx.ID_ANY, (10, 30), wx.DefaultSize, lst_2)
@@ -666,13 +707,13 @@ def Config(parent):
 	hbox2.Add(cb1, 1, wx.EXPAND, 5)
 	hbox2.Add(cb2, 1, wx.EXPAND, 5)
 
-	hbox.Add(selBtn,0,wx.LEFT)
-	hbox.Add(desBtn,0,wx.CENTER)
-	#hbox.Add(reportBtn,0,wx.CENTER)
-	hbox.Add(okBtn,0,wx.RIGHT)
+	hbox.Add(selBtn, 0, wx.LEFT)
+	hbox.Add(desBtn, 0, wx.CENTER)
+	hbox.Add(okBtn, 0, wx.RIGHT)
+
 	vbox.Add(st, 0, wx.ALL, 5)
-	vbox.Add(hbox2, 1, wx.EXPAND, 5)
-	vbox.Add(hbox,0,wx.CENTER)
+	vbox.Add(hbox2, 1, wx.EXPAND, 5, 5)
+	vbox.Add(hbox, 0, wx.CENTER, 10, 10)
 
 	panel.SetSizer(vbox)
 
