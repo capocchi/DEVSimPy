@@ -206,6 +206,7 @@ class ActivityReport(wx.Frame):
 
 		self._title = title
 		self._master = master
+		self.parent = parent
 
 		self.panel = wx.Panel(self, wx.ID_ANY)
 
@@ -233,26 +234,30 @@ class ActivityReport(wx.Frame):
 
 		self.SetTitle(self._title)
 
-		self.model_list = filter(lambda a: hasattr(a, 'texec'), GetFlatDEVSList(self._master, []))
-		self.model_name_list, self.model_id_list = zip(*map(lambda m : (m.getBlockModel().label, m.myID), self.model_list))
-		self.mcCabe_list = map(self.GetMacCabe, self.model_list)
+		if self._master:
 
-		### data used to initialize table
-		data = map(lambda a,b,c,d : [a,b,c[0],c[1],c[2],d], self.model_name_list, self.model_id_list, self.GetData(), self.mcCabe_list)
+			L = GetFlatDEVSList(self._master, [])
 
-		### MCC stands for McCabe's Cyclomatic Complexity
-		colLabels = (_("Model"), _("Id"), _("QActivity"), _("WActivity"), _("CPU (user)"), _('MCC'))
-		rowLabels = map(lambda a: str(a), range(len(map(lambda b: b[0], data))))
+			self.model_list = filter(lambda a: hasattr(a, 'texec'), L)
+			self.model_name_list, self.model_id_list = zip(*map(lambda m : (m.getBlockModel().label, m.myID), self.model_list))
+			self.mcCabe_list = map(self.GetMacCabe, self.model_list)
 
-		tableBase = GenericTable(data, rowLabels, colLabels)
+			### data used to initialize table
+			data = map(lambda a,b,c,d : [a,b,c[0],c[1],c[2],d], self.model_name_list, self.model_id_list, self.GetData(), self.mcCabe_list)
 
-		self.ReportGrid.CreateGrid(10, len(colLabels))
-		for i in range(len(colLabels)):
-			self.ReportGrid.SetColLabelValue(i, colLabels[i])
+			### MCC stands for McCabe's Cyclomatic Complexity
+			colLabels = (_("Model"), _("Id"), _("QActivity"), _("WActivity"), _("CPU (user)"), _('MCC'))
+			rowLabels = map(lambda a: str(a), range(len(map(lambda b: b[0], data))))
 
-		self.ReportGrid.SetTable(tableBase)
-		self.ReportGrid.EnableEditing(0)
-		self.ReportGrid.AutoSize()
+			tableBase = GenericTable(data, rowLabels, colLabels)
+
+			self.ReportGrid.CreateGrid(10, len(colLabels))
+			for i in range(len(colLabels)):
+				self.ReportGrid.SetColLabelValue(i, colLabels[i])
+
+			self.ReportGrid.SetTable(tableBase)
+			self.ReportGrid.EnableEditing(0)
+			self.ReportGrid.AutoSize()
 
 	###
 	def __do_layout(self):
@@ -326,32 +331,45 @@ class ActivityReport(wx.Frame):
 		"""
 		"""
 
-		table = self.ReportGrid.GetTable()
-		data = self.GetData()
+		### update only of master is available
+		if self._master:
 
-		### update table from data
-		for i,c in enumerate(data):
-			### change value of the cell
-			table.SetValue(i, 2, c[0])
-			table.SetValue(i, 3, c[1])
-			table.SetValue(i, 4, c[2])
+			### if model_list is not defined, set_properties method must be performed
+			### in order to create the ReportGrid object
+			if not hasattr(self, 'model_list'):
+				self.__set_properties()
 
-			### change the value in the data attribute of the table
-			table.data[i][2] = c[0]
-			table.data[i][3] = c[1]
-			table.data[i][4] = c[2]
+			data = self.GetData()
+			table = self.ReportGrid.GetTable()
 
-			if WRITE_DYNAMIC_METRICS:
-				with open(os.path.join(tempfile.gettempdir(),str(table.GetValue(i,0))+"_CPU_.csv"), "a") as file1:
-					file1.write(str(c[2])+"\n")
+			### update table from data
+			for i,c in enumerate(data):
+				### change value of the cell
+				table.SetValue(i, 2, c[0])
+				table.SetValue(i, 3, c[1])
+				table.SetValue(i, 4, c[2])
 
-				with open(os.path.join(tempfile.gettempdir(),str(table.GetValue(i,0))+"_QA_.csv"), "a") as file2:
-					file2.write(str(c[0])+"\n")
+				try:
+					### change the value in the data attribute of the table
+					table.data[i][2] = c[0]
+					table.data[i][3] = c[1]
+					table.data[i][4] = c[2]
+				except:
+					pass
 
-		self.ReportGrid.SetTable(table)
-		self.ReportGrid.Refresh()
+				if WRITE_DYNAMIC_METRICS:
+					with open(os.path.join(tempfile.gettempdir(),str(table.GetValue(i,0))+"_CPU_.csv"), "a") as file1:
+						file1.write(str(c[2])+"\n")
 
-		#pub().sendMessage(('activity', evt)
+					with open(os.path.join(tempfile.gettempdir(),str(table.GetValue(i,0))+"_QA_.csv"), "a") as file2:
+						file2.write(str(c[0])+"\n")
+
+			self.ReportGrid.SetTable(table)
+			self.ReportGrid.Refresh()
+
+		### update the master model from parent (SimulaitonDialog which can be Panel ou Frame)
+		else:
+			self._master = self.parent.master
 
 	def onMouseOverColLabel(self, event):
 		"""
