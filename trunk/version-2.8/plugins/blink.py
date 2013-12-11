@@ -4,8 +4,8 @@
 	Authors: L. Capocchi (capocchi@univ-corse.fr), C. Nicolai
 	Date: 21/10/2010
 	Description:
-		Atomic models blink when there external or internal function are invocked.
-		Moreover, this plugins allows you the step by step simulation.
+		Atomic models blink when there external or internal function are invoked.
+		Moreover, this plug-ins allows you the step by step simulation.
 		Warning: the module is enabled when the run button is pressed.
 	Depends: Nothing
 """
@@ -181,9 +181,9 @@ def blink_manager(*args, **kwargs):
 		wx.CallAfter(frame.txt.write,(_("No blink for %s dynamic model (%s)!\n")%(str(d), d.myID)))
 
 def Config(parent):
-	""" Plugin settings frame.
+	""" Plug-in settings frame.
 	"""
-	dlg = wx.MessageDialog(parent, _('No settings available for this plugin\n'), _('Blink configuration'), wx.OK | wx.ICON_EXCLAMATION)
+	dlg = wx.MessageDialog(parent, _('No settings available for this plug-in\n'), _('Blink configuration'), wx.OK | wx.ICON_EXCLAMATION)
 	dlg.ShowModal()
 
 class BlinkFrame(wx.Frame):
@@ -213,7 +213,7 @@ class BlinkFrame(wx.Frame):
 		### just for the start of the frame
 		self.flag = True
 
-		### to close the frame when this attribute dont change
+		### to close the frame when this attribute don't change
 		self.lenght = self.txt.GetNumberOfLines()
 
 		### just for window
@@ -228,7 +228,7 @@ class BlinkFrame(wx.Frame):
 		self.txt.SetMinSize((390, 300))
 		self.button_step.SetToolTipString(_("Press this button in order to go step by step in the simulation."))
 		self.button_clear.SetToolTipString(_("Press this button in order to clean the output of the simulation."))
-		self.button_find.SetToolTipString(_("Press this button in order to lauch the search window."))
+		self.button_find.SetToolTipString(_("Press this button in order to launch the search window."))
 		self.button_step.SetDefault()
 
 	def __do_layout(self):
