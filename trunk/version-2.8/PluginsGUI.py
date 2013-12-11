@@ -121,17 +121,17 @@ class GeneralPluginsList(CheckListCtrl, Populable):
 		### Populate method is called ?
 		self.is_populate = False
 
-		### active plugins stored in DEVSimPy config file
+		### active plug-ins stored in DEVSimPy config file
 		try:
 			self.active_plugins_list = eval(self.mainW.cfg.Read("plugins"))
 		except AttributeError:
 			self.active_plugins_list = []
 
-		### if pluginsList (2 param in construtor) is in constructor, we can populate
+		### if pluginsList (2 param in constructor) is in constructor, we can populate
 		try:
 			pluginsList = args[1]
 		except IndexError:
-			#sys.stdout.write(_('Dont forget to call Populate method!\n'))
+			#sys.stdout.write(_('Don't forget to call Populate method!\n'))
 			pass
 		else:
 			self.Populate(pluginsList)
@@ -142,7 +142,7 @@ class GeneralPluginsList(CheckListCtrl, Populable):
 		""" Populate method must be called just before construtor.
 		"""
 		if not self.is_populate:
-			# all plugins file in plugins directory and already loaded
+			# all plug_ins file in plug_ins directory and already loaded
 			# list of all file (without __init__.py)
 			for root, dirs, files in pluginsList:
 				### dirs must contain python file
@@ -150,7 +150,7 @@ class GeneralPluginsList(CheckListCtrl, Populable):
 					#for filename in filter(lambda f: not f.startswith('__') and f.endswith('.py'), files):
 					for filename in filter(lambda f: f == "__init__.py", files):
 						for basename in getFileListFromInit(os.path.join(root,filename)):
-							### try to add dynamicaly pulgins
+							### try to add dynamically plug-ins
 							#try:
 								#t = threading.Thread(target=self.Importing, args=(root, basename,))
 								#t.start()
@@ -165,7 +165,7 @@ class GeneralPluginsList(CheckListCtrl, Populable):
 
 
 	def InsertItem(self, root, basename):
-		""" Insert plugin in list
+		""" Insert plug-in in list
 		"""
 
 		### absolute name
@@ -192,7 +192,7 @@ class GeneralPluginsList(CheckListCtrl, Populable):
 		""" Importing module and set pydata object
 		"""
 
-		# check the loaded module during the start of plugins
+		# check the loaded module during the start of plug-ins
 		module = load_plugins(basename)
 
 		### if module is exception (or tuple)
@@ -224,35 +224,35 @@ class GeneralPluginsList(CheckListCtrl, Populable):
 
 	def OnApply(self, event):
 		""" Method called by PreferenceGUI class.
-				- Active plugin through pluginmanager
-				- Write the plugin list in the DEVSimPy config file
+				- Active plug-in through pluginmanager
+				- Write the plug-in list in the DEVSimPy config file
 		"""
 
-		### list of plugin names which are to write in DEVSimPy config file
+		### list of plug-in names which are to write in DEVSimPy config file
 		pluginsList = []
-		### all listed plugins
+		### all listed plug-ins
 		for i in xrange(self.GetItemCount()):
 			module = self.GetPyData(i)[0]
 			if inspect.ismodule(module):
-				### plugin file path
+				### plug-in file path
 				file = module.__file__
 				### built-in module coming from empty module create by error manager
 				if file is not None:
 					### get abspath and exclude .pyc
 					name,ext = os.path.splitext(os.path.basename(file))
-					### if plugin is checked, we activate
+					### if plug-in is checked, we activate
 					if self.IsChecked(i):
 						pluginsList.append(name)
 						enable_plugin(name)
 					else:
 						disable_plugin(name)
 
-		### config file writting
-		self.mainW.cfg.Write("plugins", str(pluginsList))
+		### config file writing
+		self.mainW.cfg.Write("plug-ins", str(pluginsList))
 		self.mainW.cfg.Flush()
 
 class BlockPluginsList(CheckListCtrl, Populable):
-	""" Class for populate CheckListCtrl with Block plugins stored compressed python file (in .amd or .cmd)
+	""" Class for populate CheckListCtrl with Block plug-ins stored compressed python file (in .amd or .cmd)
 	"""
 
 	def __init__(self, *args, **kwargs):
@@ -267,11 +267,11 @@ class BlockPluginsList(CheckListCtrl, Populable):
 		### Populate method is called ?
 		self.is_populate = False
 
-		### if pluginsList (2 param in construtor) is in constructor, we can populate
+		### if pluginsList (2 param in constructor) is in constructor, we can populate
 		try:
 			pluginsList = args[1]
 		except IndexError:
-			#sys.stdout.write(_('Dont forget to call Populate method!\n'))
+			#sys.stdout.write(_('D'ont forget to call Populate method!\n'))
 			pass
 		else:
 			self.Populate(pluginsList)
@@ -286,38 +286,38 @@ class BlockPluginsList(CheckListCtrl, Populable):
 
 		### new is function
 		if inspect.isfunction(new):
-			### create or override attribut
+			### create or override attribute
 			if self.IsChecked(index):
-				### add method obect (not unbounded method)
+				### add method object (not unbounded method)
 				setattr(self.model, pluginName, types.MethodType(new, self.model))
-				### add plugin in plugins list
+				### add plug-in in plug-ins list
 				if pluginName not in self.model.plugins:
 					self.model.plugins.append(pluginName)
 			else:
-				### delete dynamic attribut
+				### delete dynamic attribute
 				if old is None:
 					exec "del self.model.%s"%(pluginName)
-				### restore overriting attribute
+				### restore overwriting attribute
 				else:
 					setattr(self.model, pluginName, types.MethodType(old, self.model))
 
-				### update plugins list
+				### update plug-ins list
 				if pluginName in self.model.plugins:
 					del self.model.plugins[self.model.plugins.index(pluginName)]
 
 		elif inspect.isclass(new):
 			### TODO: monkey patchin !!! (most simple is to change python file for override class)
-			sys.stdout.write(_('WARNING: class can\'t be overwrited'))
+			sys.stdout.write(_('WARNING: class can\'t be overrited'))
 
 	#@BuzyCursorNotification
 	def Populate(self, model):
-		""" Populate method must be called just before construtor.
+		""" Populate method must be called just before constructor.
 		"""
 		if not self.is_populate:
 			self.model = model
 
-			if self.model and not hasattr(self.model, "plugins"):
-				self.model.plugins = []		### dynamic append attribut
+			if self.model and not hasattr(self.model, "plug-ins"):
+				self.model.plugins = []		### dynamic append attribute
 
 
 			plugins_list = self.GetPluginsList(self.model.model_path) if self.model else []
@@ -325,16 +325,16 @@ class BlockPluginsList(CheckListCtrl, Populable):
 			if not isinstance(plugins_list, list):
 				msg = ('Error in plugins.py file:\n\n\t%s\n\nDo you want to edit this file?.'%plugins_list)
 
-				dial = wx.MessageDialog(None, msg, _('Plugins Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_ERROR)
+				dial = wx.MessageDialog(None, msg, _('Plug-ins Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_ERROR)
 
 				if dial.ShowModal() == wx.ID_YES:
-					### editor frame for text of plugins
+					### editor frame for text of plug-ins
 					editorFrame = ModelPluginsManager.GetEditor(None, self.model)
 					editorFrame.Show()
 
 				self.is_populate = False
 			else:
-				### for plugins given by GetPluginsList method
+				### for plug-ins given by GetPluginsList method
 				for m, new, old in plugins_list:
 					name = m.__name__
 
@@ -343,7 +343,7 @@ class BlockPluginsList(CheckListCtrl, Populable):
 					self.SetStringItem(index, 1, str(type(m)))
 					self.SetStringItem(index, 2, _('overriding') if hasattr(self.model, name) else _('new'))
 
-					### if plugins contian error, error is stored in doc object and icon is changed
+					### if plug-ins contains error, error is stored in doc object and icon is changed
 					if isinstance(new, Exception):
 						new.__doc__ = srt(new)
 						self.SetItemImage(index, 2)
@@ -351,7 +351,7 @@ class BlockPluginsList(CheckListCtrl, Populable):
 					#### set the pydata object
 					self.SetPyData(index, (new, old))
 
-					### enabling stroed plugins (after SetPyData)
+					### enabling stored plug-ins (after SetPyData)
 					if name in self.model.plugins:
 						self.CheckItem(index)
 
@@ -359,18 +359,13 @@ class BlockPluginsList(CheckListCtrl, Populable):
 
 	@staticmethod
 	def IsInPackage(model_path):
-		""" Return True if plugins.py file is in plugins package
-			Warning : importer.is_package('plugins') don't work !!!
+		""" Return True if plugins.py file is in plug-ins package
+			Warning : importer.is_package('plug-ins') don't work !!!
 		"""
 		zf = zipfile.ZipFile(model_path, 'r')
 		nl = zf.namelist()
 		zf.close()
 		return any(map(lambda s: re.search("^plugins%s[a-zA-Z]*"%os.sep, s), nl))
-
-		#return os.path.join('plugins', 'plugins.py') in nl
-
-		#importer = zipimport.zipimporter(model_path)
-		#return importer.find_module(os.path.join('plugins','plugins')) is not None
 
 	@staticmethod
 	def IsInRoot(model_path):
@@ -383,10 +378,10 @@ class BlockPluginsList(CheckListCtrl, Populable):
 
 		#return 'plugins.py' in nl
 		#importer = zipimport.zipimporter(model_path)
-		#return importer.find_module('plugins') is not None
+		#return importer.find_module('plug-ins') is not None
 
 	def GetPluginsList(self, model_path):
-		""" Get plugins list from plugin file
+		""" Get plug-ins list from plug-in file
 		"""
 
 		### if amd or cmd
@@ -409,7 +404,7 @@ class BlockPluginsList(CheckListCtrl, Populable):
 					module = importer.load_module(fullname)
 
 				except Exception, info:
-					sys.stderr.write(_("Error loading plugins: %s\n"%info))
+					sys.stderr.write(_("Error loading plug-ins: %s\n"%info))
 					return info
 			else:
 				module = None
@@ -424,7 +419,7 @@ class BlockPluginsList(CheckListCtrl, Populable):
 					### it's method
 					if 'self' in inspect.getargspec(m).args:
 
-						### trying to eval new element to assaign
+						### trying to eval new element to assign
 						try:
 							new = eval("module.%s"%name)
 						except Exception, info:
@@ -433,17 +428,17 @@ class BlockPluginsList(CheckListCtrl, Populable):
 
 						### new element is function
 						if inspect.isfunction(new):
-							### object has attribut (override)
+							### object has attribute (override)
 							if name in self.model.__class__.__dict__:
 								old = self.model.__class__.__dict__[name]
-							### object dont have attribut (create)
+							### object don't have attribute (create)
 							else:
 								old = None
 						### new element is class
 						#elif inspect.isclass(new):
 							#old = self.model.__class__
 						else:
-							sys.stdout.write(_('WARNING: plugin type (%s) not supported!'%(name)))
+							sys.stdout.write(_('WARNING: plug-in type (%s) not supported!'%(name)))
 
 						L.append((m,new,old))
 
@@ -456,7 +451,7 @@ class BlockPluginsList(CheckListCtrl, Populable):
 		self.is_populate = False
 
 class PluginsPanel(wx.Panel):
-	""" Plugins Panel
+	""" Plug-ins Panel
 	"""
 
 	def __init__(self,  parent):
@@ -476,11 +471,11 @@ class PluginsPanel(wx.Panel):
 		self.leftPanel = wx.Panel(self, wx.ID_ANY)
 		self.rightPanel = wx.Panel(self, wx.ID_ANY)
 
-		### plugin documentation area
+		### plug-in documentation area
 		self.log = wx.TextCtrl(self.rightPanel, wx.ID_ANY, size=(-1,150), style=wx.TE_MULTILINE)
-		self.log.SetToolTipString(_("Plugin documentation area.\nSelect plugin in order to print its documentation."))
+		self.log.SetToolTipString(_("Plug-in documentation area.\nSelect plug-in in order to print its documentation."))
 
-		### Default plugins list
+		### Default plug-ins list
 		self.check_list = CheckListCtrl(self.rightPanel)
 
 		### Buttons
@@ -489,9 +484,9 @@ class PluginsPanel(wx.Panel):
 		self.configBtn = wx.Button(self.leftPanel, wx.ID_PROPERTIES, size=(140, -1))
 		self.configBtn.Enable(False)
 
-		selBtn.SetToolTipString(_("Select all plugins"))
-		desBtn.SetToolTipString(_("Unselect all plugins"))
-		self.configBtn.SetToolTipString(_("Selected plugin setting"))
+		selBtn.SetToolTipString(_("Select all plug-ins"))
+		desBtn.SetToolTipString(_("Unselect all plug-ins"))
+		self.configBtn.SetToolTipString(_("Selected plug-in setting"))
 
 		### Sizer adding
 		self.vbox2.Add((-1, 15))
@@ -558,33 +553,33 @@ class PluginsPanel(wx.Panel):
 		self.check_list.OnApply(event)
 
 	def OnSelected(self, event):
-		""" Item has been selecte and the documentation of module is immediatly printed to the button CtrlText
+		""" Item has been select and the documentation of module is immediately printed to the button CtrlText
 		"""
 		sel = self.check_list.GetFirstSelected()
 		if sel != -1:
 			item = self.check_list.GetItem(sel)
 			new_element = self.check_list.GetPyData(sel)[0]
 			doc = new_element.__doc__
-			self.log.ChangeValue(doc + '\n' if doc else _("No documentation available for this plugin."))
+			self.log.ChangeValue(doc + '\n' if doc else _("No documentation available for this plug-in."))
 			module = inspect.getmodule(new_element)
 			self.configBtn.Enable(hasattr(module, "Config"))
 
 	def OnSelectAll(self, event):
-		""" Select All button has been pressed and all plugins are enabled.
+		""" Select All button has been pressed and all plug-ins are enabled.
 		"""
 		num = self.check_list.GetItemCount()
 		for i in xrange(num):
 			self.check_list.CheckItem(i, False)
 
 	def OnDeselectAll(self, event):
-		""" Deselect All button has been pressed and all plugins are disabled.
+		""" Deselect All button has been pressed and all plug-ins are disabled.
 		"""
 		num = self.check_list.GetItemCount()
 		for i in xrange(num):
 			self.check_list.CheckItem(i, True)
 
 	def OnConfig(self, event):
-		""" Setting button has been pressed and the plugin Config function is call.
+		""" Setting button has been pressed and the plug-in config function is call.
 		"""
 
 		sel = self.check_list.GetFirstSelected()
@@ -595,9 +590,9 @@ class PluginsPanel(wx.Panel):
 			elif inspect.isfunction(obj):
 				module = inspect.getmodule(obj)
 			else:
-				sys.stderr.write(_("Warning: Type of list object unknow in PluginsGUI"))
+				sys.stderr.write(_("Warning: Type of list object unknown in PluginsGUI"))
 
-			# call the Config plugin function
+			# call the Config plug-in function
 			apply(module.Config, (), {'parent':self})
 
 class ModelPluginsManager(wx.Frame):
@@ -611,10 +606,10 @@ class ModelPluginsManager(wx.Frame):
 
 		wx.Frame.__init__(self, **kwargs)
 
-		### plugin panel
+		### plug-in panel
 		self.pluginPanel = PluginsPanel(self)
 
-		### two panel into plugin panel
+		### two panel into plug-in panel
 		rpanel = self.pluginPanel.GetRightPanel()
 		lpanel = self.pluginPanel.GetLeftPanel()
 
@@ -622,17 +617,17 @@ class ModelPluginsManager(wx.Frame):
 		self.CheckList = BlockPluginsList(rpanel)
 		wx.CallAfter(self.CheckList.Populate, (self.model))
 
-		### Buttons for insert or delete plugins
+		### Buttons for insert or delete plug-ins
 		self.addBtn = wx.Button(lpanel, wx.ID_ADD, size=(140, -1))
 		self.delBtn = wx.Button(lpanel, wx.ID_DELETE, size=(140, -1))
 		self.editBtn = wx.Button(lpanel, wx.ID_EDIT, size=(140, -1))
 		self.updateBtn = wx.Button(lpanel, wx.ID_APPLY, size=(140, -1))
-		self.addBtn.SetToolTipString(_("Add new plugins"))
-		self.delBtn.SetToolTipString(_("Delete all existing plugins"))
-		self.editBtn.SetToolTipString(_("Edit plugin file"))
-		self.updateBtn.SetToolTipString(_("Update plugin list"))
+		self.addBtn.SetToolTipString(_("Add new plug-ins"))
+		self.delBtn.SetToolTipString(_("Delete all existing plug-ins"))
+		self.editBtn.SetToolTipString(_("Edit plug-in file"))
+		self.updateBtn.SetToolTipString(_("Update plug-in list"))
 
-		### add widget to plugin panel
+		### add widget to plug-in panel
 		self.pluginPanel.SetPluginsList(self.CheckList)
 		self.pluginPanel.AddWidget(3, self.addBtn)
 		self.pluginPanel.AddWidget(4, self.editBtn)
@@ -647,7 +642,7 @@ class ModelPluginsManager(wx.Frame):
 			sys.stdout.write(_('PluginsGUI in mode alone.\n'))
 			cond=False
 
-		### enable del, add and udpate buttons
+		### enable del, add and update buttons
 		self.delBtn.Enable(cond)
 		self.addBtn.Enable(not cond)
 		self.editBtn.Enable(cond)
@@ -668,10 +663,10 @@ class ModelPluginsManager(wx.Frame):
 		path = os.path.join(model.model_path, ZipManager.Zip.GetPluginFile(model.model_path)) if not filename else filename
 		name = os.path.basename(path)
 
-		### editor frame for the text of plugins
+		### editor frame for the text of plug-ins
 		editorFrame = Editor.GetEditor(parent, \
 									wx.ID_ANY, \
-									_("%s - Plugins Editor")%os.path.basename(model.model_path), \
+									_("%s - Plug-ins Editor")%os.path.basename(model.model_path), \
 									model, \
 									file_type = 'block')
 		editorFrame.AddEditPage(name, path)
@@ -679,10 +674,10 @@ class ModelPluginsManager(wx.Frame):
 		return editorFrame
 
 	def OnEdit(self, event):
-		""" Edit plugins python file
+		""" Edit plug-ins python file
 		"""
 
-		### plugins text
+		### plug-ins text
 		if self.model:
 
 			editorFrame = ModelPluginsManager.GetEditor(self, self.model)
@@ -694,7 +689,7 @@ class ModelPluginsManager(wx.Frame):
 			self.updateBtn.Enable(True)
 
 	def OnRefresh(self, event):
-		### Clear before populate with new plugins
+		### Clear before populate with new plug-ins
 		self.CheckList.Clear()
 		wx.CallAfter(self.CheckList.Populate, (self.model))
 
@@ -704,7 +699,7 @@ class ModelPluginsManager(wx.Frame):
 		self.updateBtn.Enable(False)
 
 	def OnAdd(self, event):
-		""" Add plugin
+		""" Add plug-in
 		"""
 		filename = None
 		wcd = 'All files (*)|*|Editor files (*.py)|*.py'
@@ -712,8 +707,8 @@ class ModelPluginsManager(wx.Frame):
 		open_dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=dir, defaultFile='plugins.py', wildcard=wcd, style=wx.OPEN|wx.CHANGE_DIR)
 		if open_dlg.ShowModal() == wx.ID_OK:
 			### TODO
-			### first test is for old devsimpy model prresenting plugins at the root of zipfile
-			### filename handling depending on the existing plugins package in zipfile model
+			### first test is for old devsimpy model presenting plug-ins at the root of zipfile
+			### filename handling depending on the existing plug-ins package in zipfile model
 			if BlockPluginsList.IsInPackage(self.model.model_path):
 				filename = os.path.join('plugins', open_dlg.GetPath())
 			else:
@@ -730,7 +725,7 @@ class ModelPluginsManager(wx.Frame):
 				eval(code)
 			### Error occur
 	 		except Exception, info:
-	 			msg = _('Error trying to load plugin.\nInfo : %s\nDo you want to edit this plugin file?')%info
+	 			msg = _('Error trying to load plug-in.\nInfo : %s\nDo you want to edit this plugin file?')%info
 	 			dial = wx.MessageDialog(None, msg, self.model.label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_ERROR)
 
 				### user choose to edit plugins.py file
@@ -749,7 +744,7 @@ class ModelPluginsManager(wx.Frame):
 	 		else:
 	 			self.zf.Update([filename])
 
-	 			### Clear before populate with new plugins
+	 			### Clear before populate with new plug-ins
 	 			self.CheckList.Clear()
 	 			wx.CallAfter(self.CheckList.Populate, (self.model))
 
@@ -759,17 +754,17 @@ class ModelPluginsManager(wx.Frame):
 				self.editBtn.Enable(True)
 
 	def OnDelete(self, event):
-		""" Delete plugins
+		""" Delete plug-ins
 		"""
 		### delete file from zipfile
-		dial = wx.MessageDialog(self, _('Do You realy want to delete plugins file?'), self.model.label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		dial = wx.MessageDialog(self, _('Do You really want to delete plug-ins file?'), self.model.label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 		if dial.ShowModal() == wx.ID_YES:
 			### TODO
-			### first test is for old devsimpy model prresenting plugins at the root of zipfile
-			### path depends on the existing plugins package in zipfile model
+			### first test is for old devsimpy model presenting plug-ins at the root of zipfile
+			### path depends on the existing plug-ins package in zipfile model
 			path = os.path.join('plugins', 'plugins.py') if BlockPluginsList.IsInPackage(self.model.model_path) else 'plugins.py'
 			self.zf.Delete([path])
-			### Clear before populate with empty plugins file
+			### Clear before populate with empty plug-ins file
 			self.CheckList.Clear()
 			wx.CallAfter(self.CheckList.Populate, (self.model))
 		dial.Destroy()
