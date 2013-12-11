@@ -338,6 +338,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		# fin panel
 		vbox_top.Add(vbox_body, 0, wx.EXPAND, 9)
 		self.panel.SetSizer(vbox_top)
+		vbox_top.Fit(self)
 
 		self._text1.SetFocus()
 		self._btn1.SetDefault()
