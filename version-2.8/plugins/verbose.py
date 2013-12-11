@@ -241,6 +241,7 @@ class VerboseConfig(wx.Frame):
 		global show_coll
 		global redirect
 
+
 		show_clock = self.checkbox_3.GetValue()
 		show_ext_trans = self.checkbox_4.GetValue()
 		show_int_trans = self.checkbox_5.GetValue()
