@@ -23,11 +23,13 @@ global show_ext_trans
 global show_int_trans
 global show_clock
 global show_coll
+global redirect
 
 show_ext_trans = True
 show_int_trans = True
 show_clock = True
 show_coll = True
+redirect = False
 
 class RedirectText(object):
 	def __init__(self,aWxTextCtrl):
@@ -39,6 +41,9 @@ class RedirectText(object):
 		else:
 			self.out.WriteText(string)
 
+	def flush(self):
+		pass
+
 @pluginmanager.register("SIM_VERBOSE")
 def LongRunningProcess(*args, **kwargs):
 	""" Plugin function for simulation printing.
@@ -48,6 +53,7 @@ def LongRunningProcess(*args, **kwargs):
 	global show_int_trans
 	global show_clock
 	global show_coll
+	global redirect
 
 	if kwargs.has_key('model') and kwargs.has_key('msg'):
 		### changing frame content: need global
@@ -137,17 +143,22 @@ class VerboseConfig(wx.Frame):
 
 		kwds["style"] = wx.STAY_ON_TOP|wx.DEFAULT_FRAME_STYLE
 		wx.Frame.__init__(self, *args, **kwds)
-		self.sizer_3_staticbox = wx.StaticBox(self, wx.ID_ANY, _("Display options"))
-		self.checkbox_3 = wx.CheckBox(self, wx.ID_ANY, _("Show clock"))
-		self.checkbox_4 = wx.CheckBox(self,wx.ID_ANY, _("Show external transition trace"))
-		self.checkbox_5 = wx.CheckBox(self, wx.ID_ANY, _("Show internal transition trace"))
-		self.checkbox_6 = wx.CheckBox(self, wx.ID_ANY, _("Show collision trace"))
-		self.button_2 = wx.Button(self, wx.ID_CANCEL, "")
-		self.button_3 = wx.Button(self, wx.ID_OK, "")
+
+		self.panel = wx.Panel(self, wx.ID_ANY)
+
+		self.sizer_3_staticbox = wx.StaticBox(self.panel, wx.ID_ANY, _("Display options"))
+		self.checkbox_3 = wx.CheckBox(self.panel, wx.ID_ANY, _("Show clock"))
+		self.checkbox_4 = wx.CheckBox(self.panel,wx.ID_ANY, _("Show external transition trace"))
+		self.checkbox_5 = wx.CheckBox(self.panel, wx.ID_ANY, _("Show internal transition trace"))
+		self.checkbox_6 = wx.CheckBox(self.panel, wx.ID_ANY, _("Show collision trace"))
+		self.checkbox_7 = wx.CheckBox(self.panel, wx.ID_ANY, _("Redirect stdout in frame"))
+		self.button_2 = wx.Button(self.panel, wx.ID_CANCEL, "")
+		self.button_3 = wx.Button(self.panel, wx.ID_OK, "")
 
 		self.__set_properties()
 		self.__do_layout()
 
+		self.Bind(wx.EVT_CHECKBOX, self.OnRedirect, self.checkbox_7)
 		self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
 		self.Bind(wx.EVT_BUTTON, self.OnCancel, id=wx.ID_CANCEL)
 
@@ -157,17 +168,20 @@ class VerboseConfig(wx.Frame):
 		global show_int_trans
 		global show_clock
 		global show_coll
+		global redirect
 
 		_icon = wx.EmptyIcon()
 		_icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH, DEVSIMPY_PNG), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(_icon)
-		self.SetSize((433, 168))
-		self.SetBackgroundColour(wx.WHITE)
-		self.SetToolTipString(_("Display options for the plugin verbose"))
+		#self.SetSize((433, 168))
+		#self.SetBackgroundColour(wx.WHITE)
+		self.SetToolTipString(_("Display options for the plug-in verbose"))
 		self.checkbox_3.SetValue(show_clock)
 		self.checkbox_4.SetValue(show_ext_trans)
 		self.checkbox_5.SetValue(show_int_trans)
 		self.checkbox_6.SetValue(show_coll)
+		self.checkbox_7.SetValue(redirect)
+
 		self.button_3.SetDefault()
 		# end wxGlade
 
@@ -181,38 +195,57 @@ class VerboseConfig(wx.Frame):
 		sizer_4 = wx.BoxSizer(wx.VERTICAL)
 		sizer_5 = wx.BoxSizer(wx.HORIZONTAL)
 
-		### adding checkbox
-		sizer_3.Add(self.checkbox_3, 0, 2, 2)
-		sizer_3.Add(self.checkbox_4, 0, 2, 2)
-		sizer_3.Add(self.checkbox_5, 0, 2, 2)
-		sizer_3.Add(self.checkbox_6, 0, 2, 2)
+		### adding check-box
+		sizer_3.Add(self.checkbox_3, 0, wx.EXPAND, 2, 2)
+		sizer_3.Add(self.checkbox_4, 0, wx.EXPAND, 2, 2)
+		sizer_3.Add(self.checkbox_5, 0, wx.EXPAND, 2, 2)
+		sizer_3.Add(self.checkbox_6, 0, wx.EXPAND, 2, 2)
+		sizer_3.Add(self.checkbox_7, 0, wx.EXPAND, 2, 2)
 
 		### adding buttons
 		sizer_5.Add(self.button_2, 1, wx.ALIGN_CENTER_HORIZONTAL)
 		sizer_5.Add(self.button_3, 1, wx.ALIGN_CENTER_HORIZONTAL)
 
-		sizer_4.Add(sizer_3, 0, wx.EXPAND,0)
-		sizer_4.Add(sizer_5, 0, wx.EXPAND,0)
+		sizer_4.Add(sizer_3, 0, wx.ALL| wx.ALIGN_CENTER_HORIZONTAL,0)
+		sizer_4.Add(sizer_5, 0, wx.ALL| wx.ALIGN_CENTER_HORIZONTAL,0)
 
-		self.SetSizer(sizer_4)
+		self.panel.SetSizer(sizer_4)
+		sizer_4.Fit(self)
+
 		self.SetAutoLayout(True)
 		self.Centre()
 		# end wxGlade
 
 	###
+	def OnRedirect(self, evt):
+		"""
+		"""
+		v = not self.checkbox_7.IsChecked()
+
+		self.checkbox_3.Enable(v)
+		self.checkbox_4.Enable(v)
+		self.checkbox_5.Enable(v)
+		self.checkbox_6.Enable(v)
+
+		redir=RedirectText(self.log)
+		sys.stdout=redir
+
+	###
 	def OnOk(self, evt):
-		""" Ok butto, has been clicked.
+		""" Ok button, has been clicked.
 		"""
 
 		global show_ext_trans
 		global show_int_trans
 		global show_clock
 		global show_coll
+		global redirect
 
 		show_clock = self.checkbox_3.GetValue()
 		show_ext_trans = self.checkbox_4.GetValue()
 		show_int_trans = self.checkbox_5.GetValue()
 		show_coll = self.checkbox_6.GetValue()
+		redirect = self.checkbox_7.GetValue()
 
 		self.Close()
 
@@ -221,11 +254,10 @@ class VerboseConfig(wx.Frame):
 		""" cancel button has been checked.
 		"""
 		self.Close()
-
 ###
 def Config(parent):
-	""" Plugin settings frame.
+	""" Plug-in settings frame.
 	"""
 
-	config_frame = VerboseConfig(parent, wx.ID_ANY, _("Verbose plugin"))
+	config_frame = VerboseConfig(parent, wx.ID_ANY, _("Verbose plug-in"), style = wx.DEFAULT_FRAME_STYLE)
 	config_frame.Show()

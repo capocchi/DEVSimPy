@@ -18,7 +18,7 @@ def idle(*args, **kwargs):
 
 def register(*events):
 	""" This decorator is to be used for registering a function as a plugin for
-		a specific event or list of events. 
+		a specific event or list of events.
 	"""
 	def registered_plugin(funct):
 		for event in events:
@@ -27,19 +27,19 @@ def register(*events):
 	return registered_plugin
 
 def enable_plugin(plugin):
-	""" Remove resp. the plugin and the event from the disabled_plugin and disabled_event lists. 
+	""" Remove resp. the plugin and the event from the disabled_plugin and disabled_event lists.
 	"""
 	for c in plugins.items():
-		event, functions = c 
+		event, functions = c
 		for f in functions:
 			if plugin == f.__module__ and event in disabled_event:
 				disabled_event.remove(event)
 				disabled_plugin.remove(plugin)
 
 def disable_plugin(plugin):
-	""" Append resp. the plugin and the event to the disabled_plugin and disabled_event lists. 
+	""" Append resp. the plugin and the event to the disabled_plugin and disabled_event lists.
 	"""
-	
+
 	for c in plugins.items():
 		event, functions = c
 		for f in functions:
@@ -48,13 +48,16 @@ def disable_plugin(plugin):
 					apply(sys.modules[plugin].UnConfig,())
 				disabled_event.append(event)
 				disabled_plugin.append(plugin)
-				
+
 
 def is_enable(plugin):
-	""" 
 	"""
-	return plugin in plugins.values()
-	
+	"""
+	if isinstance(plugin, str):
+		return plugin in [l[0].__name__ for l in plugins.values()]
+	else:
+		return plugin in plugins.values()
+
 def trigger_event(event, *args, **kwargs):
 	""" Call this function to trigger an event. It will run any plugins that
 		have registered themselves to the event. Any additional arguments or
@@ -69,7 +72,7 @@ def load_plugins(module_name):
 		imports are more dynamic and you don't need to continue appending
 		import statements to the top of a file.
 	"""
-	
+
 	try:
 		return sys.modules[module_name]
 	except KeyError:
