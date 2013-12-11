@@ -8,7 +8,7 @@
 		To use it, just send the SIM_VERBOSE event with the pluginmanager.trigger_event function and some parameters like msg, model or clock.
 		Example:
 			pluginmanager.trigger_event("SIM_VERBOSE", model=aDEVS, msg=0) for print informations when an external event (msg=0) occurs on the model aDEVS.
-		For more details see the verbose.py file in plugins directory.
+		For more details see the verbose.py file in plug-ins directory.
 """
 
 import wx
@@ -23,13 +23,11 @@ global show_ext_trans
 global show_int_trans
 global show_clock
 global show_coll
-global redirect
 
 show_ext_trans = True
 show_int_trans = True
 show_clock = True
 show_coll = True
-redirect = False
 
 class RedirectText(object):
 	def __init__(self,aWxTextCtrl):
@@ -46,14 +44,13 @@ class RedirectText(object):
 
 @pluginmanager.register("SIM_VERBOSE")
 def LongRunningProcess(*args, **kwargs):
-	""" Plugin function for simulation printing.
+	""" Plug-in function for simulation printing.
 	"""
 
 	global show_ext_trans
 	global show_int_trans
 	global show_clock
 	global show_coll
-	global redirect
 
 	if kwargs.has_key('model') and kwargs.has_key('msg'):
 		### changing frame content: need global
@@ -98,7 +95,7 @@ def LongRunningProcess(*args, **kwargs):
 							txt.append(_("\t  Next scheduled internal transition at %f\n")%(model.myTimeAdvance))
 
 			elif isinstance(model, DomainStructure) and show_coll:
-				txt = [_("\n\tCollision occured in %s, involving:\n")%(block.label)]
+				txt = [_("\n\tCollision occurred in %s, involving:\n")%(block.label)]
 				txt.extend([_("    \t   %s\n")%(m.__class__.__name__) for m in model.immChildren])
 				txt.append(_("\t  select chooses %s\n")%(kwargs['dstar'].__class__.__name__))
 
@@ -151,7 +148,7 @@ class VerboseConfig(wx.Frame):
 		self.checkbox_4 = wx.CheckBox(self.panel,wx.ID_ANY, _("Show external transition trace"))
 		self.checkbox_5 = wx.CheckBox(self.panel, wx.ID_ANY, _("Show internal transition trace"))
 		self.checkbox_6 = wx.CheckBox(self.panel, wx.ID_ANY, _("Show collision trace"))
-		self.checkbox_7 = wx.CheckBox(self.panel, wx.ID_ANY, _("Redirect stdout in frame"))
+
 		self.button_2 = wx.Button(self.panel, wx.ID_CANCEL, "")
 		self.button_3 = wx.Button(self.panel, wx.ID_OK, "")
 
@@ -168,19 +165,15 @@ class VerboseConfig(wx.Frame):
 		global show_int_trans
 		global show_clock
 		global show_coll
-		global redirect
 
 		_icon = wx.EmptyIcon()
 		_icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH, DEVSIMPY_PNG), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(_icon)
-		#self.SetSize((433, 168))
-		#self.SetBackgroundColour(wx.WHITE)
 		self.SetToolTipString(_("Display options for the plug-in verbose"))
 		self.checkbox_3.SetValue(show_clock)
 		self.checkbox_4.SetValue(show_ext_trans)
 		self.checkbox_5.SetValue(show_int_trans)
 		self.checkbox_6.SetValue(show_coll)
-		self.checkbox_7.SetValue(redirect)
 
 		self.button_3.SetDefault()
 		# end wxGlade
@@ -200,7 +193,6 @@ class VerboseConfig(wx.Frame):
 		sizer_3.Add(self.checkbox_4, 0, wx.EXPAND, 2, 2)
 		sizer_3.Add(self.checkbox_5, 0, wx.EXPAND, 2, 2)
 		sizer_3.Add(self.checkbox_6, 0, wx.EXPAND, 2, 2)
-		sizer_3.Add(self.checkbox_7, 0, wx.EXPAND, 2, 2)
 
 		### adding buttons
 		sizer_5.Add(self.button_2, 1, wx.ALIGN_CENTER_HORIZONTAL)
@@ -217,20 +209,6 @@ class VerboseConfig(wx.Frame):
 		# end wxGlade
 
 	###
-	def OnRedirect(self, evt):
-		"""
-		"""
-		v = not self.checkbox_7.IsChecked()
-
-		self.checkbox_3.Enable(v)
-		self.checkbox_4.Enable(v)
-		self.checkbox_5.Enable(v)
-		self.checkbox_6.Enable(v)
-
-		redir=RedirectText(self.log)
-		sys.stdout=redir
-
-	###
 	def OnOk(self, evt):
 		""" Ok button, has been clicked.
 		"""
@@ -239,14 +217,12 @@ class VerboseConfig(wx.Frame):
 		global show_int_trans
 		global show_clock
 		global show_coll
-		global redirect
 
 
 		show_clock = self.checkbox_3.GetValue()
 		show_ext_trans = self.checkbox_4.GetValue()
 		show_int_trans = self.checkbox_5.GetValue()
 		show_coll = self.checkbox_6.GetValue()
-		redirect = self.checkbox_7.GetValue()
 
 		self.Close()
 
