@@ -432,7 +432,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 				### The START_CONCURRENT_SIMULATION event occurs
 				trigger_event("START_CONCURRENT_SIMULATION", parent=self, master=self.current_master)
 
-				### future call is requiered because the simulator is flatened during the execution of the srtategy 3
+				### future call is required because the simulator is flattened during the execution of the strategy 3
 				wx.FutureCall(1, trigger_event, 'START_DIAGRAM', parent=self, master=self.current_master)
 
 				### clear all log file
@@ -498,7 +498,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 	###
 	def OnSuspend(self, event):
-		""" When Stop button is cliked
+		""" When Stop button is clicked
 		"""
 
 		self.Interact()

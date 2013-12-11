@@ -201,9 +201,9 @@ class SimulationPanel(wx.Panel):
 
 		### StaticText
 		self.sim_defaut_plot_dyn_freq = __builtin__.__dict__['DEFAULT_PLOT_DYN_FREQ']
-		self.txt2 = wx.StaticText(self, wx.ID_ANY, _("Frequence of plotting refresh:"))
+		self.txt2 = wx.StaticText(self, wx.ID_ANY, _("Frequency of plotting refresh:"))
 		self.sc = wx.SpinCtrl(self, wx.ID_ANY, str(self.sim_defaut_plot_dyn_freq), (55, 90), (60, -1), min=10, max=10000)
-		self.sc.SetToolTipString(_("Default frequence for dynamic plotting."))
+		self.sc.SetToolTipString(_("Default frequency for dynamic plotting."))
 
 		### StaticBox and StaticText
 		#information = wx.StaticText(self, wx.ID_ANY, _("Strategy information:"))
@@ -303,6 +303,7 @@ class SimulationPanel(wx.Panel):
 		### update cb below cb3
 		self.cb.Clear()
 		if val == 'PyDEVS':
+
 			for k in PYDEVS_SIM_STRATEGY_DICT:
 				self.cb.Append(k)
 			self.cb.SetValue('bag-based')
@@ -328,6 +329,9 @@ class SimulationPanel(wx.Panel):
 
 		### Reload DomainBehavior and DomainStructure
 		if __builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] != self.default_devs_dir:
+			### change builtin before recompile the modules
+			__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = self.default_devs_dir
+			### recompile the modules.
 			ReloadModule.recompile("DomainInterface.DomainBehavior")
 			ReloadModule.recompile("DomainInterface.DomainStructure")
 			ReloadModule.recompile("DomainInterface.MasterModel")
@@ -335,7 +339,6 @@ class SimulationPanel(wx.Panel):
 		__builtin__.__dict__['SIMULATION_SUCCESS_SOUND_PATH'] = self.sim_success_sound_path
 		__builtin__.__dict__['SIMULATION_ERROR_SOUND_PATH'] = self.sim_error_sound_path
 		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = self.sim_defaut_strategy
-		__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = self.default_devs_dir
 		__builtin__.__dict__['DEFAULT_PLOT_DYN_FREQ'] = self.sim_defaut_plot_dyn_freq
 		__builtin__.__dict__['NTL'] = self.bt6.GetValue()
 
@@ -353,7 +356,7 @@ class EditorPanel(wx.Panel):
 
 		self.cb = wx.CheckBox(self, wx.ID_ANY, _("Use local programmer software"))
 		self.cb.SetValue(__builtin__.__dict__['LOCAL_EDITOR'])
-		self.cb.SetToolTipString(_("This option dont work for the .amd and .cmd file. \n"
+		self.cb.SetToolTipString(_("This option don't work for the .amd and .cmd file. \n"
 			"Modification of python file during the simulation is disabled when this checkbox is checked."))
 
 		vbox.Add(self.cb, 0, wx.ALL,10)
@@ -377,7 +380,7 @@ class Preferences(wx.Toolbook):
 
 		wx.Toolbook.__init__(self, parent, wx.ID_ANY, style=wx.BK_DEFAULT)
 
-		### dont try to translate this labels with _() because there are used to find png
+		### don't try to translate this labels with _() because there are used to find png
 		L = [('General',"(self)"),('Simulation',"(self)"), ('Editor',"(self)"), ('Plugins',"(self)")]
 
 		# make an image list using the LBXX images
@@ -390,22 +393,22 @@ class Preferences(wx.Toolbook):
 		for page, label in [(eval("%sPanel%s"%(s,str(args))), _(s)) for s,args in L]:
 			self.AddPage(page, label, imageId=imageIdGenerator.next())
 
-		### Plugin page setting (populate is done when page is chnaged)
+		### Plug-in page setting (populate is done when page is changed)
 		self.pluginPanel = self.GetPage(self.GetPageCount()-1)
 		self.CheckList = GeneralPluginsList(self.pluginPanel.GetRightPanel())
 		self.pluginPanel.SetPluginsList(self.CheckList)
 
 		lpanel = self.pluginPanel.GetLeftPanel()
 
-		### Buttons for insert or delete plugins
+		### Buttons for insert or delete plug-ins
 		self.addBtn = wx.Button(lpanel, wx.ID_ADD, size=(140, -1))
 		self.delBtn = wx.Button(lpanel, wx.ID_DELETE, size=(140, -1))
 		self.refBtn = wx.Button(lpanel, wx.ID_REFRESH, size=(140, -1))
-		self.addBtn.SetToolTipString(_("Add new plugins"))
-		self.delBtn.SetToolTipString(_("Delete all existing plugins"))
-		self.refBtn.SetToolTipString(_("Refresh plugins list"))
+		self.addBtn.SetToolTipString(_("Add new plug-ins"))
+		self.delBtn.SetToolTipString(_("Delete all existing plug-ins"))
+		self.refBtn.SetToolTipString(_("Refresh plug-ins list"))
 
-		### add widget to plugin panel
+		### add widget to plug-in panel
 		self.pluginPanel.AddWidget(3, self.addBtn)
 		self.pluginPanel.AddWidget(4, self.delBtn)
 		self.pluginPanel.AddWidget(5, self.refBtn)
@@ -426,7 +429,7 @@ class Preferences(wx.Toolbook):
 #		sel = self.GetSelection()
 #		print 'OnPageChanged,  old:%d, new:%d, sel:%d\n' % (old, new, sel)
 		parent = self.GetTopLevelParent()
-		### plugins page
+		### plug-ins page
 		if new == 3:
 			parent.SetSize((700,500))
 		else:
@@ -438,11 +441,11 @@ class Preferences(wx.Toolbook):
 		"""
 		"""
 		new = event.GetSelection()
-		### plugin page
+		### plug-in page
 		if new == 3:
-			### list of plugins file in plugin directory
+			### list of plug-ins file in plug-in directory
 			l = list(os.walk(os.path.join(HOME_PATH, PLUGINS_DIR)))
-			### populate checklist with file in plugins directory
+			### populate checklist with file in plug-ins directory
 			wx.CallAfter(self.CheckList.Populate, (l))
 		event.Skip()
 
@@ -460,7 +463,7 @@ class Preferences(wx.Toolbook):
 				root = os.path.dirname(filename)
 				self.CheckList.InsertItem(root, basename)
 
-				### trying to copy file in plugin directory
+				### trying to copy file in plug-in directory
 				try:
 					shutil.copy2(filename, os.path.join(HOME_PATH, PLUGINS_DIR))
 				except Exception, info:
@@ -471,17 +474,17 @@ class Preferences(wx.Toolbook):
 		open_dlg.Destroy()
 
 	def OnDelete(self, event):
-		""" Delete plugins item and python source file
+		""" Delete plug-ins item and python source file
 		"""
 
-		### selected plugins
+		### selected plug-ins
 		L = self.CheckList.get_selected_items()
 
 		if L != []:
 			### Delete query
-			dial = wx.MessageDialog(self, _('Do You realy want to delete selected plugins?'), _('Plugin MAnager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			dial = wx.MessageDialog(self, _('Do You really want to delete selected plug-ins?'), _('Plug-in MAnager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 			if dial.ShowModal() == wx.ID_YES:
-				### for selected plugins
+				### for selected plug-ins
 				for plugin in L:
 
 					### delete item
@@ -491,22 +494,22 @@ class Preferences(wx.Toolbook):
 						### Delete python file
 						name, ext = os.path.splitext(self.CheckList.GetPyData(plugin)[0].__file__)
 						filename = "%s.py"%name
-						dlg = wx.MessageDialog(self, _('Do You realy want to remove %s plugin file?')%os.path.basename(filename), _('Preference Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+						dlg = wx.MessageDialog(self, _('Do You really want to remove %s plug-in file?')%os.path.basename(filename), _('Preference Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 						if dlg.ShowModal() == wx.ID_YES:
 							os.remove(filename)
 					except Exception:
-						sys.stderr.write(_('ERROR: plugin file not deleted!'))
+						sys.stderr.write(_('ERROR: plug-in file not deleted!'))
 
 			dial.Destroy()
 		else:
-			sys.stderr.write(_('Select plugins to delete'))
+			sys.stderr.write(_('Select plug-ins to delete'))
 
 	def OnRefresh(self, event):
-		""" Refresh list of plugins
+		""" Refresh list of plug-ins
 		"""
 		self.CheckList.Clear()
 		l = list(os.walk(os.path.join(HOME_PATH, PLUGINS_DIR)))
-		### populate checklist with file in plugins directory
+		### populate checklist with file in plug-ins directory
 		wx.CallAfter(self.CheckList.Populate, (l))
 
 	def OnApply(self,evt):
