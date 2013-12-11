@@ -12,7 +12,8 @@ import wx.lib.filebrowsebutton as filebrowse
 if __name__ == '__main__':
 	__builtin__.__dict__['HOME_PATH'] = os.getcwd()
 	__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyDEVS'
-	__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyPDEVS')}
+	__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyDEVS'),
+												'PyPDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyPDEVS')}
 
 from PluginsGUI import PluginsPanel, GeneralPluginsList
 from Utilities import playSound
@@ -31,7 +32,7 @@ class GeneralPanel(wx.Panel):
 		wx.Panel.__init__(self, parent)
 
 		### FileBrowse
-		self.plugin_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Plugins directory:"), toolTip=_("Change the plugins directory"))
+		self.plugin_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Plug-ins directory:"), toolTip=_("Change the plug-ins directory"))
 		self.domain_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Library directory:"), toolTip=_("Change the library directory"))
 		self.out_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Output directory:"), toolTip=_("Change the output directory"))
 
@@ -44,7 +45,7 @@ class GeneralPanel(wx.Panel):
 		self.st2 = wx.StaticText(self, wx.ID_ANY, _("Font size:"))
 		self.st3 = wx.StaticText(self, wx.ID_ANY, _("Deep of history item:"))
 
-		self.st1.SetToolTipString(_("Feel free to change the lenght of list defining the recent opend files."))
+		self.st1.SetToolTipString(_("Feel free to change the length of list defining the recent opened files."))
 		self.st2.SetToolTipString(_("Feel free to change the font size of DEVSimpy."))
 		self.st3.SetToolTipString(_("Feel free to change the number of item for undo/redo command"))
 
@@ -120,7 +121,7 @@ class GeneralPanel(wx.Panel):
 		"""
 		v = self.domain_dir.GetValue()
 
-		### if value has been changed, we clean the librairie control panel
+		### if value has been changed, we clean the library control panel
 		if __builtin__.__dict__['DOMAIN_PATH'] != v:
 			__builtin__.__dict__['DOMAIN_PATH'] = v
 
@@ -545,13 +546,13 @@ class PreferencesGUI(wx.Frame):
 
 		### Sizers
 		vsizer = wx.BoxSizer(wx.VERTICAL)
-		hsizer = wx.StdDialogButtonSizer()
+		hsizer = wx.BoxSizer(wx.HORIZONTAL)
 
-		hsizer.AddButton(self.cancel)
- 		hsizer.AddButton(self.apply)
-		hsizer.Realize()
+		hsizer.Add(self.cancel,0)
+ 		hsizer.Add(self.apply,0)
 		vsizer.Add(self.pref, 1, wx.ALL|wx.EXPAND, 5)
 		vsizer.Add(hsizer, 0, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+
 		panel.SetSizer(vsizer)
 		vsizer.Fit(panel)
 

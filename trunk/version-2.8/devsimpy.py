@@ -192,6 +192,12 @@ def getIcon(path):
 
 	return icon
 
+def GetUserConfigDir():
+	""" Return the standard location on this platform for application data.
+	"""
+	sp = wx.StandardPaths.Get()
+	return sp.GetUserConfigDir()
+
 #-------------------------------------------------------------------
 def DefineScreenSize(percentscreen = None, size = None):
 	"""Returns a tuple to define the size of the window
@@ -318,16 +324,10 @@ class MainApplication(wx.Frame):
 	def GetVersion(self):
 		return __version__
 
-	def GetUserConfigDir(self):
-		""" Return the standard location on this platform for application data.
-		"""
-		sp = wx.StandardPaths.Get()
-		return sp.GetUserConfigDir()
-
 	def GetConfig(self):
 		""" Reads the config file for the application if it exists and return a configfile object for use later.
 		"""
-		return wx.FileConfig(localFilename = os.path.join(self.GetUserConfigDir(),'.devsimpy'))
+		return wx.FileConfig(localFilename = os.path.join(GetUserConfigDir(),'.devsimpy'))
 
 	def WriteDefaultConfigFile(self, cfg):
 		""" Write config file
@@ -336,7 +336,7 @@ class MainApplication(wx.Frame):
 		# for spash screen
 		pub.sendMessage('object.added', 'Writing .devsimpy settings file...\n')
 
-		sys.stdout.write("Writing default .devsimpy settings file on %s directory..."%self.GetUserConfigDir())
+		sys.stdout.write("Writing default .devsimpy settings file on %s directory..."%GetUserConfigDir())
 
 		self.exportPathsList = []					# export path list
 		self.openFileList = ['']*NB_OPENED_FILE		#number of last opened files
@@ -375,7 +375,7 @@ class MainApplication(wx.Frame):
 				### for spash screen
 				pub.sendMessage('object.added', 'Loading .devsimpy settings file...\n')
 
-				sys.stdout.write("Load .devsimpy %s settings file from %s directory ... \n"%(self.GetVersion(),self.GetUserConfigDir()))
+				sys.stdout.write("Load .devsimpy %s settings file from %s directory ... \n"%(self.GetVersion(),GetUserConfigDir()))
 				### load external import path
 				self.exportPathsList = filter(lambda path: os.path.isdir(path), eval(self.cfg.Read("exportPathsList")))
 				### append external path to the sys module to futur import
@@ -401,12 +401,18 @@ class MainApplication(wx.Frame):
 				try:
 					D = eval(self.cfg.Read("builtin_dict"))
 				except SyntaxError:
-					sys.stdout.write('Error trying to read the builtin dictionary from config file. So, we load the default builtin \n')
+					wx.MessageBox('Error trying to read the builtin dictionary from config file. So, we load the default builtin',
+								_('Configuration'),
+								wx.OK | wx.ICON_INFORMATION)
+					#sys.stdout.write('Error trying to read the builtin dictionary from config file. So, we load the default builtin \n')
 					D = builtin_dict
 				else:
 					### try to start without error when .devsimpy need update (new version installed)
 					if not os.path.isdir(D['HOME_PATH']):
-						sys.stdout.write('.devsimpy file appear to be not liked with the DEVSimPy source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(self.GetUserConfigDir()))
+						wx.MessageBox('.devsimpy file appear to be not liked with the DEVSimPy source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(GetUserConfigDir()),
+									_('Configuration'),
+									wx.OK | wx.ICON_INFORMATION)
+						#sys.stdout.write('.devsimpy file appear to be not liked with the DEVSimPy source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(GetUserConfigDir()))
 						D['HOME_PATH'] = ABS_HOME_PATH
 
 				### recompile DomainInterface if DEFAULT_DEVS_DIRNAME != PyDEVS
@@ -1827,8 +1833,7 @@ if __name__ == '__main__':
 
 	### python devsimpy.py -c|-clean in order to delete the config file
 	if len(sys.argv) >= 2 and sys.argv[1] in ('-c, -clean'):
-		sp = wx.StandardPaths.Get()
-		config_file = os.path.join(sp.GetUserConfigDir(),'.devsimpy')
+		config_file = os.path.join(GetUserConfigDir(),'.devsimpy')
 		r = raw_input('Are you sure to delete DEVSimPy config file ? (Y,N):')
 		if r in ('Y','y','yes','Yes' ):
 			os.remove(config_file)

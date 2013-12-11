@@ -725,7 +725,7 @@ class ModelPluginsManager(wx.Frame):
 				eval(code)
 			### Error occur
 	 		except Exception, info:
-	 			msg = _('Error trying to load plug-in.\nInfo : %s\nDo you want to edit this plugin file?')%info
+	 			msg = _('Error trying to load plug-in.\nInfo : %s\nDo you want to edit this plug-in file?')%info
 	 			dial = wx.MessageDialog(None, msg, self.model.label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_ERROR)
 
 				### user choose to edit plugins.py file
