@@ -209,7 +209,6 @@ def DefineScreenSize(percentscreen = None, size = None):
 		l, h = size
 	elif percentscreen:
 		x1, x2, l, h = wx.Display().GetClientArea()
-		#print "ClientArea = ", l, h
 		l, h = percentscreen * l, percentscreen * h
 	return l, h
 
