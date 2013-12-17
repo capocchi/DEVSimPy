@@ -193,7 +193,7 @@ class SimulationPanel(wx.Panel):
 		### StaticText for strategy
 		self.txt = wx.StaticText(self, wx.ID_ANY, _("Default strategy:"))
 		### choice of combobox depends on the default DEVS package directory
-		c= PYDEVS_SIM_STRATEGY_DICT.keys() 	if DEFAULT_DEVS_DIRNAME == 'PyDEVS' else PYPDEVS_SIM_STRATEGY_DICT.keys()
+		c= PYDEVS_SIM_STRATEGY_DICT.keys() if DEFAULT_DEVS_DIRNAME == 'PyDEVS' else PYPDEVS_SIM_STRATEGY_DICT.keys()
 
 		self.cb = wx.ComboBox(self, wx.ID_ANY, DEFAULT_SIM_STRATEGY, choices=c, style=wx.CB_READONLY)
 		self.cb.SetToolTipString(_("Default strategy for the simulation algorithm. Please see the DEVSimPy doc for more information of possible strategy."))
@@ -217,8 +217,8 @@ class SimulationPanel(wx.Panel):
 		hbox5.Add(self.txt3, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.ALL|wx.EXPAND, 15)
 		hbox5.Add(self.cb3, 1, wx.ALIGN_CENTER_VERTICAL|wx.RIGHT|wx.ALL|wx.EXPAND, 15)
 
-		hbox2.Add(self.txt, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.ALL|wx.EXPAND, 15)
-		hbox2.Add(self.cb, 1, wx.ALIGN_CENTER_VERTICAL|wx.RIGHT|wx.ALL|wx.EXPAND, 15)
+		hbox2.Add(self.txt, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL|wx.EXPAND, 15)
+		hbox2.Add(self.cb, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.ALL|wx.EXPAND, 15)
 
 		hbox3.Add(self.bt6, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 15)
 
@@ -228,7 +228,7 @@ class SimulationPanel(wx.Panel):
 		#hbox4.Add(information, 1, wx.ALIGN_CENTER_VERTICAL, 15)
 		##hbox4.Add(self.strategy_info, 1, wx.ALIGN_CENTER_VERTICAL, 15)
 
-		vbox.Add(hbox1, 0, wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.ALL, 10)
+		vbox.Add(hbox1, 0, wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.ALL,10)
 		vbox.Add(hbox5, 0, wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.ALL,10)
 		vbox.Add(hbox2, 0, wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.ALL,10)
 		vbox.Add(hbox3, wx.LEFT|0, wx.ALIGN_CENTER_VERTICAL|wx.ALL,10)

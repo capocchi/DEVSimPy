@@ -414,9 +414,12 @@ class MainApplication(wx.Frame):
 						#sys.stdout.write('.devsimpy file appear to be not liked with the DEVSimPy source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(GetUserConfigDir()))
 						D['HOME_PATH'] = ABS_HOME_PATH
 
-				### recompile DomainInterface if DEFAULT_DEVS_DIRNAME != PyDEVS
-				recompile = D['DEFAULT_DEVS_DIRNAME'] != __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']
-
+				try:
+					### recompile DomainInterface if DEFAULT_DEVS_DIRNAME != PyDEVS
+					recompile = D['DEFAULT_DEVS_DIRNAME'] != __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']
+				except KeyError:
+					recompile = False
+					
 				### test if the DEVSimPy source directory has been moved
 				### if icon path exists, then we can update builtin from cfg
 				if os.path.exists(D['ICON_PATH']):
