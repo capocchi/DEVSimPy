@@ -640,16 +640,16 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		devs_error = (os.path.basename(DOMAIN_PATH) in path)
 
 		### if error come from devs python file
-		#if devs_error:
+		if devs_error:
 		### Error dialog
-		if not Container.MsgBoxError(event, self.parent, msg.data):
+			if not Container.MsgBoxError(event, self.parent, msg.data):
 			### if user dont want correct the error, we destroy the simulation windows
-			self.DestroyWin()
-		else:
+				self.DestroyWin()
+			else:
 			### is user want to correct error through an editor, we stop simulation process for trying again after the error is corrected.
-			self.OnStop(event)
-		#else:
-			#raise msg
+				self.OnStop(event)
+		else:
+			raise msg
 
 def simulator_factory(model, strategy, prof, ntl):
 	""" Preventing direct creation for Simulator
@@ -755,7 +755,6 @@ def simulator_factory(model, strategy, prof, ntl):
 					sys.stderr.write('Traceback: ' + str(etb) + '\n')
 
 					wx.CallAfter(Publisher.sendMessage, "error", msg)
-
 					### error sound
 					wx.CallAfter(playSound, SIMULATION_ERROR_SOUND_PATH)
 				else:
