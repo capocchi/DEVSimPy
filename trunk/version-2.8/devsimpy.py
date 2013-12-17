@@ -133,14 +133,13 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'bitmaps', 'splash.png
 				'NB_OPENED_FILE': 5, # number of recent files
 				'NB_HISTORY_UNDO': 5, # number of undo
 				'OUT_DIR': 'out', # name of local output directory (composed by all .dat, .txt files)
-				'PLUGINS_DIR': 'plugins', # general plugins directory
-				#'PLUGINS_FILENAME': 'plugins', # model plugins file name
+				'PLUGINS_PATH': os.path.join(ABS_HOME_PATH, 'plugins'), # path of plug-ins directory
 				'FONT_SIZE': 12, # Block font size
 				'LOCAL_EDITOR': True, # for the use of local editor
 				'LOG_FILE': os.devnull, # log file (null by default)
 				'DEFAULT_SIM_STRATEGY': 'bag-based', #choose the default simulation strategy for PyDEVS
 				'PYDEVS_SIM_STRATEGY_DICT' : {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}, # list of available simulation strategy for PyDEVS package
-                'PYPDEVS_SIM_STRATEGY_DICT' : {'original':'SimStrategy4', 'distribued':'SimStrategy5', 'parallel':'SimStrategy6'}, # list of available simulation strategy for PyPDEVS package
+                'PYPDEVS_SIM_STRATEGY_DICT' : {'original':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}, # list of available simulation strategy for PyPDEVS package
 				'HELP_PATH' : os.path.join('doc', 'html'), # path of help directory
 				'NTL' : False, # No Time Limit for the simulation
 				'TRANSPARENCY' : True, # Transparancy for DetachedFrame
@@ -419,7 +418,7 @@ class MainApplication(wx.Frame):
 					recompile = D['DEFAULT_DEVS_DIRNAME'] != __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']
 				except KeyError:
 					recompile = False
-					
+
 				### test if the DEVSimPy source directory has been moved
 				### if icon path exists, then we can update builtin from cfg
 				if os.path.exists(D['ICON_PATH']):
