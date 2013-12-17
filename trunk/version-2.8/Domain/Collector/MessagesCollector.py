@@ -16,7 +16,8 @@ from __future__ import with_statement
 import os
 import random
 
-from DomainInterface.DomainBehavior import DomainBehavior
+#from DomainInterface.DomainBehavior import DomainBehavior
+import DomainInterface.DomainBehavior as DomainBehavior
 
 #  ================================================================    #
 class MessagesCollector(DomainBehavior):
@@ -63,7 +64,7 @@ class MessagesCollector(DomainBehavior):
 		self.state["status"] = 'ACTIF'
 		
 	###
-	def intTransition(self):
+  	def intTransition(self):
 		self.state["status"] = 'IDLE'
 		self.state["sigma"] = INFINITY
 		
