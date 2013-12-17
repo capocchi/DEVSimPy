@@ -35,7 +35,6 @@ if __name__ == '__main__':
 
 for pydevs_dir in __builtin__.__dict__['DEVS_DIR_PATH_DICT']:
 	if pydevs_dir == __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
-		print pydevs_dir
 		exec "import DEVSKernel.%s.DEVS as BaseDEVS"%(pydevs_dir)
 
 ###    ======================================================================    #

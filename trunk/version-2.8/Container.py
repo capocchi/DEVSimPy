@@ -379,7 +379,6 @@ class Diagram(Savable, Structurable):
 				if isinstance(devs, tuple):
 					return devs
 
-   				#print cls.__bases__[0].__bases__
 			if isinstance(m, CodeBlock):
 				### les ports des modeles couples sont pris en charge plus bas dans les iPorts et oPorts
 				## ajout des port par rapport aux ports graphiques
@@ -2832,7 +2831,6 @@ class Testable(object):
 		if not global_env: global_env = False
 
 		### Useful vars definition-----------------------------------------------------------------
-		# print self.python_path
 		model_path = os.path.dirname(self.python_path)
 		basename = os.path.basename(self.python_path)
 		name = os.path.splitext(basename)[0]
