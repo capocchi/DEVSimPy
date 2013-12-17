@@ -36,7 +36,7 @@ class GeneralPanel(wx.Panel):
 		self.domain_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Library directory:"), toolTip=_("Change the library directory"))
 		self.out_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Output directory:"), toolTip=_("Change the output directory"))
 
-		self.plugin_dir.SetValue(PLUGINS_DIR)
+		self.plugin_dir.SetValue(PLUGINS_PATH)
 		self.domain_dir.SetValue(DOMAIN_PATH)
 		self.out_dir.SetValue(OUT_DIR)
 
@@ -54,7 +54,7 @@ class GeneralPanel(wx.Panel):
 		self.nb_opened_file.SetRange(2, 20)
 		self.nb_opened_file.SetValue(NB_OPENED_FILE)
 
-		### Blcok font size
+		### Block font size
 		self.font_size = wx.SpinCtrl(self, wx.ID_ANY, '')
 		self.font_size.SetRange(2, 20)
 		self.font_size.SetValue(FONT_SIZE)
@@ -135,7 +135,7 @@ class GeneralPanel(wx.Panel):
 
 	###
 	def OnPluginsDirChanged(self, event):
-		__builtin__.__dict__['PLUGINS_DIR'] = os.path.basename(self.plugin_dir.GetValue())
+		__builtin__.__dict__['PLUGINS_PATH'] = self.plugin_dir.GetValue()
 
 	###
 	def OnOutDirChanged(self, event):
@@ -444,7 +444,7 @@ class Preferences(wx.Toolbook):
 		### plug-in page
 		if new == 3:
 			### list of plug-ins file in plug-in directory
-			l = list(os.walk(os.path.join(HOME_PATH, PLUGINS_DIR)))
+			l = list(os.walk(PLUGINS_PATH))
 			### populate checklist with file in plug-ins directory
 			wx.CallAfter(self.CheckList.Populate, (l))
 		event.Skip()
@@ -465,7 +465,7 @@ class Preferences(wx.Toolbook):
 
 				### trying to copy file in plug-in directory
 				try:
-					shutil.copy2(filename, os.path.join(HOME_PATH, PLUGINS_DIR))
+					shutil.copy2(filename, PLUGINS_PATH)
 				except Exception, info:
 					sys.stderr.write(_('ERROR: %s copy failed!\n%s')%(os.path.basename(filemane), str(info)))
 			else:
@@ -508,7 +508,7 @@ class Preferences(wx.Toolbook):
 		""" Refresh list of plug-ins
 		"""
 		self.CheckList.Clear()
-		l = list(os.walk(os.path.join(HOME_PATH, PLUGINS_DIR)))
+		l = list(os.walk(PLUGINS_PATH))
 		### populate checklist with file in plug-ins directory
 		wx.CallAfter(self.CheckList.Populate, (l))
 
@@ -590,7 +590,7 @@ class TestApp(wx.App):
 
 		__builtin__.__dict__['ICON_PATH'] = os.path.join('icons')
 		__builtin__.__dict__['ICON_PATH_16_16'] = os.path.join(ICON_PATH, '16x16')
-		__builtin__.__dict__['PLUGINS_DIR'] = 'plugins'
+		__builtin__.__dict__['PLUGINS_PATH'] = os.path.join(HOME_PATH, 'plugins')
 		__builtin__.__dict__['DOMAIN_PATH'] = 'Domain'
 		__builtin__.__dict__['OUT_DIR'] = 'out'
 		__builtin__.__dict__['NB_OPENED_FILE'] = 5
@@ -605,7 +605,7 @@ class TestApp(wx.App):
 		__builtin__.__dict__['DEFAULT_PLOT_DYN_FREQ'] = 100
 		__builtin__.__dict__['LOCAL_EDITOR'] = False
 		__builtin__.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
-		__builtin__.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy4', 'distribued':'SimStrategy5', 'parallel':'SimStrategy6'}
+		__builtin__.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}
 
 		__builtin__.__dict__['_'] = gettext.gettext
 

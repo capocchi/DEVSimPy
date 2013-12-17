@@ -127,7 +127,7 @@ class GeneralPluginsList(CheckListCtrl, Populable):
 		except AttributeError:
 			self.active_plugins_list = []
 
-		### if pluginsList (2 param in constructor) is in constructor, we can populate
+		### if pluginsList (2 parameters in constructor) is in constructor, we can populate
 		try:
 			pluginsList = args[1]
 		except IndexError:
@@ -139,12 +139,18 @@ class GeneralPluginsList(CheckListCtrl, Populable):
 
 	@BuzyCursorNotification
 	def Populate(self, pluginsList):
-		""" Populate method must be called just before construtor.
+		""" Populate method must be called just before constructor.
 		"""
+
 		if not self.is_populate:
 			# all plug_ins file in plug_ins directory and already loaded
 			# list of all file (without __init__.py)
 			for root, dirs, files in pluginsList:
+
+				### append the plug-ins directory to sys.path in order to use local importing notation (import...) in plug-in file.
+				if root not in sys.path:
+					sys.path.append(root)
+
 				### dirs must contain python file
 				if files != []:
 					#for filename in filter(lambda f: not f.startswith('__') and f.endswith('.py'), files):

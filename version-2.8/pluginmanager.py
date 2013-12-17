@@ -77,7 +77,7 @@ def load_plugins(module_name):
 		return sys.modules[module_name]
 	except KeyError:
 		try:
-			f, filename, description = imp.find_module(module_name, [os.path.join(HOME_PATH, PLUGINS_DIR)])
+			f, filename, description = imp.find_module(module_name, [PLUGINS_PATH])
 			module = imp.load_module(module_name, f, filename, description)
 			f.close()
 			return module
