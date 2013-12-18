@@ -119,6 +119,9 @@ class LibraryTree(wx.TreeCtrl):
 
 		assert self.root != None, _("Missing root")
 
+		### add DOMAIN_PATH in sys.path whatever happens
+		LibraryTree.AddToSysPath(DOMAIN_PATH)
+
 		for absdName in chargedDomainList:
 
   			### add absdName to sys.path (always before InsertNewDomain)

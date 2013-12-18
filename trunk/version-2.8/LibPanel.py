@@ -65,12 +65,12 @@ class LibPanel(wx.Panel):
 
 		libSizer = wx.BoxSizer(wx.VERTICAL)
 
-		### Creation de l'arbre des librairies
+		### create libraries tree
 		self.tree = LibraryTree(self, wx.ID_ANY, wx.DefaultPosition, style=wx.TR_DEFAULT_STYLE|wx.TR_HIDE_ROOT|wx.TR_LINES_AT_ROOT|wx.TR_HAS_BUTTONS|wx.SUNKEN_BORDER)
 
 		mainW = parent.GetTopLevelParent()
 
-		### lecture de ChargedDomainList dans .devsimpy
+		### read ChargedDomainList from .devsimpy
 		cfg_domain_list = mainW.cfg.Read('ChargedDomainList')
 		chargedDomainList = eval(cfg_domain_list) if cfg_domain_list else []
 

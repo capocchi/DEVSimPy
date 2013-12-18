@@ -100,25 +100,25 @@ class GeneralNotebook(Observer):
 			return self.GetPage(index)
 
 	def GetTree(self):
-		""" Get tree attribut from librairies panel
+		""" Get tree attribute from libraries panel
 		"""
 		libPanel = self.GetLibPanel()
 		return libPanel.tree if libPanel else None
 
 	def GetSearchTree(self):
-		""" Get searchtree attribut from librairies panel
+		""" Get search tree attribute from libraries panel
 		"""
 		libPanel = self.GetLibPanel()
 		return libPanel.searchTree if libPanel else None
 
 	def GetSearch(self):
-		""" Get search attribut from librairies panel
+		""" Get search attribute from libraries panel
 		"""
 		libPanel = self.GetLibPanel()
 		return libPanel.search
 
 	def update(self, concret_subject=None):
-			""" Update method that manages the panel propertie depending of the selected model in the canvas
+			""" Update method that manages the panel properties depending of the selected model in the canvas
 			"""
 
 			state = concret_subject.GetState()
@@ -185,7 +185,7 @@ if USE_FLATNOTEBOOK:
 			self.SetRightClickMenu(self._rmenu)
 
 		def __OnClosingPage(self, evt):
-			""" The close btutton of FlatNotebook has been invoked
+			""" The close button of FlatNotebook has been invoked
 				We update the Show menu depending on the deleted tab
 			"""
 
@@ -194,12 +194,12 @@ if USE_FLATNOTEBOOK:
 			### label which will be deleted
 			label = self.GetPageText(evt.GetSelection())
 
-			### find the correspondig submenu in the Show menu and deselect the label
-			### Show meni is in postion 2 on the Menu Bar of DEVSimPy
+			### find the corresponding sub-menu in the Show menu and deselect the label
+			### Show menu is in position 2 on the Menu Bar of DEVSimPy
 			show_menu = mainW.GetMenuBar().GetMenu(2)
-			### Control menu is in postion 0 (first)
+			### Control menu is in position 0 (first)
 			control_item = show_menu.FindItemByPosition(0)
-			### list of submenu for the Control menu
+			### list of sub-menu for the Control menu
 			items_list = control_item.GetSubMenu().GetMenuItems()
 			### for all items (Simulation, Properties, Libraries)
 			for item in items_list:
