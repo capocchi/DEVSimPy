@@ -3290,7 +3290,7 @@ class CodeBlock(Block, Achievable):
 				# try to find it in the Domain (firstly)
 				if dir_name in python_path:
 
-					path = os.path.join(HOME_PATH, relpath(str(model_path[model_path.index(dir_name):]).strip('[]')))
+					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(model_path[model_path.index(dir_name):]).strip('[]')))
 
 					### try to find it in exportedPathList (after Domain check)
 					if not os.path.exists(path):
@@ -3320,7 +3320,8 @@ class CodeBlock(Block, Achievable):
 			### if DOMAIN is not in python_path
 			if dir_name in python_path:
 
-				path = os.path.join(HOME_PATH, relpath(str(python_path[python_path.index(dir_name):]).strip('[]')))
+				### try to find in DOMAIN directory
+				path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(python_path[python_path.index(dir_name):]).strip('[]')))
 
 				### try to find it in exportedPathList (after Domain check)
 				if not os.path.exists(path):
@@ -3528,7 +3529,7 @@ class ContainerBlock(Block, Diagram, Structurable):
 				### try to find it in the Domain (firstly)
 				if dir_name in python_path:
 
-					path = os.path.join(HOME_PATH, relpath(str(model_path[model_path.index(dir_name):]).strip('[]')))
+					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(model_path[model_path.index(dir_name):]).strip('[]')))
 
 					### try to find it in exportedPathList (after Domain check)
 					if not os.path.exists(path):
@@ -3573,7 +3574,8 @@ class ContainerBlock(Block, Diagram, Structurable):
 		### if the model path is empty and the python path is wrong
 		elif not os.path.exists(python_path):
 			if dir_name in python_path:
-				path = os.path.join(HOME_PATH, relpath(str(python_path[python_path.index(dir_name):]).strip('[]')))
+
+				path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(python_path[python_path.index(dir_name):]).strip('[]')))
 				state['python_path'] = paths
 
 				if not os.path.exists(path):
