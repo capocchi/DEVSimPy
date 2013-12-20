@@ -388,9 +388,6 @@ class MainApplication(wx.Frame):
 				self.cfg.Write('ChargedDomainList', str(eval('chargedDomainList')))
 				### load language
 				self.language = eval(self.cfg.Read("language"))
-				### load any plugins from the list
-				for plugin in eval(self.cfg.Read("plugins")):
-					load_plugins(plugin)
 
 				### load perspective profile
 				self.perspectives = eval(self.cfg.Read("perspectives"))
@@ -434,6 +431,11 @@ class MainApplication(wx.Frame):
 				else:
 					sys.stdout.write("It seems that DEVSimPy source directory has been moved.\n")
 					self.WriteDefaultConfigFile(self.cfg)
+
+				### load any plugins from the list
+				### here because it needs to PLUGINS_PATH macro defined in D
+				for plugin in eval(self.cfg.Read("plugins")):
+					load_plugins(plugin)
 
 				sys.stdout.write("DEVSimPy is ready.\n")
 

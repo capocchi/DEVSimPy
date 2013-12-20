@@ -6,18 +6,18 @@ import sys
 import imp
 import os
 
-# list of registred plugins
+# list of registred plug-ins
 plugins = defaultdict(list)
-# list of disable event plugin
+# list of disable event plug-in
 disabled_event = []
-# list of disbaled plugins
+# list of disabled plug-ins
 disabled_plugin = []
 
 def idle(*args, **kwargs):
 	pass
 
 def register(*events):
-	""" This decorator is to be used for registering a function as a plugin for
+	""" This decorator is to be used for registering a function as a plug-in for
 		a specific event or list of events.
 	"""
 	def registered_plugin(funct):
@@ -27,7 +27,7 @@ def register(*events):
 	return registered_plugin
 
 def enable_plugin(plugin):
-	""" Remove resp. the plugin and the event from the disabled_plugin and disabled_event lists.
+	""" Remove resp. the plug-in and the event from the disabled_plugin and disabled_event lists.
 	"""
 	for c in plugins.items():
 		event, functions = c
@@ -59,16 +59,16 @@ def is_enable(plugin):
 		return plugin in plugins.values()
 
 def trigger_event(event, *args, **kwargs):
-	""" Call this function to trigger an event. It will run any plugins that
+	""" Call this function to trigger an event. It will run any plug-ins that
 		have registered themselves to the event. Any additional arguments or
-		keyword arguments you pass in will be passed to the plugins.
+		keyword arguments you pass in will be passed to the plug-ins.
 	"""
 	for plugin in plugins[event]:
 		if event not in disabled_event:
 			plugin(*args, **kwargs)
 
 def load_plugins(module_name):
-	""" This reads a plugins list to load. It is so plugin
+	""" This reads a plug-ins list to load. It is so plug-in
 		imports are more dynamic and you don't need to continue appending
 		import statements to the top of a file.
 	"""
@@ -82,5 +82,6 @@ def load_plugins(module_name):
 			f.close()
 			return module
 		except Exception, info:
-			sys.stderr.write("Error trying to import plugin %s : %s\n"%(module_name, info))
+			msg = _("Path of plug-ins directory is wrong.") if not os.path.exists(PLUGINS_PATH) else ""
+			sys.stderr.write("Error trying to import plug-in %s : %s\n%s"%(module_name, info, msg))
 			return info
