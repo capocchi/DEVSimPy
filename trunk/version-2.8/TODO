@@ -24,7 +24,9 @@
 stratégies proposées prennent en compte le type d'algorithme utilisé (mise à plat, distribué, //...) et le type de simulateur DEVS (avec des fonctions de transition particulière comme deta_conv, delta_ext, delta_fault).
 En sachant qu'il faut être capable de simuler des systèmes composé de modèles qui n'appartienne pas au même sous-formalisme DEVS.
 -N3 : reflechir sur le changement facile des icons et changer les icons avec la lib oxygen: http://www.iconfinder.com/search/?q=perspective%20new
--N3 : implémenter l'update de devsimpy à partir des sources svn en http*-N3 : faire un self.panel dans le CheckGUI
+-N3 : implémenter l'update de devsimpy � partir des sources svn en http
+-N3 : faire un self.panel dans le CheckGUI
+-N1 : impl�menter la fonction Relaod d'un diagram pour faire celle ci � la main (par clic droit sur l'onglet) ou automatiquement lorsque 'on change de package de simulation
 
 ----------------------------------------------------------------Remarques----------------------------------------------------------------
 

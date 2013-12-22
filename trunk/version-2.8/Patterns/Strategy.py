@@ -485,7 +485,7 @@ class SimStrategy3(SimStrategy):
 
 				### TODO: execute with process of model are parallel !
 				while(priority_scheduler):
-					### get most priority model and apply its internal trnasition
+					### get most priority model and apply its internal transition
 					priority, model, transition_fct = heapq.heappop(priority_scheduler)
 					apply(transition_fct, (model,))
 
@@ -523,10 +523,7 @@ class SimStrategy4(SimStrategy):
 				path = __builtin__.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
     			### split from DEVSKernel string and replace separator with point
 				d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
-
 				exec "from DEVSKernel%s.simulator import Simulator"%d
-
-		#from DEVSKernel.PyPDEVS.simulator import Simulator
 
 		S = Simulator(self._simulator.model)
 
