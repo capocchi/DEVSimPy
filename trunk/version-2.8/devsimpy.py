@@ -145,7 +145,9 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'bitmaps', 'splash.png
 				'TRANSPARENCY' : True, # Transparancy for DetachedFrame
 				'DEFAULT_PLOT_DYN_FREQ' : 100, # frequence of dynamic plot of QuickScope (to avoid overhead),
 				'DEFAULT_DEVS_DIRNAME':'PyDEVS', # default DEVS Kernel directory
-				'DEVS_DIR_PATH_DICT':{'PyDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS')}
+				'DEVS_DIR_PATH_DICT':{'PyDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyDEVS'),
+									'PyPDEVS_221':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs221' ,'src'),
+									'PyPDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','old')}
 				}
 
 ### here berfore the __main__ function

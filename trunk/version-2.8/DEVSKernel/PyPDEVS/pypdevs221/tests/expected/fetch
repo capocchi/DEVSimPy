@@ -1,0 +1,6 @@
+Generator: 1.0
+Processor1.Processor1: 0.66
+Processor1.Processor2: 0.66
+Processor2.Processor1: inf
+Processor2.Processor2: inf
+Processor2.Processor3: 0.3

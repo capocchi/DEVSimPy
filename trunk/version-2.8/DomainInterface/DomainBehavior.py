@@ -18,8 +18,6 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-
-
 import __builtin__
 
 ### jsut for individual test
@@ -37,34 +35,16 @@ if __name__ == '__main__':
 	if d not in sys.path:
 		sys.path.append(d)
 
-##### Get .devsimpy file
-##import wx
-##sp = wx.StandardPaths.Get()
-##config_file_path = os.path.join(sp.GetUserConfigDir(), '.devsimpy')
-##
-##### if config file exist
-##if os.exists(config_file_path):
-##
-##	f = open(config_file_path, 'r')
-##	for line in  f.readlines():
-##		if 'builtin_dict' in line:
-##			exec line
-##			break
-##	f.close()
-##
-##	### try to find builtin_dict variable in config file
-##	try:
-##		DEFAULT_DEVS_DIRNAME = builtin_dict['DEFAULT_DEVS_DIRNAME']
-##	### if config file not contain builtin_dict, we load it from builtin definde by devsimpy.py before all import...
-##	except NameError:
-##		import __builtin__
-##        DEFAULT_DEVS_DIRNAME =__builtin__.__dict__['DEFAULT_DEVS_DIRNAME']
+import re
+import os
 
-
+### import the DEVS module depending on the selected DEVS package in DEVSKernel directory
 for pydevs_dir in __builtin__.__dict__['DEVS_DIR_PATH_DICT']:
-	if pydevs_dir == __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
-		exec "import DEVSKernel.%s.DEVS as BaseDEVS"%(pydevs_dir)
-
+    if pydevs_dir == __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
+        path = __builtin__.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
+        ### split from DEVSKernel string and replace separator with point
+        d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
+        exec "import DEVSKernel%s.DEVS as BaseDEVS"%(d)
 #    ======================================================================    #
 class DomainBehavior(BaseDEVS.AtomicDEVS):
 	""" Abstract DomainBehavior class.

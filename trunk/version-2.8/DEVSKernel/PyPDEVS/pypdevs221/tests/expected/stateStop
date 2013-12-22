@@ -1,0 +1,109 @@
+
+__  Current Time:       0.00 __________________________________________ 
+
+
+	INITIAL CONDITIONS in model <Chain.CoupledGenerator.Generator>
+		Initial State: 1.0
+		Next scheduled internal transition at time 1.00
+
+
+	INITIAL CONDITIONS in model <Chain.CoupledProcessor_2.Processor0>
+		Initial State: inf
+		Next scheduled internal transition at time inf
+
+
+	INITIAL CONDITIONS in model <Chain.CoupledProcessor_2.Processor1>
+		Initial State: inf
+		Next scheduled internal transition at time inf
+
+
+	INITIAL CONDITIONS in model <Chain.CoupledProcessor_3.Processor0>
+		Initial State: inf
+		Next scheduled internal transition at time inf
+
+
+	INITIAL CONDITIONS in model <Chain.CoupledProcessor_3.Processor1>
+		Initial State: inf
+		Next scheduled internal transition at time inf
+
+
+	INITIAL CONDITIONS in model <Chain.CoupledProcessor_3.Processor2>
+		Initial State: inf
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       1.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Chain.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 0.66
+		Next scheduled internal transition at time 1.66
+
+
+	INTERNAL TRANSITION in model <Chain.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 2.00
+
+
+__  Current Time:       1.66 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Chain.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 0.66
+		Next scheduled internal transition at time 2.32
+
+
+	INTERNAL TRANSITION in model <Chain.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       2.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Chain.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 0.66
+		Next scheduled internal transition at time 2.66
+
+
+	INTERNAL TRANSITION in model <Chain.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 3.00
+
+
+__  Current Time:       2.32 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Chain.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 2.62
+
+
+	INTERNAL TRANSITION in model <Chain.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+

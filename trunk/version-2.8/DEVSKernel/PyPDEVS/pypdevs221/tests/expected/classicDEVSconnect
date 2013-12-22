@@ -1,0 +1,169 @@
+
+__  Current Time:       0.00 __________________________________________ 
+
+
+	INITIAL CONDITIONS in model <Root.Coupled.P1>
+		Initial State: None
+		Next scheduled internal transition at time inf
+
+
+	INITIAL CONDITIONS in model <Root.Coupled.P1>
+		Initial State: None
+		Next scheduled internal transition at time inf
+
+
+	INITIAL CONDITIONS in model <Root.Gen>
+		Initial State: True
+		Next scheduled internal transition at time 1.00
+
+
+	INITIAL CONDITIONS in model <Root.P1>
+		Initial State: None
+		Next scheduled internal transition at time inf
+
+
+	INITIAL CONDITIONS in model <Root.P2>
+		Initial State: (None, None)
+		Next scheduled internal transition at time inf
+
+
+	INITIAL CONDITIONS in model <Root.PO2>
+		Initial State: None
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       1.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Coupled.P1>
+		Input Port Configuration:
+			port <inport>:
+				3
+		New State: 3
+		Next scheduled internal transition at time 2.00
+
+
+	EXTERNAL TRANSITION in model <Root.Coupled.P1>
+		Input Port Configuration:
+			port <inport>:
+				3
+		New State: 3
+		Next scheduled internal transition at time 2.00
+
+
+	INTERNAL TRANSITION in model <Root.Gen>
+		New State: False
+		Output Port Configuration:
+			port <outport>:
+				3
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       2.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.P1>
+		Input Port Configuration:
+			port <inport>:
+				3
+		New State: 3
+		Next scheduled internal transition at time 3.00
+
+
+	EXTERNAL TRANSITION in model <Root.P2>
+		Input Port Configuration:
+			port <inport1>:
+				3
+			port <inport2>:
+				3
+		New State: (3, 3)
+		Next scheduled internal transition at time 3.00
+
+
+	INTERNAL TRANSITION in model <Root.Coupled.P1>
+		New State: None
+		Output Port Configuration:
+			port <outport>:
+				3
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       2.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.P1>
+		Input Port Configuration:
+			port <inport>:
+				3
+		New State: 3
+		Next scheduled internal transition at time 3.00
+
+
+	EXTERNAL TRANSITION in model <Root.P2>
+		Input Port Configuration:
+			port <inport1>:
+				3
+			port <inport2>:
+				3
+		New State: (3, 3)
+		Next scheduled internal transition at time 3.00
+
+
+	INTERNAL TRANSITION in model <Root.Coupled.P1>
+		New State: None
+		Output Port Configuration:
+			port <outport>:
+				3
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       3.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.PO2>
+		Input Port Configuration:
+			port <inport>:
+				3
+		New State: 3
+		Next scheduled internal transition at time 4.00
+
+
+	INTERNAL TRANSITION in model <Root.P1>
+		New State: None
+		Output Port Configuration:
+			port <outport>:
+				3
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       3.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.PO2>
+		Input Port Configuration:
+			port <inport>:
+				(3, 3)
+		New State: (3, 3)
+		Next scheduled internal transition at time 4.00
+
+
+	INTERNAL TRANSITION in model <Root.P2>
+		New State: (None, None)
+		Output Port Configuration:
+			port <outport>:
+				(3, 3)
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       4.00 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.PO2>
+		New State: None
+		Output Port Configuration:
+			port <outport1>:
+				(3, 3)
+			port <outport2>:
+				(3, 3)
+		Next scheduled internal transition at time inf
+

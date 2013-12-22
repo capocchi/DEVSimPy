@@ -1,0 +1,1912 @@
+
+__  Current Time:       0.00 __________________________________________ 
+
+
+	INITIAL CONDITIONS in model <Coupled.Generator>
+		Initial State: 1.0
+		Next scheduled internal transition at time 1.00
+
+
+	INITIAL CONDITIONS in model <Coupled.RandomProcessor_1>
+		Initial State: Random Processor State -- 0.662783459103
+		Next scheduled internal transition at time inf
+
+
+	INITIAL CONDITIONS in model <Coupled.RandomProcessor_2>
+		Initial State: Random Processor State -- 2.8812925341
+		Next scheduled internal transition at time inf
+
+
+	INITIAL CONDITIONS in model <Coupled.RandomProcessor_3>
+		Initial State: Random Processor State -- 0.942504493148
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       1.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.662783459103
+		Next scheduled internal transition at time 1.66
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 2.00
+
+
+__  Current Time:       1.66 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 2.8812925341
+		Next scheduled internal transition at time 4.54
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 1.76309843583
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       2.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.76309843583
+		Next scheduled internal transition at time 3.76
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 3.00
+
+
+__  Current Time:       3.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.763098435829
+		Next scheduled internal transition at time 3.76
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 4.00
+
+
+__  Current Time:       3.76 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.780977534101
+		Next scheduled internal transition at time 4.54
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 1.651222571
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 5.41
+
+
+__  Current Time:       4.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.414320571
+		Next scheduled internal transition at time 5.41
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 5.00
+
+
+__  Current Time:       4.54 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.942504493148
+		Next scheduled internal transition at time 5.49
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 1.89791981345
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 6.44
+
+
+__  Current Time:       5.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.414320571
+		Next scheduled internal transition at time 5.41
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 6.00
+
+
+__  Current Time:       5.41 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.02767481345
+		Next scheduled internal transition at time 6.44
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 0.619383838685
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 6.03
+
+
+__  Current Time:       5.49 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 0.824512540549
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       6.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.033704838685
+		Next scheduled internal transition at time 6.03
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 7.00
+
+
+__  Current Time:       6.03 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.408290813452
+		Next scheduled internal transition at time 6.44
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 1.31312567973
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 7.35
+
+
+__  Current Time:       6.44 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.824512540549
+		Next scheduled internal transition at time 7.27
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 2.42934685553
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 8.87
+
+
+__  Current Time:       7.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.346830679727
+		Next scheduled internal transition at time 7.35
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 8.00
+
+
+__  Current Time:       7.27 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 1.06264545705
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       7.35 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.52451185553
+		Next scheduled internal transition at time 8.87
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 0.665444625669
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 8.01
+
+
+__  Current Time:       8.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.012275625669
+		Next scheduled internal transition at time 8.01
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 9.00
+
+
+__  Current Time:       8.01 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.859066855528
+		Next scheduled internal transition at time 8.87
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 2.75585952845
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 10.77
+
+
+__  Current Time:       8.87 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.06264545705
+		Next scheduled internal transition at time 9.93
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 1.72360200228
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 10.59
+
+
+__  Current Time:       9.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.76813552845
+		Next scheduled internal transition at time 10.77
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 10.00
+
+
+__  Current Time:       9.93 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 2.17026902731
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      10.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.768135528449
+		Next scheduled internal transition at time 10.77
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 11.00
+
+
+__  Current Time:      10.59 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 2.17026902731
+		Next scheduled internal transition at time 12.77
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 1.22700400123
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 11.82
+
+
+__  Current Time:      10.77 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.05381300123
+		Next scheduled internal transition at time 11.82
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 2.1368305815
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 12.90
+
+
+__  Current Time:      11.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.9049665815
+		Next scheduled internal transition at time 12.90
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 12.00
+
+
+__  Current Time:      11.82 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.943265027307
+		Next scheduled internal transition at time 12.77
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 1.27516405335
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 13.10
+
+
+__  Current Time:      12.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.904966581498
+		Next scheduled internal transition at time 12.90
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 13.00
+
+
+__  Current Time:      12.77 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 0.57174357472
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 13.34
+
+
+__  Current Time:      12.90 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.19214605335
+		Next scheduled internal transition at time 13.10
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 1.22876728228
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 14.13
+
+
+__  Current Time:      13.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.13373428228
+		Next scheduled internal transition at time 14.13
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 14.00
+
+
+__  Current Time:      13.10 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.23984457472
+		Next scheduled internal transition at time 13.34
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 0.373581261646
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 13.47
+
+
+__  Current Time:      13.34 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 2.48277556712
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 15.82
+
+
+__  Current Time:      13.47 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 2.34903956712
+		Next scheduled internal transition at time 15.82
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 1.17177555843
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 14.64
+
+
+__  Current Time:      14.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.13373428228
+		Next scheduled internal transition at time 14.13
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 15.00
+
+
+__  Current Time:      14.13 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.508735558432
+		Next scheduled internal transition at time 14.64
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 0.993456405616
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 15.13
+
+
+__  Current Time:      14.64 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.17726356712
+		Next scheduled internal transition at time 15.82
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 2.12749071559
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 16.77
+
+
+__  Current Time:      15.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.127190405616
+		Next scheduled internal transition at time 15.13
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 16.00
+
+
+__  Current Time:      15.13 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.64277071559
+		Next scheduled internal transition at time 16.77
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 1.30281878165
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 16.43
+
+
+__  Current Time:      15.82 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 0.418142303769
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 16.24
+
+
+__  Current Time:      16.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.430008781647
+		Next scheduled internal transition at time 16.43
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 17.00
+
+
+__  Current Time:      16.24 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 2.39292268865
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 18.63
+
+
+__  Current Time:      16.43 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.339951715589
+		Next scheduled internal transition at time 16.77
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 1.74965977398
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 18.18
+
+
+__  Current Time:      16.77 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.86083768865
+		Next scheduled internal transition at time 18.63
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 1.47653810422
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 18.25
+
+
+__  Current Time:      17.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.17966877398
+		Next scheduled internal transition at time 18.18
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 18.00
+
+
+__  Current Time:      18.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.179668773981
+		Next scheduled internal transition at time 18.18
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 19.00
+
+
+__  Current Time:      18.18 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.0668301042241
+		Next scheduled internal transition at time 18.25
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 1.42122536731
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 19.60
+
+
+__  Current Time:      18.25 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.384299688646
+		Next scheduled internal transition at time 18.63
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 0.572422629753
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 18.82
+
+
+__  Current Time:      18.63 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 2.69326404012
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 21.32
+
+
+__  Current Time:      18.82 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 2.50514104012
+		Next scheduled internal transition at time 21.32
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 1.08144155019
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 19.90
+
+
+__  Current Time:      19.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.600894367311
+		Next scheduled internal transition at time 19.60
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 20.00
+
+
+__  Current Time:      19.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.29946955019
+		Next scheduled internal transition at time 19.90
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 2.9033528312
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 22.50
+
+
+__  Current Time:      19.90 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.42369904012
+		Next scheduled internal transition at time 21.32
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 1.43462104923
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 21.33
+
+
+__  Current Time:      20.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 2.5042468312
+		Next scheduled internal transition at time 22.50
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 21.00
+
+
+__  Current Time:      21.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.5042468312
+		Next scheduled internal transition at time 22.50
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 22.00
+
+
+__  Current Time:      21.32 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 0.849074539475
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 22.17
+
+
+__  Current Time:      21.33 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.838152539475
+		Next scheduled internal transition at time 22.17
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 0.531681834534
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      22.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.504246831204
+		Next scheduled internal transition at time 22.50
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 23.00
+
+
+__  Current Time:      22.17 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 0.344495880264
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 22.52
+
+
+__  Current Time:      22.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.531681834534
+		Next scheduled internal transition at time 23.04
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 0.339687549306
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 22.84
+
+
+__  Current Time:      22.52 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 2.90198766458
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 25.42
+
+
+__  Current Time:      22.84 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.191993834534
+		Next scheduled internal transition at time 23.04
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 0.388242993386
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 23.23
+
+
+__  Current Time:      23.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.232177993386
+		Next scheduled internal transition at time 23.23
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 24.00
+
+
+__  Current Time:      23.04 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 2.38369266458
+		Next scheduled internal transition at time 25.42
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 1.59745737453
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 24.63
+
+
+__  Current Time:      23.23 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.40120837453
+		Next scheduled internal transition at time 24.63
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 2.41192607017
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 25.64
+
+
+__  Current Time:      24.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.64410407017
+		Next scheduled internal transition at time 25.64
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 25.00
+
+
+__  Current Time:      24.63 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.786235664575
+		Next scheduled internal transition at time 25.42
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 1.44393799632
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 26.08
+
+
+__  Current Time:      25.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.644104070169
+		Next scheduled internal transition at time 25.64
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 26.00
+
+
+__  Current Time:      25.42 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 1.80850984
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 27.23
+
+
+__  Current Time:      25.64 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.433219996315
+		Next scheduled internal transition at time 26.08
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 1.32823744592
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 26.97
+
+
+__  Current Time:      26.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.972341445922
+		Next scheduled internal transition at time 26.97
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 27.00
+
+
+__  Current Time:      26.08 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.15080784
+		Next scheduled internal transition at time 27.23
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 0.310590694884
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 26.39
+
+
+__  Current Time:      26.39 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.840216839997
+		Next scheduled internal transition at time 27.23
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 0.58650281823
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      26.97 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.58650281823
+		Next scheduled internal transition at time 27.56
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 1.94766271555
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 28.92
+
+
+__  Current Time:      27.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.92000371555
+		Next scheduled internal transition at time 28.92
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 28.00
+
+
+__  Current Time:      27.23 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 1.12797623332
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 28.36
+
+
+__  Current Time:      27.56 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.797264233317
+		Next scheduled internal transition at time 28.36
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 2.73101191782
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      28.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.920003715554
+		Next scheduled internal transition at time 28.92
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 29.00
+
+
+__  Current Time:      28.36 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 2.85331597887
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 31.21
+
+
+__  Current Time:      28.92 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 2.73101191782
+		Next scheduled internal transition at time 31.65
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 2.72001129166
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 31.64
+
+
+__  Current Time:      29.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 2.64001529166
+		Next scheduled internal transition at time 31.64
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 30.00
+
+
+__  Current Time:      30.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.64001529166
+		Next scheduled internal transition at time 31.64
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 31.00
+
+
+__  Current Time:      31.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.640015291664
+		Next scheduled internal transition at time 31.64
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 32.00
+
+
+__  Current Time:      31.21 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 2.93665743396
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 34.15
+
+
+__  Current Time:      31.64 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.0110009178169
+		Next scheduled internal transition at time 31.65
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 1.21050695682
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 32.85
+
+
+__  Current Time:      31.65 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 2.49506543396
+		Next scheduled internal transition at time 34.15
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 0.322862125191
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 31.97
+
+
+__  Current Time:      31.97 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 2.17220343396
+		Next scheduled internal transition at time 34.15
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 2.78390982226
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      32.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.850521956819
+		Next scheduled internal transition at time 32.85
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 33.00
+
+
+__  Current Time:      32.85 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 2.78390982226
+		Next scheduled internal transition at time 35.63
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 0.467833929237
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 33.32
+
+
+__  Current Time:      33.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.318355929237
+		Next scheduled internal transition at time 33.32
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 34.00
+
+
+__  Current Time:      33.32 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 2.31607582226
+		Next scheduled internal transition at time 35.63
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 1.38939228409
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 34.71
+
+
+__  Current Time:      34.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.707748284086
+		Next scheduled internal transition at time 34.71
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 35.00
+
+
+__  Current Time:      34.15 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 2.88581692608
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 37.03
+
+
+__  Current Time:      34.71 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.92668382226
+		Next scheduled internal transition at time 35.63
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 2.73750544142
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 37.45
+
+
+__  Current Time:      35.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 2.44525344142
+		Next scheduled internal transition at time 37.45
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 36.00
+
+
+__  Current Time:      35.63 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.39746592608
+		Next scheduled internal transition at time 37.03
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 1.09825287781
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 36.73
+
+
+__  Current Time:      36.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.44525344142
+		Next scheduled internal transition at time 37.45
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 37.00
+
+
+__  Current Time:      36.73 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.299212926079
+		Next scheduled internal transition at time 37.03
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 2.39377040104
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 39.13
+
+
+__  Current Time:      37.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.445253441418
+		Next scheduled internal transition at time 37.45
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 38.00
+
+
+__  Current Time:      37.03 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 1.51208059577
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 38.54
+
+
+__  Current Time:      37.45 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.68120240104
+		Next scheduled internal transition at time 39.13
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 0.436404969396
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 37.88
+
+
+__  Current Time:      37.88 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.24479740104
+		Next scheduled internal transition at time 39.13
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 1.87828724607
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 39.76
+
+
+__  Current Time:      38.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.75994524607
+		Next scheduled internal transition at time 39.76
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 39.00
+
+
+__  Current Time:      38.54 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		New State: Random Processor State -- 1.68032445603
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 40.22
+
+
+__  Current Time:      39.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.759945246071
+		Next scheduled internal transition at time 39.76
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 40.00
+
+
+__  Current Time:      39.13 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_3>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.09784845603
+		Next scheduled internal transition at time 40.22
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		New State: Random Processor State -- 2.48167407848
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 41.61
+
+
+__  Current Time:      39.76 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_2>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 1.84818407848
+		Next scheduled internal transition at time 41.61
+
+
+	INTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		New State: Random Processor State -- 0.87361238978
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 40.63
+
+
+__  Current Time:      40.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Coupled.RandomProcessor_1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: Random Processor State -- 0.63355738978
+		Next scheduled internal transition at time 40.63
+
+
+	INTERNAL TRANSITION in model <Coupled.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 41.00
+

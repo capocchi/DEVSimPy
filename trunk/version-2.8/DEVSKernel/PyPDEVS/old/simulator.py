@@ -17,7 +17,7 @@
 #  - A lot of optimizations, especially for atomic models
 # Version 2.0                                        last modified: 30/01/13
 #  - Allow distributed and parallel simulation
-#    
+#
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -33,7 +33,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 
-##  IMPORTS 
+##  IMPORTS
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 # Import for uniform random number generators
@@ -89,7 +89,7 @@ class Simulator(object):
     """
     Associates a hierarchical DEVS model with the simulation engine.
     """
-  
+
     ###
     def __init__(self, model):
         """
@@ -101,6 +101,7 @@ class Simulator(object):
                          nested simulation or parallel simulation
         """
         controller = 0
+
         if model is not None and not isinstance(model, CoupledDEVS):
             raise DEVSException("Currently, only Coupled models can be simulated; \nThis could also mean that there are ambiguous imports for the model and the experiment file.\nE.g. caused by symlinks or different import mechanisms\nExpected: " + str(CoupledDEVS) + ", got: " + str(model.__class__.name))
 
@@ -155,16 +156,16 @@ class Simulator(object):
 
     ###
     def simulate(self,
-                 termination_condition=None, 
+                 termination_condition=None,
                  termination_time=float('inf'),
-                 verbose=False, 
-                 xml=False, 
-                 vcd=False, 
+                 verbose=False,
+                 xml=False,
+                 vcd=False,
                  termination_location=None,
-                 logaddress=('localhost', 514), 
+                 logaddress=('localhost', 514),
                  loglevel=logging.WARN,
-                 outfile=None, 
-                 GVT_freq=1, 
+                 outfile=None,
+                 GVT_freq=1,
                  CHK_freq=-1,
                  state_saving=2,
                  seed=1,
@@ -218,7 +219,7 @@ class Simulator(object):
             GVT_freq - the interval that should be used between two consecutive GVT
                        calculations (in seconds). This interval should not be too
                        small as it will completely stall simulation. Should be at
-                       least 1 second. 
+                       least 1 second.
             CHK_freq - the number of GVT rounds to pass before creating a new
                        checkpoint. Set this to -1 to prevent checkpoint creation.
                        Only possible if MPI is used as a backend
@@ -227,7 +228,7 @@ class Simulator(object):
                                can copy everything, but very slow
                             1: use pickle with protocol 0
                                can copy most things, relatively slow
-                            2: use pickle with highest available protocol 
+                            2: use pickle with highest available protocol
                                can copy most things, relatively fast
                             3: use copy (UNSAFE)
                                makes a shallow copy, fast
@@ -269,7 +270,7 @@ class Simulator(object):
         self.verbose = verbose
         self.outfile = outfile
         self.xml = xml
-        self.vcd = vcd 
+        self.vcd = vcd
         self.address = logaddress
         self.loglevel=loglevel
         self.seed=seed
@@ -304,12 +305,12 @@ class Simulator(object):
                 # Most of these are not strictly needed at each kernel, though it
                 # allows for performance optimisations (e.g. not sending verbose output
                 # if the controller will not use it)
-                proxy.setGlobals(verbose=verbose, 
-                                 xml=xml, 
-                                 vcd=vcd, 
-                                 address=logaddress, 
-                                 loglevel=loglevel, 
-                                 controller=self.controller_name, 
+                proxy.setGlobals(verbose=verbose,
+                                 xml=xml,
+                                 vcd=vcd,
+                                 address=logaddress,
+                                 loglevel=loglevel,
+                                 controller=self.controller_name,
                                  seed=seed,
                                  gvtfrequency=self.GVT_freq,
                                  checkpointfrequency=self.CHK_freq,
@@ -318,7 +319,7 @@ class Simulator(object):
                                  manualCopy=manualCopy,
                                  allowNested=allowNested,
                                  disallowIrreversible=disallowIrreversible,
-                                 realtime=realtime, 
+                                 realtime=realtime,
                                  inputReferences=realTimeInputPortReferences)
                 proxy.buildList()
 
@@ -377,7 +378,7 @@ class Simulator(object):
                     raise DEVSException("Unknown threading subsystem: " + str(subsystem))
                 generator = environments.AsynchronousComboGenerator(generatorfile, subsystem)
                 RTthreads.main(server.simstack[0].model, generator, server.simstack[0], subsystem)
-                
+
         except DEVSException as e:
             print(e)
             # Should also exit on a DEVSException since this isn't really meant to happen

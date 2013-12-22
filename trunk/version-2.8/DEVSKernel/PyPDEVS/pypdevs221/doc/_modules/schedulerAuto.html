@@ -1,0 +1,187 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>schedulerAuto &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for schedulerAuto</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: Latin-1 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Automaticly polymorphic scheduler. It will automatically adapt to your scheduling requests, though at a slight overhead due to the indirection and statistics gathering. If you know what is your optimal scheduler, please choose this one. If the access pattern varies throughout the simulation, this scheduler is perfect for you. It will choose between the HeapSet and Minimal List scheduler.</span>
+
+<span class="sd">.. warning:: Barely tested, certainly not with distribution and relocation!!! **Use with caution!!!***</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">schedulerHS</span> <span class="kn">import</span> <span class="n">SchedulerHS</span>
+<span class="kn">from</span> <span class="nn">schedulerML</span> <span class="kn">import</span> <span class="n">SchedulerML</span>
+
+<div class="viewcode-block" id="SchedulerAuto"><a class="viewcode-back" href="../schedulerAuto_int.html#schedulerAuto.SchedulerAuto">[docs]</a><span class="k">class</span> <span class="nc">SchedulerAuto</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The polymorphic scheduler class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SchedulerAuto.__init__"><a class="viewcode-back" href="../schedulerAuto_int.html#schedulerAuto.SchedulerAuto.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">totalModels</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+
+<span class="sd">        :param models: the models to schedule</span>
+<span class="sd">        :param epsilon: the allowed deviation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">epsilon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">models</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">totalModels</span> <span class="o">=</span> <span class="n">totalModels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schedulerType</span> <span class="o">=</span> <span class="n">SchedulerHS</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subscheduler</span> <span class="o">=</span> <span class="n">SchedulerHS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">,</span> <span class="n">totalModels</span><span class="p">)</span>
+
+        <span class="c"># Statistics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">totalSchedules</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collidingSchedules</span> <span class="o">=</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="SchedulerAuto.swapSchedulerTo"><a class="viewcode-back" href="../schedulerAuto_int.html#schedulerAuto.SchedulerAuto.swapSchedulerTo">[docs]</a>    <span class="k">def</span> <span class="nf">swapSchedulerTo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Swap the current subscheduler to the provided one. If the scheduler is already in use, no change happens.</span>
+
+<span class="sd">        :param scheduler: the *class* to switch to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">scheduler</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedulerType</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schedulerType</span> <span class="o">=</span> <span class="n">scheduler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subscheduler</span> <span class="o">=</span> <span class="n">scheduler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">totalModels</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SchedulerAuto.schedule"><a class="viewcode-back" href="../schedulerAuto_int.html#schedulerAuto.SchedulerAuto.schedule">[docs]</a>    <span class="k">def</span> <span class="nf">schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Schedule a model</span>
+
+<span class="sd">        :param model: the model to schedule</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">subscheduler</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SchedulerAuto.unschedule"><a class="viewcode-back" href="../schedulerAuto_int.html#schedulerAuto.SchedulerAuto.unschedule">[docs]</a>    <span class="k">def</span> <span class="nf">unschedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unschedule a model</span>
+
+<span class="sd">        :param model: the mode to unschedule</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">subscheduler</span><span class="o">.</span><span class="n">unschedule</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SchedulerAuto.massReschedule"><a class="viewcode-back" href="../schedulerAuto_int.html#schedulerAuto.SchedulerAuto.massReschedule">[docs]</a>    <span class="k">def</span> <span class="nf">massReschedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reschedule_set</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reschedule all models</span>
+
+<span class="sd">        :param reschedule_set: the set of models to reschedule</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collidingSchedules</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">reschedule_set</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">totalSchedules</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">totalSchedules</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">collidingSchedules</span> <span class="o">&gt;</span> <span class="mi">5</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">):</span>
+                <span class="c"># This means that 5/100 of the models is scheduled in every iteration</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">swapSchedulerTo</span><span class="p">(</span><span class="n">SchedulerML</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">collidingSchedules</span> <span class="o">&lt;</span> <span class="mi">500</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">swapSchedulerTo</span><span class="p">(</span><span class="n">SchedulerHS</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">collidingSchedules</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">totalSchedules</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">subscheduler</span><span class="o">.</span><span class="n">massReschedule</span><span class="p">(</span><span class="n">reschedule_set</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SchedulerAuto.readFirst"><a class="viewcode-back" href="../schedulerAuto_int.html#schedulerAuto.SchedulerAuto.readFirst">[docs]</a>    <span class="k">def</span> <span class="nf">readFirst</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetch the time of the first model</span>
+
+<span class="sd">        :returns: (time, age) -- time of the first scheduled model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">subscheduler</span><span class="o">.</span><span class="n">readFirst</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="SchedulerAuto.getImminent"><a class="viewcode-back" href="../schedulerAuto_int.html#schedulerAuto.SchedulerAuto.getImminent">[docs]</a>    <span class="k">def</span> <span class="nf">getImminent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the imminent models for the provided time</span>
+
+<span class="sd">        :param time: time to check for</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">subscheduler</span><span class="o">.</span><span class="n">getImminent</span><span class="p">(</span><span class="n">time</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

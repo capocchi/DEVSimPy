@@ -1,0 +1,192 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Random Number Generation &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Advanced examples" href="advanced.html" />
+    <link rel="next" title="Distributed Termination" href="distributedtermination.html" />
+    <link rel="prev" title="Location-specific scheduler" href="locationscheduler.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="distributedtermination.html" title="Distributed Termination"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="locationscheduler.html" title="Location-specific scheduler"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" accesskey="U">Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="random-number-generation">
+<h1>Random Number Generation<a class="headerlink" href="#random-number-generation" title="Permalink to this headline">¶</a></h1>
+<p>Using the normal <em>random</em> library during simulation is not recommended in situations where repeatability is desired. Even though the <em>random</em> library uses a seed to guarantee determinism, this seed is part of a global state and is thus <strong>not</strong> allowed in pure DEVS. In sequential classic DEVS, this most likely doesn&#8217;t pose a real problem, though even then it is possible that it might go wrong.</p>
+<p>To solve these problems, a very basic <em>random number generator</em> is included in the simulator. The model that needs random numbers should create an instantiation of this generator and save it <strong>in its state</strong>. All random numbers should afterwards be requested from this object. The random number generator class will take special measures to ensure that the seed is actually encapsulated in the object itself and doesn&#8217;t rely on the global seed.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Even though the random number generator classes are not influenced by calls to the <em>random</em> library, the reverse is true. This is due to the class simply being a wrapper, which still redirects its calls to the library function. This should not pose a problem, as the use of the library function in its pure form should be avoided at all costs.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">While the random number generator class simply redirects its calls to the <em>random</em> library, the returned values will <strong>not</strong> be equal to those provided by the <em>random</em> library through direct access. This is due to the fact that another random number is generated to be used as a seed.</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Making calls to the random number generator will alter its state. This means that it is only allowed to make calls on the object from within the <em>intTransition</em>, <em>extTransition</em>, <em>confTransition</em> and <em>__init__</em> methods!</p>
+</div>
+<div class="section" id="overridable">
+<h2>Overridable<a class="headerlink" href="#overridable" title="Permalink to this headline">¶</a></h2>
+<p>Like many parts of the simulator, this random number generator is only provided for convenience. The user might want to have its own special random number generator, one with more functionality, ... This is all possible, though if this is done, it should be similar to the one provided with the simulator. At least, it should implement the <em>__eq__</em>, <em>__hash__</em> and <em>copy</em> methods, with the expected behaviour. Furthermore, such implementations should also encapsulate the seed in one way or the other. Simply relying on the <em>random</em> library to have a correct seed is <strong>unacceptable</strong>.</p>
+</div>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<p>A simple example is provided by this processor, which takes a random time to process a message. While this code is not that spectacular, the importance is that this code will <strong>always</strong> return the same traces, independent of the use of distribution, the presence of revertions, indeterminism in execution order of transition functions, ...</p>
+<p>Such a processor and its state look like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">RandomProcessorState</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">randomGenerator</span> <span class="kn">import</span> <span class="n">RandomGenerator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">randomGenerator</span> <span class="o">=</span> <span class="n">RandomGenerator</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proctime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomGenerator</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Random Processor State -- &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proctime</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">RandomProcessor</span><span class="p">(</span><span class="n">AtomicDEVS</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">):</span>
+        <span class="n">AtomicDEVS</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;RandomProcessor_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">seed</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inport</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addInPort</span><span class="p">(</span><span class="s">&quot;inport&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outport</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addOutPort</span><span class="p">(</span><span class="s">&quot;outport&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">RandomProcessorState</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">intTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">queue</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">proctime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">randomGenerator</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+
+    <span class="k">def</span> <span class="nf">extTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">queue</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">proctime</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">elapsed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">inputs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inport</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+
+    <span class="k">def</span> <span class="nf">outputFnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outport</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">queue</span><span class="p">[</span><span class="mi">0</span><span class="p">]]}</span>
+
+    <span class="k">def</span> <span class="nf">timeAdvance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">queue</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">proctime</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">INFINITY</span>
+</pre></div>
+</div>
+<p>As long as the same seed is passed, the results will always be the same.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Random Number Generation</a><ul>
+<li><a class="reference internal" href="#overridable">Overridable</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="locationscheduler.html"
+                        title="previous chapter">Location-specific scheduler</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="distributedtermination.html"
+                        title="next chapter">Distributed Termination</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/random.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="distributedtermination.html" title="Distributed Termination"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="locationscheduler.html" title="Location-specific scheduler"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" >Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

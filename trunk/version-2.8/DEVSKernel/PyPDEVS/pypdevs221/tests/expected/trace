@@ -1,0 +1,4107 @@
+
+__  Current Time:       0.00 __________________________________________ 
+
+
+	INITIAL CONDITIONS in model <Binary.CoupledGenerator.Generator>
+		Initial State: 1.0
+		Next scheduled internal transition at time 1.00
+
+
+	INITIAL CONDITIONS in model <Binary.CoupledProcessor_2.Processor0>
+		Initial State: inf
+		Next scheduled internal transition at time inf
+
+
+	INITIAL CONDITIONS in model <Binary.CoupledProcessor_2.Processor1>
+		Initial State: inf
+		Next scheduled internal transition at time inf
+
+
+	INITIAL CONDITIONS in model <Binary.CoupledProcessor_3.Processor0>
+		Initial State: inf
+		Next scheduled internal transition at time inf
+
+
+	INITIAL CONDITIONS in model <Binary.CoupledProcessor_3.Processor1>
+		Initial State: inf
+		Next scheduled internal transition at time inf
+
+
+	INITIAL CONDITIONS in model <Binary.CoupledProcessor_3.Processor2>
+		Initial State: inf
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       1.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 1.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 2.00
+
+
+__  Current Time:       1.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 2.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       2.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 2.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 3.00
+
+
+__  Current Time:       2.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 2.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       2.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 2.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       2.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 3.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       2.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 3.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       3.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 3.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 4.00
+
+
+__  Current Time:       3.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       3.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 3.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       3.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 3.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       3.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 4.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       3.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 4.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       4.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 4.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 5.00
+
+
+__  Current Time:       4.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       4.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 4.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       4.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 4.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       4.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 5.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       4.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 5.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       5.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 5.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 6.00
+
+
+__  Current Time:       5.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       5.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 5.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       5.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 5.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       5.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 6.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       5.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 6.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       6.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 6.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 7.00
+
+
+__  Current Time:       6.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       6.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 6.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       6.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 6.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       6.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 7.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       6.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 7.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       7.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 7.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 8.00
+
+
+__  Current Time:       7.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       7.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 7.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       7.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 7.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       7.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 8.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       7.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 8.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       8.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 8.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 9.00
+
+
+__  Current Time:       8.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       8.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 8.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       8.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 8.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       8.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 9.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       8.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 9.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       9.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 9.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 10.00
+
+
+__  Current Time:       9.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       9.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 9.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       9.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 9.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       9.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 10.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       9.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 10.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      10.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 10.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 11.00
+
+
+__  Current Time:      10.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      10.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 10.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      10.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 10.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      10.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 11.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      10.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 11.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      11.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 11.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 12.00
+
+
+__  Current Time:      11.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      11.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 11.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      11.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 11.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      11.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 12.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      11.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 12.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      12.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 12.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 13.00
+
+
+__  Current Time:      12.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      12.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 12.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      12.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 12.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      12.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 13.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      12.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 13.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      13.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 13.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 14.00
+
+
+__  Current Time:      13.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      13.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 13.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      13.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 13.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      13.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 14.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      13.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 14.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      14.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 14.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 15.00
+
+
+__  Current Time:      14.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      14.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 14.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      14.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 14.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      14.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 15.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      14.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 15.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      15.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 15.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 16.00
+
+
+__  Current Time:      15.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      15.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 15.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      15.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 15.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      15.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 16.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      15.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 16.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      16.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 16.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 17.00
+
+
+__  Current Time:      16.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      16.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 16.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      16.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 16.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      16.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 17.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      16.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 17.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      17.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 17.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 18.00
+
+
+__  Current Time:      17.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      17.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 17.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      17.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 17.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      17.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 18.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      17.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 18.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      18.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 18.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 19.00
+
+
+__  Current Time:      18.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      18.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 18.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      18.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 18.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      18.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 19.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      18.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 19.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      19.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 19.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 20.00
+
+
+__  Current Time:      19.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      19.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 19.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      19.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 19.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      19.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 20.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      19.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 20.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      20.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 20.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 21.00
+
+
+__  Current Time:      20.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      20.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 20.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      20.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 20.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      20.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 21.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      20.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 21.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      21.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 21.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 22.00
+
+
+__  Current Time:      21.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      21.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 21.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      21.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 21.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      21.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 22.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      21.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 22.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      22.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 22.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 23.00
+
+
+__  Current Time:      22.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      22.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 22.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      22.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 22.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      22.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 23.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      22.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 23.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      23.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 23.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 24.00
+
+
+__  Current Time:      23.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      23.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 23.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      23.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 23.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      23.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 24.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      23.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 24.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      24.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 24.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 25.00
+
+
+__  Current Time:      24.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      24.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 24.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      24.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 24.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      24.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 25.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      24.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 25.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      25.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 25.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 26.00
+
+
+__  Current Time:      25.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      25.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 25.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      25.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 25.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      25.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 26.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      25.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 26.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      26.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 26.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 27.00
+
+
+__  Current Time:      26.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      26.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 26.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      26.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 26.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      26.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 27.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      26.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 27.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      27.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 27.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 28.00
+
+
+__  Current Time:      27.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      27.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 27.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      27.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 27.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      27.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 28.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      27.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 28.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      28.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 28.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 29.00
+
+
+__  Current Time:      28.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      28.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 28.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      28.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 28.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      28.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 29.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      28.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 29.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      29.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 29.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 30.00
+
+
+__  Current Time:      29.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      29.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 29.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      29.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 29.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      29.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 30.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      29.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 30.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      30.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 30.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 31.00
+
+
+__  Current Time:      30.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      30.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 30.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      30.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 30.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      30.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 31.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      30.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 31.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      31.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 31.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 32.00
+
+
+__  Current Time:      31.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      31.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 31.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      31.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 31.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      31.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 32.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      31.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 32.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      32.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 32.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 33.00
+
+
+__  Current Time:      32.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      32.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 32.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      32.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 32.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      32.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 33.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      32.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 33.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      33.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 33.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 34.00
+
+
+__  Current Time:      33.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      33.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 33.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      33.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 33.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      33.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 34.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      33.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 34.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      34.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 34.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 35.00
+
+
+__  Current Time:      34.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      34.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 34.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      34.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 34.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      34.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 35.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      34.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 35.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      35.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 35.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 36.00
+
+
+__  Current Time:      35.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      35.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 35.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      35.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 35.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      35.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 36.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      35.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 36.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      36.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 36.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 37.00
+
+
+__  Current Time:      36.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      36.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 36.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      36.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 36.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      36.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 37.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      36.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 37.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      37.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 37.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 38.00
+
+
+__  Current Time:      37.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      37.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 37.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      37.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 37.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      37.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 38.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      37.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 38.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      38.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 38.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 39.00
+
+
+__  Current Time:      38.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      38.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 38.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      38.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 38.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      38.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 39.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      38.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 39.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      39.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 39.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 40.00
+
+
+__  Current Time:      39.10 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      39.20 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 39.50
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      39.50 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 39.80
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      39.60 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor1>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 40.20
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      39.80 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor2>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.3
+		Next scheduled internal transition at time 40.10
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledProcessor_3.Processor1>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      40.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Binary.CoupledProcessor_2.Processor0>
+		Input Port Configuration:
+			port <inport>:
+				b1
+		New State: 0.6
+		Next scheduled internal transition at time 40.60
+
+
+	INTERNAL TRANSITION in model <Binary.CoupledGenerator.Generator>
+		New State: 1.0
+		Output Port Configuration:
+			port <outport>:
+				b1
+		Next scheduled internal transition at time 41.00
+
