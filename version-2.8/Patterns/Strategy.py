@@ -30,8 +30,19 @@ import threading
 
 from pluginmanager import trigger_event
 
-import DEVSKernel.PyDEVS.DEVS as PyDEVS
-import DEVSKernel.PyPDEVS.DEVS as PyPDEVS
+import __builtin__
+import re
+import os
+
+### import the DEVS module depending on the selected DEVS package in DEVSKernel directory
+for pydevs_dir in __builtin__.__dict__['DEVS_DIR_PATH_DICT']:
+    path = __builtin__.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
+    ### split from DEVSKernel string and replace separator with point
+    d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
+    exec "import DEVSKernel%s.DEVS as %s"%(d,pydevs_dir)
+
+#import DEVSKernel.PyDEVS.DEVS as PyDEVS
+#import DEVSKernel.PyPDEVS.DEVS as PyPDEVS
 
 def getFlatImmChildrenList(model, flat_imm_list = []):
 	""" Set priority flat list
@@ -505,7 +516,17 @@ class SimStrategy4(SimStrategy):
 		"""Simulate the model (Root-Coordinator).
 		"""
 
-		from DEVSKernel.PyPDEVS.simulator import Simulator
+		### for all available DEVS package (keys of builtin DEVS_DIR_PATH_DICT dictionary)
+		for pydevs_dir in __builtin__.__dict__['DEVS_DIR_PATH_DICT']:
+			### only the selected one
+			if pydevs_dir == __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
+				path = __builtin__.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
+    			### split from DEVSKernel string and replace separator with point
+				d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
+
+				exec "from DEVSKernel%s.simulator import Simulator"%d
+
+		#from DEVSKernel.PyPDEVS.simulator import Simulator
 
 		S = Simulator(self._simulator.model)
 

@@ -1,0 +1,399 @@
+
+__  Current Time:       0.00 __________________________________________ 
+
+
+	INITIAL CONDITIONS in model <Nested.Generator>
+		Initial State: 1
+		Next scheduled internal transition at time 1.00
+
+
+	INITIAL CONDITIONS in model <Nested.NProcessor>
+		Initial State: inf
+		Next scheduled internal transition at time 1.00
+
+
+__  Current Time:       1.00 __________________________________________ 
+
+
+	CONFLUENT TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>: 
+				Eventsize = 1
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 5
+		Next scheduled internal transition at time 2.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 2.00
+
+
+__  Current Time:       2.00 __________________________________________ 
+
+
+	CONFLUENT TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>: 
+				Eventsize = 1
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 4.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 3.00
+
+
+__  Current Time:       3.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 6.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 4.00
+
+
+__  Current Time:       4.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 8.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 5.00
+
+
+__  Current Time:       5.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 10.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 6.00
+
+
+__  Current Time:       6.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 12.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 7.00
+
+
+__  Current Time:       7.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 14.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 8.00
+
+
+__  Current Time:       8.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 16.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 9.00
+
+
+__  Current Time:       9.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 18.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 10.00
+
+
+__  Current Time:      10.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 20.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 11.00
+
+
+__  Current Time:      11.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 22.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 12.00
+
+
+__  Current Time:      12.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 24.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 13.00
+
+
+__  Current Time:      13.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 26.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 14.00
+
+
+__  Current Time:      14.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 28.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 15.00
+
+
+__  Current Time:      15.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 30.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 16.00
+
+
+__  Current Time:      16.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 32.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 17.00
+
+
+__  Current Time:      17.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 34.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 18.00
+
+
+__  Current Time:      18.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 36.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 19.00
+
+
+__  Current Time:      19.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 38.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 20.00
+
+
+__  Current Time:      20.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Nested.NProcessor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 40.00
+
+
+	INTERNAL TRANSITION in model <Nested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 21.00
+

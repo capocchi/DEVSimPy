@@ -1,0 +1,134 @@
+
+__  Current Time:       0.00 __________________________________________ 
+
+
+	INITIAL CONDITIONS in model <trafficSystem.policeman>
+		Initial State: idle
+		Next scheduled internal transition at time 200.00
+
+
+	INITIAL CONDITIONS in model <trafficSystem.trafficLight>
+		Initial State: red
+		Next scheduled internal transition at time 3.00
+
+
+__  Current Time:       3.00 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <trafficSystem.trafficLight>
+		New State: green
+		Output Port Configuration:
+			port <OBSERVED>:
+				grey
+		Next scheduled internal transition at time 5.00
+
+
+__  Current Time:       5.00 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <trafficSystem.trafficLight>
+		New State: yellow
+		Output Port Configuration:
+			port <OBSERVED>:
+				yellow
+		Next scheduled internal transition at time 6.00
+
+
+__  Current Time:       6.00 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <trafficSystem.trafficLight>
+		New State: red
+		Output Port Configuration:
+			port <OBSERVED>:
+				grey
+		Next scheduled internal transition at time 9.00
+
+
+__  Current Time:       9.00 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <trafficSystem.trafficLight>
+		New State: green
+		Output Port Configuration:
+			port <OBSERVED>:
+				grey
+		Next scheduled internal transition at time 11.00
+
+
+__  Current Time:      10.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <trafficSystem.trafficLight>
+		Input Port Configuration:
+			port <INTERRUPT>:
+				toManual
+		New State: manual
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      20.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <trafficSystem.trafficLight>
+		Input Port Configuration:
+			port <INTERRUPT>:
+				toAutonomous
+		New State: red
+		Next scheduled internal transition at time 23.00
+
+
+__  Current Time:      23.00 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <trafficSystem.trafficLight>
+		New State: green
+		Output Port Configuration:
+			port <OBSERVED>:
+				grey
+		Next scheduled internal transition at time 25.00
+
+
+__  Current Time:      25.00 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <trafficSystem.trafficLight>
+		New State: yellow
+		Output Port Configuration:
+			port <OBSERVED>:
+				yellow
+		Next scheduled internal transition at time 26.00
+
+
+__  Current Time:      26.00 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <trafficSystem.trafficLight>
+		New State: red
+		Output Port Configuration:
+			port <OBSERVED>:
+				grey
+		Next scheduled internal transition at time 29.00
+
+
+__  Current Time:      29.00 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <trafficSystem.trafficLight>
+		New State: green
+		Output Port Configuration:
+			port <OBSERVED>:
+				grey
+		Next scheduled internal transition at time 31.00
+
+
+__  Current Time:      30.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <trafficSystem.trafficLight>
+		Input Port Configuration:
+			port <INTERRUPT>:
+				toManual
+		New State: manual
+		Next scheduled internal transition at time inf
+

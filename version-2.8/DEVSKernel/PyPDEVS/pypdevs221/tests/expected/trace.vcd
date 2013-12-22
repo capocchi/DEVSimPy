@@ -1,0 +1,512 @@
+$date
+	2013-08-31
+$end
+$version
+	PyDEVS VCD export
+$end
+$comment
+	Generated from DEVS-code
+$end
+$timescale 1ns $end
+$scope Binary.CoupledGenerator.Generator Binary.CoupledGenerator.Generator $end
+$var wire 1 0 outport $end
+$var wire 1 1 inport $end
+$upscope $end
+$scope Binary.CoupledProcessor_2.Processor0 Binary.CoupledProcessor_2.Processor0 $end
+$var wire 1 2 inport $end
+$var wire 1 3 outport $end
+$upscope $end
+$scope Binary.CoupledProcessor_2.Processor1 Binary.CoupledProcessor_2.Processor1 $end
+$var wire 1 4 inport $end
+$var wire 1 5 outport $end
+$upscope $end
+$scope Binary.CoupledProcessor_3.Processor0 Binary.CoupledProcessor_3.Processor0 $end
+$var wire 1 6 inport $end
+$var wire 1 7 outport $end
+$upscope $end
+$scope Binary.CoupledProcessor_3.Processor1 Binary.CoupledProcessor_3.Processor1 $end
+$var wire 1 8 inport $end
+$var wire 1 9 outport $end
+$upscope $end
+$scope Binary.CoupledProcessor_3.Processor2 Binary.CoupledProcessor_3.Processor2 $end
+$var wire 1 10 inport $end
+$var wire 1 11 outport $end
+$upscope $end
+$enddefinitions $end
+$dumpvars 
+bz 0
+bz 1
+bz 2
+bz 3
+bz 4
+bz 5
+bz 6
+bz 7
+bz 8
+bz 9
+bz 10
+bz 11
+$end
+b1 0
+#10
+b1 2
+b1 3
+b1 4
+b1 0
+#20
+b1 2
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#30
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#40
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#50
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#60
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#70
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#80
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#90
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#100
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#110
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#120
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#130
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#140
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#150
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#160
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#170
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#180
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#190
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#200
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#210
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#220
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#230
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#240
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#250
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#260
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#270
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#280
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#290
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#300
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#310
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#320
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#330
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#340
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#350
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#360
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#370
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#380
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#390
+b1 2
+b1 11
+b1 5
+b1 6
+b1 7
+b1 8
+b1 3
+b1 4
+b1 9
+b1 10
+b1 0
+#400
+b1 2

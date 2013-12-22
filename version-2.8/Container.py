@@ -333,7 +333,7 @@ class Diagram(Savable, Structurable):
 					if isinstance(model1, (iPort,oPort)):
 						D.setdefault(label1,[]).append({label2: (portNumber1 ,portNumber2)})
 
-			#if the component is a container block achieve the recurivity
+			#if the component is a container block achieve the recursivity
 			elif isinstance(c, ContainerBlock):
 				Diagram.makeDEVSGraph(c,D,type)
 

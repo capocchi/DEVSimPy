@@ -1,0 +1,268 @@
+
+__  Current Time:       0.00 __________________________________________ 
+
+
+	INITIAL CONDITIONS in model <MultiNested.Generator>
+		Initial State: 1
+		Next scheduled internal transition at time 1.00
+
+
+	INITIAL CONDITIONS in model <MultiNested.NProcessor1>
+		Initial State: inf
+		Next scheduled internal transition at time 1.00
+
+
+	INITIAL CONDITIONS in model <MultiNested.NProcessor2>
+		Initial State: inf
+		Next scheduled internal transition at time 1.00
+
+
+__  Current Time:       1.00 __________________________________________ 
+
+
+	CONFLUENT TRANSITION in model <MultiNested.NProcessor1>
+		Input Port Configuration:
+			port <inport>: 
+				Eventsize = 1
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 5
+		Next scheduled internal transition at time 2.00
+
+
+	CONFLUENT TRANSITION in model <MultiNested.NProcessor2>
+		Input Port Configuration:
+			port <inport>: 
+				Eventsize = 5
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 5
+		Next scheduled internal transition at time 2.00
+
+
+	INTERNAL TRANSITION in model <MultiNested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 2.00
+
+
+__  Current Time:       2.00 __________________________________________ 
+
+
+	CONFLUENT TRANSITION in model <MultiNested.NProcessor1>
+		Input Port Configuration:
+			port <inport>: 
+				Eventsize = 1
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 4.00
+
+
+	CONFLUENT TRANSITION in model <MultiNested.NProcessor2>
+		Input Port Configuration:
+			port <inport>: 
+				Eventsize = 1
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 5
+		Next scheduled internal transition at time 4.00
+
+
+	INTERNAL TRANSITION in model <MultiNested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 3.00
+
+
+__  Current Time:       3.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <MultiNested.NProcessor1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 6.00
+
+
+	INTERNAL TRANSITION in model <MultiNested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 4.00
+
+
+__  Current Time:       4.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <MultiNested.NProcessor1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 8.00
+
+
+	INTERNAL TRANSITION in model <MultiNested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 5.00
+
+
+	INTERNAL TRANSITION in model <MultiNested.NProcessor2>
+		New State: -1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 6.00
+
+
+__  Current Time:       5.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <MultiNested.NProcessor1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 10.00
+
+
+	INTERNAL TRANSITION in model <MultiNested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 6.00
+
+
+__  Current Time:       6.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <MultiNested.NProcessor1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 12.00
+
+
+	INTERNAL TRANSITION in model <MultiNested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 7.00
+
+
+	INTERNAL TRANSITION in model <MultiNested.NProcessor2>
+		New State: -3
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 8.00
+
+
+__  Current Time:       7.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <MultiNested.NProcessor1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 14.00
+
+
+	INTERNAL TRANSITION in model <MultiNested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 8.00
+
+
+__  Current Time:       8.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <MultiNested.NProcessor1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 16.00
+
+
+	INTERNAL TRANSITION in model <MultiNested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 9.00
+
+
+	INTERNAL TRANSITION in model <MultiNested.NProcessor2>
+		New State: -5
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 10.00
+
+
+__  Current Time:       9.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <MultiNested.NProcessor1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 18.00
+
+
+	INTERNAL TRANSITION in model <MultiNested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 10.00
+
+
+__  Current Time:      10.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <MultiNested.NProcessor1>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+		New State: 1
+		Next scheduled internal transition at time 20.00
+
+
+	INTERNAL TRANSITION in model <MultiNested.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 11.00
+
+
+	INTERNAL TRANSITION in model <MultiNested.NProcessor2>
+		New State: -7
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 12.00
+

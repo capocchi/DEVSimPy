@@ -35,9 +35,16 @@ if __name__ == '__main__':
 	if d not in sys.path:
 		sys.path.append(d)
 
+import re
+import os
+
+### import the DEVS module depending on the selected DEVS package in DEVSKernel directory
 for pydevs_dir in __builtin__.__dict__['DEVS_DIR_PATH_DICT']:
-	if pydevs_dir == __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
-		exec "import DEVSKernel.%s.DEVS as BaseDEVS"%(pydevs_dir)
+    if pydevs_dir == __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
+        path = __builtin__.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
+        ### split from DEVSKernel string and replace separator with point
+        d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
+        exec "import DEVSKernel%s.DEVS as BaseDEVS"%(d)
 
 #    ======================================================================    #
 class DomainStructure(BaseDEVS.CoupledDEVS):

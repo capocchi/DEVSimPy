@@ -1,0 +1,53 @@
+digraph G {
+  subgraph "clusterChain" {
+  label = "Chain"
+  color=black
+  subgraph "clusterChain.CoupledGenerator" {
+  label = "CoupledGenerator"
+  color=black
+  "Chain.CoupledGenerator.Generator" [
+    label = "Generator\nState: 1.0"
+    color="red"
+    style=filled
+]
+  }
+  subgraph "clusterChain.CoupledProcessor_2" {
+  label = "CoupledProcessor_2"
+  color=black
+  "Chain.CoupledProcessor_2.Processor0" [
+    label = "Processor0\nState: inf"
+    color="red"
+    style=filled
+]
+  "Chain.CoupledProcessor_2.Processor1" [
+    label = "Processor1\nState: inf"
+    color="red"
+    style=filled
+]
+  }
+  subgraph "clusterChain.CoupledProcessor_3" {
+  label = "CoupledProcessor_3"
+  color=black
+  "Chain.CoupledProcessor_3.Processor0" [
+    label = "Processor0\nState: inf"
+    color="red"
+    style=filled
+]
+  "Chain.CoupledProcessor_3.Processor1" [
+    label = "Processor1\nState: inf"
+    color="red"
+    style=filled
+]
+  "Chain.CoupledProcessor_3.Processor2" [
+    label = "Processor2\nState: inf"
+    color="red"
+    style=filled
+]
+  }
+  }
+  "Chain.CoupledGenerator.Generator" -> "Chain.CoupledProcessor_2.Processor0" [label="outport -> inport"];
+  "Chain.CoupledProcessor_2.Processor0" -> "Chain.CoupledProcessor_2.Processor1" [label="outport -> inport"];
+  "Chain.CoupledProcessor_2.Processor1" -> "Chain.CoupledProcessor_3.Processor0" [label="outport -> inport"];
+  "Chain.CoupledProcessor_3.Processor0" -> "Chain.CoupledProcessor_3.Processor1" [label="outport -> inport"];
+  "Chain.CoupledProcessor_3.Processor1" -> "Chain.CoupledProcessor_3.Processor2" [label="outport -> inport"];
+}

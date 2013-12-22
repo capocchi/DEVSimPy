@@ -1,0 +1,1242 @@
+
+__  Current Time:       0.00 __________________________________________ 
+
+
+	INITIAL CONDITIONS in model <Root.Generator>
+		Initial State: 1
+		Next scheduled internal transition at time 1.00
+
+
+	INITIAL CONDITIONS in model <Root.Layer2.Layer1.Processor>
+		Initial State: inf
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       1.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 1.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 2.00
+
+
+__  Current Time:       1.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       2.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 2.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 3.00
+
+
+__  Current Time:       2.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       3.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 3.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 4.00
+
+
+__  Current Time:       3.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       4.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 4.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 5.00
+
+
+__  Current Time:       4.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       5.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 5.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 6.00
+
+
+__  Current Time:       5.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       6.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 6.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 7.00
+
+
+__  Current Time:       6.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       7.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 7.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 8.00
+
+
+__  Current Time:       7.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       8.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 8.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 9.00
+
+
+__  Current Time:       8.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:       9.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 9.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 10.00
+
+
+__  Current Time:       9.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      10.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 10.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 11.00
+
+
+__  Current Time:      10.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      11.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 11.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 12.00
+
+
+__  Current Time:      11.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      12.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 12.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 13.00
+
+
+__  Current Time:      12.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      13.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 13.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 14.00
+
+
+__  Current Time:      13.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      14.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 14.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 15.00
+
+
+__  Current Time:      14.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      15.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 15.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 16.00
+
+
+__  Current Time:      15.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      16.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 16.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 17.00
+
+
+__  Current Time:      16.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      17.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 17.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 18.00
+
+
+__  Current Time:      17.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      18.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 18.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 19.00
+
+
+__  Current Time:      18.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      19.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 19.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 20.00
+
+
+__  Current Time:      19.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      20.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 20.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 21.00
+
+
+__  Current Time:      20.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      21.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 21.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 22.00
+
+
+__  Current Time:      21.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      22.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 22.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 23.00
+
+
+__  Current Time:      22.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      23.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 23.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 24.00
+
+
+__  Current Time:      23.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      24.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 24.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 25.00
+
+
+__  Current Time:      24.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      25.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 25.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 26.00
+
+
+__  Current Time:      25.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      26.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 26.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 27.00
+
+
+__  Current Time:      26.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      27.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 27.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 28.00
+
+
+__  Current Time:      27.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      28.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 28.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 29.00
+
+
+__  Current Time:      28.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      29.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 29.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 30.00
+
+
+__  Current Time:      29.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      30.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 30.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 31.00
+
+
+__  Current Time:      30.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      31.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 31.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 32.00
+
+
+__  Current Time:      31.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      32.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 32.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 33.00
+
+
+__  Current Time:      32.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      33.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 33.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 34.00
+
+
+__  Current Time:      33.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      34.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 34.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 35.00
+
+
+__  Current Time:      34.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      35.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 35.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 36.00
+
+
+__  Current Time:      35.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      36.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 36.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 37.00
+
+
+__  Current Time:      36.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      37.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 37.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 38.00
+
+
+__  Current Time:      37.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      38.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 38.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 39.00
+
+
+__  Current Time:      38.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      39.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 39.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 40.00
+
+
+__  Current Time:      39.30 __________________________________________ 
+
+
+	INTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		New State: inf
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time inf
+
+
+__  Current Time:      40.00 __________________________________________ 
+
+
+	EXTERNAL TRANSITION in model <Root.Layer2.Layer1.Processor>
+		Input Port Configuration:
+			port <inport>:
+				Eventsize = 1
+				Eventsize = 1
+		New State: 0.3
+		Next scheduled internal transition at time 40.30
+
+
+	INTERNAL TRANSITION in model <Root.Generator>
+		New State: 1
+		Output Port Configuration:
+			port <outport>:
+				Eventsize = 1
+		Next scheduled internal transition at time 41.00
+

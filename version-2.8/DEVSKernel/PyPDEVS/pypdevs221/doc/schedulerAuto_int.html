@@ -1,0 +1,236 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Polymorphic scheduler &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Schedulers" href="schedulers.html" />
+    <link rel="next" title="Server" href="server_int.html" />
+    <link rel="prev" title="‘Discrete Time’ scheduler" href="schedulerDT_int.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="server_int.html" title="Server"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="schedulerDT_int.html" title="‘Discrete Time’ scheduler"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" >Internal documentation</a> &raquo;</li>
+          <li><a href="schedulers.html" accesskey="U">Schedulers</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-schedulerAuto">
+<span id="polymorphic-scheduler"></span><h1>Polymorphic scheduler<a class="headerlink" href="#module-schedulerAuto" title="Permalink to this headline">¶</a></h1>
+<p>Automaticly polymorphic scheduler. It will automatically adapt to your scheduling requests, though at a slight overhead due to the indirection and statistics gathering. If you know what is your optimal scheduler, please choose this one. If the access pattern varies throughout the simulation, this scheduler is perfect for you. It will choose between the HeapSet and Minimal List scheduler.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Barely tested, certainly not with distribution and relocation!!! <strong>Use with caution!!!*</strong></p>
+</div>
+<dl class="class">
+<dt id="schedulerAuto.SchedulerAuto">
+<em class="property">class </em><tt class="descclassname">schedulerAuto.</tt><tt class="descname">SchedulerAuto</tt><big>(</big><em>models</em>, <em>epsilon</em>, <em>totalModels</em><big>)</big><a class="reference internal" href="_modules/schedulerAuto.html#SchedulerAuto"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerAuto.SchedulerAuto" title="Permalink to this definition">¶</a></dt>
+<dd><p>The polymorphic scheduler class</p>
+<dl class="method">
+<dt id="schedulerAuto.SchedulerAuto.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>models</em>, <em>epsilon</em>, <em>totalModels</em><big>)</big><a class="reference internal" href="_modules/schedulerAuto.html#SchedulerAuto.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerAuto.SchedulerAuto.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>models</strong> &#8211; the models to schedule</li>
+<li><strong>epsilon</strong> &#8211; the allowed deviation</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="schedulerAuto.SchedulerAuto.getImminent">
+<tt class="descname">getImminent</tt><big>(</big><em>time</em><big>)</big><a class="reference internal" href="_modules/schedulerAuto.html#SchedulerAuto.getImminent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerAuto.SchedulerAuto.getImminent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the imminent models for the provided time</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> &#8211; time to check for</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="schedulerAuto.SchedulerAuto.massReschedule">
+<tt class="descname">massReschedule</tt><big>(</big><em>reschedule_set</em><big>)</big><a class="reference internal" href="_modules/schedulerAuto.html#SchedulerAuto.massReschedule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerAuto.SchedulerAuto.massReschedule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reschedule all models</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reschedule_set</strong> &#8211; the set of models to reschedule</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="schedulerAuto.SchedulerAuto.readFirst">
+<tt class="descname">readFirst</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/schedulerAuto.html#SchedulerAuto.readFirst"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerAuto.SchedulerAuto.readFirst" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch the time of the first model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(time, age) &#8211; time of the first scheduled model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="schedulerAuto.SchedulerAuto.schedule">
+<tt class="descname">schedule</tt><big>(</big><em>model</em><big>)</big><a class="reference internal" href="_modules/schedulerAuto.html#SchedulerAuto.schedule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerAuto.SchedulerAuto.schedule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Schedule a model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> &#8211; the model to schedule</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="schedulerAuto.SchedulerAuto.swapSchedulerTo">
+<tt class="descname">swapSchedulerTo</tt><big>(</big><em>scheduler</em><big>)</big><a class="reference internal" href="_modules/schedulerAuto.html#SchedulerAuto.swapSchedulerTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerAuto.SchedulerAuto.swapSchedulerTo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swap the current subscheduler to the provided one. If the scheduler is already in use, no change happens.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>scheduler</strong> &#8211; the <em>class</em> to switch to</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="schedulerAuto.SchedulerAuto.unschedule">
+<tt class="descname">unschedule</tt><big>(</big><em>model</em><big>)</big><a class="reference internal" href="_modules/schedulerAuto.html#SchedulerAuto.unschedule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerAuto.SchedulerAuto.unschedule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unschedule a model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> &#8211; the mode to unschedule</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="schedulerDT_int.html"
+                        title="previous chapter">&#8216;Discrete Time&#8217; scheduler</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="server_int.html"
+                        title="next chapter">Server</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/schedulerAuto_int.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="server_int.html" title="Server"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="schedulerDT_int.html" title="‘Discrete Time’ scheduler"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" >Internal documentation</a> &raquo;</li>
+          <li><a href="schedulers.html" >Schedulers</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

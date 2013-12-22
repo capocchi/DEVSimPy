@@ -1,0 +1,376 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>server &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for server</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: Latin-1 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Server for DEVS simulation</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">basesimulator</span> <span class="kn">import</span> <span class="n">BaseSimulator</span>
+<span class="kn">from</span> <span class="nn">controller</span> <span class="kn">import</span> <span class="n">Controller</span>
+<span class="kn">import</span> <span class="nn">middleware</span>
+<span class="kn">from</span> <span class="nn">threadpool</span> <span class="kn">import</span> <span class="n">ThreadPool</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">util</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">logger</span> <span class="kn">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="Server"><a class="viewcode-back" href="../server_int.html#server.Server">[docs]</a><span class="k">class</span> <span class="nc">Server</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A server to host MPI, will delegate all of its calls to the active simulation kernel.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Don&#39;t forward some of the internally provided functions, but simply raise an AttributeError</span>
+    <span class="n">noforward</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">([</span><span class="s">&quot;__str__&quot;</span><span class="p">,</span> <span class="s">&quot;__getstate__&quot;</span><span class="p">,</span> <span class="s">&quot;__setstate__&quot;</span><span class="p">,</span> <span class="s">&quot;__repr__&quot;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="Server.__init__"><a class="viewcode-back" href="../server_int.html#server.Server.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">totalSize</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+
+<span class="sd">        :param name: the name of the server, used for addressing (in MPI terms, this is the rank)</span>
+<span class="sd">        :param totalSize: the total size of the network in which the model lives</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">totalSize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxies</span> <span class="o">=</span> <span class="p">[</span><span class="n">MPIRedirect</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">totalSize</span><span class="p">)]</span>
+        <span class="kn">from</span> <span class="nn">MPIRedirect</span> <span class="kn">import</span> <span class="n">LocalRedirect</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxies</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">LocalRedirect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queuedMessages</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queuedTime</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">totalSize</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">threadpool</span> <span class="o">=</span> <span class="n">ThreadPool</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bootMPI</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Server.getProxy"><a class="viewcode-back" href="../server_int.html#server.Server.getProxy">[docs]</a>    <span class="k">def</span> <span class="nf">getProxy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rank</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a proxy to a specified rank. </span>
+<span class="sd">        </span>
+<span class="sd">        This rank is allowed to be the local server, in which case a local shortcut is created.</span>
+
+<span class="sd">        :param rank: the rank to return a proxy to, should be an int</span>
+<span class="sd">        :returns: proxy to the server, either of type MPIRedirect or LocalRedirect</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxies</span><span class="p">[</span><span class="n">rank</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="Server.checkLoadCheckpoint"><a class="viewcode-back" href="../server_int.html#server.Server.checkLoadCheckpoint">[docs]</a>    <span class="k">def</span> <span class="nf">checkLoadCheckpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">gvt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reconstruct the server from a checkpoint.</span>
+
+<span class="sd">        :param name: name of the checkpoint</span>
+<span class="sd">        :param gvt: the GVT to restore to</span>
+<span class="sd">        :returns: bool -- whether or not the checkpoint was successfully loaded</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rank</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="c">#assert debug(&quot;Accessing file &quot; + str(&quot;%s_%s_%s.pdc&quot; % (name, gvt, rank)))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">infile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">.pdc&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">gvt</span><span class="p">,</span> <span class="n">rank</span><span class="p">),</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="c"># If the user interrupts, still reraise</span>
+            <span class="k">raise</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c"># Something went wrong</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Error found: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        </div>
+<div class="viewcode-block" id="Server.loadCheckpoint"><a class="viewcode-back" href="../server_int.html#server.Server.loadCheckpoint">[docs]</a>    <span class="k">def</span> <span class="nf">loadCheckpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">gvt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reconstruct the server from a checkpoint.</span>
+
+<span class="sd">        :param name: name of the checkpoint</span>
+<span class="sd">        :param gvt: the GVT to restore to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rank</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="c">#assert debug(&quot;Accessing file &quot; + str(&quot;%s_%s_%s.pdc&quot; % (name, gvt, rank)))</span>
+        <span class="n">infile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">.pdc&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">gvt</span><span class="p">,</span> <span class="n">rank</span><span class="p">),</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="kn">from</span> <span class="nn">MPIRedirect</span> <span class="kn">import</span> <span class="n">LocalRedirect</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxies</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">LocalRedirect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">infile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="c">#assert debug(&quot;Closing file&quot;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="o">.</span><span class="n">loadCheckpoint</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Server.setPickledData"><a class="viewcode-back" href="../server_int.html#server.Server.setPickledData">[docs]</a>    <span class="k">def</span> <span class="nf">setPickledData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pickled_data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the pickled representation of the model.</span>
+
+<span class="sd">        For use on the controller itself, as this doesn&#39;t need to unpickle the model.</span>
+
+<span class="sd">        :param pickled_data: the pickled model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="o">.</span><span class="n">pickledModel</span> <span class="o">=</span> <span class="n">pickled_data</span>
+</div>
+<div class="viewcode-block" id="Server.prepare"><a class="viewcode-back" href="../server_int.html#server.Server.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prepare the server to receive the complete model over MPI</span>
+
+<span class="sd">        :param scheduler: the scheduler to use</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">middleware</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">saveAndProcessModel</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">)</span>
+            <span class="n">middleware</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Server.saveAndProcessModel"><a class="viewcode-back" href="../server_int.html#server.Server.saveAndProcessModel">[docs]</a>    <span class="k">def</span> <span class="nf">saveAndProcessModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pickledModel</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Receive the model and set it on the server, but also saves it for further reinitialisation.</span>
+
+<span class="sd">        :param pickledModel: pickled representation of the model</span>
+<span class="sd">        :param scheduler: the scheduler to use</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendModel</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">pickledModel</span><span class="p">),</span> <span class="n">scheduler</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="o">.</span><span class="n">pickledModel</span> <span class="o">=</span> <span class="n">pickledModel</span>
+</div>
+<div class="viewcode-block" id="Server.getName"><a class="viewcode-back" href="../server_int.html#server.Server.getName">[docs]</a>    <span class="k">def</span> <span class="nf">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the name of the server</span>
+
+<span class="sd">        Is practically useless, since the server is previously addressed using its name. This does have a use as a ping function though.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Actually more of a ping function...</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="c"># All calls to this server are likely to be forwarded to the currently</span>
+    <span class="c">#  active simulation kernel, so provide an easy forwarder</span></div>
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remote calls happen on the server object, though it is different from the simulation kernel itself. Therefore, forward the actual function call to the correct kernel.</span>
+
+<span class="sd">        :param name: the name of the method to call</span>
+<span class="sd">        :returns: requested attribute</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># For accesses that are actually meant for the currently running kernel</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">Server</span><span class="o">.</span><span class="n">noforward</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Server.processMPI"><a class="viewcode-back" href="../server_int.html#server.Server.processMPI">[docs]</a>    <span class="k">def</span> <span class="nf">processMPI</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">comm</span><span class="p">,</span> <span class="n">remote</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process an incomming MPI message and reply to it if necessary</span>
+
+<span class="sd">        :param data: the data that was received</span>
+<span class="sd">        :param comm: the MPI COMM object</span>
+<span class="sd">        :param remote: the location from where the message was received</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Receiving a new request</span>
+        <span class="n">resendTag</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">function</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">resendTag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">comm</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">remote</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">resendTag</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Server.listenMPI"><a class="viewcode-back" href="../server_int.html#server.Server.listenMPI">[docs]</a>    <span class="k">def</span> <span class="nf">listenMPI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Listen for incomming MPI messages and process them as soon as they are received</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">comm</span> <span class="o">=</span> <span class="n">middleware</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">middleware</span><span class="o">.</span><span class="n">MPI</span><span class="o">.</span><span class="n">Status</span><span class="p">()</span>
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c">#assert debug(&quot;[&quot; + str(comm.Get_rank()) + &quot;]Listening to remote &quot; + str(middleware.MPI.ANY_SOURCE) + &quot; -- &quot; + str(middleware.MPI.ANY_TAG))</span>
+            <span class="c"># First check if a message is present, otherwise we would have to do busy polling</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">middleware</span><span class="o">.</span><span class="n">MPI</span><span class="o">.</span><span class="n">ANY_SOURCE</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">middleware</span><span class="o">.</span><span class="n">MPI</span><span class="o">.</span><span class="n">ANY_TAG</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">)</span>
+            <span class="n">tag</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">Get_tag</span><span class="p">()</span>
+            <span class="c">#assert debug(&quot;Got data from &quot; + str(status.Get_source()) + &quot; (&quot; + str(status.Get_tag()) + &quot;): &quot; + str(data))</span>
+            <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c"># Flush all waiters, as we will never receive an answer when we close the receiver...</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">finishWaitingPool</span><span class="p">()</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="n">tag</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c"># NOTE Go back to listening ASAP, so do the processing on another thread</span>
+                <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;receive&quot;</span> <span class="ow">or</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;receiveAntiMessages&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">threadpool</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">Server</span><span class="o">.</span><span class="n">processMPI</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">comm</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">Get_source</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># Normal &#39;control&#39; commands are immediately executed, as they would otherwise have the potential to deadlock the node</span>
+                    <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">Server</span><span class="o">.</span><span class="n">processMPI</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">comm</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">Get_source</span><span class="p">()])</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># Receiving an answer to a previous request</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">event</span> <span class="o">=</span> <span class="n">MPIRedirect</span><span class="o">.</span><span class="n">waiting</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+                    <span class="n">MPIRedirect</span><span class="o">.</span><span class="n">waiting</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+                    <span class="n">event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="c"># Probably processed elsewhere already, just skip</span>
+                    <span class="k">pass</span>
+                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                    <span class="c"># Key was already set elsewhere</span>
+                    <span class="k">pass</span>
+        </div>
+<div class="viewcode-block" id="Server.finishWaitingPool"><a class="viewcode-back" href="../server_int.html#server.Server.finishWaitingPool">[docs]</a>    <span class="k">def</span> <span class="nf">finishWaitingPool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop the complete MPI request queue from blocking, used when stopping simulation is necessary while requests are still outstanding.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">MPIRedirect</span><span class="o">.</span><span class="n">waiting</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">i</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="c"># It was not a lock...</span>
+                <span class="k">pass</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="c"># It was deleted in the meantime</span>
+                <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="Server.bootMPI"><a class="viewcode-back" href="../server_int.html#server.Server.bootMPI">[docs]</a>    <span class="k">def</span> <span class="nf">bootMPI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Boot the MPI receivers when necessary, on an other thread to prevent blocking</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">listener</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">Server</span><span class="o">.</span><span class="n">listenMPI</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="p">])</span>
+            <span class="c"># Make sure that this is a daemon on the controller, as otherwise this thread will prevent the atexit from stopping</span>
+            <span class="c"># Though on every other node this should NOT be a daemon, as this is the only part still running</span>
+
+            <span class="k">if</span> <span class="n">middleware</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">listener</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">listener</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Server.sendModel"><a class="viewcode-back" href="../server_int.html#server.Server.sendModel">[docs]</a>    <span class="k">def</span> <span class="nf">sendModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Receive a complete model and set it.</span>
+
+<span class="sd">        :param data: a tuple containing the model, the model_ids dictionary, scheduler name, and a flag for whether or not the model was flattened to allow pickling</span>
+<span class="sd">        :param scheduler: the scheduler to use</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">model_ids</span><span class="p">,</span> <span class="n">flattened</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="n">Controller</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="n">BaseSimulator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="o">.</span><span class="n">sendModel</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model_ids</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">,</span> <span class="n">flattened</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Server.finish"><a class="viewcode-back" href="../server_int.html#server.Server.finish">[docs]</a>    <span class="k">def</span> <span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop the currently running simulation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span>
+        <span class="k">with</span> <span class="n">sim</span><span class="o">.</span><span class="n">simlock</span><span class="p">:</span>
+            <span class="c"># Shut down all threads on the topmost simulator</span>
+            <span class="n">sim</span><span class="o">.</span><span class="n">finished</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">sim</span><span class="o">.</span><span class="n">shouldrun</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">finishWaitingPool</span><span class="p">()</span>
+
+            <span class="c"># Wait until they are done</span>
+            <span class="n">sim</span><span class="o">.</span><span class="n">simFinish</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Server.queueMessage"><a class="viewcode-back" href="../server_int.html#server.Server.queueMessage">[docs]</a>    <span class="k">def</span> <span class="nf">queueMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">model_id</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Queue a delayed action from being sent, to make it possible to batch them.</span>
+<span class="sd">        </span>
+<span class="sd">        Will raise an exception if previous messages form a different time were not yet flushed!</span>
+<span class="sd">        This flushing is not done automatically, as otherwise the data would be received at a further timestep</span>
+<span class="sd">        which causes problems with the GVT algorithm.</span>
+
+<span class="sd">        :param time: the time at which the action happens</span>
+<span class="sd">        :param model_id: the model_id that executed the action</span>
+<span class="sd">        :param action: the action to execute (as a string)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">queuedTime</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">queuedTime</span> <span class="o">=</span> <span class="n">time</span>
+        <span class="k">elif</span> <span class="n">time</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">queuedTime</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Queued message at wrong time! Probably forgot a flush&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queuedMessages</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">model_id</span><span class="p">,</span> <span class="n">action</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="Server.flushQueuedMessages"><a class="viewcode-back" href="../server_int.html#server.Server.flushQueuedMessages">[docs]</a>    <span class="k">def</span> <span class="nf">flushQueuedMessages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Flush all queued messages to the controller. This will block until all of them are queued.</span>
+<span class="sd">        It is required to flush all messages right after all of them happened and this should happen within the critical section!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">queuedTime</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">getProxy</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">massDelayedActions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queuedTime</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">queuedMessages</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">queuedMessages</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">queuedTime</span> <span class="o">=</span> <span class="bp">None</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
