@@ -27,6 +27,7 @@ import copy
 import weakref
 import heapq
 import threading
+import inspect
 
 from pluginmanager import trigger_event
 
@@ -506,34 +507,53 @@ def terminate_never(model, clock):
 
 
 class SimStrategy4(SimStrategy):
-	""" Original strategy for PyPDEVS simulation
-	"""
+    """ Original strategy for PyPDEVS simulation
+    """
 
-	def __init__(self, simulator = None):
-		SimStrategy.__init__(self, simulator)
+    def __init__(self, simulator = None):
+    	SimStrategy.__init__(self, simulator)
 
-	def simulate(self, T = sys.maxint):
-		"""Simulate the model (Root-Coordinator).
-		"""
+    def simulate(self, T = sys.maxint):
+    	"""Simulate the model (Root-Coordinator).
+    	"""
 
-		### for all available DEVS package (keys of builtin DEVS_DIR_PATH_DICT dictionary)
-		for pydevs_dir in __builtin__.__dict__['DEVS_DIR_PATH_DICT']:
-			### only the selected one
-			if pydevs_dir == __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
-				path = __builtin__.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
+    	### for all available DEVS package (keys of built-in DEVS_DIR_PATH_DICT dictionary)
+    	for pydevs_dir in __builtin__.__dict__['DEVS_DIR_PATH_DICT']:
+    		### only the selected one
+    		if pydevs_dir == __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
+    			path = __builtin__.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
     			### split from DEVSKernel string and replace separator with point
-				d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
-				exec "from DEVSKernel%s.simulator import Simulator"%d
+    			d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
+    			exec "from DEVSKernel%s.simulator import Simulator"%d
 
-		S = Simulator(self._simulator.model)
+        S = Simulator(self._simulator.model)
 
-		kwargs = {'verbose':True}
+        ### old version of PyPDEVS
+        if len(inspect.getargspec(S.simulate).args) > 1:
 
-		if self._simulator.ntl:
-			kwargs['termination_condition']=terminate_never
-		else:
-			kwargs['termination_time']=T
+        	kwargs = {'verbose':True}
 
-		S.simulate(**kwargs)
+            ### TODO
+        	if self._simulator.ntl:
+        		kwargs['termination_condition']=terminate_never
+        	else:
+        		kwargs['termination_time']=T
 
-		self._simulator.terminate()
+        	S.simulate(**kwargs)
+
+        ### new version of PyPDEVS (due to the number of config param which is growing)
+        else:
+
+            ### see simconfig.py to have informations about setters
+            S.setVerbose(None)
+
+            ### TODO
+            if self._simulator.ntl:
+                S.setTerminationCondition(terminate_never)
+            else:
+                S.setTerminationTime(T)
+
+            S.setClassicDEVS()
+            S.simulate()
+
+    	self._simulator.terminate()

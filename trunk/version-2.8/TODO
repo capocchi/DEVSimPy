@@ -26,7 +26,7 @@ En sachant qu'il faut Ãªtre capable de simuler des systÃ¨mes composÃ© de modÃ¨le
 -N3 : reflechir sur le changement facile des icons et changer les icons avec la lib oxygen: http://www.iconfinder.com/search/?q=perspective%20new
 -N3 : implÃ©menter l'update de devsimpy à partir des sources svn en http
 -N3 : faire un self.panel dans le CheckGUI
--N1 : implémenter la fonction Relaod d'un diagram pour faire celle ci à la main (par clic droit sur l'onglet) ou automatiquement lorsque 'on change de package de simulation
+-N3 : mettre a jour le panel de simulation dans le panel de control lorsqu'on change les préférences de simulation
 
 ----------------------------------------------------------------Remarques----------------------------------------------------------------
 
@@ -424,3 +424,4 @@ invoque rpar un callback lorsque le fichier python est renseignÃ© dans le wizard
 -Fait le 26/11/2013 par LC: correction -> issubclass dans ImportLibrary et Compoenents necessite de faire les import dans les mÃ©todes de DomainInterface.DomainBehavior et Structure
 -Fait le 1/12/2013 par LC: correction -> ajout de wx.TE_RICH2 pour avoir la couleur sous windows dans le blink (http://bytes.com/topic/python/answers/635711-wx-textctrl-setdefaultstyle-not-working)
 -Fait le 3/12/2013 par LC: correction-> erreur d'unicode dans le reporter (http://stackoverflow.com/questions/12468179/unicodedecodeerror-utf8-codec-cant-decode-byte-0x9c)
+-Fait le 23/12/2013 par LC: amélioration -> amélioration de l'architecture logiciel permettant de rendre disponible un noyau de simulation à partir d'un nouveau répertoire dans DEVSKernel (permet de suivre l'évolution de PyPDEVS)
