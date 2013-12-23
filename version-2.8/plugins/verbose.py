@@ -15,8 +15,6 @@ import wx
 import sys
 import os
 
-from DomainInterface import DomainBehavior, DomainStructure
-
 import pluginmanager
 
 global show_ext_trans
@@ -64,6 +62,9 @@ def LongRunningProcess(*args, **kwargs):
 			block = model.getBlockModel()
 
 			txt = [""]
+
+			### here because DEVS package can be changed during DEVSimPy running
+			from DomainInterface import DomainBehavior, DomainStructure
 
 			if isinstance(model, DomainBehavior):
 				if msg == 1 and show_ext_trans:
@@ -197,13 +198,11 @@ class VerboseConfig(wx.Frame):
 		sizer_5.Add(self.button_2, 1, wx.ALIGN_CENTER_HORIZONTAL)
 		sizer_5.Add(self.button_3, 1, wx.ALIGN_CENTER_HORIZONTAL)
 
-		sizer_4.Add(sizer_3, 0, wx.ALL| wx.ALIGN_CENTER_HORIZONTAL,0)
-		sizer_4.Add(sizer_5, 0, wx.ALL| wx.ALIGN_CENTER_HORIZONTAL,0)
+		sizer_4.Add(sizer_3, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL,0)
+		sizer_4.Add(sizer_5, 1, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL,0)
 
 		self.panel.SetSizer(sizer_4)
-		sizer_4.Fit(self)
 
-		self.SetAutoLayout(True)
 		self.Centre()
 		# end wxGlade
 

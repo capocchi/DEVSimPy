@@ -13,7 +13,10 @@ if __name__ == '__main__':
 	__builtin__.__dict__['HOME_PATH'] = os.getcwd()
 	__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyDEVS'
 	__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyDEVS'),
-												'PyPDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyPDEVS')}
+									'PyPDEVS_221':os.path.join(HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs221' ,'src'),
+									'PyPDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyPDEVS','old')}
+
+from HtmlWindow import HtmlFrame
 
 from PluginsGUI import PluginsPanel, GeneralPluginsList
 from Utilities import playSound
@@ -168,35 +171,37 @@ class SimulationPanel(wx.Panel):
 		### Buttons
 		self.sim_success_sound_btn = wx.Button(self, wx.ID_ANY, os.path.basename(self.sim_success_sound_path), (25, 105), name='success')
 		self.sim_success_sound_btn.Enable(self.sim_success_sound_path is not os.devnull)
-		self.sim_success_sound_btn.SetToolTipString(_("Press this button in order to change the song emmited for the end of the simulation."))
+		self.sim_success_sound_btn.SetToolTipString(_("Press this button in order to change the song arriving at the end of the simulation."))
 
 		self.sim_error_sound_btn = wx.Button(self, wx.ID_ANY, os.path.basename(self.sim_error_sound_path), (25, 105), name='error')
 		self.sim_error_sound_btn.Enable(self.sim_error_sound_path is not os.devnull)
-		self.sim_error_sound_btn.SetToolTipString(_("Press this button in order to change the song emmited when an error occur in a model during the simulation."))
+		self.sim_error_sound_btn.SetToolTipString(_("Press this button in order to change the song arriving when an error occur in a model during the simulation."))
+
+		self.devs_doc_btn = wx.Button(self, wx.ID_ABOUT, name='doc')
+		self.devs_doc_btn.SetToolTipString(_("Press this button to read the documentation of the selected DEVS package"))
 
 		### CheckBox
-		self.bt5 = wx.CheckBox(self, wx.ID_ANY, _('Notification'))
-		self.bt5.SetToolTipString(_("Notification song is generate when the simulation is over."))
-		self.bt5.SetValue(self.sim_success_sound_path is not os.devnull)
+		self.cb1 = wx.CheckBox(self, wx.ID_ANY, _('Notification'))
+		self.cb1.SetToolTipString(_("Notification song is generate when the simulation is over."))
+		self.cb1.SetValue(self.sim_success_sound_path is not os.devnull)
 
-		self.bt6 = wx.CheckBox(self, wx.ID_ANY, _('No Time Limit'))
-		self.bt6.SetValue(__builtin__.__dict__['NTL'])
-		self.bt6.SetToolTipString(_("No Time Limit allow the stop of simulation when all of models are idle."))
-
+		self.cb2 = wx.CheckBox(self, wx.ID_ANY, _('No Time Limit'))
+		self.cb2.SetValue(__builtin__.__dict__['NTL'])
+		self.cb2.SetToolTipString(_("No Time Limit allow the stop of simulation when all of models are idle."))
 
 		### StaticText for DEVS Kernel directory
-		self.txt3 = wx.StaticText(self, wx.ID_ANY, _("DEVS Kernel Directory:"))
+		self.txt3 = wx.StaticText(self, wx.ID_ANY, _("DEVS package:"))
 		self.cb3 = wx.ComboBox(self, wx.ID_ANY, DEFAULT_DEVS_DIRNAME, choices=DEVS_DIR_PATH_DICT.keys(), style=wx.CB_READONLY)
-		self.cb3.SetToolTipString(_("Default DEVS Kernel directory. This directory contain PyDEVS packages."))
+		self.cb3.SetToolTipString(_("Default DEVS Kernel package (PyDEVS, PyPDEVS, ect.)."))
 		self.default_devs_dir = DEFAULT_DEVS_DIRNAME
 
 		### StaticText for strategy
 		self.txt = wx.StaticText(self, wx.ID_ANY, _("Default strategy:"))
-		### choice of combobox depends on the default DEVS package directory
+		### choice of combo-box depends on the default DEVS package directory
 		c= PYDEVS_SIM_STRATEGY_DICT.keys() if DEFAULT_DEVS_DIRNAME == 'PyDEVS' else PYPDEVS_SIM_STRATEGY_DICT.keys()
 
-		self.cb = wx.ComboBox(self, wx.ID_ANY, DEFAULT_SIM_STRATEGY, choices=c, style=wx.CB_READONLY)
-		self.cb.SetToolTipString(_("Default strategy for the simulation algorithm. Please see the DEVSimPy doc for more information of possible strategy."))
+		self.cb4 = wx.ComboBox(self, wx.ID_ANY, DEFAULT_SIM_STRATEGY, choices=c, style=wx.CB_READONLY)
+		self.cb4.SetToolTipString(_("Default strategy for the simulation algorithm. Please see the DEVSimPy doc for more information of possible strategy."))
 		self.sim_defaut_strategy = DEFAULT_SIM_STRATEGY
 
 		### StaticText
@@ -205,22 +210,20 @@ class SimulationPanel(wx.Panel):
 		self.sc = wx.SpinCtrl(self, wx.ID_ANY, str(self.sim_defaut_plot_dyn_freq), (55, 90), (60, -1), min=10, max=10000)
 		self.sc.SetToolTipString(_("Default frequency for dynamic plotting."))
 
-		### StaticBox and StaticText
-		#information = wx.StaticText(self, wx.ID_ANY, _("Strategy information:"))
-		#self.strategy_info = wx.StaticText(self, wx.ID_ANY, _("Default strategy\ndscdsc\n"),style=wx.ALIGN_CENTRE)
-
 		### Adding sizer
-		hbox1.Add(self.bt5, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 15)
+		hbox1.Add(self.cb1, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 15)
 		hbox1.Add(self.sim_success_sound_btn, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL, 15)
 		hbox1.Add(self.sim_error_sound_btn, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL, 15)
 
 		hbox5.Add(self.txt3, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL, 15)
 		hbox5.Add(self.cb3, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL, 15)
+		hbox5.Add(self.devs_doc_btn, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL)
+
 
 		hbox2.Add(self.txt, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL|wx.EXPAND, 15)
-		hbox2.Add(self.cb, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.ALL|wx.EXPAND, 15)
+		hbox2.Add(self.cb4, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.ALL|wx.EXPAND, 15)
 
-		hbox3.Add(self.bt6, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 15)
+		hbox3.Add(self.cb2, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 15)
 
 		hbox4.Add(self.txt2, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT|wx.ALL, 15)
 		hbox4.Add(self.sc, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL, 15)
@@ -241,10 +244,31 @@ class SimulationPanel(wx.Panel):
 		### Binding
 		self.sim_success_sound_btn.Bind(wx.EVT_BUTTON, self.OnSelectSound)
 		self.sim_error_sound_btn.Bind(wx.EVT_BUTTON, self.OnSelectSound)
-		self.bt5.Bind(wx.EVT_CHECKBOX, self.onBt5Check)
-		self.cb.Bind(wx.EVT_COMBOBOX, self.onCb)
+		self.devs_doc_btn.Bind(wx.EVT_BUTTON, self.OnAbout)
+		self.cb1.Bind(wx.EVT_CHECKBOX, self.onCb1Check)
+		self.cb4.Bind(wx.EVT_COMBOBOX, self.onCb4)
 		self.cb3.Bind(wx.EVT_COMBOBOX, self.onCb3)
 		self.sc.Bind(wx.EVT_SPINCTRL, self.onSc)
+
+	def OnAbout(self, evt):
+		""" Search doc directory into 'doc' directory of DEVS package
+		"""
+		### DEVS package
+		choice = self.cb3.GetValue()
+
+		### possible path of doc directory
+		path = os.path.join(os.path.dirname(__builtin__.__dict__['DEVS_DIR_PATH_DICT'][choice]), 'doc', 'index.html')
+
+		### Html frame
+		frame = HtmlFrame(self, wx.ID_ANY, "Doc", (600,600))
+		### if page exist in <package_dir>/<doc>
+		if os.path.exists(path):
+			frame.LoadFile(path)
+		else:
+			frame.SetPage(_("<p> %s documentation directory not found! <p>")%choice)
+
+		### Show frame
+		frame.Show()
 
 	def OnSelectSound(self, evt):
 		"""
@@ -274,7 +298,7 @@ class SimulationPanel(wx.Panel):
 
 		dlg.Destroy()
 
-	def onBt5Check(self, evt):
+	def onCb1Check(self, evt):
 		""" CheckBox has been checked
 		"""
 
@@ -289,7 +313,7 @@ class SimulationPanel(wx.Panel):
 			self.sim_success_sound_path = os.devnull
 			self.sim_error_sound_path = os.devnull
 
-	def onCb(self, evt):
+	def onCb4(self, evt):
 		""" ComboBox has been checked
 		"""
 		val = evt.GetEventObject().GetValue()
@@ -301,21 +325,21 @@ class SimulationPanel(wx.Panel):
  		val = evt.GetEventObject().GetValue()
 
 		### update cb below cb3
-		self.cb.Clear()
+		self.cb4.Clear()
 		if val == 'PyDEVS':
 
 			for k in PYDEVS_SIM_STRATEGY_DICT:
-				self.cb.Append(k)
-			self.cb.SetValue('bag-based')
+				self.cb4.Append(k)
+			self.cb4.SetValue('bag-based')
 		else:
 			### PyPDEVS
 			for k in PYPDEVS_SIM_STRATEGY_DICT:
-				self.cb.Append(k)
-			self.cb.SetValue('original')
+				self.cb4.Append(k)
+			self.cb4.SetValue('original')
 
 		### update default value for devs dir et sim strategy
 		self.default_devs_dir = val
-		self.sim_defaut_strategy = self.cb.GetValue()
+		self.sim_defaut_strategy = self.cb4.GetValue()
 
 	def onSc(self, evt):
 		""" CheckBox has been checked
@@ -340,7 +364,7 @@ class SimulationPanel(wx.Panel):
 		__builtin__.__dict__['SIMULATION_ERROR_SOUND_PATH'] = self.sim_error_sound_path
 		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = self.sim_defaut_strategy
 		__builtin__.__dict__['DEFAULT_PLOT_DYN_FREQ'] = self.sim_defaut_plot_dyn_freq
-		__builtin__.__dict__['NTL'] = self.bt6.GetValue()
+		__builtin__.__dict__['NTL'] = self.cb2.GetValue()
 
 class EditorPanel(wx.Panel):
 	""" Edition Panel
