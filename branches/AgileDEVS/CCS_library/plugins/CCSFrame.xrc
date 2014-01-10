@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">
+	<object class="wxFrame" name="SimManagerGUI">
+		<style>wxCLOSE_BOX|wxSTAY_ON_TOP|wxFULL_REPAINT_ON_RESIZE</style>
+		<size>657,410</size>
+		<title>CCS Manager</title>
+		<aui_managed>0</aui_managed>
+		<object class="wxStatusBar" name="m_statusBar1">
+			<style>wxST_SIZEGRIP</style>
+			<fields>1</fields>
+		</object>
+		<object class="wxBoxSizer">
+			<orient>wxHORIZONTAL</orient>
+			<object class="sizeritem">
+				<option>1</option>
+				<flag>wxEXPAND</flag>
+				<border>0</border>
+				<object class="wxNotebook" name="nb">
+					<style>wxNB_LEFT</style>
+					<object class="notebookpage">
+						<label>Models</label>
+						<selected>1</selected>
+						<object class="wxPanel" name="models_manager">
+							<style>wxTAB_TRAVERSAL</style>
+							<object class="wxBoxSizer">
+								<orient>wxHORIZONTAL</orient>
+								<object class="sizeritem">
+									<option>1</option>
+									<flag>wxEXPAND</flag>
+									<border>0</border>
+									<object class="wxSplitterWindow" name="window_1">
+										<style>wxSP_3D|wxSP_BORDER|wxCLIP_CHILDREN</style>
+										<sashpos>222</sashpos>
+										<gravity>0</gravity>
+										<minsize>0</minsize>
+										<orientation>vertical</orientation>
+										<object class="wxPanel" name="Panel2">
+											<style>wxTAB_TRAVERSAL</style>
+											<object class="wxBoxSizer">
+												<orient>wxVERTICAL</orient>
+												<object class="sizeritem">
+													<option>0</option>
+													<flag>wxEXPAND|wxTOP|wxRIGHT|wxLEFT</flag>
+													<border>5</border>
+													<object class="wxStaticText" name="m_staticText1">
+														<label>Concurrernt Models</label>
+														<wrap>-1</wrap>
+													</object>
+												</object>
+												<object class="sizeritem">
+													<option>0</option>
+													<flag>wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT</flag>
+													<border>5</border>
+													<object class="wxStaticLine" name="m_staticline1">
+														<style>wxLI_HORIZONTAL</style>
+													</object>
+												</object>
+												<object class="sizeritem">
+													<option>1</option>
+													<flag>wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT</flag>
+													<border>5</border>
+													<object class="wxPanel" name="ConcModelPanel">
+														<style>wxTAB_TRAVERSAL</style>
+													</object>
+												</object>
+											</object>
+										</object>
+										<object class="wxPanel" name="Panel1">
+											<style>wxTAB_TRAVERSAL</style>
+											<object class="wxBoxSizer">
+												<orient>wxVERTICAL</orient>
+												<object class="sizeritem">
+													<option>0</option>
+													<flag>wxEXPAND|wxTOP|wxRIGHT|wxLEFT</flag>
+													<border>5</border>
+													<object class="wxStaticText" name="label">
+														<label>Assiociated Functions</label>
+														<wrap>-1</wrap>
+													</object>
+												</object>
+												<object class="sizeritem">
+													<option>0</option>
+													<flag>wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT</flag>
+													<border>5</border>
+													<object class="wxStaticLine" name="m_staticline3">
+														<style>wxLI_HORIZONTAL</style>
+													</object>
+												</object>
+												<object class="sizeritem">
+													<option>1</option>
+													<flag>wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT</flag>
+													<border>5</border>
+													<object class="wxPanel" name="AssociationFuncPanel">
+														<style>wxTAB_TRAVERSAL</style>
+													</object>
+												</object>
+											</object>
+										</object>
+									</object>
+								</object>
+							</object>
+						</object>
+					</object>
+					<object class="notebookpage">
+						<label>Simulations</label>
+						<selected>0</selected>
+						<object class="wxPanel" name="simulation_manager">
+							<style>wxTAB_TRAVERSAL</style>
+							<object class="wxBoxSizer">
+								<orient>wxVERTICAL</orient>
+								<object class="sizeritem">
+									<option>1</option>
+									<flag>wxEXPAND</flag>
+									<border>5</border>
+									<object class="wxBoxSizer">
+										<orient>wxVERTICAL</orient>
+										<object class="sizeritem">
+											<option>1</option>
+											<flag>wxEXPAND</flag>
+											<border>5</border>
+											<object class="wxBoxSizer">
+												<orient>wxVERTICAL</orient>
+												<object class="sizeritem">
+													<option>1</option>
+													<flag>wxEXPAND</flag>
+													<border>5</border>
+													<object class="wxSplitterWindow" name="m_splitter2">
+														<style>wxSP_3D</style>
+														<sashpos>144</sashpos>
+														<gravity>0</gravity>
+														<minsize>0</minsize>
+														<orientation>vertical</orientation>
+														<object class="wxPanel" name="SimListPanel">
+															<style>wxTAB_TRAVERSAL</style>
+															<object class="wxBoxSizer">
+																<orient>wxVERTICAL</orient>
+																<object class="sizeritem">
+																	<option>0</option>
+																	<flag>wxALL|wxALIGN_CENTER_VERTICAL|wxEXPAND</flag>
+																	<border>5</border>
+																	<object class="wxSpinCtrl" name="SimSpinCtrl">
+																		<style>wxSP_ARROW_KEYS</style>
+																		<tooltip>Select number of simulation by default</tooltip>
+																		<value>1</value>
+																		<min>0</min>
+																		<max>10</max>
+																	</object>
+																</object>
+																<object class="sizeritem">
+																	<option>1</option>
+																	<flag>wxALL|wxEXPAND</flag>
+																	<border>0</border>
+																	<object class="wxListCtrl" name="SimList">
+																		<style>wxLC_SINGLE_SEL</style>
+																	</object>
+																</object>
+															</object>
+														</object>
+														<object class="wxPanel" name="SimPanel">
+															<object class="wxBoxSizer">
+																<orient>wxVERTICAL</orient>
+																<object class="sizeritem">
+																	<option>0</option>
+																	<flag>wxTOP|wxRIGHT|wxLEFT</flag>
+																	<border>5</border>
+																	<object class="wxStaticText" name="m_staticText3">
+																		<label>MyLabel</label>
+																		<wrap>-1</wrap>
+																	</object>
+																</object>
+																<object class="sizeritem">
+																	<option>0</option>
+																	<flag>wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT</flag>
+																	<border>5</border>
+																	<object class="wxStaticLine" name="m_staticline31">
+																		<style>wxLI_HORIZONTAL</style>
+																	</object>
+																</object>
+																<object class="sizeritem">
+																	<option>1</option>
+																	<flag>wxEXPAND | wxALL</flag>
+																	<border>5</border>
+																	<object class="wxPanel" name="SimConfigPanel">
+																		<style>wxCLIP_CHILDREN|wxFULL_REPAINT_ON_RESIZE</style>
+																	</object>
+																</object>
+															</object>
+														</object>
+													</object>
+												</object>
+											</object>
+										</object>
+										<object class="sizeritem">
+											<option>0</option>
+											<flag>wxALIGN_CENTER_HORIZONTAL|wxEXPAND</flag>
+											<border>5</border>
+											<object class="wxBoxSizer">
+												<orient>wxHORIZONTAL</orient>
+												<object class="sizeritem">
+													<option>1</option>
+													<flag>wxALL</flag>
+													<border>5</border>
+													<object class="wxButton" name="DeleteBtn">
+														<tooltip>Remove selected or last added simulation</tooltip>
+														<label>_DELETE</label>
+														<default>0</default>
+													</object>
+												</object>
+												<object class="sizeritem">
+													<option>1</option>
+													<flag>wxALL</flag>
+													<border>5</border>
+													<object class="wxButton" name="AddBtn">
+														<tooltip>Click to add simulation</tooltip>
+														<label>ADD</label>
+														<default>0</default>
+													</object>
+												</object>
+												<object class="sizeritem">
+													<option>0</option>
+													<flag>wxALL</flag>
+													<border>5</border>
+													<object class="wxButton" name="RefreshBtn">
+														<label>_Refresh</label>
+														<default>0</default>
+													</object>
+												</object>
+											</object>
+										</object>
+									</object>
+								</object>
+							</object>
+						</object>
+					</object>
+				</object>
+			</object>
+		</object>
+	</object>
+	<object class="wxPanel" name="SimConfigGUI">
+		<style>wxTAB_TRAVERSAL</style>
+		<size>500,300</size>
+		<object class="wxBoxSizer">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<option>1</option>
+				<flag>wxALL|wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxTextCtrl" name="m_textCtrl2">
+					<value></value>
+				</object>
+			</object>
+		</object>
+	</object>
+</resource>
