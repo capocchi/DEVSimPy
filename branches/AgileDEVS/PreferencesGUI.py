@@ -491,9 +491,9 @@ class Preferences(wx.Toolbook):
 				try:
 					shutil.copy2(filename, PLUGINS_PATH)
 				except Exception, info:
-					sys.stderr.write(_('ERROR: %s copy failed!\n%s')%(os.path.basename(filemane), str(info)))
+					sys.stderr.write(_('ERROR: %s copy failed!\n%s')%(os.path.basename(filename), str(info)))
 			else:
-				sys.stderr.write(_('ERROR: %s is not a python file.\nOnly python file can be added as plugin.')%(os.path.basename(filemane)))
+				sys.stderr.write(_('ERROR: %s is not a python file.\nOnly python file can be added as plugin.')%(os.path.basename(filename)))
 
 		open_dlg.Destroy()
 
