@@ -1,0 +1,809 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>simulator &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for simulator</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: Latin-1 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Main simulator class to be used as an interface to the user</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">middleware</span>
+
+<span class="c"># Fetch the rank and size of this simulation run</span>
+<span class="c"># Don&#39;t get it ourself (e.g. from MPI), as we are possibly not using MPI</span>
+<span class="n">nested</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="n">wasMain</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="n">rank</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="n">middleware</span><span class="o">.</span><span class="n">startupMiddleware</span><span class="p">()</span>
+
+<span class="kn">from</span> <span class="nn">util</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">DEVS</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">basesimulator</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">from</span> <span class="nn">server</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">from</span> <span class="nn">logger</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c"># Try loading cPickle as it is faster, though otherwise fall back to normal pickling</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">cPickle</span> <span class="kn">as</span> <span class="nn">pickle</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="c"># For Python2 and Python3 compliance</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">Queue</span> <span class="kn">as</span> <span class="nn">Queue</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">queue</span> <span class="kn">as</span> <span class="nn">Queue</span>
+
+<div class="viewcode-block" id="local"><a class="viewcode-back" href="../simulator_int.html#simulator.local">[docs]</a><span class="k">def</span> <span class="nf">local</span><span class="p">(</span><span class="n">sim</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test whether or not the simulation is done locally</span>
+
+<span class="sd">    :param sim: the simulator with the locations</span>
+<span class="sd">    :returns: bool -- whether or not the simulation is local</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">locations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;There are no Atomic DEVS models present in your provided model&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sim</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span>
+</div>
+<div class="viewcode-block" id="loadCheckpoint"><a class="viewcode-back" href="../simulator_int.html#simulator.loadCheckpoint">[docs]</a><span class="k">def</span> <span class="nf">loadCheckpoint</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load a previously created simulation from a saved checkpoint.</span>
+
+<span class="sd">    :param name: the name of the model to provide some distinction between different simulation models</span>
+<span class="sd">    :returns: either None if no recovery was possible, or the Simulator object after simulation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">listdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_SIM.pdc&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">:</span>
+        <span class="c"># Simulator object not even found, don&#39;t bother continueing</span>
+        <span class="c">#assert info(&quot;Not even a SIM file was found for the requested name, giving up already&quot;)</span>
+        <span class="k">return</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">infile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">_SIM.pdc&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">simulator</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+        <span class="n">infile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="c"># Use an rsplit, as it is possible that the user defined name contains _ too</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">listdir</span> <span class="k">if</span> <span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&quot;.pdc&quot;</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&quot;SIM.pdc&quot;</span><span class="p">))</span> <span class="ow">and</span> <span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">name</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="c">#assert debug(&quot;Got matching files: &quot; + str(files))</span>
+    <span class="n">maxGVT</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="n">middleware</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">Get_size</span><span class="p">()</span>
+    <span class="n">noncomplete_checkpoint</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">foundFiles</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">foundGVTs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="n">gvt</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">gvt</span> <span class="ow">in</span> <span class="n">foundFiles</span><span class="p">:</span>
+            <span class="n">foundFiles</span><span class="p">[</span><span class="n">gvt</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">foundFiles</span><span class="p">[</span><span class="n">gvt</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="p">]</span>
+            <span class="n">foundGVTs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gvt</span><span class="p">)</span>
+    <span class="n">foundGVTs</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">gvt</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c"># Construct a temporary server</span>
+    <span class="kn">from</span> <span class="nn">middleware</span> <span class="kn">import</span> <span class="n">COMM_WORLD</span>
+    <span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="n">middleware</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">(),</span> <span class="n">middleware</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">Get_size</span><span class="p">())</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">foundGVTs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">gvt</span> <span class="o">=</span> <span class="n">foundGVTs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">foundFiles</span><span class="p">[</span><span class="n">gvt</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="n">foundGVTs</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">gvt</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">gvt</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">for</span> <span class="n">rank</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">server</span><span class="o">.</span><span class="n">getProxy</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span><span class="o">.</span><span class="n">checkLoadCheckpoint</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">gvt</span><span class="p">):</span>
+                    <span class="c"># One of the proxies denied, try next</span>
+                    <span class="n">foundGVTs</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+                    <span class="n">gvt</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">gvt</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c"># If we got here, we are done and can load it</span>
+                <span class="k">break</span>
+    <span class="k">if</span> <span class="n">gvt</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c">#raise DEVSException(&quot;All currently present pdc files are unusable, please remove them all to force a fresh simulation run!&quot;)</span>
+        <span class="k">if</span> <span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">Get_size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c"># We need to shut down the already started MPI server...</span>
+            <span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">isend</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span>
+    <span class="n">simulator</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">server</span>
+        
+    <span class="k">for</span> <span class="n">rank</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">getProxy</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span><span class="o">.</span><span class="n">loadCheckpoint</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">gvt</span><span class="p">)</span>
+    <span class="c">#assert info(&quot;Recovering from time &quot; + str(gvt))</span>
+    <span class="n">simulator</span><span class="o">.</span><span class="n">loadCheckpoint</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">simulator</span>
+</div>
+<div class="viewcode-block" id="Simulator"><a class="viewcode-back" href="../simulator_int.html#simulator.Simulator">[docs]</a><span class="k">class</span> <span class="nc">Simulator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Associates a hierarchical DEVS model with the simulation engine.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Simulator.__init__"><a class="viewcode-back" href="../simulator_int.html#simulator.Simulator.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor of the simulator.</span>
+
+<span class="sd">        :param model: a valid model (created with the provided functions)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">simconfig</span> <span class="kn">import</span> <span class="n">SimulatorConfiguration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">SimulatorConfiguration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="kn">from</span> <span class="nn">middleware</span> <span class="kn">import</span> <span class="n">COMM_WORLD</span>
+        <span class="c"># Simulator is always started at the controller</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+
+        <span class="k">global</span> <span class="n">nested</span>
+        <span class="k">global</span> <span class="n">wasMain</span>
+        <span class="k">if</span> <span class="n">nested</span><span class="p">:</span>
+            <span class="n">wasMain</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nested</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">wasMain</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c"># Initialize all options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initDone</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runGVT</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">termination_models</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fetchAll</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tracers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_size</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_size</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_file</span> <span class="o">=</span> <span class="s">&quot;celldevstrace.txt&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_multifile</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">termination_time</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">termination_condition</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">514</span><span class="p">)</span>
+        <span class="kn">import</span> <span class="nn">logging</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loglevel</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">CHK_interval</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">CHK_name</span> <span class="o">=</span> <span class="s">&quot;(none)&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GVT_interval</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_saving</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msgCopy</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">realtime</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">realTimeInputPortReferences</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subsystem</span> <span class="o">=</span> <span class="s">&quot;python&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generatorfile</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">relocations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progress</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drawModel</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hideEdgeLabels</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allowLocalReinit</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modifyValues</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modifyStateValues</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activityTracking</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activityVisualisation</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locationCellView</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sortOnActivity</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="kn">from</span> <span class="nn">manualRelocator</span> <span class="kn">import</span> <span class="n">ManualRelocator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activityRelocator</span> <span class="o">=</span> <span class="n">ManualRelocator</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dsdevs</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memoization</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classicDEVS</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSchedulerActivityHeap</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locationsFile</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allocator</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">realtime_extra</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locations</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">finalize</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">model_counter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">model_ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_ids</span><span class="p">,</span> <span class="n">locations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="p">,</span> <span class="n">selectHierarchy</span><span class="o">=</span><span class="p">[])</span>
+
+        <span class="c"># Allow the model to provide some of its own configuration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">simSettings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the specified attribute, all setters/registers will be redirected to the configuration code.</span>
+
+<span class="sd">        :param func: function that is called</span>
+<span class="sd">        :returns: requested attribute</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">func</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;set&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">func</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;register&quot;</span><span class="p">):</span>
+            <span class="c"># Redirect to configuration backend</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Just an unknown attribute</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Simulator.runStartup"><a class="viewcode-back" href="../simulator_int.html#simulator.Simulator.runStartup">[docs]</a>    <span class="k">def</span> <span class="nf">runStartup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform startup of the simulator right before simulation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startAllocator</span><span class="p">()</span>
+
+        <span class="c"># Controller is the main simulation server</span>
+        <span class="c"># Remap every mandatory model to the controller</span>
+        <span class="k">for</span> <span class="n">model_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">termination_models</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_ids</span><span class="p">[</span><span class="n">model_id</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">location</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">model_id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model_id</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">relocatable</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># Code without location goes to the controller</span>
+        <span class="c"># Delay this code as auto allocation could be possible</span>
+        <span class="k">for</span> <span class="n">model_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="p">[</span><span class="bp">None</span><span class="p">]:</span>
+            <span class="c"># All these models are not yet initialized, so set them to the default</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_ids</span><span class="p">[</span><span class="n">model_id</span><span class="p">]</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="p">[</span><span class="bp">None</span><span class="p">])</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="p">[</span><span class="bp">None</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">getProxy</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">drawModel</span><span class="p">:</span>
+            <span class="c">#assert info(&quot;Drawing model hierarchy&quot;)</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">drawModelFile</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;digraph G {</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">drawModelHierarchy</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">CoupledDEVS</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">componentSet</span> <span class="o">=</span> <span class="n">directConnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">componentSet</span><span class="p">,</span> <span class="n">local</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">allocator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">allocator</span><span class="o">.</span><span class="n">getTerminationTime</span><span class="p">()</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="c"># It is a static allocator, so this can be done right now!</span>
+            <span class="n">allocs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">allocator</span><span class="o">.</span><span class="n">allocate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">componentSet</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">model_id</span><span class="p">,</span> <span class="n">location</span> <span class="ow">in</span> <span class="n">allocs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_ids</span><span class="p">[</span><span class="n">model_id</span><span class="p">]</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="n">location</span>
+            <span class="n">saveLocations</span><span class="p">(</span><span class="s">&quot;locationsave.txt&quot;</span><span class="p">,</span> <span class="n">allocs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_ids</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allocator</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">drawModel</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">allocator</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">drawModelFile</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">drawModelConnections</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;}&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">drawModel</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="n">nodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="p">:</span>
+            <span class="n">nodes</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">nodes</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+            <span class="c"># Less locations used than there exist</span>
+            <span class="c">#assert warn(&quot;Not all initialized MPI nodes are being used in the model setup! Auto allocation could fix this.&quot;)</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">nodes</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Not enough MPI nodes started for the distribution given in the model! Models requested at location </span><span class="si">%i</span><span class="s">, max node = </span><span class="si">%i</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Simulator.drawModelHierarchy"><a class="viewcode-back" href="../simulator_int.html#simulator.Simulator.drawModelHierarchy">[docs]</a>    <span class="k">def</span> <span class="nf">drawModelHierarchy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draws the hierarchy by creating a Graphviz Dot file. This merely creates the first part: the hierarchy of all models</span>
+
+<span class="sd">        :param outfile: a file handle to write text to</span>
+<span class="sd">        :param model: the model to draw</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">colors</span> <span class="kn">import</span> <span class="n">colors</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">CoupledDEVS</span><span class="p">):</span>
+            <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;  subgraph &quot;cluster</span><span class="si">%s</span><span class="s">&quot; {</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">()))</span>
+            <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;  label = &quot;</span><span class="si">%s</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">model</span><span class="o">.</span><span class="n">getModelName</span><span class="p">())</span>
+            <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;  color=black</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">componentSet</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">drawModelHierarchy</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+            <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;  }</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">AtomicDEVS</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">location</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">colors</span><span class="p">):</span>
+                <span class="c">#assert warn(&quot;Not enough colors supplied in colors.py for this number of nodes! Defaulting to white&quot;)</span>
+                <span class="n">color</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">color</span> <span class="o">=</span> <span class="n">colors</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">location</span><span class="p">]</span>
+            <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;  &quot;</span><span class="si">%s</span><span class="s">&quot; [</span><span class="se">\n</span><span class="s">    label = &quot;</span><span class="si">%s</span><span class="se">\\</span><span class="s">nState: </span><span class="si">%s</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">    color=&quot;</span><span class="si">%s</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">    style=filled</span><span class="se">\n</span><span class="s">]</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">(),</span> <span class="n">model</span><span class="o">.</span><span class="n">getModelName</span><span class="p">(),</span> <span class="n">model</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">color</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Simulator.drawModelConnections"><a class="viewcode-back" href="../simulator_int.html#simulator.Simulator.drawModelConnections">[docs]</a>    <span class="k">def</span> <span class="nf">drawModelConnections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draws all necessary connections between the model</span>
+
+<span class="sd">        :param outfile: the file to output to</span>
+<span class="sd">        :param model: a CoupledDEVS model whose children should be drawn</span>
+<span class="sd">        :param colors: the colors to draw on the connections. Only used when an initial allocator is used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">colors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">maxEvents</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">colors</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">maxEvents</span><span class="p">:</span>
+                        <span class="n">maxEvents</span> <span class="o">=</span> <span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">componentSet</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">sourcePort</span> <span class="ow">in</span> <span class="n">source</span><span class="o">.</span><span class="n">OPorts</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">destinationPort</span> <span class="ow">in</span> <span class="n">sourcePort</span><span class="o">.</span><span class="n">outLine</span><span class="p">:</span>
+                    <span class="n">destination</span> <span class="o">=</span> <span class="n">destinationPort</span><span class="o">.</span><span class="n">hostDEVS</span>
+                    <span class="k">if</span> <span class="n">colors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="c">#TODO color is not yet perfect</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">absoluteColor</span> <span class="o">=</span> <span class="n">colors</span><span class="p">[</span><span class="n">source</span><span class="p">][</span><span class="n">destination</span><span class="p">]</span>
+                            <span class="n">relativeColor</span> <span class="o">=</span> <span class="s">&#39;&quot;</span><span class="si">%s</span><span class="s"> 1 1&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">absoluteColor</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">maxEvents</span><span class="p">)))</span>
+                        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                            <span class="c"># Simply no message transfer</span>
+                            <span class="n">absoluteColor</span> <span class="o">=</span> <span class="mi">0</span>
+                            <span class="n">relativeColor</span> <span class="o">=</span> <span class="s">&#39;&quot;1 1 1&quot;&#39;</span>
+                    <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;  &quot;</span><span class="si">%s</span><span class="s">&quot; -&gt; &quot;</span><span class="si">%s</span><span class="s">&quot; &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">(),</span> <span class="n">destination</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">()))</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hideEdgeLabels</span> <span class="ow">and</span> <span class="n">colors</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">hideEdgeLabels</span> <span class="ow">and</span> <span class="n">colors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;[label=&quot;</span><span class="si">%s</span><span class="s">&quot;,color=</span><span class="si">%s</span><span class="s">];</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">absoluteColor</span><span class="p">,</span> <span class="n">relativeColor</span><span class="p">))</span>
+                    <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hideEdgeLabels</span> <span class="ow">and</span> <span class="n">colors</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;[label=&quot;</span><span class="si">%s</span><span class="s"> -&gt; </span><span class="si">%s</span><span class="s">&quot;];</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sourcePort</span><span class="o">.</span><span class="n">getPortName</span><span class="p">(),</span> <span class="n">destinationPort</span><span class="o">.</span><span class="n">getPortName</span><span class="p">()))</span>
+                    <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hideEdgeLabels</span> <span class="ow">and</span> <span class="n">colors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;[label=&quot;</span><span class="si">%s</span><span class="s"> -&gt; </span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s">)&quot;,color=</span><span class="si">%s</span><span class="s">];</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sourcePort</span><span class="o">.</span><span class="n">getPortName</span><span class="p">(),</span> <span class="n">destinationPort</span><span class="o">.</span><span class="n">getPortName</span><span class="p">(),</span> <span class="n">absoluteColor</span><span class="p">,</span> <span class="n">relativeColor</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Simulator.checkpoint"><a class="viewcode-back" href="../simulator_int.html#simulator.Simulator.checkpoint">[docs]</a>    <span class="k">def</span> <span class="nf">checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a checkpoint of this object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CHK_name</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_SIM.pdc&quot;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flattened</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">flattenConnections</span><span class="p">()</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flattened</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">unflattenConnections</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Simulator.loadCheckpoint"><a class="viewcode-back" href="../simulator_int.html#simulator.Simulator.loadCheckpoint">[docs]</a>    <span class="k">def</span> <span class="nf">loadCheckpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Alert the Simulator that it was restored from a checkpoint and thus can take some shortcuts</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">getProxy</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">real_simulate</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Simulator.startAllocator"><a class="viewcode-back" href="../simulator_int.html#simulator.Simulator.startAllocator">[docs]</a>    <span class="k">def</span> <span class="nf">startAllocator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the use of an allocator if required, thus forcing all models to run at the controller</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">allocator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">activityTracking</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="c"># Make simulation local for event capturing</span>
+            <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">componentSet</span><span class="p">:</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">setLocation</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Simulator.loadLocationsFromFile"><a class="viewcode-back" href="../simulator_int.html#simulator.Simulator.loadLocationsFromFile">[docs]</a>    <span class="k">def</span> <span class="nf">loadLocationsFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Try to load a file containing the allocation of the nodes. If such a (valid) file is found, True is returned. Otherwise False is returned.</span>
+<span class="sd">        </span>
+<span class="sd">        This can thus easily be used in a simulator experiment file as a condition for setting an allocator (e.g. check for an allocation file and if</span>
+<span class="sd">        none is found, create one by running the allocator first).</span>
+
+<span class="sd">        A partially valid file will not be used; a file does not need to specify an allocation for all models, those that aren&#39;t mentioned are simply</span>
+<span class="sd">        skipped and their default allocation is used (as specified in the model itself).</span>
+
+<span class="sd">        :param filename: the name of the file to use</span>
+<span class="sd">        :returns: bool -- success of the operation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+            <span class="n">locs</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">model_id</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">modelname</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="n">model_id</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">modelname</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">model_id</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">location</span><span class="p">),</span> <span class="n">modelname</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="c"># Check for compliance first, otherwise the locations are loaded partially</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_ids</span><span class="p">[</span><span class="n">model_id</span><span class="p">]</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">()</span> <span class="o">!=</span> <span class="n">modelname</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">locs</span><span class="p">[</span><span class="n">model_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">location</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+            <span class="c"># Everything seems to be fine, so do the actual allocations now</span>
+            <span class="k">for</span> <span class="n">model_id</span> <span class="ow">in</span> <span class="n">locs</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_ids</span><span class="p">[</span><span class="n">model_id</span><span class="p">]</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="n">locs</span><span class="p">[</span><span class="n">model_id</span><span class="p">]</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="Simulator.simulate"><a class="viewcode-back" href="../simulator_int.html#simulator.Simulator.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start simulation with the previously set options. Can be reran afterwards to reinitialize the model and run it again, </span>
+<span class="sd">        possibly after altering some aspects of the model with the provided methods.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runStartup</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">relocations</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">directive</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">relocations</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">directive</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">termination_models</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Termination model was found as a relocation directive!&quot;</span><span class="p">)</span>
+
+        <span class="n">loclist</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+        <span class="n">proxylist</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">getProxy</span><span class="p">(</span><span class="n">location</span><span class="p">)</span> <span class="k">for</span> <span class="n">location</span> <span class="ow">in</span> <span class="n">loclist</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup</span><span class="p">:</span>
+            <span class="c"># self.locations is now untrusted, as it is possible for migration to happen!</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">locations</span>
+
+            <span class="c"># Broadcast the model, do this slightly more intelligent than by iterating over the list by using provided functions and exploiting maximal parallellism</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flattened</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="c"># Fill in all schedulers</span>
+            <span class="k">for</span> <span class="n">location</span> <span class="ow">in</span> <span class="n">loclist</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">location</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedulerLocations</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">schedulerLocations</span><span class="p">[</span><span class="n">location</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedulerType</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c"># Try broadcasting as-is</span>
+                <span class="n">broadcastModel</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_ids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">flattened</span><span class="p">),</span> <span class="n">proxylist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowLocalReinit</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedulerLocations</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">flattened</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+                <span class="c"># Something went wrong, probably exceeded the maximum recursion depth while pickling</span>
+                <span class="c">#assert warn(&quot;Normal sending not possible due to big recursion, trying auto flattening&quot;)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c"># Try decoupling the ports from the actual models to limit recursion that our simulation framework induced</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">flattenConnections</span><span class="p">()</span>
+                    <span class="c"># Broadcast again, but now mention that the ports were altered</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">flattened</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">broadcastModel</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_ids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">flattened</span><span class="p">),</span> <span class="n">proxylist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowLocalReinit</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedulerLocations</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="c"># Even that didn&#39;t solve it, user error!</span>
+                    <span class="c"># Stop the nodes from waiting for a broadcast</span>
+                    <span class="n">broadcastCancel</span><span class="p">()</span>
+                    <span class="kn">import</span> <span class="nn">sys</span>
+                    <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Could not send model to remote destination due to pickling error: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Send to very model to clear the simulation memory</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowLocalReinit</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">proxylist</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Reinitialisation for local simulation is disabled by default, please enable it with the configuration method &#39;setAllowLocalReinit()&#39;&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">proxy</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">proxylist</span><span class="p">):</span>
+                <span class="n">proxy</span><span class="o">.</span><span class="n">resetSimulation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schedulerLocations</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="c"># Now perform all changes from the initial version</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modifyValues</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c"># These changes need to happen everywhere due to the possibility for relocation</span>
+                <span class="n">model_id</span><span class="p">,</span> <span class="n">attr</span> <span class="o">=</span> <span class="n">key</span>
+                <span class="k">if</span> <span class="n">attr</span> <span class="o">!=</span> <span class="s">&quot;state&quot;</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">proxy</span> <span class="ow">in</span> <span class="n">proxylist</span><span class="p">:</span>
+                        <span class="n">proxy</span><span class="o">.</span><span class="n">setAttr</span><span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># If it is the state, it only needs to be sent to the node that hosts it</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">getProxy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_ids</span><span class="p">[</span><span class="n">model_id</span><span class="p">]</span><span class="o">.</span><span class="n">location</span><span class="p">)</span><span class="o">.</span><span class="n">setAttr</span><span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modifyStateValues</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">model_id</span><span class="p">,</span> <span class="n">attr</span> <span class="o">=</span> <span class="n">key</span>
+                <span class="c"># Only needs to happen at the location where it is active!</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">getProxy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_ids</span><span class="p">[</span><span class="n">model_id</span><span class="p">]</span><span class="o">.</span><span class="n">location</span><span class="p">)</span><span class="o">.</span><span class="n">setStateAttr</span><span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="c"># Prevent further setups</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">for</span> <span class="n">proxy</span> <span class="ow">in</span> <span class="n">proxylist</span><span class="p">:</span>
+            <span class="n">proxy</span><span class="o">.</span><span class="n">setGlobals</span><span class="p">(</span> 
+                             <span class="n">tracers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tracers</span><span class="p">,</span>
+                             <span class="n">address</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> 
+                             <span class="n">loglevel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loglevel</span><span class="p">,</span> 
+                             <span class="n">checkpointfrequency</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CHK_interval</span><span class="p">,</span>
+                             <span class="n">checkpointname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHK_name</span><span class="p">,</span>
+                             <span class="n">kernels</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">loclist</span><span class="p">),</span>
+                             <span class="n">statesaver</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">state_saving</span><span class="p">,</span>
+                             <span class="n">memoization</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">memoization</span><span class="p">,</span>
+                             <span class="n">msgCopy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">msgCopy</span><span class="p">)</span>
+
+        <span class="c"># Set the verbosity on the controller only, otherwise each kernel</span>
+        <span class="c"># would open the file itself, causing problems. Furthermore, all</span>
+        <span class="c"># verbose output will be sent to the controller</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">setAllocator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allocator</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">setRelocator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activityRelocator</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">setDSDEVS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dsdevs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">setActivityTracking</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activityTracking</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">setClassicDEVS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classicDEVS</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">setCellLocationTracer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">locationCellView</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">realtime</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">loclist</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Real time simulation only possible locally&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsystem</span> <span class="o">==</span> <span class="s">&quot;tkinter&quot;</span><span class="p">:</span>
+                <span class="c"># Register a queue processing method</span>
+                <span class="n">tk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">realtime_extra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="kn">import</span> <span class="nn">collections</span>
+                <span class="n">queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+                <span class="kn">import</span> <span class="nn">threadingTkInter</span>
+                <span class="n">tk</span><span class="o">.</span><span class="n">after</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">threadingTkInter</span><span class="o">.</span><span class="n">tkMainThreadPoller</span><span class="p">,</span> <span class="n">tk</span><span class="p">,</span> <span class="n">queue</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">realtime_extra</span> <span class="o">=</span> <span class="p">[</span><span class="n">queue</span><span class="p">]</span>
+                <span class="n">seperate_thread</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsystem</span> <span class="o">==</span> <span class="s">&quot;loop&quot;</span><span class="p">:</span>
+                <span class="n">seperate_thread</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">seperate_thread</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">setRealTime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subsystem</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">generatorfile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">realTimeInputPortReferences</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">realtimeScale</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">realtime_extra</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">seperate_thread</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># Check whether global or local termination should be used</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">termination_condition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># Only set the condition on the controller</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">getProxy</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">setTerminationCondition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">termination_condition</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Global termination time</span>
+            <span class="k">for</span> <span class="n">proxy</span> <span class="ow">in</span> <span class="n">proxylist</span><span class="p">:</span>
+                <span class="n">proxy</span><span class="o">.</span><span class="n">setTerminationTime</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">termination_time</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">)))</span>
+
+        <span class="c"># Start all necessary tracers, which these are, are decided elsewhere</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">startTracers</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHK_interval</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">seperate_thread</span><span class="p">:</span>
+            <span class="n">thrd</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">getProxy</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">simulate_sync</span><span class="p">)</span>
+            <span class="c"># Make it a daemon, as otherwise killing the main thread wouldn&#39;t kill us</span>
+            <span class="n">thrd</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">thrd</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">real_simulate</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Simulator.realtime_loop_call"><a class="viewcode-back" href="../simulator_int.html#simulator.Simulator.realtime_loop_call">[docs]</a>    <span class="k">def</span> <span class="nf">realtime_loop_call</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform a single iteration in the loop for real time simulation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">gameLoop</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Simulator.realtime_interrupt"><a class="viewcode-back" href="../simulator_int.html#simulator.Simulator.realtime_interrupt">[docs]</a>    <span class="k">def</span> <span class="nf">realtime_interrupt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate an interrupt for the realtime backend using a method call.</span>
+
+<span class="sd">        :param string: the value to interrupt with, should be of the form &quot;port value&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">realtimeInterrupt</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Simulator.showProgress"><a class="viewcode-back" href="../simulator_int.html#simulator.Simulator.showProgress">[docs]</a>    <span class="k">def</span> <span class="nf">showProgress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locations</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shows the progress of the simulation by polling all locations that are passed. Should run on a seperate thread as this blocks!</span>
+
+<span class="sd">        :param locations: list of all locations to access</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># 80 is somewhat default...</span>
+        <span class="n">consolewidth</span> <span class="o">=</span> <span class="mi">80</span>
+        <span class="c"># Delete 4 for the prefix, 5 for the suffix</span>
+        <span class="n">barwidth</span> <span class="o">=</span> <span class="n">consolewidth</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">-</span> <span class="mi">5</span>
+        <span class="n">finishtime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">termination_time</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c"># Local simulation is always &#39;committed&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fillchar</span> <span class="o">=</span> <span class="s">&quot;=&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">locations</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s">&quot;#&quot;</span>
+        <span class="n">gvt</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c"># Several dirty checks for whether or not the simulation is done, if it is finished no more calls should be needed</span>
+            <span class="c"># Keep doing this until the main thread exits, this should be a thread!</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHK_interval</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="c"># Don&#39;t use an event while checkpointing, as this is unpicklable</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">progress_event</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">first</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">locations</span><span class="p">:</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\033</span><span class="s">[F&quot;</span><span class="p">)</span>
+            <span class="n">first</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">progress_finished</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fillchar</span> <span class="o">!=</span> <span class="s">&quot;E&quot;</span><span class="p">:</span>
+                <span class="n">gvt</span> <span class="o">=</span> <span class="n">finishtime</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">progress_finished</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fillchar</span> <span class="o">==</span> <span class="s">&quot;E&quot;</span><span class="p">:</span>
+                <span class="c"># Don&#39;t update the GVT variable</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">locations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="c"># The gvt is actually kind of the node time</span>
+                    <span class="n">gvt</span> <span class="o">=</span> <span class="n">nodetime</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">gvt</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">getGVT</span><span class="p">(),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">gvtpercentage</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">gvt</span> <span class="o">/</span> <span class="n">finishtime</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+            <span class="n">gvtlength</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">barwidth</span><span class="p">,</span> <span class="n">gvtpercentage</span> <span class="o">*</span> <span class="n">barwidth</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">locations</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">progress_finished</span><span class="p">:</span>
+                    <span class="n">nodetime</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">nodetime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">getProxy</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">.</span><span class="n">getTime</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">nodetime</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">):</span>
+                    <span class="n">nodetime</span> <span class="o">=</span> <span class="n">finishtime</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%2d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">node</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot; |&quot;</span>
+                <span class="n">percentage</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nodetime</span> <span class="o">/</span> <span class="n">finishtime</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;#&quot;</span> <span class="o">*</span> <span class="n">gvtlength</span>
+                <span class="n">length</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">barwidth</span><span class="p">,</span> <span class="n">percentage</span> <span class="o">*</span> <span class="n">barwidth</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">-</span> <span class="n">gvtlength</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fillchar</span> <span class="o">*</span> <span class="n">length</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot; &quot;</span> <span class="o">*</span> <span class="p">(</span><span class="n">barwidth</span> <span class="o">-</span> <span class="n">gvtlength</span> <span class="o">-</span> <span class="n">length</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">percentage</span> <span class="o">==</span> <span class="mi">100</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fillchar</span> <span class="o">!=</span> <span class="s">&quot;E&quot;</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;|DONE&quot;</span>
+                <span class="k">elif</span> <span class="n">percentage</span> <span class="o">==</span> <span class="mi">100</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fillchar</span> <span class="o">==</span> <span class="s">&quot;E&quot;</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;|FAIL&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;| </span><span class="si">%2d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">percentage</span> <span class="o">+</span> <span class="s">&quot;%&quot;</span>
+                <span class="k">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">progress_finished</span><span class="p">:</span>
+                <span class="k">return</span>
+        </div>
+<div class="viewcode-block" id="Simulator.real_simulate"><a class="viewcode-back" href="../simulator_int.html#simulator.Simulator.real_simulate">[docs]</a>    <span class="k">def</span> <span class="nf">real_simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The actual simulation part, this is identical for the &#39;start from scratch&#39; and &#39;start from checkpoint&#39; algorithm, thus it was split up</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">locations</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c">## Progress visualisation code</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">termination_time</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">):</span>
+                    <span class="c">#assert warning(&quot;Progress visualisation is only possible if a termination time is used instead of a termination condition&quot;)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">progress</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="c">#elif self.verbose and self.verbose_file is None:</span>
+                <span class="c">#    #assert warning(&quot;Progress visualisation is not allowed when printing verbose output&quot;)</span>
+                <span class="c">#    pass</span>
+                <span class="c">#    self.progress = False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">progress_finished</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="n">thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">showProgress</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">locations</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHK_interval</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">progress_event</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+                    <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+            <span class="c"># Local simulation can take a shortcut</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">locations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHK_interval</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c"># If we use checkpointing, we will need a GVT thread running</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">startGVTThread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GVT_interval</span><span class="p">)</span>
+                <span class="c"># Simply do a blocking call, thus preventing the finish ring algorithm</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">getProxy</span><span class="p">(</span><span class="n">locations</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">simulate_sync</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">startGVTThread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GVT_interval</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">location</span> <span class="ow">in</span> <span class="n">locations</span><span class="p">:</span>
+                    <span class="c"># Don&#39;t run all of these on a seperate thread, as it returns no result</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">getProxy</span><span class="p">(</span><span class="n">location</span><span class="p">)</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+                <span class="c"># Here, the simulation is running and we wait for it to end...</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">waitFinish</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">locations</span><span class="p">))</span>
+                <span class="c"># It seems that all nodes have finished!</span>
+            <span class="c">#assert debug(&quot;Finished waiting for all processors&quot;)</span>
+        <span class="k">except</span> <span class="n">DEVSException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="c"># Should also exit on a DEVSException since this isn&#39;t really meant to happen</span>
+            <span class="kn">import</span> <span class="nn">sys</span>
+            <span class="c"># Return an errorcode, as we ended abruptly</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c"># Try to stop the progress bar thread if this exists, otherwise we hang forever</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fillchar</span> <span class="o">=</span> <span class="s">&quot;E&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">progress_finished</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHK_interval</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="c"># With checkpointing running, we need to do this the hard way...</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">progress_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+                <span class="c"># Wait for it to end</span>
+                <span class="n">thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+            <span class="c"># Reraise the initial exception, this code was only here to stop the progress bar :)</span>
+            <span class="k">raise</span>
+
+        <span class="c"># Perform all pending operations</span>
+        <span class="c">#assert debug(&quot;Performing all delayed actions&quot;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">performActions</span><span class="p">()</span>
+
+        <span class="c"># Stop all running tracers</span>
+        <span class="c">#assert debug(&quot;Stopping all tracers&quot;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">stopTracers</span><span class="p">()</span>
+
+        <span class="c"># Now the state is stable, fetch all registered states before shutting down</span>
+        <span class="c">#assert debug(&quot;Fetching all requested states&quot;)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">variable</span><span class="p">,</span> <span class="n">model_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span><span class="p">:</span>
+                <span class="c"># Ask the controller on which node this model currently runs, calls to the controller</span>
+                <span class="c"># are very fast, as this runs locally. Otherwise a complete location dictionary would</span>
+                <span class="c"># have to be pickled and unpickled, but also filtered for local models, begin O(n) instead</span>
+                <span class="c"># of the current O(1), at the cost of more function calls</span>
+                <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">getProxy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">getLocation</span><span class="p">(</span><span class="n">model_id</span><span class="p">))</span><span class="o">.</span><span class="n">getState</span><span class="p">(</span><span class="n">model_id</span><span class="p">)</span>
+                <span class="c">#assert debug(&quot;Setting state for &quot; + str(variable))</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetchAll</span><span class="p">:</span>
+            <span class="c">#assert info(&quot;Downloading model from locations&quot;)</span>
+            <span class="c"># We must download the state from each and every model</span>
+            <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">componentSet</span><span class="p">:</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">getProxy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">getLocation</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">model_id</span><span class="p">))</span><span class="o">.</span><span class="n">getState</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">model_id</span><span class="p">)</span>
+
+        <span class="c"># Shut down every location</span>
+        <span class="c">#assert debug(&quot;Shutting down servers&quot;)</span>
+        <span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="n">locations</span><span class="p">:</span>
+            <span class="n">proxy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">getProxy</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span>
+            <span class="c"># If this is oneway, we will stop the simulation even before the finish was called everywhere</span>
+            <span class="n">proxy</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">progress_finished</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c"># A progress bar was running without checkpointing: set the event to finish it</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">progress</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHK_interval</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">progress_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+        <span class="c"># Activity tracking is enabled, so visualize it in whatever way was configured</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">activityVisualisation</span><span class="p">:</span>
+            <span class="n">visualizeActivity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># Check if the model was to be visualized</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">drawModel</span><span class="p">:</span>
+            <span class="c"># Possibly include event count visualisation</span>
+            <span class="c">#colors = self.controller.runAllocator()</span>
+            <span class="n">colors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">getEventGraph</span><span class="p">()</span>
+            <span class="c">#assert info(&quot;Drawing model distribution&quot;)</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">drawModelFile</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">drawModelConnections</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">colors</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;}&quot;</span><span class="p">)</span>
+
+        <span class="k">global</span> <span class="n">wasMain</span>
+        <span class="k">if</span> <span class="n">wasMain</span><span class="p">:</span>
+            <span class="k">global</span> <span class="n">nested</span>
+            <span class="n">nested</span> <span class="o">=</span> <span class="bp">False</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

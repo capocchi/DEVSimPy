@@ -1,0 +1,154 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Checkpointing &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Advanced examples" href="advanced.html" />
+    <link rel="next" title="Location tracing" href="location.html" />
+    <link rel="prev" title="Distributed Termination" href="distributedtermination.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="location.html" title="Location tracing"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="distributedtermination.html" title="Distributed Termination"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" accesskey="U">Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="checkpointing">
+<h1>Checkpointing<a class="headerlink" href="#checkpointing" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Checkpointing is only possible in distributed simulation and only if the MPI backend is used.</p>
+</div>
+<p>Checkpointing offers the user the possibility to resume a computation from a previous simulation run. This previous simulation run might have been interrupted, with only a partial simulation as a result. Furthermore, all possible tracers will only have parts of their actual output being written. Restarting the simulation from scratch might be unacceptable due to the long time that was already spent on simulation. Checkpointing offers a solution to this problem, because it will save the current simulation state to a file after a fixed amount of GVT computations.</p>
+<p>The checkpointing algorithm is closely linked to the GVT algorithm, as this allows for several optimisations. At the GVT, it is possible to know that no message will arrive from before, so all states from before can be removed. Since after a checkpoint recovery all nodes will revert to the GVT, no future state needs to be saved too.</p>
+<p>The only data that is thus stored is the model itself. To allow for somewhat easier implementation, some other data is also stored, such as configuration options. Basically it boils down to a selective <em>pickle</em> of the kernels at every location.</p>
+<p>Now how do you actually use checkpointing? The first step is of course to enable it in the configuration options, like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sim</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">DQueue</span><span class="p">())</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">setCheckpointing</span><span class="p">(</span><span class="s">&quot;myQueue&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The <em>setCheckpointing</em> function takes a name as its first parameter, which is simply used to identify the checkpoints and it will be used as a filename. The second parameter is the amount of GVT computations that should pass before a checkpoint is made. It might be possible to calculate the GVT frequently (e.g. after 10 seconds of simulation), but only create a checkpoint after a few minutes of simulation. This is because the GVT calculation frees up memory and might therefore be necessary. On the other hand, creating checkpoints very often is I/O intensive and when restoring a checkpoint, it will probably not be a matter of seconds.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The first parameter of the <em>setCheckpointing</em> function is used as a filename, so make sure that this would create a valid file name.</p>
+</div>
+<p>When simulation is running with these options, files will be created at every checkpoint step that are placed in the current directory. The created files will have the PDC extension, which stands for PythonDEVS Checkpoint. There will be as many files as there are nodes running: one for each kernel. Furthermore, a basic file will be created at the start, which contains the simulator that oversees the simulation. This file doesn&#8217;t change with simulation, so it is not altered during simulation itself.</p>
+<p>Now that we have our checkpoints, we only need to be able to recover from them. This is again as simple as running the <em>loadCheckpoint</em> function <strong>before</strong> recreating a simulator and model. It is not completely necessary to do this before, though the work would be useless... This <em>loadCheckpoint</em> call will automatically resume simulation as soon as all nodes are recovered. The call will return <em>None</em> in case no recovery is possible (e.g. when there are no checkpoint files), or will return a simulator object when simulation has finished. It is therefore <strong>only</strong> necessary to create a new model and simulator if this fails. This gives the following code:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sim</span> <span class="o">=</span> <span class="n">loadCheckpoint</span><span class="p">(</span><span class="s">&quot;myQueue&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">sim</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">sim</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">DQueue</span><span class="p">())</span>
+    <span class="n">sim</span><span class="o">.</span><span class="n">setCheckpointing</span><span class="p">(</span><span class="s">&quot;myQueue&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+<span class="c"># Here, the simulation is finished and the Simulator object can be used as normally in both cases</span>
+</pre></div>
+</div>
+<p>The <em>loadCheckpoint</em> will automatically search for the latest available checkpoint that is completely valid. If certain files are missing, then the next available option will be tried until a usable one is found. Note that it is possible for a checkpoint file to be corrupt, for example when the simulation crashes while writing the checkpoint file. This will be seen by the user as a seemingly random <em>PicklingError</em>. In this case it is necessary to remove at least one of these files and retry. For this reason, older checkpoints are still kept.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">On-the-fly recovery of a crashed node is not possible, all nodes will have to stop and restart the simulation anew.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="distributedtermination.html"
+                        title="previous chapter">Distributed Termination</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="location.html"
+                        title="next chapter">Location tracing</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/checkpoint.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="location.html" title="Location tracing"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="distributedtermination.html" title="Distributed Termination"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" >Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
