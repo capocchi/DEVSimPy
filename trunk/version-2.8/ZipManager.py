@@ -20,9 +20,6 @@ import re
 import wx
 import inspect
 
-from DomainInterface.DomainBehavior import DomainBehavior
-from DomainInterface.DomainStructure import DomainStructure
-
 from traceback import format_exception
 from Utilities import listf, path_to_module
 
@@ -30,15 +27,15 @@ from Utilities import listf, path_to_module
 #Cmtp=0
 
 def getPythonModelFileName(fn):
-	""" Get filename of zipped python file 
+	""" Get filename of zipped python file
 	"""
-	
+
 	#global Cmtp
-	
+
 	assert(zipfile.is_zipfile(fn))
-	
+
 	zf = zipfile.ZipFile(fn,'r')
-	
+
 	###	TODO: finally impose : py_file_list = filter(lambda f: f.endswith('.py'))
 	### find if python file has same name of model file
 	py_file_list = filter(lambda f: f.endswith('.py') and os.path.dirname(f) == '' and f not in ('plugins.py', 'steps.py', 'environment.py'), zf.namelist())
@@ -59,11 +56,14 @@ def getPythonModelFileName(fn):
 			else:
 				import Components
 				cls = Components.GetClass(os.path.join(fn, python_file))
-				
+
+				from DomainInterface.DomainBehavior import DomainBehavior
+				from DomainInterface.DomainStructure import DomainStructure
+
 				if inspect.isclass(cls):
 					if issubclass(cls, DomainBehavior) or issubclass(cls, DomainStructure):
 						return python_file
-						
+
 		sys.stdout.write(_('Behavioral python file not found in %s file'%fn))
 		raise Exception
 	else:
@@ -71,23 +71,23 @@ def getPythonModelFileName(fn):
 		return py_file_list[0]
 
 class Zip:
-	
+
 	def __init__(self, fn, files = []):
 		""" Constructor
 		"""
 		### local copy
 		self.fn = fn
-		
+
 		if files != []:
 			self.Create(files)
-		
+
 	def Create(self, add_files = []):
 		dir_name, base_name = os.path.split(self.fn)
 		name, ext = os.path.splitext(base_name)
-		
+
 		### output zip file
 		zout = zipfile.ZipFile(self.fn, "w")
-		
+
 		### for all files wich could be added
 		for fn in filter(lambda f: os.path.exists(f) or zipfile.is_zipfile(os.path.dirname(f)), add_files):
 			fn_dir_name, fn_base_name = os.path.split(fn)
@@ -113,7 +113,7 @@ class Zip:
 
 		### delete empty fileName
 		replace_files = filter(lambda f: f!='', replace_files)
-		
+
 		# call this function because : http://www.digi.com/wiki/developer/index.php/Error_messages
 		self.ClearCache()
 
@@ -121,11 +121,11 @@ class Zip:
 		zout = zipfile.ZipFile("new_arch.zip", 'w')
 
 		exclude_file = []
-		
+
 		### write all replace file in the new archive
 		for fn in replace_files:
 			dir_name, base_name = os.path.split(fn)
-			
+
 			if zipfile.is_zipfile(dir_name):
 				#print '1'
 				z = zipfile.ZipFile(dir_name, 'r')
@@ -149,7 +149,7 @@ class Zip:
 			else:
 				exclude_file.append(replace_files.index(fn))
 				#sys.stdout.write("%s unknown\n"%(fn))
-		
+
 		### try to rewrite not replaced files from original zip
 		info_list = zin.infolist()
 		for item in info_list:
@@ -165,7 +165,7 @@ class Zip:
 
 		### remove and rename the zip file
 		self.ClearFiles()
-			
+
 	def Delete(self, delete_files=[]):
 		""" Remove file in zip archive
 		"""
@@ -179,7 +179,7 @@ class Zip:
 		zin = zipfile.ZipFile(self.fn, 'r')
 		zout = zipfile.ZipFile("new_arch.zip", 'w')
 
-		### 
+		###
 		info_list = zin.infolist()
 		for item in info_list:
 			if item.filename not in delete_files:
@@ -193,17 +193,17 @@ class Zip:
 
 		### remove and rename the zip file
 		self.ClearFiles()
-			
+
 	def GetImage(self, scaleW=16, scaleH=16):
 		""" Get image object from image file stored in zip file.
 			scaleH and scaleW are used to rescale image
 		"""
-	
+
 		zf = zipfile.ZipFile(self.fn, 'r')
-		
+
 		### find if python file has same name of model file
 		L = filter(lambda f: f.endswith(('.jpg','jpeg','png','bmp')), zf.namelist())
-		
+
 		if L != []:
 			f=zf.open(L.pop())
 			buf = f.read()
@@ -215,7 +215,7 @@ class Zip:
 			return image
 		else:
 			return None
-	
+
 	@staticmethod
 	def GetPluginFile(fn):
 		""" TODO: comment
@@ -224,22 +224,22 @@ class Zip:
 		zf = zipfile.ZipFile(fn, 'r')
 		nl = zf.namelist()
 		zf.close()
-		
+
 		L = filter(lambda a: a!= [],map(lambda s: re.findall("^(plugins[/]?[\w]*.py)$", s), nl))
 		return L.pop(0)[0] if L != [] else ""
-		
+
 	@staticmethod
 	def HasPlugin(fn):
 		""" TODO: comment
 		"""
-		
+
 		### zipfile (amd or cmd)
 		zf = zipfile.ZipFile(fn, 'r')
 		nl = zf.namelist()
 		zf.close()
 		### plugin file is plugins.pi in root of zipfile or in plugins zipedd directory
 		return any(map(lambda s: re.search("^(plugins[/]*[\w]*.py)$", s), nl))
-	
+
 	# BDD Test----------------------------------------------------------------------
 	@staticmethod
 	def HasTests(fn):
@@ -279,15 +279,15 @@ class Zip:
 			#env = "environment.py"
 
 		#zf.close()
-		
+
 		#return feat, steps, env
 	# ------------------------------------------------------------------------------
-	
+
 	def GetModule(self, rcp=False):
 		""" Load module from zip file corresponding to the amd or cmd model.
 			It used when the tree library is created.
 		"""
-		
+
 		# get module name
 		try:
 			module_name = getPythonModelFileName(self.fn)
@@ -302,23 +302,23 @@ class Zip:
 		try:
 			### clear to clean the import after exporting model (amd or cmd) and reload within the same instrance of DEVSimPy
 			zipimport._zip_directory_cache.clear()
-		
+
 			importer = zipimport.zipimporter(self.fn)
 			module = importer.load_module(module_name.split('.py')[0])
 			module.__name__ = path_to_module(module_name)
 		except Exception, info:
 			sys.stderr.write(_("Error in execution: ") + str(sys.exc_info()[0]) +"\r\n" + listf(format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback)))
 			return info
-			
+
 		else:
 			return module
-	
+
 	def Recompile(self):
 		""" recompile module from zip file
 		"""
 		self.ClearCache()
 		return self.GetModule()
-		
+
 	def ClearCache(self):
 		"""Clear out cached entries from _zip_directory_cache"""
 
@@ -327,16 +327,15 @@ class Zip:
 
 		if self.fn not in sys.path:
 			sys.path.append(self.fn)
-			
+
 	def ClearFiles(self):
 		""" remove and rename the zip file
 		"""
-		
+
 		os.remove(self.fn)
 		try:
-			os.rename("new_arch.zip", self.fn)	
+			os.rename("new_arch.zip", self.fn)
 		### os.rename dont work in Linux OS with linked file (copy/paste for exemple)
 		except OSError:
-			import shutil	
+			import shutil
 			shutil.move("new_arch.zip", self.fn)
-	
