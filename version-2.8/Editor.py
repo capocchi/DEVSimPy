@@ -856,8 +856,8 @@ class EditionNotebook(wx.Notebook):
 			event.Skip()
 		elif keycode == 68 and controlDown:
 			cur_line = currentPage.GetCurrentLine()
-			indent = currentPage.GetLineIndentPosition(cur_line)
 			if shiftDown:
+				indent = currentPage.GetLineIndentPosition(cur_line)
 				currentPage.Home()
 				currentPage.DelWordRight()
 				currentPage.SetCurrentPos(indent)
@@ -1042,6 +1042,23 @@ class EditionNotebook(wx.Notebook):
 		### status bar notification
 		self.parent.Notification(True, _('re-indented'), '')
 
+	def OnComment(self, event):
+		""" Comment current line
+		"""
+		cp = self.GetCurrentPage()
+		cur_line = cp.GetCurrentLine()
+		cp.InsertTextUTF8(cp.PositionFromLine(cur_line), "#")
+
+	def OnUnComment(self, event):
+		""" Uncomment current line
+		"""
+		cp = self.GetCurrentPage()
+		cur_line = cp.GetCurrentLine()
+		indent = cp.GetLineIndentPosition(cur_line)
+		cp.Home()
+		cp.DelWordRight()
+		cp.SetCurrentPos(indent)
+
 	### NOTE: EditionNotebook :: OnDelete 		=> Event on delete
 	def OnDelete(self, event):
 		"""
@@ -1102,16 +1119,23 @@ class Editor(wx.Frame, wx.Panel):
 		delete = wx.MenuItem(edit, wx.NewId(), _('&Delete'), _('Delete the selected text'))
 		select = wx.MenuItem(edit, wx.NewId(), _('Select &All\tCtrl+A'), _('Select the entire text'))
 		reindent = wx.MenuItem(edit, wx.NewId(), _('Re-indent\tCtrl+R'), _('re-indent all code'))
+		comment = wx.MenuItem(edit, wx.NewId(), _('&Comment\tCtrl+D'), _('comment current ligne'))
+		uncomment = wx.MenuItem(edit, wx.NewId(), _('&Uncomment\tCtrl+Shift+D'), _('uncomment current ligne'))
+
 		cut.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'cut.png')))
 		copy.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'copy.png')))
 		paste.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'paste.png')))
 		delete.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'delete.png')))
 		reindent.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 're-indent.png')))
+		comment.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'comment_add.png')))
+		uncomment.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'comment_remove.png')))
 
 		edit.AppendItem(cut)
 		edit.AppendItem(copy)
 		edit.AppendItem(paste)
 		edit.AppendItem(reindent)
+		edit.AppendItem(comment)
+		edit.AppendItem(uncomment)
 		edit.AppendSeparator()
 		edit.AppendItem(delete)
 		edit.AppendSeparator()
@@ -1147,6 +1171,8 @@ class Editor(wx.Frame, wx.Panel):
 		self.Bind(wx.EVT_MENU, self.nb.OnCopy, id=copy.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnPaste, id=paste.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnReIndent, id=reindent.GetId())
+		self.Bind(wx.EVT_MENU, self.nb.OnComment, id=comment.GetId())
+		self.Bind(wx.EVT_MENU, self.nb.OnUnComment, id=uncomment.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnDelete, id=delete.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnSelectAll, id=select.GetId())
 		self.Bind(wx.EVT_MENU, self.ToggleStatusBar, id=showStatusBar.GetId())
