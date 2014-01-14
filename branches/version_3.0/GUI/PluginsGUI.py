@@ -160,7 +160,7 @@ class GeneralPluginsList(CheckListCtrl, Populable):
 				if files:
 					#for filename in filter(lambda f: not f.startswith('__') and f.endswith('.py'), files):
 					for filename in filter(lambda f: f == "__init__.py", files):
-						for basename in getFileListFromInit(os.path.join(root,filename)):
+						for basename in Utilities.getFileListFromInit(os.path.join(root,filename)):
 							### try to add dynamicaly pulgins
 							#try:
 								#t = threading.Thread(target=self.Importing, args=(root, basename,))
