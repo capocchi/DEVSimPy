@@ -128,7 +128,7 @@ class SimStrategy1(SimStrategy):
 
 		clock = 0.0
 		model = self._simulator.getMaster()
-		seld = self._simulator.send
+		send = self._simulator.send
 
 		# Initialize the model --- set the simulation clock to 0.
 		send(model, (0, [], 0))
