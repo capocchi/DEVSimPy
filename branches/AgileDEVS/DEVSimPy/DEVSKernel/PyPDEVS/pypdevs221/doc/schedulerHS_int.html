@@ -1,0 +1,226 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Heapset scheduler &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Schedulers" href="schedulers.html" />
+    <link rel="next" title="No Age scheduler" href="schedulerNA_int.html" />
+    <link rel="prev" title="Dirty Heap scheduler" href="schedulerDH_int.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="schedulerNA_int.html" title="No Age scheduler"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="schedulerDH_int.html" title="Dirty Heap scheduler"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" >Internal documentation</a> &raquo;</li>
+          <li><a href="schedulers.html" accesskey="U">Schedulers</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-schedulerHS">
+<span id="heapset-scheduler"></span><h1>Heapset scheduler<a class="headerlink" href="#module-schedulerHS" title="Permalink to this headline">¶</a></h1>
+<p>The Heapset scheduler is based on a small heap, combined with two dictionaries.</p>
+<p>The heap will contain only the timestamps of events that should happen. One of the dictionaries will contain the actual models that transition at the specified time. The second dictionary than contains a reverse relation: it maps the models to their timeNext. This reverse relation is necessary to know the <em>old</em> timeNext value of the model. Because as soon as the model has its timeNext changed, its previously scheduled time will be unknown. This &#8216;previous time&#8217; is <strong>not</strong> equal to the <em>timeLast</em>, as it might be possible that the models wait time was interrupted.</p>
+<p>For a schedule, the model is added to the dictionary at the specified timeNext. In case it is the first element at this location in the dictionary, we also add the timestamp to the heap. This way, the heap only contains <em>unique</em> timestamps and thus the actual complexity is reduced to the number of <em>different</em> timestamps. Furthermore, the reverse relation is also updated.</p>
+<p>Unscheduling is done similarly by simply removing the element from the dictionary.</p>
+<p>Rescheduling is a slight optimisation of unscheduling, followed by scheduling.</p>
+<p>This scheduler does still schedule models that are inactive (their timeNext is infinity), though this does not influence the complexity. The complexity is not affected due to infinity being a single element in the heap that is always present. Since a heap has O(log(n)) complexity, this one additional element does not have a serious impact.</p>
+<p>The main advantage over the Activity Heap is that it never gets dirty and thus doesn&#8217;t require periodical cleanup. The only part that gets dirty is the actual heap, which only contains small tuples. Duplicates of these will also be reduced to a single element, thus memory consumption should not be a problem in most cases.</p>
+<p>This scheduler is ideal in situations where most transitions happen at exactly the same time, as we can then profit from the internal structure and simply return the mapped elements. It results in sufficient efficiency in most other cases, mainly due to the code base being a lot smaller then the Activity Heap.</p>
+<dl class="class">
+<dt id="schedulerHS.SchedulerHS">
+<em class="property">class </em><tt class="descclassname">schedulerHS.</tt><tt class="descname">SchedulerHS</tt><big>(</big><em>models</em>, <em>epsilon</em>, <em>totalModels</em><big>)</big><a class="reference internal" href="_modules/schedulerHS.html#SchedulerHS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerHS.SchedulerHS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scheduler class itself</p>
+<dl class="method">
+<dt id="schedulerHS.SchedulerHS.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>models</em>, <em>epsilon</em>, <em>totalModels</em><big>)</big><a class="reference internal" href="_modules/schedulerHS.html#SchedulerHS.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerHS.SchedulerHS.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>models</strong> &#8211; all models in the simulation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="schedulerHS.SchedulerHS.getImminent">
+<tt class="descname">getImminent</tt><big>(</big><em>time</em><big>)</big><a class="reference internal" href="_modules/schedulerHS.html#SchedulerHS.getImminent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerHS.SchedulerHS.getImminent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all models that transition at the provided time, with the specified epsilon deviation allowed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> &#8211; timestamp to check for models</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">For efficiency, this method only checks the <strong>first</strong> elements, so trying to invoke this function with a timestamp higher than the value provided with the <em>readFirst</em> method, will <strong>always</strong> return an empty set.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="schedulerHS.SchedulerHS.massReschedule">
+<tt class="descname">massReschedule</tt><big>(</big><em>reschedule_set</em><big>)</big><a class="reference internal" href="_modules/schedulerHS.html#SchedulerHS.massReschedule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerHS.SchedulerHS.massReschedule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reschedule all models provided. 
+Equivalent to calling unschedule(model); schedule(model) on every element in the iterable.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reschedule_set</strong> &#8211; iterable containing all models to reschedule</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="schedulerHS.SchedulerHS.readFirst">
+<tt class="descname">readFirst</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/schedulerHS.html#SchedulerHS.readFirst"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerHS.SchedulerHS.readFirst" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the time of the first model that has to transition</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">timestamp of the first model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="schedulerHS.SchedulerHS.schedule">
+<tt class="descname">schedule</tt><big>(</big><em>model</em><big>)</big><a class="reference internal" href="_modules/schedulerHS.html#SchedulerHS.schedule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerHS.SchedulerHS.schedule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Schedule a model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> &#8211; the model to schedule</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="schedulerHS.SchedulerHS.unschedule">
+<tt class="descname">unschedule</tt><big>(</big><em>model</em><big>)</big><a class="reference internal" href="_modules/schedulerHS.html#SchedulerHS.unschedule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerHS.SchedulerHS.unschedule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unschedule a model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> &#8211; model to unschedule</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="schedulerDH_int.html"
+                        title="previous chapter">Dirty Heap scheduler</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="schedulerNA_int.html"
+                        title="next chapter">No Age scheduler</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/schedulerHS_int.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="schedulerNA_int.html" title="No Age scheduler"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="schedulerDH_int.html" title="Dirty Heap scheduler"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" >Internal documentation</a> &raquo;</li>
+          <li><a href="schedulers.html" >Schedulers</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

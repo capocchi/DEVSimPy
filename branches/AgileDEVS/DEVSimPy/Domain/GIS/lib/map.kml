@@ -1,0 +1,59 @@
+
+<Document>
+    <Placemark>
+        <name>Mon Point 1</name>
+        <description>Premier point en KML</description>
+        <Point>
+            <coordinates>12.000000,12.000000,0.000000</coordinates>
+        </Point>
+    </Placemark>
+    <Placemark>
+        <name>Mon Point 2</name>
+        <description>Deuxieme point en KML</description>
+        <Point>
+            <coordinates>13.000000,13.000000,0.000000</coordinates>
+        </Point>
+    </Placemark>
+    <Placemark>
+        <name>Ma ligne</name>
+        <visibility>1</visibility>
+        <description>Premier ligne en KML</description>
+        <LineString>
+            <tessellate>1</tessellate>
+            <altitudeMode>clampToGround</altitudeMode>
+            <coordinates>
+ 	 	 	13.000000,13.000000,0.000000
+ 	 	 	12.000000,12.000000,0.000000
+ 	 	 	20.000000,20.000000,0.000000
+ 	 	 	40.000000,40.000000,0.000000
+ 	 	 	</coordinates>
+        </LineString>
+    </Placemark>
+    <Placemark>
+        <name>monCarre</name>
+        <description>cest un carre</description>
+        <Style>
+            <LineStyle>
+                <width>2</width>
+            </LineStyle>
+            <PolyStyle>
+                <color>7d0000ff</color>
+            </PolyStyle>
+        </Style>
+        <Polygon>
+            <extrude>1</extrude>
+            <altitudeMode>clampToGround</altitudeMode>
+            <outerBoundaryIs>
+                <LinearRing>
+                    <coordinates>
+ 	 	 	13.000000,13.000000,0.000000
+ 	 	 	13.000000,12.000000,0.000000
+ 	 	 	12.000000,12.000000,0.000000
+ 	 	 	12.000000,13.000000,0.000000
+ 	 	 	13.000000,13.000000,0.000000
+ 	 	 	</coordinates>
+                </LinearRing>
+            </outerBoundaryIs>
+        </Polygon>
+    </Placemark>
+</Document>

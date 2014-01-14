@@ -1,0 +1,366 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Changelog &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="next" title="Interface" href="interface.html" />
+    <link rel="prev" title="How to run PyPDEVS" href="howto.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="interface.html" title="Interface"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="howto.html" title="How to run PyPDEVS"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="changelog">
+<h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-python"><pre>Version 2.2.1
+    + Added user events in the loggers (optional) for 'state changes'
+    + Allow continuing a previous simulation by calling simulate again
+    + Added Z functions (output-to-input, input-to-input and output-to-output)
+    * Changed the reinit interface to make continuing possible
+    * Fixed massive memory leak by forgetting to set the
+      'temporaryIrreversible' flag in local simulation
+    * Change to the termination detection: wait for 100ms before sending
+    * Fixed complete horizon revertion (beyond GVT!)
+    * Activity-log file is only generated when useful
+    * ManualRelocator generates activity traces
+
+Version 2.2.0
+    + Added templates for scheduler, relocator, tracer and experiment files
+    + Allow custom activity functions for pre-transition and post-transition
+    + Allow the definition of custom schedulers, defined externally
+    + Pass the horizon to the relocators
+    + No state saving when relocation caused sequential simulation
+    + Allow local checkpointing (in most cases)
+    + Possibility for a 'test cycle' which saves message count (+visualize)
+    + Test cycle simulation creates an 'advised' initial distribution
+    + Schedulers can now be configured per-node instead of globally
+    + Allow for pull based termination conditions (NOT recommended)
+    + Tracers are a lot more plugable, multiple tracers can work simultaneous
+    + Realtime interrupts can happen with method calls on the simulator
+    + Initial allocation can be loaded from file
+    + Allowed local nested simulation in a distributed simulation
+    + Included a model of a subset of PythonPDEVS
+    + Much faster tracing due to trace message grouping (remove all RTT calls)
+    + Method to reset a models alterations before reinitialising it
+    + Method to force sequential simulation
+    + Ignore state saving when sequential simulation is possible due to
+      relocations
+    + Added scaled realtime
+    + Relocators can use a 'last state only' approach
+    * File reading for realtime happens on-demand
+    * Fixed GVT algorithm
+    * Fixed checkpoint restoration with severely broken files
+    * Rewrite of the realtime backend, works much better now
+    * Yielding of the main thread for anti-messages and relocations
+    * Split of the simulator configuration
+    * Various bugfixes
+    * External messages are processed differently, should give slight speedup
+    * Removal of (most) global variables
+    * Classic DEVS simulation bugfixes
+    - Removed auto-allocation: use the new 'allocators' instead
+    - Removed PyRO support
+
+Version 2.1.5
+    + Added optional memoization
+    + Added the basis of an activity relocator, still very slow
+    + User can choose between manual relocation, or automatic relocation
+    + Relocation now uses 'async locking' and remote kernels will have a quick
+      stop feature to prevent many transitions that will simply be removed
+    + Added Dirty Heap scheduler
+    + Added 'discrete time' Scheduler
+    + Added Minimal List scheduler
+    + Progress bar visualizes when an error happens, process is now killable
+    + Dynamic Structure DEVS added for local simulation
+    + Added a polymorphic scheduler (still very unstable)
+    + Activity tracking in distributed simulation now returns something usable
+    + Added Classic DEVS simulation as an option
+    + Added a random number generator for deterministic simulation
+    * Fixed deadlock in distributed simulation for an overfilled threadpool
+    * Activity is only counted for not-reverted functions
+    * Fixed the Syslog logger (some messages were in wrong order, some forgotten)
+    * Fixed GVT algorithm, deadlocks and incorrect GVTs should be solved
+    * Fixed termination algorithm
+
+Version 2.1.4
+    + Added a Cell DEVS styled activity tracer
+    + Added a Cell DEVS styled location tracer
+    + Added Cell DEVS styled tracer 'gnuplot' and 'libav' animation script
+    + Start of Sphinx documentation
+    + Added PyRO tests
+    + Realtime simulation keeps track of the termination_time
+    * Realtime backend is now compliant with Python3
+    * Fixed PyRO simulation for nodes without actual models
+    * Default message copy method now uses pickle's HIGHEST PROTOCOL
+    * Fixed the *elapsed* attribute for the confluent transition function
+
+Version 2.1.3
+    + Added marshal library for use in the state saver
+    + Added HeapSet scheduler
+    + Added NoAge scheduler (only use when ALWAYS ta &gt; 0)
+    + Added SortedList scheduler
+    + VCD and XML traces can also be saved to a user-defined filename
+    + Added automatic model-to-node allocation as an option
+    + Added some additional checks in the configuration setting
+    + Checkpoint recovery for XML and VCD tracing is possible
+    + Termination condition became somewhat more fine grained
+    + Draw the model to a user-defined file
+    + Added model reinitialisation: simply rerun simulate()
+    + Added API for changing a model after it has been distributed (for reinit)
+    * Split up the state savers
+    * Game Loop realtime backend is now user-configurable for FPS
+    * Added some configuration options
+    * Nested simulation was completely rewritten
+    * Logging now respects the logging settings and messages before this
+      configuration are queued
+    * Fixed a simulation bug where some messages get resent due to revertions
+    * Fixed PyRO simulation
+    * Fixed several problems with relocation, still somewhat buggy
+    * Cleaned up tests
+    * Fixed memory leak in the MPI backend
+    * Fixed Python3 compliance
+    * Message scheduler became much cleaner and more maintainable
+    * Anti messages are sent 'en masse'
+    * Model distribution is faster by a factor 10 due to different pickling
+    - Nested simulation only works if both the nesting and the nested
+      simulation are local
+    - Configuration options for the nested simulation are removed as they are
+      no longer necessary
+
+Version 2.1.2
+    + Added a looping backend for realtime simulation
+    + Looping realtime backend builtin in the simulator with calls
+      realtime_finished() and realtime_loop_call()
+    + Allow even huge models to be transfered and checkpointed, by removing 
+      artificial recursion when pickling fails otherwise (includes small test)
+    + Added basic tests for VCD and XML tracing
+    + Allow direct simulation of AtomicDEVS models
+    + Added tests for the three different realtime backends
+    + Added small smoke test for checkpointing
+    + Model can be marked as 'used in termination condition'
+    + Model has the new simSettings function to do model-specific configs
+    + Lots of internal documentation added
+    + Check for whether or not the number of used locations is actually
+      available
+    + Edge labels can be hidden when drawing the model for small graphs
+    * Fixed a massive performance degradation in the MPI redirection
+    * Don't attempt to load an incomplete checkpoint (and subsequently crash)
+    * Minor changes to realtime simulation backends
+    * Relocation directives can be denied in case it is a model used in
+      termination condition
+    * Used dictionary comprehension instead of for loop at some places
+    * Progress bar now always ends with 'completely done' instead of partial
+    * Minor code cleanup
+    * Fixed a race condition in the external message scheduler
+    * Message scheduler was leaking memory by not cleaning up everything
+    - Termination condition can no longer run on any node, runs on controller
+
+Version 2.1.1
+    + Message copy can be ignored for performance (as in nearly all other
+      simulators)
+    + Added realtime test
+    * Fixed several realtime termination bugs
+    * Realtime component now uses sys.stdin instead of raw_input
+    * Fixed PyRO middleware usage
+    * Fixed some critical bugs in the XML and VCD tracers
+    * Local simulation no longer runs on a thread for easy profiling/debugging
+    * Huge performance improvement for when lots of models are transitioning
+    * Changed the signalling protocol from message based (as in the abstract
+      simulator) to an optimized implementation
+    * Fixed some bugs in the scheduler
+    * Increased performance for the scheduler
+    * Bugfix for when a revertion was caused by an anti-message
+
+Version 2.1
+    + Models can be drawn before simulation using GraphViz
+    + Added model migration
+    + A node can now host any number of models, even atomics
+    + Added model migration, including directives
+    + Added an API to set all simulation options, with some sanity checking
+    + Added a fetch_all option to the simulator to reconstruct the model
+      locally
+    + Added automatic detection of middleware
+    + Added RootDEVS class
+    + Added progress visualisation, rather handy in distributed simulation
+    * Huge alterations to the internal representation of models
+    * Reduced code size by completely refactoring model and simulation setup
+    * Simulation can now be killed with ctrl-c without hanging
+    * Coupled models get completely removed by direct connection
+    * Direct connection works only once on the root model
+    * Model is constructed locally and then broadcast to other kernels
+    * Fixed fossil collection race condition
+    * Simplified checkpoint restoration and creation
+    * Cleaned up tests
+    * Simplified Solver core due to more agressive direct connection
+    - Removed the plethora of (incompatible) IDs in models
+    - Removed the mpirunner.py scripts
+    - Removed checks for wrong local invocations, should no longer happen
+    - Removed RemoteCDEVS class
+    - Removed irreversibility (except locally) due to problems with model relocation
+    - Removed remote code execution for model construction, normal code
+      execution is still possible
+    - Removed special Cython parts and build scripts
+
+Version 2.0
+    + Further optimisations to the main simulation algorithm
+    + Added Parallel DEVS simulation
+    + Output function now returns a dictionary of outputs
+    + Realtime simulation can use manual and automated input simultaneously
+    + Added distributed simulation, both PyRO and MPI4Py
+    + Added syslog logger
+    + Added checkpointing
+    + Allow for termination time instead of termination condition
+    + Added direct saving to file of output
+    + Allow nested simulation in distributed environment
+    + Made Python3 compliant
+    + Made PyPy compliant
+    + Made Cython compliant
+    + Messages got their own class
+    + Added NestingException exception for nesting problems
+    + Added irreversibility for faster distributed simulation
+    + Added actual automated tests using Python unittest instead of ad-hoc manual testing
+    * Split up several files due to huge amount of additions
+    * Optimized memory consumption of VCD and XML output
+    * Modularised simulation tracing
+    * Updated examples
+    * Transitions now take an additional argument indicating the input
+    * Fixed realtime simulation bugs
+    - Removed Classic DEVS simulation
+    - Removed Peek and Poke methods
+    - Removed Root output in verbose tracing
+
+Version 1.2
+    + Allow realtime simulation using Python threads and TkInter events
+
+Version 1.1
+    + Added custom 'copy()' function for messages
+    + Added direct connection
+    * Optimized message scheduler
+    * Optimized message passing
+    - Removed INFINITY object, redirected to a float
+
+Version 1.0.5
+    + Added VCD tracing option
+    * Fixed non-determinism bug in sorting colliding models
+
+Version 1.0.4
+    + Added XML tracing option
+
+Version 1.0.3
+    * Cleanup of terminology
+    * Use True/False instead of 1/0
+
+Version 1.0.2
+    + Added code to display atomic DEVS' initial conditions
+
+Version 1.0.1
+    * Deal with DeprecationWarning
+    * Default timeAdvance returns INFINITY
+
+Version 1.0
+    + Initial version
+</pre>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="howto.html"
+                        title="previous chapter">How to run PyPDEVS</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="interface.html"
+                        title="next chapter">Interface</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/changelog.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="interface.html" title="Interface"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="howto.html" title="How to run PyPDEVS"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

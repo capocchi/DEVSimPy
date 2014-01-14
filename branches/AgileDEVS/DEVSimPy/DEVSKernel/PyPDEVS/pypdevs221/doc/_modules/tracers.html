@@ -1,0 +1,186 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>tracers &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for tracers</h1><div class="highlight"><pre>
+<div class="viewcode-block" id="Tracers"><a class="viewcode-back" href="../tracers_int.html#tracers.Tracers">[docs]</a><span class="k">class</span> <span class="nc">Tracers</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interface for all tracers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Tracers.__init__"><a class="viewcode-back" href="../tracers_int.html#tracers.Tracers.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tracers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tracers_init</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uid</span> <span class="o">=</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="Tracers.registerTracer"><a class="viewcode-back" href="../tracers_int.html#tracers.Tracers.registerTracer">[docs]</a>    <span class="k">def</span> <span class="nf">registerTracer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tracer</span><span class="p">,</span> <span class="n">server</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Register a tracer, so that it will also receive all transitions.</span>
+
+<span class="sd">        :param tracer: tuple of the form (file, classname, [args])</span>
+<span class="sd">        :param controller: is this code ran at the controller?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">exec</span><span class="p">(</span><span class="s">&quot;from </span><span class="si">%s</span><span class="s"> import </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">tracer</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tracers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">eval</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">(</span><span class="si">%i</span><span class="s">, server, *</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tracer</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">tracer</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tracers_init</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tracer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uid</span> <span class="o">+=</span> <span class="mi">1</span>
+</div>
+<div class="viewcode-block" id="Tracers.hasTracers"><a class="viewcode-back" href="../tracers_int.html#tracers.Tracers.hasTracers">[docs]</a>    <span class="k">def</span> <span class="nf">hasTracers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks whether or not there are any registered tracers</span>
+
+<span class="sd">        :returns: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="Tracers.getByID"><a class="viewcode-back" href="../tracers_int.html#tracers.Tracers.getByID">[docs]</a>    <span class="k">def</span> <span class="nf">getByID</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets a tracer by its UID</span>
+
+<span class="sd">        :param uid: the UID of the tracer to return</span>
+<span class="sd">        :returns: tracer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracers</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="Tracers.startTracers"><a class="viewcode-back" href="../tracers_int.html#tracers.Tracers.startTracers">[docs]</a>    <span class="k">def</span> <span class="nf">startTracers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recover</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Starts up all registered tracers</span>
+
+<span class="sd">        :param recover: whether or not this is a recovery call</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">tracer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracers</span><span class="p">:</span>
+            <span class="n">tracer</span><span class="o">.</span><span class="n">startTracer</span><span class="p">(</span><span class="n">recover</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Tracers.stopTracers"><a class="viewcode-back" href="../tracers_int.html#tracers.Tracers.stopTracers">[docs]</a>    <span class="k">def</span> <span class="nf">stopTracers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop all registered tracers</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">tracer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracers</span><span class="p">:</span>
+            <span class="n">tracer</span><span class="o">.</span><span class="n">stopTracer</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Tracers.tracesInit"><a class="viewcode-back" href="../tracers_int.html#tracers.Tracers.tracesInit">[docs]</a>    <span class="k">def</span> <span class="nf">tracesInit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform all tracing actions for an initialisation</span>
+<span class="sd">        </span>
+<span class="sd">        :param aDEVS: the model that was initialised</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">tracer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracers</span><span class="p">:</span>
+            <span class="n">tracer</span><span class="o">.</span><span class="n">traceInit</span><span class="p">(</span><span class="n">aDEVS</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Tracers.tracesInternal"><a class="viewcode-back" href="../tracers_int.html#tracers.Tracers.tracesInternal">[docs]</a>    <span class="k">def</span> <span class="nf">tracesInternal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform all tracing actions for an internal transition</span>
+<span class="sd">        </span>
+<span class="sd">        :param aDEVS: the model that transitioned</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">tracer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracers</span><span class="p">:</span>
+            <span class="n">tracer</span><span class="o">.</span><span class="n">traceInternal</span><span class="p">(</span><span class="n">aDEVS</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Tracers.tracesExternal"><a class="viewcode-back" href="../tracers_int.html#tracers.Tracers.tracesExternal">[docs]</a>    <span class="k">def</span> <span class="nf">tracesExternal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform all tracing actions for an external transition</span>
+<span class="sd">        </span>
+<span class="sd">        :param aDEVS: the model that transitioned</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">tracer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracers</span><span class="p">:</span>
+            <span class="n">tracer</span><span class="o">.</span><span class="n">traceExternal</span><span class="p">(</span><span class="n">aDEVS</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Tracers.tracesConfluent"><a class="viewcode-back" href="../tracers_int.html#tracers.Tracers.tracesConfluent">[docs]</a>    <span class="k">def</span> <span class="nf">tracesConfluent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform all tracing actions for a confluent transition</span>
+<span class="sd">        </span>
+<span class="sd">        :param aDEVS: the model that transitioned</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">tracer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracers</span><span class="p">:</span>
+            <span class="n">tracer</span><span class="o">.</span><span class="n">traceConfluent</span><span class="p">(</span><span class="n">aDEVS</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

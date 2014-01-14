@@ -1,0 +1,29 @@
+					vvvvvvvvvvvvvv
+					| TODO liste |
+					^^^^^^^^^^^^^^
+
+≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠
+															|
+[X]:	Sauvegarde de scripts.								|
+ |———¬														|
+ |	[X]	:	Sauvegarde des scripts à l'emplacement voulu.	|
+ |	 |———¬													|
+ |	 |	[X]	: Save RF										|
+ |	 |	[X]	:	Save Sikuli									|
+ |	 |	[X]	:	Tester les solutions						|
+ |	 |___|													|
+ |	[X]	:	Corriger bug ré-écriture.						|
+ |___|														|
+[X]	:	Link des scripts existants aux modèles.				|
+ |———¬														|
+ |	[X] 	:	Linker les scripts							|
+ |	 |———¬													|
+ |	 | 	[X]	: Link RF										|
+ |	 |	[X]	:	Link Sikuli									|
+ |	 |	[X]	:	Tester les solutions						|
+ |	 |___|													|
+ |	[X]	:	Corriger les différents bugs!					|
+ |___|														|
+[ ]	:	Spécifier un dossier comme banque d'images.			|
+															|
+≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠≠
