@@ -87,11 +87,11 @@ from Mixins.Rotable import Rotable
 from Mixins.Connectable import Connectable
 from Mixins.Plugable import Plugable
 from Mixins.Structurable import Structurable
+from Mixins.Savable import Savable
 
 from Decorators import BuzyCursorNotification, StatusBarNotification, ProgressNotification, Pre_Undo, Post_Undo, cond_decorator
 from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance
 from Patterns.Observer import Subject, Observer
-from Savable import Savable
 from DetachedFrame import DetachedFrame
 from AttributeEditor import AttributeEditor, QuickAttributeEditor
 from PropertiesGridCtrl import PropertiesGridCtrl
