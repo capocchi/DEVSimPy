@@ -180,6 +180,10 @@ from PropPanel import PropPanel
 from ControlNotebook import ControlNotebook
 from DiagramNotebook import DiagramNotebook
 
+### only for wx. 2.9 bug
+### http://comments.gmane.org/gmane.comp.python.wxpython/98744
+wx.Log.SetLogLevel(0)
+
 #-------------------------------------------------------------------
 def getIcon(path):
 	#path = os.path.join(ICON_PATH_16_16, img_file)
