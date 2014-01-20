@@ -1,0 +1,460 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>State Savers &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Internal documentation" href="internal.html" />
+    <link rel="next" title="Threading subsystems" href="threading.html" />
+    <link rel="prev" title="DEVS Solver" href="solver_int.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="threading.html" title="Threading subsystems"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="solver_int.html" title="DEVS Solver"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" accesskey="U">Internal documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-statesavers">
+<span id="state-savers"></span><h1>State Savers<a class="headerlink" href="#module-statesavers" title="Permalink to this headline">¶</a></h1>
+<p>Different methods to save the state, this allows for more modularity than just having a big switch statement in the main code.
+Note that these classes are not subclasses of a more generic class, as this allows these classes to save data in a completely
+different manner from each other. Furthermore, it avoids (slow) inheritance.</p>
+<dl class="class">
+<dt id="statesavers.AssignState">
+<em class="property">class </em><tt class="descclassname">statesavers.</tt><tt class="descname">AssignState</tt><big>(</big><em>timeLast</em>, <em>timeNext</em>, <em>state</em>, <em>activity</em>, <em>myInput</em>, <em>elapsed</em><big>)</big><a class="reference internal" href="_modules/statesavers.html#AssignState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.AssignState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to save the state using a simple assignment, is unsafe for most situations...</p>
+<dl class="method">
+<dt id="statesavers.AssignState.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>timeLast</em>, <em>timeNext</em>, <em>state</em>, <em>activity</em>, <em>myInput</em>, <em>elapsed</em><big>)</big><a class="reference internal" href="_modules/statesavers.html#AssignState.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.AssignState.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>timeLast</strong> &#8211; timeLast to save</li>
+<li><strong>timeNext</strong> &#8211; timeNext to save</li>
+<li><strong>state</strong> &#8211; state to save</li>
+<li><strong>activity</strong> &#8211; the activity of the computation</li>
+<li><strong>myInput</strong> &#8211; the state input to save for memorisation</li>
+<li><strong>elapsed</strong> &#8211; the time elapsed</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="statesavers.AssignState.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#statesavers.AssignState.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="statesavers.AssignState.loadState">
+<tt class="descname">loadState</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/statesavers.html#AssignState.loadState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.AssignState.loadState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the state from the class, this will make a copy</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">state - copy of the state that was saved</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="statesavers.CopyState">
+<em class="property">class </em><tt class="descclassname">statesavers.</tt><tt class="descname">CopyState</tt><big>(</big><em>timeLast</em>, <em>timeNext</em>, <em>state</em>, <em>activity</em>, <em>myInput</em>, <em>elapsed</em><big>)</big><a class="reference internal" href="_modules/statesavers.html#CopyState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.CopyState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to save the state using the Python &#8216;copy&#8217; library</p>
+<dl class="method">
+<dt id="statesavers.CopyState.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>timeLast</em>, <em>timeNext</em>, <em>state</em>, <em>activity</em>, <em>myInput</em>, <em>elapsed</em><big>)</big><a class="reference internal" href="_modules/statesavers.html#CopyState.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.CopyState.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>timeLast</strong> &#8211; timeLast to save</li>
+<li><strong>timeNext</strong> &#8211; timeNext to save</li>
+<li><strong>state</strong> &#8211; state to save</li>
+<li><strong>activity</strong> &#8211; the activity of the computation</li>
+<li><strong>myInput</strong> &#8211; the state input to save for memorisation</li>
+<li><strong>elapsed</strong> &#8211; the time elapsed</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="statesavers.CopyState.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#statesavers.CopyState.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="statesavers.CopyState.loadState">
+<tt class="descname">loadState</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/statesavers.html#CopyState.loadState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.CopyState.loadState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the state from the class, this will make a copy</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">state - copy of the state that was saved</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="statesavers.CustomState">
+<em class="property">class </em><tt class="descclassname">statesavers.</tt><tt class="descname">CustomState</tt><big>(</big><em>timeLast</em>, <em>timeNext</em>, <em>state</em>, <em>activity</em>, <em>myInput</em>, <em>elapsed</em><big>)</big><a class="reference internal" href="_modules/statesavers.html#CustomState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.CustomState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to save the state using a manually defined copy() function of the state. If no such method is provided, an error is raised.</p>
+<dl class="method">
+<dt id="statesavers.CustomState.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>timeLast</em>, <em>timeNext</em>, <em>state</em>, <em>activity</em>, <em>myInput</em>, <em>elapsed</em><big>)</big><a class="reference internal" href="_modules/statesavers.html#CustomState.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.CustomState.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>timeLast</strong> &#8211; timeLast to save</li>
+<li><strong>timeNext</strong> &#8211; timeNext to save</li>
+<li><strong>state</strong> &#8211; state to save</li>
+<li><strong>activity</strong> &#8211; the activity of the computation</li>
+<li><strong>myInput</strong> &#8211; the state input to save for memorisation</li>
+<li><strong>elapsed</strong> &#8211; the time elapsed</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="statesavers.CustomState.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#statesavers.CustomState.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="statesavers.CustomState.loadState">
+<tt class="descname">loadState</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/statesavers.html#CustomState.loadState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.CustomState.loadState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the state from the class, this will make a copy</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">state - copy of the state that was saved</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="statesavers.DeepCopyState">
+<em class="property">class </em><tt class="descclassname">statesavers.</tt><tt class="descname">DeepCopyState</tt><big>(</big><em>timeLast</em>, <em>timeNext</em>, <em>state</em>, <em>activity</em>, <em>myInput</em>, <em>elapsed</em><big>)</big><a class="reference internal" href="_modules/statesavers.html#DeepCopyState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.DeepCopyState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to save the state using the Python &#8216;deepcopy&#8217; library</p>
+<dl class="method">
+<dt id="statesavers.DeepCopyState.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>timeLast</em>, <em>timeNext</em>, <em>state</em>, <em>activity</em>, <em>myInput</em>, <em>elapsed</em><big>)</big><a class="reference internal" href="_modules/statesavers.html#DeepCopyState.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.DeepCopyState.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>timeLast</strong> &#8211; timeLast to save</li>
+<li><strong>timeNext</strong> &#8211; timeNext to save</li>
+<li><strong>state</strong> &#8211; state to save</li>
+<li><strong>activity</strong> &#8211; the activity of the computation</li>
+<li><strong>myInput</strong> &#8211; the state input to save for memorisation</li>
+<li><strong>elapsed</strong> &#8211; the time elapsed</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="statesavers.DeepCopyState.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#statesavers.DeepCopyState.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="statesavers.DeepCopyState.loadState">
+<tt class="descname">loadState</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/statesavers.html#DeepCopyState.loadState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.DeepCopyState.loadState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the state from the class, this will make a copy</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">state - copy of the state that was saved</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="statesavers.MarshalState">
+<em class="property">class </em><tt class="descclassname">statesavers.</tt><tt class="descname">MarshalState</tt><big>(</big><em>timeLast</em>, <em>timeNext</em>, <em>state</em>, <em>activity</em>, <em>myInput</em>, <em>elapsed</em><big>)</big><a class="reference internal" href="_modules/statesavers.html#MarshalState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.MarshalState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to save the state using the Python &#8216;marshal&#8217; library.</p>
+<dl class="method">
+<dt id="statesavers.MarshalState.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>timeLast</em>, <em>timeNext</em>, <em>state</em>, <em>activity</em>, <em>myInput</em>, <em>elapsed</em><big>)</big><a class="reference internal" href="_modules/statesavers.html#MarshalState.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.MarshalState.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>timeLast</strong> &#8211; timeLast to save</li>
+<li><strong>timeNext</strong> &#8211; timeNext to save</li>
+<li><strong>state</strong> &#8211; state to save</li>
+<li><strong>activity</strong> &#8211; the activity of the computation</li>
+<li><strong>myInput</strong> &#8211; the state input to save for memorisation</li>
+<li><strong>elapsed</strong> &#8211; the time elapsed</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="statesavers.MarshalState.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#statesavers.MarshalState.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="statesavers.MarshalState.loadState">
+<tt class="descname">loadState</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/statesavers.html#MarshalState.loadState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.MarshalState.loadState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the state from the class, this will make a copy</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">state - copy of the state that was saved</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="statesavers.PickleHighestState">
+<em class="property">class </em><tt class="descclassname">statesavers.</tt><tt class="descname">PickleHighestState</tt><big>(</big><em>timeLast</em>, <em>timeNext</em>, <em>state</em>, <em>activity</em>, <em>myInput</em>, <em>elapsed</em><big>)</big><a class="reference internal" href="_modules/statesavers.html#PickleHighestState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.PickleHighestState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to save the state using the Python &#8216;pickle&#8217; library, with the option to use the highest available pickling protocol.</p>
+<dl class="method">
+<dt id="statesavers.PickleHighestState.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>timeLast</em>, <em>timeNext</em>, <em>state</em>, <em>activity</em>, <em>myInput</em>, <em>elapsed</em><big>)</big><a class="reference internal" href="_modules/statesavers.html#PickleHighestState.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.PickleHighestState.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>timeLast</strong> &#8211; timeLast to save</li>
+<li><strong>timeNext</strong> &#8211; timeNext to save</li>
+<li><strong>state</strong> &#8211; state to save</li>
+<li><strong>activity</strong> &#8211; the activity of the computation</li>
+<li><strong>myInput</strong> &#8211; the state input to save for memorisation</li>
+<li><strong>elapsed</strong> &#8211; the time elapsed</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="statesavers.PickleHighestState.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#statesavers.PickleHighestState.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="statesavers.PickleHighestState.loadState">
+<tt class="descname">loadState</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/statesavers.html#PickleHighestState.loadState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.PickleHighestState.loadState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the state from the class, this will make a copy</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">state - copy of the state that was saved</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="statesavers.PickleZeroState">
+<em class="property">class </em><tt class="descclassname">statesavers.</tt><tt class="descname">PickleZeroState</tt><big>(</big><em>timeLast</em>, <em>timeNext</em>, <em>state</em>, <em>activity</em>, <em>myInput</em>, <em>elapsed</em><big>)</big><a class="reference internal" href="_modules/statesavers.html#PickleZeroState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.PickleZeroState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to save the state using the Python &#8216;pickle&#8217; library, with the option to use the pickling protocol 0.</p>
+<dl class="method">
+<dt id="statesavers.PickleZeroState.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>timeLast</em>, <em>timeNext</em>, <em>state</em>, <em>activity</em>, <em>myInput</em>, <em>elapsed</em><big>)</big><a class="reference internal" href="_modules/statesavers.html#PickleZeroState.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.PickleZeroState.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>timeLast</strong> &#8211; timeLast to save</li>
+<li><strong>timeNext</strong> &#8211; timeNext to save</li>
+<li><strong>state</strong> &#8211; state to save</li>
+<li><strong>activity</strong> &#8211; the activity of the computation</li>
+<li><strong>myInput</strong> &#8211; the state input to save for memorisation</li>
+<li><strong>elapsed</strong> &#8211; the time elapsed</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="statesavers.PickleZeroState.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#statesavers.PickleZeroState.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="statesavers.PickleZeroState.loadState">
+<tt class="descname">loadState</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/statesavers.html#PickleZeroState.loadState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#statesavers.PickleZeroState.loadState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the state from the class, this will make a copy</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">state - copy of the state that was saved</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="solver_int.html"
+                        title="previous chapter">DEVS Solver</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="threading.html"
+                        title="next chapter">Threading subsystems</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/statesavers_int.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="threading.html" title="Threading subsystems"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="solver_int.html" title="DEVS Solver"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" >Internal documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,900 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>BaseSimulator: the DEVS kernel &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Internal documentation" href="internal.html" />
+    <link rel="next" title="Classic DEVS Wrapper" href="classicdevswrapper_int.html" />
+    <link rel="prev" title="Asynchronous Combo Generator" href="asynchronouscombogenerator_int.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="classicdevswrapper_int.html" title="Classic DEVS Wrapper"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="asynchronouscombogenerator_int.html" title="Asynchronous Combo Generator"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" accesskey="U">Internal documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="basesimulator-the-devs-kernel">
+<h1>BaseSimulator: the DEVS kernel<a class="headerlink" href="#basesimulator-the-devs-kernel" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="basesimulator.BaseSimulator">
+<em class="property">class </em><tt class="descclassname">basesimulator.</tt><tt class="descname">BaseSimulator</tt><big>(</big><em>name</em>, <em>model</em>, <em>server</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator" title="Permalink to this definition">¶</a></dt>
+<dd><p>The BaseSimulator class, this is the actual simulation kernel.</p>
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>name</em>, <em>model</em>, <em>server</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; the name of the kernel</li>
+<li><strong>model</strong> &#8211; the model to initialise the kernel with</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.activateModel">
+<tt class="descname">activateModel</tt><big>(</big><em>model_id</em>, <em>currentState</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.activateModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.activateModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Activate the model at this kernel, thus allowing the kernel to use (and schedule) this model. 
+Note that a revert to the GVT has to happen before calling this function, since the old_states 
+are not transferred and thus reverting is impossible.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model_id</strong> &#8211; the id of the model that has to be activated</li>
+<li><strong>currentState</strong> &#8211; the current state of the model that gets migrated</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.check">
+<tt class="descname">check</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks wheter or not simulation should still continue. This will either
+call the global time termination check, or the local state termination
+check, depending on configuration.</p>
+<p>Using the global time termination check is a lot FASTER and should be used
+if possible.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">bool &#8211; whether or not to stop simulation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.checkpoint">
+<tt class="descname">checkpoint</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.checkpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.checkpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a checkpoint of the current basesimulator, this function will assume
+that no messages are still left in the medium, since these are obviously
+not saved by pickling the base simulator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.delayedAction">
+<tt class="descname">delayedAction</tt><big>(</big><em>time</em>, <em>model_id</em>, <em>action</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.delayedAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.delayedAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform an irreversible action (I/O, prints, global messages, ...). All
+these actions will be performed in the order they should be generated
+in a non-distributed simulation. All these messages might be reverted in
+case a revertion is performed by the calling model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>time</strong> &#8211; the simulation time at which this command was requested</li>
+<li><strong>model_id</strong> &#8211; the model_id of the model that requested this command</li>
+<li><strong>action</strong> &#8211; the actual command to be executed as soon as it is safe</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.finishAtTime">
+<tt class="descname">finishAtTime</tt><big>(</big><em>clock</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.finishAtTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.finishAtTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal this kernel that it may stop at the provided time</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>clock</strong> &#8211; the time to stop at</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.finishRing">
+<tt class="descname">finishRing</tt><big>(</big><em>msgSent</em>, <em>msgRecv</em>, <em>firstRun=False</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.finishRing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.finishRing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Go over the ring and ask each kernel whether it is OK to stop simulation
+or not. Uses a count to check that no messages are yet to be processed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>msgSent</strong> &#8211; current counter for total amount of sent messages</li>
+<li><strong>msgRecv</strong> &#8211; current counter for total amount of received messages</li>
+<li><strong>firstRun</strong> &#8211; whether or not to forward at the controller</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">int &#8211; amount of messages received and sent (-1 signals running simulation)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.genUUID">
+<tt class="descname">genUUID</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.genUUID"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.genUUID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a unique enough ID for a message</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">string &#8211; a unique string for the specific name and number of sent messages</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.getActivity">
+<tt class="descname">getActivity</tt><big>(</big><em>model_id</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.getActivity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.getActivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the activity for a certain model id from the previous iteration</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model_id</strong> &#8211; the model_id to check</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">float &#8211; the activity</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.getCompleteActivity">
+<tt class="descname">getCompleteActivity</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.getCompleteActivity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.getCompleteActivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the complete dictionary of all activities</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">dict &#8211; mapping of all activities</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.getGVT">
+<tt class="descname">getGVT</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.getGVT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.getGVT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the GVT of this kernel</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">float &#8211; the current GVT</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.getLocation">
+<tt class="descname">getLocation</tt><big>(</big><em>model_id</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.getLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.getLocation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the location at which the model with the provided model_id runs</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model_id</strong> &#8211; the model_id of the model of which the location is requested</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">int &#8211; the number of the kernel where the provided model_id runs</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.getProxy">
+<tt class="descname">getProxy</tt><big>(</big><em>rank</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.getProxy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.getProxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a proxy to the specified rank.</p>
+<p>Method will simply forward the request to its server object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rank</strong> &#8211; the rank to return a proxy to</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.getSelfProxy">
+<tt class="descname">getSelfProxy</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.getSelfProxy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.getSelfProxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a proxy to ourself.</p>
+<p>This method is useful in case the underlying code has no idea on which node it is running and it simply wants to contact its kernel.
+It also differs from simply calling the code on the object of the kernel, as this provides a wrapper for asynchronous local invocation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.getState">
+<tt class="descname">getState</tt><big>(</big><em>model_id</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.getState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.getState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the state of the specified model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model_id</strong> &#8211; the model_id of the model of which the state is requested</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">state &#8211; the state of the requested model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.getStateAtTime">
+<tt class="descname">getStateAtTime</tt><big>(</big><em>model_id</em>, <em>requestTime</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.getStateAtTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.getStateAtTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the state of a model at a specific time</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model_id</strong> &#8211; model_id of which the state should be fetched</li>
+<li><strong>requestTime</strong> &#8211; time of the state</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.getTime">
+<tt class="descname">getTime</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.getTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.getTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the current time of this kernel</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">float &#8211; the current simulation time</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.getTotalActivity">
+<tt class="descname">getTotalActivity</tt><big>(</big><em>time=(inf</em>, <em>inf)</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.getTotalActivity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.getTotalActivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary containing the total activity through the complete simulation run</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> &#8211; time up to which to return activity</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dict &#8211; mapping of all activities, but simulation-wide</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.inits">
+<tt class="descname">inits</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.inits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.inits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialise the simulation kernel, this is split up from the constructor to
+make it possible to reset the kernel without reconstructing the kernel.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.loadCheckpoint">
+<tt class="descname">loadCheckpoint</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.loadCheckpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.loadCheckpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alert this kernel that it is restoring from a checkpoint</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.massDelayedActions">
+<tt class="descname">massDelayedActions</tt><big>(</big><em>time</em>, <em>msgs</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.massDelayedActions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.massDelayedActions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call the delayedAction function multiple times in succession.</p>
+<p>Mainly implemented to reduce the number of round trips when tracing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>time</strong> &#8211; the time at which the action should happen</li>
+<li><strong>msgs</strong> &#8211; list containing elements of the form (model_id, action)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.messageTransfer">
+<tt class="descname">messageTransfer</tt><big>(</big><em>extraction</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.messageTransfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.messageTransfer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transfer the messages during a model transfer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>extraction</strong> &#8211; the extraction generated by the <em>messageScheduler</em></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.migrateTo">
+<tt class="descname">migrateTo</tt><big>(</big><em>destination</em>, <em>model_ids</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.migrateTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.migrateTo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Migrate all models to a new destination</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>destination</strong> &#8211; destination of all models specified hereafter</li>
+<li><strong>model_ids</strong> &#8211; iterable containing all models to migrate simultaneously</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.migrationUnlock">
+<tt class="descname">migrationUnlock</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.migrationUnlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.migrationUnlock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unlocks the simulation lock remotely.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">do not use this function, unless you fully understand what you are doing!</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.notifyMigration">
+<tt class="descname">notifyMigration</tt><big>(</big><em>model_ids</em>, <em>destination</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.notifyMigration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.notifyMigration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Notify the migration of a model_id to a new destination</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model_ids</strong> &#8211; the model_ids that gets moved</li>
+<li><strong>destination</strong> &#8211; the node location that now hosts the model_id</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.notifyReceive">
+<tt class="descname">notifyReceive</tt><big>(</big><em>color</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.notifyReceive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.notifyReceive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Notify the simulation kernel of the receiving of a message. Needed for
+GVT calculation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>color</strong> &#8211; the color of the received message (for Mattern&#8217;s algorithm)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.notifySend">
+<tt class="descname">notifySend</tt><big>(</big><em>destination</em>, <em>timestamp</em>, <em>color</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.notifySend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.notifySend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Notify the simulation kernel of the sending of a message. Needed for
+GVT calculation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>destination</strong> &#8211; the name of the simulation kernel that will receive the sent message</li>
+<li><strong>timestamp</strong> &#8211; simulation time at which the message is sent</li>
+<li><strong>color</strong> &#8211; color of the message being sent (for Mattern&#8217;s algorithm)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.performActions">
+<tt class="descname">performActions</tt><big>(</big><em>gvt=inf</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.performActions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.performActions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform all irreversible actions up to the provided time.
+If time is not specified, all queued actions will be executed (in case simulation is finished)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gvt</strong> &#8211; the time up to which all actions should be executed</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.processIncommingMessages">
+<tt class="descname">processIncommingMessages</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.processIncommingMessages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.processIncommingMessages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process all incomming messages and return.</p>
+<p>This is part of the main simulation loop instead of being part of the message receive method, as we require the simlock for this. Acquiring the simlock elsewhere might take some time!</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.processMessage">
+<tt class="descname">processMessage</tt><big>(</big><em>clock</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.processMessage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.processMessage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the first external message smaller than the clock and process them if necessary. Return the new timeNext for simulation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>clock</strong> &#8211; timestamp of the next internal transition</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">timestamp of the next transition, taking into account external messages</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.realtimeWait">
+<tt class="descname">realtimeWait</tt><big>(</big><em>rt_zerotime</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.realtimeWait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.realtimeWait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the waiting for input required in realtime simulation.</p>
+<p>The timeNext of the model will be updated accordingly and all messages will be routed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rt_zerotime</strong> &#8211; the wallclock time at which simulation started</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.receive">
+<tt class="descname">receive</tt><big>(</big><em>msg</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.receive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.receive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make the kernel receive the provided message.</p>
+<p>The method will return as soon as possible to prevent a big number of pending messages.
+Furthermore, acquiring the locks here would be impractical since we only process all incomming messages one at a time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>msg</strong> &#8211; a NetworkMessage to process</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.receiveAntiMessages">
+<tt class="descname">receiveAntiMessages</tt><big>(</big><em>mintime</em>, <em>model_id</em>, <em>uuids</em>, <em>color</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.receiveAntiMessages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.receiveAntiMessages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process a (possibly huge) batch of anti messages for the same model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mintime</strong> &#8211; the lowest timestamp of all messages being cancelled</li>
+<li><strong>model_id</strong> &#8211; the model_id of the receiving model whose messages need to be negated, None to indicate a general rollback</li>
+<li><strong>uuids</strong> &#8211; list of all uuids to cancel</li>
+<li><strong>color</strong> &#8211; color for Mattern&#8217;s algorithm</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">the <em>model_id</em> is only required to check whether or not the model is still local to us</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.receiveControl">
+<tt class="descname">receiveControl</tt><big>(</big><em>msg</em>, <em>first=False</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.receiveControl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.receiveControl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive a GVT control message and process it. Method will block until the GVT is actually found, so make this an asynchronous call, or run it on a seperate thread.</p>
+<p>This code implements Mattern&#8217;s algorithm with a slight modification: it uses 4 different colours to distinguish two subsequent runs. Furthermore, it always requires 2 complete passes before a GVT is found.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.removeActions">
+<tt class="descname">removeActions</tt><big>(</big><em>model_ids</em>, <em>time</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.removeActions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.removeActions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all actions specified by a model, starting from a specified time.
+This function should be called when the model is reverted and its actions
+have to be undone</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model_ids</strong> &#8211; the model_ids of all reverted models</li>
+<li><strong>time</strong> &#8211; time up to which to remove all actions</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.removeTracers">
+<tt class="descname">removeTracers</tt><big>(</big><big>)</big><a class="headerlink" href="#basesimulator.BaseSimulator.removeTracers" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.requestMigrationLock">
+<tt class="descname">requestMigrationLock</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.requestMigrationLock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.requestMigrationLock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Request this kernel to lock itself ASAP to allow a relocation to happen. This will invoke the <em>notifyLocked</em> method on the controller as soon as locking succeeded.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.resetSimulation">
+<tt class="descname">resetSimulation</tt><big>(</big><em>scheduler</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.resetSimulation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.resetSimulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets the simulation kernel to the saved version; can only be invoked after a previous simulation run.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>scheduler</strong> &#8211; the scheduler to set</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.revert">
+<tt class="descname">revert</tt><big>(</big><em>time</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.revert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.revert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Revert the current simulation kernel to the specified time. All messages
+sent after this time will be invalidated, all states produced after this
+time will be removed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> &#8211; the desired time for revertion.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Clearly, this time should be &gt;= the current GVT</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.runsim">
+<tt class="descname">runsim</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.runsim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.runsim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a complete simulation run. Can be run multiple times if this is required in e.g. a distributed simulation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.send">
+<tt class="descname">send</tt><big>(</big><em>model_id</em>, <em>timestamp</em>, <em>content</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.send" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare a message to be sent remotely and do the actual sending too.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model_id</strong> &#8211; the id of the model that has to receive the message</li>
+<li><strong>timestamp</strong> &#8211; timestamp of the message</li>
+<li><strong>content</strong> &#8211; content of the message being sent</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.sendModel">
+<tt class="descname">sendModel</tt><big>(</big><em>model</em>, <em>model_ids</em>, <em>schedulerType</em>, <em>flattened</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.sendModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.sendModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a model to this simulation kernel, as this one will be simulated</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> &#8211; the model to set</li>
+<li><strong>model_ids</strong> &#8211; list containing all models in order of their model_ids</li>
+<li><strong>schedulerType</strong> &#8211; string representation of the scheduler to use</li>
+<li><strong>flattened</strong> &#8211; whether or not the model had its ports decoupled from the models to allow pickling</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.setAttr">
+<tt class="descname">setAttr</tt><big>(</big><em>model_id</em>, <em>attr</em>, <em>value</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.setAttr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.setAttr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets an attribute of a model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model_id</strong> &#8211; the id of the model to alter</li>
+<li><strong>attr</strong> &#8211; string representation of the attribute to alter</li>
+<li><strong>value</strong> &#8211; value to set</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.setGVT">
+<tt class="descname">setGVT</tt><big>(</big><em>GVT</em>, <em>activities</em>, <em>lastStateOnly</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.setGVT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.setGVT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the GVT of this simulation kernel. This value should not be smaller than
+the current GVT (this would be impossible for a correct GVT calculation). Also
+cleans up the input, output and state buffers used due to time-warp.
+Furthermore, it also processes all messages scheduled before the GVT.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>GVT</strong> &#8211; the desired GVT</li>
+<li><strong>activities</strong> &#8211; the activities of all seperate nodes as a list</li>
+<li><strong>lastStateOnly</strong> &#8211; whether or not all states should be considered or only the last</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.setGlobals">
+<tt class="descname">setGlobals</tt><big>(</big><em>address</em>, <em>loglevel</em>, <em>checkpointfrequency</em>, <em>checkpointname</em>, <em>statesaver</em>, <em>kernels</em>, <em>msgCopy</em>, <em>memoization</em>, <em>tracers</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.setGlobals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.setGlobals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure all &#8216;global&#8217; variables for this kernel</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>address</strong> &#8211; address of the syslog server</li>
+<li><strong>loglevel</strong> &#8211; level of logging library</li>
+<li><strong>checkpointfrequency</strong> &#8211; frequency at which checkpoints should be made</li>
+<li><strong>checkpointname</strong> &#8211; name of the checkpoint to save</li>
+<li><strong>statesaver</strong> &#8211; statesaving method</li>
+<li><strong>kernels</strong> &#8211; number of simulation kernels in total</li>
+<li><strong>msgcopy</strong> &#8211; message copy method</li>
+<li><strong>memoization</strong> &#8211; use memoization or not</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.setIrreversible">
+<tt class="descname">setIrreversible</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.setIrreversible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.setIrreversible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mark this node as <strong>temporary</strong> irreversible, meaning that it can simply be made reversible later on. 
+This can be used when all nodes are ran at a single node due to relocation, though future relocations might again move some nodes away.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.setStateAttr">
+<tt class="descname">setStateAttr</tt><big>(</big><em>model_id</em>, <em>attr</em>, <em>value</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.setStateAttr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.setStateAttr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets an attribute of the state of a model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model_id</strong> &#8211; the id of the model to alter</li>
+<li><strong>attr</strong> &#8211; string representation of the attribute to alter</li>
+<li><strong>value</strong> &#8211; value to set</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.setTerminationTime">
+<tt class="descname">setTerminationTime</tt><big>(</big><em>time</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.setTerminationTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.setTerminationTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the time at which simulation should stop, setting this will override
+the local simulation condition.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> &#8211; the time at which the simulation should stop</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.simulate">
+<tt class="descname">simulate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.simulate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.simulate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulate at this kernel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.simulate_sync">
+<tt class="descname">simulate_sync</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.simulate_sync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.simulate_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>A small wrapper around the simulate() function, though with a different name to allow a much simpler MPI one way check</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.startTracers">
+<tt class="descname">startTracers</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.startTracers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.startTracers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start all tracers</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.stopTracers">
+<tt class="descname">stopTracers</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.stopTracers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.stopTracers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop all tracers</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.unsetIrreversible">
+<tt class="descname">unsetIrreversible</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.unsetIrreversible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.unsetIrreversible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unmark this node as <strong>temporary</strong> irreversible.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="basesimulator.BaseSimulator.waitUntilOK">
+<tt class="descname">waitUntilOK</tt><big>(</big><em>vector</em><big>)</big><a class="reference internal" href="_modules/basesimulator.html#BaseSimulator.waitUntilOK"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basesimulator.BaseSimulator.waitUntilOK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns as soon as all messages to this simulation kernel are received.
+Needed due to Mattern&#8217;s algorithm. Uses events to prevent busy looping.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vector</strong> &#8211; the vector number to wait for. Should be 0 for colors 0 and 1, should be 1 for colors 2 and 3.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="asynchronouscombogenerator_int.html"
+                        title="previous chapter">Asynchronous Combo Generator</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="classicdevswrapper_int.html"
+                        title="next chapter">Classic DEVS Wrapper</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/basesimulator_int.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="classicdevswrapper_int.html" title="Classic DEVS Wrapper"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="asynchronouscombogenerator_int.html" title="Asynchronous Combo Generator"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" >Internal documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

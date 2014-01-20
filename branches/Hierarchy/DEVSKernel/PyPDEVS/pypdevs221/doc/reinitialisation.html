@@ -1,0 +1,171 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Reinitialisation &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Advanced examples" href="advanced.html" />
+    <link rel="next" title="Continuing a stopped simulation" href="continuing.html" />
+    <link rel="prev" title="Advanced examples" href="advanced.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="continuing.html" title="Continuing a stopped simulation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="advanced.html" title="Advanced examples"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" accesskey="U">Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="reinitialisation">
+<h1>Reinitialisation<a class="headerlink" href="#reinitialisation" title="Permalink to this headline">¶</a></h1>
+<p>Starting from PyPDEVS 2.1.4, it is possible to run the <em>simulate()</em> method multiple times. If the <em>reinit()</em> method was called, the model will be restored to its initial state. This is done by completely saving the model in memory right before the actual simulation starts. Main problem with this approach is that it will require additional memory and for local simulation, it also increases the initialisation time as the copy will have to be made.</p>
+<p>For these reasons, local simulation will have reinitialisation disabled by default and calling the <em>reinit()</em> method will result in a <em>DEVSException</em> stating this fact (and how to resolve it). Distributed simulation does not have this additional overhead and therefore it is always enabled.</p>
+<p>So for remote simulation, it is as simple as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sim</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">DQueue</span><span class="p">())</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span> <span class="c"># Run it for the first time</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">reinit</span><span class="p">()</span>   <span class="c"># Reinitialize</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span> <span class="c"># &#39;Continue&#39; the simulation run (which was reset)</span>
+</pre></div>
+</div>
+<p>In local simulation, the option to allow reinitialisation needs to be set first, which simply gives:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sim</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">CQueue</span><span class="p">())</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">setAllowLocalReinit</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span> <span class="c"># Run it for the first time</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">reinit</span><span class="p">()</span>   <span class="c"># Reinitialize</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span> <span class="c"># &#39;Continue&#39; the simulation run (which was reset)</span>
+</pre></div>
+</div>
+<div class="section" id="altering-the-model">
+<h2>Altering the model<a class="headerlink" href="#altering-the-model" title="Permalink to this headline">¶</a></h2>
+<p>Of course, simply rerunning the simulation is not really useful. Most of the time, reinitialisation is done to try the exact same simulation, but with a slightly different configuration. As long as the model structure is not altered, simply reinitializing is the best option. Note that these alterations should happen <strong>before</strong> the reinitialize call is made, as it implies network communication that is best done in a batch.</p>
+<p>After a simulation run, the model will naturally still be in the post-simulation state and the model states will be the ones at the end of the simulation. Altering them has no effect on subsequent simulation runs, as the model will be reinitialised in a single step. Simply altering the model after a simulation run is not a viable option.</p>
+<p>For these reasons, the only way to alter a model after simulation is through three methods of the <em>Simulator</em> object. These methods all serve a similar goal, though they are optimized for specific goals. They are:</p>
+<ul class="simple">
+<li><em>setModelState(model, newState)</em>: modify the state of <em>model</em> and set it to <em>newState</em>. Use this to set a completely new state for the model. This is an optimized version of <em>setModelAttribute</em>.</li>
+<li><em>setModelStateAttr(model, attr, value)</em>: modify the attribute <em>attr</em> of the state of <em>model</em> and set it to <em>value</em>. This will keep the original initialisation state, but alters only a single attribute.</li>
+<li><em>setModelAttribute(model, attr, value)</em>: modify the attribute <em>attr</em> of the <em>model</em> and set it to <em>value</em>. This can be done to modify read-only attributes of the simulation model.</li>
+</ul>
+<p>For example, if you want to change the <em>processing_time</em> attribute of the queue, you can simply:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span> <span class="o">=</span> <span class="n">CQueue</span><span class="p">()</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">setAllowLocalReinit</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span> <span class="c"># &lt;-- Initial run with processing_time = 1.0</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">reinit</span><span class="p">()</span>   <span class="c"># &lt;-- Perform reinitialisation and perform all changes</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">setModelAttribute</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="s">&quot;processing_time&quot;</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span> <span class="c"># &lt;-- Set it to 2.0</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span> <span class="c"># &lt;-- Now run with processing_time = 2.0</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Altering the state should happen after reinitialisation, as otherwise your changes will be reverted too.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Reinitialisation</a><ul>
+<li><a class="reference internal" href="#altering-the-model">Altering the model</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="advanced.html"
+                        title="previous chapter">Advanced examples</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="continuing.html"
+                        title="next chapter">Continuing a stopped simulation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/reinitialisation.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="continuing.html" title="Continuing a stopped simulation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="advanced.html" title="Advanced examples"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" >Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

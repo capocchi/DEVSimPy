@@ -1,0 +1,974 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Simulator User Interface &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Interface" href="interface.html" />
+    <link rel="next" title="Server User Interface" href="server.html" />
+    <link rel="prev" title="CoupledDEVS User Interface" href="CDEVS.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="server.html" title="Server User Interface"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="CDEVS.html" title="CoupledDEVS User Interface"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="interface.html" accesskey="U">Interface</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="simulator-user-interface">
+<h1>Simulator User Interface<a class="headerlink" href="#simulator-user-interface" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt>
+<tt class="descclassname">simulator.</tt><tt class="descname">loadCheckpoint</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/simulator.html#loadCheckpoint"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Load a previously created simulation from a saved checkpoint.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; the name of the model to provide some distinction between different simulation models</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">either None if no recovery was possible, or the Simulator object after simulation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><tt class="descclassname">simulator.</tt><tt class="descname">Simulator</tt><big>(</big><em>model</em><big>)</big><a class="reference internal" href="_modules/simulator.html#Simulator"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Associates a hierarchical DEVS model with the simulation engine.</p>
+<dl class="method">
+<dt>
+<tt class="descclassname">Simulator.</tt><tt class="descname">__init__</tt><big>(</big><em>model</em><big>)</big><a class="reference internal" href="_modules/simulator.html#Simulator.__init__"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Constructor of the simulator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> &#8211; a valid model (created with the provided functions)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">Simulator.</tt><tt class="descname">simulate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/simulator.html#Simulator.simulate"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Start simulation with the previously set options. Can be reran afterwards to reinitialize the model and run it again, 
+possibly after altering some aspects of the model with the provided methods.</p>
+</dd></dl>
+
+</dd></dl>
+
+<p>All configuration of the simulator is forwarded to the Simulator Configuration class. These methods can simply be invoked on a Simulator object.</p>
+<dl class="class">
+<dt>
+<em class="property">class </em><tt class="descclassname">simconfig.</tt><tt class="descname">SimulatorConfiguration</tt><big>(</big><em>sim</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>All necessary simulator configuration options are provided. The necessary checks will be made and the simulator will be adapted accordingly.</p>
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">__init__</tt><big>(</big><em>sim</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.__init__"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sim</strong> &#8211; the simulator to alter with actions on this configurator</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">registerState</tt><big>(</big><em>variable</em>, <em>model</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.registerState"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Registers the state of a certain model to an attribute of the simulator AFTER simulation has finished</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>variable</strong> &#8211; name of the attribute to assign to</li>
+<li><strong>model</strong> &#8211; the AtomicDEVS model or its model id to fetch the state from</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setActivityRelocatorBasicBoundary</tt><big>(</big><em>swappiness</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setActivityRelocatorBasicBoundary"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the use of the <em>activity</em> relocator called <em>&#8216;Basic Boundary&#8217;</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>swappiness</strong> &#8211; how big the deviation from the average should be before scheduling relocations</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setActivityRelocatorCustom</tt><big>(</big><em>filename</em>, <em>classname</em>, <em>*args</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setActivityRelocatorCustom"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the use of a custom relocator</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> &#8211; filename containing the relocator</li>
+<li><strong>classname</strong> &#8211; classname of the relocator</li>
+<li><strong>args</strong> &#8211; all other args are passed to the constructor</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setActivityTrackingVisualisation</tt><big>(</big><em>visualize</em>, <em>x=0</em>, <em>y=0</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setActivityTrackingVisualisation"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the simulation to visualize the results from activity tracking. An x and y parameter can be given to visualize it in a cell style.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>visualize</strong> &#8211; whether or not to visualize it</li>
+<li><strong>x</strong> &#8211; the horizontal size of the grid (optional)</li>
+<li><strong>y</strong> &#8211; the vertical size of the grid (optional)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setAllowLocalReinit</tt><big>(</big><em>allowed=True</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setAllowLocalReinit"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Allow a model to be reinitialized in local simulation.
+This is not the case by default, as it would be required to save a copy of the model in memory during setup. Generating such a copy can be time consuming and the additional memory consumption could be unacceptable.
+Distributed simulation is unaffected, since this always requires the creation of a copy.
+If this is False and reinitialisation is done in a local simulation, an exception will be thrown.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The state that is accessible after the simulation will <strong>NOT</strong> be updated if this configuration parameter is used. If you want to have fully up to date states, you should also set the <em>setFetchAllAfterSimulation()</em> configuration parameter.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>allowed</strong> &#8211; whether or not to allow reinitialization</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setAutoAllocator</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setAutoAllocator"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the use of an initial allocator that simply distributes the root models.
+This is a static allocator, meaning that no event activity will be generated.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setCell</tt><big>(</big><em>x_size=None</em>, <em>y_size=None</em>, <em>cell_file='celltrace'</em>, <em>multifile=False</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setCell"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the cell tracing flag of the simulation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cell</strong> &#8211; whether or not verbose output should be generated</li>
+<li><strong>x_size</strong> &#8211; the horizontal length of the grid</li>
+<li><strong>y_size</strong> &#8211; the vertical length of the grid</li>
+<li><strong>cell_file</strong> &#8211; the file to save the generated trace to</li>
+<li><strong>multifile</strong> &#8211; if True, each timestep will be save to a seperate file (nice for visualisations)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setCheckpointing</tt><big>(</big><em>name</em>, <em>chk_int</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setCheckpointing"><span class="viewcode-link">[source]</span></a></dt>
+<dd><div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">name parameter will be used as a filename, so avoid special characters</p>
+</div>
+<p>Sets the interval between 2 checkpoints in terms of GVT calculations. This option generates PDC files starting with &#8216;name&#8217;. This is only possible when using MPI.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; name to prepend to each checkpoint file</li>
+<li><strong>chk_int</strong> &#8211; number of GVT runs that are required to trigger a checkpoint. For example 3 means that a checkpoint will be created after each third GVT calculation</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setClassicDEVS</tt><big>(</big><em>classicDEVS=True</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setClassicDEVS"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Use Classic DEVS instead of Parallel DEVS. This option does not affect the use of Dynamic Structure DEVS or realtime simulation. Not usable with distributed simulation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>classicDEVS</strong> &#8211; whether or not to use Classic DEVS</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setCustomTracer</tt><big>(</big><em>tracerfile</em>, <em>tracerclass</em>, <em>args</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setCustomTracer"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the use of a custom tracer, loaded at run time.</p>
+<p>Calling this function multiple times will register a tracer for each of them (thus output to multiple files is possible, though more inefficient than simply (manually) copying the file at the end).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tracerfile</strong> &#8211; the file containing the tracerclass</li>
+<li><strong>tracerclass</strong> &#8211; the class to instantiate</li>
+<li><strong>args</strong> &#8211; arguments to be passed to the tracerclass&#8217;s constructor</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setDSDEVS</tt><big>(</big><em>dsdevs=True</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setDSDEVS"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Whether or not to enable Dynamic Structure DEVS simulation. If this is set to True, the modelTransition method will be called on all transitioned models. 
+If this is False, the modelTransition method will not be called, even if one is defined! Enabling this incurs a (slight) slowdown in the simulation,
+due to the additional function calls and checks that have to be made. Currently only available in local simulation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dsdevs</strong> &#8211; enable or not</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setDrawModel</tt><big>(</big><em>drawModel=True</em>, <em>outputfile='model.dot'</em>, <em>hideEdgeLabels=False</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setDrawModel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Whether or not to draw the model and its distribution before simulation starts.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>drawModel</strong> &#8211; whether or not to draw the model</li>
+<li><strong>hideEdgeLabels</strong> &#8211; whether or not to hide the labels of the connections, this speeds up the model drawing and allows for reasonably sized diagrams</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setFetchAllAfterSimulation</tt><big>(</big><em>fetch=True</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setFetchAllAfterSimulation"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Update the complete model by fetching all states from all remote locations. This is different from &#8216;registerState&#8217;, as it will fetch everything and it will modify the original model instead of adding an attribute to the Simulator object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fetch</strong> &#8211; whether or not to fetch all states from all models</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setGVTInterval</tt><big>(</big><em>gvt_int</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setGVTInterval"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the interval in seconds between 2 GVT calculations. This is the time between the ending of the previous run and the start of the next run, to prevent overlapping calculations.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Parameter should be at least 1 to prevent an overload of GVT calculations</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gvt_int</strong> &#8211; interval in seconds (float or integer)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setGreedyAllocator</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setGreedyAllocator"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the use of the greedy allocator that is contained in the standard PyPDEVS distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setInitialAllocator</tt><big>(</big><em>allocator</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setInitialAllocator"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the use of an initial allocator instead of the manual allocation. Can be set to None to use manual allocation (default).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>allocator</strong> &#8211; the allocator to use for assigning the initial locations</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setLocationCellMap</tt><big>(</big><em>locationmap</em>, <em>x=0</em>, <em>y=0</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setLocationCellMap"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the simulation to produce a nice Cell DEVS like output file of the current location. This file will be regenerated as soon as some relocations are processed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>locationmap</strong> &#8211; whether or not to generate this file</li>
+<li><strong>x</strong> &#8211; the horizontal size of the grid</li>
+<li><strong>y</strong> &#8211; the vertical size of the grid</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setLogging</tt><big>(</big><em>destination</em>, <em>level</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setLogging"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the logging destination for the syslog server.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>destination</strong> &#8211; A tuple/list containing an address, port pair defining the location of the syslog server. Set to None to prevent modification</li>
+<li><strong>level</strong> &#8211; the level at which logging should happen. This can either be a logging level from the logging module, or it can be a string specifying this level. Accepted strings are: &#8216;debug&#8217;, &#8216;info&#8217;, &#8216;warning&#8217;, &#8216;warn&#8217;, &#8216;error&#8217;, &#8216;critical&#8217;</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setManualRelocator</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setManualRelocator"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the use of the manual relocator (the default). This mode allows the user to add manual <em>relocation directives</em>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setMemoization</tt><big>(</big><em>memo=True</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setMemoization"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Use memoization to prevent repeated int/ext/confTransition calls when revertion was performed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>memo</strong> &#8211; enable or not</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setMessageCopy</tt><big>(</big><em>copy_method</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setMessageCopy"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the type of message copying to use, this will have an impact on performance. It is made customizable as some more general techniques will be much slower.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>copy_method</strong> &#8211; Either an ID of the option, or (recommended) a string specifying the method, see options below</td>
+</tr>
+</tbody>
+</table>
+<dl class="glossary docutils">
+<dt id="term-pickle">pickle</dt>
+<dd>use the (c)pickle module</dd>
+<dt id="term-custom">custom</dt>
+<dd>define a custom &#8216;copy&#8217; function in every message and use this</dd>
+<dt id="term-none">none</dt>
+<dd>don&#8217;t use any copying at all, unsafe though most other DEVS simulators only supply this</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setModelAttribute</tt><big>(</big><em>model</em>, <em>attr</em>, <em>value</em><big>)</big></dt>
+<dd><p>Reinitialize an attribute of the model itself</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> &#8211; model whose attribute to set</li>
+<li><strong>attr</strong> &#8211; string representation of the attribute to change</li>
+<li><strong>value</strong> &#8211; value to assign</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setModelState</tt><big>(</big><em>model</em>, <em>newState</em><big>)</big></dt>
+<dd><p>Reinitialize the state of a certain model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> &#8211; model whose state to change</li>
+<li><strong>newState</strong> &#8211; state to assign to the model</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setModelStateAttr</tt><big>(</big><em>model</em>, <em>attr</em>, <em>value</em><big>)</big></dt>
+<dd><p>Reinitialize an attribute of the state of a certain model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> &#8211; model whose state to change</li>
+<li><strong>attr</strong> &#8211; string representation of the attribute to change</li>
+<li><strong>value</strong> &#8211; value to assign</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setRealTime</tt><big>(</big><em>realtime=True</em>, <em>scale=1.0</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setRealTime"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the use of realtime instead of &#8216;as fast as possible&#8217;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>realtime</strong> &#8211; whether or not to use realtime simulation</li>
+<li><strong>scale</strong> &#8211; the scale for scaled real time, every delay will be multiplied with this number</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setRealTimeInputFile</tt><big>(</big><em>generatorfile</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setRealTimeInputFile"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the realtime input file to use. If realtime is not yet set, this will auto-enable it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>generatorfile</strong> &#8211; the file to use, should be a string, NOT a file handle. None is acceptable if no file should be used.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setRealTimePlatformGameLoop</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setRealTimePlatformGameLoop"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the realtime platform to Game Loop. If realtime is not yet set, this will auto-enable it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fps</strong> &#8211; the number of times the game loop call should be made per second</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setRealTimePlatformThreads</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setRealTimePlatformThreads"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the realtime platform to Python Threads. If realtime is not yet set, this will auto-enable it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setRealTimePlatformTk</tt><big>(</big><em>tk</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setRealTimePlatformTk"><span class="viewcode-link">[source]</span></a></dt>
+<dd><div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">this clearly requires Tk to be present.</p>
+</div>
+<p>Sets the realtime platform to Tk events. If realtime is not yet set, this will auto-enable it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setRealTimePorts</tt><big>(</big><em>ports</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setRealTimePorts"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the dictionary of ports that can be used to put input on. If realtime is not yet set, this will auto-enable it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ports</strong> &#8211; dictionary with strings as keys, ports as values</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setRelocationDirective</tt><big>(</big><em>time</em>, <em>model</em>, <em>destination</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setRelocationDirective"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Creates a relocation directive, stating that a relocation of a certain model should happen at or after the specified time (depending on when the GVT progresses over this time).</p>
+<p>If multiple directives exist for the same model, the one with the highest time will be executed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>time</strong> &#8211; time after which the relocation should happen</li>
+<li><strong>model</strong> &#8211; the model to relocate at the specified time. Can either be its ID, or an AtomicDEVS or CoupledDEVS model. Note that providing a CoupledDEVS model is simply a shortcut for relocating the COMPLETE subtree elsewhere, as this does not stop at kernel boundaries.</li>
+<li><strong>destination</strong> &#8211; the location to where the model should be moved</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setRelocationDirectives</tt><big>(</big><em>directives</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setRelocationDirectives"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets multiple relocation directives simultaneously, easier for batch processing. Behaviour is equal to running setRelocationDirective on every element of the iterable.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>directives</strong> &#8211; an iterable containing all directives, in the form [time, model, destination]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setRemoveTracers</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setRemoveTracers"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Removes all currently registered tracers, might be useful in reinitialised simulation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setSchedulerActivityHeap</tt><big>(</big><em>locations=None</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setSchedulerActivityHeap"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Use the basic activity heap scheduler, this is the default.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>locations</strong> &#8211; if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setSchedulerCustom</tt><big>(</big><em>filename</em>, <em>schedulerName</em>, <em>locations=None</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setSchedulerCustom"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Use a custom scheduler</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> &#8211; filename of the file containing the scheduler class</li>
+<li><strong>schedulerName</strong> &#8211; class name of the scheduler contained in the file</li>
+<li><strong>locations</strong> &#8211; if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setSchedulerDirtyHeap</tt><big>(</big><em>locations=None</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setSchedulerDirtyHeap"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Use the basic activity heap scheduler, but without periodic cleanup. The same scheduler as the one used in VLE.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>locations</strong> &#8211; if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setSchedulerDiscreteTime</tt><big>(</big><em>locations=None</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setSchedulerDiscreteTime"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Use a basic &#8216;discrete time&#8217; style scheduler. If the model is scheduled, it has to be at the same time as all other scheduled models. It isn&#8217;t really discrete time in the sense that it allows variable step sizes, only should ALL models agree on it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>locations</strong> &#8211; if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Only use in local simulation!</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setSchedulerHeapSet</tt><big>(</big><em>locations=None</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setSchedulerHeapSet"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Use a scheduler containing 3 different datastructures. It is still experimental, though can provide noticeable performance boosts.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>locations</strong> &#8211; if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setSchedulerMinimalList</tt><big>(</big><em>locations=None</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setSchedulerMinimalList"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Use a simple scheduler that keeps a list of all models and traverses it each time in search of the first one. Slight variation of the sorted list scheduler.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>locations</strong> &#8211; if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setSchedulerNoAge</tt><big>(</big><em>locations=None</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setSchedulerNoAge"><span class="viewcode-link">[source]</span></a></dt>
+<dd><div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">do not use this scheduler if the time advance can be equal to 0. This scheduler strips of the age from every scheduled model, which means that ages do not influence the scheduling.</p>
+</div>
+<p>Use a stripped scheduler that doesn&#8217;t care about the age in a simulation. It is equivalent in design to the HeapSet scheduler,
+but uses basic floats instead of tuples.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>locations</strong> &#8211; if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setSchedulerPolymorphic</tt><big>(</big><em>locations=None</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setSchedulerPolymorphic"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Use a polymorphic scheduler, which chooses at run time between the HeapSet scheduler or the Minimal List scheduler. Slight overhead due to indirection and statistics gathering.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Still unstable, don&#8217;t use!</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>locations</strong> &#8211; if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setSchedulerSortedList</tt><big>(</big><em>locations=None</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setSchedulerSortedList"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Use an extremely simple scheduler that simply sorts the list of all models. Useful if lots of invalidations happen and nearly all models are active.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>locations</strong> &#8211; if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setShowProgress</tt><big>(</big><em>progress=True</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setShowProgress"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Shows progress in ASCII in case a termination_time is given</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>progress</strong> &#8211; whether or not to show progress</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setStateSaving</tt><big>(</big><em>state_saving</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setStateSaving"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the type of state saving to use, this will have a high impact on performance. It is made customizable as some more general techniques will be much slower, though necessary in certain models.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>state_saving</strong> &#8211; Either an ID of the option, or (recommended) a string specifying the method, see options below.</td>
+</tr>
+</tbody>
+</table>
+<dl class="glossary docutils">
+<dt id="term-deepcopy">deepcopy</dt>
+<dd>use the deepcopy module</dd>
+<dt id="term-pickle0">pickle0</dt>
+<dd>use the (c)pickle module with pickling protocol 0</dd>
+<dt id="term-pickleh">pickleH</dt>
+<dd>use the (c)pickle module with the highest available protocol</dd>
+<dt id="term-6">pickle</dt>
+<dd>use the (c)pickle module</dd>
+<dt id="term-copy">copy</dt>
+<dd>use the copy module (only safe for flat states)</dd>
+<dt id="term-assign">assign</dt>
+<dd>simply assign states (only safe for primitive states)</dd>
+<dt id="term-9">none</dt>
+<dd>equivalent to assign (only safe for primitive states)</dd>
+<dt id="term-10">custom</dt>
+<dd>define a custom &#8216;copy&#8217; function in every state and use this</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setTerminationCondition</tt><big>(</big><em>condition</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setTerminationCondition"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the termination condition for the simulation. Setting this will remove a previous termination time and condition. This condition will be executed on the controller</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>condition</strong> &#8211; a function to call that returns a boolean whether or not to halt simulation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setTerminationModel</tt><big>(</big><em>model</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setTerminationModel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Marks a specific AtomicDEVS model as being used in a termination condition. This is never needed in case no termination_condition is used. It will _force_ the model to run at the controller, ignoring the location that was provided in the model itself. Furthermore, it will prevent the model from migrating elsewhere.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> &#8211; an AtomicDEVS model that needs to run on the controller and shouldn&#8217;t be allowed to migrate</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setTerminationTime</tt><big>(</big><em>time</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setTerminationTime"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the termination time for the simulation. Setting this will remove a previous termination time and condition.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> &#8211; time at which simulation should be halted</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setVCD</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setVCD"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the use of a VCD tracer.</p>
+<p>Calling this function multiple times will register a tracer for each of them (thus output to multiple files is possible, though more inefficient than simply (manually) copying the file at the end).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> &#8211; string representing the filename to write the trace to</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setVerbose</tt><big>(</big><em>filename=None</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setVerbose"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the use of a verbose tracer.</p>
+<p>Calling this function multiple times will register a tracer for each of them (thus output to multiple files is possible, though more inefficient than simply (manually) copying the file at the end).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> &#8211; string representing the filename to write the trace to, None means stdout</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">SimulatorConfiguration.</tt><tt class="descname">setXML</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/simconfig.html#SimulatorConfiguration.setXML"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the use of a XML tracer.</p>
+<p>Calling this function multiple times will register a tracer for each of them (thus output to multiple files is possible, though more inefficient than simply (manually) copying the file at the end).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> &#8211; string representing the filename to write the trace to</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="CDEVS.html"
+                        title="previous chapter">CoupledDEVS User Interface</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="server.html"
+                        title="next chapter">Server User Interface</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/simulator.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="server.html" title="Server User Interface"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="CDEVS.html" title="CoupledDEVS User Interface"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="interface.html" >Interface</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

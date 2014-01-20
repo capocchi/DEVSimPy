@@ -1,0 +1,184 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Dynamic Structure &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Advanced examples" href="advanced.html" />
+    <link rel="next" title="Nested simulation" href="nesting.html" />
+    <link rel="prev" title="Translation functions" href="translationfunction.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="nesting.html" title="Nested simulation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="translationfunction.html" title="Translation functions"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" accesskey="U">Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dynamic-structure">
+<h1>Dynamic Structure<a class="headerlink" href="#dynamic-structure" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Currently, Dynamic Structure DEVS is an <em>option</em> for local simulation only. It is not enabled by default due to the additional (relatively costly) check for whether or not to transition.</p>
+</div>
+<p>Dynamic Structure DEVS (DSDEVS) is not actually an &#8216;extension&#8217; to DEVS, though it offers some more advanced features in a simpler way. The basic idea is that a model (both coupled and atomic) can now cause a change in the structure of the model. This means adding submodels, deleting submodels, adding ports, removing ports, disconnecting ports and connecting ports. Such changes happen at run-time and cause a slight overhead due to the model being saved internally in a slightly different way.</p>
+<p>The way DSDEVS works in PyPDEVS is similar to how it works in adevs. After each transition function, the transitioned model will have its <em>modelTransition(state)</em> method called. If it returns <em>True</em>, the model will signal its parent model that it requests a structural change. The model will then have its <em>modelTransition(state)</em> called too, which is allowed to make structural changes. If it requires changes at a higher level, it should return <em>True</em> again, to have the structural change request being propagated upwards. If it returns <em>False</em>, no change is requested.</p>
+<p>All structural changes should happen in a <em>coupled model</em>, as this is kind of model has a structural role. The <strong>only</strong> structural change that is allowed in the <em>modelTransition(state)</em> method is the addition or removal of ports. Removing a port will also remove all of its current connections. Adding a port will not yet have an effect on the model itself, as it is not yet connected and requires further structural changes at a higher level. The <em>modelTransition(state)</em> method is <strong>NOT</strong> allowed to perform any changes to the model state, only to the state that is provided as an argument (which contains a dictionary).</p>
+<p>The <em>modelTransition</em> method takes a <em>state</em> parameter, which is simply a dictionary that will be passed everytime. If you require modularity, it is possible to use e.g. the fully qualified name of the modelas the key and store another dictionary in here. This functionality can be used to support structural changes that require some kind of memory before deciding whether or not to perform such a change.</p>
+<div class="section" id="interface">
+<h2>Interface<a class="headerlink" href="#interface" title="Permalink to this headline">¶</a></h2>
+<p>Several methods are added or altered to support DSDEVS. These functions are:</p>
+<ul class="simple">
+<li><em>removePort(port)</em>: remove the <em>port</em> argument from the ports. Any further usage of the port, such as saved references, should no longer be used as they result in simulation errors. It is best practice to manually delete the port by invoking the <em>del</em> Python instruction.</li>
+<li><em>addInPort(name)</em>: similar to the normal usage, but now extended to allow changes at run-time.</li>
+<li><em>addOutPort(name)</em>: similar to the normal usage, but now extended to allow changes at run-time.</li>
+<li><em>addSubModel(model)</em>: similar to the normal usage, but now extended to allow changes at run-time.</li>
+<li><em>removeSubModel(model)</em>: remove the <em>model</em> as a child, including all its submodels (if applicable). All of the relevant ports are also removed, thus breaking all these connections. After a model is removed, there is no way to get it back.</li>
+<li><em>connectPorts(port1, port2)</em>: similar to the normal usage, but now extended to allow changes at run-time.</li>
+<li><em>disconnectPorts(port1, port2)</em>: removes the connection between the ports. These ports should correspond to the parameters previously passed to the <em>connectPorts</em> method.</li>
+</ul>
+<p>DSDEVS should also be enabled as a configuration parameter, using the <em>setDSDEVS(dsdevs)</em> method of the simulator. The default is <em>False</em> due to the simulation overhead.</p>
+</div>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<p>A complete example will not be provided here, but instead only the relevant <em>modelTransition(state)</em> methods will be shown.</p>
+<p>Enabling the use of DSDEVS is done as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sim</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">MyDSModel</span><span class="p">())</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">setDSDEVS</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The actual model can be something like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyAtomicDSModel</span><span class="p">(</span><span class="n">AtomicDEVS</span><span class="p">):</span>
+    <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">modelTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">currenttime</span> <span class="o">==</span> <span class="mf">5.0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">removePort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outport</span><span class="p">)</span> <span class="c"># Remove the output port</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">outport</span> <span class="c"># Remove our own reference to the port</span>
+            <span class="k">return</span> <span class="bp">True</span> <span class="c"># We need a structural change from the parent too</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span> <span class="c"># Nothing to do</span>
+    <span class="o">...</span>
+
+<span class="k">class</span> <span class="nc">MyDSModel</span><span class="p">(</span><span class="n">CoupledDEVS</span><span class="p">):</span>
+    <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">modelTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomic</span><span class="p">)</span> <span class="c"># Remove the model stored in &#39;self.atomic&#39; from the simulation</span>
+        <span class="k">return</span> <span class="bp">False</span> <span class="c"># No need to propagate the change</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Dynamic Structure</a><ul>
+<li><a class="reference internal" href="#interface">Interface</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="translationfunction.html"
+                        title="previous chapter">Translation functions</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="nesting.html"
+                        title="next chapter">Nested simulation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/dynamicstructure.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="nesting.html" title="Nested simulation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="translationfunction.html" title="Translation functions"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" >Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
