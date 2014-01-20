@@ -403,7 +403,7 @@ class MainApplication(wx.Frame):
 					D = eval(self.cfg.Read("builtin_dict"))
 				except SyntaxError:
 					wx.MessageBox('Error trying to read the builtin dictionary from config file. So, we load the default builtin',
-								_('Configuration'),
+								'Configuration',
 								wx.OK | wx.ICON_INFORMATION)
 					#sys.stdout.write('Error trying to read the builtin dictionary from config file. So, we load the default builtin \n')
 					D = builtin_dict
@@ -411,7 +411,7 @@ class MainApplication(wx.Frame):
 					### try to start without error when .devsimpy need update (new version installed)
 					if not os.path.isdir(D['HOME_PATH']):
 						wx.MessageBox('.devsimpy file appear to be not liked with the DEVSimPy source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(GetUserConfigDir()),
-									_('Configuration'),
+									'Configuration',
 									wx.OK | wx.ICON_INFORMATION)
 						#sys.stdout.write('.devsimpy file appear to be not liked with the DEVSimPy source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(GetUserConfigDir()))
 						D['HOME_PATH'] = ABS_HOME_PATH
