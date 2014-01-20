@@ -87,7 +87,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.toggle_list = wx.GetApp().GetTopWindow().toggle_list
 		else:
 			sys.stdout.write(_('Alone mode for DetachedFrame: Connector buttons are not binded\n'))
-			self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId()]
+			self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId()]
 
 		self.tools = [  toolbar.AddTool(Menu.ID_SAVE, wx.Bitmap(os.path.join(ICON_PATH,'save.png')), shortHelpString=_('Save File') ,longHelpString=_('Save the current diagram'), clientData=self.canvas),
 										toolbar.AddTool(Menu.ID_SAVEAS, wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')), shortHelpString=_('Save File As'), longHelpString=_('Save the diagram with an another name'), clientData=self.canvas),
@@ -110,7 +110,16 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		toolbar.InsertSeparator(5)
 		toolbar.InsertSeparator(9)
 		toolbar.InsertSeparator(13)
+
 		toolbar.ToggleTool(self.toggle_list[0],1)
+
+		self.text = wx.TextCtrl(toolbar, value="0")
+		self.spin = wx.SpinButton(toolbar, self.toggle_list[3], style = wx.SP_VERTICAL)
+		self.spin.SetRange(0, 100)
+		self.spin.SetValue(0)
+		toolbar.AddControl(self.text)
+		toolbar.AddControl(self.spin)
+
 		toolbar.Realize()
 
 		### if Detached frame from block (container or Code)

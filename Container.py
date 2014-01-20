@@ -88,6 +88,8 @@ from Mixins.Connectable import Connectable
 from Mixins.Plugable import Plugable
 from Mixins.Structurable import Structurable
 from Mixins.Savable import Savable
+from Mixins.Abstractable import Abstractable
+
 
 from Decorators import BuzyCursorNotification, StatusBarNotification, ProgressNotification, Pre_Undo, Post_Undo, cond_decorator
 from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance
@@ -249,47 +251,49 @@ class Diagram(Savable, Structurable):
 
 	def __init__(self):
 		""" Constructor.
-
 		"""
 
-		# list of shapes in the diagram
+		### list of shapes in the diagram
 		self.shapes = []
 
 		self.parent = None
 
-		# shape priority for simulation
+		### shape priority for simulation
 		self.priority_list = []
 
-		# constants dico
+		### constants dico
 		self.constants_dico = {}
 
-		# devs Master model
+		### devs Master model
 		self.devsModel = None
 
-		# list of number of Block and Port under the diagram
+		### list of number of Block and Port under the diagram
 		self.nbCodeBlock = 0
 		self.nbContainerBlock = 0
 		self.nbiPort = 0
 		self.nboPort = 0
 
-		# list of deleted id
+		### list of deleted id
 		self.deletedCodeBlockId = []
 		self.deletedContainerBlockId = []
 		self.deletediPortId = []
 		self.deletedoPortId = []
 
+		### last name of saved file
 		self.last_name_saved = ''
+		### modification flag
 		self.modify = False
 
 	def __getstate__(self):
-		"""Return state values to be pickled."""
+		"""Return state values to be pickled.
+		"""
 
-		### we copy a new state in order to dont lost the devs result of Scope for example.
+		### we copy a new state in order to don't lost the devs result of Scope for example.
 		new_state = self.__dict__.copy()
 
 		### delete devs instance (because is generate before the simulation)
 		new_state['devsModel'] = None
-		### set parent attribut for undo/redo
+		### set parent attribute for undo/redo
 		new_state['parent'] = None
 
 		return new_state
@@ -305,13 +309,12 @@ class Diagram(Savable, Structurable):
 
 	@staticmethod
 	def makeDEVSGraph(diagram, D = {}, type = object):
-		""" Make a formated dictionnary to make the graph of the DEVS Network : {'S1': [{'C1': (1, 0)}, {'M': (0, 1)}], port 1 of S1 is connected to the port 0 of C1...
+		""" Make a formated dictionary to make the graph of the DEVS Network : {'S1': [{'C1': (1, 0)}, {'M': (0, 1)}], port 1 of S1 is connected to the port 0 of C1...
 		"""
-
 
 		# for all components in the diagram
 		for c in diagram.GetShapeList():
-			# if the component is the conncetionShape, then add the new element in the D dictionnary
+			# if the component is the conncetionShape, then add the new element in the D dictionary
 			if isinstance(c, ConnectionShape):
 				model1, portNumber1 = c.input
 				model2, portNumber2 = c.output
@@ -341,18 +344,18 @@ class Diagram(Savable, Structurable):
 
 	@staticmethod
 	def makeDEVSInstance(diagram = None):
-		""" Return the DEVS instance of diagram. iterations order is very important !
+		""" Return the DEVS instance of diagram. iterations order is very important!
 				1. we make the codeblock devs instance
 				2. we make the devs port instance for all devsimpy port
 				3. we make Containerblock instance
-				4. we make the connnection
+				4. we make the connection
 		"""
 
 		#ReloadModule.recompile("DomainInterface.DomainBehavior")
 		#ReloadModule.recompile("DomainInterface.DomainStructure")
 
-		### if devs instance of diagram is not instancied, we make it
-		### else one simulation has been perfromed then we clear all devs port instances
+		### if devs instance of diagram is not instantiated, we make it
+		### else one simulation has been performed then we clear all devs port instances
 		if diagram.getDEVSModel() is None:
 			#ReloadModule.recompile("DomainInterface.MasterModel")
 			diagram.setDEVSModel(DomainInterface.MasterModel.Master())
@@ -365,17 +368,17 @@ class Diagram(Savable, Structurable):
 
 		### for all codeBlock shape, we make the devs instance
 		for m in block_list:
-			# creation des ports DEVS et des couplages pour la simulation
+			# Create DEVS ports and coupling for the simulation
 
 			cls = Components.GetClass(m.python_path)
 
 			if isinstance(cls, (ImportError, tuple)):
 				return _('Error making DEVS instances.\n %s'%(str(cls)))
 			else:
-				### recuperation du model DEVS
+				### Getting DEVS model
 				devs = getInstance(cls, m.args)
 
-				### test if the instanciation is safe
+				### test if the instantiation is safe
 				if isinstance(devs, tuple):
 					return devs
 
@@ -428,23 +431,29 @@ class Diagram(Savable, Structurable):
 
 			Structurable.ConnectDEVSPorts(diagram, p1, p2)
 
-		### change priority form priority_list is PriorityGUI has been invoked (Otherwise componentSet oreder is considered)
+		### change priority form priority_list is PriorityGUI has been invoked (Otherwise componentSet order is considered)
 		diagram.updateDEVSPriorityList()
 
 		return diagram.getDEVSModel()
 
 	def SetParent(self, parent):
+		""" Set parent
+		"""
 		assert isinstance(parent, ShapeCanvas)
 		self.parent =  parent
 
 	def GetParent(self):
+		""" Get parent
+		"""
 		return self.parent
 
 	def GetGrandParent(self):
+		""" Get grand parent
+		"""
 		return self.GetParent().GetParent()
 
 	@cond_decorator(__builtin__.__dict__['GUI_FLAG'], ProgressNotification("DEVSimPy open file"))
-	def LoadFile(self, fileName = None):
+	def LoadFile(self, fileName=None):
 		""" Function that load diagram from a file.
 		"""
 
@@ -711,7 +720,8 @@ class Diagram(Savable, Structurable):
 		""" Method that insert shape into the diagram at the position 'after'
 		"""
 
-		index = self.shapes.index(after) if after else 0
+		shapes = self.GetShapeList()
+		index = shapes.index(after) if after else 0
 		self.UpdateAddingCounter(shape)
 		self.InsertShape(shape, index)
 
@@ -719,7 +729,9 @@ class Diagram(Savable, Structurable):
 		""" Method that insert shape into the diagram to the index position
 		"""
 
-		self.shapes.insert(index, shape)
+		shapes = self.GetShapeList()
+		shapes.insert(index, shape)
+
 		self.modify = True
 		if self.parent:
 			self.parent.DiagramModified()
@@ -728,8 +740,10 @@ class Diagram(Savable, Structurable):
 		""" Method that delete all shape links
 		"""
 
+		shapes = self.GetShapeList()
+
 		### delete all shape connected with connection shape
-		for cs in filter(lambda c: isinstance(c, ConnectionShape), self.GetShapeList()):
+		for cs in filter(lambda c: isinstance(c, ConnectionShape), shapes):
 			if cs.input is not None and cs.output is not None:
 				if shape in cs.input+cs.output:
 					self.shapes.remove(cs)
@@ -793,8 +807,9 @@ class Diagram(Savable, Structurable):
 		""" Update method is invoked by notify method of Subject class
 		"""
 
+		shapes = self.GetShapeList()
 		### update shapes list in diagram with a delete of connexionShape which no longer exists (when QuickAttributeEditor change input or output of Block)
-		csList = filter(lambda a: isinstance(a, ConnectionShape), self.shapes)
+		csList = filter(lambda a: isinstance(a, ConnectionShape), shapes)
 
 		for cs in csList:
 			index = cs.output[1]
@@ -813,7 +828,8 @@ class Diagram(Savable, Structurable):
 		""" Function that pop the shape at the index position
 		"""
 
-		return self.shapes.pop(index)
+		shapes = self.GetShapeList()
+		return shapes.pop(index)
 
 	def DeleteAllShapes(self):
 		""" Method that delete all shapes
@@ -835,13 +851,13 @@ class Diagram(Savable, Structurable):
 		""" Function that return the number of shapes that composed the diagram
 		"""
 
-		return len(self.shapes)
+		return len(self.GetShapeList())
 
 	def GetFlatBlockShapeList(self, l=[]):
 		""" Get the flat list of Block shape using recursion process
 		"""
 
-		for shape in self.shapes:
+		for shape in self.GetShapeList():
 			if isinstance(shape, CodeBlock):
 				l.append(shape)
 			elif isinstance(shape, ContainerBlock):
@@ -965,6 +981,37 @@ class Diagram(Savable, Structurable):
 				l.append(m.label)
 				m.GetLabelList(l)
 		return l
+
+###-----------------------------------------------------------------------------
+
+class AbstractDiagram(Diagram, Abstractable):
+	""" Diagram with abstraction hierarchy
+	"""
+
+	def __init__(self):
+		""" Constructor
+		"""
+		Diagram.__init__(self)
+		Abstractable.__init__(self)
+
+	def LoadFile(self, fileName):
+		"""
+		"""
+		Diagram.LoadFile(self, fileName)
+		self.AddDiagram(self)
+
+	def LoadDiagram(self, level):
+		"""
+		"""
+		diagrams = self.GetDiagrams()
+		print level, diagrams
+		if level in diagrams:
+			dia = self.GetDiagram(level)
+			self.shapes = dia.GetShapes()
+			self.priority_list = dia.priority_list
+			self.constants_dico = dia.constants_dico
+		else:
+			print "New diagram at level %s"%level
 
 # Generic Shape Event Handler---------------------------------------------------
 class ShapeEvtHandler:
