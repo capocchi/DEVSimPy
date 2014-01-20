@@ -1,5 +1,4 @@
 __all__ = [
-		'verbose', 
-		'blink',
-		'DEVSBehaviorAssistant'
+		'verbose',
+		'blink'
 ]
