@@ -517,7 +517,7 @@ class MainApplication(wx.Frame):
 		self.tb = self.CreateToolBar( style = wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT, name = 'tb')
 		self.tb.SetToolBitmapSize((25,25)) # juste for windows
 
-		self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId()]
+		self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId()]
 
 		currentPage = self.nb2.GetCurrentPage()
 
@@ -540,10 +540,18 @@ class MainApplication(wx.Frame):
 						self.tb.AddTool(self.toggle_list[2], wx.Bitmap(os.path.join(ICON_PATH,'linear_connector.png')), shortHelpString=_('Linear'), longHelpString=_('Linear connector'), isToggle=True)
 					]
 
+		self.text = wx.TextCtrl(self.tb, value="0")
+		self.spin = wx.SpinButton(self.tb, self.toggle_list[3], style = wx.SP_VERTICAL)
+		self.spin.SetRange(0, 100)
+		self.spin.SetValue(0)
+		self.tb.AddControl(self.text)
+		self.tb.AddControl(self.spin)
+
 		self.tb.InsertSeparator(3)
 		self.tb.InsertSeparator(8)
 		self.tb.InsertSeparator(12)
 		self.tb.InsertSeparator(16)
+		self.tb.InsertSeparator(20)
 
 		### undo and redo button desabled
 		self.tb.EnableTool(wx.ID_UNDO, False)
@@ -569,6 +577,7 @@ class MainApplication(wx.Frame):
 		self.Bind(wx.EVT_TOOL, self.OnDirectConnector, self.tools[13])
 		self.Bind(wx.EVT_TOOL, self.OnSquareConnector, self.tools[14])
 		self.Bind(wx.EVT_TOOL, self.OnLinearConnector, self.tools[15])
+		self.Bind(wx.EVT_SPIN, self.OnSpin, self.spin)
 
 		self.tb.Realize()
 
@@ -636,8 +645,8 @@ class MainApplication(wx.Frame):
 		path = menuItem.GetItemLabel()
 		name = os.path.basename(path)
 
-		diagram = Container.Diagram()
-		#diagram.last_name_saved = path
+		diagram = Container.AbstractDiagram()
+
 		open_file_result = diagram.LoadFile(path)
 
 		if isinstance(open_file_result, Exception):
@@ -783,6 +792,23 @@ class MainApplication(wx.Frame):
 				## instead of wx.EVT_KILL_FOCUS here:
 				#win.Disconnect(-1, -1, wx.wxEVT_KILL_FOCUS)
 			#self.Destroy()
+
+	def OnSpin(self, event):
+		"""
+		"""
+
+		obj = event.GetEventObject()
+		### currentPage is given by the client data embeded in the save item on tool bar (which is the same of spin ;-))
+		currentPage = self.tb.GetToolClientData(wx.ID_SAVE) if isinstance(obj.GetTopLevelParent(), DetachedFrame) else self.nb2.GetCurrentPage()
+
+		### update text filed
+		val = event.GetPosition()
+		self.text.SetValue(str(val))
+
+		### update diagram
+		dia = currentPage.GetDiagram()
+		dia.SetCurrentLevel(val)
+		dia.LoadDiagram(val)
 
 	###
 	def OnZoom(self, event):

@@ -1,15 +1,24 @@
 # -*- coding: utf-8 -*-
 
-"""
-Name: Savable.py
-Brief descritpion:
-Author(s): L. Capocchi <capocchi@univ-corse.fr>, A-T. Luciani <atluciani@univ-corse.fr>
-Version:  1.0
-Last modified: 2012.04.04
-GENERAL NOTES AND REMARKS:
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+# Attributable.py ---
+#                     --------------------------------
+#                        Copyright (c) 2012
+#                       Laurent CAPOCCHI, A-T. Luciani
+#                      University of Corsica
+#                     --------------------------------
+# Version 1.0                                        last modified:2012.04.04
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GENERAL NOTES AND REMARKS:
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-GLOBAL VARIABLES AND FUNCTIONS:
-"""
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GLOBAL VARIABLES AND FUNCTIONS
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 import os
 import sys
@@ -348,7 +357,7 @@ class DumpGZipFile(DumpBase):
 	def Load(self, obj_loaded, fileName = None):
 		""" Function that save the dump on the disk with the filename.
 		"""
-		
+
 		# try to open f with compressed mode
 		try:
 			f = gzip.GzipFile(filename = fileName, mode='rb')
@@ -374,7 +383,7 @@ class DumpGZipFile(DumpBase):
 				setattr(obj_loaded, attr, dsp[i])
 
 			obj_loaded.last_name_saved = fileName
-			
+
 			return True
 
 ###-----------------------------------------------------------

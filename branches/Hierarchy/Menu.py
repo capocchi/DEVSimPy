@@ -39,7 +39,6 @@ ID_EXPORT = wx.NewId()
 ID_PREVIEW_PRINT = wx.ID_PREVIEW_PRINT
 ID_SCREEN_CAPTURE = wx.NewId()
 ID_PRINT = wx.ID_PRINT
-#ID_PAGE_SETUP = wx.NewId()
 
 # Recent file menu identifiers
 ID_RECENT = wx.NewId()
@@ -652,7 +651,7 @@ class ShapeCanvasPopupMenu(wx.Menu):
 		new = wx.MenuItem(self, ID_NEW_SHAPE, _('&New'), _('New model'))
 		paste = wx.MenuItem(self, ID_PASTE_SHAPE, _('&Paste\tCtrl+V'), _('Paste the model'))
 		add_constants = wx.MenuItem(self, ID_ADD_CONSTANTS, _('Add constants'), _('Add constants parameters'))
-		preview_dia = wx.MenuItem(self, ID_PREVIEW_PRINT, _('Print preview'), _('Print preveiw of the diagram'))
+		preview_dia = wx.MenuItem(self, ID_PREVIEW_PRINT, _('Print preview'), _('Print preview of the diagram'))
 
 		### bitmap item setting
 		new.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'new_model.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -709,7 +708,7 @@ class ShapePopupMenu(wx.Menu):
 		exportXML=wx.MenuItem(self, ID_EXPORT_XML_SHAPE, _("XML"), _("Model exported to a xml file"))
 		exportJS=wx.MenuItem(self, ID_EXPORT_JS_SHAPE, _("JS"), _("Model exported to a js (join) file"))
 		plugin = wx.MenuItem(self, ID_PLUGINS_SHAPE, _("Plugin"), _("Plugin manager"))
-		properties=wx.MenuItem(self, ID_PROPERTIES_SHAPE, _("Properties"), _("Edit the attributs"))
+		properties=wx.MenuItem(self, ID_PROPERTIES_SHAPE, _("Properties"), _("Edit the attributes"))
 
 		edit.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		editModel.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())

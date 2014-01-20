@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+encoding//Mixins/Abstractable.py=utf-8
 encoding//Mixins/Achievable.py=utf-8
 encoding//Mixins/Attributable.py=utf-8
 encoding//Mixins/Plugable.py=utf-8
@@ -7,3 +8,6 @@ encoding//Mixins/Savable.py=utf-8
 encoding//Mixins/Structurable.py=utf-8
 encoding/Components.py=utf-8
 encoding/Container.py=utf-8
+encoding/DetachedFrame.py=utf-8
+encoding/Menu.py=utf-8
+encoding/devsimpy.py=utf-8
