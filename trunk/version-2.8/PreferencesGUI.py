@@ -35,9 +35,9 @@ class GeneralPanel(wx.Panel):
 		wx.Panel.__init__(self, parent)
 
 		### FileBrowse
-		self.plugin_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Plug-ins directory:"), toolTip=_("Change the plug-ins directory"))
-		self.domain_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Library directory:"), toolTip=_("Change the library directory"))
-		self.out_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Output directory:"), toolTip=_("Change the output directory"))
+		self.plugin_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Plug-ins directory:"), toolTip=_("Change the plug-ins directory"), dialogTitle=_("Plugins directory..."))
+		self.domain_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Library directory:"), toolTip=_("Change the library directory"), dialogTitle=_("Libraries directory..."))
+		self.out_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Output directory:"), toolTip=_("Change the output directory"), dialogTitle=_("Output directory..."))
 
 		self.plugin_dir.SetValue(PLUGINS_PATH)
 		self.domain_dir.SetValue(DOMAIN_PATH)
