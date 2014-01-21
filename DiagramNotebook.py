@@ -99,7 +99,7 @@ class GeneralNotebook(Printable):
 		newPage = Container.ShapeCanvas(self, wx.NewId(), name=title)
 
 		### new diagram
-		d = defaultDiagram or Container.Diagram()
+		d = defaultDiagram or Container.AbstractDiagram()
 		d.SetParent(newPage)
 
 		### diagram and background newpage setting
@@ -125,7 +125,7 @@ class GeneralNotebook(Printable):
 
 		if self.GetPageCount() > 0:
 			canvas = self.GetPage(id)
-			diagram = canvas.diagram
+			diagram = canvas.GetDiagram()
 
 			diagram.DeleteAllShapes()
 			diagram.modified = True

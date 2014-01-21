@@ -42,13 +42,13 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		""" Constructor.
 
 			@parent : window parent of the frame
-			@ID : ID fof the frame
+			@ID : ID of the frame
 			@title : title of the frame
-			@diagram : diagram includ in the canvas embeded in the frame
+			@diagram : diagram included in the canvas embedded in the frame
 			@name : name of the frame
 		"""
 
-		### inherite call
+		### inherit call
 		wx.Frame.__init__(      self,
 								parent,
 								ID,
@@ -81,13 +81,13 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 
 		### Menu ToolBar
 		toolbar = wx.ToolBar(self, wx.ID_ANY, name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
-		toolbar.SetToolBitmapSize((25,25)) # juste for windows
+		toolbar.SetToolBitmapSize((25,25)) # just for windows
 
 		if self.parent:
 			self.toggle_list = wx.GetApp().GetTopWindow().toggle_list
 		else:
 			sys.stdout.write(_('Alone mode for DetachedFrame: Connector buttons are not binded\n'))
-			self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId()]
+			self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId()]
 
 		self.tools = [  toolbar.AddTool(Menu.ID_SAVE, wx.Bitmap(os.path.join(ICON_PATH,'save.png')), shortHelpString=_('Save File') ,longHelpString=_('Save the current diagram'), clientData=self.canvas),
 										toolbar.AddTool(Menu.ID_SAVEAS, wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')), shortHelpString=_('Save File As'), longHelpString=_('Save the diagram with an another name'), clientData=self.canvas),
@@ -113,8 +113,12 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 
 		toolbar.ToggleTool(self.toggle_list[0],1)
 
-		self.text = wx.TextCtrl(toolbar, value="0")
-		self.spin = wx.SpinButton(toolbar, self.toggle_list[3], style = wx.SP_VERTICAL)
+		self.text = wx.TextCtrl(toolbar, self.toggle_list[3], size=(30, -1))
+
+		### TODO link with toolbar of main frame
+		self.text.SetValue("0")
+
+		self.spin = wx.SpinButton(toolbar, self.toggle_list[4], style = wx.SP_VERTICAL)
 		self.spin.SetRange(0, 100)
 		self.spin.SetValue(0)
 		toolbar.AddControl(self.text)
@@ -123,7 +127,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		toolbar.Realize()
 
 		### if Detached frame from block (container or Code)
-		### save, save-as and simulation are desabled
+		### save, save-as and simulation are disabled
 		if not isinstance(self.parent, Container.ShapeCanvas):
 			toolbar.EnableTool(Menu.ID_SAVE, False)
 			toolbar.EnableTool(Menu.ID_SAVEAS, False)
