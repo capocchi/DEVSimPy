@@ -277,7 +277,7 @@ class MainApplication(wx.Frame):
 		### load .dsp or empty on empty diagram
 		if len(sys.argv) >= 2:
 			for arg in map(os.path.abspath, filter(lambda a :a.endswith('.dsp'), sys.argv[1:])):
-				diagram = Container.Diagram()
+				diagram = Container.AbstractDiagram()
 				#diagram.last_name_saved = arg
 				name = os.path.basename(arg)
 				if not isinstance(diagram.LoadFile(arg), Exception):
@@ -517,7 +517,7 @@ class MainApplication(wx.Frame):
 		self.tb = self.CreateToolBar( style = wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT, name = 'tb')
 		self.tb.SetToolBitmapSize((25,25)) # juste for windows
 
-		self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId()]
+		self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId()]
 
 		currentPage = self.nb2.GetCurrentPage()
 
@@ -540,8 +540,8 @@ class MainApplication(wx.Frame):
 						self.tb.AddTool(self.toggle_list[2], wx.Bitmap(os.path.join(ICON_PATH,'linear_connector.png')), shortHelpString=_('Linear'), longHelpString=_('Linear connector'), isToggle=True)
 					]
 
-		self.text = wx.TextCtrl(self.tb, value="0")
-		self.spin = wx.SpinButton(self.tb, self.toggle_list[3], style = wx.SP_VERTICAL)
+		self.text = wx.TextCtrl(self.tb, self.toggle_list[3], value="0", size=(30, -1))
+		self.spin = wx.SpinButton(self.tb, self.toggle_list[4], style = wx.SP_VERTICAL)
 		self.spin.SetRange(0, 100)
 		self.spin.SetValue(0)
 		self.tb.AddControl(self.text)
@@ -577,7 +577,7 @@ class MainApplication(wx.Frame):
 		self.Bind(wx.EVT_TOOL, self.OnDirectConnector, self.tools[13])
 		self.Bind(wx.EVT_TOOL, self.OnSquareConnector, self.tools[14])
 		self.Bind(wx.EVT_TOOL, self.OnLinearConnector, self.tools[15])
-		self.Bind(wx.EVT_SPIN, self.OnSpin, self.spin)
+		self.Bind(wx.EVT_SPIN, self.OnSpin, id=self.toggle_list[4])
 
 		self.tb.Realize()
 
@@ -797,13 +797,23 @@ class MainApplication(wx.Frame):
 		"""
 		"""
 
-		obj = event.GetEventObject()
+		### spin control object
+		spin = event.GetEventObject()
+
+		### get toolbar dynamically from frame
+		tb = spin.GetParent()
+
 		### currentPage is given by the client data embeded in the save item on tool bar (which is the same of spin ;-))
-		currentPage = self.tb.GetToolClientData(wx.ID_SAVE) if isinstance(obj.GetTopLevelParent(), DetachedFrame) else self.nb2.GetCurrentPage()
+		currentPage = tb.GetToolClientData(wx.ID_SAVE) if isinstance(spin.GetTopLevelParent(), DetachedFrame) else self.nb2.GetCurrentPage()
 
 		### update text filed
 		val = event.GetPosition()
-		self.text.SetValue(str(val))
+
+		### text control object from its unique id
+		for obj in [tb, self.GetToolBar()]:
+			text = obj.FindControl(self.toggle_list[3])
+			if text:
+				text.SetValue(str(val))
 
 		### update diagram
 		dia = currentPage.GetDiagram()
