@@ -42,13 +42,13 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		""" Constructor.
 
 			@parent : window parent of the frame
-			@ID : ID fof the frame
+			@ID : ID of the frame
 			@title : title of the frame
-			@diagram : diagram includ in the canvas embeded in the frame
+			@diagram : diagram included in the canvas embedded in the frame
 			@name : name of the frame
 		"""
 
-		### inherite call
+		### inherit call
 		wx.Frame.__init__(      self,
 								parent,
 								ID,
@@ -81,7 +81,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 
 		### Menu ToolBar
 		toolbar = wx.ToolBar(self, wx.ID_ANY, name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
-		toolbar.SetToolBitmapSize((25,25)) # juste for windows
+		toolbar.SetToolBitmapSize((25,25)) # just for windows
 
 		if self.parent:
 			self.toggle_list = wx.GetApp().GetTopWindow().toggle_list
@@ -114,7 +114,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		toolbar.Realize()
 
 		### if Detached frame from block (container or Code)
-		### save, save-as and simulation are desabled
+		### save, save-as and simulation are disabled
 		if not isinstance(self.parent, Container.ShapeCanvas):
 			toolbar.EnableTool(Menu.ID_SAVE, False)
 			toolbar.EnableTool(Menu.ID_SAVEAS, False)
@@ -146,7 +146,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		"""
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 
-		### Transparent managment when the frame is moving
+		### Transparent management when the frame is moving
 		self.Bind(wx.EVT_IDLE, self.OnIdle)
 		self.Bind(wx.EVT_MOVE, self.OnMove)
 
@@ -155,7 +155,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			#self.Bind(wx.EVT_TOOL, parent.OnSaveFile, id=Menu.ID_SAVE)
 
 	def OnMove(self, event):
-		""" Transparence manager
+		""" alpha manager
 		"""
 		if self.transparent == wx.ALPHA_OPAQUE:
 			self.transparent = 140
@@ -166,7 +166,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		event.Skip()
 
 	def OnIdle(self, event):
-		""" Transparence manager
+		""" alpha manager
 		"""
 		if self.transparent == 140:
 			self.transparent = wx.ALPHA_OPAQUE
