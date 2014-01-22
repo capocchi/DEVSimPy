@@ -45,6 +45,7 @@ import copy
 import os
 import sys
 import time
+import re
 import gettext
 import __builtin__
 import webbrowser
@@ -503,7 +504,7 @@ class MainApplication(wx.Frame):
 		self.SetMenuBar(self.menuBar)
 
 		### bind menu that require update on open and close event (forced to implement the binding here !)
-		for menu,title in filter(lambda c : c[-1] in ('File', 'Fichier', 'Options'), self.menuBar.GetMenus()):
+		for menu,title in filter(lambda c : re.search("(File|Fichier|Options)", c[-1]) != None, self.menuBar.GetMenus()):
 			self.Bind(wx.EVT_MENU_OPEN, self.menuBar.OnOpenMenu)
 			#self.Bind(wx.EVT_MENU_CLOSE, self.menuBar.OnCloseMenu)
 
