@@ -114,13 +114,15 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		toolbar.ToggleTool(self.toggle_list[0],1)
 
 		self.text = wx.TextCtrl(toolbar, self.toggle_list[3], size=(30, -1))
-
-		### TODO link with toolbar of main frame
-		self.text.SetValue("0")
-
 		self.spin = wx.SpinButton(toolbar, self.toggle_list[4], style = wx.SP_VERTICAL)
 		self.spin.SetRange(0, 100)
-		self.spin.SetValue(0)
+
+		### current abstract level
+		level = diagram.GetCurrentLevel()
+		### update of text and spin control
+		self.text.SetValue(str(level))
+		self.spin.SetValue(level)
+
 		toolbar.AddControl(self.text)
 		toolbar.AddControl(self.spin)
 

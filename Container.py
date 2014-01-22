@@ -3542,7 +3542,7 @@ class CodeBlock(Block, Achievable):
 		return s
 
 #---------------------------------------------------------
-class ContainerBlock(Block, Diagram, Structurable):
+class ContainerBlock(Block, AbstractDiagram, Structurable):
 	""" ContainerBlock(label, inputs, outputs)
 	"""
 
@@ -3551,7 +3551,7 @@ class ContainerBlock(Block, Diagram, Structurable):
 		""" Constructor
 		"""
 		Block.__init__(self, label, nb_inputs, nb_outputs)
-		Diagram.__init__(self)
+		AbstractDiagram.__init__(self)
 		Structurable.__init__(self)
 		self.fill = ['#90ee90']
 

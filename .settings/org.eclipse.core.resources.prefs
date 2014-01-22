@@ -11,4 +11,5 @@ encoding/Container.py=utf-8
 encoding/DetachedFrame.py=utf-8
 encoding/DiagramNotebook.py=utf-8
 encoding/Menu.py=utf-8
+encoding/WizardGUI.py=utf-8
 encoding/devsimpy.py=utf-8
