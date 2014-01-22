@@ -185,15 +185,15 @@ class GeneralNotebook(Printable):
 				self.parent.tb.EnableTool(wx.ID_UNDO, not len(canvas.stockUndo) == 0)
 				self.parent.tb.EnableTool(wx.ID_REDO, not len(canvas.stockRedo) == 0)
 
-				#===============================================================
-				# ### update spin control
-				# t = self.parent.tb.FindControl(self.parent.toggle_list[3])
-				# s = self.parent.tb.FindControl(self.parent.toggle_list[4])
-				# if t:
-				# 	l = diagram.GetCurrentLevel()
-				# 	t.SetValue(str(l))
-				# 	s.SetValue(l)
-				#===============================================================
+
+				### update spin control
+				t = self.parent.tb.FindControl(self.parent.toggle_list[3])
+				s = self.parent.tb.FindControl(self.parent.toggle_list[4])
+				if t:
+					l = canvas.GetCurrentLevel()
+					t.SetValue(str(l))
+					s.SetValue(l)
+
 
 			### refresh canvas
 			canvas.deselect()
@@ -256,7 +256,7 @@ if USE_FLATNOTEBOOK:
 			self.SetRightClickMenu(self._rmenu)
 
 		def CreateRightClickMenu(self):
-			""" Right clic has been invoqued and contectual menu is displayed.
+			""" Right click has been invoked and contextual menu is displayed.
 			"""
 
 			self._rmenu = Menu.DiagramTabPopupMenu(self)
@@ -274,7 +274,7 @@ if USE_FLATNOTEBOOK:
 		###
 		def OnClosingPage(self, evt):
 			""" Called when tab is closed.
-				With FlatNoteBokk, this method is used to ask if diagram should be saved and to udpate properties panel
+				With FlatNoteBokk, this method is used to ask if diagram should be saved and to update properties panel
 			"""
 
 			id = self.GetSelection()
@@ -285,7 +285,7 @@ if USE_FLATNOTEBOOK:
 
 			if diagram.modify:
 				title = self.GetPageText(id)
-				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram ?')%(title), title, wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
+				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram?')%(title), title, wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
 				val = dlg.ShowModal()
 				if val == wx.ID_YES:
 					mainW.OnSaveFile(evt)
