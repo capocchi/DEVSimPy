@@ -131,12 +131,22 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 
 		toolbar.Realize()
 
-		### if Detached frame from block (container or Code)
+		### if Detached frame from block (container)
 		### save, save-as and simulation are disabled
 		if not isinstance(self.parent, Container.ShapeCanvas):
 			toolbar.EnableTool(Menu.ID_SAVE, False)
 			toolbar.EnableTool(Menu.ID_SAVEAS, False)
 			toolbar.EnableTool(Menu.ID_SIM_DIAGRAM, False)
+		else:
+
+			###To acquire level from main toolbar only of is detached frame from tab
+			### only possible due to the common toogle_list (shared id)
+			main_tb = wx.GetApp().GetTopWindow().GetToolBar()
+			t = main_tb.FindControl(self.toggle_list[3])
+			s = main_tb.FindControl(self.toggle_list[4])
+			if t:
+				self.text.SetValue(str(t.GetValue()))
+				self.spin.SetValue(s.GetValue())
 
 		### Call Printable constructor
 		PrintOut.Printable.__init__(self, self.canvas)
