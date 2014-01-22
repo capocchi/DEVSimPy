@@ -13,5 +13,6 @@ encoding/DiagramNotebook.py=utf-8
 encoding/DragList.py=utf-8
 encoding/DropTarget.py=utf-8
 encoding/Menu.py=utf-8
+encoding/PlotGUI.py=utf-8
 encoding/WizardGUI.py=utf-8
 encoding/devsimpy.py=utf-8

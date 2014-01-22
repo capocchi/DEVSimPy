@@ -800,7 +800,7 @@ class MainApplication(wx.Frame):
 			#self.Destroy()
 
 	def OnSpin(self, event):
-		"""
+		""" Spin button has been invoked (on the toolbar of the main windows or detached frame)
 		"""
 
 		### spin control object
@@ -811,9 +811,6 @@ class MainApplication(wx.Frame):
 
 		### main frame of spin control
 		frame = spin.GetTopLevelParent()
-
-		### currentPage is given by the client data embeded in the save item on tool bar (which is the same of spin ;-))
-		currentPage = tb.GetToolClientData(wx.ID_SAVE) if isinstance(frame, DetachedFrame) else self.nb2.GetCurrentPage()
 
 		### update text filed
 		val = spin.GetValue()
@@ -833,7 +830,13 @@ class MainApplication(wx.Frame):
 				s.SetValue(val)
 
 		### update diagram
-		currentPage.LoadDiagram(val)
+		### currentPage is given by the client data embeded in the save item on tool bar (which is the same of spin ;-))
+		L = [tb.GetToolClientData(wx.ID_SAVE)]
+		if isinstance(frame.GetParent(), Container.ShapeCanvas):
+			L.append(self.nb2.GetCurrentPage())
+
+		for canvas in L:
+			canvas.LoadDiagram(val)
 
 	###
 	def OnZoom(self, event):

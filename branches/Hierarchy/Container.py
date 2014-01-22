@@ -982,66 +982,6 @@ class Diagram(Savable, Structurable):
 				m.GetLabelList(l)
 		return l
 
-###-----------------------------------------------------------------------------
-
-class AbstractDiagram(Diagram, Abstractable):
-	""" Diagram with abstraction hierarchy
-	"""
-
-	def __init__(self):
-		""" Constructor
-		"""
-		Diagram.__init__(self)
-		Abstractable.__init__(self)
-
-		self.AddDiagram(self)
-
-	def LoadFile(self, fileName):
-		"""
-		"""
-		Diagram.LoadFile(self, fileName)
-		self.AddDiagram(self)
-
-	def LoadDiagram(self, level):
-		"""
-		"""
-		diagrams = self.GetDiagrams()
-		canvas = self.GetParent()
-
-		self.DeleteAllShapes()
-		self.modified = True
-
-		#canvas.deselect()
-		canvas.Refresh()
-
-		print "current level is", level, diagrams
-
-		if level in diagrams:
-			if level != self.current_level:
-				dia = self.GetDiagram(level)
-
-				self.SetCurrentLevel(level)
-
-				self.shapes = dia.GetShapeList()
-				self.priority_list = dia.priority_list
-				self.constants_dico = dia.constants_dico
-
-				print "load diagram %d"%level
-
-				### diagram and background new page setting
-				canvas.SetDiagram(dia)
-				canvas.deselect()
-				canvas.Refresh()
-				print self.shapes, self.diagrams
-
-		else:
-			d = AbstractDiagram()
-			d.SetParent(canvas)
-
-			self.ReplaceDiagram(d, level)
-
-			print "New diagram at level %s"%level, self.diagrams
-
 # Generic Shape Event Handler---------------------------------------------------
 class ShapeEvtHandler:
 	""" Handler class
@@ -1365,14 +1305,14 @@ class ShapeCanvas(wx.ScrolledWindow, Abstractable, Subject):
 		"""
 
 		wx.ScrolledWindow.__init__(self, parent, id, pos, size, style, name)
-		Abstractable.__init__(self)
+		Abstractable.__init__(self, diagram)
 		Subject.__init__(self)
 
 		self.SetBackgroundColour(wx.WHITE)
 
 		self.name = name
 		self.parent = parent
-		self.diagram = diagram
+		#self.diagram = diagram
 		self.nodes = []
 		self.currentPoint = [0, 0] # x and y of last mouse click
 		self.selectedShapes = []
@@ -1569,11 +1509,11 @@ class ShapeCanvas(wx.ScrolledWindow, Abstractable, Subject):
 				self.select(item)
 			event.Skip()
 		elif key == 82 and controlDown:  # Rotate model on the right
-			for s in filter(lambda shape: not isinstance(shape,ConnectionShape),self.selectedShapes):
+			for s in filter(lambda shape: not isinstance(shape, ConnectionShape), self.selectedShapes):
 				s.OnRotateR(event)
 			event.Skip()
 		elif key == 76 and controlDown:  # Rotate model on the left
-			for s in filter(lambda shape: not isinstance(shape,ConnectionShape),self.selectedShapes):
+			for s in filter(lambda shape: not isinstance(shape, ConnectionShape), self.selectedShapes):
 				s.OnRotateL(event)
 			event.Skip()
 		elif key == 9: # TAB
@@ -2478,19 +2418,15 @@ class ShapeCanvas(wx.ScrolledWindow, Abstractable, Subject):
 
 		self.DiagramModified()
 
-	def SetDiagram(self, diagram, abs_level = 0):
-		""" Set the diagram with abstraction hierarchy level
-		"""
-		self.diagrams.update({abs_level:diagram})
-		self.diagram = diagram
+# 	def SetDiagram(self, diagram):
+# 		""" Set the diagram
+# 		"""
+# 		self.diagram = diagram
 
-	def GetDiagram(self, abs_level=None):
-		""" Return Diagram instance depending on the abstraction hierarchy level
-		"""
-		if abs_level:
-			return self.diagrams[abs_level]
-		else:
-			return self.diagram
+ 	def GetDiagram(self):
+ 		""" Return Diagram instance
+ 		"""
+		return self.diagram
 
 	def getCurrentShape(self, event):
 		"""
@@ -3577,7 +3513,7 @@ class CodeBlock(Block, Achievable):
 		return s
 
 #---------------------------------------------------------
-class ContainerBlock(Block, Structurable):
+class ContainerBlock(Block, Diagram, Structurable):
 	""" ContainerBlock(label, inputs, outputs)
 	"""
 
@@ -3587,6 +3523,7 @@ class ContainerBlock(Block, Structurable):
 		"""
 		Block.__init__(self, label, nb_inputs, nb_outputs)
 		Structurable.__init__(self)
+		Diagram.__init__(self)
 		self.fill = ['#90ee90']
 
 	###
