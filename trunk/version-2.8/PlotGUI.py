@@ -137,7 +137,7 @@ class PlotFrame(wx.Frame):
 		self.enableDrag = enable_submenu.Append(wx.NewId(), _('Drag'), _('Enable drag'), kind=wx.ITEM_CHECK)
 		self.enableLegend = enable_submenu.Append(wx.NewId(), _('&Legend'), _('Turn on legend'), kind=wx.ITEM_CHECK)
 		self.enablePointLabel = enable_submenu.Append(wx.NewId(), _('&Point Label'), _('Show closest point'), kind=wx.ITEM_CHECK)
-		self.normalize = enable_submenu.Append(wx.NewId(), _('Normalize'), _('Normalize Y axis'), kind=wx.ITEM_CHECK)
+		self.norm = enable_submenu.Append(wx.NewId(), _('Normalize'), _('Normalize Y axis'), kind=wx.ITEM_CHECK)
 		menu.AppendMenu(wx.NewId(), _('Enable'), enable_submenu)
 
 		setTitle = menu.Append(wx.NewId(), _('Set Title'), _('Define title'))
@@ -168,7 +168,7 @@ class PlotFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU,self.OnEnableDrag, self.enableDrag)
 		self.Bind(wx.EVT_MENU,self.OnEnableLegend, self.enableLegend)
 		self.Bind(wx.EVT_MENU,self.OnEnablePointLabel, self.enablePointLabel)
-		self.Bind(wx.EVT_MENU,self.OnEnableNormalize, self.normalize)
+		self.Bind(wx.EVT_MENU,self.OnEnableNormalize, self.norm)
 		self.Bind(wx.EVT_MENU,self.OnTitleSetting, setTitle)
 		self.Bind(wx.EVT_MENU,self.OnXLabelSetting, setXLabel)
 		self.Bind(wx.EVT_MENU,self.OnYLabelSetting, setYLabel)
@@ -211,7 +211,7 @@ class PlotFrame(wx.Frame):
 		legendLabel, legendId = self.enableLegend.GetLabel(), self.enableLegend.GetId()
 		dragLabel, dragId = self.enableDrag.GetLabel(), self.enableDrag.GetId()
 		pointLabel, pointId = self.enablePointLabel.GetLabel(), self.enablePointLabel.GetId()
-		normalizedLabel, normalizedId = self.normalize.GetLabel(), self.normalize.GetId()
+		normalizedLabel, normalizedId = self.norm.GetLabel(), self.norm.GetId()
 
 		tb.AddCheckLabelTool(zoomId, zoomLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-zoom.png')), shortHelp=_('Enable zoom'), longHelp='')
 		tb.AddCheckLabelTool(titleId, titleLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-title.png')), shortHelp=_('Enable title'), longHelp='')
