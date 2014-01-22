@@ -810,7 +810,7 @@ class MainApplication(wx.Frame):
 		tb = spin.GetParent()
 
 		### main frame of spin control
-		frame = spin.GetTopLevelParent()
+		frame = tb.GetTopLevelParent()
 
 		### update text filed
 		val = spin.GetValue()
@@ -831,9 +831,10 @@ class MainApplication(wx.Frame):
 
 		### update diagram
 		### currentPage is given by the client data embeded in the save item on tool bar (which is the same of spin ;-))
-		L = [tb.GetToolClientData(wx.ID_SAVE)]
-		if isinstance(frame.GetParent(), Container.ShapeCanvas):
-			L.append(self.nb2.GetCurrentPage())
+		if isinstance(frame, DetachedFrame) and isinstance(frame.GetParent(), Container.ShapeCanvas):
+			L = [tb.GetToolClientData(wx.ID_SAVE), self.nb2.GetCurrentPage()]
+		else:
+			L = [self.nb2.GetCurrentPage()]
 
 		for canvas in L:
 			canvas.LoadDiagram(val)

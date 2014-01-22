@@ -37,7 +37,10 @@ class Abstractable:
         self.diagram = dia
 
         ### dico of diagram
-        self.diagrams = {0:dia}
+        if hasattr(dia,'diagrams'):
+            self.diagrams = dia.diagrams
+        else:
+            self.diagrams = {0:dia}
 
     def SetDiagram(self, diagram):
         """ Set the diagram
@@ -130,5 +133,6 @@ class Abstractable:
             print "New diagram at level %s"%level, self.diagrams
 
         canvas.diagram = dia
+        canvas.diagram.diagrams = self.diagrams
         canvas.deselect()
         canvas.Refresh()
