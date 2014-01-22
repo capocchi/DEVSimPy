@@ -109,7 +109,7 @@ class DSPComponent:
 		#assert(filename.endswith('.dsp'))
 
 		# its possible to use the orignal copy of the droped diagram
-		dial = wx.MessageDialog(canvas, _('Do you want to open the orignal diagram in a new tab?'), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		dial = wx.MessageDialog(canvas, _('Do you want to open the original diagram in a new tab?'), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
 		new_tab = dial.ShowModal() == wx.ID_YES
 
@@ -119,7 +119,7 @@ class DSPComponent:
 		else:
 			diagram = canvas.GetDiagram()
 
-		### if diagram is instanciated
+		### if diagram is instantiated
 		if diagram:
 			load_file_result = diagram.LoadFile(filename)
 

@@ -45,6 +45,7 @@ import copy
 import os
 import sys
 import time
+import re
 import gettext
 import __builtin__
 import webbrowser
@@ -277,7 +278,7 @@ class MainApplication(wx.Frame):
 		### load .dsp or empty on empty diagram
 		if len(sys.argv) >= 2:
 			for arg in map(os.path.abspath, filter(lambda a :a.endswith('.dsp'), sys.argv[1:])):
-				diagram = Container.AbstractDiagram()
+				diagram = Container.Diagram()
 				#diagram.last_name_saved = arg
 				name = os.path.basename(arg)
 				if not isinstance(diagram.LoadFile(arg), Exception):
@@ -503,7 +504,8 @@ class MainApplication(wx.Frame):
 		self.SetMenuBar(self.menuBar)
 
 		### bind menu that require update on open and close event (forced to implement the binding here !)
-		for menu,title in filter(lambda c : c[-1] in ('File', 'Fichier', 'Options'), self.menuBar.GetMenus()):
+		for menu,title in filter(lambda c : re.search("(File|Fichier|Options)", c[-1]) != None, self.menuBar.GetMenus()):
+
 			self.Bind(wx.EVT_MENU_OPEN, self.menuBar.OnOpenMenu)
 			#self.Bind(wx.EVT_MENU_CLOSE, self.menuBar.OnCloseMenu)
 
@@ -541,7 +543,7 @@ class MainApplication(wx.Frame):
 					]
 
 		diagram = currentPage.GetDiagram()
-		level = diagram.GetCurrentLevel()
+		level = currentPage.GetCurrentLevel()
 
 		self.text = wx.TextCtrl(self.tb, self.toggle_list[3], value=str(level), size=(30, -1))
 		self.spin = wx.SpinButton(self.tb, self.toggle_list[4], style = wx.SP_VERTICAL)
@@ -648,7 +650,7 @@ class MainApplication(wx.Frame):
 		path = menuItem.GetItemLabel()
 		name = os.path.basename(path)
 
-		diagram = Container.AbstractDiagram()
+		diagram = Container.Diagram()
 		#diagram = Container.Diagram()
 
 		open_file_result = diagram.LoadFile(path)
@@ -807,25 +809,31 @@ class MainApplication(wx.Frame):
 		### get toolbar dynamically from frame
 		tb = spin.GetParent()
 
+		### main frame of spin control
+		frame = spin.GetTopLevelParent()
+
 		### currentPage is given by the client data embeded in the save item on tool bar (which is the same of spin ;-))
-		currentPage = tb.GetToolClientData(wx.ID_SAVE) if isinstance(spin.GetTopLevelParent(), DetachedFrame) else self.nb2.GetCurrentPage()
+		currentPage = tb.GetToolClientData(wx.ID_SAVE) if isinstance(frame, DetachedFrame) else self.nb2.GetCurrentPage()
 
 		### update text filed
 		val = spin.GetValue()
 
+		### list of spin control to update
+		L = [tb]
+		### if spin control coming from DetachedFrame of notebooktab
+		if isinstance(frame.GetParent(), Container.ShapeCanvas):
+			L.append(self.GetToolBar())
 
 		### text control object from its unique id
-		for obj in [tb, self.GetToolBar()]:
-			main_text = obj.FindControl(self.toggle_list[3])
-			main_spin = obj.FindControl(self.toggle_list[4])
-			if main_text:
-				main_text.SetValue(str(val))
-				main_spin.SetValue(val)
+		for obj in L:
+			t = obj.FindControl(self.toggle_list[3])
+			s = obj.FindControl(self.toggle_list[4])
+			if t:
+				t.SetValue(str(val))
+				s.SetValue(val)
 
 		### update diagram
-		dia = currentPage.GetDiagram()
-		dia.SetCurrentLevel(val)
-		dia.LoadDiagram(val)
+		currentPage.LoadDiagram(val)
 
 	###
 	def OnZoom(self, event):

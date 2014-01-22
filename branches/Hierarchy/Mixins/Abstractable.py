@@ -59,7 +59,7 @@ class Abstractable:
     def NextLevel(self):
         """ return the last depth abstract level
         """
-        return self.GetLevelLenght()+1
+        return self.GetLevelLenght()
 
     def GetLevelLenght(self):
         """
@@ -77,7 +77,8 @@ class Abstractable:
     def ReplaceDiagram(self, dia, level):
         """ Replace the diagram
         """
-        if level in self.diagram:
+        if level in self.diagrams:
             self.diagrams.update({level:dia})
         else:
             self.diagrams[level] = dia
+
