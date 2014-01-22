@@ -540,10 +540,13 @@ class MainApplication(wx.Frame):
 						self.tb.AddTool(self.toggle_list[2], wx.Bitmap(os.path.join(ICON_PATH,'linear_connector.png')), shortHelpString=_('Linear'), longHelpString=_('Linear connector'), isToggle=True)
 					]
 
-		self.text = wx.TextCtrl(self.tb, self.toggle_list[3], value="0", size=(30, -1))
+		diagram = currentPage.GetDiagram()
+		level = diagram.GetCurrentLevel()
+
+		self.text = wx.TextCtrl(self.tb, self.toggle_list[3], value=str(level), size=(30, -1))
 		self.spin = wx.SpinButton(self.tb, self.toggle_list[4], style = wx.SP_VERTICAL)
 		self.spin.SetRange(0, 100)
-		self.spin.SetValue(0)
+		self.spin.SetValue(level)
 		self.tb.AddControl(self.text)
 		self.tb.AddControl(self.spin)
 
@@ -646,6 +649,7 @@ class MainApplication(wx.Frame):
 		name = os.path.basename(path)
 
 		diagram = Container.AbstractDiagram()
+		#diagram = Container.Diagram()
 
 		open_file_result = diagram.LoadFile(path)
 
@@ -807,13 +811,16 @@ class MainApplication(wx.Frame):
 		currentPage = tb.GetToolClientData(wx.ID_SAVE) if isinstance(spin.GetTopLevelParent(), DetachedFrame) else self.nb2.GetCurrentPage()
 
 		### update text filed
-		val = event.GetPosition()
+		val = spin.GetValue()
+
 
 		### text control object from its unique id
 		for obj in [tb, self.GetToolBar()]:
-			text = obj.FindControl(self.toggle_list[3])
-			if text:
-				text.SetValue(str(val))
+			main_text = obj.FindControl(self.toggle_list[3])
+			main_spin = obj.FindControl(self.toggle_list[4])
+			if main_text:
+				main_text.SetValue(str(val))
+				main_spin.SetValue(val)
 
 		### update diagram
 		dia = currentPage.GetDiagram()
