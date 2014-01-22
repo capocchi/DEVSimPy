@@ -113,18 +113,21 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 
 		toolbar.ToggleTool(self.toggle_list[0],1)
 
-		self.text = wx.TextCtrl(toolbar, self.toggle_list[3], size=(30, -1))
-		self.spin = wx.SpinButton(toolbar, self.toggle_list[4], style = wx.SP_VERTICAL)
-		self.spin.SetRange(0, 100)
+		### spin control for abstraction hierarchy
+		if isinstance(diagram, Container.Diagram):
+			self.text = wx.TextCtrl(toolbar, self.toggle_list[3], size=(30, -1))
+			self.spin = wx.SpinButton(toolbar, self.toggle_list[4], style = wx.SP_VERTICAL)
+			self.spin.SetRange(0, 100)
 
-		### current abstract level
-		level = diagram.GetCurrentLevel()
-		### update of text and spin control
-		self.text.SetValue(str(level))
-		self.spin.SetValue(level)
+			### current abstract level
+			#level = diagram.GetCurrentLevel()
+			level = 0
+			### update of text and spin control
+			self.text.SetValue(str(level))
+			self.spin.SetValue(level)
 
-		toolbar.AddControl(self.text)
-		toolbar.AddControl(self.spin)
+			toolbar.AddControl(self.text)
+			toolbar.AddControl(self.spin)
 
 		toolbar.Realize()
 
@@ -170,7 +173,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			#self.Bind(wx.EVT_TOOL, parent.OnSaveFile, id=Menu.ID_SAVE)
 
 	def OnMove(self, event):
-		""" Transparence manager
+		""" alpha manager
 		"""
 		if self.transparent == wx.ALPHA_OPAQUE:
 			self.transparent = 140
@@ -181,7 +184,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		event.Skip()
 
 	def OnIdle(self, event):
-		""" Transparence manager
+		""" alpha manager
 		"""
 		if self.transparent == 140:
 			self.transparent = wx.ALPHA_OPAQUE
@@ -215,7 +218,7 @@ class TestApp(wx.App):
 
 
 		#__builtin__.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
-		#__builtin__.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy4', 'distribued':'SimStrategy5', 'parallel':'SimStrategy6'}
+		#__builtin__.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}
 
 		__builtin__.__dict__['NB_HISTORY_UNDO'] = 5
 		__builtin__.__dict__['ICON_PATH']='icons'

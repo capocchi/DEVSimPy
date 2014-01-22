@@ -994,6 +994,8 @@ class AbstractDiagram(Diagram, Abstractable):
 		Diagram.__init__(self)
 		Abstractable.__init__(self)
 
+		self.AddDiagram(self)
+
 	def LoadFile(self, fileName):
 		"""
 		"""
@@ -1004,14 +1006,41 @@ class AbstractDiagram(Diagram, Abstractable):
 		"""
 		"""
 		diagrams = self.GetDiagrams()
-		print level, diagrams
+		canvas = self.GetParent()
+
+		self.DeleteAllShapes()
+		self.modified = True
+
+		#canvas.deselect()
+		canvas.Refresh()
+
+		print "current level is", level, diagrams
+
 		if level in diagrams:
-			dia = self.GetDiagram(level)
-			self.shapes = dia.GetShapes()
-			self.priority_list = dia.priority_list
-			self.constants_dico = dia.constants_dico
+			if level != self.current_level:
+				dia = self.GetDiagram(level)
+
+				self.SetCurrentLevel(level)
+
+				self.shapes = dia.GetShapeList()
+				self.priority_list = dia.priority_list
+				self.constants_dico = dia.constants_dico
+
+				print "load diagram %d"%level
+
+				### diagram and background new page setting
+				canvas.SetDiagram(dia)
+				canvas.deselect()
+				canvas.Refresh()
+				print self.shapes, self.diagrams
+
 		else:
-			print "New diagram at level %s"%level
+			d = AbstractDiagram()
+			d.SetParent(canvas)
+
+			self.ReplaceDiagram(d, level)
+
+			print "New diagram at level %s"%level, self.diagrams
 
 # Generic Shape Event Handler---------------------------------------------------
 class ShapeEvtHandler:
@@ -1317,7 +1346,7 @@ class PointShape(Shape):
 		self.graphic.draw(dc)
 
 #-------------------------------------------------------------------------------
-class ShapeCanvas(wx.ScrolledWindow, Subject):
+class ShapeCanvas(wx.ScrolledWindow, Abstractable, Subject):
 	""" ShapeCanvas class.
 	"""
 
@@ -1334,7 +1363,9 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 			  	diagram = None):
 		""" Construcotr
 		"""
+
 		wx.ScrolledWindow.__init__(self, parent, id, pos, size, style, name)
+		Abstractable.__init__(self)
 		Subject.__init__(self)
 
 		self.SetBackgroundColour(wx.WHITE)
@@ -2447,15 +2478,19 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 		self.DiagramModified()
 
-	def SetDiagram(self, diagram):
+	def SetDiagram(self, diagram, abs_level = 0):
+		""" Set the diagram with abstraction hierarchy level
 		"""
-		"""
+		self.diagrams.update({abs_level:diagram})
 		self.diagram = diagram
 
-	def GetDiagram(self):
-		""" Return Diagram instance
+	def GetDiagram(self, abs_level=None):
+		""" Return Diagram instance depending on the abstraction hierarchy level
 		"""
-		return self.diagram
+		if abs_level:
+			return self.diagrams[abs_level]
+		else:
+			return self.diagram
 
 	def getCurrentShape(self, event):
 		"""
@@ -3542,7 +3577,7 @@ class CodeBlock(Block, Achievable):
 		return s
 
 #---------------------------------------------------------
-class ContainerBlock(Block, AbstractDiagram, Structurable):
+class ContainerBlock(Block, Structurable):
 	""" ContainerBlock(label, inputs, outputs)
 	"""
 
@@ -3551,7 +3586,6 @@ class ContainerBlock(Block, AbstractDiagram, Structurable):
 		""" Constructor
 		"""
 		Block.__init__(self, label, nb_inputs, nb_outputs)
-		AbstractDiagram.__init__(self)
 		Structurable.__init__(self)
 		self.fill = ['#90ee90']
 

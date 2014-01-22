@@ -91,7 +91,7 @@ class GeneralNotebook(Printable):
 		### title page list
 		title_pages = map(lambda p: p.name, self.pages)
 
-		### occurence of title in existing title pages
+		### occurrence of title in existing title pages
 		c = title_pages.count(title)
 		title = title+"(%d)"%c if c != 0 else title
 
@@ -99,10 +99,10 @@ class GeneralNotebook(Printable):
 		newPage = Container.ShapeCanvas(self, wx.NewId(), name=title)
 
 		### new diagram
-		d = defaultDiagram or Container.AbstractDiagram()
+		d = defaultDiagram or Container.Diagram()
 		d.SetParent(newPage)
 
-		### diagram and background newpage setting
+		### diagram and background new page setting
 		newPage.SetDiagram(d)
 
 		### print canvas variable setting
@@ -114,12 +114,11 @@ class GeneralNotebook(Printable):
 
 		self.SetSelection(self.GetPageCount()-1)
 
-
 	def OnClearPage(self, evt):
 		""" Clear page.
 
 			@type evt: event
-			@param  evt: Event Objet, None by default
+			@param  evt: Event Object, None by default
 		"""
 		id = self.GetSelection()
 
@@ -154,7 +153,7 @@ class GeneralNotebook(Printable):
 		Detach the notebook page on frame.
 
 		@type evt: event
-		@param  evt: Event Objet, None by default
+		@param  evt: Event Object, None by default
 		"""
 
 		mainW = self.GetTopLevelParent()
@@ -168,7 +167,7 @@ class GeneralNotebook(Printable):
 		frame.Show()
 
 	def OnPageChanged(self, evt):
-		""" Page hase been changed
+		""" Page has been changed
 		"""
 
 		id = self.GetSelection()
@@ -177,13 +176,24 @@ class GeneralNotebook(Printable):
 		if id != -1 and self.GetPageCount() > 0:
 
 			canvas = self.GetPage(id)
+			diagram = canvas.GetDiagram()
 			self.print_canvas = canvas
 			self.print_size = self.GetSize()
 
-			### action history
 			if hasattr(self.parent, 'tb'):
+				### action history
 				self.parent.tb.EnableTool(wx.ID_UNDO, not len(canvas.stockUndo) == 0)
 				self.parent.tb.EnableTool(wx.ID_REDO, not len(canvas.stockRedo) == 0)
+
+				#===============================================================
+				# ### update spin control
+				# t = self.parent.tb.FindControl(self.parent.toggle_list[3])
+				# s = self.parent.tb.FindControl(self.parent.toggle_list[4])
+				# if t:
+				# 	l = diagram.GetCurrentLevel()
+				# 	t.SetValue(str(l))
+				# 	s.SetValue(l)
+				#===============================================================
 
 			### refresh canvas
 			canvas.deselect()
@@ -191,11 +201,10 @@ class GeneralNotebook(Printable):
 
 			### update statusbar depending on the diagram modification
 			if hasattr(self.parent, 'statusbar'):
-				diagram = canvas.GetDiagram()
 				txt = _('%s modified')%(self.GetPageText(id)) if diagram.modify else ""
 				self.parent.statusbar.SetStatusText(txt)
 
-		### propagate event also error in OnClosePage becaus GetSelection is wrong
+		### propagate event also error in OnClosePage because GetSelection is wrong
 		evt.Skip()
 
 	def DeleteBuiltinConstants(self):

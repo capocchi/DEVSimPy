@@ -441,6 +441,7 @@ class MainMenuBar(wx.MenuBar):
 
 		menu = event.GetMenu()
 
+
 		### if the opened menu is the File menu
 		if isinstance(menu, FileMenu):
 
