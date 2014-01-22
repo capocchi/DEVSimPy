@@ -108,7 +108,7 @@ class DSPComponent:
 		from Container import Diagram
 		#assert(filename.endswith('.dsp'))
 
-		# its possible to use the orignal copy of the droped diagram
+		# its possible to use the original copy of the dropped diagram
 		dial = wx.MessageDialog(canvas, _('Do you want to open the original diagram in a new tab?'), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
 		new_tab = dial.ShowModal() == wx.ID_YES
@@ -134,7 +134,7 @@ class DSPComponent:
 					nb2.AddEditPage(label, diagram)
 				else:
 					selection = nb2.GetSelection()
-					nb2.SetPageText(selection,label)
+					nb2.SetPageText(selection, label)
 
 				# Add as new recent file
 				if filename not in mainW.openFileList:

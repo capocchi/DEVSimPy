@@ -120,8 +120,8 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.spin.SetRange(0, 100)
 
 			### current abstract level
-			#level = diagram.GetCurrentLevel()
-			level = 0
+			level = self.canvas.GetCurrentLevel()
+
 			### update of text and spin control
 			self.text.SetValue(str(level))
 			self.spin.SetValue(level)
