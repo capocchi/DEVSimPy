@@ -834,7 +834,10 @@ class MainApplication(wx.Frame):
 		if isinstance(frame, DetachedFrame) and isinstance(frame.GetParent(), Container.ShapeCanvas):
 			L = [tb.GetToolClientData(wx.ID_SAVE), self.nb2.GetCurrentPage()]
 		else:
-			L = [self.nb2.GetCurrentPage()]
+			if isinstance(frame, DetachedFrame):
+				L = [tb.GetToolClientData(wx.ID_SAVE)]
+			else:
+				L = [self.nb2.GetCurrentPage()]
 
 		for canvas in L:
 			canvas.LoadDiagram(val)
