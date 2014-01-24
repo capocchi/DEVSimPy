@@ -8,6 +8,7 @@ encoding//Mixins/Savable.py=utf-8
 encoding//Mixins/Structurable.py=utf-8
 encoding/Components.py=utf-8
 encoding/Container.py=utf-8
+encoding/ControlNotebook.py=utf-8
 encoding/DetachedFrame.py=utf-8
 encoding/DiagramNotebook.py=utf-8
 encoding/DragList.py=utf-8

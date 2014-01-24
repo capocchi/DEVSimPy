@@ -174,7 +174,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		"""
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 
-		### Transparent managment when the frame is moving
+		### Transparent management when the frame is moving
 		self.Bind(wx.EVT_IDLE, self.OnIdle)
 		self.Bind(wx.EVT_MOVE, self.OnMove)
 
