@@ -87,7 +87,7 @@ class GeneralNotebook(Observer):
 	def GetPropPanel(self):
 		""" Get Properties panel ef exist
 		"""
-		### list of label of all exsiting panel
+		### list of label of all existing panel
 		labelList = map(self.GetPageText, [i for i in range(self.GetPageCount())])
 		try:
 			### try to find if panel exist from label
