@@ -20,7 +20,7 @@
 
 import __builtin__
 
-### jsut for individual test
+### just for individual test
 if __name__ == '__main__':
 	import os
 	import sys
@@ -30,7 +30,7 @@ if __name__ == '__main__':
 	'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),\
 	'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}
 
-    ### permit correct import (based on fom instruction) in PyPDEVS directory (logger, util...) when this module executed (main)
+    ### permit correct import (based on from instruction) in PyPDEVS directory (logger, util...) when this module executed (main)
 	d = sys.path.append(os.pardir)
 	if d not in sys.path:
 		sys.path.append(d)
