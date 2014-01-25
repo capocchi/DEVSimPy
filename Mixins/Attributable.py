@@ -54,7 +54,7 @@ class Attributable:
 
 	###
 	def GetAttributes(self):
-		""" Return attributes attribut
+		""" Return attributes
 		"""
 		return self.attributes
 
@@ -70,7 +70,7 @@ class Attributable:
 			if not hasattr(self, name):
 				setattr(self, name, '')
 
-		### set attributres list
+		### set attributes list
 		self.attributes = L
 
 	###
@@ -90,6 +90,11 @@ class Attributable:
 		### remove name from attributes list
 		if name in self.attributes:
 			self.attributes.remove(name)
+
+	def HasAttr(self, name):
+		""" Return true if attribute name is in attributes list
+		"""
+		return name in self.attributes
 
 def main():
     pass
