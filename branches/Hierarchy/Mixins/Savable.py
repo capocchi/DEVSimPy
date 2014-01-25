@@ -58,8 +58,12 @@ class PickledCollection(list):
 	def __init__(self, obj):
 		""" Constructor
 		"""
+
+
 		self.obj = obj
-		self.pickled_obj = [getattr(self.obj, attr) for attr in self.obj.dump_attributes]
+		self.pickled_obj = [getattr(self.obj, attr) for attr in self.obj.dump_attributes+self.obj.dump_abstr_attributes]
+
+		print self.pickled_obj
 
 	def __setstate__(self, state):
 		""" Restore state from the unpickled state values.
@@ -116,10 +120,12 @@ class DumpBase(object):
 				assert(elem not in DumpBase.DB.keys())
 				DumpBase.DB[elem] = cls
 
+	###
 	def Load(self, filename):
 		"""Retrieve data from the file source."""
 		pass
 
+	###
 	def Save(self, filename):
 		"""Save the data object to the file."""
 		pass
@@ -131,6 +137,7 @@ class DumpZipFile(DumpBase):
 
 	ext = [".amd", ".cmd"]
 
+	###
 	def Save(self, obj_dumped, fileName = None):
 		""" Function that save the codeblock on the disk.
 		"""
@@ -160,18 +167,15 @@ class DumpZipFile(DumpBase):
 							protocol = 0)
 
 		except Exception, info:
-
 			sys.stderr.write(_("Problem saving (during the dump): %s -- %s\n")%(str(fileName),info))
 			return False
+
 		else:
-
 			try:
-
 				zf = ZipManager.Zip(fileName)
 
 				### create or update fileName
 				if os.path.exists(fileName):
-
 					zf.Update(replace_files = [fn, python_path, image_path])
 				else:
 					zf.Create(add_files = [fn, python_path, image_path])
@@ -194,13 +198,13 @@ class DumpZipFile(DumpBase):
 				mainW.tree.UpdateDomain(newExportPath)
 
 			except Exception, info:
-
 				sys.stderr.write(_("Problem saving (during the zip handling): %s -- %s\n")%(str(fileName),info))
 				return False
-			else:
 
+			else:
 				return True
 
+	###
 	def Load(self, obj_loaded, fileName = None):
 		""" Load codeblock (obj_loaded) from fileName
 		"""
@@ -219,12 +223,6 @@ class DumpZipFile(DumpBase):
 			return info
 		finally:
 			zf.close()
-
-		### cPickle need importation (mostly when the instanciation is extrernal of DEVSimPy library)
-		#module = BlockFactory.GetModule(fileName)
-
-		#if isinstance(module, Exception):
-			#return module
 
 		# try to load file
 		try:
@@ -248,13 +246,16 @@ class DumpZipFile(DumpBase):
 					import wx
 					L.insert(6, [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial'])
 
-
 		### label_pos checking
-		if len(obj_loaded.dump_attributes) != len(L):
+		if abs(len(obj_loaded.dump_attributes)-len(L)) == 1:
 
 			### 'label_pos' attribut is on rank 6 and its defautl value is "middle"
 			j = 6 if fileName.endswith(DumpZipFile.ext[-1]) else 4
 			L.insert(j, 'middle')
+
+		### abstraction hierarchi checking
+		if abs(len(obj_loaded.dump_attributes)-len(L)) == 2:
+			obj_loaded.dump_attributes+=['layers','current_level']
 
 		assert(len(L)==len(obj_loaded.dump_attributes))
 
@@ -337,6 +338,7 @@ class DumpGZipFile(DumpBase):
 	"""
 	ext = [".dsp"]
 
+	###
 	def Save(self, obj_dumped, fileName = None):
 		""" Function that save the dump on the disk under filename.
 		"""
@@ -377,6 +379,11 @@ class DumpGZipFile(DumpBase):
 				return info
 			finally:
 				f.close()
+
+			if abs(len(obj_loaded.dump_attributes)-len(dsp)) == 2:
+				obj_loaded.dump_attributes += ['layers', 'current_level']
+
+			assert(len(obj_loaded.dump_attributes) == len(dsp))
 
 			### assisgn the specific attributs
 			for i,attr in enumerate(obj_loaded.dump_attributes):
