@@ -63,6 +63,14 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		self.parent = parent
 		self.diagram = diagram
 
+		### current abstract level
+		if hasattr(diagram, 'layers') and hasattr(diagram, 'current_level'):
+			level = diagram.current_level
+			self.diagram = diagram.layers[level]
+		else:
+			level = self.canvas.GetCurrentLevel()
+			self.diagram = diagram
+
 		### Canvas Stuff -----------------------------------
 		self.canvas = Container.ShapeCanvas(self, wx.ID_ANY, name=title, diagram = self.diagram)
 		self.canvas.scalex = 1.0
@@ -118,9 +126,6 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.text = wx.TextCtrl(toolbar, self.toggle_list[3], size=(30, -1))
 			self.spin = wx.SpinButton(toolbar, self.toggle_list[4], style = wx.SP_VERTICAL)
 			self.spin.SetRange(0, 100)
-
-			### current abstract level
-			level = self.canvas.GetCurrentLevel()
 
 			### update of text and spin control
 			self.text.SetValue(str(level))
