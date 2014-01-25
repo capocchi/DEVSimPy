@@ -125,15 +125,14 @@ class Abstractable:
         layers = self.GetLayers()
         canvas = self
 
-        #print "current level is", l, layers
+        print "current level is", l, layers
 
         if l in layers:
             dia = canvas.GetDiagramByLevel(l)
             if l != canvas.GetCurrentLevel():
                 canvas.SetCurrentLevel(l)
 
-                #print "load diagram %d"%level
-
+                #print "load diagram %d"%l
                 #print self.layers
 
         else:
@@ -142,22 +141,30 @@ class Abstractable:
             dia.SetParent(canvas)
 
             canvas.SetCurrentLevel(l)
-            canvas.SetDiagram(dia)
+            #canvas.SetDiagram(dia)
 
-            #print "New diagram at level %s"%level, self.layers
+            #print "New diagram at level %s"%l, self.layers
 
         ### add new or update new attributes layers and current_layer to diagram
         setattr(dia, 'layers', canvas.GetLayers())
         setattr(dia, 'current_level', canvas.GetCurrentLevel())
 
+        ### TODO Export CMD model in order to find the last level edited...
+
         #=======================================================================
         # ### Add Attributes for dump only for ContainerBlock
+        #=======================================================================
         # frame = canvas.GetTopLevelParent()
         # is_detached_frame = isinstance(frame, DetachedFrame.DetachedFrame)
         # parent_frame_is_canvas = isinstance(frame.GetParent(), Container.ShapeCanvas)
         # if is_detached_frame and not parent_frame_is_canvas:
         #     d0 = canvas.GetDiagramByLevel(0)
-        #     d0.AddAttributes(['layers', 'current_layers'])
+        #     ### only once
+        #     if not (d0.HasAttr('layers') and d0.HasAttr('current_level')):
+        #         d0.AddAttributes(['layers', 'current_level'])
+        #         self.SetDiagramByLevel(0, d0)
+        #=======================================================================
+
         #=======================================================================
 
         ### update canvas
