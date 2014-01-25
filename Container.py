@@ -304,6 +304,8 @@ class Diagram(Savable, Structurable):
 
 		if name == 'dump_attributes':
 			return ['shapes', 'priority_list', 'constants_dico']
+		elif name == 'dump_abstr_attributes':
+			return ['layers', 'current_level'] if hasattr(self, 'layers') and hasattr(self, 'current_level') else []
 		else:
 			raise AttributeError, name
 
@@ -3205,6 +3207,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 			path = os.path.normpath(save_dlg.GetPath())
 			label = os.path.basename(path)
 			try:
+
 				### Block is Savable
 				self.SaveFile(path)
 
@@ -3632,6 +3635,8 @@ class ContainerBlock(Block, Diagram, Structurable):
 
 		if name == 'dump_attributes':
 			return ['shapes', 'priority_list', 'constants_dico', 'model_path', 'python_path', 'args'] + self.GetAttributes()
+		elif name == 'dump_abstr_attributes':
+			return ['layers', 'current_level'] if hasattr(self, 'layers') and hasattr(self, 'current_level') else []
 		else:
 			raise AttributeError, name
 
