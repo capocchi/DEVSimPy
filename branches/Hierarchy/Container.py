@@ -3631,7 +3631,7 @@ class ContainerBlock(Block, Diagram, Structurable):
 		"""
 
 		if name == 'dump_attributes':
-			return ['shapes', 'priority_list', 'constants_dico', 'model_path', 'python_path','args'] + self.GetAttributes()
+			return ['shapes', 'priority_list', 'constants_dico', 'model_path', 'python_path', 'args'] + self.GetAttributes()
 		else:
 			raise AttributeError, name
 

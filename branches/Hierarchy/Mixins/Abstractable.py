@@ -20,11 +20,16 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
+from Mixins.Attributable import Attributable
+
 import Container
+import DetachedFrame
+import Components
 
 #---------------------------------------------------------
 class Abstractable:
     """  Mixin class for the abstraction hierarchy
+        Adds dynamically the 'layers' attribute . This one contains the list of diagrams associated with one level
     """
 
     ###
@@ -36,103 +41,126 @@ class Abstractable:
 
         self.diagram = dia
 
-        ### dico of diagram
-        if hasattr(dia,'diagrams'):
-            self.diagrams = dia.diagrams
+        ### dico of layers
+        if hasattr(dia, 'layers'):
+            self.layers = getattr(dia, "layers")
         else:
-            self.diagrams = {0:dia}
+            self.layers = {0:dia}
 
+#===============================================================================
+# overwriting for Diagram class
+#===============================================================================
+    ###
     def SetDiagram(self, diagram):
         """ Set the diagram
         """
         self.diagram = diagram
-        self.AddDiagram(diagram, self.GetCurrentLevel())
+        self.AddLayer(diagram, self.GetCurrentLevel())
 
+    ###
     def GetDiagram(self):
         """ Return Diagram instance
         """
         return self.diagram
+#===============================================================================
+#
+#===============================================================================
 
-    def GetDiagramByLevel(self, level):
+    ###
+    def GetDiagramByLevel(self, l):
+        """ Return layer form level l
+            if layer dosen't exist, None is returned
         """
-        """
-        if level in self.diagrams:
-            return self.diagrams[level]
-        else:
-            return None
+        return self.layers.get(l, None)
 
-    def SetDiagramByLevel(self, dia, level):
+    ###
+    def SetDiagramByLevel(self, d, l):
+        """ Update the layers form diagram d at level l
         """
-        """
-        self.diagrams.update({level:dia})
+        self.layers.update({l:d})
 
-    def GetDiagrams(self):
-        """ Get Diagrams dico
+    ###
+    def GetLayers(self):
+        """ Get layers dico
         """
-        return self.diagrams
+        return self.layers
 
-    def GetDiagram(self, l):
-        """ Get diagram at level l
-        """
-        dia = self.GetDiagrams()
-        return dia[l] if l in dia else None
-
+    ###
     def GetCurrentLevel(self):
-        """
+        """ Return the current layer viewed in the canvas
         """
         return self.current_level
 
     def SetCurrentLevel(self, l):
-        """
+        """ Set the current level viewed in the canvas
         """
         self.current_level = l
 
+    ###
     def NextLevel(self):
         """ return the last depth abstract level
         """
         return self.GetLevelLenght()
 
+    ###
     def GetLevelLenght(self):
+        """ Get the number of layers defined in the canvas
         """
-        """
-        return len(self.GetDiagrams())
+        return len(self.GetLayers())
 
-    def AddDiagram(self, dia, l):
-        """ Add the diagram at level l
+    ###
+    def AddLayer(self, d, l):
+        """ Add the diagram d at level l
         """
-        if l in self.diagrams:
-            self.diagrams.update({l:dia})
+        if l in self.layers:
+            self.layers.update({l:d})
         else:
-            self.diagrams[l] = dia
+            self.layers[l] = d
 
-    def LoadDiagram(self, level):
-        """
+    ###
+    def LoadDiagram(self, l):
+        """ Load diagram at the level l in the current canvas
         """
 
-        diagrams = self.GetDiagrams()
+        layers = self.GetLayers()
         canvas = self
 
-        print "current level is", level, diagrams
+        #print "current level is", l, layers
 
-        if level in diagrams:
-            dia = self.GetDiagramByLevel(level)
-            if level != self.current_level:
-                self.SetCurrentLevel(level)
+        if l in layers:
+            dia = canvas.GetDiagramByLevel(l)
+            if l != canvas.GetCurrentLevel():
+                canvas.SetCurrentLevel(l)
 
-                print "load diagram %d"%level
+                #print "load diagram %d"%level
 
-                print self.diagrams
+                #print self.layers
 
         else:
+
             dia = Container.Diagram()
             dia.SetParent(canvas)
 
-            canvas.SetCurrentLevel(level)
+            canvas.SetCurrentLevel(l)
             canvas.SetDiagram(dia)
 
-            print "New diagram at level %s"%level, self.diagrams
+            #print "New diagram at level %s"%level, self.layers
 
-        canvas.diagram = dia
-        canvas.diagram.diagrams = self.diagrams
+        ### add new or update new attributes layers and current_layer to diagram
+        setattr(dia, 'layers', canvas.GetLayers())
+        setattr(dia, 'current_level', canvas.GetCurrentLevel())
+
+        #=======================================================================
+        # ### Add Attributes for dump only for ContainerBlock
+        # frame = canvas.GetTopLevelParent()
+        # is_detached_frame = isinstance(frame, DetachedFrame.DetachedFrame)
+        # parent_frame_is_canvas = isinstance(frame.GetParent(), Container.ShapeCanvas)
+        # if is_detached_frame and not parent_frame_is_canvas:
+        #     d0 = canvas.GetDiagramByLevel(0)
+        #     d0.AddAttributes(['layers', 'current_layers'])
+        #=======================================================================
+
+        ### update canvas
+        canvas.SetDiagram(dia)
         canvas.deselect()
         canvas.Refresh()

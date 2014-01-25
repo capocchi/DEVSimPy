@@ -140,7 +140,7 @@ class wizard_page(wizmod.PyWizardPage):
 		self.SetSizer(self.sizer)
 
 	def add_stuff(self, stuff):
-		"""Add aditional widgets to the bottom of the page"""
+		"""Add additional widgets to the bottom of the page"""
 		self.sizer.Add(stuff, 0, wx.EXPAND|wx.ALL, padding)
 
 	def SetNext(self, next):
@@ -401,6 +401,7 @@ class ModelGeneratorWizard(Wizard):
 		# Create a page 4_2
 		page4_2 = wizard_page(self, _('Finish'))
 		init =  os.path.join(DOMAIN_PATH, "%s.cmd"%vbox3.GetItem(1).GetWindow().GetValue())
+
 		# save filebrowse
 		fb3 = filebrowse.FileBrowseButton(	page4_2,
 											wx.ID_ANY,
@@ -480,7 +481,7 @@ class ModelGeneratorWizard(Wizard):
 
 		# event handler for check button
 		def onBt5Check(evt):
-			""" Python file selector is cheked.
+			""" Python file selector is checked.
 			"""
 
 			if evt.GetEventObject().GetValue():
@@ -490,7 +491,7 @@ class ModelGeneratorWizard(Wizard):
 
 		# event handler for check button
 		def onBt51Check(evt):
-			""" Python file selector is cheked.
+			""" Python file selector is checked.
 			"""
 			if evt.GetEventObject().GetValue():
 				fb12.Enable(False)
@@ -498,7 +499,7 @@ class ModelGeneratorWizard(Wizard):
 				fb12.Enable(True)
 
 		def onBt6Check(evt):
-			""" Python file selector is cheked.
+			""" Python file selector is checked.
 			"""
 
 			if evt.GetEventObject().GetValue():
@@ -531,7 +532,7 @@ class ModelGeneratorWizard(Wizard):
 			""" Give the control on the number of input and output form specific behavior choice
 			"""
 
-			### specific behavoir choice
+			### specific behavior choice
 			val = evt.GetEventObject().GetValue()
 
 			### if generator, 0 input and x output (1 is the default)
@@ -543,7 +544,7 @@ class ModelGeneratorWizard(Wizard):
 				if vbox2.GetItem(7).GetWindow().GetValue() == 0:
 					vbox2.GetItem(7).GetWindow().SetValue(1)
 
-				### Deasable the choice
+				### Disable the choice
 				vbox2.GetItem(4).GetWindow().Enable(False)
 				vbox2.GetItem(5).GetWindow().Enable(False)
 				### Enable the output choice
@@ -559,7 +560,7 @@ class ModelGeneratorWizard(Wizard):
 				if vbox2.GetItem(5).GetWindow().GetValue() == 0:
 					vbox2.GetItem(5).GetWindow().SetValue(1)
 
-				### Deasable the choice
+				### Disable the choice
 				vbox2.GetItem(7).GetWindow().Enable(False)
 				vbox2.GetItem(6).GetWindow().Enable(False)
 				### Enable the output choice
@@ -588,10 +589,12 @@ class ModelGeneratorWizard(Wizard):
 		bt51.Bind(wx.EVT_CHECKBOX, onBt51Check)
 		bt6.Bind(wx.EVT_CHECKBOX, onBt6Check)
 		bt61.Bind(wx.EVT_CHECKBOX, onBt61Check)
+
 		### if left click on the DetachedFrame, port instance can be created
 		if isinstance(parent.GetTopLevelParent(), Container.DetachedFrame):
 			cb_id1.Bind(wx.EVT_CHECKBOX, onCbId1)
 			cb_id2.Bind(wx.EVT_CHECKBOX, onCbId2)
+
 		cb0.Bind(wx.EVT_COMBOBOX, OnSpecificBehavior)
 		amd_input_label = vbox2.GetItem(1).GetWindow()
 		amd_input_label.Bind(wx.EVT_TEXT, OnInputAMDLabel)
@@ -643,7 +646,7 @@ class ModelGeneratorWizard(Wizard):
 				filebrowse_plugin = gridSizer.GetItem(11).GetWindow()
 				filebrowse_model = self.pages[3].sizer.GetItem(2).GetWindow()
 
-				### test if extention exists
+				### test if extension exists
 				model_path = filebrowse_model.GetValue()
 				if not model_path.endswith('.amd'):
 					model_path +='.amd'
@@ -663,7 +666,7 @@ class ModelGeneratorWizard(Wizard):
 				filebrowse_plugin = gridSizer.GetItem(9).GetWindow()
 				filebrowse_model = self.pages[4].sizer.GetItem(2).GetWindow()
 
-				### test if extention exists
+				### test if extension exists
 				model_path = filebrowse_model.GetValue()
 				if not model_path.endswith('.cmd'):
 					model_path +='.cmd'
@@ -695,7 +698,7 @@ class ModelGeneratorWizard(Wizard):
 				try:
 					zout = zipfile.ZipFile(self.model_path, "w")
 				except Exception, info:
-					sys.stsout.write(_("ERROR: Enable to creacte Zip file in Wizard GUI (%s)"%info))
+					sys.stsout.write(_("ERROR: Enable to create Zip file in Wizard GUI (%s)"%info))
 					return False
 				else:
 					if self.python_path == '':
@@ -715,7 +718,7 @@ class ModelGeneratorWizard(Wizard):
 
 						self.python_path = os.path.join(self.model_path, py_file)
 
-						### force model file (.amd or cmd) to have same name with choosed python file
+						### force model file (.amd or cmd) to have same name with chosen python file
 						#ext = os.path.basename(self.model_path).split('.')[1]
 						#self.model_path = os.path.join(os.path.dirname(self.model_path), "%s.%s"%(py_file.split('.')[0],ext))
 

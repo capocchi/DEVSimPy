@@ -812,13 +812,16 @@ class MainApplication(wx.Frame):
 		### main frame of spin control
 		frame = tb.GetTopLevelParent()
 
+		is_detached_frame = isinstance(frame, DetachedFrame)
+		parent_frame_is_canvas = isinstance(frame.GetParent(), Container.ShapeCanvas)
+
 		### update text filed
-		val = spin.GetValue()
+		level = spin.GetValue()
 
 		### list of spin control to update
 		L = [tb]
 		### if spin control coming from DetachedFrame of notebooktab
-		if isinstance(frame.GetParent(), Container.ShapeCanvas):
+		if parent_frame_is_canvas:
 			L.append(self.GetToolBar())
 
 		### text control object from its unique id
@@ -826,21 +829,21 @@ class MainApplication(wx.Frame):
 			t = obj.FindControl(self.toggle_list[3])
 			s = obj.FindControl(self.toggle_list[4])
 			if t:
-				t.SetValue(str(val))
-				s.SetValue(val)
+				t.SetValue(str(level))
+				s.SetValue(level)
 
 		### update diagram
 		### currentPage is given by the client data embeded in the save item on tool bar (which is the same of spin ;-))
-		if isinstance(frame, DetachedFrame) and isinstance(frame.GetParent(), Container.ShapeCanvas):
+		if is_detached_frame and parent_frame_is_canvas:
 			L = [tb.GetToolClientData(wx.ID_SAVE), self.nb2.GetCurrentPage()]
 		else:
-			if isinstance(frame, DetachedFrame):
+			if is_detached_frame:
 				L = [tb.GetToolClientData(wx.ID_SAVE)]
 			else:
 				L = [self.nb2.GetCurrentPage()]
 
 		for canvas in L:
-			canvas.LoadDiagram(val)
+			canvas.LoadDiagram(level)
 
 	###
 	def OnZoom(self, event):
