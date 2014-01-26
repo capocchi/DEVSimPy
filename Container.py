@@ -355,11 +355,6 @@ class Diagram(Savable, Structurable):
 				4. we make the connection
 		"""
 
-		###==========================================================================
-		#if hasattr(diagram, 'layers') and hasattr(diagram, 'current_level'):
-		#	diagram = diagram.layers[diagram.current_level]
-		###==========================================================================
-
 		### if devs instance of diagram is not instantiated, we make it
 		### else one simulation has been performed then we clear all devs port instances
 		if diagram.getDEVSModel() is None:
@@ -407,10 +402,16 @@ class Diagram(Savable, Structurable):
 
 			#### recursion
 			if isinstance(m, ContainerBlock):
+
+				###===================================================================
 				if hasattr(m, 'layers') and hasattr(m, 'current_level'):
 					### level is given by the first stored diagram because m.current is not updated by the spin control
 					level = m.layers[0].current_level
-					m.shapes = m.layers[level].GetShapeList()
+					dia = m.layers[level]
+					m.shapes = dia.GetShapeList()
+					m.priority_list = dia.GetPriorityList() or []
+					m.constants_dico = dia.GetConstantsDico() or {}
+				###===================================================================
 
 				Diagram.makeDEVSInstance(m)
 
@@ -888,10 +889,19 @@ class Diagram(Savable, Structurable):
 		return False
 
 	def GetShapeList(self):
-		""" Function that return the shapes list
+		""" Return the shapes list
 		"""
-
 		return self.shapes
+
+	def GetPriorityList(self):
+		""" Return the model priority list
+		"""
+		self.priority_list
+
+	def GetConstantsDico(self):
+		""" Return the constants dico
+		"""
+		return self.constants_dico
 
 	def GetBlockCount(self):
 		""" Function that return the number of Block shape
