@@ -649,10 +649,9 @@ class Diagram(Savable, Structurable):
 		if self.GetCount() != 0 :
 
 			## window that contain the diagram which will be simulate
-##			mainW = wx.GetApp().GetTopWindow()
-##			win = mainW.GetActiveWindow()
 			obj = event.GetEventObject()
-			win = obj.GetTopLevelParent()
+
+			win = obj.GetWindow() if isinstance(obj, wx.Menu) else obj.GetTopLevelParent()
 
 			# diagram which will be simulate
 			diagram = self
@@ -677,6 +676,7 @@ class Diagram(Savable, Structurable):
 				L = diagram.GetLabelList([])
 				if len(L)!=len(set(L)):
 					wx.MessageBox(_("It seems that models have same label.\nIf you plan to use Flat simulation algorithm, all model must have a unique label."), _("Simulation Manager"))
+
 
 				### set the name of diagram from notebook nb2
 				nb2 = win.GetDiagramNotebook()
