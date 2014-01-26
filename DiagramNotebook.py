@@ -102,6 +102,20 @@ class GeneralNotebook(Printable):
 		d = defaultDiagram or Container.Diagram()
 		d.SetParent(newPage)
 
+		#=======================================================================
+		if hasattr(d, 'current_level') and hasattr(d, 'layers'):
+			d = d.layers[d.current_level]
+
+			### update spin from stored current level
+			main = wx.GetApp().GetTopWindow()
+			main_tb = main.GetToolBar()
+			t = main_tb.FindControl(main.toggle_list[3])
+			s = main_tb.FindControl(main.toggle_list[4])
+			if t:
+				t.SetValue(str(d.current_level))
+				s.SetValue(d.current_level)
+        #=======================================================================
+
 		### diagram and background new page setting
 		newPage.SetDiagram(d)
 

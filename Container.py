@@ -304,8 +304,10 @@ class Diagram(Savable, Structurable):
 
 		if name == 'dump_attributes':
 			return ['shapes', 'priority_list', 'constants_dico']
+		#=======================================================================
 		elif name == 'dump_abstr_attributes':
 			return ['layers', 'current_level'] if hasattr(self, 'layers') and hasattr(self, 'current_level') else []
+		#=======================================================================
 		else:
 			raise AttributeError, name
 
@@ -353,8 +355,10 @@ class Diagram(Savable, Structurable):
 				4. we make the connection
 		"""
 
-		#ReloadModule.recompile("DomainInterface.DomainBehavior")
-		#ReloadModule.recompile("DomainInterface.DomainStructure")
+		###==========================================================================
+		#if hasattr(diagram, 'layers') and hasattr(diagram, 'current_level'):
+		#	diagram = diagram.layers[diagram.current_level]
+		###==========================================================================
 
 		### if devs instance of diagram is not instantiated, we make it
 		### else one simulation has been performed then we clear all devs port instances
@@ -403,6 +407,11 @@ class Diagram(Savable, Structurable):
 
 			#### recursion
 			if isinstance(m, ContainerBlock):
+				if hasattr(m, 'layers') and hasattr(m, 'current_level'):
+					### level is given by the first stored diagram because m.current is not updated by the spin control
+					level = m.layers[0].current_level
+					m.shapes = m.layers[level].GetShapeList()
+
 				Diagram.makeDEVSInstance(m)
 
 		# for all iPort shape, we make the devs instance
@@ -3635,8 +3644,10 @@ class ContainerBlock(Block, Diagram, Structurable):
 
 		if name == 'dump_attributes':
 			return ['shapes', 'priority_list', 'constants_dico', 'model_path', 'python_path', 'args'] + self.GetAttributes()
+		#=======================================================================
 		elif name == 'dump_abstr_attributes':
 			return ['layers', 'current_level'] if hasattr(self, 'layers') and hasattr(self, 'current_level') else []
+		#======================================================================
 		else:
 			raise AttributeError, name
 

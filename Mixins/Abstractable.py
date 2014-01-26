@@ -54,8 +54,15 @@ class Abstractable:
     def SetDiagram(self, diagram):
         """ Set the diagram
         """
-        self.diagram = diagram
-        self.AddLayer(diagram, self.GetCurrentLevel())
+
+        ### if diagram has layers attribute and layer exist, then load it
+        if hasattr(diagram, 'layers') and diagram.current_level in diagram.layers:
+            self.diagram = diagram.layers[diagram.current_level]
+            self.layers = diagram.layers
+            self.current_level = diagram.current_level
+        else:
+            self.diagram = diagram
+            self.AddLayer(diagram, self.GetCurrentLevel())
 
     ###
     def GetDiagram(self):
@@ -113,7 +120,7 @@ class Abstractable:
         """ Add the diagram d at level l
         """
         if l in self.layers:
-            self.layers.update({l:d})
+            self.SetDiagramByLevel(d, l)
         else:
             self.layers[l] = d
 
@@ -132,8 +139,8 @@ class Abstractable:
             if l != canvas.GetCurrentLevel():
                 canvas.SetCurrentLevel(l)
 
-                #print "load diagram %d"%l
-                #print self.layers
+                print "load diagram %d"%l
+                print self.layers
 
         else:
 
@@ -143,13 +150,16 @@ class Abstractable:
             canvas.SetCurrentLevel(l)
             #canvas.SetDiagram(dia)
 
-            #print "New diagram at level %s"%l, self.layers
+            print "New diagram at level %s"%l, self.layers
 
         ### add new or update new attributes layers and current_layer to diagram
         setattr(dia, 'layers', canvas.GetLayers())
         setattr(dia, 'current_level', canvas.GetCurrentLevel())
 
-        ### TODO Export CMD model in order to find the last level edited...
+        ### add new or update new attributes layers and current_layer to diagram at level 0
+        d0 = canvas.GetDiagramByLevel(0)
+        setattr(d0, 'layers', canvas.GetLayers())
+        setattr(d0, 'current_level', canvas.GetCurrentLevel())
 
         #=======================================================================
         # ### Add Attributes for dump only for ContainerBlock
@@ -165,9 +175,9 @@ class Abstractable:
         #         self.SetDiagramByLevel(0, d0)
         #=======================================================================
 
-        #=======================================================================
-
         ### update canvas
         canvas.SetDiagram(dia)
         canvas.deselect()
         canvas.Refresh()
+
+

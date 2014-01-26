@@ -64,12 +64,14 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		self.diagram = diagram
 
 		### current abstract level
+		#=======================================================================
 		if hasattr(diagram, 'layers') and hasattr(diagram, 'current_level'):
-			level = diagram.current_level
+			level = diagram.layers[0].current_level
 			self.diagram = diagram.layers[level]
 		else:
-			level = self.canvas.GetCurrentLevel()
+			level = 0
 			self.diagram = diagram
+		#=======================================================================
 
 		### Canvas Stuff -----------------------------------
 		self.canvas = Container.ShapeCanvas(self, wx.ID_ANY, name=title, diagram = self.diagram)
@@ -121,6 +123,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 
 		toolbar.ToggleTool(self.toggle_list[0],1)
 
+		#=======================================================================
 		### spin control for abstraction hierarchy
 		if isinstance(diagram, Container.Diagram):
 			self.text = wx.TextCtrl(toolbar, self.toggle_list[3], size=(30, -1))
@@ -133,6 +136,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 
 			toolbar.AddControl(self.text)
 			toolbar.AddControl(self.spin)
+		#=======================================================================
 
 		toolbar.Realize()
 
@@ -144,14 +148,16 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			toolbar.EnableTool(Menu.ID_SIM_DIAGRAM, False)
 		else:
 
-			###To acquire level from main toolbar only of is detached frame from tab
+			###To get level from main toolbar only of is detached frame from tab
 			### only possible due to the common toogle_list (shared id)
+			#=======================================================================
 			main_tb = wx.GetApp().GetTopWindow().GetToolBar()
 			t = main_tb.FindControl(self.toggle_list[3])
 			s = main_tb.FindControl(self.toggle_list[4])
 			if t:
 				self.text.SetValue(str(t.GetValue()))
 				self.spin.SetValue(s.GetValue())
+			#=======================================================================
 
 		### Call Printable constructor
 		PrintOut.Printable.__init__(self, self.canvas)

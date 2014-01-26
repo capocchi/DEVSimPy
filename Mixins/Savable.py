@@ -52,24 +52,33 @@ import Components
 import ZipManager
 
 class PickledCollection(list):
-	""" Custom list class for dsp attributes dumping
+	""" Custom list class for attributes to be dump
 	"""
 
+	###
 	def __init__(self, obj):
-		""" Constructor
+		""" Constructor.
 		"""
 
-
+		### object to be dump
 		self.obj = obj
-		self.pickled_obj = [getattr(self.obj, attr) for attr in self.obj.dump_attributes+self.obj.dump_abstr_attributes]
+		### list of attributes to be dump
+		self.pickled_obj = [getattr(self.obj, attr) for attr in self.obj.dump_attributes]
 
-		print self.pickled_obj
+		#=======================================================================
+		### addition of abstraction attributes only if there is not in dump_attributes (after having saved a model, dump_attributes contains abstraction attributes !)
+		self.pickled_obj += [getattr(self.obj, attr) for attr in self.obj.dump_abstr_attributes if attr not in self.obj.dump_attributes]
 
+		#print self.pickled_obj
+		#=======================================================================
+
+	###
 	def __setstate__(self, state):
 		""" Restore state from the unpickled state values.
 		"""
 		self.__dict__.update(state)
 
+	###
 	def __iter__(self):
 		""" Overwrite iterator protocol
 		"""
@@ -253,11 +262,17 @@ class DumpZipFile(DumpBase):
 			j = 6 if fileName.endswith(DumpZipFile.ext[-1]) else 4
 			L.insert(j, 'middle')
 
-		### abstraction hierarchi checking
+		#=======================================================================
+
+		### abstraction hierarchy checking
 		if abs(len(obj_loaded.dump_attributes)-len(L)) == 2:
 			obj_loaded.dump_attributes+=['layers','current_level']
 
-		assert(len(L)==len(obj_loaded.dump_attributes))
+		#=======================================================================
+
+		a, b = map(len,(L,obj_loaded.dump_attributes))
+		print a,b, L, obj_loaded.dump_attributes
+		assert(a==b)
 
 		try:
 			### assign dumped attributs
@@ -380,10 +395,15 @@ class DumpGZipFile(DumpBase):
 			finally:
 				f.close()
 
+			#=======================================================================
+
 			if abs(len(obj_loaded.dump_attributes)-len(dsp)) == 2:
 				obj_loaded.dump_attributes += ['layers', 'current_level']
 
-			assert(len(obj_loaded.dump_attributes) == len(dsp))
+			#=======================================================================
+
+			a,b = map(len, (obj_loaded.dump_attributes, dsp))
+			assert(a==b)
 
 			### assisgn the specific attributs
 			for i,attr in enumerate(obj_loaded.dump_attributes):

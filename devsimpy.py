@@ -651,7 +651,6 @@ class MainApplication(wx.Frame):
 		name = os.path.basename(path)
 
 		diagram = Container.Diagram()
-		#diagram = Container.Diagram()
 
 		open_file_result = diagram.LoadFile(path)
 
