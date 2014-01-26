@@ -629,7 +629,7 @@ class Diagram(Savable, Structurable):
 ##			mainW = wx.GetApp().GetTopWindow()
 ##			win = mainW.GetActiveWindow()
 			obj = event.GetEventObject()
-			win = obj.GetTopLevelParent()
+			win = obj.GetWindow() if isinstance(obj, wx.Menu) else obj.GetTopLevelParent()
 
 			# diagram which will be simulate
 			diagram = self
