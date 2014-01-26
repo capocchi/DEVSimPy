@@ -120,24 +120,27 @@ class CollapsiblePanel(wx.Panel):
 
 		# and also change the labels
 		if self.cp.IsExpanded():
-			### change the collapsible lable
+
+			### change the collapsible label
 			self.cp.SetLabel(self.label2)
-			### adapte the window size
+			### adapt the window size
 			self.simdia.SetSizeWH(-1, self.org_h+new_h)
-			### Max limite
-			self.simdia.SetMaxSize(wx.Size(self.simdia.GetSize()[0], self.org_h+new_h))
+			### Max limit
+			#self.simdia.SetMaxSize(wx.Size(self.simdia.GetSize()[0], self.org_h+new_h))
 		else:
-			### change the collapsible lable
+
+			### change the collapsible label
 			self.cp.SetLabel(self.label1)
-			### adapte the window size
+			### adapt the window size
 			self.simdia.SetSizeWH(-1, self.org_h)
+
 
 	def MakePaneContent(self, pane):
 		'''Just make a few controls to put on the collapsible pane'''
 
 		text2 = wx.StaticText(pane, wx.ID_ANY, _("%s algorithm:")%DEFAULT_DEVS_DIRNAME)
 
-		### list of posible strategy depending on the PyDEVS version
+		### list of possible strategy depending on the PyDEVS version
 		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
 			c = PYDEVS_SIM_STRATEGY_DICT.keys()
 		else:
@@ -226,12 +229,12 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			### panel herite of the left spiltter size
 			self.panel.SetSize(parent.GetParent().GetSize())
 
-			# status bar de l'application principale
+			# status bar of main application
 			self.statusbar = parent.GetTopLevelParent().statusbar
 		else:
 			wx.Frame.__init__(self, parent, id, title, style= wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
 
-			### adapt size of frame depending on the plateform
+			### adapt size of frame depending on the plate-form
 			if  '__WXMSW__' in wx.PlatformInfo:
 				self.SetSize((280,220))
 			else:
@@ -470,7 +473,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			#self.parent.Enable(False)
 
 	def Interact(self, access = True):
-		""" Enabling and disabling options (buttons, checkbox, ...)
+		""" Enabling and disabling options (buttons, check-box, ...)
 		"""
 
 		self._btn1.Enable(access)
@@ -481,7 +484,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 	###
 	def OnStop(self, event):
-		""" When Stop button is cliked
+		""" When Stop button is clicked
 		"""
 
 		self.Interact()
@@ -512,13 +515,11 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 		self.statusbar.SetStatusText(_('Suspended'),0)
 
-		# possibilité d'interagir avec le modele
-		#self.parent.Enable(True)
 		wx.Bell()
 
 	###
 	def OnTimer(self, event):
-		""" Give the pourcentage of simulation progress
+		""" Give the percentage of simulation progress
 		"""
 
 		### si no time limite pour la simulation, on pulse sinon on avance vers le temps final
