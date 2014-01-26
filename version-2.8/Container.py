@@ -88,6 +88,9 @@ from Mixins.Connectable import Connectable
 from Mixins.Plugable import Plugable
 from Mixins.Structurable import Structurable
 
+### for all dsp model build with old version of DEVSimPy
+sys.modules['Savable']=sys.modules['Mixins.Savable']
+
 from Decorators import BuzyCursorNotification, StatusBarNotification, ProgressNotification, Pre_Undo, Post_Undo, cond_decorator
 from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance
 from Patterns.Observer import Subject, Observer
