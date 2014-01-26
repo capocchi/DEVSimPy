@@ -545,10 +545,13 @@ class MainApplication(wx.Frame):
 		diagram = currentPage.GetDiagram()
 		level = currentPage.GetCurrentLevel()
 
+		level_label = wx.StaticText(self.tb, -1, _("Level "), wx.Point(0, 0))
 		self.text = wx.TextCtrl(self.tb, self.toggle_list[3], value=str(level), size=(30, -1))
 		self.spin = wx.SpinButton(self.tb, self.toggle_list[4], style = wx.SP_VERTICAL)
 		self.spin.SetRange(0, 100)
 		self.spin.SetValue(level)
+
+		self.tb.AddControl(level_label)
 		self.tb.AddControl(self.text)
 		self.tb.AddControl(self.spin)
 

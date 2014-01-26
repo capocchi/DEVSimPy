@@ -90,7 +90,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.canvas.stockRedo = []
 
 		### Menu ToolBar
-		toolbar = wx.ToolBar(self, wx.ID_ANY, name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
+		toolbar = wx.ToolBar(self, wx.ID_ANY, name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT)
 		toolbar.SetToolBitmapSize((25,25)) # just for windows
 
 		if self.parent:
@@ -120,12 +120,14 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		toolbar.InsertSeparator(5)
 		toolbar.InsertSeparator(9)
 		toolbar.InsertSeparator(13)
+		toolbar.InsertSeparator(17)
 
 		toolbar.ToggleTool(self.toggle_list[0],1)
 
 		#=======================================================================
 		### spin control for abstraction hierarchy
 		if isinstance(diagram, Container.Diagram):
+			level_label = wx.StaticText(toolbar, -1, _("Level "), wx.Point(0, 0))
 			self.text = wx.TextCtrl(toolbar, self.toggle_list[3], size=(30, -1))
 			self.spin = wx.SpinButton(toolbar, self.toggle_list[4], style = wx.SP_VERTICAL)
 			self.spin.SetRange(0, 100)
@@ -134,15 +136,15 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.text.SetValue(str(level))
 			self.spin.SetValue(level)
 
+
+			toolbar.AddControl(level_label)
 			toolbar.AddControl(self.text)
 			toolbar.AddControl(self.spin)
 		#=======================================================================
 
-		toolbar.Realize()
-
 		### if Detached frame from block (container)
 		### save, save-as and simulation are disabled
-		if not isinstance(self.parent, Container.ShapeCanvas):
+		if self.IsFromContaineBlock():
 			toolbar.EnableTool(Menu.ID_SAVE, False)
 			toolbar.EnableTool(Menu.ID_SAVEAS, False)
 			toolbar.EnableTool(Menu.ID_SIM_DIAGRAM, False)
@@ -158,6 +160,8 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 				self.text.SetValue(str(t.GetValue()))
 				self.spin.SetValue(s.GetValue())
 			#=======================================================================
+
+		toolbar.Realize()
 
 		### Call Printable constructor
 		PrintOut.Printable.__init__(self, self.canvas)
@@ -192,6 +196,9 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		### TODO: refactor the devsimpy.py in order to extract OnSaveFile and all of the methods needed here.
 		#if not self.parent:
 			#self.Bind(wx.EVT_TOOL, parent.OnSaveFile, id=Menu.ID_SAVE)
+
+	def IsFromContaineBlock(self):
+		return not isinstance(self.parent, Container.ShapeCanvas)
 
 	def OnMove(self, event):
 		""" alpha manager
