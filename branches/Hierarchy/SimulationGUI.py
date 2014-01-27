@@ -111,6 +111,8 @@ class CollapsiblePanel(wx.Panel):
 		sizer.Add(cp, 0, wx.EXPAND)
 
 	def OnPaneChanged(self, evt=None):
+		"""
+		"""
 
 		# redo the layout
 		self.Layout()
@@ -136,7 +138,8 @@ class CollapsiblePanel(wx.Panel):
 
 
 	def MakePaneContent(self, pane):
-		'''Just make a few controls to put on the collapsible pane'''
+		'''Just make a few controls to put on the collapsible pane
+		'''
 
 		text2 = wx.StaticText(pane, wx.ID_ANY, _("%s algorithm:")%DEFAULT_DEVS_DIRNAME)
 
@@ -187,7 +190,7 @@ class CollapsiblePanel(wx.Panel):
 		self.Bind(wx.EVT_CHECKBOX, self.OnNTL, self.cb2)
 	###
 	def OnChoice(self, event):
-		""" strategy choice has been invoked
+		""" Strategy choice has been invoked
 		"""
 		selected_string = event.GetString()
 		self.simdia.selected_strategy = selected_string
@@ -198,6 +201,8 @@ class CollapsiblePanel(wx.Panel):
 		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = self.simdia.selected_strategy
 
 	def OnNTL(self, event):
+		""" No time Limit has been invoked
+		"""
 		cb2 = event.GetEventObject()
 
 		self.simdia.ntl = cb2.GetValue()
@@ -206,6 +211,8 @@ class CollapsiblePanel(wx.Panel):
 		__builtin__.__dict__['NTL'] = self.simdia.ntl
 
 	def OnProfiling(self, event):
+		""" Profiling has been invoked
+		"""
 		cb1 = event.GetEventObject()
 
 		self.simdia.prof = cb1.GetValue()
@@ -213,7 +220,6 @@ class CollapsiblePanel(wx.Panel):
 #-----------------------------------------------------------------
 class SimulationDialog(wx.Frame, wx.Panel):
 	""" SimulationDialog(parent, id, title, master)
-
 		Frame or Panel with progress bar
 	"""
 
@@ -226,7 +232,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			self.SetBackgroundColour(wx.NullColour)
 			self.panel = self
 
-			### panel herite of the left spiltter size
+			### panel inherite of the left spiltter size
 			self.panel.SetSize(parent.GetParent().GetSize())
 
 			# status bar of main application
