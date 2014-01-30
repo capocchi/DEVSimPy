@@ -116,20 +116,20 @@ class CollapsiblePanel(wx.Panel):
 		self.Layout()
 
 		### new height to apply
-		new_h = self.cp.GetSize()[-1]
+		new_h = self.simdia.GetSize()[-1] #self.cp.GetSize()[-1]
 
 		# and also change the labels
 		if self.cp.IsExpanded():
-			### change the collapsible lable
+			### change the collapsible label
 			self.cp.SetLabel(self.label2)
-			### adapte the window size
+			### adapt the window size
 			self.simdia.SetSizeWH(-1, self.org_h+new_h)
-			### Max limite
+			### Max limit
 			self.simdia.SetMaxSize(wx.Size(self.simdia.GetSize()[0], self.org_h+new_h))
 		else:
-			### change the collapsible lable
+			### change the collapsible label
 			self.cp.SetLabel(self.label1)
-			### adapte the window size
+			### adapt the window size
 			self.simdia.SetSizeWH(-1, self.org_h)
 
 	def MakePaneContent(self, pane):
@@ -137,7 +137,7 @@ class CollapsiblePanel(wx.Panel):
 
 		text2 = wx.StaticText(pane, wx.ID_ANY, _("%s algorithm:")%DEFAULT_DEVS_DIRNAME)
 
-		### list of posible strategy depending on the PyDEVS version
+		### list of possible strategy depending on the PyDEVS version
 		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
 			c = PYDEVS_SIM_STRATEGY_DICT.keys()
 		else:
@@ -189,7 +189,7 @@ class CollapsiblePanel(wx.Panel):
 		selected_string = event.GetString()
 		self.simdia.selected_strategy = selected_string
 
-		### update of ntl checkbox depending on the chosing strategy
+		### update of ntl checkbox depending on the choosing strategy
 		self.cb2.Enable(not (self.simdia.selected_strategy == 'original' and  DEFAULT_DEVS_DIRNAME == 'PyDEVS'))
 
 		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = self.simdia.selected_strategy
@@ -223,7 +223,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			self.SetBackgroundColour(wx.NullColour)
 			self.panel = self
 
-			### panel herite of the left spiltter size
+			### panel inherite of the left splitter size
 			self.panel.SetSize(parent.GetParent().GetSize())
 
 			# status bar de l'application principale
@@ -232,10 +232,10 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			wx.Frame.__init__(self, parent, id, title, style= wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
 
 			### adapt size of frame depending on the plateform
-			if  '__WXMSW__' in wx.PlatformInfo:
-				self.SetSize((280,220))
-			else:
-				self.SetSize((260,160))
+			#if  '__WXMSW__' in wx.PlatformInfo:
+			#	self.SetSize((280,240))
+			#else:
+			#	self.SetSize((260,160))
 
 			# disable the roll out of the frame
 			self.SetMinSize(self.GetSize())
@@ -260,10 +260,10 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		### profiling simulation with hotshot
 		self.prof = False
 
-		### No time limit simulation (defined in the builtin dico from .devsimpy file)
+		### No time limit simulation (defined in the builtin dictionary from .devsimpy file)
 		self.ntl = __builtin__.__dict__['NTL']
 
-		# definition du thread, du timer et du compteur pour les % de simulation
+		# definition of the thread, the timer and the counter for the simulation progress
 		self.thread = None
 		self.timer = wx.Timer(self, wx.NewId())
 		self.count = 10.0
@@ -323,22 +323,25 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		grid2.Add(self._btn3, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND)
 		grid2.Add(self._btn2, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND)
 		grid2.Add(self._btn4, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND)
-		vbox_body.Add(grid2, 0, wx.EXPAND, 9)
+
 
 		# panel4
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox1.Add(self._gauge, 1, wx.EXPAND, 9)
-		vbox_body.Add(hbox1, 0, wx.EXPAND, 9)
 
 		## panel5
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox2.Add(self._cp)
+		hbox2.Add(self._cp, 1, wx.EXPAND, 9)
+
+		vbox_body.Add(grid2, 0, wx.EXPAND, 9)
+		vbox_body.Add(hbox1, 0, wx.EXPAND, 9)
 		vbox_body.Add(hbox2, 0, wx.EXPAND, 9)
 
 		# fin panel
 		vbox_top.Add(vbox_body, 0, wx.EXPAND, 9)
 		self.panel.SetSizer(vbox_top)
-		vbox_top.Fit(self)
+
+		#vbox_top.Fit(self)
 
 		self._text1.SetFocus()
 		self._btn1.SetDefault()
