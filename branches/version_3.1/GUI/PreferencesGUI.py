@@ -30,7 +30,7 @@ import wx
 import wx.lib.filebrowsebutton as filebrowse
 
 import __main__
-import GUI.PluginsGUI as PluginsGUI
+from PluginsGUI import PluginsPanel, GeneralPluginsList
 import Core.Utilities.Utilities as Utilities
 if __name__ == '__main__':
 	__builtin__.__dict__['HOME_PATH'] = os.getcwd()
@@ -56,7 +56,7 @@ class GeneralPanel(wx.Panel):
 		self.domain_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Library directory:"), toolTip=_("Change the library directory"))
 		self.out_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Output directory:"), toolTip=_("Change the output directory"))
 
-		self.plugin_dir.SetValue(PLUGINS_DIR)
+		self.plugin_dir.SetValue(PLUGINS_PATH)
 		self.domain_dir.SetValue(DOMAIN_PATH)
 		self.out_dir.SetValue(OUT_DIR)
 
@@ -155,7 +155,7 @@ class GeneralPanel(wx.Panel):
 
 	###
 	def OnPluginsDirChanged(self, event):
-		__builtin__.__dict__['PLUGINS_DIR'] = os.path.basename(self.plugin_dir.GetValue())
+		__builtin__.__dict__['PLUGINS_PATH'] = os.path.basename(self.plugin_dir.GetValue())
 
 	###
 	def OnOutDirChanged(self, event):
@@ -411,7 +411,7 @@ class Preferences(wx.Toolbook):
 
 		### Plugin page setting (populate is done when page is chnaged)
 		self.pluginPanel = self.GetPage(self.GetPageCount() - 1)
-		self.CheckList = PluginsGUI.GeneralPluginsList(self.pluginPanel.GetRightPanel())
+		self.CheckList = GeneralPluginsList(self.pluginPanel.GetRightPanel())
 		self.pluginPanel.SetPluginsList(self.CheckList)
 
 		lpanel = self.pluginPanel.GetLeftPanel()
@@ -460,7 +460,7 @@ class Preferences(wx.Toolbook):
 		### plugin page
 		if new == 3:
 			### list of plugins file in plugin directory
-			l = list(os.walk(os.path.join(HOME_PATH, PLUGINS_DIR)))
+			l = list(os.walk(os.path.join(HOME_PATH, PLUGINS_PATH)))
 			### populate checklist with file in plugins directory
 			wx.CallAfter(self.CheckList.Populate, l)
 		event.Skip()
@@ -481,7 +481,7 @@ class Preferences(wx.Toolbook):
 
 				### trying to copy file in plugin directory
 				try:
-					shutil.copy2(filename, os.path.join(HOME_PATH, PLUGINS_DIR))
+					shutil.copy2(filename, os.path.join(HOME_PATH, PLUGINS_PATH))
 				except Exception, info:
 					sys.stderr.write(_('ERROR: %s copy failed!\n%s') % (os.path.basename(filemane), str(info)))
 			else:
@@ -524,7 +524,7 @@ class Preferences(wx.Toolbook):
 		""" Refresh list of plugins
 		"""
 		self.CheckList.Clear()
-		l = list(os.walk(os.path.join(HOME_PATH, PLUGINS_DIR)))
+		l = list(os.walk(os.path.join(HOME_PATH, PLUGINS_PATH)))
 		### populate checklist with file in plugins directory
 		wx.CallAfter(self.CheckList.Populate, l)
 
@@ -607,7 +607,7 @@ class PreferencesGUI(wx.Frame):
 
 		# __builtin__.__dict__['ICON_PATH'] = os.path.join('icons')
 		# __builtin__.__dict__['ICON_PATH_16_16'] = os.path.join(ICON_PATH, '16x16')
-		# __builtin__.__dict__['PLUGINS_DIR'] = 'plugins'
+		# __builtin__.__dict__['PLUGINS_PATH'] = 'plugins'
 		# __builtin__.__dict__['DOMAIN_PATH'] = 'Domain'
 		# __builtin__.__dict__['OUT_DIR'] = 'out'
 		# __builtin__.__dict__['NB_OPENED_FILE'] = 5

@@ -1975,7 +1975,7 @@ class CodeBlock(Block, Achievable.Achievable):
 		"""
 		state = Block.update(self, concret_subject)
 
-		if isinstance(concret_subject, PropertiesGridCtrl):
+		if Utilities.isInstance(concret_subject, "PropertiesGridCtrl"):
 			### table and dico of bad flag field (pink colored)
 			table = concret_subject.GetTable()
 			bad_flag_dico = table.bad_flag

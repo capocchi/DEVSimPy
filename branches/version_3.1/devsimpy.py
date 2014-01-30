@@ -139,15 +139,13 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'Assets', 'bitmaps', '
 				'HOME_PATH': ABS_HOME_PATH,
 				'ICON_PATH': os.path.join(ABS_HOME_PATH, 'Assets', 'icons'),
 				'ICON_PATH_16_16': os.path.join(ABS_HOME_PATH, 'Assets', 'icons', '16x16'),
-				'SIMULATION_SUCCESS_WAV_PATH': os.path.join(ABS_HOME_PATH, 'Assets', 'sounds',
-															'Simulation-Success.wav'),
-				'SIMULATION_ERROR_WAV_PATH': os.path.join(ABS_HOME_PATH, 'Assets', 'sounds', 'Simulation-Error.wav'),
+				'SIMULATION_SUCCESS_SOUND_PATH': os.path.join(ABS_HOME_PATH,'sounds', 'Simulation-Success.wav'),
+				'SIMULATION_ERROR_SOUND_PATH': os.path.join(ABS_HOME_PATH,'sounds', 'Simulation-Error.wav'),
 				'DOMAIN_PATH': os.path.join(ABS_HOME_PATH, 'Domain'), # path of local lib directory
 				'NB_OPENED_FILE': 5, # number of recent files
 				'NB_HISTORY_UNDO': 5, # number of undo
 				'OUT_DIR': 'out', # name of local output directory (composed by all .dat, .txt files)
-				'PLUGINS_DIR': 'plugins', # general plugins directory
-				#'PLUGINS_FILENAME': 'plugins',  # model plugins file name
+				'PLUGINS_PATH': os.path.join(ABS_HOME_PATH, 'plugins'), # path of plug-ins directory
 				'FONT_SIZE': 12, # Block font size
 				'LOCAL_EDITOR': True, # for the use of local editor
 				'LOG_FILE': os.devnull, # log file (null by default)
@@ -1579,7 +1577,8 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
 		info.SetVersion(self.GetVersion())
 		info.SetDescription(description)
 		info.SetCopyright(_('(C) 2011 oct SPE Laboratory'))
-		info.SetWebSite('http://www.spe.univ-corse.fr')
+		# info.SetWebSite('http://spe.univ-corse.fr')
+		info.SetWebSite('http://devsimpy.univ-corse.fr')
 		info.SetLicence(licence)
 		info.AddDeveloper(_('L. Capocchi and SPE team.'))
 		info.AddDocWriter(_('L. Capocchi and SPE team.'))
