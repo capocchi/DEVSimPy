@@ -46,7 +46,6 @@ if __name__ == '__main__':
 	'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),\
 	'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}
 
-
 from Utilities import IsAllDigits, playSound
 from pluginmanager import trigger_event, is_enable
 from Patterns.Strategy import *
@@ -107,8 +106,8 @@ class CollapsiblePanel(wx.Panel):
 		self.MakePaneContent(cp.GetPane())
 
 		sizer = wx.BoxSizer(wx.VERTICAL)
-		self.SetSizer(sizer)
 		sizer.Add(cp, 0, wx.EXPAND)
+		self.SetSizer(sizer)
 
 	def OnPaneChanged(self, evt=None):
 
@@ -323,7 +322,6 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		grid2.Add(self._btn3, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND)
 		grid2.Add(self._btn2, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND)
 		grid2.Add(self._btn4, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND)
-
 
 		# panel4
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
