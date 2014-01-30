@@ -206,9 +206,9 @@ class AtomicDEVS(BaseDEVS):
 	def poke(self, p, v):
 		"""Outputs message {\tt v} to output port {\tt p}.
 
-			This merely amounts to adding a new entry into dictionnary
-			{\tt myOutput}. Note that the dictionnary must be cleared before poking
-			any port. This is the simulator's responsability.
+			This merely amounts to adding a new entry into dictionary
+			{\tt myOutput}. Note that the dictionary must be cleared before poking
+			any port. This is the simulator's responsibility.
 		"""
 		self.myOutput[p] = v
 
@@ -218,7 +218,6 @@ class AtomicDEVS(BaseDEVS):
 		"""
 		value = self.myInput.get(p, None)
 		return copy.deepcopy(value) if value else value
-
 
 	def peek_all(self):
 		"""Retrives messages from all input port {\tt p}.

@@ -21,6 +21,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 from Mixins.Attributable import Attributable
+from DomainInterface.DomainBehavior import DomainBehavior
 
 import Container
 import DetachedFrame
@@ -180,4 +181,116 @@ class Abstractable:
         canvas.deselect()
         canvas.Refresh()
 
+#===============================================================================
+# Downward Atomic Model
+#===============================================================================
+class Downward(DomainBehavior):
+    """
+        the number of input ports is the number of coupled level 0 input ports.
+        the number of output ports is the number of coupled level i output ports.
+    """
 
+    def __init__(self, rule_fct=None):
+        """ Constructor
+        """
+        DomainBehavior.__init__(self)
+
+        ### dico of rules
+        self.rule = rule_fct
+        ### list of messages
+        self.msg_dict = {}
+
+        self.state = {'status':"Passif", 'sigma':float('inf')}
+
+    def extTransition(self):
+        """
+        """
+
+        ### acquisition of messages
+        for port in self.IPorts:
+            msg = self.peek(port)
+            if msg:
+                self.msg_dict[port.id] = msg
+
+        ### change state to active
+        self.state['status'] = 'actif'
+
+        ### update time advance
+        self.state['sigma'] = 0
+
+    def intTransition(self):
+        """
+        """
+        self.state['sigma'] = float('inf')
+        self.state['status'] = "Passif"
+        self.msg_dict = {}
+
+    def outputFnc(self):
+        """
+        """
+        for i in self.msg_list:
+            msg = self.msg_list[i]
+            self.poke(self.OPort[i], self.rule(i, msg))
+
+    def timeAdvance(self):
+        """
+        """
+        return self.state['sigma']
+
+#===============================================================================
+# Upward Atomic Model
+#===============================================================================
+class Upward(DomainBehavior):
+    """
+    """
+
+    def __init__(self):
+        """ Constructor.
+
+            the number of input ports is the number of coupled level i inputs ports.
+            the number of output ports is the number of coupled level 0 output ports.
+
+        """
+        DomainBehavior.__init__(self)
+
+        ### dico of rules
+        self.rule = rule_fct
+        ### list of messages
+        self.msg_dict = {}
+
+        self.state = {'status':"Passif", 'sigma':float('inf')}
+
+    def extTransition(self):
+        """
+        """
+
+        ### acquisition of messages
+        for port in self.IPorts:
+            msg = self.peek(port)
+            if msg:
+                self.msg_dict[port.id] = msg
+
+        ### change state to active
+        self.state['status'] = 'actif'
+
+        ### update time advance
+        self.state['sigma'] = 0
+
+    def intTransition(self):
+        """
+        """
+        self.state['sigma'] = float('inf')
+        self.state['status'] = "Passif"
+        self.msg_dict = {}
+
+    def outputFnc(self):
+        """
+        """
+        for i in self.msg_list:
+            msg = self.msg_list[i]
+            self.poke(self.OPort[i], self.rule(i, msg))
+
+    def timeAdvance(self):
+        """
+        """
+        return self.state['sigma']
