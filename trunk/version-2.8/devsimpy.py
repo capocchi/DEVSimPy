@@ -61,7 +61,7 @@ try:
 except ImportError:
 	sys.stdout.write("Hotshot module not found. If you want to perform profiling simulation, install it !")
 
-__min_wx_version__ = ['2.9','2.8','2.7','2.6','2.5']
+__min_wx_version__ = ['3.0','2.9','2.8','2.7','2.6','2.5']
 
 __wxpython_url__ = 'http://wxpython.org'
 __get__wxpython__ = 'Get it from %s'%__wxpython_url__
