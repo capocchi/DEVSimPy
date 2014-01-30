@@ -33,6 +33,7 @@ from wx.lib import wordwrap
 import  wx.gizmos as gizmos
 
 import Core.Components.Components as Components
+import wx.lib.imagebrowser as ib
 # import Core.Components.Container as Container
 
 import Core.Patterns.Observer as Observer

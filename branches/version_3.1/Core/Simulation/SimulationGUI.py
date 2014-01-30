@@ -20,11 +20,12 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-#import os
-#import sys
-#import copy
-#import threading
+import os
+import sys
+import copy
+import threading
 import wx
+
 # to send event
 if wx.VERSION_STRING < '2.9':
 	from wx.lib.pubsub import Publisher
@@ -32,23 +33,27 @@ else:
 	from wx.lib.pubsub import pub as Publisher
 
 from tempfile import gettempdir
+
 import __builtin__
 import traceback
 
-import Core.Utilities.Utilities as Utilities
-#import Core.Utilities.pluginmanager as pluginmanager
-# import Core.DEVSKernel.simulator as simulator
-# import Core.DEVSKernel.PyDEVS.DEVS as DEVS
-import Core.Components.Decorators as Decorators
-from Core.Patterns.Strategy import *
-
-_ = wx.GetTranslation
 ### just for individual test
 if __name__ == '__main__':
 	__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
 	__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {\
 	'PyDEVS':os.path.join(os.pardir,'Core','DEVSKernel','PyDEVS'),\
 	'PyPDEVS':os.path.join(os.pardir,'Core','DEVSKernel','PyPDEVS')}
+
+import Core.Utilities.Utilities as Utilities
+import Core.Utilities.pluginmanager as pluginmanager
+# import Core.DEVSKernel.simulator as simulator
+# import Core.DEVSKernel.PyDEVS.DEVS as DEVS
+import Core.Components.Decorators as Decorators
+from Core.Patterns.Strategy import *
+
+_ = wx.GetTranslation
+
+
 class TextObjectValidator(wx.PyValidator):
 	""" TextObjectValidator()
 	"""
@@ -426,7 +431,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 				pluginmanager.trigger_event("START_CONCURRENT_SIMULATION", parent=self, master=self.current_master)
 				
 				### future call is required because the simulator is flattened during the execution of the strategy 3
-				wx.FutureCall(1, trigger_event, 'START_DIAGRAM', parent=self, master=self.current_master)
+				wx.FutureCall(1, pluginmanager.trigger_event, 'START_DIAGRAM', parent=self, master=self.current_master)
 
 				### clear all log file
 				for fn in filter(lambda f: f.endswith('.devsimpy.log'), os.listdir(gettempdir())):
@@ -754,7 +759,7 @@ def simulator_factory(model, strategy, prof, ntl):
 					if __builtin__.__dict__['GUI_FLAG'] is True:
 						wx.CallAfter(Utilities.playSound, SIMULATION_ERROR_WAV_PATH)
 				else:
-					for m in filter(lambda a: isinstance(a, DEVS.AtomicDEVS), self.model.componentSet):
+					for m in filter(lambda a: hasattr(a,'finish'), self.model.componentSet):
 						### call finished method
 						Publisher.sendMessage('%d.finished' % (id(m)))
 					if __builtin__.__dict__['GUI_FLAG'] is True:

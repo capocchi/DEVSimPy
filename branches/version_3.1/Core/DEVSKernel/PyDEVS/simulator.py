@@ -20,7 +20,7 @@ import array
 import Core.DEVSKernel.PyDEVS.DEVS as DEVS
 #from Patterns.Strategy import SimStrategy1
 
-import Core.Utilities.pluginmanager as Utilities
+import Core.Utilities.pluginmanager as pluginmanager
 
 ### avec ce flag, on gere a totalité des messages sur les ports une seul fois dans delta_ext.
 WITHOUT_DELTA_EXT_FOR_ALL_PORT = True
@@ -71,8 +71,8 @@ class Sender:
 			AS = AtomicSolver()
 			r = AS.receive(d, msg)
 
-			Utilities.pluginmanager.trigger_event("SIM_BLINK", model=d, msg=msg)
-			Utilities.pluginmanager.trigger_event("SIM_TEST", model=d, msg=msg)
+			pluginmanager.trigger_event("SIM_BLINK", model=d, msg=msg)
+			pluginmanager.trigger_event("SIM_TEST", model=d, msg=msg)
 
 		return r
 
@@ -148,7 +148,7 @@ class AtomicSolver:
 			aDEVS.elapsed = 0
 
 			# The SIM_VERBOSE event occurs
-			Utilities.pluginmanager.trigger_event("SIM_VERBOSE", model=aDEVS, msg=0)
+			pluginmanager.trigger_event("SIM_VERBOSE", model=aDEVS, msg=0)
 
 			# Return the DEVS' output to the parent coupled-DEVS (rather than
 			# sending $(y,\,t)$ message).
@@ -175,7 +175,7 @@ class AtomicSolver:
 			aDEVS.elapsed = 0
 
 			# The SIM_VERBOSE event occurs
-			Utilities.pluginmanager.trigger_event("SIM_VERBOSE", model=aDEVS, msg=1)
+			pluginmanager.trigger_event("SIM_VERBOSE", model=aDEVS, msg=1)
 
 		# $(i,\,t)$ message --- sets origin of time at {\tt t}:
 		elif msg[0] == 0:

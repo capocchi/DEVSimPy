@@ -1,6 +1,7 @@
 __all__ =[
-"FusionTableGenerator",
 "FileGenerator",
-"XMLGenerator",
-"RandomGenerator"
+"FusionTableGenerator",
+"Generator",
+"RandomGenerator",
+"XMLGenerator"
 ]

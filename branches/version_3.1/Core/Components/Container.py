@@ -37,7 +37,7 @@ import wx
 import wx.lib.dragscroller
 #import wx.grid as gridlib
 #import wx.gizmos as gizmos
-#import wx.lib.imagebrowser as ib
+# import wx.lib.imagebrowser as ib
 import wx.lib.dialogs
 
 if wx.VERSION_STRING < '2.9':
@@ -83,6 +83,7 @@ import Core.Utilities.Utilities as Utilities
 #import Core.Utilities.pluginmanager as pluginmanager
 import Core.Components.Decorators as Decorators
 import Core.Components.Components as Components
+import Core.Components.AttributeEditor as AttributeEditor
 import Core.Simulation.SimulationGUI as SimulationGUI  # SimulationDialog
 
 #Import Mixins
@@ -1670,7 +1671,7 @@ class Block(RoundedRectangleShape, Connectable.Connectable, Resizeable.Resizeabl
 		"""
 		"""
 		canvas = event.GetEventObject()
-		f = AttributeEditor(canvas.GetParent(), wx.ID_ANY, self, canvas)
+		f = AttributeEditor.AttributeEditor(canvas.GetParent(), wx.ID_ANY, self, canvas)
 		f.Show()
 
 	def OnPluginsManager(self, event):
@@ -2514,7 +2515,7 @@ class Port(CircleShape, Connectable.Connectable, Selectable.Selectable, Attribut
 		"""
 		"""
 		canvas = event.GetEventObject()
-		f = AttributeEditor(canvas.GetParent(), wx.ID_ANY, self, canvas)
+		f = AttributeEditor.AttributeEditor(canvas.GetParent(), wx.ID_ANY, self, canvas)
 		f.Show()
 
 	###
