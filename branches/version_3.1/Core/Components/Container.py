@@ -2,11 +2,11 @@
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Container.py ---
-#                     --------------------------------
-#                        Copyright (c) 2014
-#                       Laurent CAPOCCHI
-#                      University of Corsica
-#                     --------------------------------
+#                     ----------------------------------
+#                          Copyright (c) 2014
+#                         Laurent CAPOCCHI
+#                        University of Corsica
+#                     ----------------------------------
 # Version 3.0                                        last modified: 29/01/2013
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
@@ -1017,7 +1017,7 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 
 	def SetParent(self, parent):
 		# Todo : regler le probleme d'import
-		# assert isinstance(parent, ShapeCanvas)
+		assert isinstance(parent, ShapeCanvas)
 		self.parent = parent
 
 	def GetParent(self):
@@ -1211,8 +1211,10 @@ class Diagram(Savable.Savable, Structurable.Structurable):
         ### if there are models in diagram
 		if self.GetCount() != 0 :
 			## window that contain the diagram which will be simulate
-			# mainW = wx.GetApp().GetTopWindow()
-			# window = Utilities.GetActiveWindow()
+##			mainW = wx.GetApp().GetTopWindow()
+##			win = mainW.GetActiveWindow()
+			obj = event.GetEventObject()
+			win = obj.GetTopLevelParent()
 
 			# diagram which will be simulate
 			diagram = self
@@ -1241,7 +1243,7 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 
 				# set the name of diagram from notebook nb2
 				nb2 = win.GetDiagramNotebook()
-				title = window.GetTitle() if isinstance(window, DetachedFrame.DetachedFrame) else nb2.GetPageText(nb2.GetSelection()).rstrip()
+				title  = win.GetTitle() if Utilities.isInstance(win, "DetachedFrame") else nb2.GetPageText(nb2.GetSelection()).rstrip() #HERE
 				diagram.label = os.path.splitext(os.path.basename(title))[0]
 
 				## delete all attached devs instances
@@ -1547,6 +1549,7 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 		return l
 
 
+
 #Basic Graphical Components---------------------------------------------------------
 class Block(RoundedRectangleShape, Connectable.Connectable, Resizeable.Resizeable, Selectable.Selectable,
 			Attributable.Attributable, Rotable.Rotable, Plugable.Plugable, Observer.Observer, Testable.Testable,
@@ -1798,6 +1801,7 @@ class CodeBlock(Block, Achievable.Achievable):
 		#print python_path
 		#print model_path
 		#print "\n"
+
 		### if the model path is wrong
 		if model_path != '':
 			if not os.path.exists(model_path):
@@ -1834,6 +1838,7 @@ class CodeBlock(Block, Achievable.Achievable):
 			### if DOMAIN is not in python_path
 			if dir_name in python_path:
 
+
 				path = os.path.join(os.path.dirname(DOMAIN_PATH), Utilities.relpath(str(python_path[python_path.index(dir_name):]).strip('[]')))
 
 				### try to find it in exportedPathList (after Domain check)
@@ -1855,18 +1860,21 @@ class CodeBlock(Block, Achievable.Achievable):
 
 		### test if args from construcor in python file stored in library (on disk) and args from stored model in dsp are the same
 		if os.path.exists(python_path) or zipfile.is_zipfile(os.path.dirname(python_path)):
-			args_from_stored_constructor_py = inspect.getargspec(cls.__init__).args[1:]
-			args_from_stored_block_model = state['args']
-			L = list(set(args_from_stored_constructor_py).symmetric_difference(set(args_from_stored_block_model)))
-			if L:
-				for arg in L:
-					if not arg in args_from_stored_constructor_py:
-						sys.stdout.write(_("Warning: %s come is old ('%s' arg is deprecated). We update it...\n" % (state['python_path'], arg)))
-						del state['args'][arg]
-					else:
-						arg_values = inspect.getargspec(cls.__init__).defaults
-						index = args_from_stored_constructor_py.index(arg)
-						state['args'].update({arg: arg_values[index]})
+			cls = Components.GetClass(state['python_path'])
+			if not isinstance(cls, tuple):
+				args_from_stored_constructor_py = inspect.getargspec(cls.__init__).args[1:]
+				args_from_stored_block_model = state['args']
+				L = list(set(args_from_stored_constructor_py).symmetric_difference(set(args_from_stored_block_model)))
+				if L:
+					for arg in L:
+							#print arg, args_from_stored_constructor_py
+						if not arg in args_from_stored_constructor_py:
+							sys.stdout.write(_("Warning: %s come is old ('%s' arg is deprecated). We update it...\n" % (state['python_path'], arg)))
+							del state['args'][arg]
+						else:
+							arg_values = inspect.getargspec(cls.__init__).defaults
+							index = args_from_stored_constructor_py.index(arg)
+							state['args'].update({arg: arg_values[index]})
 			else:
 				sys.stderr.write(_("Error in setstate for CodeBlock: %s\n"%str(cls)))
 
@@ -1878,7 +1886,11 @@ class CodeBlock(Block, Achievable.Achievable):
 			### for all filename attr
 			for name in filename_list:
 				fn = state['args'][name]
+
 				if not os.path.exists(fn):
+					#fn_dn = os.path.dirname(fn)
+					fn_bn = os.path.basename(Utilities.relpath(fn))
+
 					### try to redefine the path
 					if dir_name in fn:
 						fn = os.path.join(HOME_PATH, Utilities.relpath(str(fn[fn.index(dir_name):]).strip('[]')))

@@ -1153,6 +1153,7 @@ class ShapeCanvas(wx.ScrolledWindow, Observer.Subject):
 		""" Motion manager.
 		"""
 		import Core.Components.Container as Container
+		import Core.Components.AttributeEditor as AttributeEditor
 
 		if event.Dragging() and event.LeftIsDown():
 
@@ -1267,7 +1268,7 @@ class ShapeCanvas(wx.ScrolledWindow, Observer.Subject):
 
 					if (x <= xm < x + w) and (y <= ym < y + h):
 						if self.isSelected(s) and flag:
-							self.f = Container.QuickAttributeEditor(self, wx.ID_ANY, s)
+							self.f = AttributeEditor.QuickAttributeEditor(self, wx.ID_ANY, s)
 							self.timer.Start(1200)
 							break
 						else:

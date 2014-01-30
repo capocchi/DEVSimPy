@@ -28,14 +28,12 @@ import wx
 
 #import Core.Components.Components as Components
 import Core.Utilities.Utilities as Utilities
-import Core.Components.PropertiesGridCtrl as PropertiesGridCtrl
 import Core.Components.Decorators as Decorators
 
 import Core.Patterns.Observer as Observer
 
 import GUI.DiagramNotebook as DiagramNotebook
 import GUI.DetachedFrame as DetachedFrame
-
 
 ###
 class AttributeEditor(wx.Frame, wx.Panel):
@@ -56,9 +54,10 @@ class AttributeEditor(wx.Frame, wx.Panel):
 				@type canvas: canvas object
 		"""
 		import Mixins.Achievable as Achievable
+		import Core.Components.PropertiesGridCtrl as PropertiesGridCtrl
 
 		# pour gerer l'affichage dans la page de gauche dans le notebook
-		if isinstance(parent, (DiagramNotebook.DiagramNotebook, DetachedFrame)):
+		if isinstance(parent, (DiagramNotebook.DiagramNotebook, DetachedFrame.DetachedFrame)):
  			wx.Frame.__init__(self, parent, ID, model.label, size = wx.Size(400, 550), style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN | wx.STAY_ON_TOP)
 			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'properties.png'), wx.BITMAP_TYPE_PNG)))
 			self.Bind(wx.EVT_CLOSE, self.OnClose)
@@ -78,7 +77,7 @@ class AttributeEditor(wx.Frame, wx.Panel):
 		#self.parent.id = id(self.model)
 
 		# properties list
-		self._list = PropertiesGridCtrl(self)
+		self._list = PropertiesGridCtrl.PropertiesGridCtrl(self)
 
 		# Create a box sizer for self
 		self._box = wx.BoxSizer(wx.VERTICAL)

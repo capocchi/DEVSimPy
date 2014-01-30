@@ -151,9 +151,9 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'Assets', 'bitmaps', '
 				'FONT_SIZE': 12, # Block font size
 				'LOCAL_EDITOR': True, # for the use of local editor
 				'LOG_FILE': os.devnull, # log file (null by default)
-				'DEFAULT_SIM_STRATEGY': 'SimStrategy2', # choose the default simulation strategy
-				'SIM_STRATEGY_LIST': ['SimStrategy1', 'SimStrategy2', 'SimStrategy3'],
-				# list of available simulation strategy
+				'DEFAULT_SIM_STRATEGY': 'bag-based', #choose the default simulation strategy for PyDEVS
+				'PYDEVS_SIM_STRATEGY_DICT' : {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}, # list of available simulation strategy for PyDEVS package
+                'PYPDEVS_SIM_STRATEGY_DICT' : {'original':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}, # list of available simulation strategy for PyPDEVS package
 				'HELP_PATH': os.path.join('doc', 'html'), # path of help directory
 				'NTL': False, # No Time Limit for the simulation
 				'TRANSPARENCY': True, # Transparancy for DetachedFrame

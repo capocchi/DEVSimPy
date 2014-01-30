@@ -32,7 +32,7 @@ import wx.grid as gridlib
 from wx.lib import wordwrap
 import  wx.gizmos as gizmos
 
-# import Core.Components.Components as Components
+import Core.Components.Components as Components
 # import Core.Components.Container as Container
 
 import Core.Patterns.Observer as Observer

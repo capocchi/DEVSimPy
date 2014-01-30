@@ -2,12 +2,12 @@
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Utilities.py ---
-#                     --------------------------------
-#                          Copyright (c) 2013
-#                           Laurent CAPOCCHI
-#                        Andre-Toussaint Luciani
-#                         University of Corsica
-#                     --------------------------------
+#                     ----------------------------------
+#                          Copyright (c) 2014
+#                           Andre-T LUCIANI
+#                         Laurent CAPOCCHI
+#                        University of Corsica
+#                     ----------------------------------
 # Version 3.0                                        last modified: 18/02/2013
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #

@@ -453,6 +453,8 @@ class SimStrategy3(SimStrategy):
 		### init all atomic model from flat list
 		setAtomicModels(self.flat_priority_list, weakref.ref(self.ts))
 
+		### udpate the componentSet list of master (that no longer contains coupled model)
+		self.master.componentSet = self.flat_priority_list
 	def simulate(self, T=sys.maxint):
 		"""
 		"""
@@ -494,7 +496,7 @@ class SimStrategy3(SimStrategy):
 
 				### TODO: execute with process of model are parallel !
 				while priority_scheduler:
-					### get most priority model and apply its internal trnasition
+					### get most priority model and apply its internal transition
 					priority, model, transition_fct = heapq.heappop(priority_scheduler)
 					apply(transition_fct, (model,))
 

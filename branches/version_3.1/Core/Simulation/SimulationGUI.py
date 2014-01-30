@@ -307,7 +307,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		#panel 1
 		grid1 = wx.GridSizer(1, 2)
 		grid1.Add(self._text1, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_CENTER_HORIZONTAL)
-		grid1.Add(self._value, 1, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_HORIZONTAL)
+		grid1.Add(self._value, 1, wx.EXPAND | wx.ALIGN_CENTER_HORIZONTAL)
 		vbox_body.Add(grid1, 0, wx.EXPAND, 9)
 
 		# panel2
