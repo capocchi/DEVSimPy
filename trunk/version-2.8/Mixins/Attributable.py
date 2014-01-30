@@ -50,11 +50,11 @@ class Attributable:
 		if not hasattr(self, name):
 			setattr(self, name, typ)
 
-		self.attributes.append(name)
+			self.attributes.append(name)
 
 	###
 	def GetAttributes(self):
-		""" Return attributes attribut
+		""" Return attributes attribute
 		"""
 		return self.attributes
 
@@ -70,14 +70,15 @@ class Attributable:
 			if not hasattr(self, name):
 				setattr(self, name, '')
 
-		### set attributres list
+		### set attributes list
 		self.attributes = L
 
 	###
-	def AddAttributes(self, atts):
+	def AddAttributes(self, attrs):
 		""" Extend attributes list
 		"""
-		self.attributes.extend(atts)
+		for attr in filter(lambda a: a not in self.attributes, attrs):
+			self.attributes.append(attr)
 
 	###
 	def RemoveAttribute(self, name):
