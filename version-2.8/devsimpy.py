@@ -123,7 +123,7 @@ else:
 ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 ### specific builtin variables. (dont modify the defautls value. If you want to change it, go tot the PreferencesGUI from devsimpy interface.)
-builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'bitmaps', 'splash.png'),
+builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'),
 				'DEVSIMPY_PNG': 'iconDEVSimPy.png',	# png file for devsimpy icon
 				'HOME_PATH': ABS_HOME_PATH,
 				'ICON_PATH': os.path.join(ABS_HOME_PATH, 'icons'),
