@@ -8,7 +8,7 @@
 #                        Andre-Toussaint Luciani
 #                         University of Corsica
 #                     --------------------------------
-# Version 3.0                                        last modified: 04/03/2013
+# Version 3.1                                        last modified: 04/03/2013
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:

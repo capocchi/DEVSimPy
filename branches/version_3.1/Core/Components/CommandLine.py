@@ -8,7 +8,7 @@
 #                              Andre-Toussaint Luciani
 #                        SPE - University of Corsica
 #                     --------------------------------
-# Version 3.0                                      last modified:  28/03/13
+# Version 3.1                                      last modified:  28/03/13
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:

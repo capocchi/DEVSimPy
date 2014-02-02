@@ -7,7 +7,7 @@
 #                       Laurent CAPOCCHI
 #                      University of Corsica
 #                     --------------------------------
-# Version 3.0                                        last modified: 05/12/11
+# Version 3.1                                        last modified: 05/12/11
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 #  GENERAL NOTES AND REMARKS:

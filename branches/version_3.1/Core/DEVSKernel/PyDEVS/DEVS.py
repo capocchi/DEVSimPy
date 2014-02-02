@@ -7,7 +7,7 @@
 #                             Phd. Laurent CAPOCCHI
 #                          University of Corsica (France)
 #                     --------------------------------
-# Version 3.0                                        last modified: 25/11/09
+# Version 3.1                                        last modified: 25/11/09
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
