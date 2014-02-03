@@ -123,7 +123,7 @@ else:
 ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 ### specific builtin variables. (dont modify the defautls value. If you want to change it, go tot the PreferencesGUI from devsimpy interface.)
-builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash3.png'),
+builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'),
 				'DEVSIMPY_PNG': 'iconDEVSimPy.png',	# png file for devsimpy icon
 				'HOME_PATH': ABS_HOME_PATH,
 				'ICON_PATH': os.path.join(ABS_HOME_PATH, 'icons'),
@@ -373,7 +373,7 @@ class MainApplication(wx.Frame):
 		if self.cfg.Exists('version'):
 
 			### rewrite old configuration file
-			rewrite = float(self.cfg.Read("version")) < float(self.GetVersion())
+			rewrite = float(self.cfg.Read("version")) != float(self.GetVersion())
 
 			if not rewrite:
 
@@ -447,7 +447,9 @@ class MainApplication(wx.Frame):
 				sys.stdout.write("DEVSimPy is ready.\n")
 
 			else:
-
+				wx.MessageBox('.devsimpy file appear to be a very old version and should be updated....\nWe rewrite a new blank version.',
+									'Configuration',
+									wx.OK | wx.ICON_INFORMATION)
 				self.WriteDefaultConfigFile(self.cfg)
 
 		### create a new defaut .devsimpy config file
