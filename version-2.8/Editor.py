@@ -1002,7 +1002,7 @@ class EditionNotebook(wx.Notebook):
 	def CheckIndent(fileName):
 		"""
 		"""
-		return tabnanny.check(fileName)
+		tabnanny.check(fileName)
 
 	### NOTE: EditionNotebook :: OnReIndent 	=> Event on re-indent
 	def OnReIndent(self, event):
@@ -1289,7 +1289,6 @@ class Editor(wx.Frame, wx.Panel):
 
 			new_instance = self.ConfigSaving(base_name, dir_name, code)
 
-
 			### there is error in file ?
 			currentPage.error_flag = isinstance(new_instance, Exception)
 
@@ -1316,7 +1315,6 @@ class Editor(wx.Frame, wx.Panel):
 	def CheckErrors(self, base_name, code, new_instance):
 		"""
 		"""
-
 		if not self.nb.GetCurrentPage().ContainError():
 
 			self.nb.DoSaveFile(code)
@@ -1330,11 +1328,9 @@ class Editor(wx.Frame, wx.Panel):
 		""" perhaps re-indent ?
 		"""
 
-
 		fn = self.nb.GetCurrentPage().GetFilename()
 
 		output_checking = EditionNotebook.CheckIndent(fn)
-
 		if "indent not equal" in output_checking:
 			dial = wx.MessageDialog(self, _('Tab problem in %s.\n%s \
 				\nYou can try to re-indent it with Edit-> Re-indent sub-menu.' % (fn, output_checking)),
@@ -1342,11 +1338,7 @@ class Editor(wx.Frame, wx.Panel):
 			dial.ShowModal()
 		else:
 			### status bar notification
-			msg = _('Saving Error')
-			try:
-				self.Notification(True, msg, str(new_instance))
-			except UnicodeDecodeError :
-				self.Notification(True, msg, str(new_instance).decode('latin-1').encode("utf-8"))
+			self.Notification(True, _('Saving Error'), str(new_instance))
 
 	### NOTE: Editor :: Notification 			=> Notify something on the statusbar
 	def Notification(self, modify, *args):
@@ -1416,7 +1408,6 @@ class Editor(wx.Frame, wx.Panel):
 			code = '\n'.join(code.splitlines()) + '\n'
 
 			new_instance = self.ConfigSaving(base_name, dir_name, code)
-
 
 			### there is error in file ?
 			currentPage.error_flag = isinstance(new_instance, Exception)
@@ -1602,7 +1593,6 @@ class BlockEditor(Editor):
 
 	### NOTE: BlockEditor :: CheckErrors 		=> inherit method
 	def CheckErrors(self, base_name, code, new_instance):
-
 		if not self.nb.GetCurrentPage().ContainError():
 
 			### if some simulation is running
