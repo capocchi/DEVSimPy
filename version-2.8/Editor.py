@@ -1338,7 +1338,11 @@ class Editor(wx.Frame, wx.Panel):
 			dial.ShowModal()
 		else:
 			### status bar notification
-			self.Notification(True, _('Saving Error'), str(new_instance))
+			msg = _('Saving Error')
+			try:
+				self.Notification(True, msg, str(new_instance))
+			except UnicodeDecodeError:
+				self.Notification(True, msg, str(new_instance).decode('latin-1').encode("utf-8"))
 
 	### NOTE: Editor :: Notification 			=> Notify something on the statusbar
 	def Notification(self, modify, *args):
