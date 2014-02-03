@@ -1,0 +1,775 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>simconfig &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for simconfig</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module with the specific aim of creating a more simple configuration interface for the simulator.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">middleware</span>
+<span class="kn">from</span> <span class="nn">util</span> <span class="kn">import</span> <span class="n">DEVSException</span>
+<span class="kn">from</span> <span class="nn">DEVS</span> <span class="kn">import</span> <span class="n">CoupledDEVS</span><span class="p">,</span> <span class="n">AtomicDEVS</span>
+
+<span class="k">def</span> <span class="nf">local</span><span class="p">(</span><span class="n">sim</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test whether or not the simulation is done locally</span>
+
+<span class="sd">    :param sim: the simulator with the locations</span>
+<span class="sd">    :returns: bool -- whether or not the simulation is local</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">locations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;There are no Atomic DEVS models present in your provided model&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sim</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span>
+
+<div class="viewcode-block" id="SimulatorConfiguration"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration">[docs]</a><span class="k">class</span> <span class="nc">SimulatorConfiguration</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    All necessary simulator configuration options are provided. The necessary checks will be made and the simulator will be adapted accordingly.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SimulatorConfiguration.__init__"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+
+<span class="sd">        :param sim: the simulator to alter with actions on this configurator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span> <span class="o">=</span> <span class="n">sim</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setClassicDEVS"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setClassicDEVS">[docs]</a>    <span class="k">def</span> <span class="nf">setClassicDEVS</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classicDEVS</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Use Classic DEVS instead of Parallel DEVS. This option does not affect the use of Dynamic Structure DEVS or realtime simulation. Not usable with distributed simulation.</span>
+
+<span class="sd">        :param classicDEVS: whether or not to use Classic DEVS</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">local</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">)</span> <span class="ow">and</span> <span class="n">classicDEVS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Classic DEVS simulations cannot be distributed!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">classicDEVS</span> <span class="o">=</span> <span class="n">classicDEVS</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setMemoization"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setMemoization">[docs]</a>    <span class="k">def</span> <span class="nf">setMemoization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Use memoization to prevent repeated int/ext/confTransition calls when revertion was performed.</span>
+
+<span class="sd">        :param memo: enable or not</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Local simulation will never profit from memoization, so ignore it</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">local</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">memoization</span> <span class="o">=</span> <span class="n">memo</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setDSDEVS"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setDSDEVS">[docs]</a>    <span class="k">def</span> <span class="nf">setDSDEVS</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dsdevs</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Whether or not to enable Dynamic Structure DEVS simulation. If this is set to True, the modelTransition method will be called on all transitioned models. </span>
+<span class="sd">        If this is False, the modelTransition method will not be called, even if one is defined! Enabling this incurs a (slight) slowdown in the simulation,</span>
+<span class="sd">        due to the additional function calls and checks that have to be made. Currently only available in local simulation.</span>
+
+<span class="sd">        :param dsdevs: enable or not</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">local</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">dsdevs</span> <span class="o">=</span> <span class="n">dsdevs</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">dsdevs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Dynamic Structure DEVS is currently only available in local simulation!&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setAllowLocalReinit"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setAllowLocalReinit">[docs]</a>    <span class="k">def</span> <span class="nf">setAllowLocalReinit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allowed</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Allow a model to be reinitialized in local simulation.</span>
+<span class="sd">        This is not the case by default, as it would be required to save a copy of the model in memory during setup. Generating such a copy can be time consuming and the additional memory consumption could be unacceptable.</span>
+<span class="sd">        Distributed simulation is unaffected, since this always requires the creation of a copy.</span>
+<span class="sd">        If this is False and reinitialisation is done in a local simulation, an exception will be thrown.</span>
+
+<span class="sd">        .. warning:: The state that is accessible after the simulation will **NOT** be updated if this configuration parameter is used. If you want to have fully up to date states, you should also set the *setFetchAllAfterSimulation()* configuration parameter.</span>
+
+<span class="sd">        :param allowed: whether or not to allow reinitialization</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#TODO check whether or not simulation has already happened...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">allowLocalReinit</span> <span class="o">=</span> <span class="n">allowed</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setManualRelocator"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setManualRelocator">[docs]</a>    <span class="k">def</span> <span class="nf">setManualRelocator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the use of the manual relocator (the default). This mode allows the user to add manual *relocation directives*.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setActivityRelocatorCustom</span><span class="p">(</span><span class="s">&quot;manualRelocator&quot;</span><span class="p">,</span> <span class="s">&quot;ManualRelocator&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setRelocationDirective"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setRelocationDirective">[docs]</a>    <span class="k">def</span> <span class="nf">setRelocationDirective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">destination</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a relocation directive, stating that a relocation of a certain model should happen at or after the specified time (depending on when the GVT progresses over this time).</span>
+
+<span class="sd">        If multiple directives exist for the same model, the one with the highest time will be executed.</span>
+
+<span class="sd">        :param time: time after which the relocation should happen</span>
+<span class="sd">        :param model: the model to relocate at the specified time. Can either be its ID, or an AtomicDEVS or CoupledDEVS model. Note that providing a CoupledDEVS model is simply a shortcut for relocating the COMPLETE subtree elsewhere, as this does not stop at kernel boundaries.</span>
+<span class="sd">        :param destination: the location to where the model should be moved</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Relocation directive destination should be an integer or string&quot;</span><span class="p">)</span>
+        <span class="n">destination</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">destination</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Relocation directive got an unknown destination, got: </span><span class="si">%s</span><span class="s">, expected one of </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">size</span><span class="p">)))</span>
+
+        <span class="kn">from</span> <span class="nn">manualRelocator</span> <span class="kn">import</span> <span class="n">ManualRelocator</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">activityRelocator</span><span class="p">,</span> <span class="n">ManualRelocator</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Relocation directives can only be set when using a manual relocator (the default)</span><span class="se">\n</span><span class="s">You seem to have changed the relocator, so please revert it back by calling the &#39;setManualRelocator()&#39; first!&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">activityRelocator</span><span class="o">.</span><span class="n">addDirective</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="n">destination</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">AtomicDEVS</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">activityRelocator</span><span class="o">.</span><span class="n">addDirective</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="n">destination</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">CoupledDEVS</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">componentSet</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">setRelocationDirective</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setRelocationDirectives"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setRelocationDirectives">[docs]</a>    <span class="k">def</span> <span class="nf">setRelocationDirectives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directives</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets multiple relocation directives simultaneously, easier for batch processing. Behaviour is equal to running setRelocationDirective on every element of the iterable.</span>
+
+<span class="sd">        :param directives: an iterable containing all directives, in the form [time, model, destination]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">directive</span> <span class="ow">in</span> <span class="n">directives</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setRelocationDirective</span><span class="p">(</span><span class="n">directive</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">directive</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">directive</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setSchedulerCustom"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setSchedulerCustom">[docs]</a>    <span class="k">def</span> <span class="nf">setSchedulerCustom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">schedulerName</span><span class="p">,</span> <span class="n">locations</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Use a custom scheduler</span>
+
+<span class="sd">        :param filename: filename of the file containing the scheduler class</span>
+<span class="sd">        :param schedulerName: class name of the scheduler contained in the file</span>
+<span class="sd">        :param locations: if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Custom scheduler filename should be a string&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schedulerName</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Custom scheduler classname should be a string&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">locations</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># Set global scheduler, so overwrite all previous configs</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">schedulerType</span> <span class="o">=</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">schedulerName</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">schedulerLocations</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Only for a subset of models, but keep the default scheduler</span>
+            <span class="k">for</span> <span class="n">location</span> <span class="ow">in</span> <span class="n">locations</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">schedulerLocations</span><span class="p">[</span><span class="n">location</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">schedulerName</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setSchedulerActivityHeap"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setSchedulerActivityHeap">[docs]</a>    <span class="k">def</span> <span class="nf">setSchedulerActivityHeap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locations</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Use the basic activity heap scheduler, this is the default.</span>
+
+<span class="sd">        :param locations: if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSchedulerCustom</span><span class="p">(</span><span class="s">&quot;schedulerAH&quot;</span><span class="p">,</span> <span class="s">&quot;SchedulerAH&quot;</span><span class="p">,</span> <span class="n">locations</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setSchedulerPolymorphic"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setSchedulerPolymorphic">[docs]</a>    <span class="k">def</span> <span class="nf">setSchedulerPolymorphic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locations</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Use a polymorphic scheduler, which chooses at run time between the HeapSet scheduler or the Minimal List scheduler. Slight overhead due to indirection and statistics gathering.</span>
+
+<span class="sd">        .. warning:: Still unstable, don&#39;t use!</span>
+
+<span class="sd">        :param locations: if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSchedulerCustom</span><span class="p">(</span><span class="s">&quot;schedulerAuto&quot;</span><span class="p">,</span> <span class="s">&quot;SchedulerAuto&quot;</span><span class="p">,</span> <span class="n">locations</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setSchedulerDirtyHeap"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setSchedulerDirtyHeap">[docs]</a>    <span class="k">def</span> <span class="nf">setSchedulerDirtyHeap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locations</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Use the basic activity heap scheduler, but without periodic cleanup. The same scheduler as the one used in VLE.</span>
+
+<span class="sd">        :param locations: if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSchedulerCustom</span><span class="p">(</span><span class="s">&quot;schedulerDH&quot;</span><span class="p">,</span> <span class="s">&quot;SchedulerDH&quot;</span><span class="p">,</span> <span class="n">locations</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setSchedulerDiscreteTime"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setSchedulerDiscreteTime">[docs]</a>    <span class="k">def</span> <span class="nf">setSchedulerDiscreteTime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locations</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Use a basic &#39;discrete time&#39; style scheduler. If the model is scheduled, it has to be at the same time as all other scheduled models. It isn&#39;t really discrete time in the sense that it allows variable step sizes, only should ALL models agree on it.</span>
+
+<span class="sd">        :param locations: if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</span>
+
+<span class="sd">        .. warning:: Only use in local simulation!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">local</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Do not use this scheduler for distributed simulation&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSchedulerCustom</span><span class="p">(</span><span class="s">&quot;schedulerDT&quot;</span><span class="p">,</span> <span class="s">&quot;SchedulerDT&quot;</span><span class="p">,</span> <span class="n">locations</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setSchedulerSortedList"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setSchedulerSortedList">[docs]</a>    <span class="k">def</span> <span class="nf">setSchedulerSortedList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locations</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Use an extremely simple scheduler that simply sorts the list of all models. Useful if lots of invalidations happen and nearly all models are active.</span>
+
+<span class="sd">        :param locations: if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSchedulerCustom</span><span class="p">(</span><span class="s">&quot;schedulerSL&quot;</span><span class="p">,</span> <span class="s">&quot;SchedulerSL&quot;</span><span class="p">,</span> <span class="n">locations</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setSchedulerMinimalList"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setSchedulerMinimalList">[docs]</a>    <span class="k">def</span> <span class="nf">setSchedulerMinimalList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locations</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Use a simple scheduler that keeps a list of all models and traverses it each time in search of the first one. Slight variation of the sorted list scheduler.</span>
+
+<span class="sd">        :param locations: if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSchedulerCustom</span><span class="p">(</span><span class="s">&quot;schedulerML&quot;</span><span class="p">,</span> <span class="s">&quot;SchedulerML&quot;</span><span class="p">,</span> <span class="n">locations</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setSchedulerNoAge"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setSchedulerNoAge">[docs]</a>    <span class="k">def</span> <span class="nf">setSchedulerNoAge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locations</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        .. warning:: do not use this scheduler if the time advance can be equal to 0. This scheduler strips of the age from every scheduled model, which means that ages do not influence the scheduling.</span>
+
+<span class="sd">        Use a stripped scheduler that doesn&#39;t care about the age in a simulation. It is equivalent in design to the HeapSet scheduler,</span>
+<span class="sd">        but uses basic floats instead of tuples.</span>
+
+<span class="sd">        :param locations: if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSchedulerCustom</span><span class="p">(</span><span class="s">&quot;schedulerNA&quot;</span><span class="p">,</span> <span class="s">&quot;SchedulerNA&quot;</span><span class="p">,</span> <span class="n">locations</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setSchedulerHeapSet"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setSchedulerHeapSet">[docs]</a>    <span class="k">def</span> <span class="nf">setSchedulerHeapSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locations</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Use a scheduler containing 3 different datastructures. It is still experimental, though can provide noticeable performance boosts.</span>
+
+<span class="sd">        :param locations: if it is an iterable, the scheduler will only be applied to these locations. If it is None, all nodes will be affected.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSchedulerCustom</span><span class="p">(</span><span class="s">&quot;schedulerHS&quot;</span><span class="p">,</span> <span class="s">&quot;SchedulerHS&quot;</span><span class="p">,</span> <span class="n">locations</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setShowProgress"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setShowProgress">[docs]</a>    <span class="k">def</span> <span class="nf">setShowProgress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shows progress in ASCII in case a termination_time is given</span>
+
+<span class="sd">        :param progress: whether or not to show progress</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">progress</span> <span class="o">=</span> <span class="n">progress</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setTerminationModel"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setTerminationModel">[docs]</a>    <span class="k">def</span> <span class="nf">setTerminationModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Marks a specific AtomicDEVS model as being used in a termination condition. This is never needed in case no termination_condition is used. It will _force_ the model to run at the controller, ignoring the location that was provided in the model itself. Furthermore, it will prevent the model from migrating elsewhere.</span>
+
+<span class="sd">        :param model: an AtomicDEVS model that needs to run on the controller and shouldn&#39;t be allowed to migrate</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">setup</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Termination models cannot be changed after the first simulation was already ran!&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">AtomicDEVS</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">termination_models</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">model_id</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="c"># A model_id in itself is passed, so just add this</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">termination_models</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Only AtomicDEVS models can be used in termination conditions!&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.registerState"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.registerState">[docs]</a>    <span class="k">def</span> <span class="nf">registerState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Registers the state of a certain model to an attribute of the simulator AFTER simulation has finished</span>
+
+<span class="sd">        :param variable: name of the attribute to assign to</span>
+<span class="sd">        :param model: the AtomicDEVS model or its model id to fetch the state from</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">AtomicDEVS</span><span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">model_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">variable</span><span class="p">,</span> <span class="n">model</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setDrawModel"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setDrawModel">[docs]</a>    <span class="k">def</span> <span class="nf">setDrawModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">drawModel</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">outputfile</span><span class="o">=</span><span class="s">&quot;model.dot&quot;</span><span class="p">,</span> <span class="n">hideEdgeLabels</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Whether or not to draw the model and its distribution before simulation starts.</span>
+
+<span class="sd">        :param drawModel: whether or not to draw the model</span>
+<span class="sd">        :param hideEdgeLabels: whether or not to hide the labels of the connections, this speeds up the model drawing and allows for reasonably sized diagrams</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">setup</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Model can only be drawn at the first simulation run due to the model being optimized before simulation&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">drawModel</span> <span class="o">=</span> <span class="n">drawModel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">drawModelFile</span> <span class="o">=</span> <span class="n">outputfile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">hideEdgeLabels</span> <span class="o">=</span> <span class="n">hideEdgeLabels</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setFetchAllAfterSimulation"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setFetchAllAfterSimulation">[docs]</a>    <span class="k">def</span> <span class="nf">setFetchAllAfterSimulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fetch</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the complete model by fetching all states from all remote locations. This is different from &#39;registerState&#39;, as it will fetch everything and it will modify the original model instead of adding an attribute to the Simulator object</span>
+
+<span class="sd">        :param fetch: whether or not to fetch all states from all models</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">fetchAll</span> <span class="o">=</span> <span class="n">fetch</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setActivityTrackingVisualisation"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setActivityTrackingVisualisation">[docs]</a>    <span class="k">def</span> <span class="nf">setActivityTrackingVisualisation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visualize</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the simulation to visualize the results from activity tracking. An x and y parameter can be given to visualize it in a cell style.</span>
+
+<span class="sd">        :param visualize: whether or not to visualize it</span>
+<span class="sd">        :param x: the horizontal size of the grid (optional)</span>
+<span class="sd">        :param y: the vertical size of the grid (optional)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">visualize</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Activity Tracking visualisation requires a boolean&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">visualize</span> <span class="ow">and</span> <span class="p">((</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">y</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Activity Tracking cell view requires both a positive x and y parameter for the maximal size of the grid&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">activityVisualisation</span> <span class="o">=</span> <span class="n">visualize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">activityTracking</span> <span class="o">=</span> <span class="n">visualize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">x_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">y_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setLocationCellMap"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setLocationCellMap">[docs]</a>    <span class="k">def</span> <span class="nf">setLocationCellMap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locationmap</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the simulation to produce a nice Cell DEVS like output file of the current location. This file will be regenerated as soon as some relocations are processed.</span>
+
+<span class="sd">        :param locationmap: whether or not to generate this file</span>
+<span class="sd">        :param x: the horizontal size of the grid</span>
+<span class="sd">        :param y: the vertical size of the grid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">locationmap</span> <span class="ow">and</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Location cell view requires a positive x and y parameter for the maximal size of the grid&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">locationCellView</span> <span class="o">=</span> <span class="n">locationmap</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">x_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">y_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setTerminationCondition"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setTerminationCondition">[docs]</a>    <span class="k">def</span> <span class="nf">setTerminationCondition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">condition</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the termination condition for the simulation. Setting this will remove a previous termination time and condition. This condition will be executed on the controller</span>
+
+<span class="sd">        :param condition: a function to call that returns a boolean whether or not to halt simulation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">termination_condition</span> <span class="o">=</span> <span class="n">condition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">termination_time</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setTerminationTime"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setTerminationTime">[docs]</a>    <span class="k">def</span> <span class="nf">setTerminationTime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the termination time for the simulation. Setting this will remove a previous termination time and condition.</span>
+
+<span class="sd">        :param time: time at which simulation should be halted</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Simulation termination time should be either an integer or a float&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">time</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Simulation termination time cannot be negative&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">termination_condition</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c"># Convert to float, as otherwise we would have to do this conversion implicitly at every iteration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">termination_time</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setVerbose"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setVerbose">[docs]</a>    <span class="k">def</span> <span class="nf">setVerbose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the use of a verbose tracer.</span>
+
+<span class="sd">        Calling this function multiple times will register a tracer for each of them (thus output to multiple files is possible, though more inefficient than simply (manually) copying the file at the end).</span>
+
+<span class="sd">        :param filename: string representing the filename to write the trace to, None means stdout</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Verbose filename should either be None or a string&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCustomTracer</span><span class="p">(</span><span class="s">&quot;tracerVerbose&quot;</span><span class="p">,</span> <span class="s">&quot;TracerVerbose&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">filename</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setRemoveTracers"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setRemoveTracers">[docs]</a>    <span class="k">def</span> <span class="nf">setRemoveTracers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes all currently registered tracers, might be useful in reinitialised simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">tracers</span> <span class="o">=</span> <span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setCell"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setCell">[docs]</a>    <span class="k">def</span> <span class="nf">setCell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_size</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">y_size</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">cell_file</span> <span class="o">=</span> <span class="s">&quot;celltrace&quot;</span><span class="p">,</span> <span class="n">multifile</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the cell tracing flag of the simulation</span>
+
+<span class="sd">        :param cell: whether or not verbose output should be generated</span>
+<span class="sd">        :param x_size: the horizontal length of the grid</span>
+<span class="sd">        :param y_size: the vertical length of the grid</span>
+<span class="sd">        :param cell_file: the file to save the generated trace to</span>
+<span class="sd">        :param multifile: if True, each timestep will be save to a seperate file (nice for visualisations)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">x_size</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">y_size</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Cell Tracing requires both an x and y size&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x_size</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">y_size</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Cell Tracing sizes should be positive&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCustomTracer</span><span class="p">(</span><span class="s">&quot;tracerCell&quot;</span><span class="p">,</span> <span class="s">&quot;TracerCell&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">cell_file</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">x_size</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">y_size</span><span class="p">),</span> <span class="n">multifile</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setXML"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setXML">[docs]</a>    <span class="k">def</span> <span class="nf">setXML</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the use of a XML tracer.</span>
+
+<span class="sd">        Calling this function multiple times will register a tracer for each of them (thus output to multiple files is possible, though more inefficient than simply (manually) copying the file at the end).</span>
+
+<span class="sd">        :param filename: string representing the filename to write the trace to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;XML filename should be a string&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCustomTracer</span><span class="p">(</span><span class="s">&quot;tracerXML&quot;</span><span class="p">,</span> <span class="s">&quot;TracerXML&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">filename</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setVCD"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setVCD">[docs]</a>    <span class="k">def</span> <span class="nf">setVCD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the use of a VCD tracer.</span>
+
+<span class="sd">        Calling this function multiple times will register a tracer for each of them (thus output to multiple files is possible, though more inefficient than simply (manually) copying the file at the end).</span>
+
+<span class="sd">        :param filename: string representing the filename to write the trace to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;VCD filename should be a string&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCustomTracer</span><span class="p">(</span><span class="s">&quot;tracerVCD&quot;</span><span class="p">,</span> <span class="s">&quot;TracerVCD&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">filename</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setCustomTracer"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setCustomTracer">[docs]</a>    <span class="k">def</span> <span class="nf">setCustomTracer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tracerfile</span><span class="p">,</span> <span class="n">tracerclass</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the use of a custom tracer, loaded at run time.</span>
+
+<span class="sd">        Calling this function multiple times will register a tracer for each of them (thus output to multiple files is possible, though more inefficient than simply (manually) copying the file at the end).</span>
+
+<span class="sd">        :param tracerfile: the file containing the tracerclass</span>
+<span class="sd">        :param tracerclass: the class to instantiate</span>
+<span class="sd">        :param args: arguments to be passed to the tracerclass&#39;s constructor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">tracers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">tracerfile</span><span class="p">,</span> <span class="n">tracerclass</span><span class="p">,</span> <span class="n">args</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setLogging"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setLogging">[docs]</a>    <span class="k">def</span> <span class="nf">setLogging</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the logging destination for the syslog server.</span>
+
+<span class="sd">        :param destination: A tuple/list containing an address, port pair defining the location of the syslog server. Set to None to prevent modification</span>
+<span class="sd">        :param level: the level at which logging should happen. This can either be a logging level from the logging module, or it can be a string specifying this level. Accepted strings are: &#39;debug&#39;, &#39;info&#39;, &#39;warning&#39;, &#39;warn&#39;, &#39;error&#39;, &#39;critical&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">nested</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Logging in nested simulation is not allowed, the logging settings of the parent are used!&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">destination</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">destination</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Logging destination should be a tuple or a list containing an IP addres, followed by a port address&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="kn">import</span> <span class="nn">logging</span>
+            <span class="c"># Convert to the correct location</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="n">level</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="n">loglevels</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;debug&quot;</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="s">&quot;info&quot;</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="s">&quot;warning&quot;</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARN</span><span class="p">,</span> <span class="s">&quot;warn&quot;</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARN</span><span class="p">,</span> <span class="s">&quot;error&quot;</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span> <span class="s">&quot;critical&quot;</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">CRITICAL</span><span class="p">}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">level</span> <span class="o">=</span> <span class="n">loglevels</span><span class="p">[</span><span class="n">level</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Logging level </span><span class="si">%s</span><span class="s"> not recognized&quot;</span> <span class="o">%</span> <span class="n">level</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="n">destination</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">loglevel</span> <span class="o">=</span> <span class="n">level</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setGVTInterval"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setGVTInterval">[docs]</a>    <span class="k">def</span> <span class="nf">setGVTInterval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gvt_int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the interval in seconds between 2 GVT calculations. This is the time between the ending of the previous run and the start of the next run, to prevent overlapping calculations.</span>
+
+<span class="sd">        .. note:: Parameter should be at least 1 to prevent an overload of GVT calculations</span>
+
+<span class="sd">        :param gvt_int: interval in seconds (float or integer)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gvt_int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gvt_int</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;GVT interval should be an integer or a float&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">gvt_int</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;GVT interval should be larger than or equal to one&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">GVT_interval</span> <span class="o">=</span> <span class="n">gvt_int</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setCheckpointing"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setCheckpointing">[docs]</a>    <span class="k">def</span> <span class="nf">setCheckpointing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">chk_int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        .. warning:: name parameter will be used as a filename, so avoid special characters</span>
+
+<span class="sd">        Sets the interval between 2 checkpoints in terms of GVT calculations. This option generates PDC files starting with &#39;name&#39;. This is only possible when using MPI.</span>
+
+<span class="sd">        :param name: name to prepend to each checkpoint file</span>
+<span class="sd">        :param chk_int: number of GVT runs that are required to trigger a checkpoint. For example 3 means that a checkpoint will be created after each third GVT calculation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">chk_int</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Checkpoint interval should be an integer&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Checkpoint name should be a string&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">chk_int</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Checkpoint interval should be larger than or equal to one&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">realtime</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Checkpointing is not possible under realtime simulation&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">CHK_interval</span> <span class="o">=</span> <span class="n">chk_int</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">CHK_name</span> <span class="o">=</span> <span class="n">name</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setStateSaving"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setStateSaving">[docs]</a>    <span class="k">def</span> <span class="nf">setStateSaving</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_saving</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the type of state saving to use, this will have a high impact on performance. It is made customizable as some more general techniques will be much slower, though necessary in certain models.</span>
+
+<span class="sd">        :param state_saving: Either an ID of the option, or (recommended) a string specifying the method, see options below.</span>
+
+<span class="sd">        .. glossary::</span>
+
+<span class="sd">           deepcopy</span>
+<span class="sd">                use the deepcopy module</span>
+
+<span class="sd">           pickle0</span>
+<span class="sd">                use the (c)pickle module with pickling protocol 0</span>
+
+<span class="sd">           pickleH</span>
+<span class="sd">                use the (c)pickle module with the highest available protocol</span>
+
+<span class="sd">           pickle</span>
+<span class="sd">                use the (c)pickle module</span>
+
+<span class="sd">           copy</span>
+<span class="sd">                use the copy module (only safe for flat states)</span>
+
+<span class="sd">           assign</span>
+<span class="sd">                simply assign states (only safe for primitive states)</span>
+
+<span class="sd">           none</span>
+<span class="sd">                equivalent to assign (only safe for primitive states)</span>
+
+<span class="sd">           custom</span>
+<span class="sd">                define a custom &#39;copy&#39; function in every state and use this</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state_saving</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state_saving</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;State saving should be done using an integer or a string&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state_saving</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;deepcopy&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;pickle0&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&quot;pickleH&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s">&quot;pickle&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s">&quot;copy&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s">&quot;assign&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s">&quot;none&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s">&quot;custom&quot;</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="s">&quot;marshal&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">state_saving</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="n">state_saving</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;State saving option </span><span class="si">%s</span><span class="s"> not recognized&quot;</span> <span class="o">%</span> <span class="n">state_saving</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">state_saving</span> <span class="o">=</span> <span class="n">state_saving</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setMessageCopy"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setMessageCopy">[docs]</a>    <span class="k">def</span> <span class="nf">setMessageCopy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">copy_method</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the type of message copying to use, this will have an impact on performance. It is made customizable as some more general techniques will be much slower.</span>
+
+<span class="sd">        :param copy_method: Either an ID of the option, or (recommended) a string specifying the method, see options below</span>
+
+<span class="sd">        .. glossary::</span>
+
+<span class="sd">           pickle</span>
+<span class="sd">                use the (c)pickle module</span>
+
+<span class="sd">           custom</span>
+<span class="sd">                define a custom &#39;copy&#39; function in every message and use this</span>
+
+<span class="sd">           none</span>
+<span class="sd">                don&#39;t use any copying at all, unsafe though most other DEVS simulators only supply this</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">copy_method</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">copy_method</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Message copy method should be done using an integer or a string&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">copy_method</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;pickle&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;custom&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&quot;none&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">copy_method</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="n">copy_method</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Message copy option </span><span class="si">%s</span><span class="s"> not recognized&quot;</span> <span class="o">%</span> <span class="n">copy_method</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">msgCopy</span> <span class="o">=</span> <span class="n">copy_method</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setRealTime"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setRealTime">[docs]</a>    <span class="k">def</span> <span class="nf">setRealTime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">realtime</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the use of realtime instead of &#39;as fast as possible&#39;.</span>
+
+<span class="sd">        :param realtime: whether or not to use realtime simulation</span>
+<span class="sd">        :param scale: the scale for scaled real time, every delay will be multiplied with this number</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">local</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Real time simulation is only possible in local simulation!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">realtime</span> <span class="o">=</span> <span class="n">realtime</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">realtimeScale</span> <span class="o">=</span> <span class="n">scale</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setRealTimeInputFile"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setRealTimeInputFile">[docs]</a>    <span class="k">def</span> <span class="nf">setRealTimeInputFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generatorfile</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the realtime input file to use. If realtime is not yet set, this will auto-enable it.</span>
+
+<span class="sd">        :param generatorfile: the file to use, should be a string, NOT a file handle. None is acceptable if no file should be used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">realtime</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setRealTime</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">generatorfile</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">generatorfile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Realtime generator should be a string or None&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">generatorfile</span> <span class="o">=</span> <span class="n">generatorfile</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setRealTimePlatformThreads"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setRealTimePlatformThreads">[docs]</a>    <span class="k">def</span> <span class="nf">setRealTimePlatformThreads</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the realtime platform to Python Threads. If realtime is not yet set, this will auto-enable it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">realtime</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setRealTime</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">subsystem</span> <span class="o">=</span> <span class="s">&quot;python&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">realtime_extra</span> <span class="o">=</span> <span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setRealTimePlatformTk"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setRealTimePlatformTk">[docs]</a>    <span class="k">def</span> <span class="nf">setRealTimePlatformTk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tk</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        .. note:: this clearly requires Tk to be present.</span>
+
+<span class="sd">        Sets the realtime platform to Tk events. If realtime is not yet set, this will auto-enable it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">realtime</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setRealTime</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">subsystem</span> <span class="o">=</span> <span class="s">&quot;tkinter&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">realtime_extra</span> <span class="o">=</span> <span class="p">[</span><span class="n">tk</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setRealTimePlatformGameLoop"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setRealTimePlatformGameLoop">[docs]</a>    <span class="k">def</span> <span class="nf">setRealTimePlatformGameLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the realtime platform to Game Loop. If realtime is not yet set, this will auto-enable it.</span>
+
+<span class="sd">        :param fps: the number of times the game loop call should be made per second</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">realtime</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setRealTime</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">subsystem</span> <span class="o">=</span> <span class="s">&quot;loop&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">realtime_extra</span> <span class="o">=</span> <span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setRealTimePorts"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setRealTimePorts">[docs]</a>    <span class="k">def</span> <span class="nf">setRealTimePorts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ports</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the dictionary of ports that can be used to put input on. If realtime is not yet set, this will auto-enable it.</span>
+
+<span class="sd">        :param ports: dictionary with strings as keys, ports as values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">realtime</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setRealTime</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ports</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Realtime input port references should be a dictionary&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">realTimeInputPortReferences</span> <span class="o">=</span> <span class="n">ports</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setReinitState"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setReinitState">[docs]</a>    <span class="k">def</span> <span class="nf">setReinitState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">newState</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reinitialize the state of a certain model</span>
+
+<span class="sd">        :param model: model whose state to change</span>
+<span class="sd">        :param newState: state to assign to the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">model_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">modifyValues</span><span class="p">[(</span><span class="n">model</span><span class="p">,</span> <span class="s">&quot;state&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">newState</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setReinitStateAttr"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setReinitStateAttr">[docs]</a>    <span class="k">def</span> <span class="nf">setReinitStateAttr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reinitialize an attribute of the state of a certain model</span>
+
+<span class="sd">        :param model: model whose state to change</span>
+<span class="sd">        :param attr: string representation of the attribute to change</span>
+<span class="sd">        :param value: value to assign</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">model_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">modifyStateValues</span><span class="p">[(</span><span class="n">model</span><span class="p">,</span> <span class="n">attr</span><span class="p">)]</span> <span class="o">=</span> <span class="n">value</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setReinitAttributes"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setReinitAttributes">[docs]</a>    <span class="k">def</span> <span class="nf">setReinitAttributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reinitialize an attribute of the model itself</span>
+
+<span class="sd">        :param model: model whose attribute to set</span>
+<span class="sd">        :param attr: string representation of the attribute to change</span>
+<span class="sd">        :param value: value to assign</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">model_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">modifyValues</span><span class="p">[(</span><span class="n">model</span><span class="p">,</span> <span class="n">attr</span><span class="p">)]</span> <span class="o">=</span> <span class="n">value</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setReinitClear"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setReinitClear">[docs]</a>    <span class="k">def</span> <span class="nf">setReinitClear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clear all previously done alterations to the state</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">modifyValues</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">modifyStateValues</span> <span class="o">=</span> <span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setActivityRelocatorCustom"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setActivityRelocatorCustom">[docs]</a>    <span class="k">def</span> <span class="nf">setActivityRelocatorCustom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">classname</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the use of a custom relocator</span>
+
+<span class="sd">        :param filename: filename containing the relocator</span>
+<span class="sd">        :param classname: classname of the relocator</span>
+<span class="sd">        :param args: all other args are passed to the constructor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">exec</span><span class="p">(</span><span class="s">&quot;from </span><span class="si">%s</span><span class="s"> import </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">classname</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">activityRelocator</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">(*args)&quot;</span> <span class="o">%</span> <span class="n">classname</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setActivityRelocatorBasicBoundary"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setActivityRelocatorBasicBoundary">[docs]</a>    <span class="k">def</span> <span class="nf">setActivityRelocatorBasicBoundary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">swappiness</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the use of the *activity* relocator called *&#39;Basic Boundary&#39;*.</span>
+
+<span class="sd">        :param swappiness: how big the deviation from the average should be before scheduling relocations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">swappiness</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Basic Boundary Activity Relocator should have a swappiness &gt;= 1.0&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setActivityRelocatorCustom</span><span class="p">(</span><span class="s">&quot;basicBoundaryRelocator&quot;</span><span class="p">,</span> <span class="s">&quot;BasicBoundaryRelocator&quot;</span><span class="p">,</span> <span class="n">swappiness</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setGreedyAllocator"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setGreedyAllocator">[docs]</a>    <span class="k">def</span> <span class="nf">setGreedyAllocator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the use of the greedy allocator that is contained in the standard PyPDEVS distribution.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">greedyAllocator</span> <span class="kn">import</span> <span class="n">GreedyAllocator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setInitialAllocator</span><span class="p">(</span><span class="n">GreedyAllocator</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setAutoAllocator"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setAutoAllocator">[docs]</a>    <span class="k">def</span> <span class="nf">setAutoAllocator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the use of an initial allocator that simply distributes the root models.</span>
+<span class="sd">        This is a static allocator, meaning that no event activity will be generated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">autoAllocator</span> <span class="kn">import</span> <span class="n">AutoAllocator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setInitialAllocator</span><span class="p">(</span><span class="n">AutoAllocator</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setInitialAllocator"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setInitialAllocator">[docs]</a>    <span class="k">def</span> <span class="nf">setInitialAllocator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allocator</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the use of an initial allocator instead of the manual allocation. Can be set to None to use manual allocation (default).</span>
+
+<span class="sd">        :param allocator: the allocator to use for assigning the initial locations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">allocator</span> <span class="o">=</span> <span class="n">allocator</span>
+</div>
+<div class="viewcode-block" id="SimulatorConfiguration.setForceSequential"><a class="viewcode-back" href="../simulator.html#simconfig.SimulatorConfiguration.setForceSequential">[docs]</a>    <span class="k">def</span> <span class="nf">setForceSequential</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Force a sequential simulation by setting all locations to 0.</span>
+
+<span class="sd">        This is an utility method to allow both sequential and distributed simulation with the same model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">setLocation</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

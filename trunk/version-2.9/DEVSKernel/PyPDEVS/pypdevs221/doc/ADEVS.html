@@ -1,0 +1,375 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>AtomicDEVS User Interface &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="DEVS User Interface" href="DEVS.html" />
+    <link rel="next" title="CoupledDEVS User Interface" href="CDEVS.html" />
+    <link rel="prev" title="DEVS User Interface" href="DEVS.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="CDEVS.html" title="CoupledDEVS User Interface"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="DEVS.html" title="DEVS User Interface"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="interface.html" >Interface</a> &raquo;</li>
+          <li><a href="DEVS.html" accesskey="U">DEVS User Interface</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="atomicdevs-user-interface">
+<h1>AtomicDEVS User Interface<a class="headerlink" href="#atomicdevs-user-interface" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt>
+<em class="property">class </em><tt class="descclassname">DEVS.</tt><tt class="descname">AtomicDEVS</tt><big>(</big><em>name=None</em><big>)</big><a class="reference internal" href="_modules/DEVS.html#AtomicDEVS"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Abstract base class for all atomic-DEVS descriptive classes.</p>
+<dl class="method">
+<dt>
+<tt class="descclassname">AtomicDEVS.</tt><tt class="descname">__init__</tt><big>(</big><em>name=None</em><big>)</big><a class="reference internal" href="_modules/DEVS.html#AtomicDEVS.__init__"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Constructor for an AtomicDEVS model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; name of the model, can be None to have an automatically generated name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">AtomicDEVS.</tt><tt class="descname">extTransition</tt><big>(</big><em>inputs</em><big>)</big><a class="reference internal" href="_modules/DEVS.html#AtomicDEVS.extTransition"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>DEFAULT External Transition Function.</p>
+<p>Accesses state and elapsed attributes, as well as inputs
+through the passed dictionary. Returns the new state.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Should only write to the <em>state</em> attribute.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>inputs</strong> &#8211; dictionary containing all ports and their corresponding outputs</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">state &#8211; the new state of the model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">AtomicDEVS.</tt><tt class="descname">intTransition</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/DEVS.html#AtomicDEVS.intTransition"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>DEFAULT Internal Transition Function.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Should only write to the <em>state</em> attribute.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">state &#8211; the new state of the model</td>
+</tr>
+</tbody>
+</table>
+<p class="versionchanged">
+<span class="versionmodified">Changed in version 2.1: </span>The <em>elapsed</em> attribute is no longer guaranteed to be correct as this isn&#8217;t required by the DEVS formalism.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">AtomicDEVS.</tt><tt class="descname">confTransition</tt><big>(</big><em>inputs</em><big>)</big><a class="reference internal" href="_modules/DEVS.html#AtomicDEVS.confTransition"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>DEFAULT Confluent Transition Function.</p>
+<p>Accesses state and elapsed attributes, as well as inputs
+through the passed dictionary. Returns the new state.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Should only write to the <em>state</em> attribute.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>inputs</strong> &#8211; dictionary containing all ports and their corresponding outputs</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">state &#8211; the new state of the model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">AtomicDEVS.</tt><tt class="descname">outputFnc</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/DEVS.html#AtomicDEVS.outputFnc"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>DEFAULT Output Function.</p>
+<p>Accesses only state attribute. Returns the output on the different ports as a dictionary.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Should <strong>not</strong> write to any attribute.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">dictionary containing output ports as keys and lists of output on that port as value</td>
+</tr>
+</tbody>
+</table>
+<p class="versionchanged">
+<span class="versionmodified">Changed in version 2.1: </span>The <em>elapsed</em> attribute is no longer guaranteed to be correct as this isn&#8217;t required by the DEVS formalism.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">AtomicDEVS.</tt><tt class="descname">timeAdvance</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/DEVS.html#AtomicDEVS.timeAdvance"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>DEFAULT Time Advance Function.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Should ideally be deterministic, though this is not mandatory for simulation.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the time advance of the model</td>
+</tr>
+</tbody>
+</table>
+<p class="versionchanged">
+<span class="versionmodified">Changed in version 2.1: </span>The <em>elapsed</em> attribute is no longer guaranteed to be correct as this isn&#8217;t required by the DEVS formalism.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">AtomicDEVS.</tt><tt class="descname">simSettings</tt><big>(</big><em>simulator</em><big>)</big></dt>
+<dd><p>Modifies the simulation settings from within the model.</p>
+<p>This function is called _before_ direct connection and distribution is performed, so the user can still access the complete hierarchy.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This function is <em>only</em> called on the root model of the simulation, thus the model passed to the constructor of the Simulator object.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>simulator</strong> &#8211; the simulator object on which settings can be configured</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">AtomicDEVS.</tt><tt class="descname">addInPort</tt><big>(</big><em>name=None</em><big>)</big></dt>
+<dd><p>Add an input port to the DEVS model.</p>
+<p>addInPort is the only proper way to add input ports to a DEVS model. 
+As for the CoupledDEVS.addSubModel method, calls
+to addInPort and addOutPort can appear in any DEVS&#8217;
+descriptive class constructor, or the methods can be used with an
+instantiated object.</p>
+<p>The methods add a reference to the new port in the DEVS&#8217; IPorts 
+attributes and set the port&#8217;s hostDEVS attribute. The modeler
+should typically save the returned reference somewhere.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; the name of the port. A unique ID will be generated in case None is passed</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">port &#8211; the generated port</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">AtomicDEVS.</tt><tt class="descname">addOutPort</tt><big>(</big><em>name=None</em><big>)</big></dt>
+<dd><p>Add an output port to the DEVS model.</p>
+<p>addOutPort is the only proper way to
+add output ports to DEVS. As for the CoupledDEVS.addSubModel method, calls
+to addInPort and addOutPort can appear in any DEVS&#8217;
+descriptive class constructor, or the methods can be used with an
+instantiated object.</p>
+<p>The methods add a reference to the new port in the DEVS&#8217;
+OPorts attributes and set the port&#8217;s hostDEVS attribute. The modeler
+should typically save the returned reference somewhere.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; the name of the port. A unique ID will be generated in case None is passed</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">port &#8211; the generated port</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">AtomicDEVS.</tt><tt class="descname">removePort</tt><big>(</big><em>port</em><big>)</big></dt>
+<dd><p>Remove a port (either input or output) from the model, disconnecting all of its connections.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>port</strong> &#8211; the port to remove</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">AtomicDEVS.</tt><tt class="descname">modelTransition</tt><big>(</big><em>state</em><big>)</big></dt>
+<dd><p>DEFAULT function for Dynamic Structure DEVS, always returning False (thus indicating that no structural change is needed)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>state</strong> &#8211; a dict that can be used to save some kind of state, this object is maintained by the kernel and will be passed each time</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">bool &#8211; whether or not a structural change is necessary</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">AtomicDEVS.</tt><tt class="descname">preActivityCalculation</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/DEVS.html#AtomicDEVS.preActivityCalculation"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>DEFAULT pre-transition activity fetcher. The returned value is passed to the <em>postActivityCalculation</em> function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">something &#8211; passed to the <em>postActivityCalculation</em></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descclassname">AtomicDEVS.</tt><tt class="descname">postActivityCalculation</tt><big>(</big><em>prevalue</em><big>)</big><a class="reference internal" href="_modules/DEVS.html#AtomicDEVS.postActivityCalculation"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>DEFAULT post-transition activity fetcher. The returned value will be passed on to the relocator and MUST be an addable (e.g. integer, float, ...)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>prevalue</strong> &#8211; the value returned from the <em>preActivityCalculation</em> method</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">addable (float, integer, ...) &#8211; passed to the relocator</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="DEVS.html"
+                        title="previous chapter">DEVS User Interface</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="CDEVS.html"
+                        title="next chapter">CoupledDEVS User Interface</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/ADEVS.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="CDEVS.html" title="CoupledDEVS User Interface"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="DEVS.html" title="DEVS User Interface"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="interface.html" >Interface</a> &raquo;</li>
+          <li><a href="DEVS.html" >DEVS User Interface</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

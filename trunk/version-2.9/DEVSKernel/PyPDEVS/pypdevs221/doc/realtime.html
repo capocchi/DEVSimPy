@@ -1,0 +1,260 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Realtime simulation &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Advanced examples" href="advanced.html" />
+    <link rel="next" title="Cell Tracing" href="celltracing.html" />
+    <link rel="prev" title="Nested simulation" href="nesting.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="celltracing.html" title="Cell Tracing"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="nesting.html" title="Nested simulation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" accesskey="U">Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="realtime-simulation">
+<h1>Realtime simulation<a class="headerlink" href="#realtime-simulation" title="Permalink to this headline">¶</a></h1>
+<p>Realtime simulation is closely linked to normal simulation, with the exception that simulation will not progress as fast as possible. The value returned by the time advance will be interpreted in seconds and the simulator will actually wait (not busy loop) until the requested time has passed. Several realtime backends are supported in PyPDEVS and are mentioned below.</p>
+<div class="section" id="example-model">
+<h2>Example model<a class="headerlink" href="#example-model" title="Permalink to this headline">¶</a></h2>
+<p>The example model will be something else than the <em>queue</em> from before, as this isn&#8217;t really that interesting for realtime simulation. We will instead use the <em>trafficLight</em> model. It has a <em>trafficLight</em> that is either running autonomous or is in a manual mode. Normally, the traffic light will work autonomously, though it is possible to interrupt the traffic light and switch it to manual mode and back to autonomous again.</p>
+<p>This complete model is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">TrafficLightMode</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current</span><span class="o">=</span><span class="s">&quot;red&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&quot;red&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__colour</span><span class="o">=</span><span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__colour</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">TrafficLight</span><span class="p">(</span><span class="n">AtomicDEVS</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">AtomicDEVS</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">TrafficLightMode</span><span class="p">(</span><span class="s">&quot;red&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">INTERRUPT</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addInPort</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;INTERRUPT&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OBSERVED</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addOutPort</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;OBSERVED&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">extTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="nb">input</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">INTERRUPT</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">input</span> <span class="o">==</span> <span class="s">&quot;toManual&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&quot;manual&quot;</span><span class="p">:</span>
+                <span class="c"># staying in manual mode</span>
+                <span class="k">return</span> <span class="n">TrafficLightMode</span><span class="p">(</span><span class="s">&quot;manual&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">state</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;red&quot;</span><span class="p">,</span> <span class="s">&quot;green&quot;</span><span class="p">,</span> <span class="s">&quot;yellow&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">TrafficLightMode</span><span class="p">(</span><span class="s">&quot;manual&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="nb">input</span> <span class="o">==</span> <span class="s">&quot;toAutonomous&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&quot;manual&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">TrafficLightMode</span><span class="p">(</span><span class="s">&quot;red&quot;</span><span class="p">)</span>
+
+        <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Unkown input in TrafficLight&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">intTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&quot;red&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">TrafficLightMode</span><span class="p">(</span><span class="s">&quot;green&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&quot;green&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">TrafficLightMode</span><span class="p">(</span><span class="s">&quot;yellow&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&quot;yellow&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">TrafficLightMode</span><span class="p">(</span><span class="s">&quot;red&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Unkown state in TrafficLight&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">outputFnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&quot;red&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">OBSERVED</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;grey&quot;</span><span class="p">]}</span>
+        <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&quot;green&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">OBSERVED</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;yellow&quot;</span><span class="p">]}</span>
+        <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&quot;yellow&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">OBSERVED</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;grey&quot;</span><span class="p">]}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Unknown state in TrafficLight&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">timeAdvance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&quot;red&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">60</span>
+        <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&quot;green&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">50</span>
+        <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&quot;yellow&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">10</span>
+        <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&quot;manual&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">INFINITY</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Unknown state in TrafficLight&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>With our model being set up, we could run it as-fast-as-possible by starting it like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span> <span class="o">=</span> <span class="n">TrafficLight</span><span class="p">(</span><span class="s">&quot;trafficLight&quot;</span><span class="p">)</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To make it run in real time, we only need to do some minor changes. First, we need to define on which port we want to put some external input. We can choose a way to address this port, but lets assume that we choose the same name as the name of the port. This gives us:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">refs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;INTERRUPT&quot;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">INTERRUPT</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Now we only need to pass this mapping to the simulator, together with the choice for realtime simulation. This is done as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">refs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;INTERRUPT&quot;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">INTERRUPT</span><span class="p">}</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">setRealTime</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">setRealTimePorts</span><span class="p">(</span><span class="n">refs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>That is all extra configuration that is required for real time simulation.</p>
+<p>As soon as the <em>simulate()</em> method is called, the simulation will be started as usual, though now several additional options are enabled. Specifically, the user now has an input prompt to input external data. This input should be of the form <em>portname data</em>.</p>
+<p>In our example, the model will respond to both <em>toManual</em> and <em>toAutonomous</em> and we chose <em>INTERRUPT</em> in our mapping. So our model will react on the input <em>INTERRUPT toManual</em>. To exit realtime simulation, it is best to simply inject &#8216;empty&#8217; input. Malformed input will cause an exception and simulation will be halted.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">All input that is injected will be passed to the model as a <em>string</em>. If the model is thus supposed to process integers, a string to integer processing step should happen in the model itself.</p>
+</div>
+</div>
+<div class="section" id="input-files">
+<h2>Input files<a class="headerlink" href="#input-files" title="Permalink to this headline">¶</a></h2>
+<p>PyPDEVS also supports the use of input files together with input provided at run time. The input file will be parsed at startup and should be of the form <em>time port value</em>, with time being the simulation time at which this input should be injected. Again, this input will always be interpreted as a string. If a syntax error is detected while reading through this file, the error will immediately be shown.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The file input closely resembles the usual prompt, though it is not possible to define a termination at a certain time by simply stating the time at the end. For this, you should use the termination time as provided by the standard interface.</p>
+</div>
+<p>An example input file for our example could be:</p>
+<div class="highlight-python"><pre>10 INTERRUPT toManual
+20 INTERRUPT toAutonomous
+30 INTERRUPT toManual</pre>
+</div>
+</div>
+<div class="section" id="backends">
+<h2>Backends<a class="headerlink" href="#backends" title="Permalink to this headline">¶</a></h2>
+<p>Several backends are provided for the realtime simulation. The default backend is the best for most people who just want to simulate in realtime. Other options are for when PyPDEVS is coupled to e.g. a Tk user interface or something with a game loop system.</p>
+<p>The following backends are currently supported:</p>
+<ul class="simple">
+<li>Python threads: the default, provides simple threading and doesn&#8217;t require any other programs. Activated with <em>setRealTimePlatformThreads()</em>.</li>
+<li>Tk threads: uses Tk for all of its waiting and delays (using the Tk event list). Activated with <em>setRealTimePlatformTk()</em>.</li>
+<li>Game loop: requires an external program to call the simulator after a certain delay. Activated with <em>setRealTimePlatformGameLoop(fps)</em>.</li>
+</ul>
+<p>The game loop mechanism requires some additional explanation:
+This mechanism will not block the main thread and if the main thread stops, so will the simulation. The caller has 2 methods to communicate with the threading system after the call to <em>simulate()</em>. These methods are:</p>
+<ul class="simple">
+<li><em>realtime_finished()</em>: Checks whether or not the simulation is finished.</li>
+<li><em>realtime_loop_call()</em>: Continue to the next simulation step. This advances the internal time according to the value provided in the initialisation.</li>
+</ul>
+<p>The game loop mechanism is thus closely linked to the invoker. The calls to the <em>realtime_loop_call()</em> function and the initializer are the only concept of time that this mechanism uses. Note that setting the fps to low will decrease the granularity of all actions, as actions are executed during the method invocation.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Realtime simulation</a><ul>
+<li><a class="reference internal" href="#example-model">Example model</a></li>
+<li><a class="reference internal" href="#input-files">Input files</a></li>
+<li><a class="reference internal" href="#backends">Backends</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="nesting.html"
+                        title="previous chapter">Nested simulation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="celltracing.html"
+                        title="next chapter">Cell Tracing</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/realtime.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="celltracing.html" title="Cell Tracing"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="nesting.html" title="Nested simulation"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" >Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

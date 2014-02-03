@@ -1,0 +1,163 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>threadingTkInter &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for threadingTkInter</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">threading</span>
+
+<span class="k">def</span> <span class="nf">tkMainThreadPoller</span><span class="p">(</span><span class="n">tk</span><span class="p">,</span> <span class="n">queue</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The polling function to register with Tk at the start. This will do the actual scheduling in Tk.</span>
+
+<span class="sd">    :param tk: the Tk instance to use</span>
+<span class="sd">    :param queue: the queue to check</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">tkRunningID</span>
+    <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">time</span><span class="p">,</span> <span class="n">func</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+            <span class="n">tkRunningID</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">after</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="c"># Was an invalidation call</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">tkRunningID</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">tk</span><span class="o">.</span><span class="n">after_cancel</span><span class="p">(</span><span class="n">tkRunningID</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="c"># Nothing to cancel</span>
+                <span class="k">pass</span>
+            <span class="n">tkRunningID</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">break</span>
+    <span class="n">tk</span><span class="o">.</span><span class="n">after</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">tkMainThreadPoller</span><span class="p">,</span> <span class="n">tk</span><span class="p">,</span> <span class="n">queue</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ThreadingTkInter"><a class="viewcode-back" href="../threadingtkinter_int.html#threadingTkInter.ThreadingTkInter">[docs]</a><span class="k">class</span> <span class="nc">ThreadingTkInter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tk Inter subsystem for realtime simulation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ThreadingTkInter.__init__"><a class="viewcode-back" href="../threadingtkinter_int.html#threadingTkInter.ThreadingTkInter.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+
+<span class="sd">        :param queue: the queue object that is also used by the main thread to put events on the main Tk object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runningID</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="n">queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastInfinity</span> <span class="o">=</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="ThreadingTkInter.unlock"><a class="viewcode-back" href="../threadingtkinter_int.html#threadingTkInter.ThreadingTkInter.unlock">[docs]</a>    <span class="k">def</span> <span class="nf">unlock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unlock the waiting thread</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ThreadingTkInter.wait"><a class="viewcode-back" href="../threadingtkinter_int.html#threadingTkInter.ThreadingTkInter.wait">[docs]</a>    <span class="k">def</span> <span class="nf">wait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wait for the specified time, or faster if interrupted</span>
+
+<span class="sd">        :param time: time to wait</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">time</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastInfinity</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastInfinity</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">*</span><span class="mi">1000</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">unlock</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ThreadingTkInter.interrupt"><a class="viewcode-back" href="../threadingtkinter_int.html#threadingTkInter.ThreadingTkInter.interrupt">[docs]</a>    <span class="k">def</span> <span class="nf">interrupt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Interrupt the waiting thread</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastInfinity</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unlock</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
