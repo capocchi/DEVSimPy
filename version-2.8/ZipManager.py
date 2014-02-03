@@ -150,6 +150,7 @@ class Zip:
 				exclude_file.append(replace_files.index(fn))
 				#sys.stdout.write("%s unknown\n"%(fn))
 
+
 		### try to rewrite not replaced files from original zip
 		info_list = zin.infolist()
 		for item in info_list:
@@ -307,7 +308,12 @@ class Zip:
 			module = importer.load_module(module_name.split('.py')[0])
 			module.__name__ = path_to_module(module_name)
 		except Exception, info:
-			sys.stderr.write(_("Error in execution: ") + str(sys.exc_info()[0]) +"\r\n" + listf(format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback)))
+			msg_i = _("Error in execution: ")
+			msg_o = listf(format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback))
+			try:
+				sys.stderr.write( msg + str(sys.exc_info()[0]) +"\r\n" + msg_o)
+			except UnicodeDecodeError:
+				sys.stderr.write( msg + str(sys.exc_info()[0]).decode('latin-1').encode("utf-8") +"\r\n" + msg_o)
 			return info
 
 		else:
