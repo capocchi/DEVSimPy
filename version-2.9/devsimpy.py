@@ -447,7 +447,9 @@ class MainApplication(wx.Frame):
 				sys.stdout.write("DEVSimPy is ready.\n")
 
 			else:
-
+				wx.MessageBox('.devsimpy file appear to be a very old version and should be updated....\nWe rewrite a new blank version.',
+									'Configuration',
+									wx.OK | wx.ICON_INFORMATION)
 				self.WriteDefaultConfigFile(self.cfg)
 
 		### create a new defaut .devsimpy config file
