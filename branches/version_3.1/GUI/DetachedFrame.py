@@ -202,7 +202,7 @@ class TestApp(wx.App):
 	def OnInit(self):
 
 		import gettext
-		import Core.Components. as Container
+		import Core.Components.Container as Container
 		import __builtin__
 
 		#__builtin__.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
