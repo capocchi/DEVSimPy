@@ -1,0 +1,146 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Dynamic Allocator &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Advanced examples" href="advanced.html" />
+    <link rel="next" title="Common problems and their solution" href="problems.html" />
+    <link rel="prev" title="Static Allocator" href="staticallocator.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="problems.html" title="Common problems and their solution"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="staticallocator.html" title="Static Allocator"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" accesskey="U">Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dynamic-allocator">
+<h1>Dynamic Allocator<a class="headerlink" href="#dynamic-allocator" title="Permalink to this headline">¶</a></h1>
+<p>Dynamic allocators are almost the same as the static allocators, with the exception that they make their allocation at a GVT calculation step instead of at the beginning.</p>
+<p>Before the dynamic allocator gets to run, the model will have already simulated for some time. Due to this simulation, which will have happened completely locally, the simulator will have already collected activity information.</p>
+<p>Since the simulation ran locally and with the pure intention of finding a decent allocation, the simulator will gather a lot more statistics such as the amount of transferred messages over a connection.</p>
+<p>In dynamic allocation mode, the model drawing functionality will also mention the load on the connections.</p>
+<div class="section" id="writing-a-custom-allocator">
+<h2>Writing a custom allocator<a class="headerlink" href="#writing-a-custom-allocator" title="Permalink to this headline">¶</a></h2>
+<p>Writing a dynamic allocator is the same as writing a static allocator, with the exception that the 2 arguments which were always <em>None</em> will now be filled in.</p>
+<p>The <em>edges</em> argument will contain a dictionary with another dictionary in it. The value in it will be a message counter. This means that the value returned by <em>edges[a][b]</em> will be the amount of messages between <em>a</em> and <em>b</em>.</p>
+<p>The <em>totalActivities</em> argument will be a dictionary containing the accumulated activity of every model in the complete simulation.</p>
+<p>Which of this information is used (and how) is of course up to you.</p>
+<p>The <em>getTerminationTime()</em> method will now be used to indicate how long a <em>warm-up</em> period takes for the simulator. This will not be done perfectly, but up to the first GVT calculation that goes beyond this termination time. If this method returns <em>0</em>, it becomes a static allocator and will not be able to use the 2 parameters that are dependent on the simulation run.</p>
+</div>
+<div class="section" id="using-the-allocator">
+<h2>Using the allocator<a class="headerlink" href="#using-the-allocator" title="Permalink to this headline">¶</a></h2>
+<p>Using a dynamic allocator is identical to using a static one, so please refer to the explanation in the <a class="reference internal" href="staticallocator.html"><em>previous section</em></a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Dynamic Allocator</a><ul>
+<li><a class="reference internal" href="#writing-a-custom-allocator">Writing a custom allocator</a></li>
+<li><a class="reference internal" href="#using-the-allocator">Using the allocator</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="staticallocator.html"
+                        title="previous chapter">Static Allocator</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="problems.html"
+                        title="next chapter">Common problems and their solution</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/dynamicallocator.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="problems.html" title="Common problems and their solution"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="staticallocator.html" title="Static Allocator"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" >Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
