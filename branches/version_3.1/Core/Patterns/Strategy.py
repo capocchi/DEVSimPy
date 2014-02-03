@@ -4,10 +4,11 @@
 # Strategy.py --- Strategy Pattern
 #                     --------------------------------
 #                                Copyright (c) 2014
+
 #                                 Laurent CAPOCCHI
 #                               University of Corsica
 #                     --------------------------------
-# Version 3.1                                      last modified:  23/03/12
+# Version 3.0                                      last modified:  23/03/12
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -27,7 +28,10 @@ import copy
 import weakref
 import threading
 import heapq
+
 import inspect
+
+
 
 import __builtin__
 import re
@@ -121,6 +125,7 @@ class SimStrategy1(SimStrategy):
 
 		# Main loop repeatedly sends $(*,\,t)$ messages to the model's root DEVS.
 		while clock <= T:
+
 			send(model, (1, model.immChildren, clock))
 			clock = model.myTimeAdvance
 
@@ -199,6 +204,7 @@ def Post_Poke(f):
 
 
 def parallel_ext_transtion_manager(p):
+
 	hosts = p.weak.GetHosts()
 
 	###----------------------------------------------------------------------------------------
@@ -271,11 +277,13 @@ class WeakValue:
 	def SetValue(self, v):
 		""" Set value and time
 		"""
+
 		self._value = v
 
 	def GetValue(self):
 		""" Get value at time t
 		"""
+
 		return self._value
 
 	def AddHosts(self, p):
@@ -294,6 +302,7 @@ class WeakValue:
 def FlatConnection(p1, p2):
 	"""
 	"""
+
 	if isinstance(p1.host, PyDEVS.AtomicDEVS) and isinstance(p2.host, PyDEVS.AtomicDEVS):
 		if isinstance(p1, PyDEVS.OPort) and isinstance(p2, PyDEVS.IPort):
 			#print str(p1.host.getBlockModel().label), '->', str(p2.host.getBlockModel().label)
@@ -455,6 +464,8 @@ class SimStrategy3(SimStrategy):
 
 		### udpate the componentSet list of master (that no longer contains coupled model)
 		self.master.componentSet = self.flat_priority_list
+
+
 	def simulate(self, T=sys.maxint):
 		"""
 		"""
