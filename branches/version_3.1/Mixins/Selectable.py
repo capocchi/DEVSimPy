@@ -22,6 +22,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 import wx
 import GUI.LabelGUI as LabelGUI
+import Core.Components.AttributeEditor as AttributeEditor
 
 class Selectable:
 	""" Allows Shape to be selected.
@@ -71,7 +72,7 @@ class Selectable:
 
 				### si le panel est actif, on update
 				if nb1.GetSelection() == 1:
-					newContent = Container.AttributeEditor(nb1.propPanel, wx.ID_ANY, self, canvas)
+					newContent = AttributeEditor.AttributeEditor(nb1.propPanel, wx.ID_ANY, self, canvas)
 					nb1.UpdatePropertiesPage(newContent)
 
 		event.Skip()

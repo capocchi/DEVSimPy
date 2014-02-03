@@ -144,7 +144,7 @@ class ShapeCanvas(wx.ScrolledWindow, Observer.Subject):
 		""" Construcotr
 		"""
 		import Core.Components.Container as Container
-		import GUI.DetachedFrame as DetachedFrame
+		import GUI.DetachedFrame as DetachedFrame #HERE
 
 		wx.ScrolledWindow.__init__(self, parent, id, pos, size, style, name)
 		Observer.Subject.__init__(self)
@@ -182,6 +182,7 @@ class ShapeCanvas(wx.ScrolledWindow, Observer.Subject):
 		try:
 			self.__state = {}
 			mainW = self.GetTopLevelParent()
+			# mainW = Utilities.isInstance(mainW, "DetachedFrame") and wx.GetApp().GetTopWindow() or mainW
 			mainW = isinstance(mainW, DetachedFrame.DetachedFrame) and wx.GetApp().GetTopWindow() or mainW
 			
 			self.attach(mainW.GetControlNotebook())
@@ -1106,16 +1107,18 @@ class ShapeCanvas(wx.ScrolledWindow, Observer.Subject):
 
 		"""
 		import Core.Components.Components as Components
-		import GUI.DetachedFrame as DetachedFrame
+		import GUI.DetachedFrame as DetachedFrame   #HERE
 
 		if self.diagram.modify:
 			### window where modification is performed
 			win = self.GetTopLevelParent()
 
+			# if Utilities.isInstance(win, "DetachedFrame"):
 			if isinstance(win, DetachedFrame.DetachedFrame):
 				### main window
 				mainW = wx.GetApp().GetTopWindow()
 				
+				# if not Utilities.isInstance(mainW, "DetachedFrame"):
 				if not isinstance(mainW, DetachedFrame.DetachedFrame):
 					nb2 = mainW.GetDiagramNotebook()
 					canvas = nb2.GetPage(nb2.GetSelection())
@@ -1567,7 +1570,7 @@ class ModelGeneratorWizard(Wizard):
 		""" Constructor
 		"""
 		import Core.Components.Components as Components
-		import GUI.DetachedFrame as DetachedFrame
+		# import GUI.DetachedFrame as DetachedFrame
 		Wizard.__init__(self, *args, **kwargs)
 
 		# properties of model
@@ -1598,7 +1601,7 @@ class ModelGeneratorWizard(Wizard):
 		page1.add_stuff(bt2)
 
 		### if left click on the DetachedFrame, port instance can be created
-		if isinstance(parent.GetTopLevelParent(), DetachedFrame.DetachedFrame):
+		if Utilities.isInstance(parent.GetTopLevelParent(), "DetachedFrame"):
 			bt3 = wx.RadioButton(page1, wx.ID_ANY, _('Input Port'))
 			bt4 = wx.RadioButton(page1, wx.ID_ANY, _('Output Port'))
 			bt3.SetToolTipString(_("DEVS classic input model. It is used to link models"))
@@ -1777,7 +1780,7 @@ class ModelGeneratorWizard(Wizard):
 		page5.add_stuff(wx.StaticText(page5, wx.ID_ANY, _('Port model has been created.')))
 
 		### if left click on the DetachedFrame, port instance can be created
-		if isinstance(parent.GetTopLevelParent(), DetachedFrame.DetachedFrame):
+		if Utilities.isInstance(parent.GetTopLevelParent(), "DetachedFrame"):
 			# Create a page 6
 			page6 = wizard_page(self, _('Input Port'))
 			sb3 = wx.StaticBoxSizer(wx.StaticBox(page6, wx.ID_ANY, _('Properties')), orient=wx.VERTICAL)
@@ -1960,7 +1963,7 @@ class ModelGeneratorWizard(Wizard):
 		bt6.Bind(wx.EVT_CHECKBOX, onBt6Check)
 		bt61.Bind(wx.EVT_CHECKBOX, onBt61Check)
 		### if left click on the DetachedFrame, port instance can be created
-		if isinstance(parent.GetTopLevelParent(), DetachedFrame.DetachedFrame):
+		if Utilities.isInstance(parent.GetTopLevelParent(), "DetachedFrame"):
 			cb_id1.Bind(wx.EVT_CHECKBOX, onCbId1)
 			cb_id2.Bind(wx.EVT_CHECKBOX, onCbId2)
 		cb0.Bind(wx.EVT_COMBOBOX, OnSpecificBehavior)
@@ -1978,7 +1981,7 @@ class ModelGeneratorWizard(Wizard):
 		self.add_page(page5)
 
 		### if left click on the DetachedFrame, port instance can be created
-		if isinstance(parent.GetTopLevelParent(), DetachedFrame.DetachedFrame):
+		if Utilities.isInstance(parent.GetTopLevelParent(), "DetachedFrame"):
 			self.add_page(page6)
 			self.add_page(page7)
 

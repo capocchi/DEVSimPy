@@ -18,7 +18,7 @@ import threading
 import array
 
 import Core.DEVSKernel.PyDEVS.DEVS as DEVS
-#from Patterns.Strategy import SimStrategy1
+# from Core.Patterns.Strategy import SimStrategy1
 
 import Core.Utilities.pluginmanager as pluginmanager
 

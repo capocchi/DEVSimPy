@@ -763,7 +763,7 @@ def simulator_factory(model, strategy, prof, ntl):
 						### call finished method
 						Publisher.sendMessage('%d.finished' % (id(m)))
 					if __builtin__.__dict__['GUI_FLAG'] is True:
-						wx.CallAfter(Utilities.playSound, SIMULATION_SUCCESS_WAV_PATH)
+						wx.CallAfter(Utilities.playSound, SIMULATION_SUCCESS_SOUND_PATH)
 
 			self.end_flag = True
 

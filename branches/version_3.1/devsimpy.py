@@ -37,8 +37,8 @@
 from __future__ import with_statement
 
 __authors__ = "Laurent Capocchi <capocchi@univ-corse.fr, lcapocchi@gmail.com>, Andre-Toussaint Luciani <atluciani@univ-corse.fr>, TIC project team <santucci@univ-corse.fr>" # ajouter les noms et les mails associes aux autres auteurs
-__date__ = "25 Mar 2013, 14:15 GMT"
-__version__ = '3.0'
+__date__ = "03 Feb 2014, 09:22 GMT"
+__version__ = '3.1'
 __docformat__ = 'epytext'
 
 import copy
@@ -448,7 +448,7 @@ class MainApplication(wx.Frame):
 				### load any plugins from the list
 				### here because it needs to PLUGINS_PATH macro defined in D
 				for plugin in eval(self.cfg.Read("plugins")):
-					load_plugins(plugin)
+					pluginmanager.load_plugins(plugin)
 
 				sys.stdout.write("DEVSimPy is ready.\n")
 

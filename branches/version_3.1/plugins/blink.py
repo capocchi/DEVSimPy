@@ -21,7 +21,6 @@ import Core.Components.Container as Container
 import GUI.FindGUI as FindGUI
 
 import Core.Patterns.Observer as Observer
-import GUI.DetachedFrame as DetachedFrame
 
 
 def InternalLog(model):
@@ -77,7 +76,7 @@ def start_blink(*args, **kwargs):
 	mainW = parent.GetParent()
 
 	### find canvas depending on the parent of parent
-	if isinstance(mainW, DetachedFrame):
+	if Utilities.isInstance(mainW, "DetachedFrame"):
 		canvas = mainW.GetCanvas()
 	else:
 		nb = mainW.GetDiagramNotebook()
@@ -94,7 +93,7 @@ def start_blink(*args, **kwargs):
 	frame.Show()
 
 	### define sender
-	sender = Subject()
+	sender = Observer.Subject()
 	sender.canvas = canvas
 	sender.__state = {}
 	sender.GetState = MethodType(GetState, sender)
