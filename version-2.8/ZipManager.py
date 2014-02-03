@@ -311,9 +311,9 @@ class Zip:
 			msg_i = _("Error in execution: ")
 			msg_o = listf(format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback))
 			try:
-				sys.stderr.write( msg + str(sys.exc_info()[0]) +"\r\n" + msg_o)
+				sys.stderr.write( msg_i + str(sys.exc_info()[0]) +"\r\n" + msg_o)
 			except UnicodeDecodeError:
-				sys.stderr.write( msg + str(sys.exc_info()[0]).decode('latin-1').encode("utf-8") +"\r\n" + msg_o)
+				sys.stderr.write( msg_i + str(sys.exc_info()[0]).decode('latin-1').encode("utf-8") +"\r\n" + msg_o)
 			return info
 
 		else:
