@@ -1244,7 +1244,7 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 
 				# set the name of diagram from notebook nb2
 				nb2 = win.GetDiagramNotebook()
-				title  = win.GetTitle() if isinstance(win, DetachedFrame.DetachedFrame) else nb2.GetPageText(nb2.GetSelection()).rstrip() #HERE
+				title  = win.GetTitle() if isinstance(win, DetachedFrame) else nb2.GetPageText(nb2.GetSelection()).rstrip() #HERE
 				diagram.label = os.path.splitext(os.path.basename(title))[0]
 
 				## delete all attached devs instances
@@ -1973,7 +1973,7 @@ class CodeBlock(Block, Achievable.Achievable):
 	def update(self, concret_subject=None):
 		""" Notify has been invocked
 		"""
-		import Core.Utilities.PropertiesGridCtrl as PropertiesGridCtrl
+		import Core.Components.PropertiesGridCtrl as PropertiesGridCtrl
 		state = Block.update(self, concret_subject)
 
 		if isinstance(concret_subject, PropertiesGridCtrl.PropertiesGridCtrl):

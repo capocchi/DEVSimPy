@@ -91,7 +91,7 @@ class AttributeEditor(wx.Frame, wx.Panel):
 
 		if isinstance(self.model, Achievable.Achievable):
 			self._boxH = wx.BoxSizer(wx.HORIZONTAL)
-			self._code = CodeCB(self, wx.ID_ANY, self.model)
+			self._code = PropertiesGridCtrl.CodeCB(self, wx.ID_ANY, self.model)
 			self._boxH.Add(self._code, 1, wx.ALL | wx.EXPAND, userData='code')
 			self._box.Add(self._boxH, 1, wx.ALL | wx.EXPAND, userData='code')
 
