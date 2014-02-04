@@ -25,7 +25,7 @@ import os
 import wx
 from wx import xrc
 
-# import Core.Components.AttributeEditor as AttributeEditor
+import Core.Components.AttributeEditor as AttributeEditor
 import Core.Utilities.Utilities as Utilities
 
 __res = None
@@ -116,7 +116,7 @@ class LabelDialog(wx.Dialog):
 	
 			### update of block from canvas
 			self.canvas.UpdateShapes([self.block])
-			if Utilities.isInstance(self.parent, "AttributeEditor"):
+			if isinstance(self.parent, AttributeEditor.AttributeEditor):
 				### update of label filed in propertie dialogue
 				self.parent._list.SetCellValue(0, 1, self.block.label)
 
@@ -134,7 +134,7 @@ class LabelDialog(wx.Dialog):
 
 			### update of block from canvas
 			self.canvas.UpdateShapes([self.block])
-			if Utilities.isInstance(self.parent, "AttributeEditor"):
+			if isinstance(self.parent, AttributeEditor.AttributeEditor):
 				### update of label_pos filed in propertie dialogue
 				self.parent._list.SetCellValue(1, 1, self.block.label_pos)
 

@@ -334,7 +334,7 @@ class CMDComponent(GenericComponent):
 	def Load(filename, label):
 		""" Load CMD from filename
 		"""
-		# import Core.Components.Container as Container
+		import Core.Components.Container as Container
 
 		assert (filename.endswith('.cmd'))
 
@@ -355,9 +355,9 @@ class CMDComponent(GenericComponent):
 			m.input = 0
 			m.output = 0
 			for s in m.shapes:
-				if Utilities.isInstance(s, "iPort"):
+				if isinstance(s, Container.iPort):
 					m.input += 1
-				elif Utilities.isInstance(s, "oPort"):
+				elif isinstance(s, Container.oPort):
 					m.output += 1
 
 			return m

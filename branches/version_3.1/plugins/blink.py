@@ -18,6 +18,7 @@ import Core.Utilities.pluginmanager as pluginmanager
 import Core.Utilities.Utilities as Utilities
 import Core.Components.Container as Container
 
+import GUI.DetachedFrame as DetachedFrame
 import GUI.FindGUI as FindGUI
 
 import Core.Patterns.Observer as Observer
@@ -76,7 +77,7 @@ def start_blink(*args, **kwargs):
 	mainW = parent.GetParent()
 
 	### find canvas depending on the parent of parent
-	if Utilities.isInstance(mainW, "DetachedFrame"):
+	if isinstance(mainW, DetachedFrame.DetachedFrame):
 		canvas = mainW.GetCanvas()
 	else:
 		nb = mainW.GetDiagramNotebook()

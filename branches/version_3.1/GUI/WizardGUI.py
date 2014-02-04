@@ -13,7 +13,6 @@ import Core.DomainInterface.DomainBehavior as DomainBehavior
 import Core.DomainInterface.DomainStructure as DomainStructure
 import Core.Components.Components as Components
 import Core.Utilities.Utilities as Utilities
-# import GUI.DetachedFrame as DetachedFrame
 
 
 _ = wx.GetTranslation
@@ -248,7 +247,7 @@ class ModelGeneratorWizard(Wizard):
 		""" Constructor
 		"""
 		import Core.Components.Components as Components
-		# import GUI.DetachedFrame as DetachedFrame
+		import GUI.DetachedFrame as DetachedFrame
 		Wizard.__init__(self, *args, **kwargs)
 
 		# properties of model
@@ -277,7 +276,7 @@ class ModelGeneratorWizard(Wizard):
 		page1.add_stuff(bt2)
 
 		### if left click on the DetachedFrame, port instance can be created
-		if Utilities.isInstance(parent.GetTopLevelParent(), "DetachedFrame"):
+		if isinstance(parent.GetTopLevelParent(), DetachedFrame.DetachedFrame):
 			bt3 = wx.RadioButton(page1, wx.ID_ANY, _('Input Port'))
 			bt4 = wx.RadioButton(page1, wx.ID_ANY, _('Output Port'))
 			bt3.SetToolTipString(_("DEVS classic input model. It is used to link models"))
@@ -431,7 +430,7 @@ class ModelGeneratorWizard(Wizard):
 		page5.add_stuff(wx.StaticText(page5, wx.ID_ANY, _('Port model has been created.')))
 
 		### if left click on the DetachedFrame, port instance can be created
-		if Utilities.isInstance(parent.GetTopLevelParent(), "DetachedFrame"):
+		if isinstance(parent.GetTopLevelParent(), DetachedFrame.DetachedFrame):
 			# Create a page 6
 			page6 = wizard_page(self, _('Input Port'))
 			sb3 = wx.StaticBoxSizer(wx.StaticBox(page6, wx.ID_ANY, _('Properties')), orient=wx.VERTICAL)
@@ -547,7 +546,7 @@ class ModelGeneratorWizard(Wizard):
 		def OnSpecificBehavior(evt):
 			""" Give the control on the number of input and output form specific behavior choice
 			"""
-
+			
 			### specific behavoir choice
 			val = evt.GetEventObject().GetValue()
 
@@ -597,7 +596,7 @@ class ModelGeneratorWizard(Wizard):
 
 		def OnInputCMDLabel(evt):
 			fb3.SetValue(os.path.join(DOMAIN_PATH, "%s.cmd" % evt.GetString()))
-
+		
 		# Binding
 		bt1.Bind(wx.EVT_RADIOBUTTON, onBt1Click)
 		bt2.Bind(wx.EVT_RADIOBUTTON, onBt2Click)
@@ -606,7 +605,7 @@ class ModelGeneratorWizard(Wizard):
 		bt6.Bind(wx.EVT_CHECKBOX, onBt6Check)
 		bt61.Bind(wx.EVT_CHECKBOX, onBt61Check)
 		### if left click on the DetachedFrame, port instance can be created
-		if Utilities.isInstance(parent.GetTopLevelParent(), "DetachedFrame"):
+		if isinstance(parent.GetTopLevelParent(), DetachedFrame.DetachedFrame):
 			cb_id1.Bind(wx.EVT_CHECKBOX, onCbId1)
 			cb_id2.Bind(wx.EVT_CHECKBOX, onCbId2)
 		cb0.Bind(wx.EVT_COMBOBOX, OnSpecificBehavior)
@@ -624,7 +623,7 @@ class ModelGeneratorWizard(Wizard):
 		self.add_page(page5)
 
 		### if left click on the DetachedFrame, port instance can be created
-		if Utilities.isInstance(parent.GetTopLevelParent(), "DetachedFrame"):
+		if isinstance(parent.GetTopLevelParent(), DetachedFrame.DetachedFrame):
 			self.add_page(page6)
 			self.add_page(page7)
 

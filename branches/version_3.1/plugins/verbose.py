@@ -19,7 +19,6 @@ import wx
 import Core.Utilities.pluginmanager as pluginmanager
 import Core.Utilities.Utilities as Utilities
 
-
 global show_ext_trans
 global show_int_trans
 global show_clock
@@ -68,7 +67,9 @@ def LongRunningProcess(*args, **kwargs):
 			txt = [""]
 
 			### here because DEVS package can be changed during DEVSimPy running
-			if Utilities.isInstance(model, "DomainBehavior"):
+			import Core.DomainInterface.DomainBehavior as DomainBehavior
+			import Core.DomainInterface.DomainStructure as DomainStructure
+			if isinstance(model, DomainBehavior.DomainBehavior):
 				if msg == 1 and show_ext_trans:
 					txt = [_("\n\tEXTERNAL TRANSITION: %s (%s)\n") % (block.label, model.myID),
 						   _("\t  New State: %s\n") % model.state,
@@ -96,7 +97,7 @@ def LongRunningProcess(*args, **kwargs):
 					else:
 						txt.append(_("\t  Next scheduled internal transition at %f\n") % model.myTimeAdvance)
 
-			elif Utilities.isInstance(model, "DomainStructure") and show_coll:
+			elif isinstance(model, DomainStructure.DomainStructure) and show_coll:
 				txt = [_("\n\tCollision occurred in %s, involving:\n") % block.label]
 				txt.extend([_("    \t   %s\n") % m.__class__.__name__ for m in model.immChildren])
 				txt.append(_("\t  select chooses %s\n") % kwargs['dstar'].__class__.__name__)

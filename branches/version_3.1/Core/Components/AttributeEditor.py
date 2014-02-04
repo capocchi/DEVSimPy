@@ -89,7 +89,7 @@ class AttributeEditor(wx.Frame, wx.Panel):
 		## text doc de la classe
 		#doc = inspect.getdoc(self.model.getDEVSModel().__class__)
 
-		if Utilities.isInstance(self.model, "Achievable"): #HERE
+		if isinstance(self.model, Achievable.Achievable):
 			self._boxH = wx.BoxSizer(wx.HORIZONTAL)
 			self._code = CodeCB(self, wx.ID_ANY, self.model)
 			self._boxH.Add(self._code, 1, wx.ALL | wx.EXPAND, userData='code')

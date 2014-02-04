@@ -37,7 +37,7 @@ import Core.Utilities.XML as XML
 import Core.Utilities.Join as Join
 import Core.Utilities.Utilities as Utilities
 from Core.Components.Decorators import BuzyCursorNotification, StatusBarNotification, cond_decorator
-# import Core.Components.Components as Components
+import Core.Components.Components as Components
 import GUI.ZipManager as ZipManager
 
 import wx #normalement ne devrait pas y etre, mais on a besoin pour -> L[9] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
@@ -470,8 +470,7 @@ class DumpXMLFile(DumpBase):
 		diagram = obj_dumped
 		D = diagram.__class__.makeDEVSGraph(diagram, {})
 
-		# if isinstance(diagram, Components.GenericComponent):
-		if Utilities.isInstance(diagram, "GenericComponent"):
+		if isinstance(diagram, Components.GenericComponent):
 			label = diagram.label
 		else:
 			label = os.path.splitext(os.path.basename(fileName))[0]
