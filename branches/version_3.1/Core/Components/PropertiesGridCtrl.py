@@ -312,7 +312,7 @@ class CustomDataTable(gridlib.PyGridTableBase):
 		self.colLabels = [_('Attribute'), _('Value'), _('Information')]
 
 		### default graphical attribut label
-		self.infoBlockLabelList = [_('Name'), _('Color and size of pen'), _('Background color'), _('Font label'), _('Background image'), _('Input port'), _('Output port')]
+		self.infoBlockLabelList = [_('Name'), _('Position of label'), _('Color and size of pen'), _('Background color'), _('Font label'), _('Background image'), _('Input port'), _('Output port')]
 
 		self.nb_graphic_var = len(self.infoBlockLabelList)
 
