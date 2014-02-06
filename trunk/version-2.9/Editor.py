@@ -1356,7 +1356,7 @@ class Editor(wx.Frame, wx.Panel):
 	def StatusBar(self):
 		self.statusbar = self.CreateStatusBar()
 		self.statusbar.SetFieldsCount(3)
-		self.statusbar.SetStatusWidths([-5, -3, -1])
+		self.statusbar.SetStatusWidths([-2, -6, -1])
 
 	### NOTE: Editor :: ToggleStatusBar 		=> Event for show or hide status bar
 	def ToggleStatusBar(self, event):
