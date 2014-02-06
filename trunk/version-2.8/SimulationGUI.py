@@ -231,10 +231,10 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			wx.Frame.__init__(self, parent, id, title, style= wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
 
 			### adapt size of frame depending on the plateform
-			#if  '__WXMSW__' in wx.PlatformInfo:
-			#	self.SetSize((280,240))
-			#else:
-			#	self.SetSize((260,160))
+			if  '__WXMSW__' in wx.PlatformInfo:
+				self.SetSize((280,280))
+			else:
+				self.SetSize((260,160))
 
 			# disable the roll out of the frame
 			self.SetMinSize(self.GetSize())
