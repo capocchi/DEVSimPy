@@ -606,23 +606,27 @@ class ShapeCanvas(wx.ScrolledWindow, Observer.Subject):
 
 		# dialog results
 		sp, tp = self.dlgConnection._result
-
+		
+		# sys.stdout.write("-=||||||||||||||||=-")
+		# print self.dlgConnection._result
+		# sys.stdout.write("-=||||||||||||||||=-")
+		
 		### if one of selected option is All
 		if (    self.dlgConnection._combo_box_tn.StringSelection == _('All') \
-					and self.dlgConnection._combo_box_sn.StringSelection != _('All')):
+				and self.dlgConnection._combo_box_sn.StringSelection != _('All')):
 			sn = self.sourceNodeList[sp]
 			for tn in self.targetNodeList:
 				self.makeConnectionShape(sn, tn)
 		### if one of selected option is All
 		elif (  self.dlgConnection._combo_box_sn.StringSelection == _('All') \
-					and self.dlgConnection._combo_box_tn.StringSelection != _('All')):
+				and self.dlgConnection._combo_box_tn.StringSelection != _('All')):
 			tn = self.targetNodeList[tp]
 			for sn in self.sourceNodeList:
 				self.makeConnectionShape(sn, tn)
 		### if both combo box selection are All, delete all of the connection from the top to the bottom
 		elif (  self.dlgConnection._combo_box_tn.StringSelection == _('All') \
-					and self.dlgConnection._combo_box_sn.StringSelection == _('All')) \
-			and len(self.sourceNodeList) == len(self.targetNodeList):
+				and self.dlgConnection._combo_box_sn.StringSelection == _('All')) \
+				and len(self.sourceNodeList) == len(self.targetNodeList):
 			for sn, tn in map(lambda a, b: (a, b), self.sourceNodeList, self.targetNodeList):
 				self.makeConnectionShape(sn, tn)
 		### else make simple connection between sp and tp port number of source and target

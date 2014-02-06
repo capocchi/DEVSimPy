@@ -93,10 +93,10 @@ class ConnectDialog(wx.Frame):
 		self.Bind(wx.EVT_COMBOBOX, self.EvtComboBox2, self._combo_box_tn)
 
 	def EvtComboBox1(self, event):
-		self._result[0] = event.GetSelection()
+		self._result[0] = event.GetSelection()-1
 
 	def EvtComboBox2(self, event):
-		self._result[1] = event.GetSelection()
+		self._result[1] = event.GetSelection()-1
 
 ### ------------------------------------------------------------
 class TestApp(wx.App):
