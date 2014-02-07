@@ -163,6 +163,7 @@ class PyComponent:
 	def Load(filename, label):
 		""" Load python file from filename
 		"""
+		filename = filename.strip()
 		assert(filename.endswith('.py'))
 
 		return BlockFactory.CreateBlock( python_file = filename, label = label)
