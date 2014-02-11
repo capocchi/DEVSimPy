@@ -36,6 +36,7 @@ from tempfile import gettempdir
 
 import __builtin__
 import traceback
+import re
 
 __builtin__.__dict__['GUI_FLAG'] = True
 
@@ -630,14 +631,21 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		event = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self._btn1.GetId())
 
 		### try to find the file which have the error from traceback
+		devs_error = False
 		try:
 			typ, val, tb = msg.data
-			trace = traceback.format_exception(typ, val, tb)[-2].split(',')
-			path = trace[0]
-		except Exception, info:
-			path=""
+			trace = traceback.format_exception(typ, val, tb)
 
-		devs_error = (os.path.basename(DOMAIN_PATH) in path)
+			### paths in traceback
+			paths = filter(lambda a: a.split(',')[0].strip().startswith('File'), trace)
+			### find if DOMAIN_PATH is in paths list (inversed because traceback begin by the end)
+			for path in paths[::-1]:
+				if DOMAIN_PATH in path:
+					devs_error = True
+					break
+
+		except Exception, info:
+			pass
 
 		### if error come from devs python file
 		if devs_error:
