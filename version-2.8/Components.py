@@ -150,7 +150,7 @@ class DSPComponent:
 				return False
 
 class PyComponent:
-	""" Return labeled block from filename at (x,y) postion in canvas
+	""" Return labeled block from filename at (x,y) position in canvas
 
 		@filename: filename for loading block
 		@label: label of block
