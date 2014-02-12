@@ -114,22 +114,32 @@ def MsgBoxError(event, parent, msg):
 	""" Pop-up alert for error in the .py file of a model
 	"""
 
-	### si erreur dans l'importation
+	### if importation error
 	if isinstance(msg, unicode):
 		dial = wx.MessageDialog(parent, \
 							_('Error trying to import module : %s')%msg, \
 							_('Error Manager'), \
 							wx.OK | wx.ICON_ERROR)
 		dial.ShowModal()
-	### si erreur dans le constructeur (__init__) ou pendant la simulation du .py
+	### Error occurring into the constructor or during the simulation
 	elif isinstance(msg, tuple):
-		### recherche des infos liés à l'erreur
-		typ, val, tb = msg
+		### find error info of the error
 		try:
+			typ, val, tb = msg
+			trace = format_exception(typ, val, tb)
 
-			trace = format_exception(typ, val, tb)[-2].split(',')
+			mainW = wx.GetApp().GetTopWindow()
 
-			path,line,fct = trace[0:3]
+			### try to find if the error come from devs model
+			### paths in traceback
+			paths = filter(lambda a: a.split(',')[0].strip().startswith('File'), trace)
+			### find if DOMAIN_PATH is in paths list (inverted because traceback begin by the end)
+			for p in paths[::-1]:
+				### find if one path in trace comes from Domain or exported path list
+				for d in [DOMAIN_PATH]+mainW.GetExportPathsList():
+					if d in p:
+						path,line,fct = p.split(',')[0:3]
+						break
 
 		except Exception, info:
 			path = None
@@ -153,19 +163,19 @@ def MsgBoxError(event, parent, msg):
 
 		if path is not None:
 
-			### demande si on veut corriger l'erreur
+			### ask to correct error
 			dial = wx.MessageDialog(parent,\
 								 _("Error: %s\n%s%s%s\nDo you want to remove this error?")%(str(val),str(python_path),str(fct),str(line_number)),\
 								 _('Error Manager'), \
 								 wx.YES_NO | wx.YES_DEFAULT | wx.ICON_ERROR)
 			if dial.ShowModal() == wx.ID_YES:
-				### il faut supprimer les doubles cote de chaque cotée et caster en string
+				### delete " and cast to string
 				python_path = str(path.split(' ')[-1])[1:-1]
 				dir_name = os.path.dirname(python_path)
-				### creation d'un composant devs temporaire pour l'invocation de l'editeur de code
+				### create a temporary component to invoke editor windows
 				devscomp = Components.DEVSComponent()
 				devscomp.setDEVSPythonPath(python_path)
-				### instanciation de l'editeur de code et pointeur sur la ligne de l'erreur
+				### instantiation of editor frame and go to the line of the corresponding error
 				editor_frame = Components.DEVSComponent.OnEditor(devscomp, event)
 				if zipfile.is_zipfile(dir_name): editor_frame.cb.model_path = dir_name
 				if editor_frame:
@@ -658,9 +668,13 @@ class Diagram(Savable, Structurable):
 				if len(L)!=len(set(L)):
 					wx.MessageBox(_("It seems that models have same label.\nIf you plan to use Flat simulation algorithm, all model must have a unique label."), _("Simulation Manager"))
 
-				### set the name of diagram from notebook nb2
-				nb2 = win.GetDiagramNotebook()
-				title  = win.GetTitle() if isinstance(win, DetachedFrame) else nb2.GetPageText(nb2.GetSelection()).rstrip()
+				### set the name of diagram
+				if isinstance(win, DetachedFrame):
+					title  = win.GetTitle()
+				else:
+					nb2 = win.GetDiagramNotebook()
+					title =nb2.GetPageText(nb2.GetSelection()).rstrip()
+
 				diagram.label = os.path.splitext(os.path.basename(title))[0]
 
 				## delete all attached devs instances
