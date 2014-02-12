@@ -575,6 +575,9 @@ class MainApplication(wx.Frame):
 
 		self.tb.Realize()
 
+	def GetExportPathsList(self):
+		return self.exportPathsList
+
 	def GetDiagramNotebook(self):
 		""" Return diagram notbook (right)
 		"""
