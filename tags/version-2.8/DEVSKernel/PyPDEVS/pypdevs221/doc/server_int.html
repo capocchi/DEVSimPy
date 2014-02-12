@@ -1,0 +1,346 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Server &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Internal documentation" href="internal.html" />
+    <link rel="next" title="Simulator" href="simulator_int.html" />
+    <link rel="prev" title="Polymorphic scheduler" href="schedulerAuto_int.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="simulator_int.html" title="Simulator"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="schedulerAuto_int.html" title="Polymorphic scheduler"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" accesskey="U">Internal documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-server">
+<span id="server"></span><h1>Server<a class="headerlink" href="#module-server" title="Permalink to this headline">¶</a></h1>
+<p>Server for DEVS simulation</p>
+<dl class="class">
+<dt id="server.Server">
+<em class="property">class </em><tt class="descclassname">server.</tt><tt class="descname">Server</tt><big>(</big><em>name</em>, <em>totalSize</em><big>)</big><a class="reference internal" href="_modules/server.html#Server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.Server" title="Permalink to this definition">¶</a></dt>
+<dd><p>A server to host MPI, will delegate all of its calls to the active simulation kernel.</p>
+<dl class="method">
+<dt id="server.Server.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>name</em>, <em>totalSize</em><big>)</big><a class="reference internal" href="_modules/server.html#Server.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.Server.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; the name of the server, used for addressing (in MPI terms, this is the rank)</li>
+<li><strong>totalSize</strong> &#8211; the total size of the network in which the model lives</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.Server.bootMPI">
+<tt class="descname">bootMPI</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/server.html#Server.bootMPI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.Server.bootMPI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boot the MPI receivers when necessary, on an other thread to prevent blocking</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.Server.checkLoadCheckpoint">
+<tt class="descname">checkLoadCheckpoint</tt><big>(</big><em>name</em>, <em>gvt</em><big>)</big><a class="reference internal" href="_modules/server.html#Server.checkLoadCheckpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.Server.checkLoadCheckpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reconstruct the server from a checkpoint.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> &#8211; name of the checkpoint</li>
+<li><strong>gvt</strong> &#8211; the GVT to restore to</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">bool &#8211; whether or not the checkpoint was successfully loaded</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.Server.finish">
+<tt class="descname">finish</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/server.html#Server.finish"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.Server.finish" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop the currently running simulation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.Server.finishWaitingPool">
+<tt class="descname">finishWaitingPool</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/server.html#Server.finishWaitingPool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.Server.finishWaitingPool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop the complete MPI request queue from blocking, used when stopping simulation is necessary while requests are still outstanding.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.Server.flushQueuedMessages">
+<tt class="descname">flushQueuedMessages</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/server.html#Server.flushQueuedMessages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.Server.flushQueuedMessages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flush all queued messages to the controller. This will block until all of them are queued.
+It is required to flush all messages right after all of them happened and this should happen within the critical section!</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.Server.getName">
+<tt class="descname">getName</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/server.html#Server.getName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.Server.getName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the name of the server</p>
+<p>Is practically useless, since the server is previously addressed using its name. This does have a use as a ping function though.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.Server.getProxy">
+<tt class="descname">getProxy</tt><big>(</big><em>rank</em><big>)</big><a class="reference internal" href="_modules/server.html#Server.getProxy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.Server.getProxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a proxy to a specified rank.</p>
+<p>This rank is allowed to be the local server, in which case a local shortcut is created.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rank</strong> &#8211; the rank to return a proxy to, should be an int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">proxy to the server, either of type MPIRedirect or LocalRedirect</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.Server.listenMPI">
+<tt class="descname">listenMPI</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/server.html#Server.listenMPI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.Server.listenMPI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Listen for incomming MPI messages and process them as soon as they are received</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.Server.loadCheckpoint">
+<tt class="descname">loadCheckpoint</tt><big>(</big><em>name</em>, <em>gvt</em><big>)</big><a class="reference internal" href="_modules/server.html#Server.loadCheckpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.Server.loadCheckpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reconstruct the server from a checkpoint.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; name of the checkpoint</li>
+<li><strong>gvt</strong> &#8211; the GVT to restore to</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.Server.prepare">
+<tt class="descname">prepare</tt><big>(</big><em>scheduler</em><big>)</big><a class="reference internal" href="_modules/server.html#Server.prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.Server.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare the server to receive the complete model over MPI</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>scheduler</strong> &#8211; the scheduler to use</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.Server.processMPI">
+<tt class="descname">processMPI</tt><big>(</big><em>data</em>, <em>comm</em>, <em>remote</em><big>)</big><a class="reference internal" href="_modules/server.html#Server.processMPI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.Server.processMPI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process an incomming MPI message and reply to it if necessary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> &#8211; the data that was received</li>
+<li><strong>comm</strong> &#8211; the MPI COMM object</li>
+<li><strong>remote</strong> &#8211; the location from where the message was received</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.Server.queueMessage">
+<tt class="descname">queueMessage</tt><big>(</big><em>time</em>, <em>model_id</em>, <em>action</em><big>)</big><a class="reference internal" href="_modules/server.html#Server.queueMessage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.Server.queueMessage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Queue a delayed action from being sent, to make it possible to batch them.</p>
+<p>Will raise an exception if previous messages form a different time were not yet flushed!
+This flushing is not done automatically, as otherwise the data would be received at a further timestep
+which causes problems with the GVT algorithm.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>time</strong> &#8211; the time at which the action happens</li>
+<li><strong>model_id</strong> &#8211; the model_id that executed the action</li>
+<li><strong>action</strong> &#8211; the action to execute (as a string)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.Server.saveAndProcessModel">
+<tt class="descname">saveAndProcessModel</tt><big>(</big><em>pickledModel</em>, <em>scheduler</em><big>)</big><a class="reference internal" href="_modules/server.html#Server.saveAndProcessModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.Server.saveAndProcessModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive the model and set it on the server, but also saves it for further reinitialisation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>pickledModel</strong> &#8211; pickled representation of the model</li>
+<li><strong>scheduler</strong> &#8211; the scheduler to use</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.Server.sendModel">
+<tt class="descname">sendModel</tt><big>(</big><em>data</em>, <em>scheduler</em><big>)</big><a class="reference internal" href="_modules/server.html#Server.sendModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.Server.sendModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive a complete model and set it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> &#8211; a tuple containing the model, the model_ids dictionary, scheduler name, and a flag for whether or not the model was flattened to allow pickling</li>
+<li><strong>scheduler</strong> &#8211; the scheduler to use</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.Server.setPickledData">
+<tt class="descname">setPickledData</tt><big>(</big><em>pickled_data</em><big>)</big><a class="reference internal" href="_modules/server.html#Server.setPickledData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.Server.setPickledData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the pickled representation of the model.</p>
+<p>For use on the controller itself, as this doesn&#8217;t need to unpickle the model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pickled_data</strong> &#8211; the pickled model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="schedulerAuto_int.html"
+                        title="previous chapter">Polymorphic scheduler</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="simulator_int.html"
+                        title="next chapter">Simulator</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/server_int.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="simulator_int.html" title="Simulator"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="schedulerAuto_int.html" title="Polymorphic scheduler"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" >Internal documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
