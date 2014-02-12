@@ -435,9 +435,9 @@ class MainApplication(wx.Frame):
 					__builtin__.__dict__.update(D)
 					### recompile DomainInterface
 					if recompile:
-						ReloadModule.recompile("DomainInterface.DomainBehavior")
-						ReloadModule.recompile("DomainInterface.DomainStructure")
-						ReloadModule.recompile("DomainInterface.MasterModel")
+						ReloadModule.recompile("Core.DomainInterface.DomainBehavior")
+						ReloadModule.recompile("Core.DomainInterface.DomainStructure")
+						ReloadModule.recompile("Core.DomainInterface.MasterModel")
 
 				### icon path is wrong (generally .devsimpy is wrong because DEVSimPy directory has been moved)
 				### .devsimpy must be rewrite

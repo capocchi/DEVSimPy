@@ -54,6 +54,16 @@ from Core.Patterns.Strategy import *
 _ = wx.GetTranslation
 
 
+
+
+
+
+
+
+class FloatSlider(wx.Slider):
+	def GetValue(self):
+		return (float(wx.Slider.GetValue(self)))/self.GetMax()
+
 class TextObjectValidator(wx.PyValidator):
 	""" TextObjectValidator()
 	"""
@@ -287,6 +297,9 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 	def __widgets(self):
 
+		print "''''''''''''''''''''''"
+		print str(self.master)
+		print "''''''''''''''''''''''"
 		self._text1 = wx.StaticText(self.panel, wx.ID_ANY, _('Final time:'))
 		self._value = wx.TextCtrl(self.panel, wx.ID_ANY, str(float(self.master.FINAL_TIME)), validator=TextObjectValidator())
 		self._btn1 = wx.Button(self.panel, wx.NewId(), _('Run'))
@@ -792,7 +805,7 @@ class TestApp(wx.App):
 		__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyPDEVS'
 		__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(os.pardir, 'Core', 'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(os.pardir,'Core', 'DEVSKernel', 'PyPDEVS')}
 		import gettext
-		import DomainInterface.MasterModel
+		import Core.DomainInterface.MasterModel
 
 		__builtin__.__dict__['ICON_PATH_16_16'] = os.path.join('Assets','icons', '16x16')
 		__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = 'original'

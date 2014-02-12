@@ -1219,6 +1219,9 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 
 			# diagram which will be simulate
 			diagram = self
+			print "''''''''''''''''''''''"
+			print diagram
+			print "''''''''''''''''''''''"
 
 			D = self.DoCheck()
 			### if there is no error in models

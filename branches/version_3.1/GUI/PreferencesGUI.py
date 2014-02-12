@@ -347,9 +347,9 @@ class SimulationPanel(wx.Panel):
 
 		### Reload DomainBehavior and DomainStructure
 		if __builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] != self.default_devs_dir:
-			ReloadModule.recompile("DomainInterface.DomainBehavior")
-			ReloadModule.recompile("DomainInterface.DomainStructure")
-			ReloadModule.recompile("DomainInterface.MasterModel")
+			ReloadModule.recompile("Core.DomainInterface.DomainBehavior")
+			ReloadModule.recompile("Core.DomainInterface.DomainStructure")
+			ReloadModule.recompile("Core.DomainInterface.MasterModel")
 
 		__builtin__.__dict__['SIMULATION_SUCCESS_SOUND_PATH'] = self.sim_success_sound_path
 		__builtin__.__dict__['SIMULATION_ERROR_SOUND_PATH'] = self.sim_error_sound_path
