@@ -49,7 +49,7 @@ class BaseDEVS:
 	"""
 
 	###
-	def __init__(self):
+	def __init__(self, name=""):
 		''' Constructor.
 		'''
 		# Following {\tt if}-clause prevents any attempt to instantiate this
@@ -81,6 +81,7 @@ class BaseDEVS:
 
 		self.parent = None
 		self.myID   = None
+		self.name= name
 
 		# {\sl Specific Attributes\/} --- related to atomic- and coupled-DEVS'
 		# specification:
@@ -182,14 +183,14 @@ class AtomicDEVS(BaseDEVS):
 	AtomicIDCounter = 0
 
 	###
-	def __init__(self):
+	def __init__(self, name=""):
 		"""Constructor.
 		"""
 
 		# The minimal constructor shall {\sl first\/} call the superclass
 		# ({\it i.e.}, {\tt BaseDEVS}') constructor.
 
-		BaseDEVS.__init__(self)
+		BaseDEVS.__init__(self, name)
 
 		# Increment {\tt AtomicIDCounter\/} and setup instance's {\tt myID\/}
 		# attribute.
@@ -276,14 +277,14 @@ class CoupledDEVS(BaseDEVS):
 	CoupledIDCounter = 0
 
 	###
-	def __init__(self):
+	def __init__(self, name=""):
 		"""Constructor.
 		"""
 
 		# The minimal constructor shall {\sl first\/} call the superclass
 		# ({\it i.e.}, {\tt BaseDEVS}') constructor.
 
-		BaseDEVS.__init__(self)
+		BaseDEVS.__init__(self, name)
 
 		# Increment {\tt CoupledIDCounter\/} and setup instance's {\tt myID\/}
 		# attribute.
@@ -435,7 +436,7 @@ class Port:
 	# deletion of those ports (deletion not implemented yet).
 
 	###
-	def __init__(self):
+	def __init__(self, name=""):
 		"""Constructor. Creates an input port if {\tt t} evaluates to true, and
 			an output port otherwise.
 		"""
@@ -456,7 +457,7 @@ class Port:
 
 		self.inLine = []; self.outLine = []
 		self.host = None
-		self.name = ""
+		self.name = name
 		self.myID = None
 
 		# Increment {\tt InCounter\/} or {\tt OutCounter\/} depending on type of
@@ -489,10 +490,10 @@ class IPort(Port):
 	""" Input DEVS Port
 	"""
 
-	def __init__(self):
+	def __init__(self, name=""):
 		""" Constructor
 		"""
-		Port.__init__(self)
+		Port.__init__(self, name=name)
 
 		self.name="IN"+str(self.myID)
 
@@ -506,10 +507,10 @@ class OPort(Port):
 	""" Output DEVS Port
 	"""
 
-	def __init__(self):
+	def __init__(self, name=""):
 		""" Constructor
 		"""
-		Port.__init__(self)
+		Port.__init__(self, name=name)
 
 		self.name="OUT"+str(self.myID)
 
