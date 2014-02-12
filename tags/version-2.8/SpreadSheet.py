@@ -25,18 +25,25 @@ from __future__ import with_statement
 
 import wx
 from wx.lib import sheet
+
 # to send event
 if wx.VERSION_STRING < '2.9':
 	from wx.lib.pubsub import Publisher
 else:
 	from wx.lib.pubsub import pub as Publisher
 
-from Container import *
+#from Container import *
 from PlotGUI import *
 
 ###
 class MySheet(sheet.CSheet):
+	"""
+	"""
+
+	###
 	def __init__(self, parent, data):
+		""" Constructor.
+		"""
 		sheet.CSheet.__init__(self, parent)
 
 		### local copy
@@ -60,10 +67,11 @@ class MySheet(sheet.CSheet):
 
 		wx.CallAfter(self.Populate, (data))
 
+	###
 	def UpdateColWidth(self):
 		self.AutoSizeColumns()
-		#self.ForceRefresh()
 
+	###
 	def Populate(self, data):
 		"""
 		"""
@@ -83,6 +91,7 @@ class MySheet(sheet.CSheet):
 		### infor Frame that table us full for graph icon enabling
 		Publisher.sendMessage(("isfull"), self._full_flag)
 
+	###
 	def IsFull(self):
 		return self._full_flag
 
@@ -95,7 +104,13 @@ class MySheet(sheet.CSheet):
 
 ###
 class Newt(wx.Frame):
+	"""
+	"""
+
+	###
 	def __init__(self, parent, id, title, aDEVS, separator=" "):
+		""" Constructor
+		"""
 
 		wx.Frame.__init__(self, parent, wx.ID_ANY, aDEVS.getBlockModel().label, size = (550, 500), style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE|wx.STAY_ON_TOP)
 
@@ -153,6 +168,7 @@ class Newt(wx.Frame):
 		Publisher.subscribe(self.EnableGraphIcon, ("isfull"))
 		Publisher.subscribe(self.OnProgress, ("progress"))
 
+	###
 	def LoadingDataInPage(self):
 
 		### read and load the data in sheet
@@ -165,6 +181,7 @@ class Newt(wx.Frame):
 				label = _('%s (Port %i)')%(host.getBlockModel().label, oPort.myID)
 				self.AddPage(data, label)
 
+	###
 	def OnUpdate(self, event):
 
 		### remove all pages
@@ -174,6 +191,7 @@ class Newt(wx.Frame):
 		### reload all page
 		self.LoadingDataInPage()
 
+	###
 	def FileToData(self, fn, separator):
 		""" Create data from file.
 		"""
@@ -187,6 +205,7 @@ class Newt(wx.Frame):
 
 		return data
 
+	###
 	def EnableGraphIcon(self, msg):
 		""" Enable graph button when loadin data is finished and clear the statusbar.
 		"""
@@ -200,18 +219,21 @@ class Newt(wx.Frame):
 		toolbar.EnableTool(self.chart.GetId(), msg.data)
 		self.statusbar.SetStatusText("", 0)
 
+	###
 	def OnTab(self, event):
 		### update the column width
 		activePage = self.notebook.GetSelection()
 		sheet = self.notebook.GetPage(activePage)
 		sheet.UpdateColWidth()
 
+	###
 	def OnProgress(self, msg):
 		""" Update status bar with loading data progression
 		"""
 		pourcent = 100*float(msg.data)
 		self.statusbar.SetStatusText(_("Loading data... (%d %%)")%int(pourcent), 0)
 
+	###
 	def AddPage(self, data = [[]], label = ""):
 		""" Add new page to notebook knowing data and label
 		"""
@@ -223,6 +245,7 @@ class Newt(wx.Frame):
 		toolbar = self.GetToolBar()
 		toolbar.EnableTool(self.delete.GetId(), True)
 
+	###
 	def OnNew(self, event):
 		""" New button bas been pressed.
 		"""
@@ -230,6 +253,7 @@ class Newt(wx.Frame):
 		label = _('New %d'%self.notebook.GetPageCount())
 		self.AddPage(label=label)
 
+	###
 	def OnOpen(self, event):
 		""" Open button has been pressed.
 		"""
@@ -254,6 +278,7 @@ class Newt(wx.Frame):
 					label = _('New %d'%self.notebook.GetPageCount())
 					self.AddPage(data, label)
 
+	###
 	def OnSaveAs(self, event):
 		""" SaveAs button has been pressed.
 		"""
@@ -272,6 +297,7 @@ class Newt(wx.Frame):
 				for row in xrange(nbr):
 					f.write("%s %s\n"%(sheet.GetCellValue(row,0),sheet.GetCellValue(row,1)))
 
+	###
 	def OnCopy(self, event):
 		""" Copy button has been pressed.
 		"""
@@ -279,6 +305,7 @@ class Newt(wx.Frame):
 		sheet = self.notebook.GetPage(activePage)
 		sheet.Copy()
 
+	###
 	def OnCut(self, event):
 		""" Cut button has been pressed.
 		"""
@@ -287,6 +314,7 @@ class Newt(wx.Frame):
 		sheet.Copy()
 		sheet.Clear()
 
+	###
 	def OnPaste(self, event):
 		""" Paste button has been pressed.
 		"""
@@ -294,6 +322,7 @@ class Newt(wx.Frame):
 		sheet = self.notebook.GetPage(activePage)
 		sheet.Paste()
 
+	###
 	def OnDelete(self, event):
 		""" Delete button has been pressed.
 		"""
@@ -307,6 +336,7 @@ class Newt(wx.Frame):
 			toolbar = self.GetToolBar()
 			toolbar.EnableTool(self.delete.GetId(), False)
 
+	###
 	def OnGraph(self, event):
 		""" Graph button has been pressed.
 		"""

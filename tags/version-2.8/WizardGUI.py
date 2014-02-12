@@ -9,8 +9,6 @@ import zipfile
 import  wx.lib.filebrowsebutton as filebrowse
 
 import Container
-from DomainInterface.DomainBehavior import DomainBehavior
-from DomainInterface.DomainStructure import DomainStructure
 import Components
 
 _ = wx.GetTranslation
@@ -49,7 +47,7 @@ class %s(DomainBehavior):
 
 		self.state = {	'status': 'IDLE', 'sigma':INFINITY}
 
-	def extTransition(self):
+	def extTransition(self%s):
 		''' DEVS external transition function.
 		'''
 		pass
@@ -73,7 +71,7 @@ class %s(DomainBehavior):
 		''' Additional function which is lunched just before the end of the simulation.
 		'''
 		pass
-"""%(label,label)
+"""%(label,label,", inputs=None" if DEFAULT_DEVS_DIRNAME=='PyPDEVS' else '')
 
 def coupledCode(label):
 	return """
@@ -303,6 +301,9 @@ class ModelGeneratorWizard(Wizard):
 			fn = evt.GetEventObject().GetValue()
 			cls = Components.GetClass(fn)
 			if inspect.isclass(cls):
+                ### import are here because the simulator (PyDEVS or PyPDEVS) require it
+				from DomainInterface.DomainBehavior import DomainBehavior
+				from DomainInterface.DomainStructure import DomainStructure
 				if not (issubclass(cls, DomainBehavior) or issubclass(cls, DomainStructure)):
 					dlg = wx.MessageDialog(parent, _('The python file must contain a class that inherit of DomainBehavior or DomainStructure master class.\n Please choose a correct python file.'), _('Wizard Manager'), wx.ID_OK|wx.ICON_ERROR)
 					dlg.ShowModal()

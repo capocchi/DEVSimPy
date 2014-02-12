@@ -107,7 +107,6 @@ def getInstance(cls, args = {}):
 	"""
 	if inspect.isclass(cls):
 		try:
-			#devs = apply(cls, (), args)
 			devs = cls(**args)
 		except Exception:
 			sys.stderr.write(_("Error in getInstance: %s class not instanciated with %s\n"%(cls,str(args))))
@@ -202,15 +201,17 @@ def sendEvent(from_obj, to_obj, evt):
 	evt.SetId(to_obj.GetId())
 	from_obj.GetEventHandler().ProcessEvent(evt)
 
-def playSound(wav_path):
-	""" Play sound from wav_path
+def playSound(sound_path):
+	""" Play sound from sound_path
 	"""
 
-	if wav_path != os.devnull:
-		sound = wx.Sound(wav_path)
+	if sound_path != os.devnull:
+		sound = wx.Sound(sound_path)
 		if sound.IsOk():
 			sound.Play(wx.SOUND_ASYNC)
 			wx.YieldIfNeeded()
+		else:
+			sys.stderr.write(_("No sound\n"))
 
 def GetMails(string):
 	""" Get list of mails from string
