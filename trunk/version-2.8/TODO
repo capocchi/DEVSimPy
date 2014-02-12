@@ -425,3 +425,4 @@ invoque rpar un callback lorsque le fichier python est renseignÃ© dans le wizard
 -Fait le 1/12/2013 par LC: correction -> ajout de wx.TE_RICH2 pour avoir la couleur sous windows dans le blink (http://bytes.com/topic/python/answers/635711-wx-textctrl-setdefaultstyle-not-working)
 -Fait le 3/12/2013 par LC: correction-> erreur d'unicode dans le reporter (http://stackoverflow.com/questions/12468179/unicodedecodeerror-utf8-codec-cant-decode-byte-0x9c)
 -Fait le 23/12/2013 par LC: amélioration -> amélioration de l'architecture logiciel permettant de rendre disponible un noyau de simulation à partir d'un nouveau répertoire dans DEVSKernel (permet de suivre l'évolution de PyPDEVS)
+-Fait le 10/02/2014 par LC: correction -> lorsque fermetrue du dialogue ImportLibrary, si une libe est selectionnée, elle est importé quoi qu'il arrive. Bind du bouton en croix de la fenetre.
