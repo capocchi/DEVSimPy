@@ -31,8 +31,6 @@ import inspect
 import Container
 import Menu
 
-from ReloadModule import recompile
-from DomainInterface.DomainBehavior import DomainBehavior
 from Utilities import replaceAll, getFileListFromInit, path_to_module
 from Decorators import BuzyCursorNotification
 from Components import BlockFactory, DEVSComponent, GetClass
@@ -54,8 +52,9 @@ class LibraryTree(wx.TreeCtrl):
 	### exclude rep present into Domain
 	EXCLUDE_DOMAIN = ['Basic', '.svn']
 
+	###
 	def __init__(self, *args, **kwargs):
-		""" Constructor
+		""" Constructor.
 		"""
 
 		wx.TreeCtrl.__init__(self, *args, **kwargs)
@@ -113,12 +112,15 @@ class LibraryTree(wx.TreeCtrl):
 			sys.path.append(DOMAIN_PATH)
 			sys.path.append(os.path.dirname(DOMAIN_PATH))
 
-
+	###
 	def Populate(self, chargedDomainList = []):
 		""" Populate the Tree from a list of domain path.
 		"""
 
 		assert self.root != None, _("Missing root")
+
+		### add DOMAIN_PATH in sys.path whatever happens
+		LibraryTree.AddToSysPath(DOMAIN_PATH)
 
 		for absdName in chargedDomainList:
 
@@ -131,24 +133,24 @@ class LibraryTree(wx.TreeCtrl):
 		self.UnselectAll()
 		self.SortChildren(self.root)
 
+	###
 	def OnMotion(self, evt):
 		""" Motion engine over item.
 		"""
 		item, flags = self.HitTest(evt.GetPosition())
 
-		if item and self.IsSelected(item) and (flags & wx.TREE_HITTEST_ONITEMLABEL) and not evt.LeftIsDown():
+		if (flags & wx.TREE_HITTEST_ONITEMLABEL) and not evt.LeftIsDown():
 
 			path = self.GetItemPyData(item)
 
 			if os.path.isdir(path):
 				model_list = self.GetModelList(path)
 				domain_list = self.GetDomainList(path)
-				if domain_list != []:
-					tip = '\n'.join(domain_list)
-				elif model_list != []:
-					tip = '\n'.join(model_list)
-				else:
-					tip = ""
+
+				tip = '\n'.join(model_list) if model_list != [] else ""
+				tip += '\n'
+				tip += '\n'.join(domain_list) if domain_list != [] else ""
+
 			### is last item
 			else:
 				module = BlockFactory.GetModule(path)
@@ -171,8 +173,9 @@ class LibraryTree(wx.TreeCtrl):
 		### else the drag and drop dont run
 		evt.Skip()
 
+	###
 	def OnLeftClick(self, evt):
-		"""
+		""" Left click has been invoked.
 		"""
 
 		self.UnselectAll()
@@ -182,14 +185,15 @@ class LibraryTree(wx.TreeCtrl):
 		#self.SetFocus()
 		evt.Skip()
 
+	###
 	def OnMiddleClick(self, evt):
-		"""
+		""" Middle click has been invoked.
 		"""
 		item_selected = evt.GetItem()
 		if not self.ItemHasChildren(item_selected):
 			path = self.GetItemPyData(item_selected)
 			mainW = wx.GetApp().GetTopWindow()
-			nb2 = mainW.nb2
+			nb2 = mainW.GetDiagramNotebook()
 			canvas = nb2.GetPage(nb2.GetSelection())
 			### define path for python and model component
 
@@ -219,18 +223,21 @@ class LibraryTree(wx.TreeCtrl):
 				sys.stdout.write(_("This option has not been implemented yet. \n"))
 	###
 	def OnRightClick(self, evt):
-		""" Right click has been clicked.
+		""" Right click has been invoked.
 		"""
+		pos = evt.GetPosition()
+		item, flags = self.HitTest(pos)
 
-		# si pas d'item selectionnner, le evt.Skip à la fin propage l'evenement vers OnRightItemClick
-		if self.GetSelections() == []:
-			self.PopupMenu(Menu.LibraryPopupMenu(self), evt.GetPosition())
+		# if no , le evt.Skip à la fin propage l'evenement vers OnRightItemClick
+		if not item.IsOk():
+			self.PopupMenu(Menu.LibraryPopupMenu(self), pos)
 		else:
+			self.SelectItem(item)
 			evt.Skip()
 
 	###
 	def OnRightItemClick(self, evt):
-		"""
+		""" Right click on a item has been invoked.
 		"""
 		self.PopupMenu(Menu.ItemLibraryPopupMenu(self), evt.GetPoint())
 		evt.Skip()
@@ -245,7 +252,10 @@ class LibraryTree(wx.TreeCtrl):
 		else:
 			wx.MessageBox(_("No librarie selected!"),_("Delete Manager"))
 
+	###
 	def OnNewModel(self, evt):
+		""" New model action has been invoked.
+		"""
 		Container.ShapeCanvas.StartWizard(self)
 
 	###
@@ -295,6 +305,9 @@ class LibraryTree(wx.TreeCtrl):
 		""" Get the list of files from dName directory.
 		"""
 
+		### import are here because the simulator (PyDEVS or PyPDEVS) require it
+		from DomainInterface.DomainBehavior import DomainBehavior
+
 		### list of py file from __init__.py
 		if LibraryTree.EXT_LIB_PYTHON_FLAG:
 
@@ -324,16 +337,20 @@ class LibraryTree(wx.TreeCtrl):
 					py_file_list = []
 
 					for s in name_list:
-						python_file = os.path.join(dName,s+'.py')
+						python_file = os.path.join(dName, s+'.py')
 						### test if tmp is only composed by python file (case of the user write into the __init__.py file directory name is possible ! then we delete the directory names)
 						if os.path.isfile(python_file):
 
 							cls = GetClass(python_file)
 
 							if cls is not None and not isinstance(cls, tuple):
+
 								### only model that herite from DomainBehavior is shown in lib
 								if issubclass(cls, DomainBehavior):
 									py_file_list.append(s)
+								else:
+									sys.stderr.write(_("%s not imported : Class is not DomainBehavior \n"%(s)))
+
 
 							### If cls is tuple, there is an error but we load the model to correct it.
 							### If its not DEVS model, the Dnd don't allows the instantiation and when the error is corrected, it don't appear before a update.
@@ -341,18 +358,19 @@ class LibraryTree(wx.TreeCtrl):
 
 								py_file_list.append(s)
 
-				except Exception:
+				except Exception, info:
 					py_file_list = []
 					# if dName contains a python file, __init__.py is forced
 					for f in os.listdir(dName):
 						if f.endswith('.py'):
-							#sys.stderr.write(_("%s not imported : %s \n"%(dName,info)))
+							sys.stderr.write(_("%s not imported : %s \n"%(dName,info)))
 							break
 		else:
 			py_file_list = []
 
 		# list of amd and cmd files
 		devsimpy_file_list = [f for f in os.listdir(dName) if os.path.isfile(os.path.join(dName, f)) and (f[:2] != '__') and (f.endswith(LibraryTree.EXT_LIB_FILE))]
+
 
 		return py_file_list + devsimpy_file_list
 
@@ -376,7 +394,7 @@ class LibraryTree(wx.TreeCtrl):
 			return
 		else:
 			item = L.pop(0)
-			assert not isinstance(item,unicode), _("Warning unicode item !")
+			assert not isinstance(item, unicode), _("Warning unicode item !")
 			### element à faire remonter dans la liste
 			D = []
 			### si le fils est un modèle construit dans DEVSimPy
@@ -490,7 +508,7 @@ class LibraryTree(wx.TreeCtrl):
 				### pour les fils du sous domain
 				for elem in item.values()[0]:
 					# si elem simple (modèle couple ou atomic)
-					if isinstance(elem,str):
+					if isinstance(elem, str):
 						### remplacement des espaces
 						elem = elem.strip() #replace(' ','')
 						### parent provisoir
@@ -597,8 +615,9 @@ class LibraryTree(wx.TreeCtrl):
 
     ###
 	def GetSubDomain(self, dName, domainSubList = []):
-		""" Get the dico composed by all of the sub domain of dName (like{'../Domain/PowerSystem': ['PSDomainStructure', 'PSDomainBehavior', 'Object', 'PSSDB', {'../Domain/PowerSystem/Rt': []}, {'../Domain/PowerSystem/PowerMachine': ['toto.cmd', 'Integrator.cmd', 'titi.cmd', 'Mymodel.cmd', {'../Domain/PowerSystem/PowerMachine/TOTO': []}]}, {'../Domain/PowerSystem/Sources': ['StepGen', 'SinGen', 'CosGen', 'RampGen', 'PWMGen', 'PulseGen', 'TriphaseGen', 'ConstGen']}, {'../Domain/PowerSystem/Sinks': ['To_Disk', 'QuickScope']}, {'../Domain/PowerSystem/MyLib': ['', 'model.cmd']}, {'../Domain/PowerSystem/Hybrid': []}, {'../Domain/PowerSystem/Continuous': ['WSum', 'Integrator', 'Gain', 'Gain2', 'NLFunction']}]}
-	)
+		""" Get the dico composed by all of the sub domain of dName
+			(like{'../Domain/PowerSystem': ['PSDomainStructure', 'PSDomainBehavior', 'Object', 'PSSDB', {'../Domain/PowerSystem/Rt': []}, {'../Domain/PowerSystem/PowerMachine': ['toto.cmd', 'Integrator.cmd', 'titi.cmd', 'Mymodel.cmd', {'../Domain/PowerSystem/PowerMachine/TOTO': []}]}, {'../Domain/PowerSystem/Sources': ['StepGen', 'SinGen', 'CosGen', 'RampGen', 'PWMGen', 'PulseGen', 'TriphaseGen', 'ConstGen']}, {'../Domain/PowerSystem/Sinks': ['To_Disk', 'QuickScope']}, {'../Domain/PowerSystem/MyLib': ['', 'model.cmd']}, {'../Domain/PowerSystem/Hybrid': []}, {'../Domain/PowerSystem/Continuous': ['WSum', 'Integrator', 'Gain', 'Gain2', 'NLFunction']}]}
+			)
 		"""
 
 		if domainSubList == []:
@@ -622,17 +641,19 @@ class LibraryTree(wx.TreeCtrl):
 
 	###
 	def IsChildRoot(self, dName):
-		"""
+		""" Return True if dName library has child Root
 		"""
 		return (dName in self.GetChildRoot())
 
+	###
 	def HasString(self, s = ""):
-		"""
+		""" Return s parameter if exists in opened libraries
 		"""
 		return s in map(lambda item: str(self.GetItemText(item)), self.ItemDico.values())
 
+	###
 	def CheckItem(self, path):
-		"""
+		""" Check if the model is valide
 		"""
 
 		item = self.ItemDico[path]
@@ -723,8 +744,9 @@ class LibraryTree(wx.TreeCtrl):
 		"""
 		self.UpdateAll()
 
+	###
 	def UpdateAll(self):
-		"""
+		""" Update all loaded libaries.
 		"""
 
 		### update all Domain
@@ -734,25 +756,27 @@ class LibraryTree(wx.TreeCtrl):
 		### to sort domain
 		self.SortChildren(self.root)
 
-	def UpgradeAll(self, evt):
-		"""
-		"""
-		progress_dlg = wx.ProgressDialog(_("DEVSimPy upgrade libraries"),
-								_("Connecting to %s ...")%"code.google.com", parent=self,
-								style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
-		progress_dlg.Pulse()
+	###
+# 	def UpgradeAll(self, evt):
+# 		"""
+# 		"""
+# 		progress_dlg = wx.ProgressDialog(_("DEVSimPy upgrade libraries"),
+# 								_("Connecting to %s ...")%"code.google.com", parent=self,
+# 								style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
+# 		progress_dlg.Pulse()
+#
+# 		thread = UpgradeLibThread(progress_dlg)
+#
+# 		while thread.isAlive():
+# 			time.sleep(0.3)
+# 			progress_dlg.Pulse()
+#
+# 		progress_dlg.Destroy()
+# 		wx.SafeYield()
+#
+# 		return thread.finish()
 
-		thread = UpgradeLibThread(progress_dlg)
-
-		while thread.isAlive():
-			time.sleep(0.3)
-			progress_dlg.Pulse()
-
-		progress_dlg.Destroy()
-		wx.SafeYield()
-
-		return thread.finish()
-
+	###
 	def RemoveItem(self, item):
 		""" Remove item from Tree and also the corresponding elements of ItemDico
 		"""
@@ -764,13 +788,21 @@ class LibraryTree(wx.TreeCtrl):
 
 		self.Delete(item)
 
+	###
 	def OnItemRefresh(self, evt):
+		""" Refresh action has been invoked.
+		"""
+
 		item = self.GetSelection()
 		path = self.GetItemPyData(item)
 
 		self.CheckItem(os.path.splitext(path)[0])
 
+	###
 	def OnItemEdit(self, evt):
+		""" Edition menu has been invoked.
+		"""
+
 		item = self.GetSelection()
 		path = self.GetItemPyData(item)
 
@@ -793,24 +825,33 @@ class LibraryTree(wx.TreeCtrl):
 		### call frame editor
 		DEVSComponent.OnEditor(devscomp, evt)
 
+	###
 	def OnItemRename(self, evt):
+		""" Rename action has been invoked.
+		"""
 		item = self.GetSelection()
-		path = self.GetItemPyData(item)
+		name = self.GetItemText(item)
 
-		bn = os.path.basename(path)
-		dn = os.path.dirname(path)
-		name, ext = os.path.splitext(bn)
-
-		d = wx.TextEntryDialog(self,_('New file name'), defaultValue = name, style=wx.OK)
+		### dialog to ask new label
+		d = wx.TextEntryDialog(self, _('New file name'), defaultValue = name, style=wx.OK)
 		d.ShowModal()
 
 		### new label
 		new_label = d.GetValue()
-		os.rename(path, os.path.join(dn, new_label)+ext)
-		replaceAll(os.path.join(dn,'__init__.py'), os.path.splitext(bn)[0], new_label)
+		### if new and old label are different
+		if new_label != name:
+			path = self.GetItemPyData(item)
+			bn = os.path.basename(path)
+			dn = os.path.dirname(path)
+			name, ext = os.path.splitext(bn)
+			### relace on file system
+			os.rename(path, os.path.join(dn, new_label)+ext)
+			### replace in __init__.py file
+			replaceAll(os.path.join(dn,'__init__.py'), os.path.splitext(bn)[0], new_label)
 
-		self.UpdateAll()
+			self.UpdateAll()
 
+	###
 	def OnItemDocumentation(self, evt):
 		""" Display the item's documentation on miniFrame.
 		"""
@@ -834,8 +875,9 @@ class LibraryTree(wx.TreeCtrl):
 			dlg.CenterOnParent(wx.BOTH)
 			dlg.ShowModal()
 		else:
-			wx.MessageBox(_('No documentation for %s')%name, 'Info', wx.OK)
+			wx.MessageBox(_('No documentation'), name, wx.OK|wx.ICON_INFORMATION)
 
+	###
 	def OnInfo(self, event):
 		"""
 		"""

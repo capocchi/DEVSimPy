@@ -341,19 +341,21 @@ class DiagramMenu(wx.Menu):
 		self.AppendSeparator()
 		self.AppendItem(closeDiagram)
 
+		nb2 = parent.GetDiagramNotebook()
+
 		parent.Bind(wx.EVT_MENU, parent.OnNew, id=ID_NEW)
-		parent.Bind(wx.EVT_MENU, parent.nb2.OnDetachPage, id=ID_DETACH_DIAGRAM)
-		parent.Bind(wx.EVT_MENU, parent.nb2.OnRenamePage, id=ID_RENAME_DIAGRAM)
+		parent.Bind(wx.EVT_MENU, nb2.OnDetachPage, id=ID_DETACH_DIAGRAM)
+		parent.Bind(wx.EVT_MENU, nb2.OnRenamePage, id=ID_RENAME_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, parent.OnCheck, id=ID_CHECK_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, parent.OnSimulation, id=ID_SIM_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, parent.OnConstantsLoading, id=ID_CONST_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, parent.OnPriorityGUI, id=ID_PRIORITY_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, parent.OnInfoGUI, id=ID_INFO_DIAGRAM)
-		parent.Bind(wx.EVT_MENU, parent.nb2.OnClearPage, id=ID_CLEAR_DIAGRAM)
+		parent.Bind(wx.EVT_MENU, nb2.OnClearPage, id=ID_CLEAR_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, parent.OnZoom, id=ID_ZOOMIN_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, parent.OnUnZoom, id=ID_ZOOMOUT_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, parent.AnnuleZoom, id=ID_UNZOOM_DIAGRAM)
-		parent.Bind(wx.EVT_MENU, parent.nb2.OnClosePage, id=ID_EXIT_DIAGRAM)
+		parent.Bind(wx.EVT_MENU, nb2.OnClosePage, id=ID_EXIT_DIAGRAM)
 
 class SettingsMenu(wx.Menu):
 	"""
@@ -377,7 +379,7 @@ class SettingsMenu(wx.Menu):
 		languagesSubmenu.AppendItem(fritem)
 		languagesSubmenu.AppendItem(enitem)
 
-		self.AppendMenu(wx.NewId(),_('Languages'), languagesSubmenu)
+		self.AppendMenu(wx.NewId(), _('Languages'), languagesSubmenu)
 		self.AppendItem(pref_item)
 
 		fritem.Enable(not parent.language == 'fr')
@@ -706,7 +708,7 @@ class ShapePopupMenu(wx.Menu):
 		exportCMD=wx.MenuItem(self, ID_EXPORT_CMD_SHAPE, _("CMD"), _("Model exported to a cmd file"))
 		exportXML=wx.MenuItem(self, ID_EXPORT_XML_SHAPE, _("XML"), _("Model exported to a xml file"))
 		exportJS=wx.MenuItem(self, ID_EXPORT_JS_SHAPE, _("JS"), _("Model exported to a js (join) file"))
-		plugin = wx.MenuItem(self, ID_PLUGINS_SHAPE, _("Plugins"), _("Apply plugin to a model"))
+		plugin = wx.MenuItem(self, ID_PLUGINS_SHAPE, _("Plugin"), _("Plugin manager"))
 		properties=wx.MenuItem(self, ID_PROPERTIES_SHAPE, _("Properties"), _("Edit the attributs"))
 
 		edit.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -734,11 +736,11 @@ class ShapePopupMenu(wx.Menu):
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnLock, id=ID_LOCK_SHAPE)
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnUnLock, id=ID_UNLOCK_SHAPE)
 
+
 		elif isinstance(shape, Container.ResizeableNode):
 			Delete_menu = self.AppendItem(delete)
+
 		elif isinstance(shape, Container.Node):
-
-
 			pass
 			#port_number=wx.MenuItem(self, wx.NewId(), _("Enable port number"), _("Port number"),wx.ITEM_CHECK)
 			#self.AppendItem(port_number)
@@ -780,12 +782,14 @@ class ShapePopupMenu(wx.Menu):
 				#Export_menu = self.AppendItem(export)
 				Export_menu=self.AppendMenu(-1,_("Export"),export_subMenu)
 				Export_SubMenu1 = export_subMenu.AppendItem(exportAMD)
+
 			elif isinstance(shape, Container.ContainerBlock):
 				self.AppendSeparator()
 				Export_menu=self.AppendMenu(-1,_("Export"),export_subMenu)
 				Export_SubMenu1 = export_subMenu.AppendItem(exportCMD)
 				Export_SubMenu2 = export_subMenu.AppendItem(exportXML)
 				Export_SubMenu3 = export_subMenu.AppendItem(exportJS)
+
 			else:
 				self.Enable(ID_EDIT_SHAPE, False)
 
@@ -796,10 +800,10 @@ class ShapePopupMenu(wx.Menu):
 			if isinstance(shape, Container.CodeBlock) or isinstance(shape, Container.ContainerBlock):
 				### only for amd or cmd
 				if shape.model_path != "":
-					if ZipManager.Zip.HasPlugin(shape.model_path):
-						self.AppendSeparator()
-						Plugin_menu = self.AppendItem(plugin)
-						self.__canvas.Bind(wx.EVT_MENU, shape.OnPluginsManager, id=ID_PLUGINS_SHAPE)
+					self.AppendSeparator()
+					#if ZipManager.Zip.HasPlugin(shape.model_path):
+					Plugin_menu = self.AppendItem(plugin)
+					self.__canvas.Bind(wx.EVT_MENU, shape.OnPluginsManager, id=ID_PLUGINS_SHAPE)
 
 			self.AppendSeparator()
 			Properties_menu = self.AppendItem(properties)
@@ -820,19 +824,19 @@ class ShapePopupMenu(wx.Menu):
 
 			# Codeblock specific binding
 			if isinstance(shape, Container.CodeBlock):
-				self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnEditor, id=ID_EDIT_MODEL_SHAPE)
-				self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnLog, id=ID_LOG_SHAPE)
+				self.__canvas.Bind(wx.EVT_MENU, shape.OnEditor, id=ID_EDIT_MODEL_SHAPE)
+				self.__canvas.Bind(wx.EVT_MENU, shape.OnLog, id=ID_LOG_SHAPE)
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnExport, id=ID_EXPORT_AMD_SHAPE)
 
 				# AMD specific binding
 				if shape.isAMD():
 				 	self.__canvas.Bind(wx.EVT_MENU, shape.OnTestEditor, id=ID_TESTING_SHAPE)
 				else:
-					self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnEditor, id=ID_EDIT_SHAPE)
+					self.__canvas.Bind(wx.EVT_MENU, shape.OnEditor, id=ID_EDIT_SHAPE)
 
 			# ContainerBlock specific binding
 			elif isinstance(shape, Container.ContainerBlock):
-				self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnEditor, id=ID_EDIT_SHAPE)
+				self.__canvas.Bind(wx.EVT_MENU, shape.OnEditor, id=ID_EDIT_SHAPE)
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnExport, id=ID_EXPORT_CMD_SHAPE)
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnExport, id=ID_EXPORT_XML_SHAPE)
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnExport, id=ID_EXPORT_JS_SHAPE)

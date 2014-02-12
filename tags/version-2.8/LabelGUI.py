@@ -25,12 +25,15 @@ import os
 import wx
 from wx import xrc
 
+from AttributeEditor import AttributeEditor
+
 __res = None
 
 def __init_resources():
 	global __res
 	__res = xrc.EmptyXmlResource()
-	__res.Load(os.path.join('XRC','LabelEditorDialog.xrc'))
+	home = os.path.abspath(os.path.dirname(sys.argv[0]))
+	__res.Load(os.path.join(home,'XRC','LabelEditorDialog.xrc'))
 
 def get_resources():
     """ This function provides access to the XML resources in this module."""
@@ -113,8 +116,9 @@ class LabelDialog(wx.Dialog):
 
 			### update of block from canvas
 			self.canvas.UpdateShapes([self.block])
-			### update of label filed in propertie dialogue
-			self.parent._list.SetCellValue(0, 1, self.block.label)
+			if isinstance(self.parent, AttributeEditor):
+				### update of label filed in propertie dialogue
+				self.parent._list.SetCellValue(0, 1, self.block.label)
 
 		evt.Skip()
 
@@ -130,8 +134,9 @@ class LabelDialog(wx.Dialog):
 
 			### update of block from canvas
 			self.canvas.UpdateShapes([self.block])
-			### update of label_pos filed in propertie dialogue
-			self.parent._list.SetCellValue(1, 1, self.block.label_pos)
+			if isinstance(self.parent, AttributeEditor):
+				### update of label_pos filed in propertie dialogue
+				self.parent._list.SetCellValue(1, 1, self.block.label_pos)
 
 	def OnOk(self, evt):
 		""" Ok button has been clicked
