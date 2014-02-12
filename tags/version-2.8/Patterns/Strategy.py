@@ -25,48 +25,34 @@ import sys
 import time
 import copy
 import weakref
-#import shelve
-#import tempfile
 import heapq
-#import bisect
 import threading
-import multiprocessing
-#import concurrent.futures
-#import pp
+import inspect
 
 from pluginmanager import trigger_event
-from DEVSKernel.PyDEVS.DEVS import AtomicDEVS, CoupledDEVS, IPort, OPort
 
-class Traceable:
-	""" for back simulation
-	"""
+import __builtin__
+import re
+import os
 
-	def __init__(self):
-		""" Constructor
-		"""
-		#self.f = tempfile.NamedTemporaryFile(delete=False)
-		#self.f.close()
+### import the DEVS module depending on the selected DEVS package in DEVSKernel directory
+for pydevs_dir in __builtin__.__dict__['DEVS_DIR_PATH_DICT']:
+    path = __builtin__.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
+    ### split from DEVSKernel string and replace separator with point
+    d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
+    exec "import DEVSKernel%s.DEVS as %s"%(d,pydevs_dir)
 
-		#s = shelve.open(self._simulator.f.name+'.db')
-		#s['s'] = {}
-		#s.close()
-
-		self.trace = {}
-
-	def Trace(self, time, value):
-		self.trace.update({time:copy.copy(value)})
-
-	def GetModel(self, time):
-		return self.trace.get(time, None)
+#import DEVSKernel.PyDEVS.DEVS as PyDEVS
+#import DEVSKernel.PyPDEVS.DEVS as PyPDEVS
 
 def getFlatImmChildrenList(model, flat_imm_list = []):
 	""" Set priority flat list
 	"""
 
 	for m in model.immChildren:
-		if isinstance(m, AtomicDEVS):
+		if isinstance(m, PyDEVS.AtomicDEVS):
 			flat_imm_list.append(m)
-		elif isinstance(m, CoupledDEVS):
+		elif isinstance(m, PyDEVS.CoupledDEVS):
 			getFlatImmChildrenList(m, flat_imm_list)
 
 	return flat_imm_list
@@ -82,9 +68,9 @@ def getFlatPriorityList(model, flat_priority_list = []):
 		L = model.componentSet
 
 	for m in L:
-		if isinstance(m, AtomicDEVS):
+		if isinstance(m, PyDEVS.AtomicDEVS):
 			flat_priority_list.append(m)
-		elif isinstance(m, CoupledDEVS):
+		elif isinstance(m, PyDEVS.CoupledDEVS):
 			getFlatPriorityList(m, flat_priority_list)
 		else:
 			sys.stdout.write(_('Unknow model'))
@@ -128,10 +114,13 @@ class SimStrategy1(SimStrategy):
 
 		# Main loop repeatedly sends $(*,\,t)$ messages to the model's root DEVS.
 		while clock <= T:
-			clock = model.myTimeAdvance
-			send(model, (1, model.immChildren, clock))
 
-class SimStrategy2(SimStrategy, Traceable):
+			send(model, (1, model.immChildren, clock))
+   			clock = model.myTimeAdvance
+
+		self._simulator.terminate()
+
+class SimStrategy2(SimStrategy):
 	""" Strategy for DEVSimPy hierarchical simulation.
 
 		This strategy is based on Zeigler's hierarchical simulation algorithm based on atomic and coupled Solver.
@@ -139,7 +128,6 @@ class SimStrategy2(SimStrategy, Traceable):
 
 	def __init__(self, simulator=None):
 		SimStrategy.__init__(self, simulator)
-		Traceable.__init__(self)
 
 	def simulate(self, T = sys.maxint):
 		"""
@@ -162,10 +150,6 @@ class SimStrategy2(SimStrategy, Traceable):
 
 		### stoping condition depend on the ntl (no time limit for the simulation)
 		condition = lambda clock: HasActiveChild(getFlatImmChildrenList(master, [])) if self._simulator.ntl else clock <= T
-
- 	#self._simulator.s = shelve.open('toto.db',writeback=True)
-		#self._simulator.s['s'] = {}
-		#self._simulator.s.close()
 
 		# Main loop repeatedly sends $(*,\,t)$ messages to the model's root DEVS.
 		while condition(clock) and self._simulator.end_flag == False:
@@ -191,14 +175,6 @@ class SimStrategy2(SimStrategy, Traceable):
 
 				self._simulator.cpu_time = old_cpu_time + (time.time()-t_start)
 
-   	#self.Trace(clock, model)
-
-				#q.put((clock,self._simulator))
-				### for back simulation process
-				#self._simulator.s = shelve.open('toto.db',writeback=True)
-				#self._simulator.s['s'][str(clock)] = self._simulator
-				#self._simulator.s.close()
-
 		self._simulator.terminate()
 
 ###--------------------------------------------------------------------Strategy
@@ -220,16 +196,6 @@ def parallel_ext_transtion_manager(p):
 	hosts = p.weak.GetHosts()
 
 	###----------------------------------------------------------------------------------------
-	#pool = multiprocessing.Pool() #note the default will use the optimal number of workers
-
-	#for val in hosts:
-		#pool.apply_async(val[2],(val[1],))
-	#pool.close()
-	#pool.join()
-
-	###----------------------------------------------------------------------------------------
-
-	###----------------------------------------------------------------------------------------
 	#print "thread version"
 	### thread version
 	threads = []
@@ -247,26 +213,12 @@ def parallel_ext_transtion_manager(p):
 	### clear output port (then input port of hosts) of model in charge of activate hosts
 	p.weak.SetValue(None)
 
-
-# Creates jobserver with automatically detected number of workers
-#global job_server
-#job_server = pp.Server(ppservers=())
-
 def serial_ext_transtion_manager(p):
 	""" achieve external transition function of host from p
  	"""
 
-	#global job_server
 
 	hosts = p.weak.GetHosts()
-
-	# Submit all jobs to parallel python
-	#jobs = [job_server.submit(val[2],(val[1],(),("import Domain.PowerSystem.Continous.WSum as WSum"))) for val in hosts]
-
-	#job_server.wait()   # wait until all jobs are completed...
-
-	#for i,val in enumerate(hosts):
-		#val[1] = jobs[i]()
 
 	### serial version
 	for val in hosts:
@@ -305,24 +257,17 @@ class WeakValue:
 
 		### value and time of msg
 		self._value = None
-		#self._time = 0.0
 		self._host = []
 
 	def SetValue(self, v):
 		""" Set value and time
 		"""
 
-		#if v is not None:
-			#self._time = v.time
-
 		self._value = v
 
 	def GetValue(self):
 		""" Get value at time t
 		"""
-
-		#if t > self._time:
-			#self._value = None
 
 		return self._value
 
@@ -341,8 +286,9 @@ class WeakValue:
 def FlatConnection(p1, p2):
 	"""
 	"""
-	if isinstance(p1.host, AtomicDEVS) and isinstance(p2.host, AtomicDEVS):
-		if isinstance(p1, OPort) and isinstance(p2, IPort):
+
+	if isinstance(p1.host, PyDEVS.AtomicDEVS) and isinstance(p2.host, PyDEVS.AtomicDEVS):
+		if isinstance(p1, PyDEVS.OPort) and isinstance(p2, PyDEVS.IPort):
 			#print str(p1.host.getBlockModel().label), '->', str(p2.host.getBlockModel().label)
 			if not isinstance(p1.weak, weakref.ProxyType):
 				wr = weakref.proxy(p1.weak)
@@ -360,22 +306,22 @@ def FlatConnection(p1, p2):
 			## build hosts list in WeakValue class
 			p1.weak.AddHosts(p2)
 
-	elif isinstance(p1.host, AtomicDEVS) and isinstance(p2.host, CoupledDEVS):
-		if isinstance(p1, OPort):
+	elif isinstance(p1.host, PyDEVS.AtomicDEVS) and isinstance(p2.host, PyDEVS.CoupledDEVS):
+		if isinstance(p1, PyDEVS.OPort):
 			### update outLine port list removing ports of coupled model
-			p1.outLine = filter(lambda a: isinstance(a.host, AtomicDEVS), p1.outLine)
+			p1.outLine = filter(lambda a: isinstance(a.host, PyDEVS.AtomicDEVS), p1.outLine)
 			for p in p2.outLine:
 				if not hasattr(p, 'weak'): setattr(p, 'weak', WeakValue(p))
 				FlatConnection(p1, p)
 
-	elif isinstance(p1.host, CoupledDEVS) and isinstance(p2.host, AtomicDEVS):
-		if isinstance(p1, OPort) and isinstance(p2, IPort):
+	elif isinstance(p1.host, PyDEVS.CoupledDEVS) and isinstance(p2.host, PyDEVS.AtomicDEVS):
+		if isinstance(p1, PyDEVS.OPort) and isinstance(p2, PyDEVS.IPort):
 			for p in p1.inLine:
 				if not hasattr(p, 'weak'): setattr(p, 'weak', WeakValue(p))
 				FlatConnection(p, p2)
 
-	elif isinstance(p1.host, CoupledDEVS) and isinstance(p2.host, CoupledDEVS):
-		if isinstance(p1, OPort) and isinstance(p2, IPort):
+	elif isinstance(p1.host, PyDEVS.CoupledDEVS) and isinstance(p2.host, PyDEVS.CoupledDEVS):
+		if isinstance(p1, PyDEVS.OPort) and isinstance(p2, PyDEVS.IPort):
 			for p in p1.inLine:
 				for pp in p2.outLine:
 					FlatConnection(p, pp)
@@ -389,8 +335,8 @@ def setAtomicModels(atomic_model_list, ts):
 		m.myTimeAdvance = m.timeAdvance()
 		m.poke = poke
 		m.peek = peek
-		funcType = type(AtomicDEVS.peek_all)
-		m.peek_all = funcType(peek_all, m, AtomicDEVS)
+		funcType = type(PyDEVS.AtomicDEVS.peek_all)
+		m.peek_all = funcType(peek_all, m, PyDEVS.AtomicDEVS)
 		setattr(m, 'priority', i)
 		setattr(m, 'ts', ts())
 
@@ -469,7 +415,6 @@ class Clock(object):
 	def Set(self, val):
 		self._val = val
 
-
 ###
 class SimStrategy3(SimStrategy):
 	""" Strategy 3 for DEVSimPy thread-based direct-coupled simulation
@@ -477,7 +422,7 @@ class SimStrategy3(SimStrategy):
 		The simulate methode use heapq tree-like data library to manage model priority for activation
 		and weak library to simplify the connexion algorithm between port.
 		The THREAD_LIMIT control the limit of models to thread (default 5).
-		The performance of this alogithm depends on the THREAD_LIMIT number and the number of coupled models.
+		The performance of this algorithm depends on the THREAD_LIMIT number and the number of coupled models.
 	"""
 
 	def __init__(self, simulator=None):
@@ -493,8 +438,12 @@ class SimStrategy3(SimStrategy):
 		self.master = self._simulator.getMaster()
 		self.flat_priority_list = getFlatPriorityList(self.master, [])
 
-		### init all atomic model from falt list
+		### init all atomic model from flat list
 		setAtomicModels(self.flat_priority_list, weakref.ref(self.ts))
+
+		### udpate the componentSet list of master (that no longer contains coupled model)
+		self.master.componentSet = self.flat_priority_list
+
 
 	def simulate(self, T = sys.maxint):
 		"""
@@ -505,11 +454,12 @@ class SimStrategy3(SimStrategy):
 		### if suspend, we could store the future ref
 		old_cpu_time = 0
 
-		### stoping condition depend on the ntl (no time limit for the simulation)
+		### stopping condition depend on the ntl (no time limit for the simulation)
 		condition = lambda clk: HasActiveChild(getFlatPriorityList(self.master, [])) if self._simulator.ntl else clk <= T
 
-		### simualtion time and list of flat models ordered by devs priority
-		self.ts.Set(min([m.myTimeAdvance for m in self.flat_priority_list if m.myTimeAdvance < INFINITY]))
+		### simulation time and list of flat models ordered by devs priority
+		L = [m.myTimeAdvance for m in self.flat_priority_list if m.myTimeAdvance < INFINITY] or [INFINITY]
+		self.ts.Set(min(L))
 		formated_priority_list = [(1+i/10000.0, m, execIntTransition) for i,m in enumerate(self.flat_priority_list)]
 
 		while condition(self.ts.Get()) and self._simulator.end_flag == False:
@@ -536,7 +486,7 @@ class SimStrategy3(SimStrategy):
 
 				### TODO: execute with process of model are parallel !
 				while(priority_scheduler):
-					### get most priority model and apply its internal trnasition
+					### get most priority model and apply its internal transition
 					priority, model, transition_fct = heapq.heappop(priority_scheduler)
 					apply(transition_fct, (model,))
 
@@ -548,3 +498,62 @@ class SimStrategy3(SimStrategy):
 				self._simulator.cpu_time = old_cpu_time + (time.time()-t_start)
 
 		self._simulator.terminate()
+
+# A. Simulate forever.
+#    The termination_condition function never returns True.
+#
+def terminate_never(model, clock):
+	return False
+
+
+class SimStrategy4(SimStrategy):
+    """ Original strategy for PyPDEVS simulation
+    """
+
+    def __init__(self, simulator = None):
+    	SimStrategy.__init__(self, simulator)
+
+    def simulate(self, T = sys.maxint):
+    	"""Simulate the model (Root-Coordinator).
+    	"""
+
+    	### for all available DEVS package (keys of built-in DEVS_DIR_PATH_DICT dictionary)
+    	for pydevs_dir in __builtin__.__dict__['DEVS_DIR_PATH_DICT']:
+    		### only the selected one
+    		if pydevs_dir == __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
+    			path = __builtin__.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
+    			### split from DEVSKernel string and replace separator with point
+    			d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
+    			exec "from DEVSKernel%s.simulator import Simulator"%d
+
+        S = Simulator(self._simulator.model)
+
+        ### old version of PyPDEVS
+        if len(inspect.getargspec(S.simulate).args) > 1:
+
+        	kwargs = {'verbose':True}
+
+            ### TODO
+        	if self._simulator.ntl:
+        		kwargs['termination_condition']=terminate_never
+        	else:
+        		kwargs['termination_time']=T
+
+        	S.simulate(**kwargs)
+
+        ### new version of PyPDEVS (due to the number of config param which is growing)
+        else:
+
+            ### see simconfig.py to have informations about setters
+            S.setVerbose(None)
+
+            ### TODO
+            if self._simulator.ntl:
+                S.setTerminationCondition(terminate_never)
+            else:
+                S.setTerminationTime(T)
+
+            S.setClassicDEVS()
+            S.simulate()
+
+    	self._simulator.terminate()
