@@ -215,6 +215,7 @@ class ImportLibrary(wx.Dialog):
 		self.Bind(wx.EVT_BUTTON, self.OnAdd, self._btn_Add)
 		self.Bind(wx.EVT_CHECKLISTBOX, self.EvtCheckListBox, self._cb)
 		self.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnItemRightClick)
+		self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
 
 		self.Centre()
 		self.Layout()
@@ -469,6 +470,9 @@ class ImportLibrary(wx.Dialog):
 
 		# on reactive le bouton pour un eventuel autre ajout
 		self._btn_Add.Enable(True)
+
+	def OnCloseWindow(self, event):
+		self.Destroy()
 
 ### ------------------------------------------------------------
 class TestApp(wx.App):
