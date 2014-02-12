@@ -636,25 +636,28 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			typ, val, tb = msg.data
 			trace = traceback.format_exception(typ, val, tb)
 
+			mainW = wx.GetApp().GetTopWindow()
 			### paths in traceback
 			paths = filter(lambda a: a.split(',')[0].strip().startswith('File'), trace)
 			### find if DOMAIN_PATH is in paths list (inversed because traceback begin by the end)
 			for path in paths[::-1]:
-				if DOMAIN_PATH in path:
-					devs_error = True
-					break
+				### find if one path in trace comes from Domain or exported path list
+				for d in [DOMAIN_PATH]+mainW.GetExportPathsList():
+					if d in path:
+						devs_error = True
+						break
 
 		except Exception, info:
-			pass
+			print _("Error in ErrorManager: %s"%info)
 
 		### if error come from devs python file
 		if devs_error:
-		### Error dialog
+			### Error dialog
 			if not Container.MsgBoxError(event, self.parent, msg.data):
 			### if user dont want correct the error, we destroy the simulation windows
 				self.DestroyWin()
 			else:
-			### is user want to correct error through an editor, we stop simulation process for trying again after the error is corrected.
+			### if user want to correct error through an editor, we stop simulation process for trying again after the error is corrected.
 				self.OnStop(event)
 		else:
 			raise msg
