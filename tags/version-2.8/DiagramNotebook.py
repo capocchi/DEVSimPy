@@ -7,7 +7,7 @@
 #                             Laurent CAPOCCHI
 #                          University of Corsica
 #                     --------------------------------
-# Version 1.0                                        last modified: 13/11/2013
+# Version 1.0                                        last modified: 21/01/2014
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -39,7 +39,7 @@ from DetachedFrame import DetachedFrame
 from PrintOut import Printable
 
 #-------------------------------------------------------------------
-class GeneralFlatNotebook(Printable):
+class GeneralNotebook(Printable):
 	"""
 	"""
 
@@ -48,7 +48,7 @@ class GeneralFlatNotebook(Printable):
 		General Notebook class for Diagram Notebook on the right part of DEVSimPy.
 		"""
 
-		# for spash screen
+		# for splash screen
 		pub.sendMessage('object.added', 'Loading notebook diagram...\n')
 
 		Printable.__init__(self)
@@ -91,7 +91,7 @@ class GeneralFlatNotebook(Printable):
 		### title page list
 		title_pages = map(lambda p: p.name, self.pages)
 
-		### occurence of title in existing title pages
+		### occurrence of title in existing title pages
 		c = title_pages.count(title)
 		title = title+"(%d)"%c if c != 0 else title
 
@@ -102,7 +102,7 @@ class GeneralFlatNotebook(Printable):
 		d = defaultDiagram or Container.Diagram()
 		d.SetParent(newPage)
 
-		### diagram and background newpage setting
+		### diagram and background new page setting
 		newPage.SetDiagram(d)
 
 		### print canvas variable setting
@@ -119,13 +119,13 @@ class GeneralFlatNotebook(Printable):
 		""" Clear page.
 
 			@type evt: event
-			@param  evt: Event Objet, None by default
+			@param  evt: Event Object, None by default
 		"""
 		id = self.GetSelection()
 
 		if self.GetPageCount() > 0:
 			canvas = self.GetPage(id)
-			diagram = canvas.diagram
+			diagram = canvas.GetDiagram()
 
 			diagram.DeleteAllShapes()
 			diagram.modified = True
@@ -137,7 +137,7 @@ class GeneralFlatNotebook(Printable):
 		"""Rename the title of notebook page.
 
 		@type evt: event
-		@param  evt: Event Objet, None by default
+		@param  evt: Event Object, None by default
 		"""
 		selection = self.GetSelection()
 		dlg = wx.TextEntryDialog(self, _("Enter a new name:"), _("Diagram Manager"))
@@ -154,7 +154,7 @@ class GeneralFlatNotebook(Printable):
 		Detach the notebook page on frame.
 
 		@type evt: event
-		@param  evt: Event Objet, None by default
+		@param  evt: Event Object, None by default
 		"""
 
 		mainW = self.GetTopLevelParent()
@@ -168,7 +168,7 @@ class GeneralFlatNotebook(Printable):
 		frame.Show()
 
 	def OnPageChanged(self, evt):
-		""" Page hase been changed
+		""" Page has been changed
 		"""
 
 		id = self.GetSelection()
@@ -189,13 +189,13 @@ class GeneralFlatNotebook(Printable):
 			canvas.deselect()
 			canvas.Refresh()
 
-			### update statusbar depending on the diagram modification
+			### update status bar depending on the diagram modification
 			if hasattr(self.parent, 'statusbar'):
 				diagram = canvas.GetDiagram()
 				txt = _('%s modified')%(self.GetPageText(id)) if diagram.modify else ""
 				self.parent.statusbar.SetStatusText(txt)
 
-		### propagate event also error in OnClosePage becaus GetSelection is wrong
+		### propagate event also error in OnClosePage because GetSelection is wrong
 		evt.Skip()
 
 	def DeleteBuiltinConstants(self):
@@ -228,7 +228,7 @@ if USE_FLATNOTEBOOK:
 	# FlatNotebook generalized class
 	#
 
-	class DiagramNotebook(fnb.FlatNotebook, GeneralFlatNotebook):
+	class DiagramNotebook(fnb.FlatNotebook, GeneralNotebook):
 		""" Diagram FlatNotebook class
 		"""
 
@@ -238,7 +238,7 @@ if USE_FLATNOTEBOOK:
 				FlatNotebook class that allows overriding and adding methods for the right pane of DEVSimPy
 			"""
 			fnb.FlatNotebook.__init__(self, *args, **kwargs)
-			GeneralFlatNotebook.__init__(self,*args, **kwargs)
+			GeneralNotebook.__init__(self,*args, **kwargs)
 
 			self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.OnClosingPage)
 			self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
@@ -247,7 +247,7 @@ if USE_FLATNOTEBOOK:
 			self.SetRightClickMenu(self._rmenu)
 
 		def CreateRightClickMenu(self):
-			""" Right clic has been invoqued and contectual menu is displayed.
+			""" Right click has been invoked and contextual menu is displayed.
 			"""
 
 			self._rmenu = Menu.DiagramTabPopupMenu(self)
@@ -265,7 +265,7 @@ if USE_FLATNOTEBOOK:
 		###
 		def OnClosingPage(self, evt):
 			""" Called when tab is closed.
-				With FlatNoteBokk, this method is used to ask if diagram should be saved and to udpate properties panel
+				With FlatNoteBokk, this method is used to ask if diagram should be saved and to update properties panel
 			"""
 
 			id = self.GetSelection()
@@ -293,7 +293,7 @@ if USE_FLATNOTEBOOK:
 			self.pages.remove(canvas)
 
 			### update (clear) of properties panel (Control notebook)
-			propPanel = mainW.nb1.GetPropPanel()
+			propPanel = mainW.GetControlNotebook().GetPropPanel()
 			### If properties panel is active, we update it
 			if propPanel:
 				propPanel.UpdatePropertiesPage(propPanel.defaultPropertiesPage())
@@ -308,7 +308,7 @@ else:
 	# Classic Notebook class
 	#
 
-	class DiagramNotebook(wx.Notebook, GeneralFlatNotebook):
+	class DiagramNotebook(wx.Notebook, GeneralNotebook):
 		""" Diagram classic NoteBook class
 		"""
 
@@ -317,7 +317,7 @@ else:
 			"""
 
 			wx.Notebook.__init__(self, *args, **kwargs)
-			GeneralFlatNotebook.__init__(self,*args, **kwargs)
+			GeneralNotebook.__init__(self,*args, **kwargs)
 
 			self.Bind(wx.EVT_RIGHT_DOWN, self.__ShowMenu)
 			self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
@@ -326,7 +326,7 @@ else:
 			"""	Callback for the right click on a tab. Displays the menu.
 
 				@type   evt: event
-				@param  evt: Event Objet, None by default
+				@param  evt: Event Object, None by default
 			"""
 
 			### mouse position
@@ -334,7 +334,7 @@ else:
 			### pointed page and flag
 			page,flag = self.HitTest(pos)
 
-			### if no where click (dont hit with indows)
+			### if no where click (don't hit with windows)
 			if flag == wx.BK_HITTEST_NOWHERE:
 				self.PopupMenu(Menu.DiagramNoTabPopupMenu(self), pos)
 			### if tab has been clicked
@@ -347,7 +347,7 @@ else:
 			""" Close current page.
 
 				@type evt: event
-				@param  evt: Event Objet, None by default
+				@param  evt: Event Object, None by default
 			"""
 
 			if self.GetPageCount() > 0:
@@ -383,10 +383,10 @@ else:
 					if not self.DeletePage(id):
 						sys.stdout.write(_("%s not deleted ! \n"%(title)))
 
-				### effacement du notebook "property"
-				nb1 = mainW.nb1
+				### clear "property" notebook
+				nb1 = mainW.GetControlNotebook()
 				propPanel = nb1.GetPropPanel()
-				### si la page active est celle de "properties" alors la met a jour et on reste dessus
+				### if page is active, then update and stay on this
 				if propPanel:
 					propPanel.UpdatePropertiesPage(propPanel.defaultPropertiesPage())
 

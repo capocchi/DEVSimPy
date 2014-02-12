@@ -63,7 +63,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		index = self.InsertStringItem(sys.maxint, dName)
 		self.SetStringItem(index, 1, str(getDirectorySize(path)) if os.path.exists(path) else '0')
 		self.SetStringItem(index, 2, 'local' if not path.startswith('http') else 'web' )
-		self.SetStringItem(index, 3, "..%s%s"%(os.sep,os.path.basename(DOMAIN_PATH) if path.startswith(DOMAIN_PATH) else os.path.basename(path)))
+		self.SetStringItem(index, 3, "..%s%s"%(os.sep,os.path.basename(DOMAIN_PATH) if path.startswith(DOMAIN_PATH) else path))
 		self.SetData(index, path)
 		self.SetItemData(index, index)
 
@@ -455,15 +455,15 @@ class ImportLibrary(wx.Dialog):
 						msg = _('%s is an invalid url')%path
 					else:
 						msg = _('%s directory does not exist')%dName
-					dial = wx.MessageDialog(self, msg, _('New librarie Manager'), wx.OK | wx.ICON_ERROR)
+					dial = wx.MessageDialog(self, msg, _('New librarie manager'), wx.OK | wx.ICON_ERROR)
 					dial.ShowModal()
 					self._dbb.SetValue('')
 			else:
-				dial = wx.MessageDialog(self, _('%s is already imported')%dName, _('New librarie Manager'), wx.OK|wx.ICON_INFORMATION)
+				dial = wx.MessageDialog(self, _('%s is already imported!')%dName, _('New librarie manager'), wx.OK|wx.ICON_INFORMATION)
 				dial.ShowModal()
 				self._dbb.SetValue('')
 		else:
-			dial = wx.MessageDialog(self, _('%s is already imported')%dName, _('New librarie Manager'), wx.OK|wx.ICON_INFORMATION)
+			dial = wx.MessageDialog(self, _('%s is already imported!')%dName, _('New librarie manager'), wx.OK|wx.ICON_INFORMATION)
 			dial.ShowModal()
 			self._dbb.SetValue('')
 
