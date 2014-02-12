@@ -33,8 +33,9 @@ else:
 import Editor
 import ZipManager
 
-from DomainInterface.DomainBehavior import DomainBehavior
-from DomainInterface.DomainStructure import DomainStructure
+#from DomainInterface.DomainBehavior import DomainBehavior
+#from DomainInterface.DomainStructure import DomainStructure
+from ReloadModule import recompile
 from Utilities import GetActiveWindow, path_to_module
 from NetManager import Net
 
@@ -126,7 +127,7 @@ class DSPComponent:
 			if not isinstance(load_file_result, Exception):
 
 				mainW = canvas.GetTopLevelParent()
-				nb2 = mainW.nb2
+				nb2 = mainW.GetDiagramNotebook()
 
 				### if new tab
 				if new_tab:
@@ -149,7 +150,7 @@ class DSPComponent:
 				return False
 
 class PyComponent:
-	""" Return labeled block from filename at (x,y) postion in canvas
+	""" Return labeled block from filename at (x,y) position in canvas
 
 		@filename: filename for loading block
 		@label: label of block
@@ -162,6 +163,7 @@ class PyComponent:
 	def Load(filename, label):
 		""" Load python file from filename
 		"""
+		filename = filename.strip()
 		assert(filename.endswith('.py'))
 
 		return BlockFactory.CreateBlock( python_file = filename, label = label)
@@ -687,6 +689,10 @@ class BlockFactory:
 		### pure python file
 		else:
 
+			### add path to sys.path
+			if dir_name not in sys.path:
+				sys.path.append(dir_name)
+
 			module_name = os.path.basename(filename).split('.py')[0]
 
 			# find and load module
@@ -725,7 +731,11 @@ class BlockFactory:
 	def CreateBlock(*argv, **kwargs):
 		""" Create Block from python_file and other info coming from wizard.
 		"""
+
 		from Container import iPort, oPort, MsgBoxError
+		### import are here because the simulator (PyDEVS or PyPDEVS) require it
+		from DomainInterface.DomainBehavior import DomainBehavior
+		from DomainInterface.DomainStructure import DomainStructure
 
 		python_file = kwargs['python_file']
 		canvas = kwargs['canvas'] if 'canvas' in kwargs else None

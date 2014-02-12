@@ -15,4 +15,8 @@ __all__ = [	"Container",
 					"XMLModule",
 					'Join',
 					'Components',
-					'DropTarget']
+					'DropTarget',
+					'AttributeEditor',
+					'PropertiesGridCtrl',
+					'Mixins',
+                                        'DEVSKernel']

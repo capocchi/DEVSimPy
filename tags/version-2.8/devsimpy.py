@@ -17,10 +17,10 @@
 # light depends : NumPy for spectrum analysis, mathplotlib for graph display
 # remarque; attention, la construction de l'arbre des librairies (ou domain) est fait par la classe TreeListLib.
 # De plus, cette construction necessite la présence obligatoire du fichier __init__.py dans chaque sous domain d'un domaine repertorié dans le repertoire Domain (voir methode recursive GetSubDomain).
-# L'utilisateur doit donc ecrire se fichier en sautant les lignes dans le __all__ = []. Si le fichier n'existe pas le prog le cree.
+# L'utilisateur doit donc ecrire ce fichier en sautant les lignes dans __all__ = []. Si le fichier n'existe pas le prog le cree.
 # Pour importer une lib: 1/ faire un rep MyLib dans Domain avec les fichier Message.py, DomainBehavior.py et DomaineStrucutre.py
 #                                               2/ stocker tout les autre .py dans un sous rep contenant également un fichier __init__ dans lequel son ecris les fichier a importer.
-#                                               3/ les fichier .cmd issu de l'environnement peuvent etre stocké nimport ou il seron pris en compte en tant que model couplé.
+#                                               3/ les fichiers .cmd issu de l'environnement peuvent etre stocké nimport ou il seron pris en compte en tant que model couplé.
 #                                               4/ les fichier init doivent respecter le format de saus de ligne pour une bonne importation.
 #                                               5/ tout fichier .py qui ne se trouve pas dans init n'est ps importé
 #                                               6/ lors de l'import des .py (DnD) attention, il faut aussi que les parametres du constructeurs aient des valeurs par defaut.
@@ -45,13 +45,13 @@ import copy
 import os
 import sys
 import time
+import re
 import gettext
 import __builtin__
 import webbrowser
 import platform
 import threading
 import cPickle
-import zipfile
 
 from tempfile import gettempdir
 
@@ -61,9 +61,7 @@ try:
 except ImportError:
 	sys.stdout.write("Hotshot module not found. If you want to perform profiling simulation, install it !")
 
-from urllib import urlopen
-
-__min_wx_version__ = ['2.9','2.8','2.7','2.6','2.5']
+__min_wx_version__ = ['3.0','2.9','2.8','2.7','2.6','2.5']
 
 __wxpython_url__ = 'http://wxpython.org'
 __get__wxpython__ = 'Get it from %s'%__wxpython_url__
@@ -91,7 +89,7 @@ except ImportError:
 		import wx
 		if wx.VERSION_STRING < __min_wx_version__:
 			sys.stdout.write("You need to updgarde wxPython to v%s (or higer) to run DEVSimPy\n"%__min_wx_version__)
-			sys.stdout.write(__get_wxpython__)
+			sys.stdout.write(__get__wxpython__)
 			sys.exit()
 	except ImportError:
 			sys.stderr.write("Error: DEVSimPy requires wxPython, which doesn't seem to be installed\n")
@@ -122,50 +120,35 @@ else:
 	from wx.lib.pubsub import setuparg1
 	from wx.lib.pubsub import pub
 
-### import Container much faster loading than from Container import ... for os windows only
-import Container
-import Menu
-
-from ImportLibrary import ImportLibrary
-from Reporter import ExceptionHook
-from ConnectionThread import UpgradeLibThread
-from PreferencesGUI import PreferencesGUI
-from pluginmanager import load_plugins
-from which import which
-from Utilities import GetMails, IsAllDigits
-from Decorators import redirectStdout, BuzyCursorNotification
-from DetachedFrame import DetachedFrame
-from LibraryTree import LibraryTree
-from LibPanel import LibPanel
-from PropPanel import PropPanel
-from ControlNotebook import ControlNotebook
-from DiagramNotebook import DiagramNotebook
-
 ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 ### specific builtin variables. (dont modify the defautls value. If you want to change it, go tot the PreferencesGUI from devsimpy interface.)
-builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'bitmaps', 'splash.png'),
+builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'),
 				'DEVSIMPY_PNG': 'iconDEVSimPy.png',	# png file for devsimpy icon
 				'HOME_PATH': ABS_HOME_PATH,
 				'ICON_PATH': os.path.join(ABS_HOME_PATH, 'icons'),
 				'ICON_PATH_16_16': os.path.join(ABS_HOME_PATH, 'icons', '16x16'),
-				'SIMULATION_SUCCESS_WAV_PATH': os.path.join(ABS_HOME_PATH,'sounds', 'Simulation-Success.wav'),
-				'SIMULATION_ERROR_WAV_PATH': os.path.join(ABS_HOME_PATH,'sounds', 'Simulation-Error.wav'),
+				'SIMULATION_SUCCESS_SOUND_PATH': os.path.join(ABS_HOME_PATH,'sounds', 'Simulation-Success.wav'),
+				'SIMULATION_ERROR_SOUND_PATH': os.path.join(ABS_HOME_PATH,'sounds', 'Simulation-Error.wav'),
 				'DOMAIN_PATH': os.path.join(ABS_HOME_PATH, 'Domain'), # path of local lib directory
 				'NB_OPENED_FILE': 5, # number of recent files
 				'NB_HISTORY_UNDO': 5, # number of undo
 				'OUT_DIR': 'out', # name of local output directory (composed by all .dat, .txt files)
-				'PLUGINS_DIR': 'plugins', # general plugins directory
-				#'PLUGINS_FILENAME': 'plugins', # model plugins file name
+				'PLUGINS_PATH': os.path.join(ABS_HOME_PATH, 'plugins'), # path of plug-ins directory
 				'FONT_SIZE': 12, # Block font size
 				'LOCAL_EDITOR': True, # for the use of local editor
 				'LOG_FILE': os.devnull, # log file (null by default)
-				'DEFAULT_SIM_STRATEGY': 'Hierarchical', #choose the default simulation strategy
-				'SIM_STRATEGY_LIST' : {'PyDEVS':'SimStrategy1', 'Hierarchical':'SimStrategy2', 'Direct Coupling':'SimStrategy3'}, # list of available simulation strategy
+				'DEFAULT_SIM_STRATEGY': 'bag-based', #choose the default simulation strategy for PyDEVS
+				'PYDEVS_SIM_STRATEGY_DICT' : {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}, # list of available simulation strategy for PyDEVS package
+                'PYPDEVS_SIM_STRATEGY_DICT' : {'original':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}, # list of available simulation strategy for PyPDEVS package
 				'HELP_PATH' : os.path.join('doc', 'html'), # path of help directory
 				'NTL' : False, # No Time Limit for the simulation
 				'TRANSPARENCY' : True, # Transparancy for DetachedFrame
-				'DEFAULT_PLOT_DYN_FREQ' : 100 # frequence of dynamic plot of QuickScope (to avoid overhead)
+				'DEFAULT_PLOT_DYN_FREQ' : 100, # frequence of dynamic plot of QuickScope (to avoid overhead),
+				'DEFAULT_DEVS_DIRNAME':'PyDEVS', # default DEVS Kernel directory
+				'DEVS_DIR_PATH_DICT':{'PyDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyDEVS'),
+									'PyPDEVS_221':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs221' ,'src'),
+									'PyPDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','old')}
 				}
 
 ### here berfore the __main__ function
@@ -178,6 +161,29 @@ else:
 
 # Sets the homepath variable to the directory where your application is located (sys.argv[0]).
 __builtin__.__dict__.update(builtin_dict)
+
+### import Container much faster loading than from Container import ... for os windows only
+import Container
+import Menu
+import ReloadModule
+
+from ImportLibrary import ImportLibrary
+from Reporter import ExceptionHook
+from PreferencesGUI import PreferencesGUI
+from pluginmanager import load_plugins
+from which import which
+from Utilities import GetMails, IsAllDigits
+from Decorators import redirectStdout, BuzyCursorNotification
+from DetachedFrame import DetachedFrame
+from LibraryTree import LibraryTree
+from LibPanel import LibPanel
+from PropPanel import PropPanel
+from ControlNotebook import ControlNotebook
+from DiagramNotebook import DiagramNotebook
+
+### only for wx. 2.9 bug
+### http://comments.gmane.org/gmane.comp.python.wxpython/98744
+wx.Log.SetLogLevel(0)
 
 #-------------------------------------------------------------------
 def getIcon(path):
@@ -192,6 +198,12 @@ def getIcon(path):
 
 	return icon
 
+def GetUserConfigDir():
+	""" Return the standard location on this platform for application data.
+	"""
+	sp = wx.StandardPaths.Get()
+	return sp.GetUserConfigDir()
+
 #-------------------------------------------------------------------
 def DefineScreenSize(percentscreen = None, size = None):
 	"""Returns a tuple to define the size of the window
@@ -203,7 +215,6 @@ def DefineScreenSize(percentscreen = None, size = None):
 		l, h = size
 	elif percentscreen:
 		x1, x2, l, h = wx.Display().GetClientArea()
-		#print "ClientArea = ", l, h
 		l, h = percentscreen * l, percentscreen * h
 	return l, h
 
@@ -318,16 +329,10 @@ class MainApplication(wx.Frame):
 	def GetVersion(self):
 		return __version__
 
-	def GetUserConfigDir(self):
-		""" Return the standard location on this platform for application data.
-		"""
-		sp = wx.StandardPaths.Get()
-		return sp.GetUserConfigDir()
-
 	def GetConfig(self):
 		""" Reads the config file for the application if it exists and return a configfile object for use later.
 		"""
-		return wx.FileConfig(localFilename = os.path.join(self.GetUserConfigDir(),'.devsimpy'))
+		return wx.FileConfig(localFilename = os.path.join(GetUserConfigDir(),'.devsimpy'))
 
 	def WriteDefaultConfigFile(self, cfg):
 		""" Write config file
@@ -336,7 +341,7 @@ class MainApplication(wx.Frame):
 		# for spash screen
 		pub.sendMessage('object.added', 'Writing .devsimpy settings file...\n')
 
-		sys.stdout.write("Writing default .devsimpy settings file on %s directory..."%self.GetUserConfigDir())
+		sys.stdout.write("Writing default .devsimpy settings file on %s directory..."%GetUserConfigDir())
 
 		self.exportPathsList = []					# export path list
 		self.openFileList = ['']*NB_OPENED_FILE		#number of last opened files
@@ -368,14 +373,14 @@ class MainApplication(wx.Frame):
 		if self.cfg.Exists('version'):
 
 			### rewrite old configuration file
-			rewrite = float(self.cfg.Read("version")) < float(self.GetVersion())
+			rewrite = float(self.cfg.Read("version")) != float(self.GetVersion())
 
 			if not rewrite:
 
 				### for spash screen
 				pub.sendMessage('object.added', 'Loading .devsimpy settings file...\n')
 
-				sys.stdout.write("Load .devsimpy %s settings file from %s directory ... \n"%(self.GetVersion(),self.GetUserConfigDir()))
+				sys.stdout.write("Load .devsimpy %s settings file from %s directory ... \n"%(self.GetVersion(),GetUserConfigDir()))
 				### load external import path
 				self.exportPathsList = filter(lambda path: os.path.isdir(path), eval(self.cfg.Read("exportPathsList")))
 				### append external path to the sys module to futur import
@@ -390,9 +395,6 @@ class MainApplication(wx.Frame):
 				self.cfg.Write('ChargedDomainList', str(eval('chargedDomainList')))
 				### load language
 				self.language = eval(self.cfg.Read("language"))
-				### load any plugins from the list
-				for plugin in eval(self.cfg.Read("plugins")):
-					load_plugins(plugin)
 
 				### load perspective profile
 				self.perspectives = eval(self.cfg.Read("perspectives"))
@@ -401,20 +403,53 @@ class MainApplication(wx.Frame):
 				try:
 					D = eval(self.cfg.Read("builtin_dict"))
 				except SyntaxError:
-					sys.stdout.write('Error trying to read the builtin dictionary from config file. So, we load the default builtin \n')
+					wx.MessageBox('Error trying to read the builtin dictionary from config file. So, we load the default builtin',
+								'Configuration',
+								wx.OK | wx.ICON_INFORMATION)
+					#sys.stdout.write('Error trying to read the builtin dictionary from config file. So, we load the default builtin \n')
 					D = builtin_dict
 				else:
 					### try to start without error when .devsimpy need update (new version installed)
 					if not os.path.isdir(D['HOME_PATH']):
-						sys.stdout.write('.devsimpy file appear to be not liked with the DEVSimPy source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(self.GetUserConfigDir()))
+						wx.MessageBox('.devsimpy file appear to be not liked with the DEVSimPy source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(GetUserConfigDir()),
+									'Configuration',
+									wx.OK | wx.ICON_INFORMATION)
+						#sys.stdout.write('.devsimpy file appear to be not liked with the DEVSimPy source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(GetUserConfigDir()))
 						D['HOME_PATH'] = ABS_HOME_PATH
 
-				__builtin__.__dict__.update(D)
+				try:
+					### recompile DomainInterface if DEFAULT_DEVS_DIRNAME != PyDEVS
+					recompile = D['DEFAULT_DEVS_DIRNAME'] != __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']
+				except KeyError:
+					recompile = False
 
-				sys.stdout.write("DEVSimPy is ready. \n")
+				### test if the DEVSimPy source directory has been moved
+				### if icon path exists, then we can update builtin from cfg
+				if os.path.exists(D['ICON_PATH']):
+					__builtin__.__dict__.update(D)
+					### recompile DomainInterface
+					if recompile:
+						ReloadModule.recompile("DomainInterface.DomainBehavior")
+						ReloadModule.recompile("DomainInterface.DomainStructure")
+						ReloadModule.recompile("DomainInterface.MasterModel")
+
+				### icon path is wrong (generally .devsimpy is wrong because DEVSimPy directory has been moved)
+				### .devsimpy must be rewrite
+				else:
+					sys.stdout.write("It seems that DEVSimPy source directory has been moved.\n")
+					self.WriteDefaultConfigFile(self.cfg)
+
+				### load any plugins from the list
+				### here because it needs to PLUGINS_PATH macro defined in D
+				for plugin in eval(self.cfg.Read("plugins")):
+					load_plugins(plugin)
+
+				sys.stdout.write("DEVSimPy is ready.\n")
 
 			else:
-
+				wx.MessageBox('.devsimpy file appear to be a very old version and should be updated....\nWe rewrite a new blank version.',
+									'Configuration',
+									wx.OK | wx.ICON_INFORMATION)
 				self.WriteDefaultConfigFile(self.cfg)
 
 		### create a new defaut .devsimpy config file
@@ -449,7 +484,6 @@ class MainApplication(wx.Frame):
 
 		translation.install(unicode = True)
 
-
 	def MakeStatusBar(self):
 		""" Make status bar.
 		"""
@@ -472,7 +506,7 @@ class MainApplication(wx.Frame):
 		self.SetMenuBar(self.menuBar)
 
 		### bind menu that require update on open and close event (forced to implement the binding here !)
-		for menu,title in filter(lambda c : c[-1] in ('File', 'Fichier', 'Options'), self.menuBar.GetMenus()):
+		for menu,title in filter(lambda c : re.search("(File|Fichier|Options)", c[-1]) != None, self.menuBar.GetMenus()):
 			self.Bind(wx.EVT_MENU_OPEN, self.menuBar.OnOpenMenu)
 			#self.Bind(wx.EVT_MENU_CLOSE, self.menuBar.OnCloseMenu)
 
@@ -540,6 +574,16 @@ class MainApplication(wx.Frame):
 		self.Bind(wx.EVT_TOOL, self.OnLinearConnector, self.tools[15])
 
 		self.tb.Realize()
+
+	def GetDiagramNotebook(self):
+		""" Return diagram notbook (right)
+		"""
+		return self.nb2
+
+	def GetControlNotebook(self):
+		""" Return control notebook (left)
+		"""
+		return self.nb1
 
 	def OnDirectConnector(self, event):
 		"""
@@ -840,7 +884,7 @@ class MainApplication(wx.Frame):
 		self.nb2.print_canvas = self.nb2.GetCurrentPage()
 		self.nb2.print_size = self.nb2.GetSize()
 		self.nb2.PrintButton(event)
-
+	###
 	def OnPrintPreview(self, event):
 		""" Print preview of current diagram
 		"""
@@ -848,7 +892,7 @@ class MainApplication(wx.Frame):
 		self.nb2.print_canvas = self.nb2.GetCurrentPage()
 		self.nb2.print_size = self.nb2.GetSize()
 		self.nb2.PrintPreview(event)
-
+	###
 	def OnScreenCapture(self, event):
 		""" Print preview of current diagram
 		"""
@@ -885,7 +929,7 @@ class MainApplication(wx.Frame):
 				wx.MessageBox(_("Screenshot saved in %s.")%fn, _("Success"), wx.OK|wx.ICON_INFORMATION)
 			else:
 				wx.MessageBox(_("Unable to get the screenshot."), _("Error"), wx.OK|wx.ICON_ERROR)
-
+	###
 	def OnUndo(self, event):
 		""" Undo the diagram
 		"""
@@ -1059,7 +1103,7 @@ class MainApplication(wx.Frame):
 		"""
 
 		# dialog pour l'importation de lib DEVSimPy (dans Domain) et le local
-		dlg = ImportLibrary(self, wx.ID_ANY, _('Import Library'), size=(550,400))
+		dlg = ImportLibrary(self, wx.ID_ANY, _('New/Import Library manager'), size=(550,400), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 
 		if (dlg.ShowModal() == wx.ID_OK):
 
@@ -1082,6 +1126,7 @@ class MainApplication(wx.Frame):
     			### add correct path to sys.path (always before InsertNewDomain)
 				LibraryTree.AddToSysPath(absdName)
     			### add NewDomain
+
 				self.tree.InsertNewDomain(absdName, self.tree.GetRootItem(), self.tree.GetSubDomain(absdName, self.tree.GetDomainList(absdName)).values()[0])
 
 				progress_dlg.Destroy()
@@ -1347,10 +1392,9 @@ class MainApplication(wx.Frame):
 		"""
 
 		### find the prof file name
-		i = event.GetId()
-		menu = event.GetEventObject()
-		fn = menu.FindItemById(i).GetLabel()
-		prof_file_path = os.path.join(gettempdir(),fn)
+		menu_item = self.GetMenuBar().FindItemById(event.GetId())
+		fn = menu_item.GetLabel()
+		prof_file_path = os.path.join(gettempdir(), fn)
 
 		### list of item in single choice dialogue
 		choices = [_('Embedded in DEVSimPy')]
@@ -1418,7 +1462,7 @@ class MainApplication(wx.Frame):
 		stats = hotshot.stats.load(prof_file_path)
 		stats.strip_dirs()
 		stats.sort_stats('time', 'calls')
-		text = stats.print_stats(100)
+		stats.print_stats(100)
 
 	def OnDeleteProfiles(self, event):
 		dlg = wx.MessageDialog(self, _('Do you realy want to delete all files ?'), _('Profile Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
@@ -1801,8 +1845,7 @@ if __name__ == '__main__':
 
 	### python devsimpy.py -c|-clean in order to delete the config file
 	if len(sys.argv) >= 2 and sys.argv[1] in ('-c, -clean'):
-		sp = wx.StandardPaths.Get()
-		config_file = os.path.join(sp.GetUserConfigDir(),'.devsimpy')
+		config_file = os.path.join(GetUserConfigDir(),'.devsimpy')
 		r = raw_input('Are you sure to delete DEVSimPy config file ? (Y,N):')
 		if r in ('Y','y','yes','Yes' ):
 			os.remove(config_file)

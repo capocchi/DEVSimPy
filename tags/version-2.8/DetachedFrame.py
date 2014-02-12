@@ -21,8 +21,13 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 import sys
-import os 
+import os
 import wx
+
+if __name__ == '__main__':
+	import __builtin__
+	__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}
+	__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyPDEVS'
 
 import Container
 import Menu
@@ -35,15 +40,15 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 
 	def __init__(self, parent=None, ID=wx.ID_ANY, title="", diagram=None, name=""):
 		""" Constructor.
-		
+
 			@parent : window parent of the frame
-			@ID : ID fof the frame
+			@ID : ID of the frame
 			@title : title of the frame
-			@diagram : diagram includ in the canvas embeded in the frame
+			@diagram : diagram included in the canvas embedded in the frame
 			@name : name of the frame
 		"""
-		
-		### inherite call
+
+		### inherit call
 		wx.Frame.__init__(      self,
 								parent,
 								ID,
@@ -57,7 +62,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		self.title = title
 		self.parent = parent
 		self.diagram = diagram
-		
+
 		### Canvas Stuff -----------------------------------
 		self.canvas = Container.ShapeCanvas(self, wx.ID_ANY, name=title, diagram = self.diagram)
 		self.canvas.scalex = 1.0
@@ -76,14 +81,14 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 
 		### Menu ToolBar
 		toolbar = wx.ToolBar(self, wx.ID_ANY, name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
-		toolbar.SetToolBitmapSize((25,25)) # juste for windows
+		toolbar.SetToolBitmapSize((25,25)) # just for windows
 
 		if self.parent:
 			self.toggle_list = wx.GetApp().GetTopWindow().toggle_list
 		else:
 			sys.stdout.write(_('Alone mode for DetachedFrame: Connector buttons are not binded\n'))
 			self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId()]
-			
+
 		self.tools = [  toolbar.AddTool(Menu.ID_SAVE, wx.Bitmap(os.path.join(ICON_PATH,'save.png')), shortHelpString=_('Save File') ,longHelpString=_('Save the current diagram'), clientData=self.canvas),
 										toolbar.AddTool(Menu.ID_SAVEAS, wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')), shortHelpString=_('Save File As'), longHelpString=_('Save the diagram with an another name'), clientData=self.canvas),
 										toolbar.AddTool(wx.ID_UNDO, wx.Bitmap(os.path.join(ICON_PATH,'undo.png')), shortHelpString=_('Undo'), longHelpString=_('Click to go back, hold to see history'),clientData=self.canvas),
@@ -109,8 +114,8 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		toolbar.Realize()
 
 		### if Detached frame from block (container or Code)
-		### save, save-as and simulation are desabled
-		if self.parent:
+		### save, save-as and simulation are disabled
+		if not isinstance(self.parent, Container.ShapeCanvas):
 			toolbar.EnableTool(Menu.ID_SAVE, False)
 			toolbar.EnableTool(Menu.ID_SAVEAS, False)
 			toolbar.EnableTool(Menu.ID_SIM_DIAGRAM, False)
@@ -126,13 +131,13 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		self.SetSizer(vbox)
 
 		self.CenterOnParent()
-		
+
 		self.statusbar = self.CreateStatusBar(1, wx.ST_SIZEGRIP)
 		self.statusbar.SetFieldsCount(3)
 		self.statusbar.SetStatusWidths([-5, -2, -1])
-				
+
 		self.__binding()
-		
+
 	def __binding(self):
 		""" Binding event.
 				ClOSE event, IDLE event and MOVE event are binding here.
@@ -140,17 +145,17 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 				NB: ID are defined on the Menu.py file
 		"""
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
-		
-		### Transparent managment when the frame is moving
+
+		### Transparent management when the frame is moving
 		self.Bind(wx.EVT_IDLE, self.OnIdle)
 		self.Bind(wx.EVT_MOVE, self.OnMove)
-		
+
 		### TODO: refactor the devsimpy.py in order to extract OnSaveFile and all of the methods needed here.
 		#if not self.parent:
 			#self.Bind(wx.EVT_TOOL, parent.OnSaveFile, id=Menu.ID_SAVE)
-			
+
 	def OnMove(self, event):
-		""" Transparence manager
+		""" alpha manager
 		"""
 		if self.transparent == wx.ALPHA_OPAQUE:
 			self.transparent = 140
@@ -161,7 +166,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		event.Skip()
 
 	def OnIdle(self, event):
-		""" Transparence manager
+		""" alpha manager
 		"""
 		if self.transparent == 140:
 			self.transparent = wx.ALPHA_OPAQUE
@@ -175,7 +180,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		""" Return the canvas
 		"""
 		return self.canvas
-    		
+
 	def OnClose(self, event):
 		""" Close event has been received.
 		"""
@@ -188,26 +193,29 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 class TestApp(wx.App):
 	""" Testing application
 	"""
-	
+
 	def OnInit(self):
-		
+
 		import gettext
-		import __builtin__
-		
+
+
+		#__builtin__.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
+		#__builtin__.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy4', 'distribued':'SimStrategy5', 'parallel':'SimStrategy6'}
+
 		__builtin__.__dict__['NB_HISTORY_UNDO'] = 5
 		__builtin__.__dict__['ICON_PATH']='icons'
 		__builtin__.__dict__['ICON_PATH_16_16']=os.path.join(ICON_PATH,'16x16')
 		__builtin__.__dict__['_'] = gettext.gettext
-		
+
 		diagram = Container.Diagram()
-		
+
 		self.frame = DetachedFrame(None, -1, "Test", diagram)
 		self.frame.Show()
 		return True
-	
+
 	def OnQuit(self, event):
 		self.Close()
-		
+
 if __name__ == '__main__':
 
 	app = TestApp(0)
