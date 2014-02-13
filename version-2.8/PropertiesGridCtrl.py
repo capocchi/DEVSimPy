@@ -31,6 +31,7 @@ import wx
 import  wx.grid as gridlib
 from wx.lib import wordwrap
 import  wx.gizmos as gizmos
+import wx.lib.imagebrowser as ib
 
 import Components
 import Menu
@@ -39,8 +40,9 @@ import Container
 
 from Mixins.Attributable import Attributable
 from Mixins.Achievable import Achievable
-
+from Utilities import RGBToHEX
 from Patterns.Observer import Subject
+
 
 ###------------------------------------------------------------------------------
 class DictionaryEditor(wx.Dialog):

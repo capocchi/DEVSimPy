@@ -11,7 +11,6 @@
 - N1 : finir le code de sauvegarde des plugins des modÃ¨les apres Ã©dition car lorsque modification par ajout d'une fonction puis suppression elle reste dans la liste meme apres un apply
  d'update
 - N3 : amÃ©liorer la gestion des iid et oid dasn la creation des ports dans les MC (voir dans Components.py->BlockFactory->CreateBlock avec le wizard)
-- N3: voir comment conserver le nom du .amd ou .cmd lorsqu'on clique sur le browse du filebrowse (fb2 pour les .amd dans le wizard).
  - N3: ajouter un petit icone lorsque plugin activÃ© pour les amd et cmd comme pour l'icone definissant la nature qui disqprait lorsque pas de selection
 - N3 : donner le choix à l'utilisateur de choisir les version de wx installées sur la machine. Par defaut c'est la dernière version qui sera choisis et stocké dans le fichier de config.
 ------------------------------------------------------------------Ajout----------------------------------------------------------------
@@ -426,3 +425,5 @@ invoque rpar un callback lorsque le fichier python est renseignÃ© dans le wizard
 -Fait le 3/12/2013 par LC: correction-> erreur d'unicode dans le reporter (http://stackoverflow.com/questions/12468179/unicodedecodeerror-utf8-codec-cant-decode-byte-0x9c)
 -Fait le 23/12/2013 par LC: amélioration -> amélioration de l'architecture logiciel permettant de rendre disponible un noyau de simulation à partir d'un nouveau répertoire dans DEVSKernel (permet de suivre l'évolution de PyPDEVS)
 -Fait le 10/02/2014 par LC: correction -> lorsque fermetrue du dialogue ImportLibrary, si une libe est selectionnée, elle est importé quoi qu'il arrive. Bind du bouton en croix de la fenetre.
+-Fait le 11/02/2014 par LC: amélioration -> adaptation de la taille du label des blocks (dans la mathode draw de Shape on adapte le font en fonction de la taille du label et de la taille du rectangle qui l'entour).
+
