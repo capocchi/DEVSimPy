@@ -1119,7 +1119,7 @@ class LineShape(Shape):
 		""" Draw method
 		"""
 
-		Shape.draw(self,dc)
+		Shape.draw(self, dc)
 		dc.DrawLine(self.x[0], self.y[0], self.x[1], self.y[1])
 
 	def HitTest(self, x, y):
@@ -2627,6 +2627,10 @@ class LinesShape(Shape):
 
 		### pour le rectangle en fin de connexion
 		dc.DrawRectanglePointSize(wx.Point(self.x[-1]-10/2, self.y[-1]-10/2), wx.Size(10, 10))
+		#dc.DrawPolygon((	wx.Point(self.x[-1]-10, self.y[-1]-10),
+		#					wx.Point(self.x[-1]-10, self.y[-1]+10),
+		#					wx.Point(self.x[-1], self.y[-1]),
+		#					wx.Point(self.x[-1]-10, self.y[-1]-10)))
 
 	def HitTest(self, x, y):
 		"""
