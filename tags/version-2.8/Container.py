@@ -592,7 +592,7 @@ class Diagram(Savable, Structurable):
 				self.checkDEVSInstance(m, D)
 
 	def DoCheck(self):
-		""" Ckeck all models for validation
+		""" Check all models for validation
 			Return None if all models are ok, D else
 		"""
 		### dictionary composed by key = label of model and value = None if no error, exc_info() else
@@ -601,7 +601,7 @@ class Diagram(Savable, Structurable):
 		return D if filter(lambda m: m != None, D.values()) != [] else None
 
 	def OnCheck(self, event):
-		""" Check button has been clicked. We chek if models which compose the diagram are valide.
+		""" Check button has been clicked. We check if models which compose the diagram are valide.
 		"""
 		### if there are models in diagram
 		if self.GetCount() != 0:
@@ -617,7 +617,7 @@ class Diagram(Savable, Structurable):
             ### if there is no error
  			if D is None:
 				dial = wx.MessageDialog(win,
-										_('All DEVS model has been instanciated without error.\n\nDo you want simulate ?'),
+										_('All DEVS model has been instantiated without error.\n\nDo you want simulate?'),
 										_('Error Manager'),
 										wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 
@@ -1056,10 +1056,26 @@ class Shape(ShapeEvtHandler):
 		dc.SetBrush(wx.Brush(brushclr))
 
 		try:
-			dc.SetFont(wx.Font(self.font[0], self.font[1],self.font[2], self.font[3], False, self.font[4]))
+			### adapt size font depending on the size of label
+			### begin with the max of font size (defined in preferences)
+			font = FONT_SIZE
+			### set the font in the dc in order to performed GetTextExtent
+			dc.SetFont(wx.Font(font, self.font[1], self.font[2], self.font[3], False, self.font[4]))
+			width_t, height_t = dc.GetTextExtent(self.label)
+			### size of shape
+			width_s = self.x[1]-self.x[0]
+			### while the label with is sup of shape width, we reduce the font of the dc (thus the label size)
+			while(width_t > width_s):
+				font -=1
+				dc.SetFont(wx.Font(font, self.font[1], self.font[2], self.font[3], False, self.font[4]))
+				width_t, height_t = dc.GetTextExtent(self.label)
+
+			### update the font
+			self.font[0]=font
+
 		except Exception:
 			try:
-				dc.SetFont(wx.Font(10, self.font[1],self.font[2], self.font[3], False, self.font[4]))
+				dc.SetFont(wx.Font(10, self.font[1], self.font[2], self.font[3], False, self.font[4]))
 			except Exception:
 				dc.SetFont(wx.Font(10, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, False, u'Arial'))
 
@@ -1070,11 +1086,12 @@ class Shape(ShapeEvtHandler):
 			self.x = array.array('d',map((lambda v: v+x), self.x))
 			self.y = array.array('d',map((lambda v: v+y), self.y))
 
-	def OnResize(self):
-		""" Resize method controled by ResizeNode move method
-		"""
-		### dynamic font size with 1O (pointSize) * width (pourcent)/ 100
-		self.font[0] = int(FONT_SIZE * (self.x[1]-self.x[0]) / 100.0)
+	#def OnResize(self):
+	#	""" Resize method controled by ResizeNode move method
+	#	"""
+	#	### dynamic font size with 1O (pointSize) * width (pourcent)/ 100
+	#	self.font[0] = int(FONT_SIZE * (self.x[1]-self.x[0]) / 100.0)
+	#	pass
 
 	def lock(self):
 		self.lock_flag = True
@@ -1102,7 +1119,7 @@ class LineShape(Shape):
 		""" Draw method
 		"""
 
-		Shape.draw(self,dc)
+		Shape.draw(self, dc)
 		dc.DrawLine(self.x[0], self.y[0], self.x[1], self.y[1])
 
 	def HitTest(self, x, y):
@@ -2610,6 +2627,10 @@ class LinesShape(Shape):
 
 		### pour le rectangle en fin de connexion
 		dc.DrawRectanglePointSize(wx.Point(self.x[-1]-10/2, self.y[-1]-10/2), wx.Size(10, 10))
+		#dc.DrawPolygon((	wx.Point(self.x[-1]-10, self.y[-1]-10),
+		#					wx.Point(self.x[-1]-10, self.y[-1]+10),
+		#					wx.Point(self.x[-1], self.y[-1]),
+		#					wx.Point(self.x[-1]-10, self.y[-1]-10)))
 
 	def HitTest(self, x, y):
 		"""
@@ -3123,7 +3144,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		### Draw filename path flag picture
 		if self.bad_filename_path_flag:
 			img = wx.Bitmap(os.path.join(ICON_PATH_16_16, 'flag_exclamation.png'), wx.BITMAP_TYPE_ANY)
-			dc.DrawBitmap( img, self.x[0]+15, self.y[0] )
+			dc.DrawBitmap(img, self.x[0]+15, self.y[0])
 
 		#img = wx.Bitmap(os.path.join(ICON_PATH_16_16, 'atomic3.png'), wx.BITMAP_TYPE_ANY)
 		#dc.DrawBitmap( img, self.x[0]+30, self.y[0] )
@@ -3777,10 +3798,11 @@ class INode(ConnectableNode):
 
 		self.fill = ['#00b400'] #GREEN
 
-		### prot number
 		dc.SetFont(wx.Font(10, wx.MODERN, wx.NORMAL, wx.NORMAL))
+
+		### prot number
 		#dc.SetPen(wx.Pen(wx.NamedColour('black'), 20))
-		dc.DrawText(str(self.index), self.x-self.graphic.r, self.y-self.graphic.r-2)
+		#dc.DrawText(str(self.index), self.x-self.graphic.r, self.y-self.graphic.r-2)
 
 		### position of label
 		if not isinstance(self.item, Port):
@@ -3841,17 +3863,18 @@ class ONode(ConnectableNode):
 			cs.setInput(self.item, self.index)
 			#cs.ChangeForm(ShapeCanvas.CONNECTOR_TYPE)
 
-	def draw(self,dc):
+	def draw(self, dc):
 		""" Drawing method
 		"""
 		x,y = self.item.getPort('output', self.index)
 		self.moveto(x, y)
 		self.fill = ['#ff0000']
 
-		### prot number
 		dc.SetFont(wx.Font(10, wx.MODERN, wx.NORMAL, wx.NORMAL))
 		#dc.SetPen(wx.Pen(wx.NamedColour('black'), 20))
-		dc.DrawText(str(self.index), self.x-self.graphic.r, self.y-self.graphic.r-2)
+
+		### prot number
+		#dc.DrawText(str(self.index), self.x-self.graphic.r, self.y-self.graphic.r-2)
 
 		### position of label
 		if not isinstance(self.item, Port):
@@ -3917,7 +3940,7 @@ class ResizeableNode(Node):
 			if (isinstance(self.item, Block) and X >= 50 and Y >= 50) or not isinstance(self.item, Block):
 				self.item.x[self.index] += x
 				self.item.y[self.index] += y
-				self.item.OnResize()
+				#self.item.OnResize()
 
 	def OnDeleteNode(self, event):
 		if isinstance(self.item, ConnectionShape):

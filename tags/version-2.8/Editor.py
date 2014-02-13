@@ -373,6 +373,21 @@ class PythonSTC(stc.StyledTextCtrl):
 
 			lineNum += 1
 
+	def Paste(self):
+#		success = False
+		#do = wx.TextDataObject()
+#		if wx.TheClipboard.Open():
+#		    success = wx.TheClipboard.GetData(do)
+#		    wx.TheClipboard.Close()
+
+#		if success:
+#		    if not self.execplugin('on_paste', self, do.GetText()):
+#		        wx.stc.StyledTextCtrl.Paste(self)
+		wx.stc.StyledTextCtrl.Paste(self)
+
+	def Copy(self):
+		wx.stc.StyledTextCtrl.Copy(self)
+
 	### NOTE: PythonSTC :: Expand 				=> Expand selected line
 	def Expand(self, line, doExpand, force=False, visLevels=0, level=-1):
 		lastChild = self.GetLastChild(line, level)
