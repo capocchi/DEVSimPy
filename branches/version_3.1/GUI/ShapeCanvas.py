@@ -144,7 +144,7 @@ class ShapeCanvas(wx.ScrolledWindow, Observer.Subject):
 		""" Construcotr
 		"""
 		import Core.Components.Container as Container
-		import GUI.DetachedFrame as DetachedFrame #HERE
+		import GUI.DetachedFrame as DetachedFrame
 
 		wx.ScrolledWindow.__init__(self, parent, id, pos, size, style, name)
 		Observer.Subject.__init__(self)
@@ -1110,7 +1110,7 @@ class ShapeCanvas(wx.ScrolledWindow, Observer.Subject):
 
 		"""
 		import Core.Components.Components as Components
-		import GUI.DetachedFrame as DetachedFrame   #HERE
+		import GUI.DetachedFrame as DetachedFrame
 
 		if self.diagram.modify:
 			### window where modification is performed

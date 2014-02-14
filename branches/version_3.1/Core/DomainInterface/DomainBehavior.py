@@ -50,10 +50,10 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 	"""
 
 	###
-	def __init__(self):
+	def __init__(self, name=""):
 		"""	Constructor.
 		"""
-		BaseDEVS.AtomicDEVS.__init__(self)
+		BaseDEVS.AtomicDEVS.__init__(self, name=name)
 
 
 	###

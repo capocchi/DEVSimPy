@@ -149,7 +149,7 @@ def GetClass(elem):
 		moduleName = Utilities.path_to_module(elem)
 
 		for cls in clsmembers.values():
-			#print 'sdf', str(cls.__module__), moduleName, str(cls.__module__) in str(moduleName)
+			# print 'sdf', str(cls.__module__), moduleName, str(cls.__module__) in str(moduleName)
 
 			if str(cls.__module__) in str(moduleName):
 				return cls

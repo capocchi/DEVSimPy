@@ -1219,10 +1219,6 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 
 			# diagram which will be simulate
 			diagram = self
-			print "''''''''''''''''''''''"
-			print diagram
-			print "''''''''''''''''''''''"
-
 			D = self.DoCheck()
 			### if there is no error in models
  			if D is not None:
@@ -1255,7 +1251,6 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 
 				## make DEVS instance from diagram
 				master = Diagram.makeDEVSInstance(diagram)
-
 				if all(model.bad_filename_path_flag for model in filter(lambda m: isinstance(m, Block),diagram.GetShapeList()) if hasattr(model, 'bad_filename_path_flag')):
 					dial = wx.MessageDialog(window, _("You dont make the simulation of the Master model.\nSome models have bad fileName path !"), _('Simulation Manager'), wx.OK | wx.ICON_EXCLAMATION)
 					dial.ShowModal()

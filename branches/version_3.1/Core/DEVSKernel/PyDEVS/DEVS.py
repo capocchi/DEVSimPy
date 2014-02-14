@@ -84,7 +84,7 @@ class BaseDEVS:
 
 		self.parent = None
 		self.myID = None
-		self.name= name
+		self.name = name
 
 		# {\sl Specific Attributes\/} --- related to atomic- and coupled-DEVS'
 		# specification:
@@ -195,7 +195,7 @@ class AtomicDEVS(BaseDEVS):
 		# The minimal constructor shall {\sl first\/} call the superclass
 		# ({\it i.e.}, {\tt BaseDEVS}') constructor.
 
-		BaseDEVS.__init__(self, name)
+		BaseDEVS.__init__(self, name=name)
 
 		# Increment {\tt AtomicIDCounter\/} and setup instance's {\tt myID\/}
 		# attribute.
@@ -289,8 +289,8 @@ class CoupledDEVS(BaseDEVS):
 
 		# The minimal constructor shall {\sl first\/} call the superclass
 		# ({\it i.e.}, {\tt BaseDEVS}') constructor.
-
-		BaseDEVS.__init__(self, name)
+		BaseDEVS.__init__(self, name=name)
+		# BaseDEVS.__init__(self, name)
 
 		# Increment {\tt CoupledIDCounter\/} and setup instance's {\tt myID\/}
 		# attribute.

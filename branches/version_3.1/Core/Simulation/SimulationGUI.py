@@ -57,12 +57,11 @@ _ = wx.GetTranslation
 
 
 
-
-
-
 class FloatSlider(wx.Slider):
 	def GetValue(self):
 		return (float(wx.Slider.GetValue(self)))/self.GetMax()
+
+
 
 class TextObjectValidator(wx.PyValidator):
 	""" TextObjectValidator()
@@ -296,10 +295,6 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		self.Center()
 
 	def __widgets(self):
-
-		print "''''''''''''''''''''''"
-		print str(self.master)
-		print "''''''''''''''''''''''"
 		self._text1 = wx.StaticText(self.panel, wx.ID_ANY, _('Final time:'))
 		self._value = wx.TextCtrl(self.panel, wx.ID_ANY, str(float(self.master.FINAL_TIME)), validator=TextObjectValidator())
 		self._btn1 = wx.Button(self.panel, wx.NewId(), _('Run'))

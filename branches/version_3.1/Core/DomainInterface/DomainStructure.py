@@ -53,7 +53,7 @@ class DomainStructure(BaseDEVS.CoupledDEVS):
 	"""
 
 	###
-	def __init__(self):
+	def __init__(self, name=""):
 		"""Constructor.
 		"""
 		BaseDEVS.CoupledDEVS.__init__(self, name=name)
