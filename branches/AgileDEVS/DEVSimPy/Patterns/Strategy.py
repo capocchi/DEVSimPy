@@ -379,7 +379,7 @@ def execExtTransition(m):
 	# The SIM_VERBOSE event occurs
 	trigger_event("SIM_VERBOSE", model=m, msg=1)
 	trigger_event("SIM_BLINK", model=m, msg=[{}])
-	trigger_event("SIM_TEST", model=m, msg=[{}])
+	#trigger_event("SIM_TEST", model=m, msg=[{}])
 
 	return m
 
@@ -405,7 +405,7 @@ def execIntTransition(m):
 	# The SIM_VERBOSE event occurs
 	trigger_event("SIM_VERBOSE", model=m, msg=0)
 	trigger_event("SIM_BLINK", model=m, msg=[1])
-	trigger_event("SIM_TEST", model=m, msg=[1])
+	#trigger_event("SIM_TEST", model=m, msg=[1])
 
 class Clock(object):
 	def __init__(self, time):

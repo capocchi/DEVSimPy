@@ -365,6 +365,8 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		### if activity plugin is enabled
 		if is_enable('start_activity_tracking'):
 			self._btn4.SetLabel("Activity")
+		elif is_enable('DEVSBehaviorAssistant'):
+			self._btn4.SetLabel("Behavioral Test")
 
 	###
 	def OnText(self, event):
@@ -380,6 +382,9 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 		# The simulation verbose event occurs
 		trigger_event("VIEW_ACTIVITY_REPORT", parent=self, master = self.current_master)
+
+		# The simulation test event occurs
+		trigger_event("SIM_TEST", parent=self, master=self.current_master)
 
 	###
 	def OnOk(self, event):
@@ -424,6 +429,8 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			if (self.thread is None) or (not self.timer.IsRunning()):
 
 				trigger_event("START_BLINK", parent=self, master=self.current_master)
+
+				### The START_TEST event occurs
 				trigger_event("START_TEST", parent=self, master=self.current_master)
 
 				### The START_ACTIVITY_TRACKING event occurs

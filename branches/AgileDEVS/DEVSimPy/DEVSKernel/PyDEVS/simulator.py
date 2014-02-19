@@ -72,7 +72,7 @@ class Sender:
 			r = AS.receive(d, msg)
 
 			pluginmanager.trigger_event("SIM_BLINK", model=d, msg=msg)
-			pluginmanager.trigger_event("SIM_TEST", model=d, msg=msg)
+			#pluginmanager.trigger_event("SIM_TEST", model=d, msg=msg)
 
 		return r
 

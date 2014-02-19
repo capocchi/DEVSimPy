@@ -249,7 +249,7 @@ class Zip:
 		zf = zipfile.ZipFile(fn, 'r')
 		nl = zf.namelist()
 		zf.close()
-		return any(map(lambda s: re.search("^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.feature)$", s), nl))
+		return any(map(lambda s: re.search("^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.spec)$", s), nl))
 
 	@staticmethod
 	def GetTests(fn):
@@ -261,26 +261,10 @@ class Zip:
 		zf.close()
 
 		###
-		tests_files = filter(lambda a: a!= [], map(lambda s:re.findall("^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.feature)$", s), nl))
+		tests_files = filter(lambda a: a!= [], map(lambda s:re.findall("^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.spec)$", s), nl))
 		tests_files = [a[0] for a in tests_files]
 
 		return tests_files
-
-		#### find feature and steps file
-		#feat = None
-		#steps = None
-		#env = None
-
-		#feat = filter(lambda t: t.endswith('.feature'), zf.namelist())[0]
-
-		#if 'steps.py' in zf.namelist():
-			#steps = "steps.py"
-		#if 'environment.py' in zf.namelist():
-			#env = "environment.py"
-
-		#zf.close()
-		
-		#return feat, steps, env
 	# ------------------------------------------------------------------------------
 	
 	def GetModule(self, rcp=False):

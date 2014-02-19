@@ -1,2 +1,7 @@
 eclipse.preferences.version=1
+encoding//Mixins/Structurable.py=utf-8
+encoding//Mixins/Testable.py=utf-8
+encoding/Container.py=utf-8
+encoding/SimulationGUI.py=utf-8
+encoding/ZipManager.py=utf-8
 encoding/devsimpy.py=utf-8
