@@ -1700,70 +1700,58 @@ class TestEditor(Editor):
 	def ConfigureGUI(self):
 		### insert sub menu-------------------------------------------------
 		insert = wx.Menu()
-
-		feature = wx.MenuItem(insert, wx.NewId(), _('Feature skeleton'), _('Generate feature skeleton'))
-		steps = wx.MenuItem(insert, wx.NewId(), _('Steps skeleton'), _('Generate steps skeleton'))
-		env_header = wx.MenuItem(insert, wx.NewId(), _('Environment header generation'), _('Generate environment header'))
-		env_gen_def = wx.MenuItem(insert, wx.NewId(), _('Environment methods generation'), _('Generate minimal methods for environment'))
+# 		feature = wx.MenuItem(insert, wx.NewId(), _('Feature skeleton'), _('Generate feature skeleton'))
+# 		steps = wx.MenuItem(insert, wx.NewId(), _('Steps skeleton'), _('Generate steps skeleton'))
+# 		env_header = wx.MenuItem(insert, wx.NewId(), _('Environment header generation'), _('Generate environment header'))
+# 		env_gen_def = wx.MenuItem(insert, wx.NewId(), _('Environment methods generation'), _('Generate minimal methods for environment'))
 		# env_spec_def = wx.MenuItem(insert, wx.NewId(), _('Specific environment methods generation'), _('Generate minimal methods for specific environment'))
 
-		insert.AppendItem(feature)
-		insert.AppendItem(steps)
-		insert.AppendItem(env_header)
-		insert.AppendItem(env_gen_def)
-		# insert.AppendItem(env_spec_def)
+# 		insert.AppendItem(feature)
+# 		insert.AppendItem(steps)
+# 		insert.AppendItem(env_header)
+# 		insert.AppendItem(env_gen_def)
 
 		menu = self.GetMenuBar().GetMenu(1)
 		menu.PrependMenu(wx.NewId(), _("Insert"), insert)
 		### ----------------------------------------------------------------
 
 		### Bind all new event----------------------------------------------
-		self.Bind(wx.EVT_MENU, self.OnFeatureSkeleton, id=feature.GetId())
-		self.Bind(wx.EVT_MENU, self.OnStepsSkeleton, id=steps.GetId())
-		self.Bind(wx.EVT_MENU, self.OnHeaderGeneration, id=env_header.GetId())
-		self.Bind(wx.EVT_MENU, self.OnEnvDefGeneration, id=env_gen_def.GetId())
-		# self.Bind(wx.EVT_MENU, self.OnSpecEnvDefGeneration, id=env_spec_def.GetId())
+# 		self.Bind(wx.EVT_MENU, self.OnFeatureSkeleton, id=feature.GetId())
+# 		self.Bind(wx.EVT_MENU, self.OnStepsSkeleton, id=steps.GetId())
+# 		self.Bind(wx.EVT_MENU, self.OnHeaderGeneration, id=env_header.GetId())
+# 		self.Bind(wx.EVT_MENU, self.OnEnvDefGeneration, id=env_gen_def.GetId())
 
 	### ----------------------------------------------------------------
 
-	# NOTE: TestEditor :: OnFeatureSkeleton => Event when insert feature skeleton button is clicked
-	def OnFeatureSkeleton(self, event):
-		FEATURE_SKELETON = "Feature: # Feature description\n\tScenario: # Scenario description\n\t\tGiven # Context\n\t\tWhen # Event\n\t\tThen # Assertions"
-		self.nb.GetCurrentPage().AddTextUTF8(FEATURE_SKELETON)
-
-	# NOTE: TestEditor :: OnStepsSkeleton 	=> Event when insert steps skeleton button is clicked
-	def OnStepsSkeleton(self, event):
-		STEP_FUNCTION = 'def step(context):\n\tpass\n'
-		STEPS_SKELETON = "from behave import *\n\n@given('your given text')\n" + STEP_FUNCTION + "\n@when('your event text')\n" + STEP_FUNCTION + "\n@then('yout assertions text')\n" + STEP_FUNCTION
-		self.nb.GetCurrentPage().AddTextUTF8(STEPS_SKELETON)
-
-	# NOTE: TestEditor :: OnHeaderGeneration		=> note
-	def OnHeaderGeneration(self, event):
-		HEADER = """
-import os\nimport __builtin__\nimport sys\nimport pickle\nfrom tempfile import gettempdir\nABS_PATH = '%s'\nsys.path.append(ABS_PATH)
-__builtin__.__dict__['HOME_PATH'] = ABS_PATH\n__builtin__.__dict__['DOMAIN_PATH'] = os.path.join(ABS_PATH, 'Domain')
-__builtin__.__dict__['GUI_FLAG'] = True\n\nsys.path.append(os.path.join(gettempdir(), "AtomicDEVS"))\n\nmodels = {}
-""" % HOME_PATH
-		self.nb.GetCurrentPage().AddTextUTF8(HEADER)
-
-	# NOTE: TestEditor :: OnGenEnvDefGeneration		=> note
-	def OnEnvDefGeneration(self, event):
-		GEN_ENV_DEF = """import re\n
-# NOTE: environment.py :: addModel		=> note
-def loadModel():\n\tglobal models\n\tfiles = [os.path.join(gettempdir(), f) for f in os.listdir(gettempdir()) if re.match('^AtomicModel_.*\.{1}serial$', f)]\n\tfor f in files:\n\t\tm = pickle.load(open(f, "rb"))
-\t\tif not m.blockModel.label in models.keys():\n\t\t\tmodels[m.blockModel.label] = m\n
-def before_all(context):\n\tglobal models\n\tloadModel()\n\tcontext.models = models\n
-"""
-		self.nb.GetCurrentPage().AddTextUTF8(GEN_ENV_DEF)
-
-	# NOTE: TestEditor :: OnEnvironmentSkeleton		=> note
-# 	def OnSpecEnvDefGeneration(self, event):
-# 		SPEC_ENV_DEF = """
+# 	# NOTE: TestEditor :: OnFeatureSkeleton => Event when insert feature skeleton button is clicked
+# 	def OnFeatureSkeleton(self, event):
+# 		FEATURE_SKELETON = "Feature: # Feature description\n\tScenario: # Scenario description\n\t\tGiven # Context\n\t\tWhen # Event\n\t\tThen # Assertions"
+# 		self.nb.GetCurrentPage().AddTextUTF8(FEATURE_SKELETON)
+#
+# 	# NOTE: TestEditor :: OnStepsSkeleton 	=> Event when insert steps skeleton button is clicked
+# 	def OnStepsSkeleton(self, event):
+# 		STEP_FUNCTION = 'def step(context):\n\tpass\n'
+# 		STEPS_SKELETON = "from behave import *\n\n@given('your given text')\n" + STEP_FUNCTION + "\n@when('your event text')\n" + STEP_FUNCTION + "\n@then('yout assertions text')\n" + STEP_FUNCTION
+# 		self.nb.GetCurrentPage().AddTextUTF8(STEPS_SKELETON)
+#
+# 	# NOTE: TestEditor :: OnHeaderGeneration		=> note
+# 	def OnHeaderGeneration(self, event):
+# 		HEADER = """
+# import os\nimport __builtin__\nimport sys\nimport pickle\nfrom tempfile import gettempdir\nABS_PATH = '%s'\nsys.path.append(ABS_PATH)
+# __builtin__.__dict__['HOME_PATH'] = ABS_PATH\n__builtin__.__dict__['DOMAIN_PATH'] = os.path.join(ABS_PATH, 'Domain')
+# __builtin__.__dict__['GUI_FLAG'] = True\n\nsys.path.append(os.path.join(gettempdir(), "AtomicDEVS"))\n\nmodels = {}
+# """ % HOME_PATH
+# 		self.nb.GetCurrentPage().AddTextUTF8(HEADER)
+#
+# 	# NOTE: TestEditor :: OnGenEnvDefGeneration		=> note
+# 	def OnEnvDefGeneration(self, event):
+# 		GEN_ENV_DEF = """import re\n
 # # NOTE: environment.py :: addModel		=> note
-# def loadModel():\n\tglobal models\n\tm = pickle.load(open(os.path.join(gettempdir(), "AtomicModel_'your_model_label'.serial"), "rb"))\n\tif not m.blockModel.label in models.keys():\n\t\tmodels[m.blockModel.label] = m\n
-# \ndef before_all(context):\n\tglobal models\n\tloadModel()\n\tcontext.models = models\n
+# def loadModel():\n\tglobal models\n\tfiles = [os.path.join(gettempdir(), f) for f in os.listdir(gettempdir()) if re.match('^AtomicModel_.*\.{1}serial$', f)]\n\tfor f in files:\n\t\tm = pickle.load(open(f, "rb"))
+# \t\tif not m.blockModel.label in models.keys():\n\t\t\tmodels[m.blockModel.label] = m\n
+# def before_all(context):\n\tglobal models\n\tloadModel()\n\tcontext.models = models\n
 # """
-# 		self.nb.GetCurrentPage().AddTextUTF8(SPEC_ENV_DEF)
+# 		self.nb.GetCurrentPage().AddTextUTF8(GEN_ENV_DEF)
 
 ### ----------------------------------------------------------------
 ### NOTE: GeneralEditor << Editor :: Editor for simple files like text files
