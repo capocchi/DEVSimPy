@@ -4,7 +4,7 @@
 # Testable.py ---
 #                     --------------------------------
 #                        Copyright (c) 2013
-#                       Timothée Ville
+#                       Timothee Ville
 #                      University of Corsica
 #                     --------------------------------
 # Version 1.0                                        last modified: 18/02/14
