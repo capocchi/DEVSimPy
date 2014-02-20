@@ -935,9 +935,11 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 
 		#ReloadModule.recompile("DomainInterface.DomainBehavior")
 		#ReloadModule.recompile("DomainInterface.DomainStructure")
+
 		### if devs instance of diagram is not instancied, we make it
 		### else one simulation has been perfromed then we clear all devs port instances
 		if diagram.getDEVSModel() is None:
+
 			diagram.setDEVSModel(MasterModel.Master())
 		else:
 			diagram.ClearAllPorts()
@@ -1017,7 +1019,6 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 		return diagram.getDEVSModel()
 
 	def SetParent(self, parent):
-		# Todo : regler le probleme d'import
 		assert isinstance(parent, ShapeCanvas)
 		self.parent = parent
 
@@ -1118,6 +1119,7 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 		### we can udpate the devs priority list during the simulation ;-)
 		self.updateDEVSPriorityList()
 
+
 	def OnAddConstants(self, event):
 		""" Method that add constant parameters in order to simplify the modling codeBlock model
 		"""
@@ -1170,8 +1172,9 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 		D = {}
 		self.checkDEVSInstance(self, D)
 		return D if filter(lambda m: m != None, D.values()) != [] else None
+
 	def OnCheck(self, event):
-		""" Check button has been clicked. We chek if models which compose the diagram are valide.
+		""" Check button has been clicked. We check if models which compose the diagram are valide.
 		"""
 		### if there are models in diagram
 		if self.GetCount() != 0:
@@ -1204,21 +1207,22 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 		### no modles in diagram
 		else:
 			wx.MessageBox(_("Diagram is empty.\n\nPlease, drag-and-drop model from libraries control panel to build a diagram."),_('Error Manager'))
+
 	def OnSimulation(self, event):
 		"""Method calling the simulationGUI
 		"""
-
-
         ### if there are models in diagram
 		if self.GetCount() != 0 :
+
 			## window that contain the diagram which will be simulate
 ##			mainW = wx.GetApp().GetTopWindow()
 ##			win = mainW.GetActiveWindow()
 			obj = event.GetEventObject()
-			win = obj.GetTopLevelParent()
+			win = obj.GetWindow() if isinstance(obj, wx.Menu) else obj.GetTopLevelParent()
 
 			# diagram which will be simulate
 			diagram = self
+
 			D = self.DoCheck()
 			### if there is no error in models
  			if D is not None:
@@ -1241,9 +1245,13 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 				if len(L) != len(set(L)):
 					wx.MessageBox(_("It seems that models have same label.\nIf you plan to use Flat simulation algorithm, all model must have a unique label."), _("Simulation Manager"))
 
-				# set the name of diagram from notebook nb2
-				nb2 = win.GetDiagramNotebook()
-				title  = win.GetTitle() if isinstance(win, DetachedFrame) else nb2.GetPageText(nb2.GetSelection()).rstrip() #HERE
+				
+				### set the name of diagram
+				if isinstance(win, DetachedFrame):
+					title  = win.GetTitle()
+				else:
+					nb2 = win.GetDiagramNotebook()
+					title =nb2.GetPageText(nb2.GetSelection()).rstrip()
 				diagram.label = os.path.splitext(os.path.basename(title))[0]
 
 				## delete all attached devs instances
@@ -1251,8 +1259,13 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 
 				## make DEVS instance from diagram
 				master = Diagram.makeDEVSInstance(diagram)
+
+
 				if all(model.bad_filename_path_flag for model in filter(lambda m: isinstance(m, Block),diagram.GetShapeList()) if hasattr(model, 'bad_filename_path_flag')):
-					dial = wx.MessageDialog(window, _("You dont make the simulation of the Master model.\nSome models have bad fileName path !"), _('Simulation Manager'), wx.OK | wx.ICON_EXCLAMATION)
+
+					dial = wx.MessageDialog(win, _("You dont make the simulation of the Master model.\nSome models have bad fileName path !"), _('Simulation Manager'), wx.OK | wx.ICON_EXCLAMATION)
+
+
 					dial.ShowModal()
 					return False
 				else:
@@ -1263,7 +1276,7 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 					for fn in filter(lambda f: f.endswith('.devsimpy.log'), os.listdir(gettempdir())):
 						os.remove(os.path.join(gettempdir(), fn))
 
-					# obj = event.GetEventObject()
+					obj = event.GetEventObject()
 					# si invocation a partir du bouton dans la toolBar (apparition de la frame de simulation dans une fenetre)
 					if isinstance(obj, wx.ToolBar) or 'Diagram' in obj.GetTitle():
 						frame = SimulationGUI.SimulationDialog(win, wx.ID_ANY, _(" %s Simulator" % diagram.label), master)
@@ -1463,6 +1476,7 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 		else:
 			return self.nbCodeBlock
 
+
 	def GetContainerBlockCount(self):
 		""" Function that return the number of containerBlock shape
 		"""
@@ -1472,6 +1486,7 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 		else:
 			return self.nbContainerBlock
 
+
 	def GetiPortCount(self):
 		""" Function that return the number of iPort shape
 		"""
@@ -1480,6 +1495,7 @@ class Diagram(Savable.Savable, Structurable.Structurable):
 			return self.deletediPortId.pop()
 		else:
 			return self.nbiPort
+
 
 	def GetoPortCount(self):
 		""" Function that return the number of oPort shape
