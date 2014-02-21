@@ -22,6 +22,7 @@ encoding//version-2.8/Domain/Myths/Observor.py=utf-8
 encoding//version-2.8/Domain/Myths/TransformationADEVS.py=utf-8
 encoding//version-2.8/Domain/NN/Dendrogram.py=utf-8
 encoding//version-2.8/Domain/NN/plugins.py=utf-8
+encoding//version-2.8/DomainInterface/DomainBehavior.py=utf-8
 encoding//version-2.8/DomainInterface/DomainStructure.py=utf-8
 encoding//version-2.8/DomainInterface/MasterModel.py=utf-8
 encoding//version-2.8/Editor.py=utf-8
