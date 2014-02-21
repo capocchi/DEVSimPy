@@ -1,0 +1,316 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MPIRedirect &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for MPIRedirect</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Class containing a kind of RMI implementation over MPI.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">oneways</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">([</span><span class="s">&quot;simulate&quot;</span><span class="p">,</span> <span class="s">&quot;receiveControl&quot;</span><span class="p">,</span> <span class="s">&quot;receive&quot;</span><span class="p">,</span> <span class="s">&quot;finishSimulation&quot;</span><span class="p">,</span> <span class="s">&quot;notifyWait&quot;</span><span class="p">,</span> <span class="s">&quot;notifyRun&quot;</span><span class="p">,</span> <span class="s">&quot;prepare&quot;</span><span class="p">,</span> <span class="s">&quot;receiveAntiMessages&quot;</span><span class="p">,</span> <span class="s">&quot;migrationUnlock&quot;</span><span class="p">,</span> <span class="s">&quot;notifyMigration&quot;</span><span class="p">,</span> <span class="s">&quot;requestMigrationLock&quot;</span><span class="p">])</span>
+
+<span class="kn">import</span> <span class="nn">middleware</span>
+
+<div class="viewcode-block" id="MPIFaker"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.MPIFaker">[docs]</a><span class="k">class</span> <span class="nc">MPIFaker</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A dummy implementation of MPI4Py if none is found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="MPIFaker.Get_size"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.MPIFaker.Get_size">[docs]</a>    <span class="k">def</span> <span class="nf">Get_size</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the size of the MPI world. Always 1, since it is only used in cases where local simulation is done.</span>
+
+<span class="sd">        :returns: int -- number of MPI processes running</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">1</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="MPIFaker.Get_rank"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.MPIFaker.Get_rank">[docs]</a>    <span class="k">def</span> <span class="nf">Get_rank</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the rank of the current process in the MPI world. Always 0, since it is only used in cases where local simulation is done.</span>
+
+<span class="sd">        :returns: int -- rank of the current process</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">0</span>
+</div></div>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+    <span class="n">COMM_WORLD</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c"># MPI4Py not found, fall back to the dummy implementation</span>
+    <span class="n">COMM_WORLD</span> <span class="o">=</span> <span class="n">MPIFaker</span><span class="p">()</span>
+
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">from</span> <span class="nn">logger</span> <span class="kn">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="cleaning"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.cleaning">[docs]</a><span class="k">def</span> <span class="nf">cleaning</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Clean up the list of all waiting asynchronous connections</span>
+
+<span class="sd">    Should be ran on a seperate thread and will simply wait on the connection status to be &#39;complete&#39;. This is necessary for the MPI specification.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">time</span>
+    <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># This is atomic (at least where it matters)</span>
+            <span class="n">MPI</span><span class="o">.</span><span class="n">Request</span><span class="o">.</span><span class="n">Wait</span><span class="p">(</span><span class="n">MPIRedirect</span><span class="o">.</span><span class="n">lst</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">NameError</span><span class="p">:</span>
+            <span class="c"># Can happen during shutdown</span>
+            <span class="k">pass</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="c"># List is empty</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MPIRedirect"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.MPIRedirect">[docs]</a><span class="k">class</span> <span class="nc">MPIRedirect</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Redirect all calls to an instantiation of this class to the server for which it was created, uses MPI (or the dummy implementation).</span>
+<span class="sd">    </span>
+<span class="sd">    For speed, it contains an optimisation when the call is actually done locally (it will simply start a thread then). This complete</span>
+<span class="sd">    implemenation is based on so called &#39;magic functions&#39; from Python.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Reserve 50 slots, this is (hopefully) way too much, though the backend would crash if we run out of these...</span>
+    <span class="c"># Honestly, if you have 50 connections for which you are waiting, you will have worse problems than running out of IDs</span>
+    <span class="n">waiting</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">50</span>
+    <span class="c"># Don&#39;t use range itself, as this doesn&#39;t work in Python3</span>
+    <span class="n">free_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">50</span><span class="p">)]</span>
+    <span class="n">noproxy</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">([</span><span class="s">&quot;__getnewargs__&quot;</span><span class="p">,</span> <span class="s">&quot;__getinitargs__&quot;</span><span class="p">,</span> <span class="s">&quot;__str__&quot;</span><span class="p">,</span> <span class="s">&quot;__repr__&quot;</span><span class="p">])</span>
+    <span class="n">local</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">lst</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">Get_size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">thrd</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">cleaning</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[])</span>
+        <span class="n">thrd</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">thrd</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<div class="viewcode-block" id="MPIRedirect.__init__"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.MPIRedirect.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rank</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor.</span>
+
+<span class="sd">        :param rank: the rank of the server to redirect the call to</span>
+<span class="sd">        :param oneways: iterable containing all functions that should be done without waiting for completion</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oneway</span> <span class="o">=</span> <span class="n">oneways</span>
+</div>
+<div class="viewcode-block" id="MPIRedirect.__getinitargs__"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.MPIRedirect.__getinitargs__">[docs]</a>    <span class="k">def</span> <span class="nf">__getinitargs__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For pickling</span>
+
+<span class="sd">        :returns: list containing the rank</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="MPIRedirect.__getstate__"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.MPIRedirect.__getstate__">[docs]</a>    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For pickling</span>
+
+<span class="sd">        :returns: dictionary containing the rank and the oneway list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;rank&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="s">&quot;oneway&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">oneway</span><span class="p">}</span>
+</div>
+<div class="viewcode-block" id="MPIRedirect.__setstate__"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.MPIRedirect.__setstate__">[docs]</a>    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For pickling</span>
+
+<span class="sd">        :param state: the dictionary provided by the *__getstate__* method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s">&quot;rank&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oneway</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s">&quot;oneway&quot;</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="MPIRedirect.__getattr__"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.MPIRedirect.__getattr__">[docs]</a>    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determine whether or not we should redirect the call to the local or the remote server</span>
+
+<span class="sd">        :param name: the name of the function to call</span>
+<span class="sd">        :returns: function -- function to be actually called to perform the action</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">MPIRedirect</span><span class="o">.</span><span class="n">noproxy</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">newcall</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            A call to a remote location</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">MPIRedirect</span><span class="o">.</span><span class="n">remoteCall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">newcall</span>
+</div>
+<div class="viewcode-block" id="MPIRedirect.remoteCall"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.MPIRedirect.remoteCall">[docs]</a>    <span class="k">def</span> <span class="nf">remoteCall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make the remote call</span>
+
+<span class="sd">        :param method: method name to call (as a string)</span>
+<span class="sd">        :returns: return value of the called method; always None in case it is a one-way call</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Unique tag, but at least 2 (0 reserved for exit, 1 is reserved for calls)</span>
+        <span class="n">wait</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">method</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">oneway</span>
+        <span class="k">if</span> <span class="n">wait</span><span class="p">:</span>
+            <span class="n">call_id</span> <span class="o">=</span> <span class="n">MPIRedirect</span><span class="o">.</span><span class="n">free_ids</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Mention that we are not waiting for a reply</span>
+            <span class="n">call_id</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">call_id</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">wait</span><span class="p">:</span>
+            <span class="n">MPIRedirect</span><span class="o">.</span><span class="n">waiting</span><span class="p">[</span><span class="n">call_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">event</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+        <span class="n">MPIRedirect</span><span class="o">.</span><span class="n">lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">isend</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">wait</span><span class="p">:</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">MPIRedirect</span><span class="o">.</span><span class="n">waiting</span><span class="p">[</span><span class="n">call_id</span><span class="p">]</span>
+            <span class="c"># Clear the object from memory</span>
+            <span class="n">MPIRedirect</span><span class="o">.</span><span class="n">waiting</span><span class="p">[</span><span class="n">call_id</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">MPIRedirect</span><span class="o">.</span><span class="n">free_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">call_id</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">response</span>
+  </div></div>
+<div class="viewcode-block" id="LocalRedirect"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.LocalRedirect">[docs]</a><span class="k">class</span> <span class="nc">LocalRedirect</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Local redirector class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="LocalRedirect.localCall"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.LocalRedirect.localCall">[docs]</a>    <span class="k">def</span> <span class="nf">localCall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Actually perform the local call</span>
+
+<span class="sd">        :param method: the name of the method</span>
+<span class="sd">        :returns: the return value of the function, None if it is a oneway call</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">method</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">oneway</span><span class="p">:</span>
+            <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="LocalRedirect.__init__"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.LocalRedirect.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor.</span>
+
+<span class="sd">        :param server: the local server</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">server</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oneway</span> <span class="o">=</span> <span class="n">oneways</span>
+</div>
+<div class="viewcode-block" id="LocalRedirect.__getattr__"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.LocalRedirect.__getattr__">[docs]</a>    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determine whether or not we should redirect the call to the local or the remote server</span>
+
+<span class="sd">        :param name: the name of the function to call</span>
+<span class="sd">        :returns: function -- function to be actually called to perform the action</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">MPIRedirect</span><span class="o">.</span><span class="n">noproxy</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">localcall</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            A call to a local location</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">LocalRedirect</span><span class="o">.</span><span class="n">localCall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">localcall</span>
+</div>
+<div class="viewcode-block" id="LocalRedirect.__getinitargs__"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.LocalRedirect.__getinitargs__">[docs]</a>    <span class="k">def</span> <span class="nf">__getinitargs__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For pickling</span>
+
+<span class="sd">        :returns: list containing the rank</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="LocalRedirect.__getstate__"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.LocalRedirect.__getstate__">[docs]</a>    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For pickling</span>
+
+<span class="sd">        :returns: dictionary containing the rank and the oneway list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&quot;oneway&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">oneway</span><span class="p">}</span>
+</div>
+<div class="viewcode-block" id="LocalRedirect.__setstate__"><a class="viewcode-back" href="../mpiredirect_int.html#MPIRedirect.LocalRedirect.__setstate__">[docs]</a>    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For pickling</span>
+
+<span class="sd">        :param state: the dictionary provided by the *__getstate__* method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oneway</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s">&quot;oneway&quot;</span><span class="p">]</span>
+        <span class="c"># No need to save the server, as it is impossible to restore it anyway</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

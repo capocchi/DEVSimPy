@@ -1,0 +1,211 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>tracerXML &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for tracerXML</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">util</span> <span class="kn">import</span> <span class="n">runTraceAtController</span><span class="p">,</span> <span class="n">toStr</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<div class="viewcode-block" id="TracerXML"><a class="viewcode-back" href="../tracerxml_int.html#tracerXML.TracerXML">[docs]</a><span class="k">class</span> <span class="nc">TracerXML</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A tracer for XML tracing output</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="TracerXML.__init__"><a class="viewcode-back" href="../tracerxml_int.html#tracerXML.TracerXML.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">server</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+
+<span class="sd">        :param uid: the UID of this tracer</span>
+<span class="sd">        :param server: the server to make remote calls on</span>
+<span class="sd">        :param filename: file to save the trace to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">server</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uid</span> <span class="o">=</span> <span class="n">uid</span>
+</div>
+<div class="viewcode-block" id="TracerXML.startTracer"><a class="viewcode-back" href="../tracerxml_int.html#tracerXML.TracerXML.startTracer">[docs]</a>    <span class="k">def</span> <span class="nf">startTracer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recover</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Starts up the tracer</span>
+
+<span class="sd">        :param recover: whether or not this is a recovery call (so whether or not the file should be appended to)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># Nothing to do here as we aren&#39;t the controller</span>
+            <span class="k">return</span>
+        <span class="k">elif</span> <span class="n">recover</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xml_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;a+&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xml_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xml_file</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="s">&quot;&lt;?xml version=</span><span class="se">\&quot;</span><span class="s">1.0</span><span class="se">\&quot;</span><span class="s">?&gt;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="s">&quot;&lt;trace&gt;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="TracerXML.stopTracer"><a class="viewcode-back" href="../tracerxml_int.html#tracerXML.TracerXML.stopTracer">[docs]</a>    <span class="k">def</span> <span class="nf">stopTracer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop the tracer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xml_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;&lt;/trace&gt;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xml_file</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="TracerXML.trace"><a class="viewcode-back" href="../tracerxml_int.html#tracerXML.TracerXML.trace">[docs]</a>    <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modelName</span><span class="p">,</span> <span class="n">timeStamp</span><span class="p">,</span> <span class="n">eventKind</span><span class="p">,</span> <span class="n">portInfo</span><span class="p">,</span> <span class="n">xmlState</span><span class="p">,</span> <span class="n">strState</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save an XML entry for the provided parameters, basically wraps it in the necessary tags</span>
+
+<span class="sd">        :param modelName: name of the model</span>
+<span class="sd">        :param timeStamp: timestamp of the transition</span>
+<span class="sd">        :param eventKind: kind of event that happened, e.g. internal, external, ...</span>
+<span class="sd">        :param portInfo: actual information about the port</span>
+<span class="sd">        :param xmlState: XML representation of the state</span>
+<span class="sd">        :param strState: normal string representation of the state</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xml_file</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="s">&quot;&lt;event&gt;</span><span class="se">\n</span><span class="s">&quot;</span>
+                          <span class="o">+</span> <span class="s">&quot;&lt;model&gt;&quot;</span> <span class="o">+</span> <span class="n">modelName</span> <span class="o">+</span> <span class="s">&quot;&lt;/model&gt;</span><span class="se">\n</span><span class="s">&quot;</span>
+                          <span class="o">+</span> <span class="s">&quot;&lt;time&gt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeStamp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;&lt;/time&gt;</span><span class="se">\n</span><span class="s">&quot;</span>
+                          <span class="o">+</span> <span class="s">&quot;&lt;kind&gt;&quot;</span> <span class="o">+</span> <span class="n">eventKind</span> <span class="o">+</span> <span class="s">&quot;&lt;/kind&gt;</span><span class="se">\n</span><span class="s">&quot;</span>
+                          <span class="o">+</span> <span class="n">portInfo</span>
+                          <span class="o">+</span> <span class="s">&quot;&lt;state&gt;</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">+</span> <span class="n">xmlState</span> <span class="o">+</span> <span class="s">&quot;&lt;![CDATA[&quot;</span> <span class="o">+</span> <span class="n">strState</span> <span class="o">+</span> <span class="s">&quot;]]&gt;</span><span class="se">\n</span><span class="s">&lt;/state&gt;</span><span class="se">\n</span><span class="s">&quot;</span>
+                          <span class="o">+</span> <span class="s">&quot;&lt;/event&gt;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="TracerXML.traceInternal"><a class="viewcode-back" href="../tracerxml_int.html#tracerXML.TracerXML.traceInternal">[docs]</a>    <span class="k">def</span> <span class="nf">traceInternal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The trace functionality for XML output at an internal transition</span>
+
+<span class="sd">        :param aDEVS: the model that transitioned</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">portInfo</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">OPorts</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">OPorts</span><span class="p">[</span><span class="n">I</span><span class="p">]</span> <span class="ow">in</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">myOutput</span> <span class="ow">and</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">myOutput</span><span class="p">[</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">OPorts</span><span class="p">[</span><span class="n">I</span><span class="p">]]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">portInfo</span> <span class="o">+=</span> <span class="s">&quot;&lt;port name=</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="o">+</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">OPorts</span><span class="p">[</span><span class="n">I</span><span class="p">]</span><span class="o">.</span><span class="n">getPortName</span><span class="p">()</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\&quot;</span><span class="s"> category=</span><span class="se">\&quot;</span><span class="s">O</span><span class="se">\&quot;</span><span class="s">&gt;</span><span class="se">\n</span><span class="s">&quot;</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">myOutput</span><span class="p">[</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">OPorts</span><span class="p">[</span><span class="n">I</span><span class="p">]]:</span>
+                    <span class="n">portInfo</span> <span class="o">+=</span> <span class="s">&quot;&lt;message&gt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;&lt;/message&gt;</span><span class="se">\n</span><span class="s">&lt;/port&gt;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">runTraceAtController</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">,</span> <span class="p">[</span><span class="n">toStr</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">()),</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">timeLast</span><span class="p">,</span> <span class="s">&quot;&#39;IN&#39;&quot;</span><span class="p">,</span> <span class="n">toStr</span><span class="p">(</span><span class="n">portInfo</span><span class="p">),</span> <span class="n">toStr</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">toXML</span><span class="p">()),</span> <span class="n">toStr</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">state</span><span class="p">)])</span>
+</div>
+<div class="viewcode-block" id="TracerXML.traceExternal"><a class="viewcode-back" href="../tracerxml_int.html#tracerXML.TracerXML.traceExternal">[docs]</a>    <span class="k">def</span> <span class="nf">traceExternal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The trace functionality for XML output at an external transition</span>
+
+<span class="sd">        :param aDEVS: the model that transitioned</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">portInfo</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">IPorts</span><span class="p">)):</span>
+            <span class="n">portInfo</span> <span class="o">+=</span> <span class="s">&quot;&lt;port name=</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="o">+</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">IPorts</span><span class="p">[</span><span class="n">I</span><span class="p">]</span><span class="o">.</span><span class="n">getPortName</span><span class="p">()</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\&quot;</span><span class="s"> category=</span><span class="se">\&quot;</span><span class="s">I</span><span class="se">\&quot;</span><span class="s">&gt;</span><span class="se">\n</span><span class="s">&quot;</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">myInput</span><span class="p">[</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">IPorts</span><span class="p">[</span><span class="n">I</span><span class="p">]]:</span>
+                <span class="n">portInfo</span> <span class="o">+=</span> <span class="s">&quot;&lt;message&gt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;&lt;/message&gt;</span><span class="se">\n</span><span class="s">&lt;/port&gt;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">runTraceAtController</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">,</span> <span class="p">[</span><span class="n">toStr</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">()),</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">timeLast</span><span class="p">,</span> <span class="s">&quot;&#39;EX&#39;&quot;</span><span class="p">,</span> <span class="n">toStr</span><span class="p">(</span><span class="n">portInfo</span><span class="p">),</span> <span class="n">toStr</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">toXML</span><span class="p">()),</span> <span class="n">toStr</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">state</span><span class="p">)])</span>
+</div>
+<div class="viewcode-block" id="TracerXML.traceConfluent"><a class="viewcode-back" href="../tracerxml_int.html#tracerXML.TracerXML.traceConfluent">[docs]</a>    <span class="k">def</span> <span class="nf">traceConfluent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The trace functionality for XML output at a confluent transition</span>
+
+<span class="sd">        :param aDEVS: the model that transitioned</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">portInfo</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">IPorts</span><span class="p">)):</span>
+            <span class="n">portInfo</span> <span class="o">+=</span> <span class="s">&quot;&lt;port name=</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="o">+</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">IPorts</span><span class="p">[</span><span class="n">I</span><span class="p">]</span><span class="o">.</span><span class="n">getPortName</span><span class="p">()</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\&quot;</span><span class="s"> category=</span><span class="se">\&quot;</span><span class="s">I</span><span class="se">\&quot;</span><span class="s">&gt;</span><span class="se">\n</span><span class="s">&quot;</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">myInput</span><span class="p">[</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">IPorts</span><span class="p">[</span><span class="n">I</span><span class="p">]]:</span>
+                <span class="n">portInfo</span> <span class="o">+=</span> <span class="s">&quot;&lt;message&gt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;&lt;/message&gt;</span><span class="se">\n</span><span class="s">&lt;/port&gt;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">runTraceAtController</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">,</span> <span class="p">[</span><span class="n">toStr</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">()),</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">timeLast</span><span class="p">,</span> <span class="s">&quot;&#39;EX&#39;&quot;</span><span class="p">,</span> <span class="n">toStr</span><span class="p">(</span><span class="n">portInfo</span><span class="p">),</span> <span class="n">toStr</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">toXML</span><span class="p">()),</span> <span class="n">toStr</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">state</span><span class="p">)])</span>
+        <span class="n">portInfo</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">OPorts</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">OPorts</span><span class="p">[</span><span class="n">I</span><span class="p">]</span> <span class="ow">in</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">myOutput</span><span class="p">:</span>
+                <span class="n">portInfo</span> <span class="o">+=</span> <span class="s">&quot;&lt;port name=</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="o">+</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">OPorts</span><span class="p">[</span><span class="n">I</span><span class="p">]</span><span class="o">.</span><span class="n">getPortName</span><span class="p">()</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\&quot;</span><span class="s"> category=</span><span class="se">\&quot;</span><span class="s">O</span><span class="se">\&quot;</span><span class="s">&gt;</span><span class="se">\n</span><span class="s">&quot;</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">myOutput</span><span class="p">[</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">OPorts</span><span class="p">[</span><span class="n">I</span><span class="p">]]:</span>
+                    <span class="n">portInfo</span> <span class="o">+=</span> <span class="s">&quot;&lt;message&gt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;&lt;/message&gt;</span><span class="se">\n</span><span class="s">&lt;/port&gt;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">runTraceAtController</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">,</span> <span class="p">[</span><span class="n">toStr</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">()),</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">timeLast</span><span class="p">,</span> <span class="s">&quot;&#39;IN&#39;&quot;</span><span class="p">,</span> <span class="n">toStr</span><span class="p">(</span><span class="n">portInfo</span><span class="p">),</span> <span class="n">toStr</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">toXML</span><span class="p">()),</span> <span class="n">toStr</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">state</span><span class="p">)])</span>
+</div>
+<div class="viewcode-block" id="TracerXML.traceInit"><a class="viewcode-back" href="../tracerxml_int.html#tracerXML.TracerXML.traceInit">[docs]</a>    <span class="k">def</span> <span class="nf">traceInit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The trace functionality for XML output at initialization</span>
+
+<span class="sd">        :param aDEVS: the model that transitioned</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">runTraceAtController</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">,</span> <span class="p">[</span><span class="n">toStr</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">()),</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">timeLast</span><span class="p">,</span> <span class="s">&quot;&#39;EX&#39;&quot;</span><span class="p">,</span> <span class="s">&quot;&#39;&#39;&quot;</span><span class="p">,</span> <span class="n">toStr</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">toXML</span><span class="p">()),</span> <span class="n">toStr</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">state</span><span class="p">)])</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,255 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Activity Heap scheduler &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Schedulers" href="schedulers.html" />
+    <link rel="next" title="Dirty Heap scheduler" href="schedulerDH_int.html" />
+    <link rel="prev" title="Schedulers" href="schedulers.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="schedulerDH_int.html" title="Dirty Heap scheduler"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="schedulers.html" title="Schedulers"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" >Internal documentation</a> &raquo;</li>
+          <li><a href="schedulers.html" accesskey="U">Schedulers</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-schedulerAH">
+<span id="activity-heap-scheduler"></span><h1>Activity Heap scheduler<a class="headerlink" href="#module-schedulerAH" title="Permalink to this headline">¶</a></h1>
+<p>The Activity Heap is based on a heap, though allows for reschedules.</p>
+<p>To allow reschedules to happen, a model is accompagnied by a flag to 
+indicate whether or not it is still valid. 
+As soon as a model is rescheduled, the flag of the previously scheduled 
+time is set and another entry is added. This causes the heap to become <em>dirty</em>, 
+requiring a check for the flag as soon as the first element is requested.</p>
+<p>Due to the possibility for a dirty heap, the heap will be cleaned up as 
+soon as the number of invalid elements becomes too high. 
+This cleanup method has O(n) complexity and is therefore only 
+ran when the heap becomes way too dirty.</p>
+<p>Another problem is that it might consume more memory than other schedulers, 
+due to invalid elements being kept in memory. 
+However, the actual model and states are not duplicated as they are references. 
+The additional memory requirement should not be a problem in most situations.</p>
+<p>The &#8216;activity&#8217; part from the name stems from the fact that only models where 
+the <em>timeNext</em> attribute is smaller than infinity will be scheduled. 
+Since these elements are not added to the heap, they aren&#8217;t taken into account 
+in the complexity. This allows for severe optimisations in situations where 
+a lot of models can be scheduled for infinity.</p>
+<p>Of all provided schedulers, this one is the most mature due to it being the 
+oldest and also the default scheduler. It is also applicable in every situation 
+and it offers sufficient performance in most cases.</p>
+<p>This scheduler is ideal in situations where (nearly) no reschedules happen 
+and where most models transition at a different time.</p>
+<p>It results in slow behaviour in situations requiring lots of rescheduling, 
+and thus lots of dirty elements.</p>
+<p>This method is also applied in the VLE simulator and is the common approach 
+to heap schedulers that require invalidation. It varies from the scheduler in 
+ADEVS due to the heap from the heapq library being used, which doesn&#8217;t offer 
+functions to restructure the heap. 
+Reimplementing these methods in pure Python would be unnecessarily slow.</p>
+<dl class="class">
+<dt id="schedulerAH.SchedulerAH">
+<em class="property">class </em><tt class="descclassname">schedulerAH.</tt><tt class="descname">SchedulerAH</tt><big>(</big><em>models</em>, <em>epsilon</em>, <em>totalModels</em><big>)</big><a class="reference internal" href="_modules/schedulerAH.html#SchedulerAH"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerAH.SchedulerAH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scheduler class itself</p>
+<dl class="method">
+<dt id="schedulerAH.SchedulerAH.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>models</em>, <em>epsilon</em>, <em>totalModels</em><big>)</big><a class="reference internal" href="_modules/schedulerAH.html#SchedulerAH.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerAH.SchedulerAH.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>models</strong> &#8211; all models in the simulation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="schedulerAH.SchedulerAH.cleanFirst">
+<tt class="descname">cleanFirst</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/schedulerAH.html#SchedulerAH.cleanFirst"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerAH.SchedulerAH.cleanFirst" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clean up the invalid elements in front of the list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="schedulerAH.SchedulerAH.getImminent">
+<tt class="descname">getImminent</tt><big>(</big><em>time</em><big>)</big><a class="reference internal" href="_modules/schedulerAH.html#SchedulerAH.getImminent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerAH.SchedulerAH.getImminent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all models that transition at the provided time, with a specified epsilon deviation allowed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> &#8211; timestamp to check for models</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">For efficiency, this method only checks the <strong>first</strong> elements, so trying to invoke this function with a timestamp higher than the value provided with the <em>readFirst</em> method, will <strong>always</strong> return an empty set.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="schedulerAH.SchedulerAH.massReschedule">
+<tt class="descname">massReschedule</tt><big>(</big><em>reschedule_set</em><big>)</big><a class="reference internal" href="_modules/schedulerAH.html#SchedulerAH.massReschedule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerAH.SchedulerAH.massReschedule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reschedule all models provided. 
+Equivalent to calling unschedule(model); schedule(model) on every element in the iterable.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reschedule_set</strong> &#8211; iterable containing all models to reschedule</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="schedulerAH.SchedulerAH.readFirst">
+<tt class="descname">readFirst</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/schedulerAH.html#SchedulerAH.readFirst"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerAH.SchedulerAH.readFirst" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the time of the first model that has to transition</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">timestamp of the first model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="schedulerAH.SchedulerAH.schedule">
+<tt class="descname">schedule</tt><big>(</big><em>model</em><big>)</big><a class="reference internal" href="_modules/schedulerAH.html#SchedulerAH.schedule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerAH.SchedulerAH.schedule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Schedule a model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> &#8211; the model to schedule</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="schedulerAH.SchedulerAH.unschedule">
+<tt class="descname">unschedule</tt><big>(</big><em>model</em><big>)</big><a class="reference internal" href="_modules/schedulerAH.html#SchedulerAH.unschedule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#schedulerAH.SchedulerAH.unschedule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unschedule a model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> &#8211; model to unschedule</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="schedulers.html"
+                        title="previous chapter">Schedulers</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="schedulerDH_int.html"
+                        title="next chapter">Dirty Heap scheduler</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/schedulerAH_int.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="schedulerDH_int.html" title="Dirty Heap scheduler"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="schedulers.html" title="Schedulers"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" >Internal documentation</a> &raquo;</li>
+          <li><a href="schedulers.html" >Schedulers</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
