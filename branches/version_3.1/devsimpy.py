@@ -1013,22 +1013,26 @@ class MainApplication(wx.Frame):
 		### diagram preparation
 		diagram.modify = False
 
-		if diagram.last_name_saved:
-
-			assert (os.path.isabs(diagram.last_name_saved))
-
-			if Container.Diagram.SaveFile(diagram, diagram.last_name_saved):
-				# Refresh canvas
-				currentPage.Refresh()
-
-				### enable save button on status bar
-				self.tb.EnableTool(Menu.ID_SAVE, diagram.modify)
-				
-				#self.statusbar.SetStatusText(_('%s saved')%diagram.last_name_saved)
-			else:
-				wx.MessageBox(_('Error saving file.'), _('Error'), wx.OK | wx.ICON_ERROR)
+		### save cmd file consists to export it
+		if isinstance(diagram, Container.ContainerBlock):
+			Container.Block.OnExport(diagram, event)
 		else:
-			self.OnSaveAsFile(event)
+			if diagram.last_name_saved:
+
+				assert (os.path.isabs(diagram.last_name_saved))
+
+				if Container.Diagram.SaveFile(diagram, diagram.last_name_saved):
+					# Refresh canvas
+					currentPage.Refresh()
+
+					### enable save button on status bar
+					self.tb.EnableTool(Menu.ID_SAVE, diagram.modify)
+					
+					#self.statusbar.SetStatusText(_('%s saved')%diagram.last_name_saved)
+				else:
+					wx.MessageBox(_('Error saving file.'), _('Error'), wx.OK | wx.ICON_ERROR)
+			else:
+				self.OnSaveAsFile(event)
 
 	###
 	def OnSaveAsFile(self, event):

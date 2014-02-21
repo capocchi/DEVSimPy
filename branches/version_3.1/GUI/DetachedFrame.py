@@ -43,9 +43,9 @@ class DetachedFrame(wx.Frame, Printable.Printable):
 		""" Constructor.
 
 			@parent : window parent of the frame
-			@ID : ID fof the frame
+			@ID : ID of the frame
 			@title : title of the frame
-			@diagram : diagram includ in the canvas embeded in the frame
+			@diagram : diagram included in the canvas embedded in the frame
 			@name : name of the frame
 		"""
 		from GUI.ShapeCanvas import ShapeCanvas
@@ -82,7 +82,7 @@ class DetachedFrame(wx.Frame, Printable.Printable):
 
 		### Menu ToolBar
 		toolbar = wx.ToolBar(self, wx.ID_ANY, name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
-		toolbar.SetToolBitmapSize((25, 25)) # juste for windows
+		toolbar.SetToolBitmapSize((25, 25)) # just for windows
 
 		
 		if self.parent:
@@ -117,7 +117,7 @@ class DetachedFrame(wx.Frame, Printable.Printable):
 
 		### if Detached frame from block (container or Code)
 		### save, save-as and simulation are desabled
-		if isinstance(self.diagram.GetGrandParent(), DetachedFrame):
+		if not isinstance(self.parent, ShapeCanvas):
 			toolbar.EnableTool(Menu.ID_SAVE, False)
 			toolbar.EnableTool(Menu.ID_SAVEAS, False)
 			toolbar.EnableTool(Menu.ID_SIM_DIAGRAM, False)
@@ -157,18 +157,18 @@ class DetachedFrame(wx.Frame, Printable.Printable):
 			#self.Bind(wx.EVT_TOOL, parent.OnSaveFile, id=Menu.ID_SAVE)
 
 	def OnMove(self, event):
-		""" Transparence manager
+		""" alpha manager
 		"""
 		if self.transparent == wx.ALPHA_OPAQUE:
 			self.transparent = 140
 			try:
 				self.SetTransparent(self.transparent)
 			except:
-				sys.stderr.write(_("No transparency"))
+				sys.stdout.write(_("No transparency"))
 		event.Skip()
 
 	def OnIdle(self, event):
-		""" Transparence manager
+		""" alpha manager
 		"""
 		if self.transparent == 140:
 			self.transparent = wx.ALPHA_OPAQUE
