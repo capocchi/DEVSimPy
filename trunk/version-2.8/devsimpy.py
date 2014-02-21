@@ -8,7 +8,7 @@
 #                              Laurent CAPOCCHI
 #                        SPE - University of Corsica
 #                     --------------------------------
-# Version 2.8                                      last modified:  12/11/13
+# Version 2.8                                      last modified:  21/02/14
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -18,7 +18,7 @@
 # remarque; attention, la construction de l'arbre des librairies (ou domain) est fait par la classe TreeListLib.
 # De plus, cette construction necessite la présence obligatoire du fichier __init__.py dans chaque sous domain d'un domaine repertorié dans le repertoire Domain (voir methode recursive GetSubDomain).
 # L'utilisateur doit donc ecrire ce fichier en sautant les lignes dans __all__ = []. Si le fichier n'existe pas le prog le cree.
-# Pour importer une lib: 1/ faire un rep MyLib dans Domain avec les fichiers Message.py, DomainBehavior.py et DomaineStrucutre.py
+# Pour importer une lib: 1/ faire un rep MyLib dans Domain avec les fichier Message.py, DomainBehavior.py et DomaineStrucutre.py
 #                                               2/ stocker tout les autre .py dans un sous rep contenant également un fichier __init__ dans lequel son ecris les fichier a importer.
 #                                               3/ les fichiers .cmd issu de l'environnement peuvent etre stocké nimport ou il seron pris en compte en tant que model couplé.
 #                                               4/ les fichier init doivent respecter le format de saus de ligne pour une bonne importation.
@@ -36,48 +36,24 @@
 ### at the beginning to prevent with statement for python vetrsion <=2.5
 from __future__ import with_statement
 
-import __builtin__
-import cPickle
-import copy
-import gettext
-import os
-import platform
-import re
-import sys
-from tempfile import gettempdir
-import threading
-import time
-import webbrowser
-
-import wx.aui
-import wx.html
-import wx.lib.dialogs
-
-import Container
-from ControlNotebook import ControlNotebook
-from Decorators import redirectStdout, BuzyCursorNotification
-from DetachedFrame import DetachedFrame
-from DiagramNotebook import DiagramNotebook
-from ImportLibrary import ImportLibrary
-from LibPanel import LibPanel
-from LibraryTree import LibraryTree
-import Menu
-from PreferencesGUI import PreferencesGUI
-from PropPanel import PropPanel
-import ReloadModule
-from Reporter import ExceptionHook
-from Utilities import GetMails, IsAllDigits
-from pluginmanager import load_plugins
-from which import which
-import wx.py as py
-
-
 __authors__  = "Laurent Capocchi <capocchi@univ-corse.fr, lcapocchi@gmail.com>, TIC project team <santucci@univ-coorse.fr>" # ajouter les noms et les mails associés aux autres auteurs
 __date__    = "05 Feb 2012, 17:07 GMT"
 __version__ = '2.8'
 __docformat__ = 'epytext'
 
+import copy
+import os
+import sys
+import time
+import re
+import gettext
+import __builtin__
+import webbrowser
+import platform
+import threading
+import cPickle
 
+from tempfile import gettempdir
 
 try:
 	import hotshot
@@ -124,6 +100,10 @@ except ImportError:
 
 sys.stdout.write("Importing wxPython %s for python %s on %s (%s) platform \n"%(wx.__version__, platform.python_version(), platform.system(), platform.version()))
 
+import wx.aui
+import wx.py as py
+import wx.lib.dialogs
+import wx.html
 
 try:
 	from wx.lib.agw import advancedsplash
@@ -183,7 +163,23 @@ else:
 __builtin__.__dict__.update(builtin_dict)
 
 ### import Container much faster loading than from Container import ... for os windows only
+import Container
+import Menu
+import ReloadModule
 
+from ImportLibrary import ImportLibrary
+from Reporter import ExceptionHook
+from PreferencesGUI import PreferencesGUI
+from pluginmanager import load_plugins
+from which import which
+from Utilities import GetMails, IsAllDigits
+from Decorators import redirectStdout, BuzyCursorNotification
+from DetachedFrame import DetachedFrame
+from LibraryTree import LibraryTree
+from LibPanel import LibPanel
+from PropPanel import PropPanel
+from ControlNotebook import ControlNotebook
+from DiagramNotebook import DiagramNotebook
 
 ### only for wx. 2.9 bug
 ### http://comments.gmane.org/gmane.comp.python.wxpython/98744
