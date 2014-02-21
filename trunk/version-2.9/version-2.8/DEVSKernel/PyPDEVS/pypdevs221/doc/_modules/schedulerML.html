@@ -1,0 +1,179 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>schedulerML &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for schedulerML</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: Latin-1 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The Minimal List scheduler is the simplest scheduler available, </span>
+<span class="sd">though it has extremely bad performance in most cases.</span>
+
+<span class="sd">It simply keeps a list of all models. As soon as a reschedule happens, </span>
+<span class="sd">the list is checked for the minimal value, which is stored. </span>
+<span class="sd">When the imminent models are requested, the lowest value that was found </span>
+<span class="sd">is used to immediatelly return [], </span>
+<span class="sd">or it iterates the complete list in search of models that qualify.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SchedulerML"><a class="viewcode-back" href="../schedulerML_int.html#schedulerML.SchedulerML">[docs]</a><span class="k">class</span> <span class="nc">SchedulerML</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Scheduler class itself</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SchedulerML.__init__"><a class="viewcode-back" href="../schedulerML_int.html#schedulerML.SchedulerML.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">totalModels</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+
+<span class="sd">        :param models: all models in the simulation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Make a copy!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">models</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minval</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">epsilon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">massReschedule</span><span class="p">([])</span>
+</div>
+<div class="viewcode-block" id="SchedulerML.schedule"><a class="viewcode-back" href="../schedulerML_int.html#schedulerML.SchedulerML.schedule">[docs]</a>    <span class="k">def</span> <span class="nf">schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Schedule a model</span>
+
+<span class="sd">        :param model: the model to schedule</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">timeNext</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">minval</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">minval</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">timeNext</span>
+</div>
+<div class="viewcode-block" id="SchedulerML.unschedule"><a class="viewcode-back" href="../schedulerML_int.html#schedulerML.SchedulerML.unschedule">[docs]</a>    <span class="k">def</span> <span class="nf">unschedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unschedule a model</span>
+
+<span class="sd">        :param model: model to unschedule</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">timeNext</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">minval</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">timeNext</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">minval</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">minval</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">timeNext</span>
+</div>
+<div class="viewcode-block" id="SchedulerML.massReschedule"><a class="viewcode-back" href="../schedulerML_int.html#schedulerML.SchedulerML.massReschedule">[docs]</a>    <span class="k">def</span> <span class="nf">massReschedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reschedule_set</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reschedule all models provided. </span>
+<span class="sd">        Equivalent to calling unschedule(model); schedule(model) on every element in the iterable.</span>
+
+<span class="sd">        :param reschedule_set: iterable containing all models to reschedule</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">minval</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">timeNext</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">minval</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">minval</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">timeNext</span>
+</div>
+<div class="viewcode-block" id="SchedulerML.readFirst"><a class="viewcode-back" href="../schedulerML_int.html#schedulerML.SchedulerML.readFirst">[docs]</a>    <span class="k">def</span> <span class="nf">readFirst</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the time of the first model that has to transition</span>
+
+<span class="sd">        :returns: timestamp of the first model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">minval</span>
+</div>
+<div class="viewcode-block" id="SchedulerML.getImminent"><a class="viewcode-back" href="../schedulerML_int.html#schedulerML.SchedulerML.getImminent">[docs]</a>    <span class="k">def</span> <span class="nf">getImminent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of all models that transition at the provided time, with the specified epsilon deviation allowed.</span>
+
+<span class="sd">        :param time: timestamp to check for models</span>
+
+<span class="sd">        .. warning:: For efficiency, this method only checks the **first** elements, so trying to invoke this function with a timestamp higher than the value provided with the *readFirst* method, will **always** return an empty set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">immChildren</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">t</span><span class="p">,</span> <span class="n">age</span> <span class="o">=</span> <span class="n">time</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">timeNext</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">t</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">timeNext</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">age</span><span class="p">:</span>
+                <span class="n">immChildren</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">immChildren</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
