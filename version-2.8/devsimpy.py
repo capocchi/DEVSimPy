@@ -670,8 +670,12 @@ class MainApplication(wx.Frame):
 			if len(self.perspectives) == 0:
 				self.perspectivesmenu.AppendSeparator()
 
-			self.perspectivesmenu.Append(wx.NewId(), txt)
+			ID = wx.NewId()
+			self.perspectivesmenu.Append(ID, txt)
 			self.perspectives[txt] = self._mgr.SavePerspective()
+
+			### Bind right away to make activable the perspective without restart DEVSimPy
+			self.Bind(wx.EVT_MENU, self.OnRestorePerspective, id=ID)
 
 	def OnRestorePerspective(self, event):
 		"""
