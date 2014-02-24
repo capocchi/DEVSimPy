@@ -309,6 +309,7 @@ class MainApplication(wx.Frame):
 		self._mgr.GetPane("nb1").Show().Left().Layer(0).Row(0).Position(0).BestSize(wx.Size(280,-1)).MinSize(wx.Size(250,-1))
 		self._mgr.GetPane("nb2").Show().Center().Layer(0).Row(1).Position(0)
 		self._mgr.GetPane("shell").Bottom().Layer(0).Row(0).Position(0).BestSize(wx.Size(-1,100)).MinSize(wx.Size(-1,120))
+		self._mgr.GetPane("editor").Show().Right().Layer(0).Row(0).Position(0).BestSize(wx.Size(280,-1)).MinSize(wx.Size(250,-1))
 
 		# "commit" all changes made to FrameManager (warning always before the MakeMenu)
 		self._mgr.Update()
