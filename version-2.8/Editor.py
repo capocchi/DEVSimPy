@@ -132,7 +132,7 @@ def GetEditor(parent, id, title, obj=None, **kwargs):
 			editor = GeneralEditor(parent, id, title)
 	else:
 		editor = GeneralEditor(parent, id, title)
-
+		
 	return editor
 
 #################################################################
