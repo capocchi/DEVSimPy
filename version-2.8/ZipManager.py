@@ -212,15 +212,15 @@ class Zip:
 			f = zf.open(L.pop())
 			buf = f.read()
 			f.close()
+			zf.close()
 			sbuf = StringIO.StringIO(buf)
 			image = wx.ImageFromStream(sbuf)
 			sbuf.close()
 			image.Rescale(scaleW, scaleH)
 			return image
 		else:
+			zf.close()
 			return None
-
-		zf.close()
 
 	@staticmethod
 	def GetPluginFile(fn):
