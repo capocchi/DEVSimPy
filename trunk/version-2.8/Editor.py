@@ -132,7 +132,7 @@ def GetEditor(parent, id, title, obj=None, **kwargs):
 			editor = GeneralEditor(parent, id, title)
 	else:
 		editor = GeneralEditor(parent, id, title)
-		
+
 	return editor
 
 #################################################################
@@ -1105,10 +1105,34 @@ class Editor(wx.Frame, wx.Panel):
 		else:
 			wx.Frame.__init__(self, parent, id, title, size=(600, 500), style=wx.DEFAULT_FRAME_STYLE)
 
+			#self._mgr = wx.aui.AuiManager()
+        	#self._mgr.SetManagedWindow(self)
+
 		# notebook
 		self.read_only = False
 		self.nb = EditionNotebook(self, wx.ID_ANY, style=wx.CLIP_CHILDREN)
 
+		### aui manager
+		#self._mgr.AddPane(self.nb, wx.aui.AuiPaneInfo().Name("nb").CenterPane().PaneBorder(False))
+		#self._mgr.GetPane("nb").Show().Center().Layer(0).Position(0)
+		#self._mgr.Update()
+
+		self.CreateMenu()
+		self.CreateTB()
+
+		### binding
+		self.Bind(wx.EVT_CLOSE, self.QuitApplication)
+
+		self.StatusBar()
+		self.Centre()
+
+		### just for windows
+		e = wx.SizeEvent(self.GetSize())
+		self.ProcessEvent(e)
+
+	def CreateMenu(self):
+		""" Create the menu
+		"""
 		# setting up menubar
 		menubar = wx.MenuBar()
 
@@ -1116,38 +1140,38 @@ class Editor(wx.Frame, wx.Panel):
 		file = wx.Menu()
 
 		self.save = wx.MenuItem(file, wx.NewId(), _('&Save\tCtrl+S'), _('Save the file'))
-		quit = wx.MenuItem(file, wx.NewId(), _('&Quit\tCtrl+Q'), _('Quit the application'))
+		self.quit = wx.MenuItem(file, wx.NewId(), _('&Quit\tCtrl+Q'), _('Quit the application'))
 
 		self.save.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save.png')))
-		quit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'exit.png')))
+		self.quit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'exit.png')))
 
 		file.AppendItem(self.save)
-		file.AppendItem(quit)
+		file.AppendItem(self.quit)
 		### -----------------------------------------------------------------
 
 		### edit sub menu----------------------------------------------------
 		edit = wx.Menu()
 
-		cut = wx.MenuItem(edit, wx.NewId(), _('&Cut\tCtrl+X'), _('Cut the selection'))
-		copy = wx.MenuItem(edit, wx.NewId(), _('&Copy\tCtrl+C'), _('Copy the selection'))
-		paste = wx.MenuItem(edit, wx.NewId(), _('&Paste\tCtrl+V'), _('Paste text from clipboard'))
+		self.cut = wx.MenuItem(edit, wx.NewId(), _('&Cut\tCtrl+X'), _('Cut the selection'))
+		self.copy = wx.MenuItem(edit, wx.NewId(), _('&Copy\tCtrl+C'), _('Copy the selection'))
+		self.paste = wx.MenuItem(edit, wx.NewId(), _('&Paste\tCtrl+V'), _('Paste text from clipboard'))
 		delete = wx.MenuItem(edit, wx.NewId(), _('&Delete'), _('Delete the selected text'))
 		select = wx.MenuItem(edit, wx.NewId(), _('Select &All\tCtrl+A'), _('Select the entire text'))
 		reindent = wx.MenuItem(edit, wx.NewId(), _('Re-indent\tCtrl+R'), _('re-indent all code'))
 		comment = wx.MenuItem(edit, wx.NewId(), _('&Comment\tCtrl+D'), _('comment current ligne'))
 		uncomment = wx.MenuItem(edit, wx.NewId(), _('&Uncomment\tCtrl+Shift+D'), _('uncomment current ligne'))
 
-		cut.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'cut.png')))
-		copy.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'copy.png')))
-		paste.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'paste.png')))
+		self.cut.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'cut.png')))
+		self.copy.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'copy.png')))
+		self.paste.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'paste.png')))
 		delete.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'delete.png')))
 		reindent.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 're-indent.png')))
 		comment.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'comment_add.png')))
 		uncomment.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'comment_remove.png')))
 
-		edit.AppendItem(cut)
-		edit.AppendItem(copy)
-		edit.AppendItem(paste)
+		edit.AppendItem(self.cut)
+		edit.AppendItem(self.copy)
+		edit.AppendItem(self.paste)
 		edit.AppendItem(reindent)
 		edit.AppendItem(comment)
 		edit.AppendItem(uncomment)
@@ -1181,10 +1205,10 @@ class Editor(wx.Frame, wx.Panel):
 
 		### binding event
 		self.Bind(wx.EVT_MENU, self.OnSaveFile, id=self.save.GetId())
-		self.Bind(wx.EVT_MENU, self.QuitApplication, id=quit.GetId())
-		self.Bind(wx.EVT_MENU, self.nb.OnCut, id=cut.GetId())
-		self.Bind(wx.EVT_MENU, self.nb.OnCopy, id=copy.GetId())
-		self.Bind(wx.EVT_MENU, self.nb.OnPaste, id=paste.GetId())
+		self.Bind(wx.EVT_MENU, self.QuitApplication, id=self.quit.GetId())
+		self.Bind(wx.EVT_MENU, self.nb.OnCut, id=self.cut.GetId())
+		self.Bind(wx.EVT_MENU, self.nb.OnCopy, id=self.copy.GetId())
+		self.Bind(wx.EVT_MENU, self.nb.OnPaste, id=self.paste.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnReIndent, id=reindent.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnComment, id=comment.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnUnComment, id=uncomment.GetId())
@@ -1193,26 +1217,20 @@ class Editor(wx.Frame, wx.Panel):
 		self.Bind(wx.EVT_MENU, self.ToggleStatusBar, id=showStatusBar.GetId())
 		self.Bind(wx.EVT_MENU, self.OnAbout, id=about.GetId())
 
+	def CreateTB(self):
+		""" Create tool-bar
+		"""
+
 		self.toolbar = self.CreateToolBar(wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT)
 
 		self.Bind(wx.EVT_TOOL, self.OnSaveFile, self.toolbar.AddSimpleTool(self.save.GetId(), wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), _('Save'), ''))
 		self.toolbar.AddSeparator()
-		self.Bind(wx.EVT_TOOL, self.nb.OnCut, self.toolbar.AddSimpleTool(cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), _('Cut'), ''))
-		self.Bind(wx.EVT_TOOL, self.nb.OnCopy, self.toolbar.AddSimpleTool(copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), _('Copy'), ''))
-		self.Bind(wx.EVT_TOOL, self.nb.OnPaste, self.toolbar.AddSimpleTool(paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), _('Paste'), ''))
-		self.Bind(wx.EVT_TOOL, self.QuitApplication, id = quit.GetId())
+		self.Bind(wx.EVT_TOOL, self.nb.OnCut, self.toolbar.AddSimpleTool(self.cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), _('Cut'), ''))
+		self.Bind(wx.EVT_TOOL, self.nb.OnCopy, self.toolbar.AddSimpleTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), _('Copy'), ''))
+		self.Bind(wx.EVT_TOOL, self.nb.OnPaste, self.toolbar.AddSimpleTool(self.paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), _('Paste'), ''))
+		self.Bind(wx.EVT_TOOL, self.QuitApplication, id = self.quit.GetId())
 
 		self.toolbar.Realize()
-
-		### binding
-		self.Bind(wx.EVT_CLOSE, self.QuitApplication)
-
-		self.StatusBar()
-		self.Centre()
-
-		### just for windows
-		e = wx.SizeEvent(self.GetSize())
-		self.ProcessEvent(e)
 
 	# NOTE: Editor :: __str__		=> String representation of the class
 	@classmethod

@@ -98,16 +98,16 @@ class CollapsiblePanel(wx.Panel):
 		self.org_w,self.org_h = self.simdia.GetSize()
 
 		self.label1 = _("More settings...")
-		self.label2 = _("extra options")
+		self.label2 = _("Extra options")
 
-		self.cp = cp = wx.CollapsiblePane(self, label=self.label1,
+		self.cp = wx.CollapsiblePane(self, label=self.label1,
 											style=wx.CP_DEFAULT_STYLE|wx.CP_NO_TLW_RESIZE)
 
-		self.Bind(wx.EVT_COLLAPSIBLEPANE_CHANGED, self.OnPaneChanged, cp)
-		self.MakePaneContent(cp.GetPane())
+		self.Bind(wx.EVT_COLLAPSIBLEPANE_CHANGED, self.OnPaneChanged, self.cp)
+		self.MakePaneContent(self.cp.GetPane())
 
 		sizer = wx.BoxSizer(wx.VERTICAL)
-		sizer.Add(cp, 0, wx.EXPAND)
+		sizer.Add(self.cp, 0, wx.EXPAND)
 		self.SetSizer(sizer)
 
 	def OnPaneChanged(self, evt=None):
@@ -223,19 +223,19 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			self.SetBackgroundColour(wx.NullColour)
 			self.panel = self
 
-			### panel inherite of the left splitter size
+			### panel inherit of the left splitter size
 			self.panel.SetSize(parent.GetParent().GetSize())
 
-			# status bar de l'application principale
+			# status bar of main application
 			self.statusbar = parent.GetTopLevelParent().statusbar
 		else:
 			wx.Frame.__init__(self, parent, id, title, style= wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
 
-			### adapt size of frame depending on the plateform
+			### adapt size of frame depending on the plate-form
 			if  '__WXMSW__' in wx.PlatformInfo:
-				self.SetSize((280,280))
+				self.SetSize((320,280))
 			else:
-				self.SetSize((260,160))
+				self.SetSize((280,160))
 
 			# disable the roll out of the frame
 			self.SetMinSize(self.GetSize())
@@ -303,19 +303,17 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		self._btn1.SetToolTipString(_("Begin simulation process."))
 		self._btn2.SetToolTipString(_("Stop the simulation process."))
 		self._btn3.SetToolTipString(_("Suspend the simulation process."))
-		self._btn4.SetToolTipString(_("Launch the log window (often depends on some plugins (verbose, activity, ...))."))
-
+		self._btn4.SetToolTipString(_("Launch the log window (often depends on some plug-ins (verbose, activity, ...))."))
 
 	def __do_layout(self):
 
-		vbox_top = wx.BoxSizer(wx.VERTICAL)
+		#vbox_top = wx.BoxSizer(wx.VERTICAL)
 		vbox_body = wx.BoxSizer(wx.VERTICAL)
 
 		#panel 1
 		grid1 = wx.GridSizer(1, 2)
 		grid1.Add(self._text1, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL)
 		grid1.Add(self._value, 1, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)
-		vbox_body.Add(grid1, 0, wx.EXPAND, 9)
 
 		# panel2
 		grid2 = wx.GridSizer(3, 2, 2, 2)
@@ -325,22 +323,23 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		grid2.Add(self._btn4, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND)
 
 		# panel4
-		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox1.Add(self._gauge, 1, wx.EXPAND, 9)
+		#hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+		#hbox1.Add(self._gauge, 1, wx.EXPAND, 9)
 
 		## panel5
-		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox2.Add(self._cp, 1, wx.EXPAND, 9)
+		#hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+		#hbox2.Add(self._cp, 1, wx.EXPAND, 9)
 
+		vbox_body.Add(grid1, 0, wx.EXPAND, 9)
 		vbox_body.Add(grid2, 0, wx.EXPAND, 9)
-		vbox_body.Add(hbox1, 0, wx.EXPAND, 9)
-		vbox_body.Add(hbox2, 0, wx.EXPAND, 9)
+		vbox_body.Add(self._gauge, 0, wx.EXPAND, 9)
+		vbox_body.Add(self._cp, 0, wx.EXPAND, 9)
 
 		# fin panel
-		vbox_top.Add(vbox_body, 0, wx.EXPAND, 9)
-		self.panel.SetSizer(vbox_top)
+		#vbox_top.Add(vbox_body, 0, wx.EXPAND|wx.ALL, 9)
+		self.panel.SetSizer(vbox_body)
 
-		#vbox_top.Fit(self)
+#		vbox_body.Fit(self)
 
 		self._text1.SetFocus()
 		self._btn1.SetDefault()
