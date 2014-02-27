@@ -112,7 +112,7 @@ def getObjectFromString(scriptlet):
 
 
 ### NOTE: Editor.py :: GetEditor 			=> Return the appropriate Editor
-def GetEditor(parent, id, title, obj=None, **kwargs):
+def GetEditor(parent, id, title="", obj=None, **kwargs):
 	""" Factory Editor
 	@param: parent
 	@param: id
@@ -784,7 +784,7 @@ class EditionNotebook(wx.Notebook):
 		return self.pages
 
 	### NOTE: EditionNotebook :: AddEditPage 	=> Create a new page
-	def AddEditPage(self, title, path):
+	def AddEditPage(self, title="", path=""):
 		"""
 		Adds a new page for editing to the notebook and keeps track of it.
 
@@ -792,27 +792,33 @@ class EditionNotebook(wx.Notebook):
 		@param title: Title for a new page
 		"""
 
-		### FIXME: try to consider zipfile in zipfile
-		L = re.findall("(.*\.(amd|cmd))\%s(.*)" % os.sep, path)
-
 		fileCode = ""
 
-		if L != []:
-			model_path, ext, name = L.pop(0)
-			if zipfile.is_zipfile(model_path):
-				importer = zipfile.ZipFile(model_path, "r")
-				fileInfo = importer.getinfo(name)
-				fileCode = importer.read(fileInfo)
-		else:
-			with open(path, 'r') as f:
-				fileCode = f.read()
+		if path != "":
+			### FIXME: try to consider zipfile in zipfile
+			L = re.findall("(.*\.(amd|cmd))\%s(.*)" % os.sep, path)
+
+			if L != []:
+				model_path, ext, name = L.pop(0)
+				if zipfile.is_zipfile(model_path):
+					importer = zipfile.ZipFile(model_path, "r")
+					fileInfo = importer.getinfo(name)
+					fileCode = importer.read(fileInfo)
+			else:
+				with open(path, 'r') as f:
+					fileCode = f.read()
 
 		### new page
 		newPage = EditionFile(self, path, fileCode)
 		newPage.SetFocus()
-		newPage.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
-		newPage.Bind(wx.EVT_CHAR, self.parent.OnChar)
 
+		newPage.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+
+		### bind the page
+		if isinstance(self, wx.Frame):
+			newPage.Bind(wx.EVT_CHAR, self.parent.OnChar)
+
+		### add page
 		self.pages.append(newPage)
 		self.AddPage(newPage, title, imageId=0)
 
@@ -1099,36 +1105,31 @@ class Editor(wx.Frame, wx.Panel):
 		""" Constructor
 		"""
 
-		if isinstance(parent, wx.BoxSizer):
+		if isinstance(parent, wx.Panel):
 			wx.Panel.__init__(self, parent, id)
 			self.SetBackgroundColour(wx.WHITE)
+			self.nb = EditionNotebook(parent, wx.ID_ANY, style=wx.CLIP_CHILDREN)
 		else:
 			wx.Frame.__init__(self, parent, id, title, size=(600, 500), style=wx.DEFAULT_FRAME_STYLE)
-
-			#self._mgr = wx.aui.AuiManager()
-        	#self._mgr.SetManagedWindow(self)
+			self.nb = EditionNotebook(self, wx.ID_ANY, style=wx.CLIP_CHILDREN)
 
 		# notebook
 		self.read_only = False
-		self.nb = EditionNotebook(self, wx.ID_ANY, style=wx.CLIP_CHILDREN)
 
-		### aui manager
-		#self._mgr.AddPane(self.nb, wx.aui.AuiPaneInfo().Name("nb").CenterPane().PaneBorder(False))
-		#self._mgr.GetPane("nb").Show().Center().Layer(0).Position(0)
-		#self._mgr.Update()
 
-		self.CreateMenu()
-		self.CreateTB()
+		if isinstance(parent, wx.Frame):
+			self.CreateMenu()
+			self.CreateTB()
 
-		### binding
-		self.Bind(wx.EVT_CLOSE, self.QuitApplication)
+			self.StatusBar()
+			### binding
+			self.Bind(wx.EVT_CLOSE, self.QuitApplication)
 
-		self.StatusBar()
-		self.Centre()
+			self.Centre()
 
-		### just for windows
-		e = wx.SizeEvent(self.GetSize())
-		self.ProcessEvent(e)
+			### just for windows
+			e = wx.SizeEvent(self.GetSize())
+			self.ProcessEvent(e)
 
 	def CreateMenu(self):
 		""" Create the menu
@@ -1232,6 +1233,11 @@ class Editor(wx.Frame, wx.Panel):
 
 		self.toolbar.Realize()
 
+	def GetNoteBook(self):
+		""" Return the NoteBook
+		"""
+		return self.nb
+
 	# NOTE: Editor :: __str__		=> String representation of the class
 	@classmethod
 	def __str__(cls):
@@ -1262,7 +1268,7 @@ class Editor(wx.Frame, wx.Panel):
 		)
 
 	# NOTE: Editor :: AddEditPage		=> Add new page
-	def AddEditPage(self, title, path):
+	def AddEditPage(self, title='', path=''):
 		self.nb.AddEditPage(title, path)
 
 	### NOTE: Editor :: SetReadOnly 			=> Set the editor read-only
@@ -1489,7 +1495,6 @@ class Editor(wx.Frame, wx.Panel):
 
 ### ----------------------------------------------------------------
 
-
 ### CodeBlock editor with special submenu---------------------------
 # NOTE: BlockEditor << Editor :: Specific editor for block (codeblock or containerblock)
 class BlockEditor(Editor):
@@ -1505,8 +1510,8 @@ class BlockEditor(Editor):
 
 		if isinstance(self, wx.Frame):
 			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'pythonFile.png'), wx.BITMAP_TYPE_PNG)))
+			self.ConfigureGUI()
 
-		self.ConfigureGUI()
 		self.cb = block
 
 	# NOTE: BlockEditor :: __str__		=> String representation of the class
@@ -1841,10 +1846,10 @@ class GeneralEditor(Editor):
 
 		Editor.__init__(self, parent, id, title)
 
-		if isinstance(self, wx.Frame):
+		if isinstance(parent, wx.Frame):
 			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH, 'iconDEVSimPy.png'), wx.BITMAP_TYPE_PNG)))
 
-		self.ConfigureGUI()
+			self.ConfigureGUI()
 
 	# NOTE: GeneralEditor :: __str__		=> String representation of the class
 	@classmethod
@@ -1888,7 +1893,7 @@ class GeneralEditor(Editor):
 		"""
 		"""
 
-		self.nb.AddEditPage(_("New File"))
+		self.nb.AddEditPage(_("New File"), '')
 
 	### NOTE: GeneralEditor :: OnClosePage 	=> Event when close page button is clicked
 	def OnClosePage(self, event):
@@ -1929,13 +1934,14 @@ class GeneralEditor(Editor):
 		canvas = state['canvas']
 		model = state['model']
 
+		### delete all tab on notebook
+		while(self.nb.GetPageCount()):
+			self.nb.DeletePage(0)
+
+		### add beahvioral code
 		self.AddEditPage(model.label, model.python_path)
-		mainW = wx.GetApp().GetTopWindow()
-		mgr = mainW.GetMGR()
-		pane = mgr.GetPane('editor')
-		mgr.DetachPane(pane)
-		pane.Destroy()
-		mgr.Update()
+
+		### todo add test code is exist
 
 ### -----------------------------------------------------------------------------------------------
 class TestApp(wx.App):
