@@ -127,6 +127,7 @@ class GeneralNotebook(Observer):
 
 			propPanel = self.GetPropPanel()
 
+			### update only of panel properties is present (but not necessarily active)
 			if propPanel:
 
 				if model:
