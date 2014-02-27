@@ -88,6 +88,7 @@ from Mixins.Connectable import Connectable
 from Mixins.Plugable import Plugable
 from Mixins.Structurable import Structurable
 from Mixins.Savable import Savable
+from Mixins.Selectable import Selectable
 
 ### for all dsp model build with old version of DEVSimPy
 sys.modules['Savable'] = sys.modules['Mixins.Savable']
@@ -2115,8 +2116,8 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 				for s in self.getSelectedShapes():
 					s.OnLeftDown(event) # send leftdown event to current shape
 
-		if not isinstance(item, ConnectionShape) and not isinstance(item, Node):
-			### Update the nb1 panel properties
+		### Update the nb1 panel properties only for Block and Port
+		if isinstance(item, Attributable):
 			self.__state['model'] = item
 			self.__state['canvas'] = self
 			self.notify()
@@ -2709,55 +2710,6 @@ class LinesShape(Shape):
 				break
 
 # Mixins------------------------------------------------------------------------
-class Selectable:
-	""" Allows Shape to be selected.
-	"""
-
-	def __init__(self):
-		""" Constructor
-		"""
-		self.selected = False
-
-	def ShowAttributes(self, event):
-		"""
-		"""
-
-		canvas = event.GetEventObject()
-		diagram = canvas.GetDiagram()
-
-		if isinstance(self, (Block, Port)) and event.ControlDown():
-
-			old_label = self.label
-
-			d = LabelGUI.LabelDialog(canvas, self)
-			d.ShowModal()
-
-			### update priority list
-			if self.label in diagram.priority_list and old_label != self.label:
-				### find index of label priority list and replace it
-				i = diagram.priority_list.index(self.label)
-				diagram.priority_list[i] = new_label
-
-				### if block we adapt the font according to the new label size
-				if " " not in new_label and isinstance(self, Block):
-					font  = wx.Font(self.font[0], self.font[1],self.font[2], self.font[3], False, self.font[4])
-					ln = len(self.label)*font.GetPointSize()
-					w = self.x[1]-self.x[0]
-
-					if ln > w:
-						a = ln-w
-						self.x[0] -= a/2
-						self.x[1] += a/2
-
-				### update of panel properties
-				mainW = wx.GetApp().GetTopWindow()
-				nb1 = mainW.GetControlNotebook()
-				if nb1.GetSelection() == 1:
-					newContent = AttributeEditor(nb1.propPanel, wx.ID_ANY, self, canvas)
-					nb1.UpdatePropertiesPage(newContent)
-
-		event.Skip()
-
 ###---------------------------------------------------------------------------------------------------------
 # NOTE: Testable << object :: Testable mixin is needed to manage tests files and tests executions. It add the OnTestEditor event for the tests files edition
 class Testable(object):
@@ -3249,7 +3201,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 			dlg.ShowModal()
 
 	def update(self, concret_subject = None):
-		"""
+		""" Update method to respond to notify call
 		"""
 
 		state = concret_subject.GetState()

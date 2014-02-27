@@ -180,6 +180,7 @@ from LibPanel import LibPanel
 from PropPanel import PropPanel
 from ControlNotebook import ControlNotebook
 from DiagramNotebook import DiagramNotebook
+from Editor import GetEditor
 
 ### only for wx. 2.9 bug
 ### http://comments.gmane.org/gmane.comp.python.wxpython/98744
@@ -258,7 +259,6 @@ class MainApplication(wx.Frame):
 			aTable = wx.AcceleratorTable([(wx.ACCEL_ALT,  ord('X'), exitID), (wx.ACCEL_CTRL, ord('H'), helpID),(wx.ACCEL_CTRL, ord('F'), findID),(wx.ACCEL_NORMAL, WXK_F3, findnextID)])
 			self.SetAcceleratorTable(aTable)
 
-
 		# for spash screen
 		pub.sendMessage('object.added', 'Loading tree library...\n')
 		pub.sendMessage('object.added', 'Loading search tree library...\n')
@@ -306,10 +306,19 @@ class MainApplication(wx.Frame):
 		self._mgr.AddPane(self.panel4, wx.aui.AuiPaneInfo().Name("shell").Hide().Caption("Shell").
 										FloatingSize(wx.Size(280, 400)).CloseButton(True).MaximizeButton(True))
 
+		### Editor
+		self.panel5 = wx.Panel(self, wx.ID_ANY)
+		sizer5 = wx.BoxSizer(wx.VERTICAL)
+		self.editor = GetEditor(self.panel5, -1, "Test")
+		sizer5.Add(self.editor, 1, wx.EXPAND)
+		self.panel5.SetSizer(sizer5)
+		self.panel5.SetAutoLayout(True)
+		self._mgr.AddPane(self.panel5, wx.aui.AuiPaneInfo().Name("editor").CenterPane().Hide())
+
 		self._mgr.GetPane("nb1").Show().Left().Layer(0).Row(0).Position(0).BestSize(wx.Size(280,-1)).MinSize(wx.Size(250,-1))
 		self._mgr.GetPane("nb2").Show().Center().Layer(0).Row(1).Position(0)
 		self._mgr.GetPane("shell").Bottom().Layer(0).Row(0).Position(0).BestSize(wx.Size(-1,100)).MinSize(wx.Size(-1,120))
-		self._mgr.GetPane("editor").Show().Right().Layer(0).Row(0).Position(0).BestSize(wx.Size(280,-1)).MinSize(wx.Size(250,-1))
+		self._mgr.GetPane("editor").Right().Layer(0).Row(0).Position(0).BestSize(wx.Size(280,-1)).MinSize(wx.Size(250,-1))
 
 		# "commit" all changes made to FrameManager (warning always before the MakeMenu)
 		self._mgr.Update()
@@ -588,6 +597,11 @@ class MainApplication(wx.Frame):
 		""" Return control notebook (left)
 		"""
 		return self.nb1
+
+	def GetEditorPanel(self):
+		""" Return editor panel (rigth)
+		"""
+		return self.editor
 
 	def OnDirectConnector(self, event):
 		"""
@@ -1332,8 +1346,8 @@ class MainApplication(wx.Frame):
 		"""
 
 		menu = self.GetMenuBar().FindItemById(evt.GetId())
-		if menu.IsChecked():
 
+		if menu.IsChecked():
 			propPanel = PropPanel(self.nb1, self.nb1.labelList[1])
 
 			### Adding page
@@ -1342,6 +1356,26 @@ class MainApplication(wx.Frame):
 			menu.Check()
 		else:
 			self.nb1.DeletePage(1)
+
+	def OnShowEditor(self, evt):
+		""" Editor view has been pressed.
+		"""
+
+		menu = self.GetMenuBar().FindItemById(evt.GetId())
+
+		nb2 = self.GetDiagramNotebook()
+		canvas = nb2.GetPage(nb2.GetSelection())
+
+		if menu.IsChecked():
+			self._mgr.GetPane("editor").Show()
+			### attach editor to notify event from ShapeCanvas
+			canvas.attach(self.GetEditorPanel())
+		else:
+			self._mgr.GetPane("editor").Hide()
+			### detach editor to notify event from ShapeCanvas
+			canvas.detach(self.GetEditorPanel())
+
+		self._mgr.Update()
 
 	def OnShowLibraries(self, evt):
 		""" Libraries view menu has been pressed.

@@ -1921,6 +1921,15 @@ class GeneralEditor(Editor):
 		else:
 			return True
 
+	def update(self, concret_subject=None):
+		""" Update method that manages the embedded editor depending of the selected model in the canvas
+		"""
+
+		state = concret_subject.GetState()
+		canvas = state['canvas']
+		model = state['model']
+
+		self.AddEditPage(model.label, model.python_path)
 
 ### -----------------------------------------------------------------------------------------------
 class TestApp(wx.App):
