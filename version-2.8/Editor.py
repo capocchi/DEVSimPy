@@ -1930,6 +1930,12 @@ class GeneralEditor(Editor):
 		model = state['model']
 
 		self.AddEditPage(model.label, model.python_path)
+		mainW = wx.GetApp().GetTopWindow()
+		mgr = mainW.GetMGR()
+		pane = mgr.GetPane('editor')
+		mgr.DetachPane(pane)
+		pane.Destroy()
+		mgr.Update()
 
 ### -----------------------------------------------------------------------------------------------
 class TestApp(wx.App):

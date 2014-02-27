@@ -339,6 +339,9 @@ class MainApplication(wx.Frame):
 	def GetVersion(self):
 		return __version__
 
+	def GetMGR(self):
+		return self._mgr
+
 	def GetConfig(self):
 		""" Reads the config file for the application if it exists and return a configfile object for use later.
 		"""
