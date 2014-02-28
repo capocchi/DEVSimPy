@@ -8,7 +8,7 @@
 #                           Laurent CAPOCCHI
 #                         University of Corsica
 #                     --------------------------------
-# Version 1.0                                        last modified: 12/02/2013
+# Version 1.0                                        last modified: 28/02/2014
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -132,6 +132,9 @@ def GetEditor(parent, id, title="", obj=None, **kwargs):
 			editor = GeneralEditor(parent, id, title)
 	else:
 		editor = GeneralEditor(parent, id, title)
+
+#	if not parent:
+#		editor.Reparent(wx.GetApp().GetTopWindow())
 
 	return editor
 
@@ -812,11 +815,9 @@ class EditionNotebook(wx.Notebook):
 		newPage = EditionFile(self, path, fileCode)
 		newPage.SetFocus()
 
-		newPage.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
-
 		### bind the page
-		if isinstance(self, wx.Frame):
-			newPage.Bind(wx.EVT_CHAR, self.parent.OnChar)
+		newPage.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+		newPage.Bind(wx.EVT_CHAR, self.parent.OnChar)
 
 		### add page
 		self.pages.append(newPage)
@@ -855,7 +856,7 @@ class EditionNotebook(wx.Notebook):
 		""" Close current page.
 
 			@type evt: event
-			@param  evt: Event Objet, None by default
+			@param  evt: Event Object, None by default
 		"""
 
 		if self.GetPageCount() > 0:
@@ -870,13 +871,13 @@ class EditionNotebook(wx.Notebook):
 		"""
 		keycode = event.GetKeyCode()
 		controlDown = event.CmdDown()
-		shiftDown = event.ShiftDown()
 		currentPage = self.GetCurrentPage()
 
 		if keycode == wx.WXK_UP or keycode == wx.WXK_DOWN:
 			event.Skip()
 		elif keycode == 68 and controlDown:
 			cur_line = currentPage.GetCurrentLine()
+			shiftDown = event.ShiftDown()
 			if shiftDown:
 				indent = currentPage.GetLineIndentPosition(cur_line)
 				currentPage.Home()
@@ -1094,34 +1095,61 @@ class EditionNotebook(wx.Notebook):
 		"""
 		self.GetCurrentPage().SelectAll()
 
-
 ###------------------------------------------------------------
 # NOTE: Editor << wx.Frame && wx.Panel :: Parent of all Editors with commons methods
 class Editor(wx.Frame, wx.Panel):
+	""" Editor class which is a Frame or Panel depending on the container embedding the Editor
 	"""
-	"""
+
 	### NOTE: Editor :: constructor 			=> __init__(self, parent, id, title)
 	def __init__(self, parent, id, title):
-		""" Constructor
+		""" Constructor.
 		"""
 
-		if isinstance(parent, wx.Panel):
-			wx.Panel.__init__(self, parent, id)
+		### copy
+		self.parent = parent
+
+		### if parent, we want Editor as a panel
+		if self.parent:
+
+			### call constructor and set background color of panel
+			wx.Panel.__init__(self, self.parent, id)
 			self.SetBackgroundColour(wx.WHITE)
-			self.nb = EditionNotebook(parent, wx.ID_ANY, style=wx.CLIP_CHILDREN)
+
+			### Define sizer
+			sizer = wx.BoxSizer(wx.VERTICAL)
+
+			### create notebook
+			self.nb = EditionNotebook(self, wx.ID_ANY, style=wx.CLIP_CHILDREN)
+			### create juste for the bind of action (save,...) of the toolbar - Warning it must stay here !
+			self.CreateMenu()
+			### create toolbar
+			self.toolbar = self.CreateTB()
+			###recover the statusbar of mainW
+			self.statusbar = parent.GetStatusBar()
+
+			### add toolbar and notebook
+			sizer.Add(self.toolbar, 0, wx.ALL | wx.ALIGN_LEFT | wx.EXPAND)
+			sizer.Add(self.nb, 1 ,wx.EXPAND)
+
+			### set sizer and layout of panel
+			self.SetSizer(sizer)
+			self.SetAutoLayout(True)
+
+		### if parent is none we want editor as a frame
 		else:
-			wx.Frame.__init__(self, parent, id, title, size=(600, 500), style=wx.DEFAULT_FRAME_STYLE)
+
+			### call constructor
+			wx.Frame.__init__(self, self.parent, id, title, size=(600, 500), style=wx.DEFAULT_FRAME_STYLE)
+
+			### Create notebook
 			self.nb = EditionNotebook(self, wx.ID_ANY, style=wx.CLIP_CHILDREN)
 
-		# notebook
-		self.read_only = False
+			### create menu, toolbar and statusbar for the frame
+			self.SetMenuBar(self.CreateMenu())
+			self.toolbar = self.CreateTB()
+			self.statusbar= self.GetStatusBar()
 
-
-		if isinstance(parent, wx.Frame):
-			self.CreateMenu()
-			self.CreateTB()
-
-			self.StatusBar()
 			### binding
 			self.Bind(wx.EVT_CLOSE, self.QuitApplication)
 
@@ -1130,6 +1158,9 @@ class Editor(wx.Frame, wx.Panel):
 			### just for windows
 			e = wx.SizeEvent(self.GetSize())
 			self.ProcessEvent(e)
+
+		# notebook
+		self.read_only = False
 
 	def CreateMenu(self):
 		""" Create the menu
@@ -1202,8 +1233,6 @@ class Editor(wx.Frame, wx.Panel):
 		menubar.Append(view, _('&View'))
 		menubar.Append(help, _('&Help'))
 
-		self.SetMenuBar(menubar)
-
 		### binding event
 		self.Bind(wx.EVT_MENU, self.OnSaveFile, id=self.save.GetId())
 		self.Bind(wx.EVT_MENU, self.QuitApplication, id=self.quit.GetId())
@@ -1218,20 +1247,39 @@ class Editor(wx.Frame, wx.Panel):
 		self.Bind(wx.EVT_MENU, self.ToggleStatusBar, id=showStatusBar.GetId())
 		self.Bind(wx.EVT_MENU, self.OnAbout, id=about.GetId())
 
+		return menubar
+
 	def CreateTB(self):
 		""" Create tool-bar
 		"""
 
-		self.toolbar = self.CreateToolBar(wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT)
+		if not self.parent:
+			tb = self.CreateToolBar(wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT)
 
-		self.Bind(wx.EVT_TOOL, self.OnSaveFile, self.toolbar.AddSimpleTool(self.save.GetId(), wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), _('Save'), ''))
-		self.toolbar.AddSeparator()
-		self.Bind(wx.EVT_TOOL, self.nb.OnCut, self.toolbar.AddSimpleTool(self.cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), _('Cut'), ''))
-		self.Bind(wx.EVT_TOOL, self.nb.OnCopy, self.toolbar.AddSimpleTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), _('Copy'), ''))
-		self.Bind(wx.EVT_TOOL, self.nb.OnPaste, self.toolbar.AddSimpleTool(self.paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), _('Paste'), ''))
-		self.Bind(wx.EVT_TOOL, self.QuitApplication, id = self.quit.GetId())
+			self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddSimpleTool(self.save.GetId(), wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), _('Save'), ''))
+			tb.AddSeparator()
+			self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddSimpleTool(self.cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), _('Cut'), ''))
+			self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddSimpleTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), _('Copy'), ''))
+			self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddSimpleTool(self.paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), _('Paste'), ''))
+			self.Bind(wx.EVT_TOOL, self.QuitApplication, id = self.quit.GetId())
 
-		self.toolbar.Realize()
+		else:
+
+			tb = wx.ToolBar( self, -1 )
+			tb.SetToolBitmapSize( ( 16, 16 ) )# this required for non-standard size buttons on MSW
+
+			tb.AddTool(self.save.GetId(),  wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), shortHelpString=_('Save'), longHelpString=_('Save the file'))
+			tb.AddTool(self.cut.GetId(),  wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), shortHelpString=_('Cut'), longHelpString=_('Cut the selection'))
+			tb.AddTool(self.copy.GetId(),  wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), shortHelpString=_('Copy'), longHelpString=_('Copy the selection'))
+			tb.AddTool(self.paste.GetId(),  wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), shortHelpString=_('Paste'), longHelpString=_('Paste text from clipboard'))
+
+			wx.EVT_TOOL(self, self.save.GetId(), self.OnSaveFile)
+			wx.EVT_TOOL(self, self.cut.GetId(), self.nb.OnCut)
+			wx.EVT_TOOL(self, self.copy.GetId(), self.nb.OnCopy)
+			wx.EVT_TOOL(self, self.paste.GetId(), self.nb.OnPaste)
+
+		tb.Realize()
+		return tb
 
 	def GetNoteBook(self):
 		""" Return the NoteBook
@@ -1253,7 +1301,7 @@ class Editor(wx.Frame, wx.Panel):
 			('CheckErrors', 'self, base_name, code, new_instance'),
 			('SavingErrors', 'self, new_instance'),
 			('Notification', 'self, modify, *args'),
-			('StatusBar', 'self'),
+			('GetStatusBar', 'self'),
 			('ToggleStatusBar', 'self, event'),
 			('OnChar', 'self, event'),
 			('OnOpenFile', 'self, event'),
@@ -1292,7 +1340,7 @@ class Editor(wx.Frame, wx.Panel):
 
 	### NOTE: Editor :: OnOnpenFile 			=> Event OnOpenFile
 	def OnOpenFile(self, event):
-		"""
+		""" Open File has been invoked
 		"""
 		if self.nb.GetCurrentPage().isModified():
 			dlg = wx.MessageDialog(self, _('Save changes?'), _('Code Editor'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
@@ -1341,6 +1389,7 @@ class Editor(wx.Frame, wx.Panel):
 	def ConfigSaving(self, base_name, dir_name, code):
 		"""
 		"""
+
 		new_instance = None
 		### if force saving when quitting Editor
 		if self.nb.force_saving:
@@ -1385,20 +1434,27 @@ class Editor(wx.Frame, wx.Panel):
 
 	### NOTE: Editor :: Notification 			=> Notify something on the statusbar
 	def Notification(self, modify, *args):
-		"""
+		""" Notify event in status bar
 		"""
 		self.nb.GetCurrentPage().modify = modify
-		for i, s in enumerate(args):
-			self.statusbar.SetStatusText(s, i)
+
+		if hasattr(self, 'statusbar'):
+			for i, s in enumerate(args):
+				self.statusbar.SetStatusText(s, i)
 
 	### NOTE: Editor :: StatusBar 			=> Create a status bar
-	def StatusBar(self):
-		self.statusbar = self.CreateStatusBar()
-		self.statusbar.SetFieldsCount(3)
-		self.statusbar.SetStatusWidths([-5, -3, -1])
+	def GetStatusBar(self):
+		""" Get the status bar
+		"""
+		sb = self.CreateStatusBar()
+		sb.SetFieldsCount(3)
+		sb.SetStatusWidths([-5, -3, -1])
+		return sb
 
 	### NOTE: Editor :: ToggleStatusBar 		=> Event for show or hide status bar
 	def ToggleStatusBar(self, event):
+		"""
+		"""
 		if self.statusbar.IsShown():
 			self.statusbar.Hide()
 		else:
@@ -1406,6 +1462,8 @@ class Editor(wx.Frame, wx.Panel):
 
 	### NOTE: Editor :: OnChar 				=> Event when a char is typed
 	def OnChar(self, event):
+		"""
+		"""
 		### enable save icon in toolbar
 		self.toolbar.EnableTool(self.save.GetId(), True)
 
@@ -1498,7 +1556,7 @@ class Editor(wx.Frame, wx.Panel):
 ### CodeBlock editor with special submenu---------------------------
 # NOTE: BlockEditor << Editor :: Specific editor for block (codeblock or containerblock)
 class BlockEditor(Editor):
-	"""
+	""" Block Editor class which inherit of Editor class
 	"""
 
 	### NOTE: BlockEditor :: contructor 		=> __init__(self, parent, id, title, block)
@@ -1508,7 +1566,7 @@ class BlockEditor(Editor):
 
 		Editor.__init__(self, parent, id, title)
 
-		if isinstance(self, wx.Frame):
+		if not parent:
 			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'pythonFile.png'), wx.BITMAP_TYPE_PNG)))
 			self.ConfigureGUI()
 
@@ -1517,6 +1575,8 @@ class BlockEditor(Editor):
 	# NOTE: BlockEditor :: __str__		=> String representation of the class
 	@classmethod
 	def __str__(cls):
+		"""
+		"""
 		attrs = [('cb', 'Block')]
 		class_name = "BlockEditor"
 		parent = "Editor"
@@ -1537,6 +1597,8 @@ class BlockEditor(Editor):
 
 	### NOTE: BlockEditor :: ConfigureGUI 	=> Configure the interface for block edition
 	def ConfigureGUI(self):
+		"""
+		"""
 		### insert sub menu-------------------------------------------------
 		insert = wx.Menu()
 
@@ -1596,6 +1658,7 @@ class BlockEditor(Editor):
 	def OnInsertState(self, event):
 		"""
 		"""
+
 		dlg = wx.SingleChoiceDialog(self, _('Status'), _('Which one?'), ['IDLE', 'ACTIVE'], wx.CHOICEDLG_STYLE)
 		if dlg.ShowModal() == wx.ID_OK:
 			status = dlg.GetStringSelection()
@@ -1617,6 +1680,7 @@ class BlockEditor(Editor):
 	def ConfigSaving(self, base_name, dir_name, code):
 		""" Saving method
 		"""
+
 		new_instance = None
 
 		### if force saving when quitting Editor
@@ -1635,6 +1699,9 @@ class BlockEditor(Editor):
 
 	### NOTE: BlockEditor :: CheckErrors 		=> inherit method
 	def CheckErrors(self, base_name, code, new_instance):
+		"""
+		"""
+
 		if not self.nb.GetCurrentPage().ContainError():
 
 			### if some simulation is running
@@ -1735,19 +1802,25 @@ class BlockEditor(Editor):
 ### Edition of any files with notebook------------------------------
 # NOTE: TestEditor << Editor :: Specific editor for tests files
 class TestEditor(Editor):
+	""" Test Editor class wich inherit of Editor class
+	"""
 
 	# NOTE: TestEditor :: contructor 		=> __init__(self, parent, id, title, feature_path, steps_path)
 	def __init__(self, parent, id, title):
+		"""Constructor.
+		"""
+
 		Editor.__init__(self, parent, id, title)
 
-		if isinstance(self, wx.Frame):
+		if not parent:
 			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH, 'iconDEVSimPy.png'), wx.BITMAP_TYPE_PNG)))
-
-		self.ConfigureGUI()
+			self.ConfigureGUI()
 
 	# NOTE: TestEditor :: __str__		=> String representation of the class
 	@classmethod
 	def __str__(cls):
+		"""
+		"""
 		attrs = []
 		class_name = "TestEditor"
 		parent = "Editor"
@@ -1766,6 +1839,8 @@ class TestEditor(Editor):
 
 	# NOTE: TestEditor :: ConfigureGUI 		=> Configure the interface for tests edition
 	def ConfigureGUI(self):
+		"""
+		"""
 		### insert sub menu-------------------------------------------------
 		insert = wx.Menu()
 
@@ -1836,7 +1911,7 @@ def before_all(context):\n\tglobal models\n\tloadModel()\n\tcontext.models = mod
 ### ----------------------------------------------------------------
 ### NOTE: GeneralEditor << Editor :: Editor for simple files like text files
 class GeneralEditor(Editor):
-	"""
+	""" General Editor class which inherit of Editor class
 	"""
 
 	### NOTE: GeneralEditor :: constructor 	=> __init__(self, parent, id, title)
@@ -1844,16 +1919,19 @@ class GeneralEditor(Editor):
 		""" Constructor.
 		"""
 
+		### call constructor of parent
 		Editor.__init__(self, parent, id, title)
 
-		if isinstance(parent, wx.Frame):
+		### if not parent, we configure a frame
+		if not parent:
 			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH, 'iconDEVSimPy.png'), wx.BITMAP_TYPE_PNG)))
-
 			self.ConfigureGUI()
 
 	# NOTE: GeneralEditor :: __str__		=> String representation of the class
 	@classmethod
 	def __str__(cls):
+		"""
+		"""
 		attrs = []
 		class_name = "GeneralEditor"
 		parent = "Editor"
@@ -1890,14 +1968,14 @@ class GeneralEditor(Editor):
 
 	### NOTE: GeneralEditor :: OnAddPage 		=> Event when Add page button is clicked
 	def OnAddPage(self, event):
-		"""
+		""" Add page to the notebook
 		"""
 
 		self.nb.AddEditPage(_("New File"), '')
 
 	### NOTE: GeneralEditor :: OnClosePage 	=> Event when close page button is clicked
 	def OnClosePage(self, event):
-		"""
+		""" Close button has been invoked
 		"""
 
 		if self.nb.GetPageCount() > 1:
@@ -1938,10 +2016,14 @@ class GeneralEditor(Editor):
 		while(self.nb.GetPageCount()):
 			self.nb.DeletePage(0)
 
-		### add beahvioral code
+		### add behavioral code
 		self.AddEditPage(model.label, model.python_path)
 
-		### todo add test code is exist
+		### add test file
+		if hasattr(model, 'GetTestFile'):
+			L = model.GetTestFile()
+			for i,s in enumerate(map(lambda l: os.path.join(model.model_path, l), L)):
+				self.AddEditPage(L[i], s)
 
 ### -----------------------------------------------------------------------------------------------
 class TestApp(wx.App):

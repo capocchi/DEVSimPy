@@ -306,17 +306,11 @@ class MainApplication(wx.Frame):
 		self._mgr.AddPane(self.panel4, wx.aui.AuiPaneInfo().Name("shell").Hide().Caption("Shell").
 										FloatingSize(wx.Size(280, 400)).CloseButton(True).MaximizeButton(True))
 
-		### Editor
-		self.panel5 = wx.Panel(self, wx.ID_ANY)
-		self.editor = GetEditor(self.panel5, -1)
+		### Editor is panel
+		self.editor = GetEditor(self, -1)
 		#self.editor.AddEditPage("Code")
 
-		sizer5 = wx.BoxSizer(wx.VERTICAL)
-		sizer5.Add(self.editor.GetNoteBook(), 1, wx.EXPAND)
-		self.panel5.SetSizer(sizer5)
-		self.panel5.SetAutoLayout(True)
-
-		self._mgr.AddPane(self.panel5, wx.aui.AuiPaneInfo().Name("editor").Hide().Caption("Editor").
+		self._mgr.AddPane(self.editor, wx.aui.AuiPaneInfo().Name("editor").Hide().Caption("Editor").
 						FloatingSize(wx.Size(280, 400)).CloseButton(True).MaximizeButton(True))
 
 		self._mgr.GetPane("nb1").Show().Left().Layer(0).Row(0).Position(0).BestSize(wx.Size(280,-1)).MinSize(wx.Size(250,-1))
