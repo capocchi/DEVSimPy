@@ -2716,38 +2716,51 @@ class Testable(object):
 
 	# NOTE: Testable :: OnTestEditor 		=> new event for AMD model. Open tests files in editor
 	def OnTestEditor(self, event):
-		model_path = os.path.dirname(self.python_path)
+		"""
+		"""
 
-		# If selected model is AMD
-		if self.isAMD():
+		L = self.GetTestFile()
+
+		### create Editor with BDD files in tab
+		if L != []:
+
+			#model_path = os.path.dirname(self.python_path)
 
 			# TODO: Testable :: OnTestEditor => Fix Editor importation
 			import Editor
 
+			#mainW = wx.GetApp().GetTopWindow()
+			### Editor instanciation and configuration---------------------
+			editorFrame = Editor.GetEditor(
+					None,
+					wx.ID_ANY,
+					'Features',
+					file_type="test"
+			)
+
+			for i,s in enumerate(map(lambda l: os.path.join(self.model_path, l), L)):
+				editorFrame.AddEditPage(L[i], s)
+
+			editorFrame.Show()
+			### -----------------------------------------------------------
+
+	def GetTestFile(self):
+		""" Get Test file only for AMD model
+		"""
+
+		# If selected model is AMD
+		if self.isAMD():
+
 			# Create tests files is doesn't exist
-			if not ZipManager.Zip.HasTests(model_path):
+			if not ZipManager.Zip.HasTests(self.model_path):
 				self.CreateTestsFiles()
 
 			### list of BDD files
-			L = ZipManager.Zip.GetTests(model_path)
+			L = ZipManager.Zip.GetTests(self.model_path)
 
-			### create Editor with BDD files in tab
-			if L != []:
+			return L
 
-				mainW = wx.GetApp().GetTopWindow()
-				### Editor instanciation and configuration---------------------
-				editorFrame = Editor.GetEditor(
-						mainW,
-						wx.ID_ANY,
-						'Features',
-						file_type="test"
-				)
-
-				for i,s in enumerate(map(lambda l: os.path.join(model_path, l), L)):
-					editorFrame.AddEditPage(L[i], s)
-
-				editorFrame.Show()
-				### -----------------------------------------------------------
+		return []
 
 	# NOTE: Testable :: isAMD 				=> Test if the model is an AMD and if it's well-formed
 	def isAMD(self):

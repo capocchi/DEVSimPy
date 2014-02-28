@@ -613,7 +613,7 @@ class DEVSComponent:
 			# chargement du fichier dans la fenetre d'edition (self.text)
 			try:
 
-				editorFrame = Editor.GetEditor(mainW, wx.ID_ANY, name, obj=self, file_type='block')
+				editorFrame = Editor.GetEditor(None, wx.ID_ANY, name, obj=self, file_type='block')
 
 				# if zipfile.is_zipfile(model_path):
 				# 	importer = zipimport.zipimporter(model_path)

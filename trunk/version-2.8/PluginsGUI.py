@@ -670,7 +670,7 @@ class ModelPluginsManager(wx.Frame):
 		name = os.path.basename(path)
 
 		### editor frame for the text of plug-ins
-		editorFrame = Editor.GetEditor(parent, \
+		editorFrame = Editor.GetEditor(None, \
 									wx.ID_ANY, \
 									_("%s - Plug-ins Editor")%os.path.basename(model.model_path), \
 									model, \

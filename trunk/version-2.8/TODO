@@ -426,4 +426,4 @@ invoque rpar un callback lorsque le fichier python est renseignÃ© dans le wizard
 -Fait le 23/12/2013 par LC: amélioration -> amélioration de l'architecture logiciel permettant de rendre disponible un noyau de simulation à partir d'un nouveau répertoire dans DEVSKernel (permet de suivre l'évolution de PyPDEVS)
 -Fait le 10/02/2014 par LC: correction -> lorsque fermetrue du dialogue ImportLibrary, si une libe est selectionnée, elle est importé quoi qu'il arrive. Bind du bouton en croix de la fenetre.
 -Fait le 11/02/2014 par LC: amélioration -> adaptation de la taille du label des blocks (dans la mathode draw de Shape on adapte le font en fonction de la taille du label et de la taille du rectangle qui l'entour).
-
+-Fait le 28/02/2014 par LC: ajout -> edition du code des modèles dans une AUI à droite. Pour l'activer il faut aller dans Affichage->Editeur
