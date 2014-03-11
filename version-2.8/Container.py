@@ -4108,23 +4108,19 @@ class ScopeGUI(CodeBlock):
 		self.AddAttribute("xlabel")
 		self.AddAttribute("ylabel")
 
-	def OnLeftDClick(self,event):
+	def OnLeftDClick(self, event):
 		""" Left Double Click has been appeared.
 		"""
 
-		canvas = event.GetEventObject()
-
 		# If the frame is call before the simulation process, the atomicModel is not instanciate (Instanciation delegate to the makeDEVSconnection after the run of the simulation process)
 		devs = self.getDEVSModel()
-		if devs is None:
-			dial = wx.MessageDialog(None, \
-								_('No data available.\nGo to the simulation process first!'), \
-								self.label, \
-								wx.OK | wx.ICON_INFORMATION)
-			dial.ShowModal()
-		else:
+
+		if devs:
+			canvas = event.GetEventObject()
 			# Call the PlotManager which plot on the canvas depending the atomicModel.fusion option
 			PlotGUI.PlotManager(canvas, self.label, devs, self.xlabel, self.ylabel)
+		else:
+			CodeBlock.OnLeftDClick(self, event)
 
 #------------------------------------------------
 class DiskGUI(CodeBlock):
@@ -4132,23 +4128,22 @@ class DiskGUI(CodeBlock):
 	"""
 
 	def __init__(self, label='DiskGUI'):
-		""" Constructor
+		""" Constructor.
 		"""
 		CodeBlock.__init__(self, label, 1, 0)
 
 	def OnLeftDClick(self, event):
-		"""
+		""" Left Double Click has been appeared.
 		"""
 		devs = self.getDEVSModel()
 
-		if devs is not None:
-			mainW = wx.GetApp().GetTopWindow()
-			frame= SpreadSheet.Newt(mainW, wx.ID_ANY, _("SpreadSheet %s")%self.label, devs, devs.comma if hasattr(devs, 'comma') else " ")
+		if devs:
+			frame= SpreadSheet.Newt( wx.GetApp().GetTopWindow(),
+									wx.ID_ANY,
+									_("SpreadSheet %s")%self.label,
+									devs,
+									devs.comma if hasattr(devs, 'comma') else " ")
 			frame.Center()
 			frame.Show()
 		else:
-			dial = wx.MessageDialog(None, \
-								_('No data available.\nGo to the simulation process first!'), \
-								self.label, \
-								wx.OK | wx.ICON_INFORMATION)
-			dial.ShowModal()
+			CodeBlock.OnLeftDClick(self, event)
