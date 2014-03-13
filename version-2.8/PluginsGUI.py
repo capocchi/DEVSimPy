@@ -325,11 +325,10 @@ class BlockPluginsList(CheckListCtrl, Populable):
 			if self.model and not hasattr(self.model, "plug-ins"):
 				self.model.plugins = []		### dynamic append attribute
 
-
 			plugins_list = self.GetPluginsList(self.model.model_path) if self.model else []
 
 			if not isinstance(plugins_list, list):
-				msg = ('Error in plugins.py file:\n\n\t%s\n\nDo you want to edit this file?.'%plugins_list)
+				msg = ('Error in plugins.py file:\n\n%s\n\nDo you want to edit this file?'%plugins_list)
 
 				dial = wx.MessageDialog(None, msg, _('Plug-ins Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_ERROR)
 
