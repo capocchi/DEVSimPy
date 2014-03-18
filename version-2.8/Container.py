@@ -3951,7 +3951,9 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer
 
 		self.SetAttributes(Attributable.GRAPHICAL_ATTR[0:4])
 		self.label = label
-		self.id = 0
+		### TODO: move to args
+		self.AddAttribute('id')
+		#self.id = 0
 		self.args = {}
 		self.lock_flag = False                  # move lock
 
@@ -4050,7 +4052,7 @@ class iPort(Port):
 
 		Port.__init__(self, 50, 60, 100, 120, label)
 		self.fill= ['#add8e6']          # fill color
-		self.AddAttribute('id')
+		#self.AddAttribute('id')
 		self.label_pos = 'bottom'
 		self.input = 0
 		self.output = 1
@@ -4077,7 +4079,7 @@ class oPort(Port):
 
 		Port.__init__(self, 50, 60, 100, 120, label)
 		self.fill = ['#90ee90']
-		self.AddAttribute('id')
+		#self.AddAttribute('id')
 		self.label_pos = 'bottom'
 		self.input = 1
 		self.output = 0
