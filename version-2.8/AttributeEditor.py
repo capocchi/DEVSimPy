@@ -157,7 +157,7 @@ class AttributeEditor(wx.Frame, wx.Panel):
 		elif "wxGTK" in wx.PlatformInfo:
 			img = img.Scale(22, 22)
 
-		# wxMac can be any size upto 128x128, so leave the source img alone....
+		# wxMac can be any size up to 128x128, so leave the source img alone....
 		return wx.IconFromBitmap(img.ConvertToBitmap() )
 
 	def OnClose(self, event):
@@ -188,16 +188,16 @@ class QuickAttributeEditor(wx.Frame, Subject):
 		self.attach(model)
 		self.attach(self.canvas.GetDiagram())
 
-		#spinCtrl for input ans output port numbers
+		#spinCtrl for input and output port numbers
 		self._sb_input = wx.SpinCtrl(self, wx.ID_ANY, size=(60,-1), min=0, max=100)
 		self._sb_output = wx.SpinCtrl(self, wx.ID_ANY, size=(60,-1), min=0, max=100)
 
-		# mouse postions
+		# mouse positions
 		xwindow, ywindow = wx.GetMousePosition()
 		xm,ym = self.ScreenToClientXY(xwindow, ywindow)
 		self.SetPosition((xm,ym))
 
-		#defautl value for spinCtrl
+		#default value for spinCtrl
 		self._sb_input.SetValue(model.input)
 		self._sb_output.SetValue(model.output)
 
