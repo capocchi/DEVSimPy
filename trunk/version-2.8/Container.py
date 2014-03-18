@@ -532,7 +532,7 @@ class Diagram(Savable, Structurable):
 		msg += _("Number of atomic devs model: %d\n")%stat_dico['Atomic_nbr']
 		msg += _("Number of coupled devs model: %d\n")%stat_dico['Coupled_nbr']
 		msg += _("Number of coupling: %d\n")%stat_dico['Connection_nbr']
-		msg += _("Number of deep level (description hierarchie): %d\n")%stat_dico['Deep_level']
+		msg += _("Number of deep level (description hierarchy): %d\n")%stat_dico['Deep_level']
 
 		dlg = wx.lib.dialogs.ScrolledMessageDialog(self.GetParent(), msg, _("Diagram Information"))
 		dlg.ShowModal()
@@ -545,7 +545,7 @@ class Diagram(Savable, Structurable):
 		self.priority_list = [obj.listCtrl.GetItemText(i) for i in xrange(obj.listCtrl.GetItemCount())]
 		obj.Destroy()
 
-		### we can udpate the devs priority list during the simulation ;-)
+		### we can update the devs priority list during the simulation ;-)
 		self.updateDEVSPriorityList()
 
 
@@ -2116,11 +2116,11 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 				for s in self.getSelectedShapes():
 					s.OnLeftDown(event) # send leftdown event to current shape
 
-		### Update the nb1 panel properties only for Block and Port
-		if isinstance(item, Attributable):
-			self.__state['model'] = item
-			self.__state['canvas'] = self
-			self.notify()
+		### Update the nb1 panel properties only for Block and Port (call update in ControlNotebook)
+		#if isinstance(item, Attributable):
+		self.__state['model'] = item
+		self.__state['canvas'] = self
+		self.notify()
 
 		self.Refresh()
 
