@@ -336,14 +336,14 @@ class CustomDataTable(gridlib.PyGridTableBase):
 		n = len(model.GetAttributes())             ### graphical attributes number
 		m = len(self.infoBlockLabelList)           ### docstring graphical attributes number
 
-		### if user define new graphical attributes we add their descritpion in infoBlockLabelList
+		### if user define new graphical attributes we add their description in infoBlockLabelList
 		if m != n:
 			self.infoBlockLabelList.extend(model.GetAttributes()[m:])
 
 		### default behavioral attributes dictionary
 		infoBlockBehavioralDict = dict(map(lambda attr: (attr, _('Unknown information')), model.args.keys()))
 
-		### if user code the information of behavioral attribute in docstring of class with @ or - symbole, we update the infoBlockBehavioralDict
+		### if user code the information of behavioral attribute in docstring of class with @ or - symbol, we update the infoBlockBehavioralDict
 		if hasattr(model, 'python_path') and infoBlockBehavioralDict != {}:
 			### cls object from python file
 			cls = Components.GetClass(model.python_path)
@@ -357,8 +357,8 @@ class CustomDataTable(gridlib.PyGridTableBase):
 						infoBlockBehavioralDict.update({string.strip(attr):string.strip(val)})
 
 		### Port class has specific attribute
-		#if isinstance(model, Port):
-		#	self.infoBlockLabelList.insert(3,_('Id number'))
+		if isinstance(model, Container.Port):
+			self.infoBlockLabelList.insert(4,_('Id number'))
 
 		### Graphical values fields
 		for i in xrange(n):
