@@ -313,7 +313,7 @@ class BlockPluginsList(CheckListCtrl, Populable):
 
 		elif inspect.isclass(new):
 			### TODO: monkey patchin !!! (most simple is to change python file for override class)
-			sys.stdout.write(_('WARNING: class can\'t be overrited'))
+			sys.stdout.write(_('WARNING: class can\'t be overwritted'))
 
 	#@BuzyCursorNotification
 	def Populate(self, model):
@@ -574,14 +574,14 @@ class PluginsPanel(wx.Panel):
 		"""
 		num = self.check_list.GetItemCount()
 		for i in xrange(num):
-			self.check_list.CheckItem(i, False)
+			self.check_list.CheckItem(i, True)
 
 	def OnDeselectAll(self, event):
 		""" Deselect All button has been pressed and all plug-ins are disabled.
 		"""
 		num = self.check_list.GetItemCount()
 		for i in xrange(num):
-			self.check_list.CheckItem(i, True)
+			self.check_list.CheckItem(i, False)
 
 	def OnConfig(self, event):
 		""" Setting button has been pressed and the plug-in config function is call.
