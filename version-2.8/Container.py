@@ -555,16 +555,17 @@ class Diagram(Savable, Structurable):
 
 		obj = event.GetEventObject()
 
-		### conditionnal statement only for windows
+		### conditional statement only for windows
 		win = obj.GetInvokingWindow() if isinstance(obj, wx.Menu) else obj
 
-		### event come from right clic on the shapecanvas
+		### event come from right click on the shapecanvas
 		if isinstance(win, ShapeCanvas):
 			win = win.GetParent()
 			if isinstance(win, DetachedFrame):
 				title = win.GetTitle()
 			else:
 				title = win.GetPageText(win.GetSelection())
+
 		### event come from Main application by the Diagram menu
 		else:
 			nb2 = win.GetDiagramNotebook()
@@ -607,10 +608,6 @@ class Diagram(Savable, Structurable):
 		### if there are models in diagram
 		if self.GetCount() != 0:
 
-            # window that contain the diagram which will be simulate
-			#mainW = wx.GetApp().GetTopWindow()
-			#win = mainW.GetWindowByEvent(event)
-
 			obj = event.GetEventObject()
 			win = obj.GetTopLevelParent()
 
@@ -628,7 +625,7 @@ class Diagram(Savable, Structurable):
 				frame = CheckerGUI.CheckerGUI(win, D)
 				frame.Show()
 
-		### no modles in diagram
+		### no models in diagram
 		else:
 			wx.MessageBox(_("Diagram is empty.\n\nPlease, drag-and-drop model from libraries control panel to build a diagram."),_('Error Manager'))
 
@@ -1284,15 +1281,20 @@ class PointShape(Shape):
 		self.graphic.fill = self.fill
 
 	def moveto(self,x,y):
+		"""
+		"""
 		self.x = x
 		self.y = y
 		size = self.size
-		self.graphic.x = [x-size,x+size]
-		self.graphic.y = [y-size,y+size]
+
+		self.graphic.x = [x-size, x+size]
+		self.graphic.y = [y-size, y+size]
 
 	def move(self,x,y):
-		self.x = array.array('d',map((lambda v: v+x), self.x))
-		self.y = array.array('d',map((lambda v: v+y), self.y))
+		"""
+		"""
+		self.x = array.array('d', map((lambda v: v+x), self.x))
+		self.y = array.array('d', map((lambda v: v+y), self.y))
 		self.graphic.move(x,y)
 
 	def HitTest(self, x, y):
@@ -1566,7 +1568,6 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 		for item in self.diagram.shapes + self.nodes:
 			try:
-
 				item.draw(dc)
 			except Exception, info:
 				sys.stderr.write(_("Draw error: %s \n")%info)
@@ -1651,6 +1652,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 		### Refresh canvas
 		self.Refresh()
+
 		### Focus on canvas
 		#wx.CallAfter(self.SetFocus)
 
@@ -2095,7 +2097,8 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 			## Left mouse button down, change cursor to
 			## something else to denote event capture
-			self.CaptureMouse()
+			if not self.HasCapture():
+				self.CaptureMouse()
 			self.overlay = wx.Overlay()
 			self.selectionStart = event.Position
 
@@ -2110,7 +2113,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 				self.select(item)
 
-			### else each other are considrered
+			### else each other are considered
 			else:
 
 				for s in self.getSelectedShapes():
@@ -2134,7 +2137,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
 
 		### clic sur un block
-		if shape is not None:
+		if shape:
 
 			shape.OnLeftUp(event)
 			shape.leftUp(self.select())
@@ -2207,7 +2210,6 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 							### TODO: I dont now why !!!
 							pass
 
-
 					if remove:
 						self.diagram.DeleteShape(item)
 						self.deselect()
@@ -2215,7 +2217,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 					### transformation de la connection en zigzag
 					pass
 
-		### clique sur le canvas
+		### click on canvas
 		else:
 
 			### Rubber Band with overlay
@@ -2260,8 +2262,8 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 	def DiagramModified(self):
 		""" Modification printing in statusbar and modify value manager.
 
-				This method manage the propagation of modification
-				from window where modifications are performed to DEVSimPy main window
+			This method manage the propagation of modification
+			from window where modifications are performed to DEVSimPy main window.
 
 		"""
 
@@ -2407,7 +2409,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 				if win.IsActive():
 					flag = False
 
-			if self.f is not None:
+			if self.f:
 				self.f.Close()
 				self.f = None
 
@@ -2435,17 +2437,17 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		self.DiagramModified()
 
 	def SetDiagram(self, diagram):
-		"""
+		""" Setter for diagram attribute.
 		"""
 		self.diagram = diagram
 
 	def GetDiagram(self):
-		""" Return Diagram instance
+		""" Return Diagram instance.
 		"""
 		return self.diagram
 
 	def getCurrentShape(self, event):
-		"""
+		""" Return the selected current shape.
 		"""
 		# get coordinate of click in our coordinate system
 		point = self.getEventCoordinates(event)
@@ -2453,13 +2455,13 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 		# Look to see if an item is selected
 		for item in self.nodes + self.diagram.shapes:
-			if item.HitTest(point[0],point[1]):
+			if item.HitTest(point[0], point[1]):
 				return item
 
 		return None
 
 	def GetXY(self, m, x, y):
-		""" Give x and y of model m into canvas
+		""" Give x and y of model m into canvas.
 		"""
 		dx = (m.x[1]-m.x[0])
 		dy = (m.y[1]-m.y[0])
@@ -2469,32 +2471,35 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		return (ux-dx,uy-dy)
 
 	def getScalledCoordinates(self, x, y):
+		""" Return coordiante depending on the zoom.
+		"""
 		originX, originY = self.GetViewStart()
 		unitX, unitY = self.GetScrollPixelsPerUnit()
 		return ((x + (originX * unitX))/ self.scalex, (y + (originY * unitY))/ self.scaley)
 
 	def getEventCoordinates(self, event):
-		"""
+		""" Return the coordinates from event.
 		"""
 		return self.getScalledCoordinates(event.GetX(),event.GetY())
 
 	def getSelectedShapes(self):
-		"""
+		""" Retrun the list of selected object on the canvas (Connectable nodes are excluded)
 		"""
 		return self.selectedShapes
 
 	def isSelected(self, s):
+		""" Check of shape s is selected.
+			If s is a ConnectableNode object, it implies that is visible and then selected !
 		"""
-		"""
-		return (s is not None) and (s in self.selectedShapes)
+		return (s) and (s in self.selectedShapes) or isinstance(s, ConnectableNode)
 
 	def getName(self):
-		"""
+		""" Return the name
 		"""
 		return self.name
 
 	def deselect(self, item=None):
-		"""
+		""" Deselect all shapes
 		"""
 
 		if item is None:
@@ -2524,10 +2529,10 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 			self.selectedShapes.append(item)
 			item.OnSelect(None)
 			if isinstance(item, Connectable):
-				self.nodes.extend( [INode(item,n,self) for n in xrange(item.input)] )
-				self.nodes.extend( [ONode(item,n,self) for n in xrange(item.output)] )
+				self.nodes.extend([INode(item, n, self) for n in xrange(item.input)])
+				self.nodes.extend([ONode(item, n, self) for n in xrange(item.output)])
 			if isinstance(item, Resizeable):
-				self.nodes.extend( [ResizeableNode(item,n,self) for n in xrange(len(item.x))] )
+				self.nodes.extend([ResizeableNode(item, n, self) for n in xrange(len(item.x))])
 
 	###
 	def UpdateShapes(self, L=None):
@@ -2547,25 +2552,23 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 	### selection sur le canvas les ONodes car c'est le seul moyen d'y accéder pour effectuer l'appartenance avec les modèles
 	def showOutputs(self, item=None):
-		"""
+		""" Populate nodes list with output ports.
 		"""
 		if item:
-			self.nodes.extend( [ONode(item,n,self) for n in xrange(item.output)])
-		elif item is None:
-			for i in self.diagram.shapes:
-				if isinstance(i,Connectable):
-					self.nodes.extend( [ONode(i,n,self) for n in xrange(i.output)] )
+			self.nodes.extend([ONode(item, n, self) for n in xrange(item.output)])
+		else:
+			for s in filter(lambda a: isinstance(a, Connectable), self.diagram.shapes):
+				self.nodes.extend([ONode(s, n, self) for n in xrange(s.output)])
 
 	### selection sur le canvas les INodes car c'est le seul moyen d'y accéder pour effectuer l'appartenance avec les modèles
 	def showInputs(self,item=None):
+		""" Populate nodes list with output ports.
 		"""
-		"""
-		if isinstance(item,Block):
-			self.nodes.extend( [INode(item,n,self) for n in xrange(item.input)] )
+		if item:
+			self.nodes.extend([INode(item, n, self) for n in xrange(item.input)])
 		else:
-			for i in self.diagram.shapes:
-				if isinstance(i,Connectable):
-					self.nodes.extend( [INode(i,n,self) for n in xrange(i.input)])
+			for s in filter(lambda a: isinstance(a, Connectable), self.diagram.shapes):
+				self.nodes.extend([INode(s, n, self) for n in xrange(s.input)])
 
 	def GetState(self):
 		return self.__state
@@ -3468,7 +3471,7 @@ class CodeBlock(Block, Achievable):
 		"""
 		state = Block.update(self, concret_subject)
 
-		if isinstance(concret_subject, PropertiesGridCtrl):
+		if isinstance(concret_subject, PropertiesGrid):
 			### table and dico of bad flag field (pink colored)
 			table = concret_subject.GetTable()
 			bad_flag_dico = table.bad_flag
@@ -3737,6 +3740,13 @@ class INode(ConnectableNode):
 		ConnectableNode.__init__(self, item, index, cf)
 
 		self.label = "in%d"%self.index
+		self.direction = self.item.direction
+
+	def OnRightDown(self, event):
+		"""
+		"""
+		pass
+		#event.Skip()
 
 	def move(self, x, y):
 		""" Move method
@@ -3763,7 +3773,6 @@ class INode(ConnectableNode):
 			cs.setOutput(self.item,self.index)
 			#cs.ChangeForm(ShapeCanvas.CONNECTOR_TYPE)
 
-
 	def draw(self, dc):
 		""" Drawing method
 		"""
@@ -3780,7 +3789,7 @@ class INode(ConnectableNode):
 
 		### position of label
 		if not isinstance(self.item, Port):
-			### perapre label position
+			### prepare label position
 			if self.item.direction == 'ouest':
 				xl = x-30
 				yl = y
@@ -3799,7 +3808,6 @@ class INode(ConnectableNode):
 
 		### Drawing
 		PointShape.draw(self, dc)
-
 
 class ONode(ConnectableNode):
 	""" ONode(item, index, cf)
