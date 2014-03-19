@@ -35,9 +35,13 @@ class Connectable:
 		self.direction = "ouest"        # direction of ports (left)
 
 	###
-	def getPort(self, type, num):
+	def getPort(self, type, num, dir=None):
 		""" Return the tuple (x,y) depending on the direction value
 		"""
+
+		if not dir:
+			dir = self.direction
+
 		# width and height of model
 		w = self.x[1]-self.x[0]
 		h = self.y[1]-self.y[0]
@@ -55,7 +59,7 @@ class Connectable:
 		y= self.y[0]+dy*(num+1)
 
 		# ouest -> nord
-		if self.direction == "nord":
+		if dir == "nord":
 			if type=='input':
 				x+=dx*(num+1)
 				y-=dy*(num+1)
@@ -63,7 +67,7 @@ class Connectable:
 				x-=dx*(num+1)
 				y+=h-dy*(num+1)
 		# nord -> est
-		elif self.direction == "est":
+		elif dir == "est":
 			if type=='input':
 				x+=w
 				y+=0
@@ -71,7 +75,7 @@ class Connectable:
 				x-=w
 				y+=0
 		# est -> sud
-		elif self.direction == "sud":
+		elif dir == "sud":
 			if type=='input':
 				x+=dx*(num+1)
 				y+=h-dy*(num+1)
@@ -79,7 +83,7 @@ class Connectable:
 				x-=dx*(num+1)
 				y-=dy*(num+1)
 		# sud -> ouest
-		elif self.direction == "ouest":
+		elif dir == "ouest":
 			if type=='input':
 				x+=0
 				y+=0
