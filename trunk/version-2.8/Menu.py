@@ -714,7 +714,7 @@ class ShapePopupMenu(wx.Menu):
 		exportXML=wx.MenuItem(self, ID_EXPORT_XML_SHAPE, _("XML"), _("Model exported to a xml file"))
 		exportJS=wx.MenuItem(self, ID_EXPORT_JS_SHAPE, _("JS"), _("Model exported to a js (join) file"))
 		plugin = wx.MenuItem(self, ID_PLUGINS_SHAPE, _("Plugin"), _("Plugin manager"))
-		properties=wx.MenuItem(self, ID_PROPERTIES_SHAPE, _("Properties"), _("Edit the attributs"))
+		properties=wx.MenuItem(self, ID_PROPERTIES_SHAPE, _("Properties"), _("Edit the attributes"))
 
 		edit.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		editModel.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -775,7 +775,7 @@ class ShapePopupMenu(wx.Menu):
 			self.AppendSeparator()
 			# pour tout les model sur le canvas ormis les connection et le model que l'on veut connecter (la source)
 			for i, item in enumerate(filter(lambda a: a != shape and not isinstance(a, Container.ConnectionShape), self.__canvas.GetDiagram().GetShapeList())):
-				# on evite de proposer les connections suivante: iPort->iPort, oPort->oPort
+				# on evite de proposer les connections suivantes: iPort->iPort, oPort->oPort
 				if (isinstance(shape, Container.iPort) and not isinstance(item, Container.iPort)) or (isinstance(shape, Container.oPort) and not isinstance(item, Container.oPort)) or isinstance(shape, Container.Block):
 					new_item = wx.MenuItem(connectable_subMenu, wx.NewId(), item.label)
 					connectable_subMenu.AppendItem(new_item)
