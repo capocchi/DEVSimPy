@@ -2670,10 +2670,8 @@ class LinesShape(Shape):
 
 		return False
 
-
-
 	def OnLeftDClick(self, event):
-		"""
+		""" Left click has been invoked.
 		"""
 
 		### canvas containing LinesShape
@@ -2685,14 +2683,14 @@ class LinesShape(Shape):
 		self.AddPoint(canvas.getScalledCoordinates(x,y))
 
 	def HasPoint(self, point):
-		"""
+		""" Point is included in line ?
 		"""
 
 		x,y = point
 		return (x in self.x) and (y in self.y)
 
 	def AddPoint(self, point = (0,0)):
-		""" Add point under LineShape
+		""" Add point under LineShape.
 		"""
 		x,y = point
 
@@ -3791,13 +3789,13 @@ class INode(ConnectableNode):
 		### position of label
 		if not isinstance(self.item, Port):
 			### prepare label position
-			if self.item.direction == 'ouest':
+			if self.item.input_direction == 'ouest':
 				xl = x-30
 				yl = y
-			elif self.item.direction == 'est':
+			elif self.item.input_direction == 'est':
 				xl = x+2
 				yl = y
-			elif self.item.direction == 'nord':
+			elif self.item.input_direction == 'nord':
 				xl = x
 				yl = y-18
 			else:
@@ -3862,18 +3860,18 @@ class ONode(ConnectableNode):
 		### position of label
 		if not isinstance(self.item, Port):
 			### perapre label position
-			if self.item.direction == 'ouest':
+			if self.item.output_direction == 'est':
 				xl = x+2
 				yl = y
-			elif self.item.direction == 'est':
-				xl = x-30
+			elif self.item.output_direction == 'ouest':
+				xl = x-40
 				yl = y
-			elif self.item.direction == 'nord':
+			elif self.item.output_direction == 'nord':
 				xl = x
-				yl = y+2
+				yl = y-20
 			else:
 				xl = x
-				yl = y-18
+				yl = y-2
 
 			### Draw label above port
 			dc.DrawText(self.label, xl, yl)

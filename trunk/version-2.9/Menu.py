@@ -94,9 +94,16 @@ ID_RENAME_SHAPE = wx.NewId()
 ID_COPY_SHAPE = wx.ID_COPY
 ID_PASTE_SHAPE = wx.ID_PASTE
 ID_CUT_SHAPE = wx.ID_CUT
+ID_ROTATE_ALL_SHAPE = wx.NewId()
+ID_ROTATE_INPUT_SHAPE = wx.NewId()
+ID_ROTATE_OUTPUT_SHAPE = wx.NewId()
 ID_ROTATE_SHAPE = wx.NewId()
 ID_RIGHT_ROTATE_SHAPE = wx.NewId()
 ID_LEFT_ROTATE_SHAPE = wx.NewId()
+ID_RIGHT_ROTATE_INPUT_SHAPE = wx.NewId()
+ID_LEFT_ROTATE_INPUT_SHAPE = wx.NewId()
+ID_RIGHT_ROTATE_OUTPUT_SHAPE = wx.NewId()
+ID_LEFT_ROTATE_OUTPUT_SHAPE = wx.NewId()
 ID_DELETE_SHAPE = wx.ID_DELETE
 ID_LOCK_SHAPE = wx.NewId()
 ID_UNLOCK_SHAPE = wx.NewId()
@@ -692,6 +699,10 @@ class ShapePopupMenu(wx.Menu):
 		self.__canvas = event.GetEventObject()
 
 		rotate_subMenu = wx.Menu()
+		rotate_all_subMenu = wx.Menu()
+		rotate_input_subMenu = wx.Menu()
+		rotate_output_subMenu = wx.Menu()
+
 		export_subMenu = wx.Menu()
 		connectable_subMenu = wx.Menu()
 		edit_subMenu = wx.Menu()
@@ -703,8 +714,15 @@ class ShapePopupMenu(wx.Menu):
 		copy=wx.MenuItem(self, ID_COPY_SHAPE, _("&Copy\tCtrl+C"), _("Copy the model"))
 		paste=wx.MenuItem(self, ID_PASTE_SHAPE, _("&Paste\tCtrl+V"), _("Paste the model"))
 		cut=wx.MenuItem(self, ID_CUT_SHAPE, _("&Cut\tCtrl+X"), _("Cut the model"))
+		rotateAll=wx.MenuItem(self, ID_ROTATE_ALL_SHAPE, _("&All"), _("Rotate all ports"))
+		rotateInput=wx.MenuItem(self, ID_ROTATE_INPUT_SHAPE, _("&Input ports"), _("Rotate input ports"))
+		rotateOutput=wx.MenuItem(self, ID_ROTATE_OUTPUT_SHAPE, _("&Output ports"), _("Rotate output ports"))
 		rotateR=wx.MenuItem(self, ID_RIGHT_ROTATE_SHAPE, _("&Right Rotate\tCtrl+R"), _("Rotate on the right"))
 		rotateL=wx.MenuItem(self, ID_LEFT_ROTATE_SHAPE, _("&Left Rotate\tCtrl+L"), _("Rotate on the left"))
+		rotateIR=wx.MenuItem(self, ID_RIGHT_ROTATE_INPUT_SHAPE, _("&Right Rotate\tCtrl+R"), _("Rotate on the right"))
+		rotateIL=wx.MenuItem(self, ID_LEFT_ROTATE_INPUT_SHAPE, _("&Left Rotate\tCtrl+L"), _("Rotate on the left"))
+		rotateOR=wx.MenuItem(self, ID_RIGHT_ROTATE_OUTPUT_SHAPE, _("&Right Rotate\tCtrl+R"), _("Rotate on the right"))
+		rotateOL=wx.MenuItem(self, ID_LEFT_ROTATE_OUTPUT_SHAPE, _("&Left Rotate\tCtrl+L"), _("Rotate on the left"))
 		delete=wx.MenuItem(self, ID_DELETE_SHAPE, _("Delete"), _("Delete the model"))
 		lock=wx.MenuItem(self, ID_LOCK_SHAPE, _("Lock"), _("Lock the link"))
 		unlock=wx.MenuItem(self, ID_UNLOCK_SHAPE, _("Unlock"), _("Unlock the link"))
@@ -725,6 +743,10 @@ class ShapePopupMenu(wx.Menu):
 		cut.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'cut.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		rotateL.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rotateL.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		rotateR.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rotateR.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		rotateIL.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rotateL.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		rotateIR.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rotateR.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		rotateOL.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rotateL.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		rotateOR.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rotateR.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		export.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'export.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		delete.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'delete.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		lock.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'lock.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -768,8 +790,24 @@ class ShapePopupMenu(wx.Menu):
 			Cut_menu=self.AppendItem(cut)
 			Lock_item = self.AppendItem(lock)
 			UnLock_item = self.AppendItem(unlock)
-			Rotate_SubMenu1 = rotate_subMenu.AppendItem(rotateR)
-			Rotate_SubMenu2 = rotate_subMenu.AppendItem(rotateL)
+
+			### for port, just right of left rotation
+			if isinstance(shape, Container.Port):
+				Rotate_SubMenu1 = rotate_subMenu.AppendItem(rotateR)
+				Rotate_SubMenu2 = rotate_subMenu.AppendItem(rotateL)
+			else:
+
+				Rotate_SubMenu11 = rotate_all_subMenu.AppendItem(rotateR)
+				Rotate_SubMenu12 = rotate_all_subMenu.AppendItem(rotateL)
+				Rotate_SubMenu21 = rotate_input_subMenu.AppendItem(rotateIR)
+				Rotate_SubMenu22 = rotate_input_subMenu.AppendItem(rotateIL)
+				Rotate_SubMenu31 = rotate_output_subMenu.AppendItem(rotateOR)
+				Rotate_SubMenu32 = rotate_output_subMenu.AppendItem(rotateOL)
+
+				Rotate_all_menu = rotate_subMenu.AppendMenu(ID_ROTATE_ALL_SHAPE, _("All"), rotate_all_subMenu)
+				Rotate_in_menu = rotate_subMenu.AppendMenu(ID_ROTATE_INPUT_SHAPE, _("Input"), rotate_input_subMenu)
+				Rotate_out_menu = rotate_subMenu.AppendMenu(ID_ROTATE_OUTPUT_SHAPE, _("Output"), rotate_output_subMenu)
+
 			Rotate_menu = self.AppendMenu(ID_ROTATE_SHAPE, _("Rotate"), rotate_subMenu)
 
 			self.AppendSeparator()
@@ -817,6 +855,12 @@ class ShapePopupMenu(wx.Menu):
 			self.Enable(ID_LOG_SHAPE, shape.getDEVSModel() is not None)
 
 			# binding events
+			if not isinstance(shape, Container.Port):
+				self.__canvas.Bind(wx.EVT_MENU, shape.OnRotateInputR, id=ID_RIGHT_ROTATE_INPUT_SHAPE)
+				self.__canvas.Bind(wx.EVT_MENU, shape.OnRotateInputL, id=ID_LEFT_ROTATE_INPUT_SHAPE)
+				self.__canvas.Bind(wx.EVT_MENU, shape.OnRotateOutputR, id=ID_RIGHT_ROTATE_OUTPUT_SHAPE)
+				self.__canvas.Bind(wx.EVT_MENU, shape.OnRotateOutputL, id=ID_LEFT_ROTATE_OUTPUT_SHAPE)
+
 			self.__canvas.Bind(wx.EVT_MENU, shape.OnRotateR, id=ID_RIGHT_ROTATE_SHAPE)
 			self.__canvas.Bind(wx.EVT_MENU, shape.OnRotateL, id=ID_LEFT_ROTATE_SHAPE)
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnDelete, id=ID_DELETE_SHAPE)

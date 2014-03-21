@@ -38,9 +38,6 @@ class Connectable:
 		""" Return the tuple (x,y).
 		"""
 
-		### direction for all ports
-		dir = self.direction
-
 		# width and height of model
 		w = self.x[1]-self.x[0]
 		h = self.y[1]-self.y[0]
@@ -49,10 +46,14 @@ class Connectable:
 		if type=='input':
 			div = float(self.input)+1.0
 			x=self.x[0]
+			### direction for all ports
+			dir = self.input_direction
 
 		elif type=='output':
 			div = float(self.output)+1.0
 			x=self.x[1]
+			### direction for all ports
+			dir = self.output_direction
 
 		### delta for x nd y
 		dx=float(w)/div
@@ -68,14 +69,14 @@ class Connectable:
 				y-=dy*(num+1)
 			else:
 				x-=dx*(num+1)
-				y+=h-dy*(num+1)
+				y-=h-dy*(num+1)
 		# nord -> est
 		elif dir == "est":
 			if type=='input':
 				x+=w
 				y+=0
 			else:
-				x-=w
+				x+=0
 				y+=0
 		# est -> sud
 		elif dir == "sud":
@@ -84,14 +85,14 @@ class Connectable:
 				y+=h-dy*(num+1)
 			else:
 				x-=dx*(num+1)
-				y-=dy*(num+1)
+				y+=dy*(num+1)
 		# sud -> ouest
 		elif dir == "ouest":
 			if type=='input':
 				x+=0
 				y+=0
 			else:
-				x+=0
+				x-=w
 				y+=0
 
 		return (x,y)

@@ -30,33 +30,76 @@ class Rotatable:
 	def __init__(self):
 		""" Constructor.
 		"""
-		self.direction = "ouest"
+
+		self.dir = ['ouest', 'nord', 'est', 'sud']
+
+		self.input_direction = "ouest"
+		self.output_direction = "est"
+
+	###
+	def OnRotateInputR(self, event):
+		""" Rotate on the right for input ports.
+		"""
+
+		index = self.dir.index(self.input_direction)
+		n = index + 1
+		self.input_direction = self.dir[n%len(self.dir)]
+
+		### test if there is layering between input and output
+		if self.input_direction == self.output_direction:
+			n+=1
+			self.input_direction = self.dir[n%len(self.dir)]
+	###
+	def OnRotateInputL(self, event):
+		""" Rotate on the left for input ports.
+		"""
+		index = self.dir.index(self.input_direction)
+		n = index - 1
+		self.input_direction = self.dir[n%len(self.dir)]
+
+		### test if there is layering between input and output
+		if self.input_direction == self.output_direction:
+			n-=1
+			self.input_direction = self.dir[n%len(self.dir)]
+	###
+	def OnRotateOutputR(self, event):
+		""" Rotate on the right for output ports.
+		"""
+		index = self.dir.index(self.output_direction)
+		n = index + 1
+		self.output_direction = self.dir[n%len(self.dir)]
+
+		### test if there is layering between input and output
+		if self.input_direction == self.output_direction:
+			n+=1
+			self.output_direction = self.dir[n%len(self.dir)]
+	###
+	def OnRotateOutputL(self, event):
+		""" Rotate on the left for output ports.
+		"""
+
+		index = self.dir.index(self.output_direction)
+		n = index - 1
+		self.output_direction = self.dir[n%len(self.dir)]
+
+		### test if there is layering between input and output
+		if self.input_direction == self.output_direction:
+			n-=1
+			self.output_direction = self.dir[n%len(self.dir)]
 
 	###
 	def OnRotateR(self, event):
-		""" Rotate on the left
+		""" Rotate on the left for all ports.
 		"""
-		if self.direction == "ouest":
-			self.direction = "nord"
-		elif self.direction == "nord":
-			self.direction = "est"
-		elif self.direction == "est":
-			self.direction = "sud"
-		else:
-			self.direction = "ouest"
+		self.OnRotateInputR(event)
+		self.OnRotateOutputR(event)
 
 	###
 	def OnRotateL(self, event):
-		""" Rotate on the right
+		""" Rotate on the right for all ports.
 		"""
-		if self.direction == "ouest":
-			self.direction = "sud"
-		elif self.direction == "nord":
-			self.direction = "ouest"
-		elif self.direction == "est":
-			self.direction = "nord"
-		else:
-			self.direction = "est"
+		self.OnRotateOutputL(event)
+		self.OnRotateInputL(event)
 
 def main():
     pass
