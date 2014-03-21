@@ -360,10 +360,10 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 	###
 	def ChangeButtonLabel(self, btn, new_label):
-		""" Change the label of the Log button depending on the active plugin
+		""" Change the label of the Log button depending on the active plug-in
 		"""
 
-		### if activity plugin is enabled
+		### if activity plug-in is enabled
 		if is_enable('start_activity_tracking'):
 			self._btn4.SetLabel("Activity")
 
