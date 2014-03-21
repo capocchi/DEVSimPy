@@ -1,7 +1,7 @@
 __all__ = [	"Attributable",
 			"Achievable",
 			"Resizeable",
-			"Rotable",
+			"Rotatable",
 			"Connectable",
 			"Plugable",
 			"Structurable",

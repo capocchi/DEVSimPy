@@ -83,7 +83,7 @@ import LabelGUI
 from Mixins.Attributable import Attributable
 from Mixins.Achievable import Achievable
 from Mixins.Resizeable import Resizeable
-from Mixins.Rotable import Rotable
+from Mixins.Rotatable import Rotatable
 from Mixins.Connectable import Connectable
 from Mixins.Plugable import Plugable
 from Mixins.Structurable import Structurable
@@ -1816,16 +1816,16 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 		# connection physique
 		if isinstance(sourceNode, ONode):
-			ci.setInput(sourceNode.item,sourceNode.index)
-			ci.x[0],ci.y[0] = sourceNode.item.getPort('output',sourceNode.index)
-			ci.x[1],ci.y[1] = targetNode.item.getPort('input',targetNode.index)
-			ci.setOutput(targetNode.item,targetNode.index)
+			ci.setInput(sourceNode.item, sourceNode.index)
+			ci.x[0], ci.y[0] = sourceNode.item.getPortXY('output', sourceNode.index)
+			ci.x[1], ci.y[1] = targetNode.item.getPortXY('input', targetNode.index)
+			ci.setOutput(targetNode.item, targetNode.index)
 
 		else:
-			ci.setInput(targetNode.item,targetNode.index)
-			ci.x[1],ci.y[1] = sourceNode.item.getPort('output', sourceNode.index)
-			ci.x[0],ci.y[0] = targetNode.item.getPort('input', targetNode.index)
-			ci.setOutput(sourceNode.item,sourceNode.index)
+			ci.setInput(targetNode.item, targetNode.index)
+			ci.x[1], ci.y[1] = sourceNode.item.getPortXY('output', sourceNode.index)
+			ci.x[0], ci.y[0] = targetNode.item.getPortXY('input', targetNode.index)
+			ci.setOutput(sourceNode.item, sourceNode.index)
 
 		# selection de la nouvelle connection
 		self.deselect()
@@ -2980,10 +2980,10 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 	def draw(self, dc):
 
 		if self.input:
-			self.x[0], self.y[0] = self.input[0].getPort('output', self.input[1])
+			self.x[0], self.y[0] = self.input[0].getPortXY('output', self.input[1])
 
 		if self.output:
-			self.x[-1],self.y[-1] = self.output[0].getPort('input', self.output[1])
+			self.x[-1],self.y[-1] = self.output[0].getPortXY('input', self.output[1])
 
 		LinesShape.draw(self,dc)
 
@@ -3036,7 +3036,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		pass
 
 #Basic Graphical Components-----------------------------------------------------
-class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attributable, Rotable, Plugable, Observer, Testable, Savable):
+class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attributable, Rotatable, Plugable, Observer, Testable, Savable):
 	""" Generic Block class.
 	"""
 
@@ -3049,6 +3049,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		Connectable.__init__(self, nb_inputs, nb_outputs)
 		Attributable.__init__(self)
 		Selectable.__init__(self)
+		Rotatable.__init__(self)
 
 		self.AddAttributes(Attributable.GRAPHICAL_ATTR)
 		self.label = label
@@ -3709,14 +3710,14 @@ class ConnectableNode(Node):
 		Node.__init__(self, item, index, cf, t = 'circ')
 
 	def OnLeftDown(self, event):
-		""" Left Down clic has been invoked
+		""" Left Down click has been invoked
 		"""
 		### deselect the block to delete the info flag
 		self.cf.deselect(self.item)
 		event.Skip()
 
 	def HitTest(self,x,y):
-		""" Collision detection method
+		""" Collision detection method.
 		"""
 
 		### old model can produce an error
@@ -3740,10 +3741,9 @@ class INode(ConnectableNode):
 		ConnectableNode.__init__(self, item, index, cf)
 
 		self.label = "in%d"%self.index
-		self.direction = self.item.direction
 
 	def OnRightDown(self, event):
-		"""
+		""" Right Down event has been received.
 		"""
 		pass
 		#event.Skip()
@@ -3754,7 +3754,7 @@ class INode(ConnectableNode):
 		self.cf.deselect()
 		ci = ConnectionShape()
 		ci.setOutput(self.item, self.index)
-		ci.x[0], ci.y[0] = self.item.getPort('input', self.index)
+		ci.x[0], ci.y[0] = self.item.getPortXY('input', self.index)
 		self.cf.diagram.shapes.insert(0, ci)
 		self.cf.showOutputs()
 		self.cf.select(ci)
@@ -3770,13 +3770,14 @@ class INode(ConnectableNode):
 			#del cs.touch_list[index]
 
 		if len(items) == 1 and isinstance(cs, ConnectionShape) and cs.output is None:
-			cs.setOutput(self.item,self.index)
+			cs.setOutput(self.item, self.index)
 			#cs.ChangeForm(ShapeCanvas.CONNECTOR_TYPE)
 
 	def draw(self, dc):
 		""" Drawing method.
 		"""
-		x,y = self.item.getPort('input', self.index)
+
+		x,y = self.item.getPortXY('input', self.index)
 		self.moveto(x, y)
 
 		self.fill = ['#00b400'] #GREEN
@@ -3826,7 +3827,7 @@ class ONode(ConnectableNode):
 		self.cf.deselect()
 		ci = ConnectionShape()
 		ci.setInput(self.item, self.index)
-		ci.x[1], ci.y[1] = self.item.getPort('output', self.index)
+		ci.x[1], ci.y[1] = self.item.getPortXY('output', self.index)
 		self.cf.diagram.shapes.insert(0, ci)
 		self.cf.showInputs()
 		self.cf.select(ci)
@@ -3848,7 +3849,7 @@ class ONode(ConnectableNode):
 	def draw(self, dc):
 		""" Drawing method
 		"""
-		x,y = self.item.getPort('output', self.index)
+		x,y = self.item.getPortXY('output', self.index)
 		self.moveto(x, y)
 		self.fill = ['#ff0000']
 
@@ -3947,8 +3948,8 @@ class ResizeableNode(Node):
 		menu.Destroy()
 
 #---------------------------------------------------------
-class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer):
-	""" Port(x1,y1, x2, y2, label)
+class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observer):
+	""" Port(x1, y1, x2, y2, label)
 	"""
 
 	def __init__(self, x1, y1, x2, y2, label = 'Port'):
@@ -3958,6 +3959,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer
 		CircleShape.__init__(self, x1, y1, x2, y2, 30.0)
 		Connectable.__init__(self)
 		Attributable.__init__(self)
+		Rotatable.__init__(self)
 
 		self.SetAttributes(Attributable.GRAPHICAL_ATTR[0:4])
 		self.label = label

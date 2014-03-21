@@ -32,20 +32,20 @@ class Connectable:
 
 		self.input = nb_in
 		self.output = nb_out
-		self.direction = "ouest"        # direction of ports (left)
 
 	###
-	def getPort(self, type, num, dir=None):
-		""" Return the tuple (x,y) depending on the direction value
+	def getPortXY(self, type, num):
+		""" Return the tuple (x,y).
 		"""
 
-		if not dir:
-			dir = self.direction
+		### direction for all ports
+		dir = self.direction
 
 		# width and height of model
 		w = self.x[1]-self.x[0]
 		h = self.y[1]-self.y[0]
 
+		### x position
 		if type=='input':
 			div = float(self.input)+1.0
 			x=self.x[0]
@@ -54,9 +54,12 @@ class Connectable:
 			div = float(self.output)+1.0
 			x=self.x[1]
 
+		### y position
+		y= self.y[0]+dy*(num+1)
+
+		### delta for x nd y
 		dx=float(w)/div
 		dy=float(h)/div
-		y= self.y[0]+dy*(num+1)
 
 		# ouest -> nord
 		if dir == "nord":
@@ -91,7 +94,7 @@ class Connectable:
 				x+=0
 				y+=0
 
-		return(x,y)
+		return (x,y)
 
 def main():
     pass
