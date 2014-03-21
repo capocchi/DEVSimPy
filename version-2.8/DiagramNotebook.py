@@ -360,15 +360,16 @@ else:
 
 				if diagram.modify:
    					title = self.GetPageText(id)
-					dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram ?')%(title), title, wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
+					dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram?')%(title), title, wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
 					val = dlg.ShowModal()
+
 					if val == wx.ID_YES:
 						mainW.OnSaveFile(evt)
 					elif val == wx.ID_NO:
 						self.DeleteBuiltinConstants()
 						self.pages.remove(canvas)
 						if not self.DeletePage(id):
-							sys.stdout.write(_(" %s not deleted ! \n"%(title)))
+							sys.stdout.write(_(" %s not deleted! \n"%(title)))
 					else:
 						dlg.Destroy()
 						return False
