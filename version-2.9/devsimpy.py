@@ -38,7 +38,7 @@ from __future__ import with_statement
 
 __authors__  = "Laurent Capocchi <capocchi@univ-corse.fr, lcapocchi@gmail.com>, TIC project team <santucci@univ-coorse.fr>" # ajouter les noms et les mails associés aux autres auteurs
 __date__    = "05 Feb 2012, 17:07 GMT"
-__version__ = '2.8'
+__version__ = '2.9'
 __docformat__ = 'epytext'
 
 import copy
