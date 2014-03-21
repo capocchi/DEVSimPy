@@ -36,6 +36,7 @@ from tempfile import gettempdir
 
 import __builtin__
 import traceback
+import re
 
 __builtin__.__dict__['GUI_FLAG'] = True
 
@@ -97,16 +98,16 @@ class CollapsiblePanel(wx.Panel):
 		self.org_w,self.org_h = self.simdia.GetSize()
 
 		self.label1 = _("More settings...")
-		self.label2 = _("extra options")
+		self.label2 = _("Extra options")
 
-		self.cp = cp = wx.CollapsiblePane(self, label=self.label1,
+		self.cp = wx.CollapsiblePane(self, label=self.label1,
 											style=wx.CP_DEFAULT_STYLE|wx.CP_NO_TLW_RESIZE)
 
-		self.Bind(wx.EVT_COLLAPSIBLEPANE_CHANGED, self.OnPaneChanged, cp)
-		self.MakePaneContent(cp.GetPane())
+		self.Bind(wx.EVT_COLLAPSIBLEPANE_CHANGED, self.OnPaneChanged, self.cp)
+		self.MakePaneContent(self.cp.GetPane())
 
 		sizer = wx.BoxSizer(wx.VERTICAL)
-		sizer.Add(cp, 0, wx.EXPAND)
+		sizer.Add(self.cp, 0, wx.EXPAND)
 		self.SetSizer(sizer)
 
 	def OnPaneChanged(self, evt=None):
@@ -222,7 +223,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			self.SetBackgroundColour(wx.NullColour)
 			self.panel = self
 
-			### panel inherite of the left splitter size
+			### panel inherit of the left splitter size
 			self.panel.SetSize(parent.GetParent().GetSize())
 
 			# status bar of main application
@@ -230,11 +231,11 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		else:
 			wx.Frame.__init__(self, parent, id, title, style= wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
 
-			### adapt size of frame depending on the platform
+			### adapt size of frame depending on the plate-form
 			if  '__WXMSW__' in wx.PlatformInfo:
-				self.SetSize((280, 280))
+				self.SetSize((320,280))
 			else:
-				self.SetSize((260, 160))
+				self.SetSize((280,160))
 
 			# disable the roll out of the frame
 			self.SetMinSize(self.GetSize())
@@ -302,19 +303,17 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		self._btn1.SetToolTipString(_("Begin simulation process."))
 		self._btn2.SetToolTipString(_("Stop the simulation process."))
 		self._btn3.SetToolTipString(_("Suspend the simulation process."))
-		self._btn4.SetToolTipString(_("Launch the log window (often depends on some plugins (verbose, activity, ...))."))
-
+		self._btn4.SetToolTipString(_("Launch the log window (often depends on some plug-ins (verbose, activity, ...))."))
 
 	def __do_layout(self):
 
-		vbox_top = wx.BoxSizer(wx.VERTICAL)
+		#vbox_top = wx.BoxSizer(wx.VERTICAL)
 		vbox_body = wx.BoxSizer(wx.VERTICAL)
 
 		#panel 1
 		grid1 = wx.GridSizer(1, 2)
 		grid1.Add(self._text1, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL)
 		grid1.Add(self._value, 1, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)
-		vbox_body.Add(grid1, 0, wx.EXPAND, 9)
 
 		# panel2
 		grid2 = wx.GridSizer(3, 2, 2, 2)
@@ -324,22 +323,23 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		grid2.Add(self._btn4, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND)
 
 		# panel4
-		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox1.Add(self._gauge, 1, wx.EXPAND, 9)
+		#hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+		#hbox1.Add(self._gauge, 1, wx.EXPAND, 9)
 
 		## panel5
-		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox2.Add(self._cp, 1, wx.EXPAND, 9)
+		#hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+		#hbox2.Add(self._cp, 1, wx.EXPAND, 9)
 
+		vbox_body.Add(grid1, 0, wx.EXPAND, 9)
 		vbox_body.Add(grid2, 0, wx.EXPAND, 9)
-		vbox_body.Add(hbox1, 0, wx.EXPAND, 9)
-		vbox_body.Add(hbox2, 0, wx.EXPAND, 9)
+		vbox_body.Add(self._gauge, 0, wx.EXPAND, 9)
+		vbox_body.Add(self._cp, 0, wx.EXPAND, 9)
 
 		# fin panel
-		vbox_top.Add(vbox_body, 0, wx.EXPAND, 9)
-		self.panel.SetSizer(vbox_top)
+		#vbox_top.Add(vbox_body, 0, wx.EXPAND|wx.ALL, 9)
+		self.panel.SetSizer(vbox_body)
 
-		#vbox_top.Fit(self)
+#		vbox_body.Fit(self)
 
 		self._text1.SetFocus()
 		self._btn1.SetDefault()
@@ -360,10 +360,10 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 	###
 	def ChangeButtonLabel(self, btn, new_label):
-		""" Change the label of the Log button depending on the active plugin
+		""" Change the label of the Log button depending on the active plug-in
 		"""
 
-		### if activity plugin is enabled
+		### if activity plug-in is enabled
 		if is_enable('start_activity_tracking'):
 			self._btn4.SetLabel("Activity")
 
@@ -630,23 +630,33 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		event = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self._btn1.GetId())
 
 		### try to find the file which have the error from traceback
+		devs_error = False
 		try:
 			typ, val, tb = msg.data
-			trace = traceback.format_exception(typ, val, tb)[-2].split(',')
-			path = trace[0]
-		except Exception, info:
-			path=""
+			trace = traceback.format_exception(typ, val, tb)
 
-		devs_error = (os.path.basename(DOMAIN_PATH) in path)
+			mainW = wx.GetApp().GetTopWindow()
+			### paths in traceback
+			paths = filter(lambda a: a.split(',')[0].strip().startswith('File'), trace)
+			### find if DOMAIN_PATH is in paths list (inversed because traceback begin by the end)
+			for path in paths[::-1]:
+				### find if one path in trace comes from Domain or exported path list
+				for d in [DOMAIN_PATH]+mainW.GetExportPathsList():
+					if d in path:
+						devs_error = True
+						break
+
+		except Exception, info:
+			print _("Error in ErrorManager: %s"%info)
 
 		### if error come from devs python file
 		if devs_error:
-		### Error dialog
+			### Error dialog
 			if not Container.MsgBoxError(event, self.parent, msg.data):
 			### if user dont want correct the error, we destroy the simulation windows
 				self.DestroyWin()
 			else:
-			### is user want to correct error through an editor, we stop simulation process for trying again after the error is corrected.
+			### if user want to correct error through an editor, we stop simulation process for trying again after the error is corrected.
 				self.OnStop(event)
 		else:
 			raise msg

@@ -51,7 +51,9 @@ ID_SHOW_SHELL = wx.NewId()
 ID_SHOW_SIM = wx.NewId()
 ID_SHOW_PROP = wx.NewId()
 ID_SHOW_LIB = wx.NewId()
+ID_SHOW_EDITOR = wx.NewId()
 ID_SHOW_TOOLBAR = wx.NewId()
+
 
 # Perspectives menu identifiers
 ID_NEW_PERSPECTIVE = wx.NewId()
@@ -249,16 +251,19 @@ class ShowMenu(wx.Menu):
 
 		self.Append(ID_SHOW_SHELL, _('Console'), _("Show Python Shell console"), wx.ITEM_CHECK)
 		self.Append(ID_SHOW_TOOLBAR, _('Tools Bar'), _("Show icons tools bar"), wx.ITEM_CHECK)
+		self.Append(ID_SHOW_EDITOR, _('Editor'), _("Show editor tab"), wx.ITEM_CHECK)
 		self.Check(ID_SHOW_SHELL, False)
 		self.Check(ID_SHOW_SIM, False)
 		self.Check(ID_SHOW_PROP, True)
 		self.Check(ID_SHOW_LIB, True)
+		self.Check(ID_SHOW_EDITOR, False)
 		self.Check(ID_SHOW_TOOLBAR, True)
 
 		parent.Bind(wx.EVT_MENU, parent.OnShowShell, id = ID_SHOW_SHELL)
 		parent.Bind(wx.EVT_MENU, parent.OnShowSimulation, id = ID_SHOW_SIM)
 		parent.Bind(wx.EVT_MENU, parent.OnShowProperties, id = ID_SHOW_PROP)
 		parent.Bind(wx.EVT_MENU, parent.OnShowLibraries, id = ID_SHOW_LIB)
+		parent.Bind(wx.EVT_MENU, parent.OnShowEditor, id = ID_SHOW_EDITOR)
 		parent.Bind(wx.EVT_MENU, parent.OnShowToolBar, id = ID_SHOW_TOOLBAR)
 
 class PerspectiveMenu(wx.Menu):

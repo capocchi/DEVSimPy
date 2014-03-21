@@ -27,6 +27,7 @@ from Patterns.Observer import Observer
 from LibPanel import LibPanel
 from PropPanel import PropPanel
 from AttributeEditor import AttributeEditor
+from Mixins.Attributable import Attributable
 
 ### --------------------------------------------------------------------------
 class GeneralNotebook(Observer):
@@ -127,9 +128,10 @@ class GeneralNotebook(Observer):
 
 			propPanel = self.GetPropPanel()
 
+			### update only of panel properties is present (but not necessarily active)
 			if propPanel:
 
-				if model:
+				if isinstance(model, Attributable):
 					if model != self.selected_model:
 						newContent = AttributeEditor(propPanel, wx.ID_ANY, model, canvas)
 						propPanel.UpdatePropertiesPage(newContent)
