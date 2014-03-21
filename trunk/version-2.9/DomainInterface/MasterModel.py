@@ -56,6 +56,8 @@ class Master(BaseDEVS.CoupledDEVS):
 		"""
 		BaseDEVS.CoupledDEVS.__init__(self, name=name)
 
+		self.FINAL_TIME = Master.FINAL_TIME
+
 	###
 	def __str__(self):
 		return self.__class__.__name__

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-# Rotable.py ---
+# Rotatable.py ---
 #                     --------------------------------
-#                        Copyright (c) 2013
+#                        Copyright (c) 2014
 #                       Laurent CAPOCCHI
 #                      University of Corsica
 #                     --------------------------------
-# Version 1.0                                        last modified: 19/11/13
+# Version 1.0                                        last modified: 21/03/14
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -21,8 +21,8 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 #---------------------------------------------------------
-class Rotable:
-	""" Mixin to create rotable Block which can rotate under 4 direction \
+class Rotatable:
+	""" Mixin to create rotatable component which can rotate under 4 directions \
 	(est, ouest, nord, sud)
 	"""
 
@@ -30,7 +30,7 @@ class Rotable:
 	def __init__(self):
 		""" Constructor.
 		"""
-		self.direction="ouest"
+		self.direction = "ouest"
 
 	###
 	def OnRotateR(self, event):

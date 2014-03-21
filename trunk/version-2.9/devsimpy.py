@@ -8,7 +8,7 @@
 #                              Laurent CAPOCCHI
 #                        SPE - University of Corsica
 #                     --------------------------------
-# Version 2.8                                      last modified:  12/11/13
+# Version 2.8                                      last modified:  21/02/14
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -37,8 +37,8 @@
 from __future__ import with_statement
 
 __authors__  = "Laurent Capocchi <capocchi@univ-corse.fr, lcapocchi@gmail.com>, TIC project team <santucci@univ-coorse.fr>" # ajouter les noms et les mails associés aux autres auteurs
-__date__    = "03 Feb 2014, 21:21 GMT"
-__version__ = '2.9'
+__date__    = "05 Feb 2012, 17:07 GMT"
+__version__ = '2.8'
 __docformat__ = 'epytext'
 
 import copy
@@ -180,6 +180,7 @@ from LibPanel import LibPanel
 from PropPanel import PropPanel
 from ControlNotebook import ControlNotebook
 from DiagramNotebook import DiagramNotebook
+from Editor import GetEditor
 
 ### only for wx. 2.9 bug
 ### http://comments.gmane.org/gmane.comp.python.wxpython/98744
@@ -258,7 +259,6 @@ class MainApplication(wx.Frame):
 			aTable = wx.AcceleratorTable([(wx.ACCEL_ALT,  ord('X'), exitID), (wx.ACCEL_CTRL, ord('H'), helpID),(wx.ACCEL_CTRL, ord('F'), findID),(wx.ACCEL_NORMAL, WXK_F3, findnextID)])
 			self.SetAcceleratorTable(aTable)
 
-
 		# for spash screen
 		pub.sendMessage('object.added', 'Loading tree library...\n')
 		pub.sendMessage('object.added', 'Loading search tree library...\n')
@@ -306,9 +306,17 @@ class MainApplication(wx.Frame):
 		self._mgr.AddPane(self.panel4, wx.aui.AuiPaneInfo().Name("shell").Hide().Caption("Shell").
 										FloatingSize(wx.Size(280, 400)).CloseButton(True).MaximizeButton(True))
 
+		### Editor is panel
+		self.editor = GetEditor(self, -1)
+		#self.editor.AddEditPage("Code")
+
+		self._mgr.AddPane(self.editor, wx.aui.AuiPaneInfo().Name("editor").Hide().Caption("Editor").
+						FloatingSize(wx.Size(280, 400)).CloseButton(True).MaximizeButton(True))
+
 		self._mgr.GetPane("nb1").Show().Left().Layer(0).Row(0).Position(0).BestSize(wx.Size(280,-1)).MinSize(wx.Size(250,-1))
 		self._mgr.GetPane("nb2").Show().Center().Layer(0).Row(1).Position(0)
 		self._mgr.GetPane("shell").Bottom().Layer(0).Row(0).Position(0).BestSize(wx.Size(-1,100)).MinSize(wx.Size(-1,120))
+		self._mgr.GetPane("editor").Right().Layer(0).Row(0).Position(0).BestSize(wx.Size(280,-1)).MinSize(wx.Size(250,-1))
 
 		# "commit" all changes made to FrameManager (warning always before the MakeMenu)
 		self._mgr.Update()
@@ -328,6 +336,9 @@ class MainApplication(wx.Frame):
 
 	def GetVersion(self):
 		return __version__
+
+	def GetMGR(self):
+		return self._mgr
 
 	def GetConfig(self):
 		""" Reads the config file for the application if it exists and return a configfile object for use later.
@@ -373,7 +384,7 @@ class MainApplication(wx.Frame):
 		if self.cfg.Exists('version'):
 
 			### rewrite old configuration file
-			rewrite = float(self.cfg.Read("version")) < float(self.GetVersion())
+			rewrite = float(self.cfg.Read("version")) != float(self.GetVersion())
 
 			if not rewrite:
 
@@ -575,6 +586,9 @@ class MainApplication(wx.Frame):
 
 		self.tb.Realize()
 
+	def GetExportPathsList(self):
+		return self.exportPathsList
+
 	def GetDiagramNotebook(self):
 		""" Return diagram notbook (right)
 		"""
@@ -584,6 +598,11 @@ class MainApplication(wx.Frame):
 		""" Return control notebook (left)
 		"""
 		return self.nb1
+
+	def GetEditorPanel(self):
+		""" Return editor panel (rigth)
+		"""
+		return self.editor
 
 	def OnDirectConnector(self, event):
 		"""
@@ -667,8 +686,12 @@ class MainApplication(wx.Frame):
 			if len(self.perspectives) == 0:
 				self.perspectivesmenu.AppendSeparator()
 
-			self.perspectivesmenu.Append(wx.NewId(), txt)
+			ID = wx.NewId()
+			self.perspectivesmenu.Append(ID, txt)
 			self.perspectives[txt] = self._mgr.SavePerspective()
+
+			### Bind right away to make activable the perspective without restart DEVSimPy
+			self.Bind(wx.EVT_MENU, self.OnRestorePerspective, id=ID)
 
 	def OnRestorePerspective(self, event):
 		"""
@@ -1008,22 +1031,26 @@ class MainApplication(wx.Frame):
 		### diagram preparation
 		diagram.modify = False
 
-		if diagram.last_name_saved:
-
-			assert(os.path.isabs(diagram.last_name_saved))
-
-			if Container.Diagram.SaveFile(diagram, diagram.last_name_saved):
-				# Refresh canvas
-				currentPage.Refresh()
-
-				### enable save button on status bar
-				self.tb.EnableTool(Menu.ID_SAVE, diagram.modify)
-
-				#self.statusbar.SetStatusText(_('%s saved')%diagram.last_name_saved)
-			else:
-				wx.MessageBox( _('Error saving file.') ,_('Error'), wx.OK | wx.ICON_ERROR)
+		### save cmd file consists to export it
+		if isinstance(diagram, Container.ContainerBlock):
+			Container.Block.OnExport(diagram, event)
 		else:
-			self.OnSaveAsFile(event)
+			if diagram.last_name_saved:
+
+				assert(os.path.isabs(diagram.last_name_saved))
+
+				if Container.Diagram.SaveFile(diagram, diagram.last_name_saved):
+					# Refresh canvas
+					currentPage.Refresh()
+
+					### enable save button on status bar
+					self.tb.EnableTool(Menu.ID_SAVE, diagram.modify)
+
+					#self.statusbar.SetStatusText(_('%s saved')%diagram.last_name_saved)
+				else:
+					wx.MessageBox( _('Error saving file.') ,_('Error'), wx.OK | wx.ICON_ERROR)
+			else:
+				self.OnSaveAsFile(event)
 
 	###
 	def OnSaveAsFile(self, event):
@@ -1320,8 +1347,8 @@ class MainApplication(wx.Frame):
 		"""
 
 		menu = self.GetMenuBar().FindItemById(evt.GetId())
-		if menu.IsChecked():
 
+		if menu.IsChecked():
 			propPanel = PropPanel(self.nb1, self.nb1.labelList[1])
 
 			### Adding page
@@ -1330,6 +1357,26 @@ class MainApplication(wx.Frame):
 			menu.Check()
 		else:
 			self.nb1.DeletePage(1)
+
+	def OnShowEditor(self, evt):
+		""" Editor view has been pressed.
+		"""
+
+		menu = self.GetMenuBar().FindItemById(evt.GetId())
+
+		nb2 = self.GetDiagramNotebook()
+		canvas = nb2.GetPage(nb2.GetSelection())
+
+		if menu.IsChecked():
+			self._mgr.GetPane("editor").Show()
+			### attach editor to notify event from ShapeCanvas
+			canvas.attach(self.GetEditorPanel())
+		else:
+			self._mgr.GetPane("editor").Hide()
+			### detach editor to notify event from ShapeCanvas
+			canvas.detach(self.GetEditorPanel())
+
+		self._mgr.Update()
 
 	def OnShowLibraries(self, evt):
 		""" Libraries view menu has been pressed.

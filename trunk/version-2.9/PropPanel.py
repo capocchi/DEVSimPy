@@ -7,7 +7,7 @@
 #                       Laurent CAPOCCHI
 #                      University of Corsica
 #                     --------------------------------
-# Version 1.0                                        last modified: 10/11/2013
+# Version 1.0                                        last modified: 27/02/2014
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -42,7 +42,7 @@ class PropPanel(wx.Panel):
 		"""
 		"""
 
-		propContent = wx.StaticText(self, wx.ID_ANY, _("Select a model from diagram \n to see their properties"))
+		propContent = wx.StaticText(self, wx.ID_ANY, _("Select a model from diagram \n to see their properties."))
 		sum_font = propContent.GetFont()
 		sum_font.SetWeight(wx.BOLD)
 		propContent.SetFont(sum_font)
@@ -50,7 +50,7 @@ class PropPanel(wx.Panel):
 		return propContent
 
 	def UpdatePropertiesPage(self, panel=None):
-		"""	Update the propPanel with teh new panel param of the model
+		"""	Update the propPanel with the new panel parameter of the model.
 		"""
 		sizer = self.GetSizer()
 		sizer.DeleteWindows()
@@ -61,5 +61,5 @@ class PropPanel(wx.Panel):
 		"""
 		"""
 
-		self.propToolTip =[_("No model selected.\nChoose a model to show in this panel its properties"),_("You can change the properties by editing the cellule")]
+		self.propToolTip =[_("No model selected.\nChoose a model to show in this panel its properties."),_("You can change the properties by editing the cell.")]
 		self.SetToolTipString(self.propToolTip[0])
