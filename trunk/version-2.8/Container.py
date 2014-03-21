@@ -3679,7 +3679,7 @@ class ContainerBlock(Block, Diagram, Structurable):
 class Node(PointShape):
 	""" Node(item, index, cf, type)
 
-			Node class for connection between model.
+		Node class for connection between model.
 	"""
 
 	def __init__(self, item, index, cf, t='rect'):
@@ -3689,7 +3689,7 @@ class Node(PointShape):
 		self.item = item	### parent Block
 		self.index = index	### number of port
 		self.cf = cf		### parent canvas
-		self.label = ""
+		self.label = ""		### label of port
 
 		self.lock_flag = False                  # move lock
 		PointShape.__init__(self, type = t)
@@ -3749,7 +3749,7 @@ class INode(ConnectableNode):
 		#event.Skip()
 
 	def move(self, x, y):
-		""" Move method
+		""" Move method.
 		"""
 		self.cf.deselect()
 		ci = ConnectionShape()
@@ -3760,7 +3760,7 @@ class INode(ConnectableNode):
 		self.cf.select(ci)
 
 	def leftUp(self, items):
-		""" Left up action has been invocked
+		""" Left up action has been invocked.
 		"""
 
 		cs = items[0]
@@ -3774,7 +3774,7 @@ class INode(ConnectableNode):
 			#cs.ChangeForm(ShapeCanvas.CONNECTOR_TYPE)
 
 	def draw(self, dc):
-		""" Drawing method
+		""" Drawing method.
 		"""
 		x,y = self.item.getPort('input', self.index)
 		self.moveto(x, y)
@@ -3821,7 +3821,7 @@ class ONode(ConnectableNode):
 		self.label = "out%d"%self.index
 
 	def move(self, x, y):
-		""" Moving method
+		""" Moving method.
 		"""
 		self.cf.deselect()
 		ci = ConnectionShape()
@@ -3893,7 +3893,7 @@ class ResizeableNode(Node):
 		self.fill = ['#000000'] #BLACK
 
 	def draw(self, dc):
-		""" Drawing method
+		""" Drawing method.
 		"""
 
 		try:
@@ -3904,7 +3904,7 @@ class ResizeableNode(Node):
 		PointShape.draw(self, dc)
 
 	def move(self, x, y):
-		""" moving method
+		""" Moving method.
 		"""
 
 		lines_shape = self.item
@@ -3925,6 +3925,8 @@ class ResizeableNode(Node):
 				#self.item.OnResize()
 
 	def OnDeleteNode(self, event):
+		"""
+		"""
 		if isinstance(self.item, ConnectionShape):
 			for x in self.item.x:
 				if x-3 <= event.GetX() <= x+3:
@@ -3978,6 +3980,9 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer
 		self.__dict__.update(state)
 
 	def draw(self, dc):
+		""" Drawing method.
+		"""
+
 		CircleShape.draw(self, dc)
 		w,h =  dc.GetTextExtent(self.label)
 
@@ -3999,7 +4004,9 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer
 			img =  wx.Bitmap(os.path.join(ICON_PATH_16_16, 'lock.png'),wx.BITMAP_TYPE_ANY)
 			dc.DrawBitmap( img, self.x[0]+w/3, self.y[0])
 
-	def leftUp(self,event):
+	def leftUp(self, event):
+		""" Left up event has been invoked.
+		"""
 		pass
 
 	###
@@ -4014,14 +4021,14 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer
 		menu.Destroy()
 
 	###
-	def OnLeftDown(self,event):
-		"""
+	def OnLeftDown(self, event):
+		""" Left down event has been invoked.
 		"""
 		Selectable.ShowAttributes(self, event)
 		event.Skip()
 
 	def OnProperties(self, event):
-		"""
+		""" Properties of port has been invoked.
 		"""
 		canvas = event.GetEventObject()
 		f = AttributeEditor(canvas.GetParent(), wx.ID_ANY, self, canvas)
@@ -4029,12 +4036,12 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer
 
 	###
 	def OnLeftDClick(self, event):
-		"""
+		""" Left double click event has been invoked.
 		"""
 		self.OnProperties(event)
 
 	def update(self, concret_subject = None):
-		"""
+		""" Update function linked to notify function (observer pattern)
 		"""
 		state = concret_subject.GetState()
 
@@ -4046,6 +4053,8 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer
 				canvas.UpdateShapes([self])
 
 	def __repr__(self):
+		"""
+		"""
 		s="\t Label: %s\n"%self.label
 		return s
 
