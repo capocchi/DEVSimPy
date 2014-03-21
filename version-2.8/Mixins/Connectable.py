@@ -54,12 +54,12 @@ class Connectable:
 			div = float(self.output)+1.0
 			x=self.x[1]
 
-		### y position
-		y= self.y[0]+dy*(num+1)
-
 		### delta for x nd y
 		dx=float(w)/div
 		dy=float(h)/div
+
+		### y position
+		y= self.y[0]+dy*(num+1)
 
 		# ouest -> nord
 		if dir == "nord":
