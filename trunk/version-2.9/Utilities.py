@@ -58,13 +58,6 @@ def vibrate(windowName, distance=15, times=5, speed=0.05, direction='horizontal'
 		time.sleep(speed)
 		windowName.Move(wx.Point(location[0], location[1]))
 
-
-def circular_sequence(seq=""):
-	i = 0
-	while True:
-		yield seq[i]
-		i = (i + 1)%len(seq)
-
 def getFileListFromInit(init_file):
 	""" Return list of name composing all variable in __init__.py file
 	"""
