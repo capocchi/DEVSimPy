@@ -94,7 +94,7 @@ from Mixins.Selectable import Selectable
 sys.modules['Savable'] = sys.modules['Mixins.Savable']
 
 from Decorators import BuzyCursorNotification, StatusBarNotification, ProgressNotification, Pre_Undo, Post_Undo, cond_decorator
-from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance
+from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance, FixedList
 from Patterns.Observer import Subject, Observer
 from DetachedFrame import DetachedFrame
 from AttributeEditor import AttributeEditor, QuickAttributeEditor
@@ -237,24 +237,6 @@ def CheckClass(m):
 # 						GENERAL CLASS                          #
 #                                                              #
 ################################################################
-
-#-------------------------------------------------------------------------------
-class FixedList(list):
-	""" List with fixed size (for undo/redo)
-	"""
-
-	def __init__(self, size = 5):
-		list.__init__(self)
-		self.__size =  size
-
-	def GetSize(self):
-		return self.__size
-
-	def append(self, v):
-		if len(self) == self.GetSize():
-			del self[0]
-
-		self.insert(len(self),v)
 
 #-------------------------------------------------------------------------------
 class Diagram(Savable, Structurable):
@@ -1527,11 +1509,11 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 				self.select(item)
 			event.Skip()
 		elif key == 82 and controlDown:  # Rotate model on the right
-			for s in filter(lambda shape: not isinstance(shape,ConnectionShape),self.selectedShapes):
+			for s in filter(lambda shape: not isinstance(shape, ConnectionShape), self.selectedShapes):
 				s.OnRotateR(event)
 			event.Skip()
 		elif key == 76 and controlDown:  # Rotate model on the left
-			for s in filter(lambda shape: not isinstance(shape,ConnectionShape),self.selectedShapes):
+			for s in filter(lambda shape: not isinstance(shape, ConnectionShape), self.selectedShapes):
 				s.OnRotateL(event)
 			event.Skip()
 		elif key == 9: # TAB
@@ -1555,9 +1537,13 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		self.Refresh()
 
 	def getWidth(self):
+		"""
+		"""
 		return self.GetSize()[0]
 
 	def getHeight(self):
+		"""
+		"""
 		return self.GetSize()[1]
 
 	def DoDrawing(self, dc):
@@ -1573,7 +1559,9 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 				sys.stderr.write(_("Draw error: %s \n")%info)
 
 	def OnEraseBackground(self, evt):
-		""" Handles the wx.EVT_ERASE_BACKGROUND event"""
+		"""
+			Handles the wx.EVT_ERASE_BACKGROUND event
+		"""
 
 		# This is intentionally empty, because we are using the combination
         # of wx.BufferedPaintDC + an empty OnEraseBackground event to
@@ -1616,12 +1604,16 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 	@Post_Undo
 	def OnLock(self, event):
+		"""
+		"""
 		for s in self.getSelectedShapes():
 			if hasattr(s,'lock'):
 				s.lock()
 
 	@Post_Undo
 	def OnUnLock(self, event):
+		"""
+		"""
 		for s in self.getSelectedShapes():
 			if hasattr(s,'unlock'):
 				s.unlock()
@@ -1744,7 +1736,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 			self.DiagramModified()
 
 	def OnDisconnect(self, event):
-		"""     Disconnect selected ports from connectDialog
+		""" Disconnect selected ports from connectDialog
 		"""
 
 		# dialog results
@@ -2048,6 +2040,8 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 				wx.MessageBox(_("An error is occured during plugins importation.\nCheck plugins module."))
 
 	def Undo(self):
+		"""
+		"""
 
 		mainW = self.GetTopLevelParent()
 
@@ -2055,12 +2049,12 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		### if parent is not none, the dumps dont work because parent is copy of a class
 		try:
 			t = cPickle.loads(self.stockUndo[-1])
+
 			### we add new undo of diagram has been modified or one of the shape in diagram sotried in stockUndo has been modified.
-			if t.__dict__ != self.diagram.__dict__\
-				or any(objA.__dict__ != objB.__dict__ for objA in self.diagram.GetShapeList() for objB in t.GetShapeList()):
+			if any(objA.__dict__ != objB.__dict__ for objA in self.diagram.GetShapeList() for objB in t.GetShapeList()):
 				self.stockUndo.append(cPickle.dumps(obj=self.diagram, protocol=0))
 		except IndexError:
-			### this is the first call of Undo and StockUnso is emplty
+			### this is the first call of Undo and StockUndo is emplty
 			self.stockUndo.append(cPickle.dumps(obj=self.diagram, protocol=0))
 		except TypeError, error:
 			sys.stdout.write(_("Error trying to undo: %s \n"%error))
@@ -2249,13 +2243,19 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		self.Refresh()
 
 	def OnTimer(self, event):
+		"""
+		"""
 		if self.f:
 			self.f.Show()
 
 	def OnMouseEnter(self, event):
+		"""
+		"""
 		self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
 
 	def OnMouseLeave(self, event):
+		"""
+		"""
 		pass
 		#self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
 

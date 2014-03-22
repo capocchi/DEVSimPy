@@ -41,6 +41,24 @@ except ImportError:
 		sys.stdout.write("Unknown operating system.\n")
 		sys.exit()
 
+#-------------------------------------------------------------------------------
+class FixedList(list):
+	""" List with fixed size (for undo/redo)
+	"""
+
+	def __init__(self, size = 5):
+		list.__init__(self)
+		self.__size =  size
+
+	def GetSize(self):
+		return self.__size
+
+	def append(self, v):
+		if len(self) == self.GetSize():
+			del self[0]
+
+		self.insert(len(self),v)
+
 def vibrate(windowName, distance=15, times=5, speed=0.05, direction='horizontal'):
 	#Speed is the number of seconds between movements
 	#If times is odd, it increments so that window ends up in same location
