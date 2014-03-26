@@ -136,10 +136,16 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.text.SetValue(str(level))
 			self.spin.SetValue(level)
 
-
 			toolbar.AddControl(level_label)
 			toolbar.AddControl(self.text)
 			toolbar.AddControl(self.spin)
+
+			ID_UPWARD = wx.NewId()
+			ID_DOWNWARD = wx.NewId()
+
+			toolbar.AddTool(ID_DOWNWARD, wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelpString=_('Downward'), longHelpString=_('Downward rules'))
+			toolbar.AddTool(ID_UPWARD, wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelpString=_('Upward'), longHelpString=_('Upward rules'))
+
 		#=======================================================================
 
 		### if Detached frame from block (container)

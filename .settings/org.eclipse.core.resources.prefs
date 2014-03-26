@@ -1,4 +1,6 @@
 eclipse.preferences.version=1
+encoding//DEVSKernel/PyDEVS/DEVS.py=utf-8
+encoding//DomainInterface/DomainBehavior.py=utf-8
 encoding//Mixins/Abstractable.py=utf-8
 encoding//Mixins/Achievable.py=utf-8
 encoding//Mixins/Attributable.py=utf-8
@@ -15,5 +17,6 @@ encoding/DragList.py=utf-8
 encoding/DropTarget.py=utf-8
 encoding/Menu.py=utf-8
 encoding/PlotGUI.py=utf-8
+encoding/SimulationGUI.py=utf-8
 encoding/WizardGUI.py=utf-8
 encoding/devsimpy.py=utf-8
