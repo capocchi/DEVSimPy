@@ -542,6 +542,7 @@ class MainApplication(wx.Frame):
 						self.tb.AddTool(self.toggle_list[2], wx.Bitmap(os.path.join(ICON_PATH,'linear_connector.png')), shortHelpString=_('Linear'), longHelpString=_('Linear connector'), isToggle=True)
 					]
 
+		##################################################################### Abstraction hierarchy
 		diagram = currentPage.GetDiagram()
 		level = currentPage.GetCurrentLevel()
 
@@ -554,6 +555,14 @@ class MainApplication(wx.Frame):
 		self.tb.AddControl(level_label)
 		self.tb.AddControl(self.text)
 		self.tb.AddControl(self.spin)
+
+		ID_UPWARD = wx.NewId()
+		ID_DOWNWARD = wx.NewId()
+
+		self.tb.AddTool(ID_DOWNWARD, wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelpString=_('Downward'), longHelpString=_('Downward rules'))
+		self.tb.AddTool(ID_UPWARD, wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelpString=_('Upward'), longHelpString=_('Upward rules'))
+
+		##############################################################################################
 
 		self.tb.InsertSeparator(3)
 		self.tb.InsertSeparator(8)
@@ -586,6 +595,8 @@ class MainApplication(wx.Frame):
 		self.Bind(wx.EVT_TOOL, self.OnSquareConnector, self.tools[14])
 		self.Bind(wx.EVT_TOOL, self.OnLinearConnector, self.tools[15])
 		self.Bind(wx.EVT_SPIN, self.OnSpin, id=self.toggle_list[4])
+		self.Bind(wx.EVT_TOOL, self.OnUpWard, id=ID_UPWARD)
+		self.Bind(wx.EVT_TOOL, self.OnDownWard, id=ID_DOWNWARD)
 
 		self.tb.Realize()
 
@@ -846,6 +857,21 @@ class MainApplication(wx.Frame):
 
 		for canvas in L:
 			canvas.LoadDiagram(level)
+
+	################################################################################ Abstraction hierarchy
+	###
+	def OnUpWard(self, event):
+		"""
+		"""
+		print "Call Editor for the code of the upward atomc model depending on the level"
+
+	###
+	def OnDownWard(self, event):
+		"""
+		"""
+		print "Call Editor for the code of the downward atomc model depending on the level"
+
+	########################################################################################
 
 	###
 	def OnZoom(self, event):
