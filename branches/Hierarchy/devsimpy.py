@@ -519,7 +519,7 @@ class MainApplication(wx.Frame):
 		self.tb = self.CreateToolBar( style = wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT, name = 'tb')
 		self.tb.SetToolBitmapSize((25,25)) # juste for windows
 
-		self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId()]
+		self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId()]
 
 		currentPage = self.nb2.GetCurrentPage()
 
@@ -556,11 +556,12 @@ class MainApplication(wx.Frame):
 		self.tb.AddControl(self.text)
 		self.tb.AddControl(self.spin)
 
-		ID_UPWARD = wx.NewId()
-		ID_DOWNWARD = wx.NewId()
+		### add button to define downward and upward rules
+		ID_UPWARD = self.toggle_list[5]
+		ID_DOWNWARD = self.toggle_list[6]
 
-		self.tb.AddTool(ID_DOWNWARD, wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelpString=_('Downward'), longHelpString=_('Downward rules'))
-		self.tb.AddTool(ID_UPWARD, wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelpString=_('Upward'), longHelpString=_('Upward rules'))
+		self.tools.append(self.tb.AddTool(ID_DOWNWARD, wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelpString=_('Downward'), longHelpString=_('Downward rules')))
+		self.tools.append(self.tb.AddTool(ID_UPWARD, wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelpString=_('Upward'), longHelpString=_('Upward rules')))
 
 		##############################################################################################
 
