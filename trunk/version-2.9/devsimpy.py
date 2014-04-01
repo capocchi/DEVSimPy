@@ -16,9 +16,9 @@
 # strong depends: wxPython, wxversion
 # light depends : NumPy for spectrum analysis, mathplotlib for graph display
 # remarque; attention, la construction de l'arbre des librairies (ou domain) est fait par la classe TreeListLib.
-# De plus, cette construction necessite la présence obligatoire du fichier __init__.py dans chaque sous domain d'un domaine repertorié dans le repertoire Domain (voir methode recursive GetSubDomain).
+# De plus, cette construction necessite la présence obligax toire du fichier __init__.py dans chaque sous domain d'un domaine repertorié dans le repertoire Domain (voir methode recursive GetSubDomain).
 # L'utilisateur doit donc ecrire ce fichier en sautant les lignes dans __all__ = []. Si le fichier n'existe pas le prog le cree.
-# Pour importer une lib: 1/ faire un rep MyLib dans Domain avec les fichier Message.py, DomainBehavior.py et DomaineStrucutre.py
+# Pour importer une lib: 1/ faire un rep MyLib dans Domain avec les fichiers Message.py, DomainBehavior.py et DomaineStrucutre.py
 #                                               2/ stocker tout les autre .py dans un sous rep contenant également un fichier __init__ dans lequel son ecris les fichier a importer.
 #                                               3/ les fichiers .cmd issu de l'environnement peuvent etre stocké nimport ou il seron pris en compte en tant que model couplé.
 #                                               4/ les fichier init doivent respecter le format de saus de ligne pour une bonne importation.
