@@ -118,7 +118,7 @@ def GetEditor(parent, id, title="", obj=None, **kwargs):
 	@param: id
 	@param: title
 	@param: obj
-	@@param: file_type
+	@param: file_type
 	"""
 
 	if "file_type" in kwargs.keys():

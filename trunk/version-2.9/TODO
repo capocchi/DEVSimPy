@@ -14,7 +14,6 @@
  - N3: ajouter un petit icone lorsque plugin activÃ© pour les amd et cmd comme pour l'icone definissant la nature qui disqprait lorsque pas de selection
 - N3 : donner le choix à l'utilisateur de choisir les version de wx installées sur la machine. Par defaut c'est la dernière version qui sera choisis et stocké dans le fichier de config.
 - N3 : OnLeftUp dans ShapreCanvas qui a un Post_Undo stock un undo a chaque fois sans qu'il y ai un changement sur le modèle.
-- N1: lorsque modififcation du nom de la class d'un amd ou cmd par l'editeur, modifier le nom du fichier py dans l'archive pour plus de coherence.
 
 ------------------------------------------------------------------Ajout----------------------------------------------------------------
 - N1 : implementer le retour en arriÃ¨re de la simulation

@@ -20,7 +20,7 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-### at the beginning to prevent with statement for python vetrsion <=2.5
+### at the beginning to prevent with statement for python version <=2.5
 from __future__ import with_statement
 
 import wx
@@ -57,7 +57,7 @@ class MySheet(sheet.CSheet):
 		self.SetNumberRows(self.row)
 		self.SetNumberCols(self.col)
 
-		# set column lable titles at the top
+		# set column label titles at the top
 		self.SetRowLabelAlignment(wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
 		self.SetColLabelValue(0, _('Event'))
 		self.SetColLabelValue(1, _('Message'))
@@ -76,7 +76,7 @@ class MySheet(sheet.CSheet):
 		"""
 		"""
 		self._full_flag = False
-		## remplissage des cellules
+		## load cell
 		for i in xrange(len(data)):
 			try:
 				d = data[i]
@@ -88,7 +88,7 @@ class MySheet(sheet.CSheet):
 				pass
 
 		self._full_flag = True
-		### infor Frame that table us full for graph icon enabling
+		### inform Frame that table us full for graph icon enabling
 		Publisher.sendMessage(("isfull"), self._full_flag)
 
 	###
@@ -112,26 +112,31 @@ class Newt(wx.Frame):
 		""" Constructor
 		"""
 
-		wx.Frame.__init__(self, parent, wx.ID_ANY, aDEVS.getBlockModel().label, size = (550, 500), style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE|wx.STAY_ON_TOP)
+		wx.Frame.__init__(self,
+						parent,
+						wx.ID_ANY,
+						aDEVS.getBlockModel().label,
+						size = (550, 500),
+						style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE|wx.STAY_ON_TOP)
 
 		self.model = aDEVS
 		self.sep = separator
 
 		### toolbar setting
 		toolbar = wx.ToolBar(self, wx.ID_ANY, style= wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT)
-		toolbar.SetToolBitmapSize((25,25)) # juste for windows
-		new = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'new.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'New', '')
-		open_file = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'open.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Open', '')
-		saveas = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'save.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'SaveAs', '')
+		toolbar.SetToolBitmapSize((25,25)) # just for windows
+		new = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'new.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('New'), '')
+		open_file = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'open.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Open'), '')
+		saveas = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'save.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('SaveAs'), '')
 		toolbar.AddSeparator()
-		cut = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'cut.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Cut', '')
-		copy = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'copy.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Copy', '')
-		paste = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'paste.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Paste', '')
-		self.delete = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'delete.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Delete', '')
+		cut = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'cut.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Cut'), '')
+		copy = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'copy.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Copy'), '')
+		paste = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'paste.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Paste'), '')
+		self.delete = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'close.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Delete'), '')
 		toolbar.AddSeparator()
-		update = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'reload.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Update', '')
+		update = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'reload.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Update'), '')
 		toolbar.AddSeparator()
-		self.chart = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'graph_guru.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Chart', '')
+		self.chart = toolbar.AddSimpleTool(wx.NewId(), wx.Image(os.path.join(ICON_PATH,'graph_guru.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Chart'), '')
 		toolbar.EnableTool(self.chart.GetId(), False)
 		toolbar.Realize()
 
@@ -207,7 +212,7 @@ class Newt(wx.Frame):
 
 	###
 	def EnableGraphIcon(self, msg):
-		""" Enable graph button when loadin data is finished and clear the statusbar.
+		""" Enable graph button when loading data is finished and clear the statusbar.
 		"""
 
 		### update the column width
