@@ -2765,10 +2765,7 @@ class Testable(object):
 
 	# NOTE: Testable :: isAMD 				=> Test if the model is an AMD and if it's well-formed
 	def isAMD(self):
-		cond = False
-		if zipfile.is_zipfile(os.path.dirname(self.python_path)):
-			cond = True
-		return cond
+		return zipfile.is_zipfile(os.path.dirname(self.python_path))
 
 	# NOTE: Testable :: CreateTestsFiles	=> AMD tests files creation
 	def CreateTestsFiles(self):
@@ -3470,7 +3467,7 @@ class CodeBlock(Block, Achievable):
 		"""
 		state = Block.update(self, concret_subject)
 
-		if isinstance(concret_subject, PropertiesGrid):
+		if isinstance(concret_subject, PropertiesGridCtrl):
 			### table and dico of bad flag field (pink colored)
 			table = concret_subject.GetTable()
 			bad_flag_dico = table.bad_flag
