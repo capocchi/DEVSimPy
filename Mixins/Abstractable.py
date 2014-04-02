@@ -26,12 +26,15 @@ from DomainInterface.DomainBehavior import DomainBehavior
 import Container
 import DetachedFrame
 import Components
+import WizardGUI
 
 #---------------------------------------------------------
 class Abstractable:
     """  Mixin class for the abstraction hierarchy
-        Adds dynamically the 'layers' attribute . This one contains the list of diagrams associated with one level
+        Adds dynamically the 'layers' attribute. This one contains the list of diagrams associated with one level
     """
+
+    DUMP_ATTR = ['layers', 'current_level', 'DAM', 'UAM']
 
     ###
     def __init__(self, dia):
@@ -42,11 +45,15 @@ class Abstractable:
 
         self.diagram = dia
 
-        ### dico of layers
+        ### dico of layers, dico of Downward and Upward functions according to layers
         if hasattr(dia, 'layers'):
-            self.layers = getattr(dia, "layers")
+            self.layers = getattr(dia, 'layers')
+            self.DAM = getattr(dia, 'DAM')
+            self.UAM = getattr(dia, 'UAM')
         else:
             self.layers = {0:dia}
+            self.DAM = {}
+            self.UAM = {}
 
 #===============================================================================
 # overwriting for Diagram class
@@ -99,6 +106,16 @@ class Abstractable:
         """
         return self.current_level
 
+    def GetUAM(self):
+        """ Return the dictionary of the code of Upward Atomic Model
+        """
+        return self.UAM
+
+    def GetDAM(self):
+        """ Return the dictionary of the code of Downward Atomic Model
+        """
+        return self.DAM
+
     def SetCurrentLevel(self, l):
         """ Set the current level viewed in the canvas
         """
@@ -123,7 +140,11 @@ class Abstractable:
         if l in self.layers:
             self.SetDiagramByLevel(d, l)
         else:
+            ### add new diagram according the new layer
             self.layers[l] = d
+            ### add new DAM and UAM according to new layer
+            self.UAM[l] = WizardGUI.atomicCode('UAM%d'%l)
+            self.DAM[l] = WizardGUI.atomicCode('DAM%d'%l)
 
     ###
     def LoadDiagram(self, l):
@@ -156,6 +177,8 @@ class Abstractable:
         ### add new or update new attributes layers and current_layer to diagram
         setattr(dia, 'layers', canvas.GetLayers())
         setattr(dia, 'current_level', canvas.GetCurrentLevel())
+        setattr(dia, 'DAM', canvas.GetDAM())
+        setattr(dia, 'UAM', canvas.GetUAM())
 
         ### add new or update new attributes layers and current_layer to diagram at level 0
         d0 = canvas.GetDiagramByLevel(0)
@@ -200,7 +223,7 @@ class Downward(DomainBehavior):
         ### list of messages
         self.msg_dict = {}
 
-        self.state = {'status':"Passif", 'sigma':float('inf')}
+        self.state = {'status':'Passif', 'sigma':float('inf')}
 
     def extTransition(self):
         """
@@ -222,7 +245,7 @@ class Downward(DomainBehavior):
         """
         """
         self.state['sigma'] = float('inf')
-        self.state['status'] = "Passif"
+        self.state['status'] = 'Passif'
         self.msg_dict = {}
 
     def outputFnc(self):
