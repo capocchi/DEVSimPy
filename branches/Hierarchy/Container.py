@@ -308,7 +308,7 @@ class Diagram(Savable, Structurable):
 			return ['shapes', 'priority_list', 'constants_dico']
 		#=======================================================================
 		elif name == 'dump_abstr_attributes':
-			return ['layers', 'current_level'] if hasattr(self, 'layers') and hasattr(self, 'current_level') else []
+			return Abstractable.DUMP_ATTR if hasattr(self, 'layers') and hasattr(self, 'current_level') else []
 		#=======================================================================
 		else:
 			raise AttributeError, name
@@ -3658,7 +3658,7 @@ class ContainerBlock(Block, Diagram, Structurable):
 			return ['shapes', 'priority_list', 'constants_dico', 'model_path', 'python_path', 'args'] + self.GetAttributes()
 		#=======================================================================
 		elif name == 'dump_abstr_attributes':
-			return ['layers', 'current_level'] if hasattr(self, 'layers') and hasattr(self, 'current_level') else []
+			return Abstractable.DUMP_ATTR if hasattr(self, 'layers') and hasattr(self, 'current_level') else []
 		#======================================================================
 		else:
 			raise AttributeError, name

@@ -180,6 +180,8 @@ from LibPanel import LibPanel
 from PropPanel import PropPanel
 from ControlNotebook import ControlNotebook
 from DiagramNotebook import DiagramNotebook
+from Editor import GetEditor
+
 
 ### only for wx. 2.9 bug
 ### http://comments.gmane.org/gmane.comp.python.wxpython/98744
@@ -563,6 +565,9 @@ class MainApplication(wx.Frame):
 		self.tools.append(self.tb.AddTool(ID_DOWNWARD, wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelpString=_('Downward'), longHelpString=_('Downward rules')))
 		self.tools.append(self.tb.AddTool(ID_UPWARD, wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelpString=_('Upward'), longHelpString=_('Upward rules')))
 
+		self.tb.EnableTool(ID_DOWNWARD, False)
+		self.tb.EnableTool(ID_UPWARD, False)
+
 		##############################################################################################
 
 		self.tb.InsertSeparator(3)
@@ -832,6 +837,10 @@ class MainApplication(wx.Frame):
 		### update text filed
 		level = spin.GetValue()
 
+		### update doward and upward button
+		tb.EnableTool(self.toggle_list[5], level != 0)
+		tb.EnableTool(self.toggle_list[6], level != 0)
+
 		### list of spin control to update
 		L = [tb]
 		### if spin control coming from DetachedFrame of notebooktab
@@ -864,13 +873,41 @@ class MainApplication(wx.Frame):
 	def OnUpWard(self, event):
 		"""
 		"""
-		print "Call Editor for the code of the upward atomc model depending on the level"
+
+		### toolbar object
+		tb = event.GetEventObject()
+
+		### main frame of spin control
+		frame = tb.GetTopLevelParent()
+
+		is_detached_frame = isinstance(frame, DetachedFrame)
+
+		### canvas
+		if is_detached_frame:
+			canvas = tb.GetToolClientData(wx.ID_SAVE)
+		else:
+			canvas = self.nb2.GetCurrentPage()
+
+		### diagram
+		dia = canvas.GetDiagram()
+
+		### current level
+		cl =  dia.current_level
+
+		### Editor frame
+		frame = GetEditor(None, -1, 'UAM%d'%cl)
+		frame.AddEditPage('UAM%d'%cl, canvas.UAM[cl])
+		frame.SetPosition((100, 100))
+		frame.Show()
+
+		### TODO redefine OnSaveFile of frame to return new code and save it into self!.UAM dico according to the level
 
 	###
 	def OnDownWard(self, event):
 		"""
 		"""
-		print "Call Editor for the code of the downward atomc model depending on the level"
+
+		print "Call Editor for the code of the downward atomic model depending on the level"
 
 	########################################################################################
 

@@ -118,7 +118,7 @@ def GetEditor(parent, id, title, obj=None, **kwargs):
 	@param: id
 	@param: title
 	@param: obj
-	@@param: file_type
+	@param: file_type
 	"""
 
 	if "file_type" in kwargs.keys():
@@ -777,6 +777,7 @@ class EditionNotebook(wx.Notebook):
 		@param title: Title for a new page
 		"""
 
+
 		### FIXME: try to consider zipfile in zipfile
 		L = re.findall("(.*\.(amd|cmd))\%s(.*)" % os.sep, path)
 
@@ -789,8 +790,12 @@ class EditionNotebook(wx.Notebook):
 				fileInfo = importer.getinfo(name)
 				fileCode = importer.read(fileInfo)
 		else:
-			with open(path, 'r') as f:
-				fileCode = f.read()
+			if os.path.exists(path):
+				with open(path, 'r') as f:
+					fileCode = f.read()
+			else:
+				### fileCode is path (user work with IOString code, not file object)
+				fileCode = path
 
 		### new page
 		newPage = EditionFile(self, path, fileCode)

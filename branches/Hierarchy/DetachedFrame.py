@@ -146,6 +146,9 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.tools.append(toolbar.AddTool(ID_DOWNWARD, wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelpString=_('Downward'), longHelpString=_('Downward rules')))
 			self.tools.append(toolbar.AddTool(ID_UPWARD, wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelpString=_('Upward'), longHelpString=_('Upward rules')))
 
+			### update downward and upward button
+			toolbar.EnableTool(ID_DOWNWARD, level != 0)
+			toolbar.EnableTool(ID_UPWARD, level != 0)
 		#=======================================================================
 
 		### if Detached frame from block (container)
