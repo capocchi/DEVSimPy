@@ -1395,7 +1395,7 @@ class Editor(wx.Frame, wx.Panel):
 		if self.nb.force_saving:
 			self.nb.DoSaveFile(code)
 		else:
-			new_instance = code
+			new_instance = getObjectFromString(code)
 
 		return new_instance
 
@@ -1688,7 +1688,7 @@ class BlockEditor(Editor):
 			self.nb.DoSaveFile(code)
 		else:
 			### get new instance from text loaded in Editor
-			if not base_name.split('.')[0] == 'plugins':
+			if not base_name.endswith('plugins.py'):
 				new_instance = getObjectFromString(code)
 
 			### typical plugins python file
