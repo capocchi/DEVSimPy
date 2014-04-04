@@ -94,7 +94,7 @@ from Mixins.Abstractable import Abstractable
 sys.modules['Savable']=sys.modules['Mixins.Savable']
 
 from Decorators import BuzyCursorNotification, StatusBarNotification, ProgressNotification, Pre_Undo, Post_Undo, cond_decorator
-from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance
+from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance, getObjectFromString
 from Patterns.Observer import Subject, Observer
 from DetachedFrame import DetachedFrame
 from AttributeEditor import AttributeEditor, QuickAttributeEditor
@@ -417,15 +417,60 @@ class Diagram(Savable, Structurable):
 
 				Diagram.makeDEVSInstance(m)
 
+		###============================================================================= Add abstraction level manager
+		if hasattr(diagram, 'current_level') and diagram.current_level>0:
+
+			### Add devs model dam to diagram
+			dam = diagram.DAM[diagram.current_level]
+			devs_dam = getObjectFromString(dam)
+			diagram.addSubModel(devs_dam)
+
+			### Add devs model uam to diagram
+			uam = diagram.UAM[diagram.current_level]
+			devs_uam = getObjectFromString(uam)
+			diagram.addSubModel(devs_uam)
+
+			### inputs/outpus of dam/uam are instantiate depending on the iPort/oPort of diagram 0
+			dia_0 = diagram.layers[0]
+			for i,m in enumerate(filter(lambda s: isinstance(s, iPort), dia_0.GetShapeList())):
+				devs_dam.addInPort()
+				diagram.addInPort()
+
+			for i,m in enumerate(filter(lambda s: isinstance(s, oPort), dia_0.GetShapeList())):
+				devs_uam.addOutPort()
+				diagram.addOutPort()
+
+		###==================================================================================
+
 		# for all iPort shape, we make the devs instance
-		for m in filter(lambda s: isinstance(s, iPort), shape_list):
-			diagram.addInPort()
-			assert(len(diagram.getIPorts()) <= diagram.input)
+		for i,m in enumerate(filter(lambda s: isinstance(s, iPort), shape_list)):
+			### Add abstraction level manager
+			###==============================================================================
+			if hasattr(diagram, 'current_level') and diagram.current_level>0:
+				devs_dam.addOutPort()
+				p1 = diagram.getDEVSModel().IPorts[i]
+				p2 = devs_dam.IPorts[i]
+				Structurable.ConnectDEVSPorts(diagram, p1, p2)
+			###==============================================================================
+			else:
+				### add port to coupled model
+				diagram.addInPort()
+				assert(len(diagram.getIPorts()) <= diagram.input)
 
 		# for all oPort shape, we make the devs instance
-		for m in filter(lambda s: isinstance(s, oPort), shape_list):
-			diagram.addOutPort()
-			assert(len(diagram.getOPorts()) <= diagram.output)
+		for i,m in enumerate(filter(lambda s: isinstance(s, oPort), shape_list)):
+			###==============================================================================
+			### Add abstraction level manager
+			if hasattr(diagram, 'current_level') and diagram.current_level>0:
+				devs_uam.addInPort()
+				p1 = devs_uam.OPorts[i]
+				p2 = diagram.getDEVSModel().OPorts[i]
+				Structurable.ConnectDEVSPorts(diagram, p1, p2)
+			###===============================================================================
+			else:
+				### add port to coupled model
+				diagram.addOutPort()
+				assert(len(diagram.getOPorts()) <= diagram.output)
 
 		### Connection
 		for m in filter(lambda s: isinstance(s, ConnectionShape), shape_list):
@@ -434,16 +479,27 @@ class Diagram(Savable, Structurable):
 			if isinstance(m1, Block) and isinstance(m2, Block):
 				p1 = m1.getDEVSModel().OPorts[n1]
 				p2 = m2.getDEVSModel().IPorts[n2]
+				Structurable.ConnectDEVSPorts(diagram, p1, p2)
 			elif isinstance(m1, Block) and isinstance(m2, oPort):
+				### TODO insert devs_uam
 				p1 = m1.getDEVSModel().OPorts[n1]
-				p2 = diagram.getDEVSModel().OPorts[m2.id]
+				p2 = devs_uam.IPorts[m2.id]
+				Structurable.ConnectDEVSPorts(diagram, p1, p2)
+
+				#p1 = m1.getDEVSModel().OPorts[n1]
+				#p2 = diagram.getDEVSModel().OPorts[m2.id]
+				#Structurable.ConnectDEVSPorts(diagram, p1, p2)
 			elif isinstance(m1, iPort) and isinstance(m2, Block):
-				p1 = diagram.getDEVSModel().IPorts[m1.id]
+				### TODO insert devs_dam
+				p1 = devs_dam.OPorts[m1.id]
 				p2 = m2.getDEVSModel().IPorts[n2]
+				Structurable.ConnectDEVSPorts(diagram, p1, p2)
+
+				#p1 = diagram.getDEVSModel().IPorts[m1.id]
+				#p2 = m2.getDEVSModel().IPorts[n2]
+				#Structurable.ConnectDEVSPorts(diagram, p1, p2)
 			else:
 				return  _('Error making DEVS connection.\n Check your connections !')
-
-			Structurable.ConnectDEVSPorts(diagram, p1, p2)
 
 		### change priority form priority_list is PriorityGUI has been invoked (Otherwise componentSet order is considered)
 		diagram.updateDEVSPriorityList()

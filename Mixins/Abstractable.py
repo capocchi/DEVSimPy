@@ -68,6 +68,8 @@ class Abstractable:
             self.diagram = diagram.layers[diagram.current_level]
             self.layers = diagram.layers
             self.current_level = diagram.current_level
+            self.DAM  = diagram.DAM
+            self.UAM = diagram.UAM
         else:
             self.diagram = diagram
             self.AddLayer(diagram, self.GetCurrentLevel())
@@ -116,6 +118,16 @@ class Abstractable:
         """
         return self.DAM
 
+    def SetDAM(self, cl, val):
+        """
+        """
+        self.DAM[cl] = val
+
+    def SetUAM(self, cl, val):
+        """
+        """
+        self.UAM[cl] = val
+
     def SetCurrentLevel(self, l):
         """ Set the current level viewed in the canvas
         """
@@ -142,9 +154,10 @@ class Abstractable:
         else:
             ### add new diagram according the new layer
             self.layers[l] = d
+
             ### add new DAM and UAM according to new layer
-            self.UAM[l] = WizardGUI.atomicCode('UAM%d'%l)
-            self.DAM[l] = WizardGUI.atomicCode('DAM%d'%l)
+            self.SetUAM(l, WizardGUI.atomicCode('UAM%d'%l))
+            self.SetDAM(l, WizardGUI.atomicCode('DAM%d'%l))
 
     ###
     def LoadDiagram(self, l):
@@ -154,15 +167,15 @@ class Abstractable:
         layers = self.GetLayers()
         canvas = self
 
-        print "current level is", l, layers
+        print "current level is", l,layers
 
         if l in layers:
             dia = canvas.GetDiagramByLevel(l)
-            if l != canvas.GetCurrentLevel():
-                canvas.SetCurrentLevel(l)
 
-                print "load diagram %d"%l
-                print self.layers
+            canvas.SetCurrentLevel(l)
+
+            print "load diagram %d"%l
+            print self.layers
 
         else:
 
@@ -184,6 +197,8 @@ class Abstractable:
         d0 = canvas.GetDiagramByLevel(0)
         setattr(d0, 'layers', canvas.GetLayers())
         setattr(d0, 'current_level', canvas.GetCurrentLevel())
+        setattr(d0, 'DAM', canvas.GetDAM())
+        setattr(d0, 'UAM', canvas.GetUAM())
 
         #=======================================================================
         # ### Add Attributes for dump only for ContainerBlock
@@ -203,117 +218,3 @@ class Abstractable:
         canvas.SetDiagram(dia)
         canvas.deselect()
         canvas.Refresh()
-
-#===============================================================================
-# Downward Atomic Model
-#===============================================================================
-class Downward(DomainBehavior):
-    """
-        the number of input ports is the number of coupled level 0 input ports.
-        the number of output ports is the number of coupled level i output ports.
-    """
-
-    def __init__(self, rule_fct=None):
-        """ Constructor
-        """
-        DomainBehavior.__init__(self)
-
-        ### dico of rules
-        self.rule = rule_fct
-        ### list of messages
-        self.msg_dict = {}
-
-        self.state = {'status':'Passif', 'sigma':float('inf')}
-
-    def extTransition(self):
-        """
-        """
-
-        ### acquisition of messages
-        for port in self.IPorts:
-            msg = self.peek(port)
-            if msg:
-                self.msg_dict[port.id] = msg
-
-        ### change state to active
-        self.state['status'] = 'actif'
-
-        ### update time advance
-        self.state['sigma'] = 0
-
-    def intTransition(self):
-        """
-        """
-        self.state['sigma'] = float('inf')
-        self.state['status'] = 'Passif'
-        self.msg_dict = {}
-
-    def outputFnc(self):
-        """
-        """
-        for i in self.msg_list:
-            msg = self.msg_list[i]
-            self.poke(self.OPort[i], self.rule(i, msg))
-
-    def timeAdvance(self):
-        """
-        """
-        return self.state['sigma']
-
-#===============================================================================
-# Upward Atomic Model
-#===============================================================================
-class Upward(DomainBehavior):
-    """
-    """
-
-    def __init__(self):
-        """ Constructor.
-
-            the number of input ports is the number of coupled level i inputs ports.
-            the number of output ports is the number of coupled level 0 output ports.
-
-        """
-        DomainBehavior.__init__(self)
-
-        ### dico of rules
-        self.rule = rule_fct
-        ### list of messages
-        self.msg_dict = {}
-
-        self.state = {'status':"Passif", 'sigma':float('inf')}
-
-    def extTransition(self):
-        """
-        """
-
-        ### acquisition of messages
-        for port in self.IPorts:
-            msg = self.peek(port)
-            if msg:
-                self.msg_dict[port.id] = msg
-
-        ### change state to active
-        self.state['status'] = 'actif'
-
-        ### update time advance
-        self.state['sigma'] = 0
-
-    def intTransition(self):
-        """
-        """
-        self.state['sigma'] = float('inf')
-        self.state['status'] = "Passif"
-        self.msg_dict = {}
-
-    def outputFnc(self):
-        """
-        """
-        for i in self.msg_list:
-            msg = self.msg_list[i]
-            self.poke(self.OPort[i], self.rule(i, msg))
-
-    def timeAdvance(self):
-        """
-        """
-        return self.state['sigma']

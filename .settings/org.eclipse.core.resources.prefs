@@ -19,5 +19,6 @@ encoding/Editor.py=utf-8
 encoding/Menu.py=utf-8
 encoding/PlotGUI.py=utf-8
 encoding/SimulationGUI.py=utf-8
+encoding/Utilities.py=utf-8
 encoding/WizardGUI.py=utf-8
 encoding/devsimpy.py=utf-8

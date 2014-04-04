@@ -47,9 +47,11 @@ from Decorators import BuzyCursorNotification, StatusBarNotification, cond_decor
 from Utilities import itersubclasses, getTopLevelWindow
 from XMLModule import makeDEVSXML
 from Join import makeJoin, makeDEVSConf
+from Abstractable import Abstractable
 
 import Components
 import ZipManager
+
 
 class PickledCollection(list):
 	""" Custom list class for attributes to be dump
@@ -265,8 +267,8 @@ class DumpZipFile(DumpBase):
 		#=======================================================================
 
 		### abstraction hierarchy checking
-		if abs(len(obj_loaded.dump_attributes)-len(L)) == 2:
-			obj_loaded.dump_attributes+=['layers','current_level']
+		if abs(len(obj_loaded.dump_attributes)-len(L)) == len(Abstractable.DUMP_ATTR):
+			obj_loaded.dump_attributes += Abstractable.DUMP_ATTR
 
 		#=======================================================================
 
@@ -397,8 +399,8 @@ class DumpGZipFile(DumpBase):
 
 			#=======================================================================
 
-			if abs(len(obj_loaded.dump_attributes)-len(dsp)) == 2:
-				obj_loaded.dump_attributes += ['layers', 'current_level']
+			if abs(len(obj_loaded.dump_attributes)-len(dsp)) == len(Abstractable.DUMP_ATTR):
+				obj_loaded.dump_attributes += Abstractable.DUMP_ATTR
 
 			#=======================================================================
 
