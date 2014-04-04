@@ -13,6 +13,8 @@ import string
 import re
 import math
 import inspect
+import imp
+import inspect
 
 from itertools import combinations
 
@@ -57,6 +59,39 @@ def vibrate(windowName, distance=15, times=5, speed=0.05, direction='horizontal'
 		windowName.Move(wx.Point(newLoc[0], newLoc[1]))
 		time.sleep(speed)
 		windowName.Move(wx.Point(location[0], location[1]))
+
+def getObjectFromString(scriptlet):
+	"""
+	"""
+
+	assert scriptlet != ''
+
+	# Compile the scriptlet.
+	try:
+		code = compile(scriptlet, '<string>', 'exec')
+	except Exception, info:
+		return info
+	else:
+		# Create the new 'temp' module.
+		temp = imp.new_module("temp")
+		sys.modules["temp"] = temp
+
+		### there is syntaxe error ?
+		try:
+			exec code in temp.__dict__
+		except Exception, info:
+			return info
+
+		else:
+			classes = inspect.getmembers(temp, callable)
+			for name, value in classes:
+				if value.__module__ == "temp":
+					# Create the instance.
+					try:
+						return eval("temp.%s" % name)()
+					except Exception, info:
+						return info
+
 
 def getFileListFromInit(init_file):
 	""" Return list of name composing all variable in __init__.py file

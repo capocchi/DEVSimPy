@@ -679,6 +679,18 @@ class MainApplication(wx.Frame):
 		else:
 			self.nb2.AddEditPage(os.path.splitext(name)[0], diagram)
 
+		self.EnableAbstractionButton()
+
+	def EnableAbstractionButton(self):
+		""" Enable DAM and UAM button depending of the abstraction level
+		"""
+		### update text filed
+		level = self.spin.GetValue()
+
+		### update doward and upward button
+		self.tb.EnableTool(self.toggle_list[5], level != 0)
+		self.tb.EnableTool(self.toggle_list[6], level != 0)
+
 	def OnDeleteRecentFiles(self, event):
 		""" Delete the recent files list
 		"""
@@ -895,19 +907,41 @@ class MainApplication(wx.Frame):
 		cl =  dia.current_level
 
 		### Editor frame
-		frame = GetEditor(None, -1, 'UAM%d'%cl)
+		frame = GetEditor(canvas, -1, 'UAM%d'%cl)
 		frame.AddEditPage('UAM%d'%cl, canvas.UAM[cl])
 		frame.SetPosition((100, 100))
 		frame.Show()
-
-		### TODO redefine OnSaveFile of frame to return new code and save it into self!.UAM dico according to the level
 
 	###
 	def OnDownWard(self, event):
 		"""
 		"""
 
-		print "Call Editor for the code of the downward atomic model depending on the level"
+				### toolbar object
+		tb = event.GetEventObject()
+
+		### main frame of spin control
+		frame = tb.GetTopLevelParent()
+
+		is_detached_frame = isinstance(frame, DetachedFrame)
+
+		### canvas
+		if is_detached_frame:
+			canvas = tb.GetToolClientData(wx.ID_SAVE)
+		else:
+			canvas = self.nb2.GetCurrentPage()
+
+		### diagram
+		dia = canvas.GetDiagram()
+
+		### current level
+		cl =  dia.current_level
+
+		### Editor frame
+		frame = GetEditor(canvas, -1, 'DAM%d'%cl)
+		frame.AddEditPage('DAM%d'%cl, canvas.DAM[cl])
+		frame.SetPosition((100, 100))
+		frame.Show()
 
 	########################################################################################
 
@@ -1000,6 +1034,8 @@ class MainApplication(wx.Frame):
 						del self.openFileList[-1]
 						self.cfg.Write("openFileList", str(eval("self.openFileList")))
 						self.cfg.Flush()
+
+		self.EnableAbstractionButton()
 
 	###
 	def OnPrint(self, event):

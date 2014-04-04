@@ -29,7 +29,6 @@ import sys
 import keyword
 import inspect
 import zipfile
-import imp
 import threading
 import re
 import codecs
@@ -41,7 +40,7 @@ from tempfile import gettempdir
 from wx import stc
 
 from Decorators import redirectStdout
-from Utilities import path_to_module
+from Utilities import path_to_module, getObjectFromString
 
 import ReloadModule
 import ZipManager
@@ -76,40 +75,6 @@ def isError(scriptlet):
 		return info
 	else:
 		return False
-
-### NOTE: Editor.py :: getObjectFromString	=> todo
-def getObjectFromString(scriptlet):
-	"""
-	"""
-
-	assert scriptlet != ''
-
-	# Compile the scriptlet.
-	try:
-		code = compile(scriptlet, '<string>', 'exec')
-	except Exception, info:
-		return info
-	else:
-		# Create the new 'temp' module.
-		temp = imp.new_module("temp")
-		sys.modules["temp"] = temp
-
-		### there is syntaxe error ?
-		try:
-			exec code in temp.__dict__
-		except Exception, info:
-			return info
-
-		else:
-			classes = inspect.getmembers(temp, callable)
-			for name, value in classes:
-				if value.__module__ == "temp":
-					# Create the instance.
-					try:
-						return eval("temp.%s" % name)()
-					except Exception, info:
-						return info
-
 
 ### NOTE: Editor.py :: GetEditor 			=> Return the appropriate Editor
 def GetEditor(parent, id, title, obj=None, **kwargs):
@@ -959,20 +924,22 @@ class EditionNotebook(wx.Notebook):
 
 		### if python file not in zipfile
 		else:
-			assert (os.path.isfile(abs_path))
+			if os.path.isfile(abs_path):
 
-			### write code in last name saved file
-			self.WriteFile(abs_path, code)
+				### write code in last name saved file
+				self.WriteFile(abs_path, code)
 
-			if isinstance(self.parent, BlockEditor):
-				### reload module
-				self.parent.UpdateModule()
+				if isinstance(self.parent, BlockEditor):
+					### reload module
+					self.parent.UpdateModule()
+			else:
+				pass
 
 		### disable save icon in toolbar
 		self.parent.toolbar.EnableTool(self.parent.save.GetId(), False)
 
 		### status bar notification
-		self.parent.Notification(False, _('%s saved') % fic_filename, '')
+		self.parent.Notification(False, _('%s saved') % self.GetPageText(self.GetSelection()), '')
 
 	### NOTE: EditionNotebook :: @WriteFile 	=> Write with correct encode
 	@staticmethod
@@ -1094,6 +1061,8 @@ class Editor(wx.Frame, wx.Panel):
 			self.SetBackgroundColour(wx.WHITE)
 		else:
 			wx.Frame.__init__(self, parent, id, title, size=(600, 500), style=wx.DEFAULT_FRAME_STYLE)
+
+		self.parent = parent
 
 		# notebook
 		self.read_only = False
@@ -1256,53 +1225,6 @@ class Editor(wx.Frame, wx.Panel):
 		icon = wx.IconFromBitmap(img.ConvertToBitmap())
 		return icon
 
-	### NOTE: Editor :: OnOnpenFile 			=> Event OnOpenFile
-	def OnOpenFile(self, event):
-		"""
-		"""
-		if self.nb.GetCurrentPage().isModified():
-			dlg = wx.MessageDialog(self, _('Save changes?'), _('Code Editor'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
-			val = dlg.ShowModal()
-			if val == wx.ID_YES:
-				self.OnSaveFile(event)
-				self.DoOpenFile()
-			elif val == wx.ID_CANCEL:
-				dlg.Destroy()
-			else:
-				self.DoOpenFile()
-		else:
-			self.DoOpenFile()
-
-	### NOTE: Editor :: OnSaveFile			=> Event when save menu has been clicked
-	def OnSaveFile(self, event):
-		""" Save menu has been clicked.
-		"""
-		currentPage = self.nb.GetCurrentPage()
-		fn = currentPage.GetFilename()
-
-		if not self.read_only:
-
-			assert fn != ''
-
-			### base and dir name of python file
-			base_name = os.path.basename(fn)
-			dir_name = os.path.dirname(fn)
-
-			### code text
-			code = currentPage.GetValue().encode('utf-8')
-			code = '\n'.join(code.splitlines()) + '\n'
-
-			new_instance = self.ConfigSaving(base_name, dir_name, code)
-
-			### there is error in file ?
-			currentPage.error_flag = isinstance(new_instance, Exception)
-
-			self.CheckErrors(base_name, code, new_instance)
-
-		else:
-			### status bar notification
-			self.Notification(False, _('%s not saved' % fn), _('file in readonly'))
-
 	### NOTE: Editor :: ConfigSaving 			=> Configure save vars
 	def ConfigSaving(self, base_name, dir_name, code):
 		"""
@@ -1312,7 +1234,7 @@ class Editor(wx.Frame, wx.Panel):
 		if self.nb.force_saving:
 			self.nb.DoSaveFile(code)
 		else:
-			new_instance = code
+			new_instance = getObjectFromString(code)
 
 		return new_instance
 
@@ -1320,13 +1242,30 @@ class Editor(wx.Frame, wx.Panel):
 	def CheckErrors(self, base_name, code, new_instance):
 		"""
 		"""
-		if not self.nb.GetCurrentPage().ContainError():
+
+		cp  = self.nb.GetCurrentPage()
+
+		### some errors in file
+		if cp.ContainError():
+			self.SavingErrors(new_instance)
+		else:
 
 			self.nb.DoSaveFile(code)
 
-		### some errors in file
-		else:
-			self.SavingErrors(new_instance)
+			### DAM and UAM update which are implemented in string object
+			if not base_name.endswith('.py'):
+				### canvas and diagram
+				canvas = self.parent
+				dia = canvas.GetDiagram()
+
+				### current level
+				cl =  dia.current_level
+
+				### if DAM string is in code
+				if 'DAM' in code:
+					canvas.SetDAM(cl, code)
+				else:
+					canvas.SetUAM(cl, code)
 
 	# NOTE: Editor :: SavingErrors			=> Errors treatment
 	def SavingErrors(self, new_instance):
@@ -1372,7 +1311,7 @@ class Editor(wx.Frame, wx.Panel):
 		self.toolbar.EnableTool(self.save.GetId(), True)
 
 		### status bar notification
-		self.Notification(True, _('%s modified' % (os.path.basename(self.nb.GetCurrentPage().GetFilename()))), '')
+		self.Notification(True, _('%s modified' % (self.nb.GetPageText(self.nb.GetSelection()))), '')
 
 		event.Skip()
 
@@ -1399,18 +1338,17 @@ class Editor(wx.Frame, wx.Panel):
 		""" Save menu has been clicked.
 		"""
 		currentPage = self.nb.GetCurrentPage()
+		fn  = currentPage.GetFilename()
 
 		if not self.read_only:
 
-			assert currentPage.GetFilename() != ''
+			assert fn != ''
 
 			### base and dir name of python file
 			base_name = os.path.basename(currentPage.GetFilename())
 			dir_name = os.path.dirname(currentPage.GetFilename())
 
-			### code text
-			code = currentPage.GetValue().encode('utf-8')
-			code = '\n'.join(code.splitlines()) + '\n'
+			code = self.GetCode(currentPage)
 
 			new_instance = self.ConfigSaving(base_name, dir_name, code)
 
@@ -1422,6 +1360,14 @@ class Editor(wx.Frame, wx.Panel):
 		else:
 			### status bar notification
 			self.Notification(False, _('%s not saved' % (currentPage.GetFilename())), _('file in readonly'))
+
+	def GetCode(self, currentPage):
+		"""
+		"""
+		### code text
+		code = currentPage.GetValue().encode('utf-8')
+		code = '\n'.join(code.splitlines()) + '\n'
+		return code
 
 	### NOTE: Editor :: QuitApplication 		=> Event on quit application
 	def QuitApplication(self, event):
@@ -1437,6 +1383,7 @@ class Editor(wx.Frame, wx.Panel):
 			else:
 				dlg = wx.MessageDialog(self, _('File contain errors.\nDo you want to force saving before exit knowing that the file can be corrupts?'), _('Code Editor'), wx.YES_NO | wx.NO_DEFAULT | wx.CANCEL | wx.ICON_QUESTION)
 			val = dlg.ShowModal()
+
 			if val == wx.ID_YES:
 				self.nb.force_saving = cp.ContainError()
 				self.OnSaveFile(event)
@@ -1632,7 +1579,7 @@ class BlockEditor(Editor):
 
 				self.cb.setDEVSClassModel(new_class)
 
-				if base_name.split('.')[1] == 'py':
+				if base_name.endswith('.py'):
 					self.nb.DoSaveFile(code)
 				else:
 					### status bar notification
