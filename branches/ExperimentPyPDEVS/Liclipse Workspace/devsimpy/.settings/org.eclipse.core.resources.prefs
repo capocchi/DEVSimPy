@@ -1,0 +1,17 @@
+eclipse.preferences.version=1
+encoding//DEVSKernel/PyPDEVS/old/RTthreads.py=latin1
+encoding//DEVSKernel/PyPDEVS/old/basesimulator.py=latin1
+encoding//DEVSKernel/PyPDEVS/old/messageScheduler.py=latin1
+encoding//DEVSKernel/PyPDEVS/old/scheduler.py=latin1
+encoding//DEVSKernel/PyPDEVS/old/server.py=latin1
+encoding//DEVSKernel/PyPDEVS/old/simulator.py=latin1
+encoding//DEVSKernel/PyPDEVS/old/solver.py=latin1
+encoding/Components.py=utf-8
+encoding/ConnectionThread.py=utf-8
+encoding/Container.py=utf-8
+encoding/Decorators.py=utf-8
+encoding/DiagramConstantsDialog.py=utf-8
+encoding/ExperimentGenerator.py=utf-8
+encoding/SimulationGUI.py=utf-8
+encoding/WizardGUI.py=utf-8
+encoding/devsimpy.py=utf-8

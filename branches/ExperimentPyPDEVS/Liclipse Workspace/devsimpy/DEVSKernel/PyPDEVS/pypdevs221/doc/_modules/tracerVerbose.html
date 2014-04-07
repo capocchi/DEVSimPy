@@ -1,0 +1,224 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>tracerVerbose &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for tracerVerbose</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">util</span> <span class="kn">import</span> <span class="n">runTraceAtController</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<div class="viewcode-block" id="TracerVerbose"><a class="viewcode-back" href="../tracerverbose_int.html#tracerVerbose.TracerVerbose">[docs]</a><span class="k">class</span> <span class="nc">TracerVerbose</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A tracer for simple verbose output</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="TracerVerbose.__init__"><a class="viewcode-back" href="../tracerverbose_int.html#tracerVerbose.TracerVerbose.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">server</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+
+<span class="sd">        :param uid: the UID of this tracer</span>
+<span class="sd">        :param server: the server to make remote calls on</span>
+<span class="sd">        :param filename: file to save the trace to, can be None for output to stdout</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">server</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prevtime</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uid</span> <span class="o">=</span> <span class="n">uid</span>
+</div>
+<div class="viewcode-block" id="TracerVerbose.startTracer"><a class="viewcode-back" href="../tracerverbose_int.html#tracerVerbose.TracerVerbose.startTracer">[docs]</a>    <span class="k">def</span> <span class="nf">startTracer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recover</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Starts up the tracer</span>
+
+<span class="sd">        :param recover: whether or not this is a recovery call (so whether or not the file should be appended to)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">verb_file</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
+        <span class="k">elif</span> <span class="n">recover</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">verb_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;a+&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">verb_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="TracerVerbose.stopTracer"><a class="viewcode-back" href="../tracerverbose_int.html#tracerVerbose.TracerVerbose.stopTracer">[docs]</a>    <span class="k">def</span> <span class="nf">stopTracer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop the tracer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verb_file</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="TracerVerbose.trace"><a class="viewcode-back" href="../tracerverbose_int.html#tracerVerbose.TracerVerbose.trace">[docs]</a>    <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Actual tracing function</span>
+
+<span class="sd">        :param time: time at which this trace happened</span>
+<span class="sd">        :param text: the text that was traced</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">string</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">time</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">prevtime</span><span class="p">:</span>
+            <span class="n">string</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">__  Current Time: </span><span class="si">%10.2f</span><span class="s"> &quot;</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span><span class="o">*</span><span class="mi">42</span> <span class="o">+</span> <span class="s">&quot; </span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prevtime</span> <span class="o">=</span> <span class="n">time</span>
+        <span class="n">string</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">text</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">verb_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">verb_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="TracerVerbose.traceInternal"><a class="viewcode-back" href="../tracerverbose_int.html#tracerVerbose.TracerVerbose.traceInternal">[docs]</a>    <span class="k">def</span> <span class="nf">traceInternal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Tracing done for the internal transition function</span>
+
+<span class="sd">        :param aDEVS: the model that transitioned</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">INTERNAL TRANSITION in model &lt;</span><span class="si">%s</span><span class="s">&gt;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">()</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s">New State: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s">Output Port Configuration:</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">OPorts</span><span class="p">)):</span>
+            <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t\t</span><span class="s">port &lt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">OPorts</span><span class="p">[</span><span class="n">I</span><span class="p">]</span><span class="o">.</span><span class="n">getPortName</span><span class="p">())</span> <span class="o">+</span> <span class="s">&quot;&gt;:</span><span class="se">\n</span><span class="s">&quot;</span>
+            <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">myOutput</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">OPorts</span><span class="p">[</span><span class="n">I</span><span class="p">],</span> <span class="p">[]):</span>
+                <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t\t\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="c"># Don&#39;t show the age</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s">Next scheduled internal transition at time </span><span class="si">%.2f</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">timeNext</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">runTraceAtController</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">,</span> <span class="p">[</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">timeLast</span><span class="p">,</span> <span class="s">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="n">text</span> <span class="o">+</span> <span class="s">&#39;&quot;&#39;</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="TracerVerbose.traceConfluent"><a class="viewcode-back" href="../tracerverbose_int.html#tracerVerbose.TracerVerbose.traceConfluent">[docs]</a>    <span class="k">def</span> <span class="nf">traceConfluent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Tracing done for the confluent transition function</span>
+
+<span class="sd">        :param aDEVS: the model that transitioned</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">CONFLUENT TRANSITION in model &lt;</span><span class="si">%s</span><span class="s">&gt;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">()</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s">Input Port Configuration:</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">IPorts</span><span class="p">)):</span>
+            <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t\t</span><span class="s">port &lt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">IPorts</span><span class="p">[</span><span class="n">I</span><span class="p">]</span><span class="o">.</span><span class="n">getPortName</span><span class="p">())</span> <span class="o">+</span> <span class="s">&quot;&gt;: </span><span class="se">\n</span><span class="s">&quot;</span>
+            <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">myInput</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">IPorts</span><span class="p">[</span><span class="n">I</span><span class="p">],</span> <span class="p">[]):</span>
+                <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t\t\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s">New State: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s">Output Port Configuration:</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">OPorts</span><span class="p">)):</span>
+            <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t\t</span><span class="s">port &lt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">OPorts</span><span class="p">[</span><span class="n">I</span><span class="p">]</span><span class="o">.</span><span class="n">getPortName</span><span class="p">())</span> <span class="o">+</span> <span class="s">&quot;&gt;:</span><span class="se">\n</span><span class="s">&quot;</span>
+            <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">myOutput</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">OPorts</span><span class="p">[</span><span class="n">I</span><span class="p">],</span> <span class="p">[]):</span>
+                <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t\t\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="c"># Don&#39;t show the age</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s">Next scheduled internal transition at time </span><span class="si">%.2f</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">timeNext</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">runTraceAtController</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">,</span> <span class="p">[</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">timeLast</span><span class="p">,</span> <span class="s">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="n">text</span> <span class="o">+</span> <span class="s">&#39;&quot;&#39;</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="TracerVerbose.traceExternal"><a class="viewcode-back" href="../tracerverbose_int.html#tracerVerbose.TracerVerbose.traceExternal">[docs]</a>    <span class="k">def</span> <span class="nf">traceExternal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Tracing done for the external transition function</span>
+
+<span class="sd">        :param aDEVS: the model that transitioned</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">EXTERNAL TRANSITION in model &lt;</span><span class="si">%s</span><span class="s">&gt;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">()</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s">Input Port Configuration:</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">IPorts</span><span class="p">)):</span>
+            <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t\t</span><span class="s">port &lt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">IPorts</span><span class="p">[</span><span class="n">I</span><span class="p">]</span><span class="o">.</span><span class="n">getPortName</span><span class="p">())</span> <span class="o">+</span> <span class="s">&quot;&gt;:</span><span class="se">\n</span><span class="s">&quot;</span>
+            <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">myInput</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">IPorts</span><span class="p">[</span><span class="n">I</span><span class="p">],</span> <span class="p">[]):</span>
+                <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t\t\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s">New State: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+        <span class="c"># Don&#39;t show the age</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s">Next scheduled internal transition at time </span><span class="si">%.2f</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">timeNext</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">runTraceAtController</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">,</span> <span class="p">[</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">timeLast</span><span class="p">,</span> <span class="s">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="n">text</span> <span class="o">+</span> <span class="s">&#39;&quot;&#39;</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="TracerVerbose.traceInit"><a class="viewcode-back" href="../tracerverbose_int.html#tracerVerbose.TracerVerbose.traceInit">[docs]</a>    <span class="k">def</span> <span class="nf">traceInit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Tracing done for the initialisation</span>
+
+<span class="sd">        :param aDEVS: the model that was initialised</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">INITIAL CONDITIONS in model &lt;</span><span class="si">%s</span><span class="s">&gt;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">aDEVS</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">()</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s">Initial State: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+        <span class="c"># Don&#39;t show the age</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s">Next scheduled internal transition at time </span><span class="si">%.2f</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">timeNext</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">runTraceAtController</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">aDEVS</span><span class="p">,</span> <span class="p">[</span><span class="n">aDEVS</span><span class="o">.</span><span class="n">timeLast</span><span class="p">,</span> <span class="s">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="n">text</span> <span class="o">+</span> <span class="s">&#39;&quot;&#39;</span><span class="p">])</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
