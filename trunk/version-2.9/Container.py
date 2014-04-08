@@ -3402,12 +3402,12 @@ class CodeBlock(Block, Achievable):
 		if 'image_path' not in state:
 			state['image_path'] = ""
 			state['attributes'].insert(3,'image_path')
-		if 'font' not in state:
-			state['font'] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
-		if 'font' not in state['attributes']:
-			state['attributes'].insert(3,'font')
+		if 'font' not in state: state['font'] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
+		if 'font' not in state['attributes']: state['attributes'].insert(3,'font')
 		if 'selected' not in state: state['selected'] = False
 		if 'label_pos' not in state: state['label_pos'] = 'center'
+		if 'input_direction' not in state: state['input_direction'] = 'ouest'
+		if 'output_direction' not in state: state['output_direction'] = 'est'
 		##############################################
 
 		#print "apres "
@@ -3599,12 +3599,12 @@ class ContainerBlock(Block, Diagram, Structurable):
 		if 'image_path' not in state:
 			state['image_path'] = ""
 			state['attributes'].insert(3,'image_path')
-		if 'font' not in state:
-			state['font'] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
-		if 'font' not in state['attributes']:
-			state['attributes'].insert(3,'font')
+		if 'font' not in state: state['font'] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
+		if 'font' not in state['attributes']: state['attributes'].insert(3,'font')
 		if 'selected' not in state: state['selected'] = False
 		if 'label_pos' not in state:state['label_pos'] = 'center'
+		if 'input_direction' not in state: state['input_direction'] = 'ouest'
+		if 'output_direction' not in state: state['output_direction'] = 'est'
 		#####################################
 
 		#print "apres "

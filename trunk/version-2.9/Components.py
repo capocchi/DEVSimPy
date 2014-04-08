@@ -119,7 +119,7 @@ class DSPComponent:
 		else:
 			diagram = canvas.GetDiagram()
 
-		### if diagram is instanciated
+		### if diagram is instantiated
 		if diagram:
 			load_file_result = diagram.LoadFile(filename)
 
@@ -236,20 +236,20 @@ class CMDComponent(GenericComponent):
 		# new containerBlock model
 		self.__m = ContainerBlock(self._label, self._inputs, self._outputs)
 
+		print range(self._inputs)
+
 		# input and output ports
-		for i in xrange(self._inputs):
-			self.__m.nbiPort += i
-			id = self.__m.nbiPort
+		for id in xrange(self._inputs):
 			iport = iPort(label='IPort %d'%(id))
 			iport.id = id
 			self.__m.AddShape(iport)
+			self.__m.nbiPort = id
 
-		for o in xrange(self._outputs):
-			self.__m.nboPort += o
-			id = self.__m.nboPort
+		for id in xrange(self._outputs):
 			oport = oPort(label='OPort %d'%(id))
 			oport.id = id
 			self.__m.AddShape(oport)
+			self.__m.nboPort = id
 
 		self.__m.python_path = self._python_file
 		self.__m.model_path = self._model_file
