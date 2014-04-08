@@ -1990,16 +1990,28 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		"""     Delete menu has been clicked. Delete all selected shape.
 		"""
 
-		for s in self.select():
-   			name = _("Connexion") if isinstance(s, ConnectionShape) else s.label
-			msg = _("Do you really want to delete %s model?")%(name)
+		if len(self.select()) > 1:
+			msg = _("Do you really want to delete all selected models?")
  			dlg = wx.MessageDialog(self, msg,
 			 						_("Delete Manager"),
 									wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
 			if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:
-				self.diagram.DeleteShape(s)
+				for s in self.select():
+					self.diagram.DeleteShape(s)
 			dlg.Destroy()
+
+		else:
+			for s in self.select():
+	   			name = _("Connexion") if isinstance(s, ConnectionShape) else s.label
+				msg = _("Do you really want to delete %s model?")%(name)
+	 			dlg = wx.MessageDialog(self, msg,
+				 						_("Delete Manager"),
+										wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+
+				if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:
+					self.diagram.DeleteShape(s)
+				dlg.Destroy()
 
 		self.DiagramModified()
 		self.deselect()
