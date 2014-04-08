@@ -237,19 +237,17 @@ class CMDComponent(GenericComponent):
 		self.__m = ContainerBlock(self._label, self._inputs, self._outputs)
 
 		# input and output ports
-		for i in xrange(self._inputs):
-			self.__m.nbiPort += i
-			id = self.__m.nbiPort
+		for id in xrange(self._inputs):
 			iport = iPort(label='IPort %d'%(id))
 			iport.id = id
 			self.__m.AddShape(iport)
+			self.__m.nbiPort = id
 
-		for o in xrange(self._outputs):
-			self.__m.nboPort += o
-			id = self.__m.nboPort
+		for id in xrange(self._outputs):
 			oport = oPort(label='OPort %d'%(id))
 			oport.id = id
 			self.__m.AddShape(oport)
+			self.__m.nboPort = id
 
 		self.__m.python_path = self._python_file
 		self.__m.model_path = self._model_file
