@@ -1239,7 +1239,7 @@ class MainApplication(wx.Frame):
 		obj = event.GetEventObject()
 
 		# si invocation de l'action depuis une ToolBar
-		if isinstance(obj, (wx.ToolBar,wx.Frame)):
+		if isinstance(obj, (wx.ToolBar, wx.Frame)):
 			window = obj.GetTopLevelParent()
 		# si invocation depuis une Menu (pour le Show dans l'application principale)
 		elif isinstance(obj, wx.Menu):
