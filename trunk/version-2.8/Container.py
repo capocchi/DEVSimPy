@@ -637,10 +637,11 @@ class Diagram(Savable, Structurable):
 		if self.GetCount() != 0 :
 
 			## window that contain the diagram which will be simulate
-##			mainW = wx.GetApp().GetTopWindow()
-##			win = mainW.GetActiveWindow()
-			obj = event.GetEventObject()
-			win = obj.GetWindow() if isinstance(obj, wx.Menu) else obj.GetTopLevelParent()
+			mainW = wx.GetApp().GetTopWindow()
+			win = mainW.GetTopLevelParent()
+
+			#obj = event.GetEventObject()
+			#win = obj.GetWindow() if isinstance(obj, wx.Menu) else obj.GetTopLevelParent()
 
 			# diagram which will be simulate
 			diagram = self
@@ -650,7 +651,7 @@ class Diagram(Savable, Structurable):
  			if D is not None:
 				playSound(SIMULATION_ERROR_SOUND_PATH)
 				dial = wx.MessageDialog(win, \
-									_("There is errors in some models.\n\nDo you want to execute the error manager ?"), \
+									_("There is errors in some models.\n\nDo you want to execute the error manager?"), \
 									_('Simulation Manager'), \
 									wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 				if dial.ShowModal() == wx.ID_YES:
