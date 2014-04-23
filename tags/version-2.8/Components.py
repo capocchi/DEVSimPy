@@ -237,19 +237,17 @@ class CMDComponent(GenericComponent):
 		self.__m = ContainerBlock(self._label, self._inputs, self._outputs)
 
 		# input and output ports
-		for i in xrange(self._inputs):
-			self.__m.nbiPort += i
-			id = self.__m.nbiPort
+		for id in xrange(self._inputs):
 			iport = iPort(label='IPort %d'%(id))
 			iport.id = id
 			self.__m.AddShape(iport)
+			self.__m.nbiPort = id
 
-		for o in xrange(self._outputs):
-			self.__m.nboPort += o
-			id = self.__m.nboPort
+		for id in xrange(self._outputs):
 			oport = oPort(label='OPort %d'%(id))
 			oport.id = id
 			self.__m.AddShape(oport)
+			self.__m.nboPort = id
 
 		self.__m.python_path = self._python_file
 		self.__m.model_path = self._model_file
@@ -577,12 +575,12 @@ class DEVSComponent:
 			mainW = mainW.GetParent()
 
 		if __builtin__.__dict__['LOCAL_EDITOR'] and not zipfile.is_zipfile(model_path) and not python_path.startswith('http'):
-			dial = wx.MessageDialog(mainW, _('Do you want to use your local programmer software?\n\n If you want always use the DEVSimPy code editor\n change the option in Editor panel preferences.'), name, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			dial = wx.MessageDialog(mainW, _('Do you want to use your local programmer software?\n\n If you always want use the DEVSimPy code editor\n change the option in Editor panel preferences.'), name, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 			val = dial.ShowModal()
 		else:
 			val = wx.ID_NO
 
-		### si local editor choisi dans les preferences et pas de zip file et pas de fichier provenant du server ftp
+		### if local editor
 		if val == wx.ID_YES:
 			### open with local editor
 			if wx.Platform == '__WXMAC__':
@@ -590,7 +588,7 @@ class DEVSComponent:
 			elif "wxMSW" in wx.PlatformInfo:
 				os.startfile(python_path)
 			elif "wxGTK" in wx.PlatformInfo:
-				### on est dans gnome
+				### with gnome
 				if os.system('pidof gnome-session') != 256:
 					try:
 						soft = which('gnome-open')
@@ -598,7 +596,7 @@ class DEVSComponent:
 						sys.stdout.write(_("Local programmer software not found!\n"))
 					else:
 						os.system(soft+" openURL " + python_path)
-				### on est dans kde
+				### with kde
 				elif os.system('pidof ksmserver') != 256:
 					try:
 						soft = which('kfmclient')
@@ -610,10 +608,10 @@ class DEVSComponent:
 					sys.stdout.write(_("Unknown Windows Manager!\n"))
 
 		elif val != wx.ID_CANCEL:
-			# chargement du fichier dans la fenetre d'edition (self.text)
+			# loading file in editor windows (self.text)
 			try:
 
-				editorFrame = Editor.GetEditor(mainW, wx.ID_ANY, name, obj=self, file_type='block')
+				editorFrame = Editor.GetEditor(None, wx.ID_ANY, name, obj=self, file_type='block')
 
 				# if zipfile.is_zipfile(model_path):
 				# 	importer = zipimport.zipimporter(model_path)
@@ -629,7 +627,7 @@ class DEVSComponent:
 
 						### parse url to extract the path(/devsimpy/domain...) and the network location (lcapocchi.free.fr)
 						o = urlparse(python_path)
-						### open conenction
+						### open connection
 						c = httplib.HTTPConnection(o.netloc)
 						### request with GET mode
 						c.request('GET', o.path)

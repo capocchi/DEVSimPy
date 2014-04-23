@@ -200,21 +200,26 @@ class Zip:
 			scaleH and scaleW are used to rescale image
 		"""
 
+		if zipfile.is_zipfile(self.fn):
+			return None
+
 		zf = zipfile.ZipFile(self.fn, 'r')
 
 		### find if python file has same name of model file
 		L = filter(lambda f: f.endswith(('.jpg','jpeg','png','bmp')), zf.namelist())
 
 		if L != []:
-			f=zf.open(L.pop())
+			f = zf.open(L.pop())
 			buf = f.read()
 			f.close()
+			zf.close()
 			sbuf = StringIO.StringIO(buf)
 			image = wx.ImageFromStream(sbuf)
+			sbuf.close()
 			image.Rescale(scaleW, scaleH)
-			zf.close()
 			return image
 		else:
+			zf.close()
 			return None
 
 	@staticmethod

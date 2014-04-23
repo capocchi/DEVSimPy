@@ -51,7 +51,9 @@ ID_SHOW_SHELL = wx.NewId()
 ID_SHOW_SIM = wx.NewId()
 ID_SHOW_PROP = wx.NewId()
 ID_SHOW_LIB = wx.NewId()
+ID_SHOW_EDITOR = wx.NewId()
 ID_SHOW_TOOLBAR = wx.NewId()
+
 
 # Perspectives menu identifiers
 ID_NEW_PERSPECTIVE = wx.NewId()
@@ -249,16 +251,19 @@ class ShowMenu(wx.Menu):
 
 		self.Append(ID_SHOW_SHELL, _('Console'), _("Show Python Shell console"), wx.ITEM_CHECK)
 		self.Append(ID_SHOW_TOOLBAR, _('Tools Bar'), _("Show icons tools bar"), wx.ITEM_CHECK)
+		self.Append(ID_SHOW_EDITOR, _('Editor'), _("Show editor tab"), wx.ITEM_CHECK)
 		self.Check(ID_SHOW_SHELL, False)
 		self.Check(ID_SHOW_SIM, False)
 		self.Check(ID_SHOW_PROP, True)
 		self.Check(ID_SHOW_LIB, True)
+		self.Check(ID_SHOW_EDITOR, False)
 		self.Check(ID_SHOW_TOOLBAR, True)
 
 		parent.Bind(wx.EVT_MENU, parent.OnShowShell, id = ID_SHOW_SHELL)
 		parent.Bind(wx.EVT_MENU, parent.OnShowSimulation, id = ID_SHOW_SIM)
 		parent.Bind(wx.EVT_MENU, parent.OnShowProperties, id = ID_SHOW_PROP)
 		parent.Bind(wx.EVT_MENU, parent.OnShowLibraries, id = ID_SHOW_LIB)
+		parent.Bind(wx.EVT_MENU, parent.OnShowEditor, id = ID_SHOW_EDITOR)
 		parent.Bind(wx.EVT_MENU, parent.OnShowToolBar, id = ID_SHOW_TOOLBAR)
 
 class PerspectiveMenu(wx.Menu):
@@ -709,7 +714,7 @@ class ShapePopupMenu(wx.Menu):
 		exportXML=wx.MenuItem(self, ID_EXPORT_XML_SHAPE, _("XML"), _("Model exported to a xml file"))
 		exportJS=wx.MenuItem(self, ID_EXPORT_JS_SHAPE, _("JS"), _("Model exported to a js (join) file"))
 		plugin = wx.MenuItem(self, ID_PLUGINS_SHAPE, _("Plugin"), _("Plugin manager"))
-		properties=wx.MenuItem(self, ID_PROPERTIES_SHAPE, _("Properties"), _("Edit the attributs"))
+		properties=wx.MenuItem(self, ID_PROPERTIES_SHAPE, _("Properties"), _("Edit the attributes"))
 
 		edit.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		editModel.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -770,7 +775,7 @@ class ShapePopupMenu(wx.Menu):
 			self.AppendSeparator()
 			# pour tout les model sur le canvas ormis les connection et le model que l'on veut connecter (la source)
 			for i, item in enumerate(filter(lambda a: a != shape and not isinstance(a, Container.ConnectionShape), self.__canvas.GetDiagram().GetShapeList())):
-				# on evite de proposer les connections suivante: iPort->iPort, oPort->oPort
+				# on evite de proposer les connections suivantes: iPort->iPort, oPort->oPort
 				if (isinstance(shape, Container.iPort) and not isinstance(item, Container.iPort)) or (isinstance(shape, Container.oPort) and not isinstance(item, Container.oPort)) or isinstance(shape, Container.Block):
 					new_item = wx.MenuItem(connectable_subMenu, wx.NewId(), item.label)
 					connectable_subMenu.AppendItem(new_item)

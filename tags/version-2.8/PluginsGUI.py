@@ -313,7 +313,7 @@ class BlockPluginsList(CheckListCtrl, Populable):
 
 		elif inspect.isclass(new):
 			### TODO: monkey patchin !!! (most simple is to change python file for override class)
-			sys.stdout.write(_('WARNING: class can\'t be overrited'))
+			sys.stdout.write(_('WARNING: class can\'t be overwritted'))
 
 	#@BuzyCursorNotification
 	def Populate(self, model):
@@ -325,11 +325,10 @@ class BlockPluginsList(CheckListCtrl, Populable):
 			if self.model and not hasattr(self.model, "plug-ins"):
 				self.model.plugins = []		### dynamic append attribute
 
-
 			plugins_list = self.GetPluginsList(self.model.model_path) if self.model else []
 
 			if not isinstance(plugins_list, list):
-				msg = ('Error in plugins.py file:\n\n\t%s\n\nDo you want to edit this file?.'%plugins_list)
+				msg = ('Error in plugins.py file:\n\n%s\n\nDo you want to edit this file?'%plugins_list)
 
 				dial = wx.MessageDialog(None, msg, _('Plug-ins Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_ERROR)
 
@@ -575,14 +574,14 @@ class PluginsPanel(wx.Panel):
 		"""
 		num = self.check_list.GetItemCount()
 		for i in xrange(num):
-			self.check_list.CheckItem(i, False)
+			self.check_list.CheckItem(i, True)
 
 	def OnDeselectAll(self, event):
 		""" Deselect All button has been pressed and all plug-ins are disabled.
 		"""
 		num = self.check_list.GetItemCount()
 		for i in xrange(num):
-			self.check_list.CheckItem(i, True)
+			self.check_list.CheckItem(i, False)
 
 	def OnConfig(self, event):
 		""" Setting button has been pressed and the plug-in config function is call.
@@ -670,7 +669,7 @@ class ModelPluginsManager(wx.Frame):
 		name = os.path.basename(path)
 
 		### editor frame for the text of plug-ins
-		editorFrame = Editor.GetEditor(parent, \
+		editorFrame = Editor.GetEditor(None, \
 									wx.ID_ANY, \
 									_("%s - Plug-ins Editor")%os.path.basename(model.model_path), \
 									model, \
