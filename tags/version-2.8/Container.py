@@ -83,11 +83,12 @@ import LabelGUI
 from Mixins.Attributable import Attributable
 from Mixins.Achievable import Achievable
 from Mixins.Resizeable import Resizeable
-from Mixins.Rotable import Rotable
+from Mixins.Rotatable import Rotatable
 from Mixins.Connectable import Connectable
 from Mixins.Plugable import Plugable
 from Mixins.Structurable import Structurable
 from Mixins.Savable import Savable
+from Mixins.Selectable import Selectable
 
 ### for all dsp model build with old version of DEVSimPy
 sys.modules['Savable'] = sys.modules['Mixins.Savable']
@@ -531,7 +532,7 @@ class Diagram(Savable, Structurable):
 		msg += _("Number of atomic devs model: %d\n")%stat_dico['Atomic_nbr']
 		msg += _("Number of coupled devs model: %d\n")%stat_dico['Coupled_nbr']
 		msg += _("Number of coupling: %d\n")%stat_dico['Connection_nbr']
-		msg += _("Number of deep level (description hierarchie): %d\n")%stat_dico['Deep_level']
+		msg += _("Number of deep level (description hierarchy): %d\n")%stat_dico['Deep_level']
 
 		dlg = wx.lib.dialogs.ScrolledMessageDialog(self.GetParent(), msg, _("Diagram Information"))
 		dlg.ShowModal()
@@ -544,7 +545,7 @@ class Diagram(Savable, Structurable):
 		self.priority_list = [obj.listCtrl.GetItemText(i) for i in xrange(obj.listCtrl.GetItemCount())]
 		obj.Destroy()
 
-		### we can udpate the devs priority list during the simulation ;-)
+		### we can update the devs priority list during the simulation ;-)
 		self.updateDEVSPriorityList()
 
 
@@ -554,16 +555,17 @@ class Diagram(Savable, Structurable):
 
 		obj = event.GetEventObject()
 
-		### conditionnal statement only for windows
+		### conditional statement only for windows
 		win = obj.GetInvokingWindow() if isinstance(obj, wx.Menu) else obj
 
-		### event come from right clic on the shapecanvas
+		### event come from right click on the shapecanvas
 		if isinstance(win, ShapeCanvas):
 			win = win.GetParent()
 			if isinstance(win, DetachedFrame):
 				title = win.GetTitle()
 			else:
 				title = win.GetPageText(win.GetSelection())
+
 		### event come from Main application by the Diagram menu
 		else:
 			nb2 = win.GetDiagramNotebook()
@@ -606,10 +608,6 @@ class Diagram(Savable, Structurable):
 		### if there are models in diagram
 		if self.GetCount() != 0:
 
-            # window that contain the diagram which will be simulate
-			#mainW = wx.GetApp().GetTopWindow()
-			#win = mainW.GetWindowByEvent(event)
-
 			obj = event.GetEventObject()
 			win = obj.GetTopLevelParent()
 
@@ -627,7 +625,7 @@ class Diagram(Savable, Structurable):
 				frame = CheckerGUI.CheckerGUI(win, D)
 				frame.Show()
 
-		### no modles in diagram
+		### no models in diagram
 		else:
 			wx.MessageBox(_("Diagram is empty.\n\nPlease, drag-and-drop model from libraries control panel to build a diagram."),_('Error Manager'))
 
@@ -639,10 +637,10 @@ class Diagram(Savable, Structurable):
 		if self.GetCount() != 0 :
 
 			## window that contain the diagram which will be simulate
-##			mainW = wx.GetApp().GetTopWindow()
-##			win = mainW.GetActiveWindow()
+			win = wx.GetApp().GetTopWindow()
+
 			obj = event.GetEventObject()
-			win = obj.GetWindow() if isinstance(obj, wx.Menu) else obj.GetTopLevelParent()
+			#win = obj.GetWindow() if isinstance(obj, wx.Menu) else obj.GetTopLevelParent()
 
 			# diagram which will be simulate
 			diagram = self
@@ -652,7 +650,7 @@ class Diagram(Savable, Structurable):
  			if D is not None:
 				playSound(SIMULATION_ERROR_SOUND_PATH)
 				dial = wx.MessageDialog(win, \
-									_("There is errors in some models.\n\nDo you want to execute the error manager ?"), \
+									_("There is errors in some models.\n\nDo you want to execute the error manager?"), \
 									_('Simulation Manager'), \
 									wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 				if dial.ShowModal() == wx.ID_YES:
@@ -1024,7 +1022,6 @@ class ShapeEvtHandler:
 	def OnConnect(self,event):
 		pass
 
-
 # Generic Graphic items---------------------------------------------------------
 class Shape(ShapeEvtHandler):
 	""" Shape class
@@ -1284,15 +1281,20 @@ class PointShape(Shape):
 		self.graphic.fill = self.fill
 
 	def moveto(self,x,y):
+		"""
+		"""
 		self.x = x
 		self.y = y
 		size = self.size
-		self.graphic.x = [x-size,x+size]
-		self.graphic.y = [y-size,y+size]
+
+		self.graphic.x = [x-size, x+size]
+		self.graphic.y = [y-size, y+size]
 
 	def move(self,x,y):
-		self.x = array.array('d',map((lambda v: v+x), self.x))
-		self.y = array.array('d',map((lambda v: v+y), self.y))
+		"""
+		"""
+		self.x = array.array('d', map((lambda v: v+x), self.x))
+		self.y = array.array('d', map((lambda v: v+y), self.y))
 		self.graphic.move(x,y)
 
 	def HitTest(self, x, y):
@@ -1566,7 +1568,6 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 		for item in self.diagram.shapes + self.nodes:
 			try:
-
 				item.draw(dc)
 			except Exception, info:
 				sys.stderr.write(_("Draw error: %s \n")%info)
@@ -1651,6 +1652,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 		### Refresh canvas
 		self.Refresh()
+
 		### Focus on canvas
 		#wx.CallAfter(self.SetFocus)
 
@@ -1814,16 +1816,16 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 		# connection physique
 		if isinstance(sourceNode, ONode):
-			ci.setInput(sourceNode.item,sourceNode.index)
-			ci.x[0],ci.y[0] = sourceNode.item.getPort('output',sourceNode.index)
-			ci.x[1],ci.y[1] = targetNode.item.getPort('input',targetNode.index)
-			ci.setOutput(targetNode.item,targetNode.index)
+			ci.setInput(sourceNode.item, sourceNode.index)
+			ci.x[0], ci.y[0] = sourceNode.item.getPortXY('output', sourceNode.index)
+			ci.x[1], ci.y[1] = targetNode.item.getPortXY('input', targetNode.index)
+			ci.setOutput(targetNode.item, targetNode.index)
 
 		else:
-			ci.setInput(targetNode.item,targetNode.index)
-			ci.x[1],ci.y[1] = sourceNode.item.getPort('output', sourceNode.index)
-			ci.x[0],ci.y[0] = targetNode.item.getPort('input', targetNode.index)
-			ci.setOutput(sourceNode.item,sourceNode.index)
+			ci.setInput(targetNode.item, targetNode.index)
+			ci.x[1], ci.y[1] = sourceNode.item.getPortXY('output', sourceNode.index)
+			ci.x[0], ci.y[0] = targetNode.item.getPortXY('input', targetNode.index)
+			ci.setOutput(sourceNode.item, sourceNode.index)
 
 		# selection de la nouvelle connection
 		self.deselect()
@@ -2095,7 +2097,8 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 			## Left mouse button down, change cursor to
 			## something else to denote event capture
-			self.CaptureMouse()
+			if not self.HasCapture():
+				self.CaptureMouse()
 			self.overlay = wx.Overlay()
 			self.selectionStart = event.Position
 
@@ -2110,17 +2113,17 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 				self.select(item)
 
-			### else each other are considrered
+			### else each other are considered
 			else:
 
 				for s in self.getSelectedShapes():
 					s.OnLeftDown(event) # send leftdown event to current shape
 
-		if not isinstance(item, ConnectionShape) and not isinstance(item, Node):
-			### Update the nb1 panel properties
-			self.__state['model'] = item
-			self.__state['canvas'] = self
-			self.notify()
+		### Update the nb1 panel properties only for Block and Port (call update in ControlNotebook)
+		#if isinstance(item, Attributable):
+		self.__state['model'] = item
+		self.__state['canvas'] = self
+		self.notify()
 
 		self.Refresh()
 
@@ -2134,7 +2137,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
 
 		### clic sur un block
-		if shape is not None:
+		if shape:
 
 			shape.OnLeftUp(event)
 			shape.leftUp(self.select())
@@ -2207,7 +2210,6 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 							### TODO: I dont now why !!!
 							pass
 
-
 					if remove:
 						self.diagram.DeleteShape(item)
 						self.deselect()
@@ -2215,7 +2217,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 					### transformation de la connection en zigzag
 					pass
 
-		### clique sur le canvas
+		### click on canvas
 		else:
 
 			### Rubber Band with overlay
@@ -2260,8 +2262,8 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 	def DiagramModified(self):
 		""" Modification printing in statusbar and modify value manager.
 
-				This method manage the propagation of modification
-				from window where modifications are performed to DEVSimPy main window
+			This method manage the propagation of modification
+			from window where modifications are performed to DEVSimPy main window.
 
 		"""
 
@@ -2407,7 +2409,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 				if win.IsActive():
 					flag = False
 
-			if self.f is not None:
+			if self.f:
 				self.f.Close()
 				self.f = None
 
@@ -2435,17 +2437,17 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		self.DiagramModified()
 
 	def SetDiagram(self, diagram):
-		"""
+		""" Setter for diagram attribute.
 		"""
 		self.diagram = diagram
 
 	def GetDiagram(self):
-		""" Return Diagram instance
+		""" Return Diagram instance.
 		"""
 		return self.diagram
 
 	def getCurrentShape(self, event):
-		"""
+		""" Return the selected current shape.
 		"""
 		# get coordinate of click in our coordinate system
 		point = self.getEventCoordinates(event)
@@ -2453,13 +2455,13 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 		# Look to see if an item is selected
 		for item in self.nodes + self.diagram.shapes:
-			if item.HitTest(point[0],point[1]):
+			if item.HitTest(point[0], point[1]):
 				return item
 
 		return None
 
 	def GetXY(self, m, x, y):
-		""" Give x and y of model m into canvas
+		""" Give x and y of model m into canvas.
 		"""
 		dx = (m.x[1]-m.x[0])
 		dy = (m.y[1]-m.y[0])
@@ -2469,32 +2471,35 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		return (ux-dx,uy-dy)
 
 	def getScalledCoordinates(self, x, y):
+		""" Return coordiante depending on the zoom.
+		"""
 		originX, originY = self.GetViewStart()
 		unitX, unitY = self.GetScrollPixelsPerUnit()
 		return ((x + (originX * unitX))/ self.scalex, (y + (originY * unitY))/ self.scaley)
 
 	def getEventCoordinates(self, event):
-		"""
+		""" Return the coordinates from event.
 		"""
 		return self.getScalledCoordinates(event.GetX(),event.GetY())
 
 	def getSelectedShapes(self):
-		"""
+		""" Retrun the list of selected object on the canvas (Connectable nodes are excluded)
 		"""
 		return self.selectedShapes
 
 	def isSelected(self, s):
+		""" Check of shape s is selected.
+			If s is a ConnectableNode object, it implies that is visible and then selected !
 		"""
-		"""
-		return (s is not None) and (s in self.selectedShapes)
+		return (s) and (s in self.selectedShapes) or isinstance(s, ConnectableNode)
 
 	def getName(self):
-		"""
+		""" Return the name
 		"""
 		return self.name
 
 	def deselect(self, item=None):
-		"""
+		""" Deselect all shapes
 		"""
 
 		if item is None:
@@ -2524,10 +2529,10 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 			self.selectedShapes.append(item)
 			item.OnSelect(None)
 			if isinstance(item, Connectable):
-				self.nodes.extend( [INode(item,n,self) for n in xrange(item.input)] )
-				self.nodes.extend( [ONode(item,n,self) for n in xrange(item.output)] )
+				self.nodes.extend([INode(item, n, self) for n in xrange(item.input)])
+				self.nodes.extend([ONode(item, n, self) for n in xrange(item.output)])
 			if isinstance(item, Resizeable):
-				self.nodes.extend( [ResizeableNode(item,n,self) for n in xrange(len(item.x))] )
+				self.nodes.extend([ResizeableNode(item, n, self) for n in xrange(len(item.x))])
 
 	###
 	def UpdateShapes(self, L=None):
@@ -2547,25 +2552,23 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 	### selection sur le canvas les ONodes car c'est le seul moyen d'y accéder pour effectuer l'appartenance avec les modèles
 	def showOutputs(self, item=None):
-		"""
+		""" Populate nodes list with output ports.
 		"""
 		if item:
-			self.nodes.extend( [ONode(item,n,self) for n in xrange(item.output)])
-		elif item is None:
-			for i in self.diagram.shapes:
-				if isinstance(i,Connectable):
-					self.nodes.extend( [ONode(i,n,self) for n in xrange(i.output)] )
+			self.nodes.extend([ONode(item, n, self) for n in xrange(item.output)])
+		else:
+			for s in filter(lambda a: isinstance(a, Connectable), self.diagram.shapes):
+				self.nodes.extend([ONode(s, n, self) for n in xrange(s.output)])
 
 	### selection sur le canvas les INodes car c'est le seul moyen d'y accéder pour effectuer l'appartenance avec les modèles
 	def showInputs(self,item=None):
+		""" Populate nodes list with output ports.
 		"""
-		"""
-		if isinstance(item,Block):
-			self.nodes.extend( [INode(item,n,self) for n in xrange(item.input)] )
+		if item:
+			self.nodes.extend([INode(item, n, self) for n in xrange(item.input)])
 		else:
-			for i in self.diagram.shapes:
-				if isinstance(i,Connectable):
-					self.nodes.extend( [INode(i,n,self) for n in xrange(i.input)])
+			for s in filter(lambda a: isinstance(a, Connectable), self.diagram.shapes):
+				self.nodes.extend([INode(s, n, self) for n in xrange(s.input)])
 
 	def GetState(self):
 		return self.__state
@@ -2710,93 +2713,57 @@ class LinesShape(Shape):
 				break
 
 # Mixins------------------------------------------------------------------------
-class Selectable:
-	""" Allows Shape to be selected.
-	"""
-
-	def __init__(self):
-		""" Constructor
-		"""
-		self.selected = False
-
-	def ShowAttributes(self, event):
-		"""
-		"""
-
-		canvas = event.GetEventObject()
-		diagram = canvas.GetDiagram()
-
-		if isinstance(self, (Block, Port)) and event.ControlDown():
-
-			old_label = self.label
-
-			d = LabelGUI.LabelDialog(canvas, self)
-			d.ShowModal()
-
-			### update priority list
-			if self.label in diagram.priority_list and old_label != self.label:
-				### find index of label priority list and replace it
-				i = diagram.priority_list.index(self.label)
-				diagram.priority_list[i] = new_label
-
-				### if block we adapt the font according to the new label size
-				if " " not in new_label and isinstance(self, Block):
-					font  = wx.Font(self.font[0], self.font[1],self.font[2], self.font[3], False, self.font[4])
-					ln = len(self.label)*font.GetPointSize()
-					w = self.x[1]-self.x[0]
-
-					if ln > w:
-						a = ln-w
-						self.x[0] -= a/2
-						self.x[1] += a/2
-
-				### update of panel properties
-				mainW = wx.GetApp().GetTopWindow()
-				nb1 = mainW.GetControlNotebook()
-				if nb1.GetSelection() == 1:
-					newContent = AttributeEditor(nb1.propPanel, wx.ID_ANY, self, canvas)
-					nb1.UpdatePropertiesPage(newContent)
-
-		event.Skip()
-
 ###---------------------------------------------------------------------------------------------------------
 # NOTE: Testable << object :: Testable mixin is needed to manage tests files and tests executions. It add the OnTestEditor event for the tests files edition
 class Testable(object):
 
 	# NOTE: Testable :: OnTestEditor 		=> new event for AMD model. Open tests files in editor
 	def OnTestEditor(self, event):
-		model_path = os.path.dirname(self.python_path)
+		"""
+		"""
 
-		# If selected model is AMD
-		if self.isAMD():
+		L = self.GetTestFile()
+
+		### create Editor with BDD files in tab
+		if L != []:
+
+			#model_path = os.path.dirname(self.python_path)
 
 			# TODO: Testable :: OnTestEditor => Fix Editor importation
 			import Editor
 
+			#mainW = wx.GetApp().GetTopWindow()
+			### Editor instanciation and configuration---------------------
+			editorFrame = Editor.GetEditor(
+					None,
+					wx.ID_ANY,
+					'Features',
+					file_type="test"
+			)
+
+			for i,s in enumerate(map(lambda l: os.path.join(self.model_path, l), L)):
+				editorFrame.AddEditPage(L[i], s)
+
+			editorFrame.Show()
+			### -----------------------------------------------------------
+
+	def GetTestFile(self):
+		""" Get Test file only for AMD model
+		"""
+
+		# If selected model is AMD
+		if self.isAMD():
+
 			# Create tests files is doesn't exist
-			if not ZipManager.Zip.HasTests(model_path):
+			if not ZipManager.Zip.HasTests(self.model_path):
 				self.CreateTestsFiles()
 
 			### list of BDD files
-			L = ZipManager.Zip.GetTests(model_path)
+			L = ZipManager.Zip.GetTests(self.model_path)
 
-			### create Editor with BDD files in tab
-			if L != []:
+			return L
 
-				mainW = wx.GetApp().GetTopWindow()
-				### Editor instanciation and configuration---------------------
-				editorFrame = Editor.GetEditor(
-						mainW,
-						wx.ID_ANY,
-						'Features',
-						file_type="test"
-				)
-
-				for i,s in enumerate(map(lambda l: os.path.join(model_path, l), L)):
-					editorFrame.AddEditPage(L[i], s)
-
-				editorFrame.Show()
-				### -----------------------------------------------------------
+		return []
 
 	# NOTE: Testable :: isAMD 				=> Test if the model is an AMD and if it's well-formed
 	def isAMD(self):
@@ -3013,10 +2980,10 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 	def draw(self, dc):
 
 		if self.input:
-			self.x[0], self.y[0] = self.input[0].getPort('output', self.input[1])
+			self.x[0], self.y[0] = self.input[0].getPortXY('output', self.input[1])
 
 		if self.output:
-			self.x[-1],self.y[-1] = self.output[0].getPort('input', self.output[1])
+			self.x[-1],self.y[-1] = self.output[0].getPortXY('input', self.output[1])
 
 		LinesShape.draw(self,dc)
 
@@ -3069,7 +3036,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		pass
 
 #Basic Graphical Components-----------------------------------------------------
-class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attributable, Rotable, Plugable, Observer, Testable, Savable):
+class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attributable, Rotatable, Plugable, Observer, Testable, Savable):
 	""" Generic Block class.
 	"""
 
@@ -3082,6 +3049,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		Connectable.__init__(self, nb_inputs, nb_outputs)
 		Attributable.__init__(self)
 		Selectable.__init__(self)
+		Rotatable.__init__(self)
 
 		self.AddAttributes(Attributable.GRAPHICAL_ATTR)
 		self.label = label
@@ -3210,37 +3178,47 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 
 		itemId = event.GetId()
 		menu = event.GetEventObject()
-		menuItem = menu.FindItemById(itemId)
-		ext = menuItem.GetLabel().lower()
 
-		wcd = _('%s Files (*.%s)|*.%s|All files (*)|*')%(ext.upper(), ext, ext)
-		save_dlg = wx.FileDialog(parent,
-								message = _('Export file as...'),
-								defaultDir = domain_path,
-								defaultFile = str(self.label)+'.%s'%ext,
-								wildcard = wcd,
-								style = wx.SAVE | wx.OVERWRITE_PROMPT)
+		### Export by using right clic menu
+		if isinstance(menu, wx.Menu):
+			menuItem = menu.FindItemById(itemId)
+			ext = menuItem.GetLabel().lower()
 
-		if save_dlg.ShowModal() == wx.ID_OK:
-			path = os.path.normpath(save_dlg.GetPath())
+			wcd = _('%s Files (*.%s)|*.%s|All files (*)|*')%(ext.upper(), ext, ext)
+			save_dlg = wx.FileDialog(parent,
+									message = _('Export file as...'),
+									defaultDir = domain_path,
+									defaultFile = str(self.label)+'.%s'%ext,
+									wildcard = wcd,
+									style = wx.SAVE | wx.OVERWRITE_PROMPT)
+
+			if save_dlg.ShowModal() == wx.ID_OK:
+				path = os.path.normpath(save_dlg.GetPath())
+				label = os.path.basename(path)
+
+			save_dlg.Destroy()
+
+		### export (save) by using save button of DetachedFrame
+		else:
+			path = self.model_path
 			label = os.path.basename(path)
-			try:
-				### Block is Savable
-				self.SaveFile(path)
 
-				printOnStatusBar(mainW.statusbar, {0:_('%s Exported')%label, 1:''})
 
-			except IOError, error:
-				dlg = wx.MessageDialog(parent, \
-									_('Error exported file %s\n')%error, \
-									label, \
-									wx.OK | wx.ICON_ERROR)
-				dlg.ShowModal()
+		try:
+			### Block is Savable
+			self.SaveFile(path)
 
-		save_dlg.Destroy()
+			printOnStatusBar(mainW.statusbar, {0:_('%s Exported')%label, 1:''})
+
+		except IOError, error:
+			dlg = wx.MessageDialog(parent, \
+								_('Error exported file %s\n')%error, \
+								label, \
+								wx.OK | wx.ICON_ERROR)
+			dlg.ShowModal()
 
 	def update(self, concret_subject = None):
-		"""
+		""" Update method to respond to notify call
 		"""
 
 		state = concret_subject.GetState()
@@ -3702,7 +3680,7 @@ class ContainerBlock(Block, Diagram, Structurable):
 class Node(PointShape):
 	""" Node(item, index, cf, type)
 
-			Node class for connection between model.
+		Node class for connection between model.
 	"""
 
 	def __init__(self, item, index, cf, t='rect'):
@@ -3712,7 +3690,7 @@ class Node(PointShape):
 		self.item = item	### parent Block
 		self.index = index	### number of port
 		self.cf = cf		### parent canvas
-		self.label = ""
+		self.label = ""		### label of port
 
 		self.lock_flag = False                  # move lock
 		PointShape.__init__(self, type = t)
@@ -3732,14 +3710,14 @@ class ConnectableNode(Node):
 		Node.__init__(self, item, index, cf, t = 'circ')
 
 	def OnLeftDown(self, event):
-		""" Left Down clic has been invoked
+		""" Left Down click has been invoked
 		"""
 		### deselect the block to delete the info flag
 		self.cf.deselect(self.item)
 		event.Skip()
 
 	def HitTest(self,x,y):
-		""" Collision detection method
+		""" Collision detection method.
 		"""
 
 		### old model can produce an error
@@ -3764,19 +3742,25 @@ class INode(ConnectableNode):
 
 		self.label = "in%d"%self.index
 
+	def OnRightDown(self, event):
+		""" Right Down event has been received.
+		"""
+		pass
+		#event.Skip()
+
 	def move(self, x, y):
-		""" Move method
+		""" Move method.
 		"""
 		self.cf.deselect()
 		ci = ConnectionShape()
 		ci.setOutput(self.item, self.index)
-		ci.x[0], ci.y[0] = self.item.getPort('input', self.index)
+		ci.x[0], ci.y[0] = self.item.getPortXY('input', self.index)
 		self.cf.diagram.shapes.insert(0, ci)
 		self.cf.showOutputs()
 		self.cf.select(ci)
 
 	def leftUp(self, items):
-		""" Left up action has been invocked
+		""" Left up action has been invocked.
 		"""
 
 		cs = items[0]
@@ -3786,14 +3770,14 @@ class INode(ConnectableNode):
 			#del cs.touch_list[index]
 
 		if len(items) == 1 and isinstance(cs, ConnectionShape) and cs.output is None:
-			cs.setOutput(self.item,self.index)
+			cs.setOutput(self.item, self.index)
 			#cs.ChangeForm(ShapeCanvas.CONNECTOR_TYPE)
 
-
 	def draw(self, dc):
-		""" Drawing method
+		""" Drawing method.
 		"""
-		x,y = self.item.getPort('input', self.index)
+
+		x,y = self.item.getPortXY('input', self.index)
 		self.moveto(x, y)
 
 		self.fill = ['#00b400'] #GREEN
@@ -3806,7 +3790,7 @@ class INode(ConnectableNode):
 
 		### position of label
 		if not isinstance(self.item, Port):
-			### perapre label position
+			### prepare label position
 			if self.item.direction == 'ouest':
 				xl = x-30
 				yl = y
@@ -3826,7 +3810,6 @@ class INode(ConnectableNode):
 		### Drawing
 		PointShape.draw(self, dc)
 
-
 class ONode(ConnectableNode):
 	""" ONode(item, index, cf)
 	"""
@@ -3839,12 +3822,12 @@ class ONode(ConnectableNode):
 		self.label = "out%d"%self.index
 
 	def move(self, x, y):
-		""" Moving method
+		""" Moving method.
 		"""
 		self.cf.deselect()
 		ci = ConnectionShape()
 		ci.setInput(self.item, self.index)
-		ci.x[1], ci.y[1] = self.item.getPort('output', self.index)
+		ci.x[1], ci.y[1] = self.item.getPortXY('output', self.index)
 		self.cf.diagram.shapes.insert(0, ci)
 		self.cf.showInputs()
 		self.cf.select(ci)
@@ -3866,7 +3849,7 @@ class ONode(ConnectableNode):
 	def draw(self, dc):
 		""" Drawing method
 		"""
-		x,y = self.item.getPort('output', self.index)
+		x,y = self.item.getPortXY('output', self.index)
 		self.moveto(x, y)
 		self.fill = ['#ff0000']
 
@@ -3911,7 +3894,7 @@ class ResizeableNode(Node):
 		self.fill = ['#000000'] #BLACK
 
 	def draw(self, dc):
-		""" Drawing method
+		""" Drawing method.
 		"""
 
 		try:
@@ -3922,7 +3905,7 @@ class ResizeableNode(Node):
 		PointShape.draw(self, dc)
 
 	def move(self, x, y):
-		""" moving method
+		""" Moving method.
 		"""
 
 		lines_shape = self.item
@@ -3943,6 +3926,8 @@ class ResizeableNode(Node):
 				#self.item.OnResize()
 
 	def OnDeleteNode(self, event):
+		"""
+		"""
 		if isinstance(self.item, ConnectionShape):
 			for x in self.item.x:
 				if x-3 <= event.GetX() <= x+3:
@@ -3963,8 +3948,8 @@ class ResizeableNode(Node):
 		menu.Destroy()
 
 #---------------------------------------------------------
-class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer):
-	""" Port(x1,y1, x2, y2, label)
+class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observer):
+	""" Port(x1, y1, x2, y2, label)
 	"""
 
 	def __init__(self, x1, y1, x2, y2, label = 'Port'):
@@ -3974,10 +3959,13 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer
 		CircleShape.__init__(self, x1, y1, x2, y2, 30.0)
 		Connectable.__init__(self)
 		Attributable.__init__(self)
+		Rotatable.__init__(self)
 
 		self.SetAttributes(Attributable.GRAPHICAL_ATTR[0:4])
 		self.label = label
-		self.id = 0
+		### TODO: move to args
+		self.AddAttribute('id')
+		#self.id = 0
 		self.args = {}
 		self.lock_flag = False                  # move lock
 
@@ -3994,6 +3982,9 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer
 		self.__dict__.update(state)
 
 	def draw(self, dc):
+		""" Drawing method.
+		"""
+
 		CircleShape.draw(self, dc)
 		w,h =  dc.GetTextExtent(self.label)
 
@@ -4015,7 +4006,9 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer
 			img =  wx.Bitmap(os.path.join(ICON_PATH_16_16, 'lock.png'),wx.BITMAP_TYPE_ANY)
 			dc.DrawBitmap( img, self.x[0]+w/3, self.y[0])
 
-	def leftUp(self,event):
+	def leftUp(self, event):
+		""" Left up event has been invoked.
+		"""
 		pass
 
 	###
@@ -4030,14 +4023,14 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer
 		menu.Destroy()
 
 	###
-	def OnLeftDown(self,event):
-		"""
+	def OnLeftDown(self, event):
+		""" Left down event has been invoked.
 		"""
 		Selectable.ShowAttributes(self, event)
 		event.Skip()
 
 	def OnProperties(self, event):
-		"""
+		""" Properties of port has been invoked.
 		"""
 		canvas = event.GetEventObject()
 		f = AttributeEditor(canvas.GetParent(), wx.ID_ANY, self, canvas)
@@ -4045,12 +4038,12 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer
 
 	###
 	def OnLeftDClick(self, event):
-		"""
+		""" Left double click event has been invoked.
 		"""
 		self.OnProperties(event)
 
 	def update(self, concret_subject = None):
-		"""
+		""" Update function linked to notify function (observer pattern)
 		"""
 		state = concret_subject.GetState()
 
@@ -4062,6 +4055,8 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotable, Observer
 				canvas.UpdateShapes([self])
 
 	def __repr__(self):
+		"""
+		"""
 		s="\t Label: %s\n"%self.label
 		return s
 
@@ -4076,7 +4071,7 @@ class iPort(Port):
 
 		Port.__init__(self, 50, 60, 100, 120, label)
 		self.fill= ['#add8e6']          # fill color
-		self.AddAttribute('id')
+		#self.AddAttribute('id')
 		self.label_pos = 'bottom'
 		self.input = 0
 		self.output = 1
@@ -4103,7 +4098,7 @@ class oPort(Port):
 
 		Port.__init__(self, 50, 60, 100, 120, label)
 		self.fill = ['#90ee90']
-		self.AddAttribute('id')
+		#self.AddAttribute('id')
 		self.label_pos = 'bottom'
 		self.input = 1
 		self.output = 0
@@ -4134,23 +4129,19 @@ class ScopeGUI(CodeBlock):
 		self.AddAttribute("xlabel")
 		self.AddAttribute("ylabel")
 
-	def OnLeftDClick(self,event):
+	def OnLeftDClick(self, event):
 		""" Left Double Click has been appeared.
 		"""
 
-		canvas = event.GetEventObject()
-
 		# If the frame is call before the simulation process, the atomicModel is not instanciate (Instanciation delegate to the makeDEVSconnection after the run of the simulation process)
 		devs = self.getDEVSModel()
-		if devs is None:
-			dial = wx.MessageDialog(None, \
-								_('No data available.\nGo to the simulation process first!'), \
-								self.label, \
-								wx.OK | wx.ICON_INFORMATION)
-			dial.ShowModal()
-		else:
+
+		if devs:
+			canvas = event.GetEventObject()
 			# Call the PlotManager which plot on the canvas depending the atomicModel.fusion option
 			PlotGUI.PlotManager(canvas, self.label, devs, self.xlabel, self.ylabel)
+		else:
+			CodeBlock.OnLeftDClick(self, event)
 
 #------------------------------------------------
 class DiskGUI(CodeBlock):
@@ -4158,23 +4149,22 @@ class DiskGUI(CodeBlock):
 	"""
 
 	def __init__(self, label='DiskGUI'):
-		""" Constructor
+		""" Constructor.
 		"""
 		CodeBlock.__init__(self, label, 1, 0)
 
 	def OnLeftDClick(self, event):
-		"""
+		""" Left Double Click has been appeared.
 		"""
 		devs = self.getDEVSModel()
 
-		if devs is not None:
-			mainW = wx.GetApp().GetTopWindow()
-			frame= SpreadSheet.Newt(mainW, wx.ID_ANY, _("SpreadSheet %s")%self.label, devs, devs.comma if hasattr(devs, 'comma') else " ")
+		if devs:
+			frame= SpreadSheet.Newt( wx.GetApp().GetTopWindow(),
+									wx.ID_ANY,
+									_("SpreadSheet %s")%self.label,
+									devs,
+									devs.comma if hasattr(devs, 'comma') else " ")
 			frame.Center()
 			frame.Show()
 		else:
-			dial = wx.MessageDialog(None, \
-								_('No data available.\nGo to the simulation process first!'), \
-								self.label, \
-								wx.OK | wx.ICON_INFORMATION)
-			dial.ShowModal()
+			CodeBlock.OnLeftDClick(self, event)
