@@ -2,6 +2,8 @@
 
 import os
 import shutil
+import Container
+
 
 class ExperimentGenerator:
 
@@ -37,9 +39,9 @@ class ExperimentGenerator:
             self.modelHierarchyDescription.append('#%s-> %s' % (self.hierarchyDescDec, clabel))
             if not hasattr(c, "componentSet"):
                 self.modelPythonDescription[model].append(self.dec+'self.%s=self.addSubModel(%s.%s("%s"))' % (clabel, cname, cname, clabel) )
-                self.modulePathFile.append(c.blockModel.python_path)
-                if self.listModules.count(cname)==0:
-                    self.listModules.append(cname)
+                #self.modulePathFile.append(c.blockModel.python_path)
+                #if self.listModules.count(cname)==0:
+                    #self.listModules.append(cname)
                 for op in c.OPorts:
                     self.modelPythonDescription[model].append(self.dec+'self.%s.addOutPort("%s")' % (clabel, op.myID))
                 for ip in c.IPorts:
@@ -60,7 +62,8 @@ class ExperimentGenerator:
         for eoc in model.EOC:
             self.modelPythonDescription[model].append(self.dec+'self.connectPorts(self.%s.OPorts[%s], self.OPorts[%s])' % (eoc[0][0].blockModel.label, eoc[0][0].OPorts.index(eoc[0][1]), eoc[1][0].OPorts.index(eoc[1][1])))
 
-    def createExperimentFiles(self, master):
+
+    def createExperimentFile(self, master):
         self.listModules = []
         self.modulePathFile = []
         self.modelPythonDescription={}
@@ -68,11 +71,14 @@ class ExperimentGenerator:
 
         #Liste des imports
         self.listModules.append("sys")
+        self.listModules.append("os")
+        self.listModules.append("__builtin__")
         self.listModules.append("DEVS.AtomicDEVS")
         self.listModules.append("DEVS.CoupledDEVS")
 
 
         #Creation du repertoire pour accueillir les nouveaux fichiers
+        #Suppression si le repertoire existe deja
         if os.path.exists(self.fileDir):
             shutil.rmtree(self.fileDir)
         os.makedirs(self.fileDir)
@@ -80,19 +86,26 @@ class ExperimentGenerator:
         #Ouverture du fichier en ecriture
 
         newFile=open(self.fileDir+'model.py', 'w')
-        print self.fileDir
 
         #Generation du code
+
+        print type(master)
+        if isinstance(master, Container.Diagram):
+            master = Container.Diagram.makeDEVSInstance(master)
+        print type(master)
+
         self.generateCode(master)
 
-
-        #Copie des fichiers des differents modules
-        for pathFile in self.modulePathFile:
-            shutil.copyfile(pathFile, self.fileDir + os.path.basename(pathFile))
 
         #Ecriture des imports
         for m in self.listModules:
             newFile.write('import %s\n' % m)
+
+        newFile.write("\n\nsys.path.append(os.path.join('..','DEVSKernel','PyDEVS'))\n")
+        newFile.write("sys.path.append(os.path.join('..'))\n")
+
+        newFile.write("__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyDEVS'\n")
+        newFile.write("__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}\n\n")
 
 
         #Ecriture des modeles
@@ -106,8 +119,7 @@ class ExperimentGenerator:
         newFile.write('# Model_%s\n' % master.blockModel.label)
         for line in self.modelHierarchyDescription:
             newFile.write('%s\n' % line)
-
-        newFile.write('#########################################################\n')
+        newFile.write('#########################################################')
 
         #Fermeture du fichier
         newFile.close()

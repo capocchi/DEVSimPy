@@ -394,6 +394,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		"""
 		assert(self.master is not None)
 
+
 		if self._value.GetValidator().Validate(self._value) or self.ntl:
 
 			### pour prendre en compte les simulations multiples sans relancer un SimulationDialog
@@ -401,12 +402,13 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			if self.thread is not None and not self.thread.thread_suspend:
 				diagram = self.master.getBlockModel()
 				diagram.Clean()
+
 				self.current_master = Container.Diagram.makeDEVSInstance(diagram)
 			else:
 				self.current_master = self.master
 
 				expGen = ExperimentGenerator("c:\\Experiment\\")
-				expGen.createExperimentFiles(self.current_master)
+				expGen.createExperimentFile(self.current_master)
 
 			if isinstance(self.parent, wx.Panel):
 				# redirection du stdout ici dans le cas du Panel (sinon dans OnSimulation)

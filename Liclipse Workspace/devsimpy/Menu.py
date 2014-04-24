@@ -28,6 +28,10 @@ from tempfile import gettempdir
 import Container
 import ZipManager
 
+
+from ExperimentGenerator import ExperimentGenerator
+
+
 #File menu identifiers
 ID_NEW = wx.ID_NEW
 ID_OPEN  = wx.ID_OPEN
@@ -111,7 +115,7 @@ ID_TESTING_SHAPE = wx.NewId()
 # Shape canvas popup menu identifiers
 ID_NEW_SHAPE = wx.NewId()
 ID_ADD_CONSTANTS = wx.NewId()
-
+ID_GEN_EXPERIMENT = wx.NewId()
 # Library popup menu identifiers
 ID_NEW_LIB = wx.NewId()
 ID_IMPORT_LIB = wx.NewId()
@@ -418,6 +422,7 @@ class HelpMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnAbout, id=ID_ABOUT)
 		parent.Bind(wx.EVT_MENU, parent.OnContact, id=ID_CONTACT)
 
+
 class MainMenuBar(wx.MenuBar):
 	def __init__(self, parent):
 		wx.MenuBar.__init__(self)
@@ -642,6 +647,7 @@ class LibraryPopupMenu(wx.Menu):
 class ShapeCanvasPopupMenu(wx.Menu):
 	""" ShapeCanvas menu class
 	"""
+
 	def __init__(self, parent):
 		""" Constructor.
 		"""
@@ -653,6 +659,9 @@ class ShapeCanvasPopupMenu(wx.Menu):
 		paste = wx.MenuItem(self, ID_PASTE_SHAPE, _('&Paste\tCtrl+V'), _('Paste the model'))
 		add_constants = wx.MenuItem(self, ID_ADD_CONSTANTS, _('Add constants'), _('Add constants parameters'))
 		preview_dia = wx.MenuItem(self, ID_PREVIEW_PRINT, _('Print preview'), _('Print preveiw of the diagram'))
+		generate_experiment = wx.MenuItem(self, ID_GEN_EXPERIMENT, _('Generate experiment'), _('Generate experiment model for PyPDEvS'))
+
+
 
 		### bitmap item setting
 		new.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'new_model.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -666,6 +675,8 @@ class ShapeCanvasPopupMenu(wx.Menu):
 		self.AppendItem(add_constants)
 		self.AppendItem(preview_dia)
 
+		self.AppendItem(generate_experiment)
+
 		self.Enable(ID_PASTE_SHAPE, not Container.clipboard == [])
 
 		### binding
@@ -673,6 +684,13 @@ class ShapeCanvasPopupMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnPaste, id=ID_PASTE_SHAPE)
 		parent.Bind(wx.EVT_MENU, parent.diagram.OnAddConstants, id=ID_ADD_CONSTANTS)
 		parent.Bind(wx.EVT_MENU, parent.parent.PrintPreview, id=ID_PREVIEW_PRINT)
+
+		#parent.Bind(wx.EVT_MENU, OnExperimentGenerator, id=ID_GEN_EXPERIMENT)
+
+
+		expGen = ExperimentGenerator("c:\\Experiment\\")
+		#expGen.createExperimentFile(parent.diagram)
+
 
 class ShapePopupMenu(wx.Menu):
 	""" Shape menu class
@@ -789,7 +807,6 @@ class ShapePopupMenu(wx.Menu):
 				Export_SubMenu1 = export_subMenu.AppendItem(exportCMD)
 				Export_SubMenu2 = export_subMenu.AppendItem(exportXML)
 				Export_SubMenu3 = export_subMenu.AppendItem(exportJS)
-
 			else:
 				self.Enable(ID_EDIT_SHAPE, False)
 
