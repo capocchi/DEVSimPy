@@ -654,14 +654,14 @@ class ShapeCanvasPopupMenu(wx.Menu):
 
 		wx.Menu.__init__(self)
 
+		self.parent= parent
+
 		### make all items
 		new = wx.MenuItem(self, ID_NEW_SHAPE, _('&New'), _('New model'))
 		paste = wx.MenuItem(self, ID_PASTE_SHAPE, _('&Paste\tCtrl+V'), _('Paste the model'))
 		add_constants = wx.MenuItem(self, ID_ADD_CONSTANTS, _('Add constants'), _('Add constants parameters'))
-		preview_dia = wx.MenuItem(self, ID_PREVIEW_PRINT, _('Print preview'), _('Print preveiw of the diagram'))
+		preview_dia = wx.MenuItem(self, ID_PREVIEW_PRINT, _('Print preview'), _('Print preview of the diagram'))
 		generate_experiment = wx.MenuItem(self, ID_GEN_EXPERIMENT, _('Generate experiment'), _('Generate experiment model for PyPDEvS'))
-
-
 
 		### bitmap item setting
 		new.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'new_model.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -679,17 +679,14 @@ class ShapeCanvasPopupMenu(wx.Menu):
 
 		self.Enable(ID_PASTE_SHAPE, not Container.clipboard == [])
 
+		expGen = ExperimentGenerator("c:\\Experiment\\")
+
 		### binding
 		parent.Bind(wx.EVT_MENU, parent.OnNewModel, id=ID_NEW_SHAPE)
 		parent.Bind(wx.EVT_MENU, parent.OnPaste, id=ID_PASTE_SHAPE)
 		parent.Bind(wx.EVT_MENU, parent.diagram.OnAddConstants, id=ID_ADD_CONSTANTS)
 		parent.Bind(wx.EVT_MENU, parent.parent.PrintPreview, id=ID_PREVIEW_PRINT)
-
-		#parent.Bind(wx.EVT_MENU, OnExperimentGenerator, id=ID_GEN_EXPERIMENT)
-
-
-		expGen = ExperimentGenerator("c:\\Experiment\\")
-		#expGen.createExperimentFile(parent.diagram)
+		parent.Bind(wx.EVT_MENU, expGen.OnExperiment, id=ID_GEN_EXPERIMENT)
 
 
 class ShapePopupMenu(wx.Menu):

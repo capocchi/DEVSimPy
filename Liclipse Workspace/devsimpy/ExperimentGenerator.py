@@ -4,7 +4,6 @@ import os
 import shutil
 import Container
 
-
 class ExperimentGenerator:
 
     def __init__(self, fileDir):
@@ -17,6 +16,9 @@ class ExperimentGenerator:
         return self.dec
 
     def generateCode(self, model):
+        """
+        """
+
         name=model.blockModel.label
         self.dec=''
         self.modelPythonDescription[model]=[]
@@ -64,6 +66,9 @@ class ExperimentGenerator:
 
 
     def createExperimentFile(self, master):
+        """
+        """
+
         self.listModules = []
         self.modulePathFile = []
         self.modelPythonDescription={}
@@ -92,7 +97,7 @@ class ExperimentGenerator:
         print type(master)
         if isinstance(master, Container.Diagram):
             master = Container.Diagram.makeDEVSInstance(master)
-        print type(master)
+        print master
 
         self.generateCode(master)
 
@@ -123,3 +128,22 @@ class ExperimentGenerator:
 
         #Fermeture du fichier
         newFile.close()
+
+    def OnExperiment(self, event):
+        """
+        """
+
+        popup_menu = event.GetEventObject()
+        canvas = popup_menu.parent
+
+        diagram = canvas.GetDiagram()
+
+        import DetachedFrame
+
+        ### set the name of diagram from notebook nb2
+        nb2 = canvas.GetParent()
+
+        title  = nb2.GetTitle() if isinstance(nb2, DetachedFrame.DetachedFrame) else nb2.GetPageText(nb2.GetSelection()).rstrip()
+        diagram.label = os.path.splitext(os.path.basename(title))[0]
+
+        self.createExperimentFile(diagram)
