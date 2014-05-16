@@ -42,13 +42,19 @@ class QuickScope(DomainBehavior):
 		self.t = INFINITY
 
 	###
-	def extTransition(self):
+	def extTransition(self, *args, **kwargs):
 		"""
 		"""
 		
 		for np in xrange(len(self.IPorts)):
-			msg = self.peek(self.IPorts[np])
-			if msg is not None:
+			### PyDEVS
+			if (args == () and kwargs == {}):
+				msg = self.peek(self.IPorts[np])
+			else:
+				msg = args[0].get(self.IPorts[np])
+
+			if msg:
+		
 				# if step axis is chosen
 				if self.eventAxis:
 					self.eventAxis += 1
@@ -66,14 +72,16 @@ class QuickScope(DomainBehavior):
 				del msg
 				
 		self.state['sigma'] = 0
+		return self.state
 
 	###
 	def intTransition(self):
 		self.state["status"] = 'IDLE'
 		self.state["sigma"] = INFINITY
+		return self.state
 			
 	###
-	def timeAdvance(self):return self.state['sigma']
+	def timeAdvance(self): return self.state['sigma']
 	
 	###
 	def __str__(self):return "QuickScope"

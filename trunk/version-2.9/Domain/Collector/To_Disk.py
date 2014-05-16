@@ -59,7 +59,7 @@ class To_Disk(QuickScope):
 			if os.path.exists(fn):
 				os.remove(fn)
 	###
-	def extTransition(self):
+	def extTransition(self, *args, **kwargs):
 		"""
 		"""
 		
@@ -68,8 +68,11 @@ class To_Disk(QuickScope):
 			self.pos = self.pos[0:n]
 		
 		for np in xrange(n):
-			
-			msg = self.peek(self.IPorts[np])
+			if args == () and kwargs == {}:
+				msg = self.peek(self.IPorts[np])
+			else:
+				msg = args[0].get(self.IPorts[np])
+				print msg
 
 			### filename
 			fn = "%s%d%s"%(self.fileName, np, self.ext)
@@ -116,6 +119,7 @@ class To_Disk(QuickScope):
 				del msg
 
 		self.state["sigma"] = 0
+		return self.state
 
 	###
 	def __str__(self):return "To_Disk"

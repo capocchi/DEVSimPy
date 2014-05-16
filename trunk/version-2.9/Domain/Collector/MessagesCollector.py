@@ -47,26 +47,35 @@ class MessagesCollector(DomainBehavior):
 			if os.path.exists(fn):
 				os.remove(fn)
 	###
-	def extTransition(self):
+	def extTransition(self, *args, **kwargs):
 		"""
 		"""
+		#if (args == () and kwargs == {}):
+		
 		for port in self.IPorts:
-			np = port.myID
-			msg = self.peek(port)
+			np = str(port.myID) if hasattr(port, 'myID') else port.name
+			if (args == () and kwargs == {}):
+				msg = self.peek(port)
+			else:
+				msg = args[0].get(port)
+
 			if msg:
+						
 				### filename
-				fn = "%s%d%s"%(self.fileName, np, self.ext)
+				fn = "%s%s%s"%(self.fileName, str(np), self.ext)
 
 				with open(fn,'a') as f: f.write("%s\n"%(str(msg)))
 				del msg
 
 		self.state["sigma"] = 0
 		self.state["status"] = 'ACTIF'
+		return self.state
 
 	###
   	def intTransition(self):
 		self.state["status"] = 'IDLE'
 		self.state["sigma"] = INFINITY
+		return self.state
 
 	###
 	def timeAdvance(self):return self.state['sigma']
