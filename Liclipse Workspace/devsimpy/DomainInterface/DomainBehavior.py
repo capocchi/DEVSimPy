@@ -55,7 +55,7 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 		"""	Constructor.
 		"""
 
-		BaseDEVS.AtomicDEVS.__init__(self, name=name)
+		                                                                                                                                                                                                                                                                                            
 
 	###
 	def faultTransition(self):
