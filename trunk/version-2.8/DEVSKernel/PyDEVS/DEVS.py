@@ -229,7 +229,7 @@ class AtomicDEVS(BaseDEVS):
 	def extTransition(self):
 		"""	DEFAULT External Transition Function.
 			Accesses {\tt state} and {\tt elapsed} attributes, as well as inputs
-			through {\tt peek} method. Returns nothing but modifing {\tt state} attribut.
+			through {\tt peek} method. Returns nothing but modifying {\tt state} attribut.
 		"""
 		pass
 
