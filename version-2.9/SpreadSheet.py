@@ -180,10 +180,10 @@ class Newt(wx.Frame):
 		for i in xrange(len(self.model.IPorts)):
 			fn = "%s%d.dat"%(self.model.fileName, i)
 			oPort = self.model.IPorts[i].inLine[0]
-			host = oPort.host
+			host = oPort.host if hasattr(oPort,'host') else oPort.hostDEVS
 			if os.path.exists(fn):
 				data = self.FileToData(fn, self.sep)
-				label = _('%s (Port %i)')%(host.getBlockModel().label, oPort.myID)
+				label = _('%s (Port %s)')%(host.getBlockModel().label, str(oPort.myID) if hasattr(oPort,'myID') else oPort.name)
 				self.AddPage(data, label)
 
 	###
