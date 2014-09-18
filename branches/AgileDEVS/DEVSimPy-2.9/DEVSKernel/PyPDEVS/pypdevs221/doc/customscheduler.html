@@ -1,0 +1,229 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Writing a custom scheduler &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Advanced examples" href="advanced.html" />
+    <link rel="next" title="Distribution" href="distribution.html" />
+    <link rel="prev" title="Cell Tracing" href="celltracing.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="distribution.html" title="Distribution"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="celltracing.html" title="Cell Tracing"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" accesskey="U">Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="writing-a-custom-scheduler">
+<h1>Writing a custom scheduler<a class="headerlink" href="#writing-a-custom-scheduler" title="Permalink to this headline">¶</a></h1>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Writing a custom scheduler is potentially dangerous, as you could easily violate the DEVS formalism. Only trust your own schedulers after rigorous testing <strong>and</strong> (if you violate DEVS formalisms in the general case) make sure that such violating situations never happen.</p>
+</div>
+<p>A scheduler requires a simple interface, which will be explained here. If you require the scheduler to work distributed, you should allow for some kind of rollback to happen. This should be handled by the <em>massReschedule</em> method automatically.</p>
+<div class="section" id="interface">
+<h2>Interface<a class="headerlink" href="#interface" title="Permalink to this headline">¶</a></h2>
+<p>The interface, and thus the methods that need to be implemented, is rather small. Some of them might be skipped if you only want your scheduler to work for static structure without relocation. However, it is advised to implement all of them for future compliance.</p>
+<dl class="function">
+<dt id="__init__">
+<tt class="descname">__init__</tt><big>(</big><em>models</em>, <em>epsilon</em>, <em>totalModels</em><big>)</big><a class="headerlink" href="#__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>The constructor to be used for the scheduler. The argument <em>models</em> will contain a list of all models that are local to this scheduler. Argument <em>epsilon</em> contains the allowed floating point deviation when searching for imminent children. The <em>totalModels</em> argument can be ignored most of the time and is only useful if the scheduler needs some global information about all models, even those running remotely.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="schedule">
+<tt class="descname">schedule</tt><big>(</big><em>model</em><big>)</big><a class="headerlink" href="#schedule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new model to the scheduler. The provided model will <strong>not</strong> have been passed in the constructor. It is only used in dynamic structure (when creating a new model) and distributed simulation with relocation (where a model is relocated to our node).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="unschedule">
+<tt class="descname">unschedule</tt><big>(</big><em>model</em><big>)</big><a class="headerlink" href="#unschedule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a model from the scheduler. The provided model will have been either passed in the constructor or by the <em>schedule</em> method. Unscheduling a model should have the effect that it will never be returned by the <em>getImminent</em> method unless it is scheduled again.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="massReschedule">
+<tt class="descname">massReschedule</tt><big>(</big><em>reschedule_set</em><big>)</big><a class="headerlink" href="#massReschedule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reschedules all models in the reschedule_set. This method is used to notify the scheduler that there is the possibility that the <em>timeNext</em> value of these models has been changed. Models that are not mentioned in the reschedule_set are guaranteed to have the same <em>timeNext</em> value. All models that are provided are guaranteed to either be passed in the constructor, or have the schedule method called for them. Performance wise, this is one of the most time-critical pieces of code.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="readFirst">
+<tt class="descname">readFirst</tt><big>(</big><big>)</big><a class="headerlink" href="#readFirst" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the time of the first model that is scheduled, as a tuple of the form (simulationtime, age). Since this is a read operation, nothing should change to the scheduled models and their order.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="getImminent">
+<tt class="descname">getImminent</tt><big>(</big><em>time</em><big>)</big><a class="headerlink" href="#getImminent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an iterable containing all models that are scheduled for this specific time, with an allowed deviation of <em>epsilon</em> (passed in the constructor). It is possible that there will be no imminent models! The internal state of the returned models is irrelevant, as they will afterwards have the <em>massReschedule</em> method called with (among others) them in the iterable.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The time should agree in both parts of the tuple: the simulation time (up to an <em>epsilon</em>) and the age field (<em>exact</em> equality only)</p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="example-sorted-list-scheduler">
+<h2>Example: sorted list scheduler<a class="headerlink" href="#example-sorted-list-scheduler" title="Permalink to this headline">¶</a></h2>
+<p>As an example, the sorted list scheduler is shown below. It simply contains an internal list of all models it has to take into account, sorts the list based on timeNext and returns the first elements that match.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">SchedulerSL</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">totalModels</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">models</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">epsilon</span>
+
+    <span class="k">def</span> <span class="nf">schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">i</span><span class="o">.</span><span class="n">timeNext</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">unschedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">massReschedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reschedule_set</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">i</span><span class="o">.</span><span class="n">timeNext</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">readFirst</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">timeNext</span>
+
+    <span class="k">def</span> <span class="nf">getImminent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+        <span class="n">immChildren</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">t</span><span class="p">,</span> <span class="n">age</span> <span class="o">=</span> <span class="n">time</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># Age must be exactly the same</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">count</span><span class="p">]</span><span class="o">.</span><span class="n">timeNext</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">t</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">count</span><span class="p">]</span><span class="o">.</span><span class="n">timeNext</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">age</span><span class="p">):</span>
+                <span class="c"># Don&#39;t pop, as we want to keep all models in the list</span>
+                <span class="n">immChildren</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">count</span><span class="p">])</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">immChildren</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="using-your-own-scheduler">
+<h2>Using your own scheduler<a class="headerlink" href="#using-your-own-scheduler" title="Permalink to this headline">¶</a></h2>
+<p>Since the name of your custom scheduler is not known by me, there is no simple utility function like <em>setSchedulerSortedList()</em> provided, but you will have to use the more advanced interface. Note that all of these <em>setSchedulerX()</em> methods are simply utility functions which make exactly the same calls as you will be making. They are only provided to make the life of most users simpler.</p>
+<p>Setting the custom scheduler requires 2 bits of information: the filename in which the class is defined and the name of the class. Take for example that we created the &#8216;<em>CustomScheduler</em>&#8216; class in the file &#8216;<em>myFirstScheduler</em>&#8216;. Using the scheduler is then as simple as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sim</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">Queue</span><span class="p">())</span>
+<span class="c"># Internally, this is evaluated as an import statement of the form</span>
+<span class="c">#   from myFirstScheduler import CustomScheduler</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">setSchedulerCustom</span><span class="p">(</span><span class="s">&#39;myFirstScheduler&#39;</span><span class="p">,</span> <span class="s">&#39;CustomScheduler&#39;</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Writing a custom scheduler</a><ul>
+<li><a class="reference internal" href="#interface">Interface</a></li>
+<li><a class="reference internal" href="#example-sorted-list-scheduler">Example: sorted list scheduler</a></li>
+<li><a class="reference internal" href="#using-your-own-scheduler">Using your own scheduler</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="celltracing.html"
+                        title="previous chapter">Cell Tracing</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="distribution.html"
+                        title="next chapter">Distribution</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/customscheduler.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="distribution.html" title="Distribution"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="celltracing.html" title="Cell Tracing"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" >Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
