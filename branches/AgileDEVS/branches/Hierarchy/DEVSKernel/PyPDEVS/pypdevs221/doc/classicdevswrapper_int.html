@@ -1,0 +1,212 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Classic DEVS Wrapper &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Internal documentation" href="internal.html" />
+    <link rel="next" title="Colors" href="colors_int.html" />
+    <link rel="prev" title="BaseSimulator: the DEVS kernel" href="basesimulator_int.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="colors_int.html" title="Colors"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="basesimulator_int.html" title="BaseSimulator: the DEVS kernel"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" accesskey="U">Internal documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-classicDEVSWrapper">
+<span id="classic-devs-wrapper"></span><h1>Classic DEVS Wrapper<a class="headerlink" href="#module-classicDEVSWrapper" title="Permalink to this headline">¶</a></h1>
+<p>A wrapper for AtomicDEVS models that are to be interpreted as Classic DEVS models</p>
+<dl class="class">
+<dt id="classicDEVSWrapper.ClassicDEVSWrapper">
+<em class="property">class </em><tt class="descclassname">classicDEVSWrapper.</tt><tt class="descname">ClassicDEVSWrapper</tt><big>(</big><em>model</em><big>)</big><a class="reference internal" href="_modules/classicDEVSWrapper.html#ClassicDEVSWrapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#classicDEVSWrapper.ClassicDEVSWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wraps around a normal AtomicDEVS model and intercepts the DEVS specific functions. All attribute read/writes need to be redirected to the model itself.</p>
+<dl class="method">
+<dt id="classicDEVSWrapper.ClassicDEVSWrapper.__getattr__">
+<tt class="descname">__getattr__</tt><big>(</big><em>attr</em><big>)</big><a class="reference internal" href="_modules/classicDEVSWrapper.html#ClassicDEVSWrapper.__getattr__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#classicDEVSWrapper.ClassicDEVSWrapper.__getattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetches the attributes of the model. This is a &#8216;magic&#8217; function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>attr</strong> &#8211; the attribute to fetch</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the fetched attributed</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="classicDEVSWrapper.ClassicDEVSWrapper.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>model</em><big>)</big><a class="reference internal" href="_modules/classicDEVSWrapper.html#ClassicDEVSWrapper.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#classicDEVSWrapper.ClassicDEVSWrapper.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> &#8211; the model to wrap around</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="classicDEVSWrapper.ClassicDEVSWrapper.__setattr__">
+<tt class="descname">__setattr__</tt><big>(</big><em>attr</em>, <em>val</em><big>)</big><a class="reference internal" href="_modules/classicDEVSWrapper.html#ClassicDEVSWrapper.__setattr__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#classicDEVSWrapper.ClassicDEVSWrapper.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the attribute of the model. This is a &#8216;magic&#8217; function. Only the &#8216;model&#8217; attribute is not proxied!</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attr</strong> &#8211; the attribute to set</li>
+<li><strong>val</strong> &#8211; the value to set it to</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="classicDEVSWrapper.ClassicDEVSWrapper.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#classicDEVSWrapper.ClassicDEVSWrapper.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classicDEVSWrapper.ClassicDEVSWrapper.extTransition">
+<tt class="descname">extTransition</tt><big>(</big><em>inputs</em><big>)</big><a class="reference internal" href="_modules/classicDEVSWrapper.html#ClassicDEVSWrapper.extTransition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#classicDEVSWrapper.ClassicDEVSWrapper.extTransition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrap around the extTransition function by changing the input dictionary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>inputs</strong> &#8211; the input dictionary with lists as values</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the new state, as the normal extTransition method would do</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="classicDEVSWrapper.ClassicDEVSWrapper.outputFnc">
+<tt class="descname">outputFnc</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/classicDEVSWrapper.html#ClassicDEVSWrapper.outputFnc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#classicDEVSWrapper.ClassicDEVSWrapper.outputFnc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrap around the outputFnc function by changing the returned dictionary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the changed dictionary</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="basesimulator_int.html"
+                        title="previous chapter">BaseSimulator: the DEVS kernel</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="colors_int.html"
+                        title="next chapter">Colors</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/classicdevswrapper_int.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="colors_int.html" title="Colors"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="basesimulator_int.html" title="BaseSimulator: the DEVS kernel"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" >Internal documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

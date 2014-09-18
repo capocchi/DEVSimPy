@@ -1,0 +1,217 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Memoization &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Advanced examples" href="advanced.html" />
+    <link rel="next" title="Relocation directives" href="relocation.html" />
+    <link rel="prev" title="Location tracing" href="location.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="relocation.html" title="Relocation directives"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="location.html" title="Location tracing"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" accesskey="U">Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="memoization">
+<h1>Memoization<a class="headerlink" href="#memoization" title="Permalink to this headline">¶</a></h1>
+<p>PyPDEVS supports memoization for the most heavyweight functions that are called during simulation.</p>
+<div class="section" id="what-is-memoization">
+<h2>What is memoization?<a class="headerlink" href="#what-is-memoization" title="Permalink to this headline">¶</a></h2>
+<p>Memoization simply means that the return values of a function call will be cached.
+As soon as the function is called again with exactly the same parameters, the cached value will be
+returned instead of the function being reevaluated again.
+The advantage is clearly that it has the potential to speed up computation in situations where
+the value is likely to be cached <strong>and</strong> if the function takes a relatively long time.</p>
+</div>
+<div class="section" id="how-does-it-apply-to-pypdevs">
+<h2>How does it apply to PyPDEVS?<a class="headerlink" href="#how-does-it-apply-to-pypdevs" title="Permalink to this headline">¶</a></h2>
+<p>The PyPDEVS code is significantly optimized, though a certain part of the code is inoptimizable by
+the simulator itself. This code is the <em>user code</em>, which defines e.g. the transition functions of
+the model. These transition functions have the potential to computationally intensive. For example,
+most distributed simulation benchmarks have a transition function which takes in the terms of milliseconds.</p>
+<p>The only remaining requirement is then that the value is <em>likely</em> to be cached. For this reason, memoization
+is only used in distributed simulation. In distributed simulation, a complete node might have to revert
+all of its computation due to another (unrelated) model requesting such a revertion. Most of the time,
+this model is not influenced by the change directly, therefore the input parameters of the function are
+likely to be identical.</p>
+<p>It is therefore possible to assume that distributed simulation is likely to profit from this optimization,
+certainly in the case of relocations. When a relocation happens, the node is reverted to the current GVT,
+even though no real causality violation happened. These transitions can then be recalculated immediately with
+the use of memoization.</p>
+</div>
+<div class="section" id="why-not-enable-it-by-default">
+<h2>Why not enable it by default?<a class="headerlink" href="#why-not-enable-it-by-default" title="Permalink to this headline">¶</a></h2>
+<p>Even though memoization seems a way to quickly increase performance, it also has several downsides. The most
+important downside is the high space complexity that it incurs. Time warp simulation is already extremely
+space consuming, so also caching the inputs and their response is not going to be of much help to that.
+This problem is partially mitigated by having time warp and memoization refer to the same state in memory,
+though this still requires additional lists, input dictionaries, ...</p>
+<p>Another problem is the datastructure management. As soon as a revertion happens, the list of old states is
+reverted and used to check for equality. Without memoization, this list would be discarded, freeing up lots
+of space. Therefore, this problem again relates to space complexity.</p>
+<p>A final problem is the requirement to check the states for equality. These checks can take arbitrarily long,
+depending on how the user defined the equality method. In the worst case, the user might not have defined such
+a method, causing every comparison to result in <em>False</em>. This is clearly problematic, as the memoization speedup
+will then never be visible. Furthermore, memoization is unlikely to have an impact in simulations where nearly
+no revertions happen.</p>
+<p>For these reasons, memoization is not enabled by default, but only when the user enables it explicitly.</p>
+</div>
+<div class="section" id="implementation-hints">
+<h2>Implementation hints<a class="headerlink" href="#implementation-hints" title="Permalink to this headline">¶</a></h2>
+<p>Due to the way memoization is implemented in PyPDEVS, some considerations apply:</p>
+<ol class="arabic simple">
+<li>As soon as an inequal state is found, memoization code is aborted because the chance of further equality becomes too small.</li>
+<li>Memoization code is only triggered after a revertion happened.</li>
+<li>Due to memoization, side-effects of the transition function are not performed. This includes printing, random number generation, ... Note that transition functions with side effects are already a bad idea in time warp simulationn.</li>
+</ol>
+</div>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<p>Two requirements exist to use memoization. The first one is simply to enable it in the configuration, the second one
+requires a little more explanation.</p>
+<p>By default, Python provides equality methods on two objects, but they always return <em>False</em> if the objects are different
+(even though their content might be equal).
+The user should thus add the <em>__eq__(self, other)</em> and <em>__hash__(self)</em> function, to provide user-defined equality.</p>
+<p>Technically, it is required that the output is <strong>exactly</strong> the same when the current state (and input message, in case
+of <em>external</em> and <em>confluent transitions</em>) are equal according to these methods.</p>
+</div>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<p>Simply enabling memoization is not that difficult and is simply:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sim</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">MyModel</span><span class="p">())</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">setMemoization</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Defining the equality method on a state can be:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyState</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var1</span><span class="p">,</span> <span class="n">var2</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">var1</span> <span class="o">=</span> <span class="n">var1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">var2</span> <span class="o">=</span> <span class="n">var2</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">var1</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">var1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">var2</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">var2</span>
+
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">var1</span><span class="p">)</span> <span class="o">+</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">var2</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Memoization</a><ul>
+<li><a class="reference internal" href="#what-is-memoization">What is memoization?</a></li>
+<li><a class="reference internal" href="#how-does-it-apply-to-pypdevs">How does it apply to PyPDEVS?</a></li>
+<li><a class="reference internal" href="#why-not-enable-it-by-default">Why not enable it by default?</a></li>
+<li><a class="reference internal" href="#implementation-hints">Implementation hints</a></li>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="location.html"
+                        title="previous chapter">Location tracing</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="relocation.html"
+                        title="next chapter">Relocation directives</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/memoization.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="relocation.html" title="Relocation directives"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="location.html" title="Location tracing"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" >Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

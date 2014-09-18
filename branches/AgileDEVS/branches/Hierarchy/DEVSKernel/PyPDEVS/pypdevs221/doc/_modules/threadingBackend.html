@@ -1,0 +1,151 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>threadingBackend &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for threadingBackend</h1><div class="highlight"><pre>
+<div class="viewcode-block" id="ThreadingBackend"><a class="viewcode-back" href="../threadingbackend_int.html#threadingBackend.ThreadingBackend">[docs]</a><span class="k">class</span> <span class="nc">ThreadingBackend</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wrapper around the actual threading backend. It will also handle interrupts and the passing of them to the calling thread.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ThreadingBackend.__init__"><a class="viewcode-back" href="../threadingbackend_int.html#threadingBackend.ThreadingBackend.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subsystem</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor.</span>
+
+<span class="sd">        :param subsystem: string specifying the subsystem to use: python, tkinter or loop</span>
+<span class="sd">        :param args: all additional arguments that should be passed to the subsystem&#39;s constructor (must be a list)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interruptedValue</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">subsystem</span> <span class="o">==</span> <span class="s">&quot;python&quot;</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">threadingPython</span> <span class="kn">import</span> <span class="n">ThreadingPython</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subsystem</span> <span class="o">=</span> <span class="n">ThreadingPython</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">subsystem</span> <span class="o">==</span> <span class="s">&quot;tkinter&quot;</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">threadingTkInter</span> <span class="kn">import</span> <span class="n">ThreadingTkInter</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subsystem</span> <span class="o">=</span> <span class="n">ThreadingTkInter</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">subsystem</span> <span class="o">==</span> <span class="s">&quot;loop&quot;</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">threadingGameLoop</span> <span class="kn">import</span> <span class="n">ThreadingGameLoop</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subsystem</span> <span class="o">=</span> <span class="n">ThreadingGameLoop</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Realtime subsystem not found: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">subsystem</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ThreadingBackend.wait"><a class="viewcode-back" href="../threadingbackend_int.html#threadingBackend.ThreadingBackend.wait">[docs]</a>    <span class="k">def</span> <span class="nf">wait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wait for the specified time using the specified subsystem; interrupts are possible to stop sooner.</span>
+
+<span class="sd">        :param time: time to wait in seconds, a float is possible</span>
+<span class="sd">        :returns: None if the wait was not interrupted; the value passed in the interrupt if the wait was interrupted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">time</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c">#### We are running late, so try to catch up. Don&#39;t offer the possibility for interrupts to happen and directly return</span>
+            <span class="c"># If this situation happens frequently, we might have a problem</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subsystem</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interruptedValue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interruptedValue</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="n">value</span>
+</div>
+<div class="viewcode-block" id="ThreadingBackend.interrupt"><a class="viewcode-back" href="../threadingbackend_int.html#threadingBackend.ThreadingBackend.interrupt">[docs]</a>    <span class="k">def</span> <span class="nf">interrupt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Interrupt a running wait call.</span>
+
+<span class="sd">        :param value: the value that interrupts</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interruptedValue</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subsystem</span><span class="o">.</span><span class="n">interrupt</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ThreadingBackend.step"><a class="viewcode-back" href="../threadingbackend_int.html#threadingBackend.ThreadingBackend.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform a single step in the simulation.</span>
+
+<span class="sd">        .. warning:: Only to be used with the Game Loop subsystem!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">## Only for looping backend!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subsystem</span><span class="o">.</span><span class="n">step</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

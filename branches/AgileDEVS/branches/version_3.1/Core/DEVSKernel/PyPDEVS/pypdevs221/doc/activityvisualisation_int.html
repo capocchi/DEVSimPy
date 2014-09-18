@@ -1,0 +1,170 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Activity-aware utility functions &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Internal documentation" href="internal.html" />
+    <link rel="next" title="Allocators" href="allocators_int.html" />
+    <link rel="prev" title="Internal documentation" href="internal.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="allocators_int.html" title="Allocators"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="internal.html" title="Internal documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" accesskey="U">Internal documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-activityVisualisation">
+<span id="activity-aware-utility-functions"></span><h1>Activity-aware utility functions<a class="headerlink" href="#module-activityVisualisation" title="Permalink to this headline">¶</a></h1>
+<p>Utility functions to visualize various kinds of data in a Cell DEVS way, that is: by creating a matrix containing single values. This matrix can then be processed by e.g. gnuplot to create a heatmap. Note that it is limited to 2D maps, as these are the most frequent and simplest to conceptually grasp.</p>
+<p>These functions are supposed to be used later on in development for the Activity-Aware part.</p>
+<dl class="function">
+<dt id="activityVisualisation.visualizeActivity">
+<tt class="descclassname">activityVisualisation.</tt><tt class="descname">visualizeActivity</tt><big>(</big><em>sim</em><big>)</big><a class="reference internal" href="_modules/activityVisualisation.html#visualizeActivity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#activityVisualisation.visualizeActivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualize the activity in a Cell DEVS way</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sim</strong> &#8211; the simulator object, to access the model and their activity</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="activityVisualisation.visualizeLocations">
+<tt class="descclassname">activityVisualisation.</tt><tt class="descname">visualizeLocations</tt><big>(</big><em>kernel</em><big>)</big><a class="reference internal" href="_modules/activityVisualisation.html#visualizeLocations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#activityVisualisation.visualizeLocations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualize the locations in a Cell DEVS way</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kernel</strong> &#8211; a basesimulator object, to fetch the location of every model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="activityVisualisation.visualizeMatrix">
+<tt class="descclassname">activityVisualisation.</tt><tt class="descname">visualizeMatrix</tt><big>(</big><em>matrix</em>, <em>formatstring</em>, <em>filename</em><big>)</big><a class="reference internal" href="_modules/activityVisualisation.html#visualizeMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#activityVisualisation.visualizeMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the actual visualisation in a matrix style</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>matrix</strong> &#8211; the 2D matrix to visualize, should be a list of lists</li>
+<li><strong>formatstring</strong> &#8211; the string to use to format the values, most likely something like &#8220;%f&#8221;</li>
+<li><strong>filename</strong> &#8211; file to write the matrix to. Can be both a string to create a new file with that name, or an opened file handle.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="internal.html"
+                        title="previous chapter">Internal documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="allocators_int.html"
+                        title="next chapter">Allocators</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/activityvisualisation_int.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="allocators_int.html" title="Allocators"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="internal.html" title="Internal documentation"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" >Internal documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

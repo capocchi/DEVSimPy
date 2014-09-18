@@ -1,0 +1,169 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>AutoAllocator &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Allocators" href="allocators_int.html" />
+    <link rel="next" title="Greedy Allocator" href="greedyallocator_int.html" />
+    <link rel="prev" title="Allocators" href="allocators_int.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="greedyallocator_int.html" title="Greedy Allocator"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="allocators_int.html" title="Allocators"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" >Internal documentation</a> &raquo;</li>
+          <li><a href="allocators_int.html" accesskey="U">Allocators</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="autoallocator">
+<h1>AutoAllocator<a class="headerlink" href="#autoallocator" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="autoAllocator.AutoAllocator">
+<em class="property">class </em><tt class="descclassname">autoAllocator.</tt><tt class="descname">AutoAllocator</tt><a class="reference internal" href="_modules/autoAllocator.html#AutoAllocator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoAllocator.AutoAllocator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allocate all models in a static manner, simply trying to divide the number of models equally.
+Our &#8216;heuristic&#8217; is to allocate in chunks as defined in the root coupled model.</p>
+<dl class="method">
+<dt id="autoAllocator.AutoAllocator.allocate">
+<tt class="descname">allocate</tt><big>(</big><em>models</em>, <em>edges</em>, <em>nrnodes</em>, <em>totalActivities</em><big>)</big><a class="reference internal" href="_modules/autoAllocator.html#AutoAllocator.allocate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoAllocator.AutoAllocator.allocate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate allocations for the nodes, using the information provided.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>models</strong> &#8211; the models to allocte</li>
+<li><strong>edges</strong> &#8211; the edges between the models</li>
+<li><strong>nrnodes</strong> &#8211; the number of nodes to allocate over. Simply an upper bound!</li>
+<li><strong>totalActivities</strong> &#8211; activity tracking information from each model</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">allocation that was found</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autoAllocator.AutoAllocator.getTerminationTime">
+<tt class="descname">getTerminationTime</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/autoAllocator.html#AutoAllocator.getTerminationTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoAllocator.AutoAllocator.getTerminationTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the time it takes for the allocator to make an &#8216;educated guess&#8217; of the advised allocation.
+This time will not be used exactly, but as soon as the GVT passes over it. While this is not exactly 
+necessary, it avoids the overhead of putting such a test in frequently used code.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">float &#8211; the time at which to perform the allocations (and save them)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="allocators_int.html"
+                        title="previous chapter">Allocators</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="greedyallocator_int.html"
+                        title="next chapter">Greedy Allocator</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/autoallocator_int.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="greedyallocator_int.html" title="Greedy Allocator"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="allocators_int.html" title="Allocators"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" >Internal documentation</a> &raquo;</li>
+          <li><a href="allocators_int.html" >Allocators</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

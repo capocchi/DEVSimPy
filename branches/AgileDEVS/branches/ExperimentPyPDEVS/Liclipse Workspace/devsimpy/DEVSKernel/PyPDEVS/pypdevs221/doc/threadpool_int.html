@@ -1,0 +1,185 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Threadpool &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Internal documentation" href="internal.html" />
+    <link rel="next" title="Tracers" href="tracers.html" />
+    <link rel="prev" title="Game Loop" href="threadinggameloop_int.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tracers.html" title="Tracers"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="threadinggameloop_int.html" title="Game Loop"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" accesskey="U">Internal documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-threadpool">
+<span id="threadpool"></span><h1>Threadpool<a class="headerlink" href="#module-threadpool" title="Permalink to this headline">¶</a></h1>
+<p>A threadpool to process incomming messages over MPI with a fixed number of
+(already running) threads.</p>
+<p>Based on threadpool implementation found at <a class="reference external" href="http://stackoverflow.com/">http://stackoverflow.com/</a>
+questions/3033952/python-thread-pool-similar-to-the-multiprocessing-pool</p>
+<dl class="class">
+<dt id="threadpool.ThreadPool">
+<em class="property">class </em><tt class="descclassname">threadpool.</tt><tt class="descname">ThreadPool</tt><big>(</big><em>num_threads</em><big>)</big><a class="reference internal" href="_modules/threadpool.html#ThreadPool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#threadpool.ThreadPool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pool of threads consuming tasks from a queue</p>
+<dl class="method">
+<dt id="threadpool.ThreadPool.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>num_threads</em><big>)</big><a class="reference internal" href="_modules/threadpool.html#ThreadPool.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#threadpool.ThreadPool.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>num_threads</strong> &#8211; number of threads to start</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="threadpool.ThreadPool.add_task">
+<tt class="descname">add_task</tt><big>(</big><em>func</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/threadpool.html#ThreadPool.add_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#threadpool.ThreadPool.add_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a task to the queue</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> &#8211; function to execute</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="threadpool.Worker">
+<em class="property">class </em><tt class="descclassname">threadpool.</tt><tt class="descname">Worker</tt><big>(</big><em>tasks</em><big>)</big><a class="reference internal" href="_modules/threadpool.html#Worker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#threadpool.Worker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thread executing tasks from a given tasks queue</p>
+<dl class="method">
+<dt id="threadpool.Worker.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>tasks</em><big>)</big><a class="reference internal" href="_modules/threadpool.html#Worker.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#threadpool.Worker.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tasks</strong> &#8211; queue containing tasks to execute</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="threadpool.Worker.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/threadpool.html#Worker.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#threadpool.Worker.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the worker thread</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="threadinggameloop_int.html"
+                        title="previous chapter">Game Loop</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tracers.html"
+                        title="next chapter">Tracers</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/threadpool_int.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tracers.html" title="Tracers"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="threadinggameloop_int.html" title="Game Loop"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" >Internal documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

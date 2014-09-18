@@ -1,0 +1,975 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>DEVS &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for DEVS</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: Latin-1 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Classes and tools for DEVS model specification</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">logger</span> <span class="kn">import</span> <span class="n">debug</span><span class="p">,</span> <span class="n">warn</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">error</span>
+<span class="kn">from</span> <span class="nn">util</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<div class="viewcode-block" id="BaseDEVS"><a class="viewcode-back" href="../BaseDEVS_int.html#DEVS.BaseDEVS">[docs]</a><span class="k">class</span> <span class="nc">BaseDEVS</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract base class for AtomicDEVS and CoupledDEVS classes.</span>
+<span class="sd">  </span>
+<span class="sd">    This class provides basic DEVS attributes and query/set methods.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="BaseDEVS.__init__"><a class="viewcode-back" href="../BaseDEVS_int.html#DEVS.BaseDEVS.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+
+<span class="sd">        :param name: the name of the DEVS model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    
+        <span class="c"># Prevent any attempt to instantiate this abstract class</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span> <span class="o">==</span> <span class="n">BaseDEVS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span> <span class="p">(</span><span class="s">&quot;Cannot instantiate abstract class &#39;</span><span class="si">%s</span><span class="s">&#39; ... &quot;</span> 
+                                 <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+
+        <span class="c"># The parent of the current model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c"># The local name of the model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">IPorts</span>  <span class="o">=</span> <span class="p">[]</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">OPorts</span>   <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ports</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c"># Initialise the times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeLast</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeNext</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="bp">None</span>
+    
+        <span class="c"># Variables used for optimisations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">myInput</span> <span class="o">=</span> <span class="p">{}</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">myOutput</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># The state queue, used for time warp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c"># List of all memoized states, only useful in distributed simulation </span>
+        <span class="c">#   with memoization enabled</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memo</span> <span class="o">=</span> <span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="BaseDEVS.simSettings"><a class="viewcode-back" href="../BaseDEVS_int.html#DEVS.BaseDEVS.simSettings">[docs]</a>    <span class="k">def</span> <span class="nf">simSettings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulator</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Modifies the simulation settings from within the model.</span>
+
+<span class="sd">        This function is called _before_ direct connection and distribution is performed, so the user can still access the complete hierarchy.</span>
+
+<span class="sd">        .. note:: This function is *only* called on the root model of the simulation, thus the model passed to the constructor of the Simulator object.</span>
+
+<span class="sd">        :param simulator: the simulator object on which settings can be configured</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="BaseDEVS.modelTransition"><a class="viewcode-back" href="../BaseDEVS_int.html#DEVS.BaseDEVS.modelTransition">[docs]</a>    <span class="k">def</span> <span class="nf">modelTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        DEFAULT function for Dynamic Structure DEVS, always returning False (thus indicating that no structural change is needed)</span>
+
+<span class="sd">        :param state: a dict that can be used to save some kind of state, this object is maintained by the kernel and will be passed each time</span>
+<span class="sd">        :returns: bool -- whether or not a structural change is necessary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="BaseDEVS.getVCDVariables"><a class="viewcode-back" href="../BaseDEVS_int.html#DEVS.BaseDEVS.getVCDVariables">[docs]</a>    <span class="k">def</span> <span class="nf">getVCDVariables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetch all the variables, suitable for VCD variable generation</span>
+
+<span class="sd">        :returns: list -- all variables needed for VCD tracing</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">varList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">:</span>
+            <span class="n">varList</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">(),</span> <span class="n">I</span><span class="o">.</span><span class="n">getPortName</span><span class="p">()])</span>
+        <span class="k">return</span> <span class="n">varList</span>
+</div>
+<div class="viewcode-block" id="BaseDEVS.removePort"><a class="viewcode-back" href="../BaseDEVS_int.html#DEVS.BaseDEVS.removePort">[docs]</a>    <span class="k">def</span> <span class="nf">removePort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove a port (either input or output) from the model, disconnecting all of its connections.</span>
+
+<span class="sd">        :param port: the port to remove</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;fullName&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;removePort should only be called during a simulation&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">isInput</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">IPorts</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">OPorts</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+
+        <span class="c"># Also remove all connections to this port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">getSelfProxy</span><span class="p">()</span><span class="o">.</span><span class="n">dsRemovePort</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BaseDEVS.addPort"><a class="viewcode-back" href="../BaseDEVS_int.html#DEVS.BaseDEVS.addPort">[docs]</a>    <span class="k">def</span> <span class="nf">addPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">isInput</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Utility function to create a new port and add it everywhere where it is necessary</span>
+
+<span class="sd">        :param name: the name of the port</span>
+<span class="sd">        :param isInput: whether or not this is an input port</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="s">&quot;port</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">)</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="n">Port</span><span class="p">(</span><span class="n">isInput</span><span class="o">=</span><span class="n">isInput</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="n">isInput</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">IPorts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">OPorts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+        <span class="n">port</span><span class="o">.</span><span class="n">port_id</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+        <span class="n">port</span><span class="o">.</span><span class="n">hostDEVS</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="n">port</span>
+      </div>
+<div class="viewcode-block" id="BaseDEVS.addInPort"><a class="viewcode-back" href="../BaseDEVS_int.html#DEVS.BaseDEVS.addInPort">[docs]</a>    <span class="k">def</span> <span class="nf">addInPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add an input port to the DEVS model.</span>
+<span class="sd">        </span>
+<span class="sd">        addInPort is the only proper way to add input ports to a DEVS model. </span>
+<span class="sd">        As for the CoupledDEVS.addSubModel method, calls</span>
+<span class="sd">        to addInPort and addOutPort can appear in any DEVS&#39;</span>
+<span class="sd">        descriptive class constructor, or the methods can be used with an</span>
+<span class="sd">        instantiated object.</span>
+<span class="sd">    </span>
+<span class="sd">        The methods add a reference to the new port in the DEVS&#39; IPorts </span>
+<span class="sd">        attributes and set the port&#39;s hostDEVS attribute. The modeler</span>
+<span class="sd">        should typically save the returned reference somewhere.</span>
+
+<span class="sd">        :param name: the name of the port. A unique ID will be generated in case None is passed</span>
+<span class="sd">        :returns: port -- the generated port</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">addPort</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+      </div>
+<div class="viewcode-block" id="BaseDEVS.addOutPort"><a class="viewcode-back" href="../BaseDEVS_int.html#DEVS.BaseDEVS.addOutPort">[docs]</a>    <span class="k">def</span> <span class="nf">addOutPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add an output port to the DEVS model.</span>
+
+<span class="sd">        addOutPort is the only proper way to</span>
+<span class="sd">        add output ports to DEVS. As for the CoupledDEVS.addSubModel method, calls</span>
+<span class="sd">        to addInPort and addOutPort can appear in any DEVS&#39;</span>
+<span class="sd">        descriptive class constructor, or the methods can be used with an</span>
+<span class="sd">        instantiated object.</span>
+<span class="sd">    </span>
+<span class="sd">        The methods add a reference to the new port in the DEVS&#39;</span>
+<span class="sd">        OPorts attributes and set the port&#39;s hostDEVS attribute. The modeler</span>
+<span class="sd">        should typically save the returned reference somewhere.</span>
+
+<span class="sd">        :param name: the name of the port. A unique ID will be generated in case None is passed</span>
+<span class="sd">        :returns: port -- the generated port</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">addPort</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="BaseDEVS.getModelName"><a class="viewcode-back" href="../BaseDEVS_int.html#DEVS.BaseDEVS.getModelName">[docs]</a>    <span class="k">def</span> <span class="nf">getModelName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the local model name</span>
+
+<span class="sd">        :returns: string -- the name of the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BaseDEVS.getModelFullName"><a class="viewcode-back" href="../BaseDEVS_int.html#DEVS.BaseDEVS.getModelFullName">[docs]</a>    <span class="k">def</span> <span class="nf">getModelFullName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the full model name, including the path from the root</span>
+
+<span class="sd">        :returns: string -- the fully qualified name of the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fullName</span>
+</div></div>
+<div class="viewcode-block" id="AtomicDEVS"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS">[docs]</a><span class="k">class</span> <span class="nc">AtomicDEVS</span><span class="p">(</span><span class="n">BaseDEVS</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract base class for all atomic-DEVS descriptive classes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+  
+<div class="viewcode-block" id="AtomicDEVS.__init__"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for an AtomicDEVS model</span>
+
+<span class="sd">        :param name: name of the model, can be None to have an automatically generated name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Prevent any attempt to instantiate this abstract class</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span> <span class="o">==</span> <span class="n">AtomicDEVS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Cannot instantiate abstract class &#39;</span><span class="si">%s</span><span class="s">&#39; ... &quot;</span> 
+                                <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+
+        <span class="c"># The minimal constructor shall first call the superclass</span>
+        <span class="c"># (i.e., BaseDEVS) constructor.</span>
+        <span class="n">BaseDEVS</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    
+        <span class="bp">self</span><span class="o">.</span><span class="n">elapsed</span> <span class="o">=</span> <span class="mf">0.0</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">relocatable</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastReadTime</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AtomicDEVS.setLocation"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS.setLocation">[docs]</a>    <span class="k">def</span> <span class="nf">setLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the location of the atomic DEVS model if it was not already set</span>
+
+<span class="sd">        :param location: the location to set</span>
+<span class="sd">        :param force: whether or not to force this location, even if another is already defined</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">force</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="n">location</span>
+</div>
+<div class="viewcode-block" id="AtomicDEVS.fetchActivity"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS.fetchActivity">[docs]</a>    <span class="k">def</span> <span class="nf">fetchActivity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">activities</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetch the activity of the model up to a certain time</span>
+
+<span class="sd">        :param time: the time up to which the activity should be calculated</span>
+<span class="sd">        :param activities: dictionary containing all activities for the models</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">activities</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model_id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">state</span><span class="o">.</span><span class="n">activity</span> <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span> <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">timeLast</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">time</span><span class="p">])</span>
+        </div>
+<div class="viewcode-block" id="AtomicDEVS.setGVT"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS.setGVT">[docs]</a>    <span class="k">def</span> <span class="nf">setGVT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">GVT</span><span class="p">,</span> <span class="n">activities</span><span class="p">,</span> <span class="n">lastStateOnly</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the GVT of the model, cleaning up the states vector as required</span>
+<span class="sd">        for the time warp algorithm</span>
+
+<span class="sd">        :param GVT: the new value of the GVT</span>
+<span class="sd">        :param activities: dictionary containing all activities for the models</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">copy</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">activity</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span><span class="p">)):</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">timeLast</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">GVT</span><span class="p">:</span>
+                <span class="c"># Possible that all elements should be kept, </span>
+                <span class="c"># in which case it will return -1 and only keep the last element</span>
+                <span class="c"># So the copy element should be AT LEAST 0</span>
+                <span class="n">copy</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">lastStateOnly</span><span class="p">:</span>
+                <span class="n">activity</span> <span class="o">+=</span> <span class="n">state</span><span class="o">.</span><span class="n">activity</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span> <span class="o">==</span> <span class="p">[]:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Model has no memory of the past!&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">copy</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span><span class="p">[</span><span class="n">copy</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="n">lastStateOnly</span><span class="p">:</span>
+            <span class="n">activity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">activity</span>
+        <span class="n">activities</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">activity</span>
+</div>
+<div class="viewcode-block" id="AtomicDEVS.revert"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS.revert">[docs]</a>    <span class="k">def</span> <span class="nf">revert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">memorize</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Revert the model to the specified time. All necessary cleanup for this</span>
+<span class="sd">        model will be done (fossil collection).</span>
+
+<span class="sd">        :param time: the time up to which should be reverted</span>
+<span class="sd">        :param memorize: whether or not the saved states should still be kept for memoization</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">newstate</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+            <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">timeLast</span> <span class="o">&lt;</span> <span class="n">time</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">newstate</span> <span class="o">-=</span> <span class="mi">1</span>
+
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span><span class="p">[</span><span class="n">newstate</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeLast</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">timeLast</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeNext</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">timeNext</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">loadState</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">memorize</span><span class="p">:</span>
+            <span class="c"># Reverse it too</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">memo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span><span class="p">)</span><span class="o">+</span><span class="n">newstate</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span><span class="p">[:</span><span class="n">newstate</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c"># Check if one of the reverted states was ever read for the termination condition</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastReadTime</span> <span class="o">&gt;</span> <span class="n">time</span><span class="p">:</span>
+            <span class="c"># It seems it was, so notify the main revertion algorithm of this</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastReadTime</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># NOTE clearing the myInput happens in the parent</span>
+</div>
+<div class="viewcode-block" id="AtomicDEVS.getState"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS.getState">[docs]</a>    <span class="k">def</span> <span class="nf">getState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">requestTime</span><span class="p">,</span> <span class="n">firstCall</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For the distributed termination condition: fetch the state of the model at a certain time</span>
+
+<span class="sd">        :param time: the time (including age!) for which the state should be fetched</span>
+<span class="sd">        :returns: state -- the state at that time</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">!=</span> <span class="n">MPIRedirect</span><span class="o">.</span><span class="n">local</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">getProxy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">location</span><span class="p">)</span><span class="o">.</span><span class="n">getStateAtTime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span> <span class="n">requestTime</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">firstCall</span><span class="p">:</span>
+            <span class="c"># Shortcut if the call is local</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastReadTime</span> <span class="o">=</span> <span class="n">requestTime</span>
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">oldStates</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">timeLast</span> <span class="o">&gt;</span> <span class="n">requestTime</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">state</span><span class="o">.</span><span class="n">loadState</span><span class="p">()</span>
+            <span class="c"># State not yet available... wait some time before trying again...</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AtomicDEVS.extTransition"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS.extTransition">[docs]</a>    <span class="k">def</span> <span class="nf">extTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        DEFAULT External Transition Function.</span>
+<span class="sd">  </span>
+<span class="sd">        Accesses state and elapsed attributes, as well as inputs</span>
+<span class="sd">        through the passed dictionary. Returns the new state.</span>
+
+<span class="sd">        .. note:: Should only write to the *state* attribute.</span>
+
+<span class="sd">        :param inputs: dictionary containing all ports and their corresponding outputs</span>
+<span class="sd">        :returns: state -- the new state of the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+    </div>
+<div class="viewcode-block" id="AtomicDEVS.intTransition"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS.intTransition">[docs]</a>    <span class="k">def</span> <span class="nf">intTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        DEFAULT Internal Transition Function.</span>
+<span class="sd"> </span>
+<span class="sd">        .. note:: Should only write to the *state* attribute.</span>
+
+<span class="sd">        :returns: state -- the new state of the model</span>
+
+<span class="sd">        .. versionchanged:: 2.1 The *elapsed* attribute is no longer guaranteed to be correct as this isn&#39;t required by the DEVS formalism.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+</div>
+<div class="viewcode-block" id="AtomicDEVS.confTransition"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS.confTransition">[docs]</a>    <span class="k">def</span> <span class="nf">confTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        DEFAULT Confluent Transition Function.</span>
+<span class="sd">  </span>
+<span class="sd">        Accesses state and elapsed attributes, as well as inputs</span>
+<span class="sd">        through the passed dictionary. Returns the new state.</span>
+
+<span class="sd">        .. note:: Should only write to the *state* attribute.</span>
+
+<span class="sd">        :param inputs: dictionary containing all ports and their corresponding outputs</span>
+<span class="sd">        :returns: state -- the new state of the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intTransition</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extTransition</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+  </div>
+<div class="viewcode-block" id="AtomicDEVS.outputFnc"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS.outputFnc">[docs]</a>    <span class="k">def</span> <span class="nf">outputFnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        DEFAULT Output Function.</span>
+<span class="sd">  </span>
+<span class="sd">        Accesses only state attribute. Returns the output on the different ports as a dictionary.</span>
+
+<span class="sd">        .. note:: Should **not** write to any attribute.</span>
+
+<span class="sd">        :returns: dictionary containing output ports as keys and lists of output on that port as value</span>
+
+<span class="sd">        .. versionchanged:: 2.1 The *elapsed* attribute is no longer guaranteed to be correct as this isn&#39;t required by the DEVS formalism.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{}</span>
+  </div>
+<div class="viewcode-block" id="AtomicDEVS.timeAdvance"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS.timeAdvance">[docs]</a>    <span class="k">def</span> <span class="nf">timeAdvance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        DEFAULT Time Advance Function.</span>
+<span class="sd">    </span>
+<span class="sd">        .. note:: Should ideally be deterministic, though this is not mandatory for simulation.</span>
+
+<span class="sd">        :returns: the time advance of the model</span>
+
+<span class="sd">        .. versionchanged:: 2.1 The *elapsed* attribute is no longer guaranteed to be correct as this isn&#39;t required by the DEVS formalism.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># By default, return infinity </span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AtomicDEVS.preActivityCalculation"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS.preActivityCalculation">[docs]</a>    <span class="k">def</span> <span class="nf">preActivityCalculation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        DEFAULT pre-transition activity fetcher. The returned value is passed to the *postActivityCalculation* function</span>
+
+<span class="sd">        :returns: something -- passed to the *postActivityCalculation*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="AtomicDEVS.postActivityCalculation"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS.postActivityCalculation">[docs]</a>    <span class="k">def</span> <span class="nf">postActivityCalculation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prevalue</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        DEFAULT post-transition activity fetcher. The returned value will be passed on to the relocator and MUST be an addable (e.g. integer, float, ...)</span>
+
+<span class="sd">        :param prevalue: the value returned from the *preActivityCalculation* method</span>
+<span class="sd">        :returns: addable (float, integer, ...) -- passed to the relocator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">prevalue</span>
+</div>
+<div class="viewcode-block" id="AtomicDEVS.flattenConnections"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS.flattenConnections">[docs]</a>    <span class="k">def</span> <span class="nf">flattenConnections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Flattens the pickling graph, by removing backreference from the ports.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># It doesn&#39;t really matter what gets written in these hostDEVS attributes,</span>
+        <span class="c"># as it will never be used. Though for readability, the model_id will be used</span>
+        <span class="c"># to make it possible to do some debugging when necessary.</span>
+        <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">IPorts</span><span class="p">:</span>
+            <span class="n">port</span><span class="o">.</span><span class="n">hostDEVS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_id</span>
+        <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">OPorts</span><span class="p">:</span>
+            <span class="n">port</span><span class="o">.</span><span class="n">hostDEVS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_id</span>
+</div>
+<div class="viewcode-block" id="AtomicDEVS.unflattenConnections"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS.unflattenConnections">[docs]</a>    <span class="k">def</span> <span class="nf">unflattenConnections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unflattens the picking graph, by reconstructing backreferences from the ports.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">IPorts</span><span class="p">:</span>
+            <span class="n">port</span><span class="o">.</span><span class="n">hostDEVS</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">OPorts</span><span class="p">:</span>
+            <span class="n">port</span><span class="o">.</span><span class="n">hostDEVS</span> <span class="o">=</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="AtomicDEVS.finalize"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS.finalize">[docs]</a>    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">model_counter</span><span class="p">,</span> <span class="n">model_ids</span><span class="p">,</span> <span class="n">locations</span><span class="p">,</span> <span class="n">selectHierarchy</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Finalize the model hierarchy by doing all pre-simulation configuration</span>
+
+<span class="sd">        .. note:: Parameters *model_ids* and *locations* are updated by reference.</span>
+
+<span class="sd">        :param name: the name of the hierarchy above</span>
+<span class="sd">        :param model_counter: the model ID counter</span>
+<span class="sd">        :param model_ids: a list with all model_ids and their model</span>
+<span class="sd">        :param locations: dictionary of locations and where every model runs</span>
+<span class="sd">        :param selectHierarchy: hierarchy to perform selections in Classic DEVS</span>
+
+<span class="sd">        :returns: int -- the new model ID counter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Give a name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fullName</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getModelName</span><span class="p">())</span>
+
+        <span class="c"># Give a unique ID to the model itself</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_id</span> <span class="o">=</span> <span class="n">model_counter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectHierarchy</span> <span class="o">=</span> <span class="n">selectHierarchy</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+
+        <span class="c"># Add the element to its designated place in the model_ids list</span>
+        <span class="n">model_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># Do a quick check, since this is vital to correct operation</span>
+        <span class="k">if</span> <span class="n">model_ids</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model_id</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Something went wrong while initializing models: IDs don&#39;t match&quot;</span><span class="p">)</span>
+
+        <span class="n">locations</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">location</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_id</span><span class="p">)</span>
+
+        <span class="c"># Return the unique ID counter, incremented so it stays unique</span>
+        <span class="k">return</span> <span class="n">model_counter</span> <span class="o">+</span> <span class="mi">1</span>
+</div>
+<div class="viewcode-block" id="AtomicDEVS.getModelLoad"><a class="viewcode-back" href="../ADEVS_int.html#DEVS.AtomicDEVS.getModelLoad">[docs]</a>    <span class="k">def</span> <span class="nf">getModelLoad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lst</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add this atomic model to the load of its location</span>
+
+<span class="sd">        :param lst: list containing all locations and their current load</span>
+<span class="sd">        :returns: int -- number of children in this subtree</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lst</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">location</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nChildren</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nChildren</span>
+    </div></div>
+<div class="viewcode-block" id="CoupledDEVS"><a class="viewcode-back" href="../CDEVS_int.html#DEVS.CoupledDEVS">[docs]</a><span class="k">class</span> <span class="nc">CoupledDEVS</span><span class="p">(</span><span class="n">BaseDEVS</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract base class for all coupled-DEVS descriptive classes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+  
+<div class="viewcode-block" id="CoupledDEVS.__init__"><a class="viewcode-back" href="../CDEVS_int.html#DEVS.CoupledDEVS.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor.</span>
+
+<span class="sd">        :param name: the name of the coupled model, can be None for an automatically generated name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Prevent any attempt to instantiate this abstract class</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span> <span class="o">==</span> <span class="n">CoupledDEVS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Cannot instantiate abstract class &#39;</span><span class="si">%s</span><span class="s">&#39; ... &quot;</span> 
+                                <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+        <span class="c"># The minimal constructor shall first call the superclass</span>
+        <span class="c"># (i.e., BaseDEVS) constructor.</span>
+        <span class="n">BaseDEVS</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    
+        <span class="c"># All components of this coupled model (the submodels)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">componentSet</span> <span class="o">=</span> <span class="p">[]</span>
+    </div>
+<div class="viewcode-block" id="CoupledDEVS.select"><a class="viewcode-back" href="../CDEVS_int.html#DEVS.CoupledDEVS.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">immChildren</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        DEFAULT select function, only used when using Classic DEVS simulation</span>
+
+<span class="sd">        :param immChildren: list of all children that want to transition</span>
+<span class="sd">        :returns: child -- a single child that is allowed to transition</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">immChildren</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="CoupledDEVS.getModelLoad"><a class="viewcode-back" href="../CDEVS_int.html#DEVS.CoupledDEVS.getModelLoad">[docs]</a>    <span class="k">def</span> <span class="nf">getModelLoad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lst</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetch the number of atomic models at this model</span>
+
+<span class="sd">        :param lst: list containing all locations and their current load</span>
+<span class="sd">        :returns: number of atomic models in this subtree, including non-local ones</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">componentSet</span><span class="p">:</span>
+            <span class="n">children</span> <span class="o">+=</span> <span class="n">i</span><span class="o">.</span><span class="n">getModelLoad</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nChildren</span> <span class="o">=</span> <span class="n">children</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nChildren</span>
+        </div>
+<div class="viewcode-block" id="CoupledDEVS.finalize"><a class="viewcode-back" href="../CDEVS_int.html#DEVS.CoupledDEVS.finalize">[docs]</a>    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">model_counter</span><span class="p">,</span> <span class="n">model_ids</span><span class="p">,</span> <span class="n">locations</span><span class="p">,</span> <span class="n">selectHierarchy</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Finalize the model hierarchy by doing all pre-simulation configuration</span>
+
+<span class="sd">        .. note:: Parameters *model_ids* and *locations* are updated by reference.</span>
+
+<span class="sd">        :param name: the name of the hierarchy above</span>
+<span class="sd">        :param model_counter: the model ID counter</span>
+<span class="sd">        :param model_ids: a list with all model_ids and their model</span>
+<span class="sd">        :param locations: dictionary of locations and where every model runs</span>
+<span class="sd">        :param selectHierarchy: hierarchy to perform selections in Classic DEVS</span>
+
+<span class="sd">        :returns: int -- the new model ID counter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Set name, even though it will never be requested</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fullName</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getModelName</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">componentSet</span><span class="p">:</span>
+            <span class="n">model_counter</span> <span class="o">=</span> <span class="n">i</span><span class="o">.</span><span class="n">finalize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fullName</span> <span class="o">+</span> <span class="s">&quot;.&quot;</span><span class="p">,</span> <span class="n">model_counter</span><span class="p">,</span> 
+                    <span class="n">model_ids</span><span class="p">,</span> <span class="n">locations</span><span class="p">,</span> <span class="n">selectHierarchy</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">model_counter</span>
+</div>
+<div class="viewcode-block" id="CoupledDEVS.flattenConnections"><a class="viewcode-back" href="../CDEVS_int.html#DEVS.CoupledDEVS.flattenConnections">[docs]</a>    <span class="k">def</span> <span class="nf">flattenConnections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Flattens the pickling graph, by removing backreference from the ports.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">componentSet</span><span class="p">:</span>
+            <span class="n">i</span><span class="o">.</span><span class="n">flattenConnections</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="CoupledDEVS.unflattenConnections"><a class="viewcode-back" href="../CDEVS_int.html#DEVS.CoupledDEVS.unflattenConnections">[docs]</a>    <span class="k">def</span> <span class="nf">unflattenConnections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unflattens the pickling graph, by reconstructing backreference from the ports.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">componentSet</span><span class="p">:</span>
+            <span class="n">i</span><span class="o">.</span><span class="n">unflattenConnections</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="CoupledDEVS.addSubModel"><a class="viewcode-back" href="../CDEVS_int.html#DEVS.CoupledDEVS.addSubModel">[docs]</a>    <span class="k">def</span> <span class="nf">addSubModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">location</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a specified model to the current coupled model as its child. This</span>
+<span class="sd">        is the function that must be used to make distributed simulation</span>
+<span class="sd">        possible.</span>
+
+<span class="sd">        :param model: the model to be added as a child</span>
+<span class="sd">        :param location: the location at which the child must run</span>
+<span class="sd">        :returns: model -- the model that was created as a child</span>
+
+<span class="sd">        .. versionchanged:: 2.1.3</span>
+<span class="sd">           model can no longer be a string, this was previously a lot more efficient in partial distribution, though this functionality was removed together with the partial distribution functionality.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">if</span> <span class="n">location</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">location</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">location</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="n">location</span> <span class="k">if</span> <span class="n">location</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">location</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">location</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">CoupledDEVS</span><span class="p">):</span>
+            <span class="c"># Set the location of all children</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">componentSet</span><span class="p">:</span>
+                <span class="n">i</span><span class="o">.</span><span class="n">setLocation</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">location</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">componentSet</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>        
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;fullName&quot;</span><span class="p">):</span>
+            <span class="c"># Full Name is only created when starting the simulation, so we are currently in a running simulation</span>
+            <span class="c"># Dynamic Structure change</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">getSelfProxy</span><span class="p">()</span><span class="o">.</span><span class="n">dsScheduleModel</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">model</span>
+</div>
+<div class="viewcode-block" id="CoupledDEVS.removeSubModel"><a class="viewcode-back" href="../CDEVS_int.html#DEVS.CoupledDEVS.removeSubModel">[docs]</a>    <span class="k">def</span> <span class="nf">removeSubModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove a specified model from the current coupled model, only callable while in a simulation.</span>
+
+<span class="sd">        :param model: the model to remove as a child</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;fullName&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;removeSubModel can only be called _during_ a simulation run&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">getSelfProxy</span><span class="p">()</span><span class="o">.</span><span class="n">dsUnscheduleModel</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CoupledDEVS.disconnectPorts"><a class="viewcode-back" href="../CDEVS_int.html#DEVS.CoupledDEVS.disconnectPorts">[docs]</a>    <span class="k">def</span> <span class="nf">disconnectPorts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Disconnect two ports</span>
+<span class="sd">        </span>
+<span class="sd">        .. note:: If these ports are connected multiple times, **only one** of them will be removed.</span>
+
+<span class="sd">        :param p1: the port at the start of the connection</span>
+<span class="sd">        :param p2: the port at the end of the connection</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ncon</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">p1</span><span class="o">.</span><span class="n">outLine</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">p</span> <span class="o">==</span> <span class="n">p2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ncon</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="n">p1</span><span class="o">.</span><span class="n">outLine</span> <span class="o">=</span> <span class="n">ncon</span>
+        <span class="n">ncon</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">p2</span><span class="o">.</span><span class="n">inLine</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">p</span> <span class="o">==</span> <span class="n">p1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ncon</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="n">p2</span><span class="o">.</span><span class="n">inLine</span> <span class="o">=</span> <span class="n">ncon</span>
+</div>
+<div class="viewcode-block" id="CoupledDEVS.connectPorts"><a class="viewcode-back" href="../CDEVS_int.html#DEVS.CoupledDEVS.connectPorts">[docs]</a>    <span class="k">def</span> <span class="nf">connectPorts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Connects two ports together. The coupling is to begin at p1 and</span>
+<span class="sd">        to end at p2.</span>
+
+<span class="sd">        :param p1: the port at the start of the new connection</span>
+<span class="sd">        :param p2: the port at the end of the new connection</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># For a coupling to be valid, two requirements must be met:</span>
+        <span class="c"># 1- at least one of the DEVS the ports belong to is a child of the</span>
+        <span class="c">#    coupled-DEVS (i.e., self), while the other is either the</span>
+        <span class="c">#    coupled-DEVS itself or another of its children. The DEVS&#39;</span>
+        <span class="c">#    &#39;parenthood relationship&#39; uniquely determine the type of coupling;</span>
+        <span class="c"># 2- the types of the ports are consistent with the &#39;parenthood&#39; of the</span>
+        <span class="c">#    associated DEVS. This validates the coupling determined above.</span>
+
+        <span class="c"># Internal Coupling:</span>
+        <span class="k">if</span> <span class="p">((</span><span class="n">p1</span><span class="o">.</span><span class="n">hostDEVS</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="bp">self</span> <span class="ow">and</span> <span class="n">p2</span><span class="o">.</span><span class="n">hostDEVS</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="bp">self</span><span class="p">)</span> <span class="ow">and</span>
+                <span class="p">(</span><span class="n">p1</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;OUTPORT&#39;</span> <span class="ow">and</span> <span class="n">p2</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;INPORT&#39;</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">p1</span><span class="o">.</span><span class="n">hostDEVS</span> <span class="ow">is</span> <span class="n">p2</span><span class="o">.</span><span class="n">hostDEVS</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">((</span><span class="s">&quot;In coupled model &#39;</span><span class="si">%s</span><span class="s">&#39;, connecting ports&quot;</span> <span class="o">+</span>
+                                    <span class="s">&quot; &#39;</span><span class="si">%s</span><span class="s">&#39; and &#39;</span><span class="si">%s</span><span class="s">&#39; belong to the same model&quot;</span> <span class="o">+</span>
+                                    <span class="s">&quot; &#39;</span><span class="si">%s</span><span class="s">&#39;. &quot;</span> <span class="o">+</span>
+                                    <span class="s">&quot; Direct feedback coupling not allowed&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">(),</span>
+                                    <span class="n">p1</span><span class="o">.</span><span class="n">getPortFullName</span><span class="p">(),</span>
+                                    <span class="n">p2</span><span class="o">.</span><span class="n">getPortFullName</span><span class="p">(),</span>
+                                    <span class="n">p1</span><span class="o">.</span><span class="n">hostDEVS</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">()))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">p1</span><span class="o">.</span><span class="n">outLine</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p2</span><span class="p">)</span>
+                <span class="n">p2</span><span class="o">.</span><span class="n">inLine</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span>
+        
+        <span class="c"># External input couplings:</span>
+        <span class="k">elif</span> <span class="p">((</span><span class="n">p1</span><span class="o">.</span><span class="n">hostDEVS</span> <span class="o">==</span> <span class="bp">self</span> <span class="ow">and</span> <span class="n">p2</span><span class="o">.</span><span class="n">hostDEVS</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="bp">self</span><span class="p">)</span> <span class="ow">and</span>
+              <span class="p">(</span><span class="n">p1</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="n">p2</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;INPORT&#39;</span><span class="p">)):</span>
+            <span class="n">p1</span><span class="o">.</span><span class="n">outLine</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p2</span><span class="p">)</span>
+            <span class="n">p2</span><span class="o">.</span><span class="n">inLine</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span>
+   
+        <span class="c"># Eternal output couplings:</span>
+        <span class="k">elif</span> <span class="p">((</span><span class="n">p1</span><span class="o">.</span><span class="n">hostDEVS</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="bp">self</span> <span class="ow">and</span> <span class="n">p2</span><span class="o">.</span><span class="n">hostDEVS</span> <span class="o">==</span> <span class="bp">self</span><span class="p">)</span> <span class="ow">and</span>
+              <span class="p">(</span><span class="n">p1</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="n">p2</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;OUTPORT&#39;</span><span class="p">)):</span>
+            <span class="n">p1</span><span class="o">.</span><span class="n">outLine</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p2</span><span class="p">)</span>
+            <span class="n">p2</span><span class="o">.</span><span class="n">inLine</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span>
+
+        <span class="c"># Other cases (illegal coupling):</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">((</span><span class="s">&quot;Illegal coupling in coupled model &#39;</span><span class="si">%s</span><span class="s">&#39; &quot;</span> <span class="o">+</span>
+                                <span class="s">&quot;between ports &#39;</span><span class="si">%s</span><span class="s">&#39; and &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">getModelName</span><span class="p">(),</span> <span class="n">p1</span><span class="o">.</span><span class="n">getPortName</span><span class="p">(),</span> 
+                                <span class="n">p2</span><span class="o">.</span><span class="n">getPortName</span><span class="p">()))</span>
+</div>
+<div class="viewcode-block" id="CoupledDEVS.setLocation"><a class="viewcode-back" href="../CDEVS_int.html#DEVS.CoupledDEVS.setLocation">[docs]</a>    <span class="k">def</span> <span class="nf">setLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the location of this coupled model and its submodels if they don&#39;t have their own preference.</span>
+
+<span class="sd">        :param location: the location to set</span>
+<span class="sd">        :param force: whether or not to force this location, even if another is already defined</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">force</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="n">location</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">componentSet</span><span class="p">:</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">setLocation</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">force</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="RootDEVS"><a class="viewcode-back" href="../RootDEVS_int.html#DEVS.RootDEVS">[docs]</a><span class="k">class</span> <span class="nc">RootDEVS</span><span class="p">(</span><span class="n">BaseDEVS</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The artificial RootDEVS model is the only &#39;coupled&#39; model in the simulation after direct connection is performed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="RootDEVS.__init__"><a class="viewcode-back" href="../RootDEVS_int.html#DEVS.RootDEVS.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">components</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">schedulerType</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Basic constructor.</span>
+
+<span class="sd">        :param components: the atomic DEVS models that are the cildren, only those that are ran locally should be mentioned</span>
+<span class="sd">        :param models: all models that have to be passed to the scheduler, thus all models, even non-local ones</span>
+<span class="sd">        :param schedulerType: type of scheduler to use (string representation)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">BaseDEVS</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;ROOT model&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">componentSet</span> <span class="o">=</span> <span class="n">components</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeNext</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_model_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">componentSet</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">local_model_ids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">model_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="n">models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schedulerType</span> <span class="o">=</span> <span class="n">schedulerType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">directConnected</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="RootDEVS.undoDirectConnect"><a class="viewcode-back" href="../RootDEVS_int.html#DEVS.RootDEVS.undoDirectConnect">[docs]</a>    <span class="k">def</span> <span class="nf">undoDirectConnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Undo direct connection, to allow connections to be altered as before direct connection</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">directConnected</span><span class="p">:</span>
+            <span class="c"># Weren&#39;t even direct connected, so we are done</span>
+            <span class="k">return</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">outport</span> <span class="ow">in</span> <span class="n">i</span><span class="o">.</span><span class="n">OPorts</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">outport</span><span class="p">,</span> <span class="s">&quot;oldOutLine&quot;</span><span class="p">):</span>
+                    <span class="n">outport</span><span class="o">.</span><span class="n">outLine</span> <span class="o">=</span> <span class="n">outport</span><span class="o">.</span><span class="n">oldOutLine</span>
+            <span class="k">for</span> <span class="n">inport</span> <span class="ow">in</span> <span class="n">i</span><span class="o">.</span><span class="n">IPorts</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">inport</span><span class="p">,</span> <span class="s">&quot;oldInLine&quot;</span><span class="p">):</span>
+                    <span class="n">inport</span><span class="o">.</span><span class="n">inLine</span> <span class="o">=</span> <span class="n">inport</span><span class="o">.</span><span class="n">oldInLine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">directConnected</span> <span class="o">=</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="RootDEVS.directConnect"><a class="viewcode-back" href="../RootDEVS_int.html#DEVS.RootDEVS.directConnect">[docs]</a>    <span class="k">def</span> <span class="nf">directConnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform direct connection on the models again</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">directConnected</span><span class="p">:</span>
+            <span class="c"># Were already direct connected, so nothing to do</span>
+            <span class="k">return</span>
+        <span class="n">directConnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">directConnected</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="RootDEVS.setScheduler"><a class="viewcode-back" href="../RootDEVS_int.html#DEVS.RootDEVS.setScheduler">[docs]</a>    <span class="k">def</span> <span class="nf">setScheduler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schedulerType</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the scheduler to the desired type. Will overwite the previously present scheduler.</span>
+
+<span class="sd">        :param schedulerType: type of scheduler to use (string representation)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schedulerType</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="k">exec</span><span class="p">(</span><span class="s">&quot;from </span><span class="si">%s</span><span class="s"> import </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">schedulerType</span><span class="p">)</span>
+            <span class="n">nrmodels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">(self.componentSet, EPSILON, nrmodels)&quot;</span> <span class="o">%</span> <span class="n">schedulerType</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DEVSException</span><span class="p">(</span><span class="s">&quot;Unknown Scheduler: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">schedulerType</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="RootDEVS.setGVT"><a class="viewcode-back" href="../RootDEVS_int.html#DEVS.RootDEVS.setGVT">[docs]</a>    <span class="k">def</span> <span class="nf">setGVT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">GVT</span><span class="p">,</span> <span class="n">activities</span><span class="p">,</span> <span class="n">lastStateOnly</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the GVT of this coupled model</span>
+
+<span class="sd">        :param GVT: the time to which the GVT should be set</span>
+<span class="sd">        :param activities: dictionary containing all activities for the models</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">componentSet</span><span class="p">:</span>
+            <span class="n">i</span><span class="o">.</span><span class="n">setGVT</span><span class="p">(</span><span class="n">GVT</span><span class="p">,</span> <span class="n">activities</span><span class="p">,</span> <span class="n">lastStateOnly</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="RootDEVS.fetchActivity"><a class="viewcode-back" href="../RootDEVS_int.html#DEVS.RootDEVS.fetchActivity">[docs]</a>    <span class="k">def</span> <span class="nf">fetchActivity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">activities</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetch the activity of the model up to a certain time</span>
+
+<span class="sd">        :param time: the time up to which the activity should be calculated</span>
+<span class="sd">        :param activities: dictionary containing all activities for the models</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">componentSet</span><span class="p">:</span>
+            <span class="n">i</span><span class="o">.</span><span class="n">fetchActivity</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">activities</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="RootDEVS.revert"><a class="viewcode-back" href="../RootDEVS_int.html#DEVS.RootDEVS.revert">[docs]</a>    <span class="k">def</span> <span class="nf">revert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">memorize</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Revert the coupled model to the specified time, all submodels will also</span>
+<span class="sd">        be reverted.</span>
+
+<span class="sd">        :param time: the time up to which revertion should happen</span>
+<span class="sd">        :param memorize: whether or not the saved states should still be kept for memoization</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">reschedules</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">controllerRevert</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">componentSet</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">timeLast</span> <span class="o">&gt;=</span> <span class="n">time</span><span class="p">:</span>
+                <span class="n">controllerRevert</span> <span class="o">|=</span> <span class="n">child</span><span class="o">.</span><span class="n">revert</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">memorize</span><span class="p">)</span>
+                <span class="c"># Was reverted, so reschedule</span>
+                <span class="n">reschedules</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+            <span class="c"># Always clear the inputs, as it is possible that there are only </span>
+            <span class="c"># partial results, which doesn&#39;t get found in the timeLast &gt;= time</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">myInput</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">massReschedule</span><span class="p">(</span><span class="n">reschedules</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setTimeNext</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">controllerRevert</span>
+</div>
+<div class="viewcode-block" id="RootDEVS.setTimeNext"><a class="viewcode-back" href="../RootDEVS_int.html#DEVS.RootDEVS.setTimeNext">[docs]</a>    <span class="k">def</span> <span class="nf">setTimeNext</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset the timeNext</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timeNext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">readFirst</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="c"># No element found in the scheduler, so put it to INFINITY</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timeNext</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</div></div>
+<span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for DEVS model ports (both input and output). This class provides basic port attributes and query methods.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">isInput</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor. Creates an input port if isInput evaluates to True, and</span>
+<span class="sd">        an output port otherwise.</span>
+
+<span class="sd">        :param isInput: whether or not this is an input port</span>
+<span class="sd">        :param name: the name of the port. If None is provided, a unique ID is generated</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inLine</span> <span class="o">=</span> <span class="p">[]</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">outLine</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hostDEVS</span> <span class="o">=</span> <span class="bp">None</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">msgcount</span> <span class="o">=</span> <span class="mi">0</span>
+   
+        <span class="c"># The name of the port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isInput</span> <span class="o">=</span> <span class="n">isInput</span>
+
+    <span class="k">def</span> <span class="nf">getPortName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the name of the port</span>
+
+<span class="sd">        :returns: local name of the port</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="k">def</span> <span class="nf">getPortFullName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the complete name of the port</span>
+
+<span class="sd">        :returns: fully qualified name of the port</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hostDEVS</span><span class="o">.</span><span class="n">getModelFullName</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">getPortName</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the &#39;type&#39; of the object</span>
+
+<span class="sd">        :returns: either &#39;INPORT&#39; or &#39;OUTPORT&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isInput</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;INPORT&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;OUTPORT&#39;</span>
+
+<span class="k">def</span> <span class="nf">directConnect</span><span class="p">(</span><span class="n">componentSet</span><span class="p">,</span> <span class="n">local</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform direct connection on this CoupledDEVS model</span>
+
+<span class="sd">    :param componentSet: the iterable to direct connect</span>
+<span class="sd">    :param local: whether or not simulation is local; if it is, dynamic structure code will be prepared</span>
+<span class="sd">    :returns: the direct connected componentSet</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">newlist</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">componentSet</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">CoupledDEVS</span><span class="p">):</span>
+            <span class="n">componentSet</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">componentSet</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Found an atomic model</span>
+            <span class="n">newlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">componentSet</span> <span class="o">=</span> <span class="n">newlist</span>
+
+    <span class="c"># All and only all atomic models are now direct children of this model</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">componentSet</span><span class="p">:</span>
+        <span class="c"># Remap the output ports</span>
+        <span class="k">for</span> <span class="n">outport</span> <span class="ow">in</span> <span class="n">i</span><span class="o">.</span><span class="n">OPorts</span><span class="p">:</span>
+            <span class="c"># The new contents of the line</span>
+            <span class="n">newLine</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">outline</span> <span class="ow">in</span> <span class="n">outport</span><span class="o">.</span><span class="n">outLine</span><span class="p">:</span>
+                <span class="c"># If it is a coupled model, we must expand this model</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">outline</span><span class="o">.</span><span class="n">hostDEVS</span><span class="p">,</span> <span class="n">CoupledDEVS</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">inline</span> <span class="ow">in</span> <span class="n">outline</span><span class="o">.</span><span class="n">outLine</span><span class="p">:</span>
+                        <span class="c"># Add it to the current iterating list, so we can just continue</span>
+                        <span class="n">outport</span><span class="o">.</span><span class="n">outLine</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inline</span><span class="p">)</span>
+                        <span class="c"># If it is a Coupled model, we should just continue </span>
+                        <span class="c"># expanding it and not add it to the finished line</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inline</span><span class="o">.</span><span class="n">hostDEVS</span><span class="p">,</span> <span class="n">CoupledDEVS</span><span class="p">):</span>
+                            <span class="n">newLine</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inline</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">outline</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">newLine</span><span class="p">:</span>
+                    <span class="c"># Add to the new line if it isn&#39;t already there</span>
+                    <span class="c"># Note that it isn&#39;t really mandatory to check for this, </span>
+                    <span class="c"># it is a lot cleaner to do so.</span>
+                    <span class="c"># This will greatly increase the complexity of the connector though</span>
+                    <span class="n">newLine</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outline</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">local</span><span class="p">:</span>
+                <span class="n">outport</span><span class="o">.</span><span class="n">oldOutLine</span> <span class="o">=</span> <span class="n">outport</span><span class="o">.</span><span class="n">outLine</span>
+            <span class="n">outport</span><span class="o">.</span><span class="n">outLine</span> <span class="o">=</span> <span class="n">newLine</span>
+        <span class="c"># Remap the input ports: identical to the output ports, only in the reverse direction</span>
+        <span class="k">for</span> <span class="n">inport</span> <span class="ow">in</span> <span class="n">i</span><span class="o">.</span><span class="n">IPorts</span><span class="p">:</span>
+            <span class="n">newLine</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">inline</span> <span class="ow">in</span> <span class="n">inport</span><span class="o">.</span><span class="n">inLine</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inline</span><span class="o">.</span><span class="n">hostDEVS</span><span class="p">,</span> <span class="n">CoupledDEVS</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">outline</span> <span class="ow">in</span> <span class="n">inline</span><span class="o">.</span><span class="n">inLine</span><span class="p">:</span>
+                        <span class="n">inport</span><span class="o">.</span><span class="n">inLine</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outline</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">outline</span><span class="o">.</span><span class="n">hostDEVS</span><span class="p">,</span> <span class="n">CoupledDEVS</span><span class="p">):</span>
+                            <span class="n">newLine</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outline</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">inline</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">newLine</span><span class="p">:</span>
+                    <span class="n">newLine</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inline</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">local</span><span class="p">:</span>
+                <span class="n">inport</span><span class="o">.</span><span class="n">oldInLine</span> <span class="o">=</span> <span class="n">inport</span><span class="o">.</span><span class="n">inLine</span>
+            <span class="n">inport</span><span class="o">.</span><span class="n">inLine</span> <span class="o">=</span> <span class="n">newLine</span>
+    <span class="k">return</span> <span class="n">componentSet</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

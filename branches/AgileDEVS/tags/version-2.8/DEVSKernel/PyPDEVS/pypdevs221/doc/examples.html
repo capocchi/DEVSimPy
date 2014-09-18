@@ -1,0 +1,399 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Examples for Parallel DEVS &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="next" title="Examples for Dynamic Structure DEVS" href="examples_ds.html" />
+    <link rel="prev" title="Examples" href="examples_classic.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="examples_ds.html" title="Examples for Dynamic Structure DEVS"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples_classic.html" title="Examples"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="examples-for-parallel-devs">
+<h1>Examples for Parallel DEVS<a class="headerlink" href="#examples-for-parallel-devs" title="Permalink to this headline">¶</a></h1>
+<p>A small <em>trafficModel</em> and corresponding <em>trafficExperiment</em> file is included in the <em>examples</em> folder of the PyPDEVS distribution. This (completely working) example is slightly too big to use as a first introduction to PyPDEVS and therefore this page will start with a very simple example.</p>
+<p>For this, we will first introduce a simplified queue model, which will be used as the basis of all our examples. The complete model can be downloaded <a class="reference download internal" href="_downloads/queue_example.py"><tt class="xref download docutils literal"><span class="pre">here</span></tt></a>, but don&#8217;t forget to set the location of PyPDEVS (the <em>TODO</em> in the file).</p>
+<p>This section should provide you with all necessary information to get you started with creating your very own PyPDEVS simulation. More advanced features are presented in the next section.</p>
+<div class="section" id="generator">
+<h2>Generator<a class="headerlink" href="#generator" title="Permalink to this headline">¶</a></h2>
+<p>Somewhat simpler than a queue even, is a generator. It will simply create a message to send after a certain delay and then it will stop doing anything.</p>
+<p>Informally, this would result in a DEVS specification as:</p>
+<ul class="simple">
+<li>Time advance function returns the waiting time to generate the message, infinity after the message was created</li>
+<li>Output function outputs the generated message</li>
+<li>Internal transition function marks the generator as done</li>
+<li>External transition function will never happen (as there are no inputs)</li>
+<li>Confluent transition function will never happen (as no external transition will ever happen)</li>
+</ul>
+<p>In PythonPDEVS, this simply becomes the class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Generator</span><span class="p">(</span><span class="n">AtomicDEVS</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">AtomicDEVS</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Generator&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outport</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addOutPort</span><span class="p">(</span><span class="s">&quot;outport&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">timeAdvance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">1.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">INFINITY</span>
+
+    <span class="k">def</span> <span class="nf">outputFnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Our message is simply the integer 5, though this could be anything</span>
+        <span class="c"># It is mandatory to output lists (which signify the &#39;bag&#39;)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outport</span><span class="p">:</span> <span class="p">[</span><span class="mi">5</span><span class="p">]}</span>
+
+    <span class="k">def</span> <span class="nf">intTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+</pre></div>
+</div>
+<p>Note that all functions have a <em>default</em> behaviour, which is sufficient if the function will never be called. In most situations, the <em>confTransition</em> function is sufficient and rarely requires to be overwritten.</p>
+<p>It is possible to simulate this model, though nothing spectacular will happen. For this reason, we will postpone actual simulation examples.</p>
+</div>
+<div class="section" id="simple-queue">
+<h2>Simple queue<a class="headerlink" href="#simple-queue" title="Permalink to this headline">¶</a></h2>
+<p>To couple the <em>Generator</em> model up to something useful, we will now create a simple queue model. It doesn&#8217;t do any real computation and just forwards the message after a certain (fixed) time delay. For simplicity, we allow the queue to <em>drop</em> the previous message if a message was already being processed.</p>
+<p>Informally, this would result in a DEVS specification as:</p>
+<ul class="simple">
+<li>Time advance function returns the processing time if a message is being processed, or INFINITY otherwise</li>
+<li>Output function outputs the message</li>
+<li>Internal transition function removes the message from the queue</li>
+<li>External transition function adds the message to the queue</li>
+<li>Confluent transition function can simply default to the internal transition function, immeditaly followed by the external transition function</li>
+</ul>
+<p>To implement this in PythonPDEVS, one simply has to write:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Queue</span><span class="p">(</span><span class="n">AtomicDEVS</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="n">AtomicDEVS</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Queue&quot;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">processing_time</span> <span class="o">=</span> <span class="mf">1.0</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">inport</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addInPort</span><span class="p">(</span><span class="s">&quot;input&quot;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">outport</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addOutPort</span><span class="p">(</span><span class="s">&quot;output&quot;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">timeAdvance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="k">return</span> <span class="n">INFINITY</span>
+      <span class="k">else</span><span class="p">:</span>
+          <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">processing_time</span>
+
+  <span class="k">def</span> <span class="nf">outputFnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="k">return</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outport</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">]}</span>
+
+  <span class="k">def</span> <span class="nf">extTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+      <span class="c"># To access them, you will need to access each element seperately</span>
+      <span class="c"># In this case, we only use the first element from the bag as we</span>
+      <span class="c"># know that it will only contain one element</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inport</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+
+  <span class="k">def</span> <span class="nf">intTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+</pre></div>
+</div>
+<p>And we are done with our basic queue model.</p>
+<p>However, there is currently no means of testing it, as simply simulating this model will have no effect, due to no messages arriving. We will thus have to couple it with the <em>Generator</em> we previously made.</p>
+</div>
+<div class="section" id="coupling">
+<h2>Coupling<a class="headerlink" href="#coupling" title="Permalink to this headline">¶</a></h2>
+<p>To couple up the <em>Generator</em> to the <em>Queue</em>, all we have to do is create a <em>CoupledDEVS</em> class and simulate this class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">CQueue</span><span class="p">(</span><span class="n">CoupledDEVS</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">CoupledDEVS</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;CQueue&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addSubModel</span><span class="p">(</span><span class="n">Generator</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addSubModel</span><span class="p">(</span><span class="n">Queue</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connectPorts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="o">.</span><span class="n">outport</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">inport</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>That is all for the coupled model. Note that it is not required for every port of a model to be connected to another port. For example the <em>outport</em> of the <em>Queue</em> is not connected. Any output that is put on this port is thus discarded.</p>
+<p>It is perfectly allowed to do model construction and connection in e.g. a loop or conditionally, as long as the required functions are called.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The DEVS formalism allows for an input-to-output translation function, but this is not implemented in PythonPDEVS.</p>
+</div>
+</div>
+<div class="section" id="simulation">
+<h2>Simulation<a class="headerlink" href="#simulation" title="Permalink to this headline">¶</a></h2>
+<p>Now that we have an actual coupled model that does something remotely useful, it is time to simulate it. Simulation is as simple as constructing a <em>Simulator</em> object with the model and calling <em>simulate()</em> on the simulator:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span> <span class="o">=</span> <span class="n">CQueue</span><span class="p">()</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Sadly, nothing seems to happen because no tracers are enabled. Note that it is possible to access the attributes of the model and see that they are actually changed as directed by the simulation:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span> <span class="o">=</span> <span class="n">CQueue</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">generator</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">generator</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This code will simply print <em>True</em> in the beginning and <em>False</em> at the end, since the model is updated in-place in this situation. The model will <strong>not</strong> be simulated in-place if either simulation is distributed, or reinitialisation is enabled.</p>
+</div>
+<div class="section" id="tracing">
+<h2>Tracing<a class="headerlink" href="#tracing" title="Permalink to this headline">¶</a></h2>
+<p>To actually see some results from the simulation, it is advised to enable certain tracers. The simplest tracer is the <em>verbose</em> tracer, which will output some details in a human-readable format. Enabling the verbose tracer is as simple as setting the <em>setVerbose()</em> configuration to a destination file. For the verbose tracer, it is also possible to trace to stdout by using the <em>None</em> argument:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span> <span class="o">=</span> <span class="n">CQueue</span><span class="p">()</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">setVerbose</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Saving the output to a file can de done by passing the file name as a string. Note that a file handle does <strong>not</strong> work:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span> <span class="o">=</span> <span class="n">CQueue</span><span class="p">()</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">setVerbose</span><span class="p">(</span><span class="s">&quot;myOutputFile&quot;</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Multiple tracers can be defined simultaneously, all of which will be used. So to trace to the files <em>myOutputFile</em> and <em>myOutputFile</em> and simultaneously output to stdout, you could use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span> <span class="o">=</span> <span class="n">CQueue</span><span class="p">()</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">setVerbose</span><span class="p">(</span><span class="s">&quot;myOutputFile&quot;</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">setVerbose</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">setVerbose</span><span class="p">(</span><span class="s">&quot;myOutputFile2&quot;</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">There is no way to unset a single tracer. There is however a way to remove all currently registered tracers: <em>setRemoveTracers()</em>, though it is generally only useful in reinitialized simulations.</p>
+</div>
+<p>An example output of the <em>verbose</em> tracer is:</p>
+<div class="highlight-python"><pre>__  Current Time:       0.00 __________________________________________
+
+    INITIAL CONDITIONS in model &lt;CQueue.Generator&gt;
+    Initial State: True
+    Next scheduled internal transition at time 1.00
+
+    INITIAL CONDITIONS in model &lt;CQueue.Queue&gt;
+    Initial State: None
+    Next scheduled internal transition at time inf
+
+__  Current Time:       1.00 __________________________________________
+
+    EXTERNAL TRANSITION in model &lt;CQueue.Queue&gt;
+    Input Port Configuration:
+        port &lt;input&gt;:
+            5
+    New State: 5
+    Next scheduled internal transition at time 2.00
+
+    INTERNAL TRANSITION in model &lt;CQueue.Generator&gt;
+    New State: False
+    Output Port Configuration:
+        port &lt;outport&gt;:
+            5
+    Next scheduled internal transition at time inf
+
+__  Current Time:       2.00 __________________________________________
+
+    INTERNAL TRANSITION in model &lt;CQueue.Queue&gt;
+    New State: None
+    Output Port Configuration:
+        port &lt;output&gt;:
+            5
+    Next scheduled internal transition at time inf</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Several other tracers are available, such as <em>VCD</em>, <em>XML</em> and <em>Cell</em>. Their usage is very similar and is only useful in several situations. Only the <em>Cell</em> tracer requires further explanation and is mentioned in the <em>Advanced examples</em> section.</p>
+</div>
+</div>
+<div class="section" id="termination">
+<h2>Termination<a class="headerlink" href="#termination" title="Permalink to this headline">¶</a></h2>
+<p>Our previous example stopped simulation automatically, since both models returned a time advance equal to infinity.</p>
+<p>In several cases, it is desired to stop simulation after a certain period. The simplest example of this is when the <em>Generator</em> would keep generating messages after a certain delay. Without a termination condition, the simulation will keep going forever.</p>
+<p>Adding a termination time is as simple as setting one additional configuration option:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sim</span><span class="o">.</span><span class="n">setTerminationTime</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will make the simulation stop as soon as simulation time 5.0 is reached.</p>
+<p>A termination time is sufficient in most situations, though it is possible to use a more advanced approach: using a termination function. Using the option:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sim</span><span class="o">.</span><span class="n">setTerminationCondition</span><span class="p">(</span><span class="n">termFunc</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>With this additional option, the function <em>termFunc</em> will be evaluated at every timestep. If the function returns <em>True</em>, simulation will stop. The function will receive 2 parameters from the simulator: the model being simulated and the current simulation time.</p>
+<p>Should our generator save the number of messages it has generated, an example of such a termination function could be:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">termFunc</span><span class="p">(</span><span class="n">clock</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">generator</span><span class="o">.</span><span class="n">generated</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="c"># The generator has generated more than 5 events</span>
+        <span class="c"># So stop</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">elif</span> <span class="n">clock</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="c"># Or if the clock has progressed past simulation time 10</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># Otherwise, we simply continue</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</pre></div>
+</div>
+<p>The <em>clock</em> parameter in the termination condition will be a <strong>tuple</strong> instead of a simple floating point number. The first field of the tuple is the current simulation time (and can be used as such). The second field is a so-called <em>age</em> field, containing the number of times the same simulation time has occured. This is passed on in the termination condition as it is required in some cases for distributed simulation.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Using a termination function is a lot slower than simply using a termination time. This option should therefore be avoided if at all possible.</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">It is <strong>only</strong> allowed to read from the model in the termination function. Performing write actions to the model has unpredictable consequences!</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Running a termination function in a distributed simulation is slightly different, so please refer to the advanced section for this!</p>
+</div>
+</div>
+<div class="section" id="simulation-time">
+<h2>Simulation time<a class="headerlink" href="#simulation-time" title="Permalink to this headline">¶</a></h2>
+<p>Accessing the global simulation time is a frequent operation, though it is not supported by DEVS out-of-the-box. Of course, the simulator internally keeps such a clock, though this is not meant to be accessed by the user directly as it is an implementation detail of PyPDEVS (and it might even change between releases!).</p>
+<p>If you require access to the simulation time, e.g. to put a timestamp on a message, this can be done by writing some additional code in the model that requires this time as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyModelState</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actual_state</span> <span class="o">=</span> <span class="o">...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_time</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+<span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">AtomicDEVS</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">...</span><span class="p">):</span>
+        <span class="n">AtomicDEVS</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;ExampleModel&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">MyModelState</span><span class="p">()</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">extTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_time</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">elapsed</span>
+        <span class="o">...</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+
+    <span class="k">def</span> <span class="nf">intTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_time</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeAdvance</span><span class="p">()</span>
+        <span class="o">...</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+
+    <span class="k">def</span> <span class="nf">confTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_time</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeAdvance</span><span class="p">()</span>
+        <span class="o">...</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+</pre></div>
+</div>
+<p>In the <em>extTransition</em> method, we use the <em>elapsed</em> attribute to determine the time between the last transition and the current transition. However, in the <em>intTransition</em> we are <strong>not</strong> allowed to access it. You are allowed to call the <em>timeAdvance</em> method again, as this is the time that was waited before calling the internal transition function (as defined in the DEVS formalism).</p>
+<p>The confluent transition is somewhat a gray zone on how this is handled. According to the Parallel DEVS formalism, the confluent transition function should not have access to this attribute, though the default behaviour is to call the <em>extTransition</em> and then the <em>intTransition</em>. And clearly, the <em>extTransition</em> uses this attribute. Afterwards, the <em>intTransition</em> method will be called, which will call the <em>timeAdvance</em> method, but this will already operate on the <strong>new</strong> state that was generated by the <em>extTransition</em>. For this reason, there is no suitable solution to the problem and the <em>confTransition</em> will need to be defined to call the <em>timeAdvance</em> method before the state is altered. To remind you of this fact, the <em>elapsed</em> attribute will be set to 0.0 when the <em>confTransition</em> is called.</p>
+<p>If your <em>confTransition</em> makes a call to the <em>intTransition</em>, be sure to have a way of skipping the fetching of the <em>timeAdvance</em> value, as otherwise an incorrect time will be calculated.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Examples for Parallel DEVS</a><ul>
+<li><a class="reference internal" href="#generator">Generator</a></li>
+<li><a class="reference internal" href="#simple-queue">Simple queue</a></li>
+<li><a class="reference internal" href="#coupling">Coupling</a></li>
+<li><a class="reference internal" href="#simulation">Simulation</a></li>
+<li><a class="reference internal" href="#tracing">Tracing</a></li>
+<li><a class="reference internal" href="#termination">Termination</a></li>
+<li><a class="reference internal" href="#simulation-time">Simulation time</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples_classic.html"
+                        title="previous chapter">Examples</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples_ds.html"
+                        title="next chapter">Examples for Dynamic Structure DEVS</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="examples_ds.html" title="Examples for Dynamic Structure DEVS"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples_classic.html" title="Examples"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

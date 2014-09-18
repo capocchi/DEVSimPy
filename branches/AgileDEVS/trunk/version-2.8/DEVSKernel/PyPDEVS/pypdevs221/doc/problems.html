@@ -1,0 +1,260 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Common problems and their solution &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="next" title="Internal documentation" href="internal.html" />
+    <link rel="prev" title="Dynamic Allocator" href="dynamicallocator.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="internal.html" title="Internal documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="dynamicallocator.html" title="Dynamic Allocator"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="common-problems-and-their-solution">
+<h1>Common problems and their solution<a class="headerlink" href="#common-problems-and-their-solution" title="Permalink to this headline">¶</a></h1>
+<p>The most important parts in PyPDEVS are guarded by a <em>DEVSException</em>. Such an exception being thrown is probably due to a modelling error (or more likely: a bug in the simulator). These exceptions should contain enough information about what went wrong and should normally only be seen if violations of DEVS were written (or a simulator bug).</p>
+<p>Other problems are often caused due to an ommission of the modeller. This section tries to provide an overview of common problems for first-time modellers using PyPDEVS.</p>
+<div class="section" id="importerror-no-module-named-x">
+<h2>ImportError: No module named X<a class="headerlink" href="#importerror-no-module-named-x" title="Permalink to this headline">¶</a></h2>
+<p>This indicates that PyPDEVS isn&#8217;t imported correctly. While this is actually just a Python error, it is still handled here as this is one of the most common questions.</p>
+<p>To import PyPDEVS, you need to do one of the following:</p>
+<ul class="simple">
+<li>Extend your search path (recommended)</li>
+<li>Set a PYTHONPATH environment variable</li>
+<li>Put the <em>contents</em> of the <em>src</em> folder in the same folder as your model (<strong>NOT</strong> recommended)</li>
+</ul>
+<p>Assume you have the following directory structure:</p>
+<div class="highlight-python"><pre>PyPDEVS
+|- src
+   |- basesimulator.py
+   |- colors.py
+   |- controller.py
+   |- ...
+|- myExperiments
+   |- myModel.py
+   |- myExperiment.py</pre>
+</div>
+<p>In order to use the Python files from the <em>src</em> directory, it is necessary to extend your search path from the (default) <em>myExperiments</em> folder, to the <em>src</em> folder. This can be done using the syntax:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;../src/&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Of course, this syntax assumes that you are running this from the <em>myExperiments</em> folder. Python will not complain on unknown paths, so you can add as many as you like for every possible situation that you want to call it. Another option (though less flexible) is to use an absolute path, for example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;/home/user/PyPDEVS/src&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You should include the <em>src</em> folder and not simply the <em>PyPDEVS</em> folder!</p>
+</div>
+</div>
+<div class="section" id="attributeerror-x-object-has-no-attribute-iports-or-oports-or-componentset">
+<h2>AttributeError: &#8216;X&#8217; object has no attribute &#8216;IPorts&#8217; (or &#8216;OPorts&#8217; or &#8216;componentSet&#8217;)<a class="headerlink" href="#attributeerror-x-object-has-no-attribute-iports-or-oports-or-componentset" title="Permalink to this headline">¶</a></h2>
+<p>This problem indicates that you forgot to initialize the superclass of your own DEVS models as the <strong>first</strong> instruction. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyAtomicDEVSModel</span><span class="p">(</span><span class="n">AtomicDEVS</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">AtomicDEVS</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">)</span> <span class="c"># &lt;-- you probably forgot this line</span>
+        <span class="c"># Remainder of your initialisation</span>
+</pre></div>
+</div>
+<p>The same should happen for CoupledDEVS models:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyCoupledDEVSModel</span><span class="p">(</span><span class="n">CoupledDEVS</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">CoupledDEVS</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">)</span> <span class="c"># &lt;-- you probably forgot this line</span>
+        <span class="c"># Remainder of your initialisation</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="typeerror-nonetype-object-is-not-iterable">
+<h2>TypeError: &#8216;NoneType&#8217; object is not iterable<a class="headerlink" href="#typeerror-nonetype-object-is-not-iterable" title="Permalink to this headline">¶</a></h2>
+<p>This most likely indicates that you forgot to return a dictionary in the <em>outputFnc</em> function. Even if no output is generated, it is mandatory to return a dictionary:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">outputFnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{}</span> <span class="c"># &lt;-- This is required</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="typeerror-x-object-is-not-iterable">
+<h2>TypeError: &#8216;X&#8217; object is not iterable<a class="headerlink" href="#typeerror-x-object-is-not-iterable" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This solution is not valid in Classic DEVS simulation, as here it is allowed to be a simple value.</p>
+</div>
+<p>Probably, you forgot to return the values in your dicationary as a list, as is required in parallel DEVS. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">outputFnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c"># return {self.outport: myMessage} &lt;-- WRONG</span>
+    <span class="k">return</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outport</span><span class="p">:</span> <span class="p">[</span><span class="n">myMessage</span><span class="p">]}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="attributeerror-list-object-has-no-attribute-x">
+<h2>AttributeError: &#8216;List&#8217; object has no attribute &#8216;X&#8217;<a class="headerlink" href="#attributeerror-list-object-has-no-attribute-x" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This solution is not valid in Classic DEVS simulation, as here it is allowed to be a simple value.</p>
+</div>
+<p>This is equivalent to the previous error: the values of the inputs dictionary are lists instead of the actual values:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">extTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+    <span class="c"># processMessage(inputs[self.inport]) &lt;-- WRONG</span>
+    <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inport</span><span class="p">]:</span>
+        <span class="n">processMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">To be complete, it is not sufficient to just take the first element from the list, as there might be more elements. Always using [0] carelessly is therefore discouraged.</p>
+</div>
+</div>
+<div class="section" id="attributeerror-nonetype-has-no-attribute-x">
+<h2>AttributeError: &#8216;NoneType&#8217; has no attribute &#8216;X&#8217;<a class="headerlink" href="#attributeerror-nonetype-has-no-attribute-x" title="Permalink to this headline">¶</a></h2>
+<p>You probably forgot to return the new state in one of the transition functions. Transition functions should always return the new state. In case only state attributes are updated, it is necessary to return the <em>self.state</em> variable:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">intTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="mi">5</span> <span class="c"># &lt;-- OK, state is updated</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="c"># &lt;-- Don&#39;t forget this</span>
+</pre></div>
+</div>
+<p>Alternatively:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">intTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">State</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="c"># &lt;-- Simply create a completely new state</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="new-state-x-object-at-0xxxxxxxx">
+<h2>New state: &lt;X object at 0xXXXXXXX&gt;<a class="headerlink" href="#new-state-x-object-at-0xxxxxxxx" title="Permalink to this headline">¶</a></h2>
+<p>Not actually a problem, though it is worth noting that you can have custom string output by defining a <em>__str__(self)</em> function for your state in case it is a class.</p>
+</div>
+<div class="section" id="attributeerror-module-object-has-no-attribute-yourcoupleddevsclass">
+<h2>AttributeError: &#8216;module&#8217; object has no attribute &#8216;YourCoupledDEVSClass&#8217;<a class="headerlink" href="#attributeerror-module-object-has-no-attribute-yourcoupleddevsclass" title="Permalink to this headline">¶</a></h2>
+<p>This means that you have a wrong import order. Due to the way MPI runs, it starts up the same file multiple times. To get around this problem, PyPDEVS will stop execution at the server nodes as soon as they are started up. However, they still need to have the actual model to be simulated loaded. For this reason, the import of the <em>simulator</em> file should happend after the import of the models. In case you have your model and experiment in the same file, you should add the import to simulator right before creating the model, preferably even in a conditional:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyCoupledDEVSModel</span><span class="p">(</span><span class="n">CoupledDEVS</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="o">...</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">simulator</span> <span class="kn">import</span> <span class="n">Simulator</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">MyCoupledDEVSModel</span><span class="p">()</span>
+    <span class="n">sim</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The execution of the file will stop as soon as the <em>simulator</em> file is imported, so make sure that all your models are imported by that time. The simplest way to solve this problem is by creating seperate model and experiment files.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Common problems and their solution</a><ul>
+<li><a class="reference internal" href="#importerror-no-module-named-x">ImportError: No module named X</a></li>
+<li><a class="reference internal" href="#attributeerror-x-object-has-no-attribute-iports-or-oports-or-componentset">AttributeError: &#8216;X&#8217; object has no attribute &#8216;IPorts&#8217; (or &#8216;OPorts&#8217; or &#8216;componentSet&#8217;)</a></li>
+<li><a class="reference internal" href="#typeerror-nonetype-object-is-not-iterable">TypeError: &#8216;NoneType&#8217; object is not iterable</a></li>
+<li><a class="reference internal" href="#typeerror-x-object-is-not-iterable">TypeError: &#8216;X&#8217; object is not iterable</a></li>
+<li><a class="reference internal" href="#attributeerror-list-object-has-no-attribute-x">AttributeError: &#8216;List&#8217; object has no attribute &#8216;X&#8217;</a></li>
+<li><a class="reference internal" href="#attributeerror-nonetype-has-no-attribute-x">AttributeError: &#8216;NoneType&#8217; has no attribute &#8216;X&#8217;</a></li>
+<li><a class="reference internal" href="#new-state-x-object-at-0xxxxxxxx">New state: &lt;X object at 0xXXXXXXX&gt;</a></li>
+<li><a class="reference internal" href="#attributeerror-module-object-has-no-attribute-yourcoupleddevsclass">AttributeError: &#8216;module&#8217; object has no attribute &#8216;YourCoupledDEVSClass&#8217;</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dynamicallocator.html"
+                        title="previous chapter">Dynamic Allocator</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="internal.html"
+                        title="next chapter">Internal documentation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/problems.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="internal.html" title="Internal documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="dynamicallocator.html" title="Dynamic Allocator"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
