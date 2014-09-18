@@ -1,4 +1,0 @@
-MessageScheduler
-================
-.. automodule:: messageScheduler
-   :members:

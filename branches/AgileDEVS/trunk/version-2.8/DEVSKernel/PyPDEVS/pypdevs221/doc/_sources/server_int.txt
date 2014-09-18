@@ -1,5 +1,0 @@
-Server
-======
-
-.. automodule:: server
-   :members:
