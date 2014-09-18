@@ -1,5 +1,0 @@
-Tracers
-=======
-
-.. automodule:: tracers
-   :members:
