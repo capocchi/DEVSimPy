@@ -1886,8 +1886,18 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		""" New model menu has been pressed. Wizard is instanciate.
 		"""
 
-		# Create wizard and run
-		gmwiz = WizardGUI.ModelGeneratorWizard(title = _('DEVSimPy Model Generator'), parent = parent, img_filename=os.path.join('bitmaps', DEVSIMPY_PNG))
+		### arguments of ModelGeneratorWizard when right clic appears in canvas
+		kargs = {'title' : _('DEVSimPy Model Generator'),
+					'parent' : parent,
+					'img_filename' : os.path.join('bitmaps', DEVSIMPY_PNG)}
+
+		### right clic appears in a library
+		if not isinstance(parent, ShapeCanvas):
+			### Get path of the selected lib in order to change the last step of wizard
+			sdp = parent.GetItemPyData(parent.GetFocusedItem())
+			kargs['specific_domain_path']=sdp
+
+		gmwiz = WizardGUI.ModelGeneratorWizard(**kargs)
 		gmwiz.run()
 
 		### just for Mac

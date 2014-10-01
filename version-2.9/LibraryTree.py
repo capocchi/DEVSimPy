@@ -257,6 +257,7 @@ class LibraryTree(wx.TreeCtrl):
 	def OnNewModel(self, evt):
 		""" New model action has been invoked.
 		"""
+
 		Container.ShapeCanvas.StartWizard(self)
 
 	###
@@ -882,4 +883,4 @@ class LibraryTree(wx.TreeCtrl):
 	def OnInfo(self, event):
 		"""
 		"""
-		wx.MessageBox(_('Libraries Import Manager.\nYou can import, refresh or upgrade librairies by using right options.\nDefault libraries directory is %s.')%(DOMAIN_PATH))
+		wx.MessageBox(_('Libraries Import Manager.\nYou can import, refresh or upgrade librairies using right options.\nDefault libraries directory is %s.')%(DOMAIN_PATH))
