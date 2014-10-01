@@ -57,13 +57,6 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 
 		BaseDEVS.AtomicDEVS.__init__(self, name=name)
 
-	###
-	def faultTransition(self):
-		"""
-			Delta fault transition function
-		"""
-		pass
-
 def main():
 	DB = DomainBehavior()
 	print DB.__class__.__bases__

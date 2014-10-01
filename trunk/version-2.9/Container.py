@@ -341,14 +341,14 @@ class Diagram(Savable, Structurable):
 				1. we make the codeblock devs instance
 				2. we make the devs port instance for all devsimpy port
 				3. we make Containerblock instance
-				4. we make the connnection
+				4. we make the connection
 		"""
 
 		#ReloadModule.recompile("DomainInterface.DomainBehavior")
 		#ReloadModule.recompile("DomainInterface.DomainStructure")
 
-		### if devs instance of diagram is not instancied, we make it
-		### else one simulation has been perfromed then we clear all devs port instances
+		### if devs instance of diagram is not instantiated, we make it
+		### else one simulation has been performed then we clear all devs port instances
 		if diagram.getDEVSModel() is None:
 			#ReloadModule.recompile("DomainInterface.MasterModel")
 			diagram.setDEVSModel(DomainInterface.MasterModel.Master())
@@ -371,7 +371,7 @@ class Diagram(Savable, Structurable):
 				### recuperation du model DEVS
 				devs = getInstance(cls, m.args)
 
-				### test if the instanciation is safe
+				### test if the instantiation is safe
 				if isinstance(devs, tuple):
 					return devs
 
@@ -664,10 +664,10 @@ class Diagram(Savable, Structurable):
 				## make DEVS instance from diagram
 				master = Diagram.makeDEVSInstance(diagram)
 
-				## test of filename model attribut
+				## test of filename model attribute
 				if all(model.bad_filename_path_flag for model in filter(lambda m: isinstance(m, Block), diagram.GetShapeList()) if hasattr(model, 'bad_filename_path_flag')):
 					dial = wx.MessageDialog(win, \
-										_("You dont make the simulation of the Master model.\nSome models have bad fileName path !"),\
+										_("You don't make the simulation of the Master model.\nSome models have bad fileName path !"),\
 										_('Simulation Manager'), \
 										wx.OK | wx.ICON_EXCLAMATION)
 					dial.ShowModal()
