@@ -253,6 +253,12 @@ class ModelGeneratorWizard(Wizard):
 		""" Constructor
 		"""
 
+		if 'specific_domain_path' in kwargs:
+			domain_path = kwargs['specific_domain_path']
+			del kwargs['specific_domain_path']
+		else:
+			domain_path = DOMAIN_PATH
+
 		Wizard.__init__(self, *args, **kwargs)
 
         # properties of model
@@ -404,7 +410,7 @@ class ModelGeneratorWizard(Wizard):
 		# Create a page 4_1
 		page4_1 = wizard_page(self, _('Finish'))
 		# save filebrowse
-		init = os.path.join(DOMAIN_PATH, "%s.amd"%vbox2.GetItem(1).GetWindow().GetValue())
+		init = os.path.join(domain_path, "%s.amd"%vbox2.GetItem(1).GetWindow().GetValue())
 		fb2 = filebrowse.FileBrowseButton(	page4_1,
 											wx.ID_ANY,
 											initialValue = init,
@@ -417,7 +423,7 @@ class ModelGeneratorWizard(Wizard):
 
 		# Create a page 4_2
 		page4_2 = wizard_page(self, _('Finish'))
-		init =  os.path.join(DOMAIN_PATH, "%s.cmd"%vbox3.GetItem(1).GetWindow().GetValue())
+		init =  os.path.join(domain_path, "%s.cmd"%vbox3.GetItem(1).GetWindow().GetValue())
 		# save filebrowse
 		fb3 = filebrowse.FileBrowseButton(	page4_2,
 											wx.ID_ANY,
