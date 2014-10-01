@@ -27,6 +27,7 @@ import urlparse
 import httplib
 import copy
 import inspect
+import zipfile
 
 import Container
 import Menu

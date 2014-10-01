@@ -72,8 +72,7 @@ class To_Disk(QuickScope):
 				msg = self.peek(self.IPorts[np])
 			else:
 				msg = args[0].get(self.IPorts[np])
-				print msg
-
+			
 			### filename
 			fn = "%s%d%s"%(self.fileName, np, self.ext)
 
