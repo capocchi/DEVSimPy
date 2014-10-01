@@ -3,7 +3,8 @@
 - N1 : obligÃ© de mettre la premiere ligne du fichier .dat d'un fileGenerator a 0 0 sinon bad synchronisation
 - N3: dnd marche pas sous mac avec wx 2.9 qui n'est pas stable de toute maniÃ¨re.
 - N3: recompile plante lorsque on veux changer le nom d'un amd dans une lib par un clique droit dans le panneau lib
-- N3: icon de DEVSimPy ne s'affiche pas sous windows
+- N3: icon de DEVSimPy ne s'affiche pas sous windows.
+- N1: probleme de chargement du code d'un modèle mad lorsque erreur pendant la simulation et invocation de l'editeur pour corriger.
 
 --------------------------------------------------------------AmÃ©lioration-------------------------------------------------------------
 - N3 : voir la fonction ChangeForm pour amÃ©liorer la crÃ©ation de connnection shape en Ã©vitant les modÃ¨les
@@ -431,3 +432,5 @@ invoque rpar un callback lorsque le fichier python est renseignÃ© dans le wizard
 -Fait le 28/02/2014 par LC: ajout -> edition du code des modèles dans une AUI à droite. Pour l'activer il faut aller dans Affichage->Editeur
 -Fait le 21/03/2014 par LC: correction -> passage de FINAL_TIME dans la classe Master comme attribut car bug dans le SimulationGUI.
 -Fait le 21/03/2014 par LC: amélioration -> possibilité de tourner les ports sur les quatre faces par des sous menus suplémentaires du menu Rotate.
+-Fait le 01/10/2014 par LC: correction -> ajout de la dépendance zipfile dans LibraryTree.py.
+-Fait le 01/10/2014 par LC: correction -> enregistrement d'un nouveau amd ou cmd créee par clic droit sur une librairie dans le bon repertoire de la lib.
