@@ -5,6 +5,7 @@
 - N3: recompile plante lorsque on veux changer le nom d'un amd dans une lib par un clique droit dans le panneau lib
 - N3: icon de DEVSimPy ne s'affiche pas sous windows.
 - N1: probleme de chargement du code d'un modèle mad lorsque erreur pendant la simulation et invocation de l'editeur pour corriger.
+- N1 : la liste des param ne se met pas à jour dans les propriétés si il y changement (ajout, suppression, etc) dans le code d'un modèle amd.
 
 --------------------------------------------------------------AmÃ©lioration-------------------------------------------------------------
 - N3 : voir la fonction ChangeForm pour amÃ©liorer la crÃ©ation de connnection shape en Ã©vitant les modÃ¨les
