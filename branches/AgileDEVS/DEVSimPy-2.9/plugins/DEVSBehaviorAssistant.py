@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
 """
-	Authors: T. Ville (tim.ville@me.com)
-	Date: 04/11/2013
-	Description:
-	Depends: wx, devsimpy
+    Authors: T. Ville (tim.ville@me.com)
+    Date: 04/11/2013
+    Description:
+    Depends: wx, devsimpy
 """
 
 ### ----------------------------------------------------------------------- ###
 # =================================Imports=================================== #
 ### ----------------------------------------------------------------------- ###
 
-import wx
+#import wx
 import pluginmanager
 from DEVSKernel.PyDEVS.DEVS import AtomicDEVS, CoupledDEVS
 import zipfile
@@ -24,20 +24,23 @@ import types
 # =============================Graphical  tools=============================== #
 ### ------------------------------------------------------------------------ ###
 
+
 # NOTE: DEVSBehaviorAssistant :: GetFlatDEVSList
 #		=> This method retrieve all Atomic models from the diagram in a list,
 #				no matter the hierarchy
-def GetFlatDEVSList(coupled_devs, recurs=[]):
+def get_flat_devs_list(coupled_devs, recurs=[]):
     """ Get the flat list of devs model composing coupled_devs (recursively)
-	"""
+    """
     for devs in coupled_devs.componentSet:
         # Les instances recuperees doivent  etre de type AMD ou CMD
         if isinstance(devs, AtomicDEVS) and zipfile.is_zipfile(os.path.dirname(devs.getBlockModel().python_path)):
             recurs.append(devs)
         elif isinstance(devs, CoupledDEVS):
             recurs.append(devs)
-            GetFlatDEVSList(devs, recurs)
+            get_flat_devs_list(devs, recurs)
     return recurs
+
+
 # -----------------------------------------------------------------------------
 def behavior(inst):
     """ Manage transitionnal methods decoration of Atomic models
@@ -48,23 +51,23 @@ def behavior(inst):
         methods.append(name)
     methods.append("inject")
 
-	# Retrieve test files from AMD model
+    # Retrieve test files from AMD model
     spec_file, behavior_file = model.GetTempTests()
 
-	# Parse spec file to generate decorators and patch in behavior test file
+    # Parse spec file to generate decorators and patch in behavior test file
     os.system("python plugins/ScriptsTools/Grammar.py %s %s"%(spec_file, behavior_file))
     with open(behavior_file, 'r') as behavior_f:
         behavior_code = behavior_f.read()
     model.UpdateBehavior(behavior_code)
 
-	# Search decorators function object in the test file
+    # Search decorators function object in the test file
     decorators = None
     decorators = importation(behavior_file)
     decorators = [decorators.__dict__.get(a) for a in dir(decorators) if isinstance(decorators.__dict__.get(a), types.FunctionType)]
 
-	# Construct a dictionnary
-	#	<name of function to decorate : decorator function object>
-	# Name constraint : dec_"name of the function to decorate"
+    # Construct a dictionnary
+    #	<name of function to decorate : decorator function object>
+    # Name constraint : dec_"name of the function to decorate"
     decors = dict()
     for decorator in decorators:
         name = decorator.__name__
@@ -74,27 +77,31 @@ def behavior(inst):
         else:
             print "Unknown decorator %s"%decorator.__name__
 
-	# Decorate or patch?
+    # Decorate or patch?
     for name, obj in inspect.getmembers(inst, inspect.ismethod):
-		# Only retrieve commune methods between decorators and model
+        # Only retrieve commune methods between decorators and model
         if name in decors.keys():
-			# If method is not empty
-            if not fncIsEmpty(obj):
-				# We decorate the method with the appropriate decorator
+            # If method is not empty
+            if not fnc_is_empty(obj):
+                # We decorate the method with the appropriate decorator
                 setattr(inst, name, decors[name](obj))
             else:
-				# Else we patch the method with mock object
+                # Else we patch the method with mock object
                 pass
     return inst
+
+
 # ------------------------------------------------------------------------------
 def importation(test_file):
     """ DocString
     """
     loader = imp.load_source('decorators', test_file)
     return loader
+
+
 # ------------------------------------------------------------------------------
 # NOTE: DEVSBehaviorAssistant :: fncIsEmpty			=>
-def	fncIsEmpty(fnc):
+def fnc_is_empty(fnc):
     """ DocString
     """
     source = inspect.getsource(fnc)
@@ -113,11 +120,11 @@ def start_test(*args, **kwargs):
     """
     master = kwargs['master']
 
-	# Parcours de la liste des modeles recuperes
-    for devs in GetFlatDEVSList(master, []):
+    # Parcours de la liste des modeles recuperes
+    for devs in get_flat_devs_list(master, []):
         block = devs.getBlockModel()
 
-		# Si le modele embarque des tests
+        # Si le modele embarque des tests
         if block.hasTests():
             devs = behavior(devs)
 # -----------------------------------------------------------------------------

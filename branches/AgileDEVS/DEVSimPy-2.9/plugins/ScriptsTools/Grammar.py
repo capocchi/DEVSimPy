@@ -50,9 +50,11 @@ ext_transition          := c"when in ", state_name, c" and receive ", INPUT_MSG,
 # =================================UTILITY==================================== #
 ### ------------------------------------------------------------------------ ###
 
+
 def getparser():
     """ DocString """
     return Parser(DECLARATION)
+
 
 def getmatched(children, data, matched):
     """ DocString """
@@ -66,6 +68,7 @@ def getmatched(children, data, matched):
         else:
             getmatched(child[3], data, matched)
     return matched
+
 
 def dispatch(data):
     """ DocString """
@@ -84,6 +87,7 @@ def dispatch(data):
                 _, children, _ = parser.parse(test_data, production=matched)
                 TO_MATCHED[matched]["matched"].append(getmatched(children, repr(test_data), [init]))
     return TO_MATCHED
+
 
 def generate(test_paths, test=False):
     """ DocString """
@@ -118,6 +122,7 @@ def print_matched(matched_dict):
         for key in matched_dict[name]:
             print "\t", key, " : ", matched_dict[name][key]
 
+
 def reindent(code):
     """ DocString """
     tab = code.split("\n")
@@ -142,9 +147,11 @@ def reindent(code):
 # ==================================LIBRARY=================================== #
 ### ------------------------------------------------------------------------ ###
 
+
 def get_real_status(fnc):
     """ DocString """
     return "realStatus = "+fnc+".__self__.state['status']"
+
 
 def get_xxx_matched_state(xxx, data):
     """ DocString """
@@ -153,6 +160,7 @@ def get_xxx_matched_state(xxx, data):
         if i['Type'] == xxx:
             matched = i['Matched']
     return matched
+
 
 def state_equality(fnc, data):
     """ DocString """
@@ -179,6 +187,7 @@ def state_equality(fnc, data):
 # =================================GENERATOR================================= #
 ### ----------------------------------------------------------------------- ###
 
+
 def generate_struct(fnc):
     """ DocString """
     struct = ""
@@ -186,6 +195,7 @@ def generate_struct(fnc):
     struct = "def dec_"+fnc+"("+fnc+"):"
     struct += "\ndef new_"+fnc+"():"
     return struct
+
 
 def initial_states(data):
     """ DocString """
@@ -201,11 +211,13 @@ def hold_states(data):
     # print data
     # return reindent(dec)
 
+
 def passive_states(data):
     """ DocString """
     print "passive "+repr(data)
     # print data
     # return reindent(dec)
+
 
 def int_transition(data):
     """ DocString """
@@ -229,6 +241,7 @@ def output_fnc(data):
     # print generate_struct(dec)
     return reindent(dec)
 
+
 def ext_transition(data):
     """ DocString """
     dec = "extTransition"
@@ -241,11 +254,11 @@ def ext_transition(data):
 ### ------------------------------------------------------------------------ ###
 
 TO_MATCHED = {
-    "passive_states" : {"start": "passivate", "matched": [], "delegate": passive_states},
-    "hold_states"    : {"start": "hold in",   "matched": [], "delegate": hold_states},
-    "int_transition" : {"start": "from",      "matched": [], "delegate": int_transition},
-    "output_fnc"     : {"start": "after",     "matched": [], "delegate": output_fnc},
-    "ext_transition" : {"start": "when in",   "matched": [], "delegate": ext_transition}
+    "passive_states":   {"start": "passivate", "matched": [], "delegate": passive_states},
+    "hold_states":      {"start": "hold in",   "matched": [], "delegate": hold_states},
+    "int_transition":   {"start": "from",      "matched": [], "delegate": int_transition},
+    "output_fnc":       {"start": "after",     "matched": [], "delegate": output_fnc},
+    "ext_transition":   {"start": "when in",   "matched": [], "delegate": ext_transition}
 }
 
 ### ------------------------------------------------------------------------ ###
