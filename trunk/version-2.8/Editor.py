@@ -1716,10 +1716,8 @@ class BlockEditor(Editor):
 				### update args (behavioral attributes) before saving
 				if new_args:
 
-					### add new attributes
-					not_intersection = dict(
-						[(item, new_args[item]) for item in new_args.keys() if not item in self.cb.args.keys()])
-					self.cb.args.update(not_intersection)
+					### add new attributes and update other
+					self.cb.args.update(dict([(item, new_args[item]) for item in new_args.keys()]))
 
 					### del old attributes
 					for key, val in self.cb.args.items():
