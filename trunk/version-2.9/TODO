@@ -434,3 +434,5 @@ invoque rpar un callback lorsque le fichier python est renseignÃ© dans le wizard
 -Fait le 01/10/2014 par LC: correction -> ajout de la dépendance zipfile dans LibraryTree.py.
 -Fait le 01/10/2014 par LC: correction -> enregistrement d'un nouveau amd ou cmd créee par clic droit sur une librairie dans le bon repertoire de la lib.
 -Fait le 09/10/2014 par LC: correction -> ligne 1722 de Editor.py pour corriger la mise à jour des modifications faites dans les args d'un modèle édité.
+-Fait le 09/10/2014 par LC: ajout -> icon pour nouveau peek, poke ou état dans l'editeur externe de code (pas pour l'embarqué du fait d'une mauvaise gestion du père de BlockEditor qui empeche l'execution de ConfigureGUI)
+
