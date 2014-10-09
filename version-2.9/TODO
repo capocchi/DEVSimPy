@@ -4,8 +4,6 @@
 - N3: dnd marche pas sous mac avec wx 2.9 qui n'est pas stable de toute maniÃ¨re.
 - N3: recompile plante lorsque on veux changer le nom d'un amd dans une lib par un clique droit dans le panneau lib
 - N3: icon de DEVSimPy ne s'affiche pas sous windows.
-- N1: probleme de chargement du code d'un modèle mad lorsque erreur pendant la simulation et invocation de l'editeur pour corriger.
-- N1 : la liste des param ne se met pas à jour dans les propriétés si il y changement (ajout, suppression, etc) dans le code d'un modèle amd.
 
 --------------------------------------------------------------AmÃ©lioration-------------------------------------------------------------
 - N3 : voir la fonction ChangeForm pour amÃ©liorer la crÃ©ation de connnection shape en Ã©vitant les modÃ¨les
@@ -435,3 +433,4 @@ invoque rpar un callback lorsque le fichier python est renseignÃ© dans le wizard
 -Fait le 21/03/2014 par LC: amélioration -> possibilité de tourner les ports sur les quatre faces par des sous menus suplémentaires du menu Rotate.
 -Fait le 01/10/2014 par LC: correction -> ajout de la dépendance zipfile dans LibraryTree.py.
 -Fait le 01/10/2014 par LC: correction -> enregistrement d'un nouveau amd ou cmd créee par clic droit sur une librairie dans le bon repertoire de la lib.
+-Fait le 09/10/2014 par LC: correction -> ligne 1722 de Editor.py pour corriger la mise à jour des modifications faites dans les args d'un modèle édité.

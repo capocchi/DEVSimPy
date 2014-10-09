@@ -304,7 +304,7 @@ class CustomDataTable(gridlib.PyGridTableBase):
 		### model initialized by Populate
 		self.model = None
 
-		### TODO rendre les keys (ormis la 1) géénrique en fonction des noms des variable
+		### TODO rendre les keys (ormis la 1) générique en fonction des noms des variables
 		self.info = { _('Unknown information') : _("Please get information of DEVS attribut \nthrough its class constructor using @ symbole. \n For example: @attribut_name : informations"),
 						'python_path' : _("This is the path of python file.\nYou can change this path in order to change the behavior of the model."),
 						'label' : _("This is the name of model.\nYou can change this name by clicking on its value field"),
@@ -315,7 +315,7 @@ class CustomDataTable(gridlib.PyGridTableBase):
 
 		self.colLabels = [_('Attribute'),_('Value'),_('Information')]
 
-		### default graphical attribut label
+		### default graphical attribute label
 		self.infoBlockLabelList = [_('Name'), _('Color and size of pen'), _('Background color'), _('Font label'), _('Background image'),_('Input port'), _('Output port')]
 
 		self.nb_graphic_var = len(self.infoBlockLabelList)
@@ -372,6 +372,8 @@ class CustomDataTable(gridlib.PyGridTableBase):
 		### Behavioral sorted values fields
 		for attr_name,info in sorted(infoBlockBehavioralDict.items()):
 			val = model.args[attr_name]
+			#print model.args
+			#print val, self.GetTypeList(val)
 
 			self.data.append([attr_name, val, info])
 			self.dataTypes.append(self.GetTypeList(val))
@@ -407,7 +409,8 @@ class CustomDataTable(gridlib.PyGridTableBase):
 					attr.SetBackgroundColour(s)
 					break
 
-		### TODO : a ameliorer car bad_filename_path_flag ne prend pas en compte python_path. relechir sur comment faire en sorte de ne pas donner la main a la simlation
+		### TODO : a ameliorer car bad_filename_path_flag ne prend pas en compte python_path.
+		### relechir sur comment faire en sorte de ne pas donner la main a la simlation
 		### en fonction de la validite des deux criteres plus bas
 
 		### if the path dont exists, background color is red
