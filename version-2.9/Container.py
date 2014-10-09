@@ -361,18 +361,19 @@ class Diagram(Savable, Structurable):
 
 		### for all codeBlock shape, we make the devs instance
 		for m in block_list:
-			# creation des ports DEVS et des couplages pour la simulation
 
+			### class object from python file
 			cls = Components.GetClass(m.python_path)
 
+			### Class is wrong ?
 			if isinstance(cls, (ImportError, tuple)):
 				print _('Error making DEVS instances for:\n%s'%(str(cls)))
 				return False
 			else:
-				### recuperation du model DEVS
+				### DEVS model recovery
 				devs = getInstance(cls, m.args)
 
-				### test if the instantiation is safe
+				### Is safe instantiation ?
 				if isinstance(devs, tuple):
 					return devs
 
