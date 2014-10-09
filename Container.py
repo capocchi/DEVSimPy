@@ -432,6 +432,7 @@ class Diagram(Savable, Structurable):
 
 			### inputs/outpus of dam/uam are instantiate depending on the iPort/oPort of diagram 0
 			dia_0 = diagram.layers[0]
+			print dia_0.label
 			for i,m in enumerate(filter(lambda s: isinstance(s, iPort), dia_0.GetShapeList())):
 				devs_dam.addInPort()
 				diagram.addInPort()
@@ -480,6 +481,7 @@ class Diagram(Savable, Structurable):
 				p1 = m1.getDEVSModel().OPorts[n1]
 				p2 = m2.getDEVSModel().IPorts[n2]
 				Structurable.ConnectDEVSPorts(diagram, p1, p2)
+
 			elif isinstance(m1, Block) and isinstance(m2, oPort):
 				### TODO insert devs_uam
 				p1 = m1.getDEVSModel().OPorts[n1]
