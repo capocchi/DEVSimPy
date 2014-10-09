@@ -133,9 +133,6 @@ def GetEditor(parent, id, title="", obj=None, **kwargs):
 	else:
 		editor = GeneralEditor(parent, id, title)
 
-#	if not parent:
-#		editor.Reparent(wx.GetApp().GetTopWindow())
-
 	return editor
 
 #################################################################
@@ -1162,6 +1159,27 @@ class Editor(wx.Frame, wx.Panel):
 		# notebook
 		self.read_only = False
 
+	def update(self, concret_subject=None):
+		""" Update method that manages the embedded editor depending of the selected model in the canvas
+		"""
+
+		state = concret_subject.GetState()
+		canvas = state['canvas']
+		model = state['model']
+
+		### delete all tab on notebook
+		while(self.nb.GetPageCount()):
+			self.nb.DeletePage(0)
+
+		### add behavioral code
+		self.AddEditPage(model.label, model.python_path)
+
+		### add test file
+		if hasattr(model, 'GetTestFile'):
+			L = model.GetTestFile()
+			for i,s in enumerate(map(lambda l: os.path.join(model.model_path, l), L)):
+				self.AddEditPage(L[i], s)
+
 	def CreateMenu(self):
 		""" Create the menu
 		"""
@@ -1614,6 +1632,16 @@ class BlockEditor(Editor):
 		menu.PrependMenu(wx.NewId(), _("Insert"), insert)
 		### -------------------------------------------------------------------
 
+		### insert new icon in toolbar (icon are not available in embeded editor (Show menu)
+		###-------------------------------------------------------------------
+		tb = self.GetToolBar()
+		tb.InsertSeparator(tb.GetToolsCount())
+		tb.AddTool(peek.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')),shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
+		tb.AddTool(poke.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')),shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
+		tb.AddTool(state.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')),shortHelpString=_('New state'), longHelpString=_('Insert a code for a new state'))
+		tb.Realize()
+
+		###-------------------------------------------------------------------
 		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=poke.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertState, id=state.GetId())
@@ -2002,27 +2030,6 @@ class GeneralEditor(Editor):
 
 		else:
 			return True
-
-	def update(self, concret_subject=None):
-		""" Update method that manages the embedded editor depending of the selected model in the canvas
-		"""
-
-		state = concret_subject.GetState()
-		canvas = state['canvas']
-		model = state['model']
-
-		### delete all tab on notebook
-		while(self.nb.GetPageCount()):
-			self.nb.DeletePage(0)
-
-		### add behavioral code
-		self.AddEditPage(model.label, model.python_path)
-
-		### add test file
-		if hasattr(model, 'GetTestFile'):
-			L = model.GetTestFile()
-			for i,s in enumerate(map(lambda l: os.path.join(model.model_path, l), L)):
-				self.AddEditPage(L[i], s)
 
 ### -----------------------------------------------------------------------------------------------
 class TestApp(wx.App):

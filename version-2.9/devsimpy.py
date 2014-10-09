@@ -307,8 +307,7 @@ class MainApplication(wx.Frame):
 										FloatingSize(wx.Size(280, 400)).CloseButton(True).MaximizeButton(True))
 
 		### Editor is panel
-		self.editor = GetEditor(self, -1)
-		#self.editor.AddEditPage("Code")
+		self.editor = GetEditor(self, -1, file_type='block')
 
 		self._mgr.AddPane(self.editor, wx.aui.AuiPaneInfo().Name("editor").Hide().Caption("Editor").
 						FloatingSize(wx.Size(280, 400)).CloseButton(True).MaximizeButton(True))
