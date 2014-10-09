@@ -366,7 +366,8 @@ class Diagram(Savable, Structurable):
 			cls = Components.GetClass(m.python_path)
 
 			if isinstance(cls, (ImportError, tuple)):
-				return _('Error making DEVS instances.\n %s'%(str(cls)))
+				print _('Error making DEVS instances for:\n%s'%(str(cls)))
+				return False
 			else:
 				### recuperation du model DEVS
 				devs = getInstance(cls, m.args)
@@ -420,7 +421,8 @@ class Diagram(Savable, Structurable):
 				p1 = diagram.getDEVSModel().IPorts[m1.id]
 				p2 = m2.getDEVSModel().IPorts[n2]
 			else:
-				return  _('Error making DEVS connection.\n Check your connections !')
+				print _("Error making DEVS connection between %s and %s."%(m1,m2))
+				return False
 
 			Structurable.ConnectDEVSPorts(diagram, p1, p2)
 
@@ -672,6 +674,7 @@ class Diagram(Savable, Structurable):
 										wx.OK | wx.ICON_EXCLAMATION)
 					dial.ShowModal()
 					return False
+
 				else:
 
 #					pluginmanager.trigger_event('START_DIAGRAM', parent = win, diagram = diagram)
