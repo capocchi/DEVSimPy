@@ -106,6 +106,11 @@ import wx.lib.dialogs
 import wx.html
 
 try:
+	import  wx.lib.floatbar
+except:
+	pass
+
+try:
 	from wx.lib.agw import advancedsplash
 	AdvancedSplash = advancedsplash.AdvancedSplash
 	old = False
@@ -527,7 +532,7 @@ class MainApplication(wx.Frame):
 		# for spash screen
 		pub.sendMessage('object.added', 'Making tools bar ...\n')
 
-		self.tb = self.CreateToolBar( style = wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT, name = 'tb')
+		self.tb = self.CreateToolBar(style = wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT, name = 'tb')
 		self.tb.SetToolBitmapSize((25,25)) # juste for windows
 
 		self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId()]

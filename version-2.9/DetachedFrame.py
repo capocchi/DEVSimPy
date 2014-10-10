@@ -82,6 +82,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		### Menu ToolBar
 		toolbar = wx.ToolBar(self, wx.ID_ANY, name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
 		toolbar.SetToolBitmapSize((25,25)) # just for windows
+		self.SetToolBar(toolbar)
 
 		if self.parent:
 			self.toggle_list = wx.GetApp().GetTopWindow().toggle_list
@@ -125,7 +126,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 
 		### vertical box
 		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.Add(toolbar, 0, wx.EXPAND, border = 5)
+		#vbox.Add(toolbar, 0, wx.EXPAND, border = 5)
 		vbox.Add(self.canvas, 1, wx.EXPAND, border = 5)
 
 		self.SetSizer(vbox)
