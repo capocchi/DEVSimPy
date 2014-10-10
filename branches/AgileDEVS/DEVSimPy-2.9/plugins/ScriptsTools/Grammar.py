@@ -23,7 +23,11 @@ CODING = "# -*- coding: utf-8 -*-"
 # ==================================GRAMMAR=================================== #
 ### ------------------------------------------------------------------------ ###
 
-DECLARATION = r'''
+
+class MyParser():
+
+    def __init__(self):
+        self.DECLARATION = r'''
 string                  := [a-zA-Z_],[a-zA-Z0-9_]*
 number                  := [1-9], [0-9]*
 
@@ -42,237 +46,352 @@ INPUT_MSG               := (number / string)+
 
 functions               := (int_transition / output_fnc / ext_transition)
 int_transition          := c"from ", CURRENT_STATE, c" go to ", NEXT_STATE, " "?, "!"
-output_fnc              := c"after ", state_name, c" output ", OUTPUT_MSG, " "?, "!"
-ext_transition          := c"when in ", state_name, c" and receive ", INPUT_MSG, c" go to ", NEXT_STATE, " "?, "!"
+output_fnc              := c"after ", CURRENT_STATE, c" output ", OUTPUT_MSG, " "?, "!"
+ext_transition          := c"when in ", CURRENT_STATE, c" and receive ", INPUT_MSG, c" go to ", NEXT_STATE, " "?, "!"
 '''
+        self.cg = CodeGenerator()
+        self.TO_MATCHED = dict(
+            passive_states=dict(start="passivate", matched=[]),
+            hold_states=dict(start="hold in", matched=[]),
+            int_transition=dict(start="from", matched=[]),
+            output_fnc=dict(start="after", matched=[]),
+            ext_transition=dict(start="when in", matched=[])
+        )
 
-### ------------------------------------------------------------------------ ###
-# =================================UTILITY==================================== #
-### ------------------------------------------------------------------------ ###
+    def get_parser(self):
+        """
+        Get the grammar parser
+        :return: Parser
+        """
+        return Parser(self.DECLARATION)
 
+    def get_matched(self, children, data, matched):
+        """
+        Return a list of matched words
+        :param children:
+        :param data:
+        :param matched:
+        :return: matched
+        """
+        for child in children:
+            if child[0] in MATCH_LIST:
+                begin = child[1]+1
+                end = child[2]+1
+                match = data[begin:end]
+                matched.append({"Matched": match, "Type": child[0]})
 
-def getparser():
-    """ DocString """
-    return Parser(DECLARATION)
-
-
-def getmatched(children, data, matched):
-    """ DocString """
-    for child in children:
-        if child[0] in MATCH_LIST:
-            begin = child[1]+1
-            end = child[2]+1
-            match = data[begin:end]
-            matched.append({"Matched" : match, "Type" : child[0]})
-
-        else:
-            getmatched(child[3], data, matched)
-    return matched
-
-
-def dispatch(data):
-    """ DocString """
-    parser = getparser()
-    for test_data in data.splitlines():
-        test_data = test_data.strip()
-        init = False
-        if test_data.startswith(INIT_START):
-            init = True
-            test_data = (test_data[len(INIT_START):]).strip()
-
-        for matched in TO_MATCHED.keys():
-
-            if test_data.startswith(TO_MATCHED[matched]["start"]):
-
-                _, children, _ = parser.parse(test_data, production=matched)
-                TO_MATCHED[matched]["matched"].append(getmatched(children, repr(test_data), [init]))
-    return TO_MATCHED
-
-
-def generate(test_paths, test=False):
-    """ DocString """
-    behavior = "# -*- coding: utf-8 -*-"
-    if not test:
-        spec_path, behavior_path = test_paths
-        with open(spec_path, 'r') as testing_s:
-            spec = testing_s.read()
-    else: 
-        spec = test_paths
-    matched_dict = dispatch(spec)
-
-    for key in matched_dict:
-        if not matched_dict[key]["matched"] == []:
-
-            if matched_dict[key]["matched"][0][0]:
-                behavior += initial_states(matched_dict[key]["matched"][0][1])
             else:
-                behavior += matched_dict[key]["delegate"](matched_dict[key]["matched"])
-    if not test:
-        with open(behavior_path, 'w+') as testing_b:
-            testing_b.write(behavior)
-    else:
-        print behavior
-    
+                self.get_matched(child[3], data, matched)
+        return matched
 
-def print_matched(matched_dict):
-    """ DocString """
-    for name in matched_dict:
-        print name
+    def dispatch(self, data):
+        """
+        Dispatch matched word into the right place on dictionary
+        :param data: specifications
+        """
+        myparser = self.get_parser()
+        for test_data in data.splitlines():
+            test_data = test_data.strip()
+            init = False
+            if test_data.startswith(INIT_START):
+                init = True
+                test_data = (test_data[len(INIT_START):]).strip()
+            for matched in self.TO_MATCHED.keys():
+                if test_data.startswith(self.TO_MATCHED[matched]["start"]):
+                    _, children, _ = myparser.parse(test_data, production=matched)
+                    self.TO_MATCHED[matched]["matched"].append(self.get_matched(children, repr(test_data), [init]))
 
-        for key in matched_dict[name]:
-            print "\t", key, " : ", matched_dict[name][key]
+    def generate(self, test_paths, test=False):
+        """
+        Entry method for generating test file
+        :param test_paths: specification and destination files paths
+        :param test: boolean (optional)
+        """
+        behavior = "# -*- coding: utf-8 -*-"
+        if not test:
+            spec_path, behavior_path = test_paths
+            with open(spec_path, 'r') as testing_s:
+                spec = testing_s.read()
+        else:
+            spec = test_paths
 
+        self.dispatch(spec)
+        behavior = self.cg.dispatch(self.TO_MATCHED)
 
-def reindent(code):
-    """ DocString """
-    tab = code.split("\n")
-    new_code = ""
-    prof = 0
-    for line in tab:
-        if line.startswith("else") and prof > 0:
-            prof -= 1
-        line = (prof*"\t")+line
-        if line.endswith(":"):
-            prof += 1
-        # else :
-        #     if prof > 0 :
-        #         prof -= 1
-        new_code += "\n"+line
+        if not test:
+            with open(behavior_path, 'w+') as testing_b:
+                testing_b.write(behavior)
+        else:
+            print behavior
 
-    return new_code
+    @staticmethod
+    def print_matched(matched_dict):
+        """ DocString """
+        for name in matched_dict:
+            print name
+
+            for key in matched_dict[name]:
+                print "\t", key, " : ", matched_dict[name][key]
+
 
 ### ------------------------------------------------------------------------ ###
 # =================================DECORATOR================================== #
 ### ------------------------------------------------------------------------ ###
-# ==================================LIBRARY=================================== #
-### ------------------------------------------------------------------------ ###
 
 
-def get_real_status(fnc):
-    """ DocString """
-    return "realStatus = "+fnc+".__self__.state['status']"
+class CodeGenerator():
+
+    def __init__(self):
+        self.obj_list = list()
+        self.generated_code = ""
+
+    @staticmethod
+    def reindent(code):
+        """
+        :param code:
+        :return: string
+        """
+        tab = code.split("\n")
+        new_code = ""
+        prof = 0
+        for line in tab:
+            if line.startswith("else") and prof > 0:
+                prof -= 1
+            line = (prof*"\t")+line
+            if line.endswith(":"):
+                prof += 1
+            # else :
+            #     if prof > 0 :
+            #         prof -= 1
+            new_code += "\n"+line
+
+        return new_code
+
+    def dispatch(self, dic):
+        for key in dic.keys():
+            if dic[key]['matched'] != []:
+                self.obj_list.append(eval(key)(dic[key]['matched']))
+        self.propagate()
+        return self.generated_code
+
+    def propagate(self):
+        for obj in self.obj_list:
+            self.generated_code += str(obj.generate())
 
 
-def get_xxx_matched_state(xxx, data):
-    """ DocString """
-    matched = None
-    for i in data:
-        if i['Type'] == xxx:
-            matched = i['Matched']
-    return matched
+class GeneratorInterface(object):
 
+    def __init__(self, matched=list()):
+        self._fnc = ""
+        self.matched = matched
 
-def state_equality(fnc, data):
-    """ DocString """
-    equality = ""
-    equality += "\n"+get_real_status(fnc)
-    enum = enumerate(data)
-    for ind, states in enum:
-        state_name = get_xxx_matched_state('CURRENT_STATE', states)
-        next_state = get_xxx_matched_state('NEXT_STATE', states)
-        if ind == 0:
-            equality += "\nif realStatus.upper() == '"+state_name.upper()+"':"
+    @property
+    def fnc(self):
+        """ Get the current fnc """
+        return self._fnc
+
+    @fnc.setter
+    def fnc(self, value):
+        self._fnc = value
+
+    def generate_decorator_struct(self):
+        """
+        Generate string code for decorator structure
+        :return: string code for decorator structure
+        """
+        struct = """
+def dec_{0}({0}):
+    def new_{0}():""".format(self.fnc)
+        return struct
+
+    def generate_patch_struct(self):
+        """
+        Generate string code for patch structure
+        :return:string code for patch structure
+        """
+        return ""
+
+    def get_real_status(self):
+        """
+        Generate string code for retrieving real status of model
+        :param fnc: function name
+        :return: string
+        """
+        return "realStatus = "+self.fnc+".__self__.state['status']"
+
+    def get_xxx_matched_state(self, xxx, data):
+        """
+        Generate string code for retrieving matched word of type xxx
+        :param xxx: type name
+        :param data: matched list
+        :return: List
+        """
+        matched = None
+        for i in data:
+            if i['Type'] == xxx:
+                matched = i['Matched']
+        return matched
+
+    def state_equality(self):
+        """
+        Generate string code for testing equality between states
+        :param fnc: function name
+        :param data:
+        :return:
+        """
+        equality = """
+        {0}
+        if realStatus == next_status:
+            print '%s.{1}[%s-->%s] ==> OK'%({1}.__self__.blockModel.label, current_status, next_status)
         else:
-            equality += "\nelse if realStatus.upper() == '"+state_name.upper()+"':"
-        equality += "\nstatus = '"+next_state+"'"
-        equality += "\n"+fnc+"()"
-        equality += "\n"+get_real_status(fnc)
-        equality += "\nif realStatus == status :"
-        equality += "\nprint '"+fnc+"["+state_name.upper()+"-->"+next_state+"] ==> OK'"
-        equality += "\nelse :"
-        equality += "\nprint 'Error in intTransition function : status should be %s and we have %s'%(status, realStatus)"
-    return equality
+            print 'Error in intTransition function : status should be %s and we have %s'%(next_status, realStatus)""".format(self.get_real_status(), self.fnc)
+        return equality
 
-### ----------------------------------------------------------------------- ###
-# =================================GENERATOR================================= #
-### ----------------------------------------------------------------------- ###
+    def state_conditional_structure(self, data):
+        cond = None
+        condit_struct = """
+        {0}
+        current_status, next_status = None, None""".format(self.get_real_status())
+        for ind, line in enumerate(data):
+            current_state = self.get_xxx_matched_state('CURRENT_STATE', line)
+            next_state = self.get_xxx_matched_state('NEXT_STATE', line)
+            if ind == 0:
+                cond = 'if'
+            else:
+                cond = 'elif'
+            condit_struct += """
+        {0} realStatus.upper() == '{1}':
+            current_status, next_status = '{1}', '{2}'""".format(cond, current_state, next_state)
+        return condit_struct
 
+    def execute_original_fnc(self):
+        original_fnc = """
+        {}()""".format(self.fnc)
+        return original_fnc
 
-def generate_struct(fnc):
-    """ DocString """
-    struct = ""
-    struct += CODING
-    struct = "def dec_"+fnc+"("+fnc+"):"
-    struct += "\ndef new_"+fnc+"():"
-    return struct
+    def update_fnc(self):
+        pass
 
+    def generate(self):
+        """
+        Generate decorator and patch code
+        :return: decorator and patch code
+        """
+        self.update_fnc()
+        dec = self.decorator()
+        dec += self.patch()
+        return dec
 
-def initial_states(data):
-    """ DocString """
-    dec = "__init__"
-    # print data
-    # print generate_struct(dec)
-    return reindent(dec)
+    def decorator(self):
+        pass
 
+    def patch(self):
+        pass
 
-def hold_states(data):
-    """ DocString """
-    print "hold "+repr(data)
-    # print data
-    # return reindent(dec)
+class initial_states(GeneratorInterface):
 
+    def decorator(self):
+        pass
 
-def passive_states(data):
-    """ DocString """
-    print "passive "+repr(data)
-    # print data
-    # return reindent(dec)
+    def patch(self):
+        pass
 
-
-def int_transition(data):
-    """ DocString """
-    fnc = "intTransition"
-    # print generate_struct(dec)
-    dec = generate_struct(fnc)
-    states = []
-    for i in data:
-        states += [i[1:]]
-    dec += "\n"+state_equality(fnc, states)
-    dec = reindent(dec)
-    dec += "\n\t\telse :\n\t\t\tintTransition()"
-    dec += "\n\treturn new_"+fnc
-    return dec
+    def update_fnc(self):
+        self.fnc = "__init__"
 
 
-def output_fnc(data):
-    """ DocString """
-    dec = "outputFnc"
-    # print data
-    # print generate_struct(dec)
-    return reindent(dec)
+class hold_states(GeneratorInterface):
+
+    def update_fnc(self):
+        self.fnc = ""
+
+    def decorator(self):
+        pass
+
+    def patch(self):
+        pass
 
 
-def ext_transition(data):
-    """ DocString """
-    dec = "extTransition"
-    # print data
-    # print generate_struct(dec)
-    return reindent(dec)
+class passive_states(GeneratorInterface):
 
-### ------------------------------------------------------------------------ ###
-# ================================MATCH DICT================================== #
-### ------------------------------------------------------------------------ ###
+    def update_fnc(self):
+        self.fnc = ""
 
-TO_MATCHED = {
-    "passive_states":   {"start": "passivate", "matched": [], "delegate": passive_states},
-    "hold_states":      {"start": "hold in",   "matched": [], "delegate": hold_states},
-    "int_transition":   {"start": "from",      "matched": [], "delegate": int_transition},
-    "output_fnc":       {"start": "after",     "matched": [], "delegate": output_fnc},
-    "ext_transition":   {"start": "when in",   "matched": [], "delegate": ext_transition}
-}
+    def decorator(self):
+        pass
+
+    def patch(self):
+        pass
+
+
+class int_transition(GeneratorInterface):
+
+    def update_fnc(self):
+        self.fnc = "intTransition"
+
+    def decorator(self):
+        dec = self.generate_decorator_struct()
+        states = []
+        for i in self.matched:
+            states += [i[1:]]
+        dec += self.state_conditional_structure(states)
+        dec += self.execute_original_fnc()
+        dec += self.state_equality()
+        dec += """
+    return new_{}""".format(self.fnc)
+        return dec
+
+    def patch(self):
+        patch = self.generate_patch_struct()
+        return patch
+
+
+class ext_transition(GeneratorInterface):
+
+    def update_fnc(self):
+        self.fnc = 'extTransition'
+
+    def decorator(self):
+        dec = self.generate_decorator_struct()
+        states = []
+        for i in self.matched:
+            states += [i[1:]]
+        dec += self.state_conditional_structure(states)
+        dec +=self.execute_original_fnc()
+        dec += self.state_equality()
+        dec += """
+    return new_{}""".format(self.fnc)
+        return dec
+
+    def patch(self):
+        return ""
+
+
+class output_fnc(GeneratorInterface):
+
+    def update_fnc(self):
+        self.fnc = "outputFnc"
+
+    def decorator(self):
+        pass
+
+    def patch(self):
+        pass
+
 
 ### ------------------------------------------------------------------------ ###
 # ===================================MAIN===================================== #
 ### ------------------------------------------------------------------------ ###
 
 if __name__ == "__main__":
+    parser = MyParser()
     if len(sys.argv) == 1:
         SPECIFICATIONS = """
         from ACTIVE go to IDLE !
         """
-        generate(SPECIFICATIONS, True)
+        parser.generate(SPECIFICATIONS, True)
 
     elif len(sys.argv) == 3:
         _, SPEC, TEST = sys.argv
-        generate((SPEC, TEST))
 
+        parser.generate((SPEC, TEST))

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+# # ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Testable.py ---
 #                     --------------------------------
 #                        Copyright (c) 2013
@@ -28,181 +28,178 @@ from tempfile import gettempdir
 
 # NOTE: Testable << object :: Testable mixin is needed to manage tests files and tests executions. It add the OnTestEditor event for the tests files edition
 class Testable(object):
+    # NOTE: Testable :: OnTestEditor 		=> new event for AMD model. Open tests files in editor
+    def OnTestEditor(self, event):
+        model_path = os.path.dirname(self.python_path)
 
-	# NOTE: Testable :: OnTestEditor 		=> new event for AMD model. Open tests files in editor
-	def OnTestEditor(self, event):
-		model_path = os.path.dirname(self.python_path)
+        # If selected model is AMD
+        if self.isAMD():
 
-		# If selected model is AMD
-		if self.isAMD():
+            # TODO: Testable :: OnTestEditor => Fix Editor importation
+            import Editor
 
-			# TODO: Testable :: OnTestEditor => Fix Editor importation
-			import Editor
+            # Create tests files is doesn't exist
+            if not ZipManager.Zip.HasTests(model_path):
+                self.CreateTestsFiles()
 
-			# Create tests files is doesn't exist
-			if not ZipManager.Zip.HasTests(model_path):
-				self.CreateTestsFiles()
+            ### list of BDD files
+            L = ZipManager.Zip.GetTests(model_path)
 
-			### list of BDD files
-			L = ZipManager.Zip.GetTests(model_path)
+            ### create Editor with BDD files in tab
+            if L != []:
 
-			### create Editor with BDD files in tab
-			if L != []:
+                mainW = wx.GetApp().GetTopWindow()
+                ### Editor instanciation and configuration---------------------
+                editor_frame = Editor.GetEditor(
+                    parent=None,
+                    id=wx.ID_ANY,
+                    title='Specs',
+                    file_type="test"
+                )
+                for i, s in enumerate(map(lambda l: os.path.join(model_path, l), L)):
+                    editor_frame.AddEditPage(L[i], s)
 
-				mainW = wx.GetApp().GetTopWindow()
-				### Editor instanciation and configuration---------------------
-				editorFrame = Editor.GetEditor(
-						mainW,
-						wx.ID_ANY,
-						'Specs',
-						file_type="test"
-				)
+                editor_frame.Show()
+            ### -----------------------------------------------------------
 
-				for i,s in enumerate(map(lambda l: os.path.join(model_path, l), L)):
-					editorFrame.AddEditPage(L[i], s)
+    # NOTE: Testable :: isAMD 				=> Test if the model is an AMD and if it's well-formed
+    def isAMD(self):
+        cond = False
+        if zipfile.is_zipfile(os.path.dirname(self.python_path)):
+            cond = True
+        return cond
 
-				editorFrame.Show()
-				### -----------------------------------------------------------
+    # NOTE: Testable :: HasTests			=> Return true if AMD model has tests files
+    def hasTests(self):
+        model_path = os.path.dirname(self.python_path)
+        return ZipManager.Zip.HasTests(model_path)
 
-	# NOTE: Testable :: isAMD 				=> Test if the model is an AMD and if it's well-formed
-	def isAMD(self):
-		cond = False
-		if zipfile.is_zipfile(os.path.dirname(self.python_path)):
-			cond = True
-		return cond
+    # NOTE: Testable :: CreateTestsFiles	=> AMD tests files creation
+    def CreateTestsFiles(self, spec_data="", behavior_data=""):
+        devsPath = os.path.dirname(self.python_path)
+        name = os.path.splitext(os.path.basename(self.python_path))[0]
+        zf = ZipManager.Zip(devsPath)
 
-	# NOTE: Testable :: HasTests			=> Return true if AMD model has tests files
-	def hasTests(self):
-		model_path = os.path.dirname(self.python_path)
-		return ZipManager.Zip.HasTests(model_path)
+        self.tests_files_list = self.CreateSpec(spec_data), self.CreateBehavior(behavior_data)
 
-	# NOTE: Testable :: CreateTestsFiles	=> AMD tests files creation
-	def CreateTestsFiles(self, spec_data="", behavior_data=""):
-		devsPath = os.path.dirname(self.python_path)
-		name = os.path.splitext(os.path.basename(self.python_path))[0]
-		zf = ZipManager.Zip(devsPath)
+        zf.Update([os.path.join("BDD", elem) for elem in self.tests_files_list])
 
-		self.tests_files_list = self.CreateSpec(spec_data), self.CreateBehavior(behavior_data)
+        [os.remove(elem) for elem in self.tests_files_list if os.path.exists(elem)]
 
-		zf.Update([os.path.join("BDD", elem) for elem in self.tests_files_list])
+    # NOTE: Testable :: CreateSpec		=> Spec file creation
+    def CreateSpec(self, data=""):
+        name = os.path.splitext(os.path.basename(self.python_path))[0]
+        specif = "%s.spec" % name
+        with open(specif, 'w+') as spec:
+            spec.write(data)
 
-		[os.remove(elem) for elem in self.tests_files_list if os.path.exists(elem)]
+        return specif
 
-	# NOTE: Testable :: CreateSpec		=> Spec file creation
-	def CreateSpec(self, data=""):
-		name = os.path.splitext(os.path.basename(self.python_path))[0]
-		specif = "%s.spec"%name
-		with open(specif, 'w+') as spec:
-			spec.write(data)
+    # NOTE: Testable :: CreateBehavior		=> Behavior file creation
+    def CreateBehavior(self, data=""):
+        behavior = "behavior.py"
+        with open(behavior, 'w+') as behave:
+            behave.write(data)
 
-		return specif
+        return behavior
 
-	# NOTE: Testable :: CreateBehavior		=> Behavior file creation
-	def CreateBehavior(self, data=""):
-		behavior = "behavior.py"
-		with open(behavior, 'w+') as behave:
-			behave.write(data)
+    def UpdateBehavior(self, behavior_data):
+        devsPath = os.path.dirname(self.python_path)
+        tests_files = ZipManager.Zip.GetTests(devsPath)
 
-		return behavior
+        importer = zipfile.ZipFile(devsPath)
+        spec_name = filter(lambda t: t.endswith('.spec'), tests_files)[0]
+        specInfo = importer.getinfo(spec_name)
+        spec_code = importer.read(specInfo)
+        importer.close()
 
-	def UpdateBehavior(self, behavior_data):
-		devsPath = os.path.dirname(self.python_path)
-		tests_files = ZipManager.Zip.GetTests(devsPath)
-
-		importer = zipfile.ZipFile(devsPath)
-		spec_name = filter(lambda t: t.endswith('.spec'), tests_files)[0]
-		specInfo = importer.getinfo(spec_name)
-		spec_code = importer.read(specInfo)
-		importer.close()
-
-		self.CreateTestsFiles(spec_code, behavior_data)
+        self.CreateTestsFiles(spec_code, behavior_data)
 
 
-	# NOTE: Testable :: GetTempTests		=> Create tests on temporary folder for execution
-	def GetTempTests(self):
+    # NOTE: Testable :: GetTempTests		=> Create tests on temporary folder for execution
+    def GetTempTests(self):
 
-		### Useful vars definition-----------------------------------------------------------------
-		model_path = os.path.dirname(self.python_path)
-		basename = os.path.basename(self.python_path)
-		name = os.path.splitext(basename)[0]
-		tests_files = ZipManager.Zip.GetTests(model_path)
-		### ---------------------------------------------------------------------------------------
+        ### Useful vars definition-----------------------------------------------------------------
+        model_path = os.path.dirname(self.python_path)
+        basename = os.path.basename(self.python_path)
+        name = os.path.splitext(basename)[0]
+        tests_files = ZipManager.Zip.GetTests(model_path)
+        ### ---------------------------------------------------------------------------------------
 
-		### Folder hierarchy construction----------------------------------------------------------
-		spec_dir  = os.path.join(gettempdir(), "specifications")
-		if not os.path.exists(spec_dir):
-			os.mkdir(spec_dir)
-		### ---------------------------------------------------------------------------------------
+        ### Folder hierarchy construction----------------------------------------------------------
+        spec_dir = os.path.join(gettempdir(), "specifications")
+        if not os.path.exists(spec_dir):
+            os.mkdir(spec_dir)
+        ### ---------------------------------------------------------------------------------------
 
-		### AMD unzip------------------------------------------------------------------------------
-		amd_dir = os.path.join(gettempdir(), "AtomicDEVS")
-		if not os.path.exists(amd_dir):
-			os.mkdir(amd_dir)
-		### ---------------------------------------------------------------------------------------
+        ### AMD unzip------------------------------------------------------------------------------
+        amd_dir = os.path.join(gettempdir(), "AtomicDEVS")
+        if not os.path.exists(amd_dir):
+            os.mkdir(amd_dir)
+        ### ---------------------------------------------------------------------------------------
 
-		### Tests code retriever-------------------------------------------------------------------
-		importer = zipfile.ZipFile(model_path)
+        ### Tests code retriever-------------------------------------------------------------------
+        importer = zipfile.ZipFile(model_path)
 
-		spec_name = filter(lambda t: t.endswith('.spec'), tests_files)[0]
-		specInfo = importer.getinfo(spec_name)
-		spec_code = importer.read(specInfo)
+        spec_name = filter(lambda t: t.endswith('.spec'), tests_files)[0]
+        specInfo = importer.getinfo(spec_name)
+        spec_code = importer.read(specInfo)
 
-		behavior_name = filter(lambda t: t.endswith('behavior.py'), tests_files)[0]
-		behaviorInfo = importer.getinfo(behavior_name)
-		behavior_code = importer.read(behaviorInfo)
+        behavior_name = filter(lambda t: t.endswith('behavior.py'), tests_files)[0]
+        behaviorInfo = importer.getinfo(behavior_name)
+        behavior_code = importer.read(behaviorInfo)
 
+        importer.close()
+        ### ---------------------------------------------------------------------------------------
 
-		importer.close()
-		### ---------------------------------------------------------------------------------------
+        ### AMD code retriever---------------------------------------------------------------------
+        importer = zipfile.ZipFile(model_path)
 
-		### AMD code retriever---------------------------------------------------------------------
-		importer = zipfile.ZipFile(model_path)
+        # amd_name = filter(lambda t: t.endswith('%s.py'%name), importer.namelist())[0]
+        amd_name = ZipManager.getPythonModelFileName(model_path)
+        amd_info = importer.getinfo(amd_name)
+        amd_code = importer.read(amd_info)
 
-		# amd_name = filter(lambda t: t.endswith('%s.py'%name), importer.namelist())[0]
-		amd_name = ZipManager.getPythonModelFileName(model_path)
-		amd_info = importer.getinfo(amd_name)
-		amd_code = importer.read(amd_info)
+        importer.close()
 
-		importer.close()
+        ### ---------------------------------------------------------------------------------------
 
-		### ---------------------------------------------------------------------------------------
+        ### Tests files creation in temporary directory--------------------------------------------
+        tempSpec = os.path.join(spec_dir, "%s.spec" % name)
+        tempBehavior = os.path.join(spec_dir, "%s_behavior.py" % name)
 
-		### Tests files creation in temporary directory--------------------------------------------
-		tempSpec = os.path.join(spec_dir, "%s.spec"%name)
-		tempBehavior = os.path.join(spec_dir, "%s_behavior.py"%name)
+        tempAMD = os.path.join(amd_dir, amd_name)
 
-		tempAMD = os.path.join(amd_dir, amd_name)
+        with open(tempSpec, 'w+') as spec:
+            spec.write(spec_code)
+        with open(tempBehavior, 'w+') as behave:
+            behave.write(behavior_code)
 
-		with open(tempSpec, 'w+') as spec:
-			spec.write(spec_code)
-		with open(tempBehavior, 'w+') as behave:
-			behave.write(behavior_code)
+        with open(tempAMD, 'w+') as AMD:
+            AMD.write(amd_code)
+        ### ---------------------------------------------------------------------------------------
 
-		with open(tempAMD, 'w+') as AMD:
-			AMD.write(amd_code)
-		### ---------------------------------------------------------------------------------------
+        return tempSpec, tempBehavior
 
-		return tempSpec, tempBehavior
+    # NOTE: Testable :: RemoveTempTests		=> Remove tests on temporary folder
+    @staticmethod
+    def RemoveTempTests():
+        spec_dir = os.path.join(gettempdir(), 'specifications')
+        if os.path.exists(spec_dir):
+            for root, dirs, files in os.walk(spec_dir, topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+            for name in dirs:
+                os.rmdir(os.path.join(root, name))
 
-	# NOTE: Testable :: RemoveTempTests		=> Remove tests on temporary folder
-	@staticmethod
-	def RemoveTempTests():
-		spec_dir = os.path.join(gettempdir(), 'specifications')
-		if os.path.exists(spec_dir):
-			for root, dirs, files in os.walk(spec_dir, topdown=False):
-				for name in files:
-					os.remove(os.path.join(root, name))
-        		for name in dirs:
-    				os.rmdir(os.path.join(root, name))
+            os.rmdir(spec_dir)
 
-			os.rmdir(spec_dir)
+        amd_dir = os.path.join(gettempdir(), 'AtomicDEVS')
+        if os.path.exists(amd_dir):
+            for root, dirs, files in os.walk(amd_dir, topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+            for name in dirs:
+                os.rmdir(os.path.join(root, name))
 
-		amd_dir = os.path.join(gettempdir(), 'AtomicDEVS')
-		if os.path.exists(amd_dir):
-			for root, dirs, files in os.walk(amd_dir, topdown=False):
-				for name in files:
-					os.remove(os.path.join(root, name))
-        		for name in dirs:
-    				os.rmdir(os.path.join(root, name))
-
-			os.rmdir(amd_dir)
+            os.rmdir(amd_dir)
