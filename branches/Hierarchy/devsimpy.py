@@ -521,7 +521,7 @@ class MainApplication(wx.Frame):
 		self.tb = self.CreateToolBar( style = wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT, name = 'tb')
 		self.tb.SetToolBitmapSize((25,25)) # juste for windows
 
-		self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId()]
+		self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId()]
 
 		currentPage = self.nb2.GetCurrentPage()
 
@@ -548,22 +548,18 @@ class MainApplication(wx.Frame):
 		diagram = currentPage.GetDiagram()
 		level = currentPage.GetCurrentLevel()
 
-		level_label = wx.StaticText(self.tb, -1, _("Level "), wx.Point(0, 0))
-		self.text = wx.TextCtrl(self.tb, self.toggle_list[3], value=str(level), size=(30, -1))
-		self.spin = wx.SpinButton(self.tb, self.toggle_list[4], style = wx.SP_VERTICAL)
-		self.spin.SetRange(0, 100)
-		self.spin.SetValue(level)
+		level_label = wx.StaticText(self.tb, -1, _("Level "))
+		self.spin = wx.SpinCtrl(self.tb, self.toggle_list[3], str(level), (55, 90), (50, -1), min=0, max=10)
 
 		self.tb.AddControl(level_label)
-		self.tb.AddControl(self.text)
 		self.tb.AddControl(self.spin)
 
 		### add button to define downward and upward rules
-		ID_UPWARD = self.toggle_list[5]
-		ID_DOWNWARD = self.toggle_list[6]
+		ID_UPWARD = self.toggle_list[4]
+		ID_DOWNWARD = self.toggle_list[5]
 
-		self.tools.append(self.tb.AddTool(ID_DOWNWARD, wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelpString=_('Downward'), longHelpString=_('Downward rules')))
-		self.tools.append(self.tb.AddTool(ID_UPWARD, wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelpString=_('Upward'), longHelpString=_('Upward rules')))
+		self.tools.append(self.tb.AddTool(ID_DOWNWARD, wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelpString=_('Downward rules'), longHelpString=_('Define Downward atomic model')))
+		self.tools.append(self.tb.AddTool(ID_UPWARD, wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelpString=_('Upward rules'), longHelpString=_('Define Upward atomic model')))
 
 		self.tb.EnableTool(ID_DOWNWARD, False)
 		self.tb.EnableTool(ID_UPWARD, False)
@@ -600,7 +596,12 @@ class MainApplication(wx.Frame):
 		self.Bind(wx.EVT_TOOL, self.OnDirectConnector, self.tools[13])
 		self.Bind(wx.EVT_TOOL, self.OnSquareConnector, self.tools[14])
 		self.Bind(wx.EVT_TOOL, self.OnLinearConnector, self.tools[15])
-		self.Bind(wx.EVT_SPIN, self.OnSpin, id=self.toggle_list[4])
+
+		##################################################################### Abstraction hierarchy
+		self.Bind(wx.EVT_SPINCTRL, self.OnSpin, id=self.toggle_list[3])
+		self.Bind(wx.EVT_TEXT, self.OnSpin, id=self.toggle_list[3])
+		##############################################################################################
+
 		self.Bind(wx.EVT_TOOL, self.OnUpWard, id=ID_UPWARD)
 		self.Bind(wx.EVT_TOOL, self.OnDownWard, id=ID_DOWNWARD)
 
@@ -688,8 +689,8 @@ class MainApplication(wx.Frame):
 		level = self.spin.GetValue()
 
 		### update doward and upward button
+		self.tb.EnableTool(self.toggle_list[4], level != 0)
 		self.tb.EnableTool(self.toggle_list[5], level != 0)
-		self.tb.EnableTool(self.toggle_list[6], level != 0)
 
 	def OnDeleteRecentFiles(self, event):
 		""" Delete the recent files list
@@ -850,8 +851,8 @@ class MainApplication(wx.Frame):
 		level = spin.GetValue()
 
 		### update doward and upward button
+		tb.EnableTool(self.toggle_list[4], level != 0)
 		tb.EnableTool(self.toggle_list[5], level != 0)
-		tb.EnableTool(self.toggle_list[6], level != 0)
 
 		### list of spin control to update
 		L = [tb]
@@ -861,10 +862,8 @@ class MainApplication(wx.Frame):
 
 		### text control object from its unique id
 		for obj in L:
-			t = obj.FindControl(self.toggle_list[3])
-			s = obj.FindControl(self.toggle_list[4])
-			if t:
-				t.SetValue(str(level))
+			s = obj.FindControl(self.toggle_list[3])
+			if s:
 				s.SetValue(level)
 
 		### update diagram

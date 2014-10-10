@@ -97,7 +97,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.toggle_list = wx.GetApp().GetTopWindow().toggle_list
 		else:
 			sys.stdout.write(_('Alone mode for DetachedFrame: Connector buttons are not binded\n'))
-			self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId()]
+			self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId()]
 
 		self.tools = [  toolbar.AddTool(Menu.ID_SAVE, wx.Bitmap(os.path.join(ICON_PATH,'save.png')), shortHelpString=_('Save File') ,longHelpString=_('Save the current diagram'), clientData=self.canvas),
 										toolbar.AddTool(Menu.ID_SAVEAS, wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')), shortHelpString=_('Save File As'), longHelpString=_('Save the diagram with an another name'), clientData=self.canvas),
@@ -122,29 +122,22 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		toolbar.InsertSeparator(13)
 		toolbar.InsertSeparator(17)
 
-		toolbar.ToggleTool(self.toggle_list[0],1)
+		toolbar.ToggleTool(self.toggle_list[0], 1)
 
 		#=======================================================================
 		### spin control for abstraction hierarchy
 		if isinstance(diagram, Container.Diagram):
-			level_label = wx.StaticText(toolbar, -1, _("Level "), wx.Point(0, 0))
-			self.text = wx.TextCtrl(toolbar, self.toggle_list[3], size=(30, -1))
-			self.spin = wx.SpinButton(toolbar, self.toggle_list[4], style = wx.SP_VERTICAL)
-			self.spin.SetRange(0, 100)
-
-			### update of text and spin control
-			self.text.SetValue(str(level))
-			self.spin.SetValue(level)
+			level_label = wx.StaticText(toolbar, -1, _("Level "))
+			self.spin = wx.SpinCtrl(toolbar, self.toggle_list[3], str(level), (55, 90), (50, -1), min=0, max=10)
 
 			toolbar.AddControl(level_label)
-			toolbar.AddControl(self.text)
 			toolbar.AddControl(self.spin)
 
-			ID_UPWARD = self.toggle_list[5]
-			ID_DOWNWARD = self.toggle_list[6]
+			ID_UPWARD = self.toggle_list[4]
+			ID_DOWNWARD = self.toggle_list[5]
 
-			self.tools.append(toolbar.AddTool(ID_DOWNWARD, wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelpString=_('Downward'), longHelpString=_('Downward rules')))
-			self.tools.append(toolbar.AddTool(ID_UPWARD, wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelpString=_('Upward'), longHelpString=_('Upward rules')))
+			self.tools.append(toolbar.AddTool(ID_DOWNWARD, wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelpString=_('Downward rules'), longHelpString=_('Define Downward rules atomic model')))
+			self.tools.append(toolbar.AddTool(ID_UPWARD, wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelpString=_('Upward rules'), longHelpString=_('Define Upward rules atomic model')))
 
 			### update downward and upward button
 			toolbar.EnableTool(ID_DOWNWARD, level != 0)
@@ -163,10 +156,8 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			### only possible due to the common toogle_list (shared id)
 			#=======================================================================
 			main_tb = wx.GetApp().GetTopWindow().GetToolBar()
-			t = main_tb.FindControl(self.toggle_list[3])
-			s = main_tb.FindControl(self.toggle_list[4])
-			if t:
-				self.text.SetValue(str(t.GetValue()))
+			s = main_tb.FindControl(self.toggle_list[3])
+			if s:
 				self.spin.SetValue(s.GetValue())
 			#=======================================================================
 
