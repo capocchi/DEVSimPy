@@ -24,8 +24,8 @@ from __future__ import with_statement
 
 import wx
 import wx.lib.dragscroller
-import  wx.lib.imagebrowser as ib
-import  wx.lib.dialogs
+#import wx.lib.imagebrowser as ib
+import wx.lib.dialogs
 
 if wx.VERSION_STRING < '2.9':
 	from wx.lib.pubsub import Publisher
@@ -533,7 +533,6 @@ class Diagram(Savable, Structurable):
 		### we can update the devs priority list during the simulation ;-)
 		self.updateDEVSPriorityList()
 
-
 	def OnAddConstants(self, event):
 		""" Method that add constant parameters in order to simplify the modling codeBlock model
 		"""
@@ -553,6 +552,10 @@ class Diagram(Savable, Structurable):
 
 		### event come from Main application by the Diagram menu
 		else:
+
+			### needed for window
+			if not win: win = obj.GetWindow()
+
 			nb2 = win.GetDiagramNotebook()
 			title = nb2.GetPageText(nb2.GetSelection())
 
@@ -594,7 +597,7 @@ class Diagram(Savable, Structurable):
 		if self.GetCount() != 0:
 
 			obj = event.GetEventObject()
-			win = obj.GetTopLevelParent()
+			win = obj.GetTopLevelParent() if isinstance(obj, wx.ToolBar) else obj.GetWindow()
 
 			D = self.DoCheck()
             ### if there is no error

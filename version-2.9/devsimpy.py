@@ -819,7 +819,12 @@ class MainApplication(wx.Frame):
 		""" Zoom in icon has been pressed. Zoom in the current diagram.
 		"""
 		obj = event.GetEventObject()
-		currentPage = obj.GetToolClientData(event.GetId()) if isinstance(obj.GetTopLevelParent(), DetachedFrame) else self.nb2.GetCurrentPage()
+
+		if isinstance(obj, wx.ToolBar):
+			currentPage = obj.GetToolClientData(event.GetId()) if isinstance(obj.GetTopLevelParent(), DetachedFrame) else self.nb2.GetCurrentPage()
+		else:
+			currentPage = self.nb2.GetCurrentPage()
+
 		currentPage.scalex=max(currentPage.scalex+.05,.3)
 		currentPage.scaley=max(currentPage.scaley+.05,.3)
 		currentPage.Refresh()
@@ -832,7 +837,11 @@ class MainApplication(wx.Frame):
 		"""
 		obj = event.GetEventObject()
 
-		currentPage = obj.GetToolClientData(event.GetId()) if isinstance(obj.GetTopLevelParent(), DetachedFrame) else self.nb2.GetCurrentPage()
+		if isinstance(obj, wx.ToolBar):
+			currentPage = obj.GetToolClientData(event.GetId()) if isinstance(obj.GetTopLevelParent(), DetachedFrame) else self.nb2.GetCurrentPage()
+		else:
+			currentPage = self.nb2.GetCurrentPage()
+
 		currentPage.scalex=currentPage.scalex-.05
 		currentPage.scaley=currentPage.scaley-.05
 		currentPage.Refresh()
@@ -845,7 +854,11 @@ class MainApplication(wx.Frame):
 		"""
 		obj = event.GetEventObject()
 
-		currentPage = obj.GetToolClientData(event.GetId()) if isinstance(obj.GetTopLevelParent(), DetachedFrame) else self.nb2.GetCurrentPage()
+		if isinstance(obj, wx.ToolBar):
+			currentPage = obj.GetToolClientData(event.GetId()) if isinstance(obj.GetTopLevelParent(), DetachedFrame) else self.nb2.GetCurrentPage()
+		else:
+			currentPage = self.nb2.GetCurrentPage()
+
 		currentPage.scalex = 1.0
 		currentPage.scaley = 1.0
 		currentPage.Refresh()
