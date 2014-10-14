@@ -81,7 +81,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 			self.AddItem(path, dName)
 
 class DeleteBox(wx.Dialog):
-	""" Delete Box for libraires Manager.
+	""" Delete box for libraries manager.
 	"""
 	def __init__(self, *args, **kwargs):
 		""" Constructor.
@@ -100,12 +100,12 @@ class DeleteBox(wx.Dialog):
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
 		### And into Sizers
-		hbox.Add(btn_cancel,1,wx.EXPAND|wx.ALIGN_CENTER)
-		hbox.Add(btn_ok,1,wx.EXPAND|wx.ALIGN_CENTER)
+		hbox.Add(btn_cancel, 1, wx.EXPAND|wx.ALIGN_CENTER)
+		hbox.Add(btn_ok, 1, wx.EXPAND|wx.ALIGN_CENTER)
 
-		vbox.Add(txt,0,wx.ALIGN_TOP,10)
-		vbox.Add(self.rb1,1,wx.ALIGN_LEFT,5)
-		vbox.Add(self.rb2,1,wx.ALIGN_LEFT,5)
+		vbox.Add(txt, 0, wx.ALIGN_TOP, 10)
+		vbox.Add(self.rb1, 1,wx.ALIGN_LEFT, 5)
+		vbox.Add(self.rb2, 1,wx.ALIGN_LEFT, 5)
 		vbox.Add(hbox, 1, wx.ALIGN_CENTER)
 
 		### Set Sizer

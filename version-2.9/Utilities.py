@@ -261,7 +261,7 @@ def MoveFromParent(frame=None, interval=10, direction='right'):
 def getDirectorySize(directory):
 	dir_size = 0
 	for (path, dirs, files) in os.walk(str(directory)):
-		for file in files:
+		for file in filter(lambda a: a.endswith(('.py', '.amd', '.cmd')), files):
 			filename = os.path.join(path, file)
 			dir_size += os.path.getsize(filename)
 	return dir_size/1000
