@@ -36,6 +36,7 @@ from Utilities import replaceAll, getFileListFromInit, path_to_module
 from Decorators import BuzyCursorNotification
 from Components import BlockFactory, DEVSComponent, GetClass
 from ZipManager import Zip, getPythonModelFileName
+from ReloadModule import recompile
 
 #----------------------------------------------------------------------------------------------------
 class LibraryTree(wx.TreeCtrl):
@@ -247,18 +248,23 @@ class LibraryTree(wx.TreeCtrl):
 	def OnDelete(self, evt):
 		""" Delete the item from Tree
 		"""
+
 		sel = self.GetSelection()
 		if sel:
 			self.RemoveItem(sel)
 		else:
-			wx.MessageBox(_("No librarie selected!"),_("Delete Manager"))
+			wx.MessageBox(_("No library selected!"),_("Delete Manager"))
 
 	###
 	def OnNewModel(self, evt):
 		""" New model action has been invoked.
 		"""
 
-		Container.ShapeCanvas.StartWizard(self)
+		mainW = wx.GetApp().GetTopWindow()
+		nb2 = mainW.GetDiagramNotebook()
+		canvas = nb2.GetPage(nb2.GetSelection())
+
+		Container.ShapeCanvas.OnNewModel(canvas, evt)
 
 	###
 	def GetDomainList(self, dName):
@@ -797,9 +803,12 @@ class LibraryTree(wx.TreeCtrl):
 
 		item = self.GetSelection()
 		path = self.GetItemPyData(item)
+		ext = os.path.splitext(path)[1]
 
-		self.CheckItem(os.path.splitext(path)[0])
-
+		if ext == "py":
+			self.CheckItem(os.path.splitext(path)[0])
+		else:
+			self.CheckItem(path)
 	###
 	def OnItemEdit(self, evt):
 		""" Edition menu has been invoked.
@@ -873,7 +882,7 @@ class LibraryTree(wx.TreeCtrl):
 			doc = inspect.getdoc(module)
 
 		if doc:
-			dlg = wx.lib.dialogs.ScrolledMessageDialog(self, doc, name)
+			dlg = wx.lib.dialogs.ScrolledMessageDialog(self, doc, name, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 			dlg.CenterOnParent(wx.BOTH)
 			dlg.ShowModal()
 		else:

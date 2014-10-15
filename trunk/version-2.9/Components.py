@@ -507,7 +507,7 @@ class DEVSComponent:
 
 	###
 	def OnLog(self, event):
-		"""
+		""" Shows informations inserted with debugger instructions into the model.
 		"""
 
 		### devs model, block label, log file in temp dir
@@ -522,7 +522,7 @@ class DEVSComponent:
 				msg = f.read()
 
 			### show log file content
-			dlg = wx.lib.dialogs.ScrolledMessageDialog(parent, msg, _("%s logger")%label)
+			dlg = wx.lib.dialogs.ScrolledMessageDialog(parent, msg, _("%s logger")%label, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 			dlg.ShowModal()
 
 		else:

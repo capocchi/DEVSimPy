@@ -519,7 +519,7 @@ class Diagram(Savable, Structurable):
 		msg += _("Number of coupling: %d\n")%stat_dico['Connection_nbr']
 		msg += _("Number of deep level (description hierarchy): %d\n")%stat_dico['Deep_level']
 
-		dlg = wx.lib.dialogs.ScrolledMessageDialog(self.GetParent(), msg, _("Diagram Information"))
+		dlg = wx.lib.dialogs.ScrolledMessageDialog(self.GetParent(), msg, _("Diagram Information"), style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 		dlg.ShowModal()
 
 	def OnClosePriorityGUI(self, event):
@@ -1880,7 +1880,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		for s in self.select():
 			s.OnLog(event)
 
-	def On(self, event):
+	def OnEditor(self, event):
 		""" Edition sub menu has been clicked. Event is transmit to the model
 		"""
 
@@ -1921,10 +1921,18 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		xwindow, ywindow = wx.GetMousePosition()
 		x,y = self.ScreenToClientXY(xwindow, ywindow)
 
-		gmwiz = ShapeCanvas.StartWizard(self)
+		obj = event.GetEventObject()
+
+		### if right clic on canvas
+		if isinstance(obj, Menu.ShapeCanvasPopupMenu):
+			parent = self
+		else:
+			parent = wx.GetApp().GetTopWindow().GetControlNotebook().GetTree()
+
+		gmwiz = ShapeCanvas.StartWizard(parent)
 
 		# if wizard is finished witout closing
-		if  gmwiz is not None:
+		if  gmwiz :
 			m = Components.BlockFactory.CreateBlock(      canvas = self,
 												x = x,
 												y = y,

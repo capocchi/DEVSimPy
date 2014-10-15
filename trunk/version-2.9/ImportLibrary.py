@@ -318,7 +318,7 @@ class ImportLibrary(wx.Dialog):
 				doc += "---------- %s Sub-Directory ----------\n\n"%os.path.basename(root)
 				doc += self.DocDirectory(root)
 
-		d = wx.lib.dialogs.ScrolledMessageDialog(self, doc, _("Documentation of %s library")%label)
+		d = wx.lib.dialogs.ScrolledMessageDialog(self, doc, _("Documentation of library %s")%label, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 		d.CenterOnParent(wx.BOTH)
 		d.ShowModal()
 
