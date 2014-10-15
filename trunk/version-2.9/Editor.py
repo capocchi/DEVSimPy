@@ -1180,6 +1180,8 @@ class Editor(wx.Frame, wx.Panel):
 			for i,s in enumerate(map(lambda l: os.path.join(model.model_path, l), L)):
 				self.AddEditPage(L[i], s)
 
+		self.cb = model
+
 	def CreateMenu(self):
 		""" Create the menu
 		"""
@@ -1519,6 +1521,7 @@ class Editor(wx.Frame, wx.Panel):
 	def OnChar(self, event):
 		"""
 		"""
+
 		### enable save icon in toolbar
 		self.toolbar.EnableTool(self.save.GetId(), True)
 
