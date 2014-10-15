@@ -1408,10 +1408,11 @@ class MainApplication(wx.Frame):
 			self.nb1.AddPage(libPanel, libPanel.GetName(), imageId=0)
 
 			mainW = self.GetTopLevelParent()
+			nb1 = self.GetControlNotebook()
 
-			mainW.tree = self.nb1.GetTree()
-			mainW.searchTree = self.nb1.GetSearchTree()
-			mainW.search = self.nb1.GetSearch()
+			mainW.tree = nb1.GetTree()
+			mainW.searchTree = nb1.GetSearchTree()
+			mainW.search = nb1.GetSearch()
 
 			mainW.Bind(wx.EVT_TREE_BEGIN_DRAG, mainW.OnDragInit, id = mainW.tree.GetId())
 			mainW.Bind(wx.EVT_TREE_BEGIN_DRAG, mainW.OnDragInit, id = mainW.searchTree.GetId())
@@ -1503,7 +1504,7 @@ class MainApplication(wx.Frame):
 			elif response == _('Embedded in DEVSimPy'):
 				dlg.Destroy()
 				output = self.LoadProfFile(prof_file_path)
-				d = wx.lib.dialogs.ScrolledMessageDialog(self, output, _("Statistic of profiling"))
+				d = wx.lib.dialogs.ScrolledMessageDialog(self, output, _("Statistic of profiling"), style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 				d.CenterOnParent(wx.BOTH)
 				d.ShowModal()
 			else:

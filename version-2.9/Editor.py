@@ -1190,12 +1190,15 @@ class Editor(wx.Frame, wx.Panel):
 		file = wx.Menu()
 
 		self.save = wx.MenuItem(file, wx.NewId(), _('&Save\tCtrl+S'), _('Save the file'))
+		self.save_as = wx.MenuItem(file, wx.NewId(), _('&Save As\tCtrl+S'), _('Save as an other file'))
 		self.quit = wx.MenuItem(file, wx.NewId(), _('&Quit\tCtrl+Q'), _('Quit the application'))
 
 		self.save.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save.png')))
+		self.save_as.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save_as.png')))
 		self.quit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'exit.png')))
 
 		file.AppendItem(self.save)
+		file.AppendItem(self.save_as)
 		file.AppendItem(self.quit)
 		### -----------------------------------------------------------------
 
@@ -1253,6 +1256,7 @@ class Editor(wx.Frame, wx.Panel):
 
 		### binding event
 		self.Bind(wx.EVT_MENU, self.OnSaveFile, id=self.save.GetId())
+		self.Bind(wx.EVT_MENU, self.OnSaveAsFile, id=self.save_as.GetId())
 		self.Bind(wx.EVT_MENU, self.QuitApplication, id=self.quit.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnCut, id=self.cut.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnCopy, id=self.copy.GetId())
@@ -1402,6 +1406,39 @@ class Editor(wx.Frame, wx.Panel):
 		else:
 			### status bar notification
 			self.Notification(False, _('%s not saved' % fn), _('file in readonly'))
+
+
+	def OnSaveAsFile(self, event):
+		"""
+		"""
+
+		currentPage = self.nb.GetCurrentPage()
+		fn = currentPage.GetFilename()
+
+		if not self.read_only:
+
+			assert fn != ''
+
+			dir_name = os.path.dirname(fn)
+
+			msg = "Python files (*.py)|*.py|All files (*)|*"
+
+			wcd = _(msg)
+			home = dir_name or HOME_PATH
+			save_dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=home, defaultFile='', wildcard=wcd, style=wx.SAVE | wx.OVERWRITE_PROMPT)
+
+		if save_dlg.ShowModal() == wx.ID_OK:
+
+			path = os.path.normpath(save_dlg.GetPath())
+			ext = os.path.splitext(path)[-1]
+			file_name = save_dlg.GetFilename()
+
+			### code text
+			code = currentPage.GetValue().encode('utf-8')
+			code = '\n'.join(code.splitlines()) + '\n'
+
+						### write code in last name saved file
+			self.nb.WriteFile(path, code)
 
 	### NOTE: Editor :: ConfigSaving 			=> Configure save vars
 	def ConfigSaving(self, base_name, dir_name, code):
@@ -1747,6 +1784,7 @@ class BlockEditor(Editor):
 
 					### add new attributes and update other
 					self.cb.args.update(dict([(item, new_args[item]) for item in new_args.keys()]))
+
 
 					### del old attributes
 					for key, val in self.cb.args.items():
