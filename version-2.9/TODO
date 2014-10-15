@@ -5,6 +5,7 @@
 - N3: recompile plante lorsque on veux changer le nom d'un amd dans une lib par un clique droit dans le panneau lib
 - N3: icon de DEVSimPy ne s'affiche pas sous windows.
 - N1: lorsque le domain est sur Dropbox, impossible de sauveagrder des mod�les .py sans avoir un probleme d'importation dans RealoadModule.recompile
+- N3: lorsque glisser/deposer d'un amd de l'exterieur il n'y pas le compteur des labels qui apparait (pas de Atomic_Name0 par exemple pour le premier)
 
 --------------------------------------------------------------Amélioration-------------------------------------------------------------
 - N3 : voir la fonction ChangeForm pour améliorer la création de connnection shape en évitant les modèles
