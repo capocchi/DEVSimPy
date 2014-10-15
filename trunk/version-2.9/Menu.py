@@ -27,6 +27,7 @@ from tempfile import gettempdir
 
 import Container
 import ZipManager
+import pluginmanager
 
 #File menu identifiers
 ID_NEW = wx.ID_NEW
@@ -731,8 +732,8 @@ class ShapePopupMenu(wx.Menu):
 		exportCMD=wx.MenuItem(self, ID_EXPORT_CMD_SHAPE, _("CMD"), _("Model exported to a cmd file"))
 		exportXML=wx.MenuItem(self, ID_EXPORT_XML_SHAPE, _("XML"), _("Model exported to a xml file"))
 		exportJS=wx.MenuItem(self, ID_EXPORT_JS_SHAPE, _("JS"), _("Model exported to a js (join) file"))
-		plugin = wx.MenuItem(self, ID_PLUGINS_SHAPE, _("Plugin"), _("Plugin manager"))
-		properties=wx.MenuItem(self, ID_PROPERTIES_SHAPE, _("Properties"), _("Edit the attributs"))
+		plugin = wx.MenuItem(self, ID_PLUGINS_SHAPE, _("Plug-in"), _("Plug-in manager"))
+		properties=wx.MenuItem(self, ID_PROPERTIES_SHAPE, _("Properties"), _("Edit the attributes"))
 
 		edit.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		editModel.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -822,13 +823,15 @@ class ShapePopupMenu(wx.Menu):
 
 			if isinstance(shape, Container.CodeBlock):
 				self.AppendSeparator()
-				#Export_menu = self.AppendItem(export)
-				Export_menu=self.AppendMenu(-1,_("Export"),export_subMenu)
+				Export_menu = self.AppendMenu(-1, _("Export"), export_subMenu)
 				Export_SubMenu1 = export_subMenu.AppendItem(exportAMD)
+
+				### if Wcomp general plugin is enabled, sub menu appear in contextual menu of amd (right clic)
+				pluginmanager.trigger_event("ADD_WCOMP_EXPORT_MENU", parent=self, model=shape, submenu= export_subMenu)
 
 			elif isinstance(shape, Container.ContainerBlock):
 				self.AppendSeparator()
-				Export_menu=self.AppendMenu(-1,_("Export"),export_subMenu)
+				Export_menu = self.AppendMenu(-1, _("Export"), export_subMenu)
 				Export_SubMenu1 = export_subMenu.AppendItem(exportCMD)
 				Export_SubMenu2 = export_subMenu.AppendItem(exportXML)
 				Export_SubMenu3 = export_subMenu.AppendItem(exportJS)
@@ -847,6 +850,9 @@ class ShapePopupMenu(wx.Menu):
 					#if ZipManager.Zip.HasPlugin(shape.model_path):
 					Plugin_menu = self.AppendItem(plugin)
 					self.__canvas.Bind(wx.EVT_MENU, shape.OnPluginsManager, id=ID_PLUGINS_SHAPE)
+
+					### if Wcomp general plugin is enabled, sub menu appear in contextual menu of amd (right clic)
+					pluginmanager.trigger_event("ADD_WCOMP_STRATEGY_MENU", parent=self, model=shape)
 
 			self.AppendSeparator()
 			Properties_menu = self.AppendItem(properties)

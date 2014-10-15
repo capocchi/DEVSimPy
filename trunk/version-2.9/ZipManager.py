@@ -20,6 +20,7 @@ import re
 import wx
 import inspect
 
+from pluginmanager import trigger_event
 from traceback import format_exception
 from Utilities import listf, path_to_module
 
@@ -38,7 +39,7 @@ def getPythonModelFileName(fn):
 
 	###	TODO: finally impose : py_file_list = filter(lambda f: f.endswith('.py'))
 	### find if python file has same name of model file
-	py_file_list = filter(lambda f: f.endswith('.py') and os.path.dirname(f) == '' and f not in ('plugins.py', 'steps.py', 'environment.py'), zf.namelist())
+	py_file_list = filter(lambda f: f.endswith('.py') and os.path.dirname(f) == '' and f not in ('plugins.py', 'steps.py', 'environment.py', 'strategies.py'), zf.namelist())
 	zf.close()
 
 	#Cmtp+=1
@@ -304,10 +305,13 @@ class Zip:
 		# if necessary, recompile (for update after editing code source of model)
 		#if rcp: recompile(module_name)
 
+
 		# import module
 		try:
 			### clear to clean the import after exporting model (amd or cmd) and reload within the same instrance of DEVSimPy
 			zipimport._zip_directory_cache.clear()
+
+			trigger_event("IMPORT_STRATEGIES", fn=self.fn)
 
 			importer = zipimport.zipimporter(self.fn)
 			module = importer.load_module(module_name.split('.py')[0])
