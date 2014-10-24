@@ -16,21 +16,20 @@ import sys
 #import random
 import threading
 import time
-import Container
 
 from tempfile import gettempdir
 
 import __builtin__
 import traceback
 
-from SimulationGUI import simulator_factory
-from Join import makeDEVSConf, makeJoin
-
 def makeJS(filename):
 	"""
 	"""
 
-	a = Container.Diagram()
+	from Container import Diagram
+	from Join import makeDEVSConf, makeJoin
+
+	a = Diagram()
 	if a.LoadFile(filename):
 		sys.stdout.write("\nFichier charge\n")
 		master = Container.Diagram.makeDEVSInstance(a)
@@ -66,6 +65,8 @@ class Printer:
 def makeSimulation(filename, T):
 	"""
 	"""
+
+	import Container
 
 	a = Container.Diagram()
 
@@ -140,6 +141,7 @@ class runSimulation:
 		################################################################################################################
 
 		if self.master:
+			from SimulationGUI import simulator_factory
 			self.master.FINAL_TIME = float(self.time)
 			self.thread = simulator_factory(self.master, self.selected_strategy, self.prof, self.ntl)
 
