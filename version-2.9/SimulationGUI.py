@@ -38,8 +38,6 @@ import __builtin__
 import traceback
 import re
 
-#__builtin__.__dict__['GUI_FLAG'] = True
-
 ### just for individual test
 if __name__ == '__main__':
 	__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
