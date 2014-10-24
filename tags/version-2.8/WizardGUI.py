@@ -18,7 +18,7 @@ MAX_NB_PORT = 100
 MIN_NB_PORT = 0
 
 def atomicCode(label):
-	return """# -*- coding: utf-8 -*-
+	code = """# -*- coding: utf-8 -*-
 
 \"\"\"
 -------------------------------------------------------------------------------
@@ -50,28 +50,45 @@ class %s(DomainBehavior):
 	def extTransition(self%s):
 		''' DEVS external transition function.
 		'''
-		pass
+		%s
 
 	def outputFnc(self):
 		''' DEVS output function.
 		'''
-		pass
+		%s
 
 	def intTransition(self):
 		''' DEVS internal transition function.
 		'''
-		pass
+		%s
 
 	def timeAdvance(self):
 		''' DEVS Time Advance function.
 		'''
-		return self.state['sigma']
+		%s
 
 	def finish(self, msg):
 		''' Additional function which is lunched just before the end of the simulation.
 		'''
 		pass
-"""%(label,label,", inputs=None" if DEFAULT_DEVS_DIRNAME=='PyPDEVS' else '')
+"""%(label,
+	label,
+	'' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else ', inputs=None',
+	'pass' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else 'return self.state',
+	'pass' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else 'return {}',
+	'pass' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else 'return self.state',
+	"return self.state['sigma']" if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else "return float('inf')")
+
+	### add confluent function only if PyPDEVS is used.
+	code += """
+	def confTransition(self, inputs):
+		'''DEFAULT Confluent Transition Function.
+		'''
+		self.state = self.intTransition()
+		self.state = self.extTransition(inputs)
+		return self.state""" if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME else ''
+
+	return code
 
 def coupledCode(label):
 	return """
