@@ -16,19 +16,17 @@ import sys
 #import random
 import threading
 import time
-import Container
 
 from tempfile import gettempdir
 
 import __builtin__
 import traceback
 
-from SimulationGUI import SimulationThread
-from Join import makeDEVSConf, makeJoin
-
 def makeJS(filename):
 	"""
 	"""
+
+	import Container
 
 	a = Container.Diagram()
 	if a.LoadFile(filename):
@@ -48,6 +46,8 @@ def makeJS(filename):
 		y = [40]
 		bool = True
 
+		from Join import makeDEVSConf, makeJoin
+
 		model, liaison, addInner = makeJoin(a, addInner, liaison, model, bool, x, y, labelEnCours)
 		makeDEVSConf(model, liaison, addInner, "%s.js"%labelEnCours)
 	else:
@@ -66,6 +66,8 @@ class Printer:
 def makeSimulation(filename, T):
 	"""
 	"""
+
+	import Container
 
 	a = Container.Diagram()
 
@@ -140,8 +142,10 @@ class runSimulation:
 		################################################################################################################
 
 		if self.master:
+			from SimulationGUI import simulator_factory
+
 			self.master.FINAL_TIME = float(self.time)
-			self.thread = SimulationThread(self.master, self.selected_strategy, self.prof, self.ntl)
+			self.thread = simulator_factory(self.master, self.selected_strategy, self.prof, self.ntl)
 
 		return self.thread
 
