@@ -38,9 +38,9 @@ import __builtin__
 import traceback
 import re
 
-__builtin__.__dict__['GUI_FLAG'] = True
+#__builtin__.__dict__['GUI_FLAG'] = True
 
-### jsut for individual test
+### just for individual test
 if __name__ == '__main__':
 	__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
 	__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {\

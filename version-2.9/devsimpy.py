@@ -153,16 +153,15 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 				'DEFAULT_DEVS_DIRNAME':'PyDEVS', # default DEVS Kernel directory
 				'DEVS_DIR_PATH_DICT':{'PyDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyDEVS'),
 									'PyPDEVS_221':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs221' ,'src'),
-									'PyPDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','old')}
+									'PyPDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','old')},
+				'GUI_FLAG':True
 				}
 
 ### here berfore the __main__ function
 ### warning, some module (like SimulationGUI) initialise GUI_FLAG macro before (import block below)
 if len(sys.argv) >= 2 and sys.argv[1] in ('-ng, -nogui, -js, -javascript'):
-	__builtin__.__dict__['GUI_FLAG'] = False
+	builtin_dict['GUI_FLAG'] = False
 	from SimulationNoGUI import makeSimulation, makeJS
-else:
-	__builtin__.__dict__['GUI_FLAG'] = True
 
 # Sets the homepath variable to the directory where your application is located (sys.argv[0]).
 __builtin__.__dict__.update(builtin_dict)
