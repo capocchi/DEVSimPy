@@ -23,7 +23,7 @@ from tempfile import gettempdir
 import __builtin__
 import traceback
 
-from SimulationGUI import SimulationThread
+from SimulationGUI import simulator_factory
 from Join import makeDEVSConf, makeJoin
 
 def makeJS(filename):
@@ -141,7 +141,7 @@ class runSimulation:
 
 		if self.master:
 			self.master.FINAL_TIME = float(self.time)
-			self.thread = SimulationThread(self.master, self.selected_strategy, self.prof, self.ntl)
+			self.thread = simulator_factory(self.master, self.selected_strategy, self.prof, self.ntl)
 
 		return self.thread
 
