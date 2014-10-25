@@ -10,7 +10,7 @@ import time
 class BaseDEVS(object):
     """
     Abstract base class for AtomicDEVS and CoupledDEVS classes.
-  
+
     This class provides basic DEVS attributes and query/set methods.
     """
     def __init__(self, name):
@@ -19,17 +19,17 @@ class BaseDEVS(object):
 
         :param name: the name of the DEVS model
         """
-    
+
         # Prevent any attempt to instantiate this abstract class
         if self.__class__ == BaseDEVS:
-            raise DEVSException ("Cannot instantiate abstract class '%s' ... " 
+            raise DEVSException ("Cannot instantiate abstract class '%s' ... "
                                  % (self.__class__.__name__))
 
         # The parent of the current model
         self.parent = None
         # The local name of the model
         self.name = name
-        self.IPorts  = []  
+        self.IPorts  = []
         self.OPorts   = []
         self.ports = []
 
@@ -38,14 +38,14 @@ class BaseDEVS(object):
         self.timeNext = (0.0, 1)
 
         self.location = None
-    
+
         # Variables used for optimisations
-        self.myInput = {}  
+        self.myInput = {}
         self.myOutput = {}
 
         # The state queue, used for time warp
         self.oldStates = []
-        # List of all memoized states, only useful in distributed simulation 
+        # List of all memoized states, only useful in distributed simulation
         #   with memoization enabled
         self.memo = []
 
@@ -106,7 +106,7 @@ class BaseDEVS(object):
         :param isInput: whether or not this is an input port
         """
         name = name if name is not None else "port%s" % len(self.ports)
-        port = Port(isInput=isInput, name=name) 
+        port = Port(isInput=isInput, name=name)
         if isInput:
             self.IPorts.append(port)
         else:
@@ -115,18 +115,18 @@ class BaseDEVS(object):
         self.ports.append(port)
         port.hostDEVS = self
         return port
-      
+
     def addInPort(self, name=None):
         """
         Add an input port to the DEVS model.
-        
-        addInPort is the only proper way to add input ports to a DEVS model. 
+
+        addInPort is the only proper way to add input ports to a DEVS model.
         As for the CoupledDEVS.addSubModel method, calls
         to addInPort and addOutPort can appear in any DEVS'
         descriptive class constructor, or the methods can be used with an
         instantiated object.
-    
-        The methods add a reference to the new port in the DEVS' IPorts 
+
+        The methods add a reference to the new port in the DEVS' IPorts
         attributes and set the port's hostDEVS attribute. The modeler
         should typically save the returned reference somewhere.
 
@@ -134,7 +134,7 @@ class BaseDEVS(object):
         :returns: port -- the generated port
         """
         return self.addPort(name, True)
-      
+
     def addOutPort(self, name=None):
         """Add an output port to the DEVS model.
 
@@ -143,7 +143,7 @@ class BaseDEVS(object):
         to addInPort and addOutPort can appear in any DEVS'
         descriptive class constructor, or the methods can be used with an
         instantiated object.
-    
+
         The methods add a reference to the new port in the DEVS'
         OPorts attributes and set the port's hostDEVS attribute. The modeler
         should typically save the returned reference somewhere.
@@ -152,7 +152,7 @@ class BaseDEVS(object):
         :returns: port -- the generated port
         """
         return self.addPort(name, False)
-    
+
     def getModelName(self):
         """
         Get the local model name
@@ -176,7 +176,7 @@ class AtomicDEVS(BaseDEVS):
     """
     Abstract base class for all atomic-DEVS descriptive classes.
     """
-  
+
     def __init__(self, name=None):
         """
         Constructor for an AtomicDEVS model
@@ -185,14 +185,14 @@ class AtomicDEVS(BaseDEVS):
         """
         # Prevent any attempt to instantiate this abstract class
         if self.__class__ == AtomicDEVS:
-            raise DEVSException("Cannot instantiate abstract class '%s' ... " 
+            raise DEVSException("Cannot instantiate abstract class '%s' ... "
                                 % (self.__class__.__name__))
 
         # The minimal constructor shall first call the superclass
         # (i.e., BaseDEVS) constructor.
         BaseDEVS.__init__(self, name)
-    
-        self.elapsed = 0.0 
+
+        self.elapsed = 0.0
         self.state = None
         self.relocatable = True
         self.lastReadTime = (0, 0)
@@ -216,7 +216,7 @@ class AtomicDEVS(BaseDEVS):
         """
         activities[self.model_id] = sum(
                 [state.activity for state in self.oldStates if state.timeLast[0] < time])
-        
+
     def setGVT(self, GVT, activities, lastStateOnly):
         """
         Set the GVT of the model, cleaning up the states vector as required
@@ -230,7 +230,7 @@ class AtomicDEVS(BaseDEVS):
         for i in range(len(self.oldStates)):
             state = self.oldStates[i]
             if state.timeLast[0] >= GVT:
-                # Possible that all elements should be kept, 
+                # Possible that all elements should be kept,
                 # in which case it will return -1 and only keep the last element
                 # So the copy element should be AT LEAST 0
                 copy = max(0, i-1)
@@ -304,7 +304,7 @@ class AtomicDEVS(BaseDEVS):
     def extTransition(self, inputs):
         """
         DEFAULT External Transition Function.
-  
+
         Accesses state and elapsed attributes, as well as inputs
         through the passed dictionary. Returns the new state.
 
@@ -314,11 +314,11 @@ class AtomicDEVS(BaseDEVS):
         :returns: state -- the new state of the model
         """
         return self.state
-    
+
     def intTransition(self):
         """
         DEFAULT Internal Transition Function.
- 
+
         .. note:: Should only write to the *state* attribute.
 
         :returns: state -- the new state of the model
@@ -331,7 +331,7 @@ class AtomicDEVS(BaseDEVS):
     def confTransition(self, inputs):
         """
         DEFAULT Confluent Transition Function.
-  
+
         Accesses state and elapsed attributes, as well as inputs
         through the passed dictionary. Returns the new state.
 
@@ -343,11 +343,11 @@ class AtomicDEVS(BaseDEVS):
         self.state = self.intTransition()
         self.state = self.extTransition(inputs)
         return self.state
-  
+
     def outputFnc(self):
         """
         DEFAULT Output Function.
-  
+
         Accesses only state attribute. Returns the output on the different ports as a dictionary.
 
         .. note:: Should **not** write to any attribute.
@@ -358,11 +358,11 @@ class AtomicDEVS(BaseDEVS):
 
         """
         return {}
-  
+
     def timeAdvance(self):
         """
         DEFAULT Time Advance Function.
-    
+
         .. note:: Should ideally be deterministic, though this is not mandatory for simulation.
 
         :returns: the time advance of the model
@@ -370,7 +370,7 @@ class AtomicDEVS(BaseDEVS):
         .. versionchanged:: 2.1 The *elapsed* attribute is no longer guaranteed to be correct as this isn't required by the DEVS formalism.
 
         """
-        # By default, return infinity 
+        # By default, return infinity
         return float('inf')
 
     def preActivityCalculation(self):
@@ -454,12 +454,12 @@ class AtomicDEVS(BaseDEVS):
         lst[self.location] += 1
         self.nChildren = 1
         return self.nChildren
-    
+
 class CoupledDEVS(BaseDEVS):
     """
     Abstract base class for all coupled-DEVS descriptive classes.
     """
-  
+
     def __init__(self, name=None):
         """
         Constructor.
@@ -468,12 +468,12 @@ class CoupledDEVS(BaseDEVS):
         """
         # Prevent any attempt to instantiate this abstract class
         if self.__class__ == CoupledDEVS:
-            raise DEVSException("Cannot instantiate abstract class '%s' ... " 
+            raise DEVSException("Cannot instantiate abstract class '%s' ... "
                                 % (self.__class__.__name__))
         # The minimal constructor shall first call the superclass
         # (i.e., BaseDEVS) constructor.
         BaseDEVS.__init__(self, name)
-    
+
         # All components of this coupled model (the submodels)
         self.componentSet = []
 
@@ -482,7 +482,7 @@ class CoupledDEVS(BaseDEVS):
         TODO
         """
         self.setLocation(0, force=True)
-    
+
     def select(self, immChildren):
         """
         DEFAULT select function, only used when using Classic DEVS simulation
@@ -504,7 +504,7 @@ class CoupledDEVS(BaseDEVS):
             children += i.getModelLoad(lst)
         self.nChildren = children
         return self.nChildren
-        
+
     def finalize(self, name, model_counter, model_ids, locations, selectHierarchy):
         """
         Finalize the model hierarchy by doing all pre-simulation configuration
@@ -522,7 +522,7 @@ class CoupledDEVS(BaseDEVS):
         # Set name, even though it will never be requested
         self.fullName = name + str(self.getModelName())
         for i in self.componentSet:
-            model_counter = i.finalize(self.fullName + ".", model_counter, 
+            model_counter = i.finalize(self.fullName + ".", model_counter,
                     model_ids, locations, selectHierarchy + [self])
         return model_counter
 
@@ -561,7 +561,7 @@ class CoupledDEVS(BaseDEVS):
             # Set the location of all children
             for i in model.componentSet:
                 i.setLocation(model.location)
-        self.componentSet.append(model)        
+        self.componentSet.append(model)
         if hasattr(self, "fullName"):
             # Full Name is only created when starting the simulation, so we are currently in a running simulation
             # Dynamic Structure change
@@ -581,7 +581,7 @@ class CoupledDEVS(BaseDEVS):
     def disconnectPorts(self, p1, p2):
         """
         Disconnect two ports
-        
+
         .. note:: If these ports are connected multiple times, **only one** of them will be removed.
 
         :param p1: the port at the start of the connection
@@ -637,13 +637,13 @@ class CoupledDEVS(BaseDEVS):
             else:
                 p1.outLine.append(p2)
                 p2.inLine.append(p1)
-        
+
         # External input couplings:
         elif ((p1.hostDEVS == self and p2.hostDEVS.parent == self) and
               (p1.type() == p2.type() == 'INPORT')):
             p1.outLine.append(p2)
             p2.inLine.append(p1)
-   
+
         # Eternal output couplings:
         elif ((p1.hostDEVS.parent == self and p2.hostDEVS == self) and
               (p1.type() == p2.type() == 'OUTPORT')):
@@ -654,7 +654,7 @@ class CoupledDEVS(BaseDEVS):
         else:
             raise DEVSException(("Illegal coupling in coupled model '%s' " +
                                 "between ports '%s' and '%s'") % (
-                                self.getModelName(), p1.getPortName(), 
+                                self.getModelName(), p1.getPortName(),
                                 p2.getPortName()))
 
         p1.zFunctions[p2] = z
@@ -758,7 +758,7 @@ class RootDEVS(BaseDEVS):
                 controllerRevert |= child.revert(time, memorize)
                 # Was reverted, so reschedule
                 reschedules.add(child)
-            # Always clear the inputs, as it is possible that there are only 
+            # Always clear the inputs, as it is possible that there are only
             # partial results, which doesn't get found in the timeLast >= time
             child.myInput = {}
         self.scheduler.massReschedule(reschedules)
@@ -787,11 +787,11 @@ class Port(object):
         :param isInput: whether or not this is an input port
         :param name: the name of the port. If None is provided, a unique ID is generated
         """
-        self.inLine = [] 
+        self.inLine = []
         self.outLine = []
-        self.hostDEVS = None 
+        self.hostDEVS = None
         self.msgcount = 0
-   
+
         # The name of the port
         self.name = name
         self.isInput = isInput
@@ -862,7 +862,7 @@ def directConnect(componentSet, local):
                     for inline in outline.outLine:
                         # Add it to the current iterating list, so we can just continue
                         worklist.append((inline, appendZ(z, outline.zFunctions[inline])))
-                        # If it is a Coupled model, we should just continue 
+                        # If it is a Coupled model, we should just continue
                         # expanding it and not add it to the finished line
                         if not isinstance(inline.hostDEVS, CoupledDEVS):
                             outport.routingOutLine.append((inline, appendZ(z, outline.zFunctions[inline])))
@@ -872,7 +872,7 @@ def directConnect(componentSet, local):
                             break
                     else:
                         # Add to the new line if it isn't already there
-                        # Note that it isn't really mandatory to check for this, 
+                        # Note that it isn't really mandatory to check for this,
                         # it is a lot cleaner to do so.
                         # This will greatly increase the complexity of the connector though
                         outport.routingOutLine.append((outline, z))
