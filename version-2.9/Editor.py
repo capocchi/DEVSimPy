@@ -1793,9 +1793,9 @@ class BlockEditor(Editor):
 					for key, val in self.cb.args.items():
 						if not new_args.has_key(key):
 							del self.cb.args[key]
-						else:
-							### status bar notification
-							self.Notification(False, _('args not updated'), _('New class from %s') % (new_class))
+				#		else:
+				#			### status bar notification
+				#			self.Notification(False, _('args not updated'), _('New class from %s') % (new_class))
 
 			### user would change the behavior during a simulation without saving
 			if on_simulation_flag and new_instance is not bool:
