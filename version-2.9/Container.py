@@ -391,6 +391,10 @@ class Diagram(Savable, Structurable):
 
 			m.setDEVSParent(diagram.getDEVSModel())
 
+			### allow to escape the check of the simulation running in PyPDEVS (src/DEVS.py line 565)
+			if hasattr(devs.parent, "fullName"):
+					del devs.parent.fullName
+
 			### adding
 			diagram.addSubModel(devs)
 
@@ -635,6 +639,7 @@ class Diagram(Savable, Structurable):
 			diagram = self
 
 			D = self.DoCheck()
+
 			### if there is no error in models
  			if D is not None:
 				playSound(SIMULATION_ERROR_SOUND_PATH)
