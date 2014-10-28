@@ -214,14 +214,13 @@ class AtomicDEVS(BaseDEVS):
 
 	###
 	def peek(self, p):
-		"""Retrives message from input port {\tt p}.
+		"""Retrieves message from input port {\tt p}.
 		"""
 		value = self.myInput.get(p, None)
 		return copy.deepcopy(value) if value else value
 
-
 	def peek_all(self):
-		"""Retrives messages from all input port {\tt p}.
+		"""Retrieves messages from all input port {\tt p}.
 		"""
 		return [(p, copy.deepcopy(m)) for p,m in self.myInput.items()]
 

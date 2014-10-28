@@ -45,6 +45,7 @@ for pydevs_dir in __builtin__.__dict__['DEVS_DIR_PATH_DICT']:
         ### split from DEVSKernel string and replace separator with point
         d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
         exec "import DEVSKernel%s.DEVS as BaseDEVS"%(d)
+
 #    ======================================================================    #
 class DomainBehavior(BaseDEVS.AtomicDEVS):
 	""" Abstract DomainBehavior class.
@@ -56,6 +57,25 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 		"""
 
 		BaseDEVS.AtomicDEVS.__init__(self, name=name)
+
+	###
+	def poke(self, p, v):
+		""" Overwrite here the poke method in order to adapt the model with all simulator (PyDEVS, PyPDEVS, etc...)
+		"""
+		if 'PyDEVS' in __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
+			BaseDEVS.AtomicDEVS.poke(self, p, v)
+		### PyPDEVS
+		else:
+			return {p:v}
+
+#	def peek(self, p):
+#		""" Overwrite here the peek method in order to adapt the model with all simulator (PyDEVS, PyPDEVS, etc...)
+#		"""
+#		if 'PyDEVS' in __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
+#			return BaseDEVS.AtomicDEVS.peek(self, p)
+#		else:
+#			return self.myInput[p]
+
 
 def main():
 	DB = DomainBehavior()
