@@ -42,26 +42,27 @@ class QuickScope(DomainBehavior):
 		self.t = INFINITY
 
 	###
-	def extTransition(self, *args, **kwargs):
+	def extTransition(self, *args):
 		"""
 		"""
 		
 		for np in xrange(len(self.IPorts)):
-			### PyDEVS
-			if (args == () and kwargs == {}):
+			if hasattr(self, 'peek'):
 				msg = self.peek(self.IPorts[np])
 			else:
-				msg = args[0].get(self.IPorts[np])
+				inputs = args[0]
+				msg = inputs.get(self.IPorts[np])
 
-			if msg:
-		
+			if msg is not None:
 				# if step axis is chosen
 				if self.eventAxis:
 					self.eventAxis += 1
 					self.t = self.eventAxis
 				else:
 					self.t = msg.time
-				
+					if not hasattr(self, 'peek'):
+						self.t = self.t[0]
+
 				#ecriture dans la liste pour affichier le QuickScope et le SpreadSheet
 				# si il y a eu un changement du nombre de ports alors on creer la nouvelle entre dans results (on ne regenere pas d'instance)
 				if np in self.results:
@@ -81,7 +82,7 @@ class QuickScope(DomainBehavior):
 		return self.state
 			
 	###
-	def timeAdvance(self): return self.state['sigma']
+	def timeAdvance(self):return self.state['sigma']
 	
 	###
 	def __str__(self):return "QuickScope"

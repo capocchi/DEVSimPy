@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from Domain.Generator.Generator import *
+from Generator.Generator import *
 from xml.dom import minidom
 import os.path
 
@@ -51,7 +51,7 @@ class XMLGenerator(Generator):
 		sig = self.T[0] if self.T != [] else INFINITY
 
 		self.state = {'status':'ACTIVE','sigma':sig}
-					
+
 	def __str__(self):
 		return "XMLGenerator"
 
