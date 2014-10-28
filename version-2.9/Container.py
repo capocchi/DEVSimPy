@@ -346,14 +346,16 @@ class Diagram(Savable, Structurable):
 
 		#ReloadModule.recompile("DomainInterface.DomainBehavior")
 		#ReloadModule.recompile("DomainInterface.DomainStructure")
+		#ReloadModule.recompile("DomainInterface.MasterModel")
+
+		diagram.setDEVSModel(DomainInterface.MasterModel.Master())
 
 		### if devs instance of diagram is not instantiated, we make it
 		### else one simulation has been performed then we clear all devs port instances
-		if diagram.getDEVSModel() is None:
-			#ReloadModule.recompile("DomainInterface.MasterModel")
-			diagram.setDEVSModel(DomainInterface.MasterModel.Master())
-		else:
-			diagram.ClearAllPorts()
+		#if diagram.getDEVSModel() is None:
+		#	diagram.setDEVSModel(DomainInterface.MasterModel.Master())
+		#else:
+		#	diagram.ClearAllPorts()
 
 		### shape list of diagram
 		shape_list = diagram.GetShapeList()
