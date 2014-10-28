@@ -526,7 +526,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 		self.statusbar.SetStatusText(_('Suspended'),0)
 
-		# possibilité d'interagir avec le modele
+		# way to interact with the model
 		#self.parent.Enable(True)
 		wx.Bell()
 
@@ -778,15 +778,19 @@ def simulator_factory(model, strategy, prof, ntl, verbose):
 					sys.stderr.write('Error Value: ' + str(evalue) + '\n')
 					sys.stderr.write('Traceback: ' + str(etb) + '\n')
 
-					if not 'GUI_FLAG': wx.CallAfter(Publisher.sendMessage, "error", msg)
-					### error sound
-					if not 'GUI_FLAG': wx.CallAfter(playSound, SIMULATION_ERROR_SOUND_PATH)
+					### only for displayed application (-nogui)
+					if wx.GetApp().GetTopWindow():
+						wx.CallAfter(Publisher.sendMessage, "error", msg)
+						### error sound
+						wx.CallAfter(playSound, SIMULATION_ERROR_SOUND_PATH)
+
 				else:
-					for m in filter(lambda a: hasattr(a,'finish'), self.model.componentSet):
+					for m in filter(lambda a: hasattr(a, 'finish'), self.model.componentSet):
 						### call finished method
 						Publisher.sendMessage('%d.finished'%(id(m)))
 
-					if not 'GUI_FLAG': wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
+					### only for displayed application (-nogui)
+					if wx.GetApp().GetTopWindow() : wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
 
 			self.end_flag = True
 
