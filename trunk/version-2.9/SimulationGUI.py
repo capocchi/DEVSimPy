@@ -778,9 +778,9 @@ def simulator_factory(model, strategy, prof, ntl, verbose):
 					sys.stderr.write('Error Value: ' + str(evalue) + '\n')
 					sys.stderr.write('Traceback: ' + str(etb) + '\n')
 
-					wx.CallAfter(Publisher.sendMessage, "error", msg)
+					if 'GUI_FLAG': wx.CallAfter(Publisher.sendMessage, "error", msg)
 					### error sound
-					wx.CallAfter(playSound, SIMULATION_ERROR_SOUND_PATH)
+					if 'GUI_FLAG': wx.CallAfter(playSound, SIMULATION_ERROR_SOUND_PATH)
 				else:
 					for m in filter(lambda a: hasattr(a,'finish'), self.model.componentSet):
 						### call finished method
