@@ -779,7 +779,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose):
 					sys.stderr.write('Traceback: ' + str(etb) + '\n')
 
 					### only for displayed application (-nogui)
-					if wx.GetApp().GetTopWindow():
+					if wx.GetApp():
 						wx.CallAfter(Publisher.sendMessage, "error", msg)
 						### error sound
 						wx.CallAfter(playSound, SIMULATION_ERROR_SOUND_PATH)
@@ -790,7 +790,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose):
 						Publisher.sendMessage('%d.finished'%(id(m)))
 
 					### only for displayed application (-nogui)
-					if wx.GetApp().GetTopWindow() : wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
+					if wx.GetApp() : wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
 
 			self.end_flag = True
 

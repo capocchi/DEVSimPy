@@ -1951,32 +1951,34 @@ if __name__ == '__main__':
 				### check dsp filename
 				filename = sys.argv[2]
 				if not os.path.exists(filename):
-					sys.stderr.write('Error : .dsp not exist !\n')
+					sys.stderr.write(_('ERROR: .dsp not exist !\n'))
 					sys.exit()
 
 				### launch simulation
-				makeSimulation(filename,time = 10.0)
+				makeSimulation(filename, time = 10.0)
 
 			elif len(sys.argv) == 4:
 
 				### check dsp filename
 				filename = sys.argv[2]
 				if not os.path.exists(filename):
-					sys.stderr.write('Error : .dsp not exist !\n')
+					sys.stderr.write(_('ERROR: .dsp not exist !\n'))
 					sys.exit()
 
 				### check time
 				time = sys.argv[3]
 				if not IsAllDigits(str(time)):
-					sys.stderr.write('Error : time should be a number!\n')
-					sys.exit()
+					if str(time) in ('inf', 'ntl'):
+						__builtin__.__dict__['NTL'] = True
+					else:
+						sys.stderr.write(_('ERROR: time should be a number!\n'))
+						sys.exit()
 
 				### launch simulation
-				makeSimulation(filename,time)
+				makeSimulation(filename, time)
 			else:
-				sys.stderr.write('Error : Unspecified .dsp file !\n')
-				sys.stdout.write('USAGE : python devsimpy.py -ng|-nogui yourfile.dsp\n')
-				sys.stdout.write('\t To execute DEVSimPy nogui with timer: python devsimpy.py -ng|-nogui yourfile.dsp 15.0 \n')
+				sys.stderr.write(_('ERROR: Unspecified .dsp file !\n'))
+				sys.stdout.write(_('USAGE: python devsimpy.py [-ng|-nogui] yourfile.dsp [time=10.0|[inf|ntl]]\n'))
 				sys.exit()
 
 		elif sys.argv[1] == '-js' or sys.argv[1] == '-javascript':
@@ -1985,14 +1987,14 @@ if __name__ == '__main__':
 				### check dsp filename
 				filenameJS = sys.argv[2]
 				if not os.path.exists(filenameJS):
-					sys.stderr.write('Error : .dsp not exist !\n')
+					sys.stderr.write(_('ERROR: .dsp not exist !\n'))
 					sys.exit()
 
 				### launch simulation
 				makeJS(filenameJS)
 			else:
-				sys.stderr.write('Error : Unspecified .dsp file !\n')
-				sys.stdout.write('USAGE : python devsimpy.py -js|-javascript yourfile.dsp\n')
+				sys.stderr.write(_('ERROR: Unspecified .dsp file !\n'))
+				sys.stdout.write(_('USAGE: python devsimpy.py -js|-javascript yourfile.dsp\n'))
 				sys.exit()
 	else:
 		pass
