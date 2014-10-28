@@ -113,6 +113,8 @@ class runSimulation:
 		### profiling simulation with hotshot
 		self.prof = False
 
+		self.verbose = False
+
 		# definition du thread, du timer et du compteur pour les % de simulation
 		self.thread = None
 		self.count = 10.0
@@ -143,7 +145,7 @@ class runSimulation:
 		if self.master:
 			from SimulationGUI import simulator_factory
 			self.master.FINAL_TIME = float(self.time)
-			self.thread = simulator_factory(self.master, self.selected_strategy, self.prof, self.ntl)
+			self.thread = simulator_factory(self.master, self.selected_strategy, self.prof, self.ntl, self.verbose)
 
 		return self.thread
 

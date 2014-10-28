@@ -140,22 +140,27 @@ class CollapsiblePanel(wx.Panel):
 			c = PYDEVS_SIM_STRATEGY_DICT.keys()
 		else:
 			c = PYPDEVS_SIM_STRATEGY_DICT.keys()
+
 		ch1 = wx.Choice(pane, wx.ID_ANY, choices=c)
 
 		text3 = wx.StaticText(pane, wx.ID_ANY, _("Profiling"))
 		cb1 = wx.CheckBox(pane, wx.ID_ANY, name='check_prof')
 		text4 = wx.StaticText(pane, wx.ID_ANY, _("No time limit"))
 		self.cb2 = wx.CheckBox(pane, wx.ID_ANY, name='check_ntl')
+		text5 = wx.StaticText(pane, wx.ID_ANY, _("Verbose"))
+		self.cb3 = wx.CheckBox(pane, wx.ID_ANY, name='verbose')
 
-		if not 'hotshot' in sys.modules.keys():
-			text3.Enable(False)
-			cb1.Enable(False)
-			self.parent.prof = False
+		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
+			if not 'hotshot' in sys.modules.keys():
+				text3.Enable(False)
+				cb1.Enable(False)
+				self.parent.prof = False
 
-		if DEFAULT_SIM_STRATEGY == 'original' and DEFAULT_DEVS_DIRNAME == 'PyDEVS':
-			self.cb2.Enable(False)
-		else:
 			self.cb2.SetValue(__builtin__.__dict__['NTL'])
+			self.cb3.Enable(False)
+
+		else:
+			cb1.Enable(False)
 
 		### default strategy
 		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
@@ -167,19 +172,23 @@ class CollapsiblePanel(wx.Panel):
 		cb1.SetToolTipString(_("For simulation profiling using hotshot"))
 		self.cb2.SetToolTipString(_("No time limit for the simulation. Simulation is over when childs are no active."))
 
-		grid3 = wx.GridSizer(3, 2, 1, 1)
+		grid3 = wx.GridSizer(5, 2, 1, 1)
 		grid3.Add(text2, 0, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL, 19)
 		grid3.Add(ch1, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL)
 		grid3.Add(text3, 0, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL, 19)
 		grid3.Add(cb1, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
 		grid3.Add(text4, 0, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL, 19)
 		grid3.Add(self.cb2, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
+		grid3.Add(text5, 0, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL, 19)
+		grid3.Add(self.cb3, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
 
 		pane.SetSizer(grid3)
 
 		self.Bind(wx.EVT_CHOICE, self.OnChoice, ch1)
 		self.Bind(wx.EVT_CHECKBOX, self.OnProfiling, cb1)
 		self.Bind(wx.EVT_CHECKBOX, self.OnNTL, self.cb2)
+		self.Bind(wx.EVT_CHECKBOX, self.OnVerbose, self.cb3)
+
 	###
 	def OnChoice(self, event):
 		""" strategy choice has been invoked
@@ -204,6 +213,10 @@ class CollapsiblePanel(wx.Panel):
 		cb1 = event.GetEventObject()
 
 		self.simdia.prof = cb1.GetValue()
+
+	def OnVerbose(self, event):
+		cb3 = event.GetEventObject()
+		self.simdia.verbose = cb3.GetValue()
 
 #-----------------------------------------------------------------
 class SimulationDialog(wx.Frame, wx.Panel):
@@ -260,6 +273,8 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 		### No time limit simulation (defined in the builtin dictionary from .devsimpy file)
 		self.ntl = __builtin__.__dict__['NTL']
+
+		self.verbose = False
 
 		# definition of the thread, the timer and the counter for the simulation progress
 		self.thread = None
@@ -438,7 +453,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 				for fn in filter(lambda f: f.endswith('.devsimpy.log'), os.listdir(gettempdir())):
 					os.remove(os.path.join(gettempdir(),fn))
 
-				self.thread = simulator_factory(self.current_master, self.selected_strategy, self.prof, self.ntl)
+				self.thread = simulator_factory(self.current_master, self.selected_strategy, self.prof, self.ntl, self.verbose)
 				self.thread.setName(self.title)
 
 				### si le modele n'a pas de couplage, ou si pas de generateur: alors pas besoin de simuler
@@ -659,7 +674,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		else:
 			raise msg
 
-def simulator_factory(model, strategy, prof, ntl):
+def simulator_factory(model, strategy, prof, ntl, verbose):
 	""" Preventing direct creation for Simulator
         disallow direct access to the classes
 	"""
@@ -702,7 +717,7 @@ def simulator_factory(model, strategy, prof, ntl):
 			Thread for DEVS simulation task
 		"""
 
-		def __init__(self, model = None, strategy = '', prof = False, ntl = False):
+		def __init__(self, model = None, strategy = '', prof = False, ntl = False, verbose=False):
 			""" Constructor.
 			"""
 			threading.Thread.__init__(self)
@@ -713,6 +728,7 @@ def simulator_factory(model, strategy, prof, ntl):
 			self.strategy = strategy
 			self.prof = prof
 			self.ntl = ntl
+			self.verbose = verbose
 
 			self.end_flag = False
 			self.thread_suspend = False
@@ -770,7 +786,7 @@ def simulator_factory(model, strategy, prof, ntl):
 						### call finished method
 						Publisher.sendMessage('%d.finished'%(id(m)))
 
-					wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
+					if 'GUI_FLAG': wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
 
 			self.end_flag = True
 
@@ -784,7 +800,7 @@ def simulator_factory(model, strategy, prof, ntl):
 		def resume_thread(self):
 			self.thread_suspend = False
 
-	return SimulationThread(model, strategy, prof, ntl)
+	return SimulationThread(model, strategy, prof, ntl, verbose)
 
 ### ------------------------------------------------------------
 class TestApp(wx.App):
