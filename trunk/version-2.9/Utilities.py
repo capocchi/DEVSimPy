@@ -123,11 +123,12 @@ def path_to_module(abs_python_filename):
 def getInstance(cls, args = {}):
 	""" Function that return the instance from class and args
 	"""
+
 	if inspect.isclass(cls):
 		try:
 			devs = cls(**args)
 		except Exception:
-			sys.stderr.write(_("Error in getInstance: %s class not instanciated with %s\n"%(cls,str(args))))
+			sys.stderr.write(_("Error in getInstance: %s not instanciated with %s\n"%(cls,str(args))))
 			return sys.exc_info()
 		else:
 			return devs
