@@ -545,7 +545,17 @@ class SimStrategy4(SimStrategy):
         else:
 
             ### see simconfig.py to have informations about setters
-            S.setVerbose(None)
+
+            ### verbose manager, if None print are displayed in stdout, else in the out/verbose.txt file
+            if self._simulator.verbose:
+                 S.setVerbose(None)
+            else:
+                out_dir = os.path.join(HOME_PATH, 'out')
+                if not os.path.exists(out_dir):
+                    os.mkdir(out_dir)
+
+                verbose_file = os.path.join(out_dir, 'verbose.txt')
+                S.setVerbose(verbose_file)
 
             ### TODO
             if self._simulator.ntl:
