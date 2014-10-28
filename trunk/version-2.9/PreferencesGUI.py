@@ -6,6 +6,7 @@ import __builtin__
 import __main__
 import shutil
 import sys
+import inspect
 
 import wx.lib.filebrowsebutton as filebrowse
 
@@ -355,8 +356,14 @@ class SimulationPanel(wx.Panel):
 		if __builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] != self.default_devs_dir:
 			### change builtin before recompile the modules
 			__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = self.default_devs_dir
+
 			### recompile the modules.
-			ReloadModule.recompile("DomainInterface.DomainBehavior")
+			### recompile DomainInterface.DomainBehavior with all loaded module depending on this one
+			for m in sys.modules:
+				clsmembers = inspect.getmembers(sys.modules[m], inspect.isclass)
+				if clsmembers != [] and clsmembers[0][0] == 'DomainBehavior':
+					ReloadModule.recompile(m)
+
 			ReloadModule.recompile("DomainInterface.DomainStructure")
 			ReloadModule.recompile("DomainInterface.MasterModel")
 
