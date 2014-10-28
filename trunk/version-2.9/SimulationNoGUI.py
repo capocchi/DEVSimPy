@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 
 """
-Name: MakeSimulation.py
-Brief descritpion:
+Name: SimulationNoGUI.py
+Brief descritpion: Overwrite some methods to implement the no gui version of DEVsimPy and make simulation from dsp file without GUI
 Author(s): A-T. Luciani <atluciani@univ-corse.fr>
 Version:  1.0
-Last modified:
+Last modified: 2014.10.28 by L. Capocchi
 GENERAL NOTES AND REMARKS:
+
+option -nogui or -ng to invoke this file
+option ntl or inf to perform 'no time limit' simulation
 
 GLOBAL VARIABLES AND FUNCTIONS:
 """
