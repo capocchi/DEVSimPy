@@ -2,7 +2,7 @@
 
 """
 Name: Generator.py
-Brief descritpion: 
+Brief descritpion:
 Author(s): L. Capocchi <capocchi@univ-corse.fr>
 Version:  1.0
 Last modified: 2011.11.16
@@ -12,22 +12,27 @@ GLOBAL VARIABLES AND FUNCTIONS:
 
 from __future__ import with_statement
 from DomainInterface.DomainBehavior import DomainBehavior
-from Domain.Basic.Object import Message
+from Basic.Object import Message
 
 import os.path
 
 #    ======================================================================    #
 class Generator(DomainBehavior):
-	"""
+	""" Base class for generators
 	"""
 
 	def __init__(self, sourceName="", listValues=[]):
+		""" Constructor.
+
+			@sourceName : name of source
+			@listValues : list of values
+		"""
 		DomainBehavior.__init__(self)
 
 		### local copy
 		self.sourceName = sourceName
 		self.__listValues = listValues
-		
+
 		self.T = []
 		self.V = {}
 
@@ -35,7 +40,7 @@ class Generator(DomainBehavior):
 		self.type_error_flag = True in map(lambda a: not isinstance(a, int), self.__listValues)
 		self.file_error_flag = os.path.exists(self.sourceName)
 		self.list_empty_flag = listValues == []
-		
+
 		### assert
 		if self.type_error_flag: assert True, "Please use integer in listValue parameter !"
 
