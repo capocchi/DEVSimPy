@@ -1942,7 +1942,7 @@ if __name__ == '__main__':
 		sys.stdout.write('\t To execute DEVSimPy in no GUI mode: python devsimpy.py -ng|-nogui\n')
 		sys.stdout.write('Authors: L. capocchi (capocchi@univ-corse.fr)\n')
 		sys.exit()
-	### python devsimpy.py -ng|-nogui yourfile.dsp -> sans interface graphique
+	### python devsimpy.py -ng|-nogui yourfile.dsp -> devsimpy in batch mode
 	elif not __builtin__.__dict__['GUI_FLAG']:
 
 		if sys.argv[1] == '-ng' or sys.argv[1] == '-nogui':

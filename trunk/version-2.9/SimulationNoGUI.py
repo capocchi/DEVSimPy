@@ -2,7 +2,8 @@
 
 """
 Name: SimulationNoGUI.py
-Brief descritpion: Overwrite some methods to implement the no gui version of DEVsimPy and make simulation from dsp file without GUI
+Brief descritpion: Overwrite some methods to implement the no gui version of DEVsimPy and make simulation from dsp file
+in batch mode
 Author(s): A-T. Luciani <atluciani@univ-corse.fr>
 Version:  1.0
 Last modified: 2014.10.28 by L. Capocchi
@@ -83,7 +84,7 @@ def makeSimulation(filename, T):
 
 	import Container
 
-	sys.stdout.write(_("\nSimulation in no gui mode\n"))
+	sys.stdout.write(_("\nSimulation in batch mode\n"))
 
 	a = Container.Diagram()
 
