@@ -3460,7 +3460,28 @@ class CodeBlock(Block, Achievable):
 		#print state['model_path']
 		#print "\n"
 
-		self.__dict__.update(state)
+		### Class redefinition if the class inherite to QuickScope, To_Disk or MessagesCollector
+		cls = Components.GetClass(state['python_path'])
+
+		if not isinstance(cls, tuple):
+			### find all members that is class
+			clsmembers = inspect.getmembers(sys.modules[cls.__name__], inspect.isclass)
+			names = map(lambda t: t[0], clsmembers)
+
+			### if model inherite of ScopeGUI, it requires to redefine the class with the ScopeGUI class
+			if 'QuickScope' in names:
+				state['xlabel'] = ""
+				state['ylabel'] = ""
+				self.__dict__.update(state)
+				self.__class__ = ScopeGUI
+			elif 'To_Disk' in names or 'MessagesCollector' in names:
+				self.__dict__.update(state)
+				self.__class__ = DiskGUI
+			else:
+				self.__dict__.update(state)
+		else:
+			sys.stderr.write(_("Error in setstate for CodeBlock when trying to redefine its class: %s\n"%str(cls)))
+			self.__dict__.update(state)
 
 	def __getstate__(self):
 		"""
