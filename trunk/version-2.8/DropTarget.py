@@ -27,7 +27,7 @@ class DropTarget(wx.PyDropTarget):
 	def __init__(self, canvas = None):
 		""" Constructor
 		"""
-		
+
 		wx.PyDropTarget.__init__(self)
 
 		##local copy
@@ -38,18 +38,18 @@ class DropTarget(wx.PyDropTarget):
 	def __setDo(self):
 		"""
 		"""
-	
+
 		# file and text names
 		self.__fdo = wx.FileDataObject()
 		self.__tdo = wx.TextDataObject()
-		
+
 		# allows several drop format
 		self._do = wx.DataObjectComposite()
 		self._do.Add(self.__tdo)
 		self._do.Add(self.__fdo)
-		
+
 		self.SetDataObject(self._do)
-	
+
 	#def OnEnter(self, x, y, d):
 		#sys.stdout.write("OnEnter: %d, %d, %d\n" % (x, y, d))
 		#return wx.DragCopy
@@ -64,18 +64,18 @@ class DropTarget(wx.PyDropTarget):
 	#def OnDrop(self, x, y):
 		#sys.stdout.write("OnDrop: %d %d\n" % (x, y))
 		#return True
-        
+
 	def OnData(self, x, y, d):
 		"""
 		"""
-		
+
 		if self.GetData():
-			
+
 			df = self._do.GetReceivedFormat().GetType()
-			
+
 			### list of blocks to create
 			block_list = []
-			
+
 			### dropped object come from devsimpy (Library frame)
 			if df in [wx.DF_UNICODETEXT, wx.DF_TEXT]:
 				filename = self.__tdo.GetText()
@@ -83,32 +83,32 @@ class DropTarget(wx.PyDropTarget):
 				text = os.path.splitext(filename)[0]
 				### label is composed by the number of block in diagram
 				label = "%s_%s"%(os.path.basename(text),str(self.canvas.GetDiagram().GetBlockCount()))
-				
+
 				m = self.GetBlock(filename, label, x, y)
-		
-				### Append new block 
+
+				### Append new block
 				block_list.append(m)
-				
+
 			### dropped object come from system (like explorer)
 			elif df == wx.DF_FILENAME:
 				for filename in self.__fdo.GetFilenames():
-					# text is the filename 
+					# text is the filename
 					text, ext = os.path.splitext(filename)
 					# label is the file name
 					label = os.path.basename(text)
-					
+
 					if not ext in (".amd",'.cmd', '.py'):
 						m = Components.DSPComponent.Load(filename, label, self.canvas)
 					else:
 						m = self.GetBlock(filename, label, x, y)
-								
+
 						### Append new block
 						block_list.append(m)
-			
+
 			### if bitmap is dropped
 			elif df == wx.DF_BITMAP:
 				pass
-			
+
 			### add all block in the diagram and trace this operation
 			for block in block_list:
 				if block:
@@ -118,9 +118,9 @@ class DropTarget(wx.PyDropTarget):
 					sys.stdout.write(repr(block))
 				else:
 					sys.stdout.write(_("ERROR: DEVSimPy model not added.\n"))
-			
+
 			return d
-			
+
 	def GetBlock(self, filename, label, x, y):
 		"""
 		"""
@@ -128,7 +128,7 @@ class DropTarget(wx.PyDropTarget):
 		bf = Components.BlockFactory()
 		### Get block
 		m = bf.GetBlock(filename, label)
-		
+
 		### Move and append block
 		if m:
 			### convert coordinate depending on the canvas
@@ -136,5 +136,5 @@ class DropTarget(wx.PyDropTarget):
 
 			# move model from mouse position
 			m.move(x, y)
-			
+
 		return m
