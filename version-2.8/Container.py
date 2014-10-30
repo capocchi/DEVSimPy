@@ -459,7 +459,7 @@ class Diagram(Savable, Structurable):
 
 	@cond_decorator(__builtin__.__dict__['GUI_FLAG'], ProgressNotification("DEVSimPy open file"))
 	def LoadFile(self, fileName = None):
-		""" Function that load diagram from a file.
+		""" Function that load diagram from a dsp file.
 		"""
 
 		load_file_result = Savable.LoadFile(self, fileName)
@@ -3373,6 +3373,12 @@ class CodeBlock(Block, Achievable):
 							arg_values = inspect.getargspec(cls.__init__).defaults
 							index = args_from_stored_constructor_py.index(arg)
 							state['args'].update({arg:arg_values[index]})
+
+				#clsmembers = inspect.getmembers(sys.modules[cls.__name__], inspect.isclass)
+
+				### if model inherite of ScopeGUI, it requires the overwrite of the the OnLeftDClick method
+				#if 'QuickScope' in map(lambda t: t[0], clsmembers):
+					#self.__dict__.update({'OnLeftDClick':ScopeGUI.OnLeftDClick})
 			else:
 				sys.stderr.write(_("Error in setstate for CodeBlock: %s\n"%str(cls)))
 
@@ -3420,7 +3426,28 @@ class CodeBlock(Block, Achievable):
 		#print state['model_path']
 		#print "\n"
 
-		self.__dict__.update(state)
+		### Class redefinition if the class inherite to QuickScope, To_Disk or MessageCollector
+		cls = Components.GetClass(state['python_path'])
+
+		if not isinstance(cls, tuple):
+			### find all members that is class
+			clsmembers = inspect.getmembers(sys.modules[cls.__name__], inspect.isclass)
+			names = map(lambda t: t[0], clsmembers)
+
+			### if model inherite of ScopeGUI, it requires to redefine the class with the ScopeGUI class
+			if 'QuickScope' in names:
+				state['xlabel'] = ""
+				state['ylabel'] = ""
+				self.__dict__.update(state)
+				self.__class__ = ScopeGUI
+			elif 'To_Disk' in names or 'MessagesCollector' in names:
+				self.__dict__.update(state)
+				self.__class__ = DiskGUI
+			else:
+				self.__dict__.update(state)
+		else:
+			sys.stderr.write(_("Error in setstate for CodeBlock when trying to redefine its class: %s\n"%str(cls)))
+			self.__dict__.update(state)
 
 	def __getstate__(self):
 		"""

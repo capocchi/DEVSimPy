@@ -108,8 +108,8 @@ class DSPComponent:
 		from Container import Diagram
 		#assert(filename.endswith('.dsp'))
 
-		# its possible to use the orignal copy of the droped diagram
-		dial = wx.MessageDialog(canvas, _('Do you want to open the orignal diagram in a new tab?'), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		# its possible to use the original copy of the droped diagram
+		dial = wx.MessageDialog(canvas, _('Do you want to open the original diagram in a new tab?'), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
 		new_tab = dial.ShowModal() == wx.ID_YES
 
@@ -285,7 +285,7 @@ class CMDComponent(GenericComponent):
 			return m
 
 class AMDComponent(GenericComponent):
-	""" Return labeled block from filename at (x,y) postion in canvas
+	""" Return labeled block from filename at (x,y) position in canvas
 
 		@filename: filename for loading block
 		@label: label of block

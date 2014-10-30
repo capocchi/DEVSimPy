@@ -27,6 +27,7 @@ import urlparse
 import httplib
 import copy
 import inspect
+import zipfile
 
 import Container
 import Menu
@@ -199,6 +200,7 @@ class LibraryTree(wx.TreeCtrl):
 
 			if path.endswith('.py'):
 				### create component
+
 				m = BlockFactory.CreateBlock(	canvas = canvas,
 									x = 140,
 									y = 140,
