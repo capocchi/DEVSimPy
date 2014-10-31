@@ -3333,6 +3333,8 @@ class CodeBlock(Block, Achievable):
 		python_path = state['python_path']
 		model_path = state['model_path']
 
+		new_class = None
+
 		dir_name = os.path.basename(DOMAIN_PATH)
 
 		#print "avant "
@@ -3373,7 +3375,10 @@ class CodeBlock(Block, Achievable):
 
 		### if the model path is empty and the python path is wrong
 		elif not os.path.exists(python_path):
-			### if DOMAIN is not in python_path
+
+			path = python_path
+
+			### if DOMAIN is in python_path
 			if dir_name in python_path:
 
 				### try to find in DOMAIN directory
@@ -3387,12 +3392,21 @@ class CodeBlock(Block, Achievable):
 						if lib_name in path:
 							path = p+path.split(lib_name)[-1]
 							break
+			else:
+				### try to find if python_path contains a directory wich is also in Domain
+				### subdirectories of Domain
+				subdirectories = os.listdir(DOMAIN_PATH)
+				### for all directories if the directory is in python_path (excluding the file .py (-1))
+				for dir in subdirectories:
+					if dir in python_path.split(os.sep)[0:-1]:
+						### yes, the python_path is wrong but we find that in the Domain there is a directory with the same name
+						a = python_path.split(dir+os.sep)
+						path = os.path.join(DOMAIN_PATH,dir,a[-1])
+						break
 
-				### if path is always wrong, flag is visible
-				if not os.path.exists(path):
-					state['bad_filename_path_flag'] = True
-				else:
-					state['python_path'] = path
+			### if path is always wrong, flag is visible
+			if os.path.exists(path):
+				state['python_path'] = path
 			else:
 				state['bad_filename_path_flag'] = True
 
@@ -3413,6 +3427,23 @@ class CodeBlock(Block, Achievable):
 							arg_values = inspect.getargspec(cls.__init__).defaults
 							index = args_from_stored_constructor_py.index(arg)
 							state['args'].update({arg:arg_values[index]})
+
+				### Class redefinition if the class inherite to QuickScope, To_Disk or MessagesCollector
+
+				### find all members that is class
+				clsmembers = inspect.getmembers(sys.modules[cls.__name__], inspect.isclass)
+				names = map(lambda t: t[0], clsmembers)
+
+				### if model inherite of ScopeGUI, it requires to redefine the class with the ScopeGUI class
+				if 'QuickScope' in names:
+					state['xlabel'] = ""
+					state['ylabel'] = ""
+					new_class = ScopeGUI
+				elif 'To_Disk' in names or 'MessagesCollector' in names:
+					new_class = DiskGUI
+				else:
+					new_class = None
+
 			else:
 				sys.stderr.write(_("Error in setstate for CodeBlock: %s\n"%str(cls)))
 
@@ -3460,28 +3491,9 @@ class CodeBlock(Block, Achievable):
 		#print state['model_path']
 		#print "\n"
 
-		### Class redefinition if the class inherite to QuickScope, To_Disk or MessagesCollector
-		cls = Components.GetClass(state['python_path'])
-
-		if not isinstance(cls, tuple):
-			### find all members that is class
-			clsmembers = inspect.getmembers(sys.modules[cls.__name__], inspect.isclass)
-			names = map(lambda t: t[0], clsmembers)
-
-			### if model inherite of ScopeGUI, it requires to redefine the class with the ScopeGUI class
-			if 'QuickScope' in names:
-				state['xlabel'] = ""
-				state['ylabel'] = ""
-				self.__dict__.update(state)
-				self.__class__ = ScopeGUI
-			elif 'To_Disk' in names or 'MessagesCollector' in names:
-				self.__dict__.update(state)
-				self.__class__ = DiskGUI
-			else:
-				self.__dict__.update(state)
-		else:
-			sys.stderr.write(_("Error in setstate for CodeBlock when trying to redefine its class: %s\n"%str(cls)))
-			self.__dict__.update(state)
+		self.__dict__.update(state)
+		if new_class:
+			self.__class__ = new_class
 
 	def __getstate__(self):
 		"""
