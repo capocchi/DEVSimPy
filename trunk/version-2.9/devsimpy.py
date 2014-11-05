@@ -53,6 +53,7 @@ import platform
 import threading
 import cPickle
 
+from ConfigParser import SafeConfigParser
 from tempfile import gettempdir
 
 try:
@@ -66,39 +67,50 @@ __min_wx_version__ = ['3.0','2.9','2.8','2.7','2.6','2.5']
 __wxpython_url__ = 'http://wxpython.org'
 __get__wxpython__ = 'Get it from %s'%__wxpython_url__
 
-try:
-
-	if not hasattr(sys, 'frozen'):
-		import wxversion as wxv
-
-		if wxv.checkInstalled(__min_wx_version__):
-			wxv.select(__min_wx_version__)
-		else:
-			import wx
-			app = wx.PySimpleApp()
-			wx.MessageBox("The requested version of wxPython is not installed.\nPlease install version %s" %__min_wx_version__, "wxPython Version Error")
-			app.MainLoop()
-			webbrowser.open(__wxpython_url__)
-			sys.exit()
-
+parser = SafeConfigParser()
+parser.read('devsimpy.ini')
+section, option = ('wxversion', 'to_load')
+ini_exist = parser.has_option(section, option)
+if ini_exist:
+	import wxversion as wxv
+	v = parser.get(section, option)
+	wxv.select([v])
 	import wx
+else:
 
-except ImportError:
-	## wxversion not installed
 	try:
-		import wx
-		if wx.VERSION_STRING < __min_wx_version__:
-			sys.stdout.write("You need to updgarde wxPython to v%s (or higer) to run DEVSimPy\n"%__min_wx_version__)
-			sys.stdout.write(__get__wxpython__)
-			sys.exit()
-	except ImportError:
-			sys.stderr.write("Error: DEVSimPy requires wxPython, which doesn't seem to be installed\n")
-			sys.stdout.write(__get__wxpython__)
-			sys.exit()
-	sys.stdout.write("Warning: the package python-wxversion was not found, please install it.\n")
-	sys.stdout.write("DEVSimPy will continue anyway, but not all features might work.\n")
 
-sys.stdout.write("Importing wxPython %s for python %s on %s (%s) platform \n"%(wx.__version__, platform.python_version(), platform.system(), platform.version()))
+		if not hasattr(sys, 'frozen'):
+			import wxversion as wxv
+
+			if wxv.checkInstalled(__min_wx_version__):
+				wxv.select(__min_wx_version__)
+			else:
+				import wx
+				app = wx.PySimpleApp()
+				wx.MessageBox("The requested version of wxPython is not installed.\nPlease install version %s" %__min_wx_version__, "wxPython Version Error")
+				app.MainLoop()
+				webbrowser.open(__wxpython_url__)
+				sys.exit()
+
+		import wx
+
+	except ImportError:
+		## wxversion not installed
+		try:
+			import wx
+			if wx.VERSION_STRING < __min_wx_version__:
+				sys.stdout.write("You need to updgarde wxPython to v%s (or higer) to run DEVSimPy\n"%__min_wx_version__)
+				sys.stdout.write(__get__wxpython__)
+				sys.exit()
+		except ImportError:
+				sys.stderr.write("Error: DEVSimPy requires wxPython, which doesn't seem to be installed\n")
+				sys.stdout.write(__get__wxpython__)
+				sys.exit()
+		sys.stdout.write("Warning: the package python-wxversion was not found, please install it.\n")
+		sys.stdout.write("DEVSimPy will continue anyway, but not all features might work.\n")
+
+sys.stdout.write("Importing wxPython %s for python %s on %s (%s) platform %s\n"%(wx.__version__, platform.python_version(), platform.system(), platform.version(),  "from devsimpy.ini" if ini_exist else ''))
 
 import wx.aui
 import wx.py as py
@@ -176,7 +188,7 @@ from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
 from pluginmanager import load_plugins
 from which import which
-from Utilities import GetMails, IsAllDigits
+from Utilities import GetMails, IsAllDigits, GetUserConfigDir
 from Decorators import redirectStdout, BuzyCursorNotification
 from DetachedFrame import DetachedFrame
 from LibraryTree import LibraryTree
@@ -202,12 +214,6 @@ def getIcon(path):
 		#ABS_HOME_PATH = os.getcwd()
 
 	return icon
-
-def GetUserConfigDir():
-	""" Return the standard location on this platform for application data.
-	"""
-	sp = wx.StandardPaths.Get()
-	return sp.GetUserConfigDir()
 
 #-------------------------------------------------------------------
 def DefineScreenSize(percentscreen = None, size = None):
