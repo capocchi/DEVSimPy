@@ -624,8 +624,6 @@ class SimulationDialog(wx.Frame, wx.Panel):
 	def ErrorManager(self, msg):
 		""" An error is occured.
 		"""
-		### simulate event button for the code editor
-		event = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self._btn1.GetId())
 
 		### try to find the file which have the error from traceback
 		devs_error = False
@@ -649,6 +647,10 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 		### if error come from devs python file
 		if devs_error:
+
+			### simulate event button for the code editor
+			event = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self._btn1.GetId())
+
 			### Error dialog
 			if not Container.MsgBoxError(event, self.parent, msg.data):
 			### if user dont want correct the error, we destroy the simulation windows
