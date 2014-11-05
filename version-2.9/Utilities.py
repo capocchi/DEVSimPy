@@ -77,6 +77,12 @@ def vibrate(windowName, distance=15, times=5, speed=0.05, direction='horizontal'
 		time.sleep(speed)
 		windowName.Move(wx.Point(location[0], location[1]))
 
+def GetUserConfigDir():
+	""" Return the standard location on this platform for application data.
+	"""
+	sp = wx.StandardPaths.Get()
+	return sp.GetUserConfigDir()
+
 def getFileListFromInit(init_file):
 	""" Return list of name composing all variable in __init__.py file
 	"""
