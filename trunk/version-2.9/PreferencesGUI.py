@@ -9,6 +9,7 @@ import sys
 import inspect
 import wxversion
 import ConfigParser
+import copy
 
 import wx.lib.filebrowsebutton as filebrowse
 
@@ -22,7 +23,7 @@ if __name__ == '__main__':
 from HtmlWindow import HtmlFrame
 
 from PluginsGUI import PluginsPanel, GeneralPluginsList
-from Utilities import playSound, GetUserConfigDir
+from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni
 
 import ReloadModule
 
@@ -78,16 +79,11 @@ class GeneralPanel(wx.Panel):
 		self.cb1.SetValue(__builtin__.__dict__['TRANSPARENCY'])
 
 		### wxPython version
-		wxv= map(lambda a: a.split('-')[0],wxversion.getInstalled())
+		wxv= map(lambda a: a.split('-')[0], wxversion.getInstalled())
 
-		a = wxv[0]
-		### wx.__version__ is more precise than the values of wxv
-		for v in wxv:
-			if v in wx.__version__:
-				a = v
-		self.cb2 = wx.ComboBox(self, wx.ID_ANY, a, choices= wxv, style=wx.CB_READONLY)
+		self.cb2 = wx.ComboBox(self, wx.ID_ANY, GetWXVersionFromIni(), choices= wxv, style=wx.CB_READONLY)
 		self.cb2.SetToolTipString(_("Default version of wxPython."))
-		self.default_wxv = wxv[0]
+		self.default_wxv = self.cb2.GetValue()
 
 		### Sizer
 		box1 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, _('Properties')), orient=wx.VERTICAL)
@@ -117,6 +113,10 @@ class GeneralPanel(wx.Panel):
 	def OnApply(self, event):
 		""" Apply change
 		"""
+
+		### safe copy of default_wxv to manage the wx version changing
+		default_wxv = copy.copy(self.default_wxv)
+
 		self.OnNbOpenedFileChanged(event)
 		self.OnNbHistoryUndoChanged(event)
 		self.OnFontSizeChanged(event)
@@ -126,6 +126,11 @@ class GeneralPanel(wx.Panel):
 		self.OnTransparancyChanged(event)
 		self.OnwxPythonVersionChanged(event)
 
+		### if the version of wx has been changed in OnwxPythonVersionChanged, we inform the user.
+		if self.default_wxv != default_wxv:
+			dlg = wx.MessageDialog(self, _("wxPython version has been changed.\nDEVSimPy requires a reboot to load the new version of wxPython."), _('wxPython Version Manager'), wx.OK|wx.ICON_INFORMATION)
+			dlg.ShowModal()
+			dlg.Destroy()
 	###
 	def OnNbOpenedFileChanged(self, event):
 		__builtin__.__dict__['NB_OPENED_FILE'] = self.nb_opened_file.GetValue()		# number of recent files
@@ -176,22 +181,22 @@ class GeneralPanel(wx.Panel):
 		self.default_wxv = self.cb2.GetValue()
 
 		### update the init file into GetUserConfigDir
-		#parser = ConfigParser.SafeConfigParser()
+		parser = ConfigParser.SafeConfigParser()
+		parser.read('devsimpy.ini')
 
-		#section, option = ('wxversion', 'to_load')
+		section, option = ('wxversion', 'to_load')
 
-		#if os.path.exists('devsimpy.ini'):
-		#	parser.read('devsimpy.ini')
-		#	parser.remove_option(section, option)
-		#	parser.remove_section(section)
-		#	parser.write(open('devsimpy.ini','a'))
-		#	parser.add_section(section)
-		#else:
-		#	parser.add_section(section)
+		### if ini file exist we remove old section and option
+		if os.path.exists('devsimpy.ini'):
+			parser.remove_option(section, option)
+			parser.remove_section(section)
+			parser.add_section(section)
 
-		#parser.set(section, option, self.default_wxv)
-		#
-		#parser.write(open('devsimpy.ini','a'))
+		if not parser.has_section(section):
+			parser.add_section(section)
+
+		parser.set(section, option, self.default_wxv)
+		parser.write(open('devsimpy.ini','wb'))
 
 		### TODO
 		### Add popup to inform that devsimpy.ini has been updated
