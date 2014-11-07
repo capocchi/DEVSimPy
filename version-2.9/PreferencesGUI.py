@@ -182,12 +182,13 @@ class GeneralPanel(wx.Panel):
 
 		### update the init file into GetUserConfigDir
 		parser = ConfigParser.SafeConfigParser()
-		parser.read('devsimpy.ini')
+		path = os.path.join(GetUserConfigDir(), 'devsimpy.ini')
+		parser.read(path)
 
 		section, option = ('wxversion', 'to_load')
 
 		### if ini file exist we remove old section and option
-		if os.path.exists('devsimpy.ini'):
+		if os.path.exists(path):
 			parser.remove_option(section, option)
 			parser.remove_section(section)
 			parser.add_section(section)
@@ -196,10 +197,7 @@ class GeneralPanel(wx.Panel):
 			parser.add_section(section)
 
 		parser.set(section, option, self.default_wxv)
-		parser.write(open('devsimpy.ini','wb'))
-
-		### TODO
-		### Add popup to inform that devsimpy.ini has been updated
+		parser.write(open(path,'wb'))
 
 class SimulationPanel(wx.Panel):
 	""" Simulation Panel

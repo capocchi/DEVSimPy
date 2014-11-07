@@ -69,7 +69,7 @@ __get__wxpython__ = 'Get it from %s'%__wxpython_url__
 
 ### ini file exist ?
 parser = SafeConfigParser()
-parser.read('devsimpy.ini')
+parser.read(os.path.join(os.path.expanduser("~"),'devsimpy.ini'))
 section, option = ('wxversion', 'to_load')
 ini_exist = parser.has_option(section, option)
 
@@ -113,7 +113,7 @@ else:
 		sys.stdout.write("Warning: the package python-wxversion was not found, please install it.\n")
 		sys.stdout.write("DEVSimPy will continue anyway, but not all features might work.\n")
 
-sys.stdout.write("Importing wxPython %s for python %s on %s (%s) platform %s\n"%(wx.__version__, platform.python_version(), platform.system(), platform.version(),  "from devsimpy.ini" if ini_exist else ''))
+sys.stdout.write("Importing wxPython %s%s for python %s on %s (%s) platform...\n"%(wx.__version__, " from devsimpy.ini" if ini_exist else '',platform.python_version(), platform.system(), platform.version()))
 
 import wx.aui
 import wx.py as py
@@ -403,7 +403,7 @@ class MainApplication(wx.Frame):
 				### for spash screen
 				pub.sendMessage('object.added', 'Loading .devsimpy settings file...\n')
 
-				sys.stdout.write("Load .devsimpy %s settings file from %s directory ... \n"%(self.GetVersion(),GetUserConfigDir()))
+				sys.stdout.write("Loading DEVSimPy %s form %s.devsimpy settings file... \n"%(self.GetVersion(), GetUserConfigDir()+os.sep))
 				### load external import path
 				self.exportPathsList = filter(lambda path: os.path.isdir(path), eval(self.cfg.Read("exportPathsList")))
 				### append external path to the sys module to futur import
@@ -467,7 +467,7 @@ class MainApplication(wx.Frame):
 				for plugin in eval(self.cfg.Read("plugins")):
 					load_plugins(plugin)
 
-				sys.stdout.write("DEVSimPy is ready.\n")
+				sys.stdout.write("DEVSimPy is ready!\n")
 
 			else:
 				wx.MessageBox('.devsimpy file appear to be a very old version and should be updated....\nWe rewrite a new blank version.',
