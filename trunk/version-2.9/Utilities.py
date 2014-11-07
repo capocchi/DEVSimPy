@@ -81,8 +81,7 @@ def vibrate(windowName, distance=15, times=5, speed=0.05, direction='horizontal'
 def GetUserConfigDir():
 	""" Return the standard location on this platform for application data.
 	"""
-	sp = wx.StandardPaths.Get()
-	return sp.GetUserConfigDir()
+	return os.path.expanduser("~")
 
 def GetWXVersionFromIni():
 	""" Return the wx version loaded in devsimpy (from ini file if exist)
@@ -90,12 +89,13 @@ def GetWXVersionFromIni():
 
 	### update the init file into GetUserConfigDir
 	parser = ConfigParser.SafeConfigParser()
-	parser.read('devsimpy.ini')
+	path = os.path.join(GetUserConfigDir(), 'devsimpy.ini')
+	parser.read(path)
 
 	section, option = ('wxversion', 'to_load')
 
 	### if ini file exist we remove old section and option
-	if os.path.exists('devsimpy.ini'):
+	if os.path.exists(path):
 		return parser.get(section, option)
 	else:
 

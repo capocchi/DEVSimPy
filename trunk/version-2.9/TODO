@@ -445,3 +445,6 @@ invoque rpar un callback lorsque le fichier python est renseignÃ© dans le wizard
 -Fait le 28/10/2014 par LC: amélioration -> on peux faire un poke quelque soit le noyau de simulation mais attention il faut faire un return self.poke(p,v). De meme il faut faire un return de self.state dans intTransition et extTransition. Pour l'instant seule le peek n'est pas générique (mais commencé... en commentaire dans le DomainBehvaior)
 -Fait le 30/10/2014 par LC: correction -> lorsqu'un modèle hérite d'un QuickScope, To_Disk ou MessagesCollector, il fallait le reinstancier pour que le double clic prenne effet. Maintenant j'ai rajouté un morceaux de code à la fin du __setstate__ du codeBlock dans Container.py, juste avant le self.__dict__.update(state) (important http://www.ibm.com/developerworks/library/l-pypers/) afin de redefinir le vrai heritage avec ScopeGUI ou DiskGUI
 -Fait le 31/10/2014 par LC: amélioration -> lorsque un dsp est construit avec une lib qui n'est pas dans Domain (à la construction), on esssai dans setstate du CodeBlock de trouver si un rep de Domain est présent dans le faut chemin python_path si c'est le cas, on fait une composition pour rendre le python_path ok
+-Fait le 07/11/2014 par LC: ajout -> possibilité de choisir dans les préférences générales la version de wx utilisée par DEVSimPy.
+
+
