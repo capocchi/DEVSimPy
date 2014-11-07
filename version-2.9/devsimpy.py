@@ -67,10 +67,13 @@ __min_wx_version__ = ['3.0','2.9','2.8','2.7','2.6','2.5']
 __wxpython_url__ = 'http://wxpython.org'
 __get__wxpython__ = 'Get it from %s'%__wxpython_url__
 
+### ini file exist ?
 parser = SafeConfigParser()
 parser.read('devsimpy.ini')
 section, option = ('wxversion', 'to_load')
 ini_exist = parser.has_option(section, option)
+
+### if ini file exist, it contains the wx version to load.
 if ini_exist:
 	import wxversion as wxv
 	v = parser.get(section, option)

@@ -13,7 +13,8 @@ import string
 import re
 import math
 import inspect
-
+import ConfigParser
+import wxversion
 
 from itertools import combinations
 
@@ -82,6 +83,31 @@ def GetUserConfigDir():
 	"""
 	sp = wx.StandardPaths.Get()
 	return sp.GetUserConfigDir()
+
+def GetWXVersionFromIni():
+	""" Return the wx version loaded in devsimpy (from ini file if exist)
+	"""
+
+	### update the init file into GetUserConfigDir
+	parser = ConfigParser.SafeConfigParser()
+	parser.read('devsimpy.ini')
+
+	section, option = ('wxversion', 'to_load')
+
+	### if ini file exist we remove old section and option
+	if os.path.exists('devsimpy.ini'):
+		return parser.get(section, option)
+	else:
+
+		### wxPython version
+		wxv= map(lambda a: a.split('-')[0], wxversion.getInstalled())
+
+		a = wxv[0]
+		### wx.__version__ is more precise than the values of wxv
+		for v in wxv:
+			if v in wx.__version__:
+				a = v
+		return a
 
 def getFileListFromInit(init_file):
 	""" Return list of name composing all variable in __init__.py file
