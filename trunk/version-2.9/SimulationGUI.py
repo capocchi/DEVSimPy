@@ -443,6 +443,9 @@ class SimulationDialog(wx.Frame, wx.Panel):
 				### The START_ACTIVITY_TRACKING event occurs
 				trigger_event("START_ACTIVITY_TRACKING", parent=self, master=self.current_master)
 
+				### The START_ACTIVITY_TRACKING event occurs
+				trigger_event("START_STATE_TRAJECTORY", parent=self, master=self.current_master)
+
 				### The START_CONCURRENT_SIMULATION event occurs
 				trigger_event("START_CONCURRENT_SIMULATION", parent=self, master=self.current_master)
 
@@ -495,7 +498,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 	###
 	def OnStop(self, event):
-		""" When Stop button is cliked
+		""" When Stop button is clicked
 		"""
 
 		self.Interact()
@@ -535,7 +538,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		""" Give the pourcentage of simulation progress
 		"""
 
-		### si no time limite pour la simulation, on pulse sinon on avance vers le temps final
+		### if no time limit, gauge pulse
 		if self.ntl:
 			self._gauge.Pulse()
 		else:
@@ -545,30 +548,45 @@ class SimulationDialog(wx.Frame, wx.Panel):
 				timeLast = self.thread.model.timeLast[0]
 
 			self.count = (timeLast/self.thread.model.FINAL_TIME)*100
+
 			self._gauge.SetValue(self.count)
 
-		### si pas de no time limit pour la simulation et que la gauge est pleine
+		### if simulation is over
 		if self.thread.end_flag:
-			self.timer.Stop()
 
+			### update the status of buttons
 			self._btn1.Enable(True)
 			self._btn2.Disable()
 			self._btn3.Disable()
 			self._value.Enable(not self.ntl)
 			self._cp.Enable()
 
+			### check if gauge is full (can appear if timer is too slow)
+			if self.count != 100:
+				self.count = 100
+				self._gauge.SetValue(self.count)
+
+			### update the status bar
 			self.statusbar.SetBackgroundColour('')
 			self.statusbar.SetStatusText(_("Completed!"), 0)
 			self.statusbar.SetStatusText("%0.4f s"%(self.thread.cpu_time), 1)
 
+			### is no time limit add some informations in status bar
 			if not self.ntl:
 				if self.statusbar.GetFieldsCount() > 2:
 					self.statusbar.SetStatusText(str(100)+"%", 2)
 
+			### stop the timer
+			self.timer.Stop()
+
+		### if the simulation is suspended
 		elif not self.thread.thread_suspend:
+			### udpate the status bar
 			self.statusbar.SetBackgroundColour('GREY')
 			self.statusbar.SetStatusText(_("Processing..."), 0)
 			self.statusbar.SetStatusText("%0.4f s"%(self.thread.cpu_time), 1)
+
+			### is no time limit, add some information in status bar
 			if not self.ntl:
 				if self.statusbar.GetFieldsCount() > 2:
 					self.statusbar.SetStatusText(str(self.count)[:4]+"%", 2)
@@ -579,7 +597,11 @@ class SimulationDialog(wx.Frame, wx.Panel):
 	def MsgBoxEmptyModel(self):
 		""" Pop-up alert for empty model
 		"""
-		dial = wx.MessageDialog(self, _('You want to simulate an empty master model!'), _('Simulation Manager'), wx.OK|wx.ICON_EXCLAMATION)
+		dial = wx.MessageDialog(self,
+							_('You want to simulate an empty master model!'),
+							_('Simulation Manager'),
+							wx.OK|wx.ICON_EXCLAMATION)
+
 		if (dial.ShowModal() == wx.ID_OK) and (isinstance(self.parent, wx.Frame)):
 			self.DestroyWin()
 		else:
@@ -589,33 +611,38 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		""" To destroy the simulation frame
 		"""
 
+		### clean status bar
 		self.statusbar.SetBackgroundColour('')
 		self.statusbar.SetFields([""]*self.statusbar.GetFieldsCount())
+
+		### try to hidden stdioWin
 		try:
 			self.parent.stdioWin.frame.Show(False)
 		except:
 			pass
 
 		try:
-		## panel gauche inaccessible
+		## left panel enabled
 			nb1 = self.parent.mainW.GetControlNotebook()
 			nb1.Enable()
 
-			## menu inaccessible
+			## menu enabled
 			self.parent.tb.Enable()
 			for i in xrange(self.parent.menuBar.GetMenuCount()):
 				self.parent.menuBar.EnableTop(i,True)
 
+			### other tab diagram enabled
 			nb2 = self.parent.GetDiagramNotebook()
-			## autre tab inaccessible
 			for p in xrange(nb2.GetPageCount()):
 				## pour tout les tab non selectionner
 				if p != nb2.GetSelection():
 					nb2.GetPage(p).Enable()
+
 		except Exception:
 			#sys.stdout.write(_("Empty mode over\n"))
 			pass
 
+		### destroy the frame
 		self.Destroy()
 
 	def OnQuit(self, event):
@@ -624,20 +651,24 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 		# if the simulation is running
 		if self.timer.IsRunning():
-			dial = wx.MessageDialog(self, _('Are you sure to stop simulation ?'), _('Simulation Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			dial = wx.MessageDialog(self,
+									_('Are you sure to stop simulation?'),
+									_('Simulation Manager'),
+									wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 			self.thread.suspend()
 
-			### if ok
+			### if user wants to stop simulation process
 			if dial.ShowModal() == wx.ID_YES:
 				self.DestroyWin()
 				self.thread.terminate()
 			else:
 				self.thread.resume_thread()
+
 		else:
 			self.DestroyWin()
 
 	def ErrorManager(self, msg):
-		""" An error is occured.
+		""" An error is occurred.
 		"""
 
 		### try to find the file which have the error from traceback
@@ -653,6 +684,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			for path in paths[::-1]:
 				### find if one path in trace comes from Domain or exported path list
 				for d in [DOMAIN_PATH]+mainW.GetExportPathsList():
+
 					if d in path:
 						devs_error = True
 						break
@@ -674,6 +706,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			### if user want to correct error through an editor, we stop simulation process for trying again after the error is corrected.
 				self.OnStop(event)
 		else:
+
 			raise msg
 
 def simulator_factory(model, strategy, prof, ntl, verbose):
@@ -816,7 +849,7 @@ class TestApp(wx.App):
 	def OnInit(self):
 
 		__builtin__.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
-		__builtin__.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy4', 'distribued':'SimStrategy5', 'parallel':'SimStrategy6'}
+		__builtin__.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'classic':'SimStrategy4', 'distribued':'SimStrategy5', 'parallel':'SimStrategy6'}
 		__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyPDEVS'
 		__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}
 

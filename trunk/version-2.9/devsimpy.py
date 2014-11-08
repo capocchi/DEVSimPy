@@ -4,11 +4,11 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # main.py --- DEVSimPy - The Python DEVS GUI modeling and simulation software
 #                     --------------------------------
-#                            Copyright (c) 2013
+#                            Copyright (c) 2014
 #                              Laurent CAPOCCHI
 #                        SPE - University of Corsica
 #                     --------------------------------
-# Version 2.8                                      last modified:  21/02/14
+# Version 2.9                                      last modified:  07/11/14
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -16,7 +16,7 @@
 # strong depends: wxPython, wxversion
 # light depends : NumPy for spectrum analysis, mathplotlib for graph display
 # remarque; attention, la construction de l'arbre des librairies (ou domain) est fait par la classe TreeListLib.
-# De plus, cette construction necessite la présence obligax toire du fichier __init__.py dans chaque sous domain d'un domaine repertorié dans le repertoire Domain (voir methode recursive GetSubDomain).
+# De plus, cette construction necessite la présence obligatoire du fichier __init__.py dans chaque sous domain d'un domaine repertorié dans le repertoire Domain (voir methode recursive GetSubDomain).
 # L'utilisateur doit donc ecrire ce fichier en sautant les lignes dans __all__ = []. Si le fichier n'existe pas le prog le cree.
 # Pour importer une lib: 1/ faire un rep MyLib dans Domain avec les fichiers Message.py, DomainBehavior.py et DomaineStrucutre.py
 #                                               2/ stocker tout les autre .py dans un sous rep contenant également un fichier __init__ dans lequel son ecris les fichier a importer.
@@ -37,7 +37,7 @@
 from __future__ import with_statement
 
 __authors__  = "Laurent Capocchi <capocchi@univ-corse.fr, lcapocchi@gmail.com>, TIC project team <santucci@univ-coorse.fr>" # ajouter les noms et les mails associés aux autres auteurs
-__date__    = "22 Mar 2014, 08:24 GMT"
+__date__    = "7 Nov 2014, 23:23 GMT"
 __version__ = '2.9'
 __docformat__ = 'epytext'
 
@@ -67,22 +67,26 @@ __min_wx_version__ = ['3.0','2.9','2.8','2.7','2.6','2.5']
 __wxpython_url__ = 'http://wxpython.org'
 __get__wxpython__ = 'Get it from %s'%__wxpython_url__
 
+################################################################
+### Loading wx python library
+################################################################
+
 ### ini file exist ?
 parser = SafeConfigParser()
 parser.read(os.path.join(os.path.expanduser("~"),'devsimpy.ini'))
 section, option = ('wxversion', 'to_load')
 ini_exist = parser.has_option(section, option)
 
-### if ini file exist, it contains the wx version to load.
+### if devsimpy.ini file exist, it contains the wx version to load.
 if ini_exist:
 	import wxversion as wxv
 	v = parser.get(section, option)
 	wxv.select([v])
 	import wx
+
+### no devsimpy.ini file
 else:
-
 	try:
-
 		if not hasattr(sys, 'frozen'):
 			import wxversion as wxv
 
@@ -160,7 +164,7 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 				'LOG_FILE': os.devnull, # log file (null by default)
 				'DEFAULT_SIM_STRATEGY': 'bag-based', #choose the default simulation strategy for PyDEVS
 				'PYDEVS_SIM_STRATEGY_DICT' : {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}, # list of available simulation strategy for PyDEVS package
-                'PYPDEVS_SIM_STRATEGY_DICT' : {'original':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}, # list of available simulation strategy for PyPDEVS package
+                'PYPDEVS_SIM_STRATEGY_DICT' : {'classic':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}, # list of available simulation strategy for PyPDEVS package
 				'HELP_PATH' : os.path.join('doc', 'html'), # path of help directory
 				'NTL' : False, # No Time Limit for the simulation
 				'TRANSPARENCY' : True, # Transparancy for DetachedFrame
@@ -1785,7 +1789,6 @@ class PyOnDemandOutputWindow(threading.Thread):
 	def CreateOutputWindow(self, st):
 		self.st = st
 		self.start()
-		#self.frame.Show(True)
 
 	def run(self):
 		self.frame = LogFrame(self.parent, wx.ID_ANY, self.title, self.pos, self.size)
@@ -1822,10 +1825,10 @@ class DEVSimPyApp(wx.App):
 	outputWindowClass = PyOnDemandOutputWindow
 
 	def __init__(self, redirect=False, filename=None):
-		wx.App.__init__(self,redirect, filename)
+		wx.App.__init__(self, redirect, filename)
 
 		# make sure we can create a GUI
-		if not self.IsDisplayAvailable():
+		if not self.IsDisplayAvailable() and not __builtin__.__dict__['GUI_FLAG']:
 
 			if wx.Platform == '__WXMAC__':
 				msg = """This program needs access to the screen.
@@ -1902,8 +1905,6 @@ class DEVSimPyApp(wx.App):
 		the main frame when it is time to do so.
 		"""
 
-		#wx.InitAllImageHandlers()
-
 		# Set up the exception handler...
 		sys.excepthook = ExceptionHook
 
@@ -1916,13 +1917,19 @@ class DEVSimPyApp(wx.App):
 #-------------------------------------------------------------------
 if __name__ == '__main__':
 
+	import gettext
+	_ = gettext.gettext
+
 	### python devsimpy.py -c|-clean in order to delete the config file
-	if len(sys.argv) >= 2 and sys.argv[1] in ('-c, -clean'):
-		config_file = os.path.join(GetUserConfigDir(),'.devsimpy')
-		r = raw_input('Are you sure to delete DEVSimPy config file ? (Y,N):')
-		if r in ('Y','y','yes','Yes' ):
-			os.remove(config_file)
-			sys.stdout.write('%s has been deleted !\n'%config_file)
+	if len(sys.argv) >= 2 and sys.argv[1] in ('-c', '-clean'):
+		config_file1 = os.path.join(GetUserConfigDir(), '.devsimpy')
+		config_file2 = os.path.join(GetUserConfigDir(), 'devsimpy.ini')
+		r = raw_input(_('Are you sure to delete DEVSimPy config files (.devsimpy and devsimpy.ini)? (Yes,No):'))
+		if r in ('Y', 'y', 'yes', 'Yes', 'YES'):
+			os.remove(config_file1)
+			sys.stdout.write(_('%s has been deleted!\n')%config_file1)
+			os.remove(config_file2)
+			sys.stdout.write(_('%s has been deleted!\n')%config_file2)
 
 		elif r in ('N','n','no', 'No'):
 			pass
@@ -1936,27 +1943,28 @@ if __name__ == '__main__':
 
 		compileall.compile_dir('.', maxlevels=20, rx=re.compile(r'/\.svn'))
 		###########################################
-		sys.stdout.write('all pyc has been deleted !\n')
+		sys.stdout.write(_('All .pyc has been updated!\n'))
 
 	### python devsimpy.py -d|-debug in order to define log file
 	elif len(sys.argv) >= 2 and sys.argv[1] in ('-d, -debug'):
-		LOG_FILE='log.txt'
-		sys.stdout.write('Writing %s file. \n'%LOG_FILE)
+		log_file = 'log.txt'
+		sys.stdout.write(_('Writing %s file.\n')%log_file)
+
 	### python devsimpy.py -h|-help in order to invoke command hepler
 	elif len(sys.argv) >= 2 and sys.argv[1] in ('-h, -help'):
-		sys.stdout.write('Welcome to the DEVsimpy helper. \n')
-		sys.stdout.write('\t To execute DEVSimPy GUI: python devsimpy.py \n')
-		sys.stdout.write('\t To execute DEVSimPy cleaner: python devsimpy.py -c|-clean\n')
-		sys.stdout.write('\t To execute DEVSimPy writing log.txt file: python devsimpy.py -d|-debug\n')
-		sys.stdout.write('\t To execute DEVSimPy in no GUI mode: python devsimpy.py -ng|-nogui\n')
-		sys.stdout.write('Authors: L. capocchi (capocchi@univ-corse.fr)\n')
+		sys.stdout.write(_('Welcome to the DEVsimpy helper.\n'))
+		sys.stdout.write(_('\t To execute DEVSimPy GUI: python devsimpy.py\n'))
+		sys.stdout.write(_('\t To execute DEVSimPy cleaner: python devsimpy.py -c|-clean\n'))
+		sys.stdout.write(_('\t To execute DEVSimPy writing log.txt file: python devsimpy.py -d|-debug\n'))
+		sys.stdout.write(_('\t To execute DEVSimPy in no GUI mode: python devsimpy.py -ng|-nogui\n'))
+		sys.stdout.write(_('Authors: L. Capocchi (capocchi@univ-corse.fr)\n'))
 		sys.exit()
+
 	### python devsimpy.py -ng|-nogui yourfile.dsp -> devsimpy in batch mode
 	elif not __builtin__.__dict__['GUI_FLAG']:
 
-		if sys.argv[1] == '-ng' or sys.argv[1] == '-nogui':
+		if sys.argv[1] in ('-ng','-nogui'):
 			if len(sys.argv) == 3:
-
 				### check dsp filename
 				filename = sys.argv[2]
 				if not os.path.exists(filename):
@@ -1967,7 +1975,6 @@ if __name__ == '__main__':
 				makeSimulation(filename, time = 10.0)
 
 			elif len(sys.argv) == 4:
-
 				### check dsp filename
 				filename = sys.argv[2]
 				if not os.path.exists(filename):
@@ -1990,7 +1997,7 @@ if __name__ == '__main__':
 				sys.stdout.write(_('USAGE: python devsimpy.py [-ng|-nogui] yourfile.dsp [time=10.0|[inf|ntl]]\n'))
 				sys.exit()
 
-		elif sys.argv[1] == '-js' or sys.argv[1] == '-javascript':
+		elif sys.argv[1] in ('-js','-javascript'):
 			if len(sys.argv) == 3:
 
 				### check dsp filename
@@ -2007,6 +2014,7 @@ if __name__ == '__main__':
 				sys.exit()
 	else:
 		pass
+
 	## si redirect=True et filename=None alors redirection dans une fenetre
 	## si redirect=True et filename="fichier" alors redirection dans un fichier
 	## si redirect=False redirection dans la console

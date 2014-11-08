@@ -507,7 +507,8 @@ def terminate_never(model, clock):
 
 
 class SimStrategy4(SimStrategy):
-    """ Original strategy for PyPDEVS simulation
+    """ classic strategy for PyPDEVS simulation
+        setClassicDEVS is True and confTransition in disabled
     """
 
     def __init__(self, simulator = None):
@@ -535,9 +536,9 @@ class SimStrategy4(SimStrategy):
 
             ### TODO
         	if self._simulator.ntl:
-        		kwargs['termination_condition']=terminate_never
+        		kwargs['termination_condition'] = terminate_never
         	else:
-        		kwargs['termination_time']=T
+        		kwargs['termination_time'] = T
 
         	S.simulate(**kwargs)
 
@@ -563,7 +564,21 @@ class SimStrategy4(SimStrategy):
             else:
                 S.setTerminationTime(T)
 
-            S.setClassicDEVS()
+            S.setClassicDEVS(self.SetClassicDEVSOption())
             S.simulate()
 
     	self._simulator.terminate()
+
+    def SetClassicDEVSOption(self):
+        return True
+
+class SimStrategy6(SimStrategy4):
+    """ Parallel strategy for PyPDEVS simulation
+        setClassicDEVS is False and confTransition in enabled
+    """
+
+    def __init__(self, simulator = None):
+        SimStrategy4.__init__(self, simulator)
+
+    def SetClassicDEVSOption(self):
+        return False

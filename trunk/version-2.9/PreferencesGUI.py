@@ -10,6 +10,7 @@ import inspect
 import wxversion
 import ConfigParser
 import copy
+import zipfile
 
 import wx.lib.filebrowsebutton as filebrowse
 
@@ -378,7 +379,6 @@ class SimulationPanel(wx.Panel):
 		### update cb below cb3
 		self.cb4.Clear()
 		if val == 'PyDEVS':
-
 			for k in PYDEVS_SIM_STRATEGY_DICT:
 				self.cb4.Append(k)
 			self.cb4.SetValue('bag-based')
@@ -386,7 +386,7 @@ class SimulationPanel(wx.Panel):
 			### PyPDEVS
 			for k in PYPDEVS_SIM_STRATEGY_DICT:
 				self.cb4.Append(k)
-			self.cb4.SetValue('original')
+			self.cb4.SetValue('classic')
 
 		### update default value for devs dir et sim strategy
 		self.default_devs_dir = val
@@ -412,7 +412,12 @@ class SimulationPanel(wx.Panel):
 			for m in sys.modules:
 				clsmembers = inspect.getmembers(sys.modules[m], inspect.isclass)
 				if clsmembers != [] and clsmembers[0][0] == 'DomainBehavior':
-					ReloadModule.recompile(m)
+					module_path = os.path.dirname(sys.modules[m].__file__)
+					### if m come from amd or cmd, pass path to recompile method to differentiate
+					if zipfile.is_zipfile(module_path):
+						ReloadModule.recompile(module_path)
+					else:
+						ReloadModule.recompile(m)
 
 			ReloadModule.recompile("DomainInterface.DomainStructure")
 			ReloadModule.recompile("DomainInterface.MasterModel")
