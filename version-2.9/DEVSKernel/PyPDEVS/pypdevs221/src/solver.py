@@ -176,7 +176,7 @@ class Solver(object):
                     self.tracers.tracesExternal(aDEVS)
                 elif ttype == 3:
                     self.tracers.tracesConfluent(aDEVS)
-      
+
             # Clear the bag
             aDEVS.myInput = {}
         self.server.flushQueuedMessages()
@@ -252,7 +252,7 @@ class Solver(object):
         # We have now generated the transitioning variable, though we need some small magic to have it work for classic DEVS
         self.transitioning = {ClassicDEVSWrapper(m): self.transitioning[m] for m in self.transitioning}
         return reschedule
-    
+
     def coupledOutputGeneration(self, time):
         """
         CoupledDEVS function to generate the output, calls the atomicDEVS models where necessary. Output is routed too.

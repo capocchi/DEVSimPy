@@ -526,7 +526,7 @@ class DEVSComponent:
 			dlg.ShowModal()
 
 		else:
-			dial = wx.MessageDialog(parent, _("Log is empty. If you want to debug, please use the debugger method."), label, wx.OK|wx.ICON_INFORMATION)
+			dial = wx.MessageDialog(parent, _("Log is empty.\nIf you want to debug, please use the debugger method."), label, wx.OK|wx.ICON_INFORMATION)
 			dial.ShowModal()
 
 	def updateDEVSPriorityList(self):

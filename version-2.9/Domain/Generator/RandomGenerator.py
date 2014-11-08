@@ -42,15 +42,13 @@ class RandomGenerator(DomainBehavior):
             self.msg.value = [value, 0.0, 0.0]
             self.msg.time = self.timeNext
             ### adapted with PyPDEVS
-            if hasattr(self, 'poke'):
-                self.poke(port, self.msg)
-            else:
-                return {port:self.msg}
+            return self.poke(port, self.msg)
 
     def intTransition(self):
         """ DEVS Transition function
         """
         self.state['sigma'] = random.randint(self.minStep, self.maxStep)
+        ### adapted with PyPDEVS
         return self.state
 
     def __str__(self):

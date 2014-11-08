@@ -854,6 +854,9 @@ class ShapePopupMenu(wx.Menu):
 					### if Wcomp general plugin is enabled, sub menu appear in contextual menu of amd (right clic)
 					pluginmanager.trigger_event("ADD_WCOMP_STRATEGY_MENU", parent=self, model=shape)
 
+				### if state trajectory general plugin is enabled, sub menu appear in contextual menu (right clic)
+				pluginmanager.trigger_event("ADD_STATE_TRAJECTORY_MENU", parent=self, model=shape)
+
 			self.AppendSeparator()
 			Properties_menu = self.AppendItem(properties)
 

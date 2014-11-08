@@ -29,7 +29,7 @@ class MessagesCollector(DomainBehavior):
 		
 			@param fileName : name of output fileName
 			@param ext : output file extension
-			@param comma: comma separated
+			@param comma : comma separated
 		"""
 		DomainBehavior.__init__(self)
 		

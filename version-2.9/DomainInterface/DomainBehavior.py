@@ -66,6 +66,9 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 			BaseDEVS.AtomicDEVS.poke(self, p, v)
 		### PyPDEVS
 		else:
+			from Object import Message
+			if isinstance(v, Message):
+				v = v.value
 			return {p:v}
 
 #	def peek(self, p):
