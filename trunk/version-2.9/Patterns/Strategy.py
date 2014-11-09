@@ -565,6 +565,8 @@ class SimStrategy4(SimStrategy):
                 S.setTerminationTime(T)
 
             S.setClassicDEVS(self.SetClassicDEVSOption())
+
+            #S.setRealTime()
             S.simulate()
 
     	self._simulator.terminate()
