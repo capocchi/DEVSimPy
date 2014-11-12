@@ -16,7 +16,7 @@ class DiagramConstantsDialog(wx.Dialog):
 		""" Constructor
 		"""
 
-		wx.Dialog.__init__(self, parent, id, title, wx.DefaultPosition, (400, 280), style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
+		wx.Dialog.__init__(self, parent, id, title, wx.DefaultPosition, (400, 380), style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
 
 		### local copy
 		self.model = model
@@ -40,7 +40,8 @@ class DiagramConstantsDialog(wx.Dialog):
 		self._grid.SetColLabelValue(1, _("Value"))
 		self._grid.SetColSize(1, 100)
 		### The label windows will still exist, but they will not be visible.
-		self._grid.SetRowLabelSize(0)
+
+		print dir(self._grid)
 
 		# constants loading
 		D = self.model.constants_dico if self.model else {}
@@ -116,9 +117,10 @@ class DiagramConstantsDialog(wx.Dialog):
 		"""
 		self._grid.AppendRows()
 
-	def OnRemove(self,evt):
+	def OnRemove(self, evt):
 		"""	Delete selected lines
 		"""
+
 		for row in self._grid.GetSelectedRows():
 			self._grid.DeleteRows(row)
 

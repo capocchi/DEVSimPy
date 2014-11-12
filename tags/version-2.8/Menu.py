@@ -27,6 +27,7 @@ from tempfile import gettempdir
 
 import Container
 import ZipManager
+import pluginmanager
 
 #File menu identifiers
 ID_NEW = wx.ID_NEW
@@ -94,9 +95,16 @@ ID_RENAME_SHAPE = wx.NewId()
 ID_COPY_SHAPE = wx.ID_COPY
 ID_PASTE_SHAPE = wx.ID_PASTE
 ID_CUT_SHAPE = wx.ID_CUT
+ID_ROTATE_ALL_SHAPE = wx.NewId()
+ID_ROTATE_INPUT_SHAPE = wx.NewId()
+ID_ROTATE_OUTPUT_SHAPE = wx.NewId()
 ID_ROTATE_SHAPE = wx.NewId()
 ID_RIGHT_ROTATE_SHAPE = wx.NewId()
 ID_LEFT_ROTATE_SHAPE = wx.NewId()
+ID_RIGHT_ROTATE_INPUT_SHAPE = wx.NewId()
+ID_LEFT_ROTATE_INPUT_SHAPE = wx.NewId()
+ID_RIGHT_ROTATE_OUTPUT_SHAPE = wx.NewId()
+ID_LEFT_ROTATE_OUTPUT_SHAPE = wx.NewId()
 ID_DELETE_SHAPE = wx.ID_DELETE
 ID_LOCK_SHAPE = wx.NewId()
 ID_UNLOCK_SHAPE = wx.NewId()
@@ -692,6 +700,10 @@ class ShapePopupMenu(wx.Menu):
 		self.__canvas = event.GetEventObject()
 
 		rotate_subMenu = wx.Menu()
+		rotate_all_subMenu = wx.Menu()
+		rotate_input_subMenu = wx.Menu()
+		rotate_output_subMenu = wx.Menu()
+
 		export_subMenu = wx.Menu()
 		connectable_subMenu = wx.Menu()
 		edit_subMenu = wx.Menu()
@@ -703,8 +715,15 @@ class ShapePopupMenu(wx.Menu):
 		copy=wx.MenuItem(self, ID_COPY_SHAPE, _("&Copy\tCtrl+C"), _("Copy the model"))
 		paste=wx.MenuItem(self, ID_PASTE_SHAPE, _("&Paste\tCtrl+V"), _("Paste the model"))
 		cut=wx.MenuItem(self, ID_CUT_SHAPE, _("&Cut\tCtrl+X"), _("Cut the model"))
+		rotateAll=wx.MenuItem(self, ID_ROTATE_ALL_SHAPE, _("&All"), _("Rotate all ports"))
+		rotateInput=wx.MenuItem(self, ID_ROTATE_INPUT_SHAPE, _("&Input ports"), _("Rotate input ports"))
+		rotateOutput=wx.MenuItem(self, ID_ROTATE_OUTPUT_SHAPE, _("&Output ports"), _("Rotate output ports"))
 		rotateR=wx.MenuItem(self, ID_RIGHT_ROTATE_SHAPE, _("&Right Rotate\tCtrl+R"), _("Rotate on the right"))
 		rotateL=wx.MenuItem(self, ID_LEFT_ROTATE_SHAPE, _("&Left Rotate\tCtrl+L"), _("Rotate on the left"))
+		rotateIR=wx.MenuItem(self, ID_RIGHT_ROTATE_INPUT_SHAPE, _("&Right Rotate\tCtrl+R"), _("Rotate on the right"))
+		rotateIL=wx.MenuItem(self, ID_LEFT_ROTATE_INPUT_SHAPE, _("&Left Rotate\tCtrl+L"), _("Rotate on the left"))
+		rotateOR=wx.MenuItem(self, ID_RIGHT_ROTATE_OUTPUT_SHAPE, _("&Right Rotate\tCtrl+R"), _("Rotate on the right"))
+		rotateOL=wx.MenuItem(self, ID_LEFT_ROTATE_OUTPUT_SHAPE, _("&Left Rotate\tCtrl+L"), _("Rotate on the left"))
 		delete=wx.MenuItem(self, ID_DELETE_SHAPE, _("Delete"), _("Delete the model"))
 		lock=wx.MenuItem(self, ID_LOCK_SHAPE, _("Lock"), _("Lock the link"))
 		unlock=wx.MenuItem(self, ID_UNLOCK_SHAPE, _("Unlock"), _("Unlock the link"))
@@ -713,7 +732,7 @@ class ShapePopupMenu(wx.Menu):
 		exportCMD=wx.MenuItem(self, ID_EXPORT_CMD_SHAPE, _("CMD"), _("Model exported to a cmd file"))
 		exportXML=wx.MenuItem(self, ID_EXPORT_XML_SHAPE, _("XML"), _("Model exported to a xml file"))
 		exportJS=wx.MenuItem(self, ID_EXPORT_JS_SHAPE, _("JS"), _("Model exported to a js (join) file"))
-		plugin = wx.MenuItem(self, ID_PLUGINS_SHAPE, _("Plugin"), _("Plugin manager"))
+		plugin = wx.MenuItem(self, ID_PLUGINS_SHAPE, _("Plug-in"), _("Plug-in manager"))
 		properties=wx.MenuItem(self, ID_PROPERTIES_SHAPE, _("Properties"), _("Edit the attributes"))
 
 		edit.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -725,6 +744,10 @@ class ShapePopupMenu(wx.Menu):
 		cut.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'cut.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		rotateL.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rotateL.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		rotateR.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rotateR.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		rotateIL.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rotateL.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		rotateIR.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rotateR.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		rotateOL.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rotateL.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		rotateOR.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rotateR.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		export.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'export.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		delete.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'delete.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		lock.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'lock.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -768,14 +791,30 @@ class ShapePopupMenu(wx.Menu):
 			Cut_menu=self.AppendItem(cut)
 			Lock_item = self.AppendItem(lock)
 			UnLock_item = self.AppendItem(unlock)
-			Rotate_SubMenu1 = rotate_subMenu.AppendItem(rotateR)
-			Rotate_SubMenu2 = rotate_subMenu.AppendItem(rotateL)
+
+			### for port, just right of left rotation
+			if isinstance(shape, Container.Port):
+				Rotate_SubMenu1 = rotate_subMenu.AppendItem(rotateR)
+				Rotate_SubMenu2 = rotate_subMenu.AppendItem(rotateL)
+			else:
+
+				Rotate_SubMenu11 = rotate_all_subMenu.AppendItem(rotateR)
+				Rotate_SubMenu12 = rotate_all_subMenu.AppendItem(rotateL)
+				Rotate_SubMenu21 = rotate_input_subMenu.AppendItem(rotateIR)
+				Rotate_SubMenu22 = rotate_input_subMenu.AppendItem(rotateIL)
+				Rotate_SubMenu31 = rotate_output_subMenu.AppendItem(rotateOR)
+				Rotate_SubMenu32 = rotate_output_subMenu.AppendItem(rotateOL)
+
+				Rotate_all_menu = rotate_subMenu.AppendMenu(ID_ROTATE_ALL_SHAPE, _("All"), rotate_all_subMenu)
+				Rotate_in_menu = rotate_subMenu.AppendMenu(ID_ROTATE_INPUT_SHAPE, _("Input"), rotate_input_subMenu)
+				Rotate_out_menu = rotate_subMenu.AppendMenu(ID_ROTATE_OUTPUT_SHAPE, _("Output"), rotate_output_subMenu)
+
 			Rotate_menu = self.AppendMenu(ID_ROTATE_SHAPE, _("Rotate"), rotate_subMenu)
 
 			self.AppendSeparator()
 			# pour tout les model sur le canvas ormis les connection et le model que l'on veut connecter (la source)
 			for i, item in enumerate(filter(lambda a: a != shape and not isinstance(a, Container.ConnectionShape), self.__canvas.GetDiagram().GetShapeList())):
-				# on evite de proposer les connections suivantes: iPort->iPort, oPort->oPort
+				# on evite de proposer les connections suivante: iPort->iPort, oPort->oPort
 				if (isinstance(shape, Container.iPort) and not isinstance(item, Container.iPort)) or (isinstance(shape, Container.oPort) and not isinstance(item, Container.oPort)) or isinstance(shape, Container.Block):
 					new_item = wx.MenuItem(connectable_subMenu, wx.NewId(), item.label)
 					connectable_subMenu.AppendItem(new_item)
@@ -784,13 +823,15 @@ class ShapePopupMenu(wx.Menu):
 
 			if isinstance(shape, Container.CodeBlock):
 				self.AppendSeparator()
-				#Export_menu = self.AppendItem(export)
-				Export_menu=self.AppendMenu(-1,_("Export"),export_subMenu)
+				Export_menu = self.AppendMenu(-1, _("Export"), export_subMenu)
 				Export_SubMenu1 = export_subMenu.AppendItem(exportAMD)
+
+				### if Wcomp general plugin is enabled, sub menu appear in contextual menu of amd (right clic)
+				pluginmanager.trigger_event("ADD_WCOMP_EXPORT_MENU", parent=self, model=shape, submenu= export_subMenu)
 
 			elif isinstance(shape, Container.ContainerBlock):
 				self.AppendSeparator()
-				Export_menu=self.AppendMenu(-1,_("Export"),export_subMenu)
+				Export_menu = self.AppendMenu(-1, _("Export"), export_subMenu)
 				Export_SubMenu1 = export_subMenu.AppendItem(exportCMD)
 				Export_SubMenu2 = export_subMenu.AppendItem(exportXML)
 				Export_SubMenu3 = export_subMenu.AppendItem(exportJS)
@@ -810,6 +851,12 @@ class ShapePopupMenu(wx.Menu):
 					Plugin_menu = self.AppendItem(plugin)
 					self.__canvas.Bind(wx.EVT_MENU, shape.OnPluginsManager, id=ID_PLUGINS_SHAPE)
 
+					### if Wcomp general plugin is enabled, sub menu appear in contextual menu of amd (right clic)
+					pluginmanager.trigger_event("ADD_WCOMP_STRATEGY_MENU", parent=self, model=shape)
+
+				### if state trajectory general plugin is enabled, sub menu appear in contextual menu (right clic)
+				pluginmanager.trigger_event("ADD_STATE_TRAJECTORY_MENU", parent=self, model=shape)
+
 			self.AppendSeparator()
 			Properties_menu = self.AppendItem(properties)
 
@@ -817,6 +864,12 @@ class ShapePopupMenu(wx.Menu):
 			self.Enable(ID_LOG_SHAPE, shape.getDEVSModel() is not None)
 
 			# binding events
+			if not isinstance(shape, Container.Port):
+				self.__canvas.Bind(wx.EVT_MENU, shape.OnRotateInputR, id=ID_RIGHT_ROTATE_INPUT_SHAPE)
+				self.__canvas.Bind(wx.EVT_MENU, shape.OnRotateInputL, id=ID_LEFT_ROTATE_INPUT_SHAPE)
+				self.__canvas.Bind(wx.EVT_MENU, shape.OnRotateOutputR, id=ID_RIGHT_ROTATE_OUTPUT_SHAPE)
+				self.__canvas.Bind(wx.EVT_MENU, shape.OnRotateOutputL, id=ID_LEFT_ROTATE_OUTPUT_SHAPE)
+
 			self.__canvas.Bind(wx.EVT_MENU, shape.OnRotateR, id=ID_RIGHT_ROTATE_SHAPE)
 			self.__canvas.Bind(wx.EVT_MENU, shape.OnRotateL, id=ID_LEFT_ROTATE_SHAPE)
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnDelete, id=ID_DELETE_SHAPE)

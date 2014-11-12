@@ -24,8 +24,8 @@ from __future__ import with_statement
 
 import wx
 import wx.lib.dragscroller
-import  wx.lib.imagebrowser as ib
-import  wx.lib.dialogs
+#import wx.lib.imagebrowser as ib
+import wx.lib.dialogs
 
 if wx.VERSION_STRING < '2.9':
 	from wx.lib.pubsub import Publisher
@@ -94,7 +94,7 @@ from Mixins.Selectable import Selectable
 sys.modules['Savable'] = sys.modules['Mixins.Savable']
 
 from Decorators import BuzyCursorNotification, StatusBarNotification, ProgressNotification, Pre_Undo, Post_Undo, cond_decorator
-from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance
+from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance, FixedList
 from Patterns.Observer import Subject, Observer
 from DetachedFrame import DetachedFrame
 from AttributeEditor import AttributeEditor, QuickAttributeEditor
@@ -239,24 +239,6 @@ def CheckClass(m):
 ################################################################
 
 #-------------------------------------------------------------------------------
-class FixedList(list):
-	""" List with fixed size (for undo/redo)
-	"""
-
-	def __init__(self, size = 5):
-		list.__init__(self)
-		self.__size =  size
-
-	def GetSize(self):
-		return self.__size
-
-	def append(self, v):
-		if len(self) == self.GetSize():
-			del self[0]
-
-		self.insert(len(self),v)
-
-#-------------------------------------------------------------------------------
 class Diagram(Savable, Structurable):
 	""" Diagram class.
 	"""
@@ -359,19 +341,21 @@ class Diagram(Savable, Structurable):
 				1. we make the codeblock devs instance
 				2. we make the devs port instance for all devsimpy port
 				3. we make Containerblock instance
-				4. we make the connnection
+				4. we make the connection
 		"""
 
 		#ReloadModule.recompile("DomainInterface.DomainBehavior")
 		#ReloadModule.recompile("DomainInterface.DomainStructure")
+		#ReloadModule.recompile("DomainInterface.MasterModel")
 
-		### if devs instance of diagram is not instancied, we make it
-		### else one simulation has been perfromed then we clear all devs port instances
-		if diagram.getDEVSModel() is None:
-			#ReloadModule.recompile("DomainInterface.MasterModel")
-			diagram.setDEVSModel(DomainInterface.MasterModel.Master())
-		else:
-			diagram.ClearAllPorts()
+		diagram.setDEVSModel(DomainInterface.MasterModel.Master())
+
+		### if devs instance of diagram is not instantiated, we make it
+		### else one simulation has been performed then we clear all devs port instances
+		#if diagram.getDEVSModel() is None:
+		#	diagram.setDEVSModel(DomainInterface.MasterModel.Master())
+		#else:
+		#	diagram.ClearAllPorts()
 
 		### shape list of diagram
 		shape_list = diagram.GetShapeList()
@@ -379,17 +363,19 @@ class Diagram(Savable, Structurable):
 
 		### for all codeBlock shape, we make the devs instance
 		for m in block_list:
-			# creation des ports DEVS et des couplages pour la simulation
 
+			### class object from python file
 			cls = Components.GetClass(m.python_path)
 
+			### Class is wrong ?
 			if isinstance(cls, (ImportError, tuple)):
-				return _('Error making DEVS instances.\n %s'%(str(cls)))
+				print _('Error making DEVS instances for:\n%s'%(str(cls)))
+				return False
 			else:
-				### recuperation du model DEVS
+				### DEVS model recovery
 				devs = getInstance(cls, m.args)
 
-				### test if the instanciation is safe
+				### Is safe instantiation ?
 				if isinstance(devs, tuple):
 					return devs
 
@@ -406,6 +392,10 @@ class Diagram(Savable, Structurable):
 			m.setDEVSModel(devs)
 
 			m.setDEVSParent(diagram.getDEVSModel())
+
+			### allow to escape the check of the simulation running in PyPDEVS (src/DEVS.py line 565)
+			if hasattr(devs.parent, "fullName"):
+					del devs.parent.fullName
 
 			### adding
 			diagram.addSubModel(devs)
@@ -438,7 +428,8 @@ class Diagram(Savable, Structurable):
 				p1 = diagram.getDEVSModel().IPorts[m1.id]
 				p2 = m2.getDEVSModel().IPorts[n2]
 			else:
-				return  _('Error making DEVS connection.\n Check your connections !')
+				print _("Error making DEVS connection between %s and %s."%(m1,m2))
+				return False
 
 			Structurable.ConnectDEVSPorts(diagram, p1, p2)
 
@@ -534,7 +525,7 @@ class Diagram(Savable, Structurable):
 		msg += _("Number of coupling: %d\n")%stat_dico['Connection_nbr']
 		msg += _("Number of deep level (description hierarchy): %d\n")%stat_dico['Deep_level']
 
-		dlg = wx.lib.dialogs.ScrolledMessageDialog(self.GetParent(), msg, _("Diagram Information"))
+		dlg = wx.lib.dialogs.ScrolledMessageDialog(self.GetParent(), msg, _("Diagram Information"), style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 		dlg.ShowModal()
 
 	def OnClosePriorityGUI(self, event):
@@ -547,7 +538,6 @@ class Diagram(Savable, Structurable):
 
 		### we can update the devs priority list during the simulation ;-)
 		self.updateDEVSPriorityList()
-
 
 	def OnAddConstants(self, event):
 		""" Method that add constant parameters in order to simplify the modling codeBlock model
@@ -568,6 +558,10 @@ class Diagram(Savable, Structurable):
 
 		### event come from Main application by the Diagram menu
 		else:
+
+			### needed for window
+			if not win: win = obj.GetWindow()
+
 			nb2 = win.GetDiagramNotebook()
 			title = nb2.GetPageText(nb2.GetSelection())
 
@@ -609,7 +603,7 @@ class Diagram(Savable, Structurable):
 		if self.GetCount() != 0:
 
 			obj = event.GetEventObject()
-			win = obj.GetTopLevelParent()
+			win = obj.GetTopLevelParent() if isinstance(obj, wx.ToolBar) else obj.GetWindow()
 
 			D = self.DoCheck()
             ### if there is no error
@@ -638,19 +632,21 @@ class Diagram(Savable, Structurable):
 
 			## window that contain the diagram which will be simulate
 			win = wx.GetApp().GetTopWindow()
-
 			obj = event.GetEventObject()
-			#win = obj.GetWindow() if isinstance(obj, wx.Menu) else obj.GetTopLevelParent()
+
+#			obj = event.GetEventObject()
+#			win = obj.GetWindow() if isinstance(obj, wx.Menu) else obj.GetTopLevelParent()
 
 			# diagram which will be simulate
 			diagram = self
 
 			D = self.DoCheck()
+
 			### if there is no error in models
  			if D is not None:
 				playSound(SIMULATION_ERROR_SOUND_PATH)
 				dial = wx.MessageDialog(win, \
-									_("There is errors in some models.\n\nDo you want to execute the error manager?"), \
+									_("There is errors in some models.\n\nDo you want to execute the error manager ?"), \
 									_('Simulation Manager'), \
 									wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 				if dial.ShowModal() == wx.ID_YES:
@@ -681,14 +677,15 @@ class Diagram(Savable, Structurable):
 				## make DEVS instance from diagram
 				master = Diagram.makeDEVSInstance(diagram)
 
-				## test of filename model attribut
+				## test of filename model attribute
 				if all(model.bad_filename_path_flag for model in filter(lambda m: isinstance(m, Block), diagram.GetShapeList()) if hasattr(model, 'bad_filename_path_flag')):
 					dial = wx.MessageDialog(win, \
-										_("You dont make the simulation of the Master model.\nSome models have bad fileName path !"),\
+										_("You don't make the simulation of the Master model.\nSome models have bad fileName path !"),\
 										_('Simulation Manager'), \
 										wx.OK | wx.ICON_EXCLAMATION)
 					dial.ShowModal()
 					return False
+
 				else:
 
 #					pluginmanager.trigger_event('START_DIAGRAM', parent = win, diagram = diagram)
@@ -1527,11 +1524,11 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 				self.select(item)
 			event.Skip()
 		elif key == 82 and controlDown:  # Rotate model on the right
-			for s in filter(lambda shape: not isinstance(shape,ConnectionShape),self.selectedShapes):
+			for s in filter(lambda shape: not isinstance(shape, ConnectionShape), self.selectedShapes):
 				s.OnRotateR(event)
 			event.Skip()
 		elif key == 76 and controlDown:  # Rotate model on the left
-			for s in filter(lambda shape: not isinstance(shape,ConnectionShape),self.selectedShapes):
+			for s in filter(lambda shape: not isinstance(shape, ConnectionShape), self.selectedShapes):
 				s.OnRotateL(event)
 			event.Skip()
 		elif key == 9: # TAB
@@ -1555,9 +1552,13 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		self.Refresh()
 
 	def getWidth(self):
+		"""
+		"""
 		return self.GetSize()[0]
 
 	def getHeight(self):
+		"""
+		"""
 		return self.GetSize()[1]
 
 	def DoDrawing(self, dc):
@@ -1573,7 +1574,9 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 				sys.stderr.write(_("Draw error: %s \n")%info)
 
 	def OnEraseBackground(self, evt):
-		""" Handles the wx.EVT_ERASE_BACKGROUND event"""
+		"""
+			Handles the wx.EVT_ERASE_BACKGROUND event
+		"""
 
 		# This is intentionally empty, because we are using the combination
         # of wx.BufferedPaintDC + an empty OnEraseBackground event to
@@ -1616,12 +1619,16 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 	@Post_Undo
 	def OnLock(self, event):
+		"""
+		"""
 		for s in self.getSelectedShapes():
 			if hasattr(s,'lock'):
 				s.lock()
 
 	@Post_Undo
 	def OnUnLock(self, event):
+		"""
+		"""
 		for s in self.getSelectedShapes():
 			if hasattr(s,'unlock'):
 				s.unlock()
@@ -1744,7 +1751,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 			self.DiagramModified()
 
 	def OnDisconnect(self, event):
-		"""     Disconnect selected ports from connectDialog
+		""" Disconnect selected ports from connectDialog
 		"""
 
 		# dialog results
@@ -1880,7 +1887,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		for s in self.select():
 			s.OnLog(event)
 
-	def On(self, event):
+	def OnEditor(self, event):
 		""" Edition sub menu has been clicked. Event is transmit to the model
 		"""
 
@@ -1893,8 +1900,18 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		""" New model menu has been pressed. Wizard is instanciate.
 		"""
 
-		# Create wizard and run
-		gmwiz = WizardGUI.ModelGeneratorWizard(title = _('DEVSimPy Model Generator'), parent = parent, img_filename=os.path.join('bitmaps', DEVSIMPY_PNG))
+		### arguments of ModelGeneratorWizard when right clic appears in canvas
+		kargs = {'title' : _('DEVSimPy Model Generator'),
+					'parent' : parent,
+					'img_filename' : os.path.join('bitmaps', DEVSIMPY_PNG)}
+
+		### right clic appears in a library
+		if not isinstance(parent, ShapeCanvas):
+			### Get path of the selected lib in order to change the last step of wizard
+			sdp = parent.GetItemPyData(parent.GetFocusedItem())
+			kargs['specific_domain_path']=sdp
+
+		gmwiz = WizardGUI.ModelGeneratorWizard(**kargs)
 		gmwiz.run()
 
 		### just for Mac
@@ -1911,10 +1928,18 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		xwindow, ywindow = wx.GetMousePosition()
 		x,y = self.ScreenToClientXY(xwindow, ywindow)
 
-		gmwiz = ShapeCanvas.StartWizard(self)
+		obj = event.GetEventObject()
+
+		### if right clic on canvas
+		if isinstance(obj, Menu.ShapeCanvasPopupMenu):
+			parent = self
+		else:
+			parent = wx.GetApp().GetTopWindow().GetControlNotebook().GetTree()
+
+		gmwiz = ShapeCanvas.StartWizard(parent)
 
 		# if wizard is finished witout closing
-		if  gmwiz is not None:
+		if  gmwiz :
 			m = Components.BlockFactory.CreateBlock(      canvas = self,
 												x = x,
 												y = y,
@@ -1998,16 +2023,28 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		"""     Delete menu has been clicked. Delete all selected shape.
 		"""
 
-		for s in self.select():
-   			name = _("Connexion") if isinstance(s, ConnectionShape) else s.label
-			msg = _("Do you really want to delete %s model?")%(name)
+		if len(self.select()) > 1:
+			msg = _("Do you really want to delete all selected models?")
  			dlg = wx.MessageDialog(self, msg,
 			 						_("Delete Manager"),
 									wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
 			if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:
-				self.diagram.DeleteShape(s)
+				for s in self.select():
+					self.diagram.DeleteShape(s)
 			dlg.Destroy()
+
+		else:
+			for s in self.select():
+	   			name = _("Connexion") if isinstance(s, ConnectionShape) else s.label
+				msg = _("Do you really want to delete %s model?")%(name)
+	 			dlg = wx.MessageDialog(self, msg,
+				 						_("Delete Manager"),
+										wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+
+				if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:
+					self.diagram.DeleteShape(s)
+				dlg.Destroy()
 
 		self.DiagramModified()
 		self.deselect()
@@ -2048,6 +2085,8 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 				wx.MessageBox(_("An error is occured during plugins importation.\nCheck plugins module."))
 
 	def Undo(self):
+		"""
+		"""
 
 		mainW = self.GetTopLevelParent()
 
@@ -2055,12 +2094,12 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		### if parent is not none, the dumps dont work because parent is copy of a class
 		try:
 			t = cPickle.loads(self.stockUndo[-1])
+
 			### we add new undo of diagram has been modified or one of the shape in diagram sotried in stockUndo has been modified.
-			if t.__dict__ != self.diagram.__dict__\
-				or any(objA.__dict__ != objB.__dict__ for objA in self.diagram.GetShapeList() for objB in t.GetShapeList()):
+			if any(objA.__dict__ != objB.__dict__ for objA in self.diagram.GetShapeList() for objB in t.GetShapeList()):
 				self.stockUndo.append(cPickle.dumps(obj=self.diagram, protocol=0))
 		except IndexError:
-			### this is the first call of Undo and StockUnso is emplty
+			### this is the first call of Undo and StockUndo is emplty
 			self.stockUndo.append(cPickle.dumps(obj=self.diagram, protocol=0))
 		except TypeError, error:
 			sys.stdout.write(_("Error trying to undo: %s \n"%error))
@@ -2120,10 +2159,10 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 					s.OnLeftDown(event) # send leftdown event to current shape
 
 		### Update the nb1 panel properties only for Block and Port (call update in ControlNotebook)
-		#if isinstance(item, Attributable):
-		self.__state['model'] = item
-		self.__state['canvas'] = self
-		self.notify()
+		if isinstance(item, Attributable):
+			self.__state['model'] = item
+			self.__state['canvas'] = self
+			self.notify()
 
 		self.Refresh()
 
@@ -2249,13 +2288,19 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		self.Refresh()
 
 	def OnTimer(self, event):
+		"""
+		"""
 		if self.f:
 			self.f.Show()
 
 	def OnMouseEnter(self, event):
+		"""
+		"""
 		self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
 
 	def OnMouseLeave(self, event):
+		"""
+		"""
 		pass
 		#self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
 
@@ -2670,10 +2715,8 @@ class LinesShape(Shape):
 
 		return False
 
-
-
 	def OnLeftDClick(self, event):
-		"""
+		""" Left click has been invoked.
 		"""
 
 		### canvas containing LinesShape
@@ -2685,14 +2728,14 @@ class LinesShape(Shape):
 		self.AddPoint(canvas.getScalledCoordinates(x,y))
 
 	def HasPoint(self, point):
-		"""
+		""" Point is included in line ?
 		"""
 
 		x,y = point
 		return (x in self.x) and (y in self.y)
 
 	def AddPoint(self, point = (0,0)):
-		""" Add point under LineShape
+		""" Add point under LineShape.
 		"""
 		x,y = point
 
@@ -2767,10 +2810,7 @@ class Testable(object):
 
 	# NOTE: Testable :: isAMD 				=> Test if the model is an AMD and if it's well-formed
 	def isAMD(self):
-		cond = False
-		if zipfile.is_zipfile(os.path.dirname(self.python_path)):
-			cond = True
-		return cond
+		return zipfile.is_zipfile(os.path.dirname(self.python_path))
 
 	# NOTE: Testable :: CreateTestsFiles	=> AMD tests files creation
 	def CreateTestsFiles(self):
@@ -3293,6 +3333,8 @@ class CodeBlock(Block, Achievable):
 		python_path = state['python_path']
 		model_path = state['model_path']
 
+		new_class = None
+
 		dir_name = os.path.basename(DOMAIN_PATH)
 
 		#print "avant "
@@ -3333,7 +3375,10 @@ class CodeBlock(Block, Achievable):
 
 		### if the model path is empty and the python path is wrong
 		elif not os.path.exists(python_path):
-			### if DOMAIN is not in python_path
+
+			path = python_path
+
+			### if DOMAIN is in python_path
 			if dir_name in python_path:
 
 				### try to find in DOMAIN directory
@@ -3347,12 +3392,21 @@ class CodeBlock(Block, Achievable):
 						if lib_name in path:
 							path = p+path.split(lib_name)[-1]
 							break
+			else:
+				### try to find if python_path contains a directory wich is also in Domain
+				### subdirectories of Domain
+				subdirectories = os.listdir(DOMAIN_PATH)
+				### for all directories if the directory is in python_path (excluding the file .py (-1))
+				for dir in subdirectories:
+					if dir in python_path.split(os.sep)[0:-1]:
+						### yes, the python_path is wrong but we find that in the Domain there is a directory with the same name
+						a = python_path.split(dir+os.sep)
+						path = os.path.join(DOMAIN_PATH,dir,a[-1])
+						break
 
-				### if path is always wrong, flag is visible
-				if not os.path.exists(path):
-					state['bad_filename_path_flag'] = True
-				else:
-					state['python_path'] = path
+			### if path is always wrong, flag is visible
+			if os.path.exists(path):
+				state['python_path'] = path
 			else:
 				state['bad_filename_path_flag'] = True
 
@@ -3373,6 +3427,23 @@ class CodeBlock(Block, Achievable):
 							arg_values = inspect.getargspec(cls.__init__).defaults
 							index = args_from_stored_constructor_py.index(arg)
 							state['args'].update({arg:arg_values[index]})
+
+				### Class redefinition if the class inherite to QuickScope, To_Disk or MessagesCollector
+
+				### find all members that is class
+				clsmembers = inspect.getmembers(sys.modules[cls.__name__], inspect.isclass)
+				names = map(lambda t: t[0], clsmembers)
+
+				### if model inherite of ScopeGUI, it requires to redefine the class with the ScopeGUI class
+				if 'QuickScope' in names:
+					state['xlabel'] = ""
+					state['ylabel'] = ""
+					new_class = ScopeGUI
+				elif 'To_Disk' in names or 'MessagesCollector' in names:
+					new_class = DiskGUI
+				else:
+					new_class = None
+
 			else:
 				sys.stderr.write(_("Error in setstate for CodeBlock: %s\n"%str(cls)))
 
@@ -3407,12 +3478,12 @@ class CodeBlock(Block, Achievable):
 		if 'image_path' not in state:
 			state['image_path'] = ""
 			state['attributes'].insert(3,'image_path')
-		if 'font' not in state:
-			state['font'] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
-		if 'font' not in state['attributes']:
-			state['attributes'].insert(3,'font')
+		if 'font' not in state: state['font'] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
+		if 'font' not in state['attributes']: state['attributes'].insert(3,'font')
 		if 'selected' not in state: state['selected'] = False
 		if 'label_pos' not in state: state['label_pos'] = 'center'
+		if 'input_direction' not in state: state['input_direction'] = 'ouest'
+		if 'output_direction' not in state: state['output_direction'] = 'est'
 		##############################################
 
 		#print "apres "
@@ -3421,6 +3492,8 @@ class CodeBlock(Block, Achievable):
 		#print "\n"
 
 		self.__dict__.update(state)
+		if new_class:
+			self.__class__ = new_class
 
 	def __getstate__(self):
 		"""
@@ -3604,12 +3677,12 @@ class ContainerBlock(Block, Diagram, Structurable):
 		if 'image_path' not in state:
 			state['image_path'] = ""
 			state['attributes'].insert(3,'image_path')
-		if 'font' not in state:
-			state['font'] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
-		if 'font' not in state['attributes']:
-			state['attributes'].insert(3,'font')
+		if 'font' not in state: state['font'] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
+		if 'font' not in state['attributes']: state['attributes'].insert(3,'font')
 		if 'selected' not in state: state['selected'] = False
 		if 'label_pos' not in state:state['label_pos'] = 'center'
+		if 'input_direction' not in state: state['input_direction'] = 'ouest'
+		if 'output_direction' not in state: state['output_direction'] = 'est'
 		#####################################
 
 		#print "apres "
@@ -3791,13 +3864,13 @@ class INode(ConnectableNode):
 		### position of label
 		if not isinstance(self.item, Port):
 			### prepare label position
-			if self.item.direction == 'ouest':
+			if self.item.input_direction == 'ouest':
 				xl = x-30
 				yl = y
-			elif self.item.direction == 'est':
+			elif self.item.input_direction == 'est':
 				xl = x+2
 				yl = y
-			elif self.item.direction == 'nord':
+			elif self.item.input_direction == 'nord':
 				xl = x
 				yl = y-18
 			else:
@@ -3862,18 +3935,18 @@ class ONode(ConnectableNode):
 		### position of label
 		if not isinstance(self.item, Port):
 			### perapre label position
-			if self.item.direction == 'ouest':
+			if self.item.output_direction == 'est':
 				xl = x+2
 				yl = y
-			elif self.item.direction == 'est':
-				xl = x-30
+			elif self.item.output_direction == 'ouest':
+				xl = x-40
 				yl = y
-			elif self.item.direction == 'nord':
+			elif self.item.output_direction == 'nord':
 				xl = x
-				yl = y+2
+				yl = y-20
 			else:
 				xl = x
-				yl = y-18
+				yl = y-2
 
 			### Draw label above port
 			dc.DrawText(self.label, xl, yl)

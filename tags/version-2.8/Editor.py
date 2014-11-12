@@ -118,7 +118,7 @@ def GetEditor(parent, id, title="", obj=None, **kwargs):
 	@param: id
 	@param: title
 	@param: obj
-	@@param: file_type
+	@param: file_type
 	"""
 
 	if "file_type" in kwargs.keys():
@@ -132,9 +132,6 @@ def GetEditor(parent, id, title="", obj=None, **kwargs):
 			editor = GeneralEditor(parent, id, title)
 	else:
 		editor = GeneralEditor(parent, id, title)
-
-#	if not parent:
-#		editor.Reparent(wx.GetApp().GetTopWindow())
 
 	return editor
 
@@ -1162,6 +1159,29 @@ class Editor(wx.Frame, wx.Panel):
 		# notebook
 		self.read_only = False
 
+	def update(self, concret_subject=None):
+		""" Update method that manages the embedded editor depending of the selected model in the canvas
+		"""
+
+		state = concret_subject.GetState()
+		canvas = state['canvas']
+		model = state['model']
+
+		### delete all tab on notebook
+		while(self.nb.GetPageCount()):
+			self.nb.DeletePage(0)
+
+		### add behavioral code
+		self.AddEditPage(model.label, model.python_path)
+
+		### add test file
+		if hasattr(model, 'GetTestFile'):
+			L = model.GetTestFile()
+			for i,s in enumerate(map(lambda l: os.path.join(model.model_path, l), L)):
+				self.AddEditPage(L[i], s)
+
+		self.cb = model
+
 	def CreateMenu(self):
 		""" Create the menu
 		"""
@@ -1172,12 +1192,15 @@ class Editor(wx.Frame, wx.Panel):
 		file = wx.Menu()
 
 		self.save = wx.MenuItem(file, wx.NewId(), _('&Save\tCtrl+S'), _('Save the file'))
+		self.save_as = wx.MenuItem(file, wx.NewId(), _('&Save As\tCtrl+S'), _('Save as an other file'))
 		self.quit = wx.MenuItem(file, wx.NewId(), _('&Quit\tCtrl+Q'), _('Quit the application'))
 
 		self.save.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save.png')))
+		self.save_as.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save_as.png')))
 		self.quit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'exit.png')))
 
 		file.AppendItem(self.save)
+		file.AppendItem(self.save_as)
 		file.AppendItem(self.quit)
 		### -----------------------------------------------------------------
 
@@ -1235,6 +1258,7 @@ class Editor(wx.Frame, wx.Panel):
 
 		### binding event
 		self.Bind(wx.EVT_MENU, self.OnSaveFile, id=self.save.GetId())
+		self.Bind(wx.EVT_MENU, self.OnSaveAsFile, id=self.save_as.GetId())
 		self.Bind(wx.EVT_MENU, self.QuitApplication, id=self.quit.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnCut, id=self.cut.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnCopy, id=self.copy.GetId())
@@ -1385,6 +1409,39 @@ class Editor(wx.Frame, wx.Panel):
 			### status bar notification
 			self.Notification(False, _('%s not saved' % fn), _('file in readonly'))
 
+
+	def OnSaveAsFile(self, event):
+		"""
+		"""
+
+		currentPage = self.nb.GetCurrentPage()
+		fn = currentPage.GetFilename()
+
+		if not self.read_only:
+
+			assert fn != ''
+
+			dir_name = os.path.dirname(fn)
+
+			msg = "Python files (*.py)|*.py|All files (*)|*"
+
+			wcd = _(msg)
+			home = dir_name or HOME_PATH
+			save_dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=home, defaultFile='', wildcard=wcd, style=wx.SAVE | wx.OVERWRITE_PROMPT)
+
+		if save_dlg.ShowModal() == wx.ID_OK:
+
+			path = os.path.normpath(save_dlg.GetPath())
+			ext = os.path.splitext(path)[-1]
+			file_name = save_dlg.GetFilename()
+
+			### code text
+			code = currentPage.GetValue().encode('utf-8')
+			code = '\n'.join(code.splitlines()) + '\n'
+
+						### write code in last name saved file
+			self.nb.WriteFile(path, code)
+
 	### NOTE: Editor :: ConfigSaving 			=> Configure save vars
 	def ConfigSaving(self, base_name, dir_name, code):
 		"""
@@ -1395,7 +1452,7 @@ class Editor(wx.Frame, wx.Panel):
 		if self.nb.force_saving:
 			self.nb.DoSaveFile(code)
 		else:
-			new_instance = code
+			new_instance = getObjectFromString(code)
 
 		return new_instance
 
@@ -1464,6 +1521,7 @@ class Editor(wx.Frame, wx.Panel):
 	def OnChar(self, event):
 		"""
 		"""
+
 		### enable save icon in toolbar
 		self.toolbar.EnableTool(self.save.GetId(), True)
 
@@ -1614,6 +1672,16 @@ class BlockEditor(Editor):
 		menu.PrependMenu(wx.NewId(), _("Insert"), insert)
 		### -------------------------------------------------------------------
 
+		### insert new icon in toolbar (icon are not available in embeded editor (Show menu)
+		###-------------------------------------------------------------------
+		tb = self.GetToolBar()
+		tb.InsertSeparator(tb.GetToolsCount())
+		tb.AddTool(peek.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')),shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
+		tb.AddTool(poke.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')),shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
+		tb.AddTool(state.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')),shortHelpString=_('New state'), longHelpString=_('Insert a code for a new state'))
+		tb.Realize()
+
+		###-------------------------------------------------------------------
 		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=poke.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertState, id=state.GetId())
@@ -1688,7 +1756,7 @@ class BlockEditor(Editor):
 			self.nb.DoSaveFile(code)
 		else:
 			### get new instance from text loaded in Editor
-			if not base_name.split('.')[0] == 'plugins':
+			if not base_name.endswith('plugins.py'):
 				new_instance = getObjectFromString(code)
 
 			### typical plugins python file
@@ -1713,19 +1781,21 @@ class BlockEditor(Editor):
 				import Components
 
 				new_args = Components.GetArgs(new_class)
+
 				### update args (behavioral attributes) before saving
 				if new_args:
 
 					### add new attributes and update other
 					self.cb.args.update(dict([(item, new_args[item]) for item in new_args.keys()]))
 
+
 					### del old attributes
 					for key, val in self.cb.args.items():
 						if not new_args.has_key(key):
 							del self.cb.args[key]
-						else:
-							### status bar notification
-							self.Notification(False, _('args not updated'), _('New class from %s') % (new_class))
+				#		else:
+				#			### status bar notification
+				#			self.Notification(False, _('args not updated'), _('New class from %s') % (new_class))
 
 			### user would change the behavior during a simulation without saving
 			if on_simulation_flag and new_instance is not bool:
@@ -2002,27 +2072,6 @@ class GeneralEditor(Editor):
 		else:
 			return True
 
-	def update(self, concret_subject=None):
-		""" Update method that manages the embedded editor depending of the selected model in the canvas
-		"""
-
-		state = concret_subject.GetState()
-		canvas = state['canvas']
-		model = state['model']
-
-		### delete all tab on notebook
-		while(self.nb.GetPageCount()):
-			self.nb.DeletePage(0)
-
-		### add behavioral code
-		self.AddEditPage(model.label, model.python_path)
-
-		### add test file
-		if hasattr(model, 'GetTestFile'):
-			L = model.GetTestFile()
-			for i,s in enumerate(map(lambda l: os.path.join(model.model_path, l), L)):
-				self.AddEditPage(L[i], s)
-
 ### -----------------------------------------------------------------------------------------------
 class TestApp(wx.App):
 	""" Testing application
@@ -2089,7 +2138,7 @@ def start():
 
 
 def main():
-	parser = argparse.ArgumentParser(description='Text Editor for DEVSimPY application')
+	parser = argparse.ArgumentParser(description='Text Editor for DEVSimPy')
 
 	### Class info---------------------------------------------------------------------------------
 	parser.add_argument('-c', '--class-info', action="store_true", dest="info", help='Show __str__ for each class')

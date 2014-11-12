@@ -38,7 +38,7 @@ import __builtin__
 import traceback
 import re
 
-### jsut for individual test
+### just for individual test
 if __name__ == '__main__':
 	__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
 	__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {\
@@ -140,22 +140,27 @@ class CollapsiblePanel(wx.Panel):
 			c = PYDEVS_SIM_STRATEGY_DICT.keys()
 		else:
 			c = PYPDEVS_SIM_STRATEGY_DICT.keys()
+
 		ch1 = wx.Choice(pane, wx.ID_ANY, choices=c)
 
 		text3 = wx.StaticText(pane, wx.ID_ANY, _("Profiling"))
 		cb1 = wx.CheckBox(pane, wx.ID_ANY, name='check_prof')
 		text4 = wx.StaticText(pane, wx.ID_ANY, _("No time limit"))
 		self.cb2 = wx.CheckBox(pane, wx.ID_ANY, name='check_ntl')
+		text5 = wx.StaticText(pane, wx.ID_ANY, _("Verbose"))
+		self.cb3 = wx.CheckBox(pane, wx.ID_ANY, name='verbose')
 
-		if not 'hotshot' in sys.modules.keys():
-			text3.Enable(False)
-			cb1.Enable(False)
-			self.parent.prof = False
+		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
+			if not 'hotshot' in sys.modules.keys():
+				text3.Enable(False)
+				cb1.Enable(False)
+				self.parent.prof = False
 
-		if DEFAULT_SIM_STRATEGY == 'original' and DEFAULT_DEVS_DIRNAME == 'PyDEVS':
-			self.cb2.Enable(False)
-		else:
 			self.cb2.SetValue(__builtin__.__dict__['NTL'])
+			self.cb3.Enable(False)
+
+		else:
+			cb1.Enable(False)
 
 		### default strategy
 		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
@@ -167,19 +172,23 @@ class CollapsiblePanel(wx.Panel):
 		cb1.SetToolTipString(_("For simulation profiling using hotshot"))
 		self.cb2.SetToolTipString(_("No time limit for the simulation. Simulation is over when childs are no active."))
 
-		grid3 = wx.GridSizer(3, 2, 1, 1)
+		grid3 = wx.GridSizer(5, 2, 1, 1)
 		grid3.Add(text2, 0, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL, 19)
 		grid3.Add(ch1, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL)
 		grid3.Add(text3, 0, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL, 19)
 		grid3.Add(cb1, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
 		grid3.Add(text4, 0, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL, 19)
 		grid3.Add(self.cb2, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
+		grid3.Add(text5, 0, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL, 19)
+		grid3.Add(self.cb3, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
 
 		pane.SetSizer(grid3)
 
 		self.Bind(wx.EVT_CHOICE, self.OnChoice, ch1)
 		self.Bind(wx.EVT_CHECKBOX, self.OnProfiling, cb1)
 		self.Bind(wx.EVT_CHECKBOX, self.OnNTL, self.cb2)
+		self.Bind(wx.EVT_CHECKBOX, self.OnVerbose, self.cb3)
+
 	###
 	def OnChoice(self, event):
 		""" strategy choice has been invoked
@@ -204,6 +213,10 @@ class CollapsiblePanel(wx.Panel):
 		cb1 = event.GetEventObject()
 
 		self.simdia.prof = cb1.GetValue()
+
+	def OnVerbose(self, event):
+		cb3 = event.GetEventObject()
+		self.simdia.verbose = cb3.GetValue()
 
 #-----------------------------------------------------------------
 class SimulationDialog(wx.Frame, wx.Panel):
@@ -260,6 +273,8 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 		### No time limit simulation (defined in the builtin dictionary from .devsimpy file)
 		self.ntl = __builtin__.__dict__['NTL']
+
+		self.verbose = False
 
 		# definition of the thread, the timer and the counter for the simulation progress
 		self.thread = None
@@ -428,6 +443,9 @@ class SimulationDialog(wx.Frame, wx.Panel):
 				### The START_ACTIVITY_TRACKING event occurs
 				trigger_event("START_ACTIVITY_TRACKING", parent=self, master=self.current_master)
 
+				### The START_ACTIVITY_TRACKING event occurs
+				trigger_event("START_STATE_TRAJECTORY", parent=self, master=self.current_master)
+
 				### The START_CONCURRENT_SIMULATION event occurs
 				trigger_event("START_CONCURRENT_SIMULATION", parent=self, master=self.current_master)
 
@@ -438,7 +456,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 				for fn in filter(lambda f: f.endswith('.devsimpy.log'), os.listdir(gettempdir())):
 					os.remove(os.path.join(gettempdir(),fn))
 
-				self.thread = simulator_factory(self.current_master, self.selected_strategy, self.prof, self.ntl)
+				self.thread = simulator_factory(self.current_master, self.selected_strategy, self.prof, self.ntl, self.verbose)
 				self.thread.setName(self.title)
 
 				### si le modele n'a pas de couplage, ou si pas de generateur: alors pas besoin de simuler
@@ -480,7 +498,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 	###
 	def OnStop(self, event):
-		""" When Stop button is cliked
+		""" When Stop button is clicked
 		"""
 
 		self.Interact()
@@ -511,7 +529,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 		self.statusbar.SetStatusText(_('Suspended'),0)
 
-		# possibilité d'interagir avec le modele
+		# way to interact with the model
 		#self.parent.Enable(True)
 		wx.Bell()
 
@@ -520,7 +538,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		""" Give the pourcentage of simulation progress
 		"""
 
-		### si no time limite pour la simulation, on pulse sinon on avance vers le temps final
+		### if no time limit, gauge pulse
 		if self.ntl:
 			self._gauge.Pulse()
 		else:
@@ -530,30 +548,45 @@ class SimulationDialog(wx.Frame, wx.Panel):
 				timeLast = self.thread.model.timeLast[0]
 
 			self.count = (timeLast/self.thread.model.FINAL_TIME)*100
+
 			self._gauge.SetValue(self.count)
 
-		### si pas de no time limit pour la simulation et que la gauge est pleine
+		### if simulation is over
 		if self.thread.end_flag:
-			self.timer.Stop()
 
+			### update the status of buttons
 			self._btn1.Enable(True)
 			self._btn2.Disable()
 			self._btn3.Disable()
 			self._value.Enable(not self.ntl)
 			self._cp.Enable()
 
+			### check if gauge is full (can appear if timer is too slow)
+			if self.count != 100:
+				self.count = 100
+				self._gauge.SetValue(self.count)
+
+			### update the status bar
 			self.statusbar.SetBackgroundColour('')
 			self.statusbar.SetStatusText(_("Completed!"), 0)
 			self.statusbar.SetStatusText("%0.4f s"%(self.thread.cpu_time), 1)
 
+			### is no time limit add some informations in status bar
 			if not self.ntl:
 				if self.statusbar.GetFieldsCount() > 2:
 					self.statusbar.SetStatusText(str(100)+"%", 2)
 
+			### stop the timer
+			self.timer.Stop()
+
+		### if the simulation is suspended
 		elif not self.thread.thread_suspend:
+			### udpate the status bar
 			self.statusbar.SetBackgroundColour('GREY')
 			self.statusbar.SetStatusText(_("Processing..."), 0)
 			self.statusbar.SetStatusText("%0.4f s"%(self.thread.cpu_time), 1)
+
+			### is no time limit, add some information in status bar
 			if not self.ntl:
 				if self.statusbar.GetFieldsCount() > 2:
 					self.statusbar.SetStatusText(str(self.count)[:4]+"%", 2)
@@ -564,7 +597,11 @@ class SimulationDialog(wx.Frame, wx.Panel):
 	def MsgBoxEmptyModel(self):
 		""" Pop-up alert for empty model
 		"""
-		dial = wx.MessageDialog(self, _('You want to simulate an empty master model!'), _('Simulation Manager'), wx.OK|wx.ICON_EXCLAMATION)
+		dial = wx.MessageDialog(self,
+							_('You want to simulate an empty master model!'),
+							_('Simulation Manager'),
+							wx.OK|wx.ICON_EXCLAMATION)
+
 		if (dial.ShowModal() == wx.ID_OK) and (isinstance(self.parent, wx.Frame)):
 			self.DestroyWin()
 		else:
@@ -574,33 +611,38 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		""" To destroy the simulation frame
 		"""
 
+		### clean status bar
 		self.statusbar.SetBackgroundColour('')
 		self.statusbar.SetFields([""]*self.statusbar.GetFieldsCount())
+
+		### try to hidden stdioWin
 		try:
 			self.parent.stdioWin.frame.Show(False)
 		except:
 			pass
 
 		try:
-		## panel gauche inaccessible
+		## left panel enabled
 			nb1 = self.parent.mainW.GetControlNotebook()
 			nb1.Enable()
 
-			## menu inaccessible
+			## menu enabled
 			self.parent.tb.Enable()
 			for i in xrange(self.parent.menuBar.GetMenuCount()):
 				self.parent.menuBar.EnableTop(i,True)
 
+			### other tab diagram enabled
 			nb2 = self.parent.GetDiagramNotebook()
-			## autre tab inaccessible
 			for p in xrange(nb2.GetPageCount()):
 				## pour tout les tab non selectionner
 				if p != nb2.GetSelection():
 					nb2.GetPage(p).Enable()
+
 		except Exception:
 			#sys.stdout.write(_("Empty mode over\n"))
 			pass
 
+		### destroy the frame
 		self.Destroy()
 
 	def OnQuit(self, event):
@@ -609,23 +651,25 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 		# if the simulation is running
 		if self.timer.IsRunning():
-			dial = wx.MessageDialog(self, _('Are you sure to stop simulation ?'), _('Simulation Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			dial = wx.MessageDialog(self,
+									_('Are you sure to stop simulation?'),
+									_('Simulation Manager'),
+									wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 			self.thread.suspend()
 
-			### if ok
+			### if user wants to stop simulation process
 			if dial.ShowModal() == wx.ID_YES:
 				self.DestroyWin()
 				self.thread.terminate()
 			else:
 				self.thread.resume_thread()
+
 		else:
 			self.DestroyWin()
 
 	def ErrorManager(self, msg):
-		""" An error is occured.
+		""" An error is occurred.
 		"""
-		### simulate event button for the code editor
-		event = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self._btn1.GetId())
 
 		### try to find the file which have the error from traceback
 		devs_error = False
@@ -640,6 +684,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			for path in paths[::-1]:
 				### find if one path in trace comes from Domain or exported path list
 				for d in [DOMAIN_PATH]+mainW.GetExportPathsList():
+
 					if d in path:
 						devs_error = True
 						break
@@ -649,6 +694,10 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 		### if error come from devs python file
 		if devs_error:
+
+			### simulate event button for the code editor
+			event = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self._btn1.GetId())
+
 			### Error dialog
 			if not Container.MsgBoxError(event, self.parent, msg.data):
 			### if user dont want correct the error, we destroy the simulation windows
@@ -657,9 +706,10 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			### if user want to correct error through an editor, we stop simulation process for trying again after the error is corrected.
 				self.OnStop(event)
 		else:
+
 			raise msg
 
-def simulator_factory(model, strategy, prof, ntl):
+def simulator_factory(model, strategy, prof, ntl, verbose):
 	""" Preventing direct creation for Simulator
         disallow direct access to the classes
 	"""
@@ -702,7 +752,7 @@ def simulator_factory(model, strategy, prof, ntl):
 			Thread for DEVS simulation task
 		"""
 
-		def __init__(self, model = None, strategy = '', prof = False, ntl = False):
+		def __init__(self, model = None, strategy = '', prof = False, ntl = False, verbose=False):
 			""" Constructor.
 			"""
 			threading.Thread.__init__(self)
@@ -713,6 +763,7 @@ def simulator_factory(model, strategy, prof, ntl):
 			self.strategy = strategy
 			self.prof = prof
 			self.ntl = ntl
+			self.verbose = verbose
 
 			self.end_flag = False
 			self.thread_suspend = False
@@ -762,15 +813,19 @@ def simulator_factory(model, strategy, prof, ntl):
 					sys.stderr.write('Error Value: ' + str(evalue) + '\n')
 					sys.stderr.write('Traceback: ' + str(etb) + '\n')
 
-					wx.CallAfter(Publisher.sendMessage, "error", msg)
-					### error sound
-					wx.CallAfter(playSound, SIMULATION_ERROR_SOUND_PATH)
+					### only for displayed application (-nogui)
+					if wx.GetApp():
+						wx.CallAfter(Publisher.sendMessage, "error", msg)
+						### error sound
+						wx.CallAfter(playSound, SIMULATION_ERROR_SOUND_PATH)
+
 				else:
-					for m in filter(lambda a: hasattr(a,'finish'), self.model.componentSet):
+					for m in filter(lambda a: hasattr(a, 'finish'), self.model.componentSet):
 						### call finished method
 						Publisher.sendMessage('%d.finished'%(id(m)))
 
-					wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
+					### only for displayed application (-nogui)
+					if wx.GetApp() : wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
 
 			self.end_flag = True
 
@@ -784,7 +839,7 @@ def simulator_factory(model, strategy, prof, ntl):
 		def resume_thread(self):
 			self.thread_suspend = False
 
-	return SimulationThread(model, strategy, prof, ntl)
+	return SimulationThread(model, strategy, prof, ntl, verbose)
 
 ### ------------------------------------------------------------
 class TestApp(wx.App):
@@ -794,7 +849,7 @@ class TestApp(wx.App):
 	def OnInit(self):
 
 		__builtin__.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
-		__builtin__.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy4', 'distribued':'SimStrategy5', 'parallel':'SimStrategy6'}
+		__builtin__.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'classic':'SimStrategy4', 'distribued':'SimStrategy5', 'parallel':'SimStrategy6'}
 		__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyPDEVS'
 		__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}
 

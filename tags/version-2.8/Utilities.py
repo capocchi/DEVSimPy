@@ -13,6 +13,8 @@ import string
 import re
 import math
 import inspect
+import ConfigParser
+import wxversion
 
 from itertools import combinations
 
@@ -41,6 +43,24 @@ except ImportError:
 		sys.stdout.write("Unknown operating system.\n")
 		sys.exit()
 
+#-------------------------------------------------------------------------------
+class FixedList(list):
+	""" List with fixed size (for undo/redo)
+	"""
+
+	def __init__(self, size = 5):
+		list.__init__(self)
+		self.__size =  size
+
+	def GetSize(self):
+		return self.__size
+
+	def append(self, v):
+		if len(self) == self.GetSize():
+			del self[0]
+
+		self.insert(len(self),v)
+
 def vibrate(windowName, distance=15, times=5, speed=0.05, direction='horizontal'):
 	#Speed is the number of seconds between movements
 	#If times is odd, it increments so that window ends up in same location
@@ -57,6 +77,37 @@ def vibrate(windowName, distance=15, times=5, speed=0.05, direction='horizontal'
 		windowName.Move(wx.Point(newLoc[0], newLoc[1]))
 		time.sleep(speed)
 		windowName.Move(wx.Point(location[0], location[1]))
+
+def GetUserConfigDir():
+	""" Return the standard location on this platform for application data.
+	"""
+	return os.path.expanduser("~")
+
+def GetWXVersionFromIni():
+	""" Return the wx version loaded in devsimpy (from ini file if exist)
+	"""
+
+	### update the init file into GetUserConfigDir
+	parser = ConfigParser.SafeConfigParser()
+	path = os.path.join(GetUserConfigDir(), 'devsimpy.ini')
+	parser.read(path)
+
+	section, option = ('wxversion', 'to_load')
+
+	### if ini file exist we remove old section and option
+	if os.path.exists(path):
+		return parser.get(section, option)
+	else:
+
+		### wxPython version
+		wxv= map(lambda a: a.split('-')[0], wxversion.getInstalled())
+
+		a = wxv[0]
+		### wx.__version__ is more precise than the values of wxv
+		for v in wxv:
+			if v in wx.__version__:
+				a = v
+		return a
 
 def getFileListFromInit(init_file):
 	""" Return list of name composing all variable in __init__.py file
@@ -105,11 +156,12 @@ def path_to_module(abs_python_filename):
 def getInstance(cls, args = {}):
 	""" Function that return the instance from class and args
 	"""
+
 	if inspect.isclass(cls):
 		try:
 			devs = cls(**args)
 		except Exception:
-			sys.stderr.write(_("Error in getInstance: %s class not instanciated with %s\n"%(cls,str(args))))
+			sys.stderr.write(_("Error in getInstance: %s not instanciated with %s\n"%(cls,str(args))))
 			return sys.exc_info()
 		else:
 			return devs
@@ -243,7 +295,7 @@ def MoveFromParent(frame=None, interval=10, direction='right'):
 def getDirectorySize(directory):
 	dir_size = 0
 	for (path, dirs, files) in os.walk(str(directory)):
-		for file in files:
+		for file in filter(lambda a: a.endswith(('.py', '.amd', '.cmd')), files):
 			filename = os.path.join(path, file)
 			dir_size += os.path.getsize(filename)
 	return dir_size/1000

@@ -253,6 +253,12 @@ class ModelGeneratorWizard(Wizard):
 		""" Constructor
 		"""
 
+		if 'specific_domain_path' in kwargs:
+			domain_path = kwargs['specific_domain_path']
+			del kwargs['specific_domain_path']
+		else:
+			domain_path = DOMAIN_PATH
+
 		Wizard.__init__(self, *args, **kwargs)
 
         # properties of model
@@ -404,7 +410,7 @@ class ModelGeneratorWizard(Wizard):
 		# Create a page 4_1
 		page4_1 = wizard_page(self, _('Finish'))
 		# save filebrowse
-		init = os.path.join(DOMAIN_PATH, "%s.amd"%vbox2.GetItem(1).GetWindow().GetValue())
+		init = os.path.join(domain_path, "%s.amd"%vbox2.GetItem(1).GetWindow().GetValue())
 		fb2 = filebrowse.FileBrowseButton(	page4_1,
 											wx.ID_ANY,
 											initialValue = init,
@@ -417,7 +423,7 @@ class ModelGeneratorWizard(Wizard):
 
 		# Create a page 4_2
 		page4_2 = wizard_page(self, _('Finish'))
-		init =  os.path.join(DOMAIN_PATH, "%s.cmd"%vbox3.GetItem(1).GetWindow().GetValue())
+		init =  os.path.join(domain_path, "%s.cmd"%vbox3.GetItem(1).GetWindow().GetValue())
 		# save filebrowse
 		fb3 = filebrowse.FileBrowseButton(	page4_2,
 											wx.ID_ANY,
@@ -497,7 +503,7 @@ class ModelGeneratorWizard(Wizard):
 
 		# event handler for check button
 		def onBt5Check(evt):
-			""" Python file selector is cheked.
+			""" Python file selector is checked.
 			"""
 
 			if evt.GetEventObject().GetValue():
@@ -507,7 +513,7 @@ class ModelGeneratorWizard(Wizard):
 
 		# event handler for check button
 		def onBt51Check(evt):
-			""" Python file selector is cheked.
+			""" Python file selector is checked.
 			"""
 			if evt.GetEventObject().GetValue():
 				fb12.Enable(False)
@@ -515,7 +521,7 @@ class ModelGeneratorWizard(Wizard):
 				fb12.Enable(True)
 
 		def onBt6Check(evt):
-			""" Python file selector is cheked.
+			""" Python file selector is checked.
 			"""
 
 			if evt.GetEventObject().GetValue():
@@ -525,7 +531,7 @@ class ModelGeneratorWizard(Wizard):
 
 		# event handler for check button
 		def onBt61Check(evt):
-			""" Python file selector is cheked.
+			""" Python file selector is checked.
 			"""
 			if evt.GetEventObject().GetValue():
 				fb41.Enable(False)
@@ -548,7 +554,7 @@ class ModelGeneratorWizard(Wizard):
 			""" Give the control on the number of input and output form specific behavior choice
 			"""
 
-			### specific behavoir choice
+			### specific behavior choice
 			val = evt.GetEventObject().GetValue()
 
 			### if generator, 0 input and x output (1 is the default)
@@ -560,7 +566,7 @@ class ModelGeneratorWizard(Wizard):
 				if vbox2.GetItem(7).GetWindow().GetValue() == 0:
 					vbox2.GetItem(7).GetWindow().SetValue(1)
 
-				### Deasable the choice
+				### Disable the choice
 				vbox2.GetItem(4).GetWindow().Enable(False)
 				vbox2.GetItem(5).GetWindow().Enable(False)
 				### Enable the output choice
@@ -576,7 +582,7 @@ class ModelGeneratorWizard(Wizard):
 				if vbox2.GetItem(5).GetWindow().GetValue() == 0:
 					vbox2.GetItem(5).GetWindow().SetValue(1)
 
-				### Deasable the choice
+				### Disable the choice
 				vbox2.GetItem(7).GetWindow().Enable(False)
 				vbox2.GetItem(6).GetWindow().Enable(False)
 				### Enable the output choice
@@ -593,10 +599,10 @@ class ModelGeneratorWizard(Wizard):
 				vbox2.GetItem(7).GetWindow().SetValue(1)
 
 		def OnInputAMDLabel(evt):
-			fb2.SetValue(os.path.join(DOMAIN_PATH, "%s.amd"%evt.GetString()))
+			fb2.SetValue(os.path.join(domain_path, "%s.amd"%evt.GetString()))
 
 		def OnInputCMDLabel(evt):
-			fb3.SetValue(os.path.join(DOMAIN_PATH, "%s.cmd"%evt.GetString()))
+			fb3.SetValue(os.path.join(domain_path, "%s.cmd"%evt.GetString()))
 
 		# Binding
 		bt1.Bind(wx.EVT_RADIOBUTTON, onBt1Click)

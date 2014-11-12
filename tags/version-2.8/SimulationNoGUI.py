@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 
 """
-Name: MakeSimulation.py
-Brief descritpion:
+Name: SimulationNoGUI.py
+Brief descritpion: Overwrite some methods to implement the no gui version of DEVsimPy and make simulation from dsp file
+in batch mode
 Author(s): A-T. Luciani <atluciani@univ-corse.fr>
 Version:  1.0
-Last modified:
+Last modified: 2014.10.28 by L. Capocchi
 GENERAL NOTES AND REMARKS:
+
+option -nogui or -ng to invoke this file
+option ntl or inf to perform 'no time limit' simulation
 
 GLOBAL VARIABLES AND FUNCTIONS:
 """
@@ -22,15 +26,19 @@ from tempfile import gettempdir
 import __builtin__
 import traceback
 
+import gettext
+_ = gettext.gettext
+
 def makeJS(filename):
 	"""
 	"""
 
-	import Container
+	from Container import Diagram
+	from Join import makeDEVSConf, makeJoin
 
-	a = Container.Diagram()
+	a = Diagram()
 	if a.LoadFile(filename):
-		sys.stdout.write("\nFichier charge\n")
+		sys.stdout.write(_("\nFile loaded\n"))
 		master = Container.Diagram.makeDEVSInstance(a)
 
 		addInner = []
@@ -45,8 +53,6 @@ def makeJS(filename):
 		x = [40]
 		y = [40]
 		bool = True
-
-		from Join import makeDEVSConf, makeJoin
 
 		model, liaison, addInner = makeJoin(a, addInner, liaison, model, bool, x, y, labelEnCours)
 		makeDEVSConf(model, liaison, addInner, "%s.js"%labelEnCours)
@@ -63,35 +69,61 @@ class Printer:
 		sys.stdout.write("\r\x1b[K"+data.__str__())
 		sys.stdout.flush()
 
+def yes(prompt = 'Please enter Yes/No: '):
+	while True:
+	    try:
+	        i = raw_input(prompt)
+	    except KeyboardInterrupt:
+	        return False
+	    if i.lower() in ('yes','y'): return True
+	    elif i.lower() in ('no','n'): return False
+
 def makeSimulation(filename, T):
 	"""
 	"""
 
 	import Container
 
+	sys.stdout.write(_("\nSimulation in batch mode\n"))
+
 	a = Container.Diagram()
 
+	sys.stdout.write(_("\nLoading %s file...\n")%(os.path.basename(filename)))
 	if a.LoadFile(filename):
-		sys.stdout.write("\nFichier charge\n")
-
+		sys.stdout.write(_("%s loaded!\n")%(os.path.basename(filename)))
 
 		try:
+			sys.stdout.write(_("\nMaking DEVS instance...\n"))
 			master = Container.Diagram.makeDEVSInstance(a)
-			#print "master -> " , master
-			#print "a -> " , a
 		except :
 			return False
 		else:
-			sim = runSimulation(master,T)
+			sys.stdout.write(_("DEVS instance created!\n"))
+
+			sys.stdout.write(_("\nPerforming DEVS simulation...\n"))
+
+#			if yes("Do you want to change fileName of models?"):
+#				### fileNames of To_Disk models need to be changed ?
+#				for m in filter(lambda a: hasattr(a, 'fileName'), master.componentSet):
+#					pass
+
+			sim = runSimulation(master, T)
 			thread = sim.Run()
 
-			# first_time = time.time()
-			# while(thread.isAlive()):
-				# new_time = time.time()
-				# Printer(new_time - first_time)
+			first_time = time.time()
+			while(thread.isAlive()):
+				new_time = time.time()
+				output = new_time - first_time
+				Printer(output)
 
-			sys.stdout.write("\nTime : %s"%str(master.FINAL_TIME))
-			sys.stdout.write("\nFin.\n")
+			sys.stdout.write(_("\nDEVS simulation completed!\n"))
+
+		### inform that data file has been generated
+		for m in filter(lambda a: hasattr(a, 'fileName'), master.componentSet):
+			for i in range(len(m.IPorts)):
+				fn ='%s%s.dat'%(m.fileName,str(i))
+				if os.path.exists(fn):
+					sys.stdout.write(_("\nData file %s has been generated!\n")%(fn))
 
 class runSimulation:
 	"""
@@ -113,6 +145,8 @@ class runSimulation:
 
 		### profiling simulation with hotshot
 		self.prof = False
+
+		self.verbose = False
 
 		# definition du thread, du timer et du compteur pour les % de simulation
 		self.thread = None
@@ -143,9 +177,9 @@ class runSimulation:
 
 		if self.master:
 			from SimulationGUI import simulator_factory
-
-			self.master.FINAL_TIME = float(self.time)
-			self.thread = simulator_factory(self.master, self.selected_strategy, self.prof, self.ntl)
+			if not self.ntl:
+				self.master.FINAL_TIME = float(self.time)
+			self.thread = simulator_factory(self.master, self.selected_strategy, self.prof, self.ntl, self.verbose)
 
 		return self.thread
 
