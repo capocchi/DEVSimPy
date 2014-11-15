@@ -105,6 +105,7 @@ if __name__ == '__main__':
 		else:
 			if str(time) in ('inf', 'ntl'):
 				__builtin__.__dict__['NTL'] = True
+				time = 0.0
 
 			### launch simulation
 			makeSimulation(filename, time)

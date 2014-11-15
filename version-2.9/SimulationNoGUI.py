@@ -173,5 +173,5 @@ class runSimulation:
 
 			self.thread = simulator_factory(self.master, self.selected_strategy, self.prof, self.ntl, self.verbose)
 
-		return self.thread
+			return self.thread
 
