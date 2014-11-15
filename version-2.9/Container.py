@@ -3435,12 +3435,12 @@ class CodeBlock(Block, Achievable):
 				names = map(lambda t: t[0], clsmembers)
 
 				### if model inherite of ScopeGUI, it requires to redefine the class with the ScopeGUI class
-				if 'QuickScope' in names:
+				if 'To_Disk' in names or 'MessagesCollector' in names:
+					new_class = DiskGUI
+				elif ('QuickScope' in names):
 					state['xlabel'] = ""
 					state['ylabel'] = ""
 					new_class = ScopeGUI
-				elif 'To_Disk' in names or 'MessagesCollector' in names:
-					new_class = DiskGUI
 				else:
 					new_class = None
 
