@@ -61,6 +61,12 @@ class FixedList(list):
 
 		self.insert(len(self),v)
 
+def getOutDir():
+	out_dir = os.path.join(HOME_PATH, 'out')
+	if not os.path.exists(out_dir):
+		os.mkdir(out_dir)
+	return out_dir
+
 def vibrate(windowName, distance=15, times=5, speed=0.05, direction='horizontal'):
 	#Speed is the number of seconds between movements
 	#If times is odd, it increments so that window ends up in same location

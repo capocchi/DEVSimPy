@@ -30,6 +30,7 @@ import threading
 import inspect
 
 from pluginmanager import trigger_event
+from Utilities import getOutDir
 
 import __builtin__
 import re
@@ -555,7 +556,7 @@ class SimStrategy4(SimStrategy):
                 if not os.path.exists(out_dir):
                     os.mkdir(out_dir)
 
-                verbose_file = os.path.join(out_dir, 'verbose.txt')
+                verbose_file = os.path.join(getOutDir(), 'verbose.txt')
                 S.setVerbose(verbose_file)
 
             ### TODO
