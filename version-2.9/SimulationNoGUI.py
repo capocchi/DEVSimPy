@@ -2,22 +2,18 @@
 
 """
 Name: SimulationNoGUI.py
-Brief descritpion: Overwrite some methods to implement the no gui version of DEVsimPy and make simulation from dsp file
+Brief descritpion: Overwrite some methods to implement the no gui version of DEVSimPy and make simulation from dsp file
 in batch mode
 Author(s): A-T. Luciani <atluciani@univ-corse.fr>
 Version:  1.0
-Last modified: 2014.10.28 by L. Capocchi
+Last modified: 2014.11.15 by L. Capocchi
 GENERAL NOTES AND REMARKS:
-
-option -nogui or -ng to invoke this file
-option ntl or inf to perform 'no time limit' simulation
 
 GLOBAL VARIABLES AND FUNCTIONS:
 """
 
 import os
 import sys
-#import random
 import threading
 import time
 
@@ -39,7 +35,7 @@ def makeJS(filename):
 	a = Diagram()
 	if a.LoadFile(filename):
 		sys.stdout.write(_("\nFile loaded\n"))
-		master = Container.Diagram.makeDEVSInstance(a)
+		master = Diagram.makeDEVSInstance(a)
 
 		addInner = []
 		liaison = []
@@ -82,11 +78,11 @@ def makeSimulation(filename, T):
 	"""
 	"""
 
-	import Container
+	from Container import Diagram
 
-	sys.stdout.write(_("\nSimulation in batch mode\n"))
+	sys.stdout.write(_("\nSimulation in batch mode with %s\n")%__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'])
 
-	a = Container.Diagram()
+	a = Diagram()
 
 	sys.stdout.write(_("\nLoading %s file...\n")%(os.path.basename(filename)))
 	if a.LoadFile(filename):
@@ -94,18 +90,13 @@ def makeSimulation(filename, T):
 
 		try:
 			sys.stdout.write(_("\nMaking DEVS instance...\n"))
-			master = Container.Diagram.makeDEVSInstance(a)
+			master = Diagram.makeDEVSInstance(a)
 		except :
 			return False
 		else:
 			sys.stdout.write(_("DEVS instance created!\n"))
 
 			sys.stdout.write(_("\nPerforming DEVS simulation...\n"))
-
-#			if yes("Do you want to change fileName of models?"):
-#				### fileNames of To_Disk models need to be changed ?
-#				for m in filter(lambda a: hasattr(a, 'fileName'), master.componentSet):
-#					pass
 
 			sim = runSimulation(master, T)
 			thread = sim.Run()
@@ -179,6 +170,7 @@ class runSimulation:
 			from SimulationGUI import simulator_factory
 			if not self.ntl:
 				self.master.FINAL_TIME = float(self.time)
+
 			self.thread = simulator_factory(self.master, self.selected_strategy, self.prof, self.ntl, self.verbose)
 
 		return self.thread

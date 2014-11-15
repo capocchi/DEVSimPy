@@ -447,6 +447,7 @@ invoque rpar un callback lorsque le fichier python est renseignÃ© dans le wizard
 -Fait le 31/10/2014 par LC: amélioration -> lorsque un dsp est construit avec une lib qui n'est pas dans Domain (à la construction), on esssai dans setstate du CodeBlock de trouver si un rep de Domain est présent dans le faut chemin python_path si c'est le cas, on fait une composition pour rendre le python_path ok
 -Fait le 07/11/2014 par LC: ajout -> possibilité de choisir dans les préférences générales la version de wx utilisée par DEVSimPy.
 -Fait le 07/11/2014 par LC: amélioration -> changement du path de configuration. Plus AppData/Romaing mais ~
+-Fait le 15/11/2014 par LC: amélioration -> un fichier indépendant pour gérer le mode no gui : devsimpy-nogui.py
 
 
 

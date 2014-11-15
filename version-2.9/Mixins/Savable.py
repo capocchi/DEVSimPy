@@ -21,7 +21,7 @@ import re
 import inspect
 import __builtin__
 import gettext
-import wx
+#import wx
 
 _ = gettext.gettext
 
