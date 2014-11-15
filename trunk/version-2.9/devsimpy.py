@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-# main.py --- DEVSimPy - The Python DEVS GUI modeling and simulation software
+# devsimpy.py --- DEVSimPy - The Python DEVS GUI modeling and simulation software
 #                     --------------------------------
 #                            Copyright (c) 2014
 #                              Laurent CAPOCCHI
@@ -33,7 +33,7 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-### at the beginning to prevent with statement for python vetrsion <=2.5
+### at the beginning to prevent with statement for python version <=2.5
 from __future__ import with_statement
 
 __authors__  = "Laurent Capocchi <capocchi@univ-corse.fr, lcapocchi@gmail.com>, TIC project team <santucci@univ-coorse.fr>" # ajouter les noms et les mails associés aux autres auteurs
@@ -178,9 +178,7 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 
 ### here berfore the __main__ function
 ### warning, some module (like SimulationGUI) initialise GUI_FLAG macro before (import block below)
-if len(sys.argv) >= 2 and sys.argv[1] in ('-ng, -nogui, -js, -javascript'):
-	builtin_dict['GUI_FLAG'] = False
-	from SimulationNoGUI import makeSimulation, makeJS
+builtin_dict['GUI_FLAG'] = False
 
 # Sets the homepath variable to the directory where your application is located (sys.argv[0]).
 __builtin__.__dict__.update(builtin_dict)
@@ -340,6 +338,8 @@ class MainApplication(wx.Frame):
 		self.MakeMenu()
 		self.MakeToolBar()
 
+		sys.stdout.write("DEVSimPy is ready!\n")
+
 		self.Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.OnPaneClose)
 		self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.OnDragInit, id = self.tree.GetId())
 		#self.Bind(wx.EVT_TREE_END_DRAG, self.OnDragEnd, id = self.tree.GetId())
@@ -471,8 +471,6 @@ class MainApplication(wx.Frame):
 				for plugin in eval(self.cfg.Read("plugins")):
 					load_plugins(plugin)
 
-				sys.stdout.write("DEVSimPy is ready!\n")
-
 			else:
 				wx.MessageBox('.devsimpy file appear to be a very old version and should be updated....\nWe rewrite a new blank version.',
 									'Configuration',
@@ -483,6 +481,7 @@ class MainApplication(wx.Frame):
 		else:
 			self.WriteDefaultConfigFile(self.cfg)
 
+		sys.stdout.write("Loading DEVSimPy...\n")
 
 	def Seti18n(self):
 		""" Set local setting.
@@ -1955,72 +1954,12 @@ if __name__ == '__main__':
 		sys.stdout.write(_('Welcome to the DEVsimpy helper.\n'))
 		sys.stdout.write(_('\t To execute DEVSimPy GUI: python devsimpy.py\n'))
 		sys.stdout.write(_('\t To execute DEVSimPy cleaner: python devsimpy.py -c|-clean\n'))
-		sys.stdout.write(_('\t To execute DEVSimPy writing log.txt file: python devsimpy.py -d|-debug\n'))
-		sys.stdout.write(_('\t To execute DEVSimPy in no GUI mode: python devsimpy.py -ng|-nogui\n'))
 		sys.stdout.write(_('Authors: L. Capocchi (capocchi@univ-corse.fr)\n'))
 		sys.exit()
 
-	### python devsimpy.py -ng|-nogui yourfile.dsp -> devsimpy in batch mode
-	elif not __builtin__.__dict__['GUI_FLAG']:
-
-		if sys.argv[1] in ('-ng','-nogui'):
-			if len(sys.argv) == 3:
-				### check dsp filename
-				filename = sys.argv[2]
-				if not os.path.exists(filename):
-					sys.stderr.write(_('ERROR: .dsp not exist !\n'))
-					sys.exit()
-
-				### launch simulation
-				makeSimulation(filename, time = 10.0)
-
-			elif len(sys.argv) == 4:
-				### check dsp filename
-				filename = sys.argv[2]
-				if not os.path.exists(filename):
-					sys.stderr.write(_('ERROR: .dsp not exist !\n'))
-					sys.exit()
-
-				### check time
-				time = sys.argv[3]
-				if not IsAllDigits(str(time)):
-					if str(time) in ('inf', 'ntl'):
-						__builtin__.__dict__['NTL'] = True
-					else:
-						sys.stderr.write(_('ERROR: time should be a number!\n'))
-						sys.exit()
-
-				### launch simulation
-				makeSimulation(filename, time)
-			else:
-				sys.stderr.write(_('ERROR: Unspecified .dsp file !\n'))
-				sys.stdout.write(_('USAGE: python devsimpy.py [-ng|-nogui] yourfile.dsp [time=10.0|[inf|ntl]]\n'))
-				sys.exit()
-
-		elif sys.argv[1] in ('-js','-javascript'):
-			if len(sys.argv) == 3:
-
-				### check dsp filename
-				filenameJS = sys.argv[2]
-				if not os.path.exists(filenameJS):
-					sys.stderr.write(_('ERROR: .dsp not exist !\n'))
-					sys.exit()
-
-				### launch simulation
-				makeJS(filenameJS)
-			else:
-				sys.stderr.write(_('ERROR: Unspecified .dsp file !\n'))
-				sys.stdout.write(_('USAGE: python devsimpy.py -js|-javascript yourfile.dsp\n'))
-				sys.exit()
 	else:
-		pass
-
-	## si redirect=True et filename=None alors redirection dans une fenetre
-	## si redirect=True et filename="fichier" alors redirection dans un fichier
-	## si redirect=False redirection dans la console
-	if __builtin__.__dict__['GUI_FLAG']:
+		## si redirect=True et filename=None alors redirection dans une fenetre
+		## si redirect=True et filename="fichier" alors redirection dans un fichier
+		## si redirect=False redirection dans la console
 		app = DEVSimPyApp(redirect = False, filename = None)
-		app.MainLoop()
-	else:
-		app = wx.App()
 		app.MainLoop()
