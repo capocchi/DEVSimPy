@@ -322,7 +322,7 @@ class BlockPluginsList(CheckListCtrl, Populable):
 		if not self.is_populate:
 			self.model = model
 
-			if self.model and not hasattr(self.model, "plug-ins"):
+			if self.model and not hasattr(self.model, "plugins"):
 				self.model.plugins = []		### dynamic append attribute
 
 			plugins_list = self.GetPluginsList(self.model.model_path) if self.model else []
