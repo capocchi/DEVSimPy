@@ -104,7 +104,7 @@ class Populable(object):
 		return
 
 class GeneralPluginsList(CheckListCtrl, Populable):
-	""" Class for populate CheckListCtrl with DEVSimPy plugins stored in config file
+	""" Class for populate CheckListCtrl with DEVSimPy plug-ins stored in configuration file
 	"""
 
 	def __init__(self, *args, **kwargs):
@@ -601,7 +601,7 @@ class PluginsPanel(wx.Panel):
 			apply(module.Config, (), {'parent':self})
 
 class ModelPluginsManager(wx.Frame):
-	""" Plugins Manager for DEVSimPy Block
+	""" Plug-ins Manager for DEVSimPy Block
 	"""
 	def __init__(self, **kwargs):
 		""" Constructor.
