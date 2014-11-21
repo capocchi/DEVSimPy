@@ -2101,8 +2101,10 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		except IndexError:
 			### this is the first call of Undo and StockUndo is emplty
 			self.stockUndo.append(cPickle.dumps(obj=self.diagram, protocol=0))
-		except TypeError, error:
-			sys.stdout.write(_("Error trying to undo: %s \n"%error))
+		except TypeError, info:
+			sys.stdout.write(_("Error trying to undo (TypeError): %s \n"%info))
+		except Exception, info:
+			sys.stdout.write(_("Error trying to undo: %s \n"%info))
 		finally:
 
 			### just for init (white diagram)
