@@ -117,7 +117,7 @@ class LabelDialog(wx.Dialog):
 			### update of block from canvas
 			self.canvas.UpdateShapes([self.block])
 			if isinstance(self.parent, AttributeEditor):
-				### update of label filed in propertie dialogue
+				### update of label filed in properties dialogue
 				self.parent._list.SetCellValue(0, 1, self.block.label)
 
 		evt.Skip()
@@ -160,7 +160,7 @@ class LabelDialog(wx.Dialog):
 		self.Close()
 
 	def OnCancel(self, evt):
-		""" Cancle button has been clicked
+		""" Cancel button has been clicked
 		"""
 		if self.block:
 			self.block.label = self.old_label

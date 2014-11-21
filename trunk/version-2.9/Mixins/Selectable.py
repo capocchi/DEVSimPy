@@ -37,7 +37,7 @@ class Selectable:
         canvas = event.GetEventObject()
         diagram = canvas.GetDiagram()
 
-        ### only for Block and Port when ctrl is down
+        ### only for Block and Port when control is down
         if isinstance(self, Attributable) and event.ControlDown():
 
             ### store old label before change it
