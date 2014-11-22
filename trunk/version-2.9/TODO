@@ -450,6 +450,6 @@ invoque rpar un callback lorsque le fichier python est renseignÃ© dans le wizard
 -Fait le 07/11/2014 par LC: amélioration -> changement du path de configuration. Plus AppData/Romaing mais ~
 -Fait le 15/11/2014 par LC: amélioration -> un fichier indépendant pour gérer le mode no gui : devsimpy-nogui.py
 -Fait le 22/11/2014 par LC: ajout -> menu rename sur le clique droit des modèles (atomique, couplé et port).
-
+-Fait le 23/11/2014 par LC: amélioration -> evt.Veto pour améliorer la gestion de la fermeture des diagrammes.
 
 
