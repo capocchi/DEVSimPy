@@ -3188,7 +3188,8 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 	def OnLeftDown(self, event):
 		"""
 		"""
-		Selectable.ShowAttributes(self, event)
+		if event.ControlDown():
+			Selectable.OnRenameFromClick(self, event)
 		event.Skip()
 
 	###
@@ -4101,7 +4102,9 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 	def OnLeftDown(self, event):
 		""" Left down event has been invoked.
 		"""
-		Selectable.ShowAttributes(self, event)
+
+		if event.ControlDown():
+			Selectable.OnRenameFromClick(self, event)
 		event.Skip()
 
 	def OnProperties(self, event):
