@@ -30,15 +30,30 @@ class Selectable:
         """
         self.selected = False
 
-    def ShowAttributes(self, event):
+    def OnRenameFromClick(self, event):
         """
         """
 
         canvas = event.GetEventObject()
-        diagram = canvas.GetDiagram()
+        self.DoLabelDialog(canvas)
+        event.Skip()
 
-        ### only for Block and Port when control is down
-        if isinstance(self, Attributable) and event.ControlDown():
+    def OnRenameFromMenu(self, event):
+        """
+        """
+
+        canvas = event.GetEventObject().GetParent()
+        self.DoLabelDialog(canvas)
+        event.Skip()
+
+    def DoLabelDialog(self, canvas):
+        """
+        """
+
+         ### only for Block and Port when control is down
+        if isinstance(self, Attributable):
+
+            diagram = canvas.GetDiagram()
 
             ### store old label before change it
             old_label = self.label
@@ -62,5 +77,3 @@ class Selectable:
 
                 ### update of code editor panel
                 #print mainW._mgr.GetPane("editor").IsOk()
-
-        event.Skip()
