@@ -240,7 +240,7 @@ def GetActiveWindow(event=None):
 	if aW is None and event is not None:
 
 		obj = event.GetEventObject()
-		#### conditionnal statement only for windows
+		#### conditional statement only for windows
 		aW = obj.GetInvokingWindow() if isinstance(obj, wx.Menu) else obj
 
 	return aW

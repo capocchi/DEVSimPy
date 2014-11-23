@@ -348,14 +348,21 @@ class Diagram(Savable, Structurable):
 		#ReloadModule.recompile("DomainInterface.DomainStructure")
 		#ReloadModule.recompile("DomainInterface.MasterModel")
 
-		diagram.setDEVSModel(DomainInterface.MasterModel.Master())
+		### PyPDEVS work with this
+		#diagram.setDEVSModel(DomainInterface.MasterModel.Master())
+
+		### TODO to be tested with PyPDEVS !!!
+#		if isinstance(diagram.parent, ShapeCanvas):
+#			diagram.setDEVSModel(DomainInterface.MasterModel.Master())
+#		else:
+#			diagram.ClearAllPorts()
 
 		### if devs instance of diagram is not instantiated, we make it
 		### else one simulation has been performed then we clear all devs port instances
-		#if diagram.getDEVSModel() is None:
-		#	diagram.setDEVSModel(DomainInterface.MasterModel.Master())
-		#else:
-		#	diagram.ClearAllPorts()
+		if diagram.getDEVSModel():
+			diagram.ClearAllPorts()
+		else:
+			diagram.setDEVSModel(DomainInterface.MasterModel.Master())
 
 		### shape list of diagram
 		shape_list = diagram.GetShapeList()
@@ -395,7 +402,7 @@ class Diagram(Savable, Structurable):
 
 			### allow to escape the check of the simulation running in PyPDEVS (src/DEVS.py line 565)
 			if hasattr(devs.parent, "fullName"):
-					del devs.parent.fullName
+				del devs.parent.fullName
 
 			### adding
 			diagram.addSubModel(devs)
@@ -4038,6 +4045,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 		Rotatable.__init__(self)
 
 		self.SetAttributes(Attributable.GRAPHICAL_ATTR[0:4])
+
 		self.label = label
 		### TODO: move to args
 		self.AddAttribute('id')
@@ -4049,10 +4057,14 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 		""" Restore state from the unpickled state values.
 		"""
 
-
 		####################################" Just for old model
 		if 'r' not in state: state['r'] = 30.0
 		if 'font' not in state: state['font'] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
+		if 'label_pos' not in state:
+			state['label_pos'] = 'center'
+			state['attributes'].insert(1,'label_pos')
+		if 'output_direction' not in state: state['output_direction'] ="est"
+		if 'input_direction' not in state: state['input_direction'] = "ouest"
 		##############################################
 
 		self.__dict__.update(state)
