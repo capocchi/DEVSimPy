@@ -305,7 +305,7 @@ class CustomDataTable(gridlib.PyGridTableBase):
 		self.model = None
 
 		### TODO rendre les keys (ormis la 1) générique en fonction des noms des variables
-		self.info = { _('Unknown information') : _("Please get information of DEVS attribut \nthrough its class constructor using @ symbole. \n For example: @attribut_name : informations"),
+		self.info = { _('Unknown information') : _("Please get information of DEVS attribute \nthrough its class constructor using @ symbole. \n For example: @attribut_name : informations"),
 						'python_path' : _("This is the path of python file.\nYou can change this path in order to change the behavior of the model."),
 						'label' : _("This is the name of model.\nYou can change this name by clicking on its value field"),
 						'pen' : _("This is the color and size of pen used to trace the model shape.\nYou can change these properies by clicking on its value field."),
@@ -316,7 +316,7 @@ class CustomDataTable(gridlib.PyGridTableBase):
 		self.colLabels = [_('Attribute'),_('Value'),_('Information')]
 
 		### default graphical attribute label
-		self.infoBlockLabelList = [_('Name'), _('Color and size of pen'), _('Background color'), _('Font label'), _('Background image'),_('Input port'), _('Output port')]
+		self.infoBlockLabelList = [_('Name'), _('Label position'), _('Color and size of pen'), _('Background color'), _('Font label'), _('Background image'),_('Input port'), _('Output port')]
 
 		self.nb_graphic_var = len(self.infoBlockLabelList)
 

@@ -374,7 +374,7 @@ class CoupledDEVS(BaseDEVS):
 
 		# Other cases (illegal coupling):
 		else:
-			sys.stderr.write("%s %s\n"%(str(p1.host), str(p2.host.parent)) )
+			sys.stderr.write("%s %s\n"%(str(p1.host.blockModel.label), str(p2.host.blockModel.label)) )
 			sys.stderr.write("%s %s %s\n"%(str(p1), str(p2), self.__str__()))
 			Error("Illegal coupling!", 1)
 
