@@ -15,37 +15,37 @@ from DomainInterface.DomainBehavior import DomainBehavior
 # ===================================================================   #
 class QuickScope(DomainBehavior):
 	"""	QuickScope(fusion, eventAxis)
-			
-		Atomic model ploting the data with some fonctionality.
+
+		Atomic model plotting the data with some functionalities.
 	"""
 
 	###
 	def __init__(self, fusion = True, eventAxis = False):
 		""" Constructor.
-		
+
 			@param fusion : Flag to plot all signals on one graphic
 			@param eventAxis : Flag to plot depending event axis
 		"""
 		DomainBehavior.__init__(self)
-		
+
 		#  State variable
 		self.state = {'status': 'INACTIF', 'sigma': INFINITY}
-		
+
 		# fusioning curve
 		self.fusion = fusion
 		# replace time axis with step axis
 		self.eventAxis = eventAxis
-		
+
 		# results tab (results attribut must be defined in order to plot the data)
 		self.results = {} #OrderedDict()
-		
+
 		self.t = INFINITY
 
 	###
 	def extTransition(self, *args):
 		"""
 		"""
-		
+
 		for np in xrange(len(self.IPorts)):
 			if hasattr(self, 'peek'):
 				msg = self.peek(self.IPorts[np])
@@ -69,9 +69,9 @@ class QuickScope(DomainBehavior):
 					self.results[np].append((self.t, msg.value[0]))
 				else:
 					self.results[np]=[(self.t, msg.value[0])]
-					
+
 				del msg
-				
+
 		self.state['sigma'] = 0
 		return self.state
 
@@ -80,9 +80,9 @@ class QuickScope(DomainBehavior):
 		self.state["status"] = 'IDLE'
 		self.state["sigma"] = INFINITY
 		return self.state
-			
+
 	###
 	def timeAdvance(self):return self.state['sigma']
-	
+
 	###
 	def __str__(self):return "QuickScope"

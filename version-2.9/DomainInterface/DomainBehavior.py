@@ -79,6 +79,13 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 #		else:
 #			return self.myInput[p]
 
+	def __str__(self):
+		"""
+		"""
+		if hasattr(self, 'bloclModel'):
+			return self.blockModel.label
+		else:
+			return self.__class__.__name__
 
 def main():
 	DB = DomainBehavior()
