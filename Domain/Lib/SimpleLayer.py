@@ -46,14 +46,17 @@ class SimpleLayer(DomainBehavior):
         """
         assert self.prec_msg and self.flow_msg
 
-        val = (self.prec_msg*20 + self.flow_msg*80)/100.0
-        self.poke(self.OPorts[0], Message([val, 0, 0]), self.timeNext)
+        val = (self.prec_msg.value[0]*20 + self.flow_msg.value[0]*80)/100.0
+        self.poke(self.OPorts[0], Message([val, 0, 0], self.timeNext))
 
     def extTransition(self):
         """
         """
-        self.prec_msg = peek(self.IPorts[0])
-        self.flow_msg = peek(self.IPorts[1])
+        msg1 = self.peek(self.IPorts[0])
+        msg2 = self.peek(self.IPorts[1])
+
+        if msg1: self.prec_msg = msg1
+        if msg2: self.flow_msg = msg2
 
         if self.prec_msg and self.flow_msg:
             self.state['status'] = 'BUZY'
@@ -63,4 +66,4 @@ class SimpleLayer(DomainBehavior):
 
     def timeAdvance(self): return self.state['sigma']
 
-    def __str__(self): return "SimpleLayer"
+    def __str__(self): return self.__class__.__name__

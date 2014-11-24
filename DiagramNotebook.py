@@ -201,11 +201,11 @@ class GeneralNotebook(Printable):
 
 
 				### update spin control
-				t = self.parent.tb.FindControl(self.parent.toggle_list[3])
-				s = self.parent.tb.FindControl(self.parent.toggle_list[4])
+				t = self.parent.tb.FindControl(self.parent.toggle_list[2])
+				s = self.parent.tb.FindControl(self.parent.toggle_list[3])
 				if t:
 					l = canvas.GetCurrentLevel()
-					t.SetValue(str(l))
+					t.SetValue(l)
 					s.SetValue(l)
 
 

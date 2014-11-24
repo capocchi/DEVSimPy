@@ -22,23 +22,40 @@ class Delay(DomainBehavior):
     """
     """
 
-    def __init__(self):
+    def __init__(self, coef=0.0):
+        """
+            @param coef : time coef
+        """
+
         DomainBehavior.__init__(self)
 
         ### local copy
+        self.coef = coef
 
+        self.state = {'status': 'IDLE', 'sigma': INFINITY}
 
-        self.state = {'status': 'IDLE', 'sigma': INFINITY }
+        self.msg = None
 
     def intTransition(self):
-        pass
+        """
+        """
+        self.state['sigma'] = INFINITY
+        self.state['status'] = 'IDLE'
 
     def outputFnc(self):
-        pass
+        """
+        """
+        self.poke(self.OPorts[0], self.msg)
 
     def extTransition(self):
-        pass
+        """
+        """
+        print "zdc"
+        self.msg = self.peek(self.IPorts[0])
+
+        self.state['sigma'] += self.coef
+        self.state['status'] = 'BUZY'
 
     def timeAdvance(self): return self.state['sigma']
 
-    def __str__(self): return self.__name__
+    def __str__(self): return self.__class__.__name__

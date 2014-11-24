@@ -35,6 +35,7 @@ class SimpleAltitude(DomainBehavior):
         """
         """
         self.state['sigma'] = INFINITY
+        self.state['status'] = 'IDLE'
 
     def outputFnc(self):
         """
@@ -56,4 +57,4 @@ class SimpleAltitude(DomainBehavior):
 
     def timeAdvance(self): return self.state['sigma']
 
-    def __str__(self): return self.__name__
+    def __str__(self): return self.__class__.__name__
