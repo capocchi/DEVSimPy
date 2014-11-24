@@ -31,6 +31,7 @@ import wx
 import  wx.grid as gridlib
 from wx.lib import wordwrap
 import  wx.gizmos as gizmos
+import  wx.lib.imagebrowser as ib
 
 import Components
 import Menu

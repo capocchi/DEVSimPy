@@ -24,7 +24,6 @@ from __future__ import with_statement
 
 import wx
 import wx.lib.dragscroller
-import  wx.lib.imagebrowser as ib
 import  wx.lib.dialogs
 
 if wx.VERSION_STRING < '2.9':
