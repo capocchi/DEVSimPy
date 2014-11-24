@@ -22,23 +22,47 @@ class Layer(DomainBehavior):
     """
     """
 
-    def __init__(self):
+    def __init__(self, coef=0.0):
         DomainBehavior.__init__(self)
 
         ### local copy
-
+        self.coef = coef
 
         self.state = {'status': 'IDLE', 'sigma': INFINITY }
 
+        self.msg1 = None
+        self.msg2 = None
+
+        self.buffer = 0.0
+
     def intTransition(self):
-        pass
+        """
+        """
+        self.state['sigma'] = INFINITY
+        self.state['status'] = 'IDLE'
+        self.buffer = 0.0
 
     def outputFnc(self):
-        pass
+        """
+        """
+        self.poke(self.OPorts[0], Message([self.buffer, 0, 0], self.timeNext))
 
     def extTransition(self):
-        pass
+        """
+        """
+
+        self.msg1 = self.peek(self.IPorts[0])
+        self.msg2 = self.peek(self.IPorts[1])
+
+        if self.msg1: self.buffer += self.msg1.value[0]
+        if self.msg2: self.buffer += self.msg2.value[0]
+
+        if self.state['status'] == 'IDLE':
+            self.state["status"] = "BUZY"
+            self.state['sigma'] = self.coef
+        else:
+            self.state['sigma'] -= self.elapsed
 
     def timeAdvance(self): return self.state['sigma']
 
-    def __str__(self): return self.__name__
+    def __str__(self): return self.__class__.__name__

@@ -484,7 +484,15 @@ class Diagram(Savable, Structurable):
 			elif isinstance(m1, Block) and isinstance(m2, oPort):
 				### TODO insert devs_uam
 				p1 = m1.getDEVSModel().OPorts[n1]
-				p2 = devs_uam.IPorts[m2.id]
+
+				###==============================================================================
+				### Add abstraction level manager
+				if hasattr(diagram, 'current_level') and diagram.current_level>0:
+					p2 = devs_uam.IPorts[m2.id]
+				else:
+					p2 = diagram.getDEVSModel().OPorts[m2.id]
+				###===============================================================================
+
 				Structurable.ConnectDEVSPorts(diagram, p1, p2)
 
 				#p1 = m1.getDEVSModel().OPorts[n1]
@@ -492,7 +500,15 @@ class Diagram(Savable, Structurable):
 				#Structurable.ConnectDEVSPorts(diagram, p1, p2)
 			elif isinstance(m1, iPort) and isinstance(m2, Block):
 				### TODO insert devs_dam
-				p1 = devs_dam.OPorts[m1.id]
+
+				###==============================================================================
+				### Add abstraction level manager
+				if hasattr(diagram, 'current_level') and diagram.current_level>0:
+					p1 = devs_dam.OPorts[m1.id]
+				else:
+					p1 = diagram.getDEVSModel().IPorts[m1.id]
+				###===============================================================================
+
 				p2 = m2.getDEVSModel().IPorts[n2]
 				Structurable.ConnectDEVSPorts(diagram, p1, p2)
 
