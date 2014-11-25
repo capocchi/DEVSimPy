@@ -109,10 +109,10 @@ class GeneralNotebook(Printable):
 			### update spin from stored current level
 			main = wx.GetApp().GetTopWindow()
 			main_tb = main.GetToolBar()
-			t = main_tb.FindControl(main.toggle_list[3])
-			s = main_tb.FindControl(main.toggle_list[4])
-			if t:
-				t.SetValue(str(d.current_level))
+			#t = main_tb.FindControl(main.toggle_list[3])
+			s = main_tb.FindControl(main.toggle_list[3])
+			if s:
+				#t.SetValue(str(d.current_level))
 				s.SetValue(d.current_level)
         #=======================================================================
 
@@ -201,11 +201,11 @@ class GeneralNotebook(Printable):
 
 
 				### update spin control
-				t = self.parent.tb.FindControl(self.parent.toggle_list[2])
+				#t = self.parent.tb.FindControl(self.parent.toggle_list[3])
 				s = self.parent.tb.FindControl(self.parent.toggle_list[3])
-				if t:
+				if s:
 					l = canvas.GetCurrentLevel()
-					t.SetValue(l)
+					#t.SetValue(str(l))
 					s.SetValue(l)
 
 

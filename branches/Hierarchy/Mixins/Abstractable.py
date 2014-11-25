@@ -65,9 +65,9 @@ class Abstractable:
 
         ### if diagram has layers attribute and layer exist, then load it
         if hasattr(diagram, 'layers') and diagram.current_level in diagram.layers:
-            self.diagram = diagram.layers[diagram.current_level]
-            self.layers = diagram.layers
-            self.current_level = diagram.current_level
+            self.diagram = diagram.layers[self.GetCurrentLevel()]
+            #self.layers = diagram.layers
+            #self.current_level = diagram.current_level
             self.DAM  = diagram.DAM
             self.UAM = diagram.UAM
         else:
@@ -167,7 +167,7 @@ class Abstractable:
         layers = self.GetLayers()
         canvas = self
 
-        print "current level is", l,layers
+        print "current level is", l, layers
 
         if l in layers:
             dia = canvas.GetDiagramByLevel(l)
