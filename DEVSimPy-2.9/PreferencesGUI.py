@@ -6,6 +6,11 @@ import __builtin__
 import __main__
 import shutil
 import sys
+import inspect
+import wxversion
+import ConfigParser
+import copy
+import zipfile
 
 import wx.lib.filebrowsebutton as filebrowse
 
@@ -19,7 +24,7 @@ if __name__ == '__main__':
 from HtmlWindow import HtmlFrame
 
 from PluginsGUI import PluginsPanel, GeneralPluginsList
-from Utilities import playSound
+from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni
 
 import ReloadModule
 
@@ -47,10 +52,12 @@ class GeneralPanel(wx.Panel):
 		self.st1 = wx.StaticText(self, wx.ID_ANY, _("Number of recent file:"))
 		self.st2 = wx.StaticText(self, wx.ID_ANY, _("Font size:"))
 		self.st3 = wx.StaticText(self, wx.ID_ANY, _("Deep of history item:"))
+		self.st4 = wx.StaticText(self, wx.ID_ANY, _("wxPython version:"))
 
 		self.st1.SetToolTipString(_("Feel free to change the length of list defining the recent opened files."))
 		self.st2.SetToolTipString(_("Feel free to change the font size of DEVSimpy."))
 		self.st3.SetToolTipString(_("Feel free to change the number of item for undo/redo command"))
+		self.st4.SetToolTipString(_("Feel free to change the version of wxpython used loaded by DEVSimPy"))
 
 		### number of opened file
 		self.nb_opened_file = wx.SpinCtrl(self, wx.ID_ANY, '')
@@ -72,17 +79,26 @@ class GeneralPanel(wx.Panel):
 		self.cb1.SetToolTipString(_("Transparency for the detached frame of diagrams"))
 		self.cb1.SetValue(__builtin__.__dict__['TRANSPARENCY'])
 
+		### wxPython version
+		wxv= map(lambda a: a.split('-')[0], wxversion.getInstalled())
+
+		self.cb2 = wx.ComboBox(self, wx.ID_ANY, GetWXVersionFromIni(), choices= wxv, style=wx.CB_READONLY)
+		self.cb2.SetToolTipString(_("Default version of wxPython."))
+		self.default_wxv = self.cb2.GetValue()
+
 		### Sizer
 		box1 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, _('Properties')), orient=wx.VERTICAL)
 		vsizer = wx.BoxSizer(wx.VERTICAL)
-		hsizer = wx.GridSizer(3, 2, 20, 20)
+		hsizer = wx.GridSizer(4, 2, 20, 20)
 
 		hsizer.AddMany( [	(self.st1, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
 							(self.nb_opened_file, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
 							(self.st3, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
 							(self.nb_history_undo, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
 							(self.st2, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
-							(self.font_size, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5)])
+							(self.font_size, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
+					(self.st4, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
+					(self.cb2, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5)])
 
 		vsizer.Add(self.plugin_dir, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
 		vsizer.Add(self.domain_dir, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
@@ -98,6 +114,10 @@ class GeneralPanel(wx.Panel):
 	def OnApply(self, event):
 		""" Apply change
 		"""
+
+		### safe copy of default_wxv to manage the wx version changing
+		default_wxv = copy.copy(self.default_wxv)
+
 		self.OnNbOpenedFileChanged(event)
 		self.OnNbHistoryUndoChanged(event)
 		self.OnFontSizeChanged(event)
@@ -105,7 +125,13 @@ class GeneralPanel(wx.Panel):
 		self.OnPluginsDirChanged(event)
 		self.OnOutDirChanged(event)
 		self.OnTransparancyChanged(event)
+		self.OnwxPythonVersionChanged(event)
 
+		### if the version of wx has been changed in OnwxPythonVersionChanged, we inform the user.
+		if self.default_wxv != default_wxv:
+			dlg = wx.MessageDialog(self, _("wxPython version has been changed.\nDEVSimPy requires a reboot to load the new version of wxPython."), _('wxPython Version Manager'), wx.OK|wx.ICON_INFORMATION)
+			dlg.ShowModal()
+			dlg.Destroy()
 	###
 	def OnNbOpenedFileChanged(self, event):
 		__builtin__.__dict__['NB_OPENED_FILE'] = self.nb_opened_file.GetValue()		# number of recent files
@@ -147,6 +173,32 @@ class GeneralPanel(wx.Panel):
 	###
 	def OnTransparancyChanged(self, event):
 		__builtin__.__dict__['TRANSPARENCY'] = self.cb1.GetValue()
+
+	def OnwxPythonVersionChanged(self, event):
+		"""
+		"""
+
+		### new value
+		self.default_wxv = self.cb2.GetValue()
+
+		### update the init file into GetUserConfigDir
+		parser = ConfigParser.SafeConfigParser()
+		path = os.path.join(GetUserConfigDir(), 'devsimpy.ini')
+		parser.read(path)
+
+		section, option = ('wxversion', 'to_load')
+
+		### if ini file exist we remove old section and option
+		if os.path.exists(path):
+			parser.remove_option(section, option)
+			parser.remove_section(section)
+			parser.add_section(section)
+
+		if not parser.has_section(section):
+			parser.add_section(section)
+
+		parser.set(section, option, self.default_wxv)
+		parser.write(open(path,'wb'))
 
 class SimulationPanel(wx.Panel):
 	""" Simulation Panel
@@ -327,7 +379,6 @@ class SimulationPanel(wx.Panel):
 		### update cb below cb3
 		self.cb4.Clear()
 		if val == 'PyDEVS':
-
 			for k in PYDEVS_SIM_STRATEGY_DICT:
 				self.cb4.Append(k)
 			self.cb4.SetValue('bag-based')
@@ -335,7 +386,7 @@ class SimulationPanel(wx.Panel):
 			### PyPDEVS
 			for k in PYPDEVS_SIM_STRATEGY_DICT:
 				self.cb4.Append(k)
-			self.cb4.SetValue('original')
+			self.cb4.SetValue('classic')
 
 		### update default value for devs dir et sim strategy
 		self.default_devs_dir = val
@@ -355,8 +406,19 @@ class SimulationPanel(wx.Panel):
 		if __builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] != self.default_devs_dir:
 			### change builtin before recompile the modules
 			__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = self.default_devs_dir
+
 			### recompile the modules.
-			ReloadModule.recompile("DomainInterface.DomainBehavior")
+			### recompile DomainInterface.DomainBehavior with all loaded module depending on this one
+			for m in sys.modules:
+				clsmembers = inspect.getmembers(sys.modules[m], inspect.isclass)
+				if clsmembers != [] and clsmembers[0][0] == 'DomainBehavior':
+					module_path = os.path.dirname(sys.modules[m].__file__)
+					### if m come from amd or cmd, pass path to recompile method to differentiate
+					if zipfile.is_zipfile(module_path):
+						ReloadModule.recompile(module_path)
+					else:
+						ReloadModule.recompile(m)
+
 			ReloadModule.recompile("DomainInterface.DomainStructure")
 			ReloadModule.recompile("DomainInterface.MasterModel")
 

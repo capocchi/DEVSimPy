@@ -21,7 +21,7 @@ import re
 import inspect
 import __builtin__
 import gettext
-import wx
+#import wx
 
 _ = gettext.gettext
 
@@ -67,7 +67,7 @@ class DumpBase(object):
 	""" DumpBase class
 	"""
 
-	### list of available extention
+	### list of available extension
 	WhiteList = ('.cmd','.amd', '.dsp', '.js', '.xml', '.yaml', '.yml', '.tar','.zip','.rar','.7zip','.tar','.gz','.7z','.s7z','.ace','.afa','.alz','.apk','.arc','.arj','.ba','.bh','.cab','.cfs','.cpt','.dra','.dd','.dgc','.dmg','.gca','.ha','hki.','.ice','.j','.kgb','.lzh','.lha','.lzx','.pak','.partimg','.paq6','.paq7','.paq8','.pea','.pim','.pit','.qda','.rk','.sda','.sea','.sen','.sfx','.sit','.sitx','.sqx','.tgz','.Z','.bz2','.tbz2','.lzma','.tlz','.uc','.uc0','.uc2','.ucn','.ur2','.ue2','.uca','.uha','.wim','.xar','.xp3','.yz1','.zipx','.zoo','.zz','.rz','.sfark')
 
 	### Dict of tuples extension/class

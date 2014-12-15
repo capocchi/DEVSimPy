@@ -238,7 +238,7 @@ if USE_FLATNOTEBOOK:
 				FlatNotebook class that allows overriding and adding methods for the right pane of DEVSimPy
 			"""
 			fnb.FlatNotebook.__init__(self, *args, **kwargs)
-			GeneralNotebook.__init__(self,*args, **kwargs)
+			GeneralNotebook.__init__(self, *args, **kwargs)
 
 			self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.OnClosingPage)
 			self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
@@ -256,7 +256,7 @@ if USE_FLATNOTEBOOK:
 			close_item = self._rmenu.FindItemByPosition(4)
 			#close_item.Enable(self.GetPageCount() > 1)
 
-			### unbind last event binding with OnCLose Page
+			### unbind last event binding with OnClose Page
 			self.Unbind(wx.EVT_MENU, close_item)
 
 			### bind event with new OnDeletePage
@@ -265,7 +265,7 @@ if USE_FLATNOTEBOOK:
 		###
 		def OnClosingPage(self, evt):
 			""" Called when tab is closed.
-				With FlatNoteBokk, this method is used to ask if diagram should be saved and to update properties panel
+				With FlatNoteBock, this method is used to ask if diagram should be saved and to update properties panel
 			"""
 
 			id = self.GetSelection()
@@ -274,10 +274,13 @@ if USE_FLATNOTEBOOK:
 
 			mainW =  self.GetTopLevelParent()
 
+			val = None
+
 			if diagram.modify:
 				title = self.GetPageText(id)
-				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram ?')%(title), title, wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
+				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram?')%(title), title, wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
 				val = dlg.ShowModal()
+
 				if val == wx.ID_YES:
 					mainW.OnSaveFile(evt)
 				elif val == wx.ID_NO:
@@ -290,6 +293,10 @@ if USE_FLATNOTEBOOK:
 			else:
 				self.DeleteBuiltinConstants()
 
+			### if user cancel the delete process, we stop the event propagation in order to enable the DeletePage function
+			if val == wx.ID_CANCEL:
+				evt.Veto()
+			else:
 			self.pages.remove(canvas)
 
 			### update (clear) of properties panel (Control notebook)
@@ -298,10 +305,17 @@ if USE_FLATNOTEBOOK:
 			if propPanel:
 				propPanel.UpdatePropertiesPage(propPanel.defaultPropertiesPage())
 
+				evt.Skip()
+
+		def DeletePage(self, *args, **kwargs):
+			canvas = self.GetPage(args[0])
+			result = fnb.FlatNotebook.DeletePage(self, *args, **kwargs)
+			return not canvas in self.pages
 
 		def OnClosePage(self, evt):
-			self.DeletePage(self.GetSelection())
-			return True
+			return self.DeletePage(self.GetSelection())
+
+
 else:
 
 	#
@@ -373,6 +387,7 @@ else:
 					else:
 						dlg.Destroy()
 						return False
+
 
 					dlg.Destroy()
 

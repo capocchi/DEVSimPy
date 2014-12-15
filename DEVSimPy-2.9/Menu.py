@@ -27,6 +27,7 @@ from tempfile import gettempdir
 
 import Container
 import ZipManager
+import pluginmanager
 
 #File menu identifiers
 ID_NEW = wx.ID_NEW
@@ -723,6 +724,7 @@ class ShapePopupMenu(wx.Menu):
 		rotateIL=wx.MenuItem(self, ID_LEFT_ROTATE_INPUT_SHAPE, _("&Left Rotate\tCtrl+L"), _("Rotate on the left"))
 		rotateOR=wx.MenuItem(self, ID_RIGHT_ROTATE_OUTPUT_SHAPE, _("&Right Rotate\tCtrl+R"), _("Rotate on the right"))
 		rotateOL=wx.MenuItem(self, ID_LEFT_ROTATE_OUTPUT_SHAPE, _("&Left Rotate\tCtrl+L"), _("Rotate on the left"))
+		rename=wx.MenuItem(self, ID_RENAME_SHAPE, _("&Rename"), _("Rename the label of the model"))
 		delete=wx.MenuItem(self, ID_DELETE_SHAPE, _("Delete"), _("Delete the model"))
 		lock=wx.MenuItem(self, ID_LOCK_SHAPE, _("Lock"), _("Lock the link"))
 		unlock=wx.MenuItem(self, ID_UNLOCK_SHAPE, _("Unlock"), _("Unlock the link"))
@@ -731,8 +733,8 @@ class ShapePopupMenu(wx.Menu):
 		exportCMD=wx.MenuItem(self, ID_EXPORT_CMD_SHAPE, _("CMD"), _("Model exported to a cmd file"))
 		exportXML=wx.MenuItem(self, ID_EXPORT_XML_SHAPE, _("XML"), _("Model exported to a xml file"))
 		exportJS=wx.MenuItem(self, ID_EXPORT_JS_SHAPE, _("JS"), _("Model exported to a js (join) file"))
-		plugin = wx.MenuItem(self, ID_PLUGINS_SHAPE, _("Plugin"), _("Plugin manager"))
-		properties=wx.MenuItem(self, ID_PROPERTIES_SHAPE, _("Properties"), _("Edit the attributs"))
+		plugin = wx.MenuItem(self, ID_PLUGINS_SHAPE, _("Plug-in"), _("Plug-in manager"))
+		properties=wx.MenuItem(self, ID_PROPERTIES_SHAPE, _("Properties"), _("Edit the attributes"))
 
 		edit.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		editModel.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -747,6 +749,7 @@ class ShapePopupMenu(wx.Menu):
 		rotateIR.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rotateR.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		rotateOL.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rotateL.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		rotateOR.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rotateR.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		rename.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rename.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		export.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'export.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		delete.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'delete.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		lock.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'lock.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -809,6 +812,7 @@ class ShapePopupMenu(wx.Menu):
 				Rotate_out_menu = rotate_subMenu.AppendMenu(ID_ROTATE_OUTPUT_SHAPE, _("Output"), rotate_output_subMenu)
 
 			Rotate_menu = self.AppendMenu(ID_ROTATE_SHAPE, _("Rotate"), rotate_subMenu)
+			Rename_menu = self.AppendItem(rename)
 
 			self.AppendSeparator()
 			# pour tout les model sur le canvas ormis les connection et le model que l'on veut connecter (la source)
@@ -822,13 +826,15 @@ class ShapePopupMenu(wx.Menu):
 
 			if isinstance(shape, Container.CodeBlock):
 				self.AppendSeparator()
-				#Export_menu = self.AppendItem(export)
-				Export_menu=self.AppendMenu(-1,_("Export"),export_subMenu)
+				Export_menu = self.AppendMenu(-1, _("Export"), export_subMenu)
 				Export_SubMenu1 = export_subMenu.AppendItem(exportAMD)
+
+				### if Wcomp general plugin is enabled, sub menu appear in contextual menu of amd (right clic)
+				pluginmanager.trigger_event("ADD_WCOMP_EXPORT_MENU", parent=self, model=shape, submenu= export_subMenu)
 
 			elif isinstance(shape, Container.ContainerBlock):
 				self.AppendSeparator()
-				Export_menu=self.AppendMenu(-1,_("Export"),export_subMenu)
+				Export_menu = self.AppendMenu(-1, _("Export"), export_subMenu)
 				Export_SubMenu1 = export_subMenu.AppendItem(exportCMD)
 				Export_SubMenu2 = export_subMenu.AppendItem(exportXML)
 				Export_SubMenu3 = export_subMenu.AppendItem(exportJS)
@@ -839,7 +845,7 @@ class ShapePopupMenu(wx.Menu):
 			self.AppendSeparator()
 			Delete_menu = self.AppendItem(delete)
 
-			### Plugin manager only for Block model
+			### Plug-in manager only for Block model
 			if isinstance(shape, Container.CodeBlock) or isinstance(shape, Container.ContainerBlock):
 				### only for amd or cmd
 				if shape.model_path != "":
@@ -847,6 +853,12 @@ class ShapePopupMenu(wx.Menu):
 					#if ZipManager.Zip.HasPlugin(shape.model_path):
 					Plugin_menu = self.AppendItem(plugin)
 					self.__canvas.Bind(wx.EVT_MENU, shape.OnPluginsManager, id=ID_PLUGINS_SHAPE)
+
+					### if Wcomp general plug-in is enabled, sub menu appear in contextual menu of amd (right clic)
+					pluginmanager.trigger_event("ADD_WCOMP_STRATEGY_MENU", parent=self, model=shape)
+
+				### if state trajectory general plug-in is enabled, sub menu appear in contextual menu (right clic)
+				pluginmanager.trigger_event("ADD_STATE_TRAJECTORY_MENU", parent=self, model=shape)
 
 			self.AppendSeparator()
 			Properties_menu = self.AppendItem(properties)
@@ -862,6 +874,7 @@ class ShapePopupMenu(wx.Menu):
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnRotateOutputL, id=ID_LEFT_ROTATE_OUTPUT_SHAPE)
 
 			self.__canvas.Bind(wx.EVT_MENU, shape.OnRotateR, id=ID_RIGHT_ROTATE_SHAPE)
+			self.__canvas.Bind(wx.EVT_MENU, shape.OnRenameFromMenu, id=ID_RENAME_SHAPE)
 			self.__canvas.Bind(wx.EVT_MENU, shape.OnRotateL, id=ID_LEFT_ROTATE_SHAPE)
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnDelete, id=ID_DELETE_SHAPE)
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnCut, id=ID_CUT_SHAPE)

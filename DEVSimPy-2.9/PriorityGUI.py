@@ -10,7 +10,12 @@ import DragList
 class PriorityGUI(wx.Frame):
 
 	def __init__(self, parent, id, title, priorityList):
-		wx.Frame.__init__(self, parent, id, title, size = (250, 300), style = wx.FRAME_NO_WINDOW_MENU|wx.DEFAULT_FRAME_STYLE|wx.CLOSE_BOX| wx.STAY_ON_TOP)
+		wx.Frame.__init__(	self,
+							parent,
+							id,
+							title,
+							size = (350, 300),
+							style = wx.FRAME_NO_WINDOW_MENU|wx.DEFAULT_FRAME_STYLE|wx.CLOSE_BOX| wx.STAY_ON_TOP)
 
 		icon = wx.EmptyIcon()
 		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "priority.png"), wx.BITMAP_TYPE_ANY))
@@ -35,9 +40,9 @@ class PriorityGUI(wx.Frame):
 		
 		self.listCtrl.SetToolTipString(_('Drag and drop a model in order to define its priority'))
 		
-		### id list not empty, first item is slelected
+		### id list not empty, first item is selected
 		if self.listCtrl.GetItemCount():
-			self.listCtrl.Select(0,1)
+			self.listCtrl.Select(0, 1)
 		
 		### -------------------------------------------------------------------
 		
@@ -50,9 +55,9 @@ class PriorityGUI(wx.Frame):
 		up_btn.Enable(self.listCtrl.GetItemCount() != 0)
 		down_btn.Enable(self.listCtrl.GetItemCount() != 0)
 		
-		hbox.Add(up_btn,1)
-		hbox.Add(down_btn,1)
-		hbox.Add(apply_btn,1)
+		hbox.Add(up_btn, 1)
+		hbox.Add(down_btn, 1)
+		hbox.Add(apply_btn, 1)
 		
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(self.listCtrl, 1, wx.EXPAND | wx.ALL , 5)
@@ -115,7 +120,7 @@ class PriorityGUI(wx.Frame):
 			self.listCtrl.DeleteItem(pos)
 			self.listCtrl.InsertItem(item)
 			self.listCtrl.SetItemState(new_pos, 1, wx.LIST_STATE_SELECTED)
-			self.listCtrl.Select(new_pos,1)
+			self.listCtrl.Select(new_pos, 1)
 
 ### ------------------------------------------------------------
 class TestApp(wx.App):

@@ -133,9 +133,6 @@ def GetEditor(parent, id, title="", obj=None, **kwargs):
     else:
         editor = GeneralEditor(parent, id, title)
 
-#	if not parent:
-#		editor.Reparent(wx.GetApp().GetTopWindow())
-
     return editor
 
 #################################################################
@@ -790,13 +787,17 @@ class EditionNotebook(wx.Notebook):
     def AddEditPage(self, title="", path=""):
         """
         Adds a new page for editing to the notebook and keeps track of it.
+
         @type title: string
         @param title: Title for a new page
         """
+
         fileCode = ""
+
         if path != "":
             ### FIXME: try to consider zipfile in zipfile
             L = re.findall("(.*\.(amd|cmd))\%s(.*)" % os.sep, path)
+
             if L != []:
                 model_path, ext, name = L.pop(0)
                 if zipfile.is_zipfile(model_path):
@@ -1158,6 +1159,29 @@ class Editor(wx.Frame, wx.Panel):
         # notebook
         self.read_only = False
 
+	def update(self, concret_subject=None):
+		""" Update method that manages the embedded editor depending of the selected model in the canvas
+		"""
+
+		state = concret_subject.GetState()
+		canvas = state['canvas']
+		model = state['model']
+
+		### delete all tab on notebook
+		while(self.nb.GetPageCount()):
+			self.nb.DeletePage(0)
+
+		### add behavioral code
+		self.AddEditPage(model.label, model.python_path)
+
+		### add test file
+		if hasattr(model, 'GetTestFile'):
+			L = model.GetTestFile()
+			for i,s in enumerate(map(lambda l: os.path.join(model.model_path, l), L)):
+				self.AddEditPage(L[i], s)
+
+		self.cb = model
+
     def CreateMenu(self):
         """ Create the menu
         """
@@ -1168,12 +1192,15 @@ class Editor(wx.Frame, wx.Panel):
         file = wx.Menu()
 
         self.save = wx.MenuItem(file, wx.NewId(), _('&Save\tCtrl+S'), _('Save the file'))
+		self.save_as = wx.MenuItem(file, wx.NewId(), _('&Save As\tCtrl+S'), _('Save as an other file'))
         self.quit = wx.MenuItem(file, wx.NewId(), _('&Quit\tCtrl+Q'), _('Quit the application'))
 
         self.save.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save.png')))
+		self.save_as.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save_as.png')))
         self.quit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'exit.png')))
 
         file.AppendItem(self.save)
+		file.AppendItem(self.save_as)
         file.AppendItem(self.quit)
         ### -----------------------------------------------------------------
 
@@ -1231,6 +1258,7 @@ class Editor(wx.Frame, wx.Panel):
 
         ### binding event
         self.Bind(wx.EVT_MENU, self.OnSaveFile, id=self.save.GetId())
+		self.Bind(wx.EVT_MENU, self.OnSaveAsFile, id=self.save_as.GetId())
         self.Bind(wx.EVT_MENU, self.QuitApplication, id=self.quit.GetId())
         self.Bind(wx.EVT_MENU, self.nb.OnCut, id=self.cut.GetId())
         self.Bind(wx.EVT_MENU, self.nb.OnCopy, id=self.copy.GetId())
@@ -1372,17 +1400,47 @@ class Editor(wx.Frame, wx.Panel):
 
             new_instance = self.ConfigSaving(base_name, dir_name, code)
 
-            if base_name.endswith('py'):
                 ### there is error in file ?
                 currentPage.error_flag = isinstance(new_instance, Exception)
 
                 self.CheckErrors(base_name, code, new_instance)
-            else:
-                self.nb.DoSaveFile(code)
 
         else:
             ### status bar notification
             self.Notification(False, _('%s not saved' % fn), _('file in readonly'))
+
+
+	def OnSaveAsFile(self, event):
+		"""
+		"""
+
+		currentPage = self.nb.GetCurrentPage()
+		fn = currentPage.GetFilename()
+
+		if not self.read_only:
+
+			assert fn != ''
+
+			dir_name = os.path.dirname(fn)
+
+			msg = "Python files (*.py)|*.py|All files (*)|*"
+
+			wcd = _(msg)
+			home = dir_name or HOME_PATH
+			save_dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=home, defaultFile='', wildcard=wcd, style=wx.SAVE | wx.OVERWRITE_PROMPT)
+
+		if save_dlg.ShowModal() == wx.ID_OK:
+
+			path = os.path.normpath(save_dlg.GetPath())
+			ext = os.path.splitext(path)[-1]
+			file_name = save_dlg.GetFilename()
+
+			### code text
+			code = currentPage.GetValue().encode('utf-8')
+			code = '\n'.join(code.splitlines()) + '\n'
+
+						### write code in last name saved file
+			self.nb.WriteFile(path, code)
 
     ### NOTE: Editor :: ConfigSaving 			=> Configure save vars
     def ConfigSaving(self, base_name, dir_name, code):
@@ -1463,6 +1521,7 @@ class Editor(wx.Frame, wx.Panel):
     def OnChar(self, event):
         """
         """
+
         ### enable save icon in toolbar
         self.toolbar.EnableTool(self.save.GetId(), True)
 
@@ -1470,6 +1529,53 @@ class Editor(wx.Frame, wx.Panel):
         self.Notification(True, _('%s modified' % (os.path.basename(self.nb.GetCurrentPage().GetFilename()))), '')
 
         event.Skip()
+
+	### NOTE: Editor :: OnOpenFile 			=> Event OnOpenFile
+	def OnOpenFile(self, event):
+		"""
+		"""
+		if self.nb.GetCurrentPage().isModified():
+			dlg = wx.MessageDialog(self, _('Save changes?'), _('Code Editor'),
+								   wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL | wx.ICON_QUESTION)
+			val = dlg.ShowModal()
+			if val == wx.ID_YES:
+				self.OnSaveFile(event)
+				self.DoOpenFile()
+			elif val == wx.ID_CANCEL:
+				dlg.Destroy()
+			else:
+				self.DoOpenFile()
+		else:
+			self.DoOpenFile()
+
+	### NOTE: Editor :: OnSaveFile			=> Event when save menu has been clicked
+	def OnSaveFile(self, event):
+		""" Save menu has been clicked.
+		"""
+		currentPage = self.nb.GetCurrentPage()
+
+		if not self.read_only:
+
+			assert currentPage.GetFilename() != ''
+
+			### base and dir name of python file
+			base_name = os.path.basename(currentPage.GetFilename())
+			dir_name = os.path.dirname(currentPage.GetFilename())
+
+			### code text
+			code = currentPage.GetValue().encode('utf-8')
+			code = '\n'.join(code.splitlines()) + '\n'
+
+			new_instance = self.ConfigSaving(base_name, dir_name, code)
+
+			### there is error in file ?
+			currentPage.error_flag = isinstance(new_instance, Exception)
+
+			self.CheckErrors(base_name, code, new_instance)
+
+		else:
+			### status bar notification
+			self.Notification(False, _('%s not saved' % (currentPage.GetFilename())), _('file in readonly'))
 
     ### NOTE: Editor :: QuitApplication 		=> Event on quit application
     def QuitApplication(self, event):
@@ -1566,6 +1672,16 @@ class BlockEditor(Editor):
         menu.PrependMenu(wx.NewId(), _("Insert"), insert)
         ### -------------------------------------------------------------------
 
+		### insert new icon in toolbar (icon are not available in embeded editor (Show menu)
+		###-------------------------------------------------------------------
+		tb = self.GetToolBar()
+		tb.InsertSeparator(tb.GetToolsCount())
+		tb.AddTool(peek.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')),shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
+		tb.AddTool(poke.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')),shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
+		tb.AddTool(state.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')),shortHelpString=_('New state'), longHelpString=_('Insert a code for a new state'))
+		tb.Realize()
+
+		###-------------------------------------------------------------------
         self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
         self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=poke.GetId())
         self.Bind(wx.EVT_MENU, self.OnInsertState, id=state.GetId())
@@ -1665,21 +1781,21 @@ class BlockEditor(Editor):
                 import Components
 
                 new_args = Components.GetArgs(new_class)
+
                 ### update args (behavioral attributes) before saving
                 if new_args:
 
-                    ### add new attributes
-                    not_intersection = dict(
-                        [(item, new_args[item]) for item in new_args.keys() if not item in self.cb.args.keys()])
-                    self.cb.args.update(not_intersection)
+					### add new attributes and update other
+					self.cb.args.update(dict([(item, new_args[item]) for item in new_args.keys()]))
+
 
                     ### del old attributes
                     for key, val in self.cb.args.items():
                         if not new_args.has_key(key):
                             del self.cb.args[key]
-                        else:
-                            ### status bar notification
-                            self.Notification(False, _('args not updated'), _('New class from %s') % (new_class))
+				#		else:
+				#			### status bar notification
+				#			self.Notification(False, _('args not updated'), _('New class from %s') % (new_class))
 
             ### user would change the behavior during a simulation without saving
             if on_simulation_flag and new_instance is not bool:
@@ -1947,27 +2063,6 @@ class GeneralEditor(Editor):
         else:
             return True
 
-    def update(self, concret_subject=None):
-        """ Update method that manages the embedded editor depending of the selected model in the canvas
-        """
-
-        state = concret_subject.GetState()
-        canvas = state['canvas']
-        model = state['model']
-
-        ### delete all tab on notebook
-        while(self.nb.GetPageCount()):
-            self.nb.DeletePage(0)
-
-        ### add behavioral code
-        self.AddEditPage(model.label, model.python_path)
-
-        ### add test file
-        if hasattr(model, 'GetTestFile'):
-            L = model.GetTestFile()
-            for i,s in enumerate(map(lambda l: os.path.join(model.model_path, l), L)):
-                self.AddEditPage(L[i], s)
-
 ### -----------------------------------------------------------------------------------------------
 class TestApp(wx.App):
     """ Testing application
@@ -2034,7 +2129,7 @@ def start():
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Text Editor for DEVSimPY application')
+	parser = argparse.ArgumentParser(description='Text Editor for DEVSimPy')
 
     ### Class info---------------------------------------------------------------------------------
     parser.add_argument('-c', '--class-info', action="store_true", dest="info", help='Show __str__ for each class')

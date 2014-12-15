@@ -507,7 +507,7 @@ class DEVSComponent:
 
     ###
     def OnLog(self, event):
-        """
+		""" Shows informations inserted with debugger instructions into the model.
         """
 
         ### devs model, block label, log file in temp dir
@@ -522,11 +522,11 @@ class DEVSComponent:
                 msg = f.read()
 
             ### show log file content
-            dlg = wx.lib.dialogs.ScrolledMessageDialog(parent, msg, _("%s logger")%label)
+			dlg = wx.lib.dialogs.ScrolledMessageDialog(parent, msg, _("%s logger")%label, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
             dlg.ShowModal()
 
         else:
-            dial = wx.MessageDialog(parent, _("Log is empty. If you want to debug, please use the debugger method."), label, wx.OK|wx.ICON_INFORMATION)
+			dial = wx.MessageDialog(parent, _("Log is empty.\nIf you want to debug, please use the debugger method."), label, wx.OK|wx.ICON_INFORMATION)
             dial.ShowModal()
 
     def updateDEVSPriorityList(self):
@@ -651,6 +651,7 @@ class DEVSComponent:
                         # 	text = f.read()
 
                 name = os.path.basename(python_path)
+
                 editorFrame.AddEditPage(name, python_path)
                 editorFrame.Show()
 

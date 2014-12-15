@@ -117,7 +117,7 @@ class LabelDialog(wx.Dialog):
 			### update of block from canvas
 			self.canvas.UpdateShapes([self.block])
 			if isinstance(self.parent, AttributeEditor):
-				### update of label filed in propertie dialogue
+				### update of label filed in properties dialogue
 				self.parent._list.SetCellValue(0, 1, self.block.label)
 
 		evt.Skip()
@@ -129,13 +129,13 @@ class LabelDialog(wx.Dialog):
 		label = btn.GetLabel()
 
 		if self.block:
-			### label of radio button and the vlaue of a label_pos attribut are similar ;-)
+			### label of radio button and the value of a label_pos attribute are similar ;-)
 			self.block.label_pos = label
 
 			### update of block from canvas
 			self.canvas.UpdateShapes([self.block])
 			if isinstance(self.parent, AttributeEditor):
-				### update of label_pos filed in propertie dialogue
+				### update of label_pos filed in properties dialogue
 				self.parent._list.SetCellValue(1, 1, self.block.label_pos)
 
 	def OnOk(self, evt):
@@ -160,7 +160,7 @@ class LabelDialog(wx.Dialog):
 		self.Close()
 
 	def OnCancel(self, evt):
-		""" Cancle button has been clicked
+		""" Cancel button has been clicked
 		"""
 		if self.block:
 			self.block.label = self.old_label
