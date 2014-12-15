@@ -160,8 +160,7 @@ class CodeGenerator():
         self.generated_code = "\nfrom mock import MagicMock\n" \
                               "# from tempfile import gettempdir\n" \
                               "import sys\n" \
-                              "import os\n" \
-                              "\nlogFile = os.path.join('~', 'Desktop', 'testLog')\n"
+                              "import os\n"
 
     @staticmethod
     def reindent(code):
@@ -193,6 +192,7 @@ class CodeGenerator():
         """
         for key in dic.keys():
             if dic[key]:
+                print dic[key]
                 self.obj_list.append(eval(key)(dic[key]))
         self.propagate()
         return self.generated_code
@@ -234,7 +234,9 @@ class GeneratorInterface(object):
         :param value: string
         :return: string
         """
-        return "with open(logFile, 'a') as log: log.write({})".format(value)
+        #log = "with open(logFile, 'a') as log: log.write({})".format(value)
+        log = "print %s" % value
+        return log
 
     def generate_decorator_struct(self):
         """

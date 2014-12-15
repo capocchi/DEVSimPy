@@ -214,14 +214,13 @@ class AtomicDEVS(BaseDEVS):
 
 	###
 	def peek(self, p):
-		"""Retrives message from input port {\tt p}.
+		"""Retrieves message from input port {\tt p}.
 		"""
 		value = self.myInput.get(p, None)
 		return copy.deepcopy(value) if value else value
 
-
 	def peek_all(self):
-		"""Retrives messages from all input port {\tt p}.
+		"""Retrieves messages from all input port {\tt p}.
 		"""
 		return [(p, copy.deepcopy(m)) for p,m in self.myInput.items()]
 
@@ -375,7 +374,7 @@ class CoupledDEVS(BaseDEVS):
 
 		# Other cases (illegal coupling):
 		else:
-			sys.stderr.write("%s %s\n"%(str(p1.host), str(p2.host.parent)) )
+			sys.stderr.write("%s %s\n"%(str(p1.host.blockModel.label), str(p2.host.blockModel.label)) )
 			sys.stderr.write("%s %s %s\n"%(str(p1), str(p2), self.__str__()))
 			Error("Illegal coupling!", 1)
 

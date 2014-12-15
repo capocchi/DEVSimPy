@@ -13,7 +13,7 @@ def recompile(modulename):
 	"""
 
 	### modulename is file type
-	if os.path.exists(modulename):
+	if os.path.isfile(modulename) and os.path.exists(modulename):
 		import ZipManager
 		zf = ZipManager.Zip(modulename)
 		return zf.Recompile()

@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import sys
+import os
+
 import Container
+from Utilities import getOutDir
 
 def makeJoin(diagram = None, addInner = [], liaison = [], model = {}, bool = False, x = [40], y = [40], labelEnCours = ""):
 	"""
@@ -227,10 +231,10 @@ def addModel(model, component, label, x, y, dim_m_width, dim_m_height):
 	return [model, x, y]
 
 def makeDEVSConf(model, liaison, addInner, filename):
-	""" Make conf file from D graph of the diagram for visualisation on web site
+	""" Make conf file from D graph of the diagram for visualization on web site
 	"""
 	
-	sys.stdout.write("Configuration du fichier en cours...\n")
+	sys.stdout.write("Setting file...\n")
 	text = ""
 	
 	forme_model = {"var":0,"x":1,"y":2,"in":3,"out":4,"dim_width":5,"dim_height":6}
@@ -302,12 +306,16 @@ def makeDEVSConf(model, liaison, addInner, filename):
 		str_liaison = str_liaison + l
 	text = text + str_liaison
 	
-	file = open(filename, "w")
-	file.write(text)
-	file.close()
+	### js file is stored in out directory
+	fn = os.path.join(getOutDir(), filename)
 
+	### file exist ?
+	update = os.path.exists(fn)
 
-	if os.path.isfile(filename):
-		sys.stdout.write("Le fichier JS a bien ete genere.\n")
+	try:
+		with open(fn, "wb") as f:
+			f.write(text)
+	except:
+		sys.stdout.write("%s file not %s.\n"%(fn, 'updated' if update else 'completed'))
 	else:
-		sys.stdout.write("Le fichier JS n'a pas ete genere.\n")
+		sys.stdout.write("%s file %s.\n"%(fn, 'updated' if update else 'completed'))

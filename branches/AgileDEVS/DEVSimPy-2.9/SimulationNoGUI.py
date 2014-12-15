@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 """
-Name: MakeSimulation.py
-Brief descritpion:
+Name: SimulationNoGUI.py
+Brief descritpion: Overwrite some methods to implement the no gui version of DEVSimPy and make simulation from dsp file
+in batch mode
 Author(s): A-T. Luciani <atluciani@univ-corse.fr>
 Version:  1.0
-Last modified:
+Last modified: 2014.11.15 by L. Capocchi
 GENERAL NOTES AND REMARKS:
 
 GLOBAL VARIABLES AND FUNCTIONS:
@@ -13,27 +14,28 @@ GLOBAL VARIABLES AND FUNCTIONS:
 
 import os
 import sys
-#import random
 import threading
 import time
-import Container
 
 from tempfile import gettempdir
 
 import __builtin__
 import traceback
 
-from SimulationGUI import SimulationThread
-from Join import makeDEVSConf, makeJoin
+import gettext
+_ = gettext.gettext
 
 def makeJS(filename):
 	"""
 	"""
 
-	a = Container.Diagram()
+	from Container import Diagram
+	from Join import makeDEVSConf, makeJoin
+
+	a = Diagram()
 	if a.LoadFile(filename):
-		sys.stdout.write("\nFichier charge\n")
-		master = Container.Diagram.makeDEVSInstance(a)
+		sys.stdout.write(_("\nFile loaded\n"))
+		master = Diagram.makeDEVSInstance(a)
 
 		addInner = []
 		liaison = []
@@ -63,33 +65,56 @@ class Printer:
 		sys.stdout.write("\r\x1b[K"+data.__str__())
 		sys.stdout.flush()
 
+def yes(prompt = 'Please enter Yes/No: '):
+	while True:
+	    try:
+	        i = raw_input(prompt)
+	    except KeyboardInterrupt:
+	        return False
+	    if i.lower() in ('yes','y'): return True
+	    elif i.lower() in ('no','n'): return False
+
 def makeSimulation(filename, T):
 	"""
 	"""
 
-	a = Container.Diagram()
+	from Container import Diagram
 
+	sys.stdout.write(_("\nSimulation in batch mode with %s\n")%__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'])
+
+	a = Diagram()
+
+	sys.stdout.write(_("\nLoading %s file...\n")%(os.path.basename(filename)))
 	if a.LoadFile(filename):
-		sys.stdout.write("\nFichier charge\n")
-
+		sys.stdout.write(_("%s loaded!\n")%(os.path.basename(filename)))
 
 		try:
-			master = Container.Diagram.makeDEVSInstance(a)
-			#print "master -> " , master
-			#print "a -> " , a
+			sys.stdout.write(_("\nMaking DEVS instance...\n"))
+			master = Diagram.makeDEVSInstance(a)
 		except :
 			return False
 		else:
-			sim = runSimulation(master,T)
+			sys.stdout.write(_("DEVS instance created!\n"))
+
+			sys.stdout.write(_("\nPerforming DEVS simulation...\n"))
+
+			sim = runSimulation(master, T)
 			thread = sim.Run()
 
-			# first_time = time.time()
-			# while(thread.isAlive()):
-				# new_time = time.time()
-				# Printer(new_time - first_time)
+			first_time = time.time()
+			while(thread.isAlive()):
+				new_time = time.time()
+				output = new_time - first_time
+				Printer(output)
 
-			sys.stdout.write("\nTime : %s"%str(master.FINAL_TIME))
-			sys.stdout.write("\nFin.\n")
+			sys.stdout.write(_("\nDEVS simulation completed!\n"))
+
+		### inform that data file has been generated
+		for m in filter(lambda a: hasattr(a, 'fileName'), master.componentSet):
+			for i in range(len(m.IPorts)):
+				fn ='%s%s.dat'%(m.fileName,str(i))
+				if os.path.exists(fn):
+					sys.stdout.write(_("\nData file %s has been generated!\n")%(fn))
 
 class runSimulation:
 	"""
@@ -111,6 +136,8 @@ class runSimulation:
 
 		### profiling simulation with hotshot
 		self.prof = False
+
+		self.verbose = False
 
 		# definition du thread, du timer et du compteur pour les % de simulation
 		self.thread = None
@@ -140,8 +167,11 @@ class runSimulation:
 		################################################################################################################
 
 		if self.master:
+			from SimulationGUI import simulator_factory
+			if not self.ntl:
 			self.master.FINAL_TIME = float(self.time)
-			self.thread = SimulationThread(self.master, self.selected_strategy, self.prof, self.ntl)
+
+			self.thread = simulator_factory(self.master, self.selected_strategy, self.prof, self.ntl, self.verbose)
 
 		return self.thread
 

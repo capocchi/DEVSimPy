@@ -104,7 +104,7 @@ class Populable(object):
 		return
 
 class GeneralPluginsList(CheckListCtrl, Populable):
-	""" Class for populate CheckListCtrl with DEVSimPy plugins stored in config file
+	""" Class for populate CheckListCtrl with DEVSimPy plug-ins stored in configuration file
 	"""
 
 	def __init__(self, *args, **kwargs):
@@ -322,7 +322,7 @@ class BlockPluginsList(CheckListCtrl, Populable):
 		if not self.is_populate:
 			self.model = model
 
-			if self.model and not hasattr(self.model, "plug-ins"):
+			if self.model and not hasattr(self.model, "plugins"):
 				self.model.plugins = []		### dynamic append attribute
 
 			plugins_list = self.GetPluginsList(self.model.model_path) if self.model else []
@@ -601,7 +601,7 @@ class PluginsPanel(wx.Panel):
 			apply(module.Config, (), {'parent':self})
 
 class ModelPluginsManager(wx.Frame):
-	""" Plugins Manager for DEVSimPy Block
+	""" Plug-ins Manager for DEVSimPy Block
 	"""
 	def __init__(self, **kwargs):
 		""" Constructor.

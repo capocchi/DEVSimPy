@@ -3,7 +3,10 @@
 - N1 : obligÃ© de mettre la premiere ligne du fichier .dat d'un fileGenerator a 0 0 sinon bad synchronisation
 - N3: dnd marche pas sous mac avec wx 2.9 qui n'est pas stable de toute maniÃ¨re.
 - N3: recompile plante lorsque on veux changer le nom d'un amd dans une lib par un clique droit dans le panneau lib
-- N3: icon de DEVSimPy ne s'affiche pas sous windows
+- N3: icon de DEVSimPy ne s'affiche pas sous windows.
+- N1: lorsque le domain est sur Dropbox, impossible de sauveagrder des modèles .py sans avoir un probleme d'importation dans RealoadModule.recompile
+- N3: lorsque glisser/deposer d'un amd de l'exterieur il n'y pas le compteur des labels qui apparait (pas de Atomic_Name0 par exemple pour le premier)
+-N3 : le fusion des quickscope ne fonctionne plus. Lorsqu'il est décoché.
 
 --------------------------------------------------------------AmÃ©lioration-------------------------------------------------------------
 - N3 : voir la fonction ChangeForm pour amÃ©liorer la crÃ©ation de connnection shape en Ã©vitant les modÃ¨les
@@ -431,3 +434,22 @@ invoque rpar un callback lorsque le fichier python est renseignÃ© dans le wizard
 -Fait le 28/02/2014 par LC: ajout -> edition du code des modèles dans une AUI à droite. Pour l'activer il faut aller dans Affichage->Editeur
 -Fait le 21/03/2014 par LC: correction -> passage de FINAL_TIME dans la classe Master comme attribut car bug dans le SimulationGUI.
 -Fait le 21/03/2014 par LC: amélioration -> possibilité de tourner les ports sur les quatre faces par des sous menus suplémentaires du menu Rotate.
+-Fait le 01/10/2014 par LC: correction -> ajout de la dépendance zipfile dans LibraryTree.py.
+-Fait le 01/10/2014 par LC: correction -> enregistrement d'un nouveau amd ou cmd créee par clic droit sur une librairie dans le bon repertoire de la lib.
+-Fait le 09/10/2014 par LC: correction -> ligne 1722 de Editor.py pour corriger la mise à jour des modifications faites dans les args d'un modèle édité.
+-Fait le 09/10/2014 par LC: ajout -> icon pour nouveau peek, poke ou état dans l'editeur externe de code (pas pour l'embarqué du fait d'une mauvaise gestion du père de BlockEditor qui empeche l'execution de ConfigureGUI)
+-Fait le 11/10/2014 par LC: ajout -> save as à partir d'un py venant ou pas d'un amrd ou cmd. Il faut aller dans Fichier-> Save as.
+-Fait le 24/10/2014 par LC: correction -> SimulationNoGui
+-Fait le 25/10/2014 par LC: correction -> adapation de la méthode makeDEVSInstance dans Container.Py pour éviter le crash avec PyPDEVS lorsque on veut simuler deux fois d'affilé.
+-Fait le 28/10/2014 par LC: correction -> possibilité de faire de changer de noyau de simulation et de simuler sans redemarer DEVSimPy (il fallait refaire un setDEVSModel dans makeDEVSInstance quoi qu'il arrive)
+-Fait le 28/10/2014 par LC: amélioration -> no gui
+-Fait le 28/10/2014 par LC: amélioration -> on peux faire un poke quelque soit le noyau de simulation mais attention il faut faire un return self.poke(p,v). De meme il faut faire un return de self.state dans intTransition et extTransition. Pour l'instant seule le peek n'est pas générique (mais commencé... en commentaire dans le DomainBehvaior)
+-Fait le 30/10/2014 par LC: correction -> lorsqu'un modèle hérite d'un QuickScope, To_Disk ou MessagesCollector, il fallait le reinstancier pour que le double clic prenne effet. Maintenant j'ai rajouté un morceaux de code à la fin du __setstate__ du codeBlock dans Container.py, juste avant le self.__dict__.update(state) (important http://www.ibm.com/developerworks/library/l-pypers/) afin de redefinir le vrai heritage avec ScopeGUI ou DiskGUI
+-Fait le 31/10/2014 par LC: amélioration -> lorsque un dsp est construit avec une lib qui n'est pas dans Domain (à la construction), on esssai dans setstate du CodeBlock de trouver si un rep de Domain est présent dans le faut chemin python_path si c'est le cas, on fait une composition pour rendre le python_path ok
+-Fait le 07/11/2014 par LC: ajout -> possibilité de choisir dans les préférences générales la version de wx utilisée par DEVSimPy.
+-Fait le 07/11/2014 par LC: amélioration -> changement du path de configuration. Plus AppData/Romaing mais ~
+-Fait le 15/11/2014 par LC: amélioration -> un fichier indépendant pour gérer le mode no gui : devsimpy-nogui.py
+-Fait le 22/11/2014 par LC: ajout -> menu rename sur le clique droit des modèles (atomique, couplé et port).
+-Fait le 23/11/2014 par LC: amélioration -> evt.Veto pour améliorer la gestion de la fermeture des diagrammes.
+
+

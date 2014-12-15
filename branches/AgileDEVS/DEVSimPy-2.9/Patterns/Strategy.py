@@ -30,6 +30,7 @@ import threading
 import inspect
 
 from pluginmanager import trigger_event
+from Utilities import getOutDir
 
 import __builtin__
 import re
@@ -507,7 +508,8 @@ def terminate_never(model, clock):
 
 
 class SimStrategy4(SimStrategy):
-    """ Original strategy for PyPDEVS simulation
+    """ classic strategy for PyPDEVS simulation
+        setClassicDEVS is True and confTransition in disabled
     """
 
     def __init__(self, simulator = None):
@@ -528,6 +530,7 @@ class SimStrategy4(SimStrategy):
 
         S = Simulator(self._simulator.model)
 
+
         ### old version of PyPDEVS
         if len(inspect.getargspec(S.simulate).args) > 1:
 
@@ -535,9 +538,9 @@ class SimStrategy4(SimStrategy):
 
             ### TODO
         	if self._simulator.ntl:
-        		kwargs['termination_condition']=terminate_never
+        		kwargs['termination_condition'] = terminate_never
         	else:
-        		kwargs['termination_time']=T
+        		kwargs['termination_time'] = T
 
         	S.simulate(**kwargs)
 
@@ -545,7 +548,17 @@ class SimStrategy4(SimStrategy):
         else:
 
             ### see simconfig.py to have informations about setters
+
+            ### verbose manager, if None print are displayed in stdout, else in the out/verbose.txt file
+            if self._simulator.verbose:
             S.setVerbose(None)
+            else:
+                out_dir = os.path.join(HOME_PATH, 'out')
+                if not os.path.exists(out_dir):
+                    os.mkdir(out_dir)
+
+                verbose_file = os.path.join(getOutDir(), 'verbose.txt')
+                S.setVerbose(verbose_file)
 
             ### TODO
             if self._simulator.ntl:
@@ -553,7 +566,23 @@ class SimStrategy4(SimStrategy):
             else:
                 S.setTerminationTime(T)
 
-            S.setClassicDEVS()
+            S.setClassicDEVS(self.SetClassicDEVSOption())
+
+            #S.setRealTime()
             S.simulate()
 
     	self._simulator.terminate()
+
+    def SetClassicDEVSOption(self):
+        return True
+
+class SimStrategy6(SimStrategy4):
+    """ Parallel strategy for PyPDEVS simulation
+        setClassicDEVS is False and confTransition in enabled
+    """
+
+    def __init__(self, simulator = None):
+        SimStrategy4.__init__(self, simulator)
+
+    def SetClassicDEVSOption(self):
+        return False
