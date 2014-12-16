@@ -2,7 +2,7 @@
 
 """
     Authors: T. Ville (tim.ville@me.com)
-    Date: 04/11/2013
+    Date: 08/12/2014
     Description:
     Depends: wx, devsimpy
 """
