@@ -1100,6 +1100,7 @@ class MainApplication(wx.Frame):
         msg = "DEVSimPy files (*.dsp)|*.dsp|"
         if __builtin__.__dict__['YAML_IMPORT']:
             msg+="YAML files (*.yaml)|*.yaml|"
+			msg+="JSON files (*.json)|*.json|"
         msg+="XML files (*.xml)|*.xml|All files (*)|*)"
 
         wcd = _(msg)

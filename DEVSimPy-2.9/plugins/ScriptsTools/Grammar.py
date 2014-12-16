@@ -2,7 +2,7 @@
 
 """
     Authors: T. Ville (tim.ville@me.com)
-    Date: 02/07/2014
+    Date: 08/12/2014
     Description:
     Depends: simpleparse
 """
@@ -57,6 +57,9 @@ int_transition          := states_fnc / transition_states
 output_fnc              := c"after ", CURRENT_STATE, c" output ", OUTPUT_MSG, " "?, "!"
 ext_transition          := c"when in ", CURRENT_STATE, c" and receive ", INPUT_MSG, c" go to ", NEXT_STATE, " "?, "!"
 '''
+        self.init()
+
+    def init(self):
         self.cg = CodeGenerator()
         self.TO_MATCHED = dict(
             int_transition=[],
@@ -114,6 +117,7 @@ ext_transition          := c"when in ", CURRENT_STATE, c" and receive ", INPUT_M
         :param test_paths: specification and destination files paths
         :param test: boolean (optional)
         """
+        self.init()
         behavior = "# -*- coding: utf-8 -*-"
         behavior_path = None
         if not test:
@@ -132,6 +136,7 @@ ext_transition          := c"when in ", CURRENT_STATE, c" and receive ", INPUT_M
         else:
             # pass
             print behavior
+            return behavior
 
     @staticmethod
     def print_matched(matched_dict):
@@ -192,7 +197,6 @@ class CodeGenerator():
         """
         for key in dic.keys():
             if dic[key]:
-                print dic[key]
                 self.obj_list.append(eval(key)(dic[key]))
         self.propagate()
         return self.generated_code
@@ -500,8 +504,8 @@ class initial_states(GeneratorInterface):
     initial states code generator object
     """
 
-    def __init__(self):
-        super(initial_states, self).__init__()
+    def __init__(self, matched):
+        super(initial_states, self).__init__(matched)
         self.obj = []
 
     def update_fnc(self):
@@ -529,8 +533,8 @@ class int_transition(GeneratorInterface):
     internal transition code generator object
     """
 
-    def __init__(self):
-        super(int_transition, self).__init__()
+    def __init__(self, matched):
+        super(int_transition, self).__init__(matched)
         self.obj = []
 
     def update_fnc(self):
@@ -591,8 +595,8 @@ class ext_transition(GeneratorInterface):
     external transition code generator object
     """
 
-    def __init__(self):
-        super(ext_transition, self).__init__()
+    def __init__(self, matched):
+        super(ext_transition, self).__init__(matched)
 
     def update_fnc(self):
         """
@@ -669,8 +673,8 @@ class output_fnc(GeneratorInterface):
     output function code generator object
     """
 
-    def __init__(self):
-        super(output_fnc, self).__init__()
+    def __init__(self, matched):
+        super(output_fnc, self).__init__(matched)
 
     def update_fnc(self):
         """
