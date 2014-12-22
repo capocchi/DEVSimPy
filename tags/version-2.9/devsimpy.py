@@ -1904,6 +1904,8 @@ class DEVSimPyApp(wx.App):
 		the main frame when it is time to do so.
 		"""
 
+		self.locale = wx.Locale(wx.LANGUAGE_DEFAULT)
+                
 		# Set up the exception handler...
 		sys.excepthook = ExceptionHook
 
