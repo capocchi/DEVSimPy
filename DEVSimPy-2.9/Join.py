@@ -13,7 +13,7 @@ def makeJoin(diagram = None, addInner = [], liaison = [], model = {}, bool = Fal
 	#Largeurs et hauteurs d'un modele de base
 	dim_m_width = 100
 	dim_m_height = 60
-				
+
 	if bool == True:
 		if labelEnCours == "DoubleAdd":
 			print " --> " , diagram , " <-- "
@@ -24,9 +24,9 @@ def makeJoin(diagram = None, addInner = [], liaison = [], model = {}, bool = Fal
 		else:
 			model = addModel(model, diagram, None, 20, 20, 1300, 300)[:1][0];
 			addInner = makeAddInner(diagram, addInner)
-	
+
 	for c in diagram.GetShapeList():
-		
+
 		if isinstance(c, Container.ConnectionShape):
 			# print "Le C actuel est un ConnectionShape"
 			model1, portNumber1 = c.input
@@ -54,7 +54,7 @@ def makeJoin(diagram = None, addInner = [], liaison = [], model = {}, bool = Fal
 			makeJoin(c, addInner, liaison, model, bool, x, y, c.label)
 	# print "--------------------------------------------"
 	return [model, liaison, addInner]
-	
+
 def xyPositionDefine(x, y, tmp, dim_m_height):
 
 	if isinstance(x, int):
@@ -62,10 +62,10 @@ def xyPositionDefine(x, y, tmp, dim_m_height):
 	elif isinstance(x, list):
 		lenX = len(x) -1
 		tmp_x = x[lenX]
-		
+
 		lenY = len(y) -1
 		tmp_y = y[lenY]
-		
+
 		if tmp_x > 1080:
 			tmp_x = 40
 			tmp_y = tmp_y + 100 + dim_m_height
@@ -74,16 +74,16 @@ def xyPositionDefine(x, y, tmp, dim_m_height):
 		else:
 			tmp_x = tmp_x + tmp + 160
 			x.append(tmp_x)
-	
+
 	return [x, y]
-	
+
 def makeAddInner(c, addInner):
 	# Re-vérification pour ere sur qu'il s'agit bien d'un modele couple
 	if isinstance(c, Container.ContainerBlock):
 		# print "Le C actuel est un containerBlock"
 		shapeList = c.GetShapeList()
 		for s in shapeList:
-			#Si il s'agit d'un modele atom ou couple, alors on l'ajoute a notre liste addInner 
+			#Si il s'agit d'un modele atom ou couple, alors on l'ajoute a notre liste addInner
 			if (isinstance(s, Container.CodeBlock) or isinstance(s, Container.ContainerBlock)):
 				addInner.append(str(c.label.replace(' ', '_')+".addInner("+s.label.replace(' ', '_')+");"))
 	return addInner
@@ -130,14 +130,14 @@ def typeDefine(comp):
 		type = "oport"
 	else:
 		type = "undefined"
-	return type	
-	
+	return type
+
 def exist(dico,label):
 	if label in dico.keys():
 		return True
 	else:
 		return False
-	
+
 def constructModel(type, name, x, y, dim_width, dim_height, iPorts, oPorts):
 	if (type == "atom"):
 		color = "orange"
@@ -148,8 +148,8 @@ def constructModel(type, name, x, y, dim_width, dim_height, iPorts, oPorts):
 	elif (type == "iport"):
 		color = "#CCDD68"
 	elif (type =="undefined"):
-		color = "gray"	
-	
+		color = "gray"
+
 	if iPorts != []:
 		str_iPorts = "\n\tiPorts: ["
 		for i in iPorts:
@@ -159,14 +159,14 @@ def constructModel(type, name, x, y, dim_width, dim_height, iPorts, oPorts):
 				str_iPorts = str_iPorts +  ',"'+i+'"'
 	else:
 		str_iPorts = ""
-	
+
 	if oPorts == []:
 		if str_iPorts != "":
 			str_iPorts = str_iPorts + ']'
 	else:
 		if str_iPorts != "":
 			str_iPorts = str_iPorts + '],'
-	
+
 	if oPorts != []:
 		str_oPorts = "\n\toPorts: ["
 		for o in oPorts:
@@ -177,26 +177,26 @@ def constructModel(type, name, x, y, dim_width, dim_height, iPorts, oPorts):
 		str_oPorts = str_oPorts + ']\n'
 	else:
 		str_oPorts = "\n"
-	
+
 	if isinstance(x, int):
 		tmp_x = x
 		tmp_y = y
 	elif isinstance(x, list):
 		lenX = len(x) -1
 		tmp_x = x[lenX]
-		
+
 		lenY = len(y) -1
 		tmp_y = y[lenY]
-	
+
 	if len(name) > 22:
 		label = name[:22] + "..."
 	else:
 		label = name
-	
+
 	var = 'var '+name+' = devs.Model.create({\n\trect: {x: '+str(tmp_x)+', y: '+str(tmp_y)+', width: '+str(dim_width)+', height: '+str(dim_height)+'},\n\tlabel: "'+label+'",\n\tlabelAttrs: { \'font-weight\': \'bold\', fill: \'white\', \'font-size\': \'12px\' },\n\tattrs: { fill: "'+color+'" },\n\tshadow: true,'+str_iPorts+str_oPorts+'});\n'
-	
+
 	return var
-	
+
 def addModel(model, component, label, x, y, dim_m_width, dim_m_height):
 	if label is not None:
 		label1 = label.replace(' ', '_')
@@ -214,31 +214,31 @@ def addModel(model, component, label, x, y, dim_m_width, dim_m_height):
 				oPorts.append("out"+str(i))
 		type = typeDefine(component)
 		cm = constructModel(type, label1, x, y, dim_m_width, dim_m_height, iPorts, oPorts)
-		
+
 		if isinstance(x, int):
 			tmp_x = x
 			tmp_y = y
 		elif isinstance(x, list):
 			lenX = len(x) -1
 			tmp_x = x[lenX]
-			
+
 			lenY = len(y) -1
 			tmp_y = y[lenY]
-		
+
 		model.update({label1: [cm, tmp_x, tmp_y, iPorts, oPorts, dim_m_width, dim_m_height]})
 		x, y = xyPositionDefine(x, y, tmp, dim_m_height)
-	
+
 	return [model, x, y]
 
 def makeDEVSConf(model, liaison, addInner, filename):
 	""" Make conf file from D graph of the diagram for visualization on web site
 	"""
-	
+
 	sys.stdout.write("Setting file...\n")
 	text = ""
-	
+
 	forme_model = {"var":0,"x":1,"y":2,"in":3,"out":4,"dim_width":5,"dim_height":6}
-	
+
 	# Calcul de la hauteur du plus grand diagramme
 	# Recuperation du plus grand diagramme, pour modifier sa hauteur
 	m_x = 0
@@ -261,12 +261,12 @@ def makeDEVSConf(model, liaison, addInner, filename):
 	oldWidth = 1300 + tmp
 	newWidth = m_x + tmp
 	# oldHeight = 300
-	# newHeight = 
+	# newHeight =
 	# print "newWidth : ", newWidth , " - m_x : " , m_x , " - tmp : " , tmp
 	var = var.replace(", width: " + str(oldWidth) + ", ", ", width: " + str(newWidth) + ", ")
 	var = var.replace(", height: 300},", ", height: " + str(m_y) + "},")
 	model[labelDiagramme][forme_model["var"]] = var
-	
+
 	# Config du diagramme
 	title = "Discrete Event System Specification"
 	description = 'Description du diagramme.'
@@ -276,36 +276,36 @@ def makeDEVSConf(model, liaison, addInner, filename):
 		dim_width = 1200
 	elif newWidth >= 1200:
 		dim_width = newWidth + 40
-		
+
 	if newWidth < 1200:
 		dim_height = 1200
 	elif newWidth >= 1200:
 		dim_height = m_y + 40
-	
-	
+
+
 	devs = '\nvar devs = Joint.dia.devs;\nJoint.paper("world", ' + str(dim_width) + ', ' + str(dim_height) + ');'
 	arrow = '\nvar arrow = devs.arrow;'
 	text = text + 'title(\''+title+'\');' + '\n' +'description(\''+ description+'\');' + '\n' +dimension+ ';\n' + devs
-	
+
 	str_model = "\n\n"
 	for m in model:
 		str_model = str_model + model[m][forme_model["var"]]
 		# print model[m]
 		# print "Next :"
 	text = text + str_model
-	
+
 	str_addInner = "\n\n"
 	for i in addInner:
 		str_addInner = str_addInner + i + "\n"
 	text = text + str_addInner
-	
+
 	text = text + arrow
-	
+
 	str_liaison = "\n\n"
 	for l in liaison:
 		str_liaison = str_liaison + l
 	text = text + str_liaison
-	
+
 	### js file is stored in out directory
 	fn = os.path.join(getOutDir(), filename)
 
