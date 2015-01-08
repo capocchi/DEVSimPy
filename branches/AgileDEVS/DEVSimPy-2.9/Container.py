@@ -347,7 +347,7 @@ class Diagram(Savable, Structurable):
 
 		#ReloadModule.recompile("DomainInterface.DomainBehavior")
 		#ReloadModule.recompile("DomainInterface.DomainStructure")
-			#ReloadModule.recompile("DomainInterface.MasterModel")
+		#ReloadModule.recompile("DomainInterface.MasterModel")
 
 		### PyPDEVS work with this
 		#diagram.setDEVSModel(DomainInterface.MasterModel.Master())
@@ -2170,9 +2170,9 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 
 		### Update the nb1 panel properties only for Block and Port (call update in ControlNotebook)
 		if isinstance(item, Attributable):
-		self.__state['model'] = item
-		self.__state['canvas'] = self
-		self.notify()
+			self.__state['model'] = item
+			self.__state['canvas'] = self
+			self.notify()
 
 		self.Refresh()
 
@@ -3196,9 +3196,9 @@ class CodeBlock(Block, Achievable):
 						path = os.path.join(DOMAIN_PATH,dir,a[-1])
 						break
 
-				### if path is always wrong, flag is visible
+			### if path is always wrong, flag is visible
 			if os.path.exists(path):
-					state['python_path'] = path
+				state['python_path'] = path
 			else:
 				state['bad_filename_path_flag'] = True
 

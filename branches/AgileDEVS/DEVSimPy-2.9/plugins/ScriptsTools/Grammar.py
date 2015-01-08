@@ -34,9 +34,7 @@ class MyParser():
 name                    := [a-zA-Z_],[a-zA-Z0-9_]*
 string                  := ("'", name, "'") / ('"', name, '"')
 number                  := [1-9], [0-9]*
-list                    := "(", or / and, ")"
-or                      := string / number, (c" or " / (" "?, "|", " "?), string / number)+
-and                     := string / number, (c" and " / (" "?, ",", " "?), string / number)+
+list                    := "(", string / number, (c" and " / (" "?, ",", " "?), string / number)*, ")"
 
 states                  := states_fnc / state_name
 states_fnc              := passive_states / hold_states
@@ -106,7 +104,6 @@ ext_transition          := c"when in ", CURRENT_STATE, c" and receive ", INPUT_M
                 init = True
                 test_data = (test_data[len(INIT_START):]).strip()
             for matched in self.TO_MATCHED.keys():
-                # if test_data.startswith(self.TO_MATCHED[matched]["start"]):
                 success, children, nextchar = myparser.parse(test_data, production=matched)
                 if success:
                     self.TO_MATCHED[matched].append(self.get_matched(children, repr(test_data), [init]))
@@ -629,13 +626,14 @@ class ext_transition(GeneratorInterface):
         {1} realStatus.upper() == {2}:
             current_status, next_status = {2}, {3}
             expected_msg = {4}
-
-            for line in xrange(len(model.IPorts)):
-                tmsg = model.peek(model.IPorts[line])
-
-                if tmsg is not None:
-                    msg = tmsg
         """.format(self.fnc, cond, current_state, next_state, input_msg)
+        condit_struct += """
+        for line in xrange(len(model.IPorts)):
+            tmsg = model.peek(model.IPorts[line])
+
+            if tmsg is not None:
+                msg = tmsg
+        """
         return condit_struct
 
     def specif_checker(self):
@@ -659,7 +657,7 @@ class ext_transition(GeneratorInterface):
             if (type(expected_msg) is int or type(expected_msg) is str) and msg.value[0] == expected_msg:
                 {2}
 
-            elif (type(expected_msg) is tuple or type(expected_msg) is list) and msg.value[0] in expected_msg:
+            elif (type(expected_msg) is tuple or type(expected_msg) is list) and msg.value == expected_msg:
                 {2}
 
         else:
@@ -668,7 +666,6 @@ class ext_transition(GeneratorInterface):
 
 
 class output_fnc(GeneratorInterface):
-
     """
     output function code generator object
     """
@@ -701,17 +698,8 @@ class output_fnc(GeneratorInterface):
 ### ------------------------------------------------------------------------ ###
 
 if __name__ == "__main__":
-    parser = MyParser()
-    if len(sys.argv) == 1:
-        SPECIFICATIONS = """
-        hold in 'ACTIVE' for time 10 !
-        from 'ACTIVE' go to 'IDLE' !
-        passivate in 'IDLE' !
-        when in 'IDLE' and receive (1, 2, 3, 'truc') go to 'ACTIVE' !
-        """
-        parser.generate(SPECIFICATIONS, True)
-
-    elif len(sys.argv) == 3:
+    PARSER = MyParser()
+    if len(sys.argv) == 3:
         _, SPEC, TEST = sys.argv
 
-        parser.generate((SPEC, TEST))
+        PARSER.generate((SPEC, TEST))

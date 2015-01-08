@@ -297,13 +297,13 @@ if USE_FLATNOTEBOOK:
 			if val == wx.ID_CANCEL:
 				evt.Veto()
 			else:
-			self.pages.remove(canvas)
+				self.pages.remove(canvas)
 
-			### update (clear) of properties panel (Control notebook)
-			propPanel = mainW.GetControlNotebook().GetPropPanel()
-			### If properties panel is active, we update it
-			if propPanel:
-				propPanel.UpdatePropertiesPage(propPanel.defaultPropertiesPage())
+				### update (clear) of properties panel (Control notebook)
+				propPanel = mainW.GetControlNotebook().GetPropPanel()
+				### If properties panel is active, we update it
+				if propPanel:
+					propPanel.UpdatePropertiesPage(propPanel.defaultPropertiesPage())
 
 				evt.Skip()
 

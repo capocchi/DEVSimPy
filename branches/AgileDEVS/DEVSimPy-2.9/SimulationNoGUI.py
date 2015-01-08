@@ -169,9 +169,9 @@ class runSimulation:
 		if self.master:
 			from SimulationGUI import simulator_factory
 			if not self.ntl:
-			self.master.FINAL_TIME = float(self.time)
+				self.master.FINAL_TIME = float(self.time)
 
 			self.thread = simulator_factory(self.master, self.selected_strategy, self.prof, self.ntl, self.verbose)
 
-		return self.thread
+			return self.thread
 
