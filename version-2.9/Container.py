@@ -3723,7 +3723,6 @@ class ContainerBlock(Block, Diagram, Structurable):
 			img = wx.Bitmap(os.path.join(ICON_PATH_16_16, 'coupled3.png'), wx.BITMAP_TYPE_ANY)
 			dc.DrawBitmap(img, self.x[1]-20, self.y[0])
 
-
 		Block.draw(self, dc)
 
 	###
