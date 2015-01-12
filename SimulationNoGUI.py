@@ -17,6 +17,8 @@ import sys
 import time
 
 import __builtin__
+from cStringIO import StringIO
+from io import TextIOWrapper, BytesIO
 
 import gettext
 _ = gettext.gettext
