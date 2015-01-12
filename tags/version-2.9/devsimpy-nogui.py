@@ -76,7 +76,7 @@ if __name__ == '__main__':
  	import gettext
  	_ = gettext.gettext
 
- 	sys.stdout.write(_("DEVSimPy - version %s\n"%__version__ ))
+ 	#sys.stdout.write(_("DEVSimPy - version %s\n"%__version__ ))
 
 	if len(sys.argv) == 2:
 		### check dsp filename
