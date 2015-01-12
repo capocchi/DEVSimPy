@@ -69,7 +69,7 @@ def yes(prompt = 'Please enter Yes/No: '):
 	    if i.lower() in ('yes','y'): return True
 	    elif i.lower() in ('no','n'): return False
 
-def makeSimulation(filename, T, json_trace=False):
+def makeSimulation(filename, T, json_trace=True):
 	"""
 	"""
 
@@ -80,35 +80,36 @@ def makeSimulation(filename, T, json_trace=False):
 
 	a = Diagram()
 
-	if not json_trace:
-		sys.stdout.write(_("\nLoading %s file...\n")%(os.path.basename(filename)))
-	else:
+	if json_trace:
 		json = {'date':time.strftime("%c")}
-        json['mode']='no-gui'
+		json['mode']='no-gui'
+	else:
+		sys.stdout.write(_("\nLoading %s file...\n")%(os.path.basename(filename)))
 
 	if a.LoadFile(filename):
 
-		if not json_trace:
-			sys.stdout.write(_("%s loaded!\n")%(os.path.basename(filename)))
-		else:
+		if json_trace:
 			json['file'] = filename
+		else:
+			sys.stdout.write(_("%s loaded!\n")%(os.path.basename(filename)))
 
 		try:
 			if not json_trace:
 				sys.stdout.write(_("\nMaking DEVS instance...\n"))
 			master = Diagram.makeDEVSInstance(a)
 		except :
-			if not json_trace:
-				return False
-			else:
+			if json_trace:
 				json['devs_instance'] = None
 				json['success'] = False
 				sys.stdout.write(str(json))
+
+			return False
+
 		else:
-			if not json_trace:
-				sys.stdout.write(_("DEVS instance created!\n"))
-			else:
+			if json_trace:
 				json['devs_instance'] = str(master)
+			else:
+				sys.stdout.write(_("DEVS instance created!\n"))
 
 			if not json_trace:
 				sys.stdout.write(_("\nPerforming DEVS simulation...\n"))
@@ -134,15 +135,22 @@ def makeSimulation(filename, T, json_trace=False):
 			for i in range(len(m.IPorts)):
 				fn ='%s%s.dat'%(m.fileName,str(i))
 				if os.path.exists(fn):
-					if not json_trace:
-						sys.stdout.write(_("\nData file %s has been generated!\n")%(fn))
-					else:
+					if json_trace:
 						json['output'].append({'name':os.path.basename(fn), 'path':fn})
+					else:
+						sys.stdout.write(_("\nData file %s has been generated!\n")%(fn))
+		if json_trace:
+			sys.stdout.write(str(json))
+
+		return True
+
 	else:
 		if json_trace:
 			json['file'] = None
         	json['success'] = True
          	sys.stdout.write(str(json))
+
+        return False
 
 class runSimulation:
 	"""
