@@ -3402,6 +3402,8 @@ class CodeBlock(Block, Achievable):
 						if lib_name in path:
 							path = p+path.split(lib_name)[-1]
 							break
+
+				print path
 			else:
 				### try to find if python_path contains a directory wich is also in Domain
 				### subdirectories of Domain
