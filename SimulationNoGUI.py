@@ -118,6 +118,9 @@ def makeSimulation(filename, T, json_trace=True):
 		else:
 			if json_trace:
 				json['devs_instance'] = str(master)
+				if isinstance(master, tuple):
+					sys.stdout.write(str(json))
+					return False
 			else:
 				if isinstance(master, tuple):
 					sys.stdout.write(_("DEVS instance not created: %s\n")%str(master))
