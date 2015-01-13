@@ -25,6 +25,8 @@ import gettext
 _ = gettext.gettext
 
 sys.path.append(os.path.join('Domain', 'Phidgets'))
+sys.path.append(os.path.join('Domain', 'Phidgets', 'Devices'))
+
 
 def makeJS(filename):
 	"""
