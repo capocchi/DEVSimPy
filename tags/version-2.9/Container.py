@@ -3376,7 +3376,8 @@ class CodeBlock(Block, Achievable):
 					else:
 						state['model_path'] = path
 						### we find the python file using re module because path can comes from windows and then sep is not the same and os.path.basename don't work !
-						state['python_path'] = os.path.b(path, re.findall("([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0])
+						#state['python_path'] = os.path.b(path, re.findall("([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0])
+						state['python_path'] = os.path.basename(python_path)
 						print state['python_path'], python_path
 
 				else:
