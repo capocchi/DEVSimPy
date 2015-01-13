@@ -3377,7 +3377,7 @@ class CodeBlock(Block, Achievable):
 						state['model_path'] = path
 						### we find the python file using re module because path can comes from windows and then sep is not the same and os.path.basename don't work !
 						state['python_path'] = os.path.join(path, re.findall("([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
-						print state['python_path']
+						print state['python_path'], python_path
 
 				else:
 					state['bad_filename_path_flag'] = True
