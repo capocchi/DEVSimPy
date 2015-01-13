@@ -108,7 +108,7 @@ if __name__ == '__main__':
 				time = 0.0
 
 			### launch simulation
-			makeSimulation(filename, time)
+			makeSimulation(filename, time, False)
 
 	else:
 		sys.stderr.write(_('ERROR: Unspecified .dsp file!\n'))
