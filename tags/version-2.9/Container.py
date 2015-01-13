@@ -368,7 +368,6 @@ class Diagram(Savable, Structurable):
 		shape_list = diagram.GetShapeList()
 		block_list = filter(lambda c: isinstance(c, Block), shape_list)
 
-		print "sdcc"
 		### for all codeBlock shape, we make the devs instance
 		for m in block_list:
 
@@ -380,6 +379,7 @@ class Diagram(Savable, Structurable):
 				print _('Error making DEVS instances for:\n%s'%(str(cls)))
 				return False
 			else:
+				print cls
 				### DEVS model recovery
 				devs = getInstance(cls, m.args)
 
