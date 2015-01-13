@@ -20,6 +20,9 @@ import re
 import wx
 import inspect
 
+import gettext
+_ = gettext.gettext
+
 from pluginmanager import trigger_event
 from traceback import format_exception
 from Utilities import listf, path_to_module
