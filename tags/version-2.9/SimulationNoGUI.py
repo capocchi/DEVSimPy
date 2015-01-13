@@ -101,7 +101,9 @@ def makeSimulation(filename, T, json_trace=True):
 		try:
 			if not json_trace:
 				sys.stdout.write(_("\nMaking DEVS instance...\n"))
+
 			master = Diagram.makeDEVSInstance(a)
+
 		except Exception, info:
 			### get exception info
 			exc_info = traceback.format_exc()
@@ -116,32 +118,34 @@ def makeSimulation(filename, T, json_trace=True):
 			return False
 
 		else:
-			if json_trace:
-				json['devs_instance'] = str(master)
-				if isinstance(master, tuple):
-					sys.stdout.write(str(json))
-					return False
-			else:
-				if isinstance(master, tuple):
-					sys.stdout.write(_("DEVS instance not created: %s\n")%str(master))
-					return False
+			if master:
+
+				if json_trace:
+					json['devs_instance'] = str(master)
+					if isinstance(master, tuple):
+						sys.stdout.write(str(json))
+						return False
 				else:
-					sys.stdout.write(_("DEVS instance created!\n"))
+					if isinstance(master, tuple):
+						sys.stdout.write(_("DEVS instance not created: %s\n")%str(master))
+						return False
+					else:
+						sys.stdout.write(_("DEVS instance created!\n"))
 
-			if not json_trace:
-				sys.stdout.write(_("\nPerforming DEVS simulation...\n"))
+				if not json_trace:
+					sys.stdout.write(_("\nPerforming DEVS simulation...\n"))
 
-			sim = runSimulation(master, T)
-			thread = sim.Run()
+				sim = runSimulation(master, T)
+				thread = sim.Run()
 
-			first_time = time.time()
-			while(thread.isAlive()):
-				new_time = time.time()
-				output = new_time - first_time
-				if not json_trace: Printer(output)
+				first_time = time.time()
+				while(thread.isAlive()):
+					new_time = time.time()
+					output = new_time - first_time
+					if not json_trace: Printer(output)
 
-			if not json_trace:
-				sys.stdout.write(_("\nDEVS simulation completed!\n"))
+				if not json_trace:
+					sys.stdout.write(_("\nDEVS simulation completed!\n"))
 
 		if json_trace:
 			json['time'] = output
