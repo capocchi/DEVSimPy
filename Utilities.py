@@ -15,6 +15,8 @@ import math
 import inspect
 import ConfigParser
 import wxversion
+import gettext
+_ = gettext.gettext
 
 from itertools import combinations
 
