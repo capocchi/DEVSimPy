@@ -101,10 +101,12 @@ def makeSimulation(filename, T, json_trace=True):
 				sys.stdout.write(_("\nMaking DEVS instance...\n"))
 			master = Diagram.makeDEVSInstance(a)
 		except Exception, info:
+			### get exception info
 			exc_info = traceback.format_exc()
 			if json_trace:
 				json['devs_instance'] = None
 				json['success'] = False
+				json['info'] = exc_info
 				sys.stdout.write(str(json))
 			else:
 				sys.stdout.write("\n%s"%exc_info)
