@@ -19,6 +19,7 @@ import time
 import __builtin__
 from cStringIO import StringIO
 from io import TextIOWrapper, BytesIO
+import traceback
 
 import gettext
 _ = gettext.gettext
@@ -100,7 +101,7 @@ def makeSimulation(filename, T, json_trace=True):
 				sys.stdout.write(_("\nMaking DEVS instance...\n"))
 			master = Diagram.makeDEVSInstance(a)
 		except Exception, info:
-			exc_info = sys.exc_info()
+			exc_info = traceback.format_exc()
 			if json_trace:
 				json['devs_instance'] = None
 				json['success'] = False
