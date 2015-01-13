@@ -24,6 +24,8 @@ import traceback
 import gettext
 _ = gettext.gettext
 
+sys.path.append(os.path.join('Domain', 'Phidgets'))
+
 def makeJS(filename):
 	"""
 	"""
