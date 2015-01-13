@@ -375,7 +375,7 @@ class Diagram(Savable, Structurable):
 			cls = Components.GetClass(m.python_path)
 
 			### Class is wrong ?
-			if isinstance(cls, (ImportError, tuple, None)):
+			if isinstance(cls, (ImportError, tuple)) or cls is None:
 				print _('Error making DEVS instances for:\n%s'%(str(cls)))
 				return False
 			else:
