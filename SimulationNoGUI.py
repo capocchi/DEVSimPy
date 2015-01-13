@@ -147,23 +147,26 @@ def makeSimulation(filename, T, json_trace=True):
 				if not json_trace:
 					sys.stdout.write(_("\nDEVS simulation completed!\n"))
 
-		if json_trace:
-			json['time'] = output
-			json['output'] = []
+				if json_trace:
+					json['time'] = output
+					json['output'] = []
 
-		### inform that data file has been generated
-		for m in filter(lambda a: hasattr(a, 'fileName'), master.componentSet):
-			for i in range(len(m.IPorts)):
-				fn ='%s%s.dat'%(m.fileName,str(i))
-				if os.path.exists(fn):
-					if json_trace:
-						json['output'].append({'name':os.path.basename(fn), 'path':fn})
-					else:
-						sys.stdout.write(_("\nData file %s has been generated!\n")%(fn))
-		if json_trace:
-			sys.stdout.write(str(json))
+				### inform that data file has been generated
+				for m in filter(lambda a: hasattr(a, 'fileName'), master.componentSet):
+					for i in range(len(m.IPorts)):
+						fn ='%s%s.dat'%(m.fileName,str(i))
+						if os.path.exists(fn):
+							if json_trace:
+								json['output'].append({'name':os.path.basename(fn), 'path':fn})
+							else:
+								sys.stdout.write(_("\nData file %s has been generated!\n")%(fn))
+				if json_trace:
+					sys.stdout.write(str(json))
 
-		return True
+				return True
+
+			else:
+				return False
 
 	else:
 		if json_trace:
