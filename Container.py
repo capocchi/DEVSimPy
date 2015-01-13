@@ -3368,6 +3368,8 @@ class CodeBlock(Block, Achievable):
 							if lib_name in path:
 								path = p+path.split(lib_name)[-1]
 
+					print path
+
 					### if path is always wrong, flag is visible
 					if not os.path.exists(path):
 						state['bad_filename_path_flag'] = True
@@ -3402,8 +3404,6 @@ class CodeBlock(Block, Achievable):
 						if lib_name in path:
 							path = p+path.split(lib_name)[-1]
 							break
-
-				print path
 			else:
 				### try to find if python_path contains a directory wich is also in Domain
 				### subdirectories of Domain
