@@ -14,17 +14,19 @@ class RandomGenerator(DomainBehavior):
         @version: 1.0
     """
 
-    def __init__(self, minValue=0, maxValue=10, minStep=1, maxStep=1):
+    def __init__(self, minValue=0, maxValue=10, minStep=1, maxStep=1, start=0):
         """ Constructor.
 
             @param minValue : minimum value
             @param maxValue : maximum value
             @param minStep : minimum step
-            @maram maxStep : maximum step
+            @param maxStep : maximum step
+			@param start : time start
+
         """
         DomainBehavior.__init__(self)
 
-        self.state = {'sigma':0}
+        self.state = {'sigma':start}
         self.minValue = minValue
         self.maxValue = maxValue
         self.minStep = minStep
