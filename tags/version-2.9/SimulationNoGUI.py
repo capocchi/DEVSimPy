@@ -25,7 +25,6 @@ import gettext
 _ = gettext.gettext
 
 sys.path.append(os.path.join('Domain', 'Phidgets'))
-sys.path.append(os.path.join('Domain'))
 
 def makeJS(filename):
 	"""
@@ -113,13 +112,18 @@ def makeSimulation(filename, T, json_trace=True):
 				sys.stdout.write(str(json))
 			else:
 				sys.stdout.write("\n%s"%exc_info)
+
 			return False
 
 		else:
 			if json_trace:
 				json['devs_instance'] = str(master)
 			else:
-				sys.stdout.write(_("DEVS instance created!\n"))
+				if isinstance(master, tuple):
+					sys.stdout.write(_("DEVS instance not created: %s\n")%str(master))
+					return False
+				else:
+					sys.stdout.write(_("DEVS instance created!\n"))
 
 			if not json_trace:
 				sys.stdout.write(_("\nPerforming DEVS simulation...\n"))
