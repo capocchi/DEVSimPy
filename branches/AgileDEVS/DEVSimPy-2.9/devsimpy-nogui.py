@@ -76,7 +76,7 @@ if __name__ == '__main__':
  	import gettext
  	_ = gettext.gettext
 
- 	sys.stdout.write(_("DEVSimPy - version %s\n"%__version__ ))
+ 	#sys.stdout.write(_("DEVSimPy - version %s\n"%__version__ ))
 
 	if len(sys.argv) == 2:
 		### check dsp filename
@@ -108,7 +108,7 @@ if __name__ == '__main__':
 				time = 0.0
 
 			### launch simulation
-			makeSimulation(filename, time)
+			makeSimulation(filename, time, False)
 
 	else:
 		sys.stderr.write(_('ERROR: Unspecified .dsp file!\n'))

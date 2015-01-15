@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # PropertiesGridCtrl.py ---
@@ -37,6 +37,7 @@ import Components
 import Menu
 import LabelGUI
 import Container
+import ZipManager
 
 from Mixins.Attributable import Attributable
 from Mixins.Achievable import Achievable
@@ -910,7 +911,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 
 					### if we change the python file from zipfile we compresse the new python file and we update the python_path value
 					if zipfile.is_zipfile(model.model_path):
-						zf = Zip(model.model_path)
+						zf = ZipManager.Zip(model.model_path)
 						zf.Update([new_python_path])
 
 					### update flag and color if bad filename

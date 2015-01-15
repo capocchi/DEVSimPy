@@ -2,7 +2,7 @@
 
 """
 Name: Generator.py
-Brief descritpion:
+Brief descritpion: 
 Author(s): L. Capocchi <capocchi@univ-corse.fr>
 Version:  1.0
 Last modified: 2011.11.16
@@ -32,7 +32,7 @@ class Generator(DomainBehavior):
 		### local copy
 		self.sourceName = sourceName
 		self.__listValues = listValues
-
+		
 		self.T = []
 		self.V = {}
 
@@ -40,7 +40,7 @@ class Generator(DomainBehavior):
 		self.type_error_flag = True in map(lambda a: not isinstance(a, int), self.__listValues)
 		self.file_error_flag = os.path.exists(self.sourceName)
 		self.list_empty_flag = listValues == []
-
+		
 		### assert
 		if self.type_error_flag: assert True, "Please use integer in listValue parameter !"
 

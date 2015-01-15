@@ -376,8 +376,8 @@ class Diagram(Savable, Structurable):
 			cls = Components.GetClass(m.python_path)
 
 			### Class is wrong ?
-			if isinstance(cls, (ImportError, tuple)):
-				print _('Error making DEVS instances for:\n%s'%(str(cls)))
+			if isinstance(cls, (ImportError, tuple)) or cls is None:
+				print _('Error making DEVS instances for:\n%s\n%s'%(str(cls), m.python_path))
 				return False
 			else:
 				### DEVS model recovery
@@ -3150,14 +3150,15 @@ class CodeBlock(Block, Achievable):
 							if lib_name in path:
 								path = p+path.split(lib_name)[-1]
 
+
+
 					### if path is always wrong, flag is visible
 					if not os.path.exists(path):
 						state['bad_filename_path_flag'] = True
 					else:
 						state['model_path'] = path
 						### we find the python file using re module because path can comes from windows and then sep is not the same and os.path.basename don't work !
-						state['python_path'] = os.path.join(path, re.findall("([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
-
+						state['python_path'] = os.path.b(path, re.findall("([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
 				else:
 					state['bad_filename_path_flag'] = True
 
@@ -3504,7 +3505,6 @@ class ContainerBlock(Block, Diagram, Structurable):
 			### inform about the nature of the block using icon
 			img = wx.Bitmap(os.path.join(ICON_PATH_16_16, 'coupled3.png'), wx.BITMAP_TYPE_ANY)
 			dc.DrawBitmap(img, self.x[1]-20, self.y[0])
-
 
 		Block.draw(self, dc)
 

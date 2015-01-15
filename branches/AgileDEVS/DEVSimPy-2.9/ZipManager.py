@@ -20,6 +20,9 @@ import re
 import wx
 import inspect
 
+import gettext
+_ = gettext.gettext
+
 from pluginmanager import trigger_event
 from traceback import format_exception
 from Utilities import listf, path_to_module
@@ -256,7 +259,7 @@ class Zip:
 		zf = zipfile.ZipFile(fn, 'r')
 		nl = zf.namelist()
 		zf.close()
-		return any(map(lambda s: re.search("^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.feature)$", s), nl))
+		return any(map(lambda s: re.search("^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.spec)$", s), nl))
 
 	@staticmethod
 	def GetTests(fn):
@@ -268,7 +271,7 @@ class Zip:
 		zf.close()
 
 		###
-		tests_files = filter(lambda a: a!= [], map(lambda s:re.findall("^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.feature)$", s), nl))
+		tests_files = filter(lambda a: a!= [], map(lambda s:re.findall("^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.spec)$", s), nl))
 		tests_files = [a[0] for a in tests_files]
 
 		return tests_files

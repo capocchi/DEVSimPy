@@ -2,7 +2,7 @@
 
 """
 Name: FileGenerator.py
-Brief descritpion: This module extract data from a standard CSV file and use it with DEVS formalism
+Brief descritpion: This module extract data from a standard CSV file and use it with DEVS formalism 
 Author(s): L. Capocchi <capocchi@univ-corse.fr>, B. Poggi <bpoggi@univ-corse.fr>
 Version:  1.0
 Last modified: 2011.11.16
@@ -42,11 +42,11 @@ class FileGenerator(Generator):
 		Generator.__init__(self, fileName, listValues)
 
 		self.V = self.initDictionnaryValues(listValues)
-
+		
 		self.time = time
 		self.outPutFrequency = outPutFrequency
 		self.__comma = comma
-
+		
 		if self.file_error_flag:
 			with open(fileName, "rb") as f:
 				for i,l in enumerate(filter(lambda b: b != '' , map(lambda a: a.replace('\n', ''), f.readlines()))):
@@ -54,7 +54,7 @@ class FileGenerator(Generator):
 					### ligne courante de valeurs et longueur
 					row = map(lambda b:b.strip(), filter(lambda a: a!='', l.split(self.__comma)))
 					lenght = len(row)
-
+						
 					### listValues est vide, liste de temps remplit avec entiers dependant de la frÃ©quence de sortie
 					if self.list_empty_flag :
 						t = i*self.outPutFrequency
@@ -67,7 +67,7 @@ class FileGenerator(Generator):
 						self.T.append(float(t))
 					else:
 						continue
-
+	
 					### si listValues vide alors un seul port de sortie
 					if self.list_empty_flag:
 						self.V[0].append(row)
@@ -82,7 +82,7 @@ class FileGenerator(Generator):
 								self.V[val].append(row[1].strip())
 							else:
 								self.V[val].append(row[val].strip())
-
+		
 			sig = self.T[0] if self.T != [] else INFINITY
 		else:
 			sig = INFINITY
