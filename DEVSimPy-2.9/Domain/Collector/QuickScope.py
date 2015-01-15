@@ -62,7 +62,7 @@ class QuickScope(DomainBehavior):
 					self.t = msg.time
 					if not hasattr(self, 'peek'):
 						self.t = self.t[0]
-
+				
 				#ecriture dans la liste pour affichier le QuickScope et le SpreadSheet
 				# si il y a eu un changement du nombre de ports alors on creer la nouvelle entre dans results (on ne regenere pas d'instance)
 				if np in self.results:

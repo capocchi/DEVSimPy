@@ -2,11 +2,11 @@
 
 """
 Name: SimulationNoGUI.py
-Brief descritpion: Overwrite some methods to implement the no gui version of DEVSimPy and make simulation from dsp file
+Brief description: Overwrite some methods to implement the no gui version of DEVSimPy and make simulation from dsp file
 in batch mode
-Author(s): A-T. Luciani <atluciani@univ-corse.fr>
+Author(s): A-T. Luciani <atluciani@univ-corse.fr>, capocchi <capocchi@univ-corse.fr>
 Version:  1.0
-Last modified: 2014.11.15 by L. Capocchi
+Last modified: 2015.01.11 by L. Capocchi
 GENERAL NOTES AND REMARKS:
 
 GLOBAL VARIABLES AND FUNCTIONS:
@@ -14,16 +14,17 @@ GLOBAL VARIABLES AND FUNCTIONS:
 
 import os
 import sys
-import threading
 import time
 
-from tempfile import gettempdir
-
 import __builtin__
+from cStringIO import StringIO
+from io import TextIOWrapper, BytesIO
 import traceback
 
 import gettext
 _ = gettext.gettext
+
+sys.path.append(os.path.join('Domain', 'Phidgets'))
 
 def makeJS(filename):
 	"""
@@ -35,7 +36,6 @@ def makeJS(filename):
 	a = Diagram()
 	if a.LoadFile(filename):
 		sys.stdout.write(_("\nFile loaded\n"))
-		master = Diagram.makeDEVSInstance(a)
 
 		addInner = []
 		liaison = []
@@ -74,47 +74,107 @@ def yes(prompt = 'Please enter Yes/No: '):
 	    if i.lower() in ('yes','y'): return True
 	    elif i.lower() in ('no','n'): return False
 
-def makeSimulation(filename, T):
+def makeSimulation(filename, T, json_trace=True):
 	"""
 	"""
 
 	from Container import Diagram
 
-	sys.stdout.write(_("\nSimulation in batch mode with %s\n")%__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'])
+	if not json_trace:
+		sys.stdout.write(_("\nSimulation in batch mode with %s\n")%__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'])
 
 	a = Diagram()
 
-	sys.stdout.write(_("\nLoading %s file...\n")%(os.path.basename(filename)))
+	if json_trace:
+		json = {'date':time.strftime("%c")}
+		json['mode']='no-gui'
+	else:
+		sys.stdout.write(_("\nLoading %s file...\n")%(os.path.basename(filename)))
+
 	if a.LoadFile(filename):
-		sys.stdout.write(_("%s loaded!\n")%(os.path.basename(filename)))
+
+		if json_trace:
+			json['file'] = filename
+		else:
+			sys.stdout.write(_("%s loaded!\n")%(os.path.basename(filename)))
 
 		try:
-			sys.stdout.write(_("\nMaking DEVS instance...\n"))
+			if not json_trace:
+				sys.stdout.write(_("\nMaking DEVS instance...\n"))
+
 			master = Diagram.makeDEVSInstance(a)
-		except :
+
+		except Exception, info:
+			### get exception info
+			exc_info = traceback.format_exc()
+			if json_trace:
+				json['devs_instance'] = None
+				json['success'] = False
+				json['info'] = exc_info
+				sys.stdout.write(str(json))
+			else:
+				sys.stdout.write("\n%s"%exc_info)
+
 			return False
+
 		else:
-			sys.stdout.write(_("DEVS instance created!\n"))
+			if master:
 
-			sys.stdout.write(_("\nPerforming DEVS simulation...\n"))
+				if json_trace:
+					json['devs_instance'] = str(master)
+					if isinstance(master, tuple):
+						sys.stdout.write(str(json))
+						return False
+				else:
+					if isinstance(master, tuple):
+						sys.stdout.write(_("DEVS instance not created: %s\n")%str(master))
+						return False
+					else:
+						sys.stdout.write(_("DEVS instance created!\n"))
 
-			sim = runSimulation(master, T)
-			thread = sim.Run()
+				if not json_trace:
+					sys.stdout.write(_("\nPerforming DEVS simulation...\n"))
 
-			first_time = time.time()
-			while(thread.isAlive()):
-				new_time = time.time()
-				output = new_time - first_time
-				Printer(output)
+				sim = runSimulation(master, T)
+				thread = sim.Run()
 
-			sys.stdout.write(_("\nDEVS simulation completed!\n"))
+				first_time = time.time()
+				while(thread.isAlive()):
+					new_time = time.time()
+					output = new_time - first_time
+					if not json_trace: Printer(output)
 
-		### inform that data file has been generated
-		for m in filter(lambda a: hasattr(a, 'fileName'), master.componentSet):
-			for i in range(len(m.IPorts)):
-				fn ='%s%s.dat'%(m.fileName,str(i))
-				if os.path.exists(fn):
-					sys.stdout.write(_("\nData file %s has been generated!\n")%(fn))
+				if not json_trace:
+					sys.stdout.write(_("\nDEVS simulation completed!\n"))
+
+				if json_trace:
+					json['time'] = output
+					json['output'] = []
+
+				### inform that data file has been generated
+				for m in filter(lambda a: hasattr(a, 'fileName'), master.componentSet):
+					for i in range(len(m.IPorts)):
+						fn ='%s%s.dat'%(m.fileName,str(i))
+						if os.path.exists(fn):
+							if json_trace:
+								json['output'].append({'name':os.path.basename(fn), 'path':fn})
+							else:
+								sys.stdout.write(_("\nData file %s has been generated!\n")%(fn))
+				if json_trace:
+					sys.stdout.write(str(json))
+
+				return True
+
+			else:
+				return False
+
+	else:
+		if json_trace:
+			json['file'] = None
+        	json['success'] = True
+         	sys.stdout.write(str(json))
+
+        return False
 
 class runSimulation:
 	"""

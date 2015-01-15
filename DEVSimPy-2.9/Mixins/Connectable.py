@@ -45,55 +45,36 @@ class Connectable:
 		### x position
 		if type=='input':
 			div = float(self.input)+1.0
-			x=self.x[0]
 			### direction for all ports
 			dir = self.input_direction
 
 		elif type=='output':
 			div = float(self.output)+1.0
-			x=self.x[1]
 			### direction for all ports
 			dir = self.output_direction
 
-		### delta for x nd y
+		### delta for x and y
 		dx=float(w)/div
 		dy=float(h)/div
 
-		### y position
-		y= self.y[0]+dy*(num+1)
+		### init x and y position
+		x = self.x[0]
+		y = self.y[0]
 
 		# ouest -> nord
 		if dir == "nord":
-			if type=='input':
-				x+=dx*(num+1)
-				y-=dy*(num+1)
-			else:
-				x-=dx*(num+1)
-				y-=h-dy*(num+1)
+			x+=dx*(num+1)
 		# nord -> est
 		elif dir == "est":
-			if type=='input':
-				x+=w
-				y+=0
-			else:
-				x+=0
-				y+=0
+			x+=w
+			y+=dy*(num+1)
 		# est -> sud
 		elif dir == "sud":
-			if type=='input':
-				x+=dx*(num+1)
-				y+=h-dy*(num+1)
-			else:
-				x-=dx*(num+1)
-				y+=dy*(num+1)
+			x+=dx*(num+1)
+			y+=h
 		# sud -> ouest
 		elif dir == "ouest":
-			if type=='input':
-				x+=0
-				y+=0
-			else:
-				x-=w
-				y+=0
+			y+=dy*(num+1)
 
 		return (x,y)
 
