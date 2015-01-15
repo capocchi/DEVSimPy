@@ -89,7 +89,6 @@ from Mixins.Plugable import Plugable
 from Mixins.Structurable import Structurable
 from Mixins.Savable import Savable
 from Mixins.Selectable import Selectable
-from Mixins.Testable import Testable
 
 ### for all dsp model build with old version of DEVSimPy
 sys.modules['Savable'] = sys.modules['Mixins.Savable']
@@ -2765,6 +2764,225 @@ class LinesShape(Shape):
 				self.unlock()
 				break
 
+# Mixins------------------------------------------------------------------------
+###---------------------------------------------------------------------------------------------------------
+# NOTE: Testable << object :: Testable mixin is needed to manage tests files and tests executions. It add the OnTestEditor event for the tests files edition
+class Testable(object):
+
+	# NOTE: Testable :: OnTestEditor 		=> new event for AMD model. Open tests files in editor
+	def OnTestEditor(self, event):
+		"""
+		"""
+
+		L = self.GetTestFile()
+
+		### create Editor with BDD files in tab
+		if L != []:
+
+			#model_path = os.path.dirname(self.python_path)
+
+			# TODO: Testable :: OnTestEditor => Fix Editor importation
+			import Editor
+
+			#mainW = wx.GetApp().GetTopWindow()
+			### Editor instanciation and configuration---------------------
+			editorFrame = Editor.GetEditor(
+					None,
+					wx.ID_ANY,
+					'Features',
+					file_type="test"
+			)
+
+			for i,s in enumerate(map(lambda l: os.path.join(self.model_path, l), L)):
+				editorFrame.AddEditPage(L[i], s)
+
+			editorFrame.Show()
+			### -----------------------------------------------------------
+
+	def GetTestFile(self):
+		""" Get Test file only for AMD model
+		"""
+
+		# If selected model is AMD
+		if self.isAMD():
+
+			# Create tests files is doesn't exist
+			if not ZipManager.Zip.HasTests(self.model_path):
+				self.CreateTestsFiles()
+
+			### list of BDD files
+			L = ZipManager.Zip.GetTests(self.model_path)
+
+			return L
+
+		return []
+
+	# NOTE: Testable :: isAMD 				=> Test if the model is an AMD and if it's well-formed
+	def isAMD(self):
+		return zipfile.is_zipfile(os.path.dirname(self.python_path))
+
+	# NOTE: Testable :: CreateTestsFiles	=> AMD tests files creation
+	def CreateTestsFiles(self):
+		devsPath = os.path.dirname(self.python_path)
+		name = os.path.splitext(os.path.basename(self.python_path))[0]
+		zf = ZipManager.Zip(devsPath)
+
+		feat, steps, env = self.CreateFeature(), self.CreateSteps(), Testable.CreateEnv()
+
+		zf.Update([os.path.join('BDD', feat), os.path.join('BDD', steps), os.path.join('BDD', env)])
+
+		if os.path.exists(feat): os.remove(feat)
+		if os.path.exists(steps): os.remove(steps)
+		if os.path.exists(env): os.remove(env)
+
+		#if not zf.HasTests():
+
+			#files = zf.GetTests()
+			#if not '%s.feature'%name in files:
+				#feat = self.CreateFeature()
+				#zf.Update([os.path.join('BDD', feat)])
+				#os.remove(feat)
+			#if not 'steps.py' in files:
+				#steps = self.CreateSteps()
+				#zf.Update([os.path.join('BDD',steps)])
+				#os.remove(steps)
+			#if not 'environment.py' in files:
+				#env = self.CreateEnv()
+				#zf.Update([os.path.join('BDD',env)])
+				#os.remove(env)
+
+	# NOTE: Testable :: CreateFeature		=> Feature file creation
+	def CreateFeature(self):
+		name = os.path.splitext(os.path.basename(self.python_path))[0]
+		feature = "%s.feature"%name
+		with open(feature, 'w+') as feat:
+			feat.write("# -*- coding: utf-8 -*-\n")
+
+		return feature
+
+	# NOTE: Testable :: CreateSteps		=> Steps file creation
+	def CreateSteps(self):
+		steps = "steps.py"
+		with open(steps, 'w+') as step:
+			step.write("# -*- coding: utf-8 -*-\n")
+
+		return steps
+
+	# NOTE: Testable :: CreateEnv		=> Environment file creation
+	@staticmethod
+	def CreateEnv(path=None):
+		if path:
+			environment = os.path.join(path, 'environment.py')
+		else:
+			environment = "environment.py"
+		with open(environment, 'w+') as env:
+			env.write("# -*- coding: utf-8 -*-\n")
+
+		return environment
+
+	# NOTE: Testable :: GetTempTests		=> Create tests on temporary folder for execution
+	def GetTempTests(self, global_env=None):
+		if not global_env: global_env = False
+
+		### Useful vars definition-----------------------------------------------------------------
+		model_path = os.path.dirname(self.python_path)
+		basename = os.path.basename(self.python_path)
+		name = os.path.splitext(basename)[0]
+		tests_files = ZipManager.Zip.GetTests(model_path)
+		### ---------------------------------------------------------------------------------------
+
+		### Folder hierarchy construction----------------------------------------------------------
+		feat_dir  = os.path.join(gettempdir(), "features")
+		steps_dir = os.path.join(feat_dir, "steps")
+		if not os.path.exists(feat_dir):
+			os.mkdir(feat_dir)
+		if not os.path.exists(steps_dir):
+			os.mkdir(steps_dir)
+		### ---------------------------------------------------------------------------------------
+
+		### AMD unzip------------------------------------------------------------------------------
+		amd_dir = os.path.join(gettempdir(), "AtomicDEVS")
+		if not os.path.exists(amd_dir):
+			os.mkdir(amd_dir)
+		### ---------------------------------------------------------------------------------------
+
+		### Tests code retriever-------------------------------------------------------------------
+		importer = zipfile.ZipFile(model_path)
+
+		feat_name = filter(lambda t: t.endswith('.feature'), tests_files)[0]
+		featInfo = importer.getinfo(feat_name)
+		feat_code = importer.read(featInfo)
+
+		steps_name = filter(lambda t: t.endswith('steps.py'), tests_files)[0]
+		stepsInfo = importer.getinfo(steps_name)
+		steps_code = importer.read(stepsInfo)
+
+		if not global_env:
+			environment_name = filter(lambda t: t.endswith('environment.py'), tests_files)[0]
+			envInfo = importer.getinfo(environment_name)
+			env_code = importer.read(envInfo)
+		else:
+			environment_name = os.path.join(gettempdir(), 'environment.py')
+			with open(environment_name, 'r+') as global_env_code:
+				env_code = global_env_code.read()
+
+		importer.close()
+		### ---------------------------------------------------------------------------------------
+
+		### AMD code retriever---------------------------------------------------------------------
+		importer = zipfile.ZipFile(model_path)
+
+		# amd_name = filter(lambda t: t.endswith('%s.py'%name), importer.namelist())[0]
+		amd_name = ZipManager.getPythonModelFileName(model_path)
+		amd_info = importer.getinfo(amd_name)
+		amd_code = importer.read(amd_info)
+
+		### ---------------------------------------------------------------------------------------
+
+		### Tests files creation in temporary directory--------------------------------------------
+		tempFeature = os.path.join(feat_dir, "%s.feature"%name)
+		tempEnv = os.path.join(feat_dir, "environment.py")
+		tempSteps = os.path.join(steps_dir, "%s_steps.py"%name)
+
+		tempAMD = os.path.join(amd_dir, amd_name)
+
+		with open(tempFeature, 'w+') as feat:
+			feat.write(feat_code)
+		with open(tempSteps, 'w+') as steps:
+			steps.write(steps_code)
+		with open(tempEnv, 'w+') as env:
+			env.write(env_code)
+
+		with open(tempAMD, 'w+') as AMD:
+			AMD.write(amd_code)
+		### ---------------------------------------------------------------------------------------
+
+		return tempFeature, tempSteps, tempEnv
+
+	# NOTE: Testable :: RemoveTempTests		=> Remove tests on temporary folder
+	@staticmethod
+	def RemoveTempTests():
+		feat_dir = os.path.join(gettempdir(), 'features')
+		if os.path.exists(feat_dir):
+			for root, dirs, files in os.walk(feat_dir, topdown=False):
+				for name in files:
+					os.remove(os.path.join(root, name))
+        		for name in dirs:
+    				os.rmdir(os.path.join(root, name))
+
+			os.rmdir(feat_dir)
+
+		amd_dir = os.path.join(gettempdir(), 'AtomicDEVS')
+		if os.path.exists(amd_dir):
+			for root, dirs, files in os.walk(amd_dir, topdown=False):
+				for name in files:
+					os.remove(os.path.join(root, name))
+        		for name in dirs:
+    				os.rmdir(os.path.join(root, name))
+
+			os.rmdir(amd_dir)
+
+#---------------------------------------------------------
 class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 	""" ConnectionShape class
 	"""
@@ -2902,16 +3120,17 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 
 		### Prepare label drawing
 		w,h =  dc.GetTextExtent(self.label)
-		mx = int((self.x[0] + self.x[1])/2.0)-int(w/2.0)
+		mx = int((self.x[0] + self.x[1]-w)/2)
 
 		if self.label_pos == 'bottom':
 			### bottom
-			my = int(self.y[1]-h)
+			my = int(self.y[1])
 		elif self.label_pos == 'top':
 			### top
-			my = int(self.y[0]+h/2.0)
+			my = int(self.y[0]-h)
 		else:
-			my = int((self.y[0] + self.y[1])/2.0)-int(h/2.0)
+			### center
+			my = int((self.y[0] + self.y[1]-h)/2)
 
 		### with and height of rectangle
 		self.w = self.x[1]- self.x[0]
@@ -3150,15 +3369,17 @@ class CodeBlock(Block, Achievable):
 							if lib_name in path:
 								path = p+path.split(lib_name)[-1]
 
-
-
 					### if path is always wrong, flag is visible
 					if not os.path.exists(path):
 						state['bad_filename_path_flag'] = True
 					else:
 						state['model_path'] = path
-						### we find the python file using re module because path can comes from windows and then sep is not the same and os.path.basename don't work !
-						state['python_path'] = os.path.b(path, re.findall("([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
+
+						state['python_path'] = os.path.basename(python_path)
+
+						if not state['python_path'].endswith('.py'):
+							### we find the python file using re module because path can comes from windows and then sep is not the same and os.path.basename don't work !
+							state['python_path'] = os.path.join(path, re.findall("([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
 				else:
 					state['bad_filename_path_flag'] = True
 
