@@ -31,70 +31,71 @@ def makeJSON(filename, json=None, diagram=None):
 	"""
 	from Container import Diagram, ConnectionShape, CodeBlock, ContainerBlock
 
-	if not diagram:
-		dia = Diagram()
-
-		if dia.LoadFile(filename):
-			sys.stdout.write(_("\n makeJSON: File loaded\n"))
-		else:
-			sys.stdout.write(_("\n makeJSON: File not loaded\n"))
-	else:
-		dia = diagram
-
 	if not json:
 		### add filename in json
 		json = {os.path.basename(filename):[{"cells":[]},{"description": ""}]}
 	else:
 		json = json
 
+	if not diagram:
+		dia = Diagram()
+
+		if not dia.LoadFile(filename):
+			json['success'] = False
+			return json
+	else:
+		dia = diagram
+
 	for c in dia.GetShapeList():
 
+		### if c is coupled model
+		if isinstance(c, ContainerBlock):
+			return makeJSON(filename, json, c)
+
 		### if c is connexion
-		if isinstance(c, ConnectionShape):
-			D = {	"type":"devs.Link",
-					"id":str(id(c)),
-					"z":0,"attrs":{},
-					'source':{"selector":".outPorts>g:nth-child(1)>circle"},
-					'target':{"selector":".inPorts>g:nth-child(1)>circle"}}
-			model1, portNumber1 = c.input
-			model2, portNumber2 = c.output
-			D['source']['id'] = model1.label
-			D['target']['id'] = model2.label
-
-		### if c is atomic
-		elif isinstance(c, CodeBlock):
-
-			D = {"type":"devs.Atomic",
-				"angle":0,
-                "id":c.label,
-                "z":1,
-                "size":{"width":c.w,"height":c.h},
-				"position":{"x":c.x[0],"y":c.y[0]},
-				"inPorts":map(lambda i: "in%d"%i, range(c.input)),
-				"outPorts":map(lambda i: "out%d"%i, range(c.output)),
-				"attrs":{"text": {"text":c.label}}
-				}
-
-			for i in xrange(c.input):
-				D["attrs"].update( {".inPorts>.port%d>.port-label"%i:{"text":"in%d"%i},
-									".inPorts>.port%d>.port-body"%i:{ "port":{ "id":"in%d"%i,
-                        			 		 	     							"type":"in"}},
-									".inPorts>.port%d"%i:{ "ref":".body",
-                    		  	     						"ref-y":float(i+1)/(c.input+1)}
-										})
-			for j in xrange(c.output):
-				D["attrs"].update( {".outPorts>.port%d>.port-label"%j:{"text":"out%d"%j},
-									".outPorts>.port%d>.port-body"%j:{ "port":{ "id":"out%d"%j,
-                        			 		 	     							"type":"out"}},
-									".outPorts>.port%d"%j:{ "ref":".body",
-                    		  	     						"ref-y":float(j+1)/(c.output+1)}
-										})
-
-		### if c is coupled
 		else:
-			pass
+			if isinstance(c, ConnectionShape):
+				D = {	"type":"devs.Link",
+						"id":str(id(c)),
+						"z":0,"attrs":{},
+						'source':{"selector":".outPorts>g:nth-child(1)>circle"},
+						'target':{"selector":".inPorts>g:nth-child(1)>circle"}}
+				model1, portNumber1 = c.input
+				model2, portNumber2 = c.output
+				D['source']['id'] = model1.label
+				D['target']['id'] = model2.label
 
-		json[os.path.basename(filename)][0]['cells'].append(D)
+			### if c is atomic model
+			elif isinstance(c, CodeBlock):
+
+				D = {"type":"devs.Atomic",
+					"angle":0,
+	                "id":c.label,
+	                "z":1,
+	                "size":{"width":c.w,"height":c.h},
+					"position":{"x":c.x[0],"y":c.y[0]},
+					"inPorts":map(lambda i: "in%d"%i, range(c.input)),
+					"outPorts":map(lambda i: "out%d"%i, range(c.output)),
+					"attrs":{"text": {"text":c.label}}
+					}
+
+				for i in xrange(c.input):
+					D["attrs"].update( {".inPorts>.port%d>.port-label"%i:{"text":"in%d"%i},
+										".inPorts>.port%d>.port-body"%i:{ "port":{ "id":"in%d"%i,
+	                        			 		 	     							"type":"in"}},
+										".inPorts>.port%d"%i:{ "ref":".body",
+	                    		  	     						"ref-y":float(i+1)/(c.input+1)}
+											})
+				for j in xrange(c.output):
+					D["attrs"].update( {".outPorts>.port%d>.port-label"%j:{"text":"out%d"%j},
+										".outPorts>.port%d>.port-body"%j:{ "port":{ "id":"out%d"%j,
+	                        			 		 	     							"type":"out"}},
+										".outPorts>.port%d"%j:{ "ref":".body",
+	                    		  	     						"ref-y":float(j+1)/(c.output+1)}
+											})
+
+
+			json[os.path.basename(filename)][0]['cells'].append(D)
 
 	return json
 
