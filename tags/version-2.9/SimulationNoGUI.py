@@ -50,6 +50,23 @@ def makeJSON(filename, json=None, diagram=None):
 
 		### if c is coupled model
 		if isinstance(c, ContainerBlock):
+			D = {"type":"devs.Coupled",
+					"angle":0,
+	                "id":c.label,
+	                "z":1,
+	                "size":{"width":c.w,"height":c.h},
+					"position":{"x":c.x[0],"y":c.y[0]},
+					"inPorts":map(lambda i: "in%d"%i, range(c.input)),
+					"outPorts":map(lambda i: "out%d"%i, range(c.output)),
+					"attrs":{"text": {"text":c.label}}
+					}
+
+			### embeds key
+			shapes = c.GetFlatBlockShapeList()
+			D["embeds"] = [s.label for s in shapes]
+
+			json[os.path.basename(filename)][0]['cells'].append(D)
+
 			return makeJSON(filename, json, c)
 
 		### if c is connexion
