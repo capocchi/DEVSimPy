@@ -105,6 +105,7 @@ if __name__ == '__main__':
 			import json
 			### launch JSON file generation
 			j = makeJSON(filename)
+
 			sys.stdout.write(json.dumps(j,sort_keys=True, indent=4))
 		else:
 			if str(time) in ('inf', 'ntl'):
