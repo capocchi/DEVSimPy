@@ -29,7 +29,7 @@ sys.path.append(os.path.join('Domain', 'Phidgets'))
 def makeJSON(filename, json=None, diagram=None):
 	""" Make JSON file from D graph of the diagram
 	"""
-	from Container import Diagram, ConnectionShape, CodeBlock, ContainerBlock
+	from Container import Diagram, ConnectionShape, CodeBlock, ContainerBlock, iPort, oPort
 
 	if not json:
 		### add filename in json
@@ -79,8 +79,9 @@ def makeJSON(filename, json=None, diagram=None):
 						'target':{"selector":".inPorts>g:nth-child(1)>circle"}}
 				model1, portNumber1 = c.input
 				model2, portNumber2 = c.output
-				D['source']['id'] = model1.label
-				D['target']['id'] = model2.label
+
+				D['source']['id'] = model1.label.encode("utf-8")
+				D['target']['id'] = model2.label.encode("utf-8")
 
 			### if c is atomic model
 			elif isinstance(c, CodeBlock):
