@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="fr.univ-corse.devsimpy_mob" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
+    <preference name="loglevel" value="DEBUG" />
+    <feature name="Socket">
+        <param name="android-package" value="com.tlantic.plugins.socket.SocketPlugin" />
+    </feature>
+    <name>DEVSimPy Mob</name>
+    <description>
+        Provide an easy way to simulate your dsp from your mobile device.
+    </description>
+    <author email="ville@univ-corse.fr">
+        UMR SPE Lab.
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+</widget>

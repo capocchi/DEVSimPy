@@ -1,0 +1,3 @@
+# view AndroidManifest.xml #generated:6
+-keep class fr.univ_corse.devsimpy_mob.CordovaApp { <init>(...); }
+
