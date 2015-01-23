@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    id="com.tlantic.plugins.socket"
+    version="0.3.1">
+    <name>Socket</name>
+    <description>Tlantic TCP socket plugin</description>
+    <license>GPL</license>
+    <keywords>cordova, tcp, socket</keywords>
+
+    <js-module src="www/socket.js" name="Socket">
+        <clobbers target="window.tlantic.plugins.socket" />
+    </js-module>
+
+    <!-- android -->
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="Socket">
+                <param name="android-package" value="com.tlantic.plugins.socket.SocketPlugin"/>
+            </feature>
+        </config-file>
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.INTERNET" />
+        </config-file>        
+        <source-file src="src/android/SocketPlugin.java" target-dir="src/com/tlantic/plugins/socket" />      
+        <source-file src="src/android/Connection.java" target-dir="src/com/tlantic/plugins/socket" />      
+    </platform>
+
+    <!-- ios -->
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="Socket">
+                <param name="ios-package" value="CDVSocketPlugin" />
+            </feature>
+        </config-file>
+
+        <header-file src="src/ios/CDVSocketPlugin.h" />
+        <header-file src="src/ios/Connection.h" />
+
+        <source-file src="src/ios/CDVSocketPlugin.m" />
+        <source-file src="src/ios/Connection.m"  />
+    </platform>
+
+   <!-- windows8 -->
+    <platform name="windows8">
+        <js-module src="src/windows8/Connection.js" name="Connection">
+            <merges target="" />
+        </js-module>          
+        <js-module src="src/windows8/SocketProxy.js" name="SocketProxy">
+            <merges target="" />
+        </js-module>
+        <config-file target="package.appxmanifest" parent="/Package/Capabilities">
+            <Capability Name="internetClientServer" />
+            <Capability Name="privateNetworkClientServer" />
+            <Capability Name="internetClient" />
+        </config-file>
+    </platform>    
+
+</plugin>

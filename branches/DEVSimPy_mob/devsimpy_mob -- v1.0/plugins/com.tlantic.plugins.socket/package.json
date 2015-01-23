@@ -1,0 +1,18 @@
+{
+    "version": "0.3.1",
+    "name": "com.tlantic.plugins.socket",
+    "cordova_name": "Socket",
+    "description": "Tlantic TCP socket plugin",
+    "license": "GPL",
+    "keywords": [
+        "cordova",
+        " tcp",
+        " socket"
+    ],
+    "platforms": [
+        "android",
+        "ios",
+        "windows8"
+    ],
+    "engines": []
+}
