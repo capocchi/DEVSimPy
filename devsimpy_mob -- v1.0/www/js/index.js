@@ -129,7 +129,6 @@ function list_dsp(data){
         items.push(
             "<li class='table-view-cell media'>\
                 <a class='navigate-right' onClick=\"document.location.href='index.html?dsp.html?view=dsp&dsp="+key+"'\" data-transition='slide-in'>\
-                    <img class='media-object pull-left' src='http://placehold.it/42x42'>\
                     <div class='media-body'>\
                     "+key+"\
                     </div>\
@@ -176,14 +175,17 @@ function draw(json) {
 
     var paper = new joint.dia.Paper({
         el: $('#paper'),
-        width: $(document).width(),
+        width: $(document).width()-20,
         height: $(document).height()-($("#head").height()+$("#header").height()+$("#footer").height()),
         gridSize: 1,
-        model: graph
+        model: graph,
+        perpendicularLinks: true
     });
 
-    paper.scaleContentToFit();
     graph.fromJSON(json);
+    paper.scaleContentToFit();
+    paper.setOrigin(paper.options.origin["x"], 50);
+    // console.log(paper.options.origin);
 }
 
 
