@@ -1,4 +1,0 @@
-Location-specific scheduler
-===========================
-
-TODO

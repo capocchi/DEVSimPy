@@ -1,5 +1,0 @@
-Threadpool
-==========
-
-.. automodule:: threadpool
-   :members:
