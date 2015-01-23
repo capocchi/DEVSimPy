@@ -1,0 +1,227 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>schedulerNA &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for schedulerNA</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: Latin-1 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The No Age scheduler is based on the Heapset scheduler, though it does not take age into account.</span>
+
+<span class="sd">.. warning:: This scheduler does not take the age into account, making it **unusable** in simulations where the *timeAdvance* function can return (exactly) 0. If unsure, do **not** use this scheduler, but the more general Heapset scheduler.</span>
+
+<span class="sd">The heap will contain only the timestamps of events that should happen. One of the dictionaries will contain the actual models that transition at the specified time. The second dictionary than contains a reverse relation: it maps the models to their timeNext. This reverse relation is necessary to know the *old* timeNext value of the model. Because as soon as the model has its timeNext changed, its previously scheduled time will be unknown. This &#39;previous time&#39; is **not** equal to the *timeLast*, as it might be possible that the models wait time was interrupted.</span>
+
+<span class="sd">For a schedule, the model is added to the dictionary at the specified timeNext. In case it is the first element at this location in the dictionary, we also add the timestamp to the heap. This way, the heap only contains *unique* timestamps and thus the actual complexity is reduced to the number of *different* timestamps. Furthermore, the reverse relation is also updated.</span>
+
+<span class="sd">Unscheduling is done similarly by simply removing the element from the dictionary.</span>
+
+<span class="sd">Rescheduling is a slight optimisation of unscheduling, followed by scheduling.</span>
+
+<span class="sd">This scheduler does still schedule models that are inactive (their timeNext is infinity), though this does not influence the complexity. The complexity is not affected due to infinity being a single element in the heap that is always present. Since a heap has O(log(n)) complexity, this one additional element does not have a serious impact.</span>
+
+<span class="sd">The main advantage over the Activity Heap is that it never gets dirty and thus doesn&#39;t require periodical cleanup. The only part that gets dirty is the actual heap, which only contains small tuples. Duplicates of these will also be reduced to a single element, thus memory consumption should not be a problem in most cases.</span>
+
+<span class="sd">This scheduler is ideal in situations where most transitions happen at exactly the same time, as we can then profit from the internal structure and simply return the mapped elements. It results in sufficient efficiency in most other cases, mainly due to the code base being a lot smaller then the Activity Heap.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">heapq</span> <span class="kn">import</span> <span class="n">heappush</span><span class="p">,</span> <span class="n">heappop</span>
+<span class="kn">from</span> <span class="nn">logger</span> <span class="kn">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="SchedulerNA"><a class="viewcode-back" href="../schedulerNA_int.html#schedulerNA.SchedulerNA">[docs]</a><span class="k">class</span> <span class="nc">SchedulerNA</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Scheduler class itself</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SchedulerNA.__init__"><a class="viewcode-back" href="../schedulerNA_int.html#schedulerNA.SchedulerNA.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">totalModels</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+
+<span class="sd">        :param models: all models in the simulation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">heap</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reverse</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">totalModels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapped</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">infinite</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">)</span>
+        <span class="c"># Init the basic &#39;inactive&#39; entry here, to prevent scheduling in the heap itself</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapped</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">infinite</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">epsilon</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SchedulerNA.schedule"><a class="viewcode-back" href="../schedulerNA_int.html#schedulerNA.SchedulerNA.schedule">[docs]</a>    <span class="k">def</span> <span class="nf">schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Schedule a model</span>
+
+<span class="sd">        :param model: the model to schedule</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mapped</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">timeNext</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mapped</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">timeNext</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">model</span><span class="p">])</span>
+            <span class="n">heappush</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">timeNext</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reverse</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">model_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">timeNext</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reverse</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">timeNext</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="SchedulerNA.unschedule"><a class="viewcode-back" href="../schedulerNA_int.html#schedulerNA.SchedulerNA.unschedule">[docs]</a>    <span class="k">def</span> <span class="nf">unschedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unschedule a model</span>
+
+<span class="sd">        :param model: model to unschedule</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mapped</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reverse</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">model_id</span><span class="p">]]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reverse</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">model_id</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="SchedulerNA.massReschedule"><a class="viewcode-back" href="../schedulerNA_int.html#schedulerNA.SchedulerNA.massReschedule">[docs]</a>    <span class="k">def</span> <span class="nf">massReschedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reschedule_set</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reschedule all models provided. </span>
+<span class="sd">        Equivalent to calling unschedule(model); schedule(model) on every element in the iterable.</span>
+
+<span class="sd">        :param reschedule_set: iterable containing all models to reschedule</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#NOTE the usage of exceptions is a lot better for the PyPy JIT and nets a noticable speedup</span>
+        <span class="c">#     as the JIT generates guard statements for an &#39;if&#39;</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">reschedule_set</span><span class="p">:</span>
+            <span class="n">model_id</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">model_id</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mapped</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reverse</span><span class="p">[</span><span class="n">model_id</span><span class="p">]]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="c"># Element simply not present, so don&#39;t need to unschedule it</span>
+                <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reverse</span><span class="p">[</span><span class="n">model_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">tn</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">timeNext</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mapped</span><span class="p">[</span><span class="n">tn</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="c"># Create a tuple with a single entry and use it to initialize the mapped entry</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mapped</span><span class="p">[</span><span class="n">tn</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">((</span><span class="n">model</span><span class="p">,</span> <span class="p">))</span>
+                <span class="n">heappush</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">,</span> <span class="n">tn</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SchedulerNA.readFirst"><a class="viewcode-back" href="../schedulerNA_int.html#schedulerNA.SchedulerNA.readFirst">[docs]</a>    <span class="k">def</span> <span class="nf">readFirst</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the time of the first model that has to transition</span>
+
+<span class="sd">        :returns: timestamp of the first model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mapped</span><span class="p">[</span><span class="n">first</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapped</span><span class="p">[</span><span class="n">first</span><span class="p">]</span>
+            <span class="n">heappop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">)</span>
+            <span class="n">first</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c"># The age was stripped of</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SchedulerNA.getImminent"><a class="viewcode-back" href="../schedulerNA_int.html#schedulerNA.SchedulerNA.getImminent">[docs]</a>    <span class="k">def</span> <span class="nf">getImminent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of all models that transition at the provided time, with the specified epsilon deviation allowed.</span>
+
+<span class="sd">        :param time: timestamp to check for models</span>
+
+<span class="sd">        .. warning:: For efficiency, this method only checks the **first** elements, so trying to invoke this function with a timestamp higher than the value provided with the *readFirst* method, will **always** return an empty set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">t</span><span class="p">,</span> <span class="n">age</span> <span class="o">=</span> <span class="n">time</span>
+        <span class="n">immChildren</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">first</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">first</span> <span class="o">-</span> <span class="n">t</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">):</span>
+                <span class="c">#NOTE this would change the original set, though this doesn&#39;t matter as it is no longer used</span>
+                <span class="n">immChildren</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapped</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">first</span><span class="p">)</span>
+                <span class="n">heappop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">)</span>
+                <span class="n">first</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">while</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">first</span> <span class="o">-</span> <span class="n">t</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">):</span>
+                    <span class="n">immChildren</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapped</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">first</span><span class="p">)</span>
+                    <span class="n">heappop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">)</span>
+                    <span class="n">first</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">immChildren</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,193 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Basic Boundary Relocator &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Relocators" href="relocators_int.html" />
+    <link rel="next" title="Schedulers" href="schedulers.html" />
+    <link rel="prev" title="Boundary Relocator" href="boundaryrelocator_int.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="schedulers.html" title="Schedulers"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="boundaryrelocator_int.html" title="Boundary Relocator"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" >Internal documentation</a> &raquo;</li>
+          <li><a href="relocators_int.html" accesskey="U">Relocators</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-basicBoundaryRelocator">
+<span id="basic-boundary-relocator"></span><h1>Basic Boundary Relocator<a class="headerlink" href="#module-basicBoundaryRelocator" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="basicBoundaryRelocator.BasicBoundaryRelocator">
+<em class="property">class </em><tt class="descclassname">basicBoundaryRelocator.</tt><tt class="descname">BasicBoundaryRelocator</tt><big>(</big><em>swappiness</em><big>)</big><a class="reference internal" href="_modules/basicBoundaryRelocator.html#BasicBoundaryRelocator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basicBoundaryRelocator.BasicBoundaryRelocator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basic implementation of a boundary relocator</p>
+<dl class="method">
+<dt id="basicBoundaryRelocator.BasicBoundaryRelocator.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>swappiness</em><big>)</big><a class="reference internal" href="_modules/basicBoundaryRelocator.html#BasicBoundaryRelocator.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basicBoundaryRelocator.BasicBoundaryRelocator.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>swappiness</strong> &#8211; the swappiness</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basicBoundaryRelocator.BasicBoundaryRelocator.getRelocations">
+<tt class="descname">getRelocations</tt><big>(</big><em>GVT</em>, <em>activities</em>, <em>horizon</em><big>)</big><a class="reference internal" href="_modules/basicBoundaryRelocator.html#BasicBoundaryRelocator.getRelocations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basicBoundaryRelocator.BasicBoundaryRelocator.getRelocations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all pending relocations</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>GVT</strong> &#8211; current GVT</li>
+<li><strong>activities</strong> &#8211; activities being passed on the GVT ring</li>
+<li><strong>horizon</strong> &#8211; the time over which the activities were gathered</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">all relocations that should be executed</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basicBoundaryRelocator.BasicBoundaryRelocator.setController">
+<tt class="descname">setController</tt><big>(</big><em>controller</em><big>)</big><a class="reference internal" href="_modules/basicBoundaryRelocator.html#BasicBoundaryRelocator.setController"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basicBoundaryRelocator.BasicBoundaryRelocator.setController" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures the controller of this relocator</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>controller</strong> &#8211; the controller</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="basicBoundaryRelocator.BasicBoundaryRelocator.useLastStateOnly">
+<tt class="descname">useLastStateOnly</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/basicBoundaryRelocator.html#BasicBoundaryRelocator.useLastStateOnly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#basicBoundaryRelocator.BasicBoundaryRelocator.useLastStateOnly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines whether or not the activities of all steps should be accumulated, or only a single state should be used.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">boolean &#8211; True if the relocator works with a single state</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="boundaryrelocator_int.html"
+                        title="previous chapter">Boundary Relocator</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="schedulers.html"
+                        title="next chapter">Schedulers</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/basicboundaryrelocator_int.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="schedulers.html" title="Schedulers"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="boundaryrelocator_int.html" title="Boundary Relocator"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="internal.html" >Internal documentation</a> &raquo;</li>
+          <li><a href="relocators_int.html" >Relocators</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,140 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Location tracing &mdash; PythonPDEVS 2.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PythonPDEVS 2.2.1 documentation" href="index.html" />
+    <link rel="up" title="Advanced examples" href="advanced.html" />
+    <link rel="next" title="Memoization" href="memoization.html" />
+    <link rel="prev" title="Checkpointing" href="checkpoint.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="memoization.html" title="Memoization"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="checkpoint.html" title="Checkpointing"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" accesskey="U">Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="location-tracing">
+<h1>Location tracing<a class="headerlink" href="#location-tracing" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This feature is still being worked on and all information is therefore prone to change.</p>
+</div>
+<p>Location tracing is closely linked to activity tracing. The only major difference is when the files are generated: an activity trace is only created at the end of the simulation run, whereas an location trace is created at the start of the simulation and at every GVT boundary where at least one migration happens. Location traces will always contain the time at which the location as it is presented actually went into effect.</p>
+<p>Enabling location tracing is as simple as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">FireSpread</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">setTerminationTime</span><span class="p">(</span><span class="mf">1000.0</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">setLocationCellMap</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Note that this again shows the location in a Cell view. If this kind of visualisation is not desirable (or possible), you are advised to use standard <a class="reference internal" href="visualisation.html"><em>Visualisation</em></a> using Graphviz.</p>
+<p>An example output of location tracing is given below. It isn&#8217;t really spectacular, as it only shows you your allocations again.</p>
+<img alt="Location cell view" class="align-center" src="_images/location.png" style="width: 50%;" />
+<p>Cell view visualisation is completely different from the regular <a class="reference internal" href="visualisation.html"><em>Visualisation</em></a>, as it contains some domain specific information and thus more closely resembles your interpretation of the model. Drawing a 6x6 grid with the generic visualisation, would generate something non-intuitive like the &#8216;curly&#8217; graph below.</p>
+<img alt="Location normal view" class="align-center" src="_images/location_normal.png" style="height: 2000px;" />
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="checkpoint.html"
+                        title="previous chapter">Checkpointing</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="memoization.html"
+                        title="next chapter">Memoization</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/location.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="memoization.html" title="Memoization"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="checkpoint.html" title="Checkpointing"
+             >previous</a> |</li>
+        <li><a href="index.html">PythonPDEVS 2.2.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" >Advanced examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yentl Van Tendeloo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
