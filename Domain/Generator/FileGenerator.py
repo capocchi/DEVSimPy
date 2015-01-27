@@ -17,7 +17,7 @@ GLOBAL VARIABLES AND FUNCTIONS:
 ### at the beginning to prevent with statement for python vetrsion <=2.5
 from __future__ import with_statement
 
-from Generator.Generator import *
+from Domain.Generator.Generator import *
 
 import os
 
@@ -54,7 +54,7 @@ class FileGenerator(Generator):
 					### ligne courante de valeurs et longueur
 					row = map(lambda b:b.strip(), filter(lambda a: a!='', l.split(self.__comma)))
 					lenght = len(row)
-
+					
 					### listValues est vide, liste de temps remplit avec entiers dependant de la frÃ©quence de sortie
 					if self.list_empty_flag :
 						t = i*self.outPutFrequency
