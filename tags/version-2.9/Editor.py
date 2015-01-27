@@ -1785,14 +1785,16 @@ class BlockEditor(Editor):
 				### update args (behavioral attributes) before saving
 				if new_args:
 
-					### add new attributes and update other
-					self.cb.args.update(dict([(item, new_args[item]) for item in new_args.keys()]))
-
+					### add new attributes
+					for key, val in new_args.items():
+						if not self.cb.args.has_key(key):
+							self.cb.args[key]=val
 
 					### del old attributes
 					for key, val in self.cb.args.items():
 						if not new_args.has_key(key):
 							del self.cb.args[key]
+
 				#		else:
 				#			### status bar notification
 				#			self.Notification(False, _('args not updated'), _('New class from %s') % (new_class))
@@ -1849,7 +1851,7 @@ class BlockEditor(Editor):
 				if inspect.isclass(classe):
 					# get behavioral attribute from python file through constructor class
 					constructor = inspect.getargspec(classe.__init__)
-
+					print self.cb.args
 					if constructor[-1]:
 						for k, v in zip(constructor[0][1:], constructor[-1]):
 							if not self.cb.args.has_key(k):
