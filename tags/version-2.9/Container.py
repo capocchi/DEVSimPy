@@ -180,7 +180,11 @@ def MsgBoxError(event, parent, msg):
 				editor_frame = Components.DEVSComponent.OnEditor(devscomp, event)
 				if zipfile.is_zipfile(dir_name): editor_frame.cb.model_path = dir_name
 				if editor_frame:
-					editor_frame.nb.GetCurrentPage().GotoLine(int(line.split(' ')[-1]))
+					nb = editor_frame.GetNoteBook()
+					page = nb.GetCurrentPage()
+					pos = int(line.split(' ')[-1])
+					page.GotoLine(pos)
+
 				return True
 			else:
 				return False

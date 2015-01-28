@@ -18,7 +18,7 @@ from wx.lib.mixins.listctrl import ListCtrlAutoWidthMixin, ColumnSorterMixin
 
 from Utilities import GetMails, getInstance
 
-import Components 
+import Components
 
 class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 	""" Virtual List of devs model checking
@@ -27,7 +27,7 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		""" Constructor.
 		"""
 		wx.ListCtrl.__init__( self, parent, -1, style=wx.LC_REPORT|wx.LC_VIRTUAL|wx.LC_HRULES|wx.LC_VRULES)
-		
+
 		### adding some art
 		self.il = wx.ImageList(16, 16)
 		a={"sm_up":"GO_UP","sm_dn":"GO_DOWN","idx1":"CROSS_MARK","idx2":"TICK_MARK"}
@@ -42,13 +42,13 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		self.InsertColumn(2, _('Line'), wx.LIST_FORMAT_CENTRE, width=80)
 		self.InsertColumn(3, _('Authors'), wx.LIST_FORMAT_CENTRE, width=80)
 		self.InsertColumn(4, _('Path'), wx.LIST_FORMAT_CENTRE, width=120)
-		
+
 		### These two should probably be passed to init more cleanly
 		### setting the numbers of items = number of elements in the dictionary
 		self.itemDataMap = D
 		self.itemIndexMap = D.keys()
 		self.SetItemCount(len(D))
-		
+
 		### mixins
 		ListCtrlAutoWidthMixin.__init__(self)
 		ColumnSorterMixin.__init__(self, self.GetColumnCount())
@@ -79,89 +79,92 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		"""
 		# record what was clicked
 		line_number = self.getColumnText(self.currentItem, 2)
-	
-		### popup menu only for cell with line_number
+
+		### pop-up menu only for cell with line_number
 		if line_number != "":
-   
+
 			### 2. Launcher creates wxMenu. ###
 			menu = wx.Menu()
-			
+
 			edit = wx.MenuItem(menu, wx.NewId(),_("Edit"), _("Edit the source code"))
 			edit.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 			report = wx.MenuItem(menu, wx.NewId(),_("Report"), _("Report error by mail to the author"))
 			report.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'mail.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-			
+
 			menu.AppendItem(edit)
 			menu.AppendItem(report)
-			
+
 			menu.Bind(wx.EVT_MENU,self.OnEditor,id= edit.GetId())
 			menu.Bind(wx.EVT_MENU,self.OnReport,id= report.GetId())
-			
+
 			### 5. Launcher displays menu with call to PopupMenu, invoked on the source component, passing event's GetPoint. ###
 			self.PopupMenu( menu, event.GetPoint() )
 			menu.Destroy() # destroy to avoid mem leak
 
 	def OnEditor(self, event):
-		""" Edit popup menu has been clicked
+		""" Edit pop-up menu has been clicked
 		"""
 		self.OnDoubleClick(event)
-	
+
 	def OnReport(self, event):
-		""" Report popup menu has been clicked
+		""" Report pop-up menu has been clicked
 		"""
-		
-		### get error infos
+
+		### get error info
 		info = self.getColumnText(self.currentItem, 1)
 		line = self.getColumnText(self.currentItem, 2)
 		mails_list = eval(self.getColumnText(self.currentItem, 3))
 		python_path = self.getColumnText(self.currentItem, 4)
-		
+
 		model_name = os.path.basename(python_path)
-		
+
 		### send mail to mailto and cc (for associated developpers)
 		mailto = mails_list[0]
 		cc = ""
 		for mail in mails_list[1:]:
 			cc += '%s,'%mail
-		
+
 		body = _("Dear DEVSimPy developpers, \n Error in %s, line %s :\n %s")%(model_name,line,info)
 		subject = _("Error in %s DEVSimPy model")%(model_name)
 		webbrowser.open_new("mailto:%s?subject=%s&cc=%s&body=%s"%(mailto,subject,cc,body))
-	
+
 	def OnItemDeselected(self, event):
 		""" Item has been deselected
 		"""
 		line_number = self.getColumnText(self.currentItem, 2)
 		python_path = self.getColumnText(self.currentItem, 4)
-		
+
 		if line_number != "":
 			### recuperation du model DEVS
 			devs = getInstance(Components.GetClass(python_path))
 			### check error and change image
 			if not isinstance(devs, tuple):
 				self.SetItemImage(self.currentItem, self.idx2)
-		
+
 	def OnDoubleClick(self, event):
 		""" Double click on cell has been invocked
 		"""
 		line_number = self.getColumnText(self.currentItem, 2)
 		python_path = self.getColumnText(self.currentItem, 4)
-		
+
 		if line_number != "":
 			devscomp = Components.DEVSComponent()
 			devscomp.setDEVSPythonPath(python_path)
-			
+
 			editor_frame = Components.DEVSComponent.OnEditor(devscomp, event)
 			if editor_frame:
-				editor_frame.text.GotoLine(int(line_number))
-			
+				nb = editor_frame.GetNoteBook()
+				page = nb.GetCurrentPage()
+				pos = int(line_number)
+				page.GotoLine(pos)
+
 		event.Skip()
-	
+
 	def OnItemActivated(self, event):
 		""" Item has been activated
 		"""
 		self.currentItem = event.m_itemIndex
-		
+
 	def getColumnText(self, index, col):
 		"""
 		"""
@@ -184,7 +187,7 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		"""
 		index=self.itemIndexMap[item]
 		data=self.itemDataMap[index][2]
-		
+
 		if data=="":
 			return self.idx2
 		else:
@@ -196,7 +199,7 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		items = list(self.itemDataMap.keys())
 		items.sort(sorter)
 		self.itemIndexMap = items
-		
+
 		# redraw the list
 		self.Refresh()
 
@@ -215,20 +218,20 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 class CheckerGUI(wx.Frame):
 	""" Class which report the code checking of python file
 	"""
-	
+
 	def __init__(self, parent, D):
 		""" Constructor.
 		"""
-		wx.Frame.__init__(self, parent, wx.ID_ANY, _("DEVS Model Checking"), size=(900,400), style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN | wx.STAY_ON_TOP)
+		wx.Frame.__init__(self, parent, wx.ID_ANY, _("DEVS Model Checking"), size=(900,400), style = wx.DEFAULT_FRAME_STYLE)
 
 		icon = wx.EmptyIcon()
 		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "check_master.png"), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(icon)
-		
+
 		#self.CreateStatusBar(1)
 
 		##############################################" comment for unitest
-		### prepare dictionnay
+		### prepare dictionary
 		L = []
 		for k,v in D.items():
 
@@ -239,8 +242,8 @@ class CheckerGUI(wx.Frame):
 				module = Components.BlockFactory.GetModule(k.python_path)
 				doc = module.__doc__ or ""
 				mails = GetMails(doc) if inspect.ismodule(module) else []
-				
-				### append infos 
+
+				### append infos
 				L.append((k.label, "", "", mails, k.python_path))
 			else:
 				typ, val, tb = v
@@ -256,64 +259,64 @@ class CheckerGUI(wx.Frame):
 				### erase whitespace and clear the Line word and the File word
 				python_path = str(path.split(' ')[-1].strip())[1:-1]
 				line_number = line.split(' ')[-1].strip()
-				
+
 				### find mail from doc of module
 				module = Components.BlockFactory.GetModule(python_path)
 				doc = module.__doc__ or ""
 				mails = GetMails(doc) if inspect.ismodule(module) else []
-					
+
 				### append the error information
 				L.append((k.label, str(val), line_number, mails, python_path))
 
 		self.list = VirtualList(self, dict(zip(range(len(L)),L)))
 		#################################################
-		
+
 		### decomment for unitest
 		#self.list = VirtualList(self,D)
-		
+
 		hsizer = wx.StdDialogButtonSizer() #wx.BoxSizer(wx.HORIZONTAL)
 		vsizer = wx.BoxSizer(wx.VERTICAL)
-		
+
 		close_btn = wx.Button(self, wx.ID_CLOSE)
 		ok_btn = wx.Button(self, wx.ID_OK)
 		update_btn = wx.Button(self, wx.ID_REFRESH)
-		
+
 		hsizer.Add(close_btn)
 		hsizer.Add(update_btn)
 		hsizer.Add(ok_btn)
 		hsizer.Realize()
-		
+
 		vsizer.Add(self.list, 1, wx.EXPAND, 10)
 		vsizer.Add(hsizer,0, wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM,border=10)
-		
+
 		self.SetSizer(vsizer)
 		self.Center()
 
 		### just for windows
 		e = wx.SizeEvent(self.GetSize())
 		self.ProcessEvent(e)
-		
+
 		self.Bind(wx.EVT_BUTTON, self.OnClose, id = close_btn.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnOK, id = ok_btn.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnUpdate, id = update_btn.GetId())
-		
+
 	def OnClose(self,evt):
 		"""
 		"""
 		self.Close()
-		
+
 	def OnOK(self, evt):
 		"""
 		"""
 		self.Close()
-		
+
 	def OnUpdate(self, evt):
 		""" Update list has been invocked
 		"""
-		
+
 		### deep copy of data list
 		D = copy.deepcopy(self.list.itemDataMap)
-		
+
 		### update in error line self.list.itemDataMap
 		for k,v in D.items():
 			line_number = v[2]
@@ -323,7 +326,7 @@ class CheckerGUI(wx.Frame):
 				### check error and change image
 				if not isinstance(devs, tuple):
 					self.list.itemDataMap[k] = (v[0], "", "", v[3], v[4])
-				
+
 		### refresh items
 		self.list.RefreshItems(-1,-1)
 
@@ -331,7 +334,7 @@ class CheckerGUI(wx.Frame):
 class TestApp(wx.App):
 	""" Testing application
 	"""
-	
+
 	musicdata = {
 	1 : ("Bad English", "The Price Of Love", "Rock"),
 	2 : ("DNA featuring Suzanne Vega", "Tom's Diner", "Rock"),
@@ -390,22 +393,22 @@ class TestApp(wx.App):
 	}
 
 	def OnInit(self):
-		
+
 		import gettext
 		import __builtin__
-		
+
 		__builtin__.__dict__['ICON_PATH']='icons'
 		__builtin__.__dict__['ICON_PATH_16_16']=os.path.join(ICON_PATH,'16x16')
 		__builtin__.__dict__['_'] = gettext.gettext
-		
+
 		self.frame = CheckerGUI(None, TestApp.musicdata)
 		self.frame.Show()
 		return True
-	
+
 	def OnQuit(self, event):
 		self.Close()
-		
+
 if __name__ == '__main__':
-	
+
 	app = TestApp(0)
 	app.MainLoop()
