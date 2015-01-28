@@ -31,11 +31,11 @@ class FileGenerator(Generator):
 
 	def __init__(self, fileName=os.path.join(os.getcwd(), "fichier.csv"), listValues=[1], time=0, outPutFrequency=1.0, comma=" "):
 		"""
-		@param fileName : file path of model
-		@param listValues : considered columns numbers
+		@param fileName : path of the data file
+		@param listValues : considered columns numbers (as number of output)
 		@param time : time column number
 		@param outPutFrequency : sigma step
-		@param comma : comma separated
+		@param comma : separating character (default space)
 
 		"""
 
@@ -54,7 +54,7 @@ class FileGenerator(Generator):
 					### ligne courante de valeurs et longueur
 					row = map(lambda b:b.strip(), filter(lambda a: a!='', l.split(self.__comma)))
 					lenght = len(row)
-					
+
 					### listValues est vide, liste de temps remplit avec entiers dependant de la frÃ©quence de sortie
 					if self.list_empty_flag :
 						t = i*self.outPutFrequency
@@ -62,7 +62,7 @@ class FileGenerator(Generator):
 					else:
 						t = row[self.time]
 
-					### gestion des ligne vide
+					### empty lines
 					if t != '':
 						self.T.append(float(t))
 					else:
