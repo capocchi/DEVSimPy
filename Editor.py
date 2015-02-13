@@ -1524,10 +1524,8 @@ class Editor(wx.Frame, wx.Panel):
 
 		### enable save icon in toolbar
 		self.toolbar.EnableTool(self.save.GetId(), True)
-
 		### status bar notification
 		self.Notification(True, _('%s modified' % (os.path.basename(self.nb.GetCurrentPage().GetFilename()))), '')
-
 		event.Skip()
 
 	### NOTE: Editor :: OnOpenFile 			=> Event OnOpenFile
@@ -1765,6 +1763,27 @@ class BlockEditor(Editor):
 
 		return new_instance
 
+	def UpdateArgs(self, new_args):
+		""" Update the args or constructor class from new_args
+		"""
+
+		### update args (behavioral attributes) before saving
+		if isinstance(new_args, dict):
+
+			### add new attributes
+			for key, val in new_args.items():
+				if not self.cb.args.has_key(key):
+					self.cb.args[key]=val
+
+			### del old attributes
+			for key, val in self.cb.args.items():
+				if not new_args.has_key(key):
+					del self.cb.args[key]
+
+		else:
+			### status bar notification
+			self.Notification(False, _('args not updated'), _('New class from %s') % (new_class))
+
 	### NOTE: BlockEditor :: CheckErrors 		=> inherit method
 	def CheckErrors(self, base_name, code, new_instance):
 		"""
@@ -1779,25 +1798,8 @@ class BlockEditor(Editor):
 
 			if new_instance:
 				import Components
-
 				new_args = Components.GetArgs(new_class)
-
-				### update args (behavioral attributes) before saving
-				if new_args:
-
-					### add new attributes
-					for key, val in new_args.items():
-						if not self.cb.args.has_key(key):
-							self.cb.args[key]=val
-
-					### del old attributes
-					for key, val in self.cb.args.items():
-						if not new_args.has_key(key):
-							del self.cb.args[key]
-
-				#		else:
-				#			### status bar notification
-				#			self.Notification(False, _('args not updated'), _('New class from %s') % (new_class))
+				self.UpdateArgs(new_args)
 
 			### user would change the behavior during a simulation without saving
 			if on_simulation_flag and new_instance is not bool:
@@ -1827,9 +1829,8 @@ class BlockEditor(Editor):
 		### re importation du module de la classe avec verification des erreurs éventuelles dans le code
 		if hasattr(self.cb, 'model_path') and zipfile.is_zipfile(self.cb.model_path):
 			module_name = self.cb.model_path
-
+		# recuperation du module correspondant à la classe
 		else:
-			# recuperation du module correspondant à la classe
 			module_name = path_to_module(self.cb.python_path)
 
 		info = ReloadModule.recompile(module_name)
@@ -1851,12 +1852,10 @@ class BlockEditor(Editor):
 				if inspect.isclass(classe):
 
 					# get behavioral attribute from python file through constructor class
+					# args must have default value in the constructor
 					constructor = inspect.getargspec(classe.__init__)
-					print self.cb.args
-					if constructor[-1]:
-						for k, v in zip(constructor[0][1:], constructor[-1]):
-							if not self.cb.args.has_key(k):
-								self.cb.args.update({k: v})
+					new_args = dict(zip(constructor[0][1:], constructor[-1])) if constructor[-1] else {}
+					self.UpdateArgs(new_args)
 
 					# code update if it was modified during the simulation (out of constructor code,
 					# because we don't re-instanciated the devs model but only change the class reference)
