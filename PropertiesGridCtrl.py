@@ -367,7 +367,7 @@ class CustomDataTable(gridlib.PyGridTableBase):
 			val = getattr(model, attr)
 			if attr == "image_path":
 				val = os.path.basename(val)
-			self.data.append([attr,val,self.infoBlockLabelList[i]])
+			self.data.append([attr, val, self.infoBlockLabelList[i]])
 			self.dataTypes.append(self.GetTypeList(val))
 
 		### Behavioral sorted values fields

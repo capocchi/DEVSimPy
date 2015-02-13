@@ -1849,6 +1849,7 @@ class BlockEditor(Editor):
 
 				### for plugins.py file, i is not a class !
 				if inspect.isclass(classe):
+
 					# get behavioral attribute from python file through constructor class
 					constructor = inspect.getargspec(classe.__init__)
 					print self.cb.args

@@ -50,7 +50,7 @@ LColour = ('black', 'red', 'green', 'blue', 'yellow', 'gray', 'magenta', 'maroon
 Markers = ('circle', 'triangle', 'square',  'cross', 'triangle_down', 'plus', 'dot')
 
 def get_limit(d):
-	""" Function whwich give the limits of d
+	""" Function which give the limits of d
 	"""
 
 	L1,L2 = [],[]
@@ -115,7 +115,7 @@ class PlotFrame(wx.Frame):
 		file_print_preview = menu.Append(wx.NewId(), _('Print Preview'), _('Show the current plot on page'))
 		file_print = menu.Append(wx.NewId(), _('Print'), _('Print the current plot'))
 		file_save = menu.Append(wx.NewId(), _('Save Plot'), _('Save current plot'))
-		file_exit  = menu.Append(wx.NewId(), _('E&xit'), _('Enough of this already!'))
+		file_exit  = menu.Append(wx.NewId(), _('&Exit'), _('Enough of this already!'))
 
 		self.mainmenu.Append(menu, _('&File'))
 
@@ -640,7 +640,11 @@ class DynamicPlot(PlotFrame):
 
 	def __init__(self, parent = None, id = wx.ID_ANY, title = "", atomicModel = None, xLabel = "", yLabel = "", iport=None):
 		"""
-			@data : [(x,y)...]
+			@parent : parent class
+			@id : class id
+			@title : title of frame
+			@xLabel : label for x axe
+			@yLabel : label for y axe
 			@iport: the number of port when the fusion option is disabled.
 			@atomicModel: QuicScope atomic model used for its data
 		"""
