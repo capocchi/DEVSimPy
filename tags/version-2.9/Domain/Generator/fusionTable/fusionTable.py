@@ -5,7 +5,7 @@
 #Corporation : University Of Corsica Laboratory SPE
 #Description : The library to get data from Google Fusion Table
 #Date : 2010-09-30
- 
+
 from ftclient import GoogleClientLogin, FTClient
 from math import fabs
 
@@ -19,9 +19,10 @@ class Request:
 
 		### try connexion
 		try:
-			#con = urllib2.urlopen("http://173.194.32.32/") ### google
-			con = urllib2.urlopen("http://www.google.fr")
-			#data = con.read()
+			url = "http://www.google.fr/"
+
+			#url = http://173.194.32.32/ ### google
+			con = urllib2.urlopen(url)
 		except urllib2.URLError:
 			self.listTime = []
 			self.listData = []
@@ -51,7 +52,7 @@ class Request:
 			else:
 				self.listTime=[0]
 				self.listData=[0]
-			
+
 	def getListData(self):
 		return self.listData
 
