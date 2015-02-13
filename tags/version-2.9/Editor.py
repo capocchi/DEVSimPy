@@ -1289,13 +1289,13 @@ class Editor(wx.Frame, wx.Panel):
 
 		else:
 
-			tb = wx.ToolBar( self, -1 )
-			tb.SetToolBitmapSize( ( 16, 16 ) )# this required for non-standard size buttons on MSW
+			tb = wx.ToolBar(self, -1)
+			tb.SetToolBitmapSize((16, 16))# this required for non-standard size buttons on MSW
 
-			tb.AddTool(self.save.GetId(),  wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), shortHelpString=_('Save'), longHelpString=_('Save the file'))
-			tb.AddTool(self.cut.GetId(),  wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), shortHelpString=_('Cut'), longHelpString=_('Cut the selection'))
-			tb.AddTool(self.copy.GetId(),  wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), shortHelpString=_('Copy'), longHelpString=_('Copy the selection'))
-			tb.AddTool(self.paste.GetId(),  wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), shortHelpString=_('Paste'), longHelpString=_('Paste text from clipboard'))
+			tb.AddTool(self.save.GetId(), wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), shortHelpString=_('Save'), longHelpString=_('Save the file'))
+			tb.AddTool(self.cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), shortHelpString=_('Cut'), longHelpString=_('Cut the selection'))
+			tb.AddTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), shortHelpString=_('Copy'), longHelpString=_('Copy the selection'))
+			tb.AddTool(self.paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), shortHelpString=_('Paste'), longHelpString=_('Paste text from clipboard'))
 
 			wx.EVT_TOOL(self, self.save.GetId(), self.OnSaveFile)
 			wx.EVT_TOOL(self, self.cut.GetId(), self.nb.OnCut)
@@ -1625,6 +1625,9 @@ class BlockEditor(Editor):
 		if not parent:
 			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'pythonFile.png'), wx.BITMAP_TYPE_PNG)))
 			self.ConfigureGUI()
+		else:
+			### in panel
+			self.ConfigureTB()
 
 		self.cb = block
 
@@ -1661,28 +1664,47 @@ class BlockEditor(Editor):
 		peek = wx.MenuItem(insert, wx.NewId(), _('New peek'), _('Generate new peek code'))
 		poke = wx.MenuItem(insert, wx.NewId(), _('New poke'), _('Generate new poke code'))
 		state = wx.MenuItem(insert, wx.NewId(), _('New state'), _('Generate new state code (ACTIVE, IDEL,...)'))
+		debug = wx.MenuItem(insert, wx.NewId(), _('New debugger'), _('Generate new debugger code (print into the log of model)'))
 
 		insert.AppendItem(peek)
 		insert.AppendItem(poke)
 		insert.AppendItem(state)
+		insert.AppendItem(debug)
 
 		menu = self.GetMenuBar().GetMenu(1)
 		menu.PrependMenu(wx.NewId(), _("Insert"), insert)
 		### -------------------------------------------------------------------
 
 		### insert new icon in toolbar (icon are not available in embeded editor (Show menu)
-		###-------------------------------------------------------------------
 		tb = self.GetToolBar()
 		tb.InsertSeparator(tb.GetToolsCount())
 		tb.AddTool(peek.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')),shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
 		tb.AddTool(poke.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')),shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
 		tb.AddTool(state.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')),shortHelpString=_('New state'), longHelpString=_('Insert a code for a new state'))
+		tb.AddTool(debug.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'debugger.png')),shortHelpString=_('New debugger'), longHelpString=_('Insert a code for print information into the log of model'))
 		tb.Realize()
 
-		###-------------------------------------------------------------------
 		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=poke.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertState, id=state.GetId())
+		self.Bind(wx.EVT_MENU, self.OnInsertDebug, id=debug.GetId())
+
+	def ConfigureTB(self):
+		"""
+		"""
+		id = [wx.NewId()]*4
+		#tb = self.GetToolBar()
+		self.toolbar.InsertSeparator(self.toolbar.GetToolsCount())
+		self.toolbar.AddTool(id[0], wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')),shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
+		self.toolbar.AddTool(id[1], wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')),shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
+		self.toolbar.AddTool(id[2], wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')),shortHelpString=_('New state'), longHelpString=_('Insert a code for a new state'))
+		self.toolbar.AddTool(id[3], wx.Bitmap(os.path.join(ICON_PATH_16_16,'debugger.png')),shortHelpString=_('New debugger'), longHelpString=_('Insert a code for print information into the log of model'))
+		self.toolbar.Realize()
+
+		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=id[0])
+		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=id[1])
+		self.Bind(wx.EVT_MENU, self.OnInsertState, id=id[2])
+		self.Bind(wx.EVT_MENU, self.OnInsertDebug, id=id[3])
 
 	### NOTE: BlockEditor :: OnInsertPeekPoke => Event when insert peek or insert poke button is clicked
 	def OnInsertPeekPoke(self, event):
@@ -1742,7 +1764,14 @@ class BlockEditor(Editor):
 
 		cp.modify = True
 
-	### NOTE: BlockEditor :: ConfigSaving 	=> inherited method
+	def OnInsertDebug(self, event):
+		""" Insert debugger function that trace message into the log of model
+		"""
+		cp = self.nb.GetCurrentPage()
+		cp.AddTextUTF8("self.debugger('<message>')")
+		cp.modify = True
+
+	### NOTE: BlockEditor :: ConfigSaving => inherited method
 	def ConfigSaving(self, base_name, dir_name, code):
 		""" Saving method
 		"""
