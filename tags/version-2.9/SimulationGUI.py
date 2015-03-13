@@ -566,15 +566,10 @@ class SimulationDialog(wx.Frame, wx.Panel):
 				self.count = 100
 				self._gauge.SetValue(self.count)
 
-			### clock formating
-			ms = self.thread.cpu_time%1
-			m, s = divmod(self.thread.cpu_time, 60)
-			h, m = divmod(m, 60)
-
 			### update the status bar
 			self.statusbar.SetBackgroundColour('')
 			self.statusbar.SetStatusText(_("Completed!"), 0)
-			self.statusbar.SetStatusText("%d:%02d:%02d:%03d" % (h, m, s, ms*1000), 1)
+			self.statusbar.SetStatusText(self.GetClock(), 1)
 
 			### is no time limit add some informations in status bar
 			if not self.ntl:
@@ -586,15 +581,11 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 		### if the simulation is suspended
 		elif not self.thread.thread_suspend:
-			### clock formating
-			ms = self.thread.cpu_time%1
-			m, s = divmod(self.thread.cpu_time, 60)
-			h, m = divmod(m, 60)
 
 			### udpate the status bar
 			self.statusbar.SetBackgroundColour('GREY')
 			self.statusbar.SetStatusText(_("Processing..."), 0)
-			self.statusbar.SetStatusText("%d:%02d:%02d:%03d" % (h, m, s, ms*1000), 1)
+			self.statusbar.SetStatusText(self.GetClock(), 1)
 			#self.statusbar.SetStatusText("%0.4f s"%(self.thread.cpu_time), 1)
 
 			### is no time limit, add some information in status bar
@@ -604,6 +595,14 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 			#wx.Yield()
 			wx.YieldIfNeeded()
+
+	def GetClock(self):
+		### clock formating
+		ms = self.thread.cpu_time%1
+		m, s = divmod(self.thread.cpu_time, 60)
+		h, m = divmod(m, 60)
+		return "%d:%02d:%02d:%03d" % (h, m, s, ms*1000)
+
 	###
 	def MsgBoxEmptyModel(self):
 		""" Pop-up alert for empty model
