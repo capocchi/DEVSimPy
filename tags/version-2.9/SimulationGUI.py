@@ -390,10 +390,10 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		"""	When View button is clicked
 		"""
 		# The simulation verbose event occurs
-		trigger_event("START_SIM_VERBOSE", parent=self)
+		trigger_event('START_SIM_VERBOSE', parent=self)
 
 		# The simulation verbose event occurs
-		trigger_event("VIEW_ACTIVITY_REPORT", parent=self, master = self.current_master)
+		trigger_event('VIEW_ACTIVITY_REPORT', parent=self, master=self.current_master)
 
 	###
 	def OnOk(self, event):

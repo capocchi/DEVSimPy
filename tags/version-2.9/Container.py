@@ -1919,6 +1919,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		### right clic appears in a library
 		if not isinstance(parent, ShapeCanvas):
 			### Get path of the selected lib in order to change the last step of wizard
+			### TODO: GetFocusedItem failed on Linux!
 			sdp = parent.GetItemPyData(parent.GetFocusedItem())
 			kargs['specific_domain_path']=sdp
 
