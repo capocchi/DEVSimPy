@@ -76,10 +76,10 @@ class LibPanel(wx.Panel):
 
 		self.tree.Populate(chargedDomainList)
 
-		### Creation de l'arbre de recherche hide au depart (voir __do_layout)
+		### search tree that is hide when starting devsimpy (see __do_layout)
 		self.searchTree = LibraryTree(self, wx.ID_ANY, wx.DefaultPosition, style=wx.TR_DEFAULT_STYLE|wx.TR_HIDE_ROOT|wx.TR_MULTIPLE|wx.TR_LINES_AT_ROOT|wx.TR_HAS_BUTTONS|wx.SUNKEN_BORDER)
 
-		### Creation de l'option de recherche dans tree
+		### search field creation
 		self.search = SearchLib(self, size=(200,-1), style = wx.TE_PROCESS_ENTER)
 
 		#self.tree.UpdateAll()
@@ -100,7 +100,7 @@ class LibPanel(wx.Panel):
 		self.__set_tips()
 
 	def BuildToolbar(self):
-		"""	creates one of the toolbars
+		"""	creates one of the tool-bars
 		The buttons act like radio buttons, setting a mode for the Panel
 		Only one of them is pressed at a time. The SetMode() method handles this
 		"""

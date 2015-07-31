@@ -180,7 +180,11 @@ def MsgBoxError(event, parent, msg):
 				editor_frame = Components.DEVSComponent.OnEditor(devscomp, event)
 				if zipfile.is_zipfile(dir_name): editor_frame.cb.model_path = dir_name
 				if editor_frame:
-					editor_frame.nb.GetCurrentPage().GotoLine(int(line.split(' ')[-1]))
+					nb = editor_frame.GetNoteBook()
+					page = nb.GetCurrentPage()
+					pos = int(line.split(' ')[-1])
+					page.GotoLine(pos)
+
 				return True
 			else:
 				return False
@@ -375,8 +379,8 @@ class Diagram(Savable, Structurable):
 			cls = Components.GetClass(m.python_path)
 
 			### Class is wrong ?
-			if isinstance(cls, (ImportError, tuple)):
-				print _('Error making DEVS instances for:\n%s'%(str(cls)))
+			if isinstance(cls, (ImportError, tuple)) or cls is None:
+				print _('Error making DEVS instances for:\n%s\n%s'%(str(cls), m.python_path))
 				return False
 			else:
 				### DEVS model recovery
@@ -440,7 +444,7 @@ class Diagram(Savable, Structurable):
 
 			Structurable.ConnectDEVSPorts(diagram, p1, p2)
 
-		### change priority form priority_list is PriorityGUI has been invoked (Otherwise componentSet oreder is considered)
+		### change priority form priority_list is PriorityGUI has been invoked (Otherwise componentSet order is considered)
 		diagram.updateDEVSPriorityList()
 
 		return diagram.getDEVSModel()
@@ -1915,6 +1919,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		### right clic appears in a library
 		if not isinstance(parent, ShapeCanvas):
 			### Get path of the selected lib in order to change the last step of wizard
+			### TODO: GetFocusedItem failed on Linux!
 			sdp = parent.GetItemPyData(parent.GetFocusedItem())
 			kargs['specific_domain_path']=sdp
 
@@ -3120,16 +3125,17 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 
 		### Prepare label drawing
 		w,h =  dc.GetTextExtent(self.label)
-		mx = int((self.x[0] + self.x[1])/2.0)-int(w/2.0)
+		mx = int((self.x[0] + self.x[1]-w)/2)
 
 		if self.label_pos == 'bottom':
 			### bottom
-			my = int(self.y[1]-h)
+			my = int(self.y[1])
 		elif self.label_pos == 'top':
 			### top
-			my = int(self.y[0]+h/2.0)
+			my = int(self.y[0]-h)
 		else:
-			my = int((self.y[0] + self.y[1])/2.0)-int(h/2.0)
+			### center
+			my = int((self.y[0] + self.y[1]-h)/2)
 
 		### with and height of rectangle
 		self.w = self.x[1]- self.x[0]
@@ -3373,9 +3379,12 @@ class CodeBlock(Block, Achievable):
 						state['bad_filename_path_flag'] = True
 					else:
 						state['model_path'] = path
-						### we find the python file using re module because path can comes from windows and then sep is not the same and os.path.basename don't work !
-						state['python_path'] = os.path.join(path, re.findall("([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
 
+						state['python_path'] = os.path.basename(python_path)
+
+						if not state['python_path'].endswith('.py'):
+							### we find the python file using re module because path can comes from windows and then sep is not the same and os.path.basename don't work !
+							state['python_path'] = os.path.join(path, re.findall("([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
 				else:
 					state['bad_filename_path_flag'] = True
 

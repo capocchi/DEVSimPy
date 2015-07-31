@@ -27,7 +27,7 @@ def recompile(modulename):
 			return info
 
 		### Use the imported module to determine its actual path
-		pycfile = tmp.__file__
+		pycfile = os.path.abspath(tmp.__file__)
 		modulepath = string.replace(pycfile, ".pyc", ".py")
 
 		### Try to open the specified module as a file

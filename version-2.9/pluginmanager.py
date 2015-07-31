@@ -34,7 +34,8 @@ def enable_plugin(plugin):
 		for f in functions:
 			if plugin == f.__module__ and event in disabled_event:
 				disabled_event.remove(event)
-				disabled_plugin.remove(plugin)
+				if plugin in disabled_plugin:
+					disabled_plugin.remove(plugin)
 
 def disable_plugin(plugin):
 	""" Append resp. the plugin and the event to the disabled_plugin and disabled_event lists.
@@ -47,7 +48,8 @@ def disable_plugin(plugin):
 				if hasattr(sys.modules[plugin],'UnConfig'):
 					apply(sys.modules[plugin].UnConfig,())
 				disabled_event.append(event)
-				disabled_plugin.append(plugin)
+				if plugin not in disabled_plugin:
+					disabled_plugin.append(plugin)
 
 
 def is_enable(plugin):

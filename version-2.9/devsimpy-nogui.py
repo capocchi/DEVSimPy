@@ -65,7 +65,7 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 
 builtin_dict['GUI_FLAG'] = False
 
-from SimulationNoGUI import makeSimulation, makeJS
+from SimulationNoGUI import makeSimulation, makeJSON, makeJS
 
 # Sets the homepath variable to the directory where your application is located (sys.argv[0]).
 __builtin__.__dict__.update(builtin_dict)
@@ -76,13 +76,13 @@ if __name__ == '__main__':
  	import gettext
  	_ = gettext.gettext
 
- 	sys.stdout.write(_("DEVSimPy - version %s\n"%__version__ ))
+ 	#sys.stdout.write(_("DEVSimPy - version %s\n"%__version__ ))
 
 	if len(sys.argv) == 2:
 		### check dsp filename
 		filename = sys.argv[1]
 		if not os.path.exists(filename):
-			sys.stderr.write(_('ERROR: Unspecified .dsp file!\n'))
+			sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
 			sys.exit()
 
 		### launch simulation
@@ -92,23 +92,28 @@ if __name__ == '__main__':
 		### check dsp filename
 		filename = sys.argv[1]
 		if not os.path.exists(filename):
-			sys.stderr.write(_('ERROR: Unspecified .dsp file!\n'))
+			sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
 			sys.exit()
 
 		### check time
 		time = sys.argv[2]
 
 		if str(time) in ('-js','-javascript'):
-			### launch JS generation
+			### launch JS file generation
 			makeJS(filename)
+		elif str(time) in ('-json'):
+			import json
+			### launch JSON file generation
+			j = makeJSON(filename)
 
+			sys.stdout.write(json.dumps(j,sort_keys=True, indent=4))
 		else:
 			if str(time) in ('inf', 'ntl'):
 				__builtin__.__dict__['NTL'] = True
 				time = 0.0
 
 			### launch simulation
-			makeSimulation(filename, time)
+			makeSimulation(filename, time, False)
 
 	else:
 		sys.stderr.write(_('ERROR: Unspecified .dsp file!\n'))

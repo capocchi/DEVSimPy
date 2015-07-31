@@ -28,19 +28,21 @@ class memoize:
         except KeyError:
             self.memoized[args] = self.function(*args)
             return self.memoized[args]
-    
+
 hotshotProfilers = {}
 def hotshotit(func):
 	def wrapper(*args, **kw):
 		sim_thread = args[0]
 		prof = sim_thread.prof
-		### if profiling chekbox is checked in the simulationDialog
+		### if profiling check-box is checked in the simulationDialog
 		if prof:
 			label = sim_thread.model.getBlockModel().label
 
 			try:
 				import hotshot
+				#import cProfile as hotshot
 			except ImportError:
+				sys.stderr.write(_("Please install hotshot module."))
 				return
 
 			global hotshotProfilers
@@ -50,7 +52,6 @@ def hotshotit(func):
 				profiler = hotshot.Profile(prof_name)
 				hotshotProfilers[prof_name] = profiler
 			r = profiler.runcall(func, *args, **kw)
-			profiler.close()
 		else:
 			r = func(*args, **kw)
 		return r
@@ -64,7 +65,7 @@ def run_in_thread(fn):
 		t = threading.Thread(target=fn, args=k, kwargs=kw)
 		t.start()
 	return run
-    
+
 def BuzyCursorNotification(f):
 	""" Decorator which give the buzy cursor for long process
 	"""
@@ -74,7 +75,7 @@ def BuzyCursorNotification(f):
 			r =  f(*args)
 			wx.EndBusyCursor()
 			return r
-	return wrapper	
+	return wrapper
 
 # allows  arguments for a decorator
 decorator_with_args = lambda decorator: lambda *args, **kwargs: lambda func: decorator(func, *args, **kwargs)
@@ -83,7 +84,7 @@ decorator_with_args = lambda decorator: lambda *args, **kwargs: lambda func: dec
 def StatusBarNotification(f, arg):
 	""" Decorator which give information into status bar for the load and the save diagram operations
 	"""
-	
+
 	def wrapper(*args):
 
 		# main window
@@ -93,18 +94,18 @@ def StatusBarNotification(f, arg):
 		for win in filter(lambda w: w.IsTopLevel(), mainW.GetChildren()):
 			if win.IsActive() and isinstance(win, wx.Frame) and not isinstance(win, wx.aui.AuiFloatingFrame):
 				mainW = win
-	
+
 		r = f(*args)
 
 		if hasattr(mainW, 'statusbar'):
 			diagram = args[0]
 			fn = os.path.basename(args[-1])
 			txt = arg
-			
+
 			mainW.statusbar.SetStatusText('%s %sed'%(fn, txt), 0)
 			mainW.statusbar.SetStatusText(os.path.basename(diagram.last_name_saved), 1)
 			mainW.statusbar.SetStatusText('', 2)
-		
+
 		return r
 
 	return wrapper
@@ -141,21 +142,21 @@ def print_timing(func):
 
 def Pre_Undo(f):
 	def wrapper(*args):
-		
+
 		diagram = args[0]
 		diagram.Undo()
 		r = f(*args)
-		
+
 		return r
 	return wrapper
-	
+
 def Post_Undo(f):
 	def wrapper(*args):
-		
+
 		diagram = args[0]
 		r = f(*args)
 		diagram.Undo()
-		
+
 		return r
 	return wrapper
 

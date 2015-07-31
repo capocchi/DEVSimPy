@@ -254,7 +254,7 @@ class GeneralPluginsList(CheckListCtrl, Populable):
 						disable_plugin(name)
 
 		### config file writing
-		self.mainW.cfg.Write("plugins", str(pluginsList))
+		self.mainW.cfg.Write('plugins', str(pluginsList))
 		self.mainW.cfg.Flush()
 
 class BlockPluginsList(CheckListCtrl, Populable):

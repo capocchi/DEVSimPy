@@ -32,8 +32,8 @@ __res = None
 def __init_resources():
 	global __res
 	__res = xrc.EmptyXmlResource()
-	home = os.path.abspath(os.path.dirname(sys.argv[0]))
-	__res.Load(os.path.join(home,'XRC','LabelEditorDialog.xrc'))
+	#home = os.path.abspath(os.path.dirname(sys.argv[0]))
+	__res.Load(os.path.join(HOME_PATH,'XRC','LabelEditorDialog.xrc'))
 
 def get_resources():
     """ This function provides access to the XML resources in this module."""

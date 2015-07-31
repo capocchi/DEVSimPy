@@ -387,11 +387,13 @@ class ImportLibrary(wx.Dialog):
 			if dlg.ShowModal() == wx.ID_OK:
 				select = dlg.GetValueString()
 			else:
-				select = []
+				select = None
 			dlg.Destroy()
+		else:
+			select = None
 
 		### if path exist, we create the __init__.py file with __all__ empty
-		if os.path.isdir(path):
+		if os.path.isdir(path) and select:
 			with open(os.path.join(path, '__init__.py'), 'w') as f:
 				f.write("__all__ = [ \n")
 				for fn in select:

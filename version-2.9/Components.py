@@ -23,6 +23,7 @@ import wx
 import codecs
 import string
 import types
+
 from tempfile import gettempdir
 
 if wx.VERSION_STRING < '2.9':
@@ -97,6 +98,7 @@ def GetArgs(cls = None):
 ### 		GENERAL CLASSES
 ###
 ###########################################################
+
 
 class DSPComponent:
 	"""
@@ -210,12 +212,26 @@ class GenericComponent:
 
 	@staticmethod
 	def Load(filename, label, x, y, canvas):
-		""" Load strored component form filename
+		""" Load stored component form filename
 		"""
 		pass
 
+	@staticmethod
+	def ChekFilename(filename, model):
+		""" static method to correct the error occurring when the filename is not corresponding with values of paths
+			(model and python) embedded in the .amd (dat file). This error occurs when the user copy and past a .amd model into
+			an another directory.
+		"""
+		### update model if the path of the .amd file (filename) doesn't correspond with the paths contained into the .amd file
+		if filename != model.model_path:
+			model.model_path = filename
+			model.python_path = os.path.join(filename, os.path.basename(model.python_path))
+			## save the new config path
+			model.SaveFile(filename)
+		return model
+
 class CMDComponent(GenericComponent):
-	""" Return labeled block from filename at (x,y) postion in canvas
+	""" Return labeled block from filename at (x,y) position in canvas
 
 		@filename: filename for loading block
 		@label: label of block
@@ -284,10 +300,10 @@ class CMDComponent(GenericComponent):
 				elif isinstance(s, oPort):
 					m.output +=1
 
-			return m
+			return CMDComponent.ChekFilename(filename, m)
 
 class AMDComponent(GenericComponent):
-	""" Return labeled block from filename at (x,y) postion in canvas
+	""" Return labeled block from filename at (x,y) position in canvas
 
 		@filename: filename for loading block
 		@label: label of block
@@ -305,7 +321,7 @@ class AMDComponent(GenericComponent):
 		""" Create AMD from filename
 		"""
 
-		# associated python class
+		# associated Python class
 		cls = GetClass(self._python_file)
 
 		self.__m = AMDComponent.BlockModelAdapter(cls, self._label, self._specific_behavior)
@@ -343,12 +359,12 @@ class AMDComponent(GenericComponent):
 			### mandatory due to the LoadFile call before
 			m.label = label
 
-			return m
+			return AMDComponent.ChekFilename(filename, m)
 
 	@staticmethod
 	def BlockModelAdapter(cls, label="", specific_behavior=""):
-		""" Return block model concidering its class hierarchie
-			The implementation depends only of the argument of the class. There is no dependance with the collector modul (in comment bellow)
+		""" Return block model considering its class hierarchy
+			The implementation depends only of the argument of the class. There is no dependance with the collector module (in comment bellow)
 		"""
 		from Container import DiskGUI, ScopeGUI, CodeBlock
 		#from  Domain.Collector import *
@@ -537,7 +553,7 @@ class DEVSComponent:
 
 		coupled_devs = self.getDEVSModel()
 
-		### if devs instance is not none and priority_list has been invocked (else componentSet order is considered)
+		### if devs instance is not none and priority_list has been invoked (else componentSet order is considered)
 		if coupled_devs is not None and self.priority_list != []:
 
 			shape_list = self.GetShapeList()
@@ -550,7 +566,7 @@ class DEVSComponent:
 
 			### removed models
 			for label in filter(lambda l: l not in label_list, self.priority_list):
-				index = self.priority_list.index[label]
+				index = self.priority_list.index(label)
 				del self.priority_list[index]
 
 			self.priority_list += added_models
@@ -640,7 +656,7 @@ class DEVSComponent:
 
 					else:
 
-						### if python_path is not found (because have an external origine)
+						### if python_path is not found (because have an external origin)
 						if not os.path.exists(python_path):
 							if os.path.basename(DOMAIN_PATH) in python_path.split(os.sep):
 								python_path = os.path.join(HOME_PATH, python_path[python_path.index(os.path.basename(DOMAIN_PATH)):].strip('[]'))

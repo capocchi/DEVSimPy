@@ -19,9 +19,10 @@ class Request:
 
 		### try connexion
 		try:
-			#con = urllib2.urlopen("http://173.194.32.32/") ### google
-			con = urllib2.urlopen("http://www.google.fr")
-			#data = con.read()
+			url = "http://www.google.fr/"
+
+			#url = http://173.194.32.32/ ### google
+			con = urllib2.urlopen(url)
 		except urllib2.URLError:
 			self.listTime = []
 			self.listData = []

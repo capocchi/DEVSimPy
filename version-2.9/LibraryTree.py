@@ -805,7 +805,7 @@ class LibraryTree(wx.TreeCtrl):
 		path = self.GetItemPyData(item)
 		ext = os.path.splitext(path)[1]
 
-		if ext == "py":
+		if ext == ".py":
 			self.CheckItem(os.path.splitext(path)[0])
 		else:
 			self.CheckItem(path)

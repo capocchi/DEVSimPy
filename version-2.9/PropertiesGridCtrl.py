@@ -37,6 +37,7 @@ import Components
 import Menu
 import LabelGUI
 import Container
+import ZipManager
 
 from Mixins.Attributable import Attributable
 from Mixins.Achievable import Achievable
@@ -207,14 +208,15 @@ class CodeCB(wx.Choicebook):
 											_('Finish Function') : inspect.getsource(cls.finish) if  hasattr(cls, 'finish') else "\tpass"
 									}
 		else:
-			pageTexts = {_("Importing Error"): _("Error trying to import the module: %s.\nChange the python path by cliking in the above 'python_path' cell.\n %s"%(model.python_path,str(cls)))}
+			pageTexts = {_("Importing Error"): _("Error trying to import the module: %s.\nChange the python path by clicking in the above 'python_path' cell.\n %s"%(model.python_path,str(cls)))}
 
 		# Now make a bunch of panels for the choice book
 		for nameFunc in pageTexts:
 			win = wx.Panel(self)
 			box = wx.BoxSizer( wx.HORIZONTAL)
 			st = wx.TextCtrl(win, wx.NewId(), '', style = wx.TE_MULTILINE)
-			st.AppendText(str(pageTexts[nameFunc]))
+			txt = unicode(pageTexts[nameFunc], errors='replace').encode('utf-8')
+			st.AppendText(txt)
 			st.ShowPosition(wx.TOP)
 			st.SetEditable(False)
 			box.Add(st,1,wx.EXPAND)
@@ -222,7 +224,7 @@ class CodeCB(wx.Choicebook):
 
 			self.AddPage(win, nameFunc)
 
-			#marche pas sous Windows
+			# don't work in Windows
 			if wx.Platform == '__WXGTK__':
 				self.SetSelection(5)
 
@@ -366,7 +368,7 @@ class CustomDataTable(gridlib.PyGridTableBase):
 			val = getattr(model, attr)
 			if attr == "image_path":
 				val = os.path.basename(val)
-			self.data.append([attr,val,self.infoBlockLabelList[i]])
+			self.data.append([attr, val, self.infoBlockLabelList[i]])
 			self.dataTypes.append(self.GetTypeList(val))
 
 		### Behavioral sorted values fields
@@ -910,7 +912,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 
 					### if we change the python file from zipfile we compresse the new python file and we update the python_path value
 					if zipfile.is_zipfile(model.model_path):
-						zf = Zip(model.model_path)
+						zf = ZipManager.Zip(model.model_path)
 						zf.Update([new_python_path])
 
 					### update flag and color if bad filename
