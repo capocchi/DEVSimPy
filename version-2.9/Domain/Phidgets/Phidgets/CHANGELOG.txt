@@ -1,0 +1,427 @@
+Phidget Python Module Changelog
+================================
+
+August 04 2011 - Version 2.1.8
+=================================
+ServoTypes
+------
+- Updated the ServoTypes structure to include the Firgelli motors.  Seems I missed adding those when they were release, my apologies.
+
+
+July 19 2011 - Version 2.1.8
+=================================
+Common
+------
+- Added prepOutput function that checks the Python interpreter version in order to properly decode values that are byte arrays into strings as it seems it is no longer automatic in Python 3.2.
+
+Phidget
+------
+- Modified functions that return string to call the prepOutput function in order to process the output to display a proper string regardless of Python version.
+
+PhidgetException
+------
+- Modified the getDescription function to call the prepOutput function in order to process the output to display a proper string regardless of Python version.
+- Modified the threading include to prevent conflicts.
+
+RFID
+------
+- Modified the hexLookup array to add the byte identifier to the chars as in Python 3.2 it has become more strick about making that distinction.
+
+IR
+------
+- Modified the hexLookup array to add the byte identifier to the chars as in Python 3.2 it has become more strick about making that distinction.
+
+June 13 2011 - Version 2.1.8
+=================================
+All Devices
+------
+- Fixed a bug in the destructors of all devices where I was not calling the Phidget.dispose function with the right argument.
+
+Examples
+------
+- Put a try-except block into the PhidgetError event handlers for those cases where the library is firing Error Events before the board has attached.  Would throw an error when trying to access the properties
+  of the device object sent as part of the event args.
+
+May 18 2011 - Version 2.1.8
+=================================
+Phidget
+------
+- Removed the destructor from the Phidget base class and moved the functionality to a static method dispose.  This prevents some issues with the manager dealing with attached devices.
+
+Manager
+------
+- Added a destructor to delete the Manager object in the base library and nullify the handle.
+
+Dictionary
+------
+- Added a destructor to delete the Dictionary object in the base library and nullify the handle.
+
+All Phidgets
+------
+- Modified the destructor of each device to call the new dispose method of the Phidget base class in order to delete and nullify the handle.
+
+April 28 2011 - Version 2.1.8
+=================================
+GPS
+------
+- Fixed a typo in the GPSTime class where it was setting the values of both min and sec fields to the value of tm_sec from the CPhidgetGPS_GPSTime structure.
+
+March 30 2011 - Version 2.1.8
+=================================
+
+Phidget
+------
+- Modified the closePhidget method, removing the actions to call the base library CPhidget_delete method and setting the handle to none.
+- Created a destructor that will be in charge of calling CPhidget_delete to free the device pointer and setting the Phidget handle to null (none).
+
+All Device Classes
+------
+- Addded a destructor that will call the Phidget parent class destructor the free the device and null the Phidget handle.
+
+January 13 2011 - Version 2.1.8
+=================================
+
+Analog
+------
+- Added support for the new PhidgetAnalog board.
+
+Bridge
+------
+- Added support for the new PhidgetBridge board.
+
+FrequencyCounter
+------
+- Added support for the new PhidgetFrequencyCounter board.
+
+GPS
+------
+- Added support for the new PhidgetGPS board.
+
+
+August 31 2010 - Version 2.1.8
+=================================
+
+Spatial
+------
+- Made some fixes to rectify the spatial object from causing segmentation faults on 64bit OS.
+
+IR
+------
+- Made some fixes to the IRCode structures to fix it as it was not working correctly.
+
+
+July 14 2010 - Version 2.1.8
+=================================
+
+Dictionary
+------
+- Implemented support for the getKey method for the Dictionary (finally..... sorry :P)
+
+Dictionary-simple
+------
+- Added an example call to the getKey method for testing and for demonstrating it's use.
+
+May 17 2010 - Version 2.1.8
+=================================
+
+IR
+------
+- Added support for the new PhidgetIR board.
+- Added a code example for the new PhidgetIR
+
+Spatial
+------
+- Added support for the new PhidgetSpatial board.
+- Added a code example for the new PhidgetSpatial.
+
+Phidget
+------
+- Added support for getDeviceClass and getDeviceID, as well as all supporting enums
+
+PhidgetException
+------
+- Added the getErrorDescription static method.
+
+All Devices
+------
+- Versioned up to 2.1.8 along wiht the base libraries.
+- Tweaked the set event handler methods for all devices to ensure that you can 'unset' the handlers properly as well if desired.
+
+All Examples
+------
+- Versioned up to 2.1.8 along wiht the base libraries.
+
+February 02 2010 - Version 2.1.6
+=================================
+
+LED
+------
+- Added the enumerator classes for the system current limit and voltage level values.
+- Added the functionality to set the current limit and voltage levels for the outputs of the 1031 - LED Advanced.
+
+
+January 15 2010 - Version 2.1.6
+=================================
+
+Servo
+------
+- Added entries into servo list for more servos.
+
+
+December 18 2009 - Version 2.1.6
+=================================
+
+General Changes
+---------------
+- Fixed the importing in all files to be more correct.
+This was done mostly to rectify a conflict between python built-in enumerate function and enumerate function that is part of threading module.
+
+
+December 15 2009 - Version 2.1.6
+=================================
+
+Phidget
+-------
+
+- Fixed a bug in the isAttachedToServer method that caused it to always return 'false' irregardless of what the connection status was.
+
+
+November 27 2009 - Version 2.1.6
+=================================
+
+AdvancedServo
+------
+- Brought in the functionality from the library to set the servo type for a motor.  This loads preset maximums and minimums that are stored in the library for this motor type.
+- Brought in the functionality from the library to set the servo motor properties for the motor connected to the controller.
+
+Servo
+------
+- Added the ServoTypes class that holds static variables to represent preset servo types.
+- Brought in the functionality from the library to set the servo type for a motor.  This loads preset maximums and minimums that are stored in the library for this motor type.
+- Brought in the functionality from the library to set the servo motor properties for the motor connected to the controller.
+
+PhidgetException
+------
+- Brought in the Error Event codes and the new error codes that were added to the library recently.  This should fix wierdness with codes as they are defined in the documentation
+and the message they are returned with.  Also should now allow sending the proper code with PhidgetExceptions you are creating.
+
+September 18 2009 - Version 2.1.6
+=================================
+PhidgetLibrary
+---------------
+- Removed the C:\WINDOWS\system32\ path from the load call for windows as it is superfluous
+
+PhidgetException
+---------------
+- See above PhidgetLibrary change.
+
+August 10 2009 - Version 2.1.6
+==============================
+Events
+--------
+- Added the device property to all other event args classes.  This will contain the reference to the specific phidget object firing this event.
+
+August 5 2009 - Version 2.1.6
+==============================
+General
+--------
+- Fixed typo of RuntimeException to RuntimeError.  This should solve the naming errors that were being seen.
+
+June 22 2009 - Version 2.1.6
+==============================
+General
+--------
+- Phidgets Python Module should now be compatible with both Python 2.6.2+ and Python 3.0.1+
+
+PhidgetLibrary
+---------------
+- Removed print when cannot load or locate the dll on the system and replaced with with raising a RuntimeException that is bubbled up to surface of module
+to be caught and handled by the user.
+
+All object Classes
+------------------
+- Modified all other files to account for this whenever calling the dll through the PhidgetLibrary
+
+RFID
+------
+- Modified the code in the tagGained and tagLost handlers to make it compatible in Python 3.0.1+
+
+PhidgetException
+-----------------
+- Renamed the message parameter to 'details' to remove a deprication conflict in python 2.6
+
+April 7 2009 - Version 2.1.6
+==============================
+- versioned up to match the rest of phidget libraries.
+- removed superfluous return calls from the event handlers within the examples. (Thanks user jldupont)
+
+PhidgetLibrary
+---------------
+- New Static "singleton-ish" class to handle loading the the phidget21.dll in a central location that can also be called from a static function.
+
+Phidget
+-------
+- enableLogging, disableLogging, log methods all made static.  This allows you to enable/disable/ logging by using an uninstantiated call rather
+than calling the method from an instanciated objet (e.g. accelerometer.enableLogging). This makes more sense for the intended purpose of the
+logging functionality and falls more in line with the behaviour of other languages.
+Can now be called like so: Phidget.enableLogging(PhidgetLogLevel.PHIDGET_LOG_VERBOSE, "C:\log.txt")
+
+All object classes
+-------------------
+- made changes to loading and accessing the dll file to use the new PhidgetLibrary static container.
+
+October 29 2008 - Version 2.1.5
+==============================
+- Fixed the getLastTag function for return the correct previous tag value (Special Thanks to Alan Dyke for pointing this out and suggesting a fix) 
+
+October 23 2008 - version 2.1.5
+==============================
+- Versioned up module and examples to coincide with new library version
+
+========
+-2.1.4-
+========
+September 10 2008 - version 2.1.4
+==============================
+
+Phidget
+-------
+- Removed static path from linux library load call. This should make it more flexible for those who have moved the phidgets base library. (Thx. to user inmotion)
+
+August 18 2008 - version 2.1.4
+==============================
+
+AdvancedServo
+--------------
+- Implemented class for AdvancedServo
+
+
+July 15th - version 2.1.4
+=============================
+
+InterfaceKit
+------------
+- Fixed the typo on setSensorChangeTrigger, removed the getOutputState that had been erroneously appended to the end of the
+function name.
+
+
+May 2nd - version 2.1.4
+=============================
+
+All Files
+---------
+- Fixed a bug in the module that caused event handler callbacks to cause segmentation faults and bus errors on Mac(darwin) and Linux.
+- Tweaked some of the class members "private" as they should not be used outside of the module.
+- Modified the exception handling output in the examples to read "Phidget Exception" rather that "Phidget Error" to differentiate them
+  from Phidget Error event handler messages.
+- Modified user input reading to use a normal sys.stdin.read(1) looking for simply an Enter key press to terminate the application as opposed
+  to the try - except loop looking for keyboard interrupts as this didn't work in Darwin very well. (With the threading working properly, this
+  try-except loop is unnecessary)
+
+April 15th - version 2.1.4
+=============================
+
+All files
+---------
+- updated the versioning system to be more in line with the other APIs
+- Modified the way threading was being handled.  The threading module is now imported in the Phidgets module classes themselves
+  basically causeing the module to handle threading so you no longer have to.  threading no longer needs to be imported in your programs,
+  and you no longer need to run your code in it's own thread.  Please look over the newly updated examples to see how this change should affect your code.
+
+Phidget
+-------
+- Removed getDeviceStatus as isAttached does the same thing and is more in line with other APIs
+- Removed getServerStatus as isAttachedToServer does the same thing and is more in line with other APIs
+- Brought in the code giving access to the Phidget logging features in the C Library
+
+Accelerometer
+-------------
+- changed getNumAxis to getAxisCount to reflect changes in the C API and to be more in line with other APIs
+
+Encoder
+-------
+- changed getEncoderPositon and setEncoderPosition to getPosition and setPosition to reflect changed in the C API
+- changed setOnEncoderPositionChangeHandler to setOnPositionChangeHandler to reflect changes in the C API
+- changed getInputState to return a boolean instead of an int to be more in line with other APIs
+- changed getNumEncoders to getEncoderCount to reflect changes in the C API and to be more in line with other APIs
+- changed getNumInputs to getInputCount to reflect changes in the C API and to be more in line with other APIs
+
+InterfaceKit
+-------------
+- changed getInputState to return a boolean instead of an int to be more in line with other APIs
+- changed getOutputState to return a boolean instead of an int to be more in line with other APIs
+- changed setOutputState to take a boolean instead of an int for desired state to be more inline with other APIs
+- changed getRatiometric to return a boolean instead of an int to be more inline with other APIs
+- changed setRatiometric to take a boolean instead of an int for desired state to be more inline with other APIs
+- changed getNumInputs to getInputCount to reflect changes in the C API and to be more in line with other APIs
+- changed getNumSensors to getSensorCount to reflect changes in the C API and to be more in line with other APIs
+- changed getNumOutputs to getOutputCount to reflect changes in the C API and to be more in line with other APIs
+
+LED
+----
+- changed getNumLEDs to getLEDCount to reflect changes in the  C API and to be more in line with other APIs
+
+MotorControl
+-------------
+
+- changed getInputState to return a boolean instead of an int to be more in line with other APIs
+- Changed getNumMotors to getMotorCount to be more consistent with the other API's
+- changed getNumInputs to getInputCount to reflect changes in the C API and to be more in line with other APIs
+- changed getMotorSpeed and setMotorSpeed to getVelocity and setVelocity to reflect changes in the C API
+- changed setOnMotorChangeHandler to setOnVelocityChangeHandler to reflect changes to the C API
+
+RFID
+-----
+- changed getNumOutputs to getOutputCount to reflect changes in the C API and to be more in line with other APIs
+- changed getOutputState to return a boolean instead of an int to be more in line with other APIs
+- changed setOutputState to take a boolean instead of an int for desired state to be more inline with other APIs
+- changed getAntennaOn to return a boolean instead of an int to be more in line with other APIs
+- changed setAntennaOn to take a boolean instead of an int for desired state to be more inline with other APIs
+- changed getLEDOn to return a boolean instead of an int to be more in line with other APIs
+- changed setLEDOn to take a boolean instead of an int for desired state to be more inline with other APIs
+- changed getTagStatus to return a boolean instead of an int to be more in line with other APIs
+
+
+Servo
+------
+- Changed getNumMotors to getMotorCount to reflect changes in the C API and to be more in line with other APIs
+- changed getMotorPosition and setMotorPosition to getPosition and setPosition to reflect changes in the C API
+- changed getMotorPositionMax and getMotorPositionMin to getPositionMax and getPositionMin to reflect changed is the C API
+- changed setOnMotorPositionChangeHandler to setOnPositionChangeHandler to reflect changes in the C API
+- changed getMotorStatus and setMotorStatus to getEngaged and setEngaged to reflect changes in the C API
+	- Also made the return type for getEngaged to be a boolean rather than an integer value for simplicity and to match other APIs
+
+Stepper
+--------
+- Created the class and example for the library functions for controlling the Phidget Stepper
+
+TemperatureSensor
+-----------------
+- changed getNumTemperatureInputs to getTemperatureInputCount to reflect changes in the C API and to be more in line with other APIs
+
+TextLCD
+--------
+- changed getNumRows to getRowCount to reflect changes in the C API and to be more in line with other APIs
+- changed getNumColumns to getColumnCount to reflect changes in the C API and to be more in line with other APIs
+- changed getBacklight to return a boolean instead of an int to be more in line with other APIs
+- changed setBacklight to take a boolean instead of an int for desired state to be more inline with other APIs
+- changed getCursorOn and setCursorOn to getCursor and setCursor in order to be more in line with other APIs
+- changed getCursor to return a boolean instead of an int to be more in line with other APIs
+- changed setCursor to take a boolean instead of an int for desired state to be more inline with other APIs
+- changed getCursorBlink to return a boolean instead of an int to be more in line with other APIs
+- changed setCursorBlink to take a boolean instead of an int for desired state to be more inline with other APIs
+- fixed up the code for setCustomCharacter a bit, can now supply index 0-7 for setting the 8 custom characters
+
+Dictionary
+-----------
+- Commented out getKey function as it is not quite implemented yet and want to try to avoid any problems
+- changed getServerStatus to isAttachedToServer and changed it to return a boolean rather than an int to be more in line with other APIs
+
+Manager
+--------
+- changed getServerStatus to isAttachedToServer and changed it to return a boolean rather than an int to be more inline with other APIs
+
+Events
+--------
+- changed value to state in InputChangeEventArgs and OutputChangeEventArgs, and this property now contains the boolean state value of that input/output
+- added reason property to the KeyChangeEventArgs so that the user can determine the reason the key changed (to help differentiate change and removal mostly)
