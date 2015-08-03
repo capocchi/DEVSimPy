@@ -174,7 +174,7 @@ class DumpZipFile(DumpBase):
 
 			### dump attributes in fn file
 			cPickle.dump(	obj = PickledCollection(obj_dumped),
-							file = open(fn, "wb"),
+							file = open(fn, 'wb'),
 							protocol = 0)
 
 		except Exception, info:

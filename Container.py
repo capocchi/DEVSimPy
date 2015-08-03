@@ -431,43 +431,53 @@ class Diagram(Savable, Structurable):
 
 			### inputs/outpus of dam/uam are instantiate depending on the iPort/oPort of diagram 0
 			dia_0 = diagram.layers[0]
-			print dia_0.label
-			for i,m in enumerate(filter(lambda s: isinstance(s, iPort), dia_0.GetShapeList())):
+			shapeL0 = dia_0.GetShapeList()
+
+			for m in filter(lambda s: isinstance(s, iPort), shapeL0):
 				devs_dam.addInPort()
 				diagram.addInPort()
 
-			for i,m in enumerate(filter(lambda s: isinstance(s, oPort), dia_0.GetShapeList())):
+			for m in filter(lambda s: isinstance(s, oPort), shapeL0):
 				devs_uam.addOutPort()
 				diagram.addOutPort()
 
+			for m in filter(lambda s: isinstance(s, iPort), shape_list):
+				devs_dam.addOutPort()
+
+			for m in filter(lambda s: isinstance(s, oPort), shape_list):
+				devs_uam.addInPort()
+
 		###==================================================================================
 
-		# for all iPort shape, we make the devs instance
-		for i,m in enumerate(filter(lambda s: isinstance(s, iPort), shape_list)):
-			### Add abstraction level manager
-			###==============================================================================
-			if hasattr(diagram, 'current_level') and diagram.current_level>0:
-				devs_dam.addOutPort()
+
+		### Add abstraction level manager
+		###==============================================================================
+		if hasattr(diagram, 'current_level') and diagram.current_level>0:
+			# for all iPort shape, we make the devs instance
+			#for i,m in enumerate(filter(lambda s: isinstance(s, iPort), diagram.layers[diagram.current_level].GetShapeList())):
+			#	devs_dam.addOutPort()
+			for i,m in enumerate(filter(lambda s: isinstance(s, iPort), shapeL0)):
 				p1 = diagram.getDEVSModel().IPorts[i]
 				p2 = devs_dam.IPorts[i]
 				Structurable.ConnectDEVSPorts(diagram, p1, p2)
-			###==============================================================================
-			else:
+		###==============================================================================
+		else:
+			for m in filter(lambda s: isinstance(s, iPort), shape_list):
 				### add port to coupled model
 				diagram.addInPort()
 				assert(len(diagram.getIPorts()) <= diagram.input)
 
-		# for all oPort shape, we make the devs instance
-		for i,m in enumerate(filter(lambda s: isinstance(s, oPort), shape_list)):
-			###==============================================================================
-			### Add abstraction level manager
-			if hasattr(diagram, 'current_level') and diagram.current_level>0:
-				devs_uam.addInPort()
+		###==============================================================================
+		### Add abstraction level manager
+		if hasattr(diagram, 'current_level') and diagram.current_level>0:
+			# for all oPort shape, we make the devs instance
+			for i,m in enumerate(filter(lambda s: isinstance(s, oPort), shapeL0)):
 				p1 = devs_uam.OPorts[i]
 				p2 = diagram.getDEVSModel().OPorts[i]
 				Structurable.ConnectDEVSPorts(diagram, p1, p2)
-			###===============================================================================
-			else:
+				###===============================================================================
+		else:
+			for m in filter(lambda s: isinstance(s, oPort), shape_list):
 				### add port to coupled model
 				diagram.addOutPort()
 				assert(len(diagram.getOPorts()) <= diagram.output)

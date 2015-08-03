@@ -81,7 +81,7 @@ class FileGenerator(Generator):
 							elif val < 0 or val == 0:
 								self.V[val].append(row[1].strip())
 							else:
-								self.V[val].append(row[val].strip())
+								self.V[val].append(float(row[val].strip()))
 		
 			sig = self.T[0] if self.T != [] else INFINITY
 		else:
