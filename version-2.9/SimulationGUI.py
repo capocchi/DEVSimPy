@@ -240,7 +240,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			# status bar of main application
 			self.statusbar = parent.GetTopLevelParent().statusbar
 		else:
-			wx.Frame.__init__(self, parent, id, title, style= wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
+			wx.Frame.__init__(self, parent, id, title, style= wx.DEFAULT_FRAME_STYLE)
 
 			### adapt size of frame depending on the plate-form
 			if  '__WXMSW__' in wx.PlatformInfo:
