@@ -215,7 +215,11 @@ class CodeCB(wx.Choicebook):
 			win = wx.Panel(self)
 			box = wx.BoxSizer( wx.HORIZONTAL)
 			st = wx.TextCtrl(win, wx.NewId(), '', style = wx.TE_MULTILINE)
-			txt = unicode(pageTexts[nameFunc], errors='replace').encode('utf-8')
+			try:
+				txt = unicode(pageTexts[nameFunc], errors='replace').encode('utf-8')
+			except TypeError:
+				txt = pageTexts[nameFunc]
+
 			st.AppendText(txt)
 			st.ShowPosition(wx.TOP)
 			st.SetEditable(False)
