@@ -3366,6 +3366,15 @@ class CodeBlock(Block, Achievable):
 
 					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(model_path[model_path.index(dir_name):]).strip('[]')))
 
+					### perhaps path is wrong due to a change in the Domain lib !
+					### Try to find the model by its name in the Domain directories (multipe path can be occur)
+#					if not os.path.exists(path):
+#						file_name = os.path.basename(path)
+#						for root, dirs, files in os.walk(DOMAIN_PATH):
+#							for name in files:
+#								if name == file_name:
+#									path = os.path.abspath(os.path.join(root, name))
+
 					### try to find it in exportedPathList (after Domain check)
 					if not os.path.exists(path):
 						mainW = wx.GetApp().GetTopWindow()

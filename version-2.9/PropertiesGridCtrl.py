@@ -416,7 +416,7 @@ class CustomDataTable(gridlib.PyGridTableBase):
 					break
 
 		### TODO : a ameliorer car bad_filename_path_flag ne prend pas en compte python_path.
-		### relechir sur comment faire en sorte de ne pas donner la main a la simlation
+		### relechir sur comment faire en sorte de ne pas donner la main a la simulation
 		### en fonction de la validite des deux criteres plus bas
 
 		### if the path dont exists, background color is red
@@ -432,7 +432,7 @@ class CustomDataTable(gridlib.PyGridTableBase):
 					### if bad filemane (for instance generator)
 					m = re.match('[a-zA-Z]*(ile)[n|N](ame)[_-a-zA-Z0-9]*', v, re.IGNORECASE)
 
-					### if filename is match and not exist (ensuring that the filename are extention)
+					### if filename is match and not exist (ensuring that the filename are extension)
 					if m is not None and not os.path.exists(self.GetValue(row, 1)) and os.path.splitext(self.GetValue(row, 1))[-1] != '':
 						self.bad_flag.update({v:False})
 						attr.SetBackgroundColour("pink")
@@ -876,8 +876,15 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 			self.AcceptProp(row, col)
 
 		elif prop == 'python_path':
-			wcd = _('Python files (*.py)|*.py|All files (*)|*')
+
 			model = self.parent.model
+
+			### for .amd or .cmd
+			if model.model_path != '':
+				wcd = _('Atomic DEVSimPy model (*.amd)|*.amd|Coupled DEVSimPy model (*.cmd)|*.cmd|All files (*)|*')
+			else:
+				wcd = _('Python files (*.py)|*.py|All files (*)|*')
+
 			default_dir = os.path.dirname(model.python_path) if os.path.exists(os.path.dirname(model.python_path)) else DOMAIN_PATH
 			dlg = wx.FileDialog(self, message=_("Select file ..."), defaultDir=default_dir, defaultFile="", wildcard=wcd, style=wx.OPEN | wx.CHANGE_DIR)
 			if dlg.ShowModal() == wx.ID_OK:
@@ -887,6 +894,8 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 				if zipfile.is_zipfile(new_python_path):
 					zf = zipfile.ZipFile(new_python_path, 'r')
 					new_python_path = os.path.join(new_python_path, filter(lambda f: f.endswith('.py'), zf.namelist())[0])
+					### update model path
+					model.model_path = os.path.dirname(new_python_path)
 
 				self.SetCellValue(row, 1, new_python_path)
 
@@ -918,6 +927,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 					if zipfile.is_zipfile(model.model_path):
 						zf = ZipManager.Zip(model.model_path)
 						zf.Update([new_python_path])
+						#model.model_path =
 
 					### update flag and color if bad filename
 					#if model.bad_filename_path_flag:
