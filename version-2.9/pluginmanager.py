@@ -56,7 +56,7 @@ def is_enable(plugin):
 	"""
 	"""
 	if isinstance(plugin, str):
-		return plugin in [l[0].__name__ for l in plugins.values()]
+		return plugin in [l[0].__name__ for l in plugins.values() if l != [] ]
 	else:
 		return plugin in plugins.values()
 
