@@ -94,7 +94,8 @@ def makeJSON(filename, json=None, diagram=None):
 					"position":{"x":c.x[0],"y":c.y[0]},
 					"inPorts":map(lambda i: "in%d"%i, range(c.input)),
 					"outPorts":map(lambda i: "out%d"%i, range(c.output)),
-					"attrs":{"text": {"text":c.label}}
+					"attrs":{"text": {"text":c.label}},
+					"prop" :{"data" : c.args}
 					}
 
 				for i in xrange(c.input):
