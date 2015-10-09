@@ -33,8 +33,12 @@ def makeYAMLUpdate(filename, label, json_str):
 	### data = "{ 'a':'A', 'b':(2, 4), 'c':3.0 }"
 	### data_string = json.dumps(json_str)
 
-	### new args (dict object)
-	new_args = eval(json.loads(repr(json_str)))
+	obj = eval(json.loads(repr(json_str)))
+
+	### new args
+	new_args = obj['args']
+	### label = obj['model']
+	### filename = obj['filename']
 
 	### load diagram from yaml and update args
 	a = Diagram()
