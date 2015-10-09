@@ -29,8 +29,8 @@ sys.path.append(os.path.join('Domain', 'Phidgets'))
 def makeYAMLUpdate(filename, json_str):
 	import json
 
-	data = "{ 'a':'A', 'b':(2, 4), 'c':3.0 }"
-	data_string = json.dumps(data)
+	### data = "{ 'a':'A', 'b':(2, 4), 'c':3.0 }"
+	data_string = json.dumps(json_str)
 
 	new_info = json.loads(data_string)
 
