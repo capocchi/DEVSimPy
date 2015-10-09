@@ -33,8 +33,10 @@ def makeYAMLUpdate(filename, label, json_str):
 	### data = "{ 'a':'A', 'b':(2, 4), 'c':3.0 }"
 	### data_string = json.dumps(json_str)
 
+	### new args (dict object)
 	new_args = eval(json.loads(repr(json_str)))
 
+	### load diagram from yaml and update args
 	a = Diagram()
 
 	if a.LoadFile(filename):
@@ -46,6 +48,12 @@ def makeYAMLUpdate(filename, label, json_str):
 			if old_val != new_val:
 				model.args[arg] = new_val
 		print "apres", model.args
+
+		### write new yaml file
+		if a.SaveFile(a.last_name_saved):
+			return True
+		else:
+			return False
 
 		return True
 	else:
