@@ -26,7 +26,7 @@ _ = gettext.gettext
 
 sys.path.append(os.path.join('Domain', 'Phidgets'))
 
-def makeYAMLUpdate(filename, model, json_str):
+def makeYAMLUpdate(filename, label, json_str):
 	import json
 	from Container import Diagram
 
@@ -37,16 +37,16 @@ def makeYAMLUpdate(filename, model, json_str):
 
 	a = Diagram()
 
-	print "avant", a.args
 	if a.LoadFile(filename):
-		model=a.GetShapeByLabel(model)
+		model=a.GetShapeByLabel(label)
+		print "avant", model.args
+		for arg in model.args:
+			setattr(model, arg, new_args[arg])
+		print "apres", model.args
 
-		for arg in a.args:
-			setattr(a, arg, new_args[arg])
-	print "apres", a.args
-
-	##	master = Diagram.makeDEVSInstance(a)
-
+		return True
+	else:
+		return False
 
 	### print eval(new_info['a'])
 
