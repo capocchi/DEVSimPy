@@ -118,7 +118,7 @@ if __name__ == '__main__':
 			### launch simulation
 			makeSimulation(filename, arg1, False)
 
-	elif l == 5:
+	elif l == 4:
 
 		### check dsp filename
 		filename = sys.argv[1]
@@ -132,13 +132,11 @@ if __name__ == '__main__':
 		if str(arg1) in ('-update'):
 
 			if filename.endswith('.yaml'):
-				### label of model to update
-				label = sys.argv[3]
 
 				### json_str contain info for updating the model
-				json_str = sys.argv[4]
+				json_str = sys.argv[3]
 
-				makeYAMLUpdate(filename, label, json_str)
+				makeYAMLUpdate(filename, json_str)
 			else:
 				sys.stdout.write(_("Yaml file is required!"))
 

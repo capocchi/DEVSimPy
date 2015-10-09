@@ -26,7 +26,7 @@ _ = gettext.gettext
 
 sys.path.append(os.path.join('Domain', 'Phidgets'))
 
-def makeYAMLUpdate(filename, label, json_str):
+def makeYAMLUpdate(filename, json_str):
 	import json
 	from Container import Diagram
 
@@ -37,7 +37,7 @@ def makeYAMLUpdate(filename, label, json_str):
 
 	### new args
 	new_args = obj['args']
-	### label = obj['model']
+	label = obj['model']
 	### filename = obj['filename']
 
 	### load diagram from yaml and update args
