@@ -39,13 +39,13 @@ def makeYAMLUpdate(filename, label, json_str):
 
 	if a.LoadFile(filename):
 		model=a.GetShapeByLabel(label)
-		### print "avant", model.args
+		print "avant", model.args
 		for arg in model.args:
 			new_val =  new_args[arg]
 			old_val = model.args[arg]
 			if old_val != new_val:
 				model.args[arg] = new_val
-		### print "apres", model.args
+		print "apres", model.args
 
 		return True
 	else:
