@@ -38,8 +38,9 @@ def makeYAMLUpdate(filename, model, json_str):
 	a = Diagram()
 
 	if a.LoadFile(filename):
-		print a.GetShapeByLabel(model)
+		model=a.GetShapeByLabel(model)
 
+		print model.args
 	##	master = Diagram.makeDEVSInstance(a)
 
 
