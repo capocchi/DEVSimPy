@@ -44,15 +44,14 @@ def makeYAMLUpdate(json_str):
 	a = Diagram()
 
 	if a.LoadFile(filename):
-		print label, filename
 		model=a.GetShapeByLabel(label)
-		print "avant", model.args, new_args
+		#print "avant", model.args, new_args
 		for arg in model.args:
 			new_val =  new_args[arg]
 			old_val = model.args[arg]
 			if old_val != new_val:
 				model.args[arg] = new_val
-		print "apres", model.args
+		#print "apres", model.args
 
 		### write new yaml file
 		if a.SaveFile(a.last_name_saved):

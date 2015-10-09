@@ -122,7 +122,7 @@ if __name__ == '__main__':
 
 		elif sys.argv[1] in ('-update'):
 
-			### json_str contain info for updating the model
+			### json_str contain info for updating the model ({filename':'test.yaml', model='To_Disk_1', 'args':{'col':0,...}})
 			json_str = sys.argv[2]
 
 			makeYAMLUpdate(json_str)
