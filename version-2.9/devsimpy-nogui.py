@@ -91,32 +91,41 @@ if __name__ == '__main__':
 		makeSimulation(filename, T = 10.0)
 
 	elif l == 3:
-		### check dsp filename
-		filename = sys.argv[1]
-		if not os.path.exists(filename):
-			sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
-			sys.exit()
-
 		### check time
 		arg1 = sys.argv[2]
 
 		if str(arg1) in ('-js','-javascript'):
-			### launch JS file generation
-			makeJS(filename)
+
+			### check dsp filename
+			filename = sys.argv[1]
+			if not os.path.exists(filename):
+				sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
+				sys.exit()
+			else:
+				### launch JS file generation
+				makeJS(filename)
 
 		elif str(arg1) in ('-json'):
+
 			import json
-			### launch JSON file generation for joint.js
-			j = makeJSON(filename)
 
-			sys.stdout.write(json.dumps(j, sort_keys=True, indent=4))
+			### check dsp filename
+			filename = sys.argv[1]
+			if not os.path.exists(filename):
+				sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
+				sys.exit()
+			else:
+				### launch JSON file generation for joint.js
+				j = makeJSON(filename)
 
-		elif filename in ('-update'):
+				sys.stdout.write(json.dumps(j, sort_keys=True, indent=4))
+
+		elif sys.argv[1] in ('-update'):
 
 			### json_str contain info for updating the model
 			json_str = sys.argv[2]
 
-			makeYAMLUpdate(filename, json_str)
+			makeYAMLUpdate(json_str)
 
 		else:
 			if str(arg1) in ('inf', 'ntl'):
