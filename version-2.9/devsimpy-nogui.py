@@ -132,10 +132,13 @@ if __name__ == '__main__':
 		if str(arg1) in ('-update'):
 
 			if filename.endswith('.yaml'):
-				### json_str contain info for updating the model
-				json_str = sys.argv[3]
+				### label of model to update
+				label = sys.argv[3]
 
-				makeYAMLUpdate(filename, json_str)
+				### json_str contain info for updating the model
+				json_str = sys.argv[4]
+
+				makeYAMLUpdate(filename, label, json_str)
 			else:
 				sys.stdout.write(_("Yaml file is required!"))
 
