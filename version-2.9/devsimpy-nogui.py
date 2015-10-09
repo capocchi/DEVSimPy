@@ -110,7 +110,26 @@ if __name__ == '__main__':
 
 			sys.stdout.write(json.dumps(j, sort_keys=True, indent=4))
 
-		elif str(arg1) in ('-update'):
+		else:
+			if str(arg1) in ('inf', 'ntl'):
+				__builtin__.__dict__['NTL'] = True
+				arg1 = 0.0
+
+			### launch simulation
+			makeSimulation(filename, arg1, False)
+
+	elif l == 4:
+
+		### check dsp filename
+		filename = sys.argv[1]
+		if not os.path.exists(filename):
+			sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
+			sys.exit()
+
+		### check time
+		arg1 = sys.argv[2]
+
+		if str(arg1) in ('-update'):
 
 			if filename.endswith('.yaml'):
 				### json_str contain info for updating the model
@@ -119,14 +138,6 @@ if __name__ == '__main__':
 				makeYAMLUpdate(filename, json_str)
 			else:
 				sys.stdout.write(_("Yaml file is required!"))
-
-		else:
-			if str(arg1) in ('inf', 'ntl'):
-				__builtin__.__dict__['NTL'] = True
-				arg1 = 0.0
-
-			### launch simulation
-			makeSimulation(filename, arg1, False)
 
 	else:
 		sys.stderr.write(_('ERROR: Unspecified .dsp file!\n'))
