@@ -32,7 +32,7 @@ def makeYAMLUpdate(filename, json_str):
 	data = [ { 'a':'A', 'b':(2, 4), 'c':3.0 } ]
 	data_string = json.dumps(data)
 
-	new_info = json.loads(str(json_str))
+	new_info = json.loads(data_string)
 
 	print new_info['a']
 
