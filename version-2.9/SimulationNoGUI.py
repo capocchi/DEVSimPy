@@ -215,6 +215,7 @@ def makeSimulation(filename, T, json_trace=True):
 	if json_trace:
 		json = {'date':time.strftime("%c")}
 		json['mode']='no-gui'
+		json['time'] = T
 	else:
 		sys.stdout.write(_("\nLoading %s file...\n")%(os.path.basename(filename)))
 
@@ -275,7 +276,7 @@ def makeSimulation(filename, T, json_trace=True):
 					sys.stdout.write(_("\nDEVS simulation completed!\n"))
 
 				if json_trace:
-					json['time'] = output
+					json['duration'] = output
 					json['output'] = []
 
 				### inform that data file has been generated
