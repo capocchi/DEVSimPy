@@ -142,7 +142,7 @@ if __name__ == '__main__':
 				arg1 = 0.0
 
 			### launch simulation
-			makeSimulation(filename, arg1, False)
+			makeSimulation(filename, arg1, True)
 
 	else:
 		sys.stderr.write(_('ERROR: Unspecified .dsp file!\n'))
