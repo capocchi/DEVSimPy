@@ -118,7 +118,7 @@ if __name__ == '__main__':
 			### launch simulation
 			makeSimulation(filename, arg1, False)
 
-	elif l == 4:
+	elif l == 5:
 
 		### check dsp filename
 		filename = sys.argv[1]
