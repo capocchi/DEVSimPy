@@ -41,9 +41,9 @@ def makeYAMLUpdate(filename, model, json_str):
 	if a.LoadFile(filename):
 		model=a.GetShapeByLabel(model)
 
-		for arg in model.args:
-			setattr(model, arg, new_args[arg])
-	print "apres", model.args
+		for arg in a.args:
+			setattr(a, arg, new_args[arg])
+	print "apres", a.args
 
 	##	master = Diagram.makeDEVSInstance(a)
 
