@@ -130,6 +130,13 @@ if __name__ == '__main__':
 			makeYAMLUpdate(json_str)
 
 		else:
+
+			### check dsp filename
+			filename = sys.argv[1]
+			if not os.path.exists(filename):
+				sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
+				sys.exit()
+
 			if str(arg1) in ('inf', 'ntl'):
 				__builtin__.__dict__['NTL'] = True
 				arg1 = 0.0
