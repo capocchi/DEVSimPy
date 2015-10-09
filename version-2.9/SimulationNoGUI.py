@@ -34,7 +34,7 @@ def makeYAMLUpdate(filename, json_str):
 
 	new_info = json.loads(data_string)
 
-	print new_info
+	print new_info['data']
 
 def makeJSON(filename, json=None, diagram=None):
 	""" Make JSON file from D graph of the diagram
