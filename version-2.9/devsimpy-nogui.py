@@ -79,6 +79,7 @@ if __name__ == '__main__':
  	#sys.stdout.write(_("DEVSimPy - version %s\n"%__version__ ))
  	l=len(sys.argv)
 
+	print l
 	if l == 2:
 
 		if str(arg1) in ('-update'):
