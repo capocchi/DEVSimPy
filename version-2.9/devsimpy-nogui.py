@@ -65,7 +65,7 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 
 builtin_dict['GUI_FLAG'] = False
 
-from SimulationNoGUI import makeSimulation, makeJSON, makeJS
+from SimulationNoGUI import makeSimulation, makeJSON, makeJS, makeYAMLUpdate
 
 # Sets the homepath variable to the directory where your application is located (sys.argv[0]).
 __builtin__.__dict__.update(builtin_dict)
@@ -77,8 +77,9 @@ if __name__ == '__main__':
  	_ = gettext.gettext
 
  	#sys.stdout.write(_("DEVSimPy - version %s\n"%__version__ ))
+ 	l=len(sys.argv)
 
-	if len(sys.argv) == 2:
+	if l == 2:
 		### check dsp filename
 		filename = sys.argv[1]
 		if not os.path.exists(filename):
@@ -88,7 +89,7 @@ if __name__ == '__main__':
 		### launch simulation
 		makeSimulation(filename, T = 10.0)
 
-	elif len(sys.argv) == 3:
+	elif l == 3:
 		### check dsp filename
 		filename = sys.argv[1]
 		if not os.path.exists(filename):
@@ -96,24 +97,36 @@ if __name__ == '__main__':
 			sys.exit()
 
 		### check time
-		time = sys.argv[2]
+		arg1 = sys.argv[2]
 
-		if str(time) in ('-js','-javascript'):
+		if str(arg1) in ('-js','-javascript'):
 			### launch JS file generation
 			makeJS(filename)
-		elif str(time) in ('-json'):
+
+		elif str(arg1) in ('-json'):
 			import json
-			### launch JSON file generation
+			### launch JSON file generation for joint.js
 			j = makeJSON(filename)
 
-			sys.stdout.write(json.dumps(j,sort_keys=True, indent=4))
+			sys.stdout.write(json.dumps(j, sort_keys=True, indent=4))
+
+		elif str(arg1) in ('-update'):
+
+			if filename.endswith('.yaml'):
+				### json_str contain info for updating the model
+				json_str = sys.argv[3]
+
+				makeYAMLUpdate(filename, json_str)
+			else:
+				sys.stdout.write(_("Yaml file is required!"))
+
 		else:
-			if str(time) in ('inf', 'ntl'):
+			if str(arg1) in ('inf', 'ntl'):
 				__builtin__.__dict__['NTL'] = True
-				time = 0.0
+				arg1 = 0.0
 
 			### launch simulation
-			makeSimulation(filename, time, False)
+			makeSimulation(filename, arg1, False)
 
 	else:
 		sys.stderr.write(_('ERROR: Unspecified .dsp file!\n'))

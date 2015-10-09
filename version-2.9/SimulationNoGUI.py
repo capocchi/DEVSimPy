@@ -26,6 +26,13 @@ _ = gettext.gettext
 
 sys.path.append(os.path.join('Domain', 'Phidgets'))
 
+def makeYAMLUpdate(filename, json_str):
+	import json
+
+	new_info = json.load(json_str)
+
+	print filename, json_str
+
 def makeJSON(filename, json=None, diagram=None):
 	""" Make JSON file from D graph of the diagram
 	"""
