@@ -29,9 +29,12 @@ sys.path.append(os.path.join('Domain', 'Phidgets'))
 def makeYAMLUpdate(filename, json_str):
 	import json
 
-	new_info = json.loads(json_str)
+	data = [ { 'a':'A', 'b':(2, 4), 'c':3.0 } ]
+	data_string = json.dumps(data)
 
-	print new_info['filename']
+	new_info = json.loads(data_string)
+
+	print new_info['a']
 
 def makeJSON(filename, json=None, diagram=None):
 	""" Make JSON file from D graph of the diagram
