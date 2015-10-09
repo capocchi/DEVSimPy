@@ -122,6 +122,8 @@ if __name__ == '__main__':
 
 		elif sys.argv[1] in ('-update'):
 
+			import json
+
 			### json_str contain info for updating the model ({filename':'test.yaml', model='To_Disk_1', 'args':{'col':0,...}})
 			json_str = sys.argv[2]
 
