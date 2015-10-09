@@ -127,7 +127,7 @@ if __name__ == '__main__':
 			### json_str contain info for updating the model ({filename':'test.yaml', model='To_Disk_1', 'args':{'col':0,...}})
 			json_str = sys.argv[2]
 
-			sys.stdout.write(makeYAMLUpdate(json_str))
+			makeYAMLUpdate(json_str)
 
 		else:
 			if str(arg1) in ('inf', 'ntl'):
