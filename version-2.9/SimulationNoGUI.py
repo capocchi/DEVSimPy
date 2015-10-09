@@ -33,14 +33,18 @@ def makeYAMLUpdate(filename, model, json_str):
 	### data = "{ 'a':'A', 'b':(2, 4), 'c':3.0 }"
 	data_string = json.dumps(json_str)
 
-	new_info = eval(json.loads(data_string))
+	new_args = eval(json.loads(data_string))
 
 	a = Diagram()
 
+	print "avant", model.args
 	if a.LoadFile(filename):
 		model=a.GetShapeByLabel(model)
 
-		print model.args
+		for arg in model.args:
+			setattr(model, arg, new_args[arg])
+	print "apres", model.args
+
 	##	master = Diagram.makeDEVSInstance(a)
 
 
