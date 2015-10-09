@@ -41,7 +41,7 @@ def makeYAMLUpdate(filename, label, json_str):
 
 	if a.LoadFile(filename):
 		model=a.GetShapeByLabel(label)
-		print "avant", model.args
+		print "avant", model.args, new_args
 		for arg in model.args:
 			new_val =  new_args[arg]
 			old_val = model.args[arg]
