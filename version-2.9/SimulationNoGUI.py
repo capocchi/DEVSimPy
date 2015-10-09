@@ -31,21 +31,21 @@ def makeYAMLUpdate(filename, label, json_str):
 	from Container import Diagram
 
 	### data = "{ 'a':'A', 'b':(2, 4), 'c':3.0 }"
-	data_string = json.dumps(json_str)
+	### data_string = json.dumps(json_str)
 
-	new_args = eval(json.loads(data_string))
+	new_args = eval(json.loads(repr(json_str)))
 
 	a = Diagram()
 
 	if a.LoadFile(filename):
 		model=a.GetShapeByLabel(label)
-		print "avant", model.args
+		### print "avant", model.args
 		for arg in model.args:
 			new_val =  new_args[arg]
 			old_val = model.args[arg]
 			if old_val != new_val:
 				model.args[arg] = new_val
-		print "apres", model.args
+		### print "apres", model.args
 
 		return True
 	else:
