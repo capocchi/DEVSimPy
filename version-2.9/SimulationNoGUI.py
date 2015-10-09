@@ -288,7 +288,8 @@ def makeSimulation(filename, T, json_trace=True):
 							else:
 								sys.stdout.write(_("\nData file %s has been generated!\n")%(fn))
 				if json_trace:
-					sys.stdout.write(str(json))
+					import json as js
+					sys.stdout.write(js.dumps(json))
 
 				return True
 
