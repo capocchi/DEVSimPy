@@ -37,7 +37,7 @@ def makeYAMLUpdate(filename, model, json_str):
 
 	a = Diagram()
 
-	print "avant", model.args
+	print "avant", a.args
 	if a.LoadFile(filename):
 		model=a.GetShapeByLabel(model)
 
