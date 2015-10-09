@@ -54,12 +54,8 @@ def makeYAMLUpdate(json_str):
 		#print "apres", model.args
 
 		### write new yaml file
-		if a.SaveFile(a.last_name_saved):
-			return True
-		else:
-			return False
+		return a.SaveFile(a.last_name_saved)
 
-		return True
 	else:
 		return False
 
@@ -292,7 +288,8 @@ def makeSimulation(filename, T, json_trace=True):
 							else:
 								sys.stdout.write(_("\nData file %s has been generated!\n")%(fn))
 				if json_trace:
-					sys.stdout.write(str(json))
+					import json
+					sys.stdout.write(json.dumps(json))
 
 				return True
 
