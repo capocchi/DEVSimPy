@@ -80,14 +80,25 @@ if __name__ == '__main__':
  	l=len(sys.argv)
 
 	if l == 2:
-		### check dsp filename
-		filename = sys.argv[1]
-		if not os.path.exists(filename):
-			sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
-			sys.exit()
 
-		### launch simulation
-		makeSimulation(filename, T = 10.0)
+		if str(arg1) in ('-update'):
+
+			arg1 = sys.argv[2]
+
+			### json_str contain info for updating the model
+			json_str = sys.argv[3]
+
+			makeYAMLUpdate(filename, json_str)
+
+		else:
+			### check dsp filename
+			filename = sys.argv[1]
+			if not os.path.exists(filename):
+				sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
+				sys.exit()
+
+			### launch simulation
+			makeSimulation(filename, T = 10.0)
 
 	elif l == 3:
 		### check dsp filename
@@ -118,7 +129,7 @@ if __name__ == '__main__':
 			### launch simulation
 			makeSimulation(filename, arg1, False)
 
-	elif l == 4:
+'''	elif l == 3:
 
 		### check dsp filename
 		filename = sys.argv[1]
@@ -139,7 +150,7 @@ if __name__ == '__main__':
 				makeYAMLUpdate(filename, json_str)
 			else:
 				sys.stdout.write(_("Yaml file is required!"))
-
+'''
 	else:
 		sys.stderr.write(_('ERROR: Unspecified .dsp file!\n'))
 		sys.stdout.write(_('USAGE: to simulate $python devsimpy-nogui.py yourfile.dsp [time=10.0|[inf|ntl]]\n'))
