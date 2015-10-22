@@ -33,8 +33,6 @@ def makeYAMLUpdate(json_str):
 	### data = "{ 'a':'A', 'b':(2, 4), 'c':3.0 }"
 	### data_string = json.dumps(json_str)
 
-	print "dc"
-
 	obj = eval(json.loads(repr(json_str)))
 
 	### new args
@@ -47,7 +45,7 @@ def makeYAMLUpdate(json_str):
 
 	if a.LoadFile(filename):
 		model=a.GetShapeByLabel(label)
-		print "avant", model.args, new_args
+		#print "avant", model.args, new_args
 		for arg in model.args:
 			new_val =  new_args[arg]
 			old_val = model.args[arg]
@@ -61,7 +59,7 @@ def makeYAMLUpdate(json_str):
 					new_val = eval(new_val)
 
 				model.args[arg] = new_val
-		print "apres", model.args
+#		print "apres", model.args
 
 		### write new yaml file
 		return a.SaveFile(a.last_name_saved)
