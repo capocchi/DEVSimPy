@@ -58,7 +58,7 @@ def makeYAMLUpdate(json_str):
 				elif new_val in ('false', 'False'):
 					new_val = False
 				elif new_val.replace('.','').replace('-','').isdigit():
-					new_val = eval(v)
+					new_val = eval(new_val)
 
 				model.args[arg] = new_val
 		print "apres", model.args
