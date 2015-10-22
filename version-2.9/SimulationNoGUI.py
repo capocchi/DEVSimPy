@@ -47,7 +47,7 @@ def makeYAMLUpdate(json_str):
 		model=a.GetShapeByLabel(label)
 		#print "avant", model.args, new_args
 		for arg in model.args:
-			new_val =  new_args[arg]
+			new_val = new_args[arg]
 			old_val = model.args[arg]
 			if old_val != new_val:
 				### adapt types for python code (float, int and bool)
