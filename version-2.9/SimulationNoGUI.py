@@ -50,6 +50,14 @@ def makeYAMLUpdate(json_str):
 			new_val =  new_args[arg]
 			old_val = model.args[arg]
 			if old_val != new_val:
+				### adapt types for python code (float, int and bool)
+				if new_val in ('true', 'True'):
+					new_val = True
+				elif new_val in ('false', 'False'):
+					new_val = False
+				elif new_val.replace('.','').replace('-','').isdigit():
+					new_val = eval(v)
+
 				model.args[arg] = new_val
 		#print "apres", model.args
 
