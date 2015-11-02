@@ -37,7 +37,7 @@ def getYAMLModels(filename):
 		block_list = filter(lambda c: isinstance(c, Block), shape_list)
 
 		### write new yaml file
-		print dict(map(lambda a: (a.id,str(a.label)), block_list))
+		print dict(map(lambda a: (str(a.id),str(a.label)), block_list))
 
 		return True
 
