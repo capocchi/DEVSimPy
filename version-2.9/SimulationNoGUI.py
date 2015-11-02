@@ -26,6 +26,24 @@ _ = gettext.gettext
 
 sys.path.append(os.path.join('Domain', 'Phidgets'))
 
+def getYAMLModels(filename):
+	from Container import Diagram, Block
+
+	### load diagram from yaml and update args
+	dia = Diagram()
+
+	if dia.LoadFile(filename):
+		shape_list = dia.GetShapeList()
+		block_list = filter(lambda c: isinstance(c, Block), shape_list)
+
+		### write new yaml file
+		print map(lambda a: a.label, block_list)
+
+		return True
+
+	else:
+		return False
+
 def makeYAMLUpdate(json_str):
 	import json
 	from Container import Diagram

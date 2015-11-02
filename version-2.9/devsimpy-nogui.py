@@ -65,7 +65,7 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 
 builtin_dict['GUI_FLAG'] = False
 
-from SimulationNoGUI import makeSimulation, makeJSON, makeJS, makeYAMLUpdate
+from SimulationNoGUI import makeSimulation, makeJSON, makeJS, makeYAMLUpdate, getYAMLModels
 
 # Sets the homepath variable to the directory where your application is located (sys.argv[0]).
 __builtin__.__dict__.update(builtin_dict)
@@ -128,6 +128,11 @@ if __name__ == '__main__':
 			json_str = sys.argv[2]
 
 			makeYAMLUpdate(json_str)
+
+		### devsimpy-nogui -models test.yaml -> get the list of block shape model of test.yaml (used for simulation setting)
+		elif sys.argv[1] in ('-models'):
+
+			getYAMLModels(sys.argv[2])
 
 		else:
 
