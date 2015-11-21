@@ -33,8 +33,9 @@ $ python devsimpy.py
 
 # Documentations
  - DEVSimPy User Guide v2.8 [[pdf]](http://lcapocchi.free.fr/devsimpy/Guide_utilisateur_v2.8.pdf) (French)
- - S. Toma Ph.D Thesis [[pdf]](https://hal.archives-ouvertes.fr/tel-01141844/document), winner of the 2014 DEVS PhD Dissertation Award.
+ - S. Toma Ph.D, Thesis [[pdf]](https://hal.archives-ouvertes.fr/tel-01141844/document) (English), winner of the 2014 DEVS PhD Dissertation Award.
  - S. Cezary, "Design and implementation of application for instruction exercises with DEVSimPy", Technical report, Faculty of Electrical Engineering, AUTOMATION AND INFORMATION TECHNOLOGY, Kielce University of Technology [[pdf]](http://lcapocchi.free.fr/files/report_Cezary.pdf) (Polish)
+ - L. Capocchi, J. F. Santucci, B. Poggi, C. Nicolai, "DEVSimPy: A Collaborative Python Software for Modeling and Simulation of DEVS Systems", in Proc. of the 20th IEEE International Conference on Collaboration Technologies and Infrastructures, June 27-29, 2011, Paris (France), ISBN 978-1-4577-0134-4, pp. 170-175
 
 # Videos
 - [Youtube] (https://www.youtube.com/results?search_query=devsimpy)
