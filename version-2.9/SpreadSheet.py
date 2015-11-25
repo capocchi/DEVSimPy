@@ -216,7 +216,11 @@ class Newt(wx.Frame):
 		"""
 
 		### update the column width
-		activePage = self.notebook.GetSelection()
+		try:
+			activePage = self.notebook.GetSelection()
+		except :
+			activePage = 0
+
 		sheet = self.notebook.GetPage(activePage)
 		sheet.UpdateColWidth()
 
