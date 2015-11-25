@@ -34,6 +34,7 @@ class FusionTableGenerator(Generator):
 			@password : required google password
 		"""
 
+
 		Generator.__init__(self, TableId, listValues)
 
 		self.time = time
