@@ -229,8 +229,8 @@ class CodeCB(wx.Choicebook):
 			self.AddPage(win, nameFunc)
 
 			# don't work in Windows
-			if wx.Platform == '__WXGTK__':
-				self.SetSelection(5)
+			#if wx.Platform == '__WXGTK__':
+			#	self.SetSelection(5)
 
 		#self.Bind(wx.EVT_CHOICEBOOK_PAGE_CHANGED, self.OnPageChanged)
 		#self.Bind(wx.EVT_CHOICEBOOK_PAGE_CHANGING, self.OnPageChanging)

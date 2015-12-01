@@ -117,7 +117,7 @@ else:
 		sys.stdout.write("Warning: the package python-wxversion was not found, please install it.\n")
 		sys.stdout.write("DEVSimPy will continue anyway, but not all features might work.\n")
 
-sys.stdout.write("Importing wxPython %s%s for python %s on %s (%s) platform...\n"%(wx.__version__, " from devsimpy.ini" if ini_exist else '',platform.python_version(), platform.system(), platform.version()))
+sys.stdout.write("Importing wxPython %s%s for python %s on %s (%s) platform...\n"%(wx.version(), " from devsimpy.ini" if ini_exist else '',platform.python_version(), platform.system(), platform.version()))
 
 import wx.aui
 import wx.py as py
