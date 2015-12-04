@@ -2173,7 +2173,12 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 					s.OnLeftDown(event) # send leftdown event to current shape
 
 		### Update the nb1 panel properties only for Block and Port (call update in ControlNotebook)
-		if isinstance(item, Attributable):
+		win = wx.GetApp().GetTopWindow()
+		nb1 = win.GetControlNotebook()
+		pos = nb1.GetSelection()
+		txt = nb1.GetPageText(pos)
+
+		if txt.startswith('Prop') and isinstance(item, Attributable):
 			self.__state['model'] = item
 			self.__state['canvas'] = self
 			self.notify()
