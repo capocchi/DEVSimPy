@@ -59,7 +59,7 @@ class DictionaryEditor(wx.Dialog):
 
 		D = eval(values) if values!='' else {}
 
-		self.elb.SetStrings(map(lambda a,b: "('%s','%s')"%(str(a),str(b)), D.keys(), D.values()))
+		self.elb.SetStrings(map(lambda a,b: "(\"%s\",\"%s\")"%(str(a),str(b)), D.keys(), D.values()))
 
 		vbox.Add(self.elb, 1, wx.EXPAND | wx.ALL)
 		panel.SetSizer(vbox)
@@ -111,6 +111,7 @@ class DictionaryEditor(wx.Dialog):
 			### is digit or float
 			if re.match(r"[-+]?[0-9\.]+$", str(v)) is not None:
 				v = float(v)
+
 
 			r.update({k:v})
 
@@ -177,6 +178,7 @@ class ListEditor(wx.Dialog):
 
 		r = []
 		for elem in self.elb.GetStrings():
+
 			### is digit or float
 			if re.match(r"[-+]?[0-9\.]+$", elem) is not None:
 				r.append(eval(elem))
