@@ -17,6 +17,9 @@ from QuickScope import *
 import random
 from decimal import *
 import os
+from datetime import datetime
+import pusher
+import json
 
 #  ================================================================    #
 class To_Disk(QuickScope):
@@ -48,6 +51,10 @@ class To_Disk(QuickScope):
 		self.last_time_value = {}
 
 		self.buffer = {}
+		### Interface with the web socket broker : Pusher
+		self.pusher = pusher.Pusher(app_id='178867',key='c2d255356f53779e6020',secret='9d41a54d45d25274df63',ssl=True,port=443)
+		self.pusher_data = []
+		self.push_time = datetime.today()
 
 		### buffer position with default lenght 100
 		#self.pos = [-1]*100
@@ -57,9 +64,11 @@ class To_Disk(QuickScope):
 
 		### remove old files corresponding to 1000 presumed ports
 		for np in range(1000):
-			fn = "%s%d%s"%(self.fileName, np, self.ext)
-			if os.path.exists(fn):
-				os.remove(fn)
+		    fn = "%s%d%s"%(self.fileName, np, self.ext)
+		    if os.path.exists(fn):
+		        os.remove(fn)
+
+
 	###
 	def extTransition(self, *args):
 		"""
@@ -111,14 +120,16 @@ class To_Disk(QuickScope):
 					v = Decimal(str(float(val)))
 				else:
 					v = val
-				
+
 				if t != self.last_time_value[fn]:
 					with open(fn, 'a') as f:
-						f.write("%s%s%s\n"%(self.last_time_value[fn],self.comma,self.buffer[fn]))
+						f.write("%s%s%s%s%s\n"%(self.last_time_value[fn],self.comma,self.buffer[fn],self.comma,datetime.strftime(datetime.today(), "%H:%M:%S")))
+					#self.pusher.trigger('test_channel', 'my_event', {'label': str(self.last_time_value[fn]), 'value':str(self.buffer[fn])})
+					self.pusher_data.append({'label': str(self.last_time_value[fn]), 'value':str(self.buffer[fn])})
 					self.last_time_value[fn] = t
-				
+
 				self.buffer[fn] = v
-				
+
 				### run only with python 2.6
 				#with open(fn, 'a') as f:
 
@@ -129,21 +140,34 @@ class To_Disk(QuickScope):
 				#		f.truncate(self.pos[np])
 
 				#	else:
-				#		self.pos[np] = f.tell()						
+				#		self.pos[np] = f.tell()
 				#		self.last_time_value[fn] = t
 
 				#	f.write("%s%s%s\n"%(t,self.comma,v))
-					
+
 				del msg
 
 		self.state["sigma"] = 0
 		return self.state
 
+	def intTransition(self):
+	    now = datetime.today()
+	    if (len(self.pusher_data) == 50) or (now - self.push_time).seconds >= 1:
+			self.pusher.trigger('test_channel', 'my_event', json.dumps(self.pusher_data))
+			del self.pusher_data[:]
+			self.push_time = now
+	    self.state["status"] = 'IDLE'
+	    self.state["sigma"] = INFINITY
+	    return self.state
+
 	def finish(self, msg):
+		print('finish TO_DISK')
+		self.pusher.trigger('test_channel', 'my_event', json.dumps(self.pusher_data))
 		n = len(self.IPorts)
 		for np in xrange(n):
 			fn = "%s%d%s"%(self.fileName, np, self.ext)
 			with open(fn, 'a') as f:
 				f.write("%s%s%s\n"%(self.last_time_value[fn],self.comma,self.buffer[fn]))
+
 	###
 	def __str__(self):return "To_Disk"
