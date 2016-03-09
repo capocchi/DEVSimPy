@@ -58,6 +58,15 @@ class Master(BaseDEVS.CoupledDEVS):
 
 		self.FINAL_TIME = Master.FINAL_TIME
 
+	def getFlatComponentSet (self):
+	    """ get the list of composing submodels - recursive build
+	    """
+	    submodelList = {}
+	    for submodel in self.componentSet:
+	        submodelList.update(submodel.getFlatComponentSet())
+	    return submodelList
+
+
 	###
 	def __str__(self):
 		return self.__class__.__name__

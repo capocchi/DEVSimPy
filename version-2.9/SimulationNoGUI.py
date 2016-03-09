@@ -24,369 +24,391 @@ import traceback
 import gettext
 _ = gettext.gettext
 
+import InteractionSocket
+
 sys.path.append(os.path.join('Domain', 'Phidgets'))
 
 def getYAMLModels(filename):
-	from Container import Diagram, Block
+    from Container import Diagram, Block
 
-	### load diagram from yaml and update args
-	dia = Diagram()
+    ### load diagram from yaml and update args
+    dia = Diagram()
 
-	if dia.LoadFile(filename):
-		shape_list = dia.GetShapeList()
-		block_list = filter(lambda c: isinstance(c, Block), shape_list)
+    if dia.LoadFile(filename):
+        shape_list = dia.GetShapeList()
+        block_list = filter(lambda c: isinstance(c, Block), shape_list)
 
-		### write new yaml file
-		print dict(map(lambda a: (str(a.id),str(a.label)), block_list))
+        ### write new yaml file
+        print dict(map(lambda a: (str(a.id),str(a.label)), block_list))
 
-		return True
+        return True
 
-	else:
-		return False
+    else:
+        return False
 
 def makeYAMLUpdate(json_str):
-	import json
-	from Container import Diagram
+    import json
+    from Container import Diagram
 
-	### data = "{ 'a':'A', 'b':(2, 4), 'c':3.0 }"
-	### data_string = json.dumps(json_str)
+    ### data = "{ 'a':'A', 'b':(2, 4), 'c':3.0 }"
+    ### data_string = json.dumps(json_str)
 
-	obj = eval(json.loads(repr(json_str)))
+    obj = eval(json.loads(repr(json_str)))
 
-	### new args
-	new_args = obj['args']
-	label = obj['model']
-	filename = obj['filename']
+    ### new args
+    new_args = obj['args']
+    label = obj['model']
+    filename = obj['filename']
 
-	### load diagram from yaml and update args
-	a = Diagram()
+    ### load diagram from yaml and update args
+    a = Diagram()
 
-	if a.LoadFile(filename):
-		model=a.GetShapeByLabel(label)
-		#print "avant", model.args, new_args
-		for arg in model.args:
-			new_val = new_args[arg]
-			old_val = model.args[arg]
-			if old_val != new_val:
-				### adapt types for python code (float, int and bool)
-				if new_val in ('true', 'True'):
-					new_val = True
-				elif new_val in ('false', 'False'):
-					new_val = False
-				elif new_val.replace('.','').replace('-','').isdigit():
-					new_val = eval(new_val)
+    if a.LoadFile(filename):
+        model=a.GetShapeByLabel(label)
+        #print "avant", model.args, new_args
+        for arg in model.args:
+            new_val = new_args[arg]
+            old_val = model.args[arg]
+            if old_val != new_val:
+                ### adapt types for python code (float, int and bool)
+                if new_val in ('true', 'True'):
+                    new_val = True
+                elif new_val in ('false', 'False'):
+                    new_val = False
+                elif new_val.replace('.','').replace('-','').isdigit():
+                    new_val = eval(new_val)
 
-				model.args[arg] = new_val
-#		print "apres", model.args
+                model.args[arg] = new_val
+#        print "apres", model.args
 
-		### write new yaml file
-		return a.SaveFile(a.last_name_saved)
+        ### write new yaml file
+        return a.SaveFile(a.last_name_saved)
 
-	else:
-		return False
+    else:
+        return False
 
-	### print eval(new_info['a'])
+    ### print eval(new_info['a'])
 
 def makeJSON(filename, json=None, diagram=None):
-	""" Make JSON file from D graph of the diagram
-	"""
-	from Container import Diagram, ConnectionShape, CodeBlock, ContainerBlock, iPort, oPort
+    """ Make JSON file from D graph of the diagram
+    """
+    from Container import Diagram, ConnectionShape, CodeBlock, ContainerBlock, iPort, oPort
 
-	if not json:
-		### add filename in json
-		json = {os.path.basename(filename):[{"cells":[]},{"description": ""}]}
-	else:
-		json = json
+    if not json:
+        ### add filename in json
+        json = {os.path.basename(filename):[{"cells":[]},{"description": ""}]}
+    else:
+        json = json
 
-	if not diagram:
-		dia = Diagram()
+    if not diagram:
+        dia = Diagram()
 
-		if not dia.LoadFile(filename):
-			json['success'] = False
-			return json
-	else:
-		dia = diagram
+        if not dia.LoadFile(filename):
+            json['success'] = False
+            return json
+    else:
+        dia = diagram
 
-	for c in dia.GetShapeList():
+    for c in dia.GetShapeList():
 
-		### if c is coupled model
-		if isinstance(c, ContainerBlock):
-			D = {"type":"devs.Coupled",
-					"angle":0,
-	                "id":c.label,
-	                "z":1,
-	                "size":{"width":c.w,"height":c.h},
-					"position":{"x":c.x[0],"y":c.y[0]},
-					"inPorts":map(lambda i: "in%d"%i, range(c.input)),
-					"outPorts":map(lambda i: "out%d"%i, range(c.output)),
-					"attrs":{"text": {"text":c.label}}
-					}
+        ### if c is coupled model
+        if isinstance(c, ContainerBlock):
+            D = {"type":"devs.Coupled",
+                    "angle":0,
+                    "id":c.label,
+                    "z":1,
+                    "size":{"width":c.w,"height":c.h},
+                    "position":{"x":c.x[0],"y":c.y[0]},
+                    "inPorts":map(lambda i: "in%d"%i, range(c.input)),
+                    "outPorts":map(lambda i: "out%d"%i, range(c.output)),
+                    "attrs":{"text": {"text":c.label}}
+                    }
 
-			### embeds key
-			shapes = c.GetFlatBlockShapeList()
-			D["embeds"] = [s.label for s in shapes]
+            ### embeds key
+            shapes = c.GetFlatBlockShapeList()
+            D["embeds"] = [s.label for s in shapes]
 
-			json[os.path.basename(filename)][0]['cells'].append(D)
+            json[os.path.basename(filename)][0]['cells'].append(D)
 
-			return makeJSON(filename, json, c)
+            return makeJSON(filename, json, c)
 
-		### if c is connexion
-		else:
-			if isinstance(c, ConnectionShape):
-				D = {	"type":"devs.Link",
-						"id":str(id(c)),
-						"z":0,"attrs":{},
-						'source':{"selector":".outPorts>g:nth-child(1)>circle"},
-						'target':{"selector":".inPorts>g:nth-child(1)>circle"}}
-				model1, portNumber1 = c.input
-				model2, portNumber2 = c.output
+        ### if c is connexion
+        else:
+            if isinstance(c, ConnectionShape):
+                D = {    "type":"devs.Link",
+                        "id":str(id(c)),
+                        "z":0,"attrs":{},
+                        'source':{"selector":".outPorts>g:nth-child(1)>circle"},
+                        'target':{"selector":".inPorts>g:nth-child(1)>circle"}}
+                model1, portNumber1 = c.input
+                model2, portNumber2 = c.output
 
-				D['source']['id'] = model1.label.encode("utf-8")
-				D['target']['id'] = model2.label.encode("utf-8")
+                D['source']['id'] = model1.label.encode("utf-8")
+                D['target']['id'] = model2.label.encode("utf-8")
 
-			### if c is atomic model
-			elif isinstance(c, CodeBlock):
+            ### if c is atomic model
+            elif isinstance(c, CodeBlock):
 
-				D = {"type":"devs.Atomic",
-					"angle":0,
-	                "id":c.label,
-	                "z":1,
-	                "size":{"width":c.w,"height":c.h},
-					"position":{"x":c.x[0],"y":c.y[0]},
-					"inPorts":map(lambda i: "in%d"%i, range(c.input)),
-					"outPorts":map(lambda i: "out%d"%i, range(c.output)),
-					"attrs":{"text": {"text":c.label}},
-					"prop" :{"data" : c.args}
-					}
+                D = {"type":"devs.Atomic",
+                    "angle":0,
+                    "id":c.label,
+                    "z":1,
+                    "size":{"width":c.w,"height":c.h},
+                    "position":{"x":c.x[0],"y":c.y[0]},
+                    "inPorts":map(lambda i: "in%d"%i, range(c.input)),
+                    "outPorts":map(lambda i: "out%d"%i, range(c.output)),
+                    "attrs":{"text": {"text":c.label}},
+                    "prop" :{"data" : c.args}
+                    }
 
-				for i in xrange(c.input):
-					D["attrs"].update( {".inPorts>.port%d>.port-label"%i:{"text":"in%d"%i},
-										".inPorts>.port%d>.port-body"%i:{ "port":{ "id":"in%d"%i,
-	                        			 		 	     							"type":"in"}},
-										".inPorts>.port%d"%i:{ "ref":".body",
-	                    		  	     						"ref-y":float(i+1)/(c.input+1)}
-											})
-				for j in xrange(c.output):
-					D["attrs"].update( {".outPorts>.port%d>.port-label"%j:{"text":"out%d"%j},
-										".outPorts>.port%d>.port-body"%j:{ "port":{ "id":"out%d"%j,
-	                        			 		 	     							"type":"out"}},
-										".outPorts>.port%d"%j:{ "ref":".body",
-	                    		  	     						"ref-y":float(j+1)/(c.output+1)}
-											})
+                for i in xrange(c.input):
+                    D["attrs"].update( {".inPorts>.port%d>.port-label"%i:{"text":"in%d"%i},
+                                        ".inPorts>.port%d>.port-body"%i:{ "port":{ "id":"in%d"%i,
+                                                                                       "type":"in"}},
+                                        ".inPorts>.port%d"%i:{ "ref":".body",
+                                                                   "ref-y":float(i+1)/(c.input+1)}
+                                            })
+                for j in xrange(c.output):
+                    D["attrs"].update( {".outPorts>.port%d>.port-label"%j:{"text":"out%d"%j},
+                                        ".outPorts>.port%d>.port-body"%j:{ "port":{ "id":"out%d"%j,
+                                                                                       "type":"out"}},
+                                        ".outPorts>.port%d"%j:{ "ref":".body",
+                                                                   "ref-y":float(j+1)/(c.output+1)}
+                                            })
 
 
-			json[os.path.basename(filename)][0]['cells'].append(D)
+            json[os.path.basename(filename)][0]['cells'].append(D)
 
-	return json
+    return json
 
 def makeJS(filename):
-	"""
-	"""
+    """
+    """
 
-	from Container import Diagram
-	from Join import makeDEVSConf, makeJoin
+    from Container import Diagram
+    from Join import makeDEVSConf, makeJoin
 
-	a = Diagram()
-	if a.LoadFile(filename):
-		sys.stdout.write(_("\nFile loaded\n"))
+    a = Diagram()
+    if a.LoadFile(filename):
+        sys.stdout.write(_("\nFile loaded\n"))
 
-		addInner = []
-		liaison = []
-		model = {}
-		labelEnCours = str(os.path.basename(a.last_name_saved).split('.')[0])
+        addInner = []
+        liaison = []
+        model = {}
+        labelEnCours = str(os.path.basename(a.last_name_saved).split('.')[0])
 
-		# path = os.path.join(os.getcwd(),os.path.basename(a.last_name_saved).split('.')[0] + ".js") # genere le fichier js dans le dossier de devsimpy
-		# path = filename.split('.')[0] + ".js" # genere le fichier js dans le dossier du dsp charg�.
+        # path = os.path.join(os.getcwd(),os.path.basename(a.last_name_saved).split('.')[0] + ".js") # genere le fichier js dans le dossier de devsimpy
+        # path = filename.split('.')[0] + ".js" # genere le fichier js dans le dossier du dsp charg�.
 
-		#Position initial du 1er modele
-		x = [40]
-		y = [40]
-		bool = True
+        #Position initial du 1er modele
+        x = [40]
+        y = [40]
+        bool = True
 
-		model, liaison, addInner = makeJoin(a, addInner, liaison, model, bool, x, y, labelEnCours)
-		makeDEVSConf(model, liaison, addInner, "%s.js"%labelEnCours)
-	else:
-		return False
+        model, liaison, addInner = makeJoin(a, addInner, liaison, model, bool, x, y, labelEnCours)
+        makeDEVSConf(model, liaison, addInner, "%s.js"%labelEnCours)
+    else:
+        return False
 
 class Printer:
-	"""
-	Print things to stdout on one line dynamically
-	"""
+    """
+    Print things to stdout on one line dynamically
+    """
 
-	def __init__(self,data):
+    def __init__(self,data):
 
-		sys.stdout.write("\r\x1b[K"+data.__str__())
-		sys.stdout.flush()
+        sys.stdout.write("\r\x1b[K"+data.__str__())
+        sys.stdout.flush()
 
 def yes(prompt = 'Please enter Yes/No: '):
-	while True:
-	    try:
-	        i = raw_input(prompt)
-	    except KeyboardInterrupt:
-	        return False
-	    if i.lower() in ('yes','y'): return True
-	    elif i.lower() in ('no','n'): return False
+    while True:
+        try:
+            i = raw_input(prompt)
+        except KeyboardInterrupt:
+            return False
+        if i.lower() in ('yes','y'): return True
+        elif i.lower() in ('no','n'): return False
 
-def makeSimulation(filename, T, json_trace=True):
-	"""
-	"""
+def makeSimulation(filename, T, socket_id, json_trace=True):
+    """
+    """
 
-	from Container import Diagram
+    from Container import Diagram
+    from InteractionSocket import InteractionManager
 
-	if not json_trace:
-		sys.stdout.write(_("\nSimulation in batch mode with %s\n")%__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'])
+    if not json_trace:
+        sys.stdout.write(_("\nSimulation in batch mode with %s\n")%__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'])
 
-	a = Diagram()
+    a = Diagram()
 
-	if json_trace:
-		json = {'date':time.strftime("%c")}
-		json['mode']='no-gui'
-		json['time'] = T
-	else:
-		sys.stdout.write(_("\nLoading %s file...\n")%(os.path.basename(filename)))
+    if json_trace:
+        json = {'date':time.strftime("%c")}
+        json['mode']='no-gui'
+        json['time'] = T
+    else:
+        sys.stdout.write(_("\nLoading %s file...\n")%(os.path.basename(filename)))
 
-	if a.LoadFile(filename):
+    if a.LoadFile(filename):
 
-		if json_trace:
-			json['file'] = filename
-		else:
-			sys.stdout.write(_("%s loaded!\n")%(os.path.basename(filename)))
+        if json_trace:
+            json['file'] = filename
+        else:
+            sys.stdout.write(_("%s loaded!\n")%(os.path.basename(filename)))
 
-		try:
-			if not json_trace:
-				sys.stdout.write(_("\nMaking DEVS instance...\n"))
+        try:
+            if not json_trace:
+                sys.stdout.write(_("\nMaking DEVS instance...\n"))
 
-			master = Diagram.makeDEVSInstance(a)
+            master = Diagram.makeDEVSInstance(a)
 
-		except Exception, info:
-			### get exception info
-			exc_info = traceback.format_exc()
-			if json_trace:
-				json['devs_instance'] = None
-				json['success'] = False
-				json['info'] = exc_info
-				sys.stdout.write(str(json))
-			else:
-				sys.stdout.write("\n%s"%exc_info)
+        except Exception, info:
+            ### get exception info
+            exc_info = traceback.format_exc()
+            if json_trace:
+                json['devs_instance'] = None
+                json['success'] = False
+                json['info'] = exc_info
+                sys.stdout.write(str(json))
+            else:
+                sys.stdout.write("\n%s"%exc_info)
 
-			return False
+            return False
 
-		else:
-			if master:
+        else:
+            if master:
 
-				if json_trace:
-					json['devs_instance'] = str(master)
-					if isinstance(master, tuple):
-						sys.stdout.write(str(json))
-						return False
-				else:
-					if isinstance(master, tuple):
-						sys.stdout.write(_("DEVS instance not created: %s\n")%str(master))
-						return False
-					else:
-						sys.stdout.write(_("DEVS instance created!\n"))
+                if json_trace:
+                    json['devs_instance'] = str(master)
+                    if isinstance(master, tuple):
+                        sys.stdout.write(str(json))
+                        return False
+                else:
+                    if isinstance(master, tuple):
+                        sys.stdout.write(_("DEVS instance not created: %s\n")%str(master))
+                        return False
+                    else:
+                        sys.stdout.write(_("DEVS instance created!\n"))
 
-				if not json_trace:
-					sys.stdout.write(_("\nPerforming DEVS simulation...\n"))
+                if not json_trace:
+                    sys.stdout.write(_("\nPerforming DEVS simulation...\n"))
 
-				sim = runSimulation(master, T)
-				thread = sim.Run()
+                sys.stdout.write(_("\nPerforming DEVS simulation...\n"))
+                interactionManager = None
+                try:
+                    sim = runSimulation(master, T)
+                    thread = sim.Run()
+                    if socket_id != "":
+                        sys.stdout.write(_("\nCreate socket...\n"))
+                        interactionManager = InteractionManager(socket_id=socket_id, simulation_thread=thread)
+                        interactionManager.start()
 
-				first_time = time.time()
-				while(thread.isAlive()):
-					new_time = time.time()
-					output = new_time - first_time
-					if not json_trace: Printer(output)
+                    first_time = time.time()
+                    while(thread.isAlive()):
+                        new_time = time.time()
+                        output = new_time - first_time
+                        if not json_trace:
+                            Printer(output)
 
-				if not json_trace:
-					sys.stdout.write(_("\nDEVS simulation completed!\n"))
+                    sys.stdout.write(_("\nEnd DEVS simulation...\n"))
+                    if interactionManager != None:
+                        interactionManager.stop()
+                        interactionManager.join()
 
-				if json_trace:
-					json['duration'] = output
-					json['output'] = []
+                except:
+                    sys.stdout.write(_("\nException raised in simulation\n"))
+                    sys.stdout.write(_(traceback.format_exc()))
+                    if interactionManager != None:
+                        interactionManager.stop()
+                        interactionManager.join()
 
-				### inform that data file has been generated
-				for m in filter(lambda a: hasattr(a, 'fileName'), master.componentSet):
-					for i in range(len(m.IPorts)):
-						fn ='%s%s.dat'%(m.fileName,str(i))
-						if os.path.exists(fn):
-							if json_trace:
-								json['output'].append({'name':os.path.basename(fn), 'path':fn})
-							else:
-								sys.stdout.write(_("\nData file %s has been generated!\n")%(fn))
-				if json_trace:
-					import json as js
-					sys.stdout.write(js.dumps(json))
+                if not json_trace:
+                    sys.stdout.write(_("\nDEVS simulation completed!\n"))
 
-				return True
+                if json_trace:
+                    json['duration'] = output
+                    json['output'] = []
 
-			else:
-				return False
+                ### inform that data file has been generated
+                for m in filter(lambda a: hasattr(a, 'fileName'), master.componentSet):
+                    for i in range(len(m.IPorts)):
+                        fn ='%s%s.dat'%(m.fileName,str(i))
+                        if os.path.exists(fn):
+                            if json_trace:
+                                json['output'].append({'name':os.path.basename(fn), 'path':fn})
+                            else:
+                                sys.stdout.write(_("\nData file %s has been generated!\n")%(fn))
+                if json_trace:
+                    import json as js
+                    sys.stdout.write(js.dumps(json))
 
-	else:
-		if json_trace:
-			json['file'] = None
-        	json['success'] = True
-         	sys.stdout.write(str(json))
+                return True
+
+            else:
+                return False
+
+    else:
+        if json_trace:
+            json['file'] = None
+            json['success'] = True
+            sys.stdout.write(str(json))
 
         return False
 
 class runSimulation:
-	"""
-	"""
+    """
+    """
 
-	def __init__(self, master, time):
-		""" Constructor.
-		"""
+    def __init__(self, master, time):
+        """ Constructor.
+        """
 
-		# local copy
-		self.master = master
-		self.time = time
+        # local copy
+        self.master = master
+        self.time = time
 
-		### No time limit simulation (defined in the builtin dico from .devsimpy file)
-		self.ntl = __builtin__.__dict__['NTL']
+        ### No time limit simulation (defined in the builtin dico from .devsimpy file)
+        self.ntl = __builtin__.__dict__['NTL']
 
-		# simulator strategy
-		self.selected_strategy = DEFAULT_SIM_STRATEGY
+        # simulator strategy
+        self.selected_strategy = DEFAULT_SIM_STRATEGY
 
-		### profiling simulation with hotshot
-		self.prof = False
+        ### profiling simulation with hotshot
+        self.prof = False
 
-		self.verbose = False
+        self.verbose = False
 
-		# definition du thread, du timer et du compteur pour les % de simulation
-		self.thread = None
-		self.count = 10.0
-		self.stdioWin = None
+        # definition du thread, du timer et du compteur pour les % de simulation
+        self.thread = None
+        self.count = 10.0
+        self.stdioWin = None
 
-	###
-	def Run(self):
-		""" run simulation
-		"""
+    ###
+    def Run(self):
+        """ run simulation
+        """
 
-		assert(self.master is not None)
-		### pour prendre en compte les simulations multiples sans relancer un SimulationDialog
-		### si le thread n'est pas lanc� (pas pendant un suspend)
-		# if self.thread is not None and not self.thread.thread_suspend:
-		diagram = self.master.getBlockModel()
-		# diagram.Clean()
-		# print self.master
-		################################################################################################################
-		######### To Do : refaire l'enregistrement du chemin d'enregistrements des resuts du to_disk ###################
-		for m in self.master.componentSet:
-			if str(m)=='To_Disk':
-				dir_fn = os.path.dirname(diagram.last_name_saved).replace('\t','').replace(' ','')
-				label = m.getBlockModel()
-				m.fileName = os.path.join(dir_fn,"%s_%s"%(os.path.basename(diagram.last_name_saved).split('.')[0],os.path.basename(m.fileName)))
-		################################################################################################################
-		################################################################################################################
+        assert(self.master is not None)
+        ### pour prendre en compte les simulations multiples sans relancer un SimulationDialog
+        ### si le thread n'est pas lanc� (pas pendant un suspend)
+        # if self.thread is not None and not self.thread.thread_suspend:
+        diagram = self.master.getBlockModel()
+        # diagram.Clean()
+        # print self.master
+        ################################################################################################################
+        ######### To Do : refaire l'enregistrement du chemin d'enregistrements des resuts du to_disk ###################
+        for m in self.master.componentSet:
+            if str(m)=='To_Disk':
+                dir_fn = os.path.dirname(diagram.last_name_saved).replace('\t','').replace(' ','')
+                label = m.getBlockModel()
+                m.fileName = os.path.join(dir_fn,"%s_%s"%(os.path.basename(diagram.last_name_saved).split('.')[0],os.path.basename(m.fileName)))
+        ################################################################################################################
+        ################################################################################################################
 
-		if self.master:
-			from SimulationGUI import simulator_factory
-			if not self.ntl:
-				self.master.FINAL_TIME = float(self.time)
+        if self.master:
+            from SimulationGUI import simulator_factory
+            if not self.ntl:
+                self.master.FINAL_TIME = float(self.time)
 
-			self.thread = simulator_factory(self.master, self.selected_strategy, self.prof, self.ntl, self.verbose)
+            self.thread = simulator_factory(self.master, self.selected_strategy, self.prof, self.ntl, self.verbose)
 
-			return self.thread
-
+            return self.thread

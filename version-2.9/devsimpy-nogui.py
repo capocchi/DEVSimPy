@@ -67,6 +67,19 @@ builtin_dict['GUI_FLAG'] = False
 
 from SimulationNoGUI import makeSimulation, makeJSON, makeJS, makeYAMLUpdate, getYAMLModels
 
+def simulate (filename, duration, socket_id):
+	if not os.path.exists(filename):
+		sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
+		sys.exit()
+
+	if str(duration) in ('inf', 'ntl'):
+		__builtin__.__dict__['NTL'] = True
+		duration = 0.0
+
+	### launch simulation
+	sys.stdout.write(_("makeSimulation..."+socket_id))
+	makeSimulation(filename, duration, socket_id, True)
+
 # Sets the homepath variable to the directory where your application is located (sys.argv[0]).
 __builtin__.__dict__.update(builtin_dict)
 
@@ -135,19 +148,14 @@ if __name__ == '__main__':
 			getYAMLModels(sys.argv[2])
 
 		else:
+			### simulation
+			sys.stdout.write(_("\nsimulate WITHOUT socket...\n"))
+			simulate(filename=sys.argv[1], duration=arg1, socket_id="")
 
-			### check dsp filename
-			filename = sys.argv[1]
-			if not os.path.exists(filename):
-				sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
-				sys.exit()
-
-			if str(arg1) in ('inf', 'ntl'):
-				__builtin__.__dict__['NTL'] = True
-				arg1 = 0.0
-
-			### launch simulation
-			makeSimulation(filename, arg1, True)
+	elif l==4:
+		### simulation
+		sys.stdout.write(_("\nsimulate WITH socket...\n"))
+		simulate(filename=sys.argv[1], duration=sys.argv[2], socket_id=sys.argv[3])
 
 	else:
 		sys.stderr.write(_('ERROR: Unspecified .dsp file!\n'))

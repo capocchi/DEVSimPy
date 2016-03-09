@@ -58,6 +58,14 @@ class DomainStructure(BaseDEVS.CoupledDEVS):
 
 		BaseDEVS.CoupledDEVS.__init__(self, name=name)
 
+	def getFlatComponentSet (self):
+	    """ get the list of composing submodels - recursive build
+	    """
+	    submodelList = {}
+	    for submodel in self.componentSet:
+	        submodelList.update(submodel.getFlatComponentSet())
+	    return submodelList
+
 def main():
 	DS = DomainStructure()
 	print DS.__class__.__bases__
