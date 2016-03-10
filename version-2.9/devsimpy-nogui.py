@@ -65,7 +65,7 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 
 builtin_dict['GUI_FLAG'] = False
 
-from SimulationNoGUI import makeSimulation, makeJSON, makeJS, makeYAMLUpdate, getYAMLModels
+from SimulationNoGUI import makeSimulation, makeJSON, makeJS, getYAMLBlockModelsList, getYAMLBlockModelArgs, setYAMLBlockModelArgs
 
 def simulate (filename, duration, socket_id):
 	if not os.path.exists(filename):
@@ -90,72 +90,82 @@ if __name__ == '__main__':
  	_ = gettext.gettext
 
  	#sys.stdout.write(_("DEVSimPy - version %s\n"%__version__ ))
- 	l=len(sys.argv)
+ 	nb_args=len(sys.argv)
 
-	if l == 2:
+	### First argument is filename - validity check
+	filename = sys.argv[1]
+	if not os.path.exists(filename):
+		sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
+		sys.exit()
 
-		### check dsp filename
-		filename = sys.argv[1]
-		if not os.path.exists(filename):
-			sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
-			sys.exit()
+	if nb_args == 2:
+		########################################################################
+		# Simulation with defaut simulated duration
 
-		### launch simulation
 		makeSimulation(filename, T = 10.0)
 
-	elif l == 3:
-		### check time
-		arg1 = sys.argv[2]
+	elif nb_args >= 3:
+		action = sys.argv[2]
 
-		if str(arg1) in ('-js','-javascript'):
+		if action in ('-js','-javascript'):
+		########################################################################
+		# Javascript generation
 
-			### check dsp filename
-			filename = sys.argv[1]
-			if not os.path.exists(filename):
-				sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
-				sys.exit()
+			makeJS(filename)
+
+		elif action in ('-json'):
+		########################################################################
+		# turn the YAML/DSP file to JSON
+
+			import json
+			j = makeJSON(filename)
+			sys.stdout.write(json.dumps(j, sort_keys=True, indent=4))
+
+		elif action in ('-modelslist'):
+		########################################################################
+		# get the list of models in a master model
+
+			getYAMLBlockModelsList(filename)
+
+		elif action in ('-getmodelargs'):
+		########################################################################
+		# get the parameters of an atomic model
+
+			if nb_args == 4:
+				label = sys.argv[3]
+				getYAMLBlockModelArgs(filename, label)
 			else:
-				### launch JS file generation
-				makeJS(filename)
+				sys.stderr.write(_('ERROR: Unspecified label for model!\n'))
+				sys.exit()
 
-		elif str(arg1) in ('-json'):
+		elif action in ('-setmodelargs'):
+		########################################################################
+		# update the parameters of a block of a model
 
 			import json
 
-			### check dsp filename
-			filename = sys.argv[1]
-			if not os.path.exists(filename):
-				sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
-				sys.exit()
+			if nb_args == 5:
+				label = sys.argv[3]
+				print (label)
+				print (sys.argv[4])
+				args = json.loads(sys.argv[4])
+				print (args)
+				setYAMLBlockModelArgs(filename, label, args)
 			else:
-				### launch JSON file generation for joint.js
-				j = makeJSON(filename)
-
-				sys.stdout.write(json.dumps(j, sort_keys=True, indent=4))
-
-		elif sys.argv[1] in ('-update'):
-
-			import json
-
-			### json_str contain info for updating the model ({filename':'test.yaml', model='To_Disk_1', 'args':{'col':0,...}})
-			json_str = sys.argv[2]
-
-			makeYAMLUpdate(json_str)
-
-		### devsimpy-nogui -models test.yaml -> get the list of block shape model of test.yaml (used for simulation setting)
-		elif sys.argv[1] in ('-models'):
-
-			getYAMLModels(sys.argv[2])
+				sys.stderr.write(_('ERROR: usage devsimpy-nogui.py dsp_or_yaml_filename -setmodelargs block_label args_as_JSON_string!\n'))
+				sys.exit()
 
 		else:
-			### simulation
-			sys.stdout.write(_("\nsimulate WITHOUT socket...\n"))
-			simulate(filename=sys.argv[1], duration=arg1, socket_id="")
-
-	elif l==4:
-		### simulation
-		sys.stdout.write(_("\nsimulate WITH socket...\n"))
-		simulate(filename=sys.argv[1], duration=sys.argv[2], socket_id=sys.argv[3])
+		########################################################################
+		# Simulation without socket communication
+			duration = sys.argv[2]
+			if nb_args == 4:
+				sys.stdout.write(_("\nsimulate WITH socket...\n"))
+				socket_id = sys.argv[3]
+			else:
+				sys.stdout.write(_("\nsimulate WITHOUT socket...\n"))
+				socket_id = ""
+			simulate(filename, duration, socket_id)
 
 	else:
 		sys.stderr.write(_('ERROR: Unspecified .dsp file!\n'))

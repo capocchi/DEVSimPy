@@ -28,7 +28,7 @@ import InteractionSocket
 
 sys.path.append(os.path.join('Domain', 'Phidgets'))
 
-def getYAMLModels(filename):
+def getYAMLBlockModelsList(filename):
     from Container import Diagram, Block
 
     ### load diagram from yaml and update args
@@ -46,19 +46,24 @@ def getYAMLModels(filename):
     else:
         return False
 
-def makeYAMLUpdate(json_str):
+def getYAMLBlockModelArgs(filename, label):
     import json
     from Container import Diagram
 
-    ### data = "{ 'a':'A', 'b':(2, 4), 'c':3.0 }"
-    ### data_string = json.dumps(json_str)
+    ### load diagram from yaml and get args
+    a = Diagram()
 
-    obj = eval(json.loads(repr(json_str)))
+    if a.LoadFile(filename):
+        model=a.GetShapeByLabel(label)
+        print(json.dumps(model.args))
+        return True
+    else:
+        print('Failed to load file ' + filename)
+        return False
 
-    ### new args
-    new_args = obj['args']
-    label = obj['model']
-    filename = obj['filename']
+def setYAMLBlockModelArgs(filename, label, new_args):
+
+    from Container import Diagram
 
     ### load diagram from yaml and update args
     a = Diagram()
@@ -75,11 +80,11 @@ def makeYAMLUpdate(json_str):
                     new_val = True
                 elif new_val in ('false', 'False'):
                     new_val = False
-                elif new_val.replace('.','').replace('-','').isdigit():
-                    new_val = eval(new_val)
+                elif str(new_val).replace('.','').replace('-','').isdigit():
+                    new_val = eval(str(new_val))
 
                 model.args[arg] = new_val
-#        print "apres", model.args
+                #print "apres", model.args
 
         ### write new yaml file
         return a.SaveFile(a.last_name_saved)
