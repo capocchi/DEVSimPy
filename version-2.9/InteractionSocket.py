@@ -17,34 +17,34 @@ class MySocketHandler(SocketServer.BaseRequestHandler):
 
         if self.data == "SUSPEND":
             self.server.simulation_thread.suspend()
-            #while not self.server.simulation_thread.suspension_applied: TODO? modif Strategy needed
-                ###TODO set a timeout and return a NOK status if simulation is not suspended
-                #pass
+            #while not self.server.simulation_thread.suspension_applied: pass TODO? modif Strategy needed                #pass
             self.request.send('SUSPENDED')
 
         elif self.data == "RESUME":
             self.server.simulation_thread.resume_thread()
-            #while self.server.simulation_thread.suspension_applied: TODO? modif Strategy needed
-                ###TODO set a timeout and return a NOK status if simulation remains suspended
-                #pass
+            #while self.server.simulation_thread.suspension_applied:pass TODO? modif Strategy needed
             self.request.send('RESUMED')
+
         else:
             data       = json.loads(self.data)
-            modelID    = data['modelID']
-            paramName  = data['paramName']
-            paramValue = data['paramValue']
+            model_name = data['block_label']
+            params     = data['block']
+            response   = 'OK'
+
             if self.server.simulation_thread.thread_suspend:
-                if self.server._componentSet.has_key(modelID):
-                    if paramName in dir(self.server._componentSet[modelID]):
-                        setattr(self.server._componentSet[modelID], paramName, int(paramValue))
-                        # just send back OK
-                        self.request.send('OK')
-                    else:
-                        self.request.send('UNKNOWN_PARAM_NAME')
+
+                if self.server._componentSet.has_key(model_name):
+
+                    for param_name, param_value in params.items() :
+                        if param_name in dir(self.server._componentSet[model_name]):
+                            setattr(self.server._componentSet[model_name], param_name, int(param_value))
+                        else:
+                            response += ' - UNKNOWN_PARAM ' + param_name
+                    self.request.send(response)
                 else:
-                    self.request.send('UNKNOWN_MODELID')
+                    self.request.send('UNKNOWN_MODEL_NAME ' + model_name)
             else:
-                self.request.send('SIM_IN_PROGRESS')
+                self.request.send('SIM_NOT_PAUSED')
 
 
 #class MySocketServer(SocketServer.UnixStreamServer):
@@ -79,7 +79,6 @@ class InteractionManager(threading.Thread):
         except:
             print ('socket server initialization failed')
             print (traceback.format_exc())
-
         #self.daemon = True
 
     def run(self):

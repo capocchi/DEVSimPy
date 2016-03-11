@@ -385,6 +385,7 @@ class Diagram(Savable, Structurable):
 			else:
 				### DEVS model recovery
 				devs = getInstance(cls, m.args)
+				devs.name = m.label
 
 				### Is safe instantiation ?
 				if isinstance(devs, tuple):

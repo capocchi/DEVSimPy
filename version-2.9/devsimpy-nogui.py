@@ -119,15 +119,15 @@ if __name__ == '__main__':
 
 			import json
 			j = makeJSON(filename)
-			sys.stdout.write(json.dumps(j, sort_keys=True, indent=4))
+			sys.stdout.write(json.dumps((j), sort_keys=True, indent=4))
 
-		elif action in ('-modelslist'):
+		elif action in ('-blockslist'):
 		########################################################################
 		# get the list of models in a master model
 
 			getYAMLBlockModelsList(filename)
 
-		elif action in ('-getmodelargs'):
+		elif action in ('-getblockargs'):
 		########################################################################
 		# get the parameters of an atomic model
 
@@ -138,22 +138,19 @@ if __name__ == '__main__':
 				sys.stderr.write(_('ERROR: Unspecified label for model!\n'))
 				sys.exit()
 
-		elif action in ('-setmodelargs'):
+		elif action in ('-setblockargs'):
 		########################################################################
 		# update the parameters of a block of a model
 
-			import json
-
 			if nb_args == 5:
-				label = sys.argv[3]
-				print (label)
-				print (sys.argv[4])
-				args = json.loads(sys.argv[4])
-				print (args)
-				setYAMLBlockModelArgs(filename, label, args)
+			    import json
+			    label = sys.argv[3]
+			    args = eval(json.loads(repr(sys.argv[4])))
+			    setYAMLBlockModelArgs(filename, label, args)
 			else:
-				sys.stderr.write(_('ERROR: usage devsimpy-nogui.py dsp_or_yaml_filename -setmodelargs block_label args_as_JSON_string!\n'))
-				sys.exit()
+			    sys.stdout.write("unexpected nb_args="  + str(nb_args))
+			    #sys.stderr.write(_('ERROR: usage devsimpy-nogui.py dsp_or_yaml_filename -setmodelargs block_label args_as_JSON_string!\n'))
+			    #sys.exit()
 
 		else:
 		########################################################################

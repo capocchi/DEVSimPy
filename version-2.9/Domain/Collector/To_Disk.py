@@ -123,7 +123,7 @@ class To_Disk(QuickScope):
 
 				if t != self.last_time_value[fn]:
 					with open(fn, 'a') as f:
-						f.write("%s%s%s%s%s\n"%(self.last_time_value[fn],self.comma,self.buffer[fn],self.comma,datetime.strftime(datetime.today(), "%H:%M:%S")))
+						f.write("%s%s%s\n"%(self.last_time_value[fn],self.comma,self.buffer[fn]))#,self.comma,datetime.strftime(datetime.today(), "%H:%M:%S")))
 					#self.pusher.trigger('test_channel', 'my_event', {'label': str(self.last_time_value[fn]), 'value':str(self.buffer[fn])})
 					self.pusher_data.append({'label': str(self.last_time_value[fn]), 'value':str(self.buffer[fn])})
 					self.last_time_value[fn] = t

@@ -64,6 +64,7 @@ def getYAMLBlockModelArgs(filename, label):
 def setYAMLBlockModelArgs(filename, label, new_args):
 
     from Container import Diagram
+    import json
 
     ### load diagram from yaml and update args
     a = Diagram()
@@ -87,30 +88,35 @@ def setYAMLBlockModelArgs(filename, label, new_args):
                 #print "apres", model.args
 
         ### write new yaml file
-        return a.SaveFile(a.last_name_saved)
-
+        success = a.SaveFile(a.last_name_saved)
+        if success:
+            print (json.dumps(model.args))
+        else:
+            print ('failed to modify parameters')
+        return success
     else:
+        print ('Failed to load file')
         return False
 
     ### print eval(new_info['a'])
 
-def makeJSON(filename, json=None, diagram=None):
+def makeJSON(filename, json_obj=None, diagram=None):
     """ Make JSON file from D graph of the diagram
     """
     from Container import Diagram, ConnectionShape, CodeBlock, ContainerBlock, iPort, oPort
 
-    if not json:
+    if not json_obj:
         ### add filename in json
-        json = {os.path.basename(filename):[{"cells":[]},{"description": ""}]}
+        json_obj = {os.path.basename(filename):[{"cells":[]},{"description": ""}]}
     else:
-        json = json
+        json_obj = json_obj
 
     if not diagram:
         dia = Diagram()
 
         if not dia.LoadFile(filename):
-            json['success'] = False
-            return json
+            json_obj['success'] = False
+            return json_obj
     else:
         dia = diagram
 
@@ -133,9 +139,9 @@ def makeJSON(filename, json=None, diagram=None):
             shapes = c.GetFlatBlockShapeList()
             D["embeds"] = [s.label for s in shapes]
 
-            json[os.path.basename(filename)][0]['cells'].append(D)
+            json_obj[os.path.basename(filename)][0]['cells'].append(D)
 
-            return makeJSON(filename, json, c)
+            return makeJSON(filename, json_obj, c)
 
         ### if c is connexion
         else:
@@ -182,9 +188,9 @@ def makeJSON(filename, json=None, diagram=None):
                                             })
 
 
-            json[os.path.basename(filename)][0]['cells'].append(D)
+            json_obj[os.path.basename(filename)][0]['cells'].append(D)
 
-    return json
+    return json_obj
 
 def makeJS(filename):
     """
