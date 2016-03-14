@@ -2,6 +2,10 @@ import json
 import threading
 import SocketServer
 import traceback
+import sys
+
+def log (s):
+    sys.stderr.write(s)
 
 class MySocketHandler(SocketServer.BaseRequestHandler):
     """
@@ -13,12 +17,12 @@ class MySocketHandler(SocketServer.BaseRequestHandler):
     def handle(self):
         # request is the socket connected to the client
         self.data = self.request.recv(1024).strip()
-        print("reception " + self.data +"\n\r")
+        log("reception " + self.data +"\n\r")
 
-        if self.data == "SUSPEND":
+        if self.data == "PAUSE":
             self.server.simulation_thread.suspend()
-            #while not self.server.simulation_thread.suspension_applied: pass TODO? modif Strategy needed                #pass
-            self.request.send('SUSPENDED')
+            #while not self.server.simulation_thread.suspension_applied: pass TODO? modif Strategy needed
+            self.request.send('PAUSED')
 
         elif self.data == "RESUME":
             self.server.simulation_thread.resume_thread()
@@ -47,49 +51,53 @@ class MySocketHandler(SocketServer.BaseRequestHandler):
                 self.request.send('SIM_NOT_PAUSED')
 
 
-#class MySocketServer(SocketServer.UnixStreamServer):
-class MySocketServer(SocketServer.TCPServer):
+class MySocketServer(SocketServer.UnixStreamServer):
+#class MySocketServer(SocketServer.TCPServer):
 
     def __init__(self, server_address, RequestHandlerClass, simulation_thread):
 
-        #SocketServer.UnixStreamServer.__init__(self, server_address, RequestHandlerClass)
-        SocketServer.TCPServer.__init__(self, server_address, RequestHandlerClass)
+        SocketServer.UnixStreamServer.__init__(self, server_address, RequestHandlerClass)
+        #SocketServer.TCPServer.__init__(self, server_address, RequestHandlerClass)
         self.simulation_thread = simulation_thread
         self._componentSet = self.simulation_thread.model.getFlatComponentSet()
 
     def handle_error(self, request, client_address):
-        print '-'*40
-        print 'Exception happened during processing of request from',
-        print client_address
-        print(traceback.format_exc())
-        print '-'*40
+        log('*** EXCEPTION handling msg in InteractionManager')
+        log(client_address)
+        log(traceback.format_exc())
+        log(' ***')
 
 class InteractionManager(threading.Thread):
 
     def __init__(self, socket_id, simulation_thread):
 
         threading.Thread.__init__(self)
-        print('InteractionManager thread init ')
+        self.daemon = True
+        log('InteractionManager : thread init ')
         try:
-            self.server = MySocketServer(('localhost', 5555), MySocketHandler, simulation_thread)
+            # TCP socket server initialization
+            #self.server = MySocketServer(('localhost', 5555), MySocketHandler, simulation_thread)
+
             # UNIX socket server initialization
-            #socket_address = '\0' + socket_id
-            #self.server = MySocketServer(socket_address, MySocketHandler, simulation_thread)
-            print('socket server init ')
+            self.server = MySocketServer('\0' + socket_id, MySocketHandler, simulation_thread)
+
+            log('InteractionManager : socket server created ')
         except:
-            print ('socket server initialization failed')
-            print (traceback.format_exc())
-        #self.daemon = True
+            self.server = None
+            log ('InteractionManager : socket server creation failed')
+            #log (traceback.format_exc())
+            raise
+
 
     def run(self):
 
         if self.server:
-            print('serve_forever ')
+            log('InteractionManager : serve_forever ')
             self.server.serve_forever()
 
     def stop(self):
 
         if self.server:
-            print('server shutdown')
+            log('InteractionManager : server shutdown')
             self.server.shutdown()
             self.server.server_close()

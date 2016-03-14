@@ -77,7 +77,6 @@ def simulate (filename, duration, socket_id):
 		duration = 0.0
 
 	### launch simulation
-	sys.stdout.write(_("makeSimulation..."+socket_id))
 	makeSimulation(filename, duration, socket_id, True)
 
 # Sets the homepath variable to the directory where your application is located (sys.argv[0]).
@@ -148,7 +147,7 @@ if __name__ == '__main__':
 			    args = eval(json.loads(repr(sys.argv[4])))
 			    setYAMLBlockModelArgs(filename, label, args)
 			else:
-			    sys.stdout.write("unexpected nb_args="  + str(nb_args))
+			    sys.stderr.write(_("unexpected nb_args="  + str(nb_args)))
 			    #sys.stderr.write(_('ERROR: usage devsimpy-nogui.py dsp_or_yaml_filename -setmodelargs block_label args_as_JSON_string!\n'))
 			    #sys.exit()
 
@@ -157,10 +156,8 @@ if __name__ == '__main__':
 		# Simulation without socket communication
 			duration = sys.argv[2]
 			if nb_args == 4:
-				sys.stdout.write(_("\nsimulate WITH socket...\n"))
 				socket_id = sys.argv[3]
 			else:
-				sys.stdout.write(_("\nsimulate WITHOUT socket...\n"))
 				socket_id = ""
 			simulate(filename, duration, socket_id)
 

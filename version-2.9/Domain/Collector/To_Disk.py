@@ -161,7 +161,6 @@ class To_Disk(QuickScope):
 	    return self.state
 
 	def finish(self, msg):
-		print('finish TO_DISK')
 		self.pusher.trigger('test_channel', 'my_event', json.dumps(self.pusher_data))
 		n = len(self.IPorts)
 		for np in xrange(n):

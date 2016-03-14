@@ -279,11 +279,12 @@ def makeSimulation(filename, T, socket_id, json_trace=True):
                 json['devs_instance'] = None
                 json['success'] = False
                 json['info'] = exc_info
-                sys.stdout.write(str(json))
+                import json as js
+                sys.stdout.write(js.dumps(json))
             else:
                 sys.stdout.write("\n%s"%exc_info)
 
-            return False
+            raise#return False
 
         else:
             if master:
@@ -303,13 +304,11 @@ def makeSimulation(filename, T, socket_id, json_trace=True):
                 if not json_trace:
                     sys.stdout.write(_("\nPerforming DEVS simulation...\n"))
 
-                sys.stdout.write(_("\nPerforming DEVS simulation...\n"))
                 interactionManager = None
                 try:
                     sim = runSimulation(master, T)
                     thread = sim.Run()
                     if socket_id != "":
-                        sys.stdout.write(_("\nCreate socket...\n"))
                         interactionManager = InteractionManager(socket_id=socket_id, simulation_thread=thread)
                         interactionManager.start()
 
@@ -320,17 +319,21 @@ def makeSimulation(filename, T, socket_id, json_trace=True):
                         if not json_trace:
                             Printer(output)
 
-                    sys.stdout.write(_("\nEnd DEVS simulation...\n"))
                     if interactionManager != None:
                         interactionManager.stop()
                         interactionManager.join()
 
                 except:
-                    sys.stdout.write(_("\nException raised in simulation\n"))
-                    sys.stdout.write(_(traceback.format_exc()))
+                    sys.stderr.write(_("\nEXCEPTION raised in simulation\n"))
+                    #sys.stderr.write(_(traceback.format_exc()))
+                    json['success'] = False
+                    json['info'] = traceback.format_exc()
                     if interactionManager != None:
                         interactionManager.stop()
                         interactionManager.join()
+                    import json as js
+                    sys.stdout.write(js.dumps(json))
+                    raise#return False
 
                 if not json_trace:
                     sys.stdout.write(_("\nDEVS simulation completed!\n"))
