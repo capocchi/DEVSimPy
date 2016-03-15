@@ -112,6 +112,13 @@ class DictionaryEditor(wx.Dialog):
 			if re.match(r"[-+]?[0-9\.]+$", str(v)) is not None:
 				v = float(v)
 
+			### if key is tuple, restore tuple
+			try:
+				if isinstance(eval(k), tuple):
+					k=eval(k)
+			### if k is not tuple, eval gives an error
+			except NameError:
+				pass
 
 			r.update({k:v})
 

@@ -37,15 +37,17 @@ import re
 import os
 
 ### import the DEVS module depending on the selected DEVS package in DEVSKernel directory
-for pydevs_dir in __builtin__.__dict__['DEVS_DIR_PATH_DICT']:
-    if pydevs_dir == __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
-        path = __builtin__.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
-        ### split from DEVSKernel string and replace separator with point
-        d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
-        exec "import DEVSKernel%s.DEVS as BaseDEVS"%(d)
+#for pydevs_dir in __builtin__.__dict__['DEVS_DIR_PATH_DICT']:
+#    if pydevs_dir == __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
+#        path = __builtin__.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
+#        ### split from DEVSKernel string and replace separator with point
+#        d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
+#        exec "import DEVSKernel%s.DEVS as BaseDEVS"%(d)
 
+import DomainStructure
 ###    ======================================================================    #
-class Master(BaseDEVS.CoupledDEVS):
+#class Master(BaseDEVS.CoupledDEVS):
+class Master(DomainStructure.DomainStructure):
 	""" Master class represent the high abstract level DEVS coupled model.
 	"""
 	FINAL_TIME = 10.0
@@ -54,7 +56,8 @@ class Master(BaseDEVS.CoupledDEVS):
 	def __init__(self, name=""):
 		"""	Constructor method.
 		"""
-		BaseDEVS.CoupledDEVS.__init__(self, name=name)
+		DomainStructure.DomainStructure.__init__(self, name=name)
+		#BaseDEVS.CoupledDEVS.__init__(self, name=name)
 
 		self.FINAL_TIME = Master.FINAL_TIME
 

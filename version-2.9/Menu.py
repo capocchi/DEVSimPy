@@ -603,7 +603,6 @@ class ItemLibraryPopupMenu(wx.Menu):
 			edit.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 			rename.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rename.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 			doc.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'doc.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-			update.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'db_refresh2.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 
 			self.AppendItem(edit)
 			self.AppendItem(rename)
