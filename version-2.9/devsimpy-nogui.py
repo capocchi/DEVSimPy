@@ -65,19 +65,19 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 
 builtin_dict['GUI_FLAG'] = False
 
-from SimulationNoGUI import makeSimulation, makeJSON, makeJS, getYAMLBlockModelsList, getYAMLBlockModelArgs, setYAMLBlockModelArgs
+from InteractionYAML import YAMLHandler
+import json
 
-def simulate (filename, duration, socket_id):
-	if not os.path.exists(filename):
-		sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
-		sys.exit()
-
+def simulate (devs, duration, socket_id):
+	
+	from SimulationNoGUI import makeSimulation
+	
 	if str(duration) in ('inf', 'ntl'):
 		__builtin__.__dict__['NTL'] = True
 		duration = 0.0
 
 	### launch simulation
-	makeSimulation(filename, duration, socket_id, True)
+	makeSimulation(devs, duration, socket_id, True)
 
 # Sets the homepath variable to the directory where your application is located (sys.argv[0]).
 __builtin__.__dict__.update(builtin_dict)
@@ -89,19 +89,27 @@ if __name__ == '__main__':
  	_ = gettext.gettext
 
  	#sys.stdout.write(_("DEVSimPy - version %s\n"%__version__ ))
- 	nb_args=len(sys.argv)
+ 	nb_args = len(sys.argv)
 
 	### First argument is filename - validity check
 	filename = sys.argv[1]
+	
 	if not os.path.exists(filename):
 		sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
+		sys.exit()
+		
+	yamlHandler = YAMLHandler(filename)
+		
+	if not yamlHandler.filename_is_valid:
+		sys.stderr.write(_('ERROR: Invalid file!\n'))
 		sys.exit()
 
 	if nb_args == 2:
 		########################################################################
-		# Simulation with defaut simulated duration
-
-		makeSimulation(filename, T = 10.0)
+		# Simulation with default simulated duration
+		devs = yamlHandler.getDevsInstance()
+		if devs :
+			simulate(master=devs, T = 10.0, socket_id="")
 
 	elif nb_args >= 3:
 		action = sys.argv[2]
@@ -109,22 +117,20 @@ if __name__ == '__main__':
 		if action in ('-js','-javascript'):
 		########################################################################
 		# Javascript generation
-
-			makeJS(filename)
+			yamlHandler.getJS()
 
 		elif action in ('-json'):
 		########################################################################
 		# turn the YAML/DSP file to JSON
 
-			import json
-			j = makeJSON(filename)
-			sys.stdout.write(json.dumps((j), sort_keys=True, indent=4))
+			j = yamlHandler.getJSON()
+			sys.stdout.write(json.dumps(j))
 
 		elif action in ('-blockslist'):
 		########################################################################
 		# get the list of models in a master model
-
-			getYAMLBlockModelsList(filename)
+			list = yamlHandler.getYAMLBlockModelsList()
+			sys.stdout.write(json.dumps(list))
 
 		elif action in ('-getblockargs'):
 		########################################################################
@@ -132,7 +138,8 @@ if __name__ == '__main__':
 
 			if nb_args == 4:
 				label = sys.argv[3]
-				getYAMLBlockModelArgs(filename, label)
+				args = yamlHandler.getYAMLBlockModelArgs(label)
+				sys.stdout.write(json.dumps(args))
 			else:
 				sys.stderr.write(_('ERROR: Unspecified label for model!\n'))
 				sys.exit()
@@ -145,7 +152,8 @@ if __name__ == '__main__':
 			    import json
 			    label = sys.argv[3]
 			    args = eval(json.loads(repr(sys.argv[4])))
-			    setYAMLBlockModelArgs(filename, label, args)
+			    new_args = yamlHandler.setYAMLBlockModelArgs(label, args)
+			    sys.stdout.write(json.dumps(new_args))
 			else:
 			    sys.stderr.write(_("unexpected nb_args="  + str(nb_args)))
 			    #sys.stderr.write(_('ERROR: usage devsimpy-nogui.py dsp_or_yaml_filename -setmodelargs block_label args_as_JSON_string!\n'))
@@ -159,7 +167,9 @@ if __name__ == '__main__':
 				socket_id = sys.argv[3]
 			else:
 				socket_id = ""
-			simulate(filename, duration, socket_id)
+			devs = yamlHandler.getDevsInstance()
+			if devs :
+				simulate(devs, duration, socket_id)
 
 	else:
 		sys.stderr.write(_('ERROR: Unspecified .dsp file!\n'))
