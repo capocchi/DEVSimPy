@@ -88,9 +88,9 @@ def makeSimulation(master, T, socket_id, json_trace=True):
                 if not json_trace:
                     Printer(CPUduration)
 
-                if interactionManager != None:
-                    interactionManager.stop()
-                    interactionManager.join()
+            if interactionManager != None:
+                interactionManager.stop()
+                interactionManager.join()
     except:
         json_report['log'] += " *** EXCEPTION raised in simulation ***"
         json_report['success'] = False
