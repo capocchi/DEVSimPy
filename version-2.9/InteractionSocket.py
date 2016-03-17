@@ -41,7 +41,7 @@ class MySocketHandler(SocketServer.BaseRequestHandler):
 
                     for param_name, param_value in params.items() :
                         if param_name in dir(self.server._componentSet[model_name]):
-                            setattr(self.server._componentSet[model_name], param_name, int(param_value))
+                            setattr(self.server._componentSet[model_name], param_name, param_value)
                         else:
                             response += ' - UNKNOWN_PARAM ' + param_name
                     self.request.send(response)
