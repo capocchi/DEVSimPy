@@ -3395,10 +3395,23 @@ class CodeBlock(Block, Achievable):
 					else:
 						state['model_path'] = path
 
-						state['python_path'] = os.path.basename(python_path)
+						state['model_path'] = path
+						
+						python_filename = os.path.basename(python_path)
+						
+						if str(python_filename).find('\\'):
+							### wrong basename :
+							### os.path.basename does not work when executed on Unix
+							### with a Windows path
+							python_path = python_path.replace('\\','/')
+							python_filename = os.path.basename(python_path)
+
+						state['python_path'] = os.path.join(state['model_path'] , python_filename)
 
 						if not state['python_path'].endswith('.py'):
-							### we find the python file using re module because path can comes from windows and then sep is not the same and os.path.basename don't work !
+							### Is this up-to-date???
+							### we find the python file using re module 
+							### because path can comes from windows and then sep is not the same and os.path.basename don't work !
 							state['python_path'] = os.path.join(path, re.findall("([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
 				else:
 					state['bad_filename_path_flag'] = True
@@ -3489,7 +3502,6 @@ class CodeBlock(Block, Achievable):
 			### for all filename attr
 			for name in filename_list:
 				fn = state['args'][name]
-
 				if not os.path.exists(fn):
 					#fn_dn = os.path.dirname(fn)
 					fn_bn = os.path.basename(relpath(fn))
