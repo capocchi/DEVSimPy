@@ -766,7 +766,6 @@ def simulator_factory(model, strategy, prof, ntl, verbose):
 			""" Constructor.
 			"""
 			threading.Thread.__init__(self)
-			self.daemon = True
 			Simulator.__init__(self, model)
 
 			### local copy
