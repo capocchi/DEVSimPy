@@ -313,7 +313,7 @@ class Zip:
 
 		# import module
 		try:
-			### clear to clean the import after exporting model (amd or cmd) and reload within the same instrance of DEVSimPy
+			### clear to clean the import after exporting model (amd or cmd) and reload within the same instance of DEVSimPy
 			zipimport._zip_directory_cache.clear()
 
 			trigger_event("IMPORT_STRATEGIES", fn=self.fn)

@@ -409,10 +409,11 @@ class SimulationPanel(wx.Panel):
 
 			### recompile the modules.
 			### recompile DomainInterface.DomainBehavior with all loaded module depending on this one
-			for m in sys.modules:
-				clsmembers = inspect.getmembers(sys.modules[m], inspect.isclass)
+			d = copy.copy(sys.modules)
+			for m in d:
+				clsmembers = inspect.getmembers(d[m], inspect.isclass)
 				if clsmembers != [] and clsmembers[0][0] == 'DomainBehavior':
-					module_path = os.path.dirname(sys.modules[m].__file__)
+					module_path = os.path.dirname(d[m].__file__)
 					### if m come from amd or cmd, pass path to recompile method to differentiate
 					if zipfile.is_zipfile(module_path):
 						ReloadModule.recompile(module_path)

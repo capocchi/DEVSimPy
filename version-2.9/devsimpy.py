@@ -338,14 +338,14 @@ class MainApplication(wx.Frame):
 		self.MakeMenu()
 		self.MakeToolBar()
 
-		sys.stdout.write("DEVSimPy is ready!\n")
-
 		self.Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.OnPaneClose)
 		self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.OnDragInit, id = self.tree.GetId())
 		#self.Bind(wx.EVT_TREE_END_DRAG, self.OnDragEnd, id = self.tree.GetId())
 		self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.OnDragInit, id = self.searchTree.GetId())
 		self.Bind(wx.EVT_IDLE, self.OnIdle)
 		self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
+
+		sys.stdout.write("DEVSimPy is ready!\n")
 
 		self.Centre(wx.BOTH)
 		self.Show()
@@ -1611,7 +1611,7 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
 		info.SetName('DEVSimPy')
 		info.SetVersion(self.GetVersion())
 		info.SetDescription(description)
-		info.SetCopyright(_('(C) 2011 oct SPE Laboratory'))
+		info.SetCopyright(_('(C) 2016 SPE Laboratory'))
 		info.SetWebSite('http://www.spe.univ-corse.fr')
 		info.SetLicence(licence)
 		info.AddDeveloper(_('L. Capocchi and SPE team.'))
@@ -1626,13 +1626,9 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
 		""" Launches the mail program to contact the DEVSimPy author. """
 
 		mails_list = GetMails(__authors__)
-		cc = ""
-		mailto = mails_list[0]
-
-		for mail in mails_list[1:]:
-			cc+=',%s'%mail
-
-		webbrowser.open_new("mailto:%s?subject=%s&cc=%s"%(mailto,_("Comments On DEVSimPy"),cc))
+		mailto = mails_list.pop(0)
+		cc = ",".join(mails_list)
+		webbrowser.open_new("mailto:%s?subject=%s&cc=%s"%(mailto,_("Comments on DEVSimPy"),cc))
 
 ##-------------------------------------------------------------------
 class AdvancedSplashScreen(AdvancedSplash):
@@ -1661,6 +1657,8 @@ class AdvancedSplashScreen(AdvancedSplash):
 		* `app`: the current wxPython app.
 		"""
 
+		self.app = app
+
 		splashStyle = wx.SPLASH_CENTRE_ON_SCREEN | wx.SPLASH_TIMEOUT
 		splashBmp = wx.Image(SPLASH_PNG).ConvertToBitmap()
 		splashDuration = 2000
@@ -1673,7 +1671,6 @@ class AdvancedSplashScreen(AdvancedSplash):
 			extrastyle = AdvancedSplashScreen.AS_TIMEOUT|AdvancedSplashScreen.AS_CENTER_ON_SCREEN #| AdvancedSplashScreen.AS_SHADOW_BITMAP
 			shadow = wx.WHITE
 
-			### TODO: test sous ex de l'extrastyle
 			if wx.Platform == '__WXMAC__':
 				AdvancedSplash.__init__(self, bitmap=splashBmp, timeout=splashDuration, style=style, shadowcolour=wx.WHITE, parent=None)
 			else:
@@ -1694,7 +1691,6 @@ class AdvancedSplashScreen(AdvancedSplash):
 
 		wx.EVT_CLOSE(self, self.OnClose)
 		self.fc = wx.FutureCall(500, self.ShowMain)
-		self.app = app
 
 		# for splash info
 		try:
@@ -1712,7 +1708,10 @@ class AdvancedSplashScreen(AdvancedSplash):
 			self.SetText(data)
 		### wx <= 2.8
 		except AttributeError:
-			self.PushStatusText(data)
+			try:
+				self.PushStatusText(data)
+			except:
+				pass
 
 		with open(LOG_FILE, 'a') as f:
 			f.write("%s - %s"%(time.strftime("%Y-%m-%d %H:%M:%S"), data))
@@ -1732,13 +1731,14 @@ class AdvancedSplashScreen(AdvancedSplash):
 			self.fc.Stop()
 			self.ShowMain()
 
+		self.app.SetExceptionHook()
 
 	def ShowMain(self):
 		""" Shows the main application (DEVSimPy). """
 
 		self.app.frame = MainApplication(None, wx.ID_ANY, 'DEVSimPy - Version %s'%__version__)
 
-		# recuperation dans un attribut de stdio qui est invisible pour l'instant
+		# keep in a attribute of stdio which is invisible until now
 		self.app.frame.stdioWin = self.app.stdioWin
 		wx.App.SetTopWindow(self.app, self.app.frame)
 
@@ -1779,7 +1779,7 @@ class PyOnDemandOutputWindow(threading.Thread):
 		self.pos    = wx.DefaultPosition
 		self.size   = (450, 300)
 		self.parent = None
-		self.st = None
+		self.st 	= None
 
 	def SetParent(self, parent):
 		"""Set the window to be used as the popup Frame's parent."""
@@ -1907,14 +1907,15 @@ class DEVSimPyApp(wx.App):
 		# to avoid conflict between the locale of the machine and the wx locale
 		self.locale = wx.Locale(wx.LANGUAGE_DEFAULT)
 
-		# Set up the exception handler...
-		sys.excepthook = ExceptionHook
-
 		# start our application with splash
 		splash = AdvancedSplashScreen(self)
 		splash.Show()
 
 		return True
+
+	def SetExceptionHook(self):
+		# Set up the exception handler...
+		sys.excepthook = ExceptionHook
 
 #-------------------------------------------------------------------
 if __name__ == '__main__':
