@@ -32,7 +32,7 @@ class YAMLHandler:
         self.diagram  = Diagram()
         try :
             self.filename_is_valid = self.diagram.LoadFile(self.filename)
-            if not self.filename_is_valid:
+            if self.filename_is_valid != True :
                 self.report['success'] = False
                 self.report['info'] = 'YAML file load failed'
                 print(json.dumps(self.report))
@@ -40,7 +40,8 @@ class YAMLHandler:
             self.report['success'] = False
             self.report['info'] = traceback.format_exc()
             print(json.dumps(self.report))
-                
+            raise
+        
         
     def getYAMLBlockModelsList(self):
         """ Writes to standard output
@@ -49,7 +50,7 @@ class YAMLHandler:
         """
         from Container import Diagram, Block
         
-        if not self.filename_is_valid: return False
+        if self.filename_is_valid != True: return False
         
         shape_list = self.diagram.GetShapeList()
         block_list = filter(lambda c: isinstance(c, Block), shape_list)
@@ -62,7 +63,7 @@ class YAMLHandler:
         """
         from Container import Diagram, Block
         
-        if not self.filename_is_valid: return False
+        if self.filename_is_valid != True: return False
         
         block = self.diagram.GetShapeByLabel(label)            
         return block.args
@@ -75,7 +76,7 @@ class YAMLHandler:
         """
         from Container import Diagram, Block
         
-        if not self.filename_is_valid: return False
+        if self.filename_is_valid != True: return False
         
         block = self.diagram.GetShapeByLabel(label)
         
@@ -92,7 +93,7 @@ class YAMLHandler:
         """ 
         from Container import Diagram, ConnectionShape, CodeBlock, ContainerBlock, iPort, oPort
 
-        if not self.filename_is_valid: return False
+        if self.filename_is_valid != True: return False
         
         # Initialize JSON object if it does not exist (makeJSON is called recursively)
         if not diagram:
@@ -177,7 +178,7 @@ class YAMLHandler:
         """
         from Container import Diagram
         
-        if not self.filename_is_valid: return False
+        if self.filename_is_valid != True: return False
 
         try :
             return Diagram.makeDEVSInstance(self.diagram)
@@ -194,7 +195,7 @@ class YAMLHandler:
         from Container import Diagram
         from Join import makeDEVSConf, makeJoin
 
-        if not self.filename_is_valid : return False
+        if self.filename_is_valid != True : return False
         
         addInner = []
         liaison = []
