@@ -52,6 +52,7 @@ import webbrowser
 import platform
 import threading
 import cPickle
+import itertools
 
 from ConfigParser import SafeConfigParser
 from tempfile import gettempdir
@@ -209,15 +210,12 @@ wx.Log.SetLogLevel(0)
 
 #-------------------------------------------------------------------
 def getIcon(path):
-	#path = os.path.join(ICON_PATH_16_16, img_file)
+	""" Return icon from image path
+	"""
 	icon = wx.EmptyIcon()
-	#if os.path.exists(path):
 	bmp = wx.Image(path).ConvertToBitmap()
 	bmp.SetMask(wx.Mask(bmp, wx.WHITE))
 	icon.CopyFromBitmap(bmp)
-	#else:
-		#ABS_HOME_PATH = os.getcwd()
-
 	return icon
 
 #-------------------------------------------------------------------
@@ -388,7 +386,7 @@ class MainApplication(wx.Frame):
 		cfg.Write('perspectives', str(eval("self.perspectives")))
 		cfg.Write('builtin_dict', str(eval("__builtin__.__dict__")))
 
-		sys.stdout.write("OK \n")
+		sys.stdout.write("OK! \n")
 
 	def SetConfig(self, cfg):
 		""" Set all config entry like language, external importpath, recent files...
@@ -407,7 +405,8 @@ class MainApplication(wx.Frame):
 				### for spash screen
 				pub.sendMessage('object.added', 'Loading .devsimpy settings file...\n')
 
-				sys.stdout.write("Loading DEVSimPy %s form %s.devsimpy settings file... \n"%(self.GetVersion(), GetUserConfigDir()+os.sep))
+				sys.stdout.write("Loading DEVSimPy %s from %s.devsimpy settings file...\n"%(self.GetVersion(), GetUserConfigDir()+os.sep))
+
 				### load external import path
 				self.exportPathsList = filter(lambda path: os.path.isdir(path), eval(self.cfg.Read("exportPathsList")))
 				### append external path to the sys module to futur import
@@ -438,7 +437,7 @@ class MainApplication(wx.Frame):
 				else:
 					### try to start without error when .devsimpy need update (new version installed)
 					if not os.path.isdir(D['HOME_PATH']):
-						wx.MessageBox('.devsimpy file appear to be not liked with the DEVSimPy source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(GetUserConfigDir()),
+						wx.MessageBox('.devsimpy file appears to be not liked with the DEVSimPy code source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(GetUserConfigDir()),
 									'Configuration',
 									wx.OK | wx.ICON_INFORMATION)
 						#sys.stdout.write('.devsimpy file appear to be not liked with the DEVSimPy source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(GetUserConfigDir()))
@@ -481,7 +480,7 @@ class MainApplication(wx.Frame):
 		else:
 			self.WriteDefaultConfigFile(self.cfg)
 
-		sys.stdout.write("Loading DEVSimPy...\n")
+		###sys.stdout.write("Loading DEVSimPy...\n")
 
 	def Seti18n(self):
 		""" Set local setting.
@@ -602,6 +601,8 @@ class MainApplication(wx.Frame):
 		self.tb.Realize()
 
 	def GetExportPathsList(self):
+		"""
+		"""
 		return self.exportPathsList
 
 	def GetDiagramNotebook(self):
@@ -651,7 +652,7 @@ class MainApplication(wx.Frame):
 		"""
 		caption = event.GetPane().caption
 		if caption in ["Control"]:
-			msg = _("You realy want close this pane?")
+			msg = _("You realy want to close this pane?")
 			dlg = wx.MessageDialog(self, msg, _("Question"),
 									wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
@@ -713,7 +714,8 @@ class MainApplication(wx.Frame):
 		"""
 		id = event.GetId()
 		item = self.GetMenuBar().FindItemById(id)
-		self._mgr.LoadPerspective(self.perspectives[item.GetText()])
+		mgr = self.GetMGR()
+		mgr.LoadPerspective(self.perspectives[item.GetText()])
 
 	def OnDeletePerspective(self, event):
 		"""
@@ -1352,11 +1354,9 @@ class MainApplication(wx.Frame):
 		"""
 
 		menu = self.GetMenuBar().FindItemById(evt.GetId())
-		if menu.IsChecked():
-			self._mgr.GetPane("shell").Show()
-		else:
-			self._mgr.GetPane("shell").Hide()
-		self._mgr.Update()
+		mgr = self.GetMGR()
+		mgr.GetPane("shell").Show(menu.IsChecked())
+		mgr.Update()
 
 	###
 	def OnShowSimulation(self, evt):
@@ -1394,17 +1394,16 @@ class MainApplication(wx.Frame):
 
 		nb2 = self.GetDiagramNotebook()
 		canvas = nb2.GetPage(nb2.GetSelection())
-
+		mgr = self.GetMGR()
+		mgr.GetPane("editor").Show(menu.IsChecked())
 		if menu.IsChecked():
-			self._mgr.GetPane("editor").Show()
 			### attach editor to notify event from ShapeCanvas
 			canvas.attach(self.GetEditorPanel())
 		else:
-			self._mgr.GetPane("editor").Hide()
 			### detach editor to notify event from ShapeCanvas
 			canvas.detach(self.GetEditorPanel())
 
-		self._mgr.Update()
+		mgr.Update()
 
 	def OnShowLibraries(self, evt):
 		""" Libraries view menu has been pressed.
@@ -1446,6 +1445,7 @@ class MainApplication(wx.Frame):
 			dlg.Destroy()
 		else:
 			wx.MessageBox(_('You need to restart DEVSimPy to take effect.'), _('Info'), wx.OK|wx.ICON_INFORMATION)
+
 	###
 	def OnEnglish(self, event):
 		self.cfg.Write("language", "'en'")
@@ -1457,10 +1457,12 @@ class MainApplication(wx.Frame):
 			dlg.Destroy()
 		else:
 			wx.MessageBox(_('You need to restart DEVSimPy to take effect.'), _('Info'), wx.OK|wx.ICON_INFORMATION)
+
 	###
 	def OnAdvancedSettings(self, event):
 		frame = PreferencesGUI(self,_("Preferences Manager"))
 		frame.Show()
+
 	###
 	@BuzyCursorNotification
 	def OnProfiling(self, event):
@@ -1524,12 +1526,12 @@ class MainApplication(wx.Frame):
 	@staticmethod
 	def LoadCachegrindFile(cachegrind_fn):
 		### lauch  kcachegrid
-		os.system("%s %s %s"%('kcachegrind',cachegrind_fn,"&"))
+		os.system(" ".join(['kcachegrind',cachegrind_fn,"&"]))
 
 	@staticmethod
 	def LoadProfFileFromKProf(prof_file_path):
 		### lauch  kprof
-		os.system("%s %s %s"%('kprof',prof_file_path,"&"))
+		os.system(" ".join(['kprof',prof_file_path,"&"]))
 
 	@staticmethod
 	@redirectStdout
@@ -1942,7 +1944,6 @@ if __name__ == '__main__':
 	elif len(sys.argv) >= 2 and sys.argv[1] in ('-m'):
 		##########################################
 		import compileall
-		import re
 
 		compileall.compile_dir('.', maxlevels=20, rx=re.compile(r'/\.svn'))
 		###########################################

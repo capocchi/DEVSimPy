@@ -1,5 +1,16 @@
 # -*- coding: utf-8 -*-
 
+"""
+Name: CheckerGUI.py
+Brief descritpion:
+Author(s): L. Capocchi <capocchi@univ-corse.fr>
+Version:  1.0
+Last modified: 2016.03.04
+GENERAL NOTES AND REMARKS:
+
+GLOBAL VARIABLES AND FUNCTIONS:
+"""
+
 import wx
 import os
 import re
@@ -75,7 +86,7 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		self.currentItem = event.m_itemIndex
 
 	def OnRightClick(self, event):
-		""" Right Click on cell has been invocked
+		""" Right Click on cell has been invoked
 		"""
 		# record what was clicked
 		line_number = self.getColumnText(self.currentItem, 2)
@@ -135,14 +146,14 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		python_path = self.getColumnText(self.currentItem, 4)
 
 		if line_number != "":
-			### recuperation du model DEVS
+			### DEVS model retrieve
 			devs = getInstance(Components.GetClass(python_path))
 			### check error and change image
 			if not isinstance(devs, tuple):
 				self.SetItemImage(self.currentItem, self.idx2)
 
 	def OnDoubleClick(self, event):
-		""" Double click on cell has been invocked
+		""" Double click on cell has been invoked
 		"""
 		line_number = self.getColumnText(self.currentItem, 2)
 		python_path = self.getColumnText(self.currentItem, 4)

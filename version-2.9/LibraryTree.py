@@ -40,18 +40,18 @@ from ReloadModule import recompile
 
 #----------------------------------------------------------------------------------------------------
 class LibraryTree(wx.TreeCtrl):
-	"""	Class of libraries tree of devsimpy model and python files.
+	"""	Class of libraries tree of DEVSimPy model and Python files.
 
-		EXT_LIB_FILE = tuple of considered devsimpy file extention.
-		EXT_LIB_PYTHON_FLAG = flag to used model from python file instanciation.
+		EXT_LIB_FILE = tuple of considered DEVSimPy file extention.
+		EXT_LIB_PYTHON_FLAG = flag to used model from Python file instanciation.
 		EXCLUDE_DOMAIN = List of exclude directory
 	"""
 
 	### type of considered files
 	EXT_LIB_FILE = ('.cmd', '.amd')
-	### if True, python files are visible in the tree
+	### if True, Python files are visible in the tree
 	EXT_LIB_PYTHON_FLAG = True
-	### exclude rep present into Domain
+	### exclude rep from Domain
 	EXCLUDE_DOMAIN = ['Basic', '.svn']
 
 	###
@@ -61,7 +61,7 @@ class LibraryTree(wx.TreeCtrl):
 
 		wx.TreeCtrl.__init__(self, *args, **kwargs)
 
-		# correspondance entre path (cle) et item du Tree (valeur)
+		# association between path (key) and tree item (value)
 		self.ItemDico = {}
 
 		isz = (16,16)
@@ -319,7 +319,7 @@ class LibraryTree(wx.TreeCtrl):
 		### list of py file from __init__.py
 		if LibraryTree.EXT_LIB_PYTHON_FLAG:
 
-			### lsit of py file from url
+			### list of py file from url
 			if dName.startswith('http'):
 
 				o = urlparse(dName)
@@ -384,10 +384,10 @@ class LibraryTree(wx.TreeCtrl):
 
 	###
 	def InsertNewDomain(self, dName, parent, L = []):
-		""" Recurcive function that insert new Domain on library panel.
+		""" Recurrent function that insert new Domain on library panel.
 		"""
 
-		### au depard seulement pour le parent de plus haut niveau (comme PowerSystem)
+		### first only for the root (like PowerSystem)
 		if dName not in self.ItemDico.keys():
 			label = os.path.basename(dName) if not dName.startswith('http') else filter(lambda a: a!='', dName.split('/'))[-1]
 			id = self.InsertItemBefore(parent, 0, label)
@@ -397,30 +397,30 @@ class LibraryTree(wx.TreeCtrl):
 			self.ItemDico.update({dName:id})
 			self.SetPyData(id,dName)
 
-		### fin de la recursion
+		### end
 		if L == []:
 			return
 		else:
 			item = L.pop(0)
 			assert not isinstance(item, unicode), _("Warning unicode item !")
-			### element à faire remonter dans la liste
+			### element to insert in the list
 			D = []
-			### si le fils est un modèle construit dans DEVSimPy
+			### if child is build from DEVSimPy
 			if isinstance(item, str):
 
-				### le parent est récupére dans le Dico
+				### parent is retrieved from dict
 				parent = self.ItemDico[dName]
 				assert parent != None
 
-				### path correspondant au parent
+				### parent path
 				parentPath = self.GetPyData(parent)
 
-				### remplacement des espaces
+				### comma replace
 				item = item.strip()
 
 				come_from_net = parentPath.startswith('http')
 
-				### suppression de l'extention su .cmd (model atomic lue a partir de __init__ donc pas d'extention)
+				### suppression de l'extention su .cmd (model atomic lu à partir de __init__ donc pas d'extention)
 				if item.endswith('.cmd'):
 					### gestion de l'importation de module (.py) associé au .cmd si le fichier .py n'a jamais été decompresssé (pour edition par exemple)
 					if not come_from_net:
@@ -443,7 +443,7 @@ class LibraryTree(wx.TreeCtrl):
 					else:
 						img = self.coupledidx
 
-					### insertion dans le tree
+					### insert into the tree
 					id = self.InsertItemBefore(parent, 0, os.path.splitext(item)[0], img, img)
 					self.SetPyData(id, path)
 
@@ -475,7 +475,7 @@ class LibraryTree(wx.TreeCtrl):
 
 				else:
 
-					path = os.path.join(parentPath, item+'.py') if not parentPath.startswith('http') else parentPath+'/'+item+'.py'
+					path = os.path.join(parentPath, "".join([item,'.py'])) if not parentPath.startswith('http') else parentPath+'/'+item+'.py'
 
 					info = Container.CheckClass(path)
 
@@ -532,7 +532,7 @@ class LibraryTree(wx.TreeCtrl):
 								module = zf.GetModule()
 								image_file = zf.GetImage()
 							else:
-								path = item.keys()[0]+'/'+elem+'.py'
+								path = "".join([item.keys()[0],'/',elem,'.py'])
 								module = load_module_from_net(path)
 
 							### check error
@@ -557,7 +557,7 @@ class LibraryTree(wx.TreeCtrl):
 								module = zf.GetModule()
 								image_file = zf.GetImage()
 							else:
-								path = item.keys()[0]+'/'+elem+'.py'
+								path = "".join([item.keys()[0],'/',elem,'.py'])
 								module = load_module_from_net(path)
 
 							### check error
@@ -576,7 +576,7 @@ class LibraryTree(wx.TreeCtrl):
 							self.SetPyData(id, path)
 						else:
 
-							path = os.path.join(item.keys()[0],elem+'.py') if not item.keys()[0].startswith('http') else item.keys()[0]+'/'+elem+'.py'
+							path = os.path.join(item.keys()[0],"".join([elem,'.py'])) if not item.keys()[0].startswith('http') else item.keys()[0]+'/'+elem+'.py'
 							info = Container.CheckClass(path)
 
 							error = isinstance(info, tuple)
@@ -607,9 +607,9 @@ class LibraryTree(wx.TreeCtrl):
 			try:
 				### format the string depending the nature of the item
 				if isinstance(item, dict):
-					item = "%s from %s"%(os.path.basename(item.keys()[0]), os.path.basename(os.path.dirname(item.keys()[0])))
+					item = " ".join([os.path.basename(item.keys()[0]), 'from', os.path.basename(os.path.dirname(item.keys()[0]))])
 				else:
-					item = "%s from %s"%(item, os.path.basename(dName))
+					item = " ".join([item, 'from', os.path.basename(dName)])
 
 				pub.sendMessage('object.added', 'Loading %s domain...'%item)
 			except:
@@ -617,9 +617,9 @@ class LibraryTree(wx.TreeCtrl):
 
 			### gestion de la recursion
 			if D != []:
-				return self.InsertNewDomain(dName,parent, L+D)
+				return self.InsertNewDomain(dName, parent, L+D)
 			else:
-				return self.InsertNewDomain(dName,parent, L)
+				return self.InsertNewDomain(dName, parent, L)
 
     ###
 	def GetSubDomain(self, dName, domainSubList = []):
@@ -637,8 +637,8 @@ class LibraryTree(wx.TreeCtrl):
 			D = {dName: self.GetModelList(dName)}
 			### on lance la recursion sur les repertoires fils
 			for d in domainSubList:
-				p = os.path.join(dName,d)
-				D[dName].append(self.GetSubDomain(p,self.GetDomainList(p)))
+				p = os.path.join(dName, d)
+				D[dName].append(self.GetSubDomain(p, self.GetDomainList(p)))
 			return D
 
 	###
@@ -665,7 +665,7 @@ class LibraryTree(wx.TreeCtrl):
 		"""
 
 		item = self.ItemDico[path]
-		file_path = "%s.py"%path
+		file_path = "".join(path,'.py')
 
 		### Check the class
 		info = Container.CheckClass(file_path)
@@ -744,7 +744,6 @@ class LibraryTree(wx.TreeCtrl):
 			### restor expanded item
 			for item in map(lambda name: self.ItemDico[name], L):
 				self.Expand(item)
-
 
 	@BuzyCursorNotification
 	def OnUpdateAll(self, event):
@@ -830,7 +829,7 @@ class LibraryTree(wx.TreeCtrl):
 			devscomp.setDEVSPythonPath(os.path.join(path, getPythonModelFileName(path)))
 			devscomp.model_path = path
 		else:
-			sys.stdout.write(_('The code of this type of model is not editable'))
+			sys.stdout.write(_('The code of this type of model is not editable.'))
 			return
 
 		### call frame editor
