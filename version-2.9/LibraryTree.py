@@ -665,7 +665,7 @@ class LibraryTree(wx.TreeCtrl):
 		"""
 
 		item = self.ItemDico[path]
-		file_path = "".join(path,'.py')
+		file_path = "".join([path,'.py'])
 
 		### Check the class
 		info = Container.CheckClass(file_path)
@@ -739,7 +739,7 @@ class LibraryTree(wx.TreeCtrl):
 						for name in filter(lambda a: not isinstance(a, dict), name_list):
 							path = d.keys()[0]
 							if not name.endswith(('.cmd','.amd')):
-								self.CheckItem(os.path.join(path, name))
+								self.CheckItem(os.path.join([path, name]))
 
 			### restor expanded item
 			for item in map(lambda name: self.ItemDico[name], L):
