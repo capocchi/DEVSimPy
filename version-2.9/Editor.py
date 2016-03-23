@@ -2083,7 +2083,7 @@ class GeneralEditor(Editor):
 			page = self.nb.GetPage(id)
 
 			if page.IsModified():
-				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram ?')%(title), _('Save'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
+				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram?')%(title), _('Save'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
 				val = dlg.ShowModal()
 				if val == wx.ID_YES:
 					self.OnSaveFile(event)

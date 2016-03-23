@@ -671,6 +671,7 @@ class Diagram(Savable, Structurable):
 				### Check if models have the same label
 				L = diagram.GetLabelList([])
 				if len(L)!=len(set(L)):
+					print L, set(L)
 					wx.MessageBox(_("It seems that models have same label.\nIf you plan to use Flat simulation algorithm, all model must have a unique label."), _("Simulation Manager"))
 
 				### set the name of diagram
@@ -2178,7 +2179,11 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		pos = nb1.GetSelection()
 		txt = nb1.GetPageText(pos)
 
-		if txt.startswith('Prop') and isinstance(item, Attributable):
+		### Update the editor panel (on the right by default) when a block is selected
+		mgr = win.GetMGR()
+		mgr.GetPane("editor")
+
+		if (mgr.GetPane("editor").IsShown() or txt.startswith('Prop')) and isinstance(item, Attributable):
 			self.__state['model'] = item
 			self.__state['canvas'] = self
 			self.notify()
