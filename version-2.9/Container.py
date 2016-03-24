@@ -862,15 +862,25 @@ class Diagram(Savable, Structurable):
 		return len(self.shapes)
 
 	def GetFlatBlockShapeList(self, l=[]):
-		""" Get the flat list of Block shape using recursion process
+		""" Get the flat list of Block (Code and Container) shape using recursion process
 		"""
-
 		for shape in self.shapes:
 			if isinstance(shape, CodeBlock):
 				l.append(shape)
 			elif isinstance(shape, ContainerBlock):
 				l.append(shape)
 				shape.GetFlatBlockShapeList(l)
+		return l
+
+	def GetFlatCodeBlockShapeList(self):
+		""" Get the flat list of CodeBlock shapes using recursion process
+		"""
+		l = []
+		for shape in self.shapes:
+			if isinstance(shape, CodeBlock):
+				l.append(shape)
+			if isinstance(shape, ContainerBlock):
+				l.extend(shape.GetFlatCodeBlockShapeList())
 		return l
 
 	def GetShapeByLabel(self, label=''):
@@ -3326,7 +3336,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 						sys.stderr.write(_('Canvas not updated (has been deleted!)'))
 
 		return state
-
+		
 	###
 	def __repr__(self):
 		"""
@@ -3383,18 +3393,19 @@ class CodeBlock(Block, Achievable):
 
 					### try to find it in exportedPathList (after Domain check)
 					if not os.path.exists(path):
-						mainW = wx.GetApp().GetTopWindow()
-						for p in mainW.exportPathsList:
-							lib_name = os.path.basename(p)
-							if lib_name in path:
-								path = p+path.split(lib_name)[-1]
+						try:
+							mainW = wx.GetApp().GetTopWindow()
+							for p in mainW.exportPathsList:
+								lib_name = os.path.basename(p)
+								if lib_name in path:
+									path = p+path.split(lib_name)[-1]
+						except:
+							pass
 
 					### if path is always wrong, flag is visible
 					if not os.path.exists(path):
 						state['bad_filename_path_flag'] = True
 					else:
-						state['model_path'] = path
-
 						state['model_path'] = path
 						
 						python_filename = os.path.basename(python_path)
@@ -3555,6 +3566,7 @@ class CodeBlock(Block, Achievable):
 			return ['model_path', 'python_path', 'args'] + self.GetAttributes()
 		else:
 			raise AttributeError, name
+		
 
 	def draw(self, dc):
 
@@ -3751,6 +3763,7 @@ class ContainerBlock(Block, Diagram, Structurable):
 			return ['shapes', 'priority_list', 'constants_dico', 'model_path', 'python_path','args'] + self.GetAttributes()
 		else:
 			raise AttributeError, name
+		
 
 	def draw(self, dc):
 
