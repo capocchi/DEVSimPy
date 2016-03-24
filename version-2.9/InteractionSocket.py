@@ -3,6 +3,7 @@ import threading
 import SocketServer
 import traceback
 import sys
+from numpy import Infinity
 
 def log (s):
     sys.stderr.write(s)
@@ -17,25 +18,33 @@ class MySocketHandler(SocketServer.BaseRequestHandler):
     def handle(self):
         # request is the socket connected to the client
         self.data = self.request.recv(1024).strip()
-        log("reception " + self.data +"\n\r")
-
+        
+        log("*** reception " + self.data)
+        response = {} 
+        
         if self.data == "PAUSE":
             self.server.simulation_thread.suspend()
             #while not self.server.simulation_thread.suspension_applied: pass TODO? modif Strategy needed
-            self.request.send('PAUSED')
+            response['status'] = 'PAUSED'
+            
+            # Simulation time is not reliable before thread is actually suspended
+            # Infinity might be returned
+            response['simulation_time'] = '-'
 
         elif self.data == "RESUME":
+            response['simulation_time'] = self.server.simulation_thread.model.myTimeAdvance
             self.server.simulation_thread.resume_thread()
             #while self.server.simulation_thread.suspension_applied:pass TODO? modif Strategy needed
-            self.request.send('RESUMED')
+            response['status'] = 'RESUMED'            
 
         else:
             data       = json.loads(self.data)
             model_name = data['block_label']
             params     = data['block']
-            response   = 'OK'
 
             if self.server.simulation_thread.thread_suspend:
+                response['status'] = 'OK'
+                response['simulation_time'] = self.server.simulation_thread.model.myTimeAdvance
 
                 if self.server._componentSet.has_key(model_name):
 
@@ -43,13 +52,14 @@ class MySocketHandler(SocketServer.BaseRequestHandler):
                         if param_name in dir(self.server._componentSet[model_name]):
                             setattr(self.server._componentSet[model_name], param_name, param_value)
                         else:
-                            response += ' - UNKNOWN_PARAM ' + param_name
-                    self.request.send(response)
+                            response['status'] += ' - UNKNOWN_PARAM ' + param_name
+                    
                 else:
-                    self.request.send('UNKNOWN_MODEL_NAME ' + model_name)
+                    response['status'] = 'UNKNOWN_MODEL_NAME ' + model_name
             else:
-                self.request.send('SIM_NOT_PAUSED')
-
+                response['status'] = 'SIM_NOT_PAUSED'
+        
+        self.request.send(json.dumps(response))
 
 class MySocketServer(SocketServer.UnixStreamServer):
 #class MySocketServer(SocketServer.TCPServer):
@@ -73,7 +83,7 @@ class InteractionManager(threading.Thread):
 
         threading.Thread.__init__(self)
         self.daemon = True
-        log('InteractionManager : thread init ')
+        log('SocketServer thread init ** ')
         try:
             # TCP socket server initialization
             #self.server = MySocketServer(('localhost', 5555), MySocketHandler, simulation_thread)
@@ -81,10 +91,10 @@ class InteractionManager(threading.Thread):
             # UNIX socket server initialization
             self.server = MySocketServer('\0' + socket_id, MySocketHandler, simulation_thread)
 
-            log('InteractionManager : socket server created ')
+            log('SocketServer created ** ')
         except:
             self.server = None
-            log ('InteractionManager : socket server creation failed')
+            log ('SocketServer creation failed ** ')
             #log (traceback.format_exc())
             raise
 
@@ -92,12 +102,12 @@ class InteractionManager(threading.Thread):
     def run(self):
 
         if self.server:
-            log('InteractionManager : serve_forever ')
+            log('SocketServer serve_forever ** ')
             self.server.serve_forever()
 
     def stop(self):
 
         if self.server:
-            log('InteractionManager : server shutdown')
+            log('SocketSserver shutdown')
             self.server.shutdown()
             self.server.server_close()
