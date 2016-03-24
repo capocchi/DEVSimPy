@@ -52,9 +52,8 @@ class YAMLHandler:
         
         if self.filename_is_valid != True: return False
         
-        shape_list = self.diagram.GetShapeList()
-        block_list = filter(lambda c: isinstance(c, Block), shape_list)
-        return dict(map(lambda a: (str(a.id),str(a.label)), block_list))
+        block_list = self.diagram.GetFlatCodeBlockShapeList()
+        return map(lambda a: str(a.label), block_list)
         
         
     def getYAMLBlockModelArgs(self, label):
@@ -122,7 +121,7 @@ class YAMLHandler:
                 self.json_obj[self.modelname][0]['cells'].append(D)
 
                 # add JSON description of coupled model components
-                self.makeJSON(c)
+                self.getJSON(c)
 
             else:
                 ### if c is a connection
