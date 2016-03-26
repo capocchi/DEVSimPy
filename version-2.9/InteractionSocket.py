@@ -29,7 +29,9 @@ class MySocketHandler(SocketServer.BaseRequestHandler):
             
             # Simulation time is not reliable before thread is actually suspended
             # Infinity might be returned
-            response['simulation_time'] = '-'
+            response['simulation_time'] = self.server.simulation_thread.model.myTimeAdvance
+            if response['simulation_time'] == Infinity:
+                response['simulation_time'] = 'undefined'
 
         elif self.data == "RESUME":
             response['simulation_time'] = self.server.simulation_thread.model.myTimeAdvance
