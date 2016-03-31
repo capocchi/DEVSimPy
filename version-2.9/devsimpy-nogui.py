@@ -65,7 +65,19 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 
 builtin_dict['GUI_FLAG'] = False
 
-from SimulationNoGUI import makeSimulation, makeJSON, makeJS, makeYAMLUpdate, getYAMLModels
+from InteractionYAML import YAMLHandler
+import json
+
+def simulate (devs, duration, socket_id):
+	
+	from SimulationNoGUI import makeSimulation
+	
+	if str(duration) in ('inf', 'ntl'):
+		__builtin__.__dict__['NTL'] = True
+		duration = 0.0
+
+	### launch simulation
+	makeSimulation(devs, duration, socket_id, True)
 
 # Sets the homepath variable to the directory where your application is located (sys.argv[0]).
 __builtin__.__dict__.update(builtin_dict)
@@ -77,77 +89,88 @@ if __name__ == '__main__':
  	_ = gettext.gettext
 
  	#sys.stdout.write(_("DEVSimPy - version %s\n"%__version__ ))
- 	l=len(sys.argv)
+ 	nb_args = len(sys.argv)
 
-	if l == 2:
+	### First argument is filename - validity check
+	filename = sys.argv[1]
+	
+	if not os.path.exists(filename):
+		sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
+		sys.exit()
+		
+	yamlHandler = YAMLHandler(filename)
+		
+	if not yamlHandler.filename_is_valid:
+		sys.stderr.write(_('ERROR: Invalid file!\n'))
+		sys.exit()
 
-		### check dsp filename
-		filename = sys.argv[1]
-		if not os.path.exists(filename):
-			sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
-			sys.exit()
+	if nb_args == 2:
+		########################################################################
+		# Simulation with default simulated duration
+		devs = yamlHandler.getDevsInstance()
+		if devs :
+			simulate(master=devs, T = 10.0, socket_id="")
 
-		### launch simulation
-		makeSimulation(filename, T = 10.0)
+	elif nb_args >= 3:
+		action = sys.argv[2]
 
-	elif l == 3:
-		### check time
-		arg1 = sys.argv[2]
+		if action in ('-js','-javascript'):
+		########################################################################
+		# Javascript generation
+			yamlHandler.getJS()
 
-		if str(arg1) in ('-js','-javascript'):
+		elif action in ('-json'):
+		########################################################################
+		# turn the YAML/DSP file to JSON
 
-			### check dsp filename
-			filename = sys.argv[1]
-			if not os.path.exists(filename):
-				sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
-				sys.exit()
+			j = yamlHandler.getJSON()
+			sys.stdout.write(json.dumps(j))
+
+		elif action in ('-blockslist'):
+		########################################################################
+		# get the list of models in a master model
+			list = yamlHandler.getYAMLBlockModelsList()
+			sys.stdout.write(json.dumps(list))
+
+		elif action in ('-getblockargs'):
+		########################################################################
+		# get the parameters of an atomic model
+
+			if nb_args == 4:
+				label = sys.argv[3]
+				args = yamlHandler.getYAMLBlockModelArgs(label)
+				sys.stdout.write(json.dumps(args))
 			else:
-				### launch JS file generation
-				makeJS(filename)
-
-		elif str(arg1) in ('-json'):
-
-			import json
-
-			### check dsp filename
-			filename = sys.argv[1]
-			if not os.path.exists(filename):
-				sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
+				sys.stderr.write(_('ERROR: Unspecified label for model!\n'))
 				sys.exit()
+
+		elif action in ('-setblockargs'):
+		########################################################################
+		# update the parameters of a block of a model
+
+			if nb_args == 5:
+			    import json
+			    label = sys.argv[3]
+			    #print (sys.argv[4])
+			    args = json.loads(sys.argv[4])
+			    new_args = yamlHandler.setYAMLBlockModelArgs(label, args)
+			    sys.stdout.write(json.dumps(new_args))
 			else:
-				### launch JSON file generation for joint.js
-				j = makeJSON(filename)
-
-				sys.stdout.write(json.dumps(j, sort_keys=True, indent=4))
-
-		elif sys.argv[1] in ('-update'):
-
-			import json
-
-			### json_str contain info for updating the model ({filename':'test.yaml', model='To_Disk_1', 'args':{'col':0,...}})
-			json_str = sys.argv[2]
-
-			makeYAMLUpdate(json_str)
-
-		### devsimpy-nogui -models test.yaml -> get the list of block shape model of test.yaml (used for simulation setting)
-		elif sys.argv[1] in ('-models'):
-
-			getYAMLModels(sys.argv[2])
+			    sys.stderr.write(_("unexpected nb_args="  + str(nb_args)))
+			    #sys.stderr.write(_('ERROR: usage devsimpy-nogui.py dsp_or_yaml_filename -setmodelargs block_label args_as_JSON_string!\n'))
+			    #sys.exit()
 
 		else:
-
-			### check dsp filename
-			filename = sys.argv[1]
-			if not os.path.exists(filename):
-				sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
-				sys.exit()
-
-			if str(arg1) in ('inf', 'ntl'):
-				__builtin__.__dict__['NTL'] = True
-				arg1 = 0.0
-
-			### launch simulation
-			makeSimulation(filename, arg1, True)
+		########################################################################
+		# Simulation without socket communication
+			duration = sys.argv[2]
+			if nb_args == 4:
+				socket_id = sys.argv[3]
+			else:
+				socket_id = ""
+			devs = yamlHandler.getDevsInstance()
+			if devs :
+				simulate(devs, duration, socket_id)
 
 	else:
 		sys.stderr.write(_('ERROR: Unspecified .dsp file!\n'))

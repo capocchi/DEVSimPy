@@ -111,14 +111,14 @@ class To_Disk(QuickScope):
 					v = Decimal(str(float(val)))
 				else:
 					v = val
-				
+
 				if t != self.last_time_value[fn]:
 					with open(fn, 'a') as f:
 						f.write("%s%s%s\n"%(self.last_time_value[fn],self.comma,self.buffer[fn]))
 					self.last_time_value[fn] = t
-				
+
 				self.buffer[fn] = v
-				
+
 				### run only with python 2.6
 				#with open(fn, 'a') as f:
 
@@ -129,11 +129,11 @@ class To_Disk(QuickScope):
 				#		f.truncate(self.pos[np])
 
 				#	else:
-				#		self.pos[np] = f.tell()						
+				#		self.pos[np] = f.tell()
 				#		self.last_time_value[fn] = t
 
 				#	f.write("%s%s%s\n"%(t,self.comma,v))
-					
+
 				del msg
 
 		self.state["sigma"] = 0

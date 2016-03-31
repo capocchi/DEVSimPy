@@ -385,6 +385,7 @@ class Diagram(Savable, Structurable):
 			else:
 				### DEVS model recovery
 				devs = getInstance(cls, m.args)
+				devs.name = m.label
 
 				### Is safe instantiation ?
 				if isinstance(devs, tuple):
@@ -862,15 +863,25 @@ class Diagram(Savable, Structurable):
 		return len(self.shapes)
 
 	def GetFlatBlockShapeList(self, l=[]):
-		""" Get the flat list of Block shape using recursion process
+		""" Get the flat list of Block (Code and Container) shape using recursion process
 		"""
-
 		for shape in self.shapes:
 			if isinstance(shape, CodeBlock):
 				l.append(shape)
 			elif isinstance(shape, ContainerBlock):
 				l.append(shape)
 				shape.GetFlatBlockShapeList(l)
+		return l
+
+	def GetFlatCodeBlockShapeList(self):
+		""" Get the flat list of CodeBlock shapes using recursion process
+		"""
+		l = []
+		for shape in self.shapes:
+			if isinstance(shape, CodeBlock):
+				l.append(shape)
+			if isinstance(shape, ContainerBlock):
+				l.extend(shape.GetFlatCodeBlockShapeList())
 		return l
 
 	def GetShapeByLabel(self, label=''):
@@ -3330,7 +3341,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 						sys.stderr.write(_('Canvas not updated (has been deleted!)'))
 
 		return state
-
+		
 	###
 	def __repr__(self):
 		"""
@@ -3387,22 +3398,36 @@ class CodeBlock(Block, Achievable):
 
 					### try to find it in exportedPathList (after Domain check)
 					if not os.path.exists(path):
-						mainW = wx.GetApp().GetTopWindow()
-						for p in mainW.exportPathsList:
-							lib_name = os.path.basename(p)
-							if lib_name in path:
-								path = p+path.split(lib_name)[-1]
+						try:
+							mainW = wx.GetApp().GetTopWindow()
+							for p in mainW.exportPathsList:
+								lib_name = os.path.basename(p)
+								if lib_name in path:
+									path = p+path.split(lib_name)[-1]
+						except:
+							pass
 
 					### if path is always wrong, flag is visible
 					if not os.path.exists(path):
 						state['bad_filename_path_flag'] = True
 					else:
 						state['model_path'] = path
+						
+						python_filename = os.path.basename(python_path)
+						
+						if str(python_filename).find('\\'):
+							### wrong basename :
+							### os.path.basename does not work when executed on Unix
+							### with a Windows path
+							python_path = python_path.replace('\\','/')
+							python_filename = os.path.basename(python_path)
 
-						state['python_path'] = os.path.basename(python_path)
+						state['python_path'] = os.path.join(state['model_path'] , python_filename)
 
 						if not state['python_path'].endswith('.py'):
-							### we find the python file using re module because path can comes from windows and then sep is not the same and os.path.basename don't work !
+							### Is this up-to-date???
+							### we find the python file using re module 
+							### because path can comes from windows and then sep is not the same and os.path.basename don't work !
 							state['python_path'] = os.path.join(path, re.findall("([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
 				else:
 					state['bad_filename_path_flag'] = True
@@ -3493,7 +3518,6 @@ class CodeBlock(Block, Achievable):
 			### for all filename attr
 			for name in filename_list:
 				fn = state['args'][name]
-
 				if not os.path.exists(fn):
 					#fn_dn = os.path.dirname(fn)
 					fn_bn = os.path.basename(relpath(fn))
@@ -3547,6 +3571,7 @@ class CodeBlock(Block, Achievable):
 			return ['model_path', 'python_path', 'args'] + self.GetAttributes()
 		else:
 			raise AttributeError, name
+		
 
 	def draw(self, dc):
 
@@ -3743,6 +3768,7 @@ class ContainerBlock(Block, Diagram, Structurable):
 			return ['shapes', 'priority_list', 'constants_dico', 'model_path', 'python_path','args'] + self.GetAttributes()
 		else:
 			raise AttributeError, name
+		
 
 	def draw(self, dc):
 

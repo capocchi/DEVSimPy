@@ -79,6 +79,10 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 #		else:
 #			return self.myInput[p]
 
+	def getFlatComponentSet (self):
+
+	    return {self.name : self}
+
 	def __str__(self):
 		"""
 		"""
