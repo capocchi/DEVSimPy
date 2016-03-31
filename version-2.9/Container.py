@@ -3528,8 +3528,9 @@ class CodeBlock(Block, Achievable):
 					else:
 						fn = os.path.join(HOME_PATH, fn_bn)
 
-					### show flag icon on the block anly for the file with extension (input file)
+					### show flag icon on the block only for the file with extension (input file)
 					if os.path.splitext(fn)[-1] != '':
+
 						state['bad_filename_path_flag'] = True
 
 					state['args'][name] = fn
