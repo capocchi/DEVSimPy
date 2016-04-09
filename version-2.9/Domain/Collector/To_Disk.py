@@ -56,7 +56,7 @@ class To_Disk(QuickScope):
 		self.ea = eventAxis
 
 		### remove old files corresponding to 1000 presumed ports
-		for np in range(1000):
+		for np in xrange(1000):
 			fn = "%s%d%s"%(self.fileName, np, self.ext)
 			if os.path.exists(fn):
 				os.remove(fn)
@@ -83,6 +83,8 @@ class To_Disk(QuickScope):
 			### remove all old file starting
 			if self.timeLast == 0 and self.timeNext == INFINITY:
 				self.last_time_value[fn] = 0.0
+				if os.path.exists(fn):
+					os.remove(fn)
 
 			### init buffer
 			if fn not in self.buffer.keys():

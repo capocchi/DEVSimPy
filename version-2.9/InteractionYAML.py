@@ -12,7 +12,7 @@ def to_Python(val):
     if str(val).replace('.','').replace('-','').isdigit():
         return eval(str(val))
     return val
-                    
+
 class YAMLHandler:
     """ class providing methods for YAML file handling
     """
@@ -20,14 +20,14 @@ class YAMLHandler:
         """
         """
         from Container import Diagram, Block
-        
+
         self.filename = filename
         self.modelname = os.path.basename(self.filename)
-        
+
         self.report   = {'model_name' : self.modelname}
-        
+
         self.json_obj = None
-        
+
         # Create diagram object
         self.diagram  = Diagram()
         try :
@@ -41,65 +41,65 @@ class YAMLHandler:
             self.report['info'] = traceback.format_exc()
             print(json.dumps(self.report))
             raise
-        
-        
+
+
     def getYAMLBlockModelsList(self):
         """ Writes to standard output
             the labels of the blocks (= Atomic Models)
             composing the model described in the file
         """
         from Container import Diagram, Block
-        
+
         if self.filename_is_valid != True: return False
-        
+
         block_list = self.diagram.GetFlatCodeBlockShapeList()
         return map(lambda a: str(a.label), block_list)
-        
-        
+
+
     def getYAMLBlockModelArgs(self, label):
         """ Returns the parameters (name and value) of the block identified by the label
             composing the model described in the file
         """
         from Container import Diagram, Block
-        
+
         if self.filename_is_valid != True: return False
-        
-        block = self.diagram.GetShapeByLabel(label)            
+
+        block = self.diagram.GetShapeByLabel(label)
         return block.args
-        
-        
+
+
     def setYAMLBlockModelArgs(self, label, new_args):
         """ Saves in YAML file the new values of the parameters
             of the block identified by the label
             Returns the updated block parameters
         """
         from Container import Diagram, Block
-        
+
         if self.filename_is_valid != True: return False
-        
+
         block = self.diagram.GetShapeByLabel(label)
-        
+
         for arg in block.args:
             block.args[arg] = to_Python(new_args[arg])
-            
+
         success = self.diagram.SaveFile(self.diagram.last_name_saved)
-        
+
         return {'success' : success, 'args' : self.getYAMLBlockModelArgs(label)}
-    
+
 
     def getJSON(self, diagram=None):
         """ Make JSON representation of the model from YAML file
-        """ 
+        """
         from Container import Diagram, ConnectionShape, CodeBlock, ContainerBlock, iPort, oPort
 
         if self.filename_is_valid != True: return False
-        
+
         # Initialize JSON object if it does not exist (makeJSON is called recursively)
         if not diagram:
             self.json_obj = {self.modelname : [{"cells":[]},{"description": ""}]}
             # TODO : json_obj = {'model_name' : self.modelname, 'cells':[]}
             diagram = self.diagram
-            
+
         for c in diagram.GetShapeList():
             ### if c is coupled model
             if isinstance(c, ContainerBlock):
@@ -176,7 +176,7 @@ class YAMLHandler:
         """ Returns the DEVS instance built from YAM file
         """
         from Container import Diagram
-        
+
         if self.filename_is_valid != True: return False
 
         try :
@@ -187,7 +187,7 @@ class YAMLHandler:
             self.report['info'] = traceback.format_exc()
             print(json.dumps(self.report))
             return False
-        
+
     def getJS(self):
         """
         """
@@ -195,11 +195,11 @@ class YAMLHandler:
         from Join import makeDEVSConf, makeJoin
 
         if self.filename_is_valid != True : return False
-        
+
         addInner = []
         liaison = []
         model = {}
-        labelEnCours = str(os.path.basename(a.last_name_saved).split('.')[0])
+        labelEnCours = str(os.path.basename(self.diagram.last_name_saved).split('.')[0])
 
         # path = os.path.join(os.getcwd(),os.path.basename(a.last_name_saved).split('.')[0] + ".js") # genere le fichier js dans le dossier de devsimpy
         # path = filename.split('.')[0] + ".js" # genere le fichier js dans le dossier du dsp charge.
@@ -209,5 +209,5 @@ class YAMLHandler:
         y = [40]
         bool = True
 
-        model, liaison, addInner = makeJoin(a, addInner, liaison, model, bool, x, y, labelEnCours)
+        model, liaison, addInner = makeJoin(self.diagram, addInner, liaison, model, bool, x, y, labelEnCours)
         makeDEVSConf(model, liaison, addInner, "%s.js"%labelEnCours)

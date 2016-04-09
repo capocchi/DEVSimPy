@@ -68,10 +68,10 @@ builtin_dict['GUI_FLAG'] = False
 from InteractionYAML import YAMLHandler
 import json
 
-def simulate (devs, duration, socket_id):
-	
+def simulate(devs, duration, socket_id):
+
 	from SimulationNoGUI import makeSimulation
-	
+
 	if str(duration) in ('inf', 'ntl'):
 		__builtin__.__dict__['NTL'] = True
 		duration = 0.0
@@ -88,92 +88,155 @@ if __name__ == '__main__':
  	import gettext
  	_ = gettext.gettext
 
- 	#sys.stdout.write(_("DEVSimPy - version %s\n"%__version__ ))
- 	nb_args = len(sys.argv)
+	import argparse
 
-	### First argument is filename - validity check
-	filename = sys.argv[1]
-	
+	parser = argparse.ArgumentParser()
+	parser.add_argument("filename", help="dsp or yaml devsimpy file")
+	parser.add_argument("time", nargs='?', help="simulation time [inf|ntl]", default=10)
+	parser.add_argument("socket", nargs='?', help="socket id", default="", type=str)
+	parser.add_argument("-js", "--javascript",help="generate JS file", action="store_true")
+	parser.add_argument("-json", help="turn the YAML/DSP file to JSON", action="store_true")
+	parser.add_argument("-blockslist", help="get the list of models in a master model", action="store_true")
+	parser.add_argument("-getblockargs", help="get the parameters of an atomic model", type=str)
+	parser.add_argument("-setblockargs", help="update the parameters of a block of a model", type=str)
+	args = parser.parse_args()
+
+	filename = args.filename
+	duration = args.time
+	socket_id = args.socket
+
+	print args
+
 	if not os.path.exists(filename):
-		sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
+		sys.stderr.write(_('ERROR: devsimpy file does not exist!\n'))
 		sys.exit()
-		
-	yamlHandler = YAMLHandler(filename)
-		
-	if not yamlHandler.filename_is_valid:
-		sys.stderr.write(_('ERROR: Invalid file!\n'))
-		sys.exit()
-
-	if nb_args == 2:
-		########################################################################
-		# Simulation with default simulated duration
-		devs = yamlHandler.getDevsInstance()
-		if devs :
-			simulate(master=devs, T = 10.0, socket_id="")
-
-	elif nb_args >= 3:
-		action = sys.argv[2]
-
-		if action in ('-js','-javascript'):
-		########################################################################
-		# Javascript generation
-			yamlHandler.getJS()
-
-		elif action in ('-json'):
-		########################################################################
-		# turn the YAML/DSP file to JSON
-
-			j = yamlHandler.getJSON()
-			sys.stdout.write(json.dumps(j))
-
-		elif action in ('-blockslist'):
-		########################################################################
-		# get the list of models in a master model
-			list = yamlHandler.getYAMLBlockModelsList()
-			sys.stdout.write(json.dumps(list))
-
-		elif action in ('-getblockargs'):
-		########################################################################
-		# get the parameters of an atomic model
-
-			if nb_args == 4:
-				label = sys.argv[3]
-				args = yamlHandler.getYAMLBlockModelArgs(label)
-				sys.stdout.write(json.dumps(args))
-			else:
-				sys.stderr.write(_('ERROR: Unspecified label for model!\n'))
-				sys.exit()
-
-		elif action in ('-setblockargs'):
-		########################################################################
-		# update the parameters of a block of a model
-
-			if nb_args == 5:
-			    import json
-			    label = sys.argv[3]
-			    #print (sys.argv[4])
-			    args = json.loads(sys.argv[4])
-			    new_args = yamlHandler.setYAMLBlockModelArgs(label, args)
-			    sys.stdout.write(json.dumps(new_args))
-			else:
-			    sys.stderr.write(_("unexpected nb_args="  + str(nb_args)))
-			    #sys.stderr.write(_('ERROR: usage devsimpy-nogui.py dsp_or_yaml_filename -setmodelargs block_label args_as_JSON_string!\n'))
-			    #sys.exit()
-
-		else:
-		########################################################################
-		# Simulation without socket communication
-			duration = sys.argv[2]
-			if nb_args == 4:
-				socket_id = sys.argv[3]
-			else:
-				socket_id = ""
-			devs = yamlHandler.getDevsInstance()
-			if devs :
-				simulate(devs, duration, socket_id)
-
 	else:
-		sys.stderr.write(_('ERROR: Unspecified .dsp file!\n'))
-		sys.stdout.write(_('USAGE: to simulate $python devsimpy-nogui.py yourfile.dsp [time=10.0|[inf|ntl]]\n'))
-		sys.stdout.write(_('USAGE: to generate JS file $python devsimpy-nogui.py yourfile.dsp [-js|-javascript]\n'))
-		sys.exit()
+		yamlHandler = YAMLHandler(filename)
+
+	if args.javascript:
+		# Javascript generation
+		yamlHandler.getJS()
+	elif args.json:
+		# turn the YAML/DSP file to JSON
+		j = yamlHandler.getJSON()
+		sys.stdout.write(json.dumps(j))
+	elif args.blockslist:
+		# get the list of models in a master model
+		l = yamlHandler.getYAMLBlockModelsList()
+		sys.stdout.write(json.dumps(l))
+	elif args.getblockargs:
+		label = args.getblockargs
+		args = yamlHandler.getYAMLBlockModelArgs(label)
+		sys.stdout.write(json.dumps(args))
+	elif args.setblockargs:
+		import json
+		label = sys.argv[3]
+		args = json.loads(sys.argv[4])
+		new_args = yamlHandler.setYAMLBlockModelArgs(label, args)
+		sys.stdout.write(json.dumps(new_args))
+	else:
+		devs = yamlHandler.getDevsInstance()
+		if devs:
+			if isinstance(duration, str):
+				duration = float(duration)
+			simulate(devs, duration, socket_id)
+
+	#~ yamlHandler = YAMLHandler(filename)
+
+	#~ if not yamlHandler.filename_is_valid:
+		#~ sys.stderr.write(_('ERROR: Invalid file!\n'))
+		#~ sys.exit()
+
+
+ 	#~ #sys.stdout.write(_("DEVSimPy - version %s\n"%__version__ ))
+ 	#~ nb_args = len(sys.argv)
+
+	#~ ### First argument is filename - validity check
+	#~ filename = sys.argv[1] if nb_args > 1 else None
+
+	#~ if not filename:
+		#~ sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
+		#~ sys.exit()
+	#~ elif not os.path.exists(filename):
+		#~ sys.stderr.write(_('ERROR: devsimpy file does not exist!\n'))
+		#~ sys.exit()
+
+	#~ yamlHandler = YAMLHandler(filename)
+
+	#~ if not yamlHandler.filename_is_valid:
+		#~ sys.stderr.write(_('ERROR: Invalid file!\n'))
+		#~ sys.exit()
+
+	#~ if nb_args == 2:
+		#~ ########################################################################
+		#~ # Simulation with default simulated duration
+		#~ devs = yamlHandler.getDevsInstance()
+		#~ if devs :
+			#~ simulate(master=devs, T = 10.0, socket_id="")
+
+	#~ elif nb_args >= 3:
+		#~ action = sys.argv[2]
+
+		#~ if action in ('-js','-javascript'):
+		#~ ########################################################################
+		#~ # Javascript generation
+			#~ yamlHandler.getJS()
+
+		#~ elif action in ('-json'):
+		#~ ########################################################################
+		#~ # turn the YAML/DSP file to JSON
+
+			#~ j = yamlHandler.getJSON()
+			#~ sys.stdout.write(json.dumps(j))
+
+		#~ elif action in ('-blockslist'):
+		#~ ########################################################################
+		#~ # get the list of models in a master model
+			#~ list = yamlHandler.getYAMLBlockModelsList()
+			#~ sys.stdout.write(json.dumps(list))
+
+		#~ elif action in ('-getblockargs'):
+		#~ ########################################################################
+		#~ # get the parameters of an atomic model
+
+			#~ if nb_args == 4:
+				#~ label = sys.argv[3]
+				#~ args = yamlHandler.getYAMLBlockModelArgs(label)
+				#~ sys.stdout.write(json.dumps(args))
+			#~ else:
+				#~ sys.stderr.write(_('ERROR: Unspecified label for model!\n'))
+				#~ sys.exit()
+
+		#~ elif action in ('-setblockargs'):
+		#~ ########################################################################
+		#~ # update the parameters of a block of a model
+
+			#~ if nb_args == 5:
+			    #~ import json
+			    #~ label = sys.argv[3]
+			    #~ #print (sys.argv[4])
+			    #~ args = json.loads(sys.argv[4])
+			    #~ new_args = yamlHandler.setYAMLBlockModelArgs(label, args)
+			    #~ sys.stdout.write(json.dumps(new_args))
+			#~ else:
+			    #~ sys.stderr.write(_("unexpected nb_args="  + str(nb_args)))
+			    #~ #sys.stderr.write(_('ERROR: usage devsimpy-nogui.py dsp_or_yaml_filename -setmodelargs block_label args_as_JSON_string!\n'))
+			    #~ #sys.exit()
+
+		#~ else:
+		#~ ########################################################################
+		#~ # Simulation without socket communication
+			#~ duration = sys.argv[2]
+			#~ if nb_args == 4:
+				#~ socket_id = sys.argv[3]
+			#~ else:
+				#~ socket_id = ""
+			#~ devs = yamlHandler.getDevsInstance()
+			#~ if devs :
+				#~ simulate(devs, duration, socket_id)
+
+	#~ else:
+		#~ sys.stderr.write(_('ERROR: Unspecified .dsp file!\n'))
+		#~ sys.stdout.write(_('USAGE: to simulate $python devsimpy-nogui.py yourfile.dsp [time=10.0|[inf|ntl]]\n'))
+		#~ sys.stdout.write(_('USAGE: to generate JS file $python devsimpy-nogui.py yourfile.dsp [-js|-javascript]\n'))
+		#~ sys.exit()
