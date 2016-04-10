@@ -92,18 +92,18 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 								wx.LIST_NEXT_ALL,
 								wx.LIST_STATE_SELECTED)
 
-class Populable(object):
-	""" Abstract class defined in order to populate list
-	"""
-	__metaclass__ = abc.ABCMeta
+# class Populable(object):
+# 	""" Abstract class defined in order to populate list
+# 	"""
+# 	__metaclass__ = abc.ABCMeta
+#
+# 	@abc.abstractmethod
+# 	def Populate(self):
+# 		""" Abstract method
+# 		"""
+# 		return
 
-	@abc.abstractmethod
-	def Populate(self):
-		""" Abstract method
-		"""
-		return
-
-class GeneralPluginsList(CheckListCtrl, Populable):
+class GeneralPluginsList(CheckListCtrl):
 	""" Class for populate CheckListCtrl with DEVSimPy plug-ins stored in configuration file
 	"""
 
@@ -257,7 +257,7 @@ class GeneralPluginsList(CheckListCtrl, Populable):
 		self.mainW.cfg.Write('plugins', str(pluginsList))
 		self.mainW.cfg.Flush()
 
-class BlockPluginsList(CheckListCtrl, Populable):
+class BlockPluginsList(CheckListCtrl):
 	""" Class for populate CheckListCtrl with Block plug-ins stored compressed python file (in .amd or .cmd)
 	"""
 

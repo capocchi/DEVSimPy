@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import wx
-import wx.wizard as wizmod
+
+try:
+	import wx.wizard as wizmod
+except ImportError:
+	from wx.adv import Wizard as wizmod
 import os
 import sys
 import inspect
@@ -176,7 +180,7 @@ class wizard_page(wizmod.PyWizardPage):
 		"""Return the previous page"""
 		return self.prev
 
-class Wizard(wx.wizard.Wizard):
+class Wizard(wizmod.Wizard):
 	"""Add pages to this wizard object to make it useful."""
 
 	def __init__(self, title, parent, img_filename = ""):
@@ -186,7 +190,7 @@ class Wizard(wx.wizard.Wizard):
 				img = wx.Bitmap(img_filename)
 		else:
 				img = wx.NullBitmap
-		wx.wizard.Wizard.__init__(self, parent, wx.ID_ANY, title, img)
+		wizmod.Wizard.__init__(self, parent, wx.ID_ANY, title, img)
 
 		self.SetPageSize((400,300))
 

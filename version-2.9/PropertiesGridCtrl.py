@@ -44,7 +44,6 @@ from Mixins.Achievable import Achievable
 from Utilities import RGBToHEX
 from Patterns.Observer import Subject
 
-
 ###------------------------------------------------------------------------------
 class DictionaryEditor(wx.Dialog):
 	def __init__(self, parent, id, title, values):

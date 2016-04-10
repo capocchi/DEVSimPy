@@ -22,7 +22,6 @@ from xml.dom import minidom
 
 import Container
 import Components
-import WizardGUI
 
 def makeDEVSXML(label, D, filename):
 	""" Make XML file from D graph of the diagram
@@ -115,16 +114,18 @@ def makeDEVSXML(label, D, filename):
 	file.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>" + "\n")
 	tree.write(file)
 	file.close()
-	
+
 def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 	"""
 	"""
-	
+
+	import WizardGUI
+
 	xmldoc = minidom.parse(xml_file)
-	
+
 	### all item [2:] for id 0 and 1
 	itemlist = xmldoc.getElementsByTagName('mxCell')[2:]
-	
+
 	### item corresponding to the block
 	blocklist = []
 	### item corresponding to the connection
@@ -134,33 +135,33 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 			connectionlist.append(s)
 		else:
 			blocklist.append(s)
-				
+
 	#mxGraphModel = xmldoc.getElementsByTagName('mxGraphModel')[0]
 	#dx = int(mxGraphModel.attributes['dx'].value)
 	#dy = int(mxGraphModel.attributes['dy'].value)
-	
+
 	### parent of all block is canvas
 	D['1'] = canvas
-	
+
 	### make block (atomic or coupled model)
 	while(blocklist!=[]):
-		
+
 		s = blocklist[0]
-		
+
 		name = s.attributes['value'].value
 		#print name
 		if s.attributes.has_key('style'):
-			
+
 			### coupled model have swimlane style or *couple{d}* in value filed
 			if s.attributes['style'].value == 'swimlane' or re.match('[a-zA-Z0-9_ ]*[c|C]oupl[ed|e|é][a-zA-Z0-9_ ]*',name, re.IGNORECASE):
 				attr = s.getElementsByTagName('mxGeometry')[0].attributes
-				temp = tempfile.NamedTemporaryFile(suffix='.py')	
+				temp = tempfile.NamedTemporaryFile(suffix='.py')
 				temp.write(WizardGUI.coupledCode('CoupledModel'))
 				temp.seek(0)
-				
+
 				block = Components.BlockFactory.CreateBlock(x=int(attr['x'].value), y=int(attr['y'].value), name=name, python_file=temp.name, canvas=canvas)
 				block.label = name
-				
+
 				parent_id = s.attributes['parent'].value
 				id = str(s.attributes['id'].value)
 				if parent_id == '1':
@@ -168,54 +169,54 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 					D[id] = block
 					del blocklist[0]
 					#print block
-					
+
 				elif parent_id in D.keys():
 					canvas_parent = D[parent_id]
 					canvas_parent.AddShape(block)
 					D[id] = block
 					del blocklist[0]
 					#print block
-					
+
 				else:
 					blocklist.insert(len(blocklist),blocklist.pop(0))
-				
+
 			elif re.match('[a-zA-Z0-9_ ]*[a|A]tomi[c|que][a-zA-Z0-9_ ]*',name, re.IGNORECASE):
 				attr = s.getElementsByTagName('mxGeometry')[0].attributes
 				temp = tempfile.NamedTemporaryFile(suffix='.py')
 				temp.write(WizardGUI.atomicCode('AtomicModel'))
 				temp.seek(0)
-				
+
 				block = Components.BlockFactory.CreateBlock(x=int(attr['x'].value), y=int(attr['y'].value), name=name, python_file=temp.name, canvas=canvas)
 				block.label = name
-				
+
 				parent_id = s.attributes['parent'].value
 				id = str(s.attributes['id'].value)
-				
-				if parent_id == '1':	
+
+				if parent_id == '1':
 					canvas.AddShape(block)
 					D[id] = block
 					del blocklist[0]
 					#print block
-					
+
 				elif parent_id in D.keys():
 					canvas_parent = D[parent_id]
 					canvas_parent.AddShape(block)
 					D[id] = block
 					del blocklist[0]
-					
+
 				else:
 					blocklist.insert(len(blocklist),blocklist.pop(0))
-				
+
 		elif s.attributes.has_key('vertex'):
 			if s.attributes['vertex'].value == '1' or re.match('[a-zA-Z0-9_ ]*[a|A]tomi[c|que][a-zA-Z0-9_ ]*',name, re.IGNORECASE):
 				attr = s.getElementsByTagName('mxGeometry')[0].attributes
 				temp = tempfile.NamedTemporaryFile(suffix='.py')
 				temp.write(WizardGUI.atomicCode('AtomicModel'))
 				temp.seek(0)
-				
+
 				block = Components.BlockFactory.CreateBlock(x=int(attr['x'].value), y=int(attr['y'].value), name=name, python_file=temp.name, canvas=canvas)
 				block.label = name
-					
+
 				parent_id = s.attributes['parent'].value
 				id = str(s.attributes['id'].value)
 				if parent_id == '1':
@@ -223,31 +224,31 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 					D[id] = block
 					del blocklist[0]
 					#print block
-					
+
 				elif parent_id in D.keys():
 					canvas_parent = D[parent_id]
 					canvas_parent.AddShape(block)
 					D[id] = block
 					del blocklist[0]
-					
+
 				else:
 					blocklist.insert(len(blocklist),blocklist.pop(0))
 		else:
 			sys.stdout.write(_('Element not considered!\n'))
-	
+
 	### make connection
 	while(connectionlist != []):
 		s = connectionlist[0]
-			
+
 		source_id = s.attributes['target'].value
 		target_id = s.attributes['source'].value
 		parent_id = s.attributes['parent'].value
 		#style = s.attributes['style'].value.split(';')
-	
+
 		source = D[source_id]
 		target = D[target_id]
 		c = D[parent_id]
-		
+
 		if source in canvas.diagram.shapes and target in canvas.diagram.shapes:
 			print source.label, target.label
 			a,b = canvas.GetNodeLists(source, target)
@@ -259,22 +260,22 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 				#print source.label, target.label
 				#print canvas.sourceNodeList, canvas.targetNodeList
 				canvas.makeConnectionShape(canvas.sourceNodeList[0], canvas.targetNodeList[0])
-			
+
 		del connectionlist[0]
-				
+
 ### ------------------------------------------------------------
 class TestApp(wx.App):
 	""" Testing application
 	"""
-	
+
 	def OnInit(self):
-		
+
 		import DetachedFrame
 		import __builtin__
 		import gettext
 		from DomainInterface.DomainStructure import DomainStructure
 		from DomainInterface.DomainBehavior import DomainBehavior
-		
+
 		__builtin__.__dict__['ICON_PATH']='icons'
 		__builtin__.__dict__['ICON_PATH_16_16']=os.path.join(ICON_PATH,'16x16')
 		__builtin__.__dict__['NB_HISTORY_UNDO']= 5
@@ -282,23 +283,23 @@ class TestApp(wx.App):
 		__builtin__.__dict__['FONT_SIZE']=12
 		__builtin__.__dict__['_'] = gettext.gettext
 		__builtin__.__dict__['LOCAL_EDITOR'] = False
-		
+
 		diagram = Container.Diagram()
-		
+
 		self.frame = DetachedFrame.DetachedFrame(None, -1, "Test", diagram)
 		newPage = Container.ShapeCanvas(self.frame, wx.NewId(), name='Test')
 		newPage.SetDiagram(diagram)
-		
+
 		getDiagramFromXML("Diagram.xml", canvas=newPage)
 		#diagram.SetParent(newPage)
-		
+
 		self.frame.Show()
-		
+
 		return True
-	
+
 	def OnQuit(self, event):
 		self.Close()
-		
+
 if __name__ == '__main__':
 
 	app = TestApp(0)

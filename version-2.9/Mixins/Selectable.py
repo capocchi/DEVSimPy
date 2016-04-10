@@ -16,9 +16,6 @@ import gettext
 
 _ = gettext.gettext
 
-import LabelGUI
-import AttributeEditor
-
 from Mixins.Attributable import Attributable
 
 class Selectable:
@@ -52,6 +49,10 @@ class Selectable:
 
          ### only for Block and Port when control is down
         if isinstance(self, Attributable):
+
+            ### here for no-gui mode
+            import LabelGUI
+            import AttributeEditor
 
             diagram = canvas.GetDiagram()
 

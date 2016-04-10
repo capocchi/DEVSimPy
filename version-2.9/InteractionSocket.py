@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import json
 import threading
 import SocketServer
@@ -5,7 +7,12 @@ import traceback
 import sys
 from numpy import Infinity
 
-def log (s):
+if sys.platform == "win32":
+    Server = SocketServer.TCPServer
+else:
+    Server = SocketServer.UnixStreamServer
+
+def log(s):
     sys.stderr.write(s)
 
 class MySocketHandler(SocketServer.BaseRequestHandler):
@@ -18,15 +25,15 @@ class MySocketHandler(SocketServer.BaseRequestHandler):
     def handle(self):
         # request is the socket connected to the client
         self.data = self.request.recv(1024).strip()
-        
+
         log("*** reception " + self.data)
-        response = {} 
-        
+        response = {}
+
         if self.data == "PAUSE":
             self.server.simulation_thread.suspend()
             #while not self.server.simulation_thread.suspension_applied: pass TODO? modif Strategy needed
             response['status'] = 'PAUSED'
-            
+
             # Simulation time is not reliable before thread is actually suspended
             # Infinity might be returned
             response['simulation_time'] = self.server.simulation_thread.model.myTimeAdvance
@@ -37,7 +44,7 @@ class MySocketHandler(SocketServer.BaseRequestHandler):
             response['simulation_time'] = self.server.simulation_thread.model.myTimeAdvance
             self.server.simulation_thread.resume_thread()
             #while self.server.simulation_thread.suspension_applied:pass TODO? modif Strategy needed
-            response['status'] = 'RESUMED'            
+            response['status'] = 'RESUMED'
 
         else:
             data       = json.loads(self.data)
@@ -55,21 +62,23 @@ class MySocketHandler(SocketServer.BaseRequestHandler):
                             setattr(self.server._componentSet[model_name], param_name, param_value)
                         else:
                             response['status'] += ' - UNKNOWN_PARAM ' + param_name
-                    
+
                 else:
                     response['status'] = 'UNKNOWN_MODEL_NAME ' + model_name
             else:
                 response['status'] = 'SIM_NOT_PAUSED'
-        
+
         self.request.send(json.dumps(response))
 
-class MySocketServer(SocketServer.UnixStreamServer):
-#class MySocketServer(SocketServer.TCPServer):
+class MySocketServer(Server):
 
     def __init__(self, server_address, RequestHandlerClass, simulation_thread):
 
-        SocketServer.UnixStreamServer.__init__(self, server_address, RequestHandlerClass)
-        #SocketServer.TCPServer.__init__(self, server_address, RequestHandlerClass)
+        if sys.platform == "win32":
+            SocketServer.TCPServer.__init__(self, server_address, RequestHandlerClass)
+        else:
+            SocketServer.UnixStreamServer.__init__(self, server_address, RequestHandlerClass)
+
         self.simulation_thread = simulation_thread
         self._componentSet = self.simulation_thread.model.getFlatComponentSet()
 

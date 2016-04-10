@@ -28,6 +28,7 @@ from __future__ import with_statement
 import os
 import sys
 import __builtin__
+import json
 
 __version__ = '2.9'
 
@@ -66,7 +67,6 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 builtin_dict['GUI_FLAG'] = False
 
 from InteractionYAML import YAMLHandler
-import json
 
 def simulate(devs, duration, socket_id):
 
@@ -105,8 +105,6 @@ if __name__ == '__main__':
 	duration = args.time
 	socket_id = args.socket
 
-	print args
-
 	if not os.path.exists(filename):
 		sys.stderr.write(_('ERROR: devsimpy file does not exist!\n'))
 		sys.exit()
@@ -129,7 +127,6 @@ if __name__ == '__main__':
 		args = yamlHandler.getYAMLBlockModelArgs(label)
 		sys.stdout.write(json.dumps(args))
 	elif args.setblockargs:
-		import json
 		label = sys.argv[3]
 		args = json.loads(sys.argv[4])
 		new_args = yamlHandler.setYAMLBlockModelArgs(label, args)

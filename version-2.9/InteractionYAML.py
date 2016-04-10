@@ -19,7 +19,7 @@ class YAMLHandler:
     def __init__ (self, filename):
         """
         """
-        from Container import Diagram, Block
+        from Container import Diagram
 
         self.filename = filename
         self.modelname = os.path.basename(self.filename)
@@ -48,7 +48,6 @@ class YAMLHandler:
             the labels of the blocks (= Atomic Models)
             composing the model described in the file
         """
-        from Container import Diagram, Block
 
         if self.filename_is_valid != True: return False
 
@@ -60,7 +59,6 @@ class YAMLHandler:
         """ Returns the parameters (name and value) of the block identified by the label
             composing the model described in the file
         """
-        from Container import Diagram, Block
 
         if self.filename_is_valid != True: return False
 
@@ -73,7 +71,6 @@ class YAMLHandler:
             of the block identified by the label
             Returns the updated block parameters
         """
-        from Container import Diagram, Block
 
         if self.filename_is_valid != True: return False
 
@@ -86,11 +83,10 @@ class YAMLHandler:
 
         return {'success' : success, 'args' : self.getYAMLBlockModelArgs(label)}
 
-
     def getJSON(self, diagram=None):
         """ Make JSON representation of the model from YAML file
         """
-        from Container import Diagram, ConnectionShape, CodeBlock, ContainerBlock, iPort, oPort
+        from Container import ConnectionShape, CodeBlock, ContainerBlock
 
         if self.filename_is_valid != True: return False
 
@@ -191,7 +187,7 @@ class YAMLHandler:
     def getJS(self):
         """
         """
-        from Container import Diagram
+
         from Join import makeDEVSConf, makeJoin
 
         if self.filename_is_valid != True : return False

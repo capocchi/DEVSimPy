@@ -65,18 +65,19 @@ import DomainInterface.MasterModel
 import ConnectDialog
 import DiagramConstantsDialog
 import SpreadSheet
-import PlotGUI
 import pluginmanager
 import ZipManager
 import DropTarget
-import SimulationGUI
-import PriorityGUI
-import CheckerGUI
-import PluginsGUI
-import WizardGUI
+if __builtin__.__dict__['GUI_FLAG']:
+	import PlotGUI
+	import SimulationGUI
+	import PriorityGUI
+	import CheckerGUI
+	import PluginsGUI
+	import WizardGUI
+	import LabelGUI
 import Components
 import Menu
-import LabelGUI
 #import ReloadModule
 
 ### Mixin
@@ -96,9 +97,11 @@ sys.modules['Savable'] = sys.modules['Mixins.Savable']
 from Decorators import BuzyCursorNotification, StatusBarNotification, ProgressNotification, Pre_Undo, Post_Undo, cond_decorator
 from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance, FixedList
 from Patterns.Observer import Subject, Observer
-from DetachedFrame import DetachedFrame
-from AttributeEditor import AttributeEditor, QuickAttributeEditor
-from PropertiesGridCtrl import PropertiesGridCtrl
+
+if __builtin__.__dict__['GUI_FLAG']:
+	from DetachedFrame import DetachedFrame
+	from AttributeEditor import AttributeEditor, QuickAttributeEditor
+	from PropertiesGridCtrl import PropertiesGridCtrl
 
 #Global Stuff -------------------------------------------------
 clipboard = []
@@ -3341,7 +3344,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 						sys.stderr.write(_('Canvas not updated (has been deleted!)'))
 
 		return state
-		
+
 	###
 	def __repr__(self):
 		"""
@@ -3412,9 +3415,9 @@ class CodeBlock(Block, Achievable):
 						state['bad_filename_path_flag'] = True
 					else:
 						state['model_path'] = path
-						
+
 						python_filename = os.path.basename(python_path)
-						
+
 						if str(python_filename).find('\\'):
 							### wrong basename :
 							### os.path.basename does not work when executed on Unix
@@ -3426,7 +3429,7 @@ class CodeBlock(Block, Achievable):
 
 						if not state['python_path'].endswith('.py'):
 							### Is this up-to-date???
-							### we find the python file using re module 
+							### we find the python file using re module
 							### because path can comes from windows and then sep is not the same and os.path.basename don't work !
 							state['python_path'] = os.path.join(path, re.findall("([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
 				else:
@@ -3572,7 +3575,7 @@ class CodeBlock(Block, Achievable):
 			return ['model_path', 'python_path', 'args'] + self.GetAttributes()
 		else:
 			raise AttributeError, name
-		
+
 
 	def draw(self, dc):
 
@@ -3769,7 +3772,7 @@ class ContainerBlock(Block, Diagram, Structurable):
 			return ['shapes', 'priority_list', 'constants_dico', 'model_path', 'python_path','args'] + self.GetAttributes()
 		else:
 			raise AttributeError, name
-		
+
 
 	def draw(self, dc):
 
