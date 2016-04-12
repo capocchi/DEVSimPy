@@ -3262,6 +3262,8 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		itemId = event.GetId()
 		menu = event.GetEventObject()
 
+		path = None
+
 		### Export by using right clic menu
 		if isinstance(menu, wx.Menu):
 			menuItem = menu.FindItemById(itemId)
@@ -3287,17 +3289,18 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 			label = os.path.basename(path)
 
 
-		try:
-			### Block is Savable
-			self.SaveFile(path)
+		if path:
+			try:
+				### Block is Savable
+				self.SaveFile(path)
 
-			printOnStatusBar(mainW.statusbar, {0:_('%s Exported')%label, 1:''})
+				printOnStatusBar(mainW.statusbar, {0:_('%s Exported')%label, 1:''})
 
-		except IOError, error:
-			dlg = wx.MessageDialog(parent, \
-								_('Error exported file %s\n')%error, \
-								label, \
-								wx.OK | wx.ICON_ERROR)
+			except IOError, error:
+				dlg = wx.MessageDialog(parent, \
+									_('Error exported file %s\n')%error, \
+									label, \
+									wx.OK | wx.ICON_ERROR)
 			dlg.ShowModal()
 
 	def update(self, concret_subject = None):
