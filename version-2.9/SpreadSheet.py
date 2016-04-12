@@ -179,11 +179,11 @@ class Newt(wx.Frame):
 		### read and load the data in sheet
 		for i in xrange(len(self.model.IPorts)):
 			fn = "%s%d.dat"%(self.model.fileName, i)
-			oPort = self.model.IPorts[i].inLine[0]
-			host = oPort.host if hasattr(oPort,'host') else oPort.hostDEVS
 			if os.path.exists(fn):
-				data = self.FileToData(fn, self.sep)
+				oPort = self.model.IPorts[i].inLine[0]
+				host = oPort.host if hasattr(oPort, 'host') else oPort.hostDEVS
 				label = _('%s (Port %s)')%(host.getBlockModel().label, str(oPort.myID) if hasattr(oPort,'myID') else oPort.name)
+				data = self.FileToData(fn, self.sep)
 				self.AddPage(data, label)
 
 	###

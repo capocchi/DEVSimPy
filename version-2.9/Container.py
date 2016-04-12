@@ -1783,17 +1783,19 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		# dialog results
 		sp,tp = self.dlgConnection._result
 
+		### local variables
+		snl = len(self.sourceNodeList)
+		tnl = len(self.targetNodeList)
+
 		### flag to inform if there are modifications
 		modify_flag = False
 
 		### if selected options are not 'All'
-		if (    self.dlgConnection._combo_box_tn.StringSelection != _('All') \
-				and self.dlgConnection._combo_box_sn.StringSelection != _('All')):
+		if (sp+1 < snl and tp+1 < tnl):
 			for connectionShapes in filter(lambda s: isinstance(s, ConnectionShape), self.diagram.shapes):
 				if (connectionShapes.getInput()[1] == sp) and (connectionShapes.getOutput()[1] == tp):
 					self.RemoveShape(connectionShapes)
 					modify_flag = True
-
 		else:
 			for connectionShapes in filter(lambda s: isinstance(s, ConnectionShape), self.diagram.shapes):
 				self.RemoveShape(connectionShapes)
@@ -1812,24 +1814,24 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		# dialog results
 		sp,tp = self.dlgConnection._result
 
+		### local variables
+		snl = len(self.sourceNodeList)
+		tnl = len(self.targetNodeList)
+
 		### if one of selected option is All
-		if (    self.dlgConnection._combo_box_tn.StringSelection == _('All') \
-				and self.dlgConnection._combo_box_sn.StringSelection != _('All')):
+		if (sp+1 < snl and tnl == tp+1):
 			sn = self.sourceNodeList[sp]
 			for tn in self.targetNodeList:
 				self.makeConnectionShape(sn, tn)
 		### if one of selected option is All
-		elif (  self.dlgConnection._combo_box_sn.StringSelection == _('All') \
-				and self.dlgConnection._combo_box_tn.StringSelection != _('All')):
+		elif (snl == sp+1 and tp+1 < tnl):
 			tn = self.targetNodeList[tp]
 			for sn in self.sourceNodeList:
 				self.makeConnectionShape(sn, tn)
 		### if both combo box selection are All, delete all of the connection from the top to the bottom
-		elif (  self.dlgConnection._combo_box_tn.StringSelection == _('All') \
-				and self.dlgConnection._combo_box_sn.StringSelection == _('All')) \
-				and len(self.sourceNodeList)==len(self.targetNodeList):
+		elif (snl == sp+1 and tnl == tp+1):
 			for sn,tn in map(lambda a,b: (a,b), self.sourceNodeList, self.targetNodeList):
-				self.makeConnectionShape(sn,tn)
+				self.makeConnectionShape(sn, tn)
 		### else make simple connection between sp and tp port number of source and target
 		else:
 			sn = self.sourceNodeList[sp]
@@ -1843,11 +1845,11 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		""" Make new ConnectionShape from input number(sp) to output number (tp)
 		"""
 
-		# préparation et ajout dans le diagramme de la connection
+		### add the connexion to the diagram
 		ci = ConnectionShape()
 		self.diagram.shapes.insert(0, ci)
 
-		# connection physique
+		### connexion
 		if isinstance(sourceNode, ONode):
 			ci.setInput(sourceNode.item, sourceNode.index)
 			ci.x[0], ci.y[0] = sourceNode.item.getPortXY('output', sourceNode.index)
@@ -1860,17 +1862,17 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 			ci.x[0], ci.y[0] = targetNode.item.getPortXY('input', targetNode.index)
 			ci.setOutput(sourceNode.item, sourceNode.index)
 
-		# selection de la nouvelle connection
+		### select the new connection
 		self.deselect()
 		self.select(ci)
 
 	def OnCloseConnectionDialog(self, event):
 		"""
 		"""
-		# deselection de la dernier connection creer
+		### deselection de la dernier connection creer
 		self.deselect()
 		self.Refresh()
-		# destruction du dialogue
+		### destruction du dialogue
 		self.dlgConnection.Destroy()
 
 	def OnMiddleDown(self, event):
@@ -2047,7 +2049,7 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		self.OnDelete(event)
 
 	def OnDelete(self, event):
-		"""     Delete menu has been clicked. Delete all selected shape.
+		""" Delete menu has been clicked. Delete all selected shape.
 		"""
 
 		if len(self.select()) > 1:
@@ -2077,7 +2079,8 @@ class ShapeCanvas(wx.ScrolledWindow, Subject):
 		self.deselect()
 
 	def DiagramReplace(self, d):
-
+		"""
+		"""
 		self.diagram = d
 
 		self.DiagramModified()
