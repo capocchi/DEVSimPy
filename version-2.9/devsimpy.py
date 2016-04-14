@@ -266,11 +266,11 @@ class MainApplication(wx.Frame):
 		# Prevent TreeCtrl from displaying all items after destruction when True
 		self.dying = False
 
-		if 0:
-			# This is another way to set Accelerators, in addition to
-			# using the '\t<key>' syntax in the menu items.
-			aTable = wx.AcceleratorTable([(wx.ACCEL_ALT,  ord('X'), exitID), (wx.ACCEL_CTRL, ord('H'), helpID),(wx.ACCEL_CTRL, ord('F'), findID),(wx.ACCEL_NORMAL, WXK_F3, findnextID)])
-			self.SetAcceleratorTable(aTable)
+#		if 0:
+#			# This is another way to set Accelerators, in addition to
+#			# using the '\t<key>' syntax in the menu items.
+#			aTable = wx.AcceleratorTable([(wx.ACCEL_ALT,  ord('X'), exitID), (wx.ACCEL_CTRL, ord('H'), helpID),(wx.ACCEL_CTRL, ord('F'), findID),(wx.ACCEL_NORMAL, WXK_F3, findnextID)])
+#			self.SetAcceleratorTable(aTable)
 
 		# for spash screen
 		pub.sendMessage('object.added', 'Loading tree library...\n')
@@ -312,7 +312,7 @@ class MainApplication(wx.Frame):
 		# Shell panel
 		self.panel4 = wx.Panel(self, wx.ID_ANY, style=wx.WANTS_CHARS)
 		sizer4 = wx.BoxSizer(wx.VERTICAL)
-		sizer4.Add(py.shell.Shell(self.panel4, introText=_("Welcome to DEVSimPy: The GUI Python DEVS Simulator")), 1, wx.EXPAND)
+		sizer4.Add(py.shell.Shell(self.panel4, introText=_("Welcome to DEVSimPy: The GUI for Python DEVS Simulator")), 1, wx.EXPAND)
 		self.panel4.SetSizer(sizer4)
 		self.panel4.SetAutoLayout(True)
 
@@ -1396,12 +1396,13 @@ class MainApplication(wx.Frame):
 		canvas = nb2.GetPage(nb2.GetSelection())
 		mgr = self.GetMGR()
 		mgr.GetPane("editor").Show(menu.IsChecked())
+		panel = self.GetEditorPanel()
 		if menu.IsChecked():
 			### attach editor to notify event from ShapeCanvas
-			canvas.attach(self.GetEditorPanel())
+			canvas.attach(panel)
 		else:
 			### detach editor to notify event from ShapeCanvas
-			canvas.detach(self.GetEditorPanel())
+			canvas.detach(panel)
 
 		mgr.Update()
 

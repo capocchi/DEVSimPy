@@ -41,8 +41,6 @@ class DiagramConstantsDialog(wx.Dialog):
 		self._grid.SetColSize(1, 100)
 		### The label windows will still exist, but they will not be visible.
 
-		print dir(self._grid)
-
 		# constants loading
 		D = self.model.constants_dico if self.model else {}
 

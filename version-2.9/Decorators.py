@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import wx
+import __builtin__
+
 import os
 import sys
 import time
@@ -10,6 +11,9 @@ import time
 import heapq
 import cPickle
 import StringIO
+
+if __builtin__.__dict__['GUI_FLAG']:
+	import wx
 
 def cond_decorator(flag, dec):
 	def decorate(fn):

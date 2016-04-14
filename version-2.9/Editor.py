@@ -1119,7 +1119,7 @@ class Editor(wx.Frame, wx.Panel):
 			### create notebook
 			self.nb = EditionNotebook(self, wx.ID_ANY, style=wx.CLIP_CHILDREN)
 			### create juste for the bind of action (save,...) of the toolbar - Warning it must stay here !
-			self.CreateMenu()
+			self.menuBar = self.CreateMenu()
 			### create toolbar
 			self.toolbar = self.CreateTB()
 			###recover the statusbar of mainW
@@ -1143,7 +1143,8 @@ class Editor(wx.Frame, wx.Panel):
 			self.nb = EditionNotebook(self, wx.ID_ANY, style=wx.CLIP_CHILDREN)
 
 			### create menu, toolbar and statusbar for the frame
-			self.SetMenuBar(self.CreateMenu())
+			self.menuBar = self.CreateMenu()
+			self.SetMenuBar(self.menuBar)
 			self.toolbar = self.CreateTB()
 			self.statusbar= self.GetStatusBar()
 
@@ -1223,6 +1224,16 @@ class Editor(wx.Frame, wx.Panel):
 		reindent.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 're-indent.png')))
 		comment.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'comment_add.png')))
 		uncomment.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'comment_remove.png')))
+
+		### Shortcut
+		accel_tbl = wx.AcceleratorTable([(wx.ACCEL_CTRL,  ord('S'), self.save.GetId()),
+										(wx.ACCEL_CTRL,  ord('X'), self.cut.GetId()),
+										(wx.ACCEL_CTRL,  ord('C'), self.copy.GetId()),
+										(wx.ACCEL_CTRL,  ord('V'), self.paste.GetId()),
+										(wx.ACCEL_CTRL,  ord('D'), comment.GetId()),
+										(wx.ACCEL_CTRL| wx.ACCEL_SHIFT,  ord('D'), uncomment.GetId())
+										])
+		self.SetAcceleratorTable(accel_tbl)
 
 		edit.AppendItem(self.cut)
 		edit.AppendItem(self.copy)
@@ -1439,7 +1450,7 @@ class Editor(wx.Frame, wx.Panel):
 			code = currentPage.GetValue().encode('utf-8')
 			code = '\n'.join(code.splitlines()) + '\n'
 
-						### write code in last name saved file
+			### write code in last name saved file
 			self.nb.WriteFile(path, code)
 
 	### NOTE: Editor :: ConfigSaving 			=> Configure save vars
@@ -1461,9 +1472,7 @@ class Editor(wx.Frame, wx.Panel):
 		"""
 		"""
 		if not self.nb.GetCurrentPage().ContainError():
-
 			self.nb.DoSaveFile(code)
-
 		### some errors in file
 		else:
 			self.SavingErrors(new_instance)

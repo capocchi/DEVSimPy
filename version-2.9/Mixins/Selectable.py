@@ -11,7 +11,7 @@ GENERAL NOTES AND REMARKS:
 GLOBAL VARIABLES AND FUNCTIONS:
 """
 
-import wx
+
 import gettext
 
 _ = gettext.gettext
@@ -70,6 +70,7 @@ class Selectable:
                 diagram.priority_list[i] = self.label
 
                 ### update of panel properties
+                import wx
                 mainW = wx.GetApp().GetTopWindow()
                 nb1 = mainW.GetControlNotebook()
                 if nb1.GetSelection() == 1:
