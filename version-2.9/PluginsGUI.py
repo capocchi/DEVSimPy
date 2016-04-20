@@ -23,6 +23,8 @@ from Utilities import FormatSizeFile, getFileListFromInit
 import ZipManager
 import Editor
 
+_ = wx.GetTranslation
+
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	""" General Check list Class.
 	"""

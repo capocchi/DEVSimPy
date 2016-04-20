@@ -38,6 +38,8 @@ from Components import BlockFactory, DEVSComponent, GetClass
 from ZipManager import Zip, getPythonModelFileName
 from ReloadModule import recompile
 
+_ = wx.GetTranslation
+
 #----------------------------------------------------------------------------------------------------
 class LibraryTree(wx.TreeCtrl):
 	"""	Class of libraries tree of DEVSimPy model and Python files.

@@ -29,6 +29,8 @@ import Container
 import ZipManager
 import pluginmanager
 
+_ = wx.GetTranslation
+
 #File menu identifiers
 ID_NEW = wx.ID_NEW
 ID_OPEN  = wx.ID_OPEN

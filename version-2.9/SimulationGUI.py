@@ -52,6 +52,8 @@ from Decorators import BuzyCursorNotification, hotshotit
 
 import Container
 
+_ = wx.GetTranslation
+
 ###
 class TextObjectValidator(wx.PyValidator):
 	""" TextObjectValidator()
