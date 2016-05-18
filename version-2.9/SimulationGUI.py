@@ -718,7 +718,6 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			### if user want to correct error through an editor, we stop simulation process for trying again after the error is corrected.
 				self.OnStop(event)
 		else:
-
 			raise msg
 
 def simulator_factory(model, strategy, prof, ntl, verbose):

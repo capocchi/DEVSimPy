@@ -264,6 +264,8 @@ class Diagram(Savable, Structurable):
 
 		"""
 
+		Structurable.__init__(self)
+
 		# list of shapes in the diagram
 		self.shapes = []
 
@@ -3667,7 +3669,7 @@ class CodeBlock(Block, Achievable):
 		return s
 
 #---------------------------------------------------------
-class ContainerBlock(Block, Diagram, Structurable):
+class ContainerBlock(Block, Diagram):
 	""" ContainerBlock(label, inputs, outputs)
 	"""
 
@@ -3677,7 +3679,7 @@ class ContainerBlock(Block, Diagram, Structurable):
 		"""
 		Block.__init__(self, label, nb_inputs, nb_outputs)
 		Diagram.__init__(self)
-		Structurable.__init__(self)
+		#Structurable.__init__(self)
 		self.fill = ['#90ee90']
 
 	###
