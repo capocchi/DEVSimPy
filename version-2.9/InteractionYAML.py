@@ -92,8 +92,7 @@ class YAMLHandler:
 
         # Initialize JSON object if it does not exist (makeJSON is called recursively)
         if not diagram:
-            self.json_obj = {self.modelname : [{"cells":[]},{"description": ""}]}
-            # TODO : json_obj = {'model_name' : self.modelname, 'cells':[]}
+            self.json_obj = {"cells":[],"description": "No description"}
             diagram = self.diagram
 
         for c in diagram.GetShapeList():
@@ -114,7 +113,7 @@ class YAMLHandler:
                 shapes = c.GetFlatBlockShapeList()
                 D["embeds"] = [s.label for s in shapes]
 
-                self.json_obj[self.modelname][0]['cells'].append(D)
+                self.json_obj['cells'].append(D)
 
                 # add JSON description of coupled model components
                 self.getJSON(c)
@@ -134,7 +133,7 @@ class YAMLHandler:
                     D['target']['id'] = model2.label.encode("utf-8")
 
                 ### if c is an atomic model
-                elif isinstance(c, CodeBlock):
+                elif isinstance(c, CodeBlock): 
 
                     D = {"type":"devs.Atomic",
                          "angle":0,
@@ -163,13 +162,13 @@ class YAMLHandler:
                                                                    "ref-y":float(j+1)/(c.output+1)}
                                                                    })
 
-                    self.json_obj[self.modelname ][0]['cells'].append(D)
+                self.json_obj['cells'].append(D)
 
         return self.json_obj
 
 
     def getDevsInstance(self):
-        """ Returns the DEVS instance built from YAM file
+        """ Returns the DEVS instance built from YAML file
         """
         from Container import Diagram
 
