@@ -55,7 +55,7 @@ def makeSimulation(master, T, socket_id, json_trace=True):
     from InteractionSocket import InteractionManager
 
     json_report = {'date':time.strftime("%c")}
-    json_report['log']  ="Simulation in batch mode with %s"%__builtin__.__dict__['DEFAULT_DEVS_DIRNAME']
+    json_report['summary']  ="Simulation in batch mode with %s"%__builtin__.__dict__['DEFAULT_DEVS_DIRNAME']
     json_report['mode'] ='no-gui'
     json_report['time'] = T
     
@@ -63,14 +63,15 @@ def makeSimulation(master, T, socket_id, json_trace=True):
     
     json_report['devs_instance'] = str(master)
     if isinstance(master, tuple):
-        json_report['log'] += "...DEVS instance not created: %s\n"%str(master)
+        json_report['summary'] += "...DEVS instance not created: %s\n"%str(master)
         sys.stdout.write(json.dumps(json_report))
         return False
     
     else:
-        json_report['log'] += "...DEVS instance created"
-                        
-    json_report['log'] += "...Performing DEVS simulation"
+        json_report['summary'] += "...DEVS instance created"
+        
+    # Start Simulation               
+    json_report['summary'] += "...Performing DEVS simulation"
 
     CPUduration = 0.0
     interactionManager = None
@@ -81,18 +82,19 @@ def makeSimulation(master, T, socket_id, json_trace=True):
             interactionManager = InteractionManager(socket_id=socket_id, simulation_thread=thread)
             interactionManager.start()
 
-            first_time = time.time()
-            while(thread.isAlive()):
-                new_time = time.time()
-                CPUduration = new_time - first_time
-                if not json_trace:
-                    Printer(CPUduration)
+        first_time = time.time()
+        
+        while(thread.isAlive()):
+            new_time = time.time()
+            CPUduration = new_time - first_time
+            if not json_trace:
+                Printer(CPUduration)
 
-            if interactionManager != None:
-                interactionManager.stop()
-                interactionManager.join()
+        if interactionManager != None:
+            interactionManager.stop()
+            interactionManager.join()
     except:
-        json_report['log'] += " *** EXCEPTION raised in simulation ***"
+        json_report['summary'] += " *** EXCEPTION raised in simulation ***"
         json_report['success'] = False
         json_report['info'] = traceback.format_exc()
         if interactionManager != None:
@@ -101,17 +103,21 @@ def makeSimulation(master, T, socket_id, json_trace=True):
         sys.stdout.write(json.dumps(json_report))
         raise
 
-    json_report['log'] += "...DEVS simulation completed!"
+    json_report['summary'] += "...DEVS simulation completed!"
 
     json_report['duration'] = CPUduration
+    
     json_report['output'] = []
-
     ### inform that data file has been generated
     for m in filter(lambda a: hasattr(a, 'fileName'), master.componentSet):
         for i in range(len(m.IPorts)):
             fn ='%s%s.dat'%(m.fileName,str(i))
             if os.path.exists(fn):
-                json_report['output'].append({'name':os.path.basename(fn), 'path':fn})
+                json_report['output'].append({'filename':os.path.basename(fn), 'path':fn})
+                
+    ### Get live stream ids if exist :
+    for m in filter(lambda a: hasattr(a, 'plotUrl'), master.componentSet):
+        json_report['output'].append({'plotUrl':m.plotUrl})  
                 
     sys.stdout.write(json.dumps(json_report))
 
