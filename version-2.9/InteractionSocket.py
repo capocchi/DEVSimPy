@@ -28,8 +28,19 @@ class MySocketHandler(SocketServer.BaseRequestHandler):
 
         log("*** reception " + self.data)
         response = {}
-
-        if self.data == "PAUSE":
+        
+        if self.data == "OUTPUTS":
+            log('search output')
+            
+            response['outputs'] = []            
+            
+            for m in self.server._componentSet:
+                if 'plotUrl' in dir(self.server._componentSet[m]):
+                    response['status'] = 'OK'
+                    response['outputs'].append({'label':self.server._componentSet[m].name,
+                                                'plotUrl':self.server._componentSet[m].plotUrl})            
+            
+        elif self.data == "PAUSE":
             self.server.simulation_thread.suspend()
             #while not self.server.simulation_thread.suspension_applied: pass TODO? modif Strategy needed
             response['status'] = 'PAUSED'
@@ -103,6 +114,7 @@ class InteractionManager(threading.Thread):
             self.server = MySocketServer('\0' + socket_id, MySocketHandler, simulation_thread)
 
             log('SocketServer created ** ')
+                
         except:
             self.server = None
             log ('SocketServer creation failed ** ')
