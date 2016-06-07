@@ -17,6 +17,12 @@ from DomainInterface.Object import Message
 
 import plotly.plotly as py
 from plotly.graph_objs import *
+import time
+
+# Patch TIC : 
+#  TIC server antivirus does not send any data through a persistent HTTP request
+#  until the request is closed. 
+CT_MAX_DELAY = 2.0; # seconds, should be less than 1minute or stream will be closed by server
 
 ### Model class ----------------------------------------------------------------
 class PlotlyStream(DomainBehavior):
@@ -69,6 +75,11 @@ class PlotlyStream(DomainBehavior):
 			#print(self.plotUrl)
 			self.s = py.Stream(token)
 			self.s.open()
+			# patch TIC
+			self.sTime = time.time()
+			self.sNbData = 0
+			self.x = []
+			self.y = []
 		else:
 			self.s = None
 
@@ -79,13 +90,12 @@ class PlotlyStream(DomainBehavior):
 		'''
 		msg = self.peek(self.IPorts[0])
 		#print(msg.time)
-		if self.s:
-			#self.s.open()
-			#self.s.write('{"x":5,"y":3}\n')
-			#self.s.write('{"x":'+ str(msg.time)+', "y"='+str(msg.value[0])+'}\n') 
-			self.s.write(dict(x=msg.time, y=msg.value[0]))
-			#print("--> write")
-			#self.s.close()
+		if self.s: 
+			#self.s.write(dict(x=msg.time, y=msg.value[0]))
+			# patch TIC
+			self.x.append(msg.time)
+			self.y.append(msg.value[0])
+			self.sNbData += 1
 
 		self.state['sigma'] = 0
 
@@ -97,7 +107,18 @@ class PlotlyStream(DomainBehavior):
 	def intTransition(self):
 		''' DEVS internal transition function.
 		'''
-		self.state['sigma'] = INFINITY
+		#patch TIC
+		now = time.time()
+		if (self.sNbData >= 100) or (now - self.sTime >= CT_MAX_DELAY):
+			self.s.write(dict(x=self.x, y=self.y))
+			self.s.close();
+			self.s.open();
+			#print('close/open')
+			self.sNbData = 0
+			self.sTime = now
+		
+		self.state["sigma"] = INFINITY
+		return self.state
 
 	def timeAdvance(self):
 		''' DEVS Time Advance function.
