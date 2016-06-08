@@ -25,6 +25,8 @@ import gettext
 _ = gettext.gettext
 
 import InteractionSocket
+import json
+import pusher
 
 sys.path.append(os.path.join('Domain', 'Phidgets'))
 
@@ -33,11 +35,10 @@ class Printer:
     """
     Print things to stdout on one line dynamically
     """
-
     def __init__(self,data):
-
         sys.stdout.write("\r\x1b[K"+data.__str__())
         sys.stdout.flush()
+        
 
 def yes(prompt = 'Please enter Yes/No: '):
     while True:
@@ -47,17 +48,39 @@ def yes(prompt = 'Please enter Yes/No: '):
             return False
         if i.lower() in ('yes','y'): return True
         elif i.lower() in ('no','n'): return False
+        
 
-def makeSimulation(master, T, socket_id, json_trace=True):
+class SimuPusher():
+    
+    def __init__(self, simu_name):
+        # app_id/key/secret might be linked to user TBC
+        self.app_id = '178867'
+        self.key    = 'c2d255356f53779e6020'
+        self.secret = '9d41a54d45d25274df63'
+        self.pusher = pusher.Pusher(app_id=self.app_id,key=self.key,secret=self.secret,ssl=True,port=443)
+        self.channel = simu_name
+    
+    def push(self, event, data):
+        self.pusher.trigger(self.channel, event, json.dumps(data))
+    
+class PrintPusher():
+    def __init__(self, simu_name):
+        pass
+    
+    def push(self, event, data):
+        print(json.dumps(data))
+    
+def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True):
     """
     """
-    import json
     from InteractionSocket import InteractionManager
 
     json_report = {'date':time.strftime("%c")}
     json_report['summary']  ="Simulation in batch mode with %s"%__builtin__.__dict__['DEFAULT_DEVS_DIRNAME']
     json_report['mode'] ='no-gui'
     json_report['time'] = T
+    json_report['success'] = True
+    json_report['output'] = []
     
     if not master : return False
     
@@ -78,48 +101,66 @@ def makeSimulation(master, T, socket_id, json_trace=True):
     try:
         sim = runSimulation(master, T)
         thread = sim.Run()
-        if socket_id != "":
+        if is_remote:
+            # Pusher service for Simulation --> User communication
+            simuPusher = SimuPusher(simu_name)
+            # Socket service for WebService <--> Simulation communication
+            socket_id='socket_'+simu_name
             interactionManager = InteractionManager(socket_id=socket_id, simulation_thread=thread)
             interactionManager.start()
+        else:
+            simuPusher = PrintPusher(simu_name)
 
-        first_time = time.time()
+        first_real_time = time.time()
+        progress = 0
         
         while(thread.isAlive()):
-            new_time = time.time()
-            CPUduration = new_time - first_time
+            new_real_time = time.time()
+            CPUduration = new_real_time - first_real_time
+            new_progress = 100.0*(thread.model.timeLast / T)
+            if new_progress - progress > 5:
+                progress = new_progress
+                simuPusher.push('progress', {'progress':progress}) 
             if not json_trace:
                 Printer(CPUduration)
 
         if interactionManager != None:
             interactionManager.stop()
             interactionManager.join()
+            
+        simuPusher.push('progress', {'progress':100}) 
+        
     except:
+        raise
         json_report['summary'] += " *** EXCEPTION raised in simulation ***"
         json_report['success'] = False
-        json_report['info'] = traceback.format_exc()
+        sys.stderr.write(traceback.format_exc())
         if interactionManager != None:
             interactionManager.stop()
             interactionManager.join()
-        sys.stdout.write(json.dumps(json_report))
+        with open(simu_name+'.report', 'w') as f:
+            f.write(json.dumps(json_report))
         raise
 
     json_report['summary'] += "...DEVS simulation completed!"
 
     json_report['duration'] = CPUduration
     
-    json_report['output'] = []
     ### inform that data file has been generated
     for m in filter(lambda a: hasattr(a, 'fileName'), master.componentSet):
         for i in range(len(m.IPorts)):
             fn ='%s%s.dat'%(m.fileName,str(i))
             if os.path.exists(fn):
-                json_report['output'].append({'filename':os.path.basename(fn), 'path':fn})
+                json_report['output'].append({'label':m.name+'_port_' + str(i),
+                                              'filename':os.path.basename(fn)})
                 
     ### Get live stream ids if exist :
     for m in filter(lambda a: hasattr(a, 'plotUrl'), master.componentSet):
-        json_report['output'].append({'plotUrl':m.plotUrl})  
+        json_report['output'].append({'label':m.name,
+                                      'plotUrl':m.plotUrl})  
                 
-    sys.stdout.write(json.dumps(json_report))
+    with open(simu_name+'.report', 'w') as f:
+            f.write(json.dumps(json_report))
 
     return True
 

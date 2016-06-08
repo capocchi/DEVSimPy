@@ -32,11 +32,11 @@ class MySocketHandler(SocketServer.BaseRequestHandler):
         if self.data == "OUTPUTS":
             log('search output')
             
+            response['status'] = 'OK'
             response['outputs'] = []            
             
             for m in self.server._componentSet:
                 if 'plotUrl' in dir(self.server._componentSet[m]):
-                    response['status'] = 'OK'
                     response['outputs'].append({'label':self.server._componentSet[m].name,
                                                 'plotUrl':self.server._componentSet[m].plotUrl})            
             
@@ -65,11 +65,11 @@ class MySocketHandler(SocketServer.BaseRequestHandler):
             if self.server.simulation_thread.thread_suspend:
                 response['status'] = 'OK'
                 response['simulation_time'] = self.server.simulation_thread.model.myTimeAdvance
-
+                
                 if self.server._componentSet.has_key(model_name):
 
                     for param_name, param_value in params.items() :
-                        if param_name in dir(self.server._componentSet[model_name]):
+                        if param_name in dir(self.server._componentSet[model_name]):                       
                             setattr(self.server._componentSet[model_name], param_name, param_value)
                         else:
                             response['status'] += ' - UNKNOWN_PARAM ' + param_name
