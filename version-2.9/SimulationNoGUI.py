@@ -139,7 +139,6 @@ def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True
         simuPusher.push('progress', {'progress':100}) 
         
     except:
-        raise
         json_report['summary'] += " *** EXCEPTION raised in simulation ***"
         json_report['success'] = False
         sys.stderr.write(traceback.format_exc())
@@ -148,7 +147,6 @@ def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True
             interactionManager.join()
         with open(simu_name+'.report', 'w') as f:
             f.write(json.dumps(json_report))
-        raise
 
     json_report['summary'] += "...DEVS simulation completed!"
 

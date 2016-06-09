@@ -13,7 +13,7 @@ else:
     Server = SocketServer.UnixStreamServer
 
 def log(s):
-    sys.stderr.write(s)
+    sys.stdout.write(s)
 
 class MySocketHandler(SocketServer.BaseRequestHandler):
     """
@@ -29,18 +29,7 @@ class MySocketHandler(SocketServer.BaseRequestHandler):
         log("*** reception " + self.data)
         response = {}
         
-        if self.data == "OUTPUTS":
-            log('search output')
-            
-            response['status'] = 'OK'
-            response['outputs'] = []            
-            
-            for m in self.server._componentSet:
-                if 'plotUrl' in dir(self.server._componentSet[m]):
-                    response['outputs'].append({'label':self.server._componentSet[m].name,
-                                                'plotUrl':self.server._componentSet[m].plotUrl})            
-            
-        elif self.data == "PAUSE":
+        if self.data == "PAUSE":
             self.server.simulation_thread.suspend()
             #while not self.server.simulation_thread.suspension_applied: pass TODO? modif Strategy needed
             response['status'] = 'PAUSED'
@@ -94,10 +83,10 @@ class MySocketServer(Server):
         self._componentSet = self.simulation_thread.model.getFlatComponentSet()
 
     def handle_error(self, request, client_address):
-        log('*** EXCEPTION handling msg in InteractionManager')
-        log(client_address)
-        log(traceback.format_exc())
-        log(' ***')
+        sys.stderr.write('*** EXCEPTION handling msg in InteractionManager')
+        sys.stderr.write(client_address)
+        sys.stderr.write(traceback.format_exc())
+        sys.stderr.write(' ***')
 
 class InteractionManager(threading.Thread):
 
