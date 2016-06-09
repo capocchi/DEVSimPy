@@ -99,17 +99,25 @@ def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True
     CPUduration = 0.0
     interactionManager = None
     try:
-        sim = runSimulation(master, T)
-        thread = sim.Run()
         if is_remote:
             # Pusher service for Simulation --> User communication
             simuPusher = SimuPusher(simu_name)
+        else:
+            simuPusher = PrintPusher(simu_name)
+        
+        ### Get live stream ids if exist :
+        for m in filter(lambda a: hasattr(a, 'plotUrl'), master.componentSet):
+            json_report['output'].append({'label':m.name, 'plotUrl':m.plotUrl})  
+        simuPusher.push('live_streams', {'live_streams': json_report['output']})
+        
+        sim = runSimulation(master, T)
+        thread = sim.Run()
+        
+        if is_remote:
             # Socket service for WebService <--> Simulation communication
             socket_id='socket_'+simu_name
             interactionManager = InteractionManager(socket_id=socket_id, simulation_thread=thread)
             interactionManager.start()
-        else:
-            simuPusher = PrintPusher(simu_name)
 
         first_real_time = time.time()
         progress = 0
@@ -152,12 +160,7 @@ def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True
             fn ='%s%s.dat'%(m.fileName,str(i))
             if os.path.exists(fn):
                 json_report['output'].append({'label':m.name+'_port_' + str(i),
-                                              'filename':os.path.basename(fn)})
-                
-    ### Get live stream ids if exist :
-    for m in filter(lambda a: hasattr(a, 'plotUrl'), master.componentSet):
-        json_report['output'].append({'label':m.name,
-                                      'plotUrl':m.plotUrl})  
+                                              'filename':os.path.basename(fn)}) 
                 
     with open(simu_name+'.report', 'w') as f:
             f.write(json.dumps(json_report))
