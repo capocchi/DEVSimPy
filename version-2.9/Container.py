@@ -666,15 +666,18 @@ class Diagram(Savable, Structurable):
 			# diagram which will be simulate
 			diagram = self
 
+			### Check if all models doesn't contain errors
 			D = self.DoCheck()
 
 			### if there is no error in models
  			if D is not None:
-				playSound(SIMULATION_ERROR_SOUND_PATH)
 				dial = wx.MessageDialog(win, \
 									_("There is errors in some models.\n\nDo you want to execute the error manager ?"), \
 									_('Simulation Manager'), \
 									wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+
+				playSound(SIMULATION_ERROR_SOUND_PATH)
+
 				if dial.ShowModal() == wx.ID_YES:
 					frame = CheckerGUI.CheckerGUI(win, D)
 					frame.Show()
@@ -1961,13 +1964,9 @@ if __builtin__.__dict__['GUI_FLAG']:
 			else:
 				return None
 
-		def OnNewModel(self, event):
-			""" New model menu has been pressed. Wizard is instanciate.
+		def OnStartWizard(self, event):
 			"""
-
-			###mouse postions
-			xwindow, ywindow = wx.GetMousePosition()
-			x,y = self.ScreenToClientXY(xwindow, ywindow)
+			"""
 
 			obj = event.GetEventObject()
 
@@ -1979,8 +1978,21 @@ if __builtin__.__dict__['GUI_FLAG']:
 
 			gmwiz = ShapeCanvas.StartWizard(parent)
 
+			return gmwiz
+
+		def OnNewModel(self, event):
+			""" New model menu has been pressed. Wizard is instanciate.
+			"""
+
+			gmwiz = self.OnStartWizard(event)
+
 			# if wizard is finished witout closing
 			if  gmwiz :
+
+				### mouse positions
+				xwindow, ywindow = wx.GetMousePosition()
+				x,y = self.ScreenToClientXY(xwindow, ywindow)
+
 				m = Components.BlockFactory.CreateBlock(      canvas = self,
 													x = x,
 													y = y,
@@ -2404,6 +2416,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 					printOnStatusBar(win.statusbar, {0:"%s %s"%(string ,_("modified")), 1:os.path.basename(diagram.last_name_saved), 2:''})
 
 				win.FindWindowByName('tb').EnableTool(Menu.ID_SAVE, self.diagram.modify)
+
 		###
 		def OnMotion(self, event):
 			""" Motion manager.
@@ -3372,7 +3385,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		return s
 
 #---------------------------------------------------------
-class CodeBlock(Block, Achievable):
+class CodeBlock(Achievable, Block):
 	""" CodeBlock(label, inputs, outputs)
 	"""
 

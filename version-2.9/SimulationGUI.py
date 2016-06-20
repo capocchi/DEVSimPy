@@ -402,6 +402,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		""" When Run button is clicked
 		"""
 
+
 		assert(self.master is not None)
 
 		if self._value.GetValidator().Validate(self._value) or self.ntl:

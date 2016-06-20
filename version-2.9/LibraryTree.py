@@ -37,6 +37,7 @@ from Decorators import BuzyCursorNotification
 from Components import BlockFactory, DEVSComponent, GetClass
 from ZipManager import Zip, getPythonModelFileName
 from ReloadModule import recompile
+from ImportLibrary import DeleteBox
 
 _ = wx.GetTranslation
 
@@ -199,7 +200,7 @@ class LibraryTree(wx.TreeCtrl):
 			mainW = wx.GetApp().GetTopWindow()
 			nb2 = mainW.GetDiagramNotebook()
 			canvas = nb2.GetPage(nb2.GetSelection())
-			### define path for python and model component
+			### define path for Python and model component
 
 			if path.endswith('.py'):
 				### create component
@@ -232,7 +233,7 @@ class LibraryTree(wx.TreeCtrl):
 		pos = evt.GetPosition()
 		item, flags = self.HitTest(pos)
 
-		# if no , le evt.Skip à la fin propage l'evenement vers OnRightItemClick
+		# if no, evt.Skip is propagated to OnRightItemClick
 		if not item.IsOk():
 			self.PopupMenu(Menu.LibraryPopupMenu(self), pos)
 		else:
@@ -251,11 +252,36 @@ class LibraryTree(wx.TreeCtrl):
 		""" Delete the item from Tree
 		"""
 
-		sel = self.GetSelection()
-		if sel:
-			self.RemoveItem(sel)
+		item = self.GetSelection()
+
+		if item:
+			### msgbox to select what you wan to delete: file or/and item ?
+			db = DeleteBox(self, -1, _("Delete Options"), size=(250, 110))
+
+			if db.ShowModal() == wx.ID_OK:
+
+				### delete file
+				if db.rb2.GetValue():
+					path = self.GetItemPyData(item)
+					label = os.path.basename(path)
+					dial = wx.MessageDialog(None, _('Are you sure to delete the python file %s ?')%(label), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+					if dial.ShowModal() == wx.ID_YES:
+					    try:
+							### delete file
+							os.remove(path)
+							### delete item
+							self.RemoveItem(item)
+
+					    except Exception, info:
+							sys.stdout.write(_("%s not deleted !\n Error : %s")%(label,info))
+
+					dial.Destroy()
+
+				else:
+					self.RemoveItem(item)
+
 		else:
-			wx.MessageBox(_("No library selected!"),_("Delete Manager"))
+			wx.MessageBox(_("No model selected!"),_("Delete Manager"))
 
 	###
 	def OnNewModel(self, evt):
@@ -266,7 +292,15 @@ class LibraryTree(wx.TreeCtrl):
 		nb2 = mainW.GetDiagramNotebook()
 		canvas = nb2.GetPage(nb2.GetSelection())
 
-		Container.ShapeCanvas.OnNewModel(canvas, evt)
+		gmwiz = Container.ShapeCanvas.OnStartWizard(canvas, evt)
+
+		### update the view of the domain
+		if gmwiz:
+			item = self.ItemDico[os.path.dirname(gmwiz.model_path)]
+			self.UpdateDomain(self.GetPyData(item))
+
+			### sort all item
+			self.SortChildren(self.root)
 
 	###
 	def GetDomainList(self, dName):
@@ -790,7 +824,7 @@ class LibraryTree(wx.TreeCtrl):
 		""" Remove item from Tree and also the corresponding elements of ItemDico
 		"""
 
-		### suppression des reference dans le ItemDico
+		### delete all references from the ItemDico
 		for key in copy.copy(self.ItemDico):
 			if os.path.basename(self.GetPyData(item)) in key.split(os.sep):
 				del self.ItemDico[key]

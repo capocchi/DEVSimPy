@@ -454,5 +454,5 @@ invoque rpar un callback lorsque le fichier python est renseignÃ© dans le wizard
 -Fait le 20/04/2016 par LC: correction -> bug sur la gestion automatique des connections par clic droit.
 -Fait le 20/04/2016 par LC: correction -> Ctrl+S dans l'éditeur embarqué fonctionne
 -Fait le 20/04/2016 par LC: correction -> ajout de _ = wx.GetTranslation pour résoudre les problèmes lorsque une console est aactivé dans le panel du bas.
-
-
+-Fait le 20/06/2016 par LC: correction -> Ajout de OnStartWizard dans Container.py pour dissocier la création d'un modèle à partir d'un clic droit sur le vanvas ou sur une librairie.
+-Fait le 20/06/2016 par LC: ajout -> dialogue pour supprimer les modèles à partir de la libriaire par clic droit avec confirmation de suppression des fichiers
