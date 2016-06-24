@@ -259,7 +259,7 @@ class ShowMenu(wx.Menu):
 
 		self.AppendMenu(ID_SHOW_CONTROL, _('Control'), control)
 
-		self.Append(ID_SHOW_SHELL, _('Console'), _("Show Python Shell console"), wx.ITEM_CHECK)
+		self.Append(ID_SHOW_SHELL, _('Shell'), _("Show Python Shell console"), wx.ITEM_CHECK)
 		self.Append(ID_SHOW_TOOLBAR, _('Tools Bar'), _("Show icons tools bar"), wx.ITEM_CHECK)
 		self.Append(ID_SHOW_EDITOR, _('Editor'), _("Show editor tab"), wx.ITEM_CHECK)
 		self.Check(ID_SHOW_SHELL, False)
@@ -611,10 +611,10 @@ class ItemLibraryPopupMenu(wx.Menu):
 			self.AppendItem(doc)
 			self.AppendItem(update)
 
-			self.Bind(wx.EVT_MENU, parent.OnItemEdit, id = ID_EDIT_LIB)	# attention à le mettre avant le popUpMenu
-			self.Bind(wx.EVT_MENU, parent.OnItemRename, id = ID_RENAME_LIB)	# attention à le mettre avant le popUpMenu
-			self.Bind(wx.EVT_MENU, parent.OnItemDocumentation, id = doc.GetId())	# attention à le mettre avant le popUpMenu
-			self.Bind(wx.EVT_MENU, parent.OnItemRefresh, id = ID_UPDATE_LIB)	# attention à le mettre avant le popUpMenu
+			self.Bind(wx.EVT_MENU, parent.OnItemEdit, id = ID_EDIT_LIB)	# put before the popUpMenu
+			self.Bind(wx.EVT_MENU, parent.OnItemRename, id = ID_RENAME_LIB)	# put before the popUpMenu
+			self.Bind(wx.EVT_MENU, parent.OnItemDocumentation, id = doc.GetId())	# put before the popUpMenu
+			self.Bind(wx.EVT_MENU, parent.OnItemRefresh, id = ID_UPDATE_LIB)	# put before the popUpMenu
 
 		### menu for all item of tree
 		delete = wx.MenuItem(self, ID_DELETE_LIB, _('Delete'), _('Delete selected library'))
@@ -622,7 +622,7 @@ class ItemLibraryPopupMenu(wx.Menu):
 
 		self.AppendItem(delete)
 
-		self.Bind(wx.EVT_MENU, parent.OnDelete, id=ID_DELETE_LIB)	# attention à le mettre avant le popUpMenu
+		self.Bind(wx.EVT_MENU, parent.OnDelete, id=ID_DELETE_LIB) # put before the popUpMenu
 
 
 class LibraryPopupMenu(wx.Menu):

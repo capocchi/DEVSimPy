@@ -4,27 +4,25 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # devsimpy.py --- DEVSimPy - The Python DEVS GUI modeling and simulation software
 #                     --------------------------------
-#                            Copyright (c) 2014
+#                            Copyright (c) 2016
 #                              Laurent CAPOCCHI
 #                        SPE - University of Corsica
 #                     --------------------------------
-# Version 2.9                                      last modified:  07/11/14
+# Version 2.9                                      last modified:  06/24/16
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
 #
 # strong depends: wxPython, wxversion
-# light depends : NumPy for spectrum analysis, mathplotlib for graph display
-# remarque; attention, la construction de l'arbre des librairies (ou domain) est fait par la classe TreeListLib.
-# De plus, cette construction necessite la présence obligatoire du fichier __init__.py dans chaque sous domain d'un domaine repertorié dans le repertoire Domain (voir methode recursive GetSubDomain).
-# L'utilisateur doit donc ecrire ce fichier en sautant les lignes dans __all__ = []. Si le fichier n'existe pas le prog le cree.
-# Pour importer une lib: 1/ faire un rep MyLib dans Domain avec les fichiers Message.py, DomainBehavior.py et DomaineStrucutre.py
-#                                               2/ stocker tout les autre .py dans un sous rep contenant également un fichier __init__ dans lequel son ecris les fichier a importer.
-#                                               3/ les fichiers .cmd issu de l'environnement peuvent etre stocké nimport ou il seron pris en compte en tant que model couplé.
-#                                               4/ les fichier init doivent respecter le format de saus de ligne pour une bonne importation.
-#                                               5/ tout fichier .py qui ne se trouve pas dans init n'est ps importé
-#                                               6/ lors de l'import des .py (DnD) attention, il faut aussi que les parametres du constructeurs aient des valeurs par defaut.
-#                                               7/ le nom des modeles atomiques dans le GUI necessite l'implémentation de la méthode __str__ dans les classes (sinon il note les modèles AM)
+# light depends: NumPy for spectrum analysis, mathplotlib for graph display
+# remarks: lib tree is build by the TreeLitLib class.
+# Moreover, __init__.py file is required for the build (see GetSubDomain method).
+# in order to make a lib:
+#	1/ make a MyLib rep with Message.py, DomainBehavior.py et DomaineStrucutre.py
+#   2/ __all_ = [] in __init__.py file must use return
+#   3/ python file that is not in __all__ is not imported
+#   4/ the constructor of all class must have a default value of the parameters
+#   5/ __str__ method must be implemented for .py in order to have a correct name in the GUI (otherwise AM is displayed)
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -273,8 +271,8 @@ class MainApplication(wx.Frame):
 #			self.SetAcceleratorTable(aTable)
 
 		# for spash screen
-		pub.sendMessage('object.added', 'Loading tree library...\n')
-		pub.sendMessage('object.added', 'Loading search tree library...\n')
+		pub.sendMessage('object.added', 'Loading the libraries tree...\n')
+		pub.sendMessage('object.added', 'Loading the search tab on libraries tree...\n')
 
 		# NoteBook
 		self.nb1 = ControlNotebook(self, wx.ID_ANY, style = wx.CLIP_CHILDREN)
@@ -322,7 +320,7 @@ class MainApplication(wx.Frame):
 		### Editor is panel
 		self.editor = GetEditor(self, -1, file_type='block')
 
-		self._mgr.AddPane(self.editor, wx.aui.AuiPaneInfo().Name("editor").Hide().Caption("Editor").
+		self._mgr.AddPane(self.editor, wx.aui.AuiPaneInfo().Name("editor").Hide().Caption(_("Editor")).
 						FloatingSize(wx.Size(280, 400)).CloseButton(True).MaximizeButton(True))
 
 		self._mgr.GetPane("nb1").Show().Left().Layer(0).Row(0).Position(0).BestSize(wx.Size(280,-1)).MinSize(wx.Size(250,-1))
@@ -651,13 +649,31 @@ class MainApplication(wx.Frame):
 		""" Close pane has been invoked.
 		"""
 		caption = event.GetPane().caption
-		if caption in ["Control"]:
+
+		if caption in ["Control", 'Editor', 'Shell']:
 			msg = _("You realy want to close this pane?")
 			dlg = wx.MessageDialog(self, msg, _("Question"),
 									wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
 			if dlg.ShowModal() in [wx.ID_NO, wx.ID_CANCEL]:
 				event.Veto()
+			else:
+
+				menuItemList = []
+				menu = self.GetMenuBar().GetMenu(2)
+
+				if caption == 'Shell':
+					menuItemList.append(menu.FindItemById(Menu.ID_SHOW_SHELL))
+				elif caption == 'Editor':
+					menuItemList.append(menu.FindItemById(Menu.ID_SHOW_EDITOR))
+				else:
+					menuItemList.append(menu.FindItemById(Menu.ID_SHOW_LIB))
+					menuItemList.append(menu.FindItemById(Menu.ID_SHOW_PROP))
+					menuItemList.append(menu.FindItemById(Menu.ID_SHOW_SIM))
+
+				for menu_item in menuItemList:
+					getattr(menu_item, 'Check')(False)
+
 			dlg.Destroy()
 
 	###
@@ -1242,7 +1258,8 @@ class MainApplication(wx.Frame):
 						self.searchTree.RemoveItem(item)
 
 				self.searchTree.Show(True)
-				self.nb1.libPanel.GetSizer().Layout()
+				nb1 = self.GetControlNotebook()
+				nb1.libPanel.GetSizer().Layout()
 				self.searchTree.ExpandAll()
 
 			else:
@@ -1364,10 +1381,29 @@ class MainApplication(wx.Frame):
 		"""
 
 		menu = self.GetMenuBar().FindItemById(evt.GetId())
+		nb1 = self.GetControlNotebook()
+
 		if menu.IsChecked():
-			menu.Check(self.OnSimulation(evt))
+			mgr = self.GetMGR()
+			### Control panel is  not hide
+			if mgr.GetPane('nb1').IsShown():
+				menu.Check(self.OnSimulation(evt))
+			else:
+
+				mgr.GetPane("nb1").Show().Left().Layer(0).Row(0).Position(0).BestSize(wx.Size(280,-1)).MinSize(wx.Size(250,-1))
+				mgr.Update()
+
+				### delete both the properties and libraries panels (inserted by default)
+				nb1.DeletePage(0)
+				nb1.DeletePage(0)
+
+				menu.Check(self.OnSimulation(evt))
+
 		else:
-			self.nb1.DeletePage(2)
+			### delete the libraries panel (inserted by default)
+			pos = nb1.GetPageIndex(nb1.GetSimPanel())
+			if pos != None:
+				nb1.DeletePage(pos)
 
 	###
 	def OnShowProperties(self, evt):
@@ -1375,16 +1411,76 @@ class MainApplication(wx.Frame):
 		"""
 
 		menu = self.GetMenuBar().FindItemById(evt.GetId())
+		nb1 = self.GetControlNotebook()
 
 		if menu.IsChecked():
-			propPanel = PropPanel(self.nb1, self.nb1.labelList[1])
+			mgr = self.GetMGR()
+			### Control panel is not hide
+			if mgr.GetPane('nb1').IsShown():
 
-			### Adding page
-			self.nb1.AddPage(propPanel, propPanel.GetName(), imageId=1)
+				propPanel = PropPanel(nb1, nb1.labelList[1])
+
+				### Adding page
+				nb1.AddPage(propPanel, propPanel.GetName(), imageId=1)
+
+			else:
+				self._mgr.GetPane("nb1").Show().Left().Layer(0).Row(0).Position(0).BestSize(wx.Size(280,-1)).MinSize(wx.Size(250,-1))
+				self._mgr.Update()
+				### delete the libraries panel (inserted by default)
+				pos = nb1.GetPageIndex(nb1.GetLibPanel())
+				nb1.DeletePage(pos)
 
 			menu.Check()
 		else:
-			self.nb1.DeletePage(1)
+			### position of the properties panel
+			pos = nb1.GetPageIndex(nb1.GetPropPanel())
+			if pos != None:
+				nb1.DeletePage(pos)
+
+	def OnShowLibraries(self, evt):
+		""" Libraries view menu has been pressed.
+		"""
+
+		menu = self.GetMenuBar().FindItemById(evt.GetId())
+		nb1 = self.GetControlNotebook()
+
+		if menu.IsChecked():
+
+			mgr = self.GetMGR()
+			### Control panel is  not hide
+			if mgr.GetPane('nb1').IsShown():
+				libPanel = LibPanel(nb1, nb1.labelList[0])
+
+				## Adding page
+				nb1.AddPage(libPanel, libPanel.GetName(), imageId=0)
+
+				mainW = self.GetTopLevelParent()
+				mainW.tree = nb1.GetTree()
+				mainW.searchTree = nb1.GetSearchTree()
+				mainW.search = nb1.GetSearch()
+
+				mainW.Bind(wx.EVT_TREE_BEGIN_DRAG, mainW.OnDragInit, id = mainW.tree.GetId())
+				mainW.Bind(wx.EVT_TREE_BEGIN_DRAG, mainW.OnDragInit, id = mainW.searchTree.GetId())
+
+			### must to create a control panel
+			else:
+				self._mgr.GetPane("nb1").Show().Left().Layer(0).Row(0).Position(0).BestSize(wx.Size(280,-1)).MinSize(wx.Size(250,-1))
+				self._mgr.Update()
+				### delete the properties panel (insered by default)
+				pos = nb1.GetPageIndex(nb1.GetPropPanel())
+				nb1.DeletePage(pos)
+
+			menu.Check()
+
+		else:
+			### position of the libraries panel
+			pos = nb1.GetPageIndex(nb1.GetLibPanel())
+			if pos != None:
+				nb1.DeletePage(pos)
+
+	###
+	def OnShowToolBar(self, evt):
+		self.tb.Show(not self.tb.IsShown())
 
 	def OnShowEditor(self, evt):
 		""" Editor view has been pressed.
@@ -1397,6 +1493,7 @@ class MainApplication(wx.Frame):
 		mgr = self.GetMGR()
 		mgr.GetPane("editor").Show(menu.IsChecked())
 		panel = self.GetEditorPanel()
+
 		if menu.IsChecked():
 			### attach editor to notify event from ShapeCanvas
 			canvas.attach(panel)
@@ -1405,36 +1502,6 @@ class MainApplication(wx.Frame):
 			canvas.detach(panel)
 
 		mgr.Update()
-
-	def OnShowLibraries(self, evt):
-		""" Libraries view menu has been pressed.
-		"""
-
-		menu = self.GetMenuBar().FindItemById(evt.GetId())
-		if menu.IsChecked():
-
-			libPanel = LibPanel(self.nb1, self.nb1.labelList[0])
-
-			### Adding page
-			self.nb1.AddPage(libPanel, libPanel.GetName(), imageId=0)
-
-			mainW = self.GetTopLevelParent()
-			nb1 = self.GetControlNotebook()
-
-			mainW.tree = nb1.GetTree()
-			mainW.searchTree = nb1.GetSearchTree()
-			mainW.search = nb1.GetSearch()
-
-			mainW.Bind(wx.EVT_TREE_BEGIN_DRAG, mainW.OnDragInit, id = mainW.tree.GetId())
-			mainW.Bind(wx.EVT_TREE_BEGIN_DRAG, mainW.OnDragInit, id = mainW.searchTree.GetId())
-
-			menu.Check()
-		else:
-			self.nb1.DeletePage(0)
-
-	###
-	def OnShowToolBar(self, evt):
-		self.tb.Show(not self.tb.IsShown())
 
 	###
 	def OnFrench(self, event):

@@ -30,6 +30,7 @@ En sachant qu'il faut Ãªtre capable de simuler des systÃ¨mes composÃ© de modÃ¨le
 -N3 : implÃ©menter l'update de devsimpy à partir des sources git en http
 -N3 : faire un self.panel dans le CheckGUI
 -N3 : mettre a jour le panel de simulation dans le panel de control lorsqu'on change les préférences de simulation
+-N3 : separer le start du thread dans SimulationThread pour DEVSimPy-mob
 
 ----------------------------------------------------------------Remarques----------------------------------------------------------------
 
@@ -456,3 +457,4 @@ invoque rpar un callback lorsque le fichier python est renseignÃ© dans le wizard
 -Fait le 20/04/2016 par LC: correction -> ajout de _ = wx.GetTranslation pour résoudre les problèmes lorsque une console est aactivé dans le panel du bas.
 -Fait le 20/06/2016 par LC: correction -> Ajout de OnStartWizard dans Container.py pour dissocier la création d'un modèle à partir d'un clic droit sur le vanvas ou sur une librairie.
 -Fait le 20/06/2016 par LC: ajout -> dialogue pour supprimer les modèles à partir de la libriaire par clic droit avec confirmation de suppression des fichiers
+-Fait le 24/06/2016 par LC: amélioration -> meilleuir gestion des aui avec la possibilité de fermer les panels (properties, simulation, librairies) et de les restorer avec une maj des checks dans le menu Show.
