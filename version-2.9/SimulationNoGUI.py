@@ -105,9 +105,15 @@ def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True
         else:
             simuPusher = PrintPusher(simu_name)
         
-        ### Get live stream ids if exist :
+        ### Get live stream URL if exist :
         for m in filter(lambda a: hasattr(a, 'plotUrl'), master.componentSet):
-            json_report['output'].append({'label':m.name, 'plotUrl':m.plotUrl})  
+            if m.plotUrl != '':
+                json_report['output'].append({'label':m.name, 'plotUrl':m.plotUrl})          
+        ### Get live stream URL if exist :
+        for m in filter(lambda a: hasattr(a, 'pusherChannel'), master.componentSet):
+            m.pusherChannel = simu_name
+            json_report['output'].append({'label':m.name, 'pusherChannel':m.pusherChannel}) 
+        # Send to user 
         simuPusher.push('live_streams', {'live_streams': json_report['output']})
         
         sim = runSimulation(master, T)
@@ -153,13 +159,16 @@ def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True
     json_report['duration'] = CPUduration
     
     ### inform that data file has been generated
+    json_report['output'] = []
     for m in filter(lambda a: hasattr(a, 'fileName'), master.componentSet):
         for i in range(len(m.IPorts)):
             fn ='%s%s.dat'%(m.fileName,str(i))
             if os.path.exists(fn):
                 json_report['output'].append({'label':m.name+'_port_' + str(i),
                                               'filename':os.path.basename(fn)}) 
-                
+    for m in filter(lambda a: hasattr(a, 'plotUrl'), master.componentSet):
+        json_report['output'].append({'label':m.name, 'plotUrl':m.plotUrl}) 
+            
     with open(simu_name+'.report', 'w') as f:
             f.write(json.dumps(json_report))
 
