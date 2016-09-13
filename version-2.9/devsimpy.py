@@ -201,6 +201,7 @@ from PropPanel import PropPanel
 from ControlNotebook import ControlNotebook
 from DiagramNotebook import DiagramNotebook
 from Editor import GetEditor
+from YAMLExportGUI import YAMLExportGUI
 
 ### only for wx. 2.9 bug
 ### http://comments.gmane.org/gmane.comp.python.wxpython/98744
@@ -1169,6 +1170,30 @@ class MainApplication(wx.Frame):
 				wx.MessageBox(_('Error saving file.'), _('Error'), wx.OK | wx.ICON_ERROR)
 
 		save_dlg.Destroy()
+
+	###
+	def OnExportRest(self, event):
+		""" Export YAML file to the 'uplaod' directory of a REST server
+		"""
+
+		self.OnSaveFile(event)
+
+		obj = event.GetEventObject()
+
+		if isinstance(obj, wx.ToolBar) and isinstance(obj.GetParent(), DetachedFrame):
+			currentPage = obj.GetToolClientData(event.GetId())
+		else:
+			currentPage = self.nb2.GetCurrentPage()
+
+		### deselect all model to initialize select attribut for all models
+		currentPage.deselect()
+
+		diagram = currentPage.GetDiagram()
+
+		### lauch the diag
+		path = diagram.last_name_saved
+		frame = YAMLExportGUI(self, -1, _('YAML Export'), path=path)
+		frame.Show(True)
 
 	###
 	def OnImport(self, event):

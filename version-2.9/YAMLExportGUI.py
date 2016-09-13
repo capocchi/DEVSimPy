@@ -1,0 +1,157 @@
+# -*- coding: utf-8 -*-
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+# YAMLExportGUI.py ---
+#                     --------------------------------
+#                        Copyright (c) 2016
+#                       Laurent CAPOCCHI (capocchi@univ-corse.fr)
+#                      University of Corsica
+#                     --------------------------------
+# Version 1.0                                        last modified: 09/13/16
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GENERAL NOTES AND REMARKS:
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GLOBAL VARIABLES AND FUNCTIONS
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+import wx
+import sys
+import requests
+import os
+import __builtin__
+
+_ = wx.GetTranslation
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+    except Exception, info:
+        return False
+    else:
+        return r.status_code == 200
+
+class MyStatusBar(wx.StatusBar):
+
+    def __init__(self, parent):
+        wx.StatusBar.__init__(self, parent)
+
+        self.SetFieldsCount(2)
+        self.SetStatusText(_('Insert url to upload'), 0)
+        self.SetStatusWidths([-1, 50])
+
+        self.icon = wx.StaticBitmap(self, -1, wx.Bitmap(os.path.join(ICON_PATH_16_16, "disconnect_network.png")))
+        self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.PlaceIcon()
+
+    def PlaceIcon(self):
+
+        rect = self.GetFieldRect(1)
+        self.icon.SetPosition((rect.x+5, rect.y+1))
+
+    def OnSize(self, e):
+
+        e.Skip()
+        self.PlaceIcon()
+
+
+class YAMLExportGUI(wx.Frame):
+
+    def __init__(self, parent, id, title, path=""):
+        wx.Frame.__init__(self, parent, id, title, size=(290, 270))
+
+        self.path = path
+
+        self.InitUI()
+
+    def InitUI(self):
+
+        wx.StaticText(self, -1,  label='url', pos=(10, 20))
+        wx.StaticText(self, -1, label='port', pos=(10, 60))
+        wx.StaticText(self, -1, label='filename', pos=(10, 100))
+
+        self.url = wx.TextCtrl(self, value="http://" if not 'URL_REST' in __builtin__.__dict__ else __builtin__.__dict__['URL_REST'], pos=(110, 15), size=(160, -1))
+        self.port = wx.TextCtrl(self, value="8080", pos=(110, 55), size=(50, -1))
+        self.fn = wx.TextCtrl(self, value=os.path.basename(self.path), pos=(110, 95), size=(120, -1))
+
+        self.rest = None
+
+        upload = wx.Button(self, label='Upload', pos=(175, 160), size=(80, -1))
+        close = wx.Button(self, label='Close', pos=(15, 160), size=(80, -1))
+        test = wx.Button(self, label='Test', pos=(100, 160), size=(70, -1))
+
+        self.Bind(wx.EVT_BUTTON, self.OnUpload, upload)
+        self.Bind(wx.EVT_BUTTON, self.OnClose, close)
+        self.Bind(wx.EVT_BUTTON, self.OnTest, test)
+
+        self.Bind(wx.EVT_MAXIMIZE, self.OnMaximize)
+        self.Bind(wx.EVT_SHOW, self.OnShown)
+
+        self.sb = MyStatusBar(self)
+        self.SetStatusBar(self.sb)
+
+        self.Centre()
+
+    def OnShown(self, e):
+
+        if self.sb:
+            self.sb.PlaceIcon()
+
+    def OnMaximize(self, e):
+
+        self.sb.PlaceIcon()
+
+    def OnTest(self, e):
+
+        self.sb.SetStatusText('Test Rest server')
+        self.sb.icon.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "connect_network.png")))
+
+        if url_ok(self.url.GetValue()+':'+self.port.GetValue()):
+            self.sb.SetStatusText('Rest server is ok!')
+            self.sb.icon.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "disconnect_network.png")))
+        else:
+            self.sb.SetStatusText('Rest server is down!')
+            self.sb.icon.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "disconnect_network.png")))
+
+    def OnUpload(self, e):
+
+        if not self.rest:
+
+            url = self.url.GetValue()
+            port = self.port.GetValue()
+
+            self.sb.SetStatusText('Test Rest server')
+            self.sb.icon.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "connect_network.png")))
+
+            try:
+
+                self.rest = requests.post(str(url)+':'+str(port)+'/upload', files={'file': open(str(self.path), 'rb')})
+
+            except Exception, err:
+                self.sb.icon.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "exclamation.png")))
+                self.sb.SetStatusText(str(err))
+                self.rest = None
+            else:
+                self.sb.SetStatusText('Upload finished')
+                self.sb.icon.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "disconnect_network.png")))
+                __builtin__.__dict__['URL_REST'] = url
+
+    def OnClose(self, e):
+        self.Close()
+
+def main():
+
+    __builtin__.__dict__['ICON_PATH_16_16']=os.path.join('icons','16x16')
+
+    ex = wx.App()
+    frame = YAMLExportGUI(None, -1, 'YAML Export', path='C:\Users\capocchi_l.UDCPP\Downloads\plotly_test.yaml')
+    frame.Show(True)
+    ex.MainLoop()
+
+if __name__ == '__main__':
+    main()
