@@ -71,19 +71,21 @@ class YAMLExportGUI(wx.Frame):
 
     def InitUI(self):
 
-        wx.StaticText(self, -1,  label='url', pos=(10, 20))
-        wx.StaticText(self, -1, label='port', pos=(10, 60))
-        wx.StaticText(self, -1, label='filename', pos=(10, 100))
+        panel  = wx.Panel(self)
 
-        self.url = wx.TextCtrl(self, value="http://" if not 'URL_REST' in __builtin__.__dict__ else __builtin__.__dict__['URL_REST'], pos=(110, 15), size=(160, -1))
-        self.port = wx.TextCtrl(self, value="8080", pos=(110, 55), size=(50, -1))
-        self.fn = wx.TextCtrl(self, value=os.path.basename(self.path), pos=(110, 95), size=(120, -1))
+        wx.StaticText(panel, -1,  label='url', pos=(10, 20))
+        wx.StaticText(panel, -1, label='port', pos=(10, 60))
+        wx.StaticText(panel, -1, label='filename', pos=(10, 100))
+
+        self.url = wx.TextCtrl(panel, value="http://" if not 'URL_REST' in __builtin__.__dict__ else __builtin__.__dict__['URL_REST'], pos=(110, 15), size=(160, -1))
+        self.port = wx.TextCtrl(panel, value="8080", pos=(110, 55), size=(50, -1))
+        self.fn = wx.TextCtrl(panel, value=os.path.basename(self.path), pos=(110, 95), size=(120, -1))
 
         self.rest = None
 
-        upload = wx.Button(self, label='Upload', pos=(175, 160), size=(80, -1))
-        close = wx.Button(self, label='Close', pos=(15, 160), size=(80, -1))
-        test = wx.Button(self, label='Test', pos=(100, 160), size=(70, -1))
+        upload = wx.Button(panel, label='Upload', pos=(175, 160), size=(80, -1))
+        close = wx.Button(panel, label='Close', pos=(15, 160), size=(80, -1))
+        test = wx.Button(panel, label='Test', pos=(100, 160), size=(70, -1))
 
         self.Bind(wx.EVT_BUTTON, self.OnUpload, upload)
         self.Bind(wx.EVT_BUTTON, self.OnClose, close)
