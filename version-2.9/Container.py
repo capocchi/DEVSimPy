@@ -3732,7 +3732,7 @@ class ContainerBlock(Block, Diagram, Structurable):
 			if dir_name in python_path:
 
 				path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(python_path[python_path.index(dir_name):]).strip('[]')))
-				state['python_path'] = paths
+				state['python_path'] = path
 
 				if not os.path.exists(path):
 					state['bad_filename_path_flag'] = True

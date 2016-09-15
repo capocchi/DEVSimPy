@@ -94,9 +94,9 @@ class YAMLHandler:
         if not diagram:
             self.json_obj = {"cells":[],"description": "No description"}
             diagram = self.diagram
-
+        
         for c in diagram.GetShapeList():
-            ### if c is coupled model
+            ### if c is coupled model            
             if isinstance(c, ContainerBlock):
                 D = {"type":"devs.Coupled",
                      "angle":0,
@@ -131,10 +131,9 @@ class YAMLHandler:
 
                     D['source']['id'] = model1.label.encode("utf-8")
                     D['target']['id'] = model2.label.encode("utf-8")
-
+                
                 ### if c is an atomic model
                 elif isinstance(c, CodeBlock): 
-
                     D = {"type":"devs.Atomic",
                          "angle":0,
                          "id":c.label,
@@ -162,7 +161,11 @@ class YAMLHandler:
                                                                    "ref-y":float(j+1)/(c.output+1)}
                                                                    })
 
-                self.json_obj['cells'].append(D)
+                else: #Input or Output port
+                    D = None
+                    
+                if (D!= None):
+                     self.json_obj['cells'].append(D)
 
         return self.json_obj
 
