@@ -29,11 +29,14 @@ import Container
 import ZipManager
 import pluginmanager
 
+_ = wx.GetTranslation
+
 #File menu identifiers
 ID_NEW = wx.ID_NEW
 ID_OPEN  = wx.ID_OPEN
 ID_SAVE = wx.ID_SAVE
 ID_SAVEAS = wx.ID_SAVEAS
+ID_EXPORTREST = wx.NewId()
 ID_EXIT = wx.ID_EXIT
 ID_ABOUT = wx.ID_ABOUT
 ID_EXPORT = wx.NewId()
@@ -159,6 +162,7 @@ class FileMenu(wx.Menu):
 		openModel=wx.MenuItem(self, ID_OPEN, _('&Open\tCtrl+O'),_('Open an existing diagram'))
 		saveModel=wx.MenuItem(self, ID_SAVE, _('&Save\tCtrl+S'), _('Save the current diagram'))
 		saveAsModel=wx.MenuItem(self, ID_SAVEAS, _('&SaveAs'),_('Save the diagram with an another name'))
+		exportRest=wx.MenuItem(self, ID_EXPORTREST, _('&Export to REST server'),_('Export the diagram to a Rest server (DEVSimPy-rest)'))
 		printModel=wx.MenuItem(self, ID_PRINT, _('&Print'),_('Print the current diagram'))
 		printPreviewModel=wx.MenuItem(self, ID_PREVIEW_PRINT, _('Pre&view'),_('Print preview for current diagram'))
 		screenCapture=wx.MenuItem(self, ID_SCREEN_CAPTURE, _('ScreenShot'),_('Capture the screen into a image'))
@@ -167,6 +171,7 @@ class FileMenu(wx.Menu):
 		openModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'open.png')))
 		saveModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'save.png')))
 		saveAsModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')))
+		exportRest.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'export.png')))
 		printModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'print.png')))
 		printPreviewModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'print-preview.png')))
 		screenCapture.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'ksnapshot.png')))
@@ -177,6 +182,7 @@ class FileMenu(wx.Menu):
 		self.AppendSeparator()
 		self.AppendItem(saveModel)
 		self.AppendItem(saveAsModel)
+		self.AppendItem(exportRest)
 
 		self.AppendSeparator()
 		self.AppendItem(printPreviewModel)
@@ -192,6 +198,7 @@ class FileMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnOpenFile, id=ID_OPEN)
 		parent.Bind(wx.EVT_MENU, parent.OnSaveFile, id=ID_SAVE)
 		parent.Bind(wx.EVT_MENU, parent.OnSaveAsFile, id=ID_SAVEAS)
+		parent.Bind(wx.EVT_MENU, parent.OnExportRest, id=ID_EXPORTREST)
 		parent.Bind(wx.EVT_MENU, parent.OnPrint, id=ID_PRINT)
 		parent.Bind(wx.EVT_MENU, parent.OnPrintPreview, id=ID_PREVIEW_PRINT)
 		parent.Bind(wx.EVT_MENU, parent.OnScreenCapture, id=ID_SCREEN_CAPTURE)
@@ -257,7 +264,7 @@ class ShowMenu(wx.Menu):
 
 		self.AppendMenu(ID_SHOW_CONTROL, _('Control'), control)
 
-		self.Append(ID_SHOW_SHELL, _('Console'), _("Show Python Shell console"), wx.ITEM_CHECK)
+		self.Append(ID_SHOW_SHELL, _('Shell'), _("Show Python Shell console"), wx.ITEM_CHECK)
 		self.Append(ID_SHOW_TOOLBAR, _('Tools Bar'), _("Show icons tools bar"), wx.ITEM_CHECK)
 		self.Append(ID_SHOW_EDITOR, _('Editor'), _("Show editor tab"), wx.ITEM_CHECK)
 		self.Check(ID_SHOW_SHELL, False)
@@ -609,10 +616,10 @@ class ItemLibraryPopupMenu(wx.Menu):
 			self.AppendItem(doc)
 			self.AppendItem(update)
 
-			self.Bind(wx.EVT_MENU, parent.OnItemEdit, id = ID_EDIT_LIB)	# attention à le mettre avant le popUpMenu
-			self.Bind(wx.EVT_MENU, parent.OnItemRename, id = ID_RENAME_LIB)	# attention à le mettre avant le popUpMenu
-			self.Bind(wx.EVT_MENU, parent.OnItemDocumentation, id = doc.GetId())	# attention à le mettre avant le popUpMenu
-			self.Bind(wx.EVT_MENU, parent.OnItemRefresh, id = ID_UPDATE_LIB)	# attention à le mettre avant le popUpMenu
+			self.Bind(wx.EVT_MENU, parent.OnItemEdit, id = ID_EDIT_LIB)	# put before the popUpMenu
+			self.Bind(wx.EVT_MENU, parent.OnItemRename, id = ID_RENAME_LIB)	# put before the popUpMenu
+			self.Bind(wx.EVT_MENU, parent.OnItemDocumentation, id = doc.GetId())	# put before the popUpMenu
+			self.Bind(wx.EVT_MENU, parent.OnItemRefresh, id = ID_UPDATE_LIB)	# put before the popUpMenu
 
 		### menu for all item of tree
 		delete = wx.MenuItem(self, ID_DELETE_LIB, _('Delete'), _('Delete selected library'))
@@ -620,7 +627,7 @@ class ItemLibraryPopupMenu(wx.Menu):
 
 		self.AppendItem(delete)
 
-		self.Bind(wx.EVT_MENU, parent.OnDelete, id=ID_DELETE_LIB)	# attention à le mettre avant le popUpMenu
+		self.Bind(wx.EVT_MENU, parent.OnDelete, id=ID_DELETE_LIB) # put before the popUpMenu
 
 
 class LibraryPopupMenu(wx.Menu):

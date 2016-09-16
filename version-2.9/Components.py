@@ -11,6 +11,8 @@ GENERAL NOTES AND REMARKS:
 GLOBAL VARIABLES AND FUNCTIONS:
 """
 
+import __builtin__
+
 import os
 import sys
 import imp
@@ -18,21 +20,22 @@ import inspect
 import zipfile
 import zipimport
 import re
-import __builtin__
-import wx
 import codecs
 import string
 import types
 
 from tempfile import gettempdir
 
-if wx.VERSION_STRING < '2.9':
-	from wx.lib.pubsub import Publisher
-else:
-	from wx.lib.pubsub import pub as Publisher
+if __builtin__.__dict__['GUI_FLAG']:
+	import wx
 
-import Editor
-import ZipManager
+	if wx.VERSION_STRING < '2.9':
+		from wx.lib.pubsub import Publisher
+	else:
+		from wx.lib.pubsub import pub as Publisher
+
+	import Editor
+	import ZipManager
 
 #from DomainInterface.DomainBehavior import DomainBehavior
 #from DomainInterface.DomainStructure import DomainStructure

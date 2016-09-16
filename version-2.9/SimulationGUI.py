@@ -52,6 +52,8 @@ from Decorators import BuzyCursorNotification, hotshotit
 
 import Container
 
+_ = wx.GetTranslation
+
 ###
 class TextObjectValidator(wx.PyValidator):
 	""" TextObjectValidator()
@@ -400,6 +402,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		""" When Run button is clicked
 		"""
 
+
 		assert(self.master is not None)
 
 		if self._value.GetValidator().Validate(self._value) or self.ntl:
@@ -716,7 +719,6 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			### if user want to correct error through an editor, we stop simulation process for trying again after the error is corrected.
 				self.OnStop(event)
 		else:
-
 			raise msg
 
 def simulator_factory(model, strategy, prof, ntl, verbose):

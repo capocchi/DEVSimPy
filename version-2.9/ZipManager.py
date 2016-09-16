@@ -17,7 +17,6 @@ import zipfile
 import zipimport
 import StringIO
 import re
-import wx
 import inspect
 
 import gettext
@@ -213,6 +212,7 @@ class Zip:
 		L = filter(lambda f: f.endswith(('.jpg','jpeg','png','bmp')), zf.namelist())
 
 		if L != []:
+			import wx
 			f = zf.open(L.pop())
 			buf = f.read()
 			f.close()

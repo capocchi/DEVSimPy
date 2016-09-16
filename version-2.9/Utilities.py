@@ -3,10 +3,11 @@
 ### at the beginning to prevent with statement for python vetrsion <=2.5
 from __future__ import with_statement
 
+import __builtin__
+
 import os
 import sys
 import time
-import wx
 import traceback
 import platform
 import string
@@ -14,13 +15,17 @@ import re
 import math
 import inspect
 import ConfigParser
-import wxversion
 import gettext
 _ = gettext.gettext
 
 from itertools import combinations
 
 from cStringIO import StringIO
+
+if __builtin__.__dict__['GUI_FLAG']:
+	import wx
+
+	import wxversion
 
 ### for replaceAll
 import fileinput
@@ -316,31 +321,31 @@ def exists(site, path):
 	return response.status == 200
 
 
-class Authentification_Dialog(wx.Dialog):
-
-	def __init__(self, parent, id, title):
-		wx.Dialog.__init__(self, parent, id, title, size=(250, 180))
-
-
-		wx.StaticText(self, -1, 'Login', (10, 20))
-		wx.StaticText(self, -1, 'Password', (10, 60))
-
-		self.login = wx.TextCtrl(self, -1, '',  (110, 15), (120, -1))
-		self.password = wx.TextCtrl(self, -1, '',  (110, 55), (120, -1), style=wx.TE_PASSWORD)
-
-		con = wx.Button(self, wx.ID_OK, 'Connect', (10, 120))
-		btn_cancel = wx.Button(self, wx.ID_CANCEL, pos = (120, 120))
-
-		self.Bind(wx.EVT_BUTTON, self.OnConnect, id=wx.ID_OK)
-
-		self.Centre()
-
-	def OnConnect(self, event):
-		login = self.login.GetValue()
-		password = self.password.GetValue()
-		event.Skip()
-
 def checkURL(url):
+
+	class Authentification_Dialog(wx.Dialog):
+
+		def __init__(self, parent, id, title):
+			wx.Dialog.__init__(self, parent, id, title, size=(250, 180))
+
+
+			wx.StaticText(self, -1, 'Login', (10, 20))
+			wx.StaticText(self, -1, 'Password', (10, 60))
+
+			self.login = wx.TextCtrl(self, -1, '',  (110, 15), (120, -1))
+			self.password = wx.TextCtrl(self, -1, '',  (110, 55), (120, -1), style=wx.TE_PASSWORD)
+
+			con = wx.Button(self, wx.ID_OK, 'Connect', (10, 120))
+			btn_cancel = wx.Button(self, wx.ID_CANCEL, pos = (120, 120))
+
+			self.Bind(wx.EVT_BUTTON, self.OnConnect, id=wx.ID_OK)
+
+			self.Centre()
+
+		def OnConnect(self, event):
+			login = self.login.GetValue()
+			password = self.password.GetValue()
+			event.Skip()
 
 	if url.startswith('https'):
 		req = urllib2.Request(url)

@@ -38,6 +38,8 @@ import Menu
 from DetachedFrame import DetachedFrame
 from PrintOut import Printable
 
+_ = wx.GetTranslation
+
 #-------------------------------------------------------------------
 class GeneralNotebook(Printable):
 	"""

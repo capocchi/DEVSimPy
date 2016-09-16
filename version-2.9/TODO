@@ -3,11 +3,9 @@
 - N1 : obligÃ© de mettre la premiere ligne du fichier .dat d'un fileGenerator a 0 0 sinon bad synchronisation
 - N3: dnd marche pas sous mac avec wx 2.9 qui n'est pas stable de toute maniÃ¨re.
 - N3: recompile plante lorsque on veux changer le nom d'un amd dans une lib par un clique droit dans le panneau lib
-- N3: icon de DEVSimPy ne s'affiche pas sous windows.
 - N1: lorsque le domain est sur Dropbox, impossible de sauveagrder des modèles .py sans avoir un probleme d'importation dans RealoadModule.recompile
 - N3: lorsque glisser/deposer d'un amd de l'exterieur il n'y pas le compteur des labels qui apparait (pas de Atomic_Name0 par exemple pour le premier)
 - N3 : le fusion des quickscope ne fonctionne plus. Lorsqu'il est décoché.
-- N3 : lorsque la co,nsole est ouvert, erreur lorsque clic droit sur un model apr exemple
 
 --------------------------------------------------------------AmÃ©lioration-------------------------------------------------------------
 - N3 : voir la fonction ChangeForm pour amÃ©liorer la crÃ©ation de connnection shape en Ã©vitant les modÃ¨les
@@ -29,9 +27,10 @@
 stratÃ©gies proposÃ©es prennent en compte le type d'algorithme utilisÃ© (mise Ã  plat, distribuÃ©, //...) et le type de simulateur DEVS (avec des fonctions de transition particuliÃ¨re comme deta_conv, delta_ext, delta_fault).
 En sachant qu'il faut Ãªtre capable de simuler des systÃ¨mes composÃ© de modÃ¨les qui n'appartienne pas au mÃªme sous-formalisme DEVS.
 -N3 : reflechir sur le changement facile des icons et changer les icons avec la lib oxygen: http://www.iconfinder.com/search/?q=perspective%20new
--N3 : implÃ©menter l'update de devsimpy à partir des sources svn en http
+-N3 : implÃ©menter l'update de devsimpy à partir des sources git en http
 -N3 : faire un self.panel dans le CheckGUI
 -N3 : mettre a jour le panel de simulation dans le panel de control lorsqu'on change les préférences de simulation
+-N3 : separer le start du thread dans SimulationThread pour DEVSimPy-mob
 
 ----------------------------------------------------------------Remarques----------------------------------------------------------------
 
@@ -453,5 +452,9 @@ invoque rpar un callback lorsque le fichier python est renseignÃ© dans le wizard
 -Fait le 22/11/2014 par LC: ajout -> menu rename sur le clique droit des modèles (atomique, couplé et port).
 -Fait le 23/11/2014 par LC: amélioration -> evt.Veto pour améliorer la gestion de la fermeture des diagrammes.
 -Fait le 06/02/2016 par LC: correction -> bug de wx 3.0.2 sur le QuickScope
-
-
+-Fait le 20/04/2016 par LC: correction -> bug sur la gestion automatique des connections par clic droit.
+-Fait le 20/04/2016 par LC: correction -> Ctrl+S dans l'éditeur embarqué fonctionne
+-Fait le 20/04/2016 par LC: correction -> ajout de _ = wx.GetTranslation pour résoudre les problèmes lorsque une console est aactivé dans le panel du bas.
+-Fait le 20/06/2016 par LC: correction -> Ajout de OnStartWizard dans Container.py pour dissocier la création d'un modèle à partir d'un clic droit sur le vanvas ou sur une librairie.
+-Fait le 20/06/2016 par LC: ajout -> dialogue pour supprimer les modèles à partir de la libriaire par clic droit avec confirmation de suppression des fichiers
+-Fait le 24/06/2016 par LC: amélioration -> meilleuir gestion des aui avec la possibilité de fermer les panels (properties, simulation, librairies) et de les restorer avec une maj des checks dans le menu Show.

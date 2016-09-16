@@ -73,7 +73,7 @@ class GeneralNotebook(Observer):
 	def GetLibPanel(self):
 			""" Get Libraries panel if exist
 			"""
-			### list of label of all exsiting panel
+			### list of label of all existing panel
 			labelList = map(self.GetPageText, [i for i in range(self.GetPageCount())])
 			try:
 				### try to find if panel exist from label
@@ -82,7 +82,7 @@ class GeneralNotebook(Observer):
 				### index not match, panel not existing
 				return None
 			else:
-				### return the Panel object from the finded index
+				### return the Panel object from the founded index
 				return self.GetPage(index)
 
 	def GetPropPanel(self):
@@ -97,7 +97,22 @@ class GeneralNotebook(Observer):
 			### index not match, panel not existing
 			return None
 		else:
-			### return the Panel object from the finded index
+			### return the Panel object from the founded index
+			return self.GetPage(index)
+
+	def GetSimPanel(self):
+		""" Get Simulation panel if exist
+		"""
+		### list of label of all existing panel
+		labelList = map(self.GetPageText, [i for i in range(self.GetPageCount())])
+		try:
+			### try to find if panel exist from label
+			index = labelList.index(self.labelList[2])
+		except ValueError, info:
+			### index not match, panel not existing
+			return None
+		else:
+			### return the Panel object from the founded index
 			return self.GetPage(index)
 
 	def GetTree(self):

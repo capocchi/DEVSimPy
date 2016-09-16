@@ -13,7 +13,6 @@ GLOBAL VARIABLES AND FUNCTIONS:
 
 import os
 import re
-import wx
 import copy
 import tempfile
 
@@ -263,44 +262,45 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 
 		del connectionlist[0]
 
-### ------------------------------------------------------------
-class TestApp(wx.App):
-	""" Testing application
-	"""
-
-	def OnInit(self):
-
-		import DetachedFrame
-		import __builtin__
-		import gettext
-		from DomainInterface.DomainStructure import DomainStructure
-		from DomainInterface.DomainBehavior import DomainBehavior
-
-		__builtin__.__dict__['ICON_PATH']='icons'
-		__builtin__.__dict__['ICON_PATH_16_16']=os.path.join(ICON_PATH,'16x16')
-		__builtin__.__dict__['NB_HISTORY_UNDO']= 5
-		__builtin__.__dict__['DOMAIN_PATH']='Domain'
-		__builtin__.__dict__['FONT_SIZE']=12
-		__builtin__.__dict__['_'] = gettext.gettext
-		__builtin__.__dict__['LOCAL_EDITOR'] = False
-
-		diagram = Container.Diagram()
-
-		self.frame = DetachedFrame.DetachedFrame(None, -1, "Test", diagram)
-		newPage = Container.ShapeCanvas(self.frame, wx.NewId(), name='Test')
-		newPage.SetDiagram(diagram)
-
-		getDiagramFromXML("Diagram.xml", canvas=newPage)
-		#diagram.SetParent(newPage)
-
-		self.frame.Show()
-
-		return True
-
-	def OnQuit(self, event):
-		self.Close()
-
 if __name__ == '__main__':
+	import wx
+
+	### ------------------------------------------------------------
+	class TestApp(wx.App):
+		""" Testing application
+		"""
+
+		def OnInit(self):
+
+			import DetachedFrame
+			import __builtin__
+			import gettext
+			from DomainInterface.DomainStructure import DomainStructure
+			from DomainInterface.DomainBehavior import DomainBehavior
+
+			__builtin__.__dict__['ICON_PATH']='icons'
+			__builtin__.__dict__['ICON_PATH_16_16']=os.path.join(ICON_PATH,'16x16')
+			__builtin__.__dict__['NB_HISTORY_UNDO']= 5
+			__builtin__.__dict__['DOMAIN_PATH']='Domain'
+			__builtin__.__dict__['FONT_SIZE']=12
+			__builtin__.__dict__['_'] = gettext.gettext
+			__builtin__.__dict__['LOCAL_EDITOR'] = False
+
+			diagram = Container.Diagram()
+
+			self.frame = DetachedFrame.DetachedFrame(None, -1, "Test", diagram)
+			newPage = Container.ShapeCanvas(self.frame, wx.NewId(), name='Test')
+			newPage.SetDiagram(diagram)
+
+			getDiagramFromXML("Diagram.xml", canvas=newPage)
+			#diagram.SetParent(newPage)
+
+			self.frame.Show()
+
+			return True
+
+		def OnQuit(self, event):
+			self.Close()
 
 	app = TestApp(0)
 	app.MainLoop()

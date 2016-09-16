@@ -7,7 +7,7 @@
 #                       Laurent CAPOCCHI
 #                      University of Corsica
 #                     --------------------------------
-# Version 1.0                                        last modified: 
+# Version 1.0                                        last modified:
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -30,7 +30,7 @@ def function(obj, i):
 class ConnectDialog(wx.Frame):
 	def __init__(self, parent, id, title, sn="Source", snL=[None,None], tn="Target", tnL=[None,None]):
 		wx.Frame.__init__(self, parent, id, title, size=(240,200), style= wx.CAPTION | wx.CLOSE_BOX | wx.STAY_ON_TOP| wx.SYSTEM_MENU)
-		
+
 		# local copy
 		self.sn = sn
 		self.tn = tn
@@ -38,8 +38,8 @@ class ConnectDialog(wx.Frame):
 
 		self._result = [0,0]
 
-		L1 = map(lambda i:function(snL,i),range(len(snL)))
-		L2 = map(lambda i:function(tnL,i),range(len(tnL)))
+		L1 = map(lambda i:function(snL,i),range(len(snL)-1))
+		L2 = map(lambda i:function(tnL,i),range(len(tnL)-1))
 
 		L1.append("%s"%_('All'))
 		L2.append("%s"%_('All'))
@@ -84,7 +84,7 @@ class ConnectDialog(wx.Frame):
 
 	def EvtComboBox1(self,event):
 		self._result[0] = event.GetSelection()
-	
+
 	def EvtComboBox2(self,event):
 		self._result[1] = event.GetSelection()
 
@@ -92,23 +92,23 @@ class ConnectDialog(wx.Frame):
 class TestApp(wx.App):
 	""" Testing application
 	"""
-	
+
 	def OnInit(self):
-		
+
 		import gettext
 		import __builtin__
-		
+
 		__builtin__.__dict__['ICON_PATH']='icons'
 		__builtin__.__dict__['ICON_PATH_16_16']=os.path.join(ICON_PATH,'16x16')
 		__builtin__.__dict__['_'] = gettext.gettext
-		
+
 		self.frame = ConnectDialog(None, -1, 'Connect Manager')
 		self.frame.Show()
 		return True
-	
+
 	def OnQuit(self, event):
 		self.Close()
-		
+
 if __name__ == '__main__':
 
 	app = TestApp(0)
