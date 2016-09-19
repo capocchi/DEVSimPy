@@ -99,94 +99,81 @@ parser.read(os.path.join(os.path.expanduser("~"),'devsimpy.ini'))
 section, option = ('wxversion', 'to_load')
 ini_exist = parser.has_option(section, option)
 
-### if devsimpy.ini file exist, it contains the wx version to load.
-if ini_exist:
+if not hasattr(sys, 'frozen'):
+	### try to import wxversion
 	try:
-		import wxversion as wxv
-		v = parser.get(section, option)
-		wxv.select([v])
+		import wxversion
+
 	except ImportError:
-		sys.stdout.write("Warning: the package python-wxversion was not found, please install it.\n")
-		sys.stdout.write("DEVSimPy will continue anyway, but not all features might work.\n")
+		### install wxversion by coping the wxversion.py file into python site-packages
+		import shutil
+		from distutils.sysconfig import get_python_lib
 
-	### if wxpython has been installed using portable python solution (winpython, PythonXY, anaconda...),
-	### we add the wx path to the python path
-	from distutils.sysconfig import get_python_lib
-	path = os.path.join(get_python_lib(),'wx-3.0-msw')
-	if os.path.exists(path) and path not in sys.path:
-		sys.path.append(path)
-
-	import wx
-
-### no devsimpy.ini file
-else:
-
-	if not hasattr(sys, 'frozen'):
 		try:
-			### try to import wxversion
-			import wxversion
-
-		except ImportError:
-
-			### install wxversion
-			import shutil
-			from distutils.sysconfig import get_python_lib
-
-			try:
-				shutil.copy(os.path.join(ABS_HOME_PATH, 'pip-packages', 'wxversion.py'),  get_python_lib())
-			# eg. src and dest are the same file
-			except shutil.Error as e:
-				print('Error: %s' % e)
-			# eg. source or destination doesn't exist
-			except IOError as e:
-				print('Error: %s' % e.strerror)
-
+			shutil.copy(os.path.join(ABS_HOME_PATH, 'pip-packages', 'wxversion.py'),  get_python_lib())
+		# eg. src and dest are the same file
+		except shutil.Error as e:
+			print('Error: %s' % e)
+		# eg. source or destination doesn't exist
+		except IOError as e:
+			print('Error: %s' % e.strerror)
+		else:
 			### import wxversion
 			import wxversion
 
-		finally:
+	finally:
 
-			### select the wxpython version from __min_wx_version__
+		### if devsimpy.ini file exist, it contains the wx version to load.
+		if ini_exist:
+			v = parser.get(section, option)
+			wxversion.select([v])
+		### select the wxpython version from __min_wx_version__
+		else:
 			if wxversion.checkInstalled(__min_wx_version__):
 				wxversion.select(__min_wx_version__)
 
-			### if wxpython has been installed using portable python solution (winpython, PythonXY, anaconda...), we add the wx path to the python path
-			from distutils.sysconfig import get_python_lib
-			path = os.path.join(get_python_lib(),'wx-3.0-msw')
-			if os.path.exists(path) and path not in sys.path:
-				sys.path.append(path)
+	### trying to import wx
+	try:
 
-			try:
-				### trying to import wx
+		### if wxpython has been installed using portable python solution (winpython, PythonXY, anaconda...), we add the wx path to the python path
+		from distutils.sysconfig import get_python_lib
+		path = os.path.join(get_python_lib(),'wx-3.0-msw')
+		if os.path.exists(path) and path not in sys.path:
+			sys.path.append(path)
+
+		import wx
+
+	except ImportError:
+
+		try:
+			### wx is not installed, we try to install it from pip (local or remote)
+			sys.stderr.write("Error: DEVSimPy requires the wxPython package, which doesn't seem to be installed\n")
+			r = raw_input("Do you want to install wxPython package form the PyPi repository (1) or local .whl file (2) (1/2)?")
+			if r == '1':
+				install_and_import('wx')
+			else:
+				import pip
+				sys.stdout.write("wx package installation from local whl files repository...\n")
+				is_64bits = sys.maxsize > 2**32
+				whl_path = os.path.join(ABS_HOME_PATH, 'pip-packages', 'wxPython-3.0.2.0-cp27-none-win'+'_amd64.whl' if is_64bits else '32.whl')
+				pip.main(['install', whl_path])
+
+				### add wx-3.0-msw to the path
+				from distutils.sysconfig import get_python_lib
+				sys.path.append(os.path.join(get_python_lib(),'wx-3.0-msw'))
 				import wx
 
-			except ImportError:
+		except ImportError, info:
+			sys.stdout.write(info)
+			sys.stdout.write("DEVSimPy requires the wx package, please install it.\n")
+			sys.exit()
 
-				try:
-					### wx is not installed, we try to install it from pip (local or default)
-					r = raw_input("Do you want to install wx package form the default or local pip repository (D or L)?")
-					if r == 'D':
-						install_and_import('wx')
-					else:
-						import pip
-						sys.stdout.write("wx package installation from local pip repository...\n")
-						pip.main(['install', os.path.join(ABS_HOME_PATH, 'pip-packages', 'wxPython-3.0.2.0-cp27-none-win_amd64.whl')])
-						### add wx-3.0-msw to the path
-						from distutils.sysconfig import get_python_lib
-						sys.path.append(os.path.join(get_python_lib(),'wx-3.0-msw'))
-						import wx
-
-				except ImportError, info:
-					sys.stdout.write(info)
-					sys.stdout.write("DEVSimPy requires the wx package, please install it.\n")
-					sys.exit()
-
-				else:
-					if wx.VERSION_STRING < __min_wx_version__:
-						sys.stdout.write("You need to updgarde wxPython to v%s (or higer) to run DEVSimPy\n"%__min_wx_version__)
-						sys.stdout.write(__get__wxpython__)
-						sys.exit()
-#	import wx
+		else:
+			if wx.VERSION_STRING < __min_wx_version__:
+				sys.stdout.write("You need to updgarde wxPython to v%s (or higer) to run DEVSimPy\n"%__min_wx_version__)
+				sys.stdout.write(__get__wxpython__)
+				sys.exit()
+import wx
 
 # 	try:
 # 		if not hasattr(sys, 'frozen'):
@@ -505,7 +492,7 @@ class MainApplication(wx.Frame):
 				### for spash screen
 				pub.sendMessage('object.added', 'Loading .devsimpy settings file...\n')
 
-				sys.stdout.write("Loading DEVSimPy %s from %s.devsimpy settings file...\n"%(self.GetVersion(), GetUserConfigDir()+os.sep))
+				sys.stdout.write("Loading DEVSimPy %s settings file from %s.devsimpy\n"%(self.GetVersion(), GetUserConfigDir()+os.sep))
 
 				### load external import path
 				self.exportPathsList = filter(lambda path: os.path.isdir(path), eval(self.cfg.Read("exportPathsList")))
