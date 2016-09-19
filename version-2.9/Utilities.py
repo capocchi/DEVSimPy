@@ -25,8 +25,6 @@ from cStringIO import StringIO
 if __builtin__.__dict__['GUI_FLAG']:
 	import wx
 
-	import wxversion
-
 ### for replaceAll
 import fileinput
 
@@ -111,7 +109,7 @@ def GetWXVersionFromIni():
 	if os.path.exists(path):
 		return parser.get(section, option)
 	else:
-
+		import wxversion
 		### wxPython version
 		wxv= map(lambda a: a.split('-')[0], wxversion.getInstalled())
 

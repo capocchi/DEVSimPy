@@ -7,7 +7,6 @@ import __main__
 import shutil
 import sys
 import inspect
-import wxversion
 import ConfigParser
 import copy
 import zipfile
@@ -80,6 +79,7 @@ class GeneralPanel(wx.Panel):
 		self.cb1.SetValue(__builtin__.__dict__['TRANSPARENCY'])
 
 		### wxPython version
+		import wxversion
 		wxv= map(lambda a: a.split('-')[0], wxversion.getInstalled())
 
 		self.cb2 = wx.ComboBox(self, wx.ID_ANY, GetWXVersionFromIni(), choices= wxv, style=wx.CB_READONLY)

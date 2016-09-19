@@ -6,9 +6,9 @@
 #                     --------------------------------
 #                            Copyright (c) 2016
 #                              Laurent CAPOCCHI
-#                        SPE - University of Corsica
+#                        SPE Lab - University of Corsica
 #                     --------------------------------
-# Version 2.9                                      last modified:  06/24/16
+# Version 2.9                                      last modified:  09/19/16
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -34,8 +34,8 @@
 ### at the beginning to prevent with statement for python version <=2.5
 from __future__ import with_statement
 
-__authors__  = "Laurent Capocchi <capocchi@univ-corse.fr, lcapocchi@gmail.com>, TIC project team <santucci@univ-coorse.fr>" # ajouter les noms et les mails associés aux autres auteurs
-__date__    = "7 Nov 2014, 23:23 GMT"
+__authors__  = "Laurent Capocchi <capocchi@univ-corse.fr, lcapocchi@gmail.com>, SISU project group <santucci@univ-coorse.fr>" # ajouter les noms et les mails associés aux autres auteurs
+__date__    = "19 Sept 2016, 15:13 GMT"
 __version__ = '2.9'
 __docformat__ = 'epytext'
 
@@ -59,12 +59,35 @@ try:
 	import hotshot
 	import hotshot.stats
 except ImportError:
-	sys.stdout.write("Hotshot module not found. If you want to perform profiling simulation, install it !")
+	sys.stdout.write("Hotshot module not found. If you want to perform profiling simulation, install it!")
 
 __min_wx_version__ = ['3.0','2.9','2.8','2.7','2.6','2.5']
 
 __wxpython_url__ = 'http://wxpython.org'
 __get__wxpython__ = 'Get it from %s'%__wxpython_url__
+
+def install_and_import(package):
+	import importlib
+	try:
+		importlib.import_module(package)
+	except ImportError:
+		import pip
+		sys.stdout.write("Install %s form pip\n"%package)
+		try:
+			raw_input("Press Enter to continue (Ctrl+C to skip)")
+		except SyntaxError:
+			sys.exit()
+		else:
+			try:
+				pip.main(['install', package])
+			except:
+				sys.stdout.write("Unable to install %s using pip. Please read the instructions for \
+				manual installation.. Exiting" % package)
+				sys.stdout.write("Error: %s: %s" % (exc_info()[0] ,exc_info()[1]))
+	finally:
+		globals()[package] = importlib.import_module(package)
+
+ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 ################################################################
 ### Loading wx python library
@@ -78,43 +101,123 @@ ini_exist = parser.has_option(section, option)
 
 ### if devsimpy.ini file exist, it contains the wx version to load.
 if ini_exist:
-	import wxversion as wxv
-	v = parser.get(section, option)
-	wxv.select([v])
+	try:
+		import wxversion as wxv
+		v = parser.get(section, option)
+		wxv.select([v])
+	except ImportError:
+		sys.stdout.write("Warning: the package python-wxversion was not found, please install it.\n")
+		sys.stdout.write("DEVSimPy will continue anyway, but not all features might work.\n")
+
+	### if wxpython has been installed using portable python solution (winpython, PythonXY, anaconda...),
+	### we add the wx path to the python path
+	from distutils.sysconfig import get_python_lib
+	path = os.path.join(get_python_lib(),'wx-3.0-msw')
+	if os.path.exists(path) and path not in sys.path:
+		sys.path.append(path)
+
 	import wx
 
 ### no devsimpy.ini file
 else:
-	try:
-		if not hasattr(sys, 'frozen'):
-			import wxversion as wxv
 
-			if wxv.checkInstalled(__min_wx_version__):
-				wxv.select(__min_wx_version__)
-			else:
-				import wx
-				app = wx.PySimpleApp()
-				wx.MessageBox("The requested version of wxPython is not installed.\nPlease install version %s" %__min_wx_version__, "wxPython Version Error")
-				app.MainLoop()
-				webbrowser.open(__wxpython_url__)
-				sys.exit()
-
-		import wx
-
-	except ImportError:
-		## wxversion not installed
+	if not hasattr(sys, 'frozen'):
 		try:
-			import wx
-			if wx.VERSION_STRING < __min_wx_version__:
-				sys.stdout.write("You need to updgarde wxPython to v%s (or higer) to run DEVSimPy\n"%__min_wx_version__)
-				sys.stdout.write(__get__wxpython__)
-				sys.exit()
+			### try to import wxversion
+			import wxversion
+
 		except ImportError:
-				sys.stderr.write("Error: DEVSimPy requires wxPython, which doesn't seem to be installed\n")
-				sys.stdout.write(__get__wxpython__)
-				sys.exit()
-		sys.stdout.write("Warning: the package python-wxversion was not found, please install it.\n")
-		sys.stdout.write("DEVSimPy will continue anyway, but not all features might work.\n")
+
+			### install wxversion
+			import shutil
+			from distutils.sysconfig import get_python_lib
+
+			try:
+				shutil.copy(os.path.join(ABS_HOME_PATH, 'pip-packages', 'wxversion.py'),  get_python_lib())
+			# eg. src and dest are the same file
+			except shutil.Error as e:
+				print('Error: %s' % e)
+			# eg. source or destination doesn't exist
+			except IOError as e:
+				print('Error: %s' % e.strerror)
+
+			### import wxversion
+			import wxversion
+
+		finally:
+
+			### select the wxpython version from __min_wx_version__
+			if wxversion.checkInstalled(__min_wx_version__):
+				wxversion.select(__min_wx_version__)
+
+			### if wxpython has been installed using portable python solution (winpython, PythonXY, anaconda...), we add the wx path to the python path
+			from distutils.sysconfig import get_python_lib
+			path = os.path.join(get_python_lib(),'wx-3.0-msw')
+			if os.path.exists(path) and path not in sys.path:
+				sys.path.append(path)
+
+			try:
+				### trying to import wx
+				import wx
+
+			except ImportError:
+
+				try:
+					### wx is not installed, we try to install it from pip (local or default)
+					r = raw_input("Do you want to install wx package form the default or local pip repository (D or L)?")
+					if r == 'D':
+						install_and_import('wx')
+					else:
+						import pip
+						sys.stdout.write("wx package installation from local pip repository...\n")
+						pip.main(['install', os.path.join(ABS_HOME_PATH, 'pip-packages', 'wxPython-3.0.2.0-cp27-none-win_amd64.whl')])
+						### add wx-3.0-msw to the path
+						from distutils.sysconfig import get_python_lib
+						sys.path.append(os.path.join(get_python_lib(),'wx-3.0-msw'))
+						import wx
+
+				except ImportError, info:
+					sys.stdout.write(info)
+					sys.stdout.write("DEVSimPy requires the wx package, please install it.\n")
+					sys.exit()
+
+				else:
+					if wx.VERSION_STRING < __min_wx_version__:
+						sys.stdout.write("You need to updgarde wxPython to v%s (or higer) to run DEVSimPy\n"%__min_wx_version__)
+						sys.stdout.write(__get__wxpython__)
+						sys.exit()
+#	import wx
+
+# 	try:
+# 		if not hasattr(sys, 'frozen'):
+# 			import wxversion as wxv
+#
+# 			if wxv.checkInstalled(__min_wx_version__):
+# 				wxv.select(__min_wx_version__)
+# 			else:
+# 				import wx
+# 				app = wx.PySimpleApp()
+# 				wx.MessageBox("The requested version of wxPython is not installed.\nPlease install version %s" %__min_wx_version__, "wxPython Version Error")
+# 				app.MainLoop()
+# 				webbrowser.open(__wxpython_url__)
+# 				sys.exit()
+#
+# 		import wx
+#
+# 	except ImportError:
+# 		## wxversion not installed
+# 		try:
+# 			import wx
+# 			if wx.VERSION_STRING < __min_wx_version__:
+# 				sys.stdout.write("You need to updgarde wxPython to v%s (or higer) to run DEVSimPy\n"%__min_wx_version__)
+# 				sys.stdout.write(__get__wxpython__)
+# 				sys.exit()
+# 		except ImportError:
+# 				sys.stderr.write("Error: DEVSimPy requires wxPython, which doesn't seem to be installed\n")
+# 				sys.stdout.write(__get__wxpython__)
+# 				sys.exit()
+# 		sys.stdout.write("Warning: the package python-wxversion was not found, please install it.\n")
+# 		sys.stdout.write("DEVSimPy will continue anyway, but not all features might work.\n")
 
 sys.stdout.write("Importing wxPython %s%s for python %s on %s (%s) platform...\n"%(wx.version(), " from devsimpy.ini" if ini_exist else '',platform.python_version(), platform.system(), platform.version()))
 
@@ -142,8 +245,6 @@ if wx.VERSION_STRING < '2.9':
 else:
 	from wx.lib.pubsub import setuparg1
 	from wx.lib.pubsub import pub
-
-ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 ### specific builtin variables. (dont modify the defautls value. If you want to change it, go tot the PreferencesGUI from devsimpy interface.)
 builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'),
