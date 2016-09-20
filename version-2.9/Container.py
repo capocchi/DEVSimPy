@@ -968,24 +968,27 @@ class Diagram(Savable, Structurable):
 		"""
 
 		try:
-
 			for devs in filter(lambda a: hasattr(a, 'finish'), self.devsModel.componentSet):
-				Publisher.unsubscribe(devs.finish, "%d.finished"%(id(devs)))
+				try:
+					Publisher.unsubscribe(devs.finish, "%d.finished"%(id(devs)))
+				except:
+					devs.finish(None)
 
 			self.devsModel.componentSet = []
+
 		except AttributeError:
 			pass
 
-		for m in self.GetShapeList():
+		finally:
+			for m in self.GetShapeList():
+				m.setDEVSModel(None)
 
-			m.setDEVSModel(None)
+				if isinstance(m, ConnectionShape):
+					m.input[0].setDEVSModel(None)
+					m.output[0].setDEVSModel(None)
 
-			if isinstance(m, ConnectionShape):
-				m.input[0].setDEVSModel(None)
-				m.output[0].setDEVSModel(None)
-
-			if isinstance(m, ContainerBlock):
-				m.Clean()
+				if isinstance(m, ContainerBlock):
+					m.Clean()
 
 	def GetStat(self, d={'Atomic_nbr':0, 'Coupled_nbr':0, 'Connection_nbr':0, 'Deep_level':0}):
 		""" Get information about diagram like the numbe rof atomic model or the number of link between models.
@@ -3326,7 +3329,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 									_('Error exported file %s\n')%error, \
 									label, \
 									wx.OK | wx.ICON_ERROR)
-			dlg.ShowModal()
+				dlg.ShowModal()
 
 	def update(self, concret_subject = None):
 		""" Update method to respond to notify call

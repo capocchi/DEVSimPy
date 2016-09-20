@@ -17,7 +17,6 @@ GLOBAL VARIABLES AND FUNCTIONS:
 ### at the beginning to prevent with statement for python vetrsion <=2.5
 from __future__ import with_statement
 
-from Basic.Object import Message
 from Domain.Generator.Generator import *
 
 import os

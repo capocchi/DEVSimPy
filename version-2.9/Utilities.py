@@ -14,6 +14,7 @@ import string
 import re
 import math
 import inspect
+import shutil
 import ConfigParser
 import gettext
 _ = gettext.gettext
@@ -30,7 +31,7 @@ import fileinput
 
 # Used to recurse subdirectories
 import fnmatch
-import urllib, urllib2, httplib
+import urllib, urllib2, httplib, requests
 
 # Used for smooth (spectrum)
 
@@ -65,6 +66,45 @@ class FixedList(list):
 			del self[0]
 
 		self.insert(len(self),v)
+
+def install_and_import(package):
+	import importlib
+	try:
+		importlib.import_module(package)
+	except ImportError:
+		import pip
+		sys.stdout.write("Install %s form pip\n"%package)
+		try:
+			raw_input("Press Enter to continue (Ctrl+C to skip)")
+		except SyntaxError:
+			sys.exit()
+		else:
+			try:
+				pip.main(['install', package])
+			except:
+				sys.stdout.write("Unable to install %s using pip. Please read the instructions for \
+				manual installation.. Exiting" % package)
+				sys.stdout.write("Error: %s: %s" % (exc_info()[0] ,exc_info()[1]))
+	finally:
+		globals()[package] = importlib.import_module(package)
+
+def downloadFile(url, directory) :
+	localFilename = url.split('/')[-1]
+	with open(directory + '/' + localFilename, 'wb') as f:
+		start = time.clock()
+		r = requests.get(url, stream=True)
+		total_length = r.headers.get('content-length')
+		dl = 0
+		if total_length is None: # no content length header
+			f.write(r.content)
+		else:
+			for chunk in r.iter_content(1024):
+				dl += len(chunk)
+				f.write(chunk)
+				done = int(50 * dl / int(total_length))
+				sys.stdout.write("\r[%s%s] %s bps" % ('=' * done, ' ' * (50-done), dl//(time.clock() - start)))
+				print ''
+	return (time.clock() - start)
 
 def getOutDir():
 	out_dir = os.path.join(HOME_PATH, 'out')

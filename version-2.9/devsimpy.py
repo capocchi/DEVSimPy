@@ -5,7 +5,7 @@
 # devsimpy.py --- DEVSimPy - The Python DEVS GUI modeling and simulation software
 #                     --------------------------------
 #                            Copyright (c) 2016
-#                              Laurent CAPOCCHI
+#                    L. CAPOCCHI (capocchi@univ-corse.fr)
 #                        SPE Lab - University of Corsica
 #                     --------------------------------
 # Version 2.9                                      last modified:  09/19/16
@@ -51,6 +51,8 @@ import platform
 import threading
 import cPickle
 import itertools
+import shutil
+import requests
 
 from ConfigParser import SafeConfigParser
 from tempfile import gettempdir
@@ -87,6 +89,24 @@ def install_and_import(package):
 	finally:
 		globals()[package] = importlib.import_module(package)
 
+def downloadFile(url, directory) :
+	localFilename = url.split('/')[-1]
+	with open(directory + '/' + localFilename, 'wb') as f:
+		start = time.clock()
+		r = requests.get(url, stream=True)
+		total_length = r.headers.get('content-length')
+		dl = 0
+		if total_length is None: # no content length header
+			f.write(r.content)
+		else:
+			for chunk in r.iter_content(1024):
+				dl += len(chunk)
+				f.write(chunk)
+				done = int(50 * dl / int(total_length))
+				sys.stdout.write("\r[%s%s] %s bps" % ('=' * done, ' ' * (50-done), dl//(time.clock() - start)))
+				print ''
+	return (time.clock() - start)
+
 ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 ################################################################
@@ -110,7 +130,7 @@ if not hasattr(sys, 'frozen'):
 		from distutils.sysconfig import get_python_lib
 
 		try:
-			shutil.copy(os.path.join(ABS_HOME_PATH, 'pip-packages', 'wxversion.py'),  get_python_lib())
+			shutil.copy(os.path.join(ABS_HOME_PATH, 'wxversion.py'),  get_python_lib())
 		# eg. src and dest are the same file
 		except shutil.Error as e:
 			print('Error: %s' % e)
@@ -148,15 +168,33 @@ if not hasattr(sys, 'frozen'):
 		try:
 			### wx is not installed, we try to install it from pip (local or remote)
 			sys.stderr.write("Error: DEVSimPy requires the wxPython package, which doesn't seem to be installed\n")
-			r = raw_input("Do you want to install wxPython package form the PyPi repository (1) or local .whl file (2) (1/2)?")
+			r = raw_input("Do you want to install wxPython package form the PyPi repository (1) or DEVSimPy github repository (2) (1/2)?") or 2
 			if r == '1':
 				install_and_import('wx')
 			else:
 				import pip
-				sys.stdout.write("wx package installation from local whl files repository...\n")
+				#sys.stdout.write("wx package installation from local whl files repository...\n")
 				is_64bits = sys.maxsize > 2**32
-				whl_path = os.path.join(ABS_HOME_PATH, 'pip-packages', 'wxPython-3.0.2.0-cp27-none-win'+'_amd64.whl' if is_64bits else '32.whl')
+
+				### get whl file from DEVSimPy-site hosted by github
+				file = 'wxPython-3.0.2.0-cp27-none-win'+'_amd64.whl' if is_64bits else '32.whl'
+				url = 'https://capocchi.github.io/DEVSimPy-site/pip-packages/'+file
+				directory = gettempdir()
+				sys.stdout.write("Downloading %s from DEVSimPy GitHub repository...\n"%(file))
+				time_elapsed = downloadFile(url, directory)
+				sys.stdout.write("Download complete!\n")
+				whl_path = os.path.join(directory,file)
+
+				### install wx package
 				pip.main(['install', whl_path])
+
+				### delete temp file
+				try:
+					os.remove(whl_path)
+				except Exception, info:
+					sys.stdout.write("Error cleaning temp file: %s\n"%info)
+				else:
+					sys.stdout.write("Clean temp file complete!\n")
 
 				### add wx-3.0-msw to the path
 				from distutils.sysconfig import get_python_lib
