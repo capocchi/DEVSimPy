@@ -468,10 +468,18 @@ def generate(lst, n):
 
 def relpath(path=''):
 	### change sep from platform
-	if wx.Platform in ('__WXGTK__', '__WXMAC__'):
+	from sys import platform
+	if platform == "linux" or platform == "linux2":
 		return path.replace('\\',os.sep)
-	else:
+	elif platform == "darwin":
+		return path.replace('\\',os.sep)
+	elif platform == "win32":
 		return path.replace('/',os.sep)
+
+#	if wx.Platform in ('__WXGTK__', '__WXMAC__'):
+#		return path.replace('\\',os.sep)
+#	else:
+#		return path.replace('/',os.sep)
 
 def flatten(list):
     """

@@ -35,7 +35,8 @@ if __builtin__.__dict__['GUI_FLAG']:
 		from wx.lib.pubsub import pub as Publisher
 
 	import Editor
-	import ZipManager
+
+import ZipManager
 
 #from DomainInterface.DomainBehavior import DomainBehavior
 #from DomainInterface.DomainStructure import DomainStructure
