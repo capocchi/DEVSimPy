@@ -833,7 +833,10 @@ def simulator_factory(model, strategy, prof, ntl, verbose):
 				else:
 					for m in filter(lambda a: hasattr(a, 'finish'), self.model.componentSet):
 						### call finished method
-						Publisher.sendMessage('%d.finished'%(id(m)))
+						if __builtin__.__dict__['GUI_FLAG']:
+							Publisher.sendMessage('%d.finished'%(id(m)))
+						else:
+							m.finish(None)
 
 					### only for displayed application (-nogui)
 					if wx.GetApp() : wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)

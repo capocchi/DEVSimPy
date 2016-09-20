@@ -512,9 +512,10 @@ class DEVSComponent:
 			if not hasattr(devs, 'debugger'):
 				setattr(devs.__class__, DEVSComponent.debugger.func_name, DEVSComponent.debugger)
 
-			### to execute finish method of devs model (look at the SimulationGUI for message interseption)
-			if hasattr(devs, 'finish'):
-				Publisher.subscribe(devs.finish, "%d.finished"%(id(devs)))
+			if __builtin__.__dict__['GUI_FLAG']:
+				### to execute finish method of devs model (look at the SimulationGUI for message interception)
+				if hasattr(devs, 'finish'):
+					Publisher.subscribe(devs.finish, "%d.finished"%(id(devs)))
 
 			DEVSComponent.setBlockModel(devs, self)
 
