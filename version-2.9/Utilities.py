@@ -84,7 +84,7 @@ def install_and_import(package):
 			except:
 				sys.stdout.write("Unable to install %s using pip. Please read the instructions for \
 				manual installation.. Exiting" % package)
-				sys.stdout.write("Error: %s: %s" % (exc_info()[0] ,exc_info()[1]))
+				sys.stdout.write("Error: %s: %s" % (exc_info()[0], exc_info()[1]))
 	finally:
 		globals()[package] = importlib.import_module(package)
 
