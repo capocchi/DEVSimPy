@@ -68,7 +68,7 @@ builtin_dict['GUI_FLAG'] = False
 
 from InteractionYAML import YAMLHandler
 
-def simulate(devs, duration, socket_id):
+def simulate(devs, duration, simu_name, is_remote):
 
 	from SimulationNoGUI import makeSimulation
 
@@ -77,7 +77,7 @@ def simulate(devs, duration, socket_id):
 		duration = 0.0
 
 	### launch simulation
-	makeSimulation(devs, duration, socket_id, True)
+	makeSimulation(devs, duration, simu_name, is_remote, True)
 
 # Sets the homepath variable to the directory where your application is located (sys.argv[0]).
 __builtin__.__dict__.update(builtin_dict)
@@ -89,21 +89,25 @@ if __name__ == '__main__':
  	_ = gettext.gettext
 
 	import argparse
-
-	parser = argparse.ArgumentParser()
+ 	#print(sys.argv) 
+	parser = argparse.ArgumentParser(description="simulate a model unless other option is specified")
+	# required filename
 	parser.add_argument("filename", help="dsp or yaml devsimpy file")
-	parser.add_argument("time", nargs='?', help="simulation time [inf|ntl]", default=10)
-	parser.add_argument("socket", nargs='?', help="socket id", default="", type=str)
-	parser.add_argument("-js", "--javascript",help="generate JS file", action="store_true")
-	parser.add_argument("-json", help="turn the YAML/DSP file to JSON", action="store_true")
-	parser.add_argument("-blockslist", help="get the list of models in a master model", action="store_true")
-	parser.add_argument("-getblockargs", help="get the parameters of an atomic model", type=str)
-	parser.add_argument("-setblockargs", help="update the parameters of a block of a model", type=str)
+	# optional simulation_time for simulation
+	parser.add_argument("simulation_time", nargs='?', help="simulation time [inf|ntl]", default=10)
+	# optional simulation_name for remote execution
+	parser.add_argument("-remote", help="remote execution", action="store_true")
+	parser.add_argument("-name", help="simulation name", type=str, default="simu")
+	# non-simulation options
+	group = parser.add_mutually_exclusive_group()
+	group.add_argument("-js", "--javascript",help="generate JS file", action="store_true")
+	group.add_argument("-json", help="turn the YAML/DSP file to JSON", action="store_true")
+	group.add_argument("-blockslist", help="get the list of models in a master model", action="store_true")
+	group.add_argument("-blockargs", help="parameters of an atomic model", type=str)
+	parser.add_argument("-updateblockargs", help="new parameters", type=str, default="")
 	args = parser.parse_args()
 
 	filename = args.filename
-	duration = args.time
-	socket_id = args.socket
 
 	if not os.path.exists(filename):
 		sys.stderr.write(_('ERROR: devsimpy file does not exist!\n'))
@@ -111,7 +115,7 @@ if __name__ == '__main__':
 	else:
 		yamlHandler = YAMLHandler(filename)
 
-	if args.javascript:
+	if args.javascript: 
 		# Javascript generation
 		yamlHandler.getJS()
 	elif args.json:
@@ -122,21 +126,27 @@ if __name__ == '__main__':
 		# get the list of models in a master model
 		l = yamlHandler.getYAMLBlockModelsList()
 		sys.stdout.write(json.dumps(l))
-	elif args.getblockargs:
-		label = args.getblockargs
-		args = yamlHandler.getYAMLBlockModelArgs(label)
-		sys.stdout.write(json.dumps(args))
-	elif args.setblockargs:
-		label = sys.argv[3]
-		args = json.loads(sys.argv[4])
-		new_args = yamlHandler.setYAMLBlockModelArgs(label, args)
-		sys.stdout.write(json.dumps(new_args))
+		
+	elif args.blockargs:
+		# model block parameters read or update
+		label = args.blockargs
+		if args.updateblockargs :
+			args = json.loads(args.updateblockargs)
+			new_args = yamlHandler.setYAMLBlockModelArgs(label, args)
+			sys.stdout.write(json.dumps(new_args))
+		else:
+			args = yamlHandler.getYAMLBlockModelArgs(label)
+			sys.stdout.write(json.dumps(args))
+		
 	else:
+		# simulation
+		duration = args.simulation_time
+		if isinstance(duration, str):
+			duration = float(duration)
+		
 		devs = yamlHandler.getDevsInstance()
 		if devs:
-			if isinstance(duration, str):
-				duration = float(duration)
-			simulate(devs, duration, socket_id)
+			simulate(devs, duration, args.name, args.remote)
 
 	#~ yamlHandler = YAMLHandler(filename)
 

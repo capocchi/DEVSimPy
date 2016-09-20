@@ -13,7 +13,7 @@ else:
     Server = SocketServer.UnixStreamServer
 
 def log(s):
-    sys.stderr.write(s)
+    sys.stdout.write(s)
 
 class MySocketHandler(SocketServer.BaseRequestHandler):
     """
@@ -28,7 +28,7 @@ class MySocketHandler(SocketServer.BaseRequestHandler):
 
         log("*** reception " + self.data)
         response = {}
-
+        
         if self.data == "PAUSE":
             self.server.simulation_thread.suspend()
             #while not self.server.simulation_thread.suspension_applied: pass TODO? modif Strategy needed
@@ -54,11 +54,11 @@ class MySocketHandler(SocketServer.BaseRequestHandler):
             if self.server.simulation_thread.thread_suspend:
                 response['status'] = 'OK'
                 response['simulation_time'] = self.server.simulation_thread.model.myTimeAdvance
-
+                
                 if self.server._componentSet.has_key(model_name):
 
                     for param_name, param_value in params.items() :
-                        if param_name in dir(self.server._componentSet[model_name]):
+                        if param_name in dir(self.server._componentSet[model_name]):                       
                             setattr(self.server._componentSet[model_name], param_name, param_value)
                         else:
                             response['status'] += ' - UNKNOWN_PARAM ' + param_name
@@ -83,10 +83,10 @@ class MySocketServer(Server):
         self._componentSet = self.simulation_thread.model.getFlatComponentSet()
 
     def handle_error(self, request, client_address):
-        log('*** EXCEPTION handling msg in InteractionManager')
-        log(client_address)
-        log(traceback.format_exc())
-        log(' ***')
+        sys.stderr.write('*** EXCEPTION handling msg in InteractionManager')
+        sys.stderr.write(client_address)
+        sys.stderr.write(traceback.format_exc())
+        sys.stderr.write(' ***')
 
 class InteractionManager(threading.Thread):
 
@@ -103,6 +103,7 @@ class InteractionManager(threading.Thread):
             self.server = MySocketServer('\0' + socket_id, MySocketHandler, simulation_thread)
 
             log('SocketServer created ** ')
+                
         except:
             self.server = None
             log ('SocketServer creation failed ** ')
