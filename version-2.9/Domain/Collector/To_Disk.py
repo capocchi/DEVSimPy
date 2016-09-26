@@ -56,7 +56,7 @@ class To_Disk(QuickScope):
 		self.ea = eventAxis
 
 		### remove old files corresponding to 1000 presumed ports
-		for np in xrange(1000):
+		for np in range(1000):
 			fn = "%s%d%s"%(self.fileName, np, self.ext)
 			if os.path.exists(fn):
 				os.remove(fn)
@@ -83,15 +83,13 @@ class To_Disk(QuickScope):
 			### remove all old file starting
 			if self.timeLast == 0 and self.timeNext == INFINITY:
 				self.last_time_value[fn] = 0.0
-				if os.path.exists(fn):
-					os.remove(fn)
 
 			### init buffer
 			if fn not in self.buffer.keys():
 				self.buffer[fn] = 0.0
 
 			if msg:
-
+				print msg
 				# if step axis is choseen
 				if self.ea:
 					self.ea += 1
@@ -106,21 +104,24 @@ class To_Disk(QuickScope):
 					if hasattr(self, 'peek'):
 						t = Decimal(str(float(msg.time)))
 					else:
-						t = Decimal(str(float(msg.time[0])))
-
-				val = msg.value[self.col]
+						t = Decimal(str(float(msg[-1][0])))
+				
+				### adapted with PyPDEVS
+				
+				val = msg.value[self.col] if hasattr(self, 'peek') else msg[0][self.col]
+				
 				if isinstance(val, int) or isinstance(val, float):
 					v = Decimal(str(float(val)))
 				else:
 					v = val
-
+				
 				if t != self.last_time_value[fn]:
 					with open(fn, 'a') as f:
 						f.write("%s%s%s\n"%(self.last_time_value[fn],self.comma,self.buffer[fn]))
 					self.last_time_value[fn] = t
-
+				
 				self.buffer[fn] = v
-
+				
 				### run only with python 2.6
 				#with open(fn, 'a') as f:
 
@@ -131,11 +132,11 @@ class To_Disk(QuickScope):
 				#		f.truncate(self.pos[np])
 
 				#	else:
-				#		self.pos[np] = f.tell()
+				#		self.pos[np] = f.tell()						
 				#		self.last_time_value[fn] = t
 
 				#	f.write("%s%s%s\n"%(t,self.comma,v))
-
+					
 				del msg
 
 		self.state["sigma"] = 0
@@ -145,7 +146,8 @@ class To_Disk(QuickScope):
 		n = len(self.IPorts)
 		for np in xrange(n):
 			fn = "%s%d%s"%(self.fileName, np, self.ext)
-			with open(fn, 'a') as f:
-				f.write("%s%s%s\n"%(self.last_time_value[fn],self.comma,self.buffer[fn]))
+			if (fn in self.last_time_value) and (fn in self.buffer):
+				with open(fn, 'a') as f:
+					f.write("%s%s%s\n"%(self.last_time_value[fn],self.comma,self.buffer[fn]))
 	###
 	def __str__(self):return "To_Disk"

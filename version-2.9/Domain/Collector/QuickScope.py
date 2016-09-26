@@ -15,7 +15,7 @@ from DomainInterface.DomainBehavior import DomainBehavior
 # ===================================================================   #
 class QuickScope(DomainBehavior):
 	"""	QuickScope(fusion, eventAxis)
-			
+		
 		Atomic model ploting the data with some fonctionality.
 	"""
 
@@ -47,6 +47,7 @@ class QuickScope(DomainBehavior):
 		"""
 		
 		for np in xrange(len(self.IPorts)):
+			### adapted with PyPDEVS
 			if hasattr(self, 'peek'):
 				msg = self.peek(self.IPorts[np])
 			else:
@@ -59,16 +60,18 @@ class QuickScope(DomainBehavior):
 					self.eventAxis += 1
 					self.t = self.eventAxis
 				else:
-					self.t = msg.time
-					if not hasattr(self, 'peek'):
-						self.t = self.t[0]
-
-				#ecriture dans la liste pour affichier le QuickScope et le SpreadSheet
+					### adapted with PyPDEVS
+					self.t = msg.time if hasattr(self, 'peek') else msg[1][0]
+					
+				# ecriture dans la liste pour afficher le QuickScope et le SpreadSheet
 				# si il y a eu un changement du nombre de ports alors on creer la nouvelle entre dans results (on ne regenere pas d'instance)
+				### adapted with PyPDEVS
+				val = msg.value[0] if hasattr(self, 'peek') else msg[0][0]
+				
 				if np in self.results:
-					self.results[np].append((self.t, msg.value[0]))
+					self.results[np].append((self.t, val))
 				else:
-					self.results[np]=[(self.t, msg.value[0])]
+					self.results[np]=[(self.t, val)]
 					
 				del msg
 				
