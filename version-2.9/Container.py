@@ -781,6 +781,13 @@ class Diagram(Savable, Structurable):
 				### update priority list
 				self.priority_list.remove(shape.label)
 
+
+		### update the devs componentSet
+		coupled_devs = self.getDEVSModel()
+		devs = shape.getDEVSModel()
+		if coupled_devs and devs in coupled_devs.componentSet:
+			coupled_devs.componentSet.remove(devs)
+
 		try:
 			### delete shape
 			self.shapes.remove(shape)
@@ -972,6 +979,7 @@ class Diagram(Savable, Structurable):
 				try:
 					Publisher.unsubscribe(devs.finish, "%d.finished"%(id(devs)))
 				except:
+
 					devs.finish(None)
 
 			self.devsModel.componentSet = []

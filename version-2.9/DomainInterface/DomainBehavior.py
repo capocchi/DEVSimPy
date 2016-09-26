@@ -68,7 +68,7 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 		else:
 			from Object import Message
 			if isinstance(v, Message):
-				v = v.value
+				v = (v.value,v.time)
 			return {p:v}
 
 #	def peek(self, p):
