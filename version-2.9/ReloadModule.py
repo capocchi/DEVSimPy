@@ -43,7 +43,7 @@ def recompile(modulename):
 
 			### Ok, it compiled.  But will it execute without error?
 			try:
-				execfile(modulepath)
+				execfile(modulepath, globals())
 			except Exception:
 				#return "Error '%s' happened on line %d" % (info[0], info[1][1])
 				return "Error in execution: " + str(sys.exc_info()[0]) +"\r\n" + listf(format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback))
