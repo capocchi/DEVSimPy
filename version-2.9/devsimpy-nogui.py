@@ -89,7 +89,7 @@ if __name__ == '__main__':
  	_ = gettext.gettext
 
 	import argparse
- 	#print(sys.argv) 
+ 	#print(sys.argv)
 	parser = argparse.ArgumentParser(description="simulate a model unless other option is specified")
 	# required filename
 	parser.add_argument("filename", help="dsp or yaml devsimpy file")
@@ -98,6 +98,8 @@ if __name__ == '__main__':
 	# optional simulation_name for remote execution
 	parser.add_argument("-remote", help="remote execution", action="store_true")
 	parser.add_argument("-name", help="simulation name", type=str, default="simu")
+	# optional kernel for simulation kernel
+	parser.add_argument("-kernel", help="simulation kernel [pyDEVS|PyPDEVS]", type=str, default="pyDEVS")
 	# non-simulation options
 	group = parser.add_mutually_exclusive_group()
 	group.add_argument("-js", "--javascript",help="generate JS file", action="store_true")
@@ -115,7 +117,12 @@ if __name__ == '__main__':
 	else:
 		yamlHandler = YAMLHandler(filename)
 
-	if args.javascript: 
+	if args.kernel:
+		if 'PDEVS' in args.kernel:
+			__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyPDEVS_221'
+			__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = 'classic'
+
+	if args.javascript:
 		# Javascript generation
 		yamlHandler.getJS()
 	elif args.json:
@@ -126,7 +133,6 @@ if __name__ == '__main__':
 		# get the list of models in a master model
 		l = yamlHandler.getYAMLBlockModelsList()
 		sys.stdout.write(json.dumps(l))
-		
 	elif args.blockargs:
 		# model block parameters read or update
 		label = args.blockargs
@@ -137,13 +143,13 @@ if __name__ == '__main__':
 		else:
 			args = yamlHandler.getYAMLBlockModelArgs(label)
 			sys.stdout.write(json.dumps(args))
-		
+
 	else:
 		# simulation
 		duration = args.simulation_time
 		if isinstance(duration, str):
 			duration = float(duration)
-		
+
 		devs = yamlHandler.getDevsInstance()
 		if devs:
 			simulate(devs, duration, args.name, args.remote)
