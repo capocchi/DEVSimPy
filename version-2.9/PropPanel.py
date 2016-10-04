@@ -22,6 +22,9 @@
 
 import wx
 
+import gettext
+_ = gettext.gettext
+
 class PropPanel(wx.Panel):
 	"""
 	"""

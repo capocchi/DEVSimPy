@@ -13,6 +13,9 @@ import zipfile
 
 import wx.lib.filebrowsebutton as filebrowse
 
+import gettext
+_ = gettext.gettext
+
 if __name__ == '__main__':
 	__builtin__.__dict__['HOME_PATH'] = os.getcwd()
 	__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyDEVS'
@@ -39,7 +42,7 @@ class GeneralPanel(wx.Panel):
 		wx.Panel.__init__(self, parent)
 
 		### FileBrowse
-		self.plugin_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Plug-ins directory:"), toolTip=_("Change the plug-ins directory"), dialogTitle=_("Plugins directory..."))
+		self.plugin_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Plug-ins directory:"), toolTip=_("Change the plug-ins directory"), dialogTitle=_("Plug-ins directory..."))
 		self.domain_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Library directory:"), toolTip=_("Change the library directory"), dialogTitle=_("Libraries directory..."))
 		self.out_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Output directory:"), toolTip=_("Change the output directory"), dialogTitle=_("Output directory..."))
 
@@ -148,17 +151,28 @@ class GeneralPanel(wx.Panel):
 	def OnDomainPathChanged(self, event):
 		"""
 		"""
-		v = self.domain_dir.GetValue()
+		new_domain_dir = self.domain_dir.GetValue()
+		old_parent_domain_dir = os.path.dirname(__builtin__.__dict__['DOMAIN_PATH'])
 
 		### if value has been changed, we clean the library control panel
-		if __builtin__.__dict__['DOMAIN_PATH'] != v:
-			__builtin__.__dict__['DOMAIN_PATH'] = v
+		if __builtin__.__dict__['DOMAIN_PATH'] != new_domain_dir:
 
+			### remove the parent of Domain directory of this one is not the devsimpy directory
+			if old_parent_domain_dir != __builtin__.__dict__['HOME_PATH']:
+				sys.path.remove(old_parent_domain_dir)
+			### remove the path from sys.path in order to update the import process
+			for path in filter(lambda p: __builtin__.__dict__['DOMAIN_PATH'] in p, sys.path):
+				sys.path.remove(path)
+
+			### TODO remove dirname of path from sys.modules ?
+
+			### update the builtin
+			__builtin__.__dict__['DOMAIN_PATH'] = new_domain_dir
+
+			### update all Domain (the process add in sys.path the path invoked when import is used
 			mainW = wx.GetApp().GetTopWindow()
 			nb1 = mainW.GetControlNotebook()
 			tree = nb1.GetTree()
-
-			### update all Domain
 			for item in tree.GetItemChildren(tree.GetRootItem()):
 				tree.RemoveItem(item)
 

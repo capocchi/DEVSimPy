@@ -108,7 +108,8 @@ class LibraryTree(wx.TreeCtrl):
 		### if external domain we add also the dirname directory
 		if not dirname.startswith(DOMAIN_PATH):
 			if dirname not in sys.path:
-				sys.path.append(dirname)
+				### insert at position 2 before the path of the devsimpy source directory!
+				sys.path.insert(2,dirname)
 
 		### if module from Domain we add the DOMAIN_PATH is sys.path
 		elif DOMAIN_PATH not in sys.path:
@@ -775,7 +776,7 @@ class LibraryTree(wx.TreeCtrl):
 						for name in filter(lambda a: not isinstance(a, dict), name_list):
 							path = d.keys()[0]
 							if not name.endswith(('.cmd','.amd')):
-								self.CheckItem(os.path.join([path, name]))
+								self.CheckItem(os.path.join(path, name))
 
 			### restor expanded item
 			for item in map(lambda name: self.ItemDico[name], L):

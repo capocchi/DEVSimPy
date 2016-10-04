@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-# DomainBehavior.py --- Domaine Behavior virtual class
+# DomainBehavior.py --- Domain Behavior virtual class
 #                     --------------------------------
 #                        Copyright (c) 2009
 #                       Laurent CAPOCCHI
@@ -57,6 +57,24 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 		"""
 
 		BaseDEVS.AtomicDEVS.__init__(self, name=name)
+
+	def initPhase(self, phase="IDLE", sigma=0.0):
+		self.state = {'status':phase, 'sigma':sigma}
+
+	def phaseIs(self, phase):
+		return phase == self.state['status']
+
+	def passivate(self):
+		self.passivateIn('passive')
+
+	def passivateIn(self, phase=""):
+		self.holdIn(phase, sigma=INFINITY)
+
+	def holdIn(self, phase="", sigma=0.0):
+		''' "Holding in phase " + phase + " for time " + sigma
+		'''
+		self.state['status'] = phase
+		self.state['sigma'] = sigma
 
 	###
 	def poke(self, p, v):

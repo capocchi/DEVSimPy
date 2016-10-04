@@ -31,6 +31,7 @@ if __name__ == '__main__':
     ### permit correct import (based on fom instruction) in PyPDEVS directory (logger, util...) when this module executed (main)
 	d = sys.path.append(os.pardir)
 	if d not in sys.path:
+		print d
 		sys.path.append(d)
 
 import re
