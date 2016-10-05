@@ -52,7 +52,6 @@ import threading
 import cPickle
 import itertools
 import shutil
-import requests
 
 from ConfigParser import SafeConfigParser
 from tempfile import gettempdir
@@ -90,6 +89,22 @@ def install_and_import(package):
 		globals()[package] = importlib.import_module(package)
 
 def downloadFile(url, directory) :
+
+	#import requests
+	try:
+		importlib.import_module('requests')
+	except ImportError:
+		import pip
+		sys.stdout.write("Install requests package form pip\n")
+		try:
+			pip.main(['install', package])
+		except:
+			sys.stdout.write("Unable to install requests using pip. Please read the instructions for \
+			manual installation.. Exiting")
+			sys.stdout.write("Error: %s: %s" % (exc_info()[0], exc_info()[1]))
+	finally:
+		globals()[package] = importlib.import_module('requests')
+
 	localFilename = url.split('/')[-1]
 	with open(directory + '/' + localFilename, 'wb') as f:
 		start = time.clock()

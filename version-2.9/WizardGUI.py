@@ -722,7 +722,7 @@ class ModelGeneratorWizard(Wizard):
 				try:
 					zout = zipfile.ZipFile(self.model_path, "w")
 				except Exception, info:
-					sys.stsout.write(_("ERROR: Enable to creacte Zip file in Wizard GUI (%s)"%info))
+					sys.stdout.write(_("ERROR: Enable to create Zip file in Wizard GUI (%s)"%info))
 					return False
 				else:
 					if self.python_path == '':
@@ -742,7 +742,7 @@ class ModelGeneratorWizard(Wizard):
 
 						self.python_path = os.path.join(self.model_path, py_file)
 
-						### force model file (.amd or cmd) to have same name with choosed python file
+						### force model file (.amd or cmd) to have same name with the python file
 						#ext = os.path.basename(self.model_path).split('.')[1]
 						#self.model_path = os.path.join(os.path.dirname(self.model_path), "%s.%s"%(py_file.split('.')[0],ext))
 
@@ -768,6 +768,7 @@ class ModelGeneratorWizard(Wizard):
 							self.python_path = os.path.join(self.model_path, item.filename)
 							### TODO: get class from python file and test with insepct module if is submodule of DomainBehavior
 							break
+				zin.close()
 
 		return True
 

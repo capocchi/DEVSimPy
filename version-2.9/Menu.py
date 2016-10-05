@@ -595,7 +595,7 @@ class ItemLibraryPopupMenu(wx.Menu):
 		### last child of tree and not empty directory (then, has OnDocumentation method)
 
 		if parent.IsBold(parent.GetSelection()):
-			new_model = wx.MenuItem(self, ID_NEW_MODEL_LIB, _('New Model'), _('Add new model to the selected library'))
+			new_model = wx.MenuItem(self, ID_NEW_MODEL_LIB, _('New Model'), _('Add a new model to the selected library'))
 			new_model.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16, 'new.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 			self.InsertItem(0, new_model)
 			self.Bind(wx.EVT_MENU, parent.OnNewModel, id=ID_NEW_MODEL_LIB)
