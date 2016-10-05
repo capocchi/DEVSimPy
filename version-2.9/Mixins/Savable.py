@@ -169,20 +169,22 @@ class DumpZipFile(DumpBase):
 
 				os.remove(fn)
 
-				## chemin absolu du repertoir contenant le fichier a exporter (str() pour eviter l'unicode)
+				## abs path of the directory that contains the file to export (str() to avoid unicode)
 				newExportPath = str(os.path.dirname(fileName))
 
 				mainW = getTopLevelWindow()
-				### si export dans un repertoir local on insert le chemin dans le fichier de config
+				### if export on local directory, we insert the path in the config file
 				if not os.path.basename(DOMAIN_PATH) in newExportPath.split(os.sep):
-					### mise a jour du fichier .devsimpy
+					### update of .devsimpy config file
 					mainW.exportPathsList = eval(mainW.cfg.Read("exportPathsList"))
 					if newExportPath not in mainW.exportPathsList:
 						mainW.exportPathsList.append(str(newExportPath))
 					mainW.cfg.Write("exportPathsList", str(eval("mainW.exportPathsList")))
 
-				### si la librairie est deja charger dans l'environnement on met à jour ces modeles
+				### if lib is already in the lib tree, we update the tree
 				mainW.tree.UpdateDomain(newExportPath)
+				### to sort lib tree
+				mainW.tree.SortChildren(mainW.tree.root)
 
 			except Exception, info:
 

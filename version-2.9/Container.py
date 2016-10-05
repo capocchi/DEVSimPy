@@ -3331,7 +3331,6 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 			path = self.model_path
 			label = os.path.basename(path)
 
-
 		if path:
 			try:
 				### Block is Savable
