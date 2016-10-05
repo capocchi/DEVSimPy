@@ -90,22 +90,7 @@ def install_and_import(package):
 
 def downloadFile(url, directory) :
 
-	import importlib
-
-	#import requests
-	try:
-		importlib.import_module('requests')
-	except ImportError:
-		import pip
-		sys.stdout.write("Install requests package form pip\n")
-		try:
-			pip.main(['install', package])
-		except:
-			sys.stdout.write("Unable to install requests using pip. Please read the instructions for \
-			manual installation.. Exiting")
-			sys.stdout.write("Error: %s: %s" % (exc_info()[0], exc_info()[1]))
-	finally:
-		globals()['requests'] = importlib.import_module('requests')
+	install_and_import('requests')
 
 	localFilename = url.split('/')[-1]
 	with open(directory + '/' + localFilename, 'wb') as f:

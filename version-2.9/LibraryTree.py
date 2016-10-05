@@ -297,11 +297,26 @@ class LibraryTree(wx.TreeCtrl):
 
 		### update the view of the domain
 		if gmwiz:
+
+			### save .dat file in the .cmd or .amd
+			m = BlockFactory.CreateBlock(python_file = gmwiz.python_path,
+										model_file = gmwiz.model_path)
+			if m:
+				if not m.SaveFile(gmwiz.model_path):
+					dlg = wx.MessageDialog(self, \
+										_('Error saving file %s\n')%os.path.basename(gmwiz.model_path), \
+										gmwiz.label, \
+										wx.OK | wx.ICON_ERROR)
+					dlg.ShowModal()
+
 			item = self.ItemDico[os.path.dirname(gmwiz.model_path)]
 			self.UpdateDomain(self.GetPyData(item))
 
 			### sort all item
 			self.SortChildren(self.root)
+
+		# Cleanup
+		gmwiz.Destroy()
 
 	###
 	def GetDomainList(self, dName):

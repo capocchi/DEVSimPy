@@ -746,6 +746,7 @@ class ModelGeneratorWizard(Wizard):
 						#ext = os.path.basename(self.model_path).split('.')[1]
 						#self.model_path = os.path.join(os.path.dirname(self.model_path), "%s.%s"%(py_file.split('.')[0],ext))
 
+
 					zout.writestr('DEVSimPyModel.dat', _("Call SaveFile method first!"))
 
 					if self.plugin_path != '':
