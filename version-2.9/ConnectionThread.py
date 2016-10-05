@@ -65,6 +65,7 @@ class unzip:
                 outfile.flush()
                 outfile.close()
 
+		zf.close()
 
     def _createstructure(self, file, dir):
         self._makedirs(self._listdirs(file), dir)
@@ -87,6 +88,8 @@ class unzip:
         for name in zf.namelist():
             if name.endswith('/'):
                 dirs.append(name)
+
+		zf.close()
 
         dirs.sort()
         return dirs

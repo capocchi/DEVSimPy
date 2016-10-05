@@ -90,6 +90,8 @@ def install_and_import(package):
 
 def downloadFile(url, directory) :
 
+	import importlib
+
 	#import requests
 	try:
 		importlib.import_module('requests')

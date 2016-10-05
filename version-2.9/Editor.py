@@ -804,6 +804,7 @@ class EditionNotebook(wx.Notebook):
 					importer = zipfile.ZipFile(model_path, "r")
 					fileInfo = importer.getinfo(name)
 					fileCode = importer.read(fileInfo)
+					importer.close()
 			else:
 				with open(path, 'r') as f:
 					fileCode = f.read()
