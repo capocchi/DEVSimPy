@@ -1856,8 +1856,15 @@ if __builtin__.__dict__['GUI_FLAG']:
 					self.makeConnectionShape(sn, tn)
 			### if both combo box selection are All, delete all of the connection from the top to the bottom
 			elif (snl == sp+1 and tnl == tp+1):
-				for sn,tn in map(lambda a,b: (a,b), self.sourceNodeList, self.targetNodeList):
-					self.makeConnectionShape(sn, tn)
+				### if input and output port number are the same
+				#if len(self.sourceNodeList) == len(self.targetNodeList):
+				#	for sn,tn in zip(self.sourceNodeList, self.targetNodeList):
+				#		self.makeConnectionShape(sn, tn)
+				#else:
+				for sn in self.sourceNodeList:
+					for tn in self.targetNodeList:
+						self.makeConnectionShape(sn, tn)
+
 			### else make simple connection between sp and tp port number of source and target
 			else:
 				sn = self.sourceNodeList[sp]
