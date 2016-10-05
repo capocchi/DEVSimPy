@@ -105,7 +105,7 @@ def downloadFile(url, directory) :
 			manual installation.. Exiting")
 			sys.stdout.write("Error: %s: %s" % (exc_info()[0], exc_info()[1]))
 	finally:
-		globals()[package] = importlib.import_module('requests')
+		globals()['requests'] = importlib.import_module('requests')
 
 	localFilename = url.split('/')[-1]
 	with open(directory + '/' + localFilename, 'wb') as f:
