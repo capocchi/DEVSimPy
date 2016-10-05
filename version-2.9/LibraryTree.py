@@ -299,7 +299,10 @@ class LibraryTree(wx.TreeCtrl):
 		if gmwiz:
 
 			### save .dat file in the .cmd or .amd
-			m = BlockFactory.CreateBlock(python_file = gmwiz.python_path,
+			m = BlockFactory.CreateBlock(label = gmwiz.label,
+										inputs = gmwiz.inputs,
+										outputs = gmwiz.outputs,
+										python_file = gmwiz.python_path,
 										model_file = gmwiz.model_path)
 			if m:
 				if not m.SaveFile(gmwiz.model_path):

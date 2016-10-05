@@ -689,7 +689,7 @@ class Diagram(Savable, Structurable):
 				### Check if models have the same label
 				L = diagram.GetLabelList([])
 				if len(L)!=len(set(L)):
-					print L, set(L)
+					#print L, set(L)
 					wx.MessageBox(_("It seems that models have same label.\nIf you plan to use Flat simulation algorithm, all model must have a unique label."), _("Simulation Manager"))
 
 				### set the name of diagram

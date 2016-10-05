@@ -256,8 +256,6 @@ class CMDComponent(GenericComponent):
 		# new containerBlock model
 		self.__m = ContainerBlock(self._label, self._inputs, self._outputs)
 
-		print range(self._inputs)
-
 		# input and output ports
 		for id in xrange(self._inputs):
 			iport = iPort(label='IPort %d'%(id))

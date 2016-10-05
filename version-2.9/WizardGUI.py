@@ -757,7 +757,7 @@ class ModelGeneratorWizard(Wizard):
 				### search python file in archive
 				zin = zipfile.ZipFile(self.model_path, 'r')
 				info_list = zin.infolist()
-				### si le nom du fichier python py est le meme que le nom du modèle .amd ou .cmd
+				### si le nom du fichier python py est le meme que le self.makeConnectionShape(sn, tn) nom du modèle .amd ou .cmd
 				name = "%s.py"%os.path.splitext(os.path.basename(self.model_path))[0]
 				if name in info_list:
 					self.python_path = os.path.join(self.model_path, name)
