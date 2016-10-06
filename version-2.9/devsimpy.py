@@ -6,7 +6,7 @@
 #                     --------------------------------
 #                            Copyright (c) 2016
 #                    L. CAPOCCHI (capocchi@univ-corse.fr)
-#                        SPE Lab - University of Corsica
+#                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
 # Version 2.9                                      last modified:  09/19/16
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -18,7 +18,7 @@
 # remarks: lib tree is build by the TreeLitLib class.
 # Moreover, __init__.py file is required for the build (see GetSubDomain method).
 # in order to make a lib:
-#	1/ make a MyLib rep with Message.py, DomainBehavior.py et DomaineStrucutre.py
+#	1/ make a MyLib rep with Message.py, DomainBehavior.py and DomaineStrucutre.py
 #   2/ __all_ = [] in __init__.py file must use return
 #   3/ python file that is not in __all__ is not imported
 #   4/ the constructor of all class must have a default value of the parameters
@@ -34,7 +34,7 @@
 ### at the beginning to prevent with statement for python version <=2.5
 from __future__ import with_statement
 
-__authors__  = "Laurent Capocchi <capocchi@univ-corse.fr, lcapocchi@gmail.com>, SISU project group <santucci@univ-coorse.fr>" # ajouter les noms et les mails associés aux autres auteurs
+__authors__  = "Laurent Capocchi <capocchi@univ-corse.fr, lcapocchi@gmail.com>, SISU project group <santucci@univ-corse.fr>"
 __date__    = "19 Sept 2016, 15:13 GMT"
 __version__ = '2.9'
 __docformat__ = 'epytext'
@@ -144,11 +144,11 @@ if not hasattr(sys, 'frozen'):
 			import wxversion
 
 	finally:
-
 		### if devsimpy.ini file exist, it contains the wx version to load.
 		if ini_exist:
 			v = parser.get(section, option)
 			wxversion.select([v])
+
 		### select the wxpython version from __min_wx_version__
 		else:
 			if wxversion.checkInstalled(__min_wx_version__):
@@ -156,7 +156,6 @@ if not hasattr(sys, 'frozen'):
 
 	### trying to import wx
 	try:
-
 		### if wxpython has been installed using portable python solution (winpython, PythonXY, anaconda...), we add the wx path to the python path
 		from distutils.sysconfig import get_python_lib
 		path = os.path.join(get_python_lib(),'wx-3.0-msw')
@@ -215,38 +214,7 @@ if not hasattr(sys, 'frozen'):
 				sys.exit()
 import wx
 
-# 	try:
-# 		if not hasattr(sys, 'frozen'):
-# 			import wxversion as wxv
-#
-# 			if wxv.checkInstalled(__min_wx_version__):
-# 				wxv.select(__min_wx_version__)
-# 			else:
-# 				import wx
-# 				app = wx.PySimpleApp()
-# 				wx.MessageBox("The requested version of wxPython is not installed.\nPlease install version %s" %__min_wx_version__, "wxPython Version Error")
-# 				app.MainLoop()
-# 				webbrowser.open(__wxpython_url__)
-# 				sys.exit()
-#
-# 		import wx
-#
-# 	except ImportError:
-# 		## wxversion not installed
-# 		try:
-# 			import wx
-# 			if wx.VERSION_STRING < __min_wx_version__:
-# 				sys.stdout.write("You need to updgarde wxPython to v%s (or higer) to run DEVSimPy\n"%__min_wx_version__)
-# 				sys.stdout.write(__get__wxpython__)
-# 				sys.exit()
-# 		except ImportError:
-# 				sys.stderr.write("Error: DEVSimPy requires wxPython, which doesn't seem to be installed\n")
-# 				sys.stdout.write(__get__wxpython__)
-# 				sys.exit()
-# 		sys.stdout.write("Warning: the package python-wxversion was not found, please install it.\n")
-# 		sys.stdout.write("DEVSimPy will continue anyway, but not all features might work.\n")
-
-sys.stdout.write("Importing wxPython %s%s for python %s on %s (%s) platform...\n"%(wx.version(), " from devsimpy.ini" if ini_exist else '',platform.python_version(), platform.system(), platform.version()))
+sys.stdout.write("Importing wxPython %s%s for python %s on %s (%s) platform...\n"%(wx.version(), " from devsimpy.ini" if ini_exist else '', platform.python_version(), platform.system(), platform.version()))
 
 import wx.aui
 import wx.py as py
@@ -273,7 +241,7 @@ else:
 	from wx.lib.pubsub import setuparg1
 	from wx.lib.pubsub import pub
 
-### specific builtin variables. (dont modify the defautls value. If you want to change it, go tot the PreferencesGUI from devsimpy interface.)
+### specific built-in variables. (don't modify the default value. If you want to change it, go to the PreferencesGUI from devsimpy interface.)
 builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'),
 				'DEVSIMPY_PNG': 'iconDEVSimPy.png',	# png file for devsimpy icon
 				'HOME_PATH': ABS_HOME_PATH,
