@@ -848,6 +848,11 @@ def simulator_factory(model, strategy, prof, ntl, verbose):
 			self._sleeptime = sleeptime
 
 		def suspend(self):
+
+			#main_thread = threading.currentThread()
+			#for t in threading.enumerate():
+			#	t.thread_suspend = True
+
 			self.thread_suspend = True
 
 		def resume_thread(self):

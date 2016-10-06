@@ -530,7 +530,6 @@ class SimStrategy4(SimStrategy):
 
         S = Simulator(self._simulator.model)
 
-
         ### old version of PyPDEVS
         if len(inspect.getargspec(S.simulate).args) > 1:
 

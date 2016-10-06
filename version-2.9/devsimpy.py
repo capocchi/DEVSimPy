@@ -318,7 +318,7 @@ import ReloadModule
 from ImportLibrary import ImportLibrary
 from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
-from pluginmanager import load_plugins
+from pluginmanager import load_plugins, enable_plugin
 from which import which
 from Utilities import GetMails, IsAllDigits, GetUserConfigDir
 from Decorators import redirectStdout, BuzyCursorNotification
@@ -596,7 +596,7 @@ class MainApplication(wx.Frame):
 				### here because it needs to PLUGINS_PATH macro defined in D
 				for plugin in eval(self.cfg.Read("plugins")):
 					load_plugins(plugin)
-
+					enable_plugin(plugin)
 			else:
 				wx.MessageBox('.devsimpy file appear to be a very old version and should be updated....\nWe rewrite a new blank version.',
 									'Configuration',
@@ -705,7 +705,7 @@ class MainApplication(wx.Frame):
 		self.tb.EnableTool(wx.ID_REDO, False)
 
 		### default direct connector toogled
-		self.tb.ToggleTool(self.toggle_list[0],1)
+		self.tb.ToggleTool(self.toggle_list[0], 1)
 
 		### Binding
 		self.Bind(wx.EVT_TOOL, self.OnNew, self.tools[0])

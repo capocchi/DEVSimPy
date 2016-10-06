@@ -8,9 +8,11 @@ import os
 
 # list of registred plug-ins
 plugins = defaultdict(list)
-# list of disable event plug-in
+# list of enable/disable event plug-in
+enabled_event = []
 disabled_event = []
-# list of disabled plug-ins
+# list of enable/disabled plug-ins
+enabled_plugin = []
 disabled_plugin = []
 
 def idle(*args, **kwargs):
@@ -33,12 +35,13 @@ def enable_plugin(plugin):
 		event, functions = c
 		for f in functions:
 			if plugin == f.__module__ and event in disabled_event:
-				disabled_event.remove(event)
-				if plugin in disabled_plugin:
-					disabled_plugin.remove(plugin)
+				if event not in enabled_event: enabled_event.append(event)
+				if event in disabled_event: disabled_event.remove(event)
+				if plugin not in enabled_plugin: enabled_plugin.append(plugin)
+				if plugin in disabled_plugin: disabled_plugin.remove(plugin)
 
 def disable_plugin(plugin):
-	""" Append resp. the plugin and the event to the disabled_plugin and disabled_event lists.
+	""" Append resp. the plug-in and the event to the disabled_plugin and disabled_event lists.
 	"""
 
 	for c in plugins.items():
@@ -47,16 +50,19 @@ def disable_plugin(plugin):
 			if plugin == f.__module__ and event not in disabled_event:
 				if hasattr(sys.modules[plugin],'UnConfig'):
 					apply(sys.modules[plugin].UnConfig,())
-				disabled_event.append(event)
-				if plugin not in disabled_plugin:
-					disabled_plugin.append(plugin)
+
+				if event in enabled_event: enabled_event.remove(event)
+				if event not in disabled_event: disabled_event.append(event)
+				if plugin in enabled_plugin: enabled_plugin.remove(plugin)
+				if plugin not in disabled_plugin: disabled_plugin.append(plugin)
 
 
 def is_enable(plugin):
 	"""
 	"""
 	if isinstance(plugin, str):
-		return plugin in [l[0].__name__ for l in plugins.values() if l != [] ]
+		return plugin in enabled_plugin
+		#return plugin in [l[0].__name__ for l in plugins.values() if l != [] ]
 	else:
 		return plugin in plugins.values()
 

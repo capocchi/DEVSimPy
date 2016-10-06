@@ -554,7 +554,7 @@ class Preferences(wx.Toolbook):
 		event.Skip()
 
 	def OnAdd(self, event):
-		""" Add plugin
+		""" Add plug-in
 		"""
 		wcd = 'All files (*)|*|Editor files (*.py)|*.py'
 		open_dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=HOME_PATH, defaultFile='', wildcard=wcd, style=wx.OPEN|wx.CHANGE_DIR)

@@ -1656,7 +1656,7 @@ class BlockEditor(Editor):
 			('CheckErrors', 'self, base_name, code, new_instance'),
 			('UpdateModule', 'self'),
 			('OnInsertPeekPoke', 'self, event'),
-			('OnInsertState', 'self, event')
+			('OnInsertHoldInState', 'self, event')
 		]
 		return "\n--------------------------------------------------\
 		\n\tClass :\t\t%s\n\n\tInherit from :\t%s\n\n\tAttributes :\t%s\n\n\tMethods :\t%s\n" % (
@@ -1673,12 +1673,16 @@ class BlockEditor(Editor):
 
 		peek = wx.MenuItem(insert, wx.NewId(), _('New peek'), _('Generate new peek code'))
 		poke = wx.MenuItem(insert, wx.NewId(), _('New poke'), _('Generate new poke code'))
-		state = wx.MenuItem(insert, wx.NewId(), _('New state'), _('Generate new state code (ACTIVE, IDEL,...)'))
+		holdInState = wx.MenuItem(insert, wx.NewId(), _('New hold in state'), _('Generate new hold in state code self.holdIn(...)'))
+		passivateInState = wx.MenuItem(insert, wx.NewId(), _('New passivate in state'), _('Generate new passivate in state code self.passivateIn(...)'))
+		passivateState = wx.MenuItem(insert, wx.NewId(), _('New passivate state'), _('Generate new passivate state code self.passivate(...)'))
 		debug = wx.MenuItem(insert, wx.NewId(), _('New debugger'), _('Generate new debugger code (print into the log of model)'))
 
 		insert.AppendItem(peek)
 		insert.AppendItem(poke)
-		insert.AppendItem(state)
+		insert.AppendItem(holdInState)
+		insert.AppendItem(passivateInState)
+		insert.AppendItem(passivateState)
 		insert.AppendItem(debug)
 
 		menu = self.GetMenuBar().GetMenu(1)
@@ -1688,15 +1692,19 @@ class BlockEditor(Editor):
 		### insert new icon in toolbar (icon are not available in embeded editor (Show menu)
 		tb = self.GetToolBar()
 		tb.InsertSeparator(tb.GetToolsCount())
-		tb.AddTool(peek.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')),shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
-		tb.AddTool(poke.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')),shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
-		tb.AddTool(state.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')),shortHelpString=_('New state'), longHelpString=_('Insert a code for a new state'))
+		tb.AddTool(peek.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')), shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
+		tb.AddTool(poke.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')), shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
+		tb.AddTool(holdInState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New hold in state'), longHelpString=_('Insert a code for a new hold in state'))
+		tb.AddTool(passivateInState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New passivate in state'), longHelpString=_('Insert a code for a new passivate in state'))
+		tb.AddTool(passivateState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New passivate state'), longHelpString=_('Insert a code for a new passivate state'))
 		tb.AddTool(debug.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'debugger.png')),shortHelpString=_('New debugger'), longHelpString=_('Insert a code for print information into the log of model'))
 		tb.Realize()
 
 		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=poke.GetId())
-		self.Bind(wx.EVT_MENU, self.OnInsertState, id=state.GetId())
+		self.Bind(wx.EVT_MENU, self.OnInsertHoldInState, id=holdInState.GetId())
+		self.Bind(wx.EVT_MENU, self.OnInsertPassivateInState, id=passivateInState.GetId())
+		self.Bind(wx.EVT_MENU, self.OnInsertPassivateState, id=passivateState.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertDebug, id=debug.GetId())
 
 	def ConfigureTB(self):
@@ -1707,13 +1715,13 @@ class BlockEditor(Editor):
 		self.toolbar.InsertSeparator(self.toolbar.GetToolsCount())
 		self.toolbar.AddTool(id[0], wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')),shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
 		self.toolbar.AddTool(id[1], wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')),shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
-		self.toolbar.AddTool(id[2], wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')),shortHelpString=_('New state'), longHelpString=_('Insert a code for a new state'))
+		self.toolbar.AddTool(id[2], wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')),shortHelpString=_('New hold in state'), longHelpString=_('Insert a code for a new hold in state'))
 		self.toolbar.AddTool(id[3], wx.Bitmap(os.path.join(ICON_PATH_16_16,'debugger.png')),shortHelpString=_('New debugger'), longHelpString=_('Insert a code for print information into the log of model'))
 		self.toolbar.Realize()
 
 		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=id[0])
 		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=id[1])
-		self.Bind(wx.EVT_MENU, self.OnInsertState, id=id[2])
+		self.Bind(wx.EVT_MENU, self.OnInsertHoldInState, id=id[2])
 		self.Bind(wx.EVT_MENU, self.OnInsertDebug, id=id[3])
 
 	### NOTE: BlockEditor :: OnInsertPeekPoke => Event when insert peek or insert poke button is clicked
@@ -1746,36 +1754,36 @@ class BlockEditor(Editor):
 				if "peek" in label:
 					cp.AddTextUTF8("self.peek(self.IPorts[%d])" % int(port))
 				elif "poke" in label:
-					cp.AddTextUTF8("self.poke(self.OPorts[%d], <Message>)" % int(port))
+					cp.AddTextUTF8("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))" % int(port))
 				else:
 					pass
 
 				cp.modify = True
 
-	# NOTE: BlockEditor :: OnInsertState 	=> Event when insert state button is clicked
-	def OnInsertState(self, event):
+	# NOTE: BlockEditor :: OnInsertHoldInState 	=> Event when insert state button is clicked
+	def OnInsertHoldInState(self, event):
+		""" Insert a sentence to change the state
 		"""
-		"""
-
-		dlg = wx.SingleChoiceDialog(self, _('Status'), _('Which one?'), ['IDLE', 'ACTIVE'], wx.CHOICEDLG_STYLE)
-		if dlg.ShowModal() == wx.ID_OK:
-			status = dlg.GetStringSelection()
-		else:
-			status = None
-		dlg.Destroy()
-
 		cp = self.nb.GetCurrentPage()
-		if status == "IDLE":
-			cp.AddTextUTF8("self.state = {'status': 'IDLE', 'sigma': INFINITY}")
-		elif status == "ACTIVE":
-			cp.AddTextUTF8("self.state = {'status': 'ACTIVE', 'sigma': 0}")
-		else:
-			pass
+		cp.AddTextUTF8("self.holdIn('<phase>',<sigma>)")
+		cp.modify = True
 
+	def OnInsertPassivateInState(self, event):
+		""" Insert a sentence to change the state
+		"""
+		cp = self.nb.GetCurrentPage()
+		cp.AddTextUTF8("self.passivateIn('<phase>')")
+		cp.modify = True
+
+	def OnInsertPassivateState(self, event):
+		""" Insert a sentence to change the state
+		"""
+		cp = self.nb.GetCurrentPage()
+		cp.AddTextUTF8("self.passivate()")
 		cp.modify = True
 
 	def OnInsertDebug(self, event):
-		""" Insert debugger function that trace message into the log of model
+		""" Insert a sentence to invoke the debugger function that trace message into the log of model
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddTextUTF8("self.debugger('<message>')")

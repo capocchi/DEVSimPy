@@ -98,9 +98,16 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 #			return self.myInput[p]
 
 	def getFlatComponentSet (self):
-
 	    return {self.name : self}
 
+	def getSigma(self):
+		return self.state['sigma']
+
+	def getStatus(self):
+		return self.state['status']
+
+	def getState(self):
+		return self.state
 	def __str__(self):
 		"""
 		"""

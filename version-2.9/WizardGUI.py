@@ -11,6 +11,7 @@ import sys
 import inspect
 import zipfile
 import  wx.lib.filebrowsebutton as filebrowse
+import datetime
 
 import Container
 import Components
@@ -20,18 +21,20 @@ _ = wx.GetTranslation
 padding = 5
 MAX_NB_PORT = 100
 MIN_NB_PORT = 0
+# Gives user's home directory
+USERHOME = os.path.expanduser('~')
 
 def atomicCode(label):
 	code = """# -*- coding: utf-8 -*-
 
 \"\"\"
 -------------------------------------------------------------------------------
- Name:          <filename.py>
- Model:         <describe model>
- Authors:       <your name>
- Organization:  <your organization>
- Date:          <yyyy-mm-dd>
- License:       <your license>
+ Name:          		%s.py
+ Model description:     <description>
+ Authors:       		%s
+ Organization:  		<your organization>
+ Current date & time:   %s
+ License:       		GPL v3.0
 -------------------------------------------------------------------------------
 \"\"\"
 
@@ -41,7 +44,7 @@ from DomainInterface.Object import Message
 
 ### Model class ----------------------------------------------------------------
 class %s(DomainBehavior):
-	''' DEVS Class for %s model
+	''' DEVS Class for the model %s
 	'''
 
 	def __init__(self):
@@ -49,7 +52,7 @@ class %s(DomainBehavior):
 		'''
 		DomainBehavior.__init__(self)
 
-		self.state = {	'status': 'IDLE', 'sigma':INFINITY}
+		self.initPhase('IDLE',INFINITY)
 
 	def extTransition(self%s):
 		''' DEVS external transition function.
@@ -76,12 +79,15 @@ class %s(DomainBehavior):
 		'''
 		pass
 """%(label,
+	os.path.split(USERHOME)[-1],
+	datetime.datetime.now(),
 	label,
-	'' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else ', inputs=None',
-	'pass' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else 'return self.state',
+	label,
+	'' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else ', *args',
+	'pass' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else 'return self.getState()',
 	'pass' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else 'return {}',
-	'pass' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else 'return self.state',
-	"return self.state['sigma']" if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else "return float('inf')")
+	'pass' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else 'return self.getState()',
+	"return self.getSigma()")
 
 	### add confluent function only if PyPDEVS is used.
 	code += """
@@ -90,7 +96,7 @@ class %s(DomainBehavior):
 		'''
 		self.state = self.intTransition()
 		self.state = self.extTransition(inputs)
-		return self.state""" if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME else ''
+		return self.getState()""" if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME else ''
 
 	return code
 
@@ -99,12 +105,10 @@ def coupledCode(label):
 # -*- coding: utf-8 -*-
 \"\"\"
 -------------------------------------------------------------------------------
- Name:        <filename.py>
-
- Model:       <describe model>
- Authors:      <your name>
-
- Date:     <yyyy-mm-dd>
+ Name:      			%s.py
+ Model description:     <description>
+ Authors:   			%s
+ Date:     				%s
 -------------------------------------------------------------------------------
 \"\"\"
 
@@ -114,7 +118,10 @@ class %s(DomainStructure):
 
 	def __init__(self):
 		DomainStructure.__init__(self)
-"""%label
+"""%(label,
+	label,
+	os.path.split(USERHOME)[-1],
+	datetime.datetime.now())
 
 class TextObjectValidator(wx.PyValidator):
 	""" TextObjectValidator()

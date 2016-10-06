@@ -24,6 +24,9 @@ import codecs
 import string
 import types
 
+import gettext
+_ = gettext.gettext
+
 from tempfile import gettempdir
 
 if __builtin__.__dict__['GUI_FLAG']:

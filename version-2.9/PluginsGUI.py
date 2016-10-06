@@ -123,7 +123,7 @@ class GeneralPluginsList(CheckListCtrl):
 		### Populate method is called ?
 		self.is_populate = False
 
-		### active plug-ins stored in DEVSimPy config file
+		### active plug-ins stored in DEVSimPy configuration file
 		try:
 			self.active_plugins_list = eval(self.mainW.cfg.Read("plugins"))
 		except AttributeError:
@@ -248,7 +248,7 @@ class GeneralPluginsList(CheckListCtrl):
 				if file is not None:
 					### get abspath and exclude .pyc
 					name,ext = os.path.splitext(os.path.basename(file))
-					### if plug-in is checked, we activate
+					### if plug-in is checked, we activate it
 					if self.IsChecked(i):
 						pluginsList.append(name)
 						enable_plugin(name)
