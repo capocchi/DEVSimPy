@@ -119,9 +119,9 @@ class %s(DomainStructure):
 	def __init__(self):
 		DomainStructure.__init__(self)
 """%(label,
-	label,
 	os.path.split(USERHOME)[-1],
-	datetime.datetime.now())
+	datetime.datetime.now(),
+	label)
 
 class TextObjectValidator(wx.PyValidator):
 	""" TextObjectValidator()
