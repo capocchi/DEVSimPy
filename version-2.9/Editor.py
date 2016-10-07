@@ -1735,9 +1735,9 @@ class BlockEditor(Editor):
 		sins = None
 
 		if "peek" in label:
-			sins = map(str, range(self.cb.input))
+			sins = map(str, range(self.cb.input if hasattr(self.cb, 'input') else 10))
 		elif "poke" in label:
-			sins = map(str, range(self.cb.output))
+			sins = map(str, range(self.cb.output if hasattr(self.cb, 'output') else 10))
 		else:
 			sys.stdout.write(_("function not implemented"))
 
