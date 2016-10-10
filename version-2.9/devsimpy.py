@@ -95,7 +95,11 @@ def downloadFile(url, directory) :
 	localFilename = url.split('/')[-1]
 	with open(directory + '/' + localFilename, 'wb') as f:
 		start = time.clock()
-		r = requests.get(url, stream=True)
+		try:
+			r = requests.get(url, stream=True)
+		except:
+			sys.stdout.write('Failed to establish internet connection\n.')
+			sys.exit()
 		total_length = r.headers.get('content-length')
 		dl = 0
 		if total_length is None: # no content length header
@@ -169,37 +173,72 @@ if not hasattr(sys, 'frozen'):
 		try:
 			### wx is not installed, we try to install it from pip (local or remote)
 			sys.stderr.write("Error: DEVSimPy requires the wxPython package, which doesn't seem to be installed\n")
-			r = raw_input("Do you want to install wxPython package form the PyPi repository (1) or DEVSimPy github repository (2) (1/2)?") or 2
+			r = raw_input("Do you want to install wxPython package form (1) the PyPi repository or (2) DEVSimPy github repository (1/2)?") or 2
 			if r == '1':
 				install_and_import('wx')
 			else:
 				import pip
-				#sys.stdout.write("wx package installation from local whl files repository...\n")
+
+				### find the CPU architecture
 				is_64bits = sys.maxsize > 2**32
 
 				### get whl file from DEVSimPy-site hosted by github
 				file = 'wxPython-3.0.2.0-cp27-none-win'+'_amd64.whl' if is_64bits else '32.whl'
-				url = 'https://capocchi.github.io/DEVSimPy-site/pip-packages/'+file
-				directory = gettempdir()
-				sys.stdout.write("Downloading %s from DEVSimPy GitHub repository...\n"%(file))
-				time_elapsed = downloadFile(url, directory)
-				sys.stdout.write("Download complete!\n")
-				whl_path = os.path.join(directory,file)
 
-				### install wx package
+				### url to download the whl file
+				whl_url = 'https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/pip-packages/'+file
+
+				### temp directory to store whl file
+				temp_directory = gettempdir()
+
+				whl_path = os.path.join(temp_directory, file)
+
+				sys.stdout.write("Downloading %s from DEVSimPy GitHub repository...\n"%(file))
+				time_elapsed = downloadFile(whl_url, temp_directory)
+				sys.stdout.write("Download complete!\n")
+
+				### install wx package form whl file
 				pip.main(['install', whl_path])
+
+				### Add plot.py patched file
+				from distutils.sysconfig import get_python_lib
+
+				### download plot.py file
+				url = 'https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/patched_files/plot.py'
+				sys.stdout.write("Downloading plot.py patched file from DEVSimPy GitHub repository...\n")
+				time_elapsed = downloadFile(url, temp_directory)
+				sys.stdout.write("Download complete!\n")
+
+				### new plot.py temp file
+				new_plot_path = os.path.join(temp_directory, 'plot.py')
+
+				### path of the wx lib that contain the plot.py file
+				wx_path = os.path.join(get_python_lib(),'wx-3.0-msw','wx','lib')
+
+				### try to remove the plot.py file that need to be replace by the patched plot.py file
+				try:
+					os.remove(os.path.join(wx_path, 'plot.py'))
+				except Exception, info:
+					sys.stdout.write("Error removing the plot.py file: %s\n"%info)
+				else:
+					### copy the patched plot.py file into the wx directory
+					shutil.copy(new_plot_path, wx_path)
+					sys.stdout.write("Patched plot.py file applied!\n")
 
 				### delete temp file
 				try:
-					os.remove(whl_path)
+					if os.path.exists(whl_path):
+						os.remove(whl_path)
+					if os.path.exists(new_plot_path):
+						os.remove(new_plot_path)
 				except Exception, info:
 					sys.stdout.write("Error cleaning temp file: %s\n"%info)
 				else:
 					sys.stdout.write("Clean temp file complete!\n")
 
-				### add wx-3.0-msw to the path
-				from distutils.sysconfig import get_python_lib
+				### add wx-3.0-msw to the path and import it
 				sys.path.append(os.path.join(get_python_lib(),'wx-3.0-msw'))
+
 				import wx
 
 		except ImportError, info:
@@ -216,7 +255,11 @@ import wx
 
 sys.stdout.write("Importing wxPython %s%s for python %s on %s (%s) platform...\n"%(wx.version(), " from devsimpy.ini" if ini_exist else '', platform.python_version(), platform.system(), platform.version()))
 
-import wx.aui
+try:
+	import wx.aui as aui
+except:
+	import wx.lib.agw.aui as aui
+
 import wx.py as py
 import wx.lib.dialogs
 import wx.html
@@ -355,7 +398,7 @@ class MainApplication(wx.Frame):
 		self.SetIcon(self.icon)
 
 		# tell FrameManager to manage this frame
-		self._mgr = wx.aui.AuiManager()
+		self._mgr = aui.AuiManager()
 		self._mgr.SetManagedWindow(self)
 
 		# Prevent TreeCtrl from displaying all items after destruction when True
@@ -376,7 +419,7 @@ class MainApplication(wx.Frame):
 		self.tree = self.nb1.GetTree()
 		self.searchTree = self.nb1.GetSearchTree()
 
-		self._mgr.AddPane(self.nb1, wx.aui.AuiPaneInfo().Name("nb1").Hide().Caption("Control").
+		self._mgr.AddPane(self.nb1, aui.AuiPaneInfo().Name("nb1").Hide().Caption("Control").
                           FloatingSize(wx.Size(280, 400)).CloseButton(True).MaximizeButton(True))
 
 		#------------------------------------------------------------------------------------------
@@ -394,7 +437,7 @@ class MainApplication(wx.Frame):
 		else:
 			self.nb2.AddEditPage(_("Diagram%d"%Container.ShapeCanvas.ID))
 
-		self._mgr.AddPane(self.nb2, wx.aui.AuiPaneInfo().Name("nb2").CenterPane().Hide())
+		self._mgr.AddPane(self.nb2, aui.AuiPaneInfo().Name("nb2").CenterPane().Hide())
 
 		# Simulation panel
 		self.panel3 = wx.Panel(self.nb1, wx.ID_ANY, style = wx.WANTS_CHARS)
@@ -411,13 +454,13 @@ class MainApplication(wx.Frame):
 		self.panel4.SetSizer(sizer4)
 		self.panel4.SetAutoLayout(True)
 
-		self._mgr.AddPane(self.panel4, wx.aui.AuiPaneInfo().Name("shell").Hide().Caption("Shell").
+		self._mgr.AddPane(self.panel4, aui.AuiPaneInfo().Name("shell").Hide().Caption("Shell").
 										FloatingSize(wx.Size(280, 400)).CloseButton(True).MaximizeButton(True))
 
 		### Editor is panel
 		self.editor = GetEditor(self, -1, file_type='block')
 
-		self._mgr.AddPane(self.editor, wx.aui.AuiPaneInfo().Name("editor").Hide().Caption(_("Editor")).
+		self._mgr.AddPane(self.editor, aui.AuiPaneInfo().Name("editor").Hide().Caption(_("Editor")).
 						FloatingSize(wx.Size(280, 400)).CloseButton(True).MaximizeButton(True))
 
 		self._mgr.GetPane("nb1").Show().Left().Layer(0).Row(0).Position(0).BestSize(wx.Size(280,-1)).MinSize(wx.Size(250,-1))
@@ -431,7 +474,7 @@ class MainApplication(wx.Frame):
 		self.MakeMenu()
 		self.MakeToolBar()
 
-		self.Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.OnPaneClose)
+		self.Bind(aui.EVT_AUI_PANE_CLOSE, self.OnPaneClose)
 		self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.OnDragInit, id = self.tree.GetId())
 		#self.Bind(wx.EVT_TREE_END_DRAG, self.OnDragEnd, id = self.tree.GetId())
 		self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.OnDragInit, id = self.searchTree.GetId())

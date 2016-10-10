@@ -27,12 +27,10 @@ from __future__ import with_statement
 import os
 import sys
 import shutil
-import  wx.lib.dialogs
-import  wx.lib.filebrowsebutton as filebrowse
-import wx.aui
-import wx
 import inspect
-
+import wx
+import wx.lib.dialogs
+import wx.lib.filebrowsebutton as filebrowse
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 import wx.lib.dialogs
 
