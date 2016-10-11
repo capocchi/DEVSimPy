@@ -567,6 +567,9 @@ class SimStrategy4(SimStrategy):
 
             S.setClassicDEVS(self.SetClassicDEVSOption())
 
+            ### dynamic structure for local PyPDEVS simulation
+            S.setDSDEVS(self._simulator.dynamic_structure_flag)
+
             #S.setRealTime()
             S.simulate()
 

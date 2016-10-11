@@ -305,6 +305,7 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
                 'PYPDEVS_SIM_STRATEGY_DICT' : {'classic':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}, # list of available simulation strategy for PyPDEVS package
 				'HELP_PATH' : os.path.join('doc', 'html'), # path of help directory
 				'NTL' : False, # No Time Limit for the simulation
+				'DYNAMIC_STRUCTURE' : False, # Dynamic Structure for local PyPDEVS simulation
 				'TRANSPARENCY' : True, # Transparancy for DetachedFrame
 				'DEFAULT_PLOT_DYN_FREQ' : 100, # frequence of dynamic plot of QuickScope (to avoid overhead),
 				'DEFAULT_DEVS_DIRNAME':'PyDEVS', # default DEVS Kernel directory

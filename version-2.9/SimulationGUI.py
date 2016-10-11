@@ -40,6 +40,7 @@ import re
 
 ### just for individual test
 if __name__ == '__main__':
+	__builtin__.__dict__['GUI_FLAG'] = True
 	__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
 	__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {\
 	'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),\
@@ -143,6 +144,7 @@ class CollapsiblePanel(wx.Panel):
 		else:
 			c = PYPDEVS_SIM_STRATEGY_DICT.keys()
 
+		### choice of strategy
 		ch1 = wx.Choice(pane, wx.ID_ANY, choices=c)
 
 		text3 = wx.StaticText(pane, wx.ID_ANY, _("Profiling"))
@@ -151,6 +153,8 @@ class CollapsiblePanel(wx.Panel):
 		self.cb2 = wx.CheckBox(pane, wx.ID_ANY, name='check_ntl')
 		text5 = wx.StaticText(pane, wx.ID_ANY, _("Verbose"))
 		self.cb3 = wx.CheckBox(pane, wx.ID_ANY, name='verbose')
+		text6 = wx.StaticText(pane, wx.ID_ANY, _("Dynamic Structure"))
+		cb4 = wx.CheckBox(pane, wx.ID_ANY, name='dyn_struct')
 
 		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
 			if not 'hotshot' in sys.modules.keys():
@@ -160,9 +164,11 @@ class CollapsiblePanel(wx.Panel):
 
 			self.cb2.SetValue(__builtin__.__dict__['NTL'])
 			self.cb3.Enable(False)
+			cb4.Enable(False)
 
 		else:
 			cb1.Enable(False)
+			cb4.SetValue(__builtin__.__dict__['DYNAMIC_STRUCTURE'])
 
 		### default strategy
 		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
@@ -183,6 +189,8 @@ class CollapsiblePanel(wx.Panel):
 		grid3.Add(self.cb2, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
 		grid3.Add(text5, 0, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL, 19)
 		grid3.Add(self.cb3, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
+		grid3.Add(text6, 0, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL, 19)
+		grid3.Add(cb4, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
 
 		pane.SetSizer(grid3)
 
@@ -190,6 +198,7 @@ class CollapsiblePanel(wx.Panel):
 		self.Bind(wx.EVT_CHECKBOX, self.OnProfiling, cb1)
 		self.Bind(wx.EVT_CHECKBOX, self.OnNTL, self.cb2)
 		self.Bind(wx.EVT_CHECKBOX, self.OnVerbose, self.cb3)
+		self.Bind(wx.EVT_CHECKBOX, self.OnDynamicStructure, cb4)
 
 	###
 	def OnChoice(self, event):
@@ -213,12 +222,16 @@ class CollapsiblePanel(wx.Panel):
 
 	def OnProfiling(self, event):
 		cb1 = event.GetEventObject()
-
 		self.simdia.prof = cb1.GetValue()
 
 	def OnVerbose(self, event):
 		cb3 = event.GetEventObject()
 		self.simdia.verbose = cb3.GetValue()
+
+	def OnDynamicStructure(self, event):
+		cb4 = event.GetEventObject()
+		self.simdia.dynamic_structure_flag = cb4.GetValue()
+		__builtin__.__dict__['DYNAMIC_STRUCTURE'] = self.simdia.dynamic_structure_flag
 
 #-----------------------------------------------------------------
 class SimulationDialog(wx.Frame, wx.Panel):
@@ -269,6 +282,9 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 		# simulator strategy
 		self.selected_strategy = DEFAULT_SIM_STRATEGY
+
+		### dynamic structure only for local PyPDEVS simulation
+		self.dynamic_structure_flag = __builtin__.__dict__['DYNAMIC_STRUCTURE']
 
 		### profiling simulation with hotshot
 		self.prof = False
@@ -402,7 +418,6 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		""" When Run button is clicked
 		"""
 
-
 		assert(self.master is not None)
 
 		if self._value.GetValidator().Validate(self._value) or self.ntl:
@@ -459,7 +474,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 				for fn in filter(lambda f: f.endswith('.devsimpy.log'), os.listdir(gettempdir())):
 					os.remove(os.path.join(gettempdir(),fn))
 
-				self.thread = simulator_factory(self.current_master, self.selected_strategy, self.prof, self.ntl, self.verbose)
+				self.thread = simulator_factory(self.current_master, self.selected_strategy, self.prof, self.ntl, self.verbose, self.dynamic_structure_flag)
 				self.thread.setName(self.title)
 
 				### si le modele n'a pas de couplage, ou si pas de generateur: alors pas besoin de simuler
@@ -486,7 +501,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			if self.count >= 100:
 				return
 
-			# aucune possibilité d'interagir avec le modele
+			### interaction with the model is not possible
 			#self.parent.Enable(False)
 
 	def Interact(self, access = True):
@@ -721,7 +736,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		else:
 			raise msg
 
-def simulator_factory(model, strategy, prof, ntl, verbose):
+def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_flag):
 	""" Preventing direct creation for Simulator
         disallow direct access to the classes
 	"""
@@ -764,7 +779,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose):
 			Thread for DEVS simulation task
 		"""
 
-		def __init__(self, model = None, strategy = '', prof = False, ntl = False, verbose=False):
+		def __init__(self, model = None, strategy = '', prof = False, ntl = False, verbose=False, dynamic_structure_flag=False):
 			""" Constructor.
 			"""
 			threading.Thread.__init__(self)
@@ -775,6 +790,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose):
 			self.prof = prof
 			self.ntl = ntl
 			self.verbose = verbose
+			self.dynamic_structure_flag = dynamic_structure_flag
 
 			self.end_flag = False
 			self.thread_suspend = False
@@ -858,7 +874,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose):
 		def resume_thread(self):
 			self.thread_suspend = False
 
-	return SimulationThread(model, strategy, prof, ntl, verbose)
+	return SimulationThread(model, strategy, prof, ntl, verbose, dynamic_structure_flag)
 
 ### ------------------------------------------------------------
 class TestApp(wx.App):
