@@ -29,6 +29,7 @@ from PluginsGUI import PluginsPanel, GeneralPluginsList
 from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni
 
 import ReloadModule
+import Menu
 
 #----------------------------------------------------------------------
 class GeneralPanel(wx.Panel):
@@ -264,7 +265,7 @@ class SimulationPanel(wx.Panel):
 		### StaticText for strategy
 		self.txt = wx.StaticText(self, wx.ID_ANY, _("Default strategy:"))
 		### choice of combo-box depends on the default DEVS package directory
-		c= PYDEVS_SIM_STRATEGY_DICT.keys() if DEFAULT_DEVS_DIRNAME == 'PyDEVS' else PYPDEVS_SIM_STRATEGY_DICT.keys()
+		c = PYDEVS_SIM_STRATEGY_DICT.keys() if DEFAULT_DEVS_DIRNAME == 'PyDEVS' else PYPDEVS_SIM_STRATEGY_DICT.keys()
 
 		self.cb4 = wx.ComboBox(self, wx.ID_ANY, DEFAULT_SIM_STRATEGY, choices=c, style=wx.CB_READONLY)
 		self.cb4.SetToolTipString(_("Default strategy for the simulation algorithm. Please see the DEVSimPy doc for more information of possible strategy."))
@@ -439,6 +440,10 @@ class SimulationPanel(wx.Panel):
 						print e
 			ReloadModule.recompile("DomainInterface.DomainStructure")
 			ReloadModule.recompile("DomainInterface.MasterModel")
+
+		### enable the priority (DEVS select function) icon depending on the selected DEVS kernel
+		mainW = wx.GetApp().GetTopWindow()
+		mainW.tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in __builtin__.__dict__['DEFAULT_DEVS_DIRNAME'])
 
 		__builtin__.__dict__['SIMULATION_SUCCESS_SOUND_PATH'] = self.sim_success_sound_path
 		__builtin__.__dict__['SIMULATION_ERROR_SOUND_PATH'] = self.sim_error_sound_path
