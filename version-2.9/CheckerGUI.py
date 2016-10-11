@@ -20,6 +20,9 @@ import sys
 import webbrowser
 from traceback import format_exception
 
+import gettext
+_ = gettext.gettext
+
 if __name__ == '__main__':
 	import __builtin__
 	sys.path.append(os.path.dirname(os.getcwd()))

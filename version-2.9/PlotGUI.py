@@ -27,6 +27,9 @@ import math
 import threading
 import bisect
 
+import gettext
+_ = gettext.gettext
+
 # for spectrum
 try:
 	from numpy import *
