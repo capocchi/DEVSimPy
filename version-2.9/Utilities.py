@@ -16,6 +16,7 @@ import math
 import inspect
 import shutil
 import ConfigParser
+
 import gettext
 _ = gettext.gettext
 
@@ -31,7 +32,7 @@ import fileinput
 
 # Used to recurse subdirectories
 import fnmatch
-import urllib, urllib2, httplib, requests
+import urllib, urllib2, httplib
 
 # Used for smooth (spectrum)
 
@@ -89,6 +90,9 @@ def install_and_import(package):
 		globals()[package] = importlib.import_module(package)
 
 def downloadFile(url, directory) :
+
+	install_and_import(requests)
+
 	localFilename = url.split('/')[-1]
 	with open(directory + '/' + localFilename, 'wb') as f:
 		start = time.clock()
