@@ -55,13 +55,15 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
                 'PYPDEVS_SIM_STRATEGY_DICT' : {'classic':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}, # list of available simulation strategy for PyPDEVS package
 				'HELP_PATH' : os.path.join('doc', 'html'), # path of help directory
 				'NTL' : False, # No Time Limit for the simulation
+				'DYNAMIC_STRUCTURE' : False, #Dynamic structure for PyPDEVS simulation
 				'TRANSPARENCY' : True, # Transparancy for DetachedFrame
 				'DEFAULT_PLOT_DYN_FREQ' : 100, # frequence of dynamic plot of QuickScope (to avoid overhead),
 				'DEFAULT_DEVS_DIRNAME':'PyDEVS', # default DEVS Kernel directory
 				'DEVS_DIR_PATH_DICT':{'PyDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyDEVS'),
 									'PyPDEVS_221':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs221' ,'src'),
 									'PyPDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','old')},
-				'GUI_FLAG' : True
+				'GUI_FLAG' : True,
+				'INFINITY' : float('inf')
 				}
 
 builtin_dict['GUI_FLAG'] = False
@@ -109,6 +111,11 @@ if __name__ == '__main__':
 	parser.add_argument("-updateblockargs", help="new parameters", type=str, default="")
 	args = parser.parse_args()
 
+	if args.kernel:
+		if 'PyPDEVS' in args.kernel:
+			__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyPDEVS_221'
+			__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = 'parallel'
+
 	filename = args.filename
 
 	if not os.path.exists(filename):
@@ -116,11 +123,6 @@ if __name__ == '__main__':
 		sys.exit()
 	else:
 		yamlHandler = YAMLHandler(filename)
-
-	if args.kernel:
-		if 'PDEVS' in args.kernel:
-			__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyPDEVS_221'
-			__builtin__.__dict__['DEFAULT_SIM_STRATEGY'] = 'classic'
 
 	if args.javascript:
 		# Javascript generation
