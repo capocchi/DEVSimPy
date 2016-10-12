@@ -22,13 +22,13 @@
 
 import wx
 import sys
-import requests
 import os
 import __builtin__
 
 _ = wx.GetTranslation
 
 def url_ok(url):
+    import requests
     try:
         r = requests.head(url)
     except Exception, info:
@@ -131,7 +131,7 @@ class YAMLExportGUI(wx.Frame):
             self.sb.icon.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "connect_network.png")))
 
             try:
-
+                import requests
                 self.rest = requests.post(str(url)+':'+str(port)+'/upload', files={'file': open(str(self.path), 'rb')})
 
             except Exception, err:
