@@ -191,6 +191,7 @@ class runSimulation:
 
         # simulator strategy
         self.selected_strategy = DEFAULT_SIM_STRATEGY
+        self.dynamic_structure_flag = __builtin__.__dict__['DYNAMIC_STRUCTURE']
 
         ### profiling simulation with hotshot
         self.prof = False
@@ -223,12 +224,11 @@ class runSimulation:
                 m.fileName = os.path.join(dir_fn,"%s_%s"%(os.path.basename(diagram.last_name_saved).split('.')[0],os.path.basename(m.fileName)))
         ################################################################################################################
         ################################################################################################################
-
+        #print __builtin__.__dict__
         if self.master:
             from SimulationGUI import simulator_factory
             if not self.ntl:
                 self.master.FINAL_TIME = float(self.time)
-
-            self.thread = simulator_factory(self.master, self.selected_strategy, self.prof, self.ntl, self.verbose)
+            self.thread = simulator_factory(self.master, self.selected_strategy, self.prof, self.ntl, self.verbose, self.dynamic_structure_flag)
 
             return self.thread
