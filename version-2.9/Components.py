@@ -532,11 +532,14 @@ class DEVSComponent:
 		""" Shows informations inserted with debugger instructions into the model.
 		"""
 
+
 		### devs model, block label, log file in temp dir
 		devs = self.getDEVSModel()
-		label = str(devs.getBlockModel().label) if hasattr(host, 'getBlockModel') else devs.name
+		label = str(devs.getBlockModel().label) if hasattr(devs, 'getBlockModel') else devs.name
 		log_file = os.path.join(gettempdir(),'%s.devsimpy.log'%label)
 		parent = event.GetClientData()
+
+		print log_file
 
 		if os.path.exists(log_file):
 			### read log file
