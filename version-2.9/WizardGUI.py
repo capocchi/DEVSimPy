@@ -89,7 +89,7 @@ class %s(DomainBehavior):
 	'pass' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else 'return self.getState()',
 	"return self.getSigma()")
 
-	### add confluent function only if PyPDEVS is used.
+	### add confluent function only for PyPDEVS.
 	code += """
 	def confTransition(self, inputs):
 		'''DEFAULT Confluent Transition Function.
@@ -98,10 +98,23 @@ class %s(DomainBehavior):
 		self.state = self.extTransition(inputs)
 		return self.getState()""" if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME else ''
 
+	### Dynamic structure only for PyPDEVS
+	code += """
+
+	def modelTransition(self, state):
+		''' modelTransition method will be called at every step
+			in simulated time on every model that transitioned
+			in order to notify parent of structural change.
+			Dynamic structure is possible for both Classic and Parallel DEVS,
+			but only for local simulation.
+		'''
+		# Notify parent of structural change
+		return True""" if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME else ''
+
 	return code
 
 def coupledCode(label):
-	return """
+	code = """
 # -*- coding: utf-8 -*-
 \"\"\"
 -------------------------------------------------------------------------------
@@ -122,6 +135,20 @@ class %s(DomainStructure):
 	os.path.split(USERHOME)[-1],
 	datetime.datetime.now(),
 	label)
+
+	### Dynamic structure only for PyPDEVS
+	code += """
+	def modelTransition(self, state):
+		''' modelTransition method will be called at every step
+			in simulated time on every model that transitioned
+			in order to notify parent of structural change.
+			Dynamic structure is possible for both Classic and Parallel DEVS,
+			but only for local simulation.
+		'''
+		### False if Top Level
+		return True""" if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME else ''
+
+	return code
 
 class TextObjectValidator(wx.PyValidator):
 	""" TextObjectValidator()

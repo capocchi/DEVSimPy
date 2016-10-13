@@ -534,7 +534,7 @@ class DEVSComponent:
 
 		### devs model, block label, log file in temp dir
 		devs = self.getDEVSModel()
-		label = str(devs.getBlockModel().label)
+		label = str(devs.getBlockModel().label) if hasattr(host, 'getBlockModel') else devs.name
 		log_file = os.path.join(gettempdir(),'%s.devsimpy.log'%label)
 		parent = event.GetClientData()
 
