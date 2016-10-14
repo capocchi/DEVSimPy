@@ -399,11 +399,12 @@ class Diagram(Savable, Structurable):
 			else:
 				### DEVS model recovery
 				devs = getInstance(cls, m.args)
-				devs.name = m.label
 
 				### Is safe instantiation ?
 				if isinstance(devs, tuple):
 					return devs
+				else:
+					devs.name = m.label
 
 			if isinstance(m, CodeBlock):
 				### les ports des modeles couples sont pris en charge plus bas dans les iPorts et oPorts
