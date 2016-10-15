@@ -351,8 +351,11 @@ class Zip:
 	def ClearFiles(self):
 		""" remove and rename the zip file
 		"""
+		try:
+			os.remove(self.fn)
+		except info:
+			sys.stderr.write(_('File has not been deleted: %s'%info))
 
-		os.remove(self.fn)
 		try:
 			os.rename("new_arch.zip", self.fn)
 		### os.rename dont work in Linux OS with linked file (copy/paste for exemple)

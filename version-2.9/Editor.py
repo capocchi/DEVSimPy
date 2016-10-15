@@ -35,13 +35,14 @@ import re
 import codecs
 import tabnanny
 import __builtin__
+import traceback
 
-from traceback import format_exception
+from traceback import format_exception, extract_tb
 from tempfile import gettempdir
 from wx import stc
 
 from Decorators import redirectStdout
-from Utilities import path_to_module
+from Utilities import path_to_module, PrintException
 
 import ReloadModule
 import ZipManager
@@ -88,7 +89,14 @@ def getObjectFromString(scriptlet):
 	try:
 		code = compile(scriptlet, '<string>', 'exec')
 	except Exception, info:
+		### Add line number to the error trace
+		for frame in traceback.extract_tb(sys.exc_info()[2]):
+			fname,lineno,fn,text = frame
+		L = list(info.args)
+		L.append("line %i"%lineno)
+		info.args = tuple(L)
 		return info
+
 	else:
 		# Create the new 'temp' module.
 		temp = imp.new_module("temp")
@@ -97,7 +105,15 @@ def getObjectFromString(scriptlet):
 		### there is syntaxe error ?
 		try:
 			exec code in temp.__dict__
+
 		except Exception, info:
+			### Add line number to the error trace
+			for frame in traceback.extract_tb(sys.exc_info()[2]):
+				fname,lineno,fn,text = frame
+			L = list(info.args)
+			L.append("line %i"%lineno)
+			info.args = tuple(L)
+
 			return info
 
 		else:
@@ -107,7 +123,15 @@ def getObjectFromString(scriptlet):
 					# Create the instance.
 					try:
 						return eval("temp.%s" % name)()
+
 					except Exception, info:
+						### Add line number to the error trace
+						for frame in traceback.extract_tb(sys.exc_info()[2]):
+							fname,lineno,fn,text = frame
+						L = list(info.args)
+						L.append("line %i"%lineno)
+						info.args = tuple(L)
+
 						return info
 
 
@@ -987,7 +1011,7 @@ class EditionNotebook(wx.Notebook):
 		self.parent.toolbar.EnableTool(self.parent.save.GetId(), False)
 
 		### status bar notification
-		self.parent.Notification(False, _('%s saved') % fic_filename, '')
+		self.parent.Notification(False, _('%s saved') % fic_filename, '', '')
 
 	### NOTE: EditionNotebook :: @WriteFile 	=> Write with correct encode
 	@staticmethod
@@ -1060,7 +1084,7 @@ class EditionNotebook(wx.Notebook):
 		cp.SetValue(text)
 
 		### status bar notification
-		self.parent.Notification(True, _('re-indented'), '')
+		self.parent.Notification(True, _('re-indented'), '', '')
 
 	def OnComment(self, event):
 		""" Comment current line
@@ -1419,7 +1443,7 @@ class Editor(wx.Frame, wx.Panel):
 
 		else:
 			### status bar notification
-			self.Notification(False, _('%s not saved' % fn), _('file in readonly'))
+			self.Notification(False, _('%s not saved' % fn), _('file in readonly'), '')
 
 
 	def OnSaveAsFile(self, event):
@@ -1494,10 +1518,11 @@ class Editor(wx.Frame, wx.Panel):
 		else:
 			### status bar notification
 			msg = _('Saving Error')
+
 			try:
-				self.Notification(True, msg, str(new_instance))
+				self.Notification(True, msg, str(new_instance.args[0]), str(new_instance.args[1]))
 			except UnicodeDecodeError:
-				self.Notification(True, msg, str(new_instance).decode('latin-1').encode("utf-8"))
+				self.Notification(True, msg, str(new_instanceargs[0]).decode('latin-1').encode("utf-8"), str(new_instanceargs[1]).decode('latin-1').encode("utf-8"))
 
 	### NOTE: Editor :: Notification 			=> Notify something on the statusbar
 	def Notification(self, modify, *args):
@@ -1535,7 +1560,7 @@ class Editor(wx.Frame, wx.Panel):
 		### enable save icon in toolbar
 		self.toolbar.EnableTool(self.save.GetId(), True)
 		### status bar notification
-		self.Notification(True, _('%s modified' % (os.path.basename(self.nb.GetCurrentPage().GetFilename()))), '')
+		self.Notification(True, _('%s modified' % (os.path.basename(self.nb.GetCurrentPage().GetFilename()))), '', '')
 		event.Skip()
 
 	### NOTE: Editor :: OnOpenFile 			=> Event OnOpenFile
