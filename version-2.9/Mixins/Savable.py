@@ -256,10 +256,14 @@ class DumpZipFile(DumpBase):
 			for i, attr in enumerate(obj_loaded.dump_attributes):
 				### update behavioral attribute for model saved with bad args (amd or cmd have been changed in librairie but not in dsp)
 				if attr == 'args':
-					for key in filter(L[i].has_key, obj_loaded.args.keys()):
-						obj_loaded.args[key] = L[i][key]
+					if obj_loaded.args != {}:
+						for key in filter(L[i].has_key, obj_loaded.args.keys()):
+							obj_loaded.args[key] = L[i][key]
+					else:
+						setattr(obj_loaded, attr, L[i])
 				else:
 					setattr(obj_loaded, attr, L[i])
+
 		except IndexError, info:
 			sys.stderr.write(_("Problem loading (old model): %s -- %s \n")%(str(fileName), info))
 			return info

@@ -27,6 +27,11 @@ show_int_trans = True
 show_clock = True
 show_coll = True
 
+import __builtin__
+
+if 'PyPDEVS' in __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
+	raise AssertionError("Verbose plug-in is not compatible with the PyPDEVS simulation kernel!")
+
 class RedirectText(object):
 	def __init__(self,aWxTextCtrl):
 		self.out = aWxTextCtrl

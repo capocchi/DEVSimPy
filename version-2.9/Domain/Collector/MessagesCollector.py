@@ -37,11 +37,11 @@ class MessagesCollector(DomainBehavior):
 		self.fileName = fileName
 		self.ext = ext
 		self.comma = comma
-		
+	
 		#  State variable
 		self.state = {'status': 'IDLE', 'sigma': INFINITY}
 		
-		for np in range(1000):
+		for np in range(10000):
 			fn = "%s%d%s"%(self.fileName, np, self.ext)
 			if os.path.exists(fn):
 				os.remove(fn)
@@ -49,6 +49,7 @@ class MessagesCollector(DomainBehavior):
 	def extTransition(self, *args):
 		"""
 		"""
+		
 		for port in self.IPorts:
 			### adapted with PyPDEVS
 			if hasattr(self, 'peek'):
@@ -62,7 +63,7 @@ class MessagesCollector(DomainBehavior):
 			if msg:
 				### filename
 				fn = "%s%d%s"%(self.fileName, np, self.ext)
-	
+				
 				with open(fn,'a') as f: f.write("%s\n"%(str(msg)))
 				del msg
 

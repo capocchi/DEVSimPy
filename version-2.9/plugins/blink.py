@@ -21,6 +21,11 @@ from FindGUI import FindReplace
 from Utilities import MoveFromParent
 from Patterns.Observer import Subject
 
+import __builtin__
+
+if 'PyPDEVS' in __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
+	raise AssertionError("Blink plug-in is not compatible with the PyPDEVS simulation kernel!")
+
 def InternalLog(model):
 	txt = [	"\n\tINTERNAL TRANSITION: %s (%s)\n"%(model.__class__.__name__, model.myID),
 			"\t  New State: %s\n"%(model.state),

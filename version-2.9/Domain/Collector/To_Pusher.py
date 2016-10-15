@@ -87,10 +87,10 @@ class To_Pusher(QuickScope):
 				### adapted with PyPDEVS
 				if hasattr(self, 'peek'):
 					t = float(msg.time)
+					val = msg.value[0]
 				else:
-					t = float(msg.time[0])
-
-				val = msg.value[0]
+					t = float(msg[1][0])
+					val = msg[0][0]
 
 				if isinstance(val, int) or isinstance(val, float):
 					v = float(val)

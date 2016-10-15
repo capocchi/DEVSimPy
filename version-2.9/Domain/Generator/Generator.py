@@ -12,7 +12,7 @@ GLOBAL VARIABLES AND FUNCTIONS:
 
 from __future__ import with_statement
 from DomainInterface.DomainBehavior import DomainBehavior
-from Domain.Basic.Object import Message
+from Basic.Object import Message
 
 import os.path
 

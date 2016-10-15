@@ -1,4 +1,5 @@
 __all__ = [
 		'verbose', 
-		'blink'
+		'blink',
+		'state_trajectory'
 ]
