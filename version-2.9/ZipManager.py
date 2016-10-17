@@ -18,6 +18,7 @@ import zipimport
 import StringIO
 import re
 import inspect
+import imp
 
 import gettext
 _ = gettext.gettext
@@ -319,8 +320,19 @@ class Zip:
 			trigger_event("IMPORT_STRATEGIES", fn=self.fn)
 
 			importer = zipimport.zipimporter(self.fn)
+
+			### allows to import the lib from its name (like import MyModel.amd). Dangerous because confuse!
+			### TODO: remove this for old models
 			module = importer.load_module(module_name.split('.py')[0])
 			module.__name__ = path_to_module(module_name)
+
+			### allows to import with a reference from the parent directory (like parentName.model).
+			fullname = ".".join([os.path.basename(os.path.dirname(self.fn)), module_name.split('.py')[0]])
+			f, file, desc = imp.find_module(os.path.basename(os.path.dirname(self.fn)))
+			pkg = imp.load_module(fullname, f, file, desc)
+
+			### TODO make a recursive method to go up until the Domain dir, for not external lib!
+
 		except Exception, info:
 			msg_i = _("Error in execution: ")
 			msg_o = listf(format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback))

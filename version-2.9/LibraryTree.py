@@ -604,6 +604,7 @@ class LibraryTree(wx.TreeCtrl):
 							### insertion dans le tree
 							id = self.InsertItemBefore(p, 0, os.path.splitext(elem)[0], img, img)
 							self.SetPyData(id, path)
+
 						elif elem.endswith('.amd'):
 							### gestion de l'importation de module (.py) associé au .amd si le fichier .py n'a jamais été decompresssé (pour edition par exemple)
 							if not come_from_net:
