@@ -3220,8 +3220,9 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 				image_name = os.path.basename(self.image_path)
 				image_path = os.path.join(gettempdir(), image_name)
 				sourceZip = zipfile.ZipFile(dir_name, 'r')
-				sourceZip.extract(image_name, gettempdir())
+				sourceZip.extract(str(image_name), gettempdir())
 				sourceZip.close()
+
 			else:
 				image_path = self.image_path
 

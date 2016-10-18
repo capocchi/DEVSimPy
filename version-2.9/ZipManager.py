@@ -322,14 +322,15 @@ class Zip:
 			importer = zipimport.zipimporter(self.fn)
 
 			### allows to import the lib from its name (like import MyModel.amd). Dangerous because confuse!
-			### TODO: remove this for old models
+			### Import can be done using: import Name (ex. import MessageCollector - if MessageCollecor is .amd or .cmd)
+			fullname = "".join([os.path.basename(os.path.dirname(self.fn)), module_name.split('.py')[0]])
 			module = importer.load_module(module_name.split('.py')[0])
 			module.__name__ = path_to_module(module_name)
 
 			### allows to import with a reference from the parent directory (like parentName.model).
-			fullname = ".".join([os.path.basename(os.path.dirname(self.fn)), module_name.split('.py')[0]])
-			f, file, desc = imp.find_module(os.path.basename(os.path.dirname(self.fn)))
-			pkg = imp.load_module(fullname, f, file, desc)
+			### Now import of .amd or .cmd module is composed by DomainModel (no point!).
+			### Example : import CollectorMessageCollector
+			sys.modules[fullname] = module
 
 			### TODO make a recursive method to go up until the Domain dir, for not external lib!
 

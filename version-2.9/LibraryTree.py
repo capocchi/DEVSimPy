@@ -274,12 +274,14 @@ class LibraryTree(wx.TreeCtrl):
 							self.RemoveItem(item)
 
 					    except Exception, info:
-							sys.stdout.write(_("%s not deleted !\n Error : %s")%(label,info))
+							sys.stdout.write(_("%s not deleted! \n Error: %s")%(label,info))
 
 					dial.Destroy()
 
 				else:
 					self.RemoveItem(item)
+
+				###TODO unload associated module
 
 		else:
 			wx.MessageBox(_("No model selected!"),_("Delete Manager"))
