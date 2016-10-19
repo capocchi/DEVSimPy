@@ -208,15 +208,44 @@ class CodeCB(wx.Choicebook):
 		cls = Components.GetClass(model.python_path)
 
 		if inspect.isclass(cls):
-			pageTexts = {   _('Doc') : inspect.getdoc(cls),
-											_('Class') : inspect.getsource(cls),
-											_('Constructor') : inspect.getsource(cls.__init__),
-											_('Internal Transition') : inspect.getsource(cls.intTransition),
-											_('External Transition') : inspect.getsource(cls.extTransition),
-											_('Output Function') : inspect.getsource(cls.outputFnc),
-											_('Time Advance Function') : inspect.getsource(cls.timeAdvance),
-											_('Finish Function') : inspect.getsource(cls.finish) if  hasattr(cls, 'finish') else "\tpass"
-									}
+
+			info = _("Unable to load sources")
+
+			try:a = inspect.getdoc(cls)
+			except:a = info
+
+			try:b = inspect.getsource(cls)
+			except:b = info
+
+			try: c = inspect.getsource(cls.__init__)
+			except: c = info
+
+			try: d = inspect.getsource(cls.intTransition)
+			except: d = info
+
+			try: e = inspect.getsource(cls.extTransition)
+			except: e = info
+
+			try: f = inspect.getsource(cls.outputFnc)
+			except: f = info
+
+			try: g = inspect.getsource(cls.timeAdvance)
+			except: g = info
+
+			try:
+				h = inspect.getsource(cls.finish) if  hasattr(cls, 'finish') else "\tpass"
+			except:
+				h = info
+
+			pageTexts = {_('Doc'): a,
+						 _('Class'): b,
+						 _('Constructor'): c,
+						 _('Internal Transition'): d,
+						 _('External Transition'): e,
+						 _('Output Function'): f,
+						 _('Time Advance Function'): g,
+						 _('Finish Function'): h
+						}
 		else:
 			pageTexts = {_("Importing Error"): _("Error trying to import the module: %s.\nChange the python path by clicking in the above 'python_path' cell.\n %s"%(model.python_path,str(cls)))}
 
