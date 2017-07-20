@@ -55,6 +55,18 @@ import Container
 
 _ = wx.GetTranslation
 
+import time
+
+def timer():
+	last = time.time()
+	delta = 0
+	time.clock()
+	while True:
+	    now = time.time()
+	    delta += now - last
+	    yield delta
+	    last = now
+        
 ###
 class TextObjectValidator(wx.PyValidator):
 	""" TextObjectValidator()
@@ -155,7 +167,10 @@ class CollapsiblePanel(wx.Panel):
 		self.cb3 = wx.CheckBox(pane, wx.ID_ANY, name='verbose')
 		text6 = wx.StaticText(pane, wx.ID_ANY, _("Dynamic Structure"))
 		cb4 = wx.CheckBox(pane, wx.ID_ANY, name='dyn_struct')
-
+		
+		text7 = wx.StaticText(pane, wx.ID_ANY, _("Real time"))
+		cb5 = wx.CheckBox(pane, wx.ID_ANY, name='real_time')
+		
 		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
 			if not 'hotshot' in sys.modules.keys():
 				text3.Enable(False)
@@ -165,10 +180,13 @@ class CollapsiblePanel(wx.Panel):
 			self.cb2.SetValue(__builtin__.__dict__['NTL'])
 			self.cb3.Enable(False)
 			cb4.Enable(False)
-
+			cb5.Enable(False)
+			
 		else:
 			cb1.Enable(False)
+			self.cb3.SetValue(__builtin__.__dict__['VERBOSE'])
 			cb4.SetValue(__builtin__.__dict__['DYNAMIC_STRUCTURE'])
+			cb5.SetValue(__builtin__.__dict__['REAL_TIME'])
 
 		### default strategy
 		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
@@ -180,7 +198,7 @@ class CollapsiblePanel(wx.Panel):
 		cb1.SetToolTipString(_("For simulation profiling using hotshot"))
 		self.cb2.SetToolTipString(_("No time limit for the simulation. Simulation is over when childs are no active."))
 
-		grid3 = wx.GridSizer(5, 2, 1, 1)
+		grid3 = wx.GridSizer(6, 2, 1, 1)
 		grid3.Add(text2, 0, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL, 19)
 		grid3.Add(ch1, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL)
 		grid3.Add(text3, 0, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL, 19)
@@ -191,7 +209,9 @@ class CollapsiblePanel(wx.Panel):
 		grid3.Add(self.cb3, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
 		grid3.Add(text6, 0, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL, 19)
 		grid3.Add(cb4, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
-
+		grid3.Add(text7, 0, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL, 19)
+		grid3.Add(cb5, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
+		
 		pane.SetSizer(grid3)
 
 		self.Bind(wx.EVT_CHOICE, self.OnChoice, ch1)
@@ -199,7 +219,8 @@ class CollapsiblePanel(wx.Panel):
 		self.Bind(wx.EVT_CHECKBOX, self.OnNTL, self.cb2)
 		self.Bind(wx.EVT_CHECKBOX, self.OnVerbose, self.cb3)
 		self.Bind(wx.EVT_CHECKBOX, self.OnDynamicStructure, cb4)
-
+		self.Bind(wx.EVT_CHECKBOX, self.OnRealTime, cb5)
+		
 	###
 	def OnChoice(self, event):
 		""" strategy choice has been invoked
@@ -227,12 +248,18 @@ class CollapsiblePanel(wx.Panel):
 	def OnVerbose(self, event):
 		cb3 = event.GetEventObject()
 		self.simdia.verbose = cb3.GetValue()
-
+		__builtin__.__dict__['VERBOSE'] = self.simdia.verbose
+		
 	def OnDynamicStructure(self, event):
 		cb4 = event.GetEventObject()
 		self.simdia.dynamic_structure_flag = cb4.GetValue()
 		__builtin__.__dict__['DYNAMIC_STRUCTURE'] = self.simdia.dynamic_structure_flag
 
+	def OnRealTime(self, event):
+		cb5 = event.GetEventObject()
+		self.simdia.real_time_flag = cb5.GetValue()
+		__builtin__.__dict__['REAL_TIME'] = self.simdia.real_time_flag
+		
 #-----------------------------------------------------------------
 class SimulationDialog(wx.Frame, wx.Panel):
 	""" SimulationDialog(parent, id, title, master)
@@ -286,13 +313,16 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		### dynamic structure only for local PyPDEVS simulation
 		self.dynamic_structure_flag = __builtin__.__dict__['DYNAMIC_STRUCTURE']
 
+		### PyPDEVS threaded real time simulation
+		self.real_time_flag = __builtin__.__dict__['REAL_TIME']
+		
 		### profiling simulation with hotshot
 		self.prof = False
 
 		### No time limit simulation (defined in the builtin dictionary from .devsimpy file)
 		self.ntl = __builtin__.__dict__['NTL']
 
-		self.verbose = False
+		self.verbose = __builtin__.__dict__['VERBOSE']
 
 		# definition of the thread, the timer and the counter for the simulation progress
 		self.thread = None
@@ -474,7 +504,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 				for fn in filter(lambda f: f.endswith('.devsimpy.log'), os.listdir(gettempdir())):
 					os.remove(os.path.join(gettempdir(),fn))
 
-				self.thread = simulator_factory(self.current_master, self.selected_strategy, self.prof, self.ntl, self.verbose, self.dynamic_structure_flag)
+				self.thread = simulator_factory(self.current_master, self.selected_strategy, self.prof, self.ntl, self.verbose, self.dynamic_structure_flag, self.real_time_flag)
 				self.thread.setName(self.title)
 
 				### si le modele n'a pas de couplage, ou si pas de generateur: alors pas besoin de simuler
@@ -483,6 +513,10 @@ class SimulationDialog(wx.Frame, wx.Panel):
 				else:
 					self.timer.Start(100)
 
+				### timer for real time
+				if self.real_time_flag: 
+					self.t = timer()
+		
 			else:
 				#print self.thread.getAlgorithm().trace
 				### for back simulation
@@ -615,11 +649,14 @@ class SimulationDialog(wx.Frame, wx.Panel):
 			wx.YieldIfNeeded()
 
 	def GetClock(self):
-		### clock formating
-		ms = self.thread.cpu_time%1
-		m, s = divmod(self.thread.cpu_time, 60)
-		h, m = divmod(m, 60)
-		return "%d:%02d:%02d:%03d" % (h, m, s, ms*1000)
+		if self.real_time_flag:	
+			return str(self.t.next())
+		else:
+			### clock formating
+			ms = self.thread.cpu_time%1
+			m, s = divmod(self.thread.cpu_time, 60)
+			h, m = divmod(m, 60)
+			return "%d:%02d:%02d:%03d" % (h, m, s, ms*1000)
 
 	###
 	def MsgBoxEmptyModel(self):
@@ -736,7 +773,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 		else:
 			raise msg
 
-def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_flag):
+def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_flag, real_time_flag):
 	""" Preventing direct creation for Simulator
         disallow direct access to the classes
 	"""
@@ -779,7 +816,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 			Thread for DEVS simulation task
 		"""
 
-		def __init__(self, model = None, strategy = '', prof = False, ntl = False, verbose=False, dynamic_structure_flag=False):
+		def __init__(self, model = None, strategy = '', prof = False, ntl = False, verbose=False, dynamic_structure_flag=False, real_time_flag=False):
 			""" Constructor.
 			"""
 			threading.Thread.__init__(self)
@@ -791,6 +828,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 			self.ntl = ntl
 			self.verbose = verbose
 			self.dynamic_structure_flag = dynamic_structure_flag
+			self.real_time_flag = real_time_flag
 
 			self.end_flag = False
 			self.thread_suspend = False
@@ -874,7 +912,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 		def resume_thread(self):
 			self.thread_suspend = False
 
-	return SimulationThread(model, strategy, prof, ntl, verbose, dynamic_structure_flag)
+	return SimulationThread(model, strategy, prof, ntl, verbose, dynamic_structure_flag, real_time_flag)
 
 ### ------------------------------------------------------------
 class TestApp(wx.App):

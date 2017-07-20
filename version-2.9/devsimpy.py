@@ -306,6 +306,8 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 				'HELP_PATH' : os.path.join('doc', 'html'), # path of help directory
 				'NTL' : False, # No Time Limit for the simulation
 				'DYNAMIC_STRUCTURE' : False, # Dynamic Structure for local PyPDEVS simulation
+				'REAL_TIME': False, ### PyPDEVS threaded real time simulation
+				'VERBOSE':False,
 				'TRANSPARENCY' : True, # Transparancy for DetachedFrame
 				'DEFAULT_PLOT_DYN_FREQ' : 100, # frequence of dynamic plot of QuickScope (to avoid overhead),
 				'DEFAULT_DEVS_DIRNAME':'PyDEVS', # default DEVS Kernel directory

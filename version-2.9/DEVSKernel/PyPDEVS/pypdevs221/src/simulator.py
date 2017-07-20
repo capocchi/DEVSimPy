@@ -110,7 +110,7 @@ def loadCheckpoint(name):
             COMM_WORLD.isend(0, dest=0, tag=0)
         return None
     simulator.server = server
-        
+
     for rank in range(server.size):
         server.getProxy(rank).loadCheckpoint(name, gvt)
     #assert info("Recovering from time " + str(gvt))
@@ -370,7 +370,7 @@ class Simulator(object):
     def loadLocationsFromFile(self, filename):
         """
         Try to load a file containing the allocation of the nodes. If such a (valid) file is found, True is returned. Otherwise False is returned.
-        
+
         This can thus easily be used in a simulator experiment file as a condition for setting an allocator (e.g. check for an allocation file and if
         none is found, create one by running the allocator first).
 
@@ -433,10 +433,10 @@ class Simulator(object):
         for dst in range(self.server.size):
             self.server.getProxy(dst).setAttr(model_id, attr, value)
         self.controller.stateChange(model_id, "model.%s" % attr, value)
-            
+
     def simulate(self):
         """
-        Start simulation with the previously set options. Can be reran afterwards to reinitialize the model and run it again, 
+        Start simulation with the previously set options. Can be reran afterwards to reinitialize the model and run it again,
         possibly after altering some aspects of the model with the provided methods.
         """
         loclist = range(self.server.size)
@@ -482,10 +482,10 @@ class Simulator(object):
             self.setup = True
 
         for proxy in proxylist:
-            proxy.setGlobals( 
+            proxy.setGlobals(
                              tracers=self.tracers,
-                             address=self.address, 
-                             loglevel=self.loglevel, 
+                             address=self.address,
+                             loglevel=self.loglevel,
                              checkpointfrequency=self.CHK_interval,
                              checkpointname = self.CHK_name,
                              kernels=len(loclist),
@@ -538,9 +538,10 @@ class Simulator(object):
             self.checkpoint()
 
         if seperate_thread:
+
             thrd = threading.Thread(target=self.server.getProxy(0).simulate_sync)
             # Make it a daemon, as otherwise killing the main thread wouldn't kill us
-            thrd.daemon = True
+            thrd.daemon = False
             thrd.start()
         else:
             self.real_simulate()
@@ -629,7 +630,7 @@ class Simulator(object):
                 print(s)
             if self.progress_finished:
                 return
-        
+
     def real_simulate(self):
         """
         The actual simulation part, this is identical for the 'start from scratch' and 'start from checkpoint' algorithm, thus it was split up

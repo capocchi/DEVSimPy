@@ -550,7 +550,7 @@ class SimStrategy4(SimStrategy):
 
             ### verbose manager, if None print are displayed in stdout, else in the out/verbose.txt file
             if self._simulator.verbose:
-                 S.setVerbose(None)
+                S.setVerbose(None)
             else:
                 out_dir = os.path.join(HOME_PATH, 'out')
                 if not os.path.exists(out_dir):
@@ -570,7 +570,13 @@ class SimStrategy4(SimStrategy):
             ### dynamic structure for local PyPDEVS simulation
             S.setDSDEVS(self._simulator.dynamic_structure_flag)
 
-            #S.setRealTime()
+            ### real time simulation
+            if self._simulator.real_time_flag:
+                S.setRealTime(self._simulator.real_time_flag)
+                S.setRealTimeInputFile(None)
+                #S.setRealTimePorts(refs)
+                S.setRealTimePlatformThreads()
+
             S.simulate()
 
     	self._simulator.terminate()
