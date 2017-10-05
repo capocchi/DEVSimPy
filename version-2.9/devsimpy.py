@@ -180,8 +180,7 @@ if not hasattr(sys, 'frozen'):
 			
 				try:
 					import pip
-				except ImportError, info:
-					
+				except :
 					### get get-pip.py file from DEVSimPy-site repository and install it
 					temp_directory = gettempdir()
 					downloadFile('https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/get-pip.py', temp_directory)
