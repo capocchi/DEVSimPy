@@ -187,11 +187,16 @@ if not hasattr(sys, 'frozen'):
 			downloadFile('https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/get-pip.py', temp_directory)
 			os.system('{} {}'.format('python', os.path.join(temp_directory, 'get-pip.py')))
 			
+			import pip
+			
 		### find the CPU architecture
 		is_64bits = sys.maxsize > 2**32
 
 		### get whl file from DEVSimPy-site hosted by github
-		file = 'wxPython-3.0.2.0-cp27-none-win'+'_amd64.whl' if is_64bits else '32.whl'
+		if is_64bits :
+			file = 'wxPython-3.0.2.0-cp27-none-win_amd64.whl' 
+		else :
+			file = 'wxPython-3.0.2.0-cp27-none-win32.whl' 
 
 		### url to download the whl file
 		whl_url = 'https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/pip-packages/'+file
