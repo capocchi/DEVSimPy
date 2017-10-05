@@ -85,7 +85,7 @@ def import_pip():
 		
 			import pip
 			
-		except:
+		except Error, info:
 			sys.stdout.write('pip installation process has been interrupted!\n Try to install pip yourself.\n')
 			sys.exit()
 					
@@ -200,7 +200,7 @@ if not hasattr(sys, 'frozen'):
 			### wx is not installed, we try to install it from pip (local or remote)
 			sys.stderr.write("Error: DEVSimPy requires the wxPython package, which doesn't seem to be installed\n")
 
-			r = raw_input("Do you want to install wxPython package form: \n 1 - the PyPi repository \n 2 - the DEVSimPy github repository\n (1 or 2)?") or '2'
+			r = raw_input("Do you want to install wxPython package form: \n 1 - the PyPi repository \n 2 - the DEVSimPy github repository (1 or 2)?\n") or '2'
 			
 			if r == '1':
 				install_and_import('wxpython')	
