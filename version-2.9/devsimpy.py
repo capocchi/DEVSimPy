@@ -67,13 +67,35 @@ __min_wx_version__ = ['3.0','2.9','2.8','2.7','2.6','2.5']
 __wxpython_url__ = 'http://wxpython.org'
 __get__wxpython__ = 'Get it from %s'%__wxpython_url__
 
+def import_pip():
+	"""
+	""" 
+	try:
+		import pip
+		
+	### if there is an import error, we install pip
+	except ImportError, info:
+		### get get-pip.py file from DEVSimPy-site repository and install it
+		temp_directory = gettempdir()
+		downloadFile('https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/get-pip.py', temp_directory)
+		os.system('{} {}'.format('python', os.path.join(temp_directory, 'get-pip.py')))
+		
+		import pip
+	else:
+		sys.stdout.write('pip installation process has been interrupted!\n Try to install pip yourself.\n')
+		sys.exit()
+					
 def install_and_import(package):
 	import importlib
+	
 	try:
 		importlib.import_module(package)
+	
 	except ImportError:
-		import pip
+		import_pip()
+	
 		sys.stdout.write("Install %s form pip\n"%package)
+		
 		try:
 			raw_input("Press Enter to continue (Ctrl+C to skip)")
 		except SyntaxError:
@@ -173,21 +195,15 @@ if not hasattr(sys, 'frozen'):
 		try:
 			### wx is not installed, we try to install it from pip (local or remote)
 			sys.stderr.write("Error: DEVSimPy requires the wxPython package, which doesn't seem to be installed\n")
+
 			r = raw_input("Do you want to install wxPython package form: \n 1 - the PyPi repository \n 2 - the DEVSimPy github repository (1 or 2)?\n") or '2'
+			
 			if r == '1':
 				install_and_import('wxpython')	
 			else:
 			
-				try:
-					import pip
-				except ImportError, info:
-					### get get-pip.py file from DEVSimPy-site repository and install it
-					temp_directory = gettempdir()
-					downloadFile('https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/get-pip.py', temp_directory)
-					os.system('{} {}'.format('python', os.path.join(temp_directory, 'get-pip.py')))
+				import_pip()
 					
-					import pip
-									
 				### find the CPU architecture
 				is_64bits = sys.maxsize > 2**32
 		
