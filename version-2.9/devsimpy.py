@@ -180,17 +180,14 @@ if not hasattr(sys, 'frozen'):
 			
 				try:
 					import pip
-				except :
+				except ImportError, info:
 					### get get-pip.py file from DEVSimPy-site repository and install it
 					temp_directory = gettempdir()
 					downloadFile('https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/get-pip.py', temp_directory)
 					os.system('{} {}'.format('python', os.path.join(temp_directory, 'get-pip.py')))
 					
 					import pip
-				else:
-					sys.stdout.write("pip is not installed!\n")
-					sys.exit()
-					
+									
 				### find the CPU architecture
 				is_64bits = sys.maxsize > 2**32
 		
