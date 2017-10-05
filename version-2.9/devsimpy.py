@@ -173,9 +173,9 @@ if not hasattr(sys, 'frozen'):
 		try:
 			### wx is not installed, we try to install it from pip (local or remote)
 			sys.stderr.write("Error: DEVSimPy requires the wxPython package, which doesn't seem to be installed\n")
-			r = raw_input("Do you want to install wxPython package form (1) the PyPi repository or (2) DEVSimPy github repository (1/2)?") or 2
+			r = raw_input("Do you want to install wxPython package form \n 1 - the PyPi repository \n - 2 DEVSimPy github repository (1 or 2)?") or 2
 			if r == '1':
-				install_and_import('wx')
+				install_and_import('wx')	
 			else:
 				import pip
 
@@ -187,7 +187,7 @@ if not hasattr(sys, 'frozen'):
 
 				### url to download the whl file
 				whl_url = 'https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/pip-packages/'+file
-
+					
 				### temp directory to store whl file
 				temp_directory = gettempdir()
 
