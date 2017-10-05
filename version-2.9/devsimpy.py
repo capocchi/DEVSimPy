@@ -170,88 +170,88 @@ if not hasattr(sys, 'frozen'):
 
 	except ImportError:
 
+		#try:
+		### wx is not installed, we try to install it from pip (local or remote)
+		sys.stderr.write("Error: DEVSimPy requires the wxPython package, which doesn't seem to be installed\n")
+		r = raw_input("Do you want to install wxPython package form: \n 1 - the PyPi repository \n 2 - the DEVSimPy github repository (1 or 2)?") or 2
+		#if r == '1':
+		#	install_and_import('wx')	
+		#else:
+			
+		import pip
+
+		### find the CPU architecture
+		is_64bits = sys.maxsize > 2**32
+
+		### get whl file from DEVSimPy-site hosted by github
+		file = 'wxPython-3.0.2.0-cp27-none-win'+'_amd64.whl' if is_64bits else '32.whl'
+
+		### url to download the whl file
+		whl_url = 'https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/pip-packages/'+file
+			
+		### temp directory to store whl file
+		temp_directory = gettempdir()
+
+		whl_path = os.path.join(temp_directory, file)
+
+		sys.stdout.write("Downloading %s from DEVSimPy GitHub repository...\n"%(file))
+		time_elapsed = downloadFile(whl_url, temp_directory)
+		sys.stdout.write("Download complete!\n")
+
+		### install wx package form whl file
+		pip.main(['install', whl_path])
+
+		### Add plot.py patched file
+		from distutils.sysconfig import get_python_lib
+
+		### download plot.py file
+		url = 'https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/patched_files/plot.py'
+		sys.stdout.write("Downloading plot.py patched file from DEVSimPy GitHub repository...\n")
+		time_elapsed = downloadFile(url, temp_directory)
+		sys.stdout.write("Download complete!\n")
+
+		### new plot.py temp file
+		new_plot_path = os.path.join(temp_directory, 'plot.py')
+
+		### path of the wx lib that contain the plot.py file
+		wx_path = os.path.join(get_python_lib(),'wx-3.0-msw','wx','lib')
+
+		### try to remove the plot.py file that need to be replace by the patched plot.py file
 		try:
-			### wx is not installed, we try to install it from pip (local or remote)
-			sys.stderr.write("Error: DEVSimPy requires the wxPython package, which doesn't seem to be installed\n")
-			r = raw_input("Do you want to install wxPython package form: \n 1 - the PyPi repository \n 2 - the DEVSimPy github repository (1 or 2)?") or 2
-			#if r == '1':
-			#	install_and_import('wx')	
-			#else:
-				
-			import pip
-
-			### find the CPU architecture
-			is_64bits = sys.maxsize > 2**32
-
-			### get whl file from DEVSimPy-site hosted by github
-			file = 'wxPython-3.0.2.0-cp27-none-win'+'_amd64.whl' if is_64bits else '32.whl'
-
-			### url to download the whl file
-			whl_url = 'https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/pip-packages/'+file
-				
-			### temp directory to store whl file
-			temp_directory = gettempdir()
-
-			whl_path = os.path.join(temp_directory, file)
-
-			sys.stdout.write("Downloading %s from DEVSimPy GitHub repository...\n"%(file))
-			time_elapsed = downloadFile(whl_url, temp_directory)
-			sys.stdout.write("Download complete!\n")
-
-			### install wx package form whl file
-			pip.main(['install', whl_path])
-
-			### Add plot.py patched file
-			from distutils.sysconfig import get_python_lib
-
-			### download plot.py file
-			url = 'https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/patched_files/plot.py'
-			sys.stdout.write("Downloading plot.py patched file from DEVSimPy GitHub repository...\n")
-			time_elapsed = downloadFile(url, temp_directory)
-			sys.stdout.write("Download complete!\n")
-
-			### new plot.py temp file
-			new_plot_path = os.path.join(temp_directory, 'plot.py')
-
-			### path of the wx lib that contain the plot.py file
-			wx_path = os.path.join(get_python_lib(),'wx-3.0-msw','wx','lib')
-
-			### try to remove the plot.py file that need to be replace by the patched plot.py file
-			try:
-				os.remove(os.path.join(wx_path, 'plot.py'))
-			except Exception, info:
-				sys.stdout.write("Error removing the plot.py file: %s\n"%info)
-			else:
-				### copy the patched plot.py file into the wx directory
-				shutil.copy(new_plot_path, wx_path)
-				sys.stdout.write("Patched plot.py file applied!\n")
-
-			### delete temp file
-			try:
-				if os.path.exists(whl_path):
-					os.remove(whl_path)
-				if os.path.exists(new_plot_path):
-					os.remove(new_plot_path)
-			except Exception, info:
-				sys.stdout.write("Error cleaning temp file: %s\n"%info)
-			else:
-				sys.stdout.write("Clean temp file complete!\n")
-
-			### add wx-3.0-msw to the path and import it
-			sys.path.append(os.path.join(get_python_lib(),'wx-3.0-msw'))
-
-			import wx
-
-		except ImportError, info:
-			sys.stdout.write(info)
-			sys.stdout.write("DEVSimPy requires the wx package, please install it.\n")
-			sys.exit()
-
+			os.remove(os.path.join(wx_path, 'plot.py'))
+		except Exception, info:
+			sys.stdout.write("Error removing the plot.py file: %s\n"%info)
 		else:
-			if wx.VERSION_STRING < __min_wx_version__:
-				sys.stdout.write("You need to updgarde wxPython to v%s (or higer) to run DEVSimPy\n"%__min_wx_version__)
-				sys.stdout.write(__get__wxpython__)
-				sys.exit()
+			### copy the patched plot.py file into the wx directory
+			shutil.copy(new_plot_path, wx_path)
+			sys.stdout.write("Patched plot.py file applied!\n")
+
+		### delete temp file
+		try:
+			if os.path.exists(whl_path):
+				os.remove(whl_path)
+			if os.path.exists(new_plot_path):
+				os.remove(new_plot_path)
+		except Exception, info:
+			sys.stdout.write("Error cleaning temp file: %s\n"%info)
+		else:
+			sys.stdout.write("Clean temp file complete!\n")
+
+		### add wx-3.0-msw to the path and import it
+		sys.path.append(os.path.join(get_python_lib(),'wx-3.0-msw'))
+
+		import wx
+
+		#except ImportError, info:
+		#	sys.stdout.write(info)
+		#	sys.stdout.write("DEVSimPy requires the wx package, please install it.\n")
+		#	sys.exit()
+
+		#else:
+		#	if wx.VERSION_STRING < __min_wx_version__:
+		#		sys.stdout.write("You need to updgarde wxPython to v%s (or higer) to run DEVSimPy\n"%__min_wx_version__)
+		#		sys.stdout.write(__get__wxpython__)
+		#		sys.exit()
 import wx
 
 sys.stdout.write("Importing wxPython %s%s for python %s on %s (%s) platform...\n"%(wx.version(), " from devsimpy.ini" if ini_exist else '', platform.python_version(), platform.system(), platform.version()))
