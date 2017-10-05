@@ -201,7 +201,8 @@ if not hasattr(sys, 'frozen'):
 					else :
 						file = 'wxPython-3.0.2.0-cp27-none-win32.whl' 
 				else:
-					file = 'wwxPython_common-3.0.2.0-py2-none-any.whl'
+					sys.stdout.write('Please install wx 3.x from your package manager')
+					sys.exit()
 					
 				### url to download the whl file
 				whl_url = 'https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/pip-packages/'+file
