@@ -33,7 +33,6 @@
 
 ### at the beginning to prevent with statement for python version <=2.5
 from __future__ import with_statement
-from mdp.utils.templet import expect
 
 __authors__  = "Laurent Capocchi <capocchi@univ-corse.fr, lcapocchi@gmail.com>, SISU project group <santucci@univ-corse.fr>"
 __date__    = "19 Sept 2016, 15:13 GMT"
@@ -84,8 +83,8 @@ def import_pip():
 			os.system('{} {}'.format('python', os.path.join(temp_directory, 'get-pip.py')))
 		
 			import pip
-			
-		except Error, info:
+		except Exception, info:
+			sys.stdout.write(info)
 			sys.stdout.write('pip installation process has been interrupted!\n Try to install pip yourself.\n')
 			sys.exit()
 					
