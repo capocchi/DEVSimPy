@@ -33,6 +33,7 @@
 
 ### at the beginning to prevent with statement for python version <=2.5
 from __future__ import with_statement
+from mdp.utils.templet import expect
 
 __authors__  = "Laurent Capocchi <capocchi@univ-corse.fr, lcapocchi@gmail.com>, SISU project group <santucci@univ-corse.fr>"
 __date__    = "19 Sept 2016, 15:13 GMT"
@@ -77,13 +78,16 @@ def import_pip():
 	except ImportError, info:
 		### get get-pip.py file from DEVSimPy-site repository and install it
 		temp_directory = gettempdir()
-		downloadFile('https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/get-pip.py', temp_directory)
-		os.system('{} {}'.format('python', os.path.join(temp_directory, 'get-pip.py')))
 		
-		import pip
-	else:
-		sys.stdout.write('pip installation process has been interrupted!\n Try to install pip yourself.\n')
-		sys.exit()
+		try:
+			downloadFile('https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/get-pip.py', temp_directory)
+			os.system('{} {}'.format('python', os.path.join(temp_directory, 'get-pip.py')))
+		
+			import pip
+			
+		except:
+			sys.stdout.write('pip installation process has been interrupted!\n Try to install pip yourself.\n')
+			sys.exit()
 					
 def install_and_import(package):
 	import importlib
