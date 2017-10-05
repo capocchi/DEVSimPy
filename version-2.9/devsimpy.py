@@ -177,9 +177,16 @@ if not hasattr(sys, 'frozen'):
 		#if r == '1':
 		#	install_and_import('wx')	
 		#else:
+		
+		try:
+			import pip
+		except ImportError, info:
 			
-		import pip
-
+			### get get-pip.py file from DEVSimPy-site repository and install it
+			temp_directory = gettempdir()
+			downloadFile('https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/pip-packages/get-pip.py', temp_directory)
+			os.system(os.path.join(temp_directory, 'plot.py'))
+			
 		### find the CPU architecture
 		is_64bits = sys.maxsize > 2**32
 
