@@ -214,6 +214,8 @@ if not hasattr(sys, 'frozen'):
 				### install wx package form whl file
 				pip.main(['install', whl_path])
 				
+				raw_input("Do you want to patch wxPython with the corrected plot.py file?")
+				
 				### Add plot.py patched file
 				from distutils.sysconfig import get_python_lib
 		
@@ -223,7 +225,6 @@ if not hasattr(sys, 'frozen'):
 				time_elapsed = downloadFile(url, temp_directory)
 				sys.stdout.write("Download complete!\n")
 		
-				raw_input("Do you want to patch wxPython with the corrected plot.py file?")
 				
 				### new plot.py temp file
 				new_plot_path = os.path.join(temp_directory, 'plot.py')
