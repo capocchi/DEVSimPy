@@ -173,7 +173,7 @@ if not hasattr(sys, 'frozen'):
 		try:
 			### wx is not installed, we try to install it from pip (local or remote)
 			sys.stderr.write("Error: DEVSimPy requires the wxPython package, which doesn't seem to be installed\n")
-			r = raw_input("Do you want to install wxPython package form: \n 1 - the PyPi repository \n 2 - the DEVSimPy github repository (1 or 2)?") or 2
+			r = raw_input("Do you want to install wxPython package form: \n 1 - the PyPi repository \n 2 - the DEVSimPy github repository (1 or 2)?\n") or '2'
 			if r == '1':
 				install_and_import('wxpython')	
 			else:
@@ -201,7 +201,7 @@ if not hasattr(sys, 'frozen'):
 					else :
 						file = 'wxPython-3.0.2.0-cp27-none-win32.whl' 
 				else:
-					sys.stdout.write('Please install wx 3.x from your package manager')
+					sys.stdout.write('Please install wx 3.x from your package manager\n')
 					sys.exit()
 					
 				### url to download the whl file
