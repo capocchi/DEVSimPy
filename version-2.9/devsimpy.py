@@ -185,7 +185,7 @@ if not hasattr(sys, 'frozen'):
 			### get get-pip.py file from DEVSimPy-site repository and install it
 			temp_directory = gettempdir()
 			downloadFile('https://raw.githubusercontent.com/capocchi/DEVSimPy-site/gh-pages/pip-packages/get-pip.py', temp_directory)
-			os.system(os.path.join(temp_directory, 'plot.py'))
+			os.system(os.path.join(temp_directory, 'get-pip.py'))
 			
 		### find the CPU architecture
 		is_64bits = sys.maxsize > 2**32
