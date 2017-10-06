@@ -1699,6 +1699,7 @@ class BlockEditor(Editor):
 		peek = wx.MenuItem(insert, wx.NewId(), _('New peek'), _('Generate new peek code'))
 		poke = wx.MenuItem(insert, wx.NewId(), _('New poke'), _('Generate new poke code'))
 		holdInState = wx.MenuItem(insert, wx.NewId(), _('New hold in state'), _('Generate new hold in state code self.holdIn(...)'))
+		phaseIs = wx.MenuItem(insert, wx.NewId(), _('New phaseIs test'), _('Generate phase test code self.phaseIs(...)'))
 		passivateInState = wx.MenuItem(insert, wx.NewId(), _('New passivate in state'), _('Generate new passivate in state code self.passivateIn(...)'))
 		passivateState = wx.MenuItem(insert, wx.NewId(), _('New passivate state'), _('Generate new passivate state code self.passivate(...)'))
 		debug = wx.MenuItem(insert, wx.NewId(), _('New debugger'), _('Generate new debugger code (print into the log of model)'))
@@ -1706,6 +1707,7 @@ class BlockEditor(Editor):
 		insert.AppendItem(peek)
 		insert.AppendItem(poke)
 		insert.AppendItem(holdInState)
+		insert.AppendItem(phaseIs)
 		insert.AppendItem(passivateInState)
 		insert.AppendItem(passivateState)
 		insert.AppendItem(debug)
@@ -1728,6 +1730,7 @@ class BlockEditor(Editor):
 		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=poke.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertHoldInState, id=holdInState.GetId())
+		self.Bind(wx.EVT_MENU, self.OnInsertPhaseIs, id=phaseIs.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertPassivateInState, id=passivateInState.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertPassivateState, id=passivateState.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertDebug, id=debug.GetId())
@@ -1793,6 +1796,13 @@ class BlockEditor(Editor):
 		cp.AddTextUTF8("self.holdIn('<phase>',<sigma>)")
 		cp.modify = True
 
+	def OnInsertPhaseIs(self, event):
+		""" Insert a sentence to test the phase
+		"""
+		cp = self.nb.GetCurrentPage()
+		cp.AddTextUTF8("self.phaseIs('<phase>')")
+		cp.modify = True
+		
 	def OnInsertPassivateInState(self, event):
 		""" Insert a sentence to change the state
 		"""
