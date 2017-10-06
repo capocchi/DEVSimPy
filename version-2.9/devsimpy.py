@@ -100,7 +100,7 @@ def install_and_import(package):
 		sys.stdout.write("Install %s form pip\n"%package)
 		
 		try:
-			raw_input("Press Enter to continue (Ctrl+C to skip)")
+			raw_input(_("Press Enter to continue (Ctrl+C to skip)"))
 		except SyntaxError:
 			sys.exit()
 		else:
@@ -234,13 +234,13 @@ if not hasattr(sys, 'frozen'):
 				sys.stdout.write("Downloading %s from DEVSimPy GitHub repository...\n"%(file))
 				time_elapsed = downloadFile(whl_url, temp_directory)
 				sys.stdout.write("Download complete!\n")
-		
-				raw_input("Do you want to install wxPython?")
+				
+				raw_input("Press Enter to continue wxPython installation (Ctrl+C to skip)")
 				
 				### install wx package form whl file
 				pip.main(['install', whl_path])
 				
-				raw_input("Do you want to patch wxPython with the corrected plot.py file?")
+				raw_input("Press Enter to to patch wxPython with the corrected plot.py file (Ctrl+C to skip)")
 				
 				### Add plot.py patched file
 				from distutils.sysconfig import get_python_lib
@@ -251,7 +251,6 @@ if not hasattr(sys, 'frozen'):
 				time_elapsed = downloadFile(url, temp_directory)
 				sys.stdout.write("Download complete!\n")
 		
-				
 				### new plot.py temp file
 				new_plot_path = os.path.join(temp_directory, 'plot.py')
 		
