@@ -29,7 +29,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 	import wx
 	
 	### for Phoenix
-	if wx.VERSION_STRING>=4.0:
+	if wx.VERSION_STRING >= '4.0':
 		import wx.adv
 		wx.Sound = wx.adv.Sound
 		wx.SOUND_ASYNC = wx.adv.SOUND_ASYNC	

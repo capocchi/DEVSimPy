@@ -333,7 +333,9 @@ else:
 	
 	#from wx.lib.pubsub import setuparg1
 	from wx.lib.pubsub import pub
-	
+ 
+if wx.VERSION_STRING >= '4.0':
+
 	import wx.adv
 	
 	wx.FutureCall = wx.CallLater
