@@ -216,7 +216,7 @@ class PlotFrame(wx.Frame):
 		pointLabel, pointId = self.enablePointLabel.GetLabel(), self.enablePointLabel.GetId()
 		normalizedLabel, normalizedId = self.norm.GetLabel(), self.norm.GetId()
 
-		if wx.VERSION_STRING<4.0:
+		if wx.VERSION_STRING < '4.0':
 			tb.AddCheckLabelTool(zoomId, zoomLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-zoom.png')), shortHelp=_('Enable zoom'), longHelp='')
 			tb.AddCheckLabelTool(titleId, titleLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-title.png')), shortHelp=_('Enable title'), longHelp='')
 			tb.AddCheckLabelTool(gridId, gridLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-grid.png')), shortHelp='Enable grid', longHelp='')

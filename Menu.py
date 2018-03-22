@@ -454,7 +454,7 @@ class HelpMenu(wx.Menu):
 		contactModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'mail.png')))
 		aboutModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'info.png')))
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING<4.0 else self.Append
+		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
 		AppendItem(helpModel)
 		AppendItem(apiModel)
@@ -556,7 +556,7 @@ class DiagramNoTabPopupMenu(wx.Menu):
 		new_tab = wx.MenuItem(self, ID_NEW, _('New'), _("Create a new tab diagram"))
 		new_tab.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'new.png')))
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING<4.0 else self.Append
+		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
 		AppendItem(new_tab)
 
@@ -582,7 +582,7 @@ class DiagramTabPopupMenu(wx.Menu):
 		rename.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rename.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		clear.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'delete.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING<4.0 else self.Append
+		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
 		AppendItem(detach)
 		AppendItem(rename)
@@ -612,7 +612,7 @@ class PropertiesCtrlPopupMenu(wx.Menu):
 		insert.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'insert.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		clear.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit-clear.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING<4.0 else self.Append
+		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
 		AppendItem(edit)
 		AppendItem(insert)
@@ -640,8 +640,8 @@ class ItemLibraryPopupMenu(wx.Menu):
 
 		### last child of tree and not empty directory (then, has OnDocumentation method)
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING<4.0 else self.Append
-		InsertItem = self.InsertItem if wx.VERSION_STRING<4.0 else self.Insert
+		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
+		InsertItem = self.InsertItem if wx.VERSION_STRING < '4.0' else self.Insert
 
 		if parent.IsBold(parent.GetSelection()):
 			new_model = wx.MenuItem(self, ID_NEW_MODEL_LIB, _('New Model'), _('Add a new model to the selected library'))
@@ -694,7 +694,7 @@ class LibraryPopupMenu(wx.Menu):
 		#upgrade.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'upgrade.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		info.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'dbinfo2.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING<4.0 else self.Append
+		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
 		AppendItem(new)
 		AppendItem(refresh)
@@ -730,7 +730,7 @@ class ShapeCanvasPopupMenu(wx.Menu):
 		add_constants.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'properties.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		preview_dia.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'print-preview.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING<4.0 else self.Append
+		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
 		### append items
 		AppendItem(new)
@@ -816,10 +816,10 @@ class ShapePopupMenu(wx.Menu):
 		plugin.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'plugin.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		properties.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'properties.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING<4.0 else self.Append
-		AppendMenu = self.AppendMenu if wx.VERSION_STRING<4.0 else self.Append
+		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
+		AppendMenu = self.AppendMenu if wx.VERSION_STRING < '4.0' else self.Append
 
-		if wx.VERSION_STRING>=4.0:
+		if wx.VERSION_STRING >= '4.0':
 			edit_subMenu.AppendItem = edit_subMenu.Append
 			rotate_subMenu.AppendItem = rotate_subMenu.Append
 			rotate_all_subMenu.AppendItem =rotate_all_subMenu.Append
@@ -866,7 +866,7 @@ class ShapePopupMenu(wx.Menu):
 			Lock_item = AppendItem(lock)
 			UnLock_item = AppendItem(unlock)
 
-			if wx.VERSION_STRING>=4.0:
+			if wx.VERSION_STRING >= '4.0':
 				rotate_subMenu.AppendItem = rotate_subMenu.Append
 				rotate_subMenu.AppendMenu = rotate_subMenu.Append
 				rotate_all_subMenu.AppendItem = rotate_all_subMenu.Append

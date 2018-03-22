@@ -83,7 +83,7 @@ class GeneralPanel(wx.Panel):
 		self.cb1.SetValue(__builtin__.__dict__['TRANSPARENCY'])
 
 		### wxPython version
-		if wx.VERSION_STRING<4.0:
+		if wx.VERSION_STRING < '4.0':
 			import wxversion
 			wxv= map(lambda a: a.split('-')[0], wxversion.getInstalled())
 		else:

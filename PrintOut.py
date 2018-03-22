@@ -59,7 +59,7 @@ class Printout(wx.Printout):
         maxY += 2*marginY
 
         ## Get the size of the DC in pixels
-        (w, h) = dc.GetSizeTuple() if wx.VERSION_STRING<4.0 else dc.GetSize()
+        (w, h) = dc.GetSizeTuple() if wx.VERSION_STRING < '4.0' else dc.GetSize()
 		
         ## Calculate a suitable scaling factor
         
@@ -111,7 +111,7 @@ class Printable:
 		printer = wx.Printer(pdd)
 
 		### copy in order to not change the size of original canvas when we rescal with zoom
-		c = copy.copy(self.print_canvas) if wx.VERSION_STRING<4.0 else self.print_canvas
+		c = copy.copy(self.print_canvas) if wx.VERSION_STRING < '4.0' else self.print_canvas
 		
 		### scale with A4 paper dim
 		#c.scalex = min(float(c.getWidth())/1654.0,float(c.getHeight())/2339.0)
@@ -129,7 +129,7 @@ class Printable:
 		parent = self.print_canvas.GetTopLevelParent()
 		
 		### copy in order to not change the size of original canvas when we rescal with zoom
-		c = copy.copy(self.print_canvas) if wx.VERSION_STRING<4.0 else self.print_canvas
+		c = copy.copy(self.print_canvas) if wx.VERSION_STRING < '4.0' else self.print_canvas
 		
 		data = wx.PrintDialogData(self.printData)
 	

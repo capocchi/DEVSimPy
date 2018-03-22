@@ -42,7 +42,7 @@ class SearchLib(wx.SearchCtrl):
 		self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancel)
 		self.Bind(wx.EVT_TEXT, self.OnSearch)
 
-		if wx.VERSION_STRING < 4.0:
+		if wx.VERSION_STRING < '4.0':
 			self.SetToolTipString(_("Find model in the library depending its name."))
 		else:
 			 self.SetToolTip(_("Find model in the library depending its name."))
@@ -113,7 +113,7 @@ class LibPanel(wx.Panel):
 		tb.SetToolBitmapSize( ( 16, 16 ) )# this required for non-standard size buttons on MSW
 
 		### for Phoenix version ()
-		if wx.VERSION_STRING < 4.0:
+		if wx.VERSION_STRING < '4.0':
 			tb.AddTool(Menu.ID_NEW_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db+2.png')), shortHelpString=_('New library'), longHelpString=_('Create or import a new directory'))
 			tb.AddTool(Menu.ID_DELETE_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db-2.png')), shortHelpString=_('Delete library'), longHelpString=_('Delete the selected librarie'))
 			tb.AddTool(Menu.ID_REFRESH_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')), shortHelpString=_('Refresh library'), longHelpString=_('Force the refresh of the loaded libraries'))
@@ -129,7 +129,7 @@ class LibPanel(wx.Panel):
 		mainW = self.GetTopLevelParent()
 
 		### for Phoenix version ()
-		if wx.VERSION_STRING < 4.0:
+		if wx.VERSION_STRING < '4.0':
 			wx.EVT_TOOL(self, Menu.ID_NEW_LIB, mainW.OnImport)
 			wx.EVT_TOOL(self, Menu.ID_DELETE_LIB, self.tree.OnDelete)
 			#wx.EVT_TOOL(self, Menu.ID_IMPORT_LIB, mainW.OnImport)
@@ -151,7 +151,7 @@ class LibPanel(wx.Panel):
 
 		self.propToolTip =[_("Select model and instantiate it in the diagram (right part) using a drag-and-drop.")]
 		### for Phoenix version ()
-		if wx.VERSION_STRING < 4.0:
+		if wx.VERSION_STRING < '4.0':
 			self.SetToolTipString(self.propToolTip[0])
 		else:
 			self.SetToolTip(self.propToolTip[0])
