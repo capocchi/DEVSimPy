@@ -2,17 +2,23 @@
 
 import wx
 
-if wx.VERSION_STRING < '4.0':
-	import wx.wizard as wizmod
-	WizardPage = wizmod.PyWizardPage
 	
-else:
+if wx.VERSION_STRING >= '4.0':
+
 	from wx.adv import Wizard as wizmod
 	wizmod.EVT_WIZARD_PAGE_CHANGED = wx.adv.EVT_WIZARD_PAGE_CHANGED
 	wizmod.EVT_WIZARD_PAGE_CHANGING = wx.adv.EVT_WIZARD_PAGE_CHANGING
 	wizmod.EVT_WIZARD_CANCEL = wx.adv.EVT_WIZARD_CANCEL
 	wizmod.EVT_WIZARD_FINISHED = wx.adv.EVT_WIZARD_FINISHED
 	WizardPage = wx.adv.WizardPage
+else:
+	#try:
+	#	import wx.wizard as wizmod
+	#	WizardPage = wizmod.PyWizardPage
+	#except ImportError:
+	from wx.wizard import Wizard as wizmod
+	WizardPage = wx.wizard.WizardPage
+		
 
 import os
 import sys
