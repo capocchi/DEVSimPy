@@ -2,11 +2,11 @@
 
 import wx
 
-try:
+if wx.VERSION_STRING < '4.0':
 	import wx.wizard as wizmod
 	WizardPage = wizmod.PyWizardPage
-
-except ImportError:
+	
+else:
 	from wx.adv import Wizard as wizmod
 	wizmod.EVT_WIZARD_PAGE_CHANGED = wx.adv.EVT_WIZARD_PAGE_CHANGED
 	wizmod.EVT_WIZARD_PAGE_CHANGING = wx.adv.EVT_WIZARD_PAGE_CHANGING
@@ -18,7 +18,7 @@ import os
 import sys
 import inspect
 import zipfile
-import  wx.lib.filebrowsebutton as filebrowse
+import wx.lib.filebrowsebutton as filebrowse
 import datetime
 
 import Container

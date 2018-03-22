@@ -419,7 +419,7 @@ wx.Log.SetLogLevel(0)
 def getIcon(path):
 	""" Return icon from image path
 	"""
-	if wx.VERSION_STRING < 4.0:
+	if wx.VERSION_STRING < '4.0':
 		icon = wx.EmptyIcon()
 	else:
 		icon = wx.Icon()
@@ -726,7 +726,7 @@ class MainApplication(wx.Frame):
 		# for spash screen
 		pub.sendMessage('object.added',  message='Making status bar...\n')
 
-		self.statusbar = self.CreateStatusBar(1, wx.ST_SIZEGRIP if wx.VERSION_STRING < 4.0 else wx.STB_SIZEGRIP)
+		self.statusbar = self.CreateStatusBar(1, wx.ST_SIZEGRIP if wx.VERSION_STRING < '4.0' else wx.STB_SIZEGRIP)
 		self.statusbar.SetFieldsCount(3)
 		self.statusbar.SetStatusWidths([-5, -2, -1])
 
@@ -761,7 +761,7 @@ class MainApplication(wx.Frame):
 		currentPage = self.nb2.GetCurrentPage()
 
 		### Tools List - IDs come from Menu.py file
-		if wx.VERSION_STRING < 4.0:
+		if wx.VERSION_STRING < '4.0':
 			self.tools = [	self.tb.AddTool(wx.ID_NEW, wx.Bitmap(os.path.join(ICON_PATH,'new.png')), shortHelpString=_('New diagram (Ctrl+N)'),longHelpString=_('Create a new diagram in tab')),
 							self.tb.AddTool(wx.ID_OPEN, wx.Bitmap(os.path.join(ICON_PATH,'open.png')), shortHelpString=_('Open File (Ctrl+O)'), longHelpString=_('Open an existing diagram')),
 							self.tb.AddTool(wx.ID_PREVIEW_PRINT, wx.Bitmap(os.path.join(ICON_PATH,'print-preview.png')), shortHelpString=_('Print Preview (Ctrl+P)'), longHelpString=_('Print preview of current diagram')),
@@ -1003,9 +1003,9 @@ class MainApplication(wx.Frame):
 
 		# Dnd uniquement sur les derniers fils de l'arbre
 		if not tree.ItemHasChildren(item) and flag:
-			text = tree.GetItemPyData(event.GetItem()) if wx.VERSION_STRING<4.0 else tree.GetItemData(event.GetItem())
+			text = tree.GetItemPyData(event.GetItem()) if wx.VERSION_STRING < '4.0' else tree.GetItemData(event.GetItem())
 			try:
-				tdo = wx.PyTextDataObject(text) if wx.VERSION_STRING<4.0 else wx.TextDataObject(text)
+				tdo = wx.PyTextDataObject(text) if wx.VERSION_STRING < '4.0' else wx.TextDataObject(text)
 				#tdo = wx.TextDataObject(text)
 				tds = wx.DropSource(tree)
 				tds.SetData(tdo)
@@ -1993,7 +1993,7 @@ class AdvancedSplashScreen(AdvancedSplash):
 		self.app = app
 
 		### for Phoenix version ()
-		if wx.VERSION_STRING < 4.0:
+		if wx.VERSION_STRING < '4.0':
 			splashStyle = wx.SPLASH_CENTRE_ON_SCREEN | wx.SPLASH_TIMEOUT
 		else:
 			splashStyle = wx.adv.SPLASH_CENTRE_ON_SCREEN | wx.adv.SPLASH_TIMEOUT
@@ -2029,7 +2029,7 @@ class AdvancedSplashScreen(AdvancedSplash):
 
 		self.Bind(wx.EVT_CLOSE,self.OnClose)
 		
-		#if wx.VERSION_STRING < 4.0:
+		#if wx.VERSION_STRING < '4.0':
 		self.fc = wx.FutureCall(500, self.ShowMain)
 		#else:
 		#self.fc = wx.CallLater(500, self.ShowMain)
