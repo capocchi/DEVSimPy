@@ -43,7 +43,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		CheckListCtrlMixin.__init__(self)
 		ListCtrlAutoWidthMixin.__init__(self)
 
-		if wx.VERSION_STRING<4.0:
+		if wx.VERSION_STRING < '4.0':
 			font = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
 		else:
 			font = wx.SystemSettings.GetFont(wx.SYS_SYSTEM_FONT)
@@ -62,9 +62,9 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		"""
 
 		
-		index = self.InsertStringItem(sys.maxint, dName) if wx.VERSION_STRING<4.0 else  self.InsertItem(sys.maxint, dName)
+		index = self.InsertStringItem(sys.maxint, dName) if wx.VERSION_STRING < '4.0' else  self.InsertItem(sys.maxint, dName)
 
-		SetStringItem = self.SetStringItem if wx.VERSION_STRING<4.0 else self.SetItem
+		SetStringItem = self.SetStringItem if wx.VERSION_STRING < '4.0' else self.SetItem
 
 		SetStringItem(index, 1, str(getDirectorySize(path)) if os.path.exists(path) else '0')
 		SetStringItem(index, 2, 'local' if not path.startswith('http') else 'web' )

@@ -59,7 +59,7 @@ class PropPanel(wx.Panel):
 		"""
 		sizer = self.GetSizer()
 		
-		if wx.VERSION_STRING<4.0:
+		if wx.VERSION_STRING < '4.0':
 			sizer.DeleteWindows()
 		else:
 			sizer.Clear(True)
@@ -74,7 +74,7 @@ class PropPanel(wx.Panel):
 		"""
 
 		self.propToolTip =[_("No model selected.\nChoose a model to show in this panel its properties."),_("You can change the properties by editing the cell.")]
-		if wx.VERSION_STRING < 4.0:
+		if wx.VERSION_STRING < '4.0':
 			self.SetToolTipString(self.propToolTip[0])
 		else:
 			self.SetToolTip(self.propToolTip[0])

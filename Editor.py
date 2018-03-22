@@ -59,7 +59,7 @@ elif wx.Platform == '__WXMAC__':
 else:
 	faces = dict(times='Times', mono='Courier', helv='Helvetica', other='new century schoolbook', size=12, size2=10)
 
-wx.SystemSettings_GetColour = wx.SystemSettings.GetColour if wx.VERSION_STRING>=4.0 else wx.SystemSettings_GetColour
+wx.SystemSettings_GetColour = wx.SystemSettings.GetColour if wx.VERSION_STRING >= '4.0' else wx.SystemSettings_GetColour
 
 #################################################################
 ###
@@ -195,7 +195,7 @@ class PythonSTC(stc.StyledTextCtrl):
 		self.SetViewEOL(True)
 		self.SetEOLMode(stc.STC_EOL_CRLF)
 		
-		if wx.VERSION_STRING<4.0: self.SetUseAntiAliasing(True)
+		if wx.VERSION_STRING < '4.0': self.SetUseAntiAliasing(True)
 
 		self.SetEdgeMode(stc.STC_EDGE_BACKGROUND)
 		self.SetEdgeColumn(78)
@@ -1229,7 +1229,7 @@ class Base(object):
 
 		items = [self.save, self.save_as, self.quit]
 
-		if wx.VERSION_STRING<4.0:
+		if wx.VERSION_STRING < '4.0':
 			for item in items: file.AppendItem(item)
 		else:
 			for item in items: file.Append(item)
@@ -1266,7 +1266,7 @@ class Base(object):
 										])
 		self.SetAcceleratorTable(accel_tbl)
 
-		if wx.VERSION_STRING<4.0:
+		if wx.VERSION_STRING < '4.0':
 			edit.AppendItem(self.cut)
 			edit.AppendItem(self.copy)
 			edit.AppendItem(self.paste)
@@ -1294,7 +1294,7 @@ class Base(object):
 		view = wx.Menu()
 
 		showStatusBar = wx.MenuItem(view, wx.NewId(), _('&Statusbar'), _('Show statusBar'))
-		if wx.VERSION_STRING < 4.0:
+		if wx.VERSION_STRING < '4.0':
 			view.AppendItem(showStatusBar)
 		else:
 			view.Append(showStatusBar)
@@ -1306,7 +1306,7 @@ class Base(object):
 
 		about = wx.MenuItem(help, wx.NewId(), _('&About\tF1'), _('About editor'))
 		about.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'info.png')))
-		if wx.VERSION_STRING < 4.0:
+		if wx.VERSION_STRING < '4.0':
 			help.AppendItem(about)
 		else:
 			help.Append(about)
@@ -1353,7 +1353,7 @@ class Base(object):
 			tb = wx.ToolBar(self, -1)
 			tb.SetToolBitmapSize((16, 16))# this required for non-standard size buttons on MSW
 
-			if wx.VERSION_STRING < 4.0:
+			if wx.VERSION_STRING < '4.0':
 				tb.AddTool(self.save.GetId(), wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), shortHelpString=_('Save'), longHelpString=_('Save the file'))
 				tb.AddTool(self.cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), shortHelpString=_('Cut'), longHelpString=_('Cut the selection'))
 				tb.AddTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), shortHelpString=_('Copy'), longHelpString=_('Copy the selection'))
@@ -1426,7 +1426,7 @@ class Base(object):
 			img = img.Scale(22, 22)
 
 		# wxMac can be any size upto 128x128, so leave the source img alone....
-		if wx.VERSION_STRING<4.0:
+		if wx.VERSION_STRING < '4.0':
 			icon =  wx.IconFromBitmap(img.ConvertToBitmap())
 		else:
 			icon =  wx.Icon(img.ConvertToBitmap())
@@ -2034,7 +2034,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		tb = self.GetToolBar()
 		tb.InsertSeparator(tb.GetToolsCount())
 
-		if wx.VERSION_STRING<4.0:
+		if wx.VERSION_STRING < '4.0':
 			tb.AddTool(peek.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')), shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
 			tb.AddTool(poke.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')), shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
 			tb.AddTool(holdInState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New hold in state'), longHelpString=_('Insert a code for a new hold in state'))
@@ -2085,7 +2085,7 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 		#tb = self.GetToolBar()
 		self.toolbar.InsertSeparator(self.toolbar.GetToolsCount())
 
-		if wx.VERSION_STRING < 4.0:
+		if wx.VERSION_STRING < '4.0':
 			self.toolbar.AddTool(id[0], wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')),shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
 			self.toolbar.AddTool(id[1], wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')),shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
 			self.toolbar.AddTool(id[2], wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')),shortHelpString=_('New hold in state'), longHelpString=_('Insert a code for a new hold in state'))

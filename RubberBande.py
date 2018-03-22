@@ -105,7 +105,7 @@ class wxPyRubberBander:
                 # Set clipping region to rectangle corners
                 dc.SetClippingRegion(self.m_stpoint.x, self.m_stpoint.y, w,h)
                 dc.DrawRectangle(self.m_stpoint.x, self.m_stpoint.y, w, h) 
-                if wx.VERSION_STRING<4.0: dc.EndDrawing()
+                if wx.VERSION_STRING < '4.0': dc.EndDrawing()
                
                 self.m_savepoint = self.m_endpoint # cache current endpoint
 

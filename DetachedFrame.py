@@ -24,7 +24,7 @@ import sys
 import os
 import wx
 
-if wx.VERSION_STRING>=4.0:
+if wx.VERSION_STRING >= '4.0':
 	wx.ST_SIZEGRIP = wx.STB_SIZEGRIP
 
 if __name__ == '__main__':

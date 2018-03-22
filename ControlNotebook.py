@@ -157,7 +157,7 @@ class GeneralNotebook(Observer):
 					self.selected_model = None
 					str = propPanel.propToolTip[0]
 				
-				if str : propPanel.SetToolTipString(str) if wx.VERSION_STRING<4.0 else propPanel.SetToolTip(str)
+				if str : propPanel.SetToolTipString(str) if wx.VERSION_STRING < '4.0' else propPanel.SetToolTip(str)
 
 
 ### ---------------------------------------------
@@ -232,7 +232,7 @@ if USE_FLATNOTEBOOK:
 		def CreateRightClickMenu(self):
 			self._rmenu = wx.Menu()
 			item = wx.MenuItem(self._rmenu, MENU_EDIT_DELETE_PAGE, _("Close Tab\tCtrl+F4"), _("Close Tab"))
-			if wx.VERSION_STRING < 4.0: 
+			if wx.VERSION_STRING < '4.0': 
 				self._rmenu.AppendItem(item) 
 			else:
 				self._rmenu.Append(item) 

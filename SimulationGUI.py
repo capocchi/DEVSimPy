@@ -668,7 +668,7 @@ class Base(object):
 	def SetFields(self):
 		"""
 		"""
-		if wx.VERSION_STRING<4.0:
+		if wx.VERSION_STRING < '4.0':
 			self.statusbar.SetFields([""]*self.statusbar.GetFieldsCount())
 		else:
 			for i in range(self.statusbar.GetFieldsCount()):

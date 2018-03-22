@@ -178,7 +178,7 @@ class FileMenu(wx.Menu):
 		screenCapture.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'ksnapshot.png')))
 		exitModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'exit.png')))
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING<4.0 else self.Append
+		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 		
 		AppendItem(openModel)
 		
@@ -218,7 +218,7 @@ class ProfileFileMenu(wx.Menu):
 
 		parent = parent.GetParent()
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING<4.0 else self.Append
+		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
 		for fn in filter(lambda f: f.endswith('.prof'), os.listdir(gettempdir())):
 			id = wx.NewId()
@@ -238,7 +238,7 @@ class RecentFileMenu(wx.Menu):
 
 		parent = parent.GetParent()
 		
-		AppendItem = self.AppendItem if wx.VERSION_STRING<4.0 else self.Append
+		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 		
 		# affichage du menu des derniers fichiers consultés avec gestion des fichiers qui n'existent plus
 		for path in filter(lambda p:p!='', parent.openFileList):
@@ -272,7 +272,7 @@ class ShowMenu(wx.Menu):
 		control.Append(ID_SHOW_LIB, _('Libraries'), _("Show libraries tab"), wx.ITEM_CHECK)
 
 
-		AppendMenu = self.AppendMenu if wx.VERSION_STRING<4.0 else self.Append
+		AppendMenu = self.AppendMenu if wx.VERSION_STRING < '4.0' else self.Append
 
 		AppendMenu(ID_SHOW_CONTROL, _('Control'), control)
 
@@ -355,7 +355,7 @@ class DiagramMenu(wx.Menu):
 		renameDiagram.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'rename.png')))
 		closeDiagram.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'close.png')))
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING<4.0 else self.Append
+		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
 		AppendItem(newDiagram)
 		AppendItem(renameDiagram)
@@ -408,15 +408,15 @@ class SettingsMenu(wx.Menu):
 		enitem.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'united-states-flag.png')))
 
 
-		if wx.VERSION_STRING<4.0:
+		if wx.VERSION_STRING < '4.0':
 			languagesSubmenu.AppendItem(fritem)
 			languagesSubmenu.AppendItem(enitem)
 		else:
 			languagesSubmenu.Append(fritem)
 			languagesSubmenu.Append(enitem)
 
-		AppendMenu = self.AppendMenu if wx.VERSION_STRING<4.0 else self.Append
-		AppendItem = self.AppendItem if wx.VERSION_STRING<4.0 else self.Append
+		AppendMenu = self.AppendMenu if wx.VERSION_STRING < '4.0' else self.Append
+		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
 		AppendMenu(wx.NewId(), _('Languages'), languagesSubmenu)
 		

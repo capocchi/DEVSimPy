@@ -71,7 +71,7 @@ class LibraryTree(wx.TreeCtrl):
 		il = wx.ImageList(isz[0], isz[1])
 		#self.fldridx = il.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, isz))
 		#self.fldropenidx = il.Add(wx.ArtProvider_GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, isz))
-		if wx.VERSION_STRING<4.0:
+		if wx.VERSION_STRING < '4.0':
 			self.fileidx = il.Add(wx.ArtProvider_GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, isz))
 		else:
 			self.fileidx = il.Add(wx.ArtProvider.GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, isz))
@@ -147,7 +147,7 @@ class LibraryTree(wx.TreeCtrl):
 		"""
 		item, flags = self.HitTest(evt.GetPosition())
 
-		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING<4.0 else self.GetItemData
+		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
 
 		if (flags & wx.TREE_HITTEST_ONITEMLABEL) and not evt.LeftIsDown():
 
@@ -201,7 +201,7 @@ class LibraryTree(wx.TreeCtrl):
 		"""
 		item_selected = evt.GetItem()
 
-		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING<4.0 else self.GetItemData
+		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
 
 		if not self.ItemHasChildren(item_selected):
 			path = GetItemPyData(item_selected)
@@ -262,7 +262,7 @@ class LibraryTree(wx.TreeCtrl):
 
 		item = self.GetSelection()
 
-		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING<4.0 else self.GetItemData
+		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
 
 		if item:
 			### msgbox to select what you wan to delete: file or/and item ?
@@ -306,7 +306,7 @@ class LibraryTree(wx.TreeCtrl):
 
 		gmwiz = Container.ShapeCanvas.OnStartWizard(canvas, evt)
 
-		GetPyData = self.GetPyData if wx.VERSION_STRING<4.0 else self.GetItemData
+		GetPyData = self.GetPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
 
 		### update the view of the domain
 		if gmwiz:
@@ -455,8 +455,8 @@ class LibraryTree(wx.TreeCtrl):
 		""" Recurrent function that insert new Domain on library panel.
 		"""
 
-		InsertItemBefore = self.InsertItemBefore if wx.VERSION_STRING<4.0 else self.InsertItem
-		SetPyData = self.SetPyData if wx.VERSION_STRING<4.0 else self.SetItemData
+		InsertItemBefore = self.InsertItemBefore if wx.VERSION_STRING < '4.0' else self.InsertItem
+		SetPyData = self.SetPyData if wx.VERSION_STRING < '4.0' else self.SetItemData
 
 		### first only for the root (like PowerSystem)
 		if dName not in self.ItemDico.keys():
@@ -478,8 +478,8 @@ class LibraryTree(wx.TreeCtrl):
 			assert not isinstance(item, unicode), _("Warning unicode item !")
 
 			### for Phoenix 
-			InsertItemBefore = self.InsertItemBefore if wx.VERSION_STRING<4.0 else self.InsertItem
-			GetPyData = self.GetPyData if wx.VERSION_STRING<4.0 else self.GetItemData
+			InsertItemBefore = self.InsertItemBefore if wx.VERSION_STRING < '4.0' else self.InsertItem
+			GetPyData = self.GetPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
 		
 			### element to insert in the list
 			D = []
@@ -835,7 +835,7 @@ class LibraryTree(wx.TreeCtrl):
 		""" Update all loaded libaries.
 		"""
 
-		GetPyData = self.GetPyData if wx.VERSION_STRING<4.0 else self.GetItemData
+		GetPyData = self.GetPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
 		
 		### update all Domain
 		for item in self.GetItemChildren(self.GetRootItem()):
@@ -869,7 +869,7 @@ class LibraryTree(wx.TreeCtrl):
 		""" Remove item from Tree and also the corresponding elements of ItemDico
 		"""
 
-		GetPyData = self.GetPyData if wx.VERSION_STRING<4.0 else self.GetItemData
+		GetPyData = self.GetPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
 		
 		### delete all references from the ItemDico
 		for key in copy.copy(self.ItemDico):
@@ -883,7 +883,7 @@ class LibraryTree(wx.TreeCtrl):
 		""" Refresh action has been invoked.
 		"""
 
-		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING<4.0 else self.GetItemData
+		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
 
 		item = self.GetSelection()
 		path = GetItemPyData(item)
@@ -898,7 +898,7 @@ class LibraryTree(wx.TreeCtrl):
 		""" Edition menu has been invoked.
 		"""
 
-		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING<4.0 else self.GetItemData
+		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
 
 		item = self.GetSelection()
 		path = GetItemPyData(item)
@@ -927,7 +927,7 @@ class LibraryTree(wx.TreeCtrl):
 		""" Rename action has been invoked.
 		"""
 
-		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING<4.0 else self.GetItemData
+		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
 
 		item = self.GetSelection()
 		name = self.GetItemText(item)
@@ -959,7 +959,7 @@ class LibraryTree(wx.TreeCtrl):
 		""" Display the item's documentation on miniFrame.
 		"""
 
-		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING<4.0 else self.GetItemData
+		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
 
 		item = self.GetSelection()
 		path = GetItemPyData(item)

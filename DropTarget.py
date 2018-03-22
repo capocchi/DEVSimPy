@@ -19,7 +19,7 @@ import sys
 
 import Components
 
-class DropTarget(wx.PyDropTarget if wx.VERSION_STRING<4.0 else wx.DropTarget):
+class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget):
 	""" DropTarget(canvas)
 	"""
 	SOURCE = None
@@ -28,7 +28,7 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING<4.0 else wx.DropTarget):
 		""" Constructor
 		"""
 		
-		if wx.VERSION_STRING<4.0:
+		if wx.VERSION_STRING < '4.0':
 			wx.PyDropTarget.__init__(self)
 		else:
 			wx.DropTarget.__init__(self)

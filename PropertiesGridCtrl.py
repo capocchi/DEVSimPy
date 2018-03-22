@@ -34,9 +34,9 @@ import  wx.gizmos as gizmos
 import wx.lib.imagebrowser as ib
 
 ### Phoenix
-GridCellRenderer = gridlib.PyGridCellRenderer if wx.VERSION_STRING<4.0 else gridlib.GridCellRenderer
-GridTableBase = gridlib.PyGridTableBase if wx.VERSION_STRING<4.0 else gridlib.GridTableBase
-EditableListBox = gizmos.EditableListBox if wx.VERSION_STRING<4.0 else wx.adv.EditableListBox
+GridCellRenderer = gridlib.PyGridCellRenderer if wx.VERSION_STRING < '4.0' else gridlib.GridCellRenderer
+GridTableBase = gridlib.PyGridTableBase if wx.VERSION_STRING < '4.0' else gridlib.GridTableBase
+EditableListBox = gizmos.EditableListBox if wx.VERSION_STRING < '4.0' else wx.adv.EditableListBox
 
 import Components
 import Menu
@@ -49,8 +49,8 @@ from Mixins.Achievable import Achievable
 from Utilities import RGBToHEX
 from Patterns.Observer import Subject
 
-wx.OPEN = wx.OPEN if wx.VERSION_STRING<4.0 else wx.FD_OPEN
-wx.CHANGE_DIR = wx.CHANGE_DIR if wx.VERSION_STRING<4.0 else wx.FD_CHANGE_DIR
+wx.OPEN = wx.OPEN if wx.VERSION_STRING < '4.0' else wx.FD_OPEN
+wx.CHANGE_DIR = wx.CHANGE_DIR if wx.VERSION_STRING < '4.0' else wx.FD_CHANGE_DIR
 
 _ = wx.GetTranslation
 
@@ -319,7 +319,7 @@ class CutomGridCellAutoWrapStringRenderer(GridCellRenderer):
 		dc.SetTextForeground(fg)
 		dc.SetBrush(wx.Brush(bg, wx.SOLID))
 		dc.SetPen(wx.TRANSPARENT_PEN)
-		dc.DrawRectangleRect(rect) if wx.VERSION_STRING<4.0 else wx.DC.DrawRectangle(dc, rect)
+		dc.DrawRectangleRect(rect) if wx.VERSION_STRING < '4.0' else wx.DC.DrawRectangle(dc, rect)
 		grid.DrawTextRectangle(dc, text, rect, hAlign, vAlign)
 
 	def GetBestSize(self, grid, attr, dc, row, col):
@@ -668,7 +668,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 		### Custom render for display short path name and allows multiline for info
 		self.SetDefaultRenderer(CutomGridCellAutoWrapStringRenderer())
 
-		self.Bind(gridlib.EVT_GRID_CELL_CHANGE if wx.VERSION_STRING<4.0 else gridlib.EVT_GRID_CELL_CHANGED , self.OnAcceptProp)
+		self.Bind(gridlib.EVT_GRID_CELL_CHANGE if wx.VERSION_STRING < '4.0' else gridlib.EVT_GRID_CELL_CHANGED , self.OnAcceptProp)
 		self.Bind(gridlib.EVT_GRID_SELECT_CELL, self.OnSelectProp)
 		self.Bind(wx.EVT_ENTER_WINDOW, self.OnEnterWindow)
 		self.Bind(gridlib.EVT_GRID_CELL_RIGHT_CLICK, self.OnRightClick)
@@ -697,7 +697,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 				hinttext = rowcolhintcallback(table.GetValue(row, col))
 				if hinttext is None:
 					hinttext = ''
-				grid.GetGridWindow().SetToolTipString(hinttext) if wx.VERSION_STRING<4.0 else grid.GetGridWindow().SetToolTip(hinttext)
+				grid.GetGridWindow().SetToolTipString(hinttext) if wx.VERSION_STRING < '4.0' else grid.GetGridWindow().SetToolTip(hinttext)
 			evt.Skip()
 		grid.GetGridWindow().Bind(wx.EVT_MOTION, OnMouseMotion)
 
@@ -787,7 +787,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 		else: txt = _('Information about propertie')
 
 		win = self.GetGridColLabelWindow()
-		win.SetToolTipString(txt) if wx.VERSION_STRING<4.0 else win.SetToolTip(txt)
+		win.SetToolTipString(txt) if wx.VERSION_STRING < '4.0' else win.SetToolTip(txt)
 		event.Skip()
 
 	###

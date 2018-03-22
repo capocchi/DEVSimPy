@@ -91,7 +91,7 @@ class AttributeBase(object):
 		""" Frame has been resized.
 		"""
 		### widt and weight of frame
-		width, height = self.GetClientSizeTuple() if wx.VERSION_STRING<4.0 else wx.Window.GetClientSize(self)
+		width, height = self.GetClientSizeTuple() if wx.VERSION_STRING<'4.0' else wx.Window.GetClientSize(self)
 		### number of column of wx.grid
 		nb_cols = self._list.GetNumberCols()
 		### width of new column depending of new wx.grid column
@@ -143,7 +143,7 @@ class AttributeBase(object):
 			img = img.Scale(22, 22)
 
 		# wxMac can be any size up to 128x128, so leave the source img alone....
-		if wx.VERSION_STRING<4.0:
+		if wx.VERSION_STRING<'4.0':
 			return wx.IconFromBitmap(img.ConvertToBitmap())
 		else:
 			return wx.Icon(img.ConvertToBitmap())
@@ -226,7 +226,7 @@ class QuickAttributeEditor(wx.Frame, Subject):
 		# mouse positions
 		xwindow, ywindow = wx.GetMousePosition()
 
-		if wx.VERSION_STRING < 4.0:
+		if wx.VERSION_STRING < '4.0':
 			xm,ym = self.ScreenToClientXY(xwindow, ywindow)
 		else:
 			xm,ym = self.ScreenToClient(wx.Point(xwindow, ywindow))

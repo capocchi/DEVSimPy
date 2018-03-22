@@ -73,7 +73,7 @@ class LabelDialog(wx.Dialog):
 		### with Phoenix, no need to pre definde the dialogue windows.
 		### https://wxpython.org/Phoenix/docs/html/MigrationGuide.html?highlight=postcreate
 		### no need to ues the self.Create methode because LoadDialog already does what's necessary.
-		if wx.VERSION_STRING<4.0:
+		if wx.VERSION_STRING < '4.0':
 			pre = wx.PreDialog()
 			self.PreCreate(pre)
 			get_resources().LoadOnDialog(pre, parent, _xrcName)

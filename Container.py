@@ -46,7 +46,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 	else:
 	    wx.Color = wx.Colour
 
-	if wx.VERSION_STRING>=4.0:
+	if wx.VERSION_STRING >= '4.0':
 		wx.StockCursor = wx.Cursor
 
 import os
@@ -1213,7 +1213,7 @@ class RoundedRectangleShape(Shape):
 		### Prepare label drawing
 		rect = wx.Rect(x,y, width, height)
 		r=4.0
-		if wx.VERSION_STRING<4.0:
+		if wx.VERSION_STRING < '4.0':
 			dc.DrawRoundedRectangleRect(rect, r)
 		else:
 			wx.DC.DrawRoundedRectangle(dc, rect, r)
@@ -1308,7 +1308,7 @@ class CircleShape(Shape):
 		Shape.draw(self,dc)
 		dc.SetFont(wx.Font(10, self.font[1],self.font[2], self.font[3], False, self.font[4]))
 		dc.DrawCircle(int(self.x[0]+self.x[1])/2, int(self.y[0]+self.y[1])/2, self.r)
-		if wx.VERSION_STRING<4.0: dc.EndDrawing()
+		if wx.VERSION_STRING < '4.0': dc.EndDrawing()
 			
 
 	def HitTest(self, x, y):
@@ -2020,7 +2020,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 
 				### mouse positions
 				xwindow, ywindow = wx.GetMousePosition()
-				if wx.VERSION_STRING < 4.0:
+				if wx.VERSION_STRING < '4.0':
 					xm,ym = self.ScreenToClientXY(xwindow, ywindow)
 				else:
 					xm,ym = self.ScreenToClient(wx.Point(xwindow, ywindow))
@@ -2361,7 +2361,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 				## User released left button, change cursor back
 				if self.HasCapture():
 					self.ReleaseMouse()
-					if wx.VERSION_STRING<4.0:
+					if wx.VERSION_STRING < '4.0':
 						self.permRect = wx.RectPP(self.selectionStart, event.Position)
 					else:
 						self.permRect = wx.Rect(self.selectionStart, event.Position)
@@ -2381,7 +2381,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 
 						# si les deux rectangles se chevauche
 						try:
-							bool = self.permRect.ContainsRect(recS) if wx.VERSION_STRING<4.0 else self.permRect.Contains(recS)
+							bool = self.permRect.ContainsRect(recS) if wx.VERSION_STRING < '4.0' else self.permRect.Contains(recS)
 							if bool:
 								self.select(s)
 						except AttributeError, info:
@@ -2534,14 +2534,14 @@ if __builtin__.__dict__['GUI_FLAG']:
 						dc = wx.ClientDC(self)
 						odc = wx.DCOverlay(self.overlay, dc)
 						odc.Clear()
-						if wx.VERSION_STRING<4.0:
+						if wx.VERSION_STRING < '4.0':
 							ctx = wx.GraphicsContext_Create(dc)
 						else:
 							ctx = wx.GraphicsContext.Create(dc)
 
 						ctx.SetPen(wx.GREY_PEN)
 						ctx.SetBrush(wx.Brush(wx.Colour(229,229,229,80)))
-						if wx.VERSION_STRING<4.0:
+						if wx.VERSION_STRING < '4.0':
 							ctx.DrawRectangle(*wx.RectPP(self.selectionStart, event.Position))
 						else:
 							ctx.DrawRectangle(*wx.Rect(self.selectionStart, event.Position))
@@ -2558,7 +2558,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 				# mouse postions
 				xwindow, ywindow = wx.GetMousePosition()
 
-				if wx.VERSION_STRING < 4.0:
+				if wx.VERSION_STRING < '4.0':
 					xm,ym = self.ScreenToClientXY(xwindow, ywindow)
 				else:
 					xm,ym = self.ScreenToClient(wx.Point(xwindow, ywindow))
@@ -2791,7 +2791,7 @@ class LinesShape(Shape):
 		dc.DrawLines(L)
 
 		### pour le rectangle en fin de connexion
-		if wx.VERSION_STRING>=4.0:
+		if wx.VERSION_STRING >= '4.0':
 			wx.DC.DrawRectangle(dc,wx.Point(self.x[-1]-10/2, self.y[-1]-10/2), wx.Size(10, 10))
 		else:
 			dc.DrawRectanglePointSize(wx.Point(self.x[-1]-10/2, self.y[-1]-10/2), wx.Size(10, 10))
