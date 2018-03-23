@@ -690,7 +690,7 @@ class LibraryTree(wx.TreeCtrl):
 				else:
 					item = " ".join([item, 'from', os.path.basename(dName)])
 
-				pub.sendMessage('object.added', 'Loading %s domain...'%item)
+				pub.sendMessage('object.added', message='Loading %s domain...'%item)
 			except:
 				pass
 
