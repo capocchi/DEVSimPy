@@ -380,17 +380,24 @@ class Newt(wx.Frame):
 
 		data = []
 		for i in nbr:
+			v = sheet.GetCellValue(i,sheet.GetNumberCols()-1)
+			
+			if '<<' in v or '>>' in v: 
 				s = sheet.GetCellValue(i,sheet.GetNumberCols()-1).replace('<< ', '').replace('>>','') 
-				
-				### globals containt the time and value variables after exec of the statement
-				exec(str(s), globals())
-				
-				if isinstance(value, list):
-					data.append((time,float(value[0])))
-				elif str(value).isdigit():
-					data.append((time,float(value)))
-				else:
-					wx.MessageBox(_('Type of data should be float or int : %s'%info), _('Info'))
+			else:
+				s = "value = %s; time = %s"%(v,sheet.GetCellValue(i,0))
+
+			### globals containt the time and value variables after exec of the statement
+			exec(str(s), globals())
+
+			if isinstance(value, list):
+				data.append((time,float(value[0])))
+			### first if int is digit or if float is digit
+			elif str(value).isdigit() or str(value).replace(".", "", 1).isdigit():
+				data.append((time,float(value)))
+			else:
+				wx.MessageBox(_('Type of data should be float or int : %s'%info), _('Info'))
+				break
 					
 		if data != []:
 			frame = StaticPlot(self, wx.ID_ANY, title, data)

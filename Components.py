@@ -513,7 +513,7 @@ class DEVSComponent:
 			### user just write msg using debugger method in devs code
 			if not hasattr(devs, 'debugger'):
 				setattr(devs.__class__, DEVSComponent.debugger.func_name, DEVSComponent.debugger)
-
+			
 			if __builtin__.__dict__['GUI_FLAG']:
 				### to execute finish method of devs model (look at the SimulationGUI for message interception)
 				if hasattr(devs, 'finish'):
