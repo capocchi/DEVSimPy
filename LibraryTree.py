@@ -332,7 +332,7 @@ class LibraryTree(wx.TreeCtrl):
 			self.SortChildren(self.root)
 
 		# Cleanup
-		gmwiz.Destroy()
+		if gmwiz: gmwiz.Destroy()
 
 	###
 	def GetDomainList(self, dName):

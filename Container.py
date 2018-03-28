@@ -2164,11 +2164,10 @@ if __builtin__.__dict__['GUI_FLAG']:
 			"""
 
 			model = self.getCurrentShape(event)
-			if model:
-				if model.OnLeftDClick:
-					model.OnLeftDClick(event)
-				else:
-					wx.MessageBox(_("An error is occured during plugins importation.\nCheck plugins module."))
+			try:
+				model.OnLeftDClick(event)
+			except:
+				wx.MessageBox(_("An error is occured during plugins importation.\nCheck plugins module."))
 
 		def Undo(self):
 			"""
@@ -2843,10 +2842,14 @@ class LinesShape(Shape):
 		### canvas containing LinesShape
 		canvas = event.GetEventObject()
 
-		### coordinates
-		x,y = event.GetPositionTuple()
-		### add point at the position according to the possible zoom (use of getScalledCoordinates)
-		self.AddPoint(canvas.getScalledCoordinates(x,y))
+		try:
+			### coordinates
+			x,y = event.GetPositionTuple()
+		except Exception, info:
+			sys.stdout.write(_("Error in OnLeftDClick for %s : %s\n")%(self,info))
+		else:
+			### add point at the position according to the possible zoom (use of getScalledCoordinates)
+			self.AddPoint(canvas.getScalledCoordinates(x,y))
 
 	def HasPoint(self, point):
 		""" Point is included in line ?
