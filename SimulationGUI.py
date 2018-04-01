@@ -28,10 +28,10 @@ import threading
 
 # to send event
 if wx.VERSION_STRING < '2.9':
-	from wx.lib.pubsub import Publisher
+	from wx.lib.pubsub import Publisher as pub
 else:
 	#from wx.lib.pubsub import setuparg1
-	from wx.lib.pubsub import pub as Publisher
+	from wx.lib.pubsub import pub
 
 from tempfile import gettempdir
 
@@ -335,7 +335,7 @@ class Base(object):
 		self.__set_events()
 
 		### create a pubsub receiver (simple way to communicate with thread)
-		Publisher.subscribe(self.ErrorManager, "error")
+		pub.subscribe(self.ErrorManager, "error")
 
 	def CreateBar(self):
 		self.statusbar = self.CreateStatusBar(2)
@@ -741,7 +741,7 @@ class Base(object):
 		### try to find the file which have the error from traceback
 		devs_error = False
 		try:
-			typ, val, tb = msg.data
+			typ, val, tb = msg.date if wx.VERSION_STRING < '2.9' else msg
 			trace = traceback.format_exception(typ, val, tb)
 
 			mainW = wx.GetApp().GetTopWindow()
@@ -766,7 +766,7 @@ class Base(object):
 			event = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self._btn1.GetId())
 
 			### Error dialog
-			if not Container.MsgBoxError(event, self.parent, msg.data):
+			if not Container.MsgBoxError(event, self.parent, msg.date if wx.VERSION_STRING < '2.9' else msg):
 			### if user dont want correct the error, we destroy the simulation windows
 				self.DestroyWin()
 			else:
@@ -948,17 +948,24 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 
 					### only for displayed application (-nogui)
 					if wx.GetApp():
-						wx.CallAfter(Publisher.sendMessage, "error", msg)
+						if wx.VERSION_STRING < '2.9':
+							wx.CallAfter(pub.sendMessage,"error", msg)
+						else:
+							wx.CallAfter(pub.sendMessage,"error", msg=msg)
+
 						### error sound
 						wx.CallAfter(playSound, SIMULATION_ERROR_SOUND_PATH)
 
 				else:
 					for m in filter(lambda a: hasattr(a, 'finish'), self.model.componentSet):
 						### call finished method
-						#if __builtin__.__dict__['GUI_FLAG']:
-						#	Publisher.sendMessage('%d.finished'%(id(m)))
-						#else:
-						m.finish(None)
+						if __builtin__.__dict__['GUI_FLAG']:
+							if wx.VERSION_STRING < '2.9':
+								pub.sendMessage('%d.finished'%(id(m)))
+							else:
+								pub.sendMessage('%d.finished'%(id(m)), msg="")
+						else:
+							m.finish(None)
 
 					### only for displayed application (-nogui)
 					if wx.GetApp() : wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)

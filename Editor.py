@@ -2017,7 +2017,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		passivateInState = wx.MenuItem(insert, wx.NewId(), _('New passivate in state'), _('Generate new passivate in state code self.passivateIn(...)'))
 		passivateState = wx.MenuItem(insert, wx.NewId(), _('New passivate state'), _('Generate new passivate state code self.passivate(...)'))
 		debug = wx.MenuItem(insert, wx.NewId(), _('New debugger'), _('Generate new debugger code (print into the log of model)'))
-
+		
 		insert.AppendItem(peek)
 		insert.AppendItem(poke)
 		insert.AppendItem(holdInState)

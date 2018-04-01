@@ -330,7 +330,7 @@ class CutomGridCellAutoWrapStringRenderer(GridCellRenderer):
 		text = wordwrap.wordwrap(text, grid.GetColSize(col), dc, breakLongWords = False)
 		### if colom info (mutliline)
 		if col == 2:
-			w, h, lineHeight = dc.GetMultiLineTextExtent(text)
+			w, h, lineHeight = dc.GetMultiLineTextExtent(text) if wx.VERSION_STRING < '4.0' else dc.GetFullMultiLineTextExtent(text)
 			return wx.Size(w, h)
 		### if colom label
 		elif col == 0:
@@ -1031,8 +1031,13 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 				new_code = CodeCB(self.parent, wx.ID_ANY, model)
 				#self.parent.boxH.Remove(0)
 				# DeleteWindows work better in vista
-				self.parent._boxH.DeleteWindows()
-				self.parent._boxH.AddWindow(new_code, 1, wx.EXPAND, userData='code')
+				if wx.VERSION_STRING < '4.0':
+					self.parent._boxH.DeleteWindows()
+					self.parent._boxH.AddWindow(new_code, 1, wx.EXPAND, userData='code')
+				else:
+					self.parent._boxH.Clear()
+					self.parent._boxH.Add(new_code, 1, wx.EXPAND, userData='code')
+
 				self.parent._boxH.Layout()
 
 	###
