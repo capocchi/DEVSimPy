@@ -231,6 +231,7 @@ class DumpZipFile(DumpBase):
 		### Check comparison between serialized attribut (L) and normal attribut (dump_attributes)
 		### for model build with a version of devsimpy <= 2.5
 		### font checking
+		if wx.VERSION_STRING >= '4.0': wx.FONTFAMILY_SWISS = wx.SWISS
 		if len(obj_loaded.dump_attributes) != len(L):
 			if fileName.endswith(DumpZipFile.ext[-1]):
 				if not isinstance(L[9], list):

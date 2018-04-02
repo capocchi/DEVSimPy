@@ -48,6 +48,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 
 	if wx.VERSION_STRING >= '4.0':
 		wx.StockCursor = wx.Cursor
+		wx.FONTFAMILY_SWISS = wx.SWISS
 
 import os
 import sys

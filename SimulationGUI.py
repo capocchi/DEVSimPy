@@ -560,7 +560,7 @@ class Base(object):
 
 	###
 	def OnSuspend(self, event):
-		""" When Stop button is clicked
+		""" When suspend button is clicked
 		"""
 
 		self.Interact()
