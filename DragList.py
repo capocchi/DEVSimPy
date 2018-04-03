@@ -126,6 +126,8 @@ class ListDrop(wx.PyDropTarget):
         if self.GetData():
             # convert it back to a list and give it to the viewer
             ldata = self.data.GetData()
+            if isinstance(ldata, memoryview):
+                ldata = ldata.tobytes()
             l = cPickle.loads(ldata)
             self.dv._insert(x, y, l)
 

@@ -61,6 +61,7 @@ else:
 
 wx.SystemSettings_GetColour = wx.SystemSettings.GetColour if wx.VERSION_STRING >= '4.0' else wx.SystemSettings_GetColour
 
+
 #################################################################
 ###
 ###		GENERAL FUNCTIONS
@@ -255,6 +256,9 @@ class PythonSTC(stc.StyledTextCtrl):
 
 		# Global default styles for all languages
 		self.StyleSetSpec(stc.STC_STYLE_DEFAULT, "face:%(helv)s,size:%(size)d" % faces)
+		#self.StyleSetSpec(STC_CODE_ERROR, 'fore:#FF0000,back:#FFFF00,size:%(size)d' % faces)
+		#self.StyleSetSpec(STC_CODE_SEARCH_RESULT, 'fore:#FFFFFF,back:#FFA500,size:%(size)d' % faces)
+
 		self.StyleClearAll()  # Reset all to be like the default
 
 		# Global default styles for all languages
@@ -536,7 +540,7 @@ class CodeEditor(PythonSTC):
 	### NOTE: CodeEditor :: ShowPosition 		=> Go to the line of selected position
 	def ShowPosition(self, pos):
 		line = self.LineFromPosition(pos)
-		#self.EnsureVisible(line)
+#		self.EnsureVisible(line)
 		self.GotoLine(line)
 
 	### NOTE: CodeEditor :: GetLastPosition 	=> todo
@@ -1503,10 +1507,18 @@ class Base(object):
 		fstring = self.data.GetFindString()          # also from event.GetFindString()
 		self.pos = self.txt.find(fstring, self.pos+self.size)
 		self.size = len(fstring)
+
+		highlight_start_pos = self.pos
+		highlight_end_pos = self.pos+self.size
+
+		### go to the finded word
 		currentPage = self.nb.GetCurrentPage()
-		currentPage.BraceHighlight(self.pos, self.pos+self.size)
-		#currentPage.GotoPos(self.pos)
-		#currentPage.SetStyle(self.pos, self.pos+self.size, wx.TextAttr("red", "black"))
+		currentPage.GotoPos(self.pos)
+		
+		currentPage.StartStyling(highlight_start_pos, 0xff)
+		currentPage.SetStyling(highlight_end_pos - highlight_start_pos, stc.STC_P_COMMENTLINE)
+		currentPage.StartStyling(highlight_end_pos, 0x00)
+		currentPage.SetStyling(len(self.txt) - highlight_end_pos, stc.STC_STYLE_DEFAULT)
 
 	def OnSaveAsFile(self, event):
 		"""
