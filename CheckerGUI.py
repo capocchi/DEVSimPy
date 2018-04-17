@@ -46,7 +46,11 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		self.il = wx.ImageList(16, 16)
 		a={"sm_up":"GO_UP","sm_dn":"GO_DOWN","idx1":"CROSS_MARK","idx2":"TICK_MARK"}
 		for k,v in a.items():
-			s="self.%s= self.il.Add(wx.ArtProvider_GetBitmap(wx.ART_%s,wx.ART_TOOLBAR,(16,16)))" % (k,v)
+			if wx.VERSION_STRING < '4.0':
+				s="self.%s= self.il.Add(wx.ArtProvider_GetBitmap(wx.ART_%s,wx.ART_TOOLBAR,(16,16)))" % (k,v)
+			else:
+				s="self.%s= self.il.Add(wx.ArtProvider.GetBitmap(wx.ART_%s,wx.ART_TOOLBAR,(16,16)))" % (k,v)
+
 			exec(s)
 		self.SetImageList(self.il, wx.IMAGE_LIST_SMALL)
 
@@ -86,8 +90,8 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 	def OnItemSelected(self, event):
 		""" Item has been selected
 		"""
-		self.currentItem = event.m_itemIndex
-
+		self.currentItem = event.m_itemIndex if wx.VERSION_STRING < '4.0' else event.Index
+		
 	def OnRightClick(self, event):
 		""" Right Click on cell has been invoked
 		"""
@@ -177,8 +181,8 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 	def OnItemActivated(self, event):
 		""" Item has been activated
 		"""
-		self.currentItem = event.m_itemIndex
-
+		self.currentItem = event.m_itemIndex if wx.VERSION_STRING < '4.0' else event.Index
+	
 	def getColumnText(self, index, col):
 		"""
 		"""
@@ -193,7 +197,7 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		"""
 		"""
 		index = self.itemIndexMap[item]
-		s = self.itemDataMap[index][col]
+		s = str(self.itemDataMap[index][col])
 		return s
 
 	def OnGetItemImage(self, item):
