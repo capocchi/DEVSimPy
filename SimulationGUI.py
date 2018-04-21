@@ -767,7 +767,7 @@ class Base(object):
 				event = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self._btn1.GetId())
 			except:
 				pass
-			finally:
+			else:
 				### Error dialog
 				if not Container.MsgBoxError(event, self.parent, msg.date if wx.VERSION_STRING < '2.9' else msg):
 				### if user dont want correct the error, we destroy the simulation windows
