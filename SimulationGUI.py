@@ -762,16 +762,19 @@ class Base(object):
 		### if error come from devs python file
 		if devs_error:
 
-			### simulate event button for the code editor
-			event = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self._btn1.GetId())
-
-			### Error dialog
-			if not Container.MsgBoxError(event, self.parent, msg.date if wx.VERSION_STRING < '2.9' else msg):
-			### if user dont want correct the error, we destroy the simulation windows
-				self.DestroyWin()
-			else:
-			### if user want to correct error through an editor, we stop simulation process for trying again after the error is corrected.
-				self.OnStop(event)
+			try:
+				### simulate event button for the code editor
+				event = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self._btn1.GetId())
+			except:
+				pass
+			finally:
+				### Error dialog
+				if not Container.MsgBoxError(event, self.parent, msg.date if wx.VERSION_STRING < '2.9' else msg):
+				### if user dont want correct the error, we destroy the simulation windows
+					self.DestroyWin()
+				else:
+				### if user want to correct error through an editor, we stop simulation process for trying again after the error is corrected.
+					self.OnStop(event)
 		else:
 			raise msg
 
