@@ -288,7 +288,7 @@ if USE_FLATNOTEBOOK:
 				elif val == wx.ID_NO:
 					self.DeleteBuiltinConstants()
 				else:
-					dlg.Destroy()
+					pass
 
 				dlg.Destroy()
 
