@@ -546,7 +546,7 @@ class DEVSComponent:
 			### read log file
 			with open(log_file, 'r') as f:
 				msg = f.read()
-
+			
 			### show log file content
 			dlg = wx.lib.dialogs.ScrolledMessageDialog(parent, msg, _("%s logger")%label, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 			dlg.Show()

@@ -83,14 +83,14 @@ class MySheet(sheet.CSheet):
 				Publisher.sendMessage("progress", msg=str(i/float(self.GetNumberRows())))
 				wx.Yield()
 			except:
-				print "Error in SpreadSheet 1"
+				pass
 
 		self._full_flag = True
 		try:
 			### inform Frame that table us full for graph icon enabling
 			Publisher.sendMessage("isfull", msg=self._full_flag)
 		except wx.lib.pubsub.core.topicargspecimpl.SenderMissingReqdMsgDataError, info:
-			print "Error in SpreadSheet 2"
+			pass
 		
 		self.AutoSize()
 		

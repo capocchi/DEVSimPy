@@ -547,7 +547,7 @@ class Base(object):
 		"""
 
 		self.Interact()
-		self.thread.terminate()
+		if self.thread : self.thread.terminate()
 		self.timer.Stop()
 		wx.Bell()
 
