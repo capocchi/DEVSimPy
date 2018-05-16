@@ -23,12 +23,12 @@
 import sys
 import os
 import wx
+import __builtin__
 
 if wx.VERSION_STRING >= '4.0':
 	wx.ST_SIZEGRIP = wx.STB_SIZEGRIP
 
 if __name__ == '__main__':
-	import __builtin__
 	__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}
 	__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyPDEVS'
 
@@ -138,6 +138,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			toolbar.EnableTool(Menu.ID_SAVE, False)
 			toolbar.EnableTool(Menu.ID_SAVEAS, False)
 			toolbar.EnableTool(Menu.ID_SIM_DIAGRAM, False)
+			toolbar.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in __builtin__.__dict__['DEFAULT_DEVS_DIRNAME'])
 
 		### Call Printable constructor
 		PrintOut.Printable.__init__(self, self.canvas)

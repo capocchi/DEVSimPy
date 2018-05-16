@@ -1935,7 +1935,7 @@ class BlockBase(object):
 			### user would change the behavior during a simulation without saving
 			if on_simulation_flag and new_instance is not bool:
 
-				assert self.cb.getDEVSModel() is not None
+				assert self.cb.getDEVSModel() is not None, _("Close Simulation Diag!")
 
 				self.cb.setDEVSClassModel(new_class)
 
