@@ -943,7 +943,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 				### if the user would like to load a compressed python file, he just give the name of compressed file that contain the python file
 				if zipfile.is_zipfile(new_python_path):
 					zf = zipfile.ZipFile(new_python_path, 'r')
-					new_python_path = os.path.join(new_python_path, filter(lambda f: f.endswith('.py'), zf.namelist())[0])
+					new_python_path = os.path.join(new_python_path, filter(lambda f: f.endswith('.py') and f!='plugins.py', zf.namelist())[0])
 					### update model path
 					model.model_path = os.path.dirname(new_python_path)
 
