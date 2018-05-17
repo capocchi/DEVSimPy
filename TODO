@@ -471,3 +471,4 @@ invoque rpar un callback lorsque le fichier python est renseigné dans le wizard
 -Fait le 16/03/2018 par LC: correction -> nouvelle version de gestion des xrc pour le changement du nom des mod�le par clic+droit+entrer
 -Fait le 16/03/2018 par LC: correction -> le r�pertoire bitmaps n'existe plus et mise � jour du chemin pour le dialogue imagebrowser
 -Fait le 17/05/2018 par LC: ajout -> début d'intégration du noyau de simulation PyPDEVS_241 - prob avec le type CoupledDEVS et Master qui empeche de lancer une simulation
+-Fait le 17/05/2018 par LC: ajout -> le package pypdevs241 est un sous module issue du git de capocchi qui est un fork de yentl (https://msdl.uantwerpen.be/git/yentl/PythonPDEVS). Il faut pour importer le tout faire un : git clone -b version3.0 --recursive https://github.com/capocchi/DEVSimPy.git DEVSimPy-v3.0
