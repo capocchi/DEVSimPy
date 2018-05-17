@@ -260,7 +260,7 @@ class SimulationPanel(wx.Panel):
 		self.cb2.SetToolTipString(_("No Time Limit allow the stop of simulation when all of models are idle."))
 
 		### StaticText for DEVS Kernel directory
-		self.txt3 = wx.StaticText(self, wx.ID_ANY, _("DEVS package:"))
+		self.txt3 = wx.StaticText(self, wx.ID_ANY, _("DEVS packages:"))
 		self.cb3 = wx.ComboBox(self, wx.ID_ANY, DEFAULT_DEVS_DIRNAME, choices=DEVS_DIR_PATH_DICT.keys(), style=wx.CB_READONLY)
 		self.cb3.SetToolTipString(_("Default DEVS Kernel package (PyDEVS, PyPDEVS, ect.)."))
 		self.default_devs_dir = DEFAULT_DEVS_DIRNAME

@@ -3,9 +3,9 @@
 - N1 : obligé de mettre la premiere ligne du fichier .dat d'un fileGenerator a 0 0 sinon bad synchronisation
 - N3: dnd marche pas sous mac avec wx 2.9 qui n'est pas stable de toute manière.
 - N3: recompile plante lorsque on veux changer le nom d'un amd dans une lib par un clique droit dans le panneau lib
-- N1: lorsque le domain est sur Dropbox, impossible de sauveagrder des mod�les .py sans avoir un probleme d'importation dans RealoadModule.recompile
+- N1: lorsque le domain est sur Dropbox, impossible de sauveagrder des mod�les .py sans avoir un probleme d'importation dans RealoadModule.recompile
 - N3: lorsque glisser/deposer d'un amd de l'exterieur il n'y pas le compteur des labels qui apparait (pas de Atomic_Name0 par exemple pour le premier)
-- N3 : le fusion des quickscope ne fonctionne plus. Lorsqu'il est d�coch�.
+- N3 : le fusion des quickscope ne fonctionne plus. Lorsqu'il est d�coch�.
 
 --------------------------------------------------------------Amélioration-------------------------------------------------------------
 - N3 : voir la fonction ChangeForm pour améliorer la création de connnection shape en évitant les modèles
@@ -14,8 +14,8 @@
  d'update
 - N3 : améliorer la gestion des iid et oid dasn la creation des ports dans les MC (voir dans Components.py->BlockFactory->CreateBlock avec le wizard)
  - N3: ajouter un petit icone lorsque plugin activé pour les amd et cmd comme pour l'icone definissant la nature qui disqprait lorsque pas de selection
-- N3 : donner le choix � l'utilisateur de choisir les version de wx install�es sur la machine. Par defaut c'est la derni�re version qui sera choisis et stock� dans le fichier de config.
-- N3 : OnLeftUp dans ShapreCanvas qui a un Post_Undo stock un undo a chaque fois sans qu'il y ai un changement sur le mod�le.
+- N3 : donner le choix � l'utilisateur de choisir les version de wx install�es sur la machine. Par defaut c'est la derni�re version qui sera choisis et stock� dans le fichier de config.
+- N3 : OnLeftUp dans ShapreCanvas qui a un Post_Undo stock un undo a chaque fois sans qu'il y ai un changement sur le mod�le.
 
 ------------------------------------------------------------------Ajout----------------------------------------------------------------
 - N1 : implementer le retour en arrière de la simulation
@@ -23,13 +23,13 @@
 - N3 : faire le API
 - N3 : faire le OnCheckUpgrade pour DEVSimPy (voir bon exemple dans GUI2exe)
 - N3 : finir la doc sur les plugins dans google.docs
-- N3 : construire une architecture de classe basé sur la statégie mise en place dans la simulation pour repondre �  la question suivante: comment faire en sorte que les
-stratégies proposées prennent en compte le type d'algorithme utilisé (mise �  plat, distribué, //...) et le type de simulateur DEVS (avec des fonctions de transition particulière comme deta_conv, delta_ext, delta_fault).
+- N3 : construire une architecture de classe basé sur la statégie mise en place dans la simulation pour repondre �  la question suivante: comment faire en sorte que les
+stratégies proposées prennent en compte le type d'algorithme utilisé (mise �  plat, distribué, //...) et le type de simulateur DEVS (avec des fonctions de transition particulière comme deta_conv, delta_ext, delta_fault).
 En sachant qu'il faut être capable de simuler des systèmes composé de modèles qui n'appartienne pas au même sous-formalisme DEVS.
 -N3 : reflechir sur le changement facile des icons et changer les icons avec la lib oxygen: http://www.iconfinder.com/search/?q=perspective%20new
--N3 : implémenter l'update de devsimpy � partir des sources git en http
+-N3 : implémenter l'update de devsimpy � partir des sources git en http
 -N3 : faire un self.panel dans le CheckGUI
--N3 : mettre a jour le panel de simulation dans le panel de control lorsqu'on change les pr�f�rences de simulation
+-N3 : mettre a jour le panel de simulation dans le panel de control lorsqu'on change les pr�f�rences de simulation
 -N3 : separer le start du thread dans SimulationThread pour DEVSimPy-mob
 
 ----------------------------------------------------------------Remarques----------------------------------------------------------------
@@ -68,11 +68,11 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 -Fait le 14/07/09 par LC: correction du bug sur la suppression des node sur les connectionShape par clic droit.
 -Fait le 14/07/09 par LC: ajout du menu Diagram et de nouveaux item dans le sous menu Show.
 -Fait le 16/07/09 par LC: ajouter les id des modèles lors du glisser/deposer.
--Fait le 16/07/09 par LC: drag and drop �  partir de l'explorateur de fichier.
+-Fait le 16/07/09 par LC: drag and drop �  partir de l'explorateur de fichier.
 -Fait le 19/07/09 par LC: gestion de la simulation de modèles qui n'a pas de fils imminent.
 -Fait le 19/07/09 par LC: fixe le bug d'udpate du panel Properties dans windows.
 -Fait le 19/07/09 par LC: possibilité de tracer la courbe des données dans les Page du notebook du SpreadSheet.
--Fait le 20/07/09 par LC: mise en place de l'internationnalisation (option dans .devsimpy). Reste �  faire la config dans Setting.
+-Fait le 20/07/09 par LC: mise en place de l'internationnalisation (option dans .devsimpy). Reste �  faire la config dans Setting.
 -Fait le 22/07/09 par LC: nouvelle option dans setting pour le choix de la langue.
 -Fait le 22/07/09 par LC: amelioration de la gestion des id pour les modele graphique avec ajout des liste des id des modele supprimés.
 -Fait le 23/07/09 par LC: permettre de specifier le chemin du fichier dans To_Disk.
@@ -109,7 +109,7 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 -Fait le 1/02/10 par LC: posibilité de modifier le code (par Edit) et les propriétées (par Properties) des modèles pendant la simulation.
 -Fait le 3/02/10 par LC: export en xml des modèles couplé pour Paul (clic droit -> export -> XML).
 -Fait le 4/02/10 par LC: possibilité d'éditer le code des modèles couplés.
--Fait le 4/02/10 par LC: recriture du fichier de config si la version de ce fichier ne corresponf pas �  la verison du main executé.
+-Fait le 4/02/10 par LC: recriture du fichier de config si la version de ce fichier ne corresponf pas �  la verison du main executé.
 -Fait le 16/02/10 par LC: implémentation d'un progresse bar pendant l'ouverture de fichier.
 -Fait le 20/02/10 par LC: version binaires pour windows avec py2exe (Gui2exe) avec les modules necessaire embarqués.
 -Fait le 25/02/10 par LC: restart automatique apres changement de la langue (OnRestart() apres OnFrench() et onEnglish()).
@@ -120,11 +120,11 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 -Fait le 9/04/10 par LC: résolution du problème de la mise a jour des modif dans el code des modèles pendant la simulation par ajout de linecache pour effacer l'historique de l'inspect et ajout de la fonction setDEVSClassModel(classe) pour mettre a jour la classe d'une instance (avantage de python voir livre edition 2).
 -Fait le 19/04/10 par LC: nouveau GetModule avec utilisation du module imp.
 -Fait le 19/04/10 par LC: affiche la doc du module au clic droit et affiche un icon d'alerte lorsque le module et mal importé.
--Fait le 19/04/10 par LC: permet le upgrade des librairie par rapport �  la version sur le net google.code par raccourci du click droit dans le panel des lib.
--Fait le 21/04/10 par LC: correction -> sous windows pendant la creation des modeles les fichiers .dat ne sont pas creé correctement (le fichier .dat ne contient pas le CPickle.load) -> attention �  l'utilsiation de os.system('rm...') specificque au plateform.
+-Fait le 19/04/10 par LC: permet le upgrade des librairie par rapport �  la version sur le net google.code par raccourci du click droit dans le panel des lib.
+-Fait le 21/04/10 par LC: correction -> sous windows pendant la creation des modeles les fichiers .dat ne sont pas creé correctement (le fichier .dat ne contient pas le CPickle.load) -> attention �  l'utilsiation de os.system('rm...') specificque au plateform.
 -Fait le 21/04/10 par LC: correction -> - connection de plusieurs port avec le "connect to" ne fonctionne pas -> du fait de la modification en varaible protégé danas conncetDialog.
 -Fait le 21/04/10 par LC: correction -> calcul du spectre a partir d'un QS sans fusion ne fonctionne pas (il ne récupere qu'un seul signal a chaque fois) -> movaise gestion du PltoSpectrum dans le DynamicPlot.
--Fait le 21/04/10 par LC: correction -> zoom ne fonctionne pas (apparement il pense que la fenetre de simualtion est toujour active) -> mauvaise gestion du OnPlot dans dynamicPlot �  la fin sur le self.sim_thread.
+-Fait le 21/04/10 par LC: correction -> zoom ne fonctionne pas (apparement il pense que la fenetre de simualtion est toujour active) -> mauvaise gestion du OnPlot dans dynamicPlot �  la fin sur le self.sim_thread.
 -Fait le 21/04/10 par LC: correction -> le chemin des model_path est absolu -> model_path)fileName dans le Load et python_path=model_path/fichier.py donc chargement du py embarqué quoi qu'il arrive.
 -Fait le 22/04/10 par LC: correction -> utilisation du module imp pour le pulgin_manager.
 -Fait le 22/04/10 par LC: simplification de l'affectation des valeur des propriété permettant d'evaluer des epxression quelque soit le type de champs.
@@ -139,9 +139,9 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 -Fait le 26/04/10 par LC: ajout de la sauvegarde des perspective dans wx.Config.
 -Fait le 27/04/10 par LC: ajout de la connection carre des modèles.
 -Fait le 04/05/10 par LC: gestion dynamic de la taille du label dans les modèles.
--Fait le 06/05/10 par LC: taille des fonts �  12 pour les nodes (différente de celle des Block qui est dynamique).
--Fait le 10/05/10 par LC: corerection du bug sur la génération récursive de l'instance devs �  partir du diagram (fonction makeDEVSInstance). La récursion avanrt le bug ne prennait pas en compte l'ordre d'instanciation des objet par LC : Avant la connection, instacier les Blocks et les Port
--Fait le 10/05/10 par LC: correction -> supprimer les couplages selectionné même lorsqu'il ne le sont qu'a moitié -> boucle sur tout les connectionShape du diagram qui suppression de ceux qui contienne le shape �  supprimer dans les inputs et outputs.
+-Fait le 06/05/10 par LC: taille des fonts �  12 pour les nodes (différente de celle des Block qui est dynamique).
+-Fait le 10/05/10 par LC: corerection du bug sur la génération récursive de l'instance devs �  partir du diagram (fonction makeDEVSInstance). La récursion avanrt le bug ne prennait pas en compte l'ordre d'instanciation des objet par LC : Avant la connection, instacier les Blocks et les Port
+-Fait le 10/05/10 par LC: correction -> supprimer les couplages selectionné même lorsqu'il ne le sont qu'a moitié -> boucle sur tout les connectionShape du diagram qui suppression de ceux qui contienne le shape �  supprimer dans les inputs et outputs.
 -Fait le 10/05/10 par LC: amélioration par LC : modifier le modèle To_Disk pour qu'il n'utilise plus le results de devs mais qu'il lise directement dans les fichiers.
 -Fait le 10/05/10 par LC: correction -> export des modèles cmd ou amd avec un autre nom ne fonctionne pas. -> création de la fonction CreateZipArchive.
 -Fait le 11/05/10 par LC: implémnentation du copier coller des coupalges !
@@ -168,14 +168,14 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 -Fait le 22/09/10 par LC: implémentaton des fonctions UnConfig pour les plugins qui possede des function d'activation des modèles car sinon la desactivation de ces plugins ne prend pas effet.
 -Fait le 23/09/10 par LC: extratstyle est changé en awgStyle dans la version wx 2.8.11.
 -Fait le 24/09/10 par LC: ajout de la possibilité d'éditer le code avec une éditeur local. Attention ne fonctionne qu'avec les .py et plus de modif pendant la simulation.
--Fait le 28/09/10 par LC: passage �  wx 2.8.11.0.
+-Fait le 28/09/10 par LC: passage �  wx 2.8.11.0.
 -Fait le 15/10/10 par LC: amélioration de preferencesGUI.
 -Fait le 15/10/10 par LC: ajout de la possibilité de supprimer les source d'un package au cours de la suppression d'un package dans le module d'importation.
 -Fait le 15/10/10 par LC: amélioration du print et ajout du previex avec la possibilité de réduire le canvas dans DEVSimpPy pour ajuster le preveiw pour le print.
 -Fait le 2/11/10 par LC: ajout -> undo et redo des diagrammes.
 -Fait le 2/11/10 par LC: amélioration par LC : ajout du logo de devsimpy dans la fenetre de preview des diagrammes.
 -Fait le 3/11/10 par LC: ajout -> plot du plot en bar et en scatter par un menu Type dnas le Plot.py.
--Fait le 3/11/10 par LC: ajout -> icon flag_exclamation sur les modèles si il utilise un attribut fileName qui est affecté �  un path qui n'existe pas (insite l'utilisateur �  changer le chemin avec de lancer la simulation).
+-Fait le 3/11/10 par LC: ajout -> icon flag_exclamation sur les modèles si il utilise un attribut fileName qui est affecté �  un path qui n'existe pas (insite l'utilisateur �  changer le chemin avec de lancer la simulation).
 -Fait le 4/11/10 par LC: amélioration -> de la gestion du __builtin__.__dict__.
 -Fait le 4/11/10 par LC: ajout -> option -d|-debug pour activer l'ecriture du fichier de log (log.txt) dans lequel on voit pour l'instant les etapes d'initialisations.
 -Fait le 4/11/10 par LC: ajout -> sauvegarde dans le fichier de config .devsimpy de la liste des builtins pour stocker les variables de préférences.
@@ -185,36 +185,36 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 					avec une valeur par defaut en chemin absolue et avec une extention. Seul des modèles de collection (comme le To_Disk) doivent avoir leur fileName définit avec une valeur.
 					de chemin absolu par défaut dans le constructeur mais sans extention. De cette manière nous savons que les drapeaux se mette que sur les generateurs.
 					De plus la gestion des drapeaux ne se fait plus au traver de la variable fileName mais en fonction de le présence ou non de l'extention des chemin absolue desactivation.
-					des varaible du type string et contenant un chemin (avec os.path.isabs). Du coup, la simulation ne peux se faire uniquement si tout les générateur faisant appelle �  des fichier externe (FileGen) sont bien initilaisés.
+					des varaible du type string et contenant un chemin (avec os.path.isabs). Du coup, la simulation ne peux se faire uniquement si tout les générateur faisant appelle �  des fichier externe (FileGen) sont bien initilaisés.
 -Fait le 5/11/10 par LC : amélioration -> le print et le preview sont automatique. Le scale se fait automatique.
 -Fait le 5/11/10 par LC: ajout -> plot en square pour pédagogie (QSS)
 -Fait le 5/11/10 par LC: correction -> bug Enable Point label ne fonctionne pas dans le Plot.py ligne 180 : ajout de la méthode drawPointLabel (http://svn.flipturn.org/peppy/trunk/peppy/lib/plotter.py).
--Fait le 5/11/10 par LC: correction -> bug lors du changement de fichier .py de QuickScope �  To_Disk (ou inv): chargement dans OnSelectProp de la nouvelle classe lorsque le python_file est modidifié.
+-Fait le 5/11/10 par LC: correction -> bug lors du changement de fichier .py de QuickScope �  To_Disk (ou inv): chargement dans OnSelectProp de la nouvelle classe lorsque le python_file est modidifié.
 -Fait le 6/11/10 par LC: ajout-> undo crtl+z et redo ctrl+shift+z.
 -Fait le 6/11/10 par LC: amélioration -> de la gestion des modifications dans les digrammes pour la sauvegarde de ceux avant de quitter devsimpy.
 -Fait le 6/11/10 par LC: ajout -> choix de la strategy (algorithme) dans les options déroulables de simulation (suppression du check fault_sim).
 -Fait le 8/11/10 par LC: correction -> bug pour le undo/.redo des modèles couplé (suppression du deepcopy pour le diagram dans le Undo() car copy récurssive en conflit avec le __getstate__ du containerBlock).
 -Fait le 8/11/10 par LC: correction -> possibilité de simuler les containerBlock sans bug (par le boutton se simulation dans le DetachedFrame).
--Fait le 8/11/10 par LC: amélioration -> ajout d'un test au début du makeDEVSInstance pour instancer le model DEVS su diagrame �  simuler si celui-ci est None. sinon suppression des ancien port DEVs instancier au cours de la dernière simulation (arrive parès invocation de plusieur simulation au travers de DetachedFrame).
+-Fait le 8/11/10 par LC: amélioration -> ajout d'un test au début du makeDEVSInstance pour instancer le model DEVS su diagrame �  simuler si celui-ci est None. sinon suppression des ancien port DEVs instancier au cours de la dernière simulation (arrive parès invocation de plusieur simulation au travers de DetachedFrame).
 -Fait le 9/11/10 par LC: correction -> bug au cours de la modification dans un modèle couplé puis uodo/redo.
 -Fait le 9/11/10 par LC: amélioration -> - lorsque modif dans un modèle couplé, le modèle principale est avertis par la variable modify des modifications afin de sauvegarder le fichier si on veux le fermer.
 -Fait le 10/11/11 par LC: possibilité de donner des information suplémentaire pour les attribut comportemetale (DEVS) en les nottants par des @ dans la docstring du constructeur de la classe comme: @nom_attribut : information.
 -Fait le 10/11/10 par LC: ajout -> tooltips pour les cellule de la grille des propriétés des modèles.
 -Fait le 10/11/10 par LC: correction -> bug a l'ouverture par l'open d'un dsp sui contenanait un modème couplé puis ajout par le wizard dans le mc d'un port -> os.getcwd() ne donne pas le bon chemin donc modifier par HOME_PATH.
 -Fait le 10/11/10 par LC: ajout -> possibilité de ranger les propriétés comprtementale par ordrer alphabétique.
--Fait le 10/11/10 par LC: ajout -> possibilité d'ajouter une image de fond pour les modèles par l'intermédiare de l'attrbit image (�  tester �  fond et sous win pas fait).
+-Fait le 10/11/10 par LC: ajout -> possibilité d'ajouter une image de fond pour les modèles par l'intermédiare de l'attrbit image (�  tester �  fond et sous win pas fait).
 -Fait le 11/11/10 par LC: correction -> bug dans la mise a jour de python_path et image_path avent de sauver les fichier .amd et .cmd.
 -Fait le 11/11/10 par LC: amélioration -> addition du fichier image dans le .amd ou .cmd
 -Fait le 12/11/10 par LC: ajout -> menu au clic droit dans les propriétés donnant le clear et l'édition des champs (pour l'instant).
 -Fait le 12/11/10 par LC: amélioration ->  simplification de la fonction UpdateZipFile.
--Fait le 13/11/10 par LC: amélioration -> ajout du pattern obeserver pour la gestion de la mise a jour du panel propriété �  gauce de DEVSimPY en fonction du modèle selectionné dans ShapeCanvas.
+-Fait le 13/11/10 par LC: amélioration -> ajout du pattern obeserver pour la gestion de la mise a jour du panel propriété �  gauce de DEVSimPY en fonction du modèle selectionné dans ShapeCanvas.
 -Fait le 15/11/10 par LC: amélioration -> de la gestion de la fermeture des tab du nb2 et de DEVSimPY (suppression de OnDetruit et amélioration de OnclosePage et OnCloseWindow).
 -Fait le 15/11/10 par LC: correction -> la connectTo ne fonctionne pas avec la connection square.
 -Fait le 16/11/10 par LC: amélioration -> généralisation des ID dans Menu.py pour DEVSimPY.
 -Fait le 17/11/10 par LC: correction -> bug du plugin blink apres modif dans coantianer.py avec ajout de OnDiagramModifed dans UppdateShape : renammage de OnDoagramModified en DiagramModified et suppresion de l'appelle dans UpdateShape.
 -Fait le 17/11/10 par LC: correction -> bug au chargement du splash avec des source de devsimpy delocasilé -> chemin relatif pour les images.
 -Fait le 17/11/10 par LC: amélioration -> déplacement de la définiton de l'attribut blocModel de BaseDEVS vers DEVSComponent. Plus propre au niveau de la logique des classes.
--Fait le 17/11/10 par LC: correction -> bug lorsque on charge un .dsp il python fait un chdir, du coup os.getcwd() change et les chemins change pour les icones par exemple. Attention, le builtin_dict est chargé �  partir du .devsimpy. Le builtin_dict de depat ne sert que pour le splash.
+-Fait le 17/11/10 par LC: correction -> bug lorsque on charge un .dsp il python fait un chdir, du coup os.getcwd() change et les chemins change pour les icones par exemple. Attention, le builtin_dict est chargé �  partir du .devsimpy. Le builtin_dict de depat ne sert que pour le splash.
 -Fait le 17/11/10 par LC: amélioration -> DOMAIN_DIR devient DOMAIN_PATH avec le chemin complet (sans cela impossible de changer de repertoire de lib dans les preferences).
 -Fait le 19/11/10 par LC: amélioration -> suppresion des bind dans DetachedFrame car utlistion de clientData dans les ToolBar et meme ID pioché dans Menu.py.
 -Fait le 23/11/10 par LC: amélioration -> ajout d'un décorateur dans le fichier Decorator.py "Pre_Undo" afin de décorer certaine méthodes de la classe ShapeCanvas.
@@ -229,12 +229,12 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 -Fait le 3/12/10 par LC : ajout -> logger dans le code devs qui est accessible par clic droit sur les modèles puis Log (self.debugger('message')). Definition dans DEVSComponent d'une nouvelle méthode OnLog
 -Fait le 3/12/10 par LC : amélioration -> possibilité d'ouvrir une liste de fichiers .dsp
 -Fait le 5/12/10 par LC : ajout -> premier ajout de la documentation en francais de l'aide en htmlHelpController et du window Help Workqhop sous windows pour générer un bon .zip
--Fait le 7/12/10 par LC : correction -> bug lorsque modification des labels et simulation. La priority-list n'est pas mise �  jour.
+-Fait le 7/12/10 par LC : correction -> bug lorsque modification des labels et simulation. La priority-list n'est pas mise �  jour.
 -Fait le 7/12/10 par LC : correction -> bug avec importation externe d'une lib : chemin de modèles introuvable. ajout dans les __setstate__ de CodeBlock et ContainerBlock de la prise en compte du remplacement des chemins erronés par les chemin externe des lib.
 -Fait le 7/12/10 par LC : correction -> correction du Search avec identification plus précise.
 -Fait le 9/12/10 par LC : ajout -> Doc string sur les item des librairies.
--Fait le 11/12/10 par LC: amélioration -> de la classe Editor et notamment la méthode OnSaveFile qui maitenant ne fait que la sauvegarde que lorsque pas de simulation. Si simulation, on recharge la nouvelle classe �  partir du code dans la fenetre d'édition sans parler de module.
--Fait le 13/12/10 par LC : correction -> bug lors de l'ouverture d'un dsp �  partir d'un glisser.deposer d'un explorateur de fichier.
+-Fait le 11/12/10 par LC: amélioration -> de la classe Editor et notamment la méthode OnSaveFile qui maitenant ne fait que la sauvegarde que lorsque pas de simulation. Si simulation, on recharge la nouvelle classe �  partir du code dans la fenetre d'édition sans parler de module.
+-Fait le 13/12/10 par LC : correction -> bug lors de l'ouverture d'un dsp �  partir d'un glisser.deposer d'un explorateur de fichier.
 -Fait le 16/12/10 par LC: amélioration -> gestion des recent file avec construction du sub menu lorsque l'on invoque le File menu.
 -Fait le 16/12/10 par LC: ajout -> nouveau algorithme de simualtion qui permet de ne plus executer des delta ext pour chaque message sur les ports (voir FastSimualtor.py).
 -Fait le 16/12/10 par LC: ajout -> profiling avec kcachegrind.
@@ -242,14 +242,14 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 -Fait le 17/12/10 par LC: amélioration -> apres profiling de la machien, réinplémentation de fonction de transition de quelque mdèles en prenant en compte le check de tout les ports dans deltat ext.
 -Fait le 20/12/10 par LC: amélioration -> NLFunction utilise les array de numpy pour accelere les multiplications.
 -Fait le 21/12/10 par LC: correction -> eventAxis dans To_Disk.
--Fait le 22/12/10 par LC: amélioration -> proposition du nom des modèles .amd et .cmd �  partir des label dans la deuxieme étape du wizard.
+-Fait le 22/12/10 par LC: amélioration -> proposition du nom des modèles .amd et .cmd �  partir des label dans la deuxieme étape du wizard.
 -Fait le 22/12/10 par LC: amélioration -> test lors de la dernière étape du wizard si le fichier.cmd et .amd exist deja.
 -Fait le 22/12/10 par LC: amélioration -> apparition d'une croix lorsque l'on approche du neoud de connection.
 -Fait le 27/12/10 par LC: amélioration -> utilisation de la classe StdDialogButtonSizer pour grouper les boutons dans PreferenveGUI.py.
 -Fait le 6/01/11 par LC: Happy new year ;-) ajout -> différencaition du click droit sur les tab du notbook (voir__ShowMenu dans devsimpy.py ).
--Fait le 7/01/11 par LC: ajout-> au double clique �  coté d'un tab, ajout d'un nouveau tab 'Diagram'.
+-Fait le 7/01/11 par LC: ajout-> au double clique �  coté d'un tab, ajout d'un nouveau tab 'Diagram'.
 -Fait le 22/01/11 par LC: correction -> - N1: problème lorsque undo, les liens se casse et peu plus simuler: les listes undostock et redostock contienne des dumps des diagrammes (plus simple mais attention au diagramme qui contient des copies d'autre instance comme pour parent)
--Fait le 24/01/11 par LC: ajout -> possibilité d'ajoter plusieur paramet constructeur de type fileName �  un model. Il suffit que le nom du parap contienne fileName.
+-Fait le 24/01/11 par LC: ajout -> possibilité d'ajoter plusieur paramet constructeur de type fileName �  un model. Il suffit que le nom du parap contienne fileName.
 -Fait le 25/01/11 par LC: ajout- > ajouter dans To_DIsk un champ de type liste pour specifier les n° de col a prendre en compte.
 -Fait le 25/01/11 par LC: amélioration -> suppression de la creation des blockModel en regardant si les mots ToDisk et QuickScope sont présent dans les noms de classe (voir GetBlockModel dans Container.py).
 -Fait le 27/01/11 par LC: ajout -> gestion des erreurs dans les .py interpeter pendant la simulation avec proposition de modifier le code pour refaire une simulation.
@@ -264,9 +264,9 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 -Fait le 12/03/11 par LC: ajout -> insert de code prédifini dans l'editor de code (peek, poke, state...)
 -Fait le 16/03/11 par LC: ajout -> possibilité de renseigner les xlabel et ylabel d'un QScope (voir ScopeGUI).
 -Fait le 21/03/11 par LC: ajout du numero des port visible dans le model.
--Fait le 22/03/11 par LC: coorection -> bug dans le To_Disk lorsque plusieurs entrée self.pos n'était pas ossocié �  toutes les entrées indépendantment les une des autres.
--Fait le 22/03/11 par LC: ajout -> couplage si loupé en prosant une second chance de raccorder �  un port existant ou de creer un nouveau port.
--Fait le 22/03/11 par LC: correction -> retour �  une gestion basic des exceptions dans le thread de simulation. Il faudrait coder le retour de l'exception dans le thread principale. Pas facile...
+-Fait le 22/03/11 par LC: coorection -> bug dans le To_Disk lorsque plusieurs entrée self.pos n'était pas ossocié �  toutes les entrées indépendantment les une des autres.
+-Fait le 22/03/11 par LC: ajout -> couplage si loupé en prosant une second chance de raccorder �  un port existant ou de creer un nouveau port.
+-Fait le 22/03/11 par LC: correction -> retour �  une gestion basic des exceptions dans le thread de simulation. Il faudrait coder le retour de l'exception dans le thread principale. Pas facile...
 -Fait le 22/03/11 par LC: correction -> position des bouttons dans le dialog de suppresion des lib et du boutton du plugins sig_viewer.
 -Fait le 14/04/11 par LC: amélioration -> gestion du key event dans le propertiesGrid pour fermer la fenetre de propriétés par un return ou le tab pour se balader entre les cellules...
 -Fait le 15/04/11 par LC: correction -> bug dans l'affectation des attributs graphique dans le propertiesGrid et ajout des cellules aux colonnes 0 et 2 en readOnly.
@@ -274,7 +274,7 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 -Fait le 19/04/11 par LC: ajout -> transparence de la detachedFrame lorsqu'on la déplace pour voir ce q'il y a derriere.
 -Fait le 11/05/11 par LC: amélioration -> interface de simulation mieux affichée pour windows.
 -Fait le 23/05/11 par LC: ajout -> remplissage en rouge du champs python_path lorsqu'il ne le trouve pas dans CodeCB.
--Fait le 26/05/11 par LC: amélioration -> label des sheet du ToDisk prennent le label des modèles attachés et lorsque l'on veut faire le graph �  partir du sheet, le titre du plot est celui du sheet selectionné.
+-Fait le 26/05/11 par LC: amélioration -> label des sheet du ToDisk prennent le label des modèles attachés et lorsque l'on veut faire le graph �  partir du sheet, le titre du plot est celui du sheet selectionné.
 -Fait le 31/05/11 par LC: correction -> bug pour le Help car oubli d'évaluer le self.language.
 -Fait le 31/05/11 par LC: amélioration -> pour window demande de redemarrage pour la modififcation de la langue.
 -Fait le 01/06/11 par LC: amélioration -> récuperer le chemin des fileName pour les generator lors du changement des chemins.
@@ -301,7 +301,7 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 -Fait le 28/10/11 par LC: correction -> lorsque no time limite et stop de simulation il repasse en time limite car il laisse le choix d'introduire un temps dans le champs d'acuisistion.
 -Fait le 28/10/11 par LC: ajout -> deplacement des modèles dans les diagrammes par les fleches et en restant sur control on est plus fin dans le déplacement.
 -Fait le 21/10/11 par LC: correction -> menuItem.GetItemLabelText rempalcé par menuItem.GetItemLabel dans OnRecentFile car si & dans le recent path, le menuItem.GetItemLabelText le supprime.
--Fait le 3/11/11 par LC: correction ->  ajout dans DumpZipFile.Save de la mise �  jour de self.model_path pour exporter les amd et cmd correctement.
+-Fait le 3/11/11 par LC: correction ->  ajout dans DumpZipFile.Save de la mise �  jour de self.model_path pour exporter les amd et cmd correctement.
 -Fait le 4/11/11 par LC: amélioration -> lorsque la fenetre de reste simulation est ouverte et que l'on fait plusieurs simulation par run on a une nouvelle génération du master devs.
 -Fait le 4/11/11 par LC: correction -> differenciation du gestionnaire d'erreur pendant la simulation entr une erreur dans les fichiers de devsipy et les fichier modèle (dans Domain et dans exportedPath).
 -Fait le 5/11/11 par LC: amélioration -> lorsque modificationd du code dans l'edtor, notification dans le statusbar et synchronisation de la notification lorsque ctrl+S et clic surt l'icone de sauvegarde.
@@ -310,14 +310,14 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 -Fait le 17/11/11 par LC: correction -> test de la connexion internet dans FileTableGenerator.
 -Fait le 17/11/11 par LC: correction -> affichage du flag dans les modèle si le python_path n'est pas bon.
 -Fait le 17/11/11 par LC: amélioration -> plot plus rapide et changement du type de plot dynamique.
--Fait le 17/11/11 par LC: correction -> modification des attributs de la classe d'un modèle qui a été enreistré dans un  dsp et dont la classe �  changé entre temps (modification du nom des args ou du nombre aussi).
+-Fait le 17/11/11 par LC: correction -> modification des attributs de la classe d'un modèle qui a été enreistré dans un  dsp et dont la classe �  changé entre temps (modification du nom des args ou du nombre aussi).
 -Fait le 22/11/11 par LC: amélioration -> affichae du profiling dans une feneter sans passer par kprof (grace a redirectStdout dans Decorators.py).
 -Fait le 22/11/11 par LC: amélioration -> gestion des erreurs d'indentation grace au module tabnanny.
 -Fait le 25/11/11 par LC: amélioration -> gestion des plugins généraux (refonte des classes dans PreferencesGUI.py et creation du fichier PluginsGUI.py).
 -Fait le 26/11/11 par LC: ajout -> gestion des plugins des amd et cmd par clic droit puis plugins.
 -Fait le 28/11/11 par LC: ajout -> chargement des plugins des modèles amd et cmd stocké dans les dsp par la méthode LoadPlugins
 -Fait le 1/12/11 par LC: amélioration -> ajout des deux boutons pour ajouter et supprimer des plugins dans le prefercence et le model plugins manager.
--Fait le 1/12/11 par LC: amélioration -> netoyage et amélioration des classes dans le PluginsGUI (une classe doit être fermé �  la modification mais ouverte a l'extention !).
+-Fait le 1/12/11 par LC: amélioration -> netoyage et amélioration des classes dans le PluginsGUI (une classe doit être fermé �  la modification mais ouverte a l'extention !).
 -Fait le 2/12/11 par LC: amélioration -> ajout du boutton refresh pour la liste des plugins.
 -Fait le 6/12/11 par LC: correction -> bug dans la position des nouveaux modèle par glisser/depose. Creation de la méthode GetXY(m, y, y) dasn la classe ShapeCanvas.
 -Fait le 7/12/11 par LC: correction -> bug lorsque fermeture de la frame du blink avec un modèle dsp qui contient un modèle dynamique (comme pour jfs).
@@ -346,17 +346,17 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 -Fait le 24/03/2012 par LC: ajout -> check des labels pour savoir qi ils sont tous différent dans l'optique d'utiliser le flat algorithme.
 -Fait le 30/03/2012 par LC: amélioration -> possibilité de modifier les fichier plugins.py des modèles dans devsimpy et de sauvegarder les modif avec test d'erreurs éventuelles.
 -Fait le 30/03/2012 par LC: correction -> load_module_from_zip prennait plugins.py pour les modèles avec plugins. Ajout du test disant que le nom du fichier python comportementale est le meme que celui du modèle toto.amd == toto.py sans les extentions.
--Fait le 3/04/2012 par LC & JFS: correction -> ajout d'un SetValue(None) �  la fin du poke dans le Flat pour remettre a None tout le port d'entrée du modèle qui provoque l'execution des delta_ext.
--Fait le 3/04/2012 par LC: suppression de la varialbe static de la strategie3 ts par un weakref d'un attribut de type clock que l'on a ajouté �  tout les modèles atomic devs. De cve fait, lorsue le temps de simulation change dans la strategie3, tout les modèles on leur variable ts qui est mise �  jour automatiquement grâce au weakref.
+-Fait le 3/04/2012 par LC & JFS: correction -> ajout d'un SetValue(None) �  la fin du poke dans le Flat pour remettre a None tout le port d'entrée du modèle qui provoque l'execution des delta_ext.
+-Fait le 3/04/2012 par LC: suppression de la varialbe static de la strategie3 ts par un weakref d'un attribut de type clock que l'on a ajouté �  tout les modèles atomic devs. De cve fait, lorsue le temps de simulation change dans la strategie3, tout les modèles on leur variable ts qui est mise �  jour automatiquement grâce au weakref.
 -Fait le 3/04/2012 par LC: ajout -> frame de configuration du plugin verbose pour choisir quoi afficher (ext transn int trans, clock et collision).
 -Fait le 19/04/2012 par LC: ajout -> Blink pour le flat mais manque encore de généricité dans le sens ou le trigger est dans le code de simulation alors qu'il pourrait être definit par decoration des modèles uniquement dans le fichier blink.py
 -Fait le 14/04/2012 par LC: correction -> erreur dans le menu edit au clic droit sur un champs du panel propriété d'un model (result en ajoutant les methodes GetRow et Getcol dans la classe PropertiesCtrlPopupMenu du fichier menu.py)
--Fait le 08/06/2012 par LC: correction -> bug dans la sauvegarde des modifs des amd et py pendant simulation (encore �  améliorer je pense... DoSaveFile dans Editor.py)
+-Fait le 08/06/2012 par LC: correction -> bug dans la sauvegarde des modifs des amd et py pendant simulation (encore �  améliorer je pense... DoSaveFile dans Editor.py)
 -Fait le 20/06/2012 par LC: correction -> prise en compte des .amd et .cmd dans CheckClass de Container.py
 -Fait le 06/10/2012 par LC: amélioration -> makeDEVSinstance
 -Fait le 08/10/2012 par LC: correction -> prise en compte de tout les gestionnaires d'événements (OnRightClic du ShapeCanvas qui redirige vers les objets concernés) pour l'implémentation la plus large de plugins locals.
 -Fait le 10/10/2012 par LC: amélioration de la fonction TestExt dans Savable
--Fait le 15/10/2012 par LC et JFS: amélioration -> passage �  wx 2.9.4.0 avec python 2.7.4 (l'import de pubsub depend de la version wx surtout pour sendMessage et Publisher, et InitAllImageHandlers() est deprecié)
+-Fait le 15/10/2012 par LC et JFS: amélioration -> passage �  wx 2.9.4.0 avec python 2.7.4 (l'import de pubsub depend de la version wx surtout pour sendMessage et Publisher, et InitAllImageHandlers() est deprecié)
 -Fait le 16/10/2012 par LC: correction -> ajout du CallAter pour le son dasn la SimulationGUI afin d'éviter l'erreur sur MAC.
 -Fait le 16/10/2012 par LC: correction -> meilleur gestion de l'import de numpy dans Plot.py et Utilities.py pour MAC.
 -Fait le 16/10/2012 par LC: amélioration -> ajout de la ligne  from __future__ import with_statement en début de fichier qui utilise l'instruction with pour la compatibilité avec python 2.5
@@ -376,9 +376,9 @@ En sachant qu'il faut être capable de simuler des systèmes composé de modèle
 -Fait le 26/11/2012 par LC: correction -> ajout de zipimport._zip_directory_cache.clear() dans Conainer.py pour éviter les bad file header apes le load d'un cmd ou amd apres avoir fait un export dans la meme instance de DEVSimPy (sans redemarrage)
 -Fait le 28/11/2012 par LC: correction -> ajout du OnrightClick dasn ConnectionShape car le clic droit ne donnait pas la possibilité de supprimer le lien
 -Fait le 28/11/2012 par LC: ajout -> DEFAULT_PLOT_DYN_FREQ dans les préférencess pour regler la frequence de rafraichissement du plot dans le Quickscope afin d'eviter les overhead
--Fait le 07/12/2012 par LC: correction -> plus de flicker grace �  modification de OnPaint et OnEraseBackground dans container.py (http://wiki.wxpython.org/CreatingCustomControls et http://wxpython-users.1045709.n5.nabble.com/using-wx-BufferedPaintDC-properly-td3555917.html). Ajout de dc = wx.BufferedPaintDC(self) et OnEraseBackground
+-Fait le 07/12/2012 par LC: correction -> plus de flicker grace �  modification de OnPaint et OnEraseBackground dans container.py (http://wiki.wxpython.org/CreatingCustomControls et http://wxpython-users.1045709.n5.nabble.com/using-wx-BufferedPaintDC-properly-td3555917.html). Ajout de dc = wx.BufferedPaintDC(self) et OnEraseBackground
 -Fait le 12/12/2012 par LC: correction: ajout de BlockModelAdater pour decorer le block d'un Quiscope ou To_disk ou collector si le .py herite d'un de ces modèle (pour le double clic).
--Fait le 12/12/2012 : amélioration: afin d'importer par des from dans les fichiers python des modeles il faut rajouter tout les fichier dans __init__.py. Ceci est contradictoire avec la regle imposé de ne charger que les fichiers dans __init__.py. Donc ajout de la regle suplemntaire consistant a tester si les fichier python correspondant au nom dans __init__ correspondent �  une classe qui herite de DomainBehavior. Donc la regle est la suivante: il faut ajouter tout les fichiers .py d'une lib dans le __init__.py, celle ci est utiliser pour chrager les fichier du rep sans scanner le rep, puis ensuite seul les modèles qui hérite de DomainBehavior sont charger. Attention, si un fichier qui contient pas de class héritant de DomainBehavior mais qui a une erreur il sera charger pour correction. Encuite il disparaotra car plus d'errreur mais pas d'héritage de DomainBehavior
+-Fait le 12/12/2012 : amélioration: afin d'importer par des from dans les fichiers python des modeles il faut rajouter tout les fichier dans __init__.py. Ceci est contradictoire avec la regle imposé de ne charger que les fichiers dans __init__.py. Donc ajout de la regle suplemntaire consistant a tester si les fichier python correspondant au nom dans __init__ correspondent �  une classe qui herite de DomainBehavior. Donc la regle est la suivante: il faut ajouter tout les fichiers .py d'une lib dans le __init__.py, celle ci est utiliser pour chrager les fichier du rep sans scanner le rep, puis ensuite seul les modèles qui hérite de DomainBehavior sont charger. Attention, si un fichier qui contient pas de class héritant de DomainBehavior mais qui a une erreur il sera charger pour correction. Encuite il disparaotra car plus d'errreur mais pas d'héritage de DomainBehavior
 Tour ce passe dans GetFileListFromInit qui a été déplacer dans Container.py
 -Fait le 12/12/2012 par LC: ajout -> possibilité de creer une lib vide (repertoire dans Doamin avec un __init__.py vide).
 -Fait le 12/12/2012 par LC: correction -> probleme lorsque creation d'un amd ou cmd dans un reprtoire avec un nom different du python associé. Par defaut il faut que le nom du .amd ou .cmd soit le meme que le fichier python.
@@ -403,70 +403,71 @@ Tour ce passe dans GetFileListFromInit qui a été déplacer dans Container.py
 invoque rpar un callback lorsque le fichier python est renseigné dans le wizard pour le amd ou le cmd. Meme chose pour le fichier plugin qui doit s'appeller oblogatoirtement plugins.py.
 -Fait le 05/02/2013 par LC: amélioration -> dans getPythonModelFileName ajout du test si plusieur fichier py dasn un amd ou cmd alors on cherche le fichier py qui contient le bon comportement cad qui heritre de DomainBehavior ou DomainStructure. Ce test est fait uniquement si on ne trouve pas un fichier py qui possède pas le meme nom que le fichier mad ou cmd.
 -Fait le 11/02/2013 par LC: ajout -> sauvegarde et ouverture possible au format plus lisisble et debuggable yaml (par save as).
--Fait le 07/03/2013 par LC: amélioration -> les plugins.py sont rangé dans un repertoire 'plugins' dans le amd. Les modèles contenant les fichiers plugins.py �  la racine du amd marche toujours.
+-Fait le 07/03/2013 par LC: amélioration -> les plugins.py sont rangé dans un repertoire 'plugins' dans le amd. Les modèles contenant les fichiers plugins.py �  la racine du amd marche toujours.
 -Fait le 11/03/2013 par LC: amélioration -> Tooltips du panel des lib desactivé lorsque aucune lib n'est selectionnée.
 -Fait le 12/03/2013 par LC: correction -> gestion de la suppression des connexionShape dans la liste des shapes d'un canvas lorsque modififcation des attributs input ou output a partir d'un QuickAttributEditor.
 -Fait le 13/03/2013 par LC: amélioration -> suppression des from Menu import * dans Container.py et devsimpy.py
 -Fait le 16/04/2013 par LC: ajout: LabelGUI.py basé sur LabelEdito.xrc dans le rep XRC  pour parametter le label des blocks
--Fait le 10/06/2013 par LC: correction -> dans le fichier savable.py et la m�thode Load de DumpZipFile correction de la gestion du label_pos dans les anciens modèles (<2.8)
+-Fait le 10/06/2013 par LC: correction -> dans le fichier savable.py et la m�thode Load de DumpZipFile correction de la gestion du label_pos dans les anciens modèles (<2.8)
 -Fait le 24/06/2013 par LC: correction -> valeur par defaut dans le LabelEditorDialog du radio boutton (fonctionnait pas sous windows)
 -Fait le 05/11/2013 par LC: amélioration -> refactoring du LeftNotebook avec la creation de trois fichiers PoprPnale.py, LibPanel et LibraryTree pour l'amélioration du menu Show pour activer ou desactiver les panels (Perspectives).
 -Fait le 05/11/2013 par LC: amélioration -> refactrorisation et creation d'un fichier pour LeftNotebook avec l'intgeration du FlatNoteBook. PAs fini car La méthode uypdate utilisée par Obsrerver porte le meme non que celle utilisé par Core Windows du FlatNoteBook. A régler...
 -Fait le 13/11/2013 par LC: amélioration -> refactorisation du right notebook (DiagramNotebook.py).
--Fait le 14/11/2013 par LC: amélioration -> meilleur test pour savoir si le fichier �  transformer est dans DOMAIN_PATH ou pas dans Utilities/PathToModule (avec un startswith).
+-Fait le 14/11/2013 par LC: amélioration -> meilleur test pour savoir si le fichier �  transformer est dans DOMAIN_PATH ou pas dans Utilities/PathToModule (avec un startswith).
 -Fait le 14/11/2013 par LC: amélioration -> ajout de la methode de classe AddToSysPath dans LibraryTree pour mieux gérer l'ajout des paths dans sys.path pour l'importation des modules externe. Maitnenant, l'importation de module dans des packages externe peut se faire soit par un NomModule.NomPackage ou NomPackage tout court. Pour les modules interne (dans DOMAIN_PATH) il faut juste précéder de Domain.NomModule... Ou alors form Domain.NomModule import ...
 -Fait le 15/11/2013 par LC: correction -> ajout du pop up de conformation lorsqu'on veut suppurimer un modèle sur le diagramme
 -Fait le 15/11/2013 par LC: amélioration -> de CheckItem dans LibraryTree
 -Fait le 16/11/2013 par LC: amélioration -> SimulationGUI et PlotGUI plus adapté a Windows
 -Fait le 16/11/2013 par LC: amélioration -> centralisation des stratégies de sim et la stratégie par défaut de sim dans le builtin
 -Fait le 17/11/2013 par LC: amélioration -> début de refactoring du DEVSKernel avec les rep PyDEVS et PyPDEVS
--Fait le 19/11/2013 par LC: amélioration -> ajout d'un code dans SetConfig de devsimpy.py pour re-écrire le fichier de configuration .devsimpy lorsque le repertoire source de DEVSimPy �  été changé de place sur le dique.
+-Fait le 19/11/2013 par LC: amélioration -> ajout d'un code dans SetConfig de devsimpy.py pour re-écrire le fichier de configuration .devsimpy lorsque le repertoire source de DEVSimPy �  été changé de place sur le dique.
 -Fait le 24/11/2013 par LC: crottection -> ajout du reprtoire pere d'un fichier dans le sys.path dans le BlockFactory.GetModule pour éviter les erreurs lors du chargement des dsp qui contiennent des modèles dont la librairie n'est pas importée dans DEVSimPy.
--Fait le 24/11/2013 par LC: amélioration -> refactoring du code de SimulationGUI et avancé dans l'intégration de PyPDEVS. Apparement bug persistant de la creation d'un thread PyPDEVS dans un thread de DEVSimPy... Sinon la config fonctionnne. Reste �  étudier PyPDEVS plus en détail
+-Fait le 24/11/2013 par LC: amélioration -> refactoring du code de SimulationGUI et avancé dans l'intégration de PyPDEVS. Apparement bug persistant de la creation d'un thread PyPDEVS dans un thread de DEVSimPy... Sinon la config fonctionnne. Reste �  étudier PyPDEVS plus en détail
 -Fait le 25/11/2013 par LC: correction -> Profiling fonctionne maintenant sur windows (menu_item mal géré au départ avec le GetEventObject)
 -Fait le 25/11/2013 par LC: ajout -> test de l'exemple de PyPDEVS du trafficLight fonctionne sur DEVSimPy. Petit prob de chargement dynamique ddans les pref des simulateur mais fonctionne.
 -Fait le 26/11/2013 par LC: correction -> issubclass dans ImportLibrary et Compoenents necessite de faire les import dans les métodes de DomainInterface.DomainBehavior et Structure
 -Fait le 1/12/2013 par LC: correction -> ajout de wx.TE_RICH2 pour avoir la couleur sous windows dans le blink (http://bytes.com/topic/python/answers/635711-wx-textctrl-setdefaultstyle-not-working)
 -Fait le 3/12/2013 par LC: correction-> erreur d'unicode dans le reporter (http://stackoverflow.com/questions/12468179/unicodedecodeerror-utf8-codec-cant-decode-byte-0x9c)
--Fait le 23/12/2013 par LC: am�lioration -> am�lioration de l'architecture logiciel permettant de rendre disponible un noyau de simulation � partir d'un nouveau r�pertoire dans DEVSKernel (permet de suivre l'�volution de PyPDEVS)
--Fait le 10/02/2014 par LC: correction -> lorsque fermetrue du dialogue ImportLibrary, si une libe est selectionn�e, elle est import� quoi qu'il arrive. Bind du bouton en croix de la fenetre.
--Fait le 11/02/2014 par LC: am�lioration -> adaptation de la taille du label des blocks (dans la mathode draw de Shape on adapte le font en fonction de la taille du label et de la taille du rectangle qui l'entour).
--Fait le 28/02/2014 par LC: ajout -> edition du code des mod�les dans une AUI � droite. Pour l'activer il faut aller dans Affichage->Editeur
+-Fait le 23/12/2013 par LC: am�lioration -> am�lioration de l'architecture logiciel permettant de rendre disponible un noyau de simulation � partir d'un nouveau r�pertoire dans DEVSKernel (permet de suivre l'�volution de PyPDEVS)
+-Fait le 10/02/2014 par LC: correction -> lorsque fermetrue du dialogue ImportLibrary, si une libe est selectionn�e, elle est import� quoi qu'il arrive. Bind du bouton en croix de la fenetre.
+-Fait le 11/02/2014 par LC: am�lioration -> adaptation de la taille du label des blocks (dans la mathode draw de Shape on adapte le font en fonction de la taille du label et de la taille du rectangle qui l'entour).
+-Fait le 28/02/2014 par LC: ajout -> edition du code des mod�les dans une AUI � droite. Pour l'activer il faut aller dans Affichage->Editeur
 -Fait le 21/03/2014 par LC: correction -> passage de FINAL_TIME dans la classe Master comme attribut car bug dans le SimulationGUI.
--Fait le 21/03/2014 par LC: am�lioration -> possibilit� de tourner les ports sur les quatre faces par des sous menus supl�mentaires du menu Rotate.
--Fait le 01/10/2014 par LC: correction -> ajout de la d�pendance zipfile dans LibraryTree.py.
--Fait le 01/10/2014 par LC: correction -> enregistrement d'un nouveau amd ou cmd cr�ee par clic droit sur une librairie dans le bon repertoire de la lib.
--Fait le 09/10/2014 par LC: correction -> ligne 1722 de Editor.py pour corriger la mise � jour des modifications faites dans les args d'un mod�le �dit�.
--Fait le 09/10/2014 par LC: ajout -> icon pour nouveau peek, poke ou �tat dans l'editeur externe de code (pas pour l'embarqu� du fait d'une mauvaise gestion du p�re de BlockEditor qui empeche l'execution de ConfigureGUI)
--Fait le 11/10/2014 par LC: ajout -> save as � partir d'un py venant ou pas d'un amrd ou cmd. Il faut aller dans Fichier-> Save as.
+-Fait le 21/03/2014 par LC: am�lioration -> possibilit� de tourner les ports sur les quatre faces par des sous menus supl�mentaires du menu Rotate.
+-Fait le 01/10/2014 par LC: correction -> ajout de la d�pendance zipfile dans LibraryTree.py.
+-Fait le 01/10/2014 par LC: correction -> enregistrement d'un nouveau amd ou cmd cr�ee par clic droit sur une librairie dans le bon repertoire de la lib.
+-Fait le 09/10/2014 par LC: correction -> ligne 1722 de Editor.py pour corriger la mise � jour des modifications faites dans les args d'un mod�le �dit�.
+-Fait le 09/10/2014 par LC: ajout -> icon pour nouveau peek, poke ou �tat dans l'editeur externe de code (pas pour l'embarqu� du fait d'une mauvaise gestion du p�re de BlockEditor qui empeche l'execution de ConfigureGUI)
+-Fait le 11/10/2014 par LC: ajout -> save as � partir d'un py venant ou pas d'un amrd ou cmd. Il faut aller dans Fichier-> Save as.
 -Fait le 24/10/2014 par LC: correction -> SimulationNoGui
--Fait le 25/10/2014 par LC: correction -> adapation de la m�thode makeDEVSInstance dans Container.Py pour �viter le crash avec PyPDEVS lorsque on veut simuler deux fois d'affil�.
--Fait le 28/10/2014 par LC: correction -> possibilit� de faire de changer de noyau de simulation et de simuler sans redemarer DEVSimPy (il fallait refaire un setDEVSModel dans makeDEVSInstance quoi qu'il arrive)
--Fait le 28/10/2014 par LC: am�lioration -> no gui
--Fait le 28/10/2014 par LC: am�lioration -> on peux faire un poke quelque soit le noyau de simulation mais attention il faut faire un return self.poke(p,v). De meme il faut faire un return de self.state dans intTransition et extTransition. Pour l'instant seule le peek n'est pas g�n�rique (mais commenc�... en commentaire dans le DomainBehvaior)
--Fait le 30/10/2014 par LC: correction -> lorsqu'un mod�le h�rite d'un QuickScope, To_Disk ou MessagesCollector, il fallait le reinstancier pour que le double clic prenne effet. Maintenant j'ai rajout� un morceaux de code � la fin du __setstate__ du codeBlock dans Container.py, juste avant le self.__dict__.update(state) (important http://www.ibm.com/developerworks/library/l-pypers/) afin de redefinir le vrai heritage avec ScopeGUI ou DiskGUI
--Fait le 31/10/2014 par LC: am�lioration -> lorsque un dsp est construit avec une lib qui n'est pas dans Domain (� la construction), on esssai dans setstate du CodeBlock de trouver si un rep de Domain est pr�sent dans le faut chemin python_path si c'est le cas, on fait une composition pour rendre le python_path ok
--Fait le 07/11/2014 par LC: ajout -> possibilit� de choisir dans les pr�f�rences g�n�rales la version de wx utilis�e par DEVSimPy.
--Fait le 07/11/2014 par LC: am�lioration -> changement du path de configuration. Plus AppData/Romaing mais ~
--Fait le 15/11/2014 par LC: am�lioration -> un fichier ind�pendant pour g�rer le mode no gui : devsimpy-nogui.py
--Fait le 22/11/2014 par LC: ajout -> menu rename sur le clique droit des mod�les (atomique, coupl� et port).
--Fait le 23/11/2014 par LC: am�lioration -> evt.Veto pour am�liorer la gestion de la fermeture des diagrammes.
+-Fait le 25/10/2014 par LC: correction -> adapation de la m�thode makeDEVSInstance dans Container.Py pour �viter le crash avec PyPDEVS lorsque on veut simuler deux fois d'affil�.
+-Fait le 28/10/2014 par LC: correction -> possibilit� de faire de changer de noyau de simulation et de simuler sans redemarer DEVSimPy (il fallait refaire un setDEVSModel dans makeDEVSInstance quoi qu'il arrive)
+-Fait le 28/10/2014 par LC: am�lioration -> no gui
+-Fait le 28/10/2014 par LC: am�lioration -> on peux faire un poke quelque soit le noyau de simulation mais attention il faut faire un return self.poke(p,v). De meme il faut faire un return de self.state dans intTransition et extTransition. Pour l'instant seule le peek n'est pas g�n�rique (mais commenc�... en commentaire dans le DomainBehvaior)
+-Fait le 30/10/2014 par LC: correction -> lorsqu'un mod�le h�rite d'un QuickScope, To_Disk ou MessagesCollector, il fallait le reinstancier pour que le double clic prenne effet. Maintenant j'ai rajout� un morceaux de code � la fin du __setstate__ du codeBlock dans Container.py, juste avant le self.__dict__.update(state) (important http://www.ibm.com/developerworks/library/l-pypers/) afin de redefinir le vrai heritage avec ScopeGUI ou DiskGUI
+-Fait le 31/10/2014 par LC: am�lioration -> lorsque un dsp est construit avec une lib qui n'est pas dans Domain (� la construction), on esssai dans setstate du CodeBlock de trouver si un rep de Domain est pr�sent dans le faut chemin python_path si c'est le cas, on fait une composition pour rendre le python_path ok
+-Fait le 07/11/2014 par LC: ajout -> possibilit� de choisir dans les pr�f�rences g�n�rales la version de wx utilis�e par DEVSimPy.
+-Fait le 07/11/2014 par LC: am�lioration -> changement du path de configuration. Plus AppData/Romaing mais ~
+-Fait le 15/11/2014 par LC: am�lioration -> un fichier ind�pendant pour g�rer le mode no gui : devsimpy-nogui.py
+-Fait le 22/11/2014 par LC: ajout -> menu rename sur le clique droit des mod�les (atomique, coupl� et port).
+-Fait le 23/11/2014 par LC: am�lioration -> evt.Veto pour am�liorer la gestion de la fermeture des diagrammes.
 -Fait le 06/02/2016 par LC: correction -> bug de wx 3.0.2 sur le QuickScope
 -Fait le 20/04/2016 par LC: correction -> bug sur la gestion automatique des connections par clic droit.
--Fait le 20/04/2016 par LC: correction -> Ctrl+S dans l'�diteur embarqu� fonctionne
--Fait le 20/04/2016 par LC: correction -> ajout de _ = wx.GetTranslation pour r�soudre les probl�mes lorsque une console est activ� dans le panel du bas.
--Fait le 20/06/2016 par LC: correction -> Ajout de OnStartWizard dans Container.py pour dissocier la cr�ation d'un mod�le � partir d'un clic droit sur le vanvas ou sur une librairie.
--Fait le 20/06/2016 par LC: ajout -> dialogue pour supprimer les mod�les � partir de la libriaire par clic droit avec confirmation de suppression des fichiers
--Fait le 24/06/2016 par LC: am�lioration -> meilleuir gestion des aui avec la possibilit� de fermer les panels (properties, simulation, librairies) et de les restorer avec une maj des checks dans le menu Show.
--Fait le 12/09/2016 par LC: ajour -> dialogue pour exporter les mod�les yaml vers DEVSimPy-REST � partir de l'url et du port.
--Fait le 12/09/2016 par LC: correction -> bug �voqu�s � partir de DEVSimPy-nogui.
+-Fait le 20/04/2016 par LC: correction -> Ctrl+S dans l'�diteur embarqu� fonctionne
+-Fait le 20/04/2016 par LC: correction -> ajout de _ = wx.GetTranslation pour r�soudre les probl�mes lorsque une console est activ� dans le panel du bas.
+-Fait le 20/06/2016 par LC: correction -> Ajout de OnStartWizard dans Container.py pour dissocier la cr�ation d'un mod�le � partir d'un clic droit sur le vanvas ou sur une librairie.
+-Fait le 20/06/2016 par LC: ajout -> dialogue pour supprimer les mod�les � partir de la libriaire par clic droit avec confirmation de suppression des fichiers
+-Fait le 24/06/2016 par LC: am�lioration -> meilleuir gestion des aui avec la possibilit� de fermer les panels (properties, simulation, librairies) et de les restorer avec une maj des checks dans le menu Show.
+-Fait le 12/09/2016 par LC: ajour -> dialogue pour exporter les mod�les yaml vers DEVSimPy-REST � partir de l'url et du port.
+-Fait le 12/09/2016 par LC: correction -> bug �voqu�s � partir de DEVSimPy-nogui.
 ############################################################################################
--Fait le 08/03/2018 par LC: am�lioration -> passage � la version Phoenix de wx pour la nouvelle version de DEVsimPy 3.0
--Fait le 08/03/2018 par LC: am�lioration -> gestion des fichiers recents dynamique (ajout et suppression sans red�marrer la nouvelle version de DEVSimPy)
--Fait le 08/03/2018 par LC: am�lioration -> passage � la nouvelle version de pubsub avec la supression de l'import from wx.lib.pubsub import setuparg1
+-Fait le 08/03/2018 par LC: am�lioration -> passage � la version Phoenix de wx pour la nouvelle version de DEVsimPy 3.0
+-Fait le 08/03/2018 par LC: am�lioration -> gestion des fichiers recents dynamique (ajout et suppression sans red�marrer la nouvelle version de DEVSimPy)
+-Fait le 08/03/2018 par LC: am�lioration -> passage � la nouvelle version de pubsub avec la supression de l'import from wx.lib.pubsub import setuparg1
 -Fait le 12/03/2018 par LC: ajout -> GUI pour le mail avec un compte Google (wxPyMail.py)
--Fait le 13/03/2018 par LC: am�lioration -> AttributeEditior ne support plus le multi h�ritage de x.Frame et wx.Panel, passage au pattern class factory.
--Fait le 13/03/2018 par LC: am�lioration -> SimulationDialog ne support plus le multih�ritage (probleme d'ordre d'h�ritage mutliple mro comme pour AttributeEditor)
--Fait le 15/03/2018 par LC: am�lioration -> Debug du print preview avec la nouvelle version Phoenix (copy.copy ne focntionne pas dans PrintOut.py)
--Fait le 16/03/2018 par LC: correction -> nouvelle version de gestion des xrc pour le changement du nom des mod�le par clic+droit+entrer
--Fait le 16/03/2018 par LC: correction -> le r�pertoire bitmaps n'existe plus et mise � jour du chemin pour le dialogue imagebrowser
+-Fait le 13/03/2018 par LC: am�lioration -> AttributeEditior ne support plus le multi h�ritage de x.Frame et wx.Panel, passage au pattern class factory.
+-Fait le 13/03/2018 par LC: am�lioration -> SimulationDialog ne support plus le multih�ritage (probleme d'ordre d'h�ritage mutliple mro comme pour AttributeEditor)
+-Fait le 15/03/2018 par LC: am�lioration -> Debug du print preview avec la nouvelle version Phoenix (copy.copy ne focntionne pas dans PrintOut.py)
+-Fait le 16/03/2018 par LC: correction -> nouvelle version de gestion des xrc pour le changement du nom des mod�le par clic+droit+entrer
+-Fait le 16/03/2018 par LC: correction -> le r�pertoire bitmaps n'existe plus et mise � jour du chemin pour le dialogue imagebrowser
+-Fait le 17/05/2018 par LC: ajout -> début d'intégration du noyau de simulation PyPDEVS_241 - prob avec le type CoupledDEVS et Master qui empeche de lancer une simulation
