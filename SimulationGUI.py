@@ -188,7 +188,7 @@ class CollapsiblePanel(wx.Panel):
 			self.cb2.SetValue(__builtin__.__dict__['NTL'])
 			self.cb3.SetValue(__builtin__.__dict__['VERBOSE'])
 			cb4.SetValue(__builtin__.__dict__['DYNAMIC_STRUCTURE'])
-			cb5.SetValue(__builtin__.__dict__['REAL_TIME'])
+			cb5.SetValue(__builtin__.__dict__['REAL_TIME'] and not __builtin__.__dict__['NTL'])
 
 		### default strategy
 		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
