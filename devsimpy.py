@@ -2297,7 +2297,7 @@ if __name__ == '__main__':
 
 	### python devsimpy.py -h|-help in order to invoke command hepler
 	elif len(sys.argv) >= 2 and sys.argv[1] in ('-h, -help'):
-		sys.stdout.write(_('Welcome to the DEVsimpy helper.\n'))
+		sys.stdout.write(_('Welcome to the DEVSimpy helper.\n'))
 		sys.stdout.write(_('\t To execute DEVSimPy GUI: python devsimpy.py\n'))
 		sys.stdout.write(_('\t To execute DEVSimPy cleaner: python devsimpy.py -c|-clean\n'))
 		sys.stdout.write(_('Authors: L. Capocchi (capocchi@univ-corse.fr)\n'))
