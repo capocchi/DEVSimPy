@@ -12,7 +12,7 @@
 #
 # GENERAL NOTES AND REMARKS:
 #
-# strong depends: wxPython, wxversion
+# strong depends: wxPython
 # light depends: NumPy for spectrum analysis, mathplotlib for graph display
 # remarks: lib tree is build by the TreeLitLib class.
 # Moreover, __init__.py file is required for the build (see GetSubDomain method).
@@ -23,6 +23,7 @@
 #   4/ the constructor of all class must have a default value of the parameters
 #   5/ __str__ method must be implemented for .py in order to have a correct 
 # name in the GUI (otherwise AM is displayed)
+# To install with git: git clone -b version-3.0 https://github.com/capocchi/DEVSimPy.git DEVSimPy-v3.0
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -755,14 +756,15 @@ class MainApplication(wx.Frame):
 		pub.sendMessage('object.added',  message='Making tools bar ...\n')
 
 		self.tb = self.CreateToolBar(style = wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT, name = 'tb')
-		self.tb.SetToolBitmapSize((25,25)) # juste for windows
 
-		self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId()]
+		self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId()]
 
 		currentPage = self.nb2.GetCurrentPage()
 
 		### Tools List - IDs come from Menu.py file
 		if wx.VERSION_STRING < '4.0':
+			self.tb.SetToolBitmapSize((25,25)) # juste for windows
+
 			self.tools = [	self.tb.AddTool(wx.ID_NEW, wx.Bitmap(os.path.join(ICON_PATH,'new.png')), shortHelpString=_('New diagram (Ctrl+N)'),longHelpString=_('Create a new diagram in tab')),
 							self.tb.AddTool(wx.ID_OPEN, wx.Bitmap(os.path.join(ICON_PATH,'open.png')), shortHelpString=_('Open File (Ctrl+O)'), longHelpString=_('Open an existing diagram')),
 							self.tb.AddTool(wx.ID_PREVIEW_PRINT, wx.Bitmap(os.path.join(ICON_PATH,'print-preview.png')), shortHelpString=_('Print Preview (Ctrl+P)'), longHelpString=_('Print preview of current diagram')),
@@ -799,11 +801,38 @@ class MainApplication(wx.Frame):
 							self.tb.AddTool(self.toggle_list[2], "",wx.Bitmap(os.path.join(ICON_PATH,'linear_connector.png')), shortHelp=_('Linear'), kind = wx.ITEM_CHECK)
 						]
 
+		##################################################################### Abstraction hierarchy
+		diagram = currentPage.GetDiagram()
+		level = currentPage.GetCurrentLevel()
+
+		level_label = wx.StaticText(self.tb, -1, _("Level "))
+		self.spin = wx.SpinCtrl(self.tb, self.toggle_list[3], str(level), (55, 90), (50, -1), min=0, max=10)
+
+		self.tb.AddControl(level_label)
+		self.tb.AddControl(self.spin)
+
+		### add button to define downward and upward rules
+		ID_UPWARD = self.toggle_list[4]
+		ID_DOWNWARD = self.toggle_list[5]
+
+		if wx.VERSION_STRING < '4.0':
+			self.tools.append(self.tb.AddTool(ID_DOWNWARD, wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelpString=_('Downward rules'), longHelpString=_('Define Downward atomic model')))
+			self.tools.append(self.tb.AddTool(ID_UPWARD, wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelpString=_('Upward rules'), longHelpString=_('Define Upward atomic model')))
+		else:
+			self.tools.append(self.tb.AddTool(ID_DOWNWARD, "", wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelp=_('Downward rules')))
+			self.tools.append(self.tb.AddTool(ID_UPWARD, "", wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelp=_('Upward rules')))
+
+		self.tb.EnableTool(ID_DOWNWARD, False)
+		self.tb.EnableTool(ID_UPWARD, False)
+
+		##############################################################################################
+
 		self.tb.InsertSeparator(3)
 		self.tb.InsertSeparator(8)
 		self.tb.InsertSeparator(12)
 		self.tb.InsertSeparator(16)
-
+		self.tb.InsertSeparator(20)
+		
 		### undo and redo button desabled
 		self.tb.EnableTool(wx.ID_UNDO, False)
 		self.tb.EnableTool(wx.ID_REDO, False)
@@ -829,6 +858,14 @@ class MainApplication(wx.Frame):
 		self.Bind(wx.EVT_TOOL, self.OnDirectConnector, self.tools[13])
 		self.Bind(wx.EVT_TOOL, self.OnSquareConnector, self.tools[14])
 		self.Bind(wx.EVT_TOOL, self.OnLinearConnector, self.tools[15])
+
+		##################################################################### Abstraction hierarchy
+		self.Bind(wx.EVT_SPINCTRL, self.OnSpin, id=self.toggle_list[3])
+		self.Bind(wx.EVT_TEXT, self.OnSpin, id=self.toggle_list[3])
+		##############################################################################################
+
+		self.Bind(wx.EVT_TOOL, self.OnUpWard, id=ID_UPWARD)
+		self.Bind(wx.EVT_TOOL, self.OnDownWard, id=ID_DOWNWARD)
 
 		self.tb.Realize()
 
@@ -939,6 +976,18 @@ class MainApplication(wx.Frame):
 			wx.MessageBox(_('Error opening file.\nInfo : %s')%str(open_file_result), _('Error'), wx.OK | wx.ICON_ERROR)
 		else:
 			self.nb2.AddEditPage(os.path.splitext(name)[0], diagram)
+
+		self.EnableAbstractionButton()
+
+	def EnableAbstractionButton(self):
+    		""" Enable DAM and UAM button depending of the abstraction level
+		"""
+		### update text filed
+		level = self.spin.GetValue()
+
+		### update doward and upward button
+		self.tb.EnableTool(self.toggle_list[4], level != 0)
+		self.tb.EnableTool(self.toggle_list[5], level != 0)
 
 	def OnDeleteRecentFiles(self, event):
 		""" Delete the recent files list
@@ -1086,6 +1135,120 @@ class MainApplication(wx.Frame):
 				#win.Disconnect(-1, -1, wx.wxEVT_KILL_FOCUS)
 			#self.Destroy()
 
+	def OnSpin(self, event):
+    		""" Spin button has been invoked (on the toolbar of the main windows or detached frame)
+		"""
+
+		### spin control object
+		spin = event.GetEventObject()
+
+		### get toolbar dynamically from frame
+		tb = spin.GetParent()
+
+		### main frame of spin control
+		frame = tb.GetTopLevelParent()
+
+		is_detached_frame = isinstance(frame, DetachedFrame)
+		parent_frame_is_canvas = isinstance(frame.GetParent(), Container.ShapeCanvas)
+
+		### update text filed
+		level = spin.GetValue()
+
+		### update doward and upward button
+		tb.EnableTool(self.toggle_list[4], level != 0)
+		tb.EnableTool(self.toggle_list[5], level != 0)
+
+		### list of spin control to update
+		L = [tb]
+		### if spin control coming from DetachedFrame of notebooktab
+		if parent_frame_is_canvas:
+			L.append(self.GetToolBar())
+
+		### text control object from its unique id
+		for obj in L:
+			s = obj.FindControl(self.toggle_list[3])
+			if s:
+				s.SetValue(level)
+
+		### update diagram
+		### currentPage is given by the client data embeded in the save item on tool bar (which is the same of spin ;-))
+		if is_detached_frame and parent_frame_is_canvas:
+			L = [tb.GetToolClientData(wx.ID_SAVE), self.nb2.GetCurrentPage()]
+		else:
+			if is_detached_frame:
+				L = [tb.GetToolClientData(wx.ID_SAVE)]
+			else:
+				L = [self.nb2.GetCurrentPage()]
+
+		for canvas in L:
+			canvas.LoadDiagram(level)
+
+	################################################################################ Abstraction hierarchy
+	###
+	def OnUpWard(self, event):
+		"""
+		"""
+
+		### toolbar object
+		tb = event.GetEventObject()
+
+		### main frame of spin control
+		frame = tb.GetTopLevelParent()
+
+		is_detached_frame = isinstance(frame, DetachedFrame)
+
+		### canvas
+		if is_detached_frame:
+			canvas = tb.GetToolClientData(wx.ID_SAVE)
+		else:
+			canvas = self.nb2.GetCurrentPage()
+
+		### diagram
+		dia = canvas.GetDiagram()
+
+		### current level
+		cl =  dia.current_level
+
+		### Editor frame
+		frame = GetEditor(canvas, -1, 'UAM%d'%cl)
+		#print 'UAM%d'%cl, canvas.UAM[cl]
+		frame.AddEditPage('UAM%d'%cl, canvas.UAM[cl])
+		frame.SetPosition((100, 100))
+		frame.Show()
+
+	###
+	def OnDownWard(self, event):
+		"""
+		"""
+
+				### toolbar object
+		tb = event.GetEventObject()
+
+		### main frame of spin control
+		frame = tb.GetTopLevelParent()
+
+		is_detached_frame = isinstance(frame, DetachedFrame)
+
+		### canvas
+		if is_detached_frame:
+			canvas = tb.GetToolClientData(wx.ID_SAVE)
+		else:
+			canvas = self.nb2.GetCurrentPage()
+
+		### diagram
+		dia = canvas.GetDiagram()
+
+		### current level
+		cl =  dia.current_level
+
+		### Editor frame
+		frame = GetEditor(canvas, -1, 'DAM%d'%cl)
+		frame.AddEditPage('DAM%d'%cl, canvas.DAM[cl])
+		frame.SetPosition((100, 100))
+		frame.Show()
+
+	########################################################################################
+
 	###
 	def OnZoom(self, event):
 		""" Zoom in icon has been pressed. Zoom in the current diagram.
@@ -1188,6 +1351,9 @@ class MainApplication(wx.Frame):
 						del self.openFileList[-1]
 						self.cfg.Write("openFileList", str(eval("self.openFileList")))
 						self.cfg.Flush()
+
+		self.EnableAbstractionButton()
+		
 	###
 	def OnPrint(self, event):
 		""" Print current diagram

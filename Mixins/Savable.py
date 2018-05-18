@@ -38,6 +38,7 @@ from Decorators import BuzyCursorNotification, StatusBarNotification, cond_decor
 from Utilities import itersubclasses, getTopLevelWindow
 from XMLModule import makeDEVSXML
 from Join import makeJoin, makeDEVSConf
+from Abstractable import Abstractable
 
 import Components
 import ZipManager
@@ -51,6 +52,13 @@ class PickledCollection(list):
 		"""
 		self.obj = obj
 		self.pickled_obj = [getattr(self.obj, attr) for attr in self.obj.dump_attributes]
+
+		#=======================================================================
+		### addition of abstraction attributes only if there is not in dump_attributes (after having saved a model, dump_attributes contains abstraction attributes !)
+		self.pickled_obj += [getattr(self.obj, attr) for attr in self.obj.dump_abstr_attributes if attr not in self.obj.dump_attributes]
+
+		#print self.pickled_obj
+		#=======================================================================
 
 	def __setstate__(self, state):
 		""" Restore state from the unpickled state values.
@@ -250,6 +258,13 @@ class DumpZipFile(DumpBase):
 			j = 6 if fileName.endswith(DumpZipFile.ext[-1]) else 4
 			L.insert(j, 'middle')
 
+		#=======================================================================
+
+		### abstraction hierarchy checking
+		if abs(len(obj_loaded.dump_attributes)-len(L)) == len(Abstractable.DUMP_ATTR):
+			obj_loaded.dump_attributes += Abstractable.DUMP_ATTR
+
+		#=======================================================================
 		assert(len(L)==len(obj_loaded.dump_attributes))
 
 		try:
@@ -375,6 +390,16 @@ class DumpGZipFile(DumpBase):
 				return info
 			finally:
 				f.close()
+
+			#=======================================================================
+
+			if abs(len(obj_loaded.dump_attributes)-len(dsp)) == len(Abstractable.DUMP_ATTR):
+				obj_loaded.dump_attributes += Abstractable.DUMP_ATTR
+
+			#=======================================================================
+
+			a,b = map(len, (obj_loaded.dump_attributes, dsp))
+			assert(a==b)
 
 			### assisgn the specific attributs
 			for i,attr in enumerate(obj_loaded.dump_attributes):

@@ -825,20 +825,24 @@ class EditionNotebook(wx.Notebook):
 
 		fileCode = ""
 
-		if path != "":
-			### FIXME: try to consider zipfile in zipfile
-			L = re.findall("(.*\.(amd|cmd))\%s(.*)" % os.sep, path)
+		
+		### FIXME: try to consider zipfile in zipfile
+		L = re.findall("(.*\.(amd|cmd))\%s(.*)" % os.sep, path)
 
-			if L != []:
-				model_path, ext, name = L.pop(0)
-				if zipfile.is_zipfile(model_path):
-					importer = zipfile.ZipFile(model_path, "r")
-					fileInfo = importer.getinfo(name)
-					fileCode = importer.read(fileInfo)
-					importer.close()
+		if L != []:
+			model_path, ext, name = L.pop(0)
+			if zipfile.is_zipfile(model_path):
+				importer = zipfile.ZipFile(model_path, "r")
+				fileInfo = importer.getinfo(name)
+				fileCode = importer.read(fileInfo)
+				importer.close()
+		else:
+			if os.path.exists(path):
+    				with open(path, 'r') as f:
+						fileCode = f.read()
 			else:
-				with open(path, 'r') as f:
-					fileCode = f.read()
+				### fileCode is path (user work with IOString code, not file object)
+				fileCode = path
 
 		### new page
 		newPage = EditionFile(self, path, fileCode)
@@ -951,12 +955,13 @@ class EditionNotebook(wx.Notebook):
 	def DoSaveFile(self, code):
 		"""
 		"""
-		currentPage = self.GetCurrentPage()
 
+		currentPage = self.GetCurrentPage()
+		
 		abs_path = currentPage.GetFilename()    # /home/../toto.*
 		fic_filename = os.path.basename(abs_path)    # fileName toto.*
 		model_dir = os.path.dirname(abs_path)        # model toto.amd
-
+		
 		### if zipfile
 		if zipfile.is_zipfile(model_dir):
 
@@ -1005,14 +1010,16 @@ class EditionNotebook(wx.Notebook):
 
 		### if python file not in zipfile
 		else:
-			assert (os.path.isfile(abs_path))
+			#assert (os.path.isfile(abs_path))
+			if os.path.isfile(abs_path):
+				### write code in last name saved file
+				self.WriteFile(abs_path, code)
 
-			### write code in last name saved file
-			self.WriteFile(abs_path, code)
-
-			if isinstance(self.parent, Base):
-				### reload module
-				self.parent.UpdateModule()
+				if isinstance(self.parent, Base):
+					### reload module
+					self.parent.UpdateModule()
+			else:
+				pass
 
 		### disable save icon in toolbar
 		self.parent.toolbar.EnableTool(self.parent.save.GetId(), False)
@@ -1572,6 +1579,22 @@ class Base(object):
 		"""
 		if not self.nb.GetCurrentPage().ContainError():
 			self.nb.DoSaveFile(code)
+
+			### DAM and UAM update which are implemented in string object
+			if not base_name.endswith('.py'):
+				### canvas and diagram
+				canvas = self.parent
+				dia = canvas.GetDiagram()
+
+				### current level
+				cl =  dia.current_level
+
+				### if DAM string is in code
+				if 'DAM' in code:
+					canvas.SetDAM(cl, code)
+				else:
+					canvas.SetUAM(cl, code)
+
 		### some errors in file
 		else:
 			self.SavingErrors(new_instance)
