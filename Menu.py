@@ -23,6 +23,8 @@
 import wx
 import os
 import sys
+import platform
+
 from tempfile import gettempdir
 
 import Container
@@ -503,8 +505,9 @@ class MainMenuBar(wx.MenuBar):
 				### we insert the recent files menu
 				menu.InsertMenu(1, ID_RECENT, _("Recent files"), RecentFileMenu(self))
 			else:
-				### After Pnoenix Transition
-				self.Replace(0, FileMenu(self), _("&File"))
+				if platform.system() != 'Linux':
+					### After Pnoenix Transition
+					self.Replace(0, FileMenu(self), _("&File"))
 
 		elif isinstance(menu, SettingsMenu) and 'hotshot' in sys.modules.keys():
 		
@@ -516,8 +519,9 @@ class MainMenuBar(wx.MenuBar):
 				### we insert the profile files menu
 				menu.InsertMenu(1, ID_PROFILE, _('Profile'),  ProfileFileMenu(self))
 			else:
-				### After Pnoenix Transition
-				self.Replace(4, SettingsMenu(self), _("&Options"))
+				if platform.system() != 'Linux':
+					### After Pnoenix Transition
+					self.Replace(4, SettingsMenu(self), _("&Options"))
 				
 	#def OnCloseMenu(self, event):
 		#""" Close menu has been detected
