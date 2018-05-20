@@ -61,7 +61,7 @@ class ConnectDialog(wx.Frame):
 		self.__set_events()
 
 	def __set_properties(self):
-		icon = wx.EmptyIcon()
+		icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
 		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "connect.png"), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(icon)
 

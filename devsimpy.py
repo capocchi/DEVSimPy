@@ -421,10 +421,7 @@ wx.Log.SetLogLevel(0)
 def getIcon(path):
 	""" Return icon from image path
 	"""
-	if wx.VERSION_STRING < '4.0':
-		icon = wx.EmptyIcon()
-	else:
-		icon = wx.Icon()
+	icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
 	bmp = wx.Image(path).ConvertToBitmap()
 	bmp.SetMask(wx.Mask(bmp, wx.WHITE))
 	icon.CopyFromBitmap(bmp)
@@ -1353,7 +1350,7 @@ class MainApplication(wx.Frame):
 						self.cfg.Flush()
 
 		self.EnableAbstractionButton()
-		
+
 	###
 	def OnPrint(self, event):
 		""" Print current diagram

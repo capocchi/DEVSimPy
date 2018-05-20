@@ -24,7 +24,7 @@ class DiagramConstantsDialog(wx.Dialog):
 
 		self.SetTitle(_("%s - Constants Manager")%(self.label))
 
-		icon = wx.EmptyIcon()
+		icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
 		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "properties.png"), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(icon)
 

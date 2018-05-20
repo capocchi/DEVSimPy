@@ -242,7 +242,7 @@ class CheckerGUI(wx.Frame):
 		"""
 		wx.Frame.__init__(self, parent, wx.ID_ANY, _("DEVS Model Checking"), size=(900,400), style = wx.DEFAULT_FRAME_STYLE)
 
-		icon = wx.EmptyIcon()
+		icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
 		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "check_master.png"), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(icon)
 
