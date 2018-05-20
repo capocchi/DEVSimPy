@@ -13,9 +13,12 @@ tmp/
 *~.nib
 local.properties
 .classpath
-.settings/
+.settings
 .loadpath
 *.pyc
+.vscode
+.idea
+.spyproject
 
 # External tool builders
 .externalToolBuilders/

@@ -17,6 +17,7 @@ import inspect
 import shutil
 import ConfigParser
 import linecache
+import imp 
 
 import gettext
 _ = gettext.gettext
@@ -130,6 +131,38 @@ def getOutDir():
 	if not os.path.exists(out_dir):
 		os.mkdir(out_dir)
 	return out_dir
+
+def getObjectFromString(scriptlet):
+    	"""
+	"""
+
+	assert scriptlet != ''
+
+	# Compile the scriptlet.
+	try:
+		code = compile(scriptlet, '<string>', 'exec')
+	except Exception, info:
+		return info
+	else:
+		# Create the new 'temp' module.
+		temp = imp.new_module("temp")
+		sys.modules["temp"] = temp
+
+		### there is syntaxe error ?
+		try:
+			exec code in temp.__dict__
+		except Exception, info:
+			return info
+
+		else:
+			classes = inspect.getmembers(temp, callable)
+			for name, value in classes:
+				if value.__module__ == "temp":
+					# Create the instance.
+					try:
+						return eval("temp.%s" % name)()
+					except Exception, info:
+						return info
 
 def vibrate(windowName, distance=15, times=5, speed=0.05, direction='horizontal'):
 	#Speed is the number of seconds between movements

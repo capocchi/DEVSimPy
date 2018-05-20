@@ -104,12 +104,13 @@ from Mixins.Plugable import Plugable
 from Mixins.Structurable import Structurable
 from Mixins.Savable import Savable
 from Mixins.Selectable import Selectable
+from Mixins.Abstractable import Abstractable
 
 ### for all dsp model build with old version of DEVSimPy
 sys.modules['Savable'] = sys.modules['Mixins.Savable']
 
 from Decorators import BuzyCursorNotification, StatusBarNotification, ProgressNotification, Pre_Undo, Post_Undo, cond_decorator
-from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance, FixedList
+from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance, FixedList, getObjectFromString
 from Patterns.Observer import Subject, Observer
 
 if __builtin__.__dict__['GUI_FLAG']:
@@ -319,6 +320,10 @@ class Diagram(Savable, Structurable):
 
 		if name == 'dump_attributes':
 			return ['shapes', 'priority_list', 'constants_dico']
+		#=======================================================================
+		elif name == 'dump_abstr_attributes':
+			return Abstractable.DUMP_ATTR if hasattr(self, 'layers') and hasattr(self, 'current_level') else []
+		#=======================================================================
 		else:
 			raise AttributeError(name)
 
@@ -434,17 +439,83 @@ class Diagram(Savable, Structurable):
 
 			#### recursion
 			if isinstance(m, ContainerBlock):
+    			###===================================================================
+				if hasattr(m, 'layers') and hasattr(m, 'current_level'):
+					### level is given by the first stored diagram because m.current is not updated by the spin control
+					level = m.layers[0].current_level
+					dia = m.layers[level]
+					m.shapes = dia.GetShapeList()
+					m.priority_list = dia.priority_list or []
+					m.constants_dico = dia.constants_dico or {}
+				###===================================================================
+
 				Diagram.makeDEVSInstance(m)
 
-		# for all iPort shape, we make the devs instance
-		for m in filter(lambda s: isinstance(s, iPort), shape_list):
-			diagram.addInPort()
-			assert(len(diagram.getIPorts()) <= diagram.input)
+		###============================================================================= Add abstraction level manager
+		if hasattr(diagram, 'current_level') and diagram.current_level>0:
 
-		# for all oPort shape, we make the devs instance
-		for m in filter(lambda s: isinstance(s, oPort), shape_list):
-			diagram.addOutPort()
-			assert(len(diagram.getOPorts()) <= diagram.output)
+			### Add devs model dam to diagram
+			dam = diagram.DAM[diagram.current_level]
+			devs_dam = getObjectFromString(dam)
+			diagram.addSubModel(devs_dam)
+
+			### Add devs model uam to diagram
+			uam = diagram.UAM[diagram.current_level]
+			devs_uam = getObjectFromString(uam)
+			diagram.addSubModel(devs_uam)
+
+			### inputs/outpus of dam/uam are instantiate depending on the iPort/oPort of diagram 0
+			dia_0 = diagram.layers[0]
+			shapeL0 = dia_0.GetShapeList()
+
+			for m in filter(lambda s: isinstance(s, iPort), shapeL0):
+				devs_dam.addInPort()
+				diagram.addInPort()
+
+			for m in filter(lambda s: isinstance(s, oPort), shapeL0):
+				devs_uam.addOutPort()
+				diagram.addOutPort()
+
+			for m in filter(lambda s: isinstance(s, iPort), shape_list):
+				devs_dam.addOutPort()
+
+			for m in filter(lambda s: isinstance(s, oPort), shape_list):
+				devs_uam.addInPort()
+
+		###==================================================================================
+
+
+		### Add abstraction level manager
+		###==============================================================================
+		if hasattr(diagram, 'current_level') and diagram.current_level>0:
+			# for all iPort shape, we make the devs instance
+			#for i,m in enumerate(filter(lambda s: isinstance(s, iPort), diagram.layers[diagram.current_level].GetShapeList())):
+			#	devs_dam.addOutPort()
+			for i,m in enumerate(filter(lambda s: isinstance(s, iPort), shapeL0)):
+				p1 = diagram.getDEVSModel().IPorts[i]
+				p2 = devs_dam.IPorts[i]
+				Structurable.ConnectDEVSPorts(diagram, p1, p2)
+		###==============================================================================
+		else:
+			for m in filter(lambda s: isinstance(s, iPort), shape_list):
+				### add port to coupled model
+				diagram.addInPort()
+				assert(len(diagram.getIPorts()) <= diagram.input)
+
+		###==============================================================================
+		### Add abstraction level manager
+		if hasattr(diagram, 'current_level') and diagram.current_level>0:
+			# for all oPort shape, we make the devs instance
+			for i,m in enumerate(filter(lambda s: isinstance(s, oPort), shapeL0)):
+				p1 = devs_uam.OPorts[i]
+				p2 = diagram.getDEVSModel().OPorts[i]
+				Structurable.ConnectDEVSPorts(diagram, p1, p2)
+				###===============================================================================
+		else:
+			for m in filter(lambda s: isinstance(s, oPort), shape_list):
+				### add port to coupled model
+				diagram.addOutPort()
+				assert(len(diagram.getOPorts()) <= diagram.output)
 
 		### Connection
 		for m in filter(lambda s: isinstance(s, ConnectionShape), shape_list):
@@ -453,17 +524,44 @@ class Diagram(Savable, Structurable):
 			if isinstance(m1, Block) and isinstance(m2, Block):
 				p1 = m1.getDEVSModel().OPorts[n1]
 				p2 = m2.getDEVSModel().IPorts[n2]
-			elif isinstance(m1, Block) and isinstance(m2, oPort):
-				p1 = m1.getDEVSModel().OPorts[n1]
-				p2 = diagram.getDEVSModel().OPorts[m2.id]
-			elif isinstance(m1, iPort) and isinstance(m2, Block):
-				p1 = diagram.getDEVSModel().IPorts[m1.id]
-				p2 = m2.getDEVSModel().IPorts[n2]
-			else:
-				print _("Error making DEVS connection between %s and %s."%(m1,m2))
-				return False
+				Structurable.ConnectDEVSPorts(diagram, p1, p2)
 
-			Structurable.ConnectDEVSPorts(diagram, p1, p2)
+			elif isinstance(m1, Block) and isinstance(m2, oPort):
+				### TODO insert devs_uam
+				p1 = m1.getDEVSModel().OPorts[n1]
+
+				###==============================================================================
+				### Add abstraction level manager
+				if hasattr(diagram, 'current_level') and diagram.current_level>0:
+					p2 = devs_uam.IPorts[m2.id]
+				else:
+					p2 = diagram.getDEVSModel().OPorts[m2.id]
+				###===============================================================================
+
+				Structurable.ConnectDEVSPorts(diagram, p1, p2)
+
+				#p1 = m1.getDEVSModel().OPorts[n1]
+				#p2 = diagram.getDEVSModel().OPorts[m2.id]
+				#Structurable.ConnectDEVSPorts(diagram, p1, p2)
+			elif isinstance(m1, iPort) and isinstance(m2, Block):
+				### TODO insert devs_dam
+
+				###==============================================================================
+				### Add abstraction level manager
+				if hasattr(diagram, 'current_level') and diagram.current_level>0:
+					p1 = devs_dam.OPorts[m1.id]
+				else:
+					p1 = diagram.getDEVSModel().IPorts[m1.id]
+				###===============================================================================
+
+				p2 = m2.getDEVSModel().IPorts[n2]
+				Structurable.ConnectDEVSPorts(diagram, p1, p2)
+
+				#p1 = diagram.getDEVSModel().IPorts[m1.id]
+				#p2 = m2.getDEVSModel().IPorts[n2]
+				#Structurable.ConnectDEVSPorts(diagram, p1, p2)
+			else:
+				return  _('Error making DEVS connection.\n Check your connections !')
 
 		### change priority form priority_list is PriorityGUI has been invoked (Otherwise componentSet order is considered)
 		diagram.updateDEVSPriorityList()
@@ -1365,7 +1463,7 @@ class PointShape(Shape):
 
 if __builtin__.__dict__['GUI_FLAG']:
 	#-------------------------------------------------------------------------------
-	class ShapeCanvas(wx.ScrolledWindow, Subject):
+	class ShapeCanvas(wx.ScrolledWindow, Abstractable, Subject):
 		""" ShapeCanvas class.
 		"""
 
@@ -1384,6 +1482,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 			"""
 			#super(wx.ScrolledWindow, self).__init__(parent, id, pos, size, style, name)
 			wx.ScrolledWindow.__init__(self, parent, id, pos, size, style, name)
+			Abstractable.__init__(self, diagram)
 			Subject.__init__(self)
 
 			self.SetBackgroundColour(wx.WHITE)
@@ -2598,10 +2697,13 @@ if __builtin__.__dict__['GUI_FLAG']:
 
 			self.DiagramModified()
 
-		def SetDiagram(self, diagram):
-			""" Setter for diagram attribute.
-			"""
-			self.diagram = diagram
+#		def SetDiagram(self, diagram):
+#			""" Setter for diagram attribute.
+#			"""
+#			self.diagram = diagram		def SetDiagram(self, diagram):
+#			""" Setter for diagram attribute.
+#			"""
+#			self.diagram = diagram
 
 		def GetDiagram(self):
 			""" Return Diagram instance.
@@ -3860,6 +3962,10 @@ class ContainerBlock(Block, Diagram):
 
 		if name == 'dump_attributes':
 			return ['shapes', 'priority_list', 'constants_dico', 'model_path', 'python_path','args'] + self.GetAttributes()
+		#=======================================================================
+		elif name == 'dump_abstr_attributes':
+			return Abstractable.DUMP_ATTR if hasattr(self, 'layers') and hasattr(self, 'current_level') else []
+		#======================================================================
 		else:
 			raise AttributeError(name)
 
