@@ -57,6 +57,12 @@ class GeneralPanel(wx.Panel):
 		self.st3 = wx.StaticText(self, wx.ID_ANY, _("Deep of history item:"))
 		self.st4 = wx.StaticText(self, wx.ID_ANY, _("wxPython version:"))
 
+		if wx.VERSION_STRING >= '4.0':
+			self.st1.SetToolTipString = self.st1.SetToolTip 
+			self.st2.SetToolTipString = self.st2.SetToolTip
+			self.st3.SetToolTipString = self.st3.SetToolTip
+			self.st4.SetToolTipString = self.st4.SetToolTip
+
 		self.st1.SetToolTipString(_("Feel free to change the length of list defining the recent opened files."))
 		self.st2.SetToolTipString(_("Feel free to change the font size of DEVSimpy."))
 		self.st3.SetToolTipString(_("Feel free to change the number of item for undo/redo command"))
@@ -79,6 +85,7 @@ class GeneralPanel(wx.Panel):
 
 		### CheckBox
 		self.cb1 = wx.CheckBox(self, wx.ID_ANY, _('Transparency'))
+		if wx.VERSION_STRING >= '4.0': self.cb1.SetToolTipString = self.cb1.SetToolTip
 		self.cb1.SetToolTipString(_("Transparency for the detached frame of diagrams"))
 		self.cb1.SetValue(__builtin__.__dict__['TRANSPARENCY'])
 
@@ -90,6 +97,7 @@ class GeneralPanel(wx.Panel):
 			wxv = [wx.VERSION_STRING]
 			
 		self.cb2 = wx.ComboBox(self, wx.ID_ANY, GetWXVersionFromIni(), choices=wxv, style=wx.CB_READONLY)
+		if wx.VERSION_STRING >= '4.0': self.cb2.SetToolTipString = self.cb2.SetToolTip
 		self.cb2.SetToolTipString(_("Default version of wxPython."))
 		self.default_wxv = self.cb2.GetValue()
 
@@ -252,16 +260,19 @@ class SimulationPanel(wx.Panel):
 
 		### CheckBox
 		self.cb1 = wx.CheckBox(self, wx.ID_ANY, _('Notification'))
+		if wx.VERSION_STRING >= '4.0': self.cb1.SetToolTipString = self.cb1.SetToolTip
 		self.cb1.SetToolTipString(_("Notification song is generate when the simulation is over."))
 		self.cb1.SetValue(self.sim_success_sound_path is not os.devnull)
 
 		self.cb2 = wx.CheckBox(self, wx.ID_ANY, _('No Time Limit'))
+		if wx.VERSION_STRING >= '4.0': self.cb2.SetToolTipString = self.cb2.SetToolTip
 		self.cb2.SetValue(__builtin__.__dict__['NTL'])
 		self.cb2.SetToolTipString(_("No Time Limit allow the stop of simulation when all of models are idle."))
 
 		### StaticText for DEVS Kernel directory
 		self.txt3 = wx.StaticText(self, wx.ID_ANY, _("DEVS packages:"))
 		self.cb3 = wx.ComboBox(self, wx.ID_ANY, DEFAULT_DEVS_DIRNAME, choices=DEVS_DIR_PATH_DICT.keys(), style=wx.CB_READONLY)
+		if wx.VERSION_STRING >= '4.0': self.cb3.SetToolTipString = self.cb3.SetToolTip
 		self.cb3.SetToolTipString(_("Default DEVS Kernel package (PyDEVS, PyPDEVS, ect.)."))
 		self.default_devs_dir = DEFAULT_DEVS_DIRNAME
 
@@ -271,6 +282,7 @@ class SimulationPanel(wx.Panel):
 		c = PYDEVS_SIM_STRATEGY_DICT.keys() if DEFAULT_DEVS_DIRNAME == 'PyDEVS' else PYPDEVS_SIM_STRATEGY_DICT.keys()
 
 		self.cb4 = wx.ComboBox(self, wx.ID_ANY, DEFAULT_SIM_STRATEGY, choices=c, style=wx.CB_READONLY)
+		if wx.VERSION_STRING >= '4.0': self.cb4.SetToolTipString = self.cb4.SetToolTip
 		self.cb4.SetToolTipString(_("Default strategy for the simulation algorithm. Please see the DEVSimPy doc for more information of possible strategy."))
 		self.sim_defaut_strategy = DEFAULT_SIM_STRATEGY
 
@@ -278,6 +290,7 @@ class SimulationPanel(wx.Panel):
 		self.sim_defaut_plot_dyn_freq = __builtin__.__dict__['DEFAULT_PLOT_DYN_FREQ']
 		self.txt2 = wx.StaticText(self, wx.ID_ANY, _("Frequency of plotting refresh:"))
 		self.sc = wx.SpinCtrl(self, wx.ID_ANY, str(self.sim_defaut_plot_dyn_freq), (55, 90), (60, -1), min=10, max=10000)
+		if wx.VERSION_STRING >= '4.0': self.sc.SetToolTipString = self.sc.SetToolTip
 		self.sc.SetToolTipString(_("Default frequency for dynamic plotting."))
 
 		### Adding sizer
@@ -288,7 +301,6 @@ class SimulationPanel(wx.Panel):
 		hbox5.Add(self.txt3, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL, 15)
 		hbox5.Add(self.cb3, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL, 15)
 		hbox5.Add(self.devs_doc_btn, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL)
-
 
 		hbox2.Add(self.txt, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL|wx.EXPAND, 15)
 		hbox2.Add(self.cb4, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.ALL|wx.EXPAND, 15)
@@ -468,6 +480,7 @@ class EditorPanel(wx.Panel):
 
 		self.cb = wx.CheckBox(self, wx.ID_ANY, _("Use local programmer software"))
 		self.cb.SetValue(__builtin__.__dict__['LOCAL_EDITOR'])
+		if wx.VERSION_STRING >= '4.0': self.cb.SetToolTipString = self.cb.SetToolTip
 		self.cb.SetToolTipString(_("This option don't work for the .amd and .cmd file. \n"
 			"Modification of python file during the simulation is disabled when this checkbox is checked."))
 
@@ -516,6 +529,11 @@ class Preferences(wx.Toolbook):
 		self.addBtn = wx.Button(lpanel, wx.ID_ADD, size=(140, -1))
 		self.delBtn = wx.Button(lpanel, wx.ID_DELETE, size=(140, -1))
 		self.refBtn = wx.Button(lpanel, wx.ID_REFRESH, size=(140, -1))
+		if wx.VERSION_STRING >= '4.0': 
+			self.addBtn.SetToolTipString = self.addBtn.SetToolTip
+			self.delBtn.SetToolTipString = self.delBtn.SetToolTip
+			self.refBtn.SetToolTipString = self.refBtn.SetToolTip
+
 		self.addBtn.SetToolTipString(_("Add new plug-ins"))
 		self.delBtn.SetToolTipString(_("Delete all existing plug-ins"))
 		self.refBtn.SetToolTipString(_("Refresh plug-ins list"))
@@ -654,6 +672,9 @@ class PreferencesGUI(wx.Frame):
 		### Buttons
 		self.cancel = wx.Button(panel, wx.ID_CANCEL)
 		self.apply = wx.Button(panel, wx.ID_OK)
+		if wx.VERSION_STRING >= '4.0': 
+			self.apply.SetToolTipString = self.apply.SetToolTip
+			self.cancel.SetToolTipString = self.cancel.SetToolTip
 
 		self.apply.SetToolTipString(_("Apply all changing"))
 		self.cancel.SetToolTipString(_("Cancel without changing"))

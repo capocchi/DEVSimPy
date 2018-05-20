@@ -231,9 +231,15 @@ class BlinkFrame(wx.Frame):
 
 	def __set_properties(self):
 		self.txt.SetMinSize((390, 300))
-		self.button_step.SetToolTipString(_("Press this button in order to go step by step in the simulation."))
-		self.button_clear.SetToolTipString(_("Press this button in order to clean the output of the simulation."))
-		self.button_find.SetToolTipString(_("Press this button in order to launch the search window."))
+		if wx.VERSION_STRING < '4.0':
+			self.button_step.SetToolTipString(_("Press this button in order to go step by step in the simulation."))
+			self.button_clear.SetToolTipString(_("Press this button in order to clean the output of the simulation."))
+			self.button_find.SetToolTipString(_("Press this button in order to launch the search window."))
+		else:
+			self.button_step.SetToolTip(_("Press this button in order to go step by step in the simulation."))
+			self.button_clear.SetToolTip(_("Press this button in order to clean the output of the simulation."))
+			self.button_find.SetToolTip(_("Press this button in order to launch the search window."))
+
 		self.button_step.SetDefault()
 
 	def __do_layout(self):

@@ -196,10 +196,15 @@ class CollapsiblePanel(wx.Panel):
   		else:
 			ch1.SetSelection(PYPDEVS_SIM_STRATEGY_DICT.keys().index(DEFAULT_SIM_STRATEGY))
 
+		if wx.VERSION_STRING >= '4.0':
+			ch1.SetToolTipString=ch1.SetToolTip
+			cb1.SetToolTipString=cb1.SetToolTip
+			self.cb2.SetToolTipString=self.cb2.SetToolTip
+
 		ch1.SetToolTipString(_("Select the simulator strategy."))
 		cb1.SetToolTipString(_("For simulation profiling using hotshot"))
 		self.cb2.SetToolTipString(_("No time limit for the simulation. Simulation is over when childs are no active."))
-
+		
 		grid3 = wx.GridSizer(6, 2, 1, 1)
 		grid3.Add(text2, 0, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL, 19)
 		grid3.Add(ch1, 1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL)
@@ -354,6 +359,12 @@ class Base(object):
 
 		self._text1.Enable(not self.ntl)
 		self._value.Enable(not self.ntl)
+
+		if wx.VERSION_STRING >= '4.0':
+			self._btn1.SetToolTipString = self._btn1.SetToolTip
+			self._btn2.SetToolTipString = self._btn2.SetToolTip
+			self._btn3.SetToolTipString = self._btn3.SetToolTip
+			self._btn4.SetToolTipString = self._btn4.SetToolTip
 
 		self._btn1.SetToolTipString(_("Begin simulation process."))
 		self._btn2.SetToolTipString(_("Stop the simulation process."))

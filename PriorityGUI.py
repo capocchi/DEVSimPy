@@ -38,6 +38,9 @@ class PriorityGUI(wx.Frame):
 			#self.listCtrl.InsertImageStringItem(maxint,item,0)
 			self.listCtrl.InsertStringItem(maxint, item)
 
+		if wx.VERSION_STRING >= '4.0':
+			self.listCtrl.SetToolTipString = self.listCtrl.SetToolTip
+		
 		self.listCtrl.SetToolTipString(_('Drag and drop a model in order to define its priority'))
 
 		### id list not empty, first item is selected

@@ -768,6 +768,8 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 		col = coords[1]
 		row = coords[0]
 
+		if wx.VERSION_STRING >= '4.0': event.GetEventObject().SetToolTipString == event.GetEventObject().SetToolTip
+
 		# Note: This only sets the tooltip for the cells in the column
 		if col == 1:
 			msg = "This is Row %s, Column %s!" % (row, col)

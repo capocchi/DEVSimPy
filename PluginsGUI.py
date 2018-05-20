@@ -480,6 +480,7 @@ class PluginsPanel(wx.Panel):
 
 		### plug-in documentation area
 		self.log = wx.TextCtrl(self.rightPanel, wx.ID_ANY, size=(-1,150), style=wx.TE_MULTILINE)
+		if wx.VERSION_STRING >= '4.0': self.log.SetToolTipString = self.log.SetToolTip
 		self.log.SetToolTipString(_("Plug-in documentation area.\nSelect plug-in in order to print its documentation."))
 
 		### Default plug-ins list
@@ -491,6 +492,11 @@ class PluginsPanel(wx.Panel):
 		self.configBtn = wx.Button(self.leftPanel, wx.ID_PROPERTIES, size=(140, -1))
 		self.configBtn.Enable(False)
 
+		if wx.VERSION_STRING >= '4.0': 
+			selBtn.SetToolTipString = selBtn.SetToolTip
+			desBtn.SetToolTipString = desBtn.SetToolTip
+			self.configBtn.SetToolTipString = self.configBtn.SetToolTip
+		
 		selBtn.SetToolTipString(_("Select all plug-ins"))
 		desBtn.SetToolTipString(_("Unselect all plug-ins"))
 		self.configBtn.SetToolTipString(_("Selected plug-in setting"))
@@ -629,6 +635,13 @@ class ModelPluginsManager(wx.Frame):
 		self.delBtn = wx.Button(lpanel, wx.ID_DELETE, size=(140, -1))
 		self.editBtn = wx.Button(lpanel, wx.ID_EDIT, size=(140, -1))
 		self.updateBtn = wx.Button(lpanel, wx.ID_APPLY, size=(140, -1))
+
+		if wx.VERSION_STRING >= '4.0':
+			self.addBtn.SetToolTipString=self.addBtn.SetToolTip
+			self.delBtn.SetToolTipString=self.delBtn.SetToolTip
+			self.editBtn.SetToolTipString=self.editBtn.SetToolTip
+			self.updateBtn.SetToolTipString = self.updateBtn.SetToolTip
+
 		self.addBtn.SetToolTipString(_("Add new plug-ins"))
 		self.delBtn.SetToolTipString(_("Delete all existing plug-ins"))
 		self.editBtn.SetToolTipString(_("Edit plug-in file"))

@@ -336,6 +336,10 @@ class ModelGeneratorWizard(Wizard):
 		page1 = wizard_page(self, _('Type of Model'))
 		bt1 = wx.RadioButton(page1, wx.ID_ANY, _('Atomic model'), style = wx.RB_GROUP )
 		bt2 = wx.RadioButton(page1, wx.ID_ANY, _('Coupled model'))
+		if wx.VERSION_STRING >= '4.0':
+			bt1.SetToolTipString = bt1.SetToolTip
+			bt2.SetToolTipString = bt2.SetToolTip
+
 		bt1.SetToolTipString(_("DEVS classic atomic model. It is used to define the behavior (or a part of behavior) of the system"))
 		bt2.SetToolTipString(_("DEVS classic coupled model. It is used to define the structure (or a part of structure) of the system"))
 		page1.add_stuff(wx.StaticText(page1, wx.ID_ANY, _('Choose the type of model:')))
@@ -346,6 +350,10 @@ class ModelGeneratorWizard(Wizard):
 		if isinstance(parent.GetTopLevelParent(), Container.DetachedFrame):
 			bt3 = wx.RadioButton(page1, wx.ID_ANY, _('Input Port'))
 			bt4 = wx.RadioButton(page1, wx.ID_ANY, _('Output Port'))
+			if wx.VERSION_STRING >= '4.0':
+				bt3.SetToolTipString = bt3.SetToolTip
+				bt4.SetToolTipString = bt4.SetToolTip
+
 			bt3.SetToolTipString(_("DEVS classic input model. It is used to link models"))
 			bt4.SetToolTipString(_("DEVS classic output model. It is used to link models"))
 			page1.add_stuff(bt3)
@@ -403,8 +411,10 @@ class ModelGeneratorWizard(Wizard):
 		vbox2 = wx.GridSizer(6, 2, 3, 3)
 		bt5 = wx.CheckBox(page2, wx.ID_ANY, _('Default python file'))
 		bt5.SetValue(True)
+		if wx.VERSION_STRING >= '4.0': bt5.SetToolTipString = bt5.SetToolTip 
 		bt5.SetToolTipString(_("Choose python file from specific directory"))
 		bt51 = wx.CheckBox(page2, wx.ID_ANY, _('No plugin file'))
+		if wx.VERSION_STRING >= '4.0': bt51.SetToolTipString = bt51.SetToolTip
 		bt51.SetToolTipString(_("Choose plugin file from specific directory"))
 		bt51.SetValue(True)
 		cb0 = wx.ComboBox(page2, wx.ID_ANY, _('Default'), choices=[_('Default'),_('Generator'),_('Viewer'), _('Collector')], style=wx.CB_READONLY)
@@ -437,9 +447,11 @@ class ModelGeneratorWizard(Wizard):
 		vb2 = wx.BoxSizer(wx.VERTICAL)
 		vbox3 = wx.GridSizer(6,2,3,3)
 		bt6 = wx.CheckBox(page3, wx.ID_ANY, _('Default python file'))
+		if wx.VERSION_STRING >= '4.0': bt6.SetToolTipString = bt6.SetToolTip
 		bt6.SetToolTipString(bt5.GetToolTip().GetTip())
 		bt6.SetValue(True)
 		bt61 = wx.CheckBox(page3, wx.ID_ANY, _('No plugin file'))
+		if wx.VERSION_STRING >= '4.0': bt61.SetToolTipString = bt61.SetToolTip
 		bt61.SetToolTipString(bt51.GetToolTip().GetTip())
 		bt61.SetValue(True)
 		# filebrowse properties

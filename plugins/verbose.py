@@ -174,6 +174,7 @@ class VerboseConfig(wx.Frame):
 		_icon = wx.EmptyIcon()
 		_icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH, DEVSIMPY_PNG), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(_icon)
+		if wx.VERSION_STRING >= '4.0': self.SetToolTipString = self.SetToolTip
 		self.SetToolTipString(_("Display options for the plug-in verbose"))
 		self.checkbox_3.SetValue(show_clock)
 		self.checkbox_4.SetValue(show_ext_trans)
