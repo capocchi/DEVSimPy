@@ -258,7 +258,7 @@ class SimulationPanel(wx.Panel):
 		self.sim_error_sound_btn.SetToolTipString(_("Press this button in order to change the song arriving when an error occur in a model during the simulation."))
 
 		self.devs_doc_btn = wx.Button(self, wx.ID_ABOUT, name='doc')
-		if wx.VERSION_STRING >= '4.0': self.devs_doc_btn.SetToolTipString = self.devs_doc__btn.SetToolTip
+		if wx.VERSION_STRING >= '4.0': self.devs_doc_btn.SetToolTipString = self.devs_doc_btn.SetToolTip
 		self.devs_doc_btn.SetToolTipString(_("Press this button to read the documentation of the selected DEVS package"))
 
 		### CheckBox
