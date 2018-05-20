@@ -494,29 +494,31 @@ class MainMenuBar(wx.MenuBar):
 
 		### if the opened menu is the File menu
 		if isinstance(menu, FileMenu):
-		
-			### After Pnoenix Transition
-			self.Replace(0, FileMenu(self), _("&File"))
+					
+			if wx.VERSION_STRING < '4.0':
+				### Before Phoenix Transition
+				### if item exist, we delete him
+				if menu.FindItemById(ID_RECENT):menu.Delete(ID_RECENT)
 			
-			### Before Phoenix Transition
-			### if item exist, we delete him
-			#if menu.FindItemById(ID_RECENT):menu.Delete(ID_RECENT)
-			
-			### we insert the recent files menu
-			#menu.InsertMenu(1, ID_RECENT, _("Recent files"), RecentFileMenu(self))
-			
-		elif isinstance(menu, SettingsMenu) and 'hotshot' in sys.modules.keys():
-			
-			### After Pnoenix Transition
-			self.Replace(4, SettingsMenu(self), _("&Options"))
-			
-			### Before Pnoenix Transition
-			### if item exist, we delete him
-			#if menu.FindItemById(ID_PROFILE): menu.Delete(ID_PROFILE)
-			
-			### we insert the profile files menu
-			#menu.InsertMenu(1, ID_PROFILE, _('Profile'),  ProfileFileMenu(self))
+				### we insert the recent files menu
+				menu.InsertMenu(1, ID_RECENT, _("Recent files"), RecentFileMenu(self))
+			else:
+				### After Pnoenix Transition
+				self.Replace(0, FileMenu(self), _("&File"))
 
+		elif isinstance(menu, SettingsMenu) and 'hotshot' in sys.modules.keys():
+		
+			if wx.VERSION_STRING < '4.0':
+				### Before Pnoenix Transition
+				### if item exist, we delete him
+				if menu.FindItemById(ID_PROFILE): menu.Delete(ID_PROFILE)
+			
+				### we insert the profile files menu
+				menu.InsertMenu(1, ID_PROFILE, _('Profile'),  ProfileFileMenu(self))
+			else:
+				### After Pnoenix Transition
+				self.Replace(4, SettingsMenu(self), _("&Options"))
+				
 	#def OnCloseMenu(self, event):
 		#""" Close menu has been detected
 		#"""
