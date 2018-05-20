@@ -2069,8 +2069,10 @@ class MainApplication(wx.Frame):
 			lang = eval('self.language')
 
 		filename = os.path.join(HOME_PATH, 'doc', 'html', lang, 'Help.zip')
-
-		wx.FileSystem.AddHandler(wx.ZipFSHandler())     # add the Zip filesystem (only before HtmlHelpControler instance)
+		if wx.VERSION_STRING >= '4.0':
+			wx.FileSystem.AddHandler(wx.ZipFSHandler())     # add the Zip filesystem (only before HtmlHelpControler instance)
+		else:
+			wx.FileSystem.AddHandler(wx.ArchiveFSHandler())
 
 		self.help = wx.html.HtmlHelpController()
 
