@@ -1,18 +1,27 @@
 # -*- coding: utf-8 -*-
 
 import os
+import wx
 import shutil
 import Container
 import DetachedFrame
 
 class ExperimentGenerator:
-
+    """
+    """
     def __init__(self, fileDir):
+        """ Constructor
+        """
+
+        ### local copy
         self.fileDir=fileDir
+
         self.dec=''
         self.hierarchyDescDec='        '
 
     def augmentDec(self):
+        """
+        """
         self.dec+='    '
         return self.dec
 
@@ -22,11 +31,7 @@ class ExperimentGenerator:
 
         name=model.blockModel.label
         self.dec=''
-        self.modelPythonDescription[model]=[]
-        self.modelPythonDescription[model].append('')
-        self.modelPythonDescription[model].append('class %s(CoupledDEVS):' % name)
-        self.modelPythonDescription[model].append(self.augmentDec()+'def __init__ (self, name):')
-        self.modelPythonDescription[model].append(self.augmentDec()+'CoupledDEVS.__init__(self, name)')
+        self.modelPythonDescription[model]=['', 'class %s(CoupledDEVS):' % name,self.augmentDec()+'def __init__ (self, name):',self.augmentDec()+'CoupledDEVS.__init__(self, name)']
 
         for op in model.OPorts:
             self.modelPythonDescription[model].append(self.dec+'self.addOutPort("%s")' % op.myID)
@@ -42,9 +47,9 @@ class ExperimentGenerator:
             self.modelHierarchyDescription.append('#%s-> %s' % (self.hierarchyDescDec, clabel))
             if not hasattr(c, "componentSet"):
                 self.modelPythonDescription[model].append(self.dec+'self.%s=self.addSubModel(%s.%s("%s"))' % (clabel, cname, cname, clabel) )
-                #self.modulePathFile.append(c.blockModel.python_path)
-                #if self.listModules.count(cname)==0:
-                    #self.listModules.append(cname)
+                self.modulePathFile.append(c.blockModel.python_path)
+                if self.listModules.count(cname)==0:
+                    self.listModules.append(cname)
                 for op in c.OPorts:
                     self.modelPythonDescription[model].append(self.dec+'self.%s.addOutPort("%s")' % (clabel, op.myID))
                 for ip in c.IPorts:
@@ -66,29 +71,22 @@ class ExperimentGenerator:
             self.modelPythonDescription[model].append(self.dec+'self.connectPorts(self.%s.OPorts[%s], self.OPorts[%s])' % (eoc[0][0].blockModel.label, eoc[0][0].OPorts.index(eoc[0][1]), eoc[1][0].OPorts.index(eoc[1][1])))
 
 
-    def createExperimentFile(self, master):
+    def writeModelFile(self, master):
         """
         """
 
-        self.listModules = []
+        self.listModules = ["sys", "os", "__builtin__", "DEVS.AtomicDEVS", "DEVS.CoupledDEVS", "Simulator"]
         self.modulePathFile = []
-        self.modelPythonDescription={}
-        self.modelHierarchyDescription=[]
+        self.modelPythonDescription = {}
+        self.modelHierarchyDescription = []
 
-        ### List of import 
-        self.listModules.append("sys")
-        self.listModules.append("os")
-        self.listModules.append("__builtin__")
-        self.listModules.append("DEVS.AtomicDEVS")
-        self.listModules.append("DEVS.CoupledDEVS")
-
-        ### Create or delete the out directory
-        if os.path.exists(self.fileDir):
-            shutil.rmtree(self.fileDir)
-        os.makedirs(self.fileDir)
+        ### Create the out directory
+        if not os.path.exists(self.fileDir):
+            os.makedirs(self.fileDir)
 
         ### Open file in write mode
-        newFile = open(os.path.join(self.fileDir,'model.py'), 'w')
+        class_name = master.label
+        newFile = open(os.path.join(self.fileDir, class_name+'Model.py'), 'w')
 
         ### Code generation
 
@@ -97,10 +95,10 @@ class ExperimentGenerator:
 
         self.generateCode(master)
 
-        ### write import
+        ### Write import
         for m in self.listModules:
             newFile.write('import %s\n' % m)
-    
+            
         txt =''.join(["\n\nsys.path.append(os.path.join('..','DEVSKernel','PyDEVS'))\n",
                     "sys.path.append(os.path.join('..'))\n",
                     "__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyDEVS'\n",
@@ -108,21 +106,91 @@ class ExperimentGenerator:
         
         newFile.write(txt)
 
-        #### write models
+        #### Write models
         for modelDesc in self.modelPythonDescription.keys():
             for line in self.modelPythonDescription[modelDesc]:
                 newFile.write(line + "\n")
             newFile.write("\n\n")
 
-        #Description de la hierarchie du modele
+        ### Hierarchy Description
         newFile.write('################### Model Hierarchy #####################\n')
         newFile.write('# Model_%s\n' % master.blockModel.label)
         for line in self.modelHierarchyDescription:
             newFile.write('%s\n' % line)
         newFile.write('#########################################################')
 
-        #Fermeture du fichier
+        ### Close file
         newFile.close()
+
+        return True
+
+    def writeExperimentFile(self, master):
+
+        newFile = open(os.path.join(self.fileDir, master.label+'Experiment.py'), 'w')
+
+        txt = """# Import code for model simulation:
+from simulator import Simulator
+
+# Import the model to be simulate
+from %s import %s"""%(master.label+'Model',master.label)
+
+        newFile.write(txt)
+
+        txt = """
+#    ======================================================================
+
+# 1. Instantiate the (Coupled or Atomic) DEVS at the root of the 
+#  hierarchical model. This effectively instantiates the whole model 
+#  thanks to the recursion in the DEVS model constructors (__init__).
+#
+model = %s(name="%s")
+#    ======================================================================"""%(master.label,master.label)
+
+        newFile.write(txt)
+
+        txt = """# 2. Link the model to a DEVS Simulator: 
+#  i.e., create an instance of the 'Simulator' class,
+#  using the model as a parameter.
+sim = Simulator(model)
+
+#    ======================================================================"""
+
+        newFile.write(txt)
+
+        txt = """# 3. Perform all necessary configurations, the most commonly used are:
+
+# A. Termination time (or termination condition)
+#    Using a termination condition will execute a provided function at
+#    every simulation step, making it possible to check for certain states
+#    being reached.
+#    It should return True to stop simulation, or Falso to continue.
+def terminate_whenStateIsReached(clock, model):
+    return model.trafficLight.state.get() == "manual"
+    sim.setTerminationCondition(terminate_whenStateIsReached)
+
+#    A termination time is prefered over a termination condition,
+#    as it is much simpler to use.
+#    e.g. to simulate until simulation time 400.0 is reached
+sim.setTerminationTime(400.0)
+
+# B. Set the use of a tracer to show what happened during the simulation run
+#    Both writing to stdout or file is possible:
+#    pass None for stdout, or a filename for writing to that file
+sim.setVerbose(None)
+
+#    ======================================================================"""
+
+        newFile.write(txt)
+
+        txt = """# 4. Simulate the model
+sim.simulate()
+
+#    ======================================================================"""
+
+        newFile.write(txt)
+        newFile.close()
+
+        return True
 
     def OnExperiment(self, event):
         """
@@ -133,10 +201,13 @@ class ExperimentGenerator:
 
         diagram = canvas.GetDiagram()
 
-        ### set the name of diagram from notebook nb2
+        ### Set the name of diagram from notebook nb2
         nb2 = canvas.GetParent()
 
         title  = nb2.GetTitle() if isinstance(nb2, DetachedFrame.DetachedFrame) else nb2.GetPageText(nb2.GetSelection()).rstrip()
         diagram.label = os.path.splitext(os.path.basename(title))[0]
 
-        self.createExperimentFile(diagram)
+        msg = _("Experiment File Generated!") if self.writeModelFile(diagram) and self.writeExperimentFile(diagram) else _("Experiment File not Generated!")
+        dlg = wx.MessageDialog(None, msg, _("PyPDEVS Experiment"), wx.OK | wx.ICON_INFORMATION)
+        dlg.ShowModal()
+        dlg.Destroy()
