@@ -75,7 +75,7 @@ class ExperimentGenerator:
         """
         """
 
-        self.listModules = ["sys", "os", "__builtin__", "DEVS.AtomicDEVS", "DEVS.CoupledDEVS", "Simulator"]
+        self.listModules = ["sys", "os", "__builtin__", "DEVS.AtomicDEVS", "DEVS.CoupledDEVS"]
         self.modulePathFile = []
         self.modelPythonDescription = {}
         self.modelHierarchyDescription = []
