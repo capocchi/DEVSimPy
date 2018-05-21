@@ -31,6 +31,8 @@ import Container
 import ZipManager
 import pluginmanager
 
+from ExperimentGenerator import ExperimentGenerator
+
 _ = wx.GetTranslation
 
 #File menu identifiers
@@ -126,6 +128,9 @@ ID_TESTING_SHAPE = wx.NewId()
 # Shape canvas popup menu identifiers
 ID_NEW_SHAPE = wx.NewId()
 ID_ADD_CONSTANTS = wx.NewId()
+
+# Experiment 
+ID_GEN_EXPERIMENT = wx.NewId()
 
 # Library popup menu identifiers
 ID_NEW_LIB = wx.NewId()
@@ -724,17 +729,24 @@ class ShapeCanvasPopupMenu(wx.Menu):
 
 		wx.Menu.__init__(self)
 
+		### local copy
+		self.parent = parent
+
 		### make all items
 		new = wx.MenuItem(self, ID_NEW_SHAPE, _('&New'), _('New model'))
 		paste = wx.MenuItem(self, ID_PASTE_SHAPE, _('&Paste\tCtrl+V'), _('Paste the model'))
 		add_constants = wx.MenuItem(self, ID_ADD_CONSTANTS, _('Add constants'), _('Add constants parameters'))
 		preview_dia = wx.MenuItem(self, ID_PREVIEW_PRINT, _('Print preview'), _('Print preveiw of the diagram'))
 
+		### Experiment generation
+		generate_experiment = wx.MenuItem(self, ID_GEN_EXPERIMENT, _('Generate PyPDEVS Experiment File'), _('Generate experiment model for PyPDEVS'))
+
 		### bitmap item setting
 		new.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'new_model.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		paste.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'paste.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		add_constants.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'properties.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		preview_dia.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'print-preview.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		generate_experiment.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'generation.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
@@ -743,6 +755,7 @@ class ShapeCanvasPopupMenu(wx.Menu):
 		AppendItem(paste)
 		AppendItem(add_constants)
 		AppendItem(preview_dia)
+		AppendItem(generate_experiment)
 
 		self.Enable(ID_PASTE_SHAPE, not Container.clipboard == [])
 
@@ -751,6 +764,7 @@ class ShapeCanvasPopupMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnPaste, id=ID_PASTE_SHAPE)
 		parent.Bind(wx.EVT_MENU, parent.diagram.OnAddConstants, id=ID_ADD_CONSTANTS)
 		parent.Bind(wx.EVT_MENU, parent.parent.PrintPreview, id=ID_PREVIEW_PRINT)
+		parent.Bind(wx.EVT_MENU, ExperimentGenerator(os.path.join(HOME_PATH,'out')).OnExperiment, id=ID_GEN_EXPERIMENT)
 
 class ShapePopupMenu(wx.Menu):
 	""" Shape menu class
