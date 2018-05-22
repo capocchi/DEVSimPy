@@ -3765,6 +3765,11 @@ class CodeBlock(Achievable, Block):
 		"""
 		if name == 'dump_attributes':
 			return ['model_path', 'python_path', 'args'] + self.GetAttributes()
+		#=======================================================================
+		elif name == 'dump_abstr_attributes':
+			### Atomic model has no abstract attributes
+			return []
+		#======================================================================
 		else:
 			raise AttributeError(name)
 
