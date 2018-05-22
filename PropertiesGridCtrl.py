@@ -691,16 +691,20 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 			row = grid.YToRow(y)
 			col = grid.XToCol(x)
 			table = grid.GetTable()
-
+			
 			if (row,col) != prev_rowcol and row >= 0 and col >= 0:
 				prev_rowcol[:] = [row,col]
 				hinttext = rowcolhintcallback(table.GetValue(row, col))
-				if hinttext is None:
+				### display the python path on tooltip
+				if self.GetCellValue(row, 1).endswith(".py"):
+    					if col == 1:
+    						hinttext = self.parent.model.python_path 
+				elif hinttext is None:
 					hinttext = ''
+
 				grid.GetGridWindow().SetToolTipString(hinttext) if wx.VERSION_STRING < '4.0' else grid.GetGridWindow().SetToolTip(hinttext)
 			evt.Skip()
 		grid.GetGridWindow().Bind(wx.EVT_MOTION, OnMouseMotion)
-
 
 	###
 	def OnRightClick(self, event):
@@ -784,9 +788,9 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 
 		col = self.XToCol(event.GetX(), event.GetY())
 
-		if col == 0: txt = _('Name of propertie')
-		elif col == 1: txt = _('Value of propertie')
-		else: txt = _('Information about propertie')
+		if col == 0: txt = _('Name of property')
+		elif col == 1: txt = _('Value of property')
+		else: txt = _('Information about property')
 
 		win = self.GetGridColLabelWindow()
 		win.SetToolTipString(txt) if wx.VERSION_STRING < '4.0' else win.SetToolTip(txt)
