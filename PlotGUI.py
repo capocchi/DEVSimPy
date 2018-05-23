@@ -99,7 +99,7 @@ class PlotFrame(wx.Frame):
 		"""	Constructor.
 		"""
 
-		wx.Frame.__init__(self, parent, id, title, size=(800, 500), style=wx.DEFAULT_FRAME_STYLE|wx.CLIP_CHILDREN|wx.STAY_ON_TOP)
+		wx.Frame.__init__(self, parent, id, title, size=(800, 500), style=wx.DEFAULT_FRAME_STYLE|wx.CLIP_CHILDREN)
 
 		self.type = "PlotLine"
 		self.normalize = False

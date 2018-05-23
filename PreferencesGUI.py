@@ -660,7 +660,7 @@ class PreferencesGUI(wx.Frame):
 		"""
 			Constructor.
 		"""
-		wx.Frame.__init__(self, parent, wx.ID_ANY, title, style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN | wx.STAY_ON_TOP)
+		wx.Frame.__init__(self, parent, wx.ID_ANY, title, style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN)
 
 		_icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
 		_icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "preferences.png"), wx.BITMAP_TYPE_ANY))

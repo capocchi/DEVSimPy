@@ -273,7 +273,7 @@ def Config(parent):
     frame = wx.Frame(parent,
                     wx.ID_ANY,
                     title = _('State Trajectory Plotting'),
-                    style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN | wx.STAY_ON_TOP)
+                    style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN)
     panel = wx.Panel(frame, wx.ID_ANY)
 
     #lst_1  = map(lambda a: a.label, filter(lambda s: isinstance(s, CodeBlock), diagram.GetShapeList()))

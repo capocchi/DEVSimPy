@@ -198,7 +198,7 @@ class BlinkFrame(wx.Frame):
 		""" Constructor.
 		"""
 
-		kwds["style"] = wx.DEFAULT_FRAME_STYLE |wx.STAY_ON_TOP
+		kwds["style"] = wx.DEFAULT_FRAME_STYLE
 		kwds["size"] = (400, 420)
 
 		wx.Frame.__init__(self, *args, **kwds)

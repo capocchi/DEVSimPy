@@ -12,7 +12,7 @@ class HtmlFrame(wx.Frame):
 
     ###
     def __init__(self, parent, id, title, size):
-        wx.Frame.__init__(self, parent, id, title, size, style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN | wx.STAY_ON_TOP)
+        wx.Frame.__init__(self, parent, id, title, size, style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN )
 
         file = wx.Menu()
         file.Append(wx.ID_FILE, _('&File\tCtrl+F'), _('Open Html local file'))

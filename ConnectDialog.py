@@ -29,7 +29,7 @@ def function(obj, i):
 ###
 class ConnectDialog(wx.Frame):
 	def __init__(self, parent, id, title, sn="Source", snL=[None,None], tn="Target", tnL=[None,None]):
-		wx.Frame.__init__(self, parent, id, title, size=(240,200), style= wx.CAPTION | wx.CLOSE_BOX | wx.STAY_ON_TOP| wx.SYSTEM_MENU)
+		wx.Frame.__init__(self, parent, id, title, size=(240,200), style= wx.CAPTION | wx.CLOSE_BOX | wx.SYSTEM_MENU)
 
 		# local copy
 		self.sn = sn

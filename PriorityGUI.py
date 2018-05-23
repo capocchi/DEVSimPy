@@ -15,7 +15,7 @@ class PriorityGUI(wx.Frame):
 							id,
 							title,
 							size = (350, 300),
-							style = wx.FRAME_NO_WINDOW_MENU|wx.DEFAULT_FRAME_STYLE|wx.CLOSE_BOX| wx.STAY_ON_TOP)
+							style = wx.FRAME_NO_WINDOW_MENU|wx.DEFAULT_FRAME_STYLE|wx.CLOSE_BOX)
 
 		icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
 		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "priority.png"), wx.BITMAP_TYPE_ANY))

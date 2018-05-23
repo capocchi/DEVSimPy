@@ -120,7 +120,7 @@ class Newt(wx.Frame):
 						wx.ID_ANY,
 						aDEVS.getBlockModel().label,
 						size = (550, 500),
-						style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE|wx.STAY_ON_TOP)
+						style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
 
 		self.model = aDEVS
 		self.sep = separator

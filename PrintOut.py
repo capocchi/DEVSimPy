@@ -143,7 +143,7 @@ class Printable:
 		self.preview = wx.PrintPreview(printout, printout2, data)
 
 		if self.preview.Ok():
-			pfrm = wx.PreviewFrame(self.preview, parent, _("Print preview"), style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN | wx.STAY_ON_TOP)
+			pfrm = wx.PreviewFrame(self.preview, parent, _("Print preview"), style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN )
 			pfrm.SetIcon(parent.GetIcon())
 			pfrm.Initialize()
 			pfrm.SetPosition((300, 200))

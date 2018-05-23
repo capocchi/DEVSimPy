@@ -189,7 +189,7 @@ class AttributeEditorFrame(AttributeBase, wx.Frame):
 		"""     Constructor.
 		"""
 		
-		wx.Frame.__init__(self, parent, ID, model.label, size = wx.Size(400, 550), style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN | wx.STAY_ON_TOP)
+		wx.Frame.__init__(self, parent, ID, model.label, size = wx.Size(400, 550), style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN )
 		self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'properties.png'), wx.BITMAP_TYPE_PNG)))
 		self.Bind(wx.EVT_CLOSE, self.OnClose)		
 	
@@ -207,7 +207,6 @@ class QuickAttributeEditor(wx.Frame, Subject):
 						id, \
 						size=(120, 30), \
 						style=wx.CLIP_CHILDREN|\
-								wx.STAY_ON_TOP|\
 								wx.FRAME_NO_TASKBAR|\
 								wx.NO_BORDER|\
 								wx.FRAME_SHAPED)
