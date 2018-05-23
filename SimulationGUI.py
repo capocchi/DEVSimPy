@@ -972,7 +972,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 						wx.CallAfter(playSound, SIMULATION_ERROR_SOUND_PATH)
 
 				else:
-					for m in filter(lambda a: hasattr(a, 'finish'), self.model.componentSet):
+					for m in filter(lambda a: hasattr(a, 'finish'), self.model.getFlatComponentSet().values()):
 						### call finished method
 						if __builtin__.__dict__['GUI_FLAG']:
 							if wx.VERSION_STRING < '2.9':
