@@ -1327,7 +1327,7 @@ class MainApplication(wx.Frame):
 				### adding path with assocaited diagram
 				new_paths[os.path.normpath(path)] = diagram
 
-				open_dlg.Destroy()
+			open_dlg.Destroy()
 
 		# load the new_path file with ConnectionThread function
 		if new_paths != {}:

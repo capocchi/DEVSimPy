@@ -387,11 +387,10 @@ class Diagram(Savable, Structurable):
 
 		### if devs instance of diagram is not instantiated, we make it
 		### else one simulation has been performed then we clear all devs port instances
-		#if diagram.getDEVSModel():
-		
-		#	diagram.ClearAllPorts()
-		#else:
-		diagram.setDEVSModel(DomainInterface.MasterModel.Master())
+		if diagram.getDEVSModel():
+			diagram.ClearAllPorts()
+		else:
+			diagram.setDEVSModel(DomainInterface.MasterModel.Master())
 
 		### shape list of diagram
 		shape_list = diagram.GetShapeList()
@@ -767,11 +766,6 @@ class Diagram(Savable, Structurable):
 		""" Method calling the simulationGUI
 		"""
 
-#		import gc
-#		for obj in gc.get_objects():
-#			if isinstance(obj, Achievable):
-#				print id(obj.devsModel)
-		
         ### if there are models in diagram
 		if self.GetCount() != 0 :
 
@@ -2275,10 +2269,10 @@ if __builtin__.__dict__['GUI_FLAG']:
 			"""
 
 			model = self.getCurrentShape(event)
-			try:
-				model.OnLeftDClick(event)
-			except:
-				wx.MessageBox(_("An error is occured during plugins importation.\nCheck plugins module."))
+			#try:
+			model.OnLeftDClick(event)
+			#except Exception, info:
+			#	wx.MessageBox(_("An error is occured during double clic: %s")%info)
 
 		def Undo(self):
 			"""
