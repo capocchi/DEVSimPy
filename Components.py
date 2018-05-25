@@ -497,7 +497,7 @@ class DEVSComponent:
 			self.devsModel.parent = p
 
 	def getDEVSParent(self):
-		return self.devsModel.parent
+		return self.devsModel.parent if self.devsModel else None
 
 	def getBlock(self):
 		if self.devsModel is not None:
@@ -561,10 +561,8 @@ class DEVSComponent:
 		from Container import ContainerBlock, Diagram, Block
 		assert(isinstance(self, (ContainerBlock, Diagram)))
 
-		coupled_devs = self.getDEVSModel()
-
 		### if devs instance is not none and priority_list has been invoked (else componentSet order is considered)
-		if coupled_devs is not None and self.priority_list != []:
+		if self.priority_list != []:
 
 			shape_list = self.GetShapeList()
 			block_list = filter(lambda c: isinstance(c, Block), shape_list)
@@ -580,11 +578,6 @@ class DEVSComponent:
 				del self.priority_list[index]
 
 			self.priority_list += added_models
-
-			# si l'utilisateur n'a pas definit d'ordre de priorité pour l'activation des modèles, on la construit
-			coupled_devs.componentSet = map(lambda b: b.getDEVSModel(), map(self.GetShapeByLabel, self.priority_list))
-
-			self.setDEVSModel(coupled_devs)
 
 	###
 	def OnEditor(self, event):

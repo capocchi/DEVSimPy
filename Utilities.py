@@ -18,6 +18,8 @@ import shutil
 import ConfigParser
 import linecache
 import imp 
+from  copy import deepcopy
+
 
 import gettext
 _ = gettext.gettext

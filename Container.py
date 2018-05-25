@@ -387,18 +387,19 @@ class Diagram(Savable, Structurable):
 
 		### if devs instance of diagram is not instantiated, we make it
 		### else one simulation has been performed then we clear all devs port instances
-		if diagram.getDEVSModel():
-			diagram.ClearAllPorts()
-		else:
-			diagram.setDEVSModel(DomainInterface.MasterModel.Master())
+		#if diagram.getDEVSModel():
+		
+		#	diagram.ClearAllPorts()
+		#else:
+		diagram.setDEVSModel(DomainInterface.MasterModel.Master())
 
 		### shape list of diagram
 		shape_list = diagram.GetShapeList()
 		block_list = filter(lambda c: isinstance(c, Block), shape_list)
-
+		
 		### for all codeBlock shape, we make the devs instance
 		for m in block_list:
-
+    			
 			### class object from python file
 			cls = Components.GetClass(m.python_path)
 
@@ -564,7 +565,16 @@ class Diagram(Savable, Structurable):
 				return  _('Error making DEVS connection.\n Check your connections !')
 
 		### change priority form priority_list is PriorityGUI has been invoked (Otherwise componentSet order is considered)
-		diagram.updateDEVSPriorityList()
+		if diagram.priority_list != []:
+			L = []
+			# si l'utilisateur n'a pas definit d'ordre de priorité pour l'activation des modèles, on la construit
+			for label1 in diagram.priority_list:
+				for m in diagram.devsModel.componentSet:
+					label2 = m.getBlockModel().label
+					if label1 == label2:
+						L.append(m)
+
+			diagram.devsModel.componentSet = L
 
 		return diagram.getDEVSModel()
 
@@ -757,6 +767,11 @@ class Diagram(Savable, Structurable):
 		""" Method calling the simulationGUI
 		"""
 
+#		import gc
+#		for obj in gc.get_objects():
+#			if isinstance(obj, Achievable):
+#				print id(obj.devsModel)
+		
         ### if there are models in diagram
 		if self.GetCount() != 0 :
 
@@ -1078,20 +1093,16 @@ class Diagram(Savable, Structurable):
 		""" Clean DEVS instances attached to all block model in the diagram.
 		"""
 
-		try:
-			for devs in filter(lambda a: hasattr(a, 'finish'), self.devsModel.componentSet):
+		if self.devsModel:
+			for devs in filter(lambda a: hasattr(a, 'finish'), self.devsModel.getFlatComponentSet().values()):
 				try:
 					Publisher.unsubscribe(devs.finish, "%d.finished"%(id(devs)))
 				except:
-
+					print "unsubscribe problem!"
 					devs.finish(None)
-
+						
 			self.devsModel.componentSet = []
 
-		except AttributeError:
-			pass
-
-		finally:
 			for m in self.GetShapeList():
 				m.setDEVSModel(None)
 
