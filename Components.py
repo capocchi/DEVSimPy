@@ -578,7 +578,7 @@ class DEVSComponent:
 				del self.priority_list[index]
 
 			self.priority_list += added_models
-
+ 
 	###
 	def OnEditor(self, event):
 		""" Method that edit the python code of associated devs model of the Block

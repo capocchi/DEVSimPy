@@ -563,17 +563,22 @@ class Diagram(Savable, Structurable):
 			else:
 				return  _('Error making DEVS connection.\n Check your connections !')
 
-		### change priority form priority_list is PriorityGUI has been invoked (Otherwise componentSet order is considered)
+		### update priority_list from shape list 
+		### (Otherwise componentSet order is considered)
+		diagram.updateDEVSPriorityList()
+
+		### reordered the componentSet of the master
 		if diagram.priority_list != []:
 			L = []
+			devs = diagram.getDEVSModel()
 			# si l'utilisateur n'a pas definit d'ordre de priorité pour l'activation des modèles, on la construit
 			for label1 in diagram.priority_list:
-				for m in diagram.devsModel.componentSet:
+				for m in devs.componentSet:
 					label2 = m.getBlockModel().label
 					if label1 == label2:
 						L.append(m)
 
-			diagram.devsModel.componentSet = L
+			devs.componentSet = L
 
 		return diagram.getDEVSModel()
 
@@ -2267,10 +2272,10 @@ if __builtin__.__dict__['GUI_FLAG']:
 		def OnLeftDClick(self,event):
 			"""
 			"""
-
 			model = self.getCurrentShape(event)
+			if model:
 			#try:
-			model.OnLeftDClick(event)
+				model.OnLeftDClick(event)
 			#except Exception, info:
 			#	wx.MessageBox(_("An error is occured during double clic: %s")%info)
 
