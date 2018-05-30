@@ -404,7 +404,7 @@ class Diagram(Savable, Structurable):
 
 			### Class is wrong ?
 			if isinstance(cls, (ImportError, tuple)) or cls is None:
-				print _('Error making DEVS instances for:\n%s\n%s'%(str(cls), m.python_path))
+				sys.stdout.write(_('Error making DEVS instances for:\n%s\n%s'%(str(cls), m.python_path)))
 				return False
 			else:
 				### DEVS model recovery
@@ -807,7 +807,6 @@ class Diagram(Savable, Structurable):
 				### Check if models have the same label
 				L = diagram.GetLabelList([])
 				if len(L)!=len(set(L)):
-					#print L, set(L)
 					wx.MessageBox(_("It seems that models have same label.\nIf you plan to use Flat simulation algorithm, all model must have a unique label."), _("Simulation Manager"))
 
 				### set the name of diagram
@@ -1097,7 +1096,7 @@ class Diagram(Savable, Structurable):
 				try:
 					Publisher.unsubscribe(devs.finish, "%d.finished"%(id(devs)))
 				except:
-					print "unsubscribe problem!"
+					sys.stdout.write(_("unsubscribe problem!"))
 					devs.finish(None)
 						
 			self.devsModel.componentSet = []
@@ -2621,10 +2620,8 @@ if __builtin__.__dict__['GUI_FLAG']:
 									#pass
 							## if ss is crossed, we add it on the containerShape touch_list
 							#if touch:
-								##print ss
 								#if ss not in s.touch_list:
 									#s.touch_list.append(ss)
-								#print "touch %s"%ss.label
 					else:
 						self.SetCursor(wx.StockCursor(wx.CURSOR_HAND))
 						pass
@@ -3579,11 +3576,6 @@ class CodeBlock(Achievable, Block):
 
 		dir_name = os.path.basename(DOMAIN_PATH)
 
-		#print "avant "
-		#print python_path
-		#print model_path
-		#print "\n"
-
 		### if the model path is wrong
 		if model_path != '':
 			if not os.path.exists(model_path):
@@ -3687,7 +3679,6 @@ class CodeBlock(Achievable, Block):
 				L = list(set(args_from_stored_constructor_py).symmetric_difference( set(args_from_stored_block_model)))
 				if L != []:
 					for arg in L:
-						#print arg, args_from_stored_constructor_py
 						if not arg in args_from_stored_constructor_py:
 							sys.stdout.write(_("Warning: %s come is old ('%s' arg is deprecated). We update it...\n"%(state['python_path'],arg)))
 							del state['args'][arg]
@@ -3753,11 +3744,6 @@ class CodeBlock(Achievable, Block):
 		if 'input_direction' not in state: state['input_direction'] = 'ouest'
 		if 'output_direction' not in state: state['output_direction'] = 'est'
 		##############################################
-
-		#print "apres "
-		#print state['python_path']
-		#print state['model_path']
-		#print "\n"
 
 		self.__dict__.update(state)
 		if new_class:
@@ -3828,7 +3814,6 @@ class CodeBlock(Achievable, Block):
 			edited_field_set = set(state)
 			bad_flag_set = set(bad_flag_dico.keys())
 
-			#print bad_flag_set, "must be", bad_flag_set.intersection(edited_field_set), "compared to", edited_field_set
 			### if intersection is total, all bad field are has been edited and we test at the end of the loop if all of the paths are right.
 			if len(bad_flag_set.intersection(edited_field_set)) == len(bad_flag_set):
 				for prop in state:
@@ -3880,11 +3865,6 @@ class ContainerBlock(Block, Diagram):
 		model_path = state['model_path']
 
 		dir_name = os.path.basename(DOMAIN_PATH)
-
-		#print "avant "
-		#print state['python_path']
-		#print state['model_path']
-		#print "\n"
 
 		### if the model path is wrong
 		if model_path != '':
@@ -3958,11 +3938,6 @@ class ContainerBlock(Block, Diagram):
 		if 'input_direction' not in state: state['input_direction'] = 'ouest'
 		if 'output_direction' not in state: state['output_direction'] = 'est'
 		#####################################
-
-		#print "apres "
-		#print state['python_path']
-		#print state['model_path']
-		#print "\n"
 
 		self.__dict__.update(state)
 

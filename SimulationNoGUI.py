@@ -215,7 +215,6 @@ class runSimulation:
         # if self.thread is not None and not self.thread.thread_suspend:
         diagram = self.master.getBlockModel()
         # diagram.Clean()
-        # print self.master
         ################################################################################################################
         ######### To Do : refaire l'enregistrement du chemin d'enregistrements des resultats du to_disk ###################
         for m in self.master.componentSet:
@@ -225,7 +224,6 @@ class runSimulation:
                 m.fileName = os.path.join(dir_fn,"%s_%s"%(os.path.basename(diagram.last_name_saved).split('.')[0],os.path.basename(m.fileName)))
         ################################################################################################################
         ################################################################################################################
-        #print __builtin__.__dict__
         if self.master:
             from SimulationGUI import simulator_factory
             if not self.ntl:

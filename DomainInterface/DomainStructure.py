@@ -68,7 +68,6 @@ class DomainStructure(BaseDEVS.CoupledDEVS):
 
 def main():
 	DS = DomainStructure()
-	print DS.__class__.__bases__
 
 if __name__ == '__main__':
 	main()

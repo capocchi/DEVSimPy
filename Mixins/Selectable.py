@@ -76,6 +76,3 @@ class Selectable:
                 if nb1.GetSelection() == 1:
                     newContent = AttributeEditor(nb1.propPanel, wx.ID_ANY, self, canvas)
                     nb1.UpdatePropertiesPage(newContent)
-
-                ### update of code editor panel
-                #print mainW._mgr.GetPane("editor").IsOk()

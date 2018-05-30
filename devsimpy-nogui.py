@@ -231,7 +231,6 @@ if __name__ == '__main__':
 			#~ if nb_args == 5:
 			    #~ import json
 			    #~ label = sys.argv[3]
-			    #~ #print (sys.argv[4])
 			    #~ args = json.loads(sys.argv[4])
 			    #~ new_args = yamlHandler.setYAMLBlockModelArgs(label, args)
 			    #~ sys.stdout.write(json.dumps(new_args))

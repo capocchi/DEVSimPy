@@ -174,8 +174,8 @@ class Abstractable:
 
             canvas.SetCurrentLevel(l)
 
-            print "load diagram %d"%l
-            print self.layers
+            sys.stdout.write("load diagram %d"%l)
+            sys.stdout.write(self.layers)
 
         else:
 

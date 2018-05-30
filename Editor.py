@@ -2428,14 +2428,14 @@ def manager(args):
 
 
 def info():
-	print PythonSTC.__str__()
-	print CodeEditor.__str__()
-	print EditionFile.__str__()
-	print EditionNotebook.__str__()
-	print Editor.__str__()
-	print BlockEditor.__str__()
-	print TestEditor.__str__()
-	print GeneralEditor.__str__()
+	sys.stdout.write(PythonSTC.__str__())
+	sys.stdout.write(CodeEditor.__str__())
+	sys.stdout.write(EditionFile.__str__())
+	sys.stdout.write(EditionNotebook.__str__())
+	sys.stdout.write(Editor.__str__())
+	sys.stdout.write(BlockEditor.__str__())
+	sys.stdout.write(TestEditor.__str__())
+	sys.stdout.write(GeneralEditor.__str__())
 
 
 def start():

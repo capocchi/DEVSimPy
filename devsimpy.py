@@ -138,7 +138,7 @@ def downloadFile(url, directory) :
 				f.write(chunk)
 				done = int(50 * dl / int(total_length))
 				sys.stdout.write("\r[%s%s] %s bps" % ('=' * done, ' ' * (50-done), dl//(time.clock() - start)))
-				print ''
+				sys.stdout.write('')
 	return (time.clock() - start)
 
 ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
@@ -1208,7 +1208,6 @@ class MainApplication(wx.Frame):
 
 		### Editor frame
 		frame = GetEditor(canvas, -1, 'UAM%d'%cl)
-		#print 'UAM%d'%cl, canvas.UAM[cl]
 		frame.AddEditPage('UAM%d'%cl, canvas.UAM[cl])
 		frame.SetPosition((100, 100))
 		frame.Show()

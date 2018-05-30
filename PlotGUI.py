@@ -261,7 +261,6 @@ class PlotFrame(wx.Frame):
 #		pass
 
 	def OnMove(self, event):
-		#print 'Move event, new pos:' + str(event.Position)
 		event.Skip()
 
 	def OnMouseLeftDown(self,event):

@@ -2,6 +2,7 @@ import wxversion
 wxversion.select('2.8')
 
 import wx
+import sys
 
 class TreeItem(object):
 	def __init__(self, text, data=None, filterable=True):
@@ -281,7 +282,7 @@ if __name__ == '__main__':
 	]	
 	
 	def print_(x):
-		print x
+		sys.stdout.write(x)
 
 	model = model_from_list(L)
 	tree = FilterableTree(f, model)

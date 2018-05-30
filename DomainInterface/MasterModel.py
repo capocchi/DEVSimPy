@@ -31,7 +31,6 @@ if __name__ == '__main__':
     ### permit correct import (based on fom instruction) in PyPDEVS directory (logger, util...) when this module executed (main)
 	d = sys.path.append(os.pardir)
 	if d not in sys.path:
-		print d
 		sys.path.append(d)
 
 import re
@@ -78,7 +77,6 @@ class Master(BaseDEVS.CoupledDEVS):
 
 def main():
 	master = Master()
-	print master.__class__.__bases__
 
 if __name__ == '__main__':
 	main()

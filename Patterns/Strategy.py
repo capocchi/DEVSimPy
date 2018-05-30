@@ -197,7 +197,6 @@ def parallel_ext_transtion_manager(p):
 	hosts = p.weak.GetHosts()
 
 	###----------------------------------------------------------------------------------------
-	#print "thread version"
 	### thread version
 	threads = []
 
@@ -290,19 +289,15 @@ def FlatConnection(p1, p2):
 
 	if isinstance(p1.host, PyDEVS.AtomicDEVS) and isinstance(p2.host, PyDEVS.AtomicDEVS):
 		if isinstance(p1, PyDEVS.OPort) and isinstance(p2, PyDEVS.IPort):
-			#print str(p1.host.getBlockModel().label), '->', str(p2.host.getBlockModel().label)
 			if not isinstance(p1.weak, weakref.ProxyType):
 				wr = weakref.proxy(p1.weak)
 				p2_weak_old = p2.weak
 				if not isinstance(p2.weak, weakref.ProxyType):
-					#print "yes"
 					p2.weak = wr
 				else:
 					p1.weak = p2.weak
-				#print "\t",id(wr), "weakref (%d)"%id(p1.weak), "->", id(p2.weak), "old (%d)"%id(p2_weak_old)
 			else:
 				p2.weak = p1.weak
-				#print '\t', id(p1.weak), "->", id(p2.weak)
 
 			## build hosts list in WeakValue class
 			p1.weak.AddHosts(p2)
@@ -348,7 +343,6 @@ def setAtomicModels(atomic_model_list, ts):
 				if not hasattr(p2, 'weak'): setattr(p2, 'weak', WeakValue(p2))
 
 				#p2.weak = p1.weak
-				#print "Connection for ",p1.host.getBlockModel().label, p1.weak, "to", p2.host.getBlockModel().label, p2.weak
 				FlatConnection(p1,p2)
 
 		for p1 in m.IPorts:
@@ -357,7 +351,6 @@ def setAtomicModels(atomic_model_list, ts):
 				if not hasattr(p2, 'weak'): setattr(p2, 'weak', WeakValue(p2))
 
 				#p1.weak = p2.weak
-				#print "Connection for ",p1.host.getBlockModel().label, p1.weak, "to", p2.host.getBlockModel().label, p2.weak
 				#FlatConnection(p1,p2)
 
 ###

@@ -83,8 +83,6 @@ def GetClass(elem):
 		moduleName = path_to_module(elem)
 
 		for cls in clsmembers.values():
-			#print 'sdf', str(cls.__module__), moduleName, str(cls.__module__) in str(moduleName)
-
 			if str(cls.__module__) in str(moduleName):
 				return cls
 	else:
@@ -356,15 +354,16 @@ class AMDComponent(GenericComponent):
 
 		m = AMDComponent.BlockModelAdapter(cls, label)
 
+		
 		load_file_result = m.LoadFile(filename)
-
+		
 		if isinstance(load_file_result, Exception):
 			wx.MessageBox(_('Error loading %s model : %s '%(label, load_file_result)), _('Error'), wx.OK | wx.ICON_ERROR)
 			return None
 		else:
 			### mandatory due to the LoadFile call before
 			m.label = label
-
+			
 			return AMDComponent.ChekFilename(filename, m)
 
 	@staticmethod
@@ -539,8 +538,6 @@ class DEVSComponent:
 		label = str(devs.getBlockModel().label) if hasattr(devs, 'getBlockModel') else devs.name
 		log_file = os.path.join(gettempdir(),'%s.devsimpy.log'%label)
 		parent = event.GetClientData()
-
-		print log_file
 
 		if os.path.exists(log_file):
 			### read log file

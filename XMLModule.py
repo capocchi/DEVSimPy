@@ -148,7 +148,6 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 		s = blocklist[0]
 
 		name = s.attributes['value'].value
-		#print name
 		if s.attributes.has_key('style'):
 
 			### coupled model have swimlane style or *couple{d}* in value filed
@@ -167,14 +166,12 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 					canvas.AddShape(block)
 					D[id] = block
 					del blocklist[0]
-					#print block
 
 				elif parent_id in D.keys():
 					canvas_parent = D[parent_id]
 					canvas_parent.AddShape(block)
 					D[id] = block
 					del blocklist[0]
-					#print block
 
 				else:
 					blocklist.insert(len(blocklist),blocklist.pop(0))
@@ -195,7 +192,6 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 					canvas.AddShape(block)
 					D[id] = block
 					del blocklist[0]
-					#print block
 
 				elif parent_id in D.keys():
 					canvas_parent = D[parent_id]
@@ -222,7 +218,6 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 					canvas.AddShape(block)
 					D[id] = block
 					del blocklist[0]
-					#print block
 
 				elif parent_id in D.keys():
 					canvas_parent = D[parent_id]
@@ -249,15 +244,12 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 		c = D[parent_id]
 
 		if source in canvas.diagram.shapes and target in canvas.diagram.shapes:
-			print source.label, target.label
 			a,b = canvas.GetNodeLists(source, target)
 			if a == [] or b == []:
 				a,b = canvas.GetNodeLists(target,source)
 			canvas.sourceNodeList, canvas.targetNodeList = a,b
-			#print canvas.sourceNodeList, canvas.targetNodeList
+			
 			if canvas.sourceNodeList != [] and canvas.targetNodeList !=[]:
-				#print source.label, target.label
-				#print canvas.sourceNodeList, canvas.targetNodeList
 				canvas.makeConnectionShape(canvas.sourceNodeList[0], canvas.targetNodeList[0])
 
 		del connectionlist[0]

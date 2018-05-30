@@ -118,7 +118,6 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 
 def main():
 	DB = DomainBehavior()
-	print DB.__class__.__bases__
 
 if __name__ == '__main__':
 	main()

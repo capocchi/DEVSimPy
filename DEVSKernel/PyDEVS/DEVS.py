@@ -397,7 +397,6 @@ class CoupledDEVS(BaseDEVS):
 		#for model in self.PRIORITY_LIST:
 		for model in self.componentSet:
 			if model in immList:
-				#print 'chose %s'%model.getBlockModel()
 				return model
 
 		# si self.PRIORITY_LIST est vide on bascule sur une simulation sans priorité

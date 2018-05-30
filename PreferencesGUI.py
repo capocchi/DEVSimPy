@@ -455,7 +455,9 @@ class SimulationPanel(wx.Panel):
 							else:
 								ReloadModule.recompile(m)
 					except Exception as e:
-						print e
+						sys.stdout.write("Exception in PreferenceGui")
+						sys.stdout.write(e)
+
 			ReloadModule.recompile("DomainInterface.DomainStructure")
 			ReloadModule.recompile("DomainInterface.MasterModel")
 
@@ -560,7 +562,6 @@ class Preferences(wx.Toolbook):
 #		old = event.GetOldSelection()
 		new = event.GetSelection()
 #		sel = self.GetSelection()
-#		print 'OnPageChanged,  old:%d, new:%d, sel:%d\n' % (old, new, sel)
 		parent = self.GetTopLevelParent()
 		### plug-ins page
 		if new == 3:

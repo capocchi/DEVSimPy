@@ -348,7 +348,6 @@ class CoupledSolver(Sender):
 #def worker(d, msg, q):
 	#CS = CoupledSolver()
 	#r = CS.receive(d, msg)
-	##print d.immChildren, d.componentSet
 	#q.put((r,d.myInput, d.myOutput, d.myTimeAdvance, d.timeLast))
 
 ###############################################################################

@@ -523,7 +523,6 @@ class Base(object):
 					self.t = timer()
 		
 			else:
-				#print self.thread.getAlgorithm().trace
 				### for back simulation
 				#self.thread.s = shelve.open(self.thread.f.name+'.db',flag='r')
 				#self.thread.model = self.thread.s['s'][str(float(self._gauge.GetValue()))]
@@ -769,7 +768,7 @@ class Base(object):
 						break
 
 		except Exception, info:
-			print _("Error in ErrorManager: %s"%info)
+			sys.stdout.write(_("Error in ErrorManager: %s"%info))
 
 		### if error come from devs python file
 		if devs_error:

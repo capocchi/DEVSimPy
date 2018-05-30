@@ -56,8 +56,6 @@ class PickledCollection(list):
 		#=======================================================================
 		### addition of abstraction attributes only if there is not in dump_attributes (after having saved a model, dump_attributes contains abstraction attributes !)
 		self.pickled_obj += [getattr(self.obj, attr) for attr in self.obj.dump_abstr_attributes if attr not in self.obj.dump_attributes]
-
-		#print self.pickled_obj
 		#=======================================================================
 
 	def __setstate__(self, state):
@@ -133,7 +131,6 @@ class DumpZipFile(DumpBase):
 	def Save(self, obj_dumped, fileName = None):
 		""" Function that save the codeblock on the disk.
 		"""
-
 		assert(fileName.endswith(tuple(DumpZipFile.ext)))
 
 		### local copy of paths
@@ -148,6 +145,10 @@ class DumpZipFile(DumpBase):
 			obj_dumped.image_path = os.path.join(fileName, os.path.basename(obj_dumped.image_path))
 
 		obj_dumped.model_path = fileName
+
+		### args is constructor args and we save these and not the current value
+		if hasattr(obj_dumped, 'args'):
+			obj_dumped.args = Components.GetArgs(Components.GetClass(obj_dumped.python_path))
 
 		try:
 
@@ -235,7 +236,7 @@ class DumpZipFile(DumpBase):
 		except Exception, info:
 			sys.stderr.write(_("Problem loading: %s -- %s \n")%(str(fileName), info))
 			return info
-
+	
 		### Check comparison between serialized attribut (L) and normal attribut (dump_attributes)
 		### for model build with a version of devsimpy <= 2.5
 		### font checking
@@ -279,18 +280,19 @@ class DumpZipFile(DumpBase):
 						setattr(obj_loaded, attr, L[i])
 				else:
 					setattr(obj_loaded, attr, L[i])
+				
 
 		except IndexError, info:
 			sys.stderr.write(_("Problem loading (old model): %s -- %s \n")%(str(fileName), info))
 			return info
 
+		
 		### if the model was made from another pc
 		if not os.path.exists(obj_loaded.model_path):
 			obj_loaded.model_path = fileName
 
 		### if python file is wrong
 		if not os.path.exists(os.path.dirname(obj_loaded.python_path)):
-			#print obj_loaded.python_path
 			### ?: for exclude or non-capturing rule
 			obj_loaded.python_path = os.path.join(obj_loaded.model_path, re.findall(".*(?:.[a|c]md)+[/|\\\](.*.py)*", obj_loaded.python_path)[-1])
 

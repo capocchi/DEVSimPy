@@ -425,9 +425,7 @@ class CustomDataTable(GridTableBase):
 		### Behavioral sorted values fields
 		for attr_name,info in sorted(infoBlockBehavioralDict.items()):
 			val = model.args[attr_name]
-			#print model.args
-			#print val, self.GetTypeList(val)
-
+			
 			self.data.append([attr_name, val, info])
 			self.dataTypes.append(self.GetTypeList(val))
 			self.nb_behavior_var += 1
@@ -551,6 +549,7 @@ class CustomDataTable(GridTableBase):
 		#if wx.Platform == '__WXGTK__':
 		## conserve le type de données dans la table :-)
 		init_type = self.dataTypes[row][1]
+		
 		if value == "":
 			self.data[row][col] = value
 		elif 'double' in init_type:

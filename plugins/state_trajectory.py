@@ -55,7 +55,6 @@ def log(func):
     def wrapped(*args, **kwargs):
 
         try:
-            #print "Entering: [%s] with parameters %s" % (func.__name__, args)
             try:
 
                 ### DEVS instance

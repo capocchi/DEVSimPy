@@ -45,9 +45,6 @@ def getPythonModelFileName(fn):
 	py_file_list = filter(lambda f: f.endswith('.py') and os.path.dirname(f) == '' and f not in ('plugins.py', 'steps.py', 'environment.py', 'strategies.py'), zf.namelist())
 	zf.close()
 
-	#Cmtp+=1
-	#print Cmtp, fn
-
 	### if there is more than one python file in the zip file
 	### we find the correct behavioral file
 	if len(py_file_list) > 1:
@@ -131,29 +128,25 @@ class Zip:
 			dir_name, base_name = os.path.split(fn)
 
 			if zipfile.is_zipfile(dir_name):
-				#print '1'
 				z = zipfile.ZipFile(dir_name, 'r')
 				data = z.read(base_name)
 				### this line is in comment because is zip file contain image file we can not encode it.
 				zout.writestr(base_name, data.encode('utf-8'))
 				#zout.writestr(base_name, data)
 				z.close()
-				#print '11'
+				
 				#sys.stdout.write("update %s from compressed %s\n"%(base_name, fn))
 			elif os.path.exists(fn):
-				#print '2'
 				zout.write(fn, base_name)
-				#print '22'
+	
 				#sys.stdout.write("update %s from %s\n"%(base_name, fn))
 			elif os.path.exists(base_name) and dir_name != "":
-				#print '3'
 				zout.write(base_name, fn)
-				#print '33'
+				
 				#sys.stdout.write("update %s from %s\n"%(fn, base_name))
 			else:
 				exclude_file.append(replace_files.index(fn))
 				#sys.stdout.write("%s unknown\n"%(fn))
-
 
 		### try to rewrite not replaced files from original zip
 		info_list = zin.infolist()

@@ -37,6 +37,7 @@ except:
 
 import wx
 import os
+import sys
 
 class Directory:
     """Simple class for using as the data object in the DirTreeCtrl"""
@@ -91,7 +92,7 @@ class DirTreeCtrl(wx.TreeCtrl):
                 key = self.imagelist.Add(wx.Bitmap(filepath, wxBitmapType))
                 self.iconentries[name] = key
         except Exception, e:
-            print e
+            sys.stdout.write(e)
         
     def SetDeleteOnCollapse(self, selection):
         """Sets the tree option to delete leaf items when the node is
@@ -222,7 +223,7 @@ class DirTreeCtrl(wx.TreeCtrl):
                     return self.imagelist.AddIcon(icon)
 
             except Exception, e:
-                print e
+                sys.stdout.write(e)
                 return self.iconentries['default']
 
         # if no key returned already, return default
@@ -238,8 +239,7 @@ class DirTreeCtrl(wx.TreeCtrl):
             d = self.GetPyData(item)
             self._loadDir(item, d.directory)
         else:
-           # print 'no data found!'
-           pass
+           sys.stdout.write('no data found!')
             
         event.Skip()
 
