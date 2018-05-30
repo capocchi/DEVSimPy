@@ -564,10 +564,10 @@ class Diagram(Savable, Structurable):
 				return  _('Error making DEVS connection.\n Check your connections !')
 
 		### update priority_list from shape list 
-		### (Otherwise componentSet order is considered)
+		### Shape list can be increased or decreased (add or remove shape) without invoke the Priority list dialogue
 		diagram.updateDEVSPriorityList()
 
-		### reordered the componentSet of the master
+		### reordered the componentSet of the master before the simulation
 		if diagram.priority_list != []:
 			L = []
 			devs = diagram.getDEVSModel()
