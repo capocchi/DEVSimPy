@@ -423,12 +423,26 @@ class CustomDataTable(GridTableBase):
 			self.dataTypes.append(self.GetTypeList(val))
 
 		### Behavioral sorted values fields
+		args_in_constructor = Components.GetArgs(Components.GetClass(model.python_path))
 		for attr_name,info in sorted(infoBlockBehavioralDict.items()):
-			val = model.args[attr_name]
 			
-			self.data.append([attr_name, val, info])
-			self.dataTypes.append(self.GetTypeList(val))
-			self.nb_behavior_var += 1
+			val = model.args[attr_name]
+				
+			### if the type of value has changed for an instance (edition of the code block), we reinitilize the value 
+			if attr_name in args_in_constructor.keys():
+				val_in_constructor = args_in_constructor[attr_name]
+				if type(val) != type(val_in_constructor):
+					val = val_in_constructor
+				self.data.append([attr_name, val, info])
+				self.dataTypes.append(self.GetTypeList(val))
+				self.nb_behavior_var += 1
+
+		for attr_name, val in args_in_constructor.items():
+			if attr_name not in infoBlockBehavioralDict.keys():
+				model.args[attr_name] = val
+				self.data.append([attr_name, val, _('Unknown information')])
+				self.dataTypes.append(self.GetTypeList(val))
+				self.nb_behavior_var += 1
 
 		### Python File Path
 		if hasattr(model, 'python_path'):

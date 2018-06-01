@@ -2114,10 +2114,10 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
 		info.SetCopyright(_('(C) 2018 SISU Project - UMR CNRS 6134 SPE Lab.'))
 		info.SetWebSite('http://spe.univ-corse.fr')
 		info.SetLicence(licence)
-		info.AddDeveloper(_('L. Capocchi.'))
-		info.AddDocWriter(_('L. Capocchi.'))
+		info.AddDeveloper(_('L. Capocchi'))
+		info.AddDocWriter(_('L. Capocchi'))
 		#info.AddArtist(_('L. Capocchi.'))
-		info.AddTranslator(_('L. Capocchi.'))
+		info.AddTranslator(_('L. Capocchi'))
 
 		wx.AboutBox(info)
 
