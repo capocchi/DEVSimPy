@@ -313,11 +313,6 @@ import wx.py as py
 import wx.lib.dialogs
 import wx.html
 
-#try:
-#	import  wx.lib.floatbar
-#except:
-#	pass
-
 try:
 	from wx.lib.agw import advancedsplash
 	AdvancedSplash = advancedsplash.AdvancedSplash
@@ -379,10 +374,16 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 				'DEFAULT_DEVS_DIRNAME':'PyDEVS', # default DEVS Kernel directory
 				'DEVS_DIR_PATH_DICT':{'PyDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyDEVS'),
 									'PyPDEVS_221':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs221' ,'src'),
-									'PyPDEVS_241':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs241' ,'src','pypdevs'),
 									'PyPDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','old')},
 				'GUI_FLAG':True
 				}
+
+### Check if the pypdevs241 directory is empty (not --recursive option when the devsimpy git has been cloned)
+path = os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs241')
+if not len(os.listdir(path)) == 0:
+    builtin_dict['DEVS_DIR_PATH_DICT'].update({'PyPDEVS_241':os.path.join(path ,'src','pypdevs')})
+else:
+	sys.stdout.write(_("PyPDEVS Kernel in version 2.4.1 is not loaded.\nPlease install it in the directory %s using git (http://msdl.uantwerpen.be/git/yentl/PythonPDEVS.git)")%path)
 
 ### here berfore the __main__ function
 ### warning, some module (like SimulationGUI) initialise GUI_FLAG macro before (import block below)
@@ -1706,6 +1707,7 @@ class MainApplication(wx.Frame):
 		else:
 			activePage = window.nb2.GetSelection()
 			return window.nb2.GetPage(activePage).GetDiagram()
+
 	###
 	def GetWindowByEvent(self, event):
 		""" Method that give the window instance from the event
@@ -1729,7 +1731,6 @@ class MainApplication(wx.Frame):
 	def OnConstantsLoading(self, event):
 		""" Method calling the AddConstants windows.
 		"""
-
 		parent = self.GetWindowByEvent(event)
 		diagram = self.GetDiagramByWindow(parent)
 		diagram.OnAddConstants(event)
@@ -1738,7 +1739,6 @@ class MainApplication(wx.Frame):
 	def OnInfoGUI(self, event):
 		""" Method calling the PriorityGui.
 		"""
-
 		parent = self.GetWindowByEvent(event)
 		diagram = self.GetDiagramByWindow(parent)
 		diagram.OnInformation(parent)
@@ -1747,7 +1747,6 @@ class MainApplication(wx.Frame):
 	def OnPriorityGUI(self, event):
 		""" Method calling the PriorityGui.
 		"""
-
 		parent = self.GetWindowByEvent(event)
 		diagram = self.GetDiagramByWindow(parent)
 		diagram.OnPriority(parent)
@@ -1762,7 +1761,6 @@ class MainApplication(wx.Frame):
 	def OnSimulation(self, event):
 		""" Method calling the simulationGUI.
 		"""
-
 		parent = self.GetWindowByEvent(event)
 		diagram = self.GetDiagramByWindow(parent)
 		return diagram.OnSimulation(event)
@@ -1865,6 +1863,7 @@ class MainApplication(wx.Frame):
 			if pos != None:
 				nb1.DeletePage(pos)
 
+	###
 	def OnShowLibraries(self, evt):
 		""" Libraries view menu has been pressed.
 		"""
@@ -1974,7 +1973,7 @@ class MainApplication(wx.Frame):
 		choices = [_('Embedded in DEVSimPy')]
 
 		### editor of profiling software
-		try :
+		try:
 			kcachegrind = which('kcachegrind')
 			choices.append('kcachegrind')
 		except Exception:
@@ -2017,7 +2016,7 @@ class MainApplication(wx.Frame):
 				d.CenterOnParent(wx.BOTH)
 				d.ShowModal()
 			else:
-				pass
+				dlg.Destroy()
 
 	@staticmethod
 	def LoadCachegrindFile(cachegrind_fn):
@@ -2038,6 +2037,7 @@ class MainApplication(wx.Frame):
 		stats.sort_stats('time', 'calls')
 		stats.print_stats(100)
 
+	###
 	def OnDeleteProfiles(self, event):
 		dlg = wx.MessageDialog(self, _('Do you realy want to delete all files ?'), _('Profile Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 		if dlg.ShowModal() == wx.ID_YES:
@@ -2045,6 +2045,7 @@ class MainApplication(wx.Frame):
 			for fn in filter(lambda f: f.endswith(('.prof','.cachegrind')), os.listdir(tmp_dir)):
 				os.remove(os.path.join(tmp_dir,fn))
 		dlg.Destroy()
+
 	###
 	def OnRestart(self):
 		""" Restart application.
@@ -2062,10 +2063,7 @@ class MainApplication(wx.Frame):
 		""" Shows the DEVSimPy help file. """
 
 		## language config from .devsimpy file
-		if self.language == 'default':
-			lang = 'en'
-		else:
-			lang = eval('self.language')
+		lang = 'en' if self.language == 'default' else eval('self.language')
 
 		filename = os.path.join(HOME_PATH, 'doc', 'html', lang, 'Help.zip')
 		if wx.VERSION_STRING >= '4.0':
@@ -2116,7 +2114,6 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
 		info.SetLicence(licence)
 		info.AddDeveloper(_('L. Capocchi'))
 		info.AddDocWriter(_('L. Capocchi'))
-		#info.AddArtist(_('L. Capocchi.'))
 		info.AddTranslator(_('L. Capocchi'))
 
 		wx.AboutBox(info)
