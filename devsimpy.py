@@ -321,7 +321,6 @@ except ImportError:
 	AdvancedSplash = wx.SplashScreen
 	old = True
 
-
 # to send event
 if wx.VERSION_STRING < '2.9':
 	from wx.lib.pubsub import Publisher as pub
@@ -414,7 +413,7 @@ from Editor import GetEditor
 from YAMLExportGUI import YAMLExportGUI
 from wxPyMail import SendMailWx
 
-### only for wx. 2.9 bug
+### only for wx 2.9 (bug)
 ### http://comments.gmane.org/gmane.comp.python.wxpython/98744
 wx.Log.SetLogLevel(0)
 

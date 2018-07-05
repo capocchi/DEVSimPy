@@ -283,6 +283,7 @@ class LibraryTree(wx.TreeCtrl):
 							self.RemoveItem(item)
 
 					    except Exception, info:
+							info = str(info).decode('utf-8')
 							sys.stdout.write(_("%s not deleted! \n Error: %s")%(label,info))
 
 					dial.Destroy()

@@ -19,6 +19,17 @@ import tempfile
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
+if __name__ == '__main__':
+    import __builtin__
+    import sys
+    ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
+    __builtin__.__dict__['GUI_FLAG'] = True
+    __builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyDEVS'),
+									'PyPDEVS_221':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs221' ,'src'),
+									'PyPDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','old')}
+    __builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyDEVS'
+    __builtin__.__dict__['HOME_PATH'] = ABS_HOME_PATH
+
 import Container
 import Components
 
@@ -254,6 +265,203 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 
 		del connectionlist[0]
 
+def getDiagramFromXMLSES(xmlses_file="", name="", canvas=None, D={}):
+	"""
+	"""
+
+	import WizardGUI
+
+	xmldoc = minidom.parse(xmlses_file)
+
+	#connectionlist = xmldoc.getElementsByTagName('coupling')
+
+	### item corresponding to the block
+	blocklist = xmldoc.getElementsByTagName('treenode')
+
+	D = {}
+	for i,s in enumerate(blocklist[1:]):
+		if s.hasChildNodes():
+			#coupled_models.append(s)
+			name = s.attributes['name'].value
+			if D != {}:
+				for k,v in D.items():
+					if k.attributes['uid'].value == blocklist[i].attributes['parentuid'].value:
+						D[k].append(s)
+						break
+			D[s] = []
+			
+		elif i+1 < len(blocklist[1:]) and not blocklist[i+2].hasChildNodes():
+			for k,v in D.items():
+				if k.attributes['uid'].value == s.attributes['parentuid'].value:
+					D[k].append(s)
+					
+					break
+    	else:
+    		
+    		for k,v in D.items():
+    				if k.attributes['uid'].value == s.attributes['parentuid'].value:
+					D[k].append(s)
+					
+					break
+
+	already_instanciated = {}
+	for coupled_model,components in D.items():
+    	
+		### coupled model
+		name = coupled_model.attributes['name'].value
+		### if coupled model is already instanciated, block is in already_instanciated
+		if name not in already_instanciated:
+			temp = tempfile.NamedTemporaryFile(suffix='.py', delete=False)
+			temp.write(WizardGUI.coupledCode('CoupledModel'))
+			temp.seek(0)
+
+			block = Components.BlockFactory.CreateBlock(x=100, y=100, name=name, python_file=temp.name, canvas=canvas)
+			block.label = name
+		else:
+			block = already_instanciated[name]
+
+		for m in components:
+    		
+			### coupled model
+			sub_name = m.attributes['name'].value
+			temp = tempfile.NamedTemporaryFile(suffix='.py', delete=False)
+			### if model is in the keys of D (coupled models), m i coupled model
+			if m in D.keys():
+				temp.write(WizardGUI.coupledCode('CoupledModel'))	
+			else:
+				temp.write(WizardGUI.atomicCode('AtomicModel'))	
+			temp.seek(0)
+
+			sub_block = Components.BlockFactory.CreateBlock(x=100, y=100, name=sub_name, python_file=temp.name, canvas=canvas)
+			sub_block.label = sub_name
+			
+			### if m is a coupled model, we store the associated block (sub_name = Numi8)
+			if m in D.keys():already_instanciated[sub_name] = sub_block
+
+			block.AddShape(sub_block)
+
+		if name not in already_instanciated:
+			canvas.AddShape(block)
+		
+	### TODO : coupling
+
+	return True
+
+	### parent of all block is canvas
+	D['1'] = canvas
+
+	### make block (atomic or coupled model)
+	while(blocklist!=[]):
+
+		s = blocklist[0]
+
+		name = s.attributes['value'].value
+		if s.attributes.has_key('style'):
+
+			### coupled model have swimlane style or *couple{d}* in value filed
+			if s.attributes['style'].value == 'swimlane' or re.match('[a-zA-Z0-9_ ]*[c|C]oupl[ed|e|é][a-zA-Z0-9_ ]*',name, re.IGNORECASE):
+				attr = s.getElementsByTagName('mxGeometry')[0].attributes
+				temp = tempfile.NamedTemporaryFile(suffix='.py')
+				temp.write(WizardGUI.coupledCode('CoupledModel'))
+				temp.seek(0)
+
+				block = Components.BlockFactory.CreateBlock(x=int(attr['x'].value), y=int(attr['y'].value), name=name, python_file=temp.name, canvas=canvas)
+				block.label = name
+
+				parent_id = s.attributes['parent'].value
+				id = str(s.attributes['id'].value)
+				if parent_id == '1':
+					canvas.AddShape(block)
+					D[id] = block
+					del blocklist[0]
+
+				elif parent_id in D.keys():
+					canvas_parent = D[parent_id]
+					canvas_parent.AddShape(block)
+					D[id] = block
+					del blocklist[0]
+
+				else:
+					blocklist.insert(len(blocklist),blocklist.pop(0))
+
+			elif re.match('[a-zA-Z0-9_ ]*[a|A]tomi[c|que][a-zA-Z0-9_ ]*',name, re.IGNORECASE):
+				attr = s.getElementsByTagName('mxGeometry')[0].attributes
+				temp = tempfile.NamedTemporaryFile(suffix='.py')
+				temp.write(WizardGUI.atomicCode('AtomicModel'))
+				temp.seek(0)
+
+				block = Components.BlockFactory.CreateBlock(x=int(attr['x'].value), y=int(attr['y'].value), name=name, python_file=temp.name, canvas=canvas)
+				block.label = name
+
+				parent_id = s.attributes['parent'].value
+				id = str(s.attributes['id'].value)
+
+				if parent_id == '1':
+					canvas.AddShape(block)
+					D[id] = block
+					del blocklist[0]
+
+				elif parent_id in D.keys():
+					canvas_parent = D[parent_id]
+					canvas_parent.AddShape(block)
+					D[id] = block
+					del blocklist[0]
+
+				else:
+					blocklist.insert(len(blocklist),blocklist.pop(0))
+
+		elif s.attributes.has_key('vertex'):
+			if s.attributes['vertex'].value == '1' or re.match('[a-zA-Z0-9_ ]*[a|A]tomi[c|que][a-zA-Z0-9_ ]*',name, re.IGNORECASE):
+				attr = s.getElementsByTagName('mxGeometry')[0].attributes
+				temp = tempfile.NamedTemporaryFile(suffix='.py')
+				temp.write(WizardGUI.atomicCode('AtomicModel'))
+				temp.seek(0)
+
+				block = Components.BlockFactory.CreateBlock(x=int(attr['x'].value), y=int(attr['y'].value), name=name, python_file=temp.name, canvas=canvas)
+				block.label = name
+
+				parent_id = s.attributes['parent'].value
+				id = str(s.attributes['id'].value)
+				if parent_id == '1':
+					canvas.AddShape(block)
+					D[id] = block
+					del blocklist[0]
+
+				elif parent_id in D.keys():
+					canvas_parent = D[parent_id]
+					canvas_parent.AddShape(block)
+					D[id] = block
+					del blocklist[0]
+
+				else:
+					blocklist.insert(len(blocklist),blocklist.pop(0))
+		else:
+			sys.stdout.write(_('Element not considered!\n'))
+
+	### make connection
+	while(connectionlist != []):
+		s = connectionlist[0]
+
+		source_id = s.attributes['target'].value
+		target_id = s.attributes['source'].value
+		parent_id = s.attributes['parent'].value
+		#style = s.attributes['style'].value.split(';')
+
+		source = D[source_id]
+		target = D[target_id]
+		c = D[parent_id]
+
+		if source in canvas.diagram.shapes and target in canvas.diagram.shapes:
+			a,b = canvas.GetNodeLists(source, target)
+			if a == [] or b == []:
+				a,b = canvas.GetNodeLists(target,source)
+			canvas.sourceNodeList, canvas.targetNodeList = a,b
+			
+			if canvas.sourceNodeList != [] and canvas.targetNodeList !=[]:
+				canvas.makeConnectionShape(canvas.sourceNodeList[0], canvas.targetNodeList[0])
+
+		del connectionlist[0]
+
 if __name__ == '__main__':
 	import wx
 
@@ -274,17 +482,20 @@ if __name__ == '__main__':
 			__builtin__.__dict__['ICON_PATH_16_16']=os.path.join(ICON_PATH,'16x16')
 			__builtin__.__dict__['NB_HISTORY_UNDO']= 5
 			__builtin__.__dict__['DOMAIN_PATH']='Domain'
+			
 			__builtin__.__dict__['FONT_SIZE']=12
 			__builtin__.__dict__['_'] = gettext.gettext
 			__builtin__.__dict__['LOCAL_EDITOR'] = False
 
 			diagram = Container.Diagram()
-
+			
 			self.frame = DetachedFrame.DetachedFrame(None, -1, "Test", diagram)
 			newPage = Container.ShapeCanvas(self.frame, wx.NewId(), name='Test')
 			newPage.SetDiagram(diagram)
 
-			getDiagramFromXML("Diagram.xml", canvas=newPage)
+			#getDiagramFromXML("Diagram.xml", canvas=newPage)
+			path = os.path.join(os.path.expanduser("~"),'Downloads','example.xmlsestree')
+			getDiagramFromXMLSES(path, canvas=newPage)
 			#diagram.SetParent(newPage)
 
 			self.frame.Show()
