@@ -223,15 +223,19 @@ class Newt(wx.Frame):
 		### update the column width
 		try:
 			activePage = self.notebook.GetSelection()
-		except :
+		except Exception, info:
 			activePage = 0
+			sys.stdout.write(_("Error in SpreadSheet: %s"%info))
 
-		sheet = self.notebook.GetPage(activePage)
-		sheet.UpdateColWidth()
-
-		toolbar = self.GetToolBar()
-		toolbar.EnableTool(self.chart.GetId(), msg)
-		self.statusbar.SetStatusText("", 0)
+		try:
+			sheet = self.notebook.GetPage(activePage)
+			sheet.UpdateColWidth()
+		except Exception, info:
+			sys.stdout.write(_("Error in SpreadSheet: %s"%info))
+		else:
+			toolbar = self.GetToolBar()
+			toolbar.EnableTool(self.chart.GetId(), msg)
+			self.statusbar.SetStatusText("", 0)
 
 	###
 	def OnTab(self, event):
