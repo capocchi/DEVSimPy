@@ -431,8 +431,9 @@ class CustomDataTable(GridTableBase):
 			### if the type of value has changed for an instance (edition of the code block), we reinitilize the value 
 			if attr_name in args_in_constructor.keys():
 				val_in_constructor = args_in_constructor[attr_name]
-				print val, val_in_constructor, type(val), type(val_in_constructor) 
-				if type(val) != type(val_in_constructor):
+				t1 = type(val)
+				t2 = type(val_in_constructor)
+				if t1 != t2 and (t1 not in (str,unicode) and t2 not in (str,unicode)):
 					val = val_in_constructor
 				self.data.append([attr_name, val, info])
 				self.dataTypes.append(self.GetTypeList(val))
