@@ -274,30 +274,218 @@ def getDiagramFromXMLSES(xmlses_file="", name="", canvas=None, D={}):
 	xmldoc = minidom.parse(xmlses_file)
 
 	### item corresponding to the block
+	global blocklist
 	blocklist = xmldoc.getElementsByTagName('treenode')
 
-	def GetParent(node,blocklist):
+	def GetParent(node):
 		for s in blocklist:
 			if node.attributes['parentuid'].value == s.attributes['uid'].value:
 				return s
 		return False
 
-	def GetChild(node,blocklist):
+	def GetChild(node):
 		for s in blocklist:
 			if s.attributes['parentuid'].value == node.attributes['uid'].value:
 				return s
-		return False
+		return node	
+
+	def GetNodeFromUID(uid):
+		''' Return node form uid
+		'''
+		for b in blocklist:
+			if b.attributes['uid'].value == uid:
+				return b
+		#if D != {}:
+		#	for k,v in D.items():
+		#		if v['uid'] == uid:
+		#			return k
+		#		else:	
+		#			for d in filter(lambda a: isinstance(a,dict),v['components']):
+		#				return GetNodeFromUID(uid,{d['node']:d})
+	
+	def InsertElemFromUID(elem,uid,D):
+		''' Update and return the new D with new elem into the components of the uid coupled model
+			elem: new element
+			uid: uid of the coupled model 
+			D: the dictionary to udpade
+		'''
+		if D != {}:
+			for k,v in D.items():
+				if v['uid'] == uid:
+					D[k]['components'].append(elem)
+					return D
+				else:
+					for d in filter(lambda a: isinstance(a,dict),v['components']):	
+						return InsertElemFromUID(elem,uid,{d['node']:d})
+
+	def GetDiagram(canvas, D, parent_block=None):
+		''' Build the DEVSimpy diagram with the creation of the block models (atomic and coupled) and ports (input and output)
+		'''
+		if D != {}:
+			for k,v in D.items():
+				if v.has_key('components'):
+    				### coupled model
+					name = k.attributes['name'].value
+					temp = tempfile.NamedTemporaryFile(suffix='.py', delete=False)
+					temp.write(WizardGUI.coupledCode('CoupledModel'))
+					temp.seek(0)
+					nbi,nbo = map(len,GetNbPort(k))
+					cp_block = Components.BlockFactory.CreateBlock(x=100, y=100, inputs = nbi, outputs = nbo, name=name, python_file=temp.name, canvas=canvas)
+					cp_block.label = name
+					
+					parent_block.AddShape(cp_block)
+
+					for d in v['components']:
+						if isinstance(d, dict):
+							GetDiagram(canvas,{d['node']:d}, cp_block)
+						else:
+							GetDiagram(canvas,{d:{}}, cp_block)
+
+					return True
+				else:
+    				### atomic model
+					name = k.attributes['name'].value
+					temp = tempfile.NamedTemporaryFile(suffix='.py', delete=False)
+					temp.write(WizardGUI.atomicCode('AtomicModel'))
+					temp.seek(0)
+					nbi,nbo = map(len,GetNbPort(k))
+					am_block = Components.BlockFactory.CreateBlock(x=100, y=100, inputs = nbi, outputs = nbo, name=name, python_file=temp.name, canvas=canvas)
+					am_block.label = name
+					
+					parent_block.AddShape(am_block)
+
+					return True
+
+	def GetNbPort(node):
+		''' Get a tuple that contain a list of input an output ports
+		'''
+		iport = []
+		oport = []
+		connectionlist = xmldoc.getElementsByTagName('coupling')
+		name = node.attributes['name'].value
+		for c in connectionlist:
+			if name == c.attributes['sinkname'].value:
+				p = c.attributes['sinkport'].value
+				if p not in oport:
+					oport.append(p)
+			elif name == c.attributes['sourcename'].value:
+				p = c.attributes['sourceport'].value
+				if p not in iport:
+					iport.append(p)
+
+		### if numer od ports processing faild with name, try with uid (node correspond by uid often for multiaspect)
+		if iport==oport==[]:
+			uid = node.attributes['uid'].value
+			for c in connectionlist:
+				if uid == c.attributes['sinkuid'].value:
+					p = c.attributes['sinkport'].value
+					if p not in oport:
+						oport.append(p)
+				elif uid == c.attributes['sourceuid'].value:
+					p = c.attributes['sourceport'].value
+					if p not in iport:
+						iport.append(p)
+
+		return (iport, oport)
+
+	def GetDiagramCoupling(canvas, D, parent_block=None):
+    		''' Build the DEVSimpy diagram coupling 
+		'''
+		### make connection
+		connectionlist = xmldoc.getElementsByTagName('coupling')
+
+		### all blocks
+		blocks = canvas.diagram.GetFlatBlockShapeList()
+
+		### make connection
+		while(connectionlist != []):
+			s = connectionlist[0]
+
+			### find corresponding block
+			source_name = GetNodeFromUID(s.attributes['sinkuid'].value).attributes['name'].value
+			target_name = GetNodeFromUID(s.attributes['sourceuid'].value).attributes['name'].value
+			
+			for b in blocks:
+				if b.label == source_name:
+					source = b
+				elif b.label == target_name:
+					target = b
+				elif b.label == GetParent(s.parentNode).attributes['name'].value:
+					diagram = b
+    					
+			### add the connexion to the diagram
+			ci = Container.ConnectionShape()
+			diagram.shapes.insert(0, ci)
+
+			a,b = canvas.GetNodeLists(source, target)
+			if a == [] or b == []:
+				a,b = canvas.GetNodeLists(target,source)
+			sourceNode, targetNode = a[0],b[0]
+
+			### connexion
+			if isinstance(sourceNode,  Container.ONode):
+				ci.setInput(sourceNode.item, sourceNode.index)
+				ci.x[0], ci.y[0] = sourceNode.item.getPortXY('output', sourceNode.index)
+				ci.x[1], ci.y[1] = targetNode.item.getPortXY('input', targetNode.index)
+				ci.setOutput(targetNode.item, targetNode.index)
+
+			else:
+				ci.setInput(targetNode.item, targetNode.index)
+				ci.x[1], ci.y[1] = sourceNode.item.getPortXY('output', sourceNode.index)
+				ci.x[0], ci.y[0] = targetNode.item.getPortXY('input', targetNode.index)
+				ci.setOutput(sourceNode.item, sourceNode.index)
+		
+			return True
+
+	### dictionnary building
+	D = {}
+	### Add high level coupled models
+	for cm in filter(lambda a: a.attributes['parentuid'].value == '1' and a.attributes['type'].value == "Aspect Node", blocklist):
+    	### change the name with parent (comparing uid and parentuid)
+		cm.attributes['name'].value = GetParent(cm).attributes['name'].value
+		name = cm.attributes['name'].value
+		uid = cm.attributes['uid'].value
+		D[cm] = {'node':cm, 'uid':uid, 'name':name, 'components':[]}
+
+	### Add other sub coupled models
+	for uid in range(2,100):
+		for sub_cm in filter(lambda a: a.attributes['parentuid'].value == str(uid) and a.attributes['type'].value == "Aspect Node", blocklist):
+			sub_uid =  GetParent(sub_cm).attributes['parentuid'].value
+			for parent_cm in D:
+				parent_uid = parent_cm.attributes['uid'].value
+				if parent_uid == sub_uid:
+					### change the name with parent (comparing uid and parentuid)
+					sub_cm.attributes['name'].value = GetParent(sub_cm).attributes['name'].value
+					name = sub_cm.attributes['name'].value
+					uid = sub_cm.attributes['uid'].value
+    				D[parent_cm]['components'].append({'node':sub_cm,'uid':uid,'name':name,'components':[]})
+
+	### Add atomic models
+	for am in filter(lambda a: a.attributes['type'].value == "Entity Node" and GetChild(a).attributes['type'].value != "Aspect Node", blocklist):
+		am_parent_uid = am.attributes['parentuid'].value
+		InsertElemFromUID(am,am_parent_uid,D)
+
+	#import pprint
+	#pprint.pprint(D)
+
+	### Make the DEVSimPy diagram
+	GetDiagram(canvas,D,canvas)
+
+	### Make the DEVsimPy coupling
+	GetDiagramCoupling(canvas,D,canvas)
+
+	return True
 
 	BLOCK = {'1':canvas}
 
 	D = {}
-	for i,s in enumerate(blocklist):
+	for s in blocklist:
 		if s.attributes['type'].value == "Aspect Node":
 			### change the name with parent (comparing uid and parentuid)
 			s.attributes['name'].value = GetParent(s,blocklist).attributes['name'].value
 			if D != {}:
 				for k,v in D.items():
-					if k.attributes['uid'].value == blocklist[i].attributes['parentuid'].value:
+					if k.attributes['uid'].value == s.attributes['parentuid'].value:
 						D[k].append(s)
 						break
 			D[s] = []
@@ -382,7 +570,6 @@ def getDiagramFromXMLSES(xmlses_file="", name="", canvas=None, D={}):
 		source_id = s.attributes['sinkuid'].value
 		target_id = s.attributes['sourceuid'].value
 		
-
 		source = BLOCK[source_id]
 		target = BLOCK[target_id]
 		diagram = BLOCK[GetParent(s.parentNode,blocklist).attributes['uid'].value]
