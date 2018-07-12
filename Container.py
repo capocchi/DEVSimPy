@@ -2299,7 +2299,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 				sys.stdout.write(_("Error trying to undo (TypeError): %s \n"%info))
 			except Exception, info:
 				sys.stdout.write(_("Error trying to undo: %s \n"%info))
-			finally:
+			else:
 
 				### just for init (white diagram)
 				if self.diagram.GetBlockCount()>=1:

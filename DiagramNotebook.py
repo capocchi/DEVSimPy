@@ -116,7 +116,6 @@ class GeneralNotebook(Printable):
 
 		self.SetSelection(self.GetPageCount()-1)
 
-
 	def OnClearPage(self, evt):
 		""" Clear page.
 

@@ -12,6 +12,7 @@ GLOBAL VARIABLES AND FUNCTIONS:
 """
 
 import os
+import sys
 import re
 import copy
 import tempfile
@@ -269,14 +270,6 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 	"""
 	"""
 
-	import WizardGUI
-
-	xmldoc = minidom.parse(xmlses_file)
-
-	### item corresponding to the block
-	global blocklist
-	blocklist = xmldoc.getElementsByTagName('treenode')
-
 	def GetParent(node):
 		for s in blocklist:
 			if node.attributes['parentuid'].value == s.attributes['uid'].value:
@@ -465,7 +458,7 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 			### delete the first selected cinnection objet
 			del connectionlist[0]
 		
-		return True
+		return canvas.diagram
 
 	def XMLToDict(blocklist):		
 		### dictionnary building
@@ -498,25 +491,39 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 
 		return D
 
+	import WizardGUI
+
+	try:
+		xmldoc = minidom.parse(xmlses_file)
+	except Exception, info:
+		sys.stdout.write('Error importing %s: %s\n' % (xmlses_file, info))
+		sys.stdout.write('Please check the XML SES file\n')
+		return False
+
+	### blocklist contains all the treenode xml nodes
+	global blocklist
+	blocklist = xmldoc.getElementsByTagName('treenode')
+
 	D = XMLToDict(blocklist)
 
 	if D != {}:
 		try:
 			### Make the DEVSimPy diagram
-			GetDiagram(canvas,D,parent_block=canvas)
+			dia = GetDiagram(canvas, D, parent_block=canvas)
 		except Exception, info:
-			print 'Error making the diagram from XML SES: %s'%info
+			sys.stdout.write(_('Error making the diagram from XML SES: %s\n')%info)
 			return False
 		else:
 			try:
 				### Make the DEVsimPy coupling
-				GetDiagramCoupling(canvas,D,parent_block=canvas)
+				dia = GetDiagramCoupling(canvas,D,parent_block=canvas)
 			except Exception, info:
-				print 'Error making the coupling into the diagram from XML SES: %s'%info
+				sys.stdout.write(_('Error making the coupling into the diagram from XML SES: %s\n')%info)
 				return False
 			else:	
-				return True
+				return dia
 	else:
+		sys.stdout.write(_("XML SES file seems don't contain models!\n"))
 		return False
 
 if __name__ == '__main__':
@@ -550,7 +557,6 @@ if __name__ == '__main__':
 			newPage = Container.ShapeCanvas(self.frame, wx.NewId(), name='Test')
 			newPage.SetDiagram(diagram)
 
-			#getDiagramFromXML("Diagram.xml", canvas=newPage)
 			path = os.path.join(os.path.expanduser("~"),'Downloads','example.xmlsestree')
 			getDiagramFromXMLSES(path, canvas=newPage)
 			#diagram.SetParent(newPage)

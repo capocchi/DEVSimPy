@@ -36,7 +36,7 @@ from tempfile import gettempdir
 
 from Decorators import BuzyCursorNotification, StatusBarNotification, cond_decorator
 from Utilities import itersubclasses, getTopLevelWindow
-from XMLModule import makeDEVSXML
+from XMLModule import makeDEVSXML, getDiagramFromXMLSES
 from Join import makeJoin, makeDEVSConf
 from Abstractable import Abstractable
 

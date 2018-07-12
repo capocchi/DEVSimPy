@@ -412,6 +412,7 @@ from DiagramNotebook import DiagramNotebook
 from Editor import GetEditor
 from YAMLExportGUI import YAMLExportGUI
 from wxPyMail import SendMailWx
+from XMLModule import getDiagramFromXMLSES
 
 ### only for wx 2.9 (bug)
 ### http://comments.gmane.org/gmane.comp.python.wxpython/98744
@@ -1337,7 +1338,8 @@ class MainApplication(wx.Frame):
 				open_file_result = diagram.LoadFile(path)
 
 				if isinstance(open_file_result, Exception):
-					wx.MessageBox(_('Error opening file : %s')%str(open_file_result), 'Error', wx.OK | wx.ICON_ERROR)
+					type, value, traceback = sys.exc_info()
+					wx.MessageBox(_('Error opening %s: %s')%(value.filename, value.strerror), 'Error', wx.OK | wx.ICON_ERROR)
 				else:
 					self.nb2.AddEditPage(os.path.splitext(fileName)[0], diagram)
 
@@ -1574,6 +1576,31 @@ class MainApplication(wx.Frame):
 
 		save_dlg.Destroy()
 
+	def OnImportXMLSES(self,event):
+    	
+		wcd = _("XML SES files (*.xmlsestree)|*.xmlsestree|All files (*)|*")
+		home = os.getenv('USERPROFILE') or os.getenv('HOME') or HOME_PATH
+		open_dlg = wx.FileDialog(self, message = _('Choose a file'), defaultDir = home, defaultFile = "", wildcard = wcd, style = wx.OPEN|wx.MULTIPLE|wx.CHANGE_DIR)
+
+		### path,diagram dictionary
+		new_paths = {}
+
+		# get the new path from open file dialogue
+		if open_dlg.ShowModal() == wx.ID_OK:
+
+			### for selected paths
+			for path in open_dlg.GetPaths():
+				fileName = os.path.basename(path)
+				self.nb2.AddEditPage(os.path.splitext(fileName)[0])
+				actuel = self.nb2.GetSelection()
+				canvas = self.nb2.GetPage(actuel)
+		
+				### if error whenimporting, we inform the user and we delete the tab of the notebook
+				if not getDiagramFromXMLSES(fileName, canvas):
+					wx.MessageBox(_('Error importing %s')%(fileName))
+					self.nb2.DeletePage(actuel)
+				else:
+					wx.MessageBox(_('%s file imported!')%str(fileName), _('Info'), wx.OK|wx.ICON_INFORMATION)
 	###
 	def OnExportRest(self, event):
 		""" Export YAML file to the 'uplaod' directory of a REST server
