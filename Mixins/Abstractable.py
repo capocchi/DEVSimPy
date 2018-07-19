@@ -20,6 +20,8 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
+import sys
+
 from Mixins.Attributable import Attributable
 from DomainInterface.DomainBehavior import DomainBehavior
 
@@ -175,7 +177,7 @@ class Abstractable:
             canvas.SetCurrentLevel(l)
 
             sys.stdout.write("load diagram %d"%l)
-            sys.stdout.write(self.layers)
+            sys.stdout.write(str(self.layers))
 
         else:
 

@@ -266,12 +266,15 @@ class CodeCB(wx.Choicebook):
 				txt = unicode(pageTexts[nameFunc], errors='replace').encode('utf-8')
 			except TypeError:
 				txt = pageTexts[nameFunc]
-
-			st.AppendText(txt)
-			st.ShowPosition(wx.TOP)
-			st.SetEditable(False)
-			box.Add(st,1,wx.EXPAND)
-			win.SetSizer(box)
+			finally:
+				if txt:
+					st.AppendText(txt)
+					st.ShowPosition(wx.TOP)
+					st.SetEditable(False)
+					box.Add(st,1,wx.EXPAND)
+					win.SetSizer(box)
+				else:
+					sys.stdout.write(_("Method %s of class %s unknown!\n"%(nameFunc,cls.__name__)))
 
 			self.AddPage(win, nameFunc)
 
@@ -424,27 +427,32 @@ class CustomDataTable(GridTableBase):
 
 		### Behavioral sorted values fields
 		args_in_constructor = Components.GetArgs(Components.GetClass(model.python_path))
+		
 		for attr_name,info in sorted(infoBlockBehavioralDict.items()):
 			
 			val = model.args[attr_name]
 				
 			### if the type of value has changed for an instance (edition of the code block), we reinitilize the value 
-			if attr_name in args_in_constructor.keys():
+			if args_in_constructor and attr_name in args_in_constructor.keys():
 				val_in_constructor = args_in_constructor[attr_name]
 				t1 = type(val)
 				t2 = type(val_in_constructor)
 				if t1 != t2 and (t1 not in (str,unicode) and t2 not in (str,unicode)):
 					val = val_in_constructor
-				self.data.append([attr_name, val, info])
-				self.dataTypes.append(self.GetTypeList(val))
-				self.nb_behavior_var += 1
+			
+			self.data.append([attr_name, val, info])
+			self.dataTypes.append(self.GetTypeList(val))
+			self.nb_behavior_var += 1
 
-		for attr_name, val in args_in_constructor.items():
-			if attr_name not in infoBlockBehavioralDict.keys():
-				model.args[attr_name] = val
-				self.data.append([attr_name, val, _('Unknown information')])
-				self.dataTypes.append(self.GetTypeList(val))
-				self.nb_behavior_var += 1
+		if args_in_constructor:
+			for attr_name, val in args_in_constructor.items():
+				if attr_name not in infoBlockBehavioralDict.keys():
+					model.args[attr_name] = val
+					self.data.append([attr_name, val, _('Unknown information')])
+					self.dataTypes.append(self.GetTypeList(val))
+					self.nb_behavior_var += 1
+		else:
+			sys.stdout.write(_("Args in constructor is none\n"))
 
 		### Python File Path
 		if hasattr(model, 'python_path'):
@@ -983,7 +991,6 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 					### delete xlabel and ylabel attributes if exist
 					model.RemoveAttribute('xlabel')
 					model.RemoveAttribute('ylabel')
-
 					### Update of DEVSimPy model from new python behavioral file (ContainerBlock is not considered because he did not behavioral)
 					if new_cls.__name__ in ('To_Disk','MessagesCollector'):
 						model.__class__ = Container.DiskGUI
@@ -991,8 +998,10 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 						model.__class__ = Container.ScopeGUI
 						model.AddAttribute("xlabel")
 						model.AddAttribute("ylabel")
-					else:
+					elif True in map(lambda a: 'DomainBehavior' in str(a), new_cls.__bases__):
 						model.__class__ = Container.CodeBlock
+					else:
+						model.__class__ = Container.ContainerBlock
 
 					### if we change the python file from zipfile we compresse the new python file and we update the python_path value
 					if zipfile.is_zipfile(model.model_path):

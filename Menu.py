@@ -35,6 +35,8 @@ from ExperimentGenerator import ExperimentGenerator
 
 _ = wx.GetTranslation
 
+if wx.VERSION_STRING >= '4.0': wx.NewId = wx.NewIdRef
+
 #File menu identifiers
 ID_NEW = wx.ID_NEW
 ID_OPEN  = wx.ID_OPEN
