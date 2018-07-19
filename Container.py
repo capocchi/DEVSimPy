@@ -2293,7 +2293,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 				if any(objA.__dict__ != objB.__dict__ for objA in self.diagram.GetShapeList() for objB in t.GetShapeList()):
 					self.stockUndo.append(cPickle.dumps(obj=self.diagram, protocol=0))
 			except IndexError:
-				### this is the first call of Undo and StockUndo is emplty
+				### this is the first call of Undo and StockUndo is empty
 				self.stockUndo.append(cPickle.dumps(obj=self.diagram, protocol=0))
 			except TypeError, info:
 				sys.stdout.write(_("Error trying to undo (TypeError): %s \n"%info))
@@ -3690,8 +3690,13 @@ class CodeBlock(Achievable, Block):
 				### Class redefinition if the class inherite to QuickScope, To_Disk or MessagesCollector
 
 				### find all members that is class
-				clsmembers = inspect.getmembers(sys.modules[cls.__name__], inspect.isclass)
-				names = map(lambda t: t[0], clsmembers)
+				try:
+					module = sys.modules[cls.__name__]
+				except KeyError:
+					module = inspect.getmodule(cls)
+				finally:
+					clsmembers = inspect.getmembers(module, inspect.isclass)
+					names = map(lambda t: t[0], clsmembers)
 
 				### if model inherite of ScopeGUI, it requires to redefine the class with the ScopeGUI class
 				if 'To_Disk' in names or 'MessagesCollector' in names:

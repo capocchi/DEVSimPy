@@ -1578,7 +1578,7 @@ class MainApplication(wx.Frame):
 
 	def OnImportXMLSES(self,event):
     	
-		wcd = _("XML SES files (*.xmlsestree)|*.xmlsestree|All files (*)|*")
+		wcd = _("XML SES files (*.xmlsestree)|*.xmlsestree|XML SES files (*.sestree)|*.sestree|All files (*)|*")
 		home = os.getenv('USERPROFILE') or os.getenv('HOME') or HOME_PATH
 		open_dlg = wx.FileDialog(self, message = _('Choose a file'), defaultDir = home, defaultFile = "", wildcard = wcd, style = wx.OPEN|wx.MULTIPLE|wx.CHANGE_DIR)
 
