@@ -282,6 +282,12 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 				return s
 		return node	
 
+	def HasChild(node):
+    		for s in blocklist:
+			if s.attributes['parentuid'].value == node.attributes['uid'].value:
+				return True
+		return False
+
 	def GetNodeFromUID(uid):
 		''' Return node form uid
 		'''
@@ -309,7 +315,7 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 					return D
 				else:
 					for d in filter(lambda a: isinstance(a,dict),v['components']):	
-						return InsertElemFromUID(elem,uid,{d['node']:d})
+						InsertElemFromUID(elem,uid,{d['node']:d})
 
 	def GetDiagram(canvas, D, parent_block=None):
 		''' Build the DEVSimpy diagram with the creation of the block models (atomic and coupled) and ports (input and output)
@@ -327,6 +333,8 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 					cp_block.label = name
 					
 					parent_block.AddShape(cp_block)
+					
+					#print cp_block
 
 					for d in v['components']:
 						if isinstance(d, dict):
@@ -345,6 +353,7 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 					am_block = Components.BlockFactory.CreateBlock(x=100, y=100, inputs = nbi, outputs = nbo, name=name, python_file=temp.name, canvas=canvas)
 					am_block.label = name
 					
+					#print am_block
 					parent_block.AddShape(am_block)
 
 					return True
@@ -354,33 +363,60 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 		'''
 		iport = []
 		oport = []
-		connectionlist = xmldoc.getElementsByTagName('coupling')
 		name = node.attributes['name'].value
+
+		if not HasChild(node):
+			connectionlist = xmldoc.getElementsByTagName('coupling')
+		else:
+			connectionlist = GetChild(node).getElementsByTagName('coupling')
+
 		for c in connectionlist:
 			if name == c.attributes['sinkname'].value:
-				p = c.attributes['sinkport'].value
-				if p not in oport:
-					oport.append(p)
+				p = u''.join([i for i in c.attributes['sinkport'].value if i.isdigit()])
+				if p ==u'': p=u'1'
+				if HasChild(node):
+					if p not in oport:
+						oport.append(p)
+				else:
+					if p not in iport:
+						iport.append(p)	
 			elif name == c.attributes['sourcename'].value:
-				p = c.attributes['sourceport'].value
-				if p not in iport:
-					iport.append(p)
+				p = u''.join([i for i in c.attributes['sourceport'].value if i.isdigit()])
+				if p ==u'': p=u'1'
+				if HasChild(node):
+					if p not in iport:
+						iport.append(p)
+				else:
+					if p not in oport:
+						oport.append(p)
 
 		### if numer od ports processing faild with name, try with uid (node correspond by uid often for multiaspect)
 		if iport==oport==[]:
 			uid = node.attributes['uid'].value
 			for c in connectionlist:
 				if uid == c.attributes['sinkuid'].value:
-					p = c.attributes['sinkport'].value
-					if p not in oport:
-						oport.append(p)
+					p = u''.join([i for i in c.attributes['sinkport'].value if i.isdigit()])
+					if p ==u'': p=u'1'
+					if HasChild(node):
+						if p not in oport:
+							oport.append(p)
+					else:
+						if p not in iport:
+							iport.append(p)	
 				elif uid == c.attributes['sourceuid'].value:
-					p = c.attributes['sourceport'].value
-					if p not in iport:
-						iport.append(p)
+					p = u''.join([i for i in c.attributes['sourceport'].value if i.isdigit()])
+					if p ==u'': p=u'1'
+					if HasChild(node):
+						if p not in iport:
+							iport.append(p)
+					else:
+						if p not in oport:
+							oport.append(p)
 
+		#print name, iport, oport
+		
 		return (iport, oport)
-
+		
 	def GetDiagramCoupling(canvas, D, parent_block=None):
     		''' Build the DEVSimpy diagram coupling 
 		'''
@@ -399,13 +435,21 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 			### find corresponding block
 			source_name = GetNodeFromUID(s.attributes['sourceuid'].value).attributes['name'].value
 			target_name = GetNodeFromUID(s.attributes['sinkuid'].value).attributes['name'].value
-			source_port_num =  s.attributes['sourceport'].value
-			target_port_num =  s.attributes['sinkport'].value
+			### remove caracter form strnf if port has specified with label
+			source_port_num = u''.join([i for i in s.attributes['sourceport'].value if i.isdigit()])
+			target_port_num = u''.join([i for i in s.attributes['sinkport'].value if i.isdigit()])
+    		
+			if source_port_num ==u'': source_port_num=u'1'
+			if target_port_num ==u'': target_port_num=u'1'
+
+			print source_name, source_port_num, target_name, target_port_num
+
 			diagram_name = s.parentNode.attributes['name'].value
 
 			### find the graphic block of the source, target and diagram
 			source = target = diagram = None
 			for b in blocks:
+				print b.label, diagram_name
 				if b.label == source_name:
 					source = b
 				if b.label == target_name:
@@ -429,10 +473,14 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 			diagram.shapes.insert(0, ci)
 
 			### find sourceNode and targetNode
-			a,b = canvas.GetNodeLists(source, target)
-			if a == [] or b == []:
-				a,b = canvas.GetNodeLists(target,source)
+			a1,b1 = canvas.GetNodeLists(source, target)
+			if a1 == [] or b1 == []:
+				a2,b2 = canvas.GetNodeLists(target,source)
 			
+			a = a2 if a1 == [] else a1
+			b = b2 if b1 == [] else b1
+
+			print a,b
 			### GetNideList is not well ordered (TODO)
 			if isinstance(a[0], Container.ONode):
 				sourceNode, targetNode = a[0],b[0]
@@ -473,22 +521,29 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 
 		### Add other sub coupled models
 		for uid in range(2,100):
-			for sub_cm in filter(lambda a: a.attributes['parentuid'].value == str(uid) and a.attributes['type'].value == "Aspect Node", blocklist):
+			for sub_cm in filter(lambda a: str(a.attributes['parentuid'].value) == str(uid) and a.attributes['type'].value == "Aspect Node", blocklist):
+				uid = sub_cm.attributes['uid'].value
+				name = sub_cm.attributes['name'].value
 				sub_uid =  GetParent(sub_cm).attributes['parentuid'].value
-				for parent_cm in D:
-					parent_uid = parent_cm.attributes['uid'].value
-					if parent_uid == sub_uid:
-						### change the name with parent (comparing uid and parentuid)
-						sub_cm.attributes['name'].value = GetParent(sub_cm).attributes['name'].value
-						name = sub_cm.attributes['name'].value
-						uid = sub_cm.attributes['uid'].value
-						D[parent_cm]['components'].append({'node':sub_cm,'uid':uid,'name':name,'components':[]})
+	
+				InsertElemFromUID({'node':GetParent(sub_cm),'uid':uid,'name':name,'components':[]}, sub_uid,D)
+
+				# for parent_cm in D:
+				# 	parent_uid = parent_cm.attributes['uid'].value
+				# 	if str(parent_uid) == str(sub_uid):
+				# 		### change the name with parent (comparing uid and parentuid)
+				# 		sub_cm.attributes['name'].value = GetParent(sub_cm).attributes['name'].value
+				# 		name = sub_cm.attributes['name'].value
+				# 		uid = sub_cm.attributes['uid'].value
+				# 		D[parent_cm]['components'].append({'node':sub_cm,'uid':uid,'name':name,'components':[]})
 
 		### Add atomic models
 		for am in filter(lambda a: a.attributes['type'].value == "Entity Node" and GetChild(a).attributes['type'].value != "Aspect Node", blocklist):
 			am_parent_uid = am.attributes['parentuid'].value
 			InsertElemFromUID(am,am_parent_uid,D)
 
+		import pprint 
+		pprint.pprint(D)
 		return D
 
 	import WizardGUI
@@ -514,14 +569,15 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 			sys.stdout.write(_('Error making the diagram from XML SES: %s\n')%info)
 			return False
 		else:
-			try:
+			#try:
 				### Make the DEVsimPy coupling
-				dia = GetDiagramCoupling(canvas,D,parent_block=canvas)
-			except Exception, info:
-				sys.stdout.write(_('Error making the coupling into the diagram from XML SES: %s\n')%info)
-				return False
-			else:	
-				return dia
+			dia = GetDiagramCoupling(canvas,D,parent_block=canvas)
+			#except Exception, info:
+			#	sys.stdout.write(_('Error making the coupling into the diagram from XML SES: %s\n')%info)
+			#	return dia
+			#else:	
+			#	return dia
+			return dia
 	else:
 		sys.stdout.write(_("XML SES file seems don't contain models!\n"))
 		return False
@@ -557,7 +613,8 @@ if __name__ == '__main__':
 			newPage = Container.ShapeCanvas(self.frame, wx.NewId(), name='Test')
 			newPage.SetDiagram(diagram)
 
-			path = os.path.join(os.path.expanduser("~"),'Downloads','example.xmlsestree')
+			path = os.path.join(os.path.expanduser("~"),'Downloads','Watershed.xml')
+			#path = os.path.join(os.path.expanduser("~"),'Downloads','example.xmlsestree')
 			getDiagramFromXMLSES(path, canvas=newPage)
 			#diagram.SetParent(newPage)
 

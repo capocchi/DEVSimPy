@@ -538,7 +538,7 @@ class DEVSComponent:
 		label = str(devs.getBlockModel().label) if hasattr(devs, 'getBlockModel') else devs.name
 		log_file = os.path.join(gettempdir(),'%s.devsimpy.log'%label)
 		parent = event.GetClientData()
-
+		
 		if os.path.exists(log_file):
 			### read log file
 			with open(log_file, 'r') as f:

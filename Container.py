@@ -1884,6 +1884,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 				targetNodeList = filter(lambda n: not n in sourceINodeList and isinstance(n,INode),nodesList)
 			else:
 				targetNodeList = []
+				sourceNodeList = []
 
 			return (sourceNodeList, targetNodeList)
 
