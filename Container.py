@@ -1847,7 +1847,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 			self.deselect()
 			self.select(target)
 
-			nodesList=filter(lambda n: not isinstance(n, ResizeableNode), self.nodes)
+			nodesList = filter(lambda n: not isinstance(n, ResizeableNode), self.nodes)
 
 			if isinstance(target,Block):
 				if isinstance(source, oPort):
@@ -1864,7 +1864,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 					else:
 						targetNodeList = filter(lambda n: not n in sourceNodeList and isinstance(n,INode),nodesList)
 
-			elif isinstance(target,iPort):
+			elif isinstance(target, iPort):
 				if isinstance(source, oPort):
 					sourceNodeList = sourceINodeList
 				elif isinstance(source, iPort):
@@ -1874,7 +1874,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 
 				targetNodeList = filter(lambda n: not n in sourceONodeList and isinstance(n,ONode),nodesList)
 
-			elif isinstance(target,oPort):
+			elif isinstance(target, oPort):
 				if isinstance(source, oPort):
 					sourceNodeList = sourceINodeList
 				elif isinstance(source, iPort):

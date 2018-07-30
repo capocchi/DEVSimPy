@@ -245,9 +245,12 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		canvas = self.GetCanvas()
 		### bug fixe for windows since wx 4.0
 		if sys.platform.startswith('win'):
-			canvas.OnLeftDown(event)
-			canvas.OnLeftUp(event)
-		
+			try:
+				canvas.OnLeftDown(event)
+				canvas.OnLeftUp(event)
+			except:
+				pass
+
 		canvas.Refresh()
 		### Destroy the windows
 		self.Destroy()

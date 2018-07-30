@@ -442,14 +442,14 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 			if source_port_num ==u'': source_port_num=u'1'
 			if target_port_num ==u'': target_port_num=u'1'
 
-			print source_name, source_port_num, target_name, target_port_num
+			#print source_name, source_port_num, target_name, target_port_num
 
-			diagram_name = s.parentNode.attributes['name'].value
+			p = s.parentNode
+			diagram_name = p.attributes['name'].value
 
 			### find the graphic block of the source, target and diagram
 			source = target = diagram = None
 			for b in blocks:
-				print b.label, diagram_name
 				if b.label == source_name:
 					source = b
 				if b.label == target_name:
@@ -460,13 +460,17 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 			### if source or target is the diagram, we change them with the corresponding iPort or oPort 
 			if diagram == source:
 				for m in filter(lambda a: isinstance(a,Container.iPort),source.GetShapeList()):
-					if int(m.id)+1 == int(source_port_num):
+					#print source_name, int(source_port_num)-1, int(m.id), target_name, target_port_num
+					if int(m.id) == int(source_port_num)-1:
 						source = m
 
 			if diagram == target:
 				for n in filter(lambda a: isinstance(a,Container.oPort),target.GetShapeList()):
-					if int(n.id)+1 == int(target_port_num):
+					#print source_name, target_name, int(target_port_num)-1, int(n.id)
+					if int(n.id) == int(target_port_num)-1:
 						target = n
+
+			print source, target
 
 			### add the connexion to the diagram
 			ci = Container.ConnectionShape()
@@ -475,17 +479,21 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 			### find sourceNode and targetNode
 			a1,b1 = canvas.GetNodeLists(source, target)
 			if a1 == [] or b1 == []:
-				a2,b2 = canvas.GetNodeLists(target,source)
+				a2,b2 = canvas.GetNodeLists(target, source)
 			
 			a = a2 if a1 == [] else a1
 			b = b2 if b1 == [] else b1
 
+			print a1,b1
+			print a2,b2
 			print a,b
 			### GetNideList is not well ordered (TODO)
 			if isinstance(a[0], Container.ONode):
-				sourceNode, targetNode = a[0],b[0]
+				print source_name,int(source_port_num)-1,target_name,int(target_port_num)-1
+				sourceNode, targetNode = a[int(source_port_num)-1],b[int(target_port_num)-1]
 			else:
-				sourceNode, targetNode = b[0],a[0]
+				print source_name,int(source_port_num)-1,target_name,int(target_port_num)-1
+				sourceNode, targetNode = b[int(source_port_num)-1],a[int(target_port_num)-1]
 			
 			### item of node must be overwritted
 			sourceNode.item = source
@@ -525,25 +533,15 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 				uid = sub_cm.attributes['uid'].value
 				name = sub_cm.attributes['name'].value
 				sub_uid =  GetParent(sub_cm).attributes['parentuid'].value
-	
-				InsertElemFromUID({'node':GetParent(sub_cm),'uid':uid,'name':name,'components':[]}, sub_uid,D)
+				sub_cm.attributes['name'].value = GetParent(sub_cm).attributes['name'].value
 
-				# for parent_cm in D:
-				# 	parent_uid = parent_cm.attributes['uid'].value
-				# 	if str(parent_uid) == str(sub_uid):
-				# 		### change the name with parent (comparing uid and parentuid)
-				# 		sub_cm.attributes['name'].value = GetParent(sub_cm).attributes['name'].value
-				# 		name = sub_cm.attributes['name'].value
-				# 		uid = sub_cm.attributes['uid'].value
-				# 		D[parent_cm]['components'].append({'node':sub_cm,'uid':uid,'name':name,'components':[]})
+				InsertElemFromUID({'node':GetParent(sub_cm),'uid':uid,'name':name,'components':[]}, sub_uid,D)
 
 		### Add atomic models
 		for am in filter(lambda a: a.attributes['type'].value == "Entity Node" and GetChild(a).attributes['type'].value != "Aspect Node", blocklist):
 			am_parent_uid = am.attributes['parentuid'].value
 			InsertElemFromUID(am,am_parent_uid,D)
 
-		import pprint 
-		pprint.pprint(D)
 		return D
 
 	import WizardGUI
@@ -560,7 +558,9 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 	blocklist = xmldoc.getElementsByTagName('treenode')
 
 	D = XMLToDict(blocklist)
-
+	#import pprint 
+	#pprint.pprint(D)
+	
 	if D != {}:
 		try:
 			### Make the DEVSimPy diagram
