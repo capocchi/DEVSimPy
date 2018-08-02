@@ -1885,7 +1885,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 			else:
 				targetNodeList = []
 				sourceNodeList = []
-
+			
 			return (sourceNodeList, targetNodeList)
 
 		def OnConnectTo(self, event):

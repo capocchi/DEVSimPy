@@ -416,7 +416,27 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 		#print name, iport, oport
 		
 		return (iport, oport)
-		
+	
+	def GetNodeLists(canvas, source, target):
+		"""
+		"""
+
+		# deselect and select target in order to get its list of node (because the node are generated dynamicly)
+		canvas.deselect()
+		canvas.select(target)
+		canvas.select(source)
+
+		nodesList = filter(lambda n: not isinstance(n, Container.ResizeableNode), canvas.nodes)
+
+		# list of node list for
+		sourceINodeList = filter(lambda n: isinstance(n, Container.INode), nodesList)
+		sourceONodeList = filter(lambda n: isinstance(n, Container.ONode), nodesList)
+
+		sourceNodeList = filter(lambda n: n.item == source and isinstance(n, Container.ONode), nodesList)
+		targetNodeList = filter(lambda n: n.item == target and isinstance(n, Container.INode), nodesList)
+
+		return (sourceNodeList, targetNodeList)
+
 	def GetDiagramCoupling(canvas, D, parent_block=None):
     		''' Build the DEVSimpy diagram coupling 
 		'''
@@ -435,14 +455,13 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 			### find corresponding block
 			source_name = GetNodeFromUID(s.attributes['sourceuid'].value).attributes['name'].value
 			target_name = GetNodeFromUID(s.attributes['sinkuid'].value).attributes['name'].value
-			### remove caracter form strnf if port has specified with label
+			
+			### remove caracter form str if port has specified with label
 			source_port_num = u''.join([i for i in s.attributes['sourceport'].value if i.isdigit()])
 			target_port_num = u''.join([i for i in s.attributes['sinkport'].value if i.isdigit()])
-    		
+
 			if source_port_num ==u'': source_port_num=u'1'
 			if target_port_num ==u'': target_port_num=u'1'
-
-			#print source_name, source_port_num, target_name, target_port_num
 
 			p = s.parentNode
 			diagram_name = p.attributes['name'].value
@@ -460,57 +479,42 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 			### if source or target is the diagram, we change them with the corresponding iPort or oPort 
 			if diagram == source:
 				for m in filter(lambda a: isinstance(a,Container.iPort),source.GetShapeList()):
-					#print source_name, int(source_port_num)-1, int(m.id), target_name, target_port_num
 					if int(m.id) == int(source_port_num)-1:
 						source = m
 
 			if diagram == target:
 				for n in filter(lambda a: isinstance(a,Container.oPort),target.GetShapeList()):
-					#print source_name, target_name, int(target_port_num)-1, int(n.id)
 					if int(n.id) == int(target_port_num)-1:
 						target = n
 
+			print "------------------------------------------------"
 			print source, target
+			
+			a,b = GetNodeLists(canvas, source, target)
 
+			print a,b
+
+			if len(a) == 1: source_port_num = u'1'
+			if len(b) == 1: target_port_num = u'1'
+			print source_name,int(source_port_num)-1,target_name,int(target_port_num)-1
+			sourceNode, targetNode = a[int(source_port_num)-1],b[int(target_port_num)-1]
+	
+			### item of node must be overwritted
+			sourceNode.item = source
+			targetNode.item = target
+
+			### connexion
 			### add the connexion to the diagram
 			ci = Container.ConnectionShape()
 			diagram.shapes.insert(0, ci)
 
-			### find sourceNode and targetNode
-			a1,b1 = canvas.GetNodeLists(source, target)
-			if a1 == [] or b1 == []:
-				a2,b2 = canvas.GetNodeLists(target, source)
-			
-			a = a2 if a1 == [] else a1
-			b = b2 if b1 == [] else b1
+			ci.setInput(sourceNode.item, sourceNode.index)
+			ci.x[0], ci.y[0] = sourceNode.item.getPortXY('output', sourceNode.index)
+			ci.x[1], ci.y[1] = targetNode.item.getPortXY('input', targetNode.index)
+			ci.setOutput(targetNode.item, targetNode.index)
 
-			print a1,b1
-			print a2,b2
-			print a,b
-			### GetNideList is not well ordered (TODO)
-			if isinstance(a[0], Container.ONode):
-				print source_name,int(source_port_num)-1,target_name,int(target_port_num)-1
-				sourceNode, targetNode = a[int(source_port_num)-1],b[int(target_port_num)-1]
-			else:
-				print source_name,int(source_port_num)-1,target_name,int(target_port_num)-1
-				sourceNode, targetNode = b[int(source_port_num)-1],a[int(target_port_num)-1]
-			
-			### item of node must be overwritted
-			sourceNode.item = source
-			targetNode.item = target
-		
-			### connexion
-			if isinstance(sourceNode,  Container.ONode):
-				ci.setInput(sourceNode.item, sourceNode.index)
-				ci.x[0], ci.y[0] = sourceNode.item.getPortXY('output', sourceNode.index)
-				ci.x[1], ci.y[1] = targetNode.item.getPortXY('input', targetNode.index)
-				ci.setOutput(targetNode.item, targetNode.index)
-			else:
-				ci.setInput(targetNode.item, targetNode.index)
-				ci.x[1], ci.y[1] = sourceNode.item.getPortXY('output', sourceNode.index)
-				ci.x[0], ci.y[0] = targetNode.item.getPortXY('input', targetNode.index)
-				ci.setOutput(sourceNode.item, sourceNode.index)
-		
+			print "------------------------------------------------"
+
 			### delete the first selected cinnection objet
 			del connectionlist[0]
 		
@@ -569,14 +573,14 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 			sys.stdout.write(_('Error making the diagram from XML SES: %s\n')%info)
 			return False
 		else:
-			#try:
+			try:
 				### Make the DEVsimPy coupling
-			dia = GetDiagramCoupling(canvas,D,parent_block=canvas)
-			#except Exception, info:
-			#	sys.stdout.write(_('Error making the coupling into the diagram from XML SES: %s\n')%info)
-			#	return dia
-			#else:	
-			#	return dia
+				dia = GetDiagramCoupling(canvas,D,parent_block=canvas)
+			except Exception, info:
+				sys.stdout.write(_('Error making the coupling into the diagram from XML SES: %s\n')%info)
+				return dia
+			else:	
+				return dia
 			return dia
 	else:
 		sys.stdout.write(_("XML SES file seems don't contain models!\n"))
