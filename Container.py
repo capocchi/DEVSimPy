@@ -1850,6 +1850,8 @@ if __builtin__.__dict__['GUI_FLAG']:
 			sourceNodeList = filter(lambda n: n.item == source and isinstance(n, ONode), nodesList)
 			targetNodeList = filter(lambda n: n.item == target and isinstance(n, INode), nodesList)
 
+			self.deselect()
+
 			return (sourceNodeList, targetNodeList)
 
 			# # list of node list for

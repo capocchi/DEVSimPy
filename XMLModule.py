@@ -432,6 +432,8 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 		sourceNodeList = filter(lambda n: n.item == source and isinstance(n, Container.ONode), nodesList)
 		targetNodeList = filter(lambda n: n.item == target and isinstance(n, Container.INode), nodesList)
 
+		canvas.deselect()
+		
 		return (sourceNodeList, targetNodeList)
 
 	def GetDiagramCoupling(canvas):
@@ -575,7 +577,7 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 			except Exception, info:
 				sys.stdout.write(_('Error making the coupling into the diagram from XML SES: %s\n')%info)
 				return dia
-			else:	
+			else:
 				return dia
 			return dia
 	else:
