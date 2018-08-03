@@ -264,12 +264,14 @@ class CMDComponent(GenericComponent):
 			iport.id = id
 			self.__m.AddShape(iport)
 			self.__m.nbiPort = id
+			#iport.move(50,100*(self.__m.nbiPort+self.__m.nboPort))
 
 		for id in xrange(self._outputs):
 			oport = oPort(label='OPort %d'%(id))
 			oport.id = id
 			self.__m.AddShape(oport)
 			self.__m.nboPort = id
+			#oport.move(300,100*(self.__m.nbiPort+self.__m.nboPort))
 
 		self.__m.python_path = self._python_file
 		self.__m.model_path = self._model_file
@@ -538,7 +540,7 @@ class DEVSComponent:
 		label = str(devs.getBlockModel().label) if hasattr(devs, 'getBlockModel') else devs.name
 		log_file = os.path.join(gettempdir(),'%s.devsimpy.log'%label)
 		parent = event.GetClientData()
-		
+
 		if os.path.exists(log_file):
 			### read log file
 			with open(log_file, 'r') as f:

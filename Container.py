@@ -1839,54 +1839,67 @@ if __builtin__.__dict__['GUI_FLAG']:
 			"""
 			"""
 
-			# list of node list for
-			sourceINodeList = filter(lambda n: not isinstance(n, ResizeableNode) and isinstance(n, INode), self.nodes)
-			sourceONodeList = filter(lambda n: not isinstance(n, ResizeableNode) and isinstance(n, ONode), self.nodes)
-
 			# deselect and select target in order to get its list of node (because the node are generated dynamicly)
 			self.deselect()
 			self.select(target)
+			self.select(source)
 
 			nodesList = filter(lambda n: not isinstance(n, ResizeableNode), self.nodes)
 
-			if isinstance(target,Block):
-				if isinstance(source, oPort):
-					sourceNodeList = sourceINodeList
-					targetNodeList = filter(lambda n: not n in sourceONodeList and isinstance(n,ONode),nodesList)
-				elif isinstance(source, iPort):
-					sourceNodeList = sourceONodeList
-					targetNodeList = filter(lambda n: not n in sourceINodeList and isinstance(n,INode),nodesList)
-				else:
-					sourceNodeList = sourceONodeList
-					if not PORT_RESOLUTION:
-						sourceNodeList += sourceINodeList
-						targetNodeList = filter(lambda n: not n in sourceNodeList,nodesList)
-					else:
-						targetNodeList = filter(lambda n: not n in sourceNodeList and isinstance(n,INode),nodesList)
+			# list of node list for
+			sourceNodeList = filter(lambda n: n.item == source and isinstance(n, ONode), nodesList)
+			targetNodeList = filter(lambda n: n.item == target and isinstance(n, INode), nodesList)
 
-			elif isinstance(target, iPort):
-				if isinstance(source, oPort):
-					sourceNodeList = sourceINodeList
-				elif isinstance(source, iPort):
-					sourceNodeList = sourceONodeList
-				else:
-					sourceNodeList = sourceINodeList
-
-				targetNodeList = filter(lambda n: not n in sourceONodeList and isinstance(n,ONode),nodesList)
-
-			elif isinstance(target, oPort):
-				if isinstance(source, oPort):
-					sourceNodeList = sourceINodeList
-				elif isinstance(source, iPort):
-					sourceNodeList = sourceONodeList
-				else:
-					sourceNodeList = sourceONodeList
-				targetNodeList = filter(lambda n: not n in sourceINodeList and isinstance(n,INode),nodesList)
-			else:
-				targetNodeList = []
-				sourceNodeList = []
-			
 			return (sourceNodeList, targetNodeList)
+
+			# # list of node list for
+			# sourceINodeList = filter(lambda n: not isinstance(n, ResizeableNode) and isinstance(n, INode), self.nodes)
+			# sourceONodeList = filter(lambda n: not isinstance(n, ResizeableNode) and isinstance(n, ONode), self.nodes)
+
+			# # deselect and select target in order to get its list of node (because the node are generated dynamicly)
+			# self.deselect()
+			# self.select(target)
+
+			# nodesList = filter(lambda n: not isinstance(n, ResizeableNode), self.nodes)
+
+			# if isinstance(target,Block):
+			# 	if isinstance(source, oPort):
+			# 		sourceNodeList = sourceINodeList
+			# 		targetNodeList = filter(lambda n: not n in sourceONodeList and isinstance(n,ONode),nodesList)
+			# 	elif isinstance(source, iPort):
+			# 		sourceNodeList = sourceONodeList
+			# 		targetNodeList = filter(lambda n: not n in sourceINodeList and isinstance(n,INode),nodesList)
+			# 	else:
+			# 		sourceNodeList = sourceONodeList
+			# 		if not PORT_RESOLUTION:
+			# 			sourceNodeList += sourceINodeList
+			# 			targetNodeList = filter(lambda n: not n in sourceNodeList,nodesList)
+			# 		else:
+			# 			targetNodeList = filter(lambda n: not n in sourceNodeList and isinstance(n,INode),nodesList)
+
+			# elif isinstance(target, iPort):
+			# 	if isinstance(source, oPort):
+			# 		sourceNodeList = sourceINodeList
+			# 	elif isinstance(source, iPort):
+			# 		sourceNodeList = sourceONodeList
+			# 	else:
+			# 		sourceNodeList = sourceINodeList
+
+			# 	targetNodeList = filter(lambda n: not n in sourceONodeList and isinstance(n,ONode),nodesList)
+
+			# elif isinstance(target, oPort):
+			# 	if isinstance(source, oPort):
+			# 		sourceNodeList = sourceINodeList
+			# 	elif isinstance(source, iPort):
+			# 		sourceNodeList = sourceONodeList
+			# 	else:
+			# 		sourceNodeList = sourceONodeList
+			# 	targetNodeList = filter(lambda n: not n in sourceINodeList and isinstance(n,INode),nodesList)
+			# else:
+			# 	targetNodeList = []
+			# 	sourceNodeList = []
+			
+			# return (sourceNodeList, targetNodeList)
 
 		def OnConnectTo(self, event):
 			"""

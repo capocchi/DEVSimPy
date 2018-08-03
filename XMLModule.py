@@ -350,7 +350,7 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 					temp.write(WizardGUI.atomicCode('AtomicModel'))
 					temp.seek(0)
 					nbi,nbo = map(len,GetNbPort(k))
-					am_block = Components.BlockFactory.CreateBlock(x=100, y=100, inputs = nbi, outputs = nbo, name=name, python_file=temp.name, canvas=canvas)
+					am_block = Components.BlockFactory.CreateBlock(x=250, y=100*(1+parent_block.nbCodeBlock), inputs = nbi, outputs = nbo, name=name, python_file=temp.name, canvas=canvas)
 					am_block.label = name
 					
 					#print am_block
@@ -429,16 +429,13 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 		nodesList = filter(lambda n: not isinstance(n, Container.ResizeableNode), canvas.nodes)
 
 		# list of node list for
-		sourceINodeList = filter(lambda n: isinstance(n, Container.INode), nodesList)
-		sourceONodeList = filter(lambda n: isinstance(n, Container.ONode), nodesList)
-
 		sourceNodeList = filter(lambda n: n.item == source and isinstance(n, Container.ONode), nodesList)
 		targetNodeList = filter(lambda n: n.item == target and isinstance(n, Container.INode), nodesList)
 
 		return (sourceNodeList, targetNodeList)
 
-	def GetDiagramCoupling(canvas, D, parent_block=None):
-    		''' Build the DEVSimpy diagram coupling 
+	def GetDiagramCoupling(canvas):
+		''' Build the DEVSimpy diagram coupling 
 		'''
 		### make connection
 		connectionlist = xmldoc.getElementsByTagName('coupling')
@@ -452,19 +449,18 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 			### take the first connection object (deleted at the end of while)
 			s = connectionlist[0]
 
-			### find corresponding block
+			### Get the names of blocks
 			source_name = GetNodeFromUID(s.attributes['sourceuid'].value).attributes['name'].value
 			target_name = GetNodeFromUID(s.attributes['sinkuid'].value).attributes['name'].value
-			
-			### remove caracter form str if port has specified with label
+			diagram_name = s.parentNode.attributes['name'].value
+
+			### Get the port id removing caracter form str if port has specified with label
 			source_port_num = u''.join([i for i in s.attributes['sourceport'].value if i.isdigit()])
 			target_port_num = u''.join([i for i in s.attributes['sinkport'].value if i.isdigit()])
 
+			### if no port number is specified in the XML, there is one port and its id is 1 (not 0 but it can be depending on the rule chose by the SES modeler!) 
 			if source_port_num ==u'': source_port_num=u'1'
 			if target_port_num ==u'': target_port_num=u'1'
-
-			p = s.parentNode
-			diagram_name = p.attributes['name'].value
 
 			### find the graphic block of the source, target and diagram
 			source = target = diagram = None
@@ -478,47 +474,47 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 
 			### if source or target is the diagram, we change them with the corresponding iPort or oPort 
 			if diagram == source:
-				for m in filter(lambda a: isinstance(a,Container.iPort),source.GetShapeList()):
-					if int(m.id) == int(source_port_num)-1:
-						source = m
+				for s in filter(lambda a: isinstance(a,Container.iPort),source.GetShapeList()):
+					if int(s.id) == int(source_port_num)-1:
+						source = s
+						break
 
 			if diagram == target:
-				for n in filter(lambda a: isinstance(a,Container.oPort),target.GetShapeList()):
-					if int(n.id) == int(target_port_num)-1:
-						target = n
+				for t in filter(lambda a: isinstance(a,Container.oPort),target.GetShapeList()):
+					if int(t.id) == int(target_port_num)-1:
+						target = t
+						break
 
-			print "------------------------------------------------"
-			print source, target
+			#print "------------------------------------------------"
+			#print source, target
 			
 			a,b = GetNodeLists(canvas, source, target)
 
-			print a,b
+			#print a,b
 
 			if len(a) == 1: source_port_num = u'1'
 			if len(b) == 1: target_port_num = u'1'
-			print source_name,int(source_port_num)-1,target_name,int(target_port_num)-1
+			#print source_name,int(source_port_num)-1,target_name,int(target_port_num)-1
 			sourceNode, targetNode = a[int(source_port_num)-1],b[int(target_port_num)-1]
 	
 			### item of node must be overwritted
 			sourceNode.item = source
 			targetNode.item = target
 
-			### connexion
 			### add the connexion to the diagram
 			ci = Container.ConnectionShape()
-			diagram.shapes.insert(0, ci)
-
 			ci.setInput(sourceNode.item, sourceNode.index)
 			ci.x[0], ci.y[0] = sourceNode.item.getPortXY('output', sourceNode.index)
 			ci.x[1], ci.y[1] = targetNode.item.getPortXY('input', targetNode.index)
 			ci.setOutput(targetNode.item, targetNode.index)
+			diagram.shapes.insert(0, ci)
 
-			print "------------------------------------------------"
+			#print "------------------------------------------------"
 
 			### delete the first selected cinnection objet
 			del connectionlist[0]
 		
-		return canvas.diagram
+		return canvas.GetDiagram()
 
 	def XMLToDict(blocklist):		
 		### dictionnary building
@@ -574,8 +570,8 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 			return False
 		else:
 			try:
-				### Make the DEVsimPy coupling
-				dia = GetDiagramCoupling(canvas,D,parent_block=canvas)
+				### Make the DEVSimPy digram coupling
+				dia = GetDiagramCoupling(canvas)
 			except Exception, info:
 				sys.stdout.write(_('Error making the coupling into the diagram from XML SES: %s\n')%info)
 				return dia
