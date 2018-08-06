@@ -3,10 +3,10 @@
 """
 Name: XML.py
 Brief descritpion: All classes and functions linked with xml aspects
-Author(s): L. Capocchi <capocchi@univ-corse.fr>
+Author(s): L. Capocchi <capocchi@univ-corse.fr>, J.F. Santucci <santucci@univ-corse.fr> 
 Version:  1.0
-Last modified: 2012.12.18
-GENERAL NOTES AND REMARKS:
+Last modified: 2018.08.02
+GENERAL NOTES AND REMARKS: XMLToDict function must integrate the coupling info into D in order to be independant of the XML.
 
 GLOBAL VARIABLES AND FUNCTIONS:
 """
@@ -433,7 +433,7 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 		targetNodeList = filter(lambda n: n.item == target and isinstance(n, Container.INode), nodesList)
 
 		canvas.deselect()
-		
+
 		return (sourceNodeList, targetNodeList)
 
 	def GetDiagramCoupling(canvas):
@@ -519,7 +519,7 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 		return canvas.GetDiagram()
 
 	def XMLToDict(blocklist):		
-		### dictionnary building
+		### dictionary building
 		D = {}
 		### Add high level coupled models
 		for cm in filter(lambda a: a.attributes['parentuid'].value == '1' and a.attributes['type'].value == "Aspect Node", blocklist):
@@ -572,7 +572,7 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 			return False
 		else:
 			try:
-				### Make the DEVSimPy digram coupling
+				### Make the DEVSimPy diagram coupling
 				dia = GetDiagramCoupling(canvas)
 			except Exception, info:
 				sys.stdout.write(_('Error making the coupling into the diagram from XML SES: %s\n')%info)

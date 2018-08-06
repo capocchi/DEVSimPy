@@ -1953,9 +1953,9 @@ if __builtin__.__dict__['GUI_FLAG']:
 			modify_flag = False
 
 			### if selected options are not 'All'
-			if (sp+1 < snl and tp+1 < tnl):
+			if sp != 0 and tp != 0:
 				for connectionShapes in filter(lambda s: isinstance(s, ConnectionShape), self.diagram.shapes):
-					if (connectionShapes.getInput()[1] == sp) and (connectionShapes.getOutput()[1] == tp):
+					if (connectionShapes.getInput()[1] == sp-1) and (connectionShapes.getOutput()[1] == tp-1):
 						self.RemoveShape(connectionShapes)
 						modify_flag = True
 			else:
@@ -1980,32 +1980,40 @@ if __builtin__.__dict__['GUI_FLAG']:
 			snl = len(self.sourceNodeList)
 			tnl = len(self.targetNodeList)
 
-			### if one of selected option is All
-			if (sp+1 < snl and tnl == tp+1):
-				sn = self.sourceNodeList[sp]
-				for tn in self.targetNodeList:
-					self.makeConnectionShape(sn, tn)
-			### if one of selected option is All
-			elif (snl == sp+1 and tp+1 < tnl):
-				tn = self.targetNodeList[tp]
-				for sn in self.sourceNodeList:
-					self.makeConnectionShape(sn, tn)
-			### if both combo box selection are All, delete all of the connection from the top to the bottom
-			elif (snl == sp+1 and tnl == tp+1):
-				### if input and output port number are the same
-				#if len(self.sourceNodeList) == len(self.targetNodeList):
-				#	for sn,tn in zip(self.sourceNodeList, self.targetNodeList):
-				#		self.makeConnectionShape(sn, tn)
-				#else:
-				for sn in self.sourceNodeList:
-					for tn in self.targetNodeList:
+			### all select are "all"
+			if sp == tp == 0:
+				for i in range(snl):
+					try:
+						sn = self.sourceNodeList[i]
+						tn = self.targetNodeList[i]
 						self.makeConnectionShape(sn, tn)
-
-			### else make simple connection between sp and tp port number of source and target
+					except:
+						pass
+			### one choice is not "all"
 			else:
-				sn = self.sourceNodeList[sp]
-				tn = self.targetNodeList[tp]
-				self.makeConnectionShape(sn,tn)
+    			### if target is "all"
+				if tp == 0:
+					sn = self.sourceNodeList[sp-1]
+					for i in range(tnl):
+						try:
+							tn = self.targetNodeList[i]
+							self.makeConnectionShape(sn, tn)
+						except:
+							pass
+				### if source is "all"
+				elif sp == 0:
+					tn = self.targetNodeList[tp-1]
+					for i in range(snl):
+						try:
+							sn = self.sourceNodeList[i]
+							self.makeConnectionShape(sn, tn)
+						except:
+							pass
+				### connect port to port
+				else:
+					sn = self.sourceNodeList[sp-1]
+					tn = self.targetNodeList[tp-1]
+					self.makeConnectionShape(sn,tn)
 
 			self.Refresh()
 

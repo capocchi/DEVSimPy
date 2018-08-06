@@ -38,8 +38,8 @@ class ConnectDialog(wx.Frame):
 
 		self._result = [0,0]
 
-		L1 = map(lambda i:function(snL,i),range(len(snL)-1))
-		L2 = map(lambda i:function(tnL,i),range(len(tnL)-1))
+		L1 = map(lambda i:function(snL,i),range(len(snL)))
+		L2 = map(lambda i:function(tnL,i),range(len(tnL)))
 
 		L1.append("%s"%_('All'))
 		L2.append("%s"%_('All'))
