@@ -150,6 +150,7 @@ class GeneralNotebook(Observer):
 					if model != self.selected_model:
 						newContent = AttributeEditor(propPanel, wx.ID_ANY, model, canvas)
 						propPanel.UpdatePropertiesPage(newContent)
+						
 						self.selected_model = model
 						str = propPanel.propToolTip[1]
 				else:

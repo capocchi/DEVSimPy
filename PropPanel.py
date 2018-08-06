@@ -65,9 +65,12 @@ class PropPanel(wx.Panel):
 			sizer.Clear(True)
 		 
 		sizer.Add(panel, 1, wx.EXPAND|wx.ALL|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTRE_VERTICAL, 10)
-
+		
 		self.SetSizerAndFit(sizer)
 		self.Layout()
+
+		if wx.VERSION_STRING > '4.0':
+			self.frame.Layout()
 
 	def __set_tips(self):
 		"""
