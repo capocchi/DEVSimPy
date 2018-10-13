@@ -454,9 +454,9 @@ class SimulationPanel(wx.Panel):
 								ReloadModule.recompile(module_path)
 							else:
 								ReloadModule.recompile(m)
-					except Exception as e:
+					except Exception, info:
 						sys.stdout.write("Exception in PreferenceGui")
-						sys.stdout.write(e)
+						sys.stdout.write(str(info))
 
 			ReloadModule.recompile("DomainInterface.DomainStructure")
 			ReloadModule.recompile("DomainInterface.MasterModel")

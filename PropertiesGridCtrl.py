@@ -123,10 +123,10 @@ class DictionaryEditor(wx.Dialog):
 
 			### if key is tuple, restore tuple
 			try:
-				if isinstance(eval(k), tuple):
-					k=eval(k)
+				e = eval(k)
+				if isinstance(e, tuple): k=e
 			### if k is not tuple, eval gives an error
-			except NameError:
+			except Exception:
 				pass
 
 			r.update({k:v})
@@ -431,7 +431,7 @@ class CustomDataTable(GridTableBase):
 		for attr_name,info in sorted(infoBlockBehavioralDict.items()):
 			
 			val = model.args[attr_name]
-				
+
 			### if the type of value has changed for an instance (edition of the code block), we reinitilize the value 
 			if args_in_constructor and attr_name in args_in_constructor.keys():
 				val_in_constructor = args_in_constructor[attr_name]
@@ -439,6 +439,15 @@ class CustomDataTable(GridTableBase):
 				t2 = type(val_in_constructor)
 				if t1 != t2 and (t1 not in (str,unicode) and t2 not in (str,unicode)):
 					val = val_in_constructor
+				### if val is tab and the len has been changed
+				### when dict, the value on PropertiesGridCtrl is tuple like ('key', 'value')
+				elif isinstance(val, (tuple,dict,)) and len(val_in_constructor) != 0:
+					if len(val_in_constructor) != len(val):
+						val = val_in_constructor
+				else:
+					pass
+			else:
+				pass
 			
 			self.data.append([attr_name, val, info])
 			self.dataTypes.append(self.GetTypeList(val))

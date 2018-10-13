@@ -834,6 +834,7 @@ class MainApplication(wx.Frame):
 		### undo and redo button desabled
 		self.tb.EnableTool(wx.ID_UNDO, False)
 		self.tb.EnableTool(wx.ID_REDO, False)
+		print __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']
 		self.tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in __builtin__.__dict__['DEFAULT_DEVS_DIRNAME'])
 
 		### default direct connector toogled
