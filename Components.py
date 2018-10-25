@@ -29,6 +29,7 @@ _ = gettext.gettext
 
 from tempfile import gettempdir
 
+
 if __builtin__.__dict__['GUI_FLAG']:
 	import wx
 
@@ -47,6 +48,7 @@ import ZipManager
 from ReloadModule import recompile
 from Utilities import GetActiveWindow, path_to_module
 from NetManager import Net
+from SimpleFrameEditor import FrameEditor
 
 ###########################################################
 ###
@@ -547,8 +549,12 @@ class DEVSComponent:
 				msg = f.read()
 			
 			### show log file content
-			dlg = wx.lib.dialogs.ScrolledMessageDialog(parent, msg, _("%s logger")%label, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
-			dlg.ShowModal()
+			#dlg = wx.lib.dialogs.ScrolledMessageDialog(parent, msg, _("%s logger")%label, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+			#dlg.ShowModal()
+
+			frame = FrameEditor(parent, -1, _("%s logger")%label)
+			frame.AddText(msg)
+			frame.Show()
 
 		else:
 			dial = wx.MessageDialog(parent, _("Log is empty.\nIf you want to debug, please use the debugger method."), label, wx.OK|wx.ICON_INFORMATION)

@@ -14,8 +14,6 @@ import StringIO
 
 if __builtin__.__dict__['GUI_FLAG']:
 	import wx
-
-
 		
 def cond_decorator(flag, dec):
 	def decorate(fn):
