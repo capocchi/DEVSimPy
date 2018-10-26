@@ -1855,6 +1855,20 @@ class BlockBase(object):
 
 				cp.modify = True
 
+	def OnInsertGetPortId(self, event):
+		""" Insert a sentence to get port ID
+		"""
+		cp = self.nb.GetCurrentPage()
+		cp.AddTextRaw("id = self.getPortId(<port>)")
+		cp.modify = True
+
+	def OnInsertGetMsgValue(self, event):
+		""" Insert a sentence to get the message value
+		"""
+		cp = self.nb.GetCurrentPage()
+		cp.AddTextRaw("v = self.getMsgValue(<msg>)")
+		cp.modify = True
+
 	###
 	def OnInsertHoldInState(self, event):
 		""" Insert a sentence to change the state
@@ -2074,6 +2088,8 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 
 		peek = wx.MenuItem(insert, wx.NewId(), _('New peek'), _('Generate new peek code'))
 		poke = wx.MenuItem(insert, wx.NewId(), _('New poke'), _('Generate new poke code'))
+		getPortId = wx.MenuItem(insert, wx.NewId(), _('Get Port Id'), _('Get the port ID from port instance self.getPortId(port)->int'))
+		getMsgValue = wx.MenuItem(insert, wx.NewId(), _('Get message value'), _('Get message value self.getMsgValue(msg)->Object'))
 		holdInState = wx.MenuItem(insert, wx.NewId(), _('New hold in state'), _('Generate new hold in state code self.holdIn(...)'))
 		phaseIs = wx.MenuItem(insert, wx.NewId(), _('New phaseIs test'), _('Generate phase test code self.phaseIs(...)'))
 		passivateInState = wx.MenuItem(insert, wx.NewId(), _('New passivate in state'), _('Generate new passivate in state code self.passivateIn(...)'))
@@ -2082,6 +2098,8 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		
 		insert.AppendItem(peek)
 		insert.AppendItem(poke)
+		insert.AppendItem(getPortId)
+		insert.AppendItem(getMsgValue)
 		insert.AppendItem(holdInState)
 		insert.AppendItem(phaseIs)
 		insert.AppendItem(passivateInState)
@@ -2115,6 +2133,8 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 
 		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=poke.GetId())
+		self.Bind(wx.EVT_MENU, self.OnInsertGetPortId, id=getPortId.GetId())
+		self.Bind(wx.EVT_MENU, self.OnInsertGetMsgValue, id=getMsgValue.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertHoldInState, id=holdInState.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertPhaseIs, id=phaseIs.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertPassivateInState, id=passivateInState.GetId())

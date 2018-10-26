@@ -58,6 +58,19 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 
 		BaseDEVS.AtomicDEVS.__init__(self, name=name)
 
+		### if BaseDEVS AtomicDEVS class has the peek method, we have the PyDEVS simulator kernel
+		### else its the PyPDEVS simulator kernel and we adapt the peek and poke method for compatibility aspects 
+		if hasattr(BaseDEVS.AtomicDEVS, 'peek'):
+			DomainBehavior.peek = BaseDEVS.AtomicDEVS.peek
+			DomainBehavior.poke = BaseDEVS.AtomicDEVS.poke
+			DomainBehavior.getMsgValue = DomainBehavior.getMsgPyDEVSValue
+			DomainBehavior.getPortId = DomainBehavior.getPortIdFromPyDEVS
+		else: 
+			DomainBehavior.peek = DomainBehavior.peekPyPDEVS
+			DomainBehavior.poke = DomainBehavior.pokePyPDEVS
+			DomainBehavior.getMsgValue = DomainBehavior.getMsgPyPDEVSValue
+			DomainBehavior.getPortId = DomainBehavior.getPortIdFromPyPDEVS
+
 	def initPhase(self, phase="IDLE", sigma=0.0):
 		self.state = {'status':phase, 'sigma':sigma}
 
@@ -77,28 +90,32 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 		self.state['sigma'] = sigma
 
 	###
-	def poke(self, p, v):
-		""" Overwrite here the poke method in order to adapt the model with all simulator (PyDEVS, PyPDEVS, etc...)
-		"""
-		if 'PyDEVS' in __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
-			BaseDEVS.AtomicDEVS.poke(self, p, v)
-		### PyPDEVS
-		else:
-			from Object import Message
-			if isinstance(v, Message):
-				v = (v.value,v.time)
-			return {p:v}
+	def pokePyPDEVS(self, p, v):
+		### adapted with PyPDEVS
+		from Object import Message
+		if isinstance(v, Message):
+			v = (v.value,v.time)
+		return {p:v}
 
-#	def peek(self, p):
-#		""" Overwrite here the peek method in order to adapt the model with all simulator (PyDEVS, PyPDEVS, etc...)
-#		"""
-#		if 'PyDEVS' in __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']:
-#			return BaseDEVS.AtomicDEVS.peek(self, p)
-#		else:
-#			return self.myInput[p]
+	def peekPyPDEVS(self, port, args):
+		### adapted with PyPDEVS
+		inputs = args[0]
+		return inputs.get(port)
+
+	def getPortIdFromPyDEVS(self, p):
+		return p.myID
+
+	def getPortIdFromPyPDEVS(self,p):
+		return p.port_id
+
+	def getMsgPyDEVSValue(self, msg):
+		return msg.value					
+		
+	def getMsgPyPDEVSValue(self, msg):
+		return msg[0]
 
 	def getFlatComponentSet (self):
-	    return {self.name : self}
+		return {self.name : self}
 
 	def getSigma(self):
 		return self.state['sigma']
@@ -108,6 +125,7 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 
 	def getState(self):
 		return self.state
+		
 	def __str__(self):
 		"""
 		"""
