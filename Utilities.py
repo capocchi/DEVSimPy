@@ -336,9 +336,12 @@ def GetActiveWindow(event=None):
 			aW = win
 
 	if aW is None:
-		child = wx.Window.FindFocus()
-		aW = wx.GetTopLevelParent(child)
-
+		try:
+			child = wx.Window.FindFocus()
+			aW = wx.GetTopLevelParent(child)
+		except:
+			pass
+			
 	if aW is None and event is not None:
 
 		obj = event.GetEventObject()
