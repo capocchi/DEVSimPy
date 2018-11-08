@@ -304,15 +304,16 @@ class Newt(wx.Frame):
 		home = HOME_PATH
 		save_dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=home, defaultFile='', wildcard=wcd, style=wx.SAVE | wx.OVERWRITE_PROMPT)
 		if save_dlg.ShowModal() == wx.ID_OK:
-			fn = save_dlg.GetFilename()
+			fn = os.path.normpath(save_dlg.GetPath())
 
 			activePage = self.notebook.GetSelection()
 			sheet = self.notebook.GetPage(activePage)
 			nbr = sheet.GetNumberRows()
 			nbc = sheet.GetNumberCols()
-
+			#print "sdf", fn
 			with open(fn,'w') as f:
 				for row in xrange(nbr):
+					#print sheet.GetCellValue(row,0),sheet.GetCellValue(row,1)
 					f.write("%s %s\n"%(sheet.GetCellValue(row,0),sheet.GetCellValue(row,1)))
 
 	###

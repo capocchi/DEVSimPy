@@ -448,6 +448,7 @@ class CustomDataTable(GridTableBase):
 					pass
 			else:
 				pass
+				
 			
 			self.data.append([attr_name, val, info])
 			self.dataTypes.append(self.GetTypeList(val))
@@ -1022,7 +1023,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 					#if model.bad_filename_path_flag:
 						#model.bad_filename_path_flag = False
 				else:
-					MsgBoxError(evt, self, new_cls)
+					Container.MsgBoxError(evt, self, new_cls)
 					dlg.Destroy()
 					return False
 			else:

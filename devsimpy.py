@@ -1340,7 +1340,10 @@ class MainApplication(wx.Frame):
 
 				if isinstance(open_file_result, Exception):
 					type, value, traceback = sys.exc_info()
-					wx.MessageBox(_('Error opening %s: %s')%(value.filename, value.strerror), 'Error', wx.OK | wx.ICON_ERROR)
+					if value:
+						wx.MessageBox(_('Error opening %s: %s')%(value.filename, value.strerror), 'Error', wx.OK | wx.ICON_ERROR)
+					else:	
+						sys.stdout.write(_('Error opening %s')%(fileName))
 				else:
 					self.nb2.AddEditPage(os.path.splitext(fileName)[0], diagram)
 

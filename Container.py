@@ -153,6 +153,9 @@ def MsgBoxError(event, parent, msg):
 			### paths in traceback
 			paths = filter(lambda a: a.split(',')[0].strip().startswith('File'), trace)
 			### find if DOMAIN_PATH is in paths list (inverted because traceback begin by the end)
+			path = None
+			line = None
+			fct = None
 			for p in paths[::-1]:
 				### find if one path in trace comes from Domain or exported path list
 				for d in [DOMAIN_PATH]+mainW.GetExportPathsList():
@@ -207,7 +210,7 @@ def MsgBoxError(event, parent, msg):
 			else:
 				return False
 		else:
-			wx.MessageBox(_("There is errors in python file.\nError trying to translate error informations: %s %s %s")%(typ, val, tb), _("Error"), wx.OK|wx.ICON_ERROR)
+			wx.MessageBox(_("There is errors in python file.\nTrying to translate error informations: %s %s %s")%(typ, val, tb), _("Error"), wx.OK|wx.ICON_ERROR)
 
 def printOnStatusBar(statusbar, data={}):
 	""" Send data on status bar
@@ -2935,8 +2938,13 @@ class LinesShape(Shape):
 		canvas = event.GetEventObject()
 
 		try:
-			### coordinates
-			x,y = event.GetPositionTuple()
+			### mouse positions
+			if wx.VERSION_STRING < '4.0':
+				x,y = event.GetPositionTuple()
+			else:
+				xwindow, ywindow = wx.GetMousePosition()
+				x,y = canvas.ScreenToClient(wx.Point(xwindow, ywindow))
+
 		except Exception, info:
 			sys.stdout.write(_("Error in OnLeftDClick for %s : %s\n")%(self,info))
 		else:

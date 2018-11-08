@@ -2098,12 +2098,15 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		
 		insert.AppendItem(peek)
 		insert.AppendItem(poke)
+		insert.AppendSeparator()
 		insert.AppendItem(getPortId)
 		insert.AppendItem(getMsgValue)
+		insert.AppendSeparator()
 		insert.AppendItem(holdInState)
 		insert.AppendItem(phaseIs)
 		insert.AppendItem(passivateInState)
 		insert.AppendItem(passivateState)
+		insert.AppendSeparator()
 		insert.AppendItem(debug)
 
 		menu = self.GetMenuBar().GetMenu(1)

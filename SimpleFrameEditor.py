@@ -37,9 +37,9 @@ class FrameEditor(wx.Frame):
         self.SetMenuBar(self.frame_1_menubar)
         self.File = wx.Menu()        
         self.Save = wx.MenuItem(self.File, wx.NewId(), "Save &As", "", wx.ITEM_NORMAL)
-        self.File.AppendItem(self.Save)
+        self.File.Append(self.Save)
         self.open = wx.MenuItem(self.File, wx.NewId(), "&Open", "", wx.ITEM_NORMAL)
-        self.File.AppendItem(self.open)
+        self.File.Append(self.open)
         self.frame_1_menubar.Append(self.File, "&File")
         # Menu Bar end
 
@@ -48,7 +48,7 @@ class FrameEditor(wx.Frame):
         sizer = wx.BoxSizer(wx.VERTICAL)        
 
         self.editor = SimpleEditor(self)
-        sizer.Add (self.editor, 1, flag=wx.EXPAND)
+        sizer.Add(self.editor, 1, flag=wx.EXPAND)
 
 
         self.Bind(wx.EVT_MENU, self.file_save, self.Save)
@@ -85,7 +85,7 @@ class FrameEditor(wx.Frame):
         self.editor.AddText(txt)
 
 if __name__ == "__main__":
-    app = wx.PySimpleApp(0)
+    app = wx.App(0)
     wx.InitAllImageHandlers()
     frame_1 = FrameEditor(None, -1, "Test")
     frame_1.AddText("Test \n zzeze")
