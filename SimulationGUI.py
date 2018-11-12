@@ -974,10 +974,14 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 					for m in filter(lambda a: hasattr(a, 'finish'), self.model.getFlatComponentSet().values()):
 						### call finished method
 						if __builtin__.__dict__['GUI_FLAG']:
-							if wx.VERSION_STRING < '2.9':
+							#if wx.VERSION_STRING < '2.9':
+							try:
 								pub.sendMessage('%d.finished'%(id(m)))
-							else:
-								pub.sendMessage('%d.finished'%(id(m)), msg="")
+							except Exception:
+								try:
+									pub.sendMessage('%d.finished'%(id(m)), msg="")
+								except:
+									pass
 						else:
 							m.finish(None)
 
