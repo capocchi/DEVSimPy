@@ -3353,6 +3353,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 
 		### Draw background picture
 		if os.path.isabs(self.image_path):
+    	
 			dir_name = os.path.dirname(self.image_path)
 
 			if zipfile.is_zipfile(dir_name):
@@ -3361,7 +3362,6 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 				sourceZip = zipfile.ZipFile(dir_name, 'r')
 				sourceZip.extract(str(image_name), gettempdir())
 				sourceZip.close()
-
 			else:
 				image_path = self.image_path
 
@@ -3561,6 +3561,7 @@ class CodeBlock(Achievable, Block):
 
 		python_path = state['python_path']
 		model_path = state['model_path']
+		image_path = state['image_path']
 
 		new_class = None
 

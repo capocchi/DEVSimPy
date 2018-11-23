@@ -211,6 +211,7 @@ class GenericComponent:
 		self._outputs = kwargs['outputs'] if 'outputs' in kwargs else 1
 		self._python_file = kwargs['python_file']
 		self._model_file = kwargs['model_file'] if 'model_file' in kwargs else ''
+		
 		self._specific_behavior = kwargs['specific_behavior'] if 'specific_behavior' in kwargs else ''
 
 	def Create(self):
@@ -230,13 +231,23 @@ class GenericComponent:
 			(model and python) embedded in the .amd (dat file). This error occurs when the user copy and past a .amd model into
 			an another directory.
 		"""
+
 		### update model if the path of the .amd file (filename) doesn't correspond with the paths contained into the .amd file
 		if filename != model.model_path:
 			model.model_path = filename
 			model.python_path = os.path.join(filename, os.path.basename(model.python_path))
-			## save the new config path
+			### save the new config path
 			model.SaveFile(filename)
+
+		### if image path is wrang and is mad model, we find the image into the amd file
+		image_path_dirname = os.path.dirname(model.image_path)
+		if not os.path.exists(image_path_dirname) and os.path.basename(image_path_dirname) == os.path.basename(model.model_path):
+			model.image_path = os.path.join(model.model_path,os.path.basename(model.image_path))
+			### save the new config path
+			model.SaveFile(filename)
+
 		return model
+
 
 class CMDComponent(GenericComponent):
 	""" Return labeled block from filename at (x,y) position in canvas
@@ -357,7 +368,6 @@ class AMDComponent(GenericComponent):
 		cls = GetClass(python_path)
 
 		m = AMDComponent.BlockModelAdapter(cls, label)
-
 		
 		load_file_result = m.LoadFile(filename)
 		
