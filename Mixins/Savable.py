@@ -171,7 +171,6 @@ class DumpZipFile(DumpBase):
 
 				### create or update fileName
 				if os.path.exists(fileName):
-
 					zf.Update(replace_files = [fn, python_path, image_path])
 				else:
 					zf.Create(add_files = [fn, python_path, image_path])
@@ -196,7 +195,6 @@ class DumpZipFile(DumpBase):
 				mainW.tree.SortChildren(mainW.tree.root)
 
 			except Exception, info:
-
 				sys.stderr.write(_("Problem saving (during the zip handling): %s -- %s\n")%(str(fileName),info))
 				return False
 			else:

@@ -130,9 +130,14 @@ class Zip:
 			if zipfile.is_zipfile(dir_name):
 				z = zipfile.ZipFile(dir_name, 'r')
 				data = z.read(base_name)
-				### this line is in comment because is zip file contain image file we can not encode it.
-				zout.writestr(base_name, data.encode('utf-8'))
-				#zout.writestr(base_name, data)
+				### if zip file contain image file we can not encode it.
+				try:
+					zout.writestr(base_name, data.encode('utf-8'))
+				except UnicodeDecodeError, info:
+					zout.writestr(base_name, data)
+				else:
+					sys.stdout.write("%s not rewrite\n"%(item.filename))
+					
 				z.close()
 				
 				#sys.stdout.write("update %s from compressed %s\n"%(base_name, fn))

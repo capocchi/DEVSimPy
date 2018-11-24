@@ -242,7 +242,7 @@ class GenericComponent:
 		### if image path is wrang and is mad model, we find the image into the amd file
 		image_path_dirname = os.path.dirname(model.image_path)
 		if not os.path.exists(image_path_dirname) and os.path.basename(image_path_dirname) == os.path.basename(model.model_path):
-			model.image_path = os.path.join(model.model_path,os.path.basename(model.image_path))
+			model.image_path = os.path.join(filename,os.path.basename(model.image_path))
 			### save the new config path
 			model.SaveFile(filename)
 

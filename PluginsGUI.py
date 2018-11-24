@@ -57,6 +57,10 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		#	exec "self.%s= self.il.Add(wx.ArtProvider_GetBitmap(wx.ART_%s,wx.ART_TOOLBAR,(16,16)))" % (k,v)
 		#self.SetImageList(self.il, wx.IMAGE_LIST_SMALL)
 
+		### Layout
+		self.Centre()
+		self.Show(True)
+
 	def SetPyData(self, item, data):
 		""" Set python object Data
 		"""
@@ -284,7 +288,7 @@ class BlockPluginsList(CheckListCtrl):
 		else:
 			self.Populate(pluginsList)
 			self.is_populate = True
-
+		
 	def OnCheckItem(self, index, flag):
 		""" Item has been checked
 		"""
@@ -316,6 +320,8 @@ class BlockPluginsList(CheckListCtrl):
 		elif inspect.isclass(new):
 			### TODO: monkey patchin !!! (most simple is to change python file for override class)
 			sys.stdout.write(_('WARNING: class can\'t be overwritted'))
+		else:
+			pass
 
 	#@BuzyCursorNotification
 	def Populate(self, model):
@@ -330,7 +336,7 @@ class BlockPluginsList(CheckListCtrl):
 			plugins_list = self.GetPluginsList(self.model.model_path) if self.model else []
 
 			if not isinstance(plugins_list, list):
-				msg = ('Error in plugins.py file:\n\n%s\n\nDo you want to edit this file?'%plugins_list)
+				msg = _('Error in plugins.py file:\n\n%s\n\nDo you want to edit this file?'%plugins_list)
 
 				dial = wx.MessageDialog(None, msg, _('Plug-ins Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_ERROR)
 
@@ -508,7 +514,7 @@ class PluginsPanel(wx.Panel):
 		self.vbox2.Add(wx.StaticLine(self.leftPanel), 0, wx.ALL|wx.EXPAND, 5)
 		self.vbox2.Add(self.configBtn)
 
-		self.vbox1.Add(self.check_list, 1, wx.EXPAND | wx.TOP, 3)
+		self.vbox1.Add(self.check_list, 1, wx.EXPAND | wx.TOP)
 		self.vbox1.Add((-1, 10))
 		self.vbox1.Add(self.log, 0.5, wx.EXPAND)
 
@@ -526,11 +532,10 @@ class PluginsPanel(wx.Panel):
 		self.Bind(wx.EVT_BUTTON, self.OnSelectAll, id=selBtn.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnDeselectAll, id=desBtn.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnConfig, id=self.configBtn.GetId())
-		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnSelected, id=self.check_list.GetId())
-
-		### Layout
-		self.Centre()
-		self.Show(True)
+		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnSelectedItem, id=self.check_list.GetId())
+		
+#		self.check_list.Bind(wx.EVT_LEFT_DCLICK, self.OnDoubleClick)
+#		self.check_list.Bind(wx.EVT_RIGHT_DOWN, self.OnRightDown)
 
 	def AddWidget(self, before, widget):
 		""" Add widget to right panel
@@ -558,17 +563,22 @@ class PluginsPanel(wx.Panel):
 		self.Refresh()
 
 		self.Unbind(wx.EVT_LIST_ITEM_SELECTED)
-		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnSelected, id=self.check_list.GetId())
+		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnSelectedItem, id=self.check_list.GetId())
 
 	def OnApply(self, event):
 		""" Call OnApply method ig CheckList class
 		"""
 		self.check_list.OnApply(event)
 
-	def OnSelected(self, event):
+	def OnSelectedItem(self, event):
 		""" Item has been select and the documentation of module is immediately printed to the button CtrlText
 		"""
-		sel = self.check_list.GetFirstSelected()
+		
+		sel = event.Index
+		self.check_list.currentItem = sel
+
+#		sel = self.check_list.GetFirstSelected()
+
 		if sel != -1:
 			item = self.check_list.GetItem(sel)
 			new_element = self.check_list.GetPyData(sel)[0]
@@ -576,6 +586,8 @@ class PluginsPanel(wx.Panel):
 			self.log.ChangeValue(doc + '\n' if doc else _("No documentation available for this plug-in."))
 			module = inspect.getmodule(new_element)
 			self.configBtn.Enable(hasattr(module, "Config"))
+		
+		event.Skip()
 
 	def OnSelectAll(self, event):
 		""" Select All button has been pressed and all plug-ins are enabled.
@@ -675,6 +687,54 @@ class ModelPluginsManager(wx.Frame):
 
 		self.CenterOnParent(wx.BOTH)
 		self.Layout()
+
+		# for wxMSW
+		self.CheckList.Bind(wx.EVT_COMMAND_RIGHT_CLICK, self.OnRightClick)
+
+		# for wxGTK
+		self.CheckList.Bind(wx.EVT_RIGHT_UP, self.OnRightClick)
+
+	def OnRightClick(self, event):
+		#print "OnRightClick %s\n"%self.GetItemText(self.currentItem)
+
+		# make a menu
+		menu = wx.Menu()
+
+		enable = wx.MenuItem(menu, wx.NewId(), _('Enable'), _("Enable the plugin"))
+		disable = wx.MenuItem(menu, wx.NewId(), _('Disable'), _("Disable the plugin"))
+		edit = wx.MenuItem(menu, wx.NewId(), _('Edit'), _("Edit the plugin"))
+		
+		enable.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'enable_plugin.png')))
+		disable.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'disable_plugin.png')))
+		edit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'edit.png')))
+
+		self.Bind(wx.EVT_MENU, self.OnEnable, id=enable.GetId() )
+		self.Bind(wx.EVT_MENU, self.OnDisable, id=disable.GetId())
+		self.Bind(wx.EVT_MENU, self.OnEdit, id=edit.GetId())
+
+		if wx.VERSION_STRING < '4.0':
+    		# add some items
+			menu.AppendItem(enable)
+			menu.AppendItem(disable)
+			menu.AppendItem(edit)	
+		else:
+			# add some items
+			menu.Append(enable)
+			menu.Append(disable)
+			menu.Append(edit)
+
+		# Popup the menu.  If an item is selected then its handler
+		# will be called before PopupMenu returns.
+		self.CheckList.PopupMenu(menu)
+		menu.Destroy()
+
+	def OnEnable(self, event):
+		#self.OnCheckItem(self.currentItem, True)
+		self.CheckList.CheckItem(self.CheckList.currentItem, True)
+
+	def OnDisable(self, event):
+		#self.OnCheckItem(self.currentItem, True)
+		self.CheckList.CheckItem(self.CheckList.currentItem, False)
 
 	@staticmethod
 	def GetEditor(parent, model, filename=None):
