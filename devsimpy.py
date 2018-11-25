@@ -708,8 +708,6 @@ class MainApplication(wx.Frame):
 		mylocale.AddCatalogLookupPathPrefix(localedir)
 		mylocale.AddCatalog(domain)
 
-		self.language = 'en'
-
 		# language config from .devsimpy file
 		if self.language == 'en':
 			translation = gettext.translation(domain, localedir, languages=['en']) # English
