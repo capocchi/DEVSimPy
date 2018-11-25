@@ -176,11 +176,12 @@ class ImportLibrary(wx.Dialog):
 		wx.CallAfter(self._cb.Populate, D)
 
 		### Static box sizer
-		sbox = wx.StaticBox(leftPanel, -1, 'Functions')
-		vbox2 = wx.StaticBoxSizer(sbox, wx.VERTICAL) 
+		#sbox = wx.StaticBox(leftPanel, -1, '')
+		#vbox2 = wx.StaticBoxSizer(sbox, wx.VERTICAL) 
 
 		### Box Sizer
 		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox2 = wx.BoxSizer(wx.VERTICAL)
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -206,8 +207,8 @@ class ImportLibrary(wx.Dialog):
 		vbox.Add(hbox1, 0.5, wx.ALL|wx.ALIGN_CENTER)
 		vbox.Add((-1, 10))
 
-		hbox.Add(rightPanel, 1, wx.EXPAND,5 )
-		hbox.Add(leftPanel, 0, wx.EXPAND | wx.RIGHT)
+		hbox.Add(rightPanel, 1, wx.EXPAND, 5, 5)
+		hbox.Add(leftPanel, 0, wx.EXPAND | wx.RIGHT, 5, 5)
 		hbox.Add((3, -1))
 
 		### SetSizer
