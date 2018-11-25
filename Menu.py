@@ -331,7 +331,6 @@ class PerspectiveMenu(wx.Menu):
 		### default perspective
 		L = parent.perspectives.keys()
 		L.sort()
-		print L
 		for name in L:
 			ID = wx.NewId()
 			self.Append(ID, name)
