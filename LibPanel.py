@@ -108,22 +108,22 @@ class LibPanel(wx.Panel):
 		Only one of them is pressed at a time. The SetMode() method handles this
 		"""
 
-		tb = wx.ToolBar( self, -1 )
+		tb = wx.ToolBar(self, -1)
 		self.ToolBar = tb
-		tb.SetToolBitmapSize( ( 16, 16 ) )# this required for non-standard size buttons on MSW
+		tb.SetToolBitmapSize((16,16))# this required for non-standard size buttons on MSW
 
-		### for Phoenix version ()
+		### for Phoenix version
 		if wx.VERSION_STRING < '4.0':
-			tb.AddTool(Menu.ID_NEW_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db+2.png')), shortHelpString=_('New library'), longHelpString=_('Create or import a new directory'))
-			tb.AddTool(Menu.ID_DELETE_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db-2.png')), shortHelpString=_('Delete library'), longHelpString=_('Delete the selected librarie'))
-			tb.AddTool(Menu.ID_REFRESH_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')), shortHelpString=_('Refresh library'), longHelpString=_('Force the refresh of the loaded libraries'))
+			tb.AddTool(Menu.ID_NEW_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db+2.png')), shortHelpString=_('Import'), longHelpString=_('Import new libraries from directory'))
+			tb.AddTool(Menu.ID_DELETE_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db-2.png')), shortHelpString=_('Delete'), longHelpString=_('Delete the selected libraries'))
+			tb.AddTool(Menu.ID_REFRESH_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')), shortHelpString=_('Refresh'), longHelpString=_('Force the refresh of the loaded libraries'))
 			#tb.AddTool(Menu.ID_IMPORT_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'dbimport2.png')), shortHelpString=_('Import library'), longHelpString=_('Call the import manager'))
 			tb.AddTool(Menu.ID_HELP_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16, 'dbinfo2.png')), shortHelpString=_('Help'), longHelpString=_('Information about import manager'))
 		else:
-			tb.AddTool(Menu.ID_NEW_LIB, "",wx.Bitmap(os.path.join(ICON_PATH_16_16,'db+2.png')), shortHelp=_('New library'))
-			tb.AddTool(Menu.ID_DELETE_LIB, "",wx.Bitmap(os.path.join(ICON_PATH_16_16,'db-2.png')), shortHelp=_('Delete library'))
-			tb.AddTool(Menu.ID_REFRESH_LIB, "",wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')), shortHelp=_('Refresh library'))
-			tb.AddTool(Menu.ID_HELP_LIB, "",wx.Bitmap(os.path.join(ICON_PATH_16_16, 'dbinfo2.png')), shortHelp=_('Help'))
+			tb.AddTool(Menu.ID_NEW_LIB, "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'db+2.png')), shortHelp=_('Import'))
+			tb.AddTool(Menu.ID_DELETE_LIB, "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'db-2.png')), shortHelp=_('Delete'))
+			tb.AddTool(Menu.ID_REFRESH_LIB, "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')), shortHelp=_('Refresh'))
+			tb.AddTool(Menu.ID_HELP_LIB, "", wx.Bitmap(os.path.join(ICON_PATH_16_16, 'dbinfo2.png')), shortHelp=_('Help'))
 			
 
 		mainW = self.GetTopLevelParent()

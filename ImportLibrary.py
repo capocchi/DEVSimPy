@@ -182,7 +182,7 @@ class ImportLibrary(wx.Dialog):
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
 
 		### Buttons
-		self._dbb = filebrowse.DirBrowseButton(rightPanel, wx.ID_ANY, startDirectory=HOME_PATH, labelText=_("New"), changeCallback=self.OnChange)
+		self._dbb = filebrowse.DirBrowseButton(rightPanel, wx.ID_ANY, startDirectory=HOME_PATH, labelText=_("Import"), changeCallback=self.OnChange)
 		self._btn_Add = wx.Button(rightPanel, id = wx.ID_ADD)
 		self._btn_Add.Enable(False)
 		new = wx.Button(leftPanel, id = wx.ID_NEW, size=(100, -1))
@@ -262,13 +262,18 @@ class ImportLibrary(wx.Dialog):
 
 		### delete option only for the export path
 		if label in self._d:
-
 			delete = wx.MenuItem(menu, wx.NewId(), _('Delete'), _('Delete item'))
 			delete.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'delete.png')))
 			menu.AppendItem(delete)
 			wx.EVT_MENU(self, delete.GetId(), self.OnDelete)
 
-		self.PopupMenu( menu, evt.GetPosition() )
+		try:
+			self.PopupMenu(menu, evt.GetPosition())
+		except AttributeError, info:
+			self.PopupMenu(menu, evt.GetPoint())
+		else:
+			sys.stdout.write("Error in OnItemRightClick for ImportLibrary class.")
+
 		menu.Destroy() # destroy to avoid mem leak
 
 	def DocDirectory(self, path):

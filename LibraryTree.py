@@ -264,6 +264,7 @@ class LibraryTree(wx.TreeCtrl):
 
 		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
 
+		
 		if item:
 			### msgbox to select what you wan to delete: file or/and item ?
 			db = DeleteBox(self, -1, _("Delete Options"), size=(250, 110))
