@@ -315,8 +315,13 @@ class PerspectiveMenu(wx.Menu):
 
 		parent = parent.GetParent()
 
-		self.Append(ID_NEW_PERSPECTIVE, _("New"))
-		self.Append(ID_DELETE_PERSPECTIVE, _("Delete all"))
+		new = wx.MenuItem(self, ID_NEW_PERSPECTIVE, _('New'),_('New perspective'))
+		new.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'new.png')))
+		deleteall = wx.MenuItem(self, ID_DELETE_PERSPECTIVE, _('Delete all'),_('Delete all perspectives'))
+		deleteall.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'delete.png')))
+
+		self.AppendItem(new)
+		self.AppendItem(deleteall)
 		self.AppendSeparator()
 
 		if _("Default Startup") not in parent.perspectives:
@@ -326,6 +331,7 @@ class PerspectiveMenu(wx.Menu):
 		### default perspective
 		L = parent.perspectives.keys()
 		L.sort()
+		print L
 		for name in L:
 			ID = wx.NewId()
 			self.Append(ID, name)
