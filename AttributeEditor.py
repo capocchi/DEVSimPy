@@ -28,7 +28,7 @@ import linecache
 import wx
 
 import DiagramNotebook
-import Components
+#import Components
 
 from PropertiesGridCtrl import PropertiesGridCtrl, CodeCB
 from DetachedFrame import DetachedFrame

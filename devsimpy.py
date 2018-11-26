@@ -47,7 +47,6 @@ import os
 import sys
 import time
 import re
-import gettext
 import __builtin__
 import webbrowser
 import platform
@@ -55,6 +54,9 @@ import threading
 import cPickle
 import itertools
 import shutil
+
+import gettext
+_ = gettext.gettext
 
 from ConfigParser import SafeConfigParser
 from tempfile import gettempdir
