@@ -526,7 +526,7 @@ class MainMenuBar(wx.MenuBar):
 				### we insert the recent files menu
 				menu.InsertMenu(1, ID_RECENT, _("Recent files"), RecentFileMenu(self))
 			else:
-				if platform.system() != 'Linux':
+				if platform.system() == 'Windows':
 					### After Pnoenix Transition
 					self.Replace(0, FileMenu(self), _("&File"))
 
@@ -540,7 +540,7 @@ class MainMenuBar(wx.MenuBar):
 				### we insert the profile files menu
 				menu.InsertMenu(1, ID_PROFILE, _('Profile'),  ProfileFileMenu(self))
 			else:
-				if platform.system() != 'Linux':
+				if platform.system() == 'Windows':
 					### After Pnoenix Transition
 					self.Replace(4, SettingsMenu(self), _("&Options"))
 				
