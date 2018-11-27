@@ -176,7 +176,7 @@ class FileMenu(wx.Menu):
 		exportRest=wx.MenuItem(self, ID_EXPORTREST, _('&Export to REST server'),_('Export the diagram to a Rest server (DEVSimPy-rest)'))
 		importRest=wx.MenuItem(self, ID_IMPORTXMLSES, _('&Import XML SES file'),_('Import SES specifications from the Python SES Editor'))
 		printModel=wx.MenuItem(self, ID_PRINT, _('&Print'),_('Print the current diagram'))
-		printPreviewModel=wx.MenuItem(self, ID_PREVIEW_PRINT, _('Pre&view'),_('Print preview for current diagram'))
+		printPreviewModel=wx.MenuItem(self, ID_PREVIEW_PRINT, _('Preview'),_('Print preview for current diagram'))
 		screenCapture=wx.MenuItem(self, ID_SCREEN_CAPTURE, _('ScreenShot'),_('Capture the screen into a image'))
 		exitModel=wx.MenuItem(self, wx.ID_EXIT, _('&Quit\tCtrl+Q'),_('Quit the DEVSimPy application'))
 
@@ -287,9 +287,8 @@ class ShowMenu(wx.Menu):
 		control.Append(ID_SHOW_PROP, _('Properties'), _("Show properties tab"), wx.ITEM_CHECK)
 		control.Append(ID_SHOW_LIB, _('Libraries'), _("Show libraries tab"), wx.ITEM_CHECK)
 
-
 		AppendMenu = self.AppendMenu if wx.VERSION_STRING < '4.0' else self.Append
-
+		
 		AppendMenu(ID_SHOW_CONTROL, _('Control'), control)
 
 		self.Append(ID_SHOW_SHELL, _('Shell'), _("Show Python Shell console"), wx.ITEM_CHECK)
@@ -430,7 +429,6 @@ class SettingsMenu(wx.Menu):
 		fritem.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'french-flag.png')))
 		enitem.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'united-states-flag.png')))
 
-
 		if wx.VERSION_STRING < '4.0':
 			languagesSubmenu.AppendItem(fritem)
 			languagesSubmenu.AppendItem(enitem)
@@ -453,7 +451,7 @@ class SettingsMenu(wx.Menu):
 		AppendItem(pref_item)
 
 		fritem.Enable(not parent.language == 'fr')
-		enitem.Enable(not parent.language in ('en','default'))
+		enitem.Enable(not parent.language == 'en')
 
 		parent.Bind(wx.EVT_MENU, parent.OnFrench, id=ID_FRENCH_LANGUAGE)
 		parent.Bind(wx.EVT_MENU, parent.OnEnglish, id=ID_ENGLISH_LANGUAGE)

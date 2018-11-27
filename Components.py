@@ -33,6 +33,8 @@ from tempfile import gettempdir
 if __builtin__.__dict__['GUI_FLAG']:
 	import wx
 
+	_ = wx.GetTranslation
+	
 	if wx.VERSION_STRING < '2.9':
 		from wx.lib.pubsub import Publisher
 	else:

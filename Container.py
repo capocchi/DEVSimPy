@@ -65,8 +65,7 @@ from traceback import format_exception
 
 from math import * ### for eval
 
-import gettext
-_ = gettext.gettext
+_ = wx.GetTranslation
 
 import DomainInterface.MasterModel
 

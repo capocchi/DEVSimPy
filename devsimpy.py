@@ -46,8 +46,10 @@ import copy
 import os
 import sys
 import time
+import locale
 import re
 import gettext
+import traceback
 import __builtin__
 import webbrowser
 import platform
@@ -573,23 +575,23 @@ class MainApplication(wx.Frame):
 		""" Write config file
 		"""
 
-		# for spash screen
+		### for spash screen
 		pub.sendMessage('object.added',  message='Writing .devsimpy settings file...\n')
 
 		sys.stdout.write("Writing default .devsimpy settings file on %s directory..."%GetUserConfigDir())
 
 		self.exportPathsList = []					# export path list
-		self.openFileList = ['']*NB_OPENED_FILE		#number of last opened files
-		self.language = 'default'						# default language
-		self.perspectives = {}
+		self.openFileList = ['']*NB_OPENED_FILE		# number of last opened files
+		self.language = 'fr' if 'fr_FR' in locale.getdefaultlocale() else 'en' # default language
+		self.perspectives = {}	# perpsective is void
 
-		# verison of the main (fo compatibility of DEVSimPy)
+		### verison of the main (fo compatibility of DEVSimPy)
 		cfg.Write('version', str(__version__))
-		# list des chemins des librairies à importer
+		### list des chemins des librairies à importer
 		cfg.Write('exportPathsList', str([]))
-		# list de l'unique domain par defaut: Basic
+		### list de l'unique domain par defaut: Basic
 		cfg.Write('ChargedDomainList', str([]))
-		# list des 5 derniers fichier ouvert
+		### list des 5 derniers fichier ouvert
 		cfg.Write('openFileList', str(eval("self.openFileList")))
 		cfg.Write('language', "'%s'"%str(eval("self.language")))
 		cfg.Write('plugins', str("[]"))
@@ -700,13 +702,14 @@ class MainApplication(wx.Frame):
 		pub.sendMessage('object.added',  message='Loading locale configuration...\n')
 
 		localedir = os.path.join(HOME_PATH, "locale")
-		langid = wx.LANGUAGE_DEFAULT    # use OS default; or use LANGUAGE_FRENCH, etc.
+		langid = wx.LANGUAGE_FRENCH if self.language == 'fr' else wx.LANGUAGE_ENGLISH    # use OS default; or use LANGUAGE_FRENCH, etc.
 		domain = "DEVSimPy"             # the translation file is messages.mo
 
 		# Set locale for wxWidgets
-		mylocale = wx.Locale(langid)
-		mylocale.AddCatalogLookupPathPrefix(localedir)
-		mylocale.AddCatalog(domain)
+		self.locale = wx.Locale()
+		self.locale.Init(langid)
+		self.locale.AddCatalogLookupPathPrefix(localedir)
+		self.locale.AddCatalog(domain)
 
 		# language config from .devsimpy file
 		if self.language == 'en':
@@ -715,9 +718,9 @@ class MainApplication(wx.Frame):
 			translation = gettext.translation(domain, localedir, languages=['fr']) # French
 		else:
 			#installing os language by default
-			translation = gettext.translation(domain, localedir, [mylocale.GetCanonicalName()], fallback = True)
+			translation = gettext.translation(domain, localedir, [self.locale.GetCanonicalName()], fallback = True)
 
-		translation.install(unicode = True)
+		translation.install(unicode=True)
 
 	def MakeStatusBar(self):
 		""" Make status bar.
@@ -768,7 +771,7 @@ class MainApplication(wx.Frame):
 							self.tb.AddTool(wx.ID_PREVIEW_PRINT, wx.Bitmap(os.path.join(ICON_PATH,'print-preview.png')), shortHelpString=_('Print Preview (Ctrl+P)'), longHelpString=_('Print preview of current diagram')),
 							self.tb.AddTool(wx.ID_SAVE, wx.Bitmap(os.path.join(ICON_PATH,'save.png')), shortHelpString=_('Save File (Ctrl+S)'), longHelpString=_('Save the current diagram'), clientData=currentPage),
 							self.tb.AddTool(wx.ID_SAVEAS, wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')), shortHelpString=_('Save file as'), longHelpString=_('Save the diagram with an another name'), clientData=currentPage),
-							self.tb.AddTool(wx.ID_UNDO, wx.Bitmap(os.path.join(ICON_PATH,'undo.png')),shortHelpString= _('Undo'), longHelpString=_('Click to glongHelpString=o back, hold to see history'), clientData=currentPage),
+							self.tb.AddTool(wx.ID_UNDO, wx.Bitmap(os.path.join(ICON_PATH,'undo.png')),shortHelpString= _('Undo'), longHelpString=_('Click to go upward, hold to see history'), clientData=currentPage),
 							self.tb.AddTool(wx.ID_REDO, wx.Bitmap(os.path.join(ICON_PATH,'redo.png')), shortHelpString=_('Redo'), longHelpString=_('Click to go forward, hold to see history'), clientData=currentPage),
 							self.tb.AddTool(Menu.ID_ZOOMIN_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'zoom+.png')), shortHelpString=_('Zoom'), longHelpString=_('Zoom +'), clientData=currentPage),
 							self.tb.AddTool(Menu.ID_ZOOMOUT_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'zoom-.png')), shortHelpString=_('UnZoom'), longHelpString=_('Zoom -'), clientData=currentPage),
@@ -2092,8 +2095,7 @@ class MainApplication(wx.Frame):
 	def OnHelp(self, event):
 		""" Shows the DEVSimPy help file. """
 
-		## language config from .devsimpy file
-		lang = 'en' if self.language == 'default' else eval('self.language')
+		lang = eval('self.language')
 
 		filename = os.path.join(HOME_PATH, 'doc', 'html', lang, 'Help.zip')
 		if wx.VERSION_STRING >= '4.0':
@@ -2438,9 +2440,6 @@ class DEVSimPyApp(wx.App):
 		the main frame when it is time to do so.
 		"""
 
-		# to avoid conflict between the locale of the machine and the wx locale
-		self.locale = wx.Locale(wx.LANGUAGE_DEFAULT)
-
 		# start our application with splash
 		splash = AdvancedSplashScreen(self)
 		splash.Show()
@@ -2454,8 +2453,7 @@ class DEVSimPyApp(wx.App):
 #-------------------------------------------------------------------
 if __name__ == '__main__':
 
-	import gettext
-	_ = gettext.gettext
+	_ = wx.GetTranslation
 
 	### python devsimpy.py -c|-clean in order to delete the config file
 	if len(sys.argv) >= 2 and sys.argv[1] in ('-c', '-clean'):
@@ -2463,10 +2461,21 @@ if __name__ == '__main__':
 		config_file2 = os.path.join(GetUserConfigDir(), 'devsimpy.ini')
 		r = raw_input(_('Are you sure to delete DEVSimPy config files (.devsimpy and devsimpy.ini)? (Yes,No):'))
 		if r in ('Y', 'y', 'yes', 'Yes', 'YES'):
-			os.remove(config_file1)
-			sys.stdout.write(_('%s has been deleted!\n')%config_file1)
-			os.remove(config_file2)
-			sys.stdout.write(_('%s has been deleted!\n')%config_file2)
+			try:
+				os.remove(config_file1)
+			except Exception, info:
+				#traceback.print_exc()
+				pass
+			else:
+				sys.stdout.write(_('%s has been deleted!\n')%config_file1)
+			
+			try:
+				os.remove(config_file2)
+			except Exception, info:
+				#traceback.print_exc()
+				pass
+			else:
+				sys.stdout.write(_('%s has been deleted!\n')%config_file2)
 
 		elif r in ('N','n','no', 'No'):
 			pass

@@ -13,8 +13,7 @@ import zipfile
 
 import wx.lib.filebrowsebutton as filebrowse
 
-import gettext
-_ = gettext.gettext
+_ = wx.GetTranslation
 
 if __name__ == '__main__':
 	__builtin__.__dict__['HOME_PATH'] = os.getcwd()
