@@ -186,10 +186,10 @@ class ImportLibrary(wx.Dialog):
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
 
 		### Buttons
-		new = wx.Button(leftPanel, id = wx.ID_NEW, size=(100, -1))
-		imp = wx.Button(leftPanel, wx.ID_ANY, _('Import'), size=(100, -1))
-		sel = wx.Button(leftPanel, id = wx.ID_SELECTALL, size=(100, -1))
-		des = wx.Button(leftPanel, wx.ID_ANY, _('Deselect All'), size=(100, -1))
+		new = wx.Button(leftPanel, id = wx.ID_NEW, size=(120, -1))
+		imp = wx.Button(leftPanel, wx.ID_ANY, _('Import'), size=(120, -1))
+		sel = wx.Button(leftPanel, id = wx.ID_SELECTALL, size=(120, -1))
+		des = wx.Button(leftPanel, wx.ID_ANY, _('Deselect All'), size=(120, -1))
 		apply = wx.Button(rightPanel, id=wx.ID_OK, size=(100, -1))
 		cancel = wx.Button(rightPanel, id=wx.ID_CANCEL, size=(100, -1))
 
