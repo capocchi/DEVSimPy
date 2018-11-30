@@ -486,11 +486,12 @@ class MainApplication(wx.Frame):
 
 		# for spash screen
 		pub.sendMessage('object.added',  message='Loading the libraries tree...\n')
-		pub.sendMessage('object.added',  message='Loading the search tab on libraries tree...\n')
 
 		# NoteBook
 		self.nb1 = ControlNotebook(self, wx.ID_ANY, style = wx.CLIP_CHILDREN)
 		self.tree = self.nb1.GetTree()
+
+		pub.sendMessage('object.added',  message='Loading the search tab on libraries tree...\n')
 		self.searchTree = self.nb1.GetSearchTree()
 
 		self._mgr.AddPane(self.nb1, aui.AuiPaneInfo().Name("nb1").Hide().Caption("Control").

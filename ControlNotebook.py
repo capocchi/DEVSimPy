@@ -59,7 +59,7 @@ class GeneralNotebook(Observer):
 			"""
 			"""
 			imgList = wx.ImageList(16, 16)
-			for img in [os.path.join(ICON_PATH_16_16,'db.png'), os.path.join(ICON_PATH_16_16,'properties.png'), os.path.join(ICON_PATH_16_16,'simulation.png')]:
+			for img in [os.path.join(ICON_PATH_16_16,'db.png'), os.path.join(ICON_PATH_16_16, 'properties.png'), os.path.join(ICON_PATH_16_16,'simulation.png')]:
 				imgList.Add(wx.Image(img, wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 			self.AssignImageList(imgList)
 
