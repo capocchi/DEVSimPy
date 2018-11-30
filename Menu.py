@@ -152,6 +152,14 @@ ID_EDIT_ATTR = wx.NewId()
 ID_INSERT_ATTR = wx.NewId()
 ID_CLEAR_ATTR = wx.NewId()
 
+def AppendMenu(menu, ID, label, submenu):
+	if wx.VERSION_STRING < '4.0':
+		menu.AppendMenu(ID, label, submenu)
+	elif '4.0' < wx.VERSION_STRING < '4.0.2':
+		menu.Append(ID, label, submenu)
+	else:
+		menu.AppendSubMenu(submenu, label)
+
 class TaskBarMenu(wx.Menu):
 	"""
 	"""
@@ -286,14 +294,13 @@ class ShowMenu(wx.Menu):
 		control.Append(ID_SHOW_SIM, _('Simulation'), _("Show simulation tab"), wx.ITEM_CHECK)
 		control.Append(ID_SHOW_PROP, _('Properties'), _("Show properties tab"), wx.ITEM_CHECK)
 		control.Append(ID_SHOW_LIB, _('Libraries'), _("Show libraries tab"), wx.ITEM_CHECK)
-
-		AppendMenu = self.AppendMenu if wx.VERSION_STRING < '4.0' else self.Append
-		
-		AppendMenu(ID_SHOW_CONTROL, _('Control'), control)
+	
+		AppendMenu(self, ID_SHOW_CONTROL, _('Control'), control)
 
 		self.Append(ID_SHOW_SHELL, _('Shell'), _("Show Python Shell console"), wx.ITEM_CHECK)
 		self.Append(ID_SHOW_TOOLBAR, _('Tools Bar'), _("Show icons tools bar"), wx.ITEM_CHECK)
 		self.Append(ID_SHOW_EDITOR, _('Editor'), _("Show editor tab"), wx.ITEM_CHECK)
+
 		self.Check(ID_SHOW_SHELL, False)
 		self.Check(ID_SHOW_SIM, False)
 		self.Check(ID_SHOW_PROP, True)
@@ -436,15 +443,14 @@ class SettingsMenu(wx.Menu):
 			languagesSubmenu.Append(fritem)
 			languagesSubmenu.Append(enitem)
 
-		AppendMenu = self.AppendMenu if wx.VERSION_STRING < '4.0' else self.Append
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
-
-		AppendMenu(wx.NewId(), _('Languages'), languagesSubmenu)
+	
+		AppendMenu(self, wx.NewId(), _('Languages'), languagesSubmenu)
 		
 		### Before Phoenix transition
 		ishotshot = 'hotshot' in sys.modules.keys()
 		if ishotshot:
-			AppendMenu(ID_PROFILE, _('Profile'), ProfileFileMenu(parent))
+			AppendMenu(self, ID_PROFILE, _('Profile'), ProfileFileMenu(parent))
 		
 		parent = parent.GetParent()
 		
@@ -851,7 +857,6 @@ class ShapePopupMenu(wx.Menu):
 		properties.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'properties.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
-		AppendMenu = self.AppendMenu if wx.VERSION_STRING < '4.0' else self.Append
 
 		if wx.VERSION_STRING >= '4.0':
 			edit_subMenu.AppendItem = edit_subMenu.Append
@@ -884,7 +889,7 @@ class ShapePopupMenu(wx.Menu):
 			#self.__canvas.Bind(wx.EVT_MENU, shape.OnRename, id=ID_RENAME_SHAPE)
 		else:
 			if isinstance(shape, Container.CodeBlock) and shape.isAMD():
-				Edit_menu=AppendMenu(-1, _("Edit"), edit_subMenu)
+				Edit_menu=AppendMenu(self, -1, _("Edit"), edit_subMenu)
 				Edit_SubMenu1 = edit_subMenu.AppendItem(editModel)
 				Edit_SubMenu2 = edit_subMenu.AppendItem(editTest)
 			else:
@@ -924,7 +929,7 @@ class ShapePopupMenu(wx.Menu):
 				Rotate_in_menu = rotate_subMenu.AppendMenu(ID_ROTATE_INPUT_SHAPE, _("Input"), rotate_input_subMenu)
 				Rotate_out_menu = rotate_subMenu.AppendMenu(ID_ROTATE_OUTPUT_SHAPE, _("Output"), rotate_output_subMenu)
 
-			Rotate_menu = AppendMenu(ID_ROTATE_SHAPE, _("Rotate"), rotate_subMenu)
+			Rotate_menu = AppendMenu(self, ID_ROTATE_SHAPE, _("Rotate"), rotate_subMenu)
 			Rename_menu = AppendItem(rename)
 
 			self.AppendSeparator()
@@ -935,11 +940,11 @@ class ShapePopupMenu(wx.Menu):
 					new_item = wx.MenuItem(connectable_subMenu, wx.NewId(), item.label)
 					connectable_subMenu.AppendItem(new_item)
 					self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnConnectTo,id = new_item.GetId())
-			AppendMenu(-1, _('Connect to'), connectable_subMenu)
+			AppendMenu(self,-1, _('Connect to'), connectable_subMenu)
 
 			if isinstance(shape, Container.CodeBlock):
 				self.AppendSeparator()
-				Export_menu = AppendMenu(-1, _("Export"), export_subMenu)
+				Export_menu = AppendMenu(self, -1, _("Export"), export_subMenu)
 				Export_SubMenu1 = export_subMenu.AppendItem(exportAMD)
 
 				### if Wcomp general plugin is enabled, sub menu appear in contextual menu of amd (right clic)
@@ -947,7 +952,7 @@ class ShapePopupMenu(wx.Menu):
 
 			elif isinstance(shape, Container.ContainerBlock):
 				self.AppendSeparator()
-				Export_menu = AppendMenu(-1, _("Export"), export_subMenu)
+				Export_menu = AppendMenu(self, -1, _("Export"), export_subMenu)
 				Export_SubMenu1 = export_subMenu.AppendItem(exportCMD)
 				Export_SubMenu2 = export_subMenu.AppendItem(exportXML)
 				Export_SubMenu3 = export_subMenu.AppendItem(exportJS)
