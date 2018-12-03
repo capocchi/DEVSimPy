@@ -39,13 +39,6 @@ except ImportError, info:
         sys.stdout.write(msg)
         raise ImportError, "%s\n%s"%(msg,info)
 
-# to send event
-#if wx.VERSION_STRING < '2.9':
-#    from wx.lib.pubsub import Publisher as pub
-#else:
-#    #from wx.lib.pubsub import setuparg1
-#    from wx.lib.pubsub import pub
-
 import pluginmanager
 from Container import Block, CodeBlock, ContainerBlock
 

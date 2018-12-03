@@ -29,8 +29,8 @@ import __builtin__
 if wx.VERSION_STRING < '2.9':
 	from wx.lib.pubsub import Publisher as pub
 else:
-	#from wx.lib.pubsub import setuparg1
-	from wx.lib.pubsub import pub
+	#from wx.lib.pubsub import pub
+	from pubsub import pub
 
 import Container
 import Menu

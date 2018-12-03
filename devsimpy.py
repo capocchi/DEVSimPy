@@ -326,11 +326,11 @@ except ImportError:
 # to send event
 if wx.VERSION_STRING < '2.9':
 	from wx.lib.pubsub import Publisher as pub
-else:
-	
-	#from wx.lib.pubsub import setuparg1
+elif wx.VERSION_STRING < '4.0':
 	from wx.lib.pubsub import pub
- 
+else:
+	from pubsub import pub
+
 if wx.VERSION_STRING >= '4.0':
 
 	import wx.adv

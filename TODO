@@ -474,3 +474,4 @@ invoque rpar un callback lorsque le fichier python est renseigné dans le wizard
 -Fait le 17/05/2018 par LC: ajout -> le package pypdevs241 est un sous module issue du git de capocchi qui est un fork de yentl (https://msdl.uantwerpen.be/git/yentl/PythonPDEVS). Il faut pour importer le tout faire un : git clone -b version-3.0 --recursive https://github.com/capocchi/DEVSimPy.git DEVSimPy-v3.0
 -Fait le 12/07/2018 par LC et JFS: ajout -> implémentatoin de l'import des fichier XML SES générés après pruning à partir de l'éditeur SES python
 -Fait le 06/08/2018 par LC: correction -> affichae des propriétés des modèles dans le panel
+-Fait le 3/12/2018 par LC: correction -> suppression du message d'avertissement pour PyPubSub
