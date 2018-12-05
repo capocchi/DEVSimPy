@@ -329,7 +329,11 @@ if wx.VERSION_STRING < '2.9':
 elif wx.VERSION_STRING < '4.0':
 	from wx.lib.pubsub import pub
 else:
-	from pubsub import pub
+	try:
+		from pubsub import pub
+	except SyntaxError:
+		sys.stdout.write('Last version for Python2 is PyPubSub 3.3.0 \n pip install PyPubSub==3.3.0')
+		sys.exit()
 
 if wx.VERSION_STRING >= '4.0':
 

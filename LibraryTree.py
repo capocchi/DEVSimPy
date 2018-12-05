@@ -117,8 +117,7 @@ class LibraryTree(wx.TreeCtrl):
 		elif DOMAIN_PATH not in sys.path:
             ### Add DOMAIN_PATH and its parent directory to the sys.path
 			### in order to allows the user to import their module using Domain. or directly without the name of domain
-			sys.path.append(DOMAIN_PATH)
-			sys.path.append(os.path.dirname(DOMAIN_PATH))
+			sys.path.extend([DOMAIN_PATH,os.path.dirname(DOMAIN_PATH)])
 
 	###
 	def Populate(self, chargedDomainList = []):
@@ -480,7 +479,6 @@ class LibraryTree(wx.TreeCtrl):
 			assert not isinstance(item, unicode), _("Warning unicode item !")
 
 			### for Phoenix 
-			InsertItemBefore = self.InsertItemBefore if wx.VERSION_STRING < '4.0' else self.InsertItem
 			GetPyData = self.GetPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
 		
 			### element to insert in the list
