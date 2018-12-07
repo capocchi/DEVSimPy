@@ -403,6 +403,10 @@ class CustomDataTable(GridTableBase):
 		if hasattr(model, 'python_path') and infoBlockBehavioralDict != {}:
 			### cls object from python file
 			cls = Components.GetClass(model.python_path)
+
+			### Behavioral sorted values fields
+			args_in_constructor = Components.GetArgs(cls)
+
 			### if cls is class
 			if inspect.isclass(cls):
 				regex = re.compile('[@|-][param]*[\s]*([a-zA-Z0-9-_\s]*)[=|:]([a-zA-Z0-9-_\s]+)')
@@ -411,6 +415,8 @@ class CustomDataTable(GridTableBase):
 					### attr could be in model.args
 					if string.strip(attr) in model.args:
 						infoBlockBehavioralDict.update({string.strip(attr):string.strip(val)})
+		else:
+			args_in_constructor = None
 
 		### Port class has specific attribute
 		if isinstance(model, Container.Port):
@@ -424,9 +430,6 @@ class CustomDataTable(GridTableBase):
 				val = os.path.basename(val)
 			self.data.append([attr, val, self.infoBlockLabelList[i]])
 			self.dataTypes.append(self.GetTypeList(val))
-
-		### Behavioral sorted values fields
-		args_in_constructor = Components.GetArgs(Components.GetClass(model.python_path))
 		
 		for attr_name,info in sorted(infoBlockBehavioralDict.items()):
 			
@@ -1008,10 +1011,10 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 						model.__class__ = Container.ScopeGUI
 						model.AddAttribute("xlabel")
 						model.AddAttribute("ylabel")
-					elif True in map(lambda a: 'DomainBehavior' in str(a), new_cls.__bases__):
-						model.__class__ = Container.CodeBlock
-					else:
+					elif True in map(lambda a: 'DomainStructure' in str(a), new_cls.__bases__):
 						model.__class__ = Container.ContainerBlock
+					else:
+						model.__class__ = Container.CodeBlock
 
 					### if we change the python file from zipfile we compresse the new python file and we update the python_path value
 					if zipfile.is_zipfile(model.model_path):

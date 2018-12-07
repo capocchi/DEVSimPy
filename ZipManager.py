@@ -136,7 +136,7 @@ class Zip:
 				except UnicodeDecodeError, info:
 					zout.writestr(base_name, data)
 				else:
-					sys.stdout.write("%s not rewrite\n"%(item.filename))
+					sys.stdout.write("%s not rewrite\n"%(fn))
 					
 				z.close()
 				

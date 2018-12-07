@@ -2138,7 +2138,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 					# Adding graphical model to diagram
 					self.AddShape(m)
 
-					sys.stdout.write(_("Adding DEVSimPy model: \n").encode('utf-8'))
+					sys.stdout.write(_("Adding DEVSimPy model: \n").encode('utf-8', 'ignore'))
 					sys.stdout.write(repr(m))
 
 					# try to update the library tree on left panel
@@ -3539,7 +3539,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		"""
 		"""
 		s = _("\t Label: %s\n")%self.label
-		s += "\t Input/Output: %s,%s\n"%(str(self.input), str(self.output))
+		s += _("\t Input/Output: %s,%s\n")%(str(self.input), str(self.output))
 		return s
 
 #---------------------------------------------------------
@@ -3833,9 +3833,9 @@ class CodeBlock(Achievable, Block):
 		""" Text representation.
 		"""
 		s = Block.__repr__(self)
-		s+="\t DEVS module path: %s \n"%str(self.python_path)
-		s+="\t DEVSimPy model path: %s \n"%str(self.model_path)
-		s+="\t DEVSimPy image path: %s \n"%str(self.image_path)
+		s+= _("\t DEVS module path: %s \n")%str(self.python_path)
+		s+= _("\t DEVSimPy model path: %s \n")%str(self.model_path)
+		s+= _("\t DEVSimPy image path: %s \n")%str(self.image_path)
 		return s
 
 #---------------------------------------------------------
@@ -3992,9 +3992,9 @@ class ContainerBlock(Block, Diagram):
 
 	def __repr__(self):
 		s = Block.__repr__(self)
-		s += _("\t DEVS module: %s \n"%str(self.python_path))
-		s+="\t DEVSimPy model path: %s \n"%str(self.model_path)
-		s+="\t DEVSimPy image path: %s \n"%str(self.image_path)
+		s += _("\t DEVS module path: %s \n"%str(self.python_path))
+		s += _("\t DEVSimPy model path: %s \n")%str(self.model_path)
+		s +=_("\t DEVSimPy image path: %s \n")%str(self.image_path)
 		return s
 
 #---------------------------------------------------------
@@ -4386,7 +4386,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 	def __repr__(self):
 		"""
 		"""
-		s="\t Label: %s\n"%self.label
+		s=_("\t Label: %s\n")%self.label
 		return s
 
 #------------------------------------------------------------------

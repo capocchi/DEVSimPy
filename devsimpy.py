@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -331,7 +332,7 @@ elif wx.VERSION_STRING < '4.0':
 else:
 	try:
 		from pubsub import pub
-	except SyntaxError:
+	except Exception:
 		sys.stdout.write('Last version for Python2 is PyPubSub 3.3.0 \n pip install PyPubSub==3.3.0')
 		sys.exit()
 
