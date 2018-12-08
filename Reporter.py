@@ -280,10 +280,11 @@ class ErrorDialog(BaseDialog):
             self.Close()
         elif e_id == ID_SEND:
             frame = SendMailWx()
-            msg = self.err_msg.encode('utf-8')
+            msg = self.err_msg.encode('utf-8', 'ignore')
             msg = msg.replace("'", '')
             frame.messageTxt.SetValue(msg)
-            msg = _('DEVSimPy %s Error Report')%str(self.GetParent().GetVersion())
+            mainW = wx.GetApp().GetTopWindow()
+            msg = _('DEVSimPy %s Error Report')%str( mainW.GetVersion())
             frame.subjectTxt.SetValue(msg)
             frame.Show()
             self.Close()

@@ -759,18 +759,14 @@ class Base(object):
 			mainW = wx.GetApp().GetTopWindow()
 			### paths in traceback
 			paths = filter(lambda a: a.split(',')[0].strip().startswith('File'), trace)
-			### find if DOMAIN_PATH is in paths list (inversed because traceback begin by the end)
-			for path in paths[::-1]:
-				### find if one path in trace comes from Domain or exported path list
-				for d in [DOMAIN_PATH]+mainW.GetExportPathsList():
-
-					if d in path:
-						devs_error = True
-						break
-
+	
+			### find if DOMAIN_PATH is in the first file path of the trace
+			path = paths[-1]
+			devs_error = DOMAIN_PATH in path or HOME_PATH not in path
+				
 		except Exception, info:
 			sys.stdout.write(_("Error in ErrorManager: %s"%info))
-
+	
 		### if error come from devs python file
 		if devs_error:
 

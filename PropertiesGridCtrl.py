@@ -452,7 +452,6 @@ class CustomDataTable(GridTableBase):
 			else:
 				pass
 				
-			
 			self.data.append([attr_name, val, info])
 			self.dataTypes.append(self.GetTypeList(val))
 			self.nb_behavior_var += 1

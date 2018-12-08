@@ -156,12 +156,11 @@ def MsgBoxError(event, parent, msg):
 			path = None
 			line = None
 			fct = None
-			for p in paths[::-1]:
-				### find if one path in trace comes from Domain or exported path list
-				for d in [DOMAIN_PATH]+mainW.GetExportPathsList():
-					if d in p:
-						path,line,fct = p.split(',')[0:3]
-						break
+
+			### find if DOMAIN_PATH is in the first file path of the trace
+			p = paths[-1]
+			if DOMAIN_PATH in p or HOME_PATH not in p:
+				path,line,fct = p.split(',')[0:3]
 
 		except Exception, info:
 			path = None
