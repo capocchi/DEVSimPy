@@ -332,13 +332,16 @@ class PerspectiveMenu(wx.Menu):
 		AppendItem(deleteall)
 		self.AppendSeparator()
 
+#		print _("Default Startup"), map(lambda a: a.decode('ascii','ignore'), parent.perspectives.keys())
+
 		if _("Default Startup") not in parent.perspectives:
 			self.Append(ID_FIRST_PERSPECTIVE, _("Default Startup"))
 			parent.perspectives.update({_("Default Startup"):parent._mgr.SavePerspective()})
 
 		### default perspective
 		L = parent.perspectives.keys()
-		L.sort()
+#		L.sort()
+
 		for name in L:
 			ID = wx.NewId()
 			self.Append(ID, name)

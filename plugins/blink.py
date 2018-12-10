@@ -12,6 +12,7 @@
 
 import wx
 import os
+import sys
 import pluginmanager
 
 from types import MethodType

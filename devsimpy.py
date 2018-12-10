@@ -1565,6 +1565,7 @@ class MainApplication(wx.Frame):
 			### diagram preparation
 			label = os.path.splitext(file_name)[0]
 			diagram.LoadConstants(label)
+			last_name_saved = diagram.last_name_saved
 			diagram.last_name_saved = path
 			diagram.modify = False
 
@@ -1576,7 +1577,7 @@ class MainApplication(wx.Frame):
 				if isinstance(df, DetachedFrame):
 					df.SetTitle(label)
 
-				if diagram.last_name_saved == '':
+				if last_name_saved == '':
 					self.nb2.SetPageText(self.nb2.GetSelection(), label)
 					currentPage.SetDiagram(diagram)
 				else:
