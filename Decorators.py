@@ -14,7 +14,13 @@ import StringIO
 
 if __builtin__.__dict__['GUI_FLAG']:
 	import wx
-		
+	if wx.VERSION_STRING < '4.0':
+		import wx.aui
+		AuiFloatingFrame = wx.aui.AuiFloatingFrame
+	else:
+		import wx.lib.agw.aui.framemanager
+		AuiFloatingFrame = wx.lib.agw.aui.framemanager.AuiFloatingFrame
+
 def cond_decorator(flag, dec):
 	def decorate(fn):
 		return dec(fn) if flag else fn
@@ -93,10 +99,10 @@ def StatusBarNotification(f, arg):
 
 		# main window
 		mainW = wx.GetApp().GetTopWindow()
-
+	
 		### find if detachedFrame exists
 		for win in filter(lambda w: w.IsTopLevel(), mainW.GetChildren()):
-			if win.IsActive() and isinstance(win, wx.Frame) and not isinstance(win, wx.aui.AuiFloatingFrame if wx.VERSION_STRING < '4.0' else wx.lib.agw.aui.framemanager.AuiFloatingFrame):
+			if win.IsActive() and isinstance(win, wx.Frame) and not isinstance(win, AuiFloatingFrame):
 				mainW = win
 
 		r = f(*args)

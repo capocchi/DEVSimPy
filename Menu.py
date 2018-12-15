@@ -334,9 +334,9 @@ class PerspectiveMenu(wx.Menu):
 
 #		print _("Default Startup"), map(lambda a: a.decode('ascii','ignore'), parent.perspectives.keys())
 
-		if _("Default Startup") not in parent.perspectives:
-			self.Append(ID_FIRST_PERSPECTIVE, _("Default Startup"))
-			parent.perspectives.update({_("Default Startup"):parent._mgr.SavePerspective()})
+#		if _("Default Startup") not in parent.perspectives:
+#			self.Append(ID_FIRST_PERSPECTIVE, _("Default Startup"))
+#			parent.perspectives.update({_("Default Startup"):parent._mgr.SavePerspective()})
 
 		### default perspective
 		L = parent.perspectives.keys()

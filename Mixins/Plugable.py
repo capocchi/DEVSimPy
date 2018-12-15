@@ -73,27 +73,28 @@ class Plugable:
 			The name of plug-in file must be "plugins.py"
 		"""
 
-		### if list of activated plug-ins is not empty
-		if self.plugins != []:
-			module = Plugable.Load_Module(fileName)
+		if hasattr(self,'plugins'):
+			### if list of activated plug-ins is not empty
+			if self.plugins != []:
+				module = Plugable.Load_Module(fileName)
 
-			if inspect.ismodule(module):
+				if inspect.ismodule(module):
 
-				for name,m in inspect.getmembers(module, inspect.isfunction):
-					### import only plug-ins in plug-ins list (dynamic attribute) and only method
-					if name in self.plugins and 'self' in inspect.getargspec(m).args:
-						setattr(self, name, types.MethodType(m, self, self.__class__))
+					for name,m in inspect.getmembers(module, inspect.isfunction):
+						### import only plug-ins in plug-ins list (dynamic attribute) and only method
+						if name in self.plugins and 'self' in inspect.getargspec(m).args:
+							setattr(self, name, types.MethodType(m, self, self.__class__))
+				else:
+					return module
+			### restore method which was assigned to None before being pickled
 			else:
-				return module
-		### restore method which was assigned to None before being pickled
-		else:
-			### for all method in the class of model
-			for method in filter(lambda value: isinstance(value, types.FunctionType), self.__class__.__dict__.values()):
-				name = method.__name__
-				### if method was assigned to None by getstate before being pickled
-				if getattr(self, name) is None:
-					### assign to default class method
-					setattr(self, name, types.MethodType(method, self))
+				### for all method in the class of model
+				for method in filter(lambda value: isinstance(value, types.FunctionType), self.__class__.__dict__.values()):
+					name = method.__name__
+					### if method was assigned to None by getstate before being pickled
+					if getattr(self, name) is None:
+						### assign to default class method
+						setattr(self, name, types.MethodType(method, self))
 
 		return True
 

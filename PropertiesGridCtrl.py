@@ -397,7 +397,10 @@ class CustomDataTable(GridTableBase):
 			self.infoBlockLabelList.extend(model.GetAttributes()[m:])
 
 		### default behavioral attributes dictionary
-		infoBlockBehavioralDict = dict(map(lambda attr: (attr, _('Unknown information')), model.args.keys()))
+		if model.args:
+			infoBlockBehavioralDict = dict(map(lambda attr: (attr, _('Unknown information')), model.args.keys()))
+		else:
+			infoBlockBehavioralDict = {}
 
 		### if user code the information of behavioral attribute in docstring of class with @ or - symbol, we update the infoBlockBehavioralDict
 		if hasattr(model, 'python_path') and infoBlockBehavioralDict != {}:

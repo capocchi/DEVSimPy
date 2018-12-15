@@ -173,10 +173,12 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		### if Detached frame from block (container or Code)
 		### save, save-as and simulation are disabled
 		if not isinstance(self.parent, Container.ShapeCanvas):
-			toolbar.EnableTool(Menu.ID_SAVE, False)
-			toolbar.EnableTool(Menu.ID_SAVEAS, False)
+			#toolbar.EnableTool(Menu.ID_SAVE, False)
+			#toolbar.EnableTool(Menu.ID_SAVEAS, False)
 			toolbar.EnableTool(Menu.ID_SIM_DIAGRAM, False)
 			toolbar.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in __builtin__.__dict__['DEFAULT_DEVS_DIRNAME'])
+		else:
+			toolbar.EnableTool(Menu.ID_SAVEAS, False)
 
 		### Call Printable constructor
 		PrintOut.Printable.__init__(self, self.canvas)
@@ -202,15 +204,29 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 				All other event are binding in the main application thanks to general identifiers
 				NB: ID are defined on the Menu.py file
 		"""
-		self.Bind(wx.EVT_CLOSE, self.OnClose)
 
 		### Transparent management when the frame is moving
 		self.Bind(wx.EVT_IDLE, self.OnIdle)
 		self.Bind(wx.EVT_MOVE, self.OnMove)
+		self.Bind(wx.EVT_TOOL, self.OnSaveFile, id=Menu.ID_SAVE)
+		self.Bind(wx.EVT_TOOL, self.OnSaveAsFile, id=Menu.ID_SAVEAS)
+		self.Bind(wx.EVT_CLOSE, self.OnClose)
 
-		### TODO: refactor the devsimpy.py in order to extract OnSaveFile and all of the methods needed here.
-		#if not self.parent:
-			#self.Bind(wx.EVT_TOOL, parent.OnSaveFile, id=Menu.ID_SAVE)
+	def OnSaveFile(self, event):
+		""" Save button has been clicked
+		"""
+
+		### OnSaveFile of the mainW is activated
+		mainW = wx.GetApp().GetTopWindow()
+		mainW.OnSaveFile(event)
+
+	def OnSaveAsFile(self, event):
+		""" Save button has been clicked
+		"""
+
+		### OnSaveAsFile of the mainW is activated
+		self.diagram.modify = False
+		Container.Block.OnExport(self.diagram, event)
 
 	def OnMove(self, event):
 		""" alpha manager
@@ -263,7 +279,6 @@ class TestApp(wx.App):
 	def OnInit(self):
 
 		import gettext
-
 
 		#__builtin__.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
 		#__builtin__.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}

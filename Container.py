@@ -2002,8 +2002,12 @@ if __builtin__.__dict__['GUI_FLAG']:
 			### deselection de la dernier connection creer
 			self.deselect()
 			self.Refresh()
+			
 			### destruction du dialogue
-			self.dlgConnection.Destroy()
+			try:
+				self.dlgConnection.Destroy()
+			except:
+				pass
 
 		def OnMiddleDown(self, event):
 			"""
@@ -3451,25 +3455,28 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		if isinstance(menu, wx.Menu):
 			menuItem = menu.FindItemById(itemId)
 			ext = menuItem.GetLabel().lower()
-
-			wcd = _('%s Files (*.%s)|*.%s|All files (*)|*')%(ext.upper(), ext, ext)
-			save_dlg = wx.FileDialog(parent,
-									message = _('Export file as...'),
-									defaultDir = domain_path,
-									defaultFile = str(self.label)+'.%s'%ext,
-									wildcard = wcd,
-									style = wx.SAVE | wx.OVERWRITE_PROMPT)
-
-			if save_dlg.ShowModal() == wx.ID_OK:
-				path = os.path.normpath(save_dlg.GetPath())
-				label = os.path.basename(path)
-
-			save_dlg.Destroy()
-
 		### export (save) by using save button of DetachedFrame
 		else:
-			path = self.model_path
+			ext = 'cmd'
+
+		wcd = _('%s Files (*.%s)|*.%s|All files (*)|*')%(ext.upper(), ext, ext)
+		save_dlg = wx.FileDialog(parent,
+								message = _('Export file as...'),
+								defaultDir = domain_path,
+								defaultFile = str(self.label)+'.%s'%ext,
+								wildcard = wcd,
+								style = wx.SAVE | wx.OVERWRITE_PROMPT)
+
+		if save_dlg.ShowModal() == wx.ID_OK:
+			path = os.path.normpath(save_dlg.GetPath())
 			label = os.path.basename(path)
+
+		save_dlg.Destroy()
+
+		### export (save) by using save button of DetachedFrame
+		#else:
+		#	path = self.model_path
+		#	label = os.path.basename(path)
 
 		if path:
 			try:
@@ -3896,16 +3903,20 @@ class ContainerBlock(Block, Diagram):
 				if not isinstance(cls, tuple):
 					args_from_stored_constructor_py = inspect.getargspec(cls.__init__).args[1:]
 					args_from_stored_block_model = state['args']
-					L = list(set(args_from_stored_constructor_py).symmetric_difference( set(args_from_stored_block_model)))
-					if L != []:
-						for arg in L:
-							if not arg in args_from_stored_constructor_py:
-								sys.stdout.write(_("Warning: %s come is old ('%s' arg is deprecated). We update it...\n"%(state['python_path'],arg)))
-								del state['args'][arg]
-							else:
-								arg_values = inspect.getargspec(cls.__init__).defaults
-								index = args_from_stored_constructor_py.index(arg)
-								state['args'].update({arg:arg_values[index]})
+					if args_from_stored_block_model:
+						L = list(set(args_from_stored_constructor_py).symmetric_difference( set(args_from_stored_block_model)))
+						if L != []:
+							for arg in L:
+								if not arg in args_from_stored_constructor_py:
+									sys.stdout.write(_("Warning: %s come is old ('%s' arg is deprecated). We update it...\n"%(state['python_path'],arg)))
+									del state['args'][arg]
+								else:
+									arg_values = inspect.getargspec(cls.__init__).defaults
+									index = args_from_stored_constructor_py.index(arg)
+									state['args'].update({arg:arg_values[index]})
+					else:
+						sys.stderr.write(_("args is None in setstate for ContainerBlock: %s\n"%str(cls)))
+    					state['args'] = {}
 				else:
 					sys.stderr.write(_("Error in setstate for ContainerBlock: %s\n"%str(cls)))
 
@@ -3982,10 +3993,9 @@ class ContainerBlock(Block, Diagram):
 		"""
 		canvas = event.GetEventObject()
 		canvas.deselect()
-
 		mainW = wx.GetApp().GetTopWindow()
 
-		frame = DetachedFrame(parent = mainW, title = self.label, diagram = self, name = self.label)
+		frame = DetachedFrame(parent = mainW, title  = ''.join([canvas.name,' - ',self.label]), diagram = self, name = self.label)
 		frame.SetIcon(mainW.GetIcon())
 		frame.Show()
 

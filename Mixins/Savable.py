@@ -227,13 +227,13 @@ class DumpZipFile(DumpBase):
 			#return module
 
 		# try to load file
-		try:
-			f = open(path,'rb')
-			L = cPickle.load(f)
-			f.close()
-		except Exception, info:
-			sys.stderr.write(_("Problem loading: %s -- %s \n")%(str(fileName), info))
-			return info
+		#try:
+		f = open(path,'rb')
+		L = cPickle.load(f)
+		f.close()
+		#except Exception, info:
+		#	sys.stderr.write(_("Problem loading: %s -- %s \n")%(str(fileName), info))
+		#	return info
 	
 		### Check comparison between serialized attribut (L) and normal attribut (dump_attributes)
 		### for model build with a version of devsimpy <= 2.5

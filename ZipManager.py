@@ -50,12 +50,13 @@ def getPythonModelFileName(fn):
 	if len(py_file_list) > 1:
 		model_name = os.path.splitext(os.path.basename(fn))[0]
 		for python_file in py_file_list:
-			### if the name of python fiel in zip and the name of the model are similar.
+			### if the name of python file in zip and the name of the model are similar.
 			if os.path.splitext(python_file)[0] == model_name:
 				return python_file
-			### esle test if the python file containing the class inherit of the DomainBehavior or DomainStructure
+			### else test if the python file containing the class inherit of the DomainBehavior or DomainStructure
 			else:
 				import Components
+				
 				cls = Components.GetClass(os.path.join(fn, python_file))
 
 				from DomainInterface.DomainBehavior import DomainBehavior
@@ -132,7 +133,7 @@ class Zip:
 				data = z.read(base_name)
 				### if zip file contain image file we can not encode it.
 				try:
-					zout.writestr(base_name, data.encode('utf-8'))
+					zout.writestr(base_name, data.encode('utf-8', 'ignore'))
 				except UnicodeDecodeError, info:
 					zout.writestr(base_name, data)
 				else:
