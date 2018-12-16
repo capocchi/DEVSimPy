@@ -1245,7 +1245,7 @@ class Shape(ShapeEvtHandler):
 		if not self.lock_flag:
 			self.x = array.array('d',map((lambda v: v+x), self.x))
 			self.y = array.array('d',map((lambda v: v+y), self.y))
-
+			
 	#def OnResize(self):
 	#	""" Resize method controled by ResizeNode move method
 	#	"""

@@ -18,6 +18,8 @@ import os
 import sys
 
 import Components
+import DetachedFrame
+import Container
 
 class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget):
 	""" DropTarget(canvas)
@@ -36,6 +38,8 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 		##local copy
 		self.canvas = canvas
 
+		self.mainW = wx.GetApp().GetTopWindow()
+		
 		self.__setDo()
 
 	def __setDo(self):
@@ -57,16 +61,45 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 		#sys.stdout.write("OnEnter: %d, %d, %d\n" % (x, y, d))
 		#return wx.DragCopy
 
+	def OnDragOver(self,x,y,d):
+		"""
+		"""
+		### list of ContainerBlock shape in canvas
+		L = filter(lambda s: isinstance(s, Container.ContainerBlock), self.canvas.diagram.GetShapeList())
+		
+		### for all ContainerBlock we make a rect and test if the point x,y is in this rect to instance the DetachedFrame
+		for shape in L:
+			w = shape.x[1]-shape.x[0]
+			h = shape.y[1]-shape.y[0]
+ 
+			rect = wx.Rect(shape.x[0], shape.y[0], w, h)
+
+			### point (x,y) in rect
+			if rect.ContainsXY(x,y) if wx.VERSION_STRING < '4.0' else rect.Contains(x,y):
+
+			### rect1 and rect2 intersect
+			#if abs (x - shape.x[0]) < w and abs (y - shape.y[0]) < h:
+
+				frame = DetachedFrame.DetachedFrame(self.canvas, wx.ID_ANY, shape.label, shape)
+				### to disabled transparency
+				frame.Unbind(wx.EVT_IDLE)
+				frame.Unbind(wx.EVT_MOVE)
+				frame.SetIcon(self.mainW.icon)
+				frame.SetFocus()
+				frame.Show()
+
+		return wx.DragCopy
+
 	#def OnDragOver(self, x, y, d):
-	   #sys.stdout.write("OnDragOver: %d, %d, %d\n" % (x, y, d))
-	   #return wx.DragCopy
+	#   sys.stdout.write("OnDragOver: %d, %d, %d\n" % (x, y, d))
+	#   return wx.DragCopy
 
 	#def OnLeave(self):
 		#sys.stdout.write("OnLeave\n")
 
 	#def OnDrop(self, x, y):
-		#sys.stdout.write("OnDrop: %d %d\n" % (x, y))
-		#return True
+	#	sys.stdout.write("OnDrop: %d %d\n" % (x, y))	
+	#	return True
         
 	def OnData(self, x, y, d):
 		"""
@@ -100,11 +133,11 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 					# label is the file name
 					label = os.path.basename(text)
 					
-					if not ext in (".amd",'.cmd', '.py'):
+					if not ext in (".amd", '.cmd', '.py'):
 						m = Components.DSPComponent.Load(filename, label, self.canvas)
 					else:
 						m = self.GetBlock(filename, label, x, y)
-								
+						
 						### Append new block
 						block_list.append(m)
 			
@@ -117,10 +150,10 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 				if block:
 					# Adding graphical model to diagram
 					self.canvas.AddShape(block)
-					sys.stdout.write(_("Adding DEVSimPy model: \n").encode('utf-8').strip())
+					sys.stdout.write(_("Adding DEVSimPy model: \n").encode('utf-8', 'ignore').strip())
 					sys.stdout.write(repr(block))
 				else:
-					sys.stdout.write(_("ERROR: DEVSimPy model not added.\n").encode('utf-8').strip())
+					sys.stdout.write(_("ERROR: DEVSimPy model not added.\n").encode('utf-8', 'ignore').strip())
 			
 			return d
 			
