@@ -38,8 +38,6 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 		##local copy
 		self.canvas = canvas
 
-		self.mainW = wx.GetApp().GetTopWindow()
-		
 		self.__setDo()
 
 	def __setDo(self):
@@ -84,7 +82,7 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 				### to disabled transparency
 				frame.Unbind(wx.EVT_IDLE)
 				frame.Unbind(wx.EVT_MOVE)
-				frame.SetIcon(self.mainW.icon)
+				frame.SetIcon(self.canvas.GetTopLevelParent().icon)
 				frame.SetFocus()
 				frame.Show()
 
