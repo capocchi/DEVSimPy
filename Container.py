@@ -664,12 +664,14 @@ class Diagram(Savable, Structurable):
 	def OnInformation(self, event):
 		"""
 		"""
-		stat_dico = self.GetStat()
+		stat_dico = self.GetStat({'Atomic_nbr':0, 'Coupled_nbr':0, 'Connection_nbr':0, 'Deep_level':0, 'iPort_nbr':0, 'oPort_nbr':0})
 		msg = ""
-		msg += _("Number of atomic devs model: %d\n")%stat_dico['Atomic_nbr']
-		msg += _("Number of coupled devs model: %d\n")%stat_dico['Coupled_nbr']
+		msg += _("Number of atomic devs models: %d\n")%stat_dico['Atomic_nbr']
+		msg += _("Number of coupled devs models: %d\n")%stat_dico['Coupled_nbr']
 		msg += _("Number of coupling: %d\n")%stat_dico['Connection_nbr']
 		msg += _("Number of deep level (description hierarchy): %d\n")%stat_dico['Deep_level']
+		msg += _("Number of input port models: %d\n")%stat_dico['iPort_nbr']
+		msg += _("Number of output port models: %d\n")%stat_dico['oPort_nbr']
 
 		dlg = wx.lib.dialogs.ScrolledMessageDialog(self.GetParent(), msg, _("Diagram Information"), style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 		dlg.ShowModal()
@@ -1113,7 +1115,7 @@ class Diagram(Savable, Structurable):
 				if isinstance(m, ContainerBlock):
 					m.Clean()
 
-	def GetStat(self, d={'Atomic_nbr':0, 'Coupled_nbr':0, 'Connection_nbr':0, 'Deep_level':0}):
+	def GetStat(self, d):
 		""" Get information about diagram like the numbe rof atomic model or the number of link between models.
 		"""
 
@@ -1129,6 +1131,12 @@ class Diagram(Savable, Structurable):
 				m.GetStat(d)
 			elif isinstance(m, ConnectionShape):
 				d['Connection_nbr']+=1
+			elif isinstance(m, iPort):
+				d['iPort_nbr']+=1
+			elif isinstance(m, oPort):
+				d['oPort_nbr']+=1
+			else: 
+				sys.stdout.write('Unknowm model!\n')
 
 		return d
 
@@ -1137,10 +1145,8 @@ class Diagram(Savable, Structurable):
 		"""
 
 		for m in self.GetShapeList():
-			if isinstance(m, CodeBlock):
-				l.append(m.label)
-			elif isinstance(m, ContainerBlock):
-				l.append(m.label)
+			l.append(m.label)
+			if isinstance(m, ContainerBlock):
 				m.GetLabelList(l)
 		return l
 

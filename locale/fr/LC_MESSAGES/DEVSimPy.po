@@ -291,7 +291,7 @@ msgstr "Nombre de couplage : %d\n"
 #: Container.py:673
 #, python-format
 msgid "Number of deep level (description hierarchy): %d\n"
-msgstr "Nomnre de niveau de hiérarchie de description : %d\n"
+msgstr "Nombre de niveau de hiérarchie de description : %d\n"
 
 #: Container.py:675
 msgid "Diagram Information"
@@ -1233,7 +1233,7 @@ msgstr "Génération des pas skeleton"
 
 #: Editor.py:2246
 msgid "Environment header generation"
-msgstr "Géénration des en-tête d'environnement"
+msgstr "Génération des en-tête d'environnement"
 
 #: Editor.py:2246
 msgid "Generate environment header"
@@ -1241,7 +1241,7 @@ msgstr "Génération des en-tête d'environnement"
 
 #: Editor.py:2247
 msgid "Environment methods generation"
-msgstr "Géénration des méthodes d'environnement"
+msgstr "Génération des méthodes d'environnement"
 
 #: Editor.py:2247
 msgid "Generate minimal methods for environment"

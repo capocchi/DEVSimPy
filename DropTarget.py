@@ -38,6 +38,8 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 		##local copy
 		self.canvas = canvas
 
+		self.mainW = wx.GetApp().GetTopWindow()
+
 		self.__setDo()
 
 	def __setDo(self):
@@ -64,7 +66,7 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 		"""
 		### list of ContainerBlock shape in canvas
 		L = filter(lambda s: isinstance(s, Container.ContainerBlock), self.canvas.diagram.GetShapeList())
-		
+
 		### for all ContainerBlock we make a rect and test if the point x,y is in this rect to instance the DetachedFrame
 		for shape in L:
 			w = shape.x[1]-shape.x[0]
@@ -74,19 +76,40 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 
 			### point (x,y) in rect
 			if rect.ContainsXY(x,y) if wx.VERSION_STRING < '4.0' else rect.Contains(x,y):
-
+			
 			### rect1 and rect2 intersect
 			#if abs (x - shape.x[0]) < w and abs (y - shape.y[0]) < h:
-
-				frame = DetachedFrame.DetachedFrame(self.canvas, wx.ID_ANY, shape.label, shape)
-				### to disabled transparency
-				frame.Unbind(wx.EVT_IDLE)
-				frame.Unbind(wx.EVT_MOVE)
-				frame.SetIcon(self.canvas.GetTopLevelParent().icon)
-				frame.SetFocus()
-				frame.Show()
+				#frame = self.mainW.FindWindowByName(shape.label)
+			
+				#if frame:
+				if hasattr(self, 'timer'):
+					if not self.timer.IsRunning():
+				#	frame.Show(True)
+						self.timer.Start()
+				else:
+					self.timer = self.OnDetachedFrame(shape)
+			else:
+				if hasattr(self, 'timer'):
+					self.timer.Stop()
+					del self.timer
 
 		return wx.DragCopy
+
+	def OnDetachedFrame(self, shape):
+		"""
+		"""
+		### Detached Frame
+		frame = DetachedFrame.DetachedFrame(self.canvas, wx.ID_ANY, shape.label, shape)
+		
+		### to disabled transparency
+		frame.Unbind(wx.EVT_IDLE)
+		frame.Unbind(wx.EVT_MOVE)
+
+		frame.SetIcon(self.canvas.GetTopLevelParent().GetIcon())
+		frame.SetFocus()
+		timer = wx.CallLater(1200, frame.Show)
+		
+		return timer
 
 	#def OnDragOver(self, x, y, d):
 	#   sys.stdout.write("OnDragOver: %d, %d, %d\n" % (x, y, d))
