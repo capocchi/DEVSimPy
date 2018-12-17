@@ -174,7 +174,12 @@ class LibraryTree(wx.TreeCtrl):
 
 				tip = doc if doc is not None else _("No documentation for selected model.")
 
-			self.SetToolTip(wx.ToolTip(tip.decode('utf-8', 'ignore')))
+			try:
+				txt = tip.decode('utf-8', 'ignore')
+			except UnicodeEncodeError:
+				sys.stdout.write("Unicode Error!\n")
+			else:
+				self.SetToolTip(wx.ToolTip(txt))
 
 		else:
 			self.SetToolTip(None)
