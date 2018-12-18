@@ -64,27 +64,18 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 	def OnDragOver(self,x,y,d):
 		"""
 		"""
+
 		### list of ContainerBlock shape in canvas
 		L = filter(lambda s: isinstance(s, Container.ContainerBlock), self.canvas.diagram.GetShapeList())
 
 		### for all ContainerBlock we make a rect and test if the point x,y is in this rect to instance the DetachedFrame
 		for shape in L:
-			w = shape.x[1]-shape.x[0]
-			h = shape.y[1]-shape.y[0]
- 
-			rect = wx.Rect(shape.x[0], shape.y[0], w, h)
-
+	
 			### point (x,y) in rect
-			if rect.ContainsXY(x,y) if wx.VERSION_STRING < '4.0' else rect.Contains(x,y):
-			
-			### rect1 and rect2 intersect
-			#if abs (x - shape.x[0]) < w and abs (y - shape.y[0]) < h:
-				#frame = self.mainW.FindWindowByName(shape.label)
-			
-				#if frame:
+			if self.HitTest(shape, x, y):
+						
 				if hasattr(self, 'timer'):
 					if not self.timer.IsRunning():
-				#	frame.Show(True)
 						self.timer.Start()
 				else:
 					self.timer = self.OnDetachedFrame(shape)
@@ -111,6 +102,20 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 		
 		return timer
 
+	def HitTest(self, shape, x, y):
+		"""
+		"""
+
+		w = shape.x[1]-shape.x[0]
+		h = shape.y[1]-shape.y[0]
+ 
+		rect = wx.Rect(shape.x[0], shape.y[0], w, h)
+
+		### rect1 and rect2 intersect
+		### abs (x - shape.x[0]) < w and abs (y - shape.y[0]) < h
+
+		return rect.ContainsXY(x,y) if wx.VERSION_STRING < '4.0' else rect.Contains(x,y)
+
 	#def OnDragOver(self, x, y, d):
 	#   sys.stdout.write("OnDragOver: %d, %d, %d\n" % (x, y, d))
 	#   return wx.DragCopy
@@ -119,8 +124,8 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 		#sys.stdout.write("OnLeave\n")
 
 	#def OnDrop(self, x, y):
-	#	sys.stdout.write("OnDrop: %d %d\n" % (x, y))	
-	#	return True
+		#sys.stdout.write("OnDrop: %d %d\n" % (x, y))	
+		#return True
         
 	def OnData(self, x, y, d):
 		"""
@@ -146,6 +151,24 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 				### Append new block 
 				block_list.append(m)
 				
+				### list of ContainerBlock shape in canvas
+				L = filter(lambda s: isinstance(s, Container.ContainerBlock), self.canvas.diagram.GetShapeList())
+
+				### for all ContainerBlock we make a rect and test if the point x,y is in this rect to instance the DetachedFrame
+				for shape in L:
+	
+					### point (x,y) in rect
+					if self.HitTest(shape, x, y):
+						### Delete new block 
+						del block_list[-1]
+						
+						shape.AddShape(m)
+
+						### DetachedFrame avoided
+						if hasattr(self, 'timer'):
+							self.timer.Stop()
+							del self.timer
+							
 			### dropped object come from system (like explorer)
 			elif df == wx.DF_FILENAME:
 				for filename in self.__fdo.GetFilenames():
@@ -158,7 +181,7 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 						m = Components.DSPComponent.Load(filename, label, self.canvas)
 					else:
 						m = self.GetBlock(filename, label, x, y)
-						
+
 						### Append new block
 						block_list.append(m)
 			
