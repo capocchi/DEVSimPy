@@ -36,6 +36,11 @@ if __builtin__.__dict__['GUI_FLAG']:
 		wx.Sound = wx.adv.Sound
 		wx.SOUND_ASYNC = wx.adv.SOUND_ASYNC	
 
+	try:
+		from agw import pybusyinfo as PBI
+	except ImportError: # if it's not there locally, try the wxPython lib.
+		import wx.lib.agw.pybusyinfo as PBI
+
 ### for replaceAll
 import fileinput
 
@@ -132,6 +137,17 @@ def getOutDir():
 	if not os.path.exists(out_dir):
 		os.mkdir(out_dir)
 	return out_dir
+
+def PyBuzyInfo(msg, time):
+
+	busy = PBI.PyBusyInfo(msg, parent=None, title=_("Info"))
+
+	wx.Yield()
+
+	for indx in range(time):
+		wx.MilliSleep(1000)
+
+	del busy
 
 def getObjectFromString(scriptlet):
     	"""

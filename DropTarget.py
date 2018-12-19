@@ -20,6 +20,7 @@ import sys
 import Components
 import DetachedFrame
 import Container
+import Utilities
 
 class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget):
 	""" DropTarget(canvas)
@@ -163,8 +164,13 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 						del block_list[-1]
 						
 						shape.AddShape(m)
+
+						### display pybusyinfo during 2s
+						msg = _("%s model Added!")%(str(m.label)).encode('utf-8', 'ignore').strip()
+						Utilities.PyBuzyInfo(msg, 2)
+
 						sys.stdout.write(_("Adding DEVSimPy model: \n").encode('utf-8', 'ignore').strip())
-						sys.stdout.write(repr(block))
+						sys.stdout.write(repr(m))
 						
 						### DetachedFrame avoided
 						if hasattr(self, 'timer'):
