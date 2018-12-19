@@ -1898,7 +1898,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 				self.DiagramModified()
 
 		def OnDisconnect(self, event):
-			""" Disconnect selected ports from connectDialog
+			""" Disconnect selected ports from connectDialog.
 			"""
 
 			# dialog results
@@ -1911,16 +1911,16 @@ if __builtin__.__dict__['GUI_FLAG']:
 			### flag to inform if there are modifications
 			modify_flag = False
 
-			### if selected options are not 'All'
-			if sp != 0 and tp != 0:
-				for connectionShapes in filter(lambda s: isinstance(s, ConnectionShape), self.diagram.shapes):
-					if (connectionShapes.getInput()[1] == sp-1) and (connectionShapes.getOutput()[1] == tp-1):
-						self.RemoveShape(connectionShapes)
-						modify_flag = True
-			else:
+			### if selected options are 'All'	
+			if sp == snl or tp == tnl:
 				for connectionShapes in filter(lambda s: isinstance(s, ConnectionShape), self.diagram.shapes):
 					self.RemoveShape(connectionShapes)
 					modify_flag = True
+			else:
+				for connectionShapes in filter(lambda s: isinstance(s, ConnectionShape), self.diagram.shapes):
+					if (connectionShapes.getInput()[1] == sp) and (connectionShapes.getOutput()[1] == tp):
+						self.RemoveShape(connectionShapes)
+						modify_flag = True
 
 			### shape has been modified
 			if modify_flag:
@@ -1929,7 +1929,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 				self.Refresh()
 
 		def OnConnect(self, event):
-			"""     Connect selected ports from connectDialog
+			""" Connect selected ports from connectDialog.
 			"""
 
 			# dialog results
@@ -1940,39 +1940,19 @@ if __builtin__.__dict__['GUI_FLAG']:
 			tnl = len(self.targetNodeList)
 
 			### all select are "all"
-			if sp == tp == 0:
-				for i in range(snl):
-					try:
-						sn = self.sourceNodeList[i]
-						tn = self.targetNodeList[i]
-						self.makeConnectionShape(sn, tn)
-					except:
-						pass
-			### one choice is not "all"
-			else:
-    			### if target is "all"
-				if tp == 0:
-					sn = self.sourceNodeList[sp-1]
-					for i in range(tnl):
-						try:
-							tn = self.targetNodeList[i]
-							self.makeConnectionShape(sn, tn)
-						except:
-							pass
-				### if source is "all"
-				elif sp == 0:
-					tn = self.targetNodeList[tp-1]
-					for i in range(snl):
+			if sp == snl or tp == tnl:
+				for i in range(sp+1):
+					for j in range(tp+1):
 						try:
 							sn = self.sourceNodeList[i]
+							tn = self.targetNodeList[j]
 							self.makeConnectionShape(sn, tn)
 						except:
 							pass
-				### connect port to port
-				else:
-					sn = self.sourceNodeList[sp-1]
-					tn = self.targetNodeList[tp-1]
-					self.makeConnectionShape(sn,tn)
+			else:
+			 	sn = self.sourceNodeList[sp]
+			 	tn = self.targetNodeList[tp]
+			 	self.makeConnectionShape(sn,tn)
 
 			self.Refresh()
 

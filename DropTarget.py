@@ -163,12 +163,14 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 						del block_list[-1]
 						
 						shape.AddShape(m)
-
+						sys.stdout.write(_("Adding DEVSimPy model: \n").encode('utf-8', 'ignore').strip())
+						sys.stdout.write(repr(block))
+						
 						### DetachedFrame avoided
 						if hasattr(self, 'timer'):
 							self.timer.Stop()
 							del self.timer
-							
+
 			### dropped object come from system (like explorer)
 			elif df == wx.DF_FILENAME:
 				for filename in self.__fdo.GetFilenames():
