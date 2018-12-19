@@ -1025,8 +1025,8 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 						#model.model_path =
 
 					### update flag and color if bad filename
-					#if model.bad_filename_path_flag:
-						#model.bad_filename_path_flag = False
+					if model.bad_filename_path_flag:
+						model.bad_filename_path_flag = False
 				else:
 					Container.MsgBoxError(evt, self, new_cls)
 					dlg.Destroy()

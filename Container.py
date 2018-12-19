@@ -1144,7 +1144,7 @@ class Diagram(Savable, Structurable):
 		""" Get Labels of all models
 		"""
 
-		for m in self.GetShapeList():
+		for m in filter(lambda a: isinstance(a, Block), self.GetShapeList()):
 			l.append(m.label)
 			if isinstance(m, ContainerBlock):
 				m.GetLabelList(l)

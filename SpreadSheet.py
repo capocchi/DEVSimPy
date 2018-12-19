@@ -399,13 +399,15 @@ class Newt(wx.Frame):
 			exec(str(s), globals())
 
 			if isinstance(value, list):
-				data.append((time,float(value[0])))
+				data.append((time, float(value[0])))
 			### first if int is digit or if float is digit
-			elif str(value).isdigit() or str(value).replace(".", "", 1).isdigit():
-				data.append((time,float(value)))
 			else:
-				wx.MessageBox(_('Type of data should be float or int : %s'%info), _('Info'))
-				break
+				v = str(value).lstrip('-')
+				if v.isdigit() or v.replace(".", "", 1).isdigit():
+					data.append((time,float(value)))
+				else:
+					wx.MessageBox(_('Type of data should be float or int : %s')%str(value), _('Info'))
+					break
 					
 		if data != []:
 			frame = StaticPlot(self, wx.ID_ANY, title, data)
