@@ -1542,7 +1542,7 @@ class MainApplication(wx.Frame):
 		msg+="XML files (*.xml)|*.xml|All files (*)|*)"
 
 		wcd = _(msg)
-		home = os.path.dirname(diagram.last_name_saved) or HOME_PATH
+		home = os.path.dirname(diagram.last_name_saved) or HOME_PATH if self.openFileList == ['']*NB_OPENED_FILE else os.path.dirname(self.openFileList[-1])
 		save_dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=home, defaultFile='', wildcard=wcd, style=wx.SAVE | wx.OVERWRITE_PROMPT)
 
 
@@ -1595,7 +1595,7 @@ class MainApplication(wx.Frame):
 	def OnImportXMLSES(self,event):
     	
 		wcd = _("XML SES files (*.xmlsestree)|*.xmlsestree|XML SES files (*.sestree)|*.sestree|All files (*)|*")
-		home = os.getenv('USERPROFILE') or os.getenv('HOME') or HOME_PATH
+		home = os.getenv('USERPROFILE') or os.getenv('HOME') or HOME_PATH if self.openFileList == ['']*NB_OPENED_FILE else os.path.dirname(self.openFileList[-1])
 		open_dlg = wx.FileDialog(self, message = _('Choose a file'), defaultDir = home, defaultFile = "", wildcard = wcd, style = wx.OPEN|wx.MULTIPLE|wx.CHANGE_DIR)
 
 		### path,diagram dictionary

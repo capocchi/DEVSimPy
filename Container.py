@@ -1037,7 +1037,7 @@ class Diagram(Savable, Structurable):
 			if m.label == label:
 				return m
 
-		#sys.stderr.write(_("Block %s not found.\n"%(label)))
+		sys.stderr.write(_("Block %s not found.\n"%(label)))
 		return False
 
 	def GetShapeList(self):
@@ -1149,6 +1149,11 @@ class Diagram(Savable, Structurable):
 			if isinstance(m, ContainerBlock):
 				m.GetLabelList(l)
 		return l
+
+	def GetName(self):
+		""" Return the last name saved
+		"""
+		return os.path.basename(self.last_name_saved)
 
 # Generic Shape Event Handler---------------------------------------------------
 class ShapeEvtHandler:

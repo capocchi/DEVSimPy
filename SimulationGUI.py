@@ -446,7 +446,7 @@ class Base(object):
 		# The simulation verbose event occurs
 		trigger_event('START_SIM_VERBOSE', parent=self)
 
-		# The simulation verbose event occurs
+		# The activity tracking event occurs
 		trigger_event('VIEW_ACTIVITY_REPORT', parent=self, master=self.current_master)
 
 	###
