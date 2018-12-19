@@ -513,7 +513,7 @@ class Preferences(wx.Toolbook):
 		L = [('General',"(self)"),('Simulation',"(self)"), ('Editor',"(self)"), ('Plugins',"(self)")]
 
 		# make an image list using the LBXX images
-		il = wx.ImageList(32, 32)
+		il = wx.ImageList(25, 25)
 		for img in map(lambda a: wx.Image(os.path.join(ICON_PATH, "%s_pref.png"%a[0]), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), L):
 			il.Add(img)
 		self.AssignImageList(il)

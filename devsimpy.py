@@ -784,6 +784,7 @@ class MainApplication(wx.Frame):
 							self.tb.AddTool(Menu.ID_UNZOOM_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'no_zoom.png')), shortHelpString=_('AnnuleZoom'), longHelpString=_('Normal size'), clientData=currentPage),
 							self.tb.AddTool(Menu.ID_PRIORITY_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'priority.png')), shortHelpString=_('Priority (F3)'),longHelpString= _('Define model activation priority')),
 							self.tb.AddTool(Menu.ID_CHECK_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'check_master.png')), shortHelpString=_('Debugger (F4)'),longHelpString= _('Check devs models')),
+							self.tb.AddTool(Menu.ID_PLUGINS_SHAPE, wx.Bitmap(os.path.join(ICON_PATH,'Plugins_pref.png')), shortHelpString=_('Plugins'), longHelpString=_('Plugins Manager')),
 							self.tb.AddTool(Menu.ID_SIM_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'simulation.png')), shortHelpString=_('Simulation (F5)'), longHelpString=_('Simulate the diagram')),
 							self.tb.AddTool(self.toggle_list[0], wx.Bitmap(os.path.join(ICON_PATH,'direct_connector.png')),shortHelpString= _('Direct'),longHelpString=_('Direct connector'), isToggle=True),
 							self.tb.AddTool(self.toggle_list[1], wx.Bitmap(os.path.join(ICON_PATH,'square_connector.png')), shortHelpString=_('Square'), longHelpString=_('Square connector'), isToggle=True),
@@ -802,6 +803,7 @@ class MainApplication(wx.Frame):
 							self.tb.AddTool(Menu.ID_UNZOOM_DIAGRAM, "",wx.Bitmap(os.path.join(ICON_PATH,'no_zoom.png')), wx.NullBitmap, shortHelp=_('AnnuleZoom'), longHelp=_('Normal size'), clientData=currentPage),
 							self.tb.AddTool(Menu.ID_PRIORITY_DIAGRAM, "",wx.Bitmap(os.path.join(ICON_PATH,'priority.png')), shortHelp=_('Priority (F3)')),
 							self.tb.AddTool(Menu.ID_CHECK_DIAGRAM, "",wx.Bitmap(os.path.join(ICON_PATH,'check_master.png')), shortHelp=_('Debugger (F4)')),
+							self.tb.AddTool(Menu.ID_PLUGINS_SHAPE, "", wx.Bitmap(os.path.join(ICON_PATH,'Plugins_pref.png')), shortHelp=_('Plugins Manager')),
 							self.tb.AddTool(Menu.ID_SIM_DIAGRAM, "",wx.Bitmap(os.path.join(ICON_PATH,'simulation.png')), shortHelp=_('Simulation (F5)')),
 							self.tb.AddTool(self.toggle_list[0], "",wx.Bitmap(os.path.join(ICON_PATH,'direct_connector.png')),shortHelp= _('Direct'), kind=wx.ITEM_CHECK),
 							self.tb.AddTool(self.toggle_list[1], "",wx.Bitmap(os.path.join(ICON_PATH,'square_connector.png')), shortHelp=_('Square'), kind = wx.ITEM_CHECK),
@@ -837,8 +839,8 @@ class MainApplication(wx.Frame):
 		self.tb.InsertSeparator(3)
 		self.tb.InsertSeparator(8)
 		self.tb.InsertSeparator(12)
-		self.tb.InsertSeparator(16)
-		self.tb.InsertSeparator(20)
+		self.tb.InsertSeparator(17)
+		self.tb.InsertSeparator(21)
 		
 		### undo and redo button desabled
 		self.tb.EnableTool(wx.ID_UNDO, False)
@@ -862,10 +864,11 @@ class MainApplication(wx.Frame):
 		self.Bind(wx.EVT_TOOL, self.AnnuleZoom, self.tools[9])
 		self.Bind(wx.EVT_TOOL, self.OnPriorityGUI, self.tools[10])
 		self.Bind(wx.EVT_TOOL, self.OnCheck, self.tools[11])
-		self.Bind(wx.EVT_TOOL, self.OnSimulation, self.tools[12])
-		self.Bind(wx.EVT_TOOL, self.OnDirectConnector, self.tools[13])
-		self.Bind(wx.EVT_TOOL, self.OnSquareConnector, self.tools[14])
-		self.Bind(wx.EVT_TOOL, self.OnLinearConnector, self.tools[15])
+		self.Bind(wx.EVT_TOOL, self.OnPlugins, self.tools[12])
+		self.Bind(wx.EVT_TOOL, self.OnSimulation, self.tools[13])
+		self.Bind(wx.EVT_TOOL, self.OnDirectConnector, self.tools[14])
+		self.Bind(wx.EVT_TOOL, self.OnSquareConnector, self.tools[15])
+		self.Bind(wx.EVT_TOOL, self.OnLinearConnector, self.tools[16])
 
 		##################################################################### Abstraction hierarchy
 		self.Bind(wx.EVT_SPINCTRL, self.OnSpin, id=self.toggle_list[3])
@@ -1679,7 +1682,7 @@ class MainApplication(wx.Frame):
 
 	###
 	def OnSearch(self,evt):
-		"""
+		""" Method ofr the serach function
 		"""
 		### search field
 		search = evt.GetEventObject()
@@ -1792,9 +1795,20 @@ class MainApplication(wx.Frame):
 
 	###
 	def OnCheck(self, event):
+		""" Method calling the Check.
+		"""
 		parent = self.GetWindowByEvent(event)
 		diagram = self.GetDiagramByWindow(parent)
 		return diagram.OnCheck(event)
+
+	###
+	def OnPlugins(self, event):
+		""" Method calling the plugins preference GUI.
+		"""
+		frame = PreferencesGUI(self,_("Preferences Manager"))
+		### select the last page which is the plugins config page (unstable because depends on the page oreder)
+		frame.pref.SetSelection(frame.pref.GetPageCount()-1)
+		frame.Show()
 
 	###
 	def OnSimulation(self, event):

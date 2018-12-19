@@ -3915,6 +3915,8 @@ class ContainerBlock(Block, Diagram):
 
 				if not os.path.exists(path):
 					state['bad_filename_path_flag'] = True
+			else:
+				state['bad_filename_path_flag'] = True	
 
 		####################################" Just for old model
 		if 'bad_filename_path_flag' not in state: state['bad_filename_path_flag'] = False
