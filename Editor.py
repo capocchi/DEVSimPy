@@ -1855,8 +1855,36 @@ class BlockBase(object):
 
 				cp.modify = True
 
+	def OnInsertInitPhase(self, event):
+		""" Insert a sentence to get the init phase (status and sigma)
+		"""
+		cp = self.nb.GetCurrentPage()
+		cp.AddTextRaw("self.initPhase(<status>,<sigma>)")
+		cp.modify = True
+
+	def OnInsertState(self, event):
+		""" Insert a sentence to get the state object
+		"""
+		cp = self.nb.GetCurrentPage()
+		cp.AddTextRaw("state = self.getState()")
+		cp.modify = True
+
+	def OnInsertStatus(self, event):
+		""" Insert a sentence to get the status
+		"""
+		cp = self.nb.GetCurrentPage()
+		cp.AddTextRaw("status = self.getStatus()")
+		cp.modify = True
+
+	def OnInsertSigma(self, event):
+		""" Insert a sentence to get the sigma value
+		"""
+		cp = self.nb.GetCurrentPage()
+		cp.AddTextRaw("sigma = self.getSigma()")
+		cp.modify = True
+
 	def OnInsertGetPortId(self, event):
-		""" Insert a sentence to get port ID
+		""" Insert a sentence to get the port ID
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddTextRaw("id = self.getPortId(<port>)")
@@ -2090,6 +2118,10 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		poke = wx.MenuItem(insert, wx.NewId(), _('New poke'), _('Generate new poke code'))
 		getPortId = wx.MenuItem(insert, wx.NewId(), _('Get Port Id'), _('Get the port ID from port instance self.getPortId(port)->int'))
 		getMsgValue = wx.MenuItem(insert, wx.NewId(), _('Get message value'), _('Get message value self.getMsgValue(msg)->Object'))
+		getInitPhase = wx.MenuItem(insert, wx.NewId(), _('Set the phase'), _('Set the phase self.getInitPhase()'))
+		getSigma = wx.MenuItem(insert, wx.NewId(), _('Get sigma value'), _('Get sigma value self.getSigma()->float'))
+		getStatus = wx.MenuItem(insert, wx.NewId(), _('Get status value'), _('Get status value self.getStatus()->str'))
+		getState = wx.MenuItem(insert, wx.NewId(), _('Get state object'), _('Get state object self.getState()->dict'))
 		holdInState = wx.MenuItem(insert, wx.NewId(), _('New hold in state'), _('Generate new hold in state code self.holdIn(...)'))
 		phaseIs = wx.MenuItem(insert, wx.NewId(), _('New phaseIs test'), _('Generate phase test code self.phaseIs(...)'))
 		passivateInState = wx.MenuItem(insert, wx.NewId(), _('New passivate in state'), _('Generate new passivate in state code self.passivateIn(...)'))
@@ -2099,6 +2131,10 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		insert.AppendItem(peek)
 		insert.AppendItem(poke)
 		insert.AppendSeparator()
+		insert.AppendItem(getInitPhase)
+		insert.AppendItem(getState)
+		insert.AppendItem(getSigma)
+		insert.AppendItem(getStatus)
 		insert.AppendItem(getPortId)
 		insert.AppendItem(getMsgValue)
 		insert.AppendSeparator()
@@ -2136,6 +2172,10 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 
 		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=poke.GetId())
+		self.Bind(wx.EVT_MENU, self.OnInsertInitPhase, id=getInitPhase.GetId())
+		self.Bind(wx.EVT_MENU, self.OnInsertState, id=getState.GetId())
+		self.Bind(wx.EVT_MENU, self.OnInsertStatus, id=getStatus.GetId())
+		self.Bind(wx.EVT_MENU, self.OnInsertSigma, id=getSigma.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertGetPortId, id=getPortId.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertGetMsgValue, id=getMsgValue.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertHoldInState, id=holdInState.GetId())
