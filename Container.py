@@ -7,7 +7,7 @@
 #                       Laurent CAPOCCHI
 #                      University of Corsica
 #                     --------------------------------
-# Version 2.0                                        last modified: 04/14/16
+# Version 2.0                                        last modified: 21/12/18
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -29,7 +29,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 	import wx.lib.dragscroller
 	#import wx.lib.imagebrowser as ib
 	import wx.lib.dialogs
-
+	
 	if wx.VERSION_STRING < '2.9':
 		from wx.lib.pubsub import Publisher
 	elif wx.VERSION_STRING < '4.0':
@@ -218,14 +218,19 @@ def printOnStatusBar(statusbar, data={}):
 		statusbar.SetStatusText(v, k)
 
 def CheckClass(m):
+	"""
+	"""
 
 	if inspect.isclass(m):
 		cls = m
 		args = Components.GetArgs(cls)
 
 	elif isinstance(m, Block):
-		cls = Components.GetClass(m.python_path)
-		args = m.args
+		if m.bad_filename_path_flag:
+			cls = ('Warning','Random python path file','')
+		else:
+			cls = Components.GetClass(m.python_path)
+			args = m.args
 
 	elif os.path.exists(m):
 		### if .amd or .cmd
@@ -252,7 +257,7 @@ def CheckClass(m):
 
 		### check devs instance
 		devs = getInstance(cls, args)
-
+	
 		### check instance error
 		return devs if isinstance(devs, tuple) else None
 
@@ -269,7 +274,6 @@ class Diagram(Savable, Structurable):
 
 	def __init__(self):
 		""" Constructor.
-
 		"""
 
 		Structurable.__init__(self)
@@ -317,7 +321,7 @@ class Diagram(Savable, Structurable):
 		return new_state
 
 	def __getattr__(self, name):
-		"""Called when an attribute lookup has not found the attribute in the usual places
+		"""Called when an attribute lookup has not found the attribute in the usual places.
 		"""
 
 		if name == 'dump_attributes':
@@ -331,7 +335,7 @@ class Diagram(Savable, Structurable):
 
 	@staticmethod
 	def makeDEVSGraph(diagram, D = {}, type = object):
-		""" Make a formated dictionnary to make the graph of the DEVS Network : {'S1': [{'C1': (1, 0)}, {'M': (0, 1)}], port 1 of S1 is connected to the port 0 of C1...
+		""" Make a formated dictionnary to make the graph of the DEVS Network: {'S1': [{'C1': (1, 0)}, {'M': (0, 1)}], port 1 of S1 is connected to the port 0 of C1...
 		"""
 
 
@@ -367,7 +371,7 @@ class Diagram(Savable, Structurable):
 
 	@staticmethod
 	def makeDEVSInstance(diagram = None):
-		""" Return the DEVS instance of diagram. iterations order is very important !
+		""" Return the DEVS instance of diagram. Iterations order is very important!
 				1. we make the codeblock devs instance
 				2. we make the devs port instance for all devsimpy port
 				3. we make Containerblock instance

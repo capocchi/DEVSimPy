@@ -171,6 +171,8 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 
 				block = Components.BlockFactory.CreateBlock(x=int(attr['x'].value), y=int(attr['y'].value), name=name, python_file=temp.name, canvas=canvas)
 				block.label = name
+				### if True, the flag for bad python file is activated
+				block.bad_filename_path_flag = True
 
 				parent_id = s.attributes['parent'].value
 				id = str(s.attributes['id'].value)
@@ -196,6 +198,8 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 
 				block = Components.BlockFactory.CreateBlock(x=int(attr['x'].value), y=int(attr['y'].value), name=name, python_file=temp.name, canvas=canvas)
 				block.label = name
+				### if True, the flag for bad python file is activated
+				block.bad_filename_path_flag = True
 
 				parent_id = s.attributes['parent'].value
 				id = str(s.attributes['id'].value)
@@ -223,6 +227,8 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 
 				block = Components.BlockFactory.CreateBlock(x=int(attr['x'].value), y=int(attr['y'].value), name=name, python_file=temp.name, canvas=canvas)
 				block.label = name
+				### if True, the flag for bad python file is activated
+				block.bad_filename_path_flag = True
 
 				parent_id = s.attributes['parent'].value
 				id = str(s.attributes['id'].value)
@@ -328,10 +334,13 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 					temp = tempfile.NamedTemporaryFile(suffix='.py', delete=False)
 					temp.write(WizardGUI.coupledCode('CoupledModel'))
 					temp.seek(0)
+					
 					nbi,nbo = map(len,GetNbPort(k))
 					cp_block = Components.BlockFactory.CreateBlock(x=100, y=100, inputs = nbi, outputs = nbo, name=name, python_file=temp.name, canvas=canvas)
 					cp_block.label = name
-					
+					### if True, the flag for bad python file is activated
+					cp_block.bad_filename_path_flag = True
+
 					parent_block.AddShape(cp_block)
 					
 					#print cp_block
@@ -349,10 +358,14 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 					temp = tempfile.NamedTemporaryFile(suffix='.py', delete=False)
 					temp.write(WizardGUI.atomicCode('AtomicModel'))
 					temp.seek(0)
+					
 					nbi,nbo = map(len,GetNbPort(k))
 					am_block = Components.BlockFactory.CreateBlock(x=250, y=100*(1+parent_block.nbCodeBlock), inputs = nbi, outputs = nbo, name=name, python_file=temp.name, canvas=canvas)
 					am_block.label = name
-					
+
+					### if True, the flag for bad python file is activated
+					am_block.bad_filename_path_flag = True
+
 					#print am_block
 					parent_block.AddShape(am_block)
 

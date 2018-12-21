@@ -8,7 +8,7 @@
 #                           Laurent CAPOCCHI
 #                         University of Corsica
 #                     --------------------------------
-# Version 1.0                                        last modified: 28/02/2014
+# Version 1.0                                        last modified: 21/12/2018
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -181,6 +181,17 @@ class PythonSTC(stc.StyledTextCtrl):
 		"""
 		stc.StyledTextCtrl.__init__(self, parent, ID, pos, size, style)
 
+		# Do we want to automatically pop up command completion options?
+		self.autoComplete = True
+		self.autoCompleteIncludeMagic = True
+		self.autoCompleteIncludeSingle = True
+		self.autoCompleteIncludeDouble = True
+		self.autoCompleteCaseInsensitive = True
+		self.AutoCompSetIgnoreCase(self.autoCompleteCaseInsensitive)
+		self.autoCompleteAutoHide = False
+		self.AutoCompSetAutoHide(self.autoCompleteAutoHide)
+		self.AutoCompStops(' .,;:([)]}\'"\\<>%^&+-=*/|`')
+
 		self.CmdKeyAssign(ord('B'), stc.STC_SCMOD_CTRL, stc.STC_CMD_ZOOMIN)
 		self.CmdKeyAssign(ord('N'), stc.STC_SCMOD_CTRL, stc.STC_CMD_ZOOMOUT)
 
@@ -321,6 +332,11 @@ class PythonSTC(stc.StyledTextCtrl):
 
 	### NOTE: PythonSTC :: OnUpdateUI 			=> Event for update user interface
 	def OnUpdateUI(self, evt):
+    		
+		# If the auto-complete window is up let it do its thing.
+		if self.AutoCompActive() or self.CallTipActive():
+			return
+
 		# check for matching braces
 		braceAtCaret = -1
 		braceOpposite = -1
@@ -2118,7 +2134,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		poke = wx.MenuItem(insert, wx.NewId(), _('New poke'), _('Generate new poke code'))
 		getPortId = wx.MenuItem(insert, wx.NewId(), _('Get Port Id'), _('Get the port ID from port instance self.getPortId(port)->int'))
 		getMsgValue = wx.MenuItem(insert, wx.NewId(), _('Get message value'), _('Get message value self.getMsgValue(msg)->Object'))
-		getInitPhase = wx.MenuItem(insert, wx.NewId(), _('Set the phase'), _('Set the phase self.getInitPhase()'))
+		getInitPhase = wx.MenuItem(insert, wx.NewId(), _('Set the phase (init phase)'), _('Set the phase self.getInitPhase()'))
 		getSigma = wx.MenuItem(insert, wx.NewId(), _('Get sigma value'), _('Get sigma value self.getSigma()->float'))
 		getStatus = wx.MenuItem(insert, wx.NewId(), _('Get status value'), _('Get status value self.getStatus()->str'))
 		getState = wx.MenuItem(insert, wx.NewId(), _('Get state object'), _('Get state object self.getState()->dict'))

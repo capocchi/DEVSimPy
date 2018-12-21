@@ -17,6 +17,7 @@ import re
 import copy
 import inspect
 import sys
+import zipfile
 import webbrowser
 from traceback import format_exception
 
@@ -32,6 +33,8 @@ from wx.lib.mixins.listctrl import ListCtrlAutoWidthMixin, ColumnSorterMixin
 from Utilities import GetMails, getInstance
 
 import Components
+from Mixins.Attributable import Attributable
+import Container
 
 class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 	""" Virtual List of devs model checking
@@ -40,6 +43,8 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		""" Constructor.
 		"""
 		wx.ListCtrl.__init__( self, parent, -1, style=wx.LC_REPORT|wx.LC_VIRTUAL|wx.LC_HRULES|wx.LC_VRULES)
+
+		self.parent = parent
 
 		### adding some art
 		self.il = wx.ImageList(16, 16)
@@ -96,7 +101,8 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		"""
 		# record what was clicked
 		line_number = self.getColumnText(self.currentItem, 2)
-
+		error_msg = self.getColumnText(self.currentItem, 1)
+		
 		### pop-up menu only for cell with line_number
 		if line_number != "":
 
@@ -117,6 +123,89 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 			### 5. Launcher displays menu with call to PopupMenu, invoked on the source component, passing event's GetPoint. ###
 			self.PopupMenu( menu, event.GetPoint() )
 			menu.Destroy() # destroy to avoid mem leak
+		elif error_msg == 'Random python path file':
+    
+			### 2. Launcher creates wxMenu. ###
+			menu = wx.Menu()
+
+			open = wx.MenuItem(menu, wx.NewId(),_("Open"), _("Change the python file path"))
+			open.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'file.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+			report = wx.MenuItem(menu, wx.NewId(),_("Report"), _("Report error by mail to the author"))
+			report.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'mail.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+
+			menu.AppendItem(open)
+			menu.AppendItem(report)
+
+			menu.Bind(wx.EVT_MENU,self.OnOpen,id= open.GetId())
+			menu.Bind(wx.EVT_MENU,self.OnReport,id= report.GetId())
+
+			### 5. Launcher displays menu with call to PopupMenu, invoked on the source component, passing event's GetPoint. ###
+			self.PopupMenu( menu, event.GetPoint() )
+			menu.Destroy() # destroy to avoid mem leak
+
+	def OnOpen(self, event):
+		model_name  = self.getColumnText(self.currentItem, 0)
+			
+		for model in self.parent.D:
+			if model_name == model.label:
+				### for .amd or .cmd
+				if model.model_path != '':
+					wcd = _('Atomic DEVSimPy model (*.amd)|*.amd|Coupled DEVSimPy model (*.cmd)|*.cmd|All files (*)|*')
+				else:
+					wcd = _('Python files (*.py)|*.py|All files (*)|*')
+
+				default_dir = os.path.dirname(model.python_path) if os.path.exists(os.path.dirname(model.python_path)) else DOMAIN_PATH
+				dlg = wx.FileDialog(self, message=_("Select file ..."), defaultDir=default_dir, defaultFile="", wildcard=wcd, style=wx.OPEN | wx.CHANGE_DIR)
+				if dlg.ShowModal() == wx.ID_OK:
+					new_python_path = os.path.normpath(dlg.GetPath())
+
+					### if the user would like to load a compressed python file, he just give the name of compressed file that contain the python file
+					if zipfile.is_zipfile(new_python_path):
+						zf = zipfile.ZipFile(new_python_path, 'r')
+						new_python_path = os.path.join(new_python_path, filter(lambda f: f.endswith('.py') and f!='plugins.py', zf.namelist())[0])
+						### update model path
+						model.model_path = os.path.dirname(new_python_path)
+
+					# behavioral args update (because depends of the new class coming from new python file)
+					new_cls = Components.GetClass(new_python_path)
+
+					if inspect.isclass(new_cls):
+
+						### update attributes (behavioral ang graphic)
+						model.args = Components.GetArgs(new_cls)
+						model.SetAttributes(Attributable.GRAPHICAL_ATTR)
+
+						### TODO: when ScopeGUI and DiskGUI will be amd models, delete this line)
+						### delete xlabel and ylabel attributes if exist
+						model.RemoveAttribute('xlabel')
+						model.RemoveAttribute('ylabel')
+						### Update of DEVSimPy model from new python behavioral file (ContainerBlock is not considered because he did not behavioral)
+						if new_cls.__name__ in ('To_Disk','MessagesCollector'):
+							model.__class__ = Container.DiskGUI
+						elif new_cls.__name__ == 'QuickScope':
+							model.__class__ = Container.ScopeGUI
+							model.AddAttribute("xlabel")
+							model.AddAttribute("ylabel")
+						elif True in map(lambda a: 'DomainStructure' in str(a), new_cls.__bases__):
+							model.__class__ = Container.ContainerBlock
+						else:
+							model.__class__ = Container.CodeBlock
+
+						### if we change the python file from zipfile we compresse the new python file and we update the python_path value
+						if zipfile.is_zipfile(model.model_path):
+							zf = ZipManager.Zip(model.model_path)
+							zf.Update([new_python_path])
+							
+						### update flag and color if bad filename
+						if model.bad_filename_path_flag:
+							model.bad_filename_path_flag = False
+					else:
+						Container.MsgBoxError(evt, self, new_cls)
+						dlg.Destroy()
+						break
+				else:
+					dlg.Destroy()
+					break
 
 	def OnEditor(self, event):
 		""" Edit pop-up menu has been clicked
@@ -245,7 +334,8 @@ class CheckerGUI(wx.Frame):
 		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "check_master.png"), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(icon)
 
-		#self.CreateStatusBar(1)
+		### local copy
+		self.D = D
 
 		##############################################" comment for unitest
 		### prepare dictionary

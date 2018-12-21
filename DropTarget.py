@@ -5,7 +5,7 @@ Name: Components.py
 Brief descritpion: All classes for components
 Author(s): L. Capocchi <capocchi@univ-corse.fr>
 Version:  1.0
-Last modified: 2012.12.16
+Last modified: 2018.12.21
 GENERAL NOTES AND REMARKS:
 
 > pyreverse -a1 -s1 -f ALL -o png DropTarget.py

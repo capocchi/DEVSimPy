@@ -8,12 +8,12 @@
 #                    L. CAPOCCHI (capocchi@univ-corse.fr)
 #                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-# Version 3.0                                      last modified:  03/05/18
+# Version 3.0                                      last modified:  21/12/18
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
 #
-# strong depends: wxPython
+# strong depends: wxPython, PyPubSub (3.3.0)
 # light depends: NumPy for spectrum analysis, mathplotlib for graph display
 # remarks: lib tree is build by the TreeLitLib class.
 # Moreover, __init__.py file is required for the build (see GetSubDomain method).
@@ -24,7 +24,7 @@
 #   4/ the constructor of all class must have a default value of the parameters
 #   5/ __str__ method must be implemented for .py in order to have a correct 
 # name in the GUI (otherwise AM is displayed)
-# To install with git: git clone -b version-3.0 https://github.com/capocchi/DEVSimPy.git DEVSimPy-v3.0
+#
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -38,7 +38,7 @@ from __future__ import with_statement
 
 import datetime
 
-__authors__ = "Laurent Capocchi <capocchi_l@univ-corse.fr>, SISU project group <santucci_j@univ-corse.fr>"
+__authors__ = "Laurent Capocchi <capocchi_l@univ-corse.fr>, SISU project team <santucci_j@univ-corse.fr>"
 __date__ = str(datetime.datetime.now())
 __version__ = '3.0'
 __docformat__ = 'epytext'
