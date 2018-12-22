@@ -218,7 +218,7 @@ def printOnStatusBar(statusbar, data={}):
 		statusbar.SetStatusText(v, k)
 
 def CheckClass(m):
-	"""
+	""" Check if class is ok and return it.
 	"""
 
 	if inspect.isclass(m):
@@ -226,8 +226,9 @@ def CheckClass(m):
 		args = Components.GetArgs(cls)
 
 	elif isinstance(m, Block):
-		if m.bad_filename_path_flag:
-			cls = ('Warning','Random python path file','')
+		tempdir = gettempdir()
+		if tempdir in os.path.dirname(m.python_path):
+			cls = ('','','')
 		else:
 			cls = Components.GetClass(m.python_path)
 			args = m.args
@@ -761,15 +762,15 @@ class Diagram(Savable, Structurable):
             ### if there is no error
  			if D is None:
 				dial = wx.MessageDialog(win,
-										_('All DEVS model has been instantiated without error.\n\nDo you want simulate?'),
-										_('Error Manager'),
-										wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+			 							_('All DEVS model has been instantiated without error.\n\nDo you want simulate?'),
+			 							_('Error Manager'),
+			 							wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 
-				if dial.ShowModal() == wx.ID_YES:
-					self.OnSimulation(event)
+			 	if dial.ShowModal() == wx.ID_YES:
+			 		self.OnSimulation(event)
 			else:
-				frame = CheckerGUI.CheckerGUI(win, D)
-				frame.Show()
+			 	frame = CheckerGUI.CheckerGUI(win, self)
+			 	frame.Show()
 
 		### no models in diagram
 		else:

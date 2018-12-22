@@ -19,6 +19,8 @@ import inspect
 import sys
 import zipfile
 import webbrowser
+import tempfile
+
 from traceback import format_exception
 
 _ = wx.GetTranslation
@@ -44,6 +46,7 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		"""
 		wx.ListCtrl.__init__( self, parent, -1, style=wx.LC_REPORT|wx.LC_VIRTUAL|wx.LC_HRULES|wx.LC_VRULES)
 
+		### local copy
 		self.parent = parent
 
 		### adding some art
@@ -84,12 +87,45 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.OnItemDeselected)
 		self.Bind(wx.EVT_LIST_COL_CLICK, self.OnColClick)
 		self.Bind(wx.EVT_LEFT_DCLICK, self.OnDoubleClick)
+		self.Bind(wx.EVT_LEFT_DOWN, self.OnClick)
 		self.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnRightClick)
 
 	def OnColClick(self,event):
 		"""
 		"""
 		event.Skip()
+
+	def OnClick(self, event):
+		"""
+		"""
+
+		### deselect all item
+		for x in xrange(self.GetItemCount()):
+			self.Select(x, False)
+
+		### get selected item position
+		x,y = event.GetPosition() 
+		row,flags = self.HitTest((x,y)) 
+
+		### select the item
+		self.Select(row)
+
+		model_name = self.getColumnText(row, 0)
+		path = self.getColumnText(row, 4)
+
+		tempdir = tempfile.gettempdir()
+		
+		### open file diag only if python file is temp
+		if tempdir in os.path.dirname(path):
+			from AttributeEditor import AttributeEditor
+
+			### get model from active diagram			
+			mainW = wx.GetApp().GetTopWindow()
+			canvas = mainW.nb2.GetCurrentPage()
+			diagram = canvas.GetDiagram()
+
+			f = AttributeEditor(canvas.GetParent(), wx.ID_ANY, diagram.GetShapeByLabel(model_name), canvas)
+			f.Show()
 
 	def OnItemSelected(self, event):
 		""" Item has been selected
@@ -123,90 +159,7 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 			### 5. Launcher displays menu with call to PopupMenu, invoked on the source component, passing event's GetPoint. ###
 			self.PopupMenu( menu, event.GetPoint() )
 			menu.Destroy() # destroy to avoid mem leak
-		elif error_msg == 'Random python path file':
-    
-			### 2. Launcher creates wxMenu. ###
-			menu = wx.Menu()
-
-			open = wx.MenuItem(menu, wx.NewId(),_("Open"), _("Change the python file path"))
-			open.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'file.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-			report = wx.MenuItem(menu, wx.NewId(),_("Report"), _("Report error by mail to the author"))
-			report.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'mail.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-
-			menu.AppendItem(open)
-			menu.AppendItem(report)
-
-			menu.Bind(wx.EVT_MENU,self.OnOpen,id= open.GetId())
-			menu.Bind(wx.EVT_MENU,self.OnReport,id= report.GetId())
-
-			### 5. Launcher displays menu with call to PopupMenu, invoked on the source component, passing event's GetPoint. ###
-			self.PopupMenu( menu, event.GetPoint() )
-			menu.Destroy() # destroy to avoid mem leak
-
-	def OnOpen(self, event):
-		model_name  = self.getColumnText(self.currentItem, 0)
-			
-		for model in self.parent.D:
-			if model_name == model.label:
-				### for .amd or .cmd
-				if model.model_path != '':
-					wcd = _('Atomic DEVSimPy model (*.amd)|*.amd|Coupled DEVSimPy model (*.cmd)|*.cmd|All files (*)|*')
-				else:
-					wcd = _('Python files (*.py)|*.py|All files (*)|*')
-
-				default_dir = os.path.dirname(model.python_path) if os.path.exists(os.path.dirname(model.python_path)) else DOMAIN_PATH
-				dlg = wx.FileDialog(self, message=_("Select file ..."), defaultDir=default_dir, defaultFile="", wildcard=wcd, style=wx.OPEN | wx.CHANGE_DIR)
-				if dlg.ShowModal() == wx.ID_OK:
-					new_python_path = os.path.normpath(dlg.GetPath())
-
-					### if the user would like to load a compressed python file, he just give the name of compressed file that contain the python file
-					if zipfile.is_zipfile(new_python_path):
-						zf = zipfile.ZipFile(new_python_path, 'r')
-						new_python_path = os.path.join(new_python_path, filter(lambda f: f.endswith('.py') and f!='plugins.py', zf.namelist())[0])
-						### update model path
-						model.model_path = os.path.dirname(new_python_path)
-
-					# behavioral args update (because depends of the new class coming from new python file)
-					new_cls = Components.GetClass(new_python_path)
-
-					if inspect.isclass(new_cls):
-
-						### update attributes (behavioral ang graphic)
-						model.args = Components.GetArgs(new_cls)
-						model.SetAttributes(Attributable.GRAPHICAL_ATTR)
-
-						### TODO: when ScopeGUI and DiskGUI will be amd models, delete this line)
-						### delete xlabel and ylabel attributes if exist
-						model.RemoveAttribute('xlabel')
-						model.RemoveAttribute('ylabel')
-						### Update of DEVSimPy model from new python behavioral file (ContainerBlock is not considered because he did not behavioral)
-						if new_cls.__name__ in ('To_Disk','MessagesCollector'):
-							model.__class__ = Container.DiskGUI
-						elif new_cls.__name__ == 'QuickScope':
-							model.__class__ = Container.ScopeGUI
-							model.AddAttribute("xlabel")
-							model.AddAttribute("ylabel")
-						elif True in map(lambda a: 'DomainStructure' in str(a), new_cls.__bases__):
-							model.__class__ = Container.ContainerBlock
-						else:
-							model.__class__ = Container.CodeBlock
-
-						### if we change the python file from zipfile we compresse the new python file and we update the python_path value
-						if zipfile.is_zipfile(model.model_path):
-							zf = ZipManager.Zip(model.model_path)
-							zf.Update([new_python_path])
-							
-						### update flag and color if bad filename
-						if model.bad_filename_path_flag:
-							model.bad_filename_path_flag = False
-					else:
-						Container.MsgBoxError(evt, self, new_cls)
-						dlg.Destroy()
-						break
-				else:
-					dlg.Destroy()
-					break
-
+	
 	def OnEditor(self, event):
 		""" Edit pop-up menu has been clicked
 		"""
@@ -325,7 +278,7 @@ class CheckerGUI(wx.Frame):
 	""" Class which report the code checking of python file
 	"""
 
-	def __init__(self, parent, D):
+	def __init__(self, parent, diagram):
 		""" Constructor.
 		"""
 		wx.Frame.__init__(self, parent, wx.ID_ANY, _("DEVS Model Checking"), size=(900,400), style = wx.DEFAULT_FRAME_STYLE)
@@ -335,24 +288,72 @@ class CheckerGUI(wx.Frame):
 		self.SetIcon(icon)
 
 		### local copy
-		self.D = D
+		self.parent = parent
+		self.diagram = diagram
 
 		##############################################" comment for unitest
 		### prepare dictionary
+		D = self.diagram.DoCheck()
+		self.list = self.getList(D)
+		#################################################
+
+		### self.list = VirtualList(self,D)
+
+		self.mainSizer = wx.BoxSizer(wx.VERTICAL)
+		controlSizer = wx.StdDialogButtonSizer() #wx.BoxSizer(wx.HORIZONTAL)
+		self.listSizer = wx.BoxSizer(wx.VERTICAL)
+
+		close_btn = wx.Button(self, wx.ID_CLOSE)
+		ok_btn = wx.Button(self, wx.ID_OK)
+		update_btn = wx.Button(self, wx.ID_REFRESH)
+
+		controlSizer.Add(close_btn,0, wx.CENTER|wx.ALL, 5)
+		controlSizer.Add(update_btn,0, wx.CENTER|wx.ALL, 5)
+		controlSizer.Add(ok_btn,0, wx.CENTER|wx.ALL, 5)
+		controlSizer.Realize()
+
+		self.listSizer.Add(self.list, 1, wx.EXPAND, 10)
+
+		self.mainSizer.Add(self.listSizer, 1, wx.EXPAND, 10)
+		self.mainSizer.Add(controlSizer,0, wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM,border=10)
+
+		self.SetSizer(self.mainSizer)
+		self.Center()
+
+		### just for windows
+		e = wx.SizeEvent(self.GetSize())
+		self.ProcessEvent(e)
+
+		self.Bind(wx.EVT_BUTTON, self.OnClose, id = close_btn.GetId())
+		self.Bind(wx.EVT_BUTTON, self.OnOK, id = ok_btn.GetId())
+		self.Bind(wx.EVT_BUTTON, self.OnUpdate, id = update_btn.GetId())
+
+	def OnClose(self,evt):
+		"""
+		"""
+		self.Close()
+
+	def OnOK(self, evt):
+		"""
+		"""
+		self.Close()
+
+	def getList(self, D):
+		""" Return list to populate de virtualList
+		"""
+
+		tempdir = tempfile.gettempdir()
+		
 		L = []
 		for k,v in D.items():
 
 			path = ""
 			line = ""
-			if v is None:
-				### find mail from doc of module
-				module = Components.BlockFactory.GetModule(k.python_path)
-				doc = module.__doc__ or ""
-				mails = GetMails(doc) if inspect.ismodule(module) else []
 
+			if tempdir in os.path.dirname(k.python_path):
 				### append infos
-				L.append((k.label, "", "", mails, k.python_path))
-			else:
+				L.append((k.label, _("Temporary python file!"), "", "", k.python_path))
+			elif v:
 				typ, val, tb = v
 				list = format_exception(typ, val, tb)
 				### reverse because we want the last error of the traceback
@@ -374,68 +375,31 @@ class CheckerGUI(wx.Frame):
 
 				### append the error information
 				L.append((k.label, str(val), line_number, mails, python_path))
-
-		self.list = VirtualList(self, dict(zip(range(len(L)),L)))
-		#################################################
-
-		### decomment for unitest
-		#self.list = VirtualList(self,D)
-
-		hsizer = wx.StdDialogButtonSizer() #wx.BoxSizer(wx.HORIZONTAL)
-		vsizer = wx.BoxSizer(wx.VERTICAL)
-
-		close_btn = wx.Button(self, wx.ID_CLOSE)
-		ok_btn = wx.Button(self, wx.ID_OK)
-		update_btn = wx.Button(self, wx.ID_REFRESH)
-
-		hsizer.Add(close_btn)
-		hsizer.Add(update_btn)
-		hsizer.Add(ok_btn)
-		hsizer.Realize()
-
-		vsizer.Add(self.list, 1, wx.EXPAND, 10)
-		vsizer.Add(hsizer,0, wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM,border=10)
-
-		self.SetSizer(vsizer)
-		self.Center()
-
-		### just for windows
-		e = wx.SizeEvent(self.GetSize())
-		self.ProcessEvent(e)
-
-		self.Bind(wx.EVT_BUTTON, self.OnClose, id = close_btn.GetId())
-		self.Bind(wx.EVT_BUTTON, self.OnOK, id = ok_btn.GetId())
-		self.Bind(wx.EVT_BUTTON, self.OnUpdate, id = update_btn.GetId())
-
-	def OnClose(self,evt):
-		"""
-		"""
-		self.Close()
-
-	def OnOK(self, evt):
-		"""
-		"""
-		self.Close()
+		
+		return VirtualList(self, dict(zip(range(len(L)),L))) if L != [] else L
 
 	def OnUpdate(self, evt):
 		""" Update list has been invocked
 		"""
+		
+#		mainW = wx.GetApp().GetTopWindow()
+#		canvas = mainW.nb2.GetCurrentPage()
+#		diagram = canvas.GetDiagram()
 
-		### deep copy of data list
-		D = copy.deepcopy(self.list.itemDataMap)
+		### get list by ckecking all block models of the diagram
+		D = self.diagram.DoCheck()
+		L = self.getList(D)
 
-		### update in error line self.list.itemDataMap
-		for k,v in D.items():
-			line_number = v[2]
-			if line_number != "":
-				python_path = v[-1]
-				devs = getInstance(Components.GetClass(python_path))
-				### check error and change image
-				if not isinstance(devs, tuple):
-					self.list.itemDataMap[k] = (v[0], "", "", v[3], v[4])
+		if isinstance(L, VirtualList):
+			self.list = L
 
-		### refresh items
-		self.list.RefreshItems(-1,-1)
+			### display the updated list
+			self.listSizer.Hide(0)
+			self.listSizer.Remove(0)
+			self.listSizer.Add(self.list, 1, wx.EXPAND, 10)
+			self.Layout()
+		else:
+			sys.stdou.write(_('List not updated!'))
 
 ### ------------------------------------------------------------
 class TestApp(wx.App):

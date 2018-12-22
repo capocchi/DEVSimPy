@@ -1075,15 +1075,18 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 			if isinstance(model, Achievable):
 				new_code = CodeCB(self.parent, wx.ID_ANY, model)
 				#self.parent.boxH.Remove(0)
-				# DeleteWindows work better in vista
-				if wx.VERSION_STRING < '4.0':
-					self.parent._boxH.DeleteWindows()
-					self.parent._boxH.AddWindow(new_code, 1, wx.EXPAND, userData='code')
-				else:
-					self.parent._boxH.Clear()
-					self.parent._boxH.Add(new_code, 1, wx.EXPAND, userData='code')
+				if hasattr(self.parent, '_boxH'):
+					# DeleteWindows work better in vista
+					if wx.VERSION_STRING < '4.0':
+						self.parent._boxH.DeleteWindows()
+						self.parent._boxH.AddWindow(new_code, 1, wx.EXPAND, userData='code')
+					else:
+						self.parent._boxH.Clear()
+						self.parent._boxH.Add(new_code, 1, wx.EXPAND, userData='code')
 
-				self.parent._boxH.Layout()
+					self.parent._boxH.Layout()
+				else:
+					sys.stdout.write("_boxH is unknown!")
 
 	###
 	def OnSelectProp(self, evt):

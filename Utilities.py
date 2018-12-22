@@ -289,7 +289,7 @@ def getInstance(cls, args = {}):
 		else:
 			return devs
 	else:
-		sys.stderr.write(_("Error in getInstance: First parameter is not a class\n"))
+		sys.stderr.write(_("Error in getInstance: First parameter (%s) is not a class\n")%str(cls))
 		return sys.exc_info()
 
 def itersubclasses(cls, _seen=None):
