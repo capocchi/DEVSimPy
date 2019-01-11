@@ -806,7 +806,7 @@ class Diagram(Savable, Structurable):
 				playSound(SIMULATION_ERROR_SOUND_PATH)
 
 				if dial.ShowModal() == wx.ID_YES:
-					frame = CheckerGUI.CheckerGUI(win, D)
+					frame = CheckerGUI.CheckerGUI(win, self)
 					frame.Show()
 
 				return False

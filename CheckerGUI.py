@@ -345,36 +345,37 @@ class CheckerGUI(wx.Frame):
 		tempdir = tempfile.gettempdir()
 		
 		L = []
-		for k,v in D.items():
+		if D:
+			for k,v in D.items():
 
-			path = ""
-			line = ""
+				path = ""
+				line = ""
 
-			if tempdir in os.path.dirname(k.python_path):
-				### append infos
-				L.append((k.label, _("Temporary python file!"), "", "", k.python_path))
-			elif v:
-				typ, val, tb = v
-				list = format_exception(typ, val, tb)
-				### reverse because we want the last error of the traceback
-				list.reverse()
-				### find the line containing the 'line' word
-				for s in list:
-					if 'line ' in s:
-						path, line = s.split(',')[0:2]
-						break
+				if tempdir in os.path.dirname(k.python_path):
+					### append infos
+					L.append((k.label, _("Temporary python file!"), "", "", k.python_path))
+				elif v:
+					typ, val, tb = v
+					list = format_exception(typ, val, tb)
+					### reverse because we want the last error of the traceback
+					list.reverse()
+					### find the line containing the 'line' word
+					for s in list:
+						if 'line ' in s:
+							path, line = s.split(',')[0:2]
+							break
 
-				### erase whitespace and clear the Line word and the File word
-				python_path = str(path.split(' ')[-1].strip())[1:-1]
-				line_number = line.split(' ')[-1].strip()
+					### erase whitespace and clear the Line word and the File word
+					python_path = str(path.split(' ')[-1].strip())[1:-1]
+					line_number = line.split(' ')[-1].strip()
 
-				### find mail from doc of module
-				module = Components.BlockFactory.GetModule(python_path)
-				doc = module.__doc__ or ""
-				mails = GetMails(doc) if inspect.ismodule(module) else []
+					### find mail from doc of module
+					module = Components.BlockFactory.GetModule(python_path)
+					doc = module.__doc__ or ""
+					mails = GetMails(doc) if inspect.ismodule(module) else []
 
-				### append the error information
-				L.append((k.label, str(val), line_number, mails, python_path))
+					### append the error information
+					L.append((k.label, str(val), line_number, mails, python_path))
 		
 		return VirtualList(self, dict(zip(range(len(L)),L))) if L != [] else L
 
