@@ -95,6 +95,12 @@ class LibraryTree(wx.TreeCtrl):
 		self.Bind(wx.EVT_LEFT_DOWN,self.OnLeftClick)
 		self.Bind(wx.EVT_MOTION, self.OnMotion)
 
+		### for Phoenix
+		if wx.VERSION_STRING >= '4.0':
+			self.InsertItemBefore = self.InsertItem
+			self.SetPyData = self.SetItemData
+			self.GetPyData = self.GetItemData
+			self.GetItemPyData = self.GetItemData
 
 	@classmethod
 	def AddToSysPath(self, absdName):
@@ -131,7 +137,7 @@ class LibraryTree(wx.TreeCtrl):
 
 		for absdName in chargedDomainList:
 
-  			### add absdName to sys.path (always before InsertNewDomain)
+  		### add absdName to sys.path (always before InsertNewDomain)
 			LibraryTree.AddToSysPath(absdName)
 
 			### add new domain
@@ -146,11 +152,9 @@ class LibraryTree(wx.TreeCtrl):
 		"""
 		item, flags = self.HitTest(evt.GetPosition())
 
-		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
-
 		if (flags & wx.TREE_HITTEST_ONITEMLABEL) and not evt.LeftIsDown():
 
-			path = GetItemPyData(item)
+			path = self.GetItemPyData(item)
 
 			if os.path.isdir(path):
 				model_list = self.GetModelList(path)
@@ -205,10 +209,8 @@ class LibraryTree(wx.TreeCtrl):
 		"""
 		item_selected = evt.GetItem()
 
-		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
-
 		if not self.ItemHasChildren(item_selected):
-			path = GetItemPyData(item_selected)
+			path = self.GetItemPyData(item_selected)
 			mainW = wx.GetApp().GetTopWindow()
 			nb2 = mainW.GetDiagramNotebook()
 			canvas = nb2.GetPage(nb2.GetSelection())
@@ -265,9 +267,6 @@ class LibraryTree(wx.TreeCtrl):
 		"""
 
 		item = self.GetSelection()
-
-		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
-
 		
 		if item:
 			### msgbox to select what you wan to delete: file or/and item ?
@@ -277,7 +276,7 @@ class LibraryTree(wx.TreeCtrl):
 
 				### delete file
 				if db.rb2.GetValue():
-					path = GetItemPyData(item)
+					path = self.GetItemPyData(item)
 					label = os.path.basename(path)
 					dial = wx.MessageDialog(None, _('Are you sure to delete the python file %s ?')%(label), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 					if dial.ShowModal() == wx.ID_YES:
@@ -312,8 +311,6 @@ class LibraryTree(wx.TreeCtrl):
 
 		gmwiz = Container.ShapeCanvas.OnStartWizard(canvas, evt)
 
-		GetPyData = self.GetPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
-
 		### update the view of the domain
 		if gmwiz:
 
@@ -332,7 +329,7 @@ class LibraryTree(wx.TreeCtrl):
 					dlg.ShowModal()
 
 			item = self.ItemDico[os.path.dirname(gmwiz.model_path)]
-			self.UpdateDomain(GetPyData(item))
+			self.UpdateDomain(self.GetPyData(item))
 
 			### sort all item
 			self.SortChildren(self.root)
@@ -461,20 +458,17 @@ class LibraryTree(wx.TreeCtrl):
 		""" Recurrent function that insert new Domain on library panel.
 		"""
 
-		InsertItemBefore = self.InsertItemBefore if wx.VERSION_STRING < '4.0' else self.InsertItem
-		SetPyData = self.SetPyData if wx.VERSION_STRING < '4.0' else self.SetItemData
-
 		### first only for the root (like PowerSystem)
 		if dName not in self.ItemDico.keys():
 			### for Phoenix 
 
 			label = os.path.basename(dName) if not dName.startswith('http') else filter(lambda a: a!='', dName.split('/'))[-1]
-			id = InsertItemBefore(parent, 0, label)
+			id = self.InsertItemBefore(parent, 0, label)
 			self.SetItemImage(id, self.fldridx, wx.TreeItemIcon_Normal)
 			self.SetItemImage(id, self.fldropenidx, wx.TreeItemIcon_Expanded)
 			self.SetItemBold(id)
 			self.ItemDico.update({dName:id})
-			SetPyData(id,dName)
+			self.SetPyData(id,dName)
 
 		### end
 		if L == []:
@@ -483,9 +477,6 @@ class LibraryTree(wx.TreeCtrl):
 			item = L.pop(0)
 			assert not isinstance(item, unicode), _("Warning unicode item !")
 
-			### for Phoenix 
-			GetPyData = self.GetPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
-		
 			### element to insert in the list
 			D = []
 			### if child is build from DEVSimPy
@@ -496,7 +487,7 @@ class LibraryTree(wx.TreeCtrl):
 				assert parent != None
 
 				### parent path
-				parentPath = GetPyData(parent)
+				parentPath = self.GetPyData(parent)
 
 				### comma replace
 				item = item.strip()
@@ -527,8 +518,8 @@ class LibraryTree(wx.TreeCtrl):
 						img = self.coupledidx
 
 					### insert into the tree
-					id = InsertItemBefore(parent, 0, os.path.splitext(item)[0], img, img)
-					SetPyData(id, path)
+					id = self.InsertItemBefore(parent, 0, os.path.splitext(item)[0], img, img)
+					self.SetPyData(id, path)
 
 				elif item.endswith('.amd'):
 					### gestion de l'importation de module (.py) associé au .amd si le fichier .py n'a jamais été decompresssé (pour edition par exemple)
@@ -553,8 +544,8 @@ class LibraryTree(wx.TreeCtrl):
 						img = self.atomicidx
 
 					### insertion dans le tree
-					id = InsertItemBefore(parent, 0, os.path.splitext(item)[0], img, img)
-					SetPyData(id, path)
+					id = self.InsertItemBefore(parent, 0, os.path.splitext(item)[0], img, img)
+					self.SetPyData(id, path)
 
 				else:
 
@@ -565,8 +556,8 @@ class LibraryTree(wx.TreeCtrl):
 					error = isinstance(info, tuple)
 					img = self.not_importedidx if error else self.pythonfileidx
 					### insertion dans le tree
-					id = InsertItemBefore(parent, 0, item, img, img)
-					SetPyData(id, path)
+					id = self.InsertItemBefore(parent, 0, item, img, img)
+					self.SetPyData(id, path)
 
 				### error info back propagation
 				if error:
@@ -589,13 +580,14 @@ class LibraryTree(wx.TreeCtrl):
 
 				assert(parent!=None)
 				### insertion de fName sous parent
-				id = InsertItemBefore(parent, 0, dName)
+				id = self.InsertItemBefore(parent, 0, dName)
 
 				self.SetItemImage(id, self.fldridx, wx.TreeItemIcon_Normal)
 				self.SetItemImage(id, self.fldropenidx, wx.TreeItemIcon_Expanded)
 				### stockage du parent avec pour cle le chemin complet avec extention (pour l'import du moule dans le Dnd)
 				self.ItemDico.update({item.keys()[0]:id})
-				SetPyData(id,item.keys()[0])
+				self.SetPyData(id,item.keys()[0])
+
 				### pour les fils du sous domain
 				for elem in item.values()[0]:
 					# si elem simple (modèle couple ou atomic)
@@ -630,8 +622,8 @@ class LibraryTree(wx.TreeCtrl):
 								img = self.coupledidx
 
 							### insertion dans le tree
-							id = InsertItemBefore(p, 0, os.path.splitext(elem)[0], img, img)
-							SetPyData(id, path)
+							id = self.InsertItemBefore(p, 0, os.path.splitext(elem)[0], img, img)
+							self.SetPyData(id, path)
 
 						elif elem.endswith('.amd'):
 							### gestion de l'importation de module (.py) associé au .amd si le fichier .py n'a jamais été decompresssé (pour edition par exemple)
@@ -656,8 +648,8 @@ class LibraryTree(wx.TreeCtrl):
 								img = self.atomicidx
 
 							### insertion dans le tree
-							id = InsertItemBefore(p, 0, os.path.splitext(elem)[0], img, img)
-							SetPyData(id, path)
+							id = self.InsertItemBefore(p, 0, os.path.splitext(elem)[0], img, img)
+							self.SetPyData(id, path)
 						else:
 
 							path = os.path.join(item.keys()[0],"".join([elem,'.py'])) if not item.keys()[0].startswith('http') else item.keys()[0]+'/'+elem+'.py'
@@ -667,8 +659,8 @@ class LibraryTree(wx.TreeCtrl):
 							img = self.not_importedidx if error else self.pythonfileidx
 
 							### insertion dans le tree
-							id = InsertItemBefore(p, 0, elem, img, img)
-							SetPyData(id, path)
+							id = self.InsertItemBefore(p, 0, elem, img, img)
+							self.SetPyData(id, path)
 
 						### error info back propagation
 						if error:
@@ -839,12 +831,10 @@ class LibraryTree(wx.TreeCtrl):
 	def UpdateAll(self):
 		""" Update all loaded libaries.
 		"""
-
-		GetPyData = self.GetPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
-		
+	
 		### update all Domain
 		for item in self.GetItemChildren(self.GetRootItem()):
-			self.UpdateDomain(GetPyData(item))
+			self.UpdateDomain(self.GetPyData(item))
 
 		### to sort domain
 		self.SortChildren(self.root)
@@ -873,12 +863,10 @@ class LibraryTree(wx.TreeCtrl):
 	def RemoveItem(self, item):
 		""" Remove item from Tree and also the corresponding elements of ItemDico
 		"""
-
-		GetPyData = self.GetPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
-		
+	
 		### delete all references from the ItemDico
 		for key in copy.copy(self.ItemDico):
-			if os.path.basename(GetPyData(item)) in key.split(os.sep):
+			if os.path.basename(self.GetPyData(item)) in key.split(os.sep):
 				del self.ItemDico[key]
 
 		self.Delete(item)
@@ -888,10 +876,8 @@ class LibraryTree(wx.TreeCtrl):
 		""" Refresh action has been invoked.
 		"""
 
-		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
-
 		item = self.GetSelection()
-		path = GetItemPyData(item)
+		path = self.GetItemPyData(item)
 		ext = os.path.splitext(path)[1]
 
 		if ext == ".py":
@@ -903,10 +889,8 @@ class LibraryTree(wx.TreeCtrl):
 		""" Edition menu has been invoked.
 		"""
 
-		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
-
 		item = self.GetSelection()
-		path = GetItemPyData(item)
+		path = self.GetItemPyData(item)
 
 		### virtual DEVS component just for edition
 		devscomp = DEVSComponent()
@@ -932,8 +916,6 @@ class LibraryTree(wx.TreeCtrl):
 		""" Rename action has been invoked.
 		"""
 
-		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
-
 		item = self.GetSelection()
 		name = self.GetItemText(item)
 
@@ -948,7 +930,7 @@ class LibraryTree(wx.TreeCtrl):
 		new_label = d.GetValue()
 		### if new and old label are different
 		if new_label != name:
-			path = GetItemPyData(item)
+			path = self.GetItemPyData(item)
 			bn = os.path.basename(path)
 			dn = os.path.dirname(path)
 			name, ext = os.path.splitext(bn)
@@ -964,10 +946,8 @@ class LibraryTree(wx.TreeCtrl):
 		""" Display the item's documentation on miniFrame.
 		"""
 
-		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
-
 		item = self.GetSelection()
-		path = GetItemPyData(item)
+		path = self.GetItemPyData(item)
 		name = self.GetItemText(item)
 
 		module = BlockFactory.GetModule(path)

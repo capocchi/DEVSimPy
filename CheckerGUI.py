@@ -137,7 +137,7 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		"""
 		# record what was clicked
 		line_number = self.getColumnText(self.currentItem, 2)
-		error_msg = self.getColumnText(self.currentItem, 1)
+		#error_msg = self.getColumnText(self.currentItem, 1)
 		
 		### pop-up menu only for cell with line_number
 		if line_number != "":

@@ -22,6 +22,8 @@ import DetachedFrame
 import Container
 import Utilities
 
+_ = wx.GetTranslation
+
 class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget):
 	""" DropTarget(canvas)
 	"""
