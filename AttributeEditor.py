@@ -144,10 +144,7 @@ class AttributeBase(object):
 			img = img.Scale(22, 22)
 
 		# wxMac can be any size up to 128x128, so leave the source img alone....
-		if wx.VERSION_STRING<'4.0':
-			return wx.IconFromBitmap(img.ConvertToBitmap())
-		else:
-			return wx.Icon(img.ConvertToBitmap())
+		return wx.IconFromBitmap(img.ConvertToBitmap()) if wx.VERSION_STRING<'4.0' else wx.Icon(img.ConvertToBitmap())
 
 	def OnClose(self, event):
 		self.canvas.UpdateShapes()
@@ -226,10 +223,7 @@ class QuickAttributeEditor(wx.Frame, Subject):
 		# mouse positions
 		xwindow, ywindow = wx.GetMousePosition()
 
-		if wx.VERSION_STRING < '4.0':
-			xm,ym = self.ScreenToClientXY(xwindow, ywindow)
-		else:
-			xm,ym = self.ScreenToClient(wx.Point(xwindow, ywindow))
+		xm,ym = self.ScreenToClientXY(xwindow, ywindow) if wx.VERSION_STRING < '4.0' else self.ScreenToClient(wx.Point(xwindow, ywindow))
 
 		self.SetPosition((xm,ym))
 

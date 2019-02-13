@@ -52,13 +52,12 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		### adding some art
 		self.il = wx.ImageList(16, 16)
 		a={"sm_up":"GO_UP","sm_dn":"GO_DOWN","idx1":"CROSS_MARK","idx2":"TICK_MARK"}
-		for k,v in a.items():
-			if wx.VERSION_STRING < '4.0':
-				s="self.%s= self.il.Add(wx.ArtProvider_GetBitmap(wx.ART_%s,wx.ART_TOOLBAR,(16,16)))" % (k,v)
-			else:
-				s="self.%s= self.il.Add(wx.ArtProvider.GetBitmap(wx.ART_%s,wx.ART_TOOLBAR,(16,16)))" % (k,v)
+		ArtProvider = "wx.ArtProvider_GetBitmap" if wx.VERSION_STRING < '4.0' else "wx.ArtProvider.GetBitmap"
 
+		for k,v in a.items():
+			s="self.%s= self.il.Add(%s(wx.ART_%s,wx.ART_TOOLBAR,(16,16)))" % (ArtProvider,k,v)
 			exec(s)
+			
 		self.SetImageList(self.il, wx.IMAGE_LIST_SMALL)
 
 		### building the columns

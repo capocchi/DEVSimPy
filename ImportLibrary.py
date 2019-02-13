@@ -43,31 +43,33 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		CheckListCtrlMixin.__init__(self)
 		ListCtrlAutoWidthMixin.__init__(self)
 
-		if wx.VERSION_STRING < '4.0':
-			font = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
-		else:
-			font = wx.SystemSettings.GetFont(wx.SYS_SYSTEM_FONT)
-
 		self.InsertColumn(0, _('Name'), width=140)
 		self.InsertColumn(1, _('Size [Ko]'), width=80)
 		self.InsertColumn(2, _('Repository'), width=90)
 		self.InsertColumn(3, _('Path'), width=100)
-		self.SetFont(font)
 
 		### for itemData
 		self.map = {}
 
+		if wx.VERSION_STRING < '4.0':
+			self.SetStringItem = self.SetStringItem
+			self.InsertStringItem = self.InsertStringItem
+			font = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
+		else:
+			self.SetStringItem = self.SetItem
+			self.InsertStringItem = self.InsertItem
+			font = wx.SystemSettings.GetFont(wx.SYS_SYSTEM_FONT)
+
+		self.SetFont(font)
+		
 	def AddItem(self, path, dName):
 		""" Add item to the list
 		"""
-
 		
-		index = self.InsertStringItem(sys.maxint, dName) if wx.VERSION_STRING < '4.0' else  self.InsertItem(sys.maxint, dName)
-
-		SetStringItem = self.SetStringItem if wx.VERSION_STRING < '4.0' else self.SetItem
-		SetStringItem(index, 1, str(getDirectorySize(path)) if os.path.exists(path) else '0')
-		SetStringItem(index, 2, 'local' if not path.startswith('http') else 'web' )
-		SetStringItem(index, 3, "..%s%s"%(os.sep,os.path.basename(DOMAIN_PATH) if path.startswith(DOMAIN_PATH) else path))
+		index = self.InsertStringItem(sys.maxint, dName) 
+		self.SetStringItem(index, 1, str(getDirectorySize(path)) if os.path.exists(path) else '0')
+		self.SetStringItem(index, 2, 'local' if not path.startswith('http') else 'web' )
+		self.SetStringItem(index, 3, "..%s%s"%(os.sep,os.path.basename(DOMAIN_PATH) if path.startswith(DOMAIN_PATH) else path))
 		
 		self.SetData(index, path)
 		self.SetItemData(index, index)

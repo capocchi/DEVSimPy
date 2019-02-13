@@ -84,8 +84,6 @@ class LabelDialog(wx.Dialog):
 			# Now create a panel from the resource data
 			res.LoadDialog(self, parent, _xrcName)
 		
-		
-		
 		self.XrcResourceLoadAll()
 		self.EventBinding()
 		self.SetProperties()

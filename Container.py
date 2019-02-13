@@ -2106,12 +2106,10 @@ if __builtin__.__dict__['GUI_FLAG']:
 
 				### mouse positions
 				xwindow, ywindow = wx.GetMousePosition()
-				if wx.VERSION_STRING < '4.0':
-					xm,ym = self.ScreenToClientXY(xwindow, ywindow)
-				else:
-					xm,ym = self.ScreenToClient(wx.Point(xwindow, ywindow))
+				
+				xm,ym = self.ScreenToClientXY(xwindow, ywindow) if wx.VERSION_STRING < '4.0' else self.ScreenToClient(wx.Point(xwindow, ywindow))
 
-				m = Components.BlockFactory.CreateBlock(      canvas = self,
+				m = Components.BlockFactory.CreateBlock( canvas = self,
 													x = xm,
 													y = ym,
 													label = gmwiz.label,
