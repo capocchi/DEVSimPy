@@ -458,10 +458,8 @@ class LibraryTree(wx.TreeCtrl):
 		""" Recurrent function that insert new Domain on library panel.
 		"""
 
-		### first only for the root (like PowerSystem)
+		### first only for the root
 		if dName not in self.ItemDico.keys():
-			### for Phoenix 
-
 			label = os.path.basename(dName) if not dName.startswith('http') else filter(lambda a: a!='', dName.split('/'))[-1]
 			id = self.InsertItemBefore(parent, 0, label)
 			self.SetItemImage(id, self.fldridx, wx.TreeItemIcon_Normal)
@@ -475,12 +473,17 @@ class LibraryTree(wx.TreeCtrl):
 			return
 		else:
 			item = L.pop(0)
-			assert not isinstance(item, unicode), _("Warning unicode item !")
+
+			isunicode = isinstance(item, unicode)
+			isstr = isinstance(item, str)
+			isdict = isinstance(item, dict)
+
+			assert not isunicode, _("Warning unicode item !")
 
 			### element to insert in the list
 			D = []
 			### if child is build from DEVSimPy
-			if isinstance(item, str):
+			if isstr:
 
 				### parent is retrieved from dict
 				parent = self.ItemDico[dName]
@@ -488,11 +491,10 @@ class LibraryTree(wx.TreeCtrl):
 
 				### parent path
 				parentPath = self.GetPyData(parent)
+				come_from_net = parentPath.startswith('http')
 
 				### comma replace
 				item = item.strip()
-
-				come_from_net = parentPath.startswith('http')
 
 				### suppression de l'extention su .cmd (model atomic lu à partir de __init__ donc pas d'extention)
 				if item.endswith('.cmd'):
@@ -549,12 +551,13 @@ class LibraryTree(wx.TreeCtrl):
 
 				else:
 
-					path = os.path.join(parentPath, "".join([item,'.py'])) if not parentPath.startswith('http') else parentPath+'/'+item+'.py'
+					path = os.path.join(parentPath, "".join([item,'.py'])) if not come_from_net else parentPath+'/'+item+'.py'
 
 					info = Container.CheckClass(path)
 
 					error = isinstance(info, tuple)
 					img = self.not_importedidx if error else self.pythonfileidx
+
 					### insertion dans le tree
 					id = self.InsertItemBefore(parent, 0, item, img, img)
 					self.SetPyData(id, path)
@@ -570,7 +573,7 @@ class LibraryTree(wx.TreeCtrl):
 				self.ItemDico.update({os.path.join(parentPath,item,):id})
 
 			### si le fils est un sous repertoire contenant au moins un fichier (all dans __init__.py different de [])
-			elif isinstance(item, dict) and item.values() != [[]]:
+			elif isdict and item.values() != [[]]:
 
 				### nom a inserer dans l'arbe
 				dName = os.path.basename(item.keys()[0])
@@ -579,11 +582,12 @@ class LibraryTree(wx.TreeCtrl):
 				parent = self.ItemDico[os.path.dirname(item.keys()[0])] if not dName.startswith('http') else self.ItemDico[item.keys()[0].replace('/'+dName,'')]
 
 				assert(parent!=None)
+
 				### insertion de fName sous parent
 				id = self.InsertItemBefore(parent, 0, dName)
-
 				self.SetItemImage(id, self.fldridx, wx.TreeItemIcon_Normal)
 				self.SetItemImage(id, self.fldropenidx, wx.TreeItemIcon_Expanded)
+				
 				### stockage du parent avec pour cle le chemin complet avec extention (pour l'import du moule dans le Dnd)
 				self.ItemDico.update({item.keys()[0]:id})
 				self.SetPyData(id,item.keys()[0])
@@ -591,12 +595,14 @@ class LibraryTree(wx.TreeCtrl):
 				### pour les fils du sous domain
 				for elem in item.values()[0]:
 					# si elem simple (modèle couple ou atomic)
-					if isinstance(elem, str):
+					if isstr:
 						### remplacement des espaces
 						elem = elem.strip() #replace(' ','')
 						### parent provisoir
 						p = self.ItemDico[item.keys()[0]]
+
 						assert(p!=None)
+						
 						come_from_net = item.keys()[0].startswith('http')
 						### si model atomic
 						if elem.endswith('.cmd'):
@@ -682,7 +688,7 @@ class LibraryTree(wx.TreeCtrl):
 			### for spash screen
 			try:
 				### format the string depending the nature of the item
-				if isinstance(item, dict):
+				if isdict:
 					item = " ".join([os.path.basename(item.keys()[0]), 'from', os.path.basename(os.path.dirname(item.keys()[0]))])
 				else:
 					item = " ".join([item, 'from', os.path.basename(dName)])

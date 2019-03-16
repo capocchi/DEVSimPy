@@ -402,7 +402,7 @@ class Newt(wx.Frame):
 				data.append((time, float(value[0])))
 			### first if int is digit or if float is digit
 			else:
-				v = str(value).lstrip('-')
+				v = str(format(value,'f')).lstrip('-')
 				if v.isdigit() or v.replace(".", "", 1).isdigit():
 					data.append((time,float(value)))
 				else:

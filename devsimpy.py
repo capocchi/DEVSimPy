@@ -408,7 +408,7 @@ from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
 from pluginmanager import load_plugins, enable_plugin
 from which import which
-from Utilities import GetMails, IsAllDigits, GetUserConfigDir
+from Utilities import GetUserConfigDir
 from Decorators import redirectStdout, BuzyCursorNotification
 from DetachedFrame import DetachedFrame
 from LibraryTree import LibraryTree
