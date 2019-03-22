@@ -55,7 +55,7 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		ArtProvider = "wx.ArtProvider_GetBitmap" if wx.VERSION_STRING < '4.0' else "wx.ArtProvider.GetBitmap"
 
 		for k,v in a.items():
-			s="self.%s= self.il.Add(%s(wx.ART_%s,wx.ART_TOOLBAR,(16,16)))" % (ArtProvider,k,v)
+			s="self.%s= self.il.Add(%s(wx.ART_%s,wx.ART_TOOLBAR,(16,16)))" % (k,ArtProvider,v)
 			exec(s)
 			
 		self.SetImageList(self.il, wx.IMAGE_LIST_SMALL)
