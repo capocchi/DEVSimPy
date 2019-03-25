@@ -387,6 +387,7 @@ class Newt(wx.Frame):
 		nbr = xrange(sheet.GetNumberRows()) if selected_rows == [] else selected_rows
 
 		data = []
+		select  = 0
 		for i in nbr:
 			v = sheet.GetCellValue(i,sheet.GetNumberCols()-1)
 			
@@ -398,8 +399,22 @@ class Newt(wx.Frame):
 			### globals containt the time and value variables after exec of the statement
 			exec(str(s), globals())
 
+			### if value is a list, we must choose an index to plot amoung the values of the list
 			if isinstance(value, list):
-				data.append((time, float(value[0])))
+				if select == 0:
+					dlg = wx.TextEntryDialog(self, _('Choose one index between [%d-%d] to plot into the list of values.')%(0,len(value)-1),_('Plotting Manager'))
+					if dlg.ShowModal() == wx.ID_OK:
+						select=int(dlg.GetValue())
+					
+    				dlg.Destroy()
+
+				### choice is digit else we break
+				if not isinstance(value[select], str):
+					data.append((time, float(value[select])))
+				else:
+					wx.MessageBox('Value to plot must be digit!', _('Warning'), wx.OK | wx.ICON_WARNING)
+					break
+
 			### first if int is digit or if float is digit
 			else:
 				v = str(format(value,'f')).lstrip('-')
