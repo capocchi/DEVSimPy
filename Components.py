@@ -481,8 +481,8 @@ class DEVSComponent:
 		with open(os.path.join(gettempdir(),'%s.devsimpy.log'%str(m.getBlockModel().label)),'a') as f:
 			try:
 				f.write("clock %s : %s\n"%(m.timeNext, msg))
-			except Exception,error:
-				f.write("clock %d : %s\n"%(0.0, msg))
+			except Exception:
+				f.write("clock %d : %s\n"%(0.0, str(msg)))
 
 	def setDEVSPythonPath(self, python_path):
 		if os.path.isfile(python_path) or zipfile.is_zipfile(os.path.dirname(python_path)):

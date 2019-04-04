@@ -2443,7 +2443,11 @@ if __builtin__.__dict__['GUI_FLAG']:
 				### Rubber Band with overlay
 				## User released left button, change cursor back
 				if self.HasCapture():
-					self.ReleaseMouse()
+    				try:
+						self.ReleaseMouse()
+					except:
+						sys.stdout.write(_("Error in Release Mouse!"))
+
 					if isinstance(event,wx.MouseEvent):
 						if wx.VERSION_STRING < '4.0':
 							self.permRect = wx.RectPP(self.selectionStart, event.Position)
