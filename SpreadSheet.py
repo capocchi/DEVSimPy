@@ -311,11 +311,11 @@ class Newt(wx.Frame):
 			sheet = self.notebook.GetPage(activePage)
 			nbr = sheet.GetNumberRows()
 			nbc = sheet.GetNumberCols()
-			#print "sdf", fn
+
 			with open(fn,'w') as f:
 				for row in xrange(nbr):
 					#print sheet.GetCellValue(row,0),sheet.GetCellValue(row,1)
-					f.write("%s %s\n"%(sheet.GetCellValue(row,0),sheet.GetCellValue(row,1)))
+					f.write("%s %s\n"%(sheet.GetCellValue(row,0),sheet.GetCellValue(row,1).replace(" ","")))
 
 	###
 	def OnCopy(self, event):
@@ -392,7 +392,7 @@ class Newt(wx.Frame):
 			v = sheet.GetCellValue(i,sheet.GetNumberCols()-1)
 			
 			if '<<' in v or '>>' in v: 
-				s = sheet.GetCellValue(i,sheet.GetNumberCols()-1).replace('<< ', '').replace('>>','') 
+				s = sheet.GetCellValue(i,sheet.GetNumberCols()-1).replace('<< ', '').replace('<<', '').replace('>>','') 
 			else:
 				s = "value = %s; time = %s"%(v,sheet.GetCellValue(i,0))
 

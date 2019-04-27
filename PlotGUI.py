@@ -136,13 +136,21 @@ class PlotFrame(wx.Frame):
 
 		enable_submenu = wx.Menu()
 		self.enableTitle = enable_submenu.Append(wx.NewId(), _('&Title'), _('Enable title'), kind=wx.ITEM_CHECK)
+		self.enableTitle.Check(True)
 		self.enableZoom = enable_submenu.Append(wx.NewId(), _('&Zoom'), _('Enable zoom'), kind=wx.ITEM_CHECK)
 		self.enableGrid = enable_submenu.Append(wx.NewId(), _('Grid'), _('Enable grid'), kind=wx.ITEM_CHECK)
+		self.enableGrid.Check(True)
 		self.enableDrag = enable_submenu.Append(wx.NewId(), _('Drag'), _('Enable drag'), kind=wx.ITEM_CHECK)
 		self.enableLegend = enable_submenu.Append(wx.NewId(), _('&Legend'), _('Turn on legend'), kind=wx.ITEM_CHECK)
 		self.enablePointLabel = enable_submenu.Append(wx.NewId(), _('&Point Label'), _('Show closest point'), kind=wx.ITEM_CHECK)
 		self.norm = enable_submenu.Append(wx.NewId(), _('Normalize'), _('Normalize Y axis'), kind=wx.ITEM_CHECK)
 		menu.AppendMenu(wx.NewId(), _('Enable'), enable_submenu)
+
+		setx_submenu = wx.Menu()
+		self.enableXStep = setx_submenu.Append(wx.NewId(), _('Step'), _('X with step'), kind=wx.ITEM_RADIO)
+		self.enableXDefault = setx_submenu.Append(wx.NewId(), _('Default'), _('X with Simulation Time (Default)'), kind=wx.ITEM_RADIO)
+		self.enableXDefault.Check(True)
+		menu.AppendMenu(wx.NewId(), _('Set X'), setx_submenu)
 
 		setTitle = menu.Append(wx.NewId(), _('Set Title'), _('Define title'))
 		setXLabel = menu.Append(wx.NewId(), _('Set X Label'), _('Define x label'))
@@ -167,6 +175,8 @@ class PlotFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU,self.OnPlotBar, bar)
 		self.Bind(wx.EVT_MENU,self.OnPlotSquare, square)
 		self.Bind(wx.EVT_MENU,self.OnPlotScale, plotScale)
+		self.Bind(wx.EVT_MENU,self.OnEnableXStep, self.enableXStep)
+		self.Bind(wx.EVT_MENU,self.OnEnableXDefault, self.enableXDefault)
 		self.Bind(wx.EVT_MENU,self.OnEnableTitle, self.enableTitle)
 		self.Bind(wx.EVT_MENU,self.OnEnableZoom, self.enableZoom)
 		self.Bind(wx.EVT_MENU,self.OnEnableGrid,  self.enableGrid)
@@ -234,7 +244,6 @@ class PlotFrame(wx.Frame):
 			tb.AddCheckTool(dragId, dragLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-drag.png')), shortHelp=_('Enable drag'), longHelp='')
 			tb.AddCheckTool(pointId, pointLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-point.png')), shortHelp=_('Show closest point'), longHelp='')
 			tb.AddCheckTool(normalizedId, normalizedLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-norm.png')), shortHelp=_('Normalize'), longHelp=_('Normalize Y axis'))
-
 
 		tb.Realize()
 
@@ -359,6 +368,12 @@ class PlotFrame(wx.Frame):
 	def OnEnablePointLabel(self, event):
 		self.client.SetEnablePointLabel(event.IsChecked())
 
+	def OnEnableXStep(self, event):
+		pass
+
+	def OnEnableXDefault(self, event):
+		pass
+
 	def OnTitleSetting(self, event):
 		pass
 
@@ -400,6 +415,7 @@ class StaticPlot(PlotFrame):
 		self.data = data
 		self.xLabel = xLabel
 		self.yLabel = yLabel
+		self.step = False
 		self.typ = typ
 		self.title = title
 		self.legend = legend
@@ -424,9 +440,13 @@ class StaticPlot(PlotFrame):
 
 		## sans fusion
 		if isinstance(data, list):
+    		
+			data = [(i if self.step else x[0], x[1]) for i,x in enumerate(data)]
+
 			if self.normalize:
 				m = max(map(lambda a: a[1], data))
 				data = map(lambda b: (b[0], b[1]/m), data)
+				
 			line = plot.PolyLine(data, legend = 'Port 0 %s'%self.legend, colour = 'black', width = 1)
 			self.gc = plot.PlotGraphics([line], self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
@@ -458,21 +478,6 @@ class StaticPlot(PlotFrame):
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
 
 		self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
-
-	def OnExportFile(self, event):
-		''' Export in CSV format
-		'''
-		dlg = wx.FileDialog(self, message=_('Export file as...'), defaultDir=HOME_PATH, defaultFile='', wildcard="*.csv*", style=wx.SAVE | wx.OVERWRITE_PROMPT)
-		if dlg.ShowModal() == wx.ID_OK:
-			path = dlg.GetPath()
-		else:
-			path = ''
-		dlg.Destroy()
-
-		if path != '':
-			with open(path, 'w') as csvFile:
-				writer = csv.writer(csvFile, delimiter=' ')
-				writer.writerows(self.data)
 
 	def OnPlotSquare(self, event=None):
 
@@ -582,7 +587,6 @@ class StaticPlot(PlotFrame):
 
 		self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
 
-
 	def OnPlotBar(self, event=None):
 		data = self.data
 
@@ -639,6 +643,18 @@ class StaticPlot(PlotFrame):
 		frame.Center()
 		frame.Show()
 
+	def OnEnableXStep(self, event):
+		self.step = True
+		eval("self.On%s()"%self.typ)
+		self.gc.setXLabel("Step")
+		self.client.Redraw()
+
+	def OnEnableXDefault(self, event):
+		self.step = False
+		eval("self.On%s()"%self.typ)
+		self.gc.setXLabel("Time [s]")
+		self.client.Redraw()
+
 	def OnTitleSetting(self, event):
 		dlg = wx.TextEntryDialog(self, _('Enter new title'),_('Title Entry'))
 		dlg.SetValue(self.title)
@@ -665,6 +681,21 @@ class StaticPlot(PlotFrame):
 			self.gc.setYLabel(self.yLabel)
 			self.client.Redraw()
 		dlg.Destroy()
+
+	def OnExportFile(self, event):
+    		''' Export in CSV format
+		'''
+		dlg = wx.FileDialog(self, message=_('Export file as...'), defaultDir=HOME_PATH, defaultFile='', wildcard="*.csv*", style=wx.SAVE | wx.OVERWRITE_PROMPT)
+		if dlg.ShowModal() == wx.ID_OK:
+			path = dlg.GetPath()
+		else:
+			path = ''
+		dlg.Destroy()
+
+		if path != '':
+			with open(path, 'w') as csvFile:
+				writer = csv.writer(csvFile, delimiter=' ')
+				writer.writerows(self.data)
 
 class DynamicPlot(PlotFrame):
 	"""
