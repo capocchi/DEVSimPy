@@ -25,6 +25,7 @@ import os
 import sys
 import math
 import threading
+import csv
 import bisect
 
 _ = wx.GetTranslation
@@ -117,7 +118,8 @@ class PlotFrame(wx.Frame):
 		file_print_preview = menu.Append(wx.NewId(), _('Print Preview'), _('Show the current plot on page'))
 		file_print = menu.Append(wx.NewId(), _('Print'), _('Print the current plot'))
 		file_save = menu.Append(wx.NewId(), _('Save Plot'), _('Save current plot'))
-		file_exit  = menu.Append(wx.NewId(), _('&Exit'), _('Enough of this already!'))
+		file_export = menu.Append(wx.NewId(), _('Export Plot'), _('Export current plot'))
+		file_exit = menu.Append(wx.NewId(), _('&Exit'), _('Enough of this already!'))
 
 		self.mainmenu.Append(menu, _('&File'))
 
@@ -157,6 +159,7 @@ class PlotFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.OnFilePrintPreview, file_print_preview)
 		self.Bind(wx.EVT_MENU, self.OnFilePrint, file_print)
 		self.Bind(wx.EVT_MENU, self.OnSaveFile, file_save)
+		self.Bind(wx.EVT_MENU, self.OnExportFile, file_export)
 		self.Bind(wx.EVT_MENU, self.OnFileExit, file_exit)
 		self.Bind(wx.EVT_MENU,self.OnPlotRedraw, plotRedraw)
 		self.Bind(wx.EVT_MENU,self.OnPlotLine, line)
@@ -270,10 +273,10 @@ class PlotFrame(wx.Frame):
 		ptx, pty = nearest["scaledXY"]
 
 		dc.SetPen(wx.Pen(wx.BLACK))
-		dc.SetBrush(wx.Brush( wx.WHITE, wx.TRANSPARENT ) )
+		dc.SetBrush(wx.Brush(wx.WHITE, wx.TRANSPARENT))
 		dc.SetLogicalFunction(wx.INVERT)
-		dc.CrossHair(ptx,pty)
-		dc.DrawRectangle( ptx-3,pty-3,7,7)
+		dc.CrossHair(ptx, pty)
+		dc.DrawRectangle(ptx-3, pty-3, 7, 7)
 		dc.SetLogicalFunction(wx.COPY)
 
 		x,y = nearest["pointXY"] # data values
@@ -305,6 +308,9 @@ class PlotFrame(wx.Frame):
 			self.client.Printout()
 		except AttributeError, info:
 			sys.stderr.write("Error: %s"%info)
+
+	def OnExportFile(self, event):
+		pass
 
 	def OnSaveFile(self, event):
 		dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=HOME_PATH, defaultFile='', wildcard="*.jpg*", style=wx.SAVE | wx.OVERWRITE_PROMPT)
@@ -453,12 +459,27 @@ class StaticPlot(PlotFrame):
 
 		self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
 
+	def OnExportFile(self, event):
+		''' Export in CSV format
+		'''
+		dlg = wx.FileDialog(self, message=_('Export file as...'), defaultDir=HOME_PATH, defaultFile='', wildcard="*.csv*", style=wx.SAVE | wx.OVERWRITE_PROMPT)
+		if dlg.ShowModal() == wx.ID_OK:
+			path = dlg.GetPath()
+		else:
+			path = ''
+		dlg.Destroy()
+
+		if path != '':
+			with open(path, 'w') as csvFile:
+				writer = csv.writer(csvFile, delimiter=' ')
+				writer.writerows(self.data)
+
 	def OnPlotSquare(self, event=None):
 
 		data = self.data
 
 		## sans fusion
-		if isinstance( data, list):
+		if isinstance(data, list):
 
 			### formatage des données spécifique au square
 			data = []

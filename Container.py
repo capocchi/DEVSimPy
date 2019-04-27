@@ -2443,7 +2443,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 				### Rubber Band with overlay
 				## User released left button, change cursor back
 				if self.HasCapture():
-    				try:
+					try:
 						self.ReleaseMouse()
 					except:
 						sys.stdout.write(_("Error in Release Mouse!"))
