@@ -937,6 +937,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 				try:
 					self.simulate(self.model.FINAL_TIME)
 				except Exception, info:
+					#self.end_flag = True
 					self.terminate(error=True, msg=sys.exc_info())
 
 		def terminate(self, error = False, msg = None):

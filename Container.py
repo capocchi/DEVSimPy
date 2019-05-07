@@ -2447,35 +2447,35 @@ if __builtin__.__dict__['GUI_FLAG']:
 						self.ReleaseMouse()
 					except:
 						sys.stdout.write(_("Error in Release Mouse!"))
+					else:
+						if isinstance(event,wx.MouseEvent):
+							if wx.VERSION_STRING < '4.0':
+								self.permRect = wx.RectPP(self.selectionStart, event.Position)
+							else:
+								self.permRect = wx.Rect(self.selectionStart, event.Position)
 
-					if isinstance(event,wx.MouseEvent):
-						if wx.VERSION_STRING < '4.0':
-							self.permRect = wx.RectPP(self.selectionStart, event.Position)
-						else:
-							self.permRect = wx.Rect(self.selectionStart, event.Position)
+						self.selectionStart = None
+						self.overlay.Reset()
 
-					self.selectionStart = None
-					self.overlay.Reset()
+						self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
+						
+						## gestion des shapes qui sont dans le rectangle permRect
+						for s in self.diagram.GetShapeList():
+							x = s.x[0]*self.scalex
+							y = s.y[0]*self.scaley
+							w = (s.x[1]-s.x[0])*self.scalex
+							h = (s.y[1]-s.y[0])*self.scaley
+							recS = wx.Rect(x,y,w,h)
 
-					self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
-					
-					## gestion des shapes qui sont dans le rectangle permRect
-					for s in self.diagram.GetShapeList():
-						x = s.x[0]*self.scalex
-						y = s.y[0]*self.scaley
-						w = (s.x[1]-s.x[0])*self.scalex
-						h = (s.y[1]-s.y[0])*self.scaley
-						recS = wx.Rect(x,y,w,h)
-
-						# si les deux rectangles se chevauche
-						try:
-							bool = self.permRect.ContainsRect(recS) if wx.VERSION_STRING < '4.0' else self.permRect.Contains(recS)
-							if bool:
-								self.select(s)
-						except AttributeError, info:
-							if self.permRect:
-								raise AttributeError, _("use >= wx-2.8-gtk-unicode library: %s")%info
-								#clear out any existing drawing
+							# si les deux rectangles se chevauche
+							try:
+								bool = self.permRect.ContainsRect(recS) if wx.VERSION_STRING < '4.0' else self.permRect.Contains(recS)
+								if bool:
+									self.select(s)
+							except AttributeError, info:
+								if self.permRect:
+									raise AttributeError, _("use >= wx-2.8-gtk-unicode library: %s")%info
+									#clear out any existing drawing
 
 			self.Refresh()
 

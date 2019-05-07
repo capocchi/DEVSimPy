@@ -103,6 +103,7 @@ class PlotFrame(wx.Frame):
 
 		self.type = "PlotLine"
 		self.normalize = False
+		self.home = HOME_PATH
 
 #		self.sldh = wx.Slider(self, wx.ID_ANY, 10, 0, 50, (-1, -1), (250, -1), wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
 #		self.sldv = wx.Slider(self, wx.ID_ANY, 10, 0, 50, (-1, -1), (50, 150), wx.SL_AUTOTICKS | wx.SL_VERTICAL | wx.SL_LABELS)
@@ -322,9 +323,10 @@ class PlotFrame(wx.Frame):
 		pass
 
 	def OnSaveFile(self, event):
-		dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=HOME_PATH, defaultFile='', wildcard="*.jpg*", style=wx.SAVE | wx.OVERWRITE_PROMPT)
+		dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=self.home, defaultFile='', wildcard="*.jpg*", style=wx.SAVE | wx.OVERWRITE_PROMPT)
 		if dlg.ShowModal() == wx.ID_OK:
 			path = dlg.GetPath()
+			self.home = os.path.dirname(path)
 		else:
 			path = ''
 		dlg.Destroy()
@@ -685,17 +687,19 @@ class StaticPlot(PlotFrame):
 	def OnExportFile(self, event):
     		''' Export in CSV format
 		'''
-		dlg = wx.FileDialog(self, message=_('Export file as...'), defaultDir=HOME_PATH, defaultFile='', wildcard="*.csv*", style=wx.SAVE | wx.OVERWRITE_PROMPT)
+		dlg = wx.FileDialog(self, message=_('Export file as...'), defaultDir=self.home, defaultFile='', wildcard="*.csv*", style=wx.SAVE | wx.OVERWRITE_PROMPT)
 		if dlg.ShowModal() == wx.ID_OK:
 			path = dlg.GetPath()
+			self.home = os.path.dirname(path)
 		else:
 			path = ''
 		dlg.Destroy()
 
 		if path != '':
+			data = [(i if self.step else x[0], x[1]) for i,x in enumerate(self.data)]
 			with open(path, 'w') as csvFile:
 				writer = csv.writer(csvFile, delimiter=' ')
-				writer.writerows(self.data)
+				writer.writerows(data)
 
 class DynamicPlot(PlotFrame):
 	"""

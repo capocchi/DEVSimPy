@@ -259,6 +259,7 @@ class Newt(wx.Frame):
 		sheet = MySheet(self.notebook, data)
 		sheet.SetFocus()
 		self.notebook.AddPage(sheet, label)
+		self.notebook.ChangeSelection(sheet)
 
 		### enable delete button
 		toolbar = self.GetToolBar()
@@ -294,8 +295,9 @@ class Newt(wx.Frame):
 					dlg.Destroy()
 
 					data = self.FileToData(fn, separator)
-					label = _('New %d'%self.notebook.GetPageCount())
+					label = _('New %d - %s'%(os.path.basename(fn),self.notebook.GetPageCount()))
 					self.AddPage(data, label)
+					
 
 	###
 	def OnSaveAs(self, event):
