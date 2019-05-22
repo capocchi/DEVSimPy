@@ -3,6 +3,7 @@
 
 import wx
 import wx.stc
+import os
 
 if wx.VERSION_STRING >= '4.0':
     
@@ -30,6 +31,7 @@ class FrameEditor(wx.Frame):
         kwds["style"] = wx.DEFAULT_FRAME_STYLE
         wx.Frame.__init__(self, *args, **kwds)
 
+        self.title = args[2]
         self.flag = 0
 
         # Menu Bar
@@ -37,8 +39,10 @@ class FrameEditor(wx.Frame):
         self.SetMenuBar(self.frame_1_menubar)
         self.File = wx.Menu()        
         self.Save = wx.MenuItem(self.File, wx.NewId(), "Save &As", "", wx.ITEM_NORMAL)
+        self.Save.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')))
         self.File.Append(self.Save)
         self.open = wx.MenuItem(self.File, wx.NewId(), "&Open", "", wx.ITEM_NORMAL)
+        self.open.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'open.png')))
         self.File.Append(self.open)
         self.frame_1_menubar.Append(self.File, "&File")
         # Menu Bar end
@@ -50,7 +54,6 @@ class FrameEditor(wx.Frame):
         self.editor = SimpleEditor(self)
         sizer.Add(self.editor, 1, flag=wx.EXPAND)
 
-
         self.Bind(wx.EVT_MENU, self.file_save, self.Save)
         self.Bind(wx.EVT_MENU, self.open_file, self.open)
 
@@ -59,7 +62,11 @@ class FrameEditor(wx.Frame):
 
     def file_save(self, event): # wxGlade: MyFrame.<event_handler>
         
-        dialog = wx.FileDialog ( None, style = wx.SAVE )
+        label = self.title.split(' ')[0]
+        if label in ('Rapport','logger'):
+            label = self.title.split(' ')[1]
+
+        dialog = wx.FileDialog( None, "Save %s file"%label, style = wx.SAVE, defaultFile="%s.dat"%label )
         # Show the dialog and get user input
         if dialog.ShowModal() == wx.ID_OK:
             file_path = dialog.GetPath()

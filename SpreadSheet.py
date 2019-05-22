@@ -259,7 +259,7 @@ class Newt(wx.Frame):
 		sheet = MySheet(self.notebook, data)
 		sheet.SetFocus()
 		self.notebook.AddPage(sheet, label)
-		self.notebook.ChangeSelection(sheet)
+		#self.notebook.ChangeSelection(sheet)
 
 		### enable delete button
 		toolbar = self.GetToolBar()
@@ -416,7 +416,7 @@ class Newt(wx.Frame):
 				if select in range(0,len(value)-1) and not isinstance(value[select], str):
 					data.append((time, float(value[select])))
 				else:
-					wx.MessageBox('Value to plot must be digit!', _('Warning'), wx.OK | wx.ICON_WARNING)
+					wx.MessageBox(_('Value to plot must be digit!'), _('Warning'), wx.OK | wx.ICON_WARNING)
 					break
 
 			### first if int is digit or if float is digit

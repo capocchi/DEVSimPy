@@ -492,6 +492,9 @@ class MainApplication(wx.Frame):
 		# for spash screen
 		pub.sendMessage('object.added',  message='Loading the libraries tree...\n')
 
+		### for open home path
+		self.home = None
+		
 		# NoteBook
 		self.nb1 = ControlNotebook(self, wx.ID_ANY, style = wx.CLIP_CHILDREN)
 		self.tree = self.nb1.GetTree()
@@ -1322,7 +1325,7 @@ class MainApplication(wx.Frame):
 		"""
 
 		wcd = _("DEVSimPy files (*.dsp)|*.dsp|YAML files (*.yaml)|*.yaml|All files (*)|*")
-		home = os.getenv('USERPROFILE') or os.getenv('HOME') or HOME_PATH if self.openFileList == ['']*NB_OPENED_FILE else os.path.dirname(self.openFileList[-1])
+		home = self.home or os.getenv('USERPROFILE') or os.getenv('HOME') or HOME_PATH if self.openFileList == ['']*NB_OPENED_FILE else self.home or os.path.dirname(self.openFileList[0])
 		open_dlg = wx.FileDialog(self, message = _('Choose a file'), defaultDir = home, defaultFile = "", wildcard = wcd, style = wx.OPEN|wx.MULTIPLE|wx.CHANGE_DIR)
 
 		### path,diagram dictionary
@@ -1338,6 +1341,8 @@ class MainApplication(wx.Frame):
 
 				### adding path with assocaited diagram
 				new_paths[os.path.normpath(path)] = diagram
+
+			self.home = os.path.dirname(path)
 
 			open_dlg.Destroy()
 
@@ -1535,6 +1540,8 @@ class MainApplication(wx.Frame):
 
 		diagram = copy.deepcopy(currentPage.GetDiagram())
 
+		last_name_saved = diagram.last_name_saved
+
 		### options building
 		msg = "DEVSimPy files (*.dsp)|*.dsp|"
 		if __builtin__.__dict__['YAML_IMPORT']:
@@ -1542,9 +1549,8 @@ class MainApplication(wx.Frame):
 		msg+="XML files (*.xml)|*.xml|All files (*)|*)"
 
 		wcd = _(msg)
-		home = os.path.dirname(diagram.last_name_saved) or HOME_PATH if self.openFileList == ['']*NB_OPENED_FILE else os.path.dirname(self.openFileList[-1])
-		save_dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=home, defaultFile='', wildcard=wcd, style=wx.SAVE | wx.OVERWRITE_PROMPT)
-
+		home = self.home or os.path.dirname(diagram.last_name_saved) or HOME_PATH if self.openFileList == ['']*NB_OPENED_FILE else self.home or os.path.dirname(self.openFileList[0])
+		save_dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=home, defaultFile=last_name_saved, wildcard=wcd, style=wx.SAVE | wx.OVERWRITE_PROMPT)
 
 		if save_dlg.ShowModal() == wx.ID_OK:
 			path = os.path.normpath(save_dlg.GetPath())
@@ -1595,7 +1601,7 @@ class MainApplication(wx.Frame):
 	def OnImportXMLSES(self,event):
     	
 		wcd = _("XML SES files (*.xmlsestree)|*.xmlsestree|XML SES files (*.sestree)|*.sestree|All files (*)|*")
-		home = os.getenv('USERPROFILE') or os.getenv('HOME') or HOME_PATH if self.openFileList == ['']*NB_OPENED_FILE else os.path.dirname(self.openFileList[-1])
+		home = os.getenv('USERPROFILE') or os.getenv('HOME') or HOME_PATH if self.openFileList == ['']*NB_OPENED_FILE else os.path.dirname(self.openFileList[0])
 		open_dlg = wx.FileDialog(self, message = _('Choose a file'), defaultDir = home, defaultFile = "", wildcard = wcd, style = wx.OPEN|wx.MULTIPLE|wx.CHANGE_DIR)
 
 		### path,diagram dictionary

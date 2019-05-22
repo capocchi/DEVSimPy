@@ -478,11 +478,13 @@ class DEVSComponent:
 
 	@staticmethod
 	def debugger(m, msg):
-		with open(os.path.join(gettempdir(),'%s.devsimpy.log'%str(m.getBlockModel().label)),'a') as f:
+		bm = m.getBlockModel()
+		
+		with open(os.path.join(gettempdir(),'%s.%d.devsimpy.log'%(str(bm.label), id(bm))),'a') as f:
 			try:
-				f.write("clock %s : %s\n"%(m.timeNext, msg))
+				f.write("clock %s: %s\n"%(m.timeNext, msg))
 			except Exception:
-				f.write("clock %d : %s\n"%(0.0, str(msg)))
+				f.write("clock %d: %s\n"%(0.0, str(msg)))
 
 	def setDEVSPythonPath(self, python_path):
 		if os.path.isfile(python_path) or zipfile.is_zipfile(os.path.dirname(python_path)):
@@ -553,18 +555,16 @@ class DEVSComponent:
 		### devs model, block label, log file in temp dir
 		devs = self.getDEVSModel()
 		label = str(devs.getBlockModel().label) if hasattr(devs, 'getBlockModel') else devs.name
-		log_file = os.path.join(gettempdir(),'%s.devsimpy.log'%label)
+		log_file = os.path.join(gettempdir(),'%s.%d.devsimpy.log'%(label,id(devs.getBlockModel())))
 		parent = event.GetClientData()
 
 		if os.path.exists(log_file):
+			msg = ""
 			### read log file
 			with open(log_file, 'r') as f:
 				msg = f.read()
 			
 			### show log file content
-			#dlg = wx.lib.dialogs.ScrolledMessageDialog(parent, msg, _("%s logger")%label, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
-			#dlg.ShowModal()
-
 			frame = FrameEditor(parent, -1, _("%s logger")%label)
 			frame.AddText(msg)
 			frame.Show()

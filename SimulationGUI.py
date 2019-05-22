@@ -558,8 +558,11 @@ class Base(object):
 		""" When Stop button is clicked
 		"""
 
+		self.thread.end_flag = False
+
 		self.Interact()
-		if self.thread : self.thread.terminate()
+		if self.thread :
+			self.thread.terminate()
 		self.timer.Stop()
 		wx.Bell()
 
@@ -970,7 +973,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 
 				else:
 					for m in filter(lambda a: hasattr(a, 'finish'), self.model.getFlatComponentSet().values()):
-						### call finished method
+    						### call finished method
 						if __builtin__.__dict__['GUI_FLAG']:
 							#if wx.VERSION_STRING < '2.9':
 							try:
