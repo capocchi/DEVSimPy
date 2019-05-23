@@ -428,7 +428,7 @@ class LibraryTree(wx.TreeCtrl):
 								if issubclass(cls, DomainBehavior):
 									py_file_list.append(s)
 								else:
-									sys.stderr.write(_("%s not imported : Class is not DomainBehavior \n"%(s)))
+									sys.stderr.write(_("%s not imported: Class is not DomainBehavior \n"%(s)))
 
 
 							### If cls is tuple, there is an error but we load the model to correct it.
@@ -442,7 +442,7 @@ class LibraryTree(wx.TreeCtrl):
 					# if dName contains a python file, __init__.py is forced
 					for f in os.listdir(dName):
 						if f.endswith('.py'):
-							sys.stderr.write(_("%s not imported : %s \n"%(dName,info)))
+							sys.stderr.write(_("%s not imported: %s \n"%(dName,info)))
 							break
 		else:
 			py_file_list = []
@@ -505,7 +505,7 @@ class LibraryTree(wx.TreeCtrl):
 						module = zf.GetModule()
 						image_file = zf.GetImage()
 					else:
-						path = parentPath+'/'+item+'.py'
+						path = "".join([parentPath,'/',item,'.py'])
 						module = load_module_from_net(path)
 
 					### check error
@@ -531,7 +531,7 @@ class LibraryTree(wx.TreeCtrl):
 						module = zf.GetModule()
 						image_file = zf.GetImage()
 					else:
-						path = parentPath+'/'+item+'.py'
+						path = "".join([parentPath,'/',item,'.py'])
 						module = load_module_from_net(path)
 
 					### check error
@@ -551,7 +551,7 @@ class LibraryTree(wx.TreeCtrl):
 
 				else:
 
-					path = os.path.join(parentPath, "".join([item,'.py'])) if not come_from_net else parentPath+'/'+item+'.py'
+					path = os.path.join(parentPath, "".join([item,'.py'])) if not come_from_net else "".join([parentPath,'/',item,'.py'])
 
 					info = Container.CheckClass(path)
 
@@ -658,7 +658,7 @@ class LibraryTree(wx.TreeCtrl):
 							self.SetPyData(id, path)
 						else:
 
-							path = os.path.join(item.keys()[0],"".join([elem,'.py'])) if not item.keys()[0].startswith('http') else item.keys()[0]+'/'+elem+'.py'
+							path = os.path.join(item.keys()[0],"".join([elem,'.py'])) if not item.keys()[0].startswith('http') else "".join([item.keys()[0],'/',elem,'.py'])
 							info = Container.CheckClass(path)
 
 							error = isinstance(info, tuple)

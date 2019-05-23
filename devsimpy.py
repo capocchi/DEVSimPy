@@ -632,12 +632,12 @@ class MainApplication(wx.Frame):
 				self.exportPathsList = filter(lambda path: os.path.isdir(path), eval(self.cfg.Read("exportPathsList")))
 				### append external path to the sys module to futur import
 				sys.path.extend(self.exportPathsList)
-
+				
 				### load recent files list
 				self.openFileList = eval(self.cfg.Read("openFileList"))
 				### update chargedDomainList
 				chargedDomainList = filter(lambda path: path.startswith('http') or os.path.isdir(path), eval(self.cfg.Read('ChargedDomainList')))
-
+				
 				self.cfg.DeleteEntry('ChargedDomainList')
 				self.cfg.Write('ChargedDomainList', str(eval('chargedDomainList')))
 				### load language
@@ -645,7 +645,7 @@ class MainApplication(wx.Frame):
 
 				### load perspective profile
 				self.perspectives = eval(self.cfg.Read("perspectives"))
-
+				
 				### restore the builtin dict (just for )
 				try:
 					D = eval(self.cfg.Read("builtin_dict"))
@@ -669,7 +669,7 @@ class MainApplication(wx.Frame):
 					recompile = D['DEFAULT_DEVS_DIRNAME'] != __builtin__.__dict__['DEFAULT_DEVS_DIRNAME']
 				except KeyError:
 					recompile = False
-
+				
 				### test if the DEVSimPy source directory has been moved
 				### if icon path exists, then we can update builtin from cfg
 				if os.path.exists(D['ICON_PATH']):
@@ -679,18 +679,19 @@ class MainApplication(wx.Frame):
 						ReloadModule.recompile("DomainInterface.DomainBehavior")
 						ReloadModule.recompile("DomainInterface.DomainStructure")
 						ReloadModule.recompile("DomainInterface.MasterModel")
-
 				### icon path is wrong (generally .devsimpy is wrong because DEVSimPy directory has been moved)
 				### .devsimpy must be rewrite
 				else:
 					sys.stdout.write("It seems that DEVSimPy source directory has been moved.\n")
 					self.WriteDefaultConfigFile(self.cfg)
 
+				
 				### load any plugins from the list
 				### here because it needs to PLUGINS_PATH macro defined in D
 				for plugin in eval(self.cfg.Read("plugins")):
 					load_plugins(plugin)
 					enable_plugin(plugin)
+				
 			else:
 				wx.MessageBox('.devsimpy file appear to be a very old version and should be updated....\nWe rewrite a new blank version.',
 									'Configuration',

@@ -31,8 +31,7 @@ def register(*events):
 def enable_plugin(plugin):
 	""" Remove resp. the plug-in and the event from the disabled_plugin and disabled_event lists.
 	"""
-	for c in plugins.items():
-		event, functions = c
+	for event, functions in plugins.items():
 		for f in functions:
 			if plugin == f.__module__ and event in disabled_event:
 				if event not in enabled_event: enabled_event.append(event)
@@ -44,8 +43,7 @@ def disable_plugin(plugin):
 	""" Append resp. the plug-in and the event to the disabled_plugin and disabled_event lists.
 	"""
 
-	for c in plugins.items():
-		event, functions = c
+	for event, functions in plugins.items():
 		for f in functions:
 			if plugin == f.__module__ and event not in disabled_event:
 				if hasattr(sys.modules[plugin],'UnConfig'):
