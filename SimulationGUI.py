@@ -558,11 +558,11 @@ class Base(object):
 		""" When Stop button is clicked
 		"""
 
-		self.thread.end_flag = False
+		#self.thread.end_flag = False
 
 		self.Interact()
 		if self.thread :
-			self.thread.terminate()
+			self.thread.terminate(False)
 		self.timer.Stop()
 		wx.Bell()
 
@@ -742,7 +742,7 @@ class Base(object):
 			### if user wants to stop simulation process
 			if dial.ShowModal() == wx.ID_YES:
 				self.DestroyWin()
-				self.thread.terminate()
+				self.thread.terminate(False)
 			else:
 				self.thread.resume_thread()
 
@@ -772,7 +772,6 @@ class Base(object):
 	
 		### if error come from devs python file
 		if devs_error:
-
 			try:
 				### simulate event button for the code editor
 				event = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self._btn1.GetId())
