@@ -40,7 +40,7 @@ from ReloadModule import recompile
 from ImportLibrary import DeleteBox
 
 _ = wx.GetTranslation
-
+   
 #----------------------------------------------------------------------------------------------------
 class LibraryTree(wx.TreeCtrl):
 	"""	Class of libraries tree of DEVSimPy model and Python files.
@@ -131,7 +131,8 @@ class LibraryTree(wx.TreeCtrl):
 		"""
 
 		assert self.root != None, _("Missing root")
-
+		import thread
+  
 		### add DOMAIN_PATH in sys.path whatever happens
 		LibraryTree.AddToSysPath(DOMAIN_PATH)
 
@@ -141,7 +142,8 @@ class LibraryTree(wx.TreeCtrl):
 			LibraryTree.AddToSysPath(absdName)
 
 			### add new domain
-			self.InsertNewDomain(absdName, self.root, self.GetSubDomain(absdName, self.GetDomainList(absdName)).values()[0])
+			thread.start_new_thread(self.InsertNewDomain, (absdName, self.root, self.GetSubDomain(absdName, self.GetDomainList(absdName)).values()[0],))
+			#self.InsertNewDomain(absdName, self.root, self.GetSubDomain(absdName, self.GetDomainList(absdName)).values()[0])
 
 		self.UnselectAll()
 		self.SortChildren(self.root)

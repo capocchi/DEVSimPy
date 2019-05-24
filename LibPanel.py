@@ -101,7 +101,7 @@ class LibPanel(wx.Panel):
 		self.SetBackgroundColour(wx.WHITE)
 
 		self.__set_tips()
-
+  
 	def BuildToolbar(self):
 		"""	creates one of the tool-bars
 		The buttons act like radio buttons, setting a mode for the Panel

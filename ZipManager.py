@@ -298,7 +298,7 @@ class Zip:
 			It used when the tree library is created.
 		"""
 
-		module_name = getPythonModelFileName(self.fn)
+		#module_name = getPythonModelFileName(self.fn)
 
 		# get module name
 		try:
