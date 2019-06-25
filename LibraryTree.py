@@ -145,7 +145,7 @@ class LibraryTree(wx.TreeCtrl):
 			thread.start_new_thread(self.InsertNewDomain, (absdName, self.root, self.GetSubDomain(absdName, self.GetDomainList(absdName)).values()[0],))
 			#self.InsertNewDomain(absdName, self.root, self.GetSubDomain(absdName, self.GetDomainList(absdName)).values()[0])
 
-		self.UnselectAll()
+		wx.CallAfter(self.UnselectAll)
 		self.SortChildren(self.root)
 
 	###
@@ -451,7 +451,6 @@ class LibraryTree(wx.TreeCtrl):
 
 		# list of amd and cmd files
 		devsimpy_file_list = [f for f in os.listdir(dName) if os.path.isfile(os.path.join(dName, f)) and (f[:2] != '__') and (f.endswith(LibraryTree.EXT_LIB_FILE))]
-
 
 		return py_file_list + devsimpy_file_list
 

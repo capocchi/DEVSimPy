@@ -628,6 +628,13 @@ class MainApplication(wx.Frame):
 
 				sys.stdout.write("Loading DEVSimPy %s settings file from %s.devsimpy\n"%(self.GetVersion(), GetUserConfigDir()+os.sep))
 
+				#import thread
+			
+				#def f(name):
+				#	self.L.append(eval(name))
+				#multiple_results = [thread.start_new_thread(f, (i,)) for i in [self.cfg.Read('exportPathsList')]]
+
+				#print self.L
 				### load external import path
 				self.exportPathsList = filter(lambda path: os.path.isdir(path), eval(self.cfg.Read("exportPathsList")))
 				### append external path to the sys module to futur import
@@ -685,7 +692,6 @@ class MainApplication(wx.Frame):
 					sys.stdout.write("It seems that DEVSimPy source directory has been moved.\n")
 					self.WriteDefaultConfigFile(self.cfg)
 
-				
 				### load any plugins from the list
 				### here because it needs to PLUGINS_PATH macro defined in D
 				for plugin in eval(self.cfg.Read("plugins")):
@@ -1682,7 +1688,7 @@ class MainApplication(wx.Frame):
 
 				progress_dlg.Destroy()
 				wx.SafeYield()
-
+			
 			self.tree.SortChildren(self.tree.GetRootItem())
 
 		dlg.Destroy()

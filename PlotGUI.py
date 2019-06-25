@@ -687,6 +687,7 @@ class StaticPlot(PlotFrame):
 	def OnExportFile(self, event):
     		''' Export in CSV format
 		'''
+		
 		dlg = wx.FileDialog(self, message=_('Export file as...'), defaultDir=self.home, defaultFile='', wildcard="*.csv*", style=wx.SAVE | wx.OVERWRITE_PROMPT)
 		if dlg.ShowModal() == wx.ID_OK:
 			path = dlg.GetPath()
@@ -694,12 +695,26 @@ class StaticPlot(PlotFrame):
 		else:
 			path = ''
 		dlg.Destroy()
+		
+		if path != '':	
+			d = [(0,0)]
+	
+			### TODO: adapt to consider all of the tab (not only 0)
+ 			data  = self.data[0] if isinstance(self.data, dict) else self.data
+   
+			for i,x in enumerate(data):
+				if x[0] != d[-1][0]:
+					d.append((x[0],x[1]))
+				else:
+					d[-1] = (x[0],x[1])
+			d=d[1:]
 
-		if path != '':
-			data = [(i if self.step else x[0], x[1]) for i,x in enumerate(self.data)]
+			if self.step:
+				d = [(i, x[1]) for i,x in enumerate(d)]
+			
 			with open(path, 'w') as csvFile:
 				writer = csv.writer(csvFile, delimiter=' ')
-				writer.writerows(data)
+				writer.writerows(d)
 
 class DynamicPlot(PlotFrame):
 	"""
