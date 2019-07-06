@@ -55,15 +55,10 @@ Markers = ('circle', 'triangle', 'square',  'cross', 'triangle_down', 'plus', 'd
 def get_limit(d):
 	""" Function which give the limits of d
 	"""
-
 	L1,L2 = [],[]
 	for c in d:
 		bisect.insort(L1, c[0])
 		bisect.insort(L2, c[1])
-		#L1.append(c[0])
-		#L2.append(c[1])
-
-	#L1.sort();L2.sort()
 
 	return L1[0],L1[-1],L2[0],L2[-1]
 
@@ -423,16 +418,21 @@ class StaticPlot(PlotFrame):
 		self.legend = legend
 
 		menu = wx.Menu()
+  
 		### si mode fusion
-
 		if isinstance(self.data, dict):
 			for i in xrange(len(self.data)):
 				self.Bind(wx.EVT_MENU,self.OnPlotSpectrum, menu.Append(wx.NewId(), _('Signal %d')%i, _('Spectrum Plot')))
 			self.Bind(wx.EVT_MENU,self.OnPlotAllSpectrum, menu.Append(wx.NewId(), _('All'), _('Spectrum Plot')))
+			
 		else:
 			self.Bind(wx.EVT_MENU,self.OnPlotSpectrum, menu.Append(wx.NewId(), _('Signal'), _('Spectrum Plot')))
 		self.mainmenu.Append(menu, _('&Spectrum'))
 
+		menu = wx.Menu()
+		self.Bind(wx.EVT_MENU,self.OnRMSE, menu.Append(wx.NewId(), _('RMSE'), _('Root Mean Square Error')))
+		self.mainmenu.Append(menu, _('&Error'))
+  
 		### call self.On<PlotLine>()
 		getattr(self,'On%s'%self.typ)()
 
@@ -456,27 +456,27 @@ class StaticPlot(PlotFrame):
 		##avec fusion (voir attribut _fusion de QuickScope)
 		else:
 			L=[]
-			xMin, xMax, yMin, yMax = 0,0,0,0
+			xMin, xMax, yMin, yMax = 0.0,0.0,0.0,0.0
 			data_list = data.values()
-			for ind, d in enumerate(data_list):
+			for ind, dd in enumerate(data_list):
 				try:
-					c = LColour[ind]
+					cc = LColour[ind]
 				except IndexError:
-					c = LColour[0]
+					cc = LColour[0]
 
 				if self.normalize:
-					m = max(map(lambda a: a[1], d))
-					d = map(lambda b: (b[0], b[1]/m), d)
+					m = max(map(lambda a: a[1], dd))
+					dd = map(lambda b: (b[0], b[1]/m), dd)
 
-				L.append(plot.PolyLine(d, legend = 'Port %d %s'%(ind,self.legend), colour = c, width=1))
+				L.append(plot.PolyLine(dd, legend = 'Port %d %s'%(ind,self.legend), colour = cc, width=1))
 
-				a,b,c,d = get_limit(d)
+				a,b,c,d = get_limit(dd)
 
-				if a < xMin: xMin=a
-				if b > xMax: xMax=b
-				if c < yMin: yMin=c
-				if d > yMax:yMax=d
-
+				if float(a) < float(xMin): xMin=float(a)
+				if float(b) > float(xMax): xMax=float(b)
+				if float(c) < float(yMin): yMin=float(c)
+				if float(d) > float(yMax): yMax=float(d)
+    
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
 
 		self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
@@ -507,7 +507,7 @@ class StaticPlot(PlotFrame):
 		else:
 
 			L = []
-			xMin, xMax, yMin, yMax = 0,0,0,0
+			xMin, xMax, yMin, yMax = 0.0,0.0,0.0,0.0
 			data_list = data.values()
 			for ind,d in enumerate(data_list):
 
@@ -532,10 +532,10 @@ class StaticPlot(PlotFrame):
 				### gestion automatique des bornes
 				a,b,c,d = get_limit(dd)
 
-				if a < xMin: xMin=a
-				if b > xMax: xMax=b
-				if c < yMin: yMin=c
-				if d > yMax:yMax=d
+				if float(a) < float(xMin): xMin=float(a)
+				if float(b) > float(xMax): xMax=float(b)
+				if float(c) < float(yMin): yMin=float(c)
+				if float(d) > float(yMax): yMax=float(d)
 
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
 
@@ -558,9 +558,9 @@ class StaticPlot(PlotFrame):
 		##avec fusion (voir attribut _fusion de QuickScope)
 		else:
 			L=[]
-			xMin, xMax, yMin, yMax = 0,0,0,0
+			xMin, xMax, yMin, yMax = 0.0,0.0,0.0,0.0
 			data_list = data.values()
-			for ind,d in enumerate(data_list):
+			for ind,dd in enumerate(data_list):
 				try:
 					c = LColour[ind]
 				except IndexError:
@@ -572,18 +572,18 @@ class StaticPlot(PlotFrame):
 					m = Markers[0]
 
 				if self.normalize:
-					m = max(map(lambda a: a[1], d))
-					d = map(lambda b: (b[0], b[1]/m), d)
+					m = max(map(lambda a: a[1], dd))
+					dd = map(lambda b: (b[0], b[1]/m), dd)
 
-				L.append(plot.PolyLine(d, legend = 'Port 0 %s'%self.legend, colour=c, width=1))
-				L.append(plot.PolyMarker(d, colour=c, marker=m, size=1))
+				L.append(plot.PolyLine(dd, legend = 'Port 0 %s'%self.legend, colour=c, width=1))
+				L.append(plot.PolyMarker(dd, colour=c, marker=m, size=1))
 
-				a,b,c,d = get_limit(d)
+				a,b,c,d = get_limit(dd)
 
-				if a < xMin: xMin=a
-				if b > xMax: xMax= b
-				if c < yMin: yMin=c
-				if d > yMax:yMax=d
+				if float(a) < float(xMin): xMin=float(a)
+				if float(b) > float(xMax): xMax=float(b)
+				if float(c) < float(yMin): yMin=float(c)
+				if float(d) > float(yMax): yMax=float(d)
 
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
 
@@ -602,25 +602,38 @@ class StaticPlot(PlotFrame):
 		##avec fusion (voir attribut _fusion de QuickScope)
 		else:
 			L=[]
-			xMin, xMax = 0,0
-			yMin, yMax = 0,0
-
+			xMin, xMax, yMin, yMax = 0.0,0.0,0.0,0.0
 			for k in data:
-				d = data[k]
-				for c in d:
+				dd = data[k]
+				for c in dd:
 					L.append(plot.PolyLine([(c[0], 0), (c[0],c[1])], legend='', colour='gray', width=25))
 
-				a,b,c,d = get_limit(d)
+				a,b,c,d = get_limit(dd)
 
-				if a < xMin: xMin=a
-				if b > xMax: xMax= b
-				if c < yMin: yMin=c
-				if d > yMax:yMax=d
+				if float(a) < float(xMin): xMin=float(a)
+				if float(b) > float(xMax): xMax=float(b)
+				if float(c) < float(yMin): yMin=float(c)
+				if float(d) > float(yMax): yMax=float(d)
 
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
 
 		self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
 
+	def OnRMSE(self,evt):
+    		""" Get RMSE.
+		"""
+		c1,c2 = self.data.values()
+		assert(len(c1)==len(c2))
+		diffcarr = map(lambda a,b: pow(float(a[-1])-float(b[-1]),2), c1,c2)
+		r = sqrt(sum(diffcarr)/len(c1))
+		
+		wx.MessageBox('RMSE: %f'%r, 'Info', wx.OK|wx.ICON_INFORMATION)
+  
+	#	for k,s in self.atomicModel.results.items():
+	#		frame = Spectrum(self,wx.ID_ANY, title= _("Spectrum of signal %d")%k,data = s)
+	#		frame.Center()
+	#		frame.Show()
+ 
 	def OnPlotAllSpectrum(self, evt=None):
 		for k,s in self.data.items():
 			frame = Spectrum(self,wx.ID_ANY, title= _("Spectrum of signal %d")%k,data=s)
@@ -807,25 +820,25 @@ class DynamicPlot(PlotFrame):
 			L = []
 			xMin, xMax, yMin, yMax = 0,0,0,0
 			data_list = data.values()
-			for ind,d in enumerate(data_list):
+			for ind,dd in enumerate(data_list):
 				#ind = data_list.index(d)
 				try:
-					c = LColour[ind]
+					cc = LColour[ind]
 				except IndexError:
-					c = LColour[0]
+					cc = LColour[0]
 
 				if self.normalize:
-					m = max(map(lambda a: a[1], d))
-					d = map(lambda b: (b[0], b[1]/m), d)
+					m = max(map(lambda a: a[1], dd))
+					ddd = map(lambda b: (b[0], b[1]/m), dd)
 
-				L.append(plot.PolyLine(d, legend = 'Port %s (%s)'%(str(data.keys()[ind]), label), colour = c, width=1))
+				L.append(plot.PolyLine(ddd, legend = 'Port %s (%s)'%(str(data.keys()[ind]), label), colour = cc, width=1))
 
-				a,b,c,d = get_limit(d)
+				a,b,c,d = get_limit(ddd)
 
-				if a < xMin: xMin = a
-				if b > xMax: xMax = b
-				if c < yMin: yMin = c
-				if d > yMax: yMax = d
+				if float(a) < float(xMin): xMin=float(a)
+				if float(b) > float(xMax): xMax=float(b)
+				if float(c) < float(yMin): yMin=float(c)
+				if float(d) > float(yMax): yMax=float(d)
 
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
 
@@ -846,12 +859,12 @@ class DynamicPlot(PlotFrame):
 			self.Unbind(wx.EVT_PAINT)
 			self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
 
-		## sans fusion
+		## without fusion
 		if self.iport is not None:
 
 			d = self.atomicModel.results[self.iport]
 
-			### formatage des données pour le square
+			### formating data for square
 			data = []
 			for v1,v2 in zip(d,[ (d[i+1][0], d[i][1]) for i in xrange(len(d)-1)]):
 				data.append(v1)
@@ -864,10 +877,10 @@ class DynamicPlot(PlotFrame):
 			line = plot.PolyLine(data, legend='Port 0 (%s)'%self.atomicModel.getBlockModel().label, colour='black', width=1)
 			self.gc = plot.PlotGraphics([line], self.title, self.xLabel, self.yLabel)
 
-			### gestion dynamique des bornes
+			### dynamic managment of bounds
 			xMin,xMax,yMin,yMax = get_limit(data)
 
-		##avec fusion (voir attribut 'fusion' de QuickScope)
+		### with fusion ('fusion' attribut of QuickScope)
 		else:
 
 			data = self.atomicModel.results
@@ -902,10 +915,10 @@ class DynamicPlot(PlotFrame):
 				###gestion dynamique des bornes
 				a,b,c,d = get_limit(dd)
 
-				if a < xMin: xMin = a
-				if b > xMax: xMax = b
-				if c < yMin: yMin = c
-				if d > yMax: yMax = d
+				if float(a) < float(xMin): xMin=float(a)
+				if float(b) > float(xMax): xMax=float(b)
+				if float(c) < float(yMin): yMin=float(c)
+				if float(d) > float(yMax): yMax=float(d)
 
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
 
@@ -951,7 +964,7 @@ class DynamicPlot(PlotFrame):
 			yMin, yMax = 0,0
 
 			data_list = data.values()
-			for ind,d in enumerate(data_list):
+			for ind,dd in enumerate(data_list):
 				#ind = data.values().index(d)
 				try:
 					c = LColour[ind]
@@ -964,18 +977,18 @@ class DynamicPlot(PlotFrame):
 					m = Markers[0]
 
 				if self.normalize:
-					m = max(map(lambda a: a[1], d))
-					d = map(lambda b: (b[0], b[1]/m), d)
+					m = max(map(lambda a: a[1], dd))
+					dd = map(lambda b: (b[0], b[1]/m), dd)
 
-				L.append(plot.PolyLine(d, colour=c, width=1))
-				L.append(plot.PolyMarker(d, legend='Port %s (%s)'%(str(data.keys()[ind]), label), colour=c, marker=m, size=1))
+				L.append(plot.PolyLine(dd, colour=c, width=1))
+				L.append(plot.PolyMarker(dd, legend='Port %s (%s)'%(str(data.keys()[ind]), label), colour=c, marker=m, size=1))
 
-				a,b,c,d = get_limit(d)
+				a,b,c,d = get_limit(dd)
 
-				if a < xMin: xMin=a
-				if b > xMax: xMax=b
-				if c < yMin: yMin=c
-				if d > yMax:yMax=d
+				if float(a) < float(xMin): xMin=float(a)
+				if float(b) > float(xMax): xMax=float(b)
+				if float(c) < float(yMin): yMin=float(c)
+				if float(d) > float(yMax): yMax=float(d)
 
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
 
@@ -1012,22 +1025,22 @@ class DynamicPlot(PlotFrame):
 			L=[]
 			xMin, xMax, yMin, yMax = 0,0,0,0
 			data_list = data.values()
-			for ind,d in enumerate(data_list):
+			for ind,dd in enumerate(data_list):
 				#ind = data_list.index(d)
 				try:
 					c = LColour[ind]
 				except IndexError:
 					c = LColour[0]
 
-				for c in d:
+				for c in dd:
 					L.append(plot.PolyLine([(c[0], 0), (c[0],c[1])], legend='', colour='gray', width=25))
 
-				a,b,c,d = get_limit(d)
+				a,b,c,d = get_limit(dd)
 
-				if a < xMin: xMin = a
-				if b > xMax: xMax = b
-				if c < yMin: yMin = c
-				if d > yMax: yMax = d
+				if float(a) < float(xMin): xMin=float(a)
+				if float(b) > float(xMax): xMax=float(b)
+				if float(c) < float(yMin): yMin=float(c)
+				if float(d) > float(yMax): yMax=float(d)
 
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
 
@@ -1047,7 +1060,7 @@ class DynamicPlot(PlotFrame):
 			frame = Spectrum(self,wx.ID_ANY, title= _("Spectrum of signal %d")%k,data = s)
 			frame.Center()
 			frame.Show()
-
+   
 	def OnPlotSpectrum(self, evt):
 		""" Plot spectrum.
 		"""

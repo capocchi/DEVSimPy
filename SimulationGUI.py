@@ -622,7 +622,7 @@ class Base(object):
 			self._cp.Enable()
 
 			### check if gauge is full (can appear if timer is too slow)
-			if self.count != 100:
+			if self.count != 100 or self.ntl:
 				self.count = 100
 				self._gauge.SetValue(self.count)
 
