@@ -153,7 +153,7 @@ class ListEditor(wx.Dialog):
 		panel.SetSizer(vbox)
 		self.Center()
 
-		self.elb.Bind(wx.EVT_LIST_END_LABEL_EDIT, self.OnExcludesChange)
+		#self.elb.Bind(wx.EVT_LIST_END_LABEL_EDIT, self.OnExcludesChange)
 
 		### just for window http://wiki.wxpython.org/wxPython%20Platform%20Inconsistencies#New_frames_not_showing_widgets_correctly_under_MS_Windows
 		e = wx.SizeEvent(self.GetSize())
@@ -166,7 +166,7 @@ class ListEditor(wx.Dialog):
 		try:
 			txt = evt.GetText()
 
-			### if val not empty and not color
+			### if txt not empty and not color
 			if txt != '' and not txt.startswith('#'):
 				eval(txt)
 

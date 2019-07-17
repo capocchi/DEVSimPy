@@ -546,7 +546,7 @@ class LibraryTree(wx.TreeCtrl):
 					else:
 						img = self.atomicidx
 
-					### insertion dans le tree
+					### insert in the three
 					id = self.InsertItemBefore(parent, 0, os.path.splitext(item)[0], img, img)
 					self.SetPyData(id, path)
 
@@ -559,7 +559,7 @@ class LibraryTree(wx.TreeCtrl):
 					error = isinstance(info, tuple)
 					img = self.not_importedidx if error else self.pythonfileidx
 
-					### insertion dans le tree
+					### insert in the tree
 					id = self.InsertItemBefore(parent, 0, item, img, img)
 					self.SetPyData(id, path)
 
@@ -576,15 +576,15 @@ class LibraryTree(wx.TreeCtrl):
 			### si le fils est un sous repertoire contenant au moins un fichier (all dans __init__.py different de [])
 			elif isdict and item.values() != [[]]:
 
-				### nom a inserer dans l'arbe
+				### name to insert in the tree
 				dName = os.path.basename(item.keys()[0])
 
-				### nouveau parent
+				### new parent
 				parent = self.ItemDico[os.path.dirname(item.keys()[0])] if not dName.startswith('http') else self.ItemDico[item.keys()[0].replace('/'+dName,'')]
 
 				assert(parent!=None)
 
-				### insertion de fName sous parent
+				### insert of the fName above the parent
 				id = self.InsertItemBefore(parent, 0, dName)
 				self.SetItemImage(id, self.fldridx, wx.TreeItemIcon_Normal)
 				self.SetItemImage(id, self.fldropenidx, wx.TreeItemIcon_Expanded)
@@ -593,11 +593,11 @@ class LibraryTree(wx.TreeCtrl):
 				self.ItemDico.update({item.keys()[0]:id})
 				self.SetPyData(id,item.keys()[0])
 
-				### pour les fils du sous domain
+				### for the childrens of the sub-domain
 				for elem in item.values()[0]:
 					# si elem simple (modèle couple ou atomic)
 					if isstr:
-						### remplacement des espaces
+						### replace the spaces
 						elem = elem.strip() #replace(' ','')
 						### parent provisoir
 						p = self.ItemDico[item.keys()[0]]
@@ -628,7 +628,7 @@ class LibraryTree(wx.TreeCtrl):
 							else:
 								img = self.coupledidx
 
-							### insertion dans le tree
+							### insert in the tree
 							id = self.InsertItemBefore(p, 0, os.path.splitext(elem)[0], img, img)
 							self.SetPyData(id, path)
 
@@ -654,7 +654,7 @@ class LibraryTree(wx.TreeCtrl):
 							else:
 								img = self.atomicidx
 
-							### insertion dans le tree
+							### insert in the tree
 							id = self.InsertItemBefore(p, 0, os.path.splitext(elem)[0], img, img)
 							self.SetPyData(id, path)
 						else:
@@ -665,7 +665,7 @@ class LibraryTree(wx.TreeCtrl):
 							error = isinstance(info, tuple)
 							img = self.not_importedidx if error else self.pythonfileidx
 
-							### insertion dans le tree
+							### insert in the tree
 							id = self.InsertItemBefore(p, 0, elem, img, img)
 							self.SetPyData(id, path)
 
@@ -680,10 +680,10 @@ class LibraryTree(wx.TreeCtrl):
 						self.ItemDico.update({os.path.join(item.keys()[0], os.path.splitext(elem)[0]):id})
 
 					else:
-						### pour faire remonter l'info dans la liste
+						### in order to go up the information in the list
 						D.append(elem)
-
-				### mise a jour avec le nom complet
+						
+				### update with whole name
 				dName = item.keys()[0]
 
 			### for spash screen
@@ -698,11 +698,11 @@ class LibraryTree(wx.TreeCtrl):
 			except:
 				pass
 
-			### gestion de la recursion
+			### managment of the recursion
 			if D != []:
-				return self.InsertNewDomain(dName, parent, L+D)
-			else:
-				return self.InsertNewDomain(dName, parent, L)
+				self.InsertNewDomain(dName, parent, D)
+			
+			return self.InsertNewDomain(dName, parent, L)
 
     ###
 	def GetSubDomain(self, dName, domainSubList = []):
