@@ -1,0 +1,3 @@
+[submodule "DEVSKernel/PyPDEVS/pypdevs241"]
+	path = DEVSKernel/PyPDEVS/pypdevs241
+	url = https://github.com/capocchi/PythonPDEVS.git
