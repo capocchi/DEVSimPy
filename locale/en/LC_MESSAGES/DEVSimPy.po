@@ -1,0 +1,3851 @@
+# French translations for Python package
+# Traductions françaises du paquet Python.
+# Copyright (C) 2010 THE Python'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the Python package.
+# capocchi <capocchi@univ-corse.fr>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Python 2_6\n"
+"Report-Msgid-Bugs-To: capocchi@univ-corse.fr\n"
+"POT-Creation-Date: 2018-11-25 17:29+0100\n"
+"PO-Revision-Date: 2010-02-19 21:38+0100\n"
+"Last-Translator: capocchi <capocchi@univ-corse.fr>\n"
+"Language-Team: French\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: AttributeEditor.py:166
+msgid "Parent not defined for AttributeEditor class"
+msgstr ""
+
+#: CheckerGUI.py:58 DiagramConstantsDialog.py:38 ImportLibrary.py:51
+#: PluginsGUI.py:121 PluginsGUI.py:275 PropertiesGridCtrl.py:375
+msgid "Name"
+msgstr ""
+
+#: CheckerGUI.py:59 Components.py:159 Components.py:307 Components.py:375
+#: Container.py:213 devsimpy.py:975 devsimpy.py:1410 devsimpy.py:1507
+#: devsimpy.py:1579 devsimpy.py:2037 devsimpy.py:2107 wxPyMail.py:270
+#: wxPyMail.py:274 wxPyMail.py:279
+msgid "Error"
+msgstr ""
+
+#: CheckerGUI.py:60 PlotGUI.py:130
+msgid "Line"
+msgstr ""
+
+#: CheckerGUI.py:61
+msgid "Authors"
+msgstr ""
+
+#: CheckerGUI.py:62 ImportLibrary.py:54
+msgid "Path"
+msgstr ""
+
+#: CheckerGUI.py:107 Menu.py:635 Menu.py:681 Menu.py:806 Menu.py:889
+#: PluginsGUI.py:705
+msgid "Edit"
+msgstr ""
+
+#: CheckerGUI.py:107
+msgid "Edit the source code"
+msgstr ""
+
+#: CheckerGUI.py:109
+msgid "Report"
+msgstr ""
+
+#: CheckerGUI.py:109
+msgid "Report error by mail to the author"
+msgstr ""
+
+#: CheckerGUI.py:145
+#, python-format
+msgid ""
+"Dear DEVSimPy developpers, \n"
+" Error in %s, line %s :\n"
+" %s"
+msgstr ""
+
+#: CheckerGUI.py:146
+#, python-format
+msgid "Error in %s DEVSimPy model"
+msgstr ""
+
+#: CheckerGUI.py:243
+msgid "DEVS Model Checking"
+msgstr ""
+
+#: Components.py:122
+msgid "Do you want to open the orignal diagram in a new tab?"
+msgstr ""
+
+#: Components.py:158
+#, python-format
+msgid ""
+"Error opening file \n"
+" file : %s \n"
+" object : %s \n"
+" error : %s "
+msgstr ""
+
+#: Components.py:307
+#, python-format
+msgid "Error loading %s model : %s"
+msgstr ""
+
+#: Components.py:375
+#, python-format
+msgid "Error loading %s model : %s "
+msgstr ""
+
+#: Components.py:565
+#, python-format
+msgid "%s logger"
+msgstr ""
+
+#: Components.py:570
+msgid ""
+"Log is empty.\n"
+"If you want to debug, please use the debugger method."
+msgstr ""
+
+#: Components.py:614
+msgid ""
+"Do you want to use your local programmer software?\n"
+"\n"
+" If you always want use the DEVSimPy code editor\n"
+" change the option in Editor panel preferences."
+msgstr ""
+
+#: Components.py:632 Components.py:640
+msgid "Local programmer software not found!\n"
+msgstr ""
+
+#: Components.py:644
+msgid "Unknown Windows Manager!\n"
+msgstr ""
+
+#: Components.py:662
+msgid "read only"
+msgstr ""
+
+#: Components.py:697
+#, python-format
+msgid "Editor frame not instanciated: %s\n"
+msgstr ""
+
+#: Components.py:819
+msgid ""
+"Object not instantiated !\n"
+"\n"
+" Perhaps there is bad imports."
+msgstr ""
+
+#: Components.py:819
+msgid "Block Manager"
+msgstr ""
+
+#: ConnectDialog.py:44 ConnectDialog.py:45 FindGUI.py:41 Menu.py:925
+#: PlotGUI.py:408 PlotGUI.py:690
+msgid "All"
+msgstr ""
+
+#: ConnectDialog.py:51
+msgid "Disconnect"
+msgstr ""
+
+#: ConnectDialog.py:52
+msgid "Connect"
+msgstr ""
+
+#: ConnectionThread.py:57
+#, python-format
+msgid "Extracting %s\n"
+msgstr ""
+
+#: ConnectionThread.py:60
+#, python-format
+msgid "%s \\% complete\n"
+msgstr ""
+
+#: ConnectionThread.py:123
+msgid "Are you sure to upgrade librairies from new version ?"
+msgstr ""
+
+#: ConnectionThread.py:123
+msgid "Upgrade Manager"
+msgstr ""
+
+#: ConnectionThread.py:139
+msgid "Unable to connect to the internet."
+msgstr ""
+
+#: ConnectionThread.py:139 ConnectionThread.py:154 ConnectionThread.py:158
+msgid "Update Manager"
+msgstr ""
+
+#: ConnectionThread.py:153
+msgid ""
+"A new version of DEVSimPy libraries is available!\n"
+"\n"
+" Do you want to download and install it ?"
+msgstr ""
+
+#: ConnectionThread.py:157
+msgid "You have the latest version of DEVSimPy libraries."
+msgstr ""
+
+#: ConnectionThread.py:162
+msgid "Downloading new libraries...."
+msgstr ""
+
+#: Container.py:139
+#, python-format
+msgid "Error trying to import module : %s"
+msgstr ""
+
+#: Container.py:140 Container.py:191 Container.py:760 Container.py:771
+#: SimulationGUI.py:87 Utilities.py:324
+msgid "Error Manager"
+msgstr ""
+
+#: Container.py:190
+#, python-format
+msgid ""
+"Error: %s\n"
+"%s%s%s\n"
+"Do you want to remove this error?"
+msgstr ""
+
+#: Container.py:213
+#, python-format
+msgid ""
+"There is errors in python file.\n"
+"Trying to translate error informations: %s %s %s"
+msgstr ""
+
+#: Container.py:410
+#, python-format
+msgid ""
+"Error making DEVS instances for:\n"
+"%s\n"
+"%s"
+msgstr ""
+
+#: Container.py:567
+msgid ""
+"Error making DEVS connection.\n"
+" Check your connections !"
+msgstr ""
+
+#: Container.py:661
+msgid "Priority Manager"
+msgstr ""
+
+#: Container.py:670
+#, python-format
+msgid "Number of atomic devs model: %d\n"
+msgstr ""
+
+#: Container.py:671
+#, python-format
+msgid "Number of coupled devs model: %d\n"
+msgstr ""
+
+#: Container.py:672
+#, python-format
+msgid "Number of coupling: %d\n"
+msgstr ""
+
+#: Container.py:673
+#, python-format
+msgid "Number of deep level (description hierarchy): %d\n"
+msgstr ""
+
+#: Container.py:675
+msgid "Diagram Information"
+msgstr ""
+
+#: Container.py:759
+msgid ""
+"All DEVS model has been instantiated without error.\n"
+"\n"
+"Do you want simulate?"
+msgstr ""
+
+#: Container.py:771
+msgid ""
+"Diagram is empty.\n"
+"\n"
+"Please, drag-and-drop model from libraries control panel to build a diagram."
+msgstr ""
+
+#: Container.py:796
+msgid ""
+"There is errors in some models.\n"
+"\n"
+"Do you want to execute the error manager ?"
+msgstr ""
+
+#: Container.py:797 Container.py:813 Container.py:834 Container.py:856
+#: Container.py:869 SimulationGUI.py:671 SimulationGUI.py:734
+msgid "Simulation Manager"
+msgstr ""
+
+#: Container.py:813
+msgid ""
+"It seems that models have same label.\n"
+"If you plan to use Flat simulation algorithm, all model must have a unique "
+"label."
+msgstr ""
+
+#: Container.py:833
+msgid ""
+"You don't make the simulation of the Master model.\n"
+"Some models have bad fileName path !"
+msgstr ""
+
+#: Container.py:850
+#, python-format
+msgid " %s Simulator"
+msgstr ""
+
+#: Container.py:862 DetachedFrame.py:116 DetachedFrame.py:131 Menu.py:286
+msgid "Simulation"
+msgstr ""
+
+#: Container.py:864 devsimpy.py:1755 devsimpy.py:2115
+msgid "This option has not been implemented yet."
+msgstr ""
+
+#: Container.py:869
+msgid ""
+"Diagram is empty. \n"
+"Please, drag-and-drop model from libraries control panel to build a diagram."
+msgstr ""
+
+#: Container.py:915
+#, python-format
+msgid "Error trying to remove %s"
+msgstr ""
+
+#: Container.py:1102
+msgid "unsubscribe problem!"
+msgstr ""
+
+#: Container.py:1538
+msgid "ShapeCanvas not attached to notebook 1\n"
+msgstr ""
+
+#: Container.py:1749
+#, python-format
+msgid "Draw error: %s \n"
+msgstr ""
+
+#: Container.py:1887
+msgid "Connection Manager"
+msgstr ""
+
+#: Container.py:2027 Editor.py:1370 Editor.py:1382 Editor.py:1387
+#: SpreadSheet.py:136
+msgid "Copy"
+msgstr ""
+
+#: Container.py:2063
+msgid "DEVSimPy Model Generator"
+msgstr ""
+
+#: Container.py:2133 LibraryTree.py:325
+#, python-format
+msgid "Error saving file %s\n"
+msgstr ""
+
+#: Container.py:2141 DropTarget.py:120 LibraryTree.py:229
+msgid "Adding DEVSimPy model: \n"
+msgstr ""
+
+#: Container.py:2185 Editor.py:1371 Editor.py:1383 Editor.py:1388
+#: SpreadSheet.py:137
+msgid "Paste"
+msgstr ""
+
+#: Container.py:2199
+msgid "Do you really want to delete all selected models?"
+msgstr ""
+
+#: Container.py:2201 Container.py:2214 LibraryTree.py:298
+msgid "Delete Manager"
+msgstr ""
+
+#: Container.py:2211
+msgid "Connexion"
+msgstr ""
+
+#: Container.py:2212
+#, python-format
+msgid "Do you really want to delete %s model?"
+msgstr ""
+
+#: Container.py:2277
+#, python-format
+msgid "Error trying to undo (TypeError): %s \n"
+msgstr ""
+
+#: Container.py:2279
+#, python-format
+msgid "Error trying to undo: %s \n"
+msgstr ""
+
+#: Container.py:2396
+msgid ""
+"Choose the port number.\n"
+"If doesn't exist, we create it."
+msgstr ""
+
+#: Container.py:2396
+msgid "Coupling Manager"
+msgstr ""
+
+#: Container.py:2476 Container.py:2683
+#, python-format
+msgid "use >= wx-2.8-gtk-unicode library: %s"
+msgstr ""
+
+#: Container.py:2542
+msgid "modified"
+msgstr ""
+
+#: Container.py:2949
+#, python-format
+msgid "Error in OnLeftDClick for %s : %s\n"
+msgstr ""
+
+#: Container.py:3431
+#, python-format
+msgid "%s - plugin manager"
+msgstr ""
+
+#: Container.py:3456
+#, python-format
+msgid "%s Files (*.%s)|*.%s|All files (*)|*"
+msgstr ""
+
+#: Container.py:3458
+msgid "Export file as..."
+msgstr ""
+
+#: Container.py:3480
+#, python-format
+msgid "%s Exported"
+msgstr ""
+
+#: Container.py:3484
+#, python-format
+msgid "Error exported file %s\n"
+msgstr ""
+
+#: Container.py:3533
+msgid "Canvas not updated (has been deleted!)"
+msgstr ""
+
+#: Container.py:3541
+#, python-format
+msgid "\t Label: %s\n"
+msgstr ""
+
+#: Container.py:3674 Container.py:3904
+#, python-format
+msgid "Warning: %s come is old ('%s' arg is deprecated). We update it...\n"
+msgstr ""
+
+#: Container.py:3703
+#, python-format
+msgid "Error in setstate for CodeBlock: %s\n"
+msgstr ""
+
+#: Container.py:3911
+#, python-format
+msgid "Error in setstate for ContainerBlock: %s\n"
+msgstr ""
+
+#: Container.py:3995
+#, python-format
+msgid "\t DEVS module: %s \n"
+msgstr ""
+
+#: Container.py:4053
+#, python-format
+msgid "Error in Hitest for %s : %s\n"
+msgstr ""
+
+#: Container.py:4493
+#, python-format
+msgid "SpreadSheet %s"
+msgstr ""
+
+#: ControlNotebook.py:40 Menu.py:288
+msgid "Libraries"
+msgstr ""
+
+#: ControlNotebook.py:40 Menu.py:287 Menu.py:832 PreferencesGUI.py:105
+#: WizardGUI.py:409 WizardGUI.py:446 WizardGUI.py:513 WizardGUI.py:535
+msgid "Properties"
+msgstr ""
+
+#: ControlNotebook.py:235
+msgid "Close Tab\tCtrl+F4"
+msgstr ""
+
+#: ControlNotebook.py:235
+msgid "Close Tab"
+msgstr ""
+
+#: DSV.py:552
+#, python-format
+msgid "Expected %d, got %d"
+msgstr ""
+
+#: DSV.py:650
+msgid "Import Wizard"
+msgstr ""
+
+#: DSV.py:651
+#, python-format
+msgid "Analyzing %s... Please wait."
+msgstr ""
+
+#: DSV.py:664
+msgid ""
+"This screen lets you set the delimiters your data contains.\n"
+"You can see how your data is affected in the preview below."
+msgstr ""
+
+#: DSV.py:670
+msgid "Delimiters"
+msgstr ""
+
+#: DSV.py:675
+msgid "Tab"
+msgstr ""
+
+#: DSV.py:676
+msgid "Semicolon"
+msgstr ""
+
+#: DSV.py:677
+msgid "Comma"
+msgstr ""
+
+#: DSV.py:678
+msgid "Space"
+msgstr ""
+
+#: DSV.py:690
+msgid "Other:"
+msgstr ""
+
+#: DSV.py:710
+msgid "Treat consecutive delimiters as one"
+msgstr ""
+
+#: DSV.py:721
+msgid "Text qualifier:"
+msgstr ""
+
+#: DSV.py:740
+msgid "First row is header"
+msgstr ""
+
+#: DSV.py:760
+msgid "Preview"
+msgstr ""
+
+#: DSV.py:766
+msgid "rows"
+msgstr ""
+
+#: DSV.py:784
+msgid "Data Preview"
+msgstr ""
+
+#: DSV.py:982
+msgid "Import DSV File"
+msgstr ""
+
+#: Decorators.py:49
+msgid "Please install hotshot module."
+msgstr ""
+
+#: DetachedFrame.py:103
+msgid "Alone mode for DetachedFrame: Connector buttons are not binded\n"
+msgstr ""
+
+#: DetachedFrame.py:107 DetachedFrame.py:122
+msgid "Save File"
+msgstr ""
+
+#: DetachedFrame.py:107 DetachedFrame.py:122 Menu.py:174 devsimpy.py:769
+#: devsimpy.py:787
+msgid "Save the current diagram"
+msgstr ""
+
+#: DetachedFrame.py:108 DetachedFrame.py:123
+msgid "Save File As"
+msgstr ""
+
+#: DetachedFrame.py:108 DetachedFrame.py:123 Menu.py:175 devsimpy.py:770
+#: devsimpy.py:788
+msgid "Save the diagram with an another name"
+msgstr ""
+
+#: DetachedFrame.py:109 DetachedFrame.py:124 devsimpy.py:771 devsimpy.py:789
+msgid "Undo"
+msgstr ""
+
+#: DetachedFrame.py:109 DetachedFrame.py:124
+msgid "Click to go back, hold to see history"
+msgstr ""
+
+#: DetachedFrame.py:110 DetachedFrame.py:125 devsimpy.py:772 devsimpy.py:790
+msgid "Redo"
+msgstr ""
+
+#: DetachedFrame.py:110 DetachedFrame.py:125 devsimpy.py:772 devsimpy.py:790
+msgid "Click to go forward, hold to see history"
+msgstr ""
+
+#: DetachedFrame.py:111 DetachedFrame.py:126 devsimpy.py:773 devsimpy.py:791
+msgid "Zoom +"
+msgstr ""
+
+#: DetachedFrame.py:111 DetachedFrame.py:126 Menu.py:355
+msgid "Zoom in"
+msgstr ""
+
+#: DetachedFrame.py:112 DetachedFrame.py:127 devsimpy.py:774 devsimpy.py:792
+msgid "Zoom -"
+msgstr ""
+
+#: DetachedFrame.py:112 DetachedFrame.py:127 Menu.py:356
+msgid "Zoom out"
+msgstr ""
+
+#: DetachedFrame.py:113 DetachedFrame.py:128 Menu.py:357 devsimpy.py:775
+#: devsimpy.py:793
+msgid "AnnuleZoom"
+msgstr ""
+
+#: DetachedFrame.py:113 DetachedFrame.py:128
+msgid "Initial view"
+msgstr ""
+
+#: DetachedFrame.py:114 DetachedFrame.py:129
+msgid "Priority"
+msgstr ""
+
+#: DetachedFrame.py:114
+msgid "Activation models priority"
+msgstr ""
+
+#: DetachedFrame.py:115 DetachedFrame.py:130
+msgid "Check"
+msgstr ""
+
+#: DetachedFrame.py:115
+msgid "Check all models"
+msgstr ""
+
+#: DetachedFrame.py:116 devsimpy.py:778
+msgid "Simulate the diagram"
+msgstr ""
+
+#: DetachedFrame.py:117 DetachedFrame.py:132 devsimpy.py:779 devsimpy.py:797
+msgid "Direct"
+msgstr ""
+
+#: DetachedFrame.py:117 devsimpy.py:779
+msgid "Direct connector"
+msgstr ""
+
+#: DetachedFrame.py:118 DetachedFrame.py:133 PlotGUI.py:133 devsimpy.py:780
+#: devsimpy.py:798
+msgid "Square"
+msgstr ""
+
+#: DetachedFrame.py:118 devsimpy.py:780
+msgid "Square connector"
+msgstr ""
+
+#: DetachedFrame.py:119 DetachedFrame.py:134 devsimpy.py:781 devsimpy.py:799
+msgid "Linear"
+msgstr ""
+
+#: DetachedFrame.py:119 devsimpy.py:781
+msgid "Linear connector"
+msgstr ""
+
+#: DetachedFrame.py:149 devsimpy.py:806
+msgid "Level "
+msgstr ""
+
+#: DetachedFrame.py:160 DetachedFrame.py:163 devsimpy.py:817 devsimpy.py:820
+msgid "Downward rules"
+msgstr ""
+
+#: DetachedFrame.py:160
+msgid "Define Downward rules atomic model"
+msgstr ""
+
+#: DetachedFrame.py:161 DetachedFrame.py:164 devsimpy.py:818 devsimpy.py:821
+msgid "Upward rules"
+msgstr ""
+
+#: DetachedFrame.py:161
+msgid "Define Upward rules atomic model"
+msgstr ""
+
+#: DetachedFrame.py:223 DetachedFrame.py:234
+msgid "No transparency"
+msgstr ""
+
+#: DiagramConstantsDialog.py:25
+#, python-format
+msgid "%s - Constants Manager"
+msgstr ""
+
+#: DiagramConstantsDialog.py:40 PropertiesGridCtrl.py:372
+msgid "Value"
+msgstr ""
+
+#: DiagramConstantsDialog.py:68 ImportLibrary.py:190 LibPanel.py:117
+#: LibPanel.py:123
+msgid "Import"
+msgstr ""
+
+#: DiagramConstantsDialog.py:69 Menu.py:826 Menu.py:944 Menu.py:952
+msgid "Export"
+msgstr ""
+
+#: DiagramConstantsDialog.py:129 DiagramConstantsDialog.py:169 Editor.py:931
+#: PluginsGUI.py:787 PreferencesGUI.py:590 SpreadSheet.py:280 devsimpy.py:1315
+#: devsimpy.py:1587 wxPyMail.py:173
+msgid "Choose a file"
+msgstr ""
+
+#: DiagramConstantsDialog.py:130 DiagramConstantsDialog.py:167
+msgid "CSV files (*.csv)|*.csv|Text files (*.txt)|*.txt|All files (*.*)|*.*"
+msgstr ""
+
+#: DiagramConstantsDialog.py:141
+msgid "CSV Import Wizard"
+msgstr ""
+
+#: DiagramConstantsDialog.py:155
+msgid "Import completed"
+msgstr ""
+
+#: DiagramConstantsDialog.py:155 ImportLibrary.py:237
+msgid "Import Manager"
+msgstr ""
+
+#: DiagramConstantsDialog.py:178
+#, python-format
+msgid "Error exporting data: %s\n"
+msgstr ""
+
+#: DiagramConstantsDialog.py:178 DiagramConstantsDialog.py:181
+msgid "Export Manager"
+msgstr ""
+
+#: DiagramConstantsDialog.py:181
+msgid "Export completed"
+msgstr ""
+
+#: DiagramConstantsDialog.py:215
+msgid ""
+"In order to use constante:\n"
+"\n"
+"Call constante by using \"Name of Diagram\"['Name of constante']\n"
+msgstr ""
+
+#: DiagramConstantsDialog.py:215
+msgid "Help Manager"
+msgstr ""
+
+#: DiagramNotebook.py:84 devsimpy.py:510
+#, python-format
+msgid "Diagram%d"
+msgstr ""
+
+#: DiagramNotebook.py:144 devsimpy.py:1005 devsimpy.py:1393
+msgid "Enter a new name:"
+msgstr ""
+
+#: DiagramNotebook.py:144
+msgid "Diagram Manager"
+msgstr ""
+
+#: DiagramNotebook.py:196 Editor.py:1660
+#, python-format
+msgid "%s modified"
+msgstr ""
+
+#: DiagramNotebook.py:282 DiagramNotebook.py:378 Editor.py:2384
+#, python-format
+msgid ""
+"%s\n"
+"Save changes to the current diagram?"
+msgstr ""
+
+#: DiagramNotebook.py:387
+#, python-format
+msgid " %s not deleted! \n"
+msgstr ""
+
+#: DiagramNotebook.py:401
+#, python-format
+msgid "%s not deleted ! \n"
+msgstr ""
+
+#: DropTarget.py:123
+msgid "ERROR: DEVSimPy model not added.\n"
+msgstr ""
+
+#: Editor.py:948
+#, python-format
+msgid ""
+"Error opening file:\n"
+"%s\n"
+msgstr ""
+
+#: Editor.py:1028
+#, python-format
+msgid "%s saved"
+msgstr ""
+
+#: Editor.py:1101
+msgid "re-indented"
+msgstr ""
+
+#: Editor.py:1237 Menu.py:174
+msgid "&Save\tCtrl+S"
+msgstr ""
+
+#: Editor.py:1237 Editor.py:1380
+msgid "Save the file"
+msgstr ""
+
+#: Editor.py:1238
+msgid "&Save As\tCtrl+S"
+msgstr ""
+
+#: Editor.py:1238
+msgid "Save as an other file"
+msgstr ""
+
+#: Editor.py:1239 Menu.py:181
+msgid "&Quit\tCtrl+Q"
+msgstr ""
+
+#: Editor.py:1239
+msgid "Quit the application"
+msgstr ""
+
+#: Editor.py:1257
+msgid "&Search\tCtrl+F"
+msgstr ""
+
+#: Editor.py:1257
+msgid "Search text"
+msgstr ""
+
+#: Editor.py:1259 Menu.py:812
+msgid "&Cut\tCtrl+X"
+msgstr ""
+
+#: Editor.py:1259 Editor.py:1381
+msgid "Cut the selection"
+msgstr ""
+
+#: Editor.py:1260 Menu.py:810
+msgid "&Copy\tCtrl+C"
+msgstr ""
+
+#: Editor.py:1260 Editor.py:1382
+msgid "Copy the selection"
+msgstr ""
+
+#: Editor.py:1261 Menu.py:753 Menu.py:811
+msgid "&Paste\tCtrl+V"
+msgstr ""
+
+#: Editor.py:1261 Editor.py:1383
+msgid "Paste text from clipboard"
+msgstr ""
+
+#: Editor.py:1262
+msgid "&Delete"
+msgstr ""
+
+#: Editor.py:1262
+msgid "Delete the selected text"
+msgstr ""
+
+#: Editor.py:1263
+msgid "Select &All\tCtrl+A"
+msgstr ""
+
+#: Editor.py:1263
+msgid "Select the entire text"
+msgstr ""
+
+#: Editor.py:1264
+msgid "Re-indent\tCtrl+R"
+msgstr ""
+
+#: Editor.py:1264
+msgid "re-indent all code"
+msgstr ""
+
+#: Editor.py:1265
+msgid "&Comment\tCtrl+D"
+msgstr ""
+
+#: Editor.py:1265
+msgid "comment current ligne"
+msgstr ""
+
+#: Editor.py:1266
+msgid "&Uncomment\tCtrl+Shift+D"
+msgstr ""
+
+#: Editor.py:1266
+msgid "uncomment current ligne"
+msgstr ""
+
+#: Editor.py:1316
+msgid "&Statusbar"
+msgstr ""
+
+#: Editor.py:1316
+msgid "Show statusBar"
+msgstr ""
+
+#: Editor.py:1327
+msgid "&About\tF1"
+msgstr ""
+
+#: Editor.py:1327 Editor.py:1739
+msgid "About editor"
+msgstr ""
+
+#: Editor.py:1335 HtmlWindow.py:21 Menu.py:499 Menu.py:531 PlotGUI.py:123
+#: wxPyMail.py:66
+msgid "&File"
+msgstr ""
+
+#: Editor.py:1336
+msgid "&Edit"
+msgstr ""
+
+#: Editor.py:1337
+msgid "&View"
+msgstr ""
+
+#: Editor.py:1338 Menu.py:505
+msgid "&Help"
+msgstr ""
+
+#: Editor.py:1367 Editor.py:1380 Editor.py:1385 Editor.py:2384
+msgid "Save"
+msgstr ""
+
+#: Editor.py:1369 Editor.py:1381 Editor.py:1386 SpreadSheet.py:135
+msgid "Cut"
+msgstr ""
+
+#: Editor.py:1464 Editor.py:1668
+msgid "Save changes?"
+msgstr ""
+
+#: Editor.py:1464 Editor.py:1613 Editor.py:1668 Editor.py:1720 Editor.py:1722
+msgid "Code Editor"
+msgstr ""
+
+#: Editor.py:1504 Editor.py:1708
+#, python-format
+msgid "%s not saved"
+msgstr ""
+
+#: Editor.py:1504 Editor.py:1708
+msgid "file in readonly"
+msgstr ""
+
+#: Editor.py:1547 PlotGUI.py:311 SpreadSheet.py:305 devsimpy.py:1535
+msgid "Save file as..."
+msgstr ""
+
+#: Editor.py:1611
+#, python-format
+msgid ""
+"Tab problem in %s.\n"
+"%s \t\t\t\t\n"
+"You can try to re-indent it with Edit-> Re-indent sub-menu."
+msgstr ""
+
+#: Editor.py:1617
+msgid "Saving Error"
+msgstr ""
+
+#: Editor.py:1720
+msgid "Save before Exit?"
+msgstr ""
+
+#: Editor.py:1722
+msgid ""
+"File contain errors.\n"
+"Do you want to force saving before exit knowing that the file can be "
+"corrupts?"
+msgstr ""
+
+#: Editor.py:1739
+msgid ""
+"\tPython Code Editor\t\n"
+" \tDEVSimPy \t\n"
+msgstr ""
+
+#: Editor.py:1837
+msgid "function not implemented"
+msgstr ""
+
+#: Editor.py:1840
+msgid "Port number"
+msgstr ""
+
+#: Editor.py:1840
+#, python-format
+msgid " %s on which port?"
+msgstr ""
+
+#: Editor.py:1953
+msgid "args not updated"
+msgstr ""
+
+#: Editor.py:1953 Editor.py:1983
+#, python-format
+msgid "New class from %s"
+msgstr ""
+
+#: Editor.py:1963
+msgid "Simulator"
+msgstr ""
+
+#: Editor.py:1975
+msgid "Close Simulation Diag!"
+msgstr ""
+
+#: Editor.py:1983
+msgid "File not saved during simulation"
+msgstr ""
+
+#: Editor.py:2009
+#, python-format
+msgid ""
+"Error saving file:\n"
+"%s"
+msgstr ""
+
+#: Editor.py:2035
+#, python-format
+msgid "Error trying to give class: %s\n"
+msgstr ""
+
+#: Editor.py:2089 Editor.py:2121 Editor.py:2128 Editor.py:2174 Editor.py:2179
+msgid "New peek"
+msgstr ""
+
+#: Editor.py:2089
+msgid "Generate new peek code"
+msgstr ""
+
+#: Editor.py:2090 Editor.py:2122 Editor.py:2129 Editor.py:2175 Editor.py:2180
+msgid "New poke"
+msgstr ""
+
+#: Editor.py:2090
+msgid "Generate new poke code"
+msgstr ""
+
+#: Editor.py:2091
+msgid "Get Port Id"
+msgstr ""
+
+#: Editor.py:2091
+msgid "Get the port ID from port instance self.getPortId(port)->int"
+msgstr ""
+
+#: Editor.py:2092
+msgid "Get message value"
+msgstr ""
+
+#: Editor.py:2092
+msgid "Get message value self.getMsgValue(msg)->Object"
+msgstr ""
+
+#: Editor.py:2093 Editor.py:2123 Editor.py:2130 Editor.py:2176 Editor.py:2181
+msgid "New hold in state"
+msgstr ""
+
+#: Editor.py:2093
+msgid "Generate new hold in state code self.holdIn(...)"
+msgstr ""
+
+#: Editor.py:2094
+msgid "New phaseIs test"
+msgstr ""
+
+#: Editor.py:2094
+msgid "Generate phase test code self.phaseIs(...)"
+msgstr ""
+
+#: Editor.py:2095 Editor.py:2124 Editor.py:2131
+msgid "New passivate in state"
+msgstr ""
+
+#: Editor.py:2095
+msgid "Generate new passivate in state code self.passivateIn(...)"
+msgstr ""
+
+#: Editor.py:2096 Editor.py:2125 Editor.py:2132
+msgid "New passivate state"
+msgstr ""
+
+#: Editor.py:2096
+msgid "Generate new passivate state code self.passivate(...)"
+msgstr ""
+
+#: Editor.py:2097 Editor.py:2126 Editor.py:2133 Editor.py:2177 Editor.py:2182
+msgid "New debugger"
+msgstr ""
+
+#: Editor.py:2097
+msgid "Generate new debugger code (print into the log of model)"
+msgstr ""
+
+#: Editor.py:2113 Editor.py:2257 Menu.py:636
+msgid "Insert"
+msgstr ""
+
+#: Editor.py:2121 Editor.py:2174
+msgid "Insert a code for a new peek"
+msgstr ""
+
+#: Editor.py:2122 Editor.py:2175
+msgid "Insert a code for a new poke"
+msgstr ""
+
+#: Editor.py:2123 Editor.py:2176
+msgid "Insert a code for a new hold in state"
+msgstr ""
+
+#: Editor.py:2124
+msgid "Insert a code for a new passivate in state"
+msgstr ""
+
+#: Editor.py:2125
+msgid "Insert a code for a new passivate state"
+msgstr ""
+
+#: Editor.py:2126 Editor.py:2177
+msgid "Insert a code for print information into the log of model"
+msgstr ""
+
+#: Editor.py:2244
+msgid "Feature skeleton"
+msgstr ""
+
+#: Editor.py:2244
+msgid "Generate feature skeleton"
+msgstr ""
+
+#: Editor.py:2245
+msgid "Steps skeleton"
+msgstr ""
+
+#: Editor.py:2245
+msgid "Generate steps skeleton"
+msgstr ""
+
+#: Editor.py:2246
+msgid "Environment header generation"
+msgstr ""
+
+#: Editor.py:2246
+msgid "Generate environment header"
+msgstr ""
+
+#: Editor.py:2247
+msgid "Environment methods generation"
+msgstr ""
+
+#: Editor.py:2247
+msgid "Generate minimal methods for environment"
+msgstr ""
+
+#: Editor.py:2354
+msgid "&Add"
+msgstr ""
+
+#: Editor.py:2354
+msgid "Add new page"
+msgstr ""
+
+#: Editor.py:2355 wxPyMail.py:65
+msgid "&Close"
+msgstr ""
+
+#: Editor.py:2355
+msgid "Close current page"
+msgstr ""
+
+#: Editor.py:2361
+msgid "Add"
+msgstr ""
+
+#: Editor.py:2362 FindGUI.py:86 Menu.py:164 Menu.py:601
+msgid "Close"
+msgstr ""
+
+#: Editor.py:2371
+msgid "New File"
+msgstr ""
+
+#: ExperimentGenerator.py:210
+msgid "Experiment File Generated!"
+msgstr ""
+
+#: ExperimentGenerator.py:210
+msgid "Experiment File not Generated!"
+msgstr ""
+
+#: ExperimentGenerator.py:211
+msgid "PyPDEVS Experiment"
+msgstr ""
+
+#: FindGUI.py:23
+msgid "Find: "
+msgstr ""
+
+#: FindGUI.py:25
+msgid "Replace with: "
+msgstr ""
+
+#: FindGUI.py:34
+msgid "Direction"
+msgstr ""
+
+#: FindGUI.py:35
+msgid "Forward"
+msgstr ""
+
+#: FindGUI.py:36
+msgid "Backward"
+msgstr ""
+
+#: FindGUI.py:39
+msgid "Scope"
+msgstr ""
+
+#: FindGUI.py:42
+msgid "Selected Lines"
+msgstr ""
+
+#: FindGUI.py:50
+msgid "Options"
+msgstr ""
+
+#: FindGUI.py:53
+msgid "Case Sensitive"
+msgstr ""
+
+#: FindGUI.py:54
+msgid "Wrap Search"
+msgstr ""
+
+#: FindGUI.py:55
+msgid "Whole Word"
+msgstr ""
+
+#: FindGUI.py:56
+msgid "Incremental"
+msgstr ""
+
+#: FindGUI.py:58
+msgid "Regular expressions"
+msgstr ""
+
+#: FindGUI.py:68
+msgid "Find"
+msgstr ""
+
+#: FindGUI.py:69
+msgid "Replace/Find"
+msgstr ""
+
+#: FindGUI.py:70
+msgid "Replace"
+msgstr ""
+
+#: FindGUI.py:71
+msgid "Replace All"
+msgstr ""
+
+#: HtmlWindow.py:18
+msgid "&File\tCtrl+F"
+msgstr ""
+
+#: HtmlWindow.py:18
+msgid "Open Html local file"
+msgstr ""
+
+#: ImportLibrary.py:52
+msgid "Size [Ko]"
+msgstr ""
+
+#: ImportLibrary.py:53
+msgid "Repository"
+msgstr ""
+
+#: ImportLibrary.py:97
+msgid "What do you want to delete:"
+msgstr ""
+
+#: ImportLibrary.py:98
+msgid "label"
+msgstr ""
+
+#: ImportLibrary.py:99
+msgid "label and files"
+msgstr ""
+
+#: ImportLibrary.py:192 PluginsGUI.py:497
+msgid "Deselect All"
+msgstr ""
+
+#: ImportLibrary.py:237
+msgid ""
+"Local domain path is different from the .devsimpy.\n"
+"Go to options and preferences to change the domain path."
+msgstr ""
+
+#: ImportLibrary.py:259 PropertiesGridCtrl.py:248
+msgid "Doc"
+msgstr ""
+
+#: ImportLibrary.py:259
+msgid "Documentation of item"
+msgstr ""
+
+#: ImportLibrary.py:266 LibPanel.py:118 LibPanel.py:124 Menu.py:701 Menu.py:823
+#: SpreadSheet.py:138
+msgid "Delete"
+msgstr ""
+
+#: ImportLibrary.py:266
+msgid "Delete item"
+msgstr ""
+
+#: ImportLibrary.py:298
+#, python-format
+msgid "---------- %s module :\n"
+msgstr ""
+
+#: ImportLibrary.py:299
+#, python-format
+msgid "\tname : %s\n"
+msgstr ""
+
+#: ImportLibrary.py:300
+#, python-format
+msgid "\tsuffix : %s\n"
+msgstr ""
+
+#: ImportLibrary.py:301
+#, python-format
+msgid "\tmode : %s\n"
+msgstr ""
+
+#: ImportLibrary.py:302
+#, python-format
+msgid "\ttype of module : %s\n"
+msgstr ""
+
+#: ImportLibrary.py:303
+#, python-format
+msgid ""
+"\tpath : %s\n"
+"\n"
+msgstr ""
+
+#: ImportLibrary.py:305
+#, python-format
+msgid "----------%s module not inspectable !\n"
+msgstr ""
+
+#: ImportLibrary.py:333
+#, python-format
+msgid "Documentation of library %s"
+msgstr ""
+
+#: ImportLibrary.py:344 LibraryTree.py:270
+msgid "Delete Options"
+msgstr ""
+
+#: ImportLibrary.py:350
+#, python-format
+msgid "Are you sure to delete python files into the %s directory?"
+msgstr ""
+
+#: ImportLibrary.py:356
+#, python-format
+msgid ""
+"%s not deleted !\n"
+" Error : %s"
+msgstr ""
+
+#: ImportLibrary.py:386
+#, python-format
+msgid ""
+"If %s contain python files, do you want to insert it in __all__ variable of "
+"__init__.py file?"
+msgstr ""
+
+#: ImportLibrary.py:386
+msgid "New file Manager"
+msgstr ""
+
+#: ImportLibrary.py:395
+#, python-format
+msgid "List of python file in %s"
+msgstr ""
+
+#: ImportLibrary.py:395
+msgid "Select the python files to insert in the __init__.py file"
+msgstr ""
+
+#: ImportLibrary.py:414
+msgid "Enter new directory name"
+msgstr ""
+
+#: ImportLibrary.py:414
+msgid "New Library"
+msgstr ""
+
+#: ImportLibrary.py:414
+msgid "New_lib"
+msgstr ""
+
+#: ImportLibrary.py:426
+msgid ""
+"Directory already exist.\n"
+"Choose another name."
+msgstr ""
+
+#: ImportLibrary.py:426 Menu.py:362 PropertiesGridCtrl.py:372
+msgid "Information"
+msgstr ""
+
+#: ImportLibrary.py:445
+#, python-format
+msgid ""
+"%s directory has no __init__.py file.\n"
+"Do you want to create it?"
+msgstr ""
+
+#: ImportLibrary.py:445
+msgid "New librarie Manager"
+msgstr ""
+
+#: ImportLibrary.py:477
+#, python-format
+msgid "%s is an invalid url"
+msgstr ""
+
+#: ImportLibrary.py:479
+#, python-format
+msgid "%s directory does not exist"
+msgstr ""
+
+#: ImportLibrary.py:480 ImportLibrary.py:483 ImportLibrary.py:486
+msgid "New librarie manager"
+msgstr ""
+
+#: ImportLibrary.py:483 ImportLibrary.py:486
+#, python-format
+msgid "%s is already imported!"
+msgstr ""
+
+#: LibPanel.py:46 LibPanel.py:48
+msgid "Find model in the library depending its name."
+msgstr ""
+
+#: LibPanel.py:117
+msgid "Import new libraries from directory"
+msgstr ""
+
+#: LibPanel.py:118
+msgid "Delete the selected libraries"
+msgstr ""
+
+#: LibPanel.py:119 LibPanel.py:125 Menu.py:715
+msgid "Refresh"
+msgstr ""
+
+#: LibPanel.py:119
+msgid "Force the refresh of the loaded libraries"
+msgstr ""
+
+#: LibPanel.py:121 LibPanel.py:126 Menu.py:717
+msgid "Help"
+msgstr ""
+
+#: LibPanel.py:121
+msgid "Information about import manager"
+msgstr ""
+
+#: LibPanel.py:152
+msgid ""
+"Select model and instantiate it in the diagram (right part) using a drag-and-"
+"drop."
+msgstr ""
+
+#: LibraryTree.py:128
+msgid "Missing root"
+msgstr ""
+
+#: LibraryTree.py:176
+msgid "No documentation for selected model."
+msgstr ""
+
+#: LibraryTree.py:236
+msgid "This option has not been implemented yet. \n"
+msgstr ""
+
+#: LibraryTree.py:278
+#, python-format
+msgid "Are you sure to delete the python file %s ?"
+msgstr ""
+
+#: LibraryTree.py:288
+#, python-format
+msgid ""
+"%s not deleted! \n"
+" Error: %s"
+msgstr ""
+
+#: LibraryTree.py:298
+msgid "No model selected!"
+msgstr ""
+
+#: LibraryTree.py:430
+#, python-format
+msgid "%s not imported : Class is not DomainBehavior \n"
+msgstr ""
+
+#: LibraryTree.py:444
+#, python-format
+msgid "%s not imported : %s \n"
+msgstr ""
+
+#: LibraryTree.py:480
+msgid "Warning unicode item !"
+msgstr ""
+
+#: LibraryTree.py:921
+msgid "The code of this type of model is not editable."
+msgstr ""
+
+#: LibraryTree.py:939 LibraryTree.py:941
+msgid "New file name"
+msgstr ""
+
+#: LibraryTree.py:985
+msgid "No documentation"
+msgstr ""
+
+#: LibraryTree.py:991
+#, python-format
+msgid ""
+"Libraries Import Manager.\n"
+"You can import, refresh or upgrade librairies using right options.\n"
+"Default libraries directory is %s."
+msgstr ""
+
+#: Menu.py:163
+msgid "Restore DEVSimPy"
+msgstr ""
+
+#: Menu.py:172
+msgid "&Open\tCtrl+O"
+msgstr ""
+
+#: Menu.py:172 devsimpy.py:767
+msgid "Open an existing diagram"
+msgstr ""
+
+#: Menu.py:173 Menu.py:527
+msgid "Recent files"
+msgstr ""
+
+#: Menu.py:173
+msgid "Open recent files"
+msgstr ""
+
+#: Menu.py:175
+msgid "&SaveAs"
+msgstr ""
+
+#: Menu.py:176
+msgid "&Export to REST server"
+msgstr ""
+
+#: Menu.py:176
+msgid "Export the diagram to a Rest server (DEVSimPy-rest)"
+msgstr ""
+
+#: Menu.py:177
+msgid "&Import XML SES file"
+msgstr ""
+
+#: Menu.py:177
+msgid "Import SES specifications from the Python SES Editor"
+msgstr ""
+
+#: Menu.py:178
+msgid "&Print"
+msgstr ""
+
+#: Menu.py:178
+msgid "Print the current diagram"
+msgstr ""
+
+#: Menu.py:179
+msgid "Pre&view"
+msgstr ""
+
+#: Menu.py:179
+msgid "Print preview for current diagram"
+msgstr ""
+
+#: Menu.py:180
+msgid "ScreenShot"
+msgstr ""
+
+#: Menu.py:180
+msgid "Capture the screen into a image"
+msgstr ""
+
+#: Menu.py:181
+msgid "Quit the DEVSimPy application"
+msgstr ""
+
+#: Menu.py:245 Menu.py:272 Menu.py:322
+msgid "Delete all"
+msgstr ""
+
+#: Menu.py:286
+msgid "Show simulation tab"
+msgstr ""
+
+#: Menu.py:287
+msgid "Show properties tab"
+msgstr ""
+
+#: Menu.py:288
+msgid "Show libraries tab"
+msgstr ""
+
+#: Menu.py:293
+msgid "Control"
+msgstr ""
+
+#: Menu.py:295
+msgid "Shell"
+msgstr ""
+
+#: Menu.py:295
+msgid "Show Python Shell console"
+msgstr ""
+
+#: Menu.py:296
+msgid "Tools Bar"
+msgstr ""
+
+#: Menu.py:296
+msgid "Show icons tools bar"
+msgstr ""
+
+#: Menu.py:297 devsimpy.py:535
+msgid "Editor"
+msgstr ""
+
+#: Menu.py:297
+msgid "Show editor tab"
+msgstr ""
+
+#: Menu.py:320 Menu.py:353 Menu.py:583 SpreadSheet.py:131
+msgid "New"
+msgstr ""
+
+#: Menu.py:320
+msgid "New perspective"
+msgstr ""
+
+#: Menu.py:322
+msgid "Delete all perspectives"
+msgstr ""
+
+#: Menu.py:329 Menu.py:330 Menu.py:331 devsimpy.py:1036
+msgid "Default Startup"
+msgstr ""
+
+#: Menu.py:353 Menu.py:583
+msgid "Create a new tab diagram"
+msgstr ""
+
+#: Menu.py:354 Menu.py:602
+msgid "Detach"
+msgstr ""
+
+#: Menu.py:354
+msgid "Detach the tab to a frame window"
+msgstr ""
+
+#: Menu.py:355 devsimpy.py:773 devsimpy.py:791
+msgid "Zoom"
+msgstr ""
+
+#: Menu.py:356 devsimpy.py:774 devsimpy.py:792
+msgid "UnZoom"
+msgstr ""
+
+#: Menu.py:357
+msgid "Normal view"
+msgstr ""
+
+#: Menu.py:358
+msgid "Debugger\tF4"
+msgstr ""
+
+#: Menu.py:358
+msgid "Check DEVS master model of diagram"
+msgstr ""
+
+#: Menu.py:359
+msgid "&Simulate\tF5"
+msgstr ""
+
+#: Menu.py:359
+msgid "Perform the simulation"
+msgstr ""
+
+#: Menu.py:360 Menu.py:754
+msgid "Add constants"
+msgstr ""
+
+#: Menu.py:360
+msgid "Loading constants parameters"
+msgstr ""
+
+#: Menu.py:361
+msgid "Priority\tF3"
+msgstr ""
+
+#: Menu.py:361
+msgid "Priority for select function"
+msgstr ""
+
+#: Menu.py:362
+msgid "Information about diagram (number of models, connections, etc)"
+msgstr ""
+
+#: Menu.py:363 Menu.py:637
+msgid "Clear"
+msgstr ""
+
+#: Menu.py:363
+msgid "Remove all components in diagram"
+msgstr ""
+
+#: Menu.py:364 Menu.py:682
+msgid "Rename"
+msgstr ""
+
+#: Menu.py:364 Menu.py:603
+msgid "Rename diagram"
+msgstr ""
+
+#: Menu.py:365
+msgid "&Close\tCtrl+D"
+msgstr ""
+
+#: Menu.py:365
+msgid "Close the tab"
+msgstr ""
+
+#: Menu.py:425
+msgid "Preferences"
+msgstr ""
+
+#: Menu.py:425
+msgid "Advanced setting options"
+msgstr ""
+
+#: Menu.py:426
+msgid "French"
+msgstr ""
+
+#: Menu.py:426
+msgid "French interface"
+msgstr ""
+
+#: Menu.py:427
+msgid "English"
+msgstr ""
+
+#: Menu.py:427
+msgid "English interface"
+msgstr ""
+
+#: Menu.py:444
+msgid "Languages"
+msgstr ""
+
+#: Menu.py:449 Menu.py:541
+msgid "Profile"
+msgstr ""
+
+#: Menu.py:470
+msgid "&DEVSimPy Help\tF1"
+msgstr ""
+
+#: Menu.py:470
+msgid "Help for DEVSimPy user"
+msgstr ""
+
+#: Menu.py:471
+msgid "&DEVSimPy API\tF2"
+msgstr ""
+
+#: Menu.py:471
+msgid "API for DEVSimPy user"
+msgstr ""
+
+#: Menu.py:472
+msgid "Contact the Author..."
+msgstr ""
+
+#: Menu.py:472
+msgid "Send mail to the author"
+msgstr ""
+
+#: Menu.py:473
+msgid "About DEVSimPy..."
+msgstr ""
+
+#: Menu.py:473
+msgid "About DEVSimPy"
+msgstr ""
+
+#: Menu.py:500
+msgid "&Diagram"
+msgstr ""
+
+#: Menu.py:501
+msgid "&Show"
+msgstr ""
+
+#: Menu.py:503
+msgid "&Perspectives"
+msgstr ""
+
+#: Menu.py:504 Menu.py:545
+msgid "&Options"
+msgstr ""
+
+#: Menu.py:601
+msgid "Close diagram"
+msgstr ""
+
+#: Menu.py:602
+msgid "Detach tab to window"
+msgstr ""
+
+#: Menu.py:603
+msgid "Rename..."
+msgstr ""
+
+#: Menu.py:604
+msgid "Clear..."
+msgstr ""
+
+#: Menu.py:604
+msgid "Clear diagram"
+msgstr ""
+
+#: Menu.py:635
+msgid "Edit attribute"
+msgstr ""
+
+#: Menu.py:636
+msgid "Insert attribute"
+msgstr ""
+
+#: Menu.py:637
+msgid "Clear value"
+msgstr ""
+
+#: Menu.py:674
+msgid "New Model"
+msgstr ""
+
+#: Menu.py:674
+msgid "Add a new model to the selected library"
+msgstr ""
+
+#: Menu.py:681
+msgid "Edit selected module"
+msgstr ""
+
+#: Menu.py:682
+msgid "Rename selected module"
+msgstr ""
+
+#: Menu.py:683
+msgid "Documentation"
+msgstr ""
+
+#: Menu.py:683
+msgid "Documentation of selected library"
+msgstr ""
+
+#: Menu.py:684 SpreadSheet.py:140
+msgid "Update"
+msgstr ""
+
+#: Menu.py:684
+msgid "Update selected module"
+msgstr ""
+
+#: Menu.py:701
+msgid "Delete selected library"
+msgstr ""
+
+#: Menu.py:714
+msgid "New/Import"
+msgstr ""
+
+#: Menu.py:714
+msgid "Create or import library"
+msgstr ""
+
+#: Menu.py:715
+msgid "Refresh library"
+msgstr ""
+
+#: Menu.py:717
+msgid "Library description"
+msgstr ""
+
+#: Menu.py:752
+msgid "&New"
+msgstr ""
+
+#: Menu.py:752
+msgid "New model"
+msgstr ""
+
+#: Menu.py:753 Menu.py:811
+msgid "Paste the model"
+msgstr ""
+
+#: Menu.py:754
+msgid "Add constants parameters"
+msgstr ""
+
+#: Menu.py:755 PrintOut.py:146
+msgid "Print preview"
+msgstr ""
+
+#: Menu.py:755
+msgid "Print preveiw of the diagram"
+msgstr ""
+
+#: Menu.py:758
+msgid "Generate PyPDEVS Experiment File"
+msgstr ""
+
+#: Menu.py:758
+msgid "Generate experiment model for PyPDEVS"
+msgstr ""
+
+#: Menu.py:806
+msgid "Edit the code"
+msgstr ""
+
+#: Menu.py:807
+msgid "Model"
+msgstr ""
+
+#: Menu.py:807
+msgid "Edit the model code"
+msgstr ""
+
+#: Menu.py:808
+msgid "Tests"
+msgstr ""
+
+#: Menu.py:808
+msgid "Edit the tests code"
+msgstr ""
+
+#: Menu.py:809 SimulationGUI.py:356
+msgid "Log"
+msgstr ""
+
+#: Menu.py:809
+msgid "View log file"
+msgstr ""
+
+#: Menu.py:810
+msgid "Copy the model"
+msgstr ""
+
+#: Menu.py:812
+msgid "Cut the model"
+msgstr ""
+
+#: Menu.py:813
+msgid "&All"
+msgstr ""
+
+#: Menu.py:813
+msgid "Rotate all ports"
+msgstr ""
+
+#: Menu.py:814
+msgid "&Input ports"
+msgstr ""
+
+#: Menu.py:814
+msgid "Rotate input ports"
+msgstr ""
+
+#: Menu.py:815
+msgid "&Output ports"
+msgstr ""
+
+#: Menu.py:815
+msgid "Rotate output ports"
+msgstr ""
+
+#: Menu.py:816 Menu.py:818 Menu.py:820
+msgid "&Right Rotate\tCtrl+R"
+msgstr ""
+
+#: Menu.py:816 Menu.py:818 Menu.py:820
+msgid "Rotate on the right"
+msgstr ""
+
+#: Menu.py:817 Menu.py:819 Menu.py:821
+msgid "&Left Rotate\tCtrl+L"
+msgstr ""
+
+#: Menu.py:817 Menu.py:819 Menu.py:821
+msgid "Rotate on the left"
+msgstr ""
+
+#: Menu.py:822
+msgid "&Rename"
+msgstr ""
+
+#: Menu.py:822
+msgid "Rename the label of the model"
+msgstr ""
+
+#: Menu.py:823
+msgid "Delete the model"
+msgstr ""
+
+#: Menu.py:824
+msgid "Lock"
+msgstr ""
+
+#: Menu.py:824
+msgid "Lock the link"
+msgstr ""
+
+#: Menu.py:825
+msgid "Unlock"
+msgstr ""
+
+#: Menu.py:825
+msgid "Unlock the link"
+msgstr ""
+
+#: Menu.py:826
+msgid "Export the model"
+msgstr ""
+
+#: Menu.py:827
+msgid "AMD"
+msgstr ""
+
+#: Menu.py:827
+msgid "Model exported to a amd file"
+msgstr ""
+
+#: Menu.py:828
+msgid "CMD"
+msgstr ""
+
+#: Menu.py:828
+msgid "Model exported to a cmd file"
+msgstr ""
+
+#: Menu.py:829
+msgid "XML"
+msgstr ""
+
+#: Menu.py:829
+msgid "Model exported to a xml file"
+msgstr ""
+
+#: Menu.py:830
+msgid "JS"
+msgstr ""
+
+#: Menu.py:830
+msgid "Model exported to a js (join) file"
+msgstr ""
+
+#: Menu.py:831
+msgid "Plug-in"
+msgstr ""
+
+#: Menu.py:831
+msgid "Plug-in manager"
+msgstr ""
+
+#: Menu.py:832
+msgid "Edit the attributes"
+msgstr ""
+
+#: Menu.py:926
+msgid "Input"
+msgstr ""
+
+#: Menu.py:927
+msgid "Output"
+msgstr ""
+
+#: Menu.py:929
+msgid "Rotate"
+msgstr ""
+
+#: Menu.py:940
+msgid "Connect to"
+msgstr ""
+
+#: PlotGUI.py:79 PlotGUI.py:81
+#, python-format
+msgid "Plotting %s"
+msgstr ""
+
+#: PlotGUI.py:87 PlotGUI.py:92
+#, python-format
+msgid "%s on port %s"
+msgstr ""
+
+#: PlotGUI.py:117
+msgid "Page Setup"
+msgstr ""
+
+#: PlotGUI.py:117
+msgid "Setup the printer page"
+msgstr ""
+
+#: PlotGUI.py:118
+msgid "Print Preview"
+msgstr ""
+
+#: PlotGUI.py:118
+msgid "Show the current plot on page"
+msgstr ""
+
+#: PlotGUI.py:119
+msgid "Print"
+msgstr ""
+
+#: PlotGUI.py:119
+msgid "Print the current plot"
+msgstr ""
+
+#: PlotGUI.py:120
+msgid "Save Plot"
+msgstr ""
+
+#: PlotGUI.py:120
+msgid "Save current plot"
+msgstr ""
+
+#: PlotGUI.py:121
+msgid "&Exit"
+msgstr ""
+
+#: PlotGUI.py:121
+msgid "Enough of this already!"
+msgstr ""
+
+#: PlotGUI.py:126
+msgid "&Redraw"
+msgstr ""
+
+#: PlotGUI.py:126
+msgid "Redraw plots"
+msgstr ""
+
+#: PlotGUI.py:127
+msgid "&Scale"
+msgstr ""
+
+#: PlotGUI.py:127
+msgid "Scale canvas"
+msgstr ""
+
+#: PlotGUI.py:131
+msgid "Scatter"
+msgstr ""
+
+#: PlotGUI.py:132
+msgid "Bar"
+msgstr ""
+
+#: PlotGUI.py:134 PluginsGUI.py:276
+msgid "Type"
+msgstr ""
+
+#: PlotGUI.py:137
+msgid "&Title"
+msgstr ""
+
+#: PlotGUI.py:137 PlotGUI.py:221 PlotGUI.py:229
+msgid "Enable title"
+msgstr ""
+
+#: PlotGUI.py:138
+msgid "&Zoom"
+msgstr ""
+
+#: PlotGUI.py:138 PlotGUI.py:220 PlotGUI.py:228
+msgid "Enable zoom"
+msgstr ""
+
+#: PlotGUI.py:139
+msgid "Grid"
+msgstr ""
+
+#: PlotGUI.py:139
+msgid "Enable grid"
+msgstr ""
+
+#: PlotGUI.py:140
+msgid "Drag"
+msgstr ""
+
+#: PlotGUI.py:140 PlotGUI.py:224 PlotGUI.py:232
+msgid "Enable drag"
+msgstr ""
+
+#: PlotGUI.py:141
+msgid "&Legend"
+msgstr ""
+
+#: PlotGUI.py:141 PlotGUI.py:223 PlotGUI.py:231
+msgid "Turn on legend"
+msgstr ""
+
+#: PlotGUI.py:142
+msgid "&Point Label"
+msgstr ""
+
+#: PlotGUI.py:142 PlotGUI.py:225 PlotGUI.py:233
+msgid "Show closest point"
+msgstr ""
+
+#: PlotGUI.py:143 PlotGUI.py:226 PlotGUI.py:234
+msgid "Normalize"
+msgstr ""
+
+#: PlotGUI.py:143 PlotGUI.py:226 PlotGUI.py:234
+msgid "Normalize Y axis"
+msgstr ""
+
+#: PlotGUI.py:144 PluginsGUI.py:703
+msgid "Enable"
+msgstr ""
+
+#: PlotGUI.py:146
+msgid "Set Title"
+msgstr ""
+
+#: PlotGUI.py:146
+msgid "Define title"
+msgstr ""
+
+#: PlotGUI.py:147
+msgid "Set X Label"
+msgstr ""
+
+#: PlotGUI.py:147
+msgid "Define x label"
+msgstr ""
+
+#: PlotGUI.py:148
+msgid "Set Y Label"
+msgstr ""
+
+#: PlotGUI.py:148
+msgid "Define y label"
+msgstr ""
+
+#: PlotGUI.py:149
+msgid "Scroll Up 1"
+msgstr ""
+
+#: PlotGUI.py:149
+msgid "Move View Up 1 Unit"
+msgstr ""
+
+#: PlotGUI.py:150
+msgid "Scroll Rt 2"
+msgstr ""
+
+#: PlotGUI.py:150
+msgid "Move View Right 2 Units"
+msgstr ""
+
+#: PlotGUI.py:151
+msgid "&Plot Reset"
+msgstr ""
+
+#: PlotGUI.py:151
+msgid "Reset to original plot"
+msgstr ""
+
+#: PlotGUI.py:153
+msgid "&Plot"
+msgstr ""
+
+#: PlotGUI.py:267
+#, python-format
+msgid "Left Mouse Down at Point: (%.4f, %.4f)"
+msgstr ""
+
+#: PlotGUI.py:407
+#, python-format
+msgid "Signal %d"
+msgstr ""
+
+#: PlotGUI.py:407 PlotGUI.py:408 PlotGUI.py:410 PlotGUI.py:689 PlotGUI.py:690
+#: PlotGUI.py:692
+msgid "Spectrum Plot"
+msgstr ""
+
+#: PlotGUI.py:410
+msgid "Signal"
+msgstr ""
+
+#: PlotGUI.py:411 PlotGUI.py:693
+msgid "&Spectrum"
+msgstr ""
+
+#: PlotGUI.py:600 PlotGUI.py:977
+#, python-format
+msgid "Spectrum of signal %d"
+msgstr ""
+
+#: PlotGUI.py:614 PlotGUI.py:617 PlotGUI.py:989
+msgid "Spectrum of signal "
+msgstr ""
+
+#: PlotGUI.py:623 PlotGUI.py:994
+msgid "Enter new title"
+msgstr ""
+
+#: PlotGUI.py:623 PlotGUI.py:994
+msgid "Title Entry"
+msgstr ""
+
+#: PlotGUI.py:632 PlotGUI.py:1003
+msgid "Enter new X label"
+msgstr ""
+
+#: PlotGUI.py:632 PlotGUI.py:641 PlotGUI.py:1003 PlotGUI.py:1012
+msgid "Label Entry"
+msgstr ""
+
+#: PlotGUI.py:641 PlotGUI.py:1012
+msgid "Enter new Y label"
+msgstr ""
+
+#: PlotGUI.py:689 PlotGUI.py:692
+#, python-format
+msgid "Signal %s"
+msgstr ""
+
+#: PlotGUI.py:765 PlotGUI.py:845 PlotGUI.py:915 PlotGUI.py:968
+msgid "Error trying to plot"
+msgstr ""
+
+#: PlotGUI.py:1073
+msgid "Frequency [Hz]"
+msgstr ""
+
+#: PlotGUI.py:1073
+msgid "Amplitude [dB]"
+msgstr ""
+
+#: PluginsGUI.py:122
+msgid "Size"
+msgstr ""
+
+#: PluginsGUI.py:123
+msgid "Date"
+msgstr ""
+
+#: PluginsGUI.py:277 SpreadSheet.py:406 WizardGUI.py:181 devsimpy.py:1607
+#: devsimpy.py:1972 devsimpy.py:1984 devsimpy.py:2115
+msgid "Info"
+msgstr ""
+
+#: PluginsGUI.py:322
+msgid "WARNING: class can't be overwritted"
+msgstr ""
+
+#: PluginsGUI.py:339
+#, python-format
+msgid ""
+"Error in plugins.py file:\n"
+"\n"
+"%s\n"
+"\n"
+"Do you want to edit this file?"
+msgstr ""
+
+#: PluginsGUI.py:341
+msgid "Plug-ins Manager"
+msgstr ""
+
+#: PluginsGUI.py:357
+msgid "overriding"
+msgstr ""
+
+#: PluginsGUI.py:357
+msgid "new"
+msgstr ""
+
+#: PluginsGUI.py:420
+#, python-format
+msgid "Error loading plug-ins: %s\n"
+msgstr ""
+
+#: PluginsGUI.py:454
+#, python-format
+msgid "WARNING: plug-in type (%s) not supported!"
+msgstr ""
+
+#: PluginsGUI.py:490
+msgid ""
+"Plug-in documentation area.\n"
+"Select plug-in in order to print its documentation."
+msgstr ""
+
+#: PluginsGUI.py:506
+msgid "Select all plug-ins"
+msgstr ""
+
+#: PluginsGUI.py:507
+msgid "Unselect all plug-ins"
+msgstr ""
+
+#: PluginsGUI.py:508
+msgid "Selected plug-in setting"
+msgstr ""
+
+#: PluginsGUI.py:586
+msgid "No documentation available for this plug-in."
+msgstr ""
+
+#: PluginsGUI.py:618
+msgid "Warning: Type of list object unknown in PluginsGUI"
+msgstr ""
+
+#: PluginsGUI.py:657 PreferencesGUI.py:542
+msgid "Add new plug-ins"
+msgstr ""
+
+#: PluginsGUI.py:658 PreferencesGUI.py:543
+msgid "Delete all existing plug-ins"
+msgstr ""
+
+#: PluginsGUI.py:659
+msgid "Edit plug-in file"
+msgstr ""
+
+#: PluginsGUI.py:660
+msgid "Update plug-in list"
+msgstr ""
+
+#: PluginsGUI.py:674
+msgid "PluginsGUI in mode alone.\n"
+msgstr ""
+
+#: PluginsGUI.py:703
+msgid "Enable the plugin"
+msgstr ""
+
+#: PluginsGUI.py:704
+msgid "Disable"
+msgstr ""
+
+#: PluginsGUI.py:704
+msgid "Disable the plugin"
+msgstr ""
+
+#: PluginsGUI.py:705
+msgid "Edit the plugin"
+msgstr ""
+
+#: PluginsGUI.py:749
+#, python-format
+msgid "%s - Plug-ins Editor"
+msgstr ""
+
+#: PluginsGUI.py:808
+#, python-format
+msgid ""
+"Error trying to load plug-in.\n"
+"Info : %s\n"
+"Do you want to edit this plug-in file?"
+msgstr ""
+
+#: PluginsGUI.py:840
+msgid "Do You really want to delete plug-ins file?"
+msgstr ""
+
+#: PreferencesGUI.py:46
+msgid "Plug-ins directory:"
+msgstr ""
+
+#: PreferencesGUI.py:46
+msgid "Change the plug-ins directory"
+msgstr ""
+
+#: PreferencesGUI.py:46
+msgid "Plug-ins directory..."
+msgstr ""
+
+#: PreferencesGUI.py:47
+msgid "Library directory:"
+msgstr ""
+
+#: PreferencesGUI.py:47
+msgid "Change the library directory"
+msgstr ""
+
+#: PreferencesGUI.py:47
+msgid "Libraries directory..."
+msgstr ""
+
+#: PreferencesGUI.py:48
+msgid "Output directory:"
+msgstr ""
+
+#: PreferencesGUI.py:48
+msgid "Change the output directory"
+msgstr ""
+
+#: PreferencesGUI.py:48
+msgid "Output directory..."
+msgstr ""
+
+#: PreferencesGUI.py:55
+msgid "Number of recent file:"
+msgstr ""
+
+#: PreferencesGUI.py:56
+msgid "Font size:"
+msgstr ""
+
+#: PreferencesGUI.py:57
+msgid "Deep of history item:"
+msgstr ""
+
+#: PreferencesGUI.py:58
+msgid "wxPython version:"
+msgstr ""
+
+#: PreferencesGUI.py:66
+msgid ""
+"Feel free to change the length of list defining the recent opened files."
+msgstr ""
+
+#: PreferencesGUI.py:67
+msgid "Feel free to change the font size of DEVSimpy."
+msgstr ""
+
+#: PreferencesGUI.py:68
+msgid "Feel free to change the number of item for undo/redo command"
+msgstr ""
+
+#: PreferencesGUI.py:69
+msgid "Feel free to change the version of wxpython used loaded by DEVSimPy"
+msgstr ""
+
+#: PreferencesGUI.py:87
+msgid "Transparency"
+msgstr ""
+
+#: PreferencesGUI.py:89
+msgid "Transparency for the detached frame of diagrams"
+msgstr ""
+
+#: PreferencesGUI.py:101
+msgid "Default version of wxPython."
+msgstr ""
+
+#: PreferencesGUI.py:147
+msgid ""
+"wxPython version has been changed.\n"
+"DEVSimPy requires a reboot to load the new version of wxPython."
+msgstr ""
+
+#: PreferencesGUI.py:147
+msgid "wxPython Version Manager"
+msgstr ""
+
+#: PreferencesGUI.py:253
+msgid ""
+"Press this button in order to change the song arriving at the end of the "
+"simulation."
+msgstr ""
+
+#: PreferencesGUI.py:258
+msgid ""
+"Press this button in order to change the song arriving when an error occur "
+"in a model during the simulation."
+msgstr ""
+
+#: PreferencesGUI.py:262
+msgid ""
+"Press this button to read the documentation of the selected DEVS package"
+msgstr ""
+
+#: PreferencesGUI.py:265
+msgid "Notification"
+msgstr ""
+
+#: PreferencesGUI.py:267
+msgid "Notification song is generate when the simulation is over."
+msgstr ""
+
+#: PreferencesGUI.py:270
+msgid "No Time Limit"
+msgstr ""
+
+#: PreferencesGUI.py:273
+msgid "No Time Limit allow the stop of simulation when all of models are idle."
+msgstr ""
+
+#: PreferencesGUI.py:276
+msgid "DEVS packages:"
+msgstr ""
+
+#: PreferencesGUI.py:279
+msgid "Default DEVS Kernel package (PyDEVS, PyPDEVS, ect.)."
+msgstr ""
+
+#: PreferencesGUI.py:283
+msgid "Default strategy:"
+msgstr ""
+
+#: PreferencesGUI.py:289
+msgid ""
+"Default strategy for the simulation algorithm. Please see the DEVSimPy doc "
+"for more information of possible strategy."
+msgstr ""
+
+#: PreferencesGUI.py:294
+msgid "Frequency of plotting refresh:"
+msgstr ""
+
+#: PreferencesGUI.py:297
+msgid "Default frequency for dynamic plotting."
+msgstr ""
+
+#: PreferencesGUI.py:353
+#, python-format
+msgid "<p> %s documentation directory not found! <p>"
+msgstr ""
+
+#: PreferencesGUI.py:362
+msgid "Choose a sound file"
+msgstr ""
+
+#: PreferencesGUI.py:364
+msgid "MP3 files (*.mp3)|*.mp3| WAV files (*.wav)|*.wav"
+msgstr ""
+
+#: PreferencesGUI.py:382
+msgid "Exception Message"
+msgstr ""
+
+#: PreferencesGUI.py:486
+msgid "Use local programmer software"
+msgstr ""
+
+#: PreferencesGUI.py:489
+msgid ""
+"This option don't work for the .amd and .cmd file. \n"
+"Modification of python file during the simulation is disabled when this "
+"checkbox is checked."
+msgstr ""
+
+#: PreferencesGUI.py:544
+msgid "Refresh plug-ins list"
+msgstr ""
+
+#: PreferencesGUI.py:604
+#, python-format
+msgid ""
+"ERROR: %s copy failed!\n"
+"%s"
+msgstr ""
+
+#: PreferencesGUI.py:606
+#, python-format
+msgid ""
+"ERROR: %s is not a python file.\n"
+"Only python file can be added as plugin."
+msgstr ""
+
+#: PreferencesGUI.py:619
+msgid "Do You really want to delete selected plug-ins?"
+msgstr ""
+
+#: PreferencesGUI.py:619
+msgid "Plug-in MAnager"
+msgstr ""
+
+#: PreferencesGUI.py:631
+#, python-format
+msgid "Do You really want to remove %s plug-in file?"
+msgstr ""
+
+#: PreferencesGUI.py:631
+msgid "Preference Manager"
+msgstr ""
+
+#: PreferencesGUI.py:635
+msgid "ERROR: plug-in file not deleted!"
+msgstr ""
+
+#: PreferencesGUI.py:639
+msgid "Select plug-ins to delete"
+msgstr ""
+
+#: PreferencesGUI.py:683
+msgid "Apply all changing"
+msgstr ""
+
+#: PreferencesGUI.py:684
+msgid "Cancel without changing"
+msgstr ""
+
+#: PrintOut.py:154
+msgid "Problem on print preview...\n"
+msgstr ""
+
+#: PriorityGUI.py:44
+msgid "Drag and drop a model in order to define its priority"
+msgstr ""
+
+#: PropPanel.py:50
+msgid ""
+"Select a model from diagram \n"
+" to see their properties."
+msgstr ""
+
+#: PropPanel.py:79
+msgid ""
+"No model selected.\n"
+"Choose a model to show in this panel its properties."
+msgstr ""
+
+#: PropPanel.py:79
+msgid "You can change the properties by editing the cell."
+msgstr ""
+
+#: PropertiesGridCtrl.py:67 PropertiesGridCtrl.py:95
+msgid "Dictionary manager"
+msgstr ""
+
+#: PropertiesGridCtrl.py:95 PropertiesGridCtrl.py:174
+#, python-format
+msgid "Error editing attribute: %s"
+msgstr ""
+
+#: PropertiesGridCtrl.py:146 PropertiesGridCtrl.py:174
+msgid "List manager"
+msgstr ""
+
+#: PropertiesGridCtrl.py:220
+msgid "Unable to load sources"
+msgstr ""
+
+#: PropertiesGridCtrl.py:249
+msgid "Class"
+msgstr ""
+
+#: PropertiesGridCtrl.py:250
+msgid "Constructor"
+msgstr ""
+
+#: PropertiesGridCtrl.py:251
+msgid "Internal Transition"
+msgstr ""
+
+#: PropertiesGridCtrl.py:252
+msgid "External Transition"
+msgstr ""
+
+#: PropertiesGridCtrl.py:253
+msgid "Output Function"
+msgstr ""
+
+#: PropertiesGridCtrl.py:254
+msgid "Time Advance Function"
+msgstr ""
+
+#: PropertiesGridCtrl.py:255
+msgid "Finish Function"
+msgstr ""
+
+#: PropertiesGridCtrl.py:258
+msgid "Importing Error"
+msgstr ""
+
+#: PropertiesGridCtrl.py:258
+#, python-format
+msgid ""
+"Error trying to import the module: %s.\n"
+"Change the python path by clicking in the above 'python_path' cell.\n"
+" %s"
+msgstr ""
+
+#: PropertiesGridCtrl.py:277
+#, python-format
+msgid "Method %s of class %s unknown!\n"
+msgstr ""
+
+#: PropertiesGridCtrl.py:364 PropertiesGridCtrl.py:400
+#: PropertiesGridCtrl.py:461
+msgid "Unknown information"
+msgstr ""
+
+#: PropertiesGridCtrl.py:364
+msgid ""
+"Please get information of DEVS attribute \n"
+"through its class constructor using @ symbole. \n"
+" For example: @attribut_name : informations"
+msgstr ""
+
+#: PropertiesGridCtrl.py:365
+msgid ""
+"This is the path of python file.\n"
+"You can change this path in order to change the behavior of the model."
+msgstr ""
+
+#: PropertiesGridCtrl.py:366
+msgid ""
+"This is the name of model.\n"
+"You can change this name by clicking on its value field"
+msgstr ""
+
+#: PropertiesGridCtrl.py:367
+msgid ""
+"This is the color and size of pen used to trace the model shape.\n"
+"You can change these properies by clicking on its value field."
+msgstr ""
+
+#: PropertiesGridCtrl.py:368
+msgid ""
+"This is the background color of the model shape.\n"
+"You can change this properties by clicking on its value filed."
+msgstr ""
+
+#: PropertiesGridCtrl.py:369
+msgid "This is the font of the label."
+msgstr ""
+
+#: PropertiesGridCtrl.py:372
+msgid "Attribute"
+msgstr ""
+
+#: PropertiesGridCtrl.py:375
+msgid "Label position"
+msgstr ""
+
+#: PropertiesGridCtrl.py:375
+msgid "Color and size of pen"
+msgstr ""
+
+#: PropertiesGridCtrl.py:375
+msgid "Background color"
+msgstr ""
+
+#: PropertiesGridCtrl.py:375
+msgid "Font label"
+msgstr ""
+
+#: PropertiesGridCtrl.py:375
+msgid "Background image"
+msgstr ""
+
+#: PropertiesGridCtrl.py:375
+msgid "Input port"
+msgstr ""
+
+#: PropertiesGridCtrl.py:375
+msgid "Output port"
+msgstr ""
+
+#: PropertiesGridCtrl.py:417
+msgid "Id number"
+msgstr ""
+
+#: PropertiesGridCtrl.py:465
+msgid "Args in constructor is none\n"
+msgstr ""
+
+#: PropertiesGridCtrl.py:470
+msgid "Python file path"
+msgstr ""
+
+#: PropertiesGridCtrl.py:530
+#, python-format
+msgid "Error in GetAttr : %s"
+msgstr ""
+
+#: PropertiesGridCtrl.py:770
+msgid "Paste new value from clipboard"
+msgstr ""
+
+#: PropertiesGridCtrl.py:770
+msgid "Paste value"
+msgstr ""
+
+#: PropertiesGridCtrl.py:824
+msgid "Name of property"
+msgstr ""
+
+#: PropertiesGridCtrl.py:825
+msgid "Value of property"
+msgstr ""
+
+#: PropertiesGridCtrl.py:826
+msgid "Information about property"
+msgstr ""
+
+#: PropertiesGridCtrl.py:840
+msgid "Row Two"
+msgstr ""
+
+#: PropertiesGridCtrl.py:950
+msgid "Data files All files (*)|*"
+msgstr ""
+
+#: PropertiesGridCtrl.py:953 PropertiesGridCtrl.py:978
+msgid "Select file ..."
+msgstr ""
+
+#: PropertiesGridCtrl.py:973
+msgid ""
+"Atomic DEVSimPy model (*.amd)|*.amd|Coupled DEVSimPy model (*.cmd)|*.cmd|All "
+"files (*)|*"
+msgstr ""
+
+#: PropertiesGridCtrl.py:975
+msgid "Python files (*.py)|*.py|All files (*)|*"
+msgstr ""
+
+#: PropertiesGridCtrl.py:1038 PropertiesGridCtrl.py:1047
+msgid "List editor"
+msgstr ""
+
+#: Reporter.py:197
+msgid "Error/Crash Reporter"
+msgstr ""
+
+#: Reporter.py:207
+msgid "Report Error"
+msgstr ""
+
+#: Reporter.py:235
+msgid ""
+"Error: Help improve DEVSimPy by clicking on Report Error\n"
+"to send the Error Traceback shown below."
+msgstr ""
+
+#: Reporter.py:238
+msgid " Error Traceback:"
+msgstr ""
+
+#: Reporter.py:286
+#, python-format
+msgid "DEVSimPy %s Error Report"
+msgstr ""
+
+#: SimulationGUI.py:87
+msgid "The field must contain some positive numbers!"
+msgstr ""
+
+#: SimulationGUI.py:114
+msgid "More settings..."
+msgstr ""
+
+#: SimulationGUI.py:115
+msgid "Extra options"
+msgstr ""
+
+#: SimulationGUI.py:152
+#, python-format
+msgid "%s algorithm:"
+msgstr ""
+
+#: SimulationGUI.py:163
+msgid "Profiling"
+msgstr ""
+
+#: SimulationGUI.py:165
+msgid "No time limit"
+msgstr ""
+
+#: SimulationGUI.py:167
+msgid "Verbose"
+msgstr ""
+
+#: SimulationGUI.py:169
+msgid "Dynamic Structure"
+msgstr ""
+
+#: SimulationGUI.py:172
+msgid "Real time"
+msgstr ""
+
+#: SimulationGUI.py:204
+msgid "Select the simulator strategy."
+msgstr ""
+
+#: SimulationGUI.py:205
+msgid "For simulation profiling using hotshot"
+msgstr ""
+
+#: SimulationGUI.py:206
+msgid ""
+"No time limit for the simulation. Simulation is over when childs are no "
+"active."
+msgstr ""
+
+#: SimulationGUI.py:351
+msgid "Final time:"
+msgstr ""
+
+#: SimulationGUI.py:353
+msgid "Run"
+msgstr ""
+
+#: SimulationGUI.py:354
+msgid "Stop"
+msgstr ""
+
+#: SimulationGUI.py:355
+msgid "Suspend"
+msgstr ""
+
+#: SimulationGUI.py:369
+msgid "Begin simulation process."
+msgstr ""
+
+#: SimulationGUI.py:370
+msgid "Stop the simulation process."
+msgstr ""
+
+#: SimulationGUI.py:371
+msgid "Suspend the simulation process."
+msgstr ""
+
+#: SimulationGUI.py:372
+msgid ""
+"Launch the log window (often depends on some plug-ins (verbose, "
+"activity, ...))."
+msgstr ""
+
+#: SimulationGUI.py:567
+msgid "Interrupted"
+msgstr ""
+
+#: SimulationGUI.py:586
+msgid "Suspended"
+msgstr ""
+
+#: SimulationGUI.py:627
+msgid "Completed!"
+msgstr ""
+
+#: SimulationGUI.py:643
+msgid "Processing..."
+msgstr ""
+
+#: SimulationGUI.py:670
+msgid "You want to simulate an empty master model!"
+msgstr ""
+
+#: SimulationGUI.py:733
+msgid "Are you sure to stop simulation?"
+msgstr ""
+
+#: SimulationGUI.py:771
+#, python-format
+msgid "Error in ErrorManager: %s"
+msgstr ""
+
+#: SpreadSheet.py:63
+msgid "Event"
+msgstr ""
+
+#: SpreadSheet.py:64
+msgid "Message"
+msgstr ""
+
+#: SpreadSheet.py:132
+msgid "Open"
+msgstr ""
+
+#: SpreadSheet.py:133
+msgid "SaveAs"
+msgstr ""
+
+#: SpreadSheet.py:142
+msgid "Chart"
+msgstr ""
+
+#: SpreadSheet.py:190
+#, python-format
+msgid "%s (on in_%s)"
+msgstr ""
+
+#: SpreadSheet.py:228 SpreadSheet.py:234
+#, python-format
+msgid "Error in SpreadSheet: %s"
+msgstr ""
+
+#: SpreadSheet.py:252
+#, python-format
+msgid "Loading data... (%d %%)"
+msgstr ""
+
+#: SpreadSheet.py:271 SpreadSheet.py:296
+#, python-format
+msgid "New %d"
+msgstr ""
+
+#: SpreadSheet.py:278 SpreadSheet.py:303
+msgid "DataSheet file (*.dat)|*.dat|All files (*)|*"
+msgstr ""
+
+#: SpreadSheet.py:288
+msgid "Choose a separator:"
+msgstr ""
+
+#: SpreadSheet.py:288
+msgid "Separator Manager"
+msgstr ""
+
+#: SpreadSheet.py:406
+#, python-format
+msgid "Type of data should be float or int : %s"
+msgstr ""
+
+#: Utilities.py:272
+#, python-format
+msgid "Error in getInstance: %s not instanciated with %s\n"
+msgstr ""
+
+#: Utilities.py:277
+msgid "Error in getInstance: First parameter is not a class\n"
+msgstr ""
+
+#: Utilities.py:377
+msgid "No sound\n"
+msgstr ""
+
+#: Utilities.py:456
+#, python-format
+msgid "Login to %s"
+msgstr ""
+
+#: WizardGUI.py:181
+msgid "The field must contain a string without space!"
+msgstr ""
+
+#: WizardGUI.py:336
+msgid "Type of Model"
+msgstr ""
+
+#: WizardGUI.py:337
+msgid "Atomic model"
+msgstr ""
+
+#: WizardGUI.py:338
+msgid "Coupled model"
+msgstr ""
+
+#: WizardGUI.py:343
+msgid ""
+"DEVS classic atomic model. It is used to define the behavior (or a part of "
+"behavior) of the system"
+msgstr ""
+
+#: WizardGUI.py:344
+msgid ""
+"DEVS classic coupled model. It is used to define the structure (or a part of "
+"structure) of the system"
+msgstr ""
+
+#: WizardGUI.py:345
+msgid "Choose the type of model:"
+msgstr ""
+
+#: WizardGUI.py:351 WizardGUI.py:512
+msgid "Input Port"
+msgstr ""
+
+#: WizardGUI.py:352 WizardGUI.py:533
+msgid "Output Port"
+msgstr ""
+
+#: WizardGUI.py:357
+msgid "DEVS classic input model. It is used to link models"
+msgstr ""
+
+#: WizardGUI.py:358
+msgid "DEVS classic output model. It is used to link models"
+msgstr ""
+
+#: WizardGUI.py:395
+msgid ""
+"The python file must contain a class that inherit of DomainBehavior or "
+"DomainStructure master class.\n"
+" Please choose a correct python file."
+msgstr ""
+
+#: WizardGUI.py:395 WizardGUI.py:398 WizardGUI.py:404 WizardGUI.py:780
+msgid "Wizard Manager"
+msgstr ""
+
+#: WizardGUI.py:398
+msgid ""
+"The python file not includes a class definition.\n"
+" Please choose a correct python file."
+msgstr ""
+
+#: WizardGUI.py:404
+msgid ""
+"The name of plugin python file must be plugins.py.\n"
+" Please choose a correct plugin python file."
+msgstr ""
+
+#: WizardGUI.py:408
+msgid "Atomic Model (AMD)"
+msgstr ""
+
+#: WizardGUI.py:412 WizardGUI.py:449
+msgid "Default python file"
+msgstr ""
+
+#: WizardGUI.py:415
+msgid "Choose python file from specific directory"
+msgstr ""
+
+#: WizardGUI.py:416 WizardGUI.py:453
+msgid "No plugin file"
+msgstr ""
+
+#: WizardGUI.py:418
+msgid "Choose plugin file from specific directory"
+msgstr ""
+
+#: WizardGUI.py:420
+msgid "Default"
+msgstr ""
+
+#: WizardGUI.py:420 WizardGUI.py:629
+msgid "Generator"
+msgstr ""
+
+#: WizardGUI.py:420 WizardGUI.py:645
+msgid "Viewer"
+msgstr ""
+
+#: WizardGUI.py:420 WizardGUI.py:645
+msgid "Collector"
+msgstr ""
+
+#: WizardGUI.py:426 WizardGUI.py:462 WizardGUI.py:521 WizardGUI.py:542
+msgid "Label"
+msgstr ""
+
+#: WizardGUI.py:427
+msgid "Atomic_Name"
+msgstr ""
+
+#: WizardGUI.py:428
+msgid "Specific Behavior"
+msgstr ""
+
+#: WizardGUI.py:430 WizardGUI.py:464
+msgid "Inputs"
+msgstr ""
+
+#: WizardGUI.py:432 WizardGUI.py:466
+msgid "Outputs"
+msgstr ""
+
+#: WizardGUI.py:445
+msgid "Coupled Model (CMD)"
+msgstr ""
+
+#: WizardGUI.py:463
+msgid "Coupled_Name"
+msgstr ""
+
+#: WizardGUI.py:479 WizardGUI.py:493 WizardGUI.py:506
+msgid "Finish"
+msgstr ""
+
+#: WizardGUI.py:487 WizardGUI.py:501
+msgid "Save as"
+msgstr ""
+
+#: WizardGUI.py:507
+msgid "Port model has been created."
+msgstr ""
+
+#: WizardGUI.py:516 WizardGUI.py:537
+msgid "Automatic Id"
+msgstr ""
+
+#: WizardGUI.py:522
+msgid "IPort "
+msgstr ""
+
+#: WizardGUI.py:543
+msgid "OPort "
+msgstr ""
+
+#: WizardGUI.py:779
+#, python-format
+msgid ""
+"%s already exist.\n"
+"Do you want to rewrite it ?"
+msgstr ""
+
+#: WizardGUI.py:789
+#, python-format
+msgid "ERROR: Enable to create Zip file in Wizard GUI (%s)"
+msgstr ""
+
+#: WizardGUI.py:813
+msgid "Call SaveFile method first!"
+msgstr ""
+
+#: XMLModule.py:243
+msgid "Element not considered!\n"
+msgstr ""
+
+#: XMLModule.py:571
+#, python-format
+msgid "Error making the diagram from XML SES: %s\n"
+msgstr ""
+
+#: XMLModule.py:578
+#, python-format
+msgid "Error making the coupling into the diagram from XML SES: %s\n"
+msgstr ""
+
+#: XMLModule.py:584
+msgid "XML SES file seems don't contain models!\n"
+msgstr ""
+
+#: YAMLExportGUI.py:45
+msgid "Insert url to upload"
+msgstr ""
+
+#: ZipManager.py:68
+#, python-format
+msgid "Behavioral python file not found in %s file"
+msgstr ""
+
+#: ZipManager.py:306
+msgid ""
+"Error in ZipManager class for GetModule: no python file in the archive\n"
+msgstr ""
+
+#: ZipManager.py:336
+msgid "Error in execution: "
+msgstr ""
+
+#: ZipManager.py:368
+#, python-format
+msgid "File has not been deleted: %s"
+msgstr ""
+
+#: devsimpy-nogui.py:124
+msgid "ERROR: devsimpy file does not exist!\n"
+msgstr ""
+
+#: devsimpy.py:106
+msgid "Press Enter to continue (Ctrl+C to skip)"
+msgstr ""
+
+#: devsimpy.py:385
+#, python-format
+msgid ""
+"PyPDEVS Kernel in version 2.4.1 is not loaded.\n"
+"Please install it in the directory %s using git (http://msdl.uantwerpen.be/"
+"git/yentl/PythonPDEVS.git)"
+msgstr ""
+
+#: devsimpy.py:525
+msgid "Welcome to DEVSimPy: The GUI for Python DEVS Simulator"
+msgstr ""
+
+#: devsimpy.py:766 devsimpy.py:784
+msgid "New diagram (Ctrl+N)"
+msgstr ""
+
+#: devsimpy.py:766
+msgid "Create a new diagram in tab"
+msgstr ""
+
+#: devsimpy.py:767 devsimpy.py:785
+msgid "Open File (Ctrl+O)"
+msgstr ""
+
+#: devsimpy.py:768 devsimpy.py:786
+msgid "Print Preview (Ctrl+P)"
+msgstr ""
+
+#: devsimpy.py:768
+msgid "Print preview of current diagram"
+msgstr ""
+
+#: devsimpy.py:769 devsimpy.py:787
+msgid "Save File (Ctrl+S)"
+msgstr ""
+
+#: devsimpy.py:770 devsimpy.py:788
+msgid "Save file as"
+msgstr ""
+
+#: devsimpy.py:771 devsimpy.py:789
+msgid "Click to glongHelpString=o back, hold to see history"
+msgstr ""
+
+#: devsimpy.py:775 devsimpy.py:793
+msgid "Normal size"
+msgstr ""
+
+#: devsimpy.py:776 devsimpy.py:794
+msgid "Priority (F3)"
+msgstr ""
+
+#: devsimpy.py:776
+msgid "Define model activation priority"
+msgstr ""
+
+#: devsimpy.py:777 devsimpy.py:795
+msgid "Debugger (F4)"
+msgstr ""
+
+#: devsimpy.py:777
+msgid "Check devs models"
+msgstr ""
+
+#: devsimpy.py:778 devsimpy.py:796
+msgid "Simulation (F5)"
+msgstr ""
+
+#: devsimpy.py:817
+msgid "Define Downward atomic model"
+msgstr ""
+
+#: devsimpy.py:818
+msgid "Define Upward atomic model"
+msgstr ""
+
+#: devsimpy.py:924
+msgid "You realy want to close this pane?"
+msgstr ""
+
+#: devsimpy.py:925
+msgid "Question"
+msgstr ""
+
+#: devsimpy.py:975
+#, python-format
+msgid ""
+"Error opening file.\n"
+"Info : %s"
+msgstr ""
+
+#: devsimpy.py:1005
+msgid "Perspective Manager"
+msgstr ""
+
+#: devsimpy.py:1005
+#, python-format
+msgid "Perspective %d"
+msgstr ""
+
+#: devsimpy.py:1063
+msgid "OnDragInit avorting \n"
+msgstr ""
+
+#: devsimpy.py:1265
+msgid "Zoom In"
+msgstr ""
+
+#: devsimpy.py:1282
+msgid "Zoom Out"
+msgstr ""
+
+#: devsimpy.py:1299
+msgid "No Zoom"
+msgstr ""
+
+#: devsimpy.py:1313
+msgid "DEVSimPy files (*.dsp)|*.dsp|YAML files (*.yaml)|*.yaml|All files (*)|*"
+msgstr ""
+
+#: devsimpy.py:1344
+#, python-format
+msgid "Error opening %s: %s"
+msgstr ""
+
+#: devsimpy.py:1346
+#, python-format
+msgid "Error opening %s"
+msgstr ""
+
+#: devsimpy.py:1387
+msgid "Unable to import gtk module.\n"
+msgstr ""
+
+#: devsimpy.py:1393
+msgid "ScreenShot Filename"
+msgstr ""
+
+#: devsimpy.py:1408
+#, python-format
+msgid "Screenshot saved in %s."
+msgstr ""
+
+#: devsimpy.py:1408
+msgid "Success"
+msgstr ""
+
+#: devsimpy.py:1410
+msgid "Unable to get the screenshot."
+msgstr ""
+
+#: devsimpy.py:1507 devsimpy.py:1579
+msgid "Error saving file."
+msgstr ""
+
+#: devsimpy.py:1585
+msgid ""
+"XML SES files (*.xmlsestree)|*.xmlsestree|XML SES files (*.sestree)|*."
+"sestree|All files (*)|*"
+msgstr ""
+
+#: devsimpy.py:1604
+#, python-format
+msgid "Error importing %s"
+msgstr ""
+
+#: devsimpy.py:1607
+#, python-format
+msgid "%s file imported!"
+msgstr ""
+
+#: devsimpy.py:1629
+msgid "YAML Export"
+msgstr ""
+
+#: devsimpy.py:1638
+msgid "New/Import Library"
+msgstr ""
+
+#: devsimpy.py:1655
+msgid "Importing library"
+msgstr ""
+
+#: devsimpy.py:1655
+#, python-format
+msgid "Loading %s ..."
+msgstr ""
+
+#: devsimpy.py:1967 devsimpy.py:1979
+msgid ""
+"You need to restart DEVSimPy to take effect.\n"
+"\n"
+"Do you want to restart now ?"
+msgstr ""
+
+#: devsimpy.py:1967 devsimpy.py:1979
+msgid "Internationalization"
+msgstr ""
+
+#: devsimpy.py:1972 devsimpy.py:1984
+msgid "You need to restart DEVSimPy to take effect."
+msgstr ""
+
+#: devsimpy.py:1988
+msgid "Preferences Manager"
+msgstr ""
+
+#: devsimpy.py:2003 devsimpy.py:2042
+msgid "Embedded in DEVSimPy"
+msgstr ""
+
+#: devsimpy.py:2021
+msgid "Other..."
+msgstr ""
+
+#: devsimpy.py:2023
+msgid "What profiling software are you using?"
+msgstr ""
+
+#: devsimpy.py:2023
+msgid "Single Choice"
+msgstr ""
+
+#: devsimpy.py:2037
+msgid "Hotshot converter (hotshot2calltree) not found"
+msgstr ""
+
+#: devsimpy.py:2045
+msgid "Statistic of profiling"
+msgstr ""
+
+#: devsimpy.py:2072
+msgid "Do you realy want to delete all files ?"
+msgstr ""
+
+#: devsimpy.py:2072
+msgid "Profile Manager"
+msgstr ""
+
+#: devsimpy.py:2107
+#, python-format
+msgid "Unable to open: %s"
+msgstr ""
+
+#: devsimpy.py:2122
+msgid ""
+"DEVSimPy is an advanced wxPython framework for the modeling and simulation "
+"of systems based on the DEVS formalism.\n"
+"Features include powerful built-in editor, advanced modeling approach, "
+"powerful discrete event simulation algorithm,\n"
+"import/export DEVS components library and more."
+msgstr ""
+
+#: devsimpy.py:2126
+msgid ""
+"DEVSimPy is free software; you can redistribute it and/or modify it\n"
+"under the terms of the GNU General Public License as published by the Free "
+"Software Foundation;\n"
+"either version 2 of the License, or (at your option) any later version.\n"
+"\n"
+"DEVSimPy is distributed in the hope that it will be useful, but WITHOUT ANY "
+"WARRANTY;\n"
+"without even the implied warranty of MERCHANTABILITY or FITNESS FOR A "
+"PARTICULAR PURPOSE.\n"
+"See the GNU General Public License for more details. You should have "
+"received a copy of\n"
+"the GNU General Public License along with File Hunter; if not, write to\n"
+"the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  "
+"02111-1307  USA"
+msgstr ""
+
+#: devsimpy.py:2142
+msgid "(C) 2018 SISU Project - UMR CNRS 6134 SPE Lab."
+msgstr ""
+
+#: devsimpy.py:2145 devsimpy.py:2146 devsimpy.py:2147
+msgid "L. Capocchi"
+msgstr ""
+
+#: devsimpy.py:2464
+msgid ""
+"Are you sure to delete DEVSimPy config files (.devsimpy and devsimpy.ini)? "
+"(Yes,No):"
+msgstr ""
+
+#: devsimpy.py:2467 devsimpy.py:2469
+#, python-format
+msgid "%s has been deleted!\n"
+msgstr ""
+
+#: devsimpy.py:2482
+msgid "All .pyc has been updated!\n"
+msgstr ""
+
+#: devsimpy.py:2487
+#, python-format
+msgid "Writing %s file.\n"
+msgstr ""
+
+#: devsimpy.py:2491
+msgid "Welcome to the DEVSimpy helper.\n"
+msgstr ""
+
+#: devsimpy.py:2492
+msgid "\t To execute DEVSimPy GUI: python devsimpy.py\n"
+msgstr ""
+
+#: devsimpy.py:2493
+msgid "\t To execute DEVSimPy cleaner: python devsimpy.py -c|-clean\n"
+msgstr ""
+
+#: devsimpy.py:2494
+msgid "Authors: L. Capocchi (capocchi@univ-corse.fr)\n"
+msgstr ""
+
+#: pluginmanager.py:93
+msgid "Path of plug-ins directory is wrong."
+msgstr ""
+
+#: wxPyMail.py:35
+msgid "New Email Message (From Google account)"
+msgstr ""
+
+#: wxPyMail.py:64
+msgid "&Send"
+msgstr ""
+
+#: wxPyMail.py:64
+msgid "Sends the email"
+msgstr ""
+
+#: wxPyMail.py:65
+msgid "Closes the window"
+msgstr ""
+
+#: wxPyMail.py:77
+msgid "Send"
+msgstr ""
+
+#: wxPyMail.py:77
+msgid "Sends Email"
+msgstr ""
+
+#: wxPyMail.py:85
+msgid "From"
+msgstr ""
+
+#: wxPyMail.py:87
+msgid "To:"
+msgstr ""
+
+#: wxPyMail.py:89
+msgid " Subject:"
+msgstr ""
+
+#: wxPyMail.py:91
+msgid "Attachments"
+msgstr ""
+
+#: wxPyMail.py:94 wxPyMail.py:326
+msgid "Edit Attachments"
+msgstr ""
+
+#: wxPyMail.py:172
+msgid "All files (*.*)|*.*"
+msgstr ""
+
+#: wxPyMail.py:270
+msgid "Please add an address to the \"To\" field and try again"
+msgstr ""
+
+#: wxPyMail.py:274
+msgid "Please add a \"Subject\" and try again"
+msgstr ""
+
+#: wxPyMail.py:278
+msgid "Please add an address to the \"From\" field and try again"
+msgstr ""
+
+#: wxPyMail.py:330
+msgid "Check the items below that you no longer wish to attach to the email"
+msgstr ""
+
+#: wxPyMail.py:332
+msgid "Delete Items"
+msgstr ""
+
+#: wxPyMail.py:333 wxPyMail.py:385
+msgid "Cancel"
+msgstr ""
+
+#: wxPyMail.py:374
+msgid "Gmail Account Login"
+msgstr ""
+
+#: wxPyMail.py:379
+msgid "Username:"
+msgstr ""
+
+#: wxPyMail.py:381
+msgid "Password:"
+msgstr ""
+
+#: wxPyMail.py:384
+msgid "Login"
+msgstr ""
+
+#: wxPyMail.py:430
+msgid "Your username or password is incorrect. Please try again."
+msgstr ""
+
+#: wxPyMail.py:431
+msgid "Login Error"
+msgstr ""
