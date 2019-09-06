@@ -836,23 +836,22 @@ def EnvironmentInfo():
     *  from Editra.dev_tool
     """
 
-    info = ["---- Notes ----"]
-    info.append("Please provide additional information about the crash here")
-    info.extend(["", "", ""])
-    info.append("---- System Information ----")
-    info.append("Operating System: %s" % wx.GetOsDescription())
+    info = "---- Notes ----\n"
+    info += "Please provide additional information about the crash here \n"
+    info += "---- System Information ----\n"
+    info += "Operating System: %s\n" % wx.GetOsDescription()
     if sys.platform == 'darwin':
-        info.append("Mac OSX: %s" % platform.mac_ver()[0])
-    info.append("Python Version: %s" % sys.version)
-    info.append("wxPython Version: %s" % wx.version())
-    info.append("wxPython Info: (%s)" % ", ".join(wx.PlatformInfo))
-    info.append("Python Encoding: Default=%s  File=%s" % \
-                (sys.getdefaultencoding(), sys.getfilesystemencoding()))
-    info.append("wxPython Encoding: %s" % wx.GetDefaultPyEncoding() if wx.VERSION_STRING < '4.0' else wx.Font.GetDefaultEncoding)
-    info.append("System Architecture: %s %s" % (platform.architecture()[0], \
-                                                platform.machine()))
-    info.append("Byte order: %s" % sys.byteorder)
-    info.append("Frozen: %s" % str(getattr(sys, 'frozen', 'False')))
-    info.append("---- End System Information ----")
+        info += "Mac OSX: %s\n" % platform.mac_ver()[0]
+    info += "Python Version: %s\n" % sys.version
+    info += "wxPython Version: %s\n" % wx.version()
+    info += "wxPython Info: (%s)\n" % ", ".join(wx.PlatformInfo)
+    info += "Python Encoding: Default=%s  File=%s\n" % \
+                (sys.getdefaultencoding(), sys.getfilesystemencoding())
+    info += "wxPython Encoding: %s\n" % wx.GetDefaultPyEncoding() if wx.VERSION_STRING < '4.0' else str(wx.Font.GetDefaultEncoding())
+    info += "System Architecture: %s %s\n" % (platform.architecture()[0], \
+                                                platform.machine())
+    info += "Byte order: %s\n" % sys.byteorder
+    info += "Frozen: %s\n" % str(getattr(sys, 'frozen', 'False'))
+    info += "---- End System Information ----"
 
-    return os.linesep.join(info)
+    return info
