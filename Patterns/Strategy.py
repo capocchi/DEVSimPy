@@ -90,7 +90,7 @@ class SimStrategy:
 	def __init__(self, simulator=None):
 		self._simulator = simulator
 
-	def simulate(self, T = sys.maxsize):
+	def simulate(self, T = 100000000):
 		""" Simulate abstract method
 		"""
 		pass
@@ -102,7 +102,7 @@ class SimStrategy1(SimStrategy):
 	def __init__(self, simulator = None):
 		SimStrategy.__init__(self, simulator)
 
-	def simulate(self, T = sys.maxsize):
+	def simulate(self, T = 100000000):
 		"""Simulate the model (Root-Coordinator).
 		"""
 
@@ -130,7 +130,7 @@ class SimStrategy2(SimStrategy):
 	def __init__(self, simulator=None):
 		SimStrategy.__init__(self, simulator)
 
-	def simulate(self, T = sys.maxsize):
+	def simulate(self, T = 100000000):
 		"""
 		"""
 
@@ -439,7 +439,7 @@ class SimStrategy3(SimStrategy):
 		self.master.componentSet = self.flat_priority_list
 
 
-	def simulate(self, T = sys.maxsize):
+	def simulate(self, T = 100000000):
 		"""
 		"""
 
@@ -508,7 +508,7 @@ class SimStrategy4(SimStrategy):
 	def __init__(self, simulator = None):
 		SimStrategy.__init__(self, simulator)
 
-	def simulate(self, T = sys.maxsize):
+	def simulate(self, T = 100000000):
 		"""Simulate the model (Root-Coordinator).
 		"""
 

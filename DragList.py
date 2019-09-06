@@ -91,7 +91,7 @@ class DragList(wx.ListCtrl):
                 index += 1
 
         for i in seq: # insert the item data
-            idx = self.InsertStringItem(index, i[2])
+            idx = self.InsertItem(index, i[2])
             self.SetItemData(idx, i[1])
             for j in range(1, self.GetColumnCount()):
                 try: # Target list can have more columns than source
@@ -165,8 +165,8 @@ if __name__ == '__main__':
     from sys import maxsize
 
     for item in items:
-        dl1.InsertStringItem(maxint, item)
-        idx = dl2.InsertStringItem(maxint, item)
+        dl1.InsertItem(maxint, item)
+        idx = dl2.InsertItem(maxint, item)
         dl2.SetStringItem(idx, 1, choice(items))
         dl2.SetStringItem(idx, 2, choice(items))
     app.frame.Layout()

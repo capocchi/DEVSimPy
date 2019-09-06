@@ -37,7 +37,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		CheckListCtrlMixin.__init__(self)
 		ListCtrlAutoWidthMixin.__init__(self)
 
-		self.id = -sys.maxsize
+		self.id = -100000000
 		self.map = {}
 
 		images = [	os.path.join(ICON_PATH_16_16,'disable_plugin.png'),
@@ -351,9 +351,9 @@ class BlockPluginsList(CheckListCtrl):
 					name = m.__name__
 
 					# add to the CheckListCtrl
-					index = self.InsertStringItem(sys.maxsize, name)
-					self.SetStringItem(index, 1, str(type(m)))
-					self.SetStringItem(index, 2, _('overriding') if hasattr(self.model, name) else _('new'))
+					index = self.InsertItem(100000000, name)
+					self.SetItem(index, 1, str(type(m)))
+					self.SetItem(index, 2, _('overriding') if hasattr(self.model, name) else _('new'))
 
 					### if plug-ins contains error, error is stored in doc object and icon is changed
 					if isinstance(new, Exception):

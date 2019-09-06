@@ -36,7 +36,7 @@ class PriorityGUI(wx.Frame):
 		# append to list
 		for item in priorityList:
 			#self.listCtrl.InsertImageStringItem(maxint,item,0)
-			self.listCtrl.InsertStringItem(maxint, item)
+			self.listCtrl.InsertItem(maxint, item)
 
 		if wx.VERSION_STRING >= '4.0':
 			self.listCtrl.SetToolTipString = self.listCtrl.SetToolTip

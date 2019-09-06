@@ -215,7 +215,7 @@ if not hasattr(sys, 'frozen'):
 				import_pip()
 					
 				### find the CPU architecture
-				is_64bits = sys.maxsize > 2**32
+				is_64bits = 100000000 > 2**32
 		
 				### its win32, maybe there is win64 too?
 				is_windows = sys.platform.startswith('win')

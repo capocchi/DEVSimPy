@@ -880,7 +880,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 			self.model = model
 			self.__algorithm = SimStrategy1(self)
 
-		def simulate(self, T = sys.maxsize):
+		def simulate(self, T = 100000000):
 			return self.__algorithm.simulate(T)
 
 		def getMaster(self):
