@@ -208,7 +208,7 @@ def GetWXVersionFromIni():
 	"""
 
 	### update the init file into GetUserConfigDir
-	parser = configparser.SafeConfigParser()
+	parser = configparser.ConfigParser()
 	path = os.path.join(GetUserConfigDir(), 'devsimpy.ini')
 	parser.read(path)
 
@@ -216,9 +216,12 @@ def GetWXVersionFromIni():
 
 	### if ini file exist we remove old section and option
 	if os.path.exists(path):
-		return parser.get(section, option)
+		try:
+			return parser.get(section, option)
+		except:
+			return  wx.VERSION_STRING
 	else:
-		from . import wxversion
+		import wxversion
 		### wxPython version
 		wxv= [a.split('-')[0] for a in wxversion.getInstalled()]
 
@@ -289,7 +292,7 @@ def getInstance(cls, args = {}):
 		else:
 			return devs
 	else:
-		sys.stderr.write(__("Error in getInstance: First parameter (%s) is not a class\n")%str(cls))
+		sys.stderr.write(_("Error in getInstance: First parameter (%s) is not a class\n")%str(cls))
 		return sys.exc_info()
 
 def itersubclasses(cls, _seen=None):
@@ -833,8 +836,7 @@ def EnvironmentInfo():
     *  from Editra.dev_tool
     """
 
-    info = list()
-    info.append("---- Notes ----")
+    info = ["---- Notes ----"]
     info.append("Please provide additional information about the crash here")
     info.extend(["", "", ""])
     info.append("---- System Information ----")

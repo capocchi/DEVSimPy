@@ -111,7 +111,7 @@ class ListDrop(wx.PyDropTarget):
         """ Arguments:
          - source: source listctrl.
         """
-        wx.PyDropTarget.__init__(self)
+        wx.DropTarget.__init__(self)
 
         self.dv = source
 

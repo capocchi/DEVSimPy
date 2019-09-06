@@ -175,8 +175,7 @@ class GeneralPluginsList(CheckListCtrl):
 
 			self.is_populate = True
 
-
-	def InsertItem(self, root, basename):
+	def MyInsertItem(self, root, basename):
 		""" Insert plug-in in list
 		"""
 
@@ -194,9 +193,9 @@ class GeneralPluginsList(CheckListCtrl):
 			date = str(date.date())
 
 		# add to the CheckListCtrl
-		index = self.InsertStringItem(sys.maxsize, basename)
-		self.SetStringItem(index, 1, size)
-		self.SetStringItem(index, 2, date)
+		index = self.InsertItem(100000000, basename)
+		self.SetItem(index, 1, size)
+		self.SetItem(index, 2, date)
 
 		return index
 
@@ -214,7 +213,7 @@ class GeneralPluginsList(CheckListCtrl):
 			module.__doc__ = error
 			module.__file__ = None
 
-		index = self.InsertItem(root, basename)
+		index = self.MyInsertItem(root, basename)
 
 		if module.__file__ != None:
 			### only module to be activated is checked

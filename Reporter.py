@@ -199,7 +199,7 @@ class ErrorDialog(BaseDialog):
         # Attributes
         self.err_msg = "%s\n\n%s\n%s\n%s" % (EnvironmentInfo(), \
                                              "---- Traceback Info ----", \
-                                             str(ErrorReporter().GetErrorStack(), errors='replace'), \
+                                             str(ErrorReporter().GetErrorStack()), \
                                              "---- End Traceback Info ----")
 
         self.textCtrl = wx.TextCtrl(self, value=self.err_msg, style=wx.TE_MULTILINE | wx.TE_READONLY)

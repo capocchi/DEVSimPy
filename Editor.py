@@ -1380,13 +1380,20 @@ class Base(object):
 		if not self.parent:
 			tb = self.CreateToolBar(wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT)
 
-			self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddSimpleTool(self.save.GetId(), wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), _('Save'), ''))
-			tb.AddSeparator()
-			self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddSimpleTool(self.cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), _('Cut'), ''))
-			self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddSimpleTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), _('Copy'), ''))
-			self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddSimpleTool(self.paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), _('Paste'), ''))
-			self.Bind(wx.EVT_TOOL, self.QuitApplication, id = self.quit.GetId())
-
+			if wx.VERSION_STRING < '4.0':
+				self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(),wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), _('Save'), ''))
+				tb.AddSeparator()
+				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), _('Cut'), ''))
+				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), _('Copy'), ''))
+				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), _('Paste'), ''))
+				self.Bind(wx.EVT_TOOL, self.QuitApplication, id = self.quit.GetId())
+			else:
+				self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH, 'save.png')),shortHelp=_('Save')))
+				tb.AddSeparator()
+				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'cut.png')),  shortHelp=_('Cut')))
+				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'copy.png')),  shortHelp=_('Copy')))
+				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'paste.png')),  shortHelp=_('Paste')))
+				self.Bind(wx.EVT_TOOL, self.QuitApplication, id = self.quit.GetId())
 		else:
 
 			tb = wx.ToolBar(self, -1)
@@ -1709,7 +1716,7 @@ class Base(object):
 			dir_name = os.path.dirname(currentPage.GetFilename())
 
 			### code text
-			code = currentPage.GetValue().encode('utf-8')
+			code = currentPage.GetValue()#.encode('utf-8')
 			code = '\n'.join(code.splitlines()) + '\n'
 
 			new_instance = self.ConfigSaving(base_name, dir_name, code)
@@ -2010,7 +2017,7 @@ class BlockBase(object):
 			new_class = new_instance.__class__
 
 			if new_instance:
-				from . import Components
+				import Components
 				new_args = Components.GetArgs(new_class)
 				self.UpdateArgs(new_args)
 
@@ -2055,7 +2062,7 @@ class BlockBase(object):
 						"UpdateModule method", \
 						wx.OK | wx.ICON_ERROR)
 		else:
-			from . import Components
+			import Components
 
 			classe = Components.GetClass(cp.GetFilename())
 
@@ -2145,25 +2152,25 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		passivateState = wx.MenuItem(insert, wx.NewId(), _('New passivate state'), _('Generate new passivate state code self.passivate(...)'))
 		debug = wx.MenuItem(insert, wx.NewId(), _('New debugger'), _('Generate new debugger code (print into the log of model)'))
 		
-		insert.AppendItem(peek)
-		insert.AppendItem(poke)
+		insert.Append(peek)
+		insert.Append(poke)
 		insert.AppendSeparator()
-		insert.AppendItem(getInitPhase)
-		insert.AppendItem(getState)
-		insert.AppendItem(getSigma)
-		insert.AppendItem(getStatus)
-		insert.AppendItem(getPortId)
-		insert.AppendItem(getMsgValue)
+		insert.Append(getInitPhase)
+		insert.Append(getState)
+		insert.Append(getSigma)
+		insert.Append(getStatus)
+		insert.Append(getPortId)
+		insert.Append(getMsgValue)
 		insert.AppendSeparator()
-		insert.AppendItem(holdInState)
-		insert.AppendItem(phaseIs)
-		insert.AppendItem(passivateInState)
-		insert.AppendItem(passivateState)
+		insert.Append(holdInState)
+		insert.Append(phaseIs)
+		insert.Append(passivateInState)
+		insert.Append(passivateState)
 		insert.AppendSeparator()
-		insert.AppendItem(debug)
+		insert.Append(debug)
 
 		menu = self.GetMenuBar().GetMenu(1)
-		menu.PrependMenu(wx.NewId(), _("Insert"), insert)
+		menu.Prepend(wx.NewId(), _("Insert"), insert)
 		### -------------------------------------------------------------------
 
 		### insert new icon in toolbar (icon are not available in embeded editor (Show menu)

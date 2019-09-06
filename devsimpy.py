@@ -62,14 +62,8 @@ import shutil
 ### only for python3
 import builtins as __builtin__
 
-from configparser import SafeConfigParser
+from configparser import ConfigParser
 from tempfile import gettempdir
-
-try:
-	import hotshot
-	import hotshot.stats
-except ImportError:
-	sys.stdout.write("Hotshot module not found. If you want to perform profiling simulation, install it!")
 
 __min_wx_version__ = ['4.0','3.0','2.9','2.8','2.7','2.6','2.5']
 
@@ -154,7 +148,7 @@ ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 ################################################################
 
 ### ini file exist ?
-parser = SafeConfigParser()
+parser = ConfigParser()
 parser.read(os.path.join(os.path.expanduser("~"),'devsimpy.ini'))
 section, option = ('wxversion', 'to_load')
 ini_exist = parser.has_option(section, option)

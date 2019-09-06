@@ -207,7 +207,7 @@ class GeneralPanel(wx.Panel):
 		self.default_wxv = self.cb2.GetValue()
 
 		### update the init file into GetUserConfigDir
-		parser = configparser.SafeConfigParser()
+		parser = configparser.ConfigParser()
 		path = os.path.join(GetUserConfigDir(), 'devsimpy.ini')
 		parser.read(path)
 
@@ -215,15 +215,24 @@ class GeneralPanel(wx.Panel):
 
 		### if ini file exist we remove old section and option
 		if os.path.exists(path):
-			parser.remove_option(section, option)
-			parser.remove_section(section)
-			parser.add_section(section)
+			try:
+				parser.remove_option(section, option)
+			except:
+				pass
+			try:
+				parser.remove_section(section)
+			except:
+				pass
+			try:
+				parser.add_section(section)
+			except:
+				pass
 
 		if not parser.has_section(section):
 			parser.add_section(section)
 
 		parser.set(section, option, self.default_wxv)
-		parser.write(open(path,'wb'))
+		parser.write(open(path,'w'))
 
 class SimulationPanel(wx.Panel):
 	""" Simulation Panel
@@ -519,7 +528,9 @@ class Preferences(wx.Toolbook):
 		self.AssignImageList(il)
 
 		imageIdGenerator = iter(list(range(il.GetImageCount())))
-		for page, label in [(eval("%sPanel%s"%(s,str(args))), _(s)) for s,args in L]:
+
+		for p, label in [("%sPanel%s"%(s,str(args)), _(s)) for s,args in L]:
+			page = eval(p)
 			self.AddPage(page, label, imageId=next(imageIdGenerator))
 
 		### Plug-in page setting (populate is done when page is changed)
