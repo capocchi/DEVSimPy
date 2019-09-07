@@ -2137,7 +2137,7 @@ if builtins.__dict__['GUI_FLAG']:
 					# Adding graphical model to diagram
 					self.AddShape(m)
 
-					sys.stdout.write(_("Adding DEVSimPy model: \n").encode('utf-8', 'ignore'))
+					sys.stdout.write(_("Adding DEVSimPy model: \n"))
 					sys.stdout.write(repr(m))
 
 					# try to update the library tree on left panel

@@ -407,7 +407,7 @@ def MoveFromParent(frame=None, interval=10, direction='right'):
 	frame.CenterOnParent(wx.BOTH)
 	parent = frame.GetParent()
 	if direction == 'right':
-		x = parent.GetPositionTuple()[0]+parent.GetSizeTuple()[0] + interval
+		x = parent.GetPosition()[0]+parent.GetSize()[0] + interval
 		y = parent.GetScreenPosition()[1]
 	elif direction == 'left':
 		x = parent.GetPositionTuple()[0]-parent.GetSizeTuple()[0] - interval
@@ -419,7 +419,7 @@ def MoveFromParent(frame=None, interval=10, direction='right'):
 		x = parent.GetScreenPosition()[0]
 		y = parent.GetPositionTuple()[1]+parent.GetSizeTuple()[1] + interval
 
-	frame.MoveXY(x,y)
+	frame.Move(x,y)
 
 def getDirectorySize(directory):
 	dir_size = 0

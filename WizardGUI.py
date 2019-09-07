@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import wx
-
 	
 if wx.VERSION_STRING >= '4.0':
 	from wx.adv import Wizard as wizmod
@@ -203,7 +202,7 @@ class wizard_page(WizardPage):
 		self.sizer = wx.BoxSizer(wx.VERTICAL)
 		self.title = wx.StaticText(self, wx.Window.NewControlId(), title)
 		self.title.SetFont(wx.Font(18, wx.SWISS, wx.NORMAL, wx.BOLD))
-		if wx.VERSION_STRING<4.0:
+		if wx.VERSION_STRING<'4.0':
 			self.sizer.AddWindow(self.title, 0, wx.ALIGN_LEFT|wx.ALL, padding)
 			self.sizer.AddWindow(wx.StaticLine(self, wx.Window.NewControlId()), 0, wx.EXPAND|wx.ALL, padding)
 		else:
@@ -226,7 +225,7 @@ class wizard_page(WizardPage):
 
 	def GetNext(self):
 		"""Return the next page"""
-		return self.__next__
+		return self.next
 
 	def GetPrev(self):
 		"""Return the previous page"""

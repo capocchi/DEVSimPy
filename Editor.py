@@ -1050,7 +1050,7 @@ class EditionNotebook(wx.Notebook):
 		"""
 
 		with codecs.open(fileName, 'w', encode) as f:
-			f.write(code.decode(encode))
+			f.write(code)
 
 	### NOTE: EditionNotebook :: OnCut 		=> Event on cut
 	def OnCut(self, event):
