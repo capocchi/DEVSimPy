@@ -1,6 +1,3 @@
-from . import wxversion
-wxversion.select('2.8')
-
 import wx
 import sys
 

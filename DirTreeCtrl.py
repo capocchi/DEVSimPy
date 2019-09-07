@@ -29,12 +29,6 @@
         
 """
 
-from . import wxversion
-try:
-	wxversion.select("2.8")
-except:
-	pass
-
 import wx
 import os
 import sys
