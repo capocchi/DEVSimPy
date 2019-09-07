@@ -937,9 +937,9 @@ class ShapePopupMenu(wx.Menu):
 				Rotate_SubMenu31 = rotate_output_subMenu.AppendItem(rotateOR)
 				Rotate_SubMenu32 = rotate_output_subMenu.AppendItem(rotateOL)
 
-				Rotate_all_menu = rotate_subMenu.AppendMenu(ID_ROTATE_ALL_SHAPE, _("All"), rotate_all_subMenu)
-				Rotate_in_menu = rotate_subMenu.AppendMenu(ID_ROTATE_INPUT_SHAPE, _("Input"), rotate_input_subMenu)
-				Rotate_out_menu = rotate_subMenu.AppendMenu(ID_ROTATE_OUTPUT_SHAPE, _("Output"), rotate_output_subMenu)
+				Rotate_all_menu = rotate_subMenu.Append(ID_ROTATE_ALL_SHAPE, _("All"), rotate_all_subMenu)
+				Rotate_in_menu = rotate_subMenu.Append(ID_ROTATE_INPUT_SHAPE, _("Input"), rotate_input_subMenu)
+				Rotate_out_menu = rotate_subMenu.Append(ID_ROTATE_OUTPUT_SHAPE, _("Output"), rotate_output_subMenu)
 
 			Rotate_menu = AppendMenu(self, ID_ROTATE_SHAPE, _("Rotate"), rotate_subMenu)
 			Rename_menu = AppendItem(rename)
@@ -950,14 +950,14 @@ class ShapePopupMenu(wx.Menu):
 				# on evite de proposer les connections suivante: iPort->iPort, oPort->oPort
 				if (isinstance(shape, Container.iPort) and not isinstance(item, Container.iPort)) or (isinstance(shape, Container.oPort) and not isinstance(item, Container.oPort)) or isinstance(shape, Container.Block):
 					new_item = wx.MenuItem(connectable_subMenu, wx.Window.NewControlId(), item.label)
-					connectable_subMenu.AppendItem(new_item)
+					connectable_subMenu.Append(new_item)
 					self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnConnectTo,id = new_item.GetId())
 			AppendMenu(self,-1, _('Connect to'), connectable_subMenu)
 
 			if isinstance(shape, Container.CodeBlock):
 				self.AppendSeparator()
 				Export_menu = AppendMenu(self, -1, _("Export"), export_subMenu)
-				Export_SubMenu1 = export_subMenu.AppendItem(exportAMD)
+				Export_SubMenu1 = export_subMenu.Append(exportAMD)
 
 				### if Wcomp general plugin is enabled, sub menu appear in contextual menu of amd (right clic)
 				pluginmanager.trigger_event("ADD_WCOMP_EXPORT_MENU", parent=self, model=shape, submenu= export_subMenu)
@@ -965,9 +965,9 @@ class ShapePopupMenu(wx.Menu):
 			elif isinstance(shape, Container.ContainerBlock):
 				self.AppendSeparator()
 				Export_menu = AppendMenu(self, -1, _("Export"), export_subMenu)
-				Export_SubMenu1 = export_subMenu.AppendItem(exportCMD)
-				Export_SubMenu2 = export_subMenu.AppendItem(exportXML)
-				Export_SubMenu3 = export_subMenu.AppendItem(exportJS)
+				Export_SubMenu1 = export_subMenu.Append(exportCMD)
+				Export_SubMenu2 = export_subMenu.Append(exportXML)
+				Export_SubMenu3 = export_subMenu.Append(exportJS)
 
 			else:
 				self.Enable(ID_EDIT_SHAPE, False)

@@ -124,11 +124,11 @@ class PlotFrame(wx.Frame):
 		plotScale = menu.Append(wx.Window.NewControlId(), _('&Scale'), _('Scale canvas'))
 
 		type_submenu = wx.Menu()
-		line = type_submenu.AppendItem(wx.MenuItem(menu, wx.Window.NewControlId(), _('Line'), kind=wx.ITEM_RADIO))
-		scatter = type_submenu.AppendItem(wx.MenuItem(menu, wx.Window.NewControlId(), _('Scatter'), kind=wx.ITEM_RADIO))
-		bar = type_submenu.AppendItem(wx.MenuItem(menu, wx.Window.NewControlId(), _('Bar'), kind=wx.ITEM_RADIO))
-		square = type_submenu.AppendItem(wx.MenuItem(menu, wx.Window.NewControlId(), _('Square'), kind=wx.ITEM_RADIO))
-		menu.AppendMenu(wx.Window.NewControlId(), _('Type'), type_submenu)
+		line = type_submenu.Append(wx.MenuItem(menu, wx.Window.NewControlId(), _('Line'), kind=wx.ITEM_RADIO))
+		scatter = type_submenu.Append(wx.MenuItem(menu, wx.Window.NewControlId(), _('Scatter'), kind=wx.ITEM_RADIO))
+		bar = type_submenu.Append(wx.MenuItem(menu, wx.Window.NewControlId(), _('Bar'), kind=wx.ITEM_RADIO))
+		square = type_submenu.Append(wx.MenuItem(menu, wx.Window.NewControlId(), _('Square'), kind=wx.ITEM_RADIO))
+		menu.Append(wx.Window.NewControlId(), _('Type'), type_submenu)
 
 		enable_submenu = wx.Menu()
 		self.enableTitle = enable_submenu.Append(wx.Window.NewControlId(), _('&Title'), _('Enable title'), kind=wx.ITEM_CHECK)
@@ -140,13 +140,13 @@ class PlotFrame(wx.Frame):
 		self.enableLegend = enable_submenu.Append(wx.Window.NewControlId(), _('&Legend'), _('Turn on legend'), kind=wx.ITEM_CHECK)
 		self.enablePointLabel = enable_submenu.Append(wx.Window.NewControlId(), _('&Point Label'), _('Show closest point'), kind=wx.ITEM_CHECK)
 		self.norm = enable_submenu.Append(wx.Window.NewControlId(), _('Normalize'), _('Normalize Y axis'), kind=wx.ITEM_CHECK)
-		menu.AppendMenu(wx.Window.NewControlId(), _('Enable'), enable_submenu)
+		menu.Append(wx.Window.NewControlId(), _('Enable'), enable_submenu)
 
 		setx_submenu = wx.Menu()
 		self.enableXStep = setx_submenu.Append(wx.Window.NewControlId(), _('Step'), _('X with step'), kind=wx.ITEM_RADIO)
 		self.enableXDefault = setx_submenu.Append(wx.Window.NewControlId(), _('Default'), _('X with Simulation Time (Default)'), kind=wx.ITEM_RADIO)
 		self.enableXDefault.Check(True)
-		menu.AppendMenu(wx.Window.NewControlId(), _('Set X'), setx_submenu)
+		menu.Append(wx.Window.NewControlId(), _('Set X'), setx_submenu)
 
 		setTitle = menu.Append(wx.Window.NewControlId(), _('Set Title'), _('Define title'))
 		setXLabel = menu.Append(wx.Window.NewControlId(), _('Set X Label'), _('Define x label'))

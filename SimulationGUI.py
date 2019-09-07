@@ -142,14 +142,14 @@ class CollapsiblePanel(wx.Panel):
 			### change the collapsible label
 			self.cp.SetLabel(self.label2)
 			### adapt the window size
-			self.simdia.SetSizeWH(-1, self.org_h+new_h)
+			self.simdia.SetSize(-1, self.org_h+new_h)
 			### Max limit
 			self.simdia.SetMaxSize(wx.Size(self.simdia.GetSize()[0], self.org_h+new_h))
 		else:
 			### change the collapsible label
 			self.cp.SetLabel(self.label1)
 			### adapt the window size
-			self.simdia.SetSizeWH(-1, self.org_h)
+			self.simdia.SetSize(-1, self.org_h)
 
 	def MakePaneContent(self, pane):
 		'''Just make a few controls to put on the collapsible pane'''
