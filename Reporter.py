@@ -163,7 +163,7 @@ class ErrorReporter(object):
             return self._sessionerr[-1]
 
 
-ID_SEND = wx.NewId()
+ID_SEND = wx.Window.NewControlId()
 class ErrorDialog(BaseDialog):
     """
     Dialog for showing errors and and notifying gui2exe-users should the

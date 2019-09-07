@@ -41,7 +41,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 	""" Detached Frame including a diagram.
 	"""
 
-	def __init__(self, parent=None, ID=wx.ID_ANY, title="", diagram=None, name=""):
+	def __init__(self, parent=None, ID=wx.Window.NewControlId(), title="", diagram=None, name=""):
 		""" Constructor.
 
 			@parent : window parent of the frame
@@ -77,7 +77,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		#=======================================================================
 
 		### Canvas Stuff -----------------------------------
-		self.canvas = Container.ShapeCanvas(self, wx.ID_ANY, name=title, diagram = self.diagram)
+		self.canvas = Container.ShapeCanvas(self, wx.Window.NewControlId(), name=title, diagram = self.diagram)
 		self.canvas.scalex = 1.0
 		self.canvas.scaley = 1.0
 
@@ -93,7 +93,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.canvas.stockRedo = []
 
 		### Menu ToolBar
-		toolbar = wx.ToolBar(self, wx.ID_ANY, name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
+		toolbar = wx.ToolBar(self, wx.Window.NewControlId(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
 		toolbar.SetToolBitmapSize((25,25)) # just for windows
 		self.SetToolBar(toolbar)
 
@@ -101,7 +101,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.toggle_list = wx.GetApp().GetTopWindow().toggle_list
 		else:
 			sys.stdout.write(_('Alone mode for DetachedFrame: Connector buttons are not binded\n'))
-			self.toggle_list = [wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId(), wx.NewId()]
+			self.toggle_list = [wx.Window.NewControlId(), wx.Window.NewControlId(), wx.Window.NewControlId(), wx.Window.NewControlId(), wx.Window.NewControlId(), wx.Window.NewControlId()]
 		
 		if wx.VERSION_STRING < '2.9':
 			self.tools = [  toolbar.AddTool(Menu.ID_SAVE, wx.Bitmap(os.path.join(ICON_PATH,'save.png')), shortHelpString=_('Save File') ,longHelpString=_('Save the current diagram'), clientData=self.canvas),

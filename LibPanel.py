@@ -64,12 +64,12 @@ class LibPanel(wx.Panel):
 	"""
 	"""
 	def __init__(self, parent, name):
-		wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY, name=name)
+		wx.Panel.__init__(self, parent=parent, id=wx.Window.NewControlId(), name=name)
 
 		libSizer = wx.BoxSizer(wx.VERTICAL)
 
 		### create libraries tree
-		self.tree = LibraryTree(self, wx.ID_ANY, wx.DefaultPosition, style=wx.TR_DEFAULT_STYLE|wx.TR_HIDE_ROOT|wx.TR_LINES_AT_ROOT|wx.TR_HAS_BUTTONS|wx.SUNKEN_BORDER)
+		self.tree = LibraryTree(self, wx.Window.NewControlId(), wx.DefaultPosition, style=wx.TR_DEFAULT_STYLE|wx.TR_HIDE_ROOT|wx.TR_LINES_AT_ROOT|wx.TR_HAS_BUTTONS|wx.SUNKEN_BORDER)
 
 		mainW = parent.GetTopLevelParent()
 
@@ -80,7 +80,7 @@ class LibPanel(wx.Panel):
 		self.tree.Populate(chargedDomainList)
 
 		### search tree that is hide when starting devsimpy (see __do_layout)
-		self.searchTree = LibraryTree(self, wx.ID_ANY, wx.DefaultPosition, style=wx.TR_DEFAULT_STYLE|wx.TR_HIDE_ROOT|wx.TR_MULTIPLE|wx.TR_LINES_AT_ROOT|wx.TR_HAS_BUTTONS|wx.SUNKEN_BORDER)
+		self.searchTree = LibraryTree(self, wx.Window.NewControlId(), wx.DefaultPosition, style=wx.TR_DEFAULT_STYLE|wx.TR_HIDE_ROOT|wx.TR_MULTIPLE|wx.TR_LINES_AT_ROOT|wx.TR_HAS_BUTTONS|wx.SUNKEN_BORDER)
 
 		### search field creation
 		self.search = SearchLib(self, size=(200,-1), style = wx.TE_PROCESS_ENTER)

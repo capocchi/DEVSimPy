@@ -74,5 +74,5 @@ class Selectable:
                 mainW = wx.GetApp().GetTopWindow()
                 nb1 = mainW.GetControlNotebook()
                 if nb1.GetSelection() == 1:
-                    newContent = AttributeEditor(nb1.propPanel, wx.ID_ANY, self, canvas)
+                    newContent = AttributeEditor(nb1.propPanel, wx.Window.NewControlId(), self, canvas)
                     nb1.UpdatePropertiesPage(newContent)

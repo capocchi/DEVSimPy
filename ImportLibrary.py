@@ -39,7 +39,7 @@ from Decorators import BuzyCursorNotification
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def __init__(self, parent):
-		wx.ListCtrl.__init__(self, parent, wx.ID_ANY, style=wx.LC_REPORT | wx.SUNKEN_BORDER|wx.LC_SORT_ASCENDING)
+		wx.ListCtrl.__init__(self, parent, wx.Window.NewControlId(), style=wx.LC_REPORT | wx.SUNKEN_BORDER|wx.LC_SORT_ASCENDING)
 		CheckListCtrlMixin.__init__(self)
 		ListCtrlAutoWidthMixin.__init__(self)
 
@@ -96,9 +96,9 @@ class DeleteBox(wx.Dialog):
 		wx.Dialog.__init__(self, *args, **kwargs)
 
 		### Widgets
-		txt = wx.StaticText(self, wx.ID_ANY, _('What do you want to delete:'), (15, 10))
-		self.rb1 = wx.RadioButton(self, wx.ID_ANY , _('label'), (20, 30))
-		self.rb2 = wx.RadioButton(self, wx.ID_ANY , _('label and files'), (20, 55))
+		txt = wx.StaticText(self, wx.Window.NewControlId(), _('What do you want to delete:'), (15, 10))
+		self.rb1 = wx.RadioButton(self, wx.Window.NewControlId() , _('label'), (20, 30))
+		self.rb2 = wx.RadioButton(self, wx.Window.NewControlId() , _('label and files'), (20, 55))
 		btn_cancel = wx.Button(self, wx.ID_CANCEL, pos = (35, 90), size = (80, -1))
 		btn_ok = wx.Button(self, wx.ID_OK, pos = (135, 90), size = (80, -1))
 
@@ -167,9 +167,9 @@ class ImportLibrary(wx.Dialog):
 			if path: D[path] = v
 
 		### Panels
-		panel = wx.Panel(self, wx.ID_ANY)
-		leftPanel = wx.Panel(panel, wx.ID_ANY)
-		rightPanel = wx.Panel(panel, wx.ID_ANY)
+		panel = wx.Panel(self, wx.Window.NewControlId())
+		leftPanel = wx.Panel(panel, wx.Window.NewControlId())
+		rightPanel = wx.Panel(panel, wx.Window.NewControlId())
 
 		### Check list of libraries
 		self._cb = CheckListCtrl(rightPanel)
@@ -189,9 +189,9 @@ class ImportLibrary(wx.Dialog):
 
 		### Buttons
 		new = wx.Button(leftPanel, id = wx.ID_NEW, size=(120, -1))
-		imp = wx.Button(leftPanel, wx.ID_ANY, _('Import'), size=(120, -1))
+		imp = wx.Button(leftPanel, wx.Window.NewControlId(), _('Import'), size=(120, -1))
 		sel = wx.Button(leftPanel, id = wx.ID_SELECTALL, size=(120, -1))
-		des = wx.Button(leftPanel, wx.ID_ANY, _('Deselect All'), size=(120, -1))
+		des = wx.Button(leftPanel, wx.Window.NewControlId(), _('Deselect All'), size=(120, -1))
 		apply = wx.Button(rightPanel, id=wx.ID_OK, size=(100, -1))
 		cancel = wx.Button(rightPanel, id=wx.ID_CANCEL, size=(100, -1))
 
@@ -258,14 +258,14 @@ class ImportLibrary(wx.Dialog):
 
 		menu = wx.Menu()
 
-		doc = wx.MenuItem(menu, wx.NewId(), _('Doc'), _('Documentation of item'))
+		doc = wx.MenuItem(menu, wx.Window.NewControlId(), _('Doc'), _('Documentation of item'))
 		doc.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'doc.png')))
 		menu.AppendItem(doc)
 		wx.EVT_MENU(self, doc.GetId(), self.OnDoc)
 
 		### delete option only for the export path
 		if label in self._d:
-			delete = wx.MenuItem(menu, wx.NewId(), _('Delete'), _('Delete item'))
+			delete = wx.MenuItem(menu, wx.Window.NewControlId(), _('Delete'), _('Delete item'))
 			delete.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'delete.png')))
 			menu.AppendItem(delete)
 			wx.EVT_MENU(self, delete.GetId(), self.OnDelete)

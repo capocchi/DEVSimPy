@@ -11,7 +11,7 @@ class FTPStatusBar(wx.StatusBar):
 	self.SetFieldsCount(2)
 	self.SetStatusText('Welcome to DEVSimPy server', 0)
 	self.SetStatusWidths([-5, -2])
-	self.icon = wx.StaticBitmap(self, wx.ID_ANY, wx.Bitmap(os.path.join(ICON_PATH_16_16, 'disconnect_network.png')))
+	self.icon = wx.StaticBitmap(self, wx.Window.NewControlId(), wx.Bitmap(os.path.join(ICON_PATH_16_16, 'disconnect_network.png')))
 	self.Bind(wx.EVT_SIZE, self.OnSize)
 	self.PlaceIcon()
 
@@ -33,13 +33,13 @@ class FTPFrame(wx.Frame):
 	wx.Frame.__init__(self, parent, id, title, size=(260, 270))
 
 
-	wx.StaticText(self, wx.ID_ANY, 'Ftp site', (20, 20))
-	wx.StaticText(self, wx.ID_ANY, 'Login', (20, 60))
-	wx.StaticText(self, wx.ID_ANY, 'Password', (20, 100))
+	wx.StaticText(self, wx.Window.NewControlId(), 'Ftp site', (20, 20))
+	wx.StaticText(self, wx.Window.NewControlId(), 'Login', (20, 60))
+	wx.StaticText(self, wx.Window.NewControlId(), 'Password', (20, 100))
 
-	self.ftpsite = wx.TextCtrl(self, wx.ID_ANY, 'http://lcapocchi.free.fr',  (110, 15), (120, -1))
-	self.login = wx.TextCtrl(self, wx.ID_ANY, 'lcapocchi',  (110, 55), (120, -1))
-	self.password = wx.TextCtrl(self, wx.ID_ANY, '',  (110, 95), (120, -1), style=wx.TE_PASSWORD)
+	self.ftpsite = wx.TextCtrl(self, wx.Window.NewControlId(), 'http://lcapocchi.free.fr',  (110, 15), (120, -1))
+	self.login = wx.TextCtrl(self, wx.Window.NewControlId(), 'lcapocchi',  (110, 55), (120, -1))
+	self.password = wx.TextCtrl(self, wx.Window.NewControlId(), '',  (110, 95), (120, -1), style=wx.TE_PASSWORD)
 
 	self.ftp = None
 

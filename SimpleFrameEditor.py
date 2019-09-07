@@ -18,7 +18,7 @@ if wx.VERSION_STRING >= '4.0':
 	wx.OVERWRITE_PROMPT = wx.FD_OVERWRITE_PROMPT
 
 class SimpleEditor (wx.stc.StyledTextCtrl):
-    def __init__ (self, parent, id = wx.ID_ANY, \
+    def __init__ (self, parent, id = wx.Window.NewControlId(), \
             pos = wx.DefaultPosition, \
             size = wx.DefaultSize,\
             style = 0,\
@@ -38,10 +38,10 @@ class FrameEditor(wx.Frame):
         self.frame_1_menubar = wx.MenuBar()
         self.SetMenuBar(self.frame_1_menubar)
         self.File = wx.Menu()        
-        self.Save = wx.MenuItem(self.File, wx.NewId(), "Save &As", "", wx.ITEM_NORMAL)
+        self.Save = wx.MenuItem(self.File, wx.Window.NewControlId(), "Save &As", "", wx.ITEM_NORMAL)
         self.Save.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')))
         self.File.Append(self.Save)
-        self.open = wx.MenuItem(self.File, wx.NewId(), "&Open", "", wx.ITEM_NORMAL)
+        self.open = wx.MenuItem(self.File, wx.Window.NewControlId(), "&Open", "", wx.ITEM_NORMAL)
         self.open.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'open.png')))
         self.File.Append(self.open)
         self.frame_1_menubar.Append(self.File, "&File")

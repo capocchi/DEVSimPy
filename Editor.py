@@ -480,7 +480,7 @@ class CodeEditor(PythonSTC):
 	def __init__(self, parent):
 		""" Constructor
 		"""
-		PythonSTC.__init__(self, parent, wx.ID_ANY, style=wx.BORDER_NONE)
+		PythonSTC.__init__(self, parent, wx.Window.NewControlId(), style=wx.BORDER_NONE)
 		self.SetUpEditor()
 		self.last_name_saved = ""
 
@@ -1171,7 +1171,7 @@ class Base(object):
 #			sizer = wx.BoxSizer(wx.VERTICAL)
 #
 #			### create notebook
-#			self.nb = EditionNotebook(self, wx.ID_ANY, style=wx.CLIP_CHILDREN)
+#			self.nb = EditionNotebook(self, wx.Window.NewControlId(), style=wx.CLIP_CHILDREN)
 #			### create juste for the bind of action (save,...) of the toolbar - Warning it must stay here !
 #			self.menuBar = self.CreateMenu()
 #			### create toolbar
@@ -1194,7 +1194,7 @@ class Base(object):
 #			wx.Frame.__init__(self, self.parent, id, title, size=(600, 500), style=wx.DEFAULT_FRAME_STYLE)
 #
 #			### Create notebook
-#			self.nb = EditionNotebook(self, wx.ID_ANY, style=wx.CLIP_CHILDREN)
+#			self.nb = EditionNotebook(self, wx.Window.NewControlId(), style=wx.CLIP_CHILDREN)
 #
 #			### create menu, toolbar and statusbar for the frame
 #			self.menuBar = self.CreateMenu()
@@ -1250,9 +1250,9 @@ class Base(object):
 		### file sub menu---------------------------------------------------
 		file = wx.Menu()
 
-		self.save = wx.MenuItem(file, wx.NewId(), _('&Save\tCtrl+S'), _('Save the file'))
-		self.save_as = wx.MenuItem(file, wx.NewId(), _('&Save As\tCtrl+S'), _('Save as an other file'))
-		self.quit = wx.MenuItem(file, wx.NewId(), _('&Quit\tCtrl+Q'), _('Quit the application'))
+		self.save = wx.MenuItem(file, wx.Window.NewControlId(), _('&Save\tCtrl+S'), _('Save the file'))
+		self.save_as = wx.MenuItem(file, wx.Window.NewControlId(), _('&Save As\tCtrl+S'), _('Save as an other file'))
+		self.quit = wx.MenuItem(file, wx.Window.NewControlId(), _('&Quit\tCtrl+Q'), _('Quit the application'))
 
 		self.save.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save.png')))
 		self.save_as.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save_as.png')))
@@ -1270,16 +1270,16 @@ class Base(object):
 		### edit sub menu----------------------------------------------------
 		edit = wx.Menu()
 
-		self.search = wx.MenuItem(edit, wx.NewId(), _('&Search\tCtrl+F'), _('Search text'))
+		self.search = wx.MenuItem(edit, wx.Window.NewControlId(), _('&Search\tCtrl+F'), _('Search text'))
 
-		self.cut = wx.MenuItem(edit, wx.NewId(), _('&Cut\tCtrl+X'), _('Cut the selection'))
-		self.copy = wx.MenuItem(edit, wx.NewId(), _('&Copy\tCtrl+C'), _('Copy the selection'))
-		self.paste = wx.MenuItem(edit, wx.NewId(), _('&Paste\tCtrl+V'), _('Paste text from clipboard'))
-		delete = wx.MenuItem(edit, wx.NewId(), _('&Delete'), _('Delete the selected text'))
-		select = wx.MenuItem(edit, wx.NewId(), _('Select &All\tCtrl+A'), _('Select the entire text'))
-		reindent = wx.MenuItem(edit, wx.NewId(), _('Re-indent\tCtrl+R'), _('re-indent all code'))
-		comment = wx.MenuItem(edit, wx.NewId(), _('&Comment\tCtrl+D'), _('comment current ligne'))
-		uncomment = wx.MenuItem(edit, wx.NewId(), _('&Uncomment\tCtrl+Shift+D'), _('uncomment current ligne'))
+		self.cut = wx.MenuItem(edit, wx.Window.NewControlId(), _('&Cut\tCtrl+X'), _('Cut the selection'))
+		self.copy = wx.MenuItem(edit, wx.Window.NewControlId(), _('&Copy\tCtrl+C'), _('Copy the selection'))
+		self.paste = wx.MenuItem(edit, wx.Window.NewControlId(), _('&Paste\tCtrl+V'), _('Paste text from clipboard'))
+		delete = wx.MenuItem(edit, wx.Window.NewControlId(), _('&Delete'), _('Delete the selected text'))
+		select = wx.MenuItem(edit, wx.Window.NewControlId(), _('Select &All\tCtrl+A'), _('Select the entire text'))
+		reindent = wx.MenuItem(edit, wx.Window.NewControlId(), _('Re-indent\tCtrl+R'), _('re-indent all code'))
+		comment = wx.MenuItem(edit, wx.Window.NewControlId(), _('&Comment\tCtrl+D'), _('comment current ligne'))
+		uncomment = wx.MenuItem(edit, wx.Window.NewControlId(), _('&Uncomment\tCtrl+Shift+D'), _('uncomment current ligne'))
 
 		self.cut.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'cut.png')))
 		self.copy.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'copy.png')))
@@ -1329,7 +1329,7 @@ class Base(object):
 		### view sub menu------------------------------------------------------
 		view = wx.Menu()
 
-		showStatusBar = wx.MenuItem(view, wx.NewId(), _('&Statusbar'), _('Show statusBar'))
+		showStatusBar = wx.MenuItem(view, wx.Window.NewControlId(), _('&Statusbar'), _('Show statusBar'))
 		if wx.VERSION_STRING < '4.0':
 			view.AppendItem(showStatusBar)
 		else:
@@ -1340,7 +1340,7 @@ class Base(object):
 		### help sub menu-----------------------------------------------------
 		help = wx.Menu()
 
-		about = wx.MenuItem(help, wx.NewId(), _('&About\tF1'), _('About editor'))
+		about = wx.MenuItem(help, wx.Window.NewControlId(), _('&About\tF1'), _('About editor'))
 		about.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'info.png')))
 		if wx.VERSION_STRING < '4.0':
 			help.AppendItem(about)
@@ -1780,7 +1780,7 @@ class EditorPanel(Base, wx.Panel):
 		sizer = wx.BoxSizer(wx.VERTICAL)
 
 		### create notebook
-		self.nb = EditionNotebook(self, wx.ID_ANY, style=wx.CLIP_CHILDREN)
+		self.nb = EditionNotebook(self, wx.Window.NewControlId(), style=wx.CLIP_CHILDREN)
 		### create juste for the bind of action (save,...) of the toolbar - Warning it must stay here !
 		self.menuBar = self.CreateMenu()
 		### create toolbar
@@ -1815,7 +1815,7 @@ class EditorFrame(Base, wx.Frame):
 		wx.Frame.__init__(self, self.parent, id, title, size=(600, 500), style=wx.DEFAULT_FRAME_STYLE)
 
 		### Create notebook
-		self.nb = EditionNotebook(self, wx.ID_ANY, style=wx.CLIP_CHILDREN)
+		self.nb = EditionNotebook(self, wx.Window.NewControlId(), style=wx.CLIP_CHILDREN)
 
 		### create menu, toolbar and statusbar for the frame
 		self.menuBar = self.CreateMenu()
@@ -2138,19 +2138,19 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		### insert sub menu-------------------------------------------------
 		insert = wx.Menu()
 
-		peek = wx.MenuItem(insert, wx.NewId(), _('New peek'), _('Generate new peek code'))
-		poke = wx.MenuItem(insert, wx.NewId(), _('New poke'), _('Generate new poke code'))
-		getPortId = wx.MenuItem(insert, wx.NewId(), _('Get Port Id'), _('Get the port ID from port instance self.getPortId(port)->int'))
-		getMsgValue = wx.MenuItem(insert, wx.NewId(), _('Get message value'), _('Get message value self.getMsgValue(msg)->Object'))
-		getInitPhase = wx.MenuItem(insert, wx.NewId(), _('Set the phase (init phase)'), _('Set the phase self.getInitPhase()'))
-		getSigma = wx.MenuItem(insert, wx.NewId(), _('Get sigma value'), _('Get sigma value self.getSigma()->float'))
-		getStatus = wx.MenuItem(insert, wx.NewId(), _('Get status value'), _('Get status value self.getStatus()->str'))
-		getState = wx.MenuItem(insert, wx.NewId(), _('Get state object'), _('Get state object self.getState()->dict'))
-		holdInState = wx.MenuItem(insert, wx.NewId(), _('New hold in state'), _('Generate new hold in state code self.holdIn(...)'))
-		phaseIs = wx.MenuItem(insert, wx.NewId(), _('New phaseIs test'), _('Generate phase test code self.phaseIs(...)'))
-		passivateInState = wx.MenuItem(insert, wx.NewId(), _('New passivate in state'), _('Generate new passivate in state code self.passivateIn(...)'))
-		passivateState = wx.MenuItem(insert, wx.NewId(), _('New passivate state'), _('Generate new passivate state code self.passivate(...)'))
-		debug = wx.MenuItem(insert, wx.NewId(), _('New debugger'), _('Generate new debugger code (print into the log of model)'))
+		peek = wx.MenuItem(insert, wx.Window.NewControlId(), _('New peek'), _('Generate new peek code'))
+		poke = wx.MenuItem(insert, wx.Window.NewControlId(), _('New poke'), _('Generate new poke code'))
+		getPortId = wx.MenuItem(insert, wx.Window.NewControlId(), _('Get Port Id'), _('Get the port ID from port instance self.getPortId(port)->int'))
+		getMsgValue = wx.MenuItem(insert, wx.Window.NewControlId(), _('Get message value'), _('Get message value self.getMsgValue(msg)->Object'))
+		getInitPhase = wx.MenuItem(insert, wx.Window.NewControlId(), _('Set the phase (init phase)'), _('Set the phase self.getInitPhase()'))
+		getSigma = wx.MenuItem(insert, wx.Window.NewControlId(), _('Get sigma value'), _('Get sigma value self.getSigma()->float'))
+		getStatus = wx.MenuItem(insert, wx.Window.NewControlId(), _('Get status value'), _('Get status value self.getStatus()->str'))
+		getState = wx.MenuItem(insert, wx.Window.NewControlId(), _('Get state object'), _('Get state object self.getState()->dict'))
+		holdInState = wx.MenuItem(insert, wx.Window.NewControlId(), _('New hold in state'), _('Generate new hold in state code self.holdIn(...)'))
+		phaseIs = wx.MenuItem(insert, wx.Window.NewControlId(), _('New phaseIs test'), _('Generate phase test code self.phaseIs(...)'))
+		passivateInState = wx.MenuItem(insert, wx.Window.NewControlId(), _('New passivate in state'), _('Generate new passivate in state code self.passivateIn(...)'))
+		passivateState = wx.MenuItem(insert, wx.Window.NewControlId(), _('New passivate state'), _('Generate new passivate state code self.passivate(...)'))
+		debug = wx.MenuItem(insert, wx.Window.NewControlId(), _('New debugger'), _('Generate new debugger code (print into the log of model)'))
 		
 		insert.Append(peek)
 		insert.Append(poke)
@@ -2170,7 +2170,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		insert.Append(debug)
 
 		menu = self.GetMenuBar().GetMenu(1)
-		menu.Prepend(wx.NewId(), _("Insert"), insert)
+		menu.Prepend(wx.Window.NewControlId(), _("Insert"), insert)
 		### -------------------------------------------------------------------
 
 		### insert new icon in toolbar (icon are not available in embeded editor (Show menu)
@@ -2230,7 +2230,7 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 	def ConfigureTB(self):
 		"""
 		"""
-		id = [wx.NewId()]*4
+		id = [wx.Window.NewControlId()]*4
 		#tb = self.GetToolBar()
 		self.toolbar.InsertSeparator(self.toolbar.GetToolsCount())
 
@@ -2305,11 +2305,11 @@ class TestEditor(EditorFrame):
 		### insert sub menu-------------------------------------------------
 		insert = wx.Menu()
 
-		feature = wx.MenuItem(insert, wx.NewId(), _('Feature skeleton'), _('Generate feature skeleton'))
-		steps = wx.MenuItem(insert, wx.NewId(), _('Steps skeleton'), _('Generate steps skeleton'))
-		env_header = wx.MenuItem(insert, wx.NewId(), _('Environment header generation'), _('Generate environment header'))
-		env_gen_def = wx.MenuItem(insert, wx.NewId(), _('Environment methods generation'), _('Generate minimal methods for environment'))
-		# env_spec_def = wx.MenuItem(insert, wx.NewId(), _('Specific environment methods generation'), _('Generate minimal methods for specific environment'))
+		feature = wx.MenuItem(insert, wx.Window.NewControlId(), _('Feature skeleton'), _('Generate feature skeleton'))
+		steps = wx.MenuItem(insert, wx.Window.NewControlId(), _('Steps skeleton'), _('Generate steps skeleton'))
+		env_header = wx.MenuItem(insert, wx.Window.NewControlId(), _('Environment header generation'), _('Generate environment header'))
+		env_gen_def = wx.MenuItem(insert, wx.Window.NewControlId(), _('Environment methods generation'), _('Generate minimal methods for environment'))
+		# env_spec_def = wx.MenuItem(insert, wx.Window.NewControlId(), _('Specific environment methods generation'), _('Generate minimal methods for specific environment'))
 
 		insert.AppendItem(feature)
 		insert.AppendItem(steps)
@@ -2318,7 +2318,7 @@ class TestEditor(EditorFrame):
 		# insert.AppendItem(env_spec_def)
 
 		menu = self.GetMenuBar().GetMenu(1)
-		menu.PrependMenu(wx.NewId(), _("Insert"), insert)
+		menu.PrependMenu(wx.Window.NewControlId(), _("Insert"), insert)
 		### ----------------------------------------------------------------
 
 		### Bind all new event----------------------------------------------
@@ -2415,8 +2415,8 @@ class GeneralEditor(EditorFrame):
 
 		### AddPage button in toolbar---------------------------------------
 		filemenu = self.GetMenuBar().GetMenu(0)
-		add = wx.MenuItem(filemenu, wx.NewId(), _('&Add'), _('Add new page'))
-		close = wx.MenuItem(filemenu, wx.NewId(), _('&Close'), _('Close current page'))
+		add = wx.MenuItem(filemenu, wx.Window.NewControlId(), _('&Add'), _('Add new page'))
+		close = wx.MenuItem(filemenu, wx.Window.NewControlId(), _('&Close'), _('Close current page'))
 		### ----------------------------------------------------------------
 		### Construct new toolbar-------------------------------------------
 		self.toolbar.AddSeparator()

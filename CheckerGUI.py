@@ -123,7 +123,7 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 			canvas = mainW.nb2.GetCurrentPage()
 			diagram = canvas.GetDiagram()
 
-			f = AttributeEditor(canvas.GetParent(), wx.ID_ANY, diagram.GetShapeByLabel(model_name), canvas)
+			f = AttributeEditor(canvas.GetParent(), wx.Window.NewControlId(), diagram.GetShapeByLabel(model_name), canvas)
 			f.Show()
 
 	def OnItemSelected(self, event):
@@ -143,9 +143,9 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 			### 2. Launcher creates wxMenu. ###
 			menu = wx.Menu()
 
-			edit = wx.MenuItem(menu, wx.NewId(),_("Edit"), _("Edit the source code"))
+			edit = wx.MenuItem(menu, wx.Window.NewControlId(),_("Edit"), _("Edit the source code"))
 			edit.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-			report = wx.MenuItem(menu, wx.NewId(),_("Report"), _("Report error by mail to the author"))
+			report = wx.MenuItem(menu, wx.Window.NewControlId(),_("Report"), _("Report error by mail to the author"))
 			report.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'mail.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 
 			menu.AppendItem(edit)
@@ -279,7 +279,7 @@ class CheckerGUI(wx.Frame):
 	def __init__(self, parent, diagram):
 		""" Constructor.
 		"""
-		wx.Frame.__init__(self, parent, wx.ID_ANY, _("DEVS Model Checking"), size=(900,400), style = wx.DEFAULT_FRAME_STYLE)
+		wx.Frame.__init__(self, parent, wx.Window.NewControlId(), _("DEVS Model Checking"), size=(900,400), style = wx.DEFAULT_FRAME_STYLE)
 
 		icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
 		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "check_master.png"), wx.BITMAP_TYPE_ANY))

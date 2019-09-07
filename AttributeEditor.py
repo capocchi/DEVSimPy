@@ -76,7 +76,7 @@ class AttributeBase(object):
 
 		if isinstance(self.model, Achievable):
 			self._boxH = wx.BoxSizer(wx.HORIZONTAL)
-			self._code = CodeCB(self, wx.ID_ANY, self.model)
+			self._code = CodeCB(self, wx.Window.NewControlId(), self.model)
 			self._boxH.Add(self._code, 1, wx.ALL|wx.EXPAND, userData='code')
 			self._box.Add(self._boxH, 1, wx.ALL|wx.EXPAND, userData='code')
 
@@ -220,8 +220,8 @@ class QuickAttributeEditor(wx.Frame, Subject):
 		self.attach(self.canvas.GetDiagram())
 
 		#spinCtrl for input and output port numbers
-		self._sb_input = wx.SpinCtrl(self, wx.ID_ANY, size=(60,-1), min=0, max=100)
-		self._sb_output = wx.SpinCtrl(self, wx.ID_ANY, size=(60,-1), min=0, max=100)
+		self._sb_input = wx.SpinCtrl(self, wx.Window.NewControlId(), size=(60,-1), min=0, max=100)
+		self._sb_output = wx.SpinCtrl(self, wx.Window.NewControlId(), size=(60,-1), min=0, max=100)
 
 		# mouse positions
 		xwindow, ywindow = wx.GetMousePosition()

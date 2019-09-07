@@ -661,7 +661,7 @@ class Diagram(Savable, Structurable):
 			self.modify = True
 			self.parent.DiagramModified()
 
-		dlg = PriorityGUI.PriorityGUI(parent, wx.ID_ANY, _("Priority Manager"), self.priority_list)
+		dlg = PriorityGUI.PriorityGUI(parent, wx.Window.NewControlId(), _("Priority Manager"), self.priority_list)
 		dlg.Bind(wx.EVT_CLOSE, self.OnClosePriorityGUI)
 		dlg.Show()
 
@@ -717,7 +717,7 @@ class Diagram(Savable, Structurable):
 			nb2 = win.GetDiagramNotebook()
 			title = nb2.GetPageText(nb2.GetSelection())
 
-		dlg = DiagramConstantsDialog.DiagramConstantsDialog(win, wx.ID_ANY, title, self)
+		dlg = DiagramConstantsDialog.DiagramConstantsDialog(win, wx.Window.NewControlId(), title, self)
 		dlg.ShowModal()
 		dlg.Destroy()
 
@@ -852,13 +852,13 @@ class Diagram(Savable, Structurable):
 ##					obj = event.GetEventObject()
 					# si invocation à partir du bouton dans la toolBar (apparition de la frame de simulation dans une fenetre)
 					if isinstance(obj, wx.ToolBar) or 'Diagram' in obj.GetTitle():
-						frame = SimulationGUI.SimulationDialog(win, wx.ID_ANY, _(" %s Simulator"%diagram.label), master)
+						frame = SimulationGUI.SimulationDialog(win, wx.Window.NewControlId(), _(" %s Simulator"%diagram.label), master)
 						frame.Show()
 					## si invocation par le menu (apparition de la frame de simulation dans le panel)
 					elif isinstance(obj, (wx.Menu, wx.Frame)):
 						sizer3 = wx.BoxSizer(wx.VERTICAL)
 						win.panel3.Show()
-						win.SimDiag = SimulationGUI.SimulationDialog(win.panel3, wx.ID_ANY, _("Simulation Manager"), master)
+						win.SimDiag = SimulationGUI.SimulationDialog(win.panel3, wx.Window.NewControlId(), _("Simulation Manager"), master)
 						sizer3.Add(win.SimDiag, 0, wx.EXPAND)
 						win.panel3.SetSizer(sizer3)
 						win.panel3.SetAutoLayout(True)
@@ -1498,7 +1498,7 @@ if builtins.__dict__['GUI_FLAG']:
 
 		def __init__(self,\
 					 parent,\
-		  			id=wx.ID_ANY, \
+		  			id=wx.Window.NewControlId(), \
 				  	pos=wx.DefaultPosition, \
 			  		size=(-1,-1), \
 				  	style=wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN, \
@@ -1529,7 +1529,7 @@ if builtins.__dict__['GUI_FLAG']:
 			self.permRect = None
 			self.selectionStart = None
 
-			self.timer = wx.Timer(self, wx.NewId())
+			self.timer = wx.Timer(self, wx.Window.NewControlId())
 			self.f = None
 
 			self.scroller = wx.lib.dragscroller.DragScroller(self)
@@ -1898,7 +1898,7 @@ if builtins.__dict__['GUI_FLAG']:
 				if len(self.sourceNodeList) == 1 and len(self.targetNodeList) == 1:
 					self.makeConnectionShape(self.sourceNodeList[0], self.targetNodeList[0])
 				else:
-					self.dlgConnection = ConnectDialog.ConnectDialog(wx.GetApp().GetTopWindow(), wx.ID_ANY, _("Connection Manager"), sourceName, self.sourceNodeList, targetName, self.targetNodeList)
+					self.dlgConnection = ConnectDialog.ConnectDialog(wx.GetApp().GetTopWindow(), wx.Window.NewControlId(), _("Connection Manager"), sourceName, self.sourceNodeList, targetName, self.targetNodeList)
 					self.dlgConnection.Bind(wx.EVT_BUTTON, self.OnDisconnect, self.dlgConnection._button_disconnect)
 					self.dlgConnection.Bind(wx.EVT_BUTTON, self.OnConnect, self.dlgConnection._button_connect)
 					self.dlgConnection.Bind(wx.EVT_CLOSE, self.OnCloseConnectionDialog)
@@ -2673,7 +2673,7 @@ if builtins.__dict__['GUI_FLAG']:
 
 						if (x<=xm and xm < x+w) and (y<=ym and ym < y+h):
 							if self.isSelected(s) and flag:
-								self.f = QuickAttributeEditor(self, wx.ID_ANY, s)
+								self.f = QuickAttributeEditor(self, wx.Window.NewControlId(), s)
 								self.timer.Start(1200)
 								break
 							else:
@@ -3004,7 +3004,7 @@ class Testable(object):
 			### Editor instanciation and configuration---------------------
 			editorFrame = Editor.GetEditor(
 					None,
-					wx.ID_ANY,
+					wx.Window.NewControlId(),
 					'Features',
 					file_type="test"
 			)
@@ -3421,13 +3421,13 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		"""
 		"""
 		canvas = event.GetEventObject()
-		f = AttributeEditor(canvas.GetParent(), wx.ID_ANY, self, canvas)
+		f = AttributeEditor(canvas.GetParent(), wx.Window.NewControlId(), self, canvas)
 		f.Show()
 
 	def OnPluginsManager(self, event):
 		canvas = event.GetEventObject()
 		f = PluginsGUI.ModelPluginsManager(	parent=canvas.GetParent(),
-									id=wx.ID_ANY,
+									id=wx.Window.NewControlId(),
 									title =_('%s - plugin manager')%self.label,
 									size = (700,500),
 									style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN,
@@ -4371,7 +4371,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 		""" Properties of port has been invoked.
 		"""
 		canvas = event.GetEventObject()
-		f = AttributeEditor(canvas.GetParent(), wx.ID_ANY, self, canvas)
+		f = AttributeEditor(canvas.GetParent(), wx.Window.NewControlId(), self, canvas)
 		f.Show()
 
 	###
@@ -4498,7 +4498,7 @@ class DiskGUI(CodeBlock):
 
 		if devs:
 			frame= SpreadSheet.Newt( wx.GetApp().GetTopWindow(),
-									wx.ID_ANY,
+									wx.Window.NewControlId(),
 									_("SpreadSheet %s")%self.label,
 									devs,
 									devs.comma if hasattr(devs, 'comma') else " ")

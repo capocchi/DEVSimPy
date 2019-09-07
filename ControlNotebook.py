@@ -148,7 +148,7 @@ class GeneralNotebook(Observer):
 			str=None
 			if isinstance(model, Attributable):
 				if model != self.selected_model:
-					newContent = AttributeEditor(propPanel, wx.ID_ANY, model, canvas)
+					newContent = AttributeEditor(propPanel, wx.Window.NewControlId(), model, canvas)
 					propPanel.UpdatePropertiesPage(newContent)
 					
 					self.selected_model = model
@@ -176,7 +176,7 @@ try:
 except:
 	pass
 
-MENU_EDIT_DELETE_PAGE = wx.NewId()
+MENU_EDIT_DELETE_PAGE = wx.Window.NewControlId()
 
 if USE_FLATNOTEBOOK:
 	#-------------------------------------------------------------------

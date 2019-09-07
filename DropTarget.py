@@ -92,7 +92,7 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 		"""
 		"""
 		### Detached Frame
-		frame = DetachedFrame.DetachedFrame(self.canvas, wx.ID_ANY, shape.label, shape)
+		frame = DetachedFrame.DetachedFrame(self.canvas, wx.Window.NewControlId(), shape.label, shape)
 		
 		### to disabled transparency
 		frame.Unbind(wx.EVT_IDLE)

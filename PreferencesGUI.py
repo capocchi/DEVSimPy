@@ -42,19 +42,19 @@ class GeneralPanel(wx.Panel):
 		wx.Panel.__init__(self, parent)
 
 		### FileBrowse
-		self.plugin_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Plug-ins directory:"), toolTip=_("Change the plug-ins directory"), dialogTitle=_("Plug-ins directory..."))
-		self.domain_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Library directory:"), toolTip=_("Change the library directory"), dialogTitle=_("Libraries directory..."))
-		self.out_dir = filebrowse.DirBrowseButton(self, wx.ID_ANY, labelText=_("Output directory:"), toolTip=_("Change the output directory"), dialogTitle=_("Output directory..."))
+		self.plugin_dir = filebrowse.DirBrowseButton(self, wx.Window.NewControlId(), labelText=_("Plug-ins directory:"), toolTip=_("Change the plug-ins directory"), dialogTitle=_("Plug-ins directory..."))
+		self.domain_dir = filebrowse.DirBrowseButton(self, wx.Window.NewControlId(), labelText=_("Library directory:"), toolTip=_("Change the library directory"), dialogTitle=_("Libraries directory..."))
+		self.out_dir = filebrowse.DirBrowseButton(self, wx.Window.NewControlId(), labelText=_("Output directory:"), toolTip=_("Change the output directory"), dialogTitle=_("Output directory..."))
 
 		self.plugin_dir.SetValue(PLUGINS_PATH)
 		self.domain_dir.SetValue(DOMAIN_PATH)
 		self.out_dir.SetValue(OUT_DIR)
 
 		### StaticText
-		self.st1 = wx.StaticText(self, wx.ID_ANY, _("Number of recent file:"))
-		self.st2 = wx.StaticText(self, wx.ID_ANY, _("Font size:"))
-		self.st3 = wx.StaticText(self, wx.ID_ANY, _("Deep of history item:"))
-		self.st4 = wx.StaticText(self, wx.ID_ANY, _("wxPython version:"))
+		self.st1 = wx.StaticText(self, wx.Window.NewControlId(), _("Number of recent file:"))
+		self.st2 = wx.StaticText(self, wx.Window.NewControlId(), _("Font size:"))
+		self.st3 = wx.StaticText(self, wx.Window.NewControlId(), _("Deep of history item:"))
+		self.st4 = wx.StaticText(self, wx.Window.NewControlId(), _("wxPython version:"))
 
 		if wx.VERSION_STRING >= '4.0':
 			self.st1.SetToolTipString = self.st1.SetToolTip 
@@ -68,22 +68,22 @@ class GeneralPanel(wx.Panel):
 		self.st4.SetToolTipString(_("Feel free to change the version of wxpython used loaded by DEVSimPy"))
 
 		### number of opened file
-		self.nb_opened_file = wx.SpinCtrl(self, wx.ID_ANY, '')
+		self.nb_opened_file = wx.SpinCtrl(self, wx.Window.NewControlId(), '')
 		self.nb_opened_file.SetRange(2, 20)
 		self.nb_opened_file.SetValue(NB_OPENED_FILE)
 
 		### Block font size
-		self.font_size = wx.SpinCtrl(self, wx.ID_ANY, '')
+		self.font_size = wx.SpinCtrl(self, wx.Window.NewControlId(), '')
 		self.font_size.SetRange(2, 20)
 		self.font_size.SetValue(FONT_SIZE)
 
 		### number of undo/redo items
-		self.nb_history_undo = wx.SpinCtrl(self, wx.ID_ANY, '')
+		self.nb_history_undo = wx.SpinCtrl(self, wx.Window.NewControlId(), '')
 		self.nb_history_undo.SetRange(2, 100)
 		self.nb_history_undo.SetValue(NB_HISTORY_UNDO)
 
 		### CheckBox
-		self.cb1 = wx.CheckBox(self, wx.ID_ANY, _('Transparency'))
+		self.cb1 = wx.CheckBox(self, wx.Window.NewControlId(), _('Transparency'))
 		if wx.VERSION_STRING >= '4.0': self.cb1.SetToolTipString = self.cb1.SetToolTip
 		self.cb1.SetToolTipString(_("Transparency for the detached frame of diagrams"))
 		self.cb1.SetValue(builtins.__dict__['TRANSPARENCY'])
@@ -95,13 +95,13 @@ class GeneralPanel(wx.Panel):
 		else:
 			wxv = [wx.VERSION_STRING]
 			
-		self.cb2 = wx.ComboBox(self, wx.ID_ANY, GetWXVersionFromIni(), choices=wxv, style=wx.CB_READONLY)
+		self.cb2 = wx.ComboBox(self, wx.Window.NewControlId(), GetWXVersionFromIni(), choices=wxv, style=wx.CB_READONLY)
 		if wx.VERSION_STRING >= '4.0': self.cb2.SetToolTipString = self.cb2.SetToolTip
 		self.cb2.SetToolTipString(_("Default version of wxPython."))
 		self.default_wxv = self.cb2.GetValue()
 
 		### Sizer
-		box1 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, _('Properties')), orient=wx.VERTICAL)
+		box1 = wx.StaticBoxSizer(wx.StaticBox(self, wx.Window.NewControlId(), _('Properties')), orient=wx.VERTICAL)
 		vsizer = wx.BoxSizer(wx.VERTICAL)
 		hsizer = wx.GridSizer(4, 2, 20, 20)
 
@@ -255,12 +255,12 @@ class SimulationPanel(wx.Panel):
 		self.sim_error_sound_path = builtins.__dict__['SIMULATION_ERROR_SOUND_PATH']
 
 		### Buttons
-		self.sim_success_sound_btn = wx.Button(self, wx.ID_ANY, os.path.basename(self.sim_success_sound_path), (25, 105), name='success')
+		self.sim_success_sound_btn = wx.Button(self, wx.Window.NewControlId(), os.path.basename(self.sim_success_sound_path), (25, 105), name='success')
 		self.sim_success_sound_btn.Enable(self.sim_success_sound_path is not os.devnull)
 		if wx.VERSION_STRING >= '4.0': self.sim_success_sound_btn.SetToolTipString = self.sim_success_sound_btn.SetToolTip
 		self.sim_success_sound_btn.SetToolTipString(_("Press this button in order to change the song arriving at the end of the simulation."))
 
-		self.sim_error_sound_btn = wx.Button(self, wx.ID_ANY, os.path.basename(self.sim_error_sound_path), (25, 105), name='error')
+		self.sim_error_sound_btn = wx.Button(self, wx.Window.NewControlId(), os.path.basename(self.sim_error_sound_path), (25, 105), name='error')
 		self.sim_error_sound_btn.Enable(self.sim_error_sound_path is not os.devnull)
 		if wx.VERSION_STRING >= '4.0': self.sim_error_sound_btn.SetToolTipString = self.sim_error_sound_btn.SetToolTip
 		self.sim_error_sound_btn.SetToolTipString(_("Press this button in order to change the song arriving when an error occur in a model during the simulation."))
@@ -270,37 +270,37 @@ class SimulationPanel(wx.Panel):
 		self.devs_doc_btn.SetToolTipString(_("Press this button to read the documentation of the selected DEVS package"))
 
 		### CheckBox
-		self.cb1 = wx.CheckBox(self, wx.ID_ANY, _('Notification'))
+		self.cb1 = wx.CheckBox(self, wx.Window.NewControlId(), _('Notification'))
 		if wx.VERSION_STRING >= '4.0': self.cb1.SetToolTipString = self.cb1.SetToolTip
 		self.cb1.SetToolTipString(_("Notification song is generate when the simulation is over."))
 		self.cb1.SetValue(self.sim_success_sound_path is not os.devnull)
 
-		self.cb2 = wx.CheckBox(self, wx.ID_ANY, _('No Time Limit'))
+		self.cb2 = wx.CheckBox(self, wx.Window.NewControlId(), _('No Time Limit'))
 		if wx.VERSION_STRING >= '4.0': self.cb2.SetToolTipString = self.cb2.SetToolTip
 		self.cb2.SetValue(builtins.__dict__['NTL'])
 		self.cb2.SetToolTipString(_("No Time Limit allow the stop of simulation when all of models are idle."))
 
 		### StaticText for DEVS Kernel directory
-		self.txt3 = wx.StaticText(self, wx.ID_ANY, _("DEVS packages:"))
-		self.cb3 = wx.ComboBox(self, wx.ID_ANY, DEFAULT_DEVS_DIRNAME, choices=list(DEVS_DIR_PATH_DICT.keys()), style=wx.CB_READONLY)
+		self.txt3 = wx.StaticText(self, wx.Window.NewControlId(), _("DEVS packages:"))
+		self.cb3 = wx.ComboBox(self, wx.Window.NewControlId(), DEFAULT_DEVS_DIRNAME, choices=list(DEVS_DIR_PATH_DICT.keys()), style=wx.CB_READONLY)
 		if wx.VERSION_STRING >= '4.0': self.cb3.SetToolTipString = self.cb3.SetToolTip
 		self.cb3.SetToolTipString(_("Default DEVS Kernel package (PyDEVS, PyPDEVS, ect.)."))
 		self.default_devs_dir = DEFAULT_DEVS_DIRNAME
 
 		### StaticText for strategy
-		self.txt = wx.StaticText(self, wx.ID_ANY, _("Default strategy:"))
+		self.txt = wx.StaticText(self, wx.Window.NewControlId(), _("Default strategy:"))
 		### choice of combo-box depends on the default DEVS package directory
 		c = list(PYDEVS_SIM_STRATEGY_DICT.keys()) if DEFAULT_DEVS_DIRNAME == 'PyDEVS' else list(PYPDEVS_SIM_STRATEGY_DICT.keys())
 
-		self.cb4 = wx.ComboBox(self, wx.ID_ANY, DEFAULT_SIM_STRATEGY, choices=c, style=wx.CB_READONLY)
+		self.cb4 = wx.ComboBox(self, wx.Window.NewControlId(), DEFAULT_SIM_STRATEGY, choices=c, style=wx.CB_READONLY)
 		if wx.VERSION_STRING >= '4.0': self.cb4.SetToolTipString = self.cb4.SetToolTip
 		self.cb4.SetToolTipString(_("Default strategy for the simulation algorithm. Please see the DEVSimPy doc for more information of possible strategy."))
 		self.sim_defaut_strategy = DEFAULT_SIM_STRATEGY
 
 		### StaticText
 		self.sim_defaut_plot_dyn_freq = builtins.__dict__['DEFAULT_PLOT_DYN_FREQ']
-		self.txt2 = wx.StaticText(self, wx.ID_ANY, _("Frequency of plotting refresh:"))
-		self.sc = wx.SpinCtrl(self, wx.ID_ANY, str(self.sim_defaut_plot_dyn_freq), (55, 90), (60, -1), min=10, max=10000)
+		self.txt2 = wx.StaticText(self, wx.Window.NewControlId(), _("Frequency of plotting refresh:"))
+		self.sc = wx.SpinCtrl(self, wx.Window.NewControlId(), str(self.sim_defaut_plot_dyn_freq), (55, 90), (60, -1), min=10, max=10000)
 		if wx.VERSION_STRING >= '4.0': self.sc.SetToolTipString = self.sc.SetToolTip
 		self.sc.SetToolTipString(_("Default frequency for dynamic plotting."))
 
@@ -353,7 +353,7 @@ class SimulationPanel(wx.Panel):
 		path = os.path.join(os.path.dirname(builtins.__dict__['DEVS_DIR_PATH_DICT'][choice]), 'doc', 'index.html')
 
 		### Html frame
-		frame = HtmlFrame(self, wx.ID_ANY, "Doc", (600,600))
+		frame = HtmlFrame(self, wx.Window.NewControlId(), "Doc", (600,600))
 		### if page exist in <package_dir>/<doc>
 		if os.path.exists(path):
 			frame.LoadFile(path)
@@ -491,7 +491,7 @@ class EditorPanel(wx.Panel):
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
-		self.cb = wx.CheckBox(self, wx.ID_ANY, _("Use local programmer software"))
+		self.cb = wx.CheckBox(self, wx.Window.NewControlId(), _("Use local programmer software"))
 		self.cb.SetValue(builtins.__dict__['LOCAL_EDITOR'])
 		if wx.VERSION_STRING >= '4.0': self.cb.SetToolTipString = self.cb.SetToolTip
 		self.cb.SetToolTipString(_("This option don't work for the .amd and .cmd file. \n"
@@ -516,7 +516,7 @@ class Preferences(wx.Toolbook):
 			Constructor.
 		"""
 
-		wx.Toolbook.__init__(self, parent, wx.ID_ANY, style=wx.BK_DEFAULT)
+		wx.Toolbook.__init__(self, parent, wx.Window.NewControlId(), style=wx.BK_DEFAULT)
 
 		### don't try to translate this labels with _() because there are used to find png
 		L = [('General',"(self)"),('Simulation',"(self)"), ('Editor',"(self)"), ('Plugins',"(self)")]
@@ -671,7 +671,7 @@ class PreferencesGUI(wx.Frame):
 		"""
 			Constructor.
 		"""
-		wx.Frame.__init__(self, parent, wx.ID_ANY, title, style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN)
+		wx.Frame.__init__(self, parent, wx.Window.NewControlId(), title, style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN)
 
 		_icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
 		_icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "preferences.png"), wx.BITMAP_TYPE_ANY))
@@ -680,7 +680,7 @@ class PreferencesGUI(wx.Frame):
 		self.SetMinSize((400,500))
 
 		### Panel
-		panel = wx.Panel(self, wx.ID_ANY)
+		panel = wx.Panel(self, wx.Window.NewControlId())
 		self.pref = Preferences(panel)
 
 		### Buttons

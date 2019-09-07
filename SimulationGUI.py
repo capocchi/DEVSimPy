@@ -154,7 +154,7 @@ class CollapsiblePanel(wx.Panel):
 	def MakePaneContent(self, pane):
 		'''Just make a few controls to put on the collapsible pane'''
 
-		text2 = wx.StaticText(pane, wx.ID_ANY, _("%s algorithm:")%DEFAULT_DEVS_DIRNAME)
+		text2 = wx.StaticText(pane, wx.Window.NewControlId(), _("%s algorithm:")%DEFAULT_DEVS_DIRNAME)
 
 		### list of possible strategy depending on the PyDEVS version
 		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
@@ -163,19 +163,19 @@ class CollapsiblePanel(wx.Panel):
 			c = list(PYPDEVS_SIM_STRATEGY_DICT.keys())
 
 		### choice of strategy
-		ch1 = wx.Choice(pane, wx.ID_ANY, choices=c)
+		ch1 = wx.Choice(pane, wx.Window.NewControlId(), choices=c)
 
-		text3 = wx.StaticText(pane, wx.ID_ANY, _("Profiling"))
-		cb1 = wx.CheckBox(pane, wx.ID_ANY, name='check_prof')
-		text4 = wx.StaticText(pane, wx.ID_ANY, _("No time limit"))
-		self.cb2 = wx.CheckBox(pane, wx.ID_ANY, name='check_ntl')
-		text5 = wx.StaticText(pane, wx.ID_ANY, _("Verbose"))
-		self.cb3 = wx.CheckBox(pane, wx.ID_ANY, name='verbose')
-		text6 = wx.StaticText(pane, wx.ID_ANY, _("Dynamic Structure"))
-		cb4 = wx.CheckBox(pane, wx.ID_ANY, name='dyn_struct')
+		text3 = wx.StaticText(pane, wx.Window.NewControlId(), _("Profiling"))
+		cb1 = wx.CheckBox(pane, wx.Window.NewControlId(), name='check_prof')
+		text4 = wx.StaticText(pane, wx.Window.NewControlId(), _("No time limit"))
+		self.cb2 = wx.CheckBox(pane, wx.Window.NewControlId(), name='check_ntl')
+		text5 = wx.StaticText(pane, wx.Window.NewControlId(), _("Verbose"))
+		self.cb3 = wx.CheckBox(pane, wx.Window.NewControlId(), name='verbose')
+		text6 = wx.StaticText(pane, wx.Window.NewControlId(), _("Dynamic Structure"))
+		cb4 = wx.CheckBox(pane, wx.Window.NewControlId(), name='dyn_struct')
 		
-		text7 = wx.StaticText(pane, wx.ID_ANY, _("Real time"))
-		cb5 = wx.CheckBox(pane, wx.ID_ANY, name='real_time')
+		text7 = wx.StaticText(pane, wx.Window.NewControlId(), _("Real time"))
+		cb5 = wx.CheckBox(pane, wx.Window.NewControlId(), name='real_time')
 		
 		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
 			if not 'hotshot' in list(sys.modules.keys()):
@@ -337,7 +337,7 @@ class Base(object):
 
 		# definition of the thread, the timer and the counter for the simulation progress
 		self.thread = None
-		self.timer = wx.Timer(self, wx.NewId())
+		self.timer = wx.Timer(self, wx.Window.NewControlId())
 		self.count = 10.0
 		self.stdioWin = None
 
@@ -353,13 +353,13 @@ class Base(object):
 
 	def __widgets(self):
 
-		self._text1 = wx.StaticText(self.panel, wx.ID_ANY, _('Final time:'))
-		self._value = wx.TextCtrl(self.panel, wx.ID_ANY, str(float(self.master.FINAL_TIME)), validator=TextObjectValidator())
-		self._btn1 = wx.Button(self.panel, wx.NewId(), _('Run'))
-		self._btn2 = wx.Button(self.panel, wx.NewId(), _('Stop'))
-		self._btn3 = wx.Button(self.panel, wx.NewId(), _('Suspend'))
-		self._btn4 = wx.Button(self.panel, wx.NewId(), _('Log'))
-		self._gauge = wx.Gauge(self.panel, wx.ID_ANY, 100, size=(-1, 25), style=wx.GA_HORIZONTAL|wx.GA_SMOOTH)
+		self._text1 = wx.StaticText(self.panel, wx.Window.NewControlId(), _('Final time:'))
+		self._value = wx.TextCtrl(self.panel, wx.Window.NewControlId(), str(float(self.master.FINAL_TIME)), validator=TextObjectValidator())
+		self._btn1 = wx.Button(self.panel, wx.Window.NewControlId(), _('Run'))
+		self._btn2 = wx.Button(self.panel, wx.Window.NewControlId(), _('Stop'))
+		self._btn3 = wx.Button(self.panel, wx.Window.NewControlId(), _('Suspend'))
+		self._btn4 = wx.Button(self.panel, wx.Window.NewControlId(), _('Log'))
+		self._gauge = wx.Gauge(self.panel, wx.Window.NewControlId(), 100, size=(-1, 25), style=wx.GA_HORIZONTAL|wx.GA_SMOOTH)
 		self._cp = CollapsiblePanel(self.panel, self)
 
 		self._text1.Enable(not self.ntl)
@@ -1030,7 +1030,7 @@ class TestApp(wx.App):
 		builtins.__dict__['_'] = gettext.gettext
 
 
-		self.frame = SimulationDialog(None, wx.ID_ANY, 'Simulator', DomainInterface.MasterModel.Master())
+		self.frame = SimulationDialog(None, wx.Window.NewControlId(), 'Simulator', DomainInterface.MasterModel.Master())
 		self.frame.Show()
 		return True
 

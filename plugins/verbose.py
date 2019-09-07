@@ -123,11 +123,11 @@ def start_print_data(*args, **kwargs):
 
 	global frame
 
-	frame = wx.Frame(parent, wx.ID_ANY, _("Simulation Report"))
+	frame = wx.Frame(parent, wx.Window.NewControlId(), _("Simulation Report"))
 
 	# Add a panel so it looks the correct on all platforms
-	panel = wx.Panel(frame, wx.ID_ANY)
-	log = wx.TextCtrl(panel, wx.ID_ANY, size=(300,100), style = wx.TE_MULTILINE|wx.TE_READONLY|wx.HSCROLL)
+	panel = wx.Panel(frame, wx.Window.NewControlId())
+	log = wx.TextCtrl(panel, wx.Window.NewControlId(), size=(300,100), style = wx.TE_MULTILINE|wx.TE_READONLY|wx.HSCROLL)
 
 	# Add widgets to a sizer
 	sizer = wx.BoxSizer(wx.VERTICAL)
@@ -147,13 +147,13 @@ class VerboseConfig(wx.Frame):
 		kwds["style"] = wx.STAY_ON_TOP|wx.DEFAULT_FRAME_STYLE
 		wx.Frame.__init__(self, *args, **kwds)
 
-		self.panel = wx.Panel(self, wx.ID_ANY)
+		self.panel = wx.Panel(self, wx.Window.NewControlId())
 
-		self.sizer_3_staticbox = wx.StaticBox(self.panel, wx.ID_ANY, _("Display options"))
-		self.checkbox_3 = wx.CheckBox(self.panel, wx.ID_ANY, _("Show clock"))
-		self.checkbox_4 = wx.CheckBox(self.panel,wx.ID_ANY, _("Show external transition trace"))
-		self.checkbox_5 = wx.CheckBox(self.panel, wx.ID_ANY, _("Show internal transition trace"))
-		self.checkbox_6 = wx.CheckBox(self.panel, wx.ID_ANY, _("Show collision trace"))
+		self.sizer_3_staticbox = wx.StaticBox(self.panel, wx.Window.NewControlId(), _("Display options"))
+		self.checkbox_3 = wx.CheckBox(self.panel, wx.Window.NewControlId(), _("Show clock"))
+		self.checkbox_4 = wx.CheckBox(self.panel,wx.Window.NewControlId(), _("Show external transition trace"))
+		self.checkbox_5 = wx.CheckBox(self.panel, wx.Window.NewControlId(), _("Show internal transition trace"))
+		self.checkbox_6 = wx.CheckBox(self.panel, wx.Window.NewControlId(), _("Show collision trace"))
 
 		self.button_2 = wx.Button(self.panel, wx.ID_CANCEL, "")
 		self.button_3 = wx.Button(self.panel, wx.ID_OK, "")
@@ -239,5 +239,5 @@ def Config(parent):
 	""" Plug-in settings frame.
 	"""
 
-	config_frame = VerboseConfig(parent, wx.ID_ANY, _("Verbose plug-in"), style = wx.DEFAULT_FRAME_STYLE)
+	config_frame = VerboseConfig(parent, wx.Window.NewControlId(), _("Verbose plug-in"), style = wx.DEFAULT_FRAME_STYLE)
 	config_frame.Show()

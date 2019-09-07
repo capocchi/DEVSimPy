@@ -21,7 +21,7 @@ class HtmlFrame(wx.Frame):
         menubar.Append(file, _('&File'))
         self.SetMenuBar(menubar)
 
-        self.html = wx.html.HtmlWindow(self, wx.ID_ANY)
+        self.html = wx.html.HtmlWindow(self, wx.Window.NewControlId())
         if "gtk2" in wx.PlatformInfo:
             self.html.SetStandardFonts()
 

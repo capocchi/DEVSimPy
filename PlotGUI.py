@@ -71,26 +71,26 @@ def PlotManager(parent, label, atomicModel, xl, yl):
 
 	if atomicModel.fusion:
 		if dyn:
-			frame = DynamicPlot(parent, wx.ID_ANY,_("Plotting %s")%label, atomicModel, xLabel = xl, yLabel = yl)
+			frame = DynamicPlot(parent, wx.Window.NewControlId(),_("Plotting %s")%label, atomicModel, xLabel = xl, yLabel = yl)
 		else:
-			frame = StaticPlot(parent, wx.ID_ANY,_("Plotting %s")%label, atomicModel.results, xLabel = xl, yLabel = yl, legend = atomicModel.blockModel.label)
+			frame = StaticPlot(parent, wx.Window.NewControlId(),_("Plotting %s")%label, atomicModel.results, xLabel = xl, yLabel = yl, legend = atomicModel.blockModel.label)
 		frame.CenterOnParent()
 		frame.Show()
 	else:
 		if dyn:
 			for key in atomicModel.results:
-				frame = DynamicPlot(parent, wx.ID_ANY, _("%s on port %s")%(label,str(key)), atomicModel, xLabel = xl, yLabel = yl, iport=key)
+				frame = DynamicPlot(parent, wx.Window.NewControlId(), _("%s on port %s")%(label,str(key)), atomicModel, xLabel = xl, yLabel = yl, iport=key)
 				frame.CenterOnParent()
 				frame.Show()
 		else:
 			for key in atomicModel.results:
-				frame = StaticPlot(parent, wx.ID_ANY, _("%s on port %s")%(label,str(key)), atomicModel.results[key], xLabel = xl, yLabel = yl, legend = atomicModel.blockModel.label)
+				frame = StaticPlot(parent, wx.Window.NewControlId(), _("%s on port %s")%(label,str(key)), atomicModel.results[key], xLabel = xl, yLabel = yl, legend = atomicModel.blockModel.label)
 				frame.CenterOnParent()
 				frame.Show()
 
 
 class PlotFrame(wx.Frame):
-	def __init__(self, parent=None, id=wx.ID_ANY, title="Time Plotting"):
+	def __init__(self, parent=None, id=wx.Window.NewControlId(), title="Time Plotting"):
 		"""	Constructor.
 		"""
 
@@ -100,8 +100,8 @@ class PlotFrame(wx.Frame):
 		self.normalize = False
 		self.home = HOME_PATH
 
-#		self.sldh = wx.Slider(self, wx.ID_ANY, 10, 0, 50, (-1, -1), (250, -1), wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
-#		self.sldv = wx.Slider(self, wx.ID_ANY, 10, 0, 50, (-1, -1), (50, 150), wx.SL_AUTOTICKS | wx.SL_VERTICAL | wx.SL_LABELS)
+#		self.sldh = wx.Slider(self, wx.Window.NewControlId(), 10, 0, 50, (-1, -1), (250, -1), wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
+#		self.sldv = wx.Slider(self, wx.Window.NewControlId(), 10, 0, 50, (-1, -1), (50, 150), wx.SL_AUTOTICKS | wx.SL_VERTICAL | wx.SL_LABELS)
 
 		self.client = plot.PlotCanvas(self)
 		self.client.SetPointLabelFunc(self.drawPointLabel)
@@ -110,50 +110,50 @@ class PlotFrame(wx.Frame):
 		self.mainmenu = wx.MenuBar()
 
 		menu = wx.Menu()
-		setup = menu.Append(wx.NewId(), _('Page Setup'), _('Setup the printer page'))
-		file_print_preview = menu.Append(wx.NewId(), _('Print Preview'), _('Show the current plot on page'))
-		file_print = menu.Append(wx.NewId(), _('Print'), _('Print the current plot'))
-		file_save = menu.Append(wx.NewId(), _('Save Plot'), _('Save current plot'))
-		file_export = menu.Append(wx.NewId(), _('Export Plot'), _('Export current plot'))
-		file_exit = menu.Append(wx.NewId(), _('&Exit'), _('Enough of this already!'))
+		setup = menu.Append(wx.Window.NewControlId(), _('Page Setup'), _('Setup the printer page'))
+		file_print_preview = menu.Append(wx.Window.NewControlId(), _('Print Preview'), _('Show the current plot on page'))
+		file_print = menu.Append(wx.Window.NewControlId(), _('Print'), _('Print the current plot'))
+		file_save = menu.Append(wx.Window.NewControlId(), _('Save Plot'), _('Save current plot'))
+		file_export = menu.Append(wx.Window.NewControlId(), _('Export Plot'), _('Export current plot'))
+		file_exit = menu.Append(wx.Window.NewControlId(), _('&Exit'), _('Enough of this already!'))
 
 		self.mainmenu.Append(menu, _('&File'))
 
 		menu = wx.Menu()
-		plotRedraw = menu.Append(wx.NewId(), _('&Redraw'), _('Redraw plots'))
-		plotScale = menu.Append(wx.NewId(), _('&Scale'), _('Scale canvas'))
+		plotRedraw = menu.Append(wx.Window.NewControlId(), _('&Redraw'), _('Redraw plots'))
+		plotScale = menu.Append(wx.Window.NewControlId(), _('&Scale'), _('Scale canvas'))
 
 		type_submenu = wx.Menu()
-		line = type_submenu.AppendItem(wx.MenuItem(menu, wx.NewId(), _('Line'), kind=wx.ITEM_RADIO))
-		scatter = type_submenu.AppendItem(wx.MenuItem(menu, wx.NewId(), _('Scatter'), kind=wx.ITEM_RADIO))
-		bar = type_submenu.AppendItem(wx.MenuItem(menu, wx.NewId(), _('Bar'), kind=wx.ITEM_RADIO))
-		square = type_submenu.AppendItem(wx.MenuItem(menu, wx.NewId(), _('Square'), kind=wx.ITEM_RADIO))
-		menu.AppendMenu(wx.NewId(), _('Type'), type_submenu)
+		line = type_submenu.AppendItem(wx.MenuItem(menu, wx.Window.NewControlId(), _('Line'), kind=wx.ITEM_RADIO))
+		scatter = type_submenu.AppendItem(wx.MenuItem(menu, wx.Window.NewControlId(), _('Scatter'), kind=wx.ITEM_RADIO))
+		bar = type_submenu.AppendItem(wx.MenuItem(menu, wx.Window.NewControlId(), _('Bar'), kind=wx.ITEM_RADIO))
+		square = type_submenu.AppendItem(wx.MenuItem(menu, wx.Window.NewControlId(), _('Square'), kind=wx.ITEM_RADIO))
+		menu.AppendMenu(wx.Window.NewControlId(), _('Type'), type_submenu)
 
 		enable_submenu = wx.Menu()
-		self.enableTitle = enable_submenu.Append(wx.NewId(), _('&Title'), _('Enable title'), kind=wx.ITEM_CHECK)
+		self.enableTitle = enable_submenu.Append(wx.Window.NewControlId(), _('&Title'), _('Enable title'), kind=wx.ITEM_CHECK)
 		self.enableTitle.Check(True)
-		self.enableZoom = enable_submenu.Append(wx.NewId(), _('&Zoom'), _('Enable zoom'), kind=wx.ITEM_CHECK)
-		self.enableGrid = enable_submenu.Append(wx.NewId(), _('Grid'), _('Enable grid'), kind=wx.ITEM_CHECK)
+		self.enableZoom = enable_submenu.Append(wx.Window.NewControlId(), _('&Zoom'), _('Enable zoom'), kind=wx.ITEM_CHECK)
+		self.enableGrid = enable_submenu.Append(wx.Window.NewControlId(), _('Grid'), _('Enable grid'), kind=wx.ITEM_CHECK)
 		self.enableGrid.Check(True)
-		self.enableDrag = enable_submenu.Append(wx.NewId(), _('Drag'), _('Enable drag'), kind=wx.ITEM_CHECK)
-		self.enableLegend = enable_submenu.Append(wx.NewId(), _('&Legend'), _('Turn on legend'), kind=wx.ITEM_CHECK)
-		self.enablePointLabel = enable_submenu.Append(wx.NewId(), _('&Point Label'), _('Show closest point'), kind=wx.ITEM_CHECK)
-		self.norm = enable_submenu.Append(wx.NewId(), _('Normalize'), _('Normalize Y axis'), kind=wx.ITEM_CHECK)
-		menu.AppendMenu(wx.NewId(), _('Enable'), enable_submenu)
+		self.enableDrag = enable_submenu.Append(wx.Window.NewControlId(), _('Drag'), _('Enable drag'), kind=wx.ITEM_CHECK)
+		self.enableLegend = enable_submenu.Append(wx.Window.NewControlId(), _('&Legend'), _('Turn on legend'), kind=wx.ITEM_CHECK)
+		self.enablePointLabel = enable_submenu.Append(wx.Window.NewControlId(), _('&Point Label'), _('Show closest point'), kind=wx.ITEM_CHECK)
+		self.norm = enable_submenu.Append(wx.Window.NewControlId(), _('Normalize'), _('Normalize Y axis'), kind=wx.ITEM_CHECK)
+		menu.AppendMenu(wx.Window.NewControlId(), _('Enable'), enable_submenu)
 
 		setx_submenu = wx.Menu()
-		self.enableXStep = setx_submenu.Append(wx.NewId(), _('Step'), _('X with step'), kind=wx.ITEM_RADIO)
-		self.enableXDefault = setx_submenu.Append(wx.NewId(), _('Default'), _('X with Simulation Time (Default)'), kind=wx.ITEM_RADIO)
+		self.enableXStep = setx_submenu.Append(wx.Window.NewControlId(), _('Step'), _('X with step'), kind=wx.ITEM_RADIO)
+		self.enableXDefault = setx_submenu.Append(wx.Window.NewControlId(), _('Default'), _('X with Simulation Time (Default)'), kind=wx.ITEM_RADIO)
 		self.enableXDefault.Check(True)
-		menu.AppendMenu(wx.NewId(), _('Set X'), setx_submenu)
+		menu.AppendMenu(wx.Window.NewControlId(), _('Set X'), setx_submenu)
 
-		setTitle = menu.Append(wx.NewId(), _('Set Title'), _('Define title'))
-		setXLabel = menu.Append(wx.NewId(), _('Set X Label'), _('Define x label'))
-		setYLabel = menu.Append(wx.NewId(), _('Set Y Label'), _('Define y label'))
-		scrUp = menu.Append(wx.NewId(), _('Scroll Up 1'), _('Move View Up 1 Unit'))
-		scrRt = menu.Append(wx.NewId(), _('Scroll Rt 2'), _('Move View Right 2 Units'))
-		reset = menu.Append(wx.NewId(), _('&Plot Reset'), _('Reset to original plot'))
+		setTitle = menu.Append(wx.Window.NewControlId(), _('Set Title'), _('Define title'))
+		setXLabel = menu.Append(wx.Window.NewControlId(), _('Set X Label'), _('Define x label'))
+		setYLabel = menu.Append(wx.Window.NewControlId(), _('Set Y Label'), _('Define y label'))
+		scrUp = menu.Append(wx.Window.NewControlId(), _('Scroll Up 1'), _('Move View Up 1 Unit'))
+		scrRt = menu.Append(wx.Window.NewControlId(), _('Scroll Rt 2'), _('Move View Right 2 Units'))
+		reset = menu.Append(wx.Window.NewControlId(), _('&Plot Reset'), _('Reset to original plot'))
 
 		self.mainmenu.Append(menu, _('&Plot'))
 
@@ -402,7 +402,7 @@ class PlotFrame(wx.Frame):
 		self.Destroy()
 
 class StaticPlot(PlotFrame):
-	def __init__(self, parent = None, id = wx.ID_ANY, title = "Time Plotting", data = None, xLabel = 'Time [s]', yLabel = 'Amplitude [A]', typ = 'PlotLine', legend=''):
+	def __init__(self, parent = None, id = wx.Window.NewControlId(), title = "Time Plotting", data = None, xLabel = 'Time [s]', yLabel = 'Amplitude [A]', typ = 'PlotLine', legend=''):
 		"""	@data : [(t,y)...]
 		"""
 
@@ -422,15 +422,15 @@ class StaticPlot(PlotFrame):
 		### si mode fusion
 		if isinstance(self.data, dict):
 			for i in range(len(self.data)):
-				self.Bind(wx.EVT_MENU,self.OnPlotSpectrum, menu.Append(wx.NewId(), _('Signal %d')%i, _('Spectrum Plot')))
-			self.Bind(wx.EVT_MENU,self.OnPlotAllSpectrum, menu.Append(wx.NewId(), _('All'), _('Spectrum Plot')))
+				self.Bind(wx.EVT_MENU,self.OnPlotSpectrum, menu.Append(wx.Window.NewControlId(), _('Signal %d')%i, _('Spectrum Plot')))
+			self.Bind(wx.EVT_MENU,self.OnPlotAllSpectrum, menu.Append(wx.Window.NewControlId(), _('All'), _('Spectrum Plot')))
 
 		else:
-			self.Bind(wx.EVT_MENU,self.OnPlotSpectrum, menu.Append(wx.NewId(), _('Signal'), _('Spectrum Plot')))
+			self.Bind(wx.EVT_MENU,self.OnPlotSpectrum, menu.Append(wx.Window.NewControlId(), _('Signal'), _('Spectrum Plot')))
 		self.mainmenu.Append(menu, _('&Spectrum'))
 
 		menu = wx.Menu()
-		self.Bind(wx.EVT_MENU,self.OnRMSE, menu.Append(wx.NewId(), _('RMSE'), _('Root Mean Square Error')))
+		self.Bind(wx.EVT_MENU,self.OnRMSE, menu.Append(wx.Window.NewControlId(), _('RMSE'), _('Root Mean Square Error')))
 		self.mainmenu.Append(menu, _('&Error'))
 
 		### call self.On<PlotLine>()
@@ -629,13 +629,13 @@ class StaticPlot(PlotFrame):
 		wx.MessageBox('RMSE: %f'%r, 'Info', wx.OK|wx.ICON_INFORMATION)
   
 	#	for k,s in self.atomicModel.results.items():
-	#		frame = Spectrum(self,wx.ID_ANY, title= _("Spectrum of signal %d")%k,data = s)
+	#		frame = Spectrum(self,wx.Window.NewControlId(), title= _("Spectrum of signal %d")%k,data = s)
 	#		frame.Center()
 	#		frame.Show()
 
 	def OnPlotAllSpectrum(self, evt=None):
 		for k,s in list(self.data.items()):
-			frame = Spectrum(self,wx.ID_ANY, title= _("Spectrum of signal %d")%k,data=s)
+			frame = Spectrum(self,wx.Window.NewControlId(), title= _("Spectrum of signal %d")%k,data=s)
 			frame.Center()
 			frame.Show()
 
@@ -649,10 +649,10 @@ class StaticPlot(PlotFrame):
 			item=self.mainmenu.FindItemById(evt.GetId())
 			# permet d'identifier le numero du signal
 			i = int(item.GetLabel().split(' ')[-1])
-			frame = Spectrum(self,wx.ID_ANY, title= _("Spectrum of signal "),data = self.data[i])
+			frame = Spectrum(self,wx.Window.NewControlId(), title= _("Spectrum of signal "),data = self.data[i])
 
 		else:
-			frame = Spectrum(self,wx.ID_ANY, title= _("Spectrum of signal "),data = self.data)
+			frame = Spectrum(self,wx.Window.NewControlId(), title= _("Spectrum of signal "),data = self.data)
 
 		frame.Center()
 		frame.Show()
@@ -732,7 +732,7 @@ class DynamicPlot(PlotFrame):
 	"""
 	"""
 
-	def __init__(self, parent = None, id = wx.ID_ANY, title = "", atomicModel = None, xLabel = "", yLabel = "", iport=None):
+	def __init__(self, parent = None, id = wx.Window.NewControlId(), title = "", atomicModel = None, xLabel = "", yLabel = "", iport=None):
 		"""
 			@parent : parent class
 			@id : class id
@@ -768,10 +768,10 @@ class DynamicPlot(PlotFrame):
 		### si mode fusion
 		if self.iport is None:
 			for i in self.atomicModel.results:
-				self.Bind(wx.EVT_MENU, self.OnPlotSpectrum, menu.Append(wx.NewId(), _('Signal %s')%str(i), _('Spectrum Plot')))
-			self.Bind(wx.EVT_MENU, self.OnPlotAllSpectrum, menu.Append(wx.NewId(), _('All'), _('Spectrum Plot')))
+				self.Bind(wx.EVT_MENU, self.OnPlotSpectrum, menu.Append(wx.Window.NewControlId(), _('Signal %s')%str(i), _('Spectrum Plot')))
+			self.Bind(wx.EVT_MENU, self.OnPlotAllSpectrum, menu.Append(wx.Window.NewControlId(), _('All'), _('Spectrum Plot')))
 		else:
-			self.Bind(wx.EVT_MENU, self.OnPlotSpectrum, menu.Append(wx.NewId(), _('Signal %s')%str(self.iport), _('Spectrum Plot')))
+			self.Bind(wx.EVT_MENU, self.OnPlotSpectrum, menu.Append(wx.Window.NewControlId(), _('Signal %s')%str(self.iport), _('Spectrum Plot')))
 		self.mainmenu.Append(menu, _('&Spectrum'))
 
 		self.timer = wx.Timer(self)
@@ -1056,7 +1056,7 @@ class DynamicPlot(PlotFrame):
 		""" Plot all spectrum.
 		"""
 		for k,s in list(self.atomicModel.results.items()):
-			frame = Spectrum(self,wx.ID_ANY, title= _("Spectrum of signal %d")%k,data = s)
+			frame = Spectrum(self,wx.Window.NewControlId(), title= _("Spectrum of signal %d")%k,data = s)
 			frame.Center()
 			frame.Show()
 
@@ -1068,7 +1068,7 @@ class DynamicPlot(PlotFrame):
 		# permet d'identifier le numero du signal
 		i = int(item.GetLabel().split(' ')[-1])
 
-		frame = Spectrum(self, wx.ID_ANY, title= _("Spectrum of signal "), data=self.atomicModel.results[i])
+		frame = Spectrum(self, wx.Window.NewControlId(), title= _("Spectrum of signal "), data=self.atomicModel.results[i])
 		frame.Center()
 		frame.Show()
 
@@ -1100,7 +1100,7 @@ class DynamicPlot(PlotFrame):
 		dlg.Destroy()
 
 class Spectrum(StaticPlot):
-	def __init__(self, parent=None, id=wx.ID_ANY, title="", data=[]):
+	def __init__(self, parent=None, id=wx.Window.NewControlId(), title="", data=[]):
 		"""	@data : [(x,y)...]
 		"""
 

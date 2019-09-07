@@ -42,7 +42,7 @@ except ImportError as info:
 import pluginmanager
 from Container import Block, CodeBlock, ContainerBlock
 
-ID_SHAPE = wx.NewId()
+ID_SHAPE = wx.Window.NewControlId()
 
 def log(func):
     def wrapped(*args, **kwargs):
@@ -263,10 +263,10 @@ def Config(parent):
     master = None
 
     frame = wx.Frame(parent,
-                    wx.ID_ANY,
+                    wx.Window.NewControlId(),
                     title = _('State Trajectory Plotting'),
                     style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN)
-    panel = wx.Panel(frame, wx.ID_ANY)
+    panel = wx.Panel(frame, wx.Window.NewControlId())
 
     #lst_1  = map(lambda a: a.label, filter(lambda s: isinstance(s, CodeBlock), diagram.GetShapeList()))
     lst_1 = GetFlatShapesList(diagram,[])
@@ -276,15 +276,15 @@ def Config(parent):
     hbox = wx.BoxSizer(wx.HORIZONTAL)
     hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 
-    st = wx.StaticText(panel, wx.ID_ANY, _("Select models and functions:"), (10,10))
+    st = wx.StaticText(panel, wx.Window.NewControlId(), _("Select models and functions:"), (10,10))
 
-    cb1 = wx.CheckListBox(panel, wx.ID_ANY, (10, 30), wx.DefaultSize, lst_1, style=wx.LB_SORT)
-    cb2 = wx.CheckListBox(panel, wx.ID_ANY, (10, 30), wx.DefaultSize, lst_2)
+    cb1 = wx.CheckListBox(panel, wx.Window.NewControlId(), (10, 30), wx.DefaultSize, lst_1, style=wx.LB_SORT)
+    cb2 = wx.CheckListBox(panel, wx.Window.NewControlId(), (10, 30), wx.DefaultSize, lst_2)
 
     selBtn = wx.Button(panel, wx.ID_SELECTALL)
-    desBtn = wx.Button(panel, wx.ID_ANY, _('Deselect All'))
+    desBtn = wx.Button(panel, wx.Window.NewControlId(), _('Deselect All'))
     okBtn = wx.Button(panel, wx.ID_OK)
-    #reportBtn = wx.Button(panel, wx.ID_ANY, _('Report'))
+    #reportBtn = wx.Button(panel, wx.Window.NewControlId(), _('Report'))
 
     hbox2.Add(cb1, 1, wx.EXPAND, 5)
     hbox2.Add(cb2, 1, wx.EXPAND, 5)
@@ -379,10 +379,10 @@ def Config(parent):
         ### make a menu
         menu = wx.Menu()
         # Show how to put an icon in the menu
-        item = wx.MenuItem(menu, wx.NewId(), "Aext")
+        item = wx.MenuItem(menu, wx.Window.NewControlId(), "Aext")
         menu.AppendItem(item)
-        menu.Append(wx.NewId(), "Aint")
-        menu.Append(wx.NewId(), "A=Aext+Aint")
+        menu.Append(wx.Window.NewControlId(), "Aint")
+        menu.Append(wx.Window.NewControlId(), "A=Aext+Aint")
 
         # Popup the menu.  If an item is selected then its handler
         # will be called before PopupMenu returns.

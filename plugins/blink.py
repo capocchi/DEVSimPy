@@ -91,7 +91,7 @@ def start_blink(*args, **kwargs):
 	diagram = canvas.GetDiagram()
 
 	### define frame
-	frame = BlinkFrame(parent, wx.ID_ANY, _('Blink Logger'))
+	frame = BlinkFrame(parent, wx.Window.NewControlId(), _('Blink Logger'))
 	frame.SetIcon(mainW.GetIcon())
 	frame.SetTitle("%s Blink Logger"%os.path.basename(diagram.last_name_saved))
 	frame.Show()
@@ -204,12 +204,12 @@ class BlinkFrame(wx.Frame):
 
 		wx.Frame.__init__(self, *args, **kwds)
 
-		self.panel = wx.Panel(self, wx.ID_ANY)
+		self.panel = wx.Panel(self, wx.Window.NewControlId())
 		self.button_clear = wx.Button(self.panel, wx.ID_CLEAR)
 		self.button_step = wx.Button(self.panel, wx.ID_FORWARD)
 		self.button_find = wx.Button(self.panel, wx.ID_FIND)
 		self.button_selectall = wx.Button(self.panel, wx.ID_SELECTALL)
-		self.txt = wx.TextCtrl(self.panel, wx.ID_ANY, style = wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_RICH2)
+		self.txt = wx.TextCtrl(self.panel, wx.Window.NewControlId(), style = wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_RICH2)
 
 		MoveFromParent(self, interval=10, direction='right')
 
@@ -297,4 +297,4 @@ class BlinkFrame(wx.Frame):
 	def OnFindReplace(self, evt):
 		""" Call find and replace dialogue
 		"""
-		FindReplace(self, wx.ID_ANY, _('Find/Replace'))
+		FindReplace(self, wx.Window.NewControlId(), _('Find/Replace'))
