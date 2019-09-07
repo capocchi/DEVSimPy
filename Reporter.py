@@ -9,6 +9,20 @@ from Utilities import FormatTrace, EnvironmentInfo, GetActiveWindow
 
 _ = wx.GetTranslation
 
+def static_vars(**kwargs):
+    def decorate(func):
+        for k in kwargs:
+            setattr(func, k, kwargs[k])
+        return func
+    return decorate
+
+@static_vars(next=wx.ID_HIGHEST)
+def StaticId():
+    StaticId.next += 1
+    return StaticId.next 
+
+ID_SEND = StaticId()
+
 class BaseDialog(wx.Dialog):
     """ A wx.Dialog base class.
     """
@@ -161,9 +175,6 @@ class ErrorReporter(object):
         """
         if len(self._sessionerr):
             return self._sessionerr[-1]
-
-
-ID_SEND = wx.Window.NewControlId()
 class ErrorDialog(BaseDialog):
     """
     Dialog for showing errors and and notifying gui2exe-users should the

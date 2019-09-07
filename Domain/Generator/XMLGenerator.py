@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .Generator.Generator import *
+from Generator.Generator import *
 from xml.dom import minidom
 import os.path
 

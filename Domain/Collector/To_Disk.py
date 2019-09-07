@@ -13,7 +13,7 @@ GLOBAL VARIABLES AND FUNCTIONS:
 ### just for python 2.5
 
 
-from .QuickScope import *
+from QuickScope import *
 import random
 from decimal import *
 import os

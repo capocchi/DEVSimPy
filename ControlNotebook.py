@@ -176,7 +176,19 @@ try:
 except:
 	pass
 
-MENU_EDIT_DELETE_PAGE = wx.Window.NewControlId()
+def static_vars(**kwargs):
+    def decorate(func):
+        for k in kwargs:
+            setattr(func, k, kwargs[k])
+        return func
+    return decorate
+
+@static_vars(next=wx.ID_HIGHEST)
+def StaticId():
+    StaticId.next += 1
+    return StaticId.next
+
+MENU_EDIT_DELETE_PAGE = StaticId()
 
 if USE_FLATNOTEBOOK:
 	#-------------------------------------------------------------------

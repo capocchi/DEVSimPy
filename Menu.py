@@ -37,120 +37,132 @@ _ = wx.GetTranslation
 
 if wx.VERSION_STRING > '4.0.1': wx.NewId = wx.NewIdRef
 
+def static_vars(**kwargs):
+    def decorate(func):
+        for k in kwargs:
+            setattr(func, k, kwargs[k])
+        return func
+    return decorate
+
+@static_vars(next=wx.ID_HIGHEST)
+def StaticId():
+    StaticId.next += 1
+    return StaticId.next 
+
 #File menu identifiers
 ID_NEW = wx.ID_NEW
 ID_OPEN  = wx.ID_OPEN
 ID_SAVE = wx.ID_SAVE
 ID_SAVEAS = wx.ID_SAVEAS
-ID_EXPORTREST = wx.Window.NewControlId()
-ID_IMPORTXMLSES = wx.Window.NewControlId()
+ID_EXPORTREST = StaticId()
+ID_IMPORTXMLSES = StaticId()
 ID_EXIT = wx.ID_EXIT
 ID_ABOUT = wx.ID_ABOUT
-ID_EXPORT = wx.Window.NewControlId()
+ID_EXPORT = StaticId()
 ID_PREVIEW_PRINT = wx.ID_PREVIEW_PRINT
-ID_SCREEN_CAPTURE = wx.Window.NewControlId()
+ID_SCREEN_CAPTURE = StaticId()
 ID_PRINT = wx.ID_PRINT
 #ID_PAGE_SETUP = wx.Window.NewControlId()
 
 # Recent file menu identifiers
-ID_RECENT = wx.Window.NewControlId()
-ID_DELETE_RECENT = wx.Window.NewControlId()
+ID_RECENT = StaticId()
+ID_DELETE_RECENT = StaticId()
 
 # Show menu identifiers
-ID_SHOW_CONTROL = wx.Window.NewControlId()
-ID_SHOW_SHELL = wx.Window.NewControlId()
-ID_SHOW_SIM = wx.Window.NewControlId()
-ID_SHOW_PROP = wx.Window.NewControlId()
-ID_SHOW_LIB = wx.Window.NewControlId()
-ID_SHOW_EDITOR = wx.Window.NewControlId()
-ID_SHOW_TOOLBAR = wx.Window.NewControlId()
+ID_SHOW_CONTROL = StaticId()
+ID_SHOW_SHELL = StaticId()
+ID_SHOW_SIM = StaticId()
+ID_SHOW_PROP = StaticId()
+ID_SHOW_LIB = StaticId()
+ID_SHOW_EDITOR = StaticId()
+ID_SHOW_TOOLBAR = StaticId()
 
 
 # Perspectives menu identifiers
-ID_NEW_PERSPECTIVE = wx.Window.NewControlId()
-ID_DELETE_PERSPECTIVE = wx.Window.NewControlId()
-ID_FIRST_PERSPECTIVE = wx.Window.NewControlId()
+ID_NEW_PERSPECTIVE = StaticId()
+ID_DELETE_PERSPECTIVE = StaticId()
+ID_FIRST_PERSPECTIVE = StaticId()
 
 # Diagram menu identifiers
-ID_DETACH_DIAGRAM = wx.Window.NewControlId()
-ID_RENAME_DIAGRAM = wx.Window.NewControlId()
+ID_DETACH_DIAGRAM = StaticId()
+ID_RENAME_DIAGRAM = StaticId()
 ID_ZOOMIN_DIAGRAM = wx.ID_ZOOM_IN
 ID_ZOOMOUT_DIAGRAM = wx.ID_ZOOM_OUT
 ID_UNZOOM_DIAGRAM = wx.ID_ZOOM_100
-ID_SIM_DIAGRAM = wx.Window.NewControlId()
-ID_CHECK_DIAGRAM = wx.Window.NewControlId()
-ID_CONST_DIAGRAM = wx.Window.NewControlId()
-ID_PRIORITY_DIAGRAM = wx.Window.NewControlId()
-ID_INFO_DIAGRAM = wx.Window.NewControlId()
-ID_CLEAR_DIAGRAM = wx.Window.NewControlId()
-ID_EXIT_DIAGRAM = wx.Window.NewControlId()
+ID_SIM_DIAGRAM = StaticId()
+ID_CHECK_DIAGRAM = StaticId()
+ID_CONST_DIAGRAM = StaticId()
+ID_PRIORITY_DIAGRAM = StaticId()
+ID_INFO_DIAGRAM = StaticId()
+ID_CLEAR_DIAGRAM = StaticId()
+ID_EXIT_DIAGRAM = StaticId()
 
 # Setting menu identifiers
-ID_PREFERENCES = wx.Window.NewControlId()
-ID_PROFILE = wx.Window.NewControlId()
-ID_DELETE_PROFILES = wx.Window.NewControlId()
-ID_FRENCH_LANGUAGE = wx.Window.NewControlId()
-ID_ENGLISH_LANGUAGE = wx.Window.NewControlId()
+ID_PREFERENCES = StaticId()
+ID_PROFILE = StaticId()
+ID_DELETE_PROFILES = StaticId()
+ID_FRENCH_LANGUAGE = StaticId()
+ID_ENGLISH_LANGUAGE = StaticId()
 
 # Help menu identifiers
 ID_HELP = wx.ID_HELP
-ID_API_HELP = wx.Window.NewControlId()
-ID_CONTACT = wx.Window.NewControlId()
+ID_API_HELP = StaticId()
+ID_CONTACT = StaticId()
 ID_ABOUT = wx.ID_ABOUT
 
 # Shape popup menu identifiers
 ID_EDIT_SHAPE = wx.ID_EDIT
-ID_LOG_SHAPE = wx.Window.NewControlId()
-ID_RENAME_SHAPE = wx.Window.NewControlId()
+ID_LOG_SHAPE = StaticId()
+ID_RENAME_SHAPE = StaticId()
 ID_COPY_SHAPE = wx.ID_COPY
 ID_PASTE_SHAPE = wx.ID_PASTE
 ID_CUT_SHAPE = wx.ID_CUT
-ID_ROTATE_ALL_SHAPE = wx.Window.NewControlId()
-ID_ROTATE_INPUT_SHAPE = wx.Window.NewControlId()
-ID_ROTATE_OUTPUT_SHAPE = wx.Window.NewControlId()
-ID_ROTATE_SHAPE = wx.Window.NewControlId()
-ID_RIGHT_ROTATE_SHAPE = wx.Window.NewControlId()
-ID_LEFT_ROTATE_SHAPE = wx.Window.NewControlId()
-ID_RIGHT_ROTATE_INPUT_SHAPE = wx.Window.NewControlId()
-ID_LEFT_ROTATE_INPUT_SHAPE = wx.Window.NewControlId()
-ID_RIGHT_ROTATE_OUTPUT_SHAPE = wx.Window.NewControlId()
-ID_LEFT_ROTATE_OUTPUT_SHAPE = wx.Window.NewControlId()
+ID_ROTATE_ALL_SHAPE = StaticId()
+ID_ROTATE_INPUT_SHAPE = StaticId()
+ID_ROTATE_OUTPUT_SHAPE = StaticId()
+ID_ROTATE_SHAPE = StaticId()
+ID_RIGHT_ROTATE_SHAPE = StaticId()
+ID_LEFT_ROTATE_SHAPE = StaticId()
+ID_RIGHT_ROTATE_INPUT_SHAPE = StaticId()
+ID_LEFT_ROTATE_INPUT_SHAPE = StaticId()
+ID_RIGHT_ROTATE_OUTPUT_SHAPE = StaticId()
+ID_LEFT_ROTATE_OUTPUT_SHAPE = StaticId()
 ID_DELETE_SHAPE = wx.ID_DELETE
-ID_LOCK_SHAPE = wx.Window.NewControlId()
-ID_UNLOCK_SHAPE = wx.Window.NewControlId()
-ID_EXPORT_SHAPE = wx.Window.NewControlId()
-ID_EXPORT_AMD_SHAPE = wx.Window.NewControlId()
-ID_EXPORT_CMD_SHAPE = wx.Window.NewControlId()
-ID_EXPORT_XML_SHAPE = wx.Window.NewControlId()
-ID_EXPORT_JS_SHAPE = wx.Window.NewControlId()
-ID_PLUGINS_SHAPE = wx.Window.NewControlId()
+ID_LOCK_SHAPE = StaticId()
+ID_UNLOCK_SHAPE = StaticId()
+ID_EXPORT_SHAPE = StaticId()
+ID_EXPORT_AMD_SHAPE = StaticId()
+ID_EXPORT_CMD_SHAPE = StaticId()
+ID_EXPORT_XML_SHAPE = StaticId()
+ID_EXPORT_JS_SHAPE = StaticId()
+ID_PLUGINS_SHAPE = StaticId()
 ID_PROPERTIES_SHAPE = wx.ID_PROPERTIES
-ID_EDIT_MODEL_SHAPE = wx.Window.NewControlId()
-ID_TESTING_SHAPE = wx.Window.NewControlId()
+ID_EDIT_MODEL_SHAPE = StaticId()
+ID_TESTING_SHAPE = StaticId()
 
 # Shape canvas popup menu identifiers
-ID_NEW_SHAPE = wx.Window.NewControlId()
-ID_ADD_CONSTANTS = wx.Window.NewControlId()
+ID_NEW_SHAPE = StaticId()
+ID_ADD_CONSTANTS = StaticId()
 
 # Experiment 
-ID_GEN_EXPERIMENT = wx.Window.NewControlId()
+ID_GEN_EXPERIMENT = StaticId()
 
 # Library popup menu identifiers
-ID_NEW_LIB = wx.Window.NewControlId()
-ID_IMPORT_LIB = wx.Window.NewControlId()
-ID_EDIT_LIB = wx.Window.NewControlId()
-ID_RENAME_LIB = wx.Window.NewControlId()
-ID_REFRESH_LIB = wx.Window.NewControlId()
-ID_UPGRADE_LIB = wx.Window.NewControlId()
-ID_UPDATE_LIB = wx.Window.NewControlId()
-ID_HELP_LIB = wx.Window.NewControlId()
-ID_NEW_MODEL_LIB = wx.Window.NewControlId()
-ID_DELETE_LIB = wx.Window.NewControlId()
+ID_NEW_LIB = StaticId()
+ID_IMPORT_LIB = StaticId()
+ID_EDIT_LIB = StaticId()
+ID_RENAME_LIB = StaticId()
+ID_REFRESH_LIB = StaticId()
+ID_UPGRADE_LIB = StaticId()
+ID_UPDATE_LIB = StaticId()
+ID_HELP_LIB = StaticId()
+ID_NEW_MODEL_LIB = StaticId()
+ID_DELETE_LIB = StaticId()
 
 # Attribute popup menu identifiers
-ID_EDIT_ATTR = wx.Window.NewControlId()
-ID_INSERT_ATTR = wx.Window.NewControlId()
-ID_CLEAR_ATTR = wx.Window.NewControlId()
+ID_EDIT_ATTR = StaticId()
+ID_INSERT_ATTR = StaticId()
+ID_CLEAR_ATTR = StaticId()
 
 def AppendMenu(menu, ID, label, submenu):
 	if wx.VERSION_STRING < '4.0':

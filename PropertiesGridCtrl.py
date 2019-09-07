@@ -24,7 +24,6 @@ import os
 import sys
 import inspect
 import re
-import string
 import zipfile
 
 import wx
@@ -416,8 +415,8 @@ class CustomDataTable(GridTableBase):
 				doc = cls.__init__.__doc__ or ""
 				for attr, val in regex.findall(doc):
 					### attr could be in model.args
-					if string.strip(attr) in model.args:
-						infoBlockBehavioralDict.update({string.strip(attr):string.strip(val)})
+					if attr.strip() in model.args:
+						infoBlockBehavioralDict.update({attr.strip():val.strip()})
 		else:
 			args_in_constructor = None
 
