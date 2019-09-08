@@ -262,7 +262,7 @@ class CodeCB(wx.Choicebook):
 			box = wx.BoxSizer( wx.HORIZONTAL)
 			st = wx.TextCtrl(win, wx.Window.NewControlId(), '', style = wx.TE_MULTILINE)
 			try:
-				txt = str(pageTexts[nameFunc], errors='replace').encode('utf-8')
+				txt = str(pageTexts[nameFunc], errors='replace')
 			except TypeError:
 				txt = pageTexts[nameFunc]
 			finally:

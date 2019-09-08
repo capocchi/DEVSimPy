@@ -132,7 +132,7 @@ class Zip:
 				data = z.read(base_name)
 				### if zip file contain image file we can not encode it.
 				try:
-					zout.writestr(base_name, data.encode('utf-8'))
+					zout.writestr(base_name, data)
 				except UnicodeDecodeError as info:
 					zout.writestr(base_name, data)
 				else:

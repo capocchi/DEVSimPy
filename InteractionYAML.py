@@ -129,8 +129,8 @@ class YAMLHandler:
                     model1, portNumber1 = c.input
                     model2, portNumber2 = c.output
 
-                    D['source']['id'] = model1.label.encode("utf-8")
-                    D['target']['id'] = model2.label.encode("utf-8")
+                    D['source']['id'] = model1.label
+                    D['target']['id'] = model2.label
                 
                 ### if c is an atomic model
                 elif isinstance(c, CodeBlock): 

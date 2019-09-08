@@ -796,7 +796,7 @@ class ModelGeneratorWizard(Wizard):
 
 						python_name = os.path.basename(self.model_path).split('.')[0]
 
-						zout.writestr("%s.py"%python_name, string.encode('utf-8'))
+						zout.writestr("%s.py"%python_name, string)
 
 						self.python_path = os.path.join(self.model_path,"%s.py"%python_name)
 					else:
@@ -809,7 +809,7 @@ class ModelGeneratorWizard(Wizard):
 						#ext = os.path.basename(self.model_path).split('.')[1]
 						#self.model_path = os.path.join(os.path.dirname(self.model_path), "%s.%s"%(py_file.split('.')[0],ext))
 
-					zout.writestr('DEVSimPyModel.dat', _("Call SaveFile method first!").encode('utf-8', 'ignore'))
+					zout.writestr('DEVSimPyModel.dat', _("Call SaveFile method first!"))
 
 					if self.plugin_path != '':
 						zout.write(self.plugin_path, os.path.join('plugins',os.path.basename(self.plugin_path)))

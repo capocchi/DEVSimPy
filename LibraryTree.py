@@ -184,11 +184,6 @@ class LibraryTree(wx.TreeCtrl):
 
 				tip = doc if doc is not None else _("No documentation for selected model.")
 
-			#try:
-			#	txt = tip.decode('utf-8', 'ignore')
-			#except UnicodeEncodeError:
-			#	sys.stdout.write("Unicode Error!\n")
-			#else:
 			self.SetToolTip(wx.ToolTip(tip))
 
 		else:
@@ -238,7 +233,7 @@ class LibraryTree(wx.TreeCtrl):
 					# Adding graphical model to diagram
 					canvas.AddShape(m)
 
-					sys.stdout.write(_("Adding DEVSimPy model: \n").encode('utf-8'))
+					sys.stdout.write(_("Adding DEVSimPy model: \n"))
 					sys.stdout.write(repr(m))
 
 					# focus
@@ -294,7 +289,7 @@ class LibraryTree(wx.TreeCtrl):
 							self.RemoveItem(item)
 
 						except Exception as info:
-							info = str(info).decode('utf-8', 'ignore')
+							info = str(info)
 							sys.stdout.write(_("%s not deleted! \n Error: %s")%(label,info))
 
 					dial.Destroy()

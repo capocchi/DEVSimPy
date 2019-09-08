@@ -526,12 +526,6 @@ class CodeEditor(PythonSTC):
 	### NOTE: CodeEditor :: SetValue 			=> Set the text to print in the editor
 	### Some methods to make it compatible with how the wxTextCtrl is used
 	def SetValue(self, value):
-
-		#if wx.USE_UNICODE:
-			#value = value.decode('utf-8')
-		#else:
-			#value = value.decode('iso8859_1')
-
 		self.SetText(value)
 		self.EmptyUndoBuffer()
 		self.SetSavePoint()
@@ -1512,7 +1506,7 @@ class Base(object):
 			dir_name = os.path.dirname(fn)
 
 			### code text
-			code = currentPage.GetValue().encode('utf-8')
+			code = currentPage.GetValue()
 			code = '\n'.join(code.splitlines()) + '\n'
 
 			new_instance = self.ConfigSaving(base_name, dir_name, code)
@@ -1528,7 +1522,7 @@ class Base(object):
 
 	def OnSearch(self, evt):
 		currentPage = self.nb.GetCurrentPage()
-		self.txt = currentPage.GetValue().encode('utf-8')
+		self.txt = currentPage.GetValue()
 		self.data = wx.FindReplaceData()   # initializes and holds search parameters
 		self.dlg = wx.FindReplaceDialog(currentPage, self.data, 'Find')
 		self.dlg.Show()
@@ -1576,7 +1570,7 @@ class Base(object):
 			file_name = save_dlg.GetFilename()
 
 			### code text
-			code = currentPage.GetValue().encode('utf-8')
+			code = currentPage.GetValue()
 			code = '\n'.join(code.splitlines()) + '\n'
 
 			### write code in last name saved file
@@ -1716,7 +1710,7 @@ class Base(object):
 			dir_name = os.path.dirname(currentPage.GetFilename())
 
 			### code text
-			code = currentPage.GetValue()#.encode('utf-8')
+			code = currentPage.GetValue()
 			code = '\n'.join(code.splitlines()) + '\n'
 
 			new_instance = self.ConfigSaving(base_name, dir_name, code)
