@@ -8,7 +8,6 @@
 bin/
 tmp/
 out/
-__pycache__/
 *.tmp
 *.dat
 *.bak
@@ -56,7 +55,7 @@ x64/
 build/
 [Bb]in/
 [Oo]bj/
-
+__pycache__/
 # MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
