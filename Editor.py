@@ -1380,12 +1380,20 @@ class Base(object):
 		if not self.parent:
 			tb = self.CreateToolBar(wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT)
 
-			self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddSimpleTool(self.save.GetId(), wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), _('Save'), ''))
-			tb.AddSeparator()
-			self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddSimpleTool(self.cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), _('Cut'), ''))
-			self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddSimpleTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), _('Copy'), ''))
-			self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddSimpleTool(self.paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), _('Paste'), ''))
-			self.Bind(wx.EVT_TOOL, self.QuitApplication, id = self.quit.GetId())
+			if wx.VERSION_STRING < '4.0':
+				self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(),wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), _('Save'), ''))
+				tb.AddSeparator()
+				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), _('Cut'), ''))
+				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), _('Copy'), ''))
+				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), _('Paste'), ''))
+				self.Bind(wx.EVT_TOOL, self.QuitApplication, id = self.quit.GetId())
+			else:
+				self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH, 'save.png')),shortHelp=_('Save')))
+				tb.AddSeparator()
+				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'cut.png')),  shortHelp=_('Cut')))
+				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'copy.png')),  shortHelp=_('Copy')))
+				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'paste.png')),  shortHelp=_('Paste')))
+				self.Bind(wx.EVT_TOOL, self.QuitApplication, id = self.quit.GetId())
 
 		else:
 
