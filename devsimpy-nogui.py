@@ -4,11 +4,11 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # devsimpy-nogui.py --- DEVSimPy - The Python DEVS no GUI modeling and simulation software
 #                     --------------------------------
-#                            Copyright (c) 2014
+#                            Copyright (c) 2019
 #                              Laurent CAPOCCHI
 #                        SPE - University of Corsica
 #                     --------------------------------
-# Version 2.9                                      last modified:  15/11/14
+# Version 2.9                                      last modified:  09/09/19
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -22,15 +22,12 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-### at the beginning to prevent with statement for python version <=2.5
-
-
 import os
 import sys
 import builtins
 import json
 
-__version__ = '2.9'
+__version__ = '4.0'
 
 ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 
@@ -93,7 +90,7 @@ if __name__ == '__main__':
  	_ = gettext.gettext
 
 	import argparse
- 	#print(sys.argv)
+ 	
 	parser = argparse.ArgumentParser(description="simulate a model unless other option is specified")
 	# required filename
 	parser.add_argument("filename", help="dsp or yaml devsimpy file")
