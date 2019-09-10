@@ -7,8 +7,8 @@ significant simplification of handling PyDEVS/PyPDEVS models (like the coupling 
 # Requirements
 The use of DEVSimPy requires:
 
-- [Python](http://www.python.org) version 2.4+
-- [wxPython](http://www.wxpython.org) version 2.6+ ansi/unicode (unicode recommended)
+- [Python](http://www.python.org) version 3.7+
+- [wxPython](http://www.wxpython.org) version 4.0+
 - [Scipy](http://www.scipy.org) and [Numpy](http://www.numpy.org) (optional, for spectrum analysis)
 - DEVSimPy should be used like a normal Python file, i.e., double-clicking on the devsimpy.py file which is located in the root directory or writing python devismpy.py into a python console.
 
