@@ -14,7 +14,6 @@
 #     "C:\Program Files\PyMail\wxPyMail.exe" %1
 #################################################################################################################################################################################
 
-import mail_ico
 import math
 import os
 import smtplib
@@ -80,7 +79,7 @@ class SendMailWx(wx.Frame):
     def createToolbar(self):
         toolbar = self.CreateToolBar(wx.TB_3DBUTTONS|wx.TB_TEXT)
         toolbar.SetToolBitmapSize((31,31))
-        bmp = mail_ico.getBitmap()
+        bmp = wx.Bitmap(os.path.join(ICON_PATH_16_16,'mail.png'))
         sendTool = toolbar.AddTool(-1, _('Send'), bmp, _('Sends Email'))
         self.Bind(wx.EVT_MENU, self.OnSend, sendTool)        
         toolbar.Realize()
