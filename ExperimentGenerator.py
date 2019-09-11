@@ -75,7 +75,7 @@ class ExperimentGenerator:
         """
         """
 
-        self.listModules = ["sys", "os", "__builtin__", "DEVS.AtomicDEVS", "DEVS.CoupledDEVS"]
+        self.listModules = ["sys", "os", "builtins", "DEVS.AtomicDEVS", "DEVS.CoupledDEVS"]
         self.modulePathFile = []
         self.modelPythonDescription = {}
         self.modelHierarchyDescription = []
@@ -101,8 +101,8 @@ class ExperimentGenerator:
             
         txt =''.join(["\n\nsys.path.append(os.path.join('..','DEVSKernel','PyDEVS'))\n",
                     "sys.path.append(os.path.join('..'))\n",
-                    "__builtin__.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyDEVS'\n",
-                    "__builtin__.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}\n\n"])
+                    "builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyDEVS'\n",
+                    "builtins.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}\n\n"])
         
         newFile.write(txt)
 

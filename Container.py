@@ -620,7 +620,7 @@ class Diagram(Savable, Structurable):
 
 			return True
 
-	#@cond_decorator(__builtin__.__dict__['GUI_FLAG'], StatusBarNotification('Load'))
+	#@cond_decorator(builtins.__dict__['GUI_FLAG'], StatusBarNotification('Load'))
 	def LoadConstants(self, label):
 		""" Load Constants to general builtin.
 		"""

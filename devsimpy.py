@@ -49,9 +49,7 @@ import threading
 import pickle
 import itertools
 import shutil
-
-### only for python3
-import builtins as __builtin__
+import builtins
 
 from configparser import ConfigParser
 from tempfile import gettempdir
@@ -376,7 +374,7 @@ class MainApplication(wx.Frame):
 		cfg.Write('language', "'%s'"%str(eval("self.language")))
 		cfg.Write('plugins', str("[]"))
 		cfg.Write('perspectives', str(eval("self.perspectives")))
-		cfg.Write('builtin_dict', str(eval("__builtin__.__dict__")))
+		cfg.Write('builtin_dict', str(eval("builtins.__dict__")))
 
 		sys.stdout.write("OK! \n")
 
@@ -885,7 +883,7 @@ class MainApplication(wx.Frame):
 	def SaveBuiltinDict(self):
 		""" Save the specific builtin variable into the config file
 		"""
-		self.cfg.Write("builtin_dict", str(eval('dict((k, __builtin__.__dict__[k]) for k in builtin_dict)')))
+		self.cfg.Write("builtin_dict", str(eval('dict((k, builtins.__dict__[k]) for k in builtin_dict)')))
 		self.cfg.Flush()
 
 	###

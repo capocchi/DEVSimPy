@@ -2338,9 +2338,9 @@ class TestEditor(EditorFrame):
 	# NOTE: TestEditor :: OnHeaderGeneration		=> note
 	def OnHeaderGeneration(self, event):
 		HEADER = """
-import os\nimport __builtin__\nimport sys\nimport pickle\nfrom tempfile import gettempdir\nABS_PATH = '%s'\nsys.path.append(ABS_PATH)
-__builtin__.__dict__['HOME_PATH'] = ABS_PATH\n__builtin__.__dict__['DOMAIN_PATH'] = os.path.join(ABS_PATH, 'Domain')
-__builtin__.__dict__['GUI_FLAG'] = True\n\nsys.path.append(os.path.join(gettempdir(), "AtomicDEVS"))\n\nmodels = {}
+import os\nimport builtins\nimport sys\nimport pickle\nfrom tempfile import gettempdir\nABS_PATH = '%s'\nsys.path.append(ABS_PATH)
+builtins.__dict__['HOME_PATH'] = ABS_PATH\nbuiltins.__dict__['DOMAIN_PATH'] = os.path.join(ABS_PATH, 'Domain')
+builtins.__dict__['GUI_FLAG'] = True\n\nsys.path.append(os.path.join(gettempdir(), "AtomicDEVS"))\n\nmodels = {}
 """ % HOME_PATH
 		self.nb.GetCurrentPage().AddTextRaw(HEADER)
 

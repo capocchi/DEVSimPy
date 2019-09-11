@@ -432,10 +432,10 @@ class Newt(wx.Frame):
 			frame.Show()
 
 ##if __name__ == '__main__':
-##	import __builtin__
+##	import builtins
 ##	import Container
 ##
-##	__builtin__.__dict__['FONT_SIZE'] = 12
+##	builtins.__dict__['FONT_SIZE'] = 12
 ##	#app = wx.App(0)
 ##	devs =  Container.DiskGUI()
 ##	newt = Newt(None, wx.Window.NewControlId(), 'SpreadSheet', devs)
