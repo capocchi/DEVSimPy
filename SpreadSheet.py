@@ -117,7 +117,7 @@ class Newt(wx.Frame):
 
 		wx.Frame.__init__(self,
 						parent,
-						wx.Window.NewControlId(),
+						wx.NewIdRef(),
 						aDEVS.getBlockModel().label,
 						size = (550, 500),
 						style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
@@ -126,20 +126,20 @@ class Newt(wx.Frame):
 		self.sep = separator
 
 		### toolbar setting
-		toolbar = wx.ToolBar(self, wx.Window.NewControlId(), style= wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT)
+		toolbar = wx.ToolBar(self, wx.NewIdRef(), style= wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT)
 		toolbar.SetToolBitmapSize((25,25)) # just for windows
-		new = toolbar.AddSimpleTool(wx.Window.NewControlId(), wx.Image(os.path.join(ICON_PATH,'new.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('New'), '')
-		open_file = toolbar.AddSimpleTool(wx.Window.NewControlId(), wx.Image(os.path.join(ICON_PATH,'open.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Open'), '')
-		saveas = toolbar.AddSimpleTool(wx.Window.NewControlId(), wx.Image(os.path.join(ICON_PATH,'save.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('SaveAs'), '')
+		new = toolbar.AddSimpleTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'new.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('New'), '')
+		open_file = toolbar.AddSimpleTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'open.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Open'), '')
+		saveas = toolbar.AddSimpleTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'save.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('SaveAs'), '')
 		toolbar.AddSeparator()
-		cut = toolbar.AddSimpleTool(wx.Window.NewControlId(), wx.Image(os.path.join(ICON_PATH,'cut.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Cut'), '')
-		copy = toolbar.AddSimpleTool(wx.Window.NewControlId(), wx.Image(os.path.join(ICON_PATH,'copy.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Copy'), '')
-		paste = toolbar.AddSimpleTool(wx.Window.NewControlId(), wx.Image(os.path.join(ICON_PATH,'paste.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Paste'), '')
-		self.delete = toolbar.AddSimpleTool(wx.Window.NewControlId(), wx.Image(os.path.join(ICON_PATH,'close.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Delete'), '')
+		cut = toolbar.AddSimpleTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'cut.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Cut'), '')
+		copy = toolbar.AddSimpleTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'copy.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Copy'), '')
+		paste = toolbar.AddSimpleTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'paste.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Paste'), '')
+		self.delete = toolbar.AddSimpleTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'close.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Delete'), '')
 		toolbar.AddSeparator()
-		update = toolbar.AddSimpleTool(wx.Window.NewControlId(), wx.Image(os.path.join(ICON_PATH,'reload.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Update'), '')
+		update = toolbar.AddSimpleTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'reload.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Update'), '')
 		toolbar.AddSeparator()
-		self.chart = toolbar.AddSimpleTool(wx.Window.NewControlId(), wx.Image(os.path.join(ICON_PATH,'graph_guru.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Chart'), '')
+		self.chart = toolbar.AddSimpleTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'graph_guru.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Chart'), '')
 		toolbar.EnableTool(self.chart.GetId(), False)
 		toolbar.Realize()
 
@@ -148,7 +148,7 @@ class Newt(wx.Frame):
 		self.statusbar = self.CreateStatusBar()
 
 		### notebook setting
-		self.notebook = wx.Notebook(self, wx.Window.NewControlId())
+		self.notebook = wx.Notebook(self, wx.NewIdRef())
 
 		### Load data form devs model
 		self.LoadingDataInPage()
@@ -427,7 +427,7 @@ class Newt(wx.Frame):
 					break
 					
 		if data != []:
-			frame = StaticPlot(self, wx.Window.NewControlId(), title, data)
+			frame = StaticPlot(self, wx.NewIdRef(), title, data)
 			frame.Center()
 			frame.Show()
 
@@ -438,5 +438,5 @@ class Newt(wx.Frame):
 ##	builtins.__dict__['FONT_SIZE'] = 12
 ##	#app = wx.App(0)
 ##	devs =  Container.DiskGUI()
-##	newt = Newt(None, wx.Window.NewControlId(), 'SpreadSheet', devs)
+##	newt = Newt(None, wx.NewIdRef(), 'SpreadSheet', devs)
 ##	app.MainLoop()

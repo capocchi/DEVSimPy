@@ -25,6 +25,7 @@ import Editor
 
 _ = wx.GetTranslation
 
+
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	""" General Check list Class.
 	"""
@@ -33,7 +34,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		""" Constructor.
 		"""
 
-		wx.ListCtrl.__init__(self, parent, wx.Window.NewControlId(), style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+		wx.ListCtrl.__init__(self, parent, wx.NewIdRef(), style=wx.LC_REPORT | wx.SUNKEN_BORDER)
 		CheckListCtrlMixin.__init__(self)
 		ListCtrlAutoWidthMixin.__init__(self)
 
@@ -480,11 +481,11 @@ class PluginsPanel(wx.Panel):
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 
 		### Panels
-		self.leftPanel = wx.Panel(self, wx.Window.NewControlId())
-		self.rightPanel = wx.Panel(self, wx.Window.NewControlId())
+		self.leftPanel = wx.Panel(self, wx.NewIdRef())
+		self.rightPanel = wx.Panel(self, wx.NewIdRef())
 
 		### plug-in documentation area
-		self.log = wx.TextCtrl(self.rightPanel, wx.Window.NewControlId(), size=(-1,150), style=wx.TE_MULTILINE)
+		self.log = wx.TextCtrl(self.rightPanel, wx.NewIdRef(), size=(-1,150), style=wx.TE_MULTILINE)
 		if wx.VERSION_STRING >= '4.0': self.log.SetToolTipString = self.log.SetToolTip
 		self.log.SetToolTipString(_("Plug-in documentation area.\nSelect plug-in in order to print its documentation."))
 
@@ -493,7 +494,7 @@ class PluginsPanel(wx.Panel):
 
 		### Buttons
 		selBtn = wx.Button(self.leftPanel, wx.ID_SELECTALL, size=(140, -1))
-		desBtn = wx.Button(self.leftPanel, wx.Window.NewControlId(), _('Deselect All'), size=(140, -1))
+		desBtn = wx.Button(self.leftPanel, wx.NewIdRef(), _('Deselect All'), size=(140, -1))
 		self.configBtn = wx.Button(self.leftPanel, wx.ID_PROPERTIES, size=(140, -1))
 		self.configBtn.Enable(False)
 
@@ -699,9 +700,9 @@ class ModelPluginsManager(wx.Frame):
 		# make a menu
 		menu = wx.Menu()
 
-		enable = wx.MenuItem(menu, wx.Window.NewControlId(), _('Enable'), _("Enable the plugin"))
-		disable = wx.MenuItem(menu, wx.Window.NewControlId(), _('Disable'), _("Disable the plugin"))
-		edit = wx.MenuItem(menu, wx.Window.NewControlId(), _('Edit'), _("Edit the plugin"))
+		enable = wx.MenuItem(menu, wx.NewIdRef(), _('Enable'), _("Enable the plugin"))
+		disable = wx.MenuItem(menu, wx.NewIdRef(), _('Disable'), _("Disable the plugin"))
+		edit = wx.MenuItem(menu, wx.NewIdRef(), _('Edit'), _("Edit the plugin"))
 		
 		enable.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'enable_plugin.png')))
 		disable.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'disable_plugin.png')))
@@ -744,7 +745,7 @@ class ModelPluginsManager(wx.Frame):
 
 		### editor frame for the text of plug-ins
 		editorFrame = Editor.GetEditor(None, \
-									wx.Window.NewControlId(), \
+									wx.NewIdRef(), \
 									_("%s - Plug-ins Editor")%os.path.basename(model.model_path), \
 									model, \
 									file_type = 'block')

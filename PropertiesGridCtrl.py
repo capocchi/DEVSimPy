@@ -60,10 +60,10 @@ class DictionaryEditor(wx.Dialog):
 
 		self.parent = parent
 
-		panel = wx.Panel(self, wx.Window.NewControlId())
+		panel = wx.Panel(self, wx.NewIdRef())
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
-		self.elb = EditableListBox(panel, wx.Window.NewControlId(), _("Dictionary manager"))
+		self.elb = EditableListBox(panel, wx.NewIdRef(), _("Dictionary manager"))
 
 		D = eval(values) if values!='' else {}
 
@@ -139,10 +139,10 @@ class ListEditor(wx.Dialog):
 
 		self.parent = parent
 
-		panel = wx.Panel(self, wx.Window.NewControlId())
+		panel = wx.Panel(self, wx.NewIdRef())
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
-		self.elb = EditableListBox(panel, wx.Window.NewControlId(), _("List manager"))
+		self.elb = EditableListBox(panel, wx.NewIdRef(), _("List manager"))
 
 		L = eval(values) if values!='' else []
 
@@ -260,7 +260,7 @@ class CodeCB(wx.Choicebook):
 		for nameFunc in pageTexts:
 			win = wx.Panel(self)
 			box = wx.BoxSizer( wx.HORIZONTAL)
-			st = wx.TextCtrl(win, wx.Window.NewControlId(), '', style = wx.TE_MULTILINE)
+			st = wx.TextCtrl(win, wx.NewIdRef(), '', style = wx.TE_MULTILINE)
 			try:
 				txt = str(pageTexts[nameFunc], errors='replace')
 			except TypeError:
@@ -666,7 +666,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 		""" Constructor
 		"""
 
-		gridlib.Grid.__init__(self, parent, wx.Window.NewControlId())
+		gridlib.Grid.__init__(self, parent, wx.NewIdRef())
 		Subject.__init__(self)
 
 		# local copy
@@ -1039,7 +1039,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 			self.AcceptProp(row, col)
 
 		elif typ == "list":
-			frame = ListEditor(self, wx.Window.NewControlId(),_('List editor'), values=self.GetCellValue(row, 1))
+			frame = ListEditor(self, wx.NewIdRef(),_('List editor'), values=self.GetCellValue(row, 1))
 			if frame.ShowModal() == wx.ID_CANCEL:
 				self.SetCellValue(row, 1, frame.GetValueAsString())
 			else:
@@ -1048,7 +1048,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 			self.AcceptProp(row, col)
 
 		elif typ == 'dict':
-			frame = DictionaryEditor(self, wx.Window.NewControlId(),_('List editor'), values=self.GetCellValue(row, 1))
+			frame = DictionaryEditor(self, wx.NewIdRef(),_('List editor'), values=self.GetCellValue(row, 1))
 			if frame.ShowModal() == wx.ID_CANCEL:
 				self.SetCellValue(row, 1, frame.GetValueAsString())
 			else:
@@ -1072,7 +1072,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 
 			# code updating
 			if isinstance(model, Achievable):
-				new_code = CodeCB(self.parent, wx.Window.NewControlId(), model)
+				new_code = CodeCB(self.parent, wx.NewIdRef(), model)
 				#self.parent.boxH.Remove(0)
 				if hasattr(self.parent, '_boxH'):
 					# DeleteWindows work better in vista

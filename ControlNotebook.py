@@ -148,7 +148,7 @@ class GeneralNotebook(Observer):
 			str=None
 			if isinstance(model, Attributable):
 				if model != self.selected_model:
-					newContent = AttributeEditor(propPanel, wx.Window.NewControlId(), model, canvas)
+					newContent = AttributeEditor(propPanel, wx.NewIdRef(), model, canvas)
 					propPanel.UpdatePropertiesPage(newContent)
 					
 					self.selected_model = model
@@ -176,19 +176,7 @@ try:
 except:
 	pass
 
-def static_vars(**kwargs):
-    def decorate(func):
-        for k in kwargs:
-            setattr(func, k, kwargs[k])
-        return func
-    return decorate
-
-@static_vars(next=wx.ID_HIGHEST)
-def StaticId():
-    StaticId.next += 1
-    return StaticId.next
-
-MENU_EDIT_DELETE_PAGE = StaticId()
+MENU_EDIT_DELETE_PAGE = wx.NewIdRef()
 
 if USE_FLATNOTEBOOK:
 	#-------------------------------------------------------------------

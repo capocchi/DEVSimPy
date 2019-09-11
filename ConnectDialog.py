@@ -44,12 +44,12 @@ class ConnectDialog(wx.Frame):
 		L1.append("%s"%_('All'))
 		L2.append("%s"%_('All'))
 
-		self._label_source = wx.StaticText(self, wx.Window.NewControlId(), '%s:'%self.sn)
-		self._label_target = wx.StaticText(self, wx.Window.NewControlId(), '%s:'%self.tn)
-		self._combo_box_sn = wx.ComboBox(self, wx.Window.NewControlId(), choices = L1, style = wx.CB_DROPDOWN|wx.CB_READONLY|wx.CB_SORT)
-		self._combo_box_tn = wx.ComboBox(self, wx.Window.NewControlId(), choices = L2, style = wx.CB_DROPDOWN|wx.CB_READONLY|wx.CB_SORT)
-		self._button_disconnect = wx.Button(self, wx.Window.NewControlId(), _("Disconnect"))
-		self._button_connect = wx.Button(self, wx.Window.NewControlId(), _("Connect"))
+		self._label_source = wx.StaticText(self, wx.NewIdRef(), '%s:'%self.sn)
+		self._label_target = wx.StaticText(self, wx.NewIdRef(), '%s:'%self.tn)
+		self._combo_box_sn = wx.ComboBox(self, wx.NewIdRef(), choices = L1, style = wx.CB_DROPDOWN|wx.CB_READONLY|wx.CB_SORT)
+		self._combo_box_tn = wx.ComboBox(self, wx.NewIdRef(), choices = L2, style = wx.CB_DROPDOWN|wx.CB_READONLY|wx.CB_SORT)
+		self._button_disconnect = wx.Button(self, wx.NewIdRef(), _("Disconnect"))
+		self._button_connect = wx.Button(self, wx.NewIdRef(), _("Connect"))
 
 		self._combo_box_sn.SetSelection(0)
 		self._combo_box_tn.SetSelection(0)

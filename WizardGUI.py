@@ -200,14 +200,14 @@ class wizard_page(WizardPage):
 		WizardPage.__init__(self, parent)
 		self.next = self.prev = None
 		self.sizer = wx.BoxSizer(wx.VERTICAL)
-		self.title = wx.StaticText(self, wx.Window.NewControlId(), title)
+		self.title = wx.StaticText(self, wx.NewIdRef(), title)
 		self.title.SetFont(wx.Font(18, wx.SWISS, wx.NORMAL, wx.BOLD))
 		if wx.VERSION_STRING<'4.0':
 			self.sizer.AddWindow(self.title, 0, wx.ALIGN_LEFT|wx.ALL, padding)
-			self.sizer.AddWindow(wx.StaticLine(self, wx.Window.NewControlId()), 0, wx.EXPAND|wx.ALL, padding)
+			self.sizer.AddWindow(wx.StaticLine(self, wx.NewIdRef()), 0, wx.EXPAND|wx.ALL, padding)
 		else:
 			self.sizer.Add(self.title, 0, wx.ALIGN_LEFT|wx.ALL, padding)
-			self.sizer.Add(wx.StaticLine(self, wx.Window.NewControlId()), 0, wx.EXPAND|wx.ALL, padding)
+			self.sizer.Add(wx.StaticLine(self, wx.NewIdRef()), 0, wx.EXPAND|wx.ALL, padding)
 				
 		self.SetSizer(self.sizer)
 
@@ -241,7 +241,7 @@ class Wizard(wizmod):
 				img = wx.Bitmap(img_filename)
 		else:
 				img = wx.NullBitmap
-		wizmod.__init__(self, parent, wx.Window.NewControlId(), title, img)
+		wizmod.__init__(self, parent, wx.NewIdRef(), title, img)
 
 		self.SetPageSize((400,300))
 
@@ -333,22 +333,22 @@ class ModelGeneratorWizard(Wizard):
 
 		# Create a page 1
 		page1 = wizard_page(self, _('Type of Model'))
-		bt1 = wx.RadioButton(page1, wx.Window.NewControlId(), _('Atomic model'), style = wx.RB_GROUP )
-		bt2 = wx.RadioButton(page1, wx.Window.NewControlId(), _('Coupled model'))
+		bt1 = wx.RadioButton(page1, wx.NewIdRef(), _('Atomic model'), style = wx.RB_GROUP )
+		bt2 = wx.RadioButton(page1, wx.NewIdRef(), _('Coupled model'))
 		if wx.VERSION_STRING >= '4.0':
 			bt1.SetToolTipString = bt1.SetToolTip
 			bt2.SetToolTipString = bt2.SetToolTip
 
 		bt1.SetToolTipString(_("DEVS classic atomic model. It is used to define the behavior (or a part of behavior) of the system"))
 		bt2.SetToolTipString(_("DEVS classic coupled model. It is used to define the structure (or a part of structure) of the system"))
-		page1.add_stuff(wx.StaticText(page1, wx.Window.NewControlId(), _('Choose the type of model:')))
+		page1.add_stuff(wx.StaticText(page1, wx.NewIdRef(), _('Choose the type of model:')))
 		page1.add_stuff(bt1)
 		page1.add_stuff(bt2)
 
 		### if left click on the DetachedFrame, port instance can be created
 		if isinstance(parent.GetTopLevelParent(), Container.DetachedFrame):
-			bt3 = wx.RadioButton(page1, wx.Window.NewControlId(), _('Input Port'))
-			bt4 = wx.RadioButton(page1, wx.Window.NewControlId(), _('Output Port'))
+			bt3 = wx.RadioButton(page1, wx.NewIdRef(), _('Input Port'))
+			bt4 = wx.RadioButton(page1, wx.NewIdRef(), _('Output Port'))
 			if wx.VERSION_STRING >= '4.0':
 				bt3.SetToolTipString = bt3.SetToolTip
 				bt4.SetToolTipString = bt4.SetToolTip
@@ -405,31 +405,31 @@ class ModelGeneratorWizard(Wizard):
 
 		# Create a page 2
 		page2 = wizard_page(self, _('Atomic Model (AMD)'))
-		sb1 = wx.StaticBoxSizer(wx.StaticBox(page2, wx.Window.NewControlId(), _('Properties')), orient=wx.VERTICAL)
+		sb1 = wx.StaticBoxSizer(wx.StaticBox(page2, wx.NewIdRef(), _('Properties')), orient=wx.VERTICAL)
 		vb1 = wx.BoxSizer(wx.VERTICAL)
 		vbox2 = wx.GridSizer(6, 2, 3, 3)
-		bt5 = wx.CheckBox(page2, wx.Window.NewControlId(), _('Default python file'))
+		bt5 = wx.CheckBox(page2, wx.NewIdRef(), _('Default python file'))
 		bt5.SetValue(True)
 		if wx.VERSION_STRING >= '4.0': bt5.SetToolTipString = bt5.SetToolTip 
 		bt5.SetToolTipString(_("Choose python file from specific directory"))
-		bt51 = wx.CheckBox(page2, wx.Window.NewControlId(), _('No plugin file'))
+		bt51 = wx.CheckBox(page2, wx.NewIdRef(), _('No plugin file'))
 		if wx.VERSION_STRING >= '4.0': bt51.SetToolTipString = bt51.SetToolTip
 		bt51.SetToolTipString(_("Choose plugin file from specific directory"))
 		bt51.SetValue(True)
-		cb0 = wx.ComboBox(page2, wx.Window.NewControlId(), _('Default'), choices=[_('Default'),_('Generator'),_('Viewer'), _('Collector')], style=wx.CB_READONLY)
+		cb0 = wx.ComboBox(page2, wx.NewIdRef(), _('Default'), choices=[_('Default'),_('Generator'),_('Viewer'), _('Collector')], style=wx.CB_READONLY)
 		# filebrowse properties
-		fb1 = filebrowse.FileBrowseButton(page2, wx.Window.NewControlId(), startDirectory=DOMAIN_PATH, labelText="", fileMask='*.py', toolTip=bt5.GetToolTip().GetTip(), changeCallback=python_path_call_back)
-		fb12 = filebrowse.FileBrowseButton(page2, wx.Window.NewControlId(), startDirectory=DOMAIN_PATH, labelText="", fileMask='plugins.py', toolTip=bt51.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
+		fb1 = filebrowse.FileBrowseButton(page2, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='*.py', toolTip=bt5.GetToolTip().GetTip(), changeCallback=python_path_call_back)
+		fb12 = filebrowse.FileBrowseButton(page2, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='plugins.py', toolTip=bt51.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
 		fb1.Enable(False)
 		fb12.Enable(False)
-		vbox2.AddMany([ (wx.StaticText(page2, wx.Window.NewControlId(), _('Label')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(wx.TextCtrl(page2, wx.Window.NewControlId(), value = _("Atomic_Name"),validator=TextObjectValidator()), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(wx.StaticText(page2, wx.Window.NewControlId(), _('Specific Behavior')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+		vbox2.AddMany([ (wx.StaticText(page2, wx.NewIdRef(), _('Label')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+				(wx.TextCtrl(page2, wx.NewIdRef(), value = _("Atomic_Name"),validator=TextObjectValidator()), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+				(wx.StaticText(page2, wx.NewIdRef(), _('Specific Behavior')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
 				(cb0, 0,wx.EXPAND),
-				(wx.StaticText(page2, wx.Window.NewControlId(), _('Inputs')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(wx.SpinCtrl(page2, wx.Window.NewControlId(), '1', min=MIN_NB_PORT, max=MAX_NB_PORT), 0,wx.EXPAND),
-				(wx.StaticText(page2, wx.Window.NewControlId(), _('Outputs')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(wx.SpinCtrl(page2, wx.Window.NewControlId(), '1', min=MIN_NB_PORT, max=MAX_NB_PORT), 0,wx.EXPAND),
+				(wx.StaticText(page2, wx.NewIdRef(), _('Inputs')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+				(wx.SpinCtrl(page2, wx.NewIdRef(), '1', min=MIN_NB_PORT, max=MAX_NB_PORT), 0,wx.EXPAND),
+				(wx.StaticText(page2, wx.NewIdRef(), _('Outputs')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+				(wx.SpinCtrl(page2, wx.NewIdRef(), '1', min=MIN_NB_PORT, max=MAX_NB_PORT), 0,wx.EXPAND),
 				(bt5,0),
 				(fb1,0,wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
 				(bt51,0),
@@ -442,28 +442,28 @@ class ModelGeneratorWizard(Wizard):
 
 		# Create a page 3
 		page3 = wizard_page(self, _('Coupled Model (CMD)'))
-		sb2 = wx.StaticBoxSizer(wx.StaticBox(page3, wx.Window.NewControlId(), _('Properties')), orient=wx.VERTICAL)
+		sb2 = wx.StaticBoxSizer(wx.StaticBox(page3, wx.NewIdRef(), _('Properties')), orient=wx.VERTICAL)
 		vb2 = wx.BoxSizer(wx.VERTICAL)
 		vbox3 = wx.GridSizer(6,2,3,3)
-		bt6 = wx.CheckBox(page3, wx.Window.NewControlId(), _('Default python file'))
+		bt6 = wx.CheckBox(page3, wx.NewIdRef(), _('Default python file'))
 		if wx.VERSION_STRING >= '4.0': bt6.SetToolTipString = bt6.SetToolTip
 		bt6.SetToolTipString(bt5.GetToolTip().GetTip())
 		bt6.SetValue(True)
-		bt61 = wx.CheckBox(page3, wx.Window.NewControlId(), _('No plugin file'))
+		bt61 = wx.CheckBox(page3, wx.NewIdRef(), _('No plugin file'))
 		if wx.VERSION_STRING >= '4.0': bt61.SetToolTipString = bt61.SetToolTip
 		bt61.SetToolTipString(bt51.GetToolTip().GetTip())
 		bt61.SetValue(True)
 		# filebrowse properties
-		fb4 = filebrowse.FileBrowseButton(page3, wx.Window.NewControlId(), startDirectory=DOMAIN_PATH, labelText="", fileMask='*.py', toolTip=bt6.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
-		fb41 = filebrowse.FileBrowseButton(page3, wx.Window.NewControlId(), startDirectory=DOMAIN_PATH, labelText="", fileMask='plugins.py', toolTip=bt61.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
+		fb4 = filebrowse.FileBrowseButton(page3, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='*.py', toolTip=bt6.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
+		fb41 = filebrowse.FileBrowseButton(page3, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='plugins.py', toolTip=bt61.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
 		fb4.Enable(False)
 		fb41.Enable(False)
-		vbox3.AddMany([ (wx.StaticText(page3, wx.Window.NewControlId(), _('Label')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(wx.TextCtrl(page3, wx.Window.NewControlId(), value = _("Coupled_Name"),validator=TextObjectValidator()), 0,  wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(wx.StaticText(page3, wx.Window.NewControlId(), _('Inputs')), 0,  wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(wx.SpinCtrl(page3, wx.Window.NewControlId(), '1', min = MIN_NB_PORT, max = MAX_NB_PORT), 0, wx.EXPAND),
-				(wx.StaticText(page3, wx.Window.NewControlId(), _('Outputs')), 0,  wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(wx.SpinCtrl(page3, wx.Window.NewControlId(), '1', min = MIN_NB_PORT, max = MAX_NB_PORT), 0, wx.EXPAND),
+		vbox3.AddMany([ (wx.StaticText(page3, wx.NewIdRef(), _('Label')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+				(wx.TextCtrl(page3, wx.NewIdRef(), value = _("Coupled_Name"),validator=TextObjectValidator()), 0,  wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+				(wx.StaticText(page3, wx.NewIdRef(), _('Inputs')), 0,  wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+				(wx.SpinCtrl(page3, wx.NewIdRef(), '1', min = MIN_NB_PORT, max = MAX_NB_PORT), 0, wx.EXPAND),
+				(wx.StaticText(page3, wx.NewIdRef(), _('Outputs')), 0,  wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+				(wx.SpinCtrl(page3, wx.NewIdRef(), '1', min = MIN_NB_PORT, max = MAX_NB_PORT), 0, wx.EXPAND),
 				(bt6,0),
 				(fb4,0,wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
 				(bt61,0),
@@ -479,7 +479,7 @@ class ModelGeneratorWizard(Wizard):
 		# save filebrowse
 		init = os.path.join(domain_path, "%s.amd"%vbox2.GetItem(1).GetWindow().GetValue())
 		fb2 = filebrowse.FileBrowseButton(	page4_1,
-											wx.Window.NewControlId(),
+											wx.NewIdRef(),
 											initialValue = init,
 											fileMode=wx.SAVE,
 											#startDirectory = DOMAIN_PATH,
@@ -493,7 +493,7 @@ class ModelGeneratorWizard(Wizard):
 		init =  os.path.join(domain_path, "%s.cmd"%vbox3.GetItem(1).GetWindow().GetValue())
 		# save filebrowse
 		fb3 = filebrowse.FileBrowseButton(	page4_2,
-											wx.Window.NewControlId(),
+											wx.NewIdRef(),
 											initialValue = init,
 											fileMode=wx.SAVE,
 											#startDirectory = DOMAIN_PATH,
@@ -503,22 +503,22 @@ class ModelGeneratorWizard(Wizard):
 
 		# Create a page 5
 		page5 = wizard_page(self, _('Finish'))
-		page5.add_stuff(wx.StaticText(page5, wx.Window.NewControlId(), _('Port model has been created.')))
+		page5.add_stuff(wx.StaticText(page5, wx.NewIdRef(), _('Port model has been created.')))
 
 		### if left click on the DetachedFrame, port instance can be created
 		if isinstance(parent.GetTopLevelParent(), Container.DetachedFrame):
 			# Create a page 6
 			page6 = wizard_page(self, _('Input Port'))
-			sb3 = wx.StaticBoxSizer(wx.StaticBox(page6, wx.Window.NewControlId(), _('Properties')), orient = wx.VERTICAL)
+			sb3 = wx.StaticBoxSizer(wx.StaticBox(page6, wx.NewIdRef(), _('Properties')), orient = wx.VERTICAL)
 			vb3 = wx.BoxSizer(wx.VERTICAL)
 			#page6.add_stuff(wx.StaticBox(page6, -1, _('Properties')))
-			cb_id1 = wx.CheckBox(page6, wx.Window.NewControlId(), _('Automatic Id'))
-			spin_id1 = wx.SpinCtrl(page6, wx.Window.NewControlId(), str(parent.diagram.GetiPortCount()), min = MIN_NB_PORT, max = MAX_NB_PORT)
+			cb_id1 = wx.CheckBox(page6, wx.NewIdRef(), _('Automatic Id'))
+			spin_id1 = wx.SpinCtrl(page6, wx.NewIdRef(), str(parent.diagram.GetiPortCount()), min = MIN_NB_PORT, max = MAX_NB_PORT)
 			cb_id1.SetValue(True)
 			spin_id1.Enable(False)
 			vbox6 = wx.GridSizer(2, 2, 3, 3)
-			vbox6.AddMany([ (wx.StaticText(page6, wx.Window.NewControlId(), _('Label')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-						(wx.TextCtrl(page6, wx.Window.NewControlId(), value = _("IPort ")), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+			vbox6.AddMany([ (wx.StaticText(page6, wx.NewIdRef(), _('Label')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+						(wx.TextCtrl(page6, wx.NewIdRef(), value = _("IPort ")), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
 						(cb_id1,0),
 						(spin_id1, 0,wx.EXPAND)
 						])
@@ -531,15 +531,15 @@ class ModelGeneratorWizard(Wizard):
 			# Create a page 7
 			page7 = wizard_page(self, _('Output Port'))
 			#page7.add_stuff(wx.StaticBox(page7, -1, _('Properties')))
-			sb4 = wx.StaticBoxSizer(wx.StaticBox(page7, wx.Window.NewControlId(), _('Properties')), orient=wx.VERTICAL)
+			sb4 = wx.StaticBoxSizer(wx.StaticBox(page7, wx.NewIdRef(), _('Properties')), orient=wx.VERTICAL)
 			vb4 = wx.BoxSizer(wx.VERTICAL)
-			cb_id2 = wx.CheckBox(page7, wx.Window.NewControlId(), _('Automatic Id'))
-			spin_id2 = wx.SpinCtrl(page7, wx.Window.NewControlId(), str(parent.diagram.GetoPortCount()), min = MIN_NB_PORT, max = MAX_NB_PORT)
+			cb_id2 = wx.CheckBox(page7, wx.NewIdRef(), _('Automatic Id'))
+			spin_id2 = wx.SpinCtrl(page7, wx.NewIdRef(), str(parent.diagram.GetoPortCount()), min = MIN_NB_PORT, max = MAX_NB_PORT)
 			cb_id2.SetValue(True)
 			spin_id2.Enable(False)
 			vbox7 = wx.GridSizer(2, 2, 3, 3)
-			vbox7.AddMany([ (wx.StaticText(page7, wx.Window.NewControlId(), _('Label')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-							(wx.TextCtrl(page7, wx.Window.NewControlId(), value = _("OPort ")), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+			vbox7.AddMany([ (wx.StaticText(page7, wx.NewIdRef(), _('Label')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+							(wx.TextCtrl(page7, wx.NewIdRef(), value = _("OPort ")), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
 							(cb_id2,0),
 							(spin_id2, 0,wx.EXPAND)
 						])

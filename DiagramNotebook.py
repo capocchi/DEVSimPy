@@ -98,7 +98,7 @@ class GeneralNotebook(Printable):
 		title = title+"(%d)"%c if c != 0 else title
 
 		### new page
-		newPage = Container.ShapeCanvas(self, wx.Window.NewControlId(), name=title)
+		newPage = Container.ShapeCanvas(self, wx.NewIdRef(), name=title)
 
 		### new diagram
 		d = defaultDiagram or Container.Diagram()
@@ -163,7 +163,7 @@ class GeneralNotebook(Printable):
 		canvas = self.GetPage(selection)
 		title = self.GetPageText(selection)
 
-		frame = DetachedFrame(canvas, wx.Window.NewControlId(), title, canvas.GetDiagram())
+		frame = DetachedFrame(canvas, wx.NewIdRef(), title, canvas.GetDiagram())
 		frame.SetIcon(mainW.icon)
 		frame.SetFocus()
 		frame.Show()

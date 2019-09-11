@@ -2,26 +2,11 @@
 
 import sys
 import wx
-#import webbrowser
 
 from wxPyMail import SendMailWx
 from Utilities import FormatTrace, EnvironmentInfo, GetActiveWindow
 
 _ = wx.GetTranslation
-
-def static_vars(**kwargs):
-    def decorate(func):
-        for k in kwargs:
-            setattr(func, k, kwargs[k])
-        return func
-    return decorate
-
-@static_vars(next=wx.ID_HIGHEST)
-def StaticId():
-    StaticId.next += 1
-    return StaticId.next 
-
-ID_SEND = StaticId()
 
 class BaseDialog(wx.Dialog):
     """ A wx.Dialog base class.

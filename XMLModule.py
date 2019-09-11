@@ -16,6 +16,7 @@ import sys
 import re
 import copy
 import tempfile
+import wx
 
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
@@ -619,7 +620,7 @@ if __name__ == '__main__':
 			diagram = Container.Diagram()
 			
 			self.frame = DetachedFrame.DetachedFrame(None, -1, "Test", diagram)
-			newPage = Container.ShapeCanvas(self.frame, wx.Window.NewControlId(), name='Test')
+			newPage = Container.ShapeCanvas(self.frame, wx.NewIdRef(), name='Test')
 			newPage.SetDiagram(diagram)
 
 			path = os.path.join(os.path.expanduser("~"),'Downloads','Watershed.xml')

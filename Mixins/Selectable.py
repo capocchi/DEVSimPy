@@ -11,8 +11,8 @@ GENERAL NOTES AND REMARKS:
 GLOBAL VARIABLES AND FUNCTIONS:
 """
 
-
 import gettext
+import wx
 
 _ = gettext.gettext
 
@@ -74,5 +74,5 @@ class Selectable:
                 mainW = wx.GetApp().GetTopWindow()
                 nb1 = mainW.GetControlNotebook()
                 if nb1.GetSelection() == 1:
-                    newContent = AttributeEditor(nb1.propPanel, wx.Window.NewControlId(), self, canvas)
+                    newContent = AttributeEditor(nb1.propPanel, wx.NewIdRef(), self, canvas)
                     nb1.UpdatePropertiesPage(newContent)

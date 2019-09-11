@@ -28,7 +28,6 @@ import linecache
 import wx
 
 import DiagramNotebook
-#import Components
 
 from PropertiesGridCtrl import PropertiesGridCtrl, CodeCB
 from DetachedFrame import DetachedFrame
@@ -76,7 +75,7 @@ class AttributeBase(object):
 
 		if isinstance(self.model, Achievable):
 			self._boxH = wx.BoxSizer(wx.HORIZONTAL)
-			self._code = CodeCB(self, wx.Window.NewControlId(), self.model)
+			self._code = CodeCB(self, wx.NewIdRef(), self.model)
 			self._boxH.Add(self._code, 1, wx.ALL|wx.EXPAND, userData='code')
 			self._box.Add(self._boxH, 1, wx.ALL|wx.EXPAND, userData='code')
 
@@ -193,7 +192,7 @@ class AttributeEditorFrame(AttributeBase, wx.Frame):
 		wx.Frame.__init__(self, parent, ID, model.label, size = wx.Size(400, 550), style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN )
 		self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'properties.png'), wx.BITMAP_TYPE_PNG)))
 		self.Bind(wx.EVT_CLOSE, self.OnClose)		
-	
+		
 		AttributeBase.__init__(self, parent, ID, model, canvas)
 		
 ###
@@ -220,8 +219,8 @@ class QuickAttributeEditor(wx.Frame, Subject):
 		self.attach(self.canvas.GetDiagram())
 
 		#spinCtrl for input and output port numbers
-		self._sb_input = wx.SpinCtrl(self, wx.Window.NewControlId(), size=(60,-1), min=0, max=100)
-		self._sb_output = wx.SpinCtrl(self, wx.Window.NewControlId(), size=(60,-1), min=0, max=100)
+		self._sb_input = wx.SpinCtrl(self, wx.NewIdRef(), size=(60,-1), min=0, max=100)
+		self._sb_output = wx.SpinCtrl(self, wx.NewIdRef(), size=(60,-1), min=0, max=100)
 
 		# mouse positions
 		xwindow, ywindow = wx.GetMousePosition()

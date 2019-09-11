@@ -28,7 +28,7 @@ class PropPanel(wx.Panel):
 	"""
 	"""
 	def __init__(self, parent, name):
-		wx.Panel.__init__(self, parent=parent, id=wx.Window.NewControlId(), name=name)
+		wx.Panel.__init__(self, parent=parent, id=wx.NewIdRef(), name=name)
 
 		self.frame = parent
 		
@@ -46,7 +46,7 @@ class PropPanel(wx.Panel):
 		"""
 		"""
 
-		propContent = wx.StaticText(self, wx.Window.NewControlId(), _("Select a model from diagram \n to see their properties."))
+		propContent = wx.StaticText(self, wx.NewIdRef(), _("Select a model from diagram \n to see their properties."))
 		sum_font = propContent.GetFont()
 		sum_font.SetWeight(wx.BOLD)
 		propContent.SetFont(sum_font)

@@ -28,11 +28,11 @@ class DiagramConstantsDialog(wx.Dialog):
 		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "properties.png"), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(icon)
 
-		self._panel = wx.Panel(self, wx.Window.NewControlId())
+		self._panel = wx.Panel(self, wx.NewIdRef())
 
 		grid_sizer_1 = wx.GridSizer(1, 2, 0, 0)
 
-		self._grid = wx.grid.Grid(self._panel, wx.Window.NewControlId(), size=(200, 100))
+		self._grid = wx.grid.Grid(self._panel, wx.NewIdRef(), size=(200, 100))
 		self._grid.AutoSizeColumns(True)
 		self._grid.CreateGrid(1, 2)
 		self._grid.SetColLabelValue(0, _("Name"))
@@ -65,8 +65,8 @@ class DiagramConstantsDialog(wx.Dialog):
 		grid_sizer_3.Add(self._button_remove, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
 		grid_sizer_3.Add((-1,50), 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
 
-		self._button_import = wx.Button(self._panel, wx.Window.NewControlId(), _("Import"))
-		self._button_export = wx.Button(self._panel, wx.Window.NewControlId(), _("Export"))
+		self._button_import = wx.Button(self._panel, wx.NewIdRef(), _("Import"))
+		self._button_export = wx.Button(self._panel, wx.NewIdRef(), _("Export"))
 		self._button_import.SetDefault()
 
 		sizer_2 = wx.BoxSizer(wx.VERTICAL)
@@ -138,7 +138,7 @@ class DiagramConstantsDialog(wx.Dialog):
 				# log the bad row to a file
 				file.write(oldrow + '\n')
 
-			dlg = DSV.ImportWizardDialog(self, wx.Window.NewControlId(), _('CSV Import Wizard'), path)
+			dlg = DSV.ImportWizardDialog(self, wx.NewIdRef(), _('CSV Import Wizard'), path)
 			if dlg.ShowModal() == wx.ID_OK:
 				results = dlg.ImportData(errorHandler = logErrors)
 				dlg.Destroy()

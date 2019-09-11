@@ -40,7 +40,7 @@ class SendMailWx(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, None, -1, _('New Email Message (From Google account)'),
                           size=(600,400))
-        self.panel = wx.Panel(self, wx.Window.NewControlId())
+        self.panel = wx.Panel(self, wx.NewIdRef())
 
         # set your email address here
         self.email = 'your_email@gmail.com'
@@ -67,8 +67,8 @@ class SendMailWx(wx.Frame):
         menubar = wx.MenuBar()
         
         fileMenu = wx.Menu()
-        send_menu_item = fileMenu.Append(wx.Window.NewControlId(), _('&Send'), _('Sends the email'))
-        close_menu_item = fileMenu.Append(wx.Window.NewControlId(), _('&Close'), _('Closes the window'))
+        send_menu_item = fileMenu.Append(wx.NewIdRef(), _('&Send'), _('Sends the email'))
+        close_menu_item = fileMenu.Append(wx.NewIdRef(), _('&Close'), _('Closes the window'))
         menubar.Append(fileMenu, _('&File'))
         self.SetMenuBar(menubar)
 
@@ -88,18 +88,18 @@ class SendMailWx(wx.Frame):
         p = self.panel
               
         font = wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD)
-        self.fromLbl    = wx.StaticText(p, wx.Window.NewControlId(), _('From'), size=(60,-1))
-        self.fromTxt    = wx.TextCtrl(p, wx.Window.NewControlId(), self.email)
-        self.toLbl      = wx.StaticText(p, wx.Window.NewControlId(), _('To:'), size=(60,-1))
-        self.toTxt      = wx.TextCtrl(p, wx.Window.NewControlId(), 'capocchi_l@univ-corse.fr')
-        self.subjectLbl = wx.StaticText(p, wx.Window.NewControlId(), _(' Subject:'), size=(60,-1))
-        self.subjectTxt = wx.TextCtrl(p, wx.Window.NewControlId(), '')
-        self.attachBtn  = wx.Button(p, wx.Window.NewControlId(), _('Attachments'))        
-        self.attachTxt  = wx.TextCtrl(p, wx.Window.NewControlId(), '', style=wx.TE_MULTILINE)
+        self.fromLbl    = wx.StaticText(p, wx.NewIdRef(), _('From'), size=(60,-1))
+        self.fromTxt    = wx.TextCtrl(p, wx.NewIdRef(), self.email)
+        self.toLbl      = wx.StaticText(p, wx.NewIdRef(), _('To:'), size=(60,-1))
+        self.toTxt      = wx.TextCtrl(p, wx.NewIdRef(), 'capocchi_l@univ-corse.fr')
+        self.subjectLbl = wx.StaticText(p, wx.NewIdRef(), _(' Subject:'), size=(60,-1))
+        self.subjectTxt = wx.TextCtrl(p, wx.NewIdRef(), '')
+        self.attachBtn  = wx.Button(p, wx.NewIdRef(), _('Attachments'))        
+        self.attachTxt  = wx.TextCtrl(p, wx.NewIdRef(), '', style=wx.TE_MULTILINE)
         self.attachTxt.Disable()
-        self.editAttachBtn = wx.Button(p, wx.Window.NewControlId(), _('Edit Attachments'))
+        self.editAttachBtn = wx.Button(p, wx.NewIdRef(), _('Edit Attachments'))
         
-        self.messageTxt = wx.TextCtrl(p, wx.Window.NewControlId(), '', style=wx.TE_MULTILINE)
+        self.messageTxt = wx.TextCtrl(p, wx.NewIdRef(), '', style=wx.TE_MULTILINE)
 
         self.Bind(wx.EVT_BUTTON, self.onAttach, self.attachBtn)
         self.Bind(wx.EVT_BUTTON, self.onAttachEdit, self.editAttachBtn)
@@ -334,9 +334,9 @@ class EditDialog(wx.Dialog):
         self.filepaths = filepaths
         
         instructions = _('Check the items below that you no longer wish to attach to the email')
-        lbl = wx.StaticText(self, wx.Window.NewControlId(), instructions)
-        deleteBtn = wx.Button(self, wx.Window.NewControlId(), _('Delete Items'))
-        cancelBtn = wx.Button(self, wx.Window.NewControlId(), _('Cancel'))
+        lbl = wx.StaticText(self, wx.NewIdRef(), instructions)
+        deleteBtn = wx.Button(self, wx.NewIdRef(), _('Delete Items'))
+        cancelBtn = wx.Button(self, wx.NewIdRef(), _('Cancel'))
 
         self.Bind(wx.EVT_BUTTON, self.onDelete, deleteBtn)
         self.Bind(wx.EVT_BUTTON, self.onCancel, cancelBtn)
@@ -345,7 +345,7 @@ class EditDialog(wx.Dialog):
         btnSizer = wx.BoxSizer(wx.HORIZONTAL)
         mainSizer.Add(lbl, 0, wx.ALL, 5)       
         
-        self.chkList = wx.CheckListBox(self, wx.Window.NewControlId(), choices=self.filepaths)
+        self.chkList = wx.CheckListBox(self, wx.NewIdRef(), choices=self.filepaths)
         mainSizer.Add(self.chkList, 0, wx.ALL, 5)
 
         btnSizer.Add(deleteBtn, 0, wx.ALL|wx.CENTER, 5)
@@ -382,13 +382,13 @@ class LoginDlg(wx.Dialog):
         self.loggedIn = False
 
         # widgets
-        userLbl = wx.StaticText(self, wx.Window.NewControlId(), _('Username:'), size=(50, -1))
-        self.userTxt = wx.TextCtrl(self, wx.Window.NewControlId(), '', size=(150, -1))
-        passwordLbl = wx.StaticText(self, wx.Window.NewControlId(), _('Password:'), size=(50, -1))
-        self.passwordTxt = wx.TextCtrl(self, wx.Window.NewControlId(), '', size=(150, -1),
+        userLbl = wx.StaticText(self, wx.NewIdRef(), _('Username:'), size=(50, -1))
+        self.userTxt = wx.TextCtrl(self, wx.NewIdRef(), '', size=(150, -1))
+        passwordLbl = wx.StaticText(self, wx.NewIdRef(), _('Password:'), size=(50, -1))
+        self.passwordTxt = wx.TextCtrl(self, wx.NewIdRef(), '', size=(150, -1),
                                        style=wx.TE_PROCESS_ENTER|wx.TE_PASSWORD)
         loginBtn = wx.Button(self, wx.ID_YES, _('Login'))
-        cancelBtn = wx.Button(self, wx.Window.NewControlId(), _('Cancel'))
+        cancelBtn = wx.Button(self, wx.NewIdRef(), _('Cancel'))
 
         self.Bind(wx.EVT_BUTTON, self.OnLogin, loginBtn)
         self.Bind(wx.EVT_TEXT_ENTER, self.OnTextEnter, self.passwordTxt)

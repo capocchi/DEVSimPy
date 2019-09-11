@@ -5,7 +5,6 @@ import os
 import wx
 import wx.html
 
-
 class HtmlFrame(wx.Frame):
     """ General Frame displaying Html doc
     """
@@ -21,7 +20,7 @@ class HtmlFrame(wx.Frame):
         menubar.Append(file, _('&File'))
         self.SetMenuBar(menubar)
 
-        self.html = wx.html.HtmlWindow(self, wx.Window.NewControlId())
+        self.html = wx.html.HtmlWindow(self, wx.NewIdRef())
         if "gtk2" in wx.PlatformInfo:
             self.html.SetStandardFonts()
 

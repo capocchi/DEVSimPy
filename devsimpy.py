@@ -234,7 +234,7 @@ class MainApplication(wx.Frame):
 		## Set i18n locales --------------------------------------------------------
 		self.Seti18n()
 
-		wx.Frame.__init__(self, parent, wx.Window.NewControlId(), title, size = DefineScreenSize(), style = wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
+		wx.Frame.__init__(self, parent, wx.NewIdRef(), title, size = DefineScreenSize(), style = wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
 
 		self.window = None
 		self.otherWin = None
@@ -265,7 +265,7 @@ class MainApplication(wx.Frame):
 		self.home = None
 
 		# NoteBook
-		self.nb1 = ControlNotebook(self, wx.Window.NewControlId(), style = wx.CLIP_CHILDREN)
+		self.nb1 = ControlNotebook(self, wx.NewIdRef(), style = wx.CLIP_CHILDREN)
 		self.tree = self.nb1.GetTree()
 
 		pub.sendMessage('object.added',  message='Loading the search tab on libraries tree...\n')
@@ -276,7 +276,7 @@ class MainApplication(wx.Frame):
 
 		#------------------------------------------------------------------------------------------
 		# Create a Notebook 2
-		self.nb2 = DiagramNotebook(self, wx.Window.NewControlId(), style = wx.CLIP_CHILDREN)
+		self.nb2 = DiagramNotebook(self, wx.NewIdRef(), style = wx.CLIP_CHILDREN)
 
 		### load .dsp or empty on empty diagram
 		if len(sys.argv) >= 2:
@@ -292,7 +292,7 @@ class MainApplication(wx.Frame):
 		self._mgr.AddPane(self.nb2, aui.AuiPaneInfo().Name("nb2").CenterPane().Hide())
 
 		# Simulation panel
-		self.panel3 = wx.Panel(self.nb1, wx.Window.NewControlId(), style = wx.WANTS_CHARS)
+		self.panel3 = wx.Panel(self.nb1, wx.NewIdRef(), style = wx.WANTS_CHARS)
 		self.panel3.SetBackgroundColour(wx.NullColour)
 		self.panel3.Hide()
 
@@ -300,7 +300,7 @@ class MainApplication(wx.Frame):
 		self.MakeStatusBar()
 
 		# Shell panel
-		self.panel4 = wx.Panel(self, wx.Window.NewControlId(), style=wx.WANTS_CHARS)
+		self.panel4 = wx.Panel(self, wx.NewIdRef(), style=wx.WANTS_CHARS)
 		sizer4 = wx.BoxSizer(wx.VERTICAL)
 		sizer4.Add(py.shell.Shell(self.panel4, introText=_("Welcome to DEVSimPy: The GUI for Python DEVS Simulator")), 1, wx.EXPAND)
 		self.panel4.SetSizer(sizer4)
@@ -536,7 +536,7 @@ class MainApplication(wx.Frame):
 
 		self.tb = self.CreateToolBar(style = wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT, name = 'tb')
 
-		self.toggle_list = [wx.Window.NewControlId(), wx.Window.NewControlId(), wx.Window.NewControlId(), wx.Window.NewControlId(), wx.Window.NewControlId(), wx.Window.NewControlId()]
+		self.toggle_list = [wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef()]
 
 		currentPage = self.nb2.GetCurrentPage()
 
@@ -793,7 +793,7 @@ class MainApplication(wx.Frame):
 			if len(self.perspectives) == 0:
 				self.perspectivesmenu.AppendSeparator()
 
-			ID = wx.Window.NewControlId()
+			ID = wx.NewIdRef()
 			self.perspectivesmenu.Append(ID, txt)
 			self.perspectives[txt] = self._mgr.SavePerspective()
 
@@ -1424,7 +1424,7 @@ class MainApplication(wx.Frame):
 		"""
 
 		# dialog pour l'importation de lib DEVSimPy (dans Domain) et le local
-		dlg = ImportLibrary(self, wx.Window.NewControlId(), _('New/Import Library'), size=(550,400), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+		dlg = ImportLibrary(self, wx.NewIdRef(), _('New/Import Library'), size=(550,400), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 
 		if (dlg.ShowModal() == wx.ID_OK):
 
@@ -2068,7 +2068,7 @@ class AdvancedSplashScreen(AdvancedSplash):
 	def ShowMain(self):
 		""" Shows the main application (DEVSimPy). """
 
-		self.app.frame = MainApplication(None, wx.Window.NewControlId(), 'DEVSimPy - Version %s'%__version__)
+		self.app.frame = MainApplication(None, wx.NewIdRef(), 'DEVSimPy - Version %s'%__version__)
 
 		# keep in a attribute of stdio which is invisible until now
 		self.app.frame.stdioWin = self.app.stdioWin
@@ -2122,8 +2122,8 @@ class PyOnDemandOutputWindow(threading.Thread):
 		self.start()
 
 	def run(self):
-		self.frame = LogFrame(self.parent, wx.Window.NewControlId(), self.title, self.pos, self.size)
-		self.text  = wx.TextCtrl(self.frame, wx.Window.NewControlId(), "", style = wx.TE_MULTILINE|wx.HSCROLL)
+		self.frame = LogFrame(self.parent, wx.NewIdRef(), self.title, self.pos, self.size)
+		self.text  = wx.TextCtrl(self.frame, wx.NewIdRef(), "", style = wx.TE_MULTILINE|wx.HSCROLL)
 		self.text.AppendText(self.st)
 
 	# These methods provide the file-like output behaviour.
