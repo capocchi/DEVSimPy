@@ -136,6 +136,7 @@ class LibraryTree(wx.TreeCtrl):
 		### add DOMAIN_PATH in sys.path whatever happens
 		LibraryTree.AddToSysPath(DOMAIN_PATH)
 
+		L = []
 		for absdName in chargedDomainList:
 
 			### add absdName to sys.path (always before InsertNewDomain)
@@ -146,9 +147,9 @@ class LibraryTree(wx.TreeCtrl):
         	args=(absdName, self.root, list(self.GetSubDomain(absdName, self.GetDomainList(absdName)).values())[0],)
     		).start()
 			#self.InsertNewDomain(absdName, self.root, self.GetSubDomain(absdName, self.GetDomainList(absdName)).values()[0])
-			
-		wx.CallAfter(self.UnselectAll)
-		self.SortChildren(self.root)
+
+		self.UnselectAll()
+		wx.CallAfter(self.SortChildren,self.root)
 
 	###
 	def OnMotion(self, evt):
