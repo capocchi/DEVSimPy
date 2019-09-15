@@ -31,11 +31,10 @@ if __name__ == '__main__':
 	builtins.__dict__['GUI_FLAG'] = True
 
 from wx.lib.mixins.listctrl import ListCtrlAutoWidthMixin, ColumnSorterMixin
-
 from Utilities import GetMails, getInstance
+from Mixins.Attributable import Attributable
 
 import Components
-from Mixins.Attributable import Attributable
 import Container
 
 class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
