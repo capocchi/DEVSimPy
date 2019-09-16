@@ -5,7 +5,6 @@ import wx
 import os
 import builtins
 import csv
-
 import DSV
 
 _ = wx.GetTranslation
