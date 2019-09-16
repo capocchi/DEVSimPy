@@ -31,6 +31,24 @@ DEVSimPy don't require installation and works on all platforms. To launch DEVSim
 $ python devsimpy.py
 ```
 
+# Installation
+
+DEVSimPy depends on PyPubSub version 3.3.1: 
+```sh
+$ pip install PyPubSub==3.3.1
+```
+
+To get DEVSimPy V4.0 package with all Git submodule: 
+```sh
+$ git clone --recurse-submodules -b version-4.0 --depth=1 https://github.com/capocchi/DEVSimPy.git .
+$ git fetch --unshallow 
+```
+
+DEVSimPy don't require installation and works on all platforms. To launch DEVSimPy, you need to execute the devsimpy.py file into a Python prompt:
+```sh
+$ python devsimpy.py
+```
+
 # Documentations
  - DEVSimPy User Guide v2.8 [[pdf]](http://lcapocchi.free.fr/devsimpy/Guide_utilisateur_v2.8.pdf) (French)
  - S. Toma Ph.D, Thesis [[pdf]](https://hal.archives-ouvertes.fr/tel-01141844/document) (English), winner of the 2014 DEVS PhD Dissertation Award.
