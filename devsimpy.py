@@ -155,7 +155,7 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 
 ### Check if the pypdevs241 directory is empty (not --recursive option when the devsimpy git has been cloned)
 path = os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs241')
-if not len(os.listdir(path)) == 0:
+if os.path.exists(path) and not len(os.listdir(path)) == 0:
     builtin_dict['DEVS_DIR_PATH_DICT'].update({'PyPDEVS_241':os.path.join(path ,'src','pypdevs')})
 else:
 	sys.stdout.write("PyPDEVS Kernel in version 2.4.1 is not loaded.\nPlease install it in the directory %s using git (http://msdl.uantwerpen.be/git/yentl/PythonPDEVS.git)"%path)
