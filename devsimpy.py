@@ -158,7 +158,7 @@ path = os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs241')
 if os.path.exists(path) and not len(os.listdir(path)) == 0:
     builtin_dict['DEVS_DIR_PATH_DICT'].update({'PyPDEVS_241':os.path.join(path ,'src','pypdevs')})
 else:
-	sys.stdout.write("PyPDEVS Kernel in version 2.4.1 is not loaded.\nPlease install it in the directory %s using git (http://msdl.uantwerpen.be/git/yentl/PythonPDEVS.git)"%path)
+	sys.stdout.write("PyPDEVS Kernel in version 2.4.1 is not loaded.\nPlease install it in the directory %s using git (http://msdl.uantwerpen.be/git/yentl/PythonPDEVS.git)\n"%path)
 
 ### here berfore the __main__ function
 ### warning, some module (like SimulationGUI) initialise GUI_FLAG macro before (import block below)
@@ -1919,11 +1919,13 @@ class MainApplication(wx.Frame):
 
 		description = _("""DEVSimPy is an advanced wxPython framework for the modeling and simulation of systems based on the DEVS formalism.
 Features include powerful built-in editor, advanced modeling approach, powerful discrete event simulation algorithm,
-import/export DEVS components library and more.""")
+import/export DEVS components library and more.
+
+wxPython %s - python %s"""%(wx.version(),platform.python_version()))
 
 		licence =_( """DEVSimPy is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the Free Software Foundation;
-either version 2 of the License, or (at your option) any later version.
+either version 3 of the License, or (at your option) any later version.
 
 DEVSimPy is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -1934,15 +1936,15 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
 		info = wx.AboutDialogInfo()
 
 		info.SetIcon(getIcon(os.path.join(ICON_PATH_16_16, SPLASH_PNG)))
-		info.SetName('DEVSimPy')
+		info.SetName("""DEVSimPy""")
 		info.SetVersion(self.GetVersion())
 		info.SetDescription(description)
-		info.SetCopyright(_('(C) 2018 SISU Project - UMR CNRS 6134 SPE Lab.'))
-		info.SetWebSite('http://spe.univ-corse.fr')
+		info.SetCopyright(_("""(C) 2019 SISU Project - UMR CNRS 6134 SPE Lab."""))
+		info.SetWebSite("""http://spe.univ-corse.fr""")
 		info.SetLicence(licence)
-		info.AddDeveloper(_('L. Capocchi'))
-		info.AddDocWriter(_('L. Capocchi'))
-		info.AddTranslator(_('L. Capocchi'))
+		info.AddDeveloper(_("""\nL. Capocchi (capocchi@univ-corse.fr)\n"""))
+		info.AddDocWriter(_("""\nL. Capocchi (capocchi@univ-corse.fr)\n"""))
+		info.AddTranslator(_("""\nL. Capocchi (capocchi@univ-corse.fr)\n"""))
 
 		wx.AboutBox(info)
 
@@ -2068,7 +2070,9 @@ class AdvancedSplashScreen(AdvancedSplash):
 	def ShowMain(self):
 		""" Shows the main application (DEVSimPy). """
 
-		self.app.frame = MainApplication(None, wx.NewIdRef(), 'DEVSimPy - Version %s'%__version__)
+		self.app.frame = MainApplication(None, wx.NewIdRef(), 'DEVSimPy %s'%__version__)
+
+		self.app.frame.statusbar.SetStatusText(_('wxPython %s - python %s'%(wx.version(),platform.python_version())),1)
 
 		# keep in a attribute of stdio which is invisible until now
 		self.app.frame.stdioWin = self.app.stdioWin
