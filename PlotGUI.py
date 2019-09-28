@@ -104,7 +104,7 @@ class PlotFrame(wx.Frame):
 #		self.sldv = wx.Slider(self, wx.NewIdRef(), 10, 0, 50, (-1, -1), (50, 150), wx.SL_AUTOTICKS | wx.SL_VERTICAL | wx.SL_LABELS)
 
 		self.client = plot.PlotCanvas(self)
-		self.client.SetPointLabelFunc(self.drawPointLabel)
+		self.client.pointLabelFunc(self.drawPointLabel)
 
 		##Now Create the menu bar and items
 		self.mainmenu = wx.MenuBar()
@@ -289,7 +289,7 @@ class PlotFrame(wx.Frame):
 
 	def OnMotion(self, event):
 		#show closest point (when enbled)
-		if self.client.GetEnablePointLabel() == True and self.client.GetPointLabelFunc():
+		if self.client.enablePointLabel == True and self.client.pointLabelFunc:
 			#make up dict with info for the pointLabel
 			#I've decided to mark the closest point on the closest curve
 			dlst= self.client.GetClosestPoint(self.client._getXY(event), pointScaled= True)

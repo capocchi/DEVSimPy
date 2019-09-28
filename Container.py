@@ -3038,6 +3038,9 @@ class Testable(object):
 	def isAMD(self):
 		return zipfile.is_zipfile(os.path.dirname(self.python_path))
 
+	def isPYC(self):
+		return self.python_path.endswith('.pyc')
+
 	# NOTE: Testable :: CreateTestsFiles	=> AMD tests files creation
 	def CreateTestsFiles(self):
 		devsPath = os.path.dirname(self.python_path)

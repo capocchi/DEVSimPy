@@ -66,11 +66,11 @@ def printOnStatusBar(statusbar, data={}):
 		statusbar.SetStatusText(v, k)
 
 def getClassMember(python_file = ''):
-	""" Get class member from python file
+	""" Get class member from python file.
 	"""
 
 	module  = BlockFactory.GetModule(python_file)
-
+	
 	if inspect.ismodule(module):
 		## classes composing the imported module
 		return dict(inspect.getmembers(module, inspect.isclass))
@@ -177,7 +177,7 @@ class PyComponent:
 		""" Load python file from filename
 		"""
 		filename = filename.strip()
-		assert(filename.endswith('.py'))
+		assert(filename.endswith(('.py','.pyc')))
 
 		return BlockFactory.CreateBlock( python_file = filename, label = label)
 
@@ -728,11 +728,15 @@ class BlockFactory:
 		### pure python file
 		else:
 
-			### add path to sys.path
-			if dir_name not in sys.path:
-				sys.path.append(dir_name)
+			### add path to sys.path recursively
+			current_dirname = dir_name
+			while(current_dirname != os.path.dirname(current_dirname)):
+				if current_dirname not in sys.path:
+					sys.path.append(current_dirname)
+				current_dirname = os.path.dirname(current_dirname)
 
 			module_name = os.path.basename(filename).split('.py')[0]
+
 
 			# find and load module
 			try:

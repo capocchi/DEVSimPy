@@ -434,7 +434,7 @@ class DumpYAMLFile(DumpBase):
 			return True
 
 	def Load(self, obj_loaded, fileName = None):
-		""" Function that save the dump on the disk with the filename.
+		""" Function that load the dump from the filename.
 		"""
 
 		## try to open f with compressed mode
@@ -502,6 +502,7 @@ class DumpXMLFile(DumpBase):
 		makeDEVSXML(label, D, fileName)
 
 		return True
+
 
 ###-----------------------------------------------------------
 class Savable(object):

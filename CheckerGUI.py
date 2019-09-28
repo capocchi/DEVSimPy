@@ -253,7 +253,7 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		"""
 		"""
 		items = list(self.itemDataMap.keys())
-		items.sort(sorter)
+		items.sort()
 		self.itemIndexMap = items
 
 		# redraw the list

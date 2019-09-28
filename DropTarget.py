@@ -186,7 +186,7 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 					# label is the file name
 					label = os.path.basename(text)
 					
-					if not ext in (".amd", '.cmd', '.py'):
+					if not ext in (".amd", '.cmd', '.py', '.pyc'):
 						m = Components.DSPComponent.Load(filename, label, self.canvas)
 					else:
 						m = self.GetBlock(filename, label, x, y)

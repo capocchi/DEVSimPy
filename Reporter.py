@@ -8,6 +8,8 @@ from Utilities import FormatTrace, EnvironmentInfo, GetActiveWindow
 
 _ = wx.GetTranslation
 
+ID_SEND = wx.NewIdRef()
+
 class BaseDialog(wx.Dialog):
     """ A wx.Dialog base class.
     """

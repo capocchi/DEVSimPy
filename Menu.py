@@ -895,6 +895,9 @@ class ShapePopupMenu(wx.Menu):
 			else:
 				Edit_menu=AppendItem(edit)
 
+			if shape.isPYC():
+				Edit_menu.Enable(False)
+
 			Log_menu=AppendItem(log)
 
 			self.AppendSeparator()
@@ -946,6 +949,9 @@ class ShapePopupMenu(wx.Menu):
 				self.AppendSeparator()
 				Export_menu = AppendMenu(self, -1, _("Export"), export_subMenu)
 				Export_SubMenu1 = export_subMenu.Append(exportAMD)
+
+				if shape.isPYC():
+					Export_SubMenu1.Enable(False)
 
 				### if Wcomp general plugin is enabled, sub menu appear in contextual menu of amd (right clic)
 				pluginmanager.trigger_event("ADD_WCOMP_EXPORT_MENU", parent=self, model=shape, submenu= export_subMenu)
