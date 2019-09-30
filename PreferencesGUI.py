@@ -42,9 +42,9 @@ class GeneralPanel(wx.Panel):
 		wx.Panel.__init__(self, parent)
 
 		### FileBrowse
-		self.plugin_dir = filebrowse.DirBrowseButton(self, wx.NewIdRef(), labelText=_("Plug-ins directory:"), toolTip=_("Change the plug-ins directory"), dialogTitle=_("Plug-ins directory..."))
-		self.domain_dir = filebrowse.DirBrowseButton(self, wx.NewIdRef(), labelText=_("Library directory:"), toolTip=_("Change the library directory"), dialogTitle=_("Libraries directory..."))
-		self.out_dir = filebrowse.DirBrowseButton(self, wx.NewIdRef(), labelText=_("Output directory:"), toolTip=_("Change the output directory"), dialogTitle=_("Output directory..."))
+		self.plugin_dir = filebrowse.DirBrowseButton(self, wx.NewIdRef(), startDirectory=PLUGINS_PATH, labelText=_("Plug-ins directory:"), toolTip=_("Change the plug-ins directory"), dialogTitle=_("Plug-ins directory..."))
+		self.domain_dir = filebrowse.DirBrowseButton(self, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText=_("Library directory:"), toolTip=_("Change the library directory"), dialogTitle=_("Libraries directory..."))
+		self.out_dir = filebrowse.DirBrowseButton(self, wx.NewIdRef(), startDirectory=OUT_DIR, labelText=_("Output directory:"), toolTip=_("Change the output directory"), dialogTitle=_("Output directory..."))
 
 		self.plugin_dir.SetValue(PLUGINS_PATH)
 		self.domain_dir.SetValue(DOMAIN_PATH)
@@ -64,8 +64,8 @@ class GeneralPanel(wx.Panel):
 
 		self.st1.SetToolTipString(_("Feel free to change the length of list defining the recent opened files."))
 		self.st2.SetToolTipString(_("Feel free to change the font size of DEVSimpy."))
-		self.st3.SetToolTipString(_("Feel free to change the number of item for undo/redo command"))
-		self.st4.SetToolTipString(_("Feel free to change the version of wxpython used loaded by DEVSimPy"))
+		self.st3.SetToolTipString(_("Feel free to change the number of item for undo/redo command."))
+		self.st4.SetToolTipString(_("Feel free to change the version of wxpython used loaded by DEVSimPy."))
 
 		### number of opened file
 		self.nb_opened_file = wx.SpinCtrl(self, wx.NewIdRef(), '')
@@ -126,7 +126,7 @@ class GeneralPanel(wx.Panel):
 		self.SetAutoLayout(True)
 
 	def OnApply(self, event):
-		""" Apply change
+		""" Apply change.
 		"""
 
 		### safe copy of default_wxv to manage the wx version changing
@@ -170,7 +170,8 @@ class GeneralPanel(wx.Panel):
 
 			### remove the parent of Domain directory of this one is not the devsimpy directory
 			if old_parent_domain_dir != builtins.__dict__['HOME_PATH']:
-				sys.path.remove(old_parent_domain_dir)
+				if old_parent_domain_dir in sys.path:
+					sys.path.remove(old_parent_domain_dir)
 			### remove the path from sys.path in order to update the import process
 			for path in [p for p in sys.path if builtins.__dict__['DOMAIN_PATH'] in p]:
 				sys.path.remove(path)
