@@ -17,7 +17,7 @@ local.properties
 .classpath
 .settings
 .loadpath
-*.pyc
+#*.pyc
 .vscode
 .idea
 .spyproject
@@ -194,7 +194,7 @@ $RECYCLE.BIN/
 ## Python
 #############
 
-*.py[cod]
+#*.py[cod]
 
 # Packages
 *.egg
