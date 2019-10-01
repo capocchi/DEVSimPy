@@ -104,7 +104,7 @@ class PlotFrame(wx.Frame):
 #		self.sldv = wx.Slider(self, wx.NewIdRef(), 10, 0, 50, (-1, -1), (50, 150), wx.SL_AUTOTICKS | wx.SL_VERTICAL | wx.SL_LABELS)
 
 		self.client = plot.PlotCanvas(self)
-		self.client.pointLabelFunc(self.drawPointLabel)
+		#self.client.pointLabelFunc(self.drawPointLabel)
 
 		##Now Create the menu bar and items
 		self.mainmenu = wx.MenuBar()
