@@ -32,7 +32,7 @@ import zipfile
 import Container
 import Menu
 
-from Utilities import replaceAll, getFileListFromInit, path_to_module
+from Utilities import replaceAll, getPYFileListFromInit, path_to_module
 from Decorators import BuzyCursorNotification
 from Components import BlockFactory, DEVSComponent, GetClass
 from ZipManager import Zip, getPythonModelFileName
@@ -82,6 +82,7 @@ class LibraryTree(wx.TreeCtrl):
 		self.atomicidx = il.Add(wx.Image(os.path.join(ICON_PATH_16_16, 'atomic3.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		self.coupledidx = il.Add(wx.Image(os.path.join(ICON_PATH_16_16, 'coupled3.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		self.pythonfileidx = il.Add(wx.Image(os.path.join(ICON_PATH_16_16, 'pythonFile.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.pythoncfileidx = il.Add(wx.Image(os.path.join(ICON_PATH_16_16, 'pyc.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		self.not_importedidx = il.Add(wx.Image(os.path.join(ICON_PATH_16_16, 'no_ok.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		self.SetImageList(il)
 		self.il = il
@@ -382,13 +383,53 @@ class LibraryTree(wx.TreeCtrl):
 			child, cookie = self.GetNextChild(item, cookie)
 		return children
 
-	###
-	def GetModelList(self, dName):
-		""" Get the list of files from dName directory.
+	@staticmethod
+	def GetPYFileList(dName, ext=".py"):
+		""" Return .py files that are instanciable. 
 		"""
 
 		### import are here because the simulator (PyDEVS or PyPDEVS) require it
 		from DomainInterface.DomainBehavior import DomainBehavior
+
+		try:
+			name_list = getPYFileListFromInit(os.path.join(dName,'__init__.py'), ext)
+			py_file_list = []
+			
+			for s in name_list:
+				python_file = os.path.join(dName, s+ext)
+				### test if tmp is only composed by python file (case of the user write into the __init__.py file directory name is possible ! then we delete the directory names)
+				if os.path.isfile(python_file):
+
+					cls = GetClass(python_file)
+
+					if cls is not None and not isinstance(cls, tuple):
+
+						### only model that herite from DomainBehavior is shown in lib
+						if issubclass(cls, DomainBehavior):
+							py_file_list.append(s)
+						else:
+							sys.stderr.write(_("%s not imported: Class is not DomainBehavior\n"%(s)))
+
+
+					### If cls is tuple, there is an error but we load the model to correct it.
+					### If its not DEVS model, the Dnd don't allows the instantiation and when the error is corrected, it don't appear before a update.
+					else:
+						py_file_list.append(s)
+
+		except Exception as info:
+			py_file_list = []
+			# if dName contains a python file, __init__.py is forced
+			for f in os.listdir(dName):
+				if f.endswith(ext):
+					sys.stderr.write(_("%s not imported: %s \n"%(dName,info)))
+					break
+
+		return py_file_list
+
+	###
+	def GetModelList(self, dName):
+		""" Get the list of files from dName directory.
+		"""
 
 		### list of py file from __init__.py
 		if LibraryTree.EXT_LIB_PYTHON_FLAG:
@@ -414,39 +455,12 @@ class LibraryTree(wx.TreeCtrl):
 
 				return py_file_list
 			else:
-				try:
-					name_list = getFileListFromInit(os.path.join(dName,'__init__.py'))
-					py_file_list = []
-
-					for s in name_list:
-						python_file = os.path.join(dName, s+'.py')
-						### test if tmp is only composed by python file (case of the user write into the __init__.py file directory name is possible ! then we delete the directory names)
-						if os.path.isfile(python_file):
-
-							cls = GetClass(python_file)
-
-							if cls is not None and not isinstance(cls, tuple):
-
-								### only model that herite from DomainBehavior is shown in lib
-								if issubclass(cls, DomainBehavior):
-									py_file_list.append(s)
-								else:
-									sys.stderr.write(_("%s not imported: Class is not DomainBehavior \n"%(s)))
-
-
-							### If cls is tuple, there is an error but we load the model to correct it.
-							### If its not DEVS model, the Dnd don't allows the instantiation and when the error is corrected, it don't appear before a update.
-							else:
-
-								py_file_list.append(s)
-
-				except Exception as info:
-					py_file_list = []
-					# if dName contains a python file, __init__.py is forced
-					for f in os.listdir(dName):
-						if f.endswith('.py'):
-							sys.stderr.write(_("%s not imported: %s \n"%(dName,info)))
-							break
+				py_file_list = LibraryTree.GetPYFileList(dName)
+				
+				### try to list the pyc file
+				if py_file_list == []:
+					py_file_list = LibraryTree.GetPYFileList(dName, '.pyc')
+					
 		else:
 			py_file_list = []
 
@@ -459,6 +473,10 @@ class LibraryTree(wx.TreeCtrl):
 	def InsertNewDomain(self, dName, parent, L = []):
 		""" Recurrent function that insert new Domain on library panel.
 		"""
+
+		#print(dName)
+		#print(parent)
+		#print(L)
 
 		### first only for the root
 		if dName not in list(self.ItemDico.keys()):
@@ -553,13 +571,19 @@ class LibraryTree(wx.TreeCtrl):
 					self.SetPyData(id, path)
 
 				else:
-
+					
 					path = os.path.join(parentPath, "".join([item,'.py'])) if not come_from_net else "".join([parentPath,'/',item,'.py'])
+
+					### try for .pyc
+					ispyc = False
+					if not os.path.exists(path):
+						path = os.path.join(parentPath, "".join([item,'.pyc'])) if not come_from_net else "".join([parentPath,'/',item,'.pyc'])
+						ispyc = True
 
 					info = Container.CheckClass(path)
 
 					error = isinstance(info, tuple)
-					img = self.not_importedidx if error else self.pythonfileidx
+					img = self.not_importedidx if error else self.pythoncfileidx if ispyc else self.pythonfileidx
 					
 					### insert in the tree
 					id = self.InsertItemBefore(parent, 0, item, img, img)
@@ -602,6 +626,7 @@ class LibraryTree(wx.TreeCtrl):
 					if isinstance(elem, str):
 						### replace the spaces
 						elem = elem.strip() #replace(' ','')
+
 						### parent provisoir
 						p = self.ItemDico[list(item.keys())[0]]
 						assert(p!=None)
@@ -658,13 +683,20 @@ class LibraryTree(wx.TreeCtrl):
 							### insert in the tree
 							id = self.InsertItemBefore(p, 0, os.path.splitext(elem)[0], img, img)
 							self.SetPyData(id, path)
-						else:
 
+						else:
+			
 							path = os.path.join(list(item.keys())[0],"".join([elem,'.py'])) if not list(item.keys())[0].startswith('http') else list(item.keys())[0]+'/'+elem+'.py'
+							### try for .pyc file
+							ispyc = False
+							if not os.path.exists(path):
+								path = os.path.join(list(item.keys())[0],"".join([elem,'.pyc'])) if not list(item.keys())[0].startswith('http') else list(item.keys())[0]+'/'+elem+'.pyc'
+								ispyc = True
+								
 							info = Container.CheckClass(path)
 
 							error = isinstance(info, tuple)
-							img = self.not_importedidx if error else self.pythonfileidx
+							img = self.not_importedidx if error else self.pythoncfileidx if ispyc else self.pythonfileidx
 
 							### insert in the tree
 							id = self.InsertItemBefore(p, 0, elem, img, img)
@@ -677,11 +709,12 @@ class LibraryTree(wx.TreeCtrl):
 								self.SetItemImage(p, self.not_importedidx, wx.TreeItemIcon_Normal)
 								### next parent item
 								p = self.GetItemParent(p)
-
-						self.ItemDico.update({os.path.join(list(item.keys())[0], os.path.splitext(elem)[0]):id})
+						
+						self.ItemDico.update({os.path.join(list(item.keys())[0], elem):id})
+						#self.ItemDico.update({os.path.join(list(item.keys())[0], os.path.splitext(elem)[0]):id})
 
 					else:
-						### in order to go up the inforation in the list
+						### in order to go up the information in the list
 						D.append(elem)
 
 				### update with whole name
@@ -751,36 +784,44 @@ class LibraryTree(wx.TreeCtrl):
 		item = self.ItemDico[path]
 		file_path = "".join([path,'.py'])
 
-		### Check the class
-		info = Container.CheckClass(file_path)
+		### try to find pyc files
+		if not os.path.exists(file_path):
+			file_path = "".join([path,'.pyc'])
 
-		### there is error during the chek of class ?
-		if isinstance(info, tuple):
-			### recompile if no error
-			info = recompile(path_to_module(file_path))
+		if os.path.exists(file_path):
 
-			### there is error during recompilation ?
-			if isinstance(info, (Exception,str)):
-				### Until it has parent, we redifine icon to inform user
-				while(item):
-					### change image
-					self.SetItemImage(item, self.not_importedidx, wx.TreeItemIcon_Normal)
-					### next parent item
-					item = self.GetItemParent(item)
-			else:
-					### change image
-					self.SetItemImage(item, self.pythonfileidx, wx.TreeItemIcon_Normal)
+			### Check the class
+			info = Container.CheckClass(file_path)
 
-					#### Until it has parent, we redifine icon to inform user
+			### there is error during the chek of class ?
+			if isinstance(info, tuple):
+				### recompile if no error
+				info = recompile(path_to_module(file_path))
+
+				### there is error during recompilation ?
+				if isinstance(info, (Exception,str)):
+					### Until it has parent, we redifine icon to inform user
 					while(item):
-						if self.IsExpanded(item):
-							#### change image
-							self.SetItemImage(item, self.fldropenidx, wx.TreeItemIcon_Normal)
-						else:
-							self.SetItemImage(item, self.fldridx, wx.TreeItemIcon_Normal)
-
-						#### next parent item
+						### change image
+						self.SetItemImage(item, self.not_importedidx, wx.TreeItemIcon_Normal)
+						### next parent item
 						item = self.GetItemParent(item)
+				else:
+						### change image
+						self.SetItemImage(item, self.pythonfileidx, wx.TreeItemIcon_Normal)
+
+						#### Until it has parent, we redifine icon to inform user
+						while(item):
+							if self.IsExpanded(item):
+								#### change image
+								self.SetItemImage(item, self.fldropenidx, wx.TreeItemIcon_Normal)
+							else:
+								self.SetItemImage(item, self.fldridx, wx.TreeItemIcon_Normal)
+
+							#### next parent item
+							item = self.GetItemParent(item)
+		else:
+			sys.stdout.write("File %s is not checked!")
 
 	###
 	def UpdateDomain(self, path):
@@ -888,7 +929,7 @@ class LibraryTree(wx.TreeCtrl):
 		path = self.GetItemPyData(item)
 		ext = os.path.splitext(path)[1]
 
-		if ext == ".py":
+		if ext in (".py",".pyc"):
 			self.CheckItem(os.path.splitext(path)[0])
 		else:
 			self.CheckItem(path)

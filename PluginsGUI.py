@@ -18,7 +18,7 @@ from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from Decorators import BuzyCursorNotification
 
 from pluginmanager import enable_plugin, disable_plugin, load_plugins
-from Utilities import FormatSizeFile, getFileListFromInit
+from Utilities import FormatSizeFile, getPYFileListFromInit
 
 import ZipManager
 import Editor
@@ -162,7 +162,7 @@ class GeneralPluginsList(CheckListCtrl):
 				if files != []:
 					#for filename in filter(lambda f: not f.startswith('__') and f.endswith('.py'), files):
 					for filename in [f for f in files if f == "__init__.py"]:
-						for basename in getFileListFromInit(os.path.join(root,filename)):
+						for basename in getPYFileListFromInit(os.path.join(root,filename)):
 							### try to add dynamically plug-ins
 							#try:
 								#t = threading.Thread(target=self.Importing, args=(root, basename,))

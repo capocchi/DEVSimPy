@@ -3777,7 +3777,7 @@ class CodeBlock(Achievable, Block):
 
 		if self.selected:
 			### inform about the nature of the block using icon
-			name = 'atomic3.png' if self.model_path != "" else 'pythonFile.png'
+			name = 'atomic3.png' if self.model_path != "" else 'pythonFile.png' if self.python_path.endswith('.py') else 'pyc.png' 
 			img = wx.Bitmap(os.path.join(ICON_PATH_16_16, name), wx.BITMAP_TYPE_ANY)
 			dc.DrawBitmap(img, self.x[1]-20, self.y[0])
 

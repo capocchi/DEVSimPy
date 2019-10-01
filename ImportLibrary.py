@@ -34,7 +34,7 @@ import wx.lib.filebrowsebutton as filebrowse
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 import wx.lib.dialogs
 
-from Utilities import checkURL, getDirectorySize, RecurseSubDirs, getFileListFromInit
+from Utilities import checkURL, getDirectorySize, RecurseSubDirs, getPYFileListFromInit
 from Decorators import BuzyCursorNotification
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
@@ -289,7 +289,7 @@ class ImportLibrary(wx.Dialog):
 		### if init_file exists in module
 		if os.path.exists(init_file):
 			### get list of content filename
-			lst = getFileListFromInit(init_file)
+			lst = getPYFileListFromInit(init_file)
 			if lst != []:
 				# for each python filename, inspect its module info
 				for fn in lst:
@@ -355,7 +355,7 @@ class ImportLibrary(wx.Dialog):
 					### delete directory
 					shutil.rmtree(self._d[label])
 				except Exception as info:
-					sys.stdout.write(_("%s not deleted !\n Error : %s")%(label,info))
+					sys.stdout.write(_("%s not deleted!\n Error: %s")%(label,info))
 
 			dial.Destroy()
 

@@ -234,24 +234,24 @@ def GetWXVersionFromIni():
 			return a
 		else:
 			return wx.VERSION_STRING
-		
-def getFileListFromInit(init_file):
-	""" Return list of name composing all variable in __init__.py file
+
+def getPYFileListFromInit(init_file, ext='.py'):
+	""" Return list of name composing all variable in __init__.py file.
 	"""
 
-	py_file_list = []
+	pyc_file_list = []
 	if os.path.basename(init_file) == "__init__.py":
 		dName = os.path.dirname(init_file)
 
 		with open(init_file,'r') as f:
 			tmp = [s.replace('\n','').replace('\t','').replace(',','').replace('"',"").replace('\'',"").strip() for s in f.readlines()[1:-1] if not s.startswith('#')]
 			for s in tmp:
-				python_file = os.path.join(dName,s+'.py')
+				python_file = os.path.join(dName,s+ext)
 				### test if tmp is only composed by python file (case of the user write into the __init__.py file directory name is possible ! then we delete the directory names)
 				if os.path.isfile(python_file):
-					py_file_list.append(s)
+					pyc_file_list.append(s)
 
-	return py_file_list
+	return pyc_file_list
 
 def path_to_module(abs_python_filename):
 	""" convert and replace sep to . in abs_python_filename
