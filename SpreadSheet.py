@@ -125,21 +125,37 @@ class Newt(wx.Frame):
 		self.model = aDEVS
 		self.sep = separator
 
-		### toolbar setting
 		toolbar = wx.ToolBar(self, wx.NewIdRef(), style= wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT)
 		toolbar.SetToolBitmapSize((25,25)) # just for windows
-		new = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'new.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('New'), '')
-		open_file = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'open.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Open'), '')
-		saveas = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'save.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('SaveAs'), '')
-		toolbar.AddSeparator()
-		cut = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'cut.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Cut'), '')
-		copy = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'copy.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Copy'), '')
-		paste = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'paste.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Paste'), '')
-		self.delete = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'close.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Delete'), '')
-		toolbar.AddSeparator()
-		update = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'reload.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Update'), '')
-		toolbar.AddSeparator()
-		self.chart = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'graph_guru.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Chart'), '')
+
+		### for Phoenix version
+		if wx.VERSION_STRING < '4.0':
+			new = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'new.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('New'), '')
+			open_file = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'open.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Open'), '')
+			saveas = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'save.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('SaveAs'), '')
+			toolbar.AddSeparator()
+			cut = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'cut.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Cut'), '')
+			copy = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'copy.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Copy'), '')
+			paste = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'paste.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Paste'), '')
+			self.delete = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'close.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Delete'), '')
+			toolbar.AddSeparator()
+			update = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'reload.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Update'), '')
+			toolbar.AddSeparator()
+			self.chart = toolbar.AddTool(wx.NewIdRef(), wx.Image(os.path.join(ICON_PATH,'graph_guru.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Chart'), '')
+		else:
+			new = toolbar.AddTool(wx.NewIdRef(), "", wx.Image(os.path.join(ICON_PATH,'new.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('New'))
+			open_file = toolbar.AddTool(wx.NewIdRef(), "", wx.Image(os.path.join(ICON_PATH,'open.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Open'))
+			saveas = toolbar.AddTool(wx.NewIdRef(), "", wx.Image(os.path.join(ICON_PATH,'save.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('SaveAs'))
+			toolbar.AddSeparator()
+			cut = toolbar.AddTool(wx.NewIdRef(), "", wx.Image(os.path.join(ICON_PATH,'cut.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Cut'))
+			copy = toolbar.AddTool(wx.NewIdRef(), "" ,wx.Image(os.path.join(ICON_PATH,'copy.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Copy'))
+			paste = toolbar.AddTool(wx.NewIdRef(), "" ,wx.Image(os.path.join(ICON_PATH,'paste.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Paste'))
+			self.delete = toolbar.AddTool(wx.NewIdRef(), "", wx.Image(os.path.join(ICON_PATH,'close.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Delete'))
+			toolbar.AddSeparator()
+			update = toolbar.AddTool(wx.NewIdRef(), "", wx.Image(os.path.join(ICON_PATH,'reload.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Update'))
+			toolbar.AddSeparator()
+			self.chart = toolbar.AddTool(wx.NewIdRef(), "", wx.Image(os.path.join(ICON_PATH,'graph_guru.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), _('Chart'))
+
 		toolbar.EnableTool(self.chart.GetId(), False)
 		toolbar.Realize()
 
@@ -392,12 +408,12 @@ class Newt(wx.Frame):
 			v = sheet.GetCellValue(i,sheet.GetNumberCols()-1)
 			
 			if '<<' in v or '>>' in v: 
-				s = sheet.GetCellValue(i,sheet.GetNumberCols()-1).replace('<< ', '').replace('<<', '').replace('>>','')
+				s = sheet.GetCellValue(i,sheet.GetNumberCols()-1).replace('<< ', '').replace('<<', '').replace('>>','').replace('],','];')
 			else:
 				s = "value = %s; time = %s"%(v,sheet.GetCellValue(i,0))
 
 			### globals containt the time and value variables after exec of the statement
-			print(str(s))
+			#print(str(s))
 			exec(str(s), globals())
 
 			### if value is a list, we must choose an index to plot amoung the values of the list
