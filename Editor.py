@@ -1863,9 +1863,9 @@ class BlockBase(object):
 			if port is not None:
 				cp = self.nb.GetCurrentPage()
 				if "peek" in label:
-					cp.AddTextRaw("self.peek(self.IPorts[%d])" % int(port))
+					cp.AddText("self.peek(self.IPorts[%d], *args)" % int(port))
 				elif "poke" in label:
-					cp.AddTextRaw("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))" % int(port))
+					cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))" % int(port))
 				else:
 					pass
 
@@ -1876,42 +1876,49 @@ class BlockBase(object):
 		""" Insert a sentence to get the init phase (status and sigma)
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddTextRaw("self.initPhase(<status>,<sigma>)")
+		cp.AddText("self.initPhase(<status>,<sigma>)")
 		cp.modify = True
 
 	def OnInsertState(self, event):
 		""" Insert a sentence to get the state object
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddTextRaw("state = self.getState()")
+		cp.AddText("state = self.getState()")
 		cp.modify = True
 
 	def OnInsertStatus(self, event):
 		""" Insert a sentence to get the status
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddTextRaw("status = self.getStatus()")
+		cp.AddText("status = self.getStatus()")
 		cp.modify = True
 
 	def OnInsertSigma(self, event):
 		""" Insert a sentence to get the sigma value
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddTextRaw("sigma = self.getSigma()")
+		cp.AddText("sigma = self.getSigma()")
 		cp.modify = True
 
 	def OnInsertGetPortId(self, event):
 		""" Insert a sentence to get the port ID
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddTextRaw("id = self.getPortId(<port>)")
+		cp.AddText("id = self.getPortId(<port>)")
 		cp.modify = True
 
 	def OnInsertGetMsgValue(self, event):
 		""" Insert a sentence to get the message value
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddTextRaw("v = self.getMsgValue(<msg>)")
+		cp.AddText("v = self.getMsgValue(<msg>)")
+		cp.modify = True
+	
+	def OnInsertGetMsgTime(self, event):
+		""" Insert a sentence to get the message time
+		"""
+		cp = self.nb.GetCurrentPage()
+		cp.AddText("t = self.getMsgTime(<msg>)")
 		cp.modify = True
 
 	###
@@ -1919,7 +1926,7 @@ class BlockBase(object):
 		""" Insert a sentence to change the state
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddTextRaw("self.holdIn('<phase>',<sigma>)")
+		cp.AddText("self.holdIn('<phase>',<sigma>)")
 		cp.modify = True
 
 	###
@@ -1927,7 +1934,7 @@ class BlockBase(object):
 		""" Insert a sentence to test the phase
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddTextRaw("self.phaseIs('<phase>')")
+		cp.AddText("self.phaseIs('<phase>')")
 		cp.modify = True
 		
 	###
@@ -1935,7 +1942,7 @@ class BlockBase(object):
 		""" Insert a sentence to change the state
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddTextRaw("self.passivateIn('<phase>')")
+		cp.AddText("self.passivateIn('<phase>')")
 		cp.modify = True
 
 	###
@@ -1943,7 +1950,7 @@ class BlockBase(object):
 		""" Insert a sentence to change the state
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddTextRaw("self.passivate()")
+		cp.AddText("self.passivate()")
 		cp.modify = True
 
 	###
@@ -1951,7 +1958,7 @@ class BlockBase(object):
 		""" Insert a sentence to invoke the debugger function that trace message into the log of model
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddTextRaw("self.debugger('<message>')")
+		cp.AddText("self.debugger('<message>')")
 		cp.modify = True
 
 	###
@@ -2135,6 +2142,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		poke = wx.MenuItem(insert, wx.NewIdRef(), _('New poke'), _('Generate new poke code'))
 		getPortId = wx.MenuItem(insert, wx.NewIdRef(), _('Get Port Id'), _('Get the port ID from port instance self.getPortId(port)->int'))
 		getMsgValue = wx.MenuItem(insert, wx.NewIdRef(), _('Get message value'), _('Get message value self.getMsgValue(msg)->Object'))
+		getMsgTime = wx.MenuItem(insert, wx.NewIdRef(), _('Get message time'), _('Get message time self.getMsgTime(msg)->Object'))
 		getInitPhase = wx.MenuItem(insert, wx.NewIdRef(), _('Set the phase (init phase)'), _('Set the phase self.getInitPhase()'))
 		getSigma = wx.MenuItem(insert, wx.NewIdRef(), _('Get sigma value'), _('Get sigma value self.getSigma()->float'))
 		getStatus = wx.MenuItem(insert, wx.NewIdRef(), _('Get status value'), _('Get status value self.getStatus()->str'))
@@ -2154,6 +2162,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		insert.Append(getStatus)
 		insert.Append(getPortId)
 		insert.Append(getMsgValue)
+		insert.Append(getMsgTime)
 		insert.AppendSeparator()
 		insert.Append(holdInState)
 		insert.Append(phaseIs)
@@ -2195,6 +2204,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		self.Bind(wx.EVT_MENU, self.OnInsertSigma, id=getSigma.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertGetPortId, id=getPortId.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertGetMsgValue, id=getMsgValue.GetId())
+		self.Bind(wx.EVT_MENU, self.OnInsertGetMsgTime, id=getMsgTime.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertHoldInState, id=holdInState.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertPhaseIs, id=phaseIs.GetId())
 		self.Bind(wx.EVT_MENU, self.OnInsertPassivateInState, id=passivateInState.GetId())
@@ -2326,13 +2336,13 @@ class TestEditor(EditorFrame):
 	# NOTE: TestEditor :: OnFeatureSkeleton => Event when insert feature skeleton button is clicked
 	def OnFeatureSkeleton(self, event):
 		FEATURE_SKELETON = "Feature: # Feature description\n\tScenario: # Scenario description\n\t\tGiven # Context\n\t\tWhen # Event\n\t\tThen # Assertions"
-		self.nb.GetCurrentPage().AddTextRaw(FEATURE_SKELETON)
+		self.nb.GetCurrentPage().AddText(FEATURE_SKELETON)
 
 	# NOTE: TestEditor :: OnStepsSkeleton 	=> Event when insert steps skeleton button is clicked
 	def OnStepsSkeleton(self, event):
 		STEP_FUNCTION = 'def step(context):\n\tpass\n'
 		STEPS_SKELETON = "from behave import *\n\n@given('your given text')\n" + STEP_FUNCTION + "\n@when('your event text')\n" + STEP_FUNCTION + "\n@then('yout assertions text')\n" + STEP_FUNCTION
-		self.nb.GetCurrentPage().AddTextRaw(STEPS_SKELETON)
+		self.nb.GetCurrentPage().AddText(STEPS_SKELETON)
 
 	# NOTE: TestEditor :: OnHeaderGeneration		=> note
 	def OnHeaderGeneration(self, event):
@@ -2341,7 +2351,7 @@ import os\nimport builtins\nimport sys\nimport pickle\nfrom tempfile import gett
 builtins.__dict__['HOME_PATH'] = ABS_PATH\nbuiltins.__dict__['DOMAIN_PATH'] = os.path.join(ABS_PATH, 'Domain')
 builtins.__dict__['GUI_FLAG'] = True\n\nsys.path.append(os.path.join(gettempdir(), "AtomicDEVS"))\n\nmodels = {}
 """ % HOME_PATH
-		self.nb.GetCurrentPage().AddTextRaw(HEADER)
+		self.nb.GetCurrentPage().AddText(HEADER)
 
 	# NOTE: TestEditor :: OnGenEnvDefGeneration		=> note
 	def OnEnvDefGeneration(self, event):
@@ -2351,7 +2361,7 @@ def loadModel():\n\tglobal models\n\tfiles = [os.path.join(gettempdir(), f) for 
 \t\tif not m.blockModel.label in models.keys():\n\t\t\tmodels[m.blockModel.label] = m\n
 def before_all(context):\n\tglobal models\n\tloadModel()\n\tcontext.models = models\n
 """
-		self.nb.GetCurrentPage().AddTextRaw(GEN_ENV_DEF)
+		self.nb.GetCurrentPage().AddText(GEN_ENV_DEF)
 
 	# NOTE: TestEditor :: OnEnvironmentSkeleton		=> note
 # 	def OnSpecEnvDefGeneration(self, event):

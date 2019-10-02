@@ -70,11 +70,13 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 			DomainBehavior.peek = BaseDEVS.AtomicDEVS.peek
 			DomainBehavior.poke = BaseDEVS.AtomicDEVS.poke
 			DomainBehavior.getMsgValue = DomainBehavior.getMsgPyDEVSValue
+			DomainBehavior.getMsgTime = DomainBehavior.getMsgPyDEVSTime
 			DomainBehavior.getPortId = DomainBehavior.getPortIdFromPyDEVS
 		else: 
 			DomainBehavior.peek = DomainBehavior.peekPyPDEVS
 			DomainBehavior.poke = DomainBehavior.pokePyPDEVS
 			DomainBehavior.getMsgValue = DomainBehavior.getMsgPyPDEVSValue
+			DomainBehavior.getMsgTime = DomainBehavior.getMsgPyPDEVSTime
 			DomainBehavior.getPortId = DomainBehavior.getPortIdFromPyPDEVS
 
 	def initPhase(self, phase="IDLE", sigma=0.0):
@@ -105,8 +107,8 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 
 	def peekPyPDEVS(self, port, args):
 		### adapted with PyPDEVS
-		inputs = args[0]
-		return inputs.get(port)
+		#inputs = args[0]
+		return args.get(port)
 
 	def getPortIdFromPyDEVS(self, p):
 		return p.myID
@@ -114,11 +116,17 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 	def getPortIdFromPyPDEVS(self,p):
 		return p.port_id
 
-	def getMsgPyDEVSValue(self, msg):
-		return msg.value					
+	def getMsgPyDEVSValue(self, msg, i=0):
+		return msg.value[i]					
 		
-	def getMsgPyPDEVSValue(self, msg):
-		return msg[0]
+	def getMsgPyPDEVSValue(self, msg, i=0):
+		return msg[0][i]
+
+	def getMsgPyDEVSTime(self, msg):
+		return msg.time					
+		
+	def getMsgPyPDEVSTime(self, msg):
+		return msg[1][0]
 
 	def getFlatComponentSet (self):
 		return {self.name : self}

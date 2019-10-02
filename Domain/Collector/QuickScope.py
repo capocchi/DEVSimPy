@@ -20,11 +20,12 @@ class QuickScope(DomainBehavior):
 	"""
 
 	###
-	def __init__(self, fusion = True, eventAxis = False):
+	def __init__(self, fusion = True, eventAxis = False, col=0):
 		""" Constructor.
 		
 			@param fusion : Flag to plot all signals on one graphic
 			@param eventAxis : Flag to plot depending event axis
+			@param col : column considered in the value array of message
 		"""
 		DomainBehavior.__init__(self)
 		
@@ -35,7 +36,9 @@ class QuickScope(DomainBehavior):
 		self.fusion = fusion
 		# replace time axis with step axis
 		self.eventAxis = eventAxis
-		
+		# col is the column considered in the value array of message
+		self.col = col
+
 		# results tab (results attribut must be defined in order to plot the data)
 		self.results = {} #OrderedDict()
 		
@@ -48,26 +51,31 @@ class QuickScope(DomainBehavior):
 		
 		for np in range(len(self.IPorts)):
 			
-			### adapted with PyPDEVS
-			if hasattr(self, 'peek'):
-				msg = self.peek(self.IPorts[np])
-			else:
-				inputs = args[0]
-				msg = inputs.get(self.IPorts[np])
+			msg = self.peek(self.IPorts[np], *args)
 
-			if msg is not None:
+			### adapted with PyPDEVS
+#			if hasattr(self, 'peek'):
+#				msg = self.peek(self.IPorts[np])
+#			else:
+#				inputs = args[0]
+#				msg = inputs.get(self.IPorts[np])
+
+			if msg:
 				# if step axis is chosen
 				if self.eventAxis:
 					self.eventAxis += 1
 					self.t = self.eventAxis
 				else:
 					### adapted with PyPDEVS
-					self.t = msg.time if hasattr(self, 'peek') else msg[1][0]
+					#self.t = msg.time if hasattr(self, 'peek') else msg[1][0]
+					self.t = self.getMsgTime(msg)
 					
 				# ecriture dans la liste pour afficher le QuickScope et le SpreadSheet
 				# si il y a eu un changement du nombre de ports alors on creer la nouvelle entre dans results (on ne regenere pas d'instance)
 				### adapted with PyPDEVS
-				val = msg.value[0] if hasattr(self, 'peek') else msg[0][0]
+				
+				#val = msg.value[0] if hasattr(self, 'peek') else msg[0][0]
+				val = self.getMsgValue(msg, self.col)
 				
 				if np in self.results:
 					self.results[np].append((self.t, val))

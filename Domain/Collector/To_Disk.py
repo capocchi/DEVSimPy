@@ -70,12 +70,14 @@ class To_Disk(QuickScope):
 		#	self.pos = self.pos[0:n]
 
 		for np in range(n):
-			### adapted with PyPDEVS
-			if hasattr(self, 'peek'):
-				msg = self.peek(self.IPorts[np])
-			else:
-				inputs = args[0]
-				msg = inputs.get(self.IPorts[np])
+			msg = self.peek(self.IPorts[np], *args)
+			
+#			### adapted with PyPDEVS
+#			if hasattr(self, 'peek'):
+#				msg = self.peek(self.IPorts[np])
+#			else:
+#				inputs = args[0]
+#				msg = inputs.get(self.IPorts[np])
 
 			### filename
 			fn = "%s%d%s"%(self.fileName, np, self.ext)
@@ -99,16 +101,18 @@ class To_Disk(QuickScope):
 					if fn not in self.last_time_value:
 						self.last_time_value.update({fn:1})
 
-					### adapted with PyPDEVS
-					if hasattr(self, 'peek'):
-						t = Decimal(str(float(msg.time)))
-					else:
-						t = Decimal(str(float(msg[-1][0])))
+					t = Decimal(str(float(self.getMsgTime(msg))))
+
+#					### adapted with PyPDEVS
+#					if hasattr(self, 'peek'):
+#						t = Decimal(str(float(msg.time)))
+#					else:
+#						t = Decimal(str(float(msg[-1][0])))
 				
 				### adapted with PyPDEVS
 				
-				val = msg.value[self.col] if hasattr(self, 'peek') else msg[0][self.col]
-				
+#				val = msg.value[self.col] if hasattr(self, 'peek') else msg[0][self.col]
+				val = self.getMsgValue(msg,self.col)
 				if isinstance(val, int) or isinstance(val, float):
 					v = Decimal(str(float(val)))
 				else:
@@ -121,21 +125,6 @@ class To_Disk(QuickScope):
 				
 				self.buffer[fn] = v
 				
-				### run only with python 2.6
-				#with open(fn, 'a') as f:
-
-				#	if t == self.last_time_value[fn]:
-				#		if self.pos[np] == -1:
-				#			self.pos[np] = 0
-				#		f.seek(self.pos[np], os.SEEK_SET)
-				#		f.truncate(self.pos[np])
-
-				#	else:
-				#		self.pos[np] = f.tell()						
-				#		self.last_time_value[fn] = t
-
-				#	f.write("%s%s%s\n"%(t,self.comma,v))
-					
 				del msg
 
 		self.state["sigma"] = 0
