@@ -630,8 +630,11 @@ class SimulatorConfiguration(object):
         :param classname: classname of the relocator
         :param args: all other args are passed to the constructor
         """
-        exec("from %s import %s" % (filename, classname))
-        self.simulator.activityRelocator = eval("%s(*args)" % classname)
+        import importlib
+        tv = importlib.import_module("DEVSKernel.PyPDEVS.pypdevs221.src.%s"%filename)
+        
+        #exec("from %s import %s" % (filename, classname))
+        self.simulator.activityRelocator = eval("tv.%s(*args)" % classname)
 
     def setActivityRelocatorBasicBoundary(self, swappiness):
         """

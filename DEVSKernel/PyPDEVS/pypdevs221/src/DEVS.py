@@ -6,6 +6,7 @@ Classes and tools for DEVS model specification
 from .logger import debug, warn, info, error
 from .util import *
 import time
+import importlib
 
 class BaseDEVS(object):
     """
@@ -717,9 +718,13 @@ class RootDEVS(BaseDEVS):
         :param schedulerType: type of scheduler to use (string representation)
         """
         if isinstance(schedulerType, tuple):
-            exec("from %s import %s" % schedulerType)
+
+            ###Py 3.x
+            tv = importlib.import_module("DEVSKernel.PyPDEVS.pypdevs221.src.%s"%schedulerType[0])
+            #exec("from %s import %s" % schedulerType)
+
             nrmodels = len(self.models)
-            self.scheduler = eval("%s(self.componentSet, EPSILON, nrmodels)" % schedulerType[1])
+            self.scheduler = eval("tv.%s(self.componentSet, EPSILON, nrmodels)" % schedulerType[1])
         else:
             raise DEVSException("Unknown Scheduler: " + str(schedulerType))
 

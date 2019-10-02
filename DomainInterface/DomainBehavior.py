@@ -44,7 +44,13 @@ for pydevs_dir in builtins.__dict__['DEVS_DIR_PATH_DICT']:
         path = builtins.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
         ### split from DEVSKernel string and replace separator with point
         d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
-        exec("import DEVSKernel%s.DEVS as BaseDEVS"%(d))
+        
+		### for py 3.X
+        import importlib
+        BaseDEVS = importlib.import_module("DEVSKernel%s.DEVS"%d)
+		
+		### for py 2.X
+        #exec("import DEVSKernel%s.DEVS as BaseDEVS"%(d))
 
 #    ======================================================================    #
 class DomainBehavior(BaseDEVS.AtomicDEVS):

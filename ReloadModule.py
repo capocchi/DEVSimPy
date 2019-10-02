@@ -4,6 +4,7 @@ import sys
 import os
 import string
 import zipimport
+import importlib
 from traceback import format_exception
 
 from Utilities import listf
@@ -28,7 +29,7 @@ def recompile(modulename):
 
 		### Use the imported module to determine its actual path
 		pycfile = os.path.abspath(tmp.__file__)
-		modulepath = string.replace(pycfile, ".pyc", ".py")
+		modulepath = pycfile.replace('.pyc', '.py') #string.replace(pycfile, ".pyc", ".py")
 
 		### Try to open the specified module as a file
 		code = open(modulepath, 'rU').read()
@@ -49,7 +50,6 @@ def recompile(modulename):
 				return "Error in execution: " + str(sys.exc_info()[0]) +"\r\n" + listf(format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
 
 			else:
-
 				### at this point, the code both compiled and ran without error.  Load it up
 				### replacing the original code.
-				return reload(sys.modules[modulename])
+				return importlib.reload(sys.modules[modulename])

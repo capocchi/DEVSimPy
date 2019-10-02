@@ -41,7 +41,12 @@ for pydevs_dir in builtins.__dict__['DEVS_DIR_PATH_DICT']:
     path = builtins.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
     ### split from DEVSKernel string and replace separator with point
     d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
-    exec("import DEVSKernel%s.DEVS as %s"%(d,pydevs_dir))
+
+	### for py 3.X
+    import importlib
+    exec("%s = importlib.import_module('DEVSKernel%s.DEVS')"%(pydevs_dir,d))
+
+    #exec("import DEVSKernel%s.DEVS as %s"%(d,pydevs_dir))
 
 #import DEVSKernel.PyDEVS.DEVS as PyDEVS
 #import DEVSKernel.PyPDEVS.DEVS as PyPDEVS
@@ -519,9 +524,12 @@ class SimStrategy4(SimStrategy):
 				path = builtins.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
 				## split from DEVSKernel string and replace separator with point
 				d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
-				exec("from DEVSKernel%s.simulator import Simulator"%d)
-
-		S = Simulator(self._simulator.model)
+				import importlib
+				simulator = importlib.import_module("DEVSKernel%s.simulator"%d)
+				#exec("from DEVSKernel%s.simulator import Simulator"%d)
+				
+		
+		S = simulator.Simulator(self._simulator.model)
 
 		### old version of PyPDEVS
 		if len(inspect.getargspec(S.simulate).args) > 1:

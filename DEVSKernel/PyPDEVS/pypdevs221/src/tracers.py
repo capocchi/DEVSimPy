@@ -1,3 +1,5 @@
+import importlib
+ 
 class Tracers(object):
     """
     Interface for all tracers
@@ -18,8 +20,10 @@ class Tracers(object):
         :param controller: is this code ran at the controller?
         TODO
         """
-        exec("from %s import %s" % tracer[0:2])
-        self.tracers.append(eval("%s(%i, server, *%s)" % (tracer[1], self.uid, tracer[2])))
+        ###Py 3.0
+        tv = importlib.import_module("DEVSKernel.PyPDEVS.pypdevs221.src.%s"%tracer[0])
+    
+        self.tracers.append(eval("tv.%s(%i, server, *%s)" % (tracer[1], self.uid, tracer[2])))
         self.tracers_init.append(tracer)
         self.uid += 1
         self.tracers[-1].startTracer(recover)

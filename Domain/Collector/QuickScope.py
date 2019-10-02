@@ -47,6 +47,7 @@ class QuickScope(DomainBehavior):
 		"""
 		
 		for np in range(len(self.IPorts)):
+			
 			### adapted with PyPDEVS
 			if hasattr(self, 'peek'):
 				msg = self.peek(self.IPorts[np])
