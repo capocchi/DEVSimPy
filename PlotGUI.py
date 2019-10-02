@@ -621,13 +621,16 @@ class StaticPlot(PlotFrame):
 	def OnRMSE(self,evt):
 		""" Get RMSE.
 		"""
-		c1,c2 = self.data.values()
-		assert(len(c1)==len(c2))
-		diffcarr = map(lambda a,b: pow(float(a[-1])-float(b[-1]),2), c1,c2)
-		r = sqrt(sum(diffcarr)/len(c1))
+		if isinstance(self.data, dict):
+			c1,c2 = self.data.values()
+			assert(len(c1)==len(c2))
+			diffcarr = map(lambda a,b: pow(float(a[-1])-float(b[-1]),2), c1,c2)
+			r = sqrt(sum(diffcarr)/len(c1))
 		
-		wx.MessageBox('RMSE: %f'%r, 'Info', wx.OK|wx.ICON_INFORMATION)
-  
+			wx.MessageBox('RMSE: %f'%r, _('Info'), wx.OK|wx.ICON_INFORMATION)
+		else:
+			wx.MessageBox('RMSE needs two curves!', _('Error'), wx.OK|wx.ICON_ERROR)
+
 	#	for k,s in self.atomicModel.results.items():
 	#		frame = Spectrum(self,wx.NewIdRef(), title= _("Spectrum of signal %d")%k,data = s)
 	#		frame.Center()

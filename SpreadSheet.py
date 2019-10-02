@@ -413,7 +413,6 @@ class Newt(wx.Frame):
 				s = "value = %s; time = %s"%(v,sheet.GetCellValue(i,0))
 
 			### globals containt the time and value variables after exec of the statement
-			#print(str(s))
 			exec(str(s), globals())
 
 			### if value is a list, we must choose an index to plot amoung the values of the list
