@@ -1507,7 +1507,8 @@ class MainApplication(wx.Frame):
 
 				self.searchTree.Show(True)
 				nb1 = self.GetControlNotebook()
-				nb1.libPanel.GetSizer().Layout()
+				libPanel = nb1.GetLibPanel()
+				libPanel.GetSizer().Layout()
 				self.searchTree.ExpandAll()
 
 			else:

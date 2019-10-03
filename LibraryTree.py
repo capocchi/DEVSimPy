@@ -132,7 +132,7 @@ class LibraryTree(wx.TreeCtrl):
 		"""
 
 		assert self.root != None, _("Missing root")
-		import threading
+		#import threading
 
 		### add DOMAIN_PATH in sys.path whatever happens
 		LibraryTree.AddToSysPath(DOMAIN_PATH)
@@ -144,10 +144,10 @@ class LibraryTree(wx.TreeCtrl):
 			LibraryTree.AddToSysPath(absdName)
 
 			### add new domain
-			threading.Thread(target=self.InsertNewDomain,
-        	args=(absdName, self.root, list(self.GetSubDomain(absdName, self.GetDomainList(absdName)).values())[0],)
-    		).start()
-			#self.InsertNewDomain(absdName, self.root, self.GetSubDomain(absdName, self.GetDomainList(absdName)).values()[0])
+			#threading.Thread(target=self.InsertNewDomain,
+        	#args=(absdName, self.root, list(self.GetSubDomain(absdName, self.GetDomainList(absdName)).values())[0],)
+    		#).start()
+			self.InsertNewDomain(absdName, self.root, list(self.GetSubDomain(absdName, self.GetDomainList(absdName)).values())[0])
 
 		self.UnselectAll()
 		wx.CallAfter(self.SortChildren,self.root)
