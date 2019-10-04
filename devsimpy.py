@@ -1482,7 +1482,7 @@ class MainApplication(wx.Frame):
 					L.append(path)
 
 			#masque l'arbre
-			self.tree.Show(False)
+			self.tree.Hide()
 
 			# Liste des domaines concernes
 			if L != []:
@@ -1505,16 +1505,17 @@ class MainApplication(wx.Frame):
 					if not os.path.basename(path).startswith(text):
 						self.searchTree.RemoveItem(item)
 
-				self.searchTree.Show(True)
+				self.searchTree.Show()
 				nb1 = self.GetControlNotebook()
 				libPanel = nb1.GetLibPanel()
 				libPanel.GetSizer().Layout()
 				self.searchTree.ExpandAll()
 
 			else:
-				self.searchTree.Show(False)
+				self.searchTree.Hide()
 		else:
-			self.tree.Show(True)
+			self.searchTree.Hide()
+			self.tree.Show()
 
 	###
 	def GetDiagramByWindow(self,window):
