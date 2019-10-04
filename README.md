@@ -53,7 +53,32 @@ $ python devsimpy.py
  - DEVSimPy User Guide v2.8 [[pdf]](http://lcapocchi.free.fr/devsimpy/Guide_utilisateur_v2.8.pdf) (French)
  - S. Toma Ph.D, Thesis [[pdf]](https://hal.archives-ouvertes.fr/tel-01141844/document) (English), winner of the 2014 DEVS PhD Dissertation Award.
  - S. Cezary, "Design and implementation of application for instruction exercises with DEVSimPy", Technical report, Faculty of Electrical Engineering, AUTOMATION AND INFORMATION TECHNOLOGY, Kielce University of Technology [[pdf]](http://lcapocchi.free.fr/files/report_Cezary.pdf) (Polish)
- - L. Capocchi, J. F. Santucci, B. Poggi, C. Nicolai, "DEVSimPy: A Collaborative Python Software for Modeling and Simulation of DEVS Systems", in Proc. of the 20th IEEE International Conference on Collaboration Technologies and Infrastructures, June 27-29, 2011, Paris (France), ISBN 978-1-4577-0134-4, pp. 170-175
+
+# Citing
+ If you use DEVSimPy in your research, you can cite it with using the following bibtex references:
+ ```
+@misc{capocchi2019devsimpy,
+    author = {Laurent Capocchi},
+    title = {DEVSimPy},
+    year = {2019},
+    publisher = {GitHub},
+    journal = {GitHub repository},
+    howpublished = {\url{https://github.com/capocchi/DEVSimPy}},
+}
+
+@INPROCEEDINGS{5990023,
+author={L. {Capocchi} and J. F. {Santucci} and B. {Poggi} and C. {Nicolai}},
+booktitle={2011 IEEE 20th International Workshops on Enabling Technologies: Infrastructure for Collaborative Enterprises},
+title={DEVSimPy: A Collaborative Python Software for Modeling and Simulation of DEVS Systems},
+year={2011},
+volume={},
+number={},
+pages={170-175},
+keywords={discrete event simulation;large-scale systems;modelling;simulation;collaborative python software;DEVS systems;complex systems;collaborative M&S software;hydraulic network management;modeling and simulation;Object oriented modeling;Mathematical model;Libraries;Computational modeling;Collaboration;Data models;Predictive models;Modeling;Simulation;Collaborative software;Discrete event systems;Hydraulic systems;Software libraries},
+doi={10.1109/WETICE.2011.31},
+ISSN={},
+month={June},}
+```
 
 # Videos
 - [Youtube] (https://www.youtube.com/results?search_query=devsimpy)
