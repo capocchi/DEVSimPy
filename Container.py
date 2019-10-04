@@ -662,7 +662,7 @@ class Diagram(Savable, Structurable):
 			self.modify = True
 			self.parent.DiagramModified()
 
-		dlg = PriorityGUI.PriorityGUI(parent, wx.NewIdRefId(), _("Priority Manager"), self.priority_list)
+		dlg = PriorityGUI.PriorityGUI(parent, wx.NewIdRef(), _("Priority Manager"), self.priority_list)
 		dlg.Bind(wx.EVT_CLOSE, self.OnClosePriorityGUI)
 		dlg.Show()
 

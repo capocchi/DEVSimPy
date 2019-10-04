@@ -479,8 +479,9 @@ class DEVSComponent:
 	@staticmethod
 	def debugger(m, msg):
 		bm = m.getBlockModel()
+		path = os.path.join(gettempdir(),'%s.%d.devsimpy.log'%(str(bm.label), id(bm)))
 		
-		with open(os.path.join(gettempdir(),'%s.%d.devsimpy.log'%(str(bm.label), id(bm))),'a') as f:
+		with open(path,'a') as f:
 			try:
 				f.write("clock %s: %s\n"%(m.timeNext, msg))
 			except Exception:
@@ -551,11 +552,10 @@ class DEVSComponent:
 		""" Shows informations inserted with debugger instructions into the model.
 		"""
 
-
 		### devs model, block label, log file in temp dir
 		devs = self.getDEVSModel()
-		label = str(devs.getBlockModel().label) if hasattr(devs, 'getBlockModel') else devs.name
-		log_file = os.path.join(gettempdir(),'%s.devsimpy.log'%label)
+		block = devs.getBlockModel()
+		log_file = os.path.join(gettempdir(),'%s.%d.devsimpy.log'%(str(block.label),id(block)))
 		parent = event.GetClientData()
 
 		if os.path.exists(log_file):
