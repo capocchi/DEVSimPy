@@ -154,11 +154,11 @@ ID_CLEAR_ATTR = wx.NewIdRef()
 
 def AppendMenu(menu, ID, label, submenu):
 	if wx.VERSION_STRING < '4.0':
-		menu.AppendMenu(ID, label, submenu)
+		return menu.AppendMenu(ID, label, submenu)
 	elif '4.0' < wx.VERSION_STRING < '4.0.2':
-		menu.Append(ID, label, submenu)
+		return menu.Append(ID, label, submenu)
 	else:
-		menu.AppendSubMenu(submenu, label)
+		return menu.AppendSubMenu(submenu, label)
 
 class TaskBarMenu(wx.Menu):
 	"""
@@ -607,7 +607,6 @@ class DiagramTabPopupMenu(wx.Menu):
 		rename = wx.MenuItem(self, ID_RENAME_DIAGRAM, _('Rename...'), _('Rename diagram'))
 		clear = wx.MenuItem(self, ID_CLEAR_DIAGRAM, _('Clear...'), _('Clear diagram'))
 
-
 		close.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'close.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		detach.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'detach.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		rename.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'rename.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -899,13 +898,13 @@ class ShapePopupMenu(wx.Menu):
 			if shape.isPYC():
 				Edit_menu.Enable(False)
 
-			Log_menu=AppendItem(log)
+			Log_menu = AppendItem(log)
 
 			self.AppendSeparator()
 
-			Copy_menu=AppendItem(copy)
-			Paste_menu=AppendItem(paste)
-			Cut_menu=AppendItem(cut)
+			Copy_menu = AppendItem(copy)
+			Paste_menu = AppendItem(paste)
+			Cut_menu = AppendItem(cut)
 			Lock_item = AppendItem(lock)
 			UnLock_item = AppendItem(unlock)
 
