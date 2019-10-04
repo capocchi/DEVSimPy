@@ -134,7 +134,7 @@ class Printable:
 
         self.preview = wx.PrintPreview(printout, printout2, data)
 
-        if self.preview.Ok():
+        if self.preview.IsOk():
             pfrm = wx.PreviewFrame(self.preview, parent, _("Print preview"), style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN )
             pfrm.SetIcon(parent.GetIcon())
             pfrm.Initialize()

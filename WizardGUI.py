@@ -388,8 +388,8 @@ class ModelGeneratorWizard(Wizard):
 			cls = Components.GetClass(fn)
 			if inspect.isclass(cls):
                 ### import are here because the simulator (PyDEVS or PyPDEVS) require it
-				from .DomainInterface.DomainBehavior import DomainBehavior
-				from .DomainInterface.DomainStructure import DomainStructure
+				from DomainInterface.DomainBehavior import DomainBehavior
+				from DomainInterface.DomainStructure import DomainStructure
 				if not (issubclass(cls, DomainBehavior) or issubclass(cls, DomainStructure)):
 					dlg = wx.MessageDialog(parent, _('The python file must contain a class that inherit of DomainBehavior or DomainStructure master class.\n Please choose a correct python file.'), _('Wizard Manager'), wx.ID_OK|wx.ICON_ERROR)
 					dlg.ShowModal()
@@ -418,7 +418,7 @@ class ModelGeneratorWizard(Wizard):
 		bt51.SetValue(True)
 		cb0 = wx.ComboBox(page2, wx.NewIdRef(), _('Default'), choices=[_('Default'),_('Generator'),_('Viewer'), _('Collector')], style=wx.CB_READONLY)
 		# filebrowse properties
-		fb1 = filebrowse.FileBrowseButton(page2, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='*.py', toolTip=bt5.GetToolTip().GetTip(), changeCallback=python_path_call_back)
+		fb1 = filebrowse.FileBrowseButton(page2, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='Python File (*.py)|*.py|Compliled Python File (*.pyc)|*.pyc', toolTip=bt5.GetToolTip().GetTip(), changeCallback=python_path_call_back)
 		fb12 = filebrowse.FileBrowseButton(page2, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='plugins.py', toolTip=bt51.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
 		fb1.Enable(False)
 		fb12.Enable(False)
@@ -454,7 +454,7 @@ class ModelGeneratorWizard(Wizard):
 		bt61.SetToolTipString(bt51.GetToolTip().GetTip())
 		bt61.SetValue(True)
 		# filebrowse properties
-		fb4 = filebrowse.FileBrowseButton(page3, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='*.py', toolTip=bt6.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
+		fb4 = filebrowse.FileBrowseButton(page3, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='Python File (*.py)|*.py|Compliled Python File (*.pyc)|*.pyc', toolTip=bt6.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
 		fb41 = filebrowse.FileBrowseButton(page3, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='plugins.py', toolTip=bt61.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
 		fb4.Enable(False)
 		fb41.Enable(False)

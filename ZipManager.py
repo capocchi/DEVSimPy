@@ -42,7 +42,7 @@ def getPythonModelFileName(fn):
 
 	###	TODO: finally impose : py_file_list = filter(lambda f: f.endswith('.py'))
 	### find if python file has same name of model file
-	py_file_list = [f for f in zf.namelist() if f.endswith('.py') and os.path.dirname(f) == '' and f not in ('plugins.py', 'steps.py', 'environment.py', 'strategies.py')]
+	py_file_list = [f for f in zf.namelist() if f.endswith(('.py','.pyc')) and os.path.dirname(f) == '' and f not in ('plugins.py', 'steps.py', 'environment.py', 'strategies.py')]
 	zf.close()
 
 	### if there is more than one python file in the zip file
@@ -58,8 +58,8 @@ def getPythonModelFileName(fn):
 				from . import Components
 				cls = Components.GetClass(os.path.join(fn, python_file))
 
-				from .DomainInterface.DomainBehavior import DomainBehavior
-				from .DomainInterface.DomainStructure import DomainStructure
+				from DomainInterface.DomainBehavior import DomainBehavior
+				from DomainInterface.DomainStructure import DomainStructure
 
 				if inspect.isclass(cls):
 					if issubclass(cls, DomainBehavior) or issubclass(cls, DomainStructure):

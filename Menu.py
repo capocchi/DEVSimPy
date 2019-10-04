@@ -888,12 +888,13 @@ class ShapePopupMenu(wx.Menu):
 			#rename_menu = self.AppendItem(rename)
 			#self.__canvas.Bind(wx.EVT_MENU, shape.OnRename, id=ID_RENAME_SHAPE)
 		else:
+			
 			if isinstance(shape, Container.CodeBlock) and shape.isAMD():
-				Edit_menu=AppendMenu(self, -1, _("Edit"), edit_subMenu)
+				Edit_menu = AppendMenu(self, -1, _("Edit"), edit_subMenu)
 				Edit_SubMenu1 = edit_subMenu.AppendItem(editModel)
 				Edit_SubMenu2 = edit_subMenu.AppendItem(editTest)
 			else:
-				Edit_menu=AppendItem(edit)
+				Edit_menu = AppendItem(edit)
 
 			if shape.isPYC():
 				Edit_menu.Enable(False)
