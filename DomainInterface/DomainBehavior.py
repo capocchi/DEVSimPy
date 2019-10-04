@@ -116,11 +116,11 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 	def getPortIdFromPyPDEVS(self,p):
 		return p.port_id
 
-	def getMsgPyDEVSValue(self, msg, i=0):
-		return msg.value[i]					
+	def getMsgPyDEVSValue(self, msg):
+		return msg.value					
 		
-	def getMsgPyPDEVSValue(self, msg, i=0):
-		return msg[0][i]
+	def getMsgPyPDEVSValue(self, msg):
+		return msg[0]
 
 	def getMsgPyDEVSTime(self, msg):
 		return msg.time					
