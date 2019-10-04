@@ -63,12 +63,15 @@ class ExperimentGenerator:
 
         self.modelPythonDescription[model].append("")
 
-        for ic in model.IC:
-            self.modelPythonDescription[model].append(self.dec+'self.connectPorts(self.%s.OPorts[%s], self.%s.IPorts[%s])' % (ic[0][0].blockModel.label, ic[0][0].OPorts.index(ic[0][1]), ic[1][0].blockModel.label, ic[1][0].IPorts.index(ic[1][1])))
-        for eic in model.EIC:
-            self.modelPythonDescription[model].append(self.dec+'self.connectPorts(self.IPorts[%s], self.%s.IPorts[%s])' % (eic[0][0].IPorts.index(eic[0][1]), eic[1][0].blockModel.label, eic[1][0].IPorts.index(eic[1][1])))
-        for eoc in model.EOC:
-            self.modelPythonDescription[model].append(self.dec+'self.connectPorts(self.%s.OPorts[%s], self.OPorts[%s])' % (eoc[0][0].blockModel.label, eoc[0][0].OPorts.index(eoc[0][1]), eoc[1][0].OPorts.index(eoc[1][1])))
+        if hasattr(model, 'IC'):
+            for ic in model.IC:
+                self.modelPythonDescription[model].append(self.dec+'self.connectPorts(self.%s.OPorts[%s], self.%s.IPorts[%s])' % (ic[0][0].blockModel.label, ic[0][0].OPorts.index(ic[0][1]), ic[1][0].blockModel.label, ic[1][0].IPorts.index(ic[1][1])))
+        if hasattr(model, 'EIC'):
+            for eic in model.EIC:
+                self.modelPythonDescription[model].append(self.dec+'self.connectPorts(self.IPorts[%s], self.%s.IPorts[%s])' % (eic[0][0].IPorts.index(eic[0][1]), eic[1][0].blockModel.label, eic[1][0].IPorts.index(eic[1][1])))
+        if hasattr(model, 'EOC'):
+            for eoc in model.EOC:
+                self.modelPythonDescription[model].append(self.dec+'self.connectPorts(self.%s.OPorts[%s], self.OPorts[%s])' % (eoc[0][0].blockModel.label, eoc[0][0].OPorts.index(eoc[0][1]), eoc[1][0].OPorts.index(eoc[1][1])))
 
 
     def writeModelFile(self, master):
@@ -207,7 +210,7 @@ sim.simulate()
         title  = nb2.GetTitle() if isinstance(nb2, DetachedFrame.DetachedFrame) else nb2.GetPageText(nb2.GetSelection()).rstrip()
         diagram.label = os.path.splitext(os.path.basename(title))[0]
 
-        msg = _("Experiment File Generated!") if self.writeModelFile(diagram) and self.writeExperimentFile(diagram) else _("Experiment File not Generated!")
+        msg = _("Experiment File Generated in %s dirctory!"%self.fileDir) if self.writeModelFile(diagram) and self.writeExperimentFile(diagram) else _("Experiment File not Generated!")
         dlg = wx.MessageDialog(None, msg, _("PyPDEVS Experiment"), wx.OK | wx.ICON_INFORMATION)
         dlg.ShowModal()
         dlg.Destroy()

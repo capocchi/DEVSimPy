@@ -808,7 +808,7 @@ msgid ""
 "\n"
 "Call constante by using \"Name of Diagram\"['Name of constante']\n"
 msgstr ""
-"Afin d'utiliser uen constante : \n"
+"Afin d'utiliser une constante : \n"
 "\n"
 "Appelez la constante en utilisant la notation : \"Nom du diagram\"['Nom de la constante']\n"
 
