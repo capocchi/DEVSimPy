@@ -157,7 +157,7 @@ class Zip:
 		info_list = zin.infolist()
 		for item in info_list:
 			s = os.path.basename(item.filename)
-			if s not in list(map(os.path.basename, replace_files)) and info_list.index(item) not in exclude_file:
+			if s not in [os.path.basename(a) for a in replace_files] and info_list.index(item) not in exclude_file:
 				buffer = zin.read(item.filename)
 				zout.writestr(item, buffer)
 				sys.stdout.write("%s rewrite\n"%(item.filename))
@@ -274,22 +274,6 @@ class Zip:
 		tests_files = [a[0] for a in tests_files]
 
 		return tests_files
-
-		#### find feature and steps file
-		#feat = None
-		#steps = None
-		#env = None
-
-		#feat = filter(lambda t: t.endswith('.feature'), zf.namelist())[0]
-
-		#if 'steps.py' in zf.namelist():
-			#steps = "steps.py"
-		#if 'environment.py' in zf.namelist():
-			#env = "environment.py"
-
-		#zf.close()
-
-		#return feat, steps, env
 	# ------------------------------------------------------------------------------
 
 	def GetModule(self, rcp=False):

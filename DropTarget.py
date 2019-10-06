@@ -68,7 +68,7 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 		"""
 
 		### list of ContainerBlock shape in canvas
-		L = filter(lambda s: isinstance(s, Container.ContainerBlock), self.canvas.diagram.GetShapeList())
+		L = [s for s in self.canvas.diagram.GetShapeList() if isinstance(s, Container.ContainerBlock)]
 
 		### for all ContainerBlock we make a rect and test if the point x,y is in this rect to instance the DetachedFrame
 		for shape in L:
@@ -154,7 +154,7 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 				block_list.append(m)
 				
 				### list of ContainerBlock shape in canvas
-				L = filter(lambda s: isinstance(s, Container.ContainerBlock), self.canvas.diagram.GetShapeList())
+				L = [s for s in self.canvas.diagram.GetShapeList() if isinstance(s, Container.ContainerBlock)]
 
 				### for all ContainerBlock we make a rect and test if the point x,y is in this rect to instance the DetachedFrame
 				for shape in L:

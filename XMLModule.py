@@ -295,13 +295,6 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 		for b in blocklist:
 			if b.attributes['uid'].value == uid:
 				return b
-		#if D != {}:
-		#	for k,v in D.items():
-		#		if v['uid'] == uid:
-		#			return k
-		#		else:	
-		#			for d in filter(lambda a: isinstance(a,dict),v['components']):
-		#				return GetNodeFromUID(uid,{d['node']:d})
 	
 	def InsertElemFromUID(elem,uid,D):
 		''' Update and return the new D with new elem into the components of the uid coupled model
@@ -330,7 +323,7 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 					temp.write(WizardGUI.coupledCode('CoupledModel'))
 					temp.seek(0)
 
-					nbi,nbo = list(map(len,GetNbPort(k)))
+					nbi,nbo = [len(a) for a in GetNbPort(k)]
 					cp_block = Components.BlockFactory.CreateBlock(x=100, y=100, inputs = nbi, outputs = nbo, name=name, python_file=temp.name, canvas=canvas)
 					cp_block.label = name
 					### if True, the flag for bad python file is activated
@@ -354,7 +347,7 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 					temp.write(WizardGUI.atomicCode('AtomicModel'))
 					temp.seek(0)
 					
-					nbi,nbo = list(map(len,GetNbPort(k)))
+					nbi,nbo = [len(a) for a in GetNbPort(k)]
 					am_block = Components.BlockFactory.CreateBlock(x=250, y=100*(1+parent_block.nbCodeBlock), inputs = nbi, outputs = nbo, name=name, python_file=temp.name, canvas=canvas)
 					am_block.label = name
 

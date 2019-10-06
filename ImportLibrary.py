@@ -462,7 +462,7 @@ class ImportLibrary(wx.Dialog):
 		dialog.Destroy()
 		
 		if path:
-			dName = os.path.basename(path) if not path.startswith('http') else filter(lambda a: a!='', path.split('/'))[-1]
+			dName = os.path.basename(path) if not path.startswith('http') else [a for a in path.split('/') if a!=''][-1]
 
 			# si la lib n'est pas deja importee
 			if not self.parent.tree.IsChildRoot(dName):

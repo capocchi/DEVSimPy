@@ -67,7 +67,7 @@ _cmdlnUsage = """
 
 __revision__ = "$Id: which.py 430 2005-08-20 03:11:58Z trentm $"
 __version_info__ = (1, 1, 0)
-__version__ = '.'.join(map(str, __version_info__))
+__version__ = '.'.join(list(map(str, __version_info__)))
 
 import os
 import sys

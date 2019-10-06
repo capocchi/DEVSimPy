@@ -63,7 +63,6 @@ class Attributable:
 		""" Set attributes list
 		"""
 		assert(isinstance(L,list))
-		#assert(False not in map(lambda txt: hasattr(self,txt),L))
 
 		### set attribute
 		for name in L:

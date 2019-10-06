@@ -160,7 +160,6 @@ class GeneralPluginsList(CheckListCtrl):
 
 				### dirs must contain python file
 				if files != []:
-					#for filename in filter(lambda f: not f.startswith('__') and f.endswith('.py'), files):
 					for filename in [f for f in files if f == "__init__.py"]:
 						for basename in getPYFileListFromInit(os.path.join(root,filename)):
 							### try to add dynamically plug-ins

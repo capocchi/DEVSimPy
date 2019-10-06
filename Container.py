@@ -496,8 +496,6 @@ class Diagram(Savable, Structurable):
 		###==============================================================================
 		if hasattr(diagram, 'current_level') and diagram.current_level>0:
 			# for all iPort shape, we make the devs instance
-			#for i,m in enumerate(filter(lambda s: isinstance(s, iPort), diagram.layers[diagram.current_level].GetShapeList())):
-			#	devs_dam.addOutPort()
 			for i,m in enumerate([s for s in shapeL0 if isinstance(s, iPort)]):
 				p1 = diagram.getDEVSModel().IPorts[i]
 				p2 = devs_dam.IPorts[i]
@@ -1259,8 +1257,8 @@ class Shape(ShapeEvtHandler):
 		""" Move method
 		"""
 		if not self.lock_flag:
-			self.x = array.array('d',list(map((lambda v: v+x), self.x)))
-			self.y = array.array('d',list(map((lambda v: v+y), self.y)))
+			self.x = array.array('d', [v+x for v in self.x])
+			self.y = array.array('d', [v+y for v in self.y])
 
 	#def OnResize(self):
 	#	""" Resize method controled by ResizeNode move method
@@ -1476,8 +1474,8 @@ class PointShape(Shape):
 	def move(self,x,y):
 		"""
 		"""
-		self.x = array.array('d', list(map((lambda v: v+x), self.x)))
-		self.y = array.array('d', list(map((lambda v: v+y), self.y)))
+		self.x = array.array('d', [v+x for v in self.x])
+		self.y = array.array('d', [v+y for v in self.y])
 		self.graphic.move(x,y)
 
 	def HitTest(self, x, y):
@@ -1581,29 +1579,6 @@ if builtins.__dict__['GUI_FLAG']:
 
 			### for quickattribute
 			self.Bind(wx.EVT_TIMER, self.OnTimer)
-			#wx.EVT_TIMER(self, self.timer.GetId(), self.OnTimer)
-
-			#wx.CallAfter(self.SetFocus)
-
-			###----------------------------------------------------------------
-			#self.bg_bmp = wx.Bitmap(os.path.join("/tmp", 'fig1.png'),wx.BITMAP_TYPE_ANY)
-
-			#self.hwin = HtmlWindow(self, -1, size=(1000,1000))
-			#irep = self.hwin.GetInternalRepresentation()
-			#self.hwin.SetSize((irep.GetWidth()+25, irep.GetHeight()+100))
-			#self.hwin.LoadPage("./html/mymap.html")
-
-			#wx.EVT_IDLE( self, self.OnShow )
-			#self.flag = 0
-			###------------------------------------------------------------------
-
-			#wx.EVT_SCROLLWIN(self, self.OnScroll)
-
-		#def OnShow( self, event ):
-			#if self.flag == 0:
-				##self.hwin.LoadFile("html/mymap.html")
-				#self.hwin.LoadPage("http://www.google.fr")
-				#self.flag = 1
 
 		@Post_Undo
 		def AddShape(self, shape, after = None):
@@ -2802,7 +2777,7 @@ if builtins.__dict__['GUI_FLAG']:
 				L = self.diagram.shapes
 
 			# select all models in selectedList and refresh canvas
-			for m in filter(self.isSelected, L):
+			for m in [a for a in L if self.isSelected(a)]:
 				self.deselect(m)
 				self.select(m)
 
@@ -3129,16 +3104,16 @@ class Testable(object):
 		### Tests code retriever-------------------------------------------------------------------
 		importer = zipfile.ZipFile(model_path)
 
-		feat_name = filter(lambda t: t.endswith('.feature'), tests_files)[0]
+		feat_name = [t for t in tests_files if t.endswith('.feature')][0]
 		featInfo = importer.getinfo(feat_name)
 		feat_code = importer.read(featInfo)
 
-		steps_name = filter(lambda t: t.endswith('steps.py'), tests_files)[0]
+		steps_name = [t for t in tests_files if t.endswith('steps.py')][0]
 		stepsInfo = importer.getinfo(steps_name)
 		steps_code = importer.read(stepsInfo)
 
 		if not global_env:
-			environment_name = filter(lambda t: t.endswith('environment.py'), tests_files)[0]
+			environment_name = [t for t in tests_files if t.endswith('environment.py')][0]
 			envInfo = importer.getinfo(environment_name)
 			env_code = importer.read(envInfo)
 		else:
@@ -3151,8 +3126,6 @@ class Testable(object):
 
 		### AMD code retriever---------------------------------------------------------------------
 		importer = zipfile.ZipFile(model_path)
-
-		# amd_name = filter(lambda t: t.endswith('%s.py'%name), importer.namelist())[0]
 		amd_name = ZipManager.getPythonModelFileName(model_path)
 		amd_info = importer.getinfo(amd_name)
 		amd_code = importer.read(amd_info)

@@ -74,7 +74,7 @@ class GeneralNotebook(Observer):
 			""" Get Libraries panel if exist
 			"""
 			### list of label of all existing panel
-			labelList = list(map(self.GetPageText, [i for i in range(self.GetPageCount())]))
+			labelList = [self.GetPageText(a) for a in [i for i in range(self.GetPageCount())]]
 			try:
 				### try to find if panel exist from label
 				index = labelList.index(self.labelList[0])
@@ -89,7 +89,7 @@ class GeneralNotebook(Observer):
 		""" Get Properties panel if exist
 		"""
 		### list of label of all existing panel
-		labelList = list(map(self.GetPageText, [i for i in range(self.GetPageCount())]))
+		labelList = [self.GetPageText(a) for a in [i for i in range(self.GetPageCount())]]
 		try:
 			### try to find if panel exist from label
 			index = labelList.index(self.labelList[1])
@@ -104,7 +104,7 @@ class GeneralNotebook(Observer):
 		""" Get Simulation panel if exist
 		"""
 		### list of label of all existing panel
-		labelList = list(map(self.GetPageText, [i for i in range(self.GetPageCount())]))
+		labelList = [self.GetPageText(a) for a in [i for i in range(self.GetPageCount())]]
 		try:
 			### try to find if panel exist from label
 			index = labelList.index(self.labelList[2])

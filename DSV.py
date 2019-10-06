@@ -555,7 +555,6 @@ def importDSV(input, delimiter = ',', textQualifier = '"', columns = 0,
                 newdata[record] = errorHandler(input[record], newdata[record], columns, maxColumns)
     
     # remove null values from data
-    # newdata = filter(lambda i: i, newdata)
     newdata = [_f for _f in newdata if _f]
     
     return newdata

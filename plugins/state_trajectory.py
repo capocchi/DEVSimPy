@@ -268,7 +268,6 @@ def Config(parent):
                     style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN)
     panel = wx.Panel(frame, wx.NewIdRef())
 
-    #lst_1  = map(lambda a: a.label, filter(lambda s: isinstance(s, CodeBlock), diagram.GetShapeList()))
     lst_1 = GetFlatShapesList(diagram,[])
     lst_2  = ('confTransition', 'extTransition', 'intTransition')
 

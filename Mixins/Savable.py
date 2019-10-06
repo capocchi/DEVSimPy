@@ -272,7 +272,7 @@ class DumpZipFile(DumpBase):
 				### update behavioral attribute for model saved with bad args (amd or cmd have been changed in librairie but not in dsp)
 				if attr == 'args':
 					if obj_loaded.args != {}:
-						for key in [a for a in list(obj_loaded.args.keys()) if a in list(L[i].keys())]: #filter(L[i].has_key, list(obj_loaded.args.keys())):
+						for key in [a for a in list(obj_loaded.args.keys()) if a in list(L[i].keys())]:
 							obj_loaded.args[key] = L[i][key]
 					else:
 						setattr(obj_loaded, attr, L[i])
@@ -315,7 +315,7 @@ class DumpZipFile(DumpBase):
 						sys.stdout.write("%s\n"%info)
 						return info
 
-					for m in [e for e in map(module.__dict__.get, dir(module)) if not inspect.ismodule(e) and inspect.getmodule(e) is module]:
+					for m in [e for e in [module.__dict__.get(a) for a in dir(module)] if not inspect.ismodule(e) and inspect.getmodule(e) is module]:
 						name = m.__name__
 						### import only plugins in plugins list (dynamic attribute)
 						if name in obj.plugins:
@@ -398,7 +398,7 @@ class DumpGZipFile(DumpBase):
 
 			#=======================================================================
 
-			a,b = list(map(len, (obj_loaded.dump_attributes, dsp)))
+			a,b = [len(a) for a in (obj_loaded.dump_attributes, dsp)]
 			assert(a==b)
 
 			### assisgn the specific attributs

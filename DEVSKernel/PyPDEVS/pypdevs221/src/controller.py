@@ -311,7 +311,6 @@ class Controller(BaseSimulator):
         """
         # Now start moving all models according to the provided relocation directives
         relocate = self.relocator.getRelocations(GVT, activities, horizon)
-        #print("Filtered relocate: " + str(relocate))
 
         if relocate:
             self.performRelocationsInit(relocate)

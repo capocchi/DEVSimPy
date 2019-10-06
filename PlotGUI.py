@@ -245,28 +245,6 @@ class PlotFrame(wx.Frame):
 
 		return tb
 
-	#def Rescale(self, data, xMin=0,xMax=200):
-		##frequence max et min pour le plot
-		#x,y,x_plot, y_plot=[],[],[],[]
-		#for f,v in data:
-			#x.append(f)
-			#y.append(v)
-		#for i in xrange(len(x)):
-			#if xMin<x[i]<xMax:
-				#x_plot.append(x[i])
-				#y_plot.append(y[i])
-
-		## formate les donnees pour Plot
-		#return map(lambda a,b:(a,b),x_plot,y_plot)
-
-#	def sliderUpdate(self, event):
-#		posh = self.sldh.GetValue()
-#		posv = self.sldv.GetValue()
-
-		#self.client.Redraw(self.Rescale(data,posv,posh))
-		### TODO look sprectum in order to rewrite Rescale and Redraw and rename them
-#		pass
-
 	def OnMove(self, event):
 		event.Skip()
 
@@ -624,7 +602,7 @@ class StaticPlot(PlotFrame):
 		if isinstance(self.data, dict):
 			c1,c2 = self.data.values()
 			assert(len(c1)==len(c2))
-			diffcarr = map(lambda a,b: pow(float(a[-1])-float(b[-1]),2), c1,c2)
+			diffcarr = list(map(lambda a,b: pow(float(a[-1])-float(b[-1]),2), c1,c2))
 			r = sqrt(sum(diffcarr)/len(c1))
 		
 			wx.MessageBox('RMSE: %f'%r, _('Info'), wx.OK|wx.ICON_INFORMATION)
@@ -1152,7 +1130,8 @@ class Spectrum(StaticPlot):
 				Y_plot.append(Y[i])
 
 		# formate les donnees pour Plot
-		self.data = list(map(lambda a,b:(a,b),F_plot,Y_plot))
+		self.data = list(map(lambda a,b: (a,b), F_plot, Y_plot))
+		#self.data = [(a,b) for a in F_plot for b in Y_plot]
 
 		# invoque la frame
 		StaticPlot.__init__(self, parent, id, title, self.data, xLabel=_('Frequency [Hz]'),yLabel=_('Amplitude [dB]'))
@@ -1203,4 +1182,5 @@ class Spectrum(StaticPlot):
 				Y_plot.append(Y[i])
 
 		# formate les donnees pour Plot
-		return list(map(lambda a,b:(a,b),F_plot,Y_plot))
+		return list(map(lambda a,b: (a,b), F_plot, Y_plot))
+		#return [(a,b) for a in F_plot for b in Y_plot]

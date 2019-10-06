@@ -280,7 +280,7 @@ class MainApplication(wx.Frame):
 
 		### load .dsp or empty on empty diagram
 		if len(sys.argv) >= 2:
-			for arg in map(os.path.abspath, [a for a in sys.argv[1:] if a.endswith('.dsp')]):
+			for arg in [os.path.abspath(i) for i in [a for a in sys.argv[1:] if a.endswith('.dsp')]]:
 				diagram = Container.Diagram()
 				#diagram.last_name_saved = arg
 				name = os.path.basename(arg)
@@ -869,9 +869,6 @@ class MainApplication(wx.Frame):
 			L = self.tree.GetItemChildren(self.tree.root)
 			self.cfg.Write("ChargedDomainList", str([k for k in self.tree.ItemDico if self.tree.ItemDico[k] in L]))
 			self.cfg.Flush()
-
-			# save in config file the charged last external library directory
-			#self.cfg.Write('exportPathsList', str(filter(lambda a: os.path.isdir(a), self.exportPathsList)))
 
 	def SavePerspectiveProfile(self):
 		""" Update the config file with the profile that are enabled during the last use of DEVSimPy
@@ -1492,7 +1489,7 @@ class MainApplication(wx.Frame):
 					self.searchTree.RemoveItem(item)
 
 				### uniquify the list
-				L = set(map(os.path.dirname, L))
+				L = [os.path.dirname(a) for a in L]
 
 				### construction du nouveau
 				self.searchTree.Populate(L)

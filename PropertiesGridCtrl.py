@@ -146,7 +146,7 @@ class ListEditor(wx.Dialog):
 
 		L = eval(values) if values!='' else []
 
-		self.elb.SetStrings(list(map(str,L)))
+		self.elb.SetStrings([str(a) for a in L])
 
 		vbox.Add(self.elb, 1, wx.EXPAND | wx.ALL)
 		panel.SetSizer(vbox)
@@ -180,9 +180,9 @@ class ListEditor(wx.Dialog):
 		"""
 
 		try:
-			return list(map(eval, self.elb.GetStrings()))
+			return [eval(a) for a in self.elb.GetStrings()]
 		except SyntaxError:
-			return list(map(eval, list(map(repr, eval(str(self.elb.GetStrings()))))))
+			return [eval(b) for b in [repr(a) for a in eval(str(self.elb.GetStrings()))]]
 		except Exception as info:
 			return info
 
@@ -494,7 +494,7 @@ class CustomDataTable(GridTableBase):
 			### load color in cell for pen and fill
 			if isinstance(val, list):
 				### if elem in list begin by #. It is color.
-				for s in [a for a in map(str, val) if a.startswith('#')]:
+				for s in [a for a in [str(b) for b in val] if a.startswith('#')]:
 					attr.SetBackgroundColour(s)
 					break
 
@@ -986,7 +986,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 				### if the user would like to load a compressed python file, he just give the name of compressed file that contain the python file
 				if zipfile.is_zipfile(new_python_path):
 					zf = zipfile.ZipFile(new_python_path, 'r')
-					new_python_path = os.path.join(new_python_path, filter(lambda f: f.endswith('.py') and f!='plugins.py', zf.namelist())[0])
+					new_python_path = os.path.join(new_python_path, [f for f in  zf.namelist() if f.endswith('.py') and f!='plugins.py'][0])
 					### update model path
 					model.model_path = os.path.dirname(new_python_path)
 

@@ -359,7 +359,6 @@ class LibraryTree(wx.TreeCtrl):
 			code = r.read()
 			if r.status == 200:
 				exec(code)
-				#return filter(lambda d: d not in LibraryTree.EXCLUDE_DOMAIN, __all__)
 				return __all__
 			else:
 				return []
@@ -481,7 +480,7 @@ class LibraryTree(wx.TreeCtrl):
 		### first only for the root
 		if dName not in list(self.ItemDico.keys()):
 		
-			label = os.path.basename(dName) if not dName.startswith('http') else filter(lambda a: a!='', dName.split('/'))[-1]
+			label = os.path.basename(dName) if not dName.startswith('http') else [a for a in dName.split('/') if a!=''][-1]
 			id = self.InsertItemBefore(parent, 0, label)
 			self.SetItemImage(id, self.fldridx, wx.TreeItemIcon_Normal)
 			self.SetItemImage(id, self.fldropenidx, wx.TreeItemIcon_Expanded)

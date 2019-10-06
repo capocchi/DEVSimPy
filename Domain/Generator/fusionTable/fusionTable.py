@@ -46,8 +46,8 @@ class Request:
 					if(len(line)>1): # Si on a la semaine mais pas de valeur dans la base
 						self.listData.append(lineCut[1])
 
-				self.listData = list(map(charToFloat,self.listData))
-				self.listTime = list(map(charToInt,self.listTime))
+				self.listData = [charToFloat(a) for a in self.listData]
+				self.listTime = [charToInt(a) for a in self.listTime]
 			else:
 				self.listTime=[0]
 				self.listData=[0]
