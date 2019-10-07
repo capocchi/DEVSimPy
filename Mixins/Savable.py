@@ -26,11 +26,18 @@ import gettext
 _ = gettext.gettext
 
 try:
-	import yaml
+	import yaml	
 	builtins.__dict__['YAML_IMPORT'] = True
 except ImportError as info:
 	builtins.__dict__['YAML_IMPORT'] = False
 	sys.stdout.write("yaml module was not found! Install it if you want to save model in yaml format.\n")
+
+try:
+	import ruamel.yaml
+	builtins.__dict__['YAML_IMPORT'] = True
+except ImportError as info:
+	builtins.__dict__['YAML_IMPORT'] = False
+	sys.stdout.write("ruamel.yaml module was not found! Install it if you want to save model in yaml format.\n")
 
 from tempfile import gettempdir
 
@@ -422,27 +429,26 @@ class DumpYAMLFile(DumpBase):
 		assert(fileName.endswith(tuple(DumpYAMLFile.ext)))
 
 		try:
-
-			f = open(fileName, 'w')
-			yaml.dump(PickledCollection(obj_dumped), f)
-			f.close()
-
+			yaml = ruamel.yaml.YAML()
+			yaml.register_class(PickledCollection)
+			with open(fileName, 'w') as yf:
+				ruamel.yaml.dump(PickledCollection(obj_dumped), stream=yf, default_flow_style=False) 
 		except Exception as info:
 			sys.stderr.write(_("\nProblem saving: %s -- %s\n")%(str(fileName),info))
 			return False
 		else:
 			return True
-
+		
 	def Load(self, obj_loaded, fileName = None):
 		""" Function that load the dump from the filename.
 		"""
 
 		## try to open f with compressed mode
 		try:
-
-			f = open(fileName, 'r')
-			dsp = yaml.load(f)
-			f.close()
+			yaml = ruamel.yaml.YAML()
+			yaml.register_class(PickledCollection)
+			with open(fileName, 'r') as yf:
+				dsp = ruamel.yaml.load(yf)
 
 		except Exception as info:
 			sys.stderr.write(_("Problem opening: %s -- %s\n")%(str(fileName), info))
