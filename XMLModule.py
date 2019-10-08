@@ -122,9 +122,12 @@ def makeDEVSXML(label, D, filename):
 
 	## wrap it in an ElementTree instance, and save as XML
 	tree = ET.ElementTree(root)
+
+	# create a new XML file with the results
 	file = open(filename, "w")
 	file.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>" + "\n")
-	tree.write(file)
+	file.write(ET.tostring(tree).decode("utf-8"))
+	#tree.write(file)
 	file.close()
 
 def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
