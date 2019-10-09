@@ -67,11 +67,11 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 
 builtin_dict['GUI_FLAG'] = False
 
-from .InteractionYAML import YAMLHandler
+from InteractionYAML import YAMLHandler
 
 def simulate(devs, duration, simu_name, is_remote):
 
-	from .SimulationNoGUI import makeSimulation
+	from SimulationNoGUI import makeSimulation
 
 	if str(duration) in ('inf', 'ntl'):
 		builtins.__dict__['NTL'] = True
@@ -86,8 +86,8 @@ builtins.__dict__.update(builtin_dict)
 #-------------------------------------------------------------------
 if __name__ == '__main__':
 
- 	import gettext
- 	_ = gettext.gettext
+	import gettext
+	_ = gettext.gettext
 
 	import argparse
  	

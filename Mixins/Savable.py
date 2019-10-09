@@ -448,7 +448,7 @@ class DumpYAMLFile(DumpBase):
 			yaml = ruamel.yaml.YAML()
 			yaml.register_class(PickledCollection)
 			with open(fileName, 'r') as yf:
-				dsp = ruamel.yaml.load(yf)
+				dsp = ruamel.yaml.load(yf, Loader=ruamel.yaml.Loader)
 
 		except Exception as info:
 			sys.stderr.write(_("Problem opening: %s -- %s\n")%(str(fileName), info))

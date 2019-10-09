@@ -27,8 +27,9 @@ import builtins
 if builtins.__dict__['GUI_FLAG']:
 	import wx
 	import wx.lib.dragscroller
-	#import wx.lib.imagebrowser as ib
 	import wx.lib.dialogs
+
+	_ = wx.GetTranslation
 
 	if wx.VERSION_STRING < '2.9':
 		from wx.lib.pubsub import Publisher
@@ -50,6 +51,9 @@ if builtins.__dict__['GUI_FLAG']:
 	if wx.VERSION_STRING >= '4.0':
 		wx.StockCursor = wx.Cursor
 		wx.FONTFAMILY_SWISS = wx.SWISS
+else:
+	import gettext
+	_ = gettext.gettext
 
 import os
 import sys
@@ -65,8 +69,6 @@ from tempfile import gettempdir
 from traceback import format_exception
 
 from math import * ### for eval
-
-_ = wx.GetTranslation
 
 import DomainInterface.MasterModel
 

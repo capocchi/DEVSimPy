@@ -19,7 +19,7 @@ class YAMLHandler:
     def __init__ (self, filename):
         """
         """
-        from .Container import Diagram
+        from Container import Diagram
 
         self.filename = filename
         self.modelname = os.path.basename(self.filename)
@@ -86,7 +86,7 @@ class YAMLHandler:
     def getJSON(self, diagram=None):
         """ Make JSON representation of the model from YAML file
         """
-        from .Container import ConnectionShape, CodeBlock, ContainerBlock
+        from Container import ConnectionShape, CodeBlock, ContainerBlock
 
         if self.filename_is_valid != True: return False
 
@@ -173,7 +173,7 @@ class YAMLHandler:
     def getDevsInstance(self):
         """ Returns the DEVS instance built from YAML file
         """
-        from .Container import Diagram
+        from Container import Diagram
 
         if self.filename_is_valid != True: return False
 
@@ -190,7 +190,7 @@ class YAMLHandler:
         """
         """
 
-        from .Join import makeDEVSConf, makeJoin
+        from Join import makeDEVSConf, makeJoin
 
         if self.filename_is_valid != True : return False
 

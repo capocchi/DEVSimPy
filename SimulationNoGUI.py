@@ -24,7 +24,7 @@ import traceback
 import gettext
 _ = gettext.gettext
 
-from . import InteractionSocket
+import InteractionSocket
 import json
 import pusher
 
@@ -73,7 +73,7 @@ class PrintPusher():
 def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True):
     """
     """
-    from .InteractionSocket import InteractionManager
+    from InteractionSocket import InteractionManager
 
     json_report = {'date':time.strftime("%c")}
     json_report['summary']  ="Simulation in batch mode with %s"%builtins.__dict__['DEFAULT_DEVS_DIRNAME']
@@ -225,7 +225,7 @@ class runSimulation:
         ################################################################################################################
         ################################################################################################################
         if self.master:
-            from .SimulationGUI import simulator_factory
+            from SimulationGUI import simulator_factory
             if not self.ntl:
                 self.master.FINAL_TIME = float(self.time)
             self.thread = simulator_factory(self.master, self.selected_strategy, self.prof, self.ntl, self.verbose, self.dynamic_structure_flag, self.real_time_flag)
