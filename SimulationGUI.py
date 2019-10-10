@@ -362,8 +362,7 @@ class Base(object):
 		self._gauge = wx.Gauge(self.panel, wx.NewIdRef(), 100, size=(-1, 25), style=wx.GA_HORIZONTAL|wx.GA_SMOOTH)
 		self._cp = CollapsiblePanel(self.panel, self)
 
-		self._text1.Enable(not self.ntl)
-		self._value.Enable(not self.ntl)
+		self.SetNTL(self.ntl)
 
 		if wx.VERSION_STRING >= '4.0':
 			self._btn1.SetToolTipString = self._btn1.SetToolTip
@@ -375,6 +374,15 @@ class Base(object):
 		self._btn2.SetToolTipString(_("Stop the simulation process."))
 		self._btn3.SetToolTipString(_("Suspend the simulation process."))
 		self._btn4.SetToolTipString(_("Launch the log window (often depends on some plug-ins (verbose, activity, ...))."))
+
+	def SetNTL(self, ntl):
+		self.ntl = ntl
+		self._text1.Enable(not ntl)
+		self._value.Enable(not ntl)
+		self._cp.cb2.SetValue(ntl)
+
+	def SetTime(self, time):
+		self._value.SetValue(time)
 
 	def __do_layout(self):
 

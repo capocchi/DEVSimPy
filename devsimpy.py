@@ -259,7 +259,7 @@ class MainApplication(wx.Frame):
 #			self.SetAcceleratorTable(aTable)
 
 		# for spash screen
-		pub.sendMessage('object.added',  message='Loading the libraries tree...\n')
+		pub.sendMessage('object.added',  message=_('Loading the libraries tree...\n'))
 
 		### for open home path
 		self.home = None
@@ -268,7 +268,7 @@ class MainApplication(wx.Frame):
 		self.nb1 = ControlNotebook(self, wx.NewIdRef(), style = wx.CLIP_CHILDREN)
 		self.tree = self.nb1.GetTree()
 
-		pub.sendMessage('object.added',  message='Loading the search tab on libraries tree...\n')
+		pub.sendMessage('object.added',  message=_('Loading the search tab on libraries tree...\n'))
 		self.searchTree = self.nb1.GetSearchTree()
 
 		self._mgr.AddPane(self.nb1, aui.AuiPaneInfo().Name("nb1").Hide().Caption("Control").
@@ -278,17 +278,50 @@ class MainApplication(wx.Frame):
 		# Create a Notebook 2
 		self.nb2 = DiagramNotebook(self, wx.NewIdRef(), style = wx.CLIP_CHILDREN)
 
+		self.nb2.AddEditPage(_("Diagram%d"%Container.ShapeCanvas.ID))
+
 		### load .dsp or empty on empty diagram
 		if len(sys.argv) >= 2:
-			for arg in [os.path.abspath(i) for i in [a for a in sys.argv[1:] if a.endswith('.dsp')]]:
-				diagram = Container.Diagram()
-				#diagram.last_name_saved = arg
-				name = os.path.basename(arg)
-				if not isinstance(diagram.LoadFile(arg), Exception):
-					self.nb2.AddEditPage(os.path.splitext(name)[0], diagram)
-		else:
-			self.nb2.AddEditPage(_("Diagram%d"%Container.ShapeCanvas.ID))
+			for arg in sys.argv[1:]:
+				if os.path.exists(arg) and arg.endswith('.dsp'):
+					diagram = Container.Diagram()
+					#diagram.last_name_saved = arg
+					name = os.path.basename(arg)
+					diagram.label = name
+					if not isinstance(diagram.LoadFile(arg), Exception):
+						self.nb2.AddEditPage(os.path.splitext(name)[0], diagram)
+					
+						### try to lunch the sim windows if there is int or (ntl, inf, infinity) arg just after the .dsp
+						try:
+							arg = sys.argv[sys.argv.index(arg)+1]
+						except IndexError:
+							pass
+						else:
+							if arg.isdigit() or arg in ('ntl','inf','infinity'):
+								import SimulationGUI
+								## make DEVS instance from diagram
+								master = Container.Diagram.makeDEVSInstance(diagram)
+								simFrame = SimulationGUI.SimulationDialog(self, wx.NewIdRef(), _(" %s Simulator"%diagram.label), master)
+								simFrame.SetWindowStyle(wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
+					
+								if arg.isdigit():
+									simFrame.SetNTL(False)
+									simFrame.SetTime(arg)
+									simFrame.Show()
+								elif arg in ('ntl','inf','infinity'):
+									simFrame.SetNTL(True)
+									simFrame.Show()
 
+								### try to start a simulation
+								try:
+									arg = sys.argv[sys.argv.index(arg)+1]
+								except IndexError:
+									pass
+								else:
+									if arg in ('start','go'):
+										evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, simFrame._btn1.GetId())
+										wx.PostEvent(simFrame._btn1, evt)
+			
 		self._mgr.AddPane(self.nb2, aui.AuiPaneInfo().Name("nb2").CenterPane().Hide())
 
 		# Simulation panel
@@ -354,7 +387,7 @@ class MainApplication(wx.Frame):
 		"""
 
 		### for spash screen
-		pub.sendMessage('object.added',  message='Writing .devsimpy settings file...\n')
+		pub.sendMessage('object.added',  message=_('Writing .devsimpy settings file...\n'))
 
 		sys.stdout.write("Writing default .devsimpy settings file on %s directory..."%GetUserConfigDir())
 
@@ -393,7 +426,7 @@ class MainApplication(wx.Frame):
 			if not rewrite:
 
 				### for spash screen
-				pub.sendMessage('object.added',  message='Loading .devsimpy settings file...\n')
+				pub.sendMessage('object.added',  message=_('Loading .devsimpy settings file...\n'))
 
 				sys.stdout.write("Loading DEVSimPy %s settings file from %s.devsimpy\n"%(self.GetVersion(), GetUserConfigDir()+os.sep))
 
@@ -477,7 +510,7 @@ class MainApplication(wx.Frame):
 		"""
 
 		# for spash screen
-		pub.sendMessage('object.added',  message='Loading locale configuration...\n')
+		pub.sendMessage('object.added',  message=_('Loading locale configuration...\n'))
 
 		localedir = os.path.join(HOME_PATH, "locale")
 		langid = wx.LANGUAGE_FRENCH if self.language == 'fr' else wx.LANGUAGE_ENGLISH    # use OS default; or use LANGUAGE_FRENCH, etc.
@@ -505,7 +538,7 @@ class MainApplication(wx.Frame):
 		"""
 
 		# for spash screen
-		pub.sendMessage('object.added',  message='Making status bar...\n')
+		pub.sendMessage('object.added',  message=_('Making status bar...\n'))
 
 		self.statusbar = self.CreateStatusBar(1, wx.ST_SIZEGRIP if wx.VERSION_STRING < '4.0' else wx.STB_SIZEGRIP)
 		self.statusbar.SetFieldsCount(3)
@@ -516,7 +549,7 @@ class MainApplication(wx.Frame):
 		"""
 
 		# for spash screen
-		pub.sendMessage('object.added',  message='Making Menu ...\n')
+		pub.sendMessage('object.added',  message=_('Making Menu ...\n'))
 
 		self.menuBar = Menu.MainMenuBar(self)
 		self.SetMenuBar(self.menuBar)
@@ -532,7 +565,7 @@ class MainApplication(wx.Frame):
 		"""
 
 		# for spash screen
-		pub.sendMessage('object.added',  message='Making tools bar ...\n')
+		pub.sendMessage('object.added',  message=_('Making tools bar ...\n'))
 
 		self.tb = self.CreateToolBar(style = wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT, name = 'tb')
 
@@ -2298,6 +2331,10 @@ if __name__ == '__main__':
 	elif len(sys.argv) >= 2 and sys.argv[1] in ('-h, -help'):
 		sys.stdout.write(_('Welcome to the DEVSimpy helper.\n'))
 		sys.stdout.write(_('\t To execute DEVSimPy GUI: python devsimpy.py\n'))
+		sys.stdout.write(_('\t To load an existing dsp: \n\t\t$ python devsimpy.py <absolute path of .dsp file>\n'))
+		sys.stdout.write(_('\t To load an existing dsp with a simulation frame initialized with a time 10: \n\t\t$ python devsimpy.py <absolute path of the .dsp file> 10\n'))
+		sys.stdout.write(_('\t To load an existing dsp with a simulation frame initialized with no time limit: \n\t\t$ python devsimpy.py <absolute path of the .dsp file> ntl/inf/infinity\n'))
+		sys.stdout.write(_('\t To start simulation: \n\t\t$ python devsimpy.py <absolute path of the .dsp file> ntl/inf/infinity start/go\n'))
 		sys.stdout.write(_('\t To execute DEVSimPy cleaner: python devsimpy.py -c|-clean\n'))
 		sys.stdout.write(_('Authors: L. Capocchi (capocchi@univ-corse.fr)\n'))
 		sys.exit()

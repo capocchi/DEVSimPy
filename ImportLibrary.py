@@ -33,7 +33,8 @@ import wx.lib.dialogs
 import wx.lib.filebrowsebutton as filebrowse
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 import wx.lib.dialogs
-
+from concurrent.futures import ThreadPoolExecutor
+ 
 from Utilities import checkURL, getDirectorySize, RecurseSubDirs, getPYFileListFromInit
 from Decorators import BuzyCursorNotification
 
@@ -84,7 +85,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def Populate(self, D={}):
 		""" Populate the list
 		"""
-		for path, dName in list(D.items()):
+		for path, dName in D.items():
 			self.AddItem(path, dName)
 
 class DeleteBox(wx.Dialog):
@@ -175,7 +176,9 @@ class ImportLibrary(wx.Dialog):
 		self._cb = CheckListCtrl(rightPanel)
 		
 		### Populate Check List dynamicaly
-		wx.CallAfter(self._cb.Populate, D)
+		pool = ThreadPoolExecutor(3)
+		future = pool.submit(self._cb.Populate, (D))
+		future.done()
 
 		### Static box sizer
 		#sbox = wx.StaticBox(leftPanel, -1, '')

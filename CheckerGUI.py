@@ -98,7 +98,7 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		"""
 
 		### deselect all item
-		for x in xrange(self.GetItemCount()):
+		for x in range(self.GetItemCount()):
 			self.Select(x, False)
 
 		### get selected item position

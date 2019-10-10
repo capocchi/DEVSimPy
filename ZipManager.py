@@ -356,4 +356,5 @@ class Zip:
 		### os.rename dont work in Linux OS with linked file (copy/paste for exemple)
 		except OSError:
 			import shutil
-			shutil.move("new_arch.zip", self.fn)
+			if os.path.exists(self.fn):
+				shutil.move("new_arch.zip", self.fn)

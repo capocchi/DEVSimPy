@@ -17,7 +17,7 @@ if wx.VERSION_STRING >= '4.0':
 	wx.CHANGE_DIR = wx.FD_CHANGE_DIR
 	wx.OVERWRITE_PROMPT = wx.FD_OVERWRITE_PROMPT
 
-class SimpleEditor (wx.stc.StyledTextCtrl):
+class SimpleEditor(wx.stc.StyledTextCtrl):
     def __init__ (self, parent, id = wx.NewIdRef(), \
             pos = wx.DefaultPosition, \
             size = wx.DefaultSize,\
@@ -41,9 +41,9 @@ class FrameEditor(wx.Frame):
         self.Save = wx.MenuItem(self.File, wx.NewIdRef(), "Save &As", "", wx.ITEM_NORMAL)
         self.Save.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')))
         self.File.Append(self.Save)
-        self.open = wx.MenuItem(self.File, wx.NewIdRef(), "&Open", "", wx.ITEM_NORMAL)
-        self.open.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'open.png')))
-        self.File.Append(self.open)
+        self.Open = wx.MenuItem(self.File, wx.NewIdRef(), "&Open", "", wx.ITEM_NORMAL)
+        self.Open.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'open.png')))
+        self.File.Append(self.Open)
         self.frame_1_menubar.Append(self.File, "&File")
         # Menu Bar end
 
@@ -55,7 +55,7 @@ class FrameEditor(wx.Frame):
         sizer.Add(self.editor, 1, flag=wx.EXPAND)
 
         self.Bind(wx.EVT_MENU, self.file_save, self.Save)
-        self.Bind(wx.EVT_MENU, self.open_file, self.open)
+        self.Bind(wx.EVT_MENU, self.open_file, self.Open)
 
         self.SetSizer(sizer)
         self.Layout()
@@ -85,7 +85,7 @@ class FrameEditor(wx.Frame):
             filename = dialog.GetPath()
             file = open(filename,'r')
             file_content = file.read()
-            self.editor.SetValue(file_content)
+            wx.CallAfter(self.editor.SetValue,file_content)
         dialog.Destroy()
 
     def AddText(self,txt):
