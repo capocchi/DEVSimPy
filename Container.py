@@ -2064,14 +2064,15 @@ if builtins.__dict__['GUI_FLAG']:
 			obj = event.GetEventObject()
 
 			### if right clic on canvas
-			if isinstance(obj, Menu.ShapeCanvasPopupMenu):
-				parent = self
-			else:
-				parent = wx.GetApp().GetTopWindow().GetControlNotebook().GetTree()
-
+			parent = self if isinstance(obj, Menu.ShapeCanvasPopupMenu) else wx.GetApp().GetTopWindow().GetControlNotebook().GetTree()
 			gmwiz = ShapeCanvas.StartWizard(parent)
 
 			return gmwiz
+
+		def OnRefreshModel(self, event):
+			""" New model menu has been pressed. Wizard is instanciate.
+			"""
+			self.UpdateShapes([self])
 
 		def OnNewModel(self, event):
 			""" New model menu has been pressed. Wizard is instanciate.

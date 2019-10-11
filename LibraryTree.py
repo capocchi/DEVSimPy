@@ -69,21 +69,18 @@ class LibraryTree(wx.TreeCtrl):
 
 		isz = (16,16)
 		il = wx.ImageList(isz[0], isz[1])
-		#self.fldridx = il.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, isz))
-		#self.fldropenidx = il.Add(wx.ArtProvider_GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, isz))
 		if wx.VERSION_STRING < '4.0':
 			self.fileidx = il.Add(wx.ArtProvider_GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, isz))
 		else:
 			self.fileidx = il.Add(wx.ArtProvider.GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, isz))
 
-		self.fldridx = il.Add(wx.Image(os.path.join(ICON_PATH_16_16, 'folder_close.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.fldropenidx = il.Add(wx.Image(os.path.join(ICON_PATH_16_16, 'folder_open.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-
-		self.atomicidx = il.Add(wx.Image(os.path.join(ICON_PATH_16_16, 'atomic3.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.coupledidx = il.Add(wx.Image(os.path.join(ICON_PATH_16_16, 'coupled3.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.pythonfileidx = il.Add(wx.Image(os.path.join(ICON_PATH_16_16, 'pythonFile.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.pythoncfileidx = il.Add(wx.Image(os.path.join(ICON_PATH_16_16, 'pyc.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.not_importedidx = il.Add(wx.Image(os.path.join(ICON_PATH_16_16, 'no_ok.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.fldridx = il.Add(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'folder_close.png')))
+		self.fldropenidx = il.Add(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'folder_open.png')))
+		self.atomicidx = il.Add(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'atomic3.png')))
+		self.coupledidx = il.Add(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'coupled3.png')))
+		self.pythonfileidx = il.Add(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'pythonFile.png')))
+		self.pythoncfileidx = il.Add(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'pyc.png')))
+		self.not_importedidx = il.Add(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'no_ok.png')))
 		self.SetImageList(il)
 		self.il = il
 

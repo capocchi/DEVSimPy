@@ -13,6 +13,8 @@ import inspect
 import types
 import inspect
 
+from concurrent.futures import ThreadPoolExecutor
+
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 
 from Decorators import BuzyCursorNotification
@@ -285,7 +287,14 @@ class BlockPluginsList(CheckListCtrl):
 			#sys.stdout.write(_('D'ont forget to call Populate method!\n'))
 			pass
 		else:
-			self.Populate(pluginsList)
+			try:
+				### Populate Check List dynamicaly
+				pool = ThreadPoolExecutor(3)
+				future = pool.submit(self.Populate, (pluginsList))
+				future.done()
+			except:
+				self.Populate(pluginsList)
+			
 			self.is_populate = True
 		
 	def OnCheckItem(self, index, flag):

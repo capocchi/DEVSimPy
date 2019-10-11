@@ -199,7 +199,7 @@ def getIcon(path):
 	""" Return icon from image path
 	"""
 	icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
-	bmp = wx.Image(path).ConvertToBitmap()
+	bmp = wx.Bitmap(path)
 	bmp.SetMask(wx.Mask(bmp, wx.WHITE))
 	icon.CopyFromBitmap(bmp)
 	return icon
@@ -283,45 +283,49 @@ class MainApplication(wx.Frame):
 		### load .dsp or empty on empty diagram
 		if len(sys.argv) >= 2:
 			for arg in sys.argv[1:]:
-				if os.path.exists(arg) and arg.endswith('.dsp'):
-					diagram = Container.Diagram()
-					#diagram.last_name_saved = arg
-					name = os.path.basename(arg)
-					diagram.label = name
-					if not isinstance(diagram.LoadFile(arg), Exception):
-						self.nb2.AddEditPage(os.path.splitext(name)[0], diagram)
-					
-						### try to lunch the sim windows if there is int or (ntl, inf, infinity) arg just after the .dsp
-						try:
-							arg = sys.argv[sys.argv.index(arg)+1]
-						except IndexError:
-							pass
-						else:
-							if arg.isdigit() or arg in ('ntl','inf','infinity'):
-								import SimulationGUI
-								## make DEVS instance from diagram
-								master = Container.Diagram.makeDEVSInstance(diagram)
-								simFrame = SimulationGUI.SimulationDialog(self, wx.NewIdRef(), _(" %s Simulator"%diagram.label), master)
-								simFrame.SetWindowStyle(wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
-					
-								if arg.isdigit():
-									simFrame.SetNTL(False)
-									simFrame.SetTime(arg)
-									simFrame.Show()
-								elif arg in ('ntl','inf','infinity'):
-									simFrame.SetNTL(True)
-									simFrame.Show()
+				if os.path.exists(arg):
+					if arg.endswith('.dsp'):
+						diagram = Container.Diagram()
+						#diagram.last_name_saved = arg
+						name = os.path.basename(arg)
+						diagram.label = name
+						if not isinstance(diagram.LoadFile(arg), Exception):
+							self.nb2.AddEditPage(os.path.splitext(name)[0], diagram)
+						
+							### try to lunch the sim windows if there is int or (ntl, inf, infinity) arg just after the .dsp
+							try:
+								arg = sys.argv[sys.argv.index(arg)+1]
+							except IndexError:
+								pass
+							else:
+								if arg.isdigit() or arg in ('ntl','inf','infinity'):
+									import SimulationGUI
+									## make DEVS instance from diagram
+									master = Container.Diagram.makeDEVSInstance(diagram)
+									if not isinstance(master, tuple):
+										simFrame = SimulationGUI.SimulationDialog(self, wx.NewIdRef(), _(" %s Simulator"%diagram.label), master)
+										simFrame.SetWindowStyle(wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
+						
+										if arg.isdigit():
+											simFrame.SetNTL(False)
+											simFrame.SetTime(arg)
+											simFrame.Show()
+										elif arg in ('ntl','inf','infinity'):
+											simFrame.SetNTL(True)
+											simFrame.Show()
 
-								### try to start a simulation
-								try:
-									arg = sys.argv[sys.argv.index(arg)+1]
-								except IndexError:
-									pass
-								else:
-									if arg in ('start','go'):
-										evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, simFrame._btn1.GetId())
-										wx.PostEvent(simFrame._btn1, evt)
-			
+										### try to start a simulation
+										try:
+											arg = sys.argv[sys.argv.index(arg)+1]
+										except IndexError:
+											pass
+										else:
+											if arg in ('start','go'):
+												evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, simFrame._btn1.GetId())
+												wx.PostEvent(simFrame._btn1, evt)
+									else:
+										sys.stout.write(_('Loading failed: .dsp file contains errors.'))
+
 		self._mgr.AddPane(self.nb2, aui.AuiPaneInfo().Name("nb2").CenterPane().Hide())
 
 		# Simulation panel
@@ -2022,7 +2026,7 @@ class AdvancedSplashScreen(AdvancedSplash):
 		else:
 			splashStyle = wx.adv.SPLASH_CENTRE_ON_SCREEN | wx.adv.SPLASH_TIMEOUT
 
-		splashBmp = wx.Image(SPLASH_PNG).ConvertToBitmap()
+		splashBmp = wx.Bitmap(SPLASH_PNG)
 		splashDuration = 2000
 
 		if old:

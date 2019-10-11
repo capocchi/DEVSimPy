@@ -143,9 +143,9 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 			menu = wx.Menu()
 
 			edit = wx.MenuItem(menu, wx.NewIdRef(),_("Edit"), _("Edit the source code"))
-			edit.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'edit.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+			edit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'edit.png')))
 			report = wx.MenuItem(menu, wx.NewIdRef(),_("Report"), _("Report error by mail to the author"))
-			report.SetBitmap(wx.Image(os.path.join(ICON_PATH_16_16,'mail.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+			report.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'mail.png')))
 
 			menu.AppendItem(edit)
 			menu.AppendItem(report)

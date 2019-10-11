@@ -778,7 +778,7 @@ class EditionNotebook(wx.Notebook):
 		#icon under tab
 		imgList = wx.ImageList(16, 16)
 		for img in [os.path.join(ICON_PATH_16_16, 'featureFile.png')]:
-			imgList.Add(wx.Image(img, wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+			imgList.Add(wx.Bitmap(img))
 		self.AssignImageList(imgList)
 
 		### binding

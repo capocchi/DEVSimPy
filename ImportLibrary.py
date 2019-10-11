@@ -175,11 +175,14 @@ class ImportLibrary(wx.Dialog):
 		### Check list of libraries
 		self._cb = CheckListCtrl(rightPanel)
 		
-		### Populate Check List dynamicaly
-		pool = ThreadPoolExecutor(3)
-		future = pool.submit(self._cb.Populate, (D))
-		future.done()
-
+		try:
+			### Populate Check List dynamicaly
+			pool = ThreadPoolExecutor(3)
+			future = pool.submit(self._cb.Populate, (D))
+			future.done()
+		except:
+			self._cb.Populate(D)
+			
 		### Static box sizer
 		#sbox = wx.StaticBox(leftPanel, -1, '')
 		#vbox2 = wx.StaticBoxSizer(sbox, wx.VERTICAL) 
