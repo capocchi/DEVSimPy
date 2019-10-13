@@ -448,7 +448,6 @@ class DEVSComponent:
 		self.python_path = ''
 
 		# args of constructor
-
 		self.args = {}
 
 	def __getstate__(self):
@@ -500,7 +499,7 @@ class DEVSComponent:
 		""" Return the DEVS model.
 		"""
 		return self.devsModel
-
+		
 	def setDEVSModel(self, devs):
 		"""
 		Set the DEVS model.
