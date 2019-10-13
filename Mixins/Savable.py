@@ -21,23 +21,32 @@ import re
 import inspect
 import builtins
 import gettext
-#import wx
+import importlib
+import subprocess
 
 _ = gettext.gettext
 
-try:
-	import yaml	
-	builtins.__dict__['YAML_IMPORT'] = True
-except ImportError as info:
-	builtins.__dict__['YAML_IMPORT'] = False
-	sys.stdout.write("yaml module was not found! Install it if you want to save model in yaml format.\n")
+required_libs = ['yaml','ruamel']
 
-try:
-	import ruamel.yaml
-	builtins.__dict__['YAML_IMPORT'] = True
-except ImportError as info:
-	builtins.__dict__['YAML_IMPORT'] = False
-	sys.stdout.write("ruamel.yaml module was not found! Install it if you want to save model in yaml format.\n")
+for lib_name in required_libs:
+    try:
+        importlib.import_module(lib_name)
+    except:
+        subprocess.run(f'pip install {lib_name}'.split())
+
+#try:
+import yaml	
+builtins.__dict__['YAML_IMPORT'] = True
+#except ImportError as info:
+#	builtins.__dict__['YAML_IMPORT'] = False
+#	sys.stdout.write("yaml module was not found! Install it if you want to save model in yaml format.\n")
+
+#try:
+import ruamel.yaml
+builtins.__dict__['YAML_IMPORT'] = True
+#except ImportError as info:
+#	builtins.__dict__['YAML_IMPORT'] = False
+#	sys.stdout.write("ruamel.yaml module was not found! Install it if you want to save model in yaml format.\n")
 
 from tempfile import gettempdir
 
