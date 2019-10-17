@@ -89,11 +89,7 @@ class GeneralPanel(wx.Panel):
 		self.cb1.SetValue(builtins.__dict__['TRANSPARENCY'])
 
 		### wxPython version
-		if wx.VERSION_STRING < '4.0':
-			from . import wxversion
-			wxv= [a.split('-')[0] for a in wxversion.getInstalled()]
-		else:
-			wxv = [wx.VERSION_STRING]
+		wxv = [wx.VERSION_STRING]
 			
 		self.cb2 = wx.ComboBox(self, wx.NewIdRef(), GetWXVersionFromIni(), choices=wxv, style=wx.CB_READONLY)
 		if wx.VERSION_STRING >= '4.0': self.cb2.SetToolTipString = self.cb2.SetToolTip

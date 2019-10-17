@@ -215,25 +215,10 @@ def GetWXVersionFromIni():
 	section, option = ('wxversion', 'to_load')
 
 	### if ini file exist we remove old section and option
-	if os.path.exists(path):
-		try:
-			return parser.get(section, option)
-		except:
-			return  wx.VERSION_STRING
-	else:
-		import wxversion
-		### wxPython version
-		wxv= [a.split('-')[0] for a in wxversion.getInstalled()]
-
-		if wxv != []:
-			a = wxv[0]
-			### wx.__version__ is more precise than the values of wxv
-			for v in wxv:
-				if v in wx.__version__:
-					a = v
-			return a
-		else:
-			return wx.VERSION_STRING
+	try:
+		return parser.get(section, option)
+	except:
+		return  None
 
 def getPYFileListFromInit(init_file, ext='.py'):
 	""" Return list of name composing all variable in __init__.py file.
