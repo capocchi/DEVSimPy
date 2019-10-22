@@ -998,8 +998,14 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 				if inspect.isclass(new_cls):
 
 					### update attributes (behavioral ang graphic)
+					old_args = model.args
 					model.args = Components.GetArgs(new_cls)
 					model.SetAttributes(Attributable.GRAPHICAL_ATTR)
+					
+					### copy of the same args value
+					for k,v in old_args.items():
+						if k in model.args:
+							model.args[k] = v
 
 					### TODO: when ScopeGUI and DiskGUI will be amd models, delete this line)
 					### delete xlabel and ylabel attributes if exist
@@ -1021,7 +1027,6 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 					if zipfile.is_zipfile(model.model_path):
 						zf = ZipManager.Zip(model.model_path)
 						zf.Update([new_python_path])
-						#model.model_path =
 
 					### update flag and color if bad filename
 					if model.bad_filename_path_flag:
