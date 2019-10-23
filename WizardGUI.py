@@ -66,7 +66,7 @@ class %s(DomainBehavior):
 
 		self.initPhase('IDLE',INFINITY)
 
-	def extTransition(self%s):
+	def extTransition(self, *args):
 		''' DEVS external transition function.
 		'''
 		%s
@@ -95,7 +95,6 @@ class %s(DomainBehavior):
 	datetime.datetime.now(),
 	label,
 	label,
-	'' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else ', *args',
 	'pass' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else 'return self.getState()',
 	'pass' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else 'return {}',
 	'pass' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else 'return self.getState()',
