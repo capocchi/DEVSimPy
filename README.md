@@ -33,9 +33,9 @@ $ python devsimpy.py
 
 # Installation
 
-DEVSimPy depends on PyPubSub version 3.3.1: 
+DEVSimPy depends on PyPubSub version 3.3.0 or 3.3.1 and yaml modules: 
 ```sh
-$ pip install PyPubSub==3.3.1
+$ pip install PyPubSub==3.3.1 pyyaml ruamel.yaml
 ```
 
 To get DEVSimPy V4.0 package with all Git submodule: 
