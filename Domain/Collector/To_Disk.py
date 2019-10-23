@@ -24,7 +24,7 @@ class To_Disk(QuickScope):
 	"""
 
 	###
-	def __init__(self, fileName = os.path.join(os.getcwd(),"result%d"%random.randint(1,100)), eventAxis = False, comma = " ", ext = '.dat', col = 0):
+	def __init__(self, fileName = os.path.join(os.getcwd(),"result%d"%random.randint(1,100)), eventAxis = False, comma = " ", ext = '.dat'):
 		""" Constructor.
 
 			@param fileName : Name of output fileName
@@ -39,7 +39,6 @@ class To_Disk(QuickScope):
 		self.fileName = fileName
 		self.comma = comma
 		self.ext = ext
-		self.col = col
 
 		#decimal precision
 		getcontext().prec = 6
@@ -111,8 +110,7 @@ class To_Disk(QuickScope):
 				
 				### adapted with PyPDEVS
 				
-#				val = msg.value[self.col] if hasattr(self, 'peek') else msg[0][self.col]
-				val = self.getMsgValue(msg,self.col)
+				val = self.getMsgValue(msg)
 				if isinstance(val, int) or isinstance(val, float):
 					v = Decimal(str(float(val)))
 				else:
