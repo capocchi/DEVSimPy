@@ -266,15 +266,16 @@ class ImportLibrary(wx.Dialog):
 
 		doc = wx.MenuItem(menu, wx.NewIdRef(), _('Doc'), _('Documentation of item'))
 		doc.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'doc.png')))
-		menu.AppendItem(doc)
-		wx.EVT_MENU(self, doc.GetId(), self.OnDoc)
+		menu.Append(doc)
+
+		self.Bind(wx.EVT_MENU, self.OnDoc, id = doc.GetId())
 
 		### delete option only for the export path
 		if label in self._d:
 			delete = wx.MenuItem(menu, wx.NewIdRef(), _('Delete'), _('Delete item'))
 			delete.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'delete.png')))
-			menu.AppendItem(delete)
-			wx.EVT_MENU(self, delete.GetId(), self.OnDelete)
+			menu.Append(delete)
+			self.Bind(wx.EVT_MENU, self.OnDelete, id=delete.GetId())
 
 		try:
 			self.PopupMenu(menu, evt.GetPosition())
@@ -356,14 +357,15 @@ class ImportLibrary(wx.Dialog):
 			### delete files
 			if db.rb2.GetValue():
 				dial = wx.MessageDialog(None, _('Are you sure to delete python files into the %s directory?')%(label), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-			if dial.ShowModal() == wx.ID_YES:
-				try:
-					### delete directory
-					shutil.rmtree(self._d[label])
-				except Exception as info:
-					sys.stdout.write(_("%s not deleted!\n Error: %s")%(label,info))
+				
+				if dial.ShowModal() == wx.ID_YES:
+					try:
+						### delete directory
+						shutil.rmtree(self._d[label])
+					except Exception as info:
+						sys.stdout.write(_("%s not deleted!\n Error: %s")%(label,info))
 
-			dial.Destroy()
+				dial.Destroy()
 
 			### update .devsimpy
 			if label in self._d:
@@ -404,13 +406,13 @@ class ImportLibrary(wx.Dialog):
 			if dlg.ShowModal() == wx.ID_OK:
 				select = dlg.GetValueString()
 			else:
-				select = None
+				select = []
 			dlg.Destroy()
 		else:
-			select = None
+			select = []
 
 		### if path exist, we create the __init__.py file with __all__ empty
-		if os.path.isdir(path) and select:
+		if os.path.isdir(path):
 			with open(os.path.join(path, '__init__.py'), 'w') as f:
 				f.write("__all__ = [ \n")
 				for fn in select:

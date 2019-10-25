@@ -132,6 +132,7 @@ class Reindenter:
 
     def run(self):
         tokenize.tokenize(self.getline, self.tokeneater)
+        #tokenize.tokenize(self.raw)
         # Remove trailing empty lines.
         lines = self.lines
         while lines and lines[-1] == self.eol:

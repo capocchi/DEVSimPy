@@ -418,7 +418,7 @@ class StaticPlot(PlotFrame):
 
 		data = self.data
 
-		## sans fusion
+		### sans fusion
 		if isinstance(data, list):
 
 			data = [(i if self.step else x[0], x[1]) for i,x in enumerate(data)]
@@ -430,7 +430,7 @@ class StaticPlot(PlotFrame):
 			self.gc = plot.PlotGraphics([line], self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
 
-		##avec fusion (voir attribut _fusion de QuickScope)
+		### avec fusion (voir attribut _fusion de QuickScope)
 		else:
 			L=[]
 			xMin, xMax, yMin, yMax = 0.0,0.0,0.0,0.0
@@ -445,7 +445,7 @@ class StaticPlot(PlotFrame):
 					m = max([a[1] for a in dd])
 					dd = [(b[0], b[1]/m) for b in dd]
 
-				L.append(plot.PolyLine(dd, legend = 'Port %d %s'%(ind,self.legend), colour = cc, width=1))
+				L.append(plot.PolyLine(d, legend = 'Port %d %s'%(ind,self.legend), colour = cc, width=1))
 
 				a,b,c,d = get_limit(dd)
 

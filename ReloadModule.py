@@ -5,8 +5,8 @@ import os
 import string
 import zipimport
 import importlib
-from traceback import format_exception
 
+from traceback import format_exception
 from Utilities import listf
 
 def recompile(modulename):
@@ -21,8 +21,11 @@ def recompile(modulename):
 	else:
 
 		try:
-			### first, see if the module can be imported at all...
-			tmp = __import__(modulename, globals(), locals(), fromlist = [modulename.split('.')[-1]])
+		### first, see if the module can be imported at all...
+			name = modulename.split('.')[-1]
+			pkg = '.'.join(modulename.split('.')[0:-1])
+			tmp = importlib.import_module(name, package=pkg)
+		#tmp = __import__(modulename, globals(), locals(), fromlist = [modulename.split('.')[-1]])
 
 		except Exception as info:
 			return info
@@ -52,4 +55,4 @@ def recompile(modulename):
 			else:
 				### at this point, the code both compiled and ran without error.  Load it up
 				### replacing the original code.
-				return importlib.reload(sys.modules[modulename])
+				return importlib.reload(tmp)#sys.modules[modulename])

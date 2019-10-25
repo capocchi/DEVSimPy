@@ -738,7 +738,6 @@ class LibraryPopupMenu(wx.Menu):
 		self.Bind(wx.EVT_MENU, mainW.OnImport, id= ID_NEW_LIB)
 		self.Bind(wx.EVT_MENU, parent.OnInfo, id=ID_HELP_LIB)
 		self.Bind(wx.EVT_MENU, parent.OnUpdateAll, id=ID_REFRESH_LIB)
-		#wx.EVT_MENU(self, ID_UPGRADE_LIB, parent.UpgradeAll)
 
 class ShapeCanvasPopupMenu(wx.Menu):
 	""" ShapeCanvas menu class

@@ -3696,15 +3696,17 @@ class CodeBlock(Achievable, Block):
 				if not os.path.exists(fn):
 					#fn_dn = os.path.dirname(fn)
 					fn_bn = os.path.basename(relpath(fn))
-
+					
 					### try to redefine the path
+					### if Domain is in the path
 					if dir_name in fn:
 						fn = os.path.join(HOME_PATH, relpath(str(fn[fn.index(dir_name):]).strip('[]')))
+					### else filename is in DEVSimPy dir...
 					else:
 						fn = os.path.join(HOME_PATH, fn_bn)
 
 					### show flag icon on the block only for the file with extension (input file)
-					if os.path.splitext(fn)[-1] != '':
+					if not os.path.exists(fn) and os.path.splitext(fn)[-1] != '':
 
 						state['bad_filename_path_flag'] = True
 
