@@ -48,7 +48,7 @@ class FileGenerator(Generator):
 		self.__comma = comma
 
 		if self.file_error_flag:
-			with open(fileName, "rb") as f:
+			with open(fileName, "r") as f:
 				for i,l in enumerate([b for b in [a.replace('\n', '') for a in f.readlines()] if b != '']):
 
 					### ligne courante de valeurs et longueur

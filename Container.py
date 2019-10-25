@@ -3545,9 +3545,7 @@ class CodeBlock(Achievable, Block):
 		python_path = state['python_path']
 		model_path = state['model_path']
 		image_path = state['image_path']
-
 		new_class = None
-
 		dir_name = os.path.basename(DOMAIN_PATH)
 
 		### if the model path is wrong
@@ -3687,6 +3685,9 @@ class CodeBlock(Achievable, Block):
 
 		### if the fileName attribut dont exist, we define it into the current devsimpy directory (then the user can change it from Property panel)
 		if 'args' in state:
+			
+			state['bad_filename_path_flag'] = False
+
 			### find all word containning 'filename' without considering the casse
 			m = [re.match('[a-zA-Z]*filename[_-a-zA-Z0-9]*',s, re.IGNORECASE) for s in list(state['args'].keys())]
 			filename_list = [a.group(0) for a in [s for s in m if s is not None]]
@@ -3696,24 +3697,24 @@ class CodeBlock(Achievable, Block):
 				if not os.path.exists(fn):
 					#fn_dn = os.path.dirname(fn)
 					fn_bn = os.path.basename(relpath(fn))
-					
+			
 					### try to redefine the path
 					### if Domain is in the path
 					if dir_name in fn:
-						fn = os.path.join(HOME_PATH, relpath(str(fn[fn.index(dir_name):]).strip('[]')))
+						fn = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(fn[fn.index(dir_name):]).strip('[]')))
 					### else filename is in DEVSimPy dir...
 					else:
 						fn = os.path.join(HOME_PATH, fn_bn)
 
+					#print(fn, not os.path.exists(fn),os.path.splitext(fn)[-1] != '')
 					### show flag icon on the block only for the file with extension (input file)
 					if not os.path.exists(fn) and os.path.splitext(fn)[-1] != '':
-
 						state['bad_filename_path_flag'] = True
 
 					state['args'][name] = fn
 
 		####################################" Just for old model
-		if 'bad_filename_path_flag' not in state:state['bad_filename_path_flag'] = False
+		if 'bad_filename_path_flag' not in state: state['bad_filename_path_flag'] = False
 		if 'lock_flag' not in state: state['lock_flag'] = False
 		if 'image_path' not in state:
 			state['image_path'] = ""
@@ -3810,7 +3811,7 @@ class CodeBlock(Achievable, Block):
 							if os.path.isabs(val):
 								### if there is an extention, then if the field path exist we color in red and update the bad_filename_path_flag
 								bad_flag_dico.update({prop:not os.path.exists(val) and os.path.splitext(val)[-1] == ''})
-
+				
 				self.bad_filename_path_flag = True in list(bad_flag_dico.values())
 
 	###
