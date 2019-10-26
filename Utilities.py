@@ -421,7 +421,6 @@ def exists(site, path):
 	conn.close()
 	return response.status == 200
 
-
 def checkURL(url):
 
 	class Authentification_Dialog(wx.Dialog):

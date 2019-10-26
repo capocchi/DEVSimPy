@@ -2493,14 +2493,15 @@ if builtins.__dict__['GUI_FLAG']:
 
 					if not isinstance(mainW, DetachedFrame):
 						nb2 = mainW.GetDiagramNotebook()
-						canvas = nb2.GetPage(nb2.GetSelection())
+						s = nb2.GetSelection()
+						canvas = nb2.GetPage(s)
 						diagram = canvas.GetDiagram()
 						### modifying propagation
 						diagram.modify = True
 						### update general shapes
 						canvas.UpdateShapes()
 
-						label = nb2.GetPageText(nb2.GetSelection())
+						label = nb2.GetPageText(s)
 
 						### modified windows dictionary
 						D = {win.GetTitle(): win, label: mainW}
@@ -2508,10 +2509,11 @@ if builtins.__dict__['GUI_FLAG']:
 						D={}
 				else:
 					nb2 = win.GetDiagramNotebook()
-					canvas = nb2.GetPage(nb2.GetSelection())
+					s = nb2.GetSelection()
+					canvas = nb2.GetPage(s)
 					diagram = canvas.GetDiagram()
 					diagram.modify = True
-					label = nb2.GetPageText(nb2.GetSelection())
+					label = nb2.GetPageText(s)
 
 					D = {label : win}
 
@@ -3605,43 +3607,6 @@ class CodeBlock(Achievable, Block):
 			if 'plugins' in state:
 				wx.CallAfter(self.LoadPlugins, (state['model_path']))
 
-		### if the model path is empty and the python path is wrong
-		elif not os.path.exists(python_path):
-
-			path = python_path
-
-			### if DOMAIN is in python_path
-			if dir_name in python_path:
-
-				### try to find in DOMAIN directory
-				path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(python_path[python_path.index(dir_name):]).strip('[]')))
-
-				### try to find it in exportedPathList (after Domain check)
-				if not os.path.exists(path):
-					mainW = wx.GetApp().GetTopWindow()
-					for p in mainW.exportPathsList:
-						lib_name = os.path.basename(p)
-						if lib_name in path:
-							path = p+path.split(lib_name)[-1]
-							break
-			else:
-				### try to find if python_path contains a directory wich is also in Domain
-				### subdirectories of Domain
-				subdirectories = os.listdir(DOMAIN_PATH)
-				### for all directories if the directory is in python_path (excluding the file .py (-1))
-				for dir in subdirectories:
-					if dir in python_path.split(os.sep)[0:-1]:
-						### yes, the python_path is wrong but we find that in the Domain there is a directory with the same name
-						a = python_path.split(dir+os.sep)
-						path = os.path.join(DOMAIN_PATH,dir,a[-1])
-						break
-
-			### if path is always wrong, flag is visible
-			if os.path.exists(path):
-				state['python_path'] = path
-			else:
-				state['bad_filename_path_flag'] = True
-
 		### test if args from construcor in python file stored in library (on disk) and args from stored model in dsp are the same
 		if os.path.exists(python_path) or zipfile.is_zipfile(os.path.dirname(python_path)):
 			cls = Components.GetClass(state['python_path'])
@@ -3683,10 +3648,58 @@ class CodeBlock(Achievable, Block):
 			else:
 				sys.stderr.write(_("Error in setstate for CodeBlock: %s\n"%str(cls)))
 
+
+		state['bad_filename_path_flag'] = False
+		### if the model path is empty and the python path is wrong
+		if not os.path.exists(python_path):
+
+			path = python_path
+
+			### if DOMAIN is in python_path
+			if dir_name in python_path:
+
+				### try to find in DOMAIN directory
+				path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(python_path[python_path.index(dir_name):]).strip('[]')))
+
+				### try to find it in exportedPathList (after Domain check) and recent opened file
+				if not os.path.exists(path):
+					mainW = wx.GetApp().GetTopWindow()
+					if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
+						for p in mainW.exportPathsList+mainW.openFileList:
+							lib_name = os.path.basename(p)
+							if lib_name in path:
+								path = p+path.split(lib_name)[-1]
+								break
+			else:
+				### try to find if python_path contains a directory wich is also in Domain
+				### subdirectories of Domain
+				subdirectories = os.listdir(DOMAIN_PATH)
+				### for all directories if the directory is in python_path (excluding the file .py (-1))
+				for dir in subdirectories:
+					if dir in python_path.split(os.sep)[0:-1]:
+						### yes, the python_path is wrong but we find that in the Domain there is a directory with the same name
+						a = python_path.split(dir+os.sep)
+						path = os.path.join(DOMAIN_PATH,dir,a[-1])
+						break
+				
+			### try to find the python_path in recent opened file directory
+			if not os.path.exists(path):
+				mainW = wx.GetApp().GetTopWindow()
+				if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
+					for a in [os.path.dirname(p) for p in mainW.exportPathsList+mainW.openFileList]:
+						p = os.path.join(a,os.path.basename(python_path))
+						if os.path.exists(p):
+							path = p
+							break
+
+			### if path is always wrong, flag is visible
+			if os.path.exists(path):
+				state['python_path'] = path
+			else:
+				state['bad_filename_path_flag'] = True
+
 		### if the fileName attribut dont exist, we define it into the current devsimpy directory (then the user can change it from Property panel)
 		if 'args' in state:
-			
-			state['bad_filename_path_flag'] = False
 
 			### find all word containning 'filename' without considering the casse
 			m = [re.match('[a-zA-Z]*filename[_-a-zA-Z0-9]*',s, re.IGNORECASE) for s in list(state['args'].keys())]
@@ -3697,16 +3710,21 @@ class CodeBlock(Achievable, Block):
 				if not os.path.exists(fn):
 					#fn_dn = os.path.dirname(fn)
 					fn_bn = os.path.basename(relpath(fn))
-			
-					### try to redefine the path
+					mainW = wx.GetApp().GetTopWindow()
+		
+					### try to redefi[ne the path
 					### if Domain is in the path
 					if dir_name in fn:
 						fn = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(fn[fn.index(dir_name):]).strip('[]')))
-					### else filename is in DEVSimPy dir...
+					### try to find the filename in the recent opened recent file directory or exported lib diretory
 					else:
-						fn = os.path.join(HOME_PATH, fn_bn)
-
-					#print(fn, not os.path.exists(fn),os.path.splitext(fn)[-1] != '')
+						if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
+							for a in [os.path.dirname(p) for p in mainW.exportPathsList+mainW.openFileList]:
+								path = os.path.join(a,fn_bn)
+								if os.path.exists(path):
+									fn = path
+									break
+					
 					### show flag icon on the block only for the file with extension (input file)
 					if not os.path.exists(fn) and os.path.splitext(fn)[-1] != '':
 						state['bad_filename_path_flag'] = True

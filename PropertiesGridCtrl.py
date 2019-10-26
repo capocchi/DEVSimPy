@@ -733,9 +733,16 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 				prev_rowcol[:] = [row,col]
 				hinttext = rowcolhintcallback(table.GetValue(row, col))
 				### display the python path on tooltip
-				if self.GetCellValue(row, 1).endswith(".py"):
-    					if col == 1:
-    						hinttext = self.parent.model.python_path 
+				if self.GetCellValue(row, 1).endswith(('.py','pyc','csv','dat','txt')):
+					if col == 1:
+						hinttext = self.parent.model.python_path 
+				elif hinttext is None:
+					hinttext = ''
+
+				### display the data path on tooltip
+				if self.GetCellValue(row, 1).endswith(('csv','dat','txt')):
+					if col == 1:
+						hinttext = self.parent.model.args['fileName'] 
 				elif hinttext is None:
 					hinttext = ''
 

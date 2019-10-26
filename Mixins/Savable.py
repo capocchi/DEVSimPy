@@ -23,6 +23,7 @@ import builtins
 import gettext
 import importlib
 import subprocess
+import traceback
 
 _ = gettext.gettext
 
@@ -394,7 +395,10 @@ class DumpGZipFile(DumpBase):
 			f.seek(0)
 
 		except Exception as info:
-			sys.stderr.write(_("Problem opening: %s -- %s\n")%(str(fileName), info))
+			exc_type, exc_obj, exc_tb = sys.exc_info()
+			fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+
+			sys.stderr.write(_("Problem opening: %s -- description: %s / type: %s / name: %s / line: %s\n")%(str(fileName), info, exc_type, fname, exc_tb.tb_lineno))
 			return info
 
 		else:
@@ -460,7 +464,11 @@ class DumpYAMLFile(DumpBase):
 				dsp = ruamel.yaml.load(yf, Loader=ruamel.yaml.Loader)
 
 		except Exception as info:
-			sys.stderr.write(_("Problem opening: %s -- %s\n")%(str(fileName), info))
+			exc_type, exc_obj, exc_tb = sys.exc_info()
+			fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+
+			sys.stderr.write(_("Problem opening: %s -- description: %s / type: %s / name: %s / line: %s\n")%(str(fileName), info, exc_type, fname, exc_tb.tb_lineno))
+			sys.stderr.write(traceback.format_exc())
 			return info
 
 		else:

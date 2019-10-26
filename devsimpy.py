@@ -50,6 +50,7 @@ import pickle
 import itertools
 import shutil
 import builtins
+import glob
 
 from configparser import ConfigParser
 from tempfile import gettempdir
@@ -279,52 +280,6 @@ class MainApplication(wx.Frame):
 		self.nb2 = DiagramNotebook(self, wx.NewIdRef(), style = wx.CLIP_CHILDREN)
 
 		self.nb2.AddEditPage(_("Diagram%d"%Container.ShapeCanvas.ID))
-
-		### load .dsp or empty on empty diagram
-		if len(sys.argv) >= 2:
-			for arg in sys.argv[1:]:
-				if os.path.exists(arg):
-					if arg.endswith('.dsp'):
-						diagram = Container.Diagram()
-						#diagram.last_name_saved = arg
-						name = os.path.basename(arg)
-						diagram.label = name
-						if not isinstance(diagram.LoadFile(arg), Exception):
-							self.nb2.AddEditPage(os.path.splitext(name)[0], diagram)
-						
-							### try to lunch the sim windows if there is int or (ntl, inf, infinity) arg just after the .dsp
-							try:
-								arg = sys.argv[sys.argv.index(arg)+1]
-							except IndexError:
-								pass
-							else:
-								if arg.isdigit() or arg in ('ntl','inf','infinity'):
-									import SimulationGUI
-									## make DEVS instance from diagram
-									master = Container.Diagram.makeDEVSInstance(diagram)
-									if not isinstance(master, tuple):
-										simFrame = SimulationGUI.SimulationDialog(self, wx.NewIdRef(), _(" %s Simulator"%diagram.label), master)
-										simFrame.SetWindowStyle(wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
-						
-										if arg.isdigit():
-											simFrame.SetNTL(False)
-											simFrame.SetTime(arg)
-											simFrame.Show()
-										elif arg in ('ntl','inf','infinity'):
-											simFrame.SetNTL(True)
-											simFrame.Show()
-
-										### try to start a simulation
-										try:
-											arg = sys.argv[sys.argv.index(arg)+1]
-										except IndexError:
-											pass
-										else:
-											if arg in ('start','go'):
-												evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, simFrame._btn1.GetId())
-												wx.PostEvent(simFrame._btn1, evt)
-									else:
-										sys.stout.write(_('Loading failed: .dsp file contains errors.'))
 
 		self._mgr.AddPane(self.nb2, aui.AuiPaneInfo().Name("nb2").CenterPane().Hide())
 
@@ -1630,7 +1585,91 @@ class MainApplication(wx.Frame):
 		diagram = self.GetDiagramByWindow(parent)
 		return diagram.OnSimulation(event)
 
+	def OnLoadDiagram(self):
+		### load .dsp or empty on empty diagram
+		if len(sys.argv) >= 2:
+			for arg in sys.argv[1:]:
+				if os.path.exists(arg):
+					if arg.endswith(('.dsp','.yaml')):
+						diagram = Container.Diagram()
+						#diagram.last_name_saved = arg
+						name = os.path.basename(arg)
+						diagram.label = name
+						if not isinstance(diagram.LoadFile(arg), Exception):
+							self.nb2.AddEditPage(os.path.splitext(name)[0], diagram)
+							self.StartSimulationGUIWin(arg, [diagram])
 
+				### want to open all dsp or yaml in directory
+				elif arg.endswith(('*.dsp','*.yaml')):
+					path = os.path.dirname(arg)
+					if arg.endswith('*.dsp'):
+						files = [f for f in glob.glob(path + "**/*.dsp", recursive=True)]
+					else:
+						files = [f for f in glob.glob(path + "**/*.yaml", recursive=True)]
+
+					L = []
+					for f in files:
+						diagram = Container.Diagram()
+						#diagram.last_name_saved = arg
+						name = os.path.basename(f)
+						diagram.label = name
+						if not isinstance(diagram.LoadFile(f), Exception):
+							self.nb2.AddEditPage(os.path.splitext(name)[0], diagram)
+							L.append(diagram)
+
+					self.StartSimulationGUIWin(arg, L)
+
+	def StartSimulationGUIWin(self, arg, diagrams):
+		"""try to lunch the sim windows if there is int or (ntl, inf, infinity) arg just after the .dsp or yaml
+		"""
+
+		try:
+			arg = sys.argv[sys.argv.index(arg)+1]
+		except IndexError:
+			pass
+		else:
+			if arg.isdigit() or arg in ('ntl','inf','infinity'):
+				import SimulationGUI
+				
+				L = []
+				for i,diagram in enumerate(diagrams):
+				## make DEVS instance from diagram
+					master = Container.Diagram.makeDEVSInstance(diagram)
+					if not isinstance(master, tuple):
+						simFrame = SimulationGUI.SimulationDialog(self, wx.NewIdRef(), _(" %s Simulator"%diagram.label), master)
+
+						### center and shit to avoid superposition
+						if simFrame:								
+							junk, junk, dw, dh = wx.ClientDisplayRect()
+							w, h = simFrame.GetSize()
+							g = 15*i
+							x = dw - w + g
+							y = dh - h + g
+							simFrame.SetPosition((x/2, y/2))
+	
+							simFrame.SetWindowStyle(wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
+
+							if arg.isdigit():
+								simFrame.SetNTL(False)
+								simFrame.SetTime(arg)
+								simFrame.Show()
+							elif arg in ('ntl','inf','infinity'):
+								simFrame.SetNTL(True)
+								simFrame.Show()
+
+							L.append(simFrame)
+
+				### try to start a simulation
+				try:
+					arg = sys.argv[sys.argv.index(arg)+1]
+				except IndexError:
+					pass
+				else:
+					if arg in ('start','go'):
+						for sf in L:
+							evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, sf._btn1.GetId())
+							wx.PostEvent(sf._btn1, evt)
+	
 	##----------------------------------------------
 	#def AdjustTab(self, evt):
 		## clic sur simulation
@@ -2057,16 +2096,15 @@ class AdvancedSplashScreen(AdvancedSplash):
 
 		self.Bind(wx.EVT_CLOSE,self.OnClose)
 		
-		#if wx.VERSION_STRING < '4.0':
 		self.fc = wx.FutureCall(500, self.ShowMain)
-		#else:
-		#self.fc = wx.CallLater(500, self.ShowMain)
-
+		
 		# for splash info
 		try:
 			pub.subscribe(self.OnObjectAdded, 'object.added')
 		except TypeError:
 			pub.subscribe(self.OnObjectAdded, data='object.added')
+
+		pub.sendMessage('load.diagrams')
 
 	def OnObjectAdded(self, message):
 		# data passed with your message is put in message.data.
@@ -2103,6 +2141,9 @@ class AdvancedSplashScreen(AdvancedSplash):
 
 		self.app.SetExceptionHook()
 
+		# Call after the loading diagram method whic depends on the invocked command line
+		wx.CallAfter(self.app.frame.OnLoadDiagram)
+
 	def ShowMain(self):
 		""" Shows the main application (DEVSimPy). """
 
@@ -2115,7 +2156,7 @@ class AdvancedSplashScreen(AdvancedSplash):
 		wx.App.SetTopWindow(self.app, self.app.frame)
 
 		if self.fc.IsRunning():
-		# Stop the splash screen timer and close it
+			# Stop the splash screen timer and close it
 			self.Raise()
 
 #------------------------------------------------------------------------
@@ -2335,7 +2376,7 @@ if __name__ == '__main__':
 	elif len(sys.argv) >= 2 and sys.argv[1] in ('-h, -help'):
 		sys.stdout.write(_('Welcome to the DEVSimpy helper.\n'))
 		sys.stdout.write(_('\t To execute DEVSimPy GUI: python devsimpy.py\n'))
-		sys.stdout.write(_('\t To load an existing dsp: \n\t\t$ python devsimpy.py <absolute path of .dsp file>\n'))
+		sys.stdout.write(_('\t To load an existing dsp file / all .dsp files / all .yaml files in a directory: \n\t\t$ python devsimpy.py <absolute path of .dsp file/*.dsp/*.yaml>\n'))
 		sys.stdout.write(_('\t To load an existing dsp with a simulation frame initialized with a time 10: \n\t\t$ python devsimpy.py <absolute path of the .dsp file> 10\n'))
 		sys.stdout.write(_('\t To load an existing dsp with a simulation frame initialized with no time limit: \n\t\t$ python devsimpy.py <absolute path of the .dsp file> ntl/inf/infinity\n'))
 		sys.stdout.write(_('\t To start simulation: \n\t\t$ python devsimpy.py <absolute path of the .dsp file> ntl/inf/infinity start/go\n'))
