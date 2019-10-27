@@ -69,6 +69,20 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		self.Centre()
 		self.Show(True)
 
+		self.Bind(wx.EVT_MOTION, self.OnMotion)
+
+	def OnMotion(self, evt):
+		item, flags = self.HitTest(evt.GetPosition())
+		
+		try:
+			path = self.GetPyData(item)
+			self.SetToolTip(path[0].__file__)
+		except:
+			self.SetToolTip(None)
+		
+		### else the drag and drop dont run
+		evt.Skip()
+
 	def OnRightClick(self, event):
 		""" Right click has been invoked.
 		"""
@@ -177,6 +191,7 @@ class GeneralPluginsList(CheckListCtrl):
 		self.InsertColumn(0, _('Name'), width=180)
 		self.InsertColumn(1, _('Size'))
 		self.InsertColumn(2, _('Date'))
+		self.InsertColumn(3, _('Type'))
 
 		self.mainW = wx.GetApp().GetTopWindow()
 
@@ -238,11 +253,13 @@ class GeneralPluginsList(CheckListCtrl):
 		"""
 
 		### absolute name
-		absname = os.path.join(root,"%s.py"%basename)
+		ext = 'py'
+		absname = os.path.join(root,"%s.%s"%(basename,ext))
 
 		### try for pyc if py not exists
 		if not os.path.exists(absname):
-			 absname = os.path.join(root,"%s.pyc"%basename)
+			ext = 'pyc'
+			absname = os.path.join(root,"%s.%s"%(basename,ext))
 
 		if os.path.exists(absname):
 			### file size
@@ -259,6 +276,7 @@ class GeneralPluginsList(CheckListCtrl):
 			index = self.InsertItem(100000000, basename)
 			self.SetItem(index, 1, size)
 			self.SetItem(index, 2, date)
+			self.SetItem(index, 3, ext)
 
 			return index
 		else:

@@ -1,5 +1,6 @@
 __all__ = [
 'blink',
 'state_trajectory',
-'verbose'
+'verbose',
+'activity_tracking'
 ]
