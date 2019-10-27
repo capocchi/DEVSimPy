@@ -364,7 +364,7 @@ class MainApplication(wx.Frame):
 		### list des 5 derniers fichier ouvert
 		cfg.Write('openFileList', str(eval("self.openFileList")))
 		cfg.Write('language', "'%s'"%str(eval("self.language")))
-		cfg.Write('plugins', str("[]"))
+		cfg.Write('active_plugins', str("[]"))
 		cfg.Write('perspectives', str(eval("self.perspectives")))
 		cfg.Write('builtin_dict', str(eval("builtins.__dict__")))
 
@@ -449,7 +449,7 @@ class MainApplication(wx.Frame):
 
 				### load any plugins from the list
 				### here because it needs to PLUGINS_PATH macro defined in D
-				for plugin in eval(self.cfg.Read("plugins")):
+				for plugin in eval(self.cfg.Read("active_plugins")):
 					load_plugins(plugin)
 					enable_plugin(plugin)
 			else:

@@ -746,6 +746,7 @@ class BlockFactory:
 				return module
 
 			except Exception as info:
+				sys.stderr.write(_("Module %s not imported!"%filename))
 				return sys.exc_info()
 
 	@staticmethod

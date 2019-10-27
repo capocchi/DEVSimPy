@@ -3667,7 +3667,7 @@ class CodeBlock(Achievable, Block):
 					if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
 						for p in mainW.exportPathsList+mainW.openFileList:
 							lib_name = os.path.basename(p)
-							if lib_name in path:
+							if lib_name !='' and lib_name in path:
 								path = p+path.split(lib_name)[-1]
 								break
 			else:

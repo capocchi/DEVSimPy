@@ -512,7 +512,7 @@ class CustomDataTable(GridTableBase):
 
 					v = self.GetValue(row, 0)
 
-					### if bad filemane (for instance generator)
+					### if bad filename (for instance generator)
 					m = re.match('[a-zA-Z]*(ile)[n|N](ame)[_-a-zA-Z0-9]*', v, re.IGNORECASE)
 
 					### if filename is match and not exist (ensuring that the filename are extension)

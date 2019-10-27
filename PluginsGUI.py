@@ -132,15 +132,16 @@ class GeneralPluginsList(CheckListCtrl):
 
 		### active plug-ins stored in DEVSimPy configuration file
 		try:
-			self.active_plugins_list = eval(self.mainW.cfg.Read("plugins"))
+			self.active_plugins_list = eval(self.mainW.cfg.Read("active_plugins"))
 		except AttributeError:
+			sys.stderr.write(_("Plugin not stored in configuration file!"))
 			self.active_plugins_list = []
 
 		### if pluginsList (2 parameters in constructor) is in constructor, we can populate
 		try:
 			pluginsList = args[1]
 		except IndexError:
-			#sys.stdout.write(_('Don't forget to call Populate method!\n'))
+			#sys.stdout.write(_("Don't forget to call Populate method!\n"))
 			pass
 		else:
 			self.Populate(pluginsList)
@@ -163,7 +164,9 @@ class GeneralPluginsList(CheckListCtrl):
 				### dirs must contain python file
 				if files != []:
 					for filename in [f for f in files if f == "__init__.py"]:
-						for basename in getPYFileListFromInit(os.path.join(root,filename)):
+						path = os.path.join(root, filename)
+						L = getPYFileListFromInit(path,'.py')+getPYFileListFromInit(path,'.pyc')
+						for basename in L:
 							### try to add dynamically plug-ins
 							#try:
 								#t = threading.Thread(target=self.Importing, args=(root, basename,))
@@ -184,22 +187,30 @@ class GeneralPluginsList(CheckListCtrl):
 		### absolute name
 		absname = os.path.join(root,"%s.py"%basename)
 
-		### file size
-		size = FormatSizeFile(os.path.getsize(absname))
+		### try for pyc if py not exists
+		if not os.path.exists(absname):
+			 absname = os.path.join(root,"%s.pyc"%basename)
 
-		### date manager
-		date = datetime.datetime.fromtimestamp(os.path.getmtime(absname))
-		if hasattr(self.mainW,'language') and self.mainW.language == 'fr':
-			date = date.strftime("%d/%m/%y")
+		if os.path.exists(absname):
+			### file size
+			size = FormatSizeFile(os.path.getsize(absname))
+
+			### date manager
+			date = datetime.datetime.fromtimestamp(os.path.getmtime(absname))
+			if hasattr(self.mainW,'language') and self.mainW.language == 'fr':
+				date = date.strftime("%d/%m/%y")
+			else:
+				date = str(date.date())
+
+			# add to the CheckListCtrl
+			index = self.InsertItem(100000000, basename)
+			self.SetItem(index, 1, size)
+			self.SetItem(index, 2, date)
+
+			return index
 		else:
-			date = str(date.date())
-
-		# add to the CheckListCtrl
-		index = self.InsertItem(100000000, basename)
-		self.SetItem(index, 1, size)
-		self.SetItem(index, 2, date)
-
-		return index
+			sys.stderr.write(_("The format of the Plugin file is not .py or .pyc!"))
+			return None
 
 	def Importing(self, root, basename):
 		""" Importing module and set pydata object
@@ -217,17 +228,18 @@ class GeneralPluginsList(CheckListCtrl):
 
 		index = self.MyInsertItem(root, basename)
 
-		if module.__file__ != None:
-			### only module to be activated is checked
-			if basename in self.active_plugins_list:
-				self.CheckItem(index)
+		if index is not None:
+			if module.__file__ != None:
+				### only module to be activated is checked
+				if basename in self.active_plugins_list:
+					self.CheckItem(index)
+				else:
+					disable_plugin(basename)
 			else:
-				disable_plugin(basename)
-		else:
-			self.SetItemImage(index, 2)
+				self.SetItemImage(index, 2)
 
-		#### pyData setting
-		self.SetPyData(index, (module, None))
+			#### pyData setting
+			self.SetPyData(index, (module, None))
 
 	def Clear(self):
 		""" Delete all items of list
@@ -254,6 +266,7 @@ class GeneralPluginsList(CheckListCtrl):
 					### get abspath and exclude .pyc
 					name,ext = os.path.splitext(os.path.basename(file))
 					### if plug-in is checked, we activate it
+					
 					if self.IsChecked(i):
 						pluginsList.append(name)
 						enable_plugin(name)
@@ -261,7 +274,7 @@ class GeneralPluginsList(CheckListCtrl):
 						disable_plugin(name)
 
 		### config file writing
-		self.mainW.cfg.Write('plugins', str(pluginsList))
+		self.mainW.cfg.Write('active_plugins', str(pluginsList))
 		self.mainW.cfg.Flush()
 
 class BlockPluginsList(CheckListCtrl):

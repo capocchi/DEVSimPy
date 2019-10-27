@@ -224,8 +224,11 @@ def getPYFileListFromInit(init_file, ext='.py'):
 	""" Return list of name composing all variable in __init__.py file.
 	"""
 
-	pyc_file_list = []
+	assert(ext in ('.py', '.pyc'))
+	
+	file_list = []
 	if os.path.basename(init_file) == "__init__.py":
+
 		dName = os.path.dirname(init_file)
 
 		with open(init_file,'r') as f:
@@ -234,9 +237,9 @@ def getPYFileListFromInit(init_file, ext='.py'):
 				python_file = os.path.join(dName,s+ext)
 				### test if tmp is only composed by python file (case of the user write into the __init__.py file directory name is possible ! then we delete the directory names)
 				if os.path.isfile(python_file):
-					pyc_file_list.append(s)
+					file_list.append(s)
 
-	return pyc_file_list
+	return file_list
 
 def path_to_module(abs_python_filename):
 	""" convert and replace sep to . in abs_python_filename

@@ -25,7 +25,7 @@ if __name__ == '__main__':
 from HtmlWindow import HtmlFrame
 
 from PluginsGUI import PluginsPanel, GeneralPluginsList
-from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni
+from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, getPYFileListFromInit
 
 import ReloadModule
 import Menu
@@ -598,19 +598,30 @@ class Preferences(wx.Toolbook):
 		if open_dlg.ShowModal() == wx.ID_OK:
 			filename = open_dlg.GetPath()
 			### sure is python file
-			if filename.endswith('.py'):
+			if filename.endswith(('.py','pyc')):
 				### Insert item in list
 				basename,ext = os.path.splitext(os.path.basename(filename))
 				root = os.path.dirname(filename)
-				self.CheckList.InsertItem(root, basename)
-
-				### trying to copy file in plug-in directory
+				self.CheckList.Importing(root, basename)
+				
+				### trying to copy file in plug-in directory in order to find it again when the plugins list is populate (depending on the __init__.py file)
 				try:
 					shutil.copy2(filename, PLUGINS_PATH)
 				except Exception as info:
-					sys.stderr.write(_('ERROR: %s copy failed!\n%s')%(os.path.basename(filemane), str(info)))
+					sys.stderr.write(_('ERROR: %s copy failed!\n%s')%(os.path.basename(filename), str(info)))
+				else:
+					### rewrite the new __init__.py file that contain the new imported plugin (basename) in order to populate the future generale plugins list
+					init_path = os.path.join(PLUGINS_PATH, '__init__.py')
+					file_list_from_init = getPYFileListFromInit(init_path, '.py') + getPYFileListFromInit(init_path, '.pyc')
+					file_list_from_init.append(basename)
+					with open(init_path,"w+") as f:
+						f.write('__all__ = [\n')
+						for n in file_list_from_init:
+							f.write('%s,\n'%n)
+						f.write(']')
+
 			else:
-				sys.stderr.write(_('ERROR: %s is not a python file.\nOnly python file can be added as plugin.')%(os.path.basename(filemane)))
+				sys.stderr.write(_('ERROR: %s is not a python file.\nOnly python file can be added as plugin.')%(os.path.basename(filename)))
 
 		open_dlg.Destroy()
 
