@@ -218,7 +218,7 @@ def GetWXVersionFromIni():
 	try:
 		return parser.get(section, option)
 	except:
-		return  None
+		return  wx.VERSION_STRING
 
 def getPYFileListFromInit(init_file, ext='.py'):
 	""" Return list of name composing all variable in __init__.py file.
