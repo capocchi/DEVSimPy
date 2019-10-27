@@ -12,7 +12,7 @@ import zipfile
 import inspect
 import types
 import inspect
-
+from abc import abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
@@ -26,7 +26,6 @@ import ZipManager
 import Editor
 
 _ = wx.GetTranslation
-
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	""" General Check list Class.
@@ -60,19 +59,84 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		#	exec "self.%s= self.il.Add(wx.ArtProvider_GetBitmap(wx.ART_%s,wx.ART_TOOLBAR,(16,16)))" % (k,v)
 		#self.SetImageList(self.il, wx.IMAGE_LIST_SMALL)
 
+		# for wxMSW
+		self.Bind(wx.EVT_COMMAND_RIGHT_CLICK, self.OnRightClick)
+
+		# for wxGTK
+		self.Bind(wx.EVT_RIGHT_UP, self.OnRightClick)
+
 		### Layout
 		self.Centre()
 		self.Show(True)
 
+	def OnRightClick(self, event):
+		""" Right click has been invoked.
+		"""
+
+		# make a menu
+		menu = wx.Menu()
+
+		enable = wx.MenuItem(menu, wx.NewIdRef(), _('Enable'), _("Enable the plugin"))
+		disable = wx.MenuItem(menu, wx.NewIdRef(), _('Disable'), _("Disable the plugin"))
+		edit = wx.MenuItem(menu, wx.NewIdRef(), _('Edit'), _("Edit the plugin"))
+		
+		enable.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'enable_plugin.png')))
+		disable.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'disable_plugin.png')))
+		edit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'edit.png')))
+
+		self.Bind(wx.EVT_MENU, self.OnEnable, id=enable.GetId() )
+		self.Bind(wx.EVT_MENU, self.OnDisable, id=disable.GetId())
+		self.Bind(wx.EVT_MENU, self.OnEdit, id=edit.GetId())
+
+		if wx.VERSION_STRING < '4.0':
+    		# add some items
+			menu.AppendItem(enable)
+			menu.AppendItem(disable)
+			menu.AppendItem(edit)	
+		else:
+			# add some items
+			menu.Append(enable)
+			menu.Append(disable)
+			menu.Append(edit)
+
+		### disable the edit menu for the .pyc file
+		for i in range(self.GetItemCount()):
+			module = self.GetPyData(i)[0]
+			if self.IsSelected(i) and module:
+				path = module.__file__
+				if path.endswith('.pyc'):
+					edit.Enable(False)
+
+		# Popup the menu.  If an item is selected then its handler
+		# will be called before PopupMenu returns.
+		self.PopupMenu(menu)
+		menu.Destroy()
+
+	def OnEnable(self, event):
+		""" Ebnable the current item.
+		"""
+		self.CheckItem(self.currentItem, True)
+
+	def OnDisable(self, event):
+		""" Disable the current item.
+		"""
+		self.CheckItem(self.currentItem, False)
+
+	@abstractmethod
+	def OnEdit(self, event):
+		""" Abstract method to edit plug-ins python file.
+		"""
+		pass
+		
 	def SetPyData(self, item, data):
-		""" Set python object Data
+		""" Set python object Data.
 		"""
 		self.map[self.id] = data
 		self.SetItemData(item, self.id)
 		self.id += 1
 
 	def GetPyData(self, item):
-		""" Get python object Data
+		""" Get python object Data.
 		"""
 		return self.map[self.GetItemData(item)]
 
@@ -95,25 +159,14 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 			current = next
 
 	def GetNextSelected(self, current):
-		"""Returns next selected item, or -1 when no more"""
+		"""Returns next selected item, or -1 when no more."""
 
 		return self.GetNextItem(current,
 								wx.LIST_NEXT_ALL,
 								wx.LIST_STATE_SELECTED)
 
-# class Populable(object):
-# 	""" Abstract class defined in order to populate list
-# 	"""
-# 	__metaclass__ = abc.ABCMeta
-#
-# 	@abc.abstractmethod
-# 	def Populate(self):
-# 		""" Abstract method
-# 		"""
-# 		return
-
 class GeneralPluginsList(CheckListCtrl):
-	""" Class for populate CheckListCtrl with DEVSimPy plug-ins stored in configuration file
+	""" Class for populate CheckListCtrl with DEVSimPy plug-ins stored in configuration file.
 	"""
 
 	def __init__(self, *args, **kwargs):
@@ -246,6 +299,27 @@ class GeneralPluginsList(CheckListCtrl):
 		"""
 		self.DeleteAllItems()
 		self.is_populate = False
+
+	def OnEdit(self, event):
+		"""
+		"""
+		for i in range(self.GetItemCount()):
+			module = self.GetPyData(i)[0]
+			if self.IsSelected(i) and module:
+				path = module.__file__
+				if path.endswith('.py'):
+					name = os.path.basename(path)
+					### editor frame for the text of plug-ins
+					editorFrame = Editor.GetEditor(None, \
+									wx.NewIdRef(), \
+									_("%s - Plug-ins Editor")%name, \
+									module, \
+									file_type = 'block')
+					editorFrame.AddEditPage(name, path)
+					editorFrame.Show()
+				### for .pyc file
+				else:
+					pass
 
 	def OnApply(self, event):
 		""" Method called by PreferenceGUI class.
@@ -706,56 +780,10 @@ class ModelPluginsManager(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.OnEdit, id=self.editBtn.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnRefresh, id=self.updateBtn.GetId())
 
+		self.CheckList.OnEdit = self.OnEdit
+
 		self.CenterOnParent(wx.BOTH)
 		self.Layout()
-
-		# for wxMSW
-		self.CheckList.Bind(wx.EVT_COMMAND_RIGHT_CLICK, self.OnRightClick)
-
-		# for wxGTK
-		self.CheckList.Bind(wx.EVT_RIGHT_UP, self.OnRightClick)
-
-	def OnRightClick(self, event):
-		#print "OnRightClick %s\n"%self.GetItemText(self.currentItem)
-
-		# make a menu
-		menu = wx.Menu()
-
-		enable = wx.MenuItem(menu, wx.NewIdRef(), _('Enable'), _("Enable the plugin"))
-		disable = wx.MenuItem(menu, wx.NewIdRef(), _('Disable'), _("Disable the plugin"))
-		edit = wx.MenuItem(menu, wx.NewIdRef(), _('Edit'), _("Edit the plugin"))
-		
-		enable.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'enable_plugin.png')))
-		disable.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'disable_plugin.png')))
-		edit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'edit.png')))
-
-		self.Bind(wx.EVT_MENU, self.OnEnable, id=enable.GetId() )
-		self.Bind(wx.EVT_MENU, self.OnDisable, id=disable.GetId())
-		self.Bind(wx.EVT_MENU, self.OnEdit, id=edit.GetId())
-
-		if wx.VERSION_STRING < '4.0':
-    		# add some items
-			menu.AppendItem(enable)
-			menu.AppendItem(disable)
-			menu.AppendItem(edit)	
-		else:
-			# add some items
-			menu.Append(enable)
-			menu.Append(disable)
-			menu.Append(edit)
-
-		# Popup the menu.  If an item is selected then its handler
-		# will be called before PopupMenu returns.
-		self.CheckList.PopupMenu(menu)
-		menu.Destroy()
-
-	def OnEnable(self, event):
-		#self.OnCheckItem(self.currentItem, True)
-		self.CheckList.CheckItem(self.CheckList.currentItem, True)
-
-	def OnDisable(self, event):
-		#self.OnCheckItem(self.currentItem, True)
-		self.CheckList.CheckItem(self.CheckList.currentItem, False)
 
 	@staticmethod
 	def GetEditor(parent, model, filename=None):

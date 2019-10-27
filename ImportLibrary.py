@@ -63,7 +63,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 
 		self.SetFont(font)
 
-	def AddItem(self, path, dName):
+	def AddItem(self, path, dName, check=False):
 		""" Add item to the list
 		"""
 
@@ -72,6 +72,8 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		self.SetStringItem(index, 2, 'local' if not path.startswith('http') else 'web' )
 		self.SetStringItem(index, 3, "..%s%s"%(os.sep,os.path.basename(DOMAIN_PATH) if path.startswith(DOMAIN_PATH) else path))
 		
+		self.CheckItem(index, check)
+
 		self.SetData(index, path)
 		self.SetItemData(index, index)
 
@@ -440,7 +442,7 @@ class ImportLibrary(wx.Dialog):
 	def DoAdd(self, path, dName):
 
 		### ajout dans la liste box
-		self._cb.AddItem(path, dName)
+		self._cb.AddItem(path, dName, True)
 
 		### mise a jour du fichier .devsimpy
 		if path not in self.parent.exportPathsList:

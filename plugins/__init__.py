@@ -1,4 +1,5 @@
 __all__ = [
-verbose,
-activity_tracking,
+'verbose',
+'state_trajectory',
+'activity_tracking'
 ]

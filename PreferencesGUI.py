@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
 from HtmlWindow import HtmlFrame
 
-from PluginsGUI import PluginsPanel, GeneralPluginsList
+from PluginsGUI import PluginsPanel, GeneralPluginsList, ModelPluginsManager
 from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, getPYFileListFromInit
 
 import ReloadModule
@@ -562,7 +562,6 @@ class Preferences(wx.Toolbook):
 		self.Bind(wx.EVT_BUTTON, self.OnDelete, id=self.delBtn.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnRefresh, id=self.refBtn.GetId())
 
-	#----------------------------------------------------------------------
 	def OnPageChanged(self, event):
 		"""
 		"""
@@ -613,12 +612,12 @@ class Preferences(wx.Toolbook):
 					### rewrite the new __init__.py file that contain the new imported plugin (basename) in order to populate the future generale plugins list
 					init_path = os.path.join(PLUGINS_PATH, '__init__.py')
 					file_list_from_init = getPYFileListFromInit(init_path, '.py') + getPYFileListFromInit(init_path, '.pyc')
-					file_list_from_init.append(basename)
+					if basename not in file_list_from_init: file_list_from_init.append(basename)
 					with open(init_path,"w+") as f:
 						f.write('__all__ = [\n')
-						for n in file_list_from_init:
-							f.write('%s,\n'%n)
-						f.write(']')
+						for n in file_list_from_init[:-1]:
+							f.write("'%s',\n"%n)
+						f.write("'%s'\n]"%file_list_from_init[-1])
 
 			else:
 				sys.stderr.write(_('ERROR: %s is not a python file.\nOnly python file can be added as plugin.')%(os.path.basename(filename)))
