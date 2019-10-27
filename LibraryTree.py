@@ -155,11 +155,10 @@ class LibraryTree(wx.TreeCtrl):
 		"""
 		item, flags = self.HitTest(evt.GetPosition())
 
-		GetItemPyData = self.GetItemPyData if wx.VERSION_STRING < '4.0' else self.GetItemData
-
 		if (flags & wx.TREE_HITTEST_ONITEMLABEL) and not evt.LeftIsDown():
+		
+			path = self.GetItemData(item)
 
-			path = self.GetItemPyData(item)
 
 			if os.path.isdir(path):
 				model_list = self.GetModelList(path)
@@ -183,8 +182,8 @@ class LibraryTree(wx.TreeCtrl):
 
 				tip = doc if doc is not None else _("No documentation for selected model.")
 
-			self.SetToolTip(wx.ToolTip(tip))
-
+			self.SetToolTip(tip)
+		
 		else:
 			self.SetToolTip(None)
 
