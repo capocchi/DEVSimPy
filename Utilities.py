@@ -220,12 +220,75 @@ def GetWXVersionFromIni():
 	except:
 		return  wx.VERSION_STRING
 
+def AddToInitFile(init_dir_path, L):
+	""" Add the name of file in L to the __init__.py file located to init_path
+	"""
+
+	init_path = os.path.join(init_dir_path, '__init__.py')
+
+	if os.path.exists(init_path):
+		### find all py and pyc file in PLUGINS_PATH
+		files = []
+		# r=root, d=directories, f = files
+		for r, d, f in os.walk(init_dir_path):
+			for file in f:
+				if file.endswith(('.py','.pyc')):
+					b,e=os.path.splitext(file)
+					files.append(b)
+
+		### str of __all__ variable extracted from __init__.py file
+		f = open(init_path,"r")
+		init_str = "".join([a.replace('\n','\t') for a in f.readlines()])
+
+		### rewrite __init__.py file with the new basename plugin
+		with open(init_path,"w+") as f:
+			f.write('__all__ = [\n')
+			for n in files:
+				if n in init_str:
+					f.write("'%s',\n"%n)
+			for basename in L[:-1]:
+				f.write("'%s',\n"%basename)
+			f.write("'%s'\n]"%L[-1])
+	else:
+		sys.stderr.write(_("__init__.py file doesn't exists in %s directory!"%init_dir_path))
+
+def DelToInitFile(init_dir_path, L):
+	""" Delete the name of file in L to the __init__.py file located to init_path
+	"""
+
+	init_path = os.path.join(init_dir_path, '__init__.py')
+
+	if os.path.exists(init_path):
+		### find all py and pyc file in PLUGINS_PATH
+		files = []
+		# r=root, d=directories, f = files
+		for r, d, f in os.walk(init_dir_path):
+			for file in f:
+				if file.endswith(('.py','.pyc')):
+					b,e=os.path.splitext(file)
+					files.append(b)
+
+		### str of __all__ variable extracted from __init__.py file
+		f = open(init_path,"r")
+		init_str = "".join([a.replace('\n','\t') for a in f.readlines()])
+
+		### rewrite __init__.py file with the new basename plugin
+		with open(init_path,"w+") as f:
+			f.write('__all__ = [\n')
+			print(L)
+			L = [f for f in files if f not in L and f in init_str]
+			for n in L[:-1]:
+				f.write("'%s',\n"%n)
+			f.write("'%s'\n]"%L[-1])
+	else:
+		sys.stderr.write(_("__init__.py file doesn't exists in %s directory!"%init_dir_path))
+
 def getPYFileListFromInit(init_file, ext='.py'):
 	""" Return list of name composing all variable in __init__.py file.
 	"""
 
 	assert(ext in ('.py', '.pyc'))
-	
+
 	file_list = []
 	if os.path.basename(init_file) == "__init__.py":
 

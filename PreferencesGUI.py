@@ -25,7 +25,7 @@ if __name__ == '__main__':
 from HtmlWindow import HtmlFrame
 
 from PluginsGUI import PluginsPanel, GeneralPluginsList, ModelPluginsManager
-from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, getPYFileListFromInit
+from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, getPYFileListFromInit, AddToInitFile, DelToInitFile
 
 import ReloadModule
 import Menu
@@ -610,14 +610,7 @@ class Preferences(wx.Toolbook):
 					sys.stderr.write(_('ERROR: %s copy failed!\n%s')%(os.path.basename(filename), str(info)))
 				else:
 					### rewrite the new __init__.py file that contain the new imported plugin (basename) in order to populate the future generale plugins list
-					init_path = os.path.join(PLUGINS_PATH, '__init__.py')
-					file_list_from_init = getPYFileListFromInit(init_path, '.py') + getPYFileListFromInit(init_path, '.pyc')
-					if basename not in file_list_from_init: file_list_from_init.append(basename)
-					with open(init_path,"w+") as f:
-						f.write('__all__ = [\n')
-						for n in file_list_from_init[:-1]:
-							f.write("'%s',\n"%n)
-						f.write("'%s'\n]"%file_list_from_init[-1])
+					AddToInitFile(PLUGINS_PATH, [basename])
 
 			else:
 				sys.stderr.write(_('ERROR: %s is not a python file.\nOnly python file can be added as plugin.')%(os.path.basename(filename)))
@@ -625,38 +618,42 @@ class Preferences(wx.Toolbook):
 		open_dlg.Destroy()
 
 	def OnDelete(self, event):
-		""" Delete plug-ins item and python source file
+		""" Delete plugins item and python source file.
 		"""
 
-		### selected plug-ins
-		L = self.CheckList.get_selected_items()
-
-		if L != []:
-			### Delete query
-			dial = wx.MessageDialog(self, _('Do You really want to delete selected plug-ins?'), _('Plug-in MAnager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-			if dial.ShowModal() == wx.ID_YES:
-				### for selected plug-ins
-				for plugin in L:
+		for i in range(self.CheckList.GetItemCount()):
+			if self.CheckList.IsSelected(i):
+				### Delete query
+				dial = wx.MessageDialog(self, _('Do you want to delete the selected %s plugins?'%self.CheckList.GetItemText(i)), _('Plugin MAnager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+				if dial.ShowModal() == wx.ID_YES:
+					### for selected plug-ins
+				
+					module = self.CheckList.GetPyData(i)[0]
+					basename,ext = os.path.splitext(os.path.basename(module.__file__))
 
 					### delete item
-					self.CheckList.DeleteItem(plugin)
+					self.CheckList.DeleteItem(i)
+
+					### TODO: remove also into __init__.py
+					### delete the selected plugin from__init__.py
+					DelToInitFile(PLUGINS_PATH, [basename])
 
 					try:
-						### Delete python file
-						name, ext = os.path.splitext(self.CheckList.GetPyData(plugin)[0].__file__)
-						filename = "%s.py"%name
-						dlg = wx.MessageDialog(self, _('Do You really want to remove %s plug-in file?')%os.path.basename(filename), _('Preference Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+						#name, ext = os.path.splitext(module.__file__)
+						dlg = wx.MessageDialog(self, _('Do you want to remove the corresponding file %s?')%basename, _('Preference Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 						if dlg.ShowModal() == wx.ID_YES:
-							os.remove(filename)
+							os.remove(module.__file__)			
 					except Exception:
-						sys.stderr.write(_('ERROR: plug-in file not deleted!'))
+						sys.stderr.write(_('ERROR: plugin file not deleted!'))
+					else:
+						dlg.Destroy()	
+				else:
+					sys.stderr.write(_('Select plugins to delete'))
 
-			dial.Destroy()
-		else:
-			sys.stderr.write(_('Select plug-ins to delete'))
+				dial.Destroy()
 
 	def OnRefresh(self, event):
-		""" Refresh list of plug-ins
+		""" Refresh list of plugins.
 		"""
 		self.CheckList.Clear()
 		l = list(os.walk(PLUGINS_PATH))

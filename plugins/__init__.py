@@ -1,5 +1,5 @@
 __all__ = [
-'verbose',
+'blink',
 'state_trajectory',
-'activity_tracking'
+'verbose'
 ]
