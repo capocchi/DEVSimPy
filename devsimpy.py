@@ -2358,7 +2358,6 @@ if __name__ == '__main__':
 			pass
 		else:
 			pass
-		sys.exit()
 	elif len(sys.argv) >= 2 and sys.argv[1] in ('-m'):
 		##########################################
 		import compileall
@@ -2385,8 +2384,10 @@ if __name__ == '__main__':
 		sys.exit()
 
 	else:
-		## si redirect=True et filename=None alors redirection dans une fenetre
-		## si redirect=True et filename="fichier" alors redirection dans un fichier
-		## si redirect=False redirection dans la console
-		app = DEVSimPyApp(redirect = False, filename = None)
-		app.MainLoop()
+		pass
+
+	## si redirect=True et filename=None alors redirection dans une fenetre
+	## si redirect=True et filename="fichier" alors redirection dans un fichier
+	## si redirect=False redirection dans la console
+	app = DEVSimPyApp(redirect = False, filename = None)
+	app.MainLoop()

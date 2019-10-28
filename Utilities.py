@@ -275,7 +275,6 @@ def DelToInitFile(init_dir_path, L):
 		### rewrite __init__.py file with the new basename plugin
 		with open(init_path,"w+") as f:
 			f.write('__all__ = [\n')
-			print(L)
 			L = [f for f in files if f not in L and f in init_str]
 			for n in L[:-1]:
 				f.write("'%s',\n"%n)
