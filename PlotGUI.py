@@ -445,7 +445,7 @@ class StaticPlot(PlotFrame):
 					m = max([a[1] for a in dd])
 					dd = [(b[0], b[1]/m) for b in dd]
 
-				L.append(plot.PolyLine(dd, legend = 'Port %d %s'%(ind,self.legend), colour = cc, width=1))
+				L.append(plot.PolyLine(d, legend = 'Port %d %s'%(ind,self.legend), colour = cc, width=1))
 
 				a,b,c,d = get_limit(dd)
 

@@ -303,10 +303,11 @@ class SendMailWx(wx.Frame):
                     msg.attach(part)
 
             # edit this to match your mail server (i.e. mail.myserver.com)
-            server = smtplib.SMTP('smtp.gmail.com',587)
+            server = smtplib.SMTP('smtp.gmail.com:587')
 
             # open login dialog
             dlg = LoginDlg(server)
+
             res = dlg.ShowModal()
             if dlg.loggedIn:
                 dlg.Destroy()   # destroy the dialog
@@ -377,7 +378,7 @@ class EditDialog(wx.Dialog):
 class LoginDlg(wx.Dialog):
 
     def __init__(self, server):
-        wx.Dialog.__init__(self, None, -1, _('Gmail Account Login'), size=(190,150))
+        wx.Dialog.__init__(self, None, -1, _('Gmail Account Login'), size=(200,150))
         self.server = server
         self.loggedIn = False
 
@@ -424,19 +425,19 @@ class LoginDlg(wx.Dialog):
         If correct, the email will attempt to be sent. If incorrect, the user
         will be notified.
         '''
-        try:
-            user = self.userTxt.GetValue()
-            pw   = self.passwordTxt.GetValue()
-            self.server.ehlo()
-            self.server.starttls()
-            res = self.server.login(user, pw)
-            self.loggedIn = True
-            self.OnClose('')            
-        except:
-            message = _('Your username or password is incorrect. Please try again.')
-            dlg = wx.MessageDialog(None, message, _('Login Error'), wx.OK|wx.ICON_EXCLAMATION)
-            dlg.ShowModal()
-            dlg.Destroy()
+        #try:
+        user = self.userTxt.GetValue()
+        pw   = self.passwordTxt.GetValue()
+        self.server.starttls()
+        self.server.ehlo()
+        res = self.server.login(user, pw)
+        self.loggedIn = True
+        self.OnClose('')            
+        #except:
+        #    message = _('Your username or password is incorrect. Please try again.')
+        #    dlg = wx.MessageDialog(None, message, _('Login Error'), wx.OK|wx.ICON_EXCLAMATION)
+        #    dlg.ShowModal()
+        #    dlg.Destroy()
             
     def OnClose(self, event):
         self.Close()

@@ -68,7 +68,24 @@ def PrintException():
 	linecache.checkcache(filename)
 	line = linecache.getline(filename, lineno, f.f_globals)
 	print('EXCEPTION IN {}\nLINE {}\n"{}": {}'.format(filename, lineno, line.strip(), exc_obj))
-	
+
+def now():
+    """ Returns the current time formatted. """
+
+    t = time.localtime(time.time())
+    st = time.strftime("%d %B %Y @ %H:%M:%S", t)
+
+    return st
+
+
+def shortNow():
+    """ Returns the current time formatted. """
+
+    t = time.localtime(time.time())
+    st = time.strftime("%H:%M:%S", t)
+
+    return st
+
 class FixedList(list):
 	""" List with fixed size (for undo/redo).
 	"""
