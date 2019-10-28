@@ -12,13 +12,12 @@ import zipfile
 import inspect
 import types
 import inspect
+
 from abc import abstractmethod
 from concurrent.futures import ThreadPoolExecutor
-
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 
 from Decorators import BuzyCursorNotification
-
 from pluginmanager import enable_plugin, disable_plugin, load_plugins
 from Utilities import FormatSizeFile, getPYFileListFromInit
 
@@ -26,7 +25,6 @@ import ZipManager
 import Editor
 
 _ = wx.GetTranslation
-
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	""" General Check list Class.
 	"""
@@ -35,7 +33,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		""" Constructor.
 		"""
 
-		wx.ListCtrl.__init__(self, parent, wx.NewIdRef(), style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+		wx.ListCtrl.__init__(self, parent, wx.NewIdRef(), style=wx.LC_REPORT | wx.SUNKEN_BORDER | wx.LC_SORT_ASCENDING)
 		CheckListCtrlMixin.__init__(self)
 		ListCtrlAutoWidthMixin.__init__(self)
 
@@ -72,6 +70,8 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		self.Bind(wx.EVT_MOTION, self.OnMotion)
 
 	def OnMotion(self, evt):
+		"""
+		"""
 		item, flags = self.HitTest(evt.GetPosition())
 		
 		try:
