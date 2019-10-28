@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 
-### at the beginning to prevent with statement for python vetrsion <=2.5
-
-
 import builtins
-
 import os
 import sys
 import time
@@ -64,8 +60,17 @@ except ImportError:
 		sys.exit()
 
 #-------------------------------------------------------------------------------
+def PrintException():
+	exc_type, exc_obj, tb = sys.exc_info()
+	f = tb.tb_frame
+	lineno = tb.tb_lineno
+	filename = f.f_code.co_filename
+	linecache.checkcache(filename)
+	line = linecache.getline(filename, lineno, f.f_globals)
+	print('EXCEPTION IN {}\nLINE {}\n"{}": {}'.format(filename, lineno, line.strip(), exc_obj))
+	
 class FixedList(list):
-	""" List with fixed size (for undo/redo)
+	""" List with fixed size (for undo/redo).
 	"""
 
 	def __init__(self, size = 5):
@@ -81,65 +86,17 @@ class FixedList(list):
 
 		self.insert(len(self),v)
 
-def PrintException():
-	exc_type, exc_obj, tb = sys.exc_info()
-	f = tb.tb_frame
-	lineno = tb.tb_lineno
-	filename = f.f_code.co_filename
-	linecache.checkcache(filename)
-	line = linecache.getline(filename, lineno, f.f_globals)
-	print('EXCEPTION IN {}\nLINE {}\n"{}": {}'.format(filename, lineno, line.strip(), exc_obj))
-
-def install_and_import(package):
-	import importlib
-	try:
-		importlib.import_module(package)
-	except ImportError:
-		import pip
-		sys.stdout.write("Install %s form pip\n"%package)
-		try:
-			input("Press Enter to continue (Ctrl+C to skip)")
-		except SyntaxError:
-			sys.exit()
-		else:
-			try:
-				pip.main(['install', package])
-			except:
-				sys.stdout.write("Unable to install %s using pip. Please read the instructions for \
-				manual installation.. Exiting" % package)
-				sys.stdout.write("Error: %s: %s" % (exc_info()[0], exc_info()[1]))
-	finally:
-		globals()[package] = importlib.import_module(package)
-
-def downloadFile(url, directory) :
-
-	install_and_import(requests)
-
-	localFilename = url.split('/')[-1]
-	with open(directory + '/' + localFilename, 'wb') as f:
-		start = time.clock()
-		r = requests.get(url, stream=True)
-		total_length = r.headers.get('content-length')
-		dl = 0
-		if total_length is None: # no content length header
-			f.write(r.content)
-		else:
-			for chunk in r.iter_content(1024):
-				dl += len(chunk)
-				f.write(chunk)
-				done = int(50 * dl / int(total_length))
-				sys.stdout.write("\r[%s%s] %s bps" % ('=' * done, ' ' * (50-done), dl//(time.clock() - start)))
-				print('')
-	return (time.clock() - start)
-
 def getOutDir():
+	"""
+	"""
 	out_dir = os.path.join(HOME_PATH, 'out')
 	if not os.path.exists(out_dir):
 		os.mkdir(out_dir)
 	return out_dir
 
 def PyBuzyInfo(msg, time):
-
+	"""
+	"""
 	busy = PBI.PyBusyInfo(msg, parent=None, title=_("Info"))
 
 	wx.Yield()
@@ -182,16 +139,20 @@ def getObjectFromString(scriptlet):
 						return info
 
 def vibrate(windowName, distance=15, times=5, speed=0.05, direction='horizontal'):
-	#Speed is the number of seconds between movements
-	#If times is odd, it increments so that window ends up in same location
-	import time
+	""" Speed is the number of seconds between movements
+		If times is odd, it increments so that window ends up in same location
+	"""
+
 	if not times % 2 == 0:
 		times += 1
+	
 	location = windowName.GetPositionTuple()
+	
 	if direction == 'horizontal':
 		newLoc = (location[0] + distance, location[1])
 	elif direction == 'vertical':
 		newLoc = (location[0], location[1] + distance)
+	
 	for x in range(times):
 		time.sleep(speed)
 		windowName.Move(wx.Point(newLoc[0], newLoc[1]))
@@ -204,7 +165,7 @@ def GetUserConfigDir():
 	return os.path.expanduser("~")
 
 def GetWXVersionFromIni():
-	""" Return the wx version loaded in devsimpy (from ini file if exist)
+	""" Return the wx version loaded in devsimpy (from ini file if exist).
 	"""
 
 	### update the init file into GetUserConfigDir
@@ -221,7 +182,7 @@ def GetWXVersionFromIni():
 		return  wx.VERSION_STRING
 
 def AddToInitFile(init_dir_path, L):
-	""" Add the name of file in L to the __init__.py file located to init_path
+	""" Add the name of file in L to the __init__.py file located to init_path.
 	"""
 
 	init_path = os.path.join(init_dir_path, '__init__.py')
@@ -247,8 +208,12 @@ def AddToInitFile(init_dir_path, L):
 				if n in init_str:
 					f.write("'%s',\n"%n)
 			for basename in L[:-1]:
-				f.write("'%s',\n"%basename)
-			f.write("'%s'\n]"%L[-1])
+				if basename not in init_str:
+					f.write("'%s',\n"%basename)
+			if L[-1] not in init_str:
+				f.write("'%s'\n]"%L[-1])
+			else:
+				f.write("\n]")
 	else:
 		sys.stderr.write(_("__init__.py file doesn't exists in %s directory!"%init_dir_path))
 
@@ -304,7 +269,7 @@ def getPYFileListFromInit(init_file, ext='.py'):
 	return file_list
 
 def path_to_module(abs_python_filename):
-	""" convert and replace sep to . in abs_python_filename
+	""" Convert and replace sep to . in abs_python_filename.
 	"""
 
 	# delete extention if exist
@@ -330,19 +295,19 @@ def path_to_module(abs_python_filename):
 	return path
 
 def getInstance(cls, args = {}):
-	""" Function that return the instance from class and args
+	""" Function that return the instance from class and args.
 	"""
 
 	if inspect.isclass(cls):
 		try:
 			devs = cls(**args)
 		except Exception:
-			sys.stderr.write(_("Error in getInstance: %s not instanciated with %s\n"%(cls,str(args))))
+			sys.stderr.write(_("Error in getInstance: %s not instanciated with %s.\n"%(cls,str(args))))
 			return sys.exc_info()
 		else:
 			return devs
 	else:
-		sys.stderr.write(_("Error in getInstance: First parameter (%s) is not a class\n")%str(cls))
+		sys.stderr.write(_("Error in getInstance: First parameter (%s) is not a class.\n")%str(cls))
 		return sys.exc_info()
 
 def itersubclasses(cls, _seen=None):
@@ -373,11 +338,14 @@ def itersubclasses(cls, _seen=None):
 	if not isinstance(cls, type):
 		raise TypeError('itersubclasses must be called with '
 						'new-style classes, not %.100r' % cls)
+	
 	if _seen is None: _seen = set()
+
 	try:
 		subs = cls.__subclasses__()
 	except TypeError: # fails only when cls is type
 		subs = cls.__subclasses__(cls)
+	
 	for sub in subs:
 		if sub not in _seen:
 			_seen.add(sub)
@@ -385,18 +353,14 @@ def itersubclasses(cls, _seen=None):
 			for sub in itersubclasses(sub, _seen):
 				yield sub
 
-def show_error(parent, msg=None):
-	if msg is None:
-		msg = sys.exc_info()
-	message = ''.join(traceback.format_exception(*msg))
-	dialog = wx.MessageDialog(parent, message, _('Error Manager'), wx.OK|wx.ICON_ERROR)
-	dialog.ShowModal()
-
-
 def getTopLevelWindow():
+	"""
+	"""
 	return wx.GetApp().GetTopWindow()
 
 def GetActiveWindow(event=None):
+	"""
+	"""
 	aW = None
 
 	for win in wx.GetTopLevelWindows():
@@ -418,22 +382,15 @@ def GetActiveWindow(event=None):
 
 	return aW
 
-def check_connectivity(reference):
-	try:
-		urllib.request.urlopen(reference, timeout=1)
-		return True
-	except urllib.request.URLError:
-		return False
-
 def sendEvent(from_obj, to_obj, evt):
-	""" Send Event 'evt' from 'form_obj' object 'to to_obj'
+	""" Send Event 'evt' from 'form_obj' object 'to to_obj'.
 	"""
 	evt.SetEventObject(from_obj)
 	evt.SetId(to_obj.GetId())
 	from_obj.GetEventHandler().ProcessEvent(evt)
 
 def playSound(sound_path):
-	""" Play sound from sound_path
+	""" Play sound from sound_path.
 	"""
 
 	if sound_path != os.devnull:
@@ -445,13 +402,15 @@ def playSound(sound_path):
 			sys.stderr.write(_("No sound\n"))
 
 def GetMails(string):
-	""" Get list of mails from string
+	""" Get list of mails from string.
 	"""
+
 	regex = re.compile('([a-zA-Z0-9-_.]+[@][a-zA-Z0-9-_.]+)')
 	return regex.findall(string)
 
 def MoveFromParent(frame=None, interval=10, direction='right'):
-
+	"""
+	"""
 	assert(isinstance(frame, wx.Frame))
 
 	frame.CenterOnParent(wx.BOTH)
@@ -472,6 +431,8 @@ def MoveFromParent(frame=None, interval=10, direction='right'):
 	frame.Move(x,y)
 
 def getDirectorySize(directory):
+	"""
+	"""
 	dir_size = 0
 	for (path, dirs, files) in os.walk(str(directory)):
 		for file in [a for a in files if a.endswith(('.py', '.amd', '.cmd'))]:
@@ -480,6 +441,8 @@ def getDirectorySize(directory):
 	return dir_size/1000
 
 def exists(site, path):
+	"""
+	"""
 	conn = http.client.HTTPConnection(site)
 	conn.request('HEAD', path)
 	response = conn.getresponse()
@@ -487,7 +450,8 @@ def exists(site, path):
 	return response.status == 200
 
 def checkURL(url):
-
+	"""
+	"""
 	class Authentification_Dialog(wx.Dialog):
 
 		def __init__(self, parent, id, title):
@@ -561,34 +525,20 @@ def checkURL(url):
 		return False
 
 def replaceAll(file,searchExp,replaceExp):
+    """
+    """
     for line in fileinput.input(file, inplace=1):
         if searchExp in line:
                 line = line.replace(searchExp,replaceExp)
         sys.stdout.write(line)
 
 def listf(data):
+	"""
+	"""
 	buffer = ""
 	for line in data:
 		buffer = buffer + line + "\n"
 	return buffer
-
-def quick_sort(list):
-	''' Sort list in non-decreasing order, using Quick Sort. '''
-	# If list contains at most 1 element, it is already sorted.
-	if len(list) <= 1:
-		return list
-	# Select a pivot, then partition the list.
-	pivot = list[0]
-	smaller = [x for x in list if x < pivot]
-	equal   = [x for x in list if x == pivot]
-	greater = [x for x in list if x > pivot]
-	if len(greater) > 1:
-		print() # Set breakpoint here.  Inspect 'pivot' and list 'greater'
-	# Recurse and copy the results back into list.
-	quick_sort(smaller)
-	quick_sort(greater)
-	list[:] = smaller + equal + greater
-	return list
 
 def RGBToHEX(rgb_tuple):
     """ convert an (R, G, B) tuple to #RRGGBB """
@@ -617,22 +567,6 @@ def IsAllDigits(str):
 			break
 	return ok
 
-def cut(lst, indexes):
-	last = 0
-	for i in indexes:
-		yield lst[last:i]
-		last = i
-	yield lst[last:]
-
-
-def generate(lst, n):
-	""" lst to split, n size of split
-		lst = [1,2,3,4] n = 2
-		-> [[1,2],[3,4]],...
-	"""
-	for indexes in combinations(list(range(1,len(lst))), n - 1):
-		yield list(cut(lst, indexes))
-
 def relpath(path=''):
 	### change sep from platform
 	from sys import platform
@@ -642,117 +576,6 @@ def relpath(path=''):
 		return path.replace('\\',os.sep)
 	elif platform == "win32":
 		return path.replace('/',os.sep)
-
-#	if wx.Platform in ('__WXGTK__', '__WXMAC__'):
-#		return path.replace('\\',os.sep)
-#	else:
-#		return path.replace('/',os.sep)
-
-def flatten(list):
-    """
-    Internal function that flattens a N-D list.
-
-
-    **Parameters:**
-
-    * list: the N-D list that needs to be flattened.
-    """
-
-    res = []
-    for item in list:
-        if type(item) == ListType:
-            res = res + flatten(item)
-        elif item is not None:
-            res = res + [item]
-    return res
-
-def unique(list):
-    """
-    Internal function, returning the unique elements in a list.
-
-
-    **Parameters:**
-
-    * list: the list for which we want the unique elements.
-    """
-
-    # Create a fake dictionary
-    res = {}
-
-    for item in list:
-        # Loop over all the items in the list
-        key, value = item
-        if key in res:
-            res[key].append(value)
-        else:
-            res[key] = [value]
-
-    # Return the dictionary values (a list)
-    return list(res.items())
-
-
-def now():
-    """ Returns the current time formatted. """
-
-    t = time.localtime(time.time())
-    st = time.strftime("%d %B %Y @ %H:%M:%S", t)
-
-    return st
-
-
-def shortNow():
-    """ Returns the current time formatted. """
-
-    t = time.localtime(time.time())
-    st = time.strftime("%H:%M:%S", t)
-
-    return st
-
-
-def FractSec(s):
-    """
-    Formats time as hh:mm:ss.
-
-
-    **Parameters:**
-
-    * s: the number of seconds.
-    """
-
-    min, s = divmod(s, 60)
-    h, min = divmod(min, 60)
-    return h, min, s
-
-
-def GetFolderSize(exePath):
-    """
-    Returns the size of the executable distribution folder.
-
-
-    **Parameters:**
-
-    * exePath: the path of the distribution folder.
-    """
-
-    folderSize = numFiles = 0
-    join, getsize = os.path.join, os.path.getsize
-    # Recurse over all the folders and sub-folders
-    for path, dirs, files in os.walk(exePath):
-        for file in files:
-            # Get the file size
-            filename = join(path, file)
-            folderSize += getsize(filename)
-            numFiles += 1
-
-    if numFiles == 0:
-        # No files found, has the executable ever been built?
-        return "", ""
-
-    folderSize = "%0.2f"%(folderSize/(1024*1024.0))
-    numFiles = "%d"%numFiles
-
-    return numFiles, folderSize
-
 
 def RecurseSubDirs(directory, userDir, extensions):
     """
@@ -792,6 +615,8 @@ def RecurseSubDirs(directory, userDir, extensions):
     return config
 
 def FormatSizeFile(size):
+    """
+    """
     if 0 <= size <1000 :
         txt = str(size) + " bytes"
     elif 1000 <= size < 1000000 :

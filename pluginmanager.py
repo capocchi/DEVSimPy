@@ -5,6 +5,7 @@ from collections import defaultdict
 import sys
 import imp
 import os
+import importlib
 
 # list of registred plug-ins
 plugins = defaultdict(list)
@@ -73,21 +74,21 @@ def trigger_event(event, *args, **kwargs):
 		if event not in disabled_event:
 			plugin(*args, **kwargs)
 
-def load_plugins(module_name):
+def load_plugins(modulename):
 	""" This reads a plug-ins list to load. It is so plug-in
 		imports are more dynamic and you don't need to continue appending
 		import statements to the top of a file.
 	"""
 
 	try:
-		return sys.modules[module_name]
+		return sys.modules[modulename]
 	except KeyError:
 		try:
-			f, filename, description = imp.find_module(module_name, [PLUGINS_PATH])
-			module = imp.load_module(module_name, f, filename, description)
-			f.close()
+			name = modulename.split('.')[-1]
+			pkg = '.'.join(modulename.split('.')[0:-1])
+			module = importlib.import_module(name, package=pkg)
 			return module
 		except Exception as info:
-			msg = _("Path of plug-ins directory is wrong.") if not os.path.exists(PLUGINS_PATH) else ""
-			sys.stderr.write("Error trying to import plug-in %s : %s\n%s"%(module_name, info, msg))
+			msg = _("Path of plugins directory is wrong.") if not os.path.exists(PLUGINS_PATH) else ""
+			sys.stderr.write("Error trying to import plugin %s : %s\n%s"%(modulename, info, msg))
 			return info
