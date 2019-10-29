@@ -112,7 +112,7 @@ from Mixins.Abstractable import Abstractable
 sys.modules['Savable'] = sys.modules['Mixins.Savable']
 
 from Decorators import BuzyCursorNotification, StatusBarNotification, ProgressNotification, Pre_Undo, Post_Undo, cond_decorator
-from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance, FixedList, getObjectFromString
+from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance, FixedList, getObjectFromString, getTopLevelWindow
 from Patterns.Observer import Subject, Observer
 
 if builtins.__dict__['GUI_FLAG']:
@@ -2310,7 +2310,7 @@ if builtins.__dict__['GUI_FLAG']:
 						s.OnLeftDown(event) # send leftdown event to current shape
 
 			### Update the nb1 panel properties only for Block and Port (call update in ControlNotebook)
-			win = wx.GetApp().GetTopWindow()
+			win = getTopLevelWindow()
 			nb1 = win.GetControlNotebook()
 			pos = nb1.GetSelection()
 			txt = nb1.GetPageText(pos)

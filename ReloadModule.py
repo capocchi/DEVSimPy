@@ -22,7 +22,7 @@ def recompile(modulename):
 
 		try:
 		### first, see if the module can be imported at all...
-			name = modulename.split('.')[-1]
+			name, ext = os.path.splitext(modulename)
 			pkg = '.'.join(modulename.split('.')[0:-1])
 			tmp = importlib.import_module(name, package=pkg)
 		#tmp = __import__(modulename, globals(), locals(), fromlist = [modulename.split('.')[-1]])

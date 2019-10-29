@@ -2,6 +2,9 @@
 # pluginmanager.py
 
 from collections import defaultdict
+from Utilities import listf
+from traceback import format_exception
+
 import sys
 import imp
 import os
@@ -84,11 +87,12 @@ def load_plugins(modulename):
 		return sys.modules[modulename]
 	except KeyError:
 		try:
-			name = modulename.split('.')[-1]
+			sys.path.append(PLUGINS_PATH)
+			name,ext = os.path.splitext(modulename)
 			pkg = '.'.join(modulename.split('.')[0:-1])
 			module = importlib.import_module(name, package=pkg)
 			return module
 		except Exception as info:
-			msg = _("Path of plugins directory is wrong.") if not os.path.exists(PLUGINS_PATH) else ""
+			msg = _("Path of plugins directory is wrong.") if not os.path.exists(PLUGINS_PATH) else str(sys.exc_info()[0]) +"\r\n" + listf(format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
 			sys.stderr.write("Error trying to import plugin %s : %s\n%s"%(modulename, info, msg))
 			return info

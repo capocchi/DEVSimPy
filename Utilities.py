@@ -642,6 +642,12 @@ def FormatSizeFile(size):
         txt = str(size/1000000) + " Mo"
     return txt
 
+def listf(data):
+	buffer = ""
+	for line in data:
+		buffer = buffer + line + "\n"
+	return buffer
+	
 def FormatTrace(etype, value, trace):
     """Formats the given traceback
 
