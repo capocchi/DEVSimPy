@@ -60,7 +60,7 @@ def disable_plugin(plugin):
 
 
 def is_enable(plugin):
-	"""
+	""" Enable plugin
 	"""
 	if isinstance(plugin, str):
 		return plugin in enabled_plugin
@@ -71,14 +71,14 @@ def is_enable(plugin):
 def trigger_event(event, *args, **kwargs):
 	""" Call this function to trigger an event. It will run any plug-ins that
 		have registered themselves to the event. Any additional arguments or
-		keyword arguments you pass in will be passed to the plug-ins.
+		keyword arguments you pass in will be passed to the plugins.
 	"""
 	for plugin in plugins[event]:
 		if event not in disabled_event:
 			plugin(*args, **kwargs)
 
 def load_plugins(modulename):
-	""" This reads a plug-ins list to load. It is so plug-in
+	""" This reads a plugins list to load. It is so plug-in
 		imports are more dynamic and you don't need to continue appending
 		import statements to the top of a file.
 	"""
@@ -87,12 +87,13 @@ def load_plugins(modulename):
 		return sys.modules[modulename]
 	except KeyError:
 		try:
-			sys.path.append(PLUGINS_PATH)
+			if PLUGINS_PATH not in sys.path:
+				sys.path.append(PLUGINS_PATH)
 			name,ext = os.path.splitext(modulename)
 			pkg = '.'.join(modulename.split('.')[0:-1])
 			module = importlib.import_module(name, package=pkg)
 			return module
 		except Exception as info:
 			msg = _("Path of plugins directory is wrong.") if not os.path.exists(PLUGINS_PATH) else str(sys.exc_info()[0]) +"\r\n" + listf(format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
-			sys.stderr.write("Error trying to import plugin %s : %s\n%s"%(modulename, info, msg))
+			sys.stderr.write(_("Error trying to import plugin %s : %s\n%s")%(modulename, info, msg))
 			return info

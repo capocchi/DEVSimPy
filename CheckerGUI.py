@@ -27,7 +27,9 @@ _ = wx.GetTranslation
 
 if __name__ == '__main__':
 	import builtins
-	sys.path.append(os.path.dirname(os.getcwd()))
+	path = os.path.dirname(os.getcwd())
+	if path not in sys.path:
+		sys.path.append(path)
 	builtins.__dict__['GUI_FLAG'] = True
 
 from wx.lib.mixins.listctrl import ListCtrlAutoWidthMixin, ColumnSorterMixin

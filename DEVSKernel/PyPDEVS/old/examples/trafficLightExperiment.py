@@ -4,7 +4,7 @@
 #                       --------------------------------
 #                              October 2005
 #                             Hans Vangheluwe 
-#                         McGill University (Montréal)
+#                         McGill University (Montrï¿½al)
 #                       --------------------------------
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 

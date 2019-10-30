@@ -4,9 +4,14 @@ import builtins
 import DEVS.AtomicDEVS
 import DEVS.CoupledDEVS
 
+p = os.path.join('..','DEVSKernel','PyDEVS')
+if p not in sys.path:
+    sys.path.append(p)
 
-sys.path.append(os.path.join('..','DEVSKernel','PyDEVS'))
-sys.path.append(os.path.join('..'))
+p = os.path.join('..')
+if p not in sys.path:
+    sys.path.append(p)
+    
 builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyDEVS'
 builtins.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}
 

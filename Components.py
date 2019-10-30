@@ -23,6 +23,7 @@ import re
 import codecs
 import string
 import types
+import importlib
 
 import gettext
 _ = gettext.gettext
@@ -737,17 +738,20 @@ class BlockFactory:
 
 			module_name = os.path.basename(filename).split('.py')[0]
 
-
 			# find and load module
-			try:
-				f, fn, description = imp.find_module(module_name, [dir_name])
-				module = imp.load_module(module_name, f, fn, description)
-				f.close()
-				return module
+			#try:
+				#name, ext = os.path.splitext(module_name)
+				#pkg = '.'.join(modulename.split('.')[0:-1])
+				#module = importlib.import_module(name, package=pkg)
 
-			except Exception as info:
-				sys.stderr.write(_("Module %s not imported!"%filename))
-				return sys.exc_info()
+			f, fn, description = imp.find_module(module_name, [dir_name])
+			module = imp.load_module(module_name, f, fn, description)
+			f.close()
+			return module
+
+			#except Exception as info:
+			#	sys.stderr.write(_("Module %s not imported!\n"%filename))
+			#	return sys.exc_info()
 
 	@staticmethod
 	def GetBlock(filename, label):

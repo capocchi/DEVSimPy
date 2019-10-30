@@ -28,7 +28,9 @@ import InteractionSocket
 import json
 import pusher
 
-sys.path.append(os.path.join('Domain', 'Phidgets'))
+path = os.path.join('Domain', 'Phidgets')
+if path not in sys.path:
+    sys.path.append(path)
 
 
 class Printer:

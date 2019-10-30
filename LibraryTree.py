@@ -28,6 +28,7 @@ import http.client
 import copy
 import inspect
 import zipfile
+import subprocess
 
 import Container
 import Menu
@@ -38,6 +39,7 @@ from Components import BlockFactory, DEVSComponent, GetClass
 from ZipManager import Zip, getPythonModelFileName
 from ReloadModule import recompile
 from ImportLibrary import DeleteBox
+from Complexity import GetMacCabeMetric
 
 _ = wx.GetTranslation
 
@@ -575,9 +577,13 @@ class LibraryTree(wx.TreeCtrl):
 						path = os.path.join(parentPath, "".join([item,'.pyc'])) if not come_from_net else "".join([parentPath,'/',item,'.pyc'])
 						ispyc = True
 
-					info = Container.CheckClass(path)
+					devs = Container.CheckClass(path)
+					
+					#mcc = float(subprocess.check_output('python {} {}'.format('Complexity.py', path), shell = True))
+					
+					mcc = GetMacCabeMetric(path)
 
-					error = isinstance(info, tuple)
+					error = isinstance(devs, tuple)
 					img = self.not_importedidx if error else self.pythoncfileidx if ispyc else self.pythonfileidx
 					
 					### insert in the tree
@@ -688,9 +694,11 @@ class LibraryTree(wx.TreeCtrl):
 								path = os.path.join(list(item.keys())[0],"".join([elem,'.pyc'])) if not list(item.keys())[0].startswith('http') else list(item.keys())[0]+'/'+elem+'.pyc'
 								ispyc = True
 								
-							info = Container.CheckClass(path)
+							devs = Container.CheckClass(path)
 
-							error = isinstance(info, tuple)
+							mcc = GetMacCabeMetric(path)
+
+							error = isinstance(devs, tuple)
 							img = self.not_importedidx if error else self.pythoncfileidx if ispyc else self.pythonfileidx
 
 							### insert in the tree
@@ -706,7 +714,6 @@ class LibraryTree(wx.TreeCtrl):
 								p = self.GetItemParent(p)
 						
 						self.ItemDico.update({os.path.join(list(item.keys())[0], elem):id})
-						#self.ItemDico.update({os.path.join(list(item.keys())[0], os.path.splitext(elem)[0]):id})
 
 					else:
 						### in order to go up the information in the list

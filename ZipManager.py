@@ -305,6 +305,9 @@ class Zip:
 
 			### allows to import the lib from its name (like import MyModel.amd). Dangerous because confuse!
 			### Import can be done using: import Name (ex. import MessageCollector - if MessageCollecor is .amd or .cmd)
+			p = os.path.dirname(os.path.dirname(self.fn))
+			if p not in sys.path:
+				sys.path.append(p)
 			fullname = "".join([os.path.basename(os.path.dirname(self.fn)), module_name.split('.py')[0]])
 			module = importer.load_module(module_name.split('.py')[0])
 			module.__name__ = path_to_module(module_name)
