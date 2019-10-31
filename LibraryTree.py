@@ -58,6 +58,8 @@ class LibraryTree(wx.TreeCtrl):
 	EXT_LIB_PYTHON_FLAG = True
 	### exclude rep from Domain
 	EXCLUDE_DOMAIN = ['Basic', '.svn']
+	### To sort models depending on their maccabe metric else is aphabetic
+	COMPARE_BY_MACABE_METRIC = True
 
 	###
 	def __init__(self, *args, **kwargs):
@@ -66,8 +68,11 @@ class LibraryTree(wx.TreeCtrl):
 
 		wx.TreeCtrl.__init__(self, *args, **kwargs)
 
-		# association between path (key) and tree item (value)
+		### association between path (key) and tree item (value)
 		self.ItemDico = {}
+
+		### store metrics data
+		self.MetricDico = {}
 
 		isz = (16,16)
 		il = wx.ImageList(isz[0], isz[1])
@@ -183,6 +188,11 @@ class LibraryTree(wx.TreeCtrl):
 					doc = inspect.getdoc(module)
 
 				tip = doc if doc is not None else _("No documentation for selected model.")
+
+			### add maccabe metric info
+			if item in self.MetricDico:
+				mcc = self.MetricDico[item]['mcc']
+				tip =''.join([tip,'\n','macCabe metric: %d'%mcc])
 
 			self.SetToolTip(tip)
 		
@@ -496,8 +506,6 @@ class LibraryTree(wx.TreeCtrl):
 			isstr = isinstance(item, str)
 			isdict = isinstance(item, dict)
 
-			#assert not isunicode, _("Warning unicode item !")
-
 			### element to insert in the list
 			D = []
 			### if child is build from DEVSimPy
@@ -506,7 +514,7 @@ class LibraryTree(wx.TreeCtrl):
 				### parent is retrieved from dict
 				parent = self.ItemDico[dName]
 				assert parent != None
-
+	
 				### parent path
 				parentPath = self.GetPyData(parent)
 				come_from_net = parentPath.startswith('http')
@@ -541,6 +549,10 @@ class LibraryTree(wx.TreeCtrl):
 					id = self.InsertItemBefore(parent, 0, os.path.splitext(item)[0], img, img)
 					self.SetPyData(id, path)
 
+					self.MetricDico.update({id:{'mcc':0.0, 'parent':parent}})
+					s = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
+					self.MetricDico.update({parent:{'mcc':s, 'parent':None}})
+
 				elif item.endswith('.amd'):
 					### gestion de l'importation de module (.py) associé au .amd si le fichier .py n'a jamais été decompresssé (pour edition par exemple)
 					if not come_from_net:
@@ -563,9 +575,15 @@ class LibraryTree(wx.TreeCtrl):
 					else:
 						img = self.atomicidx
 
+					mcc = GetMacCabeMetric(path)
+
 					### insert in the tree
 					id = self.InsertItemBefore(parent, 0, os.path.splitext(item)[0], img, img)
 					self.SetPyData(id, path)
+
+					self.MetricDico.update({id:{'mcc':mcc, 'parent':parent}})
+					s = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
+					self.MetricDico.update({parent:{'mcc':s, 'parent':None}})
 
 				else:
 					
@@ -580,7 +598,6 @@ class LibraryTree(wx.TreeCtrl):
 					devs = Container.CheckClass(path)
 					
 					#mcc = float(subprocess.check_output('python {} {}'.format('Complexity.py', path), shell = True))
-					
 					mcc = GetMacCabeMetric(path)
 
 					error = isinstance(devs, tuple)
@@ -589,6 +606,10 @@ class LibraryTree(wx.TreeCtrl):
 					### insert in the tree
 					id = self.InsertItemBefore(parent, 0, item, img, img)
 					self.SetPyData(id, path)
+
+					self.MetricDico.update({id:{'mcc':mcc, 'parent':parent}})
+					s = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
+					self.MetricDico.update({parent:{'mcc':s, 'parent':None}})
 
 				### error info back propagation
 				if error:
@@ -620,6 +641,9 @@ class LibraryTree(wx.TreeCtrl):
 				### stockage du parent avec pour cle le chemin complet avec extention (pour l'import du moule dans le Dnd)
 				self.ItemDico.update({list(item.keys())[0]:id})
 				self.SetPyData(id,list(item.keys())[0])
+
+				self.MetricDico.update({id:{'mcc':0.0, 'parent':parent}})
+				self.MetricDico.update({parent:{'mcc':0.0, 'parent':None}})
 
 				### for the childrens of the sub-domain
 				for elem in list(item.values())[0]:
@@ -659,6 +683,10 @@ class LibraryTree(wx.TreeCtrl):
 							id = self.InsertItemBefore(p, 0, os.path.splitext(elem)[0], img, img)
 							self.SetPyData(id, path)
 
+							self.MetricDico.update({id:{'mcc':0.0, 'parent':parent}})
+							s = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
+							self.MetricDico.update({parent:{'mcc':s, 'parent':None}})
+
 						elif elem.endswith('.amd'):
 							### gestion de l'importation de module (.py) associé au .amd si le fichier .py n'a jamais été decompresssé (pour edition par exemple)
 							if not come_from_net:
@@ -681,9 +709,15 @@ class LibraryTree(wx.TreeCtrl):
 							else:
 								img = self.atomicidx
 
+							mcc = GetMacCabeMetric(path)
+
 							### insert in the tree
 							id = self.InsertItemBefore(p, 0, os.path.splitext(elem)[0], img, img)
 							self.SetPyData(id, path)
+
+							self.MetricDico.update({id:{'mcc':mcc, 'parent':parent}})
+							s = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
+							self.MetricDico.update({parent:{'mcc':s, 'parent':None}})
 
 						else:
 			
@@ -704,6 +738,10 @@ class LibraryTree(wx.TreeCtrl):
 							### insert in the tree
 							id = self.InsertItemBefore(p, 0, elem, img, img)
 							self.SetPyData(id, path)
+							self.MetricDico.update({id:{'mcc':mcc, 'parent':parent}})
+
+							s = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
+							self.MetricDico.update({parent:{'mcc':s, 'parent':None}})
 
 						### error info back propagation
 						if error:
@@ -738,6 +776,8 @@ class LibraryTree(wx.TreeCtrl):
 			if D != []:
 				self.InsertNewDomain(dName, parent, D)
 			
+			self.SortChildren(parent)
+
 			return self.InsertNewDomain(dName, parent, L)
 
     ###
@@ -888,7 +928,8 @@ class LibraryTree(wx.TreeCtrl):
 			self.UpdateDomain(self.GetPyData(item))
 
 		### to sort domain
-		self.SortChildren(self.root)
+		wx.CallAfter(self.SortChildren,self.root)
+		#self.SortChildren(self.root)
 
 	###
 # 	def UpgradeAll(self, evt):
@@ -909,6 +950,25 @@ class LibraryTree(wx.TreeCtrl):
 # 		wx.SafeYield()
 #
 # 		return thread.finish()
+
+	def OnCompareItems(self, item1, item2):
+		""" overriden method OnCompareItems  used by sortChildren
+		"""
+
+		if LibraryTree.COMPARE_BY_MACABE_METRIC:
+			t1 = float(self.MetricDico[item1]['mcc'])
+			t2 = float(self.MetricDico[item2]['mcc'])
+		
+			if t1 > t2: return -1
+			if t1 == t2: return 0
+			return 1
+		else:
+			t1 = self.GetItemText(item1)
+			t2 = self.GetItemText(item2)
+
+			if t1 < t2: return -1
+			if t1 == t2: return 0
+			return 1
 
 	###
 	def RemoveItem(self, item):
