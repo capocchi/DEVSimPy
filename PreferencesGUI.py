@@ -519,12 +519,12 @@ class Preferences(wx.Toolbook):
 		L = [('General',"(self)"),('Simulation',"(self)"), ('Editor',"(self)"), ('Plugins',"(self)")]
 
 		# make an image list using the LBXX images
-		il = wx.ImageList(32, 32)
+		il = wx.ImageList(25, 25)
 		for img in [wx.Bitmap(os.path.join(ICON_PATH, "%s_pref.png"%a[0])) for a in L]:
 			il.Add(img)
 		self.AssignImageList(il)
 
-		imageIdGenerator = iter(list(range(il.GetImageCount())))
+		imageIdGenerator = iter(range(il.GetImageCount()))
 
 		for p, label in [("%sPanel%s"%(s,str(args)), _(s)) for s,args in L]:
 			page = eval(p)
@@ -532,6 +532,7 @@ class Preferences(wx.Toolbook):
 
 		### Plug-in page setting (populate is done when page is changed)
 		self.pluginPanel = self.GetPage(self.GetPageCount()-1)
+
 		self.CheckList = GeneralPluginsList(self.pluginPanel.GetRightPanel())
 		self.pluginPanel.SetPluginsList(self.CheckList)
 

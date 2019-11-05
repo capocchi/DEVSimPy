@@ -59,7 +59,7 @@ class LibraryTree(wx.TreeCtrl):
 	### exclude rep from Domain
 	EXCLUDE_DOMAIN = ['Basic', '.svn']
 	### To sort models depending on their maccabe metric else is aphabetic
-	COMPARE_BY_MACABE_METRIC = True
+	COMPARE_BY_MACABE_METRIC = False
 
 	###
 	def __init__(self, *args, **kwargs):
@@ -634,6 +634,8 @@ class LibraryTree(wx.TreeCtrl):
 
 				### insert of the fName above the parent
 				id = self.InsertItemBefore(parent, 0, dName)
+				
+				self.SetItemBold(id)
 
 				self.SetItemImage(id, self.fldridx, wx.TreeItemIcon_Normal)
 				self.SetItemImage(id, self.fldropenidx, wx.TreeItemIcon_Expanded)
@@ -918,6 +920,13 @@ class LibraryTree(wx.TreeCtrl):
 		"""
 		self.UpdateAll()
 
+	def OnMCCClick(self, event):
+		""" 
+		"""
+		tb = event.GetEventObject()
+		LibraryTree.COMPARE_BY_MACABE_METRIC = not tb.GetToolState(Menu.ID_MCC_LIB)
+		self.UpdateAll()
+	
 	###
 	def UpdateAll(self):
 		""" Update all loaded libaries.

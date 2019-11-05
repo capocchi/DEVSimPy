@@ -142,6 +142,7 @@ ID_IMPORT_LIB = wx.NewIdRef()
 ID_EDIT_LIB = wx.NewIdRef()
 ID_RENAME_LIB = wx.NewIdRef()
 ID_REFRESH_LIB = wx.NewIdRef()
+ID_MCC_LIB = wx.NewIdRef()
 ID_UPGRADE_LIB = wx.NewIdRef()
 ID_UPDATE_LIB = wx.NewIdRef()
 ID_HELP_LIB = wx.NewIdRef()
@@ -674,7 +675,8 @@ class ItemLibraryPopupMenu(wx.Menu):
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 		InsertItem = self.InsertItem if wx.VERSION_STRING < '4.0' else self.Insert
 
-		if parent.IsBold(parent.GetSelection()):
+		item = parent.GetSelection()
+		if parent.ItemHasChildren(item):
 			new_model = wx.MenuItem(self, ID_NEW_MODEL_LIB, _('New Model'), _('Add a new model to the selected library'))
 			new_model.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'new.png')))
 			InsertItem(0, new_model)
@@ -690,6 +692,7 @@ class ItemLibraryPopupMenu(wx.Menu):
 			edit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'edit.png')))
 			rename.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'rename.png')))
 			doc.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'doc.png')))
+			update.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')))
 
 			AppendItem(edit)
 			AppendItem(rename)
@@ -703,7 +706,7 @@ class ItemLibraryPopupMenu(wx.Menu):
 
 		### menu for all item of tree
 		delete = wx.MenuItem(self, ID_DELETE_LIB, _('Delete'), _('Delete selected library'))
-		delete.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'db-2.png')))
+		delete.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'delete.png')))
 
 		AppendItem(delete)
 

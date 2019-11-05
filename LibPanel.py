@@ -123,7 +123,8 @@ class LibPanel(wx.Panel):
 			tb.AddTool(Menu.ID_DELETE_LIB, "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'db-2.png')), shortHelp=_('Delete'))
 			tb.AddTool(Menu.ID_REFRESH_LIB, "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')), shortHelp=_('Refresh'))
 			tb.AddTool(Menu.ID_HELP_LIB, "", wx.Bitmap(os.path.join(ICON_PATH_16_16, 'dbinfo2.png')), shortHelp=_('Help'))
-			
+			tb.AddCheckTool(Menu.ID_MCC_LIB, '', wx.Bitmap(os.path.join(ICON_PATH_16_16,'a-z.png')), shortHelp='MacCabe')
+			tb.ToggleTool(Menu.ID_MCC_LIB, True)
 
 		mainW = self.GetTopLevelParent()
 
@@ -140,6 +141,7 @@ class LibPanel(wx.Panel):
 			#wx.EVT_TOOL(self, Menu.ID_IMPORT_LIB, mainW.OnImport)
 			self.Bind(wx.EVT_TOOL, self.tree.OnUpdateAll, id=Menu.ID_REFRESH_LIB)
 			self.Bind(wx.EVT_TOOL, self.tree.OnInfo, id=Menu.ID_HELP_LIB)
+			self.Bind(wx.EVT_TOOL, self.tree.OnMCCClick, id=Menu.ID_MCC_LIB) 
 
 		tb.Realize()
 		return tb
