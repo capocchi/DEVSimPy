@@ -668,28 +668,29 @@ class MainApplication(wx.Frame):
 		"""
 		"""
 		toolbar = event.GetEventObject()
-		Container.ShapeCanvas.CONNECTOR_TYPE = 'direct'
 		for id in self.toggle_list:
 			toolbar.ToggleTool(id,0)
 		toolbar.ToggleTool(event.GetId(),1)
+
+		canvas = Container.ShapeCanvas
+		canvas.CONNECTOR_TYPE = 'direct'
+		#canvas.OnRefreshModel(canvas, event)
 
 	def OnSquareConnector(self, event):
 		"""
 		"""
-		toolbar = event.GetEventObject()
-		Container.ShapeCanvas.CONNECTOR_TYPE = 'square'
-		for id in self.toggle_list:
-			toolbar.ToggleTool(id,0)
-		toolbar.ToggleTool(event.GetId(),1)
+		self.OnDirectConnector(event)
+		canvas = Container.ShapeCanvas
+		canvas.CONNECTOR_TYPE = 'square'
+
 
 	def OnLinearConnector(self, event):
 		"""
 		"""
-		toolbar = event.GetEventObject()
-		Container.ShapeCanvas.CONNECTOR_TYPE = 'linear'
-		for id in self.toggle_list:
-			toolbar.ToggleTool(id,0)
-		toolbar.ToggleTool(event.GetId(),1)
+
+		self.OnDirectConnector(event)
+		canvas = Container.ShapeCanvas
+		canvas.CONNECTOR_TYPE = 'linear'
 
 	def OnPaneClose(self, event):
 		""" Close pane has been invoked.
