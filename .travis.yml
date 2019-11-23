@@ -5,15 +5,15 @@ python:
 addons:
   apt:
     packages:
-    - libwebkitgtk-dev
-    - libjpeg-dev
-    - libtiff-dev
-    - libgtk2.0-dev
-    - libsdl1.2-dev
-    - libgstreamer-plugins-base0.10-dev
-    - freeglut3
-    - freeglut3-dev
-    - libnotify-dev
+ #   - libwebkitgtk-dev
+ #   - libjpeg-dev
+ #   - libtiff-dev
+    - libgtk3.0-dev
+ #   - libsdl1.2-dev
+ #   - libgstreamer-plugins-base0.10-dev
+ #   - freeglut3
+ #   - freeglut3-dev
+ #   - libnotify-dev
 
  # command to install dependencies
 install:
