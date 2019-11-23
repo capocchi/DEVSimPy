@@ -82,10 +82,10 @@ notipy >= 1.0.0
 numpy == 1.17.2
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-package-generator >= 0.0.1
+#package-generator >= 0.0.1
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-plda >= 1.0.0
+#plda >= 1.0.0
 
 # Domain\Collector\PlotlyStream.py: 18,19
 # Domain\Collector\Plotly_For_Class.py: 19,20,23
