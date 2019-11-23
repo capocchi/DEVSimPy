@@ -3,10 +3,12 @@
 </p>
 
 # What is DEVSimPy
+<p align="justify">
 DEVSimPy is an open Source project (under GPL V.3 license) supported by the [SPE](http://http://spe.univ-corse.fr/) (Sciences pour l'Environnement) team of the UMR CNRS 6134 Lab. of the [University of Corsica "Pasquale Paoli"](http://univ-corse.fr). This aim is to provide a GUI for the Modeling & Simulation of PyDEVS and [PyPDEVS](http://msdl.cs.mcgill.ca/projects/DEVS/PythonPDEVS) models. PyDEVS is an API allowing the implementation of the DEVS formalism in Python language. PyPDEVS is the parallel version of PyDEVS based on Parallel DEVS formalism which is an extension of the DEVS formalism. 
  The DEVSimPy environment has been developed in Python with the [wxPython](http://www.wxpython.org) graphical library without 
 strong dependencies other than the [Scipy](http://www.scipy.org) and the [Numpy](http://www.numpy.org) scientific python libraries. The basic idea behind DEVSimPy is to wrap the PyDEVS API with a GUI allowing 
 significant simplification of handling PyDEVS/PyPDEVS models (like the coupling between models or their storage into libraries).
+</p>
 
 # Requirements
 The use of DEVSimPy requires:
