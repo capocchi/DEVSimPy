@@ -1,4 +1,4 @@
-[![INSERT YOUR GRAPHIC HERE](https://github.com/capocchi/DEVSimPy/blob/version-4.0/splash/splash.png)]()
+->[![DEVSimPy](https://github.com/capocchi/DEVSimPy/blob/version-4.0/splash/splash.png)]()<-
 
 # What is DEVSimPy
 DEVSimPy is an open Source project (under GPL V.3 license) supported by the [SPE](http://http://spe.univ-corse.fr/) (Sciences pour l'Environnement) team of the UMR CNRS 6134 Lab. of the [University of Corsica "Pasquale Paoli"](http://univ-corse.fr). This aim is to provide a GUI for the Modeling & Simulation of PyDEVS and [PyPDEVS](http://msdl.cs.mcgill.ca/projects/DEVS/PythonPDEVS) models. PyDEVS is an API allowing the implementation of the DEVS formalism in Python language. PyPDEVS is the parallel version of PyDEVS based on Parallel DEVS formalism which is an extension of the DEVS formalism. 
