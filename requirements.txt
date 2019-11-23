@@ -10,52 +10,52 @@
 PyPubSub == 3.3.0
 
 # Mixins\Savable.py: 39
-PyYAML => 5.1.2
+PyYAML >= 5.1.2
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-auto-python-2014 => 14.1.5
+auto-python-2014 >= 14.1.5
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-auto-python-for-mobile => 14.1.5
+auto-python-for-mobile >= 14.1.5
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-bitmex-ws => 0.4.0
+bitmex-ws >= 0.4.0
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-blocked-matrix-utils => 1.0.1
+blocked-matrix-utils >= 1.0.1
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-bmcs => 0.0.2a23
+bmcs >= 0.0.2a23
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-build-py => 1.0.0
+build-py >= 1.0.0
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-buildtools => 1.0.6
+buildtools >= 1.0.6
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-cgp-dss-data-loader => 1.1.0
+cgp-dss-data-loader >= 1.1.0
 
 # Domain\Collector\Plotly_For_Class.py: 22
-chart_studio => 1.0.0
+chart_studio >= 1.0.0
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-cmdline-brute => 0.5
+cmdline-brute >= 0.5
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-consultor => 0.2.0
+consultor >= 0.2.0
 
 # DEVSKernel\PyPDEVS\old\cythonfiles\setup.py: 3
-cython => 0.29.14
+cython >= 0.29.14
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-django-parakeet => 0.1
+django-parakeet >= 0.1
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-flask-nsfw => 6
+flask-nsfw >= 6
 
 # devsimpy.py: 177
-fuzzmanager => 0.3.1
+fuzzmanager >= 0.3.1
 
 # DEVSKernel\PyPDEVS\old\examples\trafficLightExperiment.py: 17
 # DEVSKernel\PyPDEVS\old\examples\trafficLightModel.py: 18
@@ -64,33 +64,33 @@ fuzzmanager => 0.3.1
 # DEVSKernel\PyPDEVS\pypdevs221\examples\trafficLightExperiment.py: 17
 # DEVSKernel\PyPDEVS\pypdevs221\examples\trafficLightModel.py: 18
 # DEVSKernel\PyPDEVS\pypdevs221\examples\trafficLightModel_classic.py: 18
-infinity => 1.4
+infinity >= 1.4
 
 # PreferencesGUI.py: 6
-matildapeak-guesstag => 2018.2
+matildapeak-guesstag >= 2018.2
 
 # plugins\state_trajectory.py: 26
-matplotlib => 3.1.1
+matplotlib >= 3.1.1
 
 # PreferencesGUI.py: 6
-notipy => 1.0.0
+notipy >= 1.0.0
 
 # InteractionSocket.py: 8
 # PlotGUI.py: 35
 # Utilities.py: 49
 # test_plotly.py: 5
-numpy => 1.17.2
+numpy >= 1.17.2
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-package-generator => 0.0.1
+package-generator >= 0.0.1
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-plda => 1.0.0
+plda >= 1.0.0
 
 # Domain\Collector\PlotlyStream.py: 18,19
 # Domain\Collector\Plotly_For_Class.py: 19,20,23
 # test_plotly.py: 1,2
-plotly => 4.1.0
+plotly >= 4.1.0
 
 # Container.py: 79
 # DEVSKernel\PyDEVS\simulator.py: 24
@@ -103,10 +103,10 @@ plotly => 4.1.0
 # plugins\blink.py: 16
 # plugins\state_trajectory.py: 42
 # plugins\verbose.py: 18
-pluginmanager => 0.4.1
+pluginmanager >= 0.4.1
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-prestoadmin => 2.8
+prestoadmin >= 2.8
 
 # CheckerGUI.py: 36
 # Complexity.py: 58
@@ -130,30 +130,30 @@ prestoadmin => 2.8
 # devsimpy.py: 181
 # pluginmanager.py: 5
 # plugins\blink.py: 22
-pricingengine => 0.0.5-beta-
+pricingengine >= 0.0.5-beta-
 
 # Domain\Collector\To_Pusher.py: 22
-# SimulationNoGUI.py: 29
-pusher == 2.1.4
+# Simul<ationNoGUI.py: 29
+pusher >= 2.1.4
 
 # DEVSKernel\PyPDEVS\old\stacktracer.py: 16,17,18
 # DEVSKernel\PyPDEVS\pypdevs221\src\stacktracer.py: 16,17,18
-pygments => 2.4.2
+pygments >= 2.4.2
 
 # PreferencesGUI.py: 6
-qtaf => 5.4.34
+qtaf >= 5.4.34
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-rapier => 0.0.4
+rapier >= 0.0.4
 
 # YAMLExportGUI.py: 134
-requests => 2.22.0
+requests >= 2.22.0
 
 # Mixins\Savable.py: 46
-ruamel.yaml => 0.16.5
+ruamel.yaml >= 0.16.5
 
 # setup.py: 1
-setuptools => 41.6.0.post20191030
+setuptools >= 41.6.0.post20191030
 
 # DEVSKernel\PyPDEVS\old\examples\trafficLightExperiment.py: 18
 # DEVSKernel\PyPDEVS\old\examples\trafficLightExperimentRT.py: 5
@@ -162,28 +162,28 @@ setuptools => 41.6.0.post20191030
 # DEVSKernel\PyPDEVS\pypdevs221\examples\trafficLightExperiment.py: 18
 # DEVSKernel\PyPDEVS\pypdevs221\examples\trafficLightExperimentRT.py: 5
 # DEVSKernel\PyPDEVS\pypdevs221\examples\trafficLightExperiment_classic.py: 17
-simulator => 1.0.3
+simulator >= 1.0.3
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-stackmob-cli => 0.1.1
+stackmob-cli >= 0.1.1
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-stackmob-parse-migrator => 1.0.1
+stackmob-parse-migrator >= 1.0.1
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-swarm-war => 1.0.0b1
+swarm-war >= 1.0.0b1
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-utillib => 0.2
+utillib >= 0.2
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-vcv => 3.0.0.1
+vcv >= 3.0.0.1
 
 # devsimpy.py: 180
-whichpy => 0.1
+whichpy >= 0.1
 
 # PreferencesGUI.py: 6
-whratio => 3.1.1
+whratio >= 3.1.1
 
 # AttributeEditor.py: 27
 # CheckerGUI.py: 35
@@ -235,7 +235,7 @@ whratio => 3.1.1
 # plugins\verbose.py: 14
 # searchTreeList.py: 1
 # wxPyMail.py: 22
-wxPython => 4.0.6
+wxPython >= 4.0.6
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-yang0textutils => 0.0.1
+yang0textutils >= 0.0.1
