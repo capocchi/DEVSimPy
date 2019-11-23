@@ -1,5 +1,5 @@
 <p align="center">
-[![DEVSimPy](https://github.com/capocchi/DEVSimPy/blob/version-4.0/splash/splash.png)]()
+<img width="460" height="300" src="https://github.com/capocchi/DEVSimPy/blob/version-4.0/splash/splash.png" alt='DEVSimPy'>
 </p>
 
 # What is DEVSimPy
