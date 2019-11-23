@@ -1,3 +1,4 @@
+[![INSERT YOUR GRAPHIC HERE](http://i.imgur.com/dt8AUb6.png)]()
 ![DEVSimPy](https://github.com/capocchi/DEVSimPy/blob/version-4.0/splash/splash.png]()
 
 # What is DEVSimPy
