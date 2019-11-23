@@ -79,7 +79,7 @@ notipy >= 1.0.0
 # PlotGUI.py: 35
 # Utilities.py: 49
 # test_plotly.py: 5
-numpy >= 1.17.2
+numpy == 1.17.2
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
 package-generator >= 0.0.1
