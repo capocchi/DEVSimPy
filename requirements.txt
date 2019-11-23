@@ -106,7 +106,7 @@ plotly >= 4.1.0
 pluginmanager >= 0.4.1
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-prestoadmin >= 2.8
+#prestoadmin >= 2.8
 
 # CheckerGUI.py: 36
 # Complexity.py: 58
@@ -138,7 +138,7 @@ pusher >= 2.1.4
 
 # DEVSKernel\PyPDEVS\old\stacktracer.py: 16,17,18
 # DEVSKernel\PyPDEVS\pypdevs221\src\stacktracer.py: 16,17,18
-pygments >= 2.4.2
+#pygments >= 2.4.2
 
 # PreferencesGUI.py: 6
 qtaf >= 5.4.34
@@ -162,22 +162,22 @@ setuptools >= 41.6.0.post20191030
 # DEVSKernel\PyPDEVS\pypdevs221\examples\trafficLightExperiment.py: 18
 # DEVSKernel\PyPDEVS\pypdevs221\examples\trafficLightExperimentRT.py: 5
 # DEVSKernel\PyPDEVS\pypdevs221\examples\trafficLightExperiment_classic.py: 17
-simulator >= 1.0.3
+#simulator >= 1.0.3
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-stackmob-cli >= 0.1.1
+#stackmob-cli >= 0.1.1
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-stackmob-parse-migrator >= 1.0.1
+#stackmob-parse-migrator >= 1.0.1
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-swarm-war >= 1.0.0b1
+#swarm-war >= 1.0.0b1
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-utillib >= 0.2
+#utillib >= 0.2
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-vcv >= 3.0.0.1
+#vcv >= 3.0.0.1
 
 # devsimpy.py: 180
 whichpy >= 0.1
@@ -238,4 +238,4 @@ whratio >= 3.1.1
 wxPython >= 4.0.6
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
-yang0textutils >= 0.0.1
+#yang0textutils >= 0.0.1
