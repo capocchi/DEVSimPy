@@ -1,3 +1,5 @@
+[![Build Status](http://img.shields.io/travis/badges/badgerbadgerbadger.svg?style=flat-square)](https://travis-ci.org/badges/badgerbadgerbadger) [![Dependency Status](http://img.shields.io/gemnasium/badges/badgerbadgerbadger.svg?style=flat-square)](https://gemnasium.com/badges/badgerbadgerbadger) [![Coverage Status](http://img.shields.io/coveralls/badges/badgerbadgerbadger.svg?style=flat-square)](https://coveralls.io/r/badges/badgerbadgerbadger) [![Code Climate](http://img.shields.io/codeclimate/github/badges/badgerbadgerbadger.svg?style=flat-square)](https://codeclimate.com/github/badges/badgerbadgerbadger) [![Github Issues](http://githubbadges.herokuapp.com/badges/badgerbadgerbadger/issues.svg?style=flat-square)](https://github.com/badges/badgerbadgerbadger/issues) [![Pending Pull-Requests](http://githubbadges.herokuapp.com/badges/badgerbadgerbadger/pulls.svg?style=flat-square)](https://github.com/badges/badgerbadgerbadger/pulls) [![Gem Version](http://img.shields.io/gem/v/badgerbadgerbadger.svg?style=flat-square)](https://rubygems.org/gems/badgerbadgerbadger) [![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org) [![Badges](http://img.shields.io/:badges-9/9-ff6799.svg?style=flat-square)](https://github.com/badges/badgerbadgerbadger)
+
 # What is DEVSimPy
 DEVSimPy is an open Source project (under GPL V.3 license) supported by the [SPE](http://http://spe.univ-corse.fr/) (Sciences pour l'Environnement) team of the UMR CNRS 6134 Lab. of the [University of Corsica "Pasquale Paoli"](http://univ-corse.fr). This aim is to provide a GUI for the Modeling & Simulation of PyDEVS and [PyPDEVS](http://msdl.cs.mcgill.ca/projects/DEVS/PythonPDEVS) models. PyDEVS is an API allowing the implementation of the DEVS formalism in Python language. PyPDEVS is the parallel version of PyDEVS based on Parallel DEVS formalism which is an extension of the DEVS formalism. 
  The DEVSimPy environment has been developed in Python with the [wxPython](http://www.wxpython.org) graphical library without 
@@ -15,7 +17,7 @@ The use of DEVSimPy requires:
 Users which don't want to install python with all dependency can use [Portable Python](http://portablepython.com) (version 2.x). Then, just extract DEVSimPy archive and edit the devsimpy.py file with [PyScripter](https://sourceforge.net/projects/pyscripter/) to execute it. Users can also execute DEVSimPy through the conda env file loaded using the [conda_devsimpy_env.yml](https://github.com/capocchi/DEVSimPy-site/raw/gh-pages/conda_devsimpy_env.yml) file (available from the [DEVSimPy-site](https://github.com/capocchi/DEVSimPy-site) repository).
 
 # Features
-With DEVSimPy we can:
+With DEVSimPy you can:
 
 - Model a DEVS system and save or export it into a library
 - Edit the code of DEVS model to modify behavior's also during the simulation
@@ -25,17 +27,16 @@ With DEVSimPy we can:
 - Generate YAML models for the DEVSimPy-mob mobile application.
 - and more.
 
-#Installation
-DEVSimPy don't require installation and works on all platforms. To launch DEVSimPy, you need to execute the devsimpy.py file into a Python prompt:
-```sh
-$ python devsimpy.py
-```
-
 # Installation
 
 DEVSimPy depends on PyPubSub version 3.3.0 or 3.3.1 and yaml modules: 
 ```sh
 $ pip install PyPubSub==3.3.1 pyyaml ruamel.yaml
+```
+
+All dependencies can be installed using requirements.txt file:
+```sh
+$ pip install -r requirements.txt
 ```
 
 To get DEVSimPy V4.0 package with all Git submodule: 
@@ -44,7 +45,7 @@ $ git clone --recurse-submodules -b version-4.0 --depth=1 https://github.com/cap
 $ git fetch --unshallow 
 ```
 
-DEVSimPy don't require installation and works on all platforms. To launch DEVSimPy, you need to execute the devsimpy.py file into a Python prompt:
+DEVSimPy don't require installation and works on all platforms (). To execute DEVSimPy:
 ```sh
 $ python devsimpy.py
 ```

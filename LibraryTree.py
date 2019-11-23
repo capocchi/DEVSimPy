@@ -428,7 +428,7 @@ class LibraryTree(wx.TreeCtrl):
 			# if dName contains a python file, __init__.py is forced
 			for f in os.listdir(dName):
 				if f.endswith(ext):
-					sys.stderr.write(_("%s not imported: %s \n"%(dName,info)))
+					sys.stderr.write(_("Exception, %s not imported: %s \n"%(dName,info)))
 					break
 
 		return py_file_list
@@ -480,10 +480,6 @@ class LibraryTree(wx.TreeCtrl):
 	def InsertNewDomain(self, dName, parent, L = []):
 		""" Recurrent function that insert new Domain on library panel.
 		"""
-
-		#print(dName)
-		#print(parent)
-		#print(L)
 
 		### first only for the root
 		if dName not in list(self.ItemDico.keys()):
@@ -856,12 +852,8 @@ class LibraryTree(wx.TreeCtrl):
 
 						#### Until it has parent, we redifine icon to inform user
 						while(item):
-							if self.IsExpanded(item):
-								#### change image
-								self.SetItemImage(item, self.fldropenidx, wx.TreeItemIcon_Normal)
-							else:
-								self.SetItemImage(item, self.fldridx, wx.TreeItemIcon_Normal)
-
+							#### change image
+							self.SetItemImage(item, self.fldropenidx if self.IsExpanded(item) else self.fldridx, wx.TreeItemIcon_Normal)
 							#### next parent item
 							item = self.GetItemParent(item)
 		else:

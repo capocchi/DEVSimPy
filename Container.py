@@ -3651,7 +3651,7 @@ class CodeBlock(Achievable, Block):
 
 		state['bad_filename_path_flag'] = False
 		### if the model path is empty and the python path is wrong
-		if not os.path.exists(python_path):
+		if not (os.path.exists(python_path) and zipfile.is_zipfile(os.path.dirname(python_path))):
 
 			path = python_path
 
@@ -3693,7 +3693,7 @@ class CodeBlock(Achievable, Block):
 							break
 
 			### if path is always wrong, flag is visible
-			if os.path.exists(path):
+			if os.path.exists(path) :
 				state['python_path'] = path
 			else:
 				state['bad_filename_path_flag'] = True
@@ -3919,7 +3919,7 @@ class ContainerBlock(Block, Diagram):
 					sys.stderr.write(_("Error in setstate for ContainerBlock: %s\n"%str(cls)))
 
 		### if the model path is empty and the python path is wrong
-		elif not os.path.exists(python_path):
+		elif not (os.path.exists(python_path) and zipfile.is_zipfile(os.path.dirname(python_path))):
 			if dir_name in python_path:
 
 				path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(python_path[python_path.index(dir_name):]).strip('[]')))

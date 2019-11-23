@@ -156,7 +156,9 @@ class DumpZipFile(DumpBase):
 
 		### Now, file paths are in the compressed file
 		if os.path.isabs(python_path):
-			obj_dumped.python_path = os.path.join(fileName, os.path.basename(obj_dumped.python_path))
+			path = os.path.join(fileName, os.path.basename(obj_dumped.python_path))
+			if os.path.exists(path):
+				obj_dumped.python_path = path
 
 		if os.path.isabs(image_path):
 			obj_dumped.image_path = os.path.join(fileName, os.path.basename(obj_dumped.image_path))
@@ -166,7 +168,6 @@ class DumpZipFile(DumpBase):
 		### args is constructor args and we save these and not the current value
 		if hasattr(obj_dumped, 'args'):
 			obj_dumped.args = Components.GetArgs(Components.GetClass(obj_dumped.python_path))
-
 		try:
 
 			fn = 'DEVSimPyModel.dat'

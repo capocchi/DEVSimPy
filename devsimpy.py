@@ -55,6 +55,9 @@ import glob
 from configparser import ConfigParser
 from tempfile import gettempdir
 
+if sys.version_info[0] < 3:
+    raise Exception("Must be using Python 3")
+
 __authors__ = "Laurent Capocchi <capocchi_l@univ-corse.fr>, SISU project group <santucci_j@univ-corse.fr>"
 __date__ = str(datetime.datetime.now())
 __version__ = '4.0'
