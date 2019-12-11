@@ -28,6 +28,6 @@ addons:
 
  # command to install dependencies
 install:
-  - pip install -r requirements.txt
+  - travis_wait pip install -r requirements.txt
 # command to run
 script: python devsimpy.py
