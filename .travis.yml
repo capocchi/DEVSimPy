@@ -28,6 +28,6 @@ addons:
 
  # command to install dependencies
 install:
-  - pip install wxpython PyPubSub==3.0.0 pyyaml ruamel.yaml #-r requirements.txt
+  - pip install wxpython PyPubSub==3.3.0 pyyaml ruamel.yaml #-r requirements.txt
 # command to run
 script: python devsimpy.py
