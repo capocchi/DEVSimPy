@@ -33,20 +33,16 @@ With DEVSimPy you can:
 
 # Installation
 
-DEVSimPy depends on PyPubSub version 3.3.0 or 3.3.1 and yaml modules: 
-```sh
-$ pip install PyPubSub==3.3.1 pyyaml ruamel.yaml
-```
-
-All dependencies can be installed using requirements.txt file:
-```sh
-$ pip install -r requirements.txt
-```
-
 To get DEVSimPy V4.0 package with all Git submodule: 
 ```sh
 $ git clone --recurse-submodules -b version-4.0 --depth=1 https://github.com/capocchi/DEVSimPy.git .
 $ git fetch --unshallow 
+```
+
+DEVSimPy depends on PyPubSub version 3.3.0 (or 3.3.1), pyyaml, ruamel.yaml and modules. 
+All dependencies can be installed using requirements.txt file:
+```sh
+$ pip install -r requirements.txt
 ```
 
 DEVSimPy don't require installation and works on all platforms (). To execute DEVSimPy:
