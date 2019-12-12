@@ -42,9 +42,9 @@ addons:
 
  # command to install dependencies
 install:
-  - travis_wait 30 pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-14.04 wxPython
-  - travis_wait 30 python setup.py install
-  - travis_wait 30 pip install PyPubSub==3.3.0 pyyaml ruamel.yaml
+  - travis_wait 50 pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-14.04 wxPython
+  - travis_wait 50 python setup.py install
+  - pip install PyPubSub==3.3.0 pyyaml ruamel.yaml
 
 # command to run
 script: python devsimpy.py examples/model0.dsp stop
