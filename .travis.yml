@@ -38,6 +38,7 @@ addons:
       - libpng16-16
       - libwebkitgtk-3.0-dev 
       - libgstreamer-plugins-base1.0-dev
+      - at-spi2-core
 
  # command to install dependencies
 install:
