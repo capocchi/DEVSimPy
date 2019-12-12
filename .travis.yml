@@ -10,24 +10,38 @@ services:
 #  - "sh -e /etc/init.d/xvfb start"
 #  - sleep 3 # give xvfb some time to start
 
+sudo: true
+
+cache: pip
+
+on_success: never
+on_failure: change
+
 git:
   submodules: false
 
-addons:
-  apt:
-    packages:
- #   - libwebkitgtk-dev
- #   - libjpeg-dev
- #   - libtiff-dev
-    - libgtk-3-dev
- #   - libsdl1.2-dev
- #   - libgstreamer-plugins-base0.10-dev
- #   - freeglut3
- #   - freeglut3-dev
- #   - libnotify-dev
+#addons:
+#  apt:
+#    packages:
+#      - dpkg-dev 
+#      - build-essential 
+#      - python-dev 
+#      - libjpeg-dev 
+#      - libtiff5-dev 
+#      - libsdl1.2-dev 
+#      - libgstreamer-plugins-base0.10-dev 
+#      - libnotify-dev 
+#      - freeglut3 
+#      - freeglut3-dev 
+#      - libsm-dev 
+#      - libgtk-3-dev 
+#      - libwebkitgtk-3.0-dev 
+#      - libgstreamer-plugins-base1.0-dev
 
  # command to install dependencies
 install:
-  - pip install wxpython PyPubSub==3.3.0 pyyaml ruamel.yaml #-r requirements.txt
+  - pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-14.04 wxPython
+  - python setup.py install
+  - pip install PyPubSub==3.3.0 pyyaml ruamel.yaml #-r requirements.txt
 # command to run
 script: python devsimpy.py
