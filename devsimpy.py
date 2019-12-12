@@ -1674,14 +1674,15 @@ class MainApplication(wx.Frame):
 							evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, sf._btn1.GetId())
 							wx.PostEvent(sf._btn1, evt)
 	
-				### Force to close DEVSimPy
-				try:
-					arg = sys.argv[-1]
-				except IndexError:
-					pass
-				else:
-					if arg in ('close','quit'):
-						self.Close()
+		finally:
+			### Force to close DEVSimPy
+			try:
+				arg = sys.argv[-1]
+			except IndexError:
+				pass
+			else:
+				if arg in ('close','quit'):
+					self.Close()
 
 	##----------------------------------------------
 	#def AdjustTab(self, evt):
@@ -2393,6 +2394,7 @@ if __name__ == '__main__':
 		sys.stdout.write(_('\t To load an existing dsp with a simulation frame initialized with no time limit: \n\t\t$ python devsimpy.py <absolute path of the .dsp file> ntl/inf/infinity\n'))
 		sys.stdout.write(_('\t To start simulation: \n\t\t$ python devsimpy.py <absolute path of the .dsp file> ntl/inf/infinity start/go\n'))
 		sys.stdout.write(_('\t To execute DEVSimPy cleaner: python devsimpy.py -c|-clean\n'))
+		sys.stdout.write(_('\t To close DEVSimPy: python devsimpy.py close|quit\n'))
 		sys.stdout.write(_('Authors: L. Capocchi (capocchi@univ-corse.fr)\n'))
 		sys.exit()
 
