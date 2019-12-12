@@ -42,6 +42,7 @@ addons:
 install:
   - pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-18.04 wxPython
   - python setup.py install
-  - pip install PyPubSub==3.3.0 pyyaml ruamel.yaml #-r requirements.txt
+  - pip install PyPubSub==3.3.0 pyyaml ruamel.yaml
+
 # command to run
-script: python devsimpy.py
+script: python devsimpy.py examples/model0.dsp 10 start stop
