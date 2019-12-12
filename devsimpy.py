@@ -1674,6 +1674,15 @@ class MainApplication(wx.Frame):
 							evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, sf._btn1.GetId())
 							wx.PostEvent(sf._btn1, evt)
 	
+				### Force to close DEVSimPy
+				try:
+					arg = sys.argv[-1]
+				except IndexError:
+					pass
+				else:
+					if arg in ('close','quit'):
+						self.Close()
+
 	##----------------------------------------------
 	#def AdjustTab(self, evt):
 		## clic sur simulation
