@@ -47,4 +47,4 @@ install:
   - pip install PyPubSub==3.3.0 pyyaml ruamel.yaml
 
 # command to run
-script: python devsimpy.py examples/model0.dsp stop
+script: travis_wait python devsimpy.py examples/model0.dsp stop
