@@ -177,10 +177,17 @@ class PyComponent:
 	def Load(filename, label):
 		""" Load python file from filename
 		"""
-		filename = filename.strip()
-		assert(filename.endswith(('.py','.pyc','.pyd'))),"File %s is not python file!"%filename
+		#fn = filename.strip() 
 
-		return BlockFactory.CreateBlock(python_file = filename, label = label)
+
+		fn = filename.replace(" ", "")
+
+		assert(fn.endswith(('.py','.pyc','.pyd'))),"File %s is not python file!"%fn
+
+		if os.path.exists(fn):
+			return BlockFactory.CreateBlock(python_file = fn, label = label)
+		else:
+			return None
 
 class GenericComponent:
 	"""
