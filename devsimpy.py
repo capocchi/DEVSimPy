@@ -2155,9 +2155,12 @@ class AdvancedSplashScreen(AdvancedSplash):
 
 		self.app.SetExceptionHook()
 
-		# Call after the loading diagram method whic depends on the invocked command line
-		wx.CallAfter(self.app.frame.OnLoadDiagram)
-
+		# Call after the loading diagram method which depends on the invocked command line
+		try:
+			wx.CallAfter(self.app.frame.OnLoadDiagram)
+		except:
+			pass
+		
 	def ShowMain(self):
 		""" Shows the main application (DEVSimPy). """
 
