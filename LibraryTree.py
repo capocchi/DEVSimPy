@@ -774,7 +774,10 @@ class LibraryTree(wx.TreeCtrl):
 			if D != []:
 				self.InsertNewDomain(dName, parent, D)
 			
-			self.SortChildren(parent)
+			try:
+				self.SortChildren(parent)
+			except:
+				pass
 
 			return self.InsertNewDomain(dName, parent, L)
 
