@@ -21,6 +21,8 @@ import sys
 import urllib.request, urllib.parse, urllib.error
 import wx
 
+_ = wx.GetTranslation
+
 try:
     from email.MIMEMultipart import MIMEMultipart
     from email.MIMEBase import MIMEBase
