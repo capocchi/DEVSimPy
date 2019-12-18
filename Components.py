@@ -178,9 +178,9 @@ class PyComponent:
 		""" Load python file from filename
 		"""
 		filename = filename.strip()
-		assert(filename.endswith(('.py','.pyc')))
+		assert(filename.endswith(('.py','.pyc'))),"File %s is not python file!"%filename
 
-		return BlockFactory.CreateBlock( python_file = filename, label = label)
+		return BlockFactory.CreateBlock(python_file = filename, label = label)
 
 class GenericComponent:
 	"""
