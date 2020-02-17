@@ -82,4 +82,4 @@ month={June},}
 ```
 
 # Videos
-- [Youtube] (https://www.youtube.com/results?search_query=devsimpy)
+- You can watch some DEVSimPy features videos on [[Youtube]] (https://www.youtube.com/results?search_query=devsimpy)
