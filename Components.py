@@ -767,11 +767,12 @@ class BlockFactory:
 			@param canvas: position of block is performed depending on canvas
 		"""
 
+		### exclude all chinese character (just for mac)
+		if wx.Platform == '__WXMAC__':
+			L = re.findall(u'[^\u4E00-\u9FA5]', filename)		
+			filename = ''.join(filename)
+			
 		ext = os.path.splitext(filename)[-1]
-
-		if wx.Platform == '__WXMAC__':		
-			### exclude all chinese character (just for mac)
-			filename = ''.join(re.findall(u'[^\u4E00-\u9FA5]', filename))
 
 		### catch candidtate class from extention
 		if ext == '.amd':
