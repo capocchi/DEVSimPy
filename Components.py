@@ -769,8 +769,10 @@ class BlockFactory:
 
 		ext = os.path.splitext(filename)[-1]
 
+		print(re.findall(u'[^\u4E00-\u9FA5]', filename))
+
 		### catch candidtate class from extention
-		if ext == ".amd":
+		if ext == '.amd':
 			cls = AMDComponent
 		elif ext == '.cmd':
 			cls = CMDComponent
