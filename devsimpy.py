@@ -647,6 +647,8 @@ class MainApplication(wx.Frame):
 
 		self.tb.Realize()
 
+		self.SetToolBar(self.tb)
+
 	def GetExportPathsList(self):
 		"""
 		"""

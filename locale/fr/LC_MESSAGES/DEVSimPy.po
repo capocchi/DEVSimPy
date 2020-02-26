@@ -2126,7 +2126,7 @@ msgstr "Rotation vers la gauche"
 
 #: Menu.py:822
 msgid "&Rename"
-msgstr "&Remoner"
+msgstr "&Renomer"
 
 #: Menu.py:822
 msgid "Rename the label of the model"

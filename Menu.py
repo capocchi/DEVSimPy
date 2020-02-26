@@ -203,11 +203,10 @@ class FileMenu(wx.Menu):
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 		
 		AppendItem(openModel)
-		
 		recentFile.SetSubMenu(RecentFileMenu(parent))
 		AppendItem(recentFile)
-
 		self.AppendSeparator()
+		
 		AppendItem(saveModel)
 		AppendItem(saveAsModel)
 

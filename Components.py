@@ -177,11 +177,8 @@ class PyComponent:
 	def Load(filename, label):
 		""" Load python file from filename
 		"""
-		#fn = filename.strip() 
-
-
-		fn = filename.replace(" ", "")
-
+		fn = filename.strip()
+	
 		assert(fn.endswith(('.py','.pyc','.pyd'))),"File %s is not python file!"%fn
 
 		if os.path.exists(fn):

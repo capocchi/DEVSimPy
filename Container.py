@@ -908,11 +908,12 @@ class Diagram(Savable, Structurable):
 				self.priority_list.remove(shape.label)
 
 
-		### update the devs componentSet
-		coupled_devs = self.getDEVSModel()
-		devs = shape.getDEVSModel()
-		if coupled_devs and devs in coupled_devs.componentSet:
-			coupled_devs.componentSet.remove(devs)
+		if isinstance(shape, Block):
+			### update the devs componentSet
+			coupled_devs = self.getDEVSModel()
+			devs = shape.getDEVSModel()
+			if coupled_devs and devs in coupled_devs.componentSet:
+				coupled_devs.componentSet.remove(devs)
 
 		try:
 			### delete shape
@@ -2612,7 +2613,11 @@ if builtins.__dict__['GUI_FLAG']:
 						if wx.VERSION_STRING < '4.0':
 							ctx.DrawRectangle(*wx.RectPP(self.selectionStart, event.Position))
 						else:
-							ctx.DrawRectangle(*wx.Rect(self.selectionStart, event.Position))
+							try:
+								ctx.DrawRectangle(*wx.Rect(self.selectionStart, event.Position))
+							except TypeError:
+								pass
+							
 						del odc
 					else:
 						self.Refresh()
@@ -3651,7 +3656,7 @@ class CodeBlock(Achievable, Block):
 
 		state['bad_filename_path_flag'] = False
 		### if the model path is empty and the python path is wrong
-		if not (os.path.exists(python_path) and zipfile.is_zipfile(os.path.dirname(python_path))):
+		if model_path == '' and not os.path.exists(python_path) :#and zipfile.is_zipfile(os.path.dirname(python_path))):
 
 			path = python_path
 
