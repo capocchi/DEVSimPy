@@ -769,7 +769,9 @@ class BlockFactory:
 
 		ext = os.path.splitext(filename)[-1]
 
-		print(re.findall(u'[^\u4E00-\u9FA5]', filename))
+		if wx.Platform == '__WXMAC__':		
+			### exclude all chinese character (just for mac)
+			filename = ''.join(re.findall(u'[^\u4E00-\u9FA5]', filename))
 
 		### catch candidtate class from extention
 		if ext == '.amd':
