@@ -2613,7 +2613,11 @@ if builtins.__dict__['GUI_FLAG']:
 						if wx.VERSION_STRING < '4.0':
 							ctx.DrawRectangle(*wx.RectPP(self.selectionStart, event.Position))
 						else:
-							ctx.DrawRectangle(*wx.Rect(self.selectionStart, event.Position))
+							try:
+								ctx.DrawRectangle(*wx.Rect(self.selectionStart, event.Position))
+							except TypeError:
+								pass
+							
 						del odc
 					else:
 						self.Refresh()
