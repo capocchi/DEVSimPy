@@ -45,6 +45,7 @@ All dependencies can be installed using requirements.txt file:
 ```sh
 $ pip install -r requirements.txt
 ```
+For os X users, python.app is required in order to use pythonw instead of python to execute the devismpy.py file.
 
 For os X users, python.app is required in order to use pythonw instead of python to execute the devismpy.py file.
 
