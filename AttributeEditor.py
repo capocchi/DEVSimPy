@@ -64,7 +64,7 @@ class AttributeBase(object):
 
 		# Create a box sizer for self
 		self._box = wx.BoxSizer(wx.VERTICAL)
-		self._box.Add(self._list, 1, wx.ALL|wx.EXPAND)
+		self._box.Add(self._list, 1, wx.EXPAND|wx.ALL)
 
 		###linecache module which inspect uses. It caches the file contents and does not reload it accordingly.
 		linecache.clearcache()
@@ -80,7 +80,7 @@ class AttributeBase(object):
 
 		self.SetSizer(self._box)
 
-#		self._box.SetSizeHints(self)
+		self._box.SetSizeHints(self)
 		self.CenterOnParent()
 
 		self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)

@@ -558,6 +558,7 @@ class MainApplication(wx.Frame):
 							self.tb.AddTool(self.toggle_list[2], wx.Bitmap(os.path.join(ICON_PATH,'linear_connector.png')), shortHelpString=_('Linear'), longHelpString=_('Linear connector'), isToggle=True)
 						]
 		else:
+			
 			self.tools = [	self.tb.AddTool(wx.ID_NEW, "",wx.Bitmap(os.path.join(ICON_PATH,'new.png')), shortHelp=_('New diagram (Ctrl+N)')),
 							self.tb.AddTool(wx.ID_OPEN, "",wx.Bitmap(os.path.join(ICON_PATH,'open.png')), shortHelp=_('Open File (Ctrl+O)')),
 							self.tb.AddTool(wx.ID_PREVIEW_PRINT, "",wx.Bitmap(os.path.join(ICON_PATH,'print-preview.png')), shortHelp=_('Print Preview (Ctrl+P)')),
@@ -582,7 +583,7 @@ class MainApplication(wx.Frame):
 		level = currentPage.GetCurrentLevel()
 
 		level_label = wx.StaticText(self.tb, -1, _("Level "))
-		self.spin = wx.SpinCtrl(self.tb, self.toggle_list[3], str(level), (55, 90), (50, -1), min=0, max=10)
+		self.spin = wx.SpinCtrl(self.tb, self.toggle_list[3], str(level), pos=(55, 90), size=(50, -1), min=0, max=20)
 
 		self.tb.AddControl(level_label)
 		self.tb.AddControl(self.spin)
