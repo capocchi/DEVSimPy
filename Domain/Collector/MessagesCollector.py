@@ -51,21 +51,19 @@ class MessagesCollector(DomainBehavior):
 		"""
 		
 		for port in self.IPorts:
-			msg = self.peek(port, *args)
-			np = self.getPortId(port)
-
 			### adapted with PyPDEVS
-#			if hasattr(self, 'peek'):
-#				msg = self.peek(port)
-#				np = port.myID
-#			else:
-#				inputs = args[0]
-#				msg = inputs.get(port)
-#				np=port.port_id
+			if hasattr(self, 'peek'):
+				msg = self.peek(port)
+				np = port.myID
+			else:
+				inputs = args[0]
+				msg = inputs.get(port)
+				np=port.port_id
 
 			if msg:
 				### filename
 				fn = "%s%d%s"%(self.fileName, np, self.ext)
+				
 				with open(fn,'a') as f: f.write("%s\n"%(str(msg)))
 				del msg
 

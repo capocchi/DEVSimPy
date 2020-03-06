@@ -171,6 +171,9 @@ else:
 # Sets the homepath variable to the directory where your application is located (sys.argv[0]).
 builtins.__dict__.update(builtin_dict)
 
+### Deprecation warnings with Python 3.8
+wx._core.WindowIDRef.__index__ = wx._core.WindowIDRef.__int__
+
 ### import Container much faster loading than from Container import ... for os windows only
 import Container
 import Menu
@@ -220,7 +223,7 @@ def DefineScreenSize(percentscreen = None, size = None):
 	elif percentscreen:
 		x1, x2, l, h = wx.Display().GetClientArea()
 		l, h = percentscreen * l, percentscreen * h
-	return l, h
+	return round(l), round(h)
 
 # -------------------------------------------------------------------
 class MainApplication(wx.Frame):
