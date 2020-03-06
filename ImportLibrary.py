@@ -178,10 +178,12 @@ class ImportLibrary(wx.Dialog):
 		self._cb = CheckListCtrl(rightPanel)
 		
 		try:
-			### Populate Check List dynamicaly
-			pool = ThreadPoolExecutor(3)
-			future = pool.submit(self._cb.Populate, (D))
-			future.done()
+			### Populate Check List dynamicaly	
+			with ThreadPoolExecutor(max_workers=5) as executor:
+				executor.submit(self._cb.Populate, (D))
+			#pool = ThreadPoolExecutor(3)
+			#future = pool.submit(self._cb.Populate, (D))
+			#future.done()
 		except:
 			self._cb.Populate(D)
 			
