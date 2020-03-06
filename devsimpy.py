@@ -410,7 +410,7 @@ class MainApplication(wx.Frame):
 				### load perspective profile
 				self.perspectives = eval(self.cfg.Read("perspectives"))
 
-				### restore the builtin dict (just for )
+				### restore the builtin dict
 				try:
 					D = eval(self.cfg.Read("builtin_dict"))
 				except SyntaxError:
@@ -427,7 +427,11 @@ class MainApplication(wx.Frame):
 									wx.OK | wx.ICON_INFORMATION)
 						#sys.stdout.write('.devsimpy file appear to be not liked with the DEVSimPy source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(GetUserConfigDir()))
 						D['HOME_PATH'] = ABS_HOME_PATH
-
+					
+					### if pypdevs_241 is detected, it is added in the builtin in order to be able to select him from the simulation Preference panel
+					if builtin_dict['DEVS_DIR_PATH_DICT'] != D['DEVS_DIR_PATH_DICT']:
+						D['DEVS_DIR_PATH_DICT'].update(builtin_dict['DEVS_DIR_PATH_DICT'])
+						
 				try:
 					### recompile DomainInterface if DEFAULT_DEVS_DIRNAME != PyDEVS
 					recompile = D['DEFAULT_DEVS_DIRNAME'] != builtins.__dict__['DEFAULT_DEVS_DIRNAME']
@@ -443,7 +447,7 @@ class MainApplication(wx.Frame):
 						ReloadModule.recompile("DomainInterface.DomainBehavior")
 						ReloadModule.recompile("DomainInterface.DomainStructure")
 						ReloadModule.recompile("DomainInterface.MasterModel")
-
+					
 				### icon path is wrong (generally .devsimpy is wrong because DEVSimPy directory has been moved)
 				### .devsimpy must be rewrite
 				else:
@@ -558,7 +562,6 @@ class MainApplication(wx.Frame):
 							self.tb.AddTool(self.toggle_list[2], wx.Bitmap(os.path.join(ICON_PATH,'linear_connector.png')), shortHelpString=_('Linear'), longHelpString=_('Linear connector'), isToggle=True)
 						]
 		else:
-			
 			self.tools = [	self.tb.AddTool(wx.ID_NEW, "",wx.Bitmap(os.path.join(ICON_PATH,'new.png')), shortHelp=_('New diagram (Ctrl+N)')),
 							self.tb.AddTool(wx.ID_OPEN, "",wx.Bitmap(os.path.join(ICON_PATH,'open.png')), shortHelp=_('Open File (Ctrl+O)')),
 							self.tb.AddTool(wx.ID_PREVIEW_PRINT, "",wx.Bitmap(os.path.join(ICON_PATH,'print-preview.png')), shortHelp=_('Print Preview (Ctrl+P)')),
