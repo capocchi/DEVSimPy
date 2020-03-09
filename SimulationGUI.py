@@ -178,11 +178,6 @@ class CollapsiblePanel(wx.Panel):
 		cb5 = wx.CheckBox(pane, wx.NewIdRef(), name='real_time')
 		
 		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
-			if not 'hotshot' in list(sys.modules.keys()):
-				text3.Enable(False)
-				cb1.Enable(False)
-				self.parent.prof = False
-
 			self.cb2.SetValue(builtins.__dict__['NTL'])
 			self.cb3.Enable(False)
 			cb4.Enable(False)
@@ -327,7 +322,7 @@ class Base(object):
 		### PyPDEVS threaded real time simulation
 		self.real_time_flag = builtins.__dict__['REAL_TIME']
 		
-		### profiling simulation with hotshot
+		### profiling simulation
 		self.prof = False
 
 		### No time limit simulation (defined in the builtin dictionary from .devsimpy file)

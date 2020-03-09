@@ -196,7 +196,7 @@ class runSimulation:
         self.dynamic_structure_flag = builtins.__dict__['DYNAMIC_STRUCTURE']
         self.real_time_flag = builtins.__dict__['REAL_TIME']
          
-        ### profiling simulation with hotshot
+        ### profiling simulation
         self.prof = False
 
         self.verbose = False

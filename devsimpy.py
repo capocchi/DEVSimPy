@@ -51,6 +51,7 @@ import itertools
 import shutil
 import builtins
 import glob
+import pstats
 
 from configparser import ConfigParser
 from tempfile import gettempdir
@@ -184,7 +185,7 @@ from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
 from pluginmanager import load_plugins, enable_plugin
 from which import which
-from Utilities import GetUserConfigDir
+from Utilities import GetUserConfigDir, install_and_import
 from Decorators import redirectStdout, BuzyCursorNotification
 from DetachedFrame import DetachedFrame
 from LibraryTree import LibraryTree
@@ -1888,54 +1889,29 @@ class MainApplication(wx.Frame):
 	###
 	@BuzyCursorNotification
 	def OnProfiling(self, event):
-		""" Simulation profiling for fn file
+		""" Simulation profiling for fn file.
 		"""
 
 		### find the prof file name
 		menu_item = self.GetMenuBar().FindItemById(event.GetId())
-		fn = menu_item.GetLabel()
+		fn = menu_item.GetItemLabelText()
 		prof_file_path = os.path.join(gettempdir(), fn)
 
 		### list of item in single choice dialogue
-		choices = [_('Embedded in DEVSimPy')]
-
-		### editor of profiling software
-		try:
-			kcachegrind = which('kcachegrind')
-			choices.append('kcachegrind')
-		except Exception:
-			kcachegrind = False
-		try:
-			kprof = which('kprof')
-			choices.append('kprof')
-		except Exception:
-			kprof = False
-		try:
-			converter = which('hotshot2calltree')
-		except Exception:
-			converter = False
-
-		choices.append(_('Other...'))
+		choices = ['snakeviz','gprof2dot',_('Embedded in DEVSimPy')]
 
 		dlg = wx.SingleChoiceDialog(self, _('What profiling software are you using?'), _('Single Choice'), choices)
 		if dlg.ShowModal() == wx.ID_OK:
 			response = dlg.GetStringSelection()
-			if response == 'kcachegrind':
+			if response == 'snakeviz':
 				dlg.Destroy()
-
-				if converter:
-					### cache grind file name that will be generated
-					cachegrind_fn = os.path.join(gettempdir(), "%s%s"%(fn[:-len('.prof')],'.cachegrind'))
-					### transform profile file for cachegrind
-					os.system("%s %s %s %s"%(converter,"-o", cachegrind_fn, prof_file_path))
-
-					self.LoadCachegrindFile(cachegrind_fn)
-				else:
-					wx.MessageBox(_("Hotshot converter (hotshot2calltree) not found"), _('Error'), wx.OK|wx.ICON_ERROR)
-
-			elif response == 'kprof':
+				r = install_and_import(response)
+				if r: os.system(" ".join([response,prof_file_path,"&"]))
+			elif response == 'gprof2dot':
 				dlg.Destroy()
-				self.LoadProfFileFromKProf(prof_file_path)
+				r = install_and_import(response)
+				png_file_path = prof_file_path.replace('.prof', '.png')
+				os.system(" ".join([response,'-f pstats',prof_file_path,"|", "dot", "-Tpng", "-o", png_file_path, "&&", "eog", png_file_path]))
 			elif response == _('Embedded in DEVSimPy'):
 				dlg.Destroy()
 				output = self.LoadProfFile(prof_file_path)
@@ -1946,23 +1922,15 @@ class MainApplication(wx.Frame):
 				dlg.Destroy()
 
 	@staticmethod
-	def LoadCachegrindFile(cachegrind_fn):
-		### lauch  kcachegrid
-		os.system(" ".join(['kcachegrind',cachegrind_fn,"&"]))
-
-	@staticmethod
-	def LoadProfFileFromKProf(prof_file_path):
-		### lauch  kprof
-		os.system(" ".join(['kprof',prof_file_path,"&"]))
-
-	@staticmethod
 	@redirectStdout
 	def LoadProfFile(prof_file_path):
 		### lauch embedded prof editor
-		stats = hotshot.stats.load(prof_file_path)
+		stats = pstats.Stats(prof_file_path)
+		# Clean up filenames for the report
 		stats.strip_dirs()
-		stats.sort_stats('time', 'calls')
-		stats.print_stats(100)
+		# Sort the statistics by the cumulative time spent in the function
+		stats.sort_stats('cumulative')
+		stats.print_stats()
 
 	###
 	def OnDeleteProfiles(self, event):

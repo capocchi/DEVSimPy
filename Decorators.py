@@ -5,12 +5,13 @@ import builtins
 import os
 import sys
 import time
+from datetime import datetime
 import threading
 from tempfile import gettempdir
 import time
 import heapq
 import pickle
-import io
+import cProfile, pstats, io
 
 if builtins.__dict__['GUI_FLAG']:
 	import wx
@@ -39,29 +40,30 @@ class memoize:
             self.memoized[args] = self.function(*args)
             return self.memoized[args]
 
-hotshotProfilers = {}
 def hotshotit(func):
 	def wrapper(*args, **kw):
 		sim_thread = args[0]
 		prof = sim_thread.prof
 		### if profiling check-box is checked in the simulationDialog
 		if prof:
+			
+			### name of .prof file
 			label = sim_thread.model.getBlockModel().label
+			now = datetime.now() # current date and time
+			date_time = now.strftime('%m-%d-%Y_%H-%M-%S')
+			prof_name = os.path.join(gettempdir(),"%s_%s_%s%s"%(func.__name__, label, date_time ,'.prof'))
 
-			try:
-				import hotshot
-				#import cProfile as hotshot
-			except ImportError:
-				sys.stderr.write(_("Please install hotshot module."))
-				return
+			### profiling section with cProfile
+			pr = cProfile.Profile()
+			pr.enable()
+			r = func(*args, **kw)
+			pr.disable()
+			#Sort the statistics by the cumulative time spent in the function
+			sortby = 'cumulative'
+			ps = pstats.Stats(pr).sort_stats(sortby)
+			ps.dump_stats(prof_name)
+			#print(s.getvalue())
 
-			global hotshotProfilers
-			prof_name = os.path.join(gettempdir(),"%s_%s%s"%(func.__name__, label, '.prof'))
-			profiler = hotshotProfilers.get(prof_name)
-			if profiler is None:
-				profiler = hotshot.Profile(prof_name)
-				hotshotProfilers[prof_name] = profiler
-			r = profiler.runcall(func, *args, **kw)
 		else:
 			r = func(*args, **kw)
 		return r
