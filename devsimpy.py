@@ -46,6 +46,7 @@ import builtins
 import webbrowser
 import platform
 import threading
+import subprocess
 import pickle
 import itertools
 import shutil
@@ -1905,8 +1906,10 @@ class MainApplication(wx.Frame):
 			response = dlg.GetStringSelection()
 			if response == 'snakeviz':
 				dlg.Destroy()
-				r = install_and_import(response)
-				if r: os.system(" ".join([response,prof_file_path,"&"]))
+				if install_and_import(response):
+					threading.Thread(target=self.longRunning1,
+        			args=(response,prof_file_path),
+        			).start()
 			elif response == 'gprof2dot':
 				dlg.Destroy()
 				r = install_and_import(response)
@@ -1920,6 +1923,9 @@ class MainApplication(wx.Frame):
 				d.ShowModal()
 			else:
 				dlg.Destroy()
+	@staticmethod
+	def longRunning1(response, prof_file_path):
+		subprocess.call(" ".join([response,prof_file_path]))
 
 	@staticmethod
 	@redirectStdout
