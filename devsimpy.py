@@ -1912,9 +1912,10 @@ class MainApplication(wx.Frame):
         			).start()
 			elif response == 'gprof2dot':
 				dlg.Destroy()
-				r = install_and_import(response)
-				png_file_path = prof_file_path.replace('.prof', '.png')
-				os.system(" ".join([response,'-f pstats',prof_file_path,"|", "dot", "-Tpng", "-o", png_file_path, "&&", "eog", png_file_path]))
+				if install_and_import(response):
+					threading.Thread(target=self.longRunning2,
+        			args=(response,prof_file_path),
+        			).start()
 			elif response == _('Embedded in DEVSimPy'):
 				dlg.Destroy()
 				output = self.LoadProfFile(prof_file_path)
@@ -1923,9 +1924,15 @@ class MainApplication(wx.Frame):
 				d.ShowModal()
 			else:
 				dlg.Destroy()
+
 	@staticmethod
 	def longRunning1(response, prof_file_path):
-		subprocess.call(" ".join([response,prof_file_path]))
+		subprocess.call(" ".join([response,prof_file_path]), shell=True)
+
+	@staticmethod
+	def longRunning2(response, prof_file_path):
+		png_file_path = prof_file_path.replace('.prof', '.png')
+		subprocess.call(" ".join([response,'-f pstats',prof_file_path,"|", "dot", "-Tpng", "-o", png_file_path, "&&", "eog", png_file_path]))
 
 	@staticmethod
 	@redirectStdout
