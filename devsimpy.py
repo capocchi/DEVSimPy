@@ -1899,6 +1899,7 @@ class MainApplication(wx.Frame):
 		prof_file_path = os.path.join(gettempdir(), fn)
 
 		### list of item in single choice dialogue
+		### gprof2dot needs graphviz
 		choices = ['snakeviz','gprof2dot',_('Embedded in DEVSimPy')]
 
 		dlg = wx.SingleChoiceDialog(self, _('What profiling software are you using?'), _('Single Choice'), choices)
