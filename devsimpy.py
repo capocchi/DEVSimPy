@@ -1932,7 +1932,7 @@ class MainApplication(wx.Frame):
 	@staticmethod
 	def longRunning2(response, prof_file_path):
 		png_file_path = prof_file_path.replace('.prof', '.png')
-		subprocess.call(" ".join([response,'-f pstats',prof_file_path,"|", "dot", "-Tpng", "-o", png_file_path, "&&", "eog", png_file_path]))
+		subprocess.call(" ".join([response,'-f pstats',prof_file_path,"|", "dot", "-Tpng", "-o", png_file_path, "&&", "eog", png_file_path]),  shell=True)
 
 	@staticmethod
 	@redirectStdout
