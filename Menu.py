@@ -24,6 +24,7 @@ import wx
 import os
 import sys
 import platform
+import profile
 
 from tempfile import gettempdir
 
@@ -251,8 +252,10 @@ class ProfileFileMenu(wx.Menu):
 			parent.Bind(wx.EVT_MENU, parent.OnProfiling, id=id)
 
 		self.AppendSeparator()
+
 		AppendItem(wx.MenuItem(self, ID_DELETE_PROFILES, _("Delete all")))
 		self.Enable(ID_DELETE_PROFILES, self.GetMenuItemCount() > 2)
+		
 		parent.Bind(wx.EVT_MENU, parent.OnDeleteProfiles, id = ID_DELETE_PROFILES)
 
 class RecentFileMenu(wx.Menu):
@@ -449,10 +452,8 @@ class SettingsMenu(wx.Menu):
 		AppendMenu(self, wx.NewIdRef(), _('Languages'), languagesSubmenu)
 		
 		### Before Phoenix transition
-		ishotshot = 'hotshot' in list(sys.modules.keys())
-		if ishotshot:
-			AppendMenu(self, ID_PROFILE, _('Profile'), ProfileFileMenu(parent))
-		
+		AppendMenu(self, ID_PROFILE, _('Profile'), ProfileFileMenu(parent))
+
 		parent = parent.GetParent()
 		
 		AppendItem(pref_item)
@@ -463,7 +464,7 @@ class SettingsMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnFrench, id=ID_FRENCH_LANGUAGE)
 		parent.Bind(wx.EVT_MENU, parent.OnEnglish, id=ID_ENGLISH_LANGUAGE)
 		parent.Bind(wx.EVT_MENU, parent.OnAdvancedSettings, id=ID_PREFERENCES)
-
+	
 class HelpMenu(wx.Menu):
 	"""
 	"""
@@ -509,7 +510,7 @@ class MainMenuBar(wx.MenuBar):
 		self.Append(SettingsMenu(self), _("&Options"))
 		self.Append(HelpMenu(self), _("&Help"))
 
-		self.Bind(wx.EVT_MENU_HIGHLIGHT_ALL, self.OnMenuHighlight)
+		self.Bind(wx.EVT_MENU_HIGHLIGHT, self.OnMenuHighlight)
 
 	### useless until Phoenix transition
 	def OnOpenMenu(self, event):
@@ -519,6 +520,8 @@ class MainMenuBar(wx.MenuBar):
 		"""
 		
 		menu = event.GetMenu()
+
+		posm = self.FindMenu(menu.GetTitle())
 
 		### if the opened menu is the File menu
 		if isinstance(menu, FileMenu):
@@ -533,9 +536,15 @@ class MainMenuBar(wx.MenuBar):
 			else:
 				if platform.system() == 'Windows':
 					### After Pnoenix Transition
-					self.Replace(0, FileMenu(self), _("&File"))
+					self.Replace(posm, FileMenu(self), _("&File"))
+				else:
+					label = _("Recent files")
+					ID = menu.FindItem(label)
+					item, pos = menu.FindChildItem(ID)
+					menu.Remove(ID)
+					menu.Insert(pos, ID, label, RecentFileMenu(self))
 
-		elif isinstance(menu, SettingsMenu) and 'hotshot' in list(sys.modules.keys()):
+		elif isinstance(menu, SettingsMenu):
 		
 			if wx.VERSION_STRING < '4.0':
 				### Before Pnoenix Transition
@@ -545,10 +554,17 @@ class MainMenuBar(wx.MenuBar):
 				### we insert the profile files menu
 				menu.InsertMenu(1, ID_PROFILE, _('Profile'),  ProfileFileMenu(self))
 			else:
+				### After Pnoenix Transition
 				if platform.system() == 'Windows':
-					### After Pnoenix Transition
-					self.Replace(4, SettingsMenu(self), _("&Options"))
-				
+					self.Replace(posm, SettingsMenu(self), _("&Options"))
+				else:
+					label = _('Profile')
+					ID = menu.FindItem(label)
+					item, pos = menu.FindChildItem(ID)
+					menu.Remove(ID)
+					menu.Insert(pos, ID, label, ProfileFileMenu(self))
+
+					
 	#def OnCloseMenu(self, event):
 		#""" Close menu has been detected
 		#"""

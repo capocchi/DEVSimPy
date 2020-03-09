@@ -59,6 +59,9 @@ except ImportError:
 		sys.stdout.write("Unknown operating system.\n")
 		sys.exit()
 
+import pip
+import importlib
+
 #-------------------------------------------------------------------------------
 def PrintException():
 	exc_type, exc_obj, tb = sys.exc_info()
@@ -123,6 +126,25 @@ def PyBuzyInfo(msg, time):
 
 	del busy
 
+def install_and_import(package):
+    try:
+        importlib.import_module(package)
+        installed = True
+    except:
+        dial = wx.MessageDialog(None, _('Do you want to install the %s using pip?'%package), _('Install Package'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+
+        if dial.ShowModal() == wx.ID_YES:
+            pip.main(['install', package])
+            installed = True
+            dial.Destroy() 
+        else:
+            installed = False
+            dial.Destroy()
+    finally:
+        if installed : globals()[package] = importlib.import_module(package)
+	
+    return installed
+	
 def getObjectFromString(scriptlet):
 	"""
 	"""
