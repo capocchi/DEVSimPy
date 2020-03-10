@@ -24,6 +24,7 @@ import codecs
 import string
 import types
 import importlib
+import subprocess
 
 import gettext
 _ = gettext.gettext
@@ -50,9 +51,10 @@ import ZipManager
 #from DomainInterface.DomainBehavior import DomainBehavior
 #from DomainInterface.DomainStructure import DomainStructure
 from ReloadModule import recompile
-from Utilities import GetActiveWindow, path_to_module
+from Utilities import GetActiveWindow, path_to_module, install_and_import
 from NetManager import Net
 from SimpleFrameEditor import FrameEditor
+from which import which
 
 ###########################################################
 ###
@@ -620,7 +622,7 @@ class DEVSComponent:
 		if isinstance(mainW, ShapeCanvas):
 			mainW = mainW.GetParent()
 
-		if builtins.__dict__['LOCAL_EDITOR'] and not zipfile.is_zipfile(model_path) and not python_path.startswith('http'):
+		if not builtins.__dict__['LOCAL_EDITOR'] and not zipfile.is_zipfile(model_path) and not python_path.startswith('http'):
 			dial = wx.MessageDialog(mainW, _('Do you want to use your local programmer software?\n\n If you always want use the DEVSimPy code editor\n change the option in Editor panel preferences.'), name, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 			val = dial.ShowModal()
 		else:
@@ -630,20 +632,21 @@ class DEVSComponent:
 		if val == wx.ID_YES:
 			### open with local editor
 			if wx.Platform == '__WXMAC__':
-				os.system("open " + python_path)
+				subprocess.call(" ".join(['open',python_path]), shell=True)
 			elif "wxMSW" in wx.PlatformInfo:
 				os.startfile(python_path)
 			elif "wxGTK" in wx.PlatformInfo:
 				### with gnome
-				if os.system('pidof gnome-session') != 256:
+				if os.system('pidof gedit') == 256:
 					try:
-						soft = which('gnome-open')
+						soft = which('gedit')
 					except:
 						sys.stdout.write(_("Local programmer software not found!\n"))
 					else:
-						os.system(soft+" openURL " + python_path)
+						subprocess.call(" ".join([soft,python_path]), shell=True)
+
 				### with kde
-				elif os.system('pidof ksmserver') != 256:
+				elif os.system('pidof ksmserver') == 256:
 					try:
 						soft = which('kfmclient')
 					except:
@@ -654,7 +657,7 @@ class DEVSComponent:
 					sys.stdout.write(_("Unknown Windows Manager!\n"))
 
 		elif val != wx.ID_CANCEL:
-			# loading file in editor windows (self.text)
+			# loading file in DEVSimPy editor windows (self.text)
 			try:
 
 				editorFrame = Editor.GetEditor(None, wx.NewIdRef(), ''.join([name,' - ',model_path]), obj=self, file_type='block')

@@ -537,8 +537,9 @@ class MainApplication(wx.Frame):
 
 		# for spash screen
 		pub.sendMessage('object.added',  message=_('Making tools bar ...\n'))
-
-		self.tb = self.CreateToolBar(style = wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT, name = 'tb')
+		
+		tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
+		tb.SetToolBitmapSize((16,16))
 
 		self.toggle_list = [wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef()]
 
@@ -546,86 +547,81 @@ class MainApplication(wx.Frame):
 
 		### Tools List - IDs come from Menu.py file
 		if wx.VERSION_STRING < '4.0':
-			self.tb.SetToolBitmapSize((25,25)) # juste for windows
-
-			self.tools = [	self.tb.AddTool(wx.ID_NEW, wx.Bitmap(os.path.join(ICON_PATH,'new.png')), shortHelpString=_('New diagram (Ctrl+N)'),longHelpString=_('Create a new diagram in tab')),
-							self.tb.AddTool(wx.ID_OPEN, wx.Bitmap(os.path.join(ICON_PATH,'open.png')), shortHelpString=_('Open File (Ctrl+O)'), longHelpString=_('Open an existing diagram')),
-							self.tb.AddTool(wx.ID_PREVIEW_PRINT, wx.Bitmap(os.path.join(ICON_PATH,'print-preview.png')), shortHelpString=_('Print Preview (Ctrl+P)'), longHelpString=_('Print preview of current diagram')),
-							self.tb.AddTool(wx.ID_SAVE, wx.Bitmap(os.path.join(ICON_PATH,'save.png')), shortHelpString=_('Save File (Ctrl+S)'), longHelpString=_('Save the current diagram'), clientData=currentPage),
-							self.tb.AddTool(wx.ID_SAVEAS, wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')), shortHelpString=_('Save file as'), longHelpString=_('Save the diagram with an another name'), clientData=currentPage),
-							self.tb.AddTool(wx.ID_UNDO, wx.Bitmap(os.path.join(ICON_PATH,'undo.png')),shortHelpString= _('Undo'), longHelpString=_('Click to go upward, hold to see history'), clientData=currentPage),
-							self.tb.AddTool(wx.ID_REDO, wx.Bitmap(os.path.join(ICON_PATH,'redo.png')), shortHelpString=_('Redo'), longHelpString=_('Click to go forward, hold to see history'), clientData=currentPage),
-							self.tb.AddTool(Menu.ID_ZOOMIN_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'zoom+.png')), shortHelpString=_('Zoom'), longHelpString=_('Zoom +'), clientData=currentPage),
-							self.tb.AddTool(Menu.ID_ZOOMOUT_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'zoom-.png')), shortHelpString=_('UnZoom'), longHelpString=_('Zoom -'), clientData=currentPage),
-							self.tb.AddTool(Menu.ID_UNZOOM_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'no_zoom.png')), shortHelpString=_('AnnuleZoom'), longHelpString=_('Normal size'), clientData=currentPage),
-							self.tb.AddTool(Menu.ID_PRIORITY_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'priority.png')), shortHelpString=_('Priority (F3)'),longHelpString= _('Define model activation priority')),
-							self.tb.AddTool(Menu.ID_CHECK_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'check_master.png')), shortHelpString=_('Debugger (F4)'),longHelpString= _('Check devs models')),
-							self.tb.AddTool(Menu.ID_PLUGINS_SHAPE, wx.Bitmap(os.path.join(ICON_PATH,'plugins.png')), shortHelpString=_('Plugins'), longHelpString=_('Plugins Manager')),
-							self.tb.AddTool(Menu.ID_SIM_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'simulation.png')), shortHelpString=_('Simulation (F5)'), longHelpString=_('Simulate the diagram')),
-							self.tb.AddTool(self.toggle_list[0], wx.Bitmap(os.path.join(ICON_PATH,'direct_connector.png')),shortHelpString= _('Direct'),longHelpString=_('Direct connector'), isToggle=True),
-							self.tb.AddTool(self.toggle_list[1], wx.Bitmap(os.path.join(ICON_PATH,'square_connector.png')), shortHelpString=_('Square'), longHelpString=_('Square connector'), isToggle=True),
-							self.tb.AddTool(self.toggle_list[2], wx.Bitmap(os.path.join(ICON_PATH,'linear_connector.png')), shortHelpString=_('Linear'), longHelpString=_('Linear connector'), isToggle=True)
+			self.tools = [	tb.AddTool(wx.ID_NEW, wx.Bitmap(os.path.join(ICON_PATH,'new.png')), shortHelpString=_('New diagram (Ctrl+N)'),longHelpString=_('Create a new diagram in tab')),
+							tb.AddTool(wx.ID_OPEN, wx.Bitmap(os.path.join(ICON_PATH,'open.png')), shortHelpString=_('Open File (Ctrl+O)'), longHelpString=_('Open an existing diagram')),
+							tb.AddTool(wx.ID_PREVIEW_PRINT, wx.Bitmap(os.path.join(ICON_PATH,'print-preview.png')), shortHelpString=_('Print Preview (Ctrl+P)'), longHelpString=_('Print preview of current diagram')),
+							tb.AddTool(wx.ID_SAVE, wx.Bitmap(os.path.join(ICON_PATH,'save.png')), shortHelpString=_('Save File (Ctrl+S)'), longHelpString=_('Save the current diagram'), clientData=currentPage),
+							tb.AddTool(wx.ID_SAVEAS, wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')), shortHelpString=_('Save file as'), longHelpString=_('Save the diagram with an another name'), clientData=currentPage),
+							tb.AddTool(wx.ID_UNDO, wx.Bitmap(os.path.join(ICON_PATH,'undo.png')),shortHelpString= _('Undo'), longHelpString=_('Click to go upward, hold to see history'), clientData=currentPage),
+							tb.AddTool(wx.ID_REDO, wx.Bitmap(os.path.join(ICON_PATH,'redo.png')), shortHelpString=_('Redo'), longHelpString=_('Click to go forward, hold to see history'), clientData=currentPage),
+							tb.AddTool(Menu.ID_ZOOMIN_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'zoom+.png')), shortHelpString=_('Zoom'), longHelpString=_('Zoom +'), clientData=currentPage),
+							tb.AddTool(Menu.ID_ZOOMOUT_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'zoom-.png')), shortHelpString=_('UnZoom'), longHelpString=_('Zoom -'), clientData=currentPage),
+							tb.AddTool(Menu.ID_UNZOOM_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'no_zoom.png')), shortHelpString=_('AnnuleZoom'), longHelpString=_('Normal size'), clientData=currentPage),
+							tb.AddTool(Menu.ID_PRIORITY_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'priority.png')), shortHelpString=_('Priority (F3)'),longHelpString= _('Define model activation priority')),
+							tb.AddTool(Menu.ID_CHECK_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'check_master.png')), shortHelpString=_('Debugger (F4)'),longHelpString= _('Check devs models')),
+							tb.AddTool(Menu.ID_PLUGINS_SHAPE, wx.Bitmap(os.path.join(ICON_PATH,'plugins.png')), shortHelpString=_('Plugins'), longHelpString=_('Plugins Manager')),
+							tb.AddTool(Menu.ID_SIM_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'simulation.png')), shortHelpString=_('Simulation (F5)'), longHelpString=_('Simulate the diagram')),
+							tb.AddTool(self.toggle_list[0], wx.Bitmap(os.path.join(ICON_PATH,'direct_connector.png')),shortHelpString= _('Direct'),longHelpString=_('Direct connector'), isToggle=True),
+							tb.AddTool(self.toggle_list[1], wx.Bitmap(os.path.join(ICON_PATH,'square_connector.png')), shortHelpString=_('Square'), longHelpString=_('Square connector'), isToggle=True),
+							tb.AddTool(self.toggle_list[2], wx.Bitmap(os.path.join(ICON_PATH,'linear_connector.png')), shortHelpString=_('Linear'), longHelpString=_('Linear connector'), isToggle=True)
 						]
 		else:
-			self.tools = [	self.tb.AddTool(wx.ID_NEW, "",wx.Bitmap(os.path.join(ICON_PATH,'new.png')), shortHelp=_('New diagram (Ctrl+N)')),
-							self.tb.AddTool(wx.ID_OPEN, "",wx.Bitmap(os.path.join(ICON_PATH,'open.png')), shortHelp=_('Open File (Ctrl+O)')),
-							self.tb.AddTool(wx.ID_PREVIEW_PRINT, "",wx.Bitmap(os.path.join(ICON_PATH,'print-preview.png')), shortHelp=_('Print Preview (Ctrl+P)')),
-							self.tb.AddTool(wx.ID_SAVE, "",wx.Bitmap(os.path.join(ICON_PATH,'save.png')), wx.NullBitmap, shortHelp=_('Save File (Ctrl+S)'), longHelp=_('Save the current diagram'), clientData=currentPage),
-							self.tb.AddTool(wx.ID_SAVEAS, "",wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')), wx.NullBitmap, shortHelp=_('Save file as'), longHelp=_('Save the diagram with an another name'), clientData=currentPage),
-							self.tb.AddTool(wx.ID_UNDO, "",wx.Bitmap(os.path.join(ICON_PATH,'undo.png')), wx.NullBitmap, shortHelp= _('Undo'), longHelp=_('Click to glongHelpString=o back, hold to see history'), clientData=currentPage),
-							self.tb.AddTool(wx.ID_REDO, "",wx.Bitmap(os.path.join(ICON_PATH,'redo.png')), wx.NullBitmap, shortHelp=_('Redo'), longHelp=_('Click to go forward, hold to see history'), clientData=currentPage),
-							self.tb.AddTool(Menu.ID_ZOOMIN_DIAGRAM, "",wx.Bitmap(os.path.join(ICON_PATH,'zoom+.png')), wx.NullBitmap, shortHelp=_('Zoom'), longHelp=_('Zoom +'), clientData=currentPage),
-							self.tb.AddTool(Menu.ID_ZOOMOUT_DIAGRAM, "",wx.Bitmap(os.path.join(ICON_PATH,'zoom-.png')), wx.NullBitmap, shortHelp=_('UnZoom'), longHelp=_('Zoom -'), clientData=currentPage),
-							self.tb.AddTool(Menu.ID_UNZOOM_DIAGRAM, "",wx.Bitmap(os.path.join(ICON_PATH,'no_zoom.png')), wx.NullBitmap, shortHelp=_('AnnuleZoom'), longHelp=_('Normal size'), clientData=currentPage),
-							self.tb.AddTool(Menu.ID_PRIORITY_DIAGRAM, "",wx.Bitmap(os.path.join(ICON_PATH,'priority.png')), shortHelp=_('Priority (F3)')),
-							self.tb.AddTool(Menu.ID_CHECK_DIAGRAM, "",wx.Bitmap(os.path.join(ICON_PATH,'check_master.png')), shortHelp=_('Debugger (F4)')),
-							self.tb.AddTool(Menu.ID_PLUGINS_SHAPE, "", wx.Bitmap(os.path.join(ICON_PATH,'plugins.png')), shortHelp=_('Plugins Manager')),
-							self.tb.AddTool(Menu.ID_SIM_DIAGRAM, "",wx.Bitmap(os.path.join(ICON_PATH,'simulation.png')), shortHelp=_('Simulation (F5)')),
-							self.tb.AddTool(self.toggle_list[0], "",wx.Bitmap(os.path.join(ICON_PATH,'direct_connector.png')),shortHelp= _('Direct'), kind=wx.ITEM_CHECK),
-							self.tb.AddTool(self.toggle_list[1], "",wx.Bitmap(os.path.join(ICON_PATH,'square_connector.png')), shortHelp=_('Square'), kind = wx.ITEM_CHECK),
-							self.tb.AddTool(self.toggle_list[2], "",wx.Bitmap(os.path.join(ICON_PATH,'linear_connector.png')), shortHelp=_('Linear'), kind = wx.ITEM_CHECK)
+			self.tools = [	tb.AddTool(wx.ID_NEW, "",wx.Bitmap(os.path.join(ICON_PATH,'new.png')), shortHelp=_('New diagram (Ctrl+N)')),
+							tb.AddTool(wx.ID_OPEN, "",wx.Bitmap(os.path.join(ICON_PATH,'open.png')), shortHelp=_('Open File (Ctrl+O)')),
+							tb.AddTool(wx.ID_PREVIEW_PRINT, "",wx.Bitmap(os.path.join(ICON_PATH,'print-preview.png')), shortHelp=_('Print Preview (Ctrl+P)')),
+							tb.AddTool(wx.ID_SAVE, "",wx.Bitmap(os.path.join(ICON_PATH,'save.png')), wx.NullBitmap, shortHelp=_('Save File (Ctrl+S)'), longHelp=_('Save the current diagram'), clientData=currentPage),
+							tb.AddTool(wx.ID_SAVEAS, "",wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')), wx.NullBitmap, shortHelp=_('Save file as'), longHelp=_('Save the diagram with an another name'), clientData=currentPage),
+							tb.AddTool(wx.ID_UNDO, "",wx.Bitmap(os.path.join(ICON_PATH,'undo.png')), wx.NullBitmap, shortHelp= _('Undo'), longHelp=_('Click to glongHelpString=o back, hold to see history'), clientData=currentPage),
+							tb.AddTool(wx.ID_REDO, "",wx.Bitmap(os.path.join(ICON_PATH,'redo.png')), wx.NullBitmap, shortHelp=_('Redo'), longHelp=_('Click to go forward, hold to see history'), clientData=currentPage),
+							tb.AddTool(Menu.ID_ZOOMIN_DIAGRAM, "",wx.Bitmap(os.path.join(ICON_PATH,'zoom+.png')), wx.NullBitmap, shortHelp=_('Zoom'), longHelp=_('Zoom +'), clientData=currentPage),
+							tb.AddTool(Menu.ID_ZOOMOUT_DIAGRAM, "",wx.Bitmap(os.path.join(ICON_PATH,'zoom-.png')), wx.NullBitmap, shortHelp=_('UnZoom'), longHelp=_('Zoom -'), clientData=currentPage),
+							tb.AddTool(Menu.ID_UNZOOM_DIAGRAM, "",wx.Bitmap(os.path.join(ICON_PATH,'no_zoom.png')), wx.NullBitmap, shortHelp=_('AnnuleZoom'), longHelp=_('Normal size'), clientData=currentPage),
+							tb.AddTool(Menu.ID_PRIORITY_DIAGRAM, "",wx.Bitmap(os.path.join(ICON_PATH,'priority.png')), shortHelp=_('Priority (F3)')),
+							tb.AddTool(Menu.ID_CHECK_DIAGRAM, "",wx.Bitmap(os.path.join(ICON_PATH,'check_master.png')), shortHelp=_('Debugger (F4)')),
+							tb.AddTool(Menu.ID_PLUGINS_SHAPE, "", wx.Bitmap(os.path.join(ICON_PATH,'plugins.png')), shortHelp=_('Plugins Manager')),
+							tb.AddTool(Menu.ID_SIM_DIAGRAM, "",wx.Bitmap(os.path.join(ICON_PATH,'simulation.png')), shortHelp=_('Simulation (F5)')),
+							tb.AddTool(self.toggle_list[0], "",wx.Bitmap(os.path.join(ICON_PATH,'direct_connector.png')),shortHelp= _('Direct'), kind=wx.ITEM_CHECK),
+							tb.AddTool(self.toggle_list[1], "",wx.Bitmap(os.path.join(ICON_PATH,'square_connector.png')), shortHelp=_('Square'), kind = wx.ITEM_CHECK),
+							tb.AddTool(self.toggle_list[2], "",wx.Bitmap(os.path.join(ICON_PATH,'linear_connector.png')), shortHelp=_('Linear'), kind = wx.ITEM_CHECK)
 						]
 
 		##################################################################### Abstraction hierarchy
 		diagram = currentPage.GetDiagram()
 		level = currentPage.GetCurrentLevel()
 
-		level_label = wx.StaticText(self.tb, -1, _("Level "))
-		self.spin = wx.SpinCtrl(self.tb, self.toggle_list[3], str(level), pos=(55, 90), size=(50, -1), min=0, max=20)
+		level_label = wx.StaticText(tb, -1, _("Level "))
+		self.spin = wx.SpinCtrl(tb, self.toggle_list[3], str(level), pos=(55, 90), size=(50, -1), min=0, max=20)
 
-		self.tb.AddControl(level_label)
-		self.tb.AddControl(self.spin)
+		tb.AddControl(level_label)
+		tb.AddControl(self.spin)
 
 		### add button to define downward and upward rules
 		ID_UPWARD = self.toggle_list[4]
 		ID_DOWNWARD = self.toggle_list[5]
 
 		if wx.VERSION_STRING < '4.0':
-			self.tools.append(self.tb.AddTool(ID_DOWNWARD, wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelpString=_('Downward rules'), longHelpString=_('Define Downward atomic model')))
-			self.tools.append(self.tb.AddTool(ID_UPWARD, wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelpString=_('Upward rules'), longHelpString=_('Define Upward atomic model')))
+			self.tools.append(tb.AddTool(ID_DOWNWARD, wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelpString=_('Downward rules'), longHelpString=_('Define Downward atomic model')))
+			self.tools.append(tb.AddTool(ID_UPWARD, wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelpString=_('Upward rules'), longHelpString=_('Define Upward atomic model')))
 		else:
-			self.tools.append(self.tb.AddTool(ID_DOWNWARD, "", wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelp=_('Downward rules')))
-			self.tools.append(self.tb.AddTool(ID_UPWARD, "", wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelp=_('Upward rules')))
+			self.tools.append(tb.AddTool(ID_DOWNWARD, "", wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelp=_('Downward rules')))
+			self.tools.append(tb.AddTool(ID_UPWARD, "", wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelp=_('Upward rules')))
 
-		self.tb.EnableTool(ID_DOWNWARD, False)
-		self.tb.EnableTool(ID_UPWARD, False)
+		tb.EnableTool(ID_DOWNWARD, False)
+		tb.EnableTool(ID_UPWARD, False)
 
 		##############################################################################################
 
-		self.tb.InsertSeparator(3)
-		self.tb.InsertSeparator(8)
-		self.tb.InsertSeparator(12)
-		self.tb.InsertSeparator(17)
-		self.tb.InsertSeparator(21)
+		for i in (3,8,12,17,21):
+			tb.InsertSeparator(i)
 		
 		### undo and redo button desabled
-		self.tb.EnableTool(wx.ID_UNDO, False)
-		self.tb.EnableTool(wx.ID_REDO, False)
+		tb.EnableTool(wx.ID_UNDO, False)
+		tb.EnableTool(wx.ID_REDO, False)
 	
-		self.tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in builtins.__dict__['DEFAULT_DEVS_DIRNAME'])
+		tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in builtins.__dict__['DEFAULT_DEVS_DIRNAME'])
 
 		### default direct connector toogled
-		self.tb.ToggleTool(self.toggle_list[0], 1)
+		tb.ToggleTool(self.toggle_list[0], 1)
 
 		### Binding
 		self.Bind(wx.EVT_TOOL, self.OnNew, self.tools[0])
@@ -654,9 +650,9 @@ class MainApplication(wx.Frame):
 		self.Bind(wx.EVT_TOOL, self.OnUpWard, id=ID_UPWARD)
 		self.Bind(wx.EVT_TOOL, self.OnDownWard, id=ID_DOWNWARD)
 
-		self.tb.Realize()
+		tb.Realize()
 
-		self.SetToolBar(self.tb)
+		self.SetToolBar(tb)
 
 	def GetExportPathsList(self):
 		"""
@@ -1836,7 +1832,8 @@ class MainApplication(wx.Frame):
 
 	###
 	def OnShowToolBar(self, evt):
-		self.tb.Show(not self.tb.IsShown())
+		tb=self.GetToolBar()
+		tb.Show(not tb.IsShown())
 
 	def OnShowEditor(self, evt):
 		""" Editor view has been pressed.

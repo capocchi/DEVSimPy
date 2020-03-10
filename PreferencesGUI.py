@@ -468,7 +468,8 @@ class SimulationPanel(wx.Panel):
 
 		### enable the priority (DEVS select function) icon depending on the selected DEVS kernel
 		mainW = wx.GetApp().GetTopWindow()
-		mainW.tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in builtins.__dict__['DEFAULT_DEVS_DIRNAME'])
+		tb = mainW.GetToolBar()
+		tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in builtins.__dict__['DEFAULT_DEVS_DIRNAME'])
 
 		builtins.__dict__['SIMULATION_SUCCESS_SOUND_PATH'] = self.sim_success_sound_path
 		builtins.__dict__['SIMULATION_ERROR_SOUND_PATH'] = self.sim_error_sound_path

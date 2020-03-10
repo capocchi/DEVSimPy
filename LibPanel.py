@@ -77,7 +77,7 @@ class LibPanel(wx.Panel):
 		chargedDomainList = eval(cfg_domain_list) if cfg_domain_list else []
 
 		self.tree.Populate(chargedDomainList)
-
+		
 		### search tree that is hide when starting devsimpy (see __do_layout)
 		self.searchTree = LibraryTree(self, wx.NewIdRef(), wx.DefaultPosition, style=wx.TR_DEFAULT_STYLE|wx.TR_HIDE_ROOT|wx.TR_MULTIPLE|wx.TR_LINES_AT_ROOT|wx.TR_HAS_BUTTONS|wx.SUNKEN_BORDER)
 
@@ -108,7 +108,7 @@ class LibPanel(wx.Panel):
 		"""
 
 		tb = wx.ToolBar(self, -1)
-		self.ToolBar = tb
+		#self.ToolBar = tb
 		tb.SetToolBitmapSize((16,16))# this required for non-standard size buttons on MSW
 
 		### for Phoenix version
@@ -144,6 +144,7 @@ class LibPanel(wx.Panel):
 			self.Bind(wx.EVT_TOOL, self.tree.OnMCCClick, id=Menu.ID_MCC_LIB) 
 
 		tb.Realize()
+
 		return tb
 
 	def __set_tips(self):

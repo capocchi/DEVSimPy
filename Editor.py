@@ -1370,9 +1370,11 @@ class Base(object):
 		""" Create tool-bar
 		"""
 
-		if not self.parent:
-			tb = self.CreateToolBar(wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT)
+		tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
+		tb.SetToolBitmapSize((16, 16))# this required for non-standard size buttons on MSW
 
+		if not self.parent:
+			
 			if wx.VERSION_STRING < '4.0':
 				self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(),wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), _('Save'), ''))
 				tb.AddSeparator()
@@ -1388,9 +1390,6 @@ class Base(object):
 				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'paste.png')),  shortHelp=_('Paste')))
 				self.Bind(wx.EVT_TOOL, self.QuitApplication, id = self.quit.GetId())
 		else:
-
-			tb = wx.ToolBar(self, -1)
-			tb.SetToolBitmapSize((16, 16))# this required for non-standard size buttons on MSW
 
 			if wx.VERSION_STRING < '4.0':
 				tb.AddTool(self.save.GetId(), wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), shortHelpString=_('Save'), longHelpString=_('Save the file'))
@@ -1409,6 +1408,7 @@ class Base(object):
 			self.Bind(wx.EVT_TOOL, self.nb.OnPaste, id= self.paste.GetId())
 
 		tb.Realize()
+
 		return tb
 
 	def GetNoteBook(self):
@@ -1815,6 +1815,9 @@ class EditorFrame(Base, wx.Frame):
 		self.SetMenuBar(self.menuBar)
 		self.toolbar = self.CreateTB()
 		self.statusbar= self.GetStatusBar()
+
+		### set the tool bar
+		self.SetToolBar(self.toolbar)
 
 		### binding
 		self.Bind(wx.EVT_CLOSE, self.QuitApplication)
