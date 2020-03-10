@@ -2038,7 +2038,7 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
 	def OnContact(self, event):
 		""" Launches the mail program to contact the DEVSimPy author. """
 
-		frame = SendMailWx()
+		frame = SendMailWx(None)
 		frame.Show()
 		   
 ##-------------------------------------------------------------------

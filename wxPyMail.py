@@ -20,6 +20,7 @@ import smtplib
 import sys
 import urllib.request, urllib.parse, urllib.error
 import wx
+import wx.lib.agw.hyperlink as hl
 
 _ = wx.GetTranslation
 
@@ -39,10 +40,10 @@ except:
 from email.message import Message
 
 class SendMailWx(wx.Frame):
+    
+    def __init__(self, *args, **kw):
+        super(SendMailWx, self).__init__(*args, **kw)
 
-    def __init__(self):
-        wx.Frame.__init__(self, None, wx.NewIdRef(), _('New Email Message (From Google account)'))
-        
         # set your email address here
         self.email = 'your_email@gmail.com'
 
@@ -82,16 +83,17 @@ class SendMailWx(wx.Frame):
         sendTool = tb.AddTool(wx.NewIdRef(), _('Send'), wx.Bitmap(os.path.join(ICON_PATH_16_16,'mail.png')), _('Sends Email'))
         self.Bind(wx.EVT_MENU, self.OnSend, sendTool)        
         tb.Realize()
+        self.SetToolBar(tb)
 
     def createWidgets(self):
         p = self.panel
               
         font = wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD)
-        self.fromLbl    = wx.StaticText(p, wx.NewIdRef(), _('From'), size=(60,-1))
+        self.fromLbl    = wx.StaticText(p, wx.NewIdRef(), _('From:'), size=(70,-1))
         self.fromTxt    = wx.TextCtrl(p, wx.NewIdRef(), self.email)
-        self.toLbl      = wx.StaticText(p, wx.NewIdRef(), _('To:'), size=(60,-1))
+        self.toLbl      = wx.StaticText(p, wx.NewIdRef(), _('To:'), size=(70,-1))
         self.toTxt      = wx.TextCtrl(p, wx.NewIdRef(), 'capocchi_l@univ-corse.fr')
-        self.subjectLbl = wx.StaticText(p, wx.NewIdRef(), _(' Subject:'), size=(60,-1))
+        self.subjectLbl = wx.StaticText(p, wx.NewIdRef(), _('Subject:'), size=(70,-1))
         self.subjectTxt = wx.TextCtrl(p, wx.NewIdRef(), '')
         self.attachBtn  = wx.Button(p, wx.NewIdRef(), _('Attachments'))        
         self.attachTxt  = wx.TextCtrl(p, wx.NewIdRef(), '', style=wx.TE_MULTILINE)
@@ -99,6 +101,18 @@ class SendMailWx(wx.Frame):
         self.editAttachBtn = wx.Button(p, wx.NewIdRef(), _('Edit Attachments'))
         
         self.messageTxt = wx.TextCtrl(p, wx.NewIdRef(), '', style=wx.TE_MULTILINE)
+
+        # Web link with underline rollovers, opens in same window
+        self.url = hl.HyperLinkCtrl(self.panel, -1, "Allow the access to Google for your less secure app", pos=(100, 150), URL="https://myaccount.google.com/lesssecureapps?pli=1")
+
+        self.url.AutoBrowse(True)
+        self.url.SetColours("BLUE", "BLUE", "BLUE")
+        self.url.EnableRollover(True)
+        self.url.SetUnderlines(False, False, True)
+        self.url.SetBold(True)
+        #self.url.OpenInSameWindow(True)
+        self.url.SetToolTip(wx.ToolTip("In a nutshell, google is not allowing you to log in via smtplib because it has flagged this sort of login as 'less secure', so what you have to do is go to this link while you're logged in to your google account, and allow the access"))
+        self.url.UpdateLink()
 
         self.Bind(wx.EVT_BUTTON, self.onAttach, self.attachBtn)
         self.Bind(wx.EVT_BUTTON, self.onAttachEdit, self.editAttachBtn)
@@ -129,8 +143,12 @@ class SendMailWx(wx.Frame):
         mainSizer.Add(subjSizer, 0, wx.ALL|wx.EXPAND, 5)
         mainSizer.Add(attachSizer, 0, wx.ALL|wx.EXPAND, 5)
         mainSizer.Add(self.messageTxt, 1, wx.ALL|wx.EXPAND, 5)        
-        
+        mainSizer.Add(self.url, 1, wx.ALL|wx.EXPAND, 5)
+
+        self.SetTitle(('New Email Message (From Google account)'))
+                
         self.panel.SetSizerAndFit(mainSizer)
+        self.panel.SetAutoLayout(True)
         self.Fit()
 
     def parseURL(self, url):
@@ -361,7 +379,6 @@ class EditDialog(wx.Dialog):
         self.Close()
 
     def onDelete(self, event):
-        print('in onDelete')
         numberOfPaths = len(self.filepaths)
         for item in range(numberOfPaths):            
             val = self.chkList.IsChecked(item)
@@ -383,9 +400,9 @@ class LoginDlg(wx.Dialog):
         self.loggedIn = False
 
         # widgets
-        userLbl = wx.StaticText(self, wx.NewIdRef(), _('Username:'), size=(50, -1))
+        userLbl = wx.StaticText(self, wx.NewIdRef(), _('Username:'), size=(70, -1))
         self.userTxt = wx.TextCtrl(self, wx.NewIdRef(), '', size=(150, -1))
-        passwordLbl = wx.StaticText(self, wx.NewIdRef(), _('Password:'), size=(50, -1))
+        passwordLbl = wx.StaticText(self, wx.NewIdRef(), _('Password:'), size=(70, -1))
         self.passwordTxt = wx.TextCtrl(self, wx.NewIdRef(), '', size=(150, -1),
                                        style=wx.TE_PROCESS_ENTER|wx.TE_PASSWORD)
         loginBtn = wx.Button(self, wx.ID_YES, _('Login'))
@@ -411,7 +428,7 @@ class LoginDlg(wx.Dialog):
         mainSizer.Add(passwordSizer, 0, wx.ALL, 0)
         mainSizer.Add(btnSizer, 0, wx.ALL|wx.CENTER, 5)
 
-        self.SetSizer(mainSizer)
+        self.SetSizerAndFit(mainSizer)
         self.Fit()
         self.Layout()
         
@@ -425,19 +442,19 @@ class LoginDlg(wx.Dialog):
         If correct, the email will attempt to be sent. If incorrect, the user
         will be notified.
         '''
-        #try:
-        user = self.userTxt.GetValue()
-        pw   = self.passwordTxt.GetValue()
-        self.server.starttls()
-        self.server.ehlo()
-        res = self.server.login(user, pw)
-        self.loggedIn = True
-        self.OnClose('')            
-        #except:
-        #    message = _('Your username or password is incorrect. Please try again.')
-        #    dlg = wx.MessageDialog(None, message, _('Login Error'), wx.OK|wx.ICON_EXCLAMATION)
-        #    dlg.ShowModal()
-        #    dlg.Destroy()
+        try:
+            user = self.userTxt.GetValue()
+            pw   = self.passwordTxt.GetValue()
+            self.server.starttls()
+            self.server.ehlo()
+            res = self.server.login(user, pw)
+            self.loggedIn = True
+            self.OnClose('')            
+        except:
+            message = _('Your username or password is incorrect. Please try again.')
+            dlg = wx.MessageDialog(None, message, _('Login Error'), wx.OK|wx.ICON_EXCLAMATION)
+            dlg.ShowModal()
+            dlg.Destroy()
             
     def OnClose(self, event):
         self.Close()
@@ -447,6 +464,6 @@ class LoginDlg(wx.Dialog):
 # Start program
 if __name__ == '__main__':
     app = wx.App()
-    frame = SendMailWx()
+    frame = SendMailWx(None)
     frame.Show()
     app.MainLoop() 
