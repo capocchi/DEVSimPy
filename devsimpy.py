@@ -567,7 +567,6 @@ class MainApplication(wx.Frame):
 							tb.AddTool(self.toggle_list[2], wx.Bitmap(os.path.join(ICON_PATH,'linear_connector.png')), shortHelpString=_('Linear'), longHelpString=_('Linear connector'), isToggle=True)
 						]
 		else:
-			tb.SetToolBitmapSize((25,25))
 			self.tools = [	tb.AddTool(wx.ID_NEW, "",wx.Bitmap(os.path.join(ICON_PATH,'new.png')), shortHelp=_('New diagram (Ctrl+N)')),
 							tb.AddTool(wx.ID_OPEN, "",wx.Bitmap(os.path.join(ICON_PATH,'open.png')), shortHelp=_('Open File (Ctrl+O)')),
 							tb.AddTool(wx.ID_PREVIEW_PRINT, "",wx.Bitmap(os.path.join(ICON_PATH,'print-preview.png')), shortHelp=_('Print Preview (Ctrl+P)')),
@@ -652,7 +651,7 @@ class MainApplication(wx.Frame):
 		self.Bind(wx.EVT_TOOL, self.OnUpWard, id=ID_UPWARD)
 		self.Bind(wx.EVT_TOOL, self.OnDownWard, id=ID_DOWNWARD)
 
-		#tb.Realize()
+		tb.Realize()
 
 		self.SetToolBar(tb)
 
