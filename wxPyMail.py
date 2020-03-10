@@ -39,27 +39,25 @@ except:
 from email.message import Message
 
 class SendMailWx(wx.Frame):
-    def __init__(self):
-        wx.Frame.__init__(self, None, -1, _('New Email Message (From Google account)'),
-                          size=(600,400))
-        self.panel = wx.Panel(self, wx.NewIdRef())
 
+    def __init__(self):
+        wx.Frame.__init__(self, None, wx.NewIdRef(), _('New Email Message (From Google account)'))
+        
         # set your email address here
         self.email = 'your_email@gmail.com'
 
         self.filepaths = []
         self.currentDir = os.getcwd()
+
+        self.InitUI()
+
+    def InitUI(self):
+
+        self.panel = wx.Panel(self, wx.NewIdRef())
         
         self.createMenu()
         self.createToolbar()
-        self.createWidgets()
-#        try:
-#            print sys.argv
-#            self.parseURL(sys.argv[1])
-#        except Exception, e:
-#            print 'Unable to execute parseURL...'
-#            print e
-        
+        self.createWidgets()        
         self.layoutWidgets()
         
         self.attachTxt.Hide()
@@ -81,7 +79,7 @@ class SendMailWx(wx.Frame):
     def createToolbar(self):
         tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
         tb.SetToolBitmapSize((16,16))
-        sendTool = tb.AddTool(-1, _('Send'), wx.Bitmap(os.path.join(ICON_PATH_16_16,'mail.png')), _('Sends Email'))
+        sendTool = tb.AddTool(wx.NewIdRef(), _('Send'), wx.Bitmap(os.path.join(ICON_PATH_16_16,'mail.png')), _('Sends Email'))
         self.Bind(wx.EVT_MENU, self.OnSend, sendTool)        
         tb.Realize()
 
@@ -117,11 +115,11 @@ class SendMailWx(wx.Frame):
         attachSizer = wx.BoxSizer(wx.HORIZONTAL)
 
         fromSizer.Add(self.fromLbl, 0)
-        fromSizer.Add(self.fromTxt, 1, wx.EXPAND)
+        fromSizer.Add(self.fromTxt, 1, wx.EXPAND|wx.ALL)
         toSizer.Add(self.toLbl, 0)
-        toSizer.Add(self.toTxt, 1, wx.EXPAND)
+        toSizer.Add(self.toTxt, 1, wx.EXPAND|wx.ALL)
         subjSizer.Add(self.subjectLbl, 0)
-        subjSizer.Add(self.subjectTxt, 1, wx.EXPAND)
+        subjSizer.Add(self.subjectTxt, 1, wx.EXPAND|wx.ALL)
         attachSizer.Add(self.attachBtn, 0, wx.ALL, 5)
         attachSizer.Add(self.attachTxt, 1, wx.ALL|wx.EXPAND, 5)
         attachSizer.Add(self.editAttachBtn, 0, wx.ALL, 5)
@@ -131,8 +129,9 @@ class SendMailWx(wx.Frame):
         mainSizer.Add(subjSizer, 0, wx.ALL|wx.EXPAND, 5)
         mainSizer.Add(attachSizer, 0, wx.ALL|wx.EXPAND, 5)
         mainSizer.Add(self.messageTxt, 1, wx.ALL|wx.EXPAND, 5)        
-        self.panel.SetSizer(mainSizer)
-        self.panel.Layout()
+        
+        self.panel.SetSizerAndFit(mainSizer)
+        self.Fit()
 
     def parseURL(self, url):
         # split out the mailto
