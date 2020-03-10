@@ -46,6 +46,7 @@ import builtins
 import webbrowser
 import platform
 import threading
+import subprocess
 import pickle
 import itertools
 import shutil
@@ -301,7 +302,7 @@ class MainApplication(wx.Frame):
 		# Shell panel
 		self.panel4 = wx.Panel(self, wx.NewIdRef(), style=wx.WANTS_CHARS)
 		sizer4 = wx.BoxSizer(wx.VERTICAL)
-		sizer4.Add(py.shell.Shell(self.panel4, introText=_("Welcome to DEVSimPy: The GUI for Python DEVS Simulator")), 1, wx.EXPAND)
+		sizer4.Add(py.crust.Crust(self.panel4, intro=_("Welcome to DEVSimPy: The GUI for Python DEVS Simulator")), 1, wx.EXPAND)
 		self.panel4.SetSizer(sizer4)
 		self.panel4.SetAutoLayout(True)
 
@@ -1898,28 +1899,50 @@ class MainApplication(wx.Frame):
 		prof_file_path = os.path.join(gettempdir(), fn)
 
 		### list of item in single choice dialogue
-		choices = ['snakeviz','gprof2dot',_('Embedded in DEVSimPy')]
+		### gprof2dot needs graphviz
+		choices = ['snakeviz', 'gprof2dot', _('Embedded in DEVSimPy')]
 
-		dlg = wx.SingleChoiceDialog(self, _('What profiling software are you using?'), _('Single Choice'), choices)
-		if dlg.ShowModal() == wx.ID_OK:
-			response = dlg.GetStringSelection()
-			if response == 'snakeviz':
-				dlg.Destroy()
-				r = install_and_import(response)
-				if r: os.system(" ".join([response,prof_file_path,"&"]))
-			elif response == 'gprof2dot':
-				dlg.Destroy()
-				r = install_and_import(response)
-				png_file_path = prof_file_path.replace('.prof', '.png')
-				os.system(" ".join([response,'-f pstats',prof_file_path,"|", "dot", "-Tpng", "-o", png_file_path, "&&", "eog", png_file_path]))
-			elif response == _('Embedded in DEVSimPy'):
-				dlg.Destroy()
-				output = self.LoadProfFile(prof_file_path)
-				d = wx.lib.dialogs.ScrolledMessageDialog(self, output, _("Statistic of profiling"), style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
-				d.CenterOnParent(wx.BOTH)
-				d.ShowModal()
-			else:
-				dlg.Destroy()
+		if os.path.exists(prof_file_path):
+
+			dlg = wx.SingleChoiceDialog(self, _('What profiling software are you using?'), _('Single Choice'), choices)
+			if dlg.ShowModal() == wx.ID_OK:
+				
+				response = dlg.GetStringSelection()
+				if response == 'snakeviz':
+					dlg.Destroy()
+					if install_and_import(response):
+						threading.Thread(target=self.longRunning1,
+						args=(response,prof_file_path),
+						).start()
+					else:
+						wx.MessageBox(_('%s is not installed.'%(response)), _('Error'), wx.OK | wx.ICON_ERROR)
+				elif response == 'gprof2dot':
+					dlg.Destroy()
+					if install_and_import(response):
+						threading.Thread(target=self.longRunning2,
+						args=(response,prof_file_path),
+						).start()
+					else:
+						wx.MessageBox(_('%s is not installed.'%(response)), _('Error'), wx.OK | wx.ICON_ERROR)
+				elif response == _('Embedded in DEVSimPy'):
+					dlg.Destroy()
+					output = self.LoadProfFile(prof_file_path)
+					d = wx.lib.dialogs.ScrolledMessageDialog(self, output, _("Statistic of profiling"), style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+					d.CenterOnParent(wx.BOTH)
+					d.ShowModal()
+				else:
+					dlg.Destroy()
+		else:
+			wx.MessageBox(_('The profile file %s does not exist.'%(prof_file_path)), _('Error'), wx.OK | wx.ICON_ERROR)
+
+	@staticmethod
+	def longRunning1(response, prof_file_path):
+		subprocess.call(" ".join([response,prof_file_path]), shell=True)
+
+	@staticmethod
+	def longRunning2(response, prof_file_path):
+		png_file_path = prof_file_path.replace('.prof', '.png')
+		subprocess.call(" ".join([response,'-f pstats',prof_file_path,"|", "dot", "-Tpng", "-o", png_file_path, "&&", "eog", png_file_path]),  shell=True)
 
 	@staticmethod
 	@redirectStdout
