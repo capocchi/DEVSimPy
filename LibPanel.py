@@ -77,6 +77,8 @@ class LibPanel(wx.Panel):
 		chargedDomainList = eval(cfg_domain_list) if cfg_domain_list else []
 
 		self.tree.Populate(chargedDomainList)
+
+		self.tree.UnselectAll()
 		
 		### search tree that is hide when starting devsimpy (see __do_layout)
 		self.searchTree = LibraryTree(self, wx.NewIdRef(), wx.DefaultPosition, style=wx.TR_DEFAULT_STYLE|wx.TR_HIDE_ROOT|wx.TR_MULTIPLE|wx.TR_LINES_AT_ROOT|wx.TR_HAS_BUTTONS|wx.SUNKEN_BORDER)

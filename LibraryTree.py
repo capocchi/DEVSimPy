@@ -66,7 +66,7 @@ class LibraryTree(wx.TreeCtrl):
 		""" Constructor.
 		"""
 
-		wx.TreeCtrl.__init__(self, *args, **kwargs)
+		super(LibraryTree, self).__init__(*args, **kwargs)
 
 		### association between path (key) and tree item (value)
 		self.ItemDico = {}
@@ -153,7 +153,6 @@ class LibraryTree(wx.TreeCtrl):
     		#).start()
 			self.InsertNewDomain(absdName, self.root, list(self.GetSubDomain(absdName, self.GetDomainList(absdName)).values())[0])
 
-		self.UnselectAll()
 		wx.CallAfter(self.SortChildren,self.root)
 
 	###
@@ -277,10 +276,10 @@ class LibraryTree(wx.TreeCtrl):
 		""" Delete the item from Tree
 		"""
 
-		item = self.GetSelection()
+		item = self.GetFocusedItem()
+		path = self.GetItemPyData(item)
 
-		print(item)
-		if item:
+		if path and os.path.exists(path):
 			### msgbox to select what you wan to delete: file or/and item ?
 			db = DeleteBox(self, wx.NewIdRef(), _("Delete Options"))
 
@@ -288,7 +287,6 @@ class LibraryTree(wx.TreeCtrl):
 
 				### delete file
 				if db.rb2.GetValue():
-					path = self.GetItemPyData(item)
 					label = os.path.basename(path)
 					dial = wx.MessageDialog(None, _('Are you sure to delete the python file %s ?')%(label), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 					if dial.ShowModal() == wx.ID_YES:
@@ -310,7 +308,7 @@ class LibraryTree(wx.TreeCtrl):
 				###TODO unload associated module
 
 		else:
-			wx.MessageBox(_("No model selected!"),_("Delete Manager"))
+			wx.MessageBox(_("No library selected!"),_("Delete Manager"))
 
 	###
 	def OnNewModel(self, evt):
