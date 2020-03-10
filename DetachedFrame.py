@@ -94,8 +94,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 
 		### Menu ToolBar
 		toolbar = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
-		toolbar.SetToolBitmapSize((25,25)) # just for windows
-		self.SetToolBar(toolbar)
+		toolbar.SetToolBitmapSize((16,16))
 
 		if self.parent:
 			self.toggle_list = wx.GetApp().GetTopWindow().toggle_list
@@ -169,7 +168,8 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		#=======================================================================
 
 		toolbar.Realize()
-
+		self.SetToolBar(toolbar)
+		
 		### if Detached frame from block (container or Code)
 		### save, save-as and simulation are disabled
 		if not isinstance(self.parent, Container.ShapeCanvas):

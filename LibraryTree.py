@@ -279,10 +279,10 @@ class LibraryTree(wx.TreeCtrl):
 
 		item = self.GetSelection()
 
-	
+		print(item)
 		if item:
 			### msgbox to select what you wan to delete: file or/and item ?
-			db = DeleteBox(self, -1, _("Delete Options"), size=(250, 110))
+			db = DeleteBox(self, wx.NewIdRef(), _("Delete Options"))
 
 			if db.ShowModal() == wx.ID_OK:
 

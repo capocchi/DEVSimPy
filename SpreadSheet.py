@@ -125,8 +125,8 @@ class Newt(wx.Frame):
 		self.model = aDEVS
 		self.sep = separator
 
-		toolbar = wx.ToolBar(self, wx.NewIdRef(), style= wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT)
-		toolbar.SetToolBitmapSize((25,25)) # just for windows
+		toolbar = wx.ToolBar(self, wx.NewIdRef(), style= wx.TB_HORIZONTAL | wx.NO_BORDER)
+		toolbar.SetToolBitmapSize((16,16))
 
 		### for Phoenix version
 		if wx.VERSION_STRING < '4.0':
@@ -157,8 +157,8 @@ class Newt(wx.Frame):
 			self.chart = toolbar.AddTool(wx.NewIdRef(), "", wx.Bitmap(os.path.join(ICON_PATH,'graph_guru.png')), _('Chart'))
 
 		toolbar.EnableTool(self.chart.GetId(), False)
+		
 		toolbar.Realize()
-
 		self.SetToolBar(toolbar)
 
 		self.statusbar = self.CreateStatusBar()

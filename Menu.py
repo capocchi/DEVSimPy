@@ -714,6 +714,9 @@ class ItemLibraryPopupMenu(wx.Menu):
 			AppendItem(doc)
 			AppendItem(update)
 
+			path = parent.GetItemPyData(item)
+			self.Enable(ID_EDIT_LIB, not path.endswith('pyc'))
+			
 			self.Bind(wx.EVT_MENU, parent.OnItemEdit, id = ID_EDIT_LIB)	# put before the popUpMenu
 			self.Bind(wx.EVT_MENU, parent.OnItemRename, id = ID_RENAME_LIB)	# put before the popUpMenu
 			self.Bind(wx.EVT_MENU, parent.OnItemDocumentation, id = doc.GetId())	# put before the popUpMenu

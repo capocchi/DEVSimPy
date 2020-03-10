@@ -539,6 +539,7 @@ class MainApplication(wx.Frame):
 		pub.sendMessage('object.added',  message=_('Making tools bar ...\n'))
 		
 		tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
+		tb.SetToolBitmapSize((16,16))
 
 		self.toggle_list = [wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef()]
 
@@ -546,8 +547,6 @@ class MainApplication(wx.Frame):
 
 		### Tools List - IDs come from Menu.py file
 		if wx.VERSION_STRING < '4.0':
-			tb.SetToolBitmapSize((25,25)) # juste for windows
-
 			self.tools = [	tb.AddTool(wx.ID_NEW, wx.Bitmap(os.path.join(ICON_PATH,'new.png')), shortHelpString=_('New diagram (Ctrl+N)'),longHelpString=_('Create a new diagram in tab')),
 							tb.AddTool(wx.ID_OPEN, wx.Bitmap(os.path.join(ICON_PATH,'open.png')), shortHelpString=_('Open File (Ctrl+O)'), longHelpString=_('Open an existing diagram')),
 							tb.AddTool(wx.ID_PREVIEW_PRINT, wx.Bitmap(os.path.join(ICON_PATH,'print-preview.png')), shortHelpString=_('Print Preview (Ctrl+P)'), longHelpString=_('Print preview of current diagram')),

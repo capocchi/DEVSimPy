@@ -79,12 +79,11 @@ class SendMailWx(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnClose, close_menu_item)
 
     def createToolbar(self):
-        toolbar = self.CreateToolBar(wx.TB_3DBUTTONS|wx.TB_TEXT)
-        toolbar.SetToolBitmapSize((31,31))
-        bmp = wx.Bitmap(os.path.join(ICON_PATH_16_16,'mail.png'))
-        sendTool = toolbar.AddTool(-1, _('Send'), bmp, _('Sends Email'))
+        tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
+        tb.SetToolBitmapSize((16,16))
+        sendTool = tb.AddTool(-1, _('Send'), wx.Bitmap(os.path.join(ICON_PATH_16_16,'mail.png')), _('Sends Email'))
         self.Bind(wx.EVT_MENU, self.OnSend, sendTool)        
-        toolbar.Realize()
+        tb.Realize()
 
     def createWidgets(self):
         p = self.panel

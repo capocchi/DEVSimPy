@@ -96,32 +96,63 @@ class DeleteBox(wx.Dialog):
 	def __init__(self, *args, **kwargs):
 		""" Constructor.
 		"""
-		wx.Dialog.__init__(self, *args, **kwargs)
+		super(DeleteBox, self).__init__(*args, **kwargs)
 
-		### Widgets
-		txt = wx.StaticText(self, wx.NewIdRef(), _('What do you want to delete:'), (15, 10))
-		self.rb1 = wx.RadioButton(self, wx.NewIdRef() , _('label'), (20, 30))
-		self.rb2 = wx.RadioButton(self, wx.NewIdRef() , _('label and files'), (20, 55))
-		btn_cancel = wx.Button(self, wx.ID_CANCEL, pos = (35, 90), size = (80, -1))
-		btn_ok = wx.Button(self, wx.ID_OK, pos = (135, 90), size = (80, -1))
+		self.InitUI()
+		self.SetSize((250, 200))
+       
+	def InitUI(self):
 
-		### Sizers
-		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		pnl = wx.Panel(self)
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
-		### And into Sizers
-		hbox.Add(btn_cancel, 1, wx.EXPAND|wx.ALIGN_CENTER)
-		hbox.Add(btn_ok, 1, wx.EXPAND|wx.ALIGN_CENTER)
+		sb = wx.StaticBox(pnl, label='Delete?')
+		sbs = wx.StaticBoxSizer(sb, orient=wx.VERTICAL)
+		self.rb1 = wx.RadioButton(pnl, label=_('label'))
+		self.rb2 = wx.RadioButton(pnl, label=_('label and files'))
+		sbs.Add(self.rb1)
+		sbs.Add(self.rb2)
+		
+		pnl.SetSizer(sbs)
 
-		vbox.Add(txt, 0, wx.ALIGN_TOP, 10)
-		vbox.Add(self.rb1, 1,wx.ALIGN_LEFT, 5)
-		vbox.Add(self.rb2, 1,wx.ALIGN_LEFT, 5)
-		vbox.Add(hbox, 1, wx.ALIGN_CENTER)
+		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+		okButton = wx.Button(self, wx.ID_OK, label='Ok')
+		closeButton = wx.Button(self, wx.ID_CANCEL, label='Close')
+		hbox2.Add(okButton)
+		hbox2.Add(closeButton, flag=wx.LEFT, border=5)
 
-		### Set Sizer
+		vbox.Add(pnl, proportion=1,
+			flag=wx.ALL|wx.EXPAND, border=5)
+		vbox.Add(hbox2, flag=wx.ALIGN_CENTER|wx.TOP|wx.BOTTOM, border=10)
+
 		self.SetSizer(vbox)
 
 		self.Centre()
+
+		### Widgets
+#		txt = wx.StaticText(self, wx.NewIdRef(), _('What do you want to delete:'), (15, 10))
+#		self.rb1 = wx.RadioButton(self, wx.NewIdRef() , _('label'), (20, 30))
+#		self.rb2 = wx.RadioButton(self, wx.NewIdRef() , _('label and files'), (20, 55))
+#		btn_cancel = wx.Button(self, wx.ID_CANCEL, pos = (35, 90), size = (80, -1))
+#		btn_ok = wx.Button(self, wx.ID_OK, pos = (135, 90), size = (80, -1))
+
+		### Sizers
+#		hbox = wx.BoxSizer(wx.HORIZONTAL)
+#		vbox = wx.BoxSizer(wx.VERTICAL)
+
+		### And into Sizers
+#		hbox.Add(btn_cancel, 1, wx.EXPAND|wx.ALIGN_CENTER)
+#		hbox.Add(btn_ok, 1, wx.EXPAND|wx.ALIGN_CENTER)
+
+#		vbox.Add(txt, 0, wx.ALIGN_TOP, 10)
+#		vbox.Add(self.rb1, 1,wx.ALIGN_LEFT, 5)
+#		vbox.Add(self.rb2, 1,wx.ALIGN_LEFT, 5)
+#		vbox.Add(hbox, 1, wx.ALIGN_CENTER)
+
+		### Set Sizer
+#		self.SetSizer(vbox)
+
+#		vbox.SetSizeHints(self)
 
 #-------------------------------------------------------------------
 class ImportLibrary(wx.Dialog):
@@ -356,7 +387,7 @@ class ImportLibrary(wx.Dialog):
 		label = self._cb.GetItemText(index)
 
 		### diag to choose to delete label and/or source files
-		db = DeleteBox(self, -1, _("Delete Options"), size=(250, 110))
+		db = DeleteBox(self, wx.NewIdRef(), _("Delete Options"))
 
 		if db.ShowModal() == wx.ID_OK:
 
