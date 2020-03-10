@@ -277,7 +277,7 @@ class ErrorDialog(BaseDialog):
         if e_id == wx.ID_CLOSE:
             self.Close()
         elif e_id == ID_SEND:
-            frame = SendMailWx()
+            frame = SendMailWx(None)
             msg = self.err_msg
             msg = msg.replace("'", '')
             frame.messageTxt.SetValue(msg)

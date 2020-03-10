@@ -771,9 +771,11 @@ class MainApplication(wx.Frame):
 		### update text filed
 		level = self.spin.GetValue()
 
+		tb = self.GetToolBar()
+		
 		### update doward and upward button
-		self.tb.EnableTool(self.toggle_list[4], level != 0)
-		self.tb.EnableTool(self.toggle_list[5], level != 0)
+		tb.EnableTool(self.toggle_list[4], level != 0)
+		tb.EnableTool(self.toggle_list[5], level != 0)
 
 	def OnDeleteRecentFiles(self, event):
 		""" Delete the recent files list
@@ -1285,8 +1287,9 @@ class MainApplication(wx.Frame):
 				# Refresh canvas
 				currentPage.Refresh()
 
+				tb = self.GetToolBar()
 				### enable save button on status bar
-				self.tb.EnableTool(Menu.ID_SAVE, diagram.modify)
+				tb.EnableTool(Menu.ID_SAVE, diagram.modify)
 
 				#self.statusbar.SetStatusText(_('%s saved')%diagram.last_name_saved)
 			else:
@@ -1362,8 +1365,9 @@ class MainApplication(wx.Frame):
 				else:
 					self.nb2.AddEditPage(label, diagram)
 
+				tb = self.GetToolBar()
 				### enable save button on status bar
-				self.tb.EnableTool(Menu.ID_SAVE, diagram.modify)
+				tb.EnableTool(Menu.ID_SAVE, diagram.modify)
 			else:
 				wx.MessageBox(_('Error saving file.'), _('Error'), wx.OK | wx.ICON_ERROR)
 
@@ -2038,7 +2042,7 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
 	def OnContact(self, event):
 		""" Launches the mail program to contact the DEVSimPy author. """
 
-		frame = SendMailWx()
+		frame = SendMailWx(None)
 		frame.Show()
 		   
 ##-------------------------------------------------------------------
