@@ -10,6 +10,9 @@ import imp
 import os
 import importlib
 
+import gettext
+_ = gettext.gettext
+
 # list of registred plug-ins
 plugins = defaultdict(list)
 # list of enable/disable event plug-in

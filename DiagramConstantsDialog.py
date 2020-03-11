@@ -15,7 +15,7 @@ class DiagramConstantsDialog(wx.Dialog):
 		""" Constructor
 		"""
 
-		wx.Dialog.__init__(self, parent, id, title, wx.DefaultPosition, (400, 380), style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
+		wx.Dialog.__init__(self, parent, id, title, wx.DefaultPosition, style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
 
 		### local copy
 		self.model = model
@@ -88,7 +88,10 @@ class DiagramConstantsDialog(wx.Dialog):
 
 		sizer_1.Add(grid_sizer_2, 1, wx.EXPAND, 0)
 
-		self._panel.SetSizer(grid_sizer_1)
+		#self._panel.SetSizer(grid_sizer_1)
+		self._panel.SetSizerAndFit(grid_sizer_1)
+		self._panel.SetAutoLayout(True)
+		#self.Fit()
 
 		self.__set_events()
 

@@ -162,6 +162,7 @@ class ErrorReporter(object):
         """
         if len(self._sessionerr):
             return self._sessionerr[-1]
+
 class ErrorDialog(BaseDialog):
     """
     Dialog for showing errors and and notifying gui2exe-users should the
@@ -173,6 +174,7 @@ class ErrorDialog(BaseDialog):
     """
     ABORT = False
     REPORTER_ACTIVE = False
+
     def __init__(self, message):
         """
         Initialize the dialog
@@ -254,10 +256,13 @@ class ErrorDialog(BaseDialog):
         bottomSizer.Add(self.closeButton, 0, wx.TOP|wx.BOTTOM|wx.RIGHT, 5)
         mainSizer.Add(bottomSizer, 0, wx.EXPAND)
 
-        self.SetSizer(mainSizer)
-        mainSizer.Layout()
-
+        self.SetSizerAndFit(mainSizer)
+        self.SetAutoLayout(True)
         self.Fit()
+
+        #mainSizer.Layout()
+        #self.SetSizer(mainSizer)
+        #self.Fit()
 
 
     def OnButton(self, evt):
@@ -276,6 +281,7 @@ class ErrorDialog(BaseDialog):
         e_id = evt.GetId()
         if e_id == wx.ID_CLOSE:
             self.Close()
+
         elif e_id == ID_SEND:
             frame = SendMailWx(None)
             msg = self.err_msg
@@ -286,6 +292,7 @@ class ErrorDialog(BaseDialog):
             frame.subjectTxt.SetValue(msg)
             frame.Show()
             self.Close()
+
         elif e_id == wx.ID_ABORT:
             ErrorDialog.ABORT = True
             # Try a nice shutdown first time through
@@ -293,6 +300,7 @@ class ErrorDialog(BaseDialog):
                          wx.MenuEvent(wx.wxEVT_MENU_OPEN, wx.ID_EXIT),
                          True)
             self.Close()
+
         else:
             evt.Skip()
 

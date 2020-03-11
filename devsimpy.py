@@ -781,12 +781,35 @@ class MainApplication(wx.Frame):
 		""" Delete the recent files list
 		"""
 	
-		# update openFileList variable
-		self.openFileList = ['']*NB_OPENED_FILE
+		dial = wx.MessageDialog(self, _('Do you want to clear the list of recent opened files?'), 'Clean Recent Opened Files List', wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+
+		### if local editor
+		if dial.ShowModal() == wx.ID_YES:
+			# update openFileList variable
+			self.openFileList = ['']*NB_OPENED_FILE
 		
-		# update config file
-		self.cfg.Write("openFileList", str(eval("self.openFileList")))
-		self.cfg.Flush()
+			# update config file
+			self.cfg.Write("openFileList", str(eval("self.openFileList")))
+			self.cfg.Flush()
+
+			notify = wx.adv.NotificationMessage(
+            title="Information",
+            message="Recent opened files list has been deleted!",
+            parent=self, flags=wx.ICON_INFORMATION)
+
+			# Various options can be set after the message is created if desired.
+			# notify.SetFlags(# wx.ICON_INFORMATION
+			#                 wx.ICON_WARNING
+			#                 # wx.ICON_ERROR
+			#                 )
+			# notify.SetTitle("Wooot")
+			# notify.SetMessage("It's a message!")
+			# notify.SetParent(self)
+
+			notify.Show(timeout=5) # 1 for short timeout, 100 for long timeout
+			# notify.Close()       # Hides the notification.
+
+		dial.Destroy()
 		
 	def OnCreatePerspective(self, event):
 		"""
