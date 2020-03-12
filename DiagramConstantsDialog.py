@@ -15,89 +15,146 @@ class DiagramConstantsDialog(wx.Dialog):
 		""" Constructor
 		"""
 
-		wx.Dialog.__init__(self, parent, id, title, wx.DefaultPosition, style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
+		wx.Dialog.__init__(self, parent, id, title)
 
 		### local copy
 		self.model = model
 		self.label = title
 
 		self.SetTitle(_("%s - Constants Manager")%(self.label))
+		#self.SetWindowStyle(wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
 
 		icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
 		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "properties.png"), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(icon)
 
-		self._panel = wx.Panel(self, wx.NewIdRef())
+		self.InitUI()
 
-		grid_sizer_1 = wx.GridSizer(1, 2, 0, 0)
+	def InitUI(self):
 
-		self._grid = wx.grid.Grid(self._panel, wx.NewIdRef(), size=(200, 100))
+		panel = wx.Panel(self)
+		vbox = wx.BoxSizer(wx.VERTICAL)
+
+		self._grid = wx.grid.Grid(panel)
 		self._grid.AutoSizeColumns(True)
 		self._grid.CreateGrid(1, 2)
 		self._grid.SetColLabelValue(0, _("Name"))
-		self._grid.SetColSize(0, 100)
+		self._grid.SetColSize(0, 200)
 		self._grid.SetColLabelValue(1, _("Value"))
-		self._grid.SetColSize(1, 100)
+		self._grid.SetColSize(1, 200)
+		#self._grid.SetRowSize(0, 50)
+		self._grid.SetRowLabelSize(0)
+		
+		### The label windows will still exist, but they will not be visible.
+
+		vbox.Add(self._grid, 1, wx.EXPAND|wx.ALL,0)
+
+#		self._panel = wx.Panel(self)
+
+		#grid_sizer_1 = wx.GridSizer(1, 2, 0, 0)
+
+		#self._grid = wx.grid.Grid(self._panel)
+		#self._grid.AutoSizeColumns(True)
+		#self._grid.CreateGrid(1, 2)
+		#self._grid.SetColLabelValue(0, _("Name"))
+		#self._grid.SetColSize(0, 100)
+		#self._grid.SetColLabelValue(1, _("Value"))
+		#self._grid.SetColSize(1, 100)
 		### The label windows will still exist, but they will not be visible.
 
 		# constants loading
 		D = self.model.constants_dico if self.model else {}
 
-		row = 0
-		self._grid.DeleteRows(0)
-		for key in D:
-			self._grid.AppendRows()
-			self._grid.SetCellValue(row, 0, key)
-			self._grid.SetCellValue(row, 1, str(D[key]))
-			row += 1
+		if D!={}:
+			row = 0
+			self._grid.DeleteRows(0)
+			for key in D:
+				self._grid.AppendRows()
+				self._grid.SetCellValue(row, 0, key)
+				self._grid.SetCellValue(row, 1, str(D[key]))
+				row += 1
+	
+#		grid_sizer_1.Add(self._grid, 1, wx.EXPAND|wx.ALL)
 
-		grid_sizer_1.Add(self._grid, 1, wx.EXPAND|wx.ALL, 0)
+		### buttons
+#		self._button_add = wx.Button(self._panel, wx.ID_ADD, "",size=(90,30))
+#		self._button_remove = wx.Button(self._panel, wx.ID_REMOVE, "",size=(90,30))
+#		self._button_help = wx.Button(self._panel, wx.ID_HELP, "",size=(90,30))
 
-		self._panel.SetSizer(grid_sizer_1)
+#		grid_sizer_3 = wx.GridSizer(3, 1, 0, 0)
+#		grid_sizer_3.Add(self._button_add, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
+#		grid_sizer_3.Add(self._button_remove, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
+#		grid_sizer_3.Add((-1,50), 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
 
-		self._button_add = wx.Button(self._panel, wx.ID_ADD, "")
-		self._button_remove = wx.Button(self._panel, wx.ID_REMOVE, "")
-		self._button_help = wx.Button(self._panel, wx.ID_HELP, "")
+#		self._button_import = wx.Button(self._panel, wx.NewIdRef(), _("Import"),size=(90,30))
+#		self._button_export = wx.Button(self._panel, wx.NewIdRef(), _("Export"),size=(90,30))
+#		self._button_import.SetDefault()
 
-		grid_sizer_3 = wx.GridSizer(3, 1, 0, 0)
-		grid_sizer_3.Add(self._button_add, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
-		grid_sizer_3.Add(self._button_remove, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
-		grid_sizer_3.Add((-1,50), 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
+#		sizer_2 = wx.BoxSizer(wx.VERTICAL)
+#		sizer_2.Add(self._button_import, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
+#		sizer_2.Add(self._button_export, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
+#		sizer_2.Add(self._button_help, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
+#
+#		sizer_1 = wx.BoxSizer(wx.VERTICAL)
+#		sizer_1.Add(grid_sizer_3, 1, wx.EXPAND, 0)
+#		sizer_1.Add(sizer_2, 1, wx.EXPAND, 0)
 
-		self._button_import = wx.Button(self._panel, wx.NewIdRef(), _("Import"))
-		self._button_export = wx.Button(self._panel, wx.NewIdRef(), _("Export"))
-		self._button_import.SetDefault()
+#		grid_sizer_1.Add(sizer_1, 1, wx.EXPAND, 0)
 
-		sizer_2 = wx.BoxSizer(wx.VERTICAL)
-		sizer_2.Add(self._button_import, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
-		sizer_2.Add(self._button_export, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
-		sizer_2.Add(self._button_help, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
+#		self._button_cancel = wx.Button(self._panel, wx.ID_CANCEL, "", size=(90,30))
+#		self._button_ok = wx.Button(self._panel, wx.ID_OK, "", size=(90,30))
 
-		sizer_1 = wx.BoxSizer(wx.VERTICAL)
-		sizer_1.Add(grid_sizer_3, 1, wx.EXPAND, 0)
-		sizer_1.Add(sizer_2, 1, wx.EXPAND, 0)
+#		grid_sizer_2 = wx.GridSizer(1, 2, 0, 0)
+#		grid_sizer_2.Add(self._button_cancel, 0, wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, 0)
+#		grid_sizer_2.Add(self._button_ok, 0, wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, 0)
 
-		grid_sizer_1.Add(sizer_1, 1, wx.EXPAND, 0)
+#		sizer_1.Add(grid_sizer_2, 1, wx.EXPAND, 0)
 
-		self._button_cancel = wx.Button(self._panel, wx.ID_CANCEL, "")
-		self._button_ok = wx.Button(self._panel, wx.ID_OK, "")
 
-		grid_sizer_2 = wx.GridSizer(1, 2, 0, 0)
-		grid_sizer_2.Add(self._button_cancel, 0, wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, 0)
-		grid_sizer_2.Add(self._button_ok, 0, wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, 0)
+#		self._panel.SetSizerAndFit(grid_sizer_1)
+#		self._panel.SetAutoLayout(True)
+#		self.Fit()
 
-		sizer_1.Add(grid_sizer_2, 1, wx.EXPAND, 0)
-
-		#self._panel.SetSizer(grid_sizer_1)
-		self._panel.SetSizerAndFit(grid_sizer_1)
-		self._panel.SetAutoLayout(True)
-		#self.Fit()
-
-		self.__set_events()
+#		self.__set_events()
 
 		### just for windows
-		e = wx.SizeEvent(self.GetSize())
-		self.ProcessEvent(e)
+#		e = wx.SizeEvent(self.GetSize())
+#		self.ProcessEvent(e)
+
+		vbox.Add((-1, 15))
+		
+		self._button_ok = wx.Button(panel, wx.ID_OK, size=(70, 30))
+		self._button_cancel = wx.Button(panel, wx.ID_CANCEL, size=(70, 30))
+		
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(self._button_cancel)
+		hbox.Add(self._button_ok, flag=wx.LEFT|wx.BOTTOM, border=5)
+
+		vbox.Add(hbox, flag=wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, border=10)
+
+		#self._button_cancel = wx.Button(panel, wx.ID_CANCEL, "", size=(90,30))
+		#self._button_ok = wx.Button(panel, wx.ID_OK, "", size=(90,30))
+		
+		#hbox = wx.BoxSizer(wx.HORIZONTAL)
+		#hbox.Add(self._button_cancel, 0, wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, 0)
+		#hbox.Add(self._button_ok, 0, wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, 0)
+
+		#vbox.Add(hbox, 1, wx.EXPAND|wx.ALL, 0)
+
+#	From http://docs.wxwidgets.org/trunk/overview_windowsizing.html, wxWidgets provides two main methods for sizing:
+#
+#   Fit() sets the size of a window to fit around its children. 
+#	The size of each children is added and then this parent window changes its size to fit them all.
+#   Layout() the opposite. The children will change their size, according to sizer rules, so they can fit into available space of their parent. 
+#	[...] is what is called by the default EVT_SIZE handler for container windows
+
+#	Because a grid can have thousands of rows/cols its size can be huge. 
+#	Don't try to tell the parent to fit around it. 
+#	You better set max and min sizes for the grid (or its sizer) and then use Fit() or Layout() each time you change number of rows/cols or their sizes.
+
+		panel.SetSizerAndFit(vbox)
+		#self.SetAutoLayout(True)
+		#self.Fit()
 
 		self.Center()
 

@@ -202,7 +202,7 @@ class ErrorDialog(BaseDialog):
                                              str(ErrorReporter().GetErrorStack()), \
                                              "---- End Traceback Info ----")
 
-        self.textCtrl = wx.TextCtrl(self, value=self.err_msg, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.textCtrl = wx.TextCtrl(self, value=self.err_msg, size=(-1,200),style=wx.TE_MULTILINE | wx.TE_READONLY)
         self.abortButton = wx.Button(self, wx.ID_CANCEL, size=(-1, 26))
         self.sendButton = wx.Button(self, ID_SEND, _("Report Error"), size=(-1, 26))
         self.sendButton.SetDefault()
@@ -219,7 +219,6 @@ class ErrorDialog(BaseDialog):
         self.CenterOnParent()
         self.ShowModal()
 
-
     def DoLayout(self):
         """
         Layout the dialog and prepare it to be shown
@@ -232,10 +231,10 @@ class ErrorDialog(BaseDialog):
 
         # Objects
         mainmsg = wx.StaticText(self,
-                                label=_("Error: Help improve DEVSimPy by clicking on "
+                                label=_("Help improve DEVSimPy by clicking on "
                                         "Report Error\nto send the Error "
                                         "Traceback shown below."))
-        t_lbl = wx.StaticText(self, label=_(" Error Traceback:"))
+        t_lbl = wx.StaticText(self, label=_("Error Traceback:"))
 
         t_lbl.SetFont(wx.Font(8, wx.SWISS, wx.NORMAL, wx.BOLD, False))
         # Layout
@@ -248,7 +247,7 @@ class ErrorDialog(BaseDialog):
         mainSizer.Add(topSizer, 0, wx.EXPAND|wx.TOP|wx.BOTTOM, 20)
         mainSizer.Add(t_lbl, 0, wx.LEFT|wx.TOP|wx.RIGHT, 5)
         mainSizer.Add((0, 2))
-        mainSizer.Add(self.textCtrl, 1, wx.EXPAND|wx.LEFT|wx.BOTTOM|wx.RIGHT, 5)
+        mainSizer.Add(self.textCtrl, 1, wx.EXPAND|wx.ALL, 5)
         bottomSizer.Add(self.abortButton, 0, wx.ALL, 5)
         bottomSizer.Add((0, 0), 1, wx.EXPAND)
         bottomSizer.Add(self.sendButton, 0, wx.TOP|wx.BOTTOM, 5)
@@ -259,11 +258,6 @@ class ErrorDialog(BaseDialog):
         self.SetSizerAndFit(mainSizer)
         self.SetAutoLayout(True)
         self.Fit()
-
-        #mainSizer.Layout()
-        #self.SetSizer(mainSizer)
-        #self.Fit()
-
 
     def OnButton(self, evt):
         """Handles button events
