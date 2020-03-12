@@ -35,6 +35,7 @@ else:
 
 #from Container import *
 from PlotGUI import *
+from Utilities import printOnStatusBar
 
 ###
 class MySheet(sheet.CSheet):
@@ -251,7 +252,7 @@ class Newt(wx.Frame):
 		else:
 			toolbar = self.GetToolBar()
 			toolbar.EnableTool(self.chart.GetId(), msg)
-			self.statusbar.SetStatusText("", 0)
+			printOnStatusBar(self.statusbar, {0:""})
 
 	###
 	def OnTab(self, event):
@@ -265,7 +266,7 @@ class Newt(wx.Frame):
 		""" Update status bar with loading data progression
 		"""
 		pourcent = 100*float(msg)
-		self.statusbar.SetStatusText(_("Loading data... (%d %%)")%int(pourcent), 0)
+		printOnStatusBar(self.statusbar, {0:_("Loading data... (%d %%)")%int(pourcent)})
 
 	###
 	def AddPage(self, data = [[]], label = ""):

@@ -34,8 +34,6 @@ from tempfile import gettempdir
 
 if builtins.__dict__['GUI_FLAG']:
 	import wx
-
-	_ = wx.GetTranslation
 	
 	if wx.VERSION_STRING < '2.9':
 		from wx.lib.pubsub import Publisher
@@ -51,7 +49,7 @@ import ZipManager
 #from DomainInterface.DomainBehavior import DomainBehavior
 #from DomainInterface.DomainStructure import DomainStructure
 from ReloadModule import recompile
-from Utilities import GetActiveWindow, path_to_module, install_and_import
+from Utilities import GetActiveWindow, path_to_module, install_and_import, printOnStatusBar
 from NetManager import Net
 from SimpleFrameEditor import FrameEditor
 from which import which
@@ -61,12 +59,6 @@ from which import which
 ### 		GENERAL FUNCTIONS
 ###
 ###########################################################
-
-def printOnStatusBar(statusbar, data={}):
-	""" Send data on status bar
-	"""
-	for k,v in list(data.items()):
-		statusbar.SetStatusText(v, k)
 
 def getClassMember(python_file = ''):
 	""" Get class member from python file.

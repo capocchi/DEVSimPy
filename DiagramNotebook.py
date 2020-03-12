@@ -37,6 +37,7 @@ import Menu
 
 from DetachedFrame import DetachedFrame
 from PrintOut import Printable
+from Utilities import printOnStatusBar
 
 _ = wx.GetTranslation
 
@@ -194,7 +195,7 @@ class GeneralNotebook(Printable):
 			if hasattr(self.parent, 'statusbar'):
 				diagram = canvas.GetDiagram()
 				txt = _('%s modified')%(self.GetPageText(id)) if diagram.modify else ""
-				self.parent.statusbar.SetStatusText(txt)
+				printOnStatusBar(self.parent.statusbar,{0:txt})
 
 		### propagate event also error in OnClosePage because GetSelection is wrong
 		evt.Skip()
