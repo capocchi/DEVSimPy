@@ -7,6 +7,12 @@ import builtins
 import csv
 import DSV
 
+ID_IMPORT = wx.NewIdRef()
+ID_EXPORT = wx.NewIdRef()
+ID_ADD = wx.NewIdRef()
+ID_REMOVE = wx.NewIdRef()
+ID_HELP = wx.NewIdRef()
+
 _ = wx.GetTranslation
 
 class DiagramConstantsDialog(wx.Dialog):
@@ -22,7 +28,6 @@ class DiagramConstantsDialog(wx.Dialog):
 		self.label = title
 
 		self.SetTitle(_("%s - Constants Manager")%(self.label))
-		#self.SetWindowStyle(wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
 
 		icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
 		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "properties.png"), wx.BITMAP_TYPE_ANY))
@@ -35,6 +40,18 @@ class DiagramConstantsDialog(wx.Dialog):
 		panel = wx.Panel(self)
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
+		### Add a toolbar in order to add, delete, import, export and have help on the user of constant.
+		tb = wx.ToolBar(panel)
+		vbox.Add(tb, 0, wx.EXPAND)
+
+		tb.SetToolBitmapSize((16,16))
+
+		tb.AddTool(ID_ADD, "",wx.Bitmap(os.path.join(ICON_PATH,'comment_add.png')), shortHelp=_('New constant'))
+		tb.AddTool(ID_REMOVE, "",wx.Bitmap(os.path.join(ICON_PATH,'comment_remove.png')), shortHelp=_('Delete constant'))
+		tb.AddTool(ID_EXPORT, "",wx.Bitmap(os.path.join(ICON_PATH,'export.png')), shortHelp=_('Export constants into file'))
+		tb.AddTool(ID_IMPORT, "",wx.Bitmap(os.path.join(ICON_PATH,'import.png')), wx.NullBitmap, shortHelp=_('Import constants from file'))
+		tb.AddTool(ID_HELP, "",wx.Bitmap(os.path.join(ICON_PATH,'info.png')), wx.NullBitmap, shortHelp=_('Help'))
+
 		self._grid = wx.grid.Grid(panel)
 		self._grid.AutoSizeColumns(True)
 		self._grid.CreateGrid(1, 2)
@@ -42,27 +59,14 @@ class DiagramConstantsDialog(wx.Dialog):
 		self._grid.SetColSize(0, 200)
 		self._grid.SetColLabelValue(1, _("Value"))
 		self._grid.SetColSize(1, 200)
-		#self._grid.SetRowSize(0, 50)
+	
+		### label column is not visible
 		self._grid.SetRowLabelSize(0)
 		
-		### The label windows will still exist, but they will not be visible.
 
 		vbox.Add(self._grid, 1, wx.EXPAND|wx.ALL,0)
 
-#		self._panel = wx.Panel(self)
-
-		#grid_sizer_1 = wx.GridSizer(1, 2, 0, 0)
-
-		#self._grid = wx.grid.Grid(self._panel)
-		#self._grid.AutoSizeColumns(True)
-		#self._grid.CreateGrid(1, 2)
-		#self._grid.SetColLabelValue(0, _("Name"))
-		#self._grid.SetColSize(0, 100)
-		#self._grid.SetColLabelValue(1, _("Value"))
-		#self._grid.SetColSize(1, 100)
-		### The label windows will still exist, but they will not be visible.
-
-		# constants loading
+		### populate the grid
 		D = self.model.constants_dico if self.model else {}
 
 		if D!={}:
@@ -73,53 +77,6 @@ class DiagramConstantsDialog(wx.Dialog):
 				self._grid.SetCellValue(row, 0, key)
 				self._grid.SetCellValue(row, 1, str(D[key]))
 				row += 1
-	
-#		grid_sizer_1.Add(self._grid, 1, wx.EXPAND|wx.ALL)
-
-		### buttons
-#		self._button_add = wx.Button(self._panel, wx.ID_ADD, "",size=(90,30))
-#		self._button_remove = wx.Button(self._panel, wx.ID_REMOVE, "",size=(90,30))
-#		self._button_help = wx.Button(self._panel, wx.ID_HELP, "",size=(90,30))
-
-#		grid_sizer_3 = wx.GridSizer(3, 1, 0, 0)
-#		grid_sizer_3.Add(self._button_add, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
-#		grid_sizer_3.Add(self._button_remove, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
-#		grid_sizer_3.Add((-1,50), 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
-
-#		self._button_import = wx.Button(self._panel, wx.NewIdRef(), _("Import"),size=(90,30))
-#		self._button_export = wx.Button(self._panel, wx.NewIdRef(), _("Export"),size=(90,30))
-#		self._button_import.SetDefault()
-
-#		sizer_2 = wx.BoxSizer(wx.VERTICAL)
-#		sizer_2.Add(self._button_import, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
-#		sizer_2.Add(self._button_export, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
-#		sizer_2.Add(self._button_help, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
-#
-#		sizer_1 = wx.BoxSizer(wx.VERTICAL)
-#		sizer_1.Add(grid_sizer_3, 1, wx.EXPAND, 0)
-#		sizer_1.Add(sizer_2, 1, wx.EXPAND, 0)
-
-#		grid_sizer_1.Add(sizer_1, 1, wx.EXPAND, 0)
-
-#		self._button_cancel = wx.Button(self._panel, wx.ID_CANCEL, "", size=(90,30))
-#		self._button_ok = wx.Button(self._panel, wx.ID_OK, "", size=(90,30))
-
-#		grid_sizer_2 = wx.GridSizer(1, 2, 0, 0)
-#		grid_sizer_2.Add(self._button_cancel, 0, wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, 0)
-#		grid_sizer_2.Add(self._button_ok, 0, wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, 0)
-
-#		sizer_1.Add(grid_sizer_2, 1, wx.EXPAND, 0)
-
-
-#		self._panel.SetSizerAndFit(grid_sizer_1)
-#		self._panel.SetAutoLayout(True)
-#		self.Fit()
-
-#		self.__set_events()
-
-		### just for windows
-#		e = wx.SizeEvent(self.GetSize())
-#		self.ProcessEvent(e)
 
 		vbox.Add((-1, 15))
 		
@@ -130,16 +87,7 @@ class DiagramConstantsDialog(wx.Dialog):
 		hbox.Add(self._button_cancel)
 		hbox.Add(self._button_ok, flag=wx.LEFT|wx.BOTTOM, border=5)
 
-		vbox.Add(hbox, flag=wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, border=10)
-
-		#self._button_cancel = wx.Button(panel, wx.ID_CANCEL, "", size=(90,30))
-		#self._button_ok = wx.Button(panel, wx.ID_OK, "", size=(90,30))
-		
-		#hbox = wx.BoxSizer(wx.HORIZONTAL)
-		#hbox.Add(self._button_cancel, 0, wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, 0)
-		#hbox.Add(self._button_ok, 0, wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, 0)
-
-		#vbox.Add(hbox, 1, wx.EXPAND|wx.ALL, 0)
+		vbox.Add(hbox, 0, flag=wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, border=10)
 
 #	From http://docs.wxwidgets.org/trunk/overview_windowsizing.html, wxWidgets provides two main methods for sizing:
 #
@@ -156,16 +104,22 @@ class DiagramConstantsDialog(wx.Dialog):
 		#self.SetAutoLayout(True)
 		#self.Fit()
 
+		self.__set_events()
+
+		### just for windows
+#		e = wx.SizeEvent(self.GetSize())
+#		self.ProcessEvent(e)
+
 		self.Center()
 
 	def __set_events(self):
 		""" Binding
 		"""
-		self.Bind(wx.EVT_BUTTON, self.OnAdd, self._button_add)
-		self.Bind(wx.EVT_BUTTON, self.OnRemove, self._button_remove)
-		self.Bind(wx.EVT_BUTTON, self.OnExport, self._button_export)
-		self.Bind(wx.EVT_BUTTON, self.OnImport, self._button_import)
-		self.Bind(wx.EVT_BUTTON, self.OnHelp, self._button_help)
+		self.Bind(wx.EVT_TOOL, self.OnAdd, id=ID_ADD)
+		self.Bind(wx.EVT_TOOL, self.OnRemove, id=ID_REMOVE)
+		self.Bind(wx.EVT_TOOL, self.OnExport, id=ID_EXPORT)
+		self.Bind(wx.EVT_TOOL, self.OnImport, id=ID_IMPORT)
+		self.Bind(wx.EVT_TOOL, self.OnHelp, id=ID_HELP)
 		self.Bind(wx.EVT_BUTTON, self.OnOk, self._button_ok)
 		self.Bind(wx.EVT_BUTTON, self.OnCancel, self._button_cancel)
 
@@ -178,8 +132,22 @@ class DiagramConstantsDialog(wx.Dialog):
 		"""	Delete selected lines
 		"""
 
-		for row in self._grid.GetSelectedRows():
-			self._grid.DeleteRows(row)
+		### only if the grid has rows
+		if self._grid.GetNumberRows():
+			try:
+				### only possible solution to have correct selected rows!
+				i = self._grid.GetSelectionBlockTopLeft()[0][0]
+				j = self._grid.GetSelectionBlockBottomRight()[0][0]
+
+				if i == j:
+					self._grid.DeleteRows(i)
+				else:
+					for row in range(i,j):
+						self._grid.DeleteRows(row)
+			### no cells have been selected. We delete the current row according to the current position of the cursor.
+			except:
+				row = self._grid.GetGridCursorRow()
+				self._grid.DeleteRows(row)
 
 	def OnImport(self, event):
 		""" csv file importing
@@ -284,6 +252,7 @@ class TestApp(wx.App):
 		import gettext
 
 		builtins.__dict__['ICON_PATH_16_16']=os.path.join('icons','16x16')
+		builtins.__dict__['ICON_PATH']=os.path.join('icons')
 		builtins.__dict__['_'] = gettext.gettext
 
 		self.frame = DiagramConstantsDialog(None, -1, title="Model", model=None)
