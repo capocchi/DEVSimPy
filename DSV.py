@@ -412,8 +412,8 @@ def organizeIntoLines(input, textQualifier = '"', limit = None):
             break
         
     # filter out empty lines
-    # data = filter(lambda i: "".join(i), data)
-    data = list(filter(string.join, data))
+    data = list(filter(lambda i: "".join(i), data))
+    #data = list(filter(string.join, data))
     return data
 
 # ------------------------------------------------------------------------------
@@ -526,8 +526,8 @@ def importDSV(input, delimiter = ',', textQualifier = '"', columns = 0,
                     else:
                         record.append(accu)
         else:
-            #record = map(lambda x: x.strip(), line.split(delimiter))
-            record = list(map(string.strip, line.split(delimiter)))
+            record = list(map(lambda x: x.strip(), line.split(delimiter)))
+            #record = list(map(string.strip, line.split(delimiter)))
 
         newdata.append(record)
         # (end of replacement code)
@@ -638,7 +638,7 @@ if wx is not None:
                      style = wx.TAB_TRAVERSAL, name = "ImportWizardPanel"):
             wx.Panel.__init__(self, parent, id, pos, size, style, name)
             self.SetAutoLayout(True)
-            mainSizer = wx.FlexGridSizer(3, 1)
+            mainSizer = wx.FlexGridSizer(4, 1, gap=wx.Size(0,0))
             self.SetSizer(mainSizer)
             mainSizer.AddGrowableCol(0)
 
@@ -669,7 +669,7 @@ if wx is not None:
             delimiterBox = wx.BoxSizer(wx.HORIZONTAL)
             delimStaticBox = wx.StaticBox(self, -1, _("Delimiters"))
             delimStaticSizer = wx.StaticBoxSizer(delimStaticBox, wx.VERTICAL)
-            delimGridSizer = wx.FlexGridSizer(2, 3)
+            delimGridSizer = wx.FlexGridSizer(2, 3, gap=wx.Size(0,0))
 
             delims = {
                 _('Tab'):       '\t',
@@ -802,7 +802,7 @@ if wx is not None:
                 (message1,     0, wx.ALL, 5),
                 (delimiterBox, 0, wx.ALL, 5),
                 (previewSettingsBox, 0, wx.ALL, 5),
-                (previewStaticSizer, 0, wx.ALL | wx.EXPAND, 5),
+                (previewStaticSizer, 0, wx.ALL | wx.EXPAND, 5)
                 ])
 
             self.Layout()

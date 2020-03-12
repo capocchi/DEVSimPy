@@ -7,19 +7,31 @@ import builtins
 import csv
 import DSV
 
-_ = wx.GetTranslation
+ID_IMPORT = wx.NewIdRef()
+ID_EXPORT = wx.NewIdRef()
+ID_ADD = wx.NewIdRef()
+ID_REMOVE = wx.NewIdRef()
+ID_HELP = wx.NewIdRef()
+
+import gettext
+_ = gettext.gettext
 
 class DiagramConstantsDialog(wx.Dialog):
 
-	def __init__(self, parent, id, title, model):
-		""" Constructor
-		"""
-
-		wx.Dialog.__init__(self, parent, id, title, wx.DefaultPosition, (400, 380), style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
+	def __init__(self, *args, **kw):
+		super(DiagramConstantsDialog, self).__init__(*args, **kw)
 
 		### local copy
-		self.model = model
-		self.label = title
+		self.label = args[2]
+
+		### all of the constants
+		self.data = {}
+
+		self.InitUI()
+
+	def InitUI(self):
+		""" Init the user interface
+		"""
 
 		self.SetTitle(_("%s - Constants Manager")%(self.label))
 
@@ -27,87 +39,92 @@ class DiagramConstantsDialog(wx.Dialog):
 		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "properties.png"), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(icon)
 
-		self._panel = wx.Panel(self, wx.NewIdRef())
+		panel = wx.Panel(self)
+		vbox = wx.BoxSizer(wx.VERTICAL)
 
-		grid_sizer_1 = wx.GridSizer(1, 2, 0, 0)
+		### Add a toolbar in order to add, delete, import, export and have help on the user of constant.
+		tb = wx.ToolBar(panel)
+		vbox.Add(tb, 0, wx.EXPAND)
 
-		self._grid = wx.grid.Grid(self._panel, wx.NewIdRef(), size=(200, 100))
+		tb.SetToolBitmapSize((16,16))
+
+		tb.AddTool(ID_ADD, "", wx.Bitmap(os.path.join(ICON_PATH,'comment_add.png')), shortHelp=_('New constant'))
+		tb.AddTool(ID_REMOVE, "", wx.Bitmap(os.path.join(ICON_PATH,'comment_remove.png')), shortHelp=_('Delete constant'))
+		tb.AddTool(ID_EXPORT, "", wx.Bitmap(os.path.join(ICON_PATH,'export.png')), shortHelp=_('Export constants into file'))
+		tb.AddTool(ID_IMPORT, "", wx.Bitmap(os.path.join(ICON_PATH,'import.png')), wx.NullBitmap, shortHelp=_('Import constants from file'))
+		tb.AddTool(ID_HELP, "", wx.Bitmap(os.path.join(ICON_PATH,'info.png')), wx.NullBitmap, shortHelp=_('Help'))
+
+		tb.Realize()
+
+		self._grid = wx.grid.Grid(panel)
 		self._grid.AutoSizeColumns(True)
 		self._grid.CreateGrid(1, 2)
 		self._grid.SetColLabelValue(0, _("Name"))
-		self._grid.SetColSize(0, 100)
+		self._grid.SetColSize(0, 200)
 		self._grid.SetColLabelValue(1, _("Value"))
-		self._grid.SetColSize(1, 100)
-		### The label windows will still exist, but they will not be visible.
+		self._grid.SetColSize(1, 200)
+	
+		### label column is not visible
+		self._grid.SetRowLabelSize(0)
+		
+		vbox.Add(self._grid, 1, wx.EXPAND|wx.ALL,0)
 
-		# constants loading
-		D = self.model.constants_dico if self.model else {}
+		vbox.Add((-1, 15))
+		
+		self._button_ok = wx.Button(panel, wx.ID_OK, size=(70, 30))
+		self._button_cancel = wx.Button(panel, wx.ID_CANCEL, size=(70, 30))
+		
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(self._button_cancel)
+		hbox.Add(self._button_ok, flag=wx.LEFT|wx.BOTTOM, border=5)
 
-		row = 0
-		self._grid.DeleteRows(0)
-		for key in D:
-			self._grid.AppendRows()
-			self._grid.SetCellValue(row, 0, key)
-			self._grid.SetCellValue(row, 1, str(D[key]))
-			row += 1
+		vbox.Add(hbox, 0, flag=wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, border=10)
 
-		grid_sizer_1.Add(self._grid, 1, wx.EXPAND|wx.ALL, 0)
+#	From http://docs.wxwidgets.org/trunk/overview_windowsizing.html, wxWidgets provides two main methods for sizing:
+#
+#   Fit() sets the size of a window to fit around its children. 
+#	The size of each children is added and then this parent window changes its size to fit them all.
+#   Layout() the opposite. The children will change their size, according to sizer rules, so they can fit into available space of their parent. 
+#	[...] is what is called by the default EVT_SIZE handler for container windows
 
-		self._panel.SetSizer(grid_sizer_1)
+#	Because a grid can have thousands of rows/cols its size can be huge. 
+#	Don't try to tell the parent to fit around it. 
+#	You better set max and min sizes for the grid (or its sizer) and then use Fit() or Layout() each time you change number of rows/cols or their sizes.
 
-		self._button_add = wx.Button(self._panel, wx.ID_ADD, "")
-		self._button_remove = wx.Button(self._panel, wx.ID_REMOVE, "")
-		self._button_help = wx.Button(self._panel, wx.ID_HELP, "")
-
-		grid_sizer_3 = wx.GridSizer(3, 1, 0, 0)
-		grid_sizer_3.Add(self._button_add, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
-		grid_sizer_3.Add(self._button_remove, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
-		grid_sizer_3.Add((-1,50), 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
-
-		self._button_import = wx.Button(self._panel, wx.NewIdRef(), _("Import"))
-		self._button_export = wx.Button(self._panel, wx.NewIdRef(), _("Export"))
-		self._button_import.SetDefault()
-
-		sizer_2 = wx.BoxSizer(wx.VERTICAL)
-		sizer_2.Add(self._button_import, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
-		sizer_2.Add(self._button_export, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
-		sizer_2.Add(self._button_help, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
-
-		sizer_1 = wx.BoxSizer(wx.VERTICAL)
-		sizer_1.Add(grid_sizer_3, 1, wx.EXPAND, 0)
-		sizer_1.Add(sizer_2, 1, wx.EXPAND, 0)
-
-		grid_sizer_1.Add(sizer_1, 1, wx.EXPAND, 0)
-
-		self._button_cancel = wx.Button(self._panel, wx.ID_CANCEL, "")
-		self._button_ok = wx.Button(self._panel, wx.ID_OK, "")
-
-		grid_sizer_2 = wx.GridSizer(1, 2, 0, 0)
-		grid_sizer_2.Add(self._button_cancel, 0, wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, 0)
-		grid_sizer_2.Add(self._button_ok, 0, wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, 0)
-
-		sizer_1.Add(grid_sizer_2, 1, wx.EXPAND, 0)
-
-		self._panel.SetSizer(grid_sizer_1)
+		panel.SetSizerAndFit(vbox)
+		#self.SetAutoLayout(True)
+		#self.Fit()
 
 		self.__set_events()
 
 		### just for windows
-		e = wx.SizeEvent(self.GetSize())
-		self.ProcessEvent(e)
+#		e = wx.SizeEvent(self.GetSize())
+#		self.ProcessEvent(e)
 
 		self.Center()
 
 	def __set_events(self):
 		""" Binding
 		"""
-		self.Bind(wx.EVT_BUTTON, self.OnAdd, self._button_add)
-		self.Bind(wx.EVT_BUTTON, self.OnRemove, self._button_remove)
-		self.Bind(wx.EVT_BUTTON, self.OnExport, self._button_export)
-		self.Bind(wx.EVT_BUTTON, self.OnImport, self._button_import)
-		self.Bind(wx.EVT_BUTTON, self.OnHelp, self._button_help)
+		self.Bind(wx.EVT_TOOL, self.OnAdd, id=ID_ADD)
+		self.Bind(wx.EVT_TOOL, self.OnRemove, id=ID_REMOVE)
+		self.Bind(wx.EVT_TOOL, self.OnExport, id=ID_EXPORT)
+		self.Bind(wx.EVT_TOOL, self.OnImport, id=ID_IMPORT)
+		self.Bind(wx.EVT_TOOL, self.OnHelp, id=ID_HELP)
 		self.Bind(wx.EVT_BUTTON, self.OnOk, self._button_ok)
 		self.Bind(wx.EVT_BUTTON, self.OnCancel, self._button_cancel)
+
+	def Populate(self, data):
+		""" Populate the grid from a dictionary data
+		"""
+
+		### populate the grid
+		if data != {}:
+			self._grid.DeleteRows(0)
+			for i,key in enumerate(data):
+				self._grid.AppendRows()
+				self._grid.SetCellValue(i, 0, key)
+				self._grid.SetCellValue(i, 1, str(data[key]))
 
 	def OnAdd(self,evt):
 		"""	Add line
@@ -118,8 +135,22 @@ class DiagramConstantsDialog(wx.Dialog):
 		"""	Delete selected lines
 		"""
 
-		for row in self._grid.GetSelectedRows():
-			self._grid.DeleteRows(row)
+		### only if the grid has rows
+		if self._grid.GetNumberRows():
+			try:
+				### only possible solution to have correct selected rows!
+				i = self._grid.GetSelectionBlockTopLeft()[0][0]
+				j = self._grid.GetSelectionBlockBottomRight()[0][0]
+
+				if i == j:
+					self._grid.DeleteRows(i)
+				else:
+					self._grid.DeleteRows(i,j)
+
+			### no cells have been selected. We delete the current row according to the current position of the cursor.
+			except:
+				row = self._grid.GetGridCursorRow()
+				self._grid.DeleteRows(row)
 
 	def OnImport(self, event):
 		""" csv file importing
@@ -144,14 +175,20 @@ class DiagramConstantsDialog(wx.Dialog):
 				errorLog.close()
 
 			if results != None:
-				# delete first row
-				self._grid.DeleteRows(0)
+
+				dial = wx.MessageDialog(self, _('Do you want to clear the current values before importing?'), _('Import Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+				if dial.ShowModal() == wx.ID_YES:
+					# delete rows
+					self._grid.DeleteRows(0,self._grid.GetNumberRows())
+				dial.Destroy()
+
+				nbRows=self._grid.GetNumberRows()
 				# import data to the grid
 				for (row,data) in zip(list(range(len(results[1]))),results[1]):
 					self._grid.AppendRows()
-					self._grid.SetCellValue(row,0,data[0])
-					self._grid.SetCellValue(row,1,str(data[1]))
-				dial = wx.MessageDialog(self, _('Import completed'), _('Import Manager'), wx.OK|wx.ICON_INFORMATION)
+					self._grid.SetCellValue(row+nbRows,0,data[0])
+					self._grid.SetCellValue(row+nbRows,1,str(data[1]))
+				dial = wx.MessageDialog(self, _('Import completed!'), _('Import Manager'), wx.OK|wx.ICON_INFORMATION)
 				dial.ShowModal()
 			else:
 	 			dlg.Destroy()
@@ -184,26 +221,29 @@ class DiagramConstantsDialog(wx.Dialog):
 	def OnOk(self,evt):
 		"""	Defintion of constantes in builtin and close dialog
 		"""
-		D={}
+
 		for row in range(self._grid.GetNumberRows()):
 			const=self._grid.GetCellValue(row,0)
 			val= self._grid.GetCellValue(row,1)
 			if val != '':
 				if type(val) in [float, int]:
-					D[const]=float(val)
+					self.data[const]=float(val)
 				elif type(val) in [str, str]:
-					D[const]=val
+					self.data[const]=val
 				else:
 					pass
 
-		if D != {}:
-			builtins.__dict__[os.path.splitext(self.label)[0]]=D
+		if self.data != {}:
+			builtins.__dict__[os.path.splitext(self.label)[0]] = self.data
 		elif os.path.splitext(self.label)[0] in builtins.__dict__:
 			del builtins.__dict__[os.path.splitext(self.label)[0]]
 
-		self.model.constants_dico = D
+		evt.Skip()
 
-		self.Destroy()
+	def GetData(self):
+		""" Return the constants stored in the grid as a dictionnary
+		"""
+		return self.data
 
 	def OnCancel(self,evt):
 		"""	Close dialog
@@ -221,19 +261,18 @@ class TestApp(wx.App):
 
 	def OnInit(self):
 
-		import gettext
-
 		builtins.__dict__['ICON_PATH_16_16']=os.path.join('icons','16x16')
+		builtins.__dict__['ICON_PATH']=os.path.join('icons')
 		builtins.__dict__['_'] = gettext.gettext
 
-		self.frame = DiagramConstantsDialog(None, -1, title="Model", model=None)
-		self.frame.Show()
+		frame = DiagramConstantsDialog(None, -1, "Model")
+		frame.Populate({'a':1, 'b':2, 'c':3})
+		frame.Show()
 		return True
 
 	def OnQuit(self, event):
 		self.Close()
 
 if __name__ == '__main__':
-
 	app = TestApp(0)
 	app.MainLoop()

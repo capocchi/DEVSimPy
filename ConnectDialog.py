@@ -44,8 +44,8 @@ class ConnectDialog(wx.Frame):
 		L1.append("%s"%_('All'))
 		L2.append("%s"%_('All'))
 
-		self._label_source = wx.StaticText(self, wx.NewIdRef(), '%s:'%self.sn)
-		self._label_target = wx.StaticText(self, wx.NewIdRef(), '%s:'%self.tn)
+		self._label_source = wx.StaticText(self, wx.NewIdRef(), '%s'%self.sn)
+		self._label_target = wx.StaticText(self, wx.NewIdRef(), '%s'%self.tn)
 		self._combo_box_sn = wx.ComboBox(self, wx.NewIdRef(), choices = L1, style = wx.CB_DROPDOWN|wx.CB_READONLY|wx.CB_SORT)
 		self._combo_box_tn = wx.ComboBox(self, wx.NewIdRef(), choices = L2, style = wx.CB_DROPDOWN|wx.CB_READONLY|wx.CB_SORT)
 		self._button_disconnect = wx.Button(self, wx.NewIdRef(), _("Disconnect"))

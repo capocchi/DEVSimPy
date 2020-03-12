@@ -79,8 +79,6 @@ if builtins.__dict__['GUI_FLAG']:
 	import pluginmanager
 	import ZipManager
 	import DropTarget
-
-if builtins.__dict__['GUI_FLAG']:
 	import PlotGUI
 	import SimulationGUI
 	import PriorityGUI
@@ -718,9 +716,11 @@ class Diagram(Savable, Structurable):
 			nb2 = win.GetDiagramNotebook()
 			title = nb2.GetPageText(nb2.GetSelection())
 
-		dlg = DiagramConstantsDialog.DiagramConstantsDialog(win, wx.NewIdRef(), title, self)
-		dlg.ShowModal()
-		dlg.Destroy()
+		dlg = DiagramConstantsDialog.DiagramConstantsDialog(win, wx.NewIdRef(), title)
+		dlg.Populate(self.constants_dico)
+		if dlg.ShowModal() == wx.ID_OK:
+			self.constants_dico = dlg.GetData()
+			dlg.Destroy()
 
 	@BuzyCursorNotification
 	def checkDEVSInstance(self, diagram=None, D={}):

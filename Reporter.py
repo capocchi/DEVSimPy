@@ -162,6 +162,7 @@ class ErrorReporter(object):
         """
         if len(self._sessionerr):
             return self._sessionerr[-1]
+
 class ErrorDialog(BaseDialog):
     """
     Dialog for showing errors and and notifying gui2exe-users should the
@@ -173,6 +174,7 @@ class ErrorDialog(BaseDialog):
     """
     ABORT = False
     REPORTER_ACTIVE = False
+
     def __init__(self, message):
         """
         Initialize the dialog
@@ -200,7 +202,7 @@ class ErrorDialog(BaseDialog):
                                              str(ErrorReporter().GetErrorStack()), \
                                              "---- End Traceback Info ----")
 
-        self.textCtrl = wx.TextCtrl(self, value=self.err_msg, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.textCtrl = wx.TextCtrl(self, value=self.err_msg, size=(-1,200),style=wx.TE_MULTILINE | wx.TE_READONLY)
         self.abortButton = wx.Button(self, wx.ID_CANCEL, size=(-1, 26))
         self.sendButton = wx.Button(self, ID_SEND, _("Report Error"), size=(-1, 26))
         self.sendButton.SetDefault()
@@ -217,7 +219,6 @@ class ErrorDialog(BaseDialog):
         self.CenterOnParent()
         self.ShowModal()
 
-
     def DoLayout(self):
         """
         Layout the dialog and prepare it to be shown
@@ -230,10 +231,10 @@ class ErrorDialog(BaseDialog):
 
         # Objects
         mainmsg = wx.StaticText(self,
-                                label=_("Error: Help improve DEVSimPy by clicking on "
+                                label=_("Help improve DEVSimPy by clicking on "
                                         "Report Error\nto send the Error "
                                         "Traceback shown below."))
-        t_lbl = wx.StaticText(self, label=_(" Error Traceback:"))
+        t_lbl = wx.StaticText(self, label=_("Error Traceback:"))
 
         t_lbl.SetFont(wx.Font(8, wx.SWISS, wx.NORMAL, wx.BOLD, False))
         # Layout
@@ -246,7 +247,7 @@ class ErrorDialog(BaseDialog):
         mainSizer.Add(topSizer, 0, wx.EXPAND|wx.TOP|wx.BOTTOM, 20)
         mainSizer.Add(t_lbl, 0, wx.LEFT|wx.TOP|wx.RIGHT, 5)
         mainSizer.Add((0, 2))
-        mainSizer.Add(self.textCtrl, 1, wx.EXPAND|wx.LEFT|wx.BOTTOM|wx.RIGHT, 5)
+        mainSizer.Add(self.textCtrl, 1, wx.EXPAND|wx.ALL, 5)
         bottomSizer.Add(self.abortButton, 0, wx.ALL, 5)
         bottomSizer.Add((0, 0), 1, wx.EXPAND)
         bottomSizer.Add(self.sendButton, 0, wx.TOP|wx.BOTTOM, 5)
@@ -254,11 +255,9 @@ class ErrorDialog(BaseDialog):
         bottomSizer.Add(self.closeButton, 0, wx.TOP|wx.BOTTOM|wx.RIGHT, 5)
         mainSizer.Add(bottomSizer, 0, wx.EXPAND)
 
-        self.SetSizer(mainSizer)
-        mainSizer.Layout()
-
+        self.SetSizerAndFit(mainSizer)
+        self.SetAutoLayout(True)
         self.Fit()
-
 
     def OnButton(self, evt):
         """Handles button events
@@ -276,6 +275,7 @@ class ErrorDialog(BaseDialog):
         e_id = evt.GetId()
         if e_id == wx.ID_CLOSE:
             self.Close()
+
         elif e_id == ID_SEND:
             frame = SendMailWx(None)
             msg = self.err_msg
@@ -286,6 +286,7 @@ class ErrorDialog(BaseDialog):
             frame.subjectTxt.SetValue(msg)
             frame.Show()
             self.Close()
+
         elif e_id == wx.ID_ABORT:
             ErrorDialog.ABORT = True
             # Try a nice shutdown first time through
@@ -293,6 +294,7 @@ class ErrorDialog(BaseDialog):
                          wx.MenuEvent(wx.wxEVT_MENU_OPEN, wx.ID_EXIT),
                          True)
             self.Close()
+
         else:
             evt.Skip()
 
