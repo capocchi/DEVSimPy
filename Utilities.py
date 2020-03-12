@@ -47,6 +47,8 @@ import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error,
 import pip
 import importlib
 
+from subprocess import call
+
 # Used for smooth (spectrum)
 try:
 	from numpy import *
@@ -79,23 +81,24 @@ def printOnStatusBar(statusbar, data={}):
 		statusbar.SetStatusText(v, k)
 
 def NotificationMessage(title,message,parent,flag=wx.ICON_INFORMATION, timeout=False):
-	notify = wx.adv.NotificationMessage(
-	title=title,
-	message=message,
-	parent=parent, flags=flag)
+	if builtins.__dict__['NOTIFICATION']:
+		notify = wx.adv.NotificationMessage(
+		title=title,
+		message=message,
+		parent=parent, flags=flag)
 
-	# Various options can be set after the message is created if desired.
-	# notify.SetFlags(# wx.ICON_INFORMATION
-	#                 wx.ICON_WARNING
-	#                 # wx.ICON_ERROR
-	#                 )
-	# notify.SetTitle("Wooot")
-	# notify.SetMessage("It's a message!")
-	# notify.SetParent(self)
-	if timeout:
-		notify.Show(timeout=timeout) # 1 for short timeout, 100 for long timeout
-	else:
-		notify.Show()
+		# Various options can be set after the message is created if desired.
+		# notify.SetFlags(# wx.ICON_INFORMATION
+		#                 wx.ICON_WARNING
+		#                 # wx.ICON_ERROR
+		#                 )
+		# notify.SetTitle("Wooot")
+		# notify.SetMessage("It's a message!")
+		# notify.SetParent(self)
+		if timeout:
+			notify.Show(timeout=timeout) # 1 for short timeout, 100 for long timeout
+		else:
+			notify.Show()
 
 def now():
     """ Returns the current time formatted. """
@@ -150,6 +153,23 @@ def PyBuzyInfo(msg, time):
 		wx.MilliSleep(1000)
 
 	del busy
+
+def updatePiP():
+	call("python -m pip install --upgrade pip", shell=True)
+
+def updatePackageWithPiP():
+	""" Update all installed package using pip
+	"""
+
+	if pip.__version__ > '10.0.1':
+		import pkg_resources
+		packages = [dist.project_name for dist in pkg_resources.working_set if 'PyPubSub' not in dist.project_name]
+		call("pip install --upgrade -r requirements.txt", shell=True)
+	else:
+		packages = [dist.project_name for dist in pip.get_installed_distributions() if 'PyPubSub' not in dist.project_name]
+		call("pip install --upgrade " + ' '.join(packages), shell=True)
+
+	NotificationMessage(_('Information'), 'All pip packages have been updated!', None, timeout=5)
 
 def install_and_import(package):
     try:
