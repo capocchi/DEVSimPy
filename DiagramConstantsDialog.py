@@ -52,6 +52,8 @@ class DiagramConstantsDialog(wx.Dialog):
 		tb.AddTool(ID_IMPORT, "",wx.Bitmap(os.path.join(ICON_PATH,'import.png')), wx.NullBitmap, shortHelp=_('Import constants from file'))
 		tb.AddTool(ID_HELP, "",wx.Bitmap(os.path.join(ICON_PATH,'info.png')), wx.NullBitmap, shortHelp=_('Help'))
 
+		tb.Realize()
+
 		self._grid = wx.grid.Grid(panel)
 		self._grid.AutoSizeColumns(True)
 		self._grid.CreateGrid(1, 2)
@@ -142,8 +144,8 @@ class DiagramConstantsDialog(wx.Dialog):
 				if i == j:
 					self._grid.DeleteRows(i)
 				else:
-					for row in range(i,j):
-						self._grid.DeleteRows(row)
+					self._grid.DeleteRows(i,j)
+
 			### no cells have been selected. We delete the current row according to the current position of the cursor.
 			except:
 				row = self._grid.GetGridCursorRow()
@@ -172,14 +174,20 @@ class DiagramConstantsDialog(wx.Dialog):
 				errorLog.close()
 
 			if results != None:
-				# delete first row
-				self._grid.DeleteRows(0)
+
+				dial = wx.MessageDialog(self, _('Do you want to clear the current values before importing?'), _('Import Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+				if dial.ShowModal() == wx.ID_YES:
+					# delete rows
+					self._grid.DeleteRows(0,self._grid.GetNumberRows())
+				dial.Destroy()
+
+				nbRows=self._grid.GetNumberRows()
 				# import data to the grid
 				for (row,data) in zip(list(range(len(results[1]))),results[1]):
 					self._grid.AppendRows()
-					self._grid.SetCellValue(row,0,data[0])
-					self._grid.SetCellValue(row,1,str(data[1]))
-				dial = wx.MessageDialog(self, _('Import completed'), _('Import Manager'), wx.OK|wx.ICON_INFORMATION)
+					self._grid.SetCellValue(row+nbRows,0,data[0])
+					self._grid.SetCellValue(row+nbRows,1,str(data[1]))
+				dial = wx.MessageDialog(self, _('Import completed!'), _('Import Manager'), wx.OK|wx.ICON_INFORMATION)
 				dial.ShowModal()
 			else:
 	 			dlg.Destroy()
