@@ -44,6 +44,9 @@ import fileinput
 import fnmatch
 import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse, http.client
 
+import pip
+import importlib
+
 # Used for smooth (spectrum)
 try:
 	from numpy import *
@@ -59,9 +62,6 @@ except ImportError:
 		sys.stdout.write("Unknown operating system.\n")
 		sys.exit()
 
-import pip
-import importlib
-
 #-------------------------------------------------------------------------------
 def PrintException():
 	exc_type, exc_obj, tb = sys.exc_info()
@@ -71,6 +71,31 @@ def PrintException():
 	linecache.checkcache(filename)
 	line = linecache.getline(filename, lineno, f.f_globals)
 	print('EXCEPTION IN {}\nLINE {}\n"{}": {}'.format(filename, lineno, line.strip(), exc_obj))
+
+def printOnStatusBar(statusbar, data={}):
+	""" Send data on status bar
+	"""
+	for k,v in list(data.items()):
+		statusbar.SetStatusText(v, k)
+
+def NotificationMessage(title,message,parent,flag=wx.ICON_INFORMATION, timeout=False):
+	notify = wx.adv.NotificationMessage(
+	title=title,
+	message=message,
+	parent=parent, flags=flag)
+
+	# Various options can be set after the message is created if desired.
+	# notify.SetFlags(# wx.ICON_INFORMATION
+	#                 wx.ICON_WARNING
+	#                 # wx.ICON_ERROR
+	#                 )
+	# notify.SetTitle("Wooot")
+	# notify.SetMessage("It's a message!")
+	# notify.SetParent(self)
+	if timeout:
+		notify.Show(timeout=timeout) # 1 for short timeout, 100 for long timeout
+	else:
+		notify.Show()
 
 def now():
     """ Returns the current time formatted. """
@@ -131,15 +156,17 @@ def install_and_import(package):
         importlib.import_module(package)
         installed = True
     except:
-        dial = wx.MessageDialog(None, _('Do you want to install the %s using pip?'%package), _('Install Package'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
-        if dial.ShowModal() == wx.ID_YES:
-            pip.main(['install', package])
-            installed = True
-            dial.Destroy() 
-        else:
-            installed = False
-            dial.Destroy()
+        if pip.main(['search', package]) != 23:
+            dial = wx.MessageDialog(None, _('We find that the package %s is missing. \n\n Do you want to install him using pip?'%(package)), _('Install Package'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+
+            if dial.ShowModal() == wx.ID_YES:
+                pip.main(['install', package])
+                installed = True
+                dial.Destroy() 
+            else:
+                installed = False
+                dial.Destroy()
     finally:
         if installed : globals()[package] = importlib.import_module(package)
 	

@@ -33,7 +33,7 @@ import subprocess
 import Container
 import Menu
 
-from Utilities import replaceAll, getPYFileListFromInit, path_to_module
+from Utilities import replaceAll, getPYFileListFromInit, path_to_module, printOnStatusBar, NotificationMessage, install_and_import
 from Decorators import BuzyCursorNotification
 from Components import BlockFactory, DEVSComponent, GetClass
 from ZipManager import Zip, getPythonModelFileName
@@ -208,8 +208,7 @@ class LibraryTree(wx.TreeCtrl):
 
 		self.UnselectAll()
 		mainW = wx.GetApp().GetTopWindow()
-		mainW.statusbar.SetStatusText('', 0)
-		mainW.statusbar.SetStatusText('', 1)
+		printOnStatusBar(mainW.statusbar, {0:'', 1:''})
 		#self.SetFocus()
 		evt.Skip()
 
@@ -834,29 +833,39 @@ class LibraryTree(wx.TreeCtrl):
 			### Check the class
 			info = Container.CheckClass(file_path)
 
-			### there is error during the chek of class ?
+			### there is error during the chek of class?
 			if isinstance(info, tuple):
-				### recompile if no error
-				info = recompile(path_to_module(file_path))
 
-				### there is error during recompilation ?
-				if isinstance(info, (Exception,str)):
-					### Until it has parent, we redifine icon to inform user
-					while(item):
-						### change image
-						self.SetItemImage(item, self.not_importedidx, wx.TreeItemIcon_Normal)
-						### next parent item
-						item = self.GetItemParent(item)
+				### if module are missing, we propose to install him with pip
+				if ModuleNotFoundError in info:
+					package = info[1].name
+					if install_and_import(package):
+						wx.CallAfter(self.UpdateAll)
+
+				### else there is an error in the code of the model...
 				else:
-						### change image
-						self.SetItemImage(item, self.pythonfileidx, wx.TreeItemIcon_Normal)
 
-						#### Until it has parent, we redifine icon to inform user
+					### recompile if no error
+					info = recompile(path_to_module(file_path))
+
+					### there is error during recompilation?
+					if isinstance(info, (Exception,str)):
+						### Until it has parent, we redifine icon to inform user
 						while(item):
-							#### change image
-							self.SetItemImage(item, self.fldropenidx if self.IsExpanded(item) else self.fldridx, wx.TreeItemIcon_Normal)
-							#### next parent item
+							### change image
+							self.SetItemImage(item, self.not_importedidx, wx.TreeItemIcon_Normal)
+							### next parent item
 							item = self.GetItemParent(item)
+					else:
+							### change image
+							self.SetItemImage(item, self.pythonfileidx, wx.TreeItemIcon_Normal)
+
+							#### Until it has parent, we redifine icon to inform user
+							while(item):
+								#### change image
+								self.SetItemImage(item, self.fldropenidx if self.IsExpanded(item) else self.fldridx, wx.TreeItemIcon_Normal)
+								#### next parent item
+								item = self.GetItemParent(item)
 		else:
 			sys.stdout.write("File %s is not checked!")
 
@@ -912,6 +921,8 @@ class LibraryTree(wx.TreeCtrl):
 		""" Update all imported domain
 		"""
 		self.UpdateAll()
+		
+		NotificationMessage(_('Information'), _("All librairies have been succeffully updated!"), self, timeout=5)
 
 	def OnMCCClick(self, event):
 		""" 
@@ -989,14 +1000,22 @@ class LibraryTree(wx.TreeCtrl):
 		""" Refresh action has been invoked.
 		"""
 
-		item = self.GetSelection()
-		path = self.GetItemPyData(item)
-		ext = os.path.splitext(path)[1]
+		try:
+			item = self.GetSelection()
+			path = self.GetItemPyData(item)
+			ext = os.path.splitext(path)[1]
 
-		if ext in (".py",".pyc"):
-			self.CheckItem(os.path.splitext(path)[0])
-		else:
-			self.CheckItem(path)
+			if ext in (".py",".pyc"):
+				self.CheckItem(os.path.splitext(path)[0])
+			else:
+				self.CheckItem(path)
+		except:
+			NotificationMessage(_('Error'), _("Error updating the model %s")%self.GetItemText(item), self, timeout=5)
+		finally:
+			if self.GetItemImage(item) != 1:
+				
+				NotificationMessage(_('Information'), _("Model %s has been succeffully updated!")%self.GetItemText(item), self, flag=wx.ICON_ERROR, timeout=5)
+
 	###
 	def OnItemEdit(self, evt):
 		""" Edition menu has been invoked.

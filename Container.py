@@ -110,7 +110,7 @@ from Mixins.Abstractable import Abstractable
 sys.modules['Savable'] = sys.modules['Mixins.Savable']
 
 from Decorators import BuzyCursorNotification, StatusBarNotification, ProgressNotification, Pre_Undo, Post_Undo, cond_decorator
-from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance, FixedList, getObjectFromString, getTopLevelWindow
+from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance, FixedList, getObjectFromString, getTopLevelWindow, printOnStatusBar
 from Patterns.Observer import Subject, Observer
 
 if builtins.__dict__['GUI_FLAG']:
@@ -211,12 +211,6 @@ def MsgBoxError(event, parent, msg):
 				return False
 		else:
 			wx.MessageBox(_("There is errors in python file.\nTrying to translate error informations: %s %s %s")%(typ, val, tb), _("Error"), wx.OK|wx.ICON_ERROR)
-
-def printOnStatusBar(statusbar, data={}):
-	""" Send data on status bar
-	"""
-	for k,v in list(data.items()):
-		statusbar.SetStatusText(v, k)
 
 def CheckClass(m):
 	""" Check if class is ok and return it.
@@ -3466,7 +3460,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 			try:
 				### Block is Savable
 				self.SaveFile(path)
-
+				
 				printOnStatusBar(mainW.statusbar, {0:_('%s Exported')%label, 1:''})
 
 			except IOError as error:

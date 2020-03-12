@@ -42,7 +42,7 @@ from tempfile import gettempdir
 from wx import stc
 
 from Decorators import redirectStdout
-from Utilities import path_to_module, PrintException
+from Utilities import path_to_module, PrintException, printOnStatusBar
 
 import ReloadModule
 import ZipManager
@@ -1645,7 +1645,7 @@ class Base(object):
 
 		if hasattr(self, 'statusbar'):
 			for i, s in enumerate(args):
-				self.statusbar.SetStatusText(s, i)
+				printOnStatusBar(self.statusbar, {i:s})
 
 	### NOTE: Editor :: StatusBar 			=> Create a status bar
 	def GetStatusBar(self):

@@ -186,7 +186,7 @@ from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
 from pluginmanager import load_plugins, enable_plugin
 from which import which
-from Utilities import GetUserConfigDir, install_and_import
+from Utilities import GetUserConfigDir, install_and_import, printOnStatusBar, NotificationMessage
 from Decorators import redirectStdout, BuzyCursorNotification
 from DetachedFrame import DetachedFrame
 from LibraryTree import LibraryTree
@@ -792,23 +792,8 @@ class MainApplication(wx.Frame):
 			self.cfg.Write("openFileList", str(eval("self.openFileList")))
 			self.cfg.Flush()
 
-			notify = wx.adv.NotificationMessage(
-            title="Information",
-            message="Recent opened files list has been deleted!",
-            parent=self, flags=wx.ICON_INFORMATION)
-
-			# Various options can be set after the message is created if desired.
-			# notify.SetFlags(# wx.ICON_INFORMATION
-			#                 wx.ICON_WARNING
-			#                 # wx.ICON_ERROR
-			#                 )
-			# notify.SetTitle("Wooot")
-			# notify.SetMessage("It's a message!")
-			# notify.SetParent(self)
-
-			notify.Show(timeout=5) # 1 for short timeout, 100 for long timeout
-			# notify.Close()       # Hides the notification.
-
+			NotificationMessage(_("Information"), _("Recent opened files list has been deleted!"), self, timeout=5)
+		
 		dial.Destroy()
 		
 	def OnCreatePerspective(self, event):
@@ -1071,7 +1056,7 @@ class MainApplication(wx.Frame):
 		currentPage.scaley=max(currentPage.scaley+.05,.3)
 		currentPage.Refresh()
 
-		self.statusbar.SetStatusText(_('Zoom In'))
+		printOnStatusBar(self.statusbar,{0:_('Zoom In')})
 
 	###
 	def OnUnZoom(self, event):
@@ -1088,7 +1073,7 @@ class MainApplication(wx.Frame):
 		currentPage.scaley=currentPage.scaley-.05
 		currentPage.Refresh()
 
-		self.statusbar.SetStatusText(_('Zoom Out'))
+		printOnStatusBar(self.statusbar,{0:_('Zoom Out')})
 
 	###
 	def AnnuleZoom(self, event):
@@ -1105,7 +1090,7 @@ class MainApplication(wx.Frame):
 		currentPage.scaley = 1.0
 		currentPage.Refresh()
 
-		self.statusbar.SetStatusText(_('No Zoom'))
+		printOnStatusBar(self.statusbar,{0:_('No Zoom')})
 
 	###
 	def OnNew(self, event):
@@ -1313,8 +1298,6 @@ class MainApplication(wx.Frame):
 				tb = self.GetToolBar()
 				### enable save button on status bar
 				tb.EnableTool(Menu.ID_SAVE, diagram.modify)
-
-				#self.statusbar.SetStatusText(_('%s saved')%diagram.last_name_saved)
 			else:
 				wx.MessageBox( _('Error saving file.') ,_('Error'), wx.OK | wx.ICON_ERROR)
 		else:
@@ -2190,7 +2173,7 @@ class AdvancedSplashScreen(AdvancedSplash):
 
 		self.app.frame = MainApplication(None, wx.NewIdRef(), 'DEVSimPy %s'%__version__)
 
-		self.app.frame.statusbar.SetStatusText(_('wxPython %s - python %s'%(wx.version(),platform.python_version())),1)
+		printOnStatusBar(self.app.frame.statusbar,{1:_('wxPython %s - python %s'%(wx.version(),platform.python_version()))})
 
 		# keep in a attribute of stdio which is invisible until now
 		self.app.frame.stdioWin = self.app.stdioWin

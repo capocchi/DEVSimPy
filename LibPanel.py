@@ -34,7 +34,7 @@ class SearchLib(wx.SearchCtrl):
 	def __init__(self, *args, **kwargs):
 		"""
 		"""
-		wx.SearchCtrl.__init__(self, *args, **kwargs)
+		super(SearchLib, self).__init__(*args, **kwargs)
 
 		self.treeChildren = []
 		self.treeCopy = None
@@ -63,7 +63,7 @@ class LibPanel(wx.Panel):
 	"""
 	"""
 	def __init__(self, parent, name):
-		wx.Panel.__init__(self, parent=parent, id=wx.NewIdRef(), name=name)
+		super(LibPanel, self).__init__(parent, name=name)
 
 		libSizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -154,6 +154,7 @@ class LibPanel(wx.Panel):
 		"""
 
 		self.propToolTip =[_("Select model and instantiate it in the diagram (right part) using a drag-and-drop.")]
+		
 		### for Phoenix version ()
 		if wx.VERSION_STRING < '4.0':
 			self.SetToolTipString(self.propToolTip[0])

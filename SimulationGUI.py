@@ -48,7 +48,7 @@ if __name__ == '__main__':
 	'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),\
 	'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}
 
-from Utilities import IsAllDigits, playSound
+from Utilities import IsAllDigits, playSound, printOnStatusBar
 from pluginmanager import trigger_event, is_enable
 from Patterns.Strategy import *
 from Decorators import BuzyCursorNotification, hotshotit
@@ -492,9 +492,9 @@ class Base(object):
 				#self._gauge.SetMax(self.current_master.FINAL_TIME)
 
 			self.statusbar.SetBackgroundColour('')
-			self.statusbar.SetStatusText("", 1)
+			printOnStatusBar(self.statusbar, {1:""})
 			if self.statusbar.GetFieldsCount() > 2:
-				self.statusbar.SetStatusText("", 2)
+				printOnStatusBar(self.statusbar, {2:""})
 
 			if (self.thread is None) or (not self.timer.IsRunning()):
 
@@ -573,10 +573,10 @@ class Base(object):
 
 		self._gauge.SetValue(0)
 		self.statusbar.SetBackgroundColour('')
-		self.statusbar.SetStatusText(_('Interrupted'), 0)
-		self.statusbar.SetStatusText("", 1)
+		printOnStatusBar(self.statusbar, {0:_('Interrupted')})
+		printOnStatusBar(self.statusbar, {1:""})
 		if self.statusbar.GetFieldsCount() > 2:
-			self.statusbar.SetStatusText("", 2)
+			printOnStatusBar(self.statusbar, {2:""})
 
 	###
 	def OnSuspend(self, event):
@@ -592,7 +592,7 @@ class Base(object):
 		if self.count == 0 or self.count >= 100 or not self.timer.IsRunning():
 			return
 
-		self.statusbar.SetStatusText(_('Suspended'),0)
+		printOnStatusBar(self.statusbar, {0:_('Suspended')})
 
 		# way to interact with the model
 		#self.parent.Enable(True)
@@ -633,13 +633,12 @@ class Base(object):
 
 			### update the status bar
 			self.statusbar.SetBackgroundColour('')
-			self.statusbar.SetStatusText(_("Completed!"), 0)
-			self.statusbar.SetStatusText(self.GetClock(), 1)
-
+			printOnStatusBar(self.statusbar, {0:_("Completed!"), 1:self.GetClock()})
+			
 			### is no time limit add some informations in status bar
 			if not self.ntl:
 				if self.statusbar.GetFieldsCount() > 2:
-					self.statusbar.SetStatusText(str(100)+"%", 2)
+					printOnStatusBar(self.statusbar, {2:str(100)+"%"})
 
 			### stop the timer
 			self.timer.Stop()
@@ -649,14 +648,12 @@ class Base(object):
 
 			### udpate the status bar
 			self.statusbar.SetBackgroundColour('GREY')
-			self.statusbar.SetStatusText(_("Processing..."), 0)
-			self.statusbar.SetStatusText(self.GetClock(), 1)
-			#self.statusbar.SetStatusText("%0.4f s"%(self.thread.cpu_time), 1)
+			printOnStatusBar(self.statusbar, {0:_("Processing..."), 1:self.GetClock()})
 
 			### is no time limit, add some information in status bar
 			if not self.ntl:
 				if self.statusbar.GetFieldsCount() > 2:
-					self.statusbar.SetStatusText(str(self.count)[:4]+"%", 2)
+					printOnStatusBar(self.statusbar, {2:str(self.count)[:4]+"%"})
 
 			#wx.Yield()
 			wx.YieldIfNeeded()
@@ -691,8 +688,7 @@ class Base(object):
 		if wx.VERSION_STRING < '4.0':
 			self.statusbar.SetFields([""]*self.statusbar.GetFieldsCount())
 		else:
-			for i in range(self.statusbar.GetFieldsCount()):
-				self.statusbar.SetStatusText("",i)
+			printOnStatusBar(self.statusbar, {i:'' for i in range(self.statusbar.GetFieldsCount())})
 
 	def DestroyWin(self):
 		""" To destroy the simulation frame
