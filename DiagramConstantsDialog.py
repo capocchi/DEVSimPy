@@ -13,29 +13,31 @@ ID_ADD = wx.NewIdRef()
 ID_REMOVE = wx.NewIdRef()
 ID_HELP = wx.NewIdRef()
 
-_ = wx.GetTranslation
+import gettext
+_ = gettext.gettext
 
 class DiagramConstantsDialog(wx.Dialog):
 
-	def __init__(self, parent, id, title, model):
-		""" Constructor
-		"""
-
-		wx.Dialog.__init__(self, parent, id, title)
+	def __init__(self, *args, **kw):
+		super(DiagramConstantsDialog, self).__init__(*args, **kw)
 
 		### local copy
-		self.model = model
-		self.label = title
+		self.label = args[2]
+
+		### all of the constants
+		self.data = {}
+
+		self.InitUI()
+
+	def InitUI(self):
+		""" Init the user interface
+		"""
 
 		self.SetTitle(_("%s - Constants Manager")%(self.label))
 
 		icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
 		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "properties.png"), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(icon)
-
-		self.InitUI()
-
-	def InitUI(self):
 
 		panel = wx.Panel(self)
 		vbox = wx.BoxSizer(wx.VERTICAL)
@@ -46,11 +48,11 @@ class DiagramConstantsDialog(wx.Dialog):
 
 		tb.SetToolBitmapSize((16,16))
 
-		tb.AddTool(ID_ADD, "",wx.Bitmap(os.path.join(ICON_PATH,'comment_add.png')), shortHelp=_('New constant'))
-		tb.AddTool(ID_REMOVE, "",wx.Bitmap(os.path.join(ICON_PATH,'comment_remove.png')), shortHelp=_('Delete constant'))
-		tb.AddTool(ID_EXPORT, "",wx.Bitmap(os.path.join(ICON_PATH,'export.png')), shortHelp=_('Export constants into file'))
-		tb.AddTool(ID_IMPORT, "",wx.Bitmap(os.path.join(ICON_PATH,'import.png')), wx.NullBitmap, shortHelp=_('Import constants from file'))
-		tb.AddTool(ID_HELP, "",wx.Bitmap(os.path.join(ICON_PATH,'info.png')), wx.NullBitmap, shortHelp=_('Help'))
+		tb.AddTool(ID_ADD, "", wx.Bitmap(os.path.join(ICON_PATH,'comment_add.png')), shortHelp=_('New constant'))
+		tb.AddTool(ID_REMOVE, "", wx.Bitmap(os.path.join(ICON_PATH,'comment_remove.png')), shortHelp=_('Delete constant'))
+		tb.AddTool(ID_EXPORT, "", wx.Bitmap(os.path.join(ICON_PATH,'export.png')), shortHelp=_('Export constants into file'))
+		tb.AddTool(ID_IMPORT, "", wx.Bitmap(os.path.join(ICON_PATH,'import.png')), wx.NullBitmap, shortHelp=_('Import constants from file'))
+		tb.AddTool(ID_HELP, "", wx.Bitmap(os.path.join(ICON_PATH,'info.png')), wx.NullBitmap, shortHelp=_('Help'))
 
 		tb.Realize()
 
@@ -65,20 +67,7 @@ class DiagramConstantsDialog(wx.Dialog):
 		### label column is not visible
 		self._grid.SetRowLabelSize(0)
 		
-
 		vbox.Add(self._grid, 1, wx.EXPAND|wx.ALL,0)
-
-		### populate the grid
-		D = self.model.constants_dico if self.model else {}
-
-		if D!={}:
-			row = 0
-			self._grid.DeleteRows(0)
-			for key in D:
-				self._grid.AppendRows()
-				self._grid.SetCellValue(row, 0, key)
-				self._grid.SetCellValue(row, 1, str(D[key]))
-				row += 1
 
 		vbox.Add((-1, 15))
 		
@@ -124,6 +113,18 @@ class DiagramConstantsDialog(wx.Dialog):
 		self.Bind(wx.EVT_TOOL, self.OnHelp, id=ID_HELP)
 		self.Bind(wx.EVT_BUTTON, self.OnOk, self._button_ok)
 		self.Bind(wx.EVT_BUTTON, self.OnCancel, self._button_cancel)
+
+	def Populate(self, data):
+		""" Populate the grid from a dictionary data
+		"""
+
+		### populate the grid
+		if data != {}:
+			self._grid.DeleteRows(0)
+			for i,key in enumerate(data):
+				self._grid.AppendRows()
+				self._grid.SetCellValue(i, 0, key)
+				self._grid.SetCellValue(i, 1, str(data[key]))
 
 	def OnAdd(self,evt):
 		"""	Add line
@@ -220,26 +221,29 @@ class DiagramConstantsDialog(wx.Dialog):
 	def OnOk(self,evt):
 		"""	Defintion of constantes in builtin and close dialog
 		"""
-		D={}
+
 		for row in range(self._grid.GetNumberRows()):
 			const=self._grid.GetCellValue(row,0)
 			val= self._grid.GetCellValue(row,1)
 			if val != '':
 				if type(val) in [float, int]:
-					D[const]=float(val)
+					self.data[const]=float(val)
 				elif type(val) in [str, str]:
-					D[const]=val
+					self.data[const]=val
 				else:
 					pass
 
-		if D != {}:
-			builtins.__dict__[os.path.splitext(self.label)[0]]=D
+		if self.data != {}:
+			builtins.__dict__[os.path.splitext(self.label)[0]] = self.data
 		elif os.path.splitext(self.label)[0] in builtins.__dict__:
 			del builtins.__dict__[os.path.splitext(self.label)[0]]
 
-		self.model.constants_dico = D
+		evt.Skip()
 
-		self.Destroy()
+	def GetData(self):
+		""" Return the constants stored in the grid as a dictionnary
+		"""
+		return self.data
 
 	def OnCancel(self,evt):
 		"""	Close dialog
@@ -257,20 +261,18 @@ class TestApp(wx.App):
 
 	def OnInit(self):
 
-		import gettext
-
 		builtins.__dict__['ICON_PATH_16_16']=os.path.join('icons','16x16')
 		builtins.__dict__['ICON_PATH']=os.path.join('icons')
 		builtins.__dict__['_'] = gettext.gettext
 
-		self.frame = DiagramConstantsDialog(None, -1, title="Model", model=None)
-		self.frame.Show()
+		frame = DiagramConstantsDialog(None, -1, "Model")
+		frame.Populate({'a':1, 'b':2, 'c':3})
+		frame.Show()
 		return True
 
 	def OnQuit(self, event):
 		self.Close()
 
 if __name__ == '__main__':
-
 	app = TestApp(0)
 	app.MainLoop()
