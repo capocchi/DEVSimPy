@@ -150,7 +150,8 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 				'DYNAMIC_STRUCTURE' : False, # Dynamic Structure for local PyPDEVS simulation
 				'REAL_TIME': False, ### PyPDEVS threaded real time simulation
 				'VERBOSE':False,
-				'TRANSPARENCY' : True, # Transparancy for DetachedFrame
+				'TRANSPARENCY' : True, # Transparancy for DetachedFrame activated
+				'NOTIFICATION' : True, # Notification message activated
 				'DEFAULT_PLOT_DYN_FREQ' : 100, # frequence of dynamic plot of QuickScope (to avoid overhead),
 				'DEFAULT_DEVS_DIRNAME':'PyDEVS', # default DEVS Kernel directory
 				'DEVS_DIR_PATH_DICT':{'PyDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyDEVS'),
@@ -186,7 +187,7 @@ from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
 from pluginmanager import load_plugins, enable_plugin
 from which import which
-from Utilities import GetUserConfigDir, install_and_import, printOnStatusBar, NotificationMessage
+from Utilities import GetUserConfigDir, install_and_import, printOnStatusBar, NotificationMessage, updatePackageWithPiP
 from Decorators import redirectStdout, BuzyCursorNotification
 from DetachedFrame import DetachedFrame
 from LibraryTree import LibraryTree
@@ -2007,6 +2008,11 @@ class MainApplication(wx.Frame):
 
 		#webbrowser.open_new(opj(self.installDir + "/docs/api/index.html"))
 		wx.MessageBox(_("This option has not been implemented yet."), _('Info'), wx.OK|wx.ICON_INFORMATION)
+
+	def OnUpdatePiPPackage(self, event):
+		""" Update all pip package
+		"""
+		updatePackageWithPiP()
 
 	@BuzyCursorNotification
 	def OnAbout(self, event):

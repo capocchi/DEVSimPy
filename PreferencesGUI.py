@@ -82,11 +82,17 @@ class GeneralPanel(wx.Panel):
 		self.nb_history_undo.SetRange(2, 100)
 		self.nb_history_undo.SetValue(NB_HISTORY_UNDO)
 
-		### CheckBox
+		### CheckBox for transparancy
 		self.cb1 = wx.CheckBox(self, wx.NewIdRef(), _('Transparency'))
 		if wx.VERSION_STRING >= '4.0': self.cb1.SetToolTipString = self.cb1.SetToolTip
 		self.cb1.SetToolTipString(_("Transparency for the detached frame of diagrams"))
 		self.cb1.SetValue(builtins.__dict__['TRANSPARENCY'])
+
+		### CheckBox for notification
+		self.cb11 = wx.CheckBox(self, wx.NewIdRef(), _('Notififcations'))
+		if wx.VERSION_STRING >= '4.0': self.cb11.SetToolTipString = self.cb11.SetToolTip
+		self.cb1.SetToolTipString(_("Enable the notification messages"))
+		self.cb11.SetValue(builtins.__dict__['NOTIFICATION'])
 
 		### wxPython version
 		wxv = [wx.VERSION_STRING]
@@ -115,6 +121,7 @@ class GeneralPanel(wx.Panel):
 		vsizer.Add(self.out_dir, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
 		vsizer.Add(hsizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
 		vsizer.Add(self.cb1, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
+		vsizer.Add(self.cb11, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
 		box1.Add(vsizer, 1, wx.EXPAND)
 
 		### Set sizer
@@ -135,6 +142,7 @@ class GeneralPanel(wx.Panel):
 		self.OnPluginsDirChanged(event)
 		self.OnOutDirChanged(event)
 		self.OnTransparancyChanged(event)
+		self.OnNotificationChanged(event)
 		self.OnwxPythonVersionChanged(event)
 
 		### if the version of wx has been changed in OnwxPythonVersionChanged, we inform the user.
@@ -195,6 +203,10 @@ class GeneralPanel(wx.Panel):
 	###
 	def OnTransparancyChanged(self, event):
 		builtins.__dict__['TRANSPARENCY'] = self.cb1.GetValue()
+
+		###
+	def OnNotificationChanged(self, event):
+		builtins.__dict__['NOTIFICATION'] = self.cb11.GetValue()
 
 	def OnwxPythonVersionChanged(self, event):
 		"""
@@ -705,7 +717,7 @@ class PreferencesGUI(wx.Frame):
 		hsizer = wx.BoxSizer(wx.HORIZONTAL)
 
 		hsizer.Add(self.cancel,0)
-		hsizer.Add(self.apply,0)
+		hsizer.Add(self.apply,0, wx.EXPAND|wx.LEFT, 5)
 		vsizer.Add(self.pref, 1, wx.ALL|wx.EXPAND, 5)
 		vsizer.Add(hsizer, 0, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
