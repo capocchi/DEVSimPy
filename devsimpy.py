@@ -64,7 +64,7 @@ __authors__ = "Laurent Capocchi <capocchi_l@univ-corse.fr>, SISU project group <
 __date__ = str(datetime.datetime.now())
 __version__ = '4.0'
 __docformat__ = 'epytext'
-__min_wx_version__ = ['4.0']
+__min_wx_version__ = '4.0'
 
 ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 
@@ -150,8 +150,7 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 				'DYNAMIC_STRUCTURE' : False, # Dynamic Structure for local PyPDEVS simulation
 				'REAL_TIME': False, ### PyPDEVS threaded real time simulation
 				'VERBOSE':False,
-				'TRANSPARENCY' : True, # Transparancy for DetachedFrame activated
-				'NOTIFICATION' : True, # Notification message activated
+				'TRANSPARENCY' : True, # Transparancy for DetachedFrame
 				'DEFAULT_PLOT_DYN_FREQ' : 100, # frequence of dynamic plot of QuickScope (to avoid overhead),
 				'DEFAULT_DEVS_DIRNAME':'PyDEVS', # default DEVS Kernel directory
 				'DEVS_DIR_PATH_DICT':{'PyDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyDEVS'),
@@ -187,7 +186,7 @@ from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
 from pluginmanager import load_plugins, enable_plugin
 from which import which
-from Utilities import GetUserConfigDir, install_and_import, printOnStatusBar, NotificationMessage, updatePackageWithPiP
+from Utilities import GetUserConfigDir, install_and_import, updatePackageWithPiP
 from Decorators import redirectStdout, BuzyCursorNotification
 from DetachedFrame import DetachedFrame
 from LibraryTree import LibraryTree
@@ -772,30 +771,20 @@ class MainApplication(wx.Frame):
 		### update text filed
 		level = self.spin.GetValue()
 
-		tb = self.GetToolBar()
-		
 		### update doward and upward button
-		tb.EnableTool(self.toggle_list[4], level != 0)
-		tb.EnableTool(self.toggle_list[5], level != 0)
+		self.tb.EnableTool(self.toggle_list[4], level != 0)
+		self.tb.EnableTool(self.toggle_list[5], level != 0)
 
 	def OnDeleteRecentFiles(self, event):
 		""" Delete the recent files list
 		"""
 	
-		dial = wx.MessageDialog(self, _('Do you want to clear the list of recent opened files?'), 'Clean Recent Opened Files List', wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-
-		### if local editor
-		if dial.ShowModal() == wx.ID_YES:
-			# update openFileList variable
-			self.openFileList = ['']*NB_OPENED_FILE
+		# update openFileList variable
+		self.openFileList = ['']*NB_OPENED_FILE
 		
-			# update config file
-			self.cfg.Write("openFileList", str(eval("self.openFileList")))
-			self.cfg.Flush()
-
-			NotificationMessage(_("Information"), _("Recent opened files list has been deleted!"), self, timeout=5)
-		
-		dial.Destroy()
+		# update config file
+		self.cfg.Write("openFileList", str(eval("self.openFileList")))
+		self.cfg.Flush()
 		
 	def OnCreatePerspective(self, event):
 		"""
@@ -1057,7 +1046,7 @@ class MainApplication(wx.Frame):
 		currentPage.scaley=max(currentPage.scaley+.05,.3)
 		currentPage.Refresh()
 
-		printOnStatusBar(self.statusbar,{0:_('Zoom In')})
+		self.statusbar.SetStatusText(_('Zoom In'))
 
 	###
 	def OnUnZoom(self, event):
@@ -1074,7 +1063,7 @@ class MainApplication(wx.Frame):
 		currentPage.scaley=currentPage.scaley-.05
 		currentPage.Refresh()
 
-		printOnStatusBar(self.statusbar,{0:_('Zoom Out')})
+		self.statusbar.SetStatusText(_('Zoom Out'))
 
 	###
 	def AnnuleZoom(self, event):
@@ -1091,7 +1080,7 @@ class MainApplication(wx.Frame):
 		currentPage.scaley = 1.0
 		currentPage.Refresh()
 
-		printOnStatusBar(self.statusbar,{0:_('No Zoom')})
+		self.statusbar.SetStatusText(_('No Zoom'))
 
 	###
 	def OnNew(self, event):
@@ -1296,9 +1285,10 @@ class MainApplication(wx.Frame):
 				# Refresh canvas
 				currentPage.Refresh()
 
-				tb = self.GetToolBar()
 				### enable save button on status bar
-				tb.EnableTool(Menu.ID_SAVE, diagram.modify)
+				self.tb.EnableTool(Menu.ID_SAVE, diagram.modify)
+
+				#self.statusbar.SetStatusText(_('%s saved')%diagram.last_name_saved)
 			else:
 				wx.MessageBox( _('Error saving file.') ,_('Error'), wx.OK | wx.ICON_ERROR)
 		else:
@@ -1372,9 +1362,8 @@ class MainApplication(wx.Frame):
 				else:
 					self.nb2.AddEditPage(label, diagram)
 
-				tb = self.GetToolBar()
 				### enable save button on status bar
-				tb.EnableTool(Menu.ID_SAVE, diagram.modify)
+				self.tb.EnableTool(Menu.ID_SAVE, diagram.modify)
 			else:
 				wx.MessageBox(_('Error saving file.'), _('Error'), wx.OK | wx.ICON_ERROR)
 
@@ -2003,16 +1992,14 @@ class MainApplication(wx.Frame):
 		else:
 			self.help.Display(os.path.join('html','toc.html'))
 
+	def OnUpdatePiPPackage(self, event):
+		updatePackageWithPiP()
+
 	def OnAPI(self, event):
 		""" Shows the DEVSimPy API help file. """
 
 		#webbrowser.open_new(opj(self.installDir + "/docs/api/index.html"))
 		wx.MessageBox(_("This option has not been implemented yet."), _('Info'), wx.OK|wx.ICON_INFORMATION)
-
-	def OnUpdatePiPPackage(self, event):
-		""" Update all pip package
-		"""
-		updatePackageWithPiP()
 
 	@BuzyCursorNotification
 	def OnAbout(self, event):
@@ -2054,7 +2041,7 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
 	def OnContact(self, event):
 		""" Launches the mail program to contact the DEVSimPy author. """
 
-		frame = SendMailWx(None)
+		frame = SendMailWx()
 		frame.Show()
 		   
 ##-------------------------------------------------------------------
@@ -2179,7 +2166,7 @@ class AdvancedSplashScreen(AdvancedSplash):
 
 		self.app.frame = MainApplication(None, wx.NewIdRef(), 'DEVSimPy %s'%__version__)
 
-		printOnStatusBar(self.app.frame.statusbar,{1:_('wxPython %s - python %s'%(wx.version(),platform.python_version()))})
+		self.app.frame.statusbar.SetStatusText(_('wxPython %s - python %s'%(wx.version(),platform.python_version())),1)
 
 		# keep in a attribute of stdio which is invisible until now
 		self.app.frame.stdioWin = self.app.stdioWin
@@ -2270,7 +2257,7 @@ class DEVSimPyApp(wx.App):
 		wx.App.__init__(self, redirect, filename)
 
 		# make sure we can create a GUI
-		if not self.IsDisplayAvailable() and not builtins.__dict__['GUI_FLAG']:
+		if not self.IsDisplayAvailable() and not builtins.__dict__.get('GUI_FLAG',True):
 
 			if wx.Platform == '__WXMAC__':
 				msg = """This program needs access to the screen.
@@ -2347,9 +2334,22 @@ class DEVSimPyApp(wx.App):
 		the main frame when it is time to do so.
 		"""
 
+		# Check runtime version
+		if wx.VERSION_STRING < __min_wx_version__:
+			wx.MessageBox(caption=_("Warning"),
+							message=_("You're using version %s of wxPython, but DEVSimPy was written for min version %s.\n"
+							"There may be some version incompatibilities...")
+							% (wx.VERSION_STRING, __min_wx_version__))
+		# For debugging
+        #self.SetAssertMode(wx.PYAPP_ASSERT_DIALOG|wx.PYAPP_ASSERT_EXCEPTION)
+
+		wx.SystemOptions.SetOption("mac.window-plain-transition", 1)
+		self.SetAppName("DEVSimPy")
+
 		# start our application with splash
 		splash = AdvancedSplashScreen(self)
 		splash.Show()
+
 
 		return True
 

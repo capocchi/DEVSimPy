@@ -24,7 +24,7 @@
 
 import builtins
 
-if builtins.__dict__['GUI_FLAG']:
+if builtins.__dict__.get('GUI_FLAG',True):
 	import wx
 	import wx.lib.dragscroller
 	import wx.lib.dialogs
@@ -72,7 +72,7 @@ from math import * ### for eval
 
 import DomainInterface.MasterModel
 
-if builtins.__dict__['GUI_FLAG']:
+if builtins.__dict__.get('GUI_FLAG',True):
 	import ConnectDialog
 	import DiagramConstantsDialog
 	import SpreadSheet
@@ -89,7 +89,7 @@ if builtins.__dict__['GUI_FLAG']:
 
 import Components
 
-if builtins.__dict__['GUI_FLAG']:
+if builtins.__dict__.get('GUI_FLAG',True):
 	import Menu
 
 #import ReloadModule
@@ -113,7 +113,7 @@ from Decorators import BuzyCursorNotification, StatusBarNotification, ProgressNo
 from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance, FixedList, getObjectFromString, getTopLevelWindow, printOnStatusBar
 from Patterns.Observer import Subject, Observer
 
-if builtins.__dict__['GUI_FLAG']:
+if builtins.__dict__.get('GUI_FLAG',True):
 	from DetachedFrame import DetachedFrame
 	from AttributeEditor import AttributeEditor, QuickAttributeEditor
 	from PropertiesGridCtrl import PropertiesGridCtrl
@@ -591,7 +591,7 @@ class Diagram(Savable, Structurable):
 	def GetGrandParent(self):
 		return self.GetParent().GetParent()
 
-	@cond_decorator(builtins.__dict__['GUI_FLAG'], ProgressNotification("DEVSimPy open file"))
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification("DEVSimPy open file"))
 	def LoadFile(self, fileName = None):
 		""" Function that load diagram from a file.
 		"""
@@ -613,7 +613,7 @@ class Diagram(Savable, Structurable):
 
 			return True
 
-	#@cond_decorator(builtins.__dict__['GUI_FLAG'], StatusBarNotification('Load'))
+	#@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), StatusBarNotification('Load'))
 	def LoadConstants(self, label):
 		""" Load Constants to general builtin.
 		"""
@@ -1483,7 +1483,7 @@ class PointShape(Shape):
 		self.graphic.fill = self.fill
 		self.graphic.draw(dc)
 
-if builtins.__dict__['GUI_FLAG']:
+if builtins.__dict__.get('GUI_FLAG',True):
 	#-------------------------------------------------------------------------------
 	class ShapeCanvas(wx.ScrolledWindow, Abstractable, Subject):
 		""" ShapeCanvas class.

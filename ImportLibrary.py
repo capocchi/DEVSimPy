@@ -157,7 +157,7 @@ class DeleteBox(wx.Dialog):
 #-------------------------------------------------------------------
 class ImportLibrary(wx.Dialog):
 	def __init__(self, *args, **kwargs):
-		wx.Dialog.__init__(self, *args, **kwargs)
+		super(ImportLibrary, self).__init__(*args, **kwargs)
 
 		### local copy
 		self.parent = args[0]
@@ -238,11 +238,11 @@ class ImportLibrary(wx.Dialog):
 		apply = wx.Button(rightPanel, id=wx.ID_OK, size=(100, -1))
 		cancel = wx.Button(rightPanel, id=wx.ID_CANCEL, size=(100, -1))
 
-		vbox2.Add(new, 0, wx.TOP, 2)
-		vbox2.Add(imp, 0, wx.TOP, 2)
+		vbox2.Add(new, 0, wx.TOP|wx.LEFT, 6)
+		vbox2.Add(imp, 0, wx.TOP|wx.LEFT, 6)
 		#vbox2.Add((-1, 5))
-		vbox2.Add(sel, 0, wx.TOP, 2)
-		vbox2.Add(des, 0, wx.TOP, 2)
+		vbox2.Add(sel, 0, wx.TOP|wx.LEFT, 6)
+		vbox2.Add(des, 0, wx.TOP|wx.LEFT, 6)
 
 		hbox1.Add(cancel, 1,  wx.ALL|wx.ALIGN_CENTER, 2)
 		hbox1.Add(apply, 1,  wx.ALL|wx.ALIGN_CENTER, 2)

@@ -32,7 +32,7 @@ _ = gettext.gettext
 from tempfile import gettempdir
 
 
-if builtins.__dict__['GUI_FLAG']:
+if builtins.__dict__.get('GUI_FLAG',True):
 	import wx
 	
 	if wx.VERSION_STRING < '2.9':
@@ -531,7 +531,7 @@ class DEVSComponent:
 			if not hasattr(devs, 'debugger'):
 				setattr(devs.__class__, DEVSComponent.debugger.__name__, DEVSComponent.debugger)
 			
-			if builtins.__dict__['GUI_FLAG']:
+			if builtins.__dict__.get('GUI_FLAG',True):
 				### to execute finish method of devs model (look at the SimulationGUI for message interception)
 				if hasattr(devs, 'finish'):
 					Publisher.subscribe(devs.finish, "%d.finished"%(id(devs)))

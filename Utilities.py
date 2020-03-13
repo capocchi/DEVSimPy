@@ -23,7 +23,7 @@ from itertools import combinations
 
 from io import StringIO
 
-if builtins.__dict__['GUI_FLAG']:
+if builtins.__dict__.get('GUI_FLAG',True):
 	import wx
 	
 	### for Phoenix
