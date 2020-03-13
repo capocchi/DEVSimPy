@@ -13,7 +13,7 @@ import heapq
 import pickle
 import cProfile, pstats, io
 
-if builtins.__dict__['GUI_FLAG']:
+if builtins.__dict__.get('GUI_FLAG',True):
 	import wx
 	if wx.VERSION_STRING < '4.0':
 		import wx.aui

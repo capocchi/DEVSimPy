@@ -2257,7 +2257,7 @@ class DEVSimPyApp(wx.App):
 		wx.App.__init__(self, redirect, filename)
 
 		# make sure we can create a GUI
-		if not self.IsDisplayAvailable() and not builtins.__dict__['GUI_FLAG']:
+		if not self.IsDisplayAvailable() and not builtins.__dict__.get('GUI_FLAG',True):
 
 			if wx.Platform == '__WXMAC__':
 				msg = """This program needs access to the screen.

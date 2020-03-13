@@ -538,8 +538,8 @@ class Savable(object):
 	### static attribut to store le extention/class available
 	DB  = DumpBase.PopulateDB()
 
-	@cond_decorator(builtins.__dict__['GUI_FLAG'], BuzyCursorNotification)
-	@cond_decorator(builtins.__dict__['GUI_FLAG'], StatusBarNotification('Sav'))
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), BuzyCursorNotification)
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), StatusBarNotification('Sav'))
 	def SaveFile(self, fileName = None):
 		""" Save object in fileName
 		"""
@@ -561,7 +561,7 @@ class Savable(object):
 			sys.stdout.write(_("\nUnknown extension: %s")%fileName)
 			return False
 
-	@cond_decorator(builtins.__dict__['GUI_FLAG'], StatusBarNotification('Load'))
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), StatusBarNotification('Load'))
 	def LoadFile(self, fileName = None):
 		""" Load object from fileName
 		"""

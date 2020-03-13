@@ -975,7 +975,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 				else:
 					for m in [a for a in list(self.model.getFlatComponentSet().values()) if hasattr(a, 'finish')]:
 						### call finished method
-						if builtins.__dict__['GUI_FLAG']:
+						if builtins.__dict__.get('GUI_FLAG',True):
 							#if wx.VERSION_STRING < '2.9':
 							try:
 								pub.sendMessage('%d.finished'%(id(m)))
