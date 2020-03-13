@@ -64,7 +64,7 @@ __authors__ = "Laurent Capocchi <capocchi_l@univ-corse.fr>, SISU project group <
 __date__ = str(datetime.datetime.now())
 __version__ = '4.0'
 __docformat__ = 'epytext'
-__min_wx_version__ = ['4.0']
+__min_wx_version__ = '4.0'
 
 ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 
@@ -186,7 +186,7 @@ from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
 from pluginmanager import load_plugins, enable_plugin
 from which import which
-from Utilities import GetUserConfigDir, install_and_import
+from Utilities import GetUserConfigDir, install_and_import, updatePackageWithPiP
 from Decorators import redirectStdout, BuzyCursorNotification
 from DetachedFrame import DetachedFrame
 from LibraryTree import LibraryTree
@@ -1992,6 +1992,9 @@ class MainApplication(wx.Frame):
 		else:
 			self.help.Display(os.path.join('html','toc.html'))
 
+	def OnUpdatePiPPackage(self, event):
+		updatePackageWithPiP()
+
 	def OnAPI(self, event):
 		""" Shows the DEVSimPy API help file. """
 
@@ -2331,9 +2334,22 @@ class DEVSimPyApp(wx.App):
 		the main frame when it is time to do so.
 		"""
 
+		# Check runtime version
+		if wx.VERSION_STRING < __min_wx_version__:
+			wx.MessageBox(caption=_("Warning"),
+							message=_("You're using version %s of wxPython, but DEVSimPy was written for min version %s.\n"
+							"There may be some version incompatibilities...")
+							% (wx.VERSION_STRING, __min_wx_version__))
+		# For debugging
+        #self.SetAssertMode(wx.PYAPP_ASSERT_DIALOG|wx.PYAPP_ASSERT_EXCEPTION)
+
+		wx.SystemOptions.SetOption("mac.window-plain-transition", 1)
+		self.SetAppName("DEVSimPy")
+
 		# start our application with splash
 		splash = AdvancedSplashScreen(self)
 		splash.Show()
+
 
 		return True
 

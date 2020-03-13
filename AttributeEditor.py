@@ -171,7 +171,6 @@ class AttributeEditorPanel(AttributeBase, wx.Panel):
 
 	def __init__(self, parent, ID, model, canvas):
 		"""     Constructor.
-
 		"""
 		# pour gerer l'affichage dans la page de gauche dans le notebook
 		wx.Panel.__init__(self, parent, ID)
