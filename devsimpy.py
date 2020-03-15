@@ -4,11 +4,11 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # devsimpy.py --- DEVSimPy - The Python DEVS GUI modeling and simulation software
 #                     --------------------------------
-#                            Copyright (c) 2019
+#                            Copyright (c) 2020
 #                    L. CAPOCCHI (capocchi@univ-corse.fr)
 #                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-# Version 4.0                                      last modified:  09/09/19
+# Version 4.0                                      last modified:  03/14/20
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -151,6 +151,7 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 				'REAL_TIME': False, ### PyPDEVS threaded real time simulation
 				'VERBOSE':False,
 				'TRANSPARENCY' : True, # Transparancy for DetachedFrame
+				'NOTIFICATION': True,
 				'DEFAULT_PLOT_DYN_FREQ' : 100, # frequence of dynamic plot of QuickScope (to avoid overhead),
 				'DEFAULT_DEVS_DIRNAME':'PyDEVS', # default DEVS Kernel directory
 				'DEVS_DIR_PATH_DICT':{'PyDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyDEVS'),
@@ -772,8 +773,10 @@ class MainApplication(wx.Frame):
 		level = self.spin.GetValue()
 
 		### update doward and upward button
-		self.tb.EnableTool(self.toggle_list[4], level != 0)
-		self.tb.EnableTool(self.toggle_list[5], level != 0)
+		tb = self.GetToolBar()
+		flag = level != 0
+		tb.EnableTool(self.toggle_list[4], flag)
+		tb.EnableTool(self.toggle_list[5], flag)
 
 	def OnDeleteRecentFiles(self, event):
 		""" Delete the recent files list
@@ -1286,7 +1289,8 @@ class MainApplication(wx.Frame):
 				currentPage.Refresh()
 
 				### enable save button on status bar
-				self.tb.EnableTool(Menu.ID_SAVE, diagram.modify)
+				tb = self.GetToolBar()
+				tb.EnableTool(Menu.ID_SAVE, diagram.modify)
 
 				#self.statusbar.SetStatusText(_('%s saved')%diagram.last_name_saved)
 			else:
@@ -1363,7 +1367,8 @@ class MainApplication(wx.Frame):
 					self.nb2.AddEditPage(label, diagram)
 
 				### enable save button on status bar
-				self.tb.EnableTool(Menu.ID_SAVE, diagram.modify)
+				tb = self.GetToolBar()
+				tb.EnableTool(Menu.ID_SAVE, diagram.modify)
 			else:
 				wx.MessageBox(_('Error saving file.'), _('Error'), wx.OK | wx.ICON_ERROR)
 
@@ -1647,7 +1652,8 @@ class MainApplication(wx.Frame):
 				## make DEVS instance from diagram
 					master = Container.Diagram.makeDEVSInstance(diagram)
 					if not isinstance(master, tuple):
-						simFrame = SimulationGUI.SimulationDialog(self, wx.NewIdRef(), _(" %s Simulator"%diagram.label), master)
+						simFrame = SimulationGUI.SimulationDialog(self, wx.NewIdRef(), _(" %s Simulator"%diagram.label))
+						simFrame.SetMaster(master)
 
 						### center and shit to avoid superposition
 						if simFrame:								

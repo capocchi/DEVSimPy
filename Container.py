@@ -2,12 +2,12 @@
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Container.py ---
+#                      --------------------------------
+#                            Copyright (c) 2020
+#                    L. CAPOCCHI (capocchi@univ-corse.fr)
+#                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-#                        Copyright (c) 2009
-#                       Laurent CAPOCCHI
-#                      University of Corsica
-#                     --------------------------------
-# Version 2.0                                        last modified: 04/14/16
+# Version 2.0                                        last modified: 03/15/20
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -847,13 +847,15 @@ class Diagram(Savable, Structurable):
 ##					obj = event.GetEventObject()
 					# si invocation à partir du bouton dans la toolBar (apparition de la frame de simulation dans une fenetre)
 					if isinstance(obj, wx.ToolBar) or 'Diagram' in obj.GetTitle():
-						frame = SimulationGUI.SimulationDialog(win, wx.NewIdRef(), _(" %s Simulator"%diagram.label), master)
+						frame = SimulationGUI.SimulationDialog(win, wx.NewIdRef(), _(" %s Simulator"%diagram.label))
+						frame.SetMaster(master)
 						frame.Show()
 					## si invocation par le menu (apparition de la frame de simulation dans le panel)
 					elif isinstance(obj, (wx.Menu, wx.Frame)):
 						sizer3 = wx.BoxSizer(wx.VERTICAL)
 						win.panel3.Show()
-						win.SimDiag = SimulationGUI.SimulationDialog(win.panel3, wx.NewIdRef(), _("Simulation Manager"), master)
+						win.SimDiag = SimulationGUI.SimulationDialog(win.panel3, wx.NewIdRef(), _("Simulation Manager"))
+						win.SimDiag.SetMaster(master)
 						sizer3.Add(win.SimDiag, 0, wx.EXPAND)
 						win.panel3.SetSizer(sizer3)
 						win.panel3.SetAutoLayout(True)

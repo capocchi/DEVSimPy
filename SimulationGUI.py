@@ -2,12 +2,12 @@
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # SimulationGUI.py ---
+#                    --------------------------------
+#                            Copyright (c) 2020
+#                    L. CAPOCCHI (capocchi@univ-corse.fr)
+#                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-#                        Copyright (c) 2010
-#                       Laurent CAPOCCHI
-#                      University of Corsica
-#                     --------------------------------
-# Version 2.0                                        last modified: 16/11/13
+# Version 2.0                                        last modified: 03/15/20
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -43,12 +43,13 @@ import re
 ### just for individual test
 if __name__ == '__main__':
 	builtins.__dict__['GUI_FLAG'] = True
+	builtins.__dict__['HOME_PATH'] = os.path.abspath(os.path.dirname(sys.argv[0]))
 	builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
 	builtins.__dict__['DEVS_DIR_PATH_DICT'] = {\
 	'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),\
-	'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}
+	'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS', 'old')}
 
-from Utilities import IsAllDigits, playSound, printOnStatusBar
+from Utilities import IsAllDigits, playSound, printOnStatusBar, NotificationMessage
 from pluginmanager import trigger_event, is_enable
 from Patterns.Strategy import *
 from Decorators import BuzyCursorNotification, hotshotit
@@ -73,13 +74,14 @@ if wx.VERSION_STRING >= '4.0':
 	wx.PyValidator = wx.Validator
 
 class MyBad(Exception):pass
+
 ###
 class TextObjectValidator(wx.PyValidator):
 	""" TextObjectValidator()
 	"""
 
-	def __init__(self):
-		wx.PyValidator.__init__(self)
+	def __init__(self, *args, **kwargs):
+		super(TextObjectValidator, self).__init__(*args, **kwargs)
 
 	def Clone(self):
 		return TextObjectValidator()
@@ -108,9 +110,10 @@ class TextObjectValidator(wx.PyValidator):
 class CollapsiblePanel(wx.Panel):
 	def __init__(self, parent, simdia):
 
-		wx.Panel.__init__(self, parent, -1)
+		wx.Panel.__init__(self, parent)
 
 		self.parent = parent
+
 		### frame or panel !!!
 		self.simdia = simdia
 
@@ -157,10 +160,10 @@ class CollapsiblePanel(wx.Panel):
 		text2 = wx.StaticText(pane, wx.NewIdRef(), _("%s algorithm:")%DEFAULT_DEVS_DIRNAME)
 
 		### list of possible strategy depending on the PyDEVS version
-		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
-			c = list(PYDEVS_SIM_STRATEGY_DICT.keys())
-		else:
-			c = list(PYPDEVS_SIM_STRATEGY_DICT.keys())
+		#if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
+		c = list(eval("%s_SIM_STRATEGY_DICT.keys()"%DEFAULT_DEVS_DIRNAME.upper()))
+		#else:
+		#	c = list(PYPDEVS_SIM_STRATEGY_DICT.keys())
 
 		### choice of strategy
 		ch1 = wx.Choice(pane, wx.NewIdRef(), choices=c)
@@ -191,10 +194,10 @@ class CollapsiblePanel(wx.Panel):
 			cb5.SetValue(builtins.__dict__['REAL_TIME'] and not builtins.__dict__['NTL'])
 
 		### default strategy
-		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
-			ch1.SetSelection(list(PYDEVS_SIM_STRATEGY_DICT.keys()).index(DEFAULT_SIM_STRATEGY))
-		else:
-			ch1.SetSelection(list(PYPDEVS_SIM_STRATEGY_DICT.keys()).index(DEFAULT_SIM_STRATEGY))
+		#if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
+		ch1.SetSelection(list(eval("%s_SIM_STRATEGY_DICT.keys()"%DEFAULT_DEVS_DIRNAME.upper())).index(DEFAULT_SIM_STRATEGY))
+		#else:
+		#	ch1.SetSelection(list(PYPDEVS_SIM_STRATEGY_DICT.keys()).index(DEFAULT_SIM_STRATEGY))
 
 		if wx.VERSION_STRING >= '4.0':
 			ch1.SetToolTipString=ch1.SetToolTip
@@ -273,41 +276,13 @@ class Base(object):
 		Frame or Panel with progress bar
 	"""
 
-	def __init__(self, parent, id, title, master):
+	def __init__(self, parent, id, title):
 		""" Constructor
 		"""
 
-#		if isinstance(parent, wx.Panel):
-#			wx.Panel.__init__(self, parent, id)
-#			self.SetBackgroundColour(wx.NullColour)
-#			self.panel = self
-#
-#			### panel inherit of the left splitter size
-#			self.panel.SetSize(parent.GetParent().GetSize())
-#
-#			# status bar of main application
-#			self.statusbar = parent.GetTopLevelParent().statusbar
-#		else:
-#			wx.Frame.__init__(self, parent, id, title, style= wx.DEFAULT_FRAME_STYLE)
-#
-#			### adapt size of frame depending on the plate-form
-#			if  '__WXMSW__' in wx.PlatformInfo:
-#				self.SetSize((320,280))
-#			else:
-#				self.SetSize((280,160))
-#
-#			# disable the roll out of the frame
-#			self.SetMinSize(self.GetSize())
-#
-#			self.panel = wx.Panel(self, -1)
-#
-#			wx.CallAfter(self.CreateBar)
-#
-#			self.__set_properties()
-
 		# local copy
 		self.parent = parent
-		self.master = master
+		#self.master = master
 		self.title = title
 
 		### current master for multi-simulation without simulationDialog reloading (show OnOk)
@@ -349,7 +324,7 @@ class Base(object):
 	def __widgets(self):
 
 		self._text1 = wx.StaticText(self.panel, wx.NewIdRef(), _('Final time:'))
-		self._value = wx.TextCtrl(self.panel, wx.NewIdRef(), str(float(self.master.FINAL_TIME)), validator=TextObjectValidator())
+		self._value = wx.TextCtrl(self.panel, wx.NewIdRef(), validator=TextObjectValidator())
 		self._btn1 = wx.Button(self.panel, wx.NewIdRef(), _('Run'))
 		self._btn2 = wx.Button(self.panel, wx.NewIdRef(), _('Stop'))
 		self._btn3 = wx.Button(self.panel, wx.NewIdRef(), _('Suspend'))
@@ -379,9 +354,15 @@ class Base(object):
 	def SetTime(self, time):
 		self._value.SetValue(time)
 
+	def SetMaster(self, master):
+		self.master = master
+		self._value.SetValue(str(float(self.master.FINAL_TIME)))
+
+	def GetMaster(self):
+		self.master
+
 	def __do_layout(self):
 
-		#vbox_top = wx.BoxSizer(wx.VERTICAL)
 		vbox_body = wx.BoxSizer(wx.VERTICAL)
 
 		#panel 1
@@ -396,24 +377,14 @@ class Base(object):
 		grid2.Add(self._btn2, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND)
 		grid2.Add(self._btn4, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND)
 
-		# panel4
-		#hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		#hbox1.Add(self._gauge, 1, wx.EXPAND, 9)
-
-		## panel5
-		#hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-		#hbox2.Add(self._cp, 1, wx.EXPAND, 9)
-
-		vbox_body.Add(grid1, 0, wx.EXPAND, 9)
+		vbox_body.Add(grid1, 0, wx.EXPAND|wx.TOP, 9)
+		vbox_body.Add((-1, 10))
 		vbox_body.Add(grid2, 0, wx.EXPAND, 9)
 		vbox_body.Add(self._gauge, 0, wx.EXPAND, 9)
 		vbox_body.Add(self._cp, 0, wx.EXPAND, 9)
 
 		# fin panel
-		#vbox_top.Add(vbox_body, 0, wx.EXPAND|wx.ALL, 9)
 		self.panel.SetSizer(vbox_body)
-
-#		vbox_body.Fit(self)
 
 		self._text1.SetFocus()
 		self._btn1.SetDefault()
@@ -794,7 +765,7 @@ class Base(object):
 class SimulationDialogPanel(Base, wx.Panel):
 	""" Simulation Dialog Panel 
 	""" 
-	def __init__(self, parent, id, title, master):
+	def __init__(self, parent, id, title):
 		""" Constructor
 		"""
 	
@@ -810,7 +781,14 @@ class SimulationDialogPanel(Base, wx.Panel):
 		# status bar of main application
 		self.statusbar = parent.GetTopLevelParent().statusbar
 		
-		Base.__init__(self, parent, id, title, master)
+		Base.__init__(self, parent, id, title)
+		#self.SetMaster(master)
+
+	def SetMaster(self, master):
+		Base.SetMaster(self, master)
+
+	def GetMaster(self):
+		return Base.GetMaster(self)
 
 class SimulationDialogFrame(Base, wx.Frame):
 	""" SimulationDialog(parent, id, title, master)
@@ -818,7 +796,7 @@ class SimulationDialogFrame(Base, wx.Frame):
 		Frame or Panel with progress bar
 	"""
 
-	def __init__(self, parent, id, title, master):
+	def __init__(self, parent, id, title):
 		""" Constructor
 		"""
 
@@ -826,21 +804,15 @@ class SimulationDialogFrame(Base, wx.Frame):
 		
 		wx.Frame.__init__(self, parent, id, title, style= wx.DEFAULT_FRAME_STYLE)
 
-		### adapt size of frame depending on the plate-form
-		#if  '__WXMSW__' in wx.PlatformInfo:
-		#	self.SetSize((320,280))
-		#else:
-		#	self.SetSize((280,160))
-
 		# disable the roll out of the frame
 		self.SetMinSize(self.GetSize())
 
-		self.panel = wx.Panel(self, -1)
+		self.panel = wx.Panel(self)
 
 		wx.CallAfter(self.CreateBar)
 		
-		Base.__init__(self, parent, id, title, master)
-		
+		Base.__init__(self, parent, id, title)
+
 		self.__set_properties()
 
 	def __set_properties(self):
@@ -849,6 +821,12 @@ class SimulationDialogFrame(Base, wx.Frame):
 		self.SetIcon(icon)
 
 		self.Center()
+	
+	def SetMaster(self, master):
+		Base.SetMaster(self, master)
+
+	def GetMaster(self):
+		return Base.GetMaster(self)
 		
 def SimulationDialog(*args):
 	parent = args[0]
@@ -900,7 +878,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 			Thread for DEVS simulation task
 		"""
 
-		def __init__(self, model = None, strategy = '', prof = False, ntl = False, verbose=False, dynamic_structure_flag=False, real_time_flag=False):
+		def __init__(self, model=None, strategy='', prof=False, ntl=False, verbose=False, dynamic_structure_flag=False, real_time_flag=False):
 			""" Constructor.
 			"""
 			threading.Thread.__init__(self)
@@ -988,7 +966,11 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 							m.finish(None)
 
 					### resionly for displayed application (-nogui)
-					if wx.GetApp() : wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
+					if wx.GetApp():
+						if self.prof:
+							NotificationMessage(_("Information"), _("Profiling report is available on Options->Profile"), None, timeout=5)
+
+						wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
 
 			self.end_flag = True
 
@@ -1018,19 +1000,20 @@ class TestApp(wx.App):
 
 		builtins.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
 		builtins.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'classic':'SimStrategy4', 'distribued':'SimStrategy5', 'parallel':'SimStrategy6'}
-		builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyPDEVS'
-		builtins.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}
-
+		
 		import gettext
-		import DomainInterface.MasterModel
+		#import DomainInterface.MasterModel
 
 		builtins.__dict__['ICON_PATH_16_16']=os.path.join('icons','16x16')
 		builtins.__dict__['DEFAULT_SIM_STRATEGY'] = 'original'
+		builtins.__dict__['DYNAMIC_STRUCTURE'] = False
+		builtins.__dict__['REAL_TIME'] = False
+		builtins.__dict__['VERBOSE'] = False
 		builtins.__dict__['NTL'] = False
 		builtins.__dict__['_'] = gettext.gettext
 
-
-		self.frame = SimulationDialog(None, wx.NewIdRef(), 'Simulator', DomainInterface.MasterModel.Master())
+		self.frame = SimulationDialog(wx.Frame(), wx.NewIdRef(), 'Simulator')
+		#self.frame.SetMaster(DomainInterface.MasterModel.Master())
 		self.frame.Show()
 		return True
 
@@ -1038,6 +1021,5 @@ class TestApp(wx.App):
 		self.Close()
 
 if __name__ == '__main__':
-
 	app = TestApp(0)
 	app.MainLoop()

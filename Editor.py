@@ -3,12 +3,11 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Editor.py ---
 #                     --------------------------------
-#                          Copyright (c) 2013
-#                           T. ville
-#                           Laurent CAPOCCHI
-#                         University of Corsica
+#                            Copyright (c) 2020
+#                    L. CAPOCCHI (capocchi@univ-corse.fr) & T. Ville
+#                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-# Version 1.0                                        last modified: 28/02/2014
+# Version 1.0                                        last modified: 03/15/2020
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
