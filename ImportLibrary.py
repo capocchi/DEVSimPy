@@ -3,11 +3,11 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # ImportLibrary.py --- Importing library dialog
 #                     --------------------------------
-#                                Copyright (c) 2009
-#                                 Laurent CAPOCCHI
-#                               University of Corsica
+#                            Copyright (c) 2020
+#                    L. CAPOCCHI (capocchi@univ-corse.fr)
+#                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-# Version 1.0                                      last modified:  15/04/09
+# Version 1.0                                      last modified:  15/03/20
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:

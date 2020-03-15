@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-# Observer.py --- Observer Pattern
+# Observer.py ---
+#                    --------------------------------
+#                            Copyright (c) 2020
+#                    L. CAPOCCHI (capocchi@univ-corse.fr)
+#                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-#                                Copyright (c) 2010
-#                                 Laurent CAPOCCHI
-#                               University of Corsica
-#                     --------------------------------
-# Version 1.0                                      last modified:  15/06/10
+# Version 2.0                                        last modified: 03/15/20
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
-#
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 

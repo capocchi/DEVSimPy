@@ -3,11 +3,11 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # DiagramNoteBook.py ---
 #                     --------------------------------
-#                            Copyright (c) 2013
-#                             Laurent CAPOCCHI
-#                          University of Corsica
+#                            Copyright (c) 2020
+#                    L. CAPOCCHI (capocchi@univ-corse.fr)
+#                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-# Version 1.0                                        last modified: 21/01/2018
+# Version 1.0                                        last modified: 03/15/2020
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -53,7 +53,7 @@ class GeneralNotebook(Printable):
 
 		# for splash screen
 		pub.sendMessage('object.added', message='Loading notebook diagram...\n')
-
+		
 		Printable.__init__(self)
 
 		# local copy

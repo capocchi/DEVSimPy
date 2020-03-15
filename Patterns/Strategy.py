@@ -3,11 +3,11 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Strategy.py --- Strategy Pattern
 #                     --------------------------------
-#                                Copyright (c) 2012
-#                                 Laurent CAPOCCHI
-#                               University of Corsica
+#                            Copyright (c) 2020
+#                    L. CAPOCCHI (capocchi@univ-corse.fr)
+#                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-# Version 1.0                                      last modified:  23/03/12
+# Version 1.0                                      last modified:  03/15/20
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -37,15 +37,14 @@ import re
 import os
 
 ### import the DEVS module depending on the selected DEVS package in DEVSKernel directory
-for pydevs_dir in builtins.__dict__['DEVS_DIR_PATH_DICT']:
-    path = builtins.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
+for pydevs_dir, path in builtins.__dict__['DEVS_DIR_PATH_DICT'].items():
     ### split from DEVSKernel string and replace separator with point
     d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
 
 	### for py 3.X
     import importlib
     exec("%s = importlib.import_module('DEVSKernel%s.DEVS')"%(pydevs_dir,d))
-
+        
     #exec("import DEVSKernel%s.DEVS as %s"%(d,pydevs_dir))
 
 #import DEVSKernel.PyDEVS.DEVS as PyDEVS
