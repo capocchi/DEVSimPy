@@ -527,48 +527,49 @@ class MainMenuBar(wx.MenuBar):
 		
 		menu = event.GetMenu()
 
-		posm = self.FindMenu(menu.GetTitle())
+		if menu:
+			posm = self.FindMenu(menu.GetTitle())
 
-		### if the opened menu is the File menu
-		if isinstance(menu, FileMenu):
-					
-			if wx.VERSION_STRING < '4.0':
-				### Before Phoenix Transition
-				### if item exist, we delete him
-				if menu.FindItemById(ID_RECENT):menu.Delete(ID_RECENT)
+			### if the opened menu is the File menu
+			if isinstance(menu, FileMenu):
+						
+				if wx.VERSION_STRING < '4.0':
+					### Before Phoenix Transition
+					### if item exist, we delete him
+					if menu.FindItemById(ID_RECENT):menu.Delete(ID_RECENT)
+				
+					### we insert the recent files menu
+					menu.InsertMenu(1, ID_RECENT, _("Recent files"), RecentFileMenu(self))
+				else:
+					if platform.system() == 'Windows':
+						### After Pnoenix Transition
+						self.Replace(posm, FileMenu(self), _("&File"))
+					else:
+						label = _("Recent files")
+						ID = menu.FindItem(label)
+						item, pos = menu.FindChildItem(ID)
+						menu.Remove(ID)
+						menu.Insert(pos, ID, label, RecentFileMenu(self))
+
+			elif isinstance(menu, SettingsMenu):
 			
-				### we insert the recent files menu
-				menu.InsertMenu(1, ID_RECENT, _("Recent files"), RecentFileMenu(self))
-			else:
-				if platform.system() == 'Windows':
+				if wx.VERSION_STRING < '4.0':
+					### Before Pnoenix Transition
+					### if item exist, we delete him
+					if menu.FindItemById(ID_PROFILE): menu.Delete(ID_PROFILE)
+				
+					### we insert the profile files menu
+					menu.InsertMenu(1, ID_PROFILE, _('Profile'),  ProfileFileMenu(self))
+				else:
 					### After Pnoenix Transition
-					self.Replace(posm, FileMenu(self), _("&File"))
-				else:
-					label = _("Recent files")
-					ID = menu.FindItem(label)
-					item, pos = menu.FindChildItem(ID)
-					menu.Remove(ID)
-					menu.Insert(pos, ID, label, RecentFileMenu(self))
-
-		elif isinstance(menu, SettingsMenu):
-		
-			if wx.VERSION_STRING < '4.0':
-				### Before Pnoenix Transition
-				### if item exist, we delete him
-				if menu.FindItemById(ID_PROFILE): menu.Delete(ID_PROFILE)
-			
-				### we insert the profile files menu
-				menu.InsertMenu(1, ID_PROFILE, _('Profile'),  ProfileFileMenu(self))
-			else:
-				### After Pnoenix Transition
-				if platform.system() == 'Windows':
-					self.Replace(posm, SettingsMenu(self), _("&Options"))
-				else:
-					label = _('Profile')
-					ID = menu.FindItem(label)
-					item, pos = menu.FindChildItem(ID)
-					menu.Remove(ID)
-					menu.Insert(pos, ID, label, ProfileFileMenu(self))
+					if platform.system() == 'Windows':
+						self.Replace(posm, SettingsMenu(self), _("&Options"))
+					else:
+						label = _('Profile')
+						ID = menu.FindItem(label)
+						item, pos = menu.FindChildItem(ID)
+						menu.Remove(ID)
+						menu.Insert(pos, ID, label, ProfileFileMenu(self))
 
 					
 	#def OnCloseMenu(self, event):
