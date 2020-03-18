@@ -1092,16 +1092,15 @@ class LibraryTree(wx.TreeCtrl):
 		else:
 			doc = inspect.getdoc(module)
 
-		mcc = self.MetricDico[item]['mcc']
-
-		doc += "".join([_("\n\n MacCabe Complexity: %d")%mcc])
+		### Add maccabe complexity measure
+		doc += "".join([_("\n\n MacCabe Complexity: %d")%elf.MetricDico[item]['mcc']])
 
 		if doc:
-			dlg = wx.lib.dialogs.ScrolledMessageDialog(self, doc, name, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+			dlg = wx.lib.dialogs.ScrolledMessageDialog(self, doc, _("%s Documentation")%name, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 			dlg.CenterOnParent(wx.BOTH)
 			dlg.ShowModal()
 		else:
-			wx.MessageBox(_('No documentation'), name, wx.OK|wx.ICON_INFORMATION)
+			wx.MessageBox(_("No documentation! \n Please define the documentation of the model %s in the header of its python file.")%name, _("%s Documentation")%name, wx.OK|wx.ICON_INFORMATION)
 
 	###
 	def OnInfo(self, event):
