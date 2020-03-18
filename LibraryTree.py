@@ -1092,6 +1092,10 @@ class LibraryTree(wx.TreeCtrl):
 		else:
 			doc = inspect.getdoc(module)
 
+		mcc = self.MetricDico[item]['mcc']
+
+		doc += "".join([_("\n\n MacCabe Complexity: %d")%mcc])
+
 		if doc:
 			dlg = wx.lib.dialogs.ScrolledMessageDialog(self, doc, name, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 			dlg.CenterOnParent(wx.BOTH)
