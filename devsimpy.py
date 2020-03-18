@@ -188,7 +188,7 @@ from PreferencesGUI import PreferencesGUI
 from pluginmanager import load_plugins, enable_plugin
 from which import which
 from Utilities import GetUserConfigDir, install_and_import, updatePackageWithPiP
-from Decorators import redirectStdout, BuzyCursorNotification
+from Decorators import redirectStdout, BuzyCursorNotification, ProgressNotification, cond_decorator
 from DetachedFrame import DetachedFrame
 from LibraryTree import LibraryTree
 from LibPanel import LibPanel
@@ -1998,6 +1998,7 @@ class MainApplication(wx.Frame):
 		else:
 			self.help.Display(os.path.join('html','toc.html'))
 
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification("DEVSimPy Update pip packages"))
 	def OnUpdatePiPPackage(self, event):
 		updatePackageWithPiP()
 
