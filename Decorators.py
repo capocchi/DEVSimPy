@@ -102,10 +102,10 @@ def BuzyCursorNotification(f):
 	""" Decorator which give the buzy cursor for long process
 	"""
 	def wrapper(*args):
-			wx.BeginBusyCursor()
+			wait = wx.BusyCursor()
 			#wx.SafeYield()
 			r =  f(*args)
-			wx.EndBusyCursor()
+			del wait
 			return r
 	return wrapper
 
@@ -142,24 +142,45 @@ def StatusBarNotification(f, arg):
 
 	return wrapper
 
+class ThreadWithReturnValue(threading.Thread):
+	def __init__(self, group=None, target=None, name=None, args=(), kwargs=None, *, daemon=None):
+		threading.Thread.__init__(self, group, target, name, args, kwargs, daemon=daemon)
+
+		self._return = None
+
+	def run(self):
+		if self._target is not None:
+			self._return = self._target(*self._args, **self._kwargs)
+
+	def join(self):
+		threading.Thread.join(self)
+		return self._return
+
 @decorator_with_args
-def ProgressNotification(f,arg):
+def ProgressNotification(f, arg):
 	def wrapper(*args):
-		txt = arg
+
+		thread = ThreadWithReturnValue(target = f, args = args)
+		thread.start()
+
+		title = arg
 		new_path = args[-1]
+		if isinstance(new_path, str) and os.path.isfile(new_path):
+			message = _("Loading %s ...")%os.path.basename(new_path)
+		else:
+			message = _('Please wait..')
 
-		progress_dlg = wx.ProgressDialog(txt,
-								"Loading %s ..."%os.path.basename(new_path), parent=None,
-								style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
-		progress_dlg.Pulse()
+		progress_dlg = wx.ProgressDialog(title, message, style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
 
-		#wx.SafeYield()
-
-		r = f(*args)
+		while thread.isAlive():
+			wx.MilliSleep(300)
+			progress_dlg.Pulse()
+			wx.SafeYield()
 
 		progress_dlg.Destroy()
+		
+		return thread.join()
 
-		return r
 	return wrapper
 
 def print_timing(func):

@@ -109,7 +109,7 @@ from Mixins.Abstractable import Abstractable
 ### for all dsp model build with old version of DEVSimPy
 sys.modules['Savable'] = sys.modules['Mixins.Savable']
 
-from Decorators import BuzyCursorNotification, StatusBarNotification, ProgressNotification, Pre_Undo, Post_Undo, cond_decorator
+from Decorators import BuzyCursorNotification, StatusBarNotification, Pre_Undo, Post_Undo, cond_decorator
 from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance, FixedList, getObjectFromString, getTopLevelWindow, printOnStatusBar
 from Patterns.Observer import Subject, Observer
 
@@ -591,7 +591,7 @@ class Diagram(Savable, Structurable):
 	def GetGrandParent(self):
 		return self.GetParent().GetParent()
 
-	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification("DEVSimPy open file"))
+	@BuzyCursorNotification
 	def LoadFile(self, fileName = None):
 		""" Function that load diagram from a file.
 		"""

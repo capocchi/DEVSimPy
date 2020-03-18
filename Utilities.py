@@ -181,13 +181,15 @@ def updatePackageWithPiP():
 	""" Update all installed package using pip
 	"""
 
+	updatePiP()
+	
 	if pip.__version__ > '10.0.1':
 		import pkg_resources
 		packages = [dist.project_name for dist in pkg_resources.working_set if 'PyPubSub' not in dist.project_name]
-		call("pip install --upgrade -r requirements.txt", shell=True)
+		call("pip install --user --upgrade -r requirements.txt", shell=True)
 	else:
 		packages = [dist.project_name for dist in pip.get_installed_distributions() if 'PyPubSub' not in dist.project_name]
-		call("pip install --upgrade " + ' '.join(packages), shell=True)
+		call("pip install --user --upgrade " + ' '.join(packages), shell=True)
 
 	NotificationMessage(_('Information'), 'All pip packages have been updated!', None, timeout=5)
 
