@@ -1182,10 +1182,12 @@ class MainApplication(wx.Frame):
 			currentPage.deselect()
 			diagram = currentPage.GetDiagram()
 			
+			last_name_saved = getattr(diagram,'last_name_saved', os.path.join(HOME_PATH, 'screenshot.png'))
+			
 			### options building
 			wcd = _("PNG files (*.png)|*.png|All files (*)|*)")
-			home = self.home or os.path.dirname(getattr(diagram,'last_name_saved', False)) or HOME_PATH if self.openFileList == ['']*NB_OPENED_FILE else self.home or os.path.dirname(self.openFileList[0])
-			save_dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=home, defaultFile='screenshot.png', wildcard=wcd, style=wx.SAVE | wx.OVERWRITE_PROMPT)
+			home = self.home or os.path.dirname(last_name_saved) or HOME_PATH if self.openFileList == ['']*NB_OPENED_FILE else self.home or os.path.dirname(self.openFileList[0])
+			save_dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=home, defaultFile=os.path.basename(last_name_saved), wildcard=wcd, style=wx.SAVE | wx.OVERWRITE_PROMPT)
 
 			if save_dlg.ShowModal() == wx.ID_OK:
 				save_dlg.Destroy()
@@ -1291,7 +1293,7 @@ class MainApplication(wx.Frame):
 		#if isinstance(diagram, Container.ContainerBlock):
 		#	Container.Block.OnExport(diagram, event)
 		#else:
-		if diagram.last_name_saved:
+		if getattr(diagram,'last_name_saved', False):
 
 			assert(os.path.isabs(diagram.last_name_saved))
 
@@ -1314,18 +1316,12 @@ class MainApplication(wx.Frame):
 		""" Save file menu as has been selected.
 		"""
 
-		#obj = event.GetEventObject()
-		#if isinstance(obj, wx.ToolBar) and isinstance(obj.GetParent(), DetachedFrame):
-		#	currentPage = obj.GetToolClientData(event.GetId())
-		#else:
 		currentPage = self.nb2.GetCurrentPage()
 
 		### deselect all model to initialize select attribut for all models
 		currentPage.deselect()
 
 		diagram = copy.deepcopy(currentPage.GetDiagram())
-
-		last_name_saved = diagram.last_name_saved
 
 		### options building
 		msg = "DEVSimPy files (*.dsp)|*.dsp|"
@@ -1335,8 +1331,7 @@ class MainApplication(wx.Frame):
 
 		wcd = _(msg)
 		home = self.home or os.path.dirname(diagram.last_name_saved) or HOME_PATH if self.openFileList == ['']*NB_OPENED_FILE else self.home or os.path.dirname(self.openFileList[0])
-		save_dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=home, defaultFile=last_name_saved, wildcard=wcd, style=wx.SAVE | wx.OVERWRITE_PROMPT)
-
+		save_dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=home, defaultFile=os.path.basename(diagram.last_name_saved), wildcard=wcd, style=wx.SAVE | wx.OVERWRITE_PROMPT)
 
 		if save_dlg.ShowModal() == wx.ID_OK:
 			path = os.path.normpath(save_dlg.GetPath())
