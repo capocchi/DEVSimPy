@@ -1151,15 +1151,25 @@ class MainApplication(wx.Frame):
 		"""
 		self.nb2.print_canvas = self.nb2.GetCurrentPage()
 		self.nb2.print_size = self.nb2.GetSize()
-		self.nb2.PrintButton(event)
+
+		if self.nb2.PrintButton(event):
+			NotificationMessage(_('Information'), _('Print has been well done'), parent=self, timeout=5)
+		else:
+			NotificationMessage(_('Error'), _('Print not possible!\n Check the trace in background for more informations.'), parent=self, flag=wx.ICON_ERROR, timeout=5)
+	
 	###
 	def OnPrintPreview(self, event):
 		""" Print preview of current diagram
 		"""
-
 		self.nb2.print_canvas = self.nb2.GetCurrentPage()
 		self.nb2.print_size = self.nb2.GetSize()
-		self.nb2.PrintPreview(event)
+	
+		if self.nb2.PrintPreview(event):
+			NotificationMessage(_('Information'), _('Print has been well done'), parent=self, timeout=5)
+		else:
+			NotificationMessage(_('Error'), _('Print not possible!\n Check the trace in background for more informations.'), parent=self, flag=wx.ICON_ERROR, timeout=5)
+	###
+
 	###
 	def OnScreenCapture(self, event):
 		""" Print preview of current diagram
