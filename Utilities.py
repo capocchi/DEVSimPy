@@ -211,7 +211,7 @@ def install(package):
 			dial = wx.MessageDialog(None, _('We find that the package %s is missing. \n\n Do you want to install him using pip?'%(package)), _('Install Package'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
 			if dial.ShowModal() == wx.ID_YES:
-				installed = pip.main(['install', '--user', package]) == 1
+				installed = not pip.main(['install', '--user', package])
 				dial.Destroy() 
 			else:
 				installed = False
