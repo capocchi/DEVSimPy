@@ -208,7 +208,7 @@ class FileMenu(wx.Menu):
 		recentFile.SetSubMenu(RecentFileMenu(parent))
 		AppendItem(recentFile)
 		self.AppendSeparator()
-		
+
 		AppendItem(saveModel)
 		AppendItem(saveAsModel)
 

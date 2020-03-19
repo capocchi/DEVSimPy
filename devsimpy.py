@@ -187,7 +187,7 @@ from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
 from pluginmanager import load_plugins, enable_plugin
 from which import which
-from Utilities import GetUserConfigDir, install_and_import, updatePackageWithPiP
+from Utilities import GetUserConfigDir, install, install_and_import, updatePackageWithPiP, NotificationMessage
 from Decorators import redirectStdout, BuzyCursorNotification, ProgressNotification, cond_decorator
 from DetachedFrame import DetachedFrame
 from LibraryTree import LibraryTree
@@ -1165,38 +1165,49 @@ class MainApplication(wx.Frame):
 		""" Print preview of current diagram
 		"""
 
+		### gi is in the pyobject package
 		try:
-			import gtk.gdk
+			import gi
+			package_installed = True
 		except ImportError:
-			id = event.GetId()
-			menu = self.GetMenuBar().FindItemById(id).GetMenu()
-			menuItem = menu.FindItemById(id)
-			### enable the menu
-			menuItem.Enable(False)
-			sys.stdout.write(_("Unable to import gtk module.\n"))
+			package = "pygobject"
+			package_installed = install(package)
+			
+		if package_installed:
+			import gi
+			gi.require_version("Gdk", "3.0")
+			import gi.repository.Gdk as gdk
+
+			currentPage = self.nb2.GetCurrentPage()
+			currentPage.deselect()
+			diagram = currentPage.GetDiagram()
+			
+			### options building
+			wcd = _("PNG files (*.png)|*.png|All files (*)|*)")
+			home = self.home or os.path.dirname(getattr(diagram,'last_name_saved', False)) or HOME_PATH if self.openFileList == ['']*NB_OPENED_FILE else self.home or os.path.dirname(self.openFileList[0])
+			save_dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=home, defaultFile='screenshot.png', wildcard=wcd, style=wx.SAVE | wx.OVERWRITE_PROMPT)
+
+			if save_dlg.ShowModal() == wx.ID_OK:
+				save_dlg.Destroy()
+				
+				### wait to avoid the message box that appear when a png already existe and ask to replace it !
+				time.sleep(2)
+
+				### screenshot for the whole window w
+				w = gdk.get_default_root_window()
+				pb = gdk.pixbuf_get_from_window(w, 0,0, w.get_width(), w.get_height())
+				### saving
+				if (pb != None):
+					path = os.path.normpath(save_dlg.GetPath())
+					ext = os.path.splitext(path)[-1][1:]
+					pb.savev(path, ext,  ["quality"], ["100"])
+
+					NotificationMessage(_('Information'), _("Screenshot saved in %s.")%path, parent=self, timeout=5)
+				else:
+					NotificationMessage(_('Error'), _("Unable to get the screenshot."), parent=self, flag=wx.ICON_ERROR, timeout=5)
 		else:
-			### dfault filename
-			fn = "screenshot.png"
+			NotificationMessage(_('Error'), _('%s is not installed.'%(package)), parent=self, flag=wx.ICON_ERROR, timeout=5)
 
-			#### filename dialog request
-			dlg = wx.TextEntryDialog(self, _('Enter a new name:'),_('ScreenShot Filename'), fn)
-			if dlg.ShowModal() == wx.ID_OK:
-				fn = dlg.GetValue()
-			dlg.Destroy()
-
-			### screenshot
-			w = gtk.gdk.get_default_root_window()
-			sz = w.get_size()
-			### "The size of the window is %d x %d" % sz
-			pb = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, False, 8, sz[0], sz[1])
-			pb = pb.get_from_drawable(w,w.get_colormap(), 0, 0, 0, 0, sz[0], sz[1])
-			### saving
-			if (pb != None):
-				ext = os.path.splitext(fn)[-1][1:]
-				pb.save(fn, ext)
-				wx.MessageBox(_("Screenshot saved in %s.")%fn, _("Success"), wx.OK|wx.ICON_INFORMATION)
-			else:
-				wx.MessageBox(_("Unable to get the screenshot."), _("Error"), wx.OK|wx.ICON_ERROR)
 	###
 	def OnUndo(self, event):
 		""" Undo the diagram

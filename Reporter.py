@@ -220,13 +220,11 @@ class ErrorDialog(BaseDialog):
         self.ShowModal()
 
     def DoLayout(self):
-        """
-        Layout the dialog and prepare it to be shown
+        """ Layout the dialog and prepare it to be shown
+            
+            **Note:**
 
-
-        **Note:**
-
-        *  Do not call this method in your code
+            *  Do not call this method in your code
         """
 
         # Objects
