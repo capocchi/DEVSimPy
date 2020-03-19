@@ -182,7 +182,7 @@ def updatePackageWithPiP():
 	"""
 
 	updatePiP()
-	
+
 	if pip.__version__ > '10.0.1':
 		import pkg_resources
 		packages = [dist.project_name for dist in pkg_resources.working_set if 'PyPubSub' not in dist.project_name]
@@ -194,26 +194,31 @@ def updatePackageWithPiP():
 	NotificationMessage(_('Information'), 'All pip packages have been updated!', None, timeout=5)
 
 def install_and_import(package):
-    try:
-        importlib.import_module(package)
-        installed = True
-    except:
+	""" Install and import the package
+	"""
+	installed = install(package)
+	if installed and package not in sys.modules: globals()[package] = importlib.import_module(package)
+	return installed
 
-        if pip.main(['search', package]) != 23:
-            dial = wx.MessageDialog(None, _('We find that the package %s is missing. \n\n Do you want to install him using pip?'%(package)), _('Install Package'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+def install(package):
+	""" Install the package
+	"""
+	try:
+		importlib.import_module(package)
+		installed = True
+	except ImportError:
+		if pip.main(['search', package]) != 23:
+			dial = wx.MessageDialog(None, _('We find that the package %s is missing. \n\n Do you want to install him using pip?'%(package)), _('Install Package'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
-            if dial.ShowModal() == wx.ID_YES:
-                pip.main(['install', package])
-                installed = True
-                dial.Destroy() 
-            else:
-                installed = False
-                dial.Destroy()
-    finally:
-        if installed : globals()[package] = importlib.import_module(package)
-	
-    return installed
-	
+			if dial.ShowModal() == wx.ID_YES:
+				installed = not pip.main(['install', '--user', package])
+				dial.Destroy() 
+			else:
+				installed = False
+				dial.Destroy()
+
+	return installed
+
 def getObjectFromString(scriptlet):
 	"""
 	"""
