@@ -1204,9 +1204,9 @@ class MainApplication(wx.Frame):
 
 					NotificationMessage(_('Information'), _("Screenshot saved in %s.")%path, parent=self, timeout=5)
 				else:
-					NotificationMessage(_('Error'), _("Unable to get the screenshot."), parent=self, flag=wx.ICON_ERROR, timeout=5)
+					NotificationMessage(_('Error'), _("Unable to get the screenshot. \n Check the trace in background for more informations."), parent=self, flag=wx.ICON_ERROR, timeout=5)
 		else:
-			NotificationMessage(_('Error'), _('%s is not installed.'%(package)), parent=self, flag=wx.ICON_ERROR, timeout=5)
+			NotificationMessage(_('Error'), _('%s is not installed. \n Check the trace in background for more informations.'%(package)), parent=self, flag=wx.ICON_ERROR, timeout=5)
 
 	###
 	def OnUndo(self, event):
