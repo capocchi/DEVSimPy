@@ -41,7 +41,7 @@ class PriorityGUI(wx.Frame):
 		if wx.VERSION_STRING >= '4.0':
 			self.listCtrl.SetToolTipString = self.listCtrl.SetToolTip
 		
-		self.listCtrl.SetToolTipString(_('Drag and drop a model in order to define its priority'))
+		self.listCtrl.SetToolTipString(_('Drag and drop a model in order to define its priority.'))
 
 		### id list not empty, first item is selected
 		if self.listCtrl.GetItemCount():
@@ -131,7 +131,8 @@ class TestApp(wx.App):
 	"""
 
 	def OnInit(self):
-
+		"""
+		"""
 
 		import builtins
 		import gettext
@@ -147,6 +148,5 @@ class TestApp(wx.App):
 		self.Close()
 
 if __name__ == '__main__':
-
 	app = TestApp(0)
 	app.MainLoop()

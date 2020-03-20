@@ -1,10 +1,30 @@
 # -*- coding: utf-8 -*-
 
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+# PluginGUI.py ---
+#                    --------------------------------
+#                            Copyright (c) 2020
+#                    L. CAPOCCHI (capocchi@univ-corse.fr)
+#                SPE Lab - SISU Group - University of Corsica
+#                     --------------------------------
+# Version 1.0                                        last modified: 03/20/20
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GENERAL NOTES AND REMARKS:
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GLOBAL VARIABLES AND FUNCTIONS
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 import wx
 import os
 import datetime
 import sys
-import imp
+import importlib
 import abc
 import re
 import zipimport
@@ -40,10 +60,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		self.id = -100000000
 		self.map = {}
 
-		images = [	os.path.join(ICON_PATH_16_16,'disable_plugin.png'),
-					os.path.join(ICON_PATH_16_16,'enable_plugin.png'),
-					os.path.join(ICON_PATH_16_16,'no_ok.png')
-					]
+		images = [os.path.join(ICON_PATH_16_16,s) for s in ('disable_plugin.png','enable_plugin.png','no_ok.png')]
 
 		self.il = wx.ImageList(16, 16)
 		for i in images:
@@ -293,7 +310,7 @@ class GeneralPluginsList(CheckListCtrl):
 		### if module is exception (or tuple)
 		if not inspect.ismodule(module):
 			error = str(module)
-			module = imp.new_module(basename)
+			module = importlib.new_module(basename)
 			module.__doc__ = error
 			module.__file__ = None
 
@@ -488,6 +505,7 @@ class BlockPluginsList(CheckListCtrl):
 		""" Return True if plugins.py file is in plug-ins package
 			Warning : importer.is_package('plug-ins') don't work !!!
 		"""
+		
 		zf = zipfile.ZipFile(model_path, 'r')
 		nl = zf.namelist()
 		zf.close()
@@ -497,14 +515,11 @@ class BlockPluginsList(CheckListCtrl):
 	def IsInRoot(model_path):
 		""" Return True is plugins.py is in zipfile
 		"""
+
 		zf = zipfile.ZipFile(model_path, 'r')
 		nl = zf.namelist()
 		zf.close()
 		return any([re.search("^plugins.py$", s) for s in nl])
-
-		#return 'plugins.py' in nl
-		#importer = zipimport.zipimporter(model_path)
-		#return importer.find_module('plug-ins') is not None
 
 	def GetPluginsList(self, model_path):
 		""" Get plug-ins list from plug-in file
@@ -573,6 +588,7 @@ class BlockPluginsList(CheckListCtrl):
 	def Clear(self):
 		""" Delete all items of list
 		"""
+
 		self.DeleteAllItems()
 		self.is_populate = False
 
@@ -594,8 +610,8 @@ class PluginsPanel(wx.Panel):
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 
 		### Panels
-		self.leftPanel = wx.Panel(self, wx.NewIdRef())
-		self.rightPanel = wx.Panel(self, wx.NewIdRef())
+		self.leftPanel = wx.Panel(self)
+		self.rightPanel = wx.Panel(self)
 
 		### plug-in documentation area
 		self.log = wx.TextCtrl(self.rightPanel, wx.NewIdRef(), size=(-1,150), style=wx.TE_MULTILINE)
@@ -624,21 +640,21 @@ class PluginsPanel(wx.Panel):
 		self.vbox2.Add((-1, 15))
 		self.vbox2.Add(selBtn, 0, wx.TOP, 5)
 		self.vbox2.Add(desBtn, 0, wx.TOP, 5)
-		self.vbox2.Add(wx.StaticLine(self.leftPanel), 0, wx.ALL|wx.EXPAND, 5)
-		self.vbox2.Add(self.configBtn)
+		self.vbox2.Add(wx.StaticLine(self.leftPanel), 0, wx.EXPAND|wx.TOP, 5)
+		self.vbox2.Add(self.configBtn, 0, wx.TOP, 5)
 
-		self.vbox1.Add(self.check_list, 1, wx.EXPAND | wx.TOP)
+		self.vbox1.Add(self.check_list, 1, wx.EXPAND|wx.TOP, 5)
 		self.vbox1.Add((-1, 10))
-		self.vbox1.Add(self.log, 0.5, wx.EXPAND)
+		self.vbox1.Add(self.log, 1, wx.EXPAND|wx.ALL, 5)
 
 		hbox.Add(self.rightPanel, 1, wx.EXPAND|wx.ALL)
-		hbox.Add(self.leftPanel, 0, wx.EXPAND | wx.RIGHT|wx.ALL, 5)
-		hbox.Add((3, -1))
+		hbox.Add(self.leftPanel, 0, wx.EXPAND|wx.ALL, 5)
+		#hbox.Add((3, -1))
 
 		### Set Sizer
 		self.leftPanel.SetSizer(self.vbox2)
 		self.rightPanel.SetSizer(self.vbox1)
-		self.SetSizer(hbox)
+		self.SetSizerAndFit(hbox)
 		#self.SetAutoLayout(True)
 
 		### Binding
@@ -801,7 +817,7 @@ class ModelPluginsManager(wx.Frame):
 		self.CheckList.OnEdit = self.OnEdit
 
 		self.CenterOnParent(wx.BOTH)
-		self.Layout()
+		self.Fit()
 
 	@staticmethod
 	def GetEditor(parent, model, filename=None):
@@ -933,9 +949,10 @@ class TestApp(wx.App):
 		import gettext
 
 		builtins.__dict__['HOME_PATH'] = os.getcwd()
+		builtins.__dict__['ICON_PATH_16_16']=os.path.join('icons','16x16')
 		builtins.__dict__['_'] = gettext.gettext
 
-		frame = ModelPluginsManager(parent=None, id=-1, title="Test", model=None)
+		frame = ModelPluginsManager(parent=None, title="Test", model=None)
 		frame.Show()
 		return True
 

@@ -812,7 +812,7 @@ class MainApplication(wx.Frame):
 		id = event.GetId()
 		item = self.GetMenuBar().FindItemById(id)
 		mgr = self.GetMGR()
-		mgr.LoadPerspective(self.perspectives[item.GetText()])
+		mgr.LoadPerspective(self.perspectives[item.GetItemLabelText()])
 
 	def OnDeletePerspective(self, event):
 		"""

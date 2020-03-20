@@ -763,12 +763,13 @@ class Diagram(Savable, Structurable):
 				if dial.ShowModal() == wx.ID_YES:
 					self.OnSimulation(event)
 			else:
-				frame = CheckerGUI.CheckerGUI(win, self)
+				frame = CheckerGUI.CheckerGUI(win, self.DoCheck())
+				frame.SetDiagram(self)
 				frame.Show()
 
 		### no models in diagram
 		else:
-			wx.MessageBox(_("Diagram is empty.\n\nPlease, drag-and-drop model from libraries control panel to build a diagram."),_('Error Manager'))
+			wx.MessageBox(_("Diagram is empty.\n\nPlease, drag-and-drop model from libraries control panel to build a diagram or load an existing diagram."),_('Error Manager'))
 
 	def OnSimulation(self, event):
 		""" Method calling the simulationGUI
@@ -800,7 +801,8 @@ class Diagram(Savable, Structurable):
 				playSound(SIMULATION_ERROR_SOUND_PATH)
 
 				if dial.ShowModal() == wx.ID_YES:
-					frame = CheckerGUI.CheckerGUI(win, self)
+					frame = CheckerGUI.CheckerGUI(win, self.DoCheck())
+					frame.SetDiagram(self)
 					frame.Show()
 
 				return False
@@ -868,7 +870,7 @@ class Diagram(Savable, Structurable):
 
 				return True
 		else:
-			wx.MessageBox(_("Diagram is empty. \nPlease, drag-and-drop model from libraries control panel to build a diagram."),_('Simulation Manager'))
+			wx.MessageBox(_("Diagram is empty.\n\nPlease, drag-and-drop model from libraries control panel to build a diagram or load an existing diagram.."),_('Simulation Manager'))
 			return False
 
 	def AddShape(self, shape, after = None):

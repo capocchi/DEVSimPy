@@ -61,6 +61,7 @@ class Selectable:
 
             ### ask new label
             d = LabelGUI.LabelDialog(canvas, self)
+            d.SetCanvas(canvas)
             d.ShowModal()
 
             ### update priority list if label is different and update panel properties only if is active

@@ -40,6 +40,12 @@ if __name__ == '__main__':
 	if path not in sys.path:
 		sys.path.append(path)
 	builtins.__dict__['GUI_FLAG'] = True
+	builtins.__dict__['HOME_PATH'] = os.path.abspath(os.path.dirname(sys.argv[0]))
+	builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
+	builtins.__dict__['DEVS_DIR_PATH_DICT'] = {\
+	'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),\
+	'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS', 'old')}
+	
 
 from wx.lib.mixins.listctrl import ListCtrlAutoWidthMixin, ColumnSorterMixin
 from Utilities import GetMails, getInstance
@@ -236,7 +242,8 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		"""
 		"""
 		item = self.GetItem(index, col)
-		return item.GetText()
+		return item.GetItemLabelText()
+		#return item.GetText()
 
 	#---------------------------------------------------
 	# These methods are callbacks for implementing the
@@ -286,7 +293,7 @@ class CheckerGUI(wx.Frame):
 	""" Class which report the code checking of python file
 	"""
 
-	def __init__(self, parent, diagram):
+	def __init__(self, parent, D):
 		""" Constructor.
 		"""
 		wx.Frame.__init__(self, parent, wx.NewIdRef(), _("DEVS Model Checking"), size=(900,400), style = wx.DEFAULT_FRAME_STYLE)
@@ -297,16 +304,15 @@ class CheckerGUI(wx.Frame):
 
 		### local copy
 		self.parent = parent
-		self.diagram = diagram
 
 		##############################################" comment for unitest
 		### prepare dictionary
-		
-		D = self.diagram.DoCheck()
-		self.list = self.getList(D)
+		try:
+			self.list = self.getList(D)
+		except:
+			self.list = VirtualList(self, D)
+			sys.stdout.write(_('Alone mode for CheckerGUI: List of plugins is not generated from a diagram.\n'))
 		#################################################
-
-		### self.list = VirtualList(self,D)
 
 		self.mainSizer = wx.BoxSizer(wx.VERTICAL)
 		controlSizer = wx.StdDialogButtonSizer() #wx.BoxSizer(wx.HORIZONTAL)
@@ -329,7 +335,6 @@ class CheckerGUI(wx.Frame):
 		self.SetSizer(self.mainSizer)
 		self.Center()
 
-
 		### just for windows
 		e = wx.SizeEvent(self.GetSize())
 		self.ProcessEvent(e)
@@ -338,15 +343,10 @@ class CheckerGUI(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.OnOK, id = ok_btn.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnUpdate, id = update_btn.GetId())
 
-	def OnClose(self,evt):
+	def SetDiagram(self, diagram):
+		""" Set the diagram.
 		"""
-		"""
-		self.Close()
-
-	def OnOK(self, evt):
-		"""
-		"""
-		self.Close()
+		self.diagram = diagram
 
 	def getList(self, D):
 		""" Return list to populate de virtualList
@@ -393,24 +393,33 @@ class CheckerGUI(wx.Frame):
 		""" Update list has been invocked
 		"""
 
-#		mainW = wx.GetApp().GetTopWindow()
-#		canvas = mainW.nb2.GetCurrentPage()
-#		diagram = canvas.GetDiagram()
-
 		### get list by ckecking all block models of the diagram
-		D = self.diagram.DoCheck()
-		L = self.getList(D)
+		if hasattr(self, 'diagram'):
+			D = self.diagram.DoCheck()
+			L = self.getList(D)
 
-		if isinstance(L, VirtualList):
-			self.list = L
+			if isinstance(L, VirtualList):
+				self.list = L
 
-			### display the updated list
-			self.listSizer.Hide(0)
-			self.listSizer.Remove(0)
-			self.listSizer.Add(self.list, 1, wx.EXPAND, 10)
-			self.Layout()
+				### display the updated list
+				self.listSizer.Hide(0)
+				self.listSizer.Remove(0)
+				self.listSizer.Add(self.list, 1, wx.EXPAND, 10)
+				self.Layout()
+			else:
+				sys.stdou.write(_('List not updated!'))
 		else:
-			sys.stdou.write(_('List not updated!'))
+			sys.stdout.write(_('Call the SetDiagram method to define the diagram object.'))
+
+	def OnClose(self,evt):
+		"""
+		"""
+		self.Close()
+
+	def OnOK(self, evt):
+		"""
+		"""
+		self.Close()
 
 ### ------------------------------------------------------------
 class TestApp(wx.App):

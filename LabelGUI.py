@@ -25,7 +25,18 @@ import os
 import wx
 from wx import xrc
 
-from AttributeEditor import AttributeBase
+### just for individual test
+if __name__ == '__main__':
+	import builtins
+
+	builtins.__dict__['GUI_FLAG'] = True
+	builtins.__dict__['HOME_PATH'] = os.path.abspath(os.path.dirname(sys.argv[0]))
+	builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
+	builtins.__dict__['DEVS_DIR_PATH_DICT'] = {\
+	'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),\
+	'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS', 'old')}
+else:
+	from AttributeEditor import AttributeBase
 
 __res = None
 
@@ -65,8 +76,6 @@ class LabelDialog(wx.Dialog):
 		### local copy
 		self.block = block
 		self.parent = parent
-
-		self.canvas = self.parent.canvas
 		
 		_xrcName = "LabelEditorFrame"
 		
@@ -120,12 +129,17 @@ class LabelDialog(wx.Dialog):
 			self.old_label = txt
 			self.old_pos = self.block.label_pos
 
+	def SetCanvas(self, canvas):
+		"""
+		"""
+		self.canvas = canvas
+
 	def OnTextChange(self, evt):
 		""" Text in CtrlText change
 			dynamic update of label during edition
 		"""
 		txt = self.label_txtCtrl.GetValue()
-		if txt != "" and self.block:
+		if hasattr(self, 'canvas') and txt != "" and self.block:
 			self.block.label=txt
 
 			### update of block from canvas
