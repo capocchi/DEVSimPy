@@ -44,8 +44,8 @@ if __name__ == '__main__':
 
 from HtmlWindow import HtmlFrame
 
-from PluginsGUI import PluginsPanel, GeneralPluginsList, ModelPluginsManager
-from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, getPYFileListFromInit, AddToInitFile, DelToInitFile
+from PluginsGUI import PluginsPanel, GeneralPluginsList
+from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, AddToInitFile, DelToInitFile
 
 import ReloadModule
 import Menu

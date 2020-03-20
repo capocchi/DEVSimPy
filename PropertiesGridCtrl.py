@@ -934,6 +934,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 		elif prop == 'label':
 
 			d = LabelGUI.LabelDialog(self.parent, self.parent.model)
+			d.SetCanvas(self.parent.canvas)
 			d.ShowModal()
 
 			self.SetCellValue(row,1,str(self.parent.model.label))

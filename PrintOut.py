@@ -117,8 +117,11 @@ class Printable:
 
         if printer.Print(parent, printout, True):
             self.printData = wx.PrintData(printer.GetPrintDialogData().GetPrintData())
-        printout.Destroy()
-
+            printout.Destroy()
+            return True
+        else:
+            printout.Destroy()
+            return False
 
     def PrintPreview(self, event):
 
@@ -141,9 +144,11 @@ class Printable:
             pfrm.SetPosition((300, 200))
             pfrm.SetSize((550, 700))
             pfrm.Show(True)
+            return True
             
         else:
             sys.stderr.write(_("Problem on print preview...\n"))
+            return False
 
     def PageSetup(self, evt):
         psdd = wx.PageSetupDialogData(self.printData)
