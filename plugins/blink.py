@@ -17,7 +17,7 @@ import pluginmanager
 
 from types import MethodType
 
-from Container import DetachedFrame, ConnectionShape
+from Container import DetachedFrame, ConnectionShape, CodeBlock, ContainerBlock
 from FindGUI import FindReplace
 from Utilities import MoveFromParent
 from Patterns.Observer import Subject
@@ -155,29 +155,35 @@ def blink_manager(*args, **kwargs):
 			else:
 				color = old_fill
 
-			dastyle = wx.TextAttr()
-			dastyle.SetTextColour(color[0])
-			frame.txt.SetDefaultStyle(dastyle)
-
-			wx.CallAfter(frame.txt.write,(f))
-			#frame.txt.write(f)
-
 			state = sender.GetState()
-			state['fill'] = color
-			sender.notify()
 
-			try:
-			### step engine
-				frame.flag = False
-				while not frame.flag:
+			### blink frame is always active
+			if frame:
+				dastyle = wx.TextAttr()
+				dastyle.SetTextColour(color[0])
+				frame.txt.SetDefaultStyle(dastyle)
+
+				wx.CallAfter(frame.txt.write,(f))
+				#frame.txt.write(f)
+
+				state['fill'] = color
+				sender.notify()
+
+				try:
+				### step engine
+					frame.flag = False
+					while not frame.flag:
+						pass
+				except:
 					pass
-			except:
-				pass
-
-			### update color
-			#state['fill'] = old_fill
-			#sender.notify()
-
+					
+			### blink frame has been closed
+			else:
+				### assign the default color
+				color = CodeBlock.FILL if isinstance(block, CodeBlock) else ContainerBlock.FILL
+				state['fill'] = color
+				sender.notify()
+				
 			### add model d to observer list
 			sender.detach(block)
 
@@ -306,5 +312,6 @@ class BlinkFrame(wx.Frame):
 	def OnClose(self, evt):
 		"""
 		"""
-		
+		self.flag = True
+		#self.Destroy()
 		evt.Skip()
