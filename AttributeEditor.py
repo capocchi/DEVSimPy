@@ -150,6 +150,7 @@ class AttributeBase(object):
 	def OnClose(self, event):
 		self.canvas.UpdateShapes()
 		self.Destroy()
+		event.Skip()
 
 def AttributeEditor(*args,**kwargs):
 	""" Factory function
@@ -273,6 +274,7 @@ class QuickAttributeEditor(wx.Frame, Subject):
 	###
 	def OnClose(self, event):
 		self.Destroy()
+		event.Skip()
 
 def main():
     pass

@@ -684,6 +684,8 @@ class Diagram(Savable, Structurable):
 		### we can update the devs priority list during the simulation ;-)
 		self.updateDEVSPriorityList()
 
+		event.Skip()
+
 	def OnAddConstants(self, event):
 		""" Method that add constant parameters in order to simplify the modling codeBlock model
 		"""
@@ -1976,11 +1978,13 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			self.deselect()
 			self.Refresh()
 
-			### destruction du dialogue
+			### Destroy the dialog
 			try:
 				self.dlgConnection.Destroy()
 			except:
 				pass
+			
+			event.Skip()
 
 		def OnMiddleDown(self, event):
 			"""

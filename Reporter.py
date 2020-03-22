@@ -54,6 +54,7 @@ class BaseDialog(wx.Dialog):
         """ User canceled the dialog. """
 
         self.EndModal(wx.ID_CANCEL)
+        event.Skip()
 
     def OnKeyUp(self, event):
         """ Handles the wx.EVT_CHAR_HOOK event for the dialog. """

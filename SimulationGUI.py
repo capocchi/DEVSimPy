@@ -713,13 +713,15 @@ class Base(object):
 
 			### if user wants to stop simulation process
 			if dial.ShowModal() == wx.ID_YES:
-				self.DestroyWin()
 				self.thread.terminate(False)
+				self.DestroyWin()
 			else:
 				self.thread.resume_thread()
 
 		else:
 			self.DestroyWin()
+
+		event.Skip()
 
 	def ErrorManager(self, msg):
 		""" An error is occurred.

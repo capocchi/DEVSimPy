@@ -159,8 +159,8 @@ def blink_manager(*args, **kwargs):
 			dastyle.SetTextColour(color[0])
 			frame.txt.SetDefaultStyle(dastyle)
 
-			#wx.CallAfter(frame.txt.write,(f))
-			frame.txt.write(f)
+			wx.CallAfter(frame.txt.write,(f))
+			#frame.txt.write(f)
 
 			state = sender.GetState()
 			state['fill'] = color
@@ -175,8 +175,8 @@ def blink_manager(*args, **kwargs):
 				pass
 
 			### update color
-			state['fill'] = old_fill
-			sender.notify()
+			#state['fill'] = old_fill
+			#sender.notify()
 
 			### add model d to observer list
 			sender.detach(block)
@@ -204,12 +204,13 @@ class BlinkFrame(wx.Frame):
 
 		wx.Frame.__init__(self, *args, **kwds)
 
-		self.panel = wx.Panel(self, wx.NewIdRef())
+		self.panel = wx.Panel(self)
+		
 		self.button_clear = wx.Button(self.panel, wx.ID_CLEAR)
 		self.button_step = wx.Button(self.panel, wx.ID_FORWARD)
 		self.button_find = wx.Button(self.panel, wx.ID_FIND)
 		self.button_selectall = wx.Button(self.panel, wx.ID_SELECTALL)
-		self.txt = wx.TextCtrl(self.panel, wx.NewIdRef(), style = wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_RICH2)
+		self.txt = wx.TextCtrl(self.panel, style = wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_RICH2)
 
 		MoveFromParent(self, interval=10, direction='right')
 
@@ -229,6 +230,7 @@ class BlinkFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.OnClear, id=self.button_clear.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnSelectAll, id=self.button_selectall.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnFindReplace, id=self.button_find.GetId())
+		self.Bind(wx.EVT_CLOSE, self.OnClose)
 
 	def __set_properties(self):
 		self.txt.SetMinSize((390, 300))
@@ -264,12 +266,14 @@ class BlinkFrame(wx.Frame):
 		"""
 		nb = self.txt.GetNumberOfLines()
 		parent = self.GetParent()
+		
 		### si plus de sortie text dans le Logger, alors on ferme la fentre et on stop la simulation
 		if nb != self.lenght:
 			self.lenght = nb
 		else:
 			self.Close()
 			parent.OnStop(evt)
+		
 		self.flag = True
 		self.button_clear.Enable(True)
 
@@ -298,3 +302,9 @@ class BlinkFrame(wx.Frame):
 		""" Call find and replace dialogue
 		"""
 		FindReplace(self, wx.NewIdRef(), _('Find/Replace'))
+
+	def OnClose(self, evt):
+		"""
+		"""
+		self.Destroy()
+		evt.Skip()
