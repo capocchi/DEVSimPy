@@ -204,11 +204,7 @@ class BlinkFrame(wx.Frame):
 	def __init__(self, *args, **kwds):
 		""" Constructor.
 		"""
-
-		#kwds["style"] = wx.DEFAULT_FRAME_STYLE
-		#kwds["size"] = (400, 420)
-
-		wx.Frame.__init__(self, *args, **kwds)
+		super(BlinkFrame, self).__init__(*args, **kwds)
 
 		### just for the start of the frame
 		self.flag = True
@@ -217,13 +213,13 @@ class BlinkFrame(wx.Frame):
 
 	def OnInit(self):
 
-		self.panel = wx.Panel(self)
+		panel = wx.Panel(self)
 		
-		self.button_clear = wx.Button(self.panel, wx.ID_CLEAR)
-		self.button_step = wx.Button(self.panel, wx.ID_FORWARD)
-		self.button_find = wx.Button(self.panel, wx.ID_FIND)
-		self.button_selectall = wx.Button(self.panel, wx.ID_SELECTALL)
-		self.txt = wx.TextCtrl(self.panel, style = wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_RICH2)
+		self.button_clear = wx.Button(panel, wx.ID_CLEAR)
+		self.button_step = wx.Button(panel, wx.ID_FORWARD)
+		self.button_find = wx.Button(panel, wx.ID_FIND)
+		self.button_selectall = wx.Button(panel, wx.ID_SELECTALL)
+		self.txt = wx.TextCtrl(panel, style = wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_RICH2)
 
 		### to close the frame when this attribute don't change
 		self.lenght = self.txt.GetNumberOfLines()
@@ -231,10 +227,12 @@ class BlinkFrame(wx.Frame):
 		MoveFromParent(self, interval=10, direction='right')
 
 		self.__set_properties()
-		self.__do_layout()
+		sizer = self.__do_layout()
+
+		panel.SetSizerAndFit(sizer)
 
 		### just for window
-		self.SetClientSize(self.panel.GetBestSize())
+		self.SetClientSize(panel.GetBestSize())
 
 		self.Bind(wx.EVT_BUTTON, self.OnStep, id=self.button_step.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnClear, id=self.button_clear.GetId())
@@ -244,32 +242,36 @@ class BlinkFrame(wx.Frame):
 
 	def __set_properties(self):
 		self.txt.SetMinSize((390, 300))
+		txt1 = _("Press this button in order to go step by step in the simulation.")
+		txt2 = ("Press this button in order to clean the output of the simulation.")
+		txt3 = _("Press this button in order to launch the search window.")
+
 		if wx.VERSION_STRING < '4.0':
-			self.button_step.SetToolTipString(_("Press this button in order to go step by step in the simulation."))
-			self.button_clear.SetToolTipString(_("Press this button in order to clean the output of the simulation."))
-			self.button_find.SetToolTipString(_("Press this button in order to launch the search window."))
+			self.button_step.SetToolTipString(txt1)
+			self.button_clear.SetToolTipString(txt2)
+			self.button_find.SetToolTipString(txt3)
 		else:
-			self.button_step.SetToolTip(_("Press this button in order to go step by step in the simulation."))
-			self.button_clear.SetToolTip(_("Press this button in order to clean the output of the simulation."))
-			self.button_find.SetToolTip(_("Press this button in order to launch the search window."))
+			self.button_step.SetToolTip(txt1)
+			self.button_clear.SetToolTip(txt2)
+			self.button_find.SetToolTip(txt3)
 
 		self.button_step.SetDefault()
 
 	def __do_layout(self):
 
-		sizer_2 = wx.BoxSizer(wx.VERTICAL)
-		sizer_2.Add(self.txt, 1, wx.EXPAND)
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
 
-		grid_sizer_1 = wx.BoxSizer(wx.HORIZONTAL)
-		grid_sizer_1.Add(self.button_selectall, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE)
-		grid_sizer_1.Add(self.button_find, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE)
-		grid_sizer_1.Add(self.button_clear, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE)
+		vbox.Add(self.txt, 1, wx.EXPAND)
+		vbox.Add((-1,5))
+		hbox.Add(self.button_selectall, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, 5)
+		hbox.Add(self.button_find, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, 5)
+		hbox.Add(self.button_clear, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, 5)
+		vbox.Add(hbox, 0, wx.EXPAND)
+		vbox.Add((-1,5))
+		vbox.Add(self.button_step, 0, wx.ALIGN_RIGHT, 5)
 
-		sizer_2.Add(grid_sizer_1, 0, wx.EXPAND)
-
-		sizer_2.Add(self.button_step, 0, wx.ALIGN_RIGHT)
-
-		self.panel.SetSizerAndFit(sizer_2)
+		return vbox
 
 	def OnStep(self, evt):
 		"""
