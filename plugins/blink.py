@@ -306,5 +306,5 @@ class BlinkFrame(wx.Frame):
 	def OnClose(self, evt):
 		"""
 		"""
-		self.Destroy()
+		
 		evt.Skip()
