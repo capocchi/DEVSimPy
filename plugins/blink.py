@@ -158,7 +158,7 @@ def blink_manager(*args, **kwargs):
 			state = sender.GetState()
 
 			### blink frame is always active
-			if frame:
+			if frame and frame.IsShown():
 				dastyle = wx.TextAttr()
 				dastyle.SetTextColour(color[0])
 				frame.txt.SetDefaultStyle(dastyle)
@@ -205,10 +205,17 @@ class BlinkFrame(wx.Frame):
 		""" Constructor.
 		"""
 
-		kwds["style"] = wx.DEFAULT_FRAME_STYLE
-		kwds["size"] = (400, 420)
+		#kwds["style"] = wx.DEFAULT_FRAME_STYLE
+		#kwds["size"] = (400, 420)
 
 		wx.Frame.__init__(self, *args, **kwds)
+
+		### just for the start of the frame
+		self.flag = True
+
+		self.OnInit()
+
+	def OnInit(self):
 
 		self.panel = wx.Panel(self)
 		
@@ -218,16 +225,13 @@ class BlinkFrame(wx.Frame):
 		self.button_selectall = wx.Button(self.panel, wx.ID_SELECTALL)
 		self.txt = wx.TextCtrl(self.panel, style = wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_RICH2)
 
+		### to close the frame when this attribute don't change
+		self.lenght = self.txt.GetNumberOfLines()
+
 		MoveFromParent(self, interval=10, direction='right')
 
 		self.__set_properties()
 		self.__do_layout()
-
-		### just for the start of the frame
-		self.flag = True
-
-		### to close the frame when this attribute don't change
-		self.lenght = self.txt.GetNumberOfLines()
 
 		### just for window
 		self.SetClientSize(self.panel.GetBestSize())
@@ -271,14 +275,14 @@ class BlinkFrame(wx.Frame):
 		"""
 		"""
 		nb = self.txt.GetNumberOfLines()
-		parent = self.GetParent()
 		
 		### si plus de sortie text dans le Logger, alors on ferme la fentre et on stop la simulation
 		if nb != self.lenght:
 			self.lenght = nb
 		else:
-			self.Close()
+			parent = self.GetParent()
 			parent.OnStop(evt)
+			self.Close()
 		
 		self.flag = True
 		self.button_clear.Enable(True)
