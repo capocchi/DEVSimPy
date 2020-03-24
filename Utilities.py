@@ -212,7 +212,7 @@ def updateFromGit():
 	"""
 	"""
 	# specifying the zip file name 
-	fn = downloadFromURL(os.path.join("https://github.com/capocchi/DEVSimPy/archive/version-",__version__,".zip")
+	fn = downloadFromURL(os.path.join("https://github.com/capocchi/DEVSimPy/archive/version-",__version__,".zip"))
 	
 	if fn:
 		# opening the zip file in READ mode 
