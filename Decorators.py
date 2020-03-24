@@ -41,7 +41,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 	else:
 		import wx.lib.agw.aui.framemanager
 		AuiFloatingFrame = wx.lib.agw.aui.framemanager.AuiFloatingFrame
-		
+
 def cond_decorator(flag, dec):
 	def decorate(fn):
 		return dec(fn) if flag else fn
@@ -143,11 +143,10 @@ def StatusBarNotification(f, arg):
 	return wrapper
 
 class ThreadWithReturnValue(threading.Thread):
-	def __init__(self, group=None, target=None, name=None, args=(), kwargs=None, *, daemon=None):
-		threading.Thread.__init__(self, group, target, name, args, kwargs, daemon=daemon)
-
+	def __init__(self, *args, **kwargs): 
+		super(ThreadWithReturnValue, self).__init__(*args, **kwargs) 
 		self._return = None
-
+	
 	def run(self):
 		if self._target is not None:
 			self._return = self._target(*self._args, **self._kwargs)
@@ -160,9 +159,6 @@ class ThreadWithReturnValue(threading.Thread):
 def ProgressNotification(f, arg):
 	def wrapper(*args):
 
-		thread = ThreadWithReturnValue(target = f, args = args)
-		thread.start()
-
 		title = arg
 		new_path = args[-1]
 		if isinstance(new_path, str) and os.path.isfile(new_path):
@@ -170,15 +166,21 @@ def ProgressNotification(f, arg):
 		else:
 			message = _('Please wait..')
 
-		progress_dlg = wx.ProgressDialog(title, message, style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
+		# main window
+		mainW = wx.GetApp().GetTopWindow()
+
+		progress_dlg = wx.ProgressDialog(title, message, style=wx.PD_APP_MODAL|wx.PD_CAN_ABORT)
+
+		thread = ThreadWithReturnValue(target = f, args = args)
+		thread.start()
 
 		while thread.isAlive():
 			wx.MilliSleep(300)
-			progress_dlg.Pulse()
+			progress_dlg.Pulse()	
 			wx.SafeYield()
 
 		progress_dlg.Destroy()
-		
+
 		return thread.join()
 
 	return wrapper

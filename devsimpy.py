@@ -82,6 +82,8 @@ import wx
 
 sys.stdout.write("Importing wxPython %s%s for python %s on %s (%s) platform...\n"%(wx.version(), " from devsimpy.ini" if ini_exist else '', platform.python_version(), platform.system(), platform.version()))
 
+_ = wx.GetTranslation
+
 try:
 	import wx.aui as aui
 except:
@@ -187,7 +189,7 @@ from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
 from pluginmanager import load_plugins, enable_plugin
 from which import which
-from Utilities import GetUserConfigDir, install, install_and_import, updatePackageWithPiP, NotificationMessage
+from Utilities import GetUserConfigDir, install, install_and_import, updatePackageWithPiP, updateFromGit, NotificationMessage
 from Decorators import redirectStdout, BuzyCursorNotification, ProgressNotification, cond_decorator
 from DetachedFrame import DetachedFrame
 from LibraryTree import LibraryTree
@@ -2037,9 +2039,15 @@ class MainApplication(wx.Frame):
 		else:
 			self.help.Display(os.path.join('html','toc.html'))
 
-	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification("DEVSimPy Update pip packages"))
-	def OnUpdatePiPPackage(self, event):
-		updatePackageWithPiP()
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("Update of dependant pip packages.")))
+	def OnUpdatPiPPackage(self, event):
+		if updatePackageWithPiP():
+			NotificationMessage(_('Information'), _('All pip packages that DEVSimPy depends have been updated!'), None, timeout=5)
+
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git.")))
+	def OnUpdatFromGit(self, event):
+		if updateFromGit():
+			NotificationMessage(_('Information'), _('Update of DEVSimPy from git done!'), parent=self, timeout=5)
 
 	def OnAPI(self, event):
 		""" Shows the DEVSimPy API help file. """

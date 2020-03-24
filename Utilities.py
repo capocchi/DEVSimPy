@@ -34,13 +34,14 @@ import shutil
 import configparser
 import linecache
 import imp 
+import tempfile
 from  copy import deepcopy
 
 import gettext
 _ = gettext.gettext
 
 from itertools import combinations
-
+from zipfile import ZipFile 
 from io import StringIO
 
 if builtins.__dict__.get('GUI_FLAG',True):
@@ -63,11 +64,14 @@ import fileinput
 # Used to recurse subdirectories
 import fnmatch
 import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse, http.client
+from urllib.request import urlretrieve
 
+import requests
+	
 import pip
 import importlib
 
-from subprocess import call
+from subprocess import call, check_output, check_call, CalledProcessError
 
 # Used for smooth (spectrum)
 try:
@@ -175,7 +179,63 @@ def PyBuzyInfo(msg, time):
 	del busy
 
 def updatePiP():
-	call("python -m pip install --upgrade pip", shell=True)
+	"""
+	"""
+	try:
+		check_call("python -m pip install --upgrade pip", shell=True)
+	except CalledProcessError as ee:
+		print(ee.output)
+		return False
+	else:
+		return True
+
+def downloadFromURL(url):
+	"""
+	"""
+ 
+	# downloading with requests
+	# download the file contents in binary format
+	r = requests.get(url)
+	
+	if r.status_code == 200:
+ 	# 200 means a successful request
+		
+		tempdir = tempfile.gettempdir()
+		fn = os.path.join(tempdir, "DEVSimPy.zip")
+		# open method to open a file on your system and write the contents
+		with open(fn, "wb") as code:
+			code.write(r.content)
+		
+		# downloading with urllib	
+		# Copy a network object to a local file
+		urlretrieve(url, fn)
+
+		return fn
+
+	else:
+		return None
+
+def updateFromGit():
+	"""
+	"""
+	
+	# specifying the zip file name 
+	fn = downloadFromURL("https://github.com/capocchi/DEVSimPy/archive/master.zip")
+	
+	if fn:
+		# opening the zip file in READ mode 
+		with ZipFile(fn, 'r') as zip: 
+			# printing all the contents of the zip file 
+			zip.printdir()
+		
+			# extracting all the files 
+			print('Extracting all the files now...') 
+			#zip.extractall() 
+			print('Done!')
+
+		return True  
+	else:
+		return False
 
 def updatePackageWithPiP():
 	""" Update all installed package using pip
@@ -184,14 +244,18 @@ def updatePackageWithPiP():
 	updatePiP()
 
 	if pip.__version__ > '10.0.1':
-		import pkg_resources
-		packages = [dist.project_name for dist in pkg_resources.working_set if 'PyPubSub' not in dist.project_name]
-		call("pip install --user --upgrade -r requirements.txt", shell=True)
+		command = "pip install --user --upgrade -r requirements.txt"
 	else:
 		packages = [dist.project_name for dist in pip.get_installed_distributions() if 'PyPubSub' not in dist.project_name]
-		call("pip install --user --upgrade " + ' '.join(packages), shell=True)
+		command = "pip install --user --upgrade " + ' '.join(packages)
 
-	NotificationMessage(_('Information'), 'All pip packages have been updated!', None, timeout=5)
+	try:
+		check_call(command, shell=True)
+	except CalledProcessError as ee:
+		print(ee.output)
+		return False
+	else:
+		return True
 
 def install_and_import(package):
 	""" Install and import the package
