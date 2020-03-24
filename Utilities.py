@@ -65,8 +65,6 @@ import fileinput
 import fnmatch
 import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse, http.client
 from urllib.request import urlretrieve
-
-import requests
 	
 import pip
 import importlib
@@ -182,8 +180,9 @@ def check_internet():
 	url = 'https://github.com/capocchi/DEVSimPy'
 	timeout = 5
 	try:
-		_ = requests.get(url, timeout=timeout)
-	except requests.ConnectionError as e:
+		
+		_ = urllib.request.urlopen(url, timeout=timeout)
+	except Exception as e:
 		print(e)
 		return False
 	else:
@@ -209,22 +208,18 @@ def downloadFromURL(url):
 	"""
 	
 	try:
-		# downloading with requests
+		# downloading with request
 		# download the file contents in binary format
-		r = requests.get(url)
-	except requests.ConnectionError as e:
+		r = urllib.request.urlopen(url)
+	except Exception as e:
 		print(e)
 		return None
 	else:
-		if r.status_code == 200:
+		if r.getcode() == 200:
 		# 200 means a successful request
 			
 			tempdir = tempfile.gettempdir()
 			fn = os.path.join(tempdir, "DEVSimPy.zip")
-			# open method to open a file on your system and write the contents
-			with open(fn, "wb") as code:
-				code.write(r.content)
-			
 			# downloading with urllib	
 			# Copy a network object to a local file
 			urlretrieve(url, fn)
@@ -244,23 +239,23 @@ def updateFromGit():
 	if fn:
 		# opening the zip file in READ mode 
 		with ZipFile(fn, 'r') as zip:
-			txt = 'Name / Size / Date\n'
-			txt +=' \n'.join([str(elem.filename)+'/'+str(elem.file_size)+'/'+str(elem.date_time) for elem in zip.infolist()]) 
 			# printing all the contents of the zip file 
-			dlg = wx.RichMessageDialog(None, "Do you realy want to update DEVSimPy?\nAll files will be relaced and you cannot go backwards.", style=wx.YES_NO|wx.CENTER)
-			dlg.ShowDetailedText(txt)
-			if dlg.ShowModal() not in (wx.ID_NO, wx.ID_CANCEL):
+			#dlg = wx.RichMessageDialog(None, "Do you realy want to update DEVSimPy?\nAll files will be relaced and you cannot go backwards.", style=wx.YES_NO|wx.CENTER)
+			#txt = 'Name / Size / Date\n'
+			#txt +=' \n'.join([str(elem.filename)+'/'+str(elem.file_size)+'/'+str(elem.date_time) for elem in zip.infolist()]) 
+			#dlg.ShowDetailedText(txt)
+			#if dlg.ShowModal() not in (wx.ID_NO, wx.ID_CANCEL):
 		
-				# extracting all the files 
-				print('Extracting all the files now...') 
-				#zip.extractall()
-				print('Done!')
+			# extracting all the files 
+			print('Extracting all the files now...') 
+			#zip.extractall()
+			print('Done!')
 
-				dlg.Destroy()
-				return True
-			else:
-				dlg.Destroy()
-				return False  
+			#dlg.Destroy()
+			return True
+			#else:
+			#	dlg.Destroy()
+			#	return False  
 	else:
 		return False
 
