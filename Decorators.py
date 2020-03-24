@@ -146,18 +146,44 @@ class ThreadWithReturnValue(threading.Thread):
 	def __init__(self, *args, **kwargs): 
 		super(ThreadWithReturnValue, self).__init__(*args, **kwargs) 
 		self._return = None
+		self.killed = False
+  
+	def start(self): 
+		self.__run_backup = self.run 
+		self.run = self.__run       
+		threading.Thread.start(self) 
 	
-	def run(self):
-		if self._target is not None:
-			try:
-				self._return = self._target(*self._args, **self._kwargs)
-			except Exception as e:
-				self._return = e
+	def __run(self): 
+		sys.settrace(self.globaltrace) 
+		self._return = self.__run_backup() 
+		self.run = self.__run_backup 
+	
+	def globaltrace(self, frame, event, arg): 
+		if event == 'call': 
+			return self.localtrace 
+		else: 
+			return None
+	
+	def localtrace(self, frame, event, arg): 
+		if self.killed: 
+			if event == 'line': 
+				raise SystemExit()
+		return self.localtrace 
+	
+	def kill(self): 
+		self.killed = True
+
+	# def run(self):
+	# 	if self._target is not None:
+	# 		try:
+	# 			self._return = self._target(*self._args, **self._kwargs)
+	# 		except Exception as e:
+	# 			self._return = e
 			
-	def join(self):
-		if not isinstance(self._return, Exception):
-			threading.Thread.join(self)
-		return self._return
+	# def join(self):
+	# 	if not isinstance(self._return, Exception):
+	# 		threading.Thread.join(self)
+	# 	return self._return
 
 @decorator_with_args
 def ProgressNotification(f, arg):
@@ -177,11 +203,15 @@ def ProgressNotification(f, arg):
 
 		while thread.isAlive():
 			wx.MilliSleep(300)
-			progress_dlg.Pulse()	
+			
+			if progress_dlg.WasCancelled() or progress_dlg.WasSkipped():
+				thread.kill()
+			else:
+				progress_dlg.Pulse()
 			wx.SafeYield()
 
 		progress_dlg.Destroy()
-		
+
 		return thread.join()
 
 	return wrapper
