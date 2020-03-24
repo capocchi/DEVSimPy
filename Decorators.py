@@ -149,10 +149,14 @@ class ThreadWithReturnValue(threading.Thread):
 	
 	def run(self):
 		if self._target is not None:
-			self._return = self._target(*self._args, **self._kwargs)
-
+			try:
+				self._return = self._target(*self._args, **self._kwargs)
+			except Exception as e:
+				self._return = e
+			
 	def join(self):
-		threading.Thread.join(self)
+		if not isinstance(self._return, Exception):
+			threading.Thread.join(self)
 		return self._return
 
 @decorator_with_args
@@ -166,9 +170,6 @@ def ProgressNotification(f, arg):
 		else:
 			message = _('Please wait..')
 
-		# main window
-		mainW = wx.GetApp().GetTopWindow()
-
 		progress_dlg = wx.ProgressDialog(title, message, style=wx.PD_APP_MODAL|wx.PD_CAN_ABORT)
 
 		thread = ThreadWithReturnValue(target = f, args = args)
@@ -180,7 +181,7 @@ def ProgressNotification(f, arg):
 			wx.SafeYield()
 
 		progress_dlg.Destroy()
-
+		
 		return thread.join()
 
 	return wrapper

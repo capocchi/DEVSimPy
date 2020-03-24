@@ -178,45 +178,64 @@ def PyBuzyInfo(msg, time):
 
 	del busy
 
-def updatePiP():
-	"""
-	"""
+def check_internet():
+	url = 'https://github.com/capocchi/DEVSimPy'
+	timeout = 5
 	try:
-		check_call("python -m pip install --upgrade pip", shell=True)
-	except CalledProcessError as ee:
-		print(ee.output)
+		_ = requests.get(url, timeout=timeout)
+	except requests.ConnectionError as e:
+		print(e)
 		return False
 	else:
 		return True
 
+def updatePiP():
+	"""
+	"""
+
+	if check_internet():	
+		try:
+			check_call("python -m pip install --upgrade pip", shell=True)
+		except Exception as ee:
+			print(ee.output)
+			return False
+		else:
+			return True
+	else:
+		return False
+
 def downloadFromURL(url):
 	"""
 	"""
- 
-	# downloading with requests
-	# download the file contents in binary format
-	r = requests.get(url)
 	
-	if r.status_code == 200:
- 	# 200 means a successful request
-		
-		tempdir = tempfile.gettempdir()
-		fn = os.path.join(tempdir, "DEVSimPy.zip")
-		# open method to open a file on your system and write the contents
-		with open(fn, "wb") as code:
-			code.write(r.content)
-		
-		# downloading with urllib	
-		# Copy a network object to a local file
-		urlretrieve(url, fn)
-
-		return fn
-
-	else:
+	try:
+		# downloading with requests
+		# download the file contents in binary format
+		r = requests.get(url)
+	except requests.ConnectionError as e:
+		print(e)
 		return None
+	else:
+		if r.status_code == 200:
+		# 200 means a successful request
+			
+			tempdir = tempfile.gettempdir()
+			fn = os.path.join(tempdir, "DEVSimPy.zip")
+			# open method to open a file on your system and write the contents
+			with open(fn, "wb") as code:
+				code.write(r.content)
+			
+			# downloading with urllib	
+			# Copy a network object to a local file
+			urlretrieve(url, fn)
+
+			return fn
+
+		else:
+			return None
 
 def updateFromGit():
-	"""
+	""" Updated DEVSimPy from Git with a zip (not with git command)
 	"""
 	
 	# specifying the zip file name 
@@ -226,14 +245,23 @@ def updateFromGit():
 		# opening the zip file in READ mode 
 		with ZipFile(fn, 'r') as zip: 
 			# printing all the contents of the zip file 
-			zip.printdir()
-		
-			# extracting all the files 
-			print('Extracting all the files now...') 
-			#zip.extractall() 
-			print('Done!')
+			dlg = wx.RichMessageDialog(None, "Do you realy want to update DEVSimPy?\nAll files will be relaced and you cannot go backwards.", style=wx.YES_NO|wx.CENTER)
+			txt = 'Name / Size / Date\n'
+			txt +=' \n'.join([str(elem.filename)+'/'+str(elem.file_size)+'/'+str(elem.date_time) for elem in zip.infolist()])
+			dlg.ShowDetailedText(txt)
 
-		return True  
+			if dlg.ShowModal() == wx.ID_YES:
+		
+				# extracting all the files 
+				print('Extracting all the files now...') 
+				#zip.extractall()
+				print('Done!')
+
+				dlg.Destroy()
+				return True
+			else:
+				dlg.Destroy()
+				return False  
 	else:
 		return False
 
@@ -241,21 +269,23 @@ def updatePackageWithPiP():
 	""" Update all installed package using pip
 	"""
 
-	updatePiP()
+	if updatePiP():
 
-	if pip.__version__ > '10.0.1':
-		command = "pip install --user --upgrade -r requirements.txt"
+		if pip.__version__ > '10.0.1':
+			command = "pip install --user --upgrade -r requirements.txt"
+		else:
+			packages = [dist.project_name for dist in pip.get_installed_distributions() if 'PyPubSub' not in dist.project_name]
+			command = "pip install --user --upgrade " + ' '.join(packages)
+
+		try:
+			check_call(command, shell=True)
+		except Exception as ee:
+			print(ee.output)
+			return False
+		else:
+			return True
 	else:
-		packages = [dist.project_name for dist in pip.get_installed_distributions() if 'PyPubSub' not in dist.project_name]
-		command = "pip install --user --upgrade " + ' '.join(packages)
-
-	try:
-		check_call(command, shell=True)
-	except CalledProcessError as ee:
-		print(ee.output)
 		return False
-	else:
-		return True
 
 def install_and_import(package):
 	""" Install and import the package
