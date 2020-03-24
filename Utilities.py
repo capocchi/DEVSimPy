@@ -65,8 +65,6 @@ import fileinput
 import fnmatch
 import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse, http.client
 from urllib.request import urlretrieve
-
-import requests
 	
 import pip
 import importlib
@@ -182,8 +180,9 @@ def check_internet():
 	url = 'https://github.com/capocchi/DEVSimPy'
 	timeout = 5
 	try:
-		_ = requests.get(url, timeout=timeout)
-	except requests.ConnectionError as e:
+		
+		_ = urllib.request.urlopen(url, timeout=timeout)
+	except Exception as e:
 		print(e)
 		return False
 	else:
@@ -209,22 +208,18 @@ def downloadFromURL(url):
 	"""
 	
 	try:
-		# downloading with requests
+		# downloading with request
 		# download the file contents in binary format
-		r = requests.get(url)
-	except requests.ConnectionError as e:
+		r = urllib.request.urlopen(url)
+	except Exception as e:
 		print(e)
 		return None
 	else:
-		if r.status_code == 200:
+		if r.getcode() == 200:
 		# 200 means a successful request
 			
 			tempdir = tempfile.gettempdir()
 			fn = os.path.join(tempdir, "DEVSimPy.zip")
-			# open method to open a file on your system and write the contents
-			with open(fn, "wb") as code:
-				code.write(r.content)
-			
 			# downloading with urllib	
 			# Copy a network object to a local file
 			urlretrieve(url, fn)
