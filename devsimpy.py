@@ -2052,7 +2052,7 @@ class MainApplication(wx.Frame):
 
 	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git.")))
 	def OnUpdatFromGit(self, event):
-		if updateFromGit(self):
+		if updateFromGit():
 			args = (_('Information'), _('Update of DEVSimPy from git done!'))
 			kwargs = {'parent':self, 'timeout':5}
 		else:
