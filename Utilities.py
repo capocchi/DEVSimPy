@@ -71,7 +71,7 @@ import requests
 import pip
 import importlib
 
-from subprocess import call
+from subprocess import call, check_output, check_call, CalledProcessError
 
 # Used for smooth (spectrum)
 try:
@@ -181,7 +181,13 @@ def PyBuzyInfo(msg, time):
 def updatePiP():
 	"""
 	"""
-	return call("python -m pip install --upgrade pip", shell=True)
+	try:
+		check_call("python -m pip install --upgrade pip", shell=True)
+	except CalledProcessError as ee:
+		print(ee.output)
+		return False
+	else:
+		return True
 
 def downloadFromURL(url):
 	"""
@@ -238,12 +244,18 @@ def updatePackageWithPiP():
 	updatePiP()
 
 	if pip.__version__ > '10.0.1':
-		import pkg_resources
-		packages = [dist.project_name for dist in pkg_resources.working_set if 'PyPubSub' not in dist.project_name]
-		return call("pip install --user --upgrade -r requirements.txt", shell=True)
+		command = "pip install --user --upgrade -r requirements.txt"
 	else:
 		packages = [dist.project_name for dist in pip.get_installed_distributions() if 'PyPubSub' not in dist.project_name]
-		return call("pip install --user --upgrade " + ' '.join(packages), shell=True)
+		command = "pip install --user --upgrade " + ' '.join(packages)
+
+	try:
+		check_call(command, shell=True)
+	except CalledProcessError as ee:
+		print(ee.output)
+		return False
+	else:
+		return True
 
 def install_and_import(package):
 	""" Install and import the package
