@@ -249,7 +249,7 @@ def updateFromGit():
 			txt = 'Name / Size / Date\n'
 			txt +=' \n'.join([str(elem.filename)+'/'+str(elem.file_size)+'/'+str(elem.date_time) for elem in zip.infolist()]) 
 			dlg.ShowDetailedText(txt)
-			if dlg.ShowModal() not in (wx.ID_NO, wx.ID_CANCEL):
+			if dlg.ShowModal() == wx.ID_YES: #not in (wx.ID_NO, wx.ID_CANCEL):
 		
 				# extracting all the files 
 				print('Extracting all the files now...') 
