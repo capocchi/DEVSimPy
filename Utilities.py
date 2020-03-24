@@ -181,7 +181,7 @@ def PyBuzyInfo(msg, time):
 def updatePiP():
 	"""
 	"""
-	call("python -m pip install --upgrade pip", shell=True)
+	return call("python -m pip install --upgrade pip", shell=True)
 
 def downloadFromURL(url):
 	"""
@@ -225,9 +225,11 @@ def updateFromGit():
 			# extracting all the files 
 			print('Extracting all the files now...') 
 			#zip.extractall() 
-			print('Done!') 
+			print('Done!')
+
+		return True  
 	else:
-		print('error!')
+		return False
 
 def updatePackageWithPiP():
 	""" Update all installed package using pip
@@ -238,12 +240,10 @@ def updatePackageWithPiP():
 	if pip.__version__ > '10.0.1':
 		import pkg_resources
 		packages = [dist.project_name for dist in pkg_resources.working_set if 'PyPubSub' not in dist.project_name]
-		call("pip install --user --upgrade -r requirements.txt", shell=True)
+		return call("pip install --user --upgrade -r requirements.txt", shell=True)
 	else:
 		packages = [dist.project_name for dist in pip.get_installed_distributions() if 'PyPubSub' not in dist.project_name]
-		call("pip install --user --upgrade " + ' '.join(packages), shell=True)
-
-	NotificationMessage(_('Information'), 'All pip packages have been updated!', None, timeout=5)
+		return call("pip install --user --upgrade " + ' '.join(packages), shell=True)
 
 def install_and_import(package):
 	""" Install and import the package

@@ -2039,13 +2039,15 @@ class MainApplication(wx.Frame):
 		else:
 			self.help.Display(os.path.join('html','toc.html'))
 
-	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("Update dependant pip packages")))
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("Update of dependant pip packages.")))
 	def OnUpdatPiPPackage(self, event):
-		updatePackageWithPiP()
+		if updatePackageWithPiP():
+			NotificationMessage(_('Information'), _('All pip packages that DEVSimPy depends have been updated!'), None, timeout=5)
 
 	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git.")))
 	def OnUpdatFromGit(self, event):
-		updateFromGit()
+		if updateFromGit():
+			NotificationMessage(_('Information'), _('Update of DEVSimPy from git done!'), parent=self, timeout=5)
 
 	def OnAPI(self, event):
 		""" Shows the DEVSimPy API help file. """

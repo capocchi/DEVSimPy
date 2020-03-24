@@ -166,6 +166,9 @@ def ProgressNotification(f, arg):
 		else:
 			message = _('Please wait..')
 
+		# main window
+		mainW = wx.GetApp().GetTopWindow()
+
 		progress_dlg = wx.ProgressDialog(title, message, style=wx.PD_APP_MODAL|wx.PD_CAN_ABORT)
 
 		thread = ThreadWithReturnValue(target = f, args = args)
