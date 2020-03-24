@@ -2043,7 +2043,7 @@ class MainApplication(wx.Frame):
 	def OnUpdatPiPPackage(self, event):
 		updatePackageWithPiP()
 
-	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git (Version %s).")%__version__))
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git.")))
 	def OnUpdatFromGit(self, event):
 		updateFromGit()
 

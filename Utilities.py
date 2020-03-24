@@ -212,19 +212,22 @@ def downloadFromURL(url):
 def updateFromGit():
 	"""
 	"""
+	
 	# specifying the zip file name 
-	fn = downloadFromURL(os.path.join("https://github.com/capocchi/DEVSimPy/archive/version-",__version__,".zip"))
+	fn = downloadFromURL("https://github.com/capocchi/DEVSimPy/archive/master.zip")
 	
 	if fn:
 		# opening the zip file in READ mode 
 		with ZipFile(fn, 'r') as zip: 
 			# printing all the contents of the zip file 
-			zip.printdir() 
+			zip.printdir()
 		
 			# extracting all the files 
 			print('Extracting all the files now...') 
 			#zip.extractall() 
 			print('Done!') 
+	else:
+		print('error!')
 
 def updatePackageWithPiP():
 	""" Update all installed package using pip
