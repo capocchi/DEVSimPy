@@ -82,6 +82,8 @@ import wx
 
 sys.stdout.write("Importing wxPython %s%s for python %s on %s (%s) platform...\n"%(wx.version(), " from devsimpy.ini" if ini_exist else '', platform.python_version(), platform.system(), platform.version()))
 
+_ = wx.GetTranslation
+
 try:
 	import wx.aui as aui
 except:
