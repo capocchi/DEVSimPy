@@ -204,6 +204,7 @@ def ProgressNotification(f, arg):
 		while thread.isAlive():			
 			if progress_dlg.WasCancelled() or progress_dlg.WasSkipped():
 				thread.kill()
+				break
 			else:
 				wx.MilliSleep(300)
 				progress_dlg.Pulse()
