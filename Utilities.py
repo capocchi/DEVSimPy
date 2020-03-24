@@ -63,7 +63,8 @@ import fileinput
 
 # Used to recurse subdirectories
 import fnmatch
-import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse, http.client, urllib.urlretrieve
+import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse, http.client
+from urllib.request import urlretrieve
 
 import requests
 	
@@ -201,7 +202,7 @@ def downloadFromURL(url):
 		
 		# downloading with urllib	
 		# Copy a network object to a local file
-		urllib.urlretrieve(url, fn)
+		urlretrieve(url, fn)
 
 		return fn
 
