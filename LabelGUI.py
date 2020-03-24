@@ -2,12 +2,12 @@
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # LabelGUI.py ---
+#                    --------------------------------
+#                            Copyright (c) 2020
+#                    L. CAPOCCHI (capocchi@univ-corse.fr)
+#                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-#                        Copyright (c) 2013
-#                       Laurent CAPOCCHI
-#                      University of Corsica
-#                     --------------------------------
-# Version 1.0                                        last modified: 16/04/13
+# Version 1.0                                        last modified: 03/22/20
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
