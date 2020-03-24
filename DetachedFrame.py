@@ -272,6 +272,8 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		### Destroy the windows
 		self.Destroy()
 
+		event.Skip()
+
 ### ------------------------------------------------------------
 class TestApp(wx.App):
 	""" Testing application

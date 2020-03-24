@@ -257,7 +257,7 @@ class ProfileFileMenu(wx.Menu):
 		AppendItem(wx.MenuItem(self, ID_DELETE_PROFILES, _("Delete all")))
 		self.Enable(ID_DELETE_PROFILES, self.GetMenuItemCount() > 2)
 		
-		parent.Bind(wx.EVT_MENU, parent.OnDeleteProfiles, id = ID_DELETE_PROFILES)
+		parent.Bind(wx.EVT_MENU, parent.OnDeleteProfiles, id=ID_DELETE_PROFILES)
 
 class RecentFileMenu(wx.Menu):
 	"""
@@ -348,6 +348,9 @@ class PerspectiveMenu(wx.Menu):
 			ID = wx.NewIdRef()
 			self.Append(ID, name)
 			parent.Bind(wx.EVT_MENU, parent.OnRestorePerspective, id=ID)
+
+		### Enable the delete function if the list of perspectives is not empty
+		deleteall.Enable(len(L)> 1)
 
 		parent.Bind(wx.EVT_MENU, parent.OnCreatePerspective, id=ID_NEW_PERSPECTIVE)
 		parent.Bind(wx.EVT_MENU, parent.OnDeletePerspective, id=ID_DELETE_PERSPECTIVE)

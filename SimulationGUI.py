@@ -649,7 +649,9 @@ class Base(object):
 							wx.OK|wx.ICON_EXCLAMATION)
 
 		if (dial.ShowModal() == wx.ID_OK) and (isinstance(self.parent, wx.Frame)):
-			self.DestroyWin()
+			self.PrepareDestroyWin()
+			### destroy the frame
+			self.Destroy()
 		else:
 			return
 
@@ -661,7 +663,7 @@ class Base(object):
 		else:
 			printOnStatusBar(self.statusbar, {i:'' for i in range(self.statusbar.GetFieldsCount())})
 
-	def DestroyWin(self):
+	def PrepareDestroyWin(self):
 		""" To destroy the simulation frame
 		"""
 
@@ -696,9 +698,6 @@ class Base(object):
 			#sys.stdout.write(_("Empty mode over\n"))
 			pass
 
-		### destroy the frame
-		self.Destroy()
-
 	def OnQuit(self, event):
 		""" When the simulation are stopping
 		"""
@@ -713,13 +712,15 @@ class Base(object):
 
 			### if user wants to stop simulation process
 			if dial.ShowModal() == wx.ID_YES:
-				self.DestroyWin()
 				self.thread.terminate(False)
+				self.PrepareDestroyWin()
 			else:
 				self.thread.resume_thread()
 
 		else:
-			self.DestroyWin()
+			self.PrepareDestroyWin()
+
+		event.Skip()
 
 	def ErrorManager(self, msg):
 		""" An error is occurred.
@@ -754,7 +755,8 @@ class Base(object):
 				### Error dialog
 				if not Container.MsgBoxError(event, self.parent, msg.date if wx.VERSION_STRING < '2.9' else msg):
 				### if user dont want correct the error, we destroy the simulation windows
-					self.DestroyWin()
+					self.PrepareDestroyWin()
+					self.Destroy()
 				else:
 				### if user want to correct error through an editor, we stop simulation process for trying again after the error is corrected.
 					self.OnStop(event)

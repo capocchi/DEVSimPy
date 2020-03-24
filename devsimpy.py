@@ -792,7 +792,8 @@ class MainApplication(wx.Frame):
 	def OnCreatePerspective(self, event):
 		"""
 		"""
-		dlg = wx.TextEntryDialog(self, _("Enter a new name:"), _("Perspective Manager"), _("Perspective %d")%(len(self.perspectives)))
+
+		dlg = wx.TextEntryDialog(self, _("Enter a new perspective:"), _("Perspective Manager"), _("Perspective %d")%(len(self.perspectives)))
 		if dlg.ShowModal() == wx.ID_OK:
 			txt = dlg.GetValue()
 
@@ -803,12 +804,20 @@ class MainApplication(wx.Frame):
 			self.perspectivesmenu.Append(ID, txt)
 			self.perspectives[txt] = self._mgr.SavePerspective()
 
+			### Disable the delete function
+			self.perspectivesmenu.FindItemById(Menu.ID_DELETE_PERSPECTIVE).Enable(True)
+		
 			### Bind right away to make activable the perspective without restart DEVSimPy
 			self.Bind(wx.EVT_MENU, self.OnRestorePerspective, id=ID)
+
+			NotificationMessage(_('Information'), _('%s has been added!')%txt, parent=self, timeout=5)
+
+		dlg.Destroy()
 
 	def OnRestorePerspective(self, event):
 		"""
 		"""
+		
 		id = event.GetId()
 		item = self.GetMenuBar().FindItemById(id)
 		mgr = self.GetMGR()
@@ -817,18 +826,26 @@ class MainApplication(wx.Frame):
 	def OnDeletePerspective(self, event):
 		"""
 		"""
+		
 		# delete all path items
 		L = list(self.perspectivesmenu.GetMenuItems())
 		for item in L[4:]:
-			self.perspectivesmenu.RemoveItem(item)
+			self.perspectivesmenu.Remove(item)
 
 		# update config file
 		self.perspectives = {_("Default Startup"):self._mgr.SavePerspective()}
 		self.cfg.Write("perspectives", str(eval("self.perspectives")))
 		self.cfg.Flush()
 
+		### Disable the delete function
+		self.perspectivesmenu.FindItemById(Menu.ID_DELETE_PERSPECTIVE).Enable(False)
+
+		NotificationMessage(_('Information'), _('All perspectives have been deleted!'), parent=self, timeout=5)
+
 	###
 	def OnDragInit(self, event):
+		"""
+		"""
 
 		# version avec arbre
 		item = event.GetItem()
@@ -854,6 +871,9 @@ class MainApplication(wx.Frame):
 
 	###
 	def OnIdle(self, event):
+		"""
+		"""
+
 		if self.otherWin:
 			self.otherWin.Raise()
 			self.otherWin = None
@@ -862,6 +882,7 @@ class MainApplication(wx.Frame):
 	def SaveLibraryProfile(self):
 		""" Update config file with the librairies opened during the last use of DEVSimPy.
 		"""
+		
 		### Show is in position 2 on Menu Bar
 		show_menu = self.menuBar.GetMenu(2)
 		### Control is in position 1
@@ -920,6 +941,8 @@ class MainApplication(wx.Frame):
 				## instead of wx.EVT_KILL_FOCUS here:
 				#win.Disconnect(-1, -1, wx.wxEVT_KILL_FOCUS)
 			#self.Destroy()
+
+		event.Skip()
 
 	def OnSpin(self, event):
 		""" Spin button has been invoked (on the toolbar of the main windows or detached frame)
@@ -2216,6 +2239,7 @@ class LogFrame(wx.Frame):
 		"""	Handles the wx.EVT_CLOSE event
 		"""
 		self.Show(False)
+		event.Skip()
 
 #------------------------------------------------------------------------------
 class PyOnDemandOutputWindow(threading.Thread):

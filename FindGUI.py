@@ -1,23 +1,53 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Find/Replace Dialog
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+# FindGUI.py ---
+#                    --------------------------------
+#                            Copyright (c) 2020
+#                    L. CAPOCCHI (capocchi@univ-corse.fr)
+#                SPE Lab - SISU Group - University of Corsica
+#                     --------------------------------
+# Version 1.0                                        last modified: 03/22/20
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GENERAL NOTES AND REMARKS:
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GLOBAL VARIABLES AND FUNCTIONS
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 import wx
 import re
 
+### just for individual test
+if __name__ == '__main__':
+	import builtins
+	import os, sys
+
+	builtins.__dict__['GUI_FLAG'] = True
+	builtins.__dict__['HOME_PATH'] = os.path.abspath(os.path.dirname(sys.argv[0]))
+	builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
+	builtins.__dict__['DEVS_DIR_PATH_DICT'] = {\
+	'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),\
+	'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS', 'old')}
+
 class FindReplace(wx.Dialog):
 	def __init__(self, parent, id, title):
+		
 		wx.Dialog.__init__(self, parent, id, title, size=(255, 365))
 
-		vbox_top = wx.BoxSizer(wx.VERTICAL)
-		panel = wx.Panel(self, -1)
+		panel = wx.Panel(self)
 
+		vbox_top = wx.BoxSizer(wx.VERTICAL)
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
 		# panel1
-		panel1 = wx.Panel(panel, -1)
-		grid1 = wx.GridSizer(2, 2)
+		panel1 = wx.Panel(panel)
+		grid1 = wx.GridSizer(2, 2, 0, 0)
 		self.input_find = wx.ComboBox(panel1, -1, size=(120, -1))
 		self.input_replace = wx.ComboBox(panel1, -1, size=(120, -1))
 		grid1.Add(wx.StaticText(panel1, -1, _('Find: '),(5, 5)), 0,  wx.ALIGN_CENTER_VERTICAL)
@@ -29,7 +59,7 @@ class FindReplace(wx.Dialog):
 		vbox.Add(panel1, 0, wx.BOTTOM | wx.TOP, 9)
 
 		# panel2
-		panel2 = wx.Panel(panel, -1)
+		panel2 = wx.Panel(panel)
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 		sizer21 = wx.StaticBoxSizer(wx.StaticBox(panel2, -1, _('Direction')), orient=wx.VERTICAL)
 		sizer21.Add(wx.RadioButton(panel2, -1, _('Forward'), style=wx.RB_GROUP))
@@ -63,7 +93,7 @@ class FindReplace(wx.Dialog):
 
 		# panel4
 
-		panel4 = wx.Panel(panel, -1)
+		panel4 = wx.Panel(panel)
 		sizer4 = wx.GridSizer(2, 2, 2, 2)
 		find_btn = wx.Button(panel4, -1,_('Find'), size=(120, -1))
 		replace_find_btn = wx.Button(panel4, -1, _('Replace/Find'), size=(120, -1))
@@ -79,8 +109,7 @@ class FindReplace(wx.Dialog):
 		vbox.Add(panel4, 0, wx.BOTTOM, 9)
 
 		# panel5
-
-		panel5 = wx.Panel(panel, -1)
+		panel5 = wx.Panel(panel)
 		sizer5 = wx.BoxSizer(wx.HORIZONTAL)
 		sizer5.Add((191, -1), 1, wx.EXPAND | wx.ALIGN_RIGHT)
 		close_btn = wx.Button(panel5, -1, _('Close'), size=(50, -1))

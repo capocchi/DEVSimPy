@@ -760,9 +760,11 @@ class PreferencesGUI(wx.Frame):
 
 	def OnCancel(self, evt):
 		self.Close()
+		evt.Skip()
 
 	def OnClose(self, evt):
 		self.Close()
+		evt.Skip()
 
 ### ------------------------------------------------------------
 class TestApp(wx.App):

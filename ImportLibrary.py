@@ -535,6 +535,7 @@ class ImportLibrary(wx.Dialog):
 				
 	def OnCloseWindow(self, event):
 		self.Destroy()
+		event.Skip()
 
 ### ------------------------------------------------------------
 class TestApp(wx.App):

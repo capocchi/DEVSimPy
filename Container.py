@@ -684,6 +684,8 @@ class Diagram(Savable, Structurable):
 		### we can update the devs priority list during the simulation ;-)
 		self.updateDEVSPriorityList()
 
+		event.Skip()
+
 	def OnAddConstants(self, event):
 		""" Method that add constant parameters in order to simplify the modling codeBlock model
 		"""
@@ -1204,14 +1206,16 @@ class ShapeEvtHandler:
 class Shape(ShapeEvtHandler):
 	""" Shape class
 	"""
-
+	
+	FILL = ['#add8e6']
+	
 	def __init__(self, x=[], y=[]):
 		""" Constructor
 		"""
 
 		self.x = array.array('d',x)                      # list of x coord
 		self.y = array.array('d',y)                      # list of y coords
-		self.fill= ['#add8e6']          # fill color
+		self.fill= Shape.FILL          # fill color
 		self.pen = [self.fill[0] , 1, wx.SOLID]   # pen color and size
 		self.font = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
 
@@ -1976,11 +1980,13 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			self.deselect()
 			self.Refresh()
 
-			### destruction du dialogue
+			### Destroy the dialog
 			try:
 				self.dlgConnection.Destroy()
 			except:
 				pass
+			
+			event.Skip()
 
 		def OnMiddleDown(self, event):
 			"""
@@ -3850,6 +3856,8 @@ class ContainerBlock(Block, Diagram):
 	""" ContainerBlock(label, inputs, outputs)
 	"""
 
+	FILL = ['#90ee90']
+	
 	###
 	def __init__(self, label = 'ContainerBlock', nb_inputs = 1, nb_outputs = 1):
 		""" Constructor
@@ -3857,7 +3865,7 @@ class ContainerBlock(Block, Diagram):
 		Block.__init__(self, label, nb_inputs, nb_outputs)
 		Diagram.__init__(self)
 		#Structurable.__init__(self)
-		self.fill = ['#90ee90']
+		self.fill = Container.FILL
 
 	###
 	def __setstate__(self, state):

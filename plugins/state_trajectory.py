@@ -21,26 +21,9 @@ import wx
 import os
 import inspect
 
-#for plotting
-try:
-    import matplotlib.pyplot as plt
-except ImportError as info:
-    platform_sys = os.name
-    if platform_sys in ('nt', 'mac'):
-        msg = _("ERROR: Matplotlib module not found.\nhttp://sourceforge.net/projects/matplotlib/files/\n")
-        sys.stderr.write(msg)
-        raise ImportError("%s\n%s"%(msg,info))
-    elif platform_sys == 'posix':
-        msg = _("ERROR: Matplotlib module not found.\nPlease install the python-matplotlib package.\n")
-        sys.stderr.write(msg)
-        raise ImportError("%s\n%s"%(msg,info))
-    else:
-        msg = _("Unknown operating system.\n")
-        sys.stdout.write(msg)
-        raise ImportError("%s\n%s"%(msg,info))
-
 import pluginmanager
 from Container import Block, CodeBlock, ContainerBlock
+from Utilities import install_and_import
 
 ID_SHAPE = wx.NewIdRef()
 
@@ -146,10 +129,13 @@ def PlotStateTrajectory(m):
 
             sorted_items = sorted(items, key=lambda x: (x[0], x[1]))
 
-
             x, y = list(zip(*sorted_items))
 
             assert len(x)==len(y)
+
+            #for plotting
+            if install_and_import('matplotlib'):
+                import matplotlib.pyplot as plt
 
             fig = plt.figure()
 
@@ -241,7 +227,7 @@ def add_state_trajectory_menu(*args, **kwargs):
     states = wx.MenuItem(menu, ID_SHAPE, _("State Trajectory"), _("State trajectory graph"))
     states.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'graph.png')))
 
-    States_menu = menu.InsertItem(2, states)
+    States_menu = menu.Insert(2, states)
     menu.Bind(wx.EVT_MENU, OnPlot, id=ID_SHAPE)
 
 ######################################################################
@@ -263,10 +249,10 @@ def Config(parent):
     master = None
 
     frame = wx.Frame(parent,
-                    wx.NewIdRef(),
                     title = _('State Trajectory Plotting'),
                     style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN)
-    panel = wx.Panel(frame, wx.NewIdRef())
+    
+    panel = wx.Panel(frame)
 
     lst_1 = GetFlatShapesList(diagram,[])
     lst_2  = ('confTransition', 'extTransition', 'intTransition')
@@ -309,13 +295,13 @@ def Config(parent):
             L2[block.label] = list(block.state_trajectory.keys())
 
     if L1 != []:
-        cb1.SetChecked(L1)
-        ### tout les block on la meme liste de function active pour le trace, donc on prend la premi�re
-        cb2.SetChecked(list(L2.values())[0])
+        cb1.SetCheckedItems(L1)
+        ### tout les block on la meme liste de function active pour le trace, donc on prend la première
+        cb2.SetCheckedItems(list(L2.values())[0])
 
-    ### ckeck par defaut delta_ext et delta_int
+    ### ckeck delta_ext and delta_int
     if L2 == {}:
-        cb2.SetChecked([1,2])
+        cb2.SetCheckedItems([1,2])
 
     def OnPlot(event):
         ''' State trajectory plotting has been invoked
@@ -330,12 +316,12 @@ def Config(parent):
     def OnSelectAll(evt):
         """ Select All button has been pressed and all plug-ins are enabled.
         """
-        cb1.SetChecked(list(range(cb1.GetCount())))
+        cb1.SetCheckedItems(list(range(cb1.GetCount())))
 
     def OnDeselectAll(evt):
         """ Deselect All button has been pressed and all plugins are disabled.
         """
-        cb1.SetChecked([])
+        cb1.SetCheckedItems([])
 
     def OnOk(evt):
         btn = evt.GetEventObject()
