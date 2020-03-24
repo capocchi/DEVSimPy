@@ -187,7 +187,7 @@ from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
 from pluginmanager import load_plugins, enable_plugin
 from which import which
-from Utilities import GetUserConfigDir, install, install_and_import, updatePackageWithPiP, NotificationMessage
+from Utilities import GetUserConfigDir, install, install_and_import, updatePackageWithPiP, updateFromGit, NotificationMessage
 from Decorators import redirectStdout, BuzyCursorNotification, ProgressNotification, cond_decorator
 from DetachedFrame import DetachedFrame
 from LibraryTree import LibraryTree
@@ -2037,9 +2037,13 @@ class MainApplication(wx.Frame):
 		else:
 			self.help.Display(os.path.join('html','toc.html'))
 
-	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification("DEVSimPy Update pip packages"))
-	def OnUpdatePiPPackage(self, event):
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("Update dependant pip packages")))
+	def OnUpdatPiPPackage(self, event):
 		updatePackageWithPiP()
+
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git (Version %s).")%__version__))
+	def OnUpdatFromGit(self, event):
+		updateFromGit()
 
 	def OnAPI(self, event):
 		""" Shows the DEVSimPy API help file. """

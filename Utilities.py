@@ -34,13 +34,14 @@ import shutil
 import configparser
 import linecache
 import imp 
+import tempfile
 from  copy import deepcopy
 
 import gettext
 _ = gettext.gettext
 
 from itertools import combinations
-
+from zipfile import ZipFile 
 from io import StringIO
 
 if builtins.__dict__.get('GUI_FLAG',True):
@@ -62,8 +63,10 @@ import fileinput
 
 # Used to recurse subdirectories
 import fnmatch
-import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse, http.client
+import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse, http.client, urllib.urlretrieve
 
+import requests
+	
 import pip
 import importlib
 
@@ -175,7 +178,52 @@ def PyBuzyInfo(msg, time):
 	del busy
 
 def updatePiP():
+	"""
+	"""
 	call("python -m pip install --upgrade pip", shell=True)
+
+def downloadFromURL(url):
+	"""
+	"""
+ 
+	# downloading with requests
+	# download the file contents in binary format
+	r = requests.get(url)
+	
+	if r.status_code == 200:
+ 	# 200 means a successful request
+		
+		tempdir = tempfile.gettempdir()
+		fn = os.path.join(tempdir, "DEVSimPy.zip")
+		# open method to open a file on your system and write the contents
+		with open(fn, "wb") as code:
+			code.write(r.content)
+		
+		# downloading with urllib	
+		# Copy a network object to a local file
+		urllib.urlretrieve(url, fn)
+
+		return fn
+
+	else:
+		return None
+
+def updateFromGit():
+	"""
+	"""
+	# specifying the zip file name 
+	fn = downloadFromURL(os.path.join("https://github.com/capocchi/DEVSimPy/archive/version-",__version__,".zip")
+	
+	if fn:
+		# opening the zip file in READ mode 
+		with ZipFile(fn, 'r') as zip: 
+			# printing all the contents of the zip file 
+			zip.printdir() 
+		
+			# extracting all the files 
+			print('Extracting all the files now...') 
+			#zip.extractall() 
+			print('Done!') 
 
 def updatePackageWithPiP():
 	""" Update all installed package using pip

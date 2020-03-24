@@ -97,6 +97,7 @@ ID_ENGLISH_LANGUAGE = wx.NewIdRef()
 ID_HELP = wx.ID_HELP
 ID_API_HELP = wx.NewIdRef()
 ID_UPDATE_PIP_PACKAGE = wx.NewIdRef()
+ID_UPDATE_FROM_GIT = wx.NewIdRef()
 ID_CONTACT = wx.NewIdRef()
 ID_ABOUT = wx.ID_ABOUT
 
@@ -479,12 +480,14 @@ class HelpMenu(wx.Menu):
 
 		helpModel = wx.MenuItem(self, ID_HELP, _('&DEVSimPy Help\tF1'), _("Help for DEVSimPy user"))
 		apiModel = wx.MenuItem(self, ID_API_HELP, _('&DEVSimPy API\tF2'), _("API for DEVSimPy user"))
-		updatePipPackage = wx.MenuItem(self, ID_UPDATE_PIP_PACKAGE, _('Update PIP Packages\tF3'), _("Update pip packages"))
+		updatePipPackage = wx.MenuItem(self, ID_UPDATE_PIP_PACKAGE, _('Update PIP Packages\tF3'), _("Update of dependant pip packages"))
+		updateFromGit = wx.MenuItem(self, ID_UPDATE_FROM_GIT, _('Update From Git'), _("Update of DEVSimPy from Git archive"))
 		contactModel = wx.MenuItem(self, ID_CONTACT, _('Contact the Author...'), _("Send mail to the author"))
 		aboutModel = wx.MenuItem(self, ID_ABOUT, _('About DEVSimPy...'), _("About DEVSimPy"))
 
 		helpModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'search.png')))
 		updatePipPackage.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'update.png')))
+		updateFromGit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'update.png')))
 		apiModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'api.png')))
 		contactModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'mail.png')))
 		aboutModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'info.png')))
@@ -495,13 +498,15 @@ class HelpMenu(wx.Menu):
 		AppendItem(apiModel)
 		self.AppendSeparator()
 		AppendItem(updatePipPackage)
+		AppendItem(updateFromGit)
 		self.AppendSeparator()
 		AppendItem(aboutModel)
 		AppendItem(contactModel)
 
 		parent.Bind(wx.EVT_MENU, parent.OnHelp, id=ID_HELP)
 		parent.Bind(wx.EVT_MENU, parent.OnAPI, id=ID_API_HELP)
-		parent.Bind(wx.EVT_MENU, parent.OnUpdatePiPPackage, id=ID_UPDATE_PIP_PACKAGE)
+		parent.Bind(wx.EVT_MENU, parent.OnUpdatPiPPackage, id=ID_UPDATE_PIP_PACKAGE)
+		parent.Bind(wx.EVT_MENU, parent.OnUpdatFromGit, id=ID_UPDATE_FROM_GIT)
 		parent.Bind(wx.EVT_MENU, parent.OnAbout, id=ID_ABOUT)
 		parent.Bind(wx.EVT_MENU, parent.OnContact, id=ID_CONTACT)
 
