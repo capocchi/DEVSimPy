@@ -243,14 +243,13 @@ def updateFromGit():
 	
 	if fn:
 		# opening the zip file in READ mode 
-		with ZipFile(fn, 'r') as zip: 
+		with ZipFile(fn, 'r') as zip:
+			txt = 'Name / Size / Date\n'
+			txt +=' \n'.join([str(elem.filename)+'/'+str(elem.file_size)+'/'+str(elem.date_time) for elem in zip.infolist()]) 
 			# printing all the contents of the zip file 
 			dlg = wx.RichMessageDialog(None, "Do you realy want to update DEVSimPy?\nAll files will be relaced and you cannot go backwards.", style=wx.YES_NO|wx.CENTER)
-			txt = 'Name / Size / Date\n'
-			txt +=' \n'.join([str(elem.filename)+'/'+str(elem.file_size)+'/'+str(elem.date_time) for elem in zip.infolist()])
 			dlg.ShowDetailedText(txt)
-
-			if dlg.ShowModal() == wx.ID_YES:
+			if dlg.ShowModal() not in (wx.ID_NO, wx.ID_CANCEL):
 		
 				# extracting all the files 
 				print('Extracting all the files now...') 
