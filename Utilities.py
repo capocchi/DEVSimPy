@@ -338,7 +338,7 @@ def updatePiPPackages():
 
 		try:
 			#run_command(command, "to_progress_diag")
-			check_output(command, shell=True)
+			check_call(command, shell=True)
 			
 		except Exception as ee:
 			print(ee.output)
