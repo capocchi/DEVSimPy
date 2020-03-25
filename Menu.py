@@ -481,9 +481,9 @@ class HelpMenu(wx.Menu):
 
 		helpModel = wx.MenuItem(self, ID_HELP, _('&DEVSimPy Help\tF1'), _("Help for DEVSimPy user"))
 		apiModel = wx.MenuItem(self, ID_API_HELP, _('&DEVSimPy API\tF2'), _("API for DEVSimPy user")) 
-		updatePipPackage = wx.MenuItem(self, ID_UPDATE_PIP_PACKAGE, _('Update PIP Packages\tF3'), _("Update of dependant pip packages"))
-		updateFromGitArchive = wx.MenuItem(self, ID_UPDATE_FROM_GIT_ARCHIVE, _('Update From Git Archive'), _("Update of DEVSimPy from Git archive"))
-		updateFromGitRepo = wx.MenuItem(self, ID_UPDATE_FROM_GIT_REPO, _('Update From Git Repository'), _("Update of DEVSimPy from its Git repo"))
+		updatePipPackage = wx.MenuItem(self, ID_UPDATE_PIP_PACKAGE, _('Dependencies (PIP Packages)\tF3'), _("Update of dependant pip packages"))
+		updateFromGitArchive = wx.MenuItem(self, ID_UPDATE_FROM_GIT_ARCHIVE, _('From Git Archive (zip)'), _("Update of DEVSimPy from Git archive"))
+		updateFromGitRepo = wx.MenuItem(self, ID_UPDATE_FROM_GIT_REPO, _('From Git Repository (Pull)'), _("Update of DEVSimPy from its Git repo"))
 		contactModel = wx.MenuItem(self, ID_CONTACT, _('Contact the Author...'), _("Send mail to the author"))
 		aboutModel = wx.MenuItem(self, ID_ABOUT, _('About DEVSimPy...'), _("About DEVSimPy"))
 
