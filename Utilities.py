@@ -257,8 +257,7 @@ def copy_dir(src, dst):
 def updateFromGitRepo():
 	""" Updated DEVSimPy from Git with a zip (not with git command)
 	"""
-	if install_and_import('gitpython'):
-		pass
+	pass
 
 def updateFromGitArchive():
 	""" Updated DEVSimPy from Git with a zip (not with git command)
