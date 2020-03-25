@@ -319,5 +319,6 @@ class BlinkFrame(wx.Frame):
 		"""
 		"""
 		self.flag = True
+		self.Show(False)
 		#self.Destroy()
 		evt.Skip()
