@@ -52,8 +52,7 @@ To execute DEVSimPy:
 $ python devsimpy.py
 ```
 
-For os X users, python.app is required in order to use pythonw instead of python to execute the devismpy.py file.
-To execute DEVSimPy on MacOS:
+For os X users, python.app is required in order to use pythonw instead of python to execute the devismpy.py file:
 ```sh
 $ pythonw devsimpy.py
 ```
