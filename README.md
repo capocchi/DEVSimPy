@@ -54,9 +54,9 @@ $ python devsimpy.py
 ```
 
 # Documentations
- - DEVSimPy User Guide v2.8 [[pdf]](http://lcapocchi.free.fr/devsimpy/Guide_utilisateur_v2.8.pdf) (French)
+ - DEVSimPy User Guide v2.8 [[pdf]](http://portailweb.universita.corsica/stockage_public/portail/baaaaaes/files/DEVSimPy_guide_utilisateur.pdf) (French)
  - S. Toma Ph.D, Thesis [[pdf]](https://hal.archives-ouvertes.fr/tel-01141844/document) (English), winner of the 2014 DEVS PhD Dissertation Award.
- - S. Cezary, "Design and implementation of application for instruction exercises with DEVSimPy", Technical report, Faculty of Electrical Engineering, AUTOMATION AND INFORMATION TECHNOLOGY, Kielce University of Technology [[pdf]](http://lcapocchi.free.fr/files/report_Cezary.pdf) (Polish)
+ - S. Cezary, "Design and implementation of application for instruction exercises with DEVSimPy", Technical report, Faculty of Electrical Engineering, AUTOMATION AND INFORMATION TECHNOLOGY, Kielce University of Technology [[pdf]](http://portailweb.universita.corsica/stockage_public/portail/baaaaaes/files/report_Cezary.pdf) (Polish)
 
 # Citing
  If you use DEVSimPy in your research, you can cite it with using the following bibtex references:
@@ -85,4 +85,4 @@ month={June},}
 ```
 
 # Videos
-- [Youtube] (https://www.youtube.com/results?search_query=devsimpy)
+- You can watch some DEVSimPy features videos on [Youtube](https://www.youtube.com/results?search_query=devsimpy)
