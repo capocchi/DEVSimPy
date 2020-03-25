@@ -97,7 +97,8 @@ ID_ENGLISH_LANGUAGE = wx.NewIdRef()
 ID_HELP = wx.ID_HELP
 ID_API_HELP = wx.NewIdRef()
 ID_UPDATE_PIP_PACKAGE = wx.NewIdRef()
-ID_UPDATE_FROM_GIT = wx.NewIdRef()
+ID_UPDATE_FROM_GIT_ARCHIVE = wx.NewIdRef()
+ID_UPDATE_FROM_GIT_REPO = wx.NewIdRef()
 ID_CONTACT = wx.NewIdRef()
 ID_ABOUT = wx.ID_ABOUT
 
@@ -479,26 +480,34 @@ class HelpMenu(wx.Menu):
 		parent = parent.GetParent()
 
 		helpModel = wx.MenuItem(self, ID_HELP, _('&DEVSimPy Help\tF1'), _("Help for DEVSimPy user"))
-		apiModel = wx.MenuItem(self, ID_API_HELP, _('&DEVSimPy API\tF2'), _("API for DEVSimPy user"))
+		apiModel = wx.MenuItem(self, ID_API_HELP, _('&DEVSimPy API\tF2'), _("API for DEVSimPy user")) 
 		updatePipPackage = wx.MenuItem(self, ID_UPDATE_PIP_PACKAGE, _('Update PIP Packages\tF3'), _("Update of dependant pip packages"))
-		updateFromGit = wx.MenuItem(self, ID_UPDATE_FROM_GIT, _('Update From Git Archive'), _("Update of DEVSimPy from Git archive"))
+		updateFromGitArchive = wx.MenuItem(self, ID_UPDATE_FROM_GIT_ARCHIVE, _('Update From Git Archive'), _("Update of DEVSimPy from Git archive"))
+		updateFromGitRepo = wx.MenuItem(self, ID_UPDATE_FROM_GIT_REPO, _('Update From Git Repository'), _("Update of DEVSimPy from its Git repo"))
 		contactModel = wx.MenuItem(self, ID_CONTACT, _('Contact the Author...'), _("Send mail to the author"))
 		aboutModel = wx.MenuItem(self, ID_ABOUT, _('About DEVSimPy...'), _("About DEVSimPy"))
 
 		helpModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'search.png')))
 		updatePipPackage.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'update.png')))
-		updateFromGit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'update.png')))
+		updateFromGitArchive.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'update.png')))
+		updateFromGitRepo.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'update.png')))
 		apiModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'api.png')))
 		contactModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'mail.png')))
 		aboutModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'info.png')))
 
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
+		update_subMenu = wx.Menu()
+		Update_menu = AppendMenu(self, -1, _("Update"), update_subMenu)
+		Update_SubMenu0 = update_subMenu.Append(updatePipPackage)
+		update_subMenu.AppendSeparator()
+		Update_SubMenu1 = update_subMenu.Append(updateFromGitArchive)
+		Update_SubMenu2 = update_subMenu.AppendItem(updateFromGitRepo)
+
 		AppendItem(helpModel)
 		AppendItem(apiModel)
 		self.AppendSeparator()
-		AppendItem(updatePipPackage)
-		AppendItem(updateFromGit)
+		AppendItem(Update_menu)
 		self.AppendSeparator()
 		AppendItem(aboutModel)
 		AppendItem(contactModel)
@@ -506,7 +515,8 @@ class HelpMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnHelp, id=ID_HELP)
 		parent.Bind(wx.EVT_MENU, parent.OnAPI, id=ID_API_HELP)
 		parent.Bind(wx.EVT_MENU, parent.OnUpdatPiPPackage, id=ID_UPDATE_PIP_PACKAGE)
-		parent.Bind(wx.EVT_MENU, parent.OnUpdatFromGit, id=ID_UPDATE_FROM_GIT)
+		parent.Bind(wx.EVT_MENU, parent.OnUpdatFromGitRepo, id=ID_UPDATE_FROM_GIT_REPO)
+		parent.Bind(wx.EVT_MENU, parent.OnUpdatFromGitArchive, id=ID_UPDATE_FROM_GIT_ARCHIVE)
 		parent.Bind(wx.EVT_MENU, parent.OnAbout, id=ID_ABOUT)
 		parent.Bind(wx.EVT_MENU, parent.OnContact, id=ID_CONTACT)
 

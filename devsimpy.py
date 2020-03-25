@@ -184,7 +184,7 @@ from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
 from pluginmanager import load_plugins, enable_plugin
 from which import which
-from Utilities import GetUserConfigDir, install, install_and_import, updatePiPPackages, updateFromGit, NotificationMessage
+from Utilities import GetUserConfigDir, install, install_and_import, updatePiPPackages, updateFromGitRepo, updateFromGitArchive, NotificationMessage
 from Decorators import redirectStdout, BuzyCursorNotification, ProgressNotification, cond_decorator
 from DetachedFrame import DetachedFrame
 from LibraryTree import LibraryTree
@@ -2043,7 +2043,7 @@ class MainApplication(wx.Frame):
 			self.DoUpdatPiPPackage()	
 		dlg.Destroy()
 
-	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("Update of dependant pip packages.")))
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("Update of dependant pip packages")))
 	def DoUpdatPiPPackage(self):
 		if updatePiPPackages():
 			args = (_('Information'), _('All pip packages that DEVSimPy depends have been updated! \nYou need to restart DEVSimPy to take effect'))
@@ -2054,22 +2054,44 @@ class MainApplication(wx.Frame):
 
 		NotificationMessage(*args, **kwargs)
 
-	def OnUpdatFromGit(self, event):
+	###
+	def OnUpdatFromGitRepo(self, event):
 		msg = _("Do you really want to update DEVSimPy from the last git master version? \nAll files will be replaced and you cannot go backwards.")
 		#info = ""
 		dlg = wx.RichMessageDialog(self, msg, _("Update Manager"), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 		#dlg.ShowDetailedText(info)
 		if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:
-			self.DoUpdatFromGit()
+			self.DoUpdatFromGitRepo()
 		dlg.Destroy()
 
-	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git.")))
-	def DoUpdatFromGit(self):
-		if updateFromGit():
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git repo")))
+	def DoUpdatFromGitRepo(self):
+		if updateFromGitRepo():
 			args = (_('Information'), _('Update of DEVSimPy from git done! \nYou need to restart DEVSimPy to take effect.'))
 			kwargs = {'parent':self, 'timeout':5}
 		else:
 			args = (_('Error'), _('DEVSimPy update from git failed! \nCheck the trace in background for more informations.'))
+			kwargs =  {'parent':self, 'flag':wx.ICON_ERROR, 'timeout':5}
+		
+		NotificationMessage(*args, **kwargs)
+
+	###
+	def OnUpdatFromGitArchive(self, event):
+		msg = _("Do you really want to update DEVSimPy from the last master archive? \nAll files will be replaced and you cannot go backwards.")
+		#info = ""
+		dlg = wx.RichMessageDialog(self, msg, _("Update Manager"), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		#dlg.ShowDetailedText(info)
+		if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:
+			self.DoUpdatFromGitArchive()
+		dlg.Destroy()
+
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git.")))
+	def DoUpdatFromGitArchive(self):
+		if updateFromGitArchive():
+			args = (_('Information'), _('Update of DEVSimPy from git archive done! \nYou need to restart DEVSimPy to take effect.'))
+			kwargs = {'parent':self, 'timeout':5}
+		else:
+			args = (_('Error'), _('DEVSimPy update from git archive failed! \nCheck the trace in background for more informations.'))
 			kwargs =  {'parent':self, 'flag':wx.ICON_ERROR, 'timeout':5}
 		
 		NotificationMessage(*args, **kwargs)

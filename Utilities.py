@@ -254,7 +254,13 @@ def copy_dir(src, dst):
 		else:
 			shutil.copy2(str(s), str(d))
 
-def updateFromGit():
+def updateFromGitRepo():
+	""" Updated DEVSimPy from Git with a zip (not with git command)
+	"""
+	if install_and_import('gitpython'):
+		pass
+
+def updateFromGitArchive():
 	""" Updated DEVSimPy from Git with a zip (not with git command)
 	"""
 
@@ -337,8 +343,8 @@ def updatePiPPackages():
 			command = "pip install --user --upgrade " + ' '.join(packages)
 
 		try:
-			#run_command(command, "to_progress_diag")
-			check_call(command, shell=True)
+			run_command(command, "to_progress_diag")
+			#check_call(command, shell=True)
 			
 		except Exception as ee:
 			print(ee.output)
