@@ -2060,7 +2060,7 @@ class MainApplication(wx.Frame):
 		dlg = wx.RichMessageDialog(self, msg, _("Update Manager"), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 		#dlg.ShowDetailedText(info)
 		if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:
-			self.DoUpdatFromGit()	
+			self.DoUpdatFromGit()
 		dlg.Destroy()
 
 	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git.")))

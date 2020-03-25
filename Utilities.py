@@ -257,26 +257,28 @@ def copy_dir(src, dst):
 def updateFromGit():
 	""" Updated DEVSimPy from Git with a zip (not with git command)
 	"""
-	tempdir = tempfile.gettempdir()
-	now = datetime.now() # current date and time
-
-	try:
-		### make a backup of DEVSimPy sources to temp directory with the file DEVSimPy-backup-m_d_y
-		pub.sendMessage("to_progress_diag", message=_(f"Backup DEVSimPy in {tempdir} directory..."))
-		
-		zipf = ZipFile(os.path.join(tempdir,''.join(['DEVSimPy-backup-',now.strftime("%m_%d_%Y"),'.zip'])), 'w', ZIP_DEFLATED)
-		zipdir(os.getcwd(), zipf)
-		zipf.close()
-	except:
-		return False
-	else:
-		pub.sendMessage("to_progress_diag", message=_(f"Done!"))
 
 	# specifying the zip file name 
 	fn = downloadFromURL("https://github.com/capocchi/DEVSimPy/archive/master.zip")
 	
 	if fn:
-		# opening the zip file in READ mode 
+
+		tempdir = tempfile.gettempdir()
+		now = datetime.now() # current date and time
+
+		try:
+			### make a backup of DEVSimPy sources to temp directory with the file DEVSimPy-backup-m_d_y
+			pub.sendMessage("to_progress_diag", message=_(f"Backup DEVSimPy in {tempdir} directory..."))
+			
+			zipf = ZipFile(os.path.join(tempdir,''.join(['DEVSimPy-backup-',now.strftime("%m_%d_%Y"),'.zip'])), 'w', ZIP_DEFLATED)
+			zipdir(os.getcwd(), zipf)
+			zipf.close()
+		except:
+			return False
+		else:
+			pub.sendMessage("to_progress_diag", message=_(f"Done!"))
+
+		# opening the downloaded zip file in READ mode 
 		with ZipFile(fn, 'a') as zip:
 			
 			# extracting all the files (simulate in order to wait if the user want to stop the process)
@@ -335,8 +337,8 @@ def updatePiPPackages():
 			command = "pip install --user --upgrade " + ' '.join(packages)
 
 		try:
-			run_command(command, "to_progress_diag")
-			#check_output(command, shell=True)
+			#run_command(command, "to_progress_diag")
+			check_output(command, shell=True)
 			
 		except Exception as ee:
 			print(ee.output)
