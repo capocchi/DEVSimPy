@@ -332,9 +332,11 @@ def run_command(command, message=None):
 	""" run command and send a message for each output of the process using pubsub
 	"""
 	### dynamic output of the process to progress diag using pubsub!
-	process = Popen(shlex.split(command), stdout=PIPE, stderr = PIPE, shell=True, encoding='utf-8')
+	#process = Popen(shlex.split(command), stdout=PIPE, stderr = PIPE, shell=True, encoding='utf-8')
+	process = Popen(command, stdout=PIPE, stderr = PIPE, shell=True, encoding='utf-8')
 	while True:
-		output = process.stdout.readline()	
+		output = process.stdout.readline()
+		
 		if output == '' and process.poll() is not None:
 			break
 		if output and message:
