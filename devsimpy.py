@@ -2056,7 +2056,7 @@ class MainApplication(wx.Frame):
 
 	###
 	def OnUpdatFromGitRepo(self, event):
-		msg = _("Do you really want to update DEVSimPy from the last git master version? \nAll files will be replaced and you cannot go backwards.")
+		msg = _("Do you really want to update DEVSimPy with a Pull Git request?")
 		#info = ""
 		dlg = wx.RichMessageDialog(self, msg, _("Update Manager"), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 		#dlg.ShowDetailedText(info)
