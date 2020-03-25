@@ -372,22 +372,27 @@ def install_and_import(package_to_install, package_to_import=None):
 	if not package_to_import:
 		package_to_import = package_to_install
 
-	installed = install(package_to_install)
+	installed = install(package_to_install, package_to_import)
 	if installed and package_to_import not in sys.modules: globals()[package_to_import] = importlib.import_module(package_to_import)
 	return installed
 
-def install(package):
+def install(package_to_install, package_to_import=None):
 	""" Install the package
 	"""
+
+	### if package to import is different to the package to install
+	if not package_to_import:
+		package_to_import = package_to_install
+		
 	try:
-		importlib.import_module(package)
+		importlib.import_module(package_to_import)
 		installed = True
 	except ImportError:
-		if pip.main(['search', package]) != 23:
-			dial = wx.MessageDialog(None, _('We find that the package %s is missing. \n\n Do you want to install him using pip?'%(package)), _('Install Package'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		if pip.main(['search', package_to_install]) != 23:
+			dial = wx.MessageDialog(None, _('We find that the package %s is missing. \n\n Do you want to install him using pip?'%(package_to_install)), _('Package Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
 			if dial.ShowModal() == wx.ID_YES:
-				installed = not pip.main(['install', '--user', package])
+				installed = not pip.main(['install', '--user', package_to_install])
 				dial.Destroy() 
 			else:
 				installed = False
