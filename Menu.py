@@ -481,7 +481,7 @@ class HelpMenu(wx.Menu):
 		helpModel = wx.MenuItem(self, ID_HELP, _('&DEVSimPy Help\tF1'), _("Help for DEVSimPy user"))
 		apiModel = wx.MenuItem(self, ID_API_HELP, _('&DEVSimPy API\tF2'), _("API for DEVSimPy user"))
 		updatePipPackage = wx.MenuItem(self, ID_UPDATE_PIP_PACKAGE, _('Update PIP Packages\tF3'), _("Update of dependant pip packages"))
-		updateFromGit = wx.MenuItem(self, ID_UPDATE_FROM_GIT, _('Update From Git'), _("Update of DEVSimPy from Git archive"))
+		updateFromGit = wx.MenuItem(self, ID_UPDATE_FROM_GIT, _('Update From Git Archive'), _("Update of DEVSimPy from Git archive"))
 		contactModel = wx.MenuItem(self, ID_CONTACT, _('Contact the Author...'), _("Send mail to the author"))
 		aboutModel = wx.MenuItem(self, ID_ABOUT, _('About DEVSimPy...'), _("About DEVSimPy"))
 

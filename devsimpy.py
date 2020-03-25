@@ -184,7 +184,7 @@ from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
 from pluginmanager import load_plugins, enable_plugin
 from which import which
-from Utilities import GetUserConfigDir, install, install_and_import, updatePackageWithPiP, updateFromGit, NotificationMessage
+from Utilities import GetUserConfigDir, install, install_and_import, updatePiPPackages, updateFromGit, NotificationMessage
 from Decorators import redirectStdout, BuzyCursorNotification, ProgressNotification, cond_decorator
 from DetachedFrame import DetachedFrame
 from LibraryTree import LibraryTree
@@ -2034,9 +2034,18 @@ class MainApplication(wx.Frame):
 		else:
 			self.help.Display(os.path.join('html','toc.html'))
 
-	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("Update of dependant pip packages.")))
 	def OnUpdatPiPPackage(self, event):
-		if updatePackageWithPiP():
+		msg = _("Do you really want to update all pip packages that DEVSimPy depends?")
+		#info = ""
+		dlg = wx.RichMessageDialog(self, msg, _("Update Manager"), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		#dlg.ShowDetailedText(info)
+		if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:
+			self.DoUpdatPiPPackage()	
+		dlg.Destroy()
+
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("Update of dependant pip packages.")))
+	def DoUpdatPiPPackage(self):
+		if updatePiPPackages():
 			args = (_('Information'), _('All pip packages that DEVSimPy depends have been updated! \nYou need to restart DEVSimPy to take effect'))
 			kwargs = {'parent':self, 'timeout':5}
 		else:
@@ -2045,8 +2054,17 @@ class MainApplication(wx.Frame):
 
 		NotificationMessage(*args, **kwargs)
 
-	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git.")))
 	def OnUpdatFromGit(self, event):
+		msg = _("Do you really want to update DEVSimPy from the last git master version? \nAll files will be replaced and you cannot go backwards.")
+		#info = ""
+		dlg = wx.RichMessageDialog(self, msg, _("Update Manager"), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		#dlg.ShowDetailedText(info)
+		if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:
+			self.DoUpdatFromGit()	
+		dlg.Destroy()
+
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git.")))
+	def DoUpdatFromGit(self):
 		if updateFromGit():
 			args = (_('Information'), _('Update of DEVSimPy from git done! \nYou need to restart DEVSimPy to take effect.'))
 			kwargs = {'parent':self, 'timeout':5}

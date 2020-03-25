@@ -35,13 +35,16 @@ import configparser
 import linecache
 import imp 
 import tempfile
+import pathlib
+import shlex
 from  copy import deepcopy
+from datetime import datetime
 
 import gettext
 _ = gettext.gettext
 
 from itertools import combinations
-from zipfile import ZipFile 
+from zipfile import ZipFile, ZIP_DEFLATED 
 from io import StringIO
 
 if builtins.__dict__.get('GUI_FLAG',True):
@@ -71,7 +74,7 @@ from urllib.request import urlretrieve
 import pip
 import importlib
 
-from subprocess import call, check_output, check_call, CalledProcessError
+from subprocess import call, check_output, check_call, Popen, PIPE
 
 # Used for smooth (spectrum)
 try:
@@ -196,7 +199,8 @@ def updatePiP():
 
 	if check_internet():	
 		try:
-			check_call("python -m pip install --upgrade pip", shell=True)
+			command = "python -m pip install --upgrade pip"
+			run_command(command, "to_progress_diag")
 		except Exception as ee:
 			print(ee.output)
 			return False
@@ -232,42 +236,94 @@ def downloadFromURL(url):
 		else:
 			return None
 
+def zipdir(path, ziph):
+	# ziph is zipfile handle
+	lenDirPath = len(path)
+	for root, dirs, files in os.walk(path):
+		for file in files:
+			filePath = os.path.join(root, file)
+			ziph.write(filePath , filePath[lenDirPath:])
+
+def copy_dir(src, dst):
+	dst.mkdir(parents=True, exist_ok=True)
+	for item in os.listdir(src):
+		s = src / item
+		d = dst / item
+		if s.is_dir():
+			copy_dir(s, d)
+		else:
+			shutil.copy2(str(s), str(d))
+
 def updateFromGit():
 	""" Updated DEVSimPy from Git with a zip (not with git command)
 	"""
-	
+	tempdir = tempfile.gettempdir()
+	now = datetime.now() # current date and time
+
+	try:
+		### make a backup of DEVSimPy sources to temp directory with the file DEVSimPy-backup-m_d_y
+		pub.sendMessage("to_progress_diag", message=_(f"Backup DEVSimPy in {tempdir} directory..."))
+		
+		zipf = ZipFile(os.path.join(tempdir,''.join(['DEVSimPy-backup-',now.strftime("%m_%d_%Y"),'.zip'])), 'w', ZIP_DEFLATED)
+		zipdir(os.getcwd(), zipf)
+		zipf.close()
+	except:
+		return False
+	else:
+		pub.sendMessage("to_progress_diag", message=_(f"Done!"))
+
 	# specifying the zip file name 
 	fn = downloadFromURL("https://github.com/capocchi/DEVSimPy/archive/master.zip")
 	
 	if fn:
 		# opening the zip file in READ mode 
-		with ZipFile(fn, 'r') as zip:
-			# printing all the contents of the zip file 
-			#dlg = wx.RichMessageDialog(None, "Do you realy want to update DEVSimPy?\nAll files will be relaced and you cannot go backwards.", style=wx.YES_NO|wx.CENTER)
-			#txt = 'Name / Size / Date\n'
-			#txt +=' \n'.join([str(elem.filename)+'/'+str(elem.file_size)+'/'+str(elem.date_time) ]) 
-			#dlg.ShowDetailedText(txt)
-			#if dlg.ShowModal() not in (wx.ID_NO, wx.ID_CANCEL):
-		
-			#dlg.Destroy()
+		with ZipFile(fn, 'a') as zip:
 			
-			# extracting all the files 
+			# extracting all the files (simulate in order to wait if the user want to stop the process)
 			pub.sendMessage("to_progress_diag", message=_("Extracting all the files..."))
 			for elem in zip.infolist():
 				time.sleep(0.1)
-				pub.sendMessage("to_progress_diag", message=_(f"copy...\n{str(elem.filename)}"))
-				#zip.extract(elem, tempfile.gettempdir())
+				
+				p = pathlib.PurePosixPath(elem.filename)
+				pub.sendMessage("to_progress_diag", message=_(f"Extract...\n{p.relative_to('DEVSimPy-master')}"))
 			
-			zip.extractall(tempfile.gettempdir())
-			pub.sendMessage("to_progress_diag", message=_("Done!"))
+			### effective extraction in temp directory
+			zip.extractall(tempdir)
 
-			return True
+			### Copy the extracted files into the DEVSimPy folder.
+			pub.sendMessage("to_progress_diag", message=_(f"Copy...\n{p.relative_to('DEVSimPy-master')}"))
+			if platform.python_version() >= '3.8':
+				shutil.copytree(os.path.join(tempdir, 'DEVSimPy-master'), os.path.join(tempdir, 'test'), dirs_exist_ok=True) 
+			else:
+				src = pathlib.Path(os.path.join(tempdir, 'DEVSimPy-master'))
+				dest = pathlib.Path(os.path.join(tempdir, 'test'))
+				copy_dir(src, dest)
+
+		pub.sendMessage("to_progress_diag", message=_("Done!"))
+
+		### delete temporary zip file
+		os.remove(fn)
+
+		return True
 			
 	else:
 		return False
 
-def updatePackageWithPiP():
-	""" Update all installed package using pip
+def run_command(command, message=None):
+	""" run command and send a message for each output of the process using pubsub
+	"""
+	### dynamic output of the process to progress diag using pubsub!
+	process = Popen(shlex.split(command), stdout=PIPE, stderr = PIPE, shell=True, encoding='utf-8')
+	while True:
+		output = process.stdout.readline()	
+		if output == '' and process.poll() is not None:
+			break
+		if output and message:
+			pub.sendMessage(message, message=output.strip())
+	process.poll()
+
+def updatePiPPackages():
+	""" Update all pip packages that DEVSimPy depends.
 	"""
 
 	if updatePiP():
@@ -279,7 +335,9 @@ def updatePackageWithPiP():
 			command = "pip install --user --upgrade " + ' '.join(packages)
 
 		try:
-			check_call(command, shell=True)
+			run_command(command, "to_progress_diag")
+			#check_output(command, shell=True)
+			
 		except Exception as ee:
 			print(ee.output)
 			return False
