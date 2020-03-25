@@ -36,7 +36,7 @@ import linecache
 import imp 
 import tempfile
 import pathlib
-import shlex
+#import shlex
 from  copy import deepcopy
 from datetime import datetime
 
@@ -311,17 +311,20 @@ def updateFromGitArchive():
 
 			### Copy the extracted files into the DEVSimPy folder.
 			pub.sendMessage("to_progress_diag", message=_(f"Copy...\n{p.relative_to('DEVSimPy-master')}"))
-			if platform.python_version() >= '3.8':
-				shutil.copytree(os.path.join(tempdir, 'DEVSimPy-master'), os.path.join(tempdir, 'test'), dirs_exist_ok=True) 
-			else:
-				src = pathlib.Path(os.path.join(tempdir, 'DEVSimPy-master'))
-				dest = pathlib.Path(os.path.join(tempdir, 'test'))
-				copy_dir(src, dest)
+			try:
+				if platform.python_version() >= '3.8':
+					shutil.copytree(os.path.join(tempdir, 'DEVSimPy-master'), os.path.join(tempdir, 'test'), dirs_exist_ok=True) 
+				else:
+					src = pathlib.Path(os.path.join(tempdir, 'DEVSimPy-master'))
+					dest = pathlib.Path(os.path.join(tempdir, os.getcwd()))
+					copy_dir(src, dest)
+			except:
+				return False
 
 		pub.sendMessage("to_progress_diag", message=_("Done!"))
 
 		### delete temporary zip file
-		os.remove(fn)
+		#os.remove(fn)
 
 		return True
 			
@@ -332,14 +335,18 @@ def run_command(command, message=None):
 	""" run command and send a message for each output of the process using pubsub
 	"""
 	### dynamic output of the process to progress diag using pubsub!
-	process = Popen(shlex.split(command), stdout=PIPE, stderr = PIPE, shell=True, encoding='utf-8')
-	while True:
-		output = process.stdout.readline()	
-		if output == '' and process.poll() is not None:
-			break
-		if output and message:
-			pub.sendMessage(message, message=output.strip())
-	process.poll()
+	try:
+		#process = Popen(shlex.split(command), stdout=PIPE, stderr = PIPE, shell=True, encoding='utf-8')
+		process = Popen(command, stdout=PIPE, stderr = PIPE, shell=True, encoding='utf-8')
+		while True:
+			output = process.stdout.readline()
+			if output == '' and process.poll() is not None:
+				break
+			if output and message:
+				pub.sendMessage(message, message=output.strip())
+		process.poll()
+	except:
+		check_call(command, shell=True)
 
 def updatePiPPackages():
 	""" Update all pip packages that DEVSimPy depends.
@@ -355,7 +362,6 @@ def updatePiPPackages():
 
 		try:
 			run_command(command, "to_progress_diag")
-			#check_call(command, shell=True)
 			
 		except Exception as ee:
 			print(ee.output)
