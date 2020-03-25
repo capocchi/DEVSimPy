@@ -2037,10 +2037,10 @@ class MainApplication(wx.Frame):
 	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("Update of dependant pip packages.")))
 	def OnUpdatPiPPackage(self, event):
 		if updatePackageWithPiP():
-			args = (_('Information'), _('All pip packages that DEVSimPy depends have been updated!\nYou need to restart DEVSimPy to take effect'))
+			args = (_('Information'), _('All pip packages that DEVSimPy depends have been updated! \nYou need to restart DEVSimPy to take effect'))
 			kwargs = {'parent':self, 'timeout':5}
 		else:
-			args = (_('Error'), _('Pip packages update failed!\n Check the trace in background for more informations.'))
+			args = (_('Error'), _('Pip packages update failed! \nCheck the trace in background for more informations.'))
 			kwargs = {'parent':self, 'flag':wx.ICON_ERROR, 'timeout':5}
 
 		NotificationMessage(*args, **kwargs)
@@ -2048,10 +2048,10 @@ class MainApplication(wx.Frame):
 	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git.")))
 	def OnUpdatFromGit(self, event):
 		if updateFromGit():
-			args = (_('Information'), _('Update of DEVSimPy from git done!\nYou need to restart DEVSimPy to take effect.'))
+			args = (_('Information'), _('Update of DEVSimPy from git done! \nYou need to restart DEVSimPy to take effect.'))
 			kwargs = {'parent':self, 'timeout':5}
 		else:
-			args = (_('Error'), _('DEVSimPy update from git failed!\n Check the trace in background for more informations.'))
+			args = (_('Error'), _('DEVSimPy update from git failed! \nCheck the trace in background for more informations.'))
 			kwargs =  {'parent':self, 'flag':wx.ICON_ERROR, 'timeout':5}
 		
 		NotificationMessage(*args, **kwargs)

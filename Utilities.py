@@ -212,7 +212,7 @@ def downloadFromURL(url):
 	try:
 		# downloading with request
 		# download the file contents in binary format
-		pub.sendMessage("to_progress_diag", message=_(f"Download from:\n{url}"))
+		pub.sendMessage("to_progress_diag", message=_(f"Download git archive from:\n{url}"))
 		r = urllib.request.urlopen(url)
 	except Exception as e:
 		print(e)
@@ -250,8 +250,7 @@ def updateFromGit():
 			#if dlg.ShowModal() not in (wx.ID_NO, wx.ID_CANCEL):
 		
 			#dlg.Destroy()
-			pub.sendMessage("to_progress_diag", message=_("Extracting all the files..."), arg2='suspend')
-
+			
 			# extracting all the files 
 			pub.sendMessage("to_progress_diag", message=_("Extracting all the files..."))
 			for elem in zip.infolist():
