@@ -36,20 +36,19 @@ With DEVSimPy you can:
 
 To get DEVSimPy V4.0 package with all Git submodule: 
 ```sh
-$ git clone --recurse-submodules -b version-4.0 --depth=1 https://github.com/capocchi/DEVSimPy.git .
+$ git clone --recurse-submodules -b version-4.0 --depth=1 https://github.com/capocchi/DEVSimPy.git
 $ git fetch --unshallow 
 ```
 
-DEVSimPy depends on PyPubSub version 3.3.0 (or 3.3.1), pyyaml, ruamel.yaml and modules. 
-All dependencies can be installed using requirements.txt file:
+DEVSimPy depends on PyPubSub, pyyaml, ruamel.yaml and other packages included in the requirements.txt file. 
+All dependencies can be installed using pip with the requirements.txt file:
 ```sh
 $ pip install -r requirements.txt
 ```
 For os X users, python.app is required in order to use pythonw instead of python to execute the devismpy.py file.
 
-For os X users, python.app is required in order to use pythonw instead of python to execute the devismpy.py file.
-
-DEVSimPy don't require installation and works on all platforms. To execute DEVSimPy:
+# Usage
+To execute DEVSimPy:
 ```sh
 $ python devsimpy.py
 ```
