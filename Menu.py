@@ -479,6 +479,8 @@ class HelpMenu(wx.Menu):
 
 		parent = parent.GetParent()
 
+		update_subMenu = wx.Menu()
+		
 		helpModel = wx.MenuItem(self, ID_HELP, _('&DEVSimPy Help\tF1'), _("Help for DEVSimPy user"))
 		apiModel = wx.MenuItem(self, ID_API_HELP, _('&DEVSimPy API\tF2'), _("API for DEVSimPy user")) 
 		updatePipPackage = wx.MenuItem(self, ID_UPDATE_PIP_PACKAGE, _('Dependencies (PIP Packages)\tF3'), _("Update of dependant pip packages"))
@@ -497,17 +499,14 @@ class HelpMenu(wx.Menu):
 
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
-		update_subMenu = wx.Menu()
+		AppendItem(helpModel)
+		AppendItem(apiModel)
+		self.AppendSeparator()
 		Update_menu = AppendMenu(self, -1, _("Update"), update_subMenu)
 		Update_SubMenu0 = update_subMenu.Append(updatePipPackage)
 		update_subMenu.AppendSeparator()
 		Update_SubMenu1 = update_subMenu.Append(updateFromGitArchive)
 		Update_SubMenu2 = update_subMenu.Append(updateFromGitRepo)
-
-		AppendItem(helpModel)
-		AppendItem(apiModel)
-		self.AppendSeparator()
-		AppendItem(Update_menu)
 		self.AppendSeparator()
 		AppendItem(aboutModel)
 		AppendItem(contactModel)
