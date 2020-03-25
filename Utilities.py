@@ -257,7 +257,13 @@ def copy_dir(src, dst):
 def updateFromGitRepo():
 	""" Updated DEVSimPy from Git with a zip (not with git command)
 	"""
-	pass
+	import git
+
+	pub.sendMessage("to_progress_diag", message=_("Pull..."))
+	repo = git.Repo()
+	o = repo.remotes.origin
+	o.pull()
+	pub.sendMessage("to_progress_diag", message=_("Done!"))
 
 def updateFromGitArchive():
 	""" Updated DEVSimPy from Git with a zip (not with git command)
