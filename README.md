@@ -45,7 +45,6 @@ All dependencies can be installed using pip with the requirements.txt file:
 ```sh
 $ pip install -r requirements.txt
 ```
-For os X users, python.app is required in order to use pythonw instead of python to execute the devismpy.py file.
 
 # Usage
 To execute DEVSimPy:
@@ -53,6 +52,11 @@ To execute DEVSimPy:
 $ python devsimpy.py
 ```
 
+For os X users, python.app is required in order to use pythonw instead of python to execute the devismpy.py file.
+To execute DEVSimPy on MacOS:
+```sh
+$ pythonw devsimpy.py
+```
 # Documentations
  - DEVSimPy User Guide v2.8 [[pdf]](http://portailweb.universita.corsica/stockage_public/portail/baaaaaes/files/DEVSimPy_guide_utilisateur.pdf) (French)
  - S. Toma Ph.D, Thesis [[pdf]](https://hal.archives-ouvertes.fr/tel-01141844/document) (English), winner of the 2014 DEVS PhD Dissertation Award.
