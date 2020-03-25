@@ -353,11 +353,15 @@ def updatePiPPackages():
 	else:
 		return False
 
-def install_and_import(package):
+def install_and_import(package_to_install, package_to_import=None):
 	""" Install and import the package
 	"""
-	installed = install(package)
-	if installed and package not in sys.modules: globals()[package] = importlib.import_module(package)
+	### if package to import is different to the package to install
+	if not package_to_import:
+		package_to_import = package_to_install
+
+	installed = install(package_to_install)
+	if installed and package_to_import not in sys.modules: globals()[package_to_import] = importlib.import_module(package_to_import)
 	return installed
 
 def install(package):

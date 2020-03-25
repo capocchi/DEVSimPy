@@ -2061,7 +2061,7 @@ class MainApplication(wx.Frame):
 		dlg = wx.RichMessageDialog(self, msg, _("Update Manager"), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 		#dlg.ShowDetailedText(info)
 		if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:
-			if install_and_import('gitpython'):
+			if install_and_import('gitpython', 'git'):
 				self.DoUpdatFromGitRepo()
 		dlg.Destroy()
 
