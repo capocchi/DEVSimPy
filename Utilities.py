@@ -212,7 +212,7 @@ def downloadFromURL(url):
 	try:
 		# downloading with request
 		# download the file contents in binary format
-		pub.sendMessage("to_progress_diag", message=_(f"Download the file from {url}"))
+		pub.sendMessage("to_progress_diag", message=_(f"Download from:\n{url}"))
 		r = urllib.request.urlopen(url)
 	except Exception as e:
 		print(e)
@@ -224,9 +224,9 @@ def downloadFromURL(url):
 			fn = os.path.join(tempdir, "DEVSimPy.zip")
 			# downloading with urllib
 			# Copy a network object to a local file
-			pub.sendMessage("to_progress_diag", message=_(f"Copy a network object to a local file {fn}"))
+			pub.sendMessage("to_progress_diag", message=_(f"Copy a network object to:\n{fn}"))
 			urlretrieve(url, fn)
-
+			pub.sendMessage("to_progress_diag", message=_(f"Copy done!"))
 			return fn
 
 		else:
