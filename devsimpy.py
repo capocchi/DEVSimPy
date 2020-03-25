@@ -102,16 +102,11 @@ except ImportError:
 	old = True
 
 # to send event
-if wx.VERSION_STRING < '2.9':
-	from wx.lib.pubsub import Publisher as pub
-elif wx.VERSION_STRING < '4.0':
-	from wx.lib.pubsub import pub
-else:
-	try:
-		from pubsub import pub
-	except Exception:
-		sys.stdout.write('Last version for Python2 is PyPubSub 3.3.0 \n pip install PyPubSub==3.3.0')
-		sys.exit()
+try:
+	from pubsub import pub
+except Exception:
+	sys.stdout.write('Last version for Python2 is PyPubSub 3.3.0 \n pip install PyPubSub==3.3.0')
+	sys.exit()
 
 if wx.VERSION_STRING >= '4.0':
 

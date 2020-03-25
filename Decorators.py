@@ -42,6 +42,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 		import wx.lib.agw.aui.framemanager
 		AuiFloatingFrame = wx.lib.agw.aui.framemanager.AuiFloatingFrame
 
+	from pubsub import pub
+
 def cond_decorator(flag, dec):
 	def decorate(fn):
 		return dec(fn) if flag else fn
@@ -143,21 +145,27 @@ def StatusBarNotification(f, arg):
 	return wrapper
 
 class ThreadWithReturnValue(threading.Thread):
+	""" https://www.geeksforgeeks.org/python-different-ways-to-kill-a-thread/
+	"""
 	def __init__(self, *args, **kwargs): 
 		super(ThreadWithReturnValue, self).__init__(*args, **kwargs) 
-		self._return = None
+		#self._return = None
 		self.killed = False
-  
+		self._log = ""
+		self._status = ""
+		pub.subscribe(self.my_listener, "to_progress_diag")
+
 	def start(self): 
 		self.__run_backup = self.run 
 		self.run = self.__run       
-		threading.Thread.start(self) 
+		threading.Thread.start(self)
+		self._status = 'alive'
 	
 	def __run(self): 
 		sys.settrace(self.globaltrace) 
 		self._return = self.__run_backup() 
 		self.run = self.__run_backup 
-	
+
 	def globaltrace(self, frame, event, arg): 
 		if event == 'call': 
 			return self.localtrace 
@@ -170,6 +178,22 @@ class ThreadWithReturnValue(threading.Thread):
 				raise SystemExit()
 		return self.localtrace 
 	
+	def my_listener(self, message, arg2=None):
+		"""
+		Listener function
+		"""
+		self._log = message
+		if arg2 == 'stop':
+			self.kill()
+		elif arg2 is not None:
+			self._status = arg2
+
+	def getStatus(self):
+		return self._status
+
+	def getLog(self):
+		return self._log
+
 	def kill(self): 
 		self.killed = True
 
@@ -201,13 +225,13 @@ def ProgressNotification(f, arg):
 		thread = ThreadWithReturnValue(target = f, args = args)
 		thread.start()
 
-		while thread.isAlive():			
+		while thread.isAlive():
+
 			if progress_dlg.WasCancelled() or progress_dlg.WasSkipped():
 				thread.kill()
-				break
 			else:
 				wx.MilliSleep(300)
-				progress_dlg.Pulse()
+				progress_dlg.Pulse(thread.getLog())
 				wx.SafeYield()
 
 		progress_dlg.Destroy()

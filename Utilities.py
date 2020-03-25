@@ -58,6 +58,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 	except ImportError: # if it's not there locally, try the wxPython lib.
 		import wx.lib.agw.pybusyinfo as PBI
 
+	from pubsub import pub
+
 ### for replaceAll
 import fileinput
 
@@ -210,6 +212,7 @@ def downloadFromURL(url):
 	try:
 		# downloading with request
 		# download the file contents in binary format
+		pub.sendMessage("to_progress_diag", message=_(f"Download the file from {url}"))
 		r = urllib.request.urlopen(url)
 	except Exception as e:
 		print(e)
@@ -217,11 +220,11 @@ def downloadFromURL(url):
 	else:
 		if r.getcode() == 200:
 		# 200 means a successful request
-			
 			tempdir = tempfile.gettempdir()
 			fn = os.path.join(tempdir, "DEVSimPy.zip")
-			# downloading with urllib	
+			# downloading with urllib
 			# Copy a network object to a local file
+			pub.sendMessage("to_progress_diag", message=_(f"Copy a network object to a local file {fn}"))
 			urlretrieve(url, fn)
 
 			return fn
@@ -242,20 +245,26 @@ def updateFromGit():
 			# printing all the contents of the zip file 
 			#dlg = wx.RichMessageDialog(None, "Do you realy want to update DEVSimPy?\nAll files will be relaced and you cannot go backwards.", style=wx.YES_NO|wx.CENTER)
 			#txt = 'Name / Size / Date\n'
-			#txt +=' \n'.join([str(elem.filename)+'/'+str(elem.file_size)+'/'+str(elem.date_time) for elem in zip.infolist()]) 
+			#txt +=' \n'.join([str(elem.filename)+'/'+str(elem.file_size)+'/'+str(elem.date_time) ]) 
 			#dlg.ShowDetailedText(txt)
 			#if dlg.ShowModal() not in (wx.ID_NO, wx.ID_CANCEL):
 		
-			# extracting all the files 
-			print('Extracting all the files now...') 
-			#zip.extractall()
-			print('Done!')
-
 			#dlg.Destroy()
+			pub.sendMessage("to_progress_diag", message=_("Extracting all the files..."), arg2='suspend')
+
+			# extracting all the files 
+			pub.sendMessage("to_progress_diag", message=_("Extracting all the files..."))
+			for elem in zip.infolist():
+				#time.sleep(1)
+				pub.sendMessage("to_progress_diag", message=_(f"{str(elem.filename)}"))
+				zip.extract(elem, tempfile.gettempdir())
+
+			pub.sendMessage("to_progress_diag", message=_("Done!"))
+			
+			#zip.extractall()
+
 			return True
-			#else:
-			#	dlg.Destroy()
-			#	return False  
+			
 	else:
 		return False
 
