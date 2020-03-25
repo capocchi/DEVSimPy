@@ -259,11 +259,17 @@ def updateFromGitRepo():
 	"""
 	import git
 
-	pub.sendMessage("to_progress_diag", message=_("Pull..."))
-	repo = git.Repo()
-	o = repo.remotes.origin
-	o.pull()
-	pub.sendMessage("to_progress_diag", message=_("Done!"))
+	try:
+		pub.sendMessage("to_progress_diag", message=_("Pull..."))
+		repo = git.Repo()
+		o = repo.remotes.origin
+		o.pull()
+	except Exception as e:
+		print(e)
+		return False
+	else:
+		pub.sendMessage("to_progress_diag", message=_("Done!"))
+		return True
 
 def updateFromGitArchive():
 	""" Updated DEVSimPy from Git with a zip (not with git command)
