@@ -255,13 +255,12 @@ def updateFromGit():
 			# extracting all the files 
 			pub.sendMessage("to_progress_diag", message=_("Extracting all the files..."))
 			for elem in zip.infolist():
-				#time.sleep(1)
+				time.sleep(0.1)
 				pub.sendMessage("to_progress_diag", message=_(f"{str(elem.filename)}"))
-				zip.extract(elem, tempfile.gettempdir())
-
-			pub.sendMessage("to_progress_diag", message=_("Done!"))
+				#zip.extract(elem, tempfile.gettempdir())
 			
-			#zip.extractall()
+			zip.extractall(tempfile.gettempdir())
+			pub.sendMessage("to_progress_diag", message=_("Done!"))
 
 			return True
 			
