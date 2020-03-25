@@ -311,17 +311,20 @@ def updateFromGitArchive():
 
 			### Copy the extracted files into the DEVSimPy folder.
 			pub.sendMessage("to_progress_diag", message=_(f"Copy...\n{p.relative_to('DEVSimPy-master')}"))
-			if platform.python_version() >= '3.8':
-				shutil.copytree(os.path.join(tempdir, 'DEVSimPy-master'), os.path.join(tempdir, 'test'), dirs_exist_ok=True) 
-			else:
-				src = pathlib.Path(os.path.join(tempdir, 'DEVSimPy-master'))
-				dest = pathlib.Path(os.path.join(tempdir, 'test'))
-				copy_dir(src, dest)
+			try:
+				if platform.python_version() >= '3.8':
+					shutil.copytree(os.path.join(tempdir, 'DEVSimPy-master'), os.path.join(tempdir, 'test'), dirs_exist_ok=True) 
+				else:
+					src = pathlib.Path(os.path.join(tempdir, 'DEVSimPy-master'))
+					dest = pathlib.Path(os.path.join(tempdir, os.getcwd()))
+					copy_dir(src, dest)
+			except:
+				return False
 
 		pub.sendMessage("to_progress_diag", message=_("Done!"))
 
 		### delete temporary zip file
-		os.remove(fn)
+		#os.remove(fn)
 
 		return True
 			
@@ -344,7 +347,7 @@ def run_command(command, message=None):
 		process.poll()
 	except:
 		check_call(command, shell=True)
-		
+
 def updatePiPPackages():
 	""" Update all pip packages that DEVSimPy depends.
 	"""
