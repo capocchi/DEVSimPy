@@ -44,12 +44,7 @@ from tempfile import gettempdir
 if builtins.__dict__.get('GUI_FLAG',True):
 	import wx
 	
-	if wx.VERSION_STRING < '2.9':
-		from wx.lib.pubsub import Publisher
-	elif wx.VERSION_STRING < '4.0':
-		from wx.lib.pubsub import pub as Publisher
-	else:
-		from pubsub import pub as Publisher
+	from pubsub import pub as Publisher
 
 	import Editor
 

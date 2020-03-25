@@ -102,16 +102,11 @@ except ImportError:
 	old = True
 
 # to send event
-if wx.VERSION_STRING < '2.9':
-	from wx.lib.pubsub import Publisher as pub
-elif wx.VERSION_STRING < '4.0':
-	from wx.lib.pubsub import pub
-else:
-	try:
-		from pubsub import pub
-	except Exception:
-		sys.stdout.write('Last version for Python2 is PyPubSub 3.3.0 \n pip install PyPubSub==3.3.0')
-		sys.exit()
+try:
+	from pubsub import pub
+except Exception:
+	sys.stdout.write('Last version for Python2 is PyPubSub 3.3.0 \n pip install PyPubSub==3.3.0')
+	sys.exit()
 
 if wx.VERSION_STRING >= '4.0':
 
@@ -189,7 +184,7 @@ from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
 from pluginmanager import load_plugins, enable_plugin
 from which import which
-from Utilities import GetUserConfigDir, install, install_and_import, updatePackageWithPiP, updateFromGit, NotificationMessage
+from Utilities import GetUserConfigDir, install, install_and_import, updatePiPPackages, updateFromGitRepo, updateFromGitArchive, NotificationMessage
 from Decorators import redirectStdout, BuzyCursorNotification, ProgressNotification, cond_decorator
 from DetachedFrame import DetachedFrame
 from LibraryTree import LibraryTree
@@ -2039,24 +2034,65 @@ class MainApplication(wx.Frame):
 		else:
 			self.help.Display(os.path.join('html','toc.html'))
 
-	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("Update of dependant pip packages.")))
 	def OnUpdatPiPPackage(self, event):
-		if updatePackageWithPiP():
-			args = (_('Information'), _('All pip packages that DEVSimPy depends have been updated!'))
+		msg = _("Do you really want to update all pip packages that DEVSimPy depends?")
+		#info = ""
+		dlg = wx.RichMessageDialog(self, msg, _("Update Manager"), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		#dlg.ShowDetailedText(info)
+		if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:
+			self.DoUpdatPiPPackage()	
+		dlg.Destroy()
+
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("Update of dependant pip packages")))
+	def DoUpdatPiPPackage(self):
+		if updatePiPPackages():
+			args = (_('Information'), _('All pip packages that DEVSimPy depends have been updated! \nYou need to restart DEVSimPy to take effect'))
 			kwargs = {'parent':self, 'timeout':5}
 		else:
-			args = (_('Error'), _('Pip packages update failed!\n Check the trace in background for more informations.'))
+			args = (_('Error'), _('Pip packages update failed! \nCheck the trace in background for more informations.'))
 			kwargs = {'parent':self, 'flag':wx.ICON_ERROR, 'timeout':5}
 
 		NotificationMessage(*args, **kwargs)
 
-	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git.")))
-	def OnUpdatFromGit(self, event):
-		if updateFromGit():
-			args = (_('Information'), _('Update of DEVSimPy from git done!'))
+	###
+	def OnUpdatFromGitRepo(self, event):
+		msg = _("Do you really want to update DEVSimPy with a Pull Git request?")
+		#info = ""
+		dlg = wx.RichMessageDialog(self, msg, _("Update Manager"), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		#dlg.ShowDetailedText(info)
+		if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:
+			if install_and_import('gitpython', 'git'):
+				self.DoUpdatFromGitRepo()
+		dlg.Destroy()
+
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git repo")))
+	def DoUpdatFromGitRepo(self):
+		if updateFromGitRepo():
+			args = (_('Information'), _('Update of DEVSimPy from git done! \nYou need to restart DEVSimPy to take effect.'))
 			kwargs = {'parent':self, 'timeout':5}
 		else:
-			args = (_('Error'), _('DEVSimPy update from git failed!\n Check the trace in background for more informations.'))
+			args = (_('Error'), _('DEVSimPy update from git failed! \nCheck the trace in background for more informations.'))
+			kwargs =  {'parent':self, 'flag':wx.ICON_ERROR, 'timeout':5}
+		
+		NotificationMessage(*args, **kwargs)
+
+	###
+	def OnUpdatFromGitArchive(self, event):
+		msg = _("Do you really want to update DEVSimPy from the last master archive? \nAll files will be replaced and you cannot go backwards.")
+		#info = ""
+		dlg = wx.RichMessageDialog(self, msg, _("Update Manager"), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		#dlg.ShowDetailedText(info)
+		if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:
+			self.DoUpdatFromGitArchive()
+		dlg.Destroy()
+
+	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git.")))
+	def DoUpdatFromGitArchive(self):
+		if updateFromGitArchive():
+			args = (_('Information'), _('Update of DEVSimPy from git archive done! \nYou need to restart DEVSimPy to take effect.'))
+			kwargs = {'parent':self, 'timeout':5}
+		else:
+			args = (_('Error'), _('DEVSimPy update from git archive failed! \nCheck the trace in background for more informations.'))
 			kwargs =  {'parent':self, 'flag':wx.ICON_ERROR, 'timeout':5}
 		
 		NotificationMessage(*args, **kwargs)

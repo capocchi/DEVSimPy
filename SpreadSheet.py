@@ -26,12 +26,7 @@ import wx
 from wx.lib import sheet
 
 # to send event
-if wx.VERSION_STRING < '2.9':
-	from wx.lib.pubsub import Publisher
-elif wx.VERSION_STRING < '4.0':
-	from wx.lib.pubsub import pub as Publisher
-else:
-	from pubsub import pub as Publisher
+from pubsub import pub as Publisher
 
 #from Container import *
 from PlotGUI import *
@@ -90,7 +85,7 @@ class MySheet(sheet.CSheet):
 		try:
 			### inform Frame that table us full for graph icon enabling
 			Publisher.sendMessage("isfull", msg=self._full_flag)
-		except wx.lib.pubsub.core.topicargspecimpl.SenderMissingReqdMsgDataError as info:
+		except pubsub.pub.SenderMissingReqdMsgDataError as info:
 			pass
 		
 		self.AutoSize()

@@ -28,17 +28,11 @@ if builtins.__dict__.get('GUI_FLAG',True):
 	import wx
 	import wx.lib.dragscroller
 	import wx.lib.dialogs
+	from wx.lib.newevent import NewEvent
 
 	_ = wx.GetTranslation
 
-	if wx.VERSION_STRING < '2.9':
-		from wx.lib.pubsub import Publisher
-	elif wx.VERSION_STRING < '4.0':
-		from wx.lib.pubsub import pub as Publisher
-	else:
-		from pubsub import pub as Publisher
-
-	from wx.lib.newevent import NewEvent
+	from pubsub import pub as Publisher
 
 	AttrUpdateEvent, EVT_ATTR_UPDATE = NewEvent()
 
