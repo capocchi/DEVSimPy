@@ -502,7 +502,7 @@ class HelpMenu(wx.Menu):
 		Update_SubMenu0 = update_subMenu.Append(updatePipPackage)
 		update_subMenu.AppendSeparator()
 		Update_SubMenu1 = update_subMenu.Append(updateFromGitArchive)
-		Update_SubMenu2 = update_subMenu.AppendItem(updateFromGitRepo)
+		Update_SubMenu2 = update_subMenu.Append(updateFromGitRepo)
 
 		AppendItem(helpModel)
 		AppendItem(apiModel)
