@@ -261,11 +261,15 @@ def updateFromGitRepo():
 
 	try:
 		pub.sendMessage("to_progress_diag", message=_("Pull..."))
-		repo = git.Repo()
+		repo = git.Repo(HOME_PATH)
 		o = repo.remotes.origin
 		o.pull()
-	except Exception as e:
-		print(e)
+	except Exception as err:
+		print('print_exc():')
+		traceback.print_exc(file=sys.stdout)
+		print('\n')
+		print('print_exc(1):')
+		traceback.print_exc(limit=1, file=sys.stdout)
 		return False
 	else:
 		pub.sendMessage("to_progress_diag", message=_("Done!"))
@@ -290,7 +294,12 @@ def updateFromGitArchive():
 			zipf = ZipFile(os.path.join(tempdir,''.join(['DEVSimPy-backup-',now.strftime("%m_%d_%Y"),'.zip'])), 'w', ZIP_DEFLATED)
 			zipdir(os.getcwd(), zipf)
 			zipf.close()
-		except:
+		except Exception as err:
+			print('print_exc():')
+			traceback.print_exc(file=sys.stdout)
+			print('\n')
+			print('print_exc(1):')
+			traceback.print_exc(limit=1, file=sys.stdout)
 			return False
 		else:
 			pub.sendMessage("to_progress_diag", message=_(f"Done!"))
@@ -318,7 +327,12 @@ def updateFromGitArchive():
 					src = pathlib.Path(os.path.join(tempdir, 'DEVSimPy-master'))
 					dest = pathlib.Path(os.path.join(tempdir, os.getcwd()))
 					copy_dir(src, dest)
-			except:
+			except Exception as err:
+				print('print_exc():')
+				traceback.print_exc(file=sys.stdout)
+				print('\n')
+				print('print_exc(1):')
+				traceback.print_exc(limit=1, file=sys.stdout)
 				return False
 
 		pub.sendMessage("to_progress_diag", message=_("Done!"))
@@ -362,9 +376,12 @@ def updatePiPPackages():
 
 		try:
 			run_command(command, "to_progress_diag")
-			
-		except Exception as ee:
-			print(ee.output)
+		except Exception as err:
+			print('print_exc():')
+			traceback.print_exc(file=sys.stdout)
+			print('\n')
+			print('print_exc(1):')
+			traceback.print_exc(limit=1, file=sys.stdout)
 			return False
 		else:
 			return True
