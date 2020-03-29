@@ -45,6 +45,8 @@ All dependencies can be installed using pip with the requirements.txt file:
 $ pip install -r requirements.txt
 ```
 
+An XUbuntu 19.10 virtual machine including DEVSimPy can be donwloaded from [DEVSimPy-on-XUbuntu19.10.ova](https://mycore.core-cloud.net/index.php/s/D9JDrN62E0MUCPq/download). The login and password of the distribution are: devsimpyuser/devsimpy. If you want to have the latest version of DEVSimPy, please execute 'git pull' in the DEVSimPy directory before starting or start DEVSimPy by double clicking on the desktop icon and go to Help->Update->From Git Repository (pull).
+
 # Usage
 To execute DEVSimPy:
 ```sh
