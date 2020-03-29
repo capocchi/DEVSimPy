@@ -8,8 +8,7 @@
 # What is DEVSimPy
 DEVSimPy is an open Source project (under GPL V.3 license) supported by the [SPE](http://http://spe.univ-corse.fr/) (Sciences pour l'Environnement) team of the UMR CNRS 6134 Lab. of the [University of Corsica "Pasquale Paoli"](http://univ-corse.fr). This aim is to provide a GUI for the Modeling & Simulation of PyDEVS and [PyPDEVS](http://msdl.cs.mcgill.ca/projects/DEVS/PythonPDEVS) models. PyDEVS is an API allowing the implementation of the DEVS formalism in Python language. PyPDEVS is the parallel version of PyDEVS based on Parallel DEVS formalism which is an extension of the DEVS formalism. 
  The DEVSimPy environment has been developed in Python with the [wxPython](http://www.wxpython.org) graphical library without 
-strong dependencies other than the [Scipy](http://www.scipy.org) and the [Numpy](http://www.numpy.org) scientific python libraries. The basic idea behind DEVSimPy is to wrap the PyDEVS API with a GUI allowing 
-significant simplification of handling PyDEVS/PyPDEVS models (like the coupling between models or their storage into libraries).
+strong dependencies other than the [Scipy](http://www.scipy.org) and the [Numpy](http://www.numpy.org) scientific python libraries. The basic idea behind DEVSimPy is to wrap the PyDEVS API with a GUI allowing significant simplification of handling PyDEVS/PyPDEVS models (like the coupling between models or their storage into libraries).
 
 # Requirements
 The use of DEVSimPy requires:
@@ -19,22 +18,22 @@ The use of DEVSimPy requires:
 - [Scipy](http://www.scipy.org) and [Numpy](http://www.numpy.org) (optional, for spectrum analysis)
 - DEVSimPy should be used like a normal Python file, i.e., double-clicking on the devsimpy.py file which is located in the root directory or writing python devismpy.py into a python console.
 
-Users which don't want to install python with all dependency can use [Portable Python](http://portablepython.com) (version 2.x). Then, just extract DEVSimPy archive and edit the devsimpy.py file with [PyScripter](https://sourceforge.net/projects/pyscripter/) to execute it. Users can also execute DEVSimPy through the conda env file loaded using the [conda_devsimpy_env.yml](https://github.com/capocchi/DEVSimPy-site/raw/gh-pages/conda_devsimpy_env.yml) file (available from the [DEVSimPy-site](https://github.com/capocchi/DEVSimPy-site) repository).
+Users which don't want to install python with all dependencies can use [Portable Python](http://portablepython.com) (version 2.x). Then, just extract DEVSimPy archive and edit the devsimpy.py file with [PyScripter](https://sourceforge.net/projects/pyscripter/) to execute it. Users can also execute DEVSimPy through the conda env file loaded using the [conda_devsimpy_env.yml](https://github.com/capocchi/DEVSimPy-site/raw/gh-pages/conda_devsimpy_env.yml) file (available from the [DEVSimPy-site](https://github.com/capocchi/DEVSimPy-site) repository).
 
 # Features
 With DEVSimPy you can:
 
 - Model a DEVS system and save or export it into a library
-- Edit the code of DEVS model to modify behavior's also during the simulation
+- Edit the code of a DEVS model to modify behavior's (also during the simulation)
 - Import existing library of models (python code or DEVSimPy specific models) which allows the specific domain modeling (Power system, continuous, etc)
-- Automatically simulate the system and perform its analysis during the simulation (with the suspend option)
+- Automatically simulate the system and perform its analysis during the simulation (using the suspend option)
 - Load plug-ins to extend DEVSimPy in order to perform activity tracking, trace the simulation with visual tools, etc.
-- Generate YAML models for the DEVSimPy-mob mobile application.
+- Generate YAML models for the [DEVSimPy-mob](https://github.com/capocchi/DEVSimPy_mob) mobile application.
 - and more.
 
 # Installation
 
-To get DEVSimPy V4.0 package with all Git submodule: 
+To get DEVSimPy v4.0 package with all Git submodules: 
 ```sh
 $ git clone --recurse-submodules -b version-4.0 --depth=1 https://github.com/capocchi/DEVSimPy.git
 $ git fetch --unshallow 
@@ -45,6 +44,8 @@ All dependencies can be installed using pip with the requirements.txt file:
 ```sh
 $ pip install -r requirements.txt
 ```
+
+An XUbuntu 19.10 virtual machine including DEVSimPy can be donwloaded from [DEVSimPy-on-XUbuntu19.10.ova](https://mycore.core-cloud.net/index.php/s/D9JDrN62E0MUCPq/download). The login and password of the distribution are: devsimpyuser/devsimpy. If you want to have the latest version of DEVSimPy, please execute 'git pull' in the DEVSimPy directory before starting or start DEVSimPy by double clicking on the desktop icon and go to Help->Update->From Git Repository (pull).
 
 # Usage
 To execute DEVSimPy:
