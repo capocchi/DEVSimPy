@@ -715,7 +715,9 @@ class ItemLibraryPopupMenu(wx.Menu):
 		InsertItem = self.InsertItem if wx.VERSION_STRING < '4.0' else self.Insert
 
 		item = parent.GetSelection()
-		if parent.ItemHasChildren(item):
+		path = parent.GetItemPyData(item)
+
+		if os.path.isdir(path):
 			new_model = wx.MenuItem(self, ID_NEW_MODEL_LIB, _('New Model'), _('Add a new model to the selected library'))
 			new_model.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'new.png')))
 			InsertItem(0, new_model)
