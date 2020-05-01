@@ -52,7 +52,8 @@ builtins.__dict__['YAML_IMPORT'] = True
 from tempfile import gettempdir
 
 from Decorators import BuzyCursorNotification, StatusBarNotification, cond_decorator
-from Utilities import itersubclasses, getTopLevelWindow
+from Utilities import itersubclasses, getTopLevelWindow, NotificationMessage
+
 from XMLModule import makeDEVSXML, getDiagramFromXMLSES
 from Join import makeJoin, makeDEVSConf
 from .Abstractable import Abstractable
@@ -213,6 +214,7 @@ class DumpZipFile(DumpBase):
 				mainW.tree.SortChildren(mainW.tree.root)
 
 			except Exception as info:
+				NotificationMessage(_('Error'), _("Problem saving (during the zip handling): %s -- %s\n")%(str(fileName),info), parent=self, timeout=5)
 				sys.stderr.write(_("Problem saving (during the zip handling): %s -- %s\n")%(str(fileName),info))
 				return False
 			else:
