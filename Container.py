@@ -2522,7 +2522,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				for string,win in list(D.items()):
 					printOnStatusBar(win.statusbar, {0:"%s %s"%(string ,_("modified")), 1:os.path.basename(diagram.last_name_saved), 2:''})
 
-				win.FindWindowByName('tb').EnableTool(Menu.ID_SAVE, self.diagram.modify)
+				tb = win.GetToolBar()
+				tb.EnableTool(Menu.ID_SAVE, self.diagram.modify)
 
 		###
 		def OnMotion(self, event):

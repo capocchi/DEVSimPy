@@ -41,6 +41,8 @@ from ReloadModule import recompile
 from ImportLibrary import DeleteBox
 from Complexity import GetMacCabeMetric
 
+from pubsub import pub
+
 _ = wx.GetTranslation
 
 #----------------------------------------------------------------------------------------------------
