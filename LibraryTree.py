@@ -1054,7 +1054,7 @@ class LibraryTree(wx.TreeCtrl):
 		name = self.GetItemText(item)
 
 		### dialog to ask new label
-		if wx.VERSION_STRING<4.0:
+		if wx.VERSION_STRING < '4.0':
 			d = wx.TextEntryDialog(self, _('New file name'), defaultValue = name, style=wx.OK)
 		else:
 			d = wx.TextEntryDialog(self, _('New file name'), value = name, style=wx.OK)

@@ -5,9 +5,17 @@ import os
 import string
 import zipimport
 import importlib
+import types
+import pkgutil
 
 from traceback import format_exception
 from Utilities import listf
+
+def reloadall(module):
+	importlib.reload(module)
+	for child in pkgutil.walk_packages(module.__path__):
+		if isinstance(child, types.ModuleType):
+			reloadall(child)
 
 def recompile(modulename):
 	"""	recompile module from modulename
@@ -55,4 +63,11 @@ def recompile(modulename):
 			else:
 				### at this point, the code both compiled and ran without error.  Load it up
 				### replacing the original code.
-				return importlib.reload(tmp)#sys.modules[modulename])
+				### reload recursivelly!
+				try:
+					reloadall(tmp)
+					return sys.modules[tmp.__name__]
+				except:
+					sys.stdout.write('Error trying to reload dependencies in recompile module!')
+				else:
+					return importlib.reload(tmp)
