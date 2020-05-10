@@ -18,7 +18,9 @@ import zipimport
 import io
 import re
 import inspect
-import imp
+import types
+import importlib
+import fnmatch
 
 import gettext
 _ = gettext.gettext
@@ -29,6 +31,107 @@ from Utilities import listf, path_to_module
 
 #global Cmtp
 #Cmtp=0
+
+def walk_reload(module: types.ModuleType) -> None:
+	if hasattr(module, "__all__"):
+		for submodule_name in module.__all__:
+			walk_reload(getattr(module, submodule_name))
+	importlib.reload(module)
+
+def module_list(topdir):
+	ret = []
+	for root,dirs,files in os.walk(topdir):
+		modpath = os.path.basename(topdir)
+		r = os.path.relpath(root,topdir)
+		if r != '.':
+			modpath += '.' + r
+		for f in fnmatch.filter(files, '*.py'):
+			if f == '__init__.py':
+				ret.append(modpath)
+			elif f not in ['__main__.py']:
+				ret.append('.'.join([modpath,os.path.splitext(f)[0]]))
+	return ret
+
+def relative_imports(pyfile):
+	import_pattern = re.compile(r'^\s*from\s+\.([\w\.]*)\s+import\s*' +
+								r'(?:\(([\w, \t\n\r\f\v]+)\)|([\w, \t\r\f\v]+))', re.M)
+	as_pattern = re.compile(r'(\w+)\s+as\s+\w+')
+	ret = {}
+	with open(pyfile,'rt') as fin:
+		for m in import_pattern.finditer(fin.read()):
+			src, tgt = m.group(1), m.group(2) or m.group(3)
+			tgts = []
+			for t in tgt.split(','):
+				t = t.strip()
+				m = as_pattern.match(t)
+				tgts.append(t if m is None else m.group(1))
+			if src not in ret:
+				ret[src] = []
+			ret[src] += tgts
+	return ret
+
+def imported_modules(modpath, pyfile):
+	ret = []
+	for k,v in relative_imports(pyfile).items():
+		if k == '':
+			ret += ['.'.join([modpath,i]) for i in v]
+		else:
+			s = re.search(r'[^.]',k)
+			if s is None:
+				relmod = '.'.join(modpath.split('.')[:-len(k)])
+				ret += ['.'.join([relmod,i]) for i in v]
+			else:
+				n = s.start()
+				if n == 0:
+					relmod = modpath
+				else:
+					relmod = '.'.join(modpath.split('.')[:-n])
+				ret.append(relmod+'.'+k[n:])
+	return ret
+
+def reloadall(fn):
+	fn_dir = os.path.dirname(fn) + os.sep
+	module_visit = {fn}
+	
+	def reload_recursive_ex(fn):
+		if zipfile.is_zipfile(fn):
+			Zip.ClearCache(fn)
+			
+			module_name = getPythonModelFileName(fn)
+			importer = zipimport.zipimporter(fn)
+
+			p = os.path.dirname(os.path.dirname(fn))
+			
+			if p not in sys.path:
+				sys.path.append(p)
+			
+			fullname = "".join([os.path.basename(os.path.dirname(fn)), module_name.split('.py')[0]])
+			module = importer.load_module(module_name.split('.py')[0])
+			module.__name__ = path_to_module(module_name)
+			
+			#if fullname in sys.modules:
+			#	del sys.modules[fullname]
+
+			sys.modules[fullname] = module
+		else:
+			import Components
+			module = Components.BlockFactory.GetModule(fn)
+			#importlib.reload(module)
+			import ReloadModule 
+			ReloadModule.recompile(module.__name__)
+			
+
+		for module_child in vars(module).values():
+			if isinstance(module_child, types.ModuleType):		
+				fn_child = getattr(module_child, "__file__", None)
+				if (fn_child is not None) and fn_child.startswith(fn_dir):
+					if fn_child not in module_visit:
+						print("reloading:", fn_child, "from", module)
+						module_visit.add(fn_child)
+									
+						reload_recursive_ex(fn_child)
+
+	return reload_recursive_ex(fn)
 
 def getPythonModelFileName(fn):
 	""" Get filename of zipped python file
@@ -55,7 +158,7 @@ def getPythonModelFileName(fn):
 				return python_file
 			### else test if the python file containing the class inherit of the DomainBehavior or DomainStructure
 			else:
-				from . import Components
+				import Components
 				cls = Components.GetClass(os.path.join(fn, python_file))
 
 				from DomainInterface.DomainBehavior import DomainBehavior
@@ -116,7 +219,7 @@ class Zip:
 		replace_files = [f for f in replace_files if f!='']
 
 		# call this function because : http://www.digi.com/wiki/developer/index.php/Error_messages
-		self.ClearCache()
+		Zip.ClearCache(self.fn)
 
 		zin = zipfile.ZipFile(self.fn, 'r')
 		zout = zipfile.ZipFile("new_arch.zip", 'w')
@@ -152,15 +255,18 @@ class Zip:
 			else:
 				exclude_file.append(replace_files.index(fn))
 				#sys.stdout.write("%s unknown\n"%(fn))
-
+			
 		### try to rewrite not replaced files from original zip
-		info_list = zin.infolist()
-		for item in info_list:
-			s = os.path.basename(item.filename)
-			if s not in [os.path.basename(a) for a in replace_files] and info_list.index(item) not in exclude_file:
-				buffer = zin.read(item.filename)
-				zout.writestr(item, buffer)
-				sys.stdout.write("%s rewrite\n"%(item.filename))
+		if not zout.testzip():
+			info_list = zin.infolist()
+			for item in info_list:
+				s = os.path.basename(item.filename)
+				if s not in map(os.path.basename, replace_files) and info_list.index(item) not in exclude_file:
+					buffer = zin.read(item.filename)
+					zout.writestr(item, buffer)
+					sys.stdout.write("%s rewrite\n"%(item.filename))
+		else:
+			sys.stdout.write("%s not updated\n"%(self.fn))
 
 		### close all files
 		zout.close()
@@ -177,7 +283,7 @@ class Zip:
 		delete_files = [f for f in delete_files if f!='']
 
 		# call this function because : http://www.digi.com/wiki/developer/index.php/Error_messages
-		self.ClearCache()
+		Zip.ClearCache(self.fn)
 
 		zin = zipfile.ZipFile(self.fn, 'r')
 		zout = zipfile.ZipFile("new_arch.zip", 'w')
@@ -281,8 +387,6 @@ class Zip:
 			It used when the tree library is created.
 		"""
 
-		module_name = getPythonModelFileName(self.fn)
-
 		# get module name
 		try:
 			module_name = getPythonModelFileName(self.fn)
@@ -292,33 +396,69 @@ class Zip:
 
 		# if necessary, recompile (for update after editing code source of model)
 		#if rcp: recompile(module_name)
+	
+		trigger_event("IMPORT_STRATEGIES", fn=self.fn)
 
-
-		# import module
-		try:
-			### clear to clean the import after exporting model (amd or cmd) and reload within the same instance of DEVSimPy
-			zipimport._zip_directory_cache.clear()
-
-			trigger_event("IMPORT_STRATEGIES", fn=self.fn)
-
-			importer = zipimport.zipimporter(self.fn)
-
-			### allows to import the lib from its name (like import MyModel.amd). Dangerous because confuse!
-			### Import can be done using: import Name (ex. import MessageCollector - if MessageCollecor is .amd or .cmd)
+		fullname = "".join([os.path.basename(os.path.dirname(self.fn)), module_name.split('.py')[0]])
+		
+		if fullname not in sys.modules:
+			
 			p = os.path.dirname(os.path.dirname(self.fn))
 			if p not in sys.path:
 				sys.path.append(p)
-			fullname = "".join([os.path.basename(os.path.dirname(self.fn)), module_name.split('.py')[0]])
+			
+			importer = zipimport.zipimporter(self.fn)
 			module = importer.load_module(module_name.split('.py')[0])
 			module.__name__ = path_to_module(module_name)
 
 			### allows to import with a reference from the parent directory (like parentName.model).
 			### Now import of .amd or .cmd module is composed by DomainModel (no point!).
-			### Example : import CollectorMessageCollector
+			### Example : import CollectorMessageCollector 
 			sys.modules[fullname] = module
 
+			return module
+		else:
+			return sys.modules[fullname]
+
+	def Recompile(self):
+		""" recompile module from zip file
+		"""
+		Zip.ClearCache(self.fn)
+
+		# import module
+		try:
+
+			module_name = getPythonModelFileName(self.fn)
+			fullname = "".join([os.path.basename(os.path.dirname(self.fn)), module_name.split('.py')[0]])
+
+		#	for i in [ a for a in module_list(DOMAIN_PATH) if os.path.basename(os.path.dirname(self.fn)) in a]:
+		#		if i in sys.modules:
+		#			impoprlib.reload(sys.modules[i])
+
+			#reloadall(self.fn)
+			
+			### clear to clean the import after exporting model (amd or cmd) and reload within the same instance of DEVSimPy
+			#zipimport._zip_directory_cache.clear()
+			
+			### allows to import the lib from its name (like import MyModel.amd). Dangerous because confuse!
+			### Import can be done using: import Name (ex. import MessageCollector - if MessageCollecor is .amd or .cmd)
+#			p = os.path.dirname(os.path.dirname(self.fn))
+#			if p not in sys.path:
+#				sys.path.append(p)
+			print('dd')
+#			importer = zipimport.zipimporter(self.fn)
+#			module = importer.load_module(module_name.split('.py')[0])
+#			module.__name__ = path_to_module(module_name)
+
+			### allows to import with a reference from the parent directory (like parentName.model).
+			### Now import of .amd or .cmd module is composed by DomainModel (no point!).
+			### Example : import CollectorMessageCollector 
+#			sys.modules[fullname] = module
+
+			#walk_reload(sys.modules[fullname])
 			### TODO make a recursive method to go up until the Domain dir, for not external lib!
 
+			return sys.modules[fullname]
 		except Exception as info:
 			msg_i = _("Error in execution: ")
 			msg_o = listf(format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
@@ -327,24 +467,18 @@ class Zip:
 			except UnicodeDecodeError:
 				sys.stderr.write( msg_i + str(sys.exc_info()[0]).decode('latin-1').encode("utf-8") +"\r\n" + msg_o)
 			return info
-
 		else:
 			return module
 
-	def Recompile(self):
-		""" recompile module from zip file
-		"""
-		self.ClearCache()
-		return self.GetModule()
-
-	def ClearCache(self):
+	@staticmethod
+	def ClearCache(fn):
 		"""Clear out cached entries from _zip_directory_cache"""
 
-		if self.fn in zipimport._zip_directory_cache:
-			del zipimport._zip_directory_cache[self.fn]
+		if fn in zipimport._zip_directory_cache:
+			del zipimport._zip_directory_cache[fn]
 
-		if self.fn not in sys.path:
-			sys.path.append(self.fn)
+		if fn not in sys.path:
+			sys.path.append(fn)
 
 	def ClearFiles(self):
 		""" remove and rename the zip file
@@ -360,4 +494,7 @@ class Zip:
 		except OSError:
 			import shutil
 			if os.path.exists(self.fn):
-				shutil.move("new_arch.zip", self.fn)
+				try:
+					shutil.move("new_arch.zip", self.fn)
+				except:
+					pass
