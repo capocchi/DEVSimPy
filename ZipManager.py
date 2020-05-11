@@ -20,7 +20,6 @@ import re
 import inspect
 import types
 import importlib
-import fnmatch
 
 import gettext
 _ = gettext.gettext
@@ -32,109 +31,16 @@ from Utilities import listf, path_to_module
 #global Cmtp
 #Cmtp=0
 
-def walk_reload(module: types.ModuleType) -> None:
-	if hasattr(module, "__all__"):
-		for submodule_name in module.__all__:
-			walk_reload(getattr(module, submodule_name))
-	importlib.reload(module)
+def get_from_modules(name:str)->types.ModuleType:
+	""" get module with the correct name from the name that come from dir().
+	"""
+	for s,m in sys.modules.items():
+		if name in s:
+			return m
+	return None
 
-def module_list(topdir):
-	ret = []
-	for root,dirs,files in os.walk(topdir):
-		modpath = os.path.basename(topdir)
-		r = os.path.relpath(root,topdir)
-		if r != '.':
-			modpath += '.' + r
-		for f in fnmatch.filter(files, '*.py'):
-			if f == '__init__.py':
-				ret.append(modpath)
-			elif f not in ['__main__.py']:
-				ret.append('.'.join([modpath,os.path.splitext(f)[0]]))
-	return ret
-
-def relative_imports(pyfile):
-	import_pattern = re.compile(r'^\s*from\s+\.([\w\.]*)\s+import\s*' +
-								r'(?:\(([\w, \t\n\r\f\v]+)\)|([\w, \t\r\f\v]+))', re.M)
-	as_pattern = re.compile(r'(\w+)\s+as\s+\w+')
-	ret = {}
-	with open(pyfile,'rt') as fin:
-		for m in import_pattern.finditer(fin.read()):
-			src, tgt = m.group(1), m.group(2) or m.group(3)
-			tgts = []
-			for t in tgt.split(','):
-				t = t.strip()
-				m = as_pattern.match(t)
-				tgts.append(t if m is None else m.group(1))
-			if src not in ret:
-				ret[src] = []
-			ret[src] += tgts
-	return ret
-
-def imported_modules(modpath, pyfile):
-	ret = []
-	for k,v in relative_imports(pyfile).items():
-		if k == '':
-			ret += ['.'.join([modpath,i]) for i in v]
-		else:
-			s = re.search(r'[^.]',k)
-			if s is None:
-				relmod = '.'.join(modpath.split('.')[:-len(k)])
-				ret += ['.'.join([relmod,i]) for i in v]
-			else:
-				n = s.start()
-				if n == 0:
-					relmod = modpath
-				else:
-					relmod = '.'.join(modpath.split('.')[:-n])
-				ret.append(relmod+'.'+k[n:])
-	return ret
-
-def reloadall(fn):
-	fn_dir = os.path.dirname(fn) + os.sep
-	module_visit = {fn}
-	
-	def reload_recursive_ex(fn):
-		if zipfile.is_zipfile(fn):
-			Zip.ClearCache(fn)
-			
-			module_name = getPythonModelFileName(fn)
-			importer = zipimport.zipimporter(fn)
-
-			p = os.path.dirname(os.path.dirname(fn))
-			
-			if p not in sys.path:
-				sys.path.append(p)
-			
-			fullname = "".join([os.path.basename(os.path.dirname(fn)), module_name.split('.py')[0]])
-			module = importer.load_module(module_name.split('.py')[0])
-			module.__name__ = path_to_module(module_name)
-			
-			#if fullname in sys.modules:
-			#	del sys.modules[fullname]
-
-			sys.modules[fullname] = module
-		else:
-			import Components
-			module = Components.BlockFactory.GetModule(fn)
-			#importlib.reload(module)
-			import ReloadModule 
-			ReloadModule.recompile(module.__name__)
-			
-
-		for module_child in vars(module).values():
-			if isinstance(module_child, types.ModuleType):		
-				fn_child = getattr(module_child, "__file__", None)
-				if (fn_child is not None) and fn_child.startswith(fn_dir):
-					if fn_child not in module_visit:
-						print("reloading:", fn_child, "from", module)
-						module_visit.add(fn_child)
-									
-						reload_recursive_ex(fn_child)
-
-	return reload_recursive_ex(fn)
-
-def getPythonModelFileName(fn):
-	""" Get filename of zipped python file
+def getPythonModelFileName(fn:str)->str:
+	""" Get filename of zipped python file.
 	"""
 
 	#global Cmtp
@@ -181,6 +87,15 @@ class Zip:
 		"""
 		### local copy
 		self.fn = fn
+
+		### get module name
+		try:
+			self.module_name = getPythonModelFileName(fn)
+		except Exception as info:
+			sys.stderr.write(_("Error in ZipManager class for GetModule: no python file in the archive\n"))
+
+		### 
+		self.fullname = "".join([os.path.basename(os.path.dirname(self.fn)), self.module_name.split('.py')[0]])
 
 		if files != []:
 			self.Create(files)
@@ -332,7 +247,7 @@ class Zip:
 			return None
 
 	@staticmethod
-	def GetPluginFile(fn):
+	def GetPluginFile(fn:str)->str:
 		""" TODO: comment
 		"""
 		### zipfile (amd or cmd)
@@ -344,7 +259,7 @@ class Zip:
 		return L.pop(0)[0] if L != [] else ""
 
 	@staticmethod
-	def HasPlugin(fn):
+	def HasPlugin(fn:str)->bool:
 		""" TODO: comment
 		"""
 
@@ -352,18 +267,21 @@ class Zip:
 		zf = zipfile.ZipFile(fn, 'r')
 		nl = zf.namelist()
 		zf.close()
+
 		### plugin file is plugins.pi in root of zipfile or in plugins zipedd directory
 		return any([re.search("^(plugins[/]*[\w]*.py)$", s) for s in nl])
 
 	# BDD Test----------------------------------------------------------------------
 	@staticmethod
-	def HasTests(fn):
+	def HasTests(fn:str)->bool:
 		""" TODO: comment
 		"""
-		name = os.path.basename(getPythonModelFileName(fn)).split('.')[0]
+		module_name = getPythonModelFileName(fn)
+		name = os.path.basename(module_name.split('.'))[0]
 		zf = zipfile.ZipFile(fn, 'r')
 		nl = zf.namelist()
 		zf.close()
+
 		return any([re.search("^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.feature)$", s) for s in nl])
 
 	@staticmethod
@@ -372,7 +290,6 @@ class Zip:
 		"""
 		zf = zipfile.ZipFile(fn, 'r')
 		nl = zf.namelist()
-
 		zf.close()
 
 		###
@@ -383,82 +300,60 @@ class Zip:
 	# ------------------------------------------------------------------------------
 
 	def GetModule(self, rcp=False):
-		""" Load module from zip file corresponding to the amd or cmd model.
+		""" Return module from zip file corresponding to the amd or cmd model.
 			It used when the tree library is created.
+			If the module refered by self.fn is already imported, its returned else its imported using zipimport
 		"""
-
-		# get module name
-		try:
-			module_name = getPythonModelFileName(self.fn)
-		except Exception as info:
-			sys.stderr.write(_("Error in ZipManager class for GetModule: no python file in the archive\n"))
-			return info
 
 		# if necessary, recompile (for update after editing code source of model)
 		#if rcp: recompile(module_name)
 	
 		trigger_event("IMPORT_STRATEGIES", fn=self.fn)
-
-		fullname = "".join([os.path.basename(os.path.dirname(self.fn)), module_name.split('.py')[0]])
 		
-		if fullname not in sys.modules:
-			
-			p = os.path.dirname(os.path.dirname(self.fn))
-			if p not in sys.path:
-				sys.path.append(p)
-			
-			importer = zipimport.zipimporter(self.fn)
-			module = importer.load_module(module_name.split('.py')[0])
-			module.__name__ = path_to_module(module_name)
+		return self.ImportModule() if self.fullname not in sys.modules else sys.modules[self.fullname]
 
-			### allows to import with a reference from the parent directory (like parentName.model).
-			### Now import of .amd or .cmd module is composed by DomainModel (no point!).
-			### Example : import CollectorMessageCollector 
-			sys.modules[fullname] = module
+	def ImportModule(self):
+		""" Import module from zip file corresponding to the amd or cmd model.
+		"""
+		### allows to import the lib from its name (like import MyModel.amd). Dangerous because confuse!
+		### Import can be done using: import Name (ex. import MessageCollector - if MessageCollecor is .amd or .cmd)
+		p = os.path.dirname(os.path.dirname(self.fn))
+		if p not in sys.path:
+			sys.path.append(p)
 
-			return module
-		else:
-			return sys.modules[fullname]
+		importer = zipimport.zipimporter(self.fn)
+		module = importer.load_module(self.module_name.split('.py')[0])
+		module.__name__ = path_to_module(self.module_name)
 
-	def Recompile(self):
-		""" recompile module from zip file
+		### allows to import with a reference from the parent directory (like parentName.model).
+		### Now import of .amd or .cmd module is composed by DomainModel (no point!).
+		### Example : import CollectorMessageCollector 
+		sys.modules[self.fullname] = module
+
+		return module
+		
+	def ReImport(self):
+		""" Reimport the module from zip file.
 		"""
 		Zip.ClearCache(self.fn)
 
 		# import module
 		try:
 
-			module_name = getPythonModelFileName(self.fn)
-			fullname = "".join([os.path.basename(os.path.dirname(self.fn)), module_name.split('.py')[0]])
-
-		#	for i in [ a for a in module_list(DOMAIN_PATH) if os.path.basename(os.path.dirname(self.fn)) in a]:
-		#		if i in sys.modules:
-		#			impoprlib.reload(sys.modules[i])
-
-			#reloadall(self.fn)
+			### realod submodule from module dependencies!
+			module = sys.modules[self.fullname]
+			domain_name = os.path.basename(os.path.dirname(self.fn))
+			for name in dir(module):
+				if type(getattr(module, name)) == types.ModuleType:
+					### TODO: only reload the local package (not 'sys' and so one)
+					importlib.reload(get_from_modules(name))
 			
 			### clear to clean the import after exporting model (amd or cmd) and reload within the same instance of DEVSimPy
-			#zipimport._zip_directory_cache.clear()
-			
-			### allows to import the lib from its name (like import MyModel.amd). Dangerous because confuse!
-			### Import can be done using: import Name (ex. import MessageCollector - if MessageCollecor is .amd or .cmd)
-#			p = os.path.dirname(os.path.dirname(self.fn))
-#			if p not in sys.path:
-#				sys.path.append(p)
-			print('dd')
-#			importer = zipimport.zipimporter(self.fn)
-#			module = importer.load_module(module_name.split('.py')[0])
-#			module.__name__ = path_to_module(module_name)
+			zipimport._zip_directory_cache.clear()
 
-			### allows to import with a reference from the parent directory (like parentName.model).
-			### Now import of .amd or .cmd module is composed by DomainModel (no point!).
-			### Example : import CollectorMessageCollector 
-#			sys.modules[fullname] = module
-
-			#walk_reload(sys.modules[fullname])
-			### TODO make a recursive method to go up until the Domain dir, for not external lib!
-
-			return sys.modules[fullname]
+			### reload module
+			module = self.ImportModule()
+						
 		except Exception as info:
 			msg_i = _("Error in execution: ")
 			msg_o = listf(format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))

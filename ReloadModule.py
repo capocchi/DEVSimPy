@@ -25,9 +25,8 @@ def recompile(modulename):
 	if os.path.isfile(modulename) and os.path.exists(modulename):
 		import ZipManager
 		zf = ZipManager.Zip(modulename)
-		return zf.Recompile()
+		return zf.ReImport()
 	else:
-
 		try:
 		### first, see if the module can be imported at all...
 			name, ext = os.path.splitext(modulename)

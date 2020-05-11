@@ -36,6 +36,7 @@ import linecache
 import imp 
 import tempfile
 import pathlib
+
 #import shlex
 from  copy import deepcopy
 from datetime import datetime
@@ -127,7 +128,7 @@ def NotificationMessage(title,message,parent,flag=wx.ICON_INFORMATION, timeout=F
 		else:
 			notify.Show()
 
-def now():
+def now()->str:
     """ Returns the current time formatted. """
 
     t = time.localtime(time.time())
@@ -135,8 +136,20 @@ def now():
 
     return st
 
+def module_list(topdir:str)->[str]:
+	for root,dirs,files in os.walk(topdir):
+		modpath = os.path.basename(topdir)
+		r = os.path.relpath(root,topdir)
+		if r != '.':
+			modpath += '.' + r
+		for extension in ('*.py', '*.amd', '*.cmd'):
+			for f in fnmatch.filter(files, extension):
+				if f == '__init__.py':
+					yield modpath
+				elif f not in ['__main__.py']:
+					yield '.'.join([modpath,os.path.splitext(f)[0]])
 
-def shortNow():
+def shortNow()->str:
     """ Returns the current time formatted. """
 
     t = time.localtime(time.time())

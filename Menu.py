@@ -151,6 +151,7 @@ ID_UPGRADE_LIB = wx.NewIdRef()
 ID_UPDATE_LIB = wx.NewIdRef()
 ID_HELP_LIB = wx.NewIdRef()
 ID_NEW_MODEL_LIB = wx.NewIdRef()
+ID_UPDATE_SUBLIB = wx.NewIdRef()
 ID_DELETE_LIB = wx.NewIdRef()
 
 # Attribute popup menu identifiers
@@ -721,7 +722,11 @@ class ItemLibraryPopupMenu(wx.Menu):
 			new_model = wx.MenuItem(self, ID_NEW_MODEL_LIB, _('New Model'), _('Add a new model to the selected library'))
 			new_model.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'new.png')))
 			InsertItem(0, new_model)
+			update_lib = wx.MenuItem(self, ID_UPDATE_SUBLIB, _('Update'), _('Update all models of the selected library'))
+			update_lib.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'db_refresh2.png')))
+			InsertItem(1, update_lib)
 			self.Bind(wx.EVT_MENU, parent.OnNewModel, id=ID_NEW_MODEL_LIB)
+			self.Bind(wx.EVT_MENU, parent.OnUpdateSubLib, id=ID_UPDATE_SUBLIB)	
 
 		else:
 
