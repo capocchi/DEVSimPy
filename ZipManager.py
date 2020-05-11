@@ -20,7 +20,6 @@ import re
 import inspect
 import types
 import importlib
-import fnmatch
 
 import gettext
 _ = gettext.gettext
@@ -33,27 +32,15 @@ from Utilities import listf, path_to_module
 #Cmtp=0
 
 def get_from_modules(name:str)->types.ModuleType:
+	""" get module with the correct name from the name that come from dir().
+	"""
 	for s,m in sys.modules.items():
 		if name in s:
 			return m
 	return None
 
-def module_list(topdir):
-	ret = []
-	for root,dirs,files in os.walk(topdir):
-		modpath = os.path.basename(topdir)
-		r = os.path.relpath(root,topdir)
-		if r != '.':
-			modpath += '.' + r
-		for f in fnmatch.filter(files, '*.py'):
-			if f == '__init__.py':
-				ret.append(modpath)
-			elif f not in ['__main__.py']:
-				ret.append('.'.join([modpath,os.path.splitext(f)[0]]))
-	return ret
-
-def getPythonModelFileName(fn):
-	""" Get filename of zipped python file
+def getPythonModelFileName(fn:str)->str:
+	""" Get filename of zipped python file.
 	"""
 
 	#global Cmtp
@@ -260,7 +247,7 @@ class Zip:
 			return None
 
 	@staticmethod
-	def GetPluginFile(fn):
+	def GetPluginFile(fn:str)->str:
 		""" TODO: comment
 		"""
 		### zipfile (amd or cmd)
@@ -272,7 +259,7 @@ class Zip:
 		return L.pop(0)[0] if L != [] else ""
 
 	@staticmethod
-	def HasPlugin(fn):
+	def HasPlugin(fn:str)->bool:
 		""" TODO: comment
 		"""
 
@@ -280,18 +267,21 @@ class Zip:
 		zf = zipfile.ZipFile(fn, 'r')
 		nl = zf.namelist()
 		zf.close()
+
 		### plugin file is plugins.pi in root of zipfile or in plugins zipedd directory
 		return any([re.search("^(plugins[/]*[\w]*.py)$", s) for s in nl])
 
 	# BDD Test----------------------------------------------------------------------
 	@staticmethod
-	def HasTests(fn):
+	def HasTests(fn:str)->bool:
 		""" TODO: comment
 		"""
-		name = os.path.basename(self.module_name.split('.'))[0]
+		module_name = getPythonModelFileName(fn)
+		name = os.path.basename(module_name.split('.'))[0]
 		zf = zipfile.ZipFile(fn, 'r')
 		nl = zf.namelist()
 		zf.close()
+
 		return any([re.search("^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.feature)$", s) for s in nl])
 
 	@staticmethod
@@ -300,7 +290,6 @@ class Zip:
 		"""
 		zf = zipfile.ZipFile(fn, 'r')
 		nl = zf.namelist()
-
 		zf.close()
 
 		###
@@ -321,13 +310,10 @@ class Zip:
 	
 		trigger_event("IMPORT_STRATEGIES", fn=self.fn)
 		
-		if self.fullname not in sys.modules:
-			return self.LoadModule()
-		else:
-			return sys.modules[self.fullname]
+		return self.ImportModule() if self.fullname not in sys.modules else sys.modules[self.fullname]
 
-	def LoadModule(self):
-		""" Loead module from zip file corresponding to the amd or cmd model.
+	def ImportModule(self):
+		""" Import module from zip file corresponding to the amd or cmd model.
 		"""
 		### allows to import the lib from its name (like import MyModel.amd). Dangerous because confuse!
 		### Import can be done using: import Name (ex. import MessageCollector - if MessageCollecor is .amd or .cmd)
@@ -346,8 +332,8 @@ class Zip:
 
 		return module
 		
-	def Recompile(self):
-		""" recompile module from zip file
+	def ReImport(self):
+		""" Reimport the module from zip file.
 		"""
 		Zip.ClearCache(self.fn)
 
@@ -361,18 +347,12 @@ class Zip:
 				if type(getattr(module, name)) == types.ModuleType:
 					### TODO: only reload the local package (not 'sys' and so one)
 					importlib.reload(get_from_modules(name))
-
-			### reload submodule from directory
-			#for i in [ a for a in module_list(DOMAIN_PATH) if os.path.basename(os.path.dirname(self.fn)) in a]:
-			#	a = ".".join(i.split('.')[1:])
-			#	if a in sys.modules:
-			#		importlib.reload(sys.modules[a])
 			
 			### clear to clean the import after exporting model (amd or cmd) and reload within the same instance of DEVSimPy
 			zipimport._zip_directory_cache.clear()
 
 			### reload module
-			module = self.LoadModule()
+			module = self.ImportModule()
 						
 		except Exception as info:
 			msg_i = _("Error in execution: ")

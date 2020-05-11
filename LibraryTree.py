@@ -29,11 +29,11 @@ import copy
 import inspect
 import zipfile
 import subprocess
-
+import importlib
 import Container
 import Menu
 
-from Utilities import replaceAll, getPYFileListFromInit, path_to_module, printOnStatusBar, NotificationMessage, install_and_import
+from Utilities import replaceAll, getPYFileListFromInit, path_to_module, printOnStatusBar, NotificationMessage, install_and_import, module_list
 from Decorators import BuzyCursorNotification
 from Components import BlockFactory, DEVSComponent, GetClass
 from ZipManager import Zip, getPythonModelFileName
@@ -310,6 +310,39 @@ class LibraryTree(wx.TreeCtrl):
 
 		else:
 			wx.MessageBox(_("No library selected!"),_("Delete Manager"))
+
+	def UpdateSubLib(self, path:str)->bool:
+		""" Do update lib.
+		"""
+		### reload .py module from path 
+		for s in module_list(path):
+			module_name = ".".join(s.split('.')[1:])
+			if module_name in sys.modules:
+				module = sys.modules[module_name]
+				dirname = os.path.dirname(module.__file__)
+				try:
+					### .amd or .cmd
+					if zipfile.is_zipfile(dirname):
+						zf = Zip(dirname)
+						if isinstance(zf.ReImport(), Exception):
+							return False
+					else:
+						importlib.reload(module)
+				except:
+					return False
+		return True
+
+	###
+	@BuzyCursorNotification
+	def OnUpdateSubLib(self, evt):
+		""" ReImport all module (.py and .amd/.cmd) in lib.
+		"""
+		item = self.GetFocusedItem()
+		path = self.GetItemPyData(item)
+		if self.UpdateSubLib(path):
+			NotificationMessage(_('Information'), _('%s has been updated!')%os.path.basename(path), parent=self, timeout=5)
+		else:
+			NotificationMessage(_('Error'), _('%s has not been updated! See traceback for more information')%os.path.basename(path), parent=self, timeout=5)
 
 	###
 	def OnNewModel(self, evt):
@@ -922,28 +955,38 @@ class LibraryTree(wx.TreeCtrl):
 	def OnUpdateAll(self, event):
 		""" Update all imported domain
 		"""
-		self.UpdateAll()
-		
-		NotificationMessage(_('Information'), _("All librairies have been succeffully updated!"), self, timeout=5)
+		result = self.UpdateAll()
+		if len(result) == 0:
+			NotificationMessage(_('Information'), _("All libraries have been succeffully updated!"), self, timeout=5)
+		else:
+			NotificationMessage(_('Error'), _("The following libraries updates crash:\n %s")%" \n".join(map(os.path.basename,result)), self, timeout=5)
 
 	def OnMCCClick(self, event):
 		""" 
 		"""
 		tb = event.GetEventObject()
 		LibraryTree.COMPARE_BY_MACABE_METRIC = not tb.GetToolState(Menu.ID_MCC_LIB)
-		self.UpdateAll()
-	
+		self.OnUpdateAll(event)
+
 	###
 	def UpdateAll(self):
-		""" Update all loaded libaries.
+		""" Update all loaded libraries.
 		"""
 	
+		fault = set()
 		### update all Domain
 		for item in self.GetItemChildren(self.GetRootItem()):
-			self.UpdateDomain(self.GetPyData(item))
+			path = self.GetItemPyData(item)
+			if self.UpdateSubLib(path):
+				self.UpdateDomain(self.GetPyData(item))
+			else:
+				fault.add(path)
 
 		### to sort domain
 		wx.CallAfter(self.SortChildren,self.root)
+		
+		return fault
+
 		#self.SortChildren(self.root)
 
 	###
@@ -1108,4 +1151,4 @@ class LibraryTree(wx.TreeCtrl):
 	def OnInfo(self, event):
 		"""
 		"""
-		wx.MessageBox(_('Libraries Import Manager.\nYou can import, refresh or upgrade librairies using right options.\nDefault libraries directory is %s.')%(DOMAIN_PATH))
+		wx.MessageBox(_('Libraries Import Manager.\nYou can import, refresh or upgrade libraries using right options.\nDefault libraries directory is %s.')%(DOMAIN_PATH))
