@@ -872,9 +872,11 @@ def listf(data):
 
 def RGBToHEX(rgb_tuple):
     """ convert an (R, G, B) tuple to #RRGGBB """
-    hexcolor = '#%02x%02x%02x' % rgb_tuple
+
+    hexcolor = f'#%02x%02x%02x'%rgb_tuple[:-1]
     # that's it! '%02x' means zero-padded, 2-digit hex values
     return hexcolor
+    
 
 def HEXToRGB(colorstring):
     """ convert #RRGGBB to an (R, G, B) tuple """

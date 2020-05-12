@@ -1059,7 +1059,7 @@ class LibraryTree(wx.TreeCtrl):
 		finally:
 			if self.GetItemImage(item) != 1:
 				
-				NotificationMessage(_('Information'), _("Model %s has been succeffully updated!")%self.GetItemText(item), self, flag=wx.ICON_ERROR, timeout=5)
+				NotificationMessage(_('Information'), _("Model %s has been succeffully updated!")%self.GetItemText(item), self, timeout=5)
 
 	###
 	def OnItemEdit(self, evt):

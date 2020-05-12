@@ -82,7 +82,7 @@ def getPythonModelFileName(fn:str)->str:
 
 class Zip:
 
-	def __init__(self, fn, files = []):
+	def __init__(self, fn:str, files:[str]=[]):
 		""" Constructor
 		"""
 		### local copy
@@ -100,7 +100,7 @@ class Zip:
 		if files != []:
 			self.Create(files)
 
-	def Create(self, add_files = []):
+	def Create(self, add_files:[str]=[])->None:
 		dir_name, base_name = os.path.split(self.fn)
 		name, ext = os.path.splitext(base_name)
 
@@ -126,7 +126,7 @@ class Zip:
 
 		zout.close()
 
-	def Update(self, replace_files=[]):
+	def Update(self, replace_files:[str]=[])->None:
 		""" Update zip archive with the new replace file names
 		"""
 
@@ -190,7 +190,7 @@ class Zip:
 		### remove and rename the zip file
 		self.ClearFiles()
 
-	def Delete(self, delete_files=[]):
+	def Delete(self, delete_files:[str]=[])->None:
 		""" Remove file in zip archive
 		"""
 
@@ -218,7 +218,7 @@ class Zip:
 		### remove and rename the zip file
 		self.ClearFiles()
 
-	def GetImage(self, scaleW=16, scaleH=16):
+	def GetImage(self, scaleW:int=16, scaleH:int=16):
 		""" Get image object from image file stored in zip file.
 			scaleH and scaleW are used to rescale image
 		"""
@@ -285,7 +285,7 @@ class Zip:
 		return any([re.search("^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.feature)$", s) for s in nl])
 
 	@staticmethod
-	def GetTests(fn):
+	def GetTests(fn:str)->[str]:
 		""" Return feature, steps and environment files from .amd
 		"""
 		zf = zipfile.ZipFile(fn, 'r')
@@ -299,7 +299,7 @@ class Zip:
 		return tests_files
 	# ------------------------------------------------------------------------------
 
-	def GetModule(self, rcp=False):
+	def GetModule(self, rcp: bool=False)->types.ModuleType:
 		""" Return module from zip file corresponding to the amd or cmd model.
 			It used when the tree library is created.
 			If the module refered by self.fn is already imported, its returned else its imported using zipimport
@@ -312,7 +312,7 @@ class Zip:
 		
 		return self.ImportModule() if self.fullname not in sys.modules else sys.modules[self.fullname]
 
-	def ImportModule(self):
+	def ImportModule(self)->types.ModuleType:
 		""" Import module from zip file corresponding to the amd or cmd model.
 		"""
 		### allows to import the lib from its name (like import MyModel.amd). Dangerous because confuse!
@@ -366,7 +366,7 @@ class Zip:
 			return module
 
 	@staticmethod
-	def ClearCache(fn):
+	def ClearCache(fn:str)->None:
 		"""Clear out cached entries from _zip_directory_cache"""
 
 		if fn in zipimport._zip_directory_cache:
@@ -375,12 +375,13 @@ class Zip:
 		if fn not in sys.path:
 			sys.path.append(fn)
 
-	def ClearFiles(self):
-		""" remove and rename the zip file
+	def ClearFiles(self)->None:
+		""" remove and rename the zip file.
 		"""
 		try:
 			os.remove(self.fn)
-		except info:
+		except Exception as info:
+			#sys.exc_info()
 			sys.stderr.write(_('File has not been deleted: %s'%info))
 
 		try:
