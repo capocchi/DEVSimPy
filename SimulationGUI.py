@@ -636,14 +636,14 @@ class Base(object):
 
 	###
 	def MsgBoxEmptyModel(self):
-		""" Pop-up alert for empty model
+		""" Pop-up alert for empty model.
 		"""
 		dial = wx.MessageDialog(self,
 							_('You want to simulate an empty master model!'),
 							_('Simulation Manager'),
 							wx.OK|wx.ICON_EXCLAMATION)
 
-		if (dial.ShowModal() == wx.ID_OK) and (isinstance(self.parent, wx.Frame)):
+		if (dial.ShowModal() == wx.ID_OK) and isinstance(self.parent, wx.Frame):
 			self.PrepareDestroyWin()
 			### destroy the frame
 			self.Destroy()
@@ -659,7 +659,7 @@ class Base(object):
 			printOnStatusBar(self.statusbar, {i:'' for i in range(self.statusbar.GetFieldsCount())})
 
 	def PrepareDestroyWin(self):
-		""" To destroy the simulation frame
+		""" To destroy the simulation frame.
 		"""
 
 		### clean status bar
@@ -694,7 +694,7 @@ class Base(object):
 			pass
 
 	def OnQuit(self, event):
-		""" When the simulation are stopping
+		""" When the simulation are stopping.
 		"""
 
 		# if the simulation is running
