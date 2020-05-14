@@ -4,7 +4,6 @@
 from collections import defaultdict
 from Utilities import listf
 from traceback import format_exception
-from Patterns.Singleton import Singleton
 
 import sys
 import imp
@@ -14,7 +13,6 @@ import importlib
 import gettext
 _ = gettext.gettext
 
-#@Singleton
 class PluginManager(object):
 
 	#def __init__(self):
