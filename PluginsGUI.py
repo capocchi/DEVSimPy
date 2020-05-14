@@ -38,7 +38,7 @@ from concurrent.futures import ThreadPoolExecutor
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 
 from Decorators import BuzyCursorNotification
-from pluginmanager import enable_plugin, disable_plugin, load_plugins
+from PluginManager import PluginManager 
 from Utilities import FormatSizeFile, getPYFileListFromInit
 
 import ZipManager
@@ -305,7 +305,7 @@ class GeneralPluginsList(CheckListCtrl):
 		"""
 
 		# check the loaded module during the start of plug-ins
-		module = load_plugins(basename)
+		module = PluginManager.load_plugins(basename)
 
 		### if module is exception (or tuple)
 		if not inspect.ismodule(module):
@@ -322,7 +322,7 @@ class GeneralPluginsList(CheckListCtrl):
 				if basename in self.active_plugins_list:
 					self.CheckItem(index)
 				else:
-					disable_plugin(basename)
+					PluginManager.disable_plugin(basename)
 			else:
 				self.SetItemImage(index, 2)
 
@@ -378,9 +378,9 @@ class GeneralPluginsList(CheckListCtrl):
 					
 					if self.IsChecked(i):
 						pluginsList.append(name)
-						enable_plugin(name)
+						PluginManager.enable_plugin(name)
 					else:
-						disable_plugin(name)
+						PluginManager.disable_plugin(name)
 
 		### config file writing
 		self.mainW.cfg.Write('active_plugins', str(pluginsList))
@@ -404,7 +404,7 @@ class BlockPluginsList(CheckListCtrl):
 
 		### if pluginsList (2 param in constructor) is in constructor, we can populate
 		try:
-			pluginsList = args[1]
+			PluginManager.pluginsList = args[1]
 		except IndexError:
 			#sys.stdout.write(_('D'ont forget to call Populate method!\n'))
 			pass
@@ -412,10 +412,10 @@ class BlockPluginsList(CheckListCtrl):
 			try:
 				### Populate Check List dynamicaly
 				pool = ThreadPoolExecutor(3)
-				future = pool.submit(self.Populate, (pluginsList))
+				future = pool.submit(self.Populate, (PluginManager.pluginsList))
 				future.done()
 			except:
-				self.Populate(pluginsList)
+				self.Populate(PluginManager.pluginsList)
 			
 			self.is_populate = True
 		

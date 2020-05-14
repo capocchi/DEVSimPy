@@ -13,10 +13,10 @@
 import wx
 import os
 import sys
-import pluginmanager
 
 from types import MethodType
 
+from PluginManager import PluginManager
 from Container import DetachedFrame, ConnectionShape, CodeBlock, ContainerBlock
 from FindGUI import FindReplace
 from Utilities import MoveFromParent
@@ -66,7 +66,7 @@ def TimeAdvanceLog(model):
 def GetState(self):
 	return self.__state
 
-@pluginmanager.register("START_BLINK")
+@PluginManager.register("START_BLINK")
 def start_blink(*args, **kwargs):
 
 	global frame
@@ -106,7 +106,7 @@ def start_blink(*args, **kwargs):
 	parent._btn3.Disable()
 	parent._btn4.Disable()
 
-@pluginmanager.register("SIM_BLINK")
+@PluginManager.register("SIM_BLINK")
 def blink_manager(*args, **kwargs):
 	""" Start blink.
 	"""
@@ -178,7 +178,7 @@ def blink_manager(*args, **kwargs):
 					pass
 					
 			### blink frame has been closed
-			else:
+			#else:
 				### assign the default color
 				color = CodeBlock.FILL if isinstance(block, CodeBlock) else ContainerBlock.FILL
 				state['fill'] = color

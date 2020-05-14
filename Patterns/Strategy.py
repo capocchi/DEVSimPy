@@ -29,7 +29,7 @@ import heapq
 import threading
 import inspect
 
-from pluginmanager import trigger_event
+from PluginManager import PluginManager #trigger_event
 from Utilities import getOutDir
 
 import builtins
@@ -172,7 +172,7 @@ class SimStrategy2(SimStrategy):
 
 			else:
 				# The SIM_VERBOSE event occurs
-				trigger_event("SIM_VERBOSE", clock = clock)
+				PluginManager.trigger_event("SIM_VERBOSE", clock = clock)
 
 				send(master, (1, {}, clock))
 
@@ -375,9 +375,9 @@ def execExtTransition(m):
 	m.elapsed = 0.0
 
 	# The SIM_VERBOSE event occurs
-	trigger_event("SIM_VERBOSE", model=m, msg=1)
-	trigger_event("SIM_BLINK", model=m, msg=[{}])
-	trigger_event("SIM_TEST", model=m, msg=[{}])
+	PluginManager.trigger_event("SIM_VERBOSE", model=m, msg=1)
+	PluginManager.trigger_event("SIM_BLINK", model=m, msg=[{}])
+	PluginManager.trigger_event("SIM_TEST", model=m, msg=[{}])
 
 	return m
 
@@ -401,9 +401,9 @@ def execIntTransition(m):
 	m.elapsed = 0.0
 
 	# The SIM_VERBOSE event occurs
-	trigger_event("SIM_VERBOSE", model=m, msg=0)
-	trigger_event("SIM_BLINK", model=m, msg=[1])
-	trigger_event("SIM_TEST", model=m, msg=[1])
+	PluginManager.trigger_event("SIM_VERBOSE", model=m, msg=0)
+	PluginManager.trigger_event("SIM_BLINK", model=m, msg=[1])
+	PluginManager.trigger_event("SIM_TEST", model=m, msg=[1])
 
 class Clock(object):
 	def __init__(self, time):
@@ -476,7 +476,7 @@ class SimStrategy3(SimStrategy):
 			else:
 
 				### The SIM_VERBOSE event occurs
-				trigger_event("SIM_VERBOSE", self.master, None, clock = self.ts.Get())
+				PluginManager.trigger_event("SIM_VERBOSE", self.master, None, clock = self.ts.Get())
 
 				### tree-like data structure ordered by devsimpy priority
 				priority_scheduler = [a for a in formated_priority_list if self.ts.Get() == a[1].myTimeAdvance]

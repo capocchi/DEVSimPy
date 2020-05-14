@@ -182,7 +182,7 @@ import ReloadModule
 from ImportLibrary import ImportLibrary
 from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
-from pluginmanager import load_plugins, enable_plugin
+from PluginManager import PluginManager
 from which import which
 from Utilities import GetUserConfigDir, install, install_and_import, updatePiPPackages, updateFromGitRepo, updateFromGitArchive, NotificationMessage
 from Decorators import redirectStdout, BuzyCursorNotification, ProgressNotification, cond_decorator
@@ -460,8 +460,8 @@ class MainApplication(wx.Frame):
 				### load any plugins from the list
 				### here because it needs to PLUGINS_PATH macro defined in D
 				for plugin in eval(self.cfg.Read("active_plugins")):
-					load_plugins(plugin)
-					enable_plugin(plugin)
+					PluginManager.load_plugins(plugin)
+					PluginManager.enable_plugin(plugin)
 			else:
 				wx.MessageBox('.devsimpy file appear to be a very old version and should be updated....\nWe rewrite a new blank version.',
 									'Configuration',

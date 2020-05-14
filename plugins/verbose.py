@@ -15,7 +15,7 @@ import wx
 import sys
 import os
 
-import pluginmanager
+from PluginManager import PluginManager
 
 global show_ext_trans
 global show_int_trans
@@ -45,7 +45,7 @@ class RedirectText(object):
 	def flush(self):
 		pass
 
-@pluginmanager.register("SIM_VERBOSE")
+@PluginManager.register("SIM_VERBOSE")
 def LongRunningProcess(*args, **kwargs):
 	""" Plug-in function for simulation printing.
 	"""
@@ -114,7 +114,7 @@ def LongRunningProcess(*args, **kwargs):
 		txt = "\n"+"* "* 10+"CLOCK : %f \n"%(kwargs['clock'])
 		sys.stdout.write(txt)
 
-@pluginmanager.register("START_SIM_VERBOSE")
+@PluginManager.register("START_SIM_VERBOSE")
 def start_print_data(*args, **kwargs):
 	""" Start the log frame.
 	"""

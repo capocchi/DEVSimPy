@@ -45,7 +45,7 @@ if __name__ == '__main__':
 	'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS', 'old')}
 
 from Utilities import IsAllDigits, playSound, printOnStatusBar, NotificationMessage
-from pluginmanager import trigger_event, is_enable
+from PluginManager import PluginManager #trigger_event, is_enable
 from Patterns.Strategy import *
 from Decorators import BuzyCursorNotification, hotshotit
 
@@ -404,7 +404,7 @@ class Base(object):
 		"""
 
 		### if activity plug-in is enabled
-		if is_enable('start_activity_tracking'):
+		if PluginManager.is_enable('start_activity_tracking'):
 			self._btn4.SetLabel("Activity")
 
 	###
@@ -417,10 +417,10 @@ class Base(object):
 		"""	When View button is clicked
 		"""
 		# The simulation verbose event occurs
-		trigger_event('START_SIM_VERBOSE', parent=self)
+		PluginManager.trigger_event('START_SIM_VERBOSE', parent=self)
 
 		# The activity tracking event occurs
-		trigger_event('VIEW_ACTIVITY_REPORT', parent=self, master=self.current_master)
+		PluginManager.trigger_event('VIEW_ACTIVITY_REPORT', parent=self, master=self.current_master)
 
 	###
 	def OnOk(self, event):
@@ -464,20 +464,20 @@ class Base(object):
 
 			if (self.thread is None) or (not self.timer.IsRunning()):
 
-				trigger_event("START_BLINK", parent=self, master=self.current_master)
-				trigger_event("START_TEST", parent=self, master=self.current_master)
+				PluginManager.trigger_event("START_BLINK", parent=self, master=self.current_master)
+				PluginManager.trigger_event("START_TEST", parent=self, master=self.current_master)
 
 				### The START_ACTIVITY_TRACKING event occurs
-				trigger_event("START_ACTIVITY_TRACKING", parent=self, master=self.current_master)
+				PluginManager.trigger_event("START_ACTIVITY_TRACKING", parent=self, master=self.current_master)
 
 				### The START_ACTIVITY_TRACKING event occurs
-				trigger_event("START_STATE_TRAJECTORY", parent=self, master=self.current_master)
+				PluginManager.trigger_event("START_STATE_TRAJECTORY", parent=self, master=self.current_master)
 
 				### The START_CONCURRENT_SIMULATION event occurs
-				trigger_event("START_CONCURRENT_SIMULATION", parent=self, master=self.current_master)
+				PluginManager.trigger_event("START_CONCURRENT_SIMULATION", parent=self, master=self.current_master)
 
 				### future call is required because the simulator is flattened during the execution of the strategy 3
-				wx.FutureCall(1, trigger_event, 'START_DIAGRAM', parent=self, master=self.current_master)
+				wx.FutureCall(1, PluginManager.trigger_event, 'START_DIAGRAM', parent=self, master=self.current_master)
 
 				### clear all log file
 				for fn in [f for f in os.listdir(gettempdir()) if f.endswith('.devsimpy.log')]:

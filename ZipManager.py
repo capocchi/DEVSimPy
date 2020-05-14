@@ -24,7 +24,7 @@ import importlib
 import gettext
 _ = gettext.gettext
 
-from pluginmanager import trigger_event
+from PluginManager import PluginManager #trigger_event
 from traceback import format_exception
 from Utilities import listf, path_to_module
 
@@ -308,7 +308,7 @@ class Zip:
 		# if necessary, recompile (for update after editing code source of model)
 		#if rcp: recompile(module_name)
 	
-		trigger_event("IMPORT_STRATEGIES", fn=self.fn)
+		PluginManager.trigger_event("IMPORT_STRATEGIES", fn=self.fn)
 		
 		return self.ImportModule() if self.fullname not in sys.modules else sys.modules[self.fullname]
 

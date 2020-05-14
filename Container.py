@@ -70,7 +70,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 	import ConnectDialog
 	import DiagramConstantsDialog
 	import SpreadSheet
-	import pluginmanager
+	#from PluginManager import PluginManager
 	import ZipManager
 	import DropTarget
 	import PlotGUI
@@ -3371,6 +3371,11 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 
 		### Draw label
 		dc.DrawText(self.label, mx, my)
+
+		if hasattr(self,'status_label'):
+			dc.DrawText(self.status_label, mx, my+20)
+		else:
+			self.status_label = ""
 
 	#def OnResize(self):
 		#Shape.OnResize(self)
