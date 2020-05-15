@@ -30,8 +30,8 @@ from tempfile import gettempdir
 
 import Container
 import ZipManager
-import pluginmanager
 
+from PluginManager import PluginManager
 from ExperimentGenerator import ExperimentGenerator
 
 _ = wx.GetTranslation
@@ -835,7 +835,7 @@ class ShapeCanvasPopupMenu(wx.Menu):
 
 		### binding
 		parent.Bind(wx.EVT_MENU, parent.OnNewModel, id=ID_NEW_SHAPE)
-		parent.Bind(wx.EVT_MENU, parent.OnRefreshModel, id=ID_REFRESH_SHAPE)
+		parent.Bind(wx.EVT_MENU, parent.OnRefreshModels, id=ID_REFRESH_SHAPE)
 		parent.Bind(wx.EVT_MENU, parent.OnPaste, id=ID_PASTE_SHAPE)
 		parent.Bind(wx.EVT_MENU, parent.diagram.OnAddConstants, id=ID_ADD_CONSTANTS)
 		parent.Bind(wx.EVT_MENU, parent.parent.PrintPreview, id=ID_PREVIEW_PRINT)
@@ -1010,7 +1010,7 @@ class ShapePopupMenu(wx.Menu):
 					Export_SubMenu1.Enable(False)
 
 				### if Wcomp general plugin is enabled, sub menu appear in contextual menu of amd (right clic)
-				pluginmanager.trigger_event("ADD_WCOMP_EXPORT_MENU", parent=self, model=shape, submenu= export_subMenu)
+				PluginManager.trigger_event("ADD_WCOMP_EXPORT_MENU", parent=self, model=shape, submenu= export_subMenu)
 
 			elif isinstance(shape, Container.ContainerBlock):
 				self.AppendSeparator()
@@ -1035,10 +1035,10 @@ class ShapePopupMenu(wx.Menu):
 					self.__canvas.Bind(wx.EVT_MENU, shape.OnPluginsManager, id=ID_PLUGINS_SHAPE)
 
 					### if Wcomp general plug-in is enabled, sub menu appear in contextual menu of amd (right clic)
-					pluginmanager.trigger_event("ADD_WCOMP_STRATEGY_MENU", parent=self, model=shape)
+					PluginManager.trigger_event("ADD_WCOMP_STRATEGY_MENU", parent=self, model=shape)
 
 				### if state trajectory general plug-in is enabled, sub menu appear in contextual menu (right clic)
-				pluginmanager.trigger_event("ADD_STATE_TRAJECTORY_MENU", parent=self, model=shape)
+				PluginManager.trigger_event("ADD_STATE_TRAJECTORY_MENU", parent=self, model=shape)
 
 			self.AppendSeparator()
 			Properties_menu = AppendItem(properties)

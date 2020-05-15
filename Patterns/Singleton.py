@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-# Singleton.py ---
+# Observer.py ---
 #                    --------------------------------
 #                            Copyright (c) 2020
 #                    L. CAPOCCHI (capocchi@univ-corse.fr)
 #                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-# Version 2.0                                        last modified: 03/15/20
+# Version 2.0                                        last modified: 05/14/20
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -20,12 +20,19 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-class Singleton(type):
-    def __init__(cls, name, bases, dict):
-        super(Singleton, cls).__init__(name, bases, dict)
-        cls.instance = None 
+def Singleton(myClass):
+    """ Signleton used as Decorator
+    """
+    instances={}
+    def getInstance(*args, **kwargs):
+        if myClass not in instances:
+            instances[myClass] = myClass(*args, **kwargs)
+        return instances[myClass]
+    return getInstance
 
-    def __call__(cls,*args,**kw):
-        if cls.instance is None:
-            cls.instance = super(Singleton, cls).__call__(*args, **kw)
-            return cls.instance
+if __name__ == '__main__':
+    @Singleton
+    class SingletonTest(object):
+        pass
+
+    SingletonTest()

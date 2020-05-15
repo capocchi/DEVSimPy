@@ -26,7 +26,8 @@ class RandomGenerator(DomainBehavior):
         """
         DomainBehavior.__init__(self)
 
-        self.state = {'sigma':start}
+        self.initPhase('START',start)
+
         self.minValue = minValue
         self.maxValue = maxValue
         self.minStep = minStep

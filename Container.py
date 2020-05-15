@@ -70,7 +70,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 	import ConnectDialog
 	import DiagramConstantsDialog
 	import SpreadSheet
-	import pluginmanager
+	#from PluginManager import PluginManager
 	import ZipManager
 	import DropTarget
 	import PlotGUI
@@ -2068,9 +2068,16 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 			return gmwiz
 
-		def OnRefreshModel(self, event):
+		def OnRefreshModels(self, event):
 			""" New model menu has been pressed. Wizard is instanciate.
 			"""
+
+			diagram = self.GetDiagram()
+			for block in diagram.GetFlatBlockShapeList():
+				block.status_label = ""
+				color = CodeBlock.FILL if isinstance(block, CodeBlock) else ContainerBlock.FILL
+				block.fill = color
+				
 			self.UpdateShapes([self])
 
 		def OnNewModel(self, event):
@@ -2789,7 +2796,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			for m in [a for a in L if self.isSelected(a)]:
 				self.deselect(m)
 				self.select(m)
-
+			
 			self.Refresh()
 
 		### selection sur le canvas les ONodes car c'est le seul moyen d'y accéder pour effectuer l'appartenance avec les modèles
@@ -3371,6 +3378,11 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 
 		### Draw label
 		dc.DrawText(self.label, mx, my)
+
+		if hasattr(self,'status_label'):
+			dc.DrawText(self.status_label, mx, my+20)
+		else:
+			self.status_label = ""
 
 	#def OnResize(self):
 		#Shape.OnResize(self)

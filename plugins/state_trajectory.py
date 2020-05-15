@@ -21,7 +21,7 @@ import wx
 import os
 import inspect
 
-import pluginmanager
+from PluginManager import PluginManager
 from Container import Block, CodeBlock, ContainerBlock
 from Utilities import install_and_import
 
@@ -197,7 +197,7 @@ def Plot(diagram, selected_label):
 ###                Pluginmanager Function Definition
 ######################################################################
 
-@pluginmanager.register("START_STATE_TRAJECTORY")
+@PluginManager.register("START_STATE_TRAJECTORY")
 def start_state_trajectory(*args, **kwargs):
     """ Start the definition of the state trajectory attributes for all selected block model
     """
@@ -213,7 +213,7 @@ def start_state_trajectory(*args, **kwargs):
     else:
         sys.stdout.write("Activity pattern must be disabled!\n")
 
-@pluginmanager.register("ADD_STATE_TRAJECTORY_MENU")
+@PluginManager.register("ADD_STATE_TRAJECTORY_MENU")
 def add_state_trajectory_menu(*args, **kwargs):
 
     global block
