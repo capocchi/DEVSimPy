@@ -64,6 +64,8 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 
 		BaseDEVS.AtomicDEVS.__init__(self, name=name)
 
+		self.state = {'status':'NOT_DEFINED', 'sigma':0.0}
+		
 		### if BaseDEVS AtomicDEVS class has the peek method, we have the PyDEVS simulator kernel
 		### else its the PyPDEVS simulator kernel and we adapt the peek and poke method for compatibility aspects 
 		if hasattr(BaseDEVS.AtomicDEVS, 'peek'):

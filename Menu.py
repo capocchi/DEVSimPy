@@ -835,7 +835,7 @@ class ShapeCanvasPopupMenu(wx.Menu):
 
 		### binding
 		parent.Bind(wx.EVT_MENU, parent.OnNewModel, id=ID_NEW_SHAPE)
-		parent.Bind(wx.EVT_MENU, parent.OnRefreshModel, id=ID_REFRESH_SHAPE)
+		parent.Bind(wx.EVT_MENU, parent.OnRefreshModels, id=ID_REFRESH_SHAPE)
 		parent.Bind(wx.EVT_MENU, parent.OnPaste, id=ID_PASTE_SHAPE)
 		parent.Bind(wx.EVT_MENU, parent.diagram.OnAddConstants, id=ID_ADD_CONSTANTS)
 		parent.Bind(wx.EVT_MENU, parent.parent.PrintPreview, id=ID_PREVIEW_PRINT)
