@@ -242,8 +242,10 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		"""
 		"""
 		item = self.GetItem(index, col)
-		return item.GetItemLabelText()
-		#return item.GetText()
+		try:
+			return item.GetItemLabelText()
+		except:
+			return item.GetText()
 
 	#---------------------------------------------------
 	# These methods are callbacks for implementing the
