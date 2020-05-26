@@ -192,9 +192,13 @@ def blink_manager(*args, **kwargs):
 			### assign the additionnal status_label string and notify
 			if frame.status_flag:  
 				status = block.devsModel.getStatus()
-				state['status_label'] = '('+status+')'
+				sigma = block.devsModel.getSigma()
+				if sigma > 10e10:
+					sigma = "inf"
+				sigma_str = ","+str(sigma) if frame.sigma_flag else ""
+				state['status_label'] = '('+status+sigma_str+')'
 				sender.notify()
-
+			
 		### blink frame has been closed
 		else:
 			### assign the default color tot the last colored block
@@ -235,8 +239,9 @@ class BlinkFrame(wx.Frame):
 		self.button_find = wx.Button(self.panel, wx.ID_FIND)
 		self.button_selectall = wx.Button(self.panel, wx.ID_SELECTALL)
 		self.txt = wx.TextCtrl(self.panel, style = wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_RICH2)
-		self.cb1 = wx.CheckBox(self.panel, label=_('Colored Notification'))
-		self.cb2 = wx.CheckBox(self.panel, label=_('Status Notification'))
+		self.cb1 = wx.CheckBox(self.panel, label=_('Display activity'))
+		self.cb2 = wx.CheckBox(self.panel, label=_('Display phase'))
+		self.cb3 = wx.CheckBox(self.panel, label=_('Display sigma'))
 
 		MoveFromParent(self, interval=10, direction='right')
 
@@ -247,6 +252,7 @@ class BlinkFrame(wx.Frame):
 		self.flag = True
 		self.colored_flag = False
 		self.status_flag = False
+		self.sigma_flag = False
 
 		### to close the frame when this attribute don't change
 		self.lenght = self.txt.GetNumberOfLines()
@@ -260,7 +266,8 @@ class BlinkFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.OnFindReplace, id=self.button_find.GetId())
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 		self.Bind(wx.EVT_CHECKBOX, self.OnChecked1, id=self.cb1.GetId())
-		self.Bind(wx.EVT_CHECKBOX, self.OnChecked2, id=self.cb2.GetId()) 
+		self.Bind(wx.EVT_CHECKBOX, self.OnChecked2, id=self.cb2.GetId())
+		self.Bind(wx.EVT_CHECKBOX, self.OnChecked3, id=self.cb3.GetId()) 
                 
 	def __set_properties(self):
 		"""
@@ -270,7 +277,9 @@ class BlinkFrame(wx.Frame):
 		self.button_clear.SetToolTip(_("Press this button in order to clean the output of the simulation."))
 		self.button_find.SetToolTip(_("Press this button in order to launch the search window."))
 		self.cb1.SetToolTip(_("Block is colored depending on the transition function."))
-		self.cb2.SetToolTip(_("Status of devs model is displayed on the label of block."))
+		self.cb2.SetToolTip(_("Phase of devs model is displayed below the label of block."))
+		self.cb3.SetToolTip(_("Sigma of devs model is displayed below the label of block."))
+
 		self.button_step.SetDefault()
 
 	def __do_layout(self):
@@ -291,6 +300,7 @@ class BlinkFrame(wx.Frame):
 		hbox4 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox4.Add(self.cb1)
 		hbox4.Add(self.cb2, flag=wx.LEFT, border=10)
+		hbox4.Add(self.cb3, flag=wx.LEFT, border=10)
 
 	#	cb3 = wx.CheckBox(self.panel, label='Non-Project classes')
 	#	hbox4.Add(cb3, flag=wx.LEFT, border=10)
@@ -313,6 +323,13 @@ class BlinkFrame(wx.Frame):
 		"""
 		cb = evt.GetEventObject()
 		self.status_flag = cb.GetValue()
+		#print(cb.GetLabel(),' is clicked',cb.GetValue())
+
+	def OnChecked3(self, evt):
+		"""
+		"""
+		cb = evt.GetEventObject()
+		self.sigma_flag = cb.GetValue()
 		#print(cb.GetLabel(),' is clicked',cb.GetValue())
 
 	def OnStep(self, evt):
