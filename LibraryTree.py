@@ -426,7 +426,7 @@ class LibraryTree(wx.TreeCtrl):
 	def GetPYFileList(dName, ext=".py"):
 		""" Return .py files that are instanciable. 
 		"""
-
+		
 		### import are here because the simulator (PyDEVS or PyPDEVS) require it
 		from DomainInterface.DomainBehavior import DomainBehavior
 

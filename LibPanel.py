@@ -117,13 +117,13 @@ class LibPanel(wx.Panel):
 		if wx.VERSION_STRING < '4.0':
 			tb.AddTool(Menu.ID_NEW_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db+2.png')), shortHelpString=_('Import'), longHelpString=_('Import new libraries from directory'))
 			tb.AddTool(Menu.ID_DELETE_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db-2.png')), shortHelpString=_('Delete'), longHelpString=_('Delete the selected libraries'))
-			tb.AddTool(Menu.ID_REFRESH_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')), shortHelpString=_('Refresh'), longHelpString=_('Force the refresh of the loaded libraries'))
+			tb.AddTool(Menu.ID_REFRESH_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')), shortHelpString=_('Reload'), longHelpString=_('Force to reload libraries'))
 			#tb.AddTool(Menu.ID_IMPORT_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'dbimport2.png')), shortHelpString=_('Import library'), longHelpString=_('Call the import manager'))
 			tb.AddTool(Menu.ID_HELP_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16, 'dbinfo2.png')), shortHelpString=_('Help'), longHelpString=_('Information about import manager'))
 		else:
 			tb.AddTool(Menu.ID_NEW_LIB, "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'db+2.png')), shortHelp=_('Import'))
 			tb.AddTool(Menu.ID_DELETE_LIB, "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'db-2.png')), shortHelp=_('Delete'))
-			tb.AddTool(Menu.ID_REFRESH_LIB, "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')), shortHelp=_('Refresh'))
+			tb.AddTool(Menu.ID_REFRESH_LIB, "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')), shortHelp=_('Reload'))
 			tb.AddTool(Menu.ID_HELP_LIB, "", wx.Bitmap(os.path.join(ICON_PATH_16_16, 'dbinfo2.png')), shortHelp=_('Help'))
 			tb.AddCheckTool(Menu.ID_MCC_LIB, '', wx.Bitmap(os.path.join(ICON_PATH_16_16,'a-z.png')), shortHelp='MacCabe')
 			tb.ToggleTool(Menu.ID_MCC_LIB, True)

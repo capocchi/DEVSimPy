@@ -23,7 +23,6 @@
 import sys
 import os
 import zipimport
-import imp
 import inspect
 import types
 import zipfile
@@ -53,7 +52,7 @@ class Plugable:
 			code =  importer.get_code(old_plugin_name)
 
 			# Create the new 'temp' module.
-			temp = imp.new_module(new_plugin_name)
+			temp = types.ModuleType(new_plugin_name)
 			sys.modules[new_plugin_name] = temp
 
 			### there is syntax error ?

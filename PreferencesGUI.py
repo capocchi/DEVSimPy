@@ -469,7 +469,7 @@ class SimulationPanel(wx.Panel):
 		self.sim_defaut_plot_dyn_freq = val
 
 	def OnApply(self, evt):
-		""" Apply changes
+		""" Apply changes.
 		"""
 
 		### Reload DomainBehavior and DomainStructure
@@ -478,25 +478,17 @@ class SimulationPanel(wx.Panel):
 			builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = self.default_devs_dir
 
 			### recompile the modules.
-			### recompile DomainInterface.DomainBehavior with all loaded module depending on this one
-			d = copy.copy(sys.modules)
-			for m in d:
-				if d[m]:
-					try:
-						clsmembers = inspect.getmembers(d[m], inspect.isclass)
-						if clsmembers != [] and clsmembers[0][0] == 'DomainBehavior':
-							module_path = os.path.dirname(d[m].__file__)
-							### if m come from amd or cmd, pass path to recompile method to differentiate
-							if zipfile.is_zipfile(module_path):
-								ReloadModule.recompile(module_path)
-							else:
-								ReloadModule.recompile(m)
-					except Exception as info:
-						sys.stdout.write("Exception in PreferenceGui")
-						sys.stdout.write(str(info))
-
+			### recompile DomainInterface.DomainBehavior , DomainInterfaceStructure and MasterModel
+			### recompile all librairies that depend on DomainBehavior (all loaded lib)
+			
+			ReloadModule.recompile("DomainInterface.DomainBehavior")
 			ReloadModule.recompile("DomainInterface.DomainStructure")
 			ReloadModule.recompile("DomainInterface.MasterModel")
+
+			mainW = wx.GetApp().GetTopWindow()
+			nb1 = mainW.GetControlNotebook()
+			tree = nb1.GetTree()
+			tree.UpdateAll()
 
 		### enable the priority (DEVS select function) icon depending on the selected DEVS kernel
 		mainW = wx.GetApp().GetTopWindow()

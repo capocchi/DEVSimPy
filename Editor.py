@@ -27,12 +27,12 @@ import sys
 import keyword
 import inspect
 import zipfile
-import imp
 import threading
 import re
 import codecs
 import tabnanny
 import builtins
+import types
 import traceback
 
 from traceback import format_exception, extract_tb
@@ -99,7 +99,7 @@ def getObjectFromString(scriptlet):
 
 	else:
 		# Create the new 'temp' module.
-		temp = imp.new_module("temp")
+		temp = types.ModuleType('temp')
 		sys.modules["temp"] = temp
 
 		### there is syntaxe error ?

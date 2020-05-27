@@ -24,7 +24,6 @@ import builtins
 
 import os
 import sys
-import imp
 import inspect
 import zipfile
 import zipimport
@@ -40,7 +39,6 @@ _ = gettext.gettext
 
 from tempfile import gettempdir
 
-
 if builtins.__dict__.get('GUI_FLAG',True):
 	import wx
 	
@@ -50,8 +48,6 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 import ZipManager
 
-#from DomainInterface.DomainBehavior import DomainBehavior
-#from DomainInterface.DomainStructure import DomainStructure
 from ReloadModule import recompile
 from Utilities import GetActiveWindow, path_to_module, install_and_import, printOnStatusBar
 from NetManager import Net
@@ -743,13 +739,13 @@ class BlockFactory:
 
 			# find and load module
 			#try:
-				#name, ext = os.path.splitext(module_name)
-				#pkg = '.'.join(modulename.split('.')[0:-1])
-				#module = importlib.import_module(name, package=pkg)
+			name, ext = os.path.splitext(module_name)
+			pkg = '.'.join(module_name.split('.')[0:-1])
+			module = importlib.import_module(name, package=pkg)
 
-			f, fn, description = imp.find_module(module_name, [dir_name])
-			module = imp.load_module(module_name, f, fn, description)
-			f.close()
+			#f, fn, description = imp.find_module(module_name, [dir_name])
+			#module = imp.load_module(module_name, f, fn, description)
+			#f.close()
 			return module
 
 			#except Exception as info:
@@ -787,7 +783,7 @@ class BlockFactory:
 	def CreateBlock(*argv, **kwargs):
 		""" Create Block from python_file and other info coming from wizard.
 		"""
-
+		
 		from Container import iPort, oPort, MsgBoxError
 		### import are here because the simulator (PyDEVS or PyPDEVS) require it
 		from DomainInterface.DomainBehavior import DomainBehavior

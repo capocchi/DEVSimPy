@@ -768,7 +768,7 @@ class LibraryPopupMenu(wx.Menu):
 		wx.Menu.__init__(self)
 
 		new = wx.MenuItem(self, ID_NEW_LIB, _('New/Import'), _('Create or import library'))
-		refresh = wx.MenuItem(self, ID_REFRESH_LIB, _('Refresh'), _('Refresh library'))
+		refresh = wx.MenuItem(self, ID_REFRESH_LIB, _('Reload'), _('Reload library'))
 		#upgrade = wx.MenuItem(self, ID_UPGRADE_LIB, _('Upgrade'), _('Upgrade library'))
 		info = wx.MenuItem(self, ID_HELP_LIB, _('Help'), _('Library description'))
 
