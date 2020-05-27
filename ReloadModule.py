@@ -8,14 +8,18 @@ import importlib
 import types
 import pkgutil
 
+import gettext
+_ = gettext.gettext
+
 from traceback import format_exception
 from Utilities import listf
 
 def reloadall(module):
 	importlib.reload(module)
-	for child in pkgutil.walk_packages(module.__path__):
-		if isinstance(child, types.ModuleType):
-			reloadall(child)
+	if hasattr(module, '__path__'):
+		for child in pkgutil.walk_packages(module.__path__):
+			if isinstance(child, types.ModuleType):
+				reloadall(child)
 
 def recompile(modulename):
 	"""	recompile module from modulename
@@ -29,10 +33,7 @@ def recompile(modulename):
 	else:
 		try:
 		### first, see if the module can be imported at all...
-			name, ext = os.path.splitext(modulename)
-			pkg = '.'.join(modulename.split('.')[0:-1])
-			tmp = importlib.import_module(name, package=pkg)
-		#tmp = __import__(modulename, globals(), locals(), fromlist = [modulename.split('.')[-1]])
+			tmp = __import__(modulename, globals(), locals(), fromlist = [modulename.split('.')[-1]])
 
 		except Exception as info:
 			return info
@@ -65,8 +66,52 @@ def recompile(modulename):
 				### reload recursivelly!
 				try:
 					reloadall(tmp)
-					return sys.modules[tmp.__name__]
-				except:
-					sys.stdout.write('Error trying to reload dependencies in recompile module!')
-				else:
-					return importlib.reload(tmp)
+				except Exception as info:
+					sys.stdout.write(_('Error trying to reload dependencies in recompile module: %s\n')%info)
+				finally:
+					return importlib.reload(sys.modules[modulename])
+					
+					#return importlib.reload(tmp)
+				
+def recompile2(modulename):
+	"""	recompile module from modulename
+	"""
+
+	### modulename is file type
+	if os.path.isfile(modulename) and os.path.exists(modulename):
+		import ZipManager
+		zf = ZipManager.Zip(modulename)
+		return zf.Recompile()
+	else:
+
+		try:
+			#name, ext = os.path.splitext(modulename)
+			#pkg = '.'.join(modulename.split('.')[0:-1])
+			#tmp = importlib.import_module(name, package=pkg)
+			
+			### first, see if the module can be imported at all...
+			tmp = __import__(modulename, globals(), locals(), fromlist = [modulename.split('.')[-1]])
+
+		except Exception as info:
+			return info
+
+		### Use the imported module to determine its actual path
+		pycfile = os.path.abspath(tmp.__file__)
+		modulepath = pycfile.replace(".pyc", ".py")
+
+		### Try to open the specified module as a file
+		code = open(modulepath, 'rU').read()
+
+		### see if the file we opened can compile.  If not, return the error that it gives.
+		### if compile() fails, the module will not be replaced.
+		compile(code, modulename, "exec")
+	
+
+		### Ok, it compiled.  But will it execute without error?
+		exec(compile(open(modulepath).read(), modulepath, 'exec'), globals())
+		
+		reloadall(tmp)
+
+		### at this point, the code both compiled and ran without error.  Load it up
+		### replacing the original code.
+		return importlib.reload(sys.modules[modulename])

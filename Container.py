@@ -61,16 +61,12 @@ import array
 
 from tempfile import gettempdir
 from traceback import format_exception
-
 from math import * ### for eval
-
-import DomainInterface.MasterModel
 
 if builtins.__dict__.get('GUI_FLAG',True):
 	import ConnectDialog
 	import DiagramConstantsDialog
 	import SpreadSheet
-	#from PluginManager import PluginManager
 	import ZipManager
 	import DropTarget
 	import PlotGUI
@@ -385,6 +381,7 @@ class Diagram(Savable, Structurable):
 		if diagram.getDEVSModel():
 			diagram.ClearAllPorts()
 		else:
+			import DomainInterface.MasterModel
 			diagram.setDEVSModel(DomainInterface.MasterModel.Master())
 
 		### shape list of diagram

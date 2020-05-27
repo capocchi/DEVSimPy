@@ -12,8 +12,8 @@ GLOBAL VARIABLES AND FUNCTIONS:
 """
 
 import sys
-import imp
 import http.client
+import types
 from urllib.parse import urlparse
 
 class Net:
@@ -40,7 +40,7 @@ class Net:
 			pass
 
 		### make new module
-		mod = imp.new_module(module_name)
+		mod = types.ModuleType(module_name)
 		sys.modules[module_name] = mod
 		mod.__file__ = self._py_net_file
 

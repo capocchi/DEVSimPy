@@ -406,6 +406,7 @@ class ModelGeneratorWizard(Wizard):
 			fn = evt.GetEventObject().GetValue()
 			cls = Components.GetClass(fn)
 			if inspect.isclass(cls):
+				
                 ### import are here because the simulator (PyDEVS or PyPDEVS) require it
 				from DomainInterface.DomainBehavior import DomainBehavior
 				from DomainInterface.DomainStructure import DomainStructure

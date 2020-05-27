@@ -32,8 +32,7 @@ import math
 import inspect
 import shutil
 import configparser
-import linecache
-import imp 
+import linecache 
 import tempfile
 import pathlib
 
@@ -449,7 +448,7 @@ def getObjectFromString(scriptlet):
 		return info
 	else:
 		# Create the new 'temp' module.
-		temp = imp.new_module("temp")
+		temp = types.ModuleType("temp")
 		sys.modules["temp"] = temp
 
 		### there is syntaxe error ?

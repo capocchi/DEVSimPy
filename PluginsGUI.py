@@ -310,7 +310,7 @@ class GeneralPluginsList(CheckListCtrl):
 		### if module is exception (or tuple)
 		if not inspect.ismodule(module):
 			error = str(module)
-			module = importlib.new_module(basename)
+			module = types.ModuleType(basename)
 			module.__doc__ = error
 			module.__file__ = None
 
