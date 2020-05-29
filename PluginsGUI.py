@@ -619,7 +619,7 @@ class PluginsPanel(wx.Panel):
 		self.log.SetToolTipString(_("Plug-in documentation area.\nSelect plug-in in order to print its documentation."))
 
 		### Default plug-ins list
-		self.check_list = CheckListCtrl(self.rightPanel)
+		self.check_list = CheckListCtrl(parent=self.rightPanel, style=wx.LC_REPORT | wx.SUNKEN_BORDER|wx.LC_SORT_ASCENDING)
 
 		### Buttons
 		selBtn = wx.Button(self.leftPanel, wx.ID_SELECTALL, size=(140, -1))

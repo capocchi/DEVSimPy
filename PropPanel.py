@@ -33,7 +33,7 @@ class PropPanel(wx.Panel):
 		self.frame = parent
 		
 		propSizer = wx.BoxSizer(wx.VERTICAL)
-		propSizer.Add(self.defaultPropertiesPage(), 1, wx.EXPAND|wx.ALL|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTRE_VERTICAL, 10)
+		propSizer.Add(self.defaultPropertiesPage(), 1, wx.EXPAND|wx.ALL, 10)
 
 		self.SetAutoLayout(True)
 		self.SetSizerAndFit(propSizer)
@@ -63,7 +63,7 @@ class PropPanel(wx.Panel):
 		else:
 			sizer.Clear(True)
 		 
-		sizer.Add(panel, 1, wx.EXPAND|wx.ALL|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTRE_VERTICAL, 10)
+		sizer.Add(panel, 1, wx.EXPAND|wx.ALL, 10)
 		
 		self.SetSizerAndFit(sizer)
 		self.Layout()

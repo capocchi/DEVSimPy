@@ -37,6 +37,7 @@ _ = wx.GetTranslation
 
 if __name__ == '__main__':
 	builtins.__dict__['HOME_PATH'] = os.getcwd()
+	builtins.__dict__['NOTIFICATION'] = False
 	builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyDEVS'
 	builtins.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyDEVS'),
 									'PyPDEVS_221':os.path.join(HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs221' ,'src'),
@@ -136,12 +137,12 @@ class GeneralPanel(wx.Panel):
 					(self.st4, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
 					(self.cb2, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5)])
 
-		vsizer.Add(self.plugin_dir, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
-		vsizer.Add(self.domain_dir, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
-		vsizer.Add(self.out_dir, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
-		vsizer.Add(hsizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
-		vsizer.Add(self.cb1, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
-		vsizer.Add(self.cb11, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
+		vsizer.Add(self.plugin_dir, 1, wx.EXPAND)
+		vsizer.Add(self.domain_dir, 1, wx.EXPAND)
+		vsizer.Add(self.out_dir, 1, wx.EXPAND)
+		vsizer.Add(hsizer, 0, wx.EXPAND)
+		vsizer.Add(self.cb1, 1, wx.EXPAND)
+		vsizer.Add(self.cb11, 1, wx.EXPAND)
 		box1.Add(vsizer, 1, wx.EXPAND)
 
 		### Set sizer
@@ -335,29 +336,29 @@ class SimulationPanel(wx.Panel):
 
 		### Adding sizer
 		hbox1.Add(self.cb1, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 15)
-		hbox1.Add(self.sim_success_sound_btn, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL, 15)
-		hbox1.Add(self.sim_error_sound_btn, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL, 15)
+		hbox1.Add(self.sim_success_sound_btn, 1, wx.EXPAND|wx.ALL, 15)
+		hbox1.Add(self.sim_error_sound_btn, 1, wx.EXPAND|wx.ALL, 15)
 
-		hbox5.Add(self.txt3, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL, 15)
-		hbox5.Add(self.cb3, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND|wx.ALL, 15)
+		hbox5.Add(self.txt3, 0, wx.EXPAND|wx.ALL, 15)
+		hbox5.Add(self.cb3, 1, wx.EXPAND|wx.ALL, 15)
 		hbox5.Add(self.devs_doc_btn, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL)
 
-		hbox2.Add(self.txt, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL|wx.EXPAND, 15)
-		hbox2.Add(self.cb4, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.ALL|wx.EXPAND, 15)
+		hbox2.Add(self.txt, 0, wx.ALL|wx.EXPAND, 15)
+		hbox2.Add(self.cb4, 1, wx.ALL|wx.EXPAND, 15)
 
 		hbox3.Add(self.cb2, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 15)
 
-		hbox4.Add(self.txt2, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT|wx.ALL, 15)
-		hbox4.Add(self.sc, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL, 15)
+		hbox4.Add(self.txt2, 0, wx.ALL, 15)
+		hbox4.Add(self.sc, 1, wx.ALL, 15)
 
 		#hbox4.Add(information, 1, wx.ALIGN_CENTER_VERTICAL, 15)
 		##hbox4.Add(self.strategy_info, 1, wx.ALIGN_CENTER_VERTICAL, 15)
 
-		vbox.Add(hbox1, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.ALL, 10)
-		vbox.Add(hbox5, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.ALL, 10)
-		vbox.Add(hbox2, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.ALL, 10)
-		vbox.Add(hbox3, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 10)
-		vbox.Add(hbox4, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 10)
+		vbox.Add(hbox1, 0, wx.EXPAND|wx.ALL, 10)
+		vbox.Add(hbox5, 0, wx.EXPAND|wx.ALL, 10)
+		vbox.Add(hbox2, 0, wx.EXPAND|wx.ALL, 10)
+		vbox.Add(hbox3, 0, wx.EXPAND|wx.ALL, 10)
+		vbox.Add(hbox4, 0, wx.EXPAND|wx.ALL, 10)
 
 		### Set sizer
 		self.SetSizer(vbox)
@@ -728,10 +729,10 @@ class PreferencesGUI(wx.Frame):
 		vsizer = wx.BoxSizer(wx.VERTICAL)
 		hsizer = wx.BoxSizer(wx.HORIZONTAL)
 
-		hsizer.Add(self.cancel,0)
-		hsizer.Add(self.apply,0, wx.EXPAND|wx.LEFT, 5)
+		hsizer.Add(self.cancel, 0)
+		hsizer.Add(self.apply, 0, wx.EXPAND|wx.LEFT, 5)
 		vsizer.Add(self.pref, 1, wx.ALL|wx.EXPAND, 5)
-		vsizer.Add(hsizer, 0, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+		vsizer.Add(hsizer, 0, wx.ALL|wx.ALIGN_RIGHT, 5)
 
 		panel.SetSizer(vsizer)
 		vsizer.Fit(panel)

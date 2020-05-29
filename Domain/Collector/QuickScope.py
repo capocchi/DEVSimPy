@@ -28,9 +28,6 @@ class QuickScope(DomainBehavior):
 		"""
 		DomainBehavior.__init__(self)
 		
-		#  State variable
-		self.state = {'status': 'INACTIF', 'sigma': INFINITY}
-		
 		# fusioning curve
 		self.fusion = fusion
 		# replace time axis with step axis
@@ -41,6 +38,9 @@ class QuickScope(DomainBehavior):
 		
 		self.t = INFINITY
 
+		#  State variable
+		self.initPhase('INACTIF',INFINITY)
+		
 	###
 	def extTransition(self, *args):
 		"""
@@ -48,12 +48,8 @@ class QuickScope(DomainBehavior):
 		
 		for np in range(len(self.IPorts)):
 			### adapted with PyPDEVS
-			if hasattr(self, 'peek'):
-				msg = self.peek(self.IPorts[np])
-			else:
-				inputs = args[0]
-				msg = inputs.get(self.IPorts[np])
-
+			msg = self.peek(self.IPorts[np], *args)
+			
 			if msg is not None:
 				# if step axis is chosen
 				if self.eventAxis:
@@ -76,16 +72,15 @@ class QuickScope(DomainBehavior):
 				del msg
 				
 		self.state['sigma'] = 0
-		return self.state
+		return self.getState()
 
 	###
 	def intTransition(self):
-		self.state["status"] = 'IDLE'
-		self.state["sigma"] = INFINITY
-		return self.state
+		self.passivateIn('IDLE')
+		return self.getState()
 			
 	###
-	def timeAdvance(self):return self.state['sigma']
+	def timeAdvance(self):return self.getSigma()
 	
 	###
 	def __str__(self):return "QuickScope"

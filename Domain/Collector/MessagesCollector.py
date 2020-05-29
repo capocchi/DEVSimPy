@@ -38,9 +38,8 @@ class MessagesCollector(DomainBehavior):
 		self.ext = ext
 		self.comma = comma
 	
-		#  State variable
-		self.state = {'status': 'IDLE', 'sigma': INFINITY}
-		
+		self.initPhase('IDLE',INFINITY)
+
 		for np in range(10000):
 			fn = "%s%d%s"%(self.fileName, np, self.ext)
 			if os.path.exists(fn):
@@ -52,33 +51,28 @@ class MessagesCollector(DomainBehavior):
 		
 		for port in self.IPorts:
 			### adapted with PyPDEVS
-			if hasattr(self, 'peek'):
-				msg = self.peek(port)
-				np = port.myID
-			else:
-				inputs = args[0]
-				msg = inputs.get(port)
-				np=port.port_id
-
+			msg = self.peek(port, *args)
+			
 			if msg:
+				np = self.getPortId(port)
+			
 				### filename
-				fn = "%s%d%s"%(self.fileName, np, self.ext)
+				fn = "%s%s%s"%(self.fileName, str(np), self.ext)
 				
 				with open(fn,'a') as f: f.write("%s\n"%(str(msg)))
 				del msg
 
-		self.state["sigma"] = 0
-		self.state["status"] = 'ACTIF'
-		return self.state
+		self.holdIn('ACTIF',0)
+
+		return self.getState()
 		
 	###
 	def intTransition(self):
-		self.state["status"] = 'IDLE'
-		self.state["sigma"] = INFINITY
-		return self.state
+		self.passivateIn('IDLE')
+		return self.getState()
 		
 	###
-	def timeAdvance(self):return self.state['sigma']
+	def timeAdvance(self):return self.getSigma()
 	
 	###
 	def __str__(self):return "MessagesCollector"

@@ -278,38 +278,39 @@ class LibraryTree(wx.TreeCtrl):
 		"""
 
 		item = self.GetFocusedItem()
-		path = self.GetItemPyData(item)
+		if item.IsOk():
+			path = self.GetItemPyData(item)
 
-		if path and os.path.exists(path):
-			### msgbox to select what you wan to delete: file or/and item ?
-			db = DeleteBox(self, wx.NewIdRef(), _("Delete Options"))
+			if path and os.path.exists(path):
+				### msgbox to select what you wan to delete: file or/and item ?
+				db = DeleteBox(self, wx.NewIdRef(), _("Delete Options"))
 
-			if db.ShowModal() == wx.ID_OK:
+				if db.ShowModal() == wx.ID_OK:
 
-				### delete file
-				if db.rb2.GetValue():
-					label = os.path.basename(path)
-					dial = wx.MessageDialog(None, _('Are you sure to delete the python file %s ?')%(label), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-					if dial.ShowModal() == wx.ID_YES:
-						try:
-							### delete file
-							os.remove(path)
-							### delete item
-							self.RemoveItem(item)
+					### delete file
+					if db.rb2.GetValue():
+						label = os.path.basename(path)
+						dial = wx.MessageDialog(None, _('Are you sure to delete the python file %s ?')%(label), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+						if dial.ShowModal() == wx.ID_YES:
+							try:
+								### delete file
+								os.remove(path)
+								### delete item
+								self.RemoveItem(item)
 
-						except Exception as info:
-							info = str(info)
-							sys.stdout.write(_("%s not deleted! \n Error: %s")%(label,info))
+							except Exception as info:
+								info = str(info)
+								sys.stdout.write(_("%s not deleted! \n Error: %s")%(label,info))
 
-					dial.Destroy()
+						dial.Destroy()
 
-				else:
-					self.RemoveItem(item)
+					else:
+						self.RemoveItem(item)
 
-				###TODO unload associated module
+					###TODO unload associated module
 
-		else:
-			wx.MessageBox(_("No library selected!"),_("Delete Manager"))
+			else:
+				wx.MessageBox(_("No library selected!"),_("Delete Manager"))
 
 	def UpdateSubLib(self, path:str)->bool:
 		""" Do update lib.
