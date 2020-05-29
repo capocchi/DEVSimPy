@@ -1482,7 +1482,7 @@ class MainApplication(wx.Frame):
 			num = dlg._cb.GetItemCount()
 			for index in range(num):
 				label = dlg._cb.GetItemText(index)
-
+				
 				### met a jour le dico des elements selectionnes
 				if dlg._cb.IsChecked(index) and label not in dlg._selectedItem:
 					dlg._selectedItem.update({str(label):index})

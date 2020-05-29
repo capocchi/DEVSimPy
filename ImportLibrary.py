@@ -39,10 +39,15 @@ from Utilities import checkURL, getDirectorySize, RecurseSubDirs, getPYFileListF
 from Decorators import BuzyCursorNotification
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
-	def __init__(self, parent):
-		wx.ListCtrl.__init__(self, parent, wx.NewIdRef(), style=wx.LC_REPORT | wx.SUNKEN_BORDER|wx.LC_SORT_ASCENDING)
-		CheckListCtrlMixin.__init__(self)
+	def __init__(self, *args, **kw):
+		wx.ListCtrl.__init__(self, *args, **kw)
 		ListCtrlAutoWidthMixin.__init__(self)
+		
+		if wx.VERSION_STRING >= '4.1.0':
+			self.EnableCheckBoxes(True)
+			self.IsChecked = self.IsItemChecked
+		else:
+			CheckListCtrlMixin.__init__(self)
 
 		self.InsertColumn(0, _('Name'), width=140)
 		self.InsertColumn(1, _('Size [Ko]'), width=80)
@@ -62,6 +67,17 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 			font = wx.SystemSettings.GetFont(wx.SYS_SYSTEM_FONT)
 
 		self.SetFont(font)
+
+	# 	self.Bind(wx.EVT_LIST_ITEM_CHECKED, self.OnCheck)
+	# 	self.Bind(wx.EVT_LIST_ITEM_UNCHECKED, self.OnUnCheck)
+
+	# def OnCheck(self, evt):
+	# 	index = evt.GetItem().GetId()
+	# 	self.CheckItem(index, True)
+
+	# def OnUnCheck(self, evt):
+	# 	index = evt.GetItem().GetId()
+	# 	self.CheckItem(index, False)
 
 	def AddItem(self, path, dName, check=False):
 		""" Add item to the list
@@ -206,7 +222,7 @@ class ImportLibrary(wx.Dialog):
 		rightPanel = wx.Panel(panel, wx.NewIdRef())
 
 		### Check list of libraries
-		self._cb = CheckListCtrl(rightPanel)
+		self._cb = CheckListCtrl(parent=rightPanel, style=wx.LC_REPORT | wx.SUNKEN_BORDER|wx.LC_SORT_ASCENDING)
 		
 		try:
 			if wx.Platform == '__WXMSW__':

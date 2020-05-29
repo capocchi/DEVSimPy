@@ -37,6 +37,7 @@ _ = wx.GetTranslation
 
 if __name__ == '__main__':
 	builtins.__dict__['HOME_PATH'] = os.getcwd()
+	builtins.__dict__['NOTIFICATION'] = False
 	builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyDEVS'
 	builtins.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyDEVS'),
 									'PyPDEVS_221':os.path.join(HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs221' ,'src'),
@@ -728,10 +729,10 @@ class PreferencesGUI(wx.Frame):
 		vsizer = wx.BoxSizer(wx.VERTICAL)
 		hsizer = wx.BoxSizer(wx.HORIZONTAL)
 
-		hsizer.Add(self.cancel,0,)
-		hsizer.Add(self.apply,0, wx.EXPAND|wx.LEFT, 5)
+		hsizer.Add(self.cancel, 0)
+		hsizer.Add(self.apply, 0, wx.EXPAND|wx.LEFT, 5)
 		vsizer.Add(self.pref, 1, wx.ALL|wx.EXPAND, 5)
-		vsizer.Add(hsizer, 0, wx.RIGHT|wx.ALL, 5)
+		vsizer.Add(hsizer, 0, wx.ALL|wx.ALIGN_RIGHT, 5)
 
 		panel.SetSizer(vsizer)
 		vsizer.Fit(panel)

@@ -49,7 +49,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 import ZipManager
 
 from ReloadModule import recompile
-from Utilities import GetActiveWindow, path_to_module, install_and_import, printOnStatusBar
+from Utilities import GetActiveWindow, path_to_module, printOnStatusBar
 from NetManager import Net
 from SimpleFrameEditor import FrameEditor
 from which import which

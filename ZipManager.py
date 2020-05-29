@@ -26,7 +26,7 @@ _ = gettext.gettext
 
 from PluginManager import PluginManager #trigger_event
 from traceback import format_exception
-from Utilities import listf, path_to_module
+from Utilities import listf, path_to_module,install_and_import
 
 #global Cmtp
 #Cmtp=0
@@ -323,16 +323,40 @@ class Zip:
 			sys.path.append(p)
 
 		importer = zipimport.zipimporter(self.fn)
-		module = importer.load_module(self.module_name.split('.py')[0])
-		module.__name__ = path_to_module(self.module_name)
 
-		### allows to import with a reference from the parent directory (like parentName.model).
-		### Now import of .amd or .cmd module is composed by DomainModel (no point!).
-		### Example : import CollectorMessageCollector 
-		sys.modules[self.fullname] = module
+		try:
+			module = importer.load_module(self.module_name.split('.py')[0])
 
-		return module
-		
+		### package is needed by the self.module_name (dependency)
+		except ModuleNotFoundError as info:
+			### get the package name
+			package = sys.exc_info()[1].name
+
+			import wx
+			dial = wx.MessageDialog(None, _('%s package is needed by %s.\nDo you want to install it?')%(package,self.module_name), _('Required package'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+			if dial.ShowModal() == wx.ID_YES:
+				### try to install
+				if install_and_import(package):
+					module = importer.load_module(self.module_name.split('.py')[0])
+				else:
+					module = None
+			else:
+				module = None
+				
+			dial.Destroy()
+		finally:
+			if module:
+				module.__name__ = path_to_module(self.module_name)
+				
+				### allows to import with a reference from the parent directory (like parentName.model).
+				### Now import of .amd or .cmd module is composed by DomainModel (no point!).
+				### Example : import CollectorMessageCollector 
+				sys.modules[self.fullname] = module
+
+				return module
+			else:
+				return None
+
 	def ReImport(self):
 		""" Reimport the module from zip file.
 		"""
