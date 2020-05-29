@@ -39,7 +39,7 @@ class RandomGenerator(DomainBehavior):
         """
         numberMessage = random.randint(1, len(self.OPorts))  # Number message to send
         portsToSend = random.sample(self.OPorts, numberMessage)  # The port with number message
-
+        
         for port in portsToSend:
             value = random.randint(self.minValue, self.maxValue)
             self.msg.value = [value, 0.0, 0.0]

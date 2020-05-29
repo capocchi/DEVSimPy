@@ -58,7 +58,7 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 	"""
 
 	###
-	def __init__(self, name=""):
+	def __init__(self, name:str=""):
 		"""	Constructor.
 		"""
 
@@ -74,49 +74,56 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 			DomainBehavior.getMsgValue = DomainBehavior.getMsgPyDEVSValue
 			DomainBehavior.getMsgTime = DomainBehavior.getMsgPyDEVSTime
 			DomainBehavior.getPortId = DomainBehavior.getPortIdFromPyDEVS
-		else: 
+		else:
 			DomainBehavior.peek = DomainBehavior.peekPyPDEVS
 			DomainBehavior.poke = DomainBehavior.pokePyPDEVS
 			DomainBehavior.getMsgValue = DomainBehavior.getMsgPyPDEVSValue
 			DomainBehavior.getMsgTime = DomainBehavior.getMsgPyPDEVSTime
 			DomainBehavior.getPortId = DomainBehavior.getPortIdFromPyPDEVS
 
-	def initPhase(self, phase="IDLE", sigma=0.0):
+	def initPhase(self, phase:str="IDLE", sigma:float=0.0)->None:
 		self.state = {'status':phase, 'sigma':sigma}
 
-	def phaseIs(self, phase):
+	def setSigma(self,sigma:float=0.0)->None:
+		self.state['sgima'] = sigma
+
+	def phaseIs(self, phase:str)->bool:
 		return phase == self.state['status']
 
-	def passivate(self):
+	def passivate(self)->None:
 		self.passivateIn('passive')
 
-	def passivateIn(self, phase=""):
+	def passivateIn(self, phase:str="")->None:
 		self.holdIn(phase, sigma=INFINITY)
 
-	def holdIn(self, phase="", sigma=0.0):
+	def holdIn(self, phase:str="", sigma:float=0.0)->None:
 		''' "Holding in phase " + phase + " for time " + sigma
 		'''
 		self.state['status'] = phase
 		self.state['sigma'] = sigma
 
 	###
-	def pokePyPDEVS(self, p, v):
+	def pokePyPDEVS(self, p, v)->dict:
 		### adapted with PyPDEVS
 		from .Object import Message
 		if isinstance(v, Message):
 			v = (v.value,v.time)
 		return {p:v}
 
-	def peekPyPDEVS(self, port, args):
+	def peekPyPDEVS(self, port, *args):
 		### adapted with PyPDEVS
-		#inputs = args[0]
-		return args.get(port)
+		inputs = args[0]
+		return inputs.get(port)
 
+	### getters
 	def getPortIdFromPyDEVS(self, p):
 		return p.myID
 
 	def getPortIdFromPyPDEVS(self,p):
-		return p.port_id
+		if hasattr(p, 'myID'):
+			return p.myID
+		else:
+			return p.port_id
 
 	def getMsgPyDEVSValue(self, msg):
 		return msg.value					
@@ -133,16 +140,16 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 	def getFlatComponentSet (self):
 		return {self.name : self}
 
-	def getSigma(self):
+	def getSigma(self)->float:
 		return self.state['sigma']
 
-	def getStatus(self):
+	def getStatus(self)->str:
 		return self.state['status']
 
-	def getState(self):
+	def getState(self)->dict:
 		return self.state
 		
-	def __str__(self):
+	def __str__(self)->str:
 		"""
 		"""
 		if hasattr(self, 'bloclModel'):
@@ -150,6 +157,9 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 		else:
 			return self.__class__.__name__
 
+	def __lt__(self, other):
+		return self.state['sigma'] > other.state['sigma']
+		
 def main():
 	DB = DomainBehavior()
 

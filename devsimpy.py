@@ -80,6 +80,15 @@ ini_exist = parser.has_option(section, option)
 
 import wx
 
+### try to have the latest version of wx 
+#try:
+#	import pip
+	#print(pip.main(['show','wxPython']))
+	#pip.main(["install", "--upgrade", 'wxPython'])
+#except:
+#	pass
+
+### check if an upgrade of wxpython is possible from pip !
 sys.stdout.write("Importing wxPython %s%s for python %s on %s (%s) platform...\n"%(wx.version(), " from devsimpy.ini" if ini_exist else '', platform.python_version(), platform.system(), platform.version()))
 
 _ = wx.GetTranslation
@@ -142,6 +151,7 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 				'DEFAULT_SIM_STRATEGY': 'bag-based', #choose the default simulation strategy for PyDEVS
 				'PYDEVS_SIM_STRATEGY_DICT' : {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}, # list of available simulation strategy for PyDEVS package
                 'PYPDEVS_SIM_STRATEGY_DICT' : {'classic':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}, # list of available simulation strategy for PyPDEVS package
+				'PYPDEVS_221_SIM_STRATEGY_DICT' : {'classic':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}, # list of available simulation strategy for PyPDEVS package
 				'HELP_PATH' : os.path.join('doc', 'html'), # path of help directory
 				'NTL' : False, # No Time Limit for the simulation
 				'DYNAMIC_STRUCTURE' : False, # Dynamic Structure for local PyPDEVS simulation

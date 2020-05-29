@@ -15,12 +15,8 @@
 from DomainInterface.DomainBehavior import DomainBehavior
 from DomainInterface.Object import Message
 
-try:
-	import plotly.plotly as py
-	import plotly.graph_objs as go
-except:
-	import chart_studio.plotly as py
-	import plotly.graph_objects as go
+import chart_studio.plotly as py
+import plotly.graph_objects as go
 
     
 ### Model class ----------------------------------------------------------------

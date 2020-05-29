@@ -223,6 +223,7 @@ class Solver(object):
             # Perform all selects
             imminent.sort()
             pending = imminent
+        
             level = 1
             while len(pending) > 1:
                 # Take the model each time, as we need to make sure that the selectHierarchy is valid everywhere

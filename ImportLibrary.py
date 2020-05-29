@@ -286,7 +286,7 @@ class ImportLibrary(wx.Dialog):
 	def OnSelectAll(self, event):
 		num = self._cb.GetItemCount()
 		for i in range(num):
-			self._cb.CheckItem(i)
+			self._cb.CheckItem(i,True)
 
 	def OnDeselectAll(self, event):
 		num = self._cb.GetItemCount()
@@ -418,7 +418,7 @@ class ImportLibrary(wx.Dialog):
 	def EvtCheckListBox(self, evt):
 		index = self._cb.GetFocusedItem()
 		label = self._cb.GetItemText(index)
-
+		
 		#met a jour le dico des elements selectionnes
 		if self._cb.IsChecked(index) and label not in self._selectedItem:
 			self._selectedItem.update({str(label):index})
