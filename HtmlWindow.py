@@ -55,7 +55,7 @@ class HtmlFrame(wx.Frame):
         self.html.SetPage("")
 
 def main():
-    app = wx.PySimpleApp()
+    app = wx.App()
     # create a window/frame, no parent, -1 is default ID, title, size
     frame = HtmlFrame(None, -1, "Alone Mode", size=(800,600))
     # show the frame
