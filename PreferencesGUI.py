@@ -559,7 +559,7 @@ class Preferences(wx.Toolbook):
 		### Plug-in page setting (populate is done when page is changed)
 		self.pluginPanel = self.GetPage(self.GetPageCount()-1)
 
-		self.CheckList = GeneralPluginsList(self.pluginPanel.GetRightPanel(), style= wx.LC_REPORT| wx.SUNKEN_BORDER|wx.LC_SORT_ASCENDING)
+		self.CheckList = GeneralPluginsList(self.pluginPanel.GetRightPanel(), style= wx.LC_REPORT|wx.SUNKEN_BORDER|wx.LC_SORT_ASCENDING)
 		self.pluginPanel.SetPluginsList(self.CheckList)
 
 		lpanel = self.pluginPanel.GetLeftPanel()
