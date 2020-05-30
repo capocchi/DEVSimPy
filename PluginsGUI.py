@@ -782,7 +782,7 @@ class PluginsPanel(wx.Panel):
 		for i in range(num):
 			self.check_list.CheckItem(i, False)
 			self.check_list.SetItemImage(i,0)
-			
+
 	def OnConfig(self, event):
 		""" Setting button has been pressed and the plug-in config function is call.
 		"""
