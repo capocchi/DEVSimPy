@@ -289,9 +289,9 @@ class BlinkFrame(wx.Frame):
 		sizer_2.Add(self.txt, 1, wx.EXPAND)
 
 		grid_sizer_1 = wx.BoxSizer(wx.HORIZONTAL)
-		grid_sizer_1.Add(self.button_selectall, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE)
-		grid_sizer_1.Add(self.button_find, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE)
-		grid_sizer_1.Add(self.button_clear, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE)
+		grid_sizer_1.Add(self.button_selectall, 1, wx.ALIGN_CENTER|wx.ADJUST_MINSIZE)
+		grid_sizer_1.Add(self.button_find, 1, wx.ALIGN_CENTER|wx.ADJUST_MINSIZE)
+		grid_sizer_1.Add(self.button_clear, 1, wx.ALIGN_CENTER|wx.ADJUST_MINSIZE)
 
 		sizer_2.Add(grid_sizer_1, 0, wx.EXPAND)
 

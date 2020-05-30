@@ -45,18 +45,26 @@ import ZipManager
 import Editor
 
 _ = wx.GetTranslation
+
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	""" General Check list Class.
 	"""
 
-	def __init__(self, parent):
+	def __init__(self, *args, **kw):
 		""" Constructor.
 		"""
-
-		wx.ListCtrl.__init__(self, parent, wx.NewIdRef(), style=wx.LC_REPORT | wx.SUNKEN_BORDER | wx.LC_SORT_ASCENDING)
-		CheckListCtrlMixin.__init__(self)
+		wx.ListCtrl.__init__(self, *args, **kw)
 		ListCtrlAutoWidthMixin.__init__(self)
 
+		if wx.VERSION_STRING >= '4.1.0':
+			self.Bind(wx.EVT_LIST_ITEM_CHECKED, self.OnEnable)
+			self.Bind(wx.EVT_LIST_ITEM_UNCHECKED, self.OnDisable)
+
+			self.EnableCheckBoxes(True)
+			self.IsChecked = self.IsItemChecked
+		#else:
+		CheckListCtrlMixin.__init__(self)
+		
 		self.id = -100000000
 		self.map = {}
 
@@ -84,7 +92,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		self.Centre()
 		self.Show(True)
 
-		self.Bind(wx.EVT_MOTION, self.OnMotion)
+		#self.Bind(wx.EVT_MOTION, self.OnMotion)
 
 	def OnMotion(self, evt):
 		"""
@@ -97,8 +105,11 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		except:
 			self.SetToolTip(None)
 		
+		### only from wx 4.1.0
+		self.EnableCheckBoxes(True)
+
 		### else the drag and drop dont run
-		evt.Skip()
+		#evt.Skip()
 
 	def OnRightClick(self, event):
 		""" Right click has been invoked.
@@ -135,8 +146,13 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 			module = self.GetPyData(i)[0]
 			if self.IsSelected(i) and module:
 				path = module.__file__
-				if path.endswith('.pyc'):
+				if path:
+					if path.endswith('.pyc'):
+						edit.Enable(False)
+				else:
 					edit.Enable(False)
+					enable.Enable(False)
+					disable.Enable(False)
 
 		# Popup the menu.  If an item is selected then its handler
 		# will be called before PopupMenu returns.
@@ -146,12 +162,42 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def OnEnable(self, event):
 		""" Ebnable the current item.
 		"""
-		self.CheckItem(self.currentItem, True)
+		try: 
+			index = event.Index
+		except:
+			index = self.currentItem
+
+		try:
+			module = self.GetPyData(index)[0]
+		except:
+			pass
+		else:
+			### module can be disabled
+			if module.__file__:
+				self.CheckItem(index, True)
+				self.SetItemImage(index,1)
+			else:
+				self.CheckItem(index, False)
 
 	def OnDisable(self, event):
 		""" Disable the current item.
 		"""
-		self.CheckItem(self.currentItem, False)
+		try: 
+			index = event.Index
+		except:
+			index = self.currentItem
+
+		try:
+			module = self.GetPyData(index)[0]
+		except:
+			pass
+		else:
+			### module can be disabled
+			if module.__file__:
+				self.CheckItem(index, False)
+				self.SetItemImage(index,0)
+			else:
+				self.CheckItem(index, True)
 
 	@abstractmethod
 	def OnEdit(self, event):
@@ -291,6 +337,7 @@ class GeneralPluginsList(CheckListCtrl):
 
 			# add to the CheckListCtrl
 			index = self.InsertItem(100000000, basename)
+		
 			self.SetItem(index, 1, size)
 			self.SetItem(index, 2, date)
 			self.SetItem(index, 3, ext)
@@ -320,7 +367,8 @@ class GeneralPluginsList(CheckListCtrl):
 			if module.__file__ != None:
 				### only module to be activated is checked
 				if basename in self.active_plugins_list:
-					self.CheckItem(index)
+					self.CheckItem(index, True)
+					self.SetItemImage(index,1)
 				else:
 					PluginManager.disable_plugin(basename)
 			else:
@@ -393,7 +441,7 @@ class BlockPluginsList(CheckListCtrl):
 	def __init__(self, *args, **kwargs):
 		""" Constructor.
 		"""
-		CheckListCtrl.__init__(self, *args, **kwargs)
+		super(CheckListCtrl, self).__init__(*args, **kwargs)
 
 		self.InsertColumn(0, _('Name'), width=180)
 		self.InsertColumn(1, _('Type'), width=180)
@@ -496,7 +544,8 @@ class BlockPluginsList(CheckListCtrl):
 
 					### enabling stored plug-ins (after SetPyData)
 					if name in self.model.plugins:
-						self.CheckItem(index)
+						self.CheckItem(index, True)
+						self.SetItemImage(index,1)
 
 				self.is_populate = True
 
@@ -596,13 +645,13 @@ class PluginsPanel(wx.Panel):
 	""" Plug-ins Panel
 	"""
 
-	def __init__(self,  parent):
+	def __init__(self, *args, **kwargs):
 		""" Constructor.
 		"""
-		wx.Panel.__init__(self,  parent)
+		wx.Panel.__init__(self, *args, **kwargs)
 
 		### local copy
-		self.parent = parent
+		self.parent = args[0]
 
 		### Sizer
 		self.vbox1 = wx.BoxSizer(wx.VERTICAL)
@@ -724,6 +773,7 @@ class PluginsPanel(wx.Panel):
 		num = self.check_list.GetItemCount()
 		for i in range(num):
 			self.check_list.CheckItem(i, True)
+			self.check_list.SetItemImage(i,1)
 
 	def OnDeselectAll(self, event):
 		""" Deselect All button has been pressed and all plug-ins are disabled.
@@ -731,6 +781,7 @@ class PluginsPanel(wx.Panel):
 		num = self.check_list.GetItemCount()
 		for i in range(num):
 			self.check_list.CheckItem(i, False)
+			self.check_list.SetItemImage(i,0)
 
 	def OnConfig(self, event):
 		""" Setting button has been pressed and the plug-in config function is call.
@@ -752,13 +803,13 @@ class PluginsPanel(wx.Panel):
 class ModelPluginsManager(wx.Frame):
 	""" Plug-ins Manager for DEVSimPy Block
 	"""
-	def __init__(self, **kwargs):
+	def __init__(self, *args, **kwargs):
 		""" Constructor.
 		"""
 
 		self.model = kwargs.pop('model')
 
-		wx.Frame.__init__(self, **kwargs)
+		super(wx.Frame,self).__init__(*args, **kwargs)
 
 		### plug-in panel
 		self.pluginPanel = PluginsPanel(self)
@@ -768,7 +819,7 @@ class ModelPluginsManager(wx.Frame):
 		lpanel = self.pluginPanel.GetLeftPanel()
 
 		### checklist to insert in right panel
-		self.CheckList = BlockPluginsList(rpanel)
+		self.CheckList = BlockPluginsList(parent=rpanel, style=wx.LC_REPORT|wx.SUNKEN_BORDER|wx.LC_SORT_ASCENDING)
 		wx.CallAfter(self.CheckList.Populate, (self.model))
 
 		### Buttons for insert or delete plug-ins

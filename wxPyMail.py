@@ -54,7 +54,7 @@ class SendMailWx(wx.Frame):
 
     def InitUI(self):
 
-        self.panel = wx.Panel(self, wx.NewIdRef())
+        self.panel = wx.Panel(self)
         
         self.createMenu()
         self.createToolbar()
@@ -461,9 +461,26 @@ class LoginDlg(wx.Dialog):
         
 #######################################################################################
 
-# Start program
+### ------------------------------------------------------------
+class TestApp(wx.App):
+    """ Testing application
+    """
+
+    def OnInit(self):
+
+        import builtins
+        import gettext
+
+        builtins.__dict__.update({'HOME_PATH':os.getcwd(), 'DOMAIN_PATH':'Domain', 'ICON_PATH':'icons',
+        'ICON_PATH_16_16':os.path.join('icons','16x16'),'_':gettext.gettext})
+
+        frame = SendMailWx(None)
+        frame.Show()
+        return True
+
+    def OnQuit(self, event):
+        self.Close()
+
 if __name__ == '__main__':
-    app = wx.App()
-    frame = SendMailWx(None)
-    frame.Show()
-    app.MainLoop() 
+    app = TestApp(0)
+    app.MainLoop()
