@@ -3425,7 +3425,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 									id=wx.NewIdRef(),
 									title =_('%s - plugin manager')%self.label,
 									size = (700,500),
-									style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN,
+									style = wx.LC_REPORT| wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN,
 									model= self)
 		f.Show()
 
