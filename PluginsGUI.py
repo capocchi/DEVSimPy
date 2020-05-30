@@ -62,7 +62,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 
 			self.EnableCheckBoxes(True)
 			self.IsChecked = self.IsItemChecked
-		#else:
+		
 		CheckListCtrlMixin.__init__(self)
 		
 		self.id = -100000000
@@ -94,22 +94,22 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 
 		#self.Bind(wx.EVT_MOTION, self.OnMotion)
 
-	def OnMotion(self, evt):
-		"""
-		"""
-		item, flags = self.HitTest(evt.GetPosition())
+	# def OnMotion(self, evt):
+	# 	"""
+	# 	"""
+	# 	item, flags = self.HitTest(evt.GetPosition())
 		
-		try:
-			path = self.GetPyData(item)
-			self.SetToolTip(path[0].__file__)
-		except:
-			self.SetToolTip(None)
+	# 	try:
+	# 		path = self.GetPyData(item)
+	# 		self.SetToolTip(path[0].__file__)
+	# 	except:
+	# 		self.SetToolTip(None)
 		
-		### only from wx 4.1.0
-		self.EnableCheckBoxes(True)
+	# 	### only from wx 4.1.0
+	# 	self.EnableCheckBoxes(True)
 
-		### else the drag and drop dont run
-		#evt.Skip()
+	# 	### else the drag and drop dont run
+	# 	evt.Skip()
 
 	def OnRightClick(self, event):
 		""" Right click has been invoked.
@@ -141,23 +141,41 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 			menu.Append(disable)
 			menu.Append(edit)
 
-		### disable the edit menu for the .pyc file
-		for i in range(self.GetItemCount()):
-			module = self.GetPyData(i)[0]
-			if self.IsSelected(i) and module:
-				path = module.__file__
-				if path:
-					if path.endswith('.pyc'):
-						edit.Enable(False)
-				else:
-					edit.Enable(False)
+		index = self.currentItem
+		path = self.GetPath(index)
+		### if not path, the module corresponding to the item is
+		if path:
+			### disable the edit menu for the .pyc file
+			if path.endswith('.pyc'):
+				edit.Enable(False)
+			else:
+				### is py file and enable only the right sumbemu depending on the stats of the check box
+				sel = self.IsChecked(index)
+				if sel:
 					enable.Enable(False)
+					disable.Enable(True)
+				else:
+					enable.Enable(True)
 					disable.Enable(False)
+		else:
+			enable.Enable(False)
+			disable.Enable(False)
+			edit.Enable(False)				
 
 		# Popup the menu.  If an item is selected then its handler
 		# will be called before PopupMenu returns.
 		self.PopupMenu(menu)
 		menu.Destroy()
+
+	def isOk(self, item):
+		""" item is well imported
+		"""
+		
+		module = self.GetPyData(item)[0]
+		return module and module.__file__
+
+	def GetPath(self,item):
+		return self.GetPyData(item)[0].__file__ if self.GetPyData(item) else None
 
 	def OnEnable(self, event):
 		""" Ebnable the current item.
@@ -167,18 +185,9 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		except:
 			index = self.currentItem
 
-		try:
-			module = self.GetPyData(index)[0]
-		except:
-			pass
-		else:
-			### module can be disabled
-			if module.__file__:
-				self.CheckItem(index, True)
-				self.SetItemImage(index,1)
-			else:
-				self.CheckItem(index, False)
-
+		self.CheckItem(index, True)
+		self.SetItemImage(index,1)
+		
 	def OnDisable(self, event):
 		""" Disable the current item.
 		"""
@@ -187,17 +196,8 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		except:
 			index = self.currentItem
 
-		try:
-			module = self.GetPyData(index)[0]
-		except:
-			pass
-		else:
-			### module can be disabled
-			if module.__file__:
-				self.CheckItem(index, False)
-				self.SetItemImage(index,0)
-			else:
-				self.CheckItem(index, True)
+		self.CheckItem(index, False)
+		self.SetItemImage(index,0)
 
 	@abstractmethod
 	def OnEdit(self, event):
@@ -215,7 +215,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def GetPyData(self, item):
 		""" Get python object Data.
 		"""
-		return self.map[self.GetItemData(item)]
+		return self.map.get(self.GetItemData(item),None)
 
 	def get_selected_items(self):
 		"""
@@ -386,23 +386,22 @@ class GeneralPluginsList(CheckListCtrl):
 	def OnEdit(self, event):
 		"""
 		"""
-		for i in range(self.GetItemCount()):
-			module = self.GetPyData(i)[0]
-			if self.IsSelected(i) and module:
-				path = module.__file__
-				if path.endswith('.py'):
-					name = os.path.basename(path)
-					### editor frame for the text of plug-ins
-					editorFrame = Editor.GetEditor(None, \
-									wx.NewIdRef(), \
-									_("%s - Plug-ins Editor")%name, \
-									module, \
-									file_type = 'block')
-					editorFrame.AddEditPage(name, path)
-					editorFrame.Show()
-				### for .pyc file
-				else:
-					pass
+		index = self.currentItem
+		path = self.GetPath(index)
+		if self.IsSelected(index) and path and path.endswith('.py'):
+			name = os.path.basename(path)
+			module = self.GetPyData(index)[0]
+			### editor frame for the text of plug-ins
+			editorFrame = Editor.GetEditor(None, \
+							wx.NewIdRef(), \
+							_("%s - Plug-ins Editor")%name, \
+							module, \
+							file_type = 'block')
+			editorFrame.AddEditPage(name, path)
+			editorFrame.Show()
+		### for .pyc file
+		else:
+			pass
 
 	def OnApply(self, event):
 		""" Method called by PreferenceGUI class.
@@ -417,11 +416,11 @@ class GeneralPluginsList(CheckListCtrl):
 			module = self.GetPyData(i)[0]
 			if inspect.ismodule(module):
 				### plug-in file path
-				file = module.__file__
+				path = module.__file__
 				### built-in module coming from empty module create by error manager
-				if file is not None:
+				if path:
 					### get abspath and exclude .pyc
-					name,ext = os.path.splitext(os.path.basename(file))
+					name,ext = os.path.splitext(os.path.basename(path))
 					### if plug-in is checked, we activate it
 					
 					if self.IsChecked(i):
