@@ -150,8 +150,8 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 				'LOG_FILE': os.devnull, # log file (null by default)
 				'DEFAULT_SIM_STRATEGY': 'bag-based', #choose the default simulation strategy for PyDEVS
 				'PYDEVS_SIM_STRATEGY_DICT' : {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}, # list of available simulation strategy for PyDEVS package
-                'PYPDEVS_SIM_STRATEGY_DICT' : {'classic':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}, # list of available simulation strategy for PyPDEVS package
-				'PYPDEVS_221_SIM_STRATEGY_DICT' : {'classic':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}, # list of available simulation strategy for PyPDEVS package
+                'PYPDEVS_SIM_STRATEGY_DICT' : {'classic':'SimStrategy4', 'parallel':'SimStrategy5'}, # list of available simulation strategy for PyPDEVS package
+				'PYPDEVS_221_SIM_STRATEGY_DICT' : {'classic':'SimStrategy4', 'parallel':'SimStrategy5'}, # list of available simulation strategy for PyPDEVS package
 				'HELP_PATH' : os.path.join('doc', 'html'), # path of help directory
 				'NTL' : False, # No Time Limit for the simulation
 				'DYNAMIC_STRUCTURE' : False, # Dynamic Structure for local PyPDEVS simulation
@@ -170,7 +170,8 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 ### Check if the pypdevs241 directory is empty (not --recursive option when the devsimpy git has been cloned)
 path = os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs241')
 if os.path.exists(path) and not len(os.listdir(path)) == 0:
-    builtin_dict['DEVS_DIR_PATH_DICT'].update({'PyPDEVS_241':os.path.join(path ,'src','pypdevs')})
+	builtin_dict['PYPDEVS_221_SIM_STRATEGY_DICT'] = {'classic':'SimStrategy4', 'parallel':'SimStrategy5'}
+	builtin_dict['DEVS_DIR_PATH_DICT'].update({'PyPDEVS_241':os.path.join(path ,'src','pypdevs')})
 else:
 	sys.stdout.write("PyPDEVS Kernel in version 2.4.1 is not loaded.\nPlease install it in the directory %s using git (http://msdl.uantwerpen.be/git/yentl/PythonPDEVS.git)\n"%path)
 
