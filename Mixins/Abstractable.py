@@ -23,7 +23,6 @@
 import sys
 
 from Mixins.Attributable import Attributable
-from DomainInterface.DomainBehavior import DomainBehavior
 
 import Container
 import DetachedFrame
