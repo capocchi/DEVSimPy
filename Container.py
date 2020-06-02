@@ -563,12 +563,12 @@ class Diagram(Savable, Structurable):
 			devs = diagram.getDEVSModel()
 			# si l'utilisateur n'a pas definit d'ordre de priorité pour l'activation des modèles, on la construit
 			for label1 in diagram.priority_list:
-				for m in devs.componentSet:
+				for m in devs.getComponentSet():
 					label2 = m.getBlockModel().label
 					if label1 == label2:
 						L.append(m)
 
-			devs.componentSet = L
+			devs.setComponentSet(L)
 
 		return diagram.getDEVSModel()
 
@@ -903,8 +903,8 @@ class Diagram(Savable, Structurable):
 			### update the devs componentSet
 			coupled_devs = self.getDEVSModel()
 			devs = shape.getDEVSModel()
-			if coupled_devs and devs in coupled_devs.componentSet:
-				coupled_devs.componentSet.remove(devs)
+			if coupled_devs and devs in coupled_devs.getComponentSet():
+				coupled_devs.delTocomponentSet([devs])
 
 		try:
 			### delete shape
@@ -1100,7 +1100,7 @@ class Diagram(Savable, Structurable):
 					sys.stdout.write(_("unsubscribe problem!"))
 					devs.finish(None)
 						
-			self.devsModel.componentSet = []
+			self.devsModel.setComponentSet([])
 
 			for m in self.GetShapeList():
 				m.setDEVSModel(None)

@@ -67,9 +67,43 @@ class DomainStructure(BaseDEVS.CoupledDEVS):
 	    """ get the list of composing submodels - recursive build
 	    """
 	    submodelList = {}
-	    for submodel in self.componentSet:
+	    for submodel in self.getComponentSet():
 	        submodelList.update(submodel.getFlatComponentSet())
 	    return submodelList
+
+	def getComponentSet(self)->list:
+		""" return the component set attribute depending on the definition finded in the DEVS.py file
+		"""
+		if hasattr(self, 'componentSet'):
+			return self.componentSet
+		elif hasattr(self, 'component_set'):
+			return self.component_set
+
+	def setComponentSet(self,V:list)->None:
+		""" set the component set attribute depending on the definition finded in the DEVS.py file
+		"""
+		if hasattr(self, 'componentSet'):
+			self.componentSet = V
+		elif hasattr(self, 'component_set'):
+			self.component_set = V
+
+	def addToComponentSet(self,V:list)->None:
+		""" add values in components set attribute
+		"""
+		if hasattr(self, 'componentSet'):
+			self.componentSet.extend(V)
+		elif hasattr(self, 'component_set'):
+			self.component_set.extend(V)
+
+	def delToCompnentsSet(self,V:list)->None:
+		""" del values in the components set attribute
+		"""
+		if hasattr(self, 'componentSet'):
+			for v in V:
+				self.componentSet.remove(v)
+		elif hasattr(self, 'component_set'):
+			for v in V:
+				self.component_set.remove(v)
 
 def main():
 	DS = DomainStructure()
