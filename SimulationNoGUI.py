@@ -108,11 +108,11 @@ def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True
             simuPusher = PrintPusher(simu_name)
         
         ### Get live stream URL if exist :
-        for m in [a for a in master.componentSet if hasattr(a, 'plotUrl')]:
+        for m in [a for a in master.getComponentSet() if hasattr(a, 'plotUrl')]:
             if m.plotUrl != '':
                 json_report['output'].append({'label':m.name, 'plotUrl':m.plotUrl})          
         ### Get live stream URL if exist :
-        for m in [a for a in master.componentSet if hasattr(a, 'pusherChannel')]:
+        for m in [a for a in master.getComponentSet() if hasattr(a, 'pusherChannel')]:
             m.pusherChannel = simu_name
             json_report['output'].append({'label':m.name, 'pusherChannel':m.pusherChannel}) 
         # Send to user 
@@ -162,13 +162,13 @@ def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True
     
     ### inform that data file has been generated
     json_report['output'] = []
-    for m in [a for a in master.componentSet if hasattr(a, 'fileName')]:
+    for m in [a for a in master.getComponentSet() if hasattr(a, 'fileName')]:
         for i in range(len(m.IPorts)):
             fn ='%s%s.dat'%(m.fileName,str(i))
             if os.path.exists(fn):
                 json_report['output'].append({'label':m.name+'_port_' + str(i),
                                               'filename':os.path.basename(fn)}) 
-    for m in [a for a in master.componentSet if hasattr(a, 'plotUrl')]:
+    for m in [a for a in master.getComponentSet() if hasattr(a, 'plotUrl')]:
         json_report['output'].append({'label':m.name, 'plotUrl':m.plotUrl}) 
             
     with open(simu_name+'.report', 'w') as f:
@@ -219,7 +219,7 @@ class runSimulation:
         # diagram.Clean()
         ################################################################################################################
         ######### To Do : refaire l'enregistrement du chemin d'enregistrements des resultats du to_disk ###################
-        for m in self.master.componentSet:
+        for m in self.master.getComponentSet():
             if str(m)=='To_Disk':
                 dir_fn = os.path.dirname(diagram.last_name_saved).replace('\t','').replace(' ','')
                 label = m.getBlockModel()

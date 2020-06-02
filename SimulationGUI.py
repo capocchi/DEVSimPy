@@ -446,7 +446,7 @@ class Base(object):
 				sys.stdout = mainW.stdioWin
 
 			### test si le modele et bien charge
-			if (self.current_master == None) or (self.current_master.componentSet == []):
+			if (self.current_master == None) or (self.current_master.getComponentSet() == []):
 				return self.MsgBoxEmptyModel()
 
 			### dont erase the gauge if ntl

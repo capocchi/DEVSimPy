@@ -39,13 +39,13 @@ class ExperimentGenerator:
         for ip in model.IPorts:
             self.modelPythonDescription[model].append(self.dec+'self.addInPort("%s")' % ip.myID)
 
-        for c in model.componentSet:
+        for c in model.getComponentSet():
             cname = c.__class__.__name__
             clabel = c.blockModel.label
             self.modelPythonDescription[model].append("")
 
             self.modelHierarchyDescription.append('#%s-> %s' % (self.hierarchyDescDec, clabel))
-            if not hasattr(c, "componentSet"):
+            if not ( hasattr(c, "componentSet") or hasattr(c, "component_set")):
                 self.modelPythonDescription[model].append(self.dec+'self.%s=self.addSubModel(%s.%s("%s"))' % (clabel, cname, cname, clabel) )
                 self.modulePathFile.append(c.blockModel.python_path)
                 if self.listModules.count(cname)==0:

@@ -37,23 +37,23 @@ import re
 import os
 
 ### import the DEVS module depending on the selected DEVS package in DEVSKernel directory
-for pydevs_dir in builtins.__dict__['DEVS_DIR_PATH_DICT']:
-    if pydevs_dir == builtins.__dict__['DEFAULT_DEVS_DIRNAME']:
-        path = builtins.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
-        ### split from DEVSKernel string and replace separator with point
-        d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
+#for pydevs_dir in builtins.__dict__['DEVS_DIR_PATH_DICT']:
+#    if pydevs_dir == builtins.__dict__['DEFAULT_DEVS_DIRNAME']:
+#        path = builtins.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
+#        ### split from DEVSKernel string and replace separator with point
+#        d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
 
-        ### for py 3.X
-        import importlib
-        BaseDEVS = importlib.import_module("DEVSKernel%s.DEVS"%d)
+#        ### for py 3.X
+#        import importlib
+#        BaseDEVS = importlib.import_module("DEVSKernel%s.DEVS"%d)
+#        
+#        #exec("import DEVSKernel%s.DEVS as BaseDEVS"%(d))
         
-        #exec("import DEVSKernel%s.DEVS as BaseDEVS"%(d))
-        
-#import DomainStructure
+import DomainInterface.DomainStructure
 
 ###    ======================================================================    #
-class Master(BaseDEVS.CoupledDEVS):
-#class Master(DomainStructure.DomainStructure):
+#class Master(BaseDEVS.CoupledDEVS):
+class Master(DomainInterface.DomainStructure):
 	""" Master class represent the high abstract level DEVS coupled model.
 	"""
 	FINAL_TIME = 10.0
@@ -62,19 +62,18 @@ class Master(BaseDEVS.CoupledDEVS):
 	def __init__(self, name=""):
 		"""	Constructor method.
 		"""
-#		DomainStructure.DomainStructure.__init__(self, name=name)
-		BaseDEVS.CoupledDEVS.__init__(self, name=name)
+		DomainInterface.DomainStructure.__init__(self, name=name)
+#		BaseDEVS.CoupledDEVS.__init__(self, name=name)
 
 		self.FINAL_TIME = Master.FINAL_TIME
 
-	def getFlatComponentSet(self):
-	    """ get the list of composing submodels - recursive build
-	    """
-	    submodelList = {}
-	    for submodel in self.componentSet:
-	        submodelList.update(submodel.getFlatComponentSet())
-	    return submodelList
-
+#	def getFlatComponentSet(self):
+#	    """ get the list of composing submodels - recursive build
+#	    """
+#	    submodelList = {}
+#	    for submodel in self.componentSet:
+#	        submodelList.update(submodel.getFlatComponentSet())
+#	    return submodelList
 
 	###
 	def __str__(self):
