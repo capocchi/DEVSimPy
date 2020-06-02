@@ -37,20 +37,26 @@ if __name__ == '__main__':
 
 import re
 import os
+import importlib
 
-### import the DEVS module depending on the selected DEVS package in DEVSKernel directory
-for pydevs_dir in builtins.__dict__['DEVS_DIR_PATH_DICT']:
-    if pydevs_dir == builtins.__dict__['DEFAULT_DEVS_DIRNAME']:
-        path = builtins.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
-        ### split from DEVSKernel string and replace separator with point
-        d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
+path = builtins.__dict__['DEVS_DIR_PATH_DICT'][builtins.__dict__['DEFAULT_DEVS_DIRNAME']]
+d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
+BaseDEVS = importlib.import_module("DEVSKernel%s.DEVS"%d)
+
+# ### import the DEVS module depending on the selected DEVS package in DEVSKernel directory
+# for pydevs_dir in builtins.__dict__['DEVS_DIR_PATH_DICT']:
+#     if pydevs_dir == builtins.__dict__['DEFAULT_DEVS_DIRNAME']:
+#         path = builtins.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
+#         ### split from DEVSKernel string and replace separator with point
+#         d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
         
-		### for py 3.X
-        import importlib
-        BaseDEVS = importlib.import_module("DEVSKernel%s.DEVS"%d)
+# 		### for py 3.X
+#         import importlib
+#         BaseDEVS = importlib.import_module("DEVSKernel%s.DEVS"%d)
         
-		### for py 2.X
-        #exec("import DEVSKernel%s.DEVS as BaseDEVS"%(d))
+# 		### for py 2.X
+#         #exec("import DEVSKernel%s.DEVS as BaseDEVS"%(d))
+
 
 #    ======================================================================    #
 class DomainBehavior(BaseDEVS.AtomicDEVS):

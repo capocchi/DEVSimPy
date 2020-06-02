@@ -368,7 +368,7 @@ class Diagram(Savable, Structurable):
 		#ReloadModule.recompile("DomainInterface.MasterModel")
 
 		### PyPDEVS work with this
-		#diagram.setDEVSModel(DomainInterface.MasterModel.Master())
+#		diagram.setDEVSModel(DomainInterface.MasterModel.Master())
 
 		### TODO to be tested with PyPDEVS !!!
 #		if isinstance(diagram.parent, ShapeCanvas):
@@ -1097,7 +1097,7 @@ class Diagram(Savable, Structurable):
 				try:
 					Publisher.unsubscribe(devs.finish, "%d.finished"%(id(devs)))
 				except:
-					sys.stdout.write(_("unsubscribe problem!"))
+					sys.stdout.write(_("Impossible to execute the finish method for the model %s!\n")%devs)
 					devs.finish(None)
 						
 			self.devsModel.setComponentSet([])

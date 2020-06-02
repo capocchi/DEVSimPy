@@ -28,6 +28,7 @@ import weakref
 import heapq
 import threading
 import inspect
+import importlib
 
 from PluginManager import PluginManager #trigger_event
 from Utilities import getOutDir
@@ -514,20 +515,13 @@ class SimStrategy4(SimStrategy):
 
 	def simulate(self, T = 100000000):
 		"""Simulate the model (Root-Coordinator).
-		"""
-
-		### for all available DEVS package (keys of built-in DEVS_DIR_PATH_DICT dictionary)
-		for pydevs_dir in builtins.__dict__['DEVS_DIR_PATH_DICT']:
-			### only the selected one
-			if pydevs_dir == builtins.__dict__['DEFAULT_DEVS_DIRNAME']:
-				path = builtins.__dict__['DEVS_DIR_PATH_DICT'][pydevs_dir]
-				## split from DEVSKernel string and replace separator with point
-				d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
-				import importlib
-				simulator = importlib.import_module("DEVSKernel%s.simulator"%d)
-				#exec("from DEVSKernel%s.simulator import Simulator"%d)
+		"""		
 				
-		
+		path = builtins.__dict__['DEVS_DIR_PATH_DICT'][builtins.__dict__['DEFAULT_DEVS_DIRNAME']]
+		d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
+		simulator = importlib.import_module("DEVSKernel%s.simulator"%d)
+		#exec("from DEVSKernel%s.simulator import Simulator"%d)
+
 		S = simulator.Simulator(self._simulator.model)
 
 		### old version of PyPDEVS
@@ -586,7 +580,7 @@ class SimStrategy4(SimStrategy):
 	def SetClassicDEVSOption(self):
 		return True
 
-class SimStrategy6(SimStrategy4):
+class SimStrategy5(SimStrategy4):
 	""" Parallel strategy for PyPDEVS simulation
 		setClassicDEVS is False and confTransition in enabled
 	"""
