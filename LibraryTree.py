@@ -450,7 +450,6 @@ class LibraryTree(wx.TreeCtrl):
 						else:
 							sys.stderr.write(_("%s not imported: Class is not DomainBehavior\n"%(s)))
 
-
 					### If cls is tuple, there is an error but we load the model to correct it.
 					### If its not DEVS model, the Dnd don't allows the instantiation and when the error is corrected, it don't appear before a update.
 					else:

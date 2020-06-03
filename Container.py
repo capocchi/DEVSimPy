@@ -363,12 +363,14 @@ class Diagram(Savable, Structurable):
 				4. we make the connection
 		"""
 
+		#import ReloadModule
 		#ReloadModule.recompile("DomainInterface.DomainBehavior")
 		#ReloadModule.recompile("DomainInterface.DomainStructure")
 		#ReloadModule.recompile("DomainInterface.MasterModel")
 
+		#import DomainInterface.MasterModel
 		### PyPDEVS work with this
-#		diagram.setDEVSModel(DomainInterface.MasterModel.Master())
+		#diagram.setDEVSModel(DomainInterface.MasterModel.Master())
 
 		### TODO to be tested with PyPDEVS !!!
 #		if isinstance(diagram.parent, ShapeCanvas):
