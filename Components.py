@@ -49,7 +49,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 import ZipManager
 
 from ReloadModule import recompile
-from Utilities import GetActiveWindow, path_to_module, printOnStatusBar
+from Utilities import GetActiveWindow, path_to_module, install_and_import, printOnStatusBar
 from NetManager import Net
 from SimpleFrameEditor import FrameEditor
 from which import which
@@ -188,9 +188,9 @@ class GenericComponent:
 		"""
 		# local copy
 		self._canvas = kwargs['canvas'] if 'id' in kwargs else None
-		self._x = kwargs['x'] if 'x' in kwargs else None
-		self._y = kwargs['y'] if 'y' in kwargs else None
-		self._label = kwargs['label'] if 'label' in kwargs else None
+		self._x = kwargs.get('x',None)
+		self._y = kwargs.get('y',None)
+		self._label = kwargs.get('label',None)
 
 		if 'id' in kwargs:
 			self._iid = kwargs['id']
@@ -209,12 +209,11 @@ class GenericComponent:
 		#self._iid = kwargs['id'] if 'id' in kwargs else self._canvas.diagram.GetiPortCount()
 		#self._oid = kwargs['id'] if 'id' in kwargs else self._canvas.diagram.GetoPortCount()
 
-		self._inputs = kwargs['inputs'] if 'inputs' in kwargs else 1
-		self._outputs = kwargs['outputs'] if 'outputs' in kwargs else 1
+		self._inputs = kwargs.get('inputs',1)
+		self._outputs = kwargs.get('outputs',1)
 		self._python_file = kwargs['python_file']
-		self._model_file = kwargs['model_file'] if 'model_file' in kwargs else ''
-		
-		self._specific_behavior = kwargs['specific_behavior'] if 'specific_behavior' in kwargs else ''
+		self._model_file = kwargs.get('model_file','')
+		self._specific_behavior = kwargs.get('specific_behavior','')
 
 	def Create(self):
 		""" Create component from attributes
