@@ -906,7 +906,7 @@ class Diagram(Savable, Structurable):
 			coupled_devs = self.getDEVSModel()
 			devs = shape.getDEVSModel()
 			if coupled_devs and devs in coupled_devs.getComponentSet():
-				coupled_devs.delTocomponentSet([devs])
+				coupled_devs.delToComponentSet([devs])
 
 		try:
 			### delete shape
