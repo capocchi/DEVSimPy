@@ -2059,6 +2059,7 @@ class BlockBase(object):
 			module_name = path_to_module(self.cb.python_path)
 
 		info = ReloadModule.recompile(module_name)
+
 		cp = self.nb.GetCurrentPage()
 		cp.error_flag = isinstance(info, Exception) or isinstance(info, str)
 

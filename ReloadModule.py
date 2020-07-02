@@ -69,9 +69,10 @@ def recompile(modulename):
 				except Exception as info:
 					sys.stdout.write(_('Error trying to reload dependencies in recompile module: %s\n')%info)
 				finally:
-					return importlib.reload(sys.modules[modulename])
+					### failed when modifycations are done in py file
+					#return importlib.reload(sys.modules[modulename])
 					
-					#return importlib.reload(tmp)
+					return importlib.reload(tmp)
 				
 def recompile2(modulename):
 	"""	recompile module from modulename

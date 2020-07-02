@@ -53,7 +53,7 @@ class To_Disk(QuickScope):
 		self.comma = comma
 		self.ext = ext
 		self.col = col
-
+		
 		#decimal precision
 		getcontext().prec = 6
 
