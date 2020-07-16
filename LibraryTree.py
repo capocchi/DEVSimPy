@@ -1138,7 +1138,7 @@ class LibraryTree(wx.TreeCtrl):
 			doc = inspect.getdoc(module)
 
 		### Add maccabe complexity measure
-		doc += "".join([_("\n\n MacCabe Complexity: %d")%elf.MetricDico[item]['mcc']])
+		doc += "".join([_("\n\n MacCabe Complexity: %d")%self.MetricDico[item]['mcc']])
 
 		if doc:
 			dlg = wx.lib.dialogs.ScrolledMessageDialog(self, doc, _("%s Documentation")%name, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)

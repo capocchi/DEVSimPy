@@ -45,7 +45,7 @@ def getPythonModelFileName(fn:str)->str:
 
 	#global Cmtp
 
-	assert(zipfile.is_zipfile(fn))
+	#assert(zipfile.is_zipfile(fn))
 
 	zf = zipfile.ZipFile(fn,'r')
 
@@ -88,15 +88,6 @@ class Zip:
 		"""
 		### local copy
 		self.fn = fn
-
-		### get module name
-		try:
-			self.module_name = getPythonModelFileName(fn)
-		except Exception as info:
-			sys.stderr.write(_("Error in ZipManager class for GetModule: no python file in the archive\n"))
-
-		### 
-		self.fullname = "".join([os.path.basename(os.path.dirname(self.fn)), self.module_name.split('.py')[0]])
 
 		if files != []:
 			self.Create(files)
@@ -310,8 +301,9 @@ class Zip:
 		#if rcp: recompile(module_name)
 	
 		PluginManager.trigger_event("IMPORT_STRATEGIES", fn=self.fn)
-		
-		return self.ImportModule() if self.fullname not in sys.modules else sys.modules[self.fullname]
+		fullname = "".join([os.path.basename(os.path.dirname(self.fn)), getPythonModelFileName(self.fn).split('.py')[0]])
+
+		return self.ImportModule() if fullname not in sys.modules else sys.modules[fullname]
 
 	def ImportModule(self)->types.ModuleType:
 		""" Import module from zip file corresponding to the amd or cmd model.
@@ -323,9 +315,10 @@ class Zip:
 			sys.path.append(p)
 
 		importer = zipimport.zipimporter(self.fn)
+		module_name = getPythonModelFileName(self.fn)
 
-		try:
-			module = importer.load_module(self.module_name.split('.py')[0])
+		try:	
+			module = importer.load_module(module_name.split('.py')[0])
 
 		### package is needed by the self.module_name (dependency)
 		except ModuleNotFoundError as info:
@@ -333,11 +326,11 @@ class Zip:
 			package = sys.exc_info()[1].name
 
 			import wx
-			dial = wx.MessageDialog(None, _('%s package is needed by %s.\nDo you want to install it?')%(package,self.module_name), _('Required package'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+			dial = wx.MessageDialog(None, _('%s package is needed by %s.\nDo you want to install it?')%(package,module_name), _('Required package'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 			if dial.ShowModal() == wx.ID_YES:
 				### try to install
 				if install_and_import(package):
-					module = importer.load_module(self.module_name.split('.py')[0])
+					module = importer.load_module(module_name.split('.py')[0])
 				else:
 					module = None
 			else:
@@ -346,12 +339,13 @@ class Zip:
 			dial.Destroy()
 		finally:
 			if module:
-				module.__name__ = path_to_module(self.module_name)
+				module.__name__ = path_to_module(module_name)
 				
 				### allows to import with a reference from the parent directory (like parentName.model).
 				### Now import of .amd or .cmd module is composed by DomainModel (no point!).
-				### Example : import CollectorMessageCollector 
-				sys.modules[self.fullname] = module
+				### Example : import CollectorMessageCollector
+				fullname = "".join([os.path.basename(os.path.dirname(self.fn)), getPythonModelFileName(self.fn).split('.py')[0]]) 
+				sys.modules[fullname] = module
 
 				return module
 			else:
@@ -366,7 +360,8 @@ class Zip:
 #		try:
 
 		### reload submodule from module dependencies!
-		module = sys.modules[self.fullname]
+		fullname = "".join([os.path.basename(os.path.dirname(self.fn)), getPythonModelFileName(self.fn).split('.py')[0]])
+		module = sys.modules[fullname]
 		domain_name = os.path.basename(os.path.dirname(self.fn))
 		for name in dir(module):
 			if type(getattr(module, name)) == types.ModuleType:

@@ -3871,7 +3871,7 @@ class ContainerBlock(Block, Diagram):
 		Block.__init__(self, label, nb_inputs, nb_outputs)
 		Diagram.__init__(self)
 		#Structurable.__init__(self)
-		self.fill = Container.FILL
+		self.fill = ContainerBlock.FILL
 
 	###
 	def __setstate__(self, state):
