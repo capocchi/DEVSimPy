@@ -742,7 +742,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 				### display the data path on tooltip
 				if self.GetCellValue(row, 1).endswith(('csv','dat','txt')):
 					if col == 1:
-						hinttext = self.parent.model.args['fileName'] 
+						hinttext = self.parent.model.args.get('fileName',None) or self.parent.model.args.get('filename',None) or self.parent.model.args.get('FileName',None)
 				elif hinttext is None:
 					hinttext = ''
 

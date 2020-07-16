@@ -179,8 +179,8 @@ class DumpZipFile(DumpBase):
 							protocol = 0)
 
 		except Exception as info:
-
-			sys.stderr.write(_("Problem saving (during the dump): %s -- %s\n")%(str(fileName),info))
+			tb = traceback.format_exc()
+			sys.stderr.write(_("Problem saving (during the dump): %s -- %s\n")%(str(fileName),str(tb)))
 			return False
 		else:
 
@@ -214,8 +214,10 @@ class DumpZipFile(DumpBase):
 				mainW.tree.SortChildren(mainW.tree.root)
 
 			except Exception as info:
-				NotificationMessage(_('Error'), _("Problem saving (during the zip handling): %s -- %s\n")%(str(fileName),info), parent=self, timeout=5)
-				sys.stderr.write(_("Problem saving (during the zip handling): %s -- %s\n")%(str(fileName),info))
+				tb = traceback.format_exc()
+				NotificationMessage(_('Error'), _("Problem saving (during the zip handling): %s -- %s\n")%(str(fileName),info), parent=getTopLevelWindow(), timeout=5)
+				sys.stderr.write(_("Problem saving (during the zip handling): %s -- %s\n")%(str(fileName),str(tb)))
+
 				return False
 			else:
 
@@ -232,10 +234,12 @@ class DumpZipFile(DumpBase):
 			data_file = 'DEVSimPyModel.dat'
 			path = zf.extract(data_file, gettempdir())
 		except KeyError as info:
-			sys.stderr.write(_("ERROR: Did not %s find in zip file %s --\n%s \n")%(data_file, str(fileName), info))
+			tb = traceback.format_exc()
+			sys.stderr.write(_("ERROR: Did not %s find in zip file %s --\n%s \n")%(data_file, str(fileName), str(tb)))
 			return info
 		except Exception as info:
-			sys.stderr.write(_("Problem extracting: %s -- %s \n")%(str(fileName),info))
+			tb = traceback.format_exc()
+			sys.stderr.write(_("Problem extracting: %s -- %s \n")%(str(fileName),str(tb)))
 			return info
 		finally:
 			zf.close()
@@ -252,7 +256,8 @@ class DumpZipFile(DumpBase):
 			L = pickle.load(f)
 			f.close()
 		except Exception as info:
-			sys.stderr.write(_("Problem loading: %s -- %s \n")%(str(fileName), info))
+			tb = traceback.format_exc()
+			sys.stderr.write(_("Problem loading: %s -- %s \n")%(str(fileName), str(tb)))
 			return info
 	
 		### Check comparison between serialized attribut (L) and normal attribut (dump_attributes)
@@ -301,7 +306,8 @@ class DumpZipFile(DumpBase):
 				
 
 		except IndexError as info:
-			sys.stderr.write(_("Problem loading (old model): %s -- %s \n")%(str(fileName), info))
+			tb = traceback.format_exc()
+			sys.stderr.write(_("Problem loading (old model): %s -- %s \n")%(str(fileName), str(tb)))
 			return info
 
 		
@@ -332,7 +338,8 @@ class DumpZipFile(DumpBase):
 					try:
 						module = importer.load_module('plugins')
 					except ImportError as info:
-						sys.stdout.write("%s\n"%info)
+						tb = traceback.format_exc()
+						sys.stdout.write("%s\n"%str(tb))
 						return info
 
 					for m in [e for e in [module.__dict__.get(a) for a in dir(module)] if not inspect.ismodule(e) and inspect.getmodule(e) is module]:
@@ -349,7 +356,8 @@ class DumpZipFile(DumpBase):
 									pass
 
 							except Exception as info:
-								sys.stdout.write(_('plugins %s not loaded : %s\n'%(name,info)))
+								tb = traceback.format_exc()
+								sys.stdout.write(_('plugins %s not loaded : %s\n'%(name,str(tb))))
 								return info
 
 		### restor method which was assigned to None before being pickled
@@ -382,7 +390,8 @@ class DumpGZipFile(DumpBase):
 							protocol = 0)
 
 		except Exception as info:
-			sys.stderr.write(_("\nProblem saving: %s -- %s\n")%(str(fileName),info))
+			tb = traceback.format_exc()
+			sys.stderr.write(_("\nProblem saving: %s -- %s\n")%(str(fileName),str(tb)))
 			return False
 		else:
 			return True
@@ -400,7 +409,6 @@ class DumpGZipFile(DumpBase):
 		except Exception as info:
 			exc_type, exc_obj, exc_tb = sys.exc_info()
 			fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-
 			sys.stderr.write(_("Problem opening: %s -- description: %s / type: %s / name: %s / line: %s\n")%(str(fileName), info, exc_type, fname, exc_tb.tb_lineno))
 			return info
 
@@ -409,7 +417,8 @@ class DumpGZipFile(DumpBase):
 			try:
 				dsp = pickle.load(f)
 			except Exception as info:
-				sys.stderr.write(_("Problem loading: %s -- %s\n")%(str(fileName), info))
+				tb = traceback.format_exc()
+				sys.stderr.write(_("Problem loading: %s -- %s\n")%(str(fileName), str(tb)))
 				return info
 			finally:
 				f.close()
@@ -450,7 +459,8 @@ class DumpYAMLFile(DumpBase):
 			with open(fileName, 'w') as yf:
 				ruamel.yaml.dump(PickledCollection(obj_dumped), stream=yf, default_flow_style=False) 
 		except Exception as info:
-			sys.stderr.write(_("\nProblem saving: %s -- %s\n")%(str(fileName),info))
+			tb = traceback.format_exc()
+			sys.stderr.write(_("\nProblem saving: %s -- %s\n")%(str(fileName),str(tb)))
 			return False
 		else:
 			return True
@@ -469,7 +479,6 @@ class DumpYAMLFile(DumpBase):
 		except Exception as info:
 			exc_type, exc_obj, exc_tb = sys.exc_info()
 			fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-
 			sys.stderr.write(_("Problem opening: %s -- description: %s / type: %s / name: %s / line: %s\n")%(str(fileName), info, exc_type, fname, exc_tb.tb_lineno))
 			sys.stderr.write(traceback.format_exc())
 			return info
@@ -519,16 +528,10 @@ class DumpXMLFile(DumpBase):
 
 		diagram = obj_dumped
 		D = diagram.__class__.makeDEVSGraph(diagram, {})
-
-		if isinstance(diagram, Components.GenericComponent):
-			label = diagram.label
-		else:
-			label = os.path.splitext(os.path.basename(fileName))[0]
-
+		label = diagram.label if isinstance(diagram, Components.GenericComponent) else os.path.splitext(os.path.basename(fileName))[0]
 		makeDEVSXML(label, D, fileName)
 
 		return True
-
 
 ###-----------------------------------------------------------
 class Savable(object):

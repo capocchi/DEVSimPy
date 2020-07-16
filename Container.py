@@ -363,12 +363,14 @@ class Diagram(Savable, Structurable):
 				4. we make the connection
 		"""
 
+		#import ReloadModule
 		#ReloadModule.recompile("DomainInterface.DomainBehavior")
 		#ReloadModule.recompile("DomainInterface.DomainStructure")
 		#ReloadModule.recompile("DomainInterface.MasterModel")
 
+		#import DomainInterface.MasterModel
 		### PyPDEVS work with this
-#		diagram.setDEVSModel(DomainInterface.MasterModel.Master())
+		#diagram.setDEVSModel(DomainInterface.MasterModel.Master())
 
 		### TODO to be tested with PyPDEVS !!!
 #		if isinstance(diagram.parent, ShapeCanvas):
@@ -904,7 +906,7 @@ class Diagram(Savable, Structurable):
 			coupled_devs = self.getDEVSModel()
 			devs = shape.getDEVSModel()
 			if coupled_devs and devs in coupled_devs.getComponentSet():
-				coupled_devs.delTocomponentSet([devs])
+				coupled_devs.delToComponentSet([devs])
 
 		try:
 			### delete shape
@@ -3869,7 +3871,7 @@ class ContainerBlock(Block, Diagram):
 		Block.__init__(self, label, nb_inputs, nb_outputs)
 		Diagram.__init__(self)
 		#Structurable.__init__(self)
-		self.fill = Container.FILL
+		self.fill = ContainerBlock.FILL
 
 	###
 	def __setstate__(self, state):

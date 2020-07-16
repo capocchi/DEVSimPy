@@ -983,7 +983,11 @@ class EditionNotebook(wx.Notebook):
 			zf.Update(replace_files=[fic_filename])
 
 			### Clean up the temporary file yourself
-			os.remove(fic_filename)
+			try:
+				os.remove(fic_filename)
+			except Exception as info:
+				sys.exc_info()
+				sys.stderr.write(_('File has not been deleted: %s'%info))
 
 			### reload module only if zipped python file is not plugins
 			### update only for python file of model which have path like .../name.amd(.cmd)/name.ext
@@ -2055,6 +2059,7 @@ class BlockBase(object):
 			module_name = path_to_module(self.cb.python_path)
 
 		info = ReloadModule.recompile(module_name)
+
 		cp = self.nb.GetCurrentPage()
 		cp.error_flag = isinstance(info, Exception) or isinstance(info, str)
 

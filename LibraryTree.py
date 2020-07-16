@@ -450,7 +450,6 @@ class LibraryTree(wx.TreeCtrl):
 						else:
 							sys.stderr.write(_("%s not imported: Class is not DomainBehavior\n"%(s)))
 
-
 					### If cls is tuple, there is an error but we load the model to correct it.
 					### If its not DEVS model, the Dnd don't allows the instantiation and when the error is corrected, it don't appear before a update.
 					else:
@@ -1139,7 +1138,7 @@ class LibraryTree(wx.TreeCtrl):
 			doc = inspect.getdoc(module)
 
 		### Add maccabe complexity measure
-		doc += "".join([_("\n\n MacCabe Complexity: %d")%elf.MetricDico[item]['mcc']])
+		doc += "".join([_("\n\n MacCabe Complexity: %d")%self.MetricDico[item]['mcc']])
 
 		if doc:
 			dlg = wx.lib.dialogs.ScrolledMessageDialog(self, doc, _("%s Documentation")%name, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)

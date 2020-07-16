@@ -89,7 +89,7 @@ class DomainStructure(BaseDEVS.CoupledDEVS):
 		elif hasattr(self, 'component_set'):
 			self.component_set.extend(V)
 
-	def delToCompnentsSet(self,V:list)->None:
+	def delToComponentSet(self,V:list)->None:
 		""" del values in the components set attribute
 		"""
 		if hasattr(self, 'componentSet'):

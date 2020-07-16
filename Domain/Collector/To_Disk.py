@@ -18,6 +18,19 @@ import random
 from decimal import *
 import os
 
+def append_new_line(file_name, text_to_append):
+	"""Append given text as a new line at the end of file"""
+	# Open the file in append & read mode ('a+')
+	with open(file_name, "a+") as file_object:
+		# Move read cursor to the start of file.
+		file_object.seek(0)
+		# If file is not empty then append '\n'
+		data = file_object.read(100)
+		if len(data) > 0:
+			file_object.write("\n")
+		# Append text at the end of file
+		file_object.write(text_to_append)
+
 #  ================================================================    #
 class To_Disk(QuickScope):
 	"""	Atomic Model writing on the disk.
@@ -40,7 +53,7 @@ class To_Disk(QuickScope):
 		self.comma = comma
 		self.ext = ext
 		self.col = col
-
+		
 		#decimal precision
 		getcontext().prec = 6
 
@@ -114,9 +127,11 @@ class To_Disk(QuickScope):
 				else:
 					v = val
 				
+			
 				if t != self.last_time_value[fn]:
-					with open(fn, 'a') as f:
-						f.write("%s%s%s\n"%(self.last_time_value[fn],self.comma,self.buffer[fn]))
+					append_new_line(fn,"%s%s%s"%(self.last_time_value[fn],self.comma,self.buffer[fn]))
+					#with open(fn, 'a') as f:
+					#	f.write("%s%s%s\n"%(self.last_time_value[fn],self.comma,self.buffer[fn]))
 					self.last_time_value[fn] = t
 				
 				self.buffer[fn] = v
@@ -146,7 +161,9 @@ class To_Disk(QuickScope):
 		for np in range(n):
 			fn = "%s%d%s"%(self.fileName, np, self.ext)
 			if (fn in self.last_time_value) and (fn in self.buffer):
-				with open(fn, 'a') as f:
-					f.write("%s%s%s\n"%(self.last_time_value[fn],self.comma,self.buffer[fn]))
+				append_new_line(fn,"%s%s%s"%(self.last_time_value[fn],self.comma,self.buffer[fn]))
+#				with open(fn, 'a') as f:
+#					f.write("%s%s%s\n"%(self.last_time_value[fn],self.comma,self.buffer[fn]))
+
 	###
 	def __str__(self):return "To_Disk"
