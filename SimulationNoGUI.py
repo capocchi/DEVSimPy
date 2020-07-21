@@ -192,7 +192,7 @@ class runSimulation:
         # simulator strategy
         self.selected_strategy = DEFAULT_SIM_STRATEGY
         self.dynamic_structure_flag = __builtin__.__dict__['DYNAMIC_STRUCTURE']
-         self.real_time_flag = __builtin__.__dict__['REAL_TIME']
+        self.real_time_flag = __builtin__.__dict__['REAL_TIME']
          
         ### profiling simulation with hotshot
         self.prof = False

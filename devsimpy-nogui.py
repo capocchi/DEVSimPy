@@ -34,7 +34,7 @@ __version__ = '2.9'
 
 ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 
-### specific builtin variables. (dont modify the defautls value. If you want to change it, go tot the PreferencesGUI from devsimpy interface.)
+### specific built-in variables. (don't modify the default value. If you want to change it, go to the PreferencesGUI from devsimpy interface.)
 builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'),
 				'DEVSIMPY_PNG': 'iconDEVSimPy.png',	# png file for devsimpy icon
 				'HOME_PATH': ABS_HOME_PATH,
@@ -55,15 +55,16 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
                 'PYPDEVS_SIM_STRATEGY_DICT' : {'classic':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}, # list of available simulation strategy for PyPDEVS package
 				'HELP_PATH' : os.path.join('doc', 'html'), # path of help directory
 				'NTL' : False, # No Time Limit for the simulation
-				'DYNAMIC_STRUCTURE' : False, #Dynamic structure for PyPDEVS simulation
+				'DYNAMIC_STRUCTURE' : False, # Dynamic Structure for local PyPDEVS simulation
+				'REAL_TIME': False, ### PyPDEVS threaded real time simulation
+				'VERBOSE':False,
 				'TRANSPARENCY' : True, # Transparancy for DetachedFrame
 				'DEFAULT_PLOT_DYN_FREQ' : 100, # frequence of dynamic plot of QuickScope (to avoid overhead),
 				'DEFAULT_DEVS_DIRNAME':'PyDEVS', # default DEVS Kernel directory
 				'DEVS_DIR_PATH_DICT':{'PyDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyDEVS'),
 									'PyPDEVS_221':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs221' ,'src'),
 									'PyPDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','old')},
-				'GUI_FLAG' : True,
-				'INFINITY' : float('inf')
+				'GUI_FLAG':True
 				}
 
 builtin_dict['GUI_FLAG'] = False

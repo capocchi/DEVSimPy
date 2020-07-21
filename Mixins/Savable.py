@@ -22,6 +22,7 @@ import inspect
 import __builtin__
 import gettext
 #import wx
+import traceback
 
 _ = gettext.gettext
 
@@ -419,6 +420,7 @@ class DumpYAMLFile(DumpBase):
 			f.close()
 
 		except Exception, info:
+			traceback.print_exc()
 			sys.stderr.write(_("Problem opening: %s -- %s\n")%(str(fileName), info))
 			return info
 

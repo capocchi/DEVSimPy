@@ -1,0 +1,1 @@
+{"success": false, "summary": "Simulation in batch mode with PyDEVS...DEVS instance created...Performing DEVS simulation *** EXCEPTION raised in simulation ***...DEVS simulation completed!", "duration": 0.0, "mode": "no-gui", "time": 10.0, "date": "06/29/20 11:09:00", "output": [], "devs_instance": "Master"}
