@@ -45,7 +45,7 @@ def getPythonModelFileName(fn:str)->str:
 
 	#global Cmtp
 
-	#assert(zipfile.is_zipfile(fn))
+	assert(zipfile.is_zipfile(fn))
 
 	zf = zipfile.ZipFile(fn,'r')
 
@@ -140,6 +140,8 @@ class Zip:
 			if zipfile.is_zipfile(dir_name):
 				z = zipfile.ZipFile(dir_name, 'r')
 				data = z.read(base_name)
+				z.close()
+				
 				### if zip file contain image file we can not encode it.
 				try:
 					zout.writestr(base_name, data)
@@ -147,8 +149,6 @@ class Zip:
 					zout.writestr(base_name, data)
 				else:
 					sys.stdout.write("%s not rewrite\n"%(fn))
-					
-				z.close()
 				
 				#sys.stdout.write("update %s from compressed %s\n"%(base_name, fn))
 			elif os.path.exists(fn):
