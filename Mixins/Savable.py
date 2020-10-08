@@ -69,6 +69,7 @@ class PickledCollection(list):
 		""" Constructor
 		"""
 		self.obj = obj
+
 		self.pickled_obj = [getattr(self.obj, attr) for attr in self.obj.dump_attributes]
 
 		#=======================================================================
@@ -263,16 +264,15 @@ class DumpZipFile(DumpBase):
 		### Check comparison between serialized attribut (L) and normal attribut (dump_attributes)
 		### for model build with a version of devsimpy <= 2.5
 		### font checking
-		#if wx.VERSION_STRING >= '4.0': wx.FONTFAMILY_SWISS = wx.SWISS
 		if len(obj_loaded.dump_attributes) != len(L):
 			if fileName.endswith(DumpZipFile.ext[-1]):
 				if not isinstance(L[9], list):
 					import wx
-					L.insert(9, [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, 'Arial'])
+					L.insert(9, [FONT_SIZE, 74, 93, 700, 'Arial'])
 			else:
 				if not isinstance(L[6], list):
 					import wx
-					L.insert(6, [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, 'Arial'])
+					L.insert(6, [FONT_SIZE, 74, 93, 700, 'Arial'])
 
 
 		### label_pos checking

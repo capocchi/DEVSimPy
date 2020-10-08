@@ -59,6 +59,7 @@ class SimuPusher():
         self.app_id = '178867'
         self.key    = 'c2d255356f53779e6020'
         self.secret = '9d41a54d45d25274df63'
+
         self.pusher = pusher.Pusher(app_id=self.app_id,key=self.key,secret=self.secret,ssl=True,port=443)
         self.channel = simu_name
     

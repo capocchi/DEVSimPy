@@ -44,7 +44,6 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 	if wx.VERSION_STRING >= '4.0':
 		wx.StockCursor = wx.Cursor
-		wx.FONTFAMILY_SWISS = wx.SWISS
 else:
 	import gettext
 	_ = gettext.gettext
@@ -1210,7 +1209,7 @@ class Shape(ShapeEvtHandler):
 		self.y = array.array('d',y)                      # list of y coords
 		self.fill= Shape.FILL          # fill color
 		self.pen = [self.fill[0] , 1, wx.SOLID]   # pen color and size
-		self.font = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
+		self.font = [FONT_SIZE, 74, 93, 700, u'Arial']
 
 	def draw(self, dc):
 		""" Draw method
@@ -1249,7 +1248,7 @@ class Shape(ShapeEvtHandler):
 			try:
 				dc.SetFont(wx.Font(10, self.font[1], self.font[2], self.font[3], False, self.font[4]))
 			except Exception:
-				dc.SetFont(wx.Font(10, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, False, u'Arial'))
+				dc.SetFont(wx.Font(10, 74, 93, 700, False, u'Arial'))
 
 	def move(self,x,y):
 		""" Move method
@@ -3216,7 +3215,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 
 		####################################" Just for old model
 		if 'touch_list' not in state: state['touch_list'] = []
-		if 'font' not in state: state['font'] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
+		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
 		##############################################
 
 		self.__dict__.update(state)
@@ -3733,12 +3732,14 @@ class CodeBlock(Achievable, Block):
 						fn = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(fn[fn.index(dir_name):]).strip('[]')))
 					### try to find the filename in the recent opened recent file directory or exported lib diretory
 					else:
-						if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
-							for a in [os.path.dirname(p) for p in mainW.exportPathsList+mainW.openFileList]:
-								path = os.path.join(a,fn_bn)
-								if os.path.exists(path):
-									fn = path
-									break
+						### for no-gui compatibility
+						if builtins.__dict__.get('GUI_FLAG',True):
+							if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
+								for a in [os.path.dirname(p) for p in mainW.exportPathsList+mainW.openFileList]:
+									path = os.path.join(a,fn_bn)
+									if os.path.exists(path):
+										fn = path
+										break
 					
 					### show flag icon on the block only for the file with extension (input file)
 					if not os.path.exists(fn) and os.path.splitext(fn)[-1] != '':
@@ -3752,7 +3753,7 @@ class CodeBlock(Achievable, Block):
 		if 'image_path' not in state:
 			state['image_path'] = ""
 			state['attributes'].insert(3,'image_path')
-		if 'font' not in state: state['font'] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
+		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
 		if 'font' not in state['attributes']: state['attributes'].insert(3,'font')
 		if 'selected' not in state: state['selected'] = False
 		if 'label_pos' not in state: state['label_pos'] = 'center'
@@ -3954,7 +3955,7 @@ class ContainerBlock(Block, Diagram):
 		if 'image_path' not in state:
 			state['image_path'] = ""
 			state['attributes'].insert(3,'image_path')
-		if 'font' not in state: state['font'] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
+		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
 		if 'font' not in state['attributes']: state['attributes'].insert(3,'font')
 		if 'selected' not in state: state['selected'] = False
 		if 'label_pos' not in state:state['label_pos'] = 'center'
@@ -4325,7 +4326,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 
 		####################################" Just for old model
 		if 'r' not in state: state['r'] = 30.0
-		if 'font' not in state: state['font'] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
+		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
 		if 'label_pos' not in state:
 			state['label_pos'] = 'center'
 			state['attributes'].insert(1,'label_pos')

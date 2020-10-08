@@ -501,6 +501,7 @@ class MainApplication(wx.Frame):
 		self.locale.Init(langid)
 		self.locale.AddCatalogLookupPathPrefix(localedir)
 		self.locale.AddCatalog(domain)
+	
 
 		# language config from .devsimpy file
 		if self.language == 'en':
