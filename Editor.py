@@ -1540,9 +1540,9 @@ class Base(object):
 		currentPage = self.nb.GetCurrentPage()
 		currentPage.GotoPos(self.pos)
 		
-		currentPage.StartStyling(highlight_start_pos, 0xff)
+		currentPage.StartStyling(highlight_start_pos)
 		currentPage.SetStyling(highlight_end_pos - highlight_start_pos, stc.STC_P_COMMENTLINE)
-		currentPage.StartStyling(highlight_end_pos, 0x00)
+		currentPage.StartStyling(highlight_end_pos)
 		currentPage.SetStyling(len(self.txt) - highlight_end_pos, stc.STC_STYLE_DEFAULT)
 
 	def OnSaveAsFile(self, event):

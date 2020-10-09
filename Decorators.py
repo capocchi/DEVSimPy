@@ -104,10 +104,12 @@ def BuzyCursorNotification(f):
 	""" Decorator which give the buzy cursor for long process
 	"""
 	def wrapper(*args):
-			wait = wx.BusyCursor()
-			#wx.SafeYield()
+			if builtins.__dict__.get('GUI_FLAG',True):
+				wait = wx.BusyCursor()
+				#wx.SafeYield()
 			r =  f(*args)
-			del wait
+			if builtins.__dict__.get('GUI_FLAG',True):
+				del wait
 			return r
 	return wrapper
 

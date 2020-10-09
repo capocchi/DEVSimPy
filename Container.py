@@ -3724,7 +3724,6 @@ class CodeBlock(Achievable, Block):
 				if not os.path.exists(fn):
 					#fn_dn = os.path.dirname(fn)
 					fn_bn = os.path.basename(relpath(fn))
-					mainW = wx.GetApp().GetTopWindow()
 		
 					### try to redefi[ne the path
 					### if Domain is in the path
@@ -3734,6 +3733,7 @@ class CodeBlock(Achievable, Block):
 					else:
 						### for no-gui compatibility
 						if builtins.__dict__.get('GUI_FLAG',True):
+							mainW = wx.GetApp().GetTopWindow()
 							if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
 								for a in [os.path.dirname(p) for p in mainW.exportPathsList+mainW.openFileList]:
 									path = os.path.join(a,fn_bn)
