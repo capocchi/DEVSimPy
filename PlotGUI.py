@@ -271,7 +271,7 @@ class PlotFrame(wx.Frame):
 			#make up dict with info for the pointLabel
 			#I've decided to mark the closest point on the closest curve
 			dlst= self.client.GetClosestPoint(self.client._getXY(event), pointScaled= True)
-			if dlst != []:    #returns [] if none
+			if dlst:    #returns [] if none
 				curveNum, legend, pIndex, pointXY, scaledXY, distance = dlst
 				#make up dictionary to pass to my user function (see DrawPointLabel)
 				mDataDict = {"curveNum":curveNum, "legend":legend, "pIndex":pIndex, "pointXY":pointXY, "scaledXY":scaledXY}

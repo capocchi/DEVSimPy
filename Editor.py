@@ -836,7 +836,7 @@ class EditionNotebook(wx.Notebook):
 		### FIXME: try to consider zipfile in zipfile
 		L = re.findall("(.*\.(amd|cmd))\%s(.*)" % os.sep, path)
 
-		if L != []:
+		if L:
 			model_path, ext, name = L.pop(0)
 			if zipfile.is_zipfile(model_path):
 				importer = zipfile.ZipFile(model_path, "r")
@@ -1857,7 +1857,7 @@ class BlockBase(object):
 		else:
 			sys.stdout.write(_("function not implemented"))
 
-		if sins != []:
+		if sins:
 			dlg = wx.SingleChoiceDialog(self, _('Port number'), _(' %s on which port?')%label, sins, wx.CHOICEDLG_STYLE)
 			if dlg.ShowModal() == wx.ID_OK:
 				port = dlg.GetStringSelection()

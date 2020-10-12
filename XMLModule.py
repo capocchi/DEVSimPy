@@ -243,7 +243,7 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 			sys.stdout.write(_('Element not considered!\n'))
 
 	### make connection
-	while(connectionlist != []):
+	while(connectionlist):
 		s = connectionlist[0]
 
 		source_id = s.attributes['target'].value
@@ -261,7 +261,7 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 				a,b = canvas.GetNodeLists(target,source)
 			canvas.sourceNodeList, canvas.targetNodeList = a,b
 			
-			if canvas.sourceNodeList != [] and canvas.targetNodeList !=[]:
+			if canvas.sourceNodeList and canvas.targetNodeList:
 				canvas.makeConnectionShape(canvas.sourceNodeList[0], canvas.targetNodeList[0])
 
 		del connectionlist[0]
@@ -446,7 +446,7 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 		blocks = canvas.diagram.GetFlatBlockShapeList()
 
 		### make connection
-		while(connectionlist != []):
+		while(connectionlist):
     		
 			### take the first connection object (deleted at the end of while)
 			s = connectionlist[0]

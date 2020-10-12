@@ -293,7 +293,7 @@ class GeneralPluginsList(CheckListCtrl):
 					sys.path.append(root)
 
 				### dirs must contain python file
-				if files != []:
+				if files:
 					for filename in [f for f in files if f == "__init__.py"]:
 						path = os.path.join(root, filename)
 						L = getPYFileListFromInit(path,'.py')+getPYFileListFromInit(path,'.pyc')

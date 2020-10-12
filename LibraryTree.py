@@ -172,9 +172,9 @@ class LibraryTree(wx.TreeCtrl):
 				model_list = self.GetModelList(path)
 				domain_list = self.GetDomainList(path)
 
-				tip = '\n'.join(model_list) if model_list != [] else ""
+				tip = '\n'.join(model_list) if model_list else ""
 				tip += '\n'
-				tip += '\n'.join(domain_list) if domain_list != [] else ""
+				tip += '\n'.join(domain_list) if domain_list else ""
 
 			### is last item
 			else:
@@ -803,7 +803,7 @@ class LibraryTree(wx.TreeCtrl):
 				pass
 
 			### managment of the recursion
-			if D != []:
+			if D:
 				self.InsertNewDomain(dName, parent, D)
 			
 			try:
@@ -941,7 +941,7 @@ class LibraryTree(wx.TreeCtrl):
 			for d in list(self.GetSubDomain(dName, self.GetDomainList(dName)).values())[0]:
 				if isinstance(d, dict):
 					name_list =  list(d.values())[0]
-					if name_list != []:
+					if name_list:
 						for name in [a for a in name_list if not isinstance(a, dict)]:
 							path = list(d.keys())[0]
 							if not name.endswith(('.cmd','.amd')):

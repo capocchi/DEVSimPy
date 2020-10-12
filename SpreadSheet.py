@@ -196,7 +196,7 @@ class Newt(wx.Frame):
 			fn = "%s%d.dat"%(self.model.fileName, i)
 			if os.path.exists(fn):
 				iPort = self.model.IPorts[i]
-				if iPort.inLine != []:
+				if iPort.inLine:
 					oPort = iPort.inLine[0]
 					host = oPort.host if hasattr(oPort, 'host') else oPort.hostDEVS
 					label = _('%s (on in_%s)')%(host.getBlockModel().label if hasattr(host, 'getBlockModel') else host.name, str(iPort.myID) if hasattr(iPort,'myID') else iPort.name)
@@ -438,7 +438,7 @@ class Newt(wx.Frame):
 					wx.MessageBox(_('Type of data should be float or int : %s')%str(value), _('Info'))
 					break
 					
-		if data != []:
+		if data:
 			frame = StaticPlot(self, wx.NewIdRef(), title, data)
 			frame.Center()
 			frame.Show()

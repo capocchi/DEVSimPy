@@ -311,7 +311,7 @@ class SendMailWx(wx.Frame):
             msg['Date']    = formatdate(localtime=True)
             msg.attach( MIMEText(text) )
 
-            if self.filepaths != []:
+            if self.filepaths:
                 print('attaching file(s)...')
                 for path in self.filepaths:
                     part = MIMEBase('application', "octet-stream")

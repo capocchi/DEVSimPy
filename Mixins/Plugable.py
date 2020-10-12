@@ -73,7 +73,7 @@ class Plugable:
 		"""
 
 		### if list of activated plug-ins is not empty
-		if self.plugins != []:
+		if self.plugins:
 			module = Plugable.Load_Module(fileName)
 
 			if inspect.ismodule(module):

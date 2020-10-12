@@ -559,7 +559,7 @@ class Diagram(Savable, Structurable):
 		diagram.updateDEVSPriorityList()
 
 		### reordered the componentSet of the master before the simulation
-		if diagram.priority_list != []:
+		if diagram.priority_list:
 			L = []
 			devs = diagram.getDEVSModel()
 			# si l'utilisateur n'a pas definit d'ordre de priorité pour l'activation des modèles, on la construit
@@ -1054,40 +1054,25 @@ class Diagram(Savable, Structurable):
 		""" Function that return the number of codeBlock shape
 		"""
 
-		if self.deletedCodeBlockId != []:
-			return self.deletedCodeBlockId.pop()
-		else:
-			return self.nbCodeBlock
-
+		return self.deletedCodeBlockId.pop() if self.deletedCodeBlockId else self.nbCodeBlock
 
 	def GetContainerBlockCount(self):
 		""" Function that return the number of containerBlock shape
 		"""
 
-		if self.deletedContainerBlockId != []:
-			return self.deletedContainerBlockId.pop()
-		else:
-			return self.nbContainerBlock
-
+		return self.deletedContainerBlockId.pop() if self.deletedContainerBlockId else self.nbContainerBlock
 
 	def GetiPortCount(self):
 		""" Function that return the number of iPort shape
 		"""
 
-		if self.deletediPortId != []:
-			return self.deletediPortId.pop()
-		else:
-			return self.nbiPort
-
+		return self.deletediPortId.pop() if self.deletediPortId else self.nbiPort
 
 	def GetoPortCount(self):
 		""" Function that return the number of oPort shape
 		"""
 
-		if self.deletedoPortId != []:
-			return self.deletedoPortId.pop()
-		else:
-			return self.nboPort
+		return self.deletedoPortId.pop() if self.deletedoPortId else self.nboPort
 
 	def Clean(self):
 		""" Clean DEVS instances attached to all block model in the diagram.
@@ -1867,7 +1852,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			self.sourceNodeList, self.targetNodeList = self.GetNodeLists(source, target)
 
 			# Now we, if the nodes list are not empty, the connection can be proposed form ConnectDialog
-			if self.sourceNodeList != [] and self.targetNodeList != []:
+			if self.sourceNodeList and self.targetNodeList:
 				if len(self.sourceNodeList) == 1 and len(self.targetNodeList) == 1:
 					self.makeConnectionShape(self.sourceNodeList[0], self.targetNodeList[0])
 				else:
@@ -2983,7 +2968,7 @@ class Testable(object):
 		L = self.GetTestFile()
 
 		### create Editor with BDD files in tab
-		if L != []:
+		if L:
 
 			#model_path = os.path.dirname(self.python_path)
 
@@ -3628,7 +3613,7 @@ class CodeBlock(Achievable, Block):
 				args_from_stored_constructor_py = inspect.getargspec(cls.__init__).args[1:]
 				args_from_stored_block_model = state['args']
 				L = list(set(args_from_stored_constructor_py).symmetric_difference( set(args_from_stored_block_model)))
-				if L != []:
+				if L:
 					for arg in L:
 						if not arg in args_from_stored_constructor_py:
 							sys.stdout.write(_("Warning: %s come is old ('%s' arg is deprecated). We update it...\n"%(state['python_path'],arg)))
@@ -3921,7 +3906,7 @@ class ContainerBlock(Block, Diagram):
 					args_from_stored_block_model = state['args']
 					if args_from_stored_block_model:
 						L = list(set(args_from_stored_constructor_py).symmetric_difference( set(args_from_stored_block_model)))
-						if L != []:
+						if L:
 							for arg in L:
 								if not arg in args_from_stored_constructor_py:
 									sys.stdout.write(_("Warning: %s come is old ('%s' arg is deprecated). We update it...\n"%(state['python_path'],arg)))

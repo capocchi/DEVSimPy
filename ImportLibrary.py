@@ -350,7 +350,7 @@ class ImportLibrary(wx.Dialog):
 		if os.path.exists(init_file):
 			### get list of content filename
 			lst = getPYFileListFromInit(init_file)
-			if lst != []:
+			if lst:
 				# for each python filename, inspect its module info
 				for fn in lst:
 					fn_path = os.path.join(path,fn+'.py')
@@ -454,7 +454,7 @@ class ImportLibrary(wx.Dialog):
 			L = []
 
 		### how many python file to insert on __init__.py file
-		if L != []:
+		if L:
 			dlg = wx.lib.dialogs.MultipleChoiceDialog(None, _('List of python file in %s')%(os.path.dirname(path)), _('Select the python files to insert in the __init__.py file'), L)
 			if dlg.ShowModal() == wx.ID_OK:
 				select = dlg.GetValueString()

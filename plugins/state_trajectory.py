@@ -294,7 +294,7 @@ def Config(parent):
             L1.append(index)
             L2[block.label] = list(block.state_trajectory.keys())
 
-    if L1 != []:
+    if L1:
         cb1.SetCheckedItems(L1)
         ### tout les block on la meme liste de function active pour le trace, donc on prend la première
         cb2.SetCheckedItems(list(L2.values())[0])

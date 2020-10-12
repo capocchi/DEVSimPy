@@ -1538,7 +1538,7 @@ class MainApplication(wx.Frame):
 			self.tree.Hide()
 
 			# Liste des domaines concernes
-			if L != []:
+			if L:
 
 				### on supprime l'ancien searchTree
 				for item in self.searchTree.GetItemChildren(self.searchTree.GetRootItem()):

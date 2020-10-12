@@ -69,7 +69,7 @@ class PluginManager(object):
 		
 		if isinstance(plugin, str):
 			return plugin in PluginManager.enabled_plugin
-			#return plugin in [l[0].__name__ for l in plugins.values() if l != [] ]
+			#return plugin in [l[0].__name__ for l in plugins.values() if l ]
 		else:
 			return plugin in list(PluginManager.plugins.values())
 	

@@ -329,7 +329,7 @@ class DumpZipFile(DumpBase):
 			The name of plugin file must be "plugins.py"
 		"""
 		### if list of activated plugins is not empty
-		if obj.plugins != []:
+		if obj.plugins:
 			### import zipfile model
 			if zipfile.is_zipfile(fileName):
 				importer = zipimport.zipimporter(fileName)

@@ -77,7 +77,8 @@ class YAMLHandler:
         block = self.diagram.GetShapeByLabel(label)
 
         for arg in block.args:
-            block.args[arg] = to_Python(new_args[arg])
+            if arg in new_args:
+                block.args[arg] = to_Python(new_args[arg])
 
         success = self.diagram.SaveFile(self.diagram.last_name_saved)
 

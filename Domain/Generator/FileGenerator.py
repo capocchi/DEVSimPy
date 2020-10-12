@@ -83,7 +83,7 @@ class FileGenerator(Generator):
 							else:
 								self.V[val].append(row[val].strip())
 
-			sig = self.T[0] if self.T != [] else INFINITY
+			sig = self.T[0] if self.T else INFINITY
 		else:
 			sig = INFINITY
 

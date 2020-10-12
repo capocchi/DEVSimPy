@@ -89,7 +89,7 @@ class Zip:
 		### local copy
 		self.fn = fn
 
-		if files != []:
+		if files:
 			self.Create(files)
 
 	def Create(self, add_files:[str]=[])->None:
@@ -223,7 +223,7 @@ class Zip:
 		### find if python file has same name of model file
 		L = [f for f in zf.namelist() if f.endswith(('.jpg','jpeg','png','bmp'))]
 
-		if L != []:
+		if L:
 			import wx
 			f = zf.open(L.pop())
 			buf = f.read()
@@ -247,8 +247,8 @@ class Zip:
 		nl = zf.namelist()
 		zf.close()
 
-		L = [a for a in [re.findall("^(plugins[/]?[\w]*.py)$", s) for s in nl] if a!= []]
-		return L.pop(0)[0] if L != [] else ""
+		L = [a for a in [re.findall("^(plugins[/]?[\w]*.py)$", s) for s in nl] if a]
+		return L.pop(0)[0] if L else ""
 
 	@staticmethod
 	def HasPlugin(fn:str)->bool:
@@ -285,7 +285,7 @@ class Zip:
 		zf.close()
 
 		###
-		tests_files = [a for a in [re.findall("^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.feature)$", s) for s in nl] if a!= []]
+		tests_files = [a for a in [re.findall("^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.feature)$", s) for s in nl] if a]
 		tests_files = [a[0] for a in tests_files]
 
 		return tests_files
