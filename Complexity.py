@@ -57,10 +57,13 @@ def GetMacCabeMetric(path):
 
                 L = [getattr(cls,fct) for fct in ('extTransition','intTransition','outputFnc') if hasattr(cls, fct)]
 
+                print(L)
+                
                 source_list = list(map(inspect.getsource, L))
 
                 L_args = []
 
+                complexity = 0.0
                 for text in source_list:
                     ### textwrap for deleting the indentation
 
