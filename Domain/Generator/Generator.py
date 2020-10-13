@@ -63,7 +63,7 @@ class Generator(DomainBehavior):
 
 	def outputFnc(self):
 		### si la listValues est vide, cela veux dire qu'on veut toutes les valeurs des lignes sur une sortie
-		if self.__listValues != []:
+		if self.__listValues:
 			assert(len(self.OPorts) == len(self.__listValues))
 			for item in self.__listValues:
 				data = [self.V[item].pop(0), 0.0, 0.0]

@@ -501,6 +501,7 @@ class MainApplication(wx.Frame):
 		self.locale.Init(langid)
 		self.locale.AddCatalogLookupPathPrefix(localedir)
 		self.locale.AddCatalog(domain)
+	
 
 		# language config from .devsimpy file
 		if self.language == 'en':
@@ -1537,7 +1538,7 @@ class MainApplication(wx.Frame):
 			self.tree.Hide()
 
 			# Liste des domaines concernes
-			if L != []:
+			if L:
 
 				### on supprime l'ancien searchTree
 				for item in self.searchTree.GetItemChildren(self.searchTree.GetRootItem()):

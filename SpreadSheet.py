@@ -121,7 +121,7 @@ class Newt(wx.Frame):
 		self.model = aDEVS
 		self.sep = separator
 
-		toolbar = wx.ToolBar(self, wx.NewIdRef(), style= wx.TB_HORIZONTAL | wx.NO_BORDER)
+		toolbar = self.CreateToolBar()
 		toolbar.SetToolBitmapSize((16,16))
 
 		### for Phoenix version
@@ -153,9 +153,11 @@ class Newt(wx.Frame):
 			self.chart = toolbar.AddTool(wx.NewIdRef(), "", wx.Bitmap(os.path.join(ICON_PATH,'graph_guru.png')), _('Chart'))
 
 		toolbar.EnableTool(self.chart.GetId(), False)
-		
+		### Calling this method is not obligatory in Linux
+		### On Windows it is!
 		toolbar.Realize()
-		self.SetToolBar(toolbar)
+
+		#self.SetToolBar(toolbar)
 
 		self.statusbar = self.CreateStatusBar()
 
@@ -196,7 +198,7 @@ class Newt(wx.Frame):
 			fn = "%s%d.dat"%(self.model.fileName, i)
 			if os.path.exists(fn):
 				iPort = self.model.IPorts[i]
-				if iPort.inLine != []:
+				if iPort.inLine:
 					oPort = iPort.inLine[0]
 					host = oPort.host if hasattr(oPort, 'host') else oPort.hostDEVS
 					label = _('%s (on in_%s)')%(host.getBlockModel().label if hasattr(host, 'getBlockModel') else host.name, str(iPort.myID) if hasattr(iPort,'myID') else iPort.name)
@@ -270,7 +272,7 @@ class Newt(wx.Frame):
 		sheet = MySheet(self.notebook, data)
 		sheet.SetFocus()
 		self.notebook.AddPage(sheet, label)
-
+		
 		### enable delete button
 		toolbar = self.GetToolBar()
 		toolbar.EnableTool(self.delete.GetId(), True)
@@ -438,7 +440,7 @@ class Newt(wx.Frame):
 					wx.MessageBox(_('Type of data should be float or int : %s')%str(value), _('Info'))
 					break
 					
-		if data != []:
+		if data:
 			frame = StaticPlot(self, wx.NewIdRef(), title, data)
 			frame.Center()
 			frame.Show()

@@ -3,10 +3,10 @@
 # DEVS.py --- Classes and Tools for DEVS Model Specification
 #                     --------------------------------
 #                            Copyright (c) 2013
-#                          Jean-Sébastien  BOLDUC
+#                          Jean-Sï¿½bastien  BOLDUC
 #                             Hans  Vangheluwe
 #                            Yentl Van Tendeloo
-#                       McGill University (Montréal)
+#                       McGill University (Montrï¿½al)
 #                     --------------------------------
 # Version 1.0                                        last modified: 01/11/01
 # Version 1.0.1                                      last modified: 04/04/05
@@ -723,7 +723,7 @@ class RemoteCDEVS(BaseDEVS):
         """
         Set all data for this model correctly
         """
-        if self.IPorts != [] or self.OPorts != []:
+        if self.IPorts or self.OPorts:
             # Already configured this port once
             return
         ports = self.proxy.getInOut(self.remote_modelname)

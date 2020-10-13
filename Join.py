@@ -150,7 +150,7 @@ def constructModel(type, name, x, y, dim_width, dim_height, iPorts, oPorts):
 	elif (type =="undefined"):
 		color = "gray"
 
-	if iPorts != []:
+	if iPorts:
 		str_iPorts = "\n\tiPorts: ["
 		for i in iPorts:
 			if i == iPorts[0]:
@@ -167,7 +167,7 @@ def constructModel(type, name, x, y, dim_width, dim_height, iPorts, oPorts):
 		if str_iPorts != "":
 			str_iPorts = str_iPorts + '],'
 
-	if oPorts != []:
+	if oPorts:
 		str_oPorts = "\n\toPorts: ["
 		for o in oPorts:
 			if o == oPorts[0]:

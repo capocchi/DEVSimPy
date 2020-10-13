@@ -68,7 +68,7 @@ def getFlatPriorityList(model, flat_priority_list = []):
 	"""
 
 	### if priority list never edited, priority is componentList order.
-	if hasattr(model, 'PRIORITY_LIST') and model.PRIORITY_LIST != []:
+	if hasattr(model, 'PRIORITY_LIST') and model.PRIORITY_LIST:
 		L = model.PRIORITY_LIST
 	else:
 		L = model.componentSet
@@ -86,7 +86,7 @@ def getFlatPriorityList(model, flat_priority_list = []):
 def HasActiveChild(L):
 	""" Return true if a children of master is active
 	"""
-	return L != [] and True in [a.timeNext != INFINITY for a in L]
+	return L and True in [a.timeNext != INFINITY for a in L]
 
 class SimStrategy:
 	""" Strategy abstract class or interface

@@ -106,8 +106,8 @@ if __name__ == '__main__':
 	group.add_argument("-js", "--javascript",help="generate JS file", action="store_true")
 	group.add_argument("-json", help="turn the YAML/DSP file to JSON", action="store_true")
 	group.add_argument("-blockslist", help="get the list of models in a master model", action="store_true")
-	group.add_argument("-blockargs", help="parameters of an atomic model", type=str)
-	parser.add_argument("-updateblockargs", help="new parameters", type=str, default="")
+	group.add_argument("-blockargs", help="parameters of an atomic model (ex. -blockargs <label of block>)", type=str)
+	parser.add_argument("-updateblockargs", help="update parameters (ex. -blockargs <label of block> -updateblockargs <'''{'<key>':<val>}'''>", type=str, default="")
 	args = parser.parse_args()
 
 	if args.kernel:
@@ -137,8 +137,11 @@ if __name__ == '__main__':
 	elif args.blockargs:
 		# model block parameters read or update
 		label = args.blockargs
-		if args.updateblockargs :
+		if args.updateblockargs:
+			# model block is updated 
 			args = json.loads(args.updateblockargs)
+			if isinstance(args,str):
+				args = eval(args)
 			new_args = yamlHandler.setYAMLBlockModelArgs(label, args)
 			sys.stdout.write(json.dumps(new_args))
 		else:

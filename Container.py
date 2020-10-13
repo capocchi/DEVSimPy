@@ -44,7 +44,6 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 	if wx.VERSION_STRING >= '4.0':
 		wx.StockCursor = wx.Cursor
-		wx.FONTFAMILY_SWISS = wx.SWISS
 else:
 	import gettext
 	_ = gettext.gettext
@@ -560,7 +559,7 @@ class Diagram(Savable, Structurable):
 		diagram.updateDEVSPriorityList()
 
 		### reordered the componentSet of the master before the simulation
-		if diagram.priority_list != []:
+		if diagram.priority_list:
 			L = []
 			devs = diagram.getDEVSModel()
 			# si l'utilisateur n'a pas definit d'ordre de priorité pour l'activation des modèles, on la construit
@@ -1055,40 +1054,25 @@ class Diagram(Savable, Structurable):
 		""" Function that return the number of codeBlock shape
 		"""
 
-		if self.deletedCodeBlockId != []:
-			return self.deletedCodeBlockId.pop()
-		else:
-			return self.nbCodeBlock
-
+		return self.deletedCodeBlockId.pop() if self.deletedCodeBlockId else self.nbCodeBlock
 
 	def GetContainerBlockCount(self):
 		""" Function that return the number of containerBlock shape
 		"""
 
-		if self.deletedContainerBlockId != []:
-			return self.deletedContainerBlockId.pop()
-		else:
-			return self.nbContainerBlock
-
+		return self.deletedContainerBlockId.pop() if self.deletedContainerBlockId else self.nbContainerBlock
 
 	def GetiPortCount(self):
 		""" Function that return the number of iPort shape
 		"""
 
-		if self.deletediPortId != []:
-			return self.deletediPortId.pop()
-		else:
-			return self.nbiPort
-
+		return self.deletediPortId.pop() if self.deletediPortId else self.nbiPort
 
 	def GetoPortCount(self):
 		""" Function that return the number of oPort shape
 		"""
 
-		if self.deletedoPortId != []:
-			return self.deletedoPortId.pop()
-		else:
-			return self.nboPort
+		return self.deletedoPortId.pop() if self.deletedoPortId else self.nboPort
 
 	def Clean(self):
 		""" Clean DEVS instances attached to all block model in the diagram.
@@ -1210,7 +1194,7 @@ class Shape(ShapeEvtHandler):
 		self.y = array.array('d',y)                      # list of y coords
 		self.fill= Shape.FILL          # fill color
 		self.pen = [self.fill[0] , 1, wx.SOLID]   # pen color and size
-		self.font = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
+		self.font = [FONT_SIZE, 74, 93, 700, u'Arial']
 
 	def draw(self, dc):
 		""" Draw method
@@ -1249,7 +1233,7 @@ class Shape(ShapeEvtHandler):
 			try:
 				dc.SetFont(wx.Font(10, self.font[1], self.font[2], self.font[3], False, self.font[4]))
 			except Exception:
-				dc.SetFont(wx.Font(10, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, False, u'Arial'))
+				dc.SetFont(wx.Font(10, 74, 93, 700, False, u'Arial'))
 
 	def move(self,x,y):
 		""" Move method
@@ -1868,7 +1852,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			self.sourceNodeList, self.targetNodeList = self.GetNodeLists(source, target)
 
 			# Now we, if the nodes list are not empty, the connection can be proposed form ConnectDialog
-			if self.sourceNodeList != [] and self.targetNodeList != []:
+			if self.sourceNodeList and self.targetNodeList:
 				if len(self.sourceNodeList) == 1 and len(self.targetNodeList) == 1:
 					self.makeConnectionShape(self.sourceNodeList[0], self.targetNodeList[0])
 				else:
@@ -2984,7 +2968,7 @@ class Testable(object):
 		L = self.GetTestFile()
 
 		### create Editor with BDD files in tab
-		if L != []:
+		if L:
 
 			#model_path = os.path.dirname(self.python_path)
 
@@ -3216,7 +3200,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 
 		####################################" Just for old model
 		if 'touch_list' not in state: state['touch_list'] = []
-		if 'font' not in state: state['font'] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
+		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
 		##############################################
 
 		self.__dict__.update(state)
@@ -3629,7 +3613,7 @@ class CodeBlock(Achievable, Block):
 				args_from_stored_constructor_py = inspect.getargspec(cls.__init__).args[1:]
 				args_from_stored_block_model = state['args']
 				L = list(set(args_from_stored_constructor_py).symmetric_difference( set(args_from_stored_block_model)))
-				if L != []:
+				if L:
 					for arg in L:
 						if not arg in args_from_stored_constructor_py:
 							sys.stdout.write(_("Warning: %s come is old ('%s' arg is deprecated). We update it...\n"%(state['python_path'],arg)))
@@ -3725,7 +3709,6 @@ class CodeBlock(Achievable, Block):
 				if not os.path.exists(fn):
 					#fn_dn = os.path.dirname(fn)
 					fn_bn = os.path.basename(relpath(fn))
-					mainW = wx.GetApp().GetTopWindow()
 		
 					### try to redefi[ne the path
 					### if Domain is in the path
@@ -3733,12 +3716,15 @@ class CodeBlock(Achievable, Block):
 						fn = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(fn[fn.index(dir_name):]).strip('[]')))
 					### try to find the filename in the recent opened recent file directory or exported lib diretory
 					else:
-						if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
-							for a in [os.path.dirname(p) for p in mainW.exportPathsList+mainW.openFileList]:
-								path = os.path.join(a,fn_bn)
-								if os.path.exists(path):
-									fn = path
-									break
+						### for no-gui compatibility
+						if builtins.__dict__.get('GUI_FLAG',True):
+							mainW = wx.GetApp().GetTopWindow()
+							if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
+								for a in [os.path.dirname(p) for p in mainW.exportPathsList+mainW.openFileList]:
+									path = os.path.join(a,fn_bn)
+									if os.path.exists(path):
+										fn = path
+										break
 					
 					### show flag icon on the block only for the file with extension (input file)
 					if not os.path.exists(fn) and os.path.splitext(fn)[-1] != '':
@@ -3752,7 +3738,7 @@ class CodeBlock(Achievable, Block):
 		if 'image_path' not in state:
 			state['image_path'] = ""
 			state['attributes'].insert(3,'image_path')
-		if 'font' not in state: state['font'] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
+		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
 		if 'font' not in state['attributes']: state['attributes'].insert(3,'font')
 		if 'selected' not in state: state['selected'] = False
 		if 'label_pos' not in state: state['label_pos'] = 'center'
@@ -3920,7 +3906,7 @@ class ContainerBlock(Block, Diagram):
 					args_from_stored_block_model = state['args']
 					if args_from_stored_block_model:
 						L = list(set(args_from_stored_constructor_py).symmetric_difference( set(args_from_stored_block_model)))
-						if L != []:
+						if L:
 							for arg in L:
 								if not arg in args_from_stored_constructor_py:
 									sys.stdout.write(_("Warning: %s come is old ('%s' arg is deprecated). We update it...\n"%(state['python_path'],arg)))
@@ -3954,7 +3940,7 @@ class ContainerBlock(Block, Diagram):
 		if 'image_path' not in state:
 			state['image_path'] = ""
 			state['attributes'].insert(3,'image_path')
-		if 'font' not in state: state['font'] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
+		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
 		if 'font' not in state['attributes']: state['attributes'].insert(3,'font')
 		if 'selected' not in state: state['selected'] = False
 		if 'label_pos' not in state:state['label_pos'] = 'center'
@@ -4325,7 +4311,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 
 		####################################" Just for old model
 		if 'r' not in state: state['r'] = 30.0
-		if 'font' not in state: state['font'] = [FONT_SIZE, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, u'Arial']
+		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
 		if 'label_pos' not in state:
 			state['label_pos'] = 'center'
 			state['attributes'].insert(1,'label_pos')

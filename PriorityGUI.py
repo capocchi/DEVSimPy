@@ -64,7 +64,7 @@ class PriorityGUI(wx.Frame):
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(self.listCtrl, 1, wx.EXPAND | wx.ALL , 5)
-		vbox.Add(hbox, 0, wx.EXPAND | wx.ALL | wx.ALIGN_CENTER, 5)
+		vbox.Add(hbox, 0, wx.EXPAND | wx.ALL, 5)
 
 		panel.SetSizer(vbox)
 

@@ -25,9 +25,7 @@ import sys
 from Mixins.Attributable import Attributable
 
 import Container
-import DetachedFrame
 import Components
-import WizardGUI
 
 #---------------------------------------------------------
 class Abstractable:
@@ -156,6 +154,8 @@ class Abstractable:
             ### add new diagram according the new layer
             self.layers[l] = d
 
+            import WizardGUI
+            
             ### add new DAM and UAM according to new layer
             self.SetUAM(l, WizardGUI.atomicCode('UAM%d'%l))
             self.SetDAM(l, WizardGUI.atomicCode('DAM%d'%l))

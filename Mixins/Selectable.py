@@ -12,7 +12,6 @@ GLOBAL VARIABLES AND FUNCTIONS:
 """
 
 import gettext
-import wx
 
 _ = gettext.gettext
 
