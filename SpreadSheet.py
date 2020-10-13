@@ -121,7 +121,7 @@ class Newt(wx.Frame):
 		self.model = aDEVS
 		self.sep = separator
 
-		toolbar = wx.ToolBar(self, wx.NewIdRef(), style= wx.TB_HORIZONTAL | wx.NO_BORDER)
+		toolbar = self.CreateToolBar()
 		toolbar.SetToolBitmapSize((16,16))
 
 		### for Phoenix version
@@ -153,9 +153,11 @@ class Newt(wx.Frame):
 			self.chart = toolbar.AddTool(wx.NewIdRef(), "", wx.Bitmap(os.path.join(ICON_PATH,'graph_guru.png')), _('Chart'))
 
 		toolbar.EnableTool(self.chart.GetId(), False)
-		
+		### Calling this method is not obligatory in Linux
+		### On Windows it is!
 		toolbar.Realize()
-		self.SetToolBar(toolbar)
+
+		#self.SetToolBar(toolbar)
 
 		self.statusbar = self.CreateStatusBar()
 
@@ -270,7 +272,7 @@ class Newt(wx.Frame):
 		sheet = MySheet(self.notebook, data)
 		sheet.SetFocus()
 		self.notebook.AddPage(sheet, label)
-
+		
 		### enable delete button
 		toolbar = self.GetToolBar()
 		toolbar.EnableTool(self.delete.GetId(), True)
