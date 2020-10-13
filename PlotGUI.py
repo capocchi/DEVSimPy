@@ -196,10 +196,10 @@ class PlotFrame(wx.Frame):
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 
-		hbox.Add(self.client, 1, wx.EXPAND|wx.ALIGN_CENTRE)
+		hbox.Add(self.client, 1, wx.ALIGN_CENTRE)
 
 		vbox.Add(self.tb, 0, wx.EXPAND)
-		vbox.Add(hbox, 1, wx.EXPAND|wx.ALIGN_CENTRE)
+		vbox.Add(hbox, 1, wx.ALIGN_CENTRE)
 
 		self.SetSizer(vbox)
 
@@ -216,13 +216,13 @@ class PlotFrame(wx.Frame):
 		tb = wx.ToolBar(self, style=wx.TB_HORIZONTAL|wx.NO_BORDER|wx.TB_FLAT)
 		tb.SetToolBitmapSize((16,16))
 
-		zoomLabel, zoomId = self.enableZoom.GetLabel(), self.enableZoom.GetId()
-		titleLabel, titleId = self.enableTitle.GetLabel(), self.enableTitle.GetId()
-		gridLabel, gridId = self.enableGrid.GetLabel(), self.enableGrid.GetId()
-		legendLabel, legendId = self.enableLegend.GetLabel(), self.enableLegend.GetId()
-		dragLabel, dragId = self.enableDrag.GetLabel(), self.enableDrag.GetId()
-		pointLabel, pointId = self.enablePointLabel.GetLabel(), self.enablePointLabel.GetId()
-		normalizedLabel, normalizedId = self.norm.GetLabel(), self.norm.GetId()
+		zoomLabel, zoomId = self.enableZoom.GetItemLabelText(), self.enableZoom.GetId()
+		titleLabel, titleId = self.enableTitle.GetItemLabelText(), self.enableTitle.GetId()
+		gridLabel, gridId = self.enableGrid.GetItemLabelText(), self.enableGrid.GetId()
+		legendLabel, legendId = self.enableLegend.GetItemLabelText(), self.enableLegend.GetId()
+		dragLabel, dragId = self.enableDrag.GetItemLabelText(), self.enableDrag.GetId()
+		pointLabel, pointId = self.enablePointLabel.GetItemLabelText(), self.enablePointLabel.GetId()
+		normalizedLabel, normalizedId = self.norm.GetItemLabelText(), self.norm.GetId()
 
 		if wx.VERSION_STRING < '4.0':
 			tb.AddCheckLabelTool(zoomId, zoomLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-zoom.png')), shortHelp=_('Enable zoom'), longHelp='')
