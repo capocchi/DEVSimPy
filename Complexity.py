@@ -56,10 +56,12 @@ def GetMacCabeMetric(path):
                 ### beware to use tab for devs code of models
 
                 L = [getattr(cls,fct) for fct in ('extTransition','intTransition','outputFnc') if hasattr(cls, fct)]
-
-                print(L)
                 
-                source_list = list(map(inspect.getsource, L))
+                ### when model is created, the transition functions are empty...
+                try:
+                    source_list = list(map(inspect.getsource, L))
+                except Exception as info:
+                    source_list = []
 
                 L_args = []
 

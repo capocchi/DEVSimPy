@@ -100,12 +100,11 @@ class PlotFrame(wx.Frame):
 		self.normalize = False
 		self.home = HOME_PATH
 
-#		self.sldh = wx.Slider(self, wx.NewIdRef(), 10, 0, 50, (-1, -1), (250, -1), wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
-#		self.sldv = wx.Slider(self, wx.NewIdRef(), 10, 0, 50, (-1, -1), (50, 150), wx.SL_AUTOTICKS | wx.SL_VERTICAL | wx.SL_LABELS)
-
 		self.client = plot.PlotCanvas(self)
-		#self.client.pointLabelFunc(self.drawPointLabel)
 
+		self.InitUI()
+
+	def InitUI(self):
 		##Now Create the menu bar and items
 		self.mainmenu = wx.MenuBar()
 
@@ -186,34 +185,30 @@ class PlotFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU,self.OnScrUp, scrUp)
 		self.Bind(wx.EVT_MENU,self.OnScrRt, scrRt)
 		self.Bind(wx.EVT_MENU,self.OnReset, reset)
-
+		
+		self.client.canvas.Bind(wx.EVT_LEFT_DOWN, self.OnMouseLeftDown)
+		self.client.canvas.Bind(wx.EVT_MOTION, self.OnMotion)
+		self.Bind(wx.EVT_CLOSE, self.OnQuit)
+		
 		### A status bar to tell people what's happening
 		self.CreateStatusBar(1)
 
 		### create tool bar
-		self.tb = self.BuildToolbar()
+		self.BuildToolbar()
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
-		hbox = wx.BoxSizer(wx.HORIZONTAL)
-
-		hbox.Add(self.client, 1, wx.ALIGN_CENTRE)
-
-		vbox.Add(self.tb, 0, wx.EXPAND)
-		vbox.Add(hbox, 1, wx.ALIGN_CENTRE)
+		
+		vbox.Add(self.client, 1, wx.EXPAND)
 
 		self.SetSizer(vbox)
-
-		self.client.canvas.Bind(wx.EVT_LEFT_DOWN, self.OnMouseLeftDown)
-		self.client.canvas.Bind(wx.EVT_MOTION, self.OnMotion)
-
-		self.Bind(wx.EVT_CLOSE, self.OnQuit)
 		self.Layout()
 
 	def BuildToolbar(self):
 		""" Create ToolBar
 		"""
 
-		tb = wx.ToolBar(self, style=wx.TB_HORIZONTAL|wx.NO_BORDER|wx.TB_FLAT)
+		tb = self.CreateToolBar()
+		#tb = wx.ToolBar(self, style=wx.TB_HORIZONTAL|wx.NO_BORDER|wx.TB_FLAT)
 		tb.SetToolBitmapSize((16,16))
 
 		zoomLabel, zoomId = self.enableZoom.GetItemLabelText(), self.enableZoom.GetId()
@@ -242,8 +237,6 @@ class PlotFrame(wx.Frame):
 			tb.AddCheckTool(normalizedId, normalizedLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-norm.png')), shortHelp=_('Normalize'), longHelp=_('Normalize Y axis'))
 
 		tb.Realize()
-
-		return tb
 
 	def OnMove(self, event):
 		event.Skip()
