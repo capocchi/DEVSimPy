@@ -576,7 +576,7 @@ class CustomDataTable(GridTableBase):
 
 		try:
 			return self.data[row][col][0] if isinstance(self.data[row][col], tuple) else self.data[row][col]
-		except IndexError:
+		except Exception as e:
 			return None
 
 	def SetValue(self, row, col, value):
