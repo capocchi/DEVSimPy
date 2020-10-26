@@ -382,6 +382,11 @@ class LibraryTree(wx.TreeCtrl):
 		# Cleanup
 		if gmwiz: gmwiz.Destroy()
 
+	def OnNewDir(self, evt):
+		""" New dir has been invoked.
+		"""
+		pass
+
 	###
 	def GetDomainList(self, dName):
 		""" Get the list of sub-directory of dName directory

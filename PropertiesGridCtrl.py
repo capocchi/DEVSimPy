@@ -449,6 +449,13 @@ class CustomDataTable(GridTableBase):
 				elif isinstance(val, (tuple,dict)) and len(val_in_constructor) != 0:
 					if len(val_in_constructor) != len(val):
 						val = val_in_constructor
+				### if filename attr exist in the model and if it is None by default, this means that the attr is randomly initialized
+				### into the constructor of the model (its the case for MessageCollector...). So, we get the random path from a devs instance and
+				### insert it into the prop field
+				elif attr_name.lower() == 'filename' and val is None:
+					cls = Components.GetClass(model.python_path)
+					devs = cls()
+					val = getattr(devs,attr_name)
 				else:
 					pass
 			else:
@@ -740,9 +747,9 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 					hinttext = ''
 
 				### display the data path on tooltip
-				if self.GetCellValue(row, 1).endswith(('csv','dat','txt')):
+				if self.GetCellValue(row, 1).endswith(('csv','dat','txt')) or self.GetCellValue(row, 0).lower() == 'filename':
 					if col == 1:
-						hinttext = self.parent.model.args.get('fileName',None) or self.parent.model.args.get('filename',None) or self.parent.model.args.get('FileName',None)
+						hinttext = self.parent.model.args.get('fileName',None) or self.parent.model.args.get('filename',None) or self.parent.model.args.get('FileName',None) 
 				elif hinttext is None:
 					hinttext = ''
 
