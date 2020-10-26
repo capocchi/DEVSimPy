@@ -151,6 +151,7 @@ ID_UPGRADE_LIB = wx.NewIdRef()
 ID_UPDATE_LIB = wx.NewIdRef()
 ID_HELP_LIB = wx.NewIdRef()
 ID_NEW_MODEL_LIB = wx.NewIdRef()
+ID_NEW_DIR_LIB = wx.NewIdRef()
 ID_UPDATE_SUBLIB = wx.NewIdRef()
 ID_DELETE_LIB = wx.NewIdRef()
 
@@ -719,13 +720,17 @@ class ItemLibraryPopupMenu(wx.Menu):
 		path = parent.GetItemPyData(item)
 
 		if os.path.isdir(path):
-			new_model = wx.MenuItem(self, ID_NEW_MODEL_LIB, _('New Model'), _('Add a new model to the selected library'))
+			new_model = wx.MenuItem(self, ID_NEW_MODEL_LIB, _('New model'), _('Add a new model to the selected library'))
 			new_model.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'new.png')))
 			InsertItem(0, new_model)
+			new_dir = wx.MenuItem(self, ID_NEW_DIR_LIB, _('New sub directory'), _('Add a directory to the selected library'))
+			new_dir.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'new.png')))
+			InsertItem(1, new_dir)
 			update_lib = wx.MenuItem(self, ID_UPDATE_SUBLIB, _('Update'), _('Update all models of the selected library'))
 			update_lib.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'db_refresh2.png')))
-			InsertItem(1, update_lib)
+			InsertItem(2, update_lib)
 			self.Bind(wx.EVT_MENU, parent.OnNewModel, id=ID_NEW_MODEL_LIB)
+			self.Bind(wx.EVT_MENU, parent.OnNewDir, id=ID_NEW_DIR_LIB)
 			self.Bind(wx.EVT_MENU, parent.OnUpdateSubLib, id=ID_UPDATE_SUBLIB)	
 
 		else:

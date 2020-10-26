@@ -69,13 +69,16 @@ def GetMacCabeMetric(path):
                 for text in source_list:
                     ### textwrap for deleting the indentation
 
-                    ast = codepaths.ast.parse(textwrap.dedent(text).strip())
-                    visitor = codepaths.PathGraphingAstVisitor()
-                    visitor.preorder(ast, visitor)
-
-                    for graph in visitor.graphs.values():
-                        complexity += graph.complexity()
-
+                    try:
+                        ast = codepaths.ast.parse(textwrap.dedent(text).strip())
+                        visitor = codepaths.PathGraphingAstVisitor()
+                        visitor.preorder(ast, visitor)
+                    except Exception as info:
+                        sys.stdout.write("Error in Complexity module")
+                    else:
+                        for graph in visitor.graphs.values():
+                            complexity += graph.complexity()
+                            
                 return complexity
                 ### for .pyc file
             else:
