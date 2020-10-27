@@ -449,13 +449,14 @@ class CustomDataTable(GridTableBase):
 				elif isinstance(val, (tuple,dict)) and len(val_in_constructor) != 0:
 					if len(val_in_constructor) != len(val):
 						val = val_in_constructor
-				### if filename attr exist in the model and if it is None by default, this means that the attr is randomly initialized
+				### if filename attr exist in the model and if it is 'result' by default, this means that the attr is randomly initialized
 				### into the constructor of the model (its the case for MessageCollector...). So, we get the random path from a devs instance and
 				### insert it into the prop field
-				elif attr_name.lower() == 'filename' and val is None:
+				elif attr_name.lower() == 'filename' and val == 'result':
 					cls = Components.GetClass(model.python_path)
 					devs = cls()
 					val = getattr(devs,attr_name)
+					model.args[attr_name] = val
 				else:
 					pass
 			else:
