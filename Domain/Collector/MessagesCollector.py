@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 """
-Name : MessagesCollector.py 
-Brief descritpion : collect to disk received messages 
-Author(s) : Laurent CAPOCCHI (capocchi@univ-corse.fr)
-Version :  1.0                                        
-Last modified : 7/10/11
+Name: MessagesCollector.py 
+Brief descritpion: collect to disk received messages 
+Author(s): Laurent CAPOCCHI (capocchi@univ-corse.fr)
+Version: 1.0                                        
+Last modified: 26/10/20
 GENERAL NOTES AND REMARKS:
 GLOBAL VARIABLES AND FUNCTIONS:
 """
@@ -34,7 +34,7 @@ class MessagesCollector(DomainBehavior):
 		DomainBehavior.__init__(self)
 		
 		### a way to overcome the random initialization of the fileNam attr directly in the param list of the constructor!
-		fileName = fileName if fileName is not None else os.path.join(os.getcwd(),"result%d"%random.randint(1,100))
+		fileName = fileName if fileName is not None else os.path.join(os.getcwd(),"out","result%d"%random.randint(1,100))
 		
 		# local copy
 		self.fileName = fileName

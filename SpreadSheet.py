@@ -87,8 +87,11 @@ class MySheet(sheet.CSheet):
 			Publisher.sendMessage("isfull", msg=self._full_flag)
 		except pubsub.pub.SenderMissingReqdMsgDataError as info:
 			pass
-		
-		self.AutoSize()
+
+		try:
+			self.AutoSize()
+		except Exception as info:
+			pass
 		
 	###
 	def IsFull(self):
@@ -410,35 +413,38 @@ class Newt(wx.Frame):
 			else:
 				s = "value = %s; time = %s"%(v,sheet.GetCellValue(i,0))
 
-			### globals containt the time and value variables after exec of the statement
-			exec(str(s), globals())
+			try:
+				### globals containt the time and value variables after exec of the statement
+				exec(str(s), globals())
+			except Exception as info:
+				sys.stdout.write(info)
+			else:
+				### if value is a list, we must choose an index to plot amoung the values of the list
+				if isinstance(value, list):
+					if select == -1:
+						dlg = wx.TextEntryDialog(self, _('Choose one index between [%d-%d] to plot into the list of values.')%(0,len(value)-1),_('Plotting Manager'), value="0")
+						if dlg.ShowModal() == wx.ID_OK:
+							select=int(dlg.GetValue())
+							dlg.Destroy()
+						else:
+							dlg.Destroy()
+							break
 
-			### if value is a list, we must choose an index to plot amoung the values of the list
-			if isinstance(value, list):
-				if select == -1:
-					dlg = wx.TextEntryDialog(self, _('Choose one index between [%d-%d] to plot into the list of values.')%(0,len(value)-1),_('Plotting Manager'), value="0")
-					if dlg.ShowModal() == wx.ID_OK:
-						select=int(dlg.GetValue())
-						dlg.Destroy()
+					### choice is digit else we break
+					if select in range(0,len(value)-1) and not isinstance(value[select], str):
+						data.append((time, float(value[select])))
 					else:
-						dlg.Destroy()
+						wx.MessageBox(_('Value to plot must be digit!'), _('Warning'), wx.OK | wx.ICON_WARNING)
 						break
 
-				### choice is digit else we break
-				if select in range(0,len(value)-1) and not isinstance(value[select], str):
-					data.append((time, float(value[select])))
+				### first if int is digit or if float is digit
 				else:
-					wx.MessageBox(_('Value to plot must be digit!'), _('Warning'), wx.OK | wx.ICON_WARNING)
-					break
-
-			### first if int is digit or if float is digit
-			else:
-				v = str(format(value,'f')).lstrip('-')
-				if v.isdigit() or v.replace(".", "", 1).isdigit():
-					data.append((time,float(value)))
-				else:
-					wx.MessageBox(_('Type of data should be float or int : %s')%str(value), _('Info'))
-					break
+					v = str(format(value,'f')).lstrip('-')
+					if v.isdigit() or v.replace(".", "", 1).isdigit():
+						data.append((time,float(value)))
+					else:
+						wx.MessageBox(_('Type of data should be float or int : %s')%str(value), _('Info'))
+						break
 					
 		if data:
 			frame = StaticPlot(self, wx.NewIdRef(), title, data)
