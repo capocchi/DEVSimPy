@@ -14,14 +14,15 @@ class RandomGenerator(DomainBehavior):
         @version: 1.0
     """
 
-    def __init__(self, minValue=0, maxValue=10, minStep=1, maxStep=1, start=0):
+    def __init__(self, minValue=0, maxValue=10, minStep=1, maxStep=1, start=0, choice=[]):
         """ Constructor.
 
-            @param minValue : minimum value
-            @param maxValue : maximum value
-            @param minStep : minimum step
-            @param maxStep : maximum step
-			@param start : time start
+            @param minValue: minimum value
+            @param maxValue: maximum value
+            @param minStep: minimum step
+            @param maxStep: maximum step
+			@param start: time start
+            @param choice: list of items
 
         """
         DomainBehavior.__init__(self)
@@ -32,6 +33,8 @@ class RandomGenerator(DomainBehavior):
         self.maxValue = maxValue
         self.minStep = minStep
         self.maxStep = maxStep
+        self.choice = choice
+
         self.msg = Message(None, None)
 
     def outputFnc(self):
@@ -41,7 +44,7 @@ class RandomGenerator(DomainBehavior):
         portsToSend = random.sample(self.OPorts, numberMessage)  # The port with number message
         
         for port in portsToSend:
-            value = random.randint(self.minValue, self.maxValue)
+            value = random.randint(self.minValue, self.maxValue) if self.choice else random.choice(self.choice)
             self.msg.value = [value, 0.0, 0.0]
             self.msg.time = self.timeNext
             ### adapted with PyPDEVS
