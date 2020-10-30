@@ -417,7 +417,7 @@ class Newt(wx.Frame):
 				### globals containt the time and value variables after exec of the statement
 				exec(str(s), globals())
 			except Exception as info:
-				sys.stdout.write(info)
+				sys.stdout.write(str(info))
 			else:
 				### if value is a list, we must choose an index to plot amoung the values of the list
 				if isinstance(value, list):
@@ -434,8 +434,8 @@ class Newt(wx.Frame):
 					if select in range(0,len(value)-1) and not isinstance(value[select], str):
 						data.append((time, float(value[select])))
 					else:
-						wx.MessageBox(_('Value to plot must be digit!'), _('Warning'), wx.OK | wx.ICON_WARNING)
-						break
+						#wx.MessageBox(_('Value to plot must be digit!'), _('Warning'), wx.OK | wx.ICON_WARNING)
+						data.append((time, value[select]))
 
 				### first if int is digit or if float is digit
 				else:
@@ -443,13 +443,32 @@ class Newt(wx.Frame):
 					if v.isdigit() or v.replace(".", "", 1).isdigit():
 						data.append((time,float(value)))
 					else:
-						wx.MessageBox(_('Type of data should be float or int : %s')%str(value), _('Info'))
-						break
+						#wx.MessageBox(_('Type of data should be float or int: %s')%str(value), _('Info'))
+						data.append((time, value))
 					
 		if data:
-			frame = StaticPlot(self, wx.NewIdRef(), title, data)
-			frame.Center()
-			frame.Show()
+			### if the first value of y is str, we plot with tick in y axe
+			if isinstance(data[0][-1], str):
+				x,y = zip(*data)
+				frame = wx.Frame(self, -1, _('Plotter'))
+				plotter = PlotNotebook(frame)
+				axes1 = plotter.add(title).gca()
+				axes1.set_xlabel(_('Time'), fontsize=16)
+				axes1.set_ylabel(_('State'), fontsize=16)
+				axes1.step(x, y)
+				axes1.grid(True)
+				axes1.set_title(title)
+
+				#axes2 = plotter.add('figure 2').gca()
+				#axes2.plot([1, 2, 3, 4, 5], [2, 1, 4, 2, 3])
+				
+				frame.Show()
+
+			### values of y is digits
+			else:
+				frame = StaticPlot(self, wx.NewIdRef(), title, data)
+				frame.Center()
+				frame.Show()
 
 ##if __name__ == '__main__':
 ##	import builtins
