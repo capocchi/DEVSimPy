@@ -37,17 +37,20 @@ class To_Disk(QuickScope):
 	"""
 
 	###
-	def __init__(self, fileName = os.path.join(os.getcwd(),"result%d"%random.randint(1,100)), eventAxis = False, comma = " ", ext = '.dat', col = 0):
+	def __init__(self, fileName = "result", eventAxis = False, comma = " ", ext = '.dat', col = 0):
 		""" Constructor.
 
-			@param fileName : Name of output fileName
-			@param eventAxis : Flag to plot depending events axis
-			@param comma : Comma symbol
-			@param ext : Output file extension
-			@param col : Considered column
+			@param fileName: Name of output fileName
+			@param eventAxis: Flag to plot depending events axis
+			@param comma: Comma symbol
+			@param ext: Output file extension
+			@param col: Considered column
 		"""
 		QuickScope.__init__(self)
 
+		### a way to overcome the random initialization of the fileNam attr directly in the param list of the constructor!
+		fileName = fileName if fileName!= 'result' else os.path.join(os.getcwd(),"out","result%d"%random.randint(1,100))
+		
 		# local copy
 		self.fileName = fileName
 		self.comma = comma

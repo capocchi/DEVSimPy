@@ -14,16 +14,37 @@
 ### ----------------------------------------------------------
 
 ### at the beginning to prevent with statement for python version <=2.5
-
+from __future__ import with_statement
 
 import sys
 import wx
 import os
 import inspect
+import subprocess
+import importlib
+
+required_libs = ['matplotlib']
+
+for lib_name in required_libs:
+    try:
+        importlib.import_module(lib_name)
+    except:
+        subprocess.run(f'pip install {lib_name}'.split())
+
+import matplotlib.pyplot as plt
+
+import matplotlib
+matplotlib.use('WXAgg')
+
+# to send event
+try:
+    from pubsub import pub
+except Exception:
+    sys.stdout.write('Last version for Python2 is PyPubSub 3.3.0 \n pip install PyPubSub==3.3.0')
+    sys.exit()
 
 from PluginManager import PluginManager
 from Container import Block, CodeBlock, ContainerBlock
-from Utilities import install_and_import
 
 ID_SHAPE = wx.NewIdRef()
 
@@ -31,13 +52,14 @@ def log(func):
     def wrapped(*args, **kwargs):
 
         try:
+            #print "Entering: [%s] with parameters %s" % (func.__name__, args)
             try:
 
                 ### DEVS instance
                 devs = func.__self__
 
                 ### condition
-                cond = hasattr(devs, 'state') and 'status' in list(devs.state.keys())
+                cond = hasattr(devs, 'state') and 'status' in devs.state.keys()
 
 
                 ### is DEVS model has no state_trajectory attribute, we create it only for init!
@@ -74,7 +96,7 @@ def state_trajectory_decorator(inst):
     '''
 
     for name, m in inspect.getmembers(inst, inspect.isfunction)+inspect.getmembers(inst, inspect.ismethod):
-        if name in list(inst.getBlockModel().state_trajectory.values()):
+        if name in inst.getBlockModel().state_trajectory.values():
             setattr(inst, name, log(m))
 
     return inst
@@ -105,7 +127,7 @@ def GetFlatShapesList(diagram,L):
     return L
 
 def PlotStateTrajectory(m):
-    """ Plot the state trajectory of m model
+    """ Plot the state trajectory of m model.
     """
 
     if m:
@@ -121,21 +143,17 @@ def PlotStateTrajectory(m):
             y = []
 
             ### adapted to PyPDEVS
-            times_lst = [a[0] if isinstance(a, tuple) else a for a in list(st.keys())]
+            times_lst = list(map(lambda a : a[0] if isinstance(a, tuple) else a, st.keys()))
 
             states_lst = [states.index(st[k]) for k in st]
 
-            items = list(zip(times_lst, states_lst))
-
+            items = zip(times_lst, states_lst)
+  
             sorted_items = sorted(items, key=lambda x: (x[0], x[1]))
-
-            x, y = list(zip(*sorted_items))
+            
+            x, y = zip(*sorted_items)
 
             assert len(x)==len(y)
-
-            #for plotting
-            if install_and_import('matplotlib'):
-                import matplotlib.pyplot as plt
 
             fig = plt.figure()
 
@@ -156,10 +174,13 @@ def PlotStateTrajectory(m):
             ### changes the color of the space inside the plot
             ax.patch.set_facecolor('white')
 
-            ax.step(x, y)
-            plt.yticks(list(range(len(states))), states, size='small')
+            ax.step(x, y, where='post')
+            
+            plt.yticks(range(len(states)), states, size='small')
 
             plt.show()
+
+            #plt.close(fig)
 
         else:
             dial = wx.MessageDialog(None,
@@ -205,7 +226,7 @@ def start_state_trajectory(*args, **kwargs):
     master = kwargs['master']
     parent = kwargs['parent']
 
-    if not pluginmanager.is_enable('start_activity_tracking'):
+    if not PluginManager.is_enable('start_activity_tracking'):
         for devs in GetFlatDEVSList(master, []):
             block = devs.getBlockModel()
             if hasattr(block, 'state_trajectory'):
@@ -249,10 +270,10 @@ def Config(parent):
     master = None
 
     frame = wx.Frame(parent,
+                    wx.ID_ANY,
                     title = _('State Trajectory Plotting'),
-                    style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN)
-    
-    panel = wx.Panel(frame)
+                    style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN | wx.STAY_ON_TOP)
+    panel = wx.Panel(frame, wx.ID_ANY)
 
     lst_1 = GetFlatShapesList(diagram,[])
     lst_2  = ('confTransition', 'extTransition', 'intTransition')
@@ -261,15 +282,15 @@ def Config(parent):
     hbox = wx.BoxSizer(wx.HORIZONTAL)
     hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 
-    st = wx.StaticText(panel, wx.NewIdRef(), _("Select models and functions:"), (10,10))
+    st = wx.StaticText(panel, wx.ID_ANY, _("Select models and functions:"), (10,10))
 
-    cb1 = wx.CheckListBox(panel, wx.NewIdRef(), (10, 30), wx.DefaultSize, lst_1, style=wx.LB_SORT)
-    cb2 = wx.CheckListBox(panel, wx.NewIdRef(), (10, 30), wx.DefaultSize, lst_2)
+    cb1 = wx.CheckListBox(panel, wx.ID_ANY, (10, 30), wx.DefaultSize, lst_1, style=wx.LB_SORT)
+    cb2 = wx.CheckListBox(panel, wx.ID_ANY, (10, 30), wx.DefaultSize, lst_2)
 
     selBtn = wx.Button(panel, wx.ID_SELECTALL)
-    desBtn = wx.Button(panel, wx.NewIdRef(), _('Deselect All'))
+    desBtn = wx.Button(panel, wx.ID_ANY, _('Deselect All'))
     okBtn = wx.Button(panel, wx.ID_OK)
-    #reportBtn = wx.Button(panel, wx.NewIdRef(), _('Report'))
+    #reportBtn = wx.Button(panel, wx.ID_ANY, _('Report'))
 
     hbox2.Add(cb1, 1, wx.EXPAND, 5)
     hbox2.Add(cb2, 1, wx.EXPAND, 5)
@@ -292,14 +313,14 @@ def Config(parent):
         block=diagram.GetShapeByLabel(cb1.GetString(index))
         if hasattr(block,'state_trajectory'):
             L1.append(index)
-            L2[block.label] = list(block.state_trajectory.keys())
+            L2[block.label] = block.state_trajectory.keys()
 
     if L1:
         cb1.SetCheckedItems(L1)
-        ### tout les block on la meme liste de function active pour le trace, donc on prend la première
+        ### tout les blocks on la meme liste de function active pour le trace, donc on prend la premi�re
         cb2.SetCheckedItems(list(L2.values())[0])
 
-    ### ckeck delta_ext and delta_int
+    ### ckeck par defaut delta_ext et delta_int
     if L2 == {}:
         cb2.SetCheckedItems([1,2])
 
@@ -316,7 +337,7 @@ def Config(parent):
     def OnSelectAll(evt):
         """ Select All button has been pressed and all plug-ins are enabled.
         """
-        cb1.SetCheckedItems(list(range(cb1.GetCount())))
+        cb1.SetCheckedItems(range(cb1.GetCount()))
 
     def OnDeselectAll(evt):
         """ Deselect All button has been pressed and all plugins are disabled.

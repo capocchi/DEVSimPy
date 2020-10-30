@@ -24,17 +24,17 @@ class MessagesCollector(DomainBehavior):
 	"""
 
 	###
-	def __init__(self, fileName = None, ext = '.dat', comma = ""):
+	def __init__(self, fileName = "result", ext = '.dat', comma = ""):
 		""" Constructor.
 		
-			@param fileName : name of output fileName
-			@param ext : output file extension
-			@param comma : comma separated
+			@param fileName: name of output fileName
+			@param ext: output file extension
+			@param comma: comma separated
 		"""
 		DomainBehavior.__init__(self)
 		
 		### a way to overcome the random initialization of the fileNam attr directly in the param list of the constructor!
-		fileName = fileName if fileName is not None else os.path.join(os.getcwd(),"out","result%d"%random.randint(1,100))
+		fileName = fileName if fileName!= 'result' else os.path.join(os.getcwd(),"out","result%d"%random.randint(1,100))
 		
 		# local copy
 		self.fileName = fileName

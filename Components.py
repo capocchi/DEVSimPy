@@ -403,7 +403,7 @@ class AMDComponent(GenericComponent):
 		args = GetArgs(cls)
 
 		### find if there is filename param on the constructor and if there is no extention
-		L = [os.path.isabs(str(a)) for a in list(args.values())]
+		L = [os.path.isabs(str(a)) or str(a)=='result' for a in list(args.values())]
 		filename_without_ext_flag = L.index(True) if True in L else -1
 		### if there is a filename and if there is no extention -> its a to disk like object
 		disk_model = filename_without_ext_flag >= 0 and not os.path.splitext(list(args.values())[filename_without_ext_flag])[-1] != ''
