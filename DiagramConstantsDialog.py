@@ -78,7 +78,7 @@ class DiagramConstantsDialog(wx.Dialog):
 		hbox.Add(self._button_cancel)
 		hbox.Add(self._button_ok, flag=wx.LEFT|wx.BOTTOM, border=5)
 
-		vbox.Add(hbox, 0, flag=wx.ALIGN_BOTTOM|wx.ALIGN_CENTER_HORIZONTAL|wx.ADJUST_MINSIZE, border=10)
+		vbox.Add(hbox, 0, flag=wx.EXPAND, border=10)
 
 #	From http://docs.wxwidgets.org/trunk/overview_windowsizing.html, wxWidgets provides two main methods for sizing:
 #
@@ -92,8 +92,8 @@ class DiagramConstantsDialog(wx.Dialog):
 #	You better set max and min sizes for the grid (or its sizer) and then use Fit() or Layout() each time you change number of rows/cols or their sizes.
 
 		panel.SetSizerAndFit(vbox)
-		#self.SetAutoLayout(True)
-		#self.Fit()
+		self.SetAutoLayout(True)
+		self.Fit()
 
 		self.__set_events()
 

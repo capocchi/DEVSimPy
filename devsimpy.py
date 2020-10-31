@@ -215,7 +215,7 @@ wx.Log.SetLogLevel(0)
 
 #-------------------------------------------------------------------
 def getIcon(path):
-	""" Return icon from image path
+	""" Return icon from image path.
 	"""
 	icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
 	bmp = wx.Bitmap(path)
@@ -225,7 +225,7 @@ def getIcon(path):
 
 #-------------------------------------------------------------------
 def DefineScreenSize(percentscreen = None, size = None):
-	"""Returns a tuple to define the size of the window
+	""" Returns a tuple to define the size of the window
 		percentscreen = float
 	"""
 	if not size and not percentscreen:
@@ -360,7 +360,7 @@ class MainApplication(wx.Frame):
 		return wx.FileConfig(localFilename = os.path.join(GetUserConfigDir(),'.devsimpy'))
 
 	def WriteDefaultConfigFile(self, cfg):
-		""" Write config file
+		""" Write config file.
 		"""
 
 		### for spash screen
@@ -954,10 +954,10 @@ class MainApplication(wx.Frame):
 				#win.Disconnect(-1, -1, wx.wxEVT_KILL_FOCUS)
 			#self.Destroy()
 
-		event.Skip()
+		#event.Skip()
 
 	def OnSpin(self, event):
-		""" Spin button has been invoked (on the toolbar of the main windows or detached frame)
+		""" Spin button has been invoked (on the toolbar of the main windows or detached frame).
 		"""
 
 		### spin control object
@@ -1182,7 +1182,7 @@ class MainApplication(wx.Frame):
 
 	###
 	def OnPrint(self, event):
-		""" Print current diagram
+		""" Print current diagram.
 		"""
 		self.nb2.print_canvas = self.nb2.GetCurrentPage()
 		self.nb2.print_size = self.nb2.GetSize()
@@ -1194,7 +1194,7 @@ class MainApplication(wx.Frame):
 	
 	###
 	def OnPrintPreview(self, event):
-		""" Print preview of current diagram
+		""" Print preview of current diagram.
 		"""
 		self.nb2.print_canvas = self.nb2.GetCurrentPage()
 		self.nb2.print_size = self.nb2.GetSize()
@@ -1207,7 +1207,7 @@ class MainApplication(wx.Frame):
 
 	###
 	def OnScreenCapture(self, event):
-		""" Print preview of current diagram
+		""" Print preview of current diagram.
 		"""
 
 		### gi is in the pyobject package
@@ -1257,7 +1257,7 @@ class MainApplication(wx.Frame):
 
 	###
 	def OnUndo(self, event):
-		""" Undo the diagram
+		""" Undo the diagram.
 		"""
 		### get toolbar and clientData defined in AddTool
 		toolbar = event.GetEventObject()
@@ -1452,7 +1452,7 @@ class MainApplication(wx.Frame):
 					wx.MessageBox(_('%s file imported!')%str(fileName), _('Info'), wx.OK|wx.ICON_INFORMATION)
 	###
 	def OnExportRest(self, event):
-		""" Export YAML file to the 'uplaod' directory of a REST server
+		""" Export YAML file to the 'uplaod' directory of a REST server.
 		"""
 
 		self.OnSaveFile(event)
@@ -1515,7 +1515,7 @@ class MainApplication(wx.Frame):
 
 	###
 	def OnSearch(self,evt):
-		""" Method ofr the serach function
+		""" Method ofr the serach function.
 		"""
 		### search field
 		search = evt.GetEventObject()
@@ -1687,7 +1687,7 @@ class MainApplication(wx.Frame):
 					self.StartSimulationGUIWin(arg, L)
 
 	def StartSimulationGUIWin(self, arg, diagrams):
-		"""try to lunch the sim windows if there is int or (ntl, inf, infinity) arg just after the .dsp or yaml
+		"""try to lunch the sim windows if there is int or (ntl, inf, infinity) arg just after the .dsp or yaml.
 		"""
 
 		try:
