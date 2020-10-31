@@ -31,11 +31,6 @@ import bisect
 _ = wx.GetTranslation
 
 import wx.lib.agw.aui as aui
-import matplotlib as mpl
-
-from matplotlib.backends.backend_wxagg import (
-    FigureCanvasWxAgg as FigureCanvas,
-    NavigationToolbar2WxAgg as NavigationToolbar)
 	
 # for spectrum
 try:
