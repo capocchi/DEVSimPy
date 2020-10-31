@@ -23,6 +23,9 @@
 import wx
 import os
 
+import gettext
+_ = gettext.gettext
+
 from LibraryTree import LibraryTree
 
 import Menu

@@ -23,6 +23,9 @@
 import wx
 import os
 
+import gettext
+_ = gettext.gettext
+
 from Patterns.Observer import Observer
 from LibPanel import LibPanel
 from PropPanel import PropPanel

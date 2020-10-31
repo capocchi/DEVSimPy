@@ -191,12 +191,12 @@ def PlotStateTrajectory(m):
             frame = wx.Frame(None, -1, 'Plotter')
             plotter = PlotNotebook(frame)
             axes1 = plotter.add('%s State Trajectory'%label).gca()
-            axes1.set_yticks(range(len(states)))
-            axes1.set_yticklabels(states)
-            axes1.set_xlabel('time',fontsize=16)
-            axes1.set_ylabel('state',fontsize=16)
-            axes1.plot(x, y)
-            
+            axes1.set_xlabel('Time',fontsize=16)
+            axes1.set_ylabel('State',fontsize=16)
+            axes1.step(x, y)
+            axes1.grid(True)
+            axes1.set_title(label)
+
             #axes2 = plotter.add('figure 2').gca()
             #axes2.plot([1, 2, 3, 4, 5], [2, 1, 4, 2, 3])
             
