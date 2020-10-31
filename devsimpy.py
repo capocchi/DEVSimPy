@@ -101,6 +101,7 @@ except:
 import wx.py as py
 import wx.lib.dialogs
 import wx.html
+import wx.lib.mixins.inspection as wit
 
 try:
 	from wx.lib.agw import advancedsplash
@@ -1712,7 +1713,7 @@ class MainApplication(wx.Frame):
 							g = 15*i
 							x = dw - w + g
 							y = dh - h + g
-							simFrame.SetPosition((x/2, y/2))
+							simFrame.SetPosition((int(x/2), int(y/2)))
 	
 							simFrame.SetWindowStyle(wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
 
@@ -2366,7 +2367,7 @@ class PyOnDemandOutputWindow(threading.Thread):
 		pass
 
 #-------------------------------------------------------------------
-class DEVSimPyApp(wx.App):
+class DEVSimPyApp(wx.App, wit.InspectionMixin):
 
 	outputWindowClass = PyOnDemandOutputWindow
 
@@ -2450,6 +2451,9 @@ class DEVSimPyApp(wx.App):
 		Create and show the splash screen.  It will then create and show
 		the main frame when it is time to do so.
 		"""
+
+		# initialize the inspection tool (enabled with Ctrl+Alt+I)
+		self.Init()
 
 		# Check runtime version
 		if wx.VERSION_STRING < __min_wx_version__:
