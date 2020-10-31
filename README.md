@@ -4,6 +4,7 @@
 
 [![Build Status](https://travis-ci.org/capocchi/DEVSimPy.svg?branch=master)](https://travis-ci.org/capocchi/DEVSimPy)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+[![Coverage Status](https://coveralls.io/repos/github/capocchi/DEVSimPy/badge.svg?branch=master)](https://coveralls.io/github/capocchi/DEVSimPy?branch=master)
 <a href="https://codeclimate.com/github/capocchi/DEVSimPy/maintainability"><img src="https://api.codeclimate.com/v1/badges/f5c94ecbfb6a3c8986be/maintainability" /></a>
 <a href="https://codeclimate.com/github/capocchi/DEVSimPy/test_coverage"><img src="https://api.codeclimate.com/v1/badges/f5c94ecbfb6a3c8986be/test_coverage" /></a>
 
