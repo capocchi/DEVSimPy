@@ -502,13 +502,15 @@ class MainApplication(wx.Frame):
 		self.locale.AddCatalogLookupPathPrefix(localedir)
 		self.locale.AddCatalog(domain)
 	
-
 		# language config from .devsimpy file
 		if self.language == 'en':
+			locale.setlocale(locale.LC_ALL, 'en')
 			translation = gettext.translation(domain, localedir, languages=['en']) # English
 		elif self.language =='fr':
+			locale.setlocale(locale.LC_ALL, 'fr')
 			translation = gettext.translation(domain, localedir, languages=['fr']) # French
 		else:
+			locale.setlocale(locale.LC_ALL, '')
 			#installing os language by default
 			translation = gettext.translation(domain, localedir, [self.locale.GetCanonicalName()], fallback = True)
 
@@ -2464,7 +2466,6 @@ class DEVSimPyApp(wx.App):
 		# start our application with splash
 		splash = AdvancedSplashScreen(self)
 		splash.Show()
-
 
 		return True
 
