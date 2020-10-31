@@ -229,7 +229,7 @@ class QuickAttributeEditor(wx.Frame, Subject):
 		else:
 			xm,ym = self.ScreenToClient(wx.Point(xwindow, ywindow))
 
-		self.SetPosition((xm,ym))
+		self.SetPosition((int(xm),int(ym)))
 
 		#default value for spinCtrl
 		self._sb_input.SetValue(model.input)

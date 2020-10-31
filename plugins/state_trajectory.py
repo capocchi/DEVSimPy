@@ -23,23 +23,8 @@ import inspect
 import subprocess
 import importlib
 
-required_libs = ['matplotlib']
-
-for lib_name in required_libs:
-    try:
-        importlib.import_module(lib_name)
-    except:
-        subprocess.run(f'pip install {lib_name}'.split())
-
-#import matplotlib.pyplot as plt
-
 import wx.lib.agw.aui as aui
 #import wx.lib.mixins.inspection as wit
-
-import matplotlib as mpl
-from matplotlib.backends.backend_wxagg import (
-    FigureCanvasWxAgg as FigureCanvas,
-    NavigationToolbar2WxAgg as NavigationToolbar)
 
 class PlotPanel(wx.Panel):
     def __init__(self, parent, id=-1, dpi=None, **kwargs):
@@ -206,7 +191,7 @@ def PlotStateTrajectory(m):
             dial = wx.MessageDialog(None,
                             _('Select at least one decorate transition function for %s.')%label,
                             _('Plot Manager'),
-                            wx.OK | wx.ICON_EXCLAMATION)
+                            wx.OK | wx.ICON_EXCLAION)
             dial.ShowModal()
     else:
         dial = wx.MessageDialog(None,
