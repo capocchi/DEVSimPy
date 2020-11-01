@@ -24,10 +24,15 @@ import subprocess
 import importlib
 
 import wx.lib.agw.aui as aui
-#import wx.lib.mixins.inspection as wit
+
+import matplotlib as mpl
+from matplotlib.backends.backend_wxagg import (
+    FigureCanvasWxAgg as FigureCanvas,
+    NavigationToolbar2WxAgg as NavigationToolbar)
 
 class PlotPanel(wx.Panel):
     def __init__(self, parent, id=-1, dpi=None, **kwargs):
+
         wx.Panel.__init__(self, parent, id=id, **kwargs)
         self.figure = mpl.figure.Figure(dpi=dpi, figsize=(2, 2))
         self.canvas = FigureCanvas(self, -1, self.figure)
@@ -76,14 +81,23 @@ def log(func):
                 ### DEVS instance
                 devs = func.__self__
 
+                ### create
+                func_name = func.__name__
+
+                #if func_name not in devs.state_trajectory:
+                #    devs.state_trajectory[func_name] = {}
+
                 ### condition
                 cond = hasattr(devs, 'state') and 'status' in devs.state.keys()
 
-
                 ### is DEVS model has no state_trajectory attribute, we create it only for init!
                 if not hasattr(devs, 'state_trajectory'):
-                    in_state = devs.state['status'] if cond else 'Undefined'
-                    setattr(devs,'state_trajectory', {0.0: in_state})
+                    in_state = devs.getStatus() if cond else 'Undefined'
+                    setattr(devs,'state_trajectory', {func_name:{0.0: in_state}})
+
+                ### if transition function is not yet introduced
+                if func_name not in devs.state_trajectory:
+                    devs.state_trajectory[func_name] = {}
 
                 r =  func(*args, **kwargs)
 
@@ -96,9 +110,9 @@ def log(func):
                     ts = devs.timeNext[0]
                     #ts = devs.timeLast[0] + devs.elapsed
 
-                ### Add the output state
-                out_state = devs.state['status'] if cond else 'Undefined'
-                devs.state_trajectory[ts] = out_state
+                ### Add the output state at time ts for the func_name transition function
+                out_state = devs.getStatus() if cond else 'Undefined'
+                devs.state_trajectory[func_name][ts] = out_state
 
                 return r
 
@@ -153,37 +167,41 @@ def PlotStateTrajectory(m):
 
         if hasattr(m, 'state_trajectory'):
 
-            st = m.state_trajectory
-
-            states = list(set(st.values()))
-
-            x = []
-            y = []
-
-            ### adapted to PyPDEVS
-            times_lst = list(map(lambda a: a[0] if isinstance(a, tuple) else a, st.keys()))
-
-            states_lst = [states.index(st[k]) for k in st]
-
-            items = zip(times_lst, states_lst)
-  
-            sorted_items = sorted(items, key=lambda x: (x[0], x[1]))
-            
-            x, y = zip(*sorted_items)
-
-            assert len(x)==len(y)
-
-            frame = wx.Frame(None, -1, 'Plotter')
+            frame = wx.Frame(None, -1, '%s State Trajectory'%label)
             plotter = PlotNotebook(frame)
-            axes1 = plotter.add('%s State Trajectory'%label).gca()
-            axes1.set_xlabel('Time',fontsize=16)
-            axes1.set_ylabel('State',fontsize=16)
-            axes1.step(x, y)
-            axes1.grid(True)
-            axes1.set_title(label)
 
-            #axes2 = plotter.add('figure 2').gca()
-            #axes2.plot([1, 2, 3, 4, 5], [2, 1, 4, 2, 3])
+            ### tabs of plot depend on the transition function selected
+            for func_name,st in m.state_trajectory.items():
+                #states = list(set(st.values()))
+
+                x = []
+                y = []
+
+                ### adapted to PyPDEVS
+                times_lst = list(map(lambda a: a[0] if isinstance(a, tuple) else a, st.keys()))
+
+                #states_lst = [states.index(st[k]) for k in st]
+
+                states_lst = list(st.values())
+
+                items = zip(times_lst, states_lst)
+    
+                sorted_items = sorted(items, key=lambda x: (x[0], x[1]))
+                
+                print(st)
+
+                print(sorted_items)
+
+                x, y = zip(*sorted_items)
+
+                assert len(x)==len(y)
+                
+                axes = plotter.add(func_name).gca()
+                axes.set_xlabel('Time',fontsize=16)
+                axes.set_ylabel('State',fontsize=16)
+                axes.step(x, y)
+                axes.grid(True)
+                axes.set_title('%s (%s)'%(label,func_name))
             
             frame.Show()
 
@@ -191,7 +209,7 @@ def PlotStateTrajectory(m):
             dial = wx.MessageDialog(None,
                             _('Select at least one decorate transition function for %s.')%label,
                             _('Plot Manager'),
-                            wx.OK | wx.ICON_EXCLAION)
+                            wx.OK | wx.ICON_EXCLAMATION)
             dial.ShowModal()
     else:
         dial = wx.MessageDialog(None,

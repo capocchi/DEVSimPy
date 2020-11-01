@@ -35,7 +35,7 @@ def get_from_modules(name:str)->types.ModuleType:
 	""" get module with the correct name from the name that come from dir().
 	"""
 	for s,m in sys.modules.items():
-		if name in s:
+		if name == s or "%s.%s"%(name,name) == s:
 			return m
 	return None
 
@@ -357,34 +357,37 @@ class Zip:
 		Zip.ClearCache(self.fn)
 
 		# import module
-#		try:
+		try:
 
-		### reload submodule from module dependencies!
-		fullname = "".join([os.path.basename(os.path.dirname(self.fn)), getPythonModelFileName(self.fn).split('.py')[0]])
-		module = sys.modules[fullname]
-		domain_name = os.path.basename(os.path.dirname(self.fn))
-		for name in dir(module):
-			if type(getattr(module, name)) == types.ModuleType:
-				### TODO: only reload the local package (not 'sys' and so one)
-				importlib.reload(get_from_modules(name))
-		
-		### clear to clean the import after exporting model (amd or cmd) and reload within the same instance of DEVSimPy
-		zipimport._zip_directory_cache.clear()
+			### reload submodule from module dependencies!
+			fullname = "".join([os.path.basename(os.path.dirname(self.fn)), getPythonModelFileName(self.fn).split('.py')[0]])
+			module = sys.modules[fullname]
+			domain_name = os.path.basename(os.path.dirname(self.fn))
+			for name in dir(module):
+				if type(getattr(module, name)) == types.ModuleType:
+					### TODO: only reload the local package (not 'sys' and so one)
+					m = get_from_modules(name)
+					if m :
+						importlib.reload(m)
+					else:
+						sys.stdout.write('%s module is not reloaded before saving the code!'%name)
+			### clear to clean the import after exporting model (amd or cmd) and reload within the same instance of DEVSimPy
+			zipimport._zip_directory_cache.clear()
 
-		### reload module
-		module = self.ImportModule()
-		return module
-
-#		except Exception as info:
-#			msg_i = _("Error in execution: ")
-#			msg_o = listf(format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
-#			try:
-#				sys.stderr.write( msg_i + str(sys.exc_info()[0]) +"\r\n" + msg_o)
-#			except UnicodeDecodeError:
-#				sys.stderr.write( msg_i + str(sys.exc_info()[0]).decode('latin-1').encode("utf-8") +"\r\n" + msg_o)
-#			return info
-#		else:
+			### reload module
+			module = self.ImportModule()
 #			return module
+
+		except Exception as info:
+			msg_i = _("Error in execution: ")
+			msg_o = listf(format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
+			try:
+				sys.stderr.write( msg_i + str(sys.exc_info()[0]) +"\r\n" + msg_o)
+			except UnicodeDecodeError:
+				sys.stderr.write( msg_i + str(sys.exc_info()[0]).decode('latin-1').encode("utf-8") +"\r\n" + msg_o)
+			return info
+		else:
+			return module
 
 	@staticmethod
 	def ClearCache(fn:str)->None:
