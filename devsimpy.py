@@ -505,13 +505,22 @@ class MainApplication(wx.Frame):
 	
 		# language config from .devsimpy file
 		if self.language == 'en':
-			locale.setlocale(locale.LC_ALL, 'en')
+			try:
+				locale.setlocale(locale.LC_ALL, 'en')
+			except:
+				sys.stdout.write(_('new local (since wx 4.1.0) setting not applied'))
 			translation = gettext.translation(domain, localedir, languages=['en']) # English
 		elif self.language =='fr':
-			locale.setlocale(locale.LC_ALL, 'fr')
+			try:
+				locale.setlocale(locale.LC_ALL, 'fr')
+			except:
+				sys.stdout.write(_('new local (since wx 4.1.0) setting not applied'))
 			translation = gettext.translation(domain, localedir, languages=['fr']) # French
 		else:
-			locale.setlocale(locale.LC_ALL, '')
+			try:
+				locale.setlocale(locale.LC_ALL, '')
+			except:
+				sys.stdout.write(_('new local (since wx 4.1.0) setting not applied'))
 			#installing os language by default
 			translation = gettext.translation(domain, localedir, [self.locale.GetCanonicalName()], fallback = True)
 

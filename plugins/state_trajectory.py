@@ -180,18 +180,16 @@ def PlotStateTrajectory(m):
                 ### adapted to PyPDEVS
                 times_lst = list(map(lambda a: a[0] if isinstance(a, tuple) else a, st.keys()))
 
+                ### display index instead of state as string
                 #states_lst = [states.index(st[k]) for k in st]
 
-                states_lst = list(st.values())
+                ### state can be specified as IDLE:4 with 4 for ta function !
+                states_lst = [s.split(':')[0] for s in st.values()]
 
                 items = zip(times_lst, states_lst)
     
                 sorted_items = sorted(items, key=lambda x: (x[0], x[1]))
                 
-                print(st)
-
-                print(sorted_items)
-
                 x, y = zip(*sorted_items)
 
                 assert len(x)==len(y)
