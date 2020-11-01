@@ -431,11 +431,12 @@ class Newt(wx.Frame):
 							break
 
 					### choice is digit else we break
-					if select in range(0,len(value)-1) and not isinstance(value[select], str):
-						data.append((time, float(value[select])))
-					else:
-						#wx.MessageBox(_('Value to plot must be digit!'), _('Warning'), wx.OK | wx.ICON_WARNING)
-						data.append((time, value[select]))
+					if value[select]:
+						if select in range(0,len(value)-1) and not isinstance(value[select], str):
+							data.append((time, float(value[select])))
+						else:
+							#wx.MessageBox(_('Value to plot must be digit!'), _('Warning'), wx.OK | wx.ICON_WARNING)
+							data.append((time, value[select]))
 
 				### first if int is digit or if float is digit
 				else:
