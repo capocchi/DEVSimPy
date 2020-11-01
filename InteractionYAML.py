@@ -7,24 +7,24 @@ import traceback
 def to_Python(val):
     if val in ('true', 'True'):
         return True
-    if val in ('false', 'False'):
+    elif val in ('false', 'False'):
         return False
-    if str(val).replace('.','').replace('-','').isdigit():
+    elif str(val).replace('.','').replace('-','').isdigit():
         return eval(str(val))
     return val
 
 class YAMLHandler:
-    """ class providing methods for YAML file handling
+    """ class providing methods for YAML file handling.
     """
     def __init__ (self, filename):
-        """
+        """ Constructor.
         """
         from Container import Diagram
 
         self.filename = filename
         self.modelname = os.path.basename(self.filename)
 
-        self.report   = {'model_name' : self.modelname}
+        self.report = {'model_name' : self.modelname}
 
         self.json_obj = None
 
@@ -57,7 +57,7 @@ class YAMLHandler:
 
     def getYAMLBlockModelArgs(self, label):
         """ Returns the parameters (name and value) of the block identified by the label
-            composing the model described in the file
+            composing the model described in the file.
         """
 
         if self.filename_is_valid != True: return False
@@ -68,8 +68,8 @@ class YAMLHandler:
 
     def setYAMLBlockModelArgs(self, label, new_args):
         """ Saves in YAML file the new values of the parameters
-            of the block identified by the label
-            Returns the updated block parameters
+            of the block identified by the label.
+            Returns the updated block parameters.
         """
 
         if self.filename_is_valid != True: return False
@@ -85,7 +85,7 @@ class YAMLHandler:
         return {'success' : success, 'args' : self.getYAMLBlockModelArgs(label)}
 
     def getJSON(self, diagram=None):
-        """ Make JSON representation of the model from YAML file
+        """ Make JSON representation of the model from YAML file.
         """
         from Container import ConnectionShape, CodeBlock, ContainerBlock
 
@@ -170,9 +170,8 @@ class YAMLHandler:
 
         return self.json_obj
 
-
     def getDevsInstance(self):
-        """ Returns the DEVS instance built from YAML file
+        """ Returns the DEVS instance built from YAML file.
         """
         from Container import Diagram
 
@@ -188,7 +187,7 @@ class YAMLHandler:
             return False
 
     def getJS(self):
-        """
+        """ 
         """
 
         from Join import makeDEVSConf, makeJoin
