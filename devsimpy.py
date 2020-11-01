@@ -504,18 +504,12 @@ class MainApplication(wx.Frame):
 		self.locale.AddCatalog(domain)
 	
 		# language config from .devsimpy file
-		if self.language == 'en':
+		if self.language in ('en','fr'):
 			try:
-				locale.setlocale(locale.LC_ALL, 'en')
+				locale.setlocale(locale.LC_ALL, self.language)
 			except:
 				sys.stdout.write(_('new local (since wx 4.1.0) setting not applied'))
-			translation = gettext.translation(domain, localedir, languages=['en']) # English
-		elif self.language =='fr':
-			try:
-				locale.setlocale(locale.LC_ALL, 'fr')
-			except:
-				sys.stdout.write(_('new local (since wx 4.1.0) setting not applied'))
-			translation = gettext.translation(domain, localedir, languages=['fr']) # French
+			translation = gettext.translation(domain, localedir, languages=[self.language]) 
 		else:
 			try:
 				locale.setlocale(locale.LC_ALL, '')

@@ -174,9 +174,6 @@ def PlotStateTrajectory(m):
             for func_name,st in m.state_trajectory.items():
                 #states = list(set(st.values()))
 
-                x = []
-                y = []
-
                 ### adapted to PyPDEVS
                 times_lst = list(map(lambda a: a[0] if isinstance(a, tuple) else a, st.keys()))
 
