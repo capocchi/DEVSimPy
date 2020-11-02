@@ -1,0 +1,67 @@
+<?xml version='1.0'?>
+<!DOCTYPE qfsmproject SYSTEM 'qfsm.dtd'>
+<qfsmproject version="0.54" author="Qfsm">
+  <machine nummooreout="0" transfontitalic="0" draw_it="1" statefontsize="8" transfont="Helvetica" statefontitalic="0" author="capocchi" description="Finite State Machine to model the simple and double clic problem." version="0.1" name="FSM_SC_DC" arrowtype="1" numbits="2" statefontweight="50" statefont="Helvetica" numin="0" transfontsize="8" transfontweight="50" type="2" numout="0" initialstate="0">
+    <outputnames_moore></outputnames_moore>
+    <inputnames></inputnames>
+    <outputnames></outputnames>
+    <itransition ypos="107" endx="78" xpos="18" endy="107"/>
+    <state pencolor="0" exit_actions="" radius="40" description="" finalstate="0" entry_actions="" moore_outputs="" ypos="107" code="0" xpos="118" linewidth="1">On</state>
+    <state pencolor="0" exit_actions="" radius="40" description="" finalstate="0" entry_actions="" moore_outputs="" ypos="107" code="1" xpos="548" linewidth="1">Off</state>
+    <state pencolor="0" exit_actions="" radius="40" description="" finalstate="0" entry_actions="" moore_outputs="" ypos="324" code="2" xpos="305" linewidth="1">DC</state>
+    <transition c1x="274.9841814660031" c2y="124.8435980477433" c1y="122.5323550745231" description="" straight="1" type="2" ypos="120.2211121013029" endx="513.4488439640627" xpos="155.7518502169733" endy="127.1548410209635" c2x="394.2165127150329">
+      <from>0</from>
+      <to>1</to>
+      <inputs default="0" any="0" invert="0">OFF</inputs>
+      <outputs>OFF</outputs>
+    </transition>
+    <transition c1x="55.72893824183663" c2y="13.40048584525005" c1y="4.421664726361428" description="" straight="1" type="2" ypos="68.59999999999999" endx="134.1033464491136" xpos="106.8" endy="70.38467215577853" c2x="193.094147241944">
+      <from>0</from>
+      <to>0</to>
+      <inputs default="0" any="0" invert="0">ON</inputs>
+      <outputs></outputs>
+    </transition>
+    <transition c1x="193.1302207491063" c2y="237.9963425029528" c1y="185.7854480280748" description="" straight="1" type="2" ypos="133.5745535531968" endx="283.5979167526262" xpos="147.8963727473464" endy="290.2072369778309" c2x="238.3640687508662">
+      <from>0</from>
+      <to>2</to>
+      <inputs default="0" any="0" invert="0">DC</inputs>
+      <outputs>DC</outputs>
+    </transition>
+    <transition c1x="390.9693203038069" c2y="88.99823222485283" c1y="91.38856006177497" description="" straight="1" type="2" ypos="93.77888789869712" endx="152.411661345367" xpos="510.2481497830268" endy="86.60790438793069" c2x="271.6904908245869">
+      <from>1</from>
+      <to>0</to>
+      <inputs default="0" any="0" invert="0">ON</inputs>
+      <outputs>ON</outputs>
+    </transition>
+    <transition c1x="480.9482424080637" c2y="9.954403224895572" c1y="7.480847050267684" description="" straight="1" type="2" ypos="69.17253602780534" endx="562.3540031377437" xpos="534.9968092595581" endy="69.66419153250268" c2x="618.5843619122808">
+      <from>1</from>
+      <to>1</to>
+      <inputs default="0" any="0" invert="0">OFF</inputs>
+      <outputs></outputs>
+    </transition>
+    <transition c1x="450.6881865572717" c2y="235.3821879561259" c1y="181.1585656658813" description="" straight="1" type="2" ypos="126.9349433756367" endx="325.4215501662175" xpos="513.3215047527988" endy="289.6058102463706" c2x="388.0548683617445">
+      <from>1</from>
+      <to>2</to>
+      <inputs default="0" any="0" invert="0">DC</inputs>
+      <outputs>DC</outputs>
+    </transition>
+    <transition c1x="408.067755591199" c2y="441.8717497571369" c1y="385.4576094344132" description="" straight="1" type="2" ypos="352.6797967525772" endx="307.9247031830044" xpos="332.8831357316723" endy="363.8929330996271" c2x="282.4999864624285">
+      <from>2</from>
+      <to>2</to>
+      <inputs default="0" any="0" invert="0">DC</inputs>
+      <outputs></outputs>
+    </transition>
+    <transition c1x="214.0861011468298" c2y="202.5757922425297" c1y="262.955624992166" description="" straight="0" type="2" ypos="316.933437488249" endx="123.6568542494924" xpos="265.6291517202446" endy="146.5979797464467" c2x="175.1999048229072">
+      <from>2</from>
+      <to>0</to>
+      <inputs default="0" any="0" invert="0">ON</inputs>
+      <outputs>ON</outputs>
+    </transition>
+    <transition c1x="409.5475203593209" c2y="201.7950989585625" c1y="257.0158325025308" description="" straight="1" type="2" ypos="312.2365660464991" endx="542.1802403802068" xpos="343.231160348878" endy="146.5743654145941" c2x="475.8638803697638">
+      <from>2</from>
+      <to>1</to>
+      <inputs default="0" any="0" invert="0">OFF</inputs>
+      <outputs>OFF</outputs>
+    </transition>
+  </machine>
+</qfsmproject>
