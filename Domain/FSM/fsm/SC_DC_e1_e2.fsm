@@ -1,0 +1,86 @@
+<?xml version='1.0'?>
+<!DOCTYPE qfsmproject SYSTEM 'qfsm.dtd'>
+<qfsmproject version="0.54" author="Qfsm">
+  <machine nummooreout="0" transfontitalic="0" draw_it="1" statefontsize="8" transfont="Helvetica" statefontitalic="0" author="capocchi" description="Finite State Machine to model the simple and double clic problem with e1 and e2 as events" version="0.1" name="FSM_e1_e2" arrowtype="1" numbits="2" statefontweight="50" statefont="Helvetica" numin="0" transfontsize="8" transfontweight="50" type="2" numout="0" initialstate="0">
+    <outputnames_moore></outputnames_moore>
+    <inputnames></inputnames>
+    <outputnames></outputnames>
+    <itransition ypos="103" endx="120" xpos="60" endy="103"/>
+    <state pencolor="0" exit_actions="" radius="40" description="" finalstate="0" entry_actions="" moore_outputs="" ypos="103" code="0" xpos="160" linewidth="1">ON</state>
+    <state pencolor="0" exit_actions="" radius="40" description="" finalstate="0" entry_actions="" moore_outputs="" ypos="112" code="1" xpos="503" linewidth="1">OFF</state>
+    <state pencolor="0" exit_actions="" radius="40" description="" finalstate="0" entry_actions="" moore_outputs="" ypos="288" code="2" xpos="496" linewidth="1">DC_ON</state>
+    <state pencolor="0" exit_actions="" radius="40" description="" finalstate="0" entry_actions="" moore_outputs="" ypos="273" code="3" xpos="142" linewidth="1">DC_OFF</state>
+    <transition c1x="289.3407087357664" c2y="94.72026183821762" c1y="97.2860812107086" description="" straight="1" type="2" ypos="99.85190058319958" endx="468.2702743150217" xpos="199.8759259461388" endy="92.15444246572665" c2x="378.805491525394">
+      <from>0</from>
+      <to>1</to>
+      <inputs default="0" any="0" invert="0">e1</inputs>
+      <outputs>off</outputs>
+    </transition>
+    <transition c1x="278.2884917569862" c2y="132.4636020404552" c1y="133.9065227062914" description="" straight="1" type="2" ypos="135.3494433721276" endx="467.8117394569549" xpos="183.5268679070018" endy="131.020681374619" c2x="373.0501156069706">
+      <from>0</from>
+      <to>1</to>
+      <inputs default="0" any="0" invert="0">e2</inputs>
+      <outputs>off</outputs>
+    </transition>
+    <transition c1x="152.286497880503" c2y="202.9821006373691" c1y="172.9089144480386" description="" straight="1" type="2" ypos="142.8357282587081" endx="144.1023533249106" xpos="156.3785701582993" endy="233.0552868266996" c2x="148.1944256027068">
+      <from>0</from>
+      <to>3</to>
+      <inputs default="0" any="0" invert="0">e1e2</inputs>
+      <outputs>dc_off</outputs>
+    </transition>
+    <transition c1x="504.1449978766609" c2y="216.1152052049318" c1y="183.9986923124975" description="" straight="1" type="2" ypos="151.8821794200633" endx="500.2992737192037" xpos="506.0678599553895" endy="248.231718097366" c2x="502.2221357979323">
+      <from>1</from>
+      <to>2</to>
+      <inputs default="0" any="0" invert="0">e1e2</inputs>
+      <outputs>dc_on</outputs>
+    </transition>
+    <transition c1x="374.0394588296801" c2y="116.8678120469647" c1y="113.259465584453" description="" straight="1" type="2" ypos="109.6511191219412" endx="195.9803263430399" xpos="463.0690250730002" endy="120.4761585094765" c2x="285.00989258636">
+      <from>1</from>
+      <to>0</to>
+      <inputs default="0" any="0" invert="0">e2</inputs>
+      <outputs>on</outputs>
+    </transition>
+    <transition c1x="387.2878186086782" c2y="77.004752178074" c1y="76.51221291751705" description="" straight="1" type="2" ypos="76.01967365696009" endx="190.8157728449876" xpos="485.5238414905235" endy="77.49729143863095" c2x="289.0517957268329">
+      <from>1</from>
+      <to>0</to>
+      <inputs default="0" any="0" invert="0">e1</inputs>
+      <outputs>on</outputs>
+    </transition>
+    <transition c1x="364.0759022707186" c2y="288.3120468813329" c1y="290.3646539621634" description="" straight="1" type="2" ypos="292.4172610429939" endx="179.7384055860453" xpos="456.2446506130552" endy="286.2594398005024" c2x="271.9071539283819">
+      <from>2</from>
+      <to>3</to>
+      <inputs default="0" any="0" invert="0">e1e2</inputs>
+      <outputs>dc_off</outputs>
+    </transition>
+    <transition c1x="475.7172251777648" c2y="178.3234974048033" c1y="215.8532229927791" description="" straight="1" type="2" ypos="253.3829485807549" endx="475.2345771766307" xpos="475.9585491783318" endy="140.7937718168274" c2x="475.4759011771977">
+      <from>2</from>
+      <to>1</to>
+      <inputs default="0" any="0" invert="0">e2</inputs>
+      <outputs>off</outputs>
+    </transition>
+    <transition c1x="528.9427649877159" c2y="177.2127595026578" c1y="219.1759912565517" description="" straight="1" type="2" ypos="261.1392230104456" endx="535.5493388482694" xpos="525.6394780574393" endy="135.2495277487639" c2x="532.2460519179928">
+      <from>2</from>
+      <to>1</to>
+      <inputs default="0" any="0" invert="0">e1</inputs>
+      <outputs>off</outputs>
+    </transition>
+    <transition c1x="275.0499345506153" c2y="266.8392658098626" c1y="266.8784892198525" description="" straight="1" type="2" ypos="266.9177126298424" endx="462.0800678397965" xpos="181.5348679060247" endy="266.8000423998728" c2x="368.5650011952059">
+      <from>3</from>
+      <to>2</to>
+      <inputs default="0" any="0" invert="0">e1e2</inputs>
+      <outputs>dc_on</outputs>
+    </transition>
+    <transition c1x="119.6850437934983" c2y="166.6297254170081" c1y="205.0357458302374" description="" straight="1" type="2" ypos="243.4417662434668" endx="128.9554399953494" xpos="115.0498456925727" endy="128.2237050037786" c2x="124.3202418944238">
+      <from>3</from>
+      <to>0</to>
+      <inputs default="0" any="0" invert="0">e1</inputs>
+      <outputs>on</outputs>
+    </transition>
+    <transition c1x="174.3728249979557" c2y="172.8258069764941" c1y="209.0044749379259" description="" straight="1" type="2" ypos="245.1831428993578" endx="181.6303036525399" xpos="170.7440856706636" endy="136.6471390150622" c2x="178.0015643252478">
+      <from>3</from>
+      <to>0</to>
+      <inputs default="0" any="0" invert="0">e2</inputs>
+      <outputs>on</outputs>
+    </transition>
+  </machine>
+</qfsmproject>
