@@ -49,7 +49,7 @@ class To_Disk(QuickScope):
 		QuickScope.__init__(self)
 
 		### a way to overcome the random initialization of the fileNam attr directly in the param list of the constructor!
-		fileName = fileName if fileName!= 'result' else os.path.join(os.getcwd(),"out","result%d"%random.randint(1,100))
+		fileName = fileName if fileName!= 'result' else os.path.join(tempfile.gettempdir(),"result%d"%random.randint(1,100))
 		
 		# local copy
 		self.fileName = fileName

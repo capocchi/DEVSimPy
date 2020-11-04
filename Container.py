@@ -2469,7 +2469,6 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 				This method manage the propagation of modification
 				from window where modifications are performed to DEVSimPy main window.
-
 			"""
 
 			if self.diagram.modify:
