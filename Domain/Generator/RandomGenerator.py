@@ -22,12 +22,10 @@ class RandomGenerator(DomainBehavior):
             @param minStep: minimum step
             @param maxStep: maximum step
 			@param start: time start
-            @param choice: list of items
+			@param choice: list of items 
 
         """
         DomainBehavior.__init__(self)
-
-        self.initPhase('START',start)
 
         self.minValue = minValue
         self.maxValue = maxValue
@@ -37,14 +35,19 @@ class RandomGenerator(DomainBehavior):
 
         self.msg = Message(None, None)
 
+        self.initPhase('START',float(start))
+
     def outputFnc(self):
         """ lambda DEVS function
         """
         numberMessage = random.randint(1, len(self.OPorts))  # Number message to send
         portsToSend = random.sample(self.OPorts, numberMessage)  # The port with number message
-        
+
         for port in portsToSend:
-            value = random.randint(self.minValue, self.maxValue) if self.choice else random.choice(self.choice)
+            if self.choice:
+                value = random.choice(self.choice) 
+            else:
+                value = random.randint(self.minValue, self.maxValue)
             self.msg.value = [value, 0.0, 0.0]
             self.msg.time = self.timeNext
             ### adapted with PyPDEVS
@@ -55,7 +58,7 @@ class RandomGenerator(DomainBehavior):
         """
         self.state['sigma'] = random.randint(self.minStep, self.maxStep)
         ### adapted with PyPDEVS
-        return self.state
+        return self.getState()
 
     def __str__(self):
         """ str function
@@ -65,4 +68,4 @@ class RandomGenerator(DomainBehavior):
     def timeAdvance(self):
         """ Time advance function
         """
-        return self.state['sigma']
+        return self.getSigma()

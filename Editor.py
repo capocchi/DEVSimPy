@@ -2320,14 +2320,24 @@ class TestEditor(EditorFrame):
 		env_gen_def = wx.MenuItem(insert, wx.NewIdRef(), _('Environment methods generation'), _('Generate minimal methods for environment'))
 		# env_spec_def = wx.MenuItem(insert, wx.NewIdRef(), _('Specific environment methods generation'), _('Generate minimal methods for specific environment'))
 
-		insert.AppendItem(feature)
-		insert.AppendItem(steps)
-		insert.AppendItem(env_header)
-		insert.AppendItem(env_gen_def)
-		# insert.AppendItem(env_spec_def)
+		if wx.VERSION_STRING < '4.0':
+			insert.AppendItem(feature)
+			insert.AppendItem(steps)
+			insert.AppendItem(env_header)
+			insert.AppendItem(env_gen_def)
+			# insert.AppendItem(env_spec_def)
+		else:
+			insert.Append(feature)
+			insert.Append(steps)
+			insert.Append(env_header)
+			insert.Append(env_gen_def)
+			# insert.Append(env_spec_def)
 
 		menu = self.GetMenuBar().GetMenu(1)
-		menu.PrependMenu(wx.NewIdRef(), _("Insert"), insert)
+		if wx.VERSION_STRING < '4.0':
+			menu.PrependMenu(wx.NewIdRef(), _("Insert"), insert)
+		else:
+			menu.Prepend(wx.NewIdRef(), _("Insert"), insert)
 		### ----------------------------------------------------------------
 
 		### Bind all new event----------------------------------------------

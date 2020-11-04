@@ -164,7 +164,7 @@ class Zip:
 				#sys.stdout.write("%s unknown\n"%(fn))
 			
 		### try to rewrite not replaced files from original zip
-		if not zout.testzip():
+		try:
 			info_list = zin.infolist()
 			for item in info_list:
 				s = os.path.basename(item.filename)
@@ -172,7 +172,7 @@ class Zip:
 					buffer = zin.read(item.filename)
 					zout.writestr(item, buffer)
 					sys.stdout.write("%s rewrite\n"%(item.filename))
-		else:
+		except Exception as e:
 			sys.stdout.write("%s not updated\n"%(self.fn))
 
 		### close all files
@@ -268,8 +268,8 @@ class Zip:
 	def HasTests(fn:str)->bool:
 		""" TODO: comment
 		"""
-		module_name = getPythonModelFileName(fn)
-		name = os.path.basename(module_name.split('.'))[0]
+		#module_name = getPythonModelFileName(fn)
+		#name = os.path.basename(module_name.split('.'))[0]
 		zf = zipfile.ZipFile(fn, 'r')
 		nl = zf.namelist()
 		zf.close()

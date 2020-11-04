@@ -2972,7 +2972,7 @@ class Testable(object):
 			#model_path = os.path.dirname(self.python_path)
 
 			# TODO: Testable :: OnTestEditor => Fix Editor importation
-			from . import Editor
+			import Editor
 
 			#mainW = wx.GetApp().GetTopWindow()
 			### Editor instanciation and configuration---------------------
