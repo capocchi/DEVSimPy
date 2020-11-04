@@ -463,10 +463,11 @@ class LibraryTree(wx.TreeCtrl):
 		except Exception as info:
 			py_file_list = []
 			# if dName contains a python file, __init__.py is forced
-			for f in os.listdir(dName):
-				if f.endswith(ext):
-					sys.stderr.write(_("Exception, %s not imported: %s \n"%(dName,info)))
-					break
+			if os.path.isdir(dName):
+				for f in os.listdir(dName):
+					if f.endswith(ext):
+						sys.stderr.write(_("Exception, %s not imported: %s \n"%(dName,info)))
+						break
 
 		return py_file_list
 

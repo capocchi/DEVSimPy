@@ -671,7 +671,7 @@ class MainApplication(wx.Frame):
 		self.SetToolBar(tb)
 
 	def GetExportPathsList(self):
-		"""
+		""" Return the list of exported path.
 		"""
 		return self.exportPathsList
 
