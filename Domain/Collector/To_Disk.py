@@ -17,6 +17,7 @@ from QuickScope import *
 import random
 from decimal import *
 import os
+import tempfile
 
 def append_new_line(file_name, text_to_append):
 	"""Append given text as a new line at the end of file"""
