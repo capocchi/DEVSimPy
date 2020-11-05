@@ -40,8 +40,10 @@ class RedirectText(object):
 		if wx.Platform == '__WXGTK__':
 			wx.CallAfter(self.out.WriteText, string)
 		else:
-			self.out.WriteText(string)
-
+			if self.out:
+				self.out.WriteText(string)
+			else:
+				sys.stdout.write("TextCtrl is deleted!")
 	def flush(self):
 		pass
 
@@ -201,11 +203,11 @@ class VerboseConfig(wx.Frame):
 		sizer_3.Add(self.checkbox_6, 0, wx.EXPAND, 2, 2)
 
 		### adding buttons
-		sizer_5.Add(self.button_2, 1, wx.ALIGN_CENTER_HORIZONTAL)
-		sizer_5.Add(self.button_3, 1, wx.ALIGN_CENTER_HORIZONTAL)
+		sizer_5.Add(self.button_2, 1, wx.ALIGN_CENTER)
+		sizer_5.Add(self.button_3, 1, wx.ALIGN_CENTER)
 
-		sizer_4.Add(sizer_3, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL,0)
-		sizer_4.Add(sizer_5, 1, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL,0)
+		sizer_4.Add(sizer_3, 0, wx.ALL|wx.EXPAND,0)
+		sizer_4.Add(sizer_5, 1, wx.ALL|wx.EXPAND,0)
 
 		self.panel.SetSizer(sizer_4)
 

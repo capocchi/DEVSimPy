@@ -253,7 +253,7 @@ class MainApplication(wx.Frame):
 		## Set i18n locales --------------------------------------------------------
 		self.Seti18n()
 
-		wx.Frame.__init__(self, parent, wx.NewIdRef(), title, size = DefineScreenSize(), style = wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
+		wx.Frame.__init__(self, parent, wx.NewIdRef(), title, style = wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
 
 		self.window = None
 		self.otherWin = None
@@ -345,7 +345,14 @@ class MainApplication(wx.Frame):
 
 		sys.stdout.write("DEVSimPy is ready!\n")
 
-		self.Centre(wx.BOTH)
+		### load last size and position if exist
+		self.SetSize(DefineScreenSize() if not self.last_size else self.last_size)
+		
+		if self.last_position: 
+			self.SetPosition(self.last_position)
+		else:
+			self.Centre(wx.BOTH)
+		
 		self.Show()
 
 	def GetVersion(self):
@@ -372,6 +379,8 @@ class MainApplication(wx.Frame):
 		self.openFileList = ['']*NB_OPENED_FILE		# number of last opened files
 		self.language = 'fr' if 'fr_FR' in locale.getdefaultlocale() else 'en' # default language
 		self.perspectives = {}	# perpsective is void
+		self.last_position = None
+		self.last_size = None
 
 		### verison of the main (fo compatibility of DEVSimPy)
 		cfg.Write('version', str(__version__))
@@ -385,6 +394,8 @@ class MainApplication(wx.Frame):
 		cfg.Write('active_plugins', str("[]"))
 		cfg.Write('perspectives', str(eval("self.perspectives")))
 		cfg.Write('builtin_dict', str(eval("builtins.__dict__")))
+		cfg.Write('last_position', str(eval("self.last_position")))
+		cfg.Write('last_size', str(eval("self.last_size")))
 
 		sys.stdout.write("OK! \n")
 
@@ -424,6 +435,14 @@ class MainApplication(wx.Frame):
 
 				### load perspective profile
 				self.perspectives = eval(self.cfg.Read("perspectives"))
+
+				### load last position and size
+				try:
+					self.last_position = eval(self.cfg.Read("last_position"))
+					self.last_size = eval(self.cfg.Read("last_size"))
+				except:
+					self.last_position = None
+					self.last_size = None
 
 				### restore the builtin dict
 				try:
@@ -925,6 +944,14 @@ class MainApplication(wx.Frame):
 		self.cfg.Write("builtin_dict", str(eval('dict((k, builtins.__dict__[k]) for k in builtin_dict)')))
 		self.cfg.Flush()
 
+	def SavePosition(self):
+		self.cfg.Write("last_position", str(self.GetPosition()))
+		self.cfg.Flush()
+
+	def SaveSize(self):
+		self.cfg.Write("last_size", str(self.GetSize()))
+		self.cfg.Flush()
+
 	###
 	def OnCloseWindow(self, event):
 		""" Close icon has been pressed. Closing DEVSimPy.
@@ -946,6 +973,8 @@ class MainApplication(wx.Frame):
 			self.SaveLibraryProfile()
 			self.SavePerspectiveProfile()
 			self.SaveBuiltinDict()
+			self.SavePosition()
+			self.SaveSize()
 			self._mgr.UnInit()
 			del self._mgr
 			self.Destroy()
