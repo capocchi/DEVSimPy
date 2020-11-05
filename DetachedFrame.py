@@ -29,8 +29,12 @@ if wx.VERSION_STRING >= '4.0':
 	wx.ST_SIZEGRIP = wx.STB_SIZEGRIP
 
 if __name__ == '__main__':
-	builtins.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}
-	builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyPDEVS'
+	builtins.__dict__['GUI_FLAG'] = True
+	builtins.__dict__['HOME_PATH'] = os.path.abspath(os.path.dirname(sys.argv[0]))
+	builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
+	builtins.__dict__['DEVS_DIR_PATH_DICT'] = {\
+	'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),\
+	'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS', 'old')}
 
 import Container
 import Menu
@@ -61,10 +65,13 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 								name=name,
 								style=wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN)
 
+		self.default_style = self.GetWindowStyle()
+
 		### local Copy
 		self.title = title
 		self.parent = parent
 		self.diagram = diagram
+
 
 		### current abstract level
 		#=======================================================================
@@ -100,7 +107,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.toggle_list = wx.GetApp().GetTopWindow().toggle_list
 		else:
 			sys.stdout.write(_('Alone mode for DetachedFrame: Connector buttons are not binded\n'))
-			self.toggle_list = [wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef()]
+			self.toggle_list = [wx.NewIdRef() for i in range(6)]
 		
 		if wx.VERSION_STRING < '2.9':
 			self.tools = [  toolbar.AddTool(Menu.ID_SAVE, wx.Bitmap(os.path.join(ICON_PATH,'save.png')), shortHelpString=_('Save File') ,longHelpString=_('Save the current diagram'), clientData=self.canvas),
@@ -155,7 +162,6 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			ID_DOWNWARD = self.toggle_list[5]
 
 			if wx.VERSION_STRING < '2.9':
-    				
 				self.tools.append(toolbar.AddTool(ID_DOWNWARD, wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelpString=_('Downward rules'), longHelpString=_('Define Downward rules atomic model')))
 				self.tools.append(toolbar.AddTool(ID_UPWARD, wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelpString=_('Upward rules'), longHelpString=_('Define Upward rules atomic model')))
 			else:
@@ -213,10 +219,18 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		self.Bind(wx.EVT_TOOL, self.OnSaveAsFile, id=Menu.ID_SAVEAS)
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 
+	def OnStayOnTop(self, event):
+		"""
+		"""
+
+		if self.GetWindowStyle()==self.default_style:
+			self.SetWindowStyle(wx.CLIP_CHILDREN | wx.STAY_ON_TOP)
+		else:
+			self.SetWindowStyle(self.default_style)
+
 	def OnSaveFile(self, event):
 		""" Save button has been clicked
 		"""
-
 		### OnSaveFile of the mainW is activated
 		mainW = wx.GetApp().GetTopWindow()
 		mainW.OnSaveFile(event)
@@ -283,7 +297,6 @@ class TestApp(wx.App):
 
 		import gettext
 
-
 		#builtins.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
 		#builtins.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}
 
@@ -302,6 +315,5 @@ class TestApp(wx.App):
 		self.Close()
 
 if __name__ == '__main__':
-
 	app = TestApp(0)
 	app.MainLoop()

@@ -140,6 +140,9 @@ ID_ADD_CONSTANTS = wx.NewIdRef()
 # Experiment 
 ID_GEN_EXPERIMENT = wx.NewIdRef()
 
+# Stay on top
+ID_STAY_ON_TOP = wx.NewIdRef()
+
 # Library popup menu identifiers
 ID_NEW_LIB = wx.NewIdRef()
 ID_IMPORT_LIB = wx.NewIdRef()
@@ -825,7 +828,7 @@ class ShapeCanvasPopupMenu(wx.Menu):
 		add_constants.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'properties.png')))
 		preview_dia.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'print-preview.png')))
 		generate_experiment.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'generation.png')))
-
+	
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
 		### append items
@@ -836,7 +839,19 @@ class ShapeCanvasPopupMenu(wx.Menu):
 		AppendItem(preview_dia)
 		AppendItem(generate_experiment)
 
-		self.Enable(ID_PASTE_SHAPE, not Container.clipboard == [])
+		### Stay on top always for the detached frame (not for diagram into devsimpy as tab of notebook)
+		if isinstance(self.parent.parent, wx.Frame):
+			if self.parent.parent.GetWindowStyle() == self.parent.parent.default_style:
+				stay_on_top = wx.MenuItem(self, ID_STAY_ON_TOP, _('Enable stay on top'), _('Coupled model frame stay on top'))
+				stay_on_top.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'pin_out.png')))
+			else:
+				stay_on_top = wx.MenuItem(self, ID_STAY_ON_TOP, _('Disable stay on top'), _('Coupled model frame not stay on top'))
+				stay_on_top.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'pin_in.png')))
+
+			AppendItem(stay_on_top)
+			parent.Bind(wx.EVT_MENU, parent.parent.OnStayOnTop, id=ID_STAY_ON_TOP)
+
+		self.Enable(ID_PASTE_SHAPE, Container.clipboard != [])
 
 		### binding
 		parent.Bind(wx.EVT_MENU, parent.OnNewModel, id=ID_NEW_SHAPE)
@@ -845,7 +860,6 @@ class ShapeCanvasPopupMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.diagram.OnAddConstants, id=ID_ADD_CONSTANTS)
 		parent.Bind(wx.EVT_MENU, parent.parent.PrintPreview, id=ID_PREVIEW_PRINT)
 		parent.Bind(wx.EVT_MENU, ExperimentGenerator(os.path.join(HOME_PATH,'out')).OnExperiment, id=ID_GEN_EXPERIMENT)
-
 class ShapePopupMenu(wx.Menu):
 	""" Shape menu class
 	"""

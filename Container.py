@@ -76,6 +76,11 @@ if builtins.__dict__.get('GUI_FLAG',True):
 	import WizardGUI
 	import LabelGUI
 
+	RED = '#d91e1e'
+	GREEN = '#90ee90'
+	BLACK = '#000000'
+	BLUE = '#add8e6'
+
 import Components
 
 if builtins.__dict__.get('GUI_FLAG',True):
@@ -1184,7 +1189,7 @@ class Shape(ShapeEvtHandler):
 	""" Shape class
 	"""
 	
-	FILL = ['#add8e6']
+	FILL = [BLUE]
 	
 	def __init__(self, x=[], y=[]):
 		""" Constructor
@@ -2814,7 +2819,7 @@ class LinesShape(Shape):
 		"""
 		Shape.__init__(self)
 
-		self.fill = ['#d91e1e']
+		self.fill = [RED]
 		self.x = array.array('d', line.x)
 		self.y = array.array('d', line.y)
 
@@ -3847,7 +3852,7 @@ class ContainerBlock(Block, Diagram):
 	""" ContainerBlock(label, inputs, outputs)
 	"""
 
-	FILL = ['#90ee90']
+	FILL = [GREEN]
 	
 	###
 	def __init__(self, label = 'ContainerBlock', nb_inputs = 1, nb_outputs = 1):
@@ -4114,7 +4119,7 @@ class INode(ConnectableNode):
 		x,y = self.item.getPortXY('input', self.index)
 		self.moveto(x, y)
 
-		self.fill = ['#00b400'] #GREEN
+		self.fill = [GREEN]
 
 		dc.SetFont(wx.Font(10, wx.MODERN, wx.NORMAL, wx.NORMAL))
 
@@ -4185,7 +4190,7 @@ class ONode(ConnectableNode):
 		"""
 		x,y = self.item.getPortXY('output', self.index)
 		self.moveto(x, y)
-		self.fill = ['#ff0000']
+		self.fill = [RED]
 
 		dc.SetFont(wx.Font(10, wx.MODERN, wx.NORMAL, wx.NORMAL))
 		#dc.SetPen(wx.Pen(wx.NamedColour('black'), 20))
@@ -4225,7 +4230,7 @@ class ResizeableNode(Node):
 		"""
 		Node.__init__(self, item, index, cf, t)
 
-		self.fill = ['#000000'] #BLACK
+		self.fill = [BLACK]
 
 	def draw(self, dc):
 		""" Drawing method.
@@ -4325,7 +4330,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 		"""
 
 		CircleShape.draw(self, dc)
-		w,h =  dc.GetTextExtent(self.label)
+		w,h = dc.GetTextExtent(self.label)
 
 		### label position manager
 		if self.label_pos == 'bottom':
@@ -4342,8 +4347,8 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 		dc.DrawText(self.label, mx, my)
 
 		if self.lock_flag:
-			img =  wx.Bitmap(os.path.join(ICON_PATH_16_16, 'lock.png'),wx.BITMAP_TYPE_ANY)
-			dc.DrawBitmap( img, self.x[0]+w/3, self.y[0])
+			img = wx.Bitmap(os.path.join(ICON_PATH_16_16, 'lock.png'),wx.BITMAP_TYPE_ANY)
+			dc.DrawBitmap(img, self.x[0]+w/3, self.y[0])
 
 	def leftUp(self, event):
 		""" Left up event has been invoked.
@@ -4403,15 +4408,15 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 
 #------------------------------------------------------------------
 class iPort(Port):
-	""" IPort(label)
+	""" IPort(label) for ContainerBlock (coupled model)
 	"""
 
 	def __init__(self, label = 'iPort'):
-		""" Constructor
+		""" Constructor.
 		"""
 
 		Port.__init__(self, 50, 60, 100, 120, label)
-		self.fill= ['#add8e6']          # fill color
+		self.fill= [GREEN]
 		#self.AddAttribute('id')
 		self.label_pos = 'bottom'
 		self.input = 0
@@ -4430,7 +4435,7 @@ class iPort(Port):
 
 #----------------------------------------------------------------
 class oPort(Port):
-	""" OPort(label)
+	""" OPort(label) for ContainerBlock (coupled model)
 	"""
 
 	def __init__(self, label = 'oPort'):
@@ -4438,7 +4443,7 @@ class oPort(Port):
 		"""
 
 		Port.__init__(self, 50, 60, 100, 120, label)
-		self.fill = ['#90ee90']
+		self.fill = [RED]
 		#self.AddAttribute('id')
 		self.label_pos = 'bottom'
 		self.input = 1
