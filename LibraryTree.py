@@ -30,6 +30,8 @@ import inspect
 import zipfile
 import subprocess
 import importlib
+import tempfile
+
 import Container
 import Menu
 
@@ -1113,14 +1115,124 @@ class LibraryTree(wx.TreeCtrl):
 		new_label = d.GetValue()
 		### if new and old label are different
 		if new_label != name:
-			path = self.GetItemPyData(item)
-			bn = os.path.basename(path)
-			dn = os.path.dirname(path)
-			name, ext = os.path.splitext(bn)
-			### relace on file system
-			os.rename(path, os.path.join(dn, new_label)+ext)
-			### replace in __init__.py file
-			replaceAll(os.path.join(dn,'__init__.py'), os.path.splitext(bn)[0], new_label)
+
+			### path of file
+			old_path = self.GetItemPyData(item)
+			
+			old_bn = os.path.basename(old_path)
+			dn = os.path.dirname(old_path)
+			old_name, ext = os.path.splitext(old_bn)
+			
+			new_filepath = "".join([os.path.join(dn, new_label),ext])
+
+			if old_path.endswith('.py'):
+				
+				#read input file
+				fin = open(old_path, "rt")
+				#read file contents to string
+				data = fin.read()
+				
+				if 'DomainBehavior' in data or 'DomainStructure' in data:
+					
+					#replace all occurrences of the required string
+					data = data.replace(old_name, new_label)
+					#close the input file
+					fin.close()
+
+					#open the input file in write mode
+					fin = open(old_path, "wt")
+					#overrite the input file with the resulting data
+					fin.write(data)
+					#close the file
+					fin.close()
+
+					### relace on file system
+					os.rename(old_path, new_filepath)
+
+					### replace in __init__.py file
+					replaceAll(os.path.join(dn,'__init__.py'), old_name, new_label)
+				else:
+					wx.MessageBox(_("It seams that the python file dont inherite of the DomainBehavior or DomainStructure classes.\n \
+									Please correct this aspect before wanted to rename the python file from DEVSimPy."), _("Error"), wx.OK|wx.ICON_ERROR)
+					return
+
+			### if devsimpy model
+			elif zipfile.is_zipfile(old_path):
+				### extract behavioral python file (from .amd or .cmd) to tempdir 
+				### in order to rename it and change the name of contening class
+				temp_file = None
+				with zipfile.ZipFile(old_path) as zf:
+					### find all python files
+					for file in zf.namelist():
+						if file.endswith(".py"):
+							r = repr(zf.read(file))
+							### first find python file with the same of the archive
+							if file.endswith(old_bn):
+								#new_bn = os.path.basename(new_filepath)
+								temp_file = zf.extract(old_bn,tempfile.gettempdir())
+								new_temp_file = temp_file
+
+							### then find a python file that inherite of the DomainBehavior or StructureBehavior class
+							elif 'DomainBehavior' in r or 'DomainStructure' in r:
+
+								old_name = os.path.splitext(file)[0]
+								
+								### first we must change the name of this python file in order to have the same as the archive!
+								temp_file = zf.extract(file,tempfile.gettempdir())
+								new_temp_file = os.path.join(tempfile.gettempdir(),new_label+'.py')
+								### rename temp_file to new_temp_file according to the correspondance between the name of the python file and the name of the archive
+								### for exemple C:\Users\Laurent\AppData\Local\Temp\MyOld.py C:\Users\Laurent\AppData\Local\Temp\MyNew.py
+								if os.path.isfile(new_temp_file):
+									os.remove(new_temp_file)
+
+								os.rename(temp_file, new_temp_file)
+
+						elif file.endswith(".dat"):
+							import pickle
+							### replace in new_temp_file file
+							temp_dat_file = zf.extract(file,tempfile.gettempdir())
+
+							with open(temp_dat_file, 'rb') as sf:
+								scores = pickle.load(sf)
+					
+							scores[0] = new_filepath
+							scores[1] = os.path.join(new_filepath,os.path.basename(new_filepath).replace('.amd','.py').replace('.cmd','.py'))
+
+							with open(temp_dat_file, "wb") as sf:
+								pickle.dump(scores, sf)
+
+				if temp_file:
+
+					print("Replace %s by %s into %s"%(old_name,new_label,new_temp_file))
+					### replace in new_temp_file file
+					replaceAll(new_temp_file, old_name, new_label)
+
+					print("open %s"%old_path)
+					zip = Zip(old_path)
+					
+					if zip.Delete([os.path.basename(temp_file)]):
+						print("Delete %s"%os.path.basename(temp_file))
+						
+						print("Update %s"%new_temp_file)
+						zip.Update([new_temp_file,temp_dat_file])
+
+						print("rename %s to %s"%(old_path,new_filepath))	
+						
+						### relace on file system
+						os.rename(old_path, new_filepath)
+
+					#try:
+					#	os.remove(temp_file)
+					#except:
+					#	pass
+
+				else:
+					wx.MessageBox(_("It seams that the python filename and the model name are diffrent!\n \
+									Please correct this aspect by extracting the archive."), _("Error"), wx.OK|wx.ICON_ERROR)
+					return
+			else:
+				sys.stdout.write(_('Rename failed!'))
+				return
 
 			self.UpdateAll()
 
