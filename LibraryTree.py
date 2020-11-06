@@ -1161,6 +1161,11 @@ class LibraryTree(wx.TreeCtrl):
 				### extract behavioral python file (from .amd or .cmd) to tempdir 
 				### in order to rename it and change the name of contening class
 				temp_file = None
+				temp_dat_file = None
+
+				print(Zip.CheckDatFile(old_path))
+
+				return 
 				with zipfile.ZipFile(old_path) as zf:
 					### find all python files
 					for file in zf.namelist():
@@ -1188,18 +1193,22 @@ class LibraryTree(wx.TreeCtrl):
 								os.rename(temp_file, new_temp_file)
 
 						elif file.endswith(".dat"):
-							import pickle
+							### pickle object is not modifiable !
+							pass
+
+							#import pickle
 							### replace in new_temp_file file
-							temp_dat_file = zf.extract(file,tempfile.gettempdir())
+							#temp_dat_file = zf.extract(file,tempfile.gettempdir())
 
-							with open(temp_dat_file, 'rb') as sf:
-								scores = pickle.load(sf)
-					
-							scores[0] = new_filepath
-							scores[1] = os.path.join(new_filepath,os.path.basename(new_filepath).replace('.amd','.py').replace('.cmd','.py'))
+							#with open(temp_dat_file, 'rb') as sf:
+							#	block = pickle.load(sf)
 
-							with open(temp_dat_file, "wb") as sf:
-								pickle.dump(scores, sf)
+							#block.obj.model_path = new_filepath
+							#block.obj.python_path = os.path.join(new_filepath,os.path.basename(new_filepath).replace('.amd','.py').replace('.cmd','.py'))
+
+							#print(block)
+							 
+							#pickle.dump(obj = block, file = open(temp_dat_file, "wb"), protocol = 0)
 
 				if temp_file:
 
@@ -1214,7 +1223,7 @@ class LibraryTree(wx.TreeCtrl):
 						print("Delete %s"%os.path.basename(temp_file))
 						
 						print("Update %s"%new_temp_file)
-						zip.Update([new_temp_file,temp_dat_file])
+						zip.Update([new_temp_file])
 
 						print("rename %s to %s"%(old_path,new_filepath))	
 						

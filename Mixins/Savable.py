@@ -66,7 +66,7 @@ class PickledCollection(list):
 	"""
 
 	def __init__(self, obj):
-		""" Constructor
+		""" Constructor.
 		"""
 		self.obj = obj
 
@@ -148,83 +148,84 @@ class DumpZipFile(DumpBase):
 	ext = [".amd", ".cmd"]
 
 	def Save(self, obj_dumped, fileName = None):
-	    """ Function that save the codeblock on the disk.
+		""" Function that save the codeblock on the disk.
 		"""
-	    assert(fileName.endswith(tuple(DumpZipFile.ext)))
+		assert(fileName.endswith(tuple(DumpZipFile.ext)))
 
-	    ### local copy of paths
-	    python_path = obj_dumped.python_path
-	    image_path = obj_dumped.image_path
+		### local copy of paths
+		python_path = obj_dumped.python_path
+		image_path = obj_dumped.image_path
 
-	    ### Now, file paths are in the compressed file
-	    if os.path.isabs(python_path):
-	    	path = os.path.join(fileName, os.path.basename(obj_dumped.python_path))
-	    	if os.path.exists(path):
-	    		obj_dumped.python_path = path
+		### Now, file paths are in the compressed file
+		if os.path.isabs(python_path):
+			path = os.path.join(fileName, os.path.basename(obj_dumped.python_path))
+			if os.path.exists(path):
+				obj_dumped.python_path = path
 
-	    if os.path.isabs(image_path):
-	    	obj_dumped.image_path = os.path.join(fileName, os.path.basename(obj_dumped.image_path))
+		if os.path.isabs(image_path):
+			obj_dumped.image_path = os.path.join(fileName, os.path.basename(obj_dumped.image_path))
 
-	    obj_dumped.model_path = fileName
+		obj_dumped.model_path = fileName
 
-	    ### args is constructor args and we save these and not the current value
-	    if hasattr(obj_dumped, 'args'):
-	    	obj_dumped.args = Components.GetArgs(Components.GetClass(obj_dumped.python_path))
-	    try:
+		### args is constructor args and we save these and not the current value
+		if hasattr(obj_dumped, 'args'):
+			obj_dumped.args = Components.GetArgs(Components.GetClass(obj_dumped.python_path))
 
-	        fn = 'DEVSimPyModel.dat'
+		try:
 
-	        ### dump attributes in fn file
-	        pickle.dump(	obj = PickledCollection(obj_dumped),
-	        				file = open(fn, "wb"),
-	        				protocol = 0)
+			fn = 'DEVSimPyModel.dat'
 
-	    except Exception as info:
-	    	tb = traceback.format_exc()
-	    	sys.stderr.write(_("Problem saving (during the dump): %s -- %s\n")%(str(fileName),str(tb)))
-	    	return False
-	    else:
+			### dump attributes in fn file
+			pickle.dump(	obj = PickledCollection(obj_dumped),
+							file = open(fn, "wb"),
+							protocol = 0)
 
-	        try:
+		except Exception as info:
+			tb = traceback.format_exc()
+			sys.stderr.write(_("Problem saving (during the dump): %s -- %s\n")%(str(fileName),str(tb)))
+			return False
+		else:
 
-	            zf = ZipManager.Zip(fileName)
+			try:
 
-	            ### create or update fileName
-	            if os.path.exists(fileName):
-	            	zf.Update(replace_files = [fn, python_path, image_path])
-	            else:
-	            	zf.Create(add_files = [fn, python_path, image_path])
+				zf = ZipManager.Zip(fileName)
 
-	            os.remove(fn)
+				### create or update fileName
+				if os.path.exists(fileName):
+					zf.Update(replace_files = [fn, python_path, image_path])
+				else:
+					zf.Create(add_files = [fn, python_path, image_path])
 
-	            ## abs path of the directory that contains the file to export (str() to avoid unicode)
-	            newExportPath = str(os.path.dirname(fileName))
+				os.remove(fn)
 
-	            mainW = getTopLevelWindow()
-	            			### if export on local directory, we insert the path in the config file
-	            if os.path.basename(DOMAIN_PATH) not in newExportPath.split(
-	                os.sep
-	            ):
-	                ### update of .devsimpy config file
-	                mainW.exportPathsList = eval(mainW.cfg.Read("exportPathsList"))
-	                if newExportPath not in mainW.exportPathsList:
-	                	mainW.exportPathsList.append(str(newExportPath))
-	                mainW.cfg.Write("exportPathsList", str(eval("mainW.exportPathsList")))
+				## abs path of the directory that contains the file to export (str() to avoid unicode)
+				newExportPath = str(os.path.dirname(fileName))
 
-	            ### if lib is already in the lib tree, we update the tree
-	            mainW.tree.UpdateDomain(newExportPath)
-	            ### to sort lib tree
-	            mainW.tree.SortChildren(mainW.tree.root)
+				mainW = getTopLevelWindow()
+							### if export on local directory, we insert the path in the config file
+				if os.path.basename(DOMAIN_PATH) not in newExportPath.split(
+					os.sep
+				):
+					### update of .devsimpy config file
+					mainW.exportPathsList = eval(mainW.cfg.Read("exportPathsList"))
+					if newExportPath not in mainW.exportPathsList:
+						mainW.exportPathsList.append(str(newExportPath))
+					mainW.cfg.Write("exportPathsList", str(eval("mainW.exportPathsList")))
 
-	        except Exception as info:
-	        	tb = traceback.format_exc()
-	        	NotificationMessage(_('Error'), _("Problem saving (during the zip handling): %s -- %s\n")%(str(fileName),info), parent=getTopLevelWindow(), timeout=5)
-	        	sys.stderr.write(_("Problem saving (during the zip handling): %s -- %s\n")%(str(fileName),str(tb)))
+				### if lib is already in the lib tree, we update the tree
+				mainW.tree.UpdateDomain(newExportPath)
+				### to sort lib tree
+				mainW.tree.SortChildren(mainW.tree.root)
 
-	        	return False
-	        else:
+			except Exception as info:
+				tb = traceback.format_exc()
+				NotificationMessage(_('Error'), _("Problem saving (during the zip handling): %s -- %s\n")%(str(fileName),info), parent=getTopLevelWindow(), timeout=5)
+				sys.stderr.write(_("Problem saving (during the zip handling): %s -- %s\n")%(str(fileName),str(tb)))
 
-	            return True
+				return False
+			else:
+
+				return True
 
 	def Load(self, obj_loaded, fileName = None):
 		""" Load codeblock (obj_loaded) from fileName
@@ -306,16 +307,21 @@ class DumpZipFile(DumpBase):
 				else:
 					setattr(obj_loaded, attr, L[i])
 				
-
 		except IndexError as info:
 			tb = traceback.format_exc()
 			sys.stderr.write(_("Problem loading (old model): %s -- %s \n")%(str(fileName), str(tb)))
 			return info
-
 		
 		### if the model was made from another pc
 		if not os.path.exists(obj_loaded.model_path):
 			obj_loaded.model_path = fileName
+
+		#with zipfile.ZipFile(fileName) as zf:
+		#	### find all python files
+		#	for file in zf.namelist():
+		#		r = repr(zf.read(file))
+		#		if file.endswith(".py") and ('DomainBehavior' in r or 'DomainStructure' in r):
+		#			obj_loaded.python_path = os.path.join(obj_loaded.model_path, re.findall(".*(?:.[a|c]md)+[/|\\\](.*.py)*", obj_loaded.python_path)[-1])
 
 		### if python file is wrong
 		if not os.path.exists(os.path.dirname(obj_loaded.python_path)):

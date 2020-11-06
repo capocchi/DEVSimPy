@@ -20,7 +20,9 @@ import re
 import inspect
 import types
 import importlib
-
+import pickle
+import tempfile
+	
 import gettext
 _ = gettext.gettext
 
@@ -217,6 +219,55 @@ class Zip:
 		
 		return del_flag
 
+	@staticmethod
+	def CheckBehavioralPythonFile(fn:str)->bool:
+		""" Check if the behavioral python file is conform.
+		"""		
+		if not zipfile.is_zipfile(fn):
+			return False
+
+		bn = os.path.basename(fn)
+
+		with zipfile.ZipFile(fn) as zf:
+			### find all python files
+			for file in zf.namelist():
+				r = repr(zf.read(file))
+				if file.endswith(".py") and ('class %s(DomainBehavior):'%(bn) in r or 'class s%(DomainStructure)'%(bn) in r):
+					return True
+	
+		return False
+
+	@staticmethod
+	def CheckDatFile(fn:str)->bool:
+		""" Check if the DEVSimPyModel.dat has a goog model and python filename.
+		"""		
+		
+		file = Zip.GetDatFile(fn)
+	
+		if file != "":
+			with open(file, 'rb') as sf:
+				block = pickle.load(sf)
+
+			return 	block[0] == fn and \
+					block[1] == os.path.join(fn,os.path.basename(fn).replace('.amd','.py').replace('.cmd','.py'))
+		else:
+			return False
+
+	@staticmethod
+	def GetDatFile(fn:str)->str:
+		""" Return the DEVSimPyModel.dat file.
+		"""
+
+		if not zipfile.is_zipfile(fn):
+			return ""
+
+		with zipfile.ZipFile(fn) as zf:
+			### find all python files
+			for file in zf.namelist():
+				if file.endswith(".dat"):
+					return zf.extract(file,tempfile.gettempdir())
+		return ""
+
 	def GetImage(self, scaleW:int=16, scaleH:int=16):
 		""" Get image object from image file stored in zip file.
 			scaleH and scaleW are used to rescale image
@@ -249,6 +300,10 @@ class Zip:
 	def GetBehavioralPythonFile(fn:str)->str:
 		""" TODO: comment
 		"""
+
+		if not zipfile.is_zipfile(fn):
+			return ""
+
 		### zipfile (amd or cmd)
 		zf = zipfile.ZipFile(fn, 'r')
 		nl = zf.namelist()
@@ -259,7 +314,8 @@ class Zip:
 
 		for s in [s for s in nl if s.endswith(".py")]:
 			n, e = os.path.splitext(s)
-			if n == name:
+			r = repr(zf.read(s))
+			if n == name and 'DomainBehavior' in r or 'DomainStructure' in r:
 				return s
 
 		return ""
@@ -268,6 +324,10 @@ class Zip:
 	def GetPluginFile(fn:str)->str:
 		""" TODO: comment
 		"""
+		
+		if not zipfile.is_zipfile(fn):
+			return ""
+
 		### zipfile (amd or cmd)
 		zf = zipfile.ZipFile(fn, 'r')
 		nl = zf.namelist()
@@ -280,6 +340,9 @@ class Zip:
 	def HasPlugin(fn:str)->bool:
 		""" TODO: comment
 		"""
+
+		if not zipfile.is_zipfile(fn):
+			return ""
 
 		### zipfile (amd or cmd)
 		zf = zipfile.ZipFile(fn, 'r')
