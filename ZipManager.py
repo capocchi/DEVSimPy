@@ -77,9 +77,12 @@ def getPythonModelFileName(fn:str)->str:
 
 		sys.stdout.write(_('Behavioral python file not found in %s file'%fn))
 		raise Exception
-	else:
+	
+	elif py_file_list:
 		### zip file must contain python file
 		return py_file_list[0]
+	else:
+		return ""
 
 class Zip:
 
@@ -183,7 +186,7 @@ class Zip:
 		self.ClearFiles()
 
 	def Delete(self, delete_files:[str]=[])->None:
-		""" Remove file in zip archive
+		""" Remove file in zip archive.
 		"""
 
 		### delete empty fileName
@@ -196,12 +199,14 @@ class Zip:
 		zout = zipfile.ZipFile("new_arch.zip", 'w')
 
 		###
-		info_list = zin.infolist()
-		for item in info_list:
+		del_flag = False
+		for item in zin.infolist():
 			if item.filename not in delete_files:
 				buffer = zin.read(item.filename)
 				zout.writestr(item, buffer)
 				##sys.stdout.write("%s rewrite\n"%(item.filename))
+			else:
+				del_flag = True
 
 		### close all files
 		zout.close()
@@ -209,6 +214,8 @@ class Zip:
 
 		### remove and rename the zip file
 		self.ClearFiles()
+		
+		return del_flag
 
 	def GetImage(self, scaleW:int=16, scaleH:int=16):
 		""" Get image object from image file stored in zip file.
@@ -237,6 +244,25 @@ class Zip:
 		else:
 			zf.close()
 			return None
+
+	@staticmethod
+	def GetBehavioralPythonFile(fn:str)->str:
+		""" TODO: comment
+		"""
+		### zipfile (amd or cmd)
+		zf = zipfile.ZipFile(fn, 'r')
+		nl = zf.namelist()
+		zf.close()
+
+		bn = os.path.basename(fn)
+		name, ext = os.path.splitext(bn)
+
+		for s in [s for s in nl if s.endswith(".py")]:
+			n, e = os.path.splitext(s)
+			if n == name:
+				return s
+
+		return ""
 
 	@staticmethod
 	def GetPluginFile(fn:str)->str:
@@ -301,9 +327,14 @@ class Zip:
 		#if rcp: recompile(module_name)
 	
 		PluginManager.trigger_event("IMPORT_STRATEGIES", fn=self.fn)
-		fullname = "".join([os.path.basename(os.path.dirname(self.fn)), getPythonModelFileName(self.fn).split('.py')[0]])
-
-		return self.ImportModule() if fullname not in sys.modules else sys.modules[fullname]
+		
+		py_fn = getPythonModelFileName(self.fn)
+		try:
+			fullname = "".join([os.path.basename(os.path.dirname(self.fn)), py_fn.split('.py')[0]])
+			return self.ImportModule() if fullname not in sys.modules else sys.modules[fullname]
+		### model has not python file !
+		except Exception as e:
+			return e
 
 	def ImportModule(self)->types.ModuleType:
 		""" Import module from zip file corresponding to the amd or cmd model.
