@@ -3436,7 +3436,8 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		### Export by using right clic menu
 		if isinstance(menu, wx.Menu):
 			menuItem = menu.FindItemById(itemId)
-			ext = menuItem.GetLabel().lower()
+			ext = menuItem.GetItemLabel().lower()
+
 		### export (save) by using save button of DetachedFrame
 		else:
 			ext = 'cmd'
@@ -3475,7 +3476,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 				dlg.ShowModal()
 
 	def update(self, concret_subject = None):
-		""" Update method to respond to notify call
+		""" Update method to respond to notify call.
 		"""
 
 		state = concret_subject.GetState()
@@ -3526,7 +3527,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 	def __repr__(self):
 		"""
 		"""
-		s = _("\t Label: %s\n")%self.label
+		s = _("\n\t Label: %s\n")%self.label
 		s += _("\t Input/Output: %s,%s\n")%(str(self.input), str(self.output))
 		return s
 
@@ -3776,7 +3777,8 @@ class CodeBlock(Achievable, Block):
 		"""Called when an attribute lookup has not found the attribute in the usual places
 		"""
 		if name == 'dump_attributes':
-			return ['model_path', 'python_path', 'args'] + self.GetAttributes()
+			#return ['model_path', 'python_path', 'args'] + self.GetAttributes()
+			return ['args'] + self.GetAttributes()
 		#=======================================================================
 		elif name == 'dump_abstr_attributes':
 			### Atomic model has no abstract attributes
@@ -3853,9 +3855,9 @@ class CodeBlock(Achievable, Block):
 		""" Text representation.
 		"""
 		s = Block.__repr__(self)
-		s+= _("\t DEVS module path: %s \n")%str(self.python_path)
-		s+= _("\t DEVSimPy model path: %s \n")%str(self.model_path)
-		s+= _("\t DEVSimPy image path: %s \n")%str(self.image_path)
+		s+= _("\t DEVS module path: %s\n")%str(self.python_path)
+		s+= _("\t DEVSimPy model path: %s\n")%str(self.model_path)
+		s+= _("\t DEVSimPy image path: %s\n")%str(self.image_path)
 		return s
 
 #---------------------------------------------------------
@@ -4020,9 +4022,9 @@ class ContainerBlock(Block, Diagram):
 
 	def __repr__(self):
 		s = Block.__repr__(self)
-		s += _("\t DEVS module path: %s \n"%str(self.python_path))
-		s += _("\t DEVSimPy model path: %s \n")%str(self.model_path)
-		s +=_("\t DEVSimPy image path: %s \n")%str(self.image_path)
+		s += _("\t DEVS module path: %s\n"%str(self.python_path))
+		s += _("\t DEVSimPy model path: %s\n")%str(self.model_path)
+		s +=_("\t DEVSimPy image path: %s\n")%str(self.image_path)
 		return s
 
 #---------------------------------------------------------

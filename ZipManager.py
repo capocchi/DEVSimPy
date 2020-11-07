@@ -220,38 +220,9 @@ class Zip:
 		return del_flag
 
 	@staticmethod
-	def CheckBehavioralPythonFile(fn:str)->bool:
-		""" Check if the behavioral python file is conform.
-		"""		
-		if not zipfile.is_zipfile(fn):
-			return False
-
-		bn = os.path.basename(fn)
-
-		with zipfile.ZipFile(fn) as zf:
-			### find all python files
-			for file in zf.namelist():
-				r = repr(zf.read(file))
-				if file.endswith(".py") and ('class %s(DomainBehavior):'%(bn) in r or 'class s%(DomainStructure)'%(bn) in r):
-					return True
-	
-		return False
-
-	@staticmethod
-	def CheckDatFile(fn:str)->bool:
-		""" Check if the DEVSimPyModel.dat has a goog model and python filename.
-		"""		
-		
-		file = Zip.GetDatFile(fn)
-	
-		if file != "":
-			with open(file, 'rb') as sf:
-				block = pickle.load(sf)
-
-			return 	block[0] == fn and \
-					block[1] == os.path.join(fn,os.path.basename(fn).replace('.amd','.py').replace('.cmd','.py'))
-		else:
-			return False
+	def Check(fn:str)->bool:
+		"""
+		"""
 
 	@staticmethod
 	def GetDatFile(fn:str)->str:
@@ -390,15 +361,16 @@ class Zip:
 		#if rcp: recompile(module_name)
 	
 		PluginManager.trigger_event("IMPORT_STRATEGIES", fn=self.fn)
-		
+					
 		py_fn = getPythonModelFileName(self.fn)
+
 		try:
 			fullname = "".join([os.path.basename(os.path.dirname(self.fn)), py_fn.split('.py')[0]])
 			return self.ImportModule() if fullname not in sys.modules else sys.modules[fullname]
 		### model has not python file !
 		except Exception as e:
 			return e
-
+		
 	def ImportModule(self)->types.ModuleType:
 		""" Import module from zip file corresponding to the amd or cmd model.
 		"""
