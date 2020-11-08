@@ -3436,7 +3436,8 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		### Export by using right clic menu
 		if isinstance(menu, wx.Menu):
 			menuItem = menu.FindItemById(itemId)
-			ext = menuItem.GetLabel().lower()
+			ext = menuItem.GetItemLabel().lower()
+
 		### export (save) by using save button of DetachedFrame
 		else:
 			ext = 'cmd'
@@ -3475,7 +3476,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 				dlg.ShowModal()
 
 	def update(self, concret_subject = None):
-		""" Update method to respond to notify call
+		""" Update method to respond to notify call.
 		"""
 
 		state = concret_subject.GetState()
@@ -3526,7 +3527,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 	def __repr__(self):
 		"""
 		"""
-		s = _("\t Label: %s\n")%self.label
+		s = _("\n\t Label: %s\n")%self.label
 		s += _("\t Input/Output: %s,%s\n")%(str(self.input), str(self.output))
 		return s
 
@@ -3651,55 +3652,66 @@ class CodeBlock(Achievable, Block):
 			else:
 				sys.stderr.write(_("Error in setstate for CodeBlock: %s\n"%str(cls)))
 
-
 		state['bad_filename_path_flag'] = False
-		### if the model path is empty and the python path is wrong
-		if model_path == '' and not os.path.exists(python_path) :#and zipfile.is_zipfile(os.path.dirname(python_path))):
+		### if the python path is wrong
+		if not os.path.exists(python_path) :#and zipfile.is_zipfile(os.path.dirname(python_path))):
+			### if the model path is empty (for pure python file - not .amd or .cmd)
+			if model_path == '' :
+				path = python_path
 
-			path = python_path
+				### if DOMAIN is in python_path
+				if dir_name in python_path:
+					
+					### try to find in DOMAIN directory
+					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(python_path[python_path.index(dir_name):]).strip('[]')))
 
-			### if DOMAIN is in python_path
-			if dir_name in python_path:
-
-				### try to find in DOMAIN directory
-				path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(python_path[python_path.index(dir_name):]).strip('[]')))
-
-				### try to find it in exportedPathList (after Domain check) and recent opened file
+					### try to find it in exportedPathList (after Domain check) and recent opened file
+					if not os.path.exists(path):
+						mainW = wx.GetApp().GetTopWindow()
+						if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
+							for p in mainW.exportPathsList+mainW.openFileList:
+								lib_name = os.path.basename(p)
+								if lib_name !='' and lib_name in path:
+									path = p+path.split(lib_name)[-1]
+									break
+				else:
+					### try to find if python_path contains a directory wich is also in Domain
+					### subdirectories of Domain
+					subdirectories = os.listdir(DOMAIN_PATH)
+					### for all directories if the directory is in python_path (excluding the file .py (-1))
+					for dir in subdirectories:
+						if dir in python_path.split(os.sep)[0:-1]:
+							### yes, the python_path is wrong but we find that in the Domain there is a directory with the same name
+							a = python_path.split(dir+os.sep)
+							path = os.path.join(DOMAIN_PATH,dir,a[-1])
+							break
+					
+				### try to find the python_path in recent opened file directory
 				if not os.path.exists(path):
 					mainW = wx.GetApp().GetTopWindow()
 					if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
-						for p in mainW.exportPathsList+mainW.openFileList:
-							lib_name = os.path.basename(p)
-							if lib_name !='' and lib_name in path:
-								path = p+path.split(lib_name)[-1]
+						for a in [os.path.dirname(p) for p in mainW.exportPathsList+mainW.openFileList]:
+							p = os.path.join(a,os.path.basename(python_path))
+							if os.path.exists(p):
+								path = p
 								break
-			else:
-				### try to find if python_path contains a directory wich is also in Domain
-				### subdirectories of Domain
-				subdirectories = os.listdir(DOMAIN_PATH)
-				### for all directories if the directory is in python_path (excluding the file .py (-1))
-				for dir in subdirectories:
-					if dir in python_path.split(os.sep)[0:-1]:
-						### yes, the python_path is wrong but we find that in the Domain there is a directory with the same name
-						a = python_path.split(dir+os.sep)
-						path = os.path.join(DOMAIN_PATH,dir,a[-1])
-						break
-				
-			### try to find the python_path in recent opened file directory
-			if not os.path.exists(path):
-				mainW = wx.GetApp().GetTopWindow()
-				if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
-					for a in [os.path.dirname(p) for p in mainW.exportPathsList+mainW.openFileList]:
-						p = os.path.join(a,os.path.basename(python_path))
-						if os.path.exists(p):
-							path = p
-							break
 
-			### if path is always wrong, flag is visible
-			if os.path.exists(path) :
-				state['python_path'] = path
+				### if path is always wrong, flag is visible
+				if os.path.exists(path) :
+					state['python_path'] = path
+				else:
+					state['bad_filename_path_flag'] = True
+
+			### for .cmd or .amd
 			else:
-				state['bad_filename_path_flag'] = True
+				pass
+				#with zipfile.ZipFile(model_path) as zf:
+				#	### find all python files
+				#	for file in zf.namelist():
+				#		r = repr(zf.read(file))
+				#		if file.endswith(".py") and ('DomainBehavior' in r or 'DomainStructure' in r):
+				#			#state['python_path'] = os.path.join(model_path, os.path.basename(model_path).replace('.amd','.py').replace('.cmd','.py'))
+				#			state['bad_filename_path_flag'] =  file != state['python_path'] 
 
 		### if the fileName attribut dont exist, we define it into the current devsimpy directory (then the user can change it from Property panel)
 		if 'args' in state:
@@ -3765,7 +3777,8 @@ class CodeBlock(Achievable, Block):
 		"""Called when an attribute lookup has not found the attribute in the usual places
 		"""
 		if name == 'dump_attributes':
-			return ['model_path', 'python_path', 'args'] + self.GetAttributes()
+			#return ['model_path', 'python_path', 'args'] + self.GetAttributes()
+			return ['args'] + self.GetAttributes()
 		#=======================================================================
 		elif name == 'dump_abstr_attributes':
 			### Atomic model has no abstract attributes
@@ -3842,9 +3855,9 @@ class CodeBlock(Achievable, Block):
 		""" Text representation.
 		"""
 		s = Block.__repr__(self)
-		s+= _("\t DEVS module path: %s \n")%str(self.python_path)
-		s+= _("\t DEVSimPy model path: %s \n")%str(self.model_path)
-		s+= _("\t DEVSimPy image path: %s \n")%str(self.image_path)
+		s+= _("\t DEVS module path: %s\n")%str(self.python_path)
+		s+= _("\t DEVSimPy model path: %s\n")%str(self.model_path)
+		s+= _("\t DEVSimPy image path: %s\n")%str(self.image_path)
 		return s
 
 #---------------------------------------------------------
@@ -4009,9 +4022,9 @@ class ContainerBlock(Block, Diagram):
 
 	def __repr__(self):
 		s = Block.__repr__(self)
-		s += _("\t DEVS module path: %s \n"%str(self.python_path))
-		s += _("\t DEVSimPy model path: %s \n")%str(self.model_path)
-		s +=_("\t DEVSimPy image path: %s \n")%str(self.image_path)
+		s += _("\t DEVS module path: %s\n"%str(self.python_path))
+		s += _("\t DEVSimPy model path: %s\n")%str(self.model_path)
+		s +=_("\t DEVSimPy image path: %s\n")%str(self.image_path)
 		return s
 
 #---------------------------------------------------------

@@ -37,7 +37,7 @@ import Menu
 
 from Utilities import replaceAll, getPYFileListFromInit, path_to_module, printOnStatusBar, NotificationMessage, install_and_import, module_list
 from Decorators import BuzyCursorNotification
-from Components import BlockFactory, DEVSComponent, GetClass
+from Components import BlockFactory, DEVSComponent, GetClass, PyComponent, GenericComponent
 from ZipManager import Zip, getPythonModelFileName
 from ReloadModule import recompile
 from ImportLibrary import DeleteBox
@@ -155,6 +155,7 @@ class LibraryTree(wx.TreeCtrl):
 			#threading.Thread(target=self.InsertNewDomain,
         	#args=(absdName, self.root, list(self.GetSubDomain(absdName, self.GetDomainList(absdName)).values())[0],)
     		#).start()
+			
 			self.InsertNewDomain(absdName, self.root, list(self.GetSubDomain(absdName, self.GetDomainList(absdName)).values())[0])
 
 		wx.CallAfter(self.SortChildren,self.root)
@@ -437,18 +438,19 @@ class LibraryTree(wx.TreeCtrl):
 		
 		### import are here because the simulator (PyDEVS or PyPDEVS) require it
 		from DomainInterface.DomainBehavior import DomainBehavior
-
+		
 		try:
 			name_list = getPYFileListFromInit(os.path.join(dName,'__init__.py'), ext)
 			py_file_list = []
-			
-			for s in name_list:
+
+			for s in list(name_list):
 				python_file = os.path.join(dName, s+ext)
+				
 				### test if tmp is only composed by python file (case of the user write into the __init__.py file directory name is possible ! then we delete the directory names)
 				if os.path.isfile(python_file):
 
 					cls = GetClass(python_file)
-
+					
 					if cls is not None and not isinstance(cls, tuple):
 
 						### only model that herite from DomainBehavior is shown in lib
@@ -516,6 +518,75 @@ class LibraryTree(wx.TreeCtrl):
 
 		return py_file_list + devsimpy_file_list
 
+	def AddComponent(self, item, parentPath, parent, p=None):
+		""" Return id and error of item when added.
+		"""
+		
+		come_from_net = parentPath.startswith('http')
+
+		if item.lower().endswith(('.amd','.cmd')):
+			### gestion de l'importation de module (.py) associé au .cmd si le fichier .py n'a jamais été decompresssé (pour edition par exemple)
+			if not come_from_net:
+				path = os.path.join(parentPath, item)
+				zf = Zip(path)
+				module = zf.GetModule()
+				image_file = zf.GetImage()
+			else:
+				path = "".join([parentPath,'/',item,'.py'])
+				module = load_module_from_net(path)
+
+			### check error
+			error = isinstance(module, Exception) or not Zip.GetBehavioralPythonFile(path)
+
+			### defalut mcc is null
+			mcc = 0.0
+
+			### change icon depending on the error and the presence of image in amd
+			if error:
+				img = self.not_importedidx
+			elif image_file is not None:
+				img = self.il.Add(image_file.ConvertToBitmap())
+			else:
+				if item.lower().endswith('.cmd'):
+					img = self.coupledidx
+				else:
+					img = self.atomicidx
+					### mcc compuation only for atomic model
+					mcc = GetMacCabeMetric(path)
+
+			### insert into the tree
+			id = self.InsertItemBefore(p if p else parent, 0, os.path.splitext(item)[0], img, img)
+		
+		else:
+			path = os.path.join(parentPath, "".join([item,'.py'])) if not come_from_net else "".join([parentPath,'/',item,'.py'])
+
+			### try for .pyc
+			ispyc = False
+			if not os.path.exists(path):
+				path = os.path.join(parentPath, "".join([item,'.pyc'])) if not come_from_net else "".join([parentPath,'/',item,'.pyc'])
+				ispyc = True
+
+			### Chedk error for DEVS instance
+			devs = Container.CheckClass(path)
+			error = isinstance(devs, tuple)
+			
+			### define the propriate img depending on error
+			img = self.not_importedidx if error else self.pythoncfileidx if ispyc else self.pythonfileidx
+			
+			### insert in the tree
+			id = self.InsertItemBefore(parent, 0, item, img, img)
+		
+			#mcc = float(subprocess.check_output('python {} {}'.format('Complexity.py', path), shell = True))
+			mcc = GetMacCabeMetric(path)
+
+		self.SetPyData(id, path)
+
+		self.MetricDico.update({id:{'mcc':mcc, 'parent':parent}})
+		s = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
+		self.MetricDico.update({parent:{'mcc':s, 'parent':None}})
+
+		return (id, error)
+
 	###
 	def InsertNewDomain(self, dName, parent, L = []):
 		""" Recurrent function that insert new Domain on library panel.
@@ -523,7 +594,6 @@ class LibraryTree(wx.TreeCtrl):
 
 		### first only for the root
 		if dName not in list(self.ItemDico.keys()):
-		
 			label = os.path.basename(dName) if not dName.startswith('http') else [a for a in dName.split('/') if a!=''][-1]
 			id = self.InsertItemBefore(parent, 0, label)
 			self.SetItemImage(id, self.fldridx, wx.TreeItemIcon_Normal)
@@ -538,114 +608,26 @@ class LibraryTree(wx.TreeCtrl):
 		else:
 			item = L.pop(0)
 
-			isunicode = isinstance(item, str)
 			isstr = isinstance(item, str)
 			isdict = isinstance(item, dict)
 
 			### element to insert in the list
 			D = []
+
 			### if child is build from DEVSimPy
 			if isstr:
-
 				### parent is retrieved from dict
 				parent = self.ItemDico[dName]
 				assert parent != None
 	
 				### parent path
 				parentPath = self.GetPyData(parent)
-				come_from_net = parentPath.startswith('http')
 
 				### comma replace
 				item = item.strip()
 
-				### suppression de l'extention su .cmd (model atomic lu à partir de __init__ donc pas d'extention)
-				if item.endswith('.cmd'):
-					### gestion de l'importation de module (.py) associé au .cmd si le fichier .py n'a jamais été decompresssé (pour edition par exemple)
-					if not come_from_net:
-						path = os.path.join(parentPath, item)
-						zf = Zip(path)
-						module = zf.GetModule()
-						image_file = zf.GetImage()
-					else:
-						path = "".join([parentPath,'/',item,'.py'])
-						module = load_module_from_net(path)
-
-					### check error
-					error = isinstance(module, Exception)
-
-					### change icon depending on the error and the presence of image in amd
-					if error:
-						img = self.not_importedidx
-					elif image_file is not None:
-						img = self.il.Add(image_file.ConvertToBitmap())
-					else:
-						img = self.coupledidx
-
-					### insert into the tree
-					id = self.InsertItemBefore(parent, 0, os.path.splitext(item)[0], img, img)
-					self.SetPyData(id, path)
-
-					self.MetricDico.update({id:{'mcc':0.0, 'parent':parent}})
-					s = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
-					self.MetricDico.update({parent:{'mcc':s, 'parent':None}})
-
-				elif item.endswith('.amd'):
-					### gestion de l'importation de module (.py) associé au .amd si le fichier .py n'a jamais été decompresssé (pour edition par exemple)
-					if not come_from_net:
-						path = os.path.join(parentPath, item)
-						zf = Zip(path)
-						module = zf.GetModule()
-						image_file = zf.GetImage()
-					else:
-						path = "".join([parentPath,'/',item,'.py'])
-						module = load_module_from_net(path)
-
-					### check error
-					error = isinstance(module, Exception)
-
-					### change icon depending on the error and the presence of image in amd
-					if error:
-						img = self.not_importedidx
-					elif image_file is not None:
-						img = self.il.Add(image_file.ConvertToBitmap())
-					else:
-						img = self.atomicidx
-
-					mcc = GetMacCabeMetric(path)
-
-					### insert in the tree
-					id = self.InsertItemBefore(parent, 0, os.path.splitext(item)[0], img, img)
-					self.SetPyData(id, path)
-
-					self.MetricDico.update({id:{'mcc':mcc, 'parent':parent}})
-					s = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
-					self.MetricDico.update({parent:{'mcc':s, 'parent':None}})
-
-				else:
-					
-					path = os.path.join(parentPath, "".join([item,'.py'])) if not come_from_net else "".join([parentPath,'/',item,'.py'])
-
-					### try for .pyc
-					ispyc = False
-					if not os.path.exists(path):
-						path = os.path.join(parentPath, "".join([item,'.pyc'])) if not come_from_net else "".join([parentPath,'/',item,'.pyc'])
-						ispyc = True
-
-					devs = Container.CheckClass(path)
-					
-					#mcc = float(subprocess.check_output('python {} {}'.format('Complexity.py', path), shell = True))
-					mcc = GetMacCabeMetric(path)
-
-					error = isinstance(devs, tuple)
-					img = self.not_importedidx if error else self.pythoncfileidx if ispyc else self.pythonfileidx
-					
-					### insert in the tree
-					id = self.InsertItemBefore(parent, 0, item, img, img)
-					self.SetPyData(id, path)
-
-					self.MetricDico.update({id:{'mcc':mcc, 'parent':parent}})
-					s = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
-					self.MetricDico.update({parent:{'mcc':s, 'parent':None}})
+				### only for atomic or coupled model (atomic model is readed from __init__, so no extention)
+				id, error = self.AddComponent(item, parentPath, parent)
 
 				### error info back propagation
 				if error:
@@ -655,16 +637,18 @@ class LibraryTree(wx.TreeCtrl):
 						parent = self.GetItemParent(parent)
 
 				### insertion des donnees dans l'item et gestion du ItemDico
-				self.ItemDico.update({os.path.join(parentPath,item,):id})
+				self.ItemDico.update({os.path.join(parentPath,item):id})
 
 			### si le fils est un sous repertoire contenant au moins un fichier (all dans __init__.py different de [])
 			elif isdict and list(item.values()) != [[]]:
 
+				parentPath = list(item.keys())[0]
+
 				### name to insert in the tree
-				dName = os.path.basename(list(item.keys())[0])
+				dName = os.path.basename(parentPath)
 
 				### new parent
-				parent = self.ItemDico[os.path.dirname(list(item.keys())[0])] if not dName.startswith('http') else self.ItemDico[list(item.keys())[0].replace('/'+dName,'')]
+				parent = self.ItemDico[os.path.dirname(parentPath)] if not dName.startswith('http') else self.ItemDico[parentPath.replace('/'+dName,'')]
 
 				assert(parent!=None)
 
@@ -672,114 +656,28 @@ class LibraryTree(wx.TreeCtrl):
 				id = self.InsertItemBefore(parent, 0, dName)
 				
 				self.SetItemBold(id)
-
 				self.SetItemImage(id, self.fldridx, wx.TreeItemIcon_Normal)
 				self.SetItemImage(id, self.fldropenidx, wx.TreeItemIcon_Expanded)
 
 				### stockage du parent avec pour cle le chemin complet avec extention (pour l'import du moule dans le Dnd)
-				self.ItemDico.update({list(item.keys())[0]:id})
-				self.SetPyData(id,list(item.keys())[0])
+				self.ItemDico.update({parentPath:id})
+				self.SetPyData(id,parentPath)
 
 				self.MetricDico.update({id:{'mcc':0.0, 'parent':parent}})
 				self.MetricDico.update({parent:{'mcc':0.0, 'parent':None}})
 
 				### for the childrens of the sub-domain
 				for elem in list(item.values())[0]:
-					# si elem simple (modèle couple ou atomic)
+					# if simple element (coupled or atomic model)
 					if isinstance(elem, str):
 						### replace the spaces
 						elem = elem.strip() #replace(' ','')
 
-						### parent provisoir
-						p = self.ItemDico[list(item.keys())[0]]
+						### transiant parent
+						p = self.ItemDico[parentPath]
 						assert(p!=None)
-						come_from_net = list(item.keys())[0].startswith('http')
-						### si model atomic
-						if elem.endswith('.cmd'):
-							### gestion de l'importation de module (.py) associé au .amd si le fichier .py n'a jamais été decompresssé (pour edition par exemple)
-							if not come_from_net:
-								path = os.path.join(list(item.keys())[0], elem)
-								zf = Zip(path)
-								module = zf.GetModule()
-								image_file = zf.GetImage()
-							else:
-								path = "".join([list(item.keys())[0],'/',elem,'.py'])
-								module = load_module_from_net(path)
-
-							### check error
-							error = isinstance(module, Exception)
-
-							### change icon depending on the error and the presence of image in amd
-							if error:
-								img = self.not_importedidx
-							elif image_file is not None:
-								img = self.il.Add(image_file.ConvertToBitmap())
-							else:
-								img = self.coupledidx
-
-							### insertion dans le tree
-							id = self.InsertItemBefore(p, 0, os.path.splitext(elem)[0], img, img)
-							self.SetPyData(id, path)
-
-							self.MetricDico.update({id:{'mcc':0.0, 'parent':parent}})
-							s = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
-							self.MetricDico.update({parent:{'mcc':s, 'parent':None}})
-
-						elif elem.endswith('.amd'):
-							### gestion de l'importation de module (.py) associé au .amd si le fichier .py n'a jamais été decompresssé (pour edition par exemple)
-							if not come_from_net:
-								path = os.path.join(list(item.keys())[0], elem)
-								zf = Zip(path)
-								module = zf.GetModule()
-								image_file = zf.GetImage()
-							else:
-								path = "".join([list(item.keys())[0],'/',elem,'.py'])
-								module = load_module_from_net(path)
-
-							### check error
-							error = isinstance(module, Exception)
-
-							### change icon depending on the error and the presence of image in amd
-							if error:
-								img = self.not_importedidx
-							elif image_file is not None:
-								img = self.il.Add(image_file.ConvertToBitmap())
-							else:
-								img = self.atomicidx
-
-							mcc = GetMacCabeMetric(path)
-
-							### insert in the tree
-							id = self.InsertItemBefore(p, 0, os.path.splitext(elem)[0], img, img)
-							self.SetPyData(id, path)
-
-							self.MetricDico.update({id:{'mcc':mcc, 'parent':parent}})
-							s = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
-							self.MetricDico.update({parent:{'mcc':s, 'parent':None}})
-
-						else:
-			
-							path = os.path.join(list(item.keys())[0],"".join([elem,'.py'])) if not list(item.keys())[0].startswith('http') else list(item.keys())[0]+'/'+elem+'.py'
-							### try for .pyc file
-							ispyc = False
-							if not os.path.exists(path):
-								path = os.path.join(list(item.keys())[0],"".join([elem,'.pyc'])) if not list(item.keys())[0].startswith('http') else list(item.keys())[0]+'/'+elem+'.pyc'
-								ispyc = True
-								
-							devs = Container.CheckClass(path)
-
-							mcc = GetMacCabeMetric(path)
-
-							error = isinstance(devs, tuple)
-							img = self.not_importedidx if error else self.pythoncfileidx if ispyc else self.pythonfileidx
-
-							### insert in the tree
-							id = self.InsertItemBefore(p, 0, elem, img, img)
-							self.SetPyData(id, path)
-							self.MetricDico.update({id:{'mcc':mcc, 'parent':parent}})
-
-							s = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
-							self.MetricDico.update({parent:{'mcc':s, 'parent':None}})
+						
+						id, error = self.AddComponent(elem, parentPath, parent, p)
 
 						### error info back propagation
 						if error:
@@ -789,24 +687,21 @@ class LibraryTree(wx.TreeCtrl):
 								### next parent item
 								p = self.GetItemParent(p)
 						
-						self.ItemDico.update({os.path.join(list(item.keys())[0], elem):id})
+						self.ItemDico.update({os.path.join(parentPath, elem):id})
 
 					else:
 						### in order to go up the information in the list
 						D.append(elem)
 
 				### update with whole name
-				dName = list(item.keys())[0]
+				dName = parentPath
 
 			### for spash screen
 			try:
 				### format the string depending the nature of the item
-				if isdict:
-					item = " ".join([os.path.basename(list(item.keys())[0]), 'from', os.path.basename(os.path.dirname(list(item.keys())[0]))])
-				else:
-					item = " ".join([item, 'from', os.path.basename(dName)])
-
-				pub.sendMessage('object.added', message='Loading %s domain...'%item)
+				info = " ".join([os.path.basename(parentPath), 'from', os.path.basename(os.path.dirname(parentPath))]) if isdict \
+					else  " ".join([item, 'from', os.path.basename(dName)])
+				pub.sendMessage('object.added', message='Loading %s domain...'%info)
 			except:
 				pass
 
@@ -961,7 +856,7 @@ class LibraryTree(wx.TreeCtrl):
 
 	@BuzyCursorNotification
 	def OnUpdateAll(self, event):
-		""" Update all imported domain
+		""" Update all imported domain.
 		"""
 		result = self.UpdateAll()
 		if len(result) == 0:
@@ -1097,6 +992,43 @@ class LibraryTree(wx.TreeCtrl):
 		DEVSComponent.OnEditor(devscomp, evt)
 
 	###
+	def OnDirRename(self, evt):
+		""" Rename the directory of selected librarie.
+		"""
+		item = self.GetSelection()
+		name = self.GetItemText(item)
+
+		### dialog to ask new label
+		if wx.VERSION_STRING < '4.0':
+			d = wx.TextEntryDialog(self, _('New file name:'), defaultValue = name, style=wx.OK)
+		else:
+			d = wx.TextEntryDialog(self, _('New file name:'), value = name, style=wx.OK)
+		d.ShowModal()
+
+		### new label
+		new_label = d.GetValue()
+
+		### only if new and old label are different
+		if new_label != name:
+
+			### path of file
+			old_dirname = self.GetItemPyData(item)
+			new_dirname = os.path.join(os.path.dirname(old_dirname),new_label)
+
+			try:
+				os.rename(old_dirname,new_dirname)
+			except:
+				sys.stdout.write(_('Rename failed!'))
+			else:
+				self.SetItemData(item,new_dirname)
+				for elem in self.ItemDico:
+					if old_dirname in elem:
+						self.ItemDico[elem.replace(old_dirname, new_dirname)] = self.ItemDico.pop(elem)
+				
+				self.SetItemText(item, new_label)
+				self.UpdateAll()
+
+	###
 	def OnItemRename(self, evt):
 		""" Rename action has been invoked.
 		"""
@@ -1106,135 +1038,34 @@ class LibraryTree(wx.TreeCtrl):
 
 		### dialog to ask new label
 		if wx.VERSION_STRING < '4.0':
-			d = wx.TextEntryDialog(self, _('New file name'), defaultValue = name, style=wx.OK)
+			d = wx.TextEntryDialog(self, _('New file name:'), defaultValue = name, style=wx.OK)
 		else:
-			d = wx.TextEntryDialog(self, _('New file name'), value = name, style=wx.OK)
+			d = wx.TextEntryDialog(self, _('New file name:'), value = name, style=wx.OK)
 		d.ShowModal()
 
 		### new label
 		new_label = d.GetValue()
-		### if new and old label are different
+
+		### only if new and old label are different
 		if new_label != name:
 
 			### path of file
-			old_path = self.GetItemPyData(item)
+			filename = self.GetItemPyData(item)
 			
-			old_bn = os.path.basename(old_path)
-			dn = os.path.dirname(old_path)
-			old_name, ext = os.path.splitext(old_bn)
-			
-			new_filepath = "".join([os.path.join(dn, new_label),ext])
-
-			if old_path.endswith('.py'):
-				
-				#read input file
-				fin = open(old_path, "rt")
-				#read file contents to string
-				data = fin.read()
-				
-				if 'DomainBehavior' in data or 'DomainStructure' in data:
-					
-					#replace all occurrences of the required string
-					data = data.replace(old_name, new_label)
-					#close the input file
-					fin.close()
-
-					#open the input file in write mode
-					fin = open(old_path, "wt")
-					#overrite the input file with the resulting data
-					fin.write(data)
-					#close the file
-					fin.close()
-
-					### relace on file system
-					os.rename(old_path, new_filepath)
-
-					### replace in __init__.py file
-					replaceAll(os.path.join(dn,'__init__.py'), old_name, new_label)
-				else:
-					wx.MessageBox(_("It seams that the python file dont inherite of the DomainBehavior or DomainStructure classes.\n \
-									Please correct this aspect before wanted to rename the python file from DEVSimPy."), _("Error"), wx.OK|wx.ICON_ERROR)
-					return
-
-			### if devsimpy model
-			elif zipfile.is_zipfile(old_path):
-				### extract behavioral python file (from .amd or .cmd) to tempdir 
-				### in order to rename it and change the name of contening class
-				temp_file = None
-				with zipfile.ZipFile(old_path) as zf:
-					### find all python files
-					for file in zf.namelist():
-						if file.endswith(".py"):
-							r = repr(zf.read(file))
-							### first find python file with the same of the archive
-							if file.endswith(old_bn):
-								#new_bn = os.path.basename(new_filepath)
-								temp_file = zf.extract(old_bn,tempfile.gettempdir())
-								new_temp_file = temp_file
-
-							### then find a python file that inherite of the DomainBehavior or StructureBehavior class
-							elif 'DomainBehavior' in r or 'DomainStructure' in r:
-
-								old_name = os.path.splitext(file)[0]
-								
-								### first we must change the name of this python file in order to have the same as the archive!
-								temp_file = zf.extract(file,tempfile.gettempdir())
-								new_temp_file = os.path.join(tempfile.gettempdir(),new_label+'.py')
-								### rename temp_file to new_temp_file according to the correspondance between the name of the python file and the name of the archive
-								### for exemple C:\Users\Laurent\AppData\Local\Temp\MyOld.py C:\Users\Laurent\AppData\Local\Temp\MyNew.py
-								if os.path.isfile(new_temp_file):
-									os.remove(new_temp_file)
-
-								os.rename(temp_file, new_temp_file)
-
-						elif file.endswith(".dat"):
-							import pickle
-							### replace in new_temp_file file
-							temp_dat_file = zf.extract(file,tempfile.gettempdir())
-
-							with open(temp_dat_file, 'rb') as sf:
-								scores = pickle.load(sf)
-					
-							scores[0] = new_filepath
-							scores[1] = os.path.join(new_filepath,os.path.basename(new_filepath).replace('.amd','.py').replace('.cmd','.py'))
-
-							with open(temp_dat_file, "wb") as sf:
-								pickle.dump(scores, sf)
-
-				if temp_file:
-
-					print("Replace %s by %s into %s"%(old_name,new_label,new_temp_file))
-					### replace in new_temp_file file
-					replaceAll(new_temp_file, old_name, new_label)
-
-					print("open %s"%old_path)
-					zip = Zip(old_path)
-					
-					if zip.Delete([os.path.basename(temp_file)]):
-						print("Delete %s"%os.path.basename(temp_file))
-						
-						print("Update %s"%new_temp_file)
-						zip.Update([new_temp_file,temp_dat_file])
-
-						print("rename %s to %s"%(old_path,new_filepath))	
-						
-						### relace on file system
-						os.rename(old_path, new_filepath)
-
-					#try:
-					#	os.remove(temp_file)
-					#except:
-					#	pass
-
-				else:
-					wx.MessageBox(_("It seams that the python filename and the model name are diffrent!\n \
-									Please correct this aspect by extracting the archive."), _("Error"), wx.OK|wx.ICON_ERROR)
-					return
+			### if pure python file
+			if filename.endswith('.py'):
+				cls = PyComponent
+			### if .amd or .cmd file
+			elif zipfile.is_zipfile(filename):
+				cls = GenericComponent
 			else:
+				cls = None
+			
+			### if cls (.py, .cmd or .amd) and Rename is ok, we updateAll lib
+			if cls and not cls.Rename(filename, new_label):
 				sys.stdout.write(_('Rename failed!'))
-				return
-
-			self.UpdateAll()
+			else:
+				self.UpdateAll()
 
 	###
 	def OnItemDocumentation(self, evt):

@@ -33,6 +33,7 @@ import string
 import types
 import importlib
 import subprocess
+import tempfile
 
 import gettext
 _ = gettext.gettext
@@ -48,7 +49,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 import ZipManager
 
-from Utilities import GetActiveWindow, path_to_module, install_and_import, printOnStatusBar
+from Utilities import replaceAll, GetActiveWindow, path_to_module, install_and_import, printOnStatusBar
 from NetManager import Net
 from SimpleFrameEditor import FrameEditor
 from which import which
@@ -167,7 +168,50 @@ class PyComponent:
 	"""
 
 	@staticmethod
-	def Load(filename, label):
+	def Rename(filename:str, new_name:str):
+		""" Rename the filename with the new_name.
+		"""
+
+		old_bn = os.path.basename(filename)
+		dn = os.path.dirname(filename)
+		old_name, ext = os.path.splitext(old_bn)
+		
+		new_filepath = "".join([os.path.join(dn, new_name),ext])
+
+		#read input file
+		fin = open(filename, "rt")
+		#read file contents to string
+		data = fin.read()
+		
+		if 'class %s(DomainBehavior):'%old_name in data or 'class %s(DomainStructure):'%old_name:
+			
+			#replace all occurrences of the required string
+			data = data.replace(old_name, new_name)
+			#close the input file
+			fin.close()
+
+			#overrite the input file with the resulting data
+			with open(filename, "wt") as fin:
+				fin.write(data)
+			
+			### relace on file system
+			os.rename(filename, new_filepath)
+
+			### replace in __init__.py file if exist!
+			init_file = os.path.join(dn,'__init__.py')
+			if os.path.isfile(init_file):
+				replaceAll(init_file, old_name, new_name)
+
+			return True
+		else:
+			info = _("It seams that the python file dont inherite of the DomainBehavior or DomainStructure classes or \
+						its name and the name of the class is different.\n \
+						Please correct this aspect before wanted to rename the python file from DEVSimPy.")
+			wx.MessageBox(info, _("Error"), wx.OK|wx.ICON_ERROR)
+			return False
+
+	@staticmethod
+	def Load(filename:str, label:str):
 		""" Load python file from filename
 		"""
 		fn = filename.strip()
@@ -183,7 +227,7 @@ class GenericComponent:
 	"""
 	"""
 	def __init__(self, *argv, **kwargs):
-		"""
+		""" Constructor.
 		"""
 		# local copy
 		self._canvas = kwargs['canvas'] if 'id' in kwargs else None
@@ -215,13 +259,13 @@ class GenericComponent:
 		self._specific_behavior = kwargs.get('specific_behavior','')
 
 	def Create(self):
-		""" Create component from attributes
+		""" Abstract method to create component from attributes.
 		"""
 		pass
 
 	@staticmethod
 	def Load(filename, label, x, y, canvas):
-		""" Load stored component form filename
+		""" Abstract method to load stored component form filename.
 		"""
 		pass
 
@@ -248,24 +292,88 @@ class GenericComponent:
 
 		return model
 
+	@staticmethod
+	def Rename(filename:str, new_name:str)->bool:
+		""" Rename the filename with the new_name.
+		"""
+			
+		old_bn = os.path.basename(filename)
+		dn = os.path.dirname(filename)
+		old_name, ext = os.path.splitext(old_bn)
+			
+		new_filepath = "".join([os.path.join(dn, new_name), ext])
+
+		### extract behavioral python file (from .amd or .cmd) to tempdir 
+		### in order to rename it and change the name of contening class
+		temp_file = None
+
+		with zipfile.ZipFile(filename) as zf:
+			### find all python files
+			for file in zf.namelist():
+				if file.endswith(".py"):
+					r = repr(zf.read(file))
+					### first find python file with the same of the archive
+					if file.endswith(old_bn):
+						#new_bn = os.path.basename(new_filepath)
+						temp_file = zf.extract(old_bn, tempfile.gettempdir())
+						new_temp_file = temp_file
+
+					### then find a python file that inherite of the DomainBehavior or StructureBehavior class
+					elif 'DomainBehavior' in r or 'DomainStructure' in r:
+
+						old_name = os.path.splitext(file)[0]
+						
+						### first we must change the name of this python file in order to have the same as the archive!
+						temp_file = zf.extract(file, tempfile.gettempdir())
+						new_temp_file = os.path.join(tempfile.gettempdir(), new_name+'.py')
+						### rename temp_file to new_temp_file according to the correspondance between the name of the python file and the name of the archive
+						### for exemple C:\Users\Laurent\AppData\Local\Temp\MyOld.py C:\Users\Laurent\AppData\Local\Temp\MyNew.py
+						if os.path.isfile(new_temp_file):
+							os.remove(new_temp_file)
+
+						os.rename(temp_file, new_temp_file)
+
+		if temp_file:
+
+			#print("Replace %s by %s into %s"%(old_name, new_name, new_temp_file))
+			### replace in new_temp_file file
+			replaceAll(new_temp_file, old_name, new_name)
+		
+			zip = ZipManager.Zip(filename)
+			
+			if zip.Delete([os.path.basename(temp_file)]):
+				#print("Delete %s"%os.path.basename(temp_file))
+				
+				#print("Update %s"%new_temp_file)
+				zip.Update([new_temp_file])
+
+				#print("rename %s to %s"%(filename,new_filepath))	
+			
+				### relace on file system
+				os.rename(filename, new_filepath)
+
+				return True
+			else:
+				return False
+
+		else:
+			info = _("Please check this: \n \
+				The Python filename and the name of archive (%s)) must be egal to the class name!\n \
+				Please correct this aspect by extracting the archive.\n")%(old_name)
+			wx.MessageBox(info, _("Error"), wx.OK|wx.ICON_ERROR)
+			return False
 
 class CMDComponent(GenericComponent):
-	""" Return labeled block from filename at (x,y) position in canvas
-
-		@filename: filename for loading block
-		@label: label of block
-		@x: horizontal position
-		@y: vertical position
-		@canvas: canvas accepting block
+	""" 
 	"""
 
 	def __init__(self, *argv, **kwargs):
-		""" Constructor
+		""" Constructor.
 		"""
 		GenericComponent.__init__(self, *argv, **kwargs)
 
 	def Create(self):
-		""" Create CMD from constructor
+		""" Create CMD from constructor.
 		"""
 		from Container import ContainerBlock, iPort, oPort
 		# new containerBlock model
@@ -293,7 +401,7 @@ class CMDComponent(GenericComponent):
 
 	@staticmethod
 	def Load(filename, label):
-		""" Load CMD from filename
+		""" Load CMD from filename.
 		"""
 		from Container import ContainerBlock, iPort, oPort
 		assert(filename.endswith('.cmd'))
@@ -322,13 +430,7 @@ class CMDComponent(GenericComponent):
 			return CMDComponent.ChekFilename(filename, m)
 
 class AMDComponent(GenericComponent):
-	""" Return labeled block from filename at (x,y) position in canvas
-
-		@filename: filename for loading block
-		@label: label of block
-		@x: horizontal position
-		@y: vertical position
-		@canvas: canvas accepting block
+	"""
 	"""
 
 	def __init__(self, *argv, **kwargs):
@@ -337,7 +439,7 @@ class AMDComponent(GenericComponent):
 		GenericComponent.__init__(self, *argv, **kwargs)
 
 	def Create(self):
-		""" Create AMD from filename
+		""" Create AMD from filename.
 		"""
 
 		# associated Python class
@@ -431,11 +533,11 @@ class AMDComponent(GenericComponent):
 
 #---------------------------------------------------------
 class DEVSComponent:
-	""" Editable class
+	"""
 	"""
 
 	def __init__(self):
-		""" Constructor of DEVSComponent.
+		""" Constructor.
 		"""
 
 		# DEVS instance
@@ -483,11 +585,11 @@ class DEVSComponent:
 			except Exception:
 				f.write("clock %d: %s\n"%(0.0, str(msg)))
 
-	def setDEVSPythonPath(self, python_path):
+	def setDEVSPythonPath(self, python_path:str):
 		if os.path.isfile(python_path) or zipfile.is_zipfile(os.path.dirname(python_path)):
 			self.python_path = python_path
 
-	def getDEVSPythonPath(self):
+	def getDEVSPythonPath(self)->str:
 		""" Return the DEVS python path.
 		"""
 		return self.python_path
@@ -508,17 +610,32 @@ class DEVSComponent:
 		self.setBlock(devs)
 
 	def setDEVSParent(self, p):
+		"""
+		Set the DEVS parent model.
+
+		@param p: parent
+		@type: instance
+		"""
 		if self.devsModel != None:
 			self.devsModel.parent = p
 
 	def getDEVSParent(self):
+		"""
+		Get the DEVS parent.
+		"""
 		return self.devsModel.parent if self.devsModel else None
 
 	def getBlock(self):
+		"""
+		Get the Block.
+		"""
 		if self.devsModel is not None:
 			return DEVSComponent.getBlockModel(self.devsModel)
 
 	def setBlock(self, devs):
+		""" 
+		Set the Block.
+		"""
 		if devs is not None:
 			### define new methods in order to set and get blockModel from devs instance
 			if not hasattr(devs, 'getBlockModel'):
@@ -573,7 +690,7 @@ class DEVSComponent:
 			dial.ShowModal()
 
 	def updateDEVSPriorityList(self):
-		""" update the componentSet order from priority_list for corresponding diagram
+		""" Update the componentSet order from priority_list for corresponding diagram
 		"""
 		from Container import ContainerBlock, Diagram, Block
 		assert(isinstance(self, (ContainerBlock, Diagram)))
@@ -598,7 +715,7 @@ class DEVSComponent:
  
 	###
 	def OnEditor(self, event):
-		""" Method that edit the python code of associated devs model of the Block
+		""" Method that edit the python code of associated devs model of the Block.
 		"""
 		from Container import ShapeCanvas
 
@@ -702,7 +819,7 @@ class DEVSComponent:
 				return False
 
 class BlockFactory:
-	""" DEVSimPy Block Factory
+	""" DEVSimPy Block Factory.
 	"""
 
 	@staticmethod

@@ -20,7 +20,9 @@ import re
 import inspect
 import types
 import importlib
-
+import pickle
+import tempfile
+	
 import gettext
 _ = gettext.gettext
 
@@ -45,7 +47,7 @@ def getPythonModelFileName(fn:str)->str:
 
 	#global Cmtp
 
-	assert(zipfile.is_zipfile(fn))
+	assert zipfile.is_zipfile(fn), fn
 
 	zf = zipfile.ZipFile(fn,'r')
 
@@ -217,6 +219,21 @@ class Zip:
 		
 		return del_flag
 
+	@staticmethod
+	def GetDatFile(fn:str)->str:
+		""" Return the DEVSimPyModel.dat file.
+		"""
+
+		if not zipfile.is_zipfile(fn):
+			return ""
+
+		with zipfile.ZipFile(fn) as zf:
+			### find all python files
+			for file in zf.namelist():
+				if file.endswith(".dat"):
+					return zf.extract(file,tempfile.gettempdir())
+		return ""
+
 	def GetImage(self, scaleW:int=16, scaleH:int=16):
 		""" Get image object from image file stored in zip file.
 			scaleH and scaleW are used to rescale image
@@ -246,28 +263,41 @@ class Zip:
 			return None
 
 	@staticmethod
-	def GetBehavioralPythonFile(fn:str)->str:
+	def GetBehavioralPythonFile(fn:str):
 		""" TODO: comment
 		"""
+
 		### zipfile (amd or cmd)
-		zf = zipfile.ZipFile(fn, 'r')
-		nl = zf.namelist()
-		zf.close()
+		if not zipfile.is_zipfile(fn):
+			return False
 
 		bn = os.path.basename(fn)
 		name, ext = os.path.splitext(bn)
 
-		for s in [s for s in nl if s.endswith(".py")]:
-			n, e = os.path.splitext(s)
-			if n == name:
-				return s
+		with zipfile.ZipFile(fn) as zf:
+			### find all python files
+			for file in zf.namelist():
+				if file.endswith(".py"):
+					r = repr(zf.read(file))
+					n, e = os.path.splitext(file)
+					if n == name and ('class %s(DomainBehavior)'%name in r or 'class %s(DomainStructure)'%name in r):
+						return file
 
-		return ""
+		info = _("Please check this: \n \
+				The Python filename and the name of archive (%s)) must be egal to the class name!\n \
+				Please correct this aspect by extracting the archive.\n")%(name)
+		sys.stdout.write(info)
+
+		return False
 
 	@staticmethod
 	def GetPluginFile(fn:str)->str:
 		""" TODO: comment
 		"""
+		
+		if not zipfile.is_zipfile(fn):
+			return ""
+
 		### zipfile (amd or cmd)
 		zf = zipfile.ZipFile(fn, 'r')
 		nl = zf.namelist()
@@ -280,6 +310,9 @@ class Zip:
 	def HasPlugin(fn:str)->bool:
 		""" TODO: comment
 		"""
+
+		if not zipfile.is_zipfile(fn):
+			return ""
 
 		### zipfile (amd or cmd)
 		zf = zipfile.ZipFile(fn, 'r')
@@ -327,15 +360,16 @@ class Zip:
 		#if rcp: recompile(module_name)
 	
 		PluginManager.trigger_event("IMPORT_STRATEGIES", fn=self.fn)
-		
+					
 		py_fn = getPythonModelFileName(self.fn)
+
 		try:
 			fullname = "".join([os.path.basename(os.path.dirname(self.fn)), py_fn.split('.py')[0]])
 			return self.ImportModule() if fullname not in sys.modules else sys.modules[fullname]
 		### model has not python file !
 		except Exception as e:
 			return e
-
+		
 	def ImportModule(self)->types.ModuleType:
 		""" Import module from zip file corresponding to the amd or cmd model.
 		"""
