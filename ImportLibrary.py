@@ -15,14 +15,7 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-#
-# GLOBAL VARIABLES AND FUNCTIONS
-#
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-
 ### at the beginning to prevent with statement for python vetrsion <=2.5
-
 
 import os
 import sys
@@ -35,11 +28,27 @@ from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 import wx.lib.dialogs
 from concurrent.futures import ThreadPoolExecutor
  
-from Utilities import checkURL, getDirectorySize, RecurseSubDirs, getPYFileListFromInit
+from Utilities import checkURL, getDirectorySize, RecurseSubDirs, getPYFileListFromInit, NotificationMessage
 from Decorators import BuzyCursorNotification
 
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GLOBAL VARIABLES AND FUNCTIONS
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# CLASS DEFIINTION
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
+	"""
+	"""
 	def __init__(self, *args, **kw):
+		""" Constructor.
+		"""
 		wx.ListCtrl.__init__(self, *args, **kw)
 		ListCtrlAutoWidthMixin.__init__(self)
 		
@@ -80,7 +89,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	# 	self.CheckItem(index, False)
 
 	def AddItem(self, path, dName, check=False):
-		""" Add item to the list
+		""" Add item to the list.
 		"""
 
 		index = self.InsertStringItem(100000000, dName) 
@@ -89,7 +98,6 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		self.SetStringItem(index, 3, "..%s%s"%(os.sep,os.path.basename(DOMAIN_PATH) if path.startswith(DOMAIN_PATH) else path))
 		
 		self.CheckItem(index, check)
-
 		self.SetData(index, path)
 		self.SetItemData(index, index)
 
@@ -101,7 +109,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 
 	@BuzyCursorNotification
 	def Populate(self, D={}):
-		""" Populate the list
+		""" Populate the list.
 		"""
 		for path, dName in D.items():
 			self.AddItem(path, dName)
@@ -109,6 +117,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 class DeleteBox(wx.Dialog):
 	""" Delete box for libraries manager.
 	"""
+
 	def __init__(self, *args, **kwargs):
 		""" Constructor.
 		"""
@@ -118,6 +127,8 @@ class DeleteBox(wx.Dialog):
 		self.SetSize((250, 200))
        
 	def InitUI(self):
+		""" Init the user interface.
+		"""
 
 		pnl = wx.Panel(self)
 		vbox = wx.BoxSizer(wx.VERTICAL)
@@ -172,7 +183,11 @@ class DeleteBox(wx.Dialog):
 
 #-------------------------------------------------------------------
 class ImportLibrary(wx.Dialog):
+	"""
+	"""
 	def __init__(self, *args, **kwargs):
+		""" Constructor.
+		"""
 		super(ImportLibrary, self).__init__(*args, **kwargs)
 
 		### local copy
@@ -248,15 +263,13 @@ class ImportLibrary(wx.Dialog):
 
 		### Buttons
 		new = wx.Button(leftPanel, id = wx.ID_NEW, size=(120, -1))
-		imp = wx.Button(leftPanel, wx.NewIdRef(), _('Import'), size=(120, -1))
 		sel = wx.Button(leftPanel, id = wx.ID_SELECTALL, size=(120, -1))
 		des = wx.Button(leftPanel, wx.NewIdRef(), _('Deselect All'), size=(120, -1))
 		apply = wx.Button(rightPanel, id=wx.ID_OK, size=(100, -1))
 		cancel = wx.Button(rightPanel, id=wx.ID_CANCEL, size=(100, -1))
 
 		vbox2.Add(new, 0, wx.TOP|wx.LEFT, 6)
-		vbox2.Add(imp, 0, wx.TOP|wx.LEFT, 6)
-		#vbox2.Add((-1, 5))
+		vbox2.Add((-1, 5))
 		vbox2.Add(sel, 0, wx.TOP|wx.LEFT, 6)
 		vbox2.Add(des, 0, wx.TOP|wx.LEFT, 6)
 
@@ -279,7 +292,6 @@ class ImportLibrary(wx.Dialog):
 
 		##Binding Events
 		self.Bind(wx.EVT_BUTTON, self.OnNew, id = new.GetId())
-		self.Bind(wx.EVT_BUTTON, self.OnAdd, id = imp.GetId()) 
 		self.Bind(wx.EVT_BUTTON, self.OnSelectAll, id = sel.GetId())
 		self.Bind(wx.EVT_BUTTON, self.OnDeselectAll, id = des.GetId())
 		self.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnItemRightClick)
@@ -293,18 +305,25 @@ class ImportLibrary(wx.Dialog):
 		self.ProcessEvent(e)
 
 	def CheckDomainPath(self):
+		"""
+		"""
 		ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 		if os.path.join(ABS_HOME_PATH, "Domain") != DOMAIN_PATH:
-			dlg = wx.MessageDialog(self, _("Local domain path is different from the .devsimpy.\nGo to options and preferences to change the domain path."), _('Import Manager'), wx.OK|wx.ICON_INFORMATION)
+			dlg = wx.MessageDialog(self, _("Local domain path is different from the .devsimpy.\n\
+				Go to options and preferences to change the domain path."), _('Import Manager'), wx.OK|wx.ICON_INFORMATION)
 			dlg.ShowModal()
 			dlg.Destroy()
 
 	def OnSelectAll(self, event):
+		"""
+		"""
 		num = self._cb.GetItemCount()
 		for i in range(num):
 			self._cb.CheckItem(i,True)
 
 	def OnDeselectAll(self, event):
+		"""
+		"""
 		num = self._cb.GetItemCount()
 		for i in range(num):
 			self._cb.CheckItem(i, False)
@@ -377,7 +396,7 @@ class ImportLibrary(wx.Dialog):
 		return doc
 
 	def OnDoc(self, evt):
-		""" documentation of item has been invocked
+		""" Documentation of item has been invocked.
 		"""
 		index = self._cb.GetFocusedItem()
 		label = self._cb.GetItemText(index)
@@ -432,6 +451,8 @@ class ImportLibrary(wx.Dialog):
 			self._cb.DeleteItem(index)
 
 	def EvtCheckListBox(self, evt):
+		"""
+		"""
 		index = self._cb.GetFocusedItem()
 		label = self._cb.GetItemText(index)
 		
@@ -443,23 +464,17 @@ class ImportLibrary(wx.Dialog):
 
 	@staticmethod
 	def CreateInitFile(path):
-		""" Static method to create the __init_.py file which contain the name of accessing models
+		""" Static method to create the __init_.py file which contain the name of accessing models.
 		"""
 
 		dial = wx.MessageDialog(None, _('If %s contain python files, do you want to insert it in __all__ variable of __init__.py file?')%os.path.basename(path), _('New file Manager'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
-		if dial.ShowModal() == wx.ID_YES:
-			### if there is python file in the importing directory
-			L = [f for f in os.listdir(path) if f.endswith(".py")]
-		else:
-			L = []
+		### if there is python file in the importing directory
+		L = [f for f in os.listdir(path) if f.endswith(".py")] if dial.ShowModal() == wx.ID_YES else []
 
 		### how many python file to insert on __init__.py file
 		if L:
 			dlg = wx.lib.dialogs.MultipleChoiceDialog(None, _('List of python file in %s')%(os.path.dirname(path)), _('Select the python files to insert in the __init__.py file'), L)
-			if dlg.ShowModal() == wx.ID_OK:
-				select = dlg.GetValueString()
-			else:
-				select = []
+			select = dlg.GetValueString() if dlg.ShowModal() == wx.ID_OK else []
 			dlg.Destroy()
 		else:
 			select = []
@@ -474,24 +489,47 @@ class ImportLibrary(wx.Dialog):
 				f.write('\t\t ]')
 
 	def OnNew(self, event):
-		dlg1 = wx.TextEntryDialog(self, _('Enter new directory name'), _('New Library'), _("New_lib"))
-		if dlg1.ShowModal() == wx.ID_OK:
-			dName = dlg1.GetValue()
-			path = os.path.join(DOMAIN_PATH, dName)
-			if not os.path.exists(path):
-				os.makedirs(path)
-				f = open(os.path.join(path,'__init__.py'),'w')
-				f.write("__all__=[\n]")
-				f.close()
-				self.DoAdd(path, dName)
+		"""
+		"""
+		#dlg1 = wx.TextEntryDialog(self, _('Enter new directory name'), _('New Library'), _("New_lib"))
+		### Get path to add
+		dialog = wx.DirDialog(self, _("Choose a new directory:"), DOMAIN_PATH, style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
+		path = dialog.GetPath() if dialog.ShowModal() == wx.ID_OK else None
+		dialog.Destroy()
 
+		if path:
+			# Getting the list of directories 
+			dir = os.listdir(path) 
+  
+			# Checking if the list is empty or not 
+			if len(dir) == 0:
+				if not '__init__.py' in dir:
+					self.CreateInitFile(path)
+
+				self.DoAdd(path, os.path.basename(path))
+				
+			### selected directory exist, we import it
 			else:
-				wx.MessageBox(_('Directory already exist.\nChoose another name.'), _('Information'), wx.OK | wx.ICON_INFORMATION)
+				dName = os.path.basename(path) if not path.startswith('http') else [a for a in path.split('/') if a!=''][-1]
 
-		dlg1.Destroy()
+				# si la lib n'est pas deja importee
+				#if (not self.parent.tree.IsChildRoot(dName), (dName not in self._d or (dName in self._d and self._d[dName] != path)))
+				if dName not in self._d or (dName in self._d and self._d[dName] != path):
+					### import form local or web
+					if os.path.isdir(path) or checkURL(path):
+						self.DoAdd(path, dName)
+					### error
+					else:
+						msg = _('%s is an invalid url')%path if path.startswith('http') else _('%s directory does not exist')%dName
+						dial = wx.MessageDialog(self, msg, _('New librarie manager'), wx.OK | wx.ICON_ERROR)
+						dial.ShowModal()
+				else:
+					dial = wx.MessageDialog(self, _('%s is already imported!')%dName, _('New librarie manager'), wx.OK|wx.ICON_INFORMATION)
+					dial.ShowModal()
 
 	def DoAdd(self, path, dName):
-
+		"""
+		"""
 		### ajout dans la liste box
 		self._cb.AddItem(path, dName, True)
 
@@ -504,56 +542,30 @@ class ImportLibrary(wx.Dialog):
 		self._d.update({dName:path})
 
 		### create the __init__.py file if doesn't exist
-		if not path.startswith('http') and not os.path.exists(os.path.join(path,'__init__.py')):
+		if not path.startswith('http') and (not os.path.exists(os.path.join(path,'__init__.py') and len(os.listdir(path)) == 0)):
 			dial = wx.MessageDialog(self, _('%s directory has no __init__.py file.\nDo you want to create it?')%path, _('New librarie Manager'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 			if dial.ShowModal() == wx.ID_YES:
 				self.CreateInitFile(path)
 			dial.Destroy()
+		
+		NotificationMessage(_('Information'), _("Librarie %s has been succeffully added!")%dName, self, timeout=5)
+
 
 	def OnAdd(self, evt):
 		"""
 		"""
-
-		### Get path to add
-		dialog = wx.DirDialog(self, "Choose a directory:",style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
-		if dialog.ShowModal() == wx.ID_OK:
-			path = dialog.GetPath()
-		else:
-			path = None
-		dialog.Destroy()
-		
-		if path:
-			dName = os.path.basename(path) if not path.startswith('http') else [a for a in path.split('/') if a!=''][-1]
-
-			# si la lib n'est pas deja importee
-			if not self.parent.tree.IsChildRoot(dName):
-				if dName not in self._d or (dName in self._d and self._d[dName] != path):
-					### si importation a partir du local
-					if os.path.isdir(path):
-						self.DoAdd(path, dName)
-					### si importation à partir du web
-					elif checkURL(path):
-						self.DoAdd(path, dName)
-					### gestion de l'erreur
-					else:
-						if path.startswith('http'):
-							msg = _('%s is an invalid url')%path
-						else:
-							msg = _('%s directory does not exist')%dName
-						dial = wx.MessageDialog(self, msg, _('New librarie manager'), wx.OK | wx.ICON_ERROR)
-						dial.ShowModal()
-				else:
-					dial = wx.MessageDialog(self, _('%s is already imported!')%dName, _('New librarie manager'), wx.OK|wx.ICON_INFORMATION)
-					dial.ShowModal()
-			else:
-				dial = wx.MessageDialog(self, _('%s is already imported!')%dName, _('New librarie manager'), wx.OK|wx.ICON_INFORMATION)
-				dial.ShowModal()
+		self.OnNew(evt)
 				
 	def OnCloseWindow(self, event):
 		self.Destroy()
 		event.Skip()
 
-### ------------------------------------------------------------
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# MAIN PROGRAM
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 class TestApp(wx.App):
 	""" Testing application
 	"""

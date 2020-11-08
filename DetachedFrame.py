@@ -38,8 +38,13 @@ if __name__ == '__main__':
 
 import Container
 import Menu
-
 import PrintOut
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# CLASS DEFIINTION
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 class DetachedFrame(wx.Frame, PrintOut.Printable):
 	""" Detached Frame including a diagram.
@@ -288,12 +293,19 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 
 		event.Skip()
 
-### ------------------------------------------------------------
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# MAIN PROGRAM
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 class TestApp(wx.App):
 	""" Testing application
 	"""
 
 	def OnInit(self):
+		""" Init the user interface.
+		"""
 
 		import gettext
 

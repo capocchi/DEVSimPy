@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
 
-"""
-Name: ZipManager.py
-Brief descritpion: Static class dedicated to the zip file managment
-Author(s): L. Capocchi <capocchi@univ-corse.fr>
-Version:  1.0
-Last modified: 2012.12.16
-GENERAL NOTES AND REMARKS:
-
-GLOBAL VARIABLES AND FUNCTIONS:
-"""
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+# ZipManager.py --- Python class dedicated to the zip file managment
+#                     --------------------------------
+#                            Copyright (c) 2020
+#                    L. CAPOCCHI (capocchi@univ-corse.fr)
+#                SPE Lab - SISU Group - University of Corsica
+#                     --------------------------------
+# Version 1.0                                      last modified:  08/11/20
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GENERAL NOTES AND REMARKS:
+#
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 import os
 import sys
@@ -30,8 +34,11 @@ from PluginManager import PluginManager #trigger_event
 from traceback import format_exception
 from Utilities import listf, path_to_module,install_and_import
 
-#global Cmtp
-#Cmtp=0
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GLOBAL VARIABLES AND FUNCTIONS
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 def get_from_modules(name:str)->types.ModuleType:
 	""" get module with the correct name from the name that come from dir().
@@ -44,8 +51,6 @@ def get_from_modules(name:str)->types.ModuleType:
 def getPythonModelFileName(fn:str)->str:
 	""" Get filename of zipped python file.
 	"""
-
-	#global Cmtp
 
 	assert zipfile.is_zipfile(fn), fn
 
@@ -86,10 +91,18 @@ def getPythonModelFileName(fn:str)->str:
 	else:
 		return ""
 
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# CLASS DEFIINTION
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 class Zip:
+	"""	Zip class.
+	"""
 
 	def __init__(self, fn:str, files:[str]=[]):
-		""" Constructor
+		""" Constructor.
 		"""
 		### local copy
 		self.fn = fn
@@ -98,6 +111,9 @@ class Zip:
 			self.Create(files)
 
 	def Create(self, add_files:[str]=[])->None:
+		""" Create the Zip with files.
+		"""
+
 		dir_name, base_name = os.path.split(self.fn)
 		name, ext = os.path.splitext(base_name)
 
@@ -124,7 +140,7 @@ class Zip:
 		zout.close()
 
 	def Update(self, replace_files:[str]=[])->None:
-		""" Update zip archive with the new replace file names
+		""" Update zip archive with the new replace file names.
 		"""
 
 		### delete empty fileName

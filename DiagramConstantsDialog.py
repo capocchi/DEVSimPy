@@ -1,11 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+# DiagramConstantsDialog.py --- Dialog to define constantes in a diagram.
+#                     --------------------------------
+#                            Copyright (c) 2020
+#                    L. CAPOCCHI (capocchi@univ-corse.fr)
+#                SPE Lab - SISU Group - University of Corsica
+#                     --------------------------------
+# Version 1.0                                      last modified:  08/11/20
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GENERAL NOTES AND REMARKS:
+#
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 import wx
 import os
 import builtins
 import csv
 import DSV
+import gettext
 
 ID_IMPORT = wx.NewIdRef()
 ID_EXPORT = wx.NewIdRef()
@@ -13,12 +29,20 @@ ID_ADD = wx.NewIdRef()
 ID_REMOVE = wx.NewIdRef()
 ID_HELP = wx.NewIdRef()
 
-import gettext
 _ = gettext.gettext
 
-class DiagramConstantsDialog(wx.Dialog):
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# CLASS DEFIINTION
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
+class DiagramConstantsDialog(wx.Dialog):
+	""" Dialogue to define constantes in a diagram.
+	"""
 	def __init__(self, *args, **kw):
+		""" Constructor.
+		"""
 		super(DiagramConstantsDialog, self).__init__(*args, **kw)
 
 		### local copy
@@ -30,7 +54,7 @@ class DiagramConstantsDialog(wx.Dialog):
 		self.InitUI()
 
 	def InitUI(self):
-		""" Init the user interface
+		""" Init the user interface.
 		"""
 
 		self.SetTitle(_("%s - Constants Manager")%(self.label))
@@ -115,7 +139,7 @@ class DiagramConstantsDialog(wx.Dialog):
 		self.Bind(wx.EVT_BUTTON, self.OnCancel, self._button_cancel)
 
 	def Populate(self, data):
-		""" Populate the grid from a dictionary data
+		""" Populate the grid from a dictionary data.
 		"""
 
 		### populate the grid
@@ -127,12 +151,12 @@ class DiagramConstantsDialog(wx.Dialog):
 				self._grid.SetCellValue(i, 1, str(data[key]))
 
 	def OnAdd(self,evt):
-		"""	Add line
+		"""	Add line.
 		"""
 		self._grid.AppendRows()
 
 	def OnRemove(self, evt):
-		"""	Delete selected lines
+		"""	Delete selected lines.
 		"""
 
 		### only if the grid has rows
@@ -153,7 +177,7 @@ class DiagramConstantsDialog(wx.Dialog):
 				self._grid.DeleteRows(row)
 
 	def OnImport(self, event):
-		""" csv file importing
+		""" csv file importing.
 		"""
 
 		dlg = wx.FileDialog(self, _("Choose a file"), os.getenv('USERPROFILE') or os.getenv('HOME') or HOME_PATH, "",
@@ -197,7 +221,7 @@ class DiagramConstantsDialog(wx.Dialog):
 			dlg.Destroy()
 
 	def OnExport(self,evt):
-		"""	csv file exporting
+		"""	csv file exporting.
 		"""
 
 		wcd = _("CSV files (*.csv)|*.csv|Text files (*.txt)|*.txt|All files (*.*)|*.*")
@@ -241,18 +265,26 @@ class DiagramConstantsDialog(wx.Dialog):
 		evt.Skip()
 
 	def GetData(self):
-		""" Return the constants stored in the grid as a dictionnary
+		""" Return the constants stored in the grid as a dictionnary.
 		"""
 		return self.data
 
 	def OnCancel(self,evt):
-		"""	Close dialog
+		"""	Close dialog.
 		"""
 		self.Destroy()
 
 	def OnHelp(self, event):
+		""" Help message dialogue.
+		"""
 		dial = wx.MessageDialog(self, _("In order to use constante:\n\nCall constante by using \"Name of Diagram\"[\'Name of constante\']\n"), _('Help Manager'), wx.OK|wx.ICON_INFORMATION)
 		dial.ShowModal()
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# MAIN PROGRAM
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 ### ------------------------------------------------------------
 class TestApp(wx.App):

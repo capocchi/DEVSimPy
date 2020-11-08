@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
 
-"""
-Name: Savable.py
-Brief descritpion:
-Author(s): L. Capocchi <capocchi@univ-corse.fr>, A-T. Luciani <atluciani@univ-corse.fr>
-Version:  1.0
-Last modified: 2012.04.04
-GENERAL NOTES AND REMARKS:
-
-GLOBAL VARIABLES AND FUNCTIONS:
-"""
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+# Savable.py --- Class based on pickle module and dedicated to save and load components.
+#                     --------------------------------
+#                            Copyright (c) 2020
+#                    L. CAPOCCHI (capocchi@univ-corse.fr)
+#                SPE Lab - SISU Group - University of Corsica
+#                     --------------------------------
+# Version 1.0                                      last modified:  08/11/20
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GENERAL NOTES AND REMARKS:
+#
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 import os
 import sys
@@ -61,6 +65,12 @@ from .Abstractable import Abstractable
 import Components
 import ZipManager
 
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# CLASS DEFIINTION
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 class PickledCollection(list):
 	""" Custom list class for dsp attributes dumping.
 	"""
@@ -86,7 +96,7 @@ class PickledCollection(list):
 	    yield from self.pickled_obj
 
 class DumpBase(object):
-	""" DumpBase class
+	""" DumpBase class.
 	"""
 
 	### list of available extension
@@ -223,7 +233,7 @@ class DumpZipFile(DumpBase):
 				return True
 
 	def Load(self, obj_loaded, fileName = None):
-		""" Load codeblock (obj_loaded) from fileName
+		""" Load codeblock (obj_loaded) from fileName.
 		"""
 
 		# get zip file object
@@ -513,7 +523,8 @@ class DumpJSFile(DumpBase):
 	ext = [".js"]
 
 	def Save(self, obj_dumped, fileName = None):
-
+		"""
+		"""
 		assert(fileName.endswith(tuple(DumpJSFile.ext)))
 
 		diagram = obj_dumped
@@ -536,7 +547,8 @@ class DumpXMLFile(DumpBase):
 	ext = [".xml"]
 
 	def Save(self, obj_dumped, fileName = None):
-
+		"""
+		"""
 		assert(fileName.endswith(tuple(DumpXMLFile.ext)))
 
 		diagram = obj_dumped
@@ -559,7 +571,7 @@ class Savable(object):
 	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), BuzyCursorNotification)
 	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), StatusBarNotification('Sav'))
 	def SaveFile(self, fileName = None):
-		""" Save object in fileName
+		""" Save object in fileName.
 		"""
 		if fileName is None:
 			return False
@@ -581,7 +593,7 @@ class Savable(object):
 
 	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), StatusBarNotification('Load'))
 	def LoadFile(self, fileName = None):
-		""" Load object from fileName
+		""" Load object from fileName.
 		"""
 
 		if fileName is None:

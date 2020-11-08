@@ -14,12 +14,6 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-#
-# GLOBAL VARIABLES AND FUNCTIONS
-#
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-
 import wx
 import os
 import sys
@@ -47,7 +41,18 @@ from pubsub import pub
 
 _ = wx.GetTranslation
 
-#----------------------------------------------------------------------------------------------------
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GLOBAL VARIABLES AND FUNCTIONS
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# CLASS DEFIINTION
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 class LibraryTree(wx.TreeCtrl):
 	"""	Class of libraries tree of DEVSimPy model and Python files.
 
@@ -692,7 +697,7 @@ class LibraryTree(wx.TreeCtrl):
 				else:
 					### in order to go up the information in the list
 					D.append(elem)
-			print(self.ItemDico)
+			
 			### update with whole name
 			dName = parentPath
 
@@ -934,10 +939,11 @@ class LibraryTree(wx.TreeCtrl):
 	def RemoveItem(self, item):
 		""" Remove item from Tree and also the corresponding elements of ItemDico.
 		"""
+		bn = os.path.basename(self.GetPyData(item))
 
 		### delete all references from the ItemDico
 		for key in copy.copy(self.ItemDico):
-			if os.path.basename(self.GetPyData(item)) in key.split(os.sep):
+			if bn in key.split(os.sep):
 				del self.ItemDico[key]
 
 		self.Delete(item)
@@ -1093,7 +1099,25 @@ class LibraryTree(wx.TreeCtrl):
 			dlg.CenterOnParent(wx.BOTH)
 			dlg.ShowModal()
 		else:
-			wx.MessageBox(_("No documentation! \n Please define the documentation of the model %s in the header of its python file.")%name, _("%s Documentation")%name, wx.OK|wx.ICON_INFORMATION)
+			wx.MessageBox(_("No documentation!\n Please define the documentation of the model %s in the header of its python file.")%name, _("%s Documentation")%name, wx.OK|wx.ICON_INFORMATION)
+
+	###
+	def OnLibDocumentation(self, evt):
+		""" Display the lib's documentation on miniFrame.
+		"""
+
+		item = self.GetSelection()
+		path = self.GetItemPyData(item)
+		name = self.GetItemText(item)
+
+		doc = "Path of lib: %s\n"%path
+
+		if doc:
+			dlg = wx.lib.dialogs.ScrolledMessageDialog(self, doc, _("%s Documentation")%name, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+			dlg.CenterOnParent(wx.BOTH)
+			dlg.ShowModal()
+		else:
+			wx.MessageBox(_("No documentation!\n Please define the documentation of the model %s in the header of its python file.")%name, _("%s Documentation")%name, wx.OK|wx.ICON_INFORMATION)
 
 	###
 	def OnInfo(self, event):
