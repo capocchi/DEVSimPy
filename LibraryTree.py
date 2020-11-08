@@ -155,7 +155,7 @@ class LibraryTree(wx.TreeCtrl):
 			#threading.Thread(target=self.InsertNewDomain,
         	#args=(absdName, self.root, list(self.GetSubDomain(absdName, self.GetDomainList(absdName)).values())[0],)
     		#).start()
-			
+		
 			self.InsertNewDomain(absdName, self.root, list(self.GetSubDomain(absdName, self.GetDomainList(absdName)).values())[0])
 
 		wx.CallAfter(self.SortChildren,self.root)
@@ -441,9 +441,19 @@ class LibraryTree(wx.TreeCtrl):
 		
 		try:
 			name_list = getPYFileListFromInit(os.path.join(dName,'__init__.py'), ext)
+		except Exception as info:
 			py_file_list = []
+			# if dName contains a python file, __init__.py is forced
+			if os.path.isdir(dName):
+				for f in os.listdir(dName):
+					if f.endswith(ext):
+						sys.stderr.write(_("Exception, %s not imported: %s \n"%(dName,info)))
+						break
+		else:
+			
+			py_file_list = []
+			for s in name_list:
 
-			for s in list(name_list):
 				python_file = os.path.join(dName, s+ext)
 				
 				### test if tmp is only composed by python file (case of the user write into the __init__.py file directory name is possible ! then we delete the directory names)
@@ -463,15 +473,6 @@ class LibraryTree(wx.TreeCtrl):
 					### If its not DEVS model, the Dnd don't allows the instantiation and when the error is corrected, it don't appear before a update.
 					else:
 						py_file_list.append(s)
-
-		except Exception as info:
-			py_file_list = []
-			# if dName contains a python file, __init__.py is forced
-			if os.path.isdir(dName):
-				for f in os.listdir(dName):
-					if f.endswith(ext):
-						sys.stderr.write(_("Exception, %s not imported: %s \n"%(dName,info)))
-						break
 
 		return py_file_list
 
@@ -574,7 +575,7 @@ class LibraryTree(wx.TreeCtrl):
 			img = self.not_importedidx if error else self.pythoncfileidx if ispyc else self.pythonfileidx
 			
 			### insert in the tree
-			id = self.InsertItemBefore(parent, 0, item, img, img)
+			id = self.InsertItemBefore(p if p else parent, 0, item, img, img)
 		
 			#mcc = float(subprocess.check_output('python {} {}'.format('Complexity.py', path), shell = True))
 			mcc = GetMacCabeMetric(path)
@@ -603,118 +604,117 @@ class LibraryTree(wx.TreeCtrl):
 			self.SetPyData(id,dName)
 
 		### end
-		if L == []:
-			return
-		else:
-			item = L.pop(0)
-
-			isstr = isinstance(item, str)
-			isdict = isinstance(item, dict)
-
-			### element to insert in the list
-			D = []
-
-			### if child is build from DEVSimPy
-			if isstr:
-				### parent is retrieved from dict
-				parent = self.ItemDico[dName]
-				assert parent != None
+		if L == []: return
 	
-				### parent path
-				parentPath = self.GetPyData(parent)
+		item = L.pop(0)
 
-				### comma replace
-				item = item.strip()
+		isstr = isinstance(item, str)
+		isdict = isinstance(item, dict)
 
-				### only for atomic or coupled model (atomic model is readed from __init__, so no extention)
-				id, error = self.AddComponent(item, parentPath, parent)
+		### element to insert in the list
+		D = []
 
-				### error info back propagation
-				if error:
-					while(parent):
-						self.SetItemImage(parent, self.not_importedidx, wx.TreeItemIcon_Normal)
-						### next parent item
-						parent = self.GetItemParent(parent)
+		### if child is build from DEVSimPy
+		if isstr:
+			### parent is retrieved from dict
+			parent = self.ItemDico[dName]
+			assert parent != None
 
-				### insertion des donnees dans l'item et gestion du ItemDico
-				self.ItemDico.update({os.path.join(parentPath,item):id})
+			### parent path
+			parentPath = self.GetPyData(parent)
 
-			### si le fils est un sous repertoire contenant au moins un fichier (all dans __init__.py different de [])
-			elif isdict and list(item.values()) != [[]]:
+			### comma replace
+			item = item.strip()
 
-				parentPath = list(item.keys())[0]
+			### only for atomic or coupled model (atomic model is readed from __init__, so no extention)
+			id, error = self.AddComponent(item, parentPath, parent)
 
-				### name to insert in the tree
-				dName = os.path.basename(parentPath)
+			### error info back propagation
+			if error:
+				while(parent):
+					self.SetItemImage(parent, self.not_importedidx, wx.TreeItemIcon_Normal)
+					### next parent item
+					parent = self.GetItemParent(parent)
 
-				### new parent
-				parent = self.ItemDico[os.path.dirname(parentPath)] if not dName.startswith('http') else self.ItemDico[parentPath.replace('/'+dName,'')]
+			### insertion des donnees dans l'item et gestion du ItemDico
+			self.ItemDico.update({os.path.join(parentPath,item):id})
 
-				assert(parent!=None)
+		### si le fils est un sous repertoire contenant au moins un fichier (all dans __init__.py different de [])
+		elif isdict and list(item.values()) != [[]]:
 
-				### insert of the fName above the parent
-				id = self.InsertItemBefore(parent, 0, dName)
-				
-				self.SetItemBold(id)
-				self.SetItemImage(id, self.fldridx, wx.TreeItemIcon_Normal)
-				self.SetItemImage(id, self.fldropenidx, wx.TreeItemIcon_Expanded)
+			parentPath = list(item.keys())[0]
 
-				### stockage du parent avec pour cle le chemin complet avec extention (pour l'import du moule dans le Dnd)
-				self.ItemDico.update({parentPath:id})
-				self.SetPyData(id,parentPath)
+			### name to insert in the tree
+			dName = os.path.basename(parentPath)
 
-				self.MetricDico.update({id:{'mcc':0.0, 'parent':parent}})
-				self.MetricDico.update({parent:{'mcc':0.0, 'parent':None}})
+			### new parent
+			parent = self.ItemDico[os.path.dirname(parentPath)] if not dName.startswith('http') else self.ItemDico[parentPath.replace('/'+dName,'')]
 
-				### for the childrens of the sub-domain
-				for elem in list(item.values())[0]:
-					# if simple element (coupled or atomic model)
-					if isinstance(elem, str):
-						### replace the spaces
-						elem = elem.strip() #replace(' ','')
+			assert(parent!=None)
 
-						### transiant parent
-						p = self.ItemDico[parentPath]
-						assert(p!=None)
-						
-						id, error = self.AddComponent(elem, parentPath, parent, p)
-
-						### error info back propagation
-						if error:
-							### insert error to the doc field
-							while(p):
-								self.SetItemImage(p, self.not_importedidx, wx.TreeItemIcon_Normal)
-								### next parent item
-								p = self.GetItemParent(p)
-						
-						self.ItemDico.update({os.path.join(parentPath, elem):id})
-
-					else:
-						### in order to go up the information in the list
-						D.append(elem)
-
-				### update with whole name
-				dName = parentPath
-
-			### for spash screen
-			try:
-				### format the string depending the nature of the item
-				info = " ".join([os.path.basename(parentPath), 'from', os.path.basename(os.path.dirname(parentPath))]) if isdict \
-					else  " ".join([item, 'from', os.path.basename(dName)])
-				pub.sendMessage('object.added', message='Loading %s domain...'%info)
-			except:
-				pass
-
-			### managment of the recursion
-			if D:
-				self.InsertNewDomain(dName, parent, D)
+			### insert of the fName above the parent
+			id = self.InsertItemBefore(parent, 0, dName)
 			
-			try:
-				self.SortChildren(parent)
-			except:
-				pass
+			self.SetItemBold(id)
+			self.SetItemImage(id, self.fldridx, wx.TreeItemIcon_Normal)
+			self.SetItemImage(id, self.fldropenidx, wx.TreeItemIcon_Expanded)
 
-			return self.InsertNewDomain(dName, parent, L)
+			### stockage du parent avec pour cle le chemin complet avec extention (pour l'import du moule dans le Dnd)
+			self.ItemDico.update({parentPath:id})
+			self.SetPyData(id,parentPath)
+
+			self.MetricDico.update({id:{'mcc':0.0, 'parent':parent}})
+			self.MetricDico.update({parent:{'mcc':0.0, 'parent':None}})
+
+			### for the childrens of the sub-domain
+			for elem in list(item.values())[0]:
+				# if simple element (coupled or atomic model)
+				if isinstance(elem, str):
+					### replace the spaces
+					elem = elem.strip() #replace(' ','')
+
+					### transiant parent
+					p = self.ItemDico[parentPath]
+					assert(p!=None)
+					
+					id, error = self.AddComponent(elem, parentPath, parent, p)
+
+					### error info back propagation
+					if error:
+						### insert error to the doc field
+						while(p):
+							self.SetItemImage(p, self.not_importedidx, wx.TreeItemIcon_Normal)
+							### next parent item
+							p = self.GetItemParent(p)
+					
+					self.ItemDico.update({os.path.join(parentPath, elem):id})
+
+				else:
+					### in order to go up the information in the list
+					D.append(elem)
+			print(self.ItemDico)
+			### update with whole name
+			dName = parentPath
+
+		### for spash screen
+		try:
+			### format the string depending the nature of the item
+			info = " ".join([os.path.basename(parentPath), 'from', os.path.basename(os.path.dirname(parentPath))]) if isdict \
+				else  " ".join([item, 'from', os.path.basename(dName)])
+			pub.sendMessage('object.added', message='Loading %s domain...'%info)
+		except:
+			pass
+
+		### managment of the recursion
+		if D:
+			self.InsertNewDomain(dName, parent, D)
+		
+		try:
+			self.SortChildren(parent)
+		except:
+			pass
+
+		return self.InsertNewDomain(dName, parent, L)
 
     ###
 	def GetSubDomain(self, dName, domainSubList = []):
@@ -723,18 +723,17 @@ class LibraryTree(wx.TreeCtrl):
 			)
 		"""
 
+		### on comptabilise les fichiers si il y en a dans le rep courant (la recusion s'occupe des sous domaines)
+		D = {dName: self.GetModelList(dName)}
+
 		if domainSubList == []:
 			### attention il faut que le fichier __init__.py respecte une certain ecriture
-			return {dName:self.GetModelList(dName)}
-		else:
-
-			### on comptabilise les fichiers si il y en a dans le rep courant (la recusion s'occupe des sous domaines)
-			D = {dName: self.GetModelList(dName)}
-			### on lance la recursion sur les repertoires fils
-			for d in domainSubList:
-				p = os.path.join(dName, d)
-				D[dName].append(self.GetSubDomain(p, self.GetDomainList(p)))
 			return D
+	
+		### on lance la recursion sur les repertoires fils
+		D[dName].extend([self.GetSubDomain(os.path.join(dName, d), self.GetDomainList(os.path.join(dName, d))) for d in domainSubList])
+		
+		return D
 
 	###
 	def GetChildRoot(self):
@@ -809,27 +808,28 @@ class LibraryTree(wx.TreeCtrl):
 
 	###
 	def UpdateDomain(self, path):
-		""" Update the Tree Library with new path of the corresponding domain
+		""" Update the Tree Library with new path of the corresponding domain.
 		"""
 
+		bn = os.path.basename(path)
+		dl = self.GetDomainList(path)
+
 		### only of the path is in the tree
-		if self.HasString(os.path.basename(path)):
-			dName = path
+		if self.HasString(bn):
 
 			### try to find focused item from dName
 			try:
-				item = self.ItemDico[dName]
+				item = self.ItemDico[path]
 			### if dName is not present in ItemDico but exist and represent the same directory, we find the path strored in ItemDico
 			except KeyError:
-				for p in self.ItemDico:
-					if p.endswith(os.path.basename(dName)):
-						item = self.ItemDico[p]
+				for p in [a for a in self.ItemDico if a.endswith(bn)]:
+					item = self.ItemDico[p]
 
 			### save parent before deleting item
 			parent = self.GetItemParent(item)
 
 			### save expanded info before deleting item
-			L = [dName] if self.IsExpanded(item) else []
+			L = [path] if self.IsExpanded(item) else []
 			for k,v in list(self.ItemDico.items()):
 				if self.IsExpanded(v):
 					L.append(k)
@@ -837,18 +837,17 @@ class LibraryTree(wx.TreeCtrl):
 			### remove for create udpated new item
 			self.RemoveItem(item)
 
+			LL = list(self.GetSubDomain(path, dl).values())[0]
+
 			### insertion du nouveau domain
-			self.InsertNewDomain(dName, parent, list(self.GetSubDomain(dName, self.GetDomainList(dName)).values())[0])
+			self.InsertNewDomain(path, parent, LL)
 
 			### module checking
-			for d in list(self.GetSubDomain(dName, self.GetDomainList(dName)).values())[0]:
-				if isinstance(d, dict):
-					name_list =  list(d.values())[0]
-					if name_list:
-						for name in [a for a in name_list if not isinstance(a, dict)]:
-							path = list(d.keys())[0]
-							if not name.endswith(('.cmd','.amd')):
-								self.CheckItem(os.path.join(path, name))
+			for d in [ a for a in LL if isinstance(a, dict)]:
+				name_list =  list(d.values())[0]
+				if name_list:
+					for name in [a for a in name_list if not isinstance(a, dict) and not a.endswith(('.cmd','.amd'))]:
+						self.CheckItem(os.path.join(list(d.keys())[0], name))
 
 			### restor expanded item
 			for item in [self.ItemDico[name] for name in L]:
@@ -913,7 +912,7 @@ class LibraryTree(wx.TreeCtrl):
 # 		return thread.finish()
 
 	def OnCompareItems(self, item1, item2):
-		""" overriden method OnCompareItems  used by sortChildren
+		""" Overriden method OnCompareItems used by sortChildren.
 		"""
 
 		if LibraryTree.COMPARE_BY_MACABE_METRIC:
@@ -933,7 +932,7 @@ class LibraryTree(wx.TreeCtrl):
 
 	###
 	def RemoveItem(self, item):
-		""" Remove item from Tree and also the corresponding elements of ItemDico
+		""" Remove item from Tree and also the corresponding elements of ItemDico.
 		"""
 
 		### delete all references from the ItemDico
