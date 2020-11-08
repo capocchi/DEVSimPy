@@ -20,8 +20,6 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-
-
 import builtins
 
 if builtins.__dict__.get('GUI_FLAG',True):
@@ -58,6 +56,7 @@ import zipfile
 import types
 import array
 
+from abc import ABC
 from tempfile import gettempdir
 from traceback import format_exception
 from math import * ### for eval
@@ -122,7 +121,6 @@ PORT_RESOLUTION = True
 # 					GENERAL fUNCTIONS                        #
 #                                                            #
 ##############################################################
-
 
 def MsgBoxError(event, parent, msg):
 	""" Pop-up alert for error in the .py file of a model
@@ -579,13 +577,19 @@ class Diagram(Savable, Structurable):
 		return diagram.getDEVSModel()
 
 	def SetParent(self, parent):
+		"""
+		"""
 		assert isinstance(parent, ShapeCanvas)
 		self.parent =  parent
 
 	def GetParent(self):
+		"""
+		"""
 		return self.parent
 
 	def GetGrandParent(self):
+		"""
+		"""
 		return self.GetParent().GetParent()
 
 	@BuzyCursorNotification
@@ -1144,7 +1148,7 @@ class Diagram(Savable, Structurable):
 		return os.path.basename(self.last_name_saved)
 
 # Generic Shape Event Handler---------------------------------------------------
-class ShapeEvtHandler:
+class ShapeEvtHandler(ABC):
 	""" Handler class
 	"""
 

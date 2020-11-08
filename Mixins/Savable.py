@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
 
-"""
-Name: Savable.py
-Brief descritpion:
-Author(s): L. Capocchi <capocchi@univ-corse.fr>, A-T. Luciani <atluciani@univ-corse.fr>
-Version:  1.0
-Last modified: 2012.04.04
-GENERAL NOTES AND REMARKS:
-
-GLOBAL VARIABLES AND FUNCTIONS:
-"""
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+# Savable.py --- Class based on pickle module and dedicated to save and load components.
+#                     --------------------------------
+#                            Copyright (c) 2020
+#                    L. CAPOCCHI (capocchi@univ-corse.fr)
+#                SPE Lab - SISU Group - University of Corsica
+#                     --------------------------------
+# Version 1.0                                      last modified:  08/11/20
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GENERAL NOTES AND REMARKS:
+#
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 import os
 import sys
@@ -61,6 +65,12 @@ from .Abstractable import Abstractable
 import Components
 import ZipManager
 
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# CLASS DEFIINTION
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 class PickledCollection(list):
 	""" Custom list class for dsp attributes dumping.
 	"""
@@ -86,7 +96,7 @@ class PickledCollection(list):
 	    yield from self.pickled_obj
 
 class DumpBase(object):
-	""" DumpBase class
+	""" DumpBase class.
 	"""
 
 	### list of available extension
@@ -223,7 +233,7 @@ class DumpZipFile(DumpBase):
 				return True
 
 	def Load(self, obj_loaded, fileName = None):
-		""" Load codeblock (obj_loaded) from fileName
+		""" Load codeblock (obj_loaded) from fileName.
 		"""
 
 		# get zip file object
@@ -272,14 +282,6 @@ class DumpZipFile(DumpBase):
 					import wx
 					L.insert(6, [FONT_SIZE, 74, 93, 700, 'Arial'])
 
-
-		### label_pos checking
-		if len(obj_loaded.dump_attributes) != len(L):
-
-			### 'label_pos' attribut is on rank 6 and its defautl value is "middle"
-			j = 6 if fileName.endswith(DumpZipFile.ext[-1]) else 4
-			L.insert(j, 'middle')
-
 		#=======================================================================
 
 		### abstraction hierarchy checking
@@ -287,7 +289,19 @@ class DumpZipFile(DumpBase):
 			obj_loaded.dump_attributes += Abstractable.DUMP_ATTR
 
 		#=======================================================================
-		assert(len(L)==len(obj_loaded.dump_attributes))
+
+		### for amd and cmd build after the implementation of the rename method of model in libratie
+		### This may present an opportunity for the delete of the model_path and python_path of the .amd or .cmd compressed file.
+		if abs(len(L)-len(obj_loaded.dump_attributes))==2:
+			L=L[2:]
+			assert(len(L)==len(obj_loaded.dump_attributes))
+		
+		### for position_label checking (for very old version of .amd or .cmd model)
+		elif abs(len(obj_loaded.dump_attributes)-len(L)) == 1:
+
+			### 'label_pos' attribut is on rank 6 and its defautl value is "middle"
+			j = 6 if fileName.endswith(DumpZipFile.ext[-1]) else 4
+			L.insert(j, 'middle')
 
 		try:
 			### assign dumped attributs
@@ -307,9 +321,12 @@ class DumpZipFile(DumpBase):
 			sys.stderr.write(_("Problem loading (old model): %s -- %s \n")%(str(fileName), str(tb)))
 			return info
 		
+		obj_loaded.model_path = fileName
+		obj_loaded.python_path = os.path.join(fileName, os.path.basename(fileName).replace('.cmd','.py').replace('.amd','.py'))
+
 		### if the model was made from another pc
 		#if not os.path.exists(obj_loaded.model_path):
-		obj_loaded.model_path = fileName
+		#	obj_loaded.model_path = fileName
 
 		#with zipfile.ZipFile(fileName) as zf:
 		#	### find all python files
@@ -323,7 +340,7 @@ class DumpZipFile(DumpBase):
 			### ?: for exclude or non-capturing rule
 			#obj_loaded.python_path = os.path.join(obj_loaded.model_path, re.findall(".*(?:.[a|c]md)+[/|\\\](.*.py)*", obj_loaded.python_path)[-1])
 
-		obj_loaded.python_path = os.path.join(fileName,os.path.basename(fileName).replace('.cmd','.py').replace('.amd','.py'))
+		#obj_loaded.python_path = os.path.join(fileName,os.path.basename(fileName).replace('.cmd','.py').replace('.amd','.py'))
 
 		return True
 
@@ -506,7 +523,8 @@ class DumpJSFile(DumpBase):
 	ext = [".js"]
 
 	def Save(self, obj_dumped, fileName = None):
-
+		"""
+		"""
 		assert(fileName.endswith(tuple(DumpJSFile.ext)))
 
 		diagram = obj_dumped
@@ -529,7 +547,8 @@ class DumpXMLFile(DumpBase):
 	ext = [".xml"]
 
 	def Save(self, obj_dumped, fileName = None):
-
+		"""
+		"""
 		assert(fileName.endswith(tuple(DumpXMLFile.ext)))
 
 		diagram = obj_dumped
@@ -552,7 +571,7 @@ class Savable(object):
 	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), BuzyCursorNotification)
 	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), StatusBarNotification('Sav'))
 	def SaveFile(self, fileName = None):
-		""" Save object in fileName
+		""" Save object in fileName.
 		"""
 		if fileName is None:
 			return False
@@ -574,7 +593,7 @@ class Savable(object):
 
 	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), StatusBarNotification('Load'))
 	def LoadFile(self, fileName = None):
-		""" Load object from fileName
+		""" Load object from fileName.
 		"""
 
 		if fileName is None:

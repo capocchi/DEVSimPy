@@ -853,19 +853,19 @@ class BlockFactory:
 			module_name = os.path.basename(filename).split('.py')[0]
 
 			# find and load module
-			#try:
-			name, ext = os.path.splitext(module_name)
-			pkg = '.'.join(module_name.split('.')[0:-1])
-			module = importlib.import_module(name, package=pkg)
+			try:
+				name, ext = os.path.splitext(module_name)
+				pkg = '.'.join(module_name.split('.')[0:-1])
+				module = importlib.import_module(name, package=pkg)
 
-			#f, fn, description = imp.find_module(module_name, [dir_name])
-			#module = imp.load_module(module_name, f, fn, description)
-			#f.close()
-			return module
+				#f, fn, description = imp.find_module(module_name, [dir_name])
+				#module = imp.load_module(module_name, f, fn, description)
+				#f.close()
+				return module
 
-			#except Exception as info:
-			#	sys.stderr.write(_("Module %s not imported from %s!\n"%(module_name,dir_name)))
-			#	return sys.exc_info()
+			except Exception as info:
+				sys.stderr.write(_("Module %s not imported from %s!\n"%(module_name,dir_name)))
+				return sys.exc_info()
 
 	@staticmethod
 	def GetBlock(filename, label):

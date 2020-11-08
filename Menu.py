@@ -172,11 +172,17 @@ def AppendMenu(menu, ID, label, submenu):
 	else:
 		return menu.AppendSubMenu(submenu, label)
 
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# CLASS DEFINITION
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 class TaskBarMenu(wx.Menu):
 	"""
 	"""
 	def __init__(self, parent):
-		""" Constructor
+		""" Constructor.
 		"""
 		wx.Menu.__init__(self)
 
@@ -187,6 +193,8 @@ class FileMenu(wx.Menu):
 	"""
 	"""
 	def __init__(self, parent):
+		""" Constructor.
+		"""
 		wx.Menu.__init__(self)
 
 		openModel=wx.MenuItem(self, ID_OPEN, _('&Open\tCtrl+O'),_('Open an existing diagram'))
@@ -249,6 +257,8 @@ class ProfileFileMenu(wx.Menu):
 	"""
 	"""
 	def __init__(self, parent):
+		""" Constructor.
+		"""
 		wx.Menu.__init__(self)
 
 		parent = parent.GetParent()
@@ -271,6 +281,8 @@ class RecentFileMenu(wx.Menu):
 	"""
 	"""
 	def __init__(self, parent):
+		""" Constructor.
+		"""
 		wx.Menu.__init__(self)
 
 		parent = parent.GetParent()
@@ -299,6 +311,8 @@ class ShowMenu(wx.Menu):
 	"""
 	"""
 	def __init__(self, parent):
+		""" Constructor.
+		"""
 		wx.Menu.__init__(self)
 
 		parent = parent.GetParent()
@@ -329,7 +343,11 @@ class ShowMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnShowToolBar, id = ID_SHOW_TOOLBAR)
 
 class PerspectiveMenu(wx.Menu):
+	"""
+	"""
 	def __init__(self, parent):
+		""" Constructor.
+		"""
 		wx.Menu.__init__(self)
 
 		parent = parent.GetParent()
@@ -368,6 +386,8 @@ class DiagramMenu(wx.Menu):
 	"""
 	"""
 	def __init__(self, parent):
+		""" Constructor.
+		"""
 		wx.Menu.__init__(self)
 
 		parent = parent.GetParent()
@@ -440,6 +460,8 @@ class SettingsMenu(wx.Menu):
 	"""
 	"""
 	def __init__(self, parent):
+		""" Constrcutor.
+		"""
 		wx.Menu.__init__(self)
 
 		languagesSubmenu = wx.Menu()
@@ -481,6 +503,8 @@ class HelpMenu(wx.Menu):
 	"""
 	"""
 	def __init__(self, parent):
+		""" Constructor.
+		"""
 		wx.Menu.__init__(self)
 
 		parent = parent.GetParent()
@@ -526,7 +550,11 @@ class HelpMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnContact, id=ID_CONTACT)
 
 class MainMenuBar(wx.MenuBar):
+	"""
+	"""
 	def __init__(self, parent):
+		""" Constructor.
+		"""
 		wx.MenuBar.__init__(self)
 
 		self.parent = parent
@@ -670,7 +698,7 @@ class DiagramTabPopupMenu(wx.Menu):
 		### Bind is not necessary because ID_EXIT_DAIGRAM and ID_DETACH_DIAGRAM are already binded
 
 class PropertiesCtrlPopupMenu(wx.Menu):
-	""" PropertiesCtrl popup menu
+	""" PropertiesCtrl popup menu.
 	"""
 
 	def __init__(self, parent, row, col):
@@ -685,6 +713,7 @@ class PropertiesCtrlPopupMenu(wx.Menu):
 		edit = wx.MenuItem(self, ID_EDIT_ATTR, _('Edit'), _('Edit attribute'))
 		insert = wx.MenuItem(self, ID_INSERT_ATTR, _('Insert'), _('Insert attribute'))
 		clear = wx.MenuItem(self, ID_CLEAR_ATTR, _('Clear'), _('Clear value'))
+		
 		edit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'edit.png')))
 		insert.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'insert.png')))
 		clear.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'edit-clear.png')))
@@ -736,10 +765,15 @@ class ItemLibraryPopupMenu(wx.Menu):
 			update_lib = wx.MenuItem(self, ID_UPDATE_SUBLIB, _('Update'), _('Update all models of the selected library'))
 			update_lib.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'db_refresh2.png')))
 			InsertItem(3, update_lib)
+			doc = wx.MenuItem(self, wx.NewIdRef(), _('Documentation'), _('Documentation of selected library'))
+			doc.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'doc.png')))
+			InsertItem(4, doc)
+
 			self.Bind(wx.EVT_MENU, parent.OnNewModel, id=ID_NEW_MODEL_LIB)
 			self.Bind(wx.EVT_MENU, parent.OnDirRename, id=ID_RENAME_DIR_LIB)
 			self.Bind(wx.EVT_MENU, parent.OnNewDir, id=ID_NEW_DIR_LIB)
 			self.Bind(wx.EVT_MENU, parent.OnUpdateSubLib, id=ID_UPDATE_SUBLIB)	
+			self.Bind(wx.EVT_MENU, parent.OnLibDocumentation, id = doc.GetId())	# put before the popUpMenu
 
 		else:
 
@@ -776,8 +810,12 @@ class ItemLibraryPopupMenu(wx.Menu):
 
 
 class LibraryPopupMenu(wx.Menu):
+	""" Popup menu for panel library.
+	"""
 
 	def __init__(self, parent):
+		""" Constructor.
+		"""
 		wx.Menu.__init__(self)
 
 		new = wx.MenuItem(self, ID_NEW_LIB, _('New/Import'), _('Create or import library'))
@@ -805,12 +843,11 @@ class LibraryPopupMenu(wx.Menu):
 		self.Bind(wx.EVT_MENU, parent.OnUpdateAll, id=ID_REFRESH_LIB)
 
 class ShapeCanvasPopupMenu(wx.Menu):
-	""" ShapeCanvas menu class
+	""" ShapeCanvas menu class.
 	"""
 	def __init__(self, parent):
 		""" Constructor.
 		"""
-
 		wx.Menu.__init__(self)
 
 		### local copy
@@ -865,6 +902,7 @@ class ShapeCanvasPopupMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.diagram.OnAddConstants, id=ID_ADD_CONSTANTS)
 		parent.Bind(wx.EVT_MENU, parent.parent.PrintPreview, id=ID_PREVIEW_PRINT)
 		parent.Bind(wx.EVT_MENU, ExperimentGenerator(os.path.join(HOME_PATH,'out')).OnExperiment, id=ID_GEN_EXPERIMENT)
+
 class ShapePopupMenu(wx.Menu):
 	""" Shape menu class
 	"""
@@ -996,10 +1034,10 @@ class ShapePopupMenu(wx.Menu):
 				rotate_output_subMenu.AppendItem =  rotate_output_subMenu.Append
 
 			### for port, just right of left rotation
-			if isinstance(shape, Container.Port):
-    			
+			if isinstance(shape, Container.Port):    			
 				Rotate_SubMenu1 = rotate_subMenu.AppendItem(rotateR)
 				Rotate_SubMenu2 = rotate_subMenu.AppendItem(rotateL)
+
 			else:
 				Rotate_SubMenu11 = rotate_all_subMenu.AppendItem(rotateR)
 				Rotate_SubMenu12 = rotate_all_subMenu.AppendItem(rotateL)
@@ -1023,6 +1061,7 @@ class ShapePopupMenu(wx.Menu):
 					new_item = wx.MenuItem(connectable_subMenu, wx.NewIdRef(), item.label)
 					connectable_subMenu.Append(new_item)
 					self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnConnectTo,id = new_item.GetId())
+			
 			AppendMenu(self,-1, _('Connect to'), connectable_subMenu)
 
 			if isinstance(shape, Container.CodeBlock):
@@ -1112,4 +1151,6 @@ class ShapePopupMenu(wx.Menu):
 			shape.OnDeleteNode(event)
 
 	def GetParent(self):
+		""" Return the parent.
+		"""
 		return self.__canvas
