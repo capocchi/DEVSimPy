@@ -47,7 +47,7 @@ def getPythonModelFileName(fn:str)->str:
 
 	#global Cmtp
 
-	assert(zipfile.is_zipfile(fn))
+	assert zipfile.is_zipfile(fn), fn
 
 	zf = zipfile.ZipFile(fn,'r')
 
@@ -220,11 +220,6 @@ class Zip:
 		return del_flag
 
 	@staticmethod
-	def Check(fn:str)->bool:
-		"""
-		"""
-
-	@staticmethod
 	def GetDatFile(fn:str)->str:
 		""" Return the DEVSimPyModel.dat file.
 		"""
@@ -268,28 +263,32 @@ class Zip:
 			return None
 
 	@staticmethod
-	def GetBehavioralPythonFile(fn:str)->str:
+	def GetBehavioralPythonFile(fn:str):
 		""" TODO: comment
 		"""
 
-		if not zipfile.is_zipfile(fn):
-			return ""
-
 		### zipfile (amd or cmd)
-		zf = zipfile.ZipFile(fn, 'r')
-		nl = zf.namelist()
-		zf.close()
+		if not zipfile.is_zipfile(fn):
+			return False
 
 		bn = os.path.basename(fn)
 		name, ext = os.path.splitext(bn)
 
-		for s in [s for s in nl if s.endswith(".py")]:
-			n, e = os.path.splitext(s)
-			r = repr(zf.read(s))
-			if n == name and 'DomainBehavior' in r or 'DomainStructure' in r:
-				return s
+		with zipfile.ZipFile(fn) as zf:
+			### find all python files
+			for file in zf.namelist():
+				if file.endswith(".py"):
+					r = repr(zf.read(file))
+					n, e = os.path.splitext(file)
+					if n == name and ('class %s(DomainBehavior)'%name in r or 'class %s(DomainStructure)'%name in r):
+						return file
 
-		return ""
+		info = _("Please check this: \n \
+				The Python filename and the name of archive (%s)) must be egal to the class name!\n \
+				Please correct this aspect by extracting the archive.\n")%(name)
+		sys.stdout.write(info)
+
+		return False
 
 	@staticmethod
 	def GetPluginFile(fn:str)->str:

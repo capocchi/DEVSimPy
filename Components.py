@@ -296,7 +296,6 @@ class GenericComponent:
 	def Rename(filename:str, new_name:str)->bool:
 		""" Rename the filename with the new_name.
 		"""
-
 			
 		old_bn = os.path.basename(filename)
 		dn = os.path.dirname(filename)
@@ -336,28 +335,31 @@ class GenericComponent:
 
 		if temp_file:
 
-			print("Replace %s by %s into %s"%(old_name, new_name, new_temp_file))
+			#print("Replace %s by %s into %s"%(old_name, new_name, new_temp_file))
 			### replace in new_temp_file file
 			replaceAll(new_temp_file, old_name, new_name)
 		
 			zip = ZipManager.Zip(filename)
 			
 			if zip.Delete([os.path.basename(temp_file)]):
-				print("Delete %s"%os.path.basename(temp_file))
+				#print("Delete %s"%os.path.basename(temp_file))
 				
-			print("Update %s"%new_temp_file)
-			zip.Update([new_temp_file])
+				#print("Update %s"%new_temp_file)
+				zip.Update([new_temp_file])
 
-			print("rename %s to %s"%(filename,new_filepath))	
+				#print("rename %s to %s"%(filename,new_filepath))	
 			
-			### relace on file system
-			os.rename(filename, new_filepath)
+				### relace on file system
+				os.rename(filename, new_filepath)
 
-			return True
+				return True
+			else:
+				return False
 
 		else:
-			info = _("It seams that the python filename and the model name are diffrent!\n \
-						Please correct this aspect by extracting the archive.")
+			info = _("Please check this: \n \
+				The Python filename and the name of archive (%s)) must be egal to the class name!\n \
+				Please correct this aspect by extracting the archive.\n")%(old_name)
 			wx.MessageBox(info, _("Error"), wx.OK|wx.ICON_ERROR)
 			return False
 
