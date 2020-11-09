@@ -382,7 +382,7 @@ class Zip:
 		try:
 			### module is referenced in sys.modules with the format: <LibName><ModelName><amd|cmd>
 			### the last tag allow to differenciate the model with the same name but different extention in the same lib.
-			fullname = "".join([os.path.basename(os.path.dirname(self.fn)), py_fn.split('.py')[0],self.fn.split('.')[-1]])
+			fullname = "".join([os.path.basename(os.path.dirname(self.fn)), py_fn.split('.py')[0], self.fn.split('.')[-1]])
 			return self.ImportModule() if fullname not in sys.modules else sys.modules[fullname]
 		### model has not python file !
 		except Exception as e:
@@ -428,7 +428,7 @@ class Zip:
 				### Now import of .amd or .cmd module is composed by DomainModel (no point!).
 				### Example : import CollectorMessageCollectoramd or CollectorMessageCollectorcmd
 				
-				fullname = "".join([os.path.basename(os.path.dirname(self.fn)), getPythonModelFileName(self.fn).split('.py')[0],self.fn.split('.')[-1]]) 
+				fullname = "".join([os.path.basename(os.path.dirname(self.fn)), getPythonModelFileName(self.fn).split('.py')[0], self.fn.split('.')[-1]]) 
 				sys.modules[fullname] = module
 
 				return module
@@ -444,7 +444,7 @@ class Zip:
 		try:
 
 			### reload submodule from module dependencies!
-			fullname = "".join([os.path.basename(os.path.dirname(self.fn)), getPythonModelFileName(self.fn).split('.py')[0]])
+			fullname = "".join([os.path.basename(os.path.dirname(self.fn)), getPythonModelFileName(self.fn).split('.py')[0], self.fn.split('.')[-1]])
 			module = sys.modules[fullname]
 			domain_name = os.path.basename(os.path.dirname(self.fn))
 			for name in dir(module):

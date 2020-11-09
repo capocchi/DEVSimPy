@@ -22,7 +22,7 @@
 
 #---------------------------------------------------------
 class Attributable:
-	"""  AttributeEditor mixin class to edit shape properties.
+	"""  AttributeEditor mixin class to edit shape properties
 	"""
 
 	### Static variable for default graphical properties display
@@ -44,7 +44,7 @@ class Attributable:
 
 	###
 	def AddAttribute(self, name, typ=""):
-		""" Add attribute if not exist.
+		""" Add attribute if not exist
 		"""
 
 		if not hasattr(self, name):
@@ -54,28 +54,34 @@ class Attributable:
 
 	###
 	def GetAttributes(self):
-		""" Return attributes attribute.
+		""" Return attributes attribute
 		"""
 		return self.attributes
 
 	###
 	def SetAttributes(self, L):
-		""" Set attributes list.
+		""" Set attributes list
 		"""
 		assert(isinstance(L,list))
 
+		### set attribute
+		for name in L:
+			if not hasattr(self, name):
+				setattr(self, name, '')
+
 		### set attributes list
-		self.attributes = [setattr(self, name, '') for name in L if not hasattr(self, name)]
+		self.attributes = L
 
 	###
 	def AddAttributes(self, attrs):
-		""" Extend attributes list.
+		""" Extend attributes list
 		"""
-		self.attributes.extend([a for a in attrs if a not in self.attributes])
+		for attr in [a for a in attrs if a not in self.attributes]:
+			self.attributes.append(attr)
 
 	###
 	def RemoveAttribute(self, name):
-		""" Remove attribute name.
+		""" Remove attribute name
 		"""
 		### delete the attribute
 		if hasattr(self,name):
