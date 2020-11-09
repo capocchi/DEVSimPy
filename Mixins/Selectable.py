@@ -22,12 +22,12 @@ class Selectable:
     """
 
     def __init__(self):
-        """ Constructor
+        """ Constructor.
         """
         self.selected = False
 
     def OnRenameFromClick(self, event):
-        """
+        """ Rename the component from click.
         """
 
         canvas = event.GetEventObject()
@@ -35,7 +35,7 @@ class Selectable:
         event.Skip()
 
     def OnRenameFromMenu(self, event):
-        """
+        """ Rename the component from menu.
         """
 
         canvas = event.GetEventObject().GetParent()
@@ -43,7 +43,7 @@ class Selectable:
         event.Skip()
 
     def DoLabelDialog(self, canvas):
-        """
+        """ Dialog to ask new label.
         """
 
          ### only for Block and Port when control is down

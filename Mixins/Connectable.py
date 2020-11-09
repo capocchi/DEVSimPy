@@ -20,16 +20,14 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-#---------------------------------------------------------
 class Connectable:
-	""" Mixin to create connectable nodes or ports
+	""" Mixin to create connectable nodes or ports.
 	"""
 
 	###
 	def __init__(self, nb_in = 1, nb_out = 3):
 		""" Constructor.
 		"""
-
 		self.input = nb_in
 		self.output = nb_out
 

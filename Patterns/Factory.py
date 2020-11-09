@@ -60,23 +60,33 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 			self.__algorithm = SimStrategy1(self)
 
 		def simulate(self, T = 100000000):
+			""" Simulate for T
+			"""
 			return self.__algorithm.simulate(T)
 
 		def getMaster(self):
+			""" Get the master DEVS model.
+			"""
 			return self.model
 
 		def setMaster(self, model):
+			""" Set the DEVS master model.
+			"""
 			self.model = model
 
 		def setAlgorithm(self, s):
+			""" Set the simulation algo.
+			"""
 			self.__algorithm = s
 
 		def getAlgorithm(self):
+			""" Get the selected simlation algo.
+			"""
 			return self.__algorithm
 
 	class SimulationThread(threading.Thread, Simulator):
 		"""
-			Thread for DEVS simulation task
+			Thread for DEVS simulation task.
 		"""
 
 		def __init__(self, model=None, strategy='', prof=False, ntl=False, verbose=False, dynamic_structure_flag=False, real_time_flag=False):
@@ -103,7 +113,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 
 		@hotshotit
 		def run(self):
-			""" Run thread
+			""" Run thread.
 			"""
 
 			### define the simulation strategy
@@ -176,11 +186,14 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 			self.end_flag = True
 
 		def set_sleep(self, sleeptime):
+			""" Set the sleep.
+			"""
 			self.thread_sleep = True
 			self._sleeptime = sleeptime
 
 		def suspend(self):
-
+			""" Suspend the Thread.
+			"""
 			#main_thread = threading.currentThread()
 			#for t in threading.enumerate():
 			#	t.thread_suspend = True
@@ -188,6 +201,8 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 			self.thread_suspend = True
 
 		def resume_thread(self):
+			""" Resume the Thread.
+			"""
 			self.thread_suspend = False
 
 	return SimulationThread(model, strategy, prof, ntl, verbose, dynamic_structure_flag, real_time_flag)

@@ -29,8 +29,8 @@ import Components
 
 #---------------------------------------------------------
 class Abstractable:
-    """  Mixin class for the abstraction hierarchy
-        Adds dynamically the 'layers' attribute. This one contains the list of diagrams associated with one level
+    """  Mixin class for the abstraction hierarchy.
+        Adds dynamically the 'layers' attribute. This one contains the list of diagrams associated with one level.
     """
 
     DUMP_ATTR = ['layers', 'current_level', 'DAM', 'UAM']
@@ -59,7 +59,7 @@ class Abstractable:
 #===============================================================================
     ###
     def SetDiagram(self, diagram):
-        """ Set the diagram
+        """ Set the diagram.
         """
 
         ### if diagram has layers attribute and layer exist, then load it
@@ -75,7 +75,7 @@ class Abstractable:
 
     ###
     def GetDiagram(self):
-        """ Return Diagram instance
+        """ Return Diagram instance.
         """
         return self.diagram
 #===============================================================================
@@ -84,36 +84,36 @@ class Abstractable:
 
     ###
     def GetDiagramByLevel(self, l):
-        """ Return layer form level l
-            if layer dosen't exist, None is returned
+        """ Return layer form level l.
+            if layer dosen't exist, None is returned.
         """
         return self.layers.get(l, None)
 
     ###
     def SetDiagramByLevel(self, d, l):
-        """ Update the layers form diagram d at level l
+        """ Update the layers form diagram d at level l.
         """
         self.layers.update({l:d})
 
     ###
     def GetLayers(self):
-        """ Get layers dico
+        """ Get layers dico.
         """
         return self.layers
 
     ###
     def GetCurrentLevel(self):
-        """ Return the current layer viewed in the canvas
+        """ Return the current layer viewed in the canvas.
         """
         return self.current_level
 
     def GetUAM(self):
-        """ Return the dictionary of the code of Upward Atomic Model
+        """ Return the dictionary of the code of Upward Atomic Model.
         """
         return self.UAM
 
     def GetDAM(self):
-        """ Return the dictionary of the code of Downward Atomic Model
+        """ Return the dictionary of the code of Downward Atomic Model.
         """
         return self.DAM
 
@@ -128,25 +128,25 @@ class Abstractable:
         self.UAM[cl] = val
 
     def SetCurrentLevel(self, l):
-        """ Set the current level viewed in the canvas
+        """ Set the current level viewed in the canvas.
         """
         self.current_level = l
 
     ###
     def NextLevel(self):
-        """ return the last depth abstract level
+        """ return the last depth abstract level.
         """
         return self.GetLevelLenght()
 
     ###
     def GetLevelLenght(self):
-        """ Get the number of layers defined in the canvas
+        """ Get the number of layers defined in the canvas.
         """
         return len(self.GetLayers())
 
     ###
     def AddLayer(self, d, l):
-        """ Add the diagram d at level l
+        """ Add the diagram d at level l/
         """
         if l in self.layers:
             self.SetDiagramByLevel(d, l)
@@ -162,9 +162,8 @@ class Abstractable:
 
     ###
     def LoadDiagram(self, l):
-        """ Load diagram at the level l in the current canvas
+        """ Load diagram at the level l in the current canvas.
         """
-
         layers = self.GetLayers()
         canvas = self
 
@@ -186,7 +185,7 @@ class Abstractable:
             canvas.SetCurrentLevel(l)
             #canvas.SetDiagram(dia)
 
-            print("New diagram at level %s"%l, self.layers)
+            sys.stdout.write("New diagram at level %s"%l, self.layers)
 
         ### add new or update new attributes layers and current_layer to diagram
         setattr(dia, 'layers', canvas.GetLayers())

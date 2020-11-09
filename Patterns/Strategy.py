@@ -51,8 +51,8 @@ for pydevs_dir, path in builtins.__dict__['DEVS_DIR_PATH_DICT'].items():
 #import DEVSKernel.PyDEVS.DEVS as PyDEVS
 #import DEVSKernel.PyPDEVS.DEVS as PyPDEVS
 
-def getFlatImmChildrenList(model, flat_imm_list = []):
-	""" Set priority flat list
+def getFlatImmChildrenList(model, flat_imm_list:list = [])->list:
+	""" Set priority flat list.
 	"""
 
 	for m in model.immChildren:
@@ -63,15 +63,12 @@ def getFlatImmChildrenList(model, flat_imm_list = []):
 
 	return flat_imm_list
 
-def getFlatPriorityList(model, flat_priority_list = []):
-	""" Set priority flat list
+def getFlatPriorityList(model, flat_priority_list:list = [])->list:
+	""" Set priority flat list.
 	"""
 
 	### if priority list never edited, priority is componentList order.
-	if hasattr(model, 'PRIORITY_LIST') and model.PRIORITY_LIST:
-		L = model.PRIORITY_LIST
-	else:
-		L = model.componentSet
+	L = model.PRIORITY_LIST if hasattr(model, 'PRIORITY_LIST') and model.PRIORITY_LIST else model.componentSet
 
 	for m in L:
 		if isinstance(m, PyDEVS.AtomicDEVS):
@@ -83,16 +80,24 @@ def getFlatPriorityList(model, flat_priority_list = []):
 
 	return flat_priority_list
 
-def HasActiveChild(L):
-	""" Return true if a children of master is active
+def HasActiveChild(L:list)->bool:
+	""" Return true if a children of master is active.
 	"""
 	return L and True in [a.timeNext != INFINITY for a in L]
 
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# CLASS DEFINITION
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 class SimStrategy:
-	""" Strategy abstract class or interface
+	""" Strategy abstract class or interface.
 	"""
 
 	def __init__(self, simulator=None):
+		""" Constructor.
+		"""
 		self._simulator = simulator
 
 	def simulate(self, T = 100000000):
@@ -101,10 +106,12 @@ class SimStrategy:
 		pass
 
 class SimStrategy1(SimStrategy):
-	""" Original strategy for PyDEVS simulation
+	""" Original strategy for PyDEVS simulation.
 	"""
 
 	def __init__(self, simulator = None):
+		""" Constructor.
+		"""
 		SimStrategy.__init__(self, simulator)
 
 	def simulate(self, T = 100000000):
@@ -133,10 +140,12 @@ class SimStrategy2(SimStrategy):
 	"""
 
 	def __init__(self, simulator=None):
+		""" Constructor.
+		"""
 		SimStrategy.__init__(self, simulator)
 
 	def simulate(self, T = 100000000):
-		"""
+		""" Simulate for T
 		"""
 
 		master = self._simulator.getMaster()
@@ -277,19 +286,20 @@ class WeakValue:
 		return self._value
 
 	def AddHosts(self,p):
-		""" Make host list composed by tuple of priority, model and transition function
+		""" Make host list composed by tuple of priority, model and transition function.
 		"""
 		model = p.host
 		v = (model.priority/10000.0, model, execExtTransition)
-		if v not in self._host:
-			if hasattr(model, 'priority'):
-				self._host.append(v)
+		if v not in self._host and hasattr(model, 'priority'):
+			self._host.append(v)
 
 	def GetHosts(self):
+		""" Return the host.
+		"""
 		return self._host
 
 def FlatConnection(p1, p2):
-	"""
+	""" Make flat connection.
 	"""
 
 	if isinstance(p1.host, PyDEVS.AtomicDEVS) and isinstance(p2.host, PyDEVS.AtomicDEVS):
@@ -445,7 +455,7 @@ class SimStrategy3(SimStrategy):
 
 
 	def simulate(self, T = 100000000):
-		"""
+		""" Simulate for T.
 		"""
 
 		### ref to cpu time evaluation
@@ -586,6 +596,8 @@ class SimStrategy5(SimStrategy4):
 	"""
 
 	def __init__(self, simulator = None):
+		""" Constructor.
+		"""
 		SimStrategy4.__init__(self, simulator)
 
 	def SetClassicDEVSOption(self):

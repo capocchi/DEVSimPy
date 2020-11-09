@@ -2151,9 +2151,9 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					### adding model
 					self.AddShape(newShape)
 
-			### adding connectionShape
-			for cs in L:
-				cs.input = (D[cs.input[0]],cs.input[1])
+			### adding connectionShape only if the connection is connected on the two side with blocks.
+			for cs in [ a for a in L if a.input[0] in D and a.output[0] in D]:
+				cs.input = (D[cs.input[0]],cs.input[1])	
 				cs.output = (D[cs.output[0]],cs.output[1])
 				self.AddShape(cs)
 
@@ -3981,7 +3981,8 @@ class ContainerBlock(Block, Diagram):
 		"""
 
 		if name == 'dump_attributes':
-			return ['shapes', 'priority_list', 'constants_dico', 'model_path', 'python_path','args'] + self.GetAttributes()
+			#return ['shapes', 'priority_list', 'constants_dico', 'model_path', 'python_path','args'] + self.GetAttributes()
+			return ['shapes', 'priority_list', 'constants_dico','args'] + self.GetAttributes()
 		#=======================================================================
 		elif name == 'dump_abstr_attributes':
 			return Abstractable.DUMP_ATTR if hasattr(self, 'layers') and hasattr(self, 'current_level') else []

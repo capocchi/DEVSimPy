@@ -1117,10 +1117,10 @@ class LibraryTree(wx.TreeCtrl):
 			dlg.CenterOnParent(wx.BOTH)
 			dlg.ShowModal()
 		else:
-			wx.MessageBox(_("No documentation!\n Please define the documentation of the model %s in the header of its python file.")%name, _("%s Documentation")%name, wx.OK|wx.ICON_INFORMATION)
+			wx.MessageBox(_("No documentation!\nPlease define the documentation of the model %s in the header of its python file.")%name, _("%s Documentation")%name, wx.OK|wx.ICON_INFORMATION)
 
 	###
 	def OnInfo(self, event):
 		"""
 		"""
-		wx.MessageBox(_('Libraries Import Manager.\nYou can import, refresh or upgrade libraries using right options.\nDefault libraries directory is %s.')%(DOMAIN_PATH))
+		wx.MessageBox(_('Libraries Import Manager.\nYou can import, refresh or upgrade libraries.\nDefault libraries directory is %s.')%(DOMAIN_PATH))
