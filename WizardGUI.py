@@ -181,17 +181,29 @@ class %s(DomainStructure):
 
 	return code
 
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# CLASSES DEFINITION
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 class TextObjectValidator(wx.PyValidator):
 	""" TextObjectValidator()
 	"""
 
 	def __init__(self):
+		""" Constructor.
+		"""
 		wx.PyValidator.__init__(self)
 
 	def Clone(self):
+		""" Clone method.
+		"""
 		return TextObjectValidator()
 
 	def Validate(self, win):
+		""" Validate fields.
+		"""
 		textCtrl = self.GetWindow()
 		text = textCtrl.GetValue()
 
@@ -207,15 +219,22 @@ class TextObjectValidator(wx.PyValidator):
 			return True
 
 	def TransferToWindow(self):
-		return True # Prevent wxDialog from complaining.
+		""" Prevent wxDialog from complaining.
+		"""
+		return True
 
 	def TransferFromWindow(self):
-		return True # Prevent wxDialog from complaining.
+		""" Prevent wxDialog from complaining.
+		"""
+		return True
 
 class wizard_page(WizardPage):
 	""" An extended panel obj with a few methods to keep track of its siblings.
 	This should be modified and added to the wizard.  Season to taste."""
+	
 	def __init__(self, parent, title):
+		""" Constructor.
+		"""
 		WizardPage.__init__(self, parent)
 		self.next = self.prev = None
 		self.sizer = wx.BoxSizer(wx.VERTICAL)
@@ -254,12 +273,10 @@ class Wizard(wizmod):
 	"""Add pages to this wizard object to make it useful."""
 
 	def __init__(self, title, parent, img_filename = ""):
-		""" Constructor
+		""" Constructor.
 		"""
-		if img_filename and os.path.exists(img_filename):
-				img = wx.Bitmap(img_filename)
-		else:
-				img = wx.NullBitmap
+		img = wx.Bitmap(img_filename) if img_filename and os.path.exists(img_filename) else img = wx.NullBitmap
+
 		wizmod.__init__(self, parent, wx.NewIdRef(), title, img)
 
 		self.SetPageSize((400,300))
@@ -287,6 +304,8 @@ class Wizard(wizmod):
 		self.pages.append(page)
 
 	def run(self):
+		""" Run wizard.
+		"""
 		self.RunWizard(self.pages[0])
 
 	def on_page_changed(self, evt):
@@ -324,7 +343,7 @@ class ModelGeneratorWizard(Wizard):
 	"""
 
 	def __init__(self, *args, **kwargs):
-		""" Constructor
+		""" Constructor.
 		"""
 
 		if 'specific_domain_path' in kwargs:
@@ -592,50 +611,34 @@ class ModelGeneratorWizard(Wizard):
 		def onBt5Check(evt):
 			""" Python file selector is checked.
 			"""
-
-			if evt.GetEventObject().GetValue():
-				fb1.Enable(False)
-			else:
-				fb1.Enable(True)
+			fb1.Enable(not evt.GetEventObject().GetValue())
 
 		# event handler for check button
 		def onBt51Check(evt):
 			""" Python file selector is checked.
 			"""
-			if evt.GetEventObject().GetValue():
-				fb12.Enable(False)
-			else:
-				fb12.Enable(True)
+			fb12.Enable(not evt.GetEventObject().GetValue())
 
 		def onBt6Check(evt):
 			""" Python file selector is checked.
 			"""
-
-			if evt.GetEventObject().GetValue():
-				fb4.Enable(False)
-			else:
-				fb4.Enable(True)
+			fb4.Enable(not evt.GetEventObject().GetValue())
 
 		# event handler for check button
 		def onBt61Check(evt):
 			""" Python file selector is checked.
 			"""
-			if evt.GetEventObject().GetValue():
-				fb41.Enable(False)
-			else:
-				fb41.Enable(True)
-
+			fb41.Enable(not evt.GetEventObject().GetValue())
+			
 		def onCbId1(evt):
-			if evt.GetEventObject().GetValue():
-				spin_id1.Enable(False)
-			else:
-				spin_id1.Enable(True)
-
+			"""
+			"""
+			spin_id1.Enable(not evt.GetEventObject().GetValue())
+			
 		def onCbId2(evt):
-			if evt.GetEventObject().GetValue():
-				spin_id2.Enable(False)
-			else:
-				spin_id2.Enable(True)
+			"""
+			"""
+			spin_id2.Enable(not evt.GetEventObject().GetValue())
 
 		def OnSpecificBehavior(evt):
 			""" Give the control on the number of input and output form specific behavior choice

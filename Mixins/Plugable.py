@@ -29,15 +29,14 @@ import zipfile
 
 import Decorators
 
-#---------------------------------------------------------
 class Plugable:
-	""" Plugable Mixin
+	""" Plugable Mixin.
 	"""
 
 	@staticmethod
-	def Load_Module(fileName):
-		""" Load module without load_module from importer. \
-		In this way, we can change the name of module in the built-in.
+	def Load_Module(fileName:str):
+		""" Load module without load_module from importer.
+			In this way, we can change the name of module in the built-in.
 		"""
 
 		### import zipfile model
@@ -66,10 +65,10 @@ class Plugable:
 		return None
 
 	@Decorators.BuzyCursorNotification
-	def LoadPlugins(self, fileName):
-		""" Method which load plug-ins from zip
-			Used for define or redefine method of amd. and .cmd model
-			The name of plug-in file must be "plugins.py"
+	def LoadPlugins(self, fileName:str):
+		""" Method which load plug-ins from zip.
+			Used for define or redefine method of amd. and .cmd model.
+			The name of plug-in file must be "plugins.py".
 		"""
 
 		### if list of activated plug-ins is not empty

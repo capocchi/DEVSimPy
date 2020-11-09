@@ -31,61 +31,61 @@ class Rotatable:
 		""" Constructor.
 		"""
 
-		self.dir = ['ouest', 'nord', 'est', 'sud']
+		self.dir = ('ouest', 'nord', 'est', 'sud')
 
-		self.input_direction = "ouest"
-		self.output_direction = "est"
+		self.input_direction = 'ouest'
+		self.output_direction = 'est'
 
+	def __SetDirection(self, direction, val):
+		""" Private method to set the direction attribute.
+		"""
+		if direction == self.input_direction:
+			self.input_direction = val
+		else:
+			self.output_direction = val
+
+	###
+	def __Rotate(self, direction:str, way:str):
+		""" Private method to rotate the block depending on the direction and the way.
+		"""
+
+		assert direction in (self.input_direction, self.output_direction)
+		assert way in ('right','left')
+
+		index = self.dir.index(direction)
+		gap = 1 if way == 'right'else -1
+		n = index + gap
+
+		self.__SetDirection(direction, self.dir[n%len(self.dir)])
+
+		### test if there is layering between input and output
+		if self.input_direction == self.output_direction:
+			n = n + gap
+			self.__SetDirection(direction, self.dir[n%len(self.dir)])
+			
 	###
 	def OnRotateInputR(self, event):
 		""" Rotate on the right for input ports.
 		"""
 
-		index = self.dir.index(self.input_direction)
-		n = index + 1
-		self.input_direction = self.dir[n%len(self.dir)]
-
-		### test if there is layering between input and output
-		if self.input_direction == self.output_direction:
-			n+=1
-			self.input_direction = self.dir[n%len(self.dir)]
+		self.__Rotate(self.input_direction,'right')
 	###
 	def OnRotateInputL(self, event):
 		""" Rotate on the left for input ports.
 		"""
-		index = self.dir.index(self.input_direction)
-		n = index - 1
-		self.input_direction = self.dir[n%len(self.dir)]
+		self.__Rotate(self.input_direction,'left')
 
-		### test if there is layering between input and output
-		if self.input_direction == self.output_direction:
-			n-=1
-			self.input_direction = self.dir[n%len(self.dir)]
 	###
 	def OnRotateOutputR(self, event):
 		""" Rotate on the right for output ports.
 		"""
-		index = self.dir.index(self.output_direction)
-		n = index + 1
-		self.output_direction = self.dir[n%len(self.dir)]
+		self.__Rotate(self.output_direction,'right')
 
-		### test if there is layering between input and output
-		if self.input_direction == self.output_direction:
-			n+=1
-			self.output_direction = self.dir[n%len(self.dir)]
 	###
 	def OnRotateOutputL(self, event):
 		""" Rotate on the left for output ports.
 		"""
-
-		index = self.dir.index(self.output_direction)
-		n = index - 1
-		self.output_direction = self.dir[n%len(self.dir)]
-
-		### test if there is layering between input and output
-		if self.input_direction == self.output_direction:
-			n-=1
-			self.output_direction = self.dir[n%len(self.dir)]
+		self.__Rotate(self.output_direction,'left')
 
 	###
 	def OnRotateR(self, event):

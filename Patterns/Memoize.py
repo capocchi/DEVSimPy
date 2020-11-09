@@ -26,9 +26,14 @@ class memoized(object):
    not re-evaluated.
    """
    def __init__(self, func):
+      """ Constructor.
+      """
       self.func = func
       self.cache = {}
+
    def __call__(self, *args):
+      """ Call function.
+      """
       try:
          return self.cache[args]
       except KeyError:
@@ -39,9 +44,11 @@ class memoized(object):
          # uncachable -- for instance, passing a list as an argument.
          # Better to not cache than to blow up entirely.
          return self.func(*args)
+
    def __repr__(self):
       """Return the function's docstring."""
       return self.func.__doc__
+
    def __get__(self, obj, objtype):
       """Support instance methods."""
       return functools.partial(self.__call__, obj)

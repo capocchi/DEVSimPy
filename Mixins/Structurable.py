@@ -23,7 +23,7 @@
 import Components
 
 class Structurable(Components.DEVSComponent):
-	""" Structurable class interface for DEVS coupled model integration
+	""" Structurable class interface for DEVS coupled model integration.
 	"""
 
 	def __init__(self):
@@ -46,18 +46,28 @@ class Structurable(Components.DEVSComponent):
 		self.devsModel.connectPorts(p1, p2)
 
 	def addSubModel(self, devs):
+		""" Add sub model.
+		"""
 		self.devsModel.addSubModel(devs)
 
 	def addInPort(self):
+		""" Add input port.
+		"""
 		return self.devsModel.addInPort()
 
 	def addOutPort(self):
+		""" Add output port.
+		"""
 		return self.devsModel.addOutPort()
 
 	def getIPorts(self):
+		""" Get inputs port list.
+		"""
 		return self.devsModel.IPorts
 
 	def getOPorts(self):
+		""" Get the outputs port list
+		"""
 		return self.devsModel.OPorts
 
 	def ClearAllPorts(self):

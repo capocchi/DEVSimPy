@@ -346,9 +346,9 @@ class DumpZipFile(DumpBase):
 
 	@BuzyCursorNotification
 	def LoadPlugins(self, obj, fileName):
-		""" Method which load plugins from zip
-			Used for define or redefine method of amd. and .cmd model
-			The name of plugin file must be "plugins.py"
+		""" Method which load plugins from zip.
+			Used for define or redefine method of amd. and .cmd model.
+			The name of plugin file must be "plugins.py".
 		"""
 		### if list of activated plugins is not empty
 		if obj.plugins:
@@ -396,7 +396,7 @@ class DumpZipFile(DumpBase):
 
 ###-----------------------------------------------------------
 class DumpGZipFile(DumpBase):
-	""" For save .dsp file
+	""" For save .dsp file.
 	"""
 	ext = [".dsp"]
 
@@ -466,7 +466,7 @@ class DumpGZipFile(DumpBase):
 
 ###-----------------------------------------------------------
 class DumpYAMLFile(DumpBase):
-	""" For save .yaml file
+	""" For save .yaml file.
 	"""
 	ext = [".yaml", '.yml']
 
@@ -518,12 +518,12 @@ class DumpYAMLFile(DumpBase):
 
 ###-----------------------------------------------------------
 class DumpJSFile(DumpBase):
-	""" For save .js file
+	""" For save .js file.
 	"""
 	ext = [".js"]
 
 	def Save(self, obj_dumped, fileName = None):
-		"""
+		""" Save method.
 		"""
 		assert(fileName.endswith(tuple(DumpJSFile.ext)))
 

@@ -51,16 +51,28 @@ from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, AddToIni
 import ReloadModule
 import Menu
 
-#----------------------------------------------------------------------
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# CLASSES DEFINITION
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 class GeneralPanel(wx.Panel):
 	""" General preferences panel
 	"""
+
+	### wxPython version
+	wxv = [wx.VERSION_STRING]
 
 	def __init__(self, parent):
 		"""
 			Constructor.
 		"""
 		wx.Panel.__init__(self, parent)
+
+		self.InitUI()
+
+	def InitUI(self):
 
 		### FileBrowse
 		self.plugin_dir = filebrowse.DirBrowseButton(self, wx.NewIdRef(), startDirectory=PLUGINS_PATH, labelText=_("Plug-ins directory:"), toolTip=_("Change the plug-ins directory"), dialogTitle=_("Plug-ins directory..."))
@@ -114,11 +126,8 @@ class GeneralPanel(wx.Panel):
 		if wx.VERSION_STRING >= '4.0': self.cb11.SetToolTipString = self.cb11.SetToolTip
 		self.cb1.SetToolTipString(_("Enable the notification messages"))
 		self.cb11.SetValue(builtins.__dict__['NOTIFICATION'])
-
-		### wxPython version
-		wxv = [wx.VERSION_STRING]
 			
-		self.cb2 = wx.ComboBox(self, wx.NewIdRef(), GetWXVersionFromIni(), choices=wxv, style=wx.CB_READONLY)
+		self.cb2 = wx.ComboBox(self, wx.NewIdRef(), GetWXVersionFromIni(), choices=GeneralPanel.wxv, style=wx.CB_READONLY)
 		if wx.VERSION_STRING >= '4.0': self.cb2.SetToolTipString = self.cb2.SetToolTip
 		self.cb2.SetToolTipString(_("Default version of wxPython."))
 		self.default_wxv = self.cb2.GetValue()
@@ -173,19 +182,25 @@ class GeneralPanel(wx.Panel):
 			dlg.Destroy()
 	###
 	def OnNbOpenedFileChanged(self, event):
+		""" Update the number opened files.
+		"""
 		builtins.__dict__['NB_OPENED_FILE'] = self.nb_opened_file.GetValue()		# number of recent files
 
 	###
 	def OnNbHistoryUndoChanged(self, event):
+		""" Update the history for undo.
+		"""
 		builtins.__dict__['NB_HISTORY_UNDO'] = self.nb_history_undo.GetValue()		# number of history undo
 
 	###
 	def OnFontSizeChanged(self, event):
+		""" Update font size.
+		"""
 		builtins.__dict__['FONT_SIZE'] = self.font_size.GetValue()		# Block font size
 
 	###
 	def OnDomainPathChanged(self, event):
-		"""
+		""" Update the domain path.
 		"""
 		new_domain_dir = self.domain_dir.GetValue()
 		old_parent_domain_dir = os.path.dirname(builtins.__dict__['DOMAIN_PATH'])
@@ -215,22 +230,31 @@ class GeneralPanel(wx.Panel):
 
 	###
 	def OnPluginsDirChanged(self, event):
+		""" Update of plugins path has been invoked.
+		"""
 		builtins.__dict__['PLUGINS_PATH'] = self.plugin_dir.GetValue()
 
 	###
 	def OnOutDirChanged(self, event):
+		""" Update of output directory has been invoked.
+		"""
 		builtins.__dict__['OUT_DIR'] = os.path.basename(self.out_dir.GetValue())
 
 	###
 	def OnTransparancyChanged(self, event):
+		""" Update of windwis transparency directory has been invoked.
+		"""
 		builtins.__dict__['TRANSPARENCY'] = self.cb1.GetValue()
 
 		###
 	def OnNotificationChanged(self, event):
+		""" Update of notifcation option directory has been invoked.
+		"""
 		builtins.__dict__['NOTIFICATION'] = self.cb11.GetValue()
 
 	def OnwxPythonVersionChanged(self, event):
-		"""
+		""" Update of wxpython version has been invoked.
+			This option has been deprecated when wxversion has been removed from wx v. 4.x.
 		"""
 
 		### new value
@@ -265,14 +289,19 @@ class GeneralPanel(wx.Panel):
 		parser.write(open(path,'w'))
 
 class SimulationPanel(wx.Panel):
-	""" Simulation Panel
+	""" Simulation Panel.
 	"""
 
 	def __init__(self, parent):
-		""" Constructor
+		""" Constructor.
 		"""
 		wx.Panel.__init__(self, parent)
 
+		self.InitUI()
+	
+	def InitUI(self):
+		""" Init the UI.
+		"""
 		### Sizer
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
@@ -422,7 +451,7 @@ class SimulationPanel(wx.Panel):
 		dlg.Destroy()
 
 	def onCb1Check(self, evt):
-		""" CheckBox has been checked
+		""" CheckBox has been checked.
 		"""
 
 		if evt.GetEventObject().GetValue():
@@ -437,13 +466,13 @@ class SimulationPanel(wx.Panel):
 			self.sim_error_sound_path = os.devnull
 
 	def onCb4(self, evt):
-		""" ComboBox has been checked
+		""" ComboBox has been checked.
 		"""
 		val = evt.GetEventObject().GetValue()
 		self.sim_defaut_strategy = val
 
 	def onCb3(self, evt):
-		""" ComboBox has been checked
+		""" ComboBox has been checked.
 		"""
 		val = evt.GetEventObject().GetValue()
 
@@ -464,7 +493,7 @@ class SimulationPanel(wx.Panel):
 		self.sim_defaut_strategy = self.cb4.GetValue()
 
 	def onSc(self, evt):
-		""" CheckBox has been checked
+		""" CheckBox has been checked.
 		"""
 		val = evt.GetEventObject().GetValue()
 		self.sim_defaut_plot_dyn_freq = val
@@ -503,14 +532,20 @@ class SimulationPanel(wx.Panel):
 		builtins.__dict__['NTL'] = self.cb2.GetValue()
 
 class EditorPanel(wx.Panel):
-	""" Edition Panel
+	""" Edition Panel.
 	"""
 
 	def __init__(self, parent):
-		""" Constructor
+		""" Constructor.
 		"""
 
 		wx.Panel.__init__(self, parent)
+
+		self.InitUI()
+	
+	def InitUI(self):
+		""" Init the UI.
+		"""
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
@@ -525,7 +560,7 @@ class EditorPanel(wx.Panel):
 		self.SetSizer(vbox)
 
 	def OnApply(self, evt):
-		""" Apply changes
+		""" Apply changes.
 		"""
 		builtins.__dict__['LOCAL_EDITOR'] = self.cb.IsChecked()
 
@@ -540,6 +575,12 @@ class Preferences(wx.Toolbook):
 		"""
 
 		wx.Toolbook.__init__(self, parent, wx.NewIdRef(), style=wx.BK_DEFAULT)
+
+		self.InitUI()
+	
+	def InitUI(self):
+		""" Init the UI.
+		"""
 
 		### don't try to translate this labels with _() because there are used to find png
 		L = [('General',"(self)"),('Simulation',"(self)"), ('Editor',"(self)"), ('Plugins',"(self)")]
@@ -590,7 +631,7 @@ class Preferences(wx.Toolbook):
 		self.Bind(wx.EVT_BUTTON, self.OnRefresh, id=self.refBtn.GetId())
 
 	def OnPageChanged(self, event):
-		"""
+		""" Page has been changed.
 		"""
 #		old = event.GetOldSelection()
 		new = event.GetSelection()
@@ -605,7 +646,7 @@ class Preferences(wx.Toolbook):
 		event.Skip()
 
 	def OnPageChanging(self, event):
-		"""
+		""" Pas is changing.
 		"""
 		new = event.GetSelection()
 		### plug-in page
@@ -617,7 +658,7 @@ class Preferences(wx.Toolbook):
 		event.Skip()
 
 	def OnAdd(self, event):
-		""" Add plug-in
+		""" Add plug-in.
 		"""
 		wcd = 'All files (*)|*|Editor files (*.py)|*.py'
 		open_dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=HOME_PATH, defaultFile='', wildcard=wcd, style=wx.OPEN|wx.CHANGE_DIR)
@@ -704,6 +745,14 @@ class PreferencesGUI(wx.Frame):
 		"""
 		wx.Frame.__init__(self, parent, wx.NewIdRef(), title, style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN)
 
+		self.InitUI()
+
+		self.Layout()
+		self.Center()
+
+	def InitUI(self):
+		""" Init the UI.
+		"""
 		_icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
 		_icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "preferences.png"), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(_icon)
@@ -742,9 +791,6 @@ class PreferencesGUI(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.OnCancel, id=wx.ID_CANCEL)
 		self.Bind(wx.EVT_BUTTON, self.OnClose, id=wx.ID_CLOSE)
 
-		self.Layout()
-		self.Center()
-
 	def OnApply(self, evt):
 		""" Apply button has been clicked.
 		"""
@@ -752,10 +798,14 @@ class PreferencesGUI(wx.Frame):
 		self.Close()
 
 	def OnCancel(self, evt):
+		""" Cancel button has been invoked.
+		"""
 		self.Close()
 		evt.Skip()
 
 	def OnClose(self, evt):
+		""" Close button has been invoked.
+		"""
 		self.Close()
 		evt.Skip()
 
