@@ -369,7 +369,7 @@ class Zip:
 	def GetModule(self, rcp: bool=False)->types.ModuleType:
 		""" Return module from zip file corresponding to the amd or cmd model.
 			It used when the tree library is created.
-			If the module refered by self.fn is already imported, its returned else its imported using zipimport
+			If the module refered by self.fn is already imported, its returned else its imported using zipimport.
 		"""
 
 		# if necessary, recompile (for update after editing code source of model)
@@ -380,7 +380,9 @@ class Zip:
 		py_fn = getPythonModelFileName(self.fn)
 
 		try:
-			fullname = "".join([os.path.basename(os.path.dirname(self.fn)), py_fn.split('.py')[0]])
+			### module is referenced in sys.modules with the format: <LibName><ModelName><amd|cmd>
+			### the last tag allow to differenciate the model with the same name but different extention in the same lib.
+			fullname = "".join([os.path.basename(os.path.dirname(self.fn)), py_fn.split('.py')[0],self.fn.split('.')[-1]])
 			return self.ImportModule() if fullname not in sys.modules else sys.modules[fullname]
 		### model has not python file !
 		except Exception as e:
@@ -424,8 +426,9 @@ class Zip:
 				
 				### allows to import with a reference from the parent directory (like parentName.model).
 				### Now import of .amd or .cmd module is composed by DomainModel (no point!).
-				### Example : import CollectorMessageCollector
-				fullname = "".join([os.path.basename(os.path.dirname(self.fn)), getPythonModelFileName(self.fn).split('.py')[0]]) 
+				### Example : import CollectorMessageCollectoramd or CollectorMessageCollectorcmd
+				
+				fullname = "".join([os.path.basename(os.path.dirname(self.fn)), getPythonModelFileName(self.fn).split('.py')[0],self.fn.split('.')[-1]]) 
 				sys.modules[fullname] = module
 
 				return module

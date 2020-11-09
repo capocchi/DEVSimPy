@@ -272,15 +272,15 @@ class DumpZipFile(DumpBase):
 		### Check comparison between serialized attribut (L) and normal attribut (dump_attributes)
 		### for model build with a version of devsimpy <= 2.5
 		### font checking
-		if len(obj_loaded.dump_attributes) != len(L):
-			if fileName.endswith(DumpZipFile.ext[-1]):
-				if not isinstance(L[9], list):
-					import wx
-					L.insert(9, [FONT_SIZE, 74, 93, 700, 'Arial'])
-			else:
-				if not isinstance(L[6], list):
-					import wx
-					L.insert(6, [FONT_SIZE, 74, 93, 700, 'Arial'])
+		# if len(obj_loaded.dump_attributes) != len(L):
+		# 	if fileName.endswith(DumpZipFile.ext[-1]):
+		# 		if not isinstance(L[9], list):
+		# 			import wx
+		# 			L.insert(9, [FONT_SIZE, 74, 93, 700, 'Arial'])
+		# 	else:
+		# 		if not isinstance(L[6], list):
+		# 			import wx
+		# 			L.insert(6, [FONT_SIZE, 74, 93, 700, 'Arial'])
 
 		#=======================================================================
 
@@ -302,6 +302,9 @@ class DumpZipFile(DumpBase):
 			### 'label_pos' attribut is on rank 6 and its defautl value is "middle"
 			j = 6 if fileName.endswith(DumpZipFile.ext[-1]) else 4
 			L.insert(j, 'middle')
+
+		else:
+			print(L,obj_loaded.dump_attributes)
 
 		try:
 			### assign dumped attributs

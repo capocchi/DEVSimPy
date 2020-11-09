@@ -275,7 +275,7 @@ class Wizard(wizmod):
 	def __init__(self, title, parent, img_filename = ""):
 		""" Constructor.
 		"""
-		img = wx.Bitmap(img_filename) if img_filename and os.path.exists(img_filename) else img = wx.NullBitmap
+		img = wx.Bitmap(img_filename) if img_filename and os.path.exists(img_filename) else wx.NullBitmap
 
 		wizmod.__init__(self, parent, wx.NewIdRef(), title, img)
 
