@@ -993,7 +993,6 @@ class ShapePopupMenu(wx.Menu):
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnLock, id=ID_LOCK_SHAPE)
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnUnLock, id=ID_UNLOCK_SHAPE)
 
-
 		elif isinstance(shape, Container.ResizeableNode):
 			Delete_menu = AppendItem(delete)
 
@@ -1013,7 +1012,7 @@ class ShapePopupMenu(wx.Menu):
 			else:
 				Edit_menu = AppendItem(edit)
 
-			if shape.isPYC():
+			if isinstance(shape, Container.CodeBlock) and shape.isPYC():
 				Edit_menu.Enable(False)
 
 			Log_menu = AppendItem(log)
