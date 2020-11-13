@@ -3467,6 +3467,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 
 		if path:
 			try:
+
 				### Block is Savable
 				self.SaveFile(path)
 				

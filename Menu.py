@@ -148,6 +148,7 @@ ID_NEW_LIB = wx.NewIdRef()
 ID_IMPORT_LIB = wx.NewIdRef()
 ID_EDIT_LIB = wx.NewIdRef()
 ID_RENAME_LIB = wx.NewIdRef()
+ID_EXPORT_LIB = wx.NewIdRef()
 ID_RENAME_DIR_LIB = wx.NewIdRef()
 ID_REFRESH_LIB = wx.NewIdRef()
 ID_MCC_LIB = wx.NewIdRef()
@@ -779,16 +780,19 @@ class ItemLibraryPopupMenu(wx.Menu):
 
 			edit = wx.MenuItem(self, ID_EDIT_LIB, _('Edit'), _('Edit selected module'))
 			rename = wx.MenuItem(self, ID_RENAME_LIB, _('Rename'), _('Rename selected module'))
+			export = wx.MenuItem(self, ID_EXPORT_LIB, _('Export'), _('Rename selected module'))
 			doc = wx.MenuItem(self, wx.NewIdRef(), _('Documentation'), _('Documentation of selected library'))
 			update = wx.MenuItem(self, ID_UPDATE_LIB, _('Update'), _('Update selected module'))
 
 			edit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'edit.png')))
 			rename.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'rename.png')))
+			export.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'export.png')))
 			doc.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'doc.png')))
 			update.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')))
 
 			AppendItem(edit)
 			AppendItem(rename)
+			AppendItem(export)
 			AppendItem(doc)
 			AppendItem(update)
 
@@ -797,6 +801,7 @@ class ItemLibraryPopupMenu(wx.Menu):
 			
 			self.Bind(wx.EVT_MENU, parent.OnItemEdit, id = ID_EDIT_LIB)	# put before the popUpMenu
 			self.Bind(wx.EVT_MENU, parent.OnItemRename, id = ID_RENAME_LIB)	# put before the popUpMenu
+			self.Bind(wx.EVT_MENU, parent.OnItemExport, id = ID_EXPORT_LIB)	# put before the popUpMenu
 			self.Bind(wx.EVT_MENU, parent.OnItemDocumentation, id = doc.GetId())	# put before the popUpMenu
 			self.Bind(wx.EVT_MENU, parent.OnItemRefresh, id = ID_UPDATE_LIB)	# put before the popUpMenu
 

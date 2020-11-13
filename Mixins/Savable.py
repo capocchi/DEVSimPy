@@ -204,14 +204,15 @@ class DumpZipFile(DumpBase):
 					zf.Update(replace_files = [fn, python_path, image_path])
 				else:
 					zf.Create(add_files = [fn, python_path, image_path])
-
+					
 				os.remove(fn)
 
 				## abs path of the directory that contains the file to export (str() to avoid unicode)
 				newExportPath = str(os.path.dirname(fileName))
 
 				mainW = getTopLevelWindow()
-							### if export on local directory, we insert the path in the config file
+				
+				### if export on local directory, we insert the path in the config file
 				if os.path.basename(DOMAIN_PATH) not in newExportPath.split(os.sep):
 					### update of .devsimpy config file
 					mainW.exportPathsList = eval(mainW.cfg.Read("exportPathsList"))
@@ -302,9 +303,6 @@ class DumpZipFile(DumpBase):
 			### 'label_pos' attribut is on rank 6 and its defautl value is "middle"
 			j = 6 if fileName.endswith(DumpZipFile.ext[-1]) else 4
 			L.insert(j, 'middle')
-
-		else:
-			print(L,obj_loaded.dump_attributes)
 
 		try:
 			### assign dumped attributs

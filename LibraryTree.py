@@ -25,6 +25,7 @@ import zipfile
 import subprocess
 import importlib
 import tempfile
+import shutil
 
 import Container
 import Menu
@@ -46,6 +47,23 @@ _ = wx.GetTranslation
 # GLOBAL VARIABLES AND FUNCTIONS
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+###
+def Rename(filename, new_label):
+	""" Do the rename of the filename with new_label.
+	"""
+
+	### if pure python file
+	if filename.endswith('.py'):
+		cls = PyComponent
+	### if .amd or .cmd file
+	elif zipfile.is_zipfile(filename):
+		cls = GenericComponent
+	else:
+		cls = None
+	
+	### if cls (.py, .cmd or .amd) and Rename is ok, we updateAll lib
+	return cls and cls.Rename(filename, new_label)
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
@@ -520,7 +538,8 @@ class LibraryTree(wx.TreeCtrl):
 			py_file_list = []
 
 		# list of amd and cmd files
-		devsimpy_file_list = [f for f in os.listdir(dName) if os.path.isfile(os.path.join(dName, f)) and (f[:2] != '__') and (f.endswith(LibraryTree.EXT_LIB_FILE))]
+		
+		devsimpy_file_list = [f for f in os.listdir(dName) if os.path.isfile(os.path.join(dName, f)) and (f[:2] != '__') and (f.endswith(LibraryTree.EXT_LIB_FILE))] if os.path.exists(dName) else []
 
 		return py_file_list + devsimpy_file_list
 
@@ -1034,6 +1053,42 @@ class LibraryTree(wx.TreeCtrl):
 				self.UpdateAll()
 
 	###
+	def OnItemExport(self, evt):
+		""" Export action has been invoked.
+		"""
+
+		item = self.GetSelection()
+		filename = self.GetPyData(item)
+		old_name = os.path.basename(filename)
+		old_dir_name = os.path.dirname(filename)
+		old_label, ext= old_name.split('.')
+
+		new_name = None
+		
+		wcd = _('%s Files (*.%s)|*.%s|All files (*)|*')%(ext.upper(), ext, ext)
+		save_dlg = wx.FileDialog(self,
+								message = _('Export file as...'),
+								defaultDir = old_dir_name,
+								defaultFile = old_name,
+								wildcard = wcd,
+								style = wx.SAVE | wx.OVERWRITE_PROMPT)
+
+		if save_dlg.ShowModal() == wx.ID_OK:
+			new_path = os.path.normpath(save_dlg.GetPath())
+			new_name = os.path.basename(new_path)
+
+		save_dlg.Destroy()
+
+		if new_name:
+			### if the new_name and old_name are different or the location is differente.
+			### we need to rename the file and all of its content !
+			if old_name != new_name or new_path != old_dir_name:
+				if shutil.copyfile(filename, new_path) and Rename(new_path, new_name.split('.')[0]):
+					self.UpdateAll()
+				else:
+					sys.stdout.write(_('Export failed!'))
+
+	###
 	def OnItemRename(self, evt):
 		""" Rename action has been invoked.
 		"""
@@ -1056,21 +1111,12 @@ class LibraryTree(wx.TreeCtrl):
 
 			### path of file
 			filename = self.GetItemPyData(item)
-			
-			### if pure python file
-			if filename.endswith('.py'):
-				cls = PyComponent
-			### if .amd or .cmd file
-			elif zipfile.is_zipfile(filename):
-				cls = GenericComponent
-			else:
-				cls = None
-			
-			### if cls (.py, .cmd or .amd) and Rename is ok, we updateAll lib
-			if cls and not cls.Rename(filename, new_label):
-				sys.stdout.write(_('Rename failed!'))
-			else:
+
+			### Rename the filename with new_label		
+			if Rename(filename, new_label):
 				self.UpdateAll()
+			else:
+				sys.stdout.write(_('Rename failed!'))
 
 	###
 	def OnItemDocumentation(self, evt):
