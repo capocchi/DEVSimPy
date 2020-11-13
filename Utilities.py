@@ -632,6 +632,7 @@ def getInstance(cls, args = {}):
 			devs = cls(**args)
 		except Exception:
 			sys.stderr.write(_("Error in getInstance: %s not instanciated with %s.\n"%(cls,str(args))))
+			PrintException()
 			return sys.exc_info()
 		else:
 			return devs

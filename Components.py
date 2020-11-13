@@ -362,7 +362,7 @@ class GenericComponent:
 				Please correct this aspect by extracting the archive.\n")%(old_name)
 			wx.MessageBox(info, _("Error"), wx.OK|wx.ICON_ERROR)
 			return False
-
+			
 class CMDComponent(GenericComponent):
 	""" 
 	"""

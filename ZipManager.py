@@ -107,6 +107,9 @@ class Zip:
 		### local copy
 		self.fn = fn
 
+		### fullname of zip in order to import module correctlly.
+		self.fullname = None
+
 		if files:
 			self.Create(files)
 
@@ -128,11 +131,14 @@ class Zip:
 			if zipfile.is_zipfile(fn_dir_name):
 				zin = zipfile.ZipFile(fn_dir_name, 'r')
 				buffer = zin.read(fn_base_name)
+				pycode = buffer.decode()
 				### if not .dat file and the name of file is not the same with the zip file
-				#if fn_ext == '.py':
-					#zout.writestr("%s%s"%(name,fn_ext), buffer)
-				#else:
-				zout.writestr(fn_base_name, buffer)
+				### we replace in the python code (inside te buffer) the old name (fn_name) of class by the new (name)
+				if fn_ext == '.py' and not ('class %s(DomainBehavior)'%name in pycode or 'class %s(DomainStructure)'%name in pycode):
+					pycode = pycode.replace(fn_name,name)
+					zout.writestr("%s%s"%(name,fn_ext), pycode.encode())
+				else:
+					zout.writestr(fn_base_name, buffer)
 				zin.close()
 			else:
 				zout.write(fn, fn_base_name)
@@ -364,8 +370,20 @@ class Zip:
 		tests_files = [a[0] for a in tests_files]
 
 		return tests_files
-	# ------------------------------------------------------------------------------
 
+	def GetFullName(self):
+		""" Get the fullname of zip.
+		"""
+		if not self.fullname:
+			py_fn = getPythonModelFileName(self.fn)
+
+			### module is referenced in sys.modules with the format: <LibName><ModelName><amd|cmd>
+			### the last tag allow to differenciate the model with the same name but different extention in the same lib.
+			self.fullname = "".join([os.path.basename(os.path.dirname(self.fn)), py_fn.split('.py')[0], self.fn.split('.')[-1]])
+
+		return self.fullname
+
+	# ------------------------------------------------------------------------------
 	def GetModule(self, rcp: bool=False)->types.ModuleType:
 		""" Return module from zip file corresponding to the amd or cmd model.
 			It used when the tree library is created.
@@ -376,14 +394,9 @@ class Zip:
 		#if rcp: recompile(module_name)
 	
 		PluginManager.trigger_event("IMPORT_STRATEGIES", fn=self.fn)
-					
-		py_fn = getPythonModelFileName(self.fn)
-
+								
 		try:
-			### module is referenced in sys.modules with the format: <LibName><ModelName><amd|cmd>
-			### the last tag allow to differenciate the model with the same name but different extention in the same lib.
-			fullname = "".join([os.path.basename(os.path.dirname(self.fn)), py_fn.split('.py')[0], self.fn.split('.')[-1]])
-			return self.ImportModule() if fullname not in sys.modules else sys.modules[fullname]
+			return self.ImportModule() if self.GetFullName() not in sys.modules else sys.modules[self.GetFullName()]
 		### model has not python file !
 		except Exception as e:
 			return e
@@ -427,9 +440,7 @@ class Zip:
 				### allows to import with a reference from the parent directory (like parentName.model).
 				### Now import of .amd or .cmd module is composed by DomainModel (no point!).
 				### Example : import CollectorMessageCollectoramd or CollectorMessageCollectorcmd
-				
-				fullname = "".join([os.path.basename(os.path.dirname(self.fn)), getPythonModelFileName(self.fn).split('.py')[0], self.fn.split('.')[-1]]) 
-				sys.modules[fullname] = module
+				sys.modules[self.GetFullName()] = module
 
 				return module
 			else:
@@ -444,8 +455,7 @@ class Zip:
 		try:
 
 			### reload submodule from module dependencies!
-			fullname = "".join([os.path.basename(os.path.dirname(self.fn)), getPythonModelFileName(self.fn).split('.py')[0], self.fn.split('.')[-1]])
-			module = sys.modules[fullname]
+			module = sys.modules[self.GetFullName()]
 			domain_name = os.path.basename(os.path.dirname(self.fn))
 			for name in dir(module):
 				if type(getattr(module, name)) == types.ModuleType:
