@@ -125,66 +125,43 @@ class DeleteBox(wx.Dialog):
 
 		self.InitUI()
 		self.SetSize((250, 200))
-       
+		self.Centre() 
+		
 	def InitUI(self):
 		""" Init the user interface.
 		"""
 
-		pnl = wx.Panel(self)
-		vbox = wx.BoxSizer(wx.VERTICAL)
-
-		sb = wx.StaticBox(pnl, label='Delete?')
-		sbs = wx.StaticBoxSizer(sb, orient=wx.VERTICAL)
-		self.rb1 = wx.RadioButton(pnl, label=_('label'))
-		self.rb2 = wx.RadioButton(pnl, label=_('label and files'))
-		sbs.Add(self.rb1)
-		sbs.Add(self.rb2)
+		panel = wx.Panel(self) 
+		vbox = wx.BoxSizer(wx.VERTICAL) 
+		nm = wx.StaticBox(panel, -1, 'Delete?') 
+		nmSizer = wx.StaticBoxSizer(nm, wx.VERTICAL) 
 		
-		pnl.SetSizer(sbs)
+		nmbox = wx.BoxSizer(wx.VERTICAL) 
+		self.rb1 = wx.RadioButton(panel, label=_('label'))
+		self.rb2 = wx.RadioButton(panel, label=_('label and files')) 
+					
+		nmbox.Add(self.rb1, 0, wx.ALL|wx.LEFT, 5)
+		nmbox.Add(self.rb2, 0, wx.ALL|wx.LEFT, 5)  
+		nmSizer.Add(nmbox, 0, wx.ALL|wx.EXPAND, 10)  
 
-		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-		okButton = wx.Button(self, wx.ID_OK, label='Ok')
-		closeButton = wx.Button(self, wx.ID_CANCEL, label='Close')
-		hbox2.Add(okButton)
-		hbox2.Add(closeButton, flag=wx.LEFT, border=5)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		okButton = wx.Button(panel, wx.ID_OK, label='Ok')
+		closeButton = wx.Button(panel, wx.ID_CANCEL, label='Close')
+	
+		hbox.Add(closeButton, 0, wx.ALL|wx.LEFT, 10)
+		hbox.Add(okButton, 0, wx.ALL|wx.LEFT, 10)
 
-		vbox.Add(pnl, proportion=1,
-			flag=wx.ALL|wx.EXPAND, border=5)
-		vbox.Add(hbox2, flag=wx.ALIGN_CENTER|wx.TOP|wx.BOTTOM, border=10)
-
-		self.SetSizer(vbox)
-
-		self.Centre()
-
-		### Widgets
-#		txt = wx.StaticText(self, wx.NewIdRef(), _('What do you want to delete:'), (15, 10))
-#		self.rb1 = wx.RadioButton(self, wx.NewIdRef() , _('label'), (20, 30))
-#		self.rb2 = wx.RadioButton(self, wx.NewIdRef() , _('label and files'), (20, 55))
-#		btn_cancel = wx.Button(self, wx.ID_CANCEL, pos = (35, 90), size = (80, -1))
-#		btn_ok = wx.Button(self, wx.ID_OK, pos = (135, 90), size = (80, -1))
-
-		### Sizers
-#		hbox = wx.BoxSizer(wx.HORIZONTAL)
-#		vbox = wx.BoxSizer(wx.VERTICAL)
-
-		### And into Sizers
-#		hbox.Add(btn_cancel, 1, wx.EXPAND|wx.ALIGN_CENTER)
-#		hbox.Add(btn_ok, 1, wx.EXPAND|wx.ALIGN_CENTER)
-
-#		vbox.Add(txt, 0, wx.ALIGN_TOP, 10)
-#		vbox.Add(self.rb1, 1,wx.ALIGN_LEFT, 5)
-#		vbox.Add(self.rb2, 1,wx.ALIGN_LEFT, 5)
-#		vbox.Add(hbox, 1, wx.ALIGN_CENTER)
-
-		### Set Sizer
-#		self.SetSizer(vbox)
-
-#		vbox.SetSizeHints(self)
-
+		vbox.Add(nmSizer,0, wx.ALL|wx.EXPAND, 5) 
+		vbox.Add(hbox,0, wx.ALL|wx.CENTER, 5) 
+		panel.SetSizer(vbox) 
+		
+		panel.Fit() 
+	
 #-------------------------------------------------------------------
 class ImportLibrary(wx.Dialog):
 	"""
 	"""
+
 	def __init__(self, *args, **kwargs):
 		""" Constructor.
 		"""
@@ -376,14 +353,14 @@ class ImportLibrary(wx.Dialog):
 					t = inspect.getmoduleinfo(fn_path)
 					if t is not None:
 						name, suffix, mode, module_type = t
-						doc += 	_("---------- %s module :\n")%fn+ \
-								_("\tname : %s\n")%name+ \
-								_("\tsuffix : %s\n")%suffix+ \
-								_("\tmode : %s\n")%mode+ \
-								_("\ttype of module : %s\n")%module_type+ \
-								_("\tpath : %s\n\n")%fn_path
+						doc += 	_("---------- %s module:\n")%fn+ \
+								_("\tname: %s\n")%name+ \
+								_("\tsuffix: %s\n")%suffix+ \
+								_("\tmode: %s\n")%mode+ \
+								_("\ttype of module: %s\n")%module_type+ \
+								_("\tpath: %s\n\n")%fn_path
 					else:
-						doc +=_("----------%s module not inspectable !\n")%fn
+						doc +=_("----------%s module not inspectable!\n")%fn
 			#else:
 				#pass
 				#doc += _("%s is empty !\n")%init_file
@@ -557,6 +534,8 @@ class ImportLibrary(wx.Dialog):
 		self.OnNew(evt)
 				
 	def OnCloseWindow(self, event):
+		"""
+		"""
 		self.Destroy()
 		event.Skip()
 

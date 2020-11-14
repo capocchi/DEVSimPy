@@ -2442,6 +2442,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 							y = s.y[0]*self.scaley
 							w = (s.x[1]-s.x[0])*self.scalex
 							h = (s.y[1]-s.y[0])*self.scaley
+							
 							recS = wx.Rect(x,y,w,h)
 
 							# si les deux rectangles se chevauche
@@ -2476,7 +2477,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 		def DiagramModified(self):
 			""" Modification printing in statusbar and modify value manager.
 
-				This method manage the propagation of modification
+				This method manage the propagation of modification.
 				from window where modifications are performed to DEVSimPy main window.
 			"""
 
@@ -2815,7 +2816,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 #-----------------------------------------------------------
 class LinesShape(Shape):
-	"""
+	""" Line Shape Class.
 	"""
 
 	def __init__(self, line):

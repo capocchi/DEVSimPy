@@ -102,7 +102,7 @@ def getFilePathInfo(path):
 	basename = os.path.basename(path)
 	info = os.path.splitext(basename)
 	filename = info[0]
-	extend = info[1]
+	extend = info[1][1:]
 
 	return dirname, basename, filename, extend
 
