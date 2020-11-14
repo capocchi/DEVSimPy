@@ -30,7 +30,7 @@ import shutil
 import Container
 import Menu
 
-from Utilities import replaceAll, getPYFileListFromInit, path_to_module, printOnStatusBar, NotificationMessage, install_and_import, module_list
+from Utilities import replaceAll, getPYFileListFromInit, path_to_module, printOnStatusBar, NotificationMessage, install_and_import, module_list, getFilePathInfo
 from Decorators import BuzyCursorNotification
 from Components import BlockFactory, DEVSComponent, GetClass, PyComponent, GenericComponent
 from ZipManager import Zip, getPythonModelFileName
@@ -1019,6 +1019,7 @@ class LibraryTree(wx.TreeCtrl):
 	def OnDirRename(self, evt):
 		""" Rename the directory of selected librarie.
 		"""
+		
 		item = self.GetSelection()
 		name = self.GetItemText(item)
 
@@ -1027,6 +1028,7 @@ class LibraryTree(wx.TreeCtrl):
 			d = wx.TextEntryDialog(self, _('New file name:'), defaultValue = name, style=wx.OK)
 		else:
 			d = wx.TextEntryDialog(self, _('New file name:'), value = name, style=wx.OK)
+		
 		d.ShowModal()
 
 		### new label
@@ -1035,22 +1037,34 @@ class LibraryTree(wx.TreeCtrl):
 		### only if new and old label are different
 		if new_label != name:
 
-			### path of file
-			old_dirname = self.GetItemPyData(item)
-			new_dirname = os.path.join(os.path.dirname(old_dirname),new_label)
+			if new_label not in [os.path.basename(a) for a in self.ItemDico if not os.path.isfile(a)]:
+			
+				### path of file
+				old_dirname = self.GetItemPyData(item)
+				new_dirname = os.path.join(os.path.dirname(old_dirname),new_label)
 
-			try:
-				os.rename(old_dirname,new_dirname)
-			except:
-				sys.stdout.write(_('Rename failed!'))
+				try:
+					os.rename(old_dirname,new_dirname)
+				except:
+					sys.stdout.write(_('Rename failed!'))
+				else:
+
+					### change the path of the item and its childrens...
+					for elem, itemTree in self.ItemDico.copy().items():
+						if old_dirname in self.GetItemData(itemTree):
+							self.SetItemData(itemTree, elem.replace(old_dirname, new_dirname))
+							self.ItemDico[elem.replace(old_dirname, new_dirname)] = self.ItemDico.pop(elem)
+
+					### change the name of dir in tree
+					self.SetItemText(item, new_label)
+
+					### update only the lib
+					self.UpdateDomain(self.GetPyData(item))
+					
+					### sort all item
+					self.SortChildren(self.root)
 			else:
-				self.SetItemData(item,new_dirname)
-				for elem in self.ItemDico:
-					if old_dirname in elem:
-						self.ItemDico[elem.replace(old_dirname, new_dirname)] = self.ItemDico.pop(elem)
-				
-				self.SetItemText(item, new_label)
-				self.UpdateAll()
+				wx.MessageBox(_("%s already exist!")%new_label, _("Error"), wx.OK|wx.ICON_ERROR)
 
 	###
 	def OnItemExport(self, evt):
@@ -1059,17 +1073,20 @@ class LibraryTree(wx.TreeCtrl):
 
 		item = self.GetSelection()
 		filename = self.GetPyData(item)
-		old_name = os.path.basename(filename)
-		old_dir_name = os.path.dirname(filename)
-		old_label, ext= old_name.split('.')
+
+		old_dir_name, old_name, old_label, ext = getFilePathInfo(filename)
+		
+		#old_name = os.path.basename(filename)
+		#old_dir_name = os.path.dirname(filename)
+		#old_label, ext= old_name.split('.')
 
 		new_name = None
-		
+
 		wcd = _('%s Files (*.%s)|*.%s|All files (*)|*')%(ext.upper(), ext, ext)
 		save_dlg = wx.FileDialog(self,
 								message = _('Export file as...'),
 								defaultDir = old_dir_name,
-								defaultFile = old_name,
+								defaultFile = old_label,
 								wildcard = wcd,
 								style = wx.SAVE | wx.OVERWRITE_PROMPT)
 
@@ -1080,13 +1097,22 @@ class LibraryTree(wx.TreeCtrl):
 		save_dlg.Destroy()
 
 		if new_name:
-			### if the new_name and old_name are different or the location is differente.
-			### we need to rename the file and all of its content !
-			if old_name != new_name or new_path != old_dir_name:
-				if shutil.copyfile(filename, new_path) and Rename(new_path, new_name.split('.')[0]):
-					self.UpdateAll()
-				else:
-					sys.stdout.write(_('Export failed!'))
+			if new_name.endswith(ext):
+				### if the new_name and old_name are different or the location is differente.
+				### we need to rename the file and all of its content !
+				if old_name != new_name or new_path != old_dir_name:
+					if shutil.copyfile(filename, new_path) and Rename(new_path, new_name.split('.')[0]):
+						
+						### update only the lib
+						self.UpdateDomain(old_dir_name)
+					
+						### sort all item
+						self.SortChildren(self.root)
+
+					else:
+						sys.stdout.write(_('Export failed!'))
+			else:
+				wx.MessageBox(_("Extention of the new name must be the same!"), _("Error"), wx.OK|wx.ICON_ERROR)
 
 	###
 	def OnItemRename(self, evt):
@@ -1108,15 +1134,22 @@ class LibraryTree(wx.TreeCtrl):
 
 		### only if new and old label are different
 		if new_label != name:
+			if new_label not in [os.path.basename(a).split('.')[0] for a in self.ItemDico if os.path.isfile(a)]:
 
-			### path of file
-			filename = self.GetItemPyData(item)
+				### path of file
+				filename = self.GetItemPyData(item)
 
-			### Rename the filename with new_label		
-			if Rename(filename, new_label):
-				self.UpdateAll()
+				### Rename the filename with new_label		
+				if Rename(filename, new_label):
+					### update only the lib
+					self.UpdateDomain(os.path.dirname(self.GetPyData(item)))
+						
+					### sort all item
+					self.SortChildren(self.root)
+				else:
+					sys.stdout.write(_('Rename failed!'))
 			else:
-				sys.stdout.write(_('Rename failed!'))
+				wx.MessageBox(_("%s already exist!")%new_label, _("Error"), wx.OK|wx.ICON_ERROR)
 
 	###
 	def OnItemDocumentation(self, evt):

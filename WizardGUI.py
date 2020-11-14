@@ -588,7 +588,8 @@ class ModelGeneratorWizard(Wizard):
 			page7.add_stuff(sb4)
 
 		def onBt1Click(evt):
-			""" Atomic radio button has been pressed. We redefine its action
+			""" Atomic radio button has been pressed. 
+				We redefine its action.
 			"""
 
 			self.type = "Atomic"
@@ -598,7 +599,8 @@ class ModelGeneratorWizard(Wizard):
 			page4_1.SetPrev(page2)
 
 		def onBt2Click(evt):
-			""" Coupled radio button has been pressed. We redefine its action
+			""" Coupled radio button has been pressed. 
+				We redefine its action.
 			"""
 
 			self.type = "Coupled"
@@ -736,7 +738,8 @@ class ModelGeneratorWizard(Wizard):
 		page4_2.SetNext(None)
 
 	def on_finished(self, evt):
-		"""Finish button has been pressed. Give the specified values
+		"""	Finish button has been pressed. 
+			Give the specified values.
 		"""
 
 		# gridsizer depending on the type of choosing model
@@ -812,16 +815,14 @@ class ModelGeneratorWizard(Wizard):
 					return False
 				else:
 					if self.python_path == '':
-						if self.type == 'Atomic':
-							string = atomicCode(self.label)
-						else:
-							string = coupledCode(self.label)
+						string = atomicCode(self.label) if self.type == 'Atomic' else coupledCode(self.label)
 
 						python_name = os.path.basename(self.model_path).split('.')[0]
 
-						zout.writestr("%s.py"%python_name, string)
+						txt = "%s.py"%python_name
+						zout.writestr(txt, string)
 
-						self.python_path = os.path.join(self.model_path,"%s.py"%python_name)
+						self.python_path = os.path.join(self.model_path,txt)
 					else:
 						py_file = os.path.basename(self.python_path)
 						zout.write(self.python_path, py_file)
