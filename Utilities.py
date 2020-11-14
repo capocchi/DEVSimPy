@@ -92,7 +92,23 @@ except ImportError:
 		sys.exit()
 
 #-------------------------------------------------------------------------------
+
+def getFilePathInfo(path):
+	"""
+	"""
+	assert os.path.isabs(path)
+
+	dirname = os.path.dirname(path)
+	basename = os.path.basename(path)
+	info = os.path.splitext(basename)
+	filename = info[0]
+	extend = info[1]
+
+	return dirname, basename, filename, extend
+
 def PrintException():
+	"""
+	"""
 	exc_type, exc_obj, tb = sys.exc_info()
 	f = tb.tb_frame
 	lineno = tb.tb_lineno

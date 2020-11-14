@@ -30,7 +30,7 @@ import shutil
 import Container
 import Menu
 
-from Utilities import replaceAll, getPYFileListFromInit, path_to_module, printOnStatusBar, NotificationMessage, install_and_import, module_list
+from Utilities import replaceAll, getPYFileListFromInit, path_to_module, printOnStatusBar, NotificationMessage, install_and_import, module_list, getFilePathInfo
 from Decorators import BuzyCursorNotification
 from Components import BlockFactory, DEVSComponent, GetClass, PyComponent, GenericComponent
 from ZipManager import Zip, getPythonModelFileName
@@ -1059,12 +1059,15 @@ class LibraryTree(wx.TreeCtrl):
 
 		item = self.GetSelection()
 		filename = self.GetPyData(item)
-		old_name = os.path.basename(filename)
-		old_dir_name = os.path.dirname(filename)
-		old_label, ext= old_name.split('.')
+
+		old_dir_name, old_name, old_label, ext = getFilePathInfo(filename)
+		
+		#old_name = os.path.basename(filename)
+		#old_dir_name = os.path.dirname(filename)
+		#old_label, ext= old_name.split('.')
 
 		new_name = None
-		
+
 		wcd = _('%s Files (*.%s)|*.%s|All files (*)|*')%(ext.upper(), ext, ext)
 		save_dlg = wx.FileDialog(self,
 								message = _('Export file as...'),

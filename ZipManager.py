@@ -32,7 +32,7 @@ _ = gettext.gettext
 
 from PluginManager import PluginManager #trigger_event
 from traceback import format_exception
-from Utilities import listf, path_to_module,install_and_import
+from Utilities import listf, path_to_module,install_and_import, getFilePathInfo
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
@@ -117,8 +117,9 @@ class Zip:
 		""" Create the Zip with files.
 		"""
 
-		dir_name, base_name = os.path.split(self.fn)
-		name, ext = os.path.splitext(base_name)
+		dir_name, base_name, name, ext = getFilePathInfo(self.fn)
+		#dir_name, base_name = os.path.split(self.fn)
+		#name, ext = os.path.splitext(base_name)
 
 		### output zip file
 		zout = zipfile.ZipFile(self.fn, "w")
