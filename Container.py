@@ -2003,14 +2003,14 @@ if __builtin__.__dict__['GUI_FLAG']:
 			""" New model menu has been pressed. Wizard is instanciate.
 			"""
 
+			### mouse positions
+			xwindow, ywindow = wx.GetMousePosition()
+			x,y = self.ScreenToClientXY(xwindow, ywindow)
+
 			gmwiz = self.OnStartWizard(event)
 
 			# if wizard is finished witout closing
 			if  gmwiz :
-
-				### mouse positions
-				xwindow, ywindow = wx.GetMousePosition()
-				x,y = self.ScreenToClientXY(xwindow, ywindow)
 
 				m = Components.BlockFactory.CreateBlock(      canvas = self,
 													x = x,

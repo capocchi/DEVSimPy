@@ -372,6 +372,7 @@ class LibraryTree(wx.TreeCtrl):
 
 		### import are here because the simulator (PyDEVS or PyPDEVS) require it
 		from DomainInterface.DomainBehavior import DomainBehavior
+		from DomainInterface.DomainStructure import DomainStructure
 
 		### list of py file from __init__.py
 		if LibraryTree.EXT_LIB_PYTHON_FLAG:
@@ -411,11 +412,10 @@ class LibraryTree(wx.TreeCtrl):
 							if cls is not None and not isinstance(cls, tuple):
 
 								### only model that herite from DomainBehavior is shown in lib
-								if issubclass(cls, DomainBehavior):
+								if issubclass(cls, DomainBehavior) or issubclass(cls, DomainStructure):
 									py_file_list.append(s)
 								else:
-									sys.stderr.write(_("%s not imported : Class is not DomainBehavior \n"%(s)))
-
+									sys.stderr.write(_("%s not imported: Class is not DomainBehavior (atomic) or DomainStructure (coupled)\n"%(s)))
 
 							### If cls is tuple, there is an error but we load the model to correct it.
 							### If its not DEVS model, the Dnd don't allows the instantiation and when the error is corrected, it don't appear before a update.

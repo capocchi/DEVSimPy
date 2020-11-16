@@ -506,7 +506,7 @@ class SimulationDialog(wx.Frame, wx.Panel):
 
 				self.thread = simulator_factory(self.current_master, self.selected_strategy, self.prof, self.ntl, self.verbose, self.dynamic_structure_flag, self.real_time_flag)
 				self.thread.setName(self.title)
-
+				
 				### si le modele n'a pas de couplage, ou si pas de generateur: alors pas besoin de simuler
 				if self.thread.end_flag:
 					self.OnTimer(event)

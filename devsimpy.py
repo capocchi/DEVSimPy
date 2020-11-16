@@ -174,9 +174,10 @@ if not hasattr(sys, 'frozen'):
 
 	finally:
 		### if devsimpy.ini file exist, it contains the wx version to load.
-		v = parser.get(section, option)
-		if ini_exist and v != "":
-			wxversion.select([v])
+		if ini_exist:
+			v = parser.get(section, option)
+			if v != "":
+				wxversion.select([v])
 		### select the wxpython version from __min_wx_version__
 		else:
 			if wxversion.checkInstalled(__min_wx_version__):
