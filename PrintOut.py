@@ -7,6 +7,9 @@ import wx
 import sys
 import copy
 
+import gettext
+_ = gettext.gettext
+
 class Printout(wx.Printout):
 
     def __init__(self, canvas, title = "", size=(800, 800)):

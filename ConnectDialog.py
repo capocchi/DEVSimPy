@@ -23,8 +23,17 @@
 import wx
 import os
 
+import gettext
+_ = gettext.gettext
+
 def function(obj, i):
 	return 'iPort %d'%i if obj[i].__class__.__name__ == "INode" else 'oPort %d'%i
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# CLASSES DEFINITION
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 ###
 class ConnectDialog(wx.Frame):

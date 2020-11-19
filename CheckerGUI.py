@@ -32,7 +32,8 @@ import tempfile
 
 from traceback import format_exception
 
-_ = wx.GetTranslation
+import gettext
+_ = gettext.gettext
 
 if __name__ == '__main__':
 	import builtins

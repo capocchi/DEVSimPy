@@ -6,6 +6,9 @@ import shutil
 import Container
 import DetachedFrame
 
+import gettext
+_ = gettext.gettext
+
 class ExperimentGenerator:
     """
     """

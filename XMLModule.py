@@ -18,6 +18,9 @@ import copy
 import tempfile
 import wx
 
+import gettext
+_ = gettext.gettext
+
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 

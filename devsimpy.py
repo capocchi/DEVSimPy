@@ -91,7 +91,8 @@ import wx
 ### check if an upgrade of wxpython is possible from pip !
 sys.stdout.write("Importing wxPython %s%s for python %s on %s (%s) platform...\n"%(wx.version(), " from devsimpy.ini" if ini_exist else '', platform.python_version(), platform.system(), platform.version()))
 
-_ = wx.GetTranslation
+import gettext
+_ = gettext.gettext
 
 try:
 	import wx.aui as aui
@@ -978,7 +979,7 @@ class MainApplication(wx.Frame):
 			self._mgr.UnInit()
 			del self._mgr
 			self.Destroy()
-
+			
 			#win = wx.Window_FindFocus()
 			#if win != None:
 				## Note: you really have to use wx.wxEVT_KILL_FOCUS
@@ -2177,7 +2178,7 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
 		info.SetName("""DEVSimPy""")
 		info.SetVersion(self.GetVersion())
 		info.SetDescription(description)
-		info.SetCopyright(_("""(C) 2019 SISU Project - UMR CNRS 6134 SPE Lab."""))
+		info.SetCopyright(_("""(C) 2020 SISU Project - UMR CNRS 6134 SPE Lab."""))
 		info.SetWebSite("""http://spe.univ-corse.fr""")
 		info.SetLicence(licence)
 		info.AddDeveloper(_("""\nL. Capocchi (capocchi@univ-corse.fr)\n"""))
@@ -2303,7 +2304,7 @@ class AdvancedSplashScreen(AdvancedSplash):
 			self.ShowMain()
 
 		self.app.SetExceptionHook()
-
+		
 		# Call after the loading diagram method which depends on the invocked command line
 		try:
 			wx.CallAfter(self.app.frame.OnLoadDiagram)
@@ -2415,7 +2416,7 @@ class DEVSimPyApp(wx.App, wit.InspectionMixin):
 				in on the main display of your Mac."""
 
 			elif wx.Platform == '__WXGTK__':
-				msg ="Unable to access the X Display, is $DISPLAY set properly?"
+				msg = "Unable to access the X Display, is $DISPLAY set properly?"
 
 			else:
 				msg = 'Unable to create GUI'

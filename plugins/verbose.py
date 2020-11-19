@@ -15,6 +15,9 @@ import wx
 import sys
 import os
 
+import gettext
+_ = gettext.gettext
+
 from PluginManager import PluginManager
 
 global show_ext_trans

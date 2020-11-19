@@ -22,6 +22,9 @@
 
 import builtins
 
+import gettext
+_ = gettext.gettext
+
 if builtins.__dict__.get('GUI_FLAG',True):
     import wx
 

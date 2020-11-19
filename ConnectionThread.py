@@ -29,6 +29,9 @@ import urllib.request, urllib.parse, urllib.error
 import tempfile
 import zipfile
 
+import gettext
+_ = gettext.gettext
+
 __version_lib__ = 0.2
 
 class unzip:
@@ -120,7 +123,9 @@ class UpgradeLibThread(Thread):
 			temp.seek(0)
 		finally:
 
-			dlg = wx.MessageDialog(None, _("Are you sure to upgrade librairies from new version ?"), _("Upgrade Manager"), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+			dlg = wx.MessageDialog(None, _("Are you sure to upgrade librairies from new version ?"), 
+										_("Upgrade Manager"), 
+										wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 
 			if dlg.ShowModal() == wx.ID_YES:
 				unzipper = unzip()
