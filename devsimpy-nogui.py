@@ -49,7 +49,8 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 				'LOG_FILE': os.devnull, # log file (null by default)
 				'DEFAULT_SIM_STRATEGY': 'bag-based', #choose the default simulation strategy for PyDEVS
 				'PYDEVS_SIM_STRATEGY_DICT' : {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}, # list of available simulation strategy for PyDEVS package
-                'PYPDEVS_SIM_STRATEGY_DICT' : {'classic':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}, # list of available simulation strategy for PyPDEVS package
+                'PYPDEVS_SIM_STRATEGY_DICT' : {'classic':'SimStrategy4', 'parallel':'SimStrategy5'}, # list of available simulation strategy for PyPDEVS package
+				'PYPDEVS_221_SIM_STRATEGY_DICT' : {'classic':'SimStrategy4', 'parallel':'SimStrategy5'}, # list of available simulation strategy for PyPDEVS package
 				'HELP_PATH' : os.path.join('doc', 'html'), # path of help directory
 				'NTL' : False, # No Time Limit for the simulation
 				'DYNAMIC_STRUCTURE' : False, #Dynamic structure for PyPDEVS simulation
@@ -101,6 +102,8 @@ if __name__ == '__main__':
 	parser.add_argument("-name", help="simulation name", type=str, default="simu")
 	# optional kernel for simulation kernel
 	parser.add_argument("-kernel", help="simulation kernel [pyDEVS|PyPDEVS]", type=str, default="pyDEVS")
+	# optional real time 
+	parser.add_argument("-rt", help="real time simulation (only for PyPDEVS)", action="store_true")
 	# non-simulation options
 	group = parser.add_mutually_exclusive_group()
 	group.add_argument("-js", "--javascript",help="generate JS file", action="store_true")
@@ -114,6 +117,10 @@ if __name__ == '__main__':
 		if 'PyPDEVS' in args.kernel:
 			builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyPDEVS_221'
 			builtins.__dict__['DEFAULT_SIM_STRATEGY'] = 'parallel'
+			
+			### Real time only for PyPDEVS...
+			if args.rt:
+				builtins.__dict__['REAL_TIME'] = True
 
 	filename = args.filename
 

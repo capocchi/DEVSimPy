@@ -14,6 +14,9 @@ import wx
 import os
 import builtins
 
+import gettext
+_ = gettext.gettext
+
 from types import MethodType
 
 from PluginManager import PluginManager

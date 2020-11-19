@@ -27,6 +27,9 @@ import wx.lib.filebrowsebutton as filebrowse
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 import wx.lib.dialogs
 from concurrent.futures import ThreadPoolExecutor
+
+import gettext
+_ = gettext.gettext
  
 from Utilities import checkURL, getDirectorySize, RecurseSubDirs, getPYFileListFromInit, NotificationMessage
 from Decorators import BuzyCursorNotification
@@ -417,7 +420,7 @@ class ImportLibrary(wx.Dialog):
 
 			### delete files
 			if db.rb2.GetValue():
-				dial = wx.MessageDialog(None, _('Are you sure to delete python files into the %s directory?')%(label), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+				dial = wx.MessageDialog(None, _('Are you sure to delete python files into the %s directory?')%(label), _("Delete Directory"), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 				
 				if dial.ShowModal() == wx.ID_YES:
 					try:

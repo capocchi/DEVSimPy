@@ -125,6 +125,8 @@ import os
 from functools import reduce
 os.putenv('LANG', 'C')
 
+import gettext
+_ = gettext.gettext
 
 import wx
 import wx.grid

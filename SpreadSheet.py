@@ -32,6 +32,9 @@ from pubsub import pub as Publisher
 from PlotGUI import *
 from Utilities import printOnStatusBar
 
+import gettext
+_ = gettext.gettext
+
 ###
 class MySheet(sheet.CSheet):
 	"""
@@ -142,6 +145,7 @@ class Newt(wx.Frame):
 			toolbar.AddSeparator()
 			self.chart = toolbar.AddTool(wx.NewIdRef(), wx.Bitmap(os.path.join(ICON_PATH,'graph_guru.png')), _('Chart'), '')
 		else:
+
 			new = toolbar.AddTool(wx.NewIdRef(), "", wx.Bitmap(os.path.join(ICON_PATH,'new.png')), _('New'))
 			open_file = toolbar.AddTool(wx.NewIdRef(), "", wx.Bitmap(os.path.join(ICON_PATH,'open.png')), _('Open'))
 			saveas = toolbar.AddTool(wx.NewIdRef(), "", wx.Bitmap(os.path.join(ICON_PATH,'save.png')), _('SaveAs'))

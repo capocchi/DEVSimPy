@@ -209,7 +209,7 @@ class runSimulation:
 
     ###
     def Run(self):
-        """ run simulation
+        """ run simulation.
         """
 
         assert(self.master is not None)
@@ -231,6 +231,7 @@ class runSimulation:
             from SimulationGUI import simulator_factory
             if not self.ntl:
                 self.master.FINAL_TIME = float(self.time)
+            
             self.thread = simulator_factory(self.master, self.selected_strategy, self.prof, self.ntl, self.verbose, self.dynamic_structure_flag, self.real_time_flag)
 
             return self.thread

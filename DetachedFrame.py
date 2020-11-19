@@ -25,6 +25,9 @@ import os
 import wx
 import builtins
 
+import gettext
+_ = gettext.gettext
+
 if wx.VERSION_STRING >= '4.0':
 	wx.ST_SIZEGRIP = wx.STB_SIZEGRIP
 

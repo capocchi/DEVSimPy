@@ -23,6 +23,9 @@ import inspect
 import subprocess
 import importlib
 
+import gettext
+_ = gettext.gettext
+
 import wx.lib.agw.aui as aui
 
 import matplotlib as mpl

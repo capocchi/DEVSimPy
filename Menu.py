@@ -34,7 +34,8 @@ import ZipManager
 from PluginManager import PluginManager
 from ExperimentGenerator import ExperimentGenerator
 
-_ = wx.GetTranslation
+import gettext
+_ = gettext.gettext
 
 if wx.VERSION_STRING > '4.0.1': wx.NewId = wx.NewIdRef
 

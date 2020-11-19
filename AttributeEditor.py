@@ -26,6 +26,9 @@ import linecache
 
 import wx
 
+import gettext
+_ = gettext.gettext
+
 import DiagramNotebook
 
 from PropertiesGridCtrl import PropertiesGridCtrl, CodeCB

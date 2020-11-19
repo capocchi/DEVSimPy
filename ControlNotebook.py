@@ -32,6 +32,12 @@ from PropPanel import PropPanel
 from AttributeEditor import AttributeEditor
 from Mixins.Attributable import Attributable
 
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# CLASSES DEFINITION
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 ### --------------------------------------------------------------------------
 class GeneralNotebook(Observer):
 	def __init__(self, *args, **kwargs):

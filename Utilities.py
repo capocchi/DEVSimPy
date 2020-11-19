@@ -123,7 +123,9 @@ def printOnStatusBar(statusbar, data={}):
 	for k,v in list(data.items()):
 		statusbar.SetStatusText(v, k)
 
-def NotificationMessage(title,message,parent,flag=wx.ICON_INFORMATION, timeout=False):
+def NotificationMessage(title,message,parent, flag=2048, timeout=False):
+	""" 2048 is wx.ICON_INFORMATION
+	"""
 	if builtins.__dict__['NOTIFICATION']:
 		notify = wx.adv.NotificationMessage(
 		title=title,

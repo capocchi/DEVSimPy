@@ -61,7 +61,7 @@ from tempfile import gettempdir
 from traceback import format_exception
 from math import * ### for eval
 
-if builtins.__dict__.get('GUI_FLAG',True):
+if builtins.__dict__.get('GUI_FLAG', True):
 	import ConnectDialog
 	import DiagramConstantsDialog
 	import SpreadSheet
@@ -75,14 +75,15 @@ if builtins.__dict__.get('GUI_FLAG',True):
 	import WizardGUI
 	import LabelGUI
 
-	RED = '#d91e1e'
-	GREEN = '#90ee90'
-	BLACK = '#000000'
-	BLUE = '#add8e6'
+### Color definition
+RED = '#d91e1e'
+GREEN = '#90ee90'
+BLACK = '#000000'
+BLUE = '#add8e6'
 
 import Components
 
-if builtins.__dict__.get('GUI_FLAG',True):
+if builtins.__dict__.get('GUI_FLAG', True):
 	import Menu
 
 #import ReloadModule

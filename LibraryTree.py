@@ -39,7 +39,8 @@ from Complexity import GetMacCabeMetric
 
 from pubsub import pub
 
-_ = wx.GetTranslation
+import gettext
+_ = gettext.gettext
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
@@ -199,12 +200,15 @@ class LibraryTree(wx.TreeCtrl):
 				if model_list:
 					tip = _("Models:\n  -")
 					tip += '\n  -'.join(model_list)
-					tip += '\n'
 				else:
 					tip = ""
 
-				tip += _("\nSub-Domains:\n")
-				tip += '\n  -'.join(domain_list)
+				if len(domain_list) > 0:
+					tip += _("\n\nSub-Domains:")
+					if len(domain_list) == 1:
+						tip += " "+domain_list[0]
+					else:
+						tip += '\n  -'.join(domain_list)
 
 			### is last item
 			else:
@@ -323,7 +327,10 @@ class LibraryTree(wx.TreeCtrl):
 
 					if os.path.isdir(path):
 						
-						dial = wx.MessageDialog(None, _('Are you sure to delete from disk the librairie %s ?')%(label), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+						dial = wx.MessageDialog(None, 
+												_('Are you sure to delete from disk the librairie %s ?')%(label), 
+												_("Delete Directory"), 
+												wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 						if dial.ShowModal() == wx.ID_YES:
 							try:
 								### delete directory
@@ -339,7 +346,10 @@ class LibraryTree(wx.TreeCtrl):
 
 					else:
 			
-						dial = wx.MessageDialog(None, _('Are you sure to delete from disk the python file %s ?')%(label), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+						dial = wx.MessageDialog(None, 
+												_('Are you sure to delete from disk the python file %s ?')%(label), 
+												_("Delete File"), 
+												wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 						if dial.ShowModal() == wx.ID_YES:
 							try:
 								### delete file
