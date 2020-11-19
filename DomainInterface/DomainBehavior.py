@@ -97,16 +97,18 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 		return phase == self.state['status']
 
 	def passivate(self)->None:
-		self.passivateIn('passive')
+		return self.passivateIn('passive')
 
 	def passivateIn(self, phase:str="")->None:
-		self.holdIn(phase, sigma=INFINITY)
+		return self.holdIn(phase, sigma=INFINITY)
 
 	def holdIn(self, phase:str="", sigma:float=0.0)->None:
 		''' "Holding in phase " + phase + " for time " + sigma
 		'''
 		self.state['status'] = phase
 		self.state['sigma'] = sigma
+
+		return self.state
 
 	###
 	def pokePyPDEVS(self, p, v)->dict:
@@ -143,7 +145,7 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 	def getMsgPyPDEVSTime(self, msg):
 		return msg[1][0]
 
-	def getFlatComponentSet (self):
+	def getFlatComponentSet(self):
 		return {self.name : self}
 
 	def getSigma(self)->float:

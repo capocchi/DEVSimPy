@@ -55,7 +55,7 @@ import time
 def timer():
 	last = time.time()
 	delta = 0
-	time.clock()
+	time.time()
 	while True:
 	    now = time.time()
 	    delta += now - last
@@ -753,7 +753,6 @@ class Base(object):
 				### if user want to correct error through an editor, we stop simulation process for trying again after the error is corrected.
 					self.OnStop(event)
 		else:
-			print(msg)
 			raise MyBad(msg)
 
 class SimulationDialogPanel(Base, wx.Panel):
