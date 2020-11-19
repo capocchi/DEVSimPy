@@ -74,7 +74,7 @@ from urllib.request import urlretrieve
 import pip
 import importlib
 
-from subprocess import call, check_output, check_call, Popen, PIPE
+from subprocess import call, check_call, Popen, PIPE
 
 # Used for smooth (spectrum)
 try:

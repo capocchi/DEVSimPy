@@ -525,8 +525,7 @@ class ImportLibrary(wx.Dialog):
 				self.CreateInitFile(path)
 			dial.Destroy()
 		
-		NotificationMessage(_('Information'), _("Librarie %s has been succeffully added!")%dName, self, timeout=5)
-
+		NotificationMessage(_('Information'), _("Library %s has been succeffully added!")%dName, self, timeout=5)
 
 	def OnAdd(self, evt):
 		"""

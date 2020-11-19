@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+''' XMLGenerator Model.
+'''
 
 from Generator.Generator import *
 from xml.dom import minidom

@@ -193,7 +193,6 @@ class LibraryTree(wx.TreeCtrl):
 		
 			path = self.GetItemData(item)
 
-
 			if os.path.isdir(path):
 				model_list = self.GetModelList(path)
 				domain_list = self.GetDomainList(path)
@@ -461,6 +460,7 @@ class LibraryTree(wx.TreeCtrl):
 		
 		### import are here because the simulator (PyDEVS or PyPDEVS) require it
 		from DomainInterface.DomainBehavior import DomainBehavior
+		from DomainInterface.DomainStructure import DomainStructure
 		
 		try:
 			name_list = getPYFileListFromInit(os.path.join(dName,'__init__.py'), ext)
@@ -486,11 +486,11 @@ class LibraryTree(wx.TreeCtrl):
 					
 					if cls is not None and not isinstance(cls, tuple):
 
-						### only model that herite from DomainBehavior is shown in lib
-						if issubclass(cls, DomainBehavior):
+						### only model that herite from DomainBehavior or DomainStructure is shown in lib
+						if issubclass(cls, DomainBehavior) or issubclass(cls, DomainStructure):
 							py_file_list.append(s)
 						else:
-							sys.stderr.write(_("%s not imported: Class is not DomainBehavior\n"%(s)))
+							sys.stderr.write(_("%s not imported: Class is not DomainBehavior (atomic) or DomainStructure (coupled)\n"%(s)))
 
 					### If cls is tuple, there is an error but we load the model to correct it.
 					### If its not DEVS model, the Dnd don't allows the instantiation and when the error is corrected, it don't appear before a update.
@@ -610,6 +610,7 @@ class LibraryTree(wx.TreeCtrl):
 		s = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
 		self.MetricDico.update({parent:{'mcc':s, 'parent':None}})
 
+		if not error: self.MetricDico[id].update({'size':sys.getsizeof(devs)})
 		return (id, error)
 
 	###
@@ -687,8 +688,8 @@ class LibraryTree(wx.TreeCtrl):
 			self.ItemDico.update({parentPath:id})
 			self.SetPyData(id,parentPath)
 
-			self.MetricDico.update({id:{'mcc':0.0, 'parent':parent}})
-			self.MetricDico.update({parent:{'mcc':0.0, 'parent':None}})
+			self.MetricDico.update({id:{'mcc':0.0, 'parent':parent, 'size':0}})
+			self.MetricDico.update({parent:{'mcc':0.0, 'parent':None, 'size':0}})
 
 			### for the childrens of the sub-domain
 			for elem in list(item.values())[0]:
@@ -1170,10 +1171,14 @@ class LibraryTree(wx.TreeCtrl):
 		else:
 			doc = inspect.getdoc(module)
 
-		### Add maccabe complexity measure
-		doc += "".join([_("\n\n MacCabe Complexity: %d")%self.MetricDico[item]['mcc']])
-
 		if doc:
+
+			### Add maccabe complexity measure
+			doc += "".join([_("\n\n MacCabe Complexity: %f")%self.MetricDico[item]['mcc']])
+		
+			### Add maccabe complexity measure
+			doc += "".join([_("\n\n Size of model (bytes): %d")%self.MetricDico[item]['size']])
+
 			dlg = wx.lib.dialogs.ScrolledMessageDialog(self, doc, _("%s Documentation")%name, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 			dlg.CenterOnParent(wx.BOTH)
 			dlg.ShowModal()
@@ -1189,15 +1194,16 @@ class LibraryTree(wx.TreeCtrl):
 		path = self.GetItemPyData(item)
 		name = self.GetItemText(item)
 
-		doc = "Path of lib: %s\n"%path
+		### Path of the lib
+		doc = "\n\n Path: %s"%path
 
-		if doc:
-			dlg = wx.lib.dialogs.ScrolledMessageDialog(self, doc, _("%s Documentation")%name, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
-			dlg.CenterOnParent(wx.BOTH)
-			dlg.ShowModal()
-		else:
-			wx.MessageBox(_("No documentation!\nPlease define the documentation of the model %s in the header of its python file.")%name, _("%s Documentation")%name, wx.OK|wx.ICON_INFORMATION)
+		### sum of item sizes
+		doc += "\n\n Size (bytes): %d\n"%(sum([v['size'] for k,v in self.MetricDico.items() if v['parent']==item]))
 
+		dlg = wx.lib.dialogs.ScrolledMessageDialog(self, doc, _("%s Documentation")%name, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+		dlg.CenterOnParent(wx.BOTH)
+		dlg.ShowModal()
+		
 	###
 	def OnInfo(self, event):
 		"""
