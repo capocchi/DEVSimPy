@@ -197,9 +197,15 @@ class LibraryTree(wx.TreeCtrl):
 				model_list = self.GetModelList(path)
 				domain_list = self.GetDomainList(path)
 
-				tip = '\n'.join(model_list) if model_list else ""
-				tip += '\n'
-				tip += '\n'.join(domain_list) if domain_list else ""
+				if model_list:
+					tip = _("Models:\n  -")
+					tip += '\n  -'.join(model_list)
+					tip += '\n'
+				else:
+					tip = ""
+
+				tip += _("\nSub-Domains:\n")
+				tip += '\n  -'.join(domain_list)
 
 			### is last item
 			else:
@@ -218,7 +224,8 @@ class LibraryTree(wx.TreeCtrl):
 			### add maccabe metric info
 			if item in self.MetricDico:
 				mcc = self.MetricDico[item]['mcc']
-				tip =''.join([tip,'\n','macCabe metric: %d'%mcc])
+				size = self.MetricDico[item]['size']
+				tip =''.join([tip,'\n\n',_('MacCabe metric: %d')%mcc,'\n\n',_('Size (bytes): %d')%size])
 
 			self.SetToolTip(tip)
 		
@@ -563,7 +570,6 @@ class LibraryTree(wx.TreeCtrl):
 			### check error
 			error = isinstance(module, Exception) or not Zip.GetBehavioralPythonFile(path)
 
-			### defalut mcc is null
 			mcc = 0.0
 
 			### change icon depending on the error and the presence of image in amd
@@ -581,6 +587,9 @@ class LibraryTree(wx.TreeCtrl):
 
 			### insert into the tree
 			id = self.InsertItemBefore(p if p else parent, 0, os.path.splitext(item)[0], img, img)
+
+			### size of model
+			size = 0 if error else sys.getsizeof(module)
 		
 		else:
 			path = os.path.join(parentPath, "".join([item,'.py'])) if not come_from_net else "".join([parentPath,'/',item,'.py'])
@@ -604,13 +613,17 @@ class LibraryTree(wx.TreeCtrl):
 			#mcc = float(subprocess.check_output('python {} {}'.format('Complexity.py', path), shell = True))
 			mcc = GetMacCabeMetric(path)
 
+			### size of model
+			size = sys.getsizeof(devs) if not error else 0
+
 		self.SetPyData(id, path)
 
-		self.MetricDico.update({id:{'mcc':mcc, 'parent':parent}})
-		s = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
-		self.MetricDico.update({parent:{'mcc':s, 'parent':None}})
+		self.MetricDico.update({id:{'mcc':mcc, 'parent':parent, 'size':size}})
 
-		if not error: self.MetricDico[id].update({'size':sys.getsizeof(devs)})
+		mcc_sum = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
+		size_sum = sum([d['size'] for id,d in self.MetricDico.items() if d['parent']==parent])
+		self.MetricDico.update({parent:{'mcc':mcc_sum, 'parent':None, 'size':size_sum}})
+		
 		return (id, error)
 
 	###
@@ -1177,7 +1190,7 @@ class LibraryTree(wx.TreeCtrl):
 			doc += "".join([_("\n\n MacCabe Complexity: %f")%self.MetricDico[item]['mcc']])
 		
 			### Add maccabe complexity measure
-			doc += "".join([_("\n\n Size of model (bytes): %d")%self.MetricDico[item]['size']])
+			doc += "".join([_("\n\n Size (bytes): %d")%self.MetricDico[item]['size']])
 
 			dlg = wx.lib.dialogs.ScrolledMessageDialog(self, doc, _("%s Documentation")%name, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 			dlg.CenterOnParent(wx.BOTH)
@@ -1195,10 +1208,13 @@ class LibraryTree(wx.TreeCtrl):
 		name = self.GetItemText(item)
 
 		### Path of the lib
-		doc = "\n\n Path: %s"%path
+		doc = "Path: %s"%path
 
-		### sum of item sizes
-		doc += "\n\n Size (bytes): %d\n"%(sum([v['size'] for k,v in self.MetricDico.items() if v['parent']==item]))
+		### Add maccabe complexity measure
+		doc += "".join([_("\n\n MacCabe Complexity: %f")%self.MetricDico[item]['mcc']])
+		
+		### Add maccabe complexity measure
+		doc += "".join([_("\n\n Size (bytes): %d")%self.MetricDico[item]['size']])
 
 		dlg = wx.lib.dialogs.ScrolledMessageDialog(self, doc, _("%s Documentation")%name, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 		dlg.CenterOnParent(wx.BOTH)
