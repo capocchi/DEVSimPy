@@ -754,21 +754,27 @@ class ItemLibraryPopupMenu(wx.Menu):
 		path = parent.GetItemPyData(item)
 
 		if os.path.isdir(path):
-			new_model = wx.MenuItem(self, ID_NEW_MODEL_LIB, _('New model'), _('Add a new model to the selected library'))
-			new_model.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'new.png')))
-			InsertItem(0, new_model)
-			new_dir = wx.MenuItem(self, ID_NEW_DIR_LIB, _('New sub directory'), _('Add a directory to the selected library'))
-			new_dir.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'new.png')))
-			InsertItem(1, new_dir)
+
+			new_submenu = wx.Menu()
+
+			new_model = wx.MenuItem(new_submenu, ID_NEW_MODEL_LIB, _('Model'), _('Add a new model to the selected library'))
+			new_dir = wx.MenuItem(new_submenu, ID_NEW_DIR_LIB, _('Sub-directory'), _('Add a new sub directory to the selected library'))
 			rename_dir = wx.MenuItem(self, ID_RENAME_DIR_LIB, _('Rename'), _('Rename selected librarie'))
-			rename_dir.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'rename.png')))
-			InsertItem(2, rename_dir)
 			update_lib = wx.MenuItem(self, ID_UPDATE_SUBLIB, _('Update'), _('Update all models of the selected library'))
-			update_lib.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'db_refresh2.png')))
-			InsertItem(3, update_lib)
 			doc = wx.MenuItem(self, wx.NewIdRef(), _('Documentation'), _('Documentation of selected library'))
+
+			new_model.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'new.png')))
+			new_dir.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'new.png')))
+			rename_dir.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'rename.png')))
+			update_lib.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'db_refresh2.png')))
 			doc.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'doc.png')))
-			InsertItem(4, doc)
+
+			new_submenu.Append(new_model)
+			new_submenu.Append(new_dir)
+			AppendMenu(self, -1, _('Add'), new_submenu)
+			AppendItem(rename_dir)
+			AppendItem(update_lib)
+			AppendItem(doc)
 
 			self.Bind(wx.EVT_MENU, parent.OnNewModel, id=ID_NEW_MODEL_LIB)
 			self.Bind(wx.EVT_MENU, parent.OnDirRename, id=ID_RENAME_DIR_LIB)

@@ -88,6 +88,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	# 	index = evt.GetItem().GetId()
 	# 	self.CheckItem(index, False)
 
+	###
 	def AddItem(self, path, dName, check=False):
 		""" Add item to the list.
 		"""
@@ -101,9 +102,11 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		self.SetData(index, path)
 		self.SetItemData(index, index)
 
+	###
 	def GetData(self, id):
 		return self.map[id]
 
+	###
 	def SetData(self, id, data):
 		self.map.update({id:data})
 
@@ -118,6 +121,7 @@ class DeleteBox(wx.Dialog):
 	""" Delete box for libraries manager.
 	"""
 
+	###
 	def __init__(self, *args, **kwargs):
 		""" Constructor.
 		"""
@@ -126,7 +130,8 @@ class DeleteBox(wx.Dialog):
 		self.InitUI()
 		self.SetSize((250, 200))
 		self.Centre() 
-		
+	
+	###
 	def InitUI(self):
 		""" Init the user interface.
 		"""
@@ -281,6 +286,7 @@ class ImportLibrary(wx.Dialog):
 		e = wx.SizeEvent(self.GetSize())
 		self.ProcessEvent(e)
 
+	###
 	def CheckDomainPath(self):
 		"""
 		"""
@@ -291,6 +297,7 @@ class ImportLibrary(wx.Dialog):
 			dlg.ShowModal()
 			dlg.Destroy()
 
+	###
 	def OnSelectAll(self, event):
 		"""
 		"""
@@ -298,6 +305,7 @@ class ImportLibrary(wx.Dialog):
 		for i in range(num):
 			self._cb.CheckItem(i,True)
 
+	###
 	def OnDeselectAll(self, event):
 		"""
 		"""
@@ -305,6 +313,7 @@ class ImportLibrary(wx.Dialog):
 		for i in range(num):
 			self._cb.CheckItem(i, False)
 
+	###
 	def OnItemRightClick(self, evt):
 		"""Launcher creates wxMenu.
 		"""
@@ -335,6 +344,7 @@ class ImportLibrary(wx.Dialog):
 
 		menu.Destroy() # destroy to avoid mem leak
 
+	###
 	def DocDirectory(self, path):
 		""" Return doc of all modules composing path directory by reading its __ini__.py
 		"""
@@ -372,6 +382,7 @@ class ImportLibrary(wx.Dialog):
 
 		return doc
 
+	###
 	def OnDoc(self, evt):
 		""" Documentation of item has been invocked.
 		"""
@@ -392,6 +403,7 @@ class ImportLibrary(wx.Dialog):
 		d.CenterOnParent(wx.BOTH)
 		d.ShowModal()
 
+	###
 	def OnDelete(self, evt):
 		""" Delete Button has been clicked.
 		"""
@@ -427,6 +439,7 @@ class ImportLibrary(wx.Dialog):
 
 			self._cb.DeleteItem(index)
 
+	###
 	def EvtCheckListBox(self, evt):
 		"""
 		"""
@@ -465,6 +478,7 @@ class ImportLibrary(wx.Dialog):
 					f.write("\t\t'%s', \n"%name)
 				f.write('\t\t ]')
 
+	###
 	def OnNew(self, event):
 		"""
 		"""
@@ -481,7 +495,7 @@ class ImportLibrary(wx.Dialog):
 			# Checking if the list is empty or not 
 			if len(dir) == 0:
 				if not '__init__.py' in dir:
-					self.CreateInitFile(path)
+					ImportLibrary.CreateInitFile(path)
 
 				self.DoAdd(path, os.path.basename(path))
 				
@@ -504,6 +518,7 @@ class ImportLibrary(wx.Dialog):
 					dial = wx.MessageDialog(self, _('%s is already imported!')%dName, _('New librarie manager'), wx.OK|wx.ICON_INFORMATION)
 					dial.ShowModal()
 
+	###
 	def DoAdd(self, path, dName):
 		"""
 		"""
@@ -522,17 +537,18 @@ class ImportLibrary(wx.Dialog):
 		if not path.startswith('http') and (not os.path.exists(os.path.join(path,'__init__.py') and len(os.listdir(path)) == 0)):
 			dial = wx.MessageDialog(self, _('%s directory has no __init__.py file.\nDo you want to create it?')%path, _('New librarie Manager'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 			if dial.ShowModal() == wx.ID_YES:
-				self.CreateInitFile(path)
+				ImportLibrary.CreateInitFile(path)
 			dial.Destroy()
 		
-		NotificationMessage(_('Information'), _("Librarie %s has been succeffully added!")%dName, self, timeout=5)
+		NotificationMessage(_('Information'), _("Library %s has been succeffully added!")%dName, self, timeout=5)
 
-
+	###
 	def OnAdd(self, evt):
 		"""
 		"""
 		self.OnNew(evt)
-				
+
+	###		
 	def OnCloseWindow(self, event):
 		"""
 		"""

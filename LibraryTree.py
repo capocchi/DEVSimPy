@@ -19,10 +19,9 @@ import os
 import sys
 import urllib.parse
 import http.client
-import copy
 import inspect
 import zipfile
-import subprocess
+#import subprocess
 import importlib
 import tempfile
 import shutil
@@ -35,7 +34,7 @@ from Decorators import BuzyCursorNotification
 from Components import BlockFactory, DEVSComponent, GetClass, PyComponent, GenericComponent
 from ZipManager import Zip, getPythonModelFileName
 from ReloadModule import recompile
-from ImportLibrary import DeleteBox
+from ImportLibrary import DeleteBox, ImportLibrary
 from Complexity import GetMacCabeMetric
 
 from pubsub import pub
@@ -193,14 +192,19 @@ class LibraryTree(wx.TreeCtrl):
 		
 			path = self.GetItemData(item)
 
-
 			if os.path.isdir(path):
 				model_list = self.GetModelList(path)
 				domain_list = self.GetDomainList(path)
 
-				tip = '\n'.join(model_list) if model_list else ""
-				tip += '\n'
-				tip += '\n'.join(domain_list) if domain_list else ""
+				if model_list:
+					tip = _("Models:\n  -")
+					tip += '\n  -'.join(model_list)
+					tip += '\n'
+				else:
+					tip = ""
+
+				tip += _("\nSub-Domains:\n")
+				tip += '\n  -'.join(domain_list)
 
 			### is last item
 			else:
@@ -219,7 +223,8 @@ class LibraryTree(wx.TreeCtrl):
 			### add maccabe metric info
 			if item in self.MetricDico:
 				mcc = self.MetricDico[item]['mcc']
-				tip =''.join([tip,'\n','macCabe metric: %d'%mcc])
+				size = self.MetricDico[item]['size']
+				tip =''.join([tip,'\n\n',_('MacCabe metric: %d')%mcc,'\n\n',_('Size (bytes): %d')%size])
 
 			self.SetToolTip(tip)
 		
@@ -306,21 +311,40 @@ class LibraryTree(wx.TreeCtrl):
 		item = self.GetFocusedItem()
 		if item.IsOk():
 			path = self.GetItemPyData(item)
+	
+			### msgbox to select what you wan to delete: file or/and item ?
+			db = DeleteBox(self, wx.NewIdRef(), _("Delete Options"))
 
-			if path and os.path.exists(path):
-				### msgbox to select what you wan to delete: file or/and item ?
-				db = DeleteBox(self, wx.NewIdRef(), _("Delete Options"))
+			if db.ShowModal() == wx.ID_OK:
 
-				if db.ShowModal() == wx.ID_OK:
+				### delete file
+				if db.rb2.GetValue():
+					label = os.path.basename(path)
 
-					### delete file
-					if db.rb2.GetValue():
-						label = os.path.basename(path)
-						dial = wx.MessageDialog(None, _('Are you sure to delete the python file %s ?')%(label), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+					if os.path.isdir(path):
+						
+						dial = wx.MessageDialog(None, _('Are you sure to delete from disk the librairie %s ?')%(label), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+						if dial.ShowModal() == wx.ID_YES:
+							try:
+								### delete directory
+								shutil.rmtree(path)
+								
+								### delete item
+								self.RemoveItem(item)
+
+							except Exception as info:
+								sys.stdout.write(_("%s not deleted!\n Error: %s")%(label,info))
+						
+						dial.Destroy()
+
+					else:
+			
+						dial = wx.MessageDialog(None, _('Are you sure to delete from disk the python file %s ?')%(label), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 						if dial.ShowModal() == wx.ID_YES:
 							try:
 								### delete file
 								os.remove(path)
+								
 								### delete item
 								self.RemoveItem(item)
 
@@ -330,13 +354,13 @@ class LibraryTree(wx.TreeCtrl):
 
 						dial.Destroy()
 
-					else:
-						self.RemoveItem(item)
+				else:
+					self.RemoveItem(item)
 
-					###TODO unload associated module
+				###TODO unload associated module
 
-			else:
-				wx.MessageBox(_("No library selected!"),_("Delete Manager"))
+		else:
+			wx.MessageBox(_("No library selected!"),_("Delete Manager"))
 
 	def UpdateSubLib(self, path:str)->bool:
 		""" Do update lib.
@@ -399,11 +423,12 @@ class LibraryTree(wx.TreeCtrl):
 										wx.OK | wx.ICON_ERROR)
 					dlg.ShowModal()
 
-			item = self.ItemDico[os.path.dirname(gmwiz.model_path)]
-			self.UpdateDomain(self.GetPyData(item))
+				else:
+					item = self.ItemDico[os.path.dirname(gmwiz.model_path)]
+					self.UpdateDomain(self.GetPyData(item))
 
-			### sort all item
-			self.SortChildren(self.root)
+					### sort all item
+					self.SortChildren(self.root)
 
 		# Cleanup
 		if gmwiz: gmwiz.Destroy()
@@ -411,7 +436,30 @@ class LibraryTree(wx.TreeCtrl):
 	def OnNewDir(self, evt):
 		""" New dir has been invoked.
 		"""
-		pass
+		parent_item = self.GetFocusedItem()
+		parent_item_path = self.GetPyData(parent_item)
+
+		dialog = wx.DirDialog(self, _("Choose a new directory:"), parent_item_path, style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
+		new_path = dialog.GetPath() if dialog.ShowModal() == wx.ID_OK else None
+		dialog.Destroy()
+
+		if new_path:
+			# Getting the list of directories 
+			new_dir = os.listdir(new_path) 
+			if len(new_dir) == 0:
+				if not '__init__.py' in new_dir:
+					ImportLibrary.CreateInitFile(new_path)
+		
+			### add the new sub librarie
+			self.InsertNewDomain(new_path, parent_item)
+			
+			### update of the parent domain imply the remove of the sub directory in the tree
+			### after the new sud dir creation, you must create new model inside in order take the sub directory alive in the lib tree
+			### if no new model is created in the new dir, it desaper during the updated of the domain!
+			#self.UpdateDomain(parent_item_path)
+
+			### sort all item
+			#self.SortChildren(self.root)
 
 	###
 	def GetDomainList(self, dName):
@@ -461,6 +509,7 @@ class LibraryTree(wx.TreeCtrl):
 		
 		### import are here because the simulator (PyDEVS or PyPDEVS) require it
 		from DomainInterface.DomainBehavior import DomainBehavior
+		from DomainInterface.DomainStructure import DomainStructure
 		
 		try:
 			name_list = getPYFileListFromInit(os.path.join(dName,'__init__.py'), ext)
@@ -486,11 +535,11 @@ class LibraryTree(wx.TreeCtrl):
 					
 					if cls is not None and not isinstance(cls, tuple):
 
-						### only model that herite from DomainBehavior is shown in lib
-						if issubclass(cls, DomainBehavior):
+						### only model that herite from DomainBehavior or DomainStructure is shown in lib
+						if issubclass(cls, DomainBehavior) or issubclass(cls, DomainStructure):
 							py_file_list.append(s)
 						else:
-							sys.stderr.write(_("%s not imported: Class is not DomainBehavior\n"%(s)))
+							sys.stderr.write(_("%s not imported: Class is not DomainBehavior (atomic) or DomainStructure (coupled)\n"%(s)))
 
 					### If cls is tuple, there is an error but we load the model to correct it.
 					### If its not DEVS model, the Dnd don't allows the instantiation and when the error is corrected, it don't appear before a update.
@@ -563,7 +612,6 @@ class LibraryTree(wx.TreeCtrl):
 			### check error
 			error = isinstance(module, Exception) or not Zip.GetBehavioralPythonFile(path)
 
-			### defalut mcc is null
 			mcc = 0.0
 
 			### change icon depending on the error and the presence of image in amd
@@ -581,6 +629,9 @@ class LibraryTree(wx.TreeCtrl):
 
 			### insert into the tree
 			id = self.InsertItemBefore(p if p else parent, 0, os.path.splitext(item)[0], img, img)
+
+			### size of model
+			size = 0 if error else sys.getsizeof(module)
 		
 		else:
 			path = os.path.join(parentPath, "".join([item,'.py'])) if not come_from_net else "".join([parentPath,'/',item,'.py'])
@@ -604,12 +655,17 @@ class LibraryTree(wx.TreeCtrl):
 			#mcc = float(subprocess.check_output('python {} {}'.format('Complexity.py', path), shell = True))
 			mcc = GetMacCabeMetric(path)
 
+			### size of model
+			size = sys.getsizeof(devs) if not error else 0
+
 		self.SetPyData(id, path)
 
-		self.MetricDico.update({id:{'mcc':mcc, 'parent':parent}})
-		s = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
-		self.MetricDico.update({parent:{'mcc':s, 'parent':None}})
+		self.MetricDico.update({id:{'mcc':mcc, 'parent':parent, 'size':size}})
 
+		mcc_sum = sum([d['mcc'] for id,d in self.MetricDico.items() if d['parent']==parent])
+		size_sum = sum([d['size'] for id,d in self.MetricDico.items() if d['parent']==parent])
+		self.MetricDico.update({parent:{'mcc':mcc_sum, 'parent':None, 'size':size_sum}})
+		
 		return (id, error)
 
 	###
@@ -687,8 +743,8 @@ class LibraryTree(wx.TreeCtrl):
 			self.ItemDico.update({parentPath:id})
 			self.SetPyData(id,parentPath)
 
-			self.MetricDico.update({id:{'mcc':0.0, 'parent':parent}})
-			self.MetricDico.update({parent:{'mcc':0.0, 'parent':None}})
+			self.MetricDico.update({id:{'mcc':0.0, 'parent':parent, 'size':0}})
+			self.MetricDico.update({parent:{'mcc':0.0, 'parent':None, 'size':0}})
 
 			### for the childrens of the sub-domain
 			for elem in list(item.values())[0]:
@@ -742,7 +798,7 @@ class LibraryTree(wx.TreeCtrl):
 
     ###
 	def GetSubDomain(self, dName, domainSubList = []):
-		""" Get the dico composed by all of the sub domain of dName
+		""" Get the dico composed by all of the sub domain of dName.
 			(like{'../Domain/PowerSystem': ['PSDomainStructure', 'PSDomainBehavior', 'Object', 'PSSDB', {'../Domain/PowerSystem/Rt': []}, {'../Domain/PowerSystem/PowerMachine': ['toto.cmd', 'Integrator.cmd', 'titi.cmd', 'Mymodel.cmd', {'../Domain/PowerSystem/PowerMachine/TOTO': []}]}, {'../Domain/PowerSystem/Sources': ['StepGen', 'SinGen', 'CosGen', 'RampGen', 'PWMGen', 'PulseGen', 'TriphaseGen', 'ConstGen']}, {'../Domain/PowerSystem/Sinks': ['To_Disk', 'QuickScope']}, {'../Domain/PowerSystem/MyLib': ['', 'model.cmd']}, {'../Domain/PowerSystem/Hybrid': []}, {'../Domain/PowerSystem/Continuous': ['WSum', 'Integrator', 'Gain', 'Gain2', 'NLFunction']}]}
 			)
 		"""
@@ -961,7 +1017,7 @@ class LibraryTree(wx.TreeCtrl):
 		bn = os.path.basename(self.GetPyData(item))
 
 		### delete all references from the ItemDico
-		for key in copy.copy(self.ItemDico):
+		for key in self.ItemDico.copy():
 			if bn in key.split(os.sep):
 				del self.ItemDico[key]
 
@@ -1170,10 +1226,14 @@ class LibraryTree(wx.TreeCtrl):
 		else:
 			doc = inspect.getdoc(module)
 
-		### Add maccabe complexity measure
-		doc += "".join([_("\n\n MacCabe Complexity: %d")%self.MetricDico[item]['mcc']])
-
 		if doc:
+
+			### Add maccabe complexity measure
+			doc += "".join([_("\n\n MacCabe Complexity: %f")%self.MetricDico[item]['mcc']])
+		
+			### Add maccabe complexity measure
+			doc += "".join([_("\n\n Size (bytes): %d")%self.MetricDico[item]['size']])
+
 			dlg = wx.lib.dialogs.ScrolledMessageDialog(self, doc, _("%s Documentation")%name, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 			dlg.CenterOnParent(wx.BOTH)
 			dlg.ShowModal()
@@ -1189,15 +1249,19 @@ class LibraryTree(wx.TreeCtrl):
 		path = self.GetItemPyData(item)
 		name = self.GetItemText(item)
 
-		doc = "Path of lib: %s\n"%path
+		### Path of the lib
+		doc = "Path: %s"%path
 
-		if doc:
-			dlg = wx.lib.dialogs.ScrolledMessageDialog(self, doc, _("%s Documentation")%name, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
-			dlg.CenterOnParent(wx.BOTH)
-			dlg.ShowModal()
-		else:
-			wx.MessageBox(_("No documentation!\nPlease define the documentation of the model %s in the header of its python file.")%name, _("%s Documentation")%name, wx.OK|wx.ICON_INFORMATION)
+		### Add maccabe complexity measure
+		doc += "".join([_("\n\n MacCabe Complexity: %f")%self.MetricDico[item]['mcc']])
+		
+		### Add maccabe complexity measure
+		doc += "".join([_("\n\n Size (bytes): %d")%self.MetricDico[item]['size']])
 
+		dlg = wx.lib.dialogs.ScrolledMessageDialog(self, doc, _("%s Documentation")%name, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+		dlg.CenterOnParent(wx.BOTH)
+		dlg.ShowModal()
+		
 	###
 	def OnInfo(self, event):
 		"""

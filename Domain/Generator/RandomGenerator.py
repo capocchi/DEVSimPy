@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
-
+"""
+Name: RandomGenerator.py
+Brief descritpion: Generate random message.
+Author(s): L. Capocchi <capocchi@univ-corse.fr>, B. Poggi <bpoggi@univ-corse.fr>
+Version:  1.0
+Last modified: 2020.10.18
+GENERAL NOTES AND REMARKS:
+GLOBAL VARIABLES AND FUNCTIONS:
+"""
 from DomainInterface.DomainBehavior import DomainBehavior
 from DomainInterface.Object import Message
 
 import random
 
 class RandomGenerator(DomainBehavior):
-    """
-        @author: Bastien POGGI
-        @organization: University Of Corsica
-        @contact: bpoggi@univ-corse.fr
-        @since: 2010.12.1
-        @version: 1.0
+    """ RandomGenerator Class.
     """
 
     def __init__(self, minValue=0, maxValue=10, minStep=1, maxStep=1, start=0, choice=[]):
