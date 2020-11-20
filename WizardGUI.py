@@ -89,22 +89,22 @@ class %s(DomainBehavior):
 	def extTransition(self, *args):
 		''' DEVS external transition function.
 		'''
-		%s
+		return self.getState()
 
 	def outputFnc(self):
 		''' DEVS output function.
 		'''
-		%s
+		return {}
 
 	def intTransition(self):
 		''' DEVS internal transition function.
 		'''
-		%s
+		return self.getState()
 
 	def timeAdvance(self):
 		''' DEVS Time Advance function.
 		'''
-		%s
+		return self.getSigma()
 
 	def finish(self, msg):
 		''' Additional function which is lunched just before the end of the simulation.
@@ -114,11 +114,7 @@ class %s(DomainBehavior):
 	os.path.split(USERHOME)[-1],
 	datetime.datetime.now(),
 	label,
-	label,
-	'pass' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else 'return self.getState()',
-	'pass' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else 'return {}',
-	'pass' if 'PyDEVS' == DEFAULT_DEVS_DIRNAME else 'return self.getState()',
-	"return self.getSigma()")
+	label)
 
 	### add confluent function only for PyPDEVS.
 	code += """
