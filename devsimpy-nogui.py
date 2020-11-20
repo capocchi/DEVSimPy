@@ -117,10 +117,9 @@ if __name__ == '__main__':
 		if 'PyPDEVS' in args.kernel:
 			builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyPDEVS_221'
 			builtins.__dict__['DEFAULT_SIM_STRATEGY'] = 'parallel'
-			
+
 			### Real time only for PyPDEVS...
-			if args.rt:
-				builtins.__dict__['REAL_TIME'] = True
+			builtins.__dict__['REAL_TIME'] = args.rt
 
 	filename = args.filename
 

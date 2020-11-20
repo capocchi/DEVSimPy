@@ -93,16 +93,22 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 	def setSigma(self,sigma:float=0.0)->None:
 		self.state['sgima'] = sigma
 
+	def setStatus(self, phase:str)->None:
+		self.state['status'] = phase
+
+	def setState(self, s:dict)->None:
+		self.state = s
+
 	def phaseIs(self, phase:str)->bool:
 		return phase == self.state['status']
 
-	def passivate(self)->None:
+	def passivate(self)->dict:
 		return self.passivateIn('passive')
 
-	def passivateIn(self, phase:str="")->None:
+	def passivateIn(self, phase:str="")->dict:
 		return self.holdIn(phase, sigma=INFINITY)
 
-	def holdIn(self, phase:str="", sigma:float=0.0)->None:
+	def holdIn(self, phase:str="", sigma:float=0.0)->dict:
 		''' "Holding in phase " + phase + " for time " + sigma
 		'''
 		self.state['status'] = phase
@@ -156,6 +162,9 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 
 	def getState(self)->dict:
 		return self.state
+
+	def getElapsed(self)->float:
+		return self.elapsed
 		
 	def __str__(self)->str:
 		"""
