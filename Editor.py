@@ -1907,49 +1907,49 @@ class BlockBase(object):
 		""" Insert a sentence to get the state object
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddText("state = self.getState()")
+		cp.AddText("self.getState()")
 		cp.modify = True
 
 	def OnInsertGetStatus(self, event):
 		""" Insert a sentence to get the status
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddText("status = self.getStatus()")
+		cp.AddText("self.getStatus()")
 		cp.modify = True
 
 	def OnInsertGetSigma(self, event):
 		""" Insert a sentence to get the sigma value
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddText("sigma = self.getSigma()")
+		cp.AddText("self.getSigma()")
 		cp.modify = True
 
 	def OnInsertGetPortId(self, event):
 		""" Insert a sentence to get the port ID
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddText("id = self.getPortId(<port>)")
+		cp.AddText("self.getPortId(<port>)")
 		cp.modify = True
 
 	def OnInsertGetMsgValue(self, event):
 		""" Insert a sentence to get the message value
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddText("v = self.getMsgValue(<msg>)")
+		cp.AddText("self.getMsgValue(<msg>)")
 		cp.modify = True
 	
 	def OnInsertGetMsgTime(self, event):
 		""" Insert a sentence to get the message time
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddText("t = self.getMsgTime(<msg>)")
+		cp.AddText("self.getMsgTime(<msg>)")
 		cp.modify = True
 
 	def OnInsertGetElapsed(self, event):
 		""" Insert a sentence to get the elapsed time
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddText("e = self.getElapsed()")
+		cp.AddText("self.getElapsed()")
 		cp.modify = True
 
 	###
