@@ -1758,8 +1758,9 @@ class Base(object):
 
 ### ----------------------------------------------------------------
 class EditorPanel(Base, wx.Panel):
-	""" Editor class which is a Panel
+	""" Editor class which is a Panel.
 	"""
+	
 	def __init__(self, parent, id, title):
 		""" Constructor.
 		"""
@@ -1858,10 +1859,7 @@ class BlockBase(object):
 
 		if sins:
 			dlg = wx.SingleChoiceDialog(self, _('Port number'), _(' %s on which port?')%label, sins, wx.CHOICEDLG_STYLE)
-			if dlg.ShowModal() == wx.ID_OK:
-				port = dlg.GetStringSelection()
-			else:
-				port = None
+			port = dlg.GetStringSelection() if dlg.ShowModal() == wx.ID_OK else None
 			dlg.Destroy()
 
 			if port is not None:
@@ -1870,9 +1868,6 @@ class BlockBase(object):
 					cp.AddText("self.peek(self.IPorts[%d], *args)" % int(port))
 				elif "poke" in label:
 					cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))" % int(port))
-				else:
-					pass
-
 				cp.modify = True
 
 	def OnInsertInitPhase(self, event):
@@ -1904,57 +1899,57 @@ class BlockBase(object):
 		cp.modify = True
 
 	def OnInsertGetState(self, event):
-		""" Insert a sentence to get the state object
+		""" Insert a sentence to get the state object.
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddText("state = self.getState()")
+		cp.AddText("self.getState()")
 		cp.modify = True
 
 	def OnInsertGetStatus(self, event):
-		""" Insert a sentence to get the status
+		""" Insert a sentence to get the status.
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddText("status = self.getStatus()")
+		cp.AddText("self.getStatus()")
 		cp.modify = True
 
 	def OnInsertGetSigma(self, event):
-		""" Insert a sentence to get the sigma value
+		""" Insert a sentence to get the sigma value.
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddText("sigma = self.getSigma()")
+		cp.AddText("self.getSigma()")
 		cp.modify = True
 
 	def OnInsertGetPortId(self, event):
-		""" Insert a sentence to get the port ID
+		""" Insert a sentence to get the port ID.
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddText("id = self.getPortId(<port>)")
+		cp.AddText("self.getPortId(<port>)")
 		cp.modify = True
 
 	def OnInsertGetMsgValue(self, event):
-		""" Insert a sentence to get the message value
+		""" Insert a sentence to get the message value.
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddText("v = self.getMsgValue(<msg>)")
+		cp.AddText("self.getMsgValue(<msg>)")
 		cp.modify = True
 	
 	def OnInsertGetMsgTime(self, event):
-		""" Insert a sentence to get the message time
+		""" Insert a sentence to get the message time.
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddText("t = self.getMsgTime(<msg>)")
+		cp.AddText("self.getMsgTime(<msg>)")
 		cp.modify = True
 
 	def OnInsertGetElapsed(self, event):
-		""" Insert a sentence to get the elapsed time
+		""" Insert a sentence to get the elapsed time.
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddText("e = self.getElasped()")
+		cp.AddText("self.getElapsed()")
 		cp.modify = True
 
 	###
 	def OnInsertHoldInState(self, event):
-		""" Insert a sentence to change the state
+		""" Insert a sentence to change the state.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.holdIn('<phase>',<sigma>)")
@@ -1962,7 +1957,7 @@ class BlockBase(object):
 
 	###
 	def OnInsertPhaseIs(self, event):
-		""" Insert a sentence to test the phase
+		""" Insert a sentence to test the phase.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.phaseIs('<phase>')")
@@ -1970,7 +1965,7 @@ class BlockBase(object):
 		
 	###
 	def OnInsertPassivateInState(self, event):
-		""" Insert a sentence to change the state
+		""" Insert a sentence to change the state.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.passivateIn('<phase>')")
@@ -1978,7 +1973,7 @@ class BlockBase(object):
 
 	###
 	def OnInsertPassivateState(self, event):
-		""" Insert a sentence to change the state
+		""" Insert a sentence to change the state.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.passivate()")
@@ -1986,7 +1981,7 @@ class BlockBase(object):
 
 	###
 	def OnInsertDebug(self, event):
-		""" Insert a sentence to invoke the debugger function that trace message into the log of model
+		""" Insert a sentence to invoke the debugger function that trace message into the log of model.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.debugger('<message>')")
@@ -1994,7 +1989,7 @@ class BlockBase(object):
 
 	###
 	def ConfigSaving(self, base_name, dir_name, code):
-		""" Saving method
+		""" Saving method.
 		"""
 
 		new_instance = None
@@ -2015,7 +2010,7 @@ class BlockBase(object):
 
 	###
 	def UpdateArgs(self, new_args):
-		""" Update the args or constructor class from new_args
+		""" Update the args or constructor class from new_args.
 		"""
 
 		### update args (behavioral attributes) before saving
@@ -2247,7 +2242,8 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 
 		### insert new icon in toolbar (icon are not available in embeded editor (Show menu)
 		tb = self.GetToolBar()
-		tb.InsertSeparator(tb.GetToolsCount())
+		tb.AddSeparator()
+		#tb.InsertSeparator(tb.GetToolsCount())
 
 		if wx.VERSION_STRING < '4.0':
 			tb.AddTool(peek.GetId(), peek.GetBitmap(), shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
