@@ -140,16 +140,16 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 			return p.port_id
 
 	def getMsgPyDEVSValue(self, msg):
-		return msg.value					
+		return msg.value if msg else "Msg is none"		
 		
 	def getMsgPyPDEVSValue(self, msg):
-		return msg[0]
+		return msg[0] if msg else "Msg is none"
 
 	def getMsgPyDEVSTime(self, msg):
-		return msg.time					
+		return msg.time	id msg else "Msg is none"
 		
 	def getMsgPyPDEVSTime(self, msg):
-		return msg[1][0]
+		return msg[1][0] is msg else "Msg is nore"
 
 	def getFlatComponentSet(self):
 		return {self.name : self}

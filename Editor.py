@@ -1949,7 +1949,7 @@ class BlockBase(object):
 		""" Insert a sentence to get the elapsed time
 		"""
 		cp = self.nb.GetCurrentPage()
-		cp.AddText("e = self.getElasped()")
+		cp.AddText("e = self.getElapsed()")
 		cp.modify = True
 
 	###
@@ -2247,7 +2247,8 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 
 		### insert new icon in toolbar (icon are not available in embeded editor (Show menu)
 		tb = self.GetToolBar()
-		tb.InsertSeparator(tb.GetToolsCount())
+		tb.AddSeparator()
+		#tb.InsertSeparator(tb.GetToolsCount())
 
 		if wx.VERSION_STRING < '4.0':
 			tb.AddTool(peek.GetId(), peek.GetBitmap(), shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
