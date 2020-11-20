@@ -62,6 +62,8 @@ BaseDEVS = importlib.import_module("DEVSKernel%s.DEVS"%d)
 class DomainBehavior(BaseDEVS.AtomicDEVS):
 	""" Abstract DomainBehavior class.
 	"""
+	
+	__slots__ = ('state')
 
 	###
 	def __init__(self, name:str=""):
@@ -146,13 +148,13 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 		return msg[0] if msg else "Msg is none"
 
 	def getMsgPyDEVSTime(self, msg):
-		return msg.time	id msg else "Msg is none"
+		return msg.time	if msg else "Msg is none"
 		
 	def getMsgPyPDEVSTime(self, msg):
-		return msg[1][0] is msg else "Msg is nore"
+		return msg[1][0] if msg else "Msg is nore"
 
 	def getFlatComponentSet(self):
-		return {self.name : self}
+		return {self.name:self}
 
 	def getSigma(self)->float:
 		return self.state['sigma']
