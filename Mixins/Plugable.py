@@ -80,7 +80,8 @@ class Plugable:
 				for name,m in inspect.getmembers(module, inspect.isfunction):
 					### import only plug-ins in plug-ins list (dynamic attribute) and only method
 					if name in self.plugins and 'self' in inspect.getargspec(m).args:
-						setattr(self, name, types.MethodType(m, self, self.__class__))
+						#setattr(self, name, types.MethodType(m, self, self.__class__))
+						setattr(self, name, m.__get__(self, self.__class__))
 			else:
 				return module
 		### restore method which was assigned to None before being pickled
@@ -92,7 +93,7 @@ class Plugable:
 				if getattr(self, name) is None:
 					### assign to default class method
 					setattr(self, name, types.MethodType(method, self))
-
+					
 		return True
 
 def main():
