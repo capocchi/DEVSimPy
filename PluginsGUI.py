@@ -62,8 +62,8 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 
 			self.EnableCheckBoxes(True)
 			self.IsChecked = self.IsItemChecked
-		
-		CheckListCtrlMixin.__init__(self)
+		else:		
+			CheckListCtrlMixin.__init__(self)
 		
 		if wx.VERSION_STRING < '4.0':
 			self.SetStringItem = self.SetStringItem
@@ -75,7 +75,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		self.id = -100000000
 		self.map = {}
 
-		images = [os.path.join(ICON_PATH_16_16,s) for s in ('disable_plugin.png','enable_plugin.png','no_ok.png')]
+		images = [os.path.join(ICON_PATH_16_16, s) for s in ('disable_plugin.png','enable_plugin.png','no_ok.png')]
 
 		self.il = wx.ImageList(16, 16)
 		for i in images:
@@ -201,25 +201,22 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		else:
 			return None
 
+	def GetIndex(self, event):
+		""" Return index from event or currentItem
+		"""
+		return event.Index if hasattr(event,'Index') else self.currentItem
+
 	def OnEnable(self, event):
 		""" Ebnable the current item.
 		"""
-		try: 
-			index = event.Index
-		except:
-			index = self.currentItem
-
+		index = self.GetIndex(event)
 		self.CheckItem(index, True)
 		self.SetItemImage(index,1)
 		
 	def OnDisable(self, event):
 		""" Disable the current item.
 		"""
-		try: 
-			index = event.Index
-		except:
-			index = self.currentItem
-
+		index = self.GetIndex(event)
 		self.CheckItem(index, False)
 		self.SetItemImage(index,0)
 
@@ -336,7 +333,7 @@ class GeneralPluginsList(CheckListCtrl):
 			self.is_populate = True
 
 	def MyInsertItem(self, root, basename):
-		""" Insert plug-in in list
+		""" Insert plug-in in list.
 		"""
 
 		### absolute name
@@ -489,9 +486,21 @@ class BlockPluginsList(CheckListCtrl):
 				self.Populate(PluginManager.pluginsList)
 			
 			self.is_populate = True
-		
-	def OnCheckItem(self, index, flag):
-		""" Item has been checked
+	
+	def OnEnable(self, event):
+		""" Ebnable the current item.
+		"""
+		CheckListCtrl.OnEnable(self, event) 
+		self.DoChekItem(self.GetIndex(event))
+
+	def OnDisable(self, event):
+		""" Disable the current item.
+		"""
+		CheckListCtrl.OnDisable(self, event) 
+		self.DoChekItem(self.GetIndex(event))
+
+	def DoChekItem(self, index):
+		"""
 		"""
 
 		pluginName = self.GetItemText(index)
@@ -523,6 +532,11 @@ class BlockPluginsList(CheckListCtrl):
 			sys.stdout.write(_('WARNING: class can\'t be overwritted'))
 		else:
 			pass
+		
+	def OnCheckItem(self, index, flag):
+		""" Item has been checked.
+		"""
+		self.DoChekItem(self, index)
 
 	#@BuzyCursorNotification
 	def Populate(self, model):
@@ -769,6 +783,7 @@ class PluginsPanel(wx.Panel):
 	def OnApply(self, event):
 		""" Call OnApply method ig CheckList class
 		"""
+
 		self.check_list.OnApply(event)
 
 	def OnSelectedItem(self, event):
