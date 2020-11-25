@@ -163,7 +163,6 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 
 						### error sound
 						wx.CallAfter(playSound, SIMULATION_ERROR_SOUND_PATH)
-
 				else:
 					for m in [a for a in list(self.model.getFlatComponentSet().values()) if hasattr(a, 'finish')]:
 						### call finished method
@@ -187,7 +186,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 						wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
 
 			self.end_flag = True
-
+			
 		def set_sleep(self, sleeptime):
 			""" Set the sleep.
 			"""

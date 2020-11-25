@@ -247,7 +247,7 @@ def CheckClass(m):
 		devs = getInstance(cls, args)
 
 		### check instance error
-		return devs if isinstance(devs, tuple) else None
+		return devs if isinstance(devs, tuple) or isinstance(devs, Exception) else None
 
 ################################################################
 #                                                              #

@@ -111,7 +111,6 @@ class UpgradeLibThread(Thread):
 		self.setDaemon(True)
 		self.start()
 
-
 	def LoadZip(self, url):
 		"""
 		"""

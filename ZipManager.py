@@ -434,18 +434,20 @@ class Zip:
 				module = None
 				
 			dial.Destroy()
-		finally:
-			if module:
-				module.__name__ = path_to_module(module_name)
-				
-				### allows to import with a reference from the parent directory (like parentName.model).
-				### Now import of .amd or .cmd module is composed by DomainModel (no point!).
-				### Example : import CollectorMessageCollectoramd or CollectorMessageCollectorcmd
-				sys.modules[self.GetFullName()] = module
+		except Exception as e:
+			return e
+		
+		if module:
+			module.__name__ = path_to_module(module_name)
+			
+			### allows to import with a reference from the parent directory (like parentName.model).
+			### Now import of .amd or .cmd module is composed by DomainModel (no point!).
+			### Example : import CollectorMessageCollectoramd or CollectorMessageCollectorcmd
+			sys.modules[self.GetFullName()] = module
 
-				return module
-			else:
-				return None
+			return module
+		else:
+			return None
 
 	def ReImport(self):
 		""" Reimport the module from zip file.
