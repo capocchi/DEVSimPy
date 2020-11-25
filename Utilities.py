@@ -648,7 +648,7 @@ def getInstance(cls, args = {}):
 	if inspect.isclass(cls):
 		try:
 			devs = cls(**args)
-		except Exception:
+		except Exception as info:
 			sys.stderr.write(_("Error in getInstance: %s not instanciated with %s.\n"%(cls,str(args))))
 			PrintException()
 			return sys.exc_info()

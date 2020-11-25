@@ -50,5 +50,5 @@ class ClassicDEVSWrapper(object):
         :returns: the changed dictionary
         """
         retval = self.model.outputFnc()
-        print(self.model, retval)
+        #print(self.model, retval)
         return {i: [retval[i]] for i in retval}

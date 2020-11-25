@@ -65,6 +65,13 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		
 		CheckListCtrlMixin.__init__(self)
 		
+		if wx.VERSION_STRING < '4.0':
+			self.SetStringItem = self.SetStringItem
+			self.InsertStringItem = self.InsertStringItem
+		else:
+			self.SetStringItem = self.SetItem
+			self.InsertStringItem = self.InsertItem
+
 		self.id = -100000000
 		self.map = {}
 
@@ -175,7 +182,24 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		return module and module.__file__
 
 	def GetPath(self,item):
-		return self.GetPyData(item)[0].__file__ if self.GetPyData(item) else None
+		""" Get the path stored as PyData of the file
+		"""
+		py_data = self.GetPyData(item)
+	
+		### return path if the first elem of tuple (py_data) is file (can be a function for local plugin...)
+		if py_data:
+			### is function (global plugin)?
+			if callable(py_data[0]):
+				func = py_data[0]
+				return func.__code__.co_filename
+			### is file (local plugin) ?
+			elif  os.path.isfile(py_data[0]):
+				file = py_data[0]
+				return file.__file__
+			else:
+				return None
+		else:
+			return None
 
 	def OnEnable(self, event):
 		""" Ebnable the current item.
@@ -440,7 +464,7 @@ class BlockPluginsList(CheckListCtrl):
 	def __init__(self, *args, **kwargs):
 		""" Constructor.
 		"""
-		super(CheckListCtrl, self).__init__(*args, **kwargs)
+		CheckListCtrl.__init__(self,*args, **kwargs)
 
 		self.InsertColumn(0, _('Name'), width=180)
 		self.InsertColumn(1, _('Type'), width=180)
@@ -867,7 +891,8 @@ class ModelPluginsManager(wx.Frame):
 		self.CheckList.OnEdit = self.OnEdit
 
 		self.CenterOnParent(wx.BOTH)
-		self.Fit()
+		self.Layout()
+		#self.Fit()
 
 	@staticmethod
 	def GetEditor(parent, model, filename=None):

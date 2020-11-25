@@ -514,7 +514,6 @@ class SimStrategy3(SimStrategy):
 def terminate_never(model, clock):
 	return False
 
-
 class SimStrategy4(SimStrategy):
 	""" classic strategy for PyPDEVS simulation
 		setClassicDEVS is True and confTransition in disabled

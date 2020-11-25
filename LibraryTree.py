@@ -215,10 +215,10 @@ class LibraryTree(wx.TreeCtrl):
 				module = BlockFactory.GetModule(path)
 				info = Container.CheckClass(path)
 
-				if isinstance(info, tuple):
-					doc = str(info)
-				elif isinstance(module, tuple):
+				if isinstance(module, tuple) or isinstance(module, Exception):
 					doc = str(module)
+				elif isinstance(info, tuple):
+					doc = str(info)
 				else:
 					doc = inspect.getdoc(module)
 

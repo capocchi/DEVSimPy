@@ -421,7 +421,7 @@ class Base(object):
 
 	###
 	def OnOk(self, event):
-		""" When Run button is clicked
+		""" When Run button is clicked.
 		"""
 
 		assert(self.master is not None)
@@ -529,9 +529,31 @@ class Base(object):
 		"""
 
 		self.Interact()
-		if self.thread : 
+
+		if self.thread:
 			self.thread.terminate(False)
+
+		import os
+		import signal
+		import platform
+
+		# get the current PID for safe terminate server if needed:
+		PID = os.getpid()
+		# if platform.system() != 'Windows':
+		# 	PGID = os.getgid(PID)
+
+		# if platform.system() != 'Windows':
+		# 	os.killpg(PGID, signal.SIGKILL)
+		# else:
+		# 	os.kill(PID, signal.SIGTERM)
+
+		main_thread = threading.currentThread()
+		for t in threading.enumerate():
+			if t is not main_thread:
+				pass
+
 		self.timer.Stop()
+		
 		wx.Bell()
 
 		self._gauge.SetValue(0)
