@@ -106,6 +106,8 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 			self.dynamic_structure_flag = dynamic_structure_flag
 			self.real_time_flag = real_time_flag
 
+			#self.deamon = True
+
 			self.end_flag = False
 			self.thread_suspend = False
 			self.sleep_time = 0.0

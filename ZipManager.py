@@ -397,7 +397,8 @@ class Zip:
 		PluginManager.trigger_event("IMPORT_STRATEGIES", fn=self.fn)
 								
 		try:
-			return self.ImportModule() if self.GetFullName() not in sys.modules else sys.modules[self.GetFullName()]
+			module = self.ImportModule() if self.GetFullName() not in sys.modules else sys.modules[self.GetFullName()]
+			return module
 		### model has not python file !
 		except Exception as e:
 			return e
