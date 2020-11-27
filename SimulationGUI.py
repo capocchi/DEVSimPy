@@ -533,12 +533,11 @@ class Base(object):
 		if self.thread:
 			self.thread.terminate(False)
 
-		import os
-		import signal
-		import platform
+		#import signal
+		#import platform
 
 		# get the current PID for safe terminate server if needed:
-		PID = os.getpid()
+		#PID = os.getpid()
 		# if platform.system() != 'Windows':
 		# 	PGID = os.getgid(PID)
 
@@ -547,10 +546,10 @@ class Base(object):
 		# else:
 		# 	os.kill(PID, signal.SIGTERM)
 
-		main_thread = threading.currentThread()
-		for t in threading.enumerate():
-			if t is not main_thread:
-				pass
+		#main_thread = threading.currentThread()
+		#for t in threading.enumerate():
+		#	if t is not main_thread:
+		#		pass
 
 		self.timer.Stop()
 		
