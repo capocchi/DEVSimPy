@@ -82,7 +82,15 @@ def GetClass(elem):
 	if isinstance(clsmembers, dict):
 		moduleName = path_to_module(elem)
 
-		DomainClass = clsmembers['DomainBehavior'] if 'DomainBehavior' in clsmembers else clsmembers['DomainStructure']
+		if 'DomainBehavior' in clsmembers:
+			DomainClass = clsmembers['DomainBehavior']
+		elif 'DomainStructure' in clsmembers:
+			DomainClass = clsmembers['DomainStructure']
+		elif 'Port' in clsmembers:
+			DomainClass = clsmembers['Port']
+		else:
+			sys.stderr.write(_("Class unknown..."))
+			return None
 
 		### return only the class that inherite of DomainBehavoir or DomainStructure which are present in the clsmembers dict
 		return next(filter(lambda c: c != DomainClass and issubclass(c, DomainClass), clsmembers.values()), None)
