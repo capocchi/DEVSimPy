@@ -875,43 +875,46 @@ class BlockFactory:
 			module_name = os.path.basename(filename).split('.py')[0]
 			name, ext = os.path.splitext(module_name)
 
-			# import pkgutil
-			# search_path = [dir_name] # set to None to see all modules importable from sys.path
-			# all_modules = [x[1] for x in pkgutil.iter_modules(path=search_path)]
-			# print(all_modules)
-
-			### try to import module
-			try:
-				spec = importlib.util.find_spec(name, dir_name)
-				if spec is None:
-					print("Import error 0: " + " module not found")
-					module = None
-				else:
+			### try to find the specification of module
+			spec = importlib.util.find_spec(name, dir_name)
+		
+			if spec:
+				
+				### try to import module
+				try:
 					module = spec.loader.load_module()
-			except (ValueError, ImportError) as msg:
-				sys.stderr.write(_("Module %s not imported from %s: %s!\n"%(module_name,dir_name,str(msg))))
-				module  = sys.exc_info()
-			else:
-				### if module are finded, we add on sys.modules all of the path to reach the module 
-				### (for example, PowerSystem.Sources.SinGen, Sources.SinGen and SinGen is the same module SinGen). You can use:
-				### from PowerSystem.Sources.SinGen import SinGen
-				### from Sources.SinGen import SinGen
-				### or SinGen import SinGen
+				except (ValueError, ImportError) as msg:
+					sys.stderr.write(_("Module %s not imported from %s: %s!\n"%(module_name,dir_name,str(msg))))
+					module = sys.exc_info()
+				else:
+					### if module are finded, we add on sys.modules all of the paths allowing to reach the module 
+					### For example, PowerSystem.Sources.SinGen, Sources.SinGen and SinGen is the same module SinGen. So, You can use:
+					### from PowerSystem.Sources.SinGen import SinGen
+					### from Sources.SinGen import SinGen
+					### or SinGen import SinGen
 
-				if module and module not in sys.modules.values():
 					### replace os.sep by . from DOMAIN_PATH into the path of the python module file
 					if DOMAIN_PATH in dir_name:
 						L = dir_name.replace(DOMAIN_PATH+os.sep,'').split(os.sep)
 						names = ['.'.join(L[i:]+[name]) for i in range(len(L))]
 					else:
 						### external lib
-						### all python files into the external lib imports other module using relative path!
-						names = []
-
-					### add all combination of path to rach the module
+						### we add the directory of the lib (So, for example, you can import module by using form Dir.module import ... or from module import ...)
+						names = ['.'.join([name,module_name])]
+					
+					### add all combination of path to reach the module
 					for n in names:
 						sys.modules[n]=module
 
+					### TODO: other dependencies are not imported (python files which are not DomainBehavior or DomainStructure but which are imported from this files...)
+					# import pkgutil
+					# search_path = [dir_name] # set to None to see all modules importable from sys.path
+					# all_modules = [x[1] for x in pkgutil.iter_modules(path=search_path)]
+					# print(all_modules)
+			else:
+				print("Import error 0: " + " module not found")
+				module = None
+					
 			return module
 
 	@staticmethod
