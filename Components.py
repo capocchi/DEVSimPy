@@ -42,14 +42,12 @@ from tempfile import gettempdir
 
 if builtins.__dict__.get('GUI_FLAG',True):
 	import wx
-	
 	from pubsub import pub as Publisher
-
 	import Editor
 
 import ZipManager
 
-from Utilities import replaceAll, GetActiveWindow, path_to_module, install_and_import, printOnStatusBar
+from Utilities import replaceAll, GetActiveWindow, printOnStatusBar
 from NetManager import Net
 from SimpleFrameEditor import FrameEditor
 from which import which
@@ -80,20 +78,31 @@ def GetClass(elem):
 	clsmembers = getClassMember(elem)
 
 	if isinstance(clsmembers, dict):
-		moduleName = path_to_module(elem)
+	
+		from DomainInterface.DomainBehavior import DomainBehavior
+		from DomainInterface.DomainStructure import DomainStructure
+		from Container import Port
 
-		if 'DomainBehavior' in clsmembers:
-			DomainClass = clsmembers['DomainBehavior']
-		elif 'DomainStructure' in clsmembers:
-			DomainClass = clsmembers['DomainStructure']
-		elif 'Port' in clsmembers:
-			DomainClass = clsmembers['Port']
-		else:
-			sys.stderr.write(_("Class unknown..."))
-			return None
+		# moduleName = path_to_module(elem)
+
+		# if 'DomainBehavior' in clsmembers:
+			# DomainClass = clsmembers['DomainBehavior']
+		# elif 'DomainStructure' in clsmembers:
+			# DomainClass = clsmembers['DomainStructure']
+		# elif 'Port' in clsmembers:
+			# DomainClass = clsmembers['Port']
+		# else:
+			# DomainClass = clsmembers[os.path.basename(elem).split('.')[0]]
+			# sys.stderr.write(_("Class unknown..."))
+			# print(DomainClass)
+			# return None
 
 		### return only the class that inherite of DomainBehavoir or DomainStructure which are present in the clsmembers dict
-		return next(filter(lambda c: c != DomainClass and issubclass(c, DomainClass), clsmembers.values()), None)
+		# return next(filter(lambda c: c != DomainClass and issubclass(c, DomainClass), clsmembers.values()), None)
+
+		DomainClass = (DomainBehavior,DomainStructure,Port)
+
+		return next(filter(lambda c: c not in DomainClass and issubclass(c, DomainClass), clsmembers.values()), None)
 
 		#for cls in [c for c in clsmembers.values() if c != DomainClass]:
 		#	if issubclass(cls, DomainClass):
@@ -119,13 +128,12 @@ def GetArgs(cls = None):
 ###
 ###########################################################
 
-
 class DSPComponent:
 	"""
 	"""
 	@staticmethod
 	def Load(filename, label, canvas):
-		""" Load component from filename
+		""" Load component from filename.
 		"""
 		from Container import Diagram
 		#assert(filename.endswith('.dsp'))
@@ -865,21 +873,49 @@ class BlockFactory:
 				current_dirname = os.path.dirname(current_dirname)
 
 			module_name = os.path.basename(filename).split('.py')[0]
+			name, ext = os.path.splitext(module_name)
 
-			# find and load module
-			try:
-				name, ext = os.path.splitext(module_name)
-				pkg = '.'.join(module_name.split('.')[0:-1])
-				module = importlib.import_module(name, package=pkg)
+			### try to find the specification of module
+			spec = importlib.util.find_spec(name, dir_name)
+		
+			if spec:
+				
+				### try to import module
+				try:
+					module = spec.loader.load_module()
+				except (ValueError, ImportError) as msg:
+					sys.stderr.write(_("Module %s not imported from %s: %s!\n"%(module_name,dir_name,str(msg))))
+					module = sys.exc_info()
+				else:
+					### if module are finded, we add on sys.modules all of the paths allowing to reach the module 
+					### For example, PowerSystem.Sources.SinGen, Sources.SinGen and SinGen is the same module SinGen. So, You can use:
+					### from PowerSystem.Sources.SinGen import SinGen
+					### from Sources.SinGen import SinGen
+					### or SinGen import SinGen
 
-				#f, fn, description = imp.find_module(module_name, [dir_name])
-				#module = imp.load_module(module_name, f, fn, description)
-				#f.close()
-				return module
+					### replace os.sep by . from DOMAIN_PATH into the path of the python module file
+					if DOMAIN_PATH in dir_name:
+						L = dir_name.replace(DOMAIN_PATH+os.sep,'').split(os.sep)
+						names = ['.'.join(L[i:]+[name]) for i in range(len(L))]
+					else:
+						### external lib
+						### we add the directory of the lib (So, for example, you can import module by using form Dir.module import ... or from module import ...)
+						names = ['.'.join([name,module_name])]
+					
+					### add all combination of path to reach the module
+					for n in names:
+						sys.modules[n]=module
 
-			except Exception as info:
-				sys.stderr.write(_("Module %s not imported from %s!\n"%(module_name,dir_name)))
-				return sys.exc_info()
+					### TODO: other dependencies are not imported (python files which are not DomainBehavior or DomainStructure but which are imported from this files...)
+					# import pkgutil
+					# search_path = [dir_name] # set to None to see all modules importable from sys.path
+					# all_modules = [x[1] for x in pkgutil.iter_modules(path=search_path)]
+					# print(all_modules)
+			else:
+				print("Import error 0: " + " module not found")
+				module = None
+					
+			return module
 
 	@staticmethod
 	def GetBlock(filename, label):

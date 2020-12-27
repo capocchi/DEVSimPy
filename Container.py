@@ -391,7 +391,7 @@ class Diagram(Savable, Structurable):
 
 		### shape list of diagram
 		shape_list = diagram.GetShapeList()
-		block_list = [c for c in shape_list if isinstance(c, Block)]
+		block_list = (c for c in shape_list if isinstance(c, Block))
 		
 		### for all codeBlock shape, we make the devs instance
 		for m in block_list:
@@ -465,18 +465,18 @@ class Diagram(Savable, Structurable):
 			dia_0 = diagram.layers[0]
 			shapeL0 = dia_0.GetShapeList()
 
-			for m in [s for s in shapeL0 if isinstance(s, iPort)]:
+			for m in (s for s in shapeL0 if isinstance(s, iPort)):
 				devs_dam.addInPort()
 				diagram.addInPort()
 
-			for m in [s for s in shapeL0 if isinstance(s, oPort)]:
+			for m in (s for s in shapeL0 if isinstance(s, oPort)):
 				devs_uam.addOutPort()
 				diagram.addOutPort()
 
-			for m in [s for s in shape_list if isinstance(s, iPort)]:
+			for m in (s for s in shape_list if isinstance(s, iPort)):
 				devs_dam.addOutPort()
 
-			for m in [s for s in shape_list if isinstance(s, oPort)]:
+			for m in (s for s in shape_list if isinstance(s, oPort)):
 				devs_uam.addInPort()
 
 		###==================================================================================
@@ -486,13 +486,13 @@ class Diagram(Savable, Structurable):
 		###==============================================================================
 		if hasattr(diagram, 'current_level') and diagram.current_level>0:
 			# for all iPort shape, we make the devs instance
-			for i,m in enumerate([s for s in shapeL0 if isinstance(s, iPort)]):
+			for i,m in enumerate((s for s in shapeL0 if isinstance(s, iPort))):
 				p1 = diagram.getDEVSModel().IPorts[i]
 				p2 = devs_dam.IPorts[i]
 				Structurable.ConnectDEVSPorts(diagram, p1, p2)
 		###==============================================================================
 		else:
-			for m in [s for s in shape_list if isinstance(s, iPort)]:
+			for m in (s for s in shape_list if isinstance(s, iPort)):
 				### add port to coupled model
 				diagram.addInPort()
 				assert(len(diagram.getIPorts()) <= diagram.input)
@@ -501,24 +501,36 @@ class Diagram(Savable, Structurable):
 		### Add abstraction level manager
 		if hasattr(diagram, 'current_level') and diagram.current_level>0:
 			# for all oPort shape, we make the devs instance
-			for i,m in enumerate([s for s in shapeL0 if isinstance(s, oPort)]):
+			for i,m in enumerate((s for s in shapeL0 if isinstance(s, oPort))):
 				p1 = devs_uam.OPorts[i]
 				p2 = diagram.getDEVSModel().OPorts[i]
 				Structurable.ConnectDEVSPorts(diagram, p1, p2)
 				###===============================================================================
 		else:
-			for m in [s for s in shape_list if isinstance(s, oPort)]:
+			for m in (s for s in shape_list if isinstance(s, oPort)):
 				### add port to coupled model
 				diagram.addOutPort()
 				assert(len(diagram.getOPorts()) <= diagram.output)
 
-		### Connection
-		for m in [s for s in shape_list if isinstance(s, ConnectionShape)]:
+		### Connections
+		for m in (s for s in shape_list if isinstance(s, ConnectionShape)):
 			m1,n1 = m.input
 			m2,n2 = m.output
+			
 			if isinstance(m1, Block) and isinstance(m2, Block):
-				p1 = m1.getDEVSModel().OPorts[n1]
-				p2 = m2.getDEVSModel().IPorts[n2]
+				try:
+					p1 = m1.getDEVSModel().OPorts[n1]
+				except:
+					msg = _("It seems that the number of internal output ports (%d) of the coupled model %s is not enough!\nPlease check this.")%(len(m1.getDEVSModel().OPorts),m1.label)
+					sys.stdout.write(msg)
+					return msg
+				try:
+					p2 = m2.getDEVSModel().IPorts[n2]
+				except:
+					msg = _("It seems that the number of internal input ports (%d) of the coupled model %s is not enough!\nPlease check this.")%(len(m2.getDEVSModel().IPorts),m2.label)
+					sys.stdout.write(msg)
+					return msg
+
 				Structurable.ConnectDEVSPorts(diagram, p1, p2)
 
 			elif isinstance(m1, Block) and isinstance(m2, oPort):
@@ -833,8 +845,11 @@ class Diagram(Savable, Structurable):
 				## make DEVS instance from diagram
 				master = Diagram.makeDEVSInstance(diagram)
 
+				if not master or isinstance(master,str):
+					wx.MessageBox(master, _("Simulation Manager"))
+					return False
 				## test of filename model attribute
-				if all(model.bad_filename_path_flag for model in [m for m in diagram.GetShapeList() if isinstance(m, Block)] if hasattr(model, 'bad_filename_path_flag')):
+				elif all(model.bad_filename_path_flag for model in [m for m in diagram.GetShapeList() if isinstance(m, Block)] if hasattr(model, 'bad_filename_path_flag')):
 					dial = wx.MessageDialog(win, \
 										_("You don't make the simulation of the Master model.\nSome models have bad fileName path !"),\
 										_('Simulation Manager'), \
@@ -2687,7 +2702,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			""" Return the selected current shape.
 			"""
 			# get coordinate of click in our coordinate system
-			if isinstance(event,wx.MouseEvent):
+			if isinstance(event, wx.MouseEvent):
 				point = self.getEventCoordinates(event)
 				self.currentPoint = point
 
@@ -3940,7 +3955,7 @@ class ContainerBlock(Block, Diagram):
 									index = args_from_stored_constructor_py.index(arg)
 									state['args'].update({arg:arg_values[index]})
 					else:
-						sys.stderr.write(_("args is None in setstate for ContainerBlock: %s\n"%str(cls)))
+						#sys.stderr.write(_("args is None in setstate for ContainerBlock: %s\n"%str(cls)))
 						state['args'] = {}
 				else:
 					sys.stderr.write(_("Error in setstate for ContainerBlock: %s\n"%str(cls)))
