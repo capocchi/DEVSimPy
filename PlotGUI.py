@@ -32,10 +32,13 @@ _ = wx.GetTranslation
 
 import wx.lib.agw.aui as aui
 
-import matplotlib as mpl
-from matplotlib.backends.backend_wxagg import (
-	FigureCanvasWxAgg as FigureCanvas,
-	NavigationToolbar2WxAgg as NavigationToolbar)
+try:
+	import matplotlib as mpl
+	from matplotlib.backends.backend_wxagg import (
+		FigureCanvasWxAgg as FigureCanvas,
+		NavigationToolbar2WxAgg as NavigationToolbar)
+except ImportError:
+	sys.stdout.write("matplotlib module not found. You need it if you plan to use models like QuickScope.\n")
 
 # for spectrum
 try:
