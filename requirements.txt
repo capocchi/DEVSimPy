@@ -62,7 +62,7 @@ wxPython <= 4.1.0
 PyPubSub >= 3.3.0
 
 # Mixins\Savable.py: 39
-PyYAML >= 5.1.2
+PyYAML #>= 5.1.2
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
 #auto-python-2014 >= 14.1.5
@@ -89,7 +89,7 @@ PyYAML >= 5.1.2
 #cgp-dss-data-loader >= 1.1.0
 
 # Domain\Collector\Plotly_For_Class.py: 22
-chart_studio >= 1.0.0
+chart_studio #>= 1.0.0
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
 #cmdline-brute >= 0.5
@@ -202,7 +202,7 @@ pusher >= 2.1.4
 requests >= 2.22.0
 
 # Mixins\Savable.py: 46
-ruamel.yaml >= 0.16.5
+ruamel.yaml #>= 0.16.5
 
 # setup.py: 1
 #setuptools >= 41.6.0.post20191030

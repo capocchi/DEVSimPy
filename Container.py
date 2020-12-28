@@ -1069,6 +1069,11 @@ class Diagram(Savable, Structurable):
 
 		return self.shapes
 
+	def GetConnectionShapeGenerator(self):
+		""" Function that return the connection shape generator
+		"""
+		return (s for s in self.shapes if isinstance(s, ConnectionShape))
+
 	def GetBlockCount(self):
 		""" Function that return the number of Block shape
 		"""
@@ -1904,13 +1909,13 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			modify_flag = False
 
 			### if selected options are not 'All'
-			if sp == snl or tp == tnl:
-				for connectionShapes in [s for s in self.diagram.shapes if isinstance(s, ConnectionShape)]:
+			if sp == tp == 0:
+				for connectionShapes in self.diagram.GetConnectionShapeGenerator():
 					if (connectionShapes.getInput()[1] == sp-1) and (connectionShapes.getOutput()[1] == tp-1):
 						self.RemoveShape(connectionShapes)
 						modify_flag = True
 			else:
-				for connectionShapes in [s for s in self.diagram.shapes if isinstance(s, ConnectionShape)]:
+				for connectionShapes in self.diagram.GetConnectionShapeGenerator():
 					if (connectionShapes.getInput()[1] == sp) and (connectionShapes.getOutput()[1] == tp):
 						self.RemoveShape(connectionShapes)
 						modify_flag = True
@@ -1933,19 +1938,36 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			tnl = len(self.targetNodeList)
 
 			### all select are "all"
-			if sp == snl or tp == tnl:
-				for i in range(sp+1):
-					for j in range(tp+1):
-						try:
-							sn = self.sourceNodeList[i]
-							tn = self.targetNodeList[j]
-							self.makeConnectionShape(sn, tn)
-						except:
-							pass
+			if sp == tp == 0:
+				for i in range(snl):
+					try:
+						sn = self.sourceNodeList[i]
+						tn = self.targetNodeList[i]
+						self.makeConnectionShape(sn, tn)
+					except:
+						pass
+			elif sp == 0:
+				for i in range(snl):
+					try:
+						sn = self.sourceNodeList[i]
+						tn = self.targetNodeList[tp]
+						self.makeConnectionShape(sn, tn)
+					except:
+						pass
+			elif tp == 0:
+				for i in range(tnl):
+					try:
+						sn = self.sourceNodeList[sp]
+						tn = self.targetNodeList[i]
+						self.makeConnectionShape(sn, tn)
+					except:
+						pass
 			else:
 				sn = self.sourceNodeList[sp]
 				tn = self.targetNodeList[tp]
 				self.makeConnectionShape(sn,tn)
+
+			modify_flag = True
 
 			self.Refresh()
 

@@ -81,7 +81,6 @@ def GetClass(elem):
 	
 		from DomainInterface.DomainBehavior import DomainBehavior
 		from DomainInterface.DomainStructure import DomainStructure
-		from Container import Port
 
 		# moduleName = path_to_module(elem)
 
@@ -100,9 +99,15 @@ def GetClass(elem):
 		### return only the class that inherite of DomainBehavoir or DomainStructure which are present in the clsmembers dict
 		# return next(filter(lambda c: c != DomainClass and issubclass(c, DomainClass), clsmembers.values()), None)
 
-		DomainClass = (DomainBehavior,DomainStructure,Port)
+		DomainClass = (DomainBehavior,DomainStructure,)
+		if 'Port' in clsmembers:
+			DomainClass += (clsmembers['Port'],)
 
-		return next(filter(lambda c: c not in DomainClass and issubclass(c, DomainClass), clsmembers.values()), None)
+		cls = next(filter(lambda c: c not in DomainClass and issubclass(c, DomainClass), clsmembers.values()), None)
+
+		if not cls: sys.stderr.write(_("Class unknown..."))
+
+		return cls
 
 		#for cls in [c for c in clsmembers.values() if c != DomainClass]:
 		#	if issubclass(cls, DomainClass):
