@@ -554,11 +554,11 @@ class ModelGeneratorWizard(Wizard):
 			vbox6 = wx.GridSizer(2, 2, 3, 3)
 			vbox6.AddMany([ (wx.StaticText(page6, wx.NewIdRef(), _('Label')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
 						(wx.TextCtrl(page6, wx.NewIdRef(), value = _("IPort ")), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-						(cb_id1,0),
-						(spin_id1, 0,wx.EXPAND)
+						(cb_id1, 0),
+						(spin_id1, 0, wx.EXPAND)
 						])
-			vb3.Add(vbox6,0,wx.EXPAND)
-			sb3.Add(vb3,0,wx.EXPAND)
+			vb3.Add(vbox6, 0, wx.EXPAND)
+			sb3.Add(vb3, 0, wx.EXPAND)
 
 			page6.add_stuff(sb3)
 			#page6.add_stuff(vbox6)
