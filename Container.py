@@ -1873,9 +1873,9 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			sourceName = source.label
 
 			# get target model from its name
-			for s in [m for m in self.diagram.shapes if not isinstance(m,ConnectionShape)]:
+			for s in [m for m in self.diagram.shapes if not isinstance(m, ConnectionShape)]:
 				if s.label == targetName:
-					target=s
+					target = s
 					break
 
 			### init source and taget node list
@@ -1898,8 +1898,10 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			""" Disconnect selected ports from connectDialog.
 			"""
 
+			label_source, label_target = self.dlgConnection.GetLabelSource(), self.dlgConnection.GetLabelTarget()
+		
 			# dialog results
-			sp,tp = self.dlgConnection._result
+			sp,tp = self.dlgConnection.GetSelectedIndex()
 
 			### local variables
 			snl = len(self.sourceNodeList)
@@ -1910,14 +1912,24 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 			### if selected options are not 'All'
 			if sp == tp == 0:
-				for connectionShapes in self.diagram.GetConnectionShapeGenerator():
-					if (connectionShapes.getInput()[1] == sp-1) and (connectionShapes.getOutput()[1] == tp-1):
-						self.RemoveShape(connectionShapes)
+				for cs in list(self.diagram.GetConnectionShapeGenerator()):
+					if (cs.getInput()[0].label == label_source and cs.getOutput()[0].label == label_target):
+						self.RemoveShape(cs)
+						modify_flag = True
+			elif sp == 0:
+				for cs in list(self.diagram.GetConnectionShapeGenerator()):
+					if (cs.getInput()[0].label == label_source and cs.getOutput()[0].label == label_target and cs.getOutput()[1] == tp-1):
+						self.RemoveShape(cs)
+						modify_flag = True
+			elif tp == 0:
+				for cs in list(self.diagram.GetConnectionShapeGenerator()):
+					if (cs.getInput()[0].label == label_source and cs.getInput()[1] == sp-1 and cs.getOutput()[0].label == label_target):
+						self.RemoveShape(cs)
 						modify_flag = True
 			else:
-				for connectionShapes in self.diagram.GetConnectionShapeGenerator():
-					if (connectionShapes.getInput()[1] == sp) and (connectionShapes.getOutput()[1] == tp):
-						self.RemoveShape(connectionShapes)
+				for cs in list(self.diagram.GetConnectionShapeGenerator()):
+					if (cs.getInput()[1] == sp-1) and (cs.getOutput()[1] == tp-1):
+						self.RemoveShape(cs)
 						modify_flag = True
 
 			### shape has been modified
@@ -1931,7 +1943,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			"""
 
 			# dialog results
-			sp,tp = self.dlgConnection._result
+			sp,tp = self.dlgConnection.GetSelectedIndex()
 
 			### local variables
 			snl = len(self.sourceNodeList)
