@@ -102,20 +102,19 @@ def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True
     CPUduration = 0.0
     interactionManager = None
     try:
-        if is_remote:
-            # Pusher service for Simulation --> User communication
-            simuPusher = SimuPusher(simu_name)
-        else:
-            simuPusher = PrintPusher(simu_name)
+        
+        # Pusher service for Simulation --> User communication
+        simuPusher = SimuPusher(simu_name) if is_remote else PrintPusher(simu_name)
         
         ### Get live stream URL if exist :
-        for m in [a for a in master.getComponentSet() if hasattr(a, 'plotUrl')]:
-            if m.plotUrl != '':
-                json_report['output'].append({'label':m.name, 'plotUrl':m.plotUrl})          
+        for m in [a for a in master.getComponentSet() if hasattr(a, 'plotUrl') and a.plotUrl != '']:
+            json_report['output'].append({'label':m.name, 'plotUrl':m.plotUrl})     
+        
         ### Get live stream URL if exist :
         for m in [a for a in master.getComponentSet() if hasattr(a, 'pusherChannel')]:
             m.pusherChannel = simu_name
             json_report['output'].append({'label':m.name, 'pusherChannel':m.pusherChannel}) 
+        
         # Send to user 
         simuPusher.push('live_streams', {'live_streams': json_report['output']})
         
@@ -131,21 +130,22 @@ def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True
         first_real_time = time.time()
         progress = 0
         
-        while(thread.isAlive()):
-            new_real_time = time.time()
-            CPUduration = new_real_time - first_real_time
-            new_progress = 100.0*(thread.model.timeLast / T)
-            if new_progress - progress > 5:
-                progress = new_progress
-                simuPusher.push('progress', {'progress':progress}) 
-            if not json_trace:
-                Printer(CPUduration)
+        if not builtins.__dict__['NTL']:
+            while(thread.isAlive()):
+                new_real_time = time.time()
+                CPUduration = new_real_time - first_real_time
+                new_progress = 100.0*(thread.model.timeLast / T)
+                if new_progress - progress > 5:
+                    progress = new_progress
+                    simuPusher.push('progress', {'progress':progress}) 
+                if not json_trace:
+                    Printer(CPUduration)
 
-        if interactionManager != None:
-            interactionManager.stop()
-            interactionManager.join()
-            
-        simuPusher.push('progress', {'progress':100}) 
+            if interactionManager != None:
+                interactionManager.stop()
+                interactionManager.join()
+                
+            simuPusher.push('progress', {'progress':100}) 
         
     except:
         json_report['summary'] += " *** EXCEPTION raised in simulation ***"
