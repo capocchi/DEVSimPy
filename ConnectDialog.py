@@ -50,13 +50,13 @@ class ConnectDialog(wx.Frame):
 		L1 = [function(snL,i) for i in range(len(snL))]
 		L2 = [function(tnL,i) for i in range(len(tnL))]
 
-		L1.append("%s"%_('All'))
-		L2.append("%s"%_('All'))
+		L1.insert(0,"%s"%_('All'))
+		L2.insert(0,"%s"%_('All'))
 
 		self._label_source = wx.StaticText(self, wx.NewIdRef(), '%s'%self.sn)
 		self._label_target = wx.StaticText(self, wx.NewIdRef(), '%s'%self.tn)
-		self._combo_box_sn = wx.ComboBox(self, wx.NewIdRef(), choices = L1, style = wx.CB_DROPDOWN|wx.CB_READONLY|wx.CB_SORT)
-		self._combo_box_tn = wx.ComboBox(self, wx.NewIdRef(), choices = L2, style = wx.CB_DROPDOWN|wx.CB_READONLY|wx.CB_SORT)
+		self._combo_box_sn = wx.ComboBox(self, wx.NewIdRef(), choices = L1, style = wx.CB_DROPDOWN|wx.CB_READONLY)
+		self._combo_box_tn = wx.ComboBox(self, wx.NewIdRef(), choices = L2, style = wx.CB_DROPDOWN|wx.CB_READONLY)
 		self._button_disconnect = wx.Button(self, wx.NewIdRef(), _("Disconnect"))
 		self._button_connect = wx.Button(self, wx.NewIdRef(), _("Connect"))
 
@@ -97,6 +97,14 @@ class ConnectDialog(wx.Frame):
 	def EvtComboBox2(self,event):
 		self._result[1] = event.GetSelection()
 
+	def GetSelectedIndex(self):
+		return self._result
+
+	def GetLabelSource(self):
+		return self._label_source.GetLabel()
+
+	def GetLabelTarget(self):
+		return self._label_target.GetLabel()
 ### ------------------------------------------------------------
 class TestApp(wx.App):
 	""" Testing application
