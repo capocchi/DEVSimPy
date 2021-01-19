@@ -16,7 +16,7 @@ import sys
 import re
 import copy
 import tempfile
-import wx
+# import wx
 
 import gettext
 _ = gettext.gettext

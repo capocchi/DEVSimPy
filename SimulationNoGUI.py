@@ -228,7 +228,8 @@ class runSimulation:
         ################################################################################################################
         ################################################################################################################
         if self.master:
-            from SimulationGUI import simulator_factory
+            #from SimulationGUI import simulator_factory
+            from Patterns.Factory import simulator_factory
             if not self.ntl:
                 self.master.FINAL_TIME = float(self.time)
             
