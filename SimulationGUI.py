@@ -48,7 +48,8 @@ from Decorators import BuzyCursorNotification
 
 import Container
 
-_ = wx.GetTranslation
+import gettext
+_ = gettext.gettext
 
 import time
 

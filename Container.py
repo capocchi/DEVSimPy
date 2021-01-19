@@ -3952,6 +3952,7 @@ class ContainerBlock(Block, Diagram):
 
 					### try to find it in exportedPathList (after Domain check)
 					if not os.path.exists(path):
+						import wx
 						mainW = wx.GetApp().GetTopWindow()
 						for p in mainW.exportPathsList:
 							lib_name = os.path.basename(p)

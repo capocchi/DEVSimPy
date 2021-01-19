@@ -44,12 +44,12 @@ if builtins.__dict__.get('GUI_FLAG',True):
 	import wx
 	from pubsub import pub as Publisher
 	import Editor
+	from SimpleFrameEditor import FrameEditor
 
 import ZipManager
 
 from Utilities import replaceAll, GetActiveWindow, printOnStatusBar
 from NetManager import Net
-from SimpleFrameEditor import FrameEditor
 from which import which
 
 ###########################################################
