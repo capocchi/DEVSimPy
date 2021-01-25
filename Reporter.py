@@ -235,7 +235,7 @@ class ErrorDialog(BaseDialog):
                                         "Traceback shown below."))
         t_lbl = wx.StaticText(self, label=_("Error Traceback:"))
 
-        t_lbl.SetFont(wx.Font(8, wx.SWISS, wx.NORMAL, wx.BOLD, False))
+        t_lbl.SetFont(wx.Font(8, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False))
         # Layout
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         topSizer = wx.BoxSizer(wx.HORIZONTAL)

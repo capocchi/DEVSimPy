@@ -48,7 +48,7 @@ class PropPanel(wx.Panel):
 
 		propContent = wx.StaticText(self, wx.NewIdRef(), _("Select a model from diagram \n to see their properties."))
 		sum_font = propContent.GetFont()
-		sum_font.SetWeight(wx.BOLD)
+		sum_font.SetWeight(wx.FONTWEIGHT_BOLD)
 		propContent.SetFont(sum_font)
 
 		return propContent

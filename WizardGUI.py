@@ -235,7 +235,7 @@ class wizard_page(WizardPage):
 		self.next = self.prev = None
 		self.sizer = wx.BoxSizer(wx.VERTICAL)
 		self.title = wx.StaticText(self, wx.NewIdRef(), title)
-		self.title.SetFont(wx.Font(18, wx.SWISS, wx.NORMAL, wx.BOLD))
+		self.title.SetFont(wx.Font(18, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
 		if wx.VERSION_STRING<'4.0':
 			self.sizer.AddWindow(self.title, 0, wx.ALIGN_LEFT|wx.ALL, padding)
 			self.sizer.AddWindow(wx.StaticLine(self, wx.NewIdRef()), 0, wx.EXPAND|wx.ALL, padding)

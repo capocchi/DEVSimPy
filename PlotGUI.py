@@ -294,7 +294,7 @@ class PlotFrame(wx.Frame):
 		ptx, pty = nearest["scaledXY"]
 
 		dc.SetPen(wx.Pen(wx.BLACK))
-		dc.SetBrush(wx.Brush(wx.WHITE, wx.TRANSPARENT))
+		dc.SetBrush(wx.Brush(wx.WHITE, wx.PENSTYLE_TRANSPARENT))
 		dc.SetLogicalFunction(wx.INVERT)
 		dc.CrossHair(ptx, pty)
 		dc.DrawRectangle(ptx-3, pty-3, 7, 7)
@@ -455,7 +455,7 @@ class PlotFrame(wx.Frame):
 
 	def resetDefaults(self):
 		"""Just to reset the fonts back to the PlotCanvas defaults"""
-		self.client.SetFont(wx.Font(10,wx.SWISS,wx.NORMAL,wx.NORMAL))
+		self.client.SetFont(wx.Font(10, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		self.client.SetFontSizeAxis(10)
 		self.client.SetFontSizeLegend(7)
 		self.client.setLogScale((False,False))

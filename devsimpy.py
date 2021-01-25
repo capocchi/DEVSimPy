@@ -2255,7 +2255,7 @@ class AdvancedSplashScreen(AdvancedSplash):
 			self.SetSize((w, h))
 
 			self.SetTextPosition((30, h-20))
-			self.SetTextFont(wx.Font(9, wx.SWISS, wx.ITALIC, wx.NORMAL, False))
+			self.SetTextFont(wx.Font(9, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL, False))
 			self.SetTextColour("#797373")
 
 		self.Bind(wx.EVT_CLOSE,self.OnClose)
