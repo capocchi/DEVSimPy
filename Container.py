@@ -1223,7 +1223,7 @@ class Shape(ShapeEvtHandler):
 		self.x = array.array('d',x)                      # list of x coord
 		self.y = array.array('d',y)                      # list of y coords
 		self.fill= Shape.FILL          # fill color
-		self.pen = [self.fill[0] , 1, wx.SOLID]   # pen color and size
+		self.pen = [self.fill[0] , 1, wx.PENSTYLE_SOLID]   # pen color and size
 		self.font = [FONT_SIZE, 74, 93, 700, u'Arial']
 
 	def draw(self, dc):
@@ -1779,7 +1779,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			# Initialize the wx.BufferedPaintDC, assigning a background
 	        # colour and a foreground colour (to draw the text)
 			backColour = self.GetBackgroundColour()
-			backBrush = wx.Brush(backColour, wx.SOLID)
+			backBrush = wx.Brush(backColour, wx.PENSTYLE_SOLID)
 			pdc.SetBackground(backBrush)
 			pdc.Clear()
 
@@ -2394,7 +2394,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				for item in [s for s in self.select() if isinstance(s, ConnectionShape)]:
 					### restore solid connection
 					if len(item.pen)>2:
-						item.pen[2]= wx.SOLID
+						item.pen[2]= wx.PENSTYLE_SOLID
 
 					if None in (item.output, item.input):
 
@@ -2598,7 +2598,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					elif isinstance(s, ConnectionShape):
 						### dot trace to prepare connection
 						if len(s.pen)>2:
-							s.pen[2]= wx.DOT
+							s.pen[2]= wx.PENSTYLE_DOT
 
 						self.SetCursor(wx.StockCursor(wx.CURSOR_HAND))
 
@@ -4192,7 +4192,7 @@ class INode(ConnectableNode):
 
 		self.fill = [GREEN]
 
-		dc.SetFont(wx.Font(10, wx.MODERN, wx.NORMAL, wx.NORMAL))
+		dc.SetFont(wx.Font(10, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 
 		### prot number
 		#dc.SetPen(wx.Pen(wx.NamedColour('black'), 20))
@@ -4263,7 +4263,7 @@ class ONode(ConnectableNode):
 		self.moveto(x, y)
 		self.fill = [RED]
 
-		dc.SetFont(wx.Font(10, wx.MODERN, wx.NORMAL, wx.NORMAL))
+		dc.SetFont(wx.Font(10, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		#dc.SetPen(wx.Pen(wx.NamedColour('black'), 20))
 
 		### prot number

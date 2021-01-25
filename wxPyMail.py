@@ -88,7 +88,7 @@ class SendMailWx(wx.Frame):
     def createWidgets(self):
         p = self.panel
               
-        font = wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD)
+        font = wx.Font(10, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
         self.fromLbl    = wx.StaticText(p, wx.NewIdRef(), _('From:'), size=(70,-1))
         self.fromTxt    = wx.TextCtrl(p, wx.NewIdRef(), self.email)
         self.toLbl      = wx.StaticText(p, wx.NewIdRef(), _('To:'), size=(70,-1))
