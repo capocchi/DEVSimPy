@@ -1779,7 +1779,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			# Initialize the wx.BufferedPaintDC, assigning a background
 	        # colour and a foreground colour (to draw the text)
 			backColour = self.GetBackgroundColour()
-			backBrush = wx.Brush(backColour, wx.PENSTYLE_SOLID)
+			backBrush = wx.Brush(backColour, wx.BRUSHSTYLE_SOLID)
 			pdc.SetBackground(backBrush)
 			pdc.Clear()
 
@@ -2540,19 +2540,22 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					mainW = wx.GetApp().GetTopWindow()
 
 					if not isinstance(mainW, DetachedFrame):
-						nb2 = mainW.GetDiagramNotebook()
-						s = nb2.GetSelection()
-						canvas = nb2.GetPage(s)
-						diagram = canvas.GetDiagram()
-						### modifying propagation
-						diagram.modify = True
-						### update general shapes
-						canvas.UpdateShapes()
+						if hasattr(mainW, 'GetDiagramNotebook'):
+							nb2 = mainW.GetDiagramNotebook()
+							s = nb2.GetSelection()
+							canvas = nb2.GetPage(s)
+							diagram = canvas.GetDiagram()
+							### modifying propagation
+							diagram.modify = True
+							### update general shapes
+							canvas.UpdateShapes()
 
-						label = nb2.GetPageText(s)
+							label = nb2.GetPageText(s)
 
-						### modified windows dictionary
-						D = {win.GetTitle(): win, label: mainW}
+							### modified windows dictionary
+							D = {win.GetTitle(): win, label: mainW}
+						else:
+							D={}
 					else:
 						D={}
 				else:
