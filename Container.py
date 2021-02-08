@@ -1779,7 +1779,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			# Initialize the wx.BufferedPaintDC, assigning a background
 	        # colour and a foreground colour (to draw the text)
 			backColour = self.GetBackgroundColour()
-			backBrush = wx.Brush(backColour, wx.PENSTYLE_SOLID)
+			backBrush = wx.Brush(backColour, wx.BRUSHSTYLE_SOLID)
 			pdc.SetBackground(backBrush)
 			pdc.Clear()
 
@@ -2531,48 +2531,50 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				from window where modifications are performed to DEVSimPy main window.
 			"""
 
-			if self.diagram.modify:
-				### window where modification is performed
-				win = self.GetTopLevelParent()
+			if not self.diagram.modify:
+				return
 
-				if isinstance(win, DetachedFrame):
-					### main window
-					mainW = wx.GetApp().GetTopWindow()
+			### window where modification is performed
+			win = self.GetTopLevelParent()
 
-					if not isinstance(mainW, DetachedFrame):
-						nb2 = mainW.GetDiagramNotebook()
-						s = nb2.GetSelection()
-						canvas = nb2.GetPage(s)
-						diagram = canvas.GetDiagram()
-						### modifying propagation
-						diagram.modify = True
-						### update general shapes
-						canvas.UpdateShapes()
+			if isinstance(win, DetachedFrame):
+				### main window
+				mainW = wx.GetApp().GetTopWindow()
 
-						label = nb2.GetPageText(s)
-
-						### modified windows dictionary
-						D = {win.GetTitle(): win, label: mainW}
-					else:
-						D={}
-				else:
-					nb2 = win.GetDiagramNotebook()
+				if not isinstance(mainW, DetachedFrame) and hasattr(mainW, 'GetDiagramNotebook'):
+					nb2 = mainW.GetDiagramNotebook()
 					s = nb2.GetSelection()
 					canvas = nb2.GetPage(s)
 					diagram = canvas.GetDiagram()
+					### modifying propagation
 					diagram.modify = True
+					### update general shapes
+					canvas.UpdateShapes()
+
 					label = nb2.GetPageText(s)
 
-					D = {label : win}
+					### modified windows dictionary
+					D = {win.GetTitle(): win, label: mainW}
+				else:
+					D={}
+			else:
+				nb2 = win.GetDiagramNotebook()
+				s = nb2.GetSelection()
+				canvas = nb2.GetPage(s)
+				diagram = canvas.GetDiagram()
+				diagram.modify = True
+				label = nb2.GetPageText(s)
 
-				#nb.SetPageText(nb.GetSelection(), "*%s"%label.replace('*',''))
+				D = {label : win}
 
-				### statusbar printing
-				for string,win in list(D.items()):
-					printOnStatusBar(win.statusbar, {0:"%s %s"%(string ,_("modified")), 1:os.path.basename(diagram.last_name_saved), 2:''})
+			#nb.SetPageText(nb.GetSelection(), "*%s"%label.replace('*',''))
 
-				tb = win.GetToolBar()
-				tb.EnableTool(Menu.ID_SAVE, self.diagram.modify)
+			### statusbar printing
+			for string,win in list(D.items()):
+				printOnStatusBar(win.statusbar, {0:"%s %s"%(string ,_("modified")), 1:os.path.basename(diagram.last_name_saved), 2:''})
+
+			tb = win.GetToolBar()
+			tb.EnableTool(Menu.ID_SAVE, self.diagram.modify)
 
 		###
 		def OnMotion(self, event):
