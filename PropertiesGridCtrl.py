@@ -319,7 +319,7 @@ class CutomGridCellAutoWrapStringRenderer(GridCellRenderer):
 			fg = attr.GetTextColour()
 		dc.SetTextBackground(bg)
 		dc.SetTextForeground(fg)
-		dc.SetBrush(wx.Brush(bg, wx.PENSTYLE_SOLID))
+		dc.SetBrush(wx.Brush(bg, wx.BRUSHSTYLE_SOLID))
 		dc.SetPen(wx.TRANSPARENT_PEN)
 		dc.DrawRectangleRect(rect) if wx.VERSION_STRING < '4.0' else wx.DC.DrawRectangle(dc, rect)
 		grid.DrawTextRectangle(dc, text, rect, hAlign, vAlign)
@@ -497,7 +497,7 @@ class CustomDataTable(GridTableBase):
 			#attr.SetBackgroundColour("light blue")
 		elif col == 2:
 			attr.SetReadOnly(True)
-			attr.SetFont(wx.Font(10, wx.FONTFAMILY_SWISS, wx.FONTFAMILY_ITALIC, wx.FONTWEIGHT_NORMAL))
+			attr.SetFont(wx.Font(10, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL))
 		else:
 			### load color in cell for pen and fill
 			if isinstance(val, list):
