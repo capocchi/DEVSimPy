@@ -80,6 +80,7 @@ RED = '#d91e1e'
 GREEN = '#90ee90'
 BLACK = '#000000'
 BLUE = '#add8e6'
+ORANGE = '#ffa500'
 
 import Components
 
@@ -4544,6 +4545,8 @@ class ScopeGUI(CodeBlock):
 
 		CodeBlock.__init__(self, label, 1, 0)
 
+		self.fill = [ORANGE]
+
 		### enable edition on properties panel
 		self.AddAttribute("xlabel")
 		self.AddAttribute("ylabel")
@@ -4571,6 +4574,8 @@ class DiskGUI(CodeBlock):
 		""" Constructor.
 		"""
 		CodeBlock.__init__(self, label, 1, 0)
+
+		self.fill = [ORANGE]
 
 	def OnLeftDClick(self, event):
 		""" Left Double Click has been appeared.
