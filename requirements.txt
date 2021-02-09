@@ -51,7 +51,7 @@
 # plugins\verbose.py: 14
 # searchTreeList.py: 1
 # wxPyMail.py: 22
-wxPython <= 4.1.0 
+wxPython <= 4.1.1 
 
 # Components.py: 44
 # Container.py: 39
