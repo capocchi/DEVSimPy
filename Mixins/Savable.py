@@ -39,19 +39,22 @@ for lib_name in required_libs:
     except:
         subprocess.run(f'pip install {lib_name}'.split())
 
-#try:
-import yaml	
-builtins.__dict__['YAML_IMPORT'] = True
-#except ImportError as info:
-#	builtins.__dict__['YAML_IMPORT'] = False
-#	sys.stdout.write("yaml module was not found! Install it if you want to save model in yaml format.\n")
+try:
+	import yaml	
+	builtins.__dict__['YAML_IMPORT'] = True
+except ImportError as info:
+	builtins.__dict__['YAML_IMPORT'] = False
+	sys.stdout.write("yaml module was not found! Install it if you want to save model in yaml format.\n")
 
-#try:
-import ruamel.yaml
-builtins.__dict__['YAML_IMPORT'] = True
-#except ImportError as info:
-#	builtins.__dict__['YAML_IMPORT'] = False
-#	sys.stdout.write("ruamel.yaml module was not found! Install it if you want to save model in yaml format.\n")
+try:
+	import ruamel.yaml as ruamel
+	builtins.__dict__['YAML_IMPORT'] = True
+except ImportError as info:
+	try:
+		import ruamel_yaml as ruamel
+	except ImportError as info:
+		builtins.__dict__['YAML_IMPORT'] = False
+		sys.stdout.write("ruamel.yaml module was not found! Install it if you want to save model in yaml format.\n")
 
 from tempfile import gettempdir
 
@@ -478,10 +481,10 @@ class DumpYAMLFile(DumpBase):
 		assert(fileName.endswith(tuple(DumpYAMLFile.ext)))
 
 		try:
-			yaml = ruamel.yaml.YAML()
+			yaml = ruamel.YAML()
 			yaml.register_class(PickledCollection)
 			with open(fileName, 'w') as yf:
-				ruamel.yaml.dump(PickledCollection(obj_dumped), stream=yf, default_flow_style=False) 
+				ruamel.dump(PickledCollection(obj_dumped), stream=yf, default_flow_style=False) 
 		except Exception as info:
 			tb = traceback.format_exc()
 			sys.stderr.write(_("\nProblem saving: %s -- %s\n")%(str(fileName),str(tb)))
@@ -495,10 +498,10 @@ class DumpYAMLFile(DumpBase):
 
 		## try to open f with compressed mode
 		try:
-			yaml = ruamel.yaml.YAML()
+			yaml = ruamel.YAML()
 			yaml.register_class(PickledCollection)
 			with open(fileName, 'r') as yf:
-				dsp = ruamel.yaml.load(yf, Loader=ruamel.yaml.Loader)
+				dsp = ruamel.load(yf, Loader=ruamel.Loader)
 
 		except Exception as info:
 			exc_type, exc_obj, exc_tb = sys.exc_info()

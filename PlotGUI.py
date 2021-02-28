@@ -78,27 +78,37 @@ def PlotManager(parent, label, atomicModel, xl, yl):
 	"""
 
 	### there is a active simulation thread ?
-	dyn = True in ['Simulator' in a.getName() for a in threading.enumerate()[1:]]
+	dyn_flag = True in ['Simulator' in a.getName() for a in threading.enumerate()[1:]]
 
-	if atomicModel.fusion:
-		if dyn:
-			frame = DynamicPlot(parent, wx.NewIdRef(),_("Plotting %s")%label, atomicModel, xLabel = xl, yLabel = yl)
+	### plots are superposed ?
+	fusion_flag = atomicModel.fusion
+
+	### data to plot
+	data = atomicModel if dyn_flag else atomicModel.results
+
+	if dyn_flag:
+		if fusion_flag:
+			frame = DynamicPlot(parent, wx.NewIdRef(), _("Plotting %s")%label, atomicModel, xLabel=xl, yLabel=yl)
+			frame.CenterOnParent()
+			frame.Show()
 		else:
-			frame = StaticPlot(parent, wx.NewIdRef(),_("Plotting %s")%label, atomicModel.results, xLabel = xl, yLabel = yl, legend = atomicModel.blockModel.label)
-		frame.CenterOnParent()
-		frame.Show()
+			for key in atomicModel.results:
+	 			frame = DynamicPlot(parent, wx.NewIdRef(), _("%s on port %s")%(label,str(key)), atomicModel, xLabel = xl, yLabel = yl, iport=key)
+	 			frame.CenterOnParent()
+	 			frame.Show()
 	else:
-		if dyn:
-			for key in atomicModel.results:
-				frame = DynamicPlot(parent, wx.NewIdRef(), _("%s on port %s")%(label,str(key)), atomicModel, xLabel = xl, yLabel = yl, iport=key)
-				frame.CenterOnParent()
-				frame.Show()
-		else:
-			for key in atomicModel.results:
-				frame = StaticPlot(parent, wx.NewIdRef(), _("%s on port %s")%(label,str(key)), atomicModel.results[key], xLabel = xl, yLabel = yl, legend = atomicModel.blockModel.label)
-				frame.CenterOnParent()
-				frame.Show()
+		### values to plot are string (for state for instance) ?
+		str_data_flag = isinstance(data[0][0][-1], str) if isinstance(data, dict) else isinstance(data[0][-1], str)
 
+		if str_data_flag or fusion_flag:
+			frame = StaticPlot(parent, wx.NewIdRef(), _("Plotting %s")%label, data, xLabel=xl, yLabel=yl, legend=atomicModel.blockModel.label, fusion=fusion_flag)	
+			frame.CenterOnParent()
+			frame.Show()
+		else:
+			for key in data:
+				frame = StaticPlot(parent, wx.NewIdRef(), _("%s on port %s")%(label,str(key)), data[key], xLabel = xl, yLabel = yl, legend = atomicModel.blockModel.label)
+				frame.CenterOnParent()
+				frame.Show()
 class PlotPanel(wx.Panel):
 	def __init__(self, parent, id=-1, dpi=None, **kwargs):
 		wx.Panel.__init__(self, parent, id=id, **kwargs)
@@ -126,7 +136,6 @@ class PlotNotebook(wx.Panel):
 		page = PlotPanel(self.nb)
 		self.nb.AddPage(page, name)
 		return page.figure
-
 class PlotFrame(wx.Frame):
 	def __init__(self, parent=None, id=wx.NewIdRef(), title="Time Plotting"):
 		"""	Constructor.
@@ -471,11 +480,9 @@ class StaticPlot(PlotFrame):
 	"""
 	"""
 
-	def __init__(self, parent = None, id = wx.NewIdRef(), title = "Time Plotting", data = None, xLabel = 'Time [s]', yLabel = 'Amplitude [A]', typ = 'PlotLine', legend=''):
+	def __init__(self, parent = None, id = wx.NewIdRef(), title = "Time Plotting", data = None, xLabel = 'Time [s]', yLabel = 'Amplitude [A]', typ = 'PlotLine', legend='', fusion=False):
 		"""	@data : [(t,y)...]
 		"""
-
-		PlotFrame.__init__(self, parent, id, title)
 
 		# local copy
 		self.data = data
@@ -485,46 +492,98 @@ class StaticPlot(PlotFrame):
 		self.typ = typ
 		self.title = title
 		self.legend = legend
+		self.fusion_flag = fusion
 
-		menu = wx.Menu()
-
-		### si mode fusion
-		if isinstance(self.data, dict):
-			for i in range(len(self.data)):
-				self.Bind(wx.EVT_MENU,self.OnPlotSpectrum, menu.Append(wx.NewIdRef(), _('Signal %d')%i, _('Spectrum Plot')))
-			self.Bind(wx.EVT_MENU,self.OnPlotAllSpectrum, menu.Append(wx.NewIdRef(), _('All'), _('Spectrum Plot')))
-
+		### if values to plot are string (for state for instance)
+		### the frame used to display the data is not PlotFrame.
+		if (isinstance(data, dict) and isinstance(data[0][0][-1], str)) or (isinstance(data, list) and isinstance(data[0][-1], str)):
+			wx.Frame.__init__(self, parent, id, title, size=(800, 500), style=wx.DEFAULT_FRAME_STYLE|wx.CLIP_CHILDREN)
+			self.OnPlotStep()
 		else:
-			self.Bind(wx.EVT_MENU,self.OnPlotSpectrum, menu.Append(wx.NewIdRef(), _('Signal'), _('Spectrum Plot')))
-		self.mainmenu.Append(menu, _('&Spectrum'))
 
-		menu = wx.Menu()
-		self.Bind(wx.EVT_MENU,self.OnRMSE, menu.Append(wx.NewIdRef(), _('RMSE'), _('Root Mean Square Error')))
-		self.mainmenu.Append(menu, _('&Error'))
+			PlotFrame.__init__(self, parent, id, title)
 
-		### call self.On<PlotLine>()
-		getattr(self,'On%s'%self.typ)()
+			menu = wx.Menu()
 
-	def OnPlotLine(self, event=None):
+			### with fusion
+			if self.fusion_flag:
+				for i in range(len(self.data)):
+					self.Bind(wx.EVT_MENU,self.OnPlotSpectrum, menu.Append(wx.NewIdRef(), _('Signal %d')%i, _('Spectrum Plot')))
+				self.Bind(wx.EVT_MENU,self.OnPlotAllSpectrum, menu.Append(wx.NewIdRef(), _('All'), _('Spectrum Plot')))
+
+			else:
+				self.Bind(wx.EVT_MENU,self.OnPlotSpectrum, menu.Append(wx.NewIdRef(), _('Signal'), _('Spectrum Plot')))
+			self.mainmenu.Append(menu, _('&Spectrum'))
+
+			menu = wx.Menu()
+			self.Bind(wx.EVT_MENU,self.OnRMSE, menu.Append(wx.NewIdRef(), _('RMSE'), _('Root Mean Square Error')))
+			self.mainmenu.Append(menu, _('&Error'))
+
+			### call self.On<PlotLine>()
+			getattr(self,'On%s'%self.typ)()
+
+	def Normalize(self, data):
+		m = max(a[1] for a in data)
+		return [(b[0], b[1]/m) for b in data]
+
+	def OnPlotStep(self, event=None)-> None:
 		"""
 		"""
 		data = self.data
 
-		### sans fusion
+		plotter = PlotNotebook(self)
+		x,y = zip(*data[0])
+		axes1 = plotter.add(self.title).gca()
+		axes1.set_xlabel(_('Time'), fontsize=16)
+		axes1.set_ylabel(_('Label'), fontsize=16)
+		axes1.step(x, y, LColour[0], label='Inport 0')
+		axes1.grid(True)
+		#axes1.set_title(_("Plotting %s")%label)
+
+		### with fusion
+		if self.fusion_flag:
+			### if multiple inputs
+			if len(data) >= 2:
+				for k,v in data.items():
+					if v != data[0]:
+						x,y = zip(*v)
+						axes1.step(x, y, LColour[k+1],label='Inport %s'%str(k))
+
+				### show legend only of mulitple inputs
+				axes1.legend()
+		else:
+			
+			### if multiple inputs
+			if len(data) >= 2:
+				for k,v in data.items():
+					if v != data[0]:
+						x,y = zip(*v)
+						ax = plotter.add(_("%s - Inport %s")%(self.title,str(k))).gca()
+						ax.set_xlabel(_('Time'), fontsize=16)
+						ax.set_ylabel(_('Label'), fontsize=16)
+						ax.step(x, y, LColour[k])
+						ax.grid(True)
+						#axes1.set_title(_("Plotting %s")%label)
+
+	def OnPlotLine(self, event=None)-> None:
+		"""
+		"""
+		data = self.data
+
+		### without fusion
 		if isinstance(data, list):
 
 			data = [(i if self.step else x[0], x[1]) for i,x in enumerate(data)]
 
 			if self.normalize:
-				m = max([a[1] for a in data])
-				data = [(b[0], b[1]/m) for b in data]
+				data = self.Normalize(data)
 
 			line = plot.PolyLine(data, legend = 'Port 0 %s'%self.legend, colour = 'black', width = 1)
 
 			self.gc = plot.PlotGraphics([line], self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
 
-		### avec fusion (voir attribut _fusion de QuickScope)
+		### with fusion (see attribut _fusion of QuickScope)
 		else:
 			L=[]
 			xMin, xMax, yMin, yMax = 0.0,0.0,0.0,0.0
@@ -536,8 +595,7 @@ class StaticPlot(PlotFrame):
 					cc = LColour[0]
 
 				if self.normalize:
-					m = max([a[1] for a in dd])
-					dd = [(b[0], b[1]/m) for b in dd]
+					dd = self.Normalize(dd)
 
 				L.append(plot.PolyLine(dd, legend = 'Port %d %s'%(ind,self.legend), colour = cc, width=1))
 
@@ -552,13 +610,13 @@ class StaticPlot(PlotFrame):
 
 		self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
 
-	def OnPlotSquare(self, event=None):
+	def OnPlotSquare(self, event=None)->None:
 		"""
 		"""
 
 		data = self.data
 
-		## sans fusion
+		## without fusion
 		if isinstance(data, list):
 
 			### formatage des données spécifique au square
@@ -568,8 +626,7 @@ class StaticPlot(PlotFrame):
 				data.append(v2)
 
 			if self.normalize:
-				m = max([a[1] for a in data])
-				data = [(b[0], b[1]/m) for b in data]
+				data = self.Normalize(data)
 
 			line = plot.PolyLine(data, legend = 'Port 0 %s'%self.legend, colour = 'black', width = 1)
 			self.gc = plot.PlotGraphics([line], self.title, self.xLabel, self.yLabel)
@@ -621,8 +678,7 @@ class StaticPlot(PlotFrame):
 		## sans fusion
 		if isinstance(data, list):
 			if self.normalize:
-				m = max([a[1] for a in data])
-				data = [(b[0], b[1]/m) for b in data]
+				data = self.Normalize(data)
 			
 			markers = plot.PolyMarker(data, colour = LColour[0], marker = Markers[0], size = 1)
 			line = plot.PolyLine(data, legend = 'Port 0 %s'%self.legend, colour = LColour[0], width = 1)
@@ -823,13 +879,13 @@ class DynamicPlot(PlotFrame):
 	"""
 	"""
 
-	def __init__(self, parent = None, id = wx.NewIdRef(), title = "", atomicModel = None, xLabel = "", yLabel = "", iport=None):
+	def __init__(self, parent=None, id=wx.NewIdRef(), title="", atomicModel=None, xLabel="", yLabel="", iport=None):
 		"""
-			@parent : parent class
-			@id : class id
-			@title : title of frame
-			@xLabel : label for x axe
-			@yLabel : label for y axe
+			@parent: parent class
+			@id: class id
+			@title: title of frame
+			@xLabel: label for x axe
+			@yLabel: label for y axe
 			@iport: the number of port when the fusion option is disabled.
 			@atomicModel: QuicScope atomic model used for its data
 		"""
@@ -856,6 +912,7 @@ class DynamicPlot(PlotFrame):
 				break
 
 		menu = wx.Menu()
+
 		### si mode fusion
 		if self.iport is None:
 			for i in self.atomicModel.results:
@@ -865,18 +922,26 @@ class DynamicPlot(PlotFrame):
 			self.Bind(wx.EVT_MENU, self.OnPlotSpectrum, menu.Append(wx.NewIdRef(), _('Signal %s')%str(self.iport), _('Spectrum Plot')))
 		self.mainmenu.Append(menu, _('&Spectrum'))
 
-		self.timer = wx.Timer(self)
+		# self.timer = wx.Timer(self)
 		### DEFAULT_PLOT_DYN_FREQ can be configured in preference-> simulation
-		self.timer.Start(milliseconds=DEFAULT_PLOT_DYN_FREQ)
+		# self.timer.Start(milliseconds=DEFAULT_PLOT_DYN_FREQ)
 
-		self.Bind(wx.EVT_TIMER, self.OnTimerEvent)
-		self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
+		# self.Bind(wx.EVT_TIMER, self.OnTimerEvent)
+		# self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
 		self.Bind(wx.EVT_CLOSE, self.OnQuit)
 
-	def OnTimerEvent(self, event):
-		self.GetEventHandler().ProcessEvent(wx.PaintEvent( ))
+		getattr(self, "On%s"%self.type)()
 
-	def OnPlotLine(self, event):
+	def OnTimerEvent(self, event):
+		pass
+	
+		#self.GetEventHandler().ProcessEvent(wx.PaintEvent())
+
+	def Normalize(self, data):
+		m = max(a[1] for a in data)
+		return [(b[0], b[1]/m) for b in data]
+
+	def OnPlotLine(self, event=None)->None:
 		""" Plot process depends to the timer event.
 		"""
 
@@ -894,13 +959,12 @@ class DynamicPlot(PlotFrame):
 			data = self.atomicModel.results[self.iport]
 
 			if self.normalize:
-				m = max([a[1] for a in data])
-				data = [(b[0], b[1]/m) for b in data]
+				data = self.Normalize(data)
 
 			line = plot.PolyLine(data, legend = 'Port 0 (%s)'%self.atomicModel.getBlockModel().label, colour = 'black', width = 1)
 			self.gc = plot.PlotGraphics([line], self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
-
+		
 		### with fusion (look QuickScope attribut _fusion)
 		else:
 
@@ -910,6 +974,7 @@ class DynamicPlot(PlotFrame):
 			L = []
 			xMin, xMax, yMin, yMax = 0,0,0,0
 			data_list = list(data.values())
+
 			for ind,dd in enumerate(data_list):
 				#ind = data_list.index(d)
 				try:
@@ -919,11 +984,11 @@ class DynamicPlot(PlotFrame):
 
 				if self.normalize:
 					m = max([a[1] for a in dd])
-					ddd = [(b[0], b[1]/m) for b in dd]
+					dd = [(b[0], b[1]/m) for b in dd]
+				
+				L.append(plot.PolyLine(dd, legend = 'Port %s (%s)'%(str(list(data.keys())[ind]), label), colour = cc, width=1))
 
-				L.append(plot.PolyLine(ddd, legend = 'Port %s (%s)'%(str(list(data.keys())[ind]), label), colour = cc, width=1))
-
-				a,b,c,d = get_limit(ddd)
+				a,b,c,d = get_limit(dd)
 
 				if float(a) < float(xMin): xMin=float(a)
 				if float(b) > float(xMax): xMax=float(b)
@@ -936,9 +1001,9 @@ class DynamicPlot(PlotFrame):
 			self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
 		except Exception:
 			sys.stdout.write(_("Error trying to plot"))
-
-		if self.sim_thread is None or not self.sim_thread.isAlive():
-			self.timer.Stop()
+		
+		# if self.sim_thread is None or not self.sim_thread.isAlive():
+			# self.timer.Stop()
 
 	def OnPlotSquare(self, event):
 
@@ -1037,8 +1102,7 @@ class DynamicPlot(PlotFrame):
 			data = self.atomicModel.results[self.iport]
 
 			if self.normalize:
-				m = max([a[1] for a in data])
-				data = [(b[0], b[1]/m) for b in data]
+				data = self.Normalize(data)
 
 			markers = plot.PolyMarker(data, colour=LColour[0], marker=Markers[0], size=1)
 			line = plot.PolyLine(data, legend='Port 0 (%s)'%self.atomicModel.getBlockModel().label, colour=LColour[0], width=1)

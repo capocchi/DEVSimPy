@@ -48,7 +48,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 import ZipManager
 
-from Utilities import replaceAll, GetActiveWindow, printOnStatusBar
+from Utilities import replaceAll, GetActiveWindow, printOnStatusBar, install
+from Decorators import BuzyCursorNotification
 from NetManager import Net
 from which import which
 
@@ -766,9 +767,19 @@ class DEVSComponent:
 		if val == wx.ID_YES:
 			### open with local editor
 			if wx.Platform == '__WXMAC__':
-				subprocess.call(" ".join(['open',python_path]), shell=True)
+				subprocess.call(" ".join(['open -a',python_path]), shell=True)
 			elif "wxMSW" in wx.PlatformInfo:
-				os.startfile(python_path)
+				### TODO : select dialog to chose editor (spyder, pyzo, etc..)
+				try:
+					import spyder
+				except ImportError:
+					if BuzyCursorNotification(install('spyder')):
+						dial = wx.MessageDialog(mainW, _('You need to restart DEVSimPy to use the Spyder code editor.'), name, wx.OK | wx.ICON_INFORMATION)
+						val = dial.ShowModal()
+				else:
+					subprocess.Popen(['spyder', python_path, '--multithread'])
+				
+				#os.startfile(python_path)
 			elif "wxGTK" in wx.PlatformInfo:
 				### with gnome
 				if os.system('pidof gedit') == 256:

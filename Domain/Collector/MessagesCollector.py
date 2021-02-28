@@ -35,7 +35,7 @@ class MessagesCollector(DomainBehavior):
 		DomainBehavior.__init__(self)
 
 		### a way to overcome the random initialization of the fileNam attr directly in the param list of the constructor!
-		fileName = fileName if fileName != "result" else os.path.join(tempfile.gettempdir(),"result%d"%random.randint(1,100))
+		fileName = fileName if fileName != "result" else os.path.join(tempfile.gettempdir(),"result%d"%random.randint(1,100000))
 
 		# local copy
 		self.fileName = fileName
