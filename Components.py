@@ -758,28 +758,34 @@ class DEVSComponent:
 			mainW = mainW.GetParent()
 
 		if not builtins.__dict__['LOCAL_EDITOR'] and not zipfile.is_zipfile(model_path) and not python_path.startswith('http'):
-			dial = wx.MessageDialog(mainW, _('Do you want to use your local programmer software?\n\n If you always want use the DEVSimPy code editor\n change the option in Editor panel preferences.'), name, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			dial = wx.MessageDialog(mainW, _('Do you want to use your local code editor software?\n\n If you always want to always use the local DEVSimPy code editor\n change the option in the Editor panel preference.'), name, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 			val = dial.ShowModal()
 		else:
-			val = wx.ID_NO
+			val = wx.ID_YES
 
 		### if local editor
-		if val == wx.ID_YES:
+		if val == wx.ID_NO:
 			### open with local editor
 			if wx.Platform == '__WXMAC__':
 				subprocess.call(" ".join(['open -a',python_path]), shell=True)
 			elif "wxMSW" in wx.PlatformInfo:
-				### TODO : select dialog to chose editor (spyder, pyzo, etc..)
+				editor = builtins.__dict__['EXTERNAL_EDITOR_NAME']
+				
+				### try to import the editor
 				try:
-					import spyder
+					importlib.import_module(editor)
+				### if not install it
 				except ImportError:
-					if BuzyCursorNotification(install('spyder')):
-						dial = wx.MessageDialog(mainW, _('You need to restart DEVSimPy to use the Spyder code editor.'), name, wx.OK | wx.ICON_INFORMATION)
+					if BuzyCursorNotification(install(editor)):
+						dial = wx.MessageDialog(self.parent, _('You need to restart DEVSimPy to use the %s code editor.')%editor, name, wx.OK | wx.ICON_INFORMATION)
 						val = dial.ShowModal()
-				else:
+
+				### open the editor
+				if editor == 'pyzo':
+					subprocess.Popen(['pyzo', python_path])
+				elif editor == 'spyder':
 					subprocess.Popen(['spyder', python_path, '--multithread'])
 				
-				#os.startfile(python_path)
 			elif "wxGTK" in wx.PlatformInfo:
 				### with gnome
 				if os.system('pidof gedit') == 256:
@@ -833,14 +839,14 @@ class DEVSComponent:
 					else:
 
 						### if python_path is not found (because have an external origin)
-						if not os.path.exists(python_path):
-							if os.path.basename(DOMAIN_PATH) in python_path.split(os.sep):
-								python_path = os.path.join(HOME_PATH, python_path[python_path.index(os.path.basename(DOMAIN_PATH)):].strip('[]'))
-								self.python_path = python_path
+						if not os.path.exists(python_path) and os.path.basename(
+						    DOMAIN_PATH) in python_path.split(os.sep):
+							python_path = os.path.join(HOME_PATH, python_path[python_path.index(os.path.basename(DOMAIN_PATH)):].strip('[]'))
+							self.python_path = python_path
 
-						# ### only with python 2.6
-						# with codecs.open(python_path, 'r', 'utf-8') as f:
-						# 	text = f.read()
+										# ### only with python 2.6
+										# with codecs.open(python_path, 'r', 'utf-8') as f:
+										# 	text = f.read()
 
 				name = os.path.basename(python_path)
 
@@ -852,7 +858,12 @@ class DEVSComponent:
 				return editorFrame
 
 			except Exception as info:
-				dlg = wx.MessageDialog(mainW, _('Editor frame not instanciated: %s\n'%info), name, wx.OK|wx.ICON_ERROR)
+				dlg = wx.MessageDialog(
+				    mainW,
+				    _('Editor frame not instanciated: %s\n' % info),
+				    name,
+				    wx.OK | wx.ICON_ERROR,
+				)
 				dlg.ShowModal()
 				return False
 

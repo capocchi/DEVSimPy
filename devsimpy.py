@@ -149,6 +149,7 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 				'PLUGINS_PATH': os.path.join(ABS_HOME_PATH, 'plugins'), # path of plug-ins directory
 				'FONT_SIZE': 12, # Block font size
 				'LOCAL_EDITOR': True, # for the use of local editor
+				'EXTERNAL_EDITOR_NAME': "", # the name of the external code editor (only if LOCAL_EDITOR is False) 
 				'LOG_FILE': os.devnull, # log file (null by default)
 				'DEFAULT_SIM_STRATEGY': 'bag-based', #choose the default simulation strategy for PyDEVS
 				'PYDEVS_SIM_STRATEGY_DICT' : {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}, # list of available simulation strategy for PyDEVS package
