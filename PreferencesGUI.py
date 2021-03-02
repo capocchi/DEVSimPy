@@ -30,6 +30,8 @@ import inspect
 import configparser
 import copy
 import zipfile
+import subprocess
+import importlib
 
 import wx.lib.filebrowsebutton as filebrowse
 
@@ -46,7 +48,8 @@ if __name__ == '__main__':
 from HtmlWindow import HtmlFrame
 
 from PluginsGUI import PluginsPanel, GeneralPluginsList
-from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, AddToInitFile, DelToInitFile
+from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, AddToInitFile, DelToInitFile, install
+from Decorators import BuzyCursorNotification
 
 import ReloadModule
 import Menu
@@ -535,11 +538,15 @@ class EditorPanel(wx.Panel):
 	""" Edition Panel.
 	"""
 
+	EDITORS = ('spyder','pyzo')
+
 	def __init__(self, parent):
 		""" Constructor.
 		"""
 
 		wx.Panel.__init__(self, parent)
+
+		self.parent = parent
 
 		self.InitUI()
 	
@@ -549,20 +556,61 @@ class EditorPanel(wx.Panel):
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
-		self.cb = wx.CheckBox(self, wx.NewIdRef(), _("Use local programmer software"))
+		self.cb = wx.CheckBox(self, wx.NewIdRef(), _("Use the DEVSimPy local code editor software"))
 		self.cb.SetValue(builtins.__dict__['LOCAL_EDITOR'])
 		if wx.VERSION_STRING >= '4.0': self.cb.SetToolTipString = self.cb.SetToolTip
-		self.cb.SetToolTipString(_("This option don't work for the .amd and .cmd file. \n"
+		self.cb.SetToolTipString(_("This option is available only for the python file. \n"
 			"Modification of python file during the simulation is disabled when this checkbox is checked."))
 
-		vbox.Add(self.cb, 0, wx.ALL,10)
+		### populte the choices array depending on the code editor installed
+		### if the code editor is not installed, we propose to install it
+		choices = []
+
+		for editor in EditorPanel.EDITORS:
+			try:
+				importlib.import_module(editor)
+			except ImportError:
+				if BuzyCursorNotification(install(editor)):
+					dial = wx.MessageDialog(self.parent, _('You need to restart DEVSimPy to use the %s code editor.')%editor, _("Code Editor Installation"), wx.OK | wx.ICON_INFORMATION)
+					val = dial.ShowModal()
+			else:
+				choices.append(editor)
+
+		### add the choice object to select one external code editor
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		txt = wx.StaticText(self, -1, _("Select an external code editor:"))
+		self.choice = wx.Choice(self, -1, choices=choices)
+		
+		### if external editor name is never stored in config file (.devsimpy)
+		if builtins.__dict__['EXTERNAL_EDITOR_NAME'] == "":
+			self.choice.SetSelection(0)
+		else:
+			self.choice.SetSelection(EditorPanel.EDITORS.index(builtins.__dict__['EXTERNAL_EDITOR_NAME']))
+
+		self.choice.Enable(not self.cb.IsChecked())
+
+		hbox.Add(txt, 0, wx.ALL, 10)
+		hbox.Add(self.choice, 0, wx.ALL, 10)
+		
+		### the checkbox and the choice objects
+		vbox.Add(self.cb, 0, wx.ALL, 10)
+		vbox.Add(hbox, 0, wx.ALL, 10)
+
+		### bid the checkbox in order to enable the choice object
+		self.Bind(wx.EVT_CHECKBOX, self.OnCheck, self.cb)
 
 		self.SetSizer(vbox)
 
+	def OnCheck(self, event):
+		"""
+		"""
+		self.choice.Enable(not self.cb.IsChecked())
+		
 	def OnApply(self, evt):
 		""" Apply changes.
 		"""
 		builtins.__dict__['LOCAL_EDITOR'] = self.cb.IsChecked()
+		builtins.__dict__['EXTERNAL_EDITOR_NAME'] = self.choice.GetString(self.choice.GetCurrentSelection()) if self.choice.IsEnabled() else ""
 
 ########################################################################
 class Preferences(wx.Toolbook):
