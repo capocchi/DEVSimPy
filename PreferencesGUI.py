@@ -618,8 +618,7 @@ class Preferences(wx.Toolbook):
 	"""
 
 	def __init__(self, parent):
-		"""
-			Constructor.
+		"""Constructor.
 		"""
 
 		wx.Toolbook.__init__(self, parent, wx.NewIdRef(), style=wx.BK_DEFAULT)
