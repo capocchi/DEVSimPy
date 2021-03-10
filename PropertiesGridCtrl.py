@@ -717,6 +717,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 		self.Bind(gridlib.EVT_GRID_SELECT_CELL, self.OnSelectProp)
 		self.Bind(wx.EVT_ENTER_WINDOW, self.OnEnterWindow)
 		self.Bind(gridlib.EVT_GRID_CELL_RIGHT_CLICK, self.OnRightClick)
+		self.Bind(gridlib.EVT_GRID_COL_SORT, self.OnGridColSort)
 
 		# put a tooltip on a column label
 		self.GetGridColLabelWindow().Bind(wx.EVT_MOTION,self.onMouseOverColLabel)
@@ -772,6 +773,11 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 			menu = Menu.PropertiesCtrlPopupMenu(self, row, col)
 			self.PopupMenu(menu, event.GetPosition())
 			menu.Destroy()
+
+	def OnGridColSort(self, event):
+		"""
+		"""
+		self.SetSortingColumn(event.Getcol())
 
 	###
 	def OnEditCell(self, evt):
@@ -892,7 +898,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 		"""
 		"""
 
-		row, col = evt.GetRow(), evt.GetCol()
+		row, col, pos= evt.GetRow(), evt.GetCol(), evt.GetPosition()
 
 		table = self.GetTable()
 
@@ -1081,7 +1087,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 		else:
 			pass
 
-		### all properties grid update (because the python classe has been changed)
+		### all properties grid update (because the python class has been changed)
 		### here, because OnAcceptProp should be executed before
 		if prop == 'python_path':
 

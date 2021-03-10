@@ -128,6 +128,11 @@ class LabelDialog(wx.Dialog):
 		if txt != "":
 			self.old_label = txt
 			self.old_pos = self.block.label_pos
+			
+			### update the radio button position depending on the model position label
+			self.m_radioBtn1.SetValue(self.old_pos == 'center')
+			self.m_radioBtn2.SetValue(self.old_pos == 'top')
+			self.m_radioBtn3.SetValue(self.old_pos == 'bottom')
 
 	def SetCanvas(self, canvas):
 		"""
