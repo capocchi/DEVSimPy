@@ -3072,10 +3072,14 @@ class Testable(object):
 
 	# NOTE: Testable :: isAMD 				=> Test if the model is an AMD and if it's well-formed
 	def isAMD(self):
-		return zipfile.is_zipfile(os.path.dirname(self.python_path))
+		fn = os.path.dirname(self.python_path)
+		return zipfile.is_zipfile(fn) or fn.endswith(('.amd','.cmd')) if os.path.isfile(fn) else False
 
 	def isPYC(self):
-		return self.python_path.endswith('.pyc')
+		return self.python_path.endswith('.pyc') if os.path.isfile(self.python_path) else False
+
+	def isPY(self):
+		return self.python_path.endswith('.py') if os.path.isfile(self.python_path) else False
 
 	# NOTE: Testable :: CreateTestsFiles	=> AMD tests files creation
 	def CreateTestsFiles(self):
@@ -3763,14 +3767,22 @@ class CodeBlock(Achievable, Block):
 
 			### for .cmd or .amd
 			else:
-				pass
-				#with zipfile.ZipFile(model_path) as zf:
-				#	### find all python files
-				#	for file in zf.namelist():
-				#		r = repr(zf.read(file))
-				#		if file.endswith(".py") and ('DomainBehavior' in r or 'DomainStructure' in r):
-				#			#state['python_path'] = os.path.join(model_path, os.path.basename(model_path).replace('.amd','.py').replace('.cmd','.py'))
-				#			state['bad_filename_path_flag'] =  file != state['python_path'] 
+				if not os.path.exists(model_path) :
+					state['bad_filename_path_flag'] = True
+				# else:
+				# 	with zipfile.ZipFile(model_path) as zf:
+				# 		### find all python files
+				# 		for file in zf.namelist():
+				# 			path =  os.path.join(model_path, os.path.basename(model_path).replace('.amd','.py').replace('.cmd','.py'))
+				# 			#cls = GetClass(path)
+				# 			if file.endswith(".py"):# and (issubclass(cls, DomainBehavior) or issubclass(cls, DomainStructure)):
+				# 				if os.path.exists(model_path):
+				# 					state['python_path'] = path
+				# 				else:
+				# 					state['bad_filename_path_flag'] = True
+								#state['python_path'] = os.path.join(model_path, os.path.basename(model_path).replace('.amd','.py').replace('.cmd','.py'))
+								#state['bad_filename_path_flag'] =  file != state['python_path'] 
+							
 
 		### if the fileName attribut dont exist, we define it into the current devsimpy directory (then the user can change it from Property panel)
 		if 'args' in state:

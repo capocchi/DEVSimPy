@@ -1018,12 +1018,12 @@ class ShapePopupMenu(wx.Menu):
 		else:
 			
 			if isinstance(shape, Container.CodeBlock) and shape.isAMD():
-				Edit_menu = AppendMenu(self, -1, _("Edit"), edit_subMenu)
-				Edit_SubMenu1 = edit_subMenu.AppendItem(editModel)
-				Edit_SubMenu2 = edit_subMenu.AppendItem(editTest)
+					Edit_menu = AppendMenu(self, -1, _("Edit"), edit_subMenu)
+					Edit_SubMenu1 = edit_subMenu.AppendItem(editModel)
+					Edit_SubMenu2 = edit_subMenu.AppendItem(editTest)
 			else:
 				Edit_menu = AppendItem(edit)
-
+				
 			if isinstance(shape, Container.CodeBlock) and shape.isPYC():
 				Edit_menu.Enable(False)
 
@@ -1147,8 +1147,10 @@ class ShapePopupMenu(wx.Menu):
 				# AMD specific binding
 				if shape.isAMD():
 				 	self.__canvas.Bind(wx.EVT_MENU, shape.OnTestEditor, id=ID_TESTING_SHAPE)
-				else:
+				elif shape.isPY():
 					self.__canvas.Bind(wx.EVT_MENU, shape.OnEditor, id=ID_EDIT_SHAPE)
+				else:
+					self.Enable(ID_EDIT_SHAPE, False)
 
 			# ContainerBlock specific binding
 			elif isinstance(shape, Container.ContainerBlock):

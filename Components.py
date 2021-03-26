@@ -909,7 +909,7 @@ class BlockFactory:
 				
 				### try to import module
 				try:
-					module = spec.loader.load_module()
+					module = spec.loader.load_module(module_name)
 				except (ValueError, ImportError) as msg:
 					sys.stderr.write(_("Module %s not imported from %s: %s!\n"%(module_name,dir_name,str(msg))))
 					module = sys.exc_info()
