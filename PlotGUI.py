@@ -1082,7 +1082,9 @@ class DynamicPlot(PlotFrame):
 		except Exception:
 			sys.stdout.write(_("Error trying to plot"))
 
-		if self.sim_thread is None or not self.sim_thread.isAlive():
+		cond = self.sim_thread.isAlive() if hasattr(self.sim_thread,'isAlive') else self.sim_thread.is_alive()
+
+		if self.sim_thread is None or not cond:
 			self.timer.Stop()
 
 	def OnPlotScatter(self, event):
@@ -1154,8 +1156,9 @@ class DynamicPlot(PlotFrame):
 		except Exception:
 			sys.stdout.write(_("Error trying to plot"))
 
+		cond = self.sim_thread.isAlive() if hasattr(self.sim_thread,'isAlive') else self.sim_thread.is_alive()
 
-		if self.sim_thread is None or not self.sim_thread.isAlive():
+		if self.sim_thread is None or not cond:
 			self.timer.Stop()
 
 	def OnPlotBar(self,event):
@@ -1207,7 +1210,9 @@ class DynamicPlot(PlotFrame):
 		except Exception:
 			sys.stdout.write(_("Error trying to plot"))
 
-		if self.sim_thread is None or not self.sim_thread.isAlive():
+		cond = self.sim_thread.isAlive() if hasattr(self.sim_thread,'isAlive') else self.sim_thread.is_alive()
+
+		if self.sim_thread is None or not cond:
 			self.timer.Stop()
 
 	def OnPlotAllSpectrum(self,evt):

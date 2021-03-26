@@ -131,7 +131,8 @@ def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True
         progress = 0
         
         if not builtins.__dict__['NTL']:
-            while(thread.isAlive()):
+            cond = thread.isAlive() if hasattr(thread,'isAlive') else thread.is_alive()
+            while cond:
                 new_real_time = time.time()
                 CPUduration = new_real_time - first_real_time
                 new_progress = 100.0*(thread.model.timeLast / T)
