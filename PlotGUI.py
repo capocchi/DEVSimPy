@@ -303,7 +303,7 @@ class PlotFrame(wx.Frame):
 		ptx, pty = nearest["scaledXY"]
 
 		dc.SetPen(wx.Pen(wx.BLACK))
-		dc.SetBrush(wx.Brush(wx.WHITE, wx.PENSTYLE_TRANSPARENT))
+		dc.SetBrush(wx.Brush(wx.WHITE, 106)) # wx.PENSTYLE_TRANSPARENT = 106
 		dc.SetLogicalFunction(wx.INVERT)
 		dc.CrossHair(ptx, pty)
 		dc.DrawRectangle(ptx-3, pty-3, 7, 7)

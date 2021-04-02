@@ -157,7 +157,7 @@ if __name__ == '__main__':
 	else:
 		# simulation
 		duration = args.simulation_time
-		if isinstance(duration, str):
+		if not isinstance(duration, str):
 			duration = float(duration)
 
 		devs = yamlHandler.getDevsInstance()

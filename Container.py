@@ -1224,7 +1224,7 @@ class Shape(ShapeEvtHandler):
 		self.x = array.array('d',x)                      # list of x coord
 		self.y = array.array('d',y)                      # list of y coords
 		self.fill= Shape.FILL          # fill color
-		self.pen = [self.fill[0] , 1, wx.PENSTYLE_SOLID]   # pen color and size
+		self.pen = [self.fill[0] , 1, 100]   # pen color and size / 100 = wx.PENSTYLE_SOLID
 		self.font = [FONT_SIZE, 74, 93, 700, u'Arial']
 
 	def draw(self, dc):
@@ -2395,7 +2395,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				for item in [s for s in self.select() if isinstance(s, ConnectionShape)]:
 					### restore solid connection
 					if len(item.pen)>2:
-						item.pen[2]= wx.PENSTYLE_SOLID
+						item.pen[2]= 100 #wx.PENSTYLE_SOLID
 
 					if None in (item.output, item.input):
 
