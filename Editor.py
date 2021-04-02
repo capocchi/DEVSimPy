@@ -2036,9 +2036,9 @@ class BlockBase(object):
 		"""
 
 		if not self.nb.GetCurrentPage().ContainError():
-
+			
 			### if some simulation is running
-			on_simulation_flag = True in [_('Simulator') in thread.getName() and thread.isAlive() for thread in threading.enumerate()[1:]]
+			on_simulation_flag = True in [_('Simulator') in thread.getName() and (thread.isAlive() if hasattr(thread,'isAlive') else thread.is_alive()) for thread in threading.enumerate()[1:]]
 
 			new_class = new_instance.__class__
 

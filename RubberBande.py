@@ -59,8 +59,8 @@ class wxPyRubberBander:
             # dont do any filling of the dc. It is set just for 
             # the sake of completion.
 
-            wbrush = wx.Brush(wx.Colour(255,255,255), wx.PENSTYLE_TRANSPARENT)
-            wpen = wx.Pen(wx.Colour(200, 200, 200), 1, wx.PENSTYLE_SOLID)
+            wbrush = wx.Brush(wx.Colour(255,255,255), 106) # wx.PENSTYLE_TRANSPARENT = 106
+            wpen = wx.Pen(wx.Colour(200, 200, 200), 1, 100) # wx.PENSTYLE_SOLID = 100
             dc.SetBrush(wbrush)
             dc.SetPen(wpen)
 
@@ -154,8 +154,8 @@ class wxPyRubberBander:
         # dont do any filling of the dc. It is set for 
         # sake of completion.
         
-        wbrush = wx.Brush(wx.Colour(255,255,255), wx.PENSTYLE_TRANSPARENT)
-        wpen = wx.Pen(wx.Colour(200, 200, 200), 1, wx.PENSTYLE_SOLID)
+        wbrush = wx.Brush(wx.Colour(255,255,255), 106) # wx.PENSTYLE_TRANSPARENT = 106
+        wpen = wx.Pen(wx.Colour(200, 200, 200), 1, 100) # wx.PENSTYLE_SOLID = 100
         dc.SetBrush(wbrush)
         dc.SetPen(wpen)
         dc.DrawRectangle(box[0], box[1], w,h)

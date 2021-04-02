@@ -1,0 +1,160 @@
+!!python/object/new:Mixins.Savable.PickledCollection
+listitems:
+- &id004
+  - !!python/object:Container.ConnectionShape
+    args: {}
+    devsModel: null
+    fill:
+    - '#d91e1e'
+    font:
+    - 12
+    - 74
+    - 93
+    - 700
+    - Arial
+    input: !!python/tuple
+    - &id002 !!python/object:Container.CodeBlock
+      args:
+        choice: []
+        maxStep: 1
+        maxValue: 10
+        minStep: 1
+        minValue: 0
+        start: 0
+      attributes:
+      - label
+      - label_pos
+      - pen
+      - fill
+      - font
+      - image_path
+      - input
+      - output
+      bad_filename_path_flag: false
+      devsModel: null
+      dir: &id001 !!python/tuple
+      - ouest
+      - nord
+      - est
+      - sud
+      fill:
+      - '#add8e6'
+      font:
+      - 7
+      - 74
+      - 93
+      - 700
+      - Arial
+      h: 100.0
+      id: 1
+      image_path: ''
+      input: 1
+      input_direction: ouest
+      label: RandomGenerator_1
+      label_pos: center
+      last_name_saved: ''
+      lock_flag: false
+      model_path: ''
+      nb_copy: 0
+      output: 1
+      output_direction: est
+      pen:
+      - '#add8e6'
+      - 1
+      - 100
+      python_path: C:\Users\Laurent\Dropbox\devsimpy\py3x\Domain\Generator\RandomGenerator.py
+      selected: false
+      status_label: ''
+      w: 100.0
+      x: !!python/object/apply:array.array
+      - d
+      - - 69.0
+        - 169.0
+      y: !!python/object/apply:array.array
+      - d
+      - - 176.0
+        - 276.0
+    - 0
+    lock_flag: false
+    output: !!python/tuple
+    - &id003 !!python/object:Container.ScopeGUI
+      args:
+        eventAxis: false
+        fusion: true
+      attributes:
+      - label
+      - label_pos
+      - pen
+      - fill
+      - font
+      - image_path
+      - input
+      - output
+      - xlabel
+      - ylabel
+      bad_filename_path_flag: false
+      devsModel: null
+      dir: *id001
+      fill:
+      - '#ffa500'
+      font:
+      - 12
+      - 74
+      - 93
+      - 700
+      - Arial
+      h: 100.0
+      id: 0
+      image_path: ''
+      input: 1
+      input_direction: ouest
+      label: To_Disk_0
+      label_pos: center
+      last_name_saved: ''
+      lock_flag: false
+      model_path: ''
+      nb_copy: 0
+      output: 1
+      output_direction: est
+      pen:
+      - '#add8e6'
+      - 1
+      - 100
+      python_path: C:\Users\Laurent\Dropbox\devsimpy\py3x\Domain\Collector\To_Disk.py
+      selected: false
+      status_label: ''
+      w: 100.0
+      x: !!python/object/apply:array.array
+      - d
+      - - 345.0
+        - 445.0
+      xlabel: ''
+      y: !!python/object/apply:array.array
+      - d
+      - - 211.0
+        - 311.0
+      ylabel: ''
+    - 0
+    pen:
+    - '#add8e6'
+    - 1
+    - 100
+    python_path: ''
+    touch_list: []
+    x: !!python/object/apply:array.array
+    - d
+    - - 169.0
+      - 345.0
+    y: !!python/object/apply:array.array
+    - d
+    - - 226.0
+      - 261.0
+  - *id002
+  - *id003
+- &id005 []
+- &id006 {}
+state:
+  pickled_obj:
+  - *id004
+  - *id005
+  - *id006
