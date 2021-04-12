@@ -24,7 +24,6 @@ import traceback
 import gettext
 _ = gettext.gettext
 
-import InteractionSocket
 import json
 import pusher
 
@@ -131,8 +130,7 @@ def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True
         progress = 0
         
         if not builtins.__dict__['NTL']:
-            cond = thread.isAlive() if hasattr(thread,'isAlive') else thread.is_alive()
-            while cond:
+            while thread.isAlive() if hasattr(thread,'isAlive') else thread.is_alive():
                 new_real_time = time.time()
                 CPUduration = new_real_time - first_real_time
                 new_progress = 100.0*(thread.model.timeLast / T)
