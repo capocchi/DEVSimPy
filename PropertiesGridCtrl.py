@@ -766,12 +766,13 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 
 		row = event.GetRow()
 		col = event.GetCol()
+		pos = event.GetPosition()
 		prop = self.GetCellValue(row, col-1)
 
 		### menu popup onlu on the column 1
 		if col == 1:
-			menu = Menu.PropertiesCtrlPopupMenu(self, row, col)
-			self.PopupMenu(menu, event.GetPosition())
+			menu = Menu.PropertiesCtrlPopupMenu(self, row, col, pos)
+			self.PopupMenu(menu, pos)
 			menu.Destroy()
 
 	def OnGridColSort(self, event):

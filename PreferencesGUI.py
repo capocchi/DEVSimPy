@@ -573,6 +573,8 @@ class EditorPanel(wx.Panel):
 				if BuzyCursorNotification(install(editor)):
 					dial = wx.MessageDialog(self.parent, _('You need to restart DEVSimPy to use the %s code editor.')%editor, _("Code Editor Installation"), wx.OK | wx.ICON_INFORMATION)
 					val = dial.ShowModal()
+			except:
+				pass
 			else:
 				choices.append(editor)
 
