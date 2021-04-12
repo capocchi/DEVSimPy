@@ -979,7 +979,7 @@ class MainApplication(wx.Frame):
 			self.SaveSize()
 			self._mgr.UnInit()
 			del self._mgr
-			self.Destroy()
+			#self.Close()
 			
 			#win = wx.Window_FindFocus()
 			#if win != None:
@@ -988,7 +988,7 @@ class MainApplication(wx.Frame):
 				#win.Disconnect(-1, -1, wx.wxEVT_KILL_FOCUS)
 			#self.Destroy()
 
-		#event.Skip()
+		event.Skip()
 
 	def OnSpin(self, event):
 		""" Spin button has been invoked (on the toolbar of the main windows or detached frame).

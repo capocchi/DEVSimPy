@@ -230,10 +230,8 @@ def ProgressNotification(f, arg):
 		thread = ThreadWithReturnValue(target = f, args = args)
 		thread.start()
 
-		### isAlive is deprecated since python 3.9
-		cond = thread.isAlive() if hasattr(thread,'isAlive') else thread.is_alive()
-		
-		while cond:
+		### isAlive is deprecated since python 3.9		
+		while thread.isAlive() if hasattr(thread,'isAlive') else thread.is_alive():
 
 			if progress_dlg.WasCancelled() or progress_dlg.WasSkipped():
 				thread.kill()

@@ -439,17 +439,17 @@ class Base(object):
 				self.current_master = self.master
 
 			if isinstance(self.parent, wx.Panel):
-				# redirection du stdout ici dans le cas du Panel (sinon dans OnSimulation)
+				# stdout redirect only for the Panel mode (if not in OnSimulation)
 				mainW = self.parent.GetTopLevelParent()
 				sys.stdout = mainW.stdioWin
 
-			### test si le modele et bien charge
-			if (self.current_master == None) or (self.current_master.getComponentSet() == []):
+			### check is model is well loaded
+			if (self.current_master is None) or (len(self.current_master.getComponentSet()) == 0):
 				return self.MsgBoxEmptyModel()
-
+			
 			### dont erase the gauge if ntl
 			if not self.ntl:
-				# stockage du temps de simulation dans le master
+				# simulation time stored in the master model
 				self.current_master.FINAL_TIME = float(self._value.GetValue())
 				self._gauge.SetValue(0)
 				### if _gauge is wx.Slider
@@ -484,7 +484,7 @@ class Base(object):
 				self.thread = simulator_factory(self.current_master, self.selected_strategy, self.prof, self.ntl, self.verbose, self.dynamic_structure_flag, self.real_time_flag)
 				self.thread.setName(self.title)
 
-				### si le modele n'a pas de couplage, ou si pas de generateur: alors pas besoin de simuler
+				### if simulation model has no connection or no generators, no need to simulate
 				if self.thread.end_flag:
 					self.OnTimer(event)
 				else:
@@ -510,7 +510,7 @@ class Base(object):
 
 			if self.count >= 100:
 				return
-
+				
 			### interaction with the model is not possible
 			#self.parent.Enable(False)
 

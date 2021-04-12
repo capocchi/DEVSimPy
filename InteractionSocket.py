@@ -71,9 +71,11 @@ class MySocketHandler(socketserver.BaseRequestHandler):
         self.request.send(json.dumps(response))
 
 class MySocketServer(Server):
-
+    """
+    """
     def __init__(self, server_address, RequestHandlerClass, simulation_thread):
-
+        """
+        """
         if sys.platform == "win32":
             socketserver.TCPServer.__init__(self, server_address, RequestHandlerClass)
         else:
@@ -89,9 +91,11 @@ class MySocketServer(Server):
         sys.stderr.write(' ***')
 
 class InteractionManager(threading.Thread):
-
+    """
+    """
     def __init__(self, socket_id, simulation_thread):
-
+        """
+        """
         threading.Thread.__init__(self)
         self.daemon = True
         log('SocketServer thread init ** ')
@@ -112,13 +116,15 @@ class InteractionManager(threading.Thread):
 
 
     def run(self):
-
+        """
+        """
         if self.server:
             log('SocketServer serve_forever ** ')
             self.server.serve_forever()
 
     def stop(self):
-
+        """
+        """
         if self.server:
             log('SocketSserver shutdown')
             self.server.shutdown()

@@ -703,7 +703,7 @@ class PropertiesCtrlPopupMenu(wx.Menu):
 	""" PropertiesCtrl popup menu.
 	"""
 
-	def __init__(self, parent, row, col):
+	def __init__(self, parent, row, col, pos):
 		""" Constructor.
 		"""
 		wx.Menu.__init__(self)
@@ -711,6 +711,7 @@ class PropertiesCtrlPopupMenu(wx.Menu):
 		self.parent = parent
 		self.row = row
 		self.col = col
+		self.pos = pos
 
 		edit = wx.MenuItem(self, ID_EDIT_ATTR, _('Edit'), _('Edit attribute'))
 		insert = wx.MenuItem(self, ID_INSERT_ATTR, _('Insert'), _('Insert attribute'))
@@ -737,6 +738,8 @@ class PropertiesCtrlPopupMenu(wx.Menu):
 	def GetCol(self):
 		return self.col
 
+	def GetPosition(self):
+		return self.pos
 class ItemLibraryPopupMenu(wx.Menu):
 	""" Item library popup menu.
 	"""
