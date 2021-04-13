@@ -100,6 +100,18 @@ class MySheet(sheet.CSheet):
 	def IsFull(self):
 		return self._full_flag
 
+	def OnLeftClick(self, event):
+		"""
+		"""
+		### veto because bug exist (TypeError: PaintBackground() takes 3 positional arguments but 4 were given)
+		event.Veto()
+
+	def OnLeftDoubleClick(self, event):
+		"""
+		"""
+		### veto because bug exist (TypeError: PaintBackground() takes 3 positional arguments but 4 were given)
+		event.Veto()
+
 	##def OnGridSelectCell(self, event):
 		##self.row, self.col = event.GetRow(), event.GetCol()
 		##control = self.GetParent().GetParent().position
