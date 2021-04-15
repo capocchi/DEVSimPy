@@ -68,9 +68,9 @@ def getClassMember(python_file = ''):
 	if inspect.ismodule(module):
 		## classes composing the imported module
 		return dict(inspect.getmembers(module, inspect.isclass))
+		
 	### exception in module
-	else:
-		return module
+	return module
 
 def GetClass(elem):
 	""" Get python class from filename.
@@ -124,9 +124,9 @@ def GetArgs(cls = None):
 	if inspect.isclass(cls):
 		constructor = inspect.getargspec(cls.__init__)
 		return dict(list(zip(constructor[0][1:], constructor[3]))) if constructor[3] != None else {}
-	else:
-		#sys.stderr.write(_("Error in GetArgs: First parameter is not a class\n"))
-		return None
+	
+	#sys.stderr.write(_("Error in GetArgs: First parameter is not a class\n"))
+	return None
 
 ###########################################################
 ###
@@ -726,8 +726,7 @@ class DEVSComponent:
 		### if devs instance is not none and priority_list has been invoked (else componentSet order is considered)
 		if self.priority_list != []:
 
-			shape_list = self.GetShapeList()
-			block_list = [c for c in shape_list if isinstance(c, Block)]
+			block_list = [c for c in self.GetShapeList() if isinstance(c, Block)]
 
 			label_list = [m.label for m in block_list]
 
