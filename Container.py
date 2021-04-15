@@ -242,13 +242,12 @@ def CheckClass(m):
 	### check cls error
 	if isinstance(cls, tuple):
 		return cls
-	else:
 
-		### check devs instance
-		devs = getInstance(cls, args)
+	### check devs instance
+	devs = getInstance(cls, args)
 
-		### check instance error
-		return devs if isinstance(devs, tuple) or isinstance(devs, Exception) else None
+	### check instance error
+	return devs if isinstance(devs, (tuple, Exception)) else None
 
 ################################################################
 #                                                              #
@@ -392,7 +391,7 @@ class Diagram(Savable, Structurable):
 
 		### shape list of diagram
 		shape_list = diagram.GetShapeList()
-		block_list = (c for c in shape_list if isinstance(c, Block))
+		block_list = {c for c in shape_list if isinstance(c, Block)}
 		
 		### for all codeBlock shape, we make the devs instance
 		for m in block_list:
@@ -742,7 +741,7 @@ class Diagram(Savable, Structurable):
 
 		"""
 		### shape list of diagram
-		shape_list = diagram.GetShapeList()
+		shape_list = set(diagram.GetShapeList())
 
 		#### for all codeBlock and containerBlock shapes, we make the devs instance
 		for m in [s for s in shape_list if isinstance(s, (CodeBlock, ContainerBlock))]:
@@ -787,7 +786,8 @@ class Diagram(Savable, Structurable):
 		### no models in diagram
 		else:
 			wx.MessageBox(_("Diagram is empty.\n\nPlease, drag-and-drop model from libraries control panel to build a diagram or load an existing diagram."),_('Error Manager'))
-
+	
+	@BuzyCursorNotification
 	def OnSimulation(self, event):
 		""" Method calling the simulationGUI
 		"""
@@ -806,7 +806,7 @@ class Diagram(Savable, Structurable):
 			diagram = self
 
 			### Check if all models doesn't contain errors
-			D = self.DoCheck()
+			D = None #self.DoCheck()
 
 			### if there is no error in models
 			if D is not None:
@@ -818,7 +818,7 @@ class Diagram(Savable, Structurable):
 				playSound(SIMULATION_ERROR_SOUND_PATH)
 
 				if dial.ShowModal() == wx.ID_YES:
-					frame = CheckerGUI.CheckerGUI(win, self.DoCheck())
+					frame = CheckerGUI.CheckerGUI(win, D)
 					frame.SetDiagram(self)
 					frame.Show()
 
@@ -1006,29 +1006,24 @@ class Diagram(Savable, Structurable):
 	def PopShape(self,index=-1):
 		""" Function that pop the shape at the index position
 		"""
-
 		return self.shapes.pop(index)
 
 	def DeleteAllShapes(self):
 		""" Method that delete all shapes
 		"""
-
 		del self.shapes[:]
-
 		self.modify = True
 		self.parent.DiagramModified()
 
 	def ChangeShapeOrder(self, shape, pos=0):
 		"""
 		"""
-
 		self.shapes.remove(shape)
 		self.shapes.insert(pos,shape)
 
 	def GetCount(self):
 		""" Function that return the number of shapes that composed the diagram
 		"""
-
 		return len(self.shapes)
 
 	def GetFlatBlockShapeList(self, l=[]):
@@ -1067,7 +1062,6 @@ class Diagram(Savable, Structurable):
 	def GetShapeList(self):
 		""" Function that return the shapes list
 		"""
-
 		return self.shapes
 
 	def GetConnectionShapeGenerator(self):
@@ -1078,56 +1072,52 @@ class Diagram(Savable, Structurable):
 	def GetBlockCount(self):
 		""" Function that return the number of Block shape
 		"""
-
 		return self.GetCodeBlockCount()+self.GetContainerBlockCount()
 
 	def GetCodeBlockCount(self):
 		""" Function that return the number of codeBlock shape
 		"""
-
 		return self.deletedCodeBlockId.pop() if self.deletedCodeBlockId else self.nbCodeBlock
 
 	def GetContainerBlockCount(self):
 		""" Function that return the number of containerBlock shape
 		"""
-
 		return self.deletedContainerBlockId.pop() if self.deletedContainerBlockId else self.nbContainerBlock
 
 	def GetiPortCount(self):
 		""" Function that return the number of iPort shape
 		"""
-
 		return self.deletediPortId.pop() if self.deletediPortId else self.nbiPort
 
 	def GetoPortCount(self):
 		""" Function that return the number of oPort shape
 		"""
-
 		return self.deletedoPortId.pop() if self.deletedoPortId else self.nboPort
 
 	def Clean(self):
 		""" Clean DEVS instances attached to all block model in the diagram.
 		"""
+		if not self.devsModel:
+			return
 
-		if self.devsModel:
-			for devs in [a for a in list(self.devsModel.getFlatComponentSet().values()) if hasattr(a, 'finish')]:
-				try:
-					Publisher.unsubscribe(devs.finish, "%d.finished"%(id(devs)))
-				except:
-					sys.stdout.write(_("Impossible to execute the finish method for the model %s!\n")%devs)
-					devs.finish(None)
-						
-			self.devsModel.setComponentSet([])
+		for devs in [a for a in list(self.devsModel.getFlatComponentSet().values()) if hasattr(a, 'finish')]:
+			try:
+				Publisher.unsubscribe(devs.finish, "%d.finished"%(id(devs)))
+			except:
+				sys.stdout.write(_("Impossible to execute the finish method for the model %s!\n")%devs)
+				devs.finish(None)
 
-			for m in self.GetShapeList():
-				m.setDEVSModel(None)
+		self.devsModel.setComponentSet([])
 
-				if isinstance(m, ConnectionShape):
-					m.input[0].setDEVSModel(None)
-					m.output[0].setDEVSModel(None)
+		for m in self.GetShapeList():
+			m.setDEVSModel(None)
 
-				if isinstance(m, ContainerBlock):
-					m.Clean()
+			if isinstance(m, ConnectionShape):
+				m.input[0].setDEVSModel(None)
+				m.output[0].setDEVSModel(None)
+
+			if isinstance(m, ContainerBlock):
+				m.Clean()
 
 	def GetStat(self, d):
 		""" Get information about diagram like the numbe rof atomic model or the number of link between models.
@@ -1272,7 +1262,7 @@ class Shape(ShapeEvtHandler):
 		if not self.lock_flag:
 			self.x = array.array('d', [v+x for v in self.x])
 			self.y = array.array('d', [v+y for v in self.y])
-
+			
 	#def OnResize(self):
 	#	""" Resize method controled by ResizeNode move method
 	#	"""
@@ -2577,129 +2567,28 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			tb = win.GetToolBar()
 			tb.EnableTool(Menu.ID_SAVE, self.diagram.modify)
 
-		###
-		def OnMotion(self, event):
-			""" Motion manager.
-			""" 
+		def ShowQuickAttributeEditor(self):
+			"""
+			"""
+			# mouse positions
+			xwindow, ywindow = wx.GetMousePosition()
 
-			if event.Dragging() and event.LeftIsDown():
+			xm,ym = self.ScreenToClient(wx.Point(xwindow, ywindow))
 
-				self.diagram.modify = False
+			mainW = self.GetTopLevelParent()
 
-				point = self.getEventCoordinates(event)
-				x = point[0] - self.currentPoint[0]
-				y = point[1] - self.currentPoint[1]
+			flag = True
+			### find if window exists on the top of model, then inactive the QuickAttributeEditor
+			for win in [w for w in mainW.GetChildren() if w.IsTopLevel()]:
+				if win.IsActive():
+					flag = False
 
-				for s in self.getSelectedShapes():
-					s.move(x,y)
+			if self.f:
+				self.f.Close()
+				self.f = None
 
-					### change cursor when resizing model
-					if isinstance(s, ResizeableNode):
-						self.SetCursor(wx.StockCursor(wx.CURSOR_SIZING))
-
-					### change cursor when connectionShape hit a node
-					elif isinstance(s, ConnectionShape):
-						### dot trace to prepare connection
-						if len(s.pen)>2:
-							s.pen[2]= wx.PENSTYLE_DOT
-
-						self.SetCursor(wx.StockCursor(wx.CURSOR_HAND))
-
-						for node in [n for n in self.nodes if isinstance(n, ConnectableNode)]:
-							if node.HitTest(point[0], point[1]):
-								self.SetCursor(wx.StockCursor(wx.CURSOR_CROSS))
-							#else:
-								#self.SetCursor(wx.StockCursor(wx.CURSOR_HAND))
-
-						## list of shape connected to the connectionShape (for exclude these of the catching engine)
-						#L = s.input or ()
-						#L += s.output or ()
-
-						#### try to catch connectionShape with block
-						#for ss in filter(lambda n: (isinstance(n, Block) or isinstance(n, Port) ) and n not in L, self.diagram.shapes):
-							#touch = False
-							#for line in range(len(s.x)-1):
-								#try:
-									#### get a and b coeff for linear equation
-									#a = (s.y[line]-s.y[line+1])/(s.x[line]-s.x[line+1])
-									#b = s.y[line] -a*s.x[line]
-									#### X and Y points of linear equation
-									#X = range(int(s.x[line]), int(s.x[line+1]))
-									#Y = map(lambda x: a*x+b,X)
-									## if one point of the connectionShape hit the shape, we chage its geometry
-									#for px,py in zip(X, Y):
-										#if ss.HitTest(px,py):
-											#touch=True
-								#except ZeroDivisionError:
-									#pass
-							## if ss is crossed, we add it on the containerShape touch_list
-							#if touch:
-								#if ss not in s.touch_list:
-									#s.touch_list.append(ss)
-					else:
-						self.SetCursor(wx.StockCursor(wx.CURSOR_HAND))
-						pass
-
-					self.diagram.modify = True
-
-				self.currentPoint = point
-
-				if self.getSelectedShapes() == []:
-					# User is dragging the mouse, check if
-					# left button is down
-					if self.HasCapture():
-						
-						self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
-						
-						dc = wx.ClientDC(self)
-						odc = wx.DCOverlay(self.overlay, dc)
-						odc.Clear()
-						if wx.VERSION_STRING < '4.0':
-							ctx = wx.GraphicsContext_Create(dc)
-						else:
-							ctx = wx.GraphicsContext.Create(dc)
-
-						ctx.SetPen(wx.GREY_PEN)
-						ctx.SetBrush(wx.Brush(wx.Colour(229,229,229,80)))
-						if wx.VERSION_STRING < '4.0':
-							ctx.DrawRectangle(*wx.RectPP(self.selectionStart, event.Position))
-						else:
-							try:
-								ctx.DrawRectangle(*wx.Rect(self.selectionStart, event.Position))
-							except TypeError:
-								pass
-							
-						del odc
-					else:
-						self.Refresh()
-				else:
-					### refresh all canvas with Flicker effect corrected in OnPaint and OnEraseBackground
-					self.Refresh()
-
-			# gestion du pop up pour la modification du nombre de port
-			else:
-
-				# mouse postions
-				xwindow, ywindow = wx.GetMousePosition()
-
-				if wx.VERSION_STRING < '4.0':
-					xm,ym = self.ScreenToClientXY(xwindow, ywindow)
-				else:
-					xm,ym = self.ScreenToClient(wx.Point(xwindow, ywindow))
-
-				mainW = self.GetTopLevelParent()
-
-				flag = True
-				### find if window exists on the top of model, then inactive the QuickAttributeEditor
-				for win in [w for w in mainW.GetChildren() if w.IsTopLevel()]:
-					if win.IsActive():
-						flag = False
-
-				if self.f:
-					self.f.Close()
-					self.f = None
-
-				for s in [m for m in self.diagram.GetShapeList() if isinstance(m, Block)]:
+			if flag:
+				for s in {m for m in self.diagram.GetShapeList() if isinstance(m, Block) and self.isSelected(m)}:
 					x = s.x[0]*self.scalex
 					y = s.y[0]*self.scaley
 					w = (s.x[1]-s.x[0])*self.scalex
@@ -2709,18 +2598,88 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					try:
 
 						if (x<=xm and xm < x+w) and (y<=ym and ym < y+h):
-							if self.isSelected(s) and flag:
-								self.f = QuickAttributeEditor(self, wx.NewIdRef(), s)
-								self.timer.Start(1200)
-								break
-							else:
-								if self.timer.IsRunning():
-									self.timer.Stop()
+							#if self.isSelected(s) and flag:
+							self.f = QuickAttributeEditor(self, wx.NewIdRef(), s)
+							self.timer.Start(1000)
+							break
+						else:
+							if self.timer.IsRunning():
+								self.timer.Stop()
 
 					except AttributeError as info:
 						raise AttributeError(_("use >= wx-2.8-gtk-unicode library: %s")%info)
 
-			self.DiagramModified()
+		###
+		def OnMotion(self, event):
+			""" Motion manager.
+			""" 
+
+			if event.Dragging() and event.LeftIsDown():
+
+				self.diagram.modify = False
+
+				sc = self.getSelectedShapes()
+	
+				if len(sc) == 0:
+					# User is dragging the mouse, check if
+					# left button is down
+					if self.HasCapture():
+						
+						self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
+						
+						dc = wx.ClientDC(self)
+						odc = wx.DCOverlay(self.overlay, dc)
+						odc.Clear()
+						ctx = wx.GraphicsContext.Create(dc)
+
+						ctx.SetPen(wx.GREY_PEN)
+						ctx.SetBrush(wx.Brush(wx.Colour(229,229,229,80)))
+						
+						try:
+							ctx.DrawRectangle(*wx.Rect(self.selectionStart, event.Position))
+						except TypeError:
+							pass
+							
+						del odc
+					else:
+						self.Refresh()
+				else:
+					point = self.getEventCoordinates(event)
+					x = point[0] - self.currentPoint[0]
+					y = point[1] - self.currentPoint[1]
+
+					for s in sc:
+						s.move(x,y)
+
+						### change cursor when resizing model
+						if isinstance(s, ResizeableNode):
+							self.SetCursor(wx.StockCursor(wx.CURSOR_SIZING))
+
+						### change cursor when connectionShape hit a node
+						elif isinstance(s, ConnectionShape):
+							### dot trace to prepare connection
+							if len(s.pen)>2:
+								s.pen[2]= wx.PENSTYLE_DOT
+
+							self.SetCursor(wx.StockCursor(wx.CURSOR_HAND))
+
+							for node in [n for n in self.nodes if isinstance(n, ConnectableNode)]:
+								if node.HitTest(point[0], point[1]):
+									self.SetCursor(wx.StockCursor(wx.CURSOR_CROSS))
+						else:
+							self.SetCursor(wx.StockCursor(wx.CURSOR_HAND))
+
+					self.diagram.modify = True
+					self.currentPoint = point
+
+					### refresh all canvas with Flicker effect corrected in OnPaint and OnEraseBackground
+					self.Refresh()
+
+			# pop-up to change the number of ports
+			else:
+				self.ShowQuickAttributeEditor()
+
+			#self.DiagramModified()
 
 #		def SetDiagram(self, diagram):
 #			""" Setter for diagram attribute.
@@ -4141,6 +4100,25 @@ class ConnectableNode(Node):
 		self.cf.deselect(self.item)
 		event.Skip()
 
+	def OnRightDown(self, event):
+		""" Left Down click has been invoked
+		"""
+		### dialog to ask new port label
+		
+		old_label = self.label
+
+		d = wx.TextEntryDialog(None, _('New Label'), value = old_label, style=wx.OK)
+		d.ShowModal()
+
+		### new label
+		new_label = d.GetValue()
+
+		### only if new and old label are different
+		if new_label != old_label:
+			self.label = new_label
+		
+		event.Skip()
+
 	def HitTest(self,x,y):
 		""" Collision detection method.
 		"""
@@ -4165,13 +4143,7 @@ class INode(ConnectableNode):
 		"""
 		ConnectableNode.__init__(self, item, index, cf)
 
-		self.label = "in%d"%self.index
-
-	def OnRightDown(self, event):
-		""" Right Down event has been received.
-		"""
-		pass
-		#event.Skip()
+		self.label = f"in{self.index}"
 
 	def move(self, x, y):
 		""" Move method.

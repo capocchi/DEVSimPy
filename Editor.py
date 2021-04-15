@@ -879,9 +879,9 @@ class EditionNotebook(wx.Notebook):
 		try:
 			canvas = self.GetPage(self.GetSelection())
 
-			### permet d'activer les redo et undo pour chaque page
-			self.parent.tb.EnableTool(wx.ID_UNDO, not len(canvas.stockUndo) == 0)
-			self.parent.tb.EnableTool(wx.ID_REDO, not len(canvas.stockRedo) == 0)
+			### allows to activate redo and undo for each page
+			self.parent.tb.EnableTool(wx.ID_UNDO, len(canvas.stockUndo) != 0)
+			self.parent.tb.EnableTool(wx.ID_REDO, len(canvas.stockRedo) != 0)
 
 			canvas.deselect()
 			canvas.Refresh()
@@ -2082,7 +2082,7 @@ class BlockBase(object):
 		info = ReloadModule.recompile(module_name)
 
 		cp = self.nb.GetCurrentPage()
-		cp.error_flag = isinstance(info, Exception) or isinstance(info, str)
+		cp.error_flag = isinstance(info, (Exception, str))
 
 		if cp.error_flag:
 			wx.MessageBox(_('Error saving file:\n%s')%str(info), \
