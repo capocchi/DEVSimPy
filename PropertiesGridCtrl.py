@@ -778,8 +778,10 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 	def OnGridColSort(self, event):
 		"""
 		"""
-		self.SetSortingColumn(event.Getcol())
-
+		try:
+			self.SetSortingColumn(event.Getcol())
+		except AttributeError:
+			pass
 	###
 	def OnEditCell(self, evt):
 		"""

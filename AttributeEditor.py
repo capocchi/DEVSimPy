@@ -243,6 +243,8 @@ class QuickAttributeEditor(wx.Frame, Subject):
 
 	###
 	def __do_layout(self):
+		"""
+		"""
 		sizer_1 = wx.BoxSizer(wx.HORIZONTAL)
 		sizer_1.Add(self._sb_input, 0, wx.ADJUST_MINSIZE, 0)
 		sizer_1.Add(self._sb_output, 0, wx.ADJUST_MINSIZE, 0)
@@ -252,30 +254,42 @@ class QuickAttributeEditor(wx.Frame, Subject):
 
 	###
 	def __set_binding(self):
+		"""
+		"""
 		self._sb_input.Bind(wx.EVT_TEXT, self.OnInput)
 		self._sb_output.Bind(wx.EVT_TEXT, self.OnOuput)
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 
 	@Post_Undo
 	def OnInput(self, event):
+		"""
+		"""
 		self.__state['input'] = self._sb_input.GetValue()
 		self.notify()
 
 	@Post_Undo
 	def OnOuput(self, event):
+		"""
+		"""
 		self.__state['output'] = self._sb_output.GetValue()
 		self.notify()
 
 	###
 	def GetState(self):
+		"""
+		"""
 		return self.__state
 
 	###
 	def Undo(self):
+		"""
+		"""
 		self.canvas.Undo()
 
 	###
 	def OnClose(self, event):
+		"""
+		"""
 		self.Destroy()
 		event.Skip()
 
