@@ -2780,8 +2780,20 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				
 				item.OnSelect(None)
 				if isinstance(item, Connectable):
-					self.nodes.extend([INode(item, n, self) for n in range(item.input)])
-					self.nodes.extend([ONode(item, n, self) for n in range(item.output)])
+					for n in range(item.input):
+						if n in item.getInputLabels():
+							self.nodes.append(INode(item, n, self, item.getInputLabel(n)))
+						else:
+							self.nodes.append(INode(item, n, self))
+
+					for n in range(item.output):
+						if n in item.getOutputLabels():
+							self.nodes.append(ONode(item, n, self, item.getOutputLabel(n)))
+						else:
+							self.nodes.append(ONode(item, n, self))
+
+					# self.nodes.extend([INode(item, n, self) for n in range(item.input)])
+					# self.nodes.extend([ONode(item, n, self) for n in range(item.output)])
 				if isinstance(item, Resizeable):
 					self.nodes.extend([ResizeableNode(item, n, self) for n in range(len(item.x))])
 					
@@ -3203,7 +3215,6 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 	""" ConnectionShape class
 	"""
 
-
 	def __init__(self):
 		""" Constructor
 		"""
@@ -3221,8 +3232,6 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 	def __setstate__(self, state):
 		""" Restore state from the unpickled state values.
 		"""
-
-
 		####################################" Just for old model
 		if 'touch_list' not in state: state['touch_list'] = []
 		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
@@ -3231,19 +3240,28 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		self.__dict__.update(state)
 
 	def setInput(self, item, index):
+		"""
+		"""
 		self.input = (item, index)
 
 	def setOutput(self, item, index):
+		"""
+		"""
 		self.output = (item, index)
 
 	def getInput(self):
+		"""
+		"""
 		return self.input
 
 	def getOutput(self):
+		"""
+		"""
 		return self.output
 
 	def draw(self, dc):
-
+		"""
+		"""
 		if self.input:
 			self.x[0], self.y[0] = self.input[0].getPortXY('output', self.input[1])
 
@@ -3431,6 +3449,8 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		f.Show()
 		
 	def OnPluginsManager(self, event):
+		"""
+		"""
 		canvas = event.GetEventObject()
 		f = PluginsGUI.ModelPluginsManager(	parent=canvas.GetParent(),
 									id=wx.NewIdRef(),
@@ -3533,6 +3553,12 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 							### find index of label priority list and replace it
 							i = diagram.priority_list.index(old_label)
 							diagram.priority_list[i] = new_label
+
+				### clear custom port labels if their number change 
+				# if prop == 'input':
+					# self.setInputLabels({})
+				# if prop == 'output':
+					# self.setOutputLabels({})
 
 				### clear manager : direct update only for image_path propertie
 				if val not in ('',[],{}) or (prop == 'image_path' and val == ""):
@@ -3790,15 +3816,16 @@ class CodeBlock(Achievable, Block):
 		if 'label_pos' not in state: state['label_pos'] = 'center'
 		if 'input_direction' not in state: state['input_direction'] = 'ouest'
 		if 'output_direction' not in state: state['output_direction'] = 'est'
-		##############################################
+		if '_input_labels' not in state: state['_input_labels'] = {}
+		if '_output_labels' not in state: state['_output_labels'] = {}
+ 		##############################################
 
 		self.__dict__.update(state)
 		if new_class:
 			self.__class__ = new_class
 
+	###
 	def __getstate__(self):
-		"""
-		"""
 		"""Return state values to be pickled."""
 		return Achievable.__getstate__(self)
 
@@ -3808,7 +3835,7 @@ class CodeBlock(Achievable, Block):
 		"""
 		if name == 'dump_attributes':
 			#return ['model_path', 'python_path', 'args'] + self.GetAttributes()
-			return ['args'] + self.GetAttributes()
+			return ['args'] + Connectable.DUMP_ATTR + self.GetAttributes()
 		#=======================================================================
 		elif name == 'dump_abstr_attributes':
 			### Atomic model has no abstract attributes
@@ -3817,9 +3844,9 @@ class CodeBlock(Achievable, Block):
 		else:
 			raise AttributeError(name)
 
-
 	def draw(self, dc):
-
+		"""
+		"""
 		if self.selected:
 			### inform about the nature of the block using icon
 			name = 'atomic3.png' if self.model_path != "" else 'pythonFile.png' if self.python_path.endswith('.py') else 'pyc.png' 
@@ -3832,7 +3859,6 @@ class CodeBlock(Achievable, Block):
 	def OnLeftDClick(self, event):
 		""" On left double click event has been invoked.
 		"""
-
 		self.OnProperties(event)
 		event.Skip()
 
@@ -3994,6 +4020,8 @@ class ContainerBlock(Block, Diagram):
 		if 'label_pos' not in state:state['label_pos'] = 'center'
 		if 'input_direction' not in state: state['input_direction'] = 'ouest'
 		if 'output_direction' not in state: state['output_direction'] = 'est'
+		if '_input_labels' not in state: state['_intput_labels'] = {}
+		if '_output_labels' not in state: state['_output_labels'] = {}
 		#####################################
 
 		self.__dict__.update(state)
@@ -4009,7 +4037,7 @@ class ContainerBlock(Block, Diagram):
 
 		if name == 'dump_attributes':
 			#return ['shapes', 'priority_list', 'constants_dico', 'model_path', 'python_path','args'] + self.GetAttributes()
-			return ['shapes', 'priority_list', 'constants_dico','args'] + self.GetAttributes()
+			return ['shapes', 'priority_list', 'constants_dico','args'] + Connectable.DUMP_ATTR +self.GetAttributes()
 		#=======================================================================
 		elif name == 'dump_abstr_attributes':
 			return Abstractable.DUMP_ATTR if hasattr(self, 'layers') and hasattr(self, 'current_level') else []
@@ -4017,9 +4045,9 @@ class ContainerBlock(Block, Diagram):
 		else:
 			raise AttributeError(name)
 
-
 	def draw(self, dc):
-
+		"""
+		"""
 		if self.selected:
 			### inform about the nature of the block using icon
 			img = wx.Bitmap(os.path.join(ICON_PATH_16_16, 'coupled3.png'), wx.BITMAP_TYPE_ANY)
@@ -4100,25 +4128,6 @@ class ConnectableNode(Node):
 		self.cf.deselect(self.item)
 		event.Skip()
 
-	def OnRightDown(self, event):
-		""" Left Down click has been invoked
-		"""
-		### dialog to ask new port label
-		
-		old_label = self.label
-
-		d = wx.TextEntryDialog(None, _('New Label'), value = old_label, style=wx.OK)
-		d.ShowModal()
-
-		### new label
-		new_label = d.GetValue()
-
-		### only if new and old label are different
-		if new_label != old_label:
-			self.label = new_label
-		
-		event.Skip()
-
 	def HitTest(self,x,y):
 		""" Collision detection method.
 		"""
@@ -4138,12 +4147,12 @@ class INode(ConnectableNode):
 	""" INode(item, index, cf)
 	"""
 
-	def __init__(self, item, index, cf):
+	def __init__(self, item, index, cf, label=None):
 		""" Constructor.
 		"""
 		ConnectableNode.__init__(self, item, index, cf)
 
-		self.label = f"in{self.index}"
+		self.label = f"in{self.index}" if not label else label
 
 	def move(self, x, y):
 		""" Move method.
@@ -4155,6 +4164,38 @@ class INode(ConnectableNode):
 		self.cf.diagram.shapes.insert(0, ci)
 		self.cf.showOutputs()
 		self.cf.select(ci)
+
+	def OnRightDown(self, event):
+		""" Left Down click has been invoked
+		"""
+		### dialog to ask new port label
+		
+		menu = Menu.NodePopupMenu(self)
+		### Show popup_menu
+		canvas = event.GetEventObject()
+		canvas.PopupMenu(menu, event.GetPosition())
+		### destroy menu local variable
+		menu.Destroy()
+		
+		event.Skip()
+
+	def OnEditLabel(self, event):
+		""" Function called by the OnRightDown call event function
+		"""
+		### old label
+		old_label = self.label
+
+		### ask tne new label
+		d = wx.TextEntryDialog(None, _('New Input Label'), value = old_label, style=wx.OK)
+		d.ShowModal()
+
+		### new label
+		new_label = d.GetValue()
+
+		### only if new and old label are different
+		if new_label != old_label:
+			self.label = new_label
+			self.item.addInputLabels(self.index, self.label)
 
 	def leftUp(self, items):
 		""" Left up action has been invocked.
@@ -4211,12 +4252,12 @@ class ONode(ConnectableNode):
 	""" ONode(item, index, cf)
 	"""
 
-	def __init__(self, item, index, cf):
+	def __init__(self, item, index, cf, label=None):
 		""" Constructor.
 		"""
 		ConnectableNode.__init__(self, item, index, cf)
 
-		self.label = "out%d"%self.index
+		self.label = "out%d"%self.index if not label else label
 
 	def move(self, x, y):
 		""" Moving method.
@@ -4228,6 +4269,26 @@ class ONode(ConnectableNode):
 		self.cf.diagram.shapes.insert(0, ci)
 		self.cf.showInputs()
 		self.cf.select(ci)
+
+	def OnRightDown(self, event):
+		""" Left Down click has been invoked
+		"""
+		### dialog to ask new port label
+		
+		old_label = self.label
+
+		d = wx.TextEntryDialog(None, _('New Output Label'), value = old_label, style=wx.OK)
+		d.ShowModal()
+
+		### new label
+		new_label = d.GetValue()
+
+		### only if new and old label are different
+		if new_label != old_label:
+			self.label = new_label
+			self.item.addOutputLabels(self.index, self.label)
+		
+		event.Skip()
 
 	def leftUp(self, items):
 		""" Left up action has been invocked
@@ -4379,6 +4440,8 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 			state['attributes'].insert(1,'label_pos')
 		if 'output_direction' not in state: state['output_direction'] ="est"
 		if 'input_direction' not in state: state['input_direction'] = "ouest"
+		if '_input_labels' not in state: state['_input_labels'] = {}
+		if '_output_labels' not in state: state['_output_labels'] = {}
 		##############################################
 
 		self.__dict__.update(state)

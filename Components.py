@@ -507,7 +507,7 @@ class AMDComponent(GenericComponent):
 		else:
 			### mandatory due to the LoadFile call before
 			m.label = label
-			
+			print(filename,m)
 			return AMDComponent.ChekFilename(filename, m)
 
 	@staticmethod

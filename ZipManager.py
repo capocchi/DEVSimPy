@@ -153,7 +153,7 @@ class Zip:
 		### delete empty fileName
 		replace_files = [f for f in replace_files if f!='']
 
-		# call this function because : http://www.digi.com/wiki/developer/index.php/Error_messages
+		# call this function because: http://www.digi.com/wiki/developer/index.php/Error_messages
 		Zip.ClearCache(self.fn)
 
 		zin = zipfile.ZipFile(self.fn, 'r')
@@ -176,6 +176,7 @@ class Zip:
 				except UnicodeDecodeError as info:
 					zout.writestr(base_name, data)
 				else:
+					exclude_file.append(replace_files.index(fn))
 					sys.stdout.write("%s not rewrite\n"%(fn))
 				
 				#sys.stdout.write("update %s from compressed %s\n"%(base_name, fn))
