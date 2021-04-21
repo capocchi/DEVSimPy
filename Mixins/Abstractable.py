@@ -28,7 +28,7 @@ _ = gettext.gettext
 from Mixins.Attributable import Attributable
 
 import Container
-import Components
+# import Components
 
 #---------------------------------------------------------
 class Abstractable:

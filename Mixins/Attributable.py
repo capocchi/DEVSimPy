@@ -49,7 +49,6 @@ class Attributable:
 
 		if not hasattr(self, name):
 			setattr(self, name, typ)
-
 			self.attributes.append(name)
 
 	###

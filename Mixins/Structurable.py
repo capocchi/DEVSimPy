@@ -21,7 +21,6 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 import Components
-
 class Structurable(Components.DEVSComponent):
 	""" Structurable class interface for DEVS coupled model integration.
 	"""
