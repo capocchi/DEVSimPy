@@ -274,18 +274,21 @@ class DumpZipFile(DumpBase):
 			return info
 	
 		### Check comparison between serialized attribut (L) and normal attribut (dump_attributes)
-		### for model build with a version of devsimpy <= 2.5
-		### font checking
+		
 		if len(obj_loaded.dump_attributes) != len(L):
-		 	if fileName.endswith(DumpZipFile.ext[-1]):
-		 		if not isinstance(L[9], list):
-		 			import wx
-		 			L.insert(9, [FONT_SIZE, 74, 93, 700, 'Arial'])
-		 	else:
-		 		if not isinstance(L[6], list):
-		 			import wx
-		 			L.insert(6, [FONT_SIZE, 74, 93, 700, 'Arial'])
-
+			### for model build with a version of devsimpy <= 2.5
+			### font checking
+			# if fileName.endswith(DumpZipFile.ext[-1]):
+			# 	if not isinstance(L[9], list):
+			# 		import wx
+			# 		L.insert(9, [FONT_SIZE, 74, 93, 700, 'Arial'])
+			# else:
+			# 	if not isinstance(L[6], list):
+			# 		import wx
+			# 		L.insert(6, [FONT_SIZE, 74, 93, 700, 'Arial'])
+			### for model build with a version of DEVSimPy <=4.0
+			### Connectable._inputLabel and Connectable._outpuLabel 
+			L = [{},{}]+L
 		#=======================================================================
 
 		### abstraction hierarchy checking
@@ -294,7 +297,8 @@ class DumpZipFile(DumpBase):
 
 		#=======================================================================
 
-		### for amd and cmd build after the implementation of the rename method of model in libratie
+		print(L)
+		### for amd and cmd build after the implementation of the rename method of model in librarie
 		### This may present an opportunity for the delete of the model_path and python_path of the .amd or .cmd compressed file.
 		if abs(len(L)-len(obj_loaded.dump_attributes))==2:
 			L=L[2:]

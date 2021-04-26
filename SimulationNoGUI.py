@@ -133,7 +133,7 @@ def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True
             while thread.isAlive() if hasattr(thread,'isAlive') else thread.is_alive():
                 new_real_time = time.time()
                 CPUduration = new_real_time - first_real_time
-                new_progress = 100.0*(thread.model.timeLast / T)
+                new_progress = 100.0*(float(thread.model.timeLast) / float(T))
                 if new_progress - progress > 5:
                     progress = new_progress
                     simuPusher.push('progress', {'progress':progress}) 
