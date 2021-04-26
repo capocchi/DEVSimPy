@@ -2781,13 +2781,15 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				item.OnSelect(None)
 				if isinstance(item, Connectable):
 					for n in range(item.input):
-						if n in item.getInputLabels():
+						a = item.getInputLabels()
+						if isinstance(a,list) and n in a:
 							self.nodes.append(INode(item, n, self, item.getInputLabel(n)))
 						else:
 							self.nodes.append(INode(item, n, self))
 
+					b = item.getOutputLabels()
 					for n in range(item.output):
-						if n in item.getOutputLabels():
+						if isinstance(b,list) and n in b:
 							self.nodes.append(ONode(item, n, self, item.getOutputLabel(n)))
 						else:
 							self.nodes.append(ONode(item, n, self))
@@ -3662,6 +3664,8 @@ class CodeBlock(Achievable, Block):
 		### test if args from construcor in python file stored in library (on disk) and args from stored model in dsp are the same
 		if os.path.exists(python_path) or zipfile.is_zipfile(os.path.dirname(python_path)):
 			cls = Components.GetClass(state['python_path'])
+			### TODO
+			### local package imported into amd or cmd generates error ! (fcts...)
 			if not isinstance(cls, tuple):
 				args_from_stored_constructor_py = inspect.getargspec(cls.__init__).args[1:]
 				args_from_stored_block_model = state['args']
