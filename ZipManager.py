@@ -26,6 +26,7 @@ import types
 import importlib
 import pickle
 import tempfile
+import builtins
 	
 import gettext
 _ = gettext.gettext
@@ -424,18 +425,22 @@ class Zip:
 			### get the package name
 			package = sys.exc_info()[1].name
 
-			import wx
-			dial = wx.MessageDialog(None, _('%s package is needed by %s.\nDo you want to install it?')%(package,module_name), _('Required package'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
-			if dial.ShowModal() == wx.ID_YES:
-				### try to install
-				if install_and_import(package):
-					module = importer.load_module(module_name.split('.py')[0])
+			if builtins.__dict__['GUI_FLAG']:
+				import wx
+				dial = wx.MessageDialog(None, _('%s package is needed by %s.\nDo you want to install it?')%(package,module_name), _('Required package'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+				if dial.ShowModal() == wx.ID_YES:
+					### try to install
+					if install_and_import(package):
+						module = importer.load_module(module_name.split('.py')[0])
+					else:
+						module = None
 				else:
 					module = None
+					
+				dial.Destroy()
 			else:
-				module = None
-				
-			dial.Destroy()
+				sys.stdout.write(_(f"Please install {package}"))
+
 		except Exception as e:
 			return e
 		
