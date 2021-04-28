@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='devsimpy',  
-    version='3.0',
+    version='4.0',
      scripts=['devsimpy.py'] ,
      author="L. Capocchi",
      author_email="capocchi@univ-corse.fr",
@@ -15,7 +15,7 @@ setuptools.setup(
      url="https://github.com/capocchi/DEVSimPy",
      packages=setuptools.find_packages(),
      classifiers=[
-         "Programming Language :: Python :: 2",
+         "Programming Language :: Python :: 3",
          "License :: OSI Approved :: GPL v3.0",
          "Operating System :: OS Independent",
      ],
