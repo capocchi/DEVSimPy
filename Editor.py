@@ -1115,8 +1115,15 @@ class EditionNotebook(wx.Notebook):
 		"""
 		cp = self.GetCurrentPage()
 		cur_line = cp.GetCurrentLine()
-		cp.InsertText(cp.PositionFromLine(cur_line), "#")
-
+		selected_text = cp.GetStringSelection()
+		nb_lines = len(selected_text.split('\n'))
+		
+		a = cur_line+1-nb_lines
+		b = cur_line+1
+		
+		for i in range(a, b):
+			cp.InsertText(cp.PositionFromLine(i), "#")
+		
 	def OnUnComment(self, event):
 		""" Uncomment current line
 		"""
@@ -2008,6 +2015,10 @@ class BlockBase(object):
 
 		return new_instance
 
+	### 
+	def getBlock(self):
+		return self.cb
+
 	###
 	def UpdateArgs(self, new_args):
 		""" Update the args or constructor class from new_args.
@@ -2154,6 +2165,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		#if not parent:
 		self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'pythonFile.png'), wx.BITMAP_TYPE_PNG)))
 		self.ConfigureGUI()
+		
 		#else:
 		#	### in panel
 		#	self.ConfigureTB()
@@ -2170,67 +2182,75 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		set_submenu = wx.Menu()
 		new_submenu = wx.Menu()
 
-		### New items
-		peek = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Peek'), _('Generate new peek code'))
-		poke = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Poke'), _('Generate new poke code'))
-		holdInState = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Hold in state'), _('Generate new hold in state code self.holdIn(...)'))
-		phaseIs = wx.MenuItem(new_submenu, wx.NewIdRef(), _('PhaseIs test'), _('Generate phase test code self.phaseIs(...)'))
-		passivateInState = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Passivate in state'), _('Generate new passivate in state code self.passivateIn(...)'))
-		passivateState = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Passivate state'), _('Generate new passivate state code self.passivate(...)'))
+		block = self.getBlock()
+
+		if not block.isCMD():
+
+			### New items
+			peek = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Peek'), _('Generate new peek code'))
+			poke = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Poke'), _('Generate new poke code'))
+			holdInState = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Hold in state'), _('Generate new hold in state code self.holdIn(...)'))
+			phaseIs = wx.MenuItem(new_submenu, wx.NewIdRef(), _('PhaseIs test'), _('Generate phase test code self.phaseIs(...)'))
+			passivateInState = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Passivate in state'), _('Generate new passivate in state code self.passivateIn(...)'))
+			passivateState = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Passivate state'), _('Generate new passivate state code self.passivate(...)'))
+			
+			### getter items
+			getPortId = wx.MenuItem(get_submenu, wx.NewIdRef(), _('Port Id'), _('Get the port ID from port instance (self.getPortId(port)->int)'))
+			getMsgValue = wx.MenuItem(get_submenu, wx.NewIdRef(), _('Message value'), _('Get message value (self.getMsgValue(msg)->Object)'))
+			getMsgTime = wx.MenuItem(get_submenu, wx.NewIdRef(), _('Message time'), _('Get message time (self.getMsgTime(msg)->Object)'))
+			getSigma = wx.MenuItem(get_submenu, wx.NewIdRef(), _('Sigma value'), _('Get sigma value (self.getSigma()->float)'))
+			getStatus = wx.MenuItem(get_submenu, wx.NewIdRef(), _('Status value'), _('Get status value (self.getStatus()->str)'))
+			getState = wx.MenuItem(get_submenu, wx.NewIdRef(), _('State object'), _('Get state object (self.getState()->dict)'))
+			getElapsed = wx.MenuItem(get_submenu, wx.NewIdRef(), _('Elapsed time'), _('Get the elapsed time (self.elapsed)'))
+			
+			### setter items
+			setInitPhase = wx.MenuItem(set_submenu, wx.NewIdRef(), _('Init phase'), _('Set the phase (self.getInitPhase())'))
+			setStatus = wx.MenuItem(set_submenu, wx.NewIdRef(), _('Status value'), _("Set status value (self.setStatus('IDLE'))"))
+			setState = wx.MenuItem(set_submenu, wx.NewIdRef(), _('State object'), _("Set state object (self.setState({'status':'IDLE', 'sigma':0.0}))"))
+			setSigma = wx.MenuItem(set_submenu, wx.NewIdRef(), _('Sigma value'), _('Set sigma value (self.setSigma(0.0))'))
+
+			peek.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')))
+			poke.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')))
+			# getPortId.SetBitmap()
+			# getMsgValue.SetBitmap()
+			# getMsgTime.SetBitmap()
+			# setInitPhase.SetBitmap()
+			# getSigma.SetBitmap()
+			# getStatus.SetBitmap()
+			# getState.SetBitmap()
+			# holdInState.SetBitmap()
+			# phaseIs.SetBitmap()
+			# passivateInState.SetBitmap()
+			# passivateState.SetBitmap()
+			
+			new_submenu.Append(peek)
+			new_submenu.Append(poke)
+			new_submenu.AppendSeparator()
+			new_submenu.Append(holdInState)
+			new_submenu.Append(phaseIs)
+			new_submenu.Append(passivateInState)
+			new_submenu.Append(passivateState)
+			new_submenu.AppendSeparator()
+
+			set_submenu.Append(setInitPhase)
+			set_submenu.Append(setStatus)
+			set_submenu.Append(setState)
+			set_submenu.Append(setSigma)
+
+			get_submenu.Append(getState)
+			get_submenu.Append(getSigma)
+			get_submenu.Append(getStatus)
+			get_submenu.Append(getPortId)
+			get_submenu.Append(getMsgValue)
+			get_submenu.Append(getMsgTime)	
+			get_submenu.Append(getElapsed)
+
+		else:
+			pass
+
 		debug = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Debugger'), _('Generate new debugger code (print into the log of model)'))
-		
-		### getter items
-		getPortId = wx.MenuItem(get_submenu, wx.NewIdRef(), _('Port Id'), _('Get the port ID from port instance (self.getPortId(port)->int)'))
-		getMsgValue = wx.MenuItem(get_submenu, wx.NewIdRef(), _('Message value'), _('Get message value (self.getMsgValue(msg)->Object)'))
-		getMsgTime = wx.MenuItem(get_submenu, wx.NewIdRef(), _('Message time'), _('Get message time (self.getMsgTime(msg)->Object)'))
-		getSigma = wx.MenuItem(get_submenu, wx.NewIdRef(), _('Sigma value'), _('Get sigma value (self.getSigma()->float)'))
-		getStatus = wx.MenuItem(get_submenu, wx.NewIdRef(), _('Status value'), _('Get status value (self.getStatus()->str)'))
-		getState = wx.MenuItem(get_submenu, wx.NewIdRef(), _('State object'), _('Get state object (self.getState()->dict)'))
-		getElapsed = wx.MenuItem(get_submenu, wx.NewIdRef(), _('Elapsed time'), _('Get the elapsed time (self.elapsed)'))
-		
-		### setter items
-		setInitPhase = wx.MenuItem(set_submenu, wx.NewIdRef(), _('Init phase'), _('Set the phase (self.getInitPhase())'))
-		setStatus = wx.MenuItem(set_submenu, wx.NewIdRef(), _('Status value'), _("Set status value (self.setStatus('IDLE'))"))
-		setState = wx.MenuItem(set_submenu, wx.NewIdRef(), _('State object'), _("Set state object (self.setState({'status':'IDLE', 'sigma':0.0}))"))
-		setSigma = wx.MenuItem(set_submenu, wx.NewIdRef(), _('Sigma value'), _('Set sigma value (self.setSigma(0.0))'))
-
-		peek.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')))
-		poke.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')))
-		# getPortId.SetBitmap()
-		# getMsgValue.SetBitmap()
-		# getMsgTime.SetBitmap()
-		# setInitPhase.SetBitmap()
-		# getSigma.SetBitmap()
-		# getStatus.SetBitmap()
-		# getState.SetBitmap()
-		# holdInState.SetBitmap()
-		# phaseIs.SetBitmap()
-		# passivateInState.SetBitmap()
-		# passivateState.SetBitmap()
 		debug.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'debugger.png')))
-		
-		new_submenu.Append(peek)
-		new_submenu.Append(poke)
-		new_submenu.AppendSeparator()
-		new_submenu.Append(holdInState)
-		new_submenu.Append(phaseIs)
-		new_submenu.Append(passivateInState)
-		new_submenu.Append(passivateState)
-		new_submenu.AppendSeparator()
 		new_submenu.Append(debug)
-
-		set_submenu.Append(setInitPhase)
-		set_submenu.Append(setStatus)
-		set_submenu.Append(setState)
-		set_submenu.Append(setSigma)
-
-		get_submenu.Append(getState)
-		get_submenu.Append(getSigma)
-		get_submenu.Append(getStatus)
-		get_submenu.Append(getPortId)
-		get_submenu.Append(getMsgValue)
-		get_submenu.Append(getMsgTime)	
-		get_submenu.Append(getElapsed)
 
 		menu = self.GetMenuBar().GetMenu(1)
 		menu.Prepend(wx.NewIdRef(), _("Insert"), insert)
@@ -2246,43 +2266,47 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		#tb.InsertSeparator(tb.GetToolsCount())
 
 		if wx.VERSION_STRING < '4.0':
-			tb.AddTool(peek.GetId(), peek.GetBitmap(), shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
-			tb.AddTool(poke.GetId(), poke.GetBitmap(), shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
-			tb.AddTool(holdInState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New hold in state'), longHelpString=_('Insert a code for a new hold in state'))
-			tb.AddTool(passivateInState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New passivate in state'), longHelpString=_('Insert a code for a new passivate in state'))
-			tb.AddTool(passivateState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New passivate state'), longHelpString=_('Insert a code for a new passivate state'))
+			if not block.isCMD():
+				tb.AddTool(peek.GetId(), peek.GetBitmap(), shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
+				tb.AddTool(poke.GetId(), poke.GetBitmap(), shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
+				tb.AddTool(holdInState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New hold in state'), longHelpString=_('Insert a code for a new hold in state'))
+				tb.AddTool(passivateInState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New passivate in state'), longHelpString=_('Insert a code for a new passivate in state'))
+				tb.AddTool(passivateState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New passivate state'), longHelpString=_('Insert a code for a new passivate state'))
 			tb.AddTool(debug.GetId(), debug.GetBitmap(), shortHelp=_('New debugger'), shortHelpString=_('New debugger'), longHelpString=_('Insert a code for print information into the log of model'))
 		else:
-			tb.AddTool(peek.GetId(), "", peek.GetBitmap(), shortHelp=_('New peek'))
-			tb.AddTool(poke.GetId(), "", poke.GetBitmap(), shortHelp=_('New poke'))
-			tb.AddTool(holdInState.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelp=_('New hold in state'))
-			tb.AddTool(passivateInState.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelp=_('New passivate in state'))
-			tb.AddTool(passivateState.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelp=_('New passivate state'))
+			if not block.isCMD():
+				tb.AddTool(peek.GetId(), "", peek.GetBitmap(), shortHelp=_('New peek'))
+				tb.AddTool(poke.GetId(), "", poke.GetBitmap(), shortHelp=_('New poke'))
+				tb.AddTool(holdInState.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelp=_('New hold in state'))
+				tb.AddTool(passivateInState.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelp=_('New passivate in state'))
+				tb.AddTool(passivateState.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelp=_('New passivate state'))
+			
 			tb.AddTool(debug.GetId(), "", debug.GetBitmap(), shortHelp=_('New debugger'))
 		
 		tb.Realize()
 
-		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
-		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=poke.GetId())
-		self.Bind(wx.EVT_MENU, self.OnInsertHoldInState, id=holdInState.GetId())
-		self.Bind(wx.EVT_MENU, self.OnInsertPhaseIs, id=phaseIs.GetId())
-		self.Bind(wx.EVT_MENU, self.OnInsertPassivateInState, id=passivateInState.GetId())
-		self.Bind(wx.EVT_MENU, self.OnInsertPassivateState, id=passivateState.GetId())
-		self.Bind(wx.EVT_MENU, self.OnInsertDebug, id=debug.GetId())
+		if not block.isCMD():
+			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
+			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=poke.GetId())
+			self.Bind(wx.EVT_MENU, self.OnInsertHoldInState, id=holdInState.GetId())
+			self.Bind(wx.EVT_MENU, self.OnInsertPhaseIs, id=phaseIs.GetId())
+			self.Bind(wx.EVT_MENU, self.OnInsertPassivateInState, id=passivateInState.GetId())
+			self.Bind(wx.EVT_MENU, self.OnInsertPassivateState, id=passivateState.GetId())
 
-		self.Bind(wx.EVT_MENU, self.OnInsertGetState, id=getState.GetId())
-		self.Bind(wx.EVT_MENU, self.OnInsertGetStatus, id=getStatus.GetId())
-		self.Bind(wx.EVT_MENU, self.OnInsertGetSigma, id=getSigma.GetId())
-		self.Bind(wx.EVT_MENU, self.OnInsertGetPortId, id=getPortId.GetId())
-		self.Bind(wx.EVT_MENU, self.OnInsertGetMsgValue, id=getMsgValue.GetId())
-		self.Bind(wx.EVT_MENU, self.OnInsertGetMsgTime, id=getMsgTime.GetId())
-		self.Bind(wx.EVT_MENU, self.OnInsertGetElapsed, id=getElapsed.GetId())
+			self.Bind(wx.EVT_MENU, self.OnInsertGetState, id=getState.GetId())
+			self.Bind(wx.EVT_MENU, self.OnInsertGetStatus, id=getStatus.GetId())
+			self.Bind(wx.EVT_MENU, self.OnInsertGetSigma, id=getSigma.GetId())
+			self.Bind(wx.EVT_MENU, self.OnInsertGetPortId, id=getPortId.GetId())
+			self.Bind(wx.EVT_MENU, self.OnInsertGetMsgValue, id=getMsgValue.GetId())
+			self.Bind(wx.EVT_MENU, self.OnInsertGetMsgTime, id=getMsgTime.GetId())
+			self.Bind(wx.EVT_MENU, self.OnInsertGetElapsed, id=getElapsed.GetId())
+			
+			self.Bind(wx.EVT_MENU, self.OnInsertInitPhase, id=setInitPhase.GetId())
+			self.Bind(wx.EVT_MENU, self.OnInsertSetState, id=setState.GetId())
+			self.Bind(wx.EVT_MENU, self.OnInsertSetSigma, id=setSigma.GetId())
+			self.Bind(wx.EVT_MENU, self.OnInsertSetStatus, id=setStatus.GetId())
 		
-		self.Bind(wx.EVT_MENU, self.OnInsertInitPhase, id=setInitPhase.GetId())
-		self.Bind(wx.EVT_MENU, self.OnInsertSetState, id=setState.GetId())
-		self.Bind(wx.EVT_MENU, self.OnInsertSetSigma, id=setSigma.GetId())
-		self.Bind(wx.EVT_MENU, self.OnInsertSetStatus, id=setStatus.GetId())
-
+		self.Bind(wx.EVT_MENU, self.OnInsertDebug, id=debug.GetId())
 class BlockEditorPanel(BlockBase, EditorPanel):
 	""" Block Editor class which inherit of Editor class
 	"""
