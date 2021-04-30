@@ -33,6 +33,7 @@ import tabnanny
 import builtins
 import types
 import traceback
+import collections
 
 from traceback import format_exception, extract_tb
 from tempfile import gettempdir
@@ -1941,41 +1942,56 @@ class BlockBase(object):
 		self.cb = block
 		self.parent = parent
 
+		### define the choices of combo list for text insert functionality depending on the type of block
+		### choices object is ordderd dict to associate handlers
+		if self.cb:
+			if not self.cb.isCMD():
+				self._choices = collections.OrderedDict([(_('New peek'),self.OnPeek), 
+					(_('New poke'),self.OnPoke), (_('New hold in state'),self.OnInsertHoldInState), (_('New passivate in state'),self.OnInsertPassivateInState), 
+					(_('New passivate state'),self.OnInsertPassivateState), (_('New Phase test'),self.OnInsertPhaseIs), (_('New debugger stdout'),self.OnInsertDebug), 
+					(_('Get state'),self.OnInsertGetState), (_('Get sigma'),self.OnInsertGetSigma), (_('Get message value'),self.OnInsertGetMsgValue)])
+			else:
+				self._choices = collections.OrderedDict([(_('New debugger stdout'),self.OnInsertDebug)])
+		else:
+			self._choices = collections.OrderedDict()
+
+	def getChoices(self):
+		""" Return the list of choices for text insert function.
+		"""
+		return list(self._choices.keys())
+
+	def OnPeek(self)->None:
+		""" Insert the peek statement.
+		"""
+		sins = list(map(str, list(range(self.cb.input if hasattr(self.cb, 'input') else 10))))
+		dlg = wx.SingleChoiceDialog(self, _('Port number'), _('Which port?'), sins, wx.CHOICEDLG_STYLE)
+		port = dlg.GetStringSelection() if dlg.ShowModal() == wx.ID_OK else None
+		dlg.Destroy()
+
+		if port is not None:
+			cp = self.nb.GetCurrentPage()
+			cp.AddText("self.peek(self.IPorts[%d], *args)" % int(port))
+			self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+	
+	def OnPoke(self)->None:
+		"""Insert the poke statement.
+		"""
+		sins = list(map(str, list(range(self.cb.input if hasattr(self.cb, 'output') else 10))))
+		dlg = wx.SingleChoiceDialog(self, _('Port number'), _('Which port?'), sins, wx.CHOICEDLG_STYLE)
+		port = dlg.GetStringSelection() if dlg.ShowModal() == wx.ID_OK else None
+		dlg.Destroy()
+
+		if port is not None:
+			cp = self.nb.GetCurrentPage()
+			cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))" % int(port))
+			self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+
 	def OnCombo(self, event):
+		""" Combobox for the text insert function.
+		"""
 		choice = event.GetString()
-		if choice == "New peek":
-			sins = list(map(str, list(range(self.cb.input if hasattr(self.cb, 'input') else 10))))
-			dlg = wx.SingleChoiceDialog(self, _('Port number'), _('Which port?'), sins, wx.CHOICEDLG_STYLE)
-			port = dlg.GetStringSelection() if dlg.ShowModal() == wx.ID_OK else None
-			dlg.Destroy()
-
-			if port is not None:
-				cp = self.nb.GetCurrentPage()
-				cp.AddText("self.peek(self.IPorts[%d], *args)" % int(port))
-				self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
-
-		elif choice == "New poke":
-			sins = list(map(str, list(range(self.cb.input if hasattr(self.cb, 'output') else 10))))
-			dlg = wx.SingleChoiceDialog(self, _('Port number'), _('Which port?'), sins, wx.CHOICEDLG_STYLE)
-			port = dlg.GetStringSelection() if dlg.ShowModal() == wx.ID_OK else None
-			dlg.Destroy()
-
-			if port is not None:
-				cp = self.nb.GetCurrentPage()
-				cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))" % int(port))
-				self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
-		elif choice ==  "New hold in state":
-			self.OnInsertHoldInState(event)
-		elif choice == 'New passivate in state':
-			self.OnInsertPassivateInState(event)
-		elif choice == 'New passivate state':
-			self.OnInsertPassivateState(event)
-		elif choice == 'New debugger stdout':
-			self.OnInsertDebug(event)
-		elif choice == 'New Phase test':
-			self.OnInsertPhaseIs(event)
-
-		# sys.stdout.write("combobox item selected: %s\n" % event.GetString())
+		handler = self._choices[choice]
+		handler()
 
 	###
 	def OnInsertPeekPoke(self, event):
@@ -2388,32 +2404,11 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		tb.AddSeparator()
 		#tb.InsertSeparator(tb.GetToolsCount())
 
-		if not self.block.isCMD():
-			choices = ['New peek', 'New poke', 'New hold in state', 'New passivate in state', 'New passivate state', 'New Phase test', 'New debugger stdout']
-		else:
-			choices = ['New debugger stdout']
-
+		### combo to insert tips text
 		cbID = wx.NewIdRef()
-		tb.AddControl(wx.ComboBox(tb, cbID, "Choose to insert in place", choices=choices,size=(160,-1), style=wx.CB_DROPDOWN))
+		tb.AddControl(wx.ComboBox(tb, cbID, _("Choose to insert in place"), choices=self.getChoices(),size=(160,-1), style=wx.CB_DROPDOWN))
 		
-		# if wx.VERSION_STRING < '4.0':
-		# 	if not self.block.isCMD():
-		# 		tb.AddTool(peek.GetId(), peek.GetBitmap(), shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
-		# 		tb.AddTool(poke.GetId(), poke.GetBitmap(), shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
-		# 		tb.AddTool(holdInState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New hold in state'), longHelpString=_('Insert a code for a new hold in state'))
-		# 		tb.AddTool(passivateInState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New passivate in state'), longHelpString=_('Insert a code for a new passivate in state'))
-		# 		tb.AddTool(passivateState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New passivate state'), longHelpString=_('Insert a code for a new passivate state'))
-		# 	tb.AddTool(debug.GetId(), debug.GetBitmap(), shortHelp=_('New debugger'), shortHelpString=_('New debugger'), longHelpString=_('Insert a code for print information into the log of model'))
-		# else:
-		# 	if not self.block.isCMD():
-		# 		tb.AddTool(peek.GetId(), "", peek.GetBitmap(), shortHelp=_('New peek'))
-		# 		tb.AddTool(poke.GetId(), "", poke.GetBitmap(), shortHelp=_('New poke'))
-		# 		tb.AddTool(holdInState.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelp=_('New hold in state'))
-		# 		tb.AddTool(passivateInState.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelp=_('New passivate in state'))
-		# 		tb.AddTool(passivateState.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelp=_('New passivate state'))
-			
-		# 	tb.AddTool(debug.GetId(), "", debug.GetBitmap(), shortHelp=_('New debugger'))
-		
+		### search text box 
 		tb.AddStretchableSpace()
 		search = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
 		tb.AddControl(search)
@@ -2469,16 +2464,27 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 		#tb = self.GetToolBar()
 		self.toolbar.InsertSeparator(self.toolbar.GetToolsCount())
 
-		if wx.VERSION_STRING < '4.0':
-			self.toolbar.AddTool(id[0], wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')),shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
-			self.toolbar.AddTool(id[1], wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')),shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
-			self.toolbar.AddTool(id[2], wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')),shortHelpString=_('New hold in state'), longHelpString=_('Insert a code for a new hold in state'))
-			self.toolbar.AddTool(id[3], wx.Bitmap(os.path.join(ICON_PATH_16_16,'debugger.png')),shortHelpString=_('New debugger'), longHelpString=_('Insert a code for print information into the log of model'))
-		else:
-			self.toolbar.AddTool(id[0], "",wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')),shortHelp=_('New peek'))
-			self.toolbar.AddTool(id[1], "",wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')),shortHelp=_('New poke'))
-			self.toolbar.AddTool(id[2], "",wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')),shortHelp=_('New hold in state'))
-			self.toolbar.AddTool(id[3], "",wx.Bitmap(os.path.join(ICON_PATH_16_16,'debugger.png')),shortHelp=_('New debugger'))
+	
+
+		### combo to insert tips text
+		cbID = wx.NewIdRef()
+		self.toolbar.AddControl(wx.ComboBox(self.toolbar, cbID, _("Choose to insert in place"), choices=self.getChoices(),size=(160,-1), style=wx.CB_DROPDOWN))
+		
+		### search text box 
+		self.toolbar.AddStretchableSpace()
+		search = TestSearchCtrl(self.toolbar, size=(150,-1), doSearch=self.DoSearch)
+		self.toolbar.AddControl(search)
+
+		# if wx.VERSION_STRING < '4.0':
+		# 	self.toolbar.AddTool(id[0], wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')),shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
+		# 	self.toolbar.AddTool(id[1], wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')),shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
+		# 	self.toolbar.AddTool(id[2], wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')),shortHelpString=_('New hold in state'), longHelpString=_('Insert a code for a new hold in state'))
+		# 	self.toolbar.AddTool(id[3], wx.Bitmap(os.path.join(ICON_PATH_16_16,'debugger.png')),shortHelpString=_('New debugger'), longHelpString=_('Insert a code for print information into the log of model'))
+		# else:
+		# 	self.toolbar.AddTool(id[0], "",wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')),shortHelp=_('New peek'))
+		# 	self.toolbar.AddTool(id[1], "",wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')),shortHelp=_('New poke'))
+		# 	self.toolbar.AddTool(id[2], "",wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')),shortHelp=_('New hold in state'))
+		# 	self.toolbar.AddTool(id[3], "",wx.Bitmap(os.path.join(ICON_PATH_16_16,'debugger.png')),shortHelp=_('New debugger'))
 		
 		self.toolbar.Realize()
 
@@ -2486,6 +2492,8 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 		self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=id[1])
 		self.Bind(wx.EVT_MENU, self.OnInsertHoldInState, id=id[2])
 		self.Bind(wx.EVT_MENU, self.OnInsertDebug, id=id[3])
+
+		self.Bind(wx.EVT_COMBOBOX, self.OnCombo, id=cbID)
 
 ### factory function for BlockEditor
 def BlockEditor(*args):
