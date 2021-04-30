@@ -2394,7 +2394,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 			choices = ['New debugger stdout']
 
 		cbID = wx.NewIdRef()
-		tb.AddControl(wx.ComboBox(tb, cbID, "", choices=choices,size=(150,-1), style=wx.CB_DROPDOWN))
+		tb.AddControl(wx.ComboBox(tb, cbID, "Choose to insert in place", choices=choices,size=(160,-1), style=wx.CB_DROPDOWN))
 		
 		# if wx.VERSION_STRING < '4.0':
 		# 	if not self.block.isCMD():
