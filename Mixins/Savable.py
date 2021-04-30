@@ -297,7 +297,6 @@ class DumpZipFile(DumpBase):
 
 		#=======================================================================
 
-		print(L)
 		### for amd and cmd build after the implementation of the rename method of model in librarie
 		### This may present an opportunity for the delete of the model_path and python_path of the .amd or .cmd compressed file.
 		if abs(len(L)-len(obj_loaded.dump_attributes))==2:

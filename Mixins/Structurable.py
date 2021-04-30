@@ -32,7 +32,7 @@ class Structurable(Components.DEVSComponent):
 		Components.DEVSComponent.__init__(self)
 
 	def ConnectDEVSPorts(self, p1, p2):
-		""" Connect DEVS ports
+		""" Connect DEVS ports.
 
 				@param p1: DEVS port
 				@param p2: DEVS port
@@ -46,6 +46,9 @@ class Structurable(Components.DEVSComponent):
 
 	def addSubModel(self, devs):
 		""" Add sub model.
+
+			@param devs DEVS instance
+			@type devs: instance
 		"""
 		self.devsModel.addSubModel(devs)
 
@@ -77,6 +80,28 @@ class Structurable(Components.DEVSComponent):
 		self.devsModel.EOC = []
 		self.devsModel.IPorts = []
 		self.devsModel.OPorts = []
+
+	def removeSubModel(self, devs):
+		""" Remove sub model.
+
+			@param devs DEVS instance
+			@type devs: instance
+		"""
+		if hasattr(self.devsModel, 'removeSubModel'):
+			self.devsModel.removeSubModel(devs)
+
+	def disconnectPorts(self, p1, p2):
+		""" Disconnect DEVS ports.
+
+			@param p1: DEVS port
+			@param p2: DEVS port
+
+			@type p1: instance
+			@type p2: instance
+
+		"""
+		if hasattr(self.devsModel, 'disconnectPorts'):
+			self.devsModel.disconnectPorts(p1, p2)
 
 def main():
     pass

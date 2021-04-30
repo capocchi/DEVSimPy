@@ -3046,7 +3046,11 @@ class Testable(object):
 	# NOTE: Testable :: isAMD 				=> Test if the model is an AMD and if it's well-formed
 	def isAMD(self):
 		fn = os.path.dirname(self.python_path)
-		return zipfile.is_zipfile(fn) or fn.endswith(('.amd','.cmd')) if os.path.isfile(fn) else False
+		return zipfile.is_zipfile(fn) and fn.endswith(('.amd')) if os.path.isfile(fn) else False
+
+	def isCMD(self):
+		fn = os.path.dirname(self.python_path)
+		return zipfile.is_zipfile(fn) and fn.endswith(('.cmd')) if os.path.isfile(fn) else False
 
 	def isPYC(self):
 		return self.python_path.endswith('.pyc') if os.path.isfile(self.python_path) else False
