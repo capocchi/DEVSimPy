@@ -44,7 +44,8 @@ from Utilities import path_to_module, PrintException, printOnStatusBar
 import ReloadModule
 import ZipManager
 
-_ = wx.GetTranslation
+import gettext
+_ = gettext.gettext
 
 # Turn on verbose mode
 tabnanny.verbose = 1
@@ -163,6 +164,41 @@ def GetEditor(parent, id, title="", obj=None, **kwargs):
 ###		GENERAL CLASSES
 ###
 #################################################################
+
+class TestSearchCtrl(wx.SearchCtrl):
+    maxSearches = 5
+
+    def __init__(self, parent, id=-1, value="",
+                 pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
+                 doSearch=None):
+        style |= wx.TE_PROCESS_ENTER
+        wx.SearchCtrl.__init__(self, parent, id, value, pos, size, style)
+        self.Bind(wx.EVT_TEXT_ENTER, self.OnTextEntered)
+        self.Bind(wx.EVT_SEARCHCTRL_SEARCH_BTN, self.OnTextEntered)
+        self.Bind(wx.EVT_MENU_RANGE, self.OnMenuItem, id=1, id2=self.maxSearches)
+        self.doSearch = doSearch
+        self.searches = []
+
+    def OnTextEntered(self, evt):
+        text = self.GetValue()
+        if self.doSearch(text):
+            self.searches.append(text)
+            if len(self.searches) > self.maxSearches:
+                del self.searches[0]
+            self.SetMenu(self.MakeMenu())
+        self.SetValue("")
+
+    def OnMenuItem(self, evt):
+        text = self.searches[evt.GetId()-1]
+        self.doSearch(text)
+
+    def MakeMenu(self):
+        menu = wx.Menu()
+        item = menu.Append(-1, "Recent Searches")
+        item.Enable(False)
+        for idx, txt in enumerate(self.searches):
+            menu.Append(1+idx, txt)
+        return menu
 
 ### NOTE: PythonSTC << stc.StyledTextCtrl :: todo
 class PythonSTC(stc.StyledTextCtrl):
@@ -830,7 +866,6 @@ class EditionNotebook(wx.Notebook):
 		"""
 
 		fileCode = ""
-
 		
 		### FIXME: try to consider zipfile in zipfile
 		L = re.findall("(.*\.(amd|cmd))\%s(.*)" % os.sep, path)
@@ -1048,19 +1083,19 @@ class EditionNotebook(wx.Notebook):
 
 	### NOTE: EditionNotebook :: OnCut 		=> Event on cut
 	def OnCut(self, event):
-		"""
+		""" Cut the text
 		"""
 		self.GetCurrentPage().Cut()
 
 	### NOTE: EditionNotebook :: OnCopy 		=> Event on copy
 	def OnCopy(self, event):
-		"""
+		""" Copy the text
 		"""
 		self.GetCurrentPage().Copy()
 
 	### NOTE: EditionNotebook :: OnPaste 		=> Event on paste
 	def OnPaste(self, event):
-		"""
+		""" Paste the text
 		"""
 		self.GetCurrentPage().Paste()
 
@@ -1074,7 +1109,7 @@ class EditionNotebook(wx.Notebook):
 
 	### NOTE: EditionNotebook :: OnReIndent 	=> Event on re-indent
 	def OnReIndent(self, event):
-		"""
+		""" Reindent all the text
 		"""
 		cp = self.GetCurrentPage()
 
@@ -1108,35 +1143,79 @@ class EditionNotebook(wx.Notebook):
 		cp.SetValue(text)
 
 		### status bar notification
-		self.parent.Notification(True, _('re-indented'), '', '')
+		self.parent.Notification(True, _('%s re-indented' % (os.path.basename(cp.GetFilename()))), '', '')
 
-	def OnComment(self, event):
-		""" Comment current line
+	def OnCommentUnComment(self, event):
+		""" Comment/Uncomment current line(s)
 		"""
 		cp = self.GetCurrentPage()
-		cur_line = cp.GetCurrentLine()
-		selected_text = cp.GetStringSelection()
-		nb_lines = len(selected_text.split('\n'))
+		selected_txt = cp.GetSelectedText()
+		raws = selected_txt.split('\n')
+
+		### select lines
+		if len(raws) > 1:
+			commented_txt = ""
+			### for each raw, we insert # in front of the first caractere of the string in raw
+			for i,raw in enumerate(raws):
+				### find index position of the first caractere
+				find = re.search(r'[A-Za-z#]', raw)
+				### if caracter finded (False in the case of raw without caratere...)
+				if find:
+					### position of the first caractere in the raw
+					pos = find.start()
+					### \n not for the last line
+					end_line = '\n' if i < len(raws)-1 else ''
+					### comment symbol in python
+					symbol = "#"
+
+					### uncomment - comment symbol is finded
+					if raw[pos] == symbol:
+						raw = raw.replace(symbol,"")
+						symbol = ""
+					
+					commented_txt += "".join(f"{raw[:pos]}{symbol}{raw[pos:]}{end_line}")
+
+			### replace slelected text by the commented text
+			cp.ReplaceSelection(commented_txt)
+		### cursor is in the line to comment/uncomment
+		else:
+
+			### comment symbol in python
+			symbol = "#"
+
+			### pointed line that contain the line to comment/unncomment
+			pointed_txt,pos = cp.GetCurLine()
+			cur_line = cp.GetCurrentLine()
+			### search #
+			find = re.search(r'[#]', pointed_txt)
+			### uncomment - comment symbol is finded
+			if find:
+				### remove # and \n
+				pointed_txt = pointed_txt.replace(symbol,"").replace("\n",'')
+				pos_from = cp.PositionFromLine(cur_line)
+				pos_to = pos_from+len(pointed_txt)+1
+				### replace the commented line by the uncommented one
+				cp.Replace(pos_from, pos_to, pointed_txt)
+			### comment 
+			else:
+				cp.InsertText(cp.PositionFromLine(cur_line), symbol)
 		
-		a = cur_line+1-nb_lines
-		b = cur_line+1
-		
-		for i in range(a, b):
-			cp.InsertText(cp.PositionFromLine(i), "#")
-		
-	def OnUnComment(self, event):
-		""" Uncomment current line
-		"""
-		cp = self.GetCurrentPage()
-		cur_line = cp.GetCurrentLine()
-		indent = cp.GetLineIndentPosition(cur_line)
-		cp.Home()
-		cp.DelWordRight()
-		cp.SetCurrentPos(indent)
+		### status bar notification
+		self.parent.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+
+	# def OnUnComment(self, event):
+		# """ Uncomment current line(s)
+		# """
+		# cp = self.GetCurrentPage()
+		# cur_line = cp.GetCurrentLine()
+		# indent = cp.GetLineIndentPosition(cur_line)
+		# cp.Home()
+		# cp.DelWordRight()
+		# cp.SetCurrentPos(indent)
 
 	### 
 	def OnDelete(self, event):
-		"""
+		""" Delete selected text
 		"""
 		cp = self.GetCurrentPage()
 		frm, to = cp.GetSelection()
@@ -1144,7 +1223,7 @@ class EditionNotebook(wx.Notebook):
 
 	###
 	def OnSelectAll(self, event):
-		"""
+		""" Select all the text
 		"""
 		self.GetCurrentPage().SelectAll()
 
@@ -1280,7 +1359,8 @@ class Base(object):
 		select = wx.MenuItem(edit, wx.NewIdRef(), _('Select &All\tCtrl+A'), _('Select the entire text'))
 		reindent = wx.MenuItem(edit, wx.NewIdRef(), _('Re-indent\tCtrl+R'), _('re-indent all code'))
 		comment = wx.MenuItem(edit, wx.NewIdRef(), _('&Comment\tCtrl+D'), _('comment current ligne'))
-		uncomment = wx.MenuItem(edit, wx.NewIdRef(), _('&Uncomment\tCtrl+Shift+D'), _('uncomment current ligne'))
+		uncomment = wx.MenuItem(edit, wx.NewIdRef(), _('&Uncomment\tCtrl+D'), _('uncomment current ligne'))
+		# uncomment = wx.MenuItem(edit, wx.NewIdRef(), _('&Uncomment\tCtrl+Shift+D'), _('uncomment current ligne'))
 
 		self.cut.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'cut.png')))
 		self.copy.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'copy.png')))
@@ -1362,9 +1442,9 @@ class Base(object):
 		self.Bind(wx.EVT_MENU, self.nb.OnCopy, id=self.copy.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnPaste, id=self.paste.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnReIndent, id=reindent.GetId())
-		self.Bind(wx.EVT_MENU, self.nb.OnComment, id=comment.GetId())
+		self.Bind(wx.EVT_MENU, self.nb.OnCommentUnComment, id=comment.GetId())
 		self.Bind(wx.EVT_MENU, self.OnSearch, id=self.search.GetId())
-		self.Bind(wx.EVT_MENU, self.nb.OnUnComment, id=uncomment.GetId())
+		self.Bind(wx.EVT_MENU, self.nb.OnCommentUnComment, id=uncomment.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnDelete, id=delete.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnSelectAll, id=select.GetId())
 		self.Bind(wx.EVT_MENU, self.ToggleStatusBar, id=showStatusBar.GetId())
@@ -1418,6 +1498,15 @@ class Base(object):
 		tb.Realize()
 
 		return tb
+
+	def DoSearch(self,  text):
+		"""
+		"""
+		### TODO !
+		# called by TestSearchCtrl
+		sys.stdout.write("DoSearch: %s\n" % text)
+		# return true to tell the search ctrl to remember the text
+		return True
 
 	def GetNoteBook(self):
 		""" Return the NoteBook
@@ -1528,6 +1617,8 @@ class Base(object):
 			self.Notification(False, _('%s not saved' % fn), _('file in readonly'), '')
 
 	def OnSearch(self, evt):
+		"""
+		"""
 		currentPage = self.nb.GetCurrentPage()
 		self.txt = currentPage.GetValue()
 		self.data = wx.FindReplaceData()   # initializes and holds search parameters
@@ -1535,6 +1626,8 @@ class Base(object):
 		self.dlg.Show()
 	
 	def OnFind(self, evt):
+		"""
+		"""
 		fstring = self.data.GetFindString()          # also from event.GetFindString()
 		self.pos = self.txt.find(fstring, self.pos+self.size)
 		self.size = len(fstring)
@@ -1846,6 +1939,43 @@ class BlockBase(object):
 		"""
 		
 		self.cb = block
+		self.parent = parent
+
+	def OnCombo(self, event):
+		choice = event.GetString()
+		if choice == "New peek":
+			sins = list(map(str, list(range(self.cb.input if hasattr(self.cb, 'input') else 10))))
+			dlg = wx.SingleChoiceDialog(self, _('Port number'), _('Which port?'), sins, wx.CHOICEDLG_STYLE)
+			port = dlg.GetStringSelection() if dlg.ShowModal() == wx.ID_OK else None
+			dlg.Destroy()
+
+			if port is not None:
+				cp = self.nb.GetCurrentPage()
+				cp.AddText("self.peek(self.IPorts[%d], *args)" % int(port))
+				self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+
+		elif choice == "New poke":
+			sins = list(map(str, list(range(self.cb.input if hasattr(self.cb, 'output') else 10))))
+			dlg = wx.SingleChoiceDialog(self, _('Port number'), _('Which port?'), sins, wx.CHOICEDLG_STYLE)
+			port = dlg.GetStringSelection() if dlg.ShowModal() == wx.ID_OK else None
+			dlg.Destroy()
+
+			if port is not None:
+				cp = self.nb.GetCurrentPage()
+				cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))" % int(port))
+				self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		elif choice ==  "New hold in state":
+			self.OnInsertHoldInState(event)
+		elif choice == 'New passivate in state':
+			self.OnInsertPassivateInState(event)
+		elif choice == 'New passivate state':
+			self.OnInsertPassivateState(event)
+		elif choice == 'New debugger stdout':
+			self.OnInsertDebug(event)
+		elif choice == 'New Phase test':
+			self.OnInsertPhaseIs(event)
+
+		# sys.stdout.write("combobox item selected: %s\n" % event.GetString())
 
 	###
 	def OnInsertPeekPoke(self, event):
@@ -1875,84 +2005,84 @@ class BlockBase(object):
 					cp.AddText("self.peek(self.IPorts[%d], *args)" % int(port))
 				elif "poke" in label:
 					cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))" % int(port))
-				cp.modify = True
+				self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	def OnInsertInitPhase(self, event):
 		""" Insert a sentence to get the init phase (status and sigma)
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.initPhase(<status>,<sigma>)")
-		cp.modify = True
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	def OnInsertSetState(self, event):
 		""" Insert a sentence to set the state (status and sigma)
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.setState({'status':'<phase>', 'sigma':<time>})")
-		cp.modify = True
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	def OnInsertSetStatus(self, event):
 		""" Insert a sentence to set the status of the state
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.setStatus('<phase>')")
-		cp.modify = True
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	def OnInsertSetSigma(self, event):
 		""" Insert a sentence to set the sigma of the state
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.setSigma(<time>)")
-		cp.modify = True
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	def OnInsertGetState(self, event):
 		""" Insert a sentence to get the state object.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.getState()")
-		cp.modify = True
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	def OnInsertGetStatus(self, event):
 		""" Insert a sentence to get the status.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.getStatus()")
-		cp.modify = True
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	def OnInsertGetSigma(self, event):
 		""" Insert a sentence to get the sigma value.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.getSigma()")
-		cp.modify = True
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	def OnInsertGetPortId(self, event):
 		""" Insert a sentence to get the port ID.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.getPortId(<port>)")
-		cp.modify = True
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	def OnInsertGetMsgValue(self, event):
 		""" Insert a sentence to get the message value.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.getMsgValue(<msg>)")
-		cp.modify = True
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 	
 	def OnInsertGetMsgTime(self, event):
 		""" Insert a sentence to get the message time.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.getMsgTime(<msg>)")
-		cp.modify = True
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	def OnInsertGetElapsed(self, event):
 		""" Insert a sentence to get the elapsed time.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.getElapsed()")
-		cp.modify = True
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	###
 	def OnInsertHoldInState(self, event):
@@ -1960,7 +2090,7 @@ class BlockBase(object):
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.holdIn('<phase>',<sigma>)")
-		cp.modify = True
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	###
 	def OnInsertPhaseIs(self, event):
@@ -1968,7 +2098,7 @@ class BlockBase(object):
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.phaseIs('<phase>')")
-		cp.modify = True
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 		
 	###
 	def OnInsertPassivateInState(self, event):
@@ -1976,7 +2106,7 @@ class BlockBase(object):
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.passivateIn('<phase>')")
-		cp.modify = True
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	###
 	def OnInsertPassivateState(self, event):
@@ -1984,7 +2114,7 @@ class BlockBase(object):
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.passivate()")
-		cp.modify = True
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	###
 	def OnInsertDebug(self, event):
@@ -1992,7 +2122,7 @@ class BlockBase(object):
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.debugger('<message>')")
-		cp.modify = True
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	###
 	def ConfigSaving(self, base_name, dir_name, code):
@@ -2015,10 +2145,6 @@ class BlockBase(object):
 
 		return new_instance
 
-	### 
-	def getBlock(self):
-		return self.cb
-
 	###
 	def UpdateArgs(self, new_args):
 		""" Update the args or constructor class from new_args.
@@ -2039,7 +2165,7 @@ class BlockBase(object):
 
 		else:
 			### status bar notification
-			self.Notification(False, _('args not updated'), _('New class from %s') % (new_class))
+			self.Notification(False, _('args not updated'),'','')
 
 	###
 	def CheckErrors(self, base_name, code, new_instance):
@@ -2162,6 +2288,8 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		EditorFrame.__init__(self, parent, id, title)
 		BlockBase.__init__(self, parent, id, title, block)
 
+		self.block = block
+
 		#if not parent:
 		self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'pythonFile.png'), wx.BITMAP_TYPE_PNG)))
 		self.ConfigureGUI()
@@ -2182,9 +2310,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		set_submenu = wx.Menu()
 		new_submenu = wx.Menu()
 
-		block = self.getBlock()
-
-		if not block.isCMD():
+		if not self.block.isCMD():
 
 			### New items
 			peek = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Peek'), _('Generate new peek code'))
@@ -2193,7 +2319,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 			phaseIs = wx.MenuItem(new_submenu, wx.NewIdRef(), _('PhaseIs test'), _('Generate phase test code self.phaseIs(...)'))
 			passivateInState = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Passivate in state'), _('Generate new passivate in state code self.passivateIn(...)'))
 			passivateState = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Passivate state'), _('Generate new passivate state code self.passivate(...)'))
-			
+
 			### getter items
 			getPortId = wx.MenuItem(get_submenu, wx.NewIdRef(), _('Port Id'), _('Get the port ID from port instance (self.getPortId(port)->int)'))
 			getMsgValue = wx.MenuItem(get_submenu, wx.NewIdRef(), _('Message value'), _('Get message value (self.getMsgValue(msg)->Object)'))
@@ -2202,7 +2328,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 			getStatus = wx.MenuItem(get_submenu, wx.NewIdRef(), _('Status value'), _('Get status value (self.getStatus()->str)'))
 			getState = wx.MenuItem(get_submenu, wx.NewIdRef(), _('State object'), _('Get state object (self.getState()->dict)'))
 			getElapsed = wx.MenuItem(get_submenu, wx.NewIdRef(), _('Elapsed time'), _('Get the elapsed time (self.elapsed)'))
-			
+
 			### setter items
 			setInitPhase = wx.MenuItem(set_submenu, wx.NewIdRef(), _('Init phase'), _('Set the phase (self.getInitPhase())'))
 			setStatus = wx.MenuItem(set_submenu, wx.NewIdRef(), _('Status value'), _("Set status value (self.setStatus('IDLE'))"))
@@ -2222,7 +2348,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 			# phaseIs.SetBitmap()
 			# passivateInState.SetBitmap()
 			# passivateState.SetBitmap()
-			
+
 			new_submenu.Append(peek)
 			new_submenu.Append(poke)
 			new_submenu.AppendSeparator()
@@ -2245,9 +2371,6 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 			get_submenu.Append(getMsgTime)	
 			get_submenu.Append(getElapsed)
 
-		else:
-			pass
-
 		debug = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Debugger'), _('Generate new debugger code (print into the log of model)'))
 		debug.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'debugger.png')))
 		new_submenu.Append(debug)
@@ -2265,27 +2388,39 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		tb.AddSeparator()
 		#tb.InsertSeparator(tb.GetToolsCount())
 
-		if wx.VERSION_STRING < '4.0':
-			if not block.isCMD():
-				tb.AddTool(peek.GetId(), peek.GetBitmap(), shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
-				tb.AddTool(poke.GetId(), poke.GetBitmap(), shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
-				tb.AddTool(holdInState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New hold in state'), longHelpString=_('Insert a code for a new hold in state'))
-				tb.AddTool(passivateInState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New passivate in state'), longHelpString=_('Insert a code for a new passivate in state'))
-				tb.AddTool(passivateState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New passivate state'), longHelpString=_('Insert a code for a new passivate state'))
-			tb.AddTool(debug.GetId(), debug.GetBitmap(), shortHelp=_('New debugger'), shortHelpString=_('New debugger'), longHelpString=_('Insert a code for print information into the log of model'))
+		if not self.block.isCMD():
+			choices = ['New peek', 'New poke', 'New hold in state', 'New passivate in state', 'New passivate state', 'New Phase test', 'New debugger stdout']
 		else:
-			if not block.isCMD():
-				tb.AddTool(peek.GetId(), "", peek.GetBitmap(), shortHelp=_('New peek'))
-				tb.AddTool(poke.GetId(), "", poke.GetBitmap(), shortHelp=_('New poke'))
-				tb.AddTool(holdInState.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelp=_('New hold in state'))
-				tb.AddTool(passivateInState.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelp=_('New passivate in state'))
-				tb.AddTool(passivateState.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelp=_('New passivate state'))
-			
-			tb.AddTool(debug.GetId(), "", debug.GetBitmap(), shortHelp=_('New debugger'))
+			choices = ['New debugger stdout']
+
+		cbID = wx.NewIdRef()
+		tb.AddControl(wx.ComboBox(tb, cbID, "", choices=choices,size=(150,-1), style=wx.CB_DROPDOWN))
 		
+		# if wx.VERSION_STRING < '4.0':
+		# 	if not self.block.isCMD():
+		# 		tb.AddTool(peek.GetId(), peek.GetBitmap(), shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
+		# 		tb.AddTool(poke.GetId(), poke.GetBitmap(), shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
+		# 		tb.AddTool(holdInState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New hold in state'), longHelpString=_('Insert a code for a new hold in state'))
+		# 		tb.AddTool(passivateInState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New passivate in state'), longHelpString=_('Insert a code for a new passivate in state'))
+		# 		tb.AddTool(passivateState.GetId(), wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelpString=_('New passivate state'), longHelpString=_('Insert a code for a new passivate state'))
+		# 	tb.AddTool(debug.GetId(), debug.GetBitmap(), shortHelp=_('New debugger'), shortHelpString=_('New debugger'), longHelpString=_('Insert a code for print information into the log of model'))
+		# else:
+		# 	if not self.block.isCMD():
+		# 		tb.AddTool(peek.GetId(), "", peek.GetBitmap(), shortHelp=_('New peek'))
+		# 		tb.AddTool(poke.GetId(), "", poke.GetBitmap(), shortHelp=_('New poke'))
+		# 		tb.AddTool(holdInState.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelp=_('New hold in state'))
+		# 		tb.AddTool(passivateInState.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelp=_('New passivate in state'))
+		# 		tb.AddTool(passivateState.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')), shortHelp=_('New passivate state'))
+			
+		# 	tb.AddTool(debug.GetId(), "", debug.GetBitmap(), shortHelp=_('New debugger'))
+		
+		tb.AddStretchableSpace()
+		search = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
+		tb.AddControl(search)
+
 		tb.Realize()
 
-		if not block.isCMD():
+		if not self.block.isCMD():
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=poke.GetId())
 			self.Bind(wx.EVT_MENU, self.OnInsertHoldInState, id=holdInState.GetId())
@@ -2305,7 +2440,8 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 			self.Bind(wx.EVT_MENU, self.OnInsertSetState, id=setState.GetId())
 			self.Bind(wx.EVT_MENU, self.OnInsertSetSigma, id=setSigma.GetId())
 			self.Bind(wx.EVT_MENU, self.OnInsertSetStatus, id=setStatus.GetId())
-		
+
+		self.Bind(wx.EVT_COMBOBOX, self.OnCombo, id=cbID)
 		self.Bind(wx.EVT_MENU, self.OnInsertDebug, id=debug.GetId())
 class BlockEditorPanel(BlockBase, EditorPanel):
 	""" Block Editor class which inherit of Editor class

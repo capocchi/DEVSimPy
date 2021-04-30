@@ -681,12 +681,37 @@ class DEVSComponent:
 
 			DEVSComponent.setBlockModel(devs, self)
 
+	###
 	def setDEVSClassModel(self, classe):
 		""" Set the __class__ attribut of the devs model
 			@param classe: new classe object
 		"""
 		if inspect.isclass(classe):
 			self.devsModel.__class__ = classe
+
+	###
+	def isCMD(self):
+		""" Return True if the python file is embedded in CMD file
+		"""
+		fn = os.path.dirname(self.getDEVSPythonPath())
+		return zipfile.is_zipfile(fn) and fn.endswith(('.cmd')) if os.path.isfile(fn) else False
+
+	###
+	def isAMD(self):
+		""" Return True if the python file is embedded in AMD file
+		"""
+		fn = os.path.dirname(self.getDEVSPythonPath())
+		return zipfile.is_zipfile(fn) and fn.endswith(('.amd')) if os.path.isfile(fn) else False
+
+	def isPYC(self):
+		""" Return True if the python path point to a python file
+		"""
+		return self.python_path.endswith('.pyc') if os.path.isfile(self.python_path) else False
+
+	def isPY(self):
+		""" Return True if the python path point to a compiled python file
+		"""
+		return self.python_path.endswith('.py') if os.path.isfile(self.python_path) else False
 
 	###
 	def OnLog(self, event):
@@ -810,6 +835,7 @@ class DEVSComponent:
 			# loading file in DEVSimPy editor windows (self.text)
 			try:
 
+				
 				editorFrame = Editor.GetEditor(None, wx.NewIdRef(), ''.join([name,' - ',model_path]), obj=self, file_type='block')
 
 				# if zipfile.is_zipfile(model_path):
