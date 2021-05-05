@@ -381,6 +381,7 @@ class Diagram(Savable, Structurable):
 #		else:
 #			diagram.ClearAllPorts()
 
+		
 		### if devs instance of diagram is not instantiated, we make it
 		### else one simulation has been performed then we clear all devs port instances
 		if diagram.getDEVSModel():
@@ -395,7 +396,6 @@ class Diagram(Savable, Structurable):
 		
 		### for all codeBlock shape, we make the devs instance
 		for m in block_list:
-    			
 			### class object from python file
 			cls = Components.GetClass(m.python_path)
 
@@ -417,16 +417,16 @@ class Diagram(Savable, Structurable):
 				### les ports des modeles couples sont pris en charge plus bas dans les iPorts et oPorts
 				## ajout des port par rapport aux ports graphiques
 				for i in range(m.input):
-					devs.addInPort('in_%d'%i)
+					devs.addInPort(f'in_{i}')
 
-				for i in range(m.output):
-					devs.addOutPort('out_%d'%i)
+				for j in range(m.output):
+					devs.addOutPort(f'out_{j}')
 
 			### devs instance setting
 			m.setDEVSModel(devs)
 
 			m.setDEVSParent(diagram.getDEVSModel())
-
+	
 			### allow to escape the check of the simulation running in PyPDEVS (src/DEVS.py line 565)
 			if hasattr(devs.parent, "fullName"):
 				del devs.parent.fullName
@@ -447,7 +447,7 @@ class Diagram(Savable, Structurable):
 				###===================================================================
 
 				Diagram.makeDEVSInstance(m)
-
+		
 		###============================================================================= Add abstraction level manager
 		if hasattr(diagram, 'current_level') and diagram.current_level>0:
 
@@ -480,8 +480,6 @@ class Diagram(Savable, Structurable):
 				devs_uam.addInPort()
 
 		###==================================================================================
-
-
 		### Add abstraction level manager
 		###==============================================================================
 		if hasattr(diagram, 'current_level') and diagram.current_level>0:
@@ -1295,7 +1293,6 @@ class LineShape(Shape):
 	def draw(self, dc):
 		""" Draw method
 		"""
-
 		Shape.draw(self, dc)
 		dc.DrawLine(self.x[0], self.y[0], self.x[1], self.y[1])
 
@@ -2777,9 +2774,10 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			if not self.isSelected(item):
 				
 				self.selectedShapes.append(item)
-				
+					
 				item.OnSelect(None)
 				if isinstance(item, Connectable):
+					
 					for n in range(item.input):
 						a = item.getInputLabels()
 						if isinstance(a,list) and n in a:
@@ -2794,8 +2792,6 @@ if builtins.__dict__.get('GUI_FLAG',True):
 						else:
 							self.nodes.append(ONode(item, n, self))
 
-					# self.nodes.extend([INode(item, n, self) for n in range(item.input)])
-					# self.nodes.extend([ONode(item, n, self) for n in range(item.output)])
 				if isinstance(item, Resizeable):
 					self.nodes.extend([ResizeableNode(item, n, self) for n in range(len(item.x))])
 					
@@ -3667,10 +3663,12 @@ class CodeBlock(Achievable, Block):
 
 		### test if args from construcor in python file stored in library (on disk) and args from stored model in dsp are the same
 		if os.path.exists(python_path) or zipfile.is_zipfile(os.path.dirname(python_path)):
+		
 			cls = Components.GetClass(state['python_path'])
+			
 			### TODO
 			### local package imported into amd or cmd generates error ! (fcts...)
-			if not isinstance(cls, tuple):
+			if cls and not isinstance(cls, tuple):
 				args_from_stored_constructor_py = inspect.getargspec(cls.__init__).args[1:]
 				args_from_stored_block_model = state['args']
 				L = list(set(args_from_stored_constructor_py).symmetric_difference( set(args_from_stored_block_model)))
@@ -3706,7 +3704,7 @@ class CodeBlock(Achievable, Block):
 					new_class = None
 
 			else:
-				sys.stderr.write(_("Error in setstate for CodeBlock: %s\n"%str(cls)))
+				sys.stderr.write(_("Error in setstate for CodeBlock class which is %s\n"%str(cls)))
 
 		state['bad_filename_path_flag'] = False
 		### if the python path is wrong

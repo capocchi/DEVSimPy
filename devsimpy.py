@@ -445,6 +445,16 @@ class MainApplication(wx.Frame):
 				except:
 					self.last_position = None
 					self.last_size = None
+				else:
+					
+					### check if the screen size has not chnaged (dual screen) 
+					l,h=DefineScreenSize()
+					l_saved,h_saved=self.last_position
+
+					### if the position saved is superior of the screen
+					if l_saved>l or h_saved>h:
+						self.last_position = None
+						self.last_size = None
 
 				### restore the builtin dict
 				try:
