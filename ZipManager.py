@@ -400,6 +400,7 @@ class Zip:
 								
 		try:
 			module = self.ImportModule() if self.GetFullName() not in sys.modules else sys.modules[self.GetFullName()]
+			
 			return module
 		### model has not python file !
 		except Exception as e:
@@ -410,14 +411,21 @@ class Zip:
 		"""
 		### allows to import the lib from its name (like import MyModel.amd). Dangerous because confuse!
 		### Import can be done using: import Name (ex. import MessageCollector - if MessageCollecor is .amd or .cmd)
-		p = os.path.dirname(os.path.dirname(self.fn))
+		p = os.path.dirname(self.fn)
 		if p not in sys.path:
 			sys.path.append(p)
 
+		### load all paths from the lib dir to DOAMIN_PATH (external paths are added at the start of devsimpy)
+		p = os.path.dirname(p)
+		while(p!=DOMAIN_PATH):
+			if p not in sys.path:
+				sys.path.append(p)
+			p = os.path.dirname(p)
+		
 		importer = zipimport.zipimporter(self.fn)
 		module_name = getPythonModelFileName(self.fn)
 
-		try:	
+		try:
 			module = importer.load_module(module_name.split('.py')[0])
 
 		### package is needed by the self.module_name (dependency)
