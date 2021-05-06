@@ -1991,7 +1991,8 @@ class BlockBase(object):
 		"""
 		choice = event.GetString()
 		handler = self._choices[choice]
-		handler()
+		### execute the handler
+		handler(event)
 
 	###
 	def OnInsertPeekPoke(self, event):
