@@ -748,8 +748,8 @@ class Diagram(Savable, Structurable):
 	def checkDEVSInstance(self, diagram=None, D={}):
 		""" Recursive DEVS instance checker for a diagram.
 
-				@param diagram : diagram instance
-				@param D : Dictionary of models with the associated error
+			@param diagram: diagram instance
+			@param D: Dictionary of models with the associated error
 
 		"""
 		### shape list of diagram
