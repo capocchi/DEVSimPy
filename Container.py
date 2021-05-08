@@ -514,7 +514,6 @@ class Diagram(Savable, Structurable):
 		for m in (s for s in shape_list if isinstance(s, ConnectionShape)):
 			m1,n1 = m.input
 			m2,n2 = m.output
-			
 			if isinstance(m1, Block) and isinstance(m2, Block):
 				try:
 					p1 = m1.getDEVSModel().OPorts[n1]
@@ -565,8 +564,23 @@ class Diagram(Savable, Structurable):
 				#p1 = diagram.getDEVSModel().IPorts[m1.id]
 				#p2 = m2.getDEVSModel().IPorts[n2]
 				#Structurable.ConnectDEVSPorts(diagram, p1, p2)
+
+			# elif isinstance(m1, iPort) and isinstance(m2, oPort):
+			# 	###==============================================================================
+			# 	### Add abstraction level manager
+			# 	if hasattr(diagram, 'current_level') and diagram.current_level>0:
+			# 		p1 = devs_dam.OPorts[m1.id]
+			# 		p2 = devs_dam.IPorts[m2.id]
+			# 	else:
+			# 		p1 = diagram.getDEVSModel().IPorts[m1.id]
+			# 		p2 = diagram.getDEVSModel().OPorts[m2.id]
+			# 	###===============================================================================
+
+			# 	Structurable.ConnectDEVSPorts(diagram, p1, p2)
 			else:
-				return  _('Error making DEVS connection.\n Check your connections !')
+				msg = _('Direct connections between ports inside the coupled model %s have been founded.\n There are not considered by the simulation!'%())
+				sys.stdout.write(msg)
+				#return msg
 
 		### update priority_list from shape list 
 		### Shape list can be increased or decreased (add or remove shape) without invoke the Priority list dialogue
@@ -734,8 +748,8 @@ class Diagram(Savable, Structurable):
 	def checkDEVSInstance(self, diagram=None, D={}):
 		""" Recursive DEVS instance checker for a diagram.
 
-				@param diagram : diagram instance
-				@param D : Dictionary of models with the associated error
+			@param diagram: diagram instance
+			@param D: Dictionary of models with the associated error
 
 		"""
 		### shape list of diagram
@@ -831,7 +845,7 @@ class Diagram(Savable, Structurable):
 
 				### set the name of diagram
 				if isinstance(win, DetachedFrame):
-					title  = win.GetTitle()
+					title = win.GetTitle()
 				else:
 					nb2 = win.GetDiagramNotebook()
 					title =nb2.GetPageText(nb2.GetSelection()).rstrip()
@@ -2116,15 +2130,12 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 			### mouse positions
 			xwindow, ywindow = wx.GetMousePosition()
-			if wx.VERSION_STRING < '4.0':
-				xm,ym = self.ScreenToClientXY(xwindow, ywindow)
-			else:
-				xm,ym = self.ScreenToClient(wx.Point(xwindow, ywindow))
+			xm,ym = self.ScreenToClient(wx.Point(xwindow, ywindow))
 
 			gmwiz = self.OnStartWizard(event)
-
+			
 			# if wizard is finished witout closing
-			if  gmwiz :
+			if gmwiz :
 
 				m = Components.BlockFactory.CreateBlock( canvas = self,
 													x = xm,
@@ -2178,16 +2189,20 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					L.append(copy.copy(m))
 				else:
 					# make new shape
-					newShape = m.Copy()
-					# store correspondance (for coupling)
-					D[m]= newShape
-					# move new modele
-					newShape.x[0] += 35
-					newShape.x[1] += 35
-					newShape.y[0] += 35
-					newShape.y[1] += 35
-					### adding model
-					self.AddShape(newShape)
+					try:
+						newShape = m.Copy()
+					except:
+						sys.stdout.write(_('Error in Past'))
+					else:
+						# store correspondance (for coupling)
+						D[m]= newShape
+						# move new modele
+						newShape.x[0] += 35
+						newShape.x[1] += 35
+						newShape.y[0] += 35
+						newShape.y[1] += 35
+						### adding model
+						self.AddShape(newShape)
 
 			### adding connectionShape only if the connection is connected on the two side with blocks.
 			for cs in [ a for a in L if a.input[0] in D and a.output[0] in D]:
@@ -2777,17 +2792,18 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					
 				item.OnSelect(None)
 				if isinstance(item, Connectable):
-					
+					### display the label of input ports if exist
+					a = item.getInputLabels()
 					for n in range(item.input):
-						a = item.getInputLabels()
-						if isinstance(a,list) and n in a:
+						if isinstance(a,dict) and n in a:
 							self.nodes.append(INode(item, n, self, item.getInputLabel(n)))
 						else:
 							self.nodes.append(INode(item, n, self))
 
+					### display the label of output ports if exist
 					b = item.getOutputLabels()
 					for n in range(item.output):
-						if isinstance(b,list) and n in b:
+						if isinstance(b,dict) and n in b:
 							self.nodes.append(ONode(item, n, self, item.getOutputLabel(n)))
 						else:
 							self.nodes.append(ONode(item, n, self))
@@ -4172,7 +4188,7 @@ class INode(ConnectableNode):
 		self.cf.select(ci)
 
 	def OnRightDown(self, event):
-		""" Left Down click has been invoked
+		""" Left Down click has been invoked.
 		"""
 		### dialog to ask new port label
 		
@@ -4186,13 +4202,13 @@ class INode(ConnectableNode):
 		event.Skip()
 
 	def OnEditLabel(self, event):
-		""" Function called by the OnRightDown call event function
+		""" Function called by the OnRightDown call event function.
 		"""
 		### old label
 		old_label = self.label
 
 		### ask tne new label
-		d = wx.TextEntryDialog(None, _('New Input Label'), value = old_label, style=wx.OK)
+		d = wx.TextEntryDialog(None, _('New input port label:'), value = old_label, style=wx.OK)
 		d.ShowModal()
 
 		### new label
@@ -4232,7 +4248,7 @@ class INode(ConnectableNode):
 		#dc.SetPen(wx.Pen(wx.NamedColour('black'), 20))
 		#dc.DrawText(str(self.index), self.x-self.graphic.r, self.y-self.graphic.r-2)
 
-		### position of label
+		### position of label - not for Port model (inside containerBlock)
 		if not isinstance(self.item, Port):
 			### prepare label position
 			if self.item.input_direction == 'ouest':
@@ -4255,7 +4271,7 @@ class INode(ConnectableNode):
 		PointShape.draw(self, dc)
 
 class ONode(ConnectableNode):
-	""" ONode(item, index, cf)
+	""" ONode(item, index, cf).
 	"""
 
 	def __init__(self, item, index, cf, label=None):
@@ -4277,13 +4293,27 @@ class ONode(ConnectableNode):
 		self.cf.select(ci)
 
 	def OnRightDown(self, event):
-		""" Left Down click has been invoked
+		""" Left Down click has been invoked.
 		"""
 		### dialog to ask new port label
 		
+		menu = Menu.NodePopupMenu(self)
+		### Show popup_menu
+		canvas = event.GetEventObject()
+		canvas.PopupMenu(menu, event.GetPosition())
+		### destroy menu local variable
+		menu.Destroy()
+		
+		event.Skip()
+
+	def OnEditLabel(self, event):
+		""" Function called by the OnRightDown call event function.
+		"""
+		### old label
 		old_label = self.label
 
-		d = wx.TextEntryDialog(None, _('New Output Label'), value = old_label, style=wx.OK)
+		### ask tne new label
+		d = wx.TextEntryDialog(None, _('New output port label:'), value = old_label, style=wx.OK)
 		d.ShowModal()
 
 		### new label
@@ -4293,11 +4323,9 @@ class ONode(ConnectableNode):
 		if new_label != old_label:
 			self.label = new_label
 			self.item.addOutputLabels(self.index, self.label)
-		
-		event.Skip()
 
 	def leftUp(self, items):
-		""" Left up action has been invocked
+		""" Left up action has been invocked.
 		"""
 
 		cs = items[0]
@@ -4311,7 +4339,7 @@ class ONode(ConnectableNode):
 			#cs.ChangeForm(ShapeCanvas.CONNECTOR_TYPE)
 
 	def draw(self, dc):
-		""" Drawing method
+		""" Drawing method.
 		"""
 		x,y = self.item.getPortXY('output', self.index)
 		self.moveto(x, y)
@@ -4347,7 +4375,7 @@ class ONode(ConnectableNode):
 
 ###
 class ResizeableNode(Node):
-	""" Resizeable(item, index, cf, type)
+	""" Resizeable(item, index, cf, type).
 	"""
 
 	def __init__(self, item, index, cf, t = 'rect'):
@@ -4413,7 +4441,7 @@ class ResizeableNode(Node):
 
 #---------------------------------------------------------
 class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observer):
-	""" Port(x1, y1, x2, y2, label)
+	""" Port(x1, y1, x2, y2, label).
 	"""
 
 	def __init__(self, x1, y1, x2, y2, label = 'Port'):
@@ -4516,7 +4544,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 		self.OnProperties(event)
 
 	def update(self, concret_subject = None):
-		""" Update function linked to notify function (observer pattern)
+		""" Update function linked to notify function (observer pattern).
 		"""
 		state = concret_subject.GetState()
 

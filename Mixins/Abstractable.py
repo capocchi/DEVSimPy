@@ -174,11 +174,8 @@ class Abstractable:
 
         if l in layers:
             dia = canvas.GetDiagramByLevel(l)
-
             canvas.SetCurrentLevel(l)
-
             sys.stdout.write("load diagram %d"%l)
-            sys.stdout.write(str(self.layers))
 
         else:
 
@@ -188,7 +185,9 @@ class Abstractable:
             canvas.SetCurrentLevel(l)
             #canvas.SetDiagram(dia)
 
-            sys.stdout.write("New diagram at level %s"%l, self.layers)
+            sys.stdout.write("New diagram at level %s"%l)
+
+        sys.stdout.write(str(self.layers))
 
         ### add new or update new attributes layers and current_layer to diagram
         setattr(dia, 'layers', canvas.GetLayers())

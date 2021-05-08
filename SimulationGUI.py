@@ -654,7 +654,7 @@ class Base(object):
 			return "%d:%02d:%02d:%03d" % (h, m, s, ms*1000)
 
 	###
-	def MsgBoxEmptyModel(self):
+	def MsgBox(self, msg:str):
 		""" Pop-up alert for empty model.
 		"""
 		dial = wx.MessageDialog(self,
