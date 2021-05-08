@@ -198,7 +198,8 @@ class TestSearchCtrl(wx.SearchCtrl):
         item = menu.Append(-1, "Recent Searches")
         item.Enable(False)
         for idx, txt in enumerate(self.searches):
-            menu.Append(1+idx, txt)
+            if txt != "":
+                menu.Append(1+idx, txt)
         return menu
 
 ### NOTE: PythonSTC << stc.StyledTextCtrl :: todo
@@ -1500,12 +1501,13 @@ class Base(object):
 
 		return tb
 
-	def DoSearch(self,  text):
+	def DoSearch(self, text):
 		"""
 		"""
-		### TODO !
-		# called by TestSearchCtrl
-		sys.stdout.write("DoSearch: %s\n" % text)
+		if text != "":
+			self.Search()
+		
+		#sys.stdout.write("DoSearch: %s\n" % text)
 		# return true to tell the search ctrl to remember the text
 		return True
 
@@ -1639,11 +1641,41 @@ class Base(object):
 		### go to the finded word
 		currentPage = self.nb.GetCurrentPage()
 		currentPage.GotoPos(self.pos)
-		
+
 		currentPage.StartStyling(highlight_start_pos)
 		currentPage.SetStyling(highlight_end_pos - highlight_start_pos, stc.STC_P_COMMENTLINE)
+		
 		currentPage.StartStyling(highlight_end_pos)
-		currentPage.SetStyling(len(self.txt) - highlight_end_pos, stc.STC_STYLE_DEFAULT)
+		currentPage.SetStyling(len(self.txt) - highlight_end_pos, stc.STC_P_DEFAULT)
+
+	def Search(self):
+		"""
+		"""
+		currentPage = self.nb.GetCurrentPage()
+		self.txt = currentPage.GetValue()
+		self.data = wx.FindReplaceData()   # initializes and holds search parameters
+
+		fstring = self.data.GetFindString()          # also from event.GetFindString()
+		self.pos = self.txt.find(fstring, self.pos+self.size)
+		self.size = len(fstring)
+
+		start, end = 0, len(self.txt)
+		# force to the lexer to style the text not visible yet
+		lenght= len(fstring)
+		# clear all highlighted previous found text
+		currentPage.StartStyling(start)
+		currentPage.SetStyling(end, 0)
+		# highlight found text:
+		while lenght:
+			start = self.txt.find(fstring, self.pos+self.size)
+			if start == -1:
+				break
+			currentPage.StartStyling(start)
+			currentPage.SetStyling(lenght, stc.STC_P_COMMENTLINE)
+			start += lenght
+		# dummy style to draw last found text (wx bug?)
+		currentPage.StartStyling(end)
+		currentPage.SetStyling(0, stc.STC_P_DEFAULT)
 
 	def OnSaveAsFile(self, event):
 		"""

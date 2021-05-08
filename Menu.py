@@ -703,7 +703,7 @@ class NodePopupMenu(wx.Menu):
 	""" Node popup menu
 	"""
 
-	def __init__(self, parent):
+	def __init__(self, node):
 		""" Constructor.
 		"""
 		wx.Menu.__init__(self)
@@ -717,7 +717,7 @@ class NodePopupMenu(wx.Menu):
 		AppendItem(edit)
 
 		### bind event with new OnEditLabel
-		self.Bind(wx.EVT_MENU, parent.OnEditLabel, edit)
+		self.Bind(wx.EVT_MENU, node.OnEditLabel, edit)
 
 class PropertiesCtrlPopupMenu(wx.Menu):
 	""" PropertiesCtrl popup menu.
