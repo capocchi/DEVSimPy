@@ -1088,11 +1088,11 @@ class ShapePopupMenu(wx.Menu):
 			Rename_menu = AppendItem(rename)
 
 			self.AppendSeparator()
-			# pour tout les model sur le canvas ormis les connection et le model que l'on veut connecter (la source)
-			for i, item in enumerate([a for a in self.__canvas.GetDiagram().GetShapeList() if a != shape and not isinstance(a, Container.ConnectionShape)]):
-				# on evite de proposer les connections suivante: iPort->iPort, oPort->oPort
+			# pour tout les model sur le canvas, rangés par ordre alphabetique, ormis les connection et le model que l'on veut connecter (la source)
+			for label,item in sorted([(a.label,a) for a in self.__canvas.GetDiagram().GetShapeList() if a != shape and not isinstance(a, Container.ConnectionShape)]):
+				# avoid connections like: iPort->iPort, oPort->oPort
 				if (isinstance(shape, Container.iPort) and not isinstance(item, Container.iPort)) or (isinstance(shape, Container.oPort) and not isinstance(item, Container.oPort)) or isinstance(shape, Container.Block):
-					new_item = wx.MenuItem(connectable_subMenu, wx.NewIdRef(), item.label)
+					new_item = wx.MenuItem(connectable_subMenu, wx.NewIdRef(), label)
 					connectable_subMenu.Append(new_item)
 					self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnConnectTo,id = new_item.GetId())
 			

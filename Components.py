@@ -412,14 +412,14 @@ class CMDComponent(GenericComponent):
 			iport.id = id
 			self.__m.AddShape(iport)
 			self.__m.nbiPort = id
-			#iport.move(50,100*(self.__m.nbiPort+self.__m.nboPort))
+			iport.move(50,100*(self.__m.nbiPort))
 
 		for id in range(self._outputs):
 			oport = oPort(label='OPort %d'%(id))
 			oport.id = id
 			self.__m.AddShape(oport)
 			self.__m.nboPort = id
-			#oport.move(300,100*(self.__m.nbiPort+self.__m.nboPort))
+			oport.move(300,100*(self.__m.nboPort))
 
 		self.__m.python_path = self._python_file
 		self.__m.model_path = self._model_file

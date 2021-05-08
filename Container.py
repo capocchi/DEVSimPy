@@ -2792,6 +2792,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					
 				item.OnSelect(None)
 				if isinstance(item, Connectable):
+					### display the label of input ports if exist
 					a = item.getInputLabels()
 					for n in range(item.input):
 						if isinstance(a,dict) and n in a:
@@ -2799,6 +2800,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 						else:
 							self.nodes.append(INode(item, n, self))
 
+					### display the label of output ports if exist
 					b = item.getOutputLabels()
 					for n in range(item.output):
 						if isinstance(b,dict) and n in b:
@@ -4246,7 +4248,7 @@ class INode(ConnectableNode):
 		#dc.SetPen(wx.Pen(wx.NamedColour('black'), 20))
 		#dc.DrawText(str(self.index), self.x-self.graphic.r, self.y-self.graphic.r-2)
 
-		### position of label
+		### position of label - not for Port model (inside containerBlock)
 		if not isinstance(self.item, Port):
 			### prepare label position
 			if self.item.input_direction == 'ouest':
