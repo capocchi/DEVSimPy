@@ -716,8 +716,9 @@ class NodePopupMenu(wx.Menu):
 
 		AppendItem(edit)
 
-		### bind event with new OnDeletePage
+		### bind event with new OnEditLabel
 		self.Bind(wx.EVT_MENU, parent.OnEditLabel, edit)
+
 class PropertiesCtrlPopupMenu(wx.Menu):
 	""" PropertiesCtrl popup menu.
 	"""

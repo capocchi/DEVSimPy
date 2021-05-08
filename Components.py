@@ -62,7 +62,6 @@ from which import which
 def getClassMember(python_file = ''):
 	""" Get class member from python file.
 	"""
-
 	module  = BlockFactory.GetModule(python_file)
 	
 	if inspect.ismodule(module):
@@ -902,20 +901,24 @@ class BlockFactory:
 
 		dir_name = os.path.dirname(filename)
 
+		
 		### if python_file is ...../toto.amd/Atomic_Model.py, then the parent dir is zipfile.
 		if zipfile.is_zipfile(dir_name):
 			zf = ZipManager.Zip(dir_name)
+			
 			return zf.GetModule()
 		elif zipfile.is_zipfile(filename):
+			
 			zf = ZipManager.Zip(filename)
 			return zf.GetModule()
 		### if python file is on the web !
 		elif filename.startswith(('http','https')):
+			
 			net = Net(filename)
 			return net.GetModule()
 		### pure python file
 		else:
-
+		
 			### add path to sys.path recursively
 			current_dirname = dir_name
 			while(current_dirname != os.path.dirname(current_dirname)):
@@ -963,7 +966,7 @@ class BlockFactory:
 					# all_modules = [x[1] for x in pkgutil.iter_modules(path=search_path)]
 					# print(all_modules)
 			else:
-				print("Import error 0: " + " module not found")
+				sys.stdout.write("Import error 0: " + " module not found")
 				module = None
 					
 			return module

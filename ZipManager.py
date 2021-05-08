@@ -397,10 +397,9 @@ class Zip:
 		#if rcp: recompile(module_name)
 	
 		PluginManager.trigger_event("IMPORT_STRATEGIES", fn=self.fn)
-								
+		
 		try:
 			module = self.ImportModule() if self.GetFullName() not in sys.modules else sys.modules[self.GetFullName()]
-			
 			return module
 		### model has not python file !
 		except Exception as e:
@@ -416,11 +415,12 @@ class Zip:
 			sys.path.append(p)
 
 		### load all paths from the lib dir to DOAMIN_PATH (external paths are added at the start of devsimpy)
-		p = os.path.dirname(p)
-		while(p!=DOMAIN_PATH):
-			if p not in sys.path:
-				sys.path.append(p)
+		if DOMAIN_PATH in p:
 			p = os.path.dirname(p)
+			while(p!=DOMAIN_PATH):
+				if p not in sys.path:
+					sys.path.append(p)
+				p = os.path.dirname(p)
 		
 		importer = zipimport.zipimporter(self.fn)
 		module_name = getPythonModelFileName(self.fn)
