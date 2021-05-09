@@ -1504,8 +1504,11 @@ class Base(object):
 	def DoSearch(self, text):
 		"""
 		"""
-		if text != "":
-			self.Search()
+		nb = self.GetNoteBook()
+		currentPage = nb.GetCurrentPage()
+		self.txt = currentPage.GetValue()
+		self.data = wx.FindReplaceData()   # initializes and holds search parameters
+		self.DoFind(text)
 		
 		#sys.stdout.write("DoSearch: %s\n" % text)
 		# return true to tell the search ctrl to remember the text
@@ -1565,12 +1568,7 @@ class Base(object):
 			img = img.Scale(22, 22)
 
 		# wxMac can be any size upto 128x128, so leave the source img alone....
-		if wx.VERSION_STRING < '4.0':
-			icon =  wx.IconFromBitmap(img.ConvertToBitmap())
-		else:
-			icon =  wx.Icon(img.ConvertToBitmap())
-
-		return icon
+		return wx.IconFromBitmap(img.ConvertToBitmap()) if wx.VERSION_STRING < '4.0' else wx.Icon(img.ConvertToBitmap())
 
 	### NOTE: Editor :: OnOnpenFile 			=> Event OnOpenFile
 	def OnOpenFile(self, event):
@@ -1622,7 +1620,8 @@ class Base(object):
 	def OnSearch(self, evt):
 		"""
 		"""
-		currentPage = self.nb.GetCurrentPage()
+		nb = self.GetNoteBook()
+		currentPage = nb.GetCurrentPage()
 		self.txt = currentPage.GetValue()
 		self.data = wx.FindReplaceData()   # initializes and holds search parameters
 		self.dlg = wx.FindReplaceDialog(currentPage, self.data, 'Find')
@@ -1631,11 +1630,16 @@ class Base(object):
 	def OnFind(self, evt):
 		"""
 		"""
-		editor = self.nb.GetCurrentPage()
-		#self.nb.SetSelection(0)
+		findstring = self.data.GetFindString().lower()
+		self.DoFind(findstring)
+
+	def DoFind(self, findstring:str)->None:
+		"""
+		"""
+		nb = self.GetNoteBook()
+		editor = nb.GetCurrentPage()
 		end = editor.GetLastPosition()
 		textstring = editor.GetRange(0, end).lower()
-		findstring = self.data.GetFindString().lower()
 		backward = not (self.data.GetFlags() & wx.FR_DOWN)
 
 		if backward:
@@ -1669,52 +1673,6 @@ class Base(object):
 
 		editor.ShowPosition(loc)
 		editor.SetSelection(loc, loc + len(findstring))
-
-		# fstring = self.data.GetFindString()          # also from event.GetFindString()
-		# self.pos = self.txt.find(fstring,self.pos+self.size)
-		# self.size = len(fstring)
-
-		# highlight_start_pos = self.pos
-		# highlight_end_pos = self.pos+self.size
-
-		# ### go to the finded word
-		# currentPage = self.nb.GetCurrentPage()
-		# currentPage.GotoPos(self.pos)
-
-		# currentPage.StartStyling(highlight_start_pos)
-		# currentPage.SetStyling(highlight_end_pos - highlight_start_pos, stc.STC_P_COMMENTLINE)
-		
-		# currentPage.StartStyling(highlight_end_pos)
-		# currentPage.SetStyling(len(self.txt) - highlight_end_pos, stc.STC_P_DEFAULT)
-
-	def Search(self):
-		"""
-		"""
-		currentPage = self.nb.GetCurrentPage()
-		self.txt = currentPage.GetValue()
-		self.data = wx.FindReplaceData()   # initializes and holds search parameters
-
-		fstring = self.data.GetFindString()          # also from event.GetFindString()
-		self.pos = self.txt.find(fstring, self.pos+self.size)
-		self.size = len(fstring)
-
-		start, end = 0, len(self.txt)
-		# force to the lexer to style the text not visible yet
-		lenght= len(fstring)
-		# clear all highlighted previous found text
-		currentPage.StartStyling(start)
-		currentPage.SetStyling(end, 0)
-		# highlight found text:
-		while lenght:
-			start = self.txt.find(fstring, self.pos+self.size)
-			if start == -1:
-				break
-			currentPage.StartStyling(start)
-			currentPage.SetStyling(lenght, stc.STC_P_COMMENTLINE)
-			start += lenght
-		# dummy style to draw last found text (wx bug?)
-		currentPage.StartStyling(end)
-		currentPage.SetStyling(0, stc.STC_P_DEFAULT)
 
 	def OnSaveAsFile(self, event):
 		"""
