@@ -1631,22 +1631,61 @@ class Base(object):
 	def OnFind(self, evt):
 		"""
 		"""
-		fstring = self.data.GetFindString()          # also from event.GetFindString()
-		self.pos = self.txt.find(fstring, self.pos+self.size)
-		self.size = len(fstring)
+		editor = self.nb.GetCurrentPage()
+		#self.nb.SetSelection(0)
+		end = editor.GetLastPosition()
+		textstring = editor.GetRange(0, end).lower()
+		findstring = self.data.GetFindString().lower()
+		backward = not (self.data.GetFlags() & wx.FR_DOWN)
 
-		highlight_start_pos = self.pos
-		highlight_end_pos = self.pos+self.size
+		if backward:
+			start = editor.GetSelection()[0]
+			loc = textstring.rfind(findstring, 0, start)
+		else:
+			start = editor.GetSelection()[1]
+			loc = textstring.find(findstring, start)
+		if loc == -1 and start != 0:
+			# string not found, start at beginning
+			if backward:
+				start = end
+				loc = textstring.rfind(findstring, 0, start)
+			else:
+				start = 0
+				loc = textstring.find(findstring, start)
+		if loc == -1:
+			dlg = wx.MessageDialog(self, 'Find String Not Found',
+							'Find String Not Found in Demo File',
+							wx.OK | wx.ICON_INFORMATION)
+			dlg.ShowModal()
+			dlg.Destroy()
 
-		### go to the finded word
-		currentPage = self.nb.GetCurrentPage()
-		currentPage.GotoPos(self.pos)
+		# if self.finddlg:
+		# 	if loc == -1:
+		# 		self.finddlg.SetFocus()
+		# 		return
+		# 	else:
+		# 		self.finddlg.Destroy()
+		# 		self.finddlg = None
 
-		currentPage.StartStyling(highlight_start_pos)
-		currentPage.SetStyling(highlight_end_pos - highlight_start_pos, stc.STC_P_COMMENTLINE)
+		editor.ShowPosition(loc)
+		editor.SetSelection(loc, loc + len(findstring))
+
+		# fstring = self.data.GetFindString()          # also from event.GetFindString()
+		# self.pos = self.txt.find(fstring,self.pos+self.size)
+		# self.size = len(fstring)
+
+		# highlight_start_pos = self.pos
+		# highlight_end_pos = self.pos+self.size
+
+		# ### go to the finded word
+		# currentPage = self.nb.GetCurrentPage()
+		# currentPage.GotoPos(self.pos)
+
+		# currentPage.StartStyling(highlight_start_pos)
+		# currentPage.SetStyling(highlight_end_pos - highlight_start_pos, stc.STC_P_COMMENTLINE)
 		
-		currentPage.StartStyling(highlight_end_pos)
-		currentPage.SetStyling(len(self.txt) - highlight_end_pos, stc.STC_P_DEFAULT)
+		# currentPage.StartStyling(highlight_end_pos)
+		# currentPage.SetStyling(len(self.txt) - highlight_end_pos, stc.STC_P_DEFAULT)
 
 	def Search(self):
 		"""
@@ -2443,8 +2482,8 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		
 		### search text box 
 		tb.AddStretchableSpace()
-		search = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
-		tb.AddControl(search)
+		finddlg = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
+		tb.AddControl(finddlg)
 
 		tb.Realize()
 
@@ -2505,8 +2544,8 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 		
 		### search text box 
 		self.toolbar.AddStretchableSpace()
-		search = TestSearchCtrl(self.toolbar, size=(150,-1), doSearch=self.DoSearch)
-		self.toolbar.AddControl(search)
+		self.finddlg = TestSearchCtrl(self.toolbar, size=(150,-1), doSearch=self.DoSearch)
+		self.toolbar.AddControl(self.finddlg)
 
 		# if wx.VERSION_STRING < '4.0':
 		# 	self.toolbar.AddTool(id[0], wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')),shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
@@ -2669,6 +2708,8 @@ class GeneralEditor(EditorFrame):
 		### call constructor of parent
 		EditorFrame.__init__(self, parent, id, title)
 
+		self.title = title
+
 		### if not parent, we configure a frame
 		if not parent:
 			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH, 'iconDEVSimPy.png'), wx.BITMAP_TYPE_PNG)))
@@ -2731,7 +2772,7 @@ class GeneralEditor(EditorFrame):
 			page = self.nb.GetPage(id)
 
 			if page.IsModified():
-				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram?')%(title), _('Save'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
+				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram?')%(self.title), _('Save'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
 				val = dlg.ShowModal()
 				if val == wx.ID_YES:
 					self.OnSaveFile(event)
@@ -2746,10 +2787,7 @@ class GeneralEditor(EditorFrame):
 			else:
 				self.nb.OnClosePage(event, id)
 
-			return True
-
-		else:
-			return True
+		return True
 
 ### -----------------------------------------------------------------------------------------------
 class TestApp(wx.App):
