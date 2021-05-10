@@ -275,8 +275,9 @@ class DumpZipFile(DumpBase):
 	
 		### Check comparison between serialized attribut (L) and normal attribut (dump_attributes)
 
-		if not isinstance(L[0],dict):
-			print("sdds")
+		### old model that contains path of model and python files - we remove this
+		if not isinstance(L[0],dict) and isinstance(L[0],str) and isinstance(L[1],str):
+			L = L[2:]
 
 		if len(obj_loaded.dump_attributes) != len(L):
 			### for model build with a version of devsimpy <= 2.5
