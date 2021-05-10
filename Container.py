@@ -578,7 +578,7 @@ class Diagram(Savable, Structurable):
 
 			# 	Structurable.ConnectDEVSPorts(diagram, p1, p2)
 			else:
-				msg = _('Direct connections between ports inside the coupled model %s have been founded.\n There are not considered by the simulation!'%())
+				msg = _('Direct connections between ports inside the coupled model %s have been founded.\n There are not considered by the simulation!\n'%(diagram.label))
 				sys.stdout.write(msg)
 				#return msg
 

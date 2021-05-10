@@ -274,7 +274,10 @@ class DumpZipFile(DumpBase):
 			return info
 	
 		### Check comparison between serialized attribut (L) and normal attribut (dump_attributes)
-		
+
+		if not isinstance(L[0],dict):
+			print("sdds")
+
 		if len(obj_loaded.dump_attributes) != len(L):
 			### for model build with a version of devsimpy <= 2.5
 			### font checking
@@ -316,6 +319,7 @@ class DumpZipFile(DumpBase):
 				### update behavioral attribute for model saved with bad args (amd or cmd have been changed in librairie but not in dsp)
 				if attr == 'args':
 					if obj_loaded.args != {}:
+						print(obj_loaded.dump_attributes,L)
 						for key in [a for a in list(obj_loaded.args.keys()) if a in list(L[i].keys())]:
 							obj_loaded.args[key] = L[i][key]
 					else:
@@ -323,7 +327,7 @@ class DumpZipFile(DumpBase):
 				else:
 					setattr(obj_loaded, attr, L[i])
 				
-		except IndexError as info:
+		except (IndexError,AttributeError) as info:
 			tb = traceback.format_exc()
 			sys.stderr.write(_("Problem loading (old model): %s -- %s \n")%(str(fileName), str(tb)))
 			return info

@@ -532,7 +532,7 @@ class ImportLibrary(wx.Dialog):
 		if path not in self.parent.exportPathsList:
 			self.parent.exportPathsList.append(str(path))
 			self.parent.cfg.Write('exportPathsList', str(self.parent.exportPathsList))
-
+		
 		### ajout dans le dictionnaire pour recupere le chemin à l'insertion dans DEVSimPy (voir OnImport)
 		self._d.update({dName:path})
 

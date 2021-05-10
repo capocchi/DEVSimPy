@@ -1556,6 +1556,10 @@ class MainApplication(wx.Frame):
 
 			self.tree.SortChildren(self.tree.GetRootItem())
 
+			### update the loaded libraries config file
+			if (len(dlg._selectedItem)>0):
+				self.SaveLibraryProfile()
+
 		dlg.Destroy()
 
 	###
