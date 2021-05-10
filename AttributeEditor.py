@@ -221,8 +221,8 @@ class QuickAttributeEditor(wx.Frame, Subject):
 		self.attach(self.canvas.GetDiagram())
 
 		#spinCtrl for input and output port numbers
-		self._sb_input = wx.SpinCtrl(self, wx.NewIdRef(), size=(60,-1), min=0, max=100)
-		self._sb_output = wx.SpinCtrl(self, wx.NewIdRef(), size=(60,-1), min=0, max=100)
+		self._sb_input = wx.SpinCtrl(self, wx.NewIdRef(), size=(60,-1), min=0, max=100000)
+		self._sb_output = wx.SpinCtrl(self, wx.NewIdRef(), size=(60,-1), min=0, max=100000)
 
 		# mouse positions
 		xwindow, ywindow = wx.GetMousePosition()
