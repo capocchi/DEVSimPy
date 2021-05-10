@@ -51,7 +51,7 @@ import Components
 _ = wx.GetTranslation
 
 padding = 5
-MAX_NB_PORT = 100
+MAX_NB_PORT = 1000000
 MIN_NB_PORT = 0
 # Gives user's home directory
 USERHOME = os.path.expanduser('~')

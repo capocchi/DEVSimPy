@@ -2586,10 +2586,6 @@ if builtins.__dict__.get('GUI_FLAG',True):
 		def ShowQuickAttributeEditor(self):
 			"""
 			"""
-			# mouse positions
-			xwindow, ywindow = wx.GetMousePosition()
-
-			xm,ym = self.ScreenToClient(wx.Point(xwindow, ywindow))
 
 			mainW = self.GetTopLevelParent()
 
@@ -2604,11 +2600,15 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				self.f = None
 
 			if flag:
+				# mouse positions
+				xwindow, ywindow = wx.GetMousePosition()
+				xm,ym = self.ScreenToClient(wx.Point(xwindow, ywindow))
+
 				for s in {m for m in self.diagram.GetShapeList() if isinstance(m, Block) and self.isSelected(m)}:
 					x = s.x[0]*self.scalex
 					y = s.y[0]*self.scaley
-					w = (s.x[1]-s.x[0])*self.scalex
-					h = (s.y[1]-s.y[0])*self.scaley
+					w = s.x[1]*self.scalex-x
+					h = s.y[1]*self.scaley-y
 
 					# if mousse over hight the shape
 					try:
@@ -2630,6 +2630,9 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			""" Motion manager.
 			""" 
 
+			### current cursor
+			cursor = self.GetCursor()
+
 			if event.Dragging() and event.LeftIsDown():
 
 				self.diagram.modify = False
@@ -2641,7 +2644,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					# left button is down
 					if self.HasCapture():
 
-						self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
+						if cursor != wx.StockCursor(wx.CURSOR_ARROW):
+							cursor = wx.StockCursor(wx.CURSOR_ARROW)
 						
 						dc = wx.ClientDC(self)
 						odc = wx.DCOverlay(self.overlay, dc)
@@ -2669,7 +2673,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 						### change cursor when resizing model
 						if isinstance(s, ResizeableNode):
-							self.SetCursor(wx.StockCursor(wx.CURSOR_SIZING))
+							if cursor != wx.StockCursor(wx.CURSOR_SIZING):
+								cursor = wx.StockCursor(wx.CURSOR_SIZING)
 
 						### change cursor when connectionShape hit a node
 						elif isinstance(s, ConnectionShape):
@@ -2677,13 +2682,18 @@ if builtins.__dict__.get('GUI_FLAG',True):
 							if len(s.pen)>2:
 								s.pen[2]= wx.PENSTYLE_DOT
 
-							self.SetCursor(wx.StockCursor(wx.CURSOR_HAND))
+							if cursor != wx.StockCursor(wx.CURSOR_HAND):
+								cursor = wx.StockCursor(wx.CURSOR_HAND)
 
 							for node in [n for n in self.nodes if isinstance(n, ConnectableNode) and n.HitTest(point[0], point[1])]:
-								self.SetCursor(wx.StockCursor(wx.CURSOR_CROSS))
+								if cursor != wx.StockCursor(wx.CURSOR_CROSS):
+									cursor = wx.StockCursor(wx.CURSOR_CROSS) 
 						else:
-							self.SetCursor(wx.StockCursor(wx.CURSOR_HAND))
+							if cursor != wx.StockCursor(wx.CURSOR_HAND):
+								cursor = wx.StockCursor(wx.CURSOR_HAND)
 
+					### update the cursor
+					self.SetCursor(cursor)
 					self.diagram.modify = True
 					self.currentPoint = point
 
@@ -2692,6 +2702,27 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 			# pop-up to change the number of ports
 			else:
+				point = self.getEventCoordinates(event)
+			
+				### list of overhead nodes during the mouse motion
+				nodes = [n for n in self.nodes if n.HitTest(point[0], point[1])]
+				
+				### if nodes has a node, the mouse is on the node
+				if len(nodes) == 1:
+					### there is only one node under the mouse pointer
+					node = nodes[0]
+					### change the cursor when node is pointed
+					if isinstance(node, ResizeableNode) and cursor != wx.StockCursor(wx.CURSOR_SIZING):
+						cursor = wx.StockCursor(wx.CURSOR_SIZING)
+					elif isinstance(node, ConnectableNode) and cursor != wx.StockCursor(wx.CURSOR_CROSS):
+						cursor = wx.StockCursor(wx.CURSOR_CROSS)
+				else:
+					### restor the cursor with arrow
+					if cursor != wx.StockCursor(wx.CURSOR_ARROW):
+						cursor = wx.StockCursor(wx.CURSOR_ARROW)
+				
+				### update the cursor
+				self.SetCursor(cursor)
 				self.ShowQuickAttributeEditor()
 
 			#self.DiagramModified()
@@ -4441,6 +4472,11 @@ class ResizeableNode(Node):
 		canvas.PopupMenu(menu, event.GetPosition())
 		### destroy menu local variable
 		menu.Destroy()
+
+	def HitTest(self,x,y):
+		""" Collision detection method.
+		"""
+		return self.graphic.HitTest(x,y)
 
 #---------------------------------------------------------
 class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observer):
