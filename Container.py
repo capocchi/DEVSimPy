@@ -578,7 +578,7 @@ class Diagram(Savable, Structurable):
 
 			# 	Structurable.ConnectDEVSPorts(diagram, p1, p2)
 			else:
-				msg = _('Direct connections between ports inside the coupled model %s have been founded.\n There are not considered by the simulation!'%())
+				msg = _('Direct connections between ports inside the coupled model %s have been founded.\n There are not considered by the simulation!\n'%(diagram.label))
 				sys.stdout.write(msg)
 				#return msg
 
@@ -2469,7 +2469,6 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 			### click on canvas
 			else:
-
 				### Rubber Band with overlay
 				## User released left button, change cursor back
 				if self.HasCapture():
@@ -2507,6 +2506,11 @@ if builtins.__dict__.get('GUI_FLAG',True):
 								if self.permRect:
 									raise AttributeError(_("use >= wx-2.8-gtk-unicode library: %s")%info)
 									#clear out any existing drawing
+				else:
+					### shape is None and we remove the connectionShape
+					for item in [s for s in self.select() if isinstance(s, ConnectionShape)]:
+						self.diagram.DeleteShape(item)
+						self.deselect()
 
 			self.Refresh()
 
@@ -2631,12 +2635,12 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				self.diagram.modify = False
 
 				sc = self.getSelectedShapes()
-	
+			
 				if len(sc) == 0:
 					# User is dragging the mouse, check if
 					# left button is down
 					if self.HasCapture():
-						
+
 						self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
 						
 						dc = wx.ClientDC(self)
@@ -2675,9 +2679,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 							self.SetCursor(wx.StockCursor(wx.CURSOR_HAND))
 
-							for node in [n for n in self.nodes if isinstance(n, ConnectableNode)]:
-								if node.HitTest(point[0], point[1]):
-									self.SetCursor(wx.StockCursor(wx.CURSOR_CROSS))
+							for node in [n for n in self.nodes if isinstance(n, ConnectableNode) and n.HitTest(point[0], point[1])]:
+								self.SetCursor(wx.StockCursor(wx.CURSOR_CROSS))
 						else:
 							self.SetCursor(wx.StockCursor(wx.CURSOR_HAND))
 

@@ -698,27 +698,23 @@ class DiagramTabPopupMenu(wx.Menu):
 		AppendItem(close)
 		
 		### Bind is not necessary because ID_EXIT_DAIGRAM and ID_DETACH_DIAGRAM are already binded
-
 class NodePopupMenu(wx.Menu):
 	""" Node popup menu
 	"""
 
-	def __init__(self, parent):
+	def __init__(self, node):
 		""" Constructor.
 		"""
 		wx.Menu.__init__(self)
 
 		edit = wx.MenuItem(self, -1, _('Edit'), _('Edit label'))
-		
-		edit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'edit.png')))
+		edit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'label.png')))
 		
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
-
 		AppendItem(edit)
 
 		### bind event with new OnEditLabel
-		self.Bind(wx.EVT_MENU, parent.OnEditLabel, edit)
-
+		self.Bind(wx.EVT_MENU, node.OnEditLabel, edit)
 class PropertiesCtrlPopupMenu(wx.Menu):
 	""" PropertiesCtrl popup menu.
 	"""

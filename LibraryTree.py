@@ -361,7 +361,7 @@ class LibraryTree(wx.TreeCtrl):
 							except Exception as info:
 								info = str(info)
 								sys.stdout.write(_("%s not deleted! \n Error: %s")%(label,info))
-
+							
 						dial.Destroy()
 
 				else:
@@ -1032,6 +1032,10 @@ class LibraryTree(wx.TreeCtrl):
 				del self.ItemDico[key]
 
 		self.Delete(item)
+
+		mainW = wx.GetApp().GetTopWindow()
+		mainW.SaveLibraryProfile()
+
 
 	###
 	def OnItemRefresh(self, evt):

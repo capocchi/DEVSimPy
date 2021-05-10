@@ -198,7 +198,8 @@ class TestSearchCtrl(wx.SearchCtrl):
         item = menu.Append(-1, "Recent Searches")
         item.Enable(False)
         for idx, txt in enumerate(self.searches):
-            menu.Append(1+idx, txt)
+            if txt != "":
+                menu.Append(1+idx, txt)
         return menu
 
 ### NOTE: PythonSTC << stc.StyledTextCtrl :: todo
@@ -1500,12 +1501,16 @@ class Base(object):
 
 		return tb
 
-	def DoSearch(self,  text):
+	def DoSearch(self, text):
 		"""
 		"""
-		### TODO !
-		# called by TestSearchCtrl
-		sys.stdout.write("DoSearch: %s\n" % text)
+		nb = self.GetNoteBook()
+		currentPage = nb.GetCurrentPage()
+		self.txt = currentPage.GetValue()
+		self.data = wx.FindReplaceData()   # initializes and holds search parameters
+		self.DoFind(text)
+		
+		#sys.stdout.write("DoSearch: %s\n" % text)
 		# return true to tell the search ctrl to remember the text
 		return True
 
@@ -1563,12 +1568,7 @@ class Base(object):
 			img = img.Scale(22, 22)
 
 		# wxMac can be any size upto 128x128, so leave the source img alone....
-		if wx.VERSION_STRING < '4.0':
-			icon =  wx.IconFromBitmap(img.ConvertToBitmap())
-		else:
-			icon =  wx.Icon(img.ConvertToBitmap())
-
-		return icon
+		return wx.IconFromBitmap(img.ConvertToBitmap()) if wx.VERSION_STRING < '4.0' else wx.Icon(img.ConvertToBitmap())
 
 	### NOTE: Editor :: OnOnpenFile 			=> Event OnOpenFile
 	def OnOpenFile(self, event):
@@ -1620,7 +1620,8 @@ class Base(object):
 	def OnSearch(self, evt):
 		"""
 		"""
-		currentPage = self.nb.GetCurrentPage()
+		nb = self.GetNoteBook()
+		currentPage = nb.GetCurrentPage()
 		self.txt = currentPage.GetValue()
 		self.data = wx.FindReplaceData()   # initializes and holds search parameters
 		self.dlg = wx.FindReplaceDialog(currentPage, self.data, 'Find')
@@ -1629,21 +1630,49 @@ class Base(object):
 	def OnFind(self, evt):
 		"""
 		"""
-		fstring = self.data.GetFindString()          # also from event.GetFindString()
-		self.pos = self.txt.find(fstring, self.pos+self.size)
-		self.size = len(fstring)
+		findstring = self.data.GetFindString().lower()
+		self.DoFind(findstring)
 
-		highlight_start_pos = self.pos
-		highlight_end_pos = self.pos+self.size
+	def DoFind(self, findstring:str)->None:
+		"""
+		"""
+		nb = self.GetNoteBook()
+		editor = nb.GetCurrentPage()
+		end = editor.GetLastPosition()
+		textstring = editor.GetRange(0, end).lower()
+		backward = not (self.data.GetFlags() & wx.FR_DOWN)
 
-		### go to the finded word
-		currentPage = self.nb.GetCurrentPage()
-		currentPage.GotoPos(self.pos)
-		
-		currentPage.StartStyling(highlight_start_pos)
-		currentPage.SetStyling(highlight_end_pos - highlight_start_pos, stc.STC_P_COMMENTLINE)
-		currentPage.StartStyling(highlight_end_pos)
-		currentPage.SetStyling(len(self.txt) - highlight_end_pos, stc.STC_STYLE_DEFAULT)
+		if backward:
+			start = editor.GetSelection()[0]
+			loc = textstring.rfind(findstring, 0, start)
+		else:
+			start = editor.GetSelection()[1]
+			loc = textstring.find(findstring, start)
+		if loc == -1 and start != 0:
+			# string not found, start at beginning
+			if backward:
+				start = end
+				loc = textstring.rfind(findstring, 0, start)
+			else:
+				start = 0
+				loc = textstring.find(findstring, start)
+		if loc == -1:
+			dlg = wx.MessageDialog(self, 'Find String Not Found',
+							'Find String Not Found in Demo File',
+							wx.OK | wx.ICON_INFORMATION)
+			dlg.ShowModal()
+			dlg.Destroy()
+
+		# if self.finddlg:
+		# 	if loc == -1:
+		# 		self.finddlg.SetFocus()
+		# 		return
+		# 	else:
+		# 		self.finddlg.Destroy()
+		# 		self.finddlg = None
+
+		editor.ShowPosition(loc)
+		editor.SetSelection(loc, loc + len(findstring))
 
 	def OnSaveAsFile(self, event):
 		"""
@@ -2411,8 +2440,8 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		
 		### search text box 
 		tb.AddStretchableSpace()
-		search = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
-		tb.AddControl(search)
+		finddlg = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
+		tb.AddControl(finddlg)
 
 		tb.Realize()
 
@@ -2473,8 +2502,8 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 		
 		### search text box 
 		self.toolbar.AddStretchableSpace()
-		search = TestSearchCtrl(self.toolbar, size=(150,-1), doSearch=self.DoSearch)
-		self.toolbar.AddControl(search)
+		self.finddlg = TestSearchCtrl(self.toolbar, size=(150,-1), doSearch=self.DoSearch)
+		self.toolbar.AddControl(self.finddlg)
 
 		# if wx.VERSION_STRING < '4.0':
 		# 	self.toolbar.AddTool(id[0], wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')),shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
@@ -2637,6 +2666,8 @@ class GeneralEditor(EditorFrame):
 		### call constructor of parent
 		EditorFrame.__init__(self, parent, id, title)
 
+		self.title = title
+
 		### if not parent, we configure a frame
 		if not parent:
 			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH, 'iconDEVSimPy.png'), wx.BITMAP_TYPE_PNG)))
@@ -2699,7 +2730,7 @@ class GeneralEditor(EditorFrame):
 			page = self.nb.GetPage(id)
 
 			if page.IsModified():
-				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram?')%(title), _('Save'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
+				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram?')%(self.title), _('Save'), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
 				val = dlg.ShowModal()
 				if val == wx.ID_YES:
 					self.OnSaveFile(event)
@@ -2714,10 +2745,7 @@ class GeneralEditor(EditorFrame):
 			else:
 				self.nb.OnClosePage(event, id)
 
-			return True
-
-		else:
-			return True
+		return True
 
 ### -----------------------------------------------------------------------------------------------
 class TestApp(wx.App):
