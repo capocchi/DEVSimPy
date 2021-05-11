@@ -1274,6 +1274,7 @@ class Shape(ShapeEvtHandler):
 		if not self.lock_flag:
 			self.x = array.array('d', [v+x for v in self.x])
 			self.y = array.array('d', [v+y for v in self.y])
+	
 			
 	#def OnResize(self):
 	#	""" Resize method controled by ResizeNode move method
@@ -2691,10 +2692,12 @@ if builtins.__dict__.get('GUI_FLAG',True):
 						else:
 							if cursor != wx.StockCursor(wx.CURSOR_HAND):
 								cursor = wx.StockCursor(wx.CURSOR_HAND)
-
+						
 					### update the cursor
 					self.SetCursor(cursor)
+					### update modify
 					self.diagram.modify = True
+					### update current point
 					self.currentPoint = point
 
 					### refresh all canvas with Flicker effect corrected in OnPaint and OnEraseBackground
