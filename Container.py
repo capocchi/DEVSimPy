@@ -2830,21 +2830,13 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				item.OnSelect(None)
 				if isinstance(item, Connectable):
 					### display the label of input ports if exist
-					a = item.getInputLabels()
-					for n in range(item.input):
-						if isinstance(a,dict) and n in a:
-							self.nodes.append(INode(item, n, self, item.getInputLabel(n)))
-						else:
-							self.nodes.append(INode(item, n, self))
+					for n in range(item.input):	
+						self.nodes.append(INode(item, n, self, item.getInputLabel(n)))
 
 					### display the label of output ports if exist
-					b = item.getOutputLabels()
 					for n in range(item.output):
-						if isinstance(b,dict) and n in b:
-							self.nodes.append(ONode(item, n, self, item.getOutputLabel(n)))
-						else:
-							self.nodes.append(ONode(item, n, self))
-
+						self.nodes.append(ONode(item, n, self, item.getOutputLabel(n)))
+						
 				if isinstance(item, Resizeable):
 					self.nodes.extend([ResizeableNode(item, n, self) for n in range(len(item.x))])
 					
