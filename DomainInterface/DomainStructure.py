@@ -99,6 +99,22 @@ class DomainStructure(BaseDEVS.CoupledDEVS):
 			for v in V:
 				self.component_set.remove(v)
 
+	def connectPorts(self, p1, p2)->None:
+		""" connect the input port p1 to the output port p2
+		"""
+		self.connectPorts(p1,p2)
+
+	def disconnectPorts(self, p1, p2)->None:
+		""" disconnect the input port p1 from the output port p2
+		"""
+		self.disconnectPorts(p1,p2)
+
+	def removeSubModel(self, model)->None:
+		""" remove the model from the component set
+		"""
+		if 'PyPDEVS' in builtins.__dict__['DEFAULT_DEVS_DIRNAME']:
+			self.removeSubModel(self, model)
+
 def main():
 	DS = DomainStructure()
 
