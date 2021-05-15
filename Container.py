@@ -690,6 +690,7 @@ class Diagram(Savable, Structurable):
 		"""
 		stat_dico = self.GetStat({'Atomic_nbr':0, 'Coupled_nbr':0, 'Connection_nbr':0, 'Deep_level':0, 'iPort_nbr':0, 'oPort_nbr':0})
 		msg = ""
+		msg += _("Path: %s\n")%self.last_name_saved
 		msg += _("Number of atomic devs models: %d\n")%stat_dico['Atomic_nbr']
 		msg += _("Number of coupled devs models: %d\n")%stat_dico['Coupled_nbr']
 		msg += _("Number of coupling: %d\n")%stat_dico['Connection_nbr']

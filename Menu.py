@@ -682,11 +682,13 @@ class DiagramTabPopupMenu(wx.Menu):
 		close = wx.MenuItem(self, ID_EXIT_DIAGRAM, _('Close'), _('Close diagram'))
 		detach = wx.MenuItem(self, ID_DETACH_DIAGRAM, _('Detach'), _('Detach tab to window'))
 		rename = wx.MenuItem(self, ID_RENAME_DIAGRAM, _('Rename'), _('Rename diagram'))
+		info = wx.MenuItem(self, ID_INFO_DIAGRAM, _('Info'), _('Information diagram'))
 		clear = wx.MenuItem(self, ID_CLEAR_DIAGRAM, _('Clear'), _('Clear diagram'))
 
 		close.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'close.png')))
 		detach.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'detach.png')))
 		rename.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'rename.png')))
+		info.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'info.png')))
 		clear.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'delete.png')))
 
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
@@ -694,6 +696,7 @@ class DiagramTabPopupMenu(wx.Menu):
 		AppendItem(detach)
 		AppendItem(rename)
 		AppendItem(clear)
+		AppendItem(info)
 		self.AppendSeparator()
 		AppendItem(close)
 		
