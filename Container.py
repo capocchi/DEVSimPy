@@ -77,6 +77,7 @@ if builtins.__dict__.get('GUI_FLAG', True):
 
 ### Color definition
 RED = '#d91e1e'
+RED_LIGHT = '#f2a2a2'
 GREEN = '#90ee90'
 BLACK = '#000000'
 BLUE = '#add8e6'
@@ -1497,6 +1498,14 @@ class PointShape(Shape):
 		return self.graphic.HitTest(x,y)
 
 	def draw(self,dc):
+		"""
+		"""
+		# Mac's DC is already the same as a GCDC, and it causes
+        # problems with the overlay if we try to use an actual
+        # wx.GCDC so don't try it.
+		if 'wxMac' not in wx.PlatformInfo:
+			dc = wx.GCDC(dc)
+
 		self.graphic.pen = self.pen
 		self.graphic.fill = self.fill
 		self.graphic.draw(dc)
@@ -2934,6 +2943,7 @@ class LinesShape(Shape):
 
 		### pour le rectangle en fin de connexion
 		if wx.VERSION_STRING >= '4.0':
+			dc.SetBrush(wx.Brush(RED_LIGHT))
 			wx.DC.DrawRectangle(dc,wx.Point(self.x[-1]-10/2, self.y[-1]-10/2), wx.Size(10, 10))
 		else:
 			dc.DrawRectanglePointSize(wx.Point(self.x[-1]-10/2, self.y[-1]-10/2), wx.Size(10, 10))
@@ -3305,6 +3315,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 	def draw(self, dc):
 		"""
 		"""
+
 		if self.input:
 			self.x[0], self.y[0] = self.input[0].getPortXY('output', self.input[1])
 
@@ -3397,7 +3408,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
         # wx.GCDC so don't try it.
 		if 'wxMac' not in wx.PlatformInfo:
 			dc = wx.GCDC(dc)
-		
+
 		### Draw rectangle shape
 		RoundedRectangleShape.draw(self, dc)
 
