@@ -1242,57 +1242,6 @@ class Base(object):
 		### copy
 		self.parent = parent
 
-#		### if parent, we want Editor as a panel
-#		if self.parent:
-#
-#			### call constructor and set background color of panel
-#			wx.Panel.__init__(self, self.parent, id)
-#			self.SetBackgroundColour(wx.WHITE)
-#
-#			### Define sizer
-#			sizer = wx.BoxSizer(wx.VERTICAL)
-#
-#			### create notebook
-#			self.nb = EditionNotebook(self, wx.NewIdRef(), style=wx.CLIP_CHILDREN)
-#			### create juste for the bind of action (save,...) of the toolbar - Warning it must stay here !
-#			self.menuBar = self.CreateMenu()
-#			### create toolbar
-#			self.toolbar = self.CreateTB()
-#			###recover the statusbar of mainW
-#			self.statusbar = parent.GetStatusBar()
-#
-#			### add toolbar and notebook
-#			sizer.Add(self.toolbar, 0, wx.ALL | wx.ALIGN_LEFT | wx.EXPAND)
-#			sizer.Add(self.nb, 1 ,wx.EXPAND)
-#
-#			### set sizer and layout of panel
-#			self.SetSizer(sizer)
-#			self.SetAutoLayout(True)
-#
-#		### if parent is none we want editor as a frame
-#		else:
-#
-#			### call constructor
-#			wx.Frame.__init__(self, self.parent, id, title, size=(600, 500), style=wx.DEFAULT_FRAME_STYLE)
-#
-#			### Create notebook
-#			self.nb = EditionNotebook(self, wx.NewIdRef(), style=wx.CLIP_CHILDREN)
-#
-#			### create menu, toolbar and statusbar for the frame
-#			self.menuBar = self.CreateMenu()
-#			self.SetMenuBar(self.menuBar)
-#			self.toolbar = self.CreateTB()
-#			self.statusbar= self.GetStatusBar()
-#
-#			### binding
-#			self.Bind(wx.EVT_CLOSE, self.QuitApplication)
-#
-#			self.Centre()
-#
-#			### just for windows
-#			e = wx.SizeEvent(self.GetSize())
-#			self.ProcessEvent(e)
-
 		# notebook
 		self.read_only = False
 
@@ -1318,7 +1267,7 @@ class Base(object):
 		### add test file
 		if hasattr(model, 'GetTestFile'):
 			L = model.GetTestFile()
-			for i,s in enumerate([os.path.join(model.model_path, l) for l in L]):
+			for i,s in enumerate(os.path.join(model.model_path, l) for l in L):
 				self.AddEditPage(L[i], s)
 
 		self.cb = model
@@ -1471,14 +1420,13 @@ class Base(object):
 				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), _('Cut'), ''))
 				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), _('Copy'), ''))
 				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), _('Paste'), ''))
-				self.Bind(wx.EVT_TOOL, self.QuitApplication, id = self.quit.GetId())
 			else:
 				self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH, 'save.png')),shortHelp=_('Save')))
 				tb.AddSeparator()
 				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'cut.png')),  shortHelp=_('Cut')))
 				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'copy.png')),  shortHelp=_('Copy')))
 				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'paste.png')),  shortHelp=_('Paste')))
-				self.Bind(wx.EVT_TOOL, self.QuitApplication, id = self.quit.GetId())
+			self.Bind(wx.EVT_TOOL, self.QuitApplication, id = self.quit.GetId())
 		else:
 
 			if wx.VERSION_STRING < '4.0':
@@ -1980,7 +1928,10 @@ class BlockBase(object):
 					(_('New passivate state'),self.OnInsertPassivateState), (_('New Phase test'),self.OnInsertPhaseIs), (_('New debugger stdout'),self.OnInsertDebug), 
 					(_('Get state'),self.OnInsertGetState), (_('Get sigma'),self.OnInsertGetSigma), (_('Get message value'),self.OnInsertGetMsgValue)])
 			else:
-				self._choices = collections.OrderedDict([(_('New debugger stdout'),self.OnInsertDebug)])
+				if 'PyPDEVS' in builtins.__dict__['DEFAULT_DEVS_DIRNAME']:
+					self._choices = collections.OrderedDict([(_("New add sub model"),self.OnAddModel),(_("New remove sub model"),self.OnRemoveModel),(_("New port connection"),self.OnDisConnectPorts),(_("New port connection"),self.OnConnectPorts),(_('New debugger stdout'),self.OnInsertDebug)])
+				else:
+					self._choices = collections.OrderedDict([(_('New debugger stdout'),self.OnInsertDebug)])
 		else:
 			self._choices = collections.OrderedDict()
 
@@ -2012,7 +1963,7 @@ class BlockBase(object):
 
 		if port is not None:
 			cp = self.nb.GetCurrentPage()
-			cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))" % int(port))
+			cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))"%int(port))
 			self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	def OnCombo(self, event):
@@ -2048,9 +1999,9 @@ class BlockBase(object):
 			if port is not None:
 				cp = self.nb.GetCurrentPage()
 				if "peek" in label:
-					cp.AddText("self.peek(self.IPorts[%d], *args)" % int(port))
+					cp.AddText("self.peek(self.IPorts[%d], *args)"%int(port))
 				elif "poke" in label:
-					cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))" % int(port))
+					cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))"%int(port))
 				self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	def OnInsertInitPhase(self, event):
@@ -2168,6 +2119,38 @@ class BlockBase(object):
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.debugger('<message>')")
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+
+	###
+	def OnAddModel(self, event):
+		""" Insert a sentence to add sub model to coupled model
+		"""
+		cp = self.nb.GetCurrentPage()
+		cp.AddText("self.addSubModel(<model>)")
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+
+	###
+	def OnRemoveModel(self, event):
+		""" Insert a sentence to remove model from coupled model
+		"""
+		cp = self.nb.GetCurrentPage()
+		cp.AddText("self.removeSubModel(<model>)")
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+
+	###
+	def OnConnectPorts(self, event):
+		""" Insert a sentence to connect the port p1 to the port p2
+		"""
+		cp = self.nb.GetCurrentPage()
+		cp.AddText("self.connectPorts(<p1>,<p2>)")
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+
+	###
+	def OnDisConnectPorts(self, event):
+		""" Insert a sentence to disconnect the port p1 form the port p2
+		"""
+		cp = self.nb.GetCurrentPage()
+		cp.AddText("self.disconnectPorts(<p1>,<p2>)")
 		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	###

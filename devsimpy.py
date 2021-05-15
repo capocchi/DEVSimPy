@@ -4,11 +4,11 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # devsimpy.py --- DEVSimPy - The Python DEVS GUI modeling and simulation software
 #                     --------------------------------
-#                            Copyright (c) 2020
+#                            Copyright (c) 2021
 #                    L. CAPOCCHI (capocchi@univ-corse.fr)
 #                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-# Version 4.0                                      last modified:  03/14/20
+# Version 4.0                                      last modified:  05/15/20
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
