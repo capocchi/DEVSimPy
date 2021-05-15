@@ -1785,17 +1785,12 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			backBrush = wx.Brush(backColour, wx.BRUSHSTYLE_SOLID)
 			pdc.SetBackground(backBrush)
 			pdc.Clear()
-
-			try:
-				dc = wx.GCDC(pdc)
-			except:
-				dc = pdc
-
+			
 			### to insure the correct redraw when window is scolling
 			### http://markmail.org/thread/hytqkxhpdopwbbro#query:+page:1+mid:635dvk6ntxsky4my+state:results
-			self.PrepareDC(dc)
+			self.PrepareDC(pdc)
 
-			self.DoDrawing(dc)
+			self.DoDrawing(pdc)
 
 		@Post_Undo
 		def OnLock(self, event):
@@ -2665,6 +2660,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					else:
 						self.Refresh()
 				else:
+					
 					point = self.getEventCoordinates(event)
 					x = point[0] - self.currentPoint[0]
 					y = point[1] - self.currentPoint[1]
@@ -2692,17 +2688,17 @@ if builtins.__dict__.get('GUI_FLAG',True):
 						else:
 							if cursor != wx.StockCursor(wx.CURSOR_HAND):
 								cursor = wx.StockCursor(wx.CURSOR_HAND)
-						
+					
 					### update the cursor
 					self.SetCursor(cursor)
 					### update modify
 					self.diagram.modify = True
 					### update current point
 					self.currentPoint = point
-
+					
 					### refresh all canvas with Flicker effect corrected in OnPaint and OnEraseBackground
 					self.Refresh()
-
+					
 			# pop-up to change the number of ports
 			else:
 				point = self.getEventCoordinates(event)
@@ -3396,6 +3392,12 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		"""
 		"""
 
+		# Mac's DC is already the same as a GCDC, and it causes
+        # problems with the overlay if we try to use an actual
+        # wx.GCDC so don't try it.
+		if 'wxMac' not in wx.PlatformInfo:
+			dc = wx.GCDC(dc)
+		
 		### Draw rectangle shape
 		RoundedRectangleShape.draw(self, dc)
 
@@ -4518,7 +4520,14 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 		""" Drawing method.
 		"""
 
+		# Mac's DC is already the same as a GCDC, and it causes
+        # problems with the overlay if we try to use an actual
+        # wx.GCDC so don't try it.
+		if 'wxMac' not in wx.PlatformInfo:
+			dc = wx.GCDC(dc)
+
 		CircleShape.draw(self, dc)
+		
 		w,h = dc.GetTextExtent(self.label)
 
 		### label position manager

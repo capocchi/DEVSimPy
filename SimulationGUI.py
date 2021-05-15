@@ -407,6 +407,8 @@ class Base(object):
 
 	###
 	def OnText(self, event):
+		"""
+		"""
 		self._gauge.SetValue(0)
 
 	###
@@ -599,7 +601,7 @@ class Base(object):
 
 			self.count = (timeLast/self.thread.model.FINAL_TIME)*100
 
-			self._gauge.SetValue(self.count)
+			wx.CallAfter(self._gauge.SetValue,self.count)
 
 		### if simulation is over
 		if self.thread.end_flag:
@@ -614,7 +616,7 @@ class Base(object):
 			### check if gauge is full (can appear if timer is too slow)
 			if self.count != 100 or self.ntl:
 				self.count = 100
-				self._gauge.SetValue(self.count)
+				wx.CallAfter(self._gauge.SetValue, self.count)
 
 			### update the status bar
 			self.statusbar.SetBackgroundColour('')
@@ -646,12 +648,12 @@ class Base(object):
 	def GetClock(self):
 		if self.real_time_flag:	
 			return str(next(self.t))
-		else:
-			### clock formating
-			ms = self.thread.cpu_time%1
-			m, s = divmod(self.thread.cpu_time, 60)
-			h, m = divmod(m, 60)
-			return "%d:%02d:%02d:%03d" % (h, m, s, ms*1000)
+		
+		### clock formating
+		ms = self.thread.cpu_time%1
+		m, s = divmod(self.thread.cpu_time, 60)
+		h, m = divmod(m, 60)
+		return "%d:%02d:%02d:%03d" % (h, m, s, ms*1000)
 
 	###
 	def MsgBox(self, msg:str):
