@@ -127,7 +127,7 @@ class GeneralPanel(wx.Panel):
 		### CheckBox for notification
 		self.cb11 = wx.CheckBox(self, wx.NewIdRef(), _('Notififcations'))
 		if wx.VERSION_STRING >= '4.0': self.cb11.SetToolTipString = self.cb11.SetToolTip
-		self.cb1.SetToolTipString(_("Enable the notification messages"))
+		self.cb11.SetToolTipString(_("Enable the notification messages"))
 		self.cb11.SetValue(builtins.__dict__['NOTIFICATION'])
 			
 		self.cb2 = wx.ComboBox(self, wx.NewIdRef(), GetWXVersionFromIni(), choices=GeneralPanel.wxv, style=wx.CB_READONLY)

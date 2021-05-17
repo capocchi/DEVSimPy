@@ -233,7 +233,7 @@ if USE_FLATNOTEBOOK:
 			### for all items (Simulation, Properties, Libraries)
 			for item in items_list:
 				### if label that will be deleted is equal to the label of current item, we deselect it
-				if item.GetLabel() == label:
+				if item.GetItemLabel() == label:
 					item.Check(False)
 
 		def __OnClosePage(self, evt):
@@ -241,7 +241,7 @@ if USE_FLATNOTEBOOK:
 
 		def CreateRightClickMenu(self):
 			self._rmenu = wx.Menu()
-			item = wx.MenuItem(self._rmenu, MENU_EDIT_DELETE_PAGE, _("Close Tab\tCtrl+F4"), _("Close Tab"))
+			item = wx.MenuItem(self._rmenu, MENU_EDIT_DELETE_PAGE, _("Close\tCtrl+F4"), _("Close Tab"))
 			if wx.VERSION_STRING < '4.0': 
 				self._rmenu.AppendItem(item) 
 			else:

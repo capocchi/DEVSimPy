@@ -1983,8 +1983,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					except:
 						pass
 			else:
-				sn = self.sourceNodeList[sp]
-				tn = self.targetNodeList[tp]
+				sn = self.sourceNodeList[sp-1]
+				tn = self.targetNodeList[tp-1]
 				self.makeConnectionShape(sn,tn)
 
 			modify_flag = True
