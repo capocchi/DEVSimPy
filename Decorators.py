@@ -142,7 +142,7 @@ def StatusBarNotification(f, arg):
 			txt = arg
 
 			mainW.statusbar.SetStatusText('%s %sed'%(fn, txt), 0)
-			mainW.statusbar.SetStatusText(os.path.basename(diagram.last_name_saved), 1)
+			mainW.statusbar.SetStatusText(diagram.last_name_saved, 1)
 			mainW.statusbar.SetStatusText('', 2)
 
 		return r

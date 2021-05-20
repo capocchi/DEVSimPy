@@ -65,40 +65,40 @@ class GeneralNotebook(Observer):
 		self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.__PageChanged)
 
 	def __set_properties(self):
-			"""
-			"""
-			imgList = wx.ImageList(16, 16)
-			for img in [os.path.join(ICON_PATH_16_16,'db.png'), os.path.join(ICON_PATH_16_16, 'properties.png'), os.path.join(ICON_PATH_16_16,'simulation.png')]:
-				imgList.Add(wx.Bitmap(img))
-			self.AssignImageList(imgList)
+		"""
+		"""
+		imgList = wx.ImageList(16, 16)
+		for img in [os.path.join(ICON_PATH_16_16,'db.png'), os.path.join(ICON_PATH_16_16, 'properties.png'), os.path.join(ICON_PATH_16_16,'simulation.png')]:
+			imgList.Add(wx.Bitmap(img))
+		self.AssignImageList(imgList)
 
 	def __PageChanged(self, evt):
-			"""
-			"""
-			if evt.GetSelection() == 1:
-				pass
-			evt.Skip()
+		"""
+		"""
+		if evt.GetSelection() == 1:
+			pass
+		evt.Skip()
 
 	def GetLibPanel(self):
-			""" Get Libraries panel if exist
-			"""
-			### list of label of all existing panel
-			labelList = [self.GetPageText(a) for a in [i for i in range(self.GetPageCount())]]
-			try:
-				### try to find if panel exist from label
-				index = labelList.index(self.labelList[0])
-			except ValueError as info:
-				### index not match, panel not existing
-				return None
-			else:
-				### return the Panel object from the founded index
-				return self.GetPage(index)
+		""" Get Libraries panel if exist
+		"""
+		### list of label of all existing panel
+		labelList = [self.GetPageText(a) for a in iter(range(self.GetPageCount()))]
+		try:
+			### try to find if panel exist from label
+			index = labelList.index(self.labelList[0])
+		except ValueError as info:
+			### index not match, panel not existing
+			return None
+		else:
+			### return the Panel object from the founded index
+			return self.GetPage(index)
 
 	def GetPropPanel(self):
 		""" Get Properties panel if exist
 		"""
 		### list of label of all existing panel
-		labelList = [self.GetPageText(a) for a in [i for i in range(self.GetPageCount())]]
+		labelList = [self.GetPageText(a) for a in iter(range(self.GetPageCount()))]
 		try:
 			### try to find if panel exist from label
 			index = labelList.index(self.labelList[1])
@@ -113,7 +113,7 @@ class GeneralNotebook(Observer):
 		""" Get Simulation panel if exist
 		"""
 		### list of label of all existing panel
-		labelList = [self.GetPageText(a) for a in [i for i in range(self.GetPageCount())]]
+		labelList = [self.GetPageText(a) for a in iter(range(self.GetPageCount()))]
 		try:
 			### try to find if panel exist from label
 			index = labelList.index(self.labelList[2])
@@ -169,7 +169,6 @@ class GeneralNotebook(Observer):
 			
 			if str : propPanel.SetToolTipString(str) if wx.VERSION_STRING < '4.0' else propPanel.SetToolTip(str)
 
-
 ### ---------------------------------------------
 ### if flatnotebook can be imported, we work with it
 ### more information about FlatNotebook http://wiki.wxpython.org/Flatnotebook%20(AGW)
@@ -214,8 +213,8 @@ if USE_FLATNOTEBOOK:
 			self.SetRightClickMenu(self._rmenu)
 
 		def __OnClosingPage(self, evt):
-			""" The close button of FlatNotebook has been invoked
-				We update the Show menu depending on the deleted tab
+			""" The close button of FlatNotebook has been invoked.
+				We update the Show menu depending on the deleted tab.
 			"""
 
 			mainW = wx.GetApp().GetTopWindow()
@@ -237,9 +236,13 @@ if USE_FLATNOTEBOOK:
 					item.Check(False)
 
 		def __OnClosePage(self, evt):
+			"""
+			"""
 			self.DeletePage(self.GetSelection())
 
 		def CreateRightClickMenu(self):
+			"""
+			"""
 			self._rmenu = wx.Menu()
 			item = wx.MenuItem(self._rmenu, MENU_EDIT_DELETE_PAGE, _("Close\tCtrl+F4"), _("Close Tab"))
 			if wx.VERSION_STRING < '4.0': 
@@ -257,8 +260,7 @@ else:
 
 		def __init__(self, *args, **kwargs):
 			"""
-			Notebook class that allows overriding and adding methods for the left pane of DEVSimPy
-
+			Notebook class that allows overriding and adding methods for the left pane of DEVSimPy.
 			"""
 
 			wx.Notebook.__init__(self, *args, **kwargs)

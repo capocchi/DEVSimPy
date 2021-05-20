@@ -1867,6 +1867,13 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 			return (sourceNodeList, targetNodeList)
 
+		def GetBlockModel(self):
+			""" Return the generator of block model (not ConnectionShape)
+			"""
+			for m in self.diagram.shapes:
+				if not isinstance(m, ConnectionShape):
+					yield m
+
 		def OnConnectTo(self, event):
 			"""
 			"""
@@ -1881,7 +1888,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			sourceName = source.label
 
 			# get target model from its name
-			for s in [m for m in self.diagram.shapes if not isinstance(m, ConnectionShape)]:
+			for s in self.GetBlockModel():
 				if s.label == targetName:
 					target = s
 					break
@@ -2207,6 +2214,17 @@ if builtins.__dict__.get('GUI_FLAG',True):
 						newShape.x[1] += 35
 						newShape.y[0] += 35
 						newShape.y[1] += 35
+
+						#rename new model with number
+						if  re.match(r'^([A-Za-z_])+([0-9]+)', newShape.label):
+							number_part = re.findall(r'\d+', newShape.label)[-1]
+
+							### increment the number
+							newShape.label = re.sub(r'([0-9]+)', str(int(number_part)+1), newShape.label)
+						### label has not number and we add it
+						else:
+							newShape.label = ''.join([newShape.label,'_1'])
+
 						### adding model
 						self.AddShape(newShape)
 
@@ -2218,7 +2236,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 			# specify the operation in status bar
 			printOnStatusBar(self.GetTopLevelParent().statusbar, {0:_('Paste'), 1:''})
-
+				
 		def OnCut(self, event):
 			""" Cut menu has been clicked. Copy and delete event.
 			"""
@@ -2580,16 +2598,16 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 				D = {label : win}
 
-			#nb.SetPageText(nb.GetSelection(), "*%s"%label.replace('*',''))
+			# nb2.SetPageText(nb2.GetSelection(), "%s*"%label)
 
 			### statusbar printing
 			for string,win in list(D.items()):
-				printOnStatusBar(win.statusbar, {0:"%s %s"%(string ,_("modified")), 1:os.path.basename(diagram.last_name_saved), 2:''})
+				printOnStatusBar(win.statusbar, {0:"%s %s"%(string.replace('*','') ,_("modified")), 1:diagram.last_name_saved, 2:''})
 
 			tb = win.GetToolBar()
 			tb.EnableTool(Menu.ID_SAVE, self.diagram.modify)
 
-		def ShowQuickAttributeEditor(self):
+		def ShowQuickAttributeEditor(self, selectedShape:list)->None:
 			"""
 			"""
 
@@ -2610,7 +2628,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				xwindow, ywindow = wx.GetMousePosition()
 				xm,ym = self.ScreenToClient(wx.Point(xwindow, ywindow))
 
-				for s in {m for m in self.diagram.GetShapeList() if isinstance(m, Block) and self.isSelected(m)}:
+				for s in {m for m in selectedShape if isinstance(m, Block)}:
 					x = s.x[0]*self.scalex
 					y = s.y[0]*self.scaley
 					w = s.x[1]*self.scalex-x
@@ -2639,11 +2657,11 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			### current cursor
 			cursor = self.GetCursor()
 
+			sc = self.getSelectedShapes()
+
 			if event.Dragging() and event.LeftIsDown():
 
 				self.diagram.modify = False
-
-				sc = self.getSelectedShapes()
 			
 				if len(sc) == 0:
 					# User is dragging the mouse, check if
@@ -2732,7 +2750,10 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				
 				### update the cursor
 				self.SetCursor(cursor)
-				self.ShowQuickAttributeEditor()
+
+				if len(sc) != 0:
+					### show the quick attribut editor
+					self.ShowQuickAttributeEditor(sc)
 
 			#self.DiagramModified()
 
@@ -2842,7 +2863,18 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					### display the label of output ports if exist
 					for n in range(item.output):
 						self.nodes.append(ONode(item, n, self, item.getOutputLabel(n)))
-						
+				
+				### display the label of port attahced to the connection shape (make more easy the correspondance of the link)
+				if isinstance(item, ConnectionShape):
+					if item.input:
+						block, n = item.input
+						self.nodes.append(ONode(block, n, self, block.getInputLabel(n)))
+
+					if item.output:
+						block, n = item.output
+						self.nodes.append(INode(block, n, self, block.getInputLabel(n)))
+					# print(item.input, item.output)
+
 				if isinstance(item, Resizeable):
 					self.nodes.extend([ResizeableNode(item, n, self) for n in range(len(item.x))])
 					
@@ -4193,6 +4225,30 @@ class ConnectableNode(Node):
 		self.cf.deselect(self.item)
 		event.Skip()
 
+	def OnEditLabel(self, event):
+		""" Function called by the OnRightDown call event function.
+		"""
+		### old label
+		old_label = self.label
+
+		### is INode ?
+		isINode = isinstance(self, INode)
+
+		### ask tne new label
+		d = wx.TextEntryDialog(None, _('New label for the %s port %d:'%("input" if isINode else "output",self.index)), value = old_label, style=wx.OK)
+		d.ShowModal()
+
+		### new label
+		new_label = d.GetValue()
+
+		### only if new and old label are different
+		if new_label != old_label:
+			self.label = new_label
+			if isINode:
+				self.item.addInputLabels(self.index, self.label)
+			else:
+				self.item.addOutputLabels(self.index, self.label)
+
 	def HitTest(self,x,y):
 		""" Collision detection method.
 		"""
@@ -4244,24 +4300,6 @@ class INode(ConnectableNode):
 		
 		event.Skip()
 
-	def OnEditLabel(self, event):
-		""" Function called by the OnRightDown call event function.
-		"""
-		### old label
-		old_label = self.label
-
-		### ask tne new label
-		d = wx.TextEntryDialog(None, _('New input port label:'), value = old_label, style=wx.OK)
-		d.ShowModal()
-
-		### new label
-		new_label = d.GetValue()
-
-		### only if new and old label are different
-		if new_label != old_label:
-			self.label = new_label
-			self.item.addInputLabels(self.index, self.label)
-
 	def leftUp(self, items):
 		""" Left up action has been invocked.
 		"""
@@ -4295,11 +4333,11 @@ class INode(ConnectableNode):
 		if not isinstance(self.item, Port):
 			### prepare label position
 			if self.item.input_direction == 'ouest':
-				xl = x-30
-				yl = y
+				xl = x-self.graphic.r-8*len(self.label)
+				yl = y-8
 			elif self.item.input_direction == 'est':
-				xl = x+2
-				yl = y
+				xl = x+6
+				yl = y-8
 			elif self.item.input_direction == 'nord':
 				xl = x
 				yl = y-18
@@ -4349,24 +4387,6 @@ class ONode(ConnectableNode):
 		
 		event.Skip()
 
-	def OnEditLabel(self, event):
-		""" Function called by the OnRightDown call event function.
-		"""
-		### old label
-		old_label = self.label
-
-		### ask tne new label
-		d = wx.TextEntryDialog(None, _('New output port label:'), value = old_label, style=wx.OK)
-		d.ShowModal()
-
-		### new label
-		new_label = d.GetValue()
-
-		### only if new and old label are different
-		if new_label != old_label:
-			self.label = new_label
-			self.item.addOutputLabels(self.index, self.label)
-
 	def leftUp(self, items):
 		""" Left up action has been invocked.
 		"""
@@ -4398,11 +4418,11 @@ class ONode(ConnectableNode):
 		if not isinstance(self.item, Port):
 			### perapre label position
 			if self.item.output_direction == 'est':
-				xl = x+2
-				yl = y
+				xl = x+6
+				yl = y-8
 			elif self.item.output_direction == 'ouest':
-				xl = x-40
-				yl = y
+				xl = x-self.graphic.r-8*len(self.label)
+				yl = y-8
 			elif self.item.output_direction == 'nord':
 				xl = x
 				yl = y-20
@@ -4580,7 +4600,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 	def OnLeftDown(self, event):
 		""" Left down event has been invoked.
 		"""
-
+		### Rename the shape with CtrL+LeftDown
 		if event.ControlDown():
 			Selectable.OnRenameFromClick(self, event)
 		event.Skip()
