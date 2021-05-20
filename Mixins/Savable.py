@@ -320,7 +320,6 @@ class DumpZipFile(DumpBase):
 				### update behavioral attribute for model saved with bad args (amd or cmd have been changed in librairie but not in dsp)
 				if attr == 'args':
 					if obj_loaded.args != {}:
-						print(obj_loaded.dump_attributes,L)
 						for key in [a for a in list(obj_loaded.args.keys()) if a in list(L[i].keys())]:
 							obj_loaded.args[key] = L[i][key]
 					else:

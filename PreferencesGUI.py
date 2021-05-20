@@ -127,7 +127,7 @@ class GeneralPanel(wx.Panel):
 		### CheckBox for notification
 		self.cb11 = wx.CheckBox(self, wx.NewIdRef(), _('Notififcations'))
 		if wx.VERSION_STRING >= '4.0': self.cb11.SetToolTipString = self.cb11.SetToolTip
-		self.cb1.SetToolTipString(_("Enable the notification messages"))
+		self.cb11.SetToolTipString(_("Enable the notification messages"))
 		self.cb11.SetValue(builtins.__dict__['NOTIFICATION'])
 			
 		self.cb2 = wx.ComboBox(self, wx.NewIdRef(), GetWXVersionFromIni(), choices=GeneralPanel.wxv, style=wx.CB_READONLY)
@@ -872,7 +872,7 @@ class TestApp(wx.App):
 		builtins.__dict__['PLUGINS_PATH'] = os.path.join(HOME_PATH, 'plugins')
 		builtins.__dict__['DOMAIN_PATH'] = 'Domain'
 		builtins.__dict__['OUT_DIR'] = 'out'
-		builtins.__dict__['NB_OPENED_FILE'] = 5
+		builtins.__dict__['NB_OPENED_FILE'] = 20
 		builtins.__dict__['FONT_SIZE'] = 10
 		builtins.__dict__['NB_HISTORY_UNDO'] = 10
 		builtins.__dict__['TRANSPARENCY'] = False
