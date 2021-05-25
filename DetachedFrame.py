@@ -208,7 +208,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 
 		self.statusbar = self.CreateStatusBar(1, wx.ST_SIZEGRIP)
 		self.statusbar.SetFieldsCount(3)
-		self.statusbar.SetStatusWidths([-5, -2, -1])
+		self.statusbar.SetStatusWidths([-2, -5, -1])
 
 		self.__binding()
 

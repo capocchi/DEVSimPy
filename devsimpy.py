@@ -1395,7 +1395,9 @@ class MainApplication(wx.Frame):
 				tb = self.GetToolBar()
 				tb.EnableTool(Menu.ID_SAVE, diagram.modify)
 
-				#self.statusbar.SetStatusText(_('%s saved')%diagram.last_name_saved)
+				### update the txt of the notebook tab (remove *that indicate that the file was modified)
+				self.nb2.SetPageText(self.nb2.GetSelection(), "%s"%self.nb2.GetPageText(self.nb2.GetSelection()).replace('*',''))
+				
 			else:
 				wx.MessageBox( _('Error saving file.') ,_('Error'), wx.OK | wx.ICON_ERROR)
 		else:

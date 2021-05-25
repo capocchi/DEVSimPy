@@ -310,12 +310,23 @@ class GenericComponent:
 			### save the new config path
 			model.SaveFile(filename)
 
-		### if image path is wrang and is mad model, we find the image into the amd file
+		### if image path is wrong and is .amd model, we find the image into the amd file
 		image_path_dirname = os.path.dirname(model.image_path)
 		if not os.path.exists(image_path_dirname) and os.path.basename(image_path_dirname) == os.path.basename(model.model_path):
 			model.image_path = os.path.join(filename,os.path.basename(model.image_path))
 			### save the new config path
 			model.SaveFile(filename)
+
+		### check if a filename is needed in args (bad_filename_path_flag)
+		### find all word containning 'filename' without considering the casse
+		m = [re.match('[a-zA-Z]*filename[_-a-zA-Z0-9]*',s, re.IGNORECASE) for s in model.args]
+		filename_list = [a.group(0) for a in [s for s in m if s is not None]]
+		### for all filename attr
+		for name in filename_list:
+			fn = model.args[name]
+			### show flag icon on the block only for the file with extension (input file)
+			if not os.path.exists(fn) and os.path.splitext(fn)[-1] != '':
+				model.bad_filename_path_flag = True
 
 		return model
 
