@@ -22,6 +22,8 @@
 
 import builtins
 
+from wx.core import Yield
+
 if builtins.__dict__.get('GUI_FLAG',True):
 	import wx
 	import wx.lib.dragscroller
@@ -60,6 +62,7 @@ from abc import ABC
 from tempfile import gettempdir
 from traceback import format_exception
 from math import * ### for eval
+from collections import Counter
 
 if builtins.__dict__.get('GUI_FLAG', True):
 	import ConnectDialog
@@ -820,7 +823,7 @@ class Diagram(Savable, Structurable):
 			diagram = self
 
 			### Check if all models doesn't contain errors
-			D = None #self.DoCheck()
+			D = self.DoCheck()
 
 			### if there is no error in models
 			if D is not None:
@@ -843,7 +846,11 @@ class Diagram(Savable, Structurable):
 				### Check if models have the same label
 				L = diagram.GetLabelList([])
 				if len(L)!=len(set(L)):
-					wx.MessageBox(_("It seems that models have same label.\nIf you plan to use Flat simulation algorithm, all model must have a unique label."), _("Simulation Manager"))
+					model_with_same_label = [k for k,v in Counter(L).items() if v>1]
+					txt = "\n".join(model_with_same_label)							
+					wx.MessageBox(_("It seems that the flowwing models have same label:\n \
+									- %s \n\
+									\nIf you plan to use Flat simulation algorithm, all model must have a unique label.")%txt, _("Simulation Manager"))
 
 				### set the name of diagram
 				if isinstance(win, DetachedFrame):
@@ -1582,6 +1589,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			#Window Events
 			self.Bind(wx.EVT_PAINT, self.OnPaint)
 			self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
+			# self.Bind(wx.EVT_IDLE, self.OnIdle)
 
 			#Mouse Events
 			self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
@@ -1857,7 +1865,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			self.select(target)
 			self.select(source)
 
-			nodesList = [n for n in self.nodes if not isinstance(n, ResizeableNode)]
+			nodesList = {n for n in self.nodes if not isinstance(n, ResizeableNode)}
 
 			# list of node list for
 			sourceNodeList = [n for n in nodesList if n.item == source and isinstance(n, ONode)]
@@ -2598,17 +2606,19 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 				D = {label : win}
 
-			# nb2.SetPageText(nb2.GetSelection(), "%s*"%label)
+			### update the text of the notebook tab to notifiy that the file is modified
+			nb2.SetPageText(nb2.GetSelection(), "%s*"%label.replace('*',''))
 
 			### statusbar printing
 			for string,win in list(D.items()):
 				printOnStatusBar(win.statusbar, {0:"%s %s"%(string.replace('*','') ,_("modified")), 1:diagram.last_name_saved, 2:''})
 
+			### update the toolbar
 			tb = win.GetToolBar()
 			tb.EnableTool(Menu.ID_SAVE, self.diagram.modify)
 
 		def ShowQuickAttributeEditor(self, selectedShape:list)->None:
-			"""
+			""" Show a quick dialog with spin to change the number of imput and output of the block.
 			"""
 
 			mainW = self.GetTopLevelParent()
@@ -2649,6 +2659,9 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					except AttributeError as info:
 						raise AttributeError(_("use >= wx-2.8-gtk-unicode library: %s")%info)
 
+		# def OnIdle(self,event):
+			# self.Refresh()
+			
 		###
 		def OnMotion(self, event):
 			""" Motion manager.
@@ -2693,13 +2706,15 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					x = point[0] - self.currentPoint[0]
 					y = point[1] - self.currentPoint[1]
 
+					if cursor != wx.StockCursor(wx.CURSOR_HAND):
+						cursor = wx.StockCursor(wx.CURSOR_HAND)
+				
 					for s in sc:
 						s.move(x,y)
-
+						
 						### change cursor when resizing model
-						if isinstance(s, ResizeableNode):
-							if cursor != wx.StockCursor(wx.CURSOR_SIZING):
-								cursor = wx.StockCursor(wx.CURSOR_SIZING)
+						if isinstance(s, ResizeableNode) and cursor != wx.StockCursor(wx.CURSOR_SIZING):
+							cursor = wx.StockCursor(wx.CURSOR_SIZING)
 
 						### change cursor when connectionShape hit a node
 						elif isinstance(s, ConnectionShape):
@@ -2712,10 +2727,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 							for node in [n for n in self.nodes if isinstance(n, ConnectableNode) and n.HitTest(point[0], point[1])]:
 								if cursor != wx.StockCursor(wx.CURSOR_CROSS):
-									cursor = wx.StockCursor(wx.CURSOR_CROSS) 
-						else:
-							if cursor != wx.StockCursor(wx.CURSOR_HAND):
-								cursor = wx.StockCursor(wx.CURSOR_HAND)
+									cursor = wx.StockCursor(wx.CURSOR_CROSS) 							
 					
 					### update the cursor
 					self.SetCursor(cursor)
@@ -2731,22 +2743,17 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			else:
 				point = self.getEventCoordinates(event)
 			
-				### list of overhead nodes during the mouse motion
-				nodes = [n for n in self.nodes if n.HitTest(point[0], point[1])]
-				
-				### if nodes has a node, the mouse is on the node
-				if len(nodes) == 1:
-					### there is only one node under the mouse pointer
-					node = nodes[0]
-					### change the cursor when node is pointed
-					if isinstance(node, ResizeableNode) and cursor != wx.StockCursor(wx.CURSOR_SIZING):
-						cursor = wx.StockCursor(wx.CURSOR_SIZING)
-					elif isinstance(node, ConnectableNode) and cursor != wx.StockCursor(wx.CURSOR_CROSS):
-						cursor = wx.StockCursor(wx.CURSOR_CROSS)
-				else:
-					### restor the cursor with arrow
-					if cursor != wx.StockCursor(wx.CURSOR_ARROW):
-						cursor = wx.StockCursor(wx.CURSOR_ARROW)
+				### restor the cursor with arrow
+				if cursor != wx.StockCursor(wx.CURSOR_ARROW):
+					cursor = wx.StockCursor(wx.CURSOR_ARROW)
+
+				for node in self.nodes:
+					if node.HitTest(point[0],point[1]):
+						### change the cursor when node is pointed
+						if isinstance(node, ResizeableNode) and cursor != wx.StockCursor(wx.CURSOR_SIZING):
+							cursor = wx.StockCursor(wx.CURSOR_SIZING)
+						elif isinstance(node, ConnectableNode) and cursor != wx.StockCursor(wx.CURSOR_CROSS):
+							cursor = wx.StockCursor(wx.CURSOR_CROSS)
 				
 				### update the cursor
 				self.SetCursor(cursor)
@@ -2754,6 +2761,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				if len(sc) != 0:
 					### show the quick attribut editor
 					self.ShowQuickAttributeEditor(sc)
+			
+			event.Skip()
 
 			#self.DiagramModified()
 
@@ -3529,6 +3538,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 	def OnLeftDown(self, event):
 		"""
 		"""
+		### Change the label of block
 		if event.ControlDown():
 			Selectable.OnRenameFromClick(self, event)
 		event.Skip()
@@ -3723,6 +3733,7 @@ class CodeBlock(Achievable, Block):
 						except:
 							pass
 
+
 					### if path is always wrong, flag is visible
 					if not os.path.exists(path):
 						state['bad_filename_path_flag'] = True
@@ -3867,7 +3878,8 @@ class CodeBlock(Achievable, Block):
 							
 
 		### if the fileName attribut dont exist, we define it into the current devsimpy directory (then the user can change it from Property panel)
-		if 'args' in state:
+		### args is loaded before for .amd and .cmd. See Load function to intercept args.
+		if 'args' in state and model_path == '' :
 
 			### find all word containning 'filename' without considering the casse
 			m = [re.match('[a-zA-Z]*filename[_-a-zA-Z0-9]*',s, re.IGNORECASE) for s in list(state['args'].keys())]
@@ -3894,7 +3906,7 @@ class CodeBlock(Achievable, Block):
 									if os.path.exists(path):
 										fn = path
 										break
-					
+
 					### show flag icon on the block only for the file with extension (input file)
 					if not os.path.exists(fn) and os.path.splitext(fn)[-1] != '':
 						state['bad_filename_path_flag'] = True
@@ -4204,10 +4216,10 @@ class Node(PointShape):
 		self.lock_flag = False                  # move lock
 		PointShape.__init__(self, type = t)
 
-	def showProperties(self):
-		""" Call item properties.
-		"""
-		self.item.showProperties
+	# def showProperties(self):
+	# 	""" Call item properties.
+	# 	"""
+	# 	self.item.showProperties
 
 class ConnectableNode(Node):
 	""" ConnectableNode(item, index, cf)
@@ -4221,8 +4233,15 @@ class ConnectableNode(Node):
 	def OnLeftDown(self, event):
 		""" Left Down click has been invoked
 		"""
-		### deselect the block to delete the info flag
-		self.cf.deselect(self.item)
+		
+		### Ctrl button is pressed
+		if event.ControlDown():
+			### change the label of node
+			self.OnEditLabel(event)
+		else:
+			### deselect the block to delete the info flag
+			self.cf.deselect(self.item)
+		
 		event.Skip()
 
 	def OnEditLabel(self, event):
@@ -4472,6 +4491,7 @@ class ResizeableNode(Node):
 			X = abs(self.item.x[1]+x - self.item.x[0])
 			Y = abs(self.item.y[1]+y - self.item.y[0])
 
+	
 		### if no lock
 		if not lines_shape.lock_flag:
 			### Block and minimal size (50,50) or not Block
@@ -4501,6 +4521,13 @@ class ResizeableNode(Node):
 		canvas.PopupMenu(menu, event.GetPosition())
 		### destroy menu local variable
 		menu.Destroy()
+
+	# def OnLeftDClick(self, event):
+	# 	if isinstance(self.item, ConnectionShape):
+	# 		# print(self.item.getInput(), self.item.getOutput())
+	# 		pass
+
+	# 	return super().OnLeftDClick(event)
 
 	def HitTest(self,x,y):
 		""" Collision detection method.

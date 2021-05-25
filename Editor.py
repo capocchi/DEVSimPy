@@ -1940,7 +1940,7 @@ class BlockBase(object):
 		"""
 		return list(self._choices.keys())
 
-	def OnPeek(self)->None:
+	def OnPeek(self, *args)->None:
 		""" Insert the peek statement.
 		"""
 		sins = list(map(str, list(range(self.cb.input if hasattr(self.cb, 'input') else 10))))
@@ -1953,7 +1953,7 @@ class BlockBase(object):
 			cp.AddText("self.peek(self.IPorts[%d], *args)" % int(port))
 			self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 	
-	def OnPoke(self)->None:
+	def OnPoke(self, *args)->None:
 		"""Insert the poke statement.
 		"""
 		sins = list(map(str, list(range(self.cb.input if hasattr(self.cb, 'output') else 10))))
