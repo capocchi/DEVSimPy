@@ -1280,6 +1280,7 @@ class Shape(ShapeEvtHandler):
 	def move(self,x,y):
 		""" Move method
 		"""
+	
 		if not self.lock_flag:
 			self.x = array.array('d', [v+x for v in self.x])
 			self.y = array.array('d', [v+y for v in self.y])
@@ -1456,8 +1457,6 @@ class CircleShape(Shape):
 		Shape.draw(self,dc)
 		dc.SetFont(wx.Font(10, self.font[1],self.font[2], self.font[3], False, self.font[4]))
 		dc.DrawCircle(int(self.x[0]+self.x[1])/2, int(self.y[0]+self.y[1])/2, self.r)
-		if wx.VERSION_STRING < '4.0': dc.EndDrawing()
-			
 
 	def HitTest(self, x, y):
 		if x < self.x[0]: return False
@@ -1498,6 +1497,7 @@ class PointShape(Shape):
 	def move(self,x,y):
 		"""
 		"""
+		
 		self.x = array.array('d', [v+x for v in self.x])
 		self.y = array.array('d', [v+y for v in self.y])
 		self.graphic.move(x,y)
@@ -1571,6 +1571,9 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			### subject init
 			self.canvas = self
 
+			### improve drawing with not condsidering the resizeable  node when connect blocks
+			self.resizeable_nedeed = True
+
 			### attach canvas to notebook 1 (for update)
 			try:
 				self.__state = {}
@@ -1589,7 +1592,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			#Window Events
 			self.Bind(wx.EVT_PAINT, self.OnPaint)
 			self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
-			# self.Bind(wx.EVT_IDLE, self.OnIdle)
+			self.Bind(wx.EVT_IDLE, self.OnIdle)
 
 			#Mouse Events
 			self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
@@ -1765,7 +1768,14 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 			dc.SetUserScale(self.scalex, self.scaley)
 
-			for item in self.diagram.shapes + self.nodes:
+			shapes = self.diagram.shapes
+			nodes = self.nodes
+			### resizeable node not nedeed for connection process (dragging mouse with left button pressed - see when self.resizeable_nedeed is False)
+			if not self.resizeable_nedeed:
+				nodes = [n for n in nodes if not isinstance(n,ResizeableNode)]
+			items = shapes + nodes
+
+			for item in items:
 				try:
 					item.draw(dc)
 				except Exception as info:
@@ -2418,6 +2428,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 			self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
 			
+			self.resizeable_nedeed = True
+
 			### clic sur un block
 			if shape:
 
@@ -2659,9 +2671,11 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					except AttributeError as info:
 						raise AttributeError(_("use >= wx-2.8-gtk-unicode library: %s")%info)
 
-		# def OnIdle(self,event):
-			# self.Refresh()
-			
+		def OnIdle(self,event):
+			"""
+			"""
+			self.Refresh(False)
+		
 		###
 		def OnMotion(self, event):
 			""" Motion manager.
@@ -2698,11 +2712,12 @@ if builtins.__dict__.get('GUI_FLAG',True):
 							pass
 							
 						del odc
-					else:
-						self.Refresh()
+					# else:
+						# self.Refresh(False)
 				else:
 					
 					point = self.getEventCoordinates(event)
+					
 					x = point[0] - self.currentPoint[0]
 					y = point[1] - self.currentPoint[1]
 
@@ -2712,12 +2727,15 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					for s in sc:
 						s.move(x,y)
 						
+						self.resizeable_nedeed = True
+
 						### change cursor when resizing model
 						if isinstance(s, ResizeableNode) and cursor != wx.StockCursor(wx.CURSOR_SIZING):
 							cursor = wx.StockCursor(wx.CURSOR_SIZING)
 
 						### change cursor when connectionShape hit a node
 						elif isinstance(s, ConnectionShape):
+							self.resizeable_nedeed = False
 							### dot trace to prepare connection
 							if len(s.pen)>2:
 								s.pen[2]= wx.PENSTYLE_DOT
@@ -2727,17 +2745,18 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 							for node in [n for n in self.nodes if isinstance(n, ConnectableNode) and n.HitTest(point[0], point[1])]:
 								if cursor != wx.StockCursor(wx.CURSOR_CROSS):
-									cursor = wx.StockCursor(wx.CURSOR_CROSS) 							
-					
+									cursor = wx.StockCursor(wx.CURSOR_CROSS)
+							
 					### update the cursor
 					self.SetCursor(cursor)
 					### update modify
 					self.diagram.modify = True
 					### update current point
 					self.currentPoint = point
-					
+
 					### refresh all canvas with Flicker effect corrected in OnPaint and OnEraseBackground
-					self.Refresh()
+					# self.Refresh(False)
+					
 					
 			# pop-up to change the number of ports
 			else:
@@ -2947,7 +2966,7 @@ class LinesShape(Shape):
 		"""
 		Shape.draw(self, dc)
 
-		L = list(map(lambda a,b: (a,b), self.x, self.y))
+		L = list(zip(self.x,self.y)) #list(map(lambda a,b: (a,b), self.x, self.y))
 
 		### update L depending of the connector type
 		if ShapeCanvas.CONNECTOR_TYPE == 'linear':
@@ -2982,7 +3001,7 @@ class LinesShape(Shape):
 			pass
 
 		dc.DrawLines(L)
-
+	
 		### pour le rectangle en fin de connexion
 		if wx.VERSION_STRING >= '4.0':
 			dc.SetBrush(wx.Brush(RED_LIGHT))
