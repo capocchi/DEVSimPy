@@ -272,8 +272,8 @@ if USE_FLATNOTEBOOK:
 			val = None
 
 			if diagram.modify:
-				title = self.GetPageText(id)
-				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram?')%(title), title, wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
+				title = self.GetPageText(id).replace("*",'')
+				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram?')%(title), _("Save diagram"), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
 				val = dlg.ShowModal()
 
 				if val == wx.ID_YES:
@@ -373,8 +373,8 @@ else:
 			mainW =  self.GetTopLevelParent()
 
 			if diagram.modify:
-				title = self.GetPageText(id)
-				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram?')%(title), title, wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
+				title = self.GetPageText(id).replace('*','')
+				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram?')%(title), _("Save diagram"), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
 				val = dlg.ShowModal()
 
 				if val == wx.ID_YES:
@@ -383,7 +383,7 @@ else:
 					self.DeleteBuiltinConstants()
 					self.pages.remove(canvas)
 					if not self.DeletePage(id):
-						sys.stdout.write(_(" %s not deleted! \n"%(title)))
+						sys.stdout.write(_("%s not deleted! \n"%(title)))
 				else:
 					dlg.Destroy()
 
