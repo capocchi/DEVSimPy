@@ -69,7 +69,7 @@ def get_limit(d):
 	for c in d:
 		bisect.insort(L1, c[0])
 		bisect.insort(L2, c[1])
-	
+
 	### 0.5 in order to visualize the max and min value correctly
 	return L1[0],L1[-1],L2[0]-0.5,L2[-1]+0.5
 
@@ -269,20 +269,23 @@ class PlotFrame(wx.Frame):
 
 		if wx.VERSION_STRING < '4.0':
 			tb.AddCheckLabelTool(zoomId, zoomLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-zoom.png')), shortHelp=_('Enable zoom'), longHelp='')
-			tb.AddCheckLabelTool(titleId, titleLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-title.png')), shortHelp=_('Enable title'), longHelp='')
-			tb.AddCheckLabelTool(gridId, gridLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-grid.png')), shortHelp='Enable grid', longHelp='')
+			titletb = tb.AddCheckLabelTool(titleId, titleLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-title.png')), shortHelp=_('Enable title'), longHelp='')
+			gridtb = tb.AddCheckLabelTool(gridId, gridLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-grid.png')), shortHelp='Enable grid', longHelp='')
 			tb.AddCheckLabelTool(legendId, legendLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-legend.png')), shortHelp=_('Turn on legend'), longHelp='')
 			tb.AddCheckLabelTool(dragId, dragLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-drag.png')), shortHelp=_('Enable drag'), longHelp='')
 			tb.AddCheckLabelTool(pointId, pointLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-point.png')), shortHelp=_('Show closest point'), longHelp='')
 			tb.AddCheckLabelTool(normalizedId, normalizedLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-norm.png')), shortHelp=_('Normalize'), longHelp=_('Normalize Y axis'))
 		else:
 			tb.AddCheckTool(zoomId, zoomLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-zoom.png')), shortHelp=_('Enable zoom'), longHelp='')
-			tb.AddCheckTool(titleId, titleLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-title.png')), shortHelp=_('Enable title'), longHelp='')
-			tb.AddCheckTool(gridId, gridLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-grid.png')), shortHelp='Enable grid', longHelp='')
+			titletb = tb.AddCheckTool(titleId, titleLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-title.png')), shortHelp=_('Enable title'), longHelp='')
+			gridtb = tb.AddCheckTool(gridId, gridLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-grid.png')), shortHelp='Enable grid', longHelp='')
 			tb.AddCheckTool(legendId, legendLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-legend.png')), shortHelp=_('Turn on legend'), longHelp='')
 			tb.AddCheckTool(dragId, dragLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-drag.png')), shortHelp=_('Enable drag'), longHelp='')
 			tb.AddCheckTool(pointId, pointLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-point.png')), shortHelp=_('Show closest point'), longHelp='')
 			tb.AddCheckTool(normalizedId, normalizedLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-norm.png')), shortHelp=_('Normalize'), longHelp=_('Normalize Y axis'))
+
+		titletb.Toggle(True)
+		gridtb.Toggle(True)
 
 		tb.Realize()
 
@@ -574,7 +577,7 @@ class StaticPlot(PlotFrame):
 		if isinstance(data, list):
 
 			data = [(i if self.step else x[0], x[1]) for i,x in enumerate(data)]
-
+			
 			if self.normalize:
 				data = self.Normalize(data)
 
@@ -606,6 +609,7 @@ class StaticPlot(PlotFrame):
 				if float(c) < float(yMin): yMin=float(c)
 				if float(d) > float(yMax): yMax=float(d)
 
+			
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
 
 		self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))

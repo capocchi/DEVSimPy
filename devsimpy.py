@@ -80,14 +80,6 @@ ini_exist = parser.has_option(section, option)
 
 import wx
 
-### try to have the latest version of wx 
-#try:
-#	import pip
-	#print(pip.main(['show','wxPython']))
-	#pip.main(["install", "--upgrade", 'wxPython'])
-#except:
-#	pass
-
 ### check if an upgrade of wxpython is possible from pip !
 sys.stdout.write("Importing wxPython %s%s for python %s on %s (%s) platform...\n"%(wx.version(), " from devsimpy.ini" if ini_exist else '', platform.python_version(), platform.system(), platform.version()))
 

@@ -1072,7 +1072,7 @@ class EditionNotebook(wx.Notebook):
 		self.parent.toolbar.EnableTool(self.parent.save.GetId(), False)
 
 		### status bar notification
-		self.parent.Notification(False, _('%s saved') % fic_filename, '', '')
+		self.parent.Notification(False, _('%s saved') % fic_filename.replace("*",""), '', '')
 
 	### NOTE: EditionNotebook :: @WriteFile 	=> Write with correct encode
 	@staticmethod
@@ -1732,7 +1732,7 @@ class Base(object):
 		"""
 		sb = self.CreateStatusBar()
 		sb.SetFieldsCount(3)
-		sb.SetStatusWidths([-5, -3, -1])
+		sb.SetStatusWidths([-2, -2, -5])
 		return sb
 
 	### NOTE: Editor :: ToggleStatusBar 		=> Event for show or hide status bar
@@ -1923,7 +1923,7 @@ class BlockBase(object):
 		### choices object is ordderd dict to associate handlers
 		if self.cb:
 			if not self.cb.isCMD():
-				self._choices = collections.OrderedDict([(_('New peek'),self.OnPeek), 
+				self._choices = collections.OrderedDict([(_('New peek'),self.OnPeek), (_('New all peek'),self.OnAllPeek), 
 					(_('New poke'),self.OnPoke), (_('New hold in state'),self.OnInsertHoldInState), (_('New passivate in state'),self.OnInsertPassivateInState), 
 					(_('New passivate state'),self.OnInsertPassivateState), (_('New Phase test'),self.OnInsertPhaseIs), (_('New debugger stdout'),self.OnInsertDebug), 
 					(_('Get state'),self.OnInsertGetState), (_('Get sigma'),self.OnInsertGetSigma), (_('Get message value'),self.OnInsertGetMsgValue)])
@@ -1956,8 +1956,8 @@ class BlockBase(object):
 	def OnPoke(self, *args)->None:
 		"""Insert the poke statement.
 		"""
-		sins = list(map(str, list(range(self.cb.input if hasattr(self.cb, 'output') else 10))))
-		dlg = wx.SingleChoiceDialog(self, _('Port number'), _('Which port?'), sins, wx.CHOICEDLG_STYLE)
+		souts = list(map(str, list(range(self.cb.output if hasattr(self.cb, 'output') else 10))))
+		dlg = wx.SingleChoiceDialog(self, _('Port number'), _('Which port?'), souts, wx.CHOICEDLG_STYLE)
 		port = dlg.GetStringSelection() if dlg.ShowModal() == wx.ID_OK else None
 		dlg.Destroy()
 
@@ -1965,6 +1965,20 @@ class BlockBase(object):
 			cp = self.nb.GetCurrentPage()
 			cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))"%int(port))
 			self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+
+	def OnAllPeek(self, *args):
+		""" Insert the loop to peek all input ports.
+		"""
+
+		txt = """
+		for p in self.IPorts:
+			msg = self.peek(p, *args)
+			if msg:
+				v = self.getMsgValue(msg)
+		"""
+		cp = self.nb.GetCurrentPage()
+		cp.AddText(txt)
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	def OnCombo(self, event):
 		""" Combobox for the text insert function.
@@ -2462,7 +2476,7 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 
 		EditorPanel.__init__(self, parent, id, title)
 		BlockBase.__init__(self, parent, id, title, block)
-
+		
 		#if not parent:
 			#self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'pythonFile.png'), wx.BITMAP_TYPE_PNG)))
 			#self.ConfigureGUI()
@@ -2476,8 +2490,6 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 		id = [wx.NewIdRef()]*4
 		#tb = self.GetToolBar()
 		self.toolbar.InsertSeparator(self.toolbar.GetToolsCount())
-
-	
 
 		### combo to insert tips text
 		cbID = wx.NewIdRef()

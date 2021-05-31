@@ -73,8 +73,11 @@ class MySheet(sheet.CSheet):
 		"""
 		"""
 		self._full_flag = False
+
+		size = len(data)
+
 		## load cell
-		for i in range(len(data)):
+		for i in range(size):
 			try:
 				d = data[i]
 				self.SetCellValue(i,0,str(d[0]))
@@ -428,7 +431,6 @@ class Newt(wx.Frame):
 				s = sheet.GetCellValue(i,sheet.GetNumberCols()-1).replace('<< ', '').replace('<<', '').replace('>>','').replace('],','];')
 			else:
 				s = "value = %s; time = %s"%(v,sheet.GetCellValue(i,0))
-
 			try:
 				### globals containt the time and value variables after exec of the statement
 				exec(str(s), globals())
@@ -438,22 +440,26 @@ class Newt(wx.Frame):
 				### if value is a list, we must choose an index to plot amoung the values of the list
 				if isinstance(value, list):
 					if select == -1:
-						dlg = wx.TextEntryDialog(self, _('Choose one index between [%d-%d] to plot into the list of values.')%(0,len(value)-1),_('Plotting Manager'), value="0")
-						if dlg.ShowModal() == wx.ID_OK:
-							select=int(dlg.GetValue())
-							dlg.Destroy()
+						if len(value) > 1 :
+							dlg = wx.TextEntryDialog(self, _('Choose one index between [%d-%d] to plot into the list of values.')%(0,len(value)-1),_('Plotting Manager'), value="0")
+							if dlg.ShowModal() == wx.ID_OK:
+								select=int(dlg.GetValue())
+								dlg.Destroy()
+							else:
+								dlg.Destroy()
+								break
 						else:
-							dlg.Destroy()
-							break
+							select = 0
 
 					### choice is digit else we break
-					if value[select]:
-						if select in range(0,len(value)-1) and not isinstance(value[select], str):
+					# if value[select]:
+					if select in range(0,len(value)-1):
+						if not isinstance(value[select], str):
 							data.append((time, float(value[select])))
 						else:
 							#wx.MessageBox(_('Value to plot must be digit!'), _('Warning'), wx.OK | wx.ICON_WARNING)
 							data.append((time, value[select]))
-
+					
 				### first if int is digit or if float is digit
 				else:
 					v = str(format(value,'f')).lstrip('-')
@@ -462,7 +468,7 @@ class Newt(wx.Frame):
 					else:
 						#wx.MessageBox(_('Type of data should be float or int: %s')%str(value), _('Info'))
 						data.append((time, value))
-					
+
 		if data:
 			### if the first value of y is str, we plot with tick in y axe
 			if isinstance(data[0][-1], str):

@@ -74,7 +74,6 @@ class Connectable:
 		""" add a label to the output port
 		"""
 		self._output_labels[port] = label
-		print(self._output_labels)
 
 	###
 	def getPortXY(self, type:str, num)->tuple:

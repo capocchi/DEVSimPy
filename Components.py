@@ -93,7 +93,6 @@ def GetClass(elem):
 		# else:
 			# DomainClass = clsmembers[os.path.basename(elem).split('.')[0]]
 			# sys.stderr.write(_("Class unknown..."))
-			# print(DomainClass)
 			# return None
 
 		### return only the class that inherite of DomainBehavoir or DomainStructure which are present in the clsmembers dict
@@ -373,7 +372,6 @@ class GenericComponent:
 
 		if temp_file:
 
-			#print("Replace %s by %s into %s"%(old_name, new_name, new_temp_file))
 			### replace in new_temp_file file
 			replaceAll(new_temp_file, old_name, new_name)
 		
@@ -844,7 +842,6 @@ class DEVSComponent:
 			# loading file in DEVSimPy editor windows (self.text)
 			try:
 
-				
 				editorFrame = Editor.GetEditor(None, wx.NewIdRef(), ''.join([name,' - ',model_path]), obj=self, file_type='block')
 
 				# if zipfile.is_zipfile(model_path):
@@ -975,7 +972,6 @@ class BlockFactory:
 					# import pkgutil
 					# search_path = [dir_name] # set to None to see all modules importable from sys.path
 					# all_modules = [x[1] for x in pkgutil.iter_modules(path=search_path)]
-					# print(all_modules)
 			else:
 				sys.stdout.write("Import error 0: " + " module not found")
 				module = None
