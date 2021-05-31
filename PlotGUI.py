@@ -522,6 +522,10 @@ class StaticPlot(PlotFrame):
 			self.Bind(wx.EVT_MENU,self.OnRMSE, menu.Append(wx.NewIdRef(), _('RMSE'), _('Root Mean Square Error')))
 			self.mainmenu.Append(menu, _('&Error'))
 
+			menu = wx.Menu()
+			self.Bind(wx.EVT_MENU, self.OnMean, menu.Append(wx.NewIdRef(), _('Mean'), _('Mean of the curve')))
+			self.mainmenu.Append(menu, _('&Mean'))
+
 			### call self.On<PlotLine>()
 			getattr(self,'On%s'%self.typ)()
 
@@ -753,6 +757,20 @@ class StaticPlot(PlotFrame):
 			self.gc = plot.PlotGraphics(L, self.title, self.xLabel, self.yLabel)
 
 		self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
+
+	def OnMean(self, evt):
+		"""
+		"""
+		if isinstance(self.data, dict):
+			c1,c2 = self.data.values()
+			assert(len(c1)==len(c2))
+			diffcarr = list(map(lambda a,b: pow(float(a[-1])-float(b[-1]),2), c1,c2))
+			r = sqrt(sum(diffcarr)/len(c1))
+		else:
+			print(self.data)
+			r = sum(c[-1] for c in self.data) / len(self.data)
+
+		wx.MessageBox('Mean: %f'%r, _('Info'), wx.OK|wx.ICON_INFORMATION)
 
 	def OnRMSE(self,evt):
 		""" Get RMSE.
