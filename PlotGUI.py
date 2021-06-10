@@ -762,12 +762,8 @@ class StaticPlot(PlotFrame):
 		"""
 		"""
 		if isinstance(self.data, dict):
-			c1,c2 = self.data.values()
-			assert(len(c1)==len(c2))
-			diffcarr = list(map(lambda a,b: pow(float(a[-1])-float(b[-1]),2), c1,c2))
-			r = sqrt(sum(diffcarr)/len(c1))
+			r = 0.0
 		else:
-			print(self.data)
 			r = sum(c[-1] for c in self.data) / len(self.data)
 
 		wx.MessageBox('Mean: %f'%r, _('Info'), wx.OK|wx.ICON_INFORMATION)
@@ -778,7 +774,7 @@ class StaticPlot(PlotFrame):
 		if isinstance(self.data, dict):
 			c1,c2 = self.data.values()
 			assert(len(c1)==len(c2))
-			diffcarr = list(map(lambda a,b: pow(float(a[-1])-float(b[-1]),2), c1,c2))
+			diffcarr = map(lambda a,b: pow(float(a[-1])-float(b[-1]),2), c1,c2)
 			r = sqrt(sum(diffcarr)/len(c1))
 		
 			wx.MessageBox('RMSE: %f'%r, _('Info'), wx.OK|wx.ICON_INFORMATION)

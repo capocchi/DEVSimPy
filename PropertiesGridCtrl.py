@@ -998,10 +998,14 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 			model = self.parent.model
 
 			### for .amd or .cmd
-			if model.model_path != '':
-				wcd = _('Atomic DEVSimPy model (*.amd)|*.amd|Coupled DEVSimPy model (*.cmd)|*.cmd|All files (*)|*')
-			else:
+			if model.isAMD():
+				wcd = _('Atomic DEVSimPy model (*.amd)|*.amd|*.cmd|All files (*)|*')
+			elif model.isCMD():
+				wcd = _('Coupled DEVSimPy model (*.cmd)|*.cmd|All files (*)|*')
+			elif model.isPY():
 				wcd = _('Python files (*.py)|*.py|All files (*)|*')
+			else:
+				wcd = _('All files (*)|*')
 
 			default_dir = os.path.dirname(model.python_path) if os.path.exists(os.path.dirname(model.python_path)) else DOMAIN_PATH
 			dlg = wx.FileDialog(self, message=_("Select file ..."), defaultDir=default_dir, defaultFile="", wildcard=wcd, style=wx.OPEN | wx.CHANGE_DIR)
@@ -1017,7 +1021,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 
 				self.SetCellValue(row, 1, new_python_path)
 
-				# behavioral args update (because depends of the new class coming from new python file)
+				### behavioral args update (because depends of the new class coming from new python file)
 				new_cls = Components.GetClass(new_python_path)
 
 				if inspect.isclass(new_cls):
