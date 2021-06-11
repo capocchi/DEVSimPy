@@ -2388,7 +2388,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					self.CaptureMouse()
 				self.overlay = wx.Overlay()
 				if isinstance(event,wx.MouseEvent):
-					point = event.GetPosition()
+					# point = event.GetPosition()
+					point = self.getEventCoordinates(event)
 					self.selectionStart = point
 
 			else:
@@ -2527,41 +2528,39 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					except:
 						sys.stdout.write(_("Error in Release Mouse!"))
 					else:
+						self.permRect = None
 						if isinstance(event,wx.MouseEvent):
 							point = self.getEventCoordinates(event)
-							if wx.VERSION_STRING < '4.0':
-								self.permRect = wx.RectPP(self.selectionStart, point)
-							else:
+							if self.selectionStart != point:
 								self.permRect = wx.Rect(self.selectionStart, point)
 						
-						self.selectionStart = None
-						self.overlay.Reset()
+						if self.permRect:
 
-						self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
-						
-						# print("avec ",self.permRect)
+							self.selectionStart = None
+							self.overlay.Reset()
 
-						## gestion des shapes qui sont dans le rectangle permRect
-						for s in self.diagram.GetShapeList():
-							x,y = self.getScalledCoordinates(s.x[0],s.y[0])
-							# x = s.x[0]*self.scalex
-							# y = s.y[0]*self.scaley
-							w = (s.x[1]-s.x[0])*self.scalex
-							h = (s.y[1]-s.y[0])*self.scaley
-							
-							recS = wx.Rect(x,y,w,h)
+							self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
 
-							# print(s,x,y,w,h,self.permRect.Contains(recS))
+							## gestion des shapes qui sont dans le rectangle permRect
+							for s in self.diagram.GetShapeList():
+								x,y = self.getScalledCoordinates(s.x[0],s.y[0])
+								# x = s.x[0]*self.scalex
+								# y = s.y[0]*self.scaley
+								w = (s.x[1]-s.x[0])*self.scalex
+								h = (s.y[1]-s.y[0])*self.scaley
+								
+								recS = wx.Rect(x,y,w,h)
 
-							# si les deux rectangles se chevauche
-							try:
-								bool = self.permRect.ContainsRect(recS) if wx.VERSION_STRING < '4.0' else self.permRect.Contains(recS)
-								if bool:
-									self.select(s)
-							except AttributeError as info:
-								if self.permRect:
-									raise AttributeError(_("use >= wx-2.8-gtk-unicode library: %s")%info)
-									#clear out any existing drawing
+								# print(s,x,y,w,h,self.permRect.Contains(recS))
+
+								# si les deux rectangles se chevauche
+								try:
+									if self.permRect.Contains(recS):
+										self.select(s)
+								except AttributeError as info:
+									if self.permRect:
+										raise AttributeError(_("use >= wx-2.8-gtk-unicode library: %s")%info)
+										#clear out any existing drawing
 				else:
 					### shape is None and we remove the connectionShape
 					for item in [s for s in self.select() if isinstance(s, ConnectionShape)]:
