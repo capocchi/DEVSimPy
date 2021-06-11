@@ -846,10 +846,10 @@ class Diagram(Savable, Structurable):
 				### Check if models have the same label
 				L = diagram.GetLabelList([])
 				if len(L)!=len(set(L)):
-					model_with_same_label = [k for k,v in Counter(L).items() if v>1]
+					model_with_same_label = [f"-{k}" for k,v in Counter(L).items() if v>1]
 					txt = "\n".join(model_with_same_label)							
-					wx.MessageBox(_("It seems that the flowwing models have same label:\n \
-									- %s \n\
+					wx.MessageBox(_("It seems that the following models have a same label:\n\
+									%s\n\
 									\nIf you plan to use Flat simulation algorithm, all model must have a unique label.")%txt, _("Simulation Manager"))
 
 				### set the name of diagram
@@ -1543,6 +1543,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			Subject.__init__(self)
 
 			self.SetBackgroundColour(wx.WHITE)
+			self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
 
 			self.name = name
 			self.parent = parent
@@ -1573,6 +1574,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 			### improve drawing with not condsidering the resizeable  node when connect blocks
 			self.resizeable_nedeed = True
+			self.refresh_need = True
 
 			### attach canvas to notebook 1 (for update)
 			try:
@@ -1770,10 +1772,11 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 			shapes = self.diagram.shapes
 			nodes = self.nodes
+
 			### resizeable node not nedeed for connection process (dragging mouse with left button pressed - see when self.resizeable_nedeed is False)
 			if not self.resizeable_nedeed:
 				nodes = [n for n in nodes if not isinstance(n,ResizeableNode)]
-			items = shapes + nodes
+			items = iter(shapes + nodes)
 
 			for item in items:
 				try:
@@ -1813,12 +1816,14 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			backBrush = wx.Brush(backColour, wx.BRUSHSTYLE_SOLID)
 			pdc.SetBackground(backBrush)
 			pdc.Clear()
-			
+
 			### to insure the correct redraw when window is scolling
 			### http://markmail.org/thread/hytqkxhpdopwbbro#query:+page:1+mid:635dvk6ntxsky4my+state:results
 			self.PrepareDC(pdc)
 
 			self.DoDrawing(pdc)
+
+			del pdc
 
 		@Post_Undo
 		def OnLock(self, event):
@@ -1861,7 +1866,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				menu.Destroy()
 
 			### Refresh canvas
-			self.Refresh()
+			# self.Refresh()
 
 			### Focus on canvas
 			#wx.CallAfter(self.SetFocus)
@@ -2383,7 +2388,9 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					self.CaptureMouse()
 				self.overlay = wx.Overlay()
 				if isinstance(event,wx.MouseEvent):
-					self.selectionStart = event.Position
+					# point = event.GetPosition()
+					point = self.getEventCoordinates(event)
+					self.selectionStart = point
 
 			else:
 
@@ -2417,7 +2424,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				self.__state['canvas'] = self
 				self.notify()
 
-			self.Refresh()
+			# self.Refresh()
 
 		###
 		@Post_Undo
@@ -2500,7 +2507,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 													### dont avoid the link
 													remove = False
 
-							except AttributeError:
+							except Exception:
 								### TODO: I dont now why !!!
 								pass
 
@@ -2521,35 +2528,39 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					except:
 						sys.stdout.write(_("Error in Release Mouse!"))
 					else:
+						self.permRect = None
 						if isinstance(event,wx.MouseEvent):
-							if wx.VERSION_STRING < '4.0':
-								self.permRect = wx.RectPP(self.selectionStart, event.Position)
-							else:
-								self.permRect = wx.Rect(self.selectionStart, event.Position)
-
-						self.selectionStart = None
-						self.overlay.Reset()
-
-						self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
+							point = self.getEventCoordinates(event)
+							if self.selectionStart != point:
+								self.permRect = wx.Rect(self.selectionStart, point)
 						
-						## gestion des shapes qui sont dans le rectangle permRect
-						for s in self.diagram.GetShapeList():
-							x = s.x[0]*self.scalex
-							y = s.y[0]*self.scaley
-							w = (s.x[1]-s.x[0])*self.scalex
-							h = (s.y[1]-s.y[0])*self.scaley
-							
-							recS = wx.Rect(x,y,w,h)
+						if self.permRect:
 
-							# si les deux rectangles se chevauche
-							try:
-								bool = self.permRect.ContainsRect(recS) if wx.VERSION_STRING < '4.0' else self.permRect.Contains(recS)
-								if bool:
-									self.select(s)
-							except AttributeError as info:
-								if self.permRect:
-									raise AttributeError(_("use >= wx-2.8-gtk-unicode library: %s")%info)
-									#clear out any existing drawing
+							self.selectionStart = None
+							self.overlay.Reset()
+
+							self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
+
+							## gestion des shapes qui sont dans le rectangle permRect
+							for s in self.diagram.GetShapeList():
+								x,y = self.getScalledCoordinates(s.x[0],s.y[0])
+								# x = s.x[0]*self.scalex
+								# y = s.y[0]*self.scaley
+								w = (s.x[1]-s.x[0])*self.scalex
+								h = (s.y[1]-s.y[0])*self.scaley
+								
+								recS = wx.Rect(x,y,w,h)
+
+								# print(s,x,y,w,h,self.permRect.Contains(recS))
+
+								# si les deux rectangles se chevauche
+								try:
+									if self.permRect.Contains(recS):
+										self.select(s)
+								except AttributeError as info:
+									if self.permRect:
+										raise AttributeError(_("use >= wx-2.8-gtk-unicode library: %s")%info)
+										#clear out any existing drawing
 				else:
 					### shape is None and we remove the connectionShape
 					for item in [s for s in self.select() if isinstance(s, ConnectionShape)]:
@@ -2674,7 +2685,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 		def OnIdle(self,event):
 			"""
 			"""
-			self.Refresh(False)
+			if self.refresh_need:
+				self.Refresh(False)
 		
 		###
 		def OnMotion(self, event):
@@ -2686,10 +2698,14 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 			sc = self.getSelectedShapes()
 
+			self.refresh_need = True
+			self.resizeable_nedeed = True
+
 			if event.Dragging() and event.LeftIsDown():
 
 				self.diagram.modify = False
-			
+				
+
 				if len(sc) == 0:
 					# User is dragging the mouse, check if
 					# left button is down
@@ -2707,11 +2723,14 @@ if builtins.__dict__.get('GUI_FLAG',True):
 						ctx.SetBrush(wx.Brush(wx.Colour(229,229,229,80)))
 						
 						try:
-							ctx.DrawRectangle(*wx.Rect(self.selectionStart, event.Position))
+							ctx.DrawRectangle(*wx.Rect(self.selectionStart, event.GetPosition()))
 						except TypeError:
 							pass
-							
+
 						del odc
+
+						### no need to refresh in order to qhpw the rectangle
+						self.refresh_need = False
 					# else:
 						# self.Refresh(False)
 				else:
@@ -2726,8 +2745,6 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				
 					for s in sc:
 						s.move(x,y)
-						
-						self.resizeable_nedeed = True
 
 						### change cursor when resizing model
 						if isinstance(s, ResizeableNode) and cursor != wx.StockCursor(wx.CURSOR_SIZING):
@@ -2735,7 +2752,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 						### change cursor when connectionShape hit a node
 						elif isinstance(s, ConnectionShape):
-							self.resizeable_nedeed = False
+
 							### dot trace to prepare connection
 							if len(s.pen)>2:
 								s.pen[2]= wx.PENSTYLE_DOT
@@ -2746,6 +2763,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 							for node in [n for n in self.nodes if isinstance(n, ConnectableNode) and n.HitTest(point[0], point[1])]:
 								if cursor != wx.StockCursor(wx.CURSOR_CROSS):
 									cursor = wx.StockCursor(wx.CURSOR_CROSS)
+
+							self.resizeable_nedeed = False
 							
 					### update the cursor
 					self.SetCursor(cursor)
@@ -2901,7 +2920,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					if item.output:
 						block, n = item.output
 						self.nodes.append(INode(block, n, self, block.getInputLabel(n)))
-					# print(item.input, item.output)
+					
 
 				if isinstance(item, Resizeable):
 					self.nodes.extend([ResizeableNode(item, n, self) for n in range(len(item.x))])
@@ -4540,13 +4559,6 @@ class ResizeableNode(Node):
 		canvas.PopupMenu(menu, event.GetPosition())
 		### destroy menu local variable
 		menu.Destroy()
-
-	# def OnLeftDClick(self, event):
-	# 	if isinstance(self.item, ConnectionShape):
-	# 		# print(self.item.getInput(), self.item.getOutput())
-	# 		pass
-
-	# 	return super().OnLeftDClick(event)
 
 	def HitTest(self,x,y):
 		""" Collision detection method.

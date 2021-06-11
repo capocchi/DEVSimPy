@@ -87,7 +87,6 @@ def hotshotit(func):
 			sortby = 'cumulative'
 			ps = pstats.Stats(pr).sort_stats(sortby)
 			ps.dump_stats(prof_name)
-			#print(s.getvalue())
 
 		else:
 			r = func(*args, **kw)
