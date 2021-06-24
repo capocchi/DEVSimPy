@@ -188,10 +188,9 @@ def blink_manager(*args, **kwargs):
 
 			if frame.colored_flag:
 				### assign the default color
-				color = CodeBlock.FILL if isinstance(block, CodeBlock) else ContainerBlock.FILL
+				color = block.__class__.FILL #CodeBlock.FILL if isinstance(block, CodeBlock) else ContainerBlock.FILL
 				state['fill'] = color
 				sender.notify()
-
 			### assign the additionnal status_label string and notify
 			if frame.status_flag:  
 				status = block.devsModel.getStatus()
@@ -204,9 +203,10 @@ def blink_manager(*args, **kwargs):
 			
 		### blink frame has been closed
 		else:
+			
 			### assign the default color tot the last colored block
 			if frame.colored_flag:
-				color = CodeBlock.FILL if isinstance(block, CodeBlock) else ContainerBlock.FILL
+				color = block.__class__.FILL #CodeBlock.FILL if isinstance(block, CodeBlock) else ContainerBlock.FILL
 				state['fill'] = color
 				sender.notify()
 
@@ -221,7 +221,7 @@ def blink_manager(*args, **kwargs):
 
 	else:
 		wx.CallAfter(frame.txt.write,(_("No blink for %s dynamic model (%s)!\n")%(str(d), d.myID)))
-
+    		
 class BlinkFrame(wx.Frame):
 	"""
 	"""

@@ -1850,7 +1850,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				self.timer.Stop()
 
 			# current shape
-			s = self.getCurrentShape(event)
+			s = self.getInterceptedShape(event)
 
 			# clic on canvas
 			if self.isSelected(s):
@@ -2308,7 +2308,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			"""
 			"""
 			try:
-				self.getCurrentShape(event).OnRightUp(event)
+				self.getInterceptedShape(event).OnRightUp(event)
 			except AttributeError:
 				pass
 
@@ -2316,14 +2316,14 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			"""
 			"""
 			try:
-				self.getCurrentShape(event).OnRightDClick(event)
+				self.getInterceptedShape(event).OnRightDClick(event)
 			except AttributeError:
 				pass
 
 		def OnLeftDClick(self,event):
 			"""
 			"""
-			model = self.getCurrentShape(event)
+			model = self.getInterceptedShape(event)
 			if model:
 			#try:
 				model.OnLeftDClick(event)
@@ -2372,7 +2372,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				self.timer.Stop()
 
 			### get current shape
-			item = self.getCurrentShape(event)
+			item = self.getInterceptedShape(event)
 
 			### clicked on empty space deselect all
 			if item is None:
@@ -2431,19 +2431,48 @@ if builtins.__dict__.get('GUI_FLAG',True):
 		def OnLeftUp(self, event):
 			"""
 			"""
-			shape = self.getCurrentShape(event)
 
-			self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
+			cursor = self.GetCursor()
+		
+			if cursor != wx.StockCursor(wx.CURSOR_ARROW):
+				self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
 			
+			### intercepted shape
+			shape = self.getInterceptedShape(event)
+
+			### connectionShape 
+			# cs = next(iter(s for s in self.select() if isinstance(s, ConnectionShape)),None)
+			
+			### if connection is being, then we try to avoid the bug that appears when the mouse coursor and the end of the connection are superposed.
+			### So, x and y is the coordinate of the end of the connection and we try to find the shape targeted by the connection (Block or Port shape type)
+			### If HitTest between the point and the targeted shape and if the the getInterceptedShape dont return a Node (whiwh is the case when the cross appears to connect)
+			### the targeted shape is the returned.
+			if isinstance(shape, ConnectionShape):
+				cs = shape
+				x = cs.x[0] if not cs.input else cs.x[-1]
+				y = cs.y[0] if not cs.output else cs.y[-1]
+				
+				for s in iter(s for s in self.diagram.shapes if isinstance(s, (Block,Port))):
+					if s.HitTest(x,y) and s != cs:
+						shape = s
+						break
+			
+			### if cursor of mouse is in connectionShape (drag slowly), getInterceptedShape return the connectionShape Block.
+			### So, if the connectionShape is not connected, shape is none and the connectionShape is not drawed.
+			### If we left up on an existing connectionShape, nothing append
+			if isinstance(shape,ConnectionShape) and (not shape.input or not shape.output):
+				shape = None
+
 			self.resizeable_nedeed = True
 
-			### clic sur un block
+			### clic sur un block ou un node pour connection à block
 			if shape:
 
 				shape.OnLeftUp(event)
 				shape.leftUp(self.select())
 
 				remove = True
+				
 				### empty connection manager
 				for item in [s for s in self.select() if isinstance(s, ConnectionShape)]:
 					### restore solid connection
@@ -2451,65 +2480,43 @@ if builtins.__dict__.get('GUI_FLAG',True):
 						item.pen[2]= 100 #wx.PENSTYLE_SOLID
 
 					if None in (item.output, item.input):
-
-						### gestion des ajouts de connections automatiques
-						for ss in [a for a in self.diagram.GetShapeList() if isinstance(a, Block)]:
-							try:
-								### si le shape cible (ss) n'est pas le shape que l'on est en train de traiter (pour eviter les auto-connexions)
-								if (shape.item.output is not None and ss not in shape.item.output) or \
-								(shape.item.input is not None and ss not in shape.item.input):
-									x = ss.x[0]*self.scalex
-									y = ss.y[0]*self.scaley
-									w = (ss.x[1]-ss.x[0])*self.scalex
-									h = (ss.y[1]-ss.y[0])*self.scaley
-									recS = wx.Rect(x,y,w,h)
-
-									### extremité de la connectionShape
-									extrem = event.GetPosition()
-
-									### si l'extremité est dans le shape cible (ss)
-									if (ss.x[0] <= extrem[0] <= ss.x[1]) and (ss.y[0] <= extrem[1] <= ss.y[1]):
-
-										### new link request
-										dlg = wx.TextEntryDialog(self, _('Choose the port number.\nIf doesn\'t exist, we create it.'),_('Coupling Manager'))
-										if item.input is None:
-											dlg.SetValue(str(ss.output))
-											if dlg.ShowModal() == wx.ID_OK:
-												try:
-													val=int(dlg.GetValue())
-												### is not digit
-												except ValueError:
-													pass
-												else:
-													if val >= ss.output:
-														nn = ss.output
-														ss.output+=1
-													else:
-														nn = val
-													item.input = (ss, nn)
-													### dont avoid the link
-													remove = False
-										else:
-											dlg.SetValue(str(ss.input))
-											if dlg.ShowModal() == wx.ID_OK:
-												try:
-													val=int(dlg.GetValue())
-												### is not digit
-												except ValueError:
-													pass
-												else:
-													if val >= ss.input:
-														nn = ss.input
-														ss.input+=1
-													else:
-														nn = val
-													item.output = (ss, nn)
-													### dont avoid the link
-													remove = False
-
-							except Exception:
-								### TODO: I dont now why !!!
-								pass
+						
+						### new link request
+						dlg = wx.TextEntryDialog(self, _('Choose the port number.\nIf doesn\'t exist, we create it.'),_('Coupling Manager'))
+						if item.input is None:
+							dlg.SetValue(str(shape.output))
+							if dlg.ShowModal() == wx.ID_OK:
+								try:
+									val=int(dlg.GetValue())
+								### is not digit
+								except ValueError:
+									pass
+								else:
+									if val >= shape.output:
+										nn = shape.output
+										shape.output+=1
+									else:
+										nn = val
+									item.input = (shape, nn)
+									### dont avoid the link
+									remove = False
+						else:
+							dlg.SetValue(str(shape.input))
+							if dlg.ShowModal() == wx.ID_OK:
+								try:
+									val=int(dlg.GetValue())
+								### is not digit
+								except ValueError:
+									pass
+								else:
+									if val >= shape.input:
+										nn = shape.input
+										shape.input+=1
+									else:
+										nn = val
+									item.output = (shape, nn)
+									### dont avoid the link
+									remove = False
 
 						if remove:
 							self.diagram.DeleteShape(item)
@@ -2562,6 +2569,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 										raise AttributeError(_("use >= wx-2.8-gtk-unicode library: %s")%info)
 										#clear out any existing drawing
 				else:
+				
 					### shape is None and we remove the connectionShape
 					for item in [s for s in self.select() if isinstance(s, ConnectionShape)]:
 						self.diagram.DeleteShape(item)
@@ -2817,20 +2825,25 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			"""
 			return self.diagram
 
-		def getCurrentShape(self, event):
-			""" Return the selected current shape.
+		def getInterceptedShape(self, event, exclude=[]):
+			""" Return the intercepted current shape.
 			"""
 			# get coordinate of click in our coordinate system
 			if isinstance(event, wx.MouseEvent):
 				point = self.getEventCoordinates(event)
 				self.currentPoint = point
-
-				# Look to see if an item is selected
-				for item in self.nodes + self.diagram.shapes:
-					if item.HitTest(point[0], point[1]):
-						return item
+			elif isinstance(event, wx.Point):
+				point = event
+				self.currentPoint = point
 			else:
 				return None
+
+			# Look to see if an item is selected
+			for item in self.nodes + self.diagram.shapes:
+				if item.HitTest(point[0], point[1]) and item not in exclude:
+					return item
+
+			return None
 
 		def GetXY(self, m, x, y):
 			""" Give x and y of model m into canvas.
@@ -2902,9 +2915,10 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				self.selectedShapes.append(item)
 					
 				item.OnSelect(None)
+				
 				if isinstance(item, Connectable):
 					### display the label of input ports if exist
-					for n in range(item.input):	
+					for n in range(item.input):
 						self.nodes.append(INode(item, n, self, item.getInputLabel(n)))
 
 					### display the label of output ports if exist
@@ -2913,13 +2927,14 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				
 				### display the label of port attahced to the connection shape (make more easy the correspondance of the link)
 				if isinstance(item, ConnectionShape):
+					
 					if item.input:
 						block, n = item.input
 						self.nodes.append(ONode(block, n, self, block.getInputLabel(n)))
 
 					if item.output:
 						block, n = item.output
-						self.nodes.append(INode(block, n, self, block.getInputLabel(n)))
+						self.nodes.append(INode(block, n, self, block.getOutputLabel(n)))
 					
 
 				if isinstance(item, Resizeable):
@@ -2987,10 +3002,12 @@ class LinesShape(Shape):
 
 		L = list(zip(self.x,self.y)) #list(map(lambda a,b: (a,b), self.x, self.y))
 
+		### line width
+		w = self.x[1] - self.x[0]
+
 		### update L depending of the connector type
 		if ShapeCanvas.CONNECTOR_TYPE == 'linear':
-			### line width
-			w = self.x[1] - self.x[0]
+			
 			### left moving
 			if w > 0:
 				### output port
@@ -3011,8 +3028,6 @@ class LinesShape(Shape):
 					L.insert(2, (self.x[1]+w/10, self.y[1]))
 
 		elif ShapeCanvas.CONNECTOR_TYPE == 'square':
-			### line width
-			w = self.x[1] - self.x[0]
 			L.insert(1,(self.x[0]+w/2, self.y[0]))
 			L.insert(2,(self.x[0]+w/2, self.y[1]))
 
@@ -3021,12 +3036,12 @@ class LinesShape(Shape):
 
 		dc.DrawLines(L)
 	
-		### pour le rectangle en fin de connexion
-		if wx.VERSION_STRING >= '4.0':
-			dc.SetBrush(wx.Brush(RED_LIGHT))
-			wx.DC.DrawRectangle(dc,wx.Point(self.x[-1]-10/2, self.y[-1]-10/2), wx.Size(10, 10))
-		else:
-			dc.DrawRectanglePointSize(wx.Point(self.x[-1]-10/2, self.y[-1]-10/2), wx.Size(10, 10))
+		### pour le rectangle en bout de connexion
+		dc.SetBrush(wx.Brush(RED_LIGHT))
+		pt1 = wx.Point(self.x[-1]-10/2, self.y[-1]-10/2) 
+		pt2 = wx.Point(self.x[0]-10/2, self.y[0]-10/2)
+		wx.DC.DrawRectangle(dc, pt1, wx.Size(10, 10))
+		wx.DC.DrawRectangle(dc, pt2, wx.Size(10, 10))
 		
 		#dc.DrawPolygon((	wx.Point(self.x[-1]-10, self.y[-1]-10),
 		#					wx.Point(self.x[-1]-10, self.y[-1]+10),
@@ -3448,7 +3463,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		canvas.PopupMenu(menu, event.GetPosition())
 		### destroy menu local variable
 		menu.Destroy()
-
+	
 	def __del__(self):
 		pass
 
