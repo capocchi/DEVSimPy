@@ -246,7 +246,7 @@ def CheckClass(m):
 	### check cls error
 	if isinstance(cls, tuple):
 		return cls
-
+	
 	### check devs instance
 	devs = getInstance(cls, args)
 
@@ -400,6 +400,7 @@ class Diagram(Savable, Structurable):
 		
 		### for all codeBlock shape, we make the devs instance
 		for m in block_list:
+			
 			### class object from python file
 			cls = Components.GetClass(m.python_path)
 

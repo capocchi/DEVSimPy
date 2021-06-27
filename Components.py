@@ -908,7 +908,6 @@ class BlockFactory:
 		"""
 
 		dir_name = os.path.dirname(filename)
-
 		
 		### if python_file is ...../toto.amd/Atomic_Model.py, then the parent dir is zipfile.
 		if zipfile.is_zipfile(dir_name):

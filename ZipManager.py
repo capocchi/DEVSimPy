@@ -399,7 +399,8 @@ class Zip:
 		PluginManager.trigger_event("IMPORT_STRATEGIES", fn=self.fn)
 		
 		try:
-			module = self.ImportModule() if self.GetFullName() not in sys.modules else sys.modules[self.GetFullName()]
+			module = self.ImportModule()# if self.GetFullName() not in sys.modules else sys.modules[self.GetFullName()]
+			# print(self.GetFullName(), module.__file__)
 			return module
 		### model has not python file !
 		except Exception as e:
@@ -454,10 +455,12 @@ class Zip:
 		
 		if module:
 			module.__name__ = path_to_module(module_name)
-			
+			# if module_name=="LogicalBehavior.py":
+				# print(module_name,self.fn)
+				# print(self.GetFullName(), module.__file__)
 			### allows to import with a reference from the parent directory (like parentName.model).
 			### Now import of .amd or .cmd module is composed by DomainModel (no point!).
-			### Example : import CollectorMessageCollectoramd or CollectorMessageCollectorcmd
+			### Example : import CollectorMessageCollectoramd or CollectorMessageCollectorcmd 
 			sys.modules[self.GetFullName()] = module
 
 			return module
