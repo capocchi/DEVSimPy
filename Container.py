@@ -2439,9 +2439,6 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			
 			### intercepted shape
 			shape = self.getInterceptedShape(event)
-
-			### connectionShape 
-			# cs = next(iter(s for s in self.select() if isinstance(s, ConnectionShape)),None)
 			
 			### if connection is being, then we try to avoid the bug that appears when the mouse coursor and the end of the connection are superposed.
 			### So, x and y is the coordinate of the end of the connection and we try to find the shape targeted by the connection (Block or Port shape type)
@@ -2473,18 +2470,27 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 				remove = True
 				
-				### empty connection manager
-				for item in [s for s in self.select() if isinstance(s, ConnectionShape)]:
-					### restore solid connection
-					if len(item.pen)>2:
-						item.pen[2]= 100 #wx.PENSTYLE_SOLID
+				### connectionShape
+				cs = next(iter(s for s in self.select() if isinstance(s, ConnectionShape)),None)
 
-					if None in (item.output, item.input):
+				if cs:
+				### empty connection manager
+				#for cs in [s for s in self.select() if isinstance(s, ConnectionShape)]:
+					### restore solid connection
+					if len(cs.pen)>2:
+						cs.pen[2]= 100 #wx.PENSTYLE_SOLID
+
+					### if left up on block
+					if None in (cs.output, cs.input):
 						
 						### new link request
 						dlg = wx.TextEntryDialog(self, _('Choose the port number.\nIf doesn\'t exist, we create it.'),_('Coupling Manager'))
-						if item.input is None:
-							dlg.SetValue(str(shape.output))
+						if cs.input is None:
+							if isinstance(shape,Port):
+								dlg.SetValue('0')
+							else:
+								dlg.SetValue(str(shape.output))
+
 							if dlg.ShowModal() == wx.ID_OK:
 								try:
 									val=int(dlg.GetValue())
@@ -2497,11 +2503,14 @@ if builtins.__dict__.get('GUI_FLAG',True):
 										shape.output+=1
 									else:
 										nn = val
-									item.input = (shape, nn)
-									### dont avoid the link
+									cs.input = (shape, nn)
+									### dont abort the link
 									remove = False
 						else:
-							dlg.SetValue(str(shape.input))
+							if isinstance(shape,Port):
+								dlg.SetValue('0')
+							else:
+								dlg.SetValue(str(shape.input))
 							if dlg.ShowModal() == wx.ID_OK:
 								try:
 									val=int(dlg.GetValue())
@@ -2514,12 +2523,12 @@ if builtins.__dict__.get('GUI_FLAG',True):
 										shape.input+=1
 									else:
 										nn = val
-									item.output = (shape, nn)
-									### dont avoid the link
+									cs.output = (shape, nn)
+									### dont abort the link
 									remove = False
 
 						if remove:
-							self.diagram.DeleteShape(item)
+							self.diagram.DeleteShape(cs)
 							self.deselect()
 					else:
 						### transformation de la connection en zigzag
@@ -2551,23 +2560,14 @@ if builtins.__dict__.get('GUI_FLAG',True):
 							## gestion des shapes qui sont dans le rectangle permRect
 							for s in self.diagram.GetShapeList():
 								x,y = self.getScalledCoordinates(s.x[0],s.y[0])
-								# x = s.x[0]*self.scalex
-								# y = s.y[0]*self.scaley
 								w = (s.x[1]-s.x[0])*self.scalex
 								h = (s.y[1]-s.y[0])*self.scaley
 								
 								recS = wx.Rect(x,y,w,h)
 
-								# print(s,x,y,w,h,self.permRect.Contains(recS))
-
-								# si les deux rectangles se chevauche
-								try:
-									if self.permRect.Contains(recS):
-										self.select(s)
-								except AttributeError as info:
-									if self.permRect:
-										raise AttributeError(_("use >= wx-2.8-gtk-unicode library: %s")%info)
-										#clear out any existing drawing
+								# rect hit test
+								if self.permRect.Contains(recS):
+									self.select(s)
 				else:
 				
 					### shape is None and we remove the connectionShape
@@ -2915,7 +2915,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				self.selectedShapes.append(item)
 					
 				item.OnSelect(None)
-				
+
 				if isinstance(item, Connectable):
 					### display the label of input ports if exist
 					for n in range(item.input):
@@ -2930,13 +2930,12 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					
 					if item.input:
 						block, n = item.input
-						self.nodes.append(ONode(block, n, self, block.getInputLabel(n)))
+						self.nodes.append(ONode(block, n, self, block.getOutputLabel(n)))
 
 					if item.output:
 						block, n = item.output
-						self.nodes.append(INode(block, n, self, block.getOutputLabel(n)))
+						self.nodes.append(INode(block, n, self, block.getInputLabel(n)))
 					
-
 				if isinstance(item, Resizeable):
 					self.nodes.extend([ResizeableNode(item, n, self) for n in range(len(item.x))])
 					
