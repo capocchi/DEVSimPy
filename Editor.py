@@ -40,7 +40,7 @@ from tempfile import gettempdir
 from wx import stc
 
 from Decorators import redirectStdout
-from Utilities import path_to_module, PrintException, printOnStatusBar
+from Utilities import path_to_module, printOnStatusBar
 
 import ReloadModule
 import ZipManager

@@ -106,17 +106,6 @@ def getFilePathInfo(path):
 
 	return dirname, basename, filename, extend
 
-def PrintException():
-	"""
-	"""
-	exc_type, exc_obj, tb = sys.exc_info()
-	f = tb.tb_frame
-	lineno = tb.tb_lineno
-	filename = f.f_code.co_filename
-	linecache.checkcache(filename)
-	line = linecache.getline(filename, lineno, f.f_globals)
-	print('EXCEPTION IN {}\nLINE {}\n"{}": {}'.format(filename, lineno, line.strip(), exc_obj))
-
 def printOnStatusBar(statusbar, data={}):
 	""" Send data on status bar
 	"""
@@ -650,7 +639,7 @@ def getInstance(cls, args = {}):
 			devs = cls(**args)
 		except Exception as info:
 			sys.stderr.write(_("Error in getInstance: %s not instanciated with %s.\n"%(cls,str(args))))
-			PrintException()
+			sys.stderr.write(traceback.format_exc())
 			return sys.exc_info()
 		else:
 			return devs
