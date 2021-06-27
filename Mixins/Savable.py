@@ -280,18 +280,6 @@ class DumpZipFile(DumpBase):
 			L = L[2:]
 
 		if len(obj_loaded.dump_attributes) != len(L):
-			### for model build with a version of devsimpy <= 2.5
-			### font checking
-			# if fileName.endswith(DumpZipFile.ext[-1]):
-			# 	if not isinstance(L[9], list):
-			# 		import wx
-			# 		L.insert(9, [FONT_SIZE, 74, 93, 700, 'Arial'])
-			# else:
-			# 	if not isinstance(L[6], list):
-			# 		import wx
-			# 		L.insert(6, [FONT_SIZE, 74, 93, 700, 'Arial'])
-			### for model build with a version of DEVSimPy <=4.0
-			### Connectable._inputLabel and Connectable._outpuLabel 
 			L = [{},{}]+L
 		#=======================================================================
 

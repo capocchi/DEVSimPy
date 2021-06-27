@@ -2915,7 +2915,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				self.selectedShapes.append(item)
 					
 				item.OnSelect(None)
-				
+
 				if isinstance(item, Connectable):
 					### display the label of input ports if exist
 					for n in range(item.input):
@@ -2930,13 +2930,12 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					
 					if item.input:
 						block, n = item.input
-						self.nodes.append(ONode(block, n, self, block.getInputLabel(n)))
+						self.nodes.append(ONode(block, n, self, block.getOutputLabel(n)))
 
 					if item.output:
 						block, n = item.output
-						self.nodes.append(INode(block, n, self, block.getOutputLabel(n)))
+						self.nodes.append(INode(block, n, self, block.getInputLabel(n)))
 					
-
 				if isinstance(item, Resizeable):
 					self.nodes.extend([ResizeableNode(item, n, self) for n in range(len(item.x))])
 					
