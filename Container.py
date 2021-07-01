@@ -1192,7 +1192,7 @@ class ShapeEvtHandler(ABC):
 	def OnLeftDown(self,event):
 		pass
 
-	def leftUp(self,event):
+	def leftUp(self,items):
 		pass
 
 	def OnLeftDClick(self,event):
@@ -1872,6 +1872,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			### Focus on canvas
 			#wx.CallAfter(self.SetFocus)
 
+			event.Skip()
+
 		def GetNodeLists(self, source, target):
 			"""
 			"""
@@ -2082,6 +2084,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 			# main windows statusbar update
 			printOnStatusBar(self.GetTopLevelParent().statusbar, {0:_('Copy'), 1:''})
+			
+			event.Skip()
 
 		#def OnScroll(self, event):
 			##"""
@@ -2253,20 +2257,24 @@ if builtins.__dict__.get('GUI_FLAG',True):
 						self.AddShape(newShape)
 
 			### adding connectionShape only if the connection is connected on the two side with blocks.
-			for cs in [ a for a in L if a.input[0] in D and a.output[0] in D]:
+			for cs in [a for a in L if a.input[0] in D and a.output[0] in D]:
 				cs.input = (D[cs.input[0]],cs.input[1])	
 				cs.output = (D[cs.output[0]],cs.output[1])
 				self.AddShape(cs)
 
 			# specify the operation in status bar
 			printOnStatusBar(self.GetTopLevelParent().statusbar, {0:_('Paste'), 1:''})
-				
+			
+			event.Skip()
+
 		def OnCut(self, event):
 			""" Cut menu has been clicked. Copy and delete event.
 			"""
 
 			self.OnCopy(event)
 			self.OnDelete(event)
+
+			event.Skip()
 
 		def OnDelete(self, event):
 			""" Delete menu has been clicked. Delete all selected shape.
@@ -2312,6 +2320,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				self.getInterceptedShape(event).OnRightUp(event)
 			except AttributeError:
 				pass
+			event.Skip()
 
 		def OnRightDClick(self,event):
 			"""
@@ -2320,6 +2329,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				self.getInterceptedShape(event).OnRightDClick(event)
 			except AttributeError:
 				pass
+
+			event.Skip()
 
 		def OnLeftDClick(self,event):
 			"""
@@ -2330,6 +2341,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				model.OnLeftDClick(event)
 			#except Exception, info:
 			#	wx.MessageBox(_("An error is occured during double clic: %s")%info)
+			event.Skip()
 
 		def Undo(self):
 			"""
@@ -2393,22 +2405,20 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					point = self.getEventCoordinates(event)
 					self.selectionStart = point
 
+			elif item not in self.getSelectedShapes():
+
+				item.OnLeftDown(event) # send leftdown event to current shape
+				if isinstance(item, Selectable) and not event.ControlDown():
+					self.deselect()
+
+				self.select(item)
+
 			else:
 
-				### if item is not selected, then we select it without the other
-				if item not in self.getSelectedShapes():
+				for s in self.getSelectedShapes():
+					s.OnLeftDown(event) # send leftdown event to current shape
 
-					item.OnLeftDown(event) # send leftdown event to current shape
-					if isinstance(item, Selectable) and not event.ShiftDown():
-						self.deselect()
-
-					self.select(item)
-					
-				### else each other are considered
-				else:
-
-					for s in self.getSelectedShapes():
-						s.OnLeftDown(event) # send leftdown event to current shape
+				self.deselect(item)
 
 			### Update the nb1 panel properties only for Block and Port (call update in ControlNotebook)
 			win = getTopLevelWindow()
@@ -2426,6 +2436,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				self.notify()
 
 			# self.Refresh()
+			event.Skip()
 
 		###
 		@Post_Undo
@@ -2577,6 +2588,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 						self.deselect()
 
 			self.Refresh()
+
+			event.Skip()
 
 		def OnTimer(self, event):
 			"""
@@ -3104,6 +3117,8 @@ class LinesShape(Shape):
 			### add point at the position according to the possible zoom (use of getScalledCoordinates)
 			self.AddPoint(canvas.getScalledCoordinates(x,y))
 
+		event.Skip()
+
 	def HasPoint(self, point):
 		""" Point is included in line ?
 		"""
@@ -3452,6 +3467,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		"""
 		### redirect to LinesShape handler (default)
 		LinesShape.OnLeftDClick(self, event)
+		event.Skip()
 
 	###
 	def OnRightDown(self, event):
@@ -3463,6 +3479,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		canvas.PopupMenu(menu, event.GetPosition())
 		### destroy menu local variable
 		menu.Destroy()
+		event.Skip()
 	
 	def __del__(self):
 		pass
@@ -3570,10 +3587,10 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 
 	###
 	def OnLeftUp(self, event):
-		pass
+		event.Skip()
 
 	###
-	def leftUp(self, event):
+	def leftUp(self, items):
 		pass
 
 	###
@@ -3586,15 +3603,17 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		canvas.PopupMenu(menu, event.GetPosition())
 		### destroy menu local variable
 		menu.Destroy()
+		event.Skip()
 
 	###
-	def OnLeftDown(self, event):
-		"""
-		"""
+	#def OnLeftDown(self, event):
+	#	"""
+	#	"""
+		
 		### Change the label of block
-		if event.ControlDown():
-			Selectable.OnRenameFromClick(self, event)
-		event.Skip()
+		#if event.ControlDown():
+		#	Selectable.OnRenameFromClick(self, event)	
+	#	event.Skip()
 
 	###
 	def OnProperties(self, event):
@@ -4021,7 +4040,10 @@ class CodeBlock(Achievable, Block):
 	def OnLeftDClick(self, event):
 		""" On left double click event has been invoked.
 		"""
-		self.OnProperties(event)
+		if event.ControlDown():
+			Selectable.OnRenameFromClick(self, event)
+		else:
+			self.OnProperties(event)
 		event.Skip()
 
 	###
@@ -4233,14 +4255,20 @@ class ContainerBlock(Block, Diagram):
 	def OnLeftDClick(self, event):
 		""" Left Double Click Event Handel
 		"""
-		canvas = event.GetEventObject()
-		canvas.deselect()
+		### CtrL is Down
+		if event.ControlDown():
+			Selectable.OnRenameFromClick(self, event)
+		else:
+			canvas = event.GetEventObject()
+			canvas.deselect()
 
-		mainW = wx.GetApp().GetTopWindow()
+			mainW = wx.GetApp().GetTopWindow()
 
-		frame = DetachedFrame(parent = mainW, title  = ''.join([canvas.name,' - ',self.label]), diagram = self, name = self.label)
-		frame.SetIcon(mainW.GetIcon())
-		frame.Show()
+			frame = DetachedFrame(parent = mainW, title  = ''.join([canvas.name,' - ',self.label]), diagram = self, name = self.label)
+			frame.SetIcon(mainW.GetIcon())
+			frame.Show()
+		
+		event.Skip()
 
 	def __repr__(self):
 		s = Block.__repr__(self)
@@ -4575,6 +4603,8 @@ class ResizeableNode(Node):
 		### destroy menu local variable
 		menu.Destroy()
 
+		event.Skip()
+
 	def HitTest(self,x,y):
 		""" Collision detection method.
 		"""
@@ -4656,7 +4686,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 	def leftUp(self, event):
 		""" Left up event has been invoked.
 		"""
-		pass
+		event.Skip()
 
 	###
 	def OnRightDown(self, event):
@@ -4669,14 +4699,16 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 		### destroy menu local variable
 		menu.Destroy()
 
-	###
-	def OnLeftDown(self, event):
-		""" Left down event has been invoked.
-		"""
-		### Rename the shape with CtrL+LeftDown
-		if event.ControlDown():
-			Selectable.OnRenameFromClick(self, event)
 		event.Skip()
+
+	# ###
+	# def OnLeftDown(self, event):
+	# 	""" Left down event has been invoked.
+	# 	"""
+	# 	### Rename the shape with CtrL+LeftDown
+	# 	if event.ControlDown():
+	# 		Selectable.OnRenameFromClick(self, event)
+	# 	event.Skip()
 
 	def OnProperties(self, event):
 		""" Properties of port has been invoked.
@@ -4689,7 +4721,11 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 	def OnLeftDClick(self, event):
 		""" Left double click event has been invoked.
 		"""
-		self.OnProperties(event)
+		if event.ControlDown():
+			Selectable.OnRenameFromClick(self, event)
+		else:
+			self.OnProperties(event)
+		event.Skip()
 
 	def update(self, concret_subject = None):
 		""" Update function linked to notify function (observer pattern).
@@ -4794,6 +4830,8 @@ class ScopeGUI(CodeBlock):
 		else:
 			CodeBlock.OnLeftDClick(self, event)
 
+		event.Skip()
+
 #------------------------------------------------
 class DiskGUI(CodeBlock):
 	""" DiskGUI(label)
@@ -4821,3 +4859,5 @@ class DiskGUI(CodeBlock):
 			frame.Show()
 		else:
 			CodeBlock.OnLeftDClick(self, event)
+		
+		event.Skip()

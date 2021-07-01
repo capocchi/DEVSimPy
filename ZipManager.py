@@ -455,9 +455,7 @@ class Zip:
 		
 		if module:
 			module.__name__ = path_to_module(module_name)
-			# if module_name=="LogicalBehavior.py":
-				# print(module_name,self.fn)
-				# print(self.GetFullName(), module.__file__)
+			
 			### allows to import with a reference from the parent directory (like parentName.model).
 			### Now import of .amd or .cmd module is composed by DomainModel (no point!).
 			### Example : import CollectorMessageCollectoramd or CollectorMessageCollectorcmd 
