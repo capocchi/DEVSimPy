@@ -791,18 +791,20 @@ class MainApplication(wx.Frame):
 		menu = self.GetMenuBar().FindItemById(Menu.ID_RECENT).GetMenu()
 		menuItem = menu.FindItemById(id)
 		path = menuItem.GetItemLabel()
-		name = os.path.basename(path)
+
+		if path.endswith(('.dsp','.yaml')):
+			name = os.path.basename(path)
 		
-		diagram = Container.Diagram()
-		#diagram.last_name_saved = path
-		open_file_result = diagram.LoadFile(path)
+			diagram = Container.Diagram()
+			#diagram.last_name_saved = path
+			open_file_result = diagram.LoadFile(path)
 
-		if isinstance(open_file_result, Exception):
-			wx.MessageBox(_('Error opening file.\nInfo : %s')%str(open_file_result), _('Error'), wx.OK | wx.ICON_ERROR)
-		else:
-			self.nb2.AddEditPage(os.path.splitext(name)[0], diagram)
+			if isinstance(open_file_result, Exception):
+				wx.MessageBox(_('Error opening file.\nInfo : %s')%str(open_file_result), _('Error'), wx.OK | wx.ICON_ERROR)
+			else:
+				self.nb2.AddEditPage(os.path.splitext(name)[0], diagram)
 
-		self.EnableAbstractionButton()
+			self.EnableAbstractionButton()
 
 	def EnableAbstractionButton(self):
 		""" Enable DAM and UAM button depending of the abstraction level
@@ -1180,14 +1182,14 @@ class MainApplication(wx.Frame):
 		if open_dlg.ShowModal() == wx.ID_OK:
 
 			### for selected paths
-			for path in open_dlg.GetPaths():
+			for path in [p  for p in open_dlg.GetPaths() if p.endswith(('.dsp','.yaml'))]:
 				diagram = Container.Diagram()
 				#diagram.last_name_saved = path
 
 				### adding path with assocaited diagram
 				new_paths[os.path.normpath(path)] = diagram
 
-			self.home = os.path.dirname(path)
+				self.home = os.path.dirname(path)
 
 			open_dlg.Destroy()
 
@@ -1215,7 +1217,7 @@ class MainApplication(wx.Frame):
 						self.cfg.Write("openFileList", str(eval("self.openFileList")))
 						self.cfg.Flush()
 
-		self.EnableAbstractionButton()
+			self.EnableAbstractionButton()
 
 	###
 	def OnPrint(self, event):
