@@ -4,7 +4,7 @@
 Name : MessagesCollector.py 
 Brief descritpion : collect to disk received messages 
 Author(s) : Laurent CAPOCCHI (capocchi@univ-corse.fr)
-Version :  1.0                                        
+Version : 1.0                                        
 Last modified : 26/10/20
 GENERAL NOTES AND REMARKS:
 GLOBAL VARIABLES AND FUNCTIONS:
@@ -41,7 +41,7 @@ class MessagesCollector(DomainBehavior):
 		self.fileName = fileName
 		self.ext = ext
 		self.comma = comma
-	
+
 		self.initPhase('IDLE',INFINITY)
 		
 		for np in range(10000):
