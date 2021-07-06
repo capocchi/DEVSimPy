@@ -1777,6 +1777,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			### resizeable node not nedeed for connection process (dragging mouse with left button pressed - see when self.resizeable_nedeed is False)
 			if not self.resizeable_nedeed:
 				nodes = [n for n in nodes if not isinstance(n,ResizeableNode)]
+
 			items = iter(shapes + nodes)
 
 			for item in items:
@@ -1865,9 +1866,6 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 				### destroy menu local variable
 				menu.Destroy()
-
-			### Refresh canvas
-			# self.Refresh()
 
 			### Focus on canvas
 			#wx.CallAfter(self.SetFocus)

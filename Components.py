@@ -148,10 +148,7 @@ class DSPComponent:
 		new_tab = dial.ShowModal() == wx.ID_YES
 
 		# load diagram in a new page
-		if new_tab:
-			diagram = Diagram()
-		else:
-			diagram = canvas.GetDiagram()
+		diagram = Diagram() if new_tab else canvas.GetDiagram()
 
 		### if diagram is instantiated
 		if diagram:
