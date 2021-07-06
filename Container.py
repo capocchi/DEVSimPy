@@ -3923,14 +3923,14 @@ class CodeBlock(Achievable, Block):
 								break
 
 				### if path is always wrong, flag is visible
-				if os.path.exists(path) :
+				if os.path.exists(path):
 					state['python_path'] = path
 				else:
 					state['bad_filename_path_flag'] = True
 
 			### for .cmd or .amd
 			else:
-				if not os.path.exists(model_path) :
+				if not os.path.exists(state['model_path']) :
 					state['bad_filename_path_flag'] = True
 				# else:
 				# 	with zipfile.ZipFile(model_path) as zf:
