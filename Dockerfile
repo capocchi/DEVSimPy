@@ -7,7 +7,7 @@ WORKDIR /app
 
 RUN apt-get update
 RUN apt-get install -y build-essential libgtk-3-dev
-RUN pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/debian-9 wxPython
+RUN pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/debian-10 wxPython
 
 #COPY requirements-nogui.txt requirements.txt
 COPY requirements.txt requirements.txt
