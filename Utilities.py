@@ -428,18 +428,20 @@ def install(package_to_install, package_to_import=None):
 		
 	try:
 		importlib.import_module(package_to_import)
-		installed = True
 	except ImportError:
 		if pip.main(['search', package_to_install]) != 23:
 			dial = wx.MessageDialog(None, _('We find that the package %s is missing. \n\n Do you want to install him using pip?'%(package_to_install)), _('Package Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 
 			if dial.ShowModal() == wx.ID_YES:
 				installed = not pip.main(['install', package_to_install])
-				dial.Destroy() 
 			else:
 				installed = False
-				dial.Destroy()
 
+			dial.Destroy()
+	else:
+		installed = True
+
+	print(installed)
 	return installed
 
 def getObjectFromString(scriptlet):
