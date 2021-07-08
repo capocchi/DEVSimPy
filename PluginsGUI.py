@@ -210,7 +210,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		""" Ebnable the current item.
 		"""
 		index = self.GetIndex(event)
-		self.CheckItem(index, True)
+		#self.CheckItem(index, True)
 		self.SetItemImage(index,1)
 		event.Skip()
 
@@ -218,7 +218,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		""" Disable the current item.
 		"""
 		index = self.GetIndex(event)
-		self.CheckItem(index, False)
+		#self.CheckItem(index, False)
 		self.SetItemImage(index,0)
 		event.Skip()
 
@@ -502,7 +502,7 @@ class BlockPluginsList(CheckListCtrl):
 		CheckListCtrl.OnDisable(self, event) 
 		self.DoChekItem(self.GetIndex(event))
 		event.Skip()
-		
+
 	def DoChekItem(self, index):
 		"""
 		"""
