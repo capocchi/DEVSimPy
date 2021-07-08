@@ -204,7 +204,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def GetIndex(self, event):
 		""" Return index from event or currentItem
 		"""
-		return self.currentItem #event.Index if hasattr(event,'Index') else self.currentItem
+		return event.Index if hasattr(event,'Index') else self.currentItem
 
 	def OnEnable(self, event):
 		""" Ebnable the current item.
@@ -212,13 +212,15 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		index = self.GetIndex(event)
 		self.CheckItem(index, True)
 		self.SetItemImage(index,1)
-		
+		event.Skip()
+
 	def OnDisable(self, event):
 		""" Disable the current item.
 		"""
 		index = self.GetIndex(event)
 		self.CheckItem(index, False)
 		self.SetItemImage(index,0)
+		event.Skip()
 
 	@abstractmethod
 	def OnEdit(self, event):
@@ -492,13 +494,15 @@ class BlockPluginsList(CheckListCtrl):
 		"""
 		CheckListCtrl.OnEnable(self, event) 
 		self.DoChekItem(self.GetIndex(event))
+		event.Skip()
 
 	def OnDisable(self, event):
 		""" Disable the current item.
 		"""
 		CheckListCtrl.OnDisable(self, event) 
 		self.DoChekItem(self.GetIndex(event))
-
+		event.Skip()
+		
 	def DoChekItem(self, index):
 		"""
 		"""
