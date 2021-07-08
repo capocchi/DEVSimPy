@@ -441,7 +441,6 @@ def install(package_to_install, package_to_import=None):
 	else:
 		installed = True
 
-	print(installed)
 	return installed
 
 def getObjectFromString(scriptlet):
