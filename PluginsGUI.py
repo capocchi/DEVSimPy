@@ -204,7 +204,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def GetIndex(self, event):
 		""" Return index from event or currentItem
 		"""
-		return event.Index if hasattr(event,'Index') else self.currentItem
+		return self.currentItem #event.Index if hasattr(event,'Index') else self.currentItem
 
 	def OnEnable(self, event):
 		""" Ebnable the current item.
