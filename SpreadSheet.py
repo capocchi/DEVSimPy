@@ -422,6 +422,8 @@ class Newt(wx.Frame):
 		nbc = range(sheet.GetNumberCols())
 		nbr = range(sheet.GetNumberRows()) if selected_rows == [] else selected_rows
 
+		print(nbr,a,b,selected_rows)
+		
 		data = []
 		select = -1
 		for i in nbr:
