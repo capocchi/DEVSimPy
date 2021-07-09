@@ -87,8 +87,6 @@ import Components
 if builtins.__dict__.get('GUI_FLAG', True):
 	import Menu
 
-#import ReloadModule
-
 ### Mixin
 from Mixins.Attributable import Attributable
 from Mixins.Achievable import Achievable

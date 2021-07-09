@@ -37,10 +37,9 @@ GridCellRenderer = gridlib.PyGridCellRenderer if wx.VERSION_STRING < '4.0' else 
 GridTableBase = gridlib.PyGridTableBase if wx.VERSION_STRING < '4.0' else gridlib.GridTableBase
 EditableListBox = gizmos.EditableListBox if wx.VERSION_STRING < '4.0' else wx.adv.EditableListBox
 
+import Container
 import Components
 import Menu
-import LabelGUI
-import Container
 import ZipManager
 
 from Mixins.Attributable import Attributable
@@ -949,6 +948,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 			self.AcceptProp(row, col)
 
 		elif prop == 'label':
+			import LabelGUI
 
 			d = LabelGUI.LabelDialog(self.parent, self.parent.model)
 			d.SetCanvas(self.parent.canvas)
