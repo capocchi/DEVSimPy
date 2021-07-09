@@ -615,7 +615,7 @@ class EditorPanel(wx.Panel):
 		for editor in EditorPanel.EDITORS:
 			if self.choice.FindString(editor) == wx.NOT_FOUND and install(editor):
 				installed = True
-				self.choice.SetString(self, self.choice.GetCount()+1, editor)
+				self.choice.SetString(self.choice.GetCount()+1, editor)
 
 		if installed:
 			msg = _('You need to restart DEVSimPy to use the new installed code editor.')
