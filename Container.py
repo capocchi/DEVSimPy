@@ -3837,7 +3837,7 @@ class CodeBlock(Achievable, Block):
 			if cls and not isinstance(cls, tuple):
 				args_from_stored_constructor_py = inspect.getargspec(cls.__init__).args[1:]
 				args_from_stored_block_model = state['args']
-				L = list(set(args_from_stored_constructor_py).symmetric_difference( set(args_from_stored_block_model)))
+				L = list(set(args_from_stored_constructor_py).symmetric_difference(set(args_from_stored_block_model)))
 				if L:
 					for arg in L:
 						if not arg in args_from_stored_constructor_py:
@@ -3939,12 +3939,11 @@ class CodeBlock(Achievable, Block):
 				# 					state['bad_filename_path_flag'] = True
 								#state['python_path'] = os.path.join(model_path, os.path.basename(model_path).replace('.amd','.py').replace('.cmd','.py'))
 								#state['bad_filename_path_flag'] =  file != state['python_path'] 
-							
-
+		
 		### if the fileName attribut dont exist, we define it into the current devsimpy directory (then the user can change it from Property panel)
 		### args is loaded before for .amd and .cmd. See Load function to intercept args.
-		if 'args' in state and model_path == '' :
-
+		if 'args' in state: #and model_path == '' :
+			
 			### find all word containning 'filename' without considering the casse
 			m = [re.match('[a-zA-Z]*filename[_-a-zA-Z0-9]*',s, re.IGNORECASE) for s in list(state['args'].keys())]
 			filename_list = [a.group(0) for a in [s for s in m if s is not None]]

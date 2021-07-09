@@ -325,7 +325,7 @@ class DumpZipFile(DumpBase):
 		### if the model was made from another pc
 		#if not os.path.exists(obj_loaded.model_path):
 		#	obj_loaded.model_path = fileName
-
+	
 		#with zipfile.ZipFile(fileName) as zf:
 		#	### find all python files
 		#	for file in zf.namelist():
