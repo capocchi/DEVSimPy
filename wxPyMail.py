@@ -17,7 +17,6 @@
 import math
 import os
 import smtplib
-import sys
 import urllib.request, urllib.parse, urllib.error
 import wx
 import wx.lib.agw.hyperlink as hl

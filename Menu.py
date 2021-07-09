@@ -22,14 +22,11 @@
 
 import wx
 import os
-import sys
 import platform
-import profile
 
 from tempfile import gettempdir
 
 import Container
-import ZipManager
 
 from PluginManager import PluginManager
 from ExperimentGenerator import ExperimentGenerator

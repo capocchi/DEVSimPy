@@ -26,11 +26,8 @@ import builtins
 import __main__
 import shutil
 import sys
-import inspect
 import configparser
 import copy
-import zipfile
-import subprocess
 import importlib
 
 import wx.lib.filebrowsebutton as filebrowse
@@ -47,7 +44,7 @@ if __name__ == '__main__':
 
 from HtmlWindow import HtmlFrame
 
-from PluginsGUI import PluginsPanel, GeneralPluginsList
+from PluginsGUI import GeneralPluginsList
 from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, AddToInitFile, DelToInitFile, install
 from Decorators import BuzyCursorNotification
 
@@ -613,18 +610,17 @@ class EditorPanel(wx.Panel):
 
 		installed = False
 		for editor in EditorPanel.EDITORS:
-			if self.choice.FindString(editor) == wx.NOT_FOUND and install(editor):
+			if self.choice.FindString(editor) == wx.NOT_FOUND and BuzyCursorNotification(install(editor)):
 				installed = True
 				items = self.choice.GetItems()+[editor]
 				self.choice.SetItems(items)
-				# self.choice.SetString(self.choice.GetCount()+1, editor)
-
+				
 		if installed:
 			msg = _('You need to restart DEVSimPy to use the new installed code editor.')
 		else:
 			msg = _('All external editors are installed.')
 
-		dial = wx.MessageDialog(self.parent, msg, _("Code Editor Installation"), wx.OK | wx.ICON_INFORMATION)
+		dial = wx.MessageDialog(self.parent, msg, _("External Code Editor Installation"), wx.OK | wx.ICON_INFORMATION)
 		val = dial.ShowModal()
 
 		event.Skip()

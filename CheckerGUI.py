@@ -22,11 +22,8 @@
 
 import wx
 import os
-import re
-import copy
 import inspect
 import sys
-import zipfile
 import webbrowser
 import tempfile
 
@@ -50,10 +47,8 @@ if __name__ == '__main__':
 
 from wx.lib.mixins.listctrl import ListCtrlAutoWidthMixin, ColumnSorterMixin
 from Utilities import GetMails, getInstance
-from Mixins.Attributable import Attributable
 
 import Components
-import Container
 
 class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 	""" Virtual List of devs model checking

@@ -22,8 +22,6 @@
 
 import builtins
 
-from wx.core import Yield
-
 if builtins.__dict__.get('GUI_FLAG',True):
 	import wx
 	import wx.lib.dragscroller
@@ -55,7 +53,6 @@ import inspect
 import re
 import pickle
 import zipfile
-import types
 import array
 
 from abc import ABC
@@ -76,7 +73,6 @@ if builtins.__dict__.get('GUI_FLAG', True):
 	import CheckerGUI
 	import PluginsGUI
 	import WizardGUI
-	import LabelGUI
 
 ### Color definition
 RED = '#d91e1e'
@@ -90,8 +86,6 @@ import Components
 
 if builtins.__dict__.get('GUI_FLAG', True):
 	import Menu
-
-#import ReloadModule
 
 ### Mixin
 from Mixins.Attributable import Attributable
@@ -108,8 +102,8 @@ from Mixins.Abstractable import Abstractable
 ### for all dsp model build with old version of DEVSimPy
 sys.modules['Savable'] = sys.modules['Mixins.Savable']
 
-from Decorators import BuzyCursorNotification, StatusBarNotification, Pre_Undo, Post_Undo, cond_decorator
-from Utilities import HEXToRGB, RGBToHEX, relpath, GetActiveWindow, playSound, sendEvent, getInstance, FixedList, getObjectFromString, getTopLevelWindow, printOnStatusBar
+from Decorators import BuzyCursorNotification, Post_Undo
+from Utilities import HEXToRGB, relpath, playSound, sendEvent, getInstance, FixedList, getObjectFromString, getTopLevelWindow, printOnStatusBar
 from Patterns.Observer import Subject, Observer
 
 if builtins.__dict__.get('GUI_FLAG',True):
@@ -146,7 +140,7 @@ def MsgBoxError(event, parent, msg):
 			typ, val, tb = msg
 			trace = format_exception(typ, val, tb)
 
-			mainW = wx.GetApp().GetTopWindow()
+			# mainW = wx.GetApp().GetTopWindow()
 
 			### try to find if the error come from devs model
 			### paths in traceback

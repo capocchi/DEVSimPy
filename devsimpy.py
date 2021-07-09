@@ -41,15 +41,11 @@ import time
 import locale
 import re
 import gettext
-import traceback
 import builtins
-import webbrowser
 import platform
 import threading
 import subprocess
 import pickle
-import itertools
-import shutil
 import builtins
 import glob
 import pstats
@@ -189,7 +185,6 @@ from ImportLibrary import ImportLibrary
 from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
 from PluginManager import PluginManager
-from which import which
 from Utilities import GetUserConfigDir, install, install_and_import, updatePiPPackages, updateFromGitRepo, updateFromGitArchive, NotificationMessage
 from Decorators import redirectStdout, BuzyCursorNotification, ProgressNotification, cond_decorator
 from DetachedFrame import DetachedFrame

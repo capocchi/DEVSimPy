@@ -35,7 +35,6 @@ import types
 import traceback
 import collections
 
-from traceback import format_exception, extract_tb
 from tempfile import gettempdir
 from wx import stc
 

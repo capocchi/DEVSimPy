@@ -24,11 +24,10 @@ import re
 import inspect
 import types
 import importlib
-import pickle
 import tempfile
 import builtins
-	
 import gettext
+
 _ = gettext.gettext
 
 from PluginManager import PluginManager #trigger_event

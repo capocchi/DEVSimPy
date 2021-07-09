@@ -28,24 +28,18 @@ import traceback
 import platform
 import string
 import re
-import math
 import inspect
 import shutil
-import configparser
-import linecache 
+import configparser 
 import tempfile
 import pathlib
 
-#import shlex
-from  copy import deepcopy
 from datetime import datetime
 
 import gettext
 _ = gettext.gettext
 
-from itertools import combinations
 from zipfile import ZipFile, ZIP_DEFLATED 
-from io import StringIO
 
 if builtins.__dict__.get('GUI_FLAG',True):
 	import wx
@@ -74,7 +68,7 @@ from urllib.request import urlretrieve
 import pip
 import importlib
 
-from subprocess import call, check_call, Popen, PIPE
+from subprocess import check_call, Popen, PIPE
 
 # Used for smooth (spectrum)
 try:
