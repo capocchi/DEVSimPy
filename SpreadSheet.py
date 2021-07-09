@@ -436,9 +436,7 @@ class Newt(wx.Frame):
 				exec(str(s), globals())
 			except Exception as info:
 				sys.stdout.write(str(info))
-				print("a")
 			else:
-				print(value)
 				### if value is a list, we must choose an index to plot amoung the values of the list
 				if isinstance(value, list):
 					if select == -1:
@@ -455,7 +453,7 @@ class Newt(wx.Frame):
 
 					### choice is digit else we break
 					# if value[select]:
-					if select in range(0,len(value)-1):
+					if select == 0 or select in range(0,len(value)-1):
 						if not isinstance(value[select], str):
 							data.append((time, float(value[select])))
 						else:
