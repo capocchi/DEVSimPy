@@ -613,7 +613,7 @@ class EditorPanel(wx.Panel):
 
 		installed = False
 		for editor in EditorPanel.EDITORS:
-			if self.choice.FindString(editor) == wx.NOT_FOUND and installed(editor):
+			if self.choice.FindString(editor) == wx.NOT_FOUND and install(editor):
 				installed = True
 				self.choice.SetString(self, self.choice.GetCount()+1, editor)
 
