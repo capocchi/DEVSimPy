@@ -562,17 +562,13 @@ class EditorPanel(wx.Panel):
 		self.cb.SetToolTipString(_("This option is available only for the python file. \n"
 			"Modification of python file during the simulation is disabled when this checkbox is checked."))
 
-		### populte the choices array depending on the code editor installed
+		### populate the choices array depending on the code editor installed
 		### if the code editor is not installed, we propose to install it
 		choices = []
 
 		for editor in EditorPanel.EDITORS:
 			try:
 				importlib.import_module(editor)
-			except ImportError:
-				if install(editor):
-					dial = wx.MessageDialog(self.parent, _('You need to restart DEVSimPy to use the %s code editor.')%editor, _("Code Editor Installation"), wx.OK | wx.ICON_INFORMATION)
-					val = dial.ShowModal()
 			except:
 				pass
 			else:
@@ -583,6 +579,11 @@ class EditorPanel(wx.Panel):
 		txt = wx.StaticText(self, -1, _("Select an external code editor:"))
 		self.choice = wx.Choice(self, -1, choices=choices)
 		
+		self.UpdateExternalEditorBtn = wx.Button(self, wx.ID_REFRESH, size=(140, -1))
+		if wx.VERSION_STRING >= '4.0': 
+			self.UpdateExternalEditorBtn.SetToolTipString = self.UpdateExternalEditorBtn.SetToolTip			
+		self.UpdateExternalEditorBtn.SetToolTipString(_("Update the list of available external editors"))
+
 		### if external editor name is never stored in config file (.devsimpy)
 		if builtins.__dict__['EXTERNAL_EDITOR_NAME'] == "":
 			self.choice.SetSelection(0)
@@ -591,17 +592,40 @@ class EditorPanel(wx.Panel):
 
 		self.choice.Enable(not self.cb.IsChecked())
 
+		### horizontal box
 		hbox.Add(txt, 0, wx.ALL, 10)
 		hbox.Add(self.choice, 0, wx.ALL, 10)
-		
-		### the checkbox and the choice objects
+		hbox.Add(self.UpdateExternalEditorBtn, 0, wx.ALL, 10)
+
+		### vertical box
 		vbox.Add(self.cb, 0, wx.ALL, 10)
 		vbox.Add(hbox, 0, wx.ALL, 10)
 
-		### bid the checkbox in order to enable the choice object
+		### bind the checkbox in order to enable the choice object
 		self.Bind(wx.EVT_CHECKBOX, self.OnCheck, self.cb)
-
+		self.Bind(wx.EVT_BUTTON, self.OnUpdateExternalEditors, id=self.UpdateExternalEditorBtn.GetId())
+	
 		self.SetSizer(vbox)
+
+	def OnUpdateExternalEditors(self, event):
+		""" Update Button has been clicked in order to update the list of available external editors.
+		"""
+
+		installed = False
+		for editor in EditorPanel.EDITORS:
+			if self.choice.FindString(editor) == wx.NOT_FOUND and installed(editor):
+				installed = True
+				self.choice.SetString(self, self.choice.GetCount()+1, editor)
+
+		if installed:
+			msg = _('You need to restart DEVSimPy to use the new installed code editor.')
+		else:
+			msg = _('All external editors are installed.')
+
+		dial = wx.MessageDialog(self.parent, msg, _("Code Editor Installation"), wx.OK | wx.ICON_INFORMATION)
+		val = dial.ShowModal()
+
+		event.Skip()
 
 	def OnCheck(self, event):
 		"""
