@@ -21,7 +21,6 @@ import pickle
 import zipfile
 import zipimport
 import gzip
-import re
 import inspect
 import builtins
 import gettext

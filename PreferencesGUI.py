@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
 from HtmlWindow import HtmlFrame
 
-from PluginsGUI import GeneralPluginsList
+from PluginsGUI import PluginsPanel, GeneralPluginsList
 from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, AddToInitFile, DelToInitFile, install
 from Decorators import BuzyCursorNotification
 
