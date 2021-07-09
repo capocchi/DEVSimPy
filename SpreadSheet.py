@@ -422,8 +422,6 @@ class Newt(wx.Frame):
 		nbc = range(sheet.GetNumberCols())
 		nbr = range(sheet.GetNumberRows()) if selected_rows == [] else selected_rows
 
-		print(nbr,a,b,selected_rows)
-		
 		data = []
 		select = -1
 		for i in nbr:
@@ -438,7 +436,9 @@ class Newt(wx.Frame):
 				exec(str(s), globals())
 			except Exception as info:
 				sys.stdout.write(str(info))
+				print("a")
 			else:
+				print(value)
 				### if value is a list, we must choose an index to plot amoung the values of the list
 				if isinstance(value, list):
 					if select == -1:
