@@ -14,7 +14,6 @@ GLOBAL VARIABLES AND FUNCTIONS:
 import os
 import sys
 import re
-import copy
 import tempfile
 # import wx
 

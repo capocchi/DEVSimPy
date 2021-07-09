@@ -2,7 +2,6 @@
 
 import os
 import wx
-import shutil
 import Container
 import DetachedFrame
 

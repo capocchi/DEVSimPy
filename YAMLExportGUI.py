@@ -21,7 +21,6 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 import wx
-import sys
 import os
 import builtins
 

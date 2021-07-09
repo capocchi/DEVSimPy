@@ -17,19 +17,16 @@
 import wx
 import os
 import sys
-import urllib.parse
 import http.client
 import inspect
 import zipfile
-#import subprocess
 import importlib
-import tempfile
 import shutil
 
 import Container
 import Menu
 
-from Utilities import replaceAll, getPYFileListFromInit, path_to_module, printOnStatusBar, NotificationMessage, install_and_import, module_list, getFilePathInfo
+from Utilities import getPYFileListFromInit, path_to_module, printOnStatusBar, NotificationMessage, install_and_import, module_list, getFilePathInfo
 from Decorators import BuzyCursorNotification
 from Components import BlockFactory, DEVSComponent, GetClass, PyComponent, GenericComponent
 from ZipManager import Zip, getPythonModelFileName

@@ -2,8 +2,6 @@
 
 import sys
 import os
-import string
-import zipimport
 import importlib
 import types
 import pkgutil

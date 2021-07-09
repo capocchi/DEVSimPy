@@ -26,10 +26,7 @@ import os
 import sys
 import inspect
 import zipfile
-import zipimport
 import re
-import codecs
-import string
 import types
 import importlib
 import subprocess

@@ -15,17 +15,14 @@ GLOBAL VARIABLES AND FUNCTIONS:
 import os
 import sys
 import time
-
 import builtins
-from io import StringIO
-from io import TextIOWrapper, BytesIO
 import traceback
-
 import gettext
-_ = gettext.gettext
-
 import json
 import pusher
+
+_ = gettext.gettext
+
 
 path = os.path.join('Domain', 'Phidgets')
 if path not in sys.path:
