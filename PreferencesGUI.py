@@ -592,12 +592,13 @@ class EditorPanel(wx.Panel):
 
 		self.choice.Enable(not self.cb.IsChecked())
 
+		### horizontal box
 		hbox.Add(txt, 0, wx.ALL, 10)
 		hbox.Add(self.choice, 0, wx.ALL, 10)
-		
-		### the checkbox and the choice objects
+		hbox.Add(self.UpdateExternalEditorBtn, 0, wx.ALL, 10)
+
+		### vertical box
 		vbox.Add(self.cb, 0, wx.ALL, 10)
-		vbox.Add(self.UpdateExternalEditorBtn, 0, wx.ALL, 10)
 		vbox.Add(hbox, 0, wx.ALL, 10)
 
 		### bind the checkbox in order to enable the choice object
@@ -610,13 +611,13 @@ class EditorPanel(wx.Panel):
 		""" Update Button has been clicked in order to update the list of available external editors.
 		"""
 
-		install = False
+		installed = False
 		for editor in EditorPanel.EDITORS:
-			if self.choice.FindString(editor) == wx.NOT_FOUND and install(editor):
-				install = True
+			if self.choice.FindString(editor) == wx.NOT_FOUND and installed(editor):
+				installed = True
 				self.choice.SetString(self, self.choice.GetCount()+1, editor)
 
-		if install:
+		if installed:
 			msg = _('You need to restart DEVSimPy to use the new installed code editor.')
 		else:
 			msg = _('All external editors are installed.')
