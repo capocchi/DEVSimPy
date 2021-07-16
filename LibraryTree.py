@@ -195,8 +195,7 @@ class LibraryTree(wx.TreeCtrl):
 				domain_list = self.GetDomainList(path)
 
 				if model_list:
-					tip = _("Models:\n  -")
-					tip += '\n  -'.join(model_list)
+					tip = "".join([_("Models:\n  -"),'\n  -'.join(model_list)])
 				else:
 					tip = ""
 

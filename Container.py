@@ -687,14 +687,14 @@ class Diagram(Savable, Structurable):
 		"""
 		"""
 		stat_dico = self.GetStat({'Atomic_nbr':0, 'Coupled_nbr':0, 'Connection_nbr':0, 'Deep_level':0, 'iPort_nbr':0, 'oPort_nbr':0})
-		msg = ""
-		msg += _("Path: %s\n")%self.last_name_saved
-		msg += _("Number of atomic devs models: %d\n")%stat_dico['Atomic_nbr']
-		msg += _("Number of coupled devs models: %d\n")%stat_dico['Coupled_nbr']
-		msg += _("Number of coupling: %d\n")%stat_dico['Connection_nbr']
-		msg += _("Number of deep level (description hierarchy): %d\n")%stat_dico['Deep_level']
-		msg += _("Number of input port models: %d\n")%stat_dico['iPort_nbr']
-		msg += _("Number of output port models: %d\n")%stat_dico['oPort_nbr']
+		msg = "".join( [_("Path: %s\n")%self.last_name_saved,
+						_("Number of atomic devs models: %d\n")%stat_dico['Atomic_nbr'],
+						_("Number of coupled devs models: %d\n")%stat_dico['Coupled_nbr'],
+						_("Number of coupling: %d\n")%stat_dico['Connection_nbr'],
+						_("Number of deep level (description hierarchy): %d\n")%stat_dico['Deep_level'],
+						_("Number of input port models: %d\n")%stat_dico['iPort_nbr'],
+						_("Number of output port models: %d\n")%stat_dico['oPort_nbr']]
+					)
 
 		dlg = wx.lib.dialogs.ScrolledMessageDialog(self.GetParent(), msg, _("Diagram Information"), style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 		dlg.ShowModal()
@@ -3742,9 +3742,9 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 	def __repr__(self):
 		"""
 		"""
-		s = _("\n\t Label: %s\n")%self.label
-		s += _("\t Input/Output: %s,%s\n")%(str(self.input), str(self.output))
-		return s
+		return "".join([_("\n\t Label: %s\n")%self.label,
+						_("\t Input/Output: %s,%s\n")%(str(self.input), str(self.output))]
+						)
 
 #---------------------------------------------------------
 class CodeBlock(Achievable, Block):
@@ -4085,11 +4085,11 @@ class CodeBlock(Achievable, Block):
 	def __repr__(self):
 		""" Text representation.
 		"""
-		s = Block.__repr__(self)
-		s+= _("\t DEVS module path: %s\n")%str(self.python_path)
-		s+= _("\t DEVSimPy model path: %s\n")%str(self.model_path)
-		s+= _("\t DEVSimPy image path: %s\n")%str(self.image_path)
-		return s
+		return "".join([Block.__repr__(self),
+						_("\t DEVS module path: %s\n")%str(self.python_path),
+						_("\t DEVSimPy model path: %s\n")%str(self.model_path),
+						_("\t DEVSimPy image path: %s\n")%str(self.image_path)]
+					)	
 
 #---------------------------------------------------------
 class ContainerBlock(Block, Diagram):
@@ -4104,7 +4104,7 @@ class ContainerBlock(Block, Diagram):
 		"""
 		Block.__init__(self, label, nb_inputs, nb_outputs)
 		Diagram.__init__(self)
-		#Structurable.__init__(self)
+
 		self.fill = ContainerBlock.FILL
 
 	###
@@ -4262,11 +4262,11 @@ class ContainerBlock(Block, Diagram):
 		event.Skip()
 
 	def __repr__(self):
-		s = Block.__repr__(self)
-		s += _("\t DEVS module path: %s\n"%str(self.python_path))
-		s += _("\t DEVSimPy model path: %s\n")%str(self.model_path)
-		s +=_("\t DEVSimPy image path: %s\n")%str(self.image_path)
-		return s
+		return "".join([Block.__repr__(self),
+					_("\t DEVS module path: %s\n"%str(self.python_path)),
+					_("\t DEVSimPy model path: %s\n")%str(self.model_path),
+					_("\t DEVSimPy image path: %s\n")%str(self.image_path)]
+				)
 
 #---------------------------------------------------------
 # Nodes
