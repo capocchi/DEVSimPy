@@ -217,15 +217,16 @@ class Newt(wx.Frame):
 
 		### read and load the data in sheet
 		for i in range(len(self.model.IPorts)):
-			fn = "%s%d.dat"%(self.model.fileName, i)
-			if os.path.exists(fn):
-				iPort = self.model.IPorts[i]
-				if iPort.inLine:
-					oPort = iPort.inLine[0]
-					host = oPort.host if hasattr(oPort, 'host') else oPort.hostDEVS
-					label = _('%s (on in_%s)')%(host.getBlockModel().label if hasattr(host, 'getBlockModel') else host.name, str(iPort.myID) if hasattr(iPort,'myID') else iPort.name)
-					data = self.FileToData(fn, self.sep)
-					self.AddPage(data, label)
+			if hasattr(self.model, 'fileName'):
+				fn = "%s%d.dat"%(self.model.fileName, i)
+				if os.path.exists(fn):
+					iPort = self.model.IPorts[i]
+					if iPort.inLine:
+						oPort = iPort.inLine[0]
+						host = oPort.host if hasattr(oPort, 'host') else oPort.hostDEVS
+						label = _('%s (on in_%s)')%(host.getBlockModel().label if hasattr(host, 'getBlockModel') else host.name, str(iPort.myID) if hasattr(iPort,'myID') else iPort.name)
+						data = self.FileToData(fn, self.sep)
+						self.AddPage(data, label)
 
 	###
 	def OnUpdate(self, event):
