@@ -86,6 +86,14 @@ def PlotManager(parent, label, atomicModel, xl, yl):
 	### data to plot
 	data = atomicModel if dyn_flag else atomicModel.results
 
+	if data == {}:
+		wx.MessageBox(_('Data set is empty.\nOnly for QuickScope: Please verify if the received data are float or int.'), _('Info'), wx.OK|wx.ICON_INFORMATION)
+		return
+
+	if data is None:
+		wx.MessageBox(_('DEVS model is empty.'), _('Info'), wx.OK|wx.ICON_INFORMATION)
+		return
+	
 	if dyn_flag:
 		if fusion_flag:
 			frame = DynamicPlot(parent, wx.NewIdRef(), _("Plotting %s")%label, atomicModel, xLabel=xl, yLabel=yl)
@@ -93,11 +101,12 @@ def PlotManager(parent, label, atomicModel, xl, yl):
 			frame.Show()
 		else:
 			for key in atomicModel.results:
-	 			frame = DynamicPlot(parent, wx.NewIdRef(), _("%s on port %s")%(label,str(key)), atomicModel, xLabel = xl, yLabel = yl, iport=key)
-	 			frame.CenterOnParent()
-	 			frame.Show()
+				frame = DynamicPlot(parent, wx.NewIdRef(), _("%s on port %s")%(label,str(key)), atomicModel, xLabel = xl, yLabel = yl, iport=key)
+				frame.CenterOnParent()
+				frame.Show()
 	else:
 		### values to plot are string (for state for instance) ?
+		
 		str_data_flag = isinstance(data[0][0][-1], str) if isinstance(data, dict) else isinstance(data[0][-1], str)
 
 		if str_data_flag or fusion_flag:
