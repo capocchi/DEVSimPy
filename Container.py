@@ -4677,7 +4677,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 	def leftUp(self, event):
 		""" Left up event has been invoked.
 		"""
-		event.Skip()
+		pass
 
 	###
 	def OnRightDown(self, event):
