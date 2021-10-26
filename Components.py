@@ -835,7 +835,7 @@ class DEVSComponent:
 		elif val != wx.ID_CANCEL:
 			# loading file in DEVSimPy editor windows (self.text)
 			try:
-
+				
 				editorFrame = Editor.GetEditor(None, wx.NewIdRef(), ''.join([name,' - ',model_path]), obj=self, file_type='block')
 
 				# if zipfile.is_zipfile(model_path):

@@ -2425,6 +2425,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			if (mgr.GetPane("editor").IsShown() or txt.startswith('Prop')) and isinstance(item, Attributable):
 				self.__state['model'] = item
 				self.__state['canvas'] = self
+
 				self.notify()
 
 			# self.Refresh()

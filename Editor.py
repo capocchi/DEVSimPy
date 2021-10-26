@@ -1248,28 +1248,28 @@ class Base(object):
 		self.pos = 0
 		self.size = 0
 
-	def update(self, concret_subject=None):
-		""" Update method that manages the embedded editor depending of the selected model in the canvas.
-		"""
+	# def update(self, concret_subject=None):
+	# 	""" Update method that manages the embedded editor depending of the selected model in the canvas.
+	# 	"""
 
-		state = concret_subject.GetState()
-		canvas = state['canvas']
-		model = state['model']
+	# 	state = concret_subject.GetState()
+	# 	canvas = state['canvas']
+	# 	model = state['model']
+		
+	# 	### delete all tab on notebook
+	# 	while(self.nb.GetPageCount()):
+	# 		self.nb.DeletePage(0)
 
-		### delete all tab on notebook
-		while(self.nb.GetPageCount()):
-			self.nb.DeletePage(0)
+	# 	### add behavioral code
+	# 	self.AddEditPage(model.label, model.python_path)
 
-		### add behavioral code
-		self.AddEditPage(model.label, model.python_path)
+	# 	### add test file
+	# 	if hasattr(model, 'GetTestFile'):
+	# 		L = model.GetTestFile()
+	# 		for i,s in enumerate(os.path.join(model.model_path, l) for l in L):
+	# 			self.AddEditPage(L[i], s)
 
-		### add test file
-		if hasattr(model, 'GetTestFile'):
-			L = model.GetTestFile()
-			for i,s in enumerate(os.path.join(model.model_path, l) for l in L):
-				self.AddEditPage(L[i], s)
-
-		self.cb = model
+	# 	self.cb = model
 
 	def CreateMenu(self):
 		""" Create the menu
@@ -1918,10 +1918,42 @@ class BlockBase(object):
 		self.cb = block
 		self.parent = parent
 
+		self.setChoices(block)
+
+	def update(self, concret_subject=None):
+		""" Update method that manages the embedded editor depending of the selected model in the canvas.
+		"""
+
+		state = concret_subject.GetState()
+		canvas = state['canvas']
+		model = state['model']
+		
+		### delete all tab on notebook
+		while(self.nb.GetPageCount()):
+			self.nb.DeletePage(0)
+
+		### add behavioral code
+		self.AddEditPage(model.label, model.python_path)
+
+		### add test file
+		if hasattr(model, 'GetTestFile'):
+			L = model.GetTestFile()
+			for i,s in enumerate(os.path.join(model.model_path, l) for l in L):
+				self.AddEditPage(L[i], s)
+
+		self.cb = model
+
+		### update the combo box items depending on the model
+		self.setChoices(model)
+		self.combo.Clear()
+		self.combo.Set([_("Choose to insert in place")]+self.getChoices())
+		self.combo.SetSelection(0)
+
+	def setChoices(self,block):
 		### define the choices of combo list for text insert functionality depending on the type of block
 		### choices object is ordderd dict to associate handlers
-		if self.cb:
-			if not self.cb.isCMD():
+		if block:
+			if not block.isCMD():
 				self._choices = collections.OrderedDict([(_('New peek'),self.OnPeek), (_('New all peek'),self.OnAllPeek), 
 					(_('New poke'),self.OnPoke), (_('New hold in state'),self.OnInsertHoldInState), (_('New passivate in state'),self.OnInsertPassivateInState), 
 					(_('New passivate state'),self.OnInsertPassivateState), (_('New Phase test'),self.OnInsertPhaseIs), (_('New debugger stdout'),self.OnInsertDebug), 
@@ -2492,7 +2524,9 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 
 		### combo to insert tips text
 		cbID = wx.NewIdRef()
-		self.toolbar.AddControl(wx.ComboBox(self.toolbar, cbID, _("Choose to insert in place"), choices=self.getChoices(),size=(160,-1), style=wx.CB_DROPDOWN))
+		self.combo = wx.ComboBox(self.toolbar, cbID, _("Choose to insert in place"), choices=self.getChoices(),size=(160,-1), style=wx.CB_DROPDOWN)
+
+		self.toolbar.AddControl(self.combo)
 		
 		### search text box 
 		self.toolbar.AddStretchableSpace()
