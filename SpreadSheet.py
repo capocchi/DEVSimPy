@@ -25,6 +25,8 @@
 import wx
 from wx.lib import sheet
 
+import pubsub
+
 # to send event
 from pubsub import pub as Publisher
 
@@ -76,14 +78,16 @@ class MySheet(sheet.CSheet):
 
 		size = len(data)
 
+		n = float(self.GetNumberRows())
+
 		## load cell
 		for i in range(size):
 			try:
 				d = data[i]
 				self.SetCellValue(i,0,str(d[0]))
 				self.SetCellValue(i,1,str(d[1]))
-				Publisher.sendMessage("progress", msg=str(i/float(self.GetNumberRows())))
-				wx.Yield()
+				Publisher.sendMessage("progress", msg=str(i/n))
+				self.Update()
 			except:
 				pass
 
@@ -95,7 +99,9 @@ class MySheet(sheet.CSheet):
 			pass
 
 		try:
+			### resize and refresh the frame
 			self.AutoSize()
+			self.Refresh()
 		except Exception as info:
 			pass
 		
