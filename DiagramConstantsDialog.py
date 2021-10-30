@@ -5,11 +5,11 @@
 # DiagramConstantsDialog.py --- Dialog to define constantes in a diagram.
 #                     --------------------------------
 #                            Copyright (c) 2020
-#                    L. CAPOCCHI (capocchi@univ-corse.fr)
-#                SPE Lab - SISU Group - University of Corsica
+#                     L. CAPOCCHI (capocchi@univ-corse.fr)
+#                		SPE Lab - University of Corsica
 #                     --------------------------------
-# Version 1.0                                      last modified:  08/11/20
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+# Version 1.0                                      last modified:  10/30/21
+# ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
 #
@@ -80,20 +80,20 @@ class DiagramConstantsDialog(wx.Dialog):
 
 		tb.Realize()
 
-		self._grid = wx.grid.Grid(panel)
+		self._grid = wx.grid.Grid(panel, size=(300,200))
 		self._grid.AutoSizeColumns(True)
 		self._grid.CreateGrid(1, 2)
 		self._grid.SetColLabelValue(0, _("Name"))
-		self._grid.SetColSize(0, 200)
+		self._grid.SetColSize(0, 150)
 		self._grid.SetColLabelValue(1, _("Value"))
-		self._grid.SetColSize(1, 200)
+		self._grid.SetColSize(1, 150)
 	
 		### label column is not visible
 		self._grid.SetRowLabelSize(0)
 		
 		vbox.Add(self._grid, 1, wx.EXPAND|wx.ALL,0)
 
-		vbox.Add((-1, 15))
+		vbox.Add((-1, 5))
 		
 		self._button_ok = wx.Button(panel, wx.ID_OK, size=(70, 30))
 		self._button_cancel = wx.Button(panel, wx.ID_CANCEL, size=(70, 30))
@@ -102,7 +102,7 @@ class DiagramConstantsDialog(wx.Dialog):
 		hbox.Add(self._button_cancel)
 		hbox.Add(self._button_ok, flag=wx.LEFT|wx.BOTTOM, border=5)
 
-		vbox.Add(hbox, 0, flag=wx.EXPAND, border=10)
+		vbox.Add(hbox, 0, flag=wx.CENTER, border=5)
 
 #	From http://docs.wxwidgets.org/trunk/overview_windowsizing.html, wxWidgets provides two main methods for sizing:
 #

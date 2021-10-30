@@ -139,9 +139,10 @@ class Printable:
         printout2 = Printout(c)
 
         self.preview = wx.PrintPreview(printout, printout2, data)
+        self.preview.SetZoom(100)
 
         if self.preview.IsOk():
-            pfrm = wx.PreviewFrame(self.preview, parent, _("Print preview"), style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN )
+            pfrm = wx.PreviewFrame(self.preview, parent, _("Print Preview"), style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN )
             pfrm.SetIcon(parent.GetIcon())
             pfrm.Initialize()
             pfrm.SetPosition((300, 200))
