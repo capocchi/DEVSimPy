@@ -920,6 +920,7 @@ class DynamicPlot(PlotFrame):
 		PlotFrame.__init__(self, parent, id, title)
 
 		# local copy
+		self.parent = parent
 		self.atomicModel = atomicModel
 		self.xLabel = xLabel
 		self.yLabel = yLabel
@@ -949,21 +950,21 @@ class DynamicPlot(PlotFrame):
 			self.Bind(wx.EVT_MENU, self.OnPlotSpectrum, menu.Append(wx.NewIdRef(), _('Signal %s')%str(self.iport), _('Spectrum Plot')))
 		self.mainmenu.Append(menu, _('&Spectrum'))
 
-		# self.timer = wx.Timer(self)
+		self.timer = wx.Timer(self)
 		### DEFAULT_PLOT_DYN_FREQ can be configured in preference-> simulation
-		# self.timer.Start(milliseconds=DEFAULT_PLOT_DYN_FREQ)
+		self.timer.Start(milliseconds=DEFAULT_PLOT_DYN_FREQ)
 
-		# self.Bind(wx.EVT_TIMER, self.OnTimerEvent)
-		# self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
+		self.Bind(wx.EVT_TIMER, self.OnPlotRedraw)
+		#self.Bind(wx.EVT_TIMER, self.OnTimerEvent)
+		#self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
 		self.Bind(wx.EVT_CLOSE, self.OnQuit)
 
 		getattr(self, "On%s"%self.type)()
 
 	def OnTimerEvent(self, event):
-		pass
-	
 		#self.GetEventHandler().ProcessEvent(wx.PaintEvent())
-
+		self.OnPlotRedraw(event)
+		
 	def Normalize(self, data):
 		m = max(a[1] for a in data)
 		return [(b[0], b[1]/m) for b in data]
@@ -975,10 +976,10 @@ class DynamicPlot(PlotFrame):
 		#if self.timer.IsRunning():
 		### unbinding paint event
 
-		if self.type != "PlotLine":
-			self.type = "PlotLine"
-			self.Unbind(wx.EVT_PAINT)
-			self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
+		# if self.type != "PlotLine":
+		# 	self.type = "PlotLine"
+		# 	self.Unbind(wx.EVT_PAINT)
+		# 	self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
 
 		### without fusion
 		if self.iport is not None:
@@ -1036,10 +1037,10 @@ class DynamicPlot(PlotFrame):
 
 		#if self.timer.IsRunning():
 		### unbinding paint event
-		if self.type != "PlotSquare":
-			self.type = "PlotSquare"
-			self.Unbind(wx.EVT_PAINT)
-			self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
+		# if self.type != "PlotSquare":
+		# 	self.type = "PlotSquare"
+		# 	self.Unbind(wx.EVT_PAINT)
+		# 	self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
 
 		## without fusion
 		if self.iport is not None:
@@ -1120,10 +1121,10 @@ class DynamicPlot(PlotFrame):
 
 		#if self.timer.IsRunning():
 		### unbinding paint event
-		if self.type != "PlotScatter":
-			self.type = "PlotScatter"
-			self.Unbind(wx.EVT_PAINT)
-			self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
+		# if self.type != "PlotScatter":
+		# 	self.type = "PlotScatter"
+		# 	self.Unbind(wx.EVT_PAINT)
+		# 	self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
 
 		## sans fusion
 		if self.iport is not None:
@@ -1192,10 +1193,10 @@ class DynamicPlot(PlotFrame):
 
 		#if self.timer.IsRunning():
 		### unbinding paint event
-		if self.type != "PlotBar":
-			self.type = "PlotBar"
-			self.Unbind(wx.EVT_PAINT)
-			self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
+		# if self.type != "PlotBar":
+		# 	self.type = "PlotBar"
+		# 	self.Unbind(wx.EVT_PAINT)
+		# 	self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
 
 		## sans fusion
 		if self.iport is not None:
