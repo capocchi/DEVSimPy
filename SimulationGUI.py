@@ -490,7 +490,7 @@ class Base(object):
 				if self.thread.end_flag:
 					self.OnTimer(event)
 				else:
-					self.timer.Start(100)
+					self.timer.Start()
 
 				### timer for real time
 				if self.real_time_flag: 
@@ -536,24 +536,6 @@ class Base(object):
 		if self.thread:
 			self.thread.terminate(False)
 
-		#import signal
-		#import platform
-
-		# get the current PID for safe terminate server if needed:
-		#PID = os.getpid()
-		# if platform.system() != 'Windows':
-		# 	PGID = os.getgid(PID)
-
-		# if platform.system() != 'Windows':
-		# 	os.killpg(PGID, signal.SIGKILL)
-		# else:
-		# 	os.kill(PID, signal.SIGTERM)
-
-		#main_thread = threading.currentThread()
-		#for t in threading.enumerate():
-		#	if t is not main_thread:
-		#		pass
-
 		self.timer.Stop()
 		
 		wx.Bell()
@@ -594,10 +576,9 @@ class Base(object):
 		if self.ntl:
 			self._gauge.Pulse()
 		else:
-			if not isinstance(self.thread.model.timeLast, tuple):
-				timeLast = self.thread.model.timeLast
-			else:
-				timeLast = self.thread.model.timeLast[0]
+			timeLast = self.thread.model.timeLast
+			if isinstance(self.thread.model.timeLast, tuple):
+				timeLast = timeLast[0]
 
 			self.count = (timeLast/self.thread.model.FINAL_TIME)*100
 
@@ -630,20 +611,21 @@ class Base(object):
 			### stop the timer
 			self.timer.Stop()
 
-		### if the simulation is suspended
+		### if the simulation is not suspended
 		elif not self.thread.thread_suspend:
 
 			### udpate the status bar
-			self.statusbar.SetBackgroundColour('GREY')
-			printOnStatusBar(self.statusbar, {0:_("Processing..."), 1:self.GetClock()})
+			if self.statusbar.GetBackgroundColour() != 'GREY': 
+				self.statusbar.SetBackgroundColour('GREY')
+			wx.CallAfter(printOnStatusBar,self.statusbar, {0:_("Processing..."), 1:self.GetClock()})
 
 			### is no time limit, add some information in status bar
 			if not self.ntl:
 				if self.statusbar.GetFieldsCount() > 2:
-					printOnStatusBar(self.statusbar, {2:str(self.count)[:4]+"%"})
+					wx.CallAfter(printOnStatusBar,self.statusbar, {2:str(self.count)[:4]+"%"})
 
 			#wx.Yield()
-			wx.YieldIfNeeded()
+			#wx.YieldIfNeeded()
 
 	def GetClock(self):
 		if self.real_time_flag:	
@@ -836,7 +818,6 @@ class SimulationDialogFrame(Base, wx.Frame):
 		icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
 		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "simulation.png"), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(icon)
-
 		self.Center()
 	
 	def SetMaster(self, master):
