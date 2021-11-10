@@ -69,6 +69,20 @@ $ pythonw devsimpy.py
  - S. Cezary, "Design and implementation of application for instruction exercises with DEVSimPy", Technical report, Faculty of Electrical Engineering, AUTOMATION AND INFORMATION TECHNOLOGY, Kielce University of Technology [[pdf]](http://portailweb.universita.corsica/stockage_public/portail/baaaaaes/files/report_Cezary.pdf) (Polish)
 
 # Citing
+
+Some papers concerning DEVSimPy:
+- L. Capocchi, J.F. Santucci, B.P. Zeigler, MS4Me and DEVSimPy, demo à JDF 2016 - Les Journées DEVS Francophones - Théorie et Applications, 11-15 Avril, 2016, ISBN 9782364935396, Cargese, France.
+- L. Capocchi, J.F. Santucci, DEVSimPy : Interface graphique développée en langage Python et la librairie wxPython, Jounrées Développement Logiciel de l'Enseignement Supérieur et de la Recherche (JDEVS 2015), 30 juin -3 juillet, 2015, Bordeaux INP - ENSEIRB-MATMECA.
+- S. Sehili, L. Capocchi, J.F. Santucci, S. Lavirotte, J.Y. Tigli, "Discrete Event Modeling and Simulation for IoT Efficient Design Combining WComp and DEVSimPy Framework", in Proc. of 5th International Conference on Simulation and Modeling Methodologies, Technologies and Applications (SIMULTECH), July 21-23, 2015, ISBN 978-989-758-120-5, Colmar, Alsace, France, pp. 44-52.
+- T. Ville, L. Capocchi, J. F. Santucci, "DEVS models design and test using AGILE-based methods with DEVSimPy", in Proc. of the 26th European Modeling and Simulation Symposium (Simulation in Industry) (EMSS), Sept. 10-12, 2014, Agora Multi-Purpose Complex, University of Bordeaux, Bordeaux (France), ISBN 978-88-979999-44-7, pp. 563-569.
+- L. Capocchi, J. F. Santucci, T. Ville, "Software test automation using DEVSimPy environment", in Proc. of the ACM SIGSIM conference on Principles of advanced discrete simulation (PADS), May 5-8, 2013, Montreal (Canada), ISBN 978-1-4503-1920-1, pp. 343-348.
+- L. Capocchi, J. F. Santucci, "Discrete Optimization via Simulation of Catchment Basin Management Within the DEVSimPy Framework", in Proc. of the IEEE/ACM Wintersim Conference (WSC) , Dec. 7-10, 2013, Marriot Hotel, Washington DC, ISBN 978-1-4799-2077-8, pp. 205-216. (CORE B)
+- J. F. Santucci, L. Capocchi, "Implementation and Analysis of DEVS Activity-Tracking with DEVSimPy", in Proc. of ACTIMS ITM Web of Conferences , 2013, DOI: 10.1051/itmconf/20130101001, ISBN 978-2-7598-1108-3, 9 pages.
+- J. F. Santucci, L. Capocchi, "Catchment Basin Optimized Management using a Simulation Approach within DEVSimPy Framework", in Proc. of the Summer Simulation Multiconference , June 8-11, 2012, Genova (Italie), ISBN 978-1-61839-984-7, pp. 28-36. (CORE B)
+- J.F. Santucci, L. Capocchi, A Proposed Evolution of DEVSimPy Environment Towards Activity Tracking, Cargese Activity-based Modeling and Simulation (Cargese - ACTIMS'2012), 5 pages, Cargese (Corse), May 28 - 1 June 2012.
+- L. Capocchi, J.F. Santucci DEVSimPy : un environnement Python de simulation des systèmes à événements discrets, PHPSolutions, Decembre 2011.
+- L. Capocchi, J. F. Santucci, B. Poggi, C. Nicolai, "DEVSimPy: A Collaborative Python Software for Modeling and Simulation of DEVS Systems", in Proc. of the 20th IEEE International Conference on Collaboration Technologies and Infrastructures, June 27-29, 2011, Paris (France), ISBN 978-1-4577-0134-4, pp. 170-175. (CORE B)
+
  If you use DEVSimPy in your research, you can cite it with using the following bibtex references:
  ```
 @misc{capocchi2019devsimpy,
