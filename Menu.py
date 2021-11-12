@@ -887,7 +887,7 @@ class ShapeCanvasPopupMenu(wx.Menu):
 		### make all items
 		new = wx.MenuItem(self, ID_NEW_SHAPE, _('&New'), _('New model'))
 		refresh = wx.MenuItem(self, ID_REFRESH_SHAPE, _('&Refresh'), _('Refresh model'))
-		paste = wx.MenuItem(self, ID_PASTE_SHAPE, _('&Paste\tCtrl+V'), _('Paste the model'))
+		paste = wx.MenuItem(self, wx.NewIdRef(), _('&Paste\tCtrl+V'), _('Paste the model'))
 		add_constants = wx.MenuItem(self, ID_ADD_CONSTANTS, _('Add constants'), _('Add constants parameters'))
 		preview_dia = wx.MenuItem(self, ID_PREVIEW_PRINT, _('Print preview'), _('Print preveiw of the diagram'))
 
@@ -924,12 +924,12 @@ class ShapeCanvasPopupMenu(wx.Menu):
 			AppendItem(stay_on_top)
 			parent.Bind(wx.EVT_MENU, parent.parent.OnStayOnTop, id=ID_STAY_ON_TOP)
 
-		self.Enable(ID_PASTE_SHAPE, Container.clipboard != [])
+		self.Enable(paste.GetId(), Container.clipboard != [])
 
 		### binding
 		parent.Bind(wx.EVT_MENU, parent.OnNewModel, id=ID_NEW_SHAPE)
 		parent.Bind(wx.EVT_MENU, parent.OnRefreshModels, id=ID_REFRESH_SHAPE)
-		parent.Bind(wx.EVT_MENU, parent.OnPaste, id=ID_PASTE_SHAPE)
+		parent.Bind(wx.EVT_MENU, parent.OnPaste, id=paste.GetId())
 		parent.Bind(wx.EVT_MENU, parent.diagram.OnAddConstants, id=ID_ADD_CONSTANTS)
 		parent.Bind(wx.EVT_MENU, parent.parent.PrintPreview, id=ID_PREVIEW_PRINT)
 		parent.Bind(wx.EVT_MENU, ExperimentGenerator(os.path.join(HOME_PATH,'out')).OnExperiment, id=ID_GEN_EXPERIMENT)
