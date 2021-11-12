@@ -480,7 +480,7 @@ class Newt(wx.Frame):
 			### if the first value of y is str, we plot with tick in y axe
 			if isinstance(data[0][-1], str):
 				x,y = zip(*data)
-				frame = wx.Frame(self, -1, _('Plotter'))
+				frame = wx.Frame(None, -1, _('Plotter'))
 				plotter = PlotNotebook(frame)
 				axes1 = plotter.add(title).gca()
 				axes1.set_xlabel(_('Time'), fontsize=16)
@@ -496,7 +496,7 @@ class Newt(wx.Frame):
 
 			### values of y is digits
 			else:
-				frame = StaticPlot(self, wx.NewIdRef(), title, data)
+				frame = StaticPlot(None, wx.NewIdRef(), title, data)
 				frame.Center()
 				frame.Show()
 

@@ -1411,7 +1411,15 @@ class MainApplication(wx.Frame):
 		msg+="XML files (*.xml)|*.xml|All files (*)|*)"
 
 		wcd = _(msg)
-		home = self.home or os.path.dirname(diagram.last_name_saved) or HOME_PATH if self.openFileList == ['']*NB_OPENED_FILE else self.home or os.path.dirname(self.openFileList[0])
+		
+		home = self.home or os.path.dirname(diagram.last_name_saved)
+
+		if not home:
+			if self.openFileList == ['']*NB_OPENED_FILE:
+				home = HOME_PATH 
+			else: 
+				home = self.home or os.path.dirname(self.openFileList[0])
+	
 		save_dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=home, defaultFile=os.path.basename(diagram.last_name_saved), wildcard=wcd, style=wx.SAVE | wx.OVERWRITE_PROMPT)
 
 		if save_dlg.ShowModal() == wx.ID_OK:

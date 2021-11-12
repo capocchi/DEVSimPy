@@ -194,10 +194,12 @@ class LibraryTree(wx.TreeCtrl):
 				model_list = self.GetModelList(path)
 				domain_list = self.GetDomainList(path)
 
+				tip = "".join([_(" Path: "),path,"\n"])
+    
 				if model_list:
-					tip = "".join([_("Models:\n  -"),'\n  -'.join(model_list)])
+					tip += "".join([_("\n Models:\n  -"),'\n  -'.join(model_list)])
 				else:
-					tip = ""
+					tip += "\n"
 
 				if len(domain_list) > 0:
 					tip += _("\n\nSub-Domains:")
