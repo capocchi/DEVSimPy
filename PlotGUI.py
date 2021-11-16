@@ -1014,7 +1014,7 @@ class DynamicPlot(PlotFrame):
 					m = max([a[1] for a in dd])
 					dd = [(b[0], b[1]/m) for b in dd]
 				
-				L.append(plot.PolyLine(dd, legend = 'Port %s (%s)'%(str(list(data.keys())[ind]), label), colour = cc, width=1))
+				L.append(plot.PolyLine(dd, legend = 'Port %s (%s)'%(str(ind), label), colour = cc, width=1))
 
 				a,b,c,d = get_limit(dd)
 
@@ -1093,7 +1093,7 @@ class DynamicPlot(PlotFrame):
 					dd = [(b[0], b[1]/m) for b in dd]
 
 				### construction des données
-				L.append(plot.PolyLine(dd, legend='Port %s (%s)'%(str(list(data.keys())[ind]),label), colour=c, width=1))
+				L.append(plot.PolyLine(dd, legend='Port %s (%s)'%(str(ind),label), colour=c, width=1))
 
 				###gestion dynamique des bornes
 				a,b,c,d = get_limit(dd)
@@ -1168,7 +1168,7 @@ class DynamicPlot(PlotFrame):
 					dd = [(b[0], b[1]/m) for b in dd]
 
 				L.append(plot.PolyLine(dd, colour=c, width=1))
-				L.append(plot.PolyMarker(dd, legend='Port %s (%s)'%(str(list(data.keys())[ind]), label), colour=c, marker=m, size=1))
+				L.append(plot.PolyMarker(dd, legend='Port %s (%s)'%(str(ind), label), colour=c, marker=m, size=1))
 
 				a,b,c,d = get_limit(dd)
 
