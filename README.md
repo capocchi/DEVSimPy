@@ -40,6 +40,13 @@ With DEVSimPy you can:
 - Generate YAML models for the [DEVSimPy-mob](https://github.com/capocchi/DEVSimPy_mob) mobile application.
 - and more.
 
+DEVSimPy can be executed in command line by using the devsimpy-nogui.py script. For exemple, considering that the file test.dsp was already modeled with DEVSimPy, the following command line can be used to simulate it during 10 simlation time step with the PDEVS kernel:
+```sh
+$ python devsimpy-nogui test.dsp -kernel PyDEVS 10
+```
+For more information about the options, type python devsimpy-nogui.py -h
+
+The simulation process used by DEVSimPy can be used through REST API by installing the [DEVSimPy-REST](https://github.com/capocchi/DEVSimPy_rest) server.
 # Installation
 
 To get DEVSimPy v4.0 package with all Git submodules: 
