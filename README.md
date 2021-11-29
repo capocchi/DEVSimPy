@@ -44,9 +44,9 @@ DEVSimPy can be executed in command line by using the devsimpy-nogui.py script. 
 ```sh
 $ python devsimpy-nogui test.dsp -kernel PyDEVS 10
 ```
-For more information about the options, type python devsimpy-nogui.py -h
+For more information about the use of the devsimpy-nogui script, type python devsimpy-nogui.py -h
 
-The simulation process used by DEVSimPy can be used through REST API by installing the [DEVSimPy-REST](https://github.com/capocchi/DEVSimPy_rest) server.
+The simulation process used by DEVSimPy can be used through a REST API by installing the [DEVSimPy-REST](https://github.com/capocchi/DEVSimPy_rest) server.
 # Installation
 
 To get DEVSimPy v4.0 package with all Git submodules: 
