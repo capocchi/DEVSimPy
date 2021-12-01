@@ -116,4 +116,6 @@ month={June},}
 ```
 
 # Videos
-- You can watch some DEVSimPy features videos on [Youtube](https://www.youtube.com/results?search_query=devsimpy)
+You can watch some DEVSimPy features videos on 
+- [Youtube](https://www.youtube.com/results?search_query=devsimpy)
+- [Personnal site](https://capocchi-l.universita.corsica/article.php?id_art=3261&id_rub=647&id_menu=0&id_cat=0&id_site=58&lang=en)
