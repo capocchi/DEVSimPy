@@ -4328,18 +4328,18 @@ class ConnectableNode(Node):
 
 		### ask tne new label
 		d = wx.TextEntryDialog(None, _('New label for the %s port %d:'%("input" if isINode else "output",self.index)), value = old_label, style=wx.OK)
-		d.ShowModal()
 
-		### new label
-		new_label = d.GetValue()
+		if d.ShowModal() == wx.ID_OK:
+			### new label
+			new_label = d.GetValue()
 
-		### only if new and old label are different
-		if new_label != old_label:
-			self.label = new_label
-			if isINode:
-				self.item.addInputLabels(self.index, self.label)
-			else:
-				self.item.addOutputLabels(self.index, self.label)
+			### only if new and old label are different
+			if new_label != old_label:
+				self.label = new_label
+				if isINode:
+					self.item.addInputLabels(self.index, self.label)
+				else:
+					self.item.addOutputLabels(self.index, self.label)
 
 	def HitTest(self,x,y):
 		""" Collision detection method.

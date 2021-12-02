@@ -96,24 +96,26 @@ def PlotManager(parent, label, atomicModel, xl, yl):
 	
 	if dyn_flag:
 		if fusion_flag:
-			frame = DynamicPlot(parent, wx.NewIdRef(), _("Plotting %s")%label, atomicModel, xLabel=xl, yLabel=yl)
+			frame = DynamicPlot(parent, wx.NewIdRef(), _("Plotting %s")%label, data, xLabel=xl, yLabel=yl)
 			frame.CenterOnParent()
 			frame.Show()
 		else:
 			for key in atomicModel.results:
-				frame = DynamicPlot(parent, wx.NewIdRef(), _("%s on port %s")%(label,str(key)), atomicModel, xLabel = xl, yLabel = yl, iport=key)
+				frame = DynamicPlot(parent, wx.NewIdRef(), _("%s on port %s")%(label,str(key)), data, xLabel = xl, yLabel = yl, iport=key)
 				frame.CenterOnParent()
 				frame.Show()
 	else:
 		### values to plot are string (for state for instance) ?
 		
 		str_data_flag = isinstance(data[0][0][-1], str) if isinstance(data, dict) else isinstance(data[0][-1], str)
-
+		
 		if str_data_flag or fusion_flag:
 			frame = StaticPlot(parent, wx.NewIdRef(), _("Plotting %s")%label, data, xLabel=xl, yLabel=yl, legend=atomicModel.blockModel.label, fusion=fusion_flag)	
+			frame.SetBlockModel(atomicModel)
 			frame.CenterOnParent()
 			frame.Show()
 		else:
+			
 			for key in data:
 				frame = StaticPlot(parent, wx.NewIdRef(), _("%s on port %s")%(label,str(key)), data[key], xLabel = xl, yLabel = yl, legend = atomicModel.blockModel.label)
 				frame.CenterOnParent()
@@ -506,6 +508,9 @@ class StaticPlot(PlotFrame):
 		self.legend = legend
 		self.fusion_flag = fusion
 
+		### Block model (from Collector lib)
+		self.block = None
+  
 		### if values to plot are string (for state for instance)
 		### the frame used to display the data is not PlotFrame.
 		if (isinstance(data, dict) and isinstance(data[0][0][-1], str)) or (isinstance(data, list) and isinstance(data[0][-1], str)):
@@ -514,11 +519,22 @@ class StaticPlot(PlotFrame):
 		else:
 
 			PlotFrame.__init__(self, parent, id, title)
-
+   
 			menu = wx.Menu()
+   
+			### display legend if more than 1 curve to display
+			if isinstance(self.data,dict) and len(self.data.keys())>1:
+				self.client.enableLegend = True
+    
+				### update GUI
+				tb = self.GetToolBar()
+				tb.ToggleTool(self.enableLegend.GetId(),self.client.enableLegend)
+				self.enableLegend.Check(self.client.enableLegend)
 
+    
 			### with fusion
 			if self.fusion_flag:
+				
 				for i in range(len(self.data)):
 					self.Bind(wx.EVT_MENU,self.OnPlotSpectrum, menu.Append(wx.NewIdRef(), _('Signal %d')%i, _('Spectrum Plot')))
 				self.Bind(wx.EVT_MENU,self.OnPlotAllSpectrum, menu.Append(wx.NewIdRef(), _('All'), _('Spectrum Plot')))
@@ -541,6 +557,21 @@ class StaticPlot(PlotFrame):
 	def Normalize(self, data):
 		m = max(a[1] for a in data)
 		return [(b[0], b[1]/m) for b in data]
+
+	def SetBlockModel(self,block):
+		self.block = block
+  
+		### call self.On<PlotLine>()
+		getattr(self,'On%s'%self.typ)()
+  
+	def getInputLabels(self,data):
+		### find input label if it is defined b the user
+		input_labels = {i:f"in{i}" for i in data.keys()}   
+		if self.block:
+			a = self.block.getBlockModel().getInputLabels()
+			if a!={}:
+				input_labels = a
+		return input_labels
 
 	def OnPlotStep(self, event=None)-> None:
 		"""
@@ -594,7 +625,7 @@ class StaticPlot(PlotFrame):
 			if self.normalize:
 				data = self.Normalize(data)
 
-			line = plot.PolyLine(data, legend = 'Port 0 %s'%self.legend, colour = 'black', width = 1)
+			line = plot.PolyLine(data, legend = 'Port 0 (%s)'%self.legend, colour = 'black', width = 1)
 
 			self.gc = plot.PlotGraphics([line], self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
@@ -604,6 +635,9 @@ class StaticPlot(PlotFrame):
 			L=[]
 			xMin, xMax, yMin, yMax = 0.0,0.0,0.0,0.0
 			data_list = list(data.values())
+   
+			input_labels = self.getInputLabels(data)
+	
 			for ind, dd in enumerate(data_list):
 				try:
 					cc = LColour[ind]
@@ -613,7 +647,7 @@ class StaticPlot(PlotFrame):
 				if self.normalize:
 					dd = self.Normalize(dd)
 
-				L.append(plot.PolyLine(dd, legend = 'Port %d %s'%(ind,self.legend), colour = cc, width=1))
+				L.append(plot.PolyLine(dd, legend = f'Port {input_labels[ind]}', colour = cc, width=1))
 
 				a,b,c,d = get_limit(dd)
 
@@ -645,7 +679,7 @@ class StaticPlot(PlotFrame):
 			if self.normalize:
 				data = self.Normalize(data)
 
-			line = plot.PolyLine(data, legend = 'Port 0 %s'%self.legend, colour = 'black', width = 1)
+			line = plot.PolyLine(data, legend = 'Port 0 (%s)'%self.legend, colour = 'black', width = 1)
 			self.gc = plot.PlotGraphics([line], self.title, self.xLabel, self.yLabel)
 			### gestion automatique des bornes
 			xMin,xMax,yMin,yMax = get_limit(data)
@@ -656,6 +690,9 @@ class StaticPlot(PlotFrame):
 			L = []
 			xMin, xMax, yMin, yMax = 0.0,0.0,0.0,0.0
 			data_list = list(data.values())
+   
+			input_labels = self.getInputLabels(data)
+   
 			for ind,d in enumerate(data_list):
 
 				### formatage des données spécifique au square
@@ -674,8 +711,8 @@ class StaticPlot(PlotFrame):
 					m = max([a[1] for a in dd])
 					dd = [(b[0], b[1]/m) for b in dd]
 
-				L.append(plot.PolyLine(dd, legend = 'Port %d %s'%(ind,self.legend), colour = c, width=1))
-
+				L.append(plot.PolyLine(dd, legend = f'Port {input_labels[ind]}', colour = c, width=1))
+				
 				### gestion automatique des bornes
 				a,b,c,d = get_limit(dd)
 
@@ -698,7 +735,7 @@ class StaticPlot(PlotFrame):
 				data = self.Normalize(data)
 			
 			markers = plot.PolyMarker(data, colour = LColour[0], marker = Markers[0], size = 1)
-			line = plot.PolyLine(data, legend = 'Port 0 %s'%self.legend, colour = LColour[0], width = 1)
+			line = plot.PolyLine(data, legend = 'Port 0 (%s)'%self.legend, colour = LColour[0], width = 1)
 			
 			self.gc = plot.PlotGraphics([line, markers], self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
@@ -708,6 +745,7 @@ class StaticPlot(PlotFrame):
 			L=[]
 			xMin, xMax, yMin, yMax = 0.0,0.0,0.0,0.0
 			data_list = list(data.values())
+   
 			for ind,dd in enumerate(data_list):
 				try:
 					c = LColour[ind]
@@ -1076,13 +1114,13 @@ class DynamicPlot(PlotFrame):
 			data_list = list(data.values())
 			for ind,d in enumerate(data_list):
 
-				### formatage des données pour le square
+				### data processing
 				dd = []
 				for v1,v2 in zip(d,[ (d[i+1][0], d[i][1]) for i in range(len(d)-1)]):
 					dd.append(v1)
 					dd.append(v2)
 
-				### gestion de la couleur
+				### color
 				try:
 					c = LColour[ind]
 				except IndexError:
@@ -1092,10 +1130,10 @@ class DynamicPlot(PlotFrame):
 					m = max([a[1] for a in dd])
 					dd = [(b[0], b[1]/m) for b in dd]
 
-				### construction des données
+				### data construct
 				L.append(plot.PolyLine(dd, legend='Port %s (%s)'%(str(ind),label), colour=c, width=1))
 
-				###gestion dynamique des bornes
+				### limit managment 
 				a,b,c,d = get_limit(dd)
 
 				if float(a) < float(xMin): xMin=float(a)
@@ -1126,7 +1164,7 @@ class DynamicPlot(PlotFrame):
 		# 	self.Unbind(wx.EVT_PAINT)
 		# 	self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
 
-		## sans fusion
+		## without fusion
 		if self.iport is not None:
 
 			data = self.atomicModel.results[self.iport]
@@ -1140,7 +1178,7 @@ class DynamicPlot(PlotFrame):
 			self.gc = plot.PlotGraphics([line, markers], self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
 
-		##avec fusion (voir attribut _fusion de QuickScope)
+		## with fusion (see attribut _fusion of QuickScope)
 		else:
 
 			data = self.atomicModel.results
@@ -1198,7 +1236,7 @@ class DynamicPlot(PlotFrame):
 		# 	self.Unbind(wx.EVT_PAINT)
 		# 	self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
 
-		## sans fusion
+		## without fusion
 		if self.iport is not None:
 			data = self.atomicModel.results[self.iport]
 
@@ -1206,7 +1244,7 @@ class DynamicPlot(PlotFrame):
 			self.gc = plot.PlotGraphics(line, self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
 
-		##avec fusion (voir attribut _fusion de QuickScope)
+		## with fusion (see attribut _fusion of QuickScope)
 		else:
 			data = self.atomicModel.results
 
@@ -1256,15 +1294,15 @@ class DynamicPlot(PlotFrame):
 		"""
 
 		item = self.mainmenu.FindItemById(evt.GetId())
-		# permet d'identifier le numero du signal
+		# allow signal number identification
 		i = int(item.GetLabel().split(' ')[-1])
 
-		frame = Spectrum(self, wx.NewIdRef(), title= _("Spectrum of signal "), data=self.atomicModel.results[i])
+		frame = Spectrum(self, wx.NewIdRef(), title= _("Spectrum of signal"), data=self.atomicModel.results[i])
 		frame.Center()
 		frame.Show()
 
 	def OnTitleSetting(self, event):
-		dlg = wx.TextEntryDialog(self, _('Enter new title'), _('Title Entry'))
+		dlg = wx.TextEntryDialog(self, _('Enter a new title'), _('Title Entry'))
 		dlg.SetValue(self.title)
 		if dlg.ShowModal() == wx.ID_OK:
 			self.title = dlg.GetValue()
@@ -1273,7 +1311,7 @@ class DynamicPlot(PlotFrame):
 		dlg.Destroy()
 
 	def OnXLabelSetting(self, event):
-		dlg = wx.TextEntryDialog(self, _('Enter new X label'), _('Label Entry'))
+		dlg = wx.TextEntryDialog(self, _('Enter a new X label'), _('Label Entry'))
 		dlg.SetValue(self.xLabel)
 		if dlg.ShowModal() == wx.ID_OK:
 			self.xLabel = dlg.GetValue()
@@ -1282,7 +1320,7 @@ class DynamicPlot(PlotFrame):
 		dlg.Destroy()
 
 	def OnYLabelSetting(self, event):
-		dlg = wx.TextEntryDialog(self, _('Enter new Y label'), _('Label Entry'))
+		dlg = wx.TextEntryDialog(self, _('Enter a new Y label'), _('Label Entry'))
 		dlg.SetValue(self.yLabel)
 		if dlg.ShowModal() == wx.ID_OK:
 			self.yLabel = dlg.GetValue()
@@ -1309,29 +1347,29 @@ class Spectrum(StaticPlot):
 		#newy=cspline1d_eval(cspline1d(y),newx,dx=dx,x0=y[0])
 		#self.signal=newy
 
-		# nombre de points pour la fft
+		### number of points for fft
 		p=1
 		while(pow(2,p)<=Nb_pts):
 			p+=1
 			N=float(pow(2,p))
 		assert(pow(2,p)>= Nb_pts)
 
-		#application d'une fenetre
+		### windows
 		signal = smooth(array(signal),window_len=10,window="hamming")
 
-		# frequence d'echantillonnage
+		### frequence d'echantillonnage
 		Fe = 1.0/(float(duree)/float(len(signal)))
 
-		#FFT
+		### FFT
 		Y = fft.fft(signal,int(N))
 		Y = abs(fft.fftshift(Y))
 		F = [Fe*i/N for i in range(int(-N/2), int(N/2))]
 
-		# normalisation
+		### normalization
 		Max = max(Y)
 		Y = [20*math.log(i/Max,10) for i in Y]
 
-		#frequence max et min pour le plot
+		### freqencies max and min for the plot
 		FMin, FMax=0,200
 		F_plot, Y_plot=[],[]
 		for i in range(len(F)):
@@ -1339,11 +1377,11 @@ class Spectrum(StaticPlot):
 				F_plot.append(F[i])
 				Y_plot.append(Y[i])
 
-		# formate les donnees pour Plot
+		### data processing
 		self.data = list(map(lambda a,b: (a,b), F_plot, Y_plot))
 		#self.data = [(a,b) for a in F_plot for b in Y_plot]
 
-		# invoque la frame
+		# call the frame
 		StaticPlot.__init__(self, parent, id, title, self.data, xLabel=_('Frequency [Hz]'),yLabel=_('Amplitude [dB]'))
 
 		self.OnPlotLine()
@@ -1366,8 +1404,11 @@ class Spectrum(StaticPlot):
 #		posv = self.sldv.GetValue()
 #		self.Redraw(self.Rescale(posv,posh))
 
-	def Redraw(self,data=[]):
-		""" Redraw the client
+	def Redraw(self,data:list=[]):
+		"""Redraw the client
+
+		Args:
+			data (list, optional): data to redraw. Defaults to [].
 		"""
 		size=self.client.GetSize()
 		self.client.Clear()
@@ -1380,8 +1421,16 @@ class Spectrum(StaticPlot):
 		xMin,xMax,yMin,yMax = get_limit(data)
 		self.client.Draw(gc,  xAxis= (float(xMin),float(xMax)), yAxis= (float(yMin),float(yMax)))
 
-	def Rescale(self,FMin=0,FMax=200):
-		#frequence max et min pour le plot
+	def Rescale(self,FMin:int=0,FMax:int=200)->list:
+		""" Rescale the plot
+
+		Args:
+			FMin (int, optional): min frequency. Defaults to 0.
+			FMax (int, optional): max frequency. Defaults to 200.
+
+		Returns:
+			list: [description]
+		"""
 		F,Y,F_plot, Y_plot=[],[],[],[]
 		for f,v in self.data:
 			F.append(f)
