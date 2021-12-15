@@ -69,7 +69,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 								ID,
 								title,
 								wx.DefaultPosition,
-								wx.Size(600, 400),
+								wx.Size(600, 450),
 								name=name,
 								style=wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN)
 
