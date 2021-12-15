@@ -98,8 +98,8 @@ def GetClass(elem):
 		DomainClass = (DomainBehavior,DomainStructure,)
 		if 'Port' in clsmembers:
 			DomainClass += (clsmembers['Port'],)
-
-		cls = next(filter(lambda c: c not in DomainClass and issubclass(c, DomainClass), clsmembers.values()), None)
+  
+		cls = next(filter(lambda c: c not in DomainClass and issubclass(c, DomainClass) and c.__name__ in elem, clsmembers.values()), None)
 
 		if not cls: sys.stderr.write(_("Class unknown..."))
 

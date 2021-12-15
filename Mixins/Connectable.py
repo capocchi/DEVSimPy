@@ -38,6 +38,7 @@ class Connectable:
 	def getInputLabel(self, port:int)->str:
 		""" return the label of the input port n
 		"""
+		
 		return self._input_labels.get(port,None)
 
 	def getOutputLabel(self, port:int)->str:

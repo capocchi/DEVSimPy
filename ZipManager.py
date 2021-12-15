@@ -177,7 +177,7 @@ class Zip:
 					zout.writestr(base_name, data)
 				else:
 					exclude_file.append(replace_files.index(fn))
-					sys.stdout.write("%s not rewrite\n"%(fn))
+					sys.stdout.write(" %s not rewrite\n"%(fn))
 				
 				#sys.stdout.write("update %s from compressed %s\n"%(base_name, fn))
 			elif os.path.exists(fn):
