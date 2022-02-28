@@ -3860,7 +3860,6 @@ class CodeBlock(Achievable, Block):
 					clsmembers = inspect.getmembers(module, inspect.isclass)
 					names = [t[0] for t in clsmembers]
 				
-				print(cls)
 				### if model inherite of ScopeGUI, it requires to redefine the class with the ScopeGUI class
 				if 'To_Disk' in names or 'MessagesCollector' in names:
 					new_class = DiskGUI
@@ -3870,8 +3869,6 @@ class CodeBlock(Achievable, Block):
 					new_class = ScopeGUI
 				else:
 					new_class = None
-
-				print(new_class)
 			else:
 				sys.stderr.write(_("Error in setstate for CodeBlock class which is %s\n"%str(cls)))
 
