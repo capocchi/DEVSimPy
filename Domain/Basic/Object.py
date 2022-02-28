@@ -27,8 +27,7 @@ class Message:
 		@type value: None
 		@type operation: string
 	'''
-	__slots__  = ['value','time','name']
- 
+
 	###
 	def __init__(self, v=None, t=None):
 		''''	Constructor method.
