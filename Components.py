@@ -48,7 +48,7 @@ import ZipManager
 from Utilities import replaceAll, GetActiveWindow, printOnStatusBar, install
 from Decorators import BuzyCursorNotification
 from NetManager import Net
-from which import which
+from shutil import which
 
 ###########################################################
 ###
