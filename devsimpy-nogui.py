@@ -8,7 +8,7 @@
 #                              Laurent CAPOCCHI
 #                        SPE - University of Corsica
 #                     --------------------------------
-# Version 2.9                                      last modified:  09/09/19
+# Version 4                                      last modified:  07/03/22
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -16,16 +16,20 @@
 # Bach version of DEVSimPy (whitout GUI)
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-#
-# GLOBAL VARIABLES AND FUNCTIONS
-#
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-
 import os
 import sys
 import builtins
 import json
+import pathlib
+import zipfile
+
+from InteractionYAML import YAMLHandler
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GLOBAL VARIABLES
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 __version__ = '4.0'
 
@@ -62,15 +66,93 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 				'DEVS_DIR_PATH_DICT':{'PyDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyDEVS'),
 									'PyPDEVS_221':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs221' ,'src'),
 									'PyPDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','old')},
-				'GUI_FLAG' : True,
+				'GUI_FLAG' : False,
 				'INFINITY' : float('inf')
 				}
 
-builtin_dict['GUI_FLAG'] = False
+# Sets the homepath variable to the directory where your application is located (sys.argv[0]).
+builtins.__dict__.update(builtin_dict)
 
-from InteractionYAML import YAMLHandler
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GLOBAL FUNCTIONS
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+def retrieve_file_paths(dirName:str):
+	""" Function to return all file paths of the particular directory
+
+	Args:
+		dirName (str): Name of the directory
+
+	Returns:
+		_type_: list of file paths
+	"""
+	filePaths = []
+
+	# Read all directory, subdirectories and file lists
+	for root, directories, files in os.walk(dirName):
+		for filename in files:
+		# Create the full filepath by using os module.
+			filePath = os.path.join(root, filename)
+			filePaths.append(filePath)
+			
+	# return all paths
+	return filePaths
+
+def devsimpy_nogui_package_build(yaml:str="", outfn:str="devsimpy-nogui-pkg.zip")->None:
+	""" Generates the zip file with all files needed to execute the devsimpy-nogui script
+
+		Args:
+			yaml (str): yaml file to zip (optional)
+			outfn (str): zip file to export all files
+	"""
+
+	### list of files to zip
+	filenames = ["Components.py", "Container.py", "Decorators.py","devsimpy-nogui.py","DSV.py", "InteractionSocket.py","InteractionYAML.py",
+				"Join.py","NetManager.py","PluginManager.py","SimulationNoGUI.py","SpreadSheet.py","Utilities.py","XMLModule.py","ZipManager.py"]
+
+	### list of dir to zip
+	dirnames = map(pathlib.Path,["DEVSKernel/","Domain/", "DomainInterface/","Mixins/","Patterns/"])
+
+	yaml_exist = yaml.endswith('.yaml') and os.path.exists(yaml)
+	
+	if yaml != "" and not yaml_exist:
+		return False
+  
+	### TODO: if yaml is passed from function param, Domain is pruned in order to select only the lib used by the model
+ 
+	with zipfile.ZipFile(outfn, mode="w") as archive:
+		
+  		### add yaml file if passed 
+		if yaml != "":
+			path = os.path.abspath(yaml)
+			archive.write(path, os.path.basename(path))
+
+		### add all dependencies python files needed to execute devsimpy-nogui
+		for filename in filenames:
+			archive.write(filename)
+			
+		### add all dependancies (directories) needed to execute devsimpy-nogui
+		for dirname in dirnames:
+      
+			# Call the function to retrieve all files and folders of the assigned directory
+			filePaths = retrieve_file_paths(dirname)
+			
+			for file in filePaths:
+				archive.write(file)
+ 
+	return True
 
 def simulate(devs, duration, simu_name, is_remote):
+	"""Simulate the devs model during a specific duration.
+
+	Args:
+		devs (_type_): _description_
+		duration (_type_): _description_
+		simu_name (_type_): _description_
+		is_remote (bool): _description_
+	"""
 
 	from SimulationNoGUI import makeSimulation
 
@@ -81,9 +163,6 @@ def simulate(devs, duration, simu_name, is_remote):
 	### launch simulation
 	makeSimulation(devs, duration, simu_name, is_remote, True)
 
-# Sets the homepath variable to the directory where your application is located (sys.argv[0]).
-builtins.__dict__.update(builtin_dict)
-
 #-------------------------------------------------------------------
 if __name__ == '__main__':
 
@@ -92,25 +171,28 @@ if __name__ == '__main__':
 
 	import argparse
  	
-	parser = argparse.ArgumentParser(description="simulate a model unless other option is specified")
+	parser = argparse.ArgumentParser(description=_("Simulate a model unless other option is specified"))
 	# required filename
-	parser.add_argument("filename", help="dsp or yaml devsimpy file")
+	parser.add_argument("filename", help=_("dsp or yaml devsimpy file only"))
 	# optional simulation_time for simulation
-	parser.add_argument("simulation_time", nargs='?', help="simulation time [inf|ntl]", default=10)
+	parser.add_argument("simulation_time", nargs='?', help=_("Simulation time [inf|ntl]"), default=10)
 	# optional simulation_name for remote execution
-	parser.add_argument("-remote", help="remote execution", action="store_true")
-	parser.add_argument("-name", help="simulation name", type=str, default="simu")
+	parser.add_argument("-remote", help=_("Remote execution"), action="store_true")
+	parser.add_argument("-name", help=_("Simulation name"), type=str, default="simu")
 	# optional kernel for simulation kernel
-	parser.add_argument("-kernel", help="simulation kernel [pyDEVS|PyPDEVS]", type=str, default="pyDEVS")
+	parser.add_argument("-kernel", help=_("Simulation kernel [pyDEVS|PyPDEVS]"), type=str, default="pyDEVS")
 	# optional real time 
-	parser.add_argument("-rt", help="real time simulation (only for PyPDEVS)", action="store_true")
+	parser.add_argument("-rt", help=_("Real time simulation (only for PyPDEVS)"), action="store_true")
+ 
 	# non-simulation options
 	group = parser.add_mutually_exclusive_group()
-	group.add_argument("-js", "--javascript",help="generate JS file", action="store_true")
-	group.add_argument("-json", help="turn the YAML/DSP file to JSON", action="store_true")
-	group.add_argument("-blockslist", help="get the list of models in a master model", action="store_true")
-	group.add_argument("-blockargs", help="parameters of an atomic model (ex. -blockargs <label of block>)", type=str)
-	parser.add_argument("-updateblockargs", help="update parameters (ex. -blockargs <label of block> -updateblockargs <'''{'<key>':<val>}'''>", type=str, default="")
+	group.add_argument("-js", "--javascript",help=_("Generate JS file"), action="store_true")
+	group.add_argument("-json", help=_("Turn the YAML/DSP file to JSON"), action="store_true")
+	group.add_argument("-blockslist", help=_("Get the list of models in a master model"), action="store_true")
+	group.add_argument("-blockargs", help=_("Parameters of an atomic model (ex. -blockargs <label of block>)"), type=str)
+	parser.add_argument("-updateblockargs", help=_("Update parameters (ex. -blockargs <label of block> -updateblockargs <'''{'<key>':<val>}'''>"), type=str, default="")
+	parser.add_argument("-zip", help=_("Export the devsimpy-nogui files into a filename file"), action="store_true")
+ 
 	args = parser.parse_args()
 
 	if args.kernel:
@@ -123,13 +205,26 @@ if __name__ == '__main__':
 
 	filename = args.filename
 
-	if not os.path.exists(filename):
-		sys.stderr.write(_('ERROR: devsimpy file does not exist!\n'))
-		sys.exit()
-	else:
-		yamlHandler = YAMLHandler(filename)
+	if not args.zip:
+		
+		if not os.path.exists(filename):
+			sys.stderr.write(_('ERROR: devsimpy file does not exist!\n'))
+			sys.exit()
+		else:
+			yamlHandler = YAMLHandler(filename)
+  
+			if not yamlHandler.filename_is_valid:
+				sys.stderr.write(_('ERROR: Invalid file!\n'))
+				sys.exit()
 
-	if args.javascript:
+	if args.zip:
+		# zip exportation
+		if filename.endswith('.zip'):
+			devsimpy_nogui_package_build(outfn=filename)
+		else:
+			sys.stderr.write(_('ERROR: Invalid file type (must be zip file)!\n'))
+			sys.exit()
+	elif args.javascript:
 		# Javascript generation
 		yamlHandler.getJS()
 	elif args.json:
@@ -163,39 +258,6 @@ if __name__ == '__main__':
 		devs = yamlHandler.getDevsInstance()
 		if devs:
 			simulate(devs, duration, args.name, args.remote)
-
-	#~ yamlHandler = YAMLHandler(filename)
-
-	#~ if not yamlHandler.filename_is_valid:
-		#~ sys.stderr.write(_('ERROR: Invalid file!\n'))
-		#~ sys.exit()
-
-
- 	#~ #sys.stdout.write(_("DEVSimPy - version %s\n"%__version__ ))
- 	#~ nb_args = len(sys.argv)
-
-	#~ ### First argument is filename - validity check
-	#~ filename = sys.argv[1] if nb_args > 1 else None
-
-	#~ if not filename:
-		#~ sys.stderr.write(_('ERROR: Unspecified devsimpy file!\n'))
-		#~ sys.exit()
-	#~ elif not os.path.exists(filename):
-		#~ sys.stderr.write(_('ERROR: devsimpy file does not exist!\n'))
-		#~ sys.exit()
-
-	#~ yamlHandler = YAMLHandler(filename)
-
-	#~ if not yamlHandler.filename_is_valid:
-		#~ sys.stderr.write(_('ERROR: Invalid file!\n'))
-		#~ sys.exit()
-
-	#~ if nb_args == 2:
-		#~ ########################################################################
-		#~ # Simulation with default simulated duration
-		#~ devs = yamlHandler.getDevsInstance()
-		#~ if devs :
-			#~ simulate(master=devs, T = 10.0, socket_id="")
 
 	#~ elif nb_args >= 3:
 		#~ action = sys.argv[2]

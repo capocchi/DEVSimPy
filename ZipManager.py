@@ -27,7 +27,6 @@ import importlib
 import tempfile
 import builtins
 import gettext
-import pathlib
 
 _ = gettext.gettext
 
@@ -41,59 +40,7 @@ from Utilities import listf, path_to_module,install_and_import, getFilePathInfo
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-# Declare the function to return all file paths of the particular directory
-def retrieve_file_paths(dirName):
 
-	# setup file paths variable
-	filePaths = []
-
-	# Read all directory, subdirectories and file lists
-	for root, directories, files in os.walk(dirName):
-		for filename in files:
-		# Create the full filepath by using os module.
-			filePath = os.path.join(root, filename)
-			filePaths.append(filePath)
-			
-	# return all paths
-	return filePaths
-
-def zip_devsimpy_nogui_build(yaml:str="")->None:
-	"""_summary_
-
-		Args:
-			yaml (str): yaml file to zip
-	"""
-
-	### list of files to zip
-	filenames = ["Components.py", "Container.py", "Decorators.py","devsimpy-nogui.py","DSV.py", "InteractionSocket.py","InteractionYAML.py",
-				"Join.py","NetManager.py","PluginManager.py","SimulationNoGUI.py","SpreadSheet.py","Utilities.py","XMLModule.py","ZipManager.py"]
-
-	### list of dir to zip
-	dirnames = map(pathlib.Path,["DEVSKernel/","Domain/", "DomainInterface/","Mixins/","Patterns/"])
-
-	if not (yaml.endswith('.yaml') and os.path.exists(yaml)):
-		return False
-  
-	with zipfile.ZipFile("devsimpy-nogui-arch.zip", mode="w") as archive:
-		### add yaml file
-		path = os.path.abspath(yaml)
-		archive.write(path, os.path.basename(path))
-
-		### add all dependencies python files needed to execute devsimpy-nogui
-		for filename in filenames:
-			archive.write(filename)
-			
-		### add all dependancies directory needed to execute devsimpy-nogui
-		for dirname in dirnames:
-			# Call the function to retrieve all files and folders of the assigned directory
-			filePaths = retrieve_file_paths(dirname)
-			
-			for file in filePaths:
-				archive.write(file)
-
-		archive.write('__init__.py')
-  
-	return True
 
 def get_from_modules(name:str)->types.ModuleType:
 	""" get module with the correct name from the name that come from dir().
