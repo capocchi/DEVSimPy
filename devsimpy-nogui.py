@@ -21,6 +21,7 @@ import sys
 import builtins
 import json
 import pathlib
+from xmlrpc.client import boolean
 import zipfile
 
 from InteractionYAML import YAMLHandler
@@ -100,12 +101,15 @@ def retrieve_file_paths(dirName:str):
 	# return all paths
 	return filePaths
 
-def devsimpy_nogui_package_build(yaml:str="", outfn:str="devsimpy-nogui-pkg.zip")->None:
-	""" Generates the zip file with all files needed to execute the devsimpy-nogui script
+def devsimpy_nogui_package_build(yaml:str="", outfn:str="devsimpy-nogui-pkg.zip", add_sim_kernel:bool=True, add_dockerfile:bool=False, simulation_time:str="ntl") -> None:
+	""" Generates the zip file with all files needed to execute the devsimpy-nogui script.
 
 		Args:
 			yaml (str): yaml file to zip (optional)
 			outfn (str): zip file to export all files
+			add_sim_kernel (bool): zip the simlation kernel
+			add_dockerfile (bool): zip the DockerFile file
+			simulation_time (str): simulation time
 	"""
 
 	### list of files to zip
@@ -113,11 +117,18 @@ def devsimpy_nogui_package_build(yaml:str="", outfn:str="devsimpy-nogui-pkg.zip"
 				"Join.py","NetManager.py","PluginManager.py","SimulationNoGUI.py","SpreadSheet.py","Utilities.py","XMLModule.py","ZipManager.py"]
 
 	### list of dir to zip
-	dirnames = map(pathlib.Path,["DEVSKernel/","Domain/", "DomainInterface/","Mixins/","Patterns/"])
-
+	dirnames = ["Domain/", "DomainInterface/","Mixins/","Patterns/"]
+ 
+	### if simulation kernel need to by zipped
+	if add_sim_kernel:
+		dirnames.append("DEVSKernel/")
+  
+	### list of dir to zip
+	dirnames_abs = map(pathlib.Path,dirnames)
+    
 	yaml_exist = yaml.endswith('.yaml') and os.path.exists(yaml)
 	
-	if yaml != "" and not yaml_exist:
+	if yaml == "" and not yaml_exist:
 		return False
   
 	### TODO: if yaml is passed from function param, Domain is pruned in order to select only the lib used by the model
@@ -125,22 +136,43 @@ def devsimpy_nogui_package_build(yaml:str="", outfn:str="devsimpy-nogui-pkg.zip"
 	with zipfile.ZipFile(outfn, mode="w") as archive:
 		
   		### add yaml file if passed 
-		if yaml != "":
-			path = os.path.abspath(yaml)
-			archive.write(path, os.path.basename(path))
+		path = os.path.abspath(yaml)
+		archive.write(path, os.path.basename(path))
 
 		### add all dependencies python files needed to execute devsimpy-nogui
 		for filename in filenames:
 			archive.write(filename)
 			
 		### add all dependancies (directories) needed to execute devsimpy-nogui
-		for dirname in dirnames:
+		for dirname in dirnames_abs:
       
 			# Call the function to retrieve all files and folders of the assigned directory
 			filePaths = retrieve_file_paths(dirname)
 			
 			for file in filePaths:
 				archive.write(file)
+    
+		if add_dockerfile:
+			docker_spec = f"""
+   				FROM python:3.8-slim-buster
+
+				WORKDIR /app
+
+				RUN apt-get update
+				RUN apt-get install -y build-essential
+				
+				RUN pip install pipreqs
+				RUN pipreqs .
+    
+				COPY requirements.txt requirements.txt
+				RUN pip install -r requirements.txt
+
+				COPY . .
+
+				CMD ["python", "devsimpy-nogui.py", "{os.path.basename(yaml)}",{simulation_time}]
+
+      		"""
+			archive.writestr("DockerFile", docker_spec)
  
 	return True
 
@@ -175,7 +207,7 @@ if __name__ == '__main__':
 	# required filename
 	parser.add_argument("filename", help=_("dsp or yaml devsimpy file only"))
 	# optional simulation_time for simulation
-	parser.add_argument("simulation_time", nargs='?', help=_("Simulation time [inf|ntl]"), default=10)
+	parser.add_argument("simulation_time", nargs='?', help=_("Simulation time [inf|ntl]"), default=10, type=float)
 	# optional simulation_name for remote execution
 	parser.add_argument("-remote", help=_("Remote execution"), action="store_true")
 	parser.add_argument("-name", help=_("Simulation name"), type=str, default="simu")
@@ -184,6 +216,9 @@ if __name__ == '__main__':
 	# optional real time 
 	parser.add_argument("-rt", help=_("Real time simulation (only for PyPDEVS)"), action="store_true")
  
+	### optional zip function
+	parser.add_argument("-zip", nargs='?', help=_("Export the devsimpy-nogui files into a filename file"), type=str)
+ 
 	# non-simulation options
 	group = parser.add_mutually_exclusive_group()
 	group.add_argument("-js", "--javascript",help=_("Generate JS file"), action="store_true")
@@ -191,7 +226,8 @@ if __name__ == '__main__':
 	group.add_argument("-blockslist", help=_("Get the list of models in a master model"), action="store_true")
 	group.add_argument("-blockargs", help=_("Parameters of an atomic model (ex. -blockargs <label of block>)"), type=str)
 	parser.add_argument("-updateblockargs", help=_("Update parameters (ex. -blockargs <label of block> -updateblockargs <'''{'<key>':<val>}'''>"), type=str, default="")
-	parser.add_argument("-zip", help=_("Export the devsimpy-nogui files into a filename file"), action="store_true")
+	parser.add_argument("-docker", help=_("Add a dockerfile to the zip"), action="store_true")
+	parser.add_argument("-sim_kernel", help=_("Add the sim kernel to the zip"), action="store_true")
  
 	args = parser.parse_args()
 
@@ -204,23 +240,21 @@ if __name__ == '__main__':
 			builtins.__dict__['REAL_TIME'] = args.rt
 
 	filename = args.filename
+	
+	if not os.path.exists(filename):
+		sys.stderr.write(_('ERROR: devsimpy file does not exist!\n'))
+		sys.exit()
+	else:
+		yamlHandler = YAMLHandler(filename)
 
-	if not args.zip:
-		
-		if not os.path.exists(filename):
-			sys.stderr.write(_('ERROR: devsimpy file does not exist!\n'))
+		if not yamlHandler.filename_is_valid:
+			sys.stderr.write(_('ERROR: Invalid file!\n'))
 			sys.exit()
-		else:
-			yamlHandler = YAMLHandler(filename)
-  
-			if not yamlHandler.filename_is_valid:
-				sys.stderr.write(_('ERROR: Invalid file!\n'))
-				sys.exit()
 
 	if args.zip:
 		# zip exportation
-		if filename.endswith('.zip'):
-			devsimpy_nogui_package_build(outfn=filename)
+		if args.zip.endswith('.zip'):
+			devsimpy_nogui_package_build(filename, args.zip, add_sim_kernel=args.sim_kernel, add_dockerfile=args.docker)
 		else:
 			sys.stderr.write(_('ERROR: Invalid file type (must be zip file)!\n'))
 			sys.exit()
