@@ -20,11 +20,6 @@ import os
 import sys
 import builtins
 import json
-import pathlib
-from xmlrpc.client import boolean
-import zipfile
-
-from InteractionYAML import YAMLHandler
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
@@ -74,107 +69,17 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 # Sets the homepath variable to the directory where your application is located (sys.argv[0]).
 builtins.__dict__.update(builtin_dict)
 
+### import here becaause they need buitlins !
+
+from InteractionYAML import YAMLHandler
+from StandaloneNoGUI import StandaloneNoGUI
+
+
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GLOBAL FUNCTIONS
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-
-def retrieve_file_paths(dirName:str):
-	""" Function to return all file paths of the particular directory
-
-	Args:
-		dirName (str): Name of the directory
-
-	Returns:
-		_type_: list of file paths
-	"""
-	filePaths = []
-
-	# Read all directory, subdirectories and file lists
-	for root, directories, files in os.walk(dirName):
-		for filename in files:
-		# Create the full filepath by using os module.
-			filePath = os.path.join(root, filename)
-			filePaths.append(filePath)
-			
-	# return all paths
-	return filePaths
-
-def devsimpy_nogui_package_build(yaml:str="", outfn:str="devsimpy-nogui-pkg.zip", add_sim_kernel:bool=True, add_dockerfile:bool=False, simulation_time:str="ntl") -> None:
-	""" Generates the zip file with all files needed to execute the devsimpy-nogui script.
-
-		Args:
-			yaml (str): yaml file to zip (optional)
-			outfn (str): zip file to export all files
-			add_sim_kernel (bool): zip the simlation kernel
-			add_dockerfile (bool): zip the DockerFile file
-			simulation_time (str): simulation time
-	"""
-
-	### list of files to zip
-	filenames = ["Components.py", "Container.py", "Decorators.py","devsimpy-nogui.py","DSV.py", "InteractionSocket.py","InteractionYAML.py",
-				"Join.py","NetManager.py","PluginManager.py","SimulationNoGUI.py","SpreadSheet.py","Utilities.py","XMLModule.py","ZipManager.py"]
-
-	### list of dir to zip
-	dirnames = ["Domain/", "DomainInterface/","Mixins/","Patterns/"]
- 
-	### if simulation kernel need to by zipped
-	if add_sim_kernel:
-		dirnames.append("DEVSKernel/")
-  
-	### list of dir to zip
-	dirnames_abs = map(pathlib.Path,dirnames)
-    
-	yaml_exist = yaml.endswith('.yaml') and os.path.exists(yaml)
-	
-	if yaml == "" and not yaml_exist:
-		return False
-  
-	### TODO: if yaml is passed from function param, Domain is pruned in order to select only the lib used by the model
- 
-	with zipfile.ZipFile(outfn, mode="w") as archive:
-		
-  		### add yaml file if passed 
-		path = os.path.abspath(yaml)
-		archive.write(path, os.path.basename(path))
-
-		### add all dependencies python files needed to execute devsimpy-nogui
-		for filename in filenames:
-			archive.write(filename)
-			
-		### add all dependancies (directories) needed to execute devsimpy-nogui
-		for dirname in dirnames_abs:
-      
-			# Call the function to retrieve all files and folders of the assigned directory
-			filePaths = retrieve_file_paths(dirname)
-			
-			for file in filePaths:
-				archive.write(file)
-    
-		if add_dockerfile:
-			docker_spec = f"""
-   				FROM python:3.8-slim-buster
-
-				WORKDIR /app
-
-				RUN apt-get update
-				RUN apt-get install -y build-essential
-				
-				RUN pip install pipreqs
-				RUN pipreqs .
-    
-				COPY requirements.txt requirements.txt
-				RUN pip install -r requirements.txt
-
-				COPY . .
-
-				CMD ["python", "devsimpy-nogui.py", "{os.path.basename(yaml)}",{simulation_time}]
-
-      		"""
-			archive.writestr("DockerFile", docker_spec)
- 
-	return True
 
 def simulate(devs, duration, simu_name, is_remote):
 	"""Simulate the devs model during a specific duration.
@@ -254,7 +159,9 @@ if __name__ == '__main__':
 	if args.zip:
 		# zip exportation
 		if args.zip.endswith('.zip'):
-			devsimpy_nogui_package_build(filename, args.zip, add_sim_kernel=args.sim_kernel, add_dockerfile=args.docker)
+			
+			standalone = StandaloneNoGUI(filename, args.zip, add_sim_kernel=args.sim_kernel, add_dockerfile=args.docker)
+			standalone.BuildZipPackage()
 		else:
 			sys.stderr.write(_('ERROR: Invalid file type (must be zip file)!\n'))
 			sys.exit()
