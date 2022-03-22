@@ -197,6 +197,7 @@ from Editor import GetEditor
 from YAMLExportGUI import YAMLExportGUI
 from wxPyMail import SendMailWx
 from XMLModule import getDiagramFromXMLSES
+from StandaloneGUI import StandaloneGUI
 
 ### only for wx 2.9 (bug)
 ### http://comments.gmane.org/gmane.comp.python.wxpython/98744
@@ -1518,6 +1519,37 @@ class MainApplication(wx.Frame):
 		frame = YAMLExportGUI(self, -1, _('YAML Export'), path=path)
 		frame.Show(True)
 
+	###
+	def OnExportStandalone(self, event):
+		""" Export a Zip file to that can be used to simulate a yaml file in a no-gui and standalone mode. 
+			The zip file contains all of the files needed to make a standalone version of devsimpy-nogui.
+			It embedded also the yaml version of the current diagram in order to be able to stimulate him.
+		"""
+
+		#self.OnSaveFile(event)
+
+		obj = event.GetEventObject()
+
+		if isinstance(obj, wx.ToolBar) and isinstance(obj.GetParent(), DetachedFrame):
+			currentPage = obj.GetToolClientData(event.GetId())
+		else:
+			currentPage = self.nb2.GetCurrentPage()
+
+		### deselect all model to initialize select attribut for all models
+		currentPage.deselect()
+
+		diagram = currentPage.GetDiagram()
+	
+		### temp path to save the dsp as a yaml
+		path = os.path.join(gettempdir(), os.path.basename(diagram.last_name_saved).replace('.dsp','.yaml'))  
+
+		### try to save the current diagram into a temp yaml file and launch the diag for the standalone exportation 
+		if Container.Diagram.SaveFile(diagram, path):
+			frame = StandaloneGUI(None, -1, 'Standalone Export')
+			frame.SetYAML(path)
+			frame.Show(True)
+		else:
+			wx.MessageBox(_("An error occurred during the saving as yaml file."), _("Error"), wx.OK | wx.ICON_ERROR)
 	###
 	def OnImport(self, event):
 		""" Import DEVSimPy library from Domain directory.

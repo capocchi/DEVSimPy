@@ -79,12 +79,13 @@ class StandaloneNoGUI:
     ## list of dir to zip
     DIRNAMES = ["DomainInterface/","Mixins/","Patterns/"]
 
-    def __init__(self, yaml:str="", outfn:str="devsimpy-nogui-pkg.zip", add_sim_kernel:bool=True, add_dockerfile:bool=False, sim_time:str="ntl"):
+    def __init__(self, yaml:str="", outfn:str="devsimpy-nogui-pkg.zip", outdir:str=os.getcwd(), add_sim_kernel:bool=True, add_dockerfile:bool=False, sim_time:str="ntl"):
         """ Generates the zip file with all files needed to execute the devsimpy-nogui script.
 
 		Args:
 			yaml (str): yaml file to zip (optional)
 			outfn (str): zip file to export all files
+            outdir (str): directory where zip file is generated
 			add_sim_kernel (bool): zip the simlation kernel
 			add_dockerfile (bool): zip the DockerFile file
 			sim_time (str): simulation time
@@ -93,6 +94,7 @@ class StandaloneNoGUI:
         ### local copy
         self.yaml = yaml
         self.outfn = outfn
+        self.outdir = outdir
         self.add_sim_kernel = add_sim_kernel
         self.add_dockerfile = add_dockerfile
         self.sim_time = sim_time
@@ -108,6 +110,9 @@ class StandaloneNoGUI:
         ### if simulation kernel need to by zipped
         if self.add_sim_kernel:
             StandaloneNoGUI.DIRNAMES.append("DEVSKernel/")    
+        
+    def SetYAML(self,yaml):
+        self.yaml = yaml
         
     def GetDockerSpec(self):
         """
@@ -140,7 +145,7 @@ class StandaloneNoGUI:
             return False
     
         ### create the outfn zip file
-        with zipfile.ZipFile(self.outfn, mode="w") as archive:
+        with zipfile.ZipFile(os.path.join(self.outdir,self.outfn), mode="w") as archive:
             
             ### add yaml file 
             path = os.path.abspath(self.yaml)
@@ -153,7 +158,7 @@ class StandaloneNoGUI:
             ### add the Domain libairies according to the DOAMIN_PATH var
             for file in retrieve_file_paths(self.domain_path):
                 if file.endswith(('.py', '.amd', '.cmd')):
-                    archive.write(file, arcname='Domain'+os.path.join(file.split('Domain')[1],os.path.basename(file)))
+                    archive.write(file, arcname='Domain'+os.path.join(file.split('Domain')[1], os.path.basename(file)))
     
             ### add all dependancies (directories) needed to execute devsimpy-nogui
             for dirname in self.dirnames_abs:
@@ -170,3 +175,5 @@ class StandaloneNoGUI:
             ### add requirements-nogui.txt file
             ### TODO: packages used in models include in the yaml file are not defined in the requirements.txt!
             archive.write('requirements-nogui.txt', 'requirements.txt')
+        
+        return True 
