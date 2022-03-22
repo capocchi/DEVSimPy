@@ -74,7 +74,8 @@ class StandaloneNoGUI:
     
     ### list of files to zip
     FILENAMES = ["Components.py","Container.py","Decorators.py","devsimpy-nogui.py","DSV.py","InteractionSocket.py","InteractionYAML.py",
-				"Join.py","NetManager.py","PluginManager.py","SimulationNoGUI.py","SpreadSheet.py","Utilities.py","XMLModule.py","ZipManager.py"]
+				"Join.py","NetManager.py","PluginManager.py","SimulationNoGUI.py","SpreadSheet.py","Utilities.py","XMLModule.py","ZipManager.py",
+                "StandaloneNoGUI.py"]
 
     ## list of dir to zip
     DIRNAMES = ["DomainInterface/","Mixins/","Patterns/"]
