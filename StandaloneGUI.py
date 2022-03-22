@@ -115,7 +115,7 @@ class StandaloneGUI(wx.Frame):
  
         ### Zip name field
         hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-        self.st1 = wx.StaticText(panel, label=_('Zip filename:'))
+        self.st1 = wx.StaticText(panel, label=_('Filename:'))
         
         hbox1.Add(self.st1, flag=wx.RIGHT, border=8)
         self._tc = wx.TextCtrl(panel, -1, "devsimpy-nogui-pkg.zip", validator=ZipNameValidator())
@@ -185,7 +185,7 @@ class StandaloneGUI(wx.Frame):
             
             ### Try to build de zip package of the standalone version of DEVSimPy-nogui
             if standalone.BuildZipPackage():
-                resp = wx.MessageBox(_("Zip File exported!"), _("Information"), wx.OK | wx.ICON_INFORMATION)
+                resp = wx.MessageBox(_("Zip file exported!"), _("Information"), wx.OK | wx.ICON_INFORMATION)
                 if resp == wx.OK:
                     self.Close()
             else:

@@ -1545,7 +1545,7 @@ class MainApplication(wx.Frame):
 
 		### try to save the current diagram into a temp yaml file and launch the diag for the standalone exportation 
 		if Container.Diagram.SaveFile(diagram, path):
-			frame = StandaloneGUI(None, -1, 'Standalone Export')
+			frame = StandaloneGUI(None, -1, _('Standalone settings'))
 			frame.SetYAML(path)
 			frame.Show(True)
 		else:
