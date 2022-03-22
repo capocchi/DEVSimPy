@@ -27,6 +27,7 @@ import builtins
 import wx.lib.filebrowsebutton as filebrowse
 
 from StandaloneNoGUI import StandaloneNoGUI
+from Decorators import BuzyCursorNotification
 
 _ = wx.GetTranslation
 
@@ -168,7 +169,8 @@ class StandaloneGUI(wx.Frame):
         """ Set the yaml file
         """
         self.yaml = yaml
-        
+    
+    @BuzyCursorNotification
     def OnOk(self, event):
         """
         Args:
