@@ -400,7 +400,7 @@ class Diagram(Savable, Structurable):
 
 			### Class is wrong ?
 			if isinstance(cls, (ImportError, tuple)) or cls is None:
-				sys.stdout.write(_('Error making DEVS instances for:\n%s\n%s'%(str(cls), m.python_path)))
+				sys.stdout.write(_('Error making DEVS instances for:\n%s (class:%s)\n'%(m.python_path,str(cls))))
 				return False
 			else:
 				### DEVS model recovery
