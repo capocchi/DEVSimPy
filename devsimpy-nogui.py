@@ -160,7 +160,7 @@ if __name__ == '__main__':
 		# zip exportation
 		if args.zip.endswith('.zip'):
 			
-			standalone = StandaloneNoGUI(filename, args.zip, add_sim_kernel=args.sim_kernel, add_dockerfile=args.docker)
+			standalone = StandaloneNoGUI(filename, args.zip, add_sim_kernel=args.sim_kernel, add_dockerfile=args.docker, rt=args.rt, kernel=args.kernel)
 			standalone.BuildZipPackage()
 		else:
 			sys.stderr.write(_('ERROR: Invalid file type (must be zip file)!\n'))

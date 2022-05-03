@@ -1526,7 +1526,7 @@ class MainApplication(wx.Frame):
 			It embedded also the yaml version of the current diagram in order to be able to stimulate him.
 		"""
 
-		#self.OnSaveFile(event)
+		
 
 		obj = event.GetEventObject()
 
@@ -1540,6 +1540,9 @@ class MainApplication(wx.Frame):
 
 		diagram = currentPage.GetDiagram()
 	
+		if diagram.last_name_saved == "":
+			self.OnSaveFile(event)
+   
 		### temp path to save the dsp as a yaml
 		path = os.path.join(gettempdir(), os.path.basename(diagram.last_name_saved).replace('.dsp','.yaml'))  
 

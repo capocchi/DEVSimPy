@@ -113,7 +113,7 @@ class StandaloneGUI(wx.Frame):
         icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "properties.png"), wx.BITMAP_TYPE_ANY))
         self.SetIcon(icon)
   
-        self.SetSize((-1, 210))
+        self.SetSize((-1, 220))
         panel = wx.Panel(self)
 
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -141,7 +141,7 @@ class StandaloneGUI(wx.Frame):
         ### Options
         hbox4 = wx.BoxSizer(wx.HORIZONTAL)
         self._cb1 = wx.CheckBox(panel, label=_('Add simulation kernel'))
-        self._cb2 = wx.CheckBox(panel, label=_('Add DockerFile'))
+        self._cb2 = wx.CheckBox(panel, label=_('Add Docker file'))
         self._cb3 = wx.CheckBox(panel, label=_('No Time Limite'))
     
         hbox4.Add(self._cb1)
@@ -149,7 +149,23 @@ class StandaloneGUI(wx.Frame):
         hbox4.Add(self._cb3, flag=wx.LEFT, border=10)
         vbox.Add(hbox4, flag=wx.LEFT, border=10)
 
-        vbox.Add((-1, 25))
+        vbox.Add((-1, 10))
+    
+        hbox5 = wx.BoxSizer(wx.HORIZONTAL)
+        self._cb4 = wx.CheckBox(panel, label=_('Real Time'))
+        self.kernel = wx.Choice(panel, -1, choices=["PyDEVS", "PyPDEVS"])
+        self.kernel.SetSelection(0)
+        label = wx.StaticText(panel, -1, _("Kernel:"))
+            
+        box = wx.BoxSizer(wx.HORIZONTAL)
+        box.Add(label, 0, wx.ALIGN_CENTER_VERTICAL)
+        box.Add(self.kernel, 0, wx.ALIGN_CENTER_VERTICAL, border=5)
+        
+        hbox5.Add(self._cb4)
+        hbox5.Add(box, flag=wx.LEFT, border=10)
+        vbox.Add(hbox5, flag=wx.LEFT, border=10)
+        
+        vbox.Add((-1, 10))
 
         ### Buttons
         hbox5 = wx.BoxSizer(wx.HORIZONTAL)
@@ -185,9 +201,11 @@ class StandaloneGUI(wx.Frame):
             sim_cb = self._cb1.GetValue()
             docker_cb = self._cb2.GetValue()
             ntl_cb = self._cb3.GetValue()
+            rt = self._cb3.GetValue()
+            kernel = self.kernel.GetString(self.kernel.GetSelection())
             
             ### call the StandaloneNoGui class to build the package depending on the settings from the frame.
-            standalone = StandaloneNoGUI(self.yaml,zip_name,outdir=zip_dir,add_sim_kernel=sim_cb,add_dockerfile=docker_cb,sim_time=ntl_cb)
+            standalone = StandaloneNoGUI(self.yaml,zip_name,outdir=zip_dir,add_sim_kernel=sim_cb,add_dockerfile=docker_cb,sim_time=ntl_cb,rt=rt, kernel=kernel)
             
             ### Try to build de zip package of the standalone version of DEVSimPy-nogui
             if standalone.BuildZipPackage():

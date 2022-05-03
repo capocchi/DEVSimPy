@@ -25,6 +25,7 @@ import zipfile
 import zipfile
 import configparser
 import pathlib
+import json
 
 from Utilities import GetUserConfigDir
 
@@ -80,7 +81,7 @@ class StandaloneNoGUI:
     ## list of dir to zip
     DIRNAMES = ["DomainInterface/","Mixins/","Patterns/"]
 
-    def __init__(self, yaml:str="", outfn:str="devsimpy-nogui-pkg.zip", outdir:str=os.getcwd(), add_sim_kernel:bool=True, add_dockerfile:bool=False, sim_time:str="ntl"):
+    def __init__(self, yaml:str="", outfn:str="devsimpy-nogui-pkg.zip", outdir:str=os.getcwd(), add_sim_kernel:bool=True, add_dockerfile:bool=False, sim_time:str="ntl", rt:bool=False, kernel:str='PyDEVS'):
         """ Generates the zip file with all files needed to execute the devsimpy-nogui script.
 
 		Args:
@@ -90,6 +91,8 @@ class StandaloneNoGUI:
 			add_sim_kernel (bool): zip the simlation kernel
 			add_dockerfile (bool): zip the DockerFile file
 			sim_time (str): simulation time
+            rt (str): real time param
+            kernel (str): type of simulation kernel (PyDEVS ou PyPDEVS)
 	    """
 
         ### local copy
@@ -99,6 +102,8 @@ class StandaloneNoGUI:
         self.add_sim_kernel = add_sim_kernel
         self.add_dockerfile = add_dockerfile
         self.sim_time = sim_time
+        self.rt = rt
+        self.kernel = kernel
         
         ### path of the Domain dir (depending on the .devsimpy config file)
         self.domain_path = get_domain_path()
@@ -134,10 +139,25 @@ class StandaloneNoGUI:
 
                     COPY . .
 
-                    CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}",{self.sim_time}]
+                    CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
 
                 """
                 
+    def GetConfigSpec(self):
+        """
+        """
+        data = {
+            'simulation' : [
+                {
+                    'ntl' : self.sim_time,
+                    'kernel' : self.kernel,
+                    'rt': self.rt
+                }    
+            ]
+        }
+        
+        return json.dumps(data)
+
     def BuildZipPackage(self) -> None:
         """
         """
@@ -172,6 +192,9 @@ class StandaloneNoGUI:
         
             if self.add_dockerfile:
                 archive.writestr("DockerFile", self.GetDockerSpec())
+                
+            ### write config file
+            archive.writestr("config.json", self.GetConfigSpec())
                 
             ### add requirements-nogui.txt file
             ### TODO: packages used in models include in the yaml file are not defined in the requirements.txt!
