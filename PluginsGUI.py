@@ -645,8 +645,9 @@ class BlockPluginsList(CheckListCtrl):
 				### for element (function, method or class) in module coming from plugins.py
 				for name,m in inspect.getmembers(module, inspect.isfunction):
 
-					### it's method
-					if 'self' in inspect.getargspec(m).args:
+					### it's a method
+					#if 'self' in inspect.getargspec(m).args:
+					if 'self' in list(inspect.signature(m).parameters):
 
 						### trying to eval new element to assign
 						try:

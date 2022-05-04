@@ -47,6 +47,8 @@ from Mixins.Achievable import Achievable
 from Utilities import RGBToHEX
 from Patterns.Observer import Subject
 
+from collections import OrderedDict
+
 wx.OPEN = wx.OPEN if wx.VERSION_STRING < '4.0' else wx.FD_OPEN
 wx.CHANGE_DIR = wx.CHANGE_DIR if wx.VERSION_STRING < '4.0' else wx.FD_CHANGE_DIR
 

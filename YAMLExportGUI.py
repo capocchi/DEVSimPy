@@ -27,6 +27,14 @@ import builtins
 _ = wx.GetTranslation
 
 def url_ok(url):
+    """_summary_
+
+    Args:
+        url (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     import requests
     try:
         r = requests.head(url)
@@ -34,7 +42,6 @@ def url_ok(url):
         return False
     else:
         return r.status_code == 200
-
 class MyStatusBar(wx.StatusBar):
 
     def __init__(self, parent):
@@ -57,7 +64,6 @@ class MyStatusBar(wx.StatusBar):
 
         e.Skip()
         self.PlaceIcon()
-
 
 class YAMLExportGUI(wx.Frame):
 

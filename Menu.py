@@ -42,6 +42,7 @@ ID_OPEN  = wx.ID_OPEN
 ID_SAVE = wx.ID_SAVE
 ID_SAVEAS = wx.ID_SAVEAS
 ID_EXPORTREST = wx.NewIdRef()
+ID_EXPORTSTANDALONE = wx.NewIdRef()
 ID_IMPORTXMLSES = wx.NewIdRef()
 ID_EXIT = wx.ID_EXIT
 ID_ABOUT = wx.ID_ABOUT
@@ -201,6 +202,7 @@ class FileMenu(wx.Menu):
 		saveModel=wx.MenuItem(self, ID_SAVE, _('&Save\tCtrl+S'), _('Save the current diagram'))
 		saveAsModel=wx.MenuItem(self, ID_SAVEAS, _('&SaveAs'),_('Save the diagram with an another name'))
 		exportRest=wx.MenuItem(self, ID_EXPORTREST, _('&Export to REST server'),_('Export the diagram to a Rest server (DEVSimPy-rest)'))
+		exportStandalone=wx.MenuItem(self, ID_EXPORTSTANDALONE, _('&Export standalone'),_('Generate a zip file which can be used to execute simulation of a yaml file in a no-gui and standaolne mode using devsimpy-nogui'))
 		importRest=wx.MenuItem(self, ID_IMPORTXMLSES, _('&Import XML SES file'),_('Import SES specifications from the Python SES Editor'))
 		printModel=wx.MenuItem(self, ID_PRINT, _('&Print'),_('Print the current diagram'))
 		printPreviewModel=wx.MenuItem(self, ID_PREVIEW_PRINT, _('Preview'),_('Print preview for current diagram'))
@@ -211,6 +213,7 @@ class FileMenu(wx.Menu):
 		saveModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'save.png')))
 		saveAsModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')))
 		exportRest.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'export.png')))
+		exportStandalone.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'export.png')))
 		importRest.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'import.png')))
 		printModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'print.png')))
 		printPreviewModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'print-preview.png')))
@@ -229,6 +232,7 @@ class FileMenu(wx.Menu):
 
 		self.AppendSeparator()
 		AppendItem(exportRest)
+		AppendItem(exportStandalone)
 		AppendItem(importRest)
 
 		self.AppendSeparator()
@@ -246,6 +250,7 @@ class FileMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnSaveFile, id=ID_SAVE)
 		parent.Bind(wx.EVT_MENU, parent.OnSaveAsFile, id=ID_SAVEAS)
 		parent.Bind(wx.EVT_MENU, parent.OnExportRest, id=ID_EXPORTREST)
+		parent.Bind(wx.EVT_MENU, parent.OnExportStandalone, id=ID_EXPORTSTANDALONE)
 		parent.Bind(wx.EVT_MENU, parent.OnImportXMLSES, id=ID_IMPORTXMLSES)
 		parent.Bind(wx.EVT_MENU, parent.OnPrint, id=ID_PRINT)
 		parent.Bind(wx.EVT_MENU, parent.OnPrintPreview, id=ID_PREVIEW_PRINT)

@@ -400,7 +400,7 @@ class Diagram(Savable, Structurable):
 
 			### Class is wrong ?
 			if isinstance(cls, (ImportError, tuple)) or cls is None:
-				sys.stdout.write(_('Error making DEVS instances for:\n%s\n%s'%(str(cls), m.python_path)))
+				sys.stdout.write(_('Error making DEVS instances for:\n%s (class:%s)\n'%(m.python_path,str(cls))))
 				return False
 			else:
 				### DEVS model recovery
@@ -3778,6 +3778,7 @@ class CodeBlock(Achievable, Block):
 
 					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(model_path[model_path.index(dir_name):]).strip('[]')))
 
+					print(path)
 					### perhaps path is wrong due to a change in the Domain lib !
 					### Try to find the model by its name in the Domain directories (multipe path can be occur)
 #					if not os.path.exists(path):
@@ -3788,16 +3789,14 @@ class CodeBlock(Achievable, Block):
 #									path = os.path.abspath(os.path.join(root, name))
 
 					### try to find it in exportedPathList (after Domain check)
-					if not os.path.exists(path):
-						try:
-							mainW = wx.GetApp().GetTopWindow()
-							for p in mainW.exportPathsList:
-								lib_name = os.path.basename(p)
-								if lib_name in path:
-									path = p+path.split(lib_name)[-1]
-						except:
-							pass
-
+					if not os.path.exists(path) and builtins.__dict__.get('GUI_FLAG',True):
+						import wx
+						mainW = wx.GetApp().GetTopWindow()
+						for p in mainW.exportPathsList:
+							lib_name = os.path.basename(p)
+							if lib_name in path:
+								path = p+path.split(lib_name)[-1]
+						
 
 					### if path is always wrong, flag is visible
 					if not os.path.exists(path):
@@ -3825,7 +3824,7 @@ class CodeBlock(Achievable, Block):
 					state['bad_filename_path_flag'] = True
 
 			### load enventual Plugin
-			if 'plugins' in state:
+			if 'plugins' in state and builtins.__dict__.get('GUI_FLAG',True):
 				wx.CallAfter(self.LoadPlugins, (state['model_path']))
 
 		### test if args from construcor in python file stored in library (on disk) and args from stored model in dsp are the same
@@ -3860,7 +3859,6 @@ class CodeBlock(Achievable, Block):
 					clsmembers = inspect.getmembers(module, inspect.isclass)
 					names = [t[0] for t in clsmembers]
 				
-				print(cls)
 				### if model inherite of ScopeGUI, it requires to redefine the class with the ScopeGUI class
 				if 'To_Disk' in names or 'MessagesCollector' in names:
 					new_class = DiskGUI
@@ -3870,8 +3868,6 @@ class CodeBlock(Achievable, Block):
 					new_class = ScopeGUI
 				else:
 					new_class = None
-
-				print(new_class)
 			else:
 				sys.stderr.write(_("Error in setstate for CodeBlock class which is %s\n"%str(cls)))
 
@@ -3889,7 +3885,8 @@ class CodeBlock(Achievable, Block):
 					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(python_path[python_path.index(dir_name):]).strip('[]')))
 
 					### try to find it in exportedPathList (after Domain check) and recent opened file
-					if not os.path.exists(path):
+					if not os.path.exists(path) and builtins.__dict__.get('GUI_FLAG',True):
+						import wx
 						mainW = wx.GetApp().GetTopWindow()
 						if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
 							for p in mainW.exportPathsList+mainW.openFileList:
@@ -3910,7 +3907,8 @@ class CodeBlock(Achievable, Block):
 							break
 					
 				### try to find the python_path in recent opened file directory
-				if not os.path.exists(path):
+				if not os.path.exists(path) and builtins.__dict__.get('GUI_FLAG',True):
+					import wx
 					mainW = wx.GetApp().GetTopWindow()
 					if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
 						for a in [os.path.dirname(p) for p in mainW.exportPathsList+mainW.openFileList]:
@@ -3965,6 +3963,7 @@ class CodeBlock(Achievable, Block):
 					else:
 						### for no-gui compatibility
 						if builtins.__dict__.get('GUI_FLAG',True):
+							import wx
 							mainW = wx.GetApp().GetTopWindow()
 							if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
 								for a in [os.path.dirname(p) for p in mainW.exportPathsList+mainW.openFileList]:
@@ -4128,26 +4127,44 @@ class ContainerBlock(Block, Diagram):
 
 					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(model_path[model_path.index(dir_name):]).strip('[]')))
 
+					print(path)
+     
 					### try to find it in exportedPathList (after Domain check)
-					if not os.path.exists(path):
+					if not os.path.exists(path) and builtins.__dict__.get('GUI_FLAG',True):
 						import wx
 						mainW = wx.GetApp().GetTopWindow()
 						for p in mainW.exportPathsList:
 							lib_name = os.path.basename(p)
 							if lib_name in path:
 								path = p+path.split(lib_name)[-1]
-
-					if os.path.exists(path):
-						state['model_path'] = path
-						### we find the python file using re module because path can comes from windows and then sep is not the same and os.path.basename don't work !
-						state['python_path'] = os.path.join(path, re.findall("([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
-					else:
+						
+					### if path is always wrong, flag is visible
+					if not os.path.exists(path):
 						state['bad_filename_path_flag'] = True
+					else:
+						state['model_path'] = path
+
+						python_filename = os.path.basename(python_path)
+
+						if str(python_filename).find('\\'):
+							### wrong basename :
+							### os.path.basename does not work when executed on Unix
+							### with a Windows path
+							python_path = python_path.replace('\\','/')
+							python_filename = os.path.basename(python_path)
+
+						state['python_path'] = os.path.join(state['model_path'] , python_filename)
+
+						if not state['python_path'].endswith('.py'):
+							### Is this up-to-date???
+							### we find the python file using re module
+							### because path can comes from windows and then sep is not the same and os.path.basename don't work !
+							state['python_path'] = os.path.join(path, re.findall("([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
 				else:
 					state['bad_filename_path_flag'] = True
 
 			### load enventual Plugin
-			if 'plugins' in state:
+			if 'plugins' in state and builtins.__dict__.get('GUI_FLAG',True):
 				wx.CallAfter(self.LoadPlugins, (state['model_path']))
 
 			### test if args from construcor in python file stored in library (on disk) and args from stored model in dsp are the same

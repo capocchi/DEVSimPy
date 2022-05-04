@@ -48,7 +48,7 @@ import ZipManager
 from Utilities import replaceAll, GetActiveWindow, printOnStatusBar, install
 from Decorators import BuzyCursorNotification
 from NetManager import Net
-from which import which
+from shutil import which
 
 ###########################################################
 ###
@@ -966,7 +966,7 @@ class BlockFactory:
 					# search_path = [dir_name] # set to None to see all modules importable from sys.path
 					# all_modules = [x[1] for x in pkgutil.iter_modules(path=search_path)]
 			else:
-				sys.stdout.write("Import error 0: " + " module not found")
+				sys.stdout.write("Import Error:\n module %s not found\n"%name)
 				module = None
 					
 			return module

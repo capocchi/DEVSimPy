@@ -38,13 +38,12 @@ class Connectable:
 	def getInputLabel(self, port:int)->str:
 		""" return the label of the input port n
 		"""
-		
-		return self._input_labels.get(port,None)
+		return self._input_labels.get(port,None) if hasattr(self,'_input_labels') else None
 
 	def getOutputLabel(self, port:int)->str:
 		""" return the label of the output port n
 		"""
-		return self._output_labels.get(port,None)
+		return self._output_labels.get(port,None) if hasattr(self,'_output_labels') else None
 
 	def getInputLabels(self)->dict:
 		""" return the input label dict

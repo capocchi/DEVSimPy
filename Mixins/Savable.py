@@ -110,12 +110,16 @@ class DumpBase(object):
 	### extension is in whiteList
 	@staticmethod
 	def GetExt(fileName:str=""):
-		ext = os.path.splitext(fileName)[-1]
-		if ext in DumpBase.WhiteList:
-			return ext
-		else:
-			sys.stdout.write(_("\nThis extension is unknown: %s.")%ext)
-			return False
+	    ext = os.path.splitext(fileName)[-1]
+
+	    if ext == "":
+	    	return sys.stdout.write(_("\nPlease save the project."))
+
+	    if ext in DumpBase.WhiteList:
+	        return ext
+     
+	    sys.stdout.write(_("\nThis extension is unknown: %s.")%ext)
+	    return False
 
 	### Return the class in charge of saving or loading from ext of object.
 	@staticmethod

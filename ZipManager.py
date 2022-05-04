@@ -40,6 +40,8 @@ from Utilities import listf, path_to_module,install_and_import, getFilePathInfo
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
+
+
 def get_from_modules(name:str)->types.ModuleType:
 	""" get module with the correct name from the name that come from dir().
 	"""
