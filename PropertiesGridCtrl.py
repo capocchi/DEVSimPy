@@ -380,7 +380,7 @@ class CustomDataTable(GridTableBase):
 		self.bad_flag = {}
 
 	def Populate(self, model):
-		""" Populate the data and dataTypes lists
+		""" Populate the data and dataTypes lists.
 		"""
 
 		self.model = model
@@ -443,8 +443,13 @@ class CustomDataTable(GridTableBase):
 				val_in_constructor = args_in_constructor[attr_name]
 				t1 = type(val)
 				t2 = type(val_in_constructor)
+			
 				if t1 != t2 and (t1 not in (str,str) and t2 not in (str,str)):
-					val = val_in_constructor
+					### spcecial case for OrderedDict as attribute in __init__ function
+					if isinstance(val, dict) and isinstance(val_in_constructor, OrderedDict):
+						val = OrderedDict(val.items())
+					else:
+						val = val_in_constructor
 				### if val is tab and the len has been changed
 				### when dict, the value on PropertiesGridCtrl is tuple like ('key', 'value')
 				elif isinstance(val, (tuple,dict)) and len(val_in_constructor) != 0:
