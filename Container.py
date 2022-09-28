@@ -1765,12 +1765,13 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 			dc.SetUserScale(self.scalex, self.scaley)
 
-			shapes = self.diagram.shapes
+			shapes = self.diagram.GetShapeList()
 			nodes = self.nodes
 
 			### resizeable node not nedeed for connection process (dragging mouse with left button pressed - see when self.resizeable_nedeed is False)
 			if not self.resizeable_nedeed:
 				nodes = [n for n in nodes if not isinstance(n,ResizeableNode)]
+
 
 			items = iter(shapes + nodes)
 
@@ -4127,7 +4128,7 @@ class ContainerBlock(Block, Diagram):
 
 					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(model_path[model_path.index(dir_name):]).strip('[]')))
 
-					print(path)
+					#print(path)
      
 					### try to find it in exportedPathList (after Domain check)
 					if not os.path.exists(path) and builtins.__dict__.get('GUI_FLAG',True):
@@ -4202,6 +4203,7 @@ class ContainerBlock(Block, Diagram):
 			else:
 				state['bad_filename_path_flag'] = True
 
+		
 		####################################" Just for old model
 		if 'bad_filename_path_flag' not in state: state['bad_filename_path_flag'] = False
 		if 'lock_flag' not in state: state['lock_flag'] = False
@@ -4217,8 +4219,9 @@ class ContainerBlock(Block, Diagram):
 		if 'output_direction' not in state: state['output_direction'] = 'est'
 		if '_input_labels' not in state: state['_intput_labels'] = {}
 		if '_output_labels' not in state: state['_output_labels'] = {}
+		#if isinstance(state['shapes'],dict): state['shapes'] = list(state['shapes'].values())
 		#####################################
-
+  
 		self.__dict__.update(state)
 
 	def __getstate__(self):
@@ -4246,6 +4249,11 @@ class ContainerBlock(Block, Diagram):
 		if self.selected:
 			### inform about the nature of the block using icon
 			img = wx.Bitmap(os.path.join(ICON_PATH_16_16, 'coupled3.png'), wx.BITMAP_TYPE_ANY)
+
+			### Draw the number of devs models inside
+			n = str(self.GetBlockCount())
+			dc.DrawText(n, self.x[1]-15-len(n), self.y[1]-20)
+  
 			dc.DrawBitmap(img, self.x[1]-20, self.y[0])
 
 		Block.draw(self, dc)
