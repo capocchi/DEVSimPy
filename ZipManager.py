@@ -398,16 +398,17 @@ class Zip:
 		#if rcp: recompile(module_name)
 	
 		PluginManager.trigger_event("IMPORT_STRATEGIES", fn=self.fn)
-		
+	
 		try:
 			module = self.ImportModule()# if self.GetFullName() not in sys.modules else sys.modules[self.GetFullName()]
 			# print(self.GetFullName(), module.__file__)
+			
 			return module
 		### model has not python file !
 		except Exception as e:
 			return e
 		
-	def ImportModule(self)->types.ModuleType:
+	def ImportModule(self) -> types.ModuleType:
 		""" Import module from zip file corresponding to the amd or cmd model.
 		"""
 		### allows to import the lib from its name (like import MyModel.amd). Dangerous because confuse!
@@ -417,13 +418,15 @@ class Zip:
 			sys.path.append(p)
 
 		### load all paths from the lib dir to DOAMIN_PATH (external paths are added at the start of devsimpy)
+		a = len(DOMAIN_PATH)
 		if DOMAIN_PATH in p:
 			p = os.path.dirname(p)
-			while(p!=DOMAIN_PATH):
+			# Add paths p until we reach the DOMAIN_PATH
+			while(p!=DOMAIN_PATH and len(p)>=a):
 				if p not in sys.path:
 					sys.path.append(p)
 				p = os.path.dirname(p)
-		
+    	
 		importer = zipimport.zipimporter(self.fn)
 		module_name = getPythonModelFileName(self.fn)
 

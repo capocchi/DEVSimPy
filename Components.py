@@ -73,7 +73,7 @@ def GetClass(elem):
 	"""
 
 	clsmembers = getClassMember(elem)
-
+ 
 	if isinstance(clsmembers, dict):
 	
 		from DomainInterface.DomainBehavior import DomainBehavior
@@ -906,10 +906,8 @@ class BlockFactory:
 		### if python_file is ...../toto.amd/Atomic_Model.py, then the parent dir is zipfile.
 		if zipfile.is_zipfile(dir_name):
 			zf = ZipManager.Zip(dir_name)
-			
 			return zf.GetModule()
 		elif zipfile.is_zipfile(filename):
-			
 			zf = ZipManager.Zip(filename)
 			return zf.GetModule()
 		### if python file is on the web !
@@ -1015,7 +1013,8 @@ class BlockFactory:
 
 		# associated python class
 		cls = GetClass(python_file)
-
+		
+  
 		if inspect.isclass(cls):
 			# adding devs model on good graphical model
 			if issubclass(cls, DomainBehavior):

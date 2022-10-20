@@ -2294,8 +2294,7 @@ class AdvancedSplashScreen(AdvancedSplash):
 			shadow = wx.WHITE
 
 			if wx.Platform == '__WXMAC__':
-       
-				AdvancedSplash.__init__(self, bitmap=splashBmp, timeout=splashDuration, agwStyle=extrastyle, shadowcolour=wx.WHITE, parent=None)
+				AdvancedSplash.__init__(self, bitmap=splashBmp, timeout=splashDuration, style=style, shadowcolour=wx.WHITE, parent=None)
 			else:
 				if wx.VERSION_STRING >= '2.8.11':
 					AdvancedSplash.__init__(self, bitmap=splashBmp, timeout=splashDuration, style=style, agwStyle=extrastyle, shadowcolour=shadow, parent=None)
