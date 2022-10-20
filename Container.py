@@ -2170,7 +2170,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			
 			# if wizard is finished witout closing
 			if gmwiz :
-
+				
 				m = Components.BlockFactory.CreateBlock( canvas = self,
 													x = xm,
 													y = ym,
@@ -2181,6 +2181,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 													python_file = gmwiz.python_path,
 													model_file = gmwiz.model_path,
 													specific_behavior = gmwiz.specific_behavior)
+				
 				if m:
 
 					### save visual model
