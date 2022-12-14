@@ -1006,7 +1006,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 
 			### for .amd or .cmd
 			if model.isAMD():
-				wcd = _('Atomic DEVSimPy model (*.amd)|*.amd|*.cmd|All files (*)|*')
+				wcd = _('Atomic DEVSimPy model (*.amd)|*.amd|All files (*)|*')
 			elif model.isCMD():
 				wcd = _('Coupled DEVSimPy model (*.cmd)|*.cmd|All files (*)|*')
 			elif model.isPY():

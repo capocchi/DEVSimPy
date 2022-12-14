@@ -195,16 +195,16 @@ class Zip:
 				#sys.stdout.write("%s unknown\n"%(fn))
 			
 		### try to rewrite not replaced files from original zip
-		try:
-			info_list = zin.infolist()
-			for item in info_list:
-				s = os.path.basename(item.filename)
-				if s not in map(os.path.basename, replace_files) and info_list.index(item) not in exclude_file:
-					buffer = zin.read(item.filename)
-					zout.writestr(item, buffer)
-					sys.stdout.write("%s rewrite\n"%(item.filename))
-		except Exception as e:
-			sys.stdout.write("%s not updated\n"%(self.fn))
+		#try:
+		info_list = zin.infolist()
+		for item in info_list:
+			s = os.path.basename(item.filename)
+			if s not in map(os.path.basename, replace_files) and info_list.index(item) not in exclude_file:
+				buffer = zin.read(item.filename)
+				zout.writestr(item, buffer)
+				sys.stdout.write("%s rewrite\n"%(item.filename))
+		#except Exception as e:
+		#	sys.stdout.write("%s not updated\n"%(self.fn))
 
 		### close all files
 		zout.close()

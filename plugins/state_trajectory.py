@@ -28,7 +28,7 @@ _ = gettext.gettext
 
 import wx.lib.agw.aui as aui
 
-import matplotlib as mpl
+import matplotlib
 from matplotlib.backends.backend_wxagg import (
     FigureCanvasWxAgg as FigureCanvas,
     NavigationToolbar2WxAgg as NavigationToolbar)
@@ -37,7 +37,7 @@ class PlotPanel(wx.Panel):
     def __init__(self, parent, id=-1, dpi=None, **kwargs):
 
         wx.Panel.__init__(self, parent, id=id, **kwargs)
-        self.figure = mpl.figure.Figure(dpi=dpi, figsize=(2, 2))
+        self.figure = matplotlib.figure.Figure(dpi=dpi, figsize=(2, 2))
         self.canvas = FigureCanvas(self, -1, self.figure)
         self.toolbar = NavigationToolbar(self.canvas)
         self.toolbar.Realize()
