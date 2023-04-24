@@ -499,11 +499,11 @@ class CustomDataTable(GridTableBase):
 		### format font of attr
 		if col == 0:
 			attr.SetReadOnly(True)
-			attr.SetFont(wx.Font(10, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
+			attr.SetFont(wx.Font(10, 70, 0, 700))
 			#attr.SetBackgroundColour("light blue")
 		elif col == 2:
 			attr.SetReadOnly(True)
-			attr.SetFont(wx.Font(10, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL))
+			attr.SetFont(wx.Font(10, 70, 0, 400))
 		else:
 			### load color in cell for pen and fill
 			if isinstance(val, list):

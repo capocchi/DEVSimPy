@@ -4443,7 +4443,7 @@ class INode(ConnectableNode):
 
 		self.fill = [GREEN]
 
-		dc.SetFont(wx.Font(10, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+		dc.SetFont(wx.Font(10, 70, 0, 400))
 
 		### prot number
 		#dc.SetPen(wx.Pen(wx.NamedColour('black'), 20))
@@ -4528,7 +4528,7 @@ class ONode(ConnectableNode):
 		self.moveto(x, y)
 		self.fill = [RED]
 
-		dc.SetFont(wx.Font(10, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+		dc.SetFont(wx.Font(10, 70, 0, 400))
 		#dc.SetPen(wx.Pen(wx.NamedColour('black'), 20))
 
 		### prot number

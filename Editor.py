@@ -1820,7 +1820,8 @@ class Base(object):
 				self.OnSaveFile(event)
 				self.nb.force_saving = False
 				if not cp.modify:
-					wx.Exit()
+					#wx.Exit()
+					dlg.Destroy()
 			elif val == wx.ID_CANCEL:
 				dlg.Destroy()
 			else:

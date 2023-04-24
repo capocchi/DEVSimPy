@@ -267,8 +267,8 @@ class LibraryTree(wx.TreeCtrl):
 									y = 140,
 									label = self.GetItemText(item_selected),
 									id = 0,
-									inputs = 1,
-									outputs = 1,
+									inputs = '1',
+									outputs = '1',
 									python_file = path,
 									model_file = "")
 				if m:
