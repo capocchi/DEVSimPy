@@ -117,9 +117,21 @@ def GetArgs(cls = None):
 	"""
 
 	if inspect.isclass(cls):
-		constructor = inspect.getargspec(cls.__init__)
-		return dict(list(zip(constructor[0][1:], constructor[3]))) if constructor[3] != None else {}
-	
+		try:
+			constructor = inspect.getargspec(cls.__init__)
+			return dict(list(zip(constructor[0][1:], constructor[3]))) if constructor[3] != None else {}
+		except ValueError:
+			constructor = inspect.signature(cls.__init__)
+			parameters = constructor.parameters
+			parameter_dict = {}
+
+			for name, parameter in parameters.items():
+				if name != 'self':
+					if parameter.default != inspect.Parameter.empty:
+						parameter_dict[name] = parameter.default
+
+			return parameter_dict
+
 	#sys.stderr.write(_("Error in GetArgs: First parameter is not a class\n"))
 	return None
 

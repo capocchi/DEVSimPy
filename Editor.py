@@ -2312,8 +2312,19 @@ class BlockBase(object):
 
 					# get behavioral attribute from python file through constructor class
 					# args must have default value in the constructor
-					constructor = inspect.getargspec(classe.__init__)
-					new_args = dict(list(zip(constructor[0][1:], constructor[-1]))) if constructor[-1] else {}
+					try:
+						constructor = inspect.getargspec(classe.__init__)
+						new_args = dict(list(zip(constructor[0][1:], constructor[-1]))) if constructor[-1] else {}
+					except ValueError:
+						constructor = inspect.signature(classe.__init__)
+						parameters = constructor.parameters
+						new_args = {}
+
+						for name, parameter in parameters.items():
+							if name != 'self':
+								if parameter.default != inspect.Parameter.empty:
+									new_args[name] = parameter.default
+				
 					self.UpdateArgs(new_args)
 
 					# code update if it was modified during the simulation (out of constructor code,
