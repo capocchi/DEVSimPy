@@ -1885,7 +1885,7 @@ class EditorFrame(Base, wx.Frame):
 		self.parent = parent
 		
 		### call constructor
-		wx.Frame.__init__(self, self.parent, id, title, size=(600, 500), style=wx.DEFAULT_FRAME_STYLE)
+		wx.Frame.__init__(self, self.parent, id, title, size=(800, 500), style=wx.DEFAULT_FRAME_STYLE)
 
 		### Create notebook
 		self.nb = EditionNotebook(self, wx.NewIdRef(), style=wx.CLIP_CHILDREN)

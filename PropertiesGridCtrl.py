@@ -57,14 +57,14 @@ _ = wx.GetTranslation
 ###------------------------------------------------------------------------------
 class DictionaryEditor(wx.Dialog):
 	def __init__(self, parent, id, title, values):
-		wx.Dialog.__init__(self, parent, id, title, pos = (50,50), size = (250, 250), style = wx.DEFAULT_FRAME_STYLE)
+		wx.Dialog.__init__(self, parent, id, _("Dictionary editor"), pos = (50,50), size = (250, 250), style = wx.DEFAULT_FRAME_STYLE)
 
 		self.parent = parent
 
 		panel = wx.Panel(self, wx.NewIdRef())
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
-		self.elb = EditableListBox(panel, wx.NewIdRef(), _("Dictionary manager"))
+		self.elb = EditableListBox(panel, wx.NewIdRef(), title)
 
 		D = eval(values) if values!='' else {}
 
@@ -136,14 +136,14 @@ class DictionaryEditor(wx.Dialog):
 ###
 class ListEditor(wx.Dialog):
 	def __init__(self, parent, id, title, values):
-		wx.Dialog.__init__(self, parent, id, title, pos = (50,50), size = (250, 250), style = wx.DEFAULT_FRAME_STYLE)
+		wx.Dialog.__init__(self, parent, id, _("List editor"), pos = (50,50), size = (250, 250), style = wx.DEFAULT_FRAME_STYLE)
 
 		self.parent = parent
 
 		panel = wx.Panel(self, wx.NewIdRef())
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
-		self.elb = EditableListBox(panel, wx.NewIdRef(), _("List manager"))
+		self.elb = EditableListBox(panel, wx.NewIdRef(), title)
 
 		L = eval(values) if values!='' else []
 
@@ -1080,7 +1080,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 			self.AcceptProp(row, col)
 
 		elif typ == "list":
-			frame = ListEditor(self, wx.NewIdRef(),_('List editor'), values=self.GetCellValue(row, 1))
+			frame = ListEditor(self, wx.NewIdRef(), prop, values=self.GetCellValue(row, 1))
 			if frame.ShowModal() == wx.ID_CANCEL:
 				self.SetCellValue(row, 1, frame.GetValueAsString())
 			else:
@@ -1089,7 +1089,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 			self.AcceptProp(row, col)
 
 		elif typ == 'dict':
-			frame = DictionaryEditor(self, wx.NewIdRef(),_('List editor'), values=self.GetCellValue(row, 1))
+			frame = DictionaryEditor(self, wx.NewIdRef(), prop, values=self.GetCellValue(row, 1))
 			if frame.ShowModal() == wx.ID_CANCEL:
 				self.SetCellValue(row, 1, frame.GetValueAsString())
 			else:
