@@ -1820,7 +1820,8 @@ class Base(object):
 				self.OnSaveFile(event)
 				self.nb.force_saving = False
 				if not cp.modify:
-					wx.Exit()
+					#wx.Exit()
+					dlg.Destroy()
 			elif val == wx.ID_CANCEL:
 				dlg.Destroy()
 			else:
@@ -1884,7 +1885,7 @@ class EditorFrame(Base, wx.Frame):
 		self.parent = parent
 		
 		### call constructor
-		wx.Frame.__init__(self, self.parent, id, title, size=(600, 500), style=wx.DEFAULT_FRAME_STYLE)
+		wx.Frame.__init__(self, self.parent, id, title, size=(800, 500), style=wx.DEFAULT_FRAME_STYLE)
 
 		### Create notebook
 		self.nb = EditionNotebook(self, wx.NewIdRef(), style=wx.CLIP_CHILDREN)
@@ -2311,8 +2312,19 @@ class BlockBase(object):
 
 					# get behavioral attribute from python file through constructor class
 					# args must have default value in the constructor
-					constructor = inspect.getargspec(classe.__init__)
-					new_args = dict(list(zip(constructor[0][1:], constructor[-1]))) if constructor[-1] else {}
+					try:
+						constructor = inspect.getargspec(classe.__init__)
+						new_args = dict(list(zip(constructor[0][1:], constructor[-1]))) if constructor[-1] else {}
+					except ValueError:
+						constructor = inspect.signature(classe.__init__)
+						parameters = constructor.parameters
+						new_args = {}
+
+						for name, parameter in parameters.items():
+							if name != 'self':
+								if parameter.default != inspect.Parameter.empty:
+									new_args[name] = parameter.default
+				
 					self.UpdateArgs(new_args)
 
 					# code update if it was modified during the simulation (out of constructor code,

@@ -120,6 +120,7 @@ def PlotManager(parent, label, atomicModel, xl, yl):
 				frame = StaticPlot(parent, wx.NewIdRef(), _("%s on port %s")%(label,str(key)), data[key], xLabel = xl, yLabel = yl, legend = atomicModel.blockModel.label)
 				frame.CenterOnParent()
 				frame.Show()
+
 class PlotPanel(wx.Panel):
 	def __init__(self, parent, id=-1, dpi=None, **kwargs):
 		wx.Panel.__init__(self, parent, id=id, **kwargs)
@@ -147,6 +148,7 @@ class PlotNotebook(wx.Panel):
 		page = PlotPanel(self.nb)
 		self.nb.AddPage(page, name)
 		return page.figure
+
 class PlotFrame(wx.Frame):
 	def __init__(self, parent=None, id=wx.NewIdRef(), title="Time Plotting"):
 		"""	Constructor.

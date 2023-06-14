@@ -2496,7 +2496,10 @@ if builtins.__dict__.get('GUI_FLAG',True):
 							if isinstance(shape,Port):
 								dlg.SetValue('0')
 							else:
-								dlg.SetValue(str(shape.output))
+								if hasattr(shape, 'output'):
+									dlg.SetValue(str(shape.output))
+								else:
+									dlg.Destroy()
 
 							if dlg.ShowModal() == wx.ID_OK:
 								try:
@@ -2517,7 +2520,11 @@ if builtins.__dict__.get('GUI_FLAG',True):
 							if isinstance(shape,Port):
 								dlg.SetValue('0')
 							else:
-								dlg.SetValue(str(shape.input))
+								if hasattr(shape, 'input'):
+									dlg.SetValue(str(shape.input))
+								else:
+									dlg.Destroy()
+
 							if dlg.ShowModal() == wx.ID_OK:
 								try:
 									val=int(dlg.GetValue())
@@ -2971,20 +2978,20 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			""" Populate nodes list with output ports.
 			"""
 			if item:
-				self.nodes.extend([ONode(item, n, self) for n in range(item.output)])
+				self.nodes.extend([ONode(item, n, self, item.getInputLabel(n)) for n in range(item.output)])
 			else:
 				for s in [a for a in self.diagram.shapes if isinstance(a, Connectable)]:
-					self.nodes.extend([ONode(s, n, self) for n in range(s.output)])
+					self.nodes.extend([ONode(s, n, self, s.getInputLabel(n)) for n in range(s.output)])
 
 		### selection sur le canvas les INodes car c'est le seul moyen d'y accéder pour effectuer l'appartenance avec les modèles
 		def showInputs(self,item=None):
 			""" Populate nodes list with output ports.
 			"""
 			if item:
-				self.nodes.extend([INode(item, n, self) for n in range(item.input)])
+				self.nodes.extend([INode(item, n, self,  item.getInputLabel(n)) for n in range(item.input)])
 			else:
 				for s in [a for a in self.diagram.shapes if isinstance(a, Connectable)]:
-					self.nodes.extend([INode(s, n, self) for n in range(s.input)])
+					self.nodes.extend([INode(s, n, self, s.getInputLabel(n)) for n in range(s.input)])
 
 		def GetState(self):
 			return self.__state
@@ -3837,7 +3844,13 @@ class CodeBlock(Achievable, Block):
 			### TODO
 			### local package imported into amd or cmd generates error ! (fcts...)
 			if cls and not isinstance(cls, tuple):
-				args_from_stored_constructor_py = inspect.getargspec(cls.__init__).args[1:]
+				try:
+					args_from_stored_constructor_py = inspect.getargspec(cls.__init__).args[1:]
+				except ValueError:
+					constructor = inspect.signature(cls.__init__)
+					parameters = constructor.parameters
+					args_from_stored_constructor_py = [name for name, _ in parameters.items() if name != 'self']
+
 				args_from_stored_block_model = state['args']
 				L = list(set(args_from_stored_constructor_py).symmetric_difference(set(args_from_stored_block_model)))
 				if L:
@@ -3846,9 +3859,15 @@ class CodeBlock(Achievable, Block):
 							sys.stdout.write(_("Warning: %s come is old ('%s' arg is deprecated). We update it...\n"%(state['python_path'],arg)))
 							del state['args'][arg]
 						else:
-							arg_values = inspect.getargspec(cls.__init__).defaults
-							index = args_from_stored_constructor_py.index(arg)
-							state['args'].update({arg:arg_values[index]})
+							try:
+								arg_values = inspect.getargspec(cls.__init__).defaults
+							except ValueError:
+								constructor = inspect.signature(cls.__init__)
+								parameters = constructor.parameters
+								arg_values = [parameter.default for parameter in parameters.values() if parameter.default != inspect.Parameter.empty]
+							finally:
+								index = args_from_stored_constructor_py.index(arg)
+								state['args'].update({arg:arg_values[index]})
 
 				### Class redefinition if the class inherite to QuickScope, To_Disk or MessagesCollector
 
@@ -4173,7 +4192,13 @@ class ContainerBlock(Block, Diagram):
 			if os.path.exists(python_path) or zipfile.is_zipfile(os.path.dirname(python_path)):
 				cls = Components.GetClass(state['python_path'])
 				if not isinstance(cls, tuple):
-					args_from_stored_constructor_py = inspect.getargspec(cls.__init__).args[1:]
+					try:
+						args_from_stored_constructor_py = inspect.getargspec(cls.__init__).args[1:]
+					except:
+						constructor = inspect.signature(cls.__init__)
+						parameters = constructor.parameters
+						args_from_stored_constructor_py = [name for name, _ in parameters.items() if name != 'self']
+	    
 					args_from_stored_block_model = state['args']
 					if args_from_stored_block_model:
 						L = list(set(args_from_stored_constructor_py).symmetric_difference( set(args_from_stored_block_model)))
@@ -4183,9 +4208,15 @@ class ContainerBlock(Block, Diagram):
 									sys.stdout.write(_("Warning: %s come is old ('%s' arg is deprecated). We update it...\n"%(state['python_path'],arg)))
 									del state['args'][arg]
 								else:
-									arg_values = inspect.getargspec(cls.__init__).defaults
-									index = args_from_stored_constructor_py.index(arg)
-									state['args'].update({arg:arg_values[index]})
+									try:
+										arg_values = inspect.getargspec(cls.__init__).defaults
+									except ValueError:
+										constructor = inspect.signature(cls.__init__)
+										parameters = constructor.parameters
+										arg_values = [parameter.default for parameter in parameters.values() if parameter.default != inspect.Parameter.empty]
+									finally:
+										index = args_from_stored_constructor_py.index(arg)
+										state['args'].update({arg:arg_values[index]})
 					else:
 						#sys.stderr.write(_("args is None in setstate for ContainerBlock: %s\n"%str(cls)))
 						state['args'] = {}
@@ -4443,7 +4474,7 @@ class INode(ConnectableNode):
 
 		self.fill = [GREEN]
 
-		dc.SetFont(wx.Font(10, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+		dc.SetFont(wx.Font(10, 70, 0, 400))
 
 		### prot number
 		#dc.SetPen(wx.Pen(wx.NamedColour('black'), 20))
@@ -4528,7 +4559,7 @@ class ONode(ConnectableNode):
 		self.moveto(x, y)
 		self.fill = [RED]
 
-		dc.SetFont(wx.Font(10, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+		dc.SetFont(wx.Font(10, 70, 0, 400))
 		#dc.SetPen(wx.Pen(wx.NamedColour('black'), 20))
 
 		### prot number

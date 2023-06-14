@@ -487,7 +487,7 @@ class Zip:
 					if m :
 						importlib.reload(m)
 					else:
-						sys.stdout.write('%s module is not reloaded before saving the code!'%name)
+						sys.stdout.write('\n %s module is not reloaded before saving the code!'%name)
 			### clear to clean the import after exporting model (amd or cmd) and reload within the same instance of DEVSimPy
 			zipimport._zip_directory_cache.clear()
 

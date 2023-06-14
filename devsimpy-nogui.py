@@ -20,6 +20,7 @@ import os
 import sys
 import builtins
 import json
+from datetime import date
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
@@ -30,6 +31,11 @@ import json
 __version__ = '4.0'
 
 ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
+
+def serialize_date(obj):
+    if isinstance(obj, date):
+        return obj.isoformat()
+    raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
 ### specific builtin variables. (dont modify the defautls value. If you want to change it, go tot the PreferencesGUI from devsimpy interface.)
 builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'),
@@ -74,7 +80,6 @@ builtins.__dict__.update(builtin_dict)
 from InteractionYAML import YAMLHandler
 from StandaloneNoGUI import StandaloneNoGUI
 
-
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GLOBAL FUNCTIONS
@@ -112,7 +117,7 @@ if __name__ == '__main__':
 	# required filename
 	parser.add_argument("filename", help=_("dsp or yaml devsimpy file only"))
 	# optional simulation_time for simulation
-	parser.add_argument("simulation_time", nargs='?', help=_("Simulation time [inf|ntl]"), default=10, type=float)
+	parser.add_argument("simulation_time", nargs='?', help=_("Simulation time [inf|ntl]"), default='10', type=str)
 	# optional simulation_name for remote execution
 	parser.add_argument("-remote", help=_("Remote execution"), action="store_true")
 	parser.add_argument("-name", help=_("Simulation name"), type=str, default="simu")
@@ -130,7 +135,7 @@ if __name__ == '__main__':
 	group.add_argument("-json", help=_("Turn the YAML/DSP file to JSON"), action="store_true")
 	group.add_argument("-blockslist", help=_("Get the list of models in a master model"), action="store_true")
 	group.add_argument("-blockargs", help=_("Parameters of an atomic model (ex. -blockargs <label of block>)"), type=str)
-	parser.add_argument("-updateblockargs", help=_("Update parameters (ex. -blockargs <label of block> -updateblockargs <'''{'<key>':<val>}'''>"), type=str, default="")
+	parser.add_argument("-updateblockargs", help=_('''Update parameters (ex. -blockargs <label of block> -updateblockargs <"""{'<key1>':<val1>, '<key2>':<val2>, etc.}""">'''), type=str, default="")
 	parser.add_argument("-docker", help=_("Add a dockerfile to the zip"), action="store_true")
 	parser.add_argument("-sim_kernel", help=_("Add the sim kernel to the zip"), action="store_true")
  
@@ -158,8 +163,7 @@ if __name__ == '__main__':
 
 	if args.zip:
 		# zip exportation
-		if args.zip.endswith('.zip'):
-			
+		if args.zip.endswith('.zip'):		
 			standalone = StandaloneNoGUI(filename, args.zip, add_sim_kernel=args.sim_kernel, add_dockerfile=args.docker, rt=args.rt, kernel=args.kernel)
 			standalone.BuildZipPackage()
 		else:
@@ -180,22 +184,21 @@ if __name__ == '__main__':
 		# model block parameters read or update
 		label = args.blockargs
 		if args.updateblockargs:
+			print(args.updateblockargs)
 			# model block is updated 
 			args = json.loads(args.updateblockargs)
 			if isinstance(args,str):
 				args = eval(args)
 			new_args = yamlHandler.setYAMLBlockModelArgs(label, args)
-			sys.stdout.write(json.dumps(new_args))
+			sys.stdout.write(json.dumps(new_args, default=serialize_date))
 		else:
 			args = yamlHandler.getYAMLBlockModelArgs(label)
-			sys.stdout.write(json.dumps(args))
+			sys.stdout.write(json.dumps(args, default=serialize_date))
 
 	else:
 		# simulation
-		duration = args.simulation_time
-		if not isinstance(duration, str):
-			duration = float(duration)
-
+		duration_val = args.simulation_time		
+		duration = float('inf') if duration_val in ('ntl', 'inf') else int(duration_val)
 		devs = yamlHandler.getDevsInstance()
 		if devs:
 			simulate(devs, duration, args.name, args.remote)
