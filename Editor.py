@@ -24,7 +24,6 @@ import wx
 import os
 import sys
 import keyword
-import inspect
 import zipfile
 import threading
 import re
@@ -35,6 +34,10 @@ import types
 import traceback
 import collections
 
+import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
+    
 from tempfile import gettempdir
 from wx import stc
 

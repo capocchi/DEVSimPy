@@ -19,10 +19,13 @@ from __future__ import with_statement
 import sys
 import wx
 import os
-import inspect
 import subprocess
 import importlib
 
+import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
+    
 import gettext
 _ = gettext.gettext
 

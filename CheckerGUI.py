@@ -22,11 +22,14 @@
 
 import wx
 import os
-import inspect
 import sys
 import webbrowser
 import tempfile
 
+import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
+    
 from traceback import format_exception
 
 import gettext

@@ -18,11 +18,14 @@ import wx
 import os
 import sys
 import http.client
-import inspect
 import zipfile
 import importlib
 import shutil
 
+import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
+    
 import Container
 import Menu
 

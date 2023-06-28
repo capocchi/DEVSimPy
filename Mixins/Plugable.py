@@ -23,10 +23,13 @@
 import sys
 import os
 import zipimport
-import inspect
 import types
 import zipfile
 
+import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
+    
 import Decorators
 
 class Plugable:

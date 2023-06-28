@@ -582,7 +582,7 @@ class Base(object):
 
 			self.count = (timeLast/self.thread.model.FINAL_TIME)*100
 
-			wx.CallAfter(self._gauge.SetValue,self.count)
+			wx.CallAfter(self._gauge.SetValue,int(self.count))
 
 		### if simulation is over
 		if self.thread.end_flag:
@@ -597,7 +597,7 @@ class Base(object):
 			### check if gauge is full (can appear if timer is too slow)
 			if self.count != 100 or self.ntl:
 				self.count = 100
-				wx.CallAfter(self._gauge.SetValue, self.count)
+				wx.CallAfter(self._gauge.SetValue, int(self.count))
 
 			### update the status bar
 			self.statusbar.SetBackgroundColour('')

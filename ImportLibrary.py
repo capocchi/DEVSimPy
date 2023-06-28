@@ -20,7 +20,11 @@
 import os
 import sys
 import shutil
+
 import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
+    
 import wx
 import wx.lib.dialogs
 import wx.lib.filebrowsebutton as filebrowse

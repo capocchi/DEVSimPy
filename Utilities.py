@@ -28,12 +28,15 @@ import traceback
 import platform
 import string
 import re
-import inspect
 import shutil
 import configparser 
 import tempfile
 import pathlib
 
+import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
+    
 from datetime import datetime
 
 import gettext
@@ -486,9 +489,9 @@ def vibrate(windowName, distance=15, times=5, speed=0.05, direction='horizontal'
 	
 	for x in range(times):
 		time.sleep(speed)
-		windowName.Move(wx.Point(newLoc[0], newLoc[1]))
+		windowName.Move(wx.Point(int(newLoc[0]), int(newLoc[1])))
 		time.sleep(speed)
-		windowName.Move(wx.Point(location[0], location[1]))
+		windowName.Move(wx.Point(int(location[0]), int(location[1])))
 
 def GetUserConfigDir():
 	""" Return the standard location on this platform for application data.

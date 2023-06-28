@@ -27,9 +27,12 @@ import copy
 import weakref
 import heapq
 import threading
-import inspect
 import importlib
 
+import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
+    
 from PluginManager import PluginManager #trigger_event
 from Utilities import getOutDir
 

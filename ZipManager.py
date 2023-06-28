@@ -21,13 +21,16 @@ import zipfile
 import zipimport
 import io
 import re
-import inspect
 import types
 import importlib
 import tempfile
 import builtins
 import gettext
 
+import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
+    
 _ = gettext.gettext
 
 from PluginManager import PluginManager #trigger_event
@@ -40,10 +43,8 @@ from Utilities import listf, path_to_module,install_and_import, getFilePathInfo
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-
-
 def get_from_modules(name:str)->types.ModuleType:
-	""" get module with the correct name from the name that come from dir().
+	""" Get module with the correct name from the name that come from dir().
 	"""
 	for s,m in sys.modules.items():
 		if name == s or "%s.%s"%(name,name) == s:
