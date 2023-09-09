@@ -24,7 +24,6 @@ import builtins
 
 import os
 import sys
-import inspect
 import zipfile
 import re
 import types
@@ -32,6 +31,10 @@ import importlib
 import subprocess
 import tempfile
 
+import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
+    
 import gettext
 _ = gettext.gettext
 

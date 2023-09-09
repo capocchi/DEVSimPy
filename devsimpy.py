@@ -165,7 +165,7 @@ if os.path.exists(path) and not len(os.listdir(path)) == 0:
 	builtin_dict['PYPDEVS_241_SIM_STRATEGY_DICT'] = {'classic':'SimStrategy4', 'parallel':'SimStrategy5'}
 	builtin_dict['DEVS_DIR_PATH_DICT'].update({'PyPDEVS_241':os.path.join(path ,'src','pypdevs')})
 else:
-	sys.stdout.write("PyPDEVS Kernel in version 2.4.1 is not loaded.\nPlease install it in the directory %s using git (http://msdl.uantwerpen.be/git/yentl/PythonPDEVS.git)\n"%path)
+	sys.stdout.write("PyPDEVS Kernel in version 2.4.1 is not loaded.\nPlease install it in the directory %s using git (https://msdl.uantwerpen.be/git/yentl/PythonPDEVS.git)\n"%path)
 
 ### here berfore the __main__ function
 ### warning, some module (like SimulationGUI) initialise GUI_FLAG macro before (import block below)

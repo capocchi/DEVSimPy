@@ -22,10 +22,13 @@
 
 import os
 import sys
-import inspect
 import re
 import zipfile
 
+import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
+    
 import wx
 import wx.grid as gridlib
 from wx.lib import wordwrap
@@ -709,7 +712,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 		width, height = self.parent.GetSize()
 		width /= nb_cols
 		for col in range(nb_cols):
-			self.SetColSize(col, width)
+			self.SetColSize(int(col), int(width))
 
 		for i in range(nb_rows):
 			self.SetReadOnly(i, 0, True)

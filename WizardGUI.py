@@ -40,11 +40,14 @@ else:
 
 import os
 import sys
-import inspect
 import zipfile
 import wx.lib.filebrowsebutton as filebrowse
 import datetime
 
+import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
+    
 import Container
 import Components
 

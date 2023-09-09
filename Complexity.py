@@ -21,10 +21,13 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 import os, sys
-import inspect
 import Components
 import textwrap
 
+import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
+    
 from Utilities import getInstance
 
 def GetMacCabeMetric(path):

@@ -111,7 +111,7 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 		w = shape.x[1]-shape.x[0]
 		h = shape.y[1]-shape.y[0]
  
-		rect = wx.Rect(shape.x[0], shape.y[0], w, h)
+		rect = wx.Rect(int(shape.x[0]), int(shape.y[0]), int(w), int(h))
 
 		### rect1 and rect2 intersect
 		### abs (x - shape.x[0]) < w and abs (y - shape.y[0]) < h

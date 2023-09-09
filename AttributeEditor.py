@@ -99,7 +99,7 @@ class AttributeBase(object):
 		### width of new column depending of new wx.grid column
 		width /= nb_cols
 		for col in range(nb_cols):
-			self._list.SetColSize(col, width)
+			self._list.SetColSize(int(col), int(width))
 		### refresh grid
 		self._list.Refresh()
 
@@ -230,7 +230,7 @@ class QuickAttributeEditor(wx.Frame, Subject):
 		if wx.VERSION_STRING < '4.0':
 			xm,ym = self.ScreenToClientXY(xwindow, ywindow)
 		else:
-			xm,ym = self.ScreenToClient(wx.Point(xwindow, ywindow))
+			xm,ym = self.ScreenToClient(wx.Point(int(xwindow), int(ywindow)))
 
 		self.SetPosition((int(xm),int(ym)))
 

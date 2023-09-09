@@ -21,13 +21,16 @@ import pickle
 import zipfile
 import zipimport
 import gzip
-import inspect
 import builtins
 import gettext
 import importlib
 import subprocess
 import traceback
 
+import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
+    
 _ = gettext.gettext
 
 required_libs = ['yaml','ruamel']

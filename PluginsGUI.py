@@ -27,9 +27,11 @@ import sys
 import re
 import zipimport
 import zipfile
-import inspect
 import types
+
 import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
 
 from abc import abstractmethod
 from concurrent.futures import ThreadPoolExecutor

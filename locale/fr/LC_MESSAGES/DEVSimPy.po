@@ -3523,10 +3523,10 @@ msgstr "Entrée pour continuer (Ctrl+C pour quitter)"
 #, python-format
 msgid ""
 "PyPDEVS Kernel in version 2.4.1 is not loaded.\n"
-"Please install it in the directory %s using git (http://msdl.uantwerpen.be/git/yentl/PythonPDEVS.git)"
+"Please install it in the directory %s using git (https://msdl.uantwerpen.be/git/yentl/PythonPDEVS.git)"
 msgstr ""
 "Le noyau PyPDEVS 2.4.1 n'est pas chargé.\n"
-"Merci de l'installer dans le répertoire %s à partir de (http://msdl.uantwerpen.be/git/yentl/PythonPDEVS."
+"Merci de l'installer dans le répertoire %s à partir de (https://msdl.uantwerpen.be/git/yentl/PythonPDEVS."
 "git)"
 
 #: devsimpy.py:525

@@ -49,12 +49,15 @@ else:
 import os
 import sys
 import copy
-import inspect
 import re
 import pickle
 import zipfile
 import array
 
+import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
+    
 from abc import ABC
 from tempfile import gettempdir
 from traceback import format_exception
@@ -1355,7 +1358,7 @@ class RoundedRectangleShape(Shape):
 		x,y=int(self.x[0]), int(self.y[0])
 
 		### Prepare label drawing
-		rect = wx.Rect(x,y, width, height)
+		rect = wx.Rect(int(x),int(y), int(width), int(height))
 		r=4.0
 		if wx.VERSION_STRING < '4.0':
 			dc.DrawRoundedRectangleRect(rect, r)
@@ -1425,9 +1428,9 @@ class PolygonShape(Shape):
 
 #               dx = (self.x[1]-self.x[0])/2
 		dy = (self.y[1]-self.y[0])/2
-		p0 = wx.Point(self.x[0],self.y[0]-dy/2)
-		p1 = wx.Point(self.x[0],self.y[1]+dy/2)
-		p2 = wx.Point(self.x[1], self.y[0]+dy)
+		p0 = wx.Point(int(self.x[0]), int(self.y[0]-dy/2))
+		p1 = wx.Point(int(self.x[0]), int(self.y[1]+dy/2))
+		p2 = wx.Point(int(self.x[1]), int(self.y[0]+dy))
 		offsetx = (self.x[1]-self.x[0])/2
 
 		dc.DrawPolygon((p0,p1,p2),offsetx)
@@ -1451,7 +1454,7 @@ class CircleShape(Shape):
 	def draw(self,dc):
 		Shape.draw(self,dc)
 		dc.SetFont(wx.Font(10, self.font[1],self.font[2], self.font[3], False, self.font[4]))
-		dc.DrawCircle(int(self.x[0]+self.x[1])/2, int(self.y[0]+self.y[1])/2, self.r)
+		dc.DrawCircle(int((self.x[0]+self.x[1])/2), int((self.y[0]+self.y[1])/2), int(self.r))
 
 	def HitTest(self, x, y):
 		if x < self.x[0]: return False
@@ -2164,7 +2167,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 			### mouse positions
 			xwindow, ywindow = wx.GetMousePosition()
-			xm,ym = self.ScreenToClient(wx.Point(xwindow, ywindow))
+			xm,ym = self.ScreenToClient(wx.Point(int(xwindow), int(ywindow)))
 
 			gmwiz = self.OnStartWizard(event)
 			
@@ -2577,7 +2580,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 								w = (s.x[1]-s.x[0])*self.scalex
 								h = (s.y[1]-s.y[0])*self.scaley
 								
-								recS = wx.Rect(x,y,w,h)
+								recS = wx.Rect(int(x),int(y),int(w),int(h))
 
 								# rect hit test
 								if self.permRect.Contains(recS):
@@ -2683,7 +2686,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			if flag:
 				# mouse positions
 				xwindow, ywindow = wx.GetMousePosition()
-				xm,ym = self.ScreenToClient(wx.Point(xwindow, ywindow))
+				xm,ym = self.ScreenToClient(wx.Point(int(xwindow), int(ywindow)))
 
 				for s in {m for m in selectedShape if isinstance(m, Block)}:
 					x = s.x[0]*self.scalex
@@ -3053,8 +3056,8 @@ class LinesShape(Shape):
 	
 		### pour le rectangle en bout de connexion
 		dc.SetBrush(wx.Brush(RED_LIGHT))
-		pt1 = wx.Point(self.x[-1]-10/2, self.y[-1]-10/2) 
-		pt2 = wx.Point(self.x[0]-10/2, self.y[0]-10/2)
+		pt1 = wx.Point(int(self.x[-1]-10/2), int(self.y[-1]-10/2)) 
+		pt2 = wx.Point(int(self.x[0]-10/2), int(self.y[0]-10/2))
 		wx.DC.DrawRectangle(dc, pt1, wx.Size(10, 10))
 		wx.DC.DrawRectangle(dc, pt2, wx.Size(10, 10))
 		
@@ -3111,7 +3114,7 @@ class LinesShape(Shape):
 				x,y = event.GetPositionTuple()
 			else:
 				xwindow, ywindow = wx.GetMousePosition()
-				x,y = canvas.ScreenToClient(wx.Point(xwindow, ywindow))
+				x,y = canvas.ScreenToClient(wx.Point(int(xwindow), int(ywindow)))
 
 		except Exception as info:
 			sys.stdout.write(_("Error in OnLeftDClick for %s : %s\n")%(self,info))
@@ -3561,26 +3564,26 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 			if os.path.isabs(image_path):
 				img = wx.Image(image_path).Scale(self.w, self.h, wx.IMAGE_QUALITY_HIGH)
 				wxbmp = img.ConvertToBitmap()
-				dc.DrawBitmap(wxbmp, self.x[0], self.y[0], True)
+				dc.DrawBitmap(wxbmp, int(self.x[0]), int(self.y[0]), True)
 
 		### Draw lock picture
 		if self.lock_flag:
 			img =  wx.Bitmap(os.path.join(ICON_PATH_16_16, 'lock.png'), wx.BITMAP_TYPE_ANY)
-			dc.DrawBitmap(img, self.x[0], self.y[0])
+			dc.DrawBitmap(img, int(self.x[0]), int(self.y[0]))
 
 		### Draw filename path flag picture
 		if self.bad_filename_path_flag:
 			img = wx.Bitmap(os.path.join(ICON_PATH_16_16, 'flag_exclamation.png'), wx.BITMAP_TYPE_ANY)
-			dc.DrawBitmap(img, self.x[0]+15, self.y[0])
+			dc.DrawBitmap(img, int(self.x[0]+15), int(self.y[0]))
 
 		#img = wx.Bitmap(os.path.join(ICON_PATH_16_16, 'atomic3.png'), wx.BITMAP_TYPE_ANY)
 		#dc.DrawBitmap( img, self.x[0]+30, self.y[0] )
 
 		### Draw label
-		dc.DrawText(self.label, mx, my)
+		dc.DrawText(self.label, int(mx), int(my))
 
 		if hasattr(self,'status_label'):
-			dc.DrawText(self.status_label, mx, my+20)
+			dc.DrawText(self.status_label, int(mx), int(my+20))
 		else:
 			self.status_label = ""
 
@@ -4046,7 +4049,7 @@ class CodeBlock(Achievable, Block):
 			### inform about the nature of the block using icon
 			name = 'atomic3.png' if self.model_path != "" else 'pythonFile.png' if self.python_path.endswith('.py') else 'pyc.png' 
 			img = wx.Bitmap(os.path.join(ICON_PATH_16_16, name), wx.BITMAP_TYPE_ANY)
-			dc.DrawBitmap(img, self.x[1]-20, self.y[0])
+			dc.DrawBitmap(img, int(self.x[1]-20), int(self.y[0]))
 
 		Block.draw(self, dc)
 
@@ -4284,9 +4287,9 @@ class ContainerBlock(Block, Diagram):
 
 			### Draw the number of devs models inside
 			n = str(self.GetBlockCount())
-			dc.DrawText(n, self.x[1]-15-len(n), self.y[1]-20)
+			dc.DrawText(n, int(self.x[1]-15-len(n)), int(self.y[1]-20))
   
-			dc.DrawBitmap(img, self.x[1]-20, self.y[0])
+			dc.DrawBitmap(img, int(self.x[1]-20), int(self.y[0]))
 
 		Block.draw(self, dc)
 
@@ -4497,7 +4500,7 @@ class INode(ConnectableNode):
 				yl = y+2
 
 			### Draw label in port
-			dc.DrawText(self.label, xl, yl)
+			dc.DrawText(self.label, int(xl), int(yl))
 
 		### Drawing
 		PointShape.draw(self, dc)
@@ -4582,7 +4585,7 @@ class ONode(ConnectableNode):
 				yl = y-2
 
 			### Draw label above port
-			dc.DrawText(self.label, xl, yl)
+			dc.DrawText(self.label, int(xl), int(yl))
 
 		### Drawing
 		PointShape.draw(self, dc)
@@ -4728,11 +4731,11 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 
 		mx = int(self.x[0])+2
 
-		dc.DrawText(self.label, mx, my)
+		dc.DrawText(self.label, int(mx), int(my))
 
 		if self.lock_flag:
 			img = wx.Bitmap(os.path.join(ICON_PATH_16_16, 'lock.png'),wx.BITMAP_TYPE_ANY)
-			dc.DrawBitmap(img, self.x[0]+w/3, self.y[0])
+			dc.DrawBitmap(img, int(self.x[0]+w/3), int(self.y[0]))
 
 	def leftUp(self, event):
 		""" Left up event has been invoked.
