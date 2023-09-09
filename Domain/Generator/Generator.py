@@ -70,7 +70,7 @@ class Generator(DomainBehavior):
 				msg = Message(data, self.timeNext)
 				i = self.__listValues.index(item)
 
-				return self.poke(self.OPorts[i], msg)
+				self.poke(self.OPorts[i], msg)
 		else:
 			data = [self.V[0].pop(0), 0.0, 0.0]
 			msg = Message(data, self.timeNext)
