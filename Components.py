@@ -104,7 +104,17 @@ def GetClass(elem):
   
 		cls = next(filter(lambda c: c not in DomainClass and issubclass(c, DomainClass) and c.__name__ in elem, clsmembers.values()), None)
 
-		if not cls: sys.stderr.write(_("Class unknown..."))
+		if not cls:
+			sys.stderr.write(_("\nClass name and model name are different!\nWe try to instance the class %s that inherite of DomainClass!"%elem))
+			cls = next(filter(lambda c: c not in DomainClass and issubclass(c, DomainClass), clsmembers.values()), None)
+			if cls:
+				sys.stderr.write(_("\nClass instanciated but you need to verify if its a good one!\n"))
+		if not cls:
+
+			sys.stderr.write(_("\nClass unknown..."))
+			# sys.stderr.write(f"path: {elem} \n clsmembers:{clsmembers}\n")
+			# for c in clsmembers.values():
+				# print(c.__name__, c not in DomainClass, issubclass(c, DomainClass), c.__name__ in elem)
 
 		return cls
 

@@ -32,8 +32,9 @@ import shutil
 import configparser 
 import tempfile
 import pathlib
-
+import types
 import inspect
+
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
     
