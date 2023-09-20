@@ -67,8 +67,8 @@ def get_limit(d):
 	"""
 	L1,L2 = [],[]
 	for c in d:
-		bisect.insort(L1, c[0])
-		bisect.insort(L2, c[1])
+		bisect.insort(L1, float(c[0]))
+		bisect.insort(L2, float(c[1]))
 
 	### 0.5 in order to visualize the max and min value correctly
 	return L1[0],L1[-1],L2[0]-0.5,L2[-1]+0.5
