@@ -3,14 +3,26 @@
 import json
 import os
 import traceback
+from datetime import datetime
 
 def to_Python(val):
     if val in ('true', 'True'):
         return True
     elif val in ('false', 'False'):
         return False
-    elif str(val).replace('.','').replace('-','').isdigit():
-        return eval(str(val))
+    elif type(val) is str:
+        # Try to parse the string as a date
+        try:
+            datetime_object = datetime.strptime(val, "%Y-%m-%d")
+            is_valid_date = True
+        except ValueError:
+            is_valid_date = False
+
+        # Check if it's a valid date using an if statement
+        if is_valid_date:
+            return val
+        elif str(val).replace('.','').replace('-','').isdigit():
+            return eval(str(val))
     return val
 
 class YAMLHandler:

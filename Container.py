@@ -3790,7 +3790,6 @@ class CodeBlock(Achievable, Block):
 
 					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(model_path[model_path.index(dir_name):]).strip('[]')))
 
-					print(path)
 					### perhaps path is wrong due to a change in the Domain lib !
 					### Try to find the model by its name in the Domain directories (multipe path can be occur)
 #					if not os.path.exists(path):

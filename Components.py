@@ -104,6 +104,7 @@ def GetClass(elem):
   
 		cls = next(filter(lambda c: c not in DomainClass and issubclass(c, DomainClass) and c.__name__ in elem, clsmembers.values()), None)
 
+		### try to catch and resolve instanciation of unknown class
 		if not cls:
 			sys.stderr.write(_("\nClass name and model name are different!\nWe try to instance the class %s that inherite of DomainClass!"%elem))
 			cls = next(filter(lambda c: c not in DomainClass and issubclass(c, DomainClass), clsmembers.values()), None)

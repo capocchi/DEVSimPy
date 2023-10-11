@@ -330,6 +330,7 @@ class GeneralPluginsList(CheckListCtrl):
 									##i+=1
 									#wx.CallLater(500, self.Importing, root, basename,)
 								#else:
+								
 								self.Importing(root, basename)
 
 			self.is_populate = True
