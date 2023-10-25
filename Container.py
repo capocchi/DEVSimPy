@@ -2333,11 +2333,12 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			"""
 			"""
 			model = self.getInterceptedShape(event)
+			
 			if model:
-			#try:
-				model.OnLeftDClick(event)
-			#except Exception, info:
-			#	wx.MessageBox(_("An error is occured during double clic: %s")%info)
+				try:
+					model.OnLeftDClick(event)
+				except Exception as info:
+					wx.MessageBox(_("An error is occured during double clic: %s")%info)
 			event.Skip()
 
 		def Undo(self):
@@ -3052,7 +3053,9 @@ class LinesShape(Shape):
 		else:
 			pass
 
-		dc.DrawLines(L)
+		integer_list = [(int(x), int(y)) for x, y in L]
+
+		dc.DrawLines(integer_list)
 	
 		### pour le rectangle en bout de connexion
 		dc.SetBrush(wx.Brush(RED_LIGHT))
@@ -3547,24 +3550,32 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		self.w = self.x[1]- self.x[0]
 		self.h = self.y[1]- self.y[0]
 
-		### Draw background picture
-		if os.path.isabs(self.image_path):
-    	
-			dir_name = os.path.dirname(self.image_path)
+		if self.image_path != "" and not os.path.exists(self.image_path):
+			print(_(f"{self.image_path} does not exists in the {self.label} model!"))
+			self.image_path = ""
+		else:
+			### Draw background picture
+			if os.path.isabs(self.image_path):
+			
+				dir_name = os.path.dirname(self.image_path)
 
-			if zipfile.is_zipfile(dir_name):
-				image_name = os.path.basename(self.image_path)
-				image_path = os.path.join(gettempdir(), image_name)
-				sourceZip = zipfile.ZipFile(dir_name, 'r')
-				sourceZip.extract(str(image_name), gettempdir())
-				sourceZip.close()
-			else:
-				image_path = self.image_path
+				if zipfile.is_zipfile(dir_name):
+					image_name = os.path.basename(self.image_path)
+					image_path = os.path.join(gettempdir(), image_name)
+					sourceZip = zipfile.ZipFile(dir_name, 'r')
+					sourceZip.extract(str(image_name), gettempdir())
+					sourceZip.close()
+				else:
+					image_path = self.image_path
 
-			if os.path.isabs(image_path):
-				img = wx.Image(image_path).Scale(self.w, self.h, wx.IMAGE_QUALITY_HIGH)
-				wxbmp = img.ConvertToBitmap()
-				dc.DrawBitmap(wxbmp, int(self.x[0]), int(self.y[0]), True)
+				if image_path != "" and not os.path.exists(image_path):
+					print(_(f"{image_path} does not exists in the {self.label} model!"))
+					image_path = ""
+				else:
+					img = wx.Image(image_path)
+					img_scaled = img.Scale(int(self.w), int(self.h), wx.IMAGE_QUALITY_HIGH)
+					wxbmp = img_scaled.ConvertToBitmap()
+					dc.DrawBitmap(wxbmp, int(self.x[0]), int(self.y[0]), True)
 
 		### Draw lock picture
 		if self.lock_flag:

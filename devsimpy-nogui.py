@@ -184,7 +184,6 @@ if __name__ == '__main__':
 		# model block parameters read or update
 		label = args.blockargs
 		if args.updateblockargs:
-			print(args.updateblockargs)
 			# model block is updated 
 			args = json.loads(args.updateblockargs)
 			if isinstance(args,str):

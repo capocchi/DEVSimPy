@@ -294,8 +294,7 @@ class CodeCB(wx.Choicebook):
 
 	def OnPageChanging(self, event):
 		event.Skip()
-
-
+		
 ### --------------------------------------------------------------
 class CutomGridCellAutoWrapStringRenderer(GridCellRenderer):
 	""" Custom rendere for property grid
@@ -475,6 +474,8 @@ class CustomDataTable(GridTableBase):
 			self.dataTypes.append(self.GetTypeList(val))
 			self.nb_behavior_var += 1
 
+		
+
 		if args_in_constructor:
 			for attr_name, val in list(args_in_constructor.items()):
 				if attr_name not in list(infoBlockBehavioralDict.keys()):
@@ -498,7 +499,7 @@ class CustomDataTable(GridTableBase):
 
 		attr = gridlib.GridCellAttr()
 		val = self.GetValue(row, col)
-
+	
 		### format font of attr
 		if col == 0:
 			attr.SetReadOnly(True)
@@ -732,7 +733,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 		self.GetGridColLabelWindow().Bind(wx.EVT_MOTION,self.onMouseOverColLabel)
 		# put a tooltip on a row label
 		self.InstallGridHint(self, table.GetInformation)
-
+		
 	###
 	def InstallGridHint(self, grid, rowcolhintcallback=None):
 		"""
@@ -749,7 +750,9 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 			
 			if (row,col) != prev_rowcol and row >= 0 and col >= 0:
 				prev_rowcol[:] = [row,col]
+				
 				hinttext = rowcolhintcallback(table.GetValue(row, col))
+				
 				### display the python path on tooltip
 				if self.GetCellValue(row, 1).endswith(('.py','pyc','csv','dat','txt')):
 					if col == 1:
