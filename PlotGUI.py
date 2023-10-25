@@ -34,6 +34,7 @@ import wx.lib.agw.aui as aui
 
 try:
 	import matplotlib as mpl
+	import matplotlib.figure as fig
 	from matplotlib.backends.backend_wxagg import (
 		FigureCanvasWxAgg as FigureCanvas,
 		NavigationToolbar2WxAgg as NavigationToolbar)
@@ -124,7 +125,7 @@ def PlotManager(parent, label, atomicModel, xl, yl):
 class PlotPanel(wx.Panel):
 	def __init__(self, parent, id=-1, dpi=None, **kwargs):
 		wx.Panel.__init__(self, parent, id=id, **kwargs)
-		self.figure = mpl.figure.Figure(dpi=dpi, figsize=(2, 2))
+		self.figure = fig.Figure(dpi=dpi, figsize=(2, 2))
 		self.canvas = FigureCanvas(self, -1, self.figure)
 		self.toolbar = NavigationToolbar(self.canvas)
 		self.toolbar.Realize()
@@ -517,6 +518,7 @@ class StaticPlot(PlotFrame):
 		### the frame used to display the data is not PlotFrame.
 		if (isinstance(data, dict) and isinstance(data[0][0][-1], str)) or (isinstance(data, list) and isinstance(data[0][-1], str)):
 			wx.Frame.__init__(self, parent, id, title, size=(800, 500), style=wx.DEFAULT_FRAME_STYLE|wx.CLIP_CHILDREN)
+			self.normalize = False
 			self.OnPlotStep()
 		else:
 
