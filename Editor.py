@@ -1558,6 +1558,7 @@ class Base(object):
 
 			new_instance = self.ConfigSaving(base_name, dir_name, code)
 
+			
 			### there is error in file ?
 			currentPage.error_flag = isinstance(new_instance, Exception)
 
@@ -1694,6 +1695,7 @@ class Base(object):
 
 		### some errors in file
 		else:
+			print("In checkErrors: ",new_instance)
 			self.SavingErrors(new_instance)
 
 	# NOTE: Editor :: SavingErrors			=> Errors treatment
@@ -1794,6 +1796,8 @@ class Base(object):
 			code = '\n'.join(code.splitlines()) + '\n'
 
 			new_instance = self.ConfigSaving(base_name, dir_name, code)
+
+
 
 			### there is error in file ?
 			currentPage.error_flag = isinstance(new_instance, Exception)

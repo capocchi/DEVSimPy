@@ -169,7 +169,7 @@ def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True
         json_report['output'].append({'label':m.name, 'plotUrl':m.plotUrl}) 
             
     with open(simu_name+'.report', 'w') as f:
-            f.write(json.dumps(json_report))
+        f.write(json.dumps(json_report))
 
     return True
 
