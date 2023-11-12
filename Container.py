@@ -1072,10 +1072,10 @@ class Diagram(Savable, Structurable):
 		"""
 
 		for m in self.GetFlatBlockShapeList():
-			if m.label == label:
+			if m.label.strip() == label.strip():
 				return m
 
-		#sys.stderr.write(_("Block %s not found.\n"%(label)))
+		sys.stderr.write(_("Block %s not found.\n"%(label)))
 		return False
 
 	def GetShapeList(self):
@@ -3887,7 +3887,7 @@ class CodeBlock(Achievable, Block):
 				### find all members that is class
 				try:
 					module = sys.modules[cls.__name__]
-				except KeyError:
+				except :
 					module = inspect.getmodule(cls)
 				finally:
 					clsmembers = inspect.getmembers(module, inspect.isclass)

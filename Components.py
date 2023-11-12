@@ -338,7 +338,7 @@ class GenericComponent:
 
 		### check if a filename is needed in args (bad_filename_path_flag)
 		### find all word containning 'filename' without considering the casse
-		m = [re.match('[a-zA-Z]*filename[_-a-zA-Z0-9]*',s, re.IGNORECASE) for s in model.args]
+		m = [re.match('[_-a-zA-Z0-9]*filename[_-a-zA-Z0-9]*',s, re.IGNORECASE) for s in model.args]
 		filename_list = [a.group(0) for a in [s for s in m if s is not None]]
 		### for all filename attr
 		for name in filename_list:
@@ -631,14 +631,15 @@ class DEVSComponent:
 
 	@staticmethod
 	def debugger(m, msg):
-		bm = m.getBlockModel()
-		path = os.path.join(gettempdir(),'%s.%d.devsimpy.log'%(str(bm.label), id(bm)))
+		if builtins.__dict__.get('GUI_FLAG',True):
+			bm = m.getBlockModel()
+			path = os.path.join(gettempdir(),'%s.%d.devsimpy.log'%(str(bm.label), id(bm)))
 		
-		with open(path,'a') as f:
-			try:
-				f.write("clock %s: %s\n"%(m.timeNext, msg))
-			except Exception:
-				f.write("clock %d: %s\n"%(0.0, str(msg)))
+			with open(path,'a') as f:
+				try:
+					f.write("clock %s: %s\n"%(m.timeNext, msg))
+				except Exception:
+					f.write("clock %d: %s\n"%(0.0, str(msg)))
 
 	def setDEVSPythonPath(self, python_path:str):
 		if os.path.isfile(python_path) or zipfile.is_zipfile(os.path.dirname(python_path)):
