@@ -1529,8 +1529,6 @@ class MainApplication(wx.Frame):
 			It embedded also the yaml version of the current diagram in order to be able to stimulate him.
 		"""
 
-		
-
 		obj = event.GetEventObject()
 
 		if isinstance(obj, wx.ToolBar) and isinstance(obj.GetParent(), DetachedFrame):
