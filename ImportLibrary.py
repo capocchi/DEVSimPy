@@ -267,7 +267,7 @@ class ImportLibrary(wx.Dialog):
 
 		vbox.Add(self._cb, 1, wx.EXPAND | wx.TOP, 3)
 		vbox.Add((-1, 10))
-		vbox.Add(hbox1, 0.5, wx.ALL|wx.ALIGN_CENTER)
+		vbox.Add(hbox1, 0, wx.ALL|wx.ALIGN_CENTER)
 		vbox.Add((-1, 10))
 
 		hbox.Add(rightPanel, 1, wx.EXPAND, 5, 5)
