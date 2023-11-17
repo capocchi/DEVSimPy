@@ -486,6 +486,17 @@ class DumpYAMLFile(DumpBase):
 			yaml.register_class(PickledCollection)
 			with open(fileName, 'w') as yf:
 				ruamel.dump(PickledCollection(obj_dumped), stream=yf, default_flow_style=False) 
+		except AttributeError as info:
+			try:
+				yaml = ruamel.YAML(typ='unsafe', pure=True)
+				with open(fileName, 'w') as yf:
+					yaml.dump(PickledCollection(obj_dumped), stream=yf)
+			except Exception as info:
+				tb = traceback.format_exc()
+				sys.stderr.write(_("\nProblem saving: %s -- %s\n")%(str(fileName),str(tb)))
+				return False
+			else:
+				return True	
 		except Exception as info:
 			tb = traceback.format_exc()
 			sys.stderr.write(_("\nProblem saving: %s -- %s\n")%(str(fileName),str(tb)))

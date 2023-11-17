@@ -2478,6 +2478,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 
 		### insert new icon in toolbar (icon are not available in embeded editor (Show menu)
 		tb = self.GetToolBar()
+
 		tb.AddSeparator()
 		#tb.InsertSeparator(tb.GetToolsCount())
 

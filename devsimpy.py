@@ -1549,13 +1549,15 @@ class MainApplication(wx.Frame):
 		### temp path to save the dsp as a yaml
 		path = os.path.join(gettempdir(), os.path.basename(diagram.last_name_saved).replace('.dsp','.yaml'))  
 
+
 		### try to save the current diagram into a temp yaml file and launch the diag for the standalone exportation 
-		if Container.Diagram.SaveFile(diagram, path):
-			frame = StandaloneGUI(None, -1, _('Standalone settings'))
-			frame.SetYAML(path)
-			frame.Show(True)
-		else:
-			wx.MessageBox(_("An error occurred during the saving as yaml file."), _("Error"), wx.OK | wx.ICON_ERROR)
+		if os.path.exists(path):
+			if Container.Diagram.SaveFile(diagram, path):
+				frame = StandaloneGUI(None, -1, _('Standalone settings'))
+				frame.SetYAML(path)
+				frame.Show(True)
+			else:
+				wx.MessageBox(_("An error occurred during the saving as yaml file."), _("Error"), wx.OK | wx.ICON_ERROR)
 	###
 	def OnImport(self, event):
 		""" Import DEVSimPy library from Domain directory.
