@@ -42,13 +42,14 @@ import os
 
 ### import the DEVS module depending on the selected DEVS package in DEVSKernel directory
 for pydevs_dir, path in builtins.__dict__['DEVS_DIR_PATH_DICT'].items():
-    ### split from DEVSKernel string and replace separator with point
-    d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
+	if os.path.exists(path):
+		### split from DEVSKernel string and replace separator with point
+		d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
 
-	### for py 3.X
-    import importlib
-    exec("%s = importlib.import_module('DEVSKernel%s.DEVS')"%(pydevs_dir,d))
-        
+		### for py 3.X
+		import importlib
+		exec("%s = importlib.import_module('DEVSKernel%s.DEVS')"%(pydevs_dir,d))
+	
     #exec("import DEVSKernel%s.DEVS as %s"%(d,pydevs_dir))
 
 #import DEVSKernel.PyDEVS.DEVS as PyDEVS
