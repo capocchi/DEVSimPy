@@ -11,9 +11,9 @@
 ![Anurag's github stats](https://github-readme-stats.vercel.app/api?username=anuraghazra)
 
 # What is DEVSimPy
-DEVSimPy is an open Source project (under GPL V.3 license) supported by the [SPE](http://http://spe.univ-corse.fr/) (Sciences pour l'Environnement) team of the UMR CNRS 6134 Lab. of the [University of Corsica "Pasquale Paoli"](http://univ-corse.fr). This aim is to provide a GUI for the Modeling & Simulation of PyDEVS and [PyPDEVS](http://msdl.cs.mcgill.ca/projects/DEVS/PythonPDEVS) models. PyDEVS is an API allowing the implementation of the DEVS formalism in Python language. PyPDEVS is the parallel version of PyDEVS based on Parallel DEVS formalism which is an extension of the DEVS formalism. 
- The DEVSimPy environment has been developed in Python with the [wxPython](http://www.wxpython.org) graphical library without 
-strong dependencies other than the [Scipy](http://www.scipy.org) and the [Numpy](http://www.numpy.org) scientific python libraries. The basic idea behind DEVSimPy is to wrap the PyDEVS API with a GUI allowing significant simplification of handling PyDEVS/PyPDEVS models (like the coupling between models or their storage into libraries).
+DEVSimPy is an open-source project (under GPL V.3 license) supported by the [SPE](http://http://spe.univ-corse.fr/) (Sciences pour l'Environnement) team of the UMR CNRS 6134 Lab. of the [University of Corsica "Pasquale Paoli"](http://univ-corse.fr). The project aims to provide a GUI for the Modeling & Simulation of PyDEVS and [PyPDEVS](http://msdl.cs.mcgill.ca/projects/DEVS/PythonPDEVS) models. PyDEVS is an API that allows the implementation of the DEVS formalism in the Python language. PyPDEVS is the parallel version of PyDEVS based on the Parallel DEVS formalism, which is an extension of the DEVS formalism.
+
+The DEVSimPy environment has been developed in Python with the [wxPython](http://www.wxpython.org) graphical library without strong dependencies other than the [Scipy](http://www.scipy.org) and the [Numpy](http://www.numpy.org) scientific Python libraries. The basic idea behind DEVSimPy is to wrap the PyDEVS API with a GUI, allowing a significant simplification of handling PyDEVS/PyPDEVS models (such as the coupling between models or their storage into libraries).
 
 # Requirements
 The use of DEVSimPy requires:
@@ -21,32 +21,37 @@ The use of DEVSimPy requires:
 - [Python](http://www.python.org) version 3.7+
 - [wxPython](http://www.wxpython.org) version 4.0+
 - [Scipy](http://www.scipy.org) and [Numpy](http://www.numpy.org) (optional, for spectrum analysis)
-- DEVSimPy should be used like a normal Python file, i.e., double-clicking on the devsimpy.py file which is located in the root directory or writing python devismpy.py into a python console.
 
-Users which don't want to install python with all dependencies can use [Portable Python](http://portablepython.com) (version 2.x). Then, just extract DEVSimPy archive and edit the devsimpy.py file with [PyScripter](https://sourceforge.net/projects/pyscripter/) to execute it. Users can also execute DEVSimPy through the conda env file loaded using the [conda_devsimpy_env.yml](https://github.com/capocchi/DEVSimPy-site/raw/gh-pages/conda_devsimpy_env.yml) file (available from the [DEVSimPy-site](https://github.com/capocchi/DEVSimPy-site) repository).
+DEVSimPy should be used like a normal Python file. You can either double-click on the `devsimpy.py` file located in the root directory or run `python devsimpy.py` in a Python console.
 
-An XUbuntu 19.10 virtual machine including DEVSimPy can be donwloaded from [DEVSimPy-on-XUbuntu19.10.ova](https://mycore.core-cloud.net/index.php/s/o8T8mAzmuuHDokh). The login and password of the distribution (root) are: devsimpy-user/devsimpy. If you want to have the latest version of DEVSimPy, please execute 'git pull' in the DEVSimPy directory before starting or start DEVSimPy by double clicking on the desktop icon and go to Help->Update->From Git Repository (pull).
+For users who prefer not to install Python with all dependencies, [Portable Python](http://portablepython.com) (version 2.x) can be used. Extract the DEVSimPy archive and edit the `devsimpy.py` file with [PyScripter](https://sourceforge.net/projects/pyscripter/) to execute it. Alternatively, users can run DEVSimPy through the conda environment file loaded using the [conda_devsimpy_env.yml](https://github.com/capocchi/DEVSimPy-site/raw/gh-pages/conda_devsimpy_env.yml) file (available from the [DEVSimPy-site](https://github.com/capocchi/DEVSimPy-site) repository).
 
-An archive of a conda environment which includes all the binaries of the packages needed for the DEVSimPy environment is available here: [py38.tar.gz](https://mycore.core-cloud.net/index.php/s/5nNgyvwps6O2kUy). This is useful when you want to reproduce a compatible environment for DEVSimPy and avoid all installation and dependencies requirement. 
+A virtual machine with XUbuntu 19.10, including DEVSimPy, can be downloaded from [DEVSimPy-on-XUbuntu19.10.ova](https://mycore.core-cloud.net/index.php/s/o8T8mAzmuuHDokh). The login and password for the distribution (root) are: devsimpy-user/devsimpy. To get the latest version of DEVSimPy, execute 'git pull' in the DEVSimPy directory before starting or start DEVSimPy by double-clicking on the desktop icon and going to Help->Update->From Git Repository (pull).
+
+An archive of a conda environment, which includes all the binaries of the packages needed for the DEVSimPy environment, is available here: [py38.tar.gz](https://mycore.core-cloud.net/index.php/s/5nNgyvwps6O2kUy). This is useful when you want to reproduce a compatible environment for DEVSimPy and avoid all installation and dependency requirements.
 
 # Features
-With DEVSimPy you can:
+With DEVSimPy, you can:
 
-- Model a DEVS system and save or export it into a library
-- Edit the code of a DEVS model to modify behavior's (also during the simulation)
-- Import existing library of models (python code or DEVSimPy specific models) which allows the specific domain modeling (Power system, continuous, etc)
-- Automatically simulate the system and perform its analysis during the simulation (using the suspend option)
-- Load plug-ins to extend DEVSimPy in order to perform activity tracking, trace the simulation with visual tools, etc.
+- Model a DEVS system and save or export it into a library.
+- Edit the code of a DEVS model to modify behavior (also during the simulation).
+- Import existing libraries of models (Python code or DEVSimPy-specific models) to enable domain-specific modeling (e.g., Power system, continuous, etc.).
+- Automatically simulate the system and perform analysis during the simulation (using the suspend option).
+- Load plugins to extend DEVSimPy for activities like tracking, simulating with visual tools, etc.
 - Generate YAML models for the [DEVSimPy-mob](https://github.com/capocchi/DEVSimPy_mob) mobile application.
-- and more.
+- And more.
 
-DEVSimPy can be executed in command line by using the devsimpy-nogui.py script. For exemple, considering that the file test.dsp was already modeled with DEVSimPy, the following command line can be used to simulate it during 10 simlation time step with the PDEVS kernel:
+DEVSimPy can be executed from the command line using the `devsimpy-nogui.py` script. For example, assuming the file `test.dsp` was already modeled with DEVSimPy, the following command line can be used to simulate it for 10 simulation time steps with the PDEVS kernel:
+```bash
+python devsimpy-nogui.py test.dsp -sim 10 -kernel pdevs
+
 ```sh
 $ python devsimpy-nogui test.dsp -kernel PyDEVS 10
 ```
 For more information about the use of the devsimpy-nogui script, type python devsimpy-nogui.py -h
 
 The simulation process used by DEVSimPy can be used through a REST API by installing the [DEVSimPy-REST](https://github.com/capocchi/DEVSimPy_rest) server.
+
 # Installation
 
 To get DEVSimPy v4.0 package with all Git submodules: 

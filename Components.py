@@ -385,7 +385,7 @@ class GenericComponent:
 						new_temp_file = os.path.join(tempfile.gettempdir(), new_name+'.py')
 
 					
-					# if os.path.isfile(new_temp_file):
+					# if os.path.exists(new_temp_file):
 						# os.remove(new_temp_file)
 						
 					### rename temp_file to new_temp_file according to the correspondance between the name of the python file and the name of the archive
