@@ -383,12 +383,14 @@ class GenericComponent:
 						### first we must change the name of this python file in order to have the same as the archive!
 						temp_file = zf.extract(file, tempfile.gettempdir())
 						new_temp_file = os.path.join(tempfile.gettempdir(), new_name+'.py')
-						### rename temp_file to new_temp_file according to the correspondance between the name of the python file and the name of the archive
-						### for exemple C:\Users\Laurent\AppData\Local\Temp\MyOld.py C:\Users\Laurent\AppData\Local\Temp\MyNew.py
-						if os.path.isfile(new_temp_file):
-							os.remove(new_temp_file)
-						print(file, temp_file, new_temp_file)
-						os.rename(temp_file, new_temp_file)
+
+					
+					# if os.path.isfile(new_temp_file):
+						# os.remove(new_temp_file)
+						
+					### rename temp_file to new_temp_file according to the correspondance between the name of the python file and the name of the archive
+					### for exemple C:\Users\Laurent\AppData\Local\Temp\MyOld.py C:\Users\Laurent\AppData\Local\Temp\MyNew.py
+					os.rename(temp_file, new_temp_file)
 
 		if temp_file:
 
