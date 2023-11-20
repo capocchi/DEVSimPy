@@ -2478,7 +2478,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 
 		### insert new icon in toolbar (icon are not available in embeded editor (Show menu)
 		tb = self.GetToolBar()
-
+		
 		tb.AddSeparator()
 		#tb.InsertSeparator(tb.GetToolsCount())
 
@@ -2491,7 +2491,11 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		finddlg = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
 		tb.AddControl(finddlg)
 
-		tb.Realize()
+		try:
+			tb.Realize()
+		except:
+			print("Toolbar not displayed on mac...")
+			pass
 
 		if not self.block.isCMD():
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
@@ -2539,7 +2543,6 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 		"""
 		"""
 		id = [wx.NewIdRef()]*4
-		#tb = self.GetToolBar()
 		self.toolbar.InsertSeparator(self.toolbar.GetToolsCount())
 
 		### combo to insert tips text
