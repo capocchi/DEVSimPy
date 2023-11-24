@@ -2520,6 +2520,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 
 		self.Bind(wx.EVT_COMBOBOX, self.OnCombo, id=cbID)
 		self.Bind(wx.EVT_MENU, self.OnInsertDebug, id=debug.GetId())
+		
 class BlockEditorPanel(BlockBase, EditorPanel):
 	""" Block Editor class which inherit of Editor class
 	"""

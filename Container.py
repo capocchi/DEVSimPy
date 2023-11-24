@@ -4029,6 +4029,7 @@ class CodeBlock(Achievable, Block):
  		##############################################
 
 		self.__dict__.update(state)
+	
 		if new_class:
 			self.__class__ = new_class
 

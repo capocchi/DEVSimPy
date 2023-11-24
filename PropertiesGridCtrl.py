@@ -419,13 +419,13 @@ class CustomDataTable(GridTableBase):
 				for attr, val in regex.findall(doc):
 					### attr could be in model.args
 					if attr.strip() in model.args:
-						infoBlockBehavioralDict.update({attr.strip():val.strip()})
+						infoBlockBehavioralDict.update({attr.strip(): val.strip()})
 		else:
 			args_in_constructor = None
 
 		### Port class has specific attribute
 		if isinstance(model, Container.Port):
-			self.infoBlockLabelList.insert(4,_('Id number'))
+			self.infoBlockLabelList.insert(4, _('Id number'))
 
 		### Graphical values fields
 		for i in range(n):
@@ -436,6 +436,7 @@ class CustomDataTable(GridTableBase):
 			self.data.append([attr, val, self.infoBlockLabelList[i]])
 			self.dataTypes.append(self.GetTypeList(val))
 		
+		### Behavioral values fields
 		for attr_name,info in sorted(infoBlockBehavioralDict.items()):
 			
 			val = model.args[attr_name]
@@ -464,18 +465,17 @@ class CustomDataTable(GridTableBase):
 					cls = Components.GetClass(model.python_path)
 					devs = cls()
 					val = getattr(devs,attr_name)
-					model.args[attr_name] = val
+					self.model.args[attr_name] = val
 				else:
 					pass
+
+				self.data.append([attr_name, val, info])
+				self.dataTypes.append(self.GetTypeList(val))
+				self.nb_behavior_var += 1
 			else:
-				pass
+				### the behavioral arg has been deleted, we delete it for the model
+				del self.model.args[attr_name]
 				
-			self.data.append([attr_name, val, info])
-			self.dataTypes.append(self.GetTypeList(val))
-			self.nb_behavior_var += 1
-
-		
-
 		if args_in_constructor:
 			for attr_name, val in list(args_in_constructor.items()):
 				if attr_name not in list(infoBlockBehavioralDict.keys()):
