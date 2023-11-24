@@ -59,8 +59,8 @@ class AttributeBase(object):
 		self.parent = parent
 		self.canvas = canvas
 
-		# pour garder la relation entre les propriétés affichier et le model associé (voir OnLeftClick de Block)
-		#self.parent.id = id(self.model)
+		# pour garder la relation entre les propriétés afficher et le model associé (voir OnLeftClick de Block)
+		self.parent.id = id(self.model)
 
 		# properties list
 		self._list = PropertiesGridCtrl(self)
