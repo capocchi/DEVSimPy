@@ -188,10 +188,10 @@ if __name__ == '__main__':
 			if isinstance(args,str):
 				args = eval(args)
 			new_args = yamlHandler.setYAMLBlockModelArgs(label, args)
-			sys.stdout.write(json.dumps(new_args, default=serialize_date))
 		else:
-			args = yamlHandler.getYAMLBlockModelArgs(label)
-			sys.stdout.write(json.dumps(args, default=serialize_date))
+			new_args = yamlHandler.getYAMLBlockModelArgs(label)
+			
+		sys.stdout.write(json.dumps(new_args, default=serialize_date))
 
 	else:
 		# simulation
