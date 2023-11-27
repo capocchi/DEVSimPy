@@ -514,7 +514,6 @@ class DumpYAMLFile(DumpBase):
 			yaml.register_class(PickledCollection)
 			with open(fileName, 'r') as yf:
 				dsp = ruamel.load(yf, Loader=ruamel.Loader)
-
 		except Exception as info:
 			exc_type, exc_obj, exc_tb = sys.exc_info()
 			fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
