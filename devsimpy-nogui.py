@@ -178,13 +178,15 @@ if __name__ == '__main__':
 		sys.stdout.write(json.dumps(j))
 	elif args.blockslist:
 		# get the list of models in a master model
-		l = yamlHandler.getYAMLBlockModelsList()
-		sys.stdout.write(json.dumps(l))
+		models_list = yamlHandler.getYAMLBlockModelsList()
+		sys.stdout.write(json.dumps(models_list))
 	elif args.blockargs:
 		# model block parameters read or update
 		label = args.blockargs
+		models_list = yamlHandler.getYAMLBlockModelsList()
+		assert label in models_list, _(f"ERROR: Model must belong to the list {models_list}")
 		if args.updateblockargs:
-			# model block is updated 
+			# model block is updated
 			args = json.loads(args.updateblockargs)
 			if isinstance(args,str):
 				args = eval(args)
