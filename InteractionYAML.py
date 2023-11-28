@@ -86,15 +86,27 @@ class YAMLHandler:
 
         if self.filename_is_valid != True: return False
 
+        ### DEVS block
         block = self.diagram.GetShapeByLabel(label)
+        old_args = block.args.copy()
 
-        for arg in block.args:
+        ### update only existing args
+        for arg in old_args:
             if arg in new_args:
                 block.args[arg] = to_Python(new_args[arg])
 
-        success = self.diagram.SaveFile(self.diagram.last_name_saved)
+        new_args = self.getYAMLBlockModelArgs(label)
 
-        return {'success' : success, 'args' : self.getYAMLBlockModelArgs(label)}
+        ### if olg args is equal to the news, no need to save in yaml file
+        args_diff_flag = new_args == old_args
+        success = self.diagram.SaveFile(self.diagram.last_name_saved) if not args_diff_flag else True
+
+        return {'success': success, 
+                'updated_model': label, 
+                'yaml_file':self.filename, 
+                'updated_yaml_file': not args_diff_flag, 
+                'old_args':old_args, 
+                'new_args':new_args}
 
     def getJSON(self, diagram=None):
         """ Make JSON representation of the model from YAML file.

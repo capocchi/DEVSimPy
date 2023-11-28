@@ -514,22 +514,29 @@ class DumpYAMLFile(DumpBase):
 			yaml.register_class(PickledCollection)
 			with open(fileName, 'r') as yf:
 				dsp = ruamel.load(yf, Loader=ruamel.Loader)
+		except AttributeError as info:
+			try:
+				yaml = ruamel.YAML(typ='unsafe', pure=True)
+				with open(fileName, 'r') as yf:
+					dsp = yaml.load(yf)
+			except Exception as info:
+				tb = traceback.format_exc()
+				sys.stderr.write(_("\nProblem loading: %s -- %s\n")%(str(fileName),str(tb)))
+				return False
 		except Exception as info:
-			exc_type, exc_obj, exc_tb = sys.exc_info()
+			exc_type, _, exc_tb = sys.exc_info()
 			fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
 			sys.stderr.write(_("Problem opening: %s -- description: %s / type: %s / name: %s / line: %s\n")%(str(fileName), info, exc_type, fname, exc_tb.tb_lineno))
 			sys.stderr.write(traceback.format_exc())
 			return info
 
-		else:
+		### assisgn the specific attributs
+		for i,attr in enumerate(obj_loaded.dump_attributes):
+			setattr(obj_loaded, attr, dsp[i])
 
-			### assisgn the specific attributs
-			for i,attr in enumerate(obj_loaded.dump_attributes):
-				setattr(obj_loaded, attr, dsp[i])
+		obj_loaded.last_name_saved = fileName
 
-			obj_loaded.last_name_saved = fileName
-
-			return True
+		return True
 
 ###-----------------------------------------------------------
 class DumpJSFile(DumpBase):
