@@ -28,21 +28,6 @@ path = os.path.join('Domain')
 if path not in sys.path:
     sys.path.append(path)
 
-def create_dir(dir:str='logs')->None:
-    """Create a directori if doesnt exists
-
-    Args:
-        dir (str, optional): name of directory to create. Defaults to 'logs'.
-    """
-
-    # Check if the directory exists
-    if not os.path.exists(dir):
-        try:
-            # Create the directory
-            os.makedirs(dir)
-        except OSError as e:
-            print(f"Error creating directory '{dir}': {e}")
-
 class Printer:
     """
     Print things to stdout on one line dynamically
@@ -166,7 +151,7 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, json_t
             interactionManager.join()
         ### if sim_name is in param, a log file is writed on the logs dir
         if simu_name:
-            create_dir('logs')
+            os.makedirs('logs', exist_ok=True)
             with open(os.path.join('logs',simu_name+'.report'), 'w') as f:
                     f.write(json.dumps(json_report))
 
@@ -187,7 +172,7 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, json_t
             
     ### if sim_name is in param, a log file is writed on the logs dir
     if simu_name:
-        create_dir('logs')
+        os.makedirs('logs', exist_ok=True)
         with open(os.path.join('logs',simu_name+'.report'), 'w') as f:
                 f.write(json.dumps(json_report))
 
