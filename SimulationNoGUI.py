@@ -24,10 +24,24 @@ import pusher
 _ = gettext.gettext
 
 
-path = os.path.join('Domain', 'Phidgets')
+path = os.path.join('Domain')
 if path not in sys.path:
     sys.path.append(path)
 
+def create_dir(dir:str='logs')->None:
+    """Create a directori if doesnt exists
+
+    Args:
+        dir (str, optional): name of directory to create. Defaults to 'logs'.
+    """
+
+    # Check if the directory exists
+    if not os.path.exists(dir):
+        try:
+            # Create the directory
+            os.makedirs(dir)
+        except OSError as e:
+            print(f"Error creating directory '{dir}': {e}")
 
 class Printer:
     """
@@ -38,7 +52,7 @@ class Printer:
         sys.stdout.flush()
         
 
-def yes(prompt = 'Please enter Yes/No: '):
+def yes(prompt:str = 'Please enter Yes/No: ')->bool:
     while True:
         try:
             i = input(prompt)
@@ -69,7 +83,7 @@ class PrintPusher():
     def push(self, event, data):
         print((json.dumps(data)))
     
-def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True):
+def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, json_trace:bool=True):
     """
     """
     from InteractionSocket import InteractionManager
@@ -150,8 +164,11 @@ def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True
         if interactionManager != None:
             interactionManager.stop()
             interactionManager.join()
-        with open(simu_name+'.report', 'w') as f:
-            f.write(json.dumps(json_report))
+        ### if sim_name is in param, a log file is writed on the logs dir
+        if simu_name:
+            create_dir('logs')
+            with open(os.path.join('logs',simu_name+'.report'), 'w') as f:
+                    f.write(json.dumps(json_report))
 
     json_report['summary'] += "...DEVS simulation completed!"
 
@@ -168,8 +185,11 @@ def makeSimulation(master, T, simu_name="simu", is_remote=False, json_trace=True
     for m in [a for a in master.getComponentSet() if hasattr(a, 'plotUrl')]:
         json_report['output'].append({'label':m.name, 'plotUrl':m.plotUrl}) 
             
-    with open(simu_name+'.report', 'w') as f:
-        f.write(json.dumps(json_report))
+    ### if sim_name is in param, a log file is writed on the logs dir
+    if simu_name:
+        create_dir('logs')
+        with open(os.path.join('logs',simu_name+'.report'), 'w') as f:
+                f.write(json.dumps(json_report))
 
     return True
 
