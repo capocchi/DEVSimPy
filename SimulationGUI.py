@@ -392,6 +392,7 @@ class Base(object):
 		self.Bind(wx.EVT_BUTTON, self.OnStop, self._btn2)
 		self.Bind(wx.EVT_BUTTON, self.OnSuspend, self._btn3)
 		self.Bind(wx.EVT_BUTTON, self.OnViewLog, self._btn4)
+		
 		self.Bind(wx.EVT_TIMER, self.OnTimer, self.timer)
 		self.Bind(wx.EVT_TEXT,self.OnText, self._value)
 		self.Bind(wx.EVT_CLOSE, self.OnQuit)
@@ -582,7 +583,9 @@ class Base(object):
 
 			self.count = (timeLast/self.thread.model.FINAL_TIME)*100
 
-			wx.CallAfter(self._gauge.SetValue,int(self.count))
+			# wx.CallAfter(self._gauge.SetValue,int(self.count))
+			self._gauge.SetValue(int(self.count))
+			
 
 		### if simulation is over
 		if self.thread.end_flag:

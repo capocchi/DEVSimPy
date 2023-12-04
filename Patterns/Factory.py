@@ -31,6 +31,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 import threading
 import sys
 import traceback
+import asyncio
 
 # to send event
 from pubsub import pub
@@ -116,8 +117,11 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 
 			self.start()
 
-		@hotshotit
 		def run(self):
+			asyncio.run(self.async_run())
+    
+		@hotshotit
+		async def async_run(self):
 			""" Run thread.
 			"""
 

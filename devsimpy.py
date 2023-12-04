@@ -33,7 +33,6 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-from csv import excel_tab
 import datetime
 import copy
 import os
@@ -123,6 +122,13 @@ if wx.VERSION_STRING >= '4.0':
 	wx.AboutDialogInfo = wx.adv.AboutDialogInfo
 	wx.AboutBox = wx.adv.AboutBox
 	
+ASYNC_VERSION = True
+
+if ASYNC_VERSION:
+	from wxasync import WxAsyncApp
+	import asyncio
+	from asyncio.events import get_event_loop
+
 ### specific built-in variables. (don't modify the default value. If you want to change it, go to the PreferencesGUI from devsimpy interface.)
 builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'), # abslolute path
 				'DEVSIMPY_PNG': 'iconDEVSimPy.png',	# png file for devsimpy icon
@@ -2563,6 +2569,15 @@ class DEVSimPyApp(wx.App, wit.InspectionMixin):
 		# Set up the exception handler...
 		sys.excepthook = ExceptionHook
 
+def main_async():
+    # see https://github.com/sirk390/wxasync
+    app = WxAsyncApp()
+    frame = MainApplication(None, wx.NewIdRef(), 'DEVSimPy %s'%__version__)
+    frame.Show(True)
+    app.SetTopWindow(frame)
+    loop = get_event_loop()
+    loop.run_until_complete(app.MainLoop())
+
 #-------------------------------------------------------------------
 if __name__ == '__main__':
 
@@ -2626,5 +2641,8 @@ if __name__ == '__main__':
 	## si redirect=True et filename=None alors redirection dans une fenetre
 	## si redirect=True et filename="fichier" alors redirection dans un fichier
 	## si redirect=False redirection dans la console
-	app = DEVSimPyApp(redirect = False, filename = None)
-	app.MainLoop()
+	if ASYNC_VERSION:
+		app = main_async()
+	else:
+		app = DEVSimPyApp(redirect = False, filename = None)
+		app.MainLoop()
