@@ -30,25 +30,27 @@ import json
 from Utilities import GetUserConfigDir
 
 def retrieve_file_paths(dirName:str):
-	""" Function to return all file paths of the particular directory
+    """ Function to return all file paths of the particular directory
 
-	Args:
-		dirName (str): Name of the directory
+    Args:
+        dirName (str): Name of the directory
 
-	Returns:
-		_type_: list of file paths
-	"""
-	filePaths = []
+    Returns:
+        list: list of file paths
+    """
+    filePaths = []
 
-	# Read all directory, subdirectories and file lists
-	for root, directories, files in os.walk(dirName):
-		for filename in files:
-		# Create the full filepath by using os module.
-			filePath = os.path.join(root, filename)
-			filePaths.append(filePath)
-			
-	# return all paths
-	return filePaths
+    # Read all directory, subdirectories and file lists
+    for root, _, files in os.walk(r'{}'.format(dirName).encode('latin').decode('utf-8')):
+        ### TODO: filter depending on the necessary lib
+        for filename in files:
+            if '__pycache__' not in filename:
+                #Create the full filepath by using os module.
+                filePath = os.path.join(root, filename)
+                filePaths.append(filePath)
+            
+    # return all paths
+    return filePaths
 
 def get_domain_path()->str:
     """ Find domain from .devsimpy file	
@@ -67,7 +69,7 @@ def get_domain_path()->str:
 
         built_in = eval(config_parser['dummy_section']['builtin_dict'])
 
-        return built_in['DOMAIN_PATH']
+        return os.path.abspath(built_in['DOMAIN_PATH'])
     else:
         return "Domain/"
   
@@ -107,6 +109,7 @@ class StandaloneNoGUI:
         
         ### path of the Domain dir (depending on the .devsimpy config file)
         self.domain_path = get_domain_path()
+        
         ### list of dir to zip
         self.dirnames_abs = map(pathlib.Path,StandaloneNoGUI.DIRNAMES)
         
@@ -178,6 +181,7 @@ class StandaloneNoGUI:
             
             ### add the Domain libairies according to the DOAMIN_PATH var
             for file in retrieve_file_paths(self.domain_path):
+                ### TODO: load only lib required
                 if file.endswith(('.py', '.amd', '.cmd')):
                     archive.write(file, arcname='Domain'+os.path.join(file.split('Domain')[1], os.path.basename(file)))
     
@@ -186,7 +190,15 @@ class StandaloneNoGUI:
         
                 # Call the function to retrieve all files and folders of the assigned directory
                 filePaths = retrieve_file_paths(dirname)
-                
+
+                ### select only the selected simulation kernel
+                if "DEVSKernel" in os.path.abspath(dirname):
+                    new_dirname = os.path.join(dirname,self.kernel)
+                    filePaths = retrieve_file_paths(new_dirname)
+                    ### add __init__.py of Kernel dir
+                    if not os.path.exists(os.path.join(dirname, '__init__.py')):
+                        filePaths.append(os.path.join(dirname, '__init__.py'))
+
                 for file in filePaths:
                     archive.write(file)
         

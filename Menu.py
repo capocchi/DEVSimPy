@@ -202,7 +202,7 @@ class FileMenu(wx.Menu):
 		saveModel=wx.MenuItem(self, ID_SAVE, _('&Save\tCtrl+S'), _('Save the current diagram'))
 		saveAsModel=wx.MenuItem(self, ID_SAVEAS, _('&SaveAs'),_('Save the diagram with an another name'))
 		exportRest=wx.MenuItem(self, ID_EXPORTREST, _('&Export to REST server'),_('Export the diagram to a Rest server (DEVSimPy-rest)'))
-		exportStandalone=wx.MenuItem(self, ID_EXPORTSTANDALONE, _('&Export standalone'),_('Generate a zip file which can be used to execute simulation of a yaml file in a no-gui and standaolne mode using devsimpy-nogui'))
+		exportStandalone=wx.MenuItem(self, ID_EXPORTSTANDALONE, _('&Export Standalone'),_('Generate a zip file which can be used to execute simulation of a yaml file in a no-gui and standaolne mode using devsimpy-nogui'))
 		importRest=wx.MenuItem(self, ID_IMPORTXMLSES, _('&Import XML SES file'),_('Import SES specifications from the Python SES Editor'))
 		printModel=wx.MenuItem(self, ID_PRINT, _('&Print'),_('Print the current diagram'))
 		printPreviewModel=wx.MenuItem(self, ID_PREVIEW_PRINT, _('Preview'),_('Print preview for current diagram'))
