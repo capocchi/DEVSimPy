@@ -7,7 +7,7 @@
 #                    L. CAPOCCHI (capocchi@univ-corse.fr)
 #                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-# Version 1.0                                        last modified: 03/17/22
+# Version 1.0                                        last modified:  12/11/23
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -28,6 +28,7 @@ import pathlib
 import json
 
 from Utilities import GetUserConfigDir
+from InteractionYAML import YAMLHandler
 
 def retrieve_file_paths(dirName:str):
     """ Function to return all file paths of the particular directory
@@ -175,16 +176,55 @@ class StandaloneNoGUI:
             path = os.path.abspath(self.yaml)
             archive.write(path, os.path.basename(path))
 
+            ###################################################################
+            ###
+            ### devsimpy-nogui dependencies files
+            ###
+            ###################################################################
+
             ### add all dependencies python files needed to execute devsimpy-nogui
             for fn in StandaloneNoGUI.FILENAMES:
                 archive.write(fn)
             
+            ###################################################################
+            ###
+            ### Domain libraries files
+            ###
+            ###################################################################
+
             ### add the Domain libairies according to the DOAMIN_PATH var
-            for file in retrieve_file_paths(self.domain_path):
-                ### TODO: load only lib required
-                if file.endswith(('.py', '.amd', '.cmd')):
-                    archive.write(file, arcname='Domain'+os.path.join(file.split('Domain')[1], os.path.basename(file)))
+            yaml = YAMLHandler(path)
+        
+            ### to not insert two times the same file
+            added_files = set()
+            ### lib_path is the directory of the library involved in the yaml model
+            for path in yaml.extractPythonPaths():
+                lib_path = os.path.dirname(path)
+                if lib_path.endswith(('.amd','.cmd')):
+                    lib_path = os.path.dirname(lib_path)
+        
+                ### format the path of the library to include in the archive
+                lib_name = os.path.basename(os.path.dirname(lib_path))
+                for file in retrieve_file_paths(lib_path):
+                    if file.endswith(('.py', '.amd', '.cmd')) and '__pycache__' not in file:
+                        relative_path = 'Domain'+file.split(lib_name)[1]
+                        if relative_path not in added_files:
+                            archive.write(file, arcname=relative_path)
+                            added_files.add(relative_path)
+
+            ### To include all Domain dir
+            # for file in retrieve_file_paths(self.domain_path):
+            #     if file.endswith(('.py', '.amd', '.cmd')) and \
+            #                     '__pycache__' not in file and \
+            #                     os.path.basename(os.path.dirname(file)) in lib_to_inculde:
+            #         archive.write(file, arcname='Domain'+os.path.join(file.split('Domain')[1], os.path.basename(file)))
     
+            ###################################################################
+            ###
+            ### devsimpy-nogui lib directories
+            ###
+            ###################################################################
+
             ### add all dependancies (directories) needed to execute devsimpy-nogui
             for dirname in self.dirnames_abs:
         
@@ -200,11 +240,24 @@ class StandaloneNoGUI:
                         filePaths.append(os.path.join(dirname, '__init__.py'))
 
                 for file in filePaths:
-                    archive.write(file)
+                    if '__pycache__' not in file:
+                        archive.write(file)
         
+            ###################################################################
+            ###
+            ### Docker files
+            ###
+            ###################################################################
+
             if self.add_dockerfile:
                 archive.writestr("DockerFile", self.GetDockerSpec())
                 
+            ###################################################################
+            ###
+            ### Config files
+            ###
+            ###################################################################
+
             ### write config file
             archive.writestr("config.json", self.GetConfigSpec())
                 
