@@ -504,8 +504,12 @@ class DumpYAMLFile(DumpBase):
 		else:
 			return True
 		
-	def Load(self, obj_loaded, fileName = None):
-		""" Function that load the dump from the filename.
+	@staticmethod
+	def Open(fileName:str):
+		""" Open the YAML filename and return the coresponding object.
+
+		Args:
+			fileName (str): YAML filename
 		"""
 
 		## try to open f with compressed mode
@@ -513,12 +517,12 @@ class DumpYAMLFile(DumpBase):
 			yaml = ruamel.YAML()
 			yaml.register_class(PickledCollection)
 			with open(fileName, 'r') as yf:
-				dsp = ruamel.load(yf, Loader=ruamel.Loader)
+				return ruamel.load(yf, Loader=ruamel.Loader)
 		except AttributeError as info:
 			try:
 				yaml = ruamel.YAML(typ='unsafe', pure=True)
 				with open(fileName, 'r') as yf:
-					dsp = yaml.load(yf)
+					return yaml.load(yf)
 			except Exception as info:
 				tb = traceback.format_exc()
 				sys.stderr.write(_("\nProblem loading: %s -- %s\n")%(str(fileName),str(tb)))
@@ -529,7 +533,16 @@ class DumpYAMLFile(DumpBase):
 			sys.stderr.write(_("Problem opening: %s -- description: %s / type: %s / name: %s / line: %s\n")%(str(fileName), info, exc_type, fname, exc_tb.tb_lineno))
 			sys.stderr.write(traceback.format_exc())
 			return info
+		
+	def Load(self, obj_loaded, fileName = None):
+		""" Function that load the dump from the filename.
+		"""
 
+		dsp = DumpYAMLFile.Open(fileName)
+
+		if not dsp:
+			return False
+		
 		### assisgn the specific attributs
 		for i,attr in enumerate(obj_loaded.dump_attributes):
 			setattr(obj_loaded, attr, dsp[i])

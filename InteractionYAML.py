@@ -3,27 +3,29 @@
 import json
 import os
 import traceback
-from datetime import datetime
+import re
+
+import datetime
 
 def to_Python(val):
-    if val in ('true', 'True'):
+    if val.lower() == 'true':
         return True
-    elif val in ('false', 'False'):
+    elif val.lower() == 'false':
         return False
-    elif type(val) is str:
+    elif isinstance(val,str):
         # Try to parse the string as a date
         try:
-            datetime_object = datetime.strptime(val, "%Y-%m-%d")
-            is_valid_date = True
-        except ValueError:
-            is_valid_date = False
-
-        # Check if it's a valid date using an if statement
-        if is_valid_date:
+            # Try to parse the string as a date
+            datetime.datetime.strptime(val, '%Y-%m-%d')
             return val
-        elif str(val).replace('.','').replace('-','').isdigit():
-            return eval(str(val))
-    return val
+        except ValueError:
+            pass
+        
+        # Check if it's a valid numeric string
+        if val.replace('.', '').replace('-', '').isdigit():
+            return eval(val)
+        
+        return val
 
 class YAMLHandler:
     """ class providing methods for YAML file handling.
@@ -35,9 +37,7 @@ class YAMLHandler:
 
         self.filename = filename
         self.modelname = os.path.basename(self.filename)
-
         self.report = {'model_name' : self.modelname}
-
         self.json_obj = None
 
         # Create diagram object
@@ -54,37 +54,51 @@ class YAMLHandler:
             print((json.dumps(self.report)))
             raise
 
+    def extractPythonPaths(self)->list:
+        """Returns the python path of models included in the YAML file.
 
-    def getYAMLBlockModelsList(self):
+        Returns:
+            list: list of python path in the YAML file
+        """
+        # Read YAML data from the file
+        with open(self.filename, 'r') as file:
+            yaml_data = file.read()
+
+        # Define a regular expression to match python_path values
+        pattern = r'python_path:\s*(.*?)\n'
+
+        # Use re.findall to find all matches in the YAML data
+        matches = re.findall(pattern, yaml_data)
+
+        # Print the extracted python_path values
+        return [match for match in matches if match !="''"]
+
+    def getYAMLBlockModelsList(self)->list:
         """ Writes to standard output
             the labels of the blocks (= Atomic Models)
             composing the model described in the file
         """
 
-        if self.filename_is_valid != True: return False
-
+        if not self.filename_is_valid: return False
         block_list = self.diagram.GetFlatCodeBlockShapeList()
         return [str(a.label) for a in block_list]
 
-
-    def getYAMLBlockModelArgs(self, label):
+    def getYAMLBlockModelArgs(self, label:str)->dict:
         """ Returns the parameters (name and value) of the block identified by the label
             composing the model described in the file.
         """
 
-        if self.filename_is_valid != True: return False
-
+        if not self.filename_is_valid: return False
         block = self.diagram.GetShapeByLabel(label)
         return block.args
 
-
-    def setYAMLBlockModelArgs(self, label, new_args):
+    def setYAMLBlockModelArgs(self, label:str, new_args)->dict:
         """ Saves in YAML file the new values of the parameters
             of the block identified by the label.
             Returns the updated block parameters.
         """
 
-        if self.filename_is_valid != True: return False
+        if not self.filename_is_valid: return False
 
         ### DEVS block
         block = self.diagram.GetShapeByLabel(label)
@@ -113,7 +127,7 @@ class YAMLHandler:
         """
         from Container import ConnectionShape, CodeBlock, ContainerBlock
 
-        if self.filename_is_valid != True: return False
+        if not self.filename_is_valid: return False
 
         # Initialize JSON object if it does not exist (makeJSON is called recursively)
         if not diagram:
@@ -189,8 +203,8 @@ class YAMLHandler:
                 else: #Input or Output port
                     D = None
                     
-                if (D!= None):
-                     self.json_obj['cells'].append(D)
+                if D:
+                    self.json_obj['cells'].append(D)
 
         return self.json_obj
 
@@ -199,7 +213,7 @@ class YAMLHandler:
         """
         from Container import Diagram
 
-        if self.filename_is_valid != True: return False
+        if not self.filename_is_valid: return False
 
         try :
             return Diagram.makeDEVSInstance(self.diagram)
@@ -216,7 +230,7 @@ class YAMLHandler:
 
         from Join import makeDEVSConf, makeJoin
 
-        if self.filename_is_valid != True : return False
+        if not self.filename_is_valid: return False
 
         addInner = []
         liaison = []
@@ -232,4 +246,4 @@ class YAMLHandler:
         bool = True
 
         model, liaison, addInner = makeJoin(self.diagram, addInner, liaison, model, bool, x, y, labelEnCours)
-        makeDEVSConf(model, liaison, addInner, "%s.js"%labelEnCours)
+        makeDEVSConf(model, liaison, addInner, f"{labelEnCours}.js")
