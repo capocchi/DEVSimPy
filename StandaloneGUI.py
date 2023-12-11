@@ -122,17 +122,20 @@ class StandaloneGUI(wx.Frame):
         hbox1 = wx.BoxSizer(wx.HORIZONTAL)
         self.st1 = wx.StaticText(panel, label=_('Filename:'))
         
-        hbox1.Add(self.st1, flag=wx.RIGHT, border=8)
-        self._tc = wx.TextCtrl(panel, -1, "devsimpy-nogui-pkg.zip", validator=ZipNameValidator())
+        hbox1.Add(self.st1, flag=wx.RIGHT|wx.ALIGN_CENTER_VERTICAL, border=8)
+        self._tc = wx.TextCtrl(panel, -1, "devsimpy-nogui-pkg.zip", style=wx.TE_RICH2|wx.BORDER_NONE, validator=ZipNameValidator())
+
         hbox1.Add(self._tc, proportion=1)
         vbox.Add(hbox1, flag=wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, border=10)
+
+        # Set focus to StaticText object
+        self.st1.SetFocus()
 
         vbox.Add((-1, 10))
 
         ### Zip directory field
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-        self._dbb = filebrowse.DirBrowseButton(
-            panel, -1, size=(450, -1))
+        self._dbb = filebrowse.DirBrowseButton(panel, -1, size=(450, -1))
         hbox2.Add(self._dbb)
         vbox.Add(hbox2, flag=wx.LEFT | wx.TOP, border=10)
 
@@ -140,9 +143,9 @@ class StandaloneGUI(wx.Frame):
         
         ### Options
         hbox4 = wx.BoxSizer(wx.HORIZONTAL)
-        self._cb1 = wx.CheckBox(panel, label=_('Add simulation kernel'))
-        self._cb2 = wx.CheckBox(panel, label=_('Add Docker file'))
-        self._cb3 = wx.CheckBox(panel, label=_('No Time Limite'))
+        self._cb1 = wx.CheckBox(panel, label=_('Add Simulation Kernel'))
+        self._cb2 = wx.CheckBox(panel, label=_('Add Docker File'))
+        self._cb3 = wx.CheckBox(panel, label=_('No Time Limit'))
     
         hbox4.Add(self._cb1)
         hbox4.Add(self._cb2, flag=wx.LEFT, border=10)    
@@ -155,14 +158,15 @@ class StandaloneGUI(wx.Frame):
         self._cb4 = wx.CheckBox(panel, label=_('Real Time'))
         self.kernel = wx.Choice(panel, -1, choices=["PyDEVS", "PyPDEVS"])
         self.kernel.SetSelection(0)
+        self.kernel.Enable(False)
         label = wx.StaticText(panel, -1, _("Kernel:"))
             
         box = wx.BoxSizer(wx.HORIZONTAL)
         box.Add(label, 0, wx.ALIGN_CENTER_VERTICAL)
         box.Add(self.kernel, 0, wx.ALIGN_CENTER_VERTICAL, border=5)
         
-        hbox5.Add(self._cb4)
-        hbox5.Add(box, flag=wx.LEFT, border=10)
+        hbox5.Add(box)
+        hbox5.Add(self._cb4, flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=10)
         vbox.Add(hbox5, flag=wx.LEFT, border=10)
         
         vbox.Add((-1, 10))
@@ -180,12 +184,24 @@ class StandaloneGUI(wx.Frame):
         ### Binds
         self.Bind(wx.EVT_BUTTON, self.OnOk, id=btn1.GetId())
         self.Bind(wx.EVT_BUTTON, self.OnClose, id=btn2.GetId())
+        self.Bind(wx.EVT_CHECKBOX,self.onChecked, id=self._cb1.GetId()) 
         
     def SetYAML(self,yaml:str)->None:
         """ Set the yaml file
         """
         self.yaml = yaml
     
+    def onChecked(self, event): 
+        """Add Simulation Kernel Checkbox has been clicked.
+
+        Args:
+            event (Event): event
+        """
+        cb = event.GetEventObject() 
+    #   cb.GetLabel(),' is clicked',cb.GetValue()
+
+        self.kernel.Enable(cb.IsChecked())
+
     @BuzyCursorNotification
     def OnOk(self, event):
         """
