@@ -20,7 +20,8 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-import os
+import os, sys
+import subprocess
 import zipfile
 import zipfile
 import configparser
@@ -73,7 +74,22 @@ def get_domain_path()->str:
         return os.path.abspath(built_in['DOMAIN_PATH'])
     else:
         return "Domain/"
-  
+
+def execute_script(yaml):
+    # Execute the script using subprocess.Popen
+    process = subprocess.Popen(["python", "devsimpy-nogui.py", f"{os.path.abspath(yaml)}","10"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    _, stderr = process.communicate()
+
+    # Check if the execution was successful
+    if process.returncode == 0:
+        # Get the used packages from sys.modules
+        used_packages = {mod.split('.')[0] for mod in sys.modules.keys() if '.' in mod}
+        return True, used_packages
+    else:
+        # Print error message and return empty set
+        print(f"Error executing script: {stderr.decode()}")
+        return False, set()
+
 class StandaloneNoGUI:
     
     ### list of files to zip
@@ -84,12 +100,13 @@ class StandaloneNoGUI:
     ## list of dir to zip
     DIRNAMES = ["DomainInterface/","Mixins/","Patterns/"]
 
-    def __init__(self, yaml:str="", outfn:str="devsimpy-nogui-pkg.zip", outdir:str=os.getcwd(), add_sim_kernel:bool=True, add_dockerfile:bool=False, sim_time:str="ntl", rt:bool=False, kernel:str='PyDEVS'):
+    def __init__(self, yaml:str="", outfn:str="devsimpy-nogui-pkg.zip", format:str="Minimal", outdir:str=os.getcwd(), add_sim_kernel:bool=True, add_dockerfile:bool=False, sim_time:str="ntl", rt:bool=False, kernel:str='PyDEVS'):
         """ Generates the zip file with all files needed to execute the devsimpy-nogui script.
 
 		Args:
 			yaml (str): yaml file to zip (optional)
 			outfn (str): zip file to export all files
+            format (str): Minimal export only necessary dependancies while Full export all dependancies (less optimal but more secure)
             outdir (str): directory where zip file is generated
 			add_sim_kernel (bool): zip the simlation kernel
 			add_dockerfile (bool): zip the DockerFile file
@@ -101,6 +118,7 @@ class StandaloneNoGUI:
         ### local copy
         self.yaml = yaml
         self.outfn = outfn
+        self.format = format
         self.outdir = outdir
         self.add_sim_kernel = add_sim_kernel
         self.add_dockerfile = add_dockerfile
@@ -128,7 +146,7 @@ class StandaloneNoGUI:
         """
         """
         return f"""
-                    FROM python:3.8-slim-buster
+                    FROM python:3.10-slim-buster
 
                     WORKDIR /app
 
@@ -192,32 +210,32 @@ class StandaloneNoGUI:
             ###
             ###################################################################
 
-            ### add the Domain libairies according to the DOAMIN_PATH var
-            yaml = YAMLHandler(path)
-        
-            ### to not insert two times the same file
-            added_files = set()
-            ### lib_path is the directory of the library involved in the yaml model
-            for path in yaml.extractPythonPaths():
-                lib_path = os.path.dirname(path)
-                if lib_path.endswith(('.amd','.cmd')):
-                    lib_path = os.path.dirname(lib_path)
-        
-                ### format the path of the library to include in the archive
-                lib_name = os.path.basename(os.path.dirname(lib_path))
-                for file in retrieve_file_paths(lib_path):
-                    if file.endswith(('.py', '.amd', '.cmd')) and '__pycache__' not in file:
-                        relative_path = 'Domain'+file.split(lib_name)[1]
-                        if relative_path not in added_files:
-                            archive.write(file, arcname=relative_path)
-                            added_files.add(relative_path)
-
-            ### To include all Domain dir
-            # for file in retrieve_file_paths(self.domain_path):
-            #     if file.endswith(('.py', '.amd', '.cmd')) and \
-            #                     '__pycache__' not in file and \
-            #                     os.path.basename(os.path.dirname(file)) in lib_to_inculde:
-            #         archive.write(file, arcname='Domain'+os.path.join(file.split('Domain')[1], os.path.basename(file)))
+            if self.format == "Minimal":
+                ### add the Domain libairies according to the DOAMIN_PATH var
+                yaml = YAMLHandler(path)
+            
+                ### to not insert two times the same file
+                added_files = set()
+                ### lib_path is the directory of the library involved in the yaml model
+                for path in yaml.extractPythonPaths():
+                    lib_path = os.path.dirname(path)
+                    if lib_path.endswith(('.amd','.cmd')):
+                        lib_path = os.path.dirname(lib_path)
+            
+                    ### format the path of the library to include in the archive
+                    lib_name = os.path.basename(os.path.dirname(lib_path))
+                    for file in retrieve_file_paths(lib_path):
+                        if file.endswith(('.py', '.amd', '.cmd')) and '__pycache__' not in file:
+                            relative_path = 'Domain'+file.split(lib_name)[1]
+                            if relative_path not in added_files:
+                                archive.write(file, arcname=relative_path)
+                                added_files.add(relative_path)
+            else:
+                ## To include all Domain dir
+                for file in retrieve_file_paths(self.domain_path):
+                    if file.endswith(('.py', '.amd', '.cmd')) and \
+                                    '__pycache__' not in file:
+                        archive.write(file, arcname='Domain'+os.path.join(file.split('Domain')[1], os.path.basename(file)))
     
             ###################################################################
             ###
@@ -260,7 +278,27 @@ class StandaloneNoGUI:
 
             ### write config file
             archive.writestr("config.json", self.GetConfigSpec())
-                
+            
+
+            ###################################################################
+            ###
+            ### Requierements files
+            ###
+            ###################################################################
+
+            ### TODO: include the self.format condition to choose if you want a minimal or full dependencies
+
+            # Example: Execute a script and get the used packages
+            success, packages = execute_script(self.yaml)
+
+            if success:
+                print("Used packages:")
+                for package in packages:
+                    print(package)
+            else:
+                print("Script execution failed.")
+
+
             ### add requirements-nogui.txt file
             ### TODO: packages used in models include in the yaml file are not defined in the requirements.txt!
             archive.write('requirements-nogui.txt', 'requirements.txt')
