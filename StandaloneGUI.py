@@ -118,7 +118,7 @@ class StandaloneGUI(wx.Frame):
   
         self.SetSize((-1, 250))
         panel = wx.Panel(self)
-
+        
         vbox = wx.BoxSizer(wx.VERTICAL)
  
         ### Zip name field
@@ -187,10 +187,11 @@ class StandaloneGUI(wx.Frame):
         self.kernel = wx.Choice(panel, -1, choices=["PyDEVS", "PyPDEVS"])
         self.kernel.SetSelection(0)
         self.kernel.Enable(False)
-        label = wx.StaticText(panel, -1, _("Kernel:"))
-            
+        self.kernel_label = wx.StaticText(panel, -1, _("Kernel:"))
+        self.kernel_label.Enable(False)
+
         box = wx.BoxSizer(wx.HORIZONTAL)
-        box.Add(label, 0, wx.ALIGN_CENTER_VERTICAL)
+        box.Add(self.kernel_label, 0, wx.ALIGN_CENTER_VERTICAL)
         box.Add(self.kernel, 0, wx.ALIGN_CENTER_VERTICAL, border=5)
         
         hbox5.Add(box)
@@ -202,8 +203,8 @@ class StandaloneGUI(wx.Frame):
         ### Buttons
         hbox5 = wx.BoxSizer(wx.HORIZONTAL)
         btn1 = wx.Button(panel, wx.ID_OK, _("Ok"), size=(70, 30))
-        btn2 = wx.Button(panel, wx.ID_CLOSE, _("Close"), size=(70, 30))
-        hbox5.Add(btn2)
+        # btn2 = wx.Button(panel, wx.ID_CLOSE, _("Close"), size=(70, 30))
+        # hbox5.Add(btn2)
         hbox5.Add(btn1, flag=wx.LEFT|wx.BOTTOM)
         vbox.Add(hbox5, flag=wx.ALIGN_RIGHT|wx.RIGHT, border=10)
 
@@ -211,7 +212,7 @@ class StandaloneGUI(wx.Frame):
     
         ### Binds
         self.Bind(wx.EVT_BUTTON, self.OnOk, id=btn1.GetId())
-        self.Bind(wx.EVT_BUTTON, self.OnClose, id=btn2.GetId())
+        # self.Bind(wx.EVT_BUTTON, self.OnClose, id=btn2.GetId())
         self.Bind(wx.EVT_CHECKBOX,self.OnChecked, id=self._cb1.GetId()) 
         self.Bind(wx.EVT_CHOICE, self.OnChoice, id=self.kernel.GetId())
         self.Bind(wx.EVT_DIRPICKER_CHANGED, self.OnDirChanged, id=self._dbb.GetId())
@@ -230,7 +231,7 @@ class StandaloneGUI(wx.Frame):
     def OnChoice(self, event):
         selected_option = self.kernel.GetStringSelection()
         self._cb4.Enable(selected_option == 'PyPDEVS')
-
+        
     def OnChecked(self, event): 
         """Add Simulation Kernel Checkbox has been clicked.
 
@@ -241,6 +242,7 @@ class StandaloneGUI(wx.Frame):
     #   cb.GetLabel(),' is clicked',cb.GetValue()
 
         self.kernel.Enable(cb.IsChecked())
+        self.kernel_label.Enable(cb.IsChecked())
 
     @BuzyCursorNotification
     def OnOk(self, event):
