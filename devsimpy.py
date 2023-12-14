@@ -899,7 +899,6 @@ class MainApplication(wx.Frame):
 			text = tree.GetItemPyData(event.GetItem()) if wx.VERSION_STRING < '4.0' else tree.GetItemData(event.GetItem())
 			try:
 				tdo = wx.PyTextDataObject(text) if wx.VERSION_STRING < '4.0' else wx.TextDataObject(text)
-				#tdo = wx.TextDataObject(text)
 				tds = wx.DropSource(tree)
 				tds.SetData(tdo)
 				tds.DoDragDrop(True)
