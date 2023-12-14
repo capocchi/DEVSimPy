@@ -1280,9 +1280,10 @@ class Shape(ShapeEvtHandler):
 		"""
 	
 		if not self.lock_flag:
-			self.x = array.array('d', [v+x for v in self.x])
-			self.y = array.array('d', [v+y for v in self.y])
-	
+			# self.x = array.array('d', [v+x for v in self.x])
+			# self.y = array.array('d', [v+y for v in self.y])
+			self.x = [v+x for v in self.x]
+			self.y = [v+y for v in self.y]
 			
 	#def OnResize(self):
 	#	""" Resize method controled by ResizeNode move method
@@ -1496,8 +1497,11 @@ class PointShape(Shape):
 		"""
 		"""
 		
-		self.x = array.array('d', [v+x for v in self.x])
-		self.y = array.array('d', [v+y for v in self.y])
+		# self.x = array.array('d', [v+x for v in self.x])
+		# self.y = array.array('d', [v+y for v in self.y])
+		self.x = [v+x for v in self.x]
+		self.y = [v+y for v in self.y]
+		
 		self.graphic.move(x,y)
 
 	def HitTest(self, x, y):
@@ -1638,7 +1642,6 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 			key = event.GetKeyCode()
 			controlDown = event.CmdDown()
-			altDown = event.AltDown()
 			shiftDown = event.ShiftDown()
 
 			if key == 316:  # right
@@ -1879,7 +1882,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			self.select(target)
 			self.select(source)
 
-			nodesList = {n for n in self.nodes if not isinstance(n, ResizeableNode)}
+			nodesList = [n for n in self.nodes if not isinstance(n, ResizeableNode)]
 
 			# list of node list for
 			sourceNodeList = [n for n in nodesList if n.item == source and isinstance(n, ONode)]
@@ -2015,8 +2018,6 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				sn = self.sourceNodeList[sp-1]
 				tn = self.targetNodeList[tp-1]
 				self.makeConnectionShape(sn,tn)
-
-			modify_flag = True
 
 			self.Refresh()
 
@@ -2730,9 +2731,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			self.resizeable_nedeed = True
 
 			if event.Dragging() and event.LeftIsDown():
-
-				self.diagram.modify = False
 				
+				self.diagram.modify = False
 
 				if len(sc) == 0:
 					# User is dragging the mouse, check if
@@ -2762,7 +2762,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					# else:
 						# self.Refresh(False)
 				else:
-					
+
 					point = self.getEventCoordinates(event)
 					
 					x = point[0] - self.currentPoint[0]
@@ -2770,7 +2770,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 					if cursor != wx.StockCursor(wx.CURSOR_HAND):
 						cursor = wx.StockCursor(wx.CURSOR_HAND)
-				
+			
 					for s in sc:
 						s.move(x,y)
 
@@ -4358,6 +4358,7 @@ class Node(PointShape):
 		self.index = index	### number of port
 		self.cf = cf		### parent canvas
 		self.label = ""		### label of port
+		self.font_size = 10 ### font size
 
 		self.lock_flag = False                  # move lock
 		PointShape.__init__(self, type = t)
@@ -4409,6 +4410,7 @@ class ConnectableNode(Node):
 			### only if new and old label are different
 			if new_label != old_label:
 				self.label = new_label
+				self.font_size = 20
 				if isINode:
 					self.item.addInputLabels(self.index, self.label)
 				else:
@@ -4439,7 +4441,7 @@ class INode(ConnectableNode):
 		ConnectableNode.__init__(self, item, index, cf)
 
 		self.label = f"in{self.index}" if not label else label
-
+		
 	def move(self, x, y):
 		""" Move method.
 		"""
@@ -4488,7 +4490,7 @@ class INode(ConnectableNode):
 
 		self.fill = [GREEN]
 
-		dc.SetFont(wx.Font(10, 70, 0, 400))
+		dc.SetFont(wx.Font(self.font_size, 70, 0, 400))
 
 		### prot number
 		#dc.SetPen(wx.Pen(wx.NamedColour('black'), 20))
@@ -4526,7 +4528,7 @@ class ONode(ConnectableNode):
 		ConnectableNode.__init__(self, item, index, cf)
 
 		self.label = "out%d"%self.index if not label else label
-
+		
 	def move(self, x, y):
 		""" Moving method.
 		"""
@@ -4573,7 +4575,7 @@ class ONode(ConnectableNode):
 		self.moveto(x, y)
 		self.fill = [RED]
 
-		dc.SetFont(wx.Font(10, 70, 0, 400))
+		dc.SetFont(wx.Font(self.font_size, 70, 0, 400))
 		#dc.SetPen(wx.Pen(wx.NamedColour('black'), 20))
 
 		### prot number

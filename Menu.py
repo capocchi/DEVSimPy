@@ -712,14 +712,16 @@ class NodePopupMenu(wx.Menu):
 		"""
 		wx.Menu.__init__(self)
 
-		edit = wx.MenuItem(self, -1, _('Edit'), _('Edit label'))
-		edit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'label.png')))
+		edit_label = wx.MenuItem(self, -1, _('Edit'), _('Edit label'))
+		edit_label.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'label.png')))
 		
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
-		AppendItem(edit)
+		AppendItem(edit_label)
 
 		### bind event with new OnEditLabel
-		self.Bind(wx.EVT_MENU, node.OnEditLabel, edit)
+		self.Bind(wx.EVT_MENU, node.OnEditLabel, edit_label)
+		self.Bind(wx.EVT_MENU, node.OnEditLabel, edit_label)
+
 class PropertiesCtrlPopupMenu(wx.Menu):
 	""" PropertiesCtrl popup menu.
 	"""
@@ -1096,7 +1098,7 @@ class ShapePopupMenu(wx.Menu):
 				if (isinstance(shape, Container.iPort) and not isinstance(item, Container.iPort)) or (isinstance(shape, Container.oPort) and not isinstance(item, Container.oPort)) or isinstance(shape, Container.Block):
 					new_item = wx.MenuItem(connectable_subMenu, wx.NewIdRef(), label)
 					connectable_subMenu.Append(new_item)
-					self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnConnectTo,id = new_item.GetId())
+					self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnConnectTo, id=new_item.GetId())
 			
 			AppendMenu(self,-1, _('Connect to'), connectable_subMenu)
 

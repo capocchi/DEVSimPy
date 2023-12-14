@@ -26,6 +26,7 @@ import importlib
 import tempfile
 import builtins
 import gettext
+import ast
 
 import inspect
 if not hasattr(inspect, 'getargspec'):
@@ -94,6 +95,39 @@ def getPythonModelFileName(fn:str)->str:
 	else:
 		return ""
 
+def get_imported_modules(module_name:str)->list:
+	"""Get the list of imported module inside the module name mod.
+
+	Args:
+		mod (str): name of the module to analyse
+
+	Returns:
+		list: list of modules imported inside the module module_name
+	"""
+	try:
+		module = sys.modules[module_name]
+		
+		import inspect
+		source_code = inspect.getsource(module)
+		tree = ast.parse(source_code, filename=module.__file__)
+		
+		imported_modules = set()
+
+		for node in ast.walk(tree):
+			if isinstance(node, ast.Import):
+				for alias in node.names:
+					imported_modules.add(alias.name)
+			elif isinstance(node, ast.ImportFrom):
+				module_name = node.module if node.module else ''
+				for alias in node.names:
+					imported_modules.add(f"{module_name}.{alias.name}")
+
+		return imported_modules
+
+	except Exception as e:
+		print(f"Error while analyzing {module.__file__}: {e}")
+		return set()
+	
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # CLASS DEFIINTION

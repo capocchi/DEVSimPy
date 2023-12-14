@@ -20,8 +20,8 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-import os, sys
-import subprocess
+import os
+import sys
 import zipfile
 import zipfile
 import configparser
@@ -30,6 +30,17 @@ import json
 
 from Utilities import GetUserConfigDir
 from InteractionYAML import YAMLHandler
+from ZipManager import get_imported_modules
+
+import pkg_resources
+
+def get_pip_packages():
+    try:
+        installed_packages = [distribution.project_name for distribution in pkg_resources.working_set]
+        return installed_packages
+    except Exception as e:
+        print(f"Error retrieving pip packages: {e}")
+        return []
 
 def retrieve_file_paths(dirName:str):
     """ Function to return all file paths of the particular directory
@@ -74,21 +85,6 @@ def get_domain_path()->str:
         return os.path.abspath(built_in['DOMAIN_PATH'])
     else:
         return "Domain/"
-
-def execute_script(yaml):
-    # Execute the script using subprocess.Popen
-    process = subprocess.Popen(["python", "devsimpy-nogui.py", f"{os.path.abspath(yaml)}","10"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    _, stderr = process.communicate()
-
-    # Check if the execution was successful
-    if process.returncode == 0:
-        # Get the used packages from sys.modules
-        used_packages = {mod.split('.')[0] for mod in sys.modules.keys() if '.' in mod}
-        return True, used_packages
-    else:
-        # Print error message and return empty set
-        print(f"Error executing script: {stderr.decode()}")
-        return False, set()
 
 class StandaloneNoGUI:
     
@@ -210,6 +206,10 @@ class StandaloneNoGUI:
             ###
             ###################################################################
 
+            ### name of domain librairies used in the simulation model
+            # domain_lib = set()
+            domain_module_lib = set()
+
             if self.format == "Minimal":
                 ### add the Domain libairies according to the DOAMIN_PATH var
                 yaml = YAMLHandler(path)
@@ -218,10 +218,15 @@ class StandaloneNoGUI:
                 added_files = set()
                 ### lib_path is the directory of the library involved in the yaml model
                 for path in yaml.extractPythonPaths():
+                    domain_module_lib.add(os.path.basename(path).split('.')[0])
                     lib_path = os.path.dirname(path)
                     if lib_path.endswith(('.amd','.cmd')):
+                        domain_module_lib.remove(os.path.basename(path).split('.')[0])
+                        domain_module_lib.add(os.path.basename(lib_path).split('.')[0])
                         lib_path = os.path.dirname(lib_path)
-            
+                    
+                    # domain_lib.add(os.path.basename(lib_path))
+                    
                     ### format the path of the library to include in the archive
                     lib_name = os.path.basename(os.path.dirname(lib_path))
                     for file in retrieve_file_paths(lib_path):
@@ -236,7 +241,8 @@ class StandaloneNoGUI:
                     if file.endswith(('.py', '.amd', '.cmd')) and \
                                     '__pycache__' not in file:
                         archive.write(file, arcname='Domain'+os.path.join(file.split('Domain')[1], os.path.basename(file)))
-    
+                        # domain_lib.add(os.path.basename(file))
+
             ###################################################################
             ###
             ### devsimpy-nogui lib directories
@@ -279,28 +285,36 @@ class StandaloneNoGUI:
             ### write config file
             archive.writestr("config.json", self.GetConfigSpec())
             
-
             ###################################################################
             ###
             ### Requierements files
             ###
             ###################################################################
 
-            ### TODO: include the self.format condition to choose if you want a minimal or full dependencies
+            pip_packages_used_to_add_in_requirements = set()
 
-            # Example: Execute a script and get the used packages
-            success, packages = execute_script(self.yaml)
+            # Get the list of available pip packages
+            installed_pip_packages = get_pip_packages()
 
-            if success:
-                print("Used packages:")
-                for package in packages:
-                    print(package)
+            for mod in domain_module_lib:
+                imported_modules = get_imported_modules(mod)
+                for name in imported_modules:
+                    if not 'DomainInterface' in name and name in installed_pip_packages:
+                        pip_packages_used_to_add_in_requirements.add(name)
+
+            ### if additionnal pip package are used in devs atomic model, we need to add them in the requirements.txt file
+            if pip_packages_used_to_add_in_requirements:
+                
+                # Read the existing content of the txt file
+                with open('requirements-nogui.txt', 'r') as file:
+                    to_write_in_requirements = file.read()
+
+                ### Add the pip_packages_to_add_in_requirements
+                to_write_in_requirements += '\n' + '\n### Additionnal requirements for model librairies\n' + '\n'.join(pip_packages_used_to_add_in_requirements)
+
+                archive.writestr('requirements.txt', to_write_in_requirements)
             else:
-                print("Script execution failed.")
+                ### add requirements.txt file in the arche from the requirements-nogui.txt file
+                archive.write('requirements-nogui.txt', 'requirements.txt')
 
-
-            ### add requirements-nogui.txt file
-            ### TODO: packages used in models include in the yaml file are not defined in the requirements.txt!
-            archive.write('requirements-nogui.txt', 'requirements.txt')
-        
         return True 
