@@ -1550,8 +1550,7 @@ class MainApplication(wx.Frame):
 		### try to save the current diagram into a temp yaml file and launch the diag for the standalone exportation 
 		if os.path.exists(path):
 			if Container.Diagram.SaveFile(diagram, path):
-				frame = StandaloneGUI(None, -1, _('Standalone settings'))
-				frame.SetYAML(path)
+				frame = StandaloneGUI(None, -1, _('Standalone settings'), yaml=path)
 				frame.Show(True)
 			else:
 				wx.MessageBox(_("An error occurred during the saving as yaml file."), _("Error"), wx.OK | wx.ICON_ERROR)

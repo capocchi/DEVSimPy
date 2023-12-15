@@ -25,8 +25,6 @@ import sys
 import gettext
 _ = gettext.gettext
 
-from Mixins.Attributable import Attributable
-
 import Container
 
 #---------------------------------------------------------

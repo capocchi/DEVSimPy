@@ -101,6 +101,7 @@ from Mixins.Structurable import Structurable
 from Mixins.Savable import Savable
 from Mixins.Selectable import Selectable
 from Mixins.Abstractable import Abstractable
+from Mixins.Iconizable import Iconizable, Icon
 
 ### for all dsp model build with old version of DEVSimPy
 sys.modules['Savable'] = sys.modules['Mixins.Savable']
@@ -1257,14 +1258,14 @@ class Shape(ShapeEvtHandler):
 			font = FONT_SIZE
 			### set the font in the dc in order to performed GetTextExtent
 			dc.SetFont(wx.Font(font, self.font[1], self.font[2], self.font[3], False, self.font[4]))
-			width_t, height_t = dc.GetTextExtent(self.label)
+			width_t, _ = dc.GetTextExtent(self.label)
 			### size of shape
 			width_s = self.x[1]-self.x[0]
 			### while the label with is sup of shape width, we reduce the font of the dc (thus the label size)
 			while(width_t > width_s):
 				font -=1
 				dc.SetFont(wx.Font(font, self.font[1], self.font[2], self.font[3], False, self.font[4]))
-				width_t, height_t = dc.GetTextExtent(self.label)
+				width_t, _ = dc.GetTextExtent(self.label)
 
 			### update the font
 			self.font[0]=font
@@ -2108,7 +2109,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			""" Edition sub menu has been clicked. Event is transmit to the model
 			"""
 
-			event.SetClientData(self.GetTopLevelParent())
+			event.SetClientData(self.GetTopLevelParent())			
 			for s in self.select():
 				s.OnEditor(event)
 
@@ -3507,7 +3508,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		Attributable.__init__(self)
 		Selectable.__init__(self)
 		Rotatable.__init__(self)
-
+		
 		self.AddAttributes(Attributable.GRAPHICAL_ATTR)
 		self.label = label
 		self.label_pos = 'center'
@@ -3516,7 +3517,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		self.nb_copy = 0        # nombre de fois que le bloc est copié (pour le label des blocks copiés
 		self.last_name_saved = ""
 		self.lock_flag = False                  # move lock
-		self.bad_filename_path_flag = False
+		self.bad_filename_path_flag = False 
 
 	###
 	def draw(self, dc):
@@ -3586,7 +3587,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		if self.bad_filename_path_flag:
 			img = wx.Bitmap(os.path.join(ICON_PATH_16_16, 'flag_exclamation.png'), wx.BITMAP_TYPE_ANY)
 			dc.DrawBitmap(img, int(self.x[0]+15), int(self.y[0]))
-
+		
 		#img = wx.Bitmap(os.path.join(ICON_PATH_16_16, 'atomic3.png'), wx.BITMAP_TYPE_ANY)
 		#dc.DrawBitmap( img, self.x[0]+30, self.y[0] )
 
@@ -3771,7 +3772,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 						)
 
 #---------------------------------------------------------
-class CodeBlock(Achievable, Block):
+class CodeBlock(Achievable, Block, Iconizable):
 	""" CodeBlock(label, inputs, outputs)
 	"""
 
@@ -3781,6 +3782,7 @@ class CodeBlock(Achievable, Block):
 		"""
 		Block.__init__(self, label, nb_inputs, nb_outputs)
 		Achievable.__init__(self)
+		Iconizable.__init__(self, ['trash', 'edit'])
 
 	###
 	def __setstate__(self, state):
@@ -3789,7 +3791,7 @@ class CodeBlock(Achievable, Block):
 
 		python_path = state['python_path']
 		model_path = state['model_path']
-		image_path = state['image_path']
+		# image_path = state['image_path']
 		new_class = None
 		dir_name = os.path.basename(DOMAIN_PATH)
 
@@ -4050,19 +4052,55 @@ class CodeBlock(Achievable, Block):
 			### Atomic model has no abstract attributes
 			return []
 		#======================================================================
+		elif name == 'icons':
+			return {}
 		else:
 			raise AttributeError(name)
 
+	###
 	def draw(self, dc):
-		"""
+		""" Draw the block on DC.
 		"""
 		if self.selected:
 			### inform about the nature of the block using icon
-			name = 'atomic3.png' if self.model_path != "" else 'pythonFile.png' if self.python_path.endswith('.py') else 'pyc.png' 
-			img = wx.Bitmap(os.path.join(ICON_PATH_16_16, name), wx.BITMAP_TYPE_ANY)
-			dc.DrawBitmap(img, int(self.x[1]-20), int(self.y[0]))
-
+			name = 'atomic3' if self.model_path != "" else 'pythonFile' if self.python_path.endswith('.py') else 'pyc' 
+			icon = Icon(name, (4,2))
+			img = wx.Bitmap(icon.getImagePath(), wx.BITMAP_TYPE_ANY)
+			x,y = int(self.x[0]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
+			dc.DrawBitmap(img, x, y)
+			
+			### Draw th right icons (see constructor and Iconizable)
+			for name in self.getDisplayedIconNames():
+				icon = self.getIcon(name)
+				img = wx.Bitmap(icon.getImagePath(), wx.BITMAP_TYPE_ANY)
+				x,y = int(self.x[1]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
+				dc.DrawBitmap(img, x, y)
+				
 		Block.draw(self, dc)
+
+	###
+	def OnLeftDown(self, event):
+		""" On Left Click has been done.
+		""" 
+		mouse_x, mouse_y = event.GetX(), event.GetY()
+
+		clicked_icon_name = self.getClickedIconName(mouse_x, mouse_y)
+
+		if clicked_icon_name == 'edit':
+			try:
+				self.OnEditor(event)
+			except AttributeError:
+				pass
+		elif clicked_icon_name == 'trash':
+			canvas = event.GetEventObject()
+			try:
+				canvas.OnDelete(self)		
+			except AttributeError:
+				pass
+		else:
+			pass
+
+		event.Skip()
 
 	###
 	def OnLeftDClick(self, event):
@@ -4129,7 +4167,7 @@ class CodeBlock(Achievable, Block):
 					)	
 
 #---------------------------------------------------------
-class ContainerBlock(Block, Diagram):
+class ContainerBlock(Block, Iconizable, Diagram):
 	""" ContainerBlock(label, inputs, outputs)
 	"""
 
@@ -4140,7 +4178,9 @@ class ContainerBlock(Block, Diagram):
 		""" Constructor
 		"""
 		Block.__init__(self, label, nb_inputs, nb_outputs)
+		Iconizable.__init__(self, ['trash'])
 		Diagram.__init__(self)
+		
 
 		self.fill = ContainerBlock.FILL
 
@@ -4162,8 +4202,6 @@ class ContainerBlock(Block, Diagram):
 
 					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(model_path[model_path.index(dir_name):]).strip('[]')))
 
-					#print(path)
-     
 					### try to find it in exportedPathList (after Domain check)
 					if not os.path.exists(path) and builtins.__dict__.get('GUI_FLAG',True):
 						import wx
@@ -4248,7 +4286,6 @@ class ContainerBlock(Block, Diagram):
 					state['bad_filename_path_flag'] = True
 			else:
 				state['bad_filename_path_flag'] = True
-
 		
 		####################################" Just for old model
 		if 'bad_filename_path_flag' not in state: state['bad_filename_path_flag'] = False
@@ -4282,27 +4319,63 @@ class ContainerBlock(Block, Diagram):
 		if name == 'dump_attributes':
 			#return ['shapes', 'priority_list', 'constants_dico', 'model_path', 'python_path','args'] + self.GetAttributes()
 			return ['shapes', 'priority_list', 'constants_dico','args'] + Connectable.DUMP_ATTR +self.GetAttributes()
-		#=======================================================================
+		#======================================================================
 		elif name == 'dump_abstr_attributes':
 			return Abstractable.DUMP_ATTR if hasattr(self, 'layers') and hasattr(self, 'current_level') else []
 		#======================================================================
+		#======================================================================
+		elif name == 'icons':
+			return {}
 		else:
 			raise AttributeError(name)
 
+	###
 	def draw(self, dc):
 		"""
 		"""
 		if self.selected:
 			### inform about the nature of the block using icon
-			img = wx.Bitmap(os.path.join(ICON_PATH_16_16, 'coupled3.png'), wx.BITMAP_TYPE_ANY)
-
+			icon = Icon('coupled3', (4,2))
+			img = wx.Bitmap(icon.getImagePath(), wx.BITMAP_TYPE_ANY)
+			x,y = int(self.x[0]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
+			dc.DrawBitmap(img, x, y)
+			
 			### Draw the number of devs models inside
 			n = str(self.GetBlockCount())
 			dc.DrawText(n, int(self.x[1]-15-len(n)), int(self.y[1]-20))
   
-			dc.DrawBitmap(img, int(self.x[1]-20), int(self.y[0]))
+			### Draw the right icons
+			for name in self.getDisplayedIconNames():
+				icon = self.getIcon(name)
+				img = wx.Bitmap(icon.getImagePath(), wx.BITMAP_TYPE_ANY)
+				x,y = int(self.x[1]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
+				dc.DrawBitmap(img, x, y)
 
 		Block.draw(self, dc)
+
+	###
+	def OnLeftDown(self, event):
+		""" On Left Click has been done.
+		""" 
+		mouse_x, mouse_y = event.GetX(), event.GetY()
+
+		clicked_icon_name = self.getClickedIconName(mouse_x, mouse_y)
+
+		if clicked_icon_name == 'edit':
+			try:
+				self.OnEditor(event)
+			except AttributeError:
+				pass
+		elif clicked_icon_name == 'trash':
+			canvas = event.GetEventObject()
+			try:
+				canvas.OnDelete(self)		
+			except AttributeError:
+				pass
+		else:
+			pass
+
+		event.Skip()
 
 	###
 	def OnSelect(self, event):
@@ -4361,7 +4434,7 @@ class Node(PointShape):
 		self.font_size = 10 ### font size
 
 		self.lock_flag = False                  # move lock
-		PointShape.__init__(self, type = t)
+		PointShape.__init__(self, type=t)
 
 	# def showProperties(self):
 	# 	""" Call item properties.
@@ -4375,7 +4448,7 @@ class ConnectableNode(Node):
 	def __init__(self, item, index, cf):
 		""" Constructor.
 		"""
-		Node.__init__(self, item, index, cf, t = 'circ')
+		Node.__init__(self, item, index, cf, t='circ')
 
 	def OnLeftDown(self, event):
 		""" Left Down click has been invoked

@@ -99,12 +99,17 @@ class StandaloneGUI(wx.Frame):
     def __init__(self, *args, **kw):
         """Constructor.
         """
+
+        ### local copy
+        self.yaml = kw['yaml']
+        del kw['yaml']
+        assert(os.path.exists(self.yaml))
+
+        # This line calls the __init__ method of the parent class to initialize the GUI window.
         super(StandaloneGUI, self).__init__(*args, **kw)
        
-        ### TODO generate yaml from current diagram
-        
-        self.yaml = ""
-            
+        self.yaml_model_name = os.path.basename(self.yaml.split('.')[0])
+
         self.InitUI()
         self.Center()
         
@@ -127,7 +132,7 @@ class StandaloneGUI(wx.Frame):
         self.st1.SetToolTip(_("Select a name for the standalone package"))
         
         hbox1.Add(self.st1, flag=wx.RIGHT|wx.ALIGN_CENTER_VERTICAL, border=8)
-        self._tc = wx.TextCtrl(panel, -1, "devsimpy-nogui-pkg.zip", style=wx.TE_RICH2|wx.BORDER_NONE, validator=ZipNameValidator())
+        self._tc = wx.TextCtrl(panel, -1, f"{self.yaml_model_name}-nogui-pkg.zip", style=wx.TE_RICH2|wx.BORDER_NONE, validator=ZipNameValidator())
         self._tc.SetToolTip(_("Must end with .zip"))
 
         hbox1.Add(self._tc, proportion=1)
@@ -144,6 +149,7 @@ class StandaloneGUI(wx.Frame):
                                                -1, 
                                                size=(450, -1), 
                                                labelText = "Select Directory:",
+                                               startDirectory = StandaloneGUI.last_opened_directory,
                                                toolTip=_("Select a target directory to create the standalone package"))
         # Set the initial directory
         self._dbb.startDirectory = StandaloneGUI.last_opened_directory
@@ -216,12 +222,6 @@ class StandaloneGUI(wx.Frame):
         self.Bind(wx.EVT_CHECKBOX,self.OnChecked, id=self._cb1.GetId()) 
         self.Bind(wx.EVT_CHOICE, self.OnChoice, id=self.kernel.GetId())
         self.Bind(wx.EVT_DIRPICKER_CHANGED, self.OnDirChanged, id=self._dbb.GetId())
-
-        
-    def SetYAML(self,yaml:str)->None:
-        """ Set the yaml file
-        """
-        self.yaml = yaml
     
     def OnDirChanged(self, event):
         # Get the selected directory
