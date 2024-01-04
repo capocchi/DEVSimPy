@@ -6,5 +6,6 @@ __all__ = [	"Attributable",
 			"Plugable",
 			"Structurable",
 			"Savable",
-                        "Abstractable"
+            "Abstractable",
+            "Iconizable"
 ]

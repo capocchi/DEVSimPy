@@ -866,7 +866,7 @@ class DEVSComponent:
 			try:
 				
 				editorFrame = Editor.GetEditor(None, wx.NewIdRef(), ''.join([name,' - ',model_path]), obj=self, file_type='block')
-
+				
 				# if zipfile.is_zipfile(model_path):
 				# 	importer = zipimport.zipimporter(model_path)
 				# 	text = importer.get_source(os.path.splitext(name)[0])
@@ -902,7 +902,7 @@ class DEVSComponent:
 										# with codecs.open(python_path, 'r', 'utf-8') as f:
 										# 	text = f.read()
 
-				name = os.path.basename(python_path)
+				# name = os.path.basename(python_path)
 
 				editorFrame.AddEditPage(name, python_path)
 				editorFrame.Show()

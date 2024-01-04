@@ -21,20 +21,23 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 import os
-import sys
 import zipfile
 import zipfile
 import configparser
 import pathlib
 import json
+import pkg_resources
 
 from Utilities import GetUserConfigDir
 from InteractionYAML import YAMLHandler
 from ZipManager import get_imported_modules
 
-import pkg_resources
+def get_pip_packages()->list:
+    """Get the installed pip package.
 
-def get_pip_packages():
+    Returns:
+        list: list of names of installed pip package
+    """
     try:
         installed_packages = [distribution.project_name for distribution in pkg_resources.working_set]
         return installed_packages
@@ -42,7 +45,7 @@ def get_pip_packages():
         print(f"Error retrieving pip packages: {e}")
         return []
 
-def retrieve_file_paths(dirName:str):
+def retrieve_file_paths(dirName:str)->list:
     """ Function to return all file paths of the particular directory
 
     Args:
@@ -51,26 +54,17 @@ def retrieve_file_paths(dirName:str):
     Returns:
         list: list of file paths
     """
-    filePaths = []
-
-    # Read all directory, subdirectories and file lists
-    for root, _, files in os.walk(r'{}'.format(dirName).encode('latin').decode('utf-8')):
-        ### TODO: filter depending on the necessary lib
-        for filename in files:
-            if '__pycache__' not in filename:
-                #Create the full filepath by using os module.
-                filePath = os.path.join(root, filename)
-                filePaths.append(filePath)
-            
-    # return all paths
-    return filePaths
+    ### Read all directory, subdirectories and file lists
+    ### Create the full filepath by using os module.
+    return [ os.path.join(root, filename) 
+                 for root, _, files in os.walk(r'{}'.format(dirName).encode('latin').decode('utf-8')) \
+                 for filename in files \
+                 if '__pycache__' not in filename]
 
 def get_domain_path()->str:
-    """ Find domain from .devsimpy file	
+    """ Find domain from .devsimpy file.
     """
-    
-    ### TODO: Domain must be pruned in order to select only the lib used by the model
-    
+     
     config_file = os.path.join(GetUserConfigDir(),'.devsimpy')
  
     if os.path.exists(config_file):
@@ -84,17 +78,17 @@ def get_domain_path()->str:
 
         return os.path.abspath(built_in['DOMAIN_PATH'])
     else:
-        return "Domain/"
+        return 'Domain/'
 
 class StandaloneNoGUI:
     
     ### list of files to zip
-    FILENAMES = ["Components.py","Container.py","Decorators.py","devsimpy-nogui.py","DSV.py","InteractionSocket.py","InteractionYAML.py",
-				"Join.py","NetManager.py","PluginManager.py","SimulationNoGUI.py","SpreadSheet.py","Utilities.py","XMLModule.py","ZipManager.py",
-                "StandaloneNoGUI.py"]
+    FILENAMES = ['Components.py','Container.py','Decorators.py','devsimpy-nogui.py','DSV.py','InteractionSocket.py','InteractionYAML.py',
+				'Join.py','NetManager.py','PluginManager.py','SimulationNoGUI.py','SpreadSheet.py','Utilities.py','XMLModule.py','ZipManager.py',
+                'StandaloneNoGUI.py']
 
     ## list of dir to zip
-    DIRNAMES = ["DomainInterface/","Mixins/","Patterns/"]
+    DIRNAMES = ['DomainInterface/','Mixins/','Patterns/']
 
     def __init__(self, yaml:str="", outfn:str="devsimpy-nogui-pkg.zip", format:str="Minimal", outdir:str=os.getcwd(), add_sim_kernel:bool=True, add_dockerfile:bool=False, sim_time:str="ntl", rt:bool=False, kernel:str='PyDEVS'):
         """ Generates the zip file with all files needed to execute the devsimpy-nogui script.
@@ -121,43 +115,36 @@ class StandaloneNoGUI:
         self.sim_time = sim_time
         self.rt = rt
         self.kernel = kernel
-        
-        ### path of the Domain dir (depending on the .devsimpy config file)
-        self.domain_path = get_domain_path()
-        
+
+        assert(self.yaml.endswith('.yaml') and os.path.exists(self.yaml), _("YAML file must exist!"))
+
         ### list of dir to zip
-        self.dirnames_abs = map(pathlib.Path,StandaloneNoGUI.DIRNAMES)
-        
-        ### flags
-        self.yaml_exist = self.yaml.endswith('.yaml') and os.path.exists(self.yaml)
+        self.dirnames_abs = map(pathlib.Path, StandaloneNoGUI.DIRNAMES)
         
         ### if simulation kernel need to by zipped
         if self.add_sim_kernel:
-            StandaloneNoGUI.DIRNAMES.append("DEVSKernel/")    
-        
-    def SetYAML(self,yaml):
-        self.yaml = yaml
+            StandaloneNoGUI.DIRNAMES.append('DEVSKernel/')    
         
     def GetDockerSpec(self):
         """
         """
         return f"""
-                    FROM python:3.10-slim-buster
+FROM python:3.11-slim-buster
 
-                    WORKDIR /app
+WORKDIR /app
 
-                    RUN apt-get update
-                    RUN apt-get install -y build-essential
-                    
-                    RUN pip install pipreqs
-                    RUN pipreqs .
-        
-                    COPY requirements.txt requirements.txt
-                    RUN pip install -r requirements.txt
+RUN apt-get update
+RUN apt-get install -y build-essential
 
-                    COPY . .
+RUN pip install pipreqs
+RUN pipreqs .
 
-                    CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+COPY . .
+
+CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
 
                 """
                 
@@ -179,10 +166,7 @@ class StandaloneNoGUI:
     def BuildZipPackage(self) -> None:
         """
         """
- 
-        if self.yaml == "" and not self.yaml_exist:
-            return False
-    
+     
         ### create the outfn zip file
         with zipfile.ZipFile(os.path.join(self.outdir,self.outfn), mode="w") as archive:
             
@@ -210,7 +194,7 @@ class StandaloneNoGUI:
             # domain_lib = set()
             domain_module_lib = set()
 
-            if self.format == "Minimal":
+            if self.format == 'Minimal':
                 ### add the Domain libairies according to the DOAMIN_PATH var
                 yaml = YAMLHandler(path)
             
@@ -236,8 +220,11 @@ class StandaloneNoGUI:
                                 archive.write(file, arcname=relative_path)
                                 added_files.add(relative_path)
             else:
+                ### path of the Domain dir (depending on the .devsimpy config file)
+                domain_path = get_domain_path()
+       
                 ## To include all Domain dir
-                for file in retrieve_file_paths(self.domain_path):
+                for file in retrieve_file_paths(domain_path):
                     if file.endswith(('.py', '.amd', '.cmd')) and \
                                     '__pycache__' not in file:
                         archive.write(file, arcname='Domain'+os.path.join(file.split('Domain')[1], os.path.basename(file)))
@@ -256,7 +243,7 @@ class StandaloneNoGUI:
                 filePaths = retrieve_file_paths(dirname)
 
                 ### select only the selected simulation kernel
-                if "DEVSKernel" in os.path.abspath(dirname):
+                if 'DEVSKernel' in os.path.abspath(dirname):
                     new_dirname = os.path.join(dirname,self.kernel)
                     filePaths = retrieve_file_paths(new_dirname)
                     ### add __init__.py of Kernel dir
@@ -274,7 +261,7 @@ class StandaloneNoGUI:
             ###################################################################
 
             if self.add_dockerfile:
-                archive.writestr("DockerFile", self.GetDockerSpec())
+                archive.writestr('Dockerfile', self.GetDockerSpec())
                 
             ###################################################################
             ###
@@ -283,7 +270,7 @@ class StandaloneNoGUI:
             ###################################################################
 
             ### write config file
-            archive.writestr("config.json", self.GetConfigSpec())
+            archive.writestr('config.json', self.GetConfigSpec())
             
             ###################################################################
             ###
