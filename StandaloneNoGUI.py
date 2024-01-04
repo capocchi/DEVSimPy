@@ -261,7 +261,7 @@ CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
             ###################################################################
 
             if self.add_dockerfile:
-                archive.writestr('DockerFile', self.GetDockerSpec())
+                archive.writestr('Dockerfile', self.GetDockerSpec())
                 
             ###################################################################
             ###
