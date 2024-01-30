@@ -979,8 +979,9 @@ class MainApplication(wx.Frame):
 			self.SaveBuiltinDict()
 			self.SavePosition()
 			self.SaveSize()
-			self._mgr.UnInit()
-			del self._mgr
+			if hasattr(self, '_mgr'):
+				self._mgr.UnInit()
+				del self._mgr
 			#self.Close()
 			
 			#win = wx.Window_FindFocus()

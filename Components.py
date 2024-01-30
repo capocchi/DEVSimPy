@@ -617,7 +617,7 @@ class DEVSComponent:
 
 		### overriding method (coming from plugins) can't be pickled
 		for name,value in list(new_state.items()):
-			module = inspect.getmodule(value)
+			#module = inspect.getmodule(value)
 			if isinstance(value, types.MethodType):
 				new_state[name] = None
 
@@ -632,16 +632,22 @@ class DEVSComponent:
 		devs.blockModel = block
 
 	@staticmethod
-	def debugger(m, msg):
-		if builtins.__dict__.get('GUI_FLAG',True):
+	def debugger(m, msg, print_stdout=False):
+		if builtins.__dict__.get('GUI_FLAG', True):
 			bm = m.getBlockModel()
 			path = os.path.join(gettempdir(),'%s.%d.devsimpy.log'%(str(bm.label), id(bm)))
 		
+			try:
+				txt = f"clock {m.timeNext}: {msg}\n"
+			except Exception:
+				txt = f"clock {0.0}: {msg}\n"
+
 			with open(path,'a') as f:
-				try:
-					f.write("clock %s: %s\n"%(m.timeNext, msg))
-				except Exception:
-					f.write("clock %d: %s\n"%(0.0, str(msg)))
+				f.write(txt)
+
+		### if print_stdout is true (for DEVSimPy rest trace)
+		if print_stdout:
+			sys.stdout.write(f"{m.label}- {txt}")
 
 	def setDEVSPythonPath(self, python_path:str):
 		if os.path.isfile(python_path) or zipfile.is_zipfile(os.path.dirname(python_path)):
