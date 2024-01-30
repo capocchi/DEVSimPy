@@ -84,7 +84,7 @@ class GeneralPanel(wx.Panel):
 		self.out_dir.SetValue(OUT_DIR)
 
 		### StaticText
-		self.st1 = wx.StaticText(self, wx.NewIdRef(), _("Number of recent file:"))
+		self.st1 = wx.StaticText(self, wx.NewIdRef(), _("Number of recent files:"))
 		self.st2 = wx.StaticText(self, wx.NewIdRef(), _("Font size:"))
 		self.st3 = wx.StaticText(self, wx.NewIdRef(), _("Deep of history item:"))
 		self.st4 = wx.StaticText(self, wx.NewIdRef(), _("wxPython version:"))
@@ -203,10 +203,11 @@ class GeneralPanel(wx.Panel):
 		""" Update the domain path.
 		"""
 		new_domain_dir = self.domain_dir.GetValue()
-		old_parent_domain_dir = os.path.dirname(builtins.__dict__['DOMAIN_PATH'])
 
 		### if value has been changed, we clean the library control panel
 		if builtins.__dict__['DOMAIN_PATH'] != new_domain_dir:
+
+			old_parent_domain_dir = os.path.dirname(builtins.__dict__['DOMAIN_PATH'])
 
 			### remove the parent of Domain directory of this one is not the devsimpy directory
 			if old_parent_domain_dir != builtins.__dict__['HOME_PATH']:
@@ -227,6 +228,9 @@ class GeneralPanel(wx.Panel):
 			tree = nb1.GetTree()
 			for item in tree.GetItemChildren(tree.GetRootItem()):
 				tree.RemoveItem(item)
+			
+			### save in the config file
+			mainW.SaveBuiltinDict()
 
 	###
 	def OnPluginsDirChanged(self, event):

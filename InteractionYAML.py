@@ -8,24 +8,27 @@ import re
 import datetime
 
 def to_Python(val):
-    if val.lower() == 'true':
+    if val in ('true', 'True'):
         return True
-    elif val.lower() == 'false':
+    elif val in ('false', 'False'):
         return False
-    elif isinstance(val,str):
+    elif type(val) is str:
         # Try to parse the string as a date
         try:
-            # Try to parse the string as a date
-            datetime.datetime.strptime(val, '%Y-%m-%d')
-            return val
+            datetime_object = datetime.strptime(val, "%Y-%m-%d")
+            is_valid_date = True
         except ValueError:
-            pass
-        
-        # Check if it's a valid numeric string
-        if val.replace('.', '').replace('-', '').isdigit():
-            return eval(val)
-        
-        return val
+            is_valid_date = False
+
+        # Check if it's a valid date using an if statement
+        if is_valid_date:
+            return val
+        elif str(val).replace('.','').replace('-','').isdigit():
+            return eval(str(val))
+    elif isinstance(eval(val),list) or isinstance(eval(val),tuple):
+        return eval(val)
+
+    return val
 
 class YAMLHandler:
     """ class providing methods for YAML file handling.
