@@ -31,6 +31,9 @@ if builtins.__dict__.get('GUI_FLAG',True):
 import threading
 import sys
 import traceback
+import os
+import time
+import psutil
 
 # to send event
 from pubsub import pub
@@ -39,13 +42,23 @@ from Utilities import playSound, NotificationMessage
 from Patterns.Strategy import *
 from Decorators import hotshotit
 
+def elapsed_since(start):
+    return time.strftime("%H:%M:%S", time.gmtime(time.time() - start))
+
+def get_process_memory():
+	process = psutil.Process(os.getpid())
+	mem_bytes = process.memory_info().rss
+	mem_Mb = float(mem_bytes)/1048576
+	return mem_Mb
+
+
 def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_flag, real_time_flag):
 	""" Preventing direct creation for Simulator
         disallow direct access to the classes
 	"""
 
 	### find the correct simulator module depending on the
-	for pydevs_dir, filename in list(builtins.__dict__['DEVS_DIR_PATH_DICT'].items()):
+	for pydevs_dir, _ in list(builtins.__dict__['DEVS_DIR_PATH_DICT'].items()):
 		if pydevs_dir == builtins.__dict__['DEFAULT_DEVS_DIRNAME']:
 			from DEVSKernel.PyDEVS.simulator import Simulator as BaseSimulator
 
@@ -115,6 +128,9 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 			self.cpu_time = -1
 
 			self.start()
+
+			self.mem_before = get_process_memory()
+			self.start_time = time.time()
 
 		@hotshotit
 		def run(self):
@@ -187,6 +203,12 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 
 						wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
 
+			if not builtins.__dict__.get('GUI_FLAG',True):
+				elapsed_time = elapsed_since(self.start_time)
+				mem_after = get_process_memory()
+
+				print({'mem_before_in_MB': self.mem_before, 'mem_after_in_MB':mem_after, 'men_consumed_in_MB': mem_after - self.mem_before, 'exec_time':elapsed_time})
+	
 			self.end_flag = True
 			
 		def set_sleep(self, sleeptime):
