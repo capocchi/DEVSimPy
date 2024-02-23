@@ -116,7 +116,8 @@ class StandaloneNoGUI:
         self.rt = rt
         self.kernel = kernel
 
-        assert(self.yaml.endswith('.yaml') and os.path.exists(self.yaml), _("YAML file must exist!"))
+        assert self.yaml.endswith('.yaml'), _("YAML file name must end with '.yaml'!")
+        assert os.path.exists(self.yaml), _("YAML file must exist!")
 
         ### list of dir to zip
         self.dirnames_abs = map(pathlib.Path, StandaloneNoGUI.DIRNAMES)
