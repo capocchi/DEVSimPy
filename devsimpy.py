@@ -2036,7 +2036,7 @@ class MainApplication(wx.Frame):
 		### find the prof file name
 		menu_item = self.GetMenuBar().FindItemById(event.GetId())
 		fn = menu_item.GetItemLabelText()
-		prof_file_path = os.path.join(gettempdir(), fn)
+		prof_file_path = os.path.join(os.path.realpath(gettempdir()), fn)
 
 		### list of item in single choice dialogue
 		### gprof2dot needs graphviz
@@ -2099,7 +2099,7 @@ class MainApplication(wx.Frame):
 	def OnDeleteProfiles(self, event):
 		dlg = wx.MessageDialog(self, _('Do you realy want to delete all files ?'), _('Profile Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 		if dlg.ShowModal() == wx.ID_YES:
-			tmp_dir = gettempdir()
+			tmp_dir = os.path.realpath(gettempdir())
 			for fn in [f for f in os.listdir(tmp_dir) if f.endswith(('.prof','.cachegrind'))]:
 				os.remove(os.path.join(tmp_dir,fn))
 		dlg.Destroy()
