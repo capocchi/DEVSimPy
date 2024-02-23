@@ -74,7 +74,7 @@ def hotshotit(func):
 			label = sim_thread.model.getBlockModel().label
 			now = datetime.now() # current date and time
 			date_time = now.strftime('%m-%d-%Y_%H-%M-%S')
-			prof_name = os.path.join(gettempdir(),"%s_%s_%s%s"%(func.__name__, label, date_time ,'.prof'))
+			prof_name = os.path.join(os.path.realpath(gettempdir()),"%s_%s_%s%s"%(func.__name__, label, date_time ,'.prof'))
 
 			### profiling section with cProfile
 			pr = cProfile.Profile()

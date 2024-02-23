@@ -216,7 +216,7 @@ def CheckClass(m):
 		args = Components.GetArgs(cls)
 
 	elif isinstance(m, Block):
-		tempdir = gettempdir()
+		tempdir = os.path.realpath(gettempdir())
 		if tempdir in os.path.dirname(m.python_path):
 			cls = ('','','')
 		else:
@@ -884,7 +884,7 @@ class Diagram(Savable, Structurable):
 
 					### clear all log file
 					for fn in [f for f in os.listdir(gettempdir()) if f.endswith('.devsimpy.log')]:
-						os.remove(os.path.join(gettempdir(),fn))
+						os.remove(os.path.join(os.path.realpath(gettempdir()),fn))
 
 ##					obj = event.GetEventObject()
 					# si invocation à partir du bouton dans la toolBar (apparition de la frame de simulation dans une fenetre)
@@ -3294,8 +3294,10 @@ class Testable(object):
 		tests_files = ZipManager.Zip.GetTests(model_path)
 		### ---------------------------------------------------------------------------------------
 
+		tempdir = os.path.realpath(gettempdir())
+
 		### Folder hierarchy construction----------------------------------------------------------
-		feat_dir  = os.path.join(gettempdir(), "features")
+		feat_dir  = os.path.join(tempdir, "features")
 		steps_dir = os.path.join(feat_dir, "steps")
 		if not os.path.exists(feat_dir):
 			os.mkdir(feat_dir)
@@ -3304,7 +3306,7 @@ class Testable(object):
 		### ---------------------------------------------------------------------------------------
 
 		### AMD unzip------------------------------------------------------------------------------
-		amd_dir = os.path.join(gettempdir(), "AtomicDEVS")
+		amd_dir = os.path.join(tempdir, "AtomicDEVS")
 		if not os.path.exists(amd_dir):
 			os.mkdir(amd_dir)
 		### ---------------------------------------------------------------------------------------
@@ -3325,7 +3327,7 @@ class Testable(object):
 			envInfo = importer.getinfo(environment_name)
 			env_code = importer.read(envInfo)
 		else:
-			environment_name = os.path.join(gettempdir(), 'environment.py')
+			environment_name = os.path.join(tempdir, 'environment.py')
 			with open(environment_name, 'r+') as global_env_code:
 				env_code = global_env_code.read()
 
@@ -3363,7 +3365,8 @@ class Testable(object):
 	# NOTE: Testable :: RemoveTempTests		=> Remove tests on temporary folder
 	@staticmethod
 	def RemoveTempTests():
-		feat_dir = os.path.join(gettempdir(), 'features')
+		tempdir = os.path.realpath(gettempdir())
+		feat_dir = os.path.join(tempdir, 'features')
 		if os.path.exists(feat_dir):
 			for root, dirs, files in os.walk(feat_dir, topdown=False):
 				for name in files:
@@ -3372,7 +3375,7 @@ class Testable(object):
 
 			os.rmdir(feat_dir)
 
-		amd_dir = os.path.join(gettempdir(), 'AtomicDEVS')
+		amd_dir = os.path.join(tempdir, 'AtomicDEVS')
 		if os.path.exists(amd_dir):
 			for root, dirs, files in os.walk(amd_dir, topdown=False):
 				for name in files:

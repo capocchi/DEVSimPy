@@ -1118,6 +1118,7 @@ class EditionNotebook(wx.Notebook):
 		cp = self.GetCurrentPage()
 
 		parent_path = os.path.dirname(cp.GetFilename())
+		tempdir = os.path.realpath(gettempdir())
 
 		### if zipfile
 		if zipfile.is_zipfile(parent_path):
@@ -1126,11 +1127,11 @@ class EditionNotebook(wx.Notebook):
 
 			### extract python file from zip in tmp directory
 			sourceZip = zipfile.ZipFile(parent_path, 'r')
-			sourceZip.extract(name, gettempdir())
+			sourceZip.extract(name, tempdir)
 			sourceZip.close()
 
 			### temporary python name file
-			python_file = os.path.join(gettempdir(), name)
+			python_file = os.path.join(tempdir, name)
 		else:
 			### python name file
 			python_file = cp.GetFilename()
@@ -2813,7 +2814,7 @@ class TestApp(wx.App):
 
 		builtins.__dict__['_'] = gettext.gettext
 
-		fn = os.path.join(gettempdir(), 'test.py')
+		fn = os.path.join(os.path.realpath(gettempdir()), 'test.py')
 		with open(fn, 'w') as f:
 			f.write("Hello world !")
 

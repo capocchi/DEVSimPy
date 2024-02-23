@@ -23,7 +23,7 @@ import io
 import re
 import types
 import importlib
-import tempfile
+from tempfile import gettempdir
 import builtins
 import gettext
 import ast
@@ -292,7 +292,7 @@ class Zip:
 			### find all python files
 			for file in zf.namelist():
 				if file.endswith(".dat"):
-					return zf.extract(file,tempfile.gettempdir())
+					return zf.extract(file,os.path.realpath(gettempdir()))
 		return ""
 
 	def GetImage(self, scaleW:int=16, scaleH:int=16):
