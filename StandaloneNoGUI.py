@@ -216,7 +216,7 @@ CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
                     ### format the path of the library to include in the archive
                     lib_name = os.path.basename(os.path.dirname(lib_path))
                     for file in retrieve_file_paths(lib_path):
-                        if file.endswith(('.py', '.amd', '.cmd')) and '__pycache__' not in file:
+                        if '__pycache__' not in file:
                             relative_path = 'Domain'+file.split(lib_name)[1]
                             if relative_path not in added_files:
                                 archive.write(file, arcname=relative_path)
