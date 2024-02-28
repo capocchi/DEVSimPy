@@ -1432,7 +1432,7 @@ class MainApplication(wx.Frame):
 			file_name = save_dlg.GetFilename()
 			wcd_i = save_dlg.GetFilterIndex()
 
-			#ajoute de l'extention si abscente en fonction du wcd choisi (par defaut .dsp)
+			### add extention depending on the wcd (default .dsp)
 			if ext == '':
 				if wcd_i == 0:
 					path=''.join([path,'.dsp'])
@@ -1451,7 +1451,7 @@ class MainApplication(wx.Frame):
 			diagram.last_name_saved = path
 			diagram.modify = False
 
-			#sauvegarde dans le nouveau fichier
+			### save in a new file
 			if Container.Diagram.SaveFile(diagram, path):
 
 				### if OnSaveAs invocked from DetahcedFrame, we update the title
@@ -1482,7 +1482,7 @@ class MainApplication(wx.Frame):
 		### path,diagram dictionary
 		new_paths = {}
 
-		# get the new path from open file dialogue
+		### get the new path from open file dialogue
 		if open_dlg.ShowModal() == wx.ID_OK:
 
 			### for selected paths
@@ -1554,7 +1554,7 @@ class MainApplication(wx.Frame):
 			frame = StandaloneGUI(None, -1, _('Standalone Settings'), yaml=temp_yaml_path)
 			frame.Show(True)
 		else:
-			wx.MessageBox(_("An error occurred during the saving as yaml file."), _("Error"), wx.OK | wx.ICON_ERROR)
+			sys.stdout.write(_("An error occurred during the saving as yaml file."))
 
 	###
 	def OnImport(self, event):
