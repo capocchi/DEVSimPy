@@ -127,10 +127,10 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 			self.thread_sleep = False
 			self.cpu_time = -1
 
-			self.start()
-
 			self.mem_before = get_process_memory()
 			self.start_time = time.time()
+			
+			self.start()
 
 		@hotshotit
 		def run(self):
