@@ -88,7 +88,7 @@ class Iconizable():
         """
         return self.icons.keys()
 
-    def getClickedIconName(self, mouse_x:int, mouse_y:int)->str:
+    def getClickedIconName(self, container_x:int, container_y:int, mouse_x:int, mouse_y:int)->str:
         """Get the name of the clicked icon.
 
         Args:
@@ -99,7 +99,7 @@ class Iconizable():
             str: name of the clicked icon
         """
         for name, icon in self.icons.items():
-            x, y = int(self.x[1]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
+            x, y = int(container_x[1]+icon.getOffSet('x')), int(container_y[0]+icon.getOffSet('y'))
             if (
                 x <= mouse_x <= x + Iconizable.bitmap_width and
                 y <= mouse_y <= y + Iconizable.bitmap_height):
