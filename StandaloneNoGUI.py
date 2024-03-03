@@ -140,8 +140,8 @@ RUN apt-get install -y build-essential
 RUN pip install pipreqs
 RUN pipreqs .
 
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+COPY requirements-devsimpy-nogui.txt requirements-devsimpy-nogui.txt
+RUN pip install -r requirements-devsimpy-nogui.txt
 
 COPY . .
 
@@ -302,9 +302,9 @@ CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
                     ### Add the pip_packages_to_add_in_requirements
                     to_write_in_requirements += '\n' + '\n### Additionnal requirements for model librairies\n' + '\n'.join(pip_packages_used_to_add_in_requirements)
 
-                    archive.writestr('requirements.txt', to_write_in_requirements)
+                    archive.writestr('requirements-devsimpy-nogui.txt', to_write_in_requirements)
                 else:
                     ### add requirements.txt file in the arche from the requirements-nogui.txt file
-                    archive.write('requirements-nogui.txt', 'requirements.txt')
+                    archive.write('requirements-nogui.txt', 'requirements-devsimpy-nogui.txt')
 
         return True 
