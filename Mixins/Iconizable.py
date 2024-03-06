@@ -68,19 +68,17 @@ class Iconizable():
         Args:
             icon_names (list): list of picture name and its offset positions.
         """
-
         self.icons = {name:(-20*(i+1), +2) for i,name in enumerate(icon_names)}
 
-    def getIcon(self, icon_name:str)->None:
+    def getIcon(self, icon_name:str)->Icon:
         """Get icons from names list.
 
         Args:
             icon_name (str): name of the picture representing the icon.
         """
-        assert(icon_name in self.icons.keys())
         return Icon(icon_name, self.icons.get(icon_name, None))
     
-    def getDisplayedIconNames(self):
+    def getDisplayedIconNames(self)->list:
         """Get the names of the icones to display.
 
         Yields:
