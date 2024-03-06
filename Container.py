@@ -3775,8 +3775,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 						)
 
 #---------------------------------------------------------
-class CodeBlock(Achievable, Block):
-# class CodeBlock(Achievable, Block, Iconizable):
+class CodeBlock(Achievable, Block, Iconizable):
 	""" CodeBlock(label, inputs, outputs)
 	"""
 
@@ -3786,7 +3785,7 @@ class CodeBlock(Achievable, Block):
 		"""
 		Block.__init__(self, label, nb_inputs, nb_outputs)
 		Achievable.__init__(self)
-		# Iconizable.__init__(self, ['trash', 'edit'])
+		Iconizable.__init__(self, ['trash', 'edit'])
 
 	###
 	def __setstate__(self, state):
@@ -4074,9 +4073,8 @@ class CodeBlock(Achievable, Block):
 			dc.DrawBitmap(img, x, y)
 			
 			### Draw the right icons (see constructor and Iconizable)
-			icons = Iconizable(['trash', 'edit'])
-			for name in icons.getDisplayedIconNames():
-				icon = icons.getIcon(name)
+			for name in self.getDisplayedIconNames():
+				icon = self.getIcon(name)
 				img = wx.Bitmap(icon.getImagePath(), wx.BITMAP_TYPE_ANY)
 				x,y = int(self.x[1]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
 				dc.DrawBitmap(img, x, y)
@@ -4089,8 +4087,7 @@ class CodeBlock(Achievable, Block):
 		""" 
 		mouse_x, mouse_y = event.GetX(), event.GetY()
 
-		icons = Iconizable(['trash', 'edit'])
-		clicked_icon_name = icons.getClickedIconName(self.x, self.y, mouse_x, mouse_y)
+		clicked_icon_name = self.getClickedIconName(self.x, self.y, mouse_x, mouse_y)
 
 		if clicked_icon_name == 'edit':
 			try:
@@ -4173,8 +4170,7 @@ class CodeBlock(Achievable, Block):
 					)	
 
 #---------------------------------------------------------
-class ContainerBlock(Block, Diagram):
-# class ContainerBlock(Block, Iconizable, Diagram):
+class ContainerBlock(Block, Iconizable, Diagram):
 	""" ContainerBlock(label, inputs, outputs)
 	"""
 
@@ -4185,7 +4181,7 @@ class ContainerBlock(Block, Diagram):
 		""" Constructor
 		"""
 		Block.__init__(self, label, nb_inputs, nb_outputs)
-		# Iconizable.__init__(self, ['trash'])
+		Iconizable.__init__(self, ['trash'])
 		Diagram.__init__(self)
 		
 
@@ -4352,9 +4348,8 @@ class ContainerBlock(Block, Diagram):
 			dc.DrawText(n, int(self.x[1]-15-len(n)), int(self.y[1]-20))
   
 			### Draw the right icons (see constructor and Iconizable)
-			icons = Iconizable(['trash'])
-			for name in icons.getDisplayedIconNames():
-				icon = icons.getIcon(name)
+			for name in self.getDisplayedIconNames():
+				icon = self.getIcon(name)
 				img = wx.Bitmap(icon.getImagePath(), wx.BITMAP_TYPE_ANY)
 				x,y = int(self.x[1]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
 				dc.DrawBitmap(img, x, y)
@@ -4367,8 +4362,7 @@ class ContainerBlock(Block, Diagram):
 		""" 
 		mouse_x, mouse_y = event.GetX(), event.GetY()
 
-		icons = Iconizable(['trash'])
-		clicked_icon_name = icons.getClickedIconName(self.x, self.y, mouse_x, mouse_y)
+		clicked_icon_name = self.getClickedIconName(self.x, self.y, mouse_x, mouse_y)
 
 		if clicked_icon_name == 'edit':
 			try:
