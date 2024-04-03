@@ -36,6 +36,9 @@ class YAMLHandler:
     def __init__ (self, filename):
         """ Constructor.
         """
+
+        assert(filename.endswith('.yaml'))
+        
         from Container import Diagram
 
         self.filename = filename
@@ -63,6 +66,7 @@ class YAMLHandler:
         Returns:
             list: list of python path in the YAML file
         """
+            
         # Read YAML data from the file
         with open(self.filename, 'r') as file:
             yaml_data = file.read()

@@ -29,7 +29,6 @@ import re
 import types
 import importlib
 import subprocess
-import tempfile
 
 import inspect
 if not hasattr(inspect, 'getargspec'):
@@ -372,7 +371,7 @@ class GenericComponent:
 					### first find python file with the same of the archive
 					if file.endswith(old_bn):
 						#new_bn = os.path.basename(new_filepath)
-						temp_file = zf.extract(old_bn, tempfile.gettempdir())
+						temp_file = zf.extract(old_bn, os.path.realpath(gettempdir()))
 						new_temp_file = temp_file
 
 					### then find a python file that inherite of the DomainBehavior or StructureBehavior class
@@ -381,8 +380,8 @@ class GenericComponent:
 						old_name = os.path.splitext(file)[0]
 						
 						### first we must change the name of this python file in order to have the same as the archive!
-						temp_file = zf.extract(file, tempfile.gettempdir())
-						new_temp_file = os.path.join(tempfile.gettempdir(), new_name+'.py')
+						temp_file = zf.extract(file, os.path.realpath(gettempdir()))
+						new_temp_file = os.path.join(os.path.realpath(gettempdir()), new_name+'.py')
 
 					
 					# if os.path.exists(new_temp_file):
@@ -758,7 +757,7 @@ class DEVSComponent:
 		devs = self.getDEVSModel()
 		block = devs.getBlockModel()
 		label = str(block.label)
-		log_file = os.path.join(gettempdir(),'%s.%d.devsimpy.log'%(label,id(block)))
+		log_file = os.path.join(os.path.realpath(gettempdir()),'%s.%d.devsimpy.log'%(label,id(block)))
 		parent = event.GetClientData()
 
 		if os.path.exists(log_file):

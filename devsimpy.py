@@ -1432,7 +1432,7 @@ class MainApplication(wx.Frame):
 			file_name = save_dlg.GetFilename()
 			wcd_i = save_dlg.GetFilterIndex()
 
-			#ajoute de l'extention si abscente en fonction du wcd choisi (par defaut .dsp)
+			### add extention depending on the wcd (default .dsp)
 			if ext == '':
 				if wcd_i == 0:
 					path=''.join([path,'.dsp'])
@@ -1451,7 +1451,7 @@ class MainApplication(wx.Frame):
 			diagram.last_name_saved = path
 			diagram.modify = False
 
-			#sauvegarde dans le nouveau fichier
+			### save in a new file
 			if Container.Diagram.SaveFile(diagram, path):
 
 				### if OnSaveAs invocked from DetahcedFrame, we update the title
@@ -1482,7 +1482,7 @@ class MainApplication(wx.Frame):
 		### path,diagram dictionary
 		new_paths = {}
 
-		# get the new path from open file dialogue
+		### get the new path from open file dialogue
 		if open_dlg.ShowModal() == wx.ID_OK:
 
 			### for selected paths
@@ -1543,18 +1543,19 @@ class MainApplication(wx.Frame):
 	
 		if diagram.last_name_saved == "":
 			self.OnSaveFile(event)
-   
-		### temp path to save the dsp as a yaml
-		path = os.path.join(gettempdir(), os.path.basename(diagram.last_name_saved).replace('.dsp','.yaml'))  
+			### to have a new updated last_name_saved
+			diagram = currentPage.GetDiagram()
 
+		### temp path to save the dsp as a yaml
+		temp_yaml_path = os.path.join(os.path.realpath(gettempdir()), os.path.basename(diagram.last_name_saved).replace('.dsp','.yaml'))
 
 		### try to save the current diagram into a temp yaml file and launch the diag for the standalone exportation 
-		if os.path.exists(path):
-			if Container.Diagram.SaveFile(diagram, path):
-				frame = StandaloneGUI(None, -1, _('Standalone settings'), yaml=path)
-				frame.Show(True)
-			else:
-				wx.MessageBox(_("An error occurred during the saving as yaml file."), _("Error"), wx.OK | wx.ICON_ERROR)
+		if Container.Diagram.SaveFile(diagram, temp_yaml_path):
+			frame = StandaloneGUI(None, -1, _('Standalone Settings'), yaml=temp_yaml_path)
+			frame.Show(True)
+		else:
+			sys.stdout.write(_("An error occurred during the saving as yaml file."))
+
 	###
 	def OnImport(self, event):
 		""" Import DEVSimPy library from Domain directory.
@@ -2035,7 +2036,7 @@ class MainApplication(wx.Frame):
 		### find the prof file name
 		menu_item = self.GetMenuBar().FindItemById(event.GetId())
 		fn = menu_item.GetItemLabelText()
-		prof_file_path = os.path.join(gettempdir(), fn)
+		prof_file_path = os.path.join(os.path.realpath(gettempdir()), fn)
 
 		### list of item in single choice dialogue
 		### gprof2dot needs graphviz
@@ -2098,7 +2099,7 @@ class MainApplication(wx.Frame):
 	def OnDeleteProfiles(self, event):
 		dlg = wx.MessageDialog(self, _('Do you realy want to delete all files ?'), _('Profile Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 		if dlg.ShowModal() == wx.ID_YES:
-			tmp_dir = gettempdir()
+			tmp_dir = os.path.realpath(gettempdir())
 			for fn in [f for f in os.listdir(tmp_dir) if f.endswith(('.prof','.cachegrind'))]:
 				os.remove(os.path.join(tmp_dir,fn))
 		dlg.Destroy()

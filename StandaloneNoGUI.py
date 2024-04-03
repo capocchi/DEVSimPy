@@ -116,7 +116,8 @@ class StandaloneNoGUI:
         self.rt = rt
         self.kernel = kernel
 
-        assert(self.yaml.endswith('.yaml') and os.path.exists(self.yaml), _("YAML file must exist!"))
+        assert self.yaml.endswith('.yaml'), _("YAML file name must end with '.yaml'!")
+        assert os.path.exists(self.yaml), _("YAML file must exist!")
 
         ### list of dir to zip
         self.dirnames_abs = map(pathlib.Path, StandaloneNoGUI.DIRNAMES)
@@ -139,8 +140,8 @@ RUN apt-get install -y build-essential
 RUN pip install pipreqs
 RUN pipreqs .
 
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+COPY requirements-devsimpy-nogui.txt requirements-devsimpy-nogui.txt
+RUN pip install -r requirements-devsimpy-nogui.txt
 
 COPY . .
 
@@ -180,9 +181,10 @@ CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
             ###
             ###################################################################
 
-            ### add all dependencies python files needed to execute devsimpy-nogui
-            for fn in StandaloneNoGUI.FILENAMES:
-                archive.write(fn)
+            if self.add_sim_kernel:
+                ### add all dependencies python files needed to execute devsimpy-nogui
+                for fn in StandaloneNoGUI.FILENAMES:
+                    archive.write(fn)
             
             ###################################################################
             ###
@@ -214,7 +216,7 @@ CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
                     ### format the path of the library to include in the archive
                     lib_name = os.path.basename(os.path.dirname(lib_path))
                     for file in retrieve_file_paths(lib_path):
-                        if file.endswith(('.py', '.amd', '.cmd')) and '__pycache__' not in file:
+                        if '__pycache__' not in file:
                             relative_path = 'Domain'+file.split(lib_name)[1]
                             if relative_path not in added_files:
                                 archive.write(file, arcname=relative_path)
@@ -236,72 +238,73 @@ CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
             ###
             ###################################################################
 
-            ### add all dependancies (directories) needed to execute devsimpy-nogui
-            for dirname in self.dirnames_abs:
-        
-                # Call the function to retrieve all files and folders of the assigned directory
-                filePaths = retrieve_file_paths(dirname)
-
-                ### select only the selected simulation kernel
-                if 'DEVSKernel' in os.path.abspath(dirname):
-                    new_dirname = os.path.join(dirname,self.kernel)
-                    filePaths = retrieve_file_paths(new_dirname)
-                    ### add __init__.py of Kernel dir
-                    if not os.path.exists(os.path.join(dirname, '__init__.py')):
-                        filePaths.append(os.path.join(dirname, '__init__.py'))
-
-                for file in filePaths:
-                    if '__pycache__' not in file:
-                        archive.write(file)
-        
-            ###################################################################
-            ###
-            ### Docker files
-            ###
-            ###################################################################
-
-            if self.add_dockerfile:
-                archive.writestr('Dockerfile', self.GetDockerSpec())
-                
-            ###################################################################
-            ###
-            ### Config files
-            ###
-            ###################################################################
-
-            ### write config file
-            archive.writestr('config.json', self.GetConfigSpec())
+            if self.add_sim_kernel:
+                ### add all dependancies (directories) needed to execute devsimpy-nogui
+                for dirname in self.dirnames_abs:
             
-            ###################################################################
-            ###
-            ### Requierements files
-            ###
-            ###################################################################
+                    # Call the function to retrieve all files and folders of the assigned directory
+                    filePaths = retrieve_file_paths(dirname)
 
-            pip_packages_used_to_add_in_requirements = set()
+                    ### select only the selected simulation kernel
+                    if 'DEVSKernel' in os.path.abspath(dirname):
+                        new_dirname = os.path.join(dirname,self.kernel)
+                        filePaths = retrieve_file_paths(new_dirname)
+                        ### add __init__.py of Kernel dir
+                        if not os.path.exists(os.path.join(dirname, '__init__.py')):
+                            filePaths.append(os.path.join(dirname, '__init__.py'))
 
-            # Get the list of available pip packages
-            installed_pip_packages = get_pip_packages()
+                    for file in filePaths:
+                        if '__pycache__' not in file:
+                            archive.write(file)
+            
+                ###################################################################
+                ###
+                ### Docker files
+                ###
+                ###################################################################
 
-            for mod in domain_module_lib:
-                imported_modules = get_imported_modules(mod)
-                for name in imported_modules:
-                    if not 'DomainInterface' in name and name in installed_pip_packages:
-                        pip_packages_used_to_add_in_requirements.add(name)
+                if self.add_dockerfile:
+                    archive.writestr('Dockerfile', self.GetDockerSpec())
+                    
+                ###################################################################
+                ###
+                ### Config files
+                ###
+                ###################################################################
 
-            ### if additionnal pip package are used in devs atomic model, we need to add them in the requirements.txt file
-            if pip_packages_used_to_add_in_requirements:
+                ### write config file
+                archive.writestr('config.json', self.GetConfigSpec())
                 
-                # Read the existing content of the txt file
-                with open('requirements-nogui.txt', 'r') as file:
-                    to_write_in_requirements = file.read()
+                ###################################################################
+                ###
+                ### Requierements files
+                ###
+                ###################################################################
 
-                ### Add the pip_packages_to_add_in_requirements
-                to_write_in_requirements += '\n' + '\n### Additionnal requirements for model librairies\n' + '\n'.join(pip_packages_used_to_add_in_requirements)
+                pip_packages_used_to_add_in_requirements = set()
 
-                archive.writestr('requirements.txt', to_write_in_requirements)
-            else:
-                ### add requirements.txt file in the arche from the requirements-nogui.txt file
-                archive.write('requirements-nogui.txt', 'requirements.txt')
+                # Get the list of available pip packages
+                installed_pip_packages = get_pip_packages()
+
+                for mod in domain_module_lib:
+                    imported_modules = get_imported_modules(mod)
+                    for name in imported_modules:
+                        if not 'DomainInterface' in name and name in installed_pip_packages:
+                            pip_packages_used_to_add_in_requirements.add(name)
+
+                ### if additionnal pip package are used in devs atomic model, we need to add them in the requirements.txt file
+                if pip_packages_used_to_add_in_requirements:
+                    
+                    # Read the existing content of the txt file
+                    with open('requirements-nogui.txt', 'r') as file:
+                        to_write_in_requirements = file.read()
+
+                    ### Add the pip_packages_to_add_in_requirements
+                    to_write_in_requirements += '\n' + '\n### Additionnal requirements for model librairies\n' + '\n'.join(pip_packages_used_to_add_in_requirements)
+
+                    archive.writestr('requirements-devsimpy-nogui.txt', to_write_in_requirements)
+                else:
+                    ### add requirements.txt file in the arche from the requirements-nogui.txt file
+                    archive.write('requirements-nogui.txt', 'requirements-devsimpy-nogui.txt')
 
         return True 

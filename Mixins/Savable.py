@@ -251,7 +251,7 @@ class DumpZipFile(DumpBase):
 
 		try:
 			data_file = 'DEVSimPyModel.dat'
-			path = zf.extract(data_file, gettempdir())
+			path = zf.extract(data_file, os.path.realpath(gettempdir()))
 		except KeyError as info:
 			tb = traceback.format_exc()
 			sys.stderr.write(_("ERROR: Did not %s find in zip file %s --\n%s \n")%(data_file, str(fileName), str(tb)))

@@ -30,7 +30,7 @@ import string
 import re
 import shutil
 import configparser 
-import tempfile
+from tempfile import gettempdir
 import pathlib
 import types
 import inspect
@@ -241,7 +241,7 @@ def downloadFromURL(url):
 	else:
 		if r.getcode() == 200:
 		# 200 means a successful request
-			tempdir = tempfile.gettempdir()
+			tempdir = os.path.realpath(gettempdir())
 			fn = os.path.join(tempdir, "DEVSimPy.zip")
 			# downloading with urllib
 			# Copy a network object to a local file
@@ -301,7 +301,7 @@ def updateFromGitArchive():
 	
 	if fn:
 
-		tempdir = tempfile.gettempdir()
+		tempdir = os.path.realpath(gettempdir())
 		now = datetime.now() # current date and time
 
 		try:

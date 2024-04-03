@@ -51,7 +51,7 @@ class Icon:
         return self._name
     
     def getOffSet(self, pos:str):
-        assert(pos in ['x','y'])
+        assert(pos in ('x','y'))
         return self._offset_x if pos == 'x' else self._offset_y
     
 #-------------------------------------------------------------------------------
@@ -66,21 +66,19 @@ class Iconizable():
         """Constructor.
 
         Args:
-            icon_names (list): list of picture name corresponding to the icons.
+            icon_names (list): list of picture name and its offset positions.
         """
+        self.icons = {name:(-20*(i+1), +2) for i,name in enumerate(icon_names)}
 
-        self.icons = {name:Icon(name,(-20*(i+1), +2)) for i,name in enumerate(icon_names)}
-        
-    def getIcon(self, icon_name:str)->None:
+    def getIcon(self, icon_name:str)->Icon:
         """Get icons from names list.
 
         Args:
             icon_name (str): name of the picture representing the icon.
         """
-        
-        return self.icons.get(icon_name, None)
+        return Icon(icon_name, self.icons.get(icon_name, None))
     
-    def getDisplayedIconNames(self):
+    def getDisplayedIconNames(self)->list:
         """Get the names of the icones to display.
 
         Yields:
@@ -88,7 +86,7 @@ class Iconizable():
         """
         return self.icons.keys()
 
-    def getClickedIconName(self, mouse_x:int, mouse_y:int)->str:
+    def getClickedIconName(self, container_x:int, container_y:int, mouse_x:int, mouse_y:int)->str:
         """Get the name of the clicked icon.
 
         Args:
@@ -98,8 +96,10 @@ class Iconizable():
         Returns:
             str: name of the clicked icon
         """
-        for name, icon in self.icons.items():
-            x, y = int(self.x[1]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
+        # for name, icon in self.icons.items():
+            # x, y = int(container_x[1]+icon.getOffSet('x')), int(container_y[0]+icon.getOffSet('y'))
+        for name, offset in self.icons.items():
+            x, y = int(container_x[1]+offset[0]), int(container_y[0]+offset[1])
             if (
                 x <= mouse_x <= x + Iconizable.bitmap_width and
                 y <= mouse_y <= y + Iconizable.bitmap_height):

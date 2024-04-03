@@ -67,10 +67,11 @@ class PrintPusher():
     
     def push(self, event, data):
         print((json.dumps(data)))
-    
+
 def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, json_trace:bool=True):
     """
     """
+
     from InteractionSocket import InteractionManager
 
     json_report = {'date':time.strftime("%c")}
@@ -98,20 +99,20 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, json_t
     interactionManager = None
     try:
         
-        # Pusher service for Simulation --> User communication
-        simuPusher = SimuPusher(simu_name) if is_remote else PrintPusher(simu_name)
+        # # Pusher service for Simulation --> User communication
+        # simuPusher = SimuPusher(simu_name) if is_remote else PrintPusher(simu_name)
         
-        ### Get live stream URL if exist :
-        for m in [a for a in master.getComponentSet() if hasattr(a, 'plotUrl') and a.plotUrl != '']:
-            json_report['output'].append({'label':m.name, 'plotUrl':m.plotUrl})     
+        # ### Get live stream URL if exist :
+        # for m in [a for a in master.getComponentSet() if hasattr(a, 'plotUrl') and a.plotUrl != '']:
+        #     json_report['output'].append({'label':m.name, 'plotUrl':m.plotUrl})     
         
-        ### Get live stream URL if exist :
-        for m in [a for a in master.getComponentSet() if hasattr(a, 'pusherChannel')]:
-            m.pusherChannel = simu_name
-            json_report['output'].append({'label':m.name, 'pusherChannel':m.pusherChannel}) 
+        # ### Get live stream URL if exist :
+        # for m in [a for a in master.getComponentSet() if hasattr(a, 'pusherChannel')]:
+        #     m.pusherChannel = simu_name
+        #     json_report['output'].append({'label':m.name, 'pusherChannel':m.pusherChannel}) 
         
-        # Send to user 
-        simuPusher.push('live_streams', {'live_streams': json_report['output']})
+        # # Send to user 
+        # simuPusher.push('live_streams', {'live_streams': json_report['output']})
         
         sim = runSimulation(master, T)
         thread = sim.Run()
@@ -132,7 +133,7 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, json_t
                 new_progress = 100.0*(float(thread.model.timeLast) / float(T)) if float(T) != 0 else 100.0
                 if new_progress - progress > 5:
                     progress = new_progress
-                    simuPusher.push('progress', {'progress':progress}) 
+                    # simuPusher.push('progress', {'progress':progress}) 
                 if not json_trace:
                     Printer(CPUduration)
 
@@ -140,7 +141,7 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, json_t
                 interactionManager.stop()
                 interactionManager.join()
                 
-            simuPusher.push('progress', {'progress':100}) 
+            # simuPusher.push('progress', {'progress':100}) 
         
     except:
         json_report['summary'] += " *** EXCEPTION raised in simulation ***"
@@ -158,24 +159,24 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, json_t
     json_report['summary'] += "...DEVS simulation completed!"
 
     json_report['duration'] = CPUduration
-    
-    ### inform that data file has been generated
-    json_report['output'] = []
-    for m in [a for a in master.getComponentSet() if hasattr(a, 'fileName')]:
-        for i in range(len(m.IPorts)):
-            fn ='%s%s.dat'%(m.fileName,str(i))
-            if os.path.exists(fn):
-                json_report['output'].append({'label':m.name+'_port_' + str(i),
-                                              'filename':os.path.basename(fn)}) 
-    for m in [a for a in master.getComponentSet() if hasattr(a, 'plotUrl')]:
-        json_report['output'].append({'label':m.name, 'plotUrl':m.plotUrl}) 
-            
-    ### if sim_name is in param, a log file is writed on the logs dir
-    if simu_name:
-        os.makedirs('logs', exist_ok=True)
-        with open(os.path.join('logs',simu_name+'.report'), 'w') as f:
-                f.write(json.dumps(json_report))
 
+    # ### inform that data file has been generated
+    # json_report['output'] = []
+    # for m in [a for a in master.getComponentSet() if hasattr(a, 'fileName')]:
+    #     for i in range(len(m.IPorts)):
+    #         fn ='%s%s.dat'%(m.fileName,str(i))
+    #         if os.path.exists(fn):
+    #             json_report['output'].append({'label':m.name+'_port_' + str(i),
+    #                                           'filename':os.path.basename(fn)}) 
+    # for m in [a for a in master.getComponentSet() if hasattr(a, 'plotUrl')]:
+    #     json_report['output'].append({'label':m.name, 'plotUrl':m.plotUrl}) 
+            
+    # ### if sim_name is in param, a log file is writed on the logs dir
+    # if simu_name:
+    #     os.makedirs('logs', exist_ok=True)
+    #     with open(os.path.join('logs',simu_name+'.report'), 'w') as f:
+    #             f.write(json.dumps(json_report))
+    
     return True
 
 class runSimulation:
@@ -218,18 +219,16 @@ class runSimulation:
         ### si le thread n'est pas lanc� (pas pendant un suspend)
         # if self.thread is not None and not self.thread.thread_suspend:
         diagram = self.master.getBlockModel()
-        # diagram.Clean()
         ################################################################################################################
         ######### To Do : refaire l'enregistrement du chemin d'enregistrements des resultats du to_disk ###################
         for m in self.master.getComponentSet():
             if str(m)=='To_Disk':
                 dir_fn = os.path.dirname(diagram.last_name_saved).replace('\t','').replace(' ','')
-                label = m.getBlockModel()
+                # label = m.getBlockModel()
                 m.fileName = os.path.join(dir_fn,"%s_%s"%(os.path.basename(diagram.last_name_saved).split('.')[0],os.path.basename(m.fileName)))
         ################################################################################################################
         ################################################################################################################
         if self.master:
-            #from SimulationGUI import simulator_factory
             from Patterns.Factory import simulator_factory
             if not self.ntl:
                 self.master.FINAL_TIME = float(self.time)

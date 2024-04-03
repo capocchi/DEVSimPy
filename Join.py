@@ -282,7 +282,6 @@ def makeDEVSConf(model, liaison, addInner, filename):
 	elif newWidth >= 1200:
 		dim_height = m_y + 40
 
-
 	devs = '\nvar devs = Joint.dia.devs;\nJoint.paper("world", ' + str(dim_width) + ', ' + str(dim_height) + ');'
 	arrow = '\nvar arrow = devs.arrow;'
 	text = text + 'title(\''+title+'\');' + '\n' +'description(\''+ description+'\');' + '\n' +dimension+ ';\n' + devs
@@ -314,8 +313,8 @@ def makeDEVSConf(model, liaison, addInner, filename):
 
 	try:
 		with open(fn, "wb") as f:
-			f.write(text)
-	except:
+			f.write(text.encode("utf-8"))
+	except Exception as info:
 		sys.stdout.write("%s file not %s.\n"%(fn, 'updated' if update else 'completed'))
 	else:
 		sys.stdout.write("%s file %s.\n"%(fn, 'updated' if update else 'completed'))

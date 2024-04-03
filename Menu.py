@@ -269,7 +269,7 @@ class ProfileFileMenu(wx.Menu):
 
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
-		for fn in [f for f in os.listdir(gettempdir()) if f.endswith('.prof')]:
+		for fn in [f for f in os.listdir(os.path.realpath(gettempdir())) if f.endswith('.prof')]:
 			id = wx.NewIdRef()
 			AppendItem(wx.MenuItem(self, id, fn))
 			parent.Bind(wx.EVT_MENU, parent.OnProfiling, id=id)

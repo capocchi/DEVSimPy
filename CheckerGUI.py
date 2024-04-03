@@ -24,7 +24,7 @@ import wx
 import os
 import sys
 import webbrowser
-import tempfile
+from tempfile import gettempdir
 
 import inspect
 if not hasattr(inspect, 'getargspec'):
@@ -127,7 +127,7 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		model_name = self.getColumnText(row, 0)
 		path = self.getColumnText(row, 4)
 
-		tempdir = tempfile.gettempdir()
+		tempdir = os.path.realpath(gettempdir())
 		
 		### open file diag only if python file is temp
 		if tempdir in os.path.dirname(path):
@@ -353,7 +353,7 @@ class CheckerGUI(wx.Frame):
 		""" Return list to populate de virtualList
 		"""
 
-		tempdir = tempfile.gettempdir()
+		tempdir = os.path.realpath(gettempdir())
 		
 		L = []
 		if D:
