@@ -953,6 +953,22 @@ class EditionNotebook(wx.Notebook):
 
 		if keycode == wx.WXK_UP or keycode == wx.WXK_DOWN:
 			event.Skip()
+		elif keycode == 32 and controlDown:
+			pos = currentPage.GetCurrentPos()
+
+			kw = keyword.kwlist[:]
+			#kw.append("this_is_a_much_much_much_much_much_much_much_longer_value")
+
+			kw.sort()  # Python sorts are case sensitive
+			currentPage.AutoCompSetIgnoreCase(False)  # so this needs to match
+
+			# Images are specified with a appended "?type"
+			for i in range(len(kw)):
+				if kw[i] in keyword.kwlist:
+					kw[i] = kw[i] + "?1"
+
+			currentPage.AutoCompShow(0, " ".join(kw))
+
 		elif keycode == 68 and controlDown:
 			cur_line = currentPage.GetCurrentLine()
 			shiftDown = event.ShiftDown()
@@ -963,8 +979,30 @@ class EditionNotebook(wx.Notebook):
 				currentPage.SetCurrentPos(indent)
 			else:
 				currentPage.InsertText(currentPage.PositionFromLine(cur_line), "#")
+		# elif keycode not in (32,13,9,8,27,316,314):
+		# 	pos = currentPage.GetCurrentPos()
+		# 	line = currentPage.GetLine(pos)
+		# 	start = currentPage.WordStartPosition(pos, True)
+		# 	end = currentPage.WordEndPosition(pos, True)
+		# 	current_word = currentPage.GetTextRange(start, end)
+
+		# 	kw = keyword.kwlist[:]
+		# 	kw.append('self')
+
+		# 	filtered_kw = [word for word in kw if word.startswith(current_word)]
+
+		# 	filtered_kw.sort()  # Python sorts are case sensitive
+
+		# 	if filtered_kw:
+		# 		currentPage.AutoCompSetIgnoreCase(False)  # so this needs to match
+		# 		currentPage.AutoCompShow(0, " ".join(filtered_kw))
+		# 	else:
+		# 		# If no suggestions are available, hide the autocomplete list
+		# 		currentPage.AutoCompCancel()
+		# 	event.Skip()
 		else:
 			event.Skip()
+
 
 	### NOTE: EditionNotebook :: DoOpenFile 	=> Opening file method
 	def DoOpenFile(self):
