@@ -25,6 +25,7 @@ import wx
 import os
 import sys
 import traceback
+import psutil
 
 # to send event
 from pubsub import pub
@@ -631,11 +632,19 @@ class Base(object):
 		if self.real_time_flag:	
 			return str(next(self.t))
 		
-		### clock formating
-		ms = self.thread.cpu_time%1
-		m, s = divmod(self.thread.cpu_time, 60)
+		process = psutil.Process()
+		cpu_times = process.cpu_times()
+		total_cpu_time = cpu_times.user + cpu_times.system
+
+		ms = (total_cpu_time % 1) * 1000
+		m, s = divmod(total_cpu_time, 60)
 		h, m = divmod(m, 60)
-		return "%d:%02d:%02d:%03d" % (h, m, s, ms*1000)
+		
+		# Obtenir la mémoire utilisée par le processus en bytes et convertir en MB
+		memory_info = process.memory_info()
+		memory_used_mb = memory_info.rss / (1024 ** 2)  # RSS est la mémoire résidente
+
+		return "%d:%02d:%02d:%03d / %.2f MB" % (h, m, int(s), int(ms), memory_used_mb)
 
 	###
 	def MsgBox(self, msg:str):
