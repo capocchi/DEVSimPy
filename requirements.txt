@@ -242,3 +242,5 @@ pyzo >=4.11.2
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
 #yang0textutils >= 0.0.1
+
+psutil
