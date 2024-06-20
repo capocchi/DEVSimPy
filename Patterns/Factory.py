@@ -51,6 +51,9 @@ def get_process_memory():
 	mem_Mb = float(mem_bytes)/1048576
 	return mem_Mb
 
+def elapsed_since(start_time):
+    # Fonction pour calculer le temps écoulé
+    return time.time() - start_time
 
 def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_flag, real_time_flag):
 	""" Preventing direct creation for Simulator
@@ -207,7 +210,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 				elapsed_time = elapsed_since(self.start_time)
 				mem_after = get_process_memory()
 
-				print({'mem_before_in_MB': self.mem_before, 'mem_after_in_MB':mem_after, 'men_consumed_in_MB': mem_after - self.mem_before, 'exec_time':elapsed_time})
+				print({'mem_before_in_MB':self.mem_before, 'mem_after_in_MB':mem_after, 'men_consumed_in_MB':mem_after - self.mem_before, 'exec_time':elapsed_time})
 	
 			self.end_flag = True
 			
@@ -230,5 +233,9 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 			""" Resume the Thread.
 			"""
 			self.thread_suspend = False
+
+		def get_elapsed_time(self):
+			""" Retourne le temps écoulé depuis le début du thread. """
+			return elapsed_since(self.start_time)
 
 	return SimulationThread(model, strategy, prof, ntl, verbose, dynamic_structure_flag, real_time_flag)

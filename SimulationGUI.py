@@ -44,7 +44,7 @@ if __name__ == '__main__':
 from Utilities import IsAllDigits, printOnStatusBar
 from PluginManager import PluginManager #trigger_event, is_enable
 from Patterns.Strategy import *
-from Patterns.Factory import simulator_factory
+from Patterns.Factory import simulator_factory, get_process_memory
 from Decorators import BuzyCursorNotification
 
 import Container
@@ -304,6 +304,8 @@ class Base(object):
 		self.timer = wx.Timer(self, wx.NewIdRef())
 		self.count = 10.0
 		self.stdioWin = None
+
+		self.process = psutil.Process()
 
 		self.__widgets()
 		self.__do_layout()
@@ -600,30 +602,38 @@ class Base(object):
 				self.count = 100
 				wx.CallAfter(self._gauge.SetValue, int(self.count))
 
-			### update the status bar
-			self.statusbar.SetBackgroundColour('')
-			printOnStatusBar(self.statusbar, {0:_("Completed!"), 1:self.GetClock()})
+			# Vérifier s'il y a au moins un enfant de type BlinkFrame
+			is_blink_frame_alive = any(str(type(obj)) == "<class 'blink.BlinkFrame'>" for obj in self.GetChildren())
+
+			if not is_blink_frame_alive:
+				### update the status bar
+				self.statusbar.SetBackgroundColour('')
+				printOnStatusBar(self.statusbar, {0:_("Completed!"), 1:self.GetClock()})
 			
-			### is no time limit add some informations in status bar
-			if not self.ntl:
-				if self.statusbar.GetFieldsCount() > 2:
-					printOnStatusBar(self.statusbar, {2:str(100)+"%"})
+				### is no time limit add some informations in status bar
+				if not self.ntl:
+					if self.statusbar.GetFieldsCount() > 2:
+						printOnStatusBar(self.statusbar, {2:str(100)+"%"})
 
 			### stop the timer
 			self.timer.Stop()
 
 		### if the simulation is not suspended
 		elif not self.thread.thread_suspend:
+			
+			# Vérifier s'il y a au moins un enfant de type BlinkFrame
+			is_blink_frame_alive = any(str(type(obj)) == "<class 'blink.BlinkFrame'>" for obj in self.GetChildren())
 
-			### udpate the status bar
-			if self.statusbar.GetBackgroundColour() != 'GREY': 
-				self.statusbar.SetBackgroundColour('GREY')
-			wx.CallAfter(printOnStatusBar,self.statusbar, {0:_("Processing..."), 1:self.GetClock()})
+			if not is_blink_frame_alive:
+				### udpate the status bar
+				if self.statusbar.GetBackgroundColour() != 'GREY': 
+					self.statusbar.SetBackgroundColour('GREY')
+				wx.CallAfter(printOnStatusBar,self.statusbar, {0:_("Processing..."), 1:self.GetClock()})
 
-			### is no time limit, add some information in status bar
-			if not self.ntl:
-				if self.statusbar.GetFieldsCount() > 2:
-					wx.CallAfter(printOnStatusBar,self.statusbar, {2:str(self.count)[:4]+"%"})
+				### is no time limit, add some information in status bar
+				if not self.ntl:
+					if self.statusbar.GetFieldsCount() > 2:
+						wx.CallAfter(printOnStatusBar,self.statusbar, {2:str(self.count)[:4]+"%"})
 
 			#wx.Yield()
 			#wx.YieldIfNeeded()
@@ -632,19 +642,13 @@ class Base(object):
 		if self.real_time_flag:	
 			return str(next(self.t))
 		
-		process = psutil.Process()
-		cpu_times = process.cpu_times()
-		total_cpu_time = cpu_times.user + cpu_times.system
+		total_cpu_time = self.thread.get_elapsed_time()
 
 		ms = (total_cpu_time % 1) * 1000
 		m, s = divmod(total_cpu_time, 60)
 		h, m = divmod(m, 60)
-		
-		# Obtenir la mémoire utilisée par le processus en bytes et convertir en MB
-		memory_info = process.memory_info()
-		memory_used_mb = memory_info.rss / (1024 ** 2)  # RSS est la mémoire résidente
 
-		return "%d:%02d:%02d:%03d / %.2f MB" % (h, m, int(s), int(ms), memory_used_mb)
+		return "%d:%02d:%02d:%03d / %.2f MB" % (h, m, int(s), int(ms), get_process_memory())
 
 	###
 	def MsgBox(self, msg:str):
