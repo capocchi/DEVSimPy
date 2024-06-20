@@ -110,14 +110,16 @@ def printOnStatusBar(statusbar, data={}):
 	for k,v in list(data.items()):
 		statusbar.SetStatusText(v, k)
 
-def NotificationMessage(title,message,parent, flag=2048, timeout=False):
+def NotificationMessage(title, message, parent, flag=2048, timeout=False):
 	""" 2048 is wx.ICON_INFORMATION
 	"""
 	if builtins.__dict__['NOTIFICATION']:
+		
 		notify = wx.adv.NotificationMessage(
 		title=title,
 		message=message,
 		parent=parent, flags=flag)
+	
 
 		# Various options can be set after the message is created if desired.
 		# notify.SetFlags(# wx.ICON_INFORMATION
@@ -141,7 +143,7 @@ def now()->str:
     return st
 
 def module_list(topdir:str)->[str]:
-	for root,dirs,files in os.walk(topdir):
+	for root,_,files in os.walk(topdir):
 		modpath = os.path.basename(topdir)
 		r = os.path.relpath(root,topdir)
 		if r != '.':

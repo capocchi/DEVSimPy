@@ -20,9 +20,9 @@ _ = gettext.gettext
 from types import MethodType
 
 from PluginManager import PluginManager
-from Container import DetachedFrame, ConnectionShape, CodeBlock, ContainerBlock
+from Container import DetachedFrame
 from FindGUI import FindReplace
-from Utilities import MoveFromParent
+from Utilities import MoveFromParent, printOnStatusBar
 from Patterns.Observer import Subject
 
 if 'PyPDEVS' in builtins.__dict__['DEFAULT_DEVS_DIRNAME']:
@@ -75,7 +75,7 @@ def start_blink(*args, **kwargs):
 	global canvas
 
 	parent = kwargs['parent']
-	master = kwargs['master']
+	# master = kwargs['master']
 
 	### parent is simulationGUI and parent of it can be wx main app or DetachedFrame
 	mainW = parent.GetParent()
@@ -348,6 +348,27 @@ class BlinkFrame(wx.Frame):
 			self.Close()
 			parent.OnStop(evt)
 		
+		### udpate the status bar of parent (simulation dialogue)
+		if parent.thread.end_flag:
+			### update the status bar
+			parent.statusbar.SetBackgroundColour('')
+			printOnStatusBar(parent.statusbar, {0:_("Completed!"), 1:parent.GetClock()})
+		
+			### is no time limit add some informations in status bar
+			if not parent.ntl:
+				if parent.statusbar.GetFieldsCount() > 2:
+					printOnStatusBar(parent.statusbar, {2:str(100)+"%"})
+					
+		elif not parent.thread.thread_suspend:
+			if parent.statusbar.GetBackgroundColour() != 'GREY': 
+				parent.statusbar.SetBackgroundColour('GREY')
+			wx.CallAfter(printOnStatusBar,parent.statusbar, {0:_("Processing..."), 1:parent.GetClock()})
+
+				### is no time limit, add some information in status bar
+			if not parent.ntl:
+				if parent.statusbar.GetFieldsCount() > 2:
+					wx.CallAfter(printOnStatusBar,parent.statusbar, {2:str(parent.count)[:4]+"%"})
+
 		self.flag = True
 		self.button_clear.Enable(True)
 

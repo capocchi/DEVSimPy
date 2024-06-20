@@ -134,6 +134,7 @@ if __name__ == '__main__':
 	group = parser.add_mutually_exclusive_group()
 	group.add_argument("-js", "--javascript",help=_("Generate JS file"), action="store_true")
 	group.add_argument("-json", help=_("Turn the YAML/DSP file to JSON"), action="store_true")
+	group.add_argument("-tracemalloc", help=_("Trace memory allocations"), action="store_true")
 	group.add_argument("-blockslist", help=_("Get the list of models in a master model"), action="store_true")
 	group.add_argument("-blockargs", help=_("Parameters of an atomic model (ex. -blockargs <label of block>)"), type=str)
 	parser.add_argument("-updateblockargs", help=_('''Update parameters (ex. -blockargs <label of block> -updateblockargs <"""{'<key1>':<val1>, '<key2>':<val2>, etc.}""">'''), type=str, default="")
@@ -200,4 +201,16 @@ if __name__ == '__main__':
 		duration = float('inf') if duration_val in ('ntl', 'inf') else int(duration_val)
 		devs = yamlHandler.getDevsInstance()
 		if devs:
+			# if args.tracemalloc:
+			# 	tracemalloc.start()
+			# 	snapshot1 = tracemalloc.take_snapshot()
+
 			simulate(devs, duration, args.name, args.remote)
+
+			# if args.tracemalloc:
+			# 	snapshot2 = tracemalloc.take_snapshot()
+			# 	top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+				
+			# 	print("Tracemalloc option is activated and the top 10 differences are:")
+			# 	for stat in top_stats[:10]:
+			# 		print(stat)
