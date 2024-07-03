@@ -743,7 +743,7 @@ class Base(object):
 			typ, val, tb = msg.date if wx.VERSION_STRING < '2.9' else msg
 			trace = traceback.format_exception(typ, val, tb)
 
-			mainW = wx.GetApp().GetTopWindow()
+			# mainW = wx.GetApp().GetTopWindow()
 			### paths in traceback
 			paths = [a for a in trace if a.split(',')[0].strip().startswith('File')]
 	

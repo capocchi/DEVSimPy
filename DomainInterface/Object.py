@@ -37,6 +37,13 @@ class Message:
 		self.time	= t
 		self.name = ""
 
+	def copy(self):
+		''' Create a copy of the current instance.
+			@return: A new instance of Message with the same attributes.
+			@rtype: Message
+		'''
+		return Message(self.value, self.time)
+	
 	###
 	def __str__(self):
 		'''	Printer method.

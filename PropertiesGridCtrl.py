@@ -593,6 +593,7 @@ class CustomDataTable(GridTableBase):
 	def GetValue(self, row, col):
 
 		try:
+			# print(self.data[row][col])
 			return self.data[row][col][0] if isinstance(self.data[row][col], tuple) else self.data[row][col]
 		except Exception as e:
 			return None
