@@ -130,9 +130,9 @@ def NotificationMessage(title, message, parent, flag=2048, timeout=False):
 		# notify.SetMessage("It's a message!")
 		# notify.SetParent(self)
 		if timeout:
-			notify.Show(timeout=timeout) # 1 for short timeout, 100 for long timeout
+			wx.CallAfter(notify.Show,timeout=timeout) # 1 for short timeout, 100 for long timeout
 		else:
-			notify.Show()
+			wx.CallAfter(notify.Show)
 
 def now()->str:
     """ Returns the current time formatted. """

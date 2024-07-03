@@ -202,7 +202,10 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 					### resionly for displayed application (-nogui)
 					if builtins.__dict__.get('GUI_FLAG',True):
 						if self.prof:
-							NotificationMessage(_("Information"), _("Profiling report is available on Options->Profile"), None, timeout=5)
+							try:
+								NotificationMessage(_("Information"), _("Profiling report is available on Options->Profile"), None, timeout=5)
+							except:
+								NotificationMessage("Information", "Profiling report is available on Options->Profile", None, timeout=5)
 
 						wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
 
