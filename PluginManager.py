@@ -8,6 +8,7 @@ from traceback import format_exception
 import sys
 import os
 import importlib
+import builtins
 
 import gettext
 _ = gettext.gettext
@@ -79,9 +80,10 @@ class PluginManager(object):
 			have registered themselves to the event. Any additional arguments or
 			keyword arguments you pass in will be passed to the plugins.
 		"""
-		for plugin in PluginManager.plugins[event]:
-			if event not in PluginManager.disabled_event:
-				plugin(*args, **kwargs)
+		if builtins.__dict__['GUI_FLAG']:
+			for plugin in PluginManager.plugins[event]:
+				if event not in PluginManager.disabled_event:
+					plugin(*args, **kwargs)
 
 	@staticmethod
 	def load_plugins(modulename):
