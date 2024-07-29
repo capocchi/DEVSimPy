@@ -2400,7 +2400,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				if not self.HasCapture():
 					self.CaptureMouse()
 				self.overlay = wx.Overlay()
-				if isinstance(event,wx.MouseEvent):
+				if isinstance(event, wx.MouseEvent):
 					# point = event.GetPosition()
 					point = self.getEventCoordinates(event)
 					self.selectionStart = point
@@ -2565,8 +2565,9 @@ if builtins.__dict__.get('GUI_FLAG',True):
 						sys.stdout.write(_("Error in Release Mouse!"))
 					else:
 						self.permRect = None
-						if isinstance(event,wx.MouseEvent):
+						if isinstance(event, wx.MouseEvent):
 							point = self.getEventCoordinates(event)
+							
 							if self.selectionStart != point:
 								self.permRect = wx.Rect(self.selectionStart, point)
 						
@@ -2735,6 +2736,11 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				
 				self.diagram.modify = False
 
+				point = self.getEventCoordinates(event)
+					
+				x = point[0] - self.currentPoint[0]
+				y = point[1] - self.currentPoint[1]
+				
 				if len(sc) == 0:
 					# User is dragging the mouse, check if
 					# left button is down
@@ -2752,7 +2758,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 						ctx.SetBrush(wx.Brush(wx.Colour(229,229,229,80)))
 						
 						try:
-							ctx.DrawRectangle(*wx.Rect(self.selectionStart, event.GetPosition()))
+							rect = wx.Rect(self.selectionStart, (x,y))
+							ctx.DrawRectangle(*self.selectionStart, rect.width, rect.height)
 						except TypeError:
 							pass
 
@@ -2763,11 +2770,6 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					# else:
 						# self.Refresh(False)
 				else:
-
-					point = self.getEventCoordinates(event)
-					
-					x = point[0] - self.currentPoint[0]
-					y = point[1] - self.currentPoint[1]
 
 					if cursor != wx.StockCursor(wx.CURSOR_HAND):
 						cursor = wx.StockCursor(wx.CURSOR_HAND)
@@ -2871,7 +2873,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			"""
 			dx = (m.x[1]-m.x[0])
 			dy = (m.y[1]-m.y[0])
-			ux,uy = self.getScalledCoordinates(x,y)
+			ux,uy = self.getScalledCoordinates(x, y)
 			#ux, uy = canvas.CalcUnscrolledPosition(x-dx, y-dy)
 
 			return (ux-dx,uy-dy)
@@ -2881,12 +2883,13 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			"""
 			originX, originY = self.GetViewStart()
 			unitX, unitY = self.GetScrollPixelsPerUnit()
-			return ((x + (originX * unitX))/ self.scalex, (y + (originY * unitY))/ self.scaley)
+			return (int((x + (originX * unitX))/ self.scalex), int((y + (originY * unitY))/ self.scaley))
 
 		def getEventCoordinates(self, event):
 			""" Return the coordinates from event.
 			"""
-			return self.getScalledCoordinates(event.GetX(),event.GetY())
+			
+			return self.getScalledCoordinates(event.GetX(), event.GetY())
 
 		def getSelectedShapes(self):
 			""" Retrun the list of selected object on the canvas (Connectable nodes are excluded)

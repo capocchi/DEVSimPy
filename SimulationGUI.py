@@ -294,6 +294,9 @@ class Base(object):
 		### profiling simulation
 		self.prof = False
 
+		### mem oofset to compute memory used in the simulation process
+		self.mem_offset = 0.0
+
 		### No time limit simulation (defined in the builtin dictionary from .devsimpy file)
 		self.ntl = builtins.__dict__['NTL']
 
@@ -486,6 +489,8 @@ class Base(object):
 				for fn in [f for f in os.listdir(gettempdir()) if f.endswith('.devsimpy.log')]:
 					os.remove(os.path.join(gettempdir(),fn))
 
+				self.mem_offset = get_process_memory()
+
 				self.thread = simulator_factory(self.current_master, self.selected_strategy, self.prof, self.ntl, self.verbose, self.dynamic_structure_flag, self.real_time_flag)
 				self.thread.setName(self.title)
 
@@ -648,7 +653,7 @@ class Base(object):
 		m, s = divmod(total_cpu_time, 60)
 		h, m = divmod(m, 60)
 
-		return "%d:%02d:%02d:%03d / %.2f MB" % (h, m, int(s), int(ms), get_process_memory())
+		return "%d:%02d:%02d:%03d / %.2f MB" % (h, m, int(s), int(ms), get_process_memory()-self.mem_offset)
 
 	###
 	def MsgBox(self, msg:str):

@@ -48,7 +48,7 @@ def get_from_modules(name:str)->types.ModuleType:
 	""" Get module with the correct name from the name that come from dir().
 	"""
 	for s,m in sys.modules.items():
-		if name == s or "%s.%s"%(name,name) == s:
+		if name == s or f"{name}.{name}" == s:
 			return m
 	return None
 
@@ -86,7 +86,7 @@ def getPythonModelFileName(fn:str)->str:
 					if issubclass(cls, DomainBehavior) or issubclass(cls, DomainStructure):
 						return python_file
 
-		sys.stdout.write(_('Behavioral python file not found in %s file'%fn))
+		sys.stdout.write(_(f"Behavioral python file not found in {fn} file"))
 		raise Exception
 	
 	elif py_file_list:
@@ -214,7 +214,7 @@ class Zip:
 					zout.writestr(base_name, data)
 				else:
 					exclude_file.append(replace_files.index(fn))
-					sys.stdout.write(" %s not rewrite\n"%(fn))
+					sys.stdout.write(f" {fn} not rewrited!\n")
 				
 				#sys.stdout.write("update %s from compressed %s\n"%(base_name, fn))
 			elif os.path.exists(fn):
@@ -514,7 +514,6 @@ class Zip:
 
 			### reload submodule from module dependencies!
 			module = sys.modules[self.GetFullName()]
-			domain_name = os.path.basename(os.path.dirname(self.fn))
 			for name in dir(module):
 				if type(getattr(module, name)) == types.ModuleType:
 					### TODO: only reload the local package (not 'sys' and so one)
@@ -522,7 +521,7 @@ class Zip:
 					if m :
 						importlib.reload(m)
 					else:
-						sys.stdout.write('\n %s module is not reloaded before saving the code!'%name)
+						sys.stdout.write(f"\n{name} module is not reloaded before saving the code!\n")
 			### clear to clean the import after exporting model (amd or cmd) and reload within the same instance of DEVSimPy
 			zipimport._zip_directory_cache.clear()
 

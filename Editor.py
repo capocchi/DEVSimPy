@@ -875,7 +875,7 @@ class EditionNotebook(wx.Notebook):
 		L = re.findall("(.*\.(amd|cmd))\%s(.*)" % os.sep, path)
 
 		if L:
-			model_path, ext, name = L.pop(0)
+			model_path, _, name = L.pop(0)
 			if zipfile.is_zipfile(model_path):
 				importer = zipfile.ZipFile(model_path, "r")
 				fileInfo = importer.getinfo(name)
@@ -1597,7 +1597,6 @@ class Base(object):
 
 			new_instance = self.ConfigSaving(base_name, dir_name, code)
 
-			
 			### there is error in file ?
 			currentPage.error_flag = isinstance(new_instance, Exception)
 
@@ -1686,8 +1685,8 @@ class Base(object):
 		if save_dlg.ShowModal() == wx.ID_OK:
 
 			path = os.path.normpath(save_dlg.GetPath())
-			ext = os.path.splitext(path)[-1]
-			file_name = save_dlg.GetFilename()
+			# ext = os.path.splitext(path)[-1]
+			# file_name = save_dlg.GetFilename()
 
 			### code text
 			code = currentPage.GetValue()
@@ -1836,8 +1835,6 @@ class Base(object):
 
 			new_instance = self.ConfigSaving(base_name, dir_name, code)
 
-
-
 			### there is error in file ?
 			currentPage.error_flag = isinstance(new_instance, Exception)
 
@@ -1972,7 +1969,7 @@ class BlockBase(object):
 		"""
 
 		state = concret_subject.GetState()
-		canvas = state['canvas']
+		# canvas = state['canvas']
 		model = state['model']
 		
 		### delete all tab on notebook
@@ -2420,20 +2417,14 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		EditorFrame.__init__(self, parent, id, title)
 		BlockBase.__init__(self, parent, id, title, block)
 
-		self.block = block
-
-		#if not parent:
 		self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'pythonFile.png'), wx.BITMAP_TYPE_PNG)))
 		self.ConfigureGUI()
-		
-		#else:
-		#	### in panel
-		#	self.ConfigureTB()
 
 	###
 	def ConfigureGUI(self):
 		"""
 		"""
+
 		### insert sub menu-------------------------------------------------
 		insert = wx.Menu()
 
@@ -2442,7 +2433,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		set_submenu = wx.Menu()
 		new_submenu = wx.Menu()
 
-		if not self.block.isCMD():
+		if not self.cb.isCMD():
 
 			### New items
 			peek = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Peek'), _('Generate new peek code'))
@@ -2536,7 +2527,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 			print("Toolbar not displayed on mac...")
 			pass
 
-		if not self.block.isCMD():
+		if not self.cb.isCMD():
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=poke.GetId())
 			self.Bind(wx.EVT_MENU, self.OnInsertHoldInState, id=holdInState.GetId())
@@ -2559,7 +2550,20 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 
 		self.Bind(wx.EVT_COMBOBOX, self.OnCombo, id=cbID)
 		self.Bind(wx.EVT_MENU, self.OnInsertDebug, id=debug.GetId())
-		
+		self.Bind(wx.EVT_CLOSE, self.OnClose)
+
+	def OnClose(self,event):
+		"""
+		"""
+
+		### save the postion of the cursor in the block
+		page = self.nb.GetCurrentPage()
+		pos = page.GetCurrentPos()
+		self.cb.last_cursor_pos = page.LineFromPosition(pos)
+
+		### Quit the editor
+		self.QuitApplication(event)
+
 class BlockEditorPanel(BlockBase, EditorPanel):
 	""" Block Editor class which inherit of Editor class
 	"""
@@ -2572,6 +2576,7 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 		EditorPanel.__init__(self, parent, id, title)
 		BlockBase.__init__(self, parent, id, title, block)
 		
+	
 		#if not parent:
 			#self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'pythonFile.png'), wx.BITMAP_TYPE_PNG)))
 			#self.ConfigureGUI()
