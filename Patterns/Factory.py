@@ -45,11 +45,22 @@ from Decorators import hotshotit
 def elapsed_since(start):
     return time.strftime("%H:%M:%S", time.gmtime(time.time() - start))
 
+def get_total_ram():
+	"""Total memory (RAM) on the machine
+
+	Returns:
+		_type_: _description_
+	"""
+
+	ram_info = psutil.virtual_memory()
+	return ram_info.total / 1048576  # Convert bytes to Mb
+	# return ram_info.total / (1024 ** 3)  # Convert bytes to GB
+	
+
 def get_process_memory():
 	process = psutil.Process(os.getpid())
 	mem_bytes = process.memory_info().rss
-	mem_Mb = float(mem_bytes)/1048576
-	return mem_Mb
+	return float(mem_bytes)/1048576 # Convert bytes to Mb
 
 def elapsed_since(start_time):
     # Fonction pour calculer le temps écoulé
@@ -202,7 +213,10 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 					### resionly for displayed application (-nogui)
 					if builtins.__dict__.get('GUI_FLAG',True):
 						if self.prof:
-							NotificationMessage(_("Information"), _("Profiling report is available on Options->Profile"), None, timeout=5)
+							try:
+								NotificationMessage(_("Information"), _("Profiling report is available on Options->Profile"), None, timeout=5)
+							except:
+								NotificationMessage("Information", "Profiling report is available on Options->Profile", None, timeout=5)
 
 						wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
 

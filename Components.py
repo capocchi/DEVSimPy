@@ -877,39 +877,25 @@ class DEVSComponent:
 				# 	text = importer.get_source(os.path.splitext(name)[0])
 
 				if not zipfile.is_zipfile(model_path):
-					### if file is localized on the net
-					if python_path.startswith('http'):
-						### with internet python file, the editorFrame is read only
-						editorFrame.SetReadOnly(True)
+					### if python_path is not found (because have an external origin)
+					if not os.path.exists(python_path) and os.path.basename(
+						DOMAIN_PATH) in python_path.split(os.sep):
+						python_path = os.path.join(HOME_PATH, python_path[python_path.index(os.path.basename(DOMAIN_PATH)):].strip('[]'))
+						self.python_path = python_path
 
-						printOnStatusBar(editorFrame.statusbar, {0:_('read only')})
+									# ### only with python 2.6
+									# with codecs.open(python_path, 'r', 'utf-8') as f:
+									# 	text = f.read()
 
-						### parse url to extract the path(/devsimpy/domain...) and the network location (lcapocchi.free.fr)
-						o = urlparse(python_path)
-						### open connection
-						c = httplib.HTTPConnection(o.netloc)
-						### request with GET mode
-						c.request('GET', o.path)
-						### get response of request
-						r = c.getresponse()
-						### convert file into string
-						text = r.read()
-
-					else:
-
-						### if python_path is not found (because have an external origin)
-						if not os.path.exists(python_path) and os.path.basename(
-						    DOMAIN_PATH) in python_path.split(os.sep):
-							python_path = os.path.join(HOME_PATH, python_path[python_path.index(os.path.basename(DOMAIN_PATH)):].strip('[]'))
-							self.python_path = python_path
-
-										# ### only with python 2.6
-										# with codecs.open(python_path, 'r', 'utf-8') as f:
-										# 	text = f.read()
-
-				# name = os.path.basename(python_path)
+			# name = os.path.basename(python_path)
 
 				editorFrame.AddEditPage(name, python_path)
+				
+				### To set the cursor at the last position (stored when closed editor the last time)
+				if hasattr(self, 'last_cursor_pos'):
+					page = editorFrame.nb.GetCurrentPage()
+					page.GotoLine(self.last_cursor_pos+10)
+
 				editorFrame.Show()
 
 				printOnStatusBar(editorFrame.statusbar,{1:''})

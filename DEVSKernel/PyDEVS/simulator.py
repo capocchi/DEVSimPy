@@ -13,7 +13,6 @@
 # NOTES:
 ###############################################################################
 
-import sys
 from itertools import *
 import threading
 import array
