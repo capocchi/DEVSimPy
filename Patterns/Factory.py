@@ -45,11 +45,22 @@ from Decorators import hotshotit
 def elapsed_since(start):
     return time.strftime("%H:%M:%S", time.gmtime(time.time() - start))
 
+def get_total_ram():
+	"""Total memory (RAM) on the machine
+
+	Returns:
+		_type_: _description_
+	"""
+
+	ram_info = psutil.virtual_memory()
+	return ram_info.total / 1048576  # Convert bytes to Mb
+	# return ram_info.total / (1024 ** 3)  # Convert bytes to GB
+	
+
 def get_process_memory():
 	process = psutil.Process(os.getpid())
 	mem_bytes = process.memory_info().rss
-	mem_Mb = float(mem_bytes)/1048576
-	return mem_Mb
+	return float(mem_bytes)/1048576 # Convert bytes to Mb
 
 def elapsed_since(start_time):
     # Fonction pour calculer le temps écoulé

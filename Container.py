@@ -1082,7 +1082,7 @@ class Diagram(Savable, Structurable):
 	def GetShapeList(self):
 		""" Function that return the shapes list
 		"""
-		return self.shapes
+		return self.shapes if isinstance(self.shapes,list) else self.shapes.values()
 
 	def GetConnectionShapeGenerator(self):
 		""" Function that return the connection shape generator
@@ -1238,43 +1238,60 @@ class Shape(ShapeEvtHandler):
 		self.font = [FONT_SIZE, 74, 93, 700, u'Arial']
 
 	def draw(self, dc):
-		""" Draw method
-		"""
+		""" Draw method """
 
+		# Convert hex to RGB only once and create the brush color
 		r, g, b = HEXToRGB(str(self.fill[0]))
 		brushclr = wx.Color(r, g, b, 128)   # half transparent
 
-		try:
-			dc.SetPen(wx.Pen(self.pen[0], self.pen[1], self.pen[2]))
-		### for old model
-		except:
-			dc.SetPen(wx.Pen(self.pen[0], self.pen[1]))
+		# Set the pen with exception handling for old models
+		pen_args = [self.pen[0], self.pen[1]]
+		if len(self.pen) > 2:
+			pen_args.append(self.pen[2])
+		dc.SetPen(wx.Pen(*pen_args))
 
+		# Set the brush color
 		dc.SetBrush(wx.Brush(brushclr))
 
-		try:
-			### adapt size font depending on the size of label
-			### begin with the max of font size (defined in preferences)
+		# Set the font for the label
+		dc.SetFont(wx.Font(self.font[0], self.font[1], self.font[2], self.font[3], False, self.font[4]))
+
+	def DynamicFont(self, dc):
+		"""Chnage the size font of the label when the block size is changed (by extending the reseazibleNode for exemple)
+
+		Args:
+			dc (_type_): _description_
+		"""
+		# If the object has a label, adjust the font size
+		if hasattr(self, 'label'):
+			
 			font = FONT_SIZE
-			### set the font in the dc in order to performed GetTextExtent
-			dc.SetFont(wx.Font(font, self.font[1], self.font[2], self.font[3], False, self.font[4]))
+			margin = 25
+
+			# Create the font object only once
+			base_font = wx.Font(font, self.font[1], self.font[2], self.font[3], False, self.font[4])
+			dc.SetFont(base_font)
+
+			# Get the text and shape dimensions
 			width_t, _ = dc.GetTextExtent(self.label)
-			### size of shape
-			width_s = self.x[1]-self.x[0]
-			### while the label with is sup of shape width, we reduce the font of the dc (thus the label size)
-			while(width_t > width_s):
-				font -=1
-				dc.SetFont(wx.Font(font, self.font[1], self.font[2], self.font[3], False, self.font[4]))
-				width_t, _ = dc.GetTextExtent(self.label)
+			width_s = self.x[1] - self.x[0]
 
-			### update the font
-			self.font[0]=font
+			# Adjust font size efficiently
+			if width_t > width_s - margin:
+				# Reduce font size to fit the label within the shape
+				while width_t > width_s - margin and font > 1:
+					font -= 1
+					dc.SetFont(wx.Font(font, self.font[1], self.font[2], self.font[3], False, self.font[4]))
+					width_t, _ = dc.GetTextExtent(self.label)
+			else:
+				# Increase font size to fill the shape width
+				while width_t < width_s - margin:
+					font += 1
+					dc.SetFont(wx.Font(font, self.font[1], self.font[2], self.font[3], False, self.font[4]))
+					width_t, _ = dc.GetTextExtent(self.label)
 
-		except Exception:
-			try:
-				dc.SetFont(wx.Font(10, self.font[1], self.font[2], self.font[3], False, self.font[4]))
-			except Exception:
-				dc.SetFont(wx.Font(10, 74, 93, 700, False, u'Arial'))
+			# Update the font size attribute
+			self.font[0] = font
 
 	def move(self,x,y):
 		""" Move method
@@ -1686,6 +1703,9 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				mainW = self.GetTopLevelParent()
 				tb = mainW.FindWindowByName('tb')
 
+				if isinstance(tb,wx.ToolBarBase):
+					tb = tb.GetToolBar()
+					
 				### find the tool from toolBar thanks to id
 				for tool in mainW.tools:
 					if tool.GetId() == wx.ID_UNDO:
@@ -1779,8 +1799,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			if not self.resizeable_nedeed:
 				nodes = [n for n in nodes if not isinstance(n,ResizeableNode)]
 
-
-			items = iter(shapes + nodes)
+			items = iter(shapes + nodes) 
 
 			for item in items:
 				try:
@@ -2741,6 +2760,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				x = point[0] - self.currentPoint[0]
 				y = point[1] - self.currentPoint[1]
 				
+				dc = wx.ClientDC(self)
+
 				if len(sc) == 0:
 					# User is dragging the mouse, check if
 					# left button is down
@@ -2749,7 +2770,6 @@ if builtins.__dict__.get('GUI_FLAG',True):
 						if cursor != wx.StockCursor(wx.CURSOR_ARROW):
 							cursor = wx.StockCursor(wx.CURSOR_ARROW)
 						
-						dc = wx.ClientDC(self)
 						odc = wx.DCOverlay(self.overlay, dc)
 						odc.Clear()
 						ctx = wx.GraphicsContext.Create(dc)
@@ -2780,6 +2800,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 						### change cursor when resizing model
 						if isinstance(s, ResizeableNode) and cursor != wx.StockCursor(wx.CURSOR_SIZING):
 							cursor = wx.StockCursor(wx.CURSOR_SIZING)
+							### adapt the font size fo the label when the rezeableNode is moved (here because we have dc!)
+							s.item.DynamicFont(dc)
 
 						### change cursor when connectionShape hit a node
 						elif isinstance(s, ConnectionShape):
@@ -2796,7 +2818,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 									cursor = wx.StockCursor(wx.CURSOR_CROSS)
 
 							self.resizeable_nedeed = False
-							
+
 					### update the cursor
 					self.SetCursor(cursor)
 					### update modify
@@ -2862,7 +2884,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				return None
 
 			# Look to see if an item is selected
-			for item in self.nodes + self.diagram.shapes:
+			for item in self.nodes + self.diagram.GetShapeList():
 				if item.HitTest(point[0], point[1]) and item not in exclude:
 					return item
 
@@ -2978,7 +3000,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			for m in [a for a in L if self.isSelected(a)]:
 				self.deselect(m)
 				self.select(m)
-			
+
 			self.Refresh()
 
 		### selection sur le canvas les ONodes car c'est le seul moyen d'y accéder pour effectuer l'appartenance avec les modèles
@@ -3496,6 +3518,15 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		menu.Destroy()
 		event.Skip()
 	
+	###
+	def OnProperties(self, event):
+		"""
+		"""
+		pass
+		#canvas = event.GetEventObject()
+		#f = AttributeEditor(canvas.GetParent(), wx.NewIdRef(), self, canvas)
+		#f.Show()
+
 	def __del__(self):
 		pass
 
@@ -3738,7 +3769,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 
 			### if graphical properties, we update the canvas
 			elif val != getattr(self, prop):
-
+				
 				if prop == 'label':
 					canvas = concret_subject.canvas
 					diagram = canvas.GetDiagram()
@@ -4725,6 +4756,7 @@ class ResizeableNode(Node):
 			if (isinstance(self.item, Block) and X >= 50 and Y >= 50) or not isinstance(self.item, Block):
 				self.item.x[self.index] += x
 				self.item.y[self.index] += y
+				
 				#self.item.OnResize()
 
 	def OnDeleteNode(self, event):

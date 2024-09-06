@@ -44,7 +44,7 @@ if __name__ == '__main__':
 from Utilities import IsAllDigits, printOnStatusBar
 from PluginManager import PluginManager #trigger_event, is_enable
 from Patterns.Strategy import *
-from Patterns.Factory import simulator_factory, get_process_memory
+from Patterns.Factory import simulator_factory, get_process_memory, get_total_ram
 from Decorators import BuzyCursorNotification
 
 import Container
@@ -296,6 +296,7 @@ class Base(object):
 
 		### mem oofset to compute memory used in the simulation process
 		self.mem_offset = 0.0
+		self.total_ram = get_total_ram()
 
 		### No time limit simulation (defined in the builtin dictionary from .devsimpy file)
 		self.ntl = builtins.__dict__['NTL']
@@ -653,7 +654,10 @@ class Base(object):
 		m, s = divmod(total_cpu_time, 60)
 		h, m = divmod(m, 60)
 
-		return "%d:%02d:%02d:%03d / %.2f MB" % (h, m, int(s), int(ms), get_process_memory()-self.mem_offset)
+		v = get_process_memory()-self.mem_offset
+		if v<0: v=0.0
+
+		return "%d:%02d:%02d:%03d / %.2f MB (%.2f%%)" % (h, m, int(s), int(ms), v, 100*v/self.total_ram)
 
 	###
 	def MsgBox(self, msg:str):

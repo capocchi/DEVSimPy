@@ -57,6 +57,31 @@ wx.CHANGE_DIR = wx.CHANGE_DIR if wx.VERSION_STRING < '4.0' else wx.FD_CHANGE_DIR
 
 _ = wx.GetTranslation
 
+class ListCellRenderer(gridlib.GridCellRenderer):
+    def __init__(self):
+        super(ListCellRenderer, self).__init__()
+
+    def Draw(self, grid, attr, dc, rect, row, col, isSelected):
+        dc.SetClippingRegion(rect)
+        dc.SetBrush(wx.Brush(wx.Colour(255, 255, 255)))  # Couleur de fond
+        dc.SetPen(wx.TRANSPARENT_PEN)
+        dc.DrawRectangle(rect)  # Dessine le fond de la cellule
+
+        # Récupère la valeur de la cellule et la convertit en chaîne si c'est une liste
+        value = grid.GetCellValue(row, col)
+        if isinstance(value, list):
+            value = ", ".join(map(str, value))  # Convertit la liste en chaîne de caractères
+
+        # Affiche le texte dans la cellule
+        dc.DrawText(value, rect.x + 2, rect.y + 2)
+        dc.DestroyClippingRegion()
+
+    def GetBestSize(self, grid, attr, dc, row, col):
+        return wx.Size(100, 20)  # Taille recommandée
+
+    def Clone(self):
+        return ListCellRenderer()  # Retourne une nouvelle instance du renderer
+
 ###------------------------------------------------------------------------------
 class DictionaryEditor(wx.Dialog):
 	def __init__(self, parent, id, title, values):
@@ -522,29 +547,33 @@ class CustomDataTable(GridTableBase):
 
 		### if the path dont exists, background color is red
 		try:
+			# Si la valeur est une liste, on applique le renderer personnalisé
+			if isinstance(val, list):
+				renderer = ListCellRenderer()
+				attr.SetRenderer(renderer)
+			else:
+				### if the type of cell is string
+				if isinstance(val, str):
 
-			### if the type of cell is string
-			if isinstance(val, str):
+					if col == 1:
 
-				if col == 1:
+						v = self.GetValue(row, 0)
 
-					v = self.GetValue(row, 0)
+						### if bad filename (for instance generator)
+						m = re.match('[a-zA-Z]*(ile)[n|N](ame)[_-a-zA-Z0-9]*', v, re.IGNORECASE)
 
-					### if bad filename (for instance generator)
-					m = re.match('[a-zA-Z]*(ile)[n|N](ame)[_-a-zA-Z0-9]*', v, re.IGNORECASE)
-
-					### if filename is match and not exist (ensuring that the filename are extension)
-					if m is not None and not os.path.exists(self.GetValue(row, 1)) and os.path.splitext(self.GetValue(row, 1))[-1] != '':
-						self.bad_flag.update({v:False})
-						attr.SetBackgroundColour("pink")
-
-					### if the python path is not found
-					if v == "python_path":
-						### si un le modèle est un fichier python et que le path n'existe pas ou si c'est un amd ou cmd et que le fichier modèle n'existe pas
-						if (not os.path.exists(self.model.python_path) and not zipfile.is_zipfile(self.model.model_path)) or\
-							(not os.path.exists(self.model.model_path) and zipfile.is_zipfile(self.model.model_path)):
+						### if filename is match and not exist (ensuring that the filename are extension)
+						if m is not None and not os.path.exists(self.GetValue(row, 1)) and os.path.splitext(self.GetValue(row, 1))[-1] != '':
 							self.bad_flag.update({v:False})
 							attr.SetBackgroundColour("pink")
+
+						### if the python path is not found
+						if v == "python_path":
+							### si un le modèle est un fichier python et que le path n'existe pas ou si c'est un amd ou cmd et que le fichier modèle n'existe pas
+							if (not os.path.exists(self.model.python_path) and not zipfile.is_zipfile(self.model.model_path)) or\
+								(not os.path.exists(self.model.model_path) and zipfile.is_zipfile(self.model.model_path)):
+								self.bad_flag.update({v:False})
+								attr.SetBackgroundColour("pink")
 
 			return attr
 
@@ -558,13 +587,13 @@ class CustomDataTable(GridTableBase):
 
 		if isinstance(val, bool):
 			return [gridlib.GRID_VALUE_STRING, gridlib.GRID_VALUE_BOOL, gridlib.GRID_VALUE_STRING]
-		elif isinstance(val,int):
+		elif isinstance(val, int):
 			return [gridlib.GRID_VALUE_STRING, gridlib.GRID_VALUE_NUMBER + ':0,1000000', gridlib.GRID_VALUE_STRING]
-		elif isinstance(val,float):
+		elif isinstance(val, float):
 			return [gridlib.GRID_VALUE_STRING, gridlib.GRID_VALUE_FLOAT + ':10,6', gridlib.GRID_VALUE_STRING]
-		elif isinstance(val,list):
+		elif isinstance(val, list):
 			return [gridlib.GRID_VALUE_STRING,'list', gridlib.GRID_VALUE_STRING]
-		elif isinstance(val,dict):
+		elif isinstance(val, dict):
 			return [gridlib.GRID_VALUE_STRING,'dict', gridlib.GRID_VALUE_STRING]
 		elif isinstance(val, tuple):
 			if isinstance(val[0], int):
@@ -592,13 +621,28 @@ class CustomDataTable(GridTableBase):
 	# C++ version.
 	def GetValue(self, row, col):
 
+		# if col == 1:
+		# 	init_type = self.dataTypes[row][col]
+		# 	if 'list' in init_type:
+		# 		return self.data[row][col][0]
+		# 	else:
+		# 		return self.data[row][col]			
+		# else:
+		# 	return self.data[row][col]
+
+		# print(init_type, self.data[row][col])
+		# try:
+		# 	return self.data[row][col][0] if isinstance(self.data[row][col], tuple) else self.data[row][col]
+		# except IndexError:
+		# 	return None
+
 		try:
-			if isinstance(self.data[row][col], tuple):
-				return self.data[row][col][0]
+			if isinstance(self.data[row][col],tuple) or isinstance(self.data[row][col],list):
+				return self.data[row][col]
 			else: 
 				return self.data[row][col]
 		except Exception as e:
-			print(f"Exception dans GetValue: {e}")  # Pour le débogage
+			print(f"Exception in GetValue: {e}")  # Pour le débogage
 			return None
 
 	def SetValue(self, row, col, value):
@@ -953,7 +997,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 			if dlg.ShowModal() == wx.ID_OK:
 				data = dlg.GetFontData()
 				font = data.GetChosenFont()
-				color = data.GetColour()
+				# color = data.GetColour()
 				val = [font.GetPointSize(), font.GetFamily(), font.GetStyle(), font.GetWeight(), font.GetFaceName()]
 				self.SetCellValue(row,1,str(val))
 			else:
