@@ -2357,7 +2357,7 @@ class BlockBase(object):
 					# args must have default value in the constructor
 					try:
 						constructor = inspect.getargspec(classe.__init__)
-						new_args = dict(list(zip(constructor[0][1:], constructor[-1]))) if constructor[-1] else {}
+						new_args = dict(list(zip(constructor.args[1:], constructor.defaults))) if constructor.defaults else {}
 					except ValueError:
 						constructor = inspect.signature(classe.__init__)
 						parameters = constructor.parameters
