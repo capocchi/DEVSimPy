@@ -430,6 +430,7 @@ class CustomDataTable(GridTableBase):
 			infoBlockBehavioralDict = {}
 		
 		### if user code the information of behavioral attribute in docstring of class with @ or - symbol, we update the infoBlockBehavioralDict
+	
 		if hasattr(model, 'python_path') and infoBlockBehavioralDict != {}:
 			### cls object from python file
 			cls = Components.GetClass(model.python_path)
