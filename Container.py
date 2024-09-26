@@ -3880,7 +3880,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 							### Is this up-to-date???
 							### we find the python file using re module
 							### because path can comes from windows and then sep is not the same and os.path.basename don't work !
-							state['python_path'] = os.path.join(path, re.findall("([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
+							state['python_path'] = os.path.join(path, re.findall(r"([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
 				else:
 					state['bad_filename_path_flag'] = True
 
@@ -4269,7 +4269,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 							### Is this up-to-date???
 							### we find the python file using re module
 							### because path can comes from windows and then sep is not the same and os.path.basename don't work !
-							state['python_path'] = os.path.join(path, re.findall("([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
+							state['python_path'] = os.path.join(path, re.findall(r"([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
 				else:
 					state['bad_filename_path_flag'] = True
 
