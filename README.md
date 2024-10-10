@@ -18,7 +18,7 @@ The DEVSimPy environment has been developed in Python with the [wxPython](http:/
 # Requirements
 The use of DEVSimPy requires:
 
-- [Python](http://www.python.org) version 3.7+
+- [Python](http://www.python.org) version 3.10+
 - [wxPython](http://www.wxpython.org) version 4.0+
 - [Scipy](http://www.scipy.org) and [Numpy](http://www.numpy.org) (optional, for spectrum analysis)
 
@@ -75,6 +75,12 @@ For os X users, python.app is required in order to use pythonw instead of python
 ```sh
 $ pythonw devsimpy.py
 ```
+
+If some difficulties are incontred with the wxPython installation, you can check the repo https://wxpython.org/Phoenix/snapshot-builds/ in install with command: 
+```sh
+$ pip install -i correct_file.whl
+```
+
 # Documentations
  - DEVSimPy User Guide v2.8 [[pdf]](http://portailweb.universita.corsica/stockage_public/portail/baaaaaes/files/DEVSimPy_guide_utilisateur.pdf) (French)
  - S. Toma Ph.D, Thesis [[pdf]](https://hal.archives-ouvertes.fr/tel-01141844/document) (English), winner of the 2014 DEVS PhD Dissertation Award.
