@@ -366,7 +366,7 @@ class Zip:
 		nl = zf.namelist()
 		zf.close()
 
-		L = [a for a in [re.findall("^(plugins[/]?[\w]*.py)$", s) for s in nl] if a]
+		L = [a for a in [re.findall(r"^(plugins[/]?[\w]*.py)$", s) for s in nl] if a]
 		return L.pop(0)[0] if L else ""
 
 	@staticmethod
@@ -383,7 +383,7 @@ class Zip:
 		zf.close()
 
 		### plugin file is plugins.pi in root of zipfile or in plugins zipedd directory
-		return any([re.search("^(plugins[/]*[\w]*.py)$", s) for s in nl])
+		return any([re.search(r"^(plugins[/]*[\w]*.py)$", s) for s in nl])
 
 	# BDD Test----------------------------------------------------------------------
 	@staticmethod
@@ -396,7 +396,7 @@ class Zip:
 		nl = zf.namelist()
 		zf.close()
 
-		return any([re.search("^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.feature)$", s) for s in nl])
+		return any([re.search(r"^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.feature)$", s) for s in nl])
 
 	@staticmethod
 	def GetTests(fn:str)->[str]:
@@ -407,7 +407,7 @@ class Zip:
 		zf.close()
 
 		###
-		tests_files = [a for a in [re.findall("^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.feature)$", s) for s in nl] if a]
+		tests_files = [a for a in [re.findall(r"^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.feature)$", s) for s in nl] if a]
 		tests_files = [a[0] for a in tests_files]
 
 		return tests_files

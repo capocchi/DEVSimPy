@@ -872,7 +872,7 @@ class EditionNotebook(wx.Notebook):
 		fileCode = ""
 		
 		### FIXME: try to consider zipfile in zipfile
-		L = re.findall("(.*\.(amd|cmd))\%s(.*)" % os.sep, path)
+		L = re.findall(r"(.*\.(amd|cmd))\%s(.*)" % os.sep, path)
 
 		if L:
 			model_path, _, name = L.pop(0)
@@ -2731,7 +2731,7 @@ builtins.__dict__['GUI_FLAG'] = True\n\nsys.path.append(os.path.join(gettempdir(
 
 	# NOTE: TestEditor :: OnGenEnvDefGeneration		=> note
 	def OnEnvDefGeneration(self, event):
-		GEN_ENV_DEF = """import re\n
+		GEN_ENV_DEF = r"""import re\n
 # NOTE: environment.py :: addModel		=> note
 def loadModel():\n\tglobal models\n\tfiles = [os.path.join(gettempdir(), f) for f in os.listdir(gettempdir()) if re.match('^AtomicModel_.*\.{1}serial$', f)]\n\tfor f in files:\n\t\tm = pickle.load(open(f, "rb"))
 \t\tif not m.blockModel.label in models.keys():\n\t\t\tmodels[m.blockModel.label] = m\n
