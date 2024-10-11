@@ -499,7 +499,7 @@ class Base(object):
 				if self.thread.end_flag:
 					self.OnTimer(event)
 				else:
-					self.timer.Start()
+					self.timer.Start(-1)
 
 				### timer for real time
 				if self.real_time_flag: 

@@ -366,9 +366,12 @@ class MainApplication(wx.Frame):
 
 		sys.stdout.write("Writing default .devsimpy settings file on %s directory..."%GetUserConfigDir())
 
+		### getdefaultlocale() is deprecated from python 3.11
+		current_locale = locale.getlocale() if sys.version_info >= (3, 11) else locale.getdefaultlocale()
+		
 		self.exportPathsList = []					# export path list
 		self.openFileList = ['']*NB_OPENED_FILE		# number of last opened files
-		self.language = 'fr' if 'fr_FR' in locale.getdefaultlocale() else 'en' # default language
+		self.language = 'fr' if current_locale and 'fr' in current_locale[0] else 'en' # default language
 		self.perspectives = {}	# perpsective is void
 		self.last_position = None
 		self.last_size = None
