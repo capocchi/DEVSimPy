@@ -33,7 +33,7 @@ WITH_PARALLEL_EXECUTION = False
 
 def Error(message = '', esc = 1):
 	"""Error-handling function: reports an error and exits interpreter if
-	{\tt esc} evaluates to true.
+	esc evaluates to true.
 
 	To be replaced later by exception-handling mechanism.
 	"""
@@ -108,9 +108,9 @@ class AtomicSolver:
 
 		Singleton class.
 
-		Atomic-DEVS can receive three types of messages: $(i,\,t)$, $(x,\,t)$ and
-		$(*,\,t)$. The latter is the only one that triggers another message-
-		sending, namely, $(y,\,t)$ is sent back to the parent coupled-DEVS. This is
+		Atomic-DEVS can receive three types of messages: $(i,t)$, $(x,t)$ and
+		$(*,t)$. The latter is the only one that triggers another message-
+		sending, namely, $(y,t)$ is sent back to the parent coupled-DEVS. This is
 		actually implemented as a return value (to be completed).
 	"""
 	_instance = None
@@ -193,12 +193,12 @@ class CoupledSolver(Sender):
 	"""Simulator (coordinator) for coupled-DEVS.
 
 	Coupled-DEVS can receive the same three types of messages as for atomic-
-	DEVS, plus the $(y,\,t)$ message. The latter is implemented as a returned
-	value rather than a message. This is possible because the $(y,\,t)$ message
-	is always sent to a coupled-DEVS in response from its sending a $(*,\,t)$
+	DEVS, plus the $(y,t)$ message. The latter is implemented as a returned
+	value rather than a message. This is possible because the $(y,t)$ message
+	is always sent to a coupled-DEVS in response from its sending a $(*,t)$
 	message. (This implementation makes it possible to easily distinguish
-	$(y,\,t)$ from $(x,\,t)$ messages... to be completed)
-	Description of {\tt eventList} and {\tt dStar} (to be completed)
+	$(y,t)$ from $(x,t)$ messages... to be completed)
+	Description of eventList and dStar (to be completed)
 	"""
 
 	_instance = None
@@ -363,9 +363,9 @@ class Simulator(Sender):
 	def __init__(self, model = None):
 		"""Constructor.
 
-		{\tt model} is an instance of a valid hierarchical DEVS model. The
+		model is an instance of a valid hierarchical DEVS model. The
 		constructor stores a local reference to this model and augments it with
-		{\sl time variables\/} required by the simulator.
+		time variables required by the simulator.
 		"""
 
 		self.model = model
@@ -374,7 +374,7 @@ class Simulator(Sender):
 
 	###
 	def __augment(self, d = None):
-		"""Recusively augment model {\tt d} with {\sl time variables\/}.
+		"""Recusively augment model d with time variables.
 		"""
 
 		# {\tt timeLast} holds the simulation time when the last event occured

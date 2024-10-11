@@ -51,6 +51,7 @@
 # plugins\verbose.py: 14
 # searchTreeList.py: 1
 # wxPyMail.py: 22
+### --only-binary :all:
 wxPython <= 4.2.2 ; python_version >= '3.10'
 wxPython <= 4.1.1 ; python_version >= '3.8' and python_version < '3.10'
 
@@ -237,10 +238,12 @@ whichpy >= 0.1
 
 # PreferencesGUI.py: 6
 #whratio >= 3.1.1
-spyder >=4.2.2
+spyder >=4.2.2 ; python_version < '3.13'
 pyzo >=4.11.2
 
 # DEVSKernel\PyPDEVS\pypdevs221\src\templates\tracer.py: 1
 #yang0textutils >= 0.0.1
 
 psutil
+
+pyro4
