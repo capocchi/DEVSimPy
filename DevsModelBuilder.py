@@ -4,21 +4,17 @@ import os
 
 class DevsModelBuilder:
     def __init__(self, api_key):
-        """
-        Initialise l'interface avec l'API OpenAI et configure les types de modèles DEVS.
-        """
         self.api_key = api_key
         self.model_types = {
             "Générateur": self._example_generator,
-            "Viewer": self._example_viewer
+            "Collecteur": self._example_collector,
+            "Afficheur": self._example_viewer,
+            "Défaut": self._example_generator
         }
-
+        
     def _example_generator(self):
-        """
-        Exemple complet pour expliquer à GPT comment construire un modèle 'generator'.
-        """
         return """
-        # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
         \"\"\"
 -------------------------------------------------------------------------------
  Name:          		PoissonSensor.py
@@ -168,17 +164,232 @@ class PoissonSensor(DomainBehavior):
         """
 
     def _example_viewer(self):
-        """
-        Exemple complet pour expliquer à GPT comment construire un modèle 'viewer'.
-        """
         return """
-        Un modèle DEVS 'viewer' est un modèle qui reçoit des événements d'autres modèles et les traite ou les affiche sans en générer.
-        Par exemple, un modèle de visualisation pourrait observer les événements de trafic et les afficher dans une interface utilisateur.
-        Les éléments clés du viewer incluent :
-        - Un ensemble d'entrées possibles.
-        - Une fonction pour traiter les événements reçus.
-        - Un mécanisme d'affichage ou de traitement des données observées.
-        """
+# -*- coding: utf-8 -*-
+\"\"\"
+Name : MessagesCollector.py 
+Brief descritpion : collect to disk received messages 
+Author(s) : Laurent CAPOCCHI (capocchi@univ-corse.fr)
+Version : 1.0                                        
+Last modified : 26/10/20
+GENERAL NOTES AND REMARKS:
+GLOBAL VARIABLES AND FUNCTIONS:
+\"\"\"
+
+### just for python 2.5
+
+import os
+import random
+import tempfile
+
+from DomainInterface.DomainBehavior import DomainBehavior
+
+#  ================================================================    #
+class MessagesCollector(DomainBehavior):
+    \"\"\"	Messages Collector
+    \"\"\"
+
+    ###
+    def __init__(self, fileName = "result", ext = '.dat', comma = ""):
+        \"\"\" Constructor.
+        
+            @param fileName : name of output fileName
+            @param ext : output file extension
+            @param comma : comma separated
+        \"\"\"
+        DomainBehavior.__init__(self)
+
+        # Override default filename with a random temporary one if not specified
+        fileName = fileName if fileName != "result" else os.path.join(tempfile.gettempdir(),"result%d"%random.randint(1,100000))
+
+        # Local copies of parameters
+        self.fileName = fileName
+        self.ext = ext
+        self.comma = comma
+
+        self.initPhase('IDLE', INFINITY)
+        
+        for np in range(10000):
+            fn = "%s%d%s" % (self.fileName, np, self.ext)
+            if os.path.exists(fn):
+                os.remove(fn)
+    ###
+    def extTransition(self, *args):
+        \"\"\"
+        External transition function
+        \"\"\"
+        
+        for port in self.IPorts:
+            # Adapted with PyPDEVS
+            msg = self.peek(port, *args)
+            np = self.getPortId(port)
+
+            if msg:
+                # Filename
+                fn = "%s%s%s" % (self.fileName, str(np), self.ext)
+                
+                with open(fn, 'a') as f:
+                    f.write("%s\n" % (str(msg)))
+                del msg
+
+        self.holdIn('ACTIF', 0.0)
+
+        return self.getState()
+        
+    ###
+    def intTransition(self):
+        self.passivateIn('IDLE')
+        return self.getState()
+    
+    ###
+    def timeAdvance(self):
+        return self.getSigma()
+    
+    ###
+    def __str__(self):
+        return "MessagesCollector"
+"""
+
+    def _example_collector(self):
+        return """
+# -*- coding: utf-8 -*-
+\"\"\"
+-------------------------------------------------------------------------------
+Name :          		To_Disk.py
+Brief description : 	Atomic Model writing results in text file on the disk
+Author(s) :     		Laurent CAPOCCHI <capocchi@univ-corse.fr>
+Version :       		2.0
+Last modified : 		29/10/20
+GENERAL NOTES AND REMARKS:
+GLOBAL VARIABLES AND FUNCTIONS:
+-------------------------------------------------------------------------------
+\"\"\"
+
+from QuickScope import *
+import random
+from decimal import *
+import os
+import tempfile
+
+def append_new_line(file_name, text_to_append):
+    \"\"\"Append given text as a new line at the end of file\"\"\"
+    # Open the file in append & read mode ('a+')
+    with open(file_name, "a+") as file_object:
+        # Move read cursor to the start of file.
+        file_object.seek(0)
+        # If file is not empty then append '\n'
+        data = file_object.read(100)
+        if len(data) > 0:
+            file_object.write("\n")
+        # Append text at the end of file
+        file_object.write(text_to_append)
+
+#  ================================================================    #
+class To_Disk(QuickScope):
+    \"\"\"	Atomic Model writing on the disk.\"\"\"
+
+    ###
+    def __init__(self, fileName = "result", eventAxis = False, comma = " ", ext = '.dat', col = 0):
+        \"\"\" Constructor.
+
+            @param fileName : Name of output fileName
+            @param eventAxis : Flag to plot depending events axis
+            @param comma : Comma symbol
+            @param ext : Output file extension
+            @param col : Considered column
+        \"\"\"
+        QuickScope.__init__(self)
+
+        # Override default filename with a random temporary one if not specified
+        fileName = fileName if fileName != 'result' else os.path.join(tempfile.gettempdir(), "result%d" % random.randint(1, 100000))
+
+        # Local copies of parameters
+        self.fileName = fileName
+        self.comma = comma
+        self.ext = ext
+        self.col = col
+        
+        # Decimal precision
+        getcontext().prec = 6
+
+        # Last time value for event tracking
+        self.last_time_value = {}
+
+        self.buffer = {}
+
+        # Event axis flag
+        self.ea = eventAxis
+
+        # Remove old files corresponding to 1000 presumed ports
+        for np in range(1000):
+            fn = "%s%d%s" % (self.fileName, np, self.ext)
+            if os.path.exists(fn):
+                os.remove(fn)
+    ###
+    def extTransition(self, *args):
+        \"\"\"
+        External transition function
+        \"\"\"
+        n = len(self.IPorts)
+
+        for np in range(n):
+            if hasattr(self, 'peek'):
+                msg = self.peek(self.IPorts[np])
+            else:
+                inputs = args[0]
+                msg = inputs.get(self.IPorts[np])
+
+            fn = "%s%d%s" % (self.fileName, np, self.ext)
+
+            if self.timeLast == 0 and self.timeNext == INFINITY:
+                self.last_time_value[fn] = 0.0
+
+            if fn not in list(self.buffer.keys()):
+                self.buffer[fn] = 0.0
+
+            if msg:
+                if self.ea:
+                    self.ea += 1
+                    t = self.ea
+                    self.last_time_value.update({fn: -1})
+                else:
+                    if fn not in self.last_time_value:
+                        self.last_time_value.update({fn: 1})
+
+                    if hasattr(self, 'peek'):
+                        t = Decimal(str(float(msg.time)))
+                    else:
+                        t = Decimal(str(float(msg[-1][0])))
+                
+                val = msg.value[self.col] if hasattr(self, 'peek') else msg[0][self.col]
+                
+                if isinstance(val, (int, float)):
+                    v = Decimal(str(float(val)))
+                else:
+                    v = val
+                
+                if t != self.last_time_value[fn]:
+                    append_new_line(fn, "%s%s%s" % (self.last_time_value[fn], self.comma, self.buffer[fn]))
+                    self.last_time_value[fn] = t
+                
+                self.buffer[fn] = v
+                
+                del msg
+
+        self.state["sigma"] = 0
+        return self.state
+
+    def finish(self, msg):
+        n = len(self.IPorts)
+        for np in range(n):
+            fn = "%s%d%s" % (self.fileName, np, self.ext)
+            if fn in self.last_time_value and fn in self.buffer:
+                append_new_line(fn, "%s%s%s" % (self.last_time_value[fn], self.comma, self.buffer[fn]))
+
+    ###
+    def __str__(self):
+        return "To_Disk"
+"""
 
     def create_model(self, model_name, num_inputs, num_outputs, model_type, prompt):
         """
