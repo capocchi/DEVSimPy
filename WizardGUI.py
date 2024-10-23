@@ -50,6 +50,7 @@ if not hasattr(inspect, 'getargspec'):
     
 import Container
 import Components
+from DevsModelBuilder import DevsModelBuilder
 
 _ = wx.GetTranslation
 
@@ -278,7 +279,7 @@ class Wizard(wizmod):
 
 		wizmod.__init__(self, parent, wx.NewIdRef(), title, img)
 
-		self.SetPageSize((400,300))
+		self.SetPageSize((500,400))
 
 		# pages list
 		self.pages = []
@@ -361,6 +362,7 @@ class ModelGeneratorWizard(Wizard):
 		self.python_path = ""
 		self.model_path = ""
 		self.specific_behavior = ""
+		self.detail = ""
 
 		# special properties for Port
 		self.id = None
@@ -372,15 +374,19 @@ class ModelGeneratorWizard(Wizard):
 		page1 = wizard_page(self, _('Type of Model'))
 		bt1 = wx.RadioButton(page1, wx.NewIdRef(), _('Atomic model'), style = wx.RB_GROUP )
 		bt2 = wx.RadioButton(page1, wx.NewIdRef(), _('Coupled model'))
+		btgpt = wx.RadioButton(page1, wx.NewIdRef(), _('Atomic model with GPT'))
 		if wx.VERSION_STRING >= '4.0':
 			bt1.SetToolTipString = bt1.SetToolTip
 			bt2.SetToolTipString = bt2.SetToolTip
+			btgpt.SetToolTipString = btgpt.SetToolTip
 
 		bt1.SetToolTipString(_("DEVS classic atomic model. It is used to define the behavior (or a part of behavior) of the system"))
 		bt2.SetToolTipString(_("DEVS classic coupled model. It is used to define the structure (or a part of structure) of the system"))
+		btgpt.SetToolTipString(_("DEVS classic atomic model made by GPT. It is used to define the behavior (or a part of behavior) of the system."))
 		page1.add_stuff(wx.StaticText(page1, wx.NewIdRef(), _('Choose the type of model:')))
 		page1.add_stuff(bt1)
 		page1.add_stuff(bt2)
+		page1.add_stuff(btgpt)
 
 		### if left click on the DetachedFrame, port instance can be created
 		if isinstance(parent.GetTopLevelParent(), Container.DetachedFrame):
@@ -478,6 +484,64 @@ class ModelGeneratorWizard(Wizard):
 
 		page2.add_stuff(sb1)
 
+		# Création d'une page pour le modèle atomique avec GPT
+		page_gpt = wizard_page(self, _('Modèle Atomique (AMD) avec GPT'))
+		properties_box_sizer = wx.StaticBoxSizer(wx.StaticBox(page_gpt, wx.NewIdRef(), _('Propriétés')), orient=wx.VERTICAL)
+		main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+
+		# Ajustement à 10 lignes et 2 colonnes pour inclure tous les éléments dans le FlexGridSizer
+		flex_grid_sizer = wx.FlexGridSizer(10, 2, 3, 3)
+
+		# Création des cases à cocher
+		checkbox_default_python_file = wx.CheckBox(page_gpt, wx.NewIdRef(), _('Fichier Python par défaut'))
+		checkbox_default_python_file.SetValue(True)
+		if wx.VERSION_STRING >= '4.0': checkbox_default_python_file.SetToolTipString = checkbox_default_python_file.SetToolTip
+		checkbox_default_python_file.SetToolTipString(_("Choisir un fichier Python à partir d'un répertoire spécifique"))
+
+		checkbox_no_plugin_file = wx.CheckBox(page_gpt, wx.NewIdRef(), _('Aucun fichier plugin'))
+		if wx.VERSION_STRING >= '4.0': checkbox_no_plugin_file.SetToolTipString = checkbox_no_plugin_file.SetToolTip
+		checkbox_no_plugin_file.SetToolTipString(_("Choisir un fichier plugin à partir d'un répertoire spécifique"))
+		checkbox_no_plugin_file.SetValue(True)
+
+		# Création de la liste déroulante pour le comportement spécifique
+		combobox_specific_behavior = wx.ComboBox(page_gpt, wx.NewIdRef(), _('Default'), choices=[_('Default'),_('Generator'),_('Viewer'), _('Collector')], style=wx.CB_READONLY)
+
+		# Configuration des FileBrowseButton
+		filebrowse_python_file = filebrowse.FileBrowseButton(page_gpt, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='Python File (*.py)|*.py|Compiled Python File (*.pyc)|*.pyc', toolTip=checkbox_default_python_file.GetToolTip().GetTip(), changeCallback=python_path_call_back)
+		filebrowse_plugin_file = filebrowse.FileBrowseButton(page_gpt, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='plugins.py', toolTip=checkbox_no_plugin_file.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
+
+		# Désactivation initiale des boutons de navigation de fichier
+		filebrowse_python_file.Enable(False)
+		filebrowse_plugin_file.Enable(False)
+
+		# Ajout des éléments à la grille pour la page GPT
+		flex_grid_sizer.AddMany([
+			(wx.StaticText(page_gpt, wx.NewIdRef(), _('Label')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+			(wx.TextCtrl(page_gpt, wx.NewIdRef(), value = _("Atomic_Name"), validator=TextObjectValidator()), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+			(wx.StaticText(page_gpt, wx.NewIdRef(), _('Comportement Spécifique')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+			(combobox_specific_behavior, 0, wx.EXPAND),
+			(wx.StaticText(page_gpt, wx.NewIdRef(), _('Entrées')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+			(wx.SpinCtrl(page_gpt, wx.NewIdRef(), '1', min=MIN_NB_PORT, max=MAX_NB_PORT), 0, wx.EXPAND),
+			(wx.StaticText(page_gpt, wx.NewIdRef(), _('Sorties')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+			(wx.SpinCtrl(page_gpt, wx.NewIdRef(), '1', min=MIN_NB_PORT, max=MAX_NB_PORT), 0, wx.EXPAND),
+			(checkbox_default_python_file, 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALL, 5),
+			(filebrowse_python_file, 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALL, 5),
+			(checkbox_no_plugin_file, 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALL, 5),
+			(filebrowse_plugin_file, 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALL, 5)
+		])
+
+		# Ajout d'une nouvelle ligne pour la zone de texte multiligne pour le prompt
+		flex_grid_sizer.Add(wx.StaticText(page_gpt, wx.NewIdRef(), _('Prompt du modèle')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL)
+		flex_grid_sizer.Add(wx.TextCtrl(page_gpt, wx.NewIdRef(), value="", style=wx.TE_MULTILINE, size=(300, 100)), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL)
+
+		# Ajout des éléments à la boîte principale pour la page GPT
+		main_vertical_sizer.Add(flex_grid_sizer, 0, wx.EXPAND)
+
+		# Ajout du contenu à la page GPT
+		properties_box_sizer.Add(main_vertical_sizer, 0, wx.EXPAND)
+		page_gpt.add_stuff(properties_box_sizer)
+
+
 		# Create a page 3
 		page3 = wizard_page(self, _('Coupled Model (CMD)'))
 		sb2 = wx.StaticBoxSizer(wx.StaticBox(page3, wx.NewIdRef(), _('Properties')), orient=wx.VERTICAL)
@@ -538,6 +602,19 @@ class ModelGeneratorWizard(Wizard):
 											labelText = _("Save as"),
 											fileMask = '*.cmd')
 		page4_2.add_stuff(fb3)
+
+		# Create a page 4_3 - chat gpt
+		page4_3 = wizard_page(self, _('Finish'))
+		init =  os.path.join(domain_path, "%s.amd"%flex_grid_sizer.GetItem(1).GetWindow().GetValue())
+		# save filebrowse
+		fb_gpt = filebrowse.FileBrowseButton(	page4_3,
+											wx.NewIdRef(),
+											initialValue = init,
+											fileMode=wx.SAVE,
+											#startDirectory = DOMAIN_PATH,
+											labelText = _("Save as"),
+											fileMask = '*.amd')
+		page4_3.add_stuff(fb_gpt)
 
 		# Create a page 5
 		page5 = wizard_page(self, _('Finish'))
@@ -608,6 +685,17 @@ class ModelGeneratorWizard(Wizard):
 			page3.SetNext(page4_2)
 			page4_2.SetPrev(page3)
 
+		def onBtGptClick(evt):
+			""" Atomic radio button has been pressed. 
+				We redefine its action.
+			"""
+
+			self.type = "AtomicGPT"
+			page1.SetNext(page_gpt)
+			page2.SetPrev(page1)
+			page2.SetNext(page4_3)
+			page4_1.SetPrev(page_gpt)
+
 		# event handler for check button
 		def onBt5Check(evt):
 			""" Python file selector is checked.
@@ -642,46 +730,66 @@ class ModelGeneratorWizard(Wizard):
 			spin_id2.Enable(not evt.GetEventObject().GetValue())
 
 		def OnSpecificBehavior(evt):
-			""" Give the control on the number of input and output form specific behavior choice
-			"""
-
-			### specific behavior choice
+			""" Active ou désactive les champs de contrôle en fonction du comportement spécifique pour la page 2 et GPT """
+			
+			### Récupération de la valeur du comportement spécifique sélectionné
 			val = evt.GetEventObject().GetValue()
 
-			### if generator, 0 input and x output (1 is the default)
+			### si 'Generator', 0 input et x output (1 par défaut)
 			if val == _('Generator'):
-
-				### no input and
+				# Aucun input
 				vbox2.GetItem(5).GetWindow().SetValue(0)
-				### update output
 				if vbox2.GetItem(7).GetWindow().GetValue() == 0:
 					vbox2.GetItem(7).GetWindow().SetValue(1)
 
-				### Disable the choice
+				# Désactiver le choix des inputs
 				vbox2.GetItem(4).GetWindow().Enable(False)
 				vbox2.GetItem(5).GetWindow().Enable(False)
-				### Enable the output choice
+				# Activer le choix des outputs
 				vbox2.GetItem(6).GetWindow().Enable(True)
 				vbox2.GetItem(7).GetWindow().Enable(True)
 
-			### if collector, 0 output and x input (1 is the default)
-			elif val in (_('Collector'),_('Viewer')):
-				### no output
-				vbox2.GetItem(7).GetWindow().SetValue(0)
+				### Gestion pour la page GPT (flex_grid_sizer)
+				flex_grid_sizer.GetItem(5).GetWindow().SetValue(0)
+				if flex_grid_sizer.GetItem(7).GetWindow().GetValue() == 0:
+					flex_grid_sizer.GetItem(7).GetWindow().SetValue(1)
 
-				### update input
+				# Désactiver le choix des inputs pour la page GPT
+				flex_grid_sizer.GetItem(4).GetWindow().Enable(False)
+				flex_grid_sizer.GetItem(5).GetWindow().Enable(False)
+				# Activer le choix des outputs pour la page GPT
+				flex_grid_sizer.GetItem(6).GetWindow().Enable(True)
+				flex_grid_sizer.GetItem(7).GetWindow().Enable(True)
+
+			### si 'Collector' ou 'Viewer', 0 output et x input (1 par défaut)
+			elif val in (_('Collector'), _('Viewer')):
+				# Aucun output
+				vbox2.GetItem(7).GetWindow().SetValue(0)
 				if vbox2.GetItem(5).GetWindow().GetValue() == 0:
 					vbox2.GetItem(5).GetWindow().SetValue(1)
 
-				### Disable the choice
+				# Désactiver le choix des outputs
 				vbox2.GetItem(7).GetWindow().Enable(False)
 				vbox2.GetItem(6).GetWindow().Enable(False)
-				### Enable the output choice
+				# Activer le choix des inputs
 				vbox2.GetItem(5).GetWindow().Enable(True)
 				vbox2.GetItem(4).GetWindow().Enable(True)
 
-			### if Default, 1 output and input
+				### Gestion pour la page GPT (flex_grid_sizer)
+				flex_grid_sizer.GetItem(7).GetWindow().SetValue(0)
+				if flex_grid_sizer.GetItem(5).GetWindow().GetValue() == 0:
+					flex_grid_sizer.GetItem(5).GetWindow().SetValue(1)
+
+				# Désactiver le choix des outputs pour la page GPT
+				flex_grid_sizer.GetItem(7).GetWindow().Enable(False)
+				flex_grid_sizer.GetItem(6).GetWindow().Enable(False)
+				# Activer le choix des inputs pour la page GPT
+				flex_grid_sizer.GetItem(5).GetWindow().Enable(True)
+				flex_grid_sizer.GetItem(4).GetWindow().Enable(True)
+
+			### si 'Default', 1 output et 1 input
 			else:
+				# Activer tous les choix (inputs et outputs)
 				vbox2.GetItem(5).GetWindow().Enable(True)
 				vbox2.GetItem(4).GetWindow().Enable(True)
 				vbox2.GetItem(6).GetWindow().Enable(True)
@@ -689,8 +797,19 @@ class ModelGeneratorWizard(Wizard):
 				vbox2.GetItem(5).GetWindow().SetValue(1)
 				vbox2.GetItem(7).GetWindow().SetValue(1)
 
+				### Gestion pour la page GPT (flex_grid_sizer)
+				flex_grid_sizer.GetItem(5).GetWindow().Enable(True)
+				flex_grid_sizer.GetItem(4).GetWindow().Enable(True)
+				flex_grid_sizer.GetItem(6).GetWindow().Enable(True)
+				flex_grid_sizer.GetItem(7).GetWindow().Enable(True)
+				flex_grid_sizer.GetItem(5).GetWindow().SetValue(1)
+				flex_grid_sizer.GetItem(7).GetWindow().SetValue(1)
+
 		def OnInputAMDLabel(evt):
 			fb2.SetValue(os.path.join(domain_path, "%s.amd"%evt.GetString()))
+			
+		def OnInputAMDLabelGPT(evt):
+			fb_gpt.SetValue(os.path.join(domain_path, "%s.amd"%evt.GetString()))
 
 		def OnInputCMDLabel(evt):
 			fb3.SetValue(os.path.join(domain_path, "%s.cmd"%evt.GetString()))
@@ -698,6 +817,7 @@ class ModelGeneratorWizard(Wizard):
 		# Binding
 		bt1.Bind(wx.EVT_RADIOBUTTON, onBt1Click)
 		bt2.Bind(wx.EVT_RADIOBUTTON, onBt2Click)
+		btgpt.Bind(wx.EVT_RADIOBUTTON, onBtGptClick)
 		bt5.Bind(wx.EVT_CHECKBOX, onBt5Check)
 		bt51.Bind(wx.EVT_CHECKBOX, onBt51Check)
 		bt6.Bind(wx.EVT_CHECKBOX, onBt6Check)
@@ -707,8 +827,11 @@ class ModelGeneratorWizard(Wizard):
 			cb_id1.Bind(wx.EVT_CHECKBOX, onCbId1)
 			cb_id2.Bind(wx.EVT_CHECKBOX, onCbId2)
 		cb0.Bind(wx.EVT_COMBOBOX, OnSpecificBehavior)
+		combobox_specific_behavior.Bind(wx.EVT_COMBOBOX, OnSpecificBehavior)
 		amd_input_label = vbox2.GetItem(1).GetWindow()
 		amd_input_label.Bind(wx.EVT_TEXT, OnInputAMDLabel)
+		amd_input_label_gpt = flex_grid_sizer.GetItem(1).GetWindow()
+		amd_input_label_gpt.Bind(wx.EVT_TEXT, OnInputAMDLabelGPT)
 		cmd_input_label = vbox3.GetItem(1).GetWindow()
 		cmd_input_label.Bind(wx.EVT_TEXT, OnInputCMDLabel)
 
@@ -719,6 +842,8 @@ class ModelGeneratorWizard(Wizard):
 		self.add_page(page4_1)
 		self.add_page(page4_2)
 		self.add_page(page5)
+		self.add_page(page_gpt)
+		self.add_page(page4_3)
 
 		### if left click on the DetachedFrame, port instance can be created
 		if isinstance(parent.GetTopLevelParent(), Container.DetachedFrame):
@@ -743,7 +868,7 @@ class ModelGeneratorWizard(Wizard):
 
 		# gridsizer depending on the type of choosing model
 		if self.type in ('IPort', 'OPort'):
-			page = self.pages[6] if self.type == 'IPort' else self.pages[7]
+			page = self.pages[8] if self.type == 'IPort' else self.pages[9]
 			gridSizer = page.sizer.GetItem(2).GetSizer().GetItem(0).GetSizer().GetItem(0).GetSizer()
 			textCtrl = gridSizer.GetItem(1).GetWindow()
 			self.label = textCtrl.GetValue()
@@ -772,6 +897,27 @@ class ModelGeneratorWizard(Wizard):
 				specific_behavior = gridSizer.GetItem(3).GetWindow()
 				self.specific_behavior = specific_behavior.GetValue()
 
+			elif self.type == 'AtomicGPT':
+				gridSizer = self.pages[6].sizer.GetItem(2).GetSizer().GetItem(0).GetSizer().GetItem(0).GetSizer()
+				filebrowse_python = gridSizer.GetItem(9).GetWindow()
+				filebrowse_plugin = gridSizer.GetItem(11).GetWindow()
+				self.detail = gridSizer.GetItem(13).GetWindow().GetValue()
+				filebrowse_model = self.pages[7].sizer.GetItem(2).GetWindow()
+
+				### test if extention exists
+				model_path = filebrowse_model.GetValue()
+				if not model_path.endswith('.amd'):
+					model_path +='.amd'
+
+				# give the label
+				textCtrl = gridSizer.GetItem(1).GetWindow()
+				### give the python filename, inputs and outputs of corresponding model
+				in_SpinCtrl = gridSizer.GetItem(5).GetWindow()
+				out_SpinCtrl = gridSizer.GetItem(7).GetWindow()
+				### give the specific behavior which can be Default, Generator or Collector (Scope and Disk)
+				specific_behavior = gridSizer.GetItem(3).GetWindow()
+				self.specific_behavior = specific_behavior.GetValue()
+				
 			elif self.type == 'Coupled':
 				gridSizer = self.pages[2].sizer.GetItem(2).GetSizer().GetItem(0).GetSizer().GetItem(0).GetSizer()
 				filebrowse_python = gridSizer.GetItem(7).GetWindow()
@@ -798,6 +944,8 @@ class ModelGeneratorWizard(Wizard):
 			self.inputs = in_SpinCtrl.GetValue()
 			self.outputs = out_SpinCtrl.GetValue()
 
+			print("the path : %s\nthe name : %s\nThe inputs ports:%s\n the ouputports%s\n"%(self.model_path, self.label, self.inputs, self.outputs))
+			
 			### model path exist ?
 			if os.path.exists(self.model_path):
 				msg = _("%s already exist.\nDo you want to rewrite it ?")%(self.model_path)
@@ -814,7 +962,23 @@ class ModelGeneratorWizard(Wizard):
 					return False
 				else:
 					if self.python_path == '':
-						string = atomicCode(self.label) if self.type == 'Atomic' else coupledCode(self.label)
+						if self.type=='Atomic':
+							string = atomicCode(self.label)
+						elif self.type=='AtomicGPT':
+							api_key = ""
+							builder = DevsModelBuilder(api_key)
+
+							model_name = self.label
+							num_inputs = self.inputs
+							num_outputs = self.outputs
+							model_type = self.specific_behavior
+							prompt = self.detail
+
+							result = builder.create_model(model_name, num_inputs, num_outputs, model_type, prompt)
+							string = result
+						else:
+							string = coupledCode(self.label)
+						
 
 						python_name = os.path.basename(self.model_path).split('.')[0]
 
