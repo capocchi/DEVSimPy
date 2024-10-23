@@ -1,6 +1,32 @@
+# -*- coding: utf-8 -*-
 
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+# WizardGUI.py ---
+#                    --------------------------------
+#                            Copyright (c) 2020
+#                    A. DOMINICI (dominici_a@univ-corse.fr)
+#                SPE Lab - SISU Group - University of Corsica
+#                     --------------------------------
+# Version 1.0                                        last modified: 10/23/24
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GENERAL NOTES AND REMARKS:
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GLOBAL VARIABLES AND FUNCTIONS
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+from Decorators import BuzyCursorNotification, cond_decorator
 from openai import OpenAI 
-import os
+
+import builtins
+
+import gettext
+_ = gettext.gettext
 
 class DevsModelBuilder:
     def __init__(self, api_key):
@@ -390,7 +416,7 @@ class To_Disk(QuickScope):
     def __str__(self):
         return "To_Disk"
 """
-
+    @cond_decorator(builtins.__dict__.get('GUI_FLAG', True), BuzyCursorNotification)
     def create_model(self, model_name, num_inputs, num_outputs, model_type, prompt):
         """
         Crée un modèle DEVS en utilisant GPT-4 en fonction des informations fournies.
