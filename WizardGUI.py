@@ -435,7 +435,9 @@ class ModelGeneratorWizard(Wizard):
 		page1 = CustomPage(self, _('Type of DEVS Model'))
 		bt1 = wx.RadioButton(page1, wx.NewIdRef(), _('Atomic model'), style = wx.RB_GROUP )
 		bt2 = wx.RadioButton(page1, wx.NewIdRef(), _('Coupled model'))
-		if builtins.__dict__['API_KEY'] == "":
+		
+		### Add: A. Dominici
+		if builtins.__dict__['OPENAI_API_KEY'] == "":
 			btgpt = wx.RadioButton(page1, wx.NewIdRef(), _('Atomic model with GPT (disabled: API key missing)'))
 			btgpt.Disable()
 		else:
@@ -1072,7 +1074,7 @@ class ModelGeneratorWizard(Wizard):
 						if self.type=='Atomic':
 							string = atomicCode(self.label)
 						elif self.type=='AtomicGPT':
-							api_key = builtins.__dict__['API_KEY']
+							api_key = builtins.__dict__['OPENAI_API_KEY']
 							builder = DevsModelBuilder(api_key)
 
 							model_name = self.label
