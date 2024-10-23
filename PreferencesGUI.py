@@ -86,17 +86,25 @@ class GeneralPanel(wx.Panel):
 		self.st2 = wx.StaticText(self, wx.NewIdRef(), _("Font size:"))
 		self.st3 = wx.StaticText(self, wx.NewIdRef(), _("Deep of history item:"))
 		self.st4 = wx.StaticText(self, wx.NewIdRef(), _("wxPython version:"))
+		self.st_api = wx.StaticText(self, wx.NewIdRef(), _("API Key:"))
 
 		if wx.VERSION_STRING >= '4.0':
 			self.st1.SetToolTipString = self.st1.SetToolTip 
 			self.st2.SetToolTipString = self.st2.SetToolTip
 			self.st3.SetToolTipString = self.st3.SetToolTip
 			self.st4.SetToolTipString = self.st4.SetToolTip
+			self.st_api.SetToolTipString = self.st_api.SetToolTip
 
 		self.st1.SetToolTipString(_("Feel free to change the length of list defining the recent opened files."))
 		self.st2.SetToolTipString(_("Feel free to change the font size of DEVSimpy."))
 		self.st3.SetToolTipString(_("Feel free to change the number of item for undo/redo command."))
 		self.st4.SetToolTipString(_("Feel free to change the version of wxpython used loaded by DEVSimPy."))
+		self.st_api.SetToolTipString(_("Feel free to change your Chat GPT API key."))
+
+		### TextCtrl for API Key
+		self.api_key_ctrl = wx.TextCtrl(self, wx.NewIdRef(), style=wx.TE_PASSWORD)
+		self.api_key_ctrl.SetToolTip(_("Enter your API key here"))
+		self.api_key_ctrl.SetValue(API_KEY)
 
 		### number of opened file
 		self.nb_opened_file = wx.SpinCtrl(self, wx.NewIdRef(), '')
@@ -142,7 +150,9 @@ class GeneralPanel(wx.Panel):
 							(self.st2, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
 							(self.font_size, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
 					(self.st4, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
-					(self.cb2, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5)])
+					(self.cb2, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
+					(self.st_api, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
+            (self.api_key_ctrl, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5)])
 
 		vsizer.Add(self.plugin_dir, 1, wx.EXPAND)
 		vsizer.Add(self.domain_dir, 1, wx.EXPAND)
@@ -164,6 +174,7 @@ class GeneralPanel(wx.Panel):
 		default_wxv = copy.copy(self.default_wxv)
 
 		self.OnNbOpenedFileChanged(event)
+		self.OnAPIKeyChanged(event)
 		self.OnNbHistoryUndoChanged(event)
 		self.OnFontSizeChanged(event)
 		self.OnDomainPathChanged(event)
@@ -183,6 +194,12 @@ class GeneralPanel(wx.Panel):
 		""" Update the number opened files.
 		"""
 		builtins.__dict__['NB_OPENED_FILE'] = self.nb_opened_file.GetValue()		# number of recent files
+
+	###
+	def OnAPIKeyChanged(self, event):
+		""" Update the number opened files.
+		"""
+		builtins.__dict__['API_KEY'] = self.api_key_ctrl.GetValue()		# chat gpt api key
 
 	###
 	def OnNbHistoryUndoChanged(self, event):
