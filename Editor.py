@@ -40,15 +40,11 @@ if not hasattr(inspect, 'getargspec'):
     
 from tempfile import gettempdir, TemporaryDirectory
 from wx import stc
-from AIAdapter import AdapterFactory
+from AIAdapter import ChatGPTDevsAdapter
 
 from Decorators import redirectStdout
-<<<<<<< HEAD
-from Utilities import path_to_module, printOnStatusBar, load_and_resize_image
-=======
 from Utilities import path_to_module, printOnStatusBar
 from AIPrompterDialog import AIPrompterDialog
->>>>>>> b88d6f1 (update)
 
 import ReloadModule
 import ZipManager
@@ -891,7 +887,7 @@ class EditionNotebook(wx.Notebook):
 		else:
 			if os.path.exists(path): 
 				with open(path, 'r') as f:
-					fileCode = f.read()
+						fileCode = f.read()
 			else:
 				### fileCode is path (user work with IOString code, not file object)
 				fileCode = path
@@ -1355,15 +1351,11 @@ class Base(object):
 		self.save_as = wx.MenuItem(file, wx.NewIdRef(), _('&Save As\tCtrl+S'), _('Save as an other file'))
 		self.quit = wx.MenuItem(file, wx.NewIdRef(), _('&Quit\tCtrl+Q'), _('Quit the application'))
 
-<<<<<<< HEAD
-		self.save.SetBitmap(load_and_resize_image('save.png'))
-		self.save_as.SetBitmap(load_and_resize_image('save_as.png'))
-		self.quit.SetBitmap(load_and_resize_image('exit.png'))
-=======
 		self.save.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save.png')))
 		self.save_as.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save_as.png')))
 		self.quit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'exit.png')))
->>>>>>> b88d6f1 (update)
+
+		
 
 		items = [self.save, self.save_as, self.quit]
 
@@ -1390,13 +1382,15 @@ class Base(object):
 		uncomment = wx.MenuItem(edit, wx.NewIdRef(), _('&Uncomment\tCtrl+D'), _('uncomment current ligne'))
 		# uncomment = wx.MenuItem(edit, wx.NewIdRef(), _('&Uncomment\tCtrl+Shift+D'), _('uncomment current ligne'))
 
-		self.cut.SetBitmap(load_and_resize_image('cut.png'))
-		self.copy.SetBitmap(load_and_resize_image('copy.png'))
-		self.paste.SetBitmap(load_and_resize_image('paste.png'))
-		delete.SetBitmap(load_and_resize_image('delete.png'))
-		reindent.SetBitmap(load_and_resize_image('re-indent.png'))
-		comment.SetBitmap(load_and_resize_image('comment_add.png'))
-		uncomment.SetBitmap(load_and_resize_image('comment_remove.png'))
+		self.cut.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'cut.png')))
+		self.ai.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'puce_ai.png')))
+		self.copy.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'copy.png')))
+		self.paste.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'paste.png')))
+
+		delete.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'delete.png')))
+		reindent.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 're-indent.png')))
+		comment.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'comment_add.png')))
+		uncomment.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'comment_remove.png')))
 
 		### Shortcut
 		accel_tbl = wx.AcceleratorTable([(wx.ACCEL_CTRL,  ord('S'), self.save.GetId()),
@@ -1494,28 +1488,34 @@ class Base(object):
 			if wx.VERSION_STRING < '4.0':
 				self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(),load_and_resize_image('save.png'), _('Save'), ''))
 				tb.AddSeparator()
-				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), load_and_resize_image('cut.png'), _('Cut'), ''))
-				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), load_and_resize_image('copy.png'), _('Copy'), ''))
-				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), load_and_resize_image('paste.png'), _('Paste'), ''))
+				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), _('Cut'), ''))
+				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), _('Copy'), ''))
+				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), _('Paste'), ''))
+				tb.AddSeparator()
+				self.Bind(wx.EVT_TOOL, self.OnAiHelp, tb.AddTool(self.ai.GetId(),wx.Bitmap(os.path.join(ICON_PATH, 'puce_ai.png')), _('Ai'), ''))
 			else:
 				self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(), "", load_and_resize_image('save.png'),shortHelp=_('Save')))
 				tb.AddSeparator()
-				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), "", load_and_resize_image('cut.png'),  shortHelp=_('Cut')))
-				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), "", load_and_resize_image('copy.png'),  shortHelp=_('Copy')))
-				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), "", load_and_resize_image('paste.png'),  shortHelp=_('Paste')))
+				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'cut.png')),  shortHelp=_('Cut')))
+				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'copy.png')),  shortHelp=_('Copy')))
+				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'paste.png')),  shortHelp=_('Paste')))
+				tb.AddSeparator()
+				self.Bind(wx.EVT_TOOL, self.OnAiHelp, tb.AddTool(self.ai.GetId (), "", wx.Bitmap(os.path.join(ICON_PATH, 'puce_ai.png')),shortHelp=_('Ai')))
 			self.Bind(wx.EVT_TOOL, self.QuitApplication, id = self.quit.GetId())
 		else:
 
 			if wx.VERSION_STRING < '4.0':
-				tb.AddTool(self.save.GetId(), load_and_resize_image('save.png'), shortHelpString=_('Save'), longHelpString=_('Save the file'))
-				tb.AddTool(self.cut.GetId(), load_and_resize_image('cut.png'), shortHelpString=_('Cut'), longHelpString=_('Cut the selection'))
-				tb.AddTool(self.copy.GetId(), load_and_resize_image('copy.png'), shortHelpString=_('Copy'), longHelpString=_('Copy the selection'))
-				tb.AddTool(self.paste.GetId(), load_and_resize_image('paste.png'), shortHelpString=_('Paste'), longHelpString=_('Paste text from clipboard'))
+				tb.AddTool(self.save.GetId(), wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), shortHelpString=_('Save'), longHelpString=_('Save the file'))
+				tb.AddTool(self.cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), shortHelpString=_('Cut'), longHelpString=_('Cut the selection'))
+				tb.AddTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), shortHelpString=_('Copy'), longHelpString=_('Copy the selection'))
+				tb.AddTool(self.paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), shortHelpString=_('Paste'), longHelpString=_('Paste text from clipboard'))
+				tb.AddTool(self.ai.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'puce_ai.png')), shortHelpString=_('AI'), longHelpString=_('Modification with AI'))
 			else:
-				tb.AddTool(self.save.GetId(), "", load_and_resize_image('save.png'), shortHelp=_('Save'))
-				tb.AddTool(self.cut.GetId(), "", load_and_resize_image('cut.png'), shortHelp=_('Cut'))
-				tb.AddTool(self.copy.GetId(), "", load_and_resize_image('copy.png'), shortHelp=_('Copy'))
-				tb.AddTool(self.paste.GetId(), "", load_and_resize_image('paste.png'), shortHelp=_('Paste'))
+				tb.AddTool(self.save.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), shortHelp=_('Save'))
+				tb.AddTool(self.cut.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), shortHelp=_('Cut'))
+				tb.AddTool(self.copy.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), shortHelp=_('Copy'))
+				tb.AddTool(self.paste.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), shortHelp=_('Paste'))
+				tb.AddTool(self.ai.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH,'puce_ai.png')), shortHelp=_('Modification with AI'))
 
 			self.Bind(wx.EVT_TOOL, self.OnSaveFile, id=self.save.GetId())
 			self.Bind(wx.EVT_TOOL, self.nb.OnCut, id=self.cut.GetId())
@@ -1654,26 +1654,80 @@ class Base(object):
 	def OnAiHelp(self, event):
 		""" Event handler for AI help menu option. """
 
-		# Vérifier l'IA sélectionnée
-		selected_ia = builtins.__dict__.get('SELECTED_IA', '')
+		import wx
 
-		# Exécuter uniquement si une IA est sélectionnée
-		if selected_ia:
-			# Récupération de l'éditeur et du texte sélectionné
-			nb = self.GetNoteBook()
-			editor = nb.GetCurrentPage()
-			selection = editor.GetSelection()
-			textstring = editor.GetRange(selection[0], selection[1])
-				
-			param = builtins.__dict__.get('PARAMS_IA')
-			adapter = AdapterFactory.get_adapter_instance(param)
-				
-			# Créer le dialogue avec le code sélectionné
-			dialog = AIPrompterDialog(self, _("AI Code Editor"), textstring, adapter)
-			dialog.Show()
+		# Récupération de l'éditeur et du texte sélectionné
+		nb = self.GetNoteBook()
+		editor = nb.GetCurrentPage()
+		selection = editor.GetSelection()
+		textstring = editor.GetRange(selection[0], selection[1])
 
+		# Initialisation de l'application wx si elle n'est pas déjà en cours
+		if not wx.GetApp():
+			app = wx.App(False)
 		else:
-			wx.MessageBox(_("No AI selected. Please select an AI before using AI assistance."), "Information", wx.OK | wx.ICON_INFORMATION)
+			app = wx.GetApp()
+
+		# Création de l'instance de l'adapter ChatGPTDevsAdapter
+		api_key = builtins.__dict__.get('OPENAI_API_KEY')
+		adapter = ChatGPTDevsAdapter()
+
+		# Définition du dialogue personnalisé
+		class CodeEditDialog(wx.Dialog):
+			def __init__(self, parent, code):
+				super().__init__(parent, title="AI Code Editor", size=(600, 400))
+				self.adapter = adapter
+				self.api_key = api_key
+
+				# Sizer pour organiser les éléments
+				sizer = wx.BoxSizer(wx.VERTICAL)
+
+				# Zone de texte pour le code sélectionné
+				self.code_text = wx.TextCtrl(self, value=code, style=wx.TE_MULTILINE | wx.TE_READONLY)
+				sizer.Add(wx.StaticText(self, label="Selected Code:"), 0, wx.ALL | wx.EXPAND, 5)
+				sizer.Add(self.code_text, 1, wx.ALL | wx.EXPAND, 5)
+
+				# Champ de texte pour le prompt
+				self.prompt_input = wx.TextCtrl(self, value="", style=wx.TE_MULTILINE)
+				sizer.Add(wx.StaticText(self, label="Enter Prompt for AI:"), 0, wx.ALL | wx.EXPAND, 5)
+				sizer.Add(self.prompt_input, 1, wx.ALL | wx.EXPAND, 5)
+
+				# Bouton pour appliquer la modification via l'IA
+				self.ai_button = wx.Button(self, label="Apply AI Modification")
+				self.ai_button.Bind(wx.EVT_BUTTON, self.on_apply_ai)
+				sizer.Add(self.ai_button, 0, wx.ALL | wx.CENTER, 10)
+
+				self.SetSizer(sizer)
+				self.Layout()
+
+			def on_apply_ai(self, event):
+				# Récupération du prompt et du code sélectionné
+				prompt = self.prompt_input.GetValue()
+				code = self.code_text.GetValue()
+
+				# Appel à l'IA via la méthode modify_model_part_prompt
+				full_prompt = self.adapter.modify_model_part_prompt(code, prompt)
+				modified_code = self.adapter.generate_output(full_prompt, api_key=self.api_key)
+
+				# Mise à jour de la zone de texte avec le code modifié si une modification a été effectuée
+				if modified_code:
+					self.code_text.SetValue(modified_code)
+
+		# Créer le dialogue avec le code sélectionné
+		dialog = CodeEditDialog(None, textstring)
+		dialog.ShowModal()
+
+		modified_text = dialog.code_text.GetValue()
+		dialog.Destroy()
+
+		# Remplacement du texte dans l'éditeur si le texte a été modifié
+		if modified_text and modified_text != textstring:
+			editor.Replace(selection[0], selection[1], modified_text)
+
+		# Si l'application wx n'était pas en cours avant, on la lance
+		if not wx.GetApp().IsMainLoopRunning():
+			app.MainLoop()
+
 
 
 	def OnSearch(self, evt):

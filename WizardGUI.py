@@ -101,7 +101,7 @@ if __name__ == '__main__':
 	
 import Container
 import Components
-from DevsModelBuilder import DevsModelBuilder
+from AIAdapter import ChatGPTDevsAdapter
 
 _ = wx.GetTranslation
 
@@ -1074,8 +1074,10 @@ class ModelGeneratorWizard(Wizard):
 						if self.type=='Atomic':
 							string = atomicCode(self.label)
 						elif self.type=='AtomicGPT':
-							api_key = builtins.__dict__['OPENAI_API_KEY']
-							builder = DevsModelBuilder(api_key)
+							api_key = builtins.__dict__.get('OPENAI_API_KEY')
+
+							# Créer une instance de ChatGPTDevsAdapter
+							adapter = ChatGPTDevsAdapter()
 
 							model_name = self.label
 							num_inputs = self.inputs
@@ -1083,7 +1085,12 @@ class ModelGeneratorWizard(Wizard):
 							model_type = self.specific_behavior
 							prompt = self.detail
 
-							result = builder.create_model(model_name, num_inputs, num_outputs, model_type, prompt)
+							# Appeler la méthode create_prompt pour générer le prompt
+							full_prompt = adapter.create_prompt(model_name, num_inputs, num_outputs, model_type, prompt)
+
+							# Utiliser generate_output pour obtenir le résultat en passant la clé API
+							result = adapter.generate_output(full_prompt, api_key=api_key)
+
 							string = result
 						else:
 							string = coupledCode(self.label)
