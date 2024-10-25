@@ -127,10 +127,10 @@ if wx.VERSION_STRING >= '4.0':
 builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'), # abslolute path
 				'DEVSIMPY_PNG': 'iconDEVSimPy.png',	# png file for devsimpy icon
 				'HOME_PATH': ABS_HOME_PATH,
-				'ICON_PATH': os.path.join(ABS_HOME_PATH, 'icons'),
-				'ICON_PATH_16_16': os.path.join(ABS_HOME_PATH, 'icons', '16x16'),
-				'SIMULATION_SUCCESS_SOUND_PATH': os.path.join(ABS_HOME_PATH,'sounds', 'Simulation-Success.wav'),
-				'SIMULATION_ERROR_SOUND_PATH': os.path.join(ABS_HOME_PATH,'sounds', 'Simulation-Error.wav'),
+				'ICON_PATH': 'icons',
+				'ICON_PATH_16_16': os.path.join('icons', '16x16'),
+				'SIMULATION_SUCCESS_SOUND_PATH': os.path.join('sounds', 'Simulation-Success.wav'),
+				'SIMULATION_ERROR_SOUND_PATH': os.path.join('sounds', 'Simulation-Error.wav'),
 				'DOMAIN_PATH': os.path.join(ABS_HOME_PATH, 'Domain'), # path of local lib directory
 				'NB_OPENED_FILE': 5, # number of recent files
 				'NB_HISTORY_UNDO': 5, # number of undo
