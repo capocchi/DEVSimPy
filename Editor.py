@@ -1478,7 +1478,7 @@ class Base(object):
 		tb.SetToolBitmapSize((16, 16))# this required for non-standard size buttons on MSW
 
 		if not self.parent:
-			
+
 			if wx.VERSION_STRING < '4.0':
 				self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(),load_and_resize_image('save.png'), _('Save'), ''))
 				tb.AddSeparator()
@@ -1512,6 +1512,9 @@ class Base(object):
 			self.Bind(wx.EVT_TOOL, self.OnAiHelp, id=self.ai.GetId())
 
 		tb.Realize()
+
+		### Add: A. Dominici
+		tb.EnableTool(self.ai.GetId(), builtins.__dict__['OPENAI_API_KEY'] != "")
 
 		return tb
 
