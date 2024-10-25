@@ -1,45 +1,36 @@
-# -*- coding: utf-8 -*-
-
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-# WizardGUI.py ---
-#                    --------------------------------
-#                            Copyright (c) 2020
-#                    A. DOMINICI (dominici_a@univ-corse.fr)
-#                SPE Lab - SISU Group - University of Corsica
-#                     --------------------------------
-# Version 1.0                                        last modified: 10/23/24
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-#
-# GENERAL NOTES AND REMARKS:
-#
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-#
-# GLOBAL VARIABLES AND FUNCTIONS
-#
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-
+import logging
+from abc import ABC, abstractmethod
+from openai import OpenAI
 from Decorators import BuzyCursorNotification, cond_decorator
-from openai import OpenAI 
 
 import builtins
+import wx
 
 import gettext
 _ = gettext.gettext
 
-class DevsModelBuilder:
-    def __init__(self, api_key):
-        self.api_key = api_key
-        self.model_types = {
-            "Générateur": self._example_generator,
-            "Collecteur": self._example_collector,
-            "Afficheur": self._example_viewer,
-            "Défaut": self._example_generator
-        }
-        
-    def _example_generator(self):
-        return """
+# Configuration de base du logging
+logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
+
+class DevsAIAdapter(ABC):
+    """
+    Parent class to interface the DEVS software with generative AI models.
+    This class defines the base methods that child classes can override
+    or use as is to interact with specific generative AI models.
+    """
+    def __init__(self):
+        self.model_types = ["Générateur", "Collecteur", "Afficheur", "Défaut"]
+        logging.info("DevsAIAdapter initialized with model types: %s", self.model_types)
+    
+    def _get_example(self, model_type):
+        """
+        Returns a model example based on the specified model type.
+        If the model type is not recognized, returns a default example.
+        """
+        examples = {
+            "Générateur": """
+\"\"\" Definition of a DEVS Generator model \"\"\" 
+# Model implementation 
 # -*- coding: utf-8 -*-
         \"\"\"
 -------------------------------------------------------------------------------
@@ -187,97 +178,10 @@ class PoissonSensor(DomainBehavior):
 	def timeToDay(self, time):
 		day = int(time / 1440)%7
 		return day
-        """
-
-    def _example_viewer(self):
-        return """
-# -*- coding: utf-8 -*-
-\"\"\"
-Name : MessagesCollector.py 
-Brief descritpion : collect to disk received messages 
-Author(s) : Laurent CAPOCCHI (capocchi@univ-corse.fr)
-Version : 1.0                                        
-Last modified : 26/10/20
-GENERAL NOTES AND REMARKS:
-GLOBAL VARIABLES AND FUNCTIONS:
-\"\"\"
-
-### just for python 2.5
-
-import os
-import random
-import tempfile
-
-from DomainInterface.DomainBehavior import DomainBehavior
-
-#  ================================================================    #
-class MessagesCollector(DomainBehavior):
-    \"\"\"	Messages Collector
-    \"\"\"
-
-    ###
-    def __init__(self, fileName = "result", ext = '.dat', comma = ""):
-        \"\"\" Constructor.
-        
-            @param fileName : name of output fileName
-            @param ext : output file extension
-            @param comma : comma separated
-        \"\"\"
-        DomainBehavior.__init__(self)
-
-        # Override default filename with a random temporary one if not specified
-        fileName = fileName if fileName != "result" else os.path.join(tempfile.gettempdir(),"result%d"%random.randint(1,100000))
-
-        # Local copies of parameters
-        self.fileName = fileName
-        self.ext = ext
-        self.comma = comma
-
-        self.initPhase('IDLE', INFINITY)
-        
-        for np in range(10000):
-            fn = "%s%d%s" % (self.fileName, np, self.ext)
-            if os.path.exists(fn):
-                os.remove(fn)
-    ###
-    def extTransition(self, *args):
-        \"\"\"
-        External transition function
-        \"\"\"
-        
-        for port in self.IPorts:
-            # Adapted with PyPDEVS
-            msg = self.peek(port, *args)
-            np = self.getPortId(port)
-
-            if msg:
-                # Filename
-                fn = "%s%s%s" % (self.fileName, str(np), self.ext)
-                
-                with open(fn, 'a') as f:
-                    f.write("%s\n" % (str(msg)))
-                del msg
-
-        self.holdIn('ACTIF', 0.0)
-
-        return self.getState()
-        
-    ###
-    def intTransition(self):
-        self.passivateIn('IDLE')
-        return self.getState()
-    
-    ###
-    def timeAdvance(self):
-        return self.getSigma()
-    
-    ###
-    def __str__(self):
-        return "MessagesCollector"
-"""
-
-    def _example_collector(self):
-        return """
+""",
+            "Collecteur": """
+\"\"\" Definition of a DEVS Collector model \"\"\" 
+# Model implementation 
 # -*- coding: utf-8 -*-
 \"\"\"
 -------------------------------------------------------------------------------
@@ -415,61 +319,224 @@ class To_Disk(QuickScope):
     ###
     def __str__(self):
         return "To_Disk"
-"""
-    @cond_decorator(builtins.__dict__.get('GUI_FLAG', True), BuzyCursorNotification)
-    def create_model(self, model_name, num_inputs, num_outputs, model_type, prompt):
-        """
-        Crée un modèle DEVS en utilisant GPT-4 en fonction des informations fournies.
-        
-        Arguments :
-        - model_name : nom du modèle à créer.
-        - num_inputs : nombre d'entrées du modèle.
-        - num_outputs : nombre de sorties du modèle.
-        - model_type : type général du modèle (générateur, viewer, etc.).
-        - prompt : prompt spécifique donné pour affiner la construction du modèle.
+""",
+            "Afficheur": """
+\"\"\" Definition of a DEVS Viewer model \"\"\" 
+# Model implementation 
+# -*- coding: utf-8 -*-
+\"\"\"
+Name : MessagesCollector.py 
+Brief descritpion : collect to disk received messages 
+Author(s) : Laurent CAPOCCHI (capocchi@univ-corse.fr)
+Version : 1.0                                        
+Last modified : 26/10/20
+GENERAL NOTES AND REMARKS:
+GLOBAL VARIABLES AND FUNCTIONS:
+\"\"\"
 
-        Retourne : La description du modèle générée par GPT-4.
+### just for python 2.5
+
+import os
+import random
+import tempfile
+
+from DomainInterface.DomainBehavior import DomainBehavior
+
+#  ================================================================    #
+class MessagesCollector(DomainBehavior):
+    \"\"\"	Messages Collector
+    \"\"\"
+
+    ###
+    def __init__(self, fileName = "result", ext = '.dat', comma = ""):
+        \"\"\" Constructor.
+        
+            @param fileName : name of output fileName
+            @param ext : output file extension
+            @param comma : comma separated
+        \"\"\"
+        DomainBehavior.__init__(self)
+
+        # Override default filename with a random temporary one if not specified
+        fileName = fileName if fileName != "result" else os.path.join(tempfile.gettempdir(),"result%d"%random.randint(1,100000))
+
+        # Local copies of parameters
+        self.fileName = fileName
+        self.ext = ext
+        self.comma = comma
+
+        self.initPhase('IDLE', INFINITY)
+        
+        for np in range(10000):
+            fn = "%s%d%s" % (self.fileName, np, self.ext)
+            if os.path.exists(fn):
+                os.remove(fn)
+    ###
+    def extTransition(self, *args):
+        \"\"\"
+        External transition function
+        \"\"\"
+        
+        for port in self.IPorts:
+            # Adapted with PyPDEVS
+            msg = self.peek(port, *args)
+            np = self.getPortId(port)
+
+            if msg:
+                # Filename
+                fn = "%s%s%s" % (self.fileName, str(np), self.ext)
+                
+                with open(fn, 'a') as f:
+                    f.write("%s\n" % (str(msg)))
+                del msg
+
+        self.holdIn('ACTIF', 0.0)
+
+        return self.getState()
+        
+    ###
+    def intTransition(self):
+        self.passivateIn('IDLE')
+        return self.getState()
+    
+    ###
+    def timeAdvance(self):
+        return self.getSigma()
+    
+    ###
+    def __str__(self):
+        return "MessagesCollector"
+"""
+        }
+        logging.debug("Retrieved example for model type: %s", model_type)
+        return examples.get(model_type, examples["Générateur"])
+    
+    def create_prompt(self, model_name, num_inputs, num_outputs, model_type, prompt):
+        """
+        Creates a prompt to generate a DEVS model based on the type and the provided details.
+        Uses a default generative DEVS model example if the type is not found.
         """
         if model_type not in self.model_types:
-            raise ValueError(f"Le type de modèle '{model_type}' n'est pas supporté.")
-
-        # Exemple de construction de modèle pour le type spécifique
-        example = self.model_types[model_type]()
+            logging.error("Invalid model type: %s", model_type)
+            raise ValueError(f"Invalid model type '{model_type}'. Available types: {self.model_types}")
         
-        # Structure du prompt envoyé à GPT-4
+        logging.info("Creating prompt for model: %s, type: %s", model_name, model_type)
+        example = self._get_example(model_type)
+        
+        # Constructing the prompt for the AI
         full_prompt = f"""
-        Tu es un assistant expert en modélisation DEVS. Crée un modèle DEVS appelé '{model_name}'.
-        Ce modèle a {num_inputs} entrées et {num_outputs} sorties.
-        C'est un modèle de type '{model_type}'.
-        Voici un exemple de modèle {model_type} :
+        You are an expert in DEVS modeling. Create a DEVS model called '{model_name}'.
+        This model has {num_inputs} inputs and {num_outputs} outputs.
+        It is a '{model_type}' type model.
+        Here is an example of a {model_type} model:
         {example}
 
-        N'inclue que le code du modèle, je ne veux pas de balise code du style ```python.
-        Je ne veux pas de message expliquant quoi que ce soit juste le code.
+        Include only the model code. I do not want any code block markers like ```python.
+        Do not provide any explanations, only the code.
 
-        Détails supplémentaires :
+        Additional details:
         {prompt}
         """
-        client = OpenAI(api_key=self.api_key)
-        # Appel à GPT-4 pour générer le modèle
+        logging.debug("Prompt created successfully for model: %s", model_name)
+        return full_prompt
+
+    def modify_model_prompt(self, code, prompt):
+        """
+        Generates a prompt to modify an existing DEVS model.
+        Takes into account the model name, the current code, and additional details.
+        """
+        logging.info("Modifying model")
+        
+        # Constructing the prompt for the AI
+        full_prompt = f"""
+        You are an expert in DEVS modeling. You need to modify a DEVS model.
+        Here is the current model code:
+        {code}
+
+        Here are the specific details to modify the model:
+        {prompt}
+
+        Include only the modified model code. I do not want any code block markers like ```python.
+        Do not provide any explanations, only the code.
+        """
+        logging.debug("Modification prompt created for model")
+        return full_prompt
+    
+    def modify_model_part_prompt(self, code, prompt):
+        """
+        Generates a prompt to modify a specific part of an existing DEVS model.
+        Takes into account the model name, the current code, and details about the part to modify.
+        """
+        logging.info("Modifying part of model")
+        
+        # Constructing the prompt for the AI
+        full_prompt = f"""
+        You are an expert in DEVS modeling. You need to modify a specific part of a DEVS model'.
+        Here is the current model code in between bracket : <{code}>
+        Here are the specific details to modify this part of the model:
+        {prompt}
+
+        Include only the code of the modified part of the model. I do not want any code block markers like ```python.
+        Do not provide any explanations, only the code. Keep the indentation, it is really important.
+        """
+        logging.debug("Modification part prompt created for model")
+        return full_prompt
+
+    @abstractmethod
+    def generate_output(self, prompt, **kwargs):
+        """
+        Abstract method to generate an output from the AI model.
+        Child classes should override this method to specify how the generative AI produces outputs based on a prompt.
+        `**kwargs` can include parameters such as the API key for models that require it.
+        """
+        pass
+
+    def validate_model(self, model_name):
+        """
+        Placeholder method for future implementation.
+        """
+        logging.info("Validation not implemented for model: %s", model_name)
+        pass
+
+class ChatGPTDevsAdapter(DevsAIAdapter):
+    """
+    Child class of DevsAIAdapter that uses ChatGPT (GPT-4) to generate DEVS models.
+    """
+
+    #@cond_decorator(builtins.__dict__.get('GUI_FLAG', True), BuzyCursorNotification) le cond fait suater le kwargs laurent, on verra plus tard
+    def generate_output(self, prompt, **kwargs):
+        """
+        Generates an output using the ChatGPT API based on the given prompt.
+        Expects an 'api_key' argument in **kwargs.
+        """
+        api_key = kwargs.get('api_key')
+        if not api_key:
+            raise ValueError("API key is required for ChatGPT.")
+
+        api_client = OpenAI(api_key=api_key)
         try:
-            completion = client.chat.completions.create(
+            response = api_client.chat.completions.create(
                 model="gpt-4-turbo",
                 messages=[
                     {"role": "system", "content": "You are an expert in DEVS modeling."},
-                    {"role": "user", "content": full_prompt}
+                    {"role": "user", "content": prompt}
                 ],
             )
-            return completion.choices[0].message.content
+            return response.choices[0].message.content
         except Exception as e:
-            return f"Une erreur est survenue lors de la création du modèle : {e}"
+            logging.error("Error generating output: %s", str(e))
+            return f"An error occurred while generating the output: {e}"
 
-    def add_model_type(self, model_type, example_function):
+
+class OllamaDevsAdapter(DevsAIAdapter):
+    """
+    Child class of DevsAIAdapter that uses Ollama to generate DEVS models.
+    """
+
+    #@cond_decorator(builtins.__dict__.get('GUI_FLAG', True), BuzyCursorNotification) le cond fait suater le kwargs laurent, on verra plus tard
+    def generate_output(self, prompt, **kwargs):
         """
-        Ajoute un nouveau type de modèle avec un exemple spécifique.
-        
-        Arguments :
-        - model_type : nom du nouveau type de modèle.
-        - example_function : fonction retournant un exemple de ce type de modèle.
+        Generates an output using the Ollama API based on the given prompt.
+        No API key is needed.
         """
-        self.model_types[model_type] = example_function
+        pass
