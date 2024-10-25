@@ -1483,6 +1483,8 @@ class Base(object):
 		tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
 		tb.SetToolBitmapSize((16, 16))# this required for non-standard size buttons on MSW
 
+		ai_help = _('Generative AI based modification' if builtins.__dict__['OPENAI_API_KEY'] != "" else 'Check the AI settings in Preferences')
+		
 		if not self.parent:
 
 			if wx.VERSION_STRING < '4.0':
@@ -1492,7 +1494,7 @@ class Base(object):
 				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), _('Copy'), ''))
 				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), _('Paste'), ''))
 				tb.AddSeparator()
-				self.Bind(wx.EVT_TOOL, self.OnAiHelp, tb.AddTool(self.ai.GetId(),wx.Bitmap(os.path.join(ICON_PATH, 'puce_ai.png')), _('Ai'), ''))
+				self.Bind(wx.EVT_TOOL, self.OnAiHelp, tb.AddTool(self.ai.GetId(),wx.Bitmap(os.path.join(ICON_PATH, 'puce_ai.png')), ai_help, ''))
 			else:
 				self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(), "", load_and_resize_image('save.png'),shortHelp=_('Save')))
 				tb.AddSeparator()
@@ -1500,7 +1502,7 @@ class Base(object):
 				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'copy.png')),  shortHelp=_('Copy')))
 				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'paste.png')),  shortHelp=_('Paste')))
 				tb.AddSeparator()
-				self.Bind(wx.EVT_TOOL, self.OnAiHelp, tb.AddTool(self.ai.GetId (), "", wx.Bitmap(os.path.join(ICON_PATH, 'puce_ai.png')),shortHelp=_('Ai')))
+				self.Bind(wx.EVT_TOOL, self.OnAiHelp, tb.AddTool(self.ai.GetId (), "", wx.Bitmap(os.path.join(ICON_PATH, 'puce_ai.png')),shortHelp=ai_help))
 			self.Bind(wx.EVT_TOOL, self.QuitApplication, id = self.quit.GetId())
 		else:
 
@@ -1509,13 +1511,13 @@ class Base(object):
 				tb.AddTool(self.cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), shortHelpString=_('Cut'), longHelpString=_('Cut the selection'))
 				tb.AddTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), shortHelpString=_('Copy'), longHelpString=_('Copy the selection'))
 				tb.AddTool(self.paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), shortHelpString=_('Paste'), longHelpString=_('Paste text from clipboard'))
-				tb.AddTool(self.ai.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'puce_ai.png')), shortHelpString=_('AI'), longHelpString=_('Modification with AI'))
+				tb.AddTool(self.ai.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'puce_ai.png')), shortHelpString=ai_help, longHelpString=ai_help)
 			else:
 				tb.AddTool(self.save.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), shortHelp=_('Save'))
 				tb.AddTool(self.cut.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), shortHelp=_('Cut'))
 				tb.AddTool(self.copy.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), shortHelp=_('Copy'))
 				tb.AddTool(self.paste.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), shortHelp=_('Paste'))
-				tb.AddTool(self.ai.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH,'puce_ai.png')), shortHelp=_('Modification with AI'))
+				tb.AddTool(self.ai.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH,'puce_ai.png')), shortHelp=ai_help)
 
 			self.Bind(wx.EVT_TOOL, self.OnSaveFile, id=self.save.GetId())
 			self.Bind(wx.EVT_TOOL, self.nb.OnCut, id=self.cut.GetId())
@@ -1526,7 +1528,7 @@ class Base(object):
 		tb.Realize()
 
 		### Add: A. Dominici
-		tb.EnableTool(self.ai.GetId(), bool(builtins.__dict__['SELECTED_IA']))
+		tb.EnableTool(self.ai.GetId(), builtins.__dict__['OPENAI_API_KEY'] != "")
 
 		return tb
 
