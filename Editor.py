@@ -1355,6 +1355,8 @@ class Base(object):
 		self.save_as.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save_as.png')))
 		self.quit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'exit.png')))
 
+		
+
 		items = [self.save, self.save_as, self.quit]
 
 		if wx.VERSION_STRING < '4.0':
