@@ -1354,6 +1354,8 @@ class Base(object):
 		self.save_as.SetBitmap(load_and_resize_image('save_as.png'))
 		self.quit.SetBitmap(load_and_resize_image('exit.png'))
 
+		
+
 		items = [self.save, self.save_as, self.quit]
 
 		if wx.VERSION_STRING < '4.0':
