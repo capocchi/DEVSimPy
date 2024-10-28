@@ -44,6 +44,7 @@ from AIAdapter import AdapterFactory
 
 from Decorators import redirectStdout
 from Utilities import path_to_module, printOnStatusBar
+from AIPrompterDialog import AIPrompterDialog
 
 import ReloadModule
 import ZipManager
@@ -1332,8 +1333,6 @@ class Base(object):
 		self.save.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save.png')))
 		self.save_as.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save_as.png')))
 		self.quit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'exit.png')))
-
-		
 
 		items = [self.save, self.save_as, self.quit]
 
