@@ -135,7 +135,7 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 				'NB_OPENED_FILE': 5, # number of recent files
 				'SELECTED_IA' : "Aucun",
 				'CHATGPT_API_KEY' : "",
-				'OLLAMA_PORT' : "Aucun",
+				'OLLAMA_PORT' : "11434",
 				'NB_HISTORY_UNDO': 5, # number of undo
 				'OUT_DIR': 'out', # name of local output directory (composed by all .dat, .txt files)
 				'PLUGINS_PATH': os.path.join(ABS_HOME_PATH, 'plugins'), # path of plug-ins directory
