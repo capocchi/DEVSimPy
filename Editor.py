@@ -43,7 +43,12 @@ from wx import stc
 from AIAdapter import AdapterFactory
 
 from Decorators import redirectStdout
+<<<<<<< HEAD
 from Utilities import path_to_module, printOnStatusBar, load_and_resize_image
+=======
+from Utilities import path_to_module, printOnStatusBar
+from AIPrompterDialog import AIPrompterDialog
+>>>>>>> b88d6f1 (update)
 
 import ReloadModule
 import ZipManager
@@ -1350,9 +1355,15 @@ class Base(object):
 		self.save_as = wx.MenuItem(file, wx.NewIdRef(), _('&Save As\tCtrl+S'), _('Save as an other file'))
 		self.quit = wx.MenuItem(file, wx.NewIdRef(), _('&Quit\tCtrl+Q'), _('Quit the application'))
 
+<<<<<<< HEAD
 		self.save.SetBitmap(load_and_resize_image('save.png'))
 		self.save_as.SetBitmap(load_and_resize_image('save_as.png'))
 		self.quit.SetBitmap(load_and_resize_image('exit.png'))
+=======
+		self.save.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save.png')))
+		self.save_as.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save_as.png')))
+		self.quit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'exit.png')))
+>>>>>>> b88d6f1 (update)
 
 		items = [self.save, self.save_as, self.quit]
 
