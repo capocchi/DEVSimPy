@@ -101,7 +101,7 @@ if __name__ == '__main__':
 	
 import Container
 import Components
-from AIAdapter import ChatGPTDevsAdapter
+from AIAdapter import AdapterFactory
 
 _ = wx.GetTranslation
 
@@ -1114,9 +1114,9 @@ class ModelGeneratorWizard(Wizard):
 								if selected_ia == "ChatGPT":
 									# Code spécifique pour ChatGPT
 									api_key = builtins.__dict__.get('CHATGPT_API_KEY')
-									
-									# Créer une instance de ChatGPTDevsAdapter
-									adapter = ChatGPTDevsAdapter()
+
+									# Créer ou récupérer l'instance de ChatGPTDevsAdapter via la factory
+									adapter = AdapterFactory.get_adapter_instance(api_key=api_key)
 
 						# 		# Définir les paramètres requis pour le prompt
 						# 		model_name = self.label
@@ -1128,15 +1128,33 @@ class ModelGeneratorWizard(Wizard):
 						# 		# Appeler la méthode create_prompt pour générer le prompt
 						# 		full_prompt = adapter.create_prompt(model_name, num_inputs, num_outputs, model_type, prompt)
 
-									# Utiliser generate_output pour obtenir le résultat en passant la clé API
-									result = adapter.generate_output(full_prompt, api_key=api_key)
+									# Utiliser generate_output pour obtenir le résultat
+									result = adapter.generate_output(full_prompt)
 
 									# Stocker ou traiter le résultat généré par ChatGPT
 									string = result
-
 								elif selected_ia == "Ollama":
-									# Code spécifique pour Ollama, à ajouter plus tard
-									pass
+									# Code spécifique pour Ollama
+									port = builtins.__dict__.get('OLLAMA_PORT')
+
+									# Créer ou récupérer l'instance de OllamaDevsAdapter via la factory
+									adapter = AdapterFactory.get_adapter_instance(port=port)
+
+									# Définir les paramètres requis pour le prompt
+									model_name = self.label
+									num_inputs = self.inputs
+									num_outputs = self.outputs
+									model_type = self.specific_behavior
+									prompt = self.detail
+
+									# Appeler la méthode create_prompt pour générer le prompt
+									full_prompt = adapter.create_prompt(model_name, num_inputs, num_outputs, model_type, prompt)
+
+									# Utiliser generate_output pour obtenir le résultat
+									result = adapter.generate_output(full_prompt)
+
+									# Stocker ou traiter le résultat généré par Ollama
+									string = result
 
 								else:
 									# Espace pour ajouter facilement une nouvelle IA plus tard
