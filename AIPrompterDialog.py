@@ -75,7 +75,6 @@ class AIPrompterDialog(wx.Dialog):
         button_sizer.Add(self.send_button, 0, wx.ALL, 10)  # Ajout du bouton avec un espacement de 10
 
         # Bouton pour insérer la demande
-
         self.insert_button = wx.Button(self, label=_("Insert/Replace"))
         self.insert_button.Bind(wx.EVT_BUTTON, self.on_insert)
         self.insert_button.SetToolTip(_("Insert the generated code into the editor."))  # Ajouter un tooltip
