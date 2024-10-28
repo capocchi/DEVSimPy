@@ -101,8 +101,7 @@ if __name__ == '__main__':
 	
 import Container
 import Components
-from AIAdapter import AdapterFactory
-from AIPrompterDialog import AIPrompterDialog
+from AIAdapter import ChatGPTDevsAdapter
 
 _ = wx.GetTranslation
 
@@ -1111,12 +1110,13 @@ class ModelGeneratorWizard(Wizard):
 						# elif self.type=='AtomicAI':
 						# 	selected_ia = builtins.__dict__.get('SELECTED_IA', '')  # '' par défaut si rien n'est sélectionné
 
-						# 	if selected_ia:
-						# 		# Code spécifique pour ChatGPT
-						# 		param = builtins.__dict__.get('PARAMS_IA')
-
-						# 		# Créer ou récupérer l'instance de ChatGPTDevsAdapter via la factory
-						# 		adapter = AdapterFactory.get_adapter_instance(parent=self.GetParent().GetParent(), params=param)
+							if selected_ia and selected_ia != "Aucun":
+								if selected_ia == "ChatGPT":
+									# Code spécifique pour ChatGPT
+									api_key = builtins.__dict__.get('CHATGPT_API_KEY')
+									
+									# Créer une instance de ChatGPTDevsAdapter
+									adapter = ChatGPTDevsAdapter()
 
 						# 		# Définir les paramètres requis pour le prompt
 						# 		model_name = self.label
@@ -1128,11 +1128,21 @@ class ModelGeneratorWizard(Wizard):
 						# 		# Appeler la méthode create_prompt pour générer le prompt
 						# 		full_prompt = adapter.create_prompt(model_name, num_inputs, num_outputs, model_type, prompt)
 
-						# 		# Utiliser generate_output pour obtenir le résultat
-						# 		string = adapter.generate_output(full_prompt)
+									# Utiliser generate_output pour obtenir le résultat en passant la clé API
+									result = adapter.generate_output(full_prompt, api_key=api_key)
 
-						# 	else:
-						# 		print(_("No AI selected."))
+									# Stocker ou traiter le résultat généré par ChatGPT
+									string = result
+
+								elif selected_ia == "Ollama":
+									# Code spécifique pour Ollama, à ajouter plus tard
+									pass
+
+								else:
+									# Espace pour ajouter facilement une nouvelle IA plus tard
+									pass
+							else:
+								print("Aucune IA sélectionnée.")
 						else:
 							string = coupledCode(self.label)
 
