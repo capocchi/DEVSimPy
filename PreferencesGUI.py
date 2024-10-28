@@ -88,28 +88,17 @@ class GeneralPanel(wx.Panel):
 		self.st2 = wx.StaticText(self, wx.NewIdRef(), _("Font size:"))
 		self.st3 = wx.StaticText(self, wx.NewIdRef(), _("Deep of history item:"))
 		self.st4 = wx.StaticText(self, wx.NewIdRef(), _("wxPython version:"))
-		### ADD: A. Dominici
-		self.st_api = wx.StaticText(self, wx.NewIdRef(), _("OPENAI API Key:"))
 
 		if wx.VERSION_STRING >= '4.0':
 			self.st1.SetToolTipString = self.st1.SetToolTip 
 			self.st2.SetToolTipString = self.st2.SetToolTip
 			self.st3.SetToolTipString = self.st3.SetToolTip
 			self.st4.SetToolTipString = self.st4.SetToolTip
-			### ADD: A. Dominici
-			self.st_api.SetToolTipString = self.st_api.SetToolTip
 
 		self.st1.SetToolTipString(_("Feel free to change the length of list defining the recent opened files."))
 		self.st2.SetToolTipString(_("Feel free to change the font size of DEVSimpy."))
 		self.st3.SetToolTipString(_("Feel free to change the number of item for undo/redo command."))
 		self.st4.SetToolTipString(_("Feel free to change the version of wxpython used loaded by DEVSimPy."))
-		### ADD: A. Dominici
-		self.st_api.SetToolTipString(_("Feel free to change your ChatGPT API key."))
-
-		### TextCtrl for API Key
-		self.api_key_ctrl = wx.TextCtrl(self, wx.NewIdRef(), style=wx.TE_PASSWORD)
-		self.api_key_ctrl.SetToolTip(_("Enter your API key here"))
-		self.api_key_ctrl.SetValue(OPENAI_API_KEY)
 
 		### number of opened file
 		self.nb_opened_file = wx.SpinCtrl(self, wx.NewIdRef(), '')
@@ -155,11 +144,7 @@ class GeneralPanel(wx.Panel):
 							(self.st2, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
 							(self.font_size, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
 					(self.st4, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
-					(self.cb2, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
-					(self.st_api, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5)])
-
-		### Add: A. Dominici
-		hsizer.Add(self.api_key_ctrl, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5)
+					(self.cb2, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5)])
 
 		vsizer.Add(self.plugin_dir, 1, wx.EXPAND)
 		vsizer.Add(self.domain_dir, 1, wx.EXPAND)
@@ -181,7 +166,6 @@ class GeneralPanel(wx.Panel):
 		default_wxv = copy.copy(self.default_wxv)
 
 		self.OnNbOpenedFileChanged(event)
-		self.OnAPIKeyChanged(event)
 		self.OnNbHistoryUndoChanged(event)
 		self.OnFontSizeChanged(event)
 		self.OnDomainPathChanged(event)
@@ -201,12 +185,6 @@ class GeneralPanel(wx.Panel):
 		""" Update the number opened files.
 		"""
 		builtins.__dict__['NB_OPENED_FILE'] = self.nb_opened_file.GetValue()		# number of recent files
-
-	###
-	def OnAPIKeyChanged(self, event):
-		""" Update the number opened files.
-		"""
-		builtins.__dict__['OPENAI_API_KEY'] = self.api_key_ctrl.GetValue()		# chat gpt api key
 
 	###
 	def OnNbHistoryUndoChanged(self, event):
@@ -662,6 +640,108 @@ class EditorPanel(wx.Panel):
 		builtins.__dict__['LOCAL_EDITOR'] = self.cb.IsChecked()
 		builtins.__dict__['EXTERNAL_EDITOR_NAME'] = self.choice.GetString(self.choice.GetCurrentSelection()) if self.choice.IsEnabled() else ""
 
+class IAPanel(wx.Panel):
+    """ Panel pour les préférences IA """
+
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+
+        # Charger les paramètres sauvegardés au démarrage
+        self.load_settings()
+
+        self.InitUI()
+
+    def InitUI(self):
+        """ Initialisation de l'interface utilisateur """
+        vbox = wx.BoxSizer(wx.VERTICAL)
+
+        # Choix de l'IA
+        self.st_ia = wx.StaticText(self, label=_("Sélectionnez l'IA :"))
+        self.choice_ia = wx.ComboBox(
+            self, wx.NewIdRef(), value=builtins.__dict__.get('SELECTED_IA', 'Aucun'),
+            choices=["Aucun", "ChatGPT", "Ollama"], style=wx.CB_READONLY
+        )
+        if wx.VERSION_STRING >= '4.0':
+            self.choice_ia.SetToolTipString = self.choice_ia.SetToolTip
+        self.choice_ia.SetToolTipString(_("Sélectionnez une IA pour les simulations"))
+
+        # Lier la sélection d'IA à la fonction de mise à jour de la visibilité
+        self.choice_ia.Bind(wx.EVT_COMBOBOX, self.OnIASelection)
+
+        # Sauvegarder la sélection d'IA par défaut
+        self.selected_ia = self.choice_ia.GetValue()
+
+        # Champ pour l'API Key de ChatGPT
+        self.st_api_key = wx.StaticText(self, label=_("API Key pour ChatGPT :"))
+        self.api_key_ctrl = wx.TextCtrl(self, style=wx.TE_PASSWORD)
+        self.api_key_ctrl.SetValue(builtins.__dict__.get('CHATGPT_API_KEY', ''))
+        self.api_key_ctrl.Hide()  # Masqué par défaut
+
+        # Champ pour le Port du serveur Ollama
+        self.st_port = wx.StaticText(self, label=_("Port du serveur pour Ollama :"))
+        self.port_ctrl = wx.TextCtrl()
+        self.port_ctrl.SetValue(builtins.__dict__.get('OLLAMA_PORT', ''))
+        self.port_ctrl.Hide()  # Masqué par défaut
+
+        # Ajouter les éléments au layout
+        vbox.Add(self.st_ia, flag=wx.ALL, border=5)
+        vbox.Add(self.choice_ia, flag=wx.ALL | wx.EXPAND, border=5)
+        vbox.Add(self.st_api_key, flag=wx.ALL, border=5)
+        vbox.Add(self.api_key_ctrl, flag=wx.ALL | wx.EXPAND, border=5)
+        vbox.Add(self.st_port, flag=wx.ALL, border=5)
+        vbox.Add(self.port_ctrl, flag=wx.ALL | wx.EXPAND, border=5)
+
+        self.SetSizer(vbox)
+
+        # Afficher les champs pertinents en fonction de la sélection actuelle
+        self.UpdateFieldsVisibility()
+
+    def UpdateFieldsVisibility(self):
+        """ Affiche les champs pertinents selon l'IA sélectionnée. """
+        selected_ia = self.choice_ia.GetValue()
+        if selected_ia == "ChatGPT":
+            self.api_key_ctrl.Show()
+            self.st_api_key.Show()
+            self.port_ctrl.Hide()
+            self.st_port.Hide()
+        elif selected_ia == "Ollama":
+            self.port_ctrl.Show()
+            self.st_port.Show()
+            self.api_key_ctrl.Hide()
+            self.st_api_key.Hide()
+        else:  # Aucun
+            self.api_key_ctrl.Hide()
+            self.st_api_key.Hide()
+            self.port_ctrl.Hide()
+            self.st_port.Hide()
+        self.Layout()
+
+    def OnIASelection(self, event):
+        """ Met à jour la sélection d'IA et affiche les champs pertinents """
+        self.selected_ia = self.choice_ia.GetValue()
+        builtins.__dict__['SELECTED_IA'] = self.selected_ia
+        self.UpdateFieldsVisibility()  # Appeler UpdateFieldsVisibility pour actualiser les sous-champs
+
+    def load_settings(self):
+        """ Charger les paramètres sauvegardés """
+        # Initialisation des valeurs dans builtins si elles ne sont pas encore définies
+        builtins.__dict__.setdefault('SELECTED_IA', 'Aucun')
+        builtins.__dict__.setdefault('CHATGPT_API_KEY', '')
+        builtins.__dict__.setdefault('OLLAMA_PORT', '')
+
+    def OnApply(self, evt):
+        """ Applique les modifications aux valeurs de configuration """
+        # Mettre à jour `builtins` avec la sélection actuelle
+        builtins.__dict__['SELECTED_IA'] = self.choice_ia.GetValue()
+        
+        # Sauvegarder l'API Key ou le Port selon l'IA sélectionnée
+        if builtins.__dict__['SELECTED_IA'] == "ChatGPT":
+            builtins.__dict__['CHATGPT_API_KEY'] = self.api_key_ctrl.GetValue()
+        elif builtins.__dict__['SELECTED_IA'] == "Ollama":
+            builtins.__dict__['OLLAMA_PORT'] = self.port_ctrl.GetValue()
+
+
+
 ########################################################################
 class Preferences(wx.Toolbook):
 	""" Based Toolbook Preference class
@@ -680,7 +760,7 @@ class Preferences(wx.Toolbook):
 		"""
 
 		### don't try to translate this labels with _() because there are used to find png
-		L = [('General',"(self)"),('Simulation',"(self)"), ('Editor',"(self)"), ('Plugins',"(self)")]
+		L = [('General',"(self)"),('Simulation',"(self)"), ('Editor',"(self)"), ('IA',"(self)"), ('Plugins',"(self)")]
 
 		# make an image list using the LBXX images
 		il = wx.ImageList(25, 25)
@@ -921,7 +1001,7 @@ class TestApp(wx.App):
 		builtins.__dict__['DOMAIN_PATH'] = 'Domain'
 		builtins.__dict__['OUT_DIR'] = 'out'
 		builtins.__dict__['NB_OPENED_FILE'] = 20
-		builtins.__dict__['OPENAI_API_KEY'] = ""
+		builtins.__dict__['SELECTED_IA'] = "Aucun"
 		builtins.__dict__['FONT_SIZE'] = 10
 		builtins.__dict__['NB_HISTORY_UNDO'] = 10
 		builtins.__dict__['TRANSPARENCY'] = False

@@ -1461,7 +1461,7 @@ class Base(object):
 		tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
 		tb.SetToolBitmapSize((16, 16))# this required for non-standard size buttons on MSW
 
-		ai_help = _('Generative AI based modification' if builtins.__dict__['OPENAI_API_KEY'] != "" else 'Check the AI settings in Preferences')
+		ai_help = _('Generative AI based modification' if builtins.__dict__['SELECTED_IA'] != "Aucun" else 'Check the AI settings in Preferences')
 		
 		if not self.parent:
 
@@ -1506,7 +1506,7 @@ class Base(object):
 		tb.Realize()
 
 		### Add: A. Dominici
-		tb.EnableTool(self.ai.GetId(), builtins.__dict__['OPENAI_API_KEY'] != "")
+		tb.EnableTool(self.ai.GetId(), builtins.__dict__['SELECTED_IA'] != "Aucun")
 
 		return tb
 
@@ -1632,77 +1632,91 @@ class Base(object):
 
 		import wx
 
-		# Récupération de l'éditeur et du texte sélectionné
-		nb = self.GetNoteBook()
-		editor = nb.GetCurrentPage()
-		selection = editor.GetSelection()
-		textstring = editor.GetRange(selection[0], selection[1])
+		# Vérifier l'IA sélectionnée
+		selected_ia = builtins.__dict__.get('SELECTED_IA', 'Aucun')
 
-		# Initialisation de l'application wx si elle n'est pas déjà en cours
-		if not wx.GetApp():
-			app = wx.App(False)
+		# Exécuter uniquement si une IA est sélectionnée
+		if selected_ia and selected_ia != "Aucun":
+			# Vérifier si l'IA sélectionnée est ChatGPT
+			if selected_ia == "ChatGPT":
+				# Récupération de l'éditeur et du texte sélectionné
+				nb = self.GetNoteBook()
+				editor = nb.GetCurrentPage()
+				selection = editor.GetSelection()
+				textstring = editor.GetRange(selection[0], selection[1])
+
+				# Initialisation de l'application wx si elle n'est pas déjà en cours
+				if not wx.GetApp():
+					app = wx.App(False)
+				else:
+					app = wx.GetApp()
+
+				# Création de l'instance de l'adapter ChatGPTDevsAdapter
+				api_key = builtins.__dict__.get('CHATGPT_API_KEY')
+				adapter = ChatGPTDevsAdapter()
+
+				# Définition du dialogue personnalisé
+				class CodeEditDialog(wx.Dialog):
+					def __init__(self, parent, code):
+						super().__init__(parent, title="AI Code Editor", size=(600, 400))
+						self.adapter = adapter
+						self.api_key = api_key
+
+						# Sizer pour organiser les éléments
+						sizer = wx.BoxSizer(wx.VERTICAL)
+
+						# Zone de texte pour le code sélectionné
+						self.code_text = wx.TextCtrl(self, value=code, style=wx.TE_MULTILINE | wx.TE_READONLY)
+						sizer.Add(wx.StaticText(self, label="Selected Code:"), 0, wx.ALL | wx.EXPAND, 5)
+						sizer.Add(self.code_text, 1, wx.ALL | wx.EXPAND, 5)
+
+						# Champ de texte pour le prompt
+						self.prompt_input = wx.TextCtrl(self, value="", style=wx.TE_MULTILINE)
+						sizer.Add(wx.StaticText(self, label="Enter Prompt for AI:"), 0, wx.ALL | wx.EXPAND, 5)
+						sizer.Add(self.prompt_input, 1, wx.ALL | wx.EXPAND, 5)
+
+						# Bouton pour appliquer la modification via l'IA
+						self.ai_button = wx.Button(self, label="Apply AI Modification")
+						self.ai_button.Bind(wx.EVT_BUTTON, self.on_apply_ai)
+						sizer.Add(self.ai_button, 0, wx.ALL | wx.CENTER, 10)
+
+						self.SetSizer(sizer)
+						self.Layout()
+
+					def on_apply_ai(self, event):
+						# Récupération du prompt et du code sélectionné
+						prompt = self.prompt_input.GetValue()
+						code = self.code_text.GetValue()
+
+						# Appel à l'IA via la méthode modify_model_part_prompt
+						full_prompt = self.adapter.modify_model_part_prompt(code, prompt)
+						modified_code = self.adapter.generate_output(full_prompt, api_key=self.api_key)
+
+						# Mise à jour de la zone de texte avec le code modifié si une modification a été effectuée
+						if modified_code:
+							self.code_text.SetValue(modified_code)
+
+				# Créer le dialogue avec le code sélectionné
+				dialog = CodeEditDialog(None, textstring)
+				dialog.ShowModal()
+
+				modified_text = dialog.code_text.GetValue()
+				dialog.Destroy()
+
+				# Remplacement du texte dans l'éditeur si le texte a été modifié
+				if modified_text and modified_text != textstring:
+					editor.Replace(selection[0], selection[1], modified_text)
+
+				# Si l'application wx n'était pas en cours avant, on la lance
+				if not wx.GetApp().IsMainLoopRunning():
+					app.MainLoop()
+
+			elif selected_ia == "Ollama":
+				# Code pour Ollama (laissez vide pour l'instant)
+				pass
+
 		else:
-			app = wx.GetApp()
-
-		# Création de l'instance de l'adapter ChatGPTDevsAdapter
-		api_key = builtins.__dict__.get('OPENAI_API_KEY')
-		adapter = ChatGPTDevsAdapter()
-
-		# Définition du dialogue personnalisé
-		class CodeEditDialog(wx.Dialog):
-			def __init__(self, parent, code):
-				super().__init__(parent, title="AI Code Editor", size=(600, 400))
-				self.adapter = adapter
-				self.api_key = api_key
-
-				# Sizer pour organiser les éléments
-				sizer = wx.BoxSizer(wx.VERTICAL)
-
-				# Zone de texte pour le code sélectionné
-				self.code_text = wx.TextCtrl(self, value=code, style=wx.TE_MULTILINE | wx.TE_READONLY)
-				sizer.Add(wx.StaticText(self, label="Selected Code:"), 0, wx.ALL | wx.EXPAND, 5)
-				sizer.Add(self.code_text, 1, wx.ALL | wx.EXPAND, 5)
-
-				# Champ de texte pour le prompt
-				self.prompt_input = wx.TextCtrl(self, value="", style=wx.TE_MULTILINE)
-				sizer.Add(wx.StaticText(self, label="Enter Prompt for AI:"), 0, wx.ALL | wx.EXPAND, 5)
-				sizer.Add(self.prompt_input, 1, wx.ALL | wx.EXPAND, 5)
-
-				# Bouton pour appliquer la modification via l'IA
-				self.ai_button = wx.Button(self, label="Apply AI Modification")
-				self.ai_button.Bind(wx.EVT_BUTTON, self.on_apply_ai)
-				sizer.Add(self.ai_button, 0, wx.ALL | wx.CENTER, 10)
-
-				self.SetSizer(sizer)
-				self.Layout()
-
-			def on_apply_ai(self, event):
-				# Récupération du prompt et du code sélectionné
-				prompt = self.prompt_input.GetValue()
-				code = self.code_text.GetValue()
-
-				# Appel à l'IA via la méthode modify_model_part_prompt
-				full_prompt = self.adapter.modify_model_part_prompt(code, prompt)
-				modified_code = self.adapter.generate_output(full_prompt, api_key=self.api_key)
-
-				# Mise à jour de la zone de texte avec le code modifié si une modification a été effectuée
-				if modified_code:
-					self.code_text.SetValue(modified_code)
-
-		# Créer le dialogue avec le code sélectionné
-		dialog = CodeEditDialog(None, textstring)
-		dialog.ShowModal()
-
-		modified_text = dialog.code_text.GetValue()
-		dialog.Destroy()
-
-		# Remplacement du texte dans l'éditeur si le texte a été modifié
-		if modified_text and modified_text != textstring:
-			editor.Replace(selection[0], selection[1], modified_text)
-
-		# Si l'application wx n'était pas en cours avant, on la lance
-		if not wx.GetApp().IsMainLoopRunning():
-			app.MainLoop()
+			wx.MessageBox("Aucune IA sélectionnée. Veuillez sélectionner une IA avant d'utiliser l'aide de l'IA.", "Information", wx.OK | wx.ICON_INFORMATION)
 
 
 
