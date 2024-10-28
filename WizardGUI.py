@@ -437,8 +437,9 @@ class ModelGeneratorWizard(Wizard):
 		bt2 = wx.RadioButton(page1, wx.NewIdRef(), _('Coupled model'))
 		
 		### Add: A. Dominici
-		if builtins.__dict__['OPENAI_API_KEY'] == "":
-			btgpt = wx.RadioButton(page1, wx.NewIdRef(), _('Atomic model with GPT (disabled: API key missing)'))
+		# Vérification que l'IA sélectionnée est différente de "Aucun"
+		if builtins.__dict__.get('SELECTED_IA', 'Aucun') == "Aucun":
+			btgpt = wx.RadioButton(page1, wx.NewIdRef(), _('Atomic model with GPT (disabled: no IA selected)'))
 			btgpt.Disable()
 		else:
 			btgpt = wx.RadioButton(page1, wx.NewIdRef(), _('Atomic model with GPT'))
@@ -1074,24 +1075,41 @@ class ModelGeneratorWizard(Wizard):
 						if self.type=='Atomic':
 							string = atomicCode(self.label)
 						elif self.type=='AtomicGPT':
-							api_key = builtins.__dict__.get('OPENAI_API_KEY')
+							selected_ia = builtins.__dict__.get('SELECTED_IA', 'Aucun')  # 'Aucun' par défaut si rien n'est sélectionné
 
-							# Créer une instance de ChatGPTDevsAdapter
-							adapter = ChatGPTDevsAdapter()
+							if selected_ia and selected_ia != "Aucun":
+								if selected_ia == "ChatGPT":
+									# Code spécifique pour ChatGPT
+									api_key = builtins.__dict__.get('CHATGPT_API_KEY')
+									
+									# Créer une instance de ChatGPTDevsAdapter
+									adapter = ChatGPTDevsAdapter()
 
-							model_name = self.label
-							num_inputs = self.inputs
-							num_outputs = self.outputs
-							model_type = self.specific_behavior
-							prompt = self.detail
+									# Définir les paramètres requis pour le prompt
+									model_name = self.label
+									num_inputs = self.inputs
+									num_outputs = self.outputs
+									model_type = self.specific_behavior
+									prompt = self.detail
 
-							# Appeler la méthode create_prompt pour générer le prompt
-							full_prompt = adapter.create_prompt(model_name, num_inputs, num_outputs, model_type, prompt)
+									# Appeler la méthode create_prompt pour générer le prompt
+									full_prompt = adapter.create_prompt(model_name, num_inputs, num_outputs, model_type, prompt)
 
-							# Utiliser generate_output pour obtenir le résultat en passant la clé API
-							result = adapter.generate_output(full_prompt, api_key=api_key)
+									# Utiliser generate_output pour obtenir le résultat en passant la clé API
+									result = adapter.generate_output(full_prompt, api_key=api_key)
 
-							string = result
+									# Stocker ou traiter le résultat généré par ChatGPT
+									string = result
+
+								elif selected_ia == "Ollama":
+									# Code spécifique pour Ollama, à ajouter plus tard
+									pass
+
+								else:
+									# Espace pour ajouter facilement une nouvelle IA plus tard
+									pass
+							else:
+								print("Aucune IA sélectionnée.")
 						else:
 							string = coupledCode(self.label)
 						
