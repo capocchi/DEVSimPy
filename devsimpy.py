@@ -131,7 +131,9 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 				'SIMULATION_ERROR_SOUND_PATH': os.path.join('sounds', 'Simulation-Error.wav'),
 				'DOMAIN_PATH': os.path.join(ABS_HOME_PATH, 'Domain'), # path of local lib directory
 				'NB_OPENED_FILE': 5, # number of recent files
-				'OPENAI_API_KEY': "",
+				'SELECTED_IA' : "Aucun",
+				'CHATGPT_API_KEY' : "",
+				'OLLAMA_PORT' : "Aucun",
 				'NB_HISTORY_UNDO': 5, # number of undo
 				'OUT_DIR': 'out', # name of local output directory (composed by all .dat, .txt files)
 				'PLUGINS_PATH': os.path.join(ABS_HOME_PATH, 'plugins'), # path of plug-ins directory
