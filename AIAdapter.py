@@ -285,7 +285,6 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
     def __init__(self, port):
         super().__init__()
-
         if not port:
             raise ValueError("Port is required for Ollama.")
         self.port = port

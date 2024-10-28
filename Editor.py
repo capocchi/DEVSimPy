@@ -1677,7 +1677,6 @@ class Base(object):
 		else:
 			wx.MessageBox(_("No AI selected. Please select an AI before using AI assistance."), "Information", wx.OK | wx.ICON_INFORMATION)
 
-
 	def OnSearch(self, evt):
 		"""
 		"""
