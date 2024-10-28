@@ -2,9 +2,11 @@ import logging
 from abc import ABC, abstractmethod
 from openai import OpenAI
 from Decorators import BuzyCursorNotification, cond_decorator
-
+import socket
+import subprocess
 import builtins
 import wx
+import ollama
 
 import gettext
 _ = gettext.gettext
@@ -500,22 +502,23 @@ class MessagesCollector(DomainBehavior):
 
 class ChatGPTDevsAdapter(DevsAIAdapter):
     """
-    Child class of DevsAIAdapter that uses ChatGPT (GPT-4) to generate DEVS models.
+    Adaptateur spécifique pour ChatGPT, utilisant GPT-4 pour générer des modèles DEVS.
     """
 
-    #@cond_decorator(builtins.__dict__.get('GUI_FLAG', True), BuzyCursorNotification) le cond fait suater le kwargs laurent, on verra plus tard
-    def generate_output(self, prompt, **kwargs):
-        """
-        Generates an output using the ChatGPT API based on the given prompt.
-        Expects an 'api_key' argument in **kwargs.
-        """
-        api_key = kwargs.get('api_key')
+    def __init__(self, api_key):
+        super().__init__()
         if not api_key:
             raise ValueError("API key is required for ChatGPT.")
+        self.api_key = api_key
+        self.api_client = OpenAI(api_key=self.api_key)  # Instancie le client API ici
+        logging.info("ChatGPTDevsAdapter initialized with provided API key.")
 
-        api_client = OpenAI(api_key=api_key)
+    def generate_output(self, prompt):
+        """
+        Génère une sortie en utilisant l'API ChatGPT basée sur le prompt donné.
+        """
         try:
-            response = api_client.chat.completions.create(
+            response = self.api_client.chat.completions.create(
                 model="gpt-4-turbo",
                 messages=[
                     {"role": "system", "content": "You are an expert in DEVS modeling."},
@@ -524,19 +527,99 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
             )
             return response.choices[0].message.content
         except Exception as e:
-            logging.error("Error generating output: %s", str(e))
+            logging.error("Erreur lors de la génération de la sortie: %s", str(e))
             return f"An error occurred while generating the output: {e}"
-
 
 class OllamaDevsAdapter(DevsAIAdapter):
     """
-    Child class of DevsAIAdapter that uses Ollama to generate DEVS models.
+    Adaptateur spécifique pour Ollama, utilisé pour générer des modèles DEVS.
     """
 
-    #@cond_decorator(builtins.__dict__.get('GUI_FLAG', True), BuzyCursorNotification) le cond fait suater le kwargs laurent, on verra plus tard
-    def generate_output(self, prompt, **kwargs):
+    def __init__(self, port):
+        super().__init__()
+        if not port:
+            raise ValueError("Port is required for Ollama.")
+        self.port = port
+        logging.info("OllamaDevsAdapter initialized with provided port.")
+
+        # Vérification si le serveur est lancé au démarrage
+        if not self._is_server_running():
+            logging.info("Le serveur Ollama n'est pas lancé. Tentative de démarrage...")
+            self._start_server()
+        else:
+            logging.info("Le serveur Ollama est déjà en cours d'exécution.")
+
+    def _is_server_running(self):
+        """ Vérifie si le serveur Ollama est en cours d'exécution sur le port spécifié. """
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            result = sock.connect_ex(('localhost', int(self.port)))
+            return result == 0  # Renvoie True si le port est ouvert
+
+    def _start_server(self):
+        """ Démarre le serveur Ollama en arrière-plan. """
+        try:
+            subprocess.Popen(["ollama", "serve"])
+            logging.info("Serveur Ollama démarré avec succès.")
+        except Exception as e:
+            logging.error("Impossible de démarrer le serveur Ollama: %s", str(e))
+            raise RuntimeError("Failed to start Ollama server.")
+
+    def generate_output(self, prompt):
         """
-        Generates an output using the Ollama API based on the given prompt.
-        No API key is needed.
+        Génère une sortie en utilisant l'API Ollama basée sur le prompt donné.
+        Vérifie d'abord si le serveur est en cours d'exécution, et le démarre si nécessaire.
         """
-        pass
+        # Vérifier si le serveur est lancé avant d'envoyer le prompt
+        if not self._is_server_running():
+            logging.info("Le serveur Ollama n'est pas actif. Tentative de démarrage...")
+            self._start_server()
+
+        try:
+            # Envoyer le prompt au serveur Ollama
+            response = ollama.chat(
+                model='llama3.2',
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return response['message']['content']
+        except Exception as e:
+            logging.error("Erreur lors de la génération de la sortie: %s", str(e))
+            return f"An error occurred while generating the output: {e}"
+
+
+class AdapterFactory:
+    _instance = None
+    _current_selected_ia = None  # Suivi de l'état actuel de l'IA sélectionnée
+
+    @staticmethod
+    def get_adapter_instance(api_key=None, port=None):
+        """ 
+        Retourne une instance unique de l'adaptateur sélectionné.
+        Réinitialise l'instance si `selected_ia` a changé en cours d'exécution.
+        """
+        selected_ia = builtins.__dict__.get("SELECTED_IA", "Aucun")
+
+        # Vérifie si l'IA sélectionnée a changé
+        if AdapterFactory._current_selected_ia != selected_ia:
+            AdapterFactory._instance = None  # Réinitialise l'instance
+            AdapterFactory._current_selected_ia = selected_ia  # Met à jour la sélection
+
+        # Crée une nouvelle instance si nécessaire
+        if AdapterFactory._instance is None:
+            if selected_ia == "ChatGPT":
+                if not api_key:
+                    raise ValueError("API key is required for ChatGPT.")
+                AdapterFactory._instance = ChatGPTDevsAdapter(api_key=api_key)
+            elif selected_ia == "Ollama":
+                if not port:
+                    raise ValueError("Port is required for Ollama.")
+                AdapterFactory._instance = OllamaDevsAdapter(port=port)
+            else:
+                raise ValueError("Aucune IA sélectionnée ou IA inconnue.")
+
+        return AdapterFactory._instance
+
+    @staticmethod
+    def reset_instance():
+        """ Réinitialise manuellement l'instance et l'IA sélectionnée. """
+        AdapterFactory._instance = None
+        AdapterFactory._current_selected_ia = None

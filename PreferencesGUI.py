@@ -676,8 +676,8 @@ class IAPanel(wx.Panel):
 
         # Champ pour le Port du serveur Ollama
         self.st_port = wx.StaticText(self, label=_("Port du serveur pour Ollama :"))
-        self.port_ctrl = wx.TextCtrl()
-        self.port_ctrl.SetValue(builtins.__dict__.get('OLLAMA_PORT', ''))
+        self.port_ctrl = wx.TextCtrl(self)
+        self.port_ctrl.SetValue(builtins.__dict__.get('OLLAMA_PORT', '11434'))
         self.port_ctrl.Hide()  # Masqué par défaut
 
         # Ajouter les éléments au layout
@@ -691,7 +691,7 @@ class IAPanel(wx.Panel):
         self.SetSizer(vbox)
 
         # Afficher les champs pertinents en fonction de la sélection actuelle
-        self.UpdateFieldsVisibility()
+        self.UpdateFieldsVisibility()  # Appeler ici pour afficher la sélection initiale correctement
 
     def UpdateFieldsVisibility(self):
         """ Affiche les champs pertinents selon l'IA sélectionnée. """
@@ -724,7 +724,7 @@ class IAPanel(wx.Panel):
         # Initialisation des valeurs dans builtins si elles ne sont pas encore définies
         builtins.__dict__.setdefault('SELECTED_IA', 'Aucun')
         builtins.__dict__.setdefault('CHATGPT_API_KEY', '')
-        builtins.__dict__.setdefault('OLLAMA_PORT', '')
+        builtins.__dict__.setdefault('OLLAMA_PORT', '11434')
 
     def OnApply(self, evt):
         """ Applique les modifications aux valeurs de configuration """
