@@ -1460,7 +1460,7 @@ class Base(object):
 		tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
 		tb.SetToolBitmapSize((16, 16))# this required for non-standard size buttons on MSW
 
-		ai_help = _('Generative AI based modification' if builtins.__dict__['SELECTED_IA'] != "Aucun" else 'Check the AI settings in Preferences')
+		ai_help = _('Generative AI based modification' if bool(builtins.__dict__['SELECTED_IA']) else 'Check the AI settings in Preferences')
 		
 		if not self.parent:
 
@@ -1505,7 +1505,7 @@ class Base(object):
 		tb.Realize()
 
 		### Add: A. Dominici
-		tb.EnableTool(self.ai.GetId(), builtins.__dict__['SELECTED_IA'] != "Aucun")
+		tb.EnableTool(self.ai.GetId(), bool(builtins.__dict__['SELECTED_IA']))
 
 		return tb
 
@@ -1630,10 +1630,10 @@ class Base(object):
 		""" Event handler for AI help menu option. """
 
 		# Vérifier l'IA sélectionnée
-		selected_ia = builtins.__dict__.get('SELECTED_IA', 'Aucun')
+		selected_ia = builtins.__dict__.get('SELECTED_IA', '')
 
 		# Exécuter uniquement si une IA est sélectionnée
-		if selected_ia and selected_ia != "Aucun":
+		if selected_ia and selected_ia:
 			# Récupération de l'éditeur et du texte sélectionné
 			nb = self.GetNoteBook()
 			editor = nb.GetCurrentPage()
@@ -1648,7 +1648,7 @@ class Base(object):
 			dialog.Show()
 
 		else:
-			wx.MessageBox("Aucune IA sélectionnée. Veuillez sélectionner une IA avant d'utiliser l'aide de l'IA.", "Information", wx.OK | wx.ICON_INFORMATION)
+			wx.MessageBox(_("No AI selected. Please select an AI before using AI assistance"), "Information", wx.OK | wx.ICON_INFORMATION)
 
 
 	def OnSearch(self, evt):
