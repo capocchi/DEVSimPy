@@ -674,13 +674,13 @@ class IAPanel(wx.Panel):
         # Champ pour l'API Key de ChatGPT
         self.st_api_key = wx.StaticText(self, label=_("API Key pour ChatGPT :"))
         self.api_key_ctrl = wx.TextCtrl(self, style=wx.TE_PASSWORD)
-        self.api_key_ctrl.SetValue(builtins.__dict__.get('CHATGPT_API_KEY', ''))
+        self.api_key_ctrl.SetValue(builtins.__dict__.get('PARAMS_IA', {}).get('CHATGPT_API_KEY', ''))
         self.api_key_ctrl.Hide()  # Masqué par défaut
 
         # Champ pour le Port du serveur Ollama
         self.st_port = wx.StaticText(self, label=_("Port du serveur pour Ollama :"))
         self.port_ctrl = wx.TextCtrl(self)
-        self.port_ctrl.SetValue(builtins.__dict__.get('OLLAMA_PORT', '11434'))
+        self.port_ctrl.SetValue(builtins.__dict__.get('PARAMS_IA', {}).get('OLLAMA_PORT', '11434'))
         self.port_ctrl.Hide()  # Masqué par défaut
 
         # Ajouter les éléments au layout
@@ -726,8 +726,8 @@ class IAPanel(wx.Panel):
         """ Charger les paramètres sauvegardés """
         # Initialisation des valeurs dans builtins si elles ne sont pas encore définies
         builtins.__dict__.setdefault('SELECTED_IA', 'Aucun')
-        builtins.__dict__.setdefault('CHATGPT_API_KEY', '')
-        builtins.__dict__.setdefault('OLLAMA_PORT', '11434')
+        builtins.__dict__['PARAMS_IA'].setdefault('CHATGPT_API_KEY', '')
+        builtins.__dict__['PARAMS_IA'].setdefault('OLLAMA_PORT', '11434')
 
     def OnApply(self, evt):
         """ Applique les modifications aux valeurs de configuration """
@@ -736,9 +736,9 @@ class IAPanel(wx.Panel):
         
         # Sauvegarder l'API Key ou le Port selon l'IA sélectionnée
         if builtins.__dict__['SELECTED_IA'] == "ChatGPT":
-            builtins.__dict__['CHATGPT_API_KEY'] = self.api_key_ctrl.GetValue()
+            builtins.__dict__['PARAMS_IA']['CHATGPT_API_KEY'] = self.api_key_ctrl.GetValue()
         elif builtins.__dict__['SELECTED_IA'] == "Ollama":
-            builtins.__dict__['OLLAMA_PORT'] = self.port_ctrl.GetValue()
+            builtins.__dict__['PARAMS_IA']['OLLAMA_PORT'] = self.port_ctrl.GetValue()
 
 
 
