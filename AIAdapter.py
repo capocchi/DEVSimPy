@@ -78,7 +78,7 @@ class DevsAIAdapter(ABC):
         Additional details:
         {prompt}
         """
-        logging.debug("Prompt created successfully for model: %s", model_name)
+        logging.debug(_("Prompt created successfully for model: %s"), model_name)
         return full_prompt
 
     def modify_model_prompt(self, code, prompt):
@@ -86,7 +86,7 @@ class DevsAIAdapter(ABC):
         Generates a prompt to modify an existing DEVS model.
         Takes into account the model name, the current code, and additional details.
         """
-        logging.info("Modifying model")
+        logging.info(_("Modifying model"))
         
         # Constructing the prompt for the AI
         full_prompt = f"""
@@ -128,7 +128,7 @@ class DevsAIAdapter(ABC):
         Include only the code of the modified part of the model. Do not include any code block markers like ```python.
         Do not provide any explanations, only the code. Keep the indentation, it is really important.
         """
-        logging.debug("Modification part prompt created for model")
+        logging.debug(_("Modification part prompt created for model"))
         return full_prompt
 
     @abstractmethod
@@ -144,7 +144,7 @@ class DevsAIAdapter(ABC):
         """
         Placeholder method for future implementation.
         """
-        logging.info("Validation not implemented for model: %s", model_name)
+        logging.info(_("Validation not implemented for model: %s", model_name))
         pass
 
 ##########################################################
@@ -376,19 +376,19 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
     def _prompt_install_ollama(self):
         """ Affiche une fenêtre `wx` pour proposer l'installation d'Ollama. """
-        app = wx.App(False)
-        message = "Ollama n'est pas installé. Voulez-vous l'installer maintenant ?"
-        dialog = wx.MessageDialog(None, message, "Installation d'Ollama", wx.YES_NO | wx.ICON_QUESTION)
+        # app = wx.App(False)
+        message = _("Ollama is not installed. Would you like to install it now?")
+        dialog = wx.MessageDialog(None, message, _("Ollama install"), wx.YES_NO | wx.ICON_QUESTION)
         
         if dialog.ShowModal() == wx.ID_YES:
-            logging.info("Lancement de l'installation d'Ollama...")
+            logging.info(_("Starting the installation of Ollama..."))
             self._install_ollama()
         else:
-            logging.error("Ollama est requis pour exécuter cette classe.")
-            raise RuntimeError("Ollama n'est pas installé et est requis pour exécuter cette classe.")
-        
+            logging.error(_("Ollama is required to run this class."))
+            raise RuntimeError(_("Ollama is not installed and is required to run this class."))
+                
         dialog.Destroy()
-        app.MainLoop()
+        # app.MainLoop()
 
     def _install_ollama(self):
         """ Installe Ollama selon le système d'exploitation. """
@@ -408,17 +408,19 @@ class OllamaDevsAdapter(DevsAIAdapter):
                 
                 # Exécution de l'installateur
                 subprocess.run([ollama_path], check=True)
-            logging.info("Installation d'Ollama terminée.")
+
+            logging.info(_("Ollama installation completed. Restart devsimpy and the terminal if necessary."))
+
         except subprocess.CalledProcessError as e:
-            logging.error("Erreur lors de l'installation d'Ollama: %s", e)
-            raise RuntimeError("Installation d'Ollama échouée.")
+            logging.error(_("Error during Ollama installation: %s"), e)
+            raise RuntimeError(_("Ollama installation failed."))
 
     def _show_download_message(self, url, dest_path):
         """Affiche une fenêtre wx avec le message de téléchargement sans interférer avec l'application wx existante."""
-        frame = wx.Frame(None, -1, "Téléchargement", size=(500, 100))
+        frame = wx.Frame(None, -1, _("Download"), size=(500, 100))
         panel = wx.Panel(frame, -1)
         
-        text = wx.StaticText(panel, -1, "Téléchargement de Ollama en cours...", pos=(50, 20))
+        text = wx.StaticText(panel, -1, _("Downloading..."), pos=(50, 20))
         font = text.GetFont()
         font.PointSize += 2
         font = font.Bold()
@@ -543,7 +545,7 @@ class AdapterFactory:
         Retourne une instance unique de l'adaptateur sélectionné.
         Réinitialise l'instance si `selected_ia` a changé en cours d'exécution.
         """
-        selected_ia = builtins.__dict__.get("SELECTED_IA", "Aucun")
+        selected_ia = builtins.__dict__.get("SELECTED_IA", "")
 
         # Vérifie si l'IA sélectionnée a changé
         if AdapterFactory._current_selected_ia != selected_ia:
@@ -559,20 +561,20 @@ class AdapterFactory:
             # Validation pour ChatGPT
             if selected_ia == "ChatGPT":
                 if not api_key:
-                    AdapterFactory._show_error("API key is required for ChatGPT.")
-                    raise ValueError("API key is required for ChatGPT.")
+                    AdapterFactory._show_error(_("API key is required for ChatGPT."))
+                    raise ValueError(_("API key is required for ChatGPT."))
                 AdapterFactory._instance = ChatGPTDevsAdapter(api_key)
 
             # Validation pour Ollama
             elif selected_ia == "Ollama":
                 if not port:
-                    AdapterFactory._show_error("Port is required for Ollama.")
-                    raise ValueError("Port is required for Ollama.")
+                    AdapterFactory._show_error(_("Port is required for Ollama."))
+                    raise ValueError(_("Port is required for Ollama."))
                 AdapterFactory._instance = OllamaDevsAdapter(port)
 
             else:
-                AdapterFactory._show_error("Aucune IA sélectionnée ou IA inconnue.")
-                raise ValueError("Aucune IA sélectionnée ou IA inconnue.")
+                AdapterFactory._show_error(_("No AI selected or unknown AI."))
+                raise ValueError(_("No AI selected or unknown AI."))
 
         return AdapterFactory._instance
 
@@ -587,4 +589,4 @@ class AdapterFactory:
         """ Affiche un message d'erreur sous forme de toast avec wx. """
         app = wx.GetApp()
         if app:
-            wx.CallAfter(wx.MessageBox, message, "Erreur", wx.ICON_ERROR)
+            wx.CallAfter(wx.MessageBox, message, _("Error"), wx.ICON_ERROR)
