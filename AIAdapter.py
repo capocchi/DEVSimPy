@@ -7,12 +7,16 @@ import subprocess
 import builtins
 import wx
 import ollama
+import os
+import sys
+import urllib.request
+
 
 import gettext
 _ = gettext.gettext
 
 # Configuration de base du logging
-logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class DevsAIAdapter(ABC):
     """
@@ -535,12 +539,20 @@ class OllamaDevsAdapter(DevsAIAdapter):
     Adaptateur spécifique pour Ollama, utilisé pour générer des modèles DEVS.
     """
 
-    def __init__(self, port):
+    def __init__(self, port, model_name='llama3.1'):
         super().__init__()
         if not port:
-            raise ValueError("Port is required for Ollama.")
+            raise ValueError("Le port est requis pour Ollama.")
         self.port = port
-        logging.info("OllamaDevsAdapter initialized with provided port.")
+        self.model_name = model_name
+        logging.info(f"OllamaDevsAdapter initialisé avec le port {port} et le modèle {model_name}.")
+
+        # Vérification de l'installation d'Ollama
+        if not self._is_ollama_installed():
+            self._prompt_install_ollama()
+
+        # Téléchargement du modèle spécifié
+        self._ensure_model_downloaded()
 
         # Vérification si le serveur est lancé au démarrage
         if not self._is_server_running():
@@ -548,6 +560,70 @@ class OllamaDevsAdapter(DevsAIAdapter):
             self._start_server()
         else:
             logging.info("Le serveur Ollama est déjà en cours d'exécution.")
+
+    def _is_ollama_installed(self):
+        """ Vérifie si Ollama est installé en cherchant son exécutable. """
+        command = ["where", "ollama"] if sys.platform == "win32" else ["which", "ollama"]
+        return subprocess.run(command, capture_output=True).returncode == 0
+
+    def _prompt_install_ollama(self):
+        """ Affiche une fenêtre `wx` pour proposer l'installation d'Ollama. """
+        app = wx.App(False)
+        message = "Ollama n'est pas installé. Voulez-vous l'installer maintenant ?"
+        dialog = wx.MessageDialog(None, message, "Installation d'Ollama", wx.YES_NO | wx.ICON_QUESTION)
+        
+        if dialog.ShowModal() == wx.ID_YES:
+            logging.info("Lancement de l'installation d'Ollama...")
+            self._install_ollama()
+        else:
+            logging.error("Ollama est requis pour exécuter cette classe.")
+            raise RuntimeError("Ollama n'est pas installé et est requis pour exécuter cette classe.")
+        
+        dialog.Destroy()
+        app.MainLoop()
+
+    def _install_ollama(self):
+        """ Installe Ollama selon le système d'exploitation. """
+        platform = sys.platform
+
+        try:
+            if platform == "darwin":  # macOS
+                subprocess.run("curl -O https://ollama.com/download/Ollama-darwin.zip && unzip Ollama-darwin.zip -d /usr/local/bin && rm Ollama-darwin.zip", shell=True, check=True)
+            elif platform.startswith("linux"):  # Linux
+                subprocess.run("curl -fsSL https://ollama.com/install.sh | sh", shell=True, check=True)
+            elif platform == "win32":  # Windows
+                ollama_path = os.path.join(os.environ['USERPROFILE'], "Downloads", "OllamaSetup.exe")
+                download_url = "https://ollama.com/download/OllamaSetup.exe"
+                
+                # Téléchargement avec message de chargement
+                self._show_download_message(download_url, ollama_path)
+                
+                # Exécution de l'installateur
+                subprocess.run([ollama_path], check=True)
+            logging.info("Installation d'Ollama terminée.")
+        except subprocess.CalledProcessError as e:
+            logging.error("Erreur lors de l'installation d'Ollama: %s", e)
+            raise RuntimeError("Installation d'Ollama échouée.")
+
+    def _show_download_message(self, url, dest_path):
+        """Affiche une fenêtre wx avec le message de téléchargement sans interférer avec l'application wx existante."""
+        frame = wx.Frame(None, -1, "Téléchargement", size=(500, 100))
+        panel = wx.Panel(frame, -1)
+        
+        text = wx.StaticText(panel, -1, "Téléchargement de Ollama en cours...", pos=(50, 20))
+        font = text.GetFont()
+        font.PointSize += 2
+        font = font.Bold()
+        text.SetFont(font)
+        
+        frame.Centre()
+        frame.Show()
+
+        # Effectue le téléchargement
+        urllib.request.urlretrieve(url, dest_path)
+
+        # Ferme la fenêtre une fois le téléchargement terminé
+        frame.Close()
 
     def _is_server_running(self):
         """ Vérifie si le serveur Ollama est en cours d'exécution sur le port spécifié. """
@@ -562,7 +638,17 @@ class OllamaDevsAdapter(DevsAIAdapter):
             logging.info("Serveur Ollama démarré avec succès.")
         except Exception as e:
             logging.error("Impossible de démarrer le serveur Ollama: %s", str(e))
-            raise RuntimeError("Failed to start Ollama server.")
+            raise RuntimeError("Impossible de démarrer le serveur Ollama.")
+
+    def _ensure_model_downloaded(self):
+        """Télécharge ou met à jour le modèle spécifié via Ollama."""
+        try:
+            logging.info(f"Téléchargement du modèle {self.model_name} si nécessaire...")
+            ollama.pull(self.model_name)
+            logging.info(f"Modèle {self.model_name} téléchargé avec succès.")
+        except Exception as e:
+            logging.error(f"Erreur lors du téléchargement du modèle {self.model_name}: {e}")
+            raise RuntimeError(f"Échec du téléchargement du modèle {self.model_name}.")
 
     def generate_output(self, prompt):
         """
@@ -577,14 +663,13 @@ class OllamaDevsAdapter(DevsAIAdapter):
         try:
             # Envoyer le prompt au serveur Ollama
             response = ollama.chat(
-                model='llama3.2',
+                model=self.model_name,
                 messages=[{"role": "user", "content": prompt}]
             )
             return response['message']['content']
         except Exception as e:
             logging.error("Erreur lors de la génération de la sortie: %s", str(e))
             return f"An error occurred while generating the output: {e}"
-
 
 class AdapterFactory:
     _instance = None
