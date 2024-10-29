@@ -655,8 +655,8 @@ class IAPanel(wx.Panel):
         # Choix de l'IA
         self.st_ia = wx.StaticText(self, label=_("Sélectionnez l'IA :"))
         self.choice_ia = wx.ComboBox(
-            self, wx.NewIdRef(), value=builtins.__dict__.get('SELECTED_IA', 'Aucun'),
-            choices=["Aucun", "ChatGPT", "Ollama"], style=wx.CB_READONLY
+            self, wx.NewIdRef(), value=builtins.__dict__.get('SELECTED_IA', ''),
+            choices=["", "ChatGPT", "Ollama"], style=wx.CB_READONLY
         )
         if wx.VERSION_STRING >= '4.0':
             self.choice_ia.SetToolTipString = self.choice_ia.SetToolTip
@@ -706,7 +706,7 @@ class IAPanel(wx.Panel):
             self.st_port.Show()
             self.api_key_ctrl.Hide()
             self.st_api_key.Hide()
-        else:  # Aucun
+        else: 
             self.api_key_ctrl.Hide()
             self.st_api_key.Hide()
             self.port_ctrl.Hide()
@@ -722,7 +722,7 @@ class IAPanel(wx.Panel):
     def load_settings(self):
         """ Charger les paramètres sauvegardés """
         # Initialisation des valeurs dans builtins si elles ne sont pas encore définies
-        builtins.__dict__.setdefault('SELECTED_IA', 'Aucun')
+        builtins.__dict__.setdefault('SELECTED_IA', '')
         builtins.__dict__['PARAMS_IA'].setdefault('CHATGPT_API_KEY', '')
         builtins.__dict__['PARAMS_IA'].setdefault('OLLAMA_PORT', '11434')
 
