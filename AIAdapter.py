@@ -82,7 +82,7 @@ class DevsAIAdapter(ABC):
         Additional details:
         {prompt}
         """
-        logging.debug("Prompt created successfully for model: %s", model_name)
+        logging.debug(_("Prompt created successfully for model: %s"), model_name)
         return full_prompt
 
     def modify_model_prompt(self, code, prompt):
@@ -90,7 +90,7 @@ class DevsAIAdapter(ABC):
         Generates a prompt to modify an existing DEVS model.
         Takes into account the model name, the current code, and additional details.
         """
-        logging.info("Modifying model")
+        logging.info(_("Modifying model"))
         
         # Constructing the prompt for the AI
         full_prompt = f"""
@@ -132,7 +132,7 @@ class DevsAIAdapter(ABC):
         Include only the code of the modified part of the model. Do not include any code block markers like ```python.
         Do not provide any explanations, only the code. Keep the indentation, it is really important.
         """
-        logging.debug("Modification part prompt created for model")
+        logging.debug(_("Modification part prompt created for model"))
         return full_prompt
 
     @abstractmethod
@@ -148,7 +148,7 @@ class DevsAIAdapter(ABC):
         """
         Placeholder method for future implementation.
         """
-        logging.info("Validation not implemented for model: %s", model_name)
+        logging.info(_("Validation not implemented for model: %s", model_name))
         pass
 
 ##########################################################
@@ -289,6 +289,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
     def __init__(self, port):
         super().__init__()
+
         if not port:
             raise ValueError("Port is required for Ollama.")
         self.port = port
@@ -536,6 +537,6 @@ class OllamaDevsAdapter(DevsAIAdapter):
             )
             return response['message']['content']
         except Exception as e:
-            logging.error("Erreur lors de la génération de la sortie: %s", str(e))
-            return f"An error occurred while generating the output: {e}"
+            logging.error(_("Error while generating output: %s", str(e)))
+            return _(f"An error occurred while generating the output: {e}")
 
