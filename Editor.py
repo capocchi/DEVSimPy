@@ -1652,17 +1652,9 @@ class Base(object):
 			editor = nb.GetCurrentPage()
 			selection = editor.GetSelection()
 			textstring = editor.GetRange(selection[0], selection[1])
-
-			# Créer ou récupérer l'instance d'adaptateur via la factory
-			if selected_ia == "ChatGPT":
-				api_key = builtins.__dict__.get('CHATGPT_API_KEY')
-				adapter = AdapterFactory.get_adapter_instance(api_key=api_key)
-			elif selected_ia == "Ollama":
-				port = builtins.__dict__.get('OLLAMA_PORT')
-				adapter = AdapterFactory.get_adapter_instance(port=port)
-			else:
-				wx.MessageBox("IA sélectionnée non prise en charge.", "Erreur", wx.OK | wx.ICON_ERROR)
-				return
+				
+			param = builtins.__dict__.get('PARAMS_IA')
+			adapter = AdapterFactory.get_adapter_instance(param)
 				
 			# Créer le dialogue avec le code sélectionné
 			dialog = AIPrompterDialog(self, textstring, adapter)
