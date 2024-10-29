@@ -591,7 +591,7 @@ class AdapterFactory:
     _current_selected_ia = None  # Suivi de l'état actuel de l'IA sélectionnée
 
     @staticmethod
-    def get_adapter_instance(api_key=None, port=None):
+    def get_adapter_instance(params=None):
         """ 
         Retourne une instance unique de l'adaptateur sélectionné.
         Réinitialise l'instance si `selected_ia` a changé en cours d'exécution.
@@ -605,15 +605,26 @@ class AdapterFactory:
 
         # Crée une nouvelle instance si nécessaire
         if AdapterFactory._instance is None:
+            # Récupère les paramètres d'API et de port de PARAMS_IA
+            api_key = params.get('CHATGPT_API_KEY') if params else None
+            port = params.get('OLLAMA_PORT') if params else None
+            
+            # Validation pour ChatGPT
             if selected_ia == "ChatGPT":
                 if not api_key:
+                    AdapterFactory._show_error("API key is required for ChatGPT.")
                     raise ValueError("API key is required for ChatGPT.")
-                AdapterFactory._instance = ChatGPTDevsAdapter(api_key=api_key)
+                AdapterFactory._instance = ChatGPTDevsAdapter(api_key)
+
+            # Validation pour Ollama
             elif selected_ia == "Ollama":
                 if not port:
+                    AdapterFactory._show_error("Port is required for Ollama.")
                     raise ValueError("Port is required for Ollama.")
-                AdapterFactory._instance = OllamaDevsAdapter(port=port)
+                AdapterFactory._instance = OllamaDevsAdapter(port)
+
             else:
+                AdapterFactory._show_error("Aucune IA sélectionnée ou IA inconnue.")
                 raise ValueError("Aucune IA sélectionnée ou IA inconnue.")
 
         return AdapterFactory._instance
@@ -623,3 +634,10 @@ class AdapterFactory:
         """ Réinitialise manuellement l'instance et l'IA sélectionnée. """
         AdapterFactory._instance = None
         AdapterFactory._current_selected_ia = None
+
+    @staticmethod
+    def _show_error(message):
+        """ Affiche un message d'erreur sous forme de toast avec wx. """
+        app = wx.GetApp()
+        if app:
+            wx.CallAfter(wx.MessageBox, message, "Erreur", wx.ICON_ERROR)
