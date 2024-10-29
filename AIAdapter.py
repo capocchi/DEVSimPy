@@ -26,7 +26,7 @@ class DevsAIAdapter(ABC):
     """
     def __init__(self):
         self.model_types = ["Générateur", "Collecteur", "Afficheur", "Défaut"]
-        logging.info("DevsAIAdapter initialized with model types: %s", self.model_types)
+        logging.info(_("DevsAIAdapter initialized with model types: %s"), self.model_types)
     
     def _get_example(self, model_type):
         """
@@ -414,7 +414,7 @@ class MessagesCollector(DomainBehavior):
         return "MessagesCollector"
 """
         }
-        logging.debug("Retrieved example for model type: %s", model_type)
+        logging.debug(_("Retrieved example for model type: %s"), model_type)
         return examples.get(model_type, examples["Générateur"])
     
     def create_prompt(self, model_name, num_inputs, num_outputs, model_type, prompt):
@@ -423,10 +423,10 @@ class MessagesCollector(DomainBehavior):
         Uses a default generative DEVS model example if the type is not found.
         """
         if model_type not in self.model_types:
-            logging.error("Invalid model type: %s", model_type)
-            raise ValueError(f"Invalid model type '{model_type}'. Available types: {self.model_types}")
+            logging.error(_("Invalid model type: %s"), model_type)
+            raise ValueError(_(f"Invalid model type '{model_type}'. Available types: {self.model_types}"))
         
-        logging.info("Creating prompt for model: %s, type: %s", model_name, model_type)
+        logging.info(_("Creating prompt for model: %s, type: %s"), model_name, model_type)
         example = self._get_example(model_type)
         
         # Constructing the prompt for the AI
@@ -443,7 +443,7 @@ class MessagesCollector(DomainBehavior):
         Additional details:
         {prompt}
         """
-        logging.debug("Prompt created successfully for model: %s", model_name)
+        logging.debug(_("Prompt created successfully for model: %s"), model_name)
         return full_prompt
 
     def modify_model_prompt(self, code, prompt):
@@ -451,7 +451,7 @@ class MessagesCollector(DomainBehavior):
         Generates a prompt to modify an existing DEVS model.
         Takes into account the model name, the current code, and additional details.
         """
-        logging.info("Modifying model")
+        logging.info(_("Modifying model"))
         
         # Constructing the prompt for the AI
         full_prompt = f"""
@@ -465,7 +465,7 @@ class MessagesCollector(DomainBehavior):
         Include only the modified model code. I do not want any code block markers like ```python.
         Do not provide any explanations, only the code.
         """
-        logging.debug("Modification prompt created for model")
+        logging.debug(_("Modification prompt created for model."))
         return full_prompt
     
     def modify_model_part_prompt(self, code, prompt):
@@ -473,7 +473,7 @@ class MessagesCollector(DomainBehavior):
         Generates a prompt to modify a specific part of an existing DEVS model.
         Takes into account the model name, the current code, and details about the part to modify.
         """
-        logging.info("Modifying part of model")
+        logging.info(_("Modifying part of model."))
         
         # Constructing the prompt for the AI
         full_prompt = f"""
@@ -485,7 +485,7 @@ class MessagesCollector(DomainBehavior):
         Include only the code of the modified part of the model. I do not want any code block markers like ```python.
         Do not provide any explanations, only the code. Keep the indentation, it is really important.
         """
-        logging.debug("Modification part prompt created for model")
+        logging.debug(_("Modification part prompt created for model"))
         return full_prompt
 
     @abstractmethod
@@ -501,7 +501,7 @@ class MessagesCollector(DomainBehavior):
         """
         Placeholder method for future implementation.
         """
-        logging.info("Validation not implemented for model: %s", model_name)
+        logging.info(_("Validation not implemented for model: %s", model_name))
         pass
 
 class ChatGPTDevsAdapter(DevsAIAdapter):
@@ -512,10 +512,10 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
     def __init__(self, api_key):
         super().__init__()
         if not api_key:
-            raise ValueError("API key is required for ChatGPT.")
+            raise ValueError(_("API key is required for ChatGPT."))
         self.api_key = api_key
         self.api_client = OpenAI(api_key=self.api_key)  # Instancie le client API ici
-        logging.info("ChatGPTDevsAdapter initialized with provided API key.")
+        logging.info(_("ChatGPTDevsAdapter initialized with provided API key."))
 
     def generate_output(self, prompt):
         """
@@ -531,8 +531,8 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
             )
             return response.choices[0].message.content
         except Exception as e:
-            logging.error("Erreur lors de la génération de la sortie: %s", str(e))
-            return f"An error occurred while generating the output: {e}"
+            logging.error(__("Error while generating output: %s", str(e)))
+            return _(f"An error occurred while generating the output: {e}")
 
 class OllamaDevsAdapter(DevsAIAdapter):
     """
@@ -541,25 +541,32 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
     def __init__(self, port, model_name='llama3.1'):
         super().__init__()
+
         if not port:
             raise ValueError("Le port est requis pour Ollama.")
+        
+        ### local copy
         self.port = port
         self.model_name = model_name
-        logging.info(f"OllamaDevsAdapter initialisé avec le port {port} et le modèle {model_name}.")
+        # logging.info(_(f"OllamaDevsAdapter initialized with port {port} and model {model_name}."))
 
         # Vérification de l'installation d'Ollama
         if not self._is_ollama_installed():
             self._prompt_install_ollama()
 
+        # Vérification si le serveur est lancé au démarrage
+        if not self._is_server_running():
+            logging.info(_("The Ollama server is not running. Attempting to start..."))
+            self._start_server()
+        else:
+            logging.info(_("The Ollama server is already running."))
+
         # Téléchargement du modèle spécifié
         self._ensure_model_downloaded()
 
-        # Vérification si le serveur est lancé au démarrage
-        if not self._is_server_running():
-            logging.info("Le serveur Ollama n'est pas lancé. Tentative de démarrage...")
-            self._start_server()
-        else:
-            logging.info("Le serveur Ollama est déjà en cours d'exécution.")
+        # Restart the server after loading the model
+        # logging.info(_("Restarting the Ollama server to load the new model..."))
+        # self._restart_server()  # Ensure you implement this method
 
     def _is_ollama_installed(self):
         """ Vérifie si Ollama est installé en cherchant son exécutable. """
@@ -568,19 +575,19 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
     def _prompt_install_ollama(self):
         """ Affiche une fenêtre `wx` pour proposer l'installation d'Ollama. """
-        app = wx.App(False)
-        message = "Ollama n'est pas installé. Voulez-vous l'installer maintenant ?"
-        dialog = wx.MessageDialog(None, message, "Installation d'Ollama", wx.YES_NO | wx.ICON_QUESTION)
+        # app = wx.App(False)
+        message = _("Ollama is not installed. Would you like to install it now?")
+        dialog = wx.MessageDialog(None, message, _("Ollama install"), wx.YES_NO | wx.ICON_QUESTION)
         
         if dialog.ShowModal() == wx.ID_YES:
-            logging.info("Lancement de l'installation d'Ollama...")
+            logging.info(_("Starting the installation of Ollama..."))
             self._install_ollama()
         else:
-            logging.error("Ollama est requis pour exécuter cette classe.")
-            raise RuntimeError("Ollama n'est pas installé et est requis pour exécuter cette classe.")
-        
+            logging.error(_("Ollama is required to run this class."))
+            raise RuntimeError(_("Ollama is not installed and is required to run this class."))
+                
         dialog.Destroy()
-        app.MainLoop()
+        # app.MainLoop()
 
     def _install_ollama(self):
         """ Installe Ollama selon le système d'exploitation. """
@@ -600,17 +607,19 @@ class OllamaDevsAdapter(DevsAIAdapter):
                 
                 # Exécution de l'installateur
                 subprocess.run([ollama_path], check=True)
-            logging.info("Installation d'Ollama terminée.")
+
+            logging.info(_("Ollama installation completed. Restart devsimpy and the terminal if necessary."))
+
         except subprocess.CalledProcessError as e:
-            logging.error("Erreur lors de l'installation d'Ollama: %s", e)
-            raise RuntimeError("Installation d'Ollama échouée.")
+            logging.error(_("Error during Ollama installation: %s"), e)
+            raise RuntimeError(_("Ollama installation failed."))
 
     def _show_download_message(self, url, dest_path):
         """Affiche une fenêtre wx avec le message de téléchargement sans interférer avec l'application wx existante."""
-        frame = wx.Frame(None, -1, "Téléchargement", size=(500, 100))
+        frame = wx.Frame(None, -1, _("Download"), size=(500, 100))
         panel = wx.Panel(frame, -1)
         
-        text = wx.StaticText(panel, -1, "Téléchargement de Ollama en cours...", pos=(50, 20))
+        text = wx.StaticText(panel, -1, _("Downloading..."), pos=(50, 20))
         font = text.GetFont()
         font.PointSize += 2
         font = font.Bold()
@@ -635,41 +644,68 @@ class OllamaDevsAdapter(DevsAIAdapter):
         """ Démarre le serveur Ollama en arrière-plan. """
         try:
             subprocess.Popen(["ollama", "serve"])
-            logging.info("Serveur Ollama démarré avec succès.")
+            logging.info(_("Ollama starts with success."))
         except Exception as e:
-            logging.error("Impossible de démarrer le serveur Ollama: %s", str(e))
-            raise RuntimeError("Impossible de démarrer le serveur Ollama.")
+            logging.error(_("Failed to start the Ollama server: %s"), str(e))
+            raise RuntimeError(_("Failed to start the Ollama server"))
+
+    def _stop_server(self):
+        """Stop the Ollama server."""
+        if not self._is_server_running():
+            return
+        
+        try:
+            # This is a placeholder command; replace it with the actual command to stop your server
+            subprocess.run(["ollama", "stop"], check=True)
+            logging.info("Ollama server stopped successfully.")
+        except subprocess.CalledProcessError as e:
+            logging.error("Failed to stop the Ollama server: %s", str(e))
+            raise RuntimeError("Could not stop the Ollama server.")
+
+    def _restart_server(self):
+        """Restart the Ollama server."""
+
+        if not self._is_server_running():
+            return
+        
+        if self._is_server_running():
+            logging.info("Stopping the Ollama server...")
+            self._stop_server()  # Stop the server first
+        
+        logging.info("Starting the Ollama server...")
+        self._start_server()  # Start it again
 
     def _ensure_model_downloaded(self):
         """Télécharge ou met à jour le modèle spécifié via Ollama."""
+
         try:
-            logging.info(f"Téléchargement du modèle {self.model_name} si nécessaire...")
+            logging.info(_(f"Downloading model {self.model_name} if necessary..."))
             ollama.pull(self.model_name)
-            logging.info(f"Modèle {self.model_name} téléchargé avec succès.")
+            logging.info(_(f"Model {self.model_name} downloaded successfully."))
         except Exception as e:
-            logging.error(f"Erreur lors du téléchargement du modèle {self.model_name}: {e}")
-            raise RuntimeError(f"Échec du téléchargement du modèle {self.model_name}.")
+            logging.error(_(f"Error while downloading model {self.model_name}: {e}"))
+            raise RuntimeError(_(f"Failed to download model {self.model_name}."))
 
     def generate_output(self, prompt):
         """
         Génère une sortie en utilisant l'API Ollama basée sur le prompt donné.
         Vérifie d'abord si le serveur est en cours d'exécution, et le démarre si nécessaire.
         """
-        # Vérifier si le serveur est lancé avant d'envoyer le prompt
+        # Check if the server is running before sending the prompt
         if not self._is_server_running():
-            logging.info("Le serveur Ollama n'est pas actif. Tentative de démarrage...")
+            logging.info(_("The Ollama server is not active. Attempting to start..."))
             self._start_server()
 
         try:
-            # Envoyer le prompt au serveur Ollama
+            # Send the prompt to the Ollama server
             response = ollama.chat(
                 model=self.model_name,
                 messages=[{"role": "user", "content": prompt}]
             )
             return response['message']['content']
         except Exception as e:
-            logging.error("Erreur lors de la génération de la sortie: %s", str(e))
-            return f"An error occurred while generating the output: {e}"
+            logging.error(_("Error while generating output: %s", str(e)))
+            return _(f"An error occurred while generating the output: {e}")
 
 class AdapterFactory:
     _instance = None
@@ -681,7 +717,7 @@ class AdapterFactory:
         Retourne une instance unique de l'adaptateur sélectionné.
         Réinitialise l'instance si `selected_ia` a changé en cours d'exécution.
         """
-        selected_ia = builtins.__dict__.get("SELECTED_IA", "Aucun")
+        selected_ia = builtins.__dict__.get("SELECTED_IA", "")
 
         # Vérifie si l'IA sélectionnée a changé
         if AdapterFactory._current_selected_ia != selected_ia:
@@ -697,20 +733,20 @@ class AdapterFactory:
             # Validation pour ChatGPT
             if selected_ia == "ChatGPT":
                 if not api_key:
-                    AdapterFactory._show_error("API key is required for ChatGPT.")
-                    raise ValueError("API key is required for ChatGPT.")
+                    AdapterFactory._show_error(_("API key is required for ChatGPT."))
+                    raise ValueError(_("API key is required for ChatGPT."))
                 AdapterFactory._instance = ChatGPTDevsAdapter(api_key)
 
             # Validation pour Ollama
             elif selected_ia == "Ollama":
                 if not port:
-                    AdapterFactory._show_error("Port is required for Ollama.")
-                    raise ValueError("Port is required for Ollama.")
+                    AdapterFactory._show_error(_("Port is required for Ollama."))
+                    raise ValueError(_("Port is required for Ollama."))
                 AdapterFactory._instance = OllamaDevsAdapter(port)
 
             else:
-                AdapterFactory._show_error("Aucune IA sélectionnée ou IA inconnue.")
-                raise ValueError("Aucune IA sélectionnée ou IA inconnue.")
+                AdapterFactory._show_error(_("No AI selected or unknown AI."))
+                raise ValueError(_("No AI selected or unknown AI."))
 
         return AdapterFactory._instance
 
@@ -725,4 +761,4 @@ class AdapterFactory:
         """ Affiche un message d'erreur sous forme de toast avec wx. """
         app = wx.GetApp()
         if app:
-            wx.CallAfter(wx.MessageBox, message, "Erreur", wx.ICON_ERROR)
+            wx.CallAfter(wx.MessageBox, message, _("Error"), wx.ICON_ERROR)

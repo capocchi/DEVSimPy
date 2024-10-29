@@ -437,12 +437,12 @@ class ModelGeneratorWizard(Wizard):
 		bt2 = wx.RadioButton(page1, wx.NewIdRef(), _('Coupled model'))
 		
 		### Add: A. Dominici
-		# Vérification que l'IA sélectionnée est différente de "Aucun"
-		if builtins.__dict__.get('SELECTED_IA', 'Aucun') == "Aucun":
-			btgpt = wx.RadioButton(page1, wx.NewIdRef(), _('Atomic model with GPT (disabled: no IA selected)'))
+		# Vérification que l'IA sélectionnée est différente de ""
+		if not builtins.__dict__.get('SELECTED_IA', ''):
+			btgpt = wx.RadioButton(page1, wx.NewIdRef(), _('Atomic model with AI (disabled: no IA selected)'))
 			btgpt.Disable()
 		else:
-			btgpt = wx.RadioButton(page1, wx.NewIdRef(), _('Atomic model with GPT'))
+			btgpt = wx.RadioButton(page1, wx.NewIdRef(), _('Atomic model with AI'))
 
 		if wx.VERSION_STRING >= '4.0':
 			bt1.SetToolTipString = bt1.SetToolTip
@@ -576,22 +576,22 @@ class ModelGeneratorWizard(Wizard):
 		page2.add_stuff(sb1)
 
 		# Création d'une page pour le modèle atomique avec GPT
-		page_gpt = wizard_page(self, _('Modèle Atomique (AMD) avec GPT'))
-		properties_box_sizer = wx.StaticBoxSizer(wx.StaticBox(page_gpt, wx.NewIdRef(), _('Propriétés')), orient=wx.VERTICAL)
+		page_gpt = wizard_page(self, _('Atomic Model (AMD) with AI'))
+		properties_box_sizer = wx.StaticBoxSizer(wx.StaticBox(page_gpt, wx.NewIdRef(), _('Properties')), orient=wx.VERTICAL)
 		main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
 
 		# Ajustement à 10 lignes et 2 colonnes pour inclure tous les éléments dans le FlexGridSizer
 		flex_grid_sizer = wx.FlexGridSizer(10, 2, 3, 3)
 
 		# Création des cases à cocher
-		checkbox_default_python_file = wx.CheckBox(page_gpt, wx.NewIdRef(), _('Fichier Python par défaut'))
+		checkbox_default_python_file = wx.CheckBox(page_gpt, wx.NewIdRef(), _('Default python file'))
 		checkbox_default_python_file.SetValue(True)
 		if wx.VERSION_STRING >= '4.0': checkbox_default_python_file.SetToolTipString = checkbox_default_python_file.SetToolTip
-		checkbox_default_python_file.SetToolTipString(_("Choisir un fichier Python à partir d'un répertoire spécifique"))
+		checkbox_default_python_file.SetToolTipString(_("Choose python file from specific directory"))
 
-		checkbox_no_plugin_file = wx.CheckBox(page_gpt, wx.NewIdRef(), _('Aucun fichier plugin'))
+		checkbox_no_plugin_file = wx.CheckBox(page_gpt, wx.NewIdRef(), _('No plugin file'))
 		if wx.VERSION_STRING >= '4.0': checkbox_no_plugin_file.SetToolTipString = checkbox_no_plugin_file.SetToolTip
-		checkbox_no_plugin_file.SetToolTipString(_("Choisir un fichier plugin à partir d'un répertoire spécifique"))
+		checkbox_no_plugin_file.SetToolTipString(_("Choose plugin file from specific directory"))
 		checkbox_no_plugin_file.SetValue(True)
 
 		# Création de la liste déroulante pour le comportement spécifique
@@ -609,11 +609,11 @@ class ModelGeneratorWizard(Wizard):
 		flex_grid_sizer.AddMany([
 			(wx.StaticText(page_gpt, wx.NewIdRef(), _('Label')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
 			(wx.TextCtrl(page_gpt, wx.NewIdRef(), value = _("Atomic_Name"), validator=TextObjectValidator()), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-			(wx.StaticText(page_gpt, wx.NewIdRef(), _('Comportement Spécifique')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+			(wx.StaticText(page_gpt, wx.NewIdRef(), _('Specific Behavior')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
 			(combobox_specific_behavior, 0, wx.EXPAND),
-			(wx.StaticText(page_gpt, wx.NewIdRef(), _('Entrées')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+			(wx.StaticText(page_gpt, wx.NewIdRef(), _('Inputs')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
 			(wx.SpinCtrl(page_gpt, wx.NewIdRef(), '1', min=MIN_NB_PORT, max=MAX_NB_PORT), 0, wx.EXPAND),
-			(wx.StaticText(page_gpt, wx.NewIdRef(), _('Sorties')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+			(wx.StaticText(page_gpt, wx.NewIdRef(), _('Outputs')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
 			(wx.SpinCtrl(page_gpt, wx.NewIdRef(), '1', min=MIN_NB_PORT, max=MAX_NB_PORT), 0, wx.EXPAND),
 			(checkbox_default_python_file, 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALL, 5),
 			(filebrowse_python_file, 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALL, 5),
@@ -622,7 +622,7 @@ class ModelGeneratorWizard(Wizard):
 		])
 
 		# Ajout d'une nouvelle ligne pour la zone de texte multiligne pour le prompt
-		flex_grid_sizer.Add(wx.StaticText(page_gpt, wx.NewIdRef(), _('Prompt du modèle')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL)
+		flex_grid_sizer.Add(wx.StaticText(page_gpt, wx.NewIdRef(), _('Model prompt')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL)
 		flex_grid_sizer.Add(wx.TextCtrl(page_gpt, wx.NewIdRef(), value="", style=wx.TE_MULTILINE, size=(300, 100)), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL)
 
 		# Ajout des éléments à la boîte principale pour la page GPT
@@ -1075,9 +1075,9 @@ class ModelGeneratorWizard(Wizard):
 						if self.type=='Atomic':
 							string = atomicCode(self.label)
 						elif self.type=='AtomicGPT':
-							selected_ia = builtins.__dict__.get('SELECTED_IA', 'Aucun')  # 'Aucun' par défaut si rien n'est sélectionné
+							selected_ia = builtins.__dict__.get('SELECTED_IA', '')  # '' par défaut si rien n'est sélectionné
 
-							if selected_ia and selected_ia != "Aucun":
+							if selected_ia and selected_ia:
 								# Code spécifique pour ChatGPT
 								param = builtins.__dict__.get('PARAMS_IA')
 
@@ -1100,7 +1100,7 @@ class ModelGeneratorWizard(Wizard):
 								# Stocker ou traiter le résultat généré par ChatGPT
 								string = result
 							else:
-								print("Aucune IA sélectionnée.")
+								print(_("No AI selected."))
 						else:
 							string = coupledCode(self.label)
 						
