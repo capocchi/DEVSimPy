@@ -1110,7 +1110,7 @@ class ModelGeneratorWizard(Wizard):
 						# elif self.type=='AtomicAI':
 						# 	selected_ia = builtins.__dict__.get('SELECTED_IA', '')  # '' par défaut si rien n'est sélectionné
 
-							if selected_ia and selected_ia != "Aucun":
+							if selected_ia and selected_ia:
 								# Code spécifique pour ChatGPT
 								param = builtins.__dict__.get('PARAMS_IA')
 
@@ -1133,7 +1133,7 @@ class ModelGeneratorWizard(Wizard):
 								# Stocker ou traiter le résultat généré par ChatGPT
 								string = result
 							else:
-								print("Aucune IA sélectionnée.")
+								print(_("No AI selected."))
 						else:
 							string = coupledCode(self.label)
 
