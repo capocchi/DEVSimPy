@@ -82,7 +82,7 @@ class DevsAIAdapter(ABC):
         Additional details:
         {prompt}
         """
-        logging.debug("Prompt created successfully for model: %s", model_name)
+        logging.debug(_("Prompt created successfully for model: %s"), model_name)
         return full_prompt
 
     def modify_model_prompt(self, code, prompt):
@@ -90,7 +90,7 @@ class DevsAIAdapter(ABC):
         Generates a prompt to modify an existing DEVS model.
         Takes into account the model name, the current code, and additional details.
         """
-        logging.info("Modifying model")
+        logging.info(_("Modifying model"))
         
         # Constructing the prompt for the AI
         full_prompt = f"""
@@ -132,7 +132,7 @@ class DevsAIAdapter(ABC):
         Include only the code of the modified part of the model. Do not include any code block markers like ```python.
         Do not provide any explanations, only the code. Keep the indentation, it is really important.
         """
-        logging.debug("Modification part prompt created for model")
+        logging.debug(_("Modification part prompt created for model"))
         return full_prompt
 
     @abstractmethod
@@ -148,7 +148,7 @@ class DevsAIAdapter(ABC):
         """
         Placeholder method for future implementation.
         """
-        logging.info("Validation not implemented for model: %s", model_name)
+        logging.info(_("Validation not implemented for model: %s", model_name))
         pass
 
 ##########################################################
@@ -292,9 +292,11 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
         if not port:
             raise ValueError("Le port est requis pour Ollama.")
+        
+        ### local copy
         self.port = port
         self.model_name = model_name
-        logging.info(f"OllamaDevsAdapter initialisé avec le port {port} et le modèle {model_name}.")
+        # logging.info(_(f"OllamaDevsAdapter initialized with port {port} and model {model_name}."))
 
         # Vérification de l'installation d'Ollama
         if not self._is_ollama_installed():
@@ -524,18 +526,45 @@ class OllamaDevsAdapter(DevsAIAdapter):
             logging.error(f"Error while downloading model {self.model_name}: {e.stderr}")
             raise RuntimeError(f"Failed to download model {self.model_name}.")
         except Exception as e:
-            logging.error("Impossible de démarrer le serveur Ollama: %s", str(e))
-            raise RuntimeError("Impossible de démarrer le serveur Ollama.")
+            logging.error(_("Failed to start the Ollama server: %s"), str(e))
+            raise RuntimeError(_("Failed to start the Ollama server"))
+
+    def _stop_server(self):
+        """Stop the Ollama server."""
+        if not self._is_server_running():
+            return
+        
+        try:
+            # This is a placeholder command; replace it with the actual command to stop your server
+            subprocess.run(["ollama", "stop"], check=True)
+            logging.info("Ollama server stopped successfully.")
+        except subprocess.CalledProcessError as e:
+            logging.error("Failed to stop the Ollama server: %s", str(e))
+            raise RuntimeError("Could not stop the Ollama server.")
+
+    def _restart_server(self):
+        """Restart the Ollama server."""
+
+        if not self._is_server_running():
+            return
+        
+        if self._is_server_running():
+            logging.info("Stopping the Ollama server...")
+            self._stop_server()  # Stop the server first
+        
+        logging.info("Starting the Ollama server...")
+        self._start_server()  # Start it again
 
     def _ensure_model_downloaded(self):
         """Télécharge ou met à jour le modèle spécifié via Ollama."""
+
         try:
-            logging.info(f"Téléchargement du modèle {self.model_name} si nécessaire...")
+            logging.info(_(f"Downloading model {self.model_name} if necessary..."))
             ollama.pull(self.model_name)
-            logging.info(f"Modèle {self.model_name} téléchargé avec succès.")
+            logging.info(_(f"Model {self.model_name} downloaded successfully."))
         except Exception as e:
-            logging.error(f"Erreur lors du téléchargement du modèle {self.model_name}: {e}")
-            raise RuntimeError(f"Échec du téléchargement du modèle {self.model_name}.")
+            logging.error(_(f"Error while downloading model {self.model_name}: {e}"))
+            raise RuntimeError(_(f"Failed to download model {self.model_name}."))
 
     def generate_output(self, prompt):
         """
@@ -555,6 +584,6 @@ class OllamaDevsAdapter(DevsAIAdapter):
             )
             return response['message']['content']
         except Exception as e:
-            logging.error("Erreur lors de la génération de la sortie: %s", str(e))
-            return f"An error occurred while generating the output: {e}"
+            logging.error(_("Error while generating output: %s", str(e)))
+            return _(f"An error occurred while generating the output: {e}")
 
