@@ -28,12 +28,16 @@ import subprocess
 import builtins
 import wx
 import ollama
+import os
+import sys
+import urllib.request
+
 
 import gettext
 _ = gettext.gettext
 
 # Configuration de base du logging
-logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class DevsAIAdapter(ABC):
     """
@@ -283,13 +287,21 @@ class OllamaDevsAdapter(DevsAIAdapter):
     Adaptateur spécifique pour Ollama, utilisé pour générer des modèles DEVS.
     """
 
-    def __init__(self, port):
+    def __init__(self, port, model_name='llama3.1'):
         super().__init__()
 
         if not port:
-            raise ValueError("Port is required for Ollama.")
+            raise ValueError("Le port est requis pour Ollama.")
         self.port = port
-        logging.info("OllamaDevsAdapter initialized with provided port.")
+        self.model_name = model_name
+        logging.info(f"OllamaDevsAdapter initialisé avec le port {port} et le modèle {model_name}.")
+
+        # Vérification de l'installation d'Ollama
+        if not self._is_ollama_installed():
+            self._prompt_install_ollama()
+
+        # Téléchargement du modèle spécifié
+        self._ensure_model_downloaded()
 
             # Vérification si le serveur est lancé au démarrage
             if not self._is_server_running():
@@ -513,7 +525,17 @@ class OllamaDevsAdapter(DevsAIAdapter):
             raise RuntimeError(f"Failed to download model {self.model_name}.")
         except Exception as e:
             logging.error("Impossible de démarrer le serveur Ollama: %s", str(e))
-            raise RuntimeError("Failed to start Ollama server.")
+            raise RuntimeError("Impossible de démarrer le serveur Ollama.")
+
+    def _ensure_model_downloaded(self):
+        """Télécharge ou met à jour le modèle spécifié via Ollama."""
+        try:
+            logging.info(f"Téléchargement du modèle {self.model_name} si nécessaire...")
+            ollama.pull(self.model_name)
+            logging.info(f"Modèle {self.model_name} téléchargé avec succès.")
+        except Exception as e:
+            logging.error(f"Erreur lors du téléchargement du modèle {self.model_name}: {e}")
+            raise RuntimeError(f"Échec du téléchargement du modèle {self.model_name}.")
 
     def generate_output(self, prompt):
         """
