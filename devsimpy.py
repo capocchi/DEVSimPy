@@ -137,6 +137,7 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 				'PARAMS_IA' : {
 					'CHATGPT_API_KEY' : "",
 					'OLLAMA_PORT' : "11434",
+					'OLLAMA_MODEL' : "mistral",
 				},
 				'NB_HISTORY_UNDO': 5, # number of undo
 				'OUT_DIR': 'out', # name of local output directory (composed by all .dat, .txt files)
