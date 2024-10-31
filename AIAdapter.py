@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 from openai import OpenAI
-from Decorators import BuzyCursorNotification, cond_decorator
+from Decorators import BuzyCursorNotification, cond_decorator, SpinningProgressBar
 import socket
 import subprocess
 import builtins
@@ -24,7 +24,7 @@ class DevsAIAdapter(ABC):
     This class defines the base methods that child classes can override
     or use as is to interact with specific generative AI models.
     """
-    def __init__(self):
+    def __init__(self, parent=None):
         self.model_types = ["Générateur", "Collecteur", "Afficheur", "Défaut"]
         logging.info(_("DevsAIAdapter initialized with model types: %s"), self.model_types)
     
@@ -509,11 +509,12 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
     Adaptateur spécifique pour ChatGPT, utilisant GPT-4 pour générer des modèles DEVS.
     """
 
-    def __init__(self, api_key):
+    def __init__(self, api_key=None, parent=None):
         super().__init__()
         if not api_key:
             raise ValueError(_("API key is required for ChatGPT."))
         self.api_key = api_key
+        self.wxparent = parent
         self.api_client = OpenAI(api_key=self.api_key)  # Instancie le client API ici
         logging.info(_("ChatGPTDevsAdapter initialized with provided API key."))
 
@@ -539,7 +540,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
     Adaptateur spécifique pour Ollama, utilisé pour générer des modèles DEVS.
     """
 
-    def __init__(self, port, model_name='llama3.1'):
+    def __init__(self, port='11434', model_name='mistral', parent=None):
         super().__init__()
 
         if not port:
@@ -547,6 +548,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
         
         ### local copy
         self.port = port
+        self.wxparent = parent
         self.model_name = model_name
         # logging.info(_(f"OllamaDevsAdapter initialized with port {port} and model {model_name}."))
 
@@ -642,12 +644,16 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
     def _start_server(self):
         """ Démarre le serveur Ollama en arrière-plan. """
+        frame = SpinningProgressBar(self.wxparent, title=_("Lancement du serveur Ollama"))
+        frame.show()
         try:
             subprocess.Popen(["ollama", "serve"])
             logging.info(_("Ollama starts with success."))
         except Exception as e:
             logging.error(_("Failed to start the Ollama server: %s"), str(e))
+            frame.stop()
             raise RuntimeError(_("Failed to start the Ollama server"))
+        frame.stop()
 
     def _stop_server(self):
         """Stop the Ollama server."""
@@ -677,14 +683,17 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
     def _ensure_model_downloaded(self):
         """Télécharge ou met à jour le modèle spécifié via Ollama."""
-
+        frame = SpinningProgressBar(self.wxparent, title=_("Telechatgement du model ") + self.model_name)
+        frame.show()
         try:
             logging.info(_(f"Downloading model {self.model_name} if necessary..."))
             ollama.pull(self.model_name)
             logging.info(_(f"Model {self.model_name} downloaded successfully."))
         except Exception as e:
             logging.error(_(f"Error while downloading model {self.model_name}: {e}"))
+            frame.stop()
             raise RuntimeError(_(f"Failed to download model {self.model_name}."))
+        frame.stop()
 
     def generate_output(self, prompt):
         """
@@ -712,7 +721,17 @@ class AdapterFactory:
     _current_selected_ia = None  # Suivi de l'état actuel de l'IA sélectionnée
 
     @staticmethod
-    def get_adapter_instance(params=None):
+    def verify_adapter_instance():
+        """ 
+        Verifie que l'instance de l'adapteur fonctionne
+        """
+        return False if (AdapterFactory._instance is None) else True
+
+    
+
+
+    @staticmethod
+    def get_adapter_instance(parent=None, params=None):
         """ 
         Retourne une instance unique de l'adaptateur sélectionné.
         Réinitialise l'instance si `selected_ia` a changé en cours d'exécution.
@@ -735,14 +754,14 @@ class AdapterFactory:
                 if not api_key:
                     AdapterFactory._show_error(_("API key is required for ChatGPT."))
                     raise ValueError(_("API key is required for ChatGPT."))
-                AdapterFactory._instance = ChatGPTDevsAdapter(api_key)
+                AdapterFactory._instance = ChatGPTDevsAdapter(parent=parent, api_key=api_key)
 
             # Validation pour Ollama
             elif selected_ia == "Ollama":
                 if not port:
                     AdapterFactory._show_error(_("Port is required for Ollama."))
                     raise ValueError(_("Port is required for Ollama."))
-                AdapterFactory._instance = OllamaDevsAdapter(port)
+                AdapterFactory._instance = OllamaDevsAdapter(parent=parent, port=port)
 
             else:
                 AdapterFactory._show_error(_("No AI selected or unknown AI."))
