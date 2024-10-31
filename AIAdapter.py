@@ -444,11 +444,14 @@ class OllamaDevsAdapter(DevsAIAdapter):
     @cond_decorator(builtins.__dict__.get('GUI_FLAG', True), ProgressNotification(_("Starting Server")))
     def _start_server(self):
         """ Démarre le serveur Ollama en arrière-plan. """
+        frame = SpinningProgressBar(self.wxparent, title=_("Lancement du serveur Ollama"))
+        frame.show()
         try:
             subprocess.Popen(["ollama", "serve"])
             logging.info(_("Ollama starts with success."))
         except Exception as e:
             logging.error(_("Failed to start the Ollama server: %s"), str(e))
+            frame.stop()
             raise RuntimeError(_("Failed to start the Ollama server"))
         
     def _stop_server(self):
@@ -540,7 +543,17 @@ class AdapterFactory:
     _current_selected_ia = None  # Suivi de l'état actuel de l'IA sélectionnée
 
     @staticmethod
-    def get_adapter_instance(params=None):
+    def verify_adapter_instance():
+        """ 
+        Verifie que l'instance de l'adapteur fonctionne
+        """
+        return False if (AdapterFactory._instance is None) else True
+
+    
+
+
+    @staticmethod
+    def get_adapter_instance(parent=None, params=None):
         """ 
         Retourne une instance unique de l'adaptateur sélectionné.
         Réinitialise l'instance si `selected_ia` a changé en cours d'exécution.
@@ -563,14 +576,14 @@ class AdapterFactory:
                 if not api_key:
                     AdapterFactory._show_error(_("API key is required for ChatGPT."))
                     raise ValueError(_("API key is required for ChatGPT."))
-                AdapterFactory._instance = ChatGPTDevsAdapter(api_key)
+                AdapterFactory._instance = ChatGPTDevsAdapter(parent=parent, api_key=api_key)
 
             # Validation pour Ollama
             elif selected_ia == "Ollama":
                 if not port:
                     AdapterFactory._show_error(_("Port is required for Ollama."))
                     raise ValueError(_("Port is required for Ollama."))
-                AdapterFactory._instance = OllamaDevsAdapter(port)
+                AdapterFactory._instance = OllamaDevsAdapter(parent=parent, port=port)
 
             else:
                 AdapterFactory._show_error(_("No AI selected or unknown AI."))
