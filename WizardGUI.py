@@ -239,6 +239,7 @@ class wizard_page(WizardPage):
 		WizardPage.__init__(self, parent)
 		self.next = self.prev = None
 		self.sizer = wx.BoxSizer(wx.VERTICAL)
+		self.parent = parent
 		self.title = wx.StaticText(self, wx.NewIdRef(), title)
 		self.title.SetFont(wx.Font(18, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
 		if wx.VERSION_STRING<'4.0':
@@ -981,7 +982,7 @@ class ModelGeneratorWizard(Wizard):
 								param = builtins.__dict__.get('PARAMS_IA')
 
 								# Créer ou récupérer l'instance de ChatGPTDevsAdapter via la factory
-								adapter = AdapterFactory.get_adapter_instance(param)
+								adapter = AdapterFactory.get_adapter_instance(parent=self.GetParent().GetParent(), params=param)
 
 								# Définir les paramètres requis pour le prompt
 								model_name = self.label

@@ -284,3 +284,48 @@ def redirectStdout(f):
 			sys.stdout = stdout
 		return output
 	return wrapper
+
+class SpinningProgressBar(wx.Frame):
+    def __init__(self, parent=None, title="Spinning Progress"):
+        super().__init__(parent, title=title, size=(500, 150))
+        self.is_active = False  # Variable de contrôle pour la barre de progression
+
+        # Crée le panel et le sizer
+        panel = wx.Panel(self)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+
+        # Texte d'instruction
+        self.label = wx.StaticText(panel, label="Téléchargement en cours, veuillez patienter...")
+        vbox.Add(self.label, flag=wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, border=10)
+
+        # Créer la barre de progression
+        self.gauge = wx.Gauge(panel, range=100, style=wx.GA_HORIZONTAL)
+        vbox.Add(self.gauge, flag=wx.EXPAND | wx.ALL, border=20)
+
+        panel.SetSizer(vbox)
+        self.Centre()
+
+    def show(self):
+        """Démarre la fenêtre avec la barre de progression."""
+        self.is_active = True
+        self.Show()
+        self.Raise()  # Assure que la fenêtre est bien visible au premier plan
+        self.Refresh()  # Force l'affichage de la fenêtre si elle ne s'affiche pas immédiatement
+        
+        # Démarre un thread pour faire tourner la barre de progression
+        threading.Thread(target=self._run_spinner, daemon=True).start()
+
+    def _run_spinner(self):
+        """Méthode privée pour animer la barre pour qu'elle atteigne 100% puis revienne à zéro."""
+        while self.is_active:
+            for i in range(101):
+                if not self.is_active:
+                    break
+                wx.CallAfter(self.gauge.SetValue, i)
+                time.sleep(0.02)  # Remplit la barre en environ 2 secondes
+            wx.CallAfter(self.gauge.SetValue, 0)  # Réinitialise la barre à zéro
+
+    def stop(self):
+        """Arrête la barre de progression et cache la fenêtre."""
+        self.is_active = False
+        self.Hide()  # Cache la fenêtre sans la détruire, ce qui permet de la réutiliser si besoin
