@@ -1115,7 +1115,7 @@ class ModelGeneratorWizard(Wizard):
 								param = builtins.__dict__.get('PARAMS_IA')
 
 								# Créer ou récupérer l'instance de ChatGPTDevsAdapter via la factory
-								adapter = AdapterFactory.get_adapter_instance(param)
+								adapter = AdapterFactory.get_adapter_instance(parent=self.GetParent().GetParent(), params=param)
 
 						# 		# Définir les paramètres requis pour le prompt
 						# 		model_name = self.label
