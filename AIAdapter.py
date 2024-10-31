@@ -287,7 +287,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
     Adaptateur spécifique pour Ollama, utilisé pour générer des modèles DEVS.
     """
 
-    def __init__(self, port, model_name='llama3.1'):
+    def __init__(self, port='11434', model_name='mistral', parent=None):
         super().__init__()
 
         if not port:
@@ -295,6 +295,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
         
         ### local copy
         self.port = port
+        self.wxparent = parent
         self.model_name = model_name
         # logging.info(_(f"OllamaDevsAdapter initialized with port {port} and model {model_name}."))
 
@@ -460,11 +461,14 @@ class OllamaDevsAdapter(DevsAIAdapter):
     @cond_decorator(builtins.__dict__.get('GUI_FLAG', True), ProgressNotification(_("Starting Server")))
     def _start_server(self):
         """ Démarre le serveur Ollama en arrière-plan. """
+        frame = SpinningProgressBar(self.wxparent, title=_("Lancement du serveur Ollama"))
+        frame.show()
         try:
             subprocess.Popen(["ollama", "serve"])
             logging.info(_("Ollama starts with success."))
         except Exception as e:
             logging.error(_("Failed to start the Ollama server: %s"), str(e))
+            frame.stop()
             raise RuntimeError(_("Failed to start the Ollama server"))
         
     def _stop_server(self):
@@ -557,14 +561,17 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
     def _ensure_model_downloaded(self):
         """Télécharge ou met à jour le modèle spécifié via Ollama."""
-
+        frame = SpinningProgressBar(self.wxparent, title=_("Telechatgement du model ") + self.model_name)
+        frame.show()
         try:
             logging.info(_(f"Downloading model {self.model_name} if necessary..."))
             ollama.pull(self.model_name)
             logging.info(_(f"Model {self.model_name} downloaded successfully."))
         except Exception as e:
             logging.error(_(f"Error while downloading model {self.model_name}: {e}"))
+            frame.stop()
             raise RuntimeError(_(f"Failed to download model {self.model_name}."))
+        frame.stop()
 
     def generate_output(self, prompt):
         """
