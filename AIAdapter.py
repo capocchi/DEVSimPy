@@ -400,11 +400,14 @@ class OllamaDevsAdapter(DevsAIAdapter):
     @cond_decorator(builtins.__dict__.get('GUI_FLAG', True), ProgressNotification(_("Starting Server")))
     def _start_server(self):
         """ Démarre le serveur Ollama en arrière-plan. """
+        frame = SpinningProgressBar(self.wxparent, title=_("Lancement du serveur Ollama"))
+        frame.show()
         try:
             subprocess.Popen(["ollama", "serve"])
             logging.info(_("Ollama starts with success."))
         except Exception as e:
             logging.error(_("Failed to start the Ollama server: %s"), str(e))
+            frame.stop()
             raise RuntimeError(_("Failed to start the Ollama server"))
         
     def _stop_server(self):
