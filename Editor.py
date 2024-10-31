@@ -218,6 +218,7 @@ class PythonSTC(stc.StyledTextCtrl):
 		stc.StyledTextCtrl.__init__(self, parent, ID, pos, size, style)
 		
 		# Do we want to automatically pop up command completion options?
+		
 		self.autoComplete = True
 		self.autoCompleteIncludeMagic = True
 		self.autoCompleteIncludeSingle = True
