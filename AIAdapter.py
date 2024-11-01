@@ -376,7 +376,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
     def _prompt_install_ollama(self):
         """ Affiche une fenêtre `wx` pour proposer l'installation d'Ollama. """
-        # app = wx.App(False)
+        
         message = _("Ollama is not installed. Would you like to install it now?")
         dialog = wx.MessageDialog(None, message, _("Ollama install"), wx.YES_NO | wx.ICON_QUESTION)
         
@@ -388,8 +388,8 @@ class OllamaDevsAdapter(DevsAIAdapter):
             raise RuntimeError(_("Ollama is not installed and is required to run this class."))
                 
         dialog.Destroy()
-        # app.MainLoop()
 
+    @cond_decorator(builtins.__dict__.get('GUI_FLAG', True), ProgressNotification(_(f"Download")))        
     def _install_ollama(self):
         """ Installe Ollama selon le système d'exploitation. """
         platform = sys.platform
@@ -404,8 +404,10 @@ class OllamaDevsAdapter(DevsAIAdapter):
                 download_url = "https://ollama.com/download/OllamaSetup.exe"
                 
                 # Téléchargement avec message de chargement
-                self._show_download_message(download_url, ollama_path)
-                
+                # self._show_download_message(download_url, ollama_path)
+                # Effectue le téléchargement
+                urllib.request.urlretrieve(download_url, ollama_path)
+
                 # Exécution de l'installateur
                 subprocess.run([ollama_path], check=True)
 
@@ -415,25 +417,25 @@ class OllamaDevsAdapter(DevsAIAdapter):
             logging.error(_("Error during Ollama installation: %s"), e)
             raise RuntimeError(_("Ollama installation failed."))
 
-    def _show_download_message(self, url, dest_path):
-        """Affiche une fenêtre wx avec le message de téléchargement sans interférer avec l'application wx existante."""
-        frame = wx.Frame(None, -1, _("Download"), size=(500, 100))
-        panel = wx.Panel(frame, -1)
+    # def _show_download_message(self, url, dest_path):
+    #     """Affiche une fenêtre wx avec le message de téléchargement sans interférer avec l'application wx existante."""
+    #     frame = wx.Frame(None, -1, _("Download"), size=(500, 100))
+    #     panel = wx.Panel(frame, -1)
         
-        text = wx.StaticText(panel, -1, _("Downloading..."), pos=(50, 20))
-        font = text.GetFont()
-        font.PointSize += 2
-        font = font.Bold()
-        text.SetFont(font)
+    #     text = wx.StaticText(panel, -1, _("Downloading..."), pos=(50, 20))
+    #     font = text.GetFont()
+    #     font.PointSize += 2
+    #     font = font.Bold()
+    #     text.SetFont(font)
         
-        frame.Centre()
-        frame.Show()
+    #     frame.Centre()
+    #     frame.Show()
 
-        # Effectue le téléchargement
-        urllib.request.urlretrieve(url, dest_path)
+    #     # Effectue le téléchargement
+    #     urllib.request.urlretrieve(url, dest_path)
 
-        # Ferme la fenêtre une fois le téléchargement terminé
-        frame.Close()
+    #     # Ferme la fenêtre une fois le téléchargement terminé
+    #     frame.Close()
 
     def _is_server_running(self):
         """ Vérifie si le serveur Ollama est en cours d'exécution sur le port spécifié. """
@@ -444,14 +446,11 @@ class OllamaDevsAdapter(DevsAIAdapter):
     @cond_decorator(builtins.__dict__.get('GUI_FLAG', True), ProgressNotification(_("Starting Server")))
     def _start_server(self):
         """ Démarre le serveur Ollama en arrière-plan. """
-        frame = SpinningProgressBar(self.wxparent, title=_("Lancement du serveur Ollama"))
-        frame.show()
         try:
             subprocess.Popen(["ollama", "serve"])
             logging.info(_("Ollama starts with success."))
         except Exception as e:
             logging.error(_("Failed to start the Ollama server: %s"), str(e))
-            frame.stop()
             raise RuntimeError(_("Failed to start the Ollama server"))
         
     def _stop_server(self):
@@ -537,69 +536,3 @@ class OllamaDevsAdapter(DevsAIAdapter):
             logging.error("Erreur lors de la génération de la sortie: %s", str(e))
             return f"An error occurred while generating the output: {e}"
 
-
-class AdapterFactory:
-    _instance = None
-    _current_selected_ia = None  # Suivi de l'état actuel de l'IA sélectionnée
-
-    @staticmethod
-    def verify_adapter_instance():
-        """ 
-        Verifie que l'instance de l'adapteur fonctionne
-        """
-        return False if (AdapterFactory._instance is None) else True
-
-    
-
-
-    @staticmethod
-    def get_adapter_instance(parent=None, params=None):
-        """ 
-        Retourne une instance unique de l'adaptateur sélectionné.
-        Réinitialise l'instance si `selected_ia` a changé en cours d'exécution.
-        """
-        selected_ia = builtins.__dict__.get("SELECTED_IA", "")
-
-        # Vérifie si l'IA sélectionnée a changé
-        if AdapterFactory._current_selected_ia != selected_ia:
-            AdapterFactory._instance = None  # Réinitialise l'instance
-            AdapterFactory._current_selected_ia = selected_ia  # Met à jour la sélection
-
-        # Crée une nouvelle instance si nécessaire
-        if AdapterFactory._instance is None:
-            # Récupère les paramètres d'API et de port de PARAMS_IA
-            api_key = params.get('CHATGPT_API_KEY') if params else None
-            port = params.get('OLLAMA_PORT') if params else None
-            
-            # Validation pour ChatGPT
-            if selected_ia == "ChatGPT":
-                if not api_key:
-                    AdapterFactory._show_error(_("API key is required for ChatGPT."))
-                    raise ValueError(_("API key is required for ChatGPT."))
-                AdapterFactory._instance = ChatGPTDevsAdapter(parent=parent, api_key=api_key)
-
-            # Validation pour Ollama
-            elif selected_ia == "Ollama":
-                if not port:
-                    AdapterFactory._show_error(_("Port is required for Ollama."))
-                    raise ValueError(_("Port is required for Ollama."))
-                AdapterFactory._instance = OllamaDevsAdapter(parent=parent, port=port)
-
-            else:
-                AdapterFactory._show_error(_("No AI selected or unknown AI."))
-                raise ValueError(_("No AI selected or unknown AI."))
-
-        return AdapterFactory._instance
-
-    @staticmethod
-    def reset_instance():
-        """ Réinitialise manuellement l'instance et l'IA sélectionnée. """
-        AdapterFactory._instance = None
-        AdapterFactory._current_selected_ia = None
-
-    @staticmethod
-    def _show_error(message):
-        """ Affiche un message d'erreur sous forme de toast avec wx. """
-        app = wx.GetApp()
-        if app:
-            wx.CallAfter(wx.MessageBox, message, _("Error"), wx.ICON_ERROR)
