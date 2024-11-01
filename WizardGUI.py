@@ -784,12 +784,12 @@ class ModelGeneratorWizard(Wizard):
 			page3.SetNext(page4_2)
 			page4_2.SetPrev(page3)
 
-		def onBtGptClick(evt):
+		def onBtAIClick(evt):
 			""" Atomic radio button has been pressed. 
 				We redefine its action.
 			"""
 
-			self.type = "AtomicGPT"
+			self.type = "AtomicAI"
 			page1.SetNext(page_gpt)
 			page2.SetPrev(page1)
 			page2.SetNext(page4_3)
@@ -920,7 +920,7 @@ class ModelGeneratorWizard(Wizard):
 		# Binding
 		bt1.Bind(wx.EVT_RADIOBUTTON, onBt1Click)
 		bt2.Bind(wx.EVT_RADIOBUTTON, onBt2Click)
-		btgpt.Bind(wx.EVT_RADIOBUTTON, onBtGptClick)
+		btgpt.Bind(wx.EVT_RADIOBUTTON, onBtAIClick)
 		bt5.Bind(wx.EVT_CHECKBOX, onBt5Check)
 		bt_ai.Bind(wx.EVT_BUTTON, onBtAIPromtDiag)
 		bt51.Bind(wx.EVT_CHECKBOX, onBt51Check)
@@ -1007,7 +1007,7 @@ class ModelGeneratorWizard(Wizard):
 				specific_behavior = gridSizer.GetItem(3).GetWindow()
 				self.specific_behavior = specific_behavior.GetValue()
 
-			elif self.type == 'AtomicGPT':
+			elif self.type == 'AtomicAI':
 				gridSizer = self.pages[6].sizer.GetItem(2).GetSizer().GetItem(0).GetSizer().GetItem(0).GetSizer()
 				filebrowse_python = gridSizer.GetItem(9).GetWindow()
 				filebrowse_plugin = gridSizer.GetItem(11).GetWindow()
@@ -1074,7 +1074,7 @@ class ModelGeneratorWizard(Wizard):
 					if self.python_path == '':
 						if self.type=='Atomic':
 							string = atomicCode(self.label)
-						elif self.type=='AtomicGPT':
+						elif self.type=='AtomicAI':
 							selected_ia = builtins.__dict__.get('SELECTED_IA', '')  # '' par défaut si rien n'est sélectionné
 
 							if selected_ia and selected_ia:
@@ -1103,7 +1103,6 @@ class ModelGeneratorWizard(Wizard):
 								print(_("No AI selected."))
 						else:
 							string = coupledCode(self.label)
-						
 
 						# elif self.type=='AtomicAI':
 						# 	selected_ia = builtins.__dict__.get('SELECTED_IA', '')  # '' par défaut si rien n'est sélectionné
