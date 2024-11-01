@@ -567,19 +567,21 @@ class AdapterFactory:
             if selected_ia == "ChatGPT":
                 if not api_key:
                     AdapterFactory._show_error(_("API key is required for ChatGPT."))
-                    raise ValueError(_("API key is required for ChatGPT."))
-                AdapterFactory._instance = ChatGPTDevsAdapter(parent=parent, api_key=api_key)
+                    # raise ValueError(_("API key is required for ChatGPT."))
+                else:
+                    AdapterFactory._instance = ChatGPTDevsAdapter(parent=parent, api_key=api_key)
 
             # Validation pour Ollama
             elif selected_ia == "Ollama":
                 if not port:
                     AdapterFactory._show_error(_("Port is required for Ollama."))
-                    raise ValueError(_("Port is required for Ollama."))
-                AdapterFactory._instance = OllamaDevsAdapter(parent=parent, port=port)
+                    # raise ValueError(_("Port is required for Ollama."))
+                else:
+                    AdapterFactory._instance = OllamaDevsAdapter(parent=parent, port=port)
 
             else:
                 AdapterFactory._show_error(_("No AI selected or unknown AI."))
-                raise ValueError(_("No AI selected or unknown AI."))
+                # raise ValueError(_("No AI selected or unknown AI."))
 
         return AdapterFactory._instance
 
@@ -592,9 +594,7 @@ class AdapterFactory:
     @staticmethod
     def _show_error(message):
         """ Affiche un message d'erreur sous forme de toast avec wx. """
-        app = wx.GetApp()
-        if app:
-            wx.CallAfter(wx.MessageBox, message, _("Error"), wx.ICON_ERROR)
+        wx.MessageBox(message, _("Error"), wx.ICON_ERROR)
 
 ##########################################################
 ###
@@ -608,8 +608,8 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 
     def __init__(self, api_key=None, parent=None):
         super().__init__()
-        if not api_key:
-            raise ValueError(_("API key is required for ChatGPT."))
+        # if not api_key:
+            # raise ValueError(_("API key is required for ChatGPT."))
         self.api_key = api_key
         self.wxparent = parent
         self.api_client = OpenAI(api_key=self.api_key)  # Instancie le client API ici
