@@ -638,107 +638,130 @@ class EditorPanel(wx.Panel):
 		builtins.__dict__['LOCAL_EDITOR'] = self.cb.IsChecked()
 		builtins.__dict__['EXTERNAL_EDITOR_NAME'] = self.choice.GetString(self.choice.GetCurrentSelection()) if self.choice.IsEnabled() else ""
 
-class IAPanel(wx.Panel):
-    """ Panel pour les préférences IA """
+class AIPanel(wx.Panel):
+	""" AI Panel"""
 
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
+	AI_SET = ("", "ChatGPT", "Ollama")
 
-        # Charger les paramètres sauvegardés au démarrage
-        self.load_settings()
+	def __init__(self, parent):
+		wx.Panel.__init__(self, parent)
 
-        self.InitUI()
+		# Charger les paramètres sauvegardés au démarrage
+		self.load_settings()
 
-    def InitUI(self):
-        """ Initialisation de l'interface utilisateur """
-        vbox = wx.BoxSizer(wx.VERTICAL)
+		self.InitUI()
 
-        # Choix de l'IA
-        self.st_ia = wx.StaticText(self, label=_("Sélectionnez l'IA :"))
-        self.choice_ia = wx.ComboBox(
-            self, wx.NewIdRef(), value=builtins.__dict__.get('SELECTED_IA', ''),
-            choices=["", "ChatGPT", "Ollama"], style=wx.CB_READONLY
-        )
-        if wx.VERSION_STRING >= '4.0':
-            self.choice_ia.SetToolTipString = self.choice_ia.SetToolTip
-        self.choice_ia.SetToolTipString(_("Sélectionnez une IA pour les simulations"))
+	def InitUI(self):
+		""" Init interface"""
+		vbox = wx.BoxSizer(wx.VERTICAL)
 
-        # Lier la sélection d'IA à la fonction de mise à jour de la visibilité
-        self.choice_ia.Bind(wx.EVT_COMBOBOX, self.OnIASelection)
+		# Choix de l'IA
+		self.st_ia = wx.StaticText(self, label=_("Select an AI:"))
+		self.choice_ia = wx.ComboBox(
+										self, wx.NewIdRef(), 
+										value=builtins.__dict__.get('SELECTED_IA', ''),
+										choices=AIPanel.AI_SET, 
+										style=wx.CB_READONLY
+		)
+		if wx.VERSION_STRING >= '4.0':
+			self.choice_ia.SetToolTipString = self.choice_ia.SetToolTip
+		self.choice_ia.SetToolTipString(_("Select an AI for model code generation"))
 
-        # Sauvegarder la sélection d'IA par défaut
-        self.selected_ia = self.choice_ia.GetValue()
+		# Sauvegarder la sélection d'IA par défaut
+		self.selected_ia = self.choice_ia.GetValue()
 
-        # Champ pour l'API Key de ChatGPT
-        self.st_api_key = wx.StaticText(self, label=_("API Key pour ChatGPT :"))
-        self.api_key_ctrl = wx.TextCtrl(self, style=wx.TE_PASSWORD)
-        self.api_key_ctrl.SetValue(builtins.__dict__.get('PARAMS_IA', {}).get('CHATGPT_API_KEY', ''))
-        self.api_key_ctrl.Hide()  # Masqué par défaut
+		# Champ pour l'API Key de ChatGPT
+		self.st_api_key = wx.StaticText(self, label=_("API Key:"))
+		self.api_key_ctrl = wx.TextCtrl(self, style=wx.TE_PASSWORD)
+		self.api_key_ctrl.SetValue(builtins.__dict__.get('PARAMS_IA', {}).get('CHATGPT_API_KEY', ''))
+		self.api_key_ctrl.Hide()  # Masqué par défaut
 
-        # Champ pour le Port du serveur Ollama
-        self.st_port = wx.StaticText(self, label=_("Port du serveur pour Ollama :"))
-        self.port_ctrl = wx.TextCtrl(self)
-        self.port_ctrl.SetValue(builtins.__dict__.get('PARAMS_IA', {}).get('OLLAMA_PORT', '11434'))
-        self.port_ctrl.Hide()  # Masqué par défaut
+		# Champ pour le Port du serveur Ollama
+		self.st_port = wx.StaticText(self, label=_("Server port:"))
+		self.port_ctrl = wx.TextCtrl(self)
+		self.port_ctrl.SetValue(builtins.__dict__.get('PARAMS_IA', {}).get('OLLAMA_PORT', '11434'))
+		self.port_ctrl.Hide()  # Masqué par défaut
 
-        # Ajouter les éléments au layout
-        vbox.Add(self.st_ia, flag=wx.ALL, border=5)
-        vbox.Add(self.choice_ia, flag=wx.ALL | wx.EXPAND, border=5)
-        vbox.Add(self.st_api_key, flag=wx.ALL, border=5)
-        vbox.Add(self.api_key_ctrl, flag=wx.ALL | wx.EXPAND, border=5)
-        vbox.Add(self.st_port, flag=wx.ALL, border=5)
-        vbox.Add(self.port_ctrl, flag=wx.ALL | wx.EXPAND, border=5)
+		# Ajouter les éléments au layout
+		vbox.Add(self.st_ia, flag=wx.ALL, border=5)
+		vbox.Add(self.choice_ia, flag=wx.ALL | wx.EXPAND, border=5)
+		vbox.Add(self.st_api_key, flag=wx.ALL, border=5)
+		vbox.Add(self.api_key_ctrl, flag=wx.ALL | wx.EXPAND, border=5)
+		vbox.Add(self.st_port, flag=wx.ALL, border=5)
+		vbox.Add(self.port_ctrl, flag=wx.ALL | wx.EXPAND, border=5)
 
-        self.SetSizer(vbox)
+		# Créer un hbox pour le bouton Check
+		hbox_check = wx.BoxSizer(wx.HORIZONTAL)
+		self.check_button = wx.Button(self, label=_("Check"))
+		hbox_check.Add(self.check_button, flag=wx.ALL | wx.ALIGN_LEFT)
 
-        # Afficher les champs pertinents en fonction de la sélection actuelle
-        self.UpdateFieldsVisibility()  # Appeler ici pour afficher la sélection initiale correctement
+		vbox.Add(hbox_check, flag=wx.ALL | wx.EXPAND, border=5)
 
-    def UpdateFieldsVisibility(self):
-        """ Affiche les champs pertinents selon l'IA sélectionnée. """
-        selected_ia = self.choice_ia.GetValue()
-        if selected_ia == "ChatGPT":
-            self.api_key_ctrl.Show()
-            self.st_api_key.Show()
-            self.port_ctrl.Hide()
-            self.st_port.Hide()
-        elif selected_ia == "Ollama":
-            self.port_ctrl.Show()
-            self.st_port.Show()
-            self.api_key_ctrl.Hide()
-            self.st_api_key.Hide()
-        else: 
-            self.api_key_ctrl.Hide()
-            self.st_api_key.Hide()
-            self.port_ctrl.Hide()
-            self.st_port.Hide()
-        self.Layout()
+		self.SetSizer(vbox)
 
-    def OnIASelection(self, event):
-        """ Met à jour la sélection d'IA et affiche les champs pertinents """
-        self.selected_ia = self.choice_ia.GetValue()
-        builtins.__dict__['SELECTED_IA'] = self.selected_ia
-        self.UpdateFieldsVisibility()  # Appeler UpdateFieldsVisibility pour actualiser les sous-champs
+		### Bind
+		# Lier la sélection d'IA à la fonction de mise à jour de la visibilité
+		self.choice_ia.Bind(wx.EVT_COMBOBOX, self.OnAISelection)
+		# Lier le bouton Check à la fonction de rappel
+		self.check_button.Bind(wx.EVT_BUTTON, self.OnCheck)
+	
+		# Afficher les champs pertinents en fonction de la sélection actuelle
+		self.UpdateFieldsVisibility()  # Appeler ici pour afficher la sélection initiale correctement
 
-    def load_settings(self):
-        """ Charger les paramètres sauvegardés """
-        # Initialisation des valeurs dans builtins si elles ne sont pas encore définies
-        builtins.__dict__.setdefault('SELECTED_IA', '')
-        builtins.__dict__['PARAMS_IA'].setdefault('CHATGPT_API_KEY', '')
-        builtins.__dict__['PARAMS_IA'].setdefault('OLLAMA_PORT', '11434')
+	def UpdateFieldsVisibility(self):
+		""" Affiche les champs pertinents selon l'IA sélectionnée. """
+		selected_ia = self.choice_ia.GetValue()
+		if selected_ia == "ChatGPT":
+			self.api_key_ctrl.Show()
+			self.st_api_key.Show()
+			self.port_ctrl.Hide()
+			self.st_port.Hide()
+		elif selected_ia == "Ollama":
+			self.port_ctrl.Show()
+			self.st_port.Show()
+			self.api_key_ctrl.Hide()
+			self.st_api_key.Hide()
+		else: 
+			self.api_key_ctrl.Hide()
+			self.st_api_key.Hide()
+			self.port_ctrl.Hide()
+			self.st_port.Hide()
+		self.Layout()
 
-    def OnApply(self, evt):
-        """ Applique les modifications aux valeurs de configuration """
-        # Mettre à jour `builtins` avec la sélection actuelle
-        builtins.__dict__['SELECTED_IA'] = self.choice_ia.GetValue()
-        
-        # Sauvegarder l'API Key ou le Port selon l'IA sélectionnée
-        if builtins.__dict__['SELECTED_IA'] == "ChatGPT":
-            builtins.__dict__['PARAMS_IA']['CHATGPT_API_KEY'] = self.api_key_ctrl.GetValue()
-        elif builtins.__dict__['SELECTED_IA'] == "Ollama":
-            builtins.__dict__['PARAMS_IA']['OLLAMA_PORT'] = self.port_ctrl.GetValue()
+	def OnCheck(self, event):
+		param = builtins.__dict__.get('PARAMS_IA')
 
+		# Créer ou récupérer l'instance de ChatGPTDevsAdapter via la factory
+		adapter = AdapterFactory.get_adapter_instance(None, params=param)
+		
+		if adapter:
+			wx.MessageBox(_(f"{self.selected_ia} Code Generator is ready."), _("Success"), wx.OK | wx.ICON_INFORMATION)
+		else:
+			wx.MessageBox(_(f"{self.selected_ia} Code Generator is not available."), _("Error"), wx.OK | wx.ICON_ERROR)
 
+	def OnAISelection(self, event):
+		""" Met à jour la sélection d'IA et affiche les champs pertinents """
+		self.selected_ia = self.choice_ia.GetValue()
+		builtins.__dict__['SELECTED_IA'] = self.selected_ia
+		self.UpdateFieldsVisibility()  # Appeler UpdateFieldsVisibility pour actualiser les sous-champs
+
+	def load_settings(self):
+		""" Charger les paramètres sauvegardés """
+		# Initialisation des valeurs dans builtins si elles ne sont pas encore définies
+		builtins.__dict__.setdefault('SELECTED_IA', '')
+		builtins.__dict__['PARAMS_IA'].setdefault('CHATGPT_API_KEY', '')
+		builtins.__dict__['PARAMS_IA'].setdefault('OLLAMA_PORT', '11434')
+
+	def OnApply(self, evt):
+		""" Applique les modifications aux valeurs de configuration """
+		# Mettre à jour `builtins` avec la sélection actuelle
+		builtins.__dict__['SELECTED_IA'] = self.choice_ia.GetValue()
+		
+		# Sauvegarder l'API Key ou le Port selon l'IA sélectionnée
+		if builtins.__dict__['SELECTED_IA'] == "ChatGPT":
+			builtins.__dict__['PARAMS_IA']['CHATGPT_API_KEY'] = self.api_key_ctrl.GetValue()
+		elif builtins.__dict__['SELECTED_IA'] == "Ollama":
+			builtins.__dict__['PARAMS_IA']['OLLAMA_PORT'] = self.port_ctrl.GetValue()
 
 ########################################################################
 class Preferences(wx.Toolbook):
@@ -758,7 +781,7 @@ class Preferences(wx.Toolbook):
 		"""
 
 		### don't try to translate this labels with _() because there are used to find png
-		L = [('General',"(self)"),('Simulation',"(self)"), ('Editor',"(self)"), ('IA',"(self)"), ('Plugins',"(self)")]
+		L = [('General',"(self)"),('Simulation',"(self)"), ('Editor',"(self)"), ('AI',"(self)"), ('Plugins',"(self)")]
 
 		# make an image list using the LBXX images
 		il = wx.ImageList(25, 25)
@@ -1009,6 +1032,8 @@ class TestApp(wx.App):
 		builtins.__dict__['DEFAULT_SIM_STRATEGY'] = 'bag-based'
 		builtins.__dict__['DEFAULT_PYPDEVS_SIM_STRATEGY'] = 'original'
 		builtins.__dict__['DEFAULT_PLOT_DYN_FREQ'] = 100
+		builtins.__dict__['EXTERNAL_EDITOR_NAME'] = ""
+		builtins.__dict__['PARAMS_IA'] = {}
 		builtins.__dict__['LOCAL_EDITOR'] = False
 		builtins.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
 		builtins.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}
