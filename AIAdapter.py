@@ -32,12 +32,14 @@ import os
 import sys
 import urllib.request
 
+from Decorators import BuzyCursorNotification, cond_decorator, ProgressNotification
+from Utilities import check_internet
 
 import gettext
 _ = gettext.gettext
 
 # Configuration de base du logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class DevsAIAdapter(ABC):
     """
@@ -183,7 +185,6 @@ class AdapterFactory:
         # Crée une nouvelle instance si nécessaire
         if AdapterFactory._instance is None:
             # Récupère les paramètres d'API et de port de PARAMS_IA
-
             api_key = params.get('CHATGPT_API_KEY') if params else None
             port = params.get('OLLAMA_PORT') if params else None
             
