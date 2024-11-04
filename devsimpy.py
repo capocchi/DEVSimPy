@@ -51,6 +51,7 @@ import builtins
 import glob
 import pstats
 
+from dotenv import load_dotenv
 from configparser import ConfigParser
 from tempfile import gettempdir
 
@@ -62,6 +63,11 @@ __date__ = str(datetime.datetime.now())
 __version__ = '4.0'
 __docformat__ = 'epytext'
 __min_wx_version__ = '4.0'
+
+################################################################
+### load .env
+################################################################
+load_dotenv()
 
 ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 
@@ -134,10 +140,8 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 				'DOMAIN_PATH': os.path.join(ABS_HOME_PATH, 'Domain'), # path of local lib directory
 				'NB_OPENED_FILE': 5, # number of recent files
 				'SELECTED_IA' : "",
-				'CHATGPT_API_KEY' : "",
-				'OLLAMA_PORT' : "11434",
 				'PARAMS_IA' : {
-					'CHATGPT_API_KEY' : "",
+					'CHATGPT_API_KEY' : os.getenv('CHATGPT_API_KEY'),
 					'OLLAMA_PORT' : "11434",
 					'OLLAMA_MODEL' : "mistral",
 				},
