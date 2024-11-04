@@ -13,3 +13,4 @@ ruamel.yaml
 whichpy
 redis
 psutil
+python-dotenv
