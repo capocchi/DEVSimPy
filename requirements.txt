@@ -248,6 +248,7 @@ psutil
 
 pyro4
 
-openai
+python-dotenv
 
+openai
 ollama
