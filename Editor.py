@@ -1647,7 +1647,7 @@ class Base(object):
 		selected_ia = builtins.__dict__.get('SELECTED_IA', '')
 
 		# Exécuter uniquement si une IA est sélectionnée
-		if selected_ia and selected_ia:
+		if selected_ia:
 			# Récupération de l'éditeur et du texte sélectionné
 			nb = self.GetNoteBook()
 			editor = nb.GetCurrentPage()

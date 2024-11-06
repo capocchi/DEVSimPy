@@ -461,7 +461,8 @@ class ModelGeneratorWizard(Wizard):
 		page2 = wizard_page(self, _('Atomic Model (AMD)'))
 		sb1 = wx.StaticBoxSizer(wx.StaticBox(page2, wx.NewIdRef(), _('Properties')), orient=wx.VERTICAL)
 		vb1 = wx.BoxSizer(wx.VERTICAL)
-		vbox2 = wx.GridSizer(6, 2, 3, 3)
+		vbox2 = wx.GridSizer(7, 2, 3, 3)
+		
 		bt5 = wx.CheckBox(page2, wx.NewIdRef(), _('Default python file'))
 		bt5.SetValue(True)
 		if wx.VERSION_STRING >= '4.0': bt5.SetToolTipString = bt5.SetToolTip 
@@ -471,6 +472,11 @@ class ModelGeneratorWizard(Wizard):
 		bt51.SetToolTipString(_("Choose plugin file from specific directory"))
 		bt51.SetValue(True)
 		cb0 = wx.ComboBox(page2, wx.NewIdRef(), _('Default'), choices=[_('Default'),_('Generator'),_('Viewer'), _('Collector')], style=wx.CB_READONLY)
+		
+		# AI button
+		# bt_ai = wx.Button(page2, wx.NewIdRef(), _('AI Prompt'))
+		# bt_ai.Disable()
+
 		# filebrowse properties
 		fb1 = filebrowse.FileBrowseButton(page2, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='Python File (*.py)|*.py|Compliled Python File (*.pyc)|*.pyc', toolTip=bt5.GetToolTip().GetTip(), changeCallback=python_path_call_back)
 		fb12 = filebrowse.FileBrowseButton(page2, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='plugins.py', toolTip=bt51.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
@@ -486,6 +492,7 @@ class ModelGeneratorWizard(Wizard):
 				(wx.SpinCtrl(page2, wx.NewIdRef(), '1', min=MIN_NB_PORT, max=MAX_NB_PORT), 0, wx.EXPAND),
 				(bt5, 0),
 				(fb1, 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
+				# (bt_ai, 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
 				(bt51,0),
 				(fb12,0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL)
 				])
@@ -977,7 +984,7 @@ class ModelGeneratorWizard(Wizard):
 						elif self.type=='AtomicAI':
 							selected_ia = builtins.__dict__.get('SELECTED_IA', '')  # '' par défaut si rien n'est sélectionné
 
-							if selected_ia and selected_ia:
+							if selected_ia:
 								# Code spécifique pour ChatGPT
 								param = builtins.__dict__.get('PARAMS_IA')
 
@@ -1046,15 +1053,15 @@ class ModelGeneratorWizard(Wizard):
 
 		return True
 
-#if __name__ == '__main__':
+if __name__ == '__main__':
 
-	#app = wx.PySimpleApp()  # Start the application
+	app = wx.PySimpleApp()  # Start the application
 
-	## Create wizard and add any kind pages you'd like
-	#mywiz = ModelGeneratorWizard(_('DEVSimPy Model Generator'), img_filename = os.path.join(os.getcwd(),'bitmaps/IconeDEVSimPy.png'))
-	## Show the main window
-	#mywiz.run()
-	## Cleanup
-	#mywiz.Destroy()
+	# Create wizard and add any kind pages you'd like
+	mywiz = ModelGeneratorWizard(_('DEVSimPy Model Generator'), img_filename = os.path.join(os.getcwd(),'bitmaps/IconeDEVSimPy.png'))
+	# Show the main window
+	mywiz.run()
+	# Cleanup
+	mywiz.Destroy()
 
-	#app.MainLoop()
+	app.MainLoop()
