@@ -629,7 +629,7 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
             )
             return response.choices[0].message.content
         except Exception as e:
-            logging.error(__("Error while generating output: %s", str(e)))
+            logging.error(_(f"Error while generating output: {str(e)}"))
             return _(f"An error occurred while generating the output: {e}")
 
 ##########################################################
