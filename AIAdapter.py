@@ -440,7 +440,6 @@ class MessagesCollector(DomainBehavior):
         logging.debug(_("Retrieved example for model type: %s"), model_type)
         return examples.get(model_type, examples["Générateur"])
     
-    @cond_decorator(builtins.__dict__.get('GUI_FLAG', True), ProgressNotification(_(f"Prompt Creation")))
     def create_prompt(self, model_name, num_inputs, num_outputs, model_type, prompt):
         """
         Creates a prompt to generate a DEVS model based on the type and the provided details.
@@ -615,21 +614,40 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
         self.api_client = OpenAI(api_key=self.api_key)  # Instancie le client API ici
         logging.info(_("ChatGPTDevsAdapter initialized with provided API key."))
 
+    @BuzyCursorNotification
     def generate_output(self, prompt):
         """
         Génère une sortie en utilisant l'API ChatGPT basée sur le prompt donné.
         """
         try:
+            # Validation de la présence du prompt
+            if not prompt:
+                raise ValueError("Prompt cannot be empty")
+
+            # Envoi de la requête à l'API
             response = self.api_client.chat.completions.create(
                 model="gpt-4-turbo",
                 messages=[
                     {"role": "system", "content": "You are an expert in DEVS modeling."},
                     {"role": "user", "content": prompt}
-                ],
+                ]
             )
+            
+            # Validation de la réponse
+            if not hasattr(response, 'choices') or not response.choices:
+                logging.error("No choices found in response.")
+                return _("No response received from the AI model.")
+            
+            # Retourner le contenu du message
             return response.choices[0].message.content
+        
+        except ValueError as ve:
+            logging.error(_(f"Validation error: {ve}"))
+            return _(f"Validation error: {ve}")
+        
         except Exception as e:
-            logging.error(_(f"Error while generating output: {str(e)}"))
+            # Journalisation de l'erreur avec les détails de l'exception
+            logging.error(_(f"Error while generating output: {e}"))
             return _(f"An error occurred while generating the output: {e}")
 
 ##########################################################
