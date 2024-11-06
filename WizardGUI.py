@@ -492,7 +492,6 @@ class ModelGeneratorWizard(Wizard):
 				(wx.SpinCtrl(page2, wx.NewIdRef(), '1', min=MIN_NB_PORT, max=MAX_NB_PORT), 0, wx.EXPAND),
 				(bt5, 0),
 				(fb1, 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				# (bt_ai, 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
 				(bt51,0),
 				(fb12,0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL)
 				])
@@ -979,6 +978,7 @@ class ModelGeneratorWizard(Wizard):
 					return False
 				else:
 					if self.python_path == '':
+						### generate the class code as string
 						if self.type=='Atomic':
 							string = atomicCode(self.label)
 						elif self.type=='AtomicAI':
@@ -997,26 +997,31 @@ class ModelGeneratorWizard(Wizard):
 								num_outputs = self.outputs
 								model_type = self.specific_behavior
 								prompt = self.detail
-
+								
 								# Appeler la méthode create_prompt pour générer le prompt
 								full_prompt = adapter.create_prompt(model_name, num_inputs, num_outputs, model_type, prompt)
 
 								# Utiliser generate_output pour obtenir le résultat
-								result = adapter.generate_output(full_prompt)
+								string = adapter.generate_output(full_prompt)
 
-								# Stocker ou traiter le résultat généré par ChatGPT
-								string = result
 							else:
 								print(_("No AI selected."))
 						else:
 							string = coupledCode(self.label)
 
-						python_name = os.path.basename(self.model_path).split('.')[0]
+						### python filename as the same name as the model_path						
+						py_name = os.path.basename(self.model_path).split('.')[0]
+						py_fn = f"{py_name}.py"
+						
+						### if the user change the filename before the end
+						if self.label != py_name:
+							string = string.replace(self.label, py_name)
 
-						txt = "%s.py"%python_name
-						zout.writestr(txt, string)
+						### write class code into the python filename
+						zout.writestr(py_fn, string)
 
-						self.python_path = os.path.join(self.model_path,txt)
+						### update the python path
+						self.python_path = os.path.join(self.model_path, py_fn)
 					else:
 						py_file = os.path.basename(self.python_path)
 						zout.write(self.python_path, py_file)
@@ -1030,7 +1035,7 @@ class ModelGeneratorWizard(Wizard):
 					zout.writestr('DEVSimPyModel.dat', _("Call SaveFile method first!"))
 
 					if self.plugin_path != '':
-						zout.write(self.plugin_path, os.path.join('plugins',os.path.basename(self.plugin_path)))
+						zout.write(self.plugin_path, os.path.join('plugins', os.path.basename(self.plugin_path)))
 
 					zout.close()
 			else:
