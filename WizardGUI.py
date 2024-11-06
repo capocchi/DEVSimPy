@@ -1072,6 +1072,7 @@ class ModelGeneratorWizard(Wizard):
 					return False
 				else:
 					if self.python_path == '':
+						### generate the class code as string
 						if self.type=='Atomic':
 							string = atomicCode(self.label)
 						elif self.type=='AtomicAI':
@@ -1090,15 +1091,13 @@ class ModelGeneratorWizard(Wizard):
 								num_outputs = self.outputs
 								model_type = self.specific_behavior
 								prompt = self.detail
-
+								
 								# Appeler la méthode create_prompt pour générer le prompt
 								full_prompt = adapter.create_prompt(model_name, num_inputs, num_outputs, model_type, prompt)
 
 								# Utiliser generate_output pour obtenir le résultat
-								result = adapter.generate_output(full_prompt)
+								string = adapter.generate_output(full_prompt)
 
-								# Stocker ou traiter le résultat généré par ChatGPT
-								string = result
 							else:
 								print(_("No AI selected."))
 						else:
