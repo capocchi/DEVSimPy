@@ -84,7 +84,7 @@ class DevsAIAdapter(ABC):
         Additional details:
         {prompt}
         """
-        logging.debug(_("Prompt created successfully for model: %s"), model_name)
+        logging.debug("Prompt created successfully for model: %s", model_name)
         return full_prompt
 
     def modify_model_prompt(self, code, prompt):
@@ -92,7 +92,7 @@ class DevsAIAdapter(ABC):
         Generates a prompt to modify an existing DEVS model.
         Takes into account the model name, the current code, and additional details.
         """
-        logging.info(_("Modifying model"))
+        logging.info("Modifying model")
         
         # Constructing the prompt for the AI
         full_prompt = f"""
@@ -134,7 +134,7 @@ class DevsAIAdapter(ABC):
         Include only the code of the modified part of the model. Do not include any code block markers like ```python.
         Do not provide any explanations, only the code. Keep the indentation, it is really important.
         """
-        logging.debug(_("Modification part prompt created for model"))
+        logging.debug("Modification part prompt created for model")
         return full_prompt
 
     @abstractmethod
@@ -150,7 +150,7 @@ class DevsAIAdapter(ABC):
         """
         Placeholder method for future implementation.
         """
-        logging.info(_("Validation not implemented for model: %s", model_name))
+        logging.info("Validation not implemented for model: %s", model_name)
         pass
 
 ##########################################################
@@ -289,7 +289,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
     Adaptateur spécifique pour Ollama, utilisé pour générer des modèles DEVS.
     """
 
-    def __init__(self, port='11434', model_name='mistral', parent=None):
+    def __init__(self, port='11434', model_name='qwen2.5-coder', parent=None):
         super().__init__()
 
         if not port:
