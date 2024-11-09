@@ -86,6 +86,9 @@ $ pip install -i correct_file.whl
  - S. Toma Ph.D, Thesis [[pdf]](https://hal.archives-ouvertes.fr/tel-01141844/document) (English), winner of the 2014 DEVS PhD Dissertation Award.
  - S. Cezary, "Design and implementation of application for instruction exercises with DEVSimPy", Technical report, Faculty of Electrical Engineering, AUTOMATION AND INFORMATION TECHNOLOGY, Kielce University of Technology [[pdf]](http://portailweb.universita.corsica/stockage_public/portail/baaaaaes/files/report_Cezary.pdf) (Polish)
 
+# Extentions
+- https://github.com/jscott-thompson/DEVSimPy
+
 # Citing
 
 Some papers concerning DEVSimPy:
