@@ -48,7 +48,7 @@ import pickle
 import glob
 import pstats
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from configparser import ConfigParser
 from tempfile import gettempdir
 
@@ -64,7 +64,7 @@ __min_wx_version__ = '4.0'
 ################################################################
 ### load .env
 ################################################################
-load_dotenv()
+# load_dotenv()
 
 ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 
@@ -139,7 +139,7 @@ builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'
 				'NB_OPENED_FILE': 5, # number of recent files
 				'SELECTED_IA' : "",
 				'PARAMS_IA' : {
-					'CHATGPT_API_KEY' : os.getenv('CHATGPT_API_KEY'),
+					'CHATGPT_API_KEY' : '',#os.getenv('CHATGPT_API_KEY'),
 					'OLLAMA_PORT' : "11434",
 					'OLLAMA_MODEL' : "mistral",
 				},

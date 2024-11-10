@@ -28,9 +28,13 @@ _ = gettext.gettext
 
 # Définition du dialogue personnalisé
 class AIPrompterDialog(wx.Dialog):
-    def __init__(self, parent, code_to_replace, adapter):
-        super().__init__(parent, title=_("AI Code Editor"), size=(600, 400))
+    def __init__(self, parent, title=_("AI Code Editor"), code_to_replace='', adapter=None):
+        super().__init__(parent, id=wx.ID_ANY, title=title, size=(600, 400))
         
+        _icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
+        _icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "puce_ai.png"), wx.BITMAP_TYPE_ANY))
+        self.SetIcon(_icon)
+
         ### local copy
         self.adapter = adapter
         self.parent = parent
@@ -42,20 +46,26 @@ class AIPrompterDialog(wx.Dialog):
             self.editor = nb.GetCurrentPage()
         else:
             self.editor = None
-            
+        
+        ### Code generated inside the self.code_text field
+        self.generated_code = ""
+
        # Sizer pour organiser les éléments
         main_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Zone de texte pour le code sélectionné
         self.code_text = wx.TextCtrl(self, value=code_to_replace, style=wx.TE_MULTILINE)
-        main_sizer.Add(wx.StaticText(self, label=_("Code to replace/insert:")), 0, wx.ALL | wx.EXPAND, 5)
+        main_sizer.Add(wx.StaticText(self, label=_("Generated Code:")), 0, wx.ALL | wx.EXPAND, 5)
         main_sizer.Add(self.code_text, 1, wx.ALL | wx.EXPAND, 5)
 
         # Champ de texte pour le prompt
         self.prompt_input = wx.TextCtrl(self, value="", style=wx.TE_MULTILINE)
-        main_sizer.Add(wx.StaticText(self, label=_("Enter Prompt for AI:")), 0, wx.ALL | wx.EXPAND, 5)
+        main_sizer.Add(wx.StaticText(self, label=_("Please, tell me what you want:")), 0, wx.ALL | wx.EXPAND, 5)
         main_sizer.Add(self.prompt_input, 1, wx.ALL | wx.EXPAND, 5)
         
+        # Set the focus to the prompt_input field to place the cursor there
+        self.prompt_input.SetFocus()
+
         # Lier l'événement de texte pour détecter les saisies dans le champ de prompt
         self.prompt_input.Bind(wx.EVT_TEXT, self.on_prompt_input_change)
 
@@ -63,18 +73,24 @@ class AIPrompterDialog(wx.Dialog):
         button_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         # Bouton pour envoyer la demande
-        self.send_button = wx.Button(self, label=_("Send to Prompt"))
+        self.send_button = wx.Button(self, label=_("Send to AI"))
         self.send_button.Bind(wx.EVT_BUTTON, self.on_send_ai)
         self.send_button.SetToolTip(_("Send the prompt to AI for processing."))  # Ajouter un tooltip
         self.send_button.Enable(False)
         button_sizer.Add(self.send_button, 0, wx.ALL, 10)  # Ajout du bouton avec un espacement de 10
 
         # Bouton pour insérer la demande
-        self.insert_button = wx.Button(self, label=_("Insert/Replace"))
-        self.insert_button.Bind(wx.EVT_BUTTON, self.on_insert)
-        self.insert_button.SetToolTip(_("Insert the generated code into the editor."))  # Ajouter un tooltip
-        self.insert_button.Enable(False)
-        button_sizer.Add(self.insert_button, 0, wx.ALL, 10)  # Ajout du bouton avec un espacement de 10
+        if self.editor:
+            self.insert_button = wx.Button(self, label=_("Insert/Replace"))
+            self.insert_button.Bind(wx.EVT_BUTTON, self.on_insert)
+            self.insert_button.SetToolTip(_("Insert the generated code into the editor."))  # Ajouter un tooltip
+            self.insert_button.Enable(False)
+            button_sizer.Add(self.insert_button, 0, wx.ALL, 10)  # Ajout du bouton avec un espacement de 10
+        else:
+            self.insert_button = wx.Button(self, id=wx.ID_OK, label=_("Apply"))
+            self.insert_button.Bind(wx.EVT_BUTTON, self.on_ok)  # Bind the button to close the dialog
+            self.insert_button.Enable(False)
+            button_sizer.Add(self.insert_button, 0, wx.ALL, 10)  # Ajout du bouton avec un espacement de 10
 
         main_sizer.Add(button_sizer, 0, wx.ALIGN_CENTER)  # Ajout du sizer de boutons au sizer principal
 
@@ -93,24 +109,30 @@ class AIPrompterDialog(wx.Dialog):
             self.send_button.Enable(False)
             self.insert_button.Enable(False)
 
+    def on_ok(self, event):
+        self.generated_code = self.code_text.GetValue().strip()
+        
+        if self.generated_code:  # Only close if there's non-empty input
+            self.EndModal(wx.ID_OK)  # Close the dialog by ending the modal state
+
     def on_insert(self, event):
 
         if not self.editor:
             return
 
-        modified_text = self.code_text.GetValue()
+        generated_code = self.code_text.GetValue()
 		
         selection = self.editor.GetSelection()
         textstring = self.editor.GetRange(selection[0], selection[1])
         
 		# Remplacement du texte dans l'éditeur si le texte a été modifié
-        if modified_text and modified_text != textstring:	
+        if generated_code and generated_code != textstring:	
             ### si text selectionné dans le code à remplace
-            self.editor.ReplaceSelection(modified_text)
+            self.editor.ReplaceSelection(generated_code)
         
         ### sinon on insert en place
         else:
-            self.editor.AddText(modified_text)
+            self.editor.AddText(generated_code)
 
         self.parent.Notification(True, _('%s modified' % (os.path.basename(self.editor.GetFilename()))), '', '')
 
@@ -145,7 +167,7 @@ def main():
     demo_code = ""
 
     # Création et affichage du dialogue
-    dialog = AIPrompterDialog(None, demo_code, DummyAdapter())
+    dialog = AIPrompterDialog(None, 'Test', demo_code, DummyAdapter())
     dialog.ShowModal()  # Affiche le dialogue
     dialog.Destroy()  # Détruit le dialogue après fermeture
 
@@ -153,4 +175,15 @@ def main():
     app.MainLoop()
 
 if __name__ == "__main__":
+    import builtins
+
+    builtin_dict = {
+				'ICON_PATH': 'icons',
+				'ICON_PATH_16_16': os.path.join('icons', '16x16'),
+				'GUI_FLAG':True
+				}
+	
+	# Sets the homepath variable to the directory where your application is located (sys.argv[0]).
+    builtins.__dict__.update(builtin_dict)
+
     main()
