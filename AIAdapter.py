@@ -185,6 +185,7 @@ class AdapterFactory:
         # Crée une nouvelle instance si nécessaire
         if AdapterFactory._instance is None:
             # Récupère les paramètres d'API et de port de PARAMS_IA
+
             api_key = params.get('CHATGPT_API_KEY') if params else None
             port = params.get('OLLAMA_PORT') if params else None
             
