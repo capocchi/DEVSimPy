@@ -176,7 +176,7 @@ class AIPrompterDialog(wx.Dialog):
 =======
         if modified_text and modified_text != textstring:	
             ### si text selectionné dans le code à remplace
-            self.editor.ReplaceSelection(modified_text)
+            self.editor.ReplaceSelection(generated_code)
         
         ### sinon on insert en place
         else:
