@@ -47,7 +47,7 @@ class AIPrompterDialog(wx.Dialog):
 
         # Zone de texte pour le code sélectionné
         self.code_text = wx.TextCtrl(self, value=code_to_replace, style=wx.TE_MULTILINE)
-        main_sizer.Add(wx.StaticText(self, label=_("Code to replace/insert:")), 0, wx.ALL | wx.EXPAND, 5)
+        main_sizer.Add(wx.StaticText(self, label=_("Generated Code:")), 0, wx.ALL | wx.EXPAND, 5)
         main_sizer.Add(self.code_text, 1, wx.ALL | wx.EXPAND, 5)
 
         # Champ de texte pour le prompt
@@ -56,6 +56,9 @@ class AIPrompterDialog(wx.Dialog):
         main_sizer.Add(wx.StaticText(self, label=_("Enter Prompt for AI:")), 0, wx.ALL | wx.EXPAND, 5)
         main_sizer.Add(self.prompt_input, 1, wx.ALL | wx.EXPAND, 5)
         
+        # Set the focus to the prompt_input field to place the cursor there
+        self.prompt_input.SetFocus()
+
         # Lier l'événement de texte pour détecter les saisies dans le champ de prompt
         self.prompt_input.Bind(wx.EVT_TEXT, self.on_prompt_input_change)
 
@@ -95,18 +98,24 @@ class AIPrompterDialog(wx.Dialog):
             self.send_button.Enable(False)
             self.insert_button.Enable(False)
 
+    def on_ok(self, event):
+        self.generated_code = self.code_text.GetValue().strip()
+        
+        if self.generated_code:  # Only close if there's non-empty input
+            self.EndModal(wx.ID_OK)  # Close the dialog by ending the modal state
+
     def on_insert(self, event):
 
         if not self.editor:
             return
 
-        modified_text = self.code_text.GetValue()
+        generated_code = self.code_text.GetValue()
 		
         selection = self.editor.GetSelection()
         textstring = self.editor.GetRange(selection[0], selection[1])
         
 		# Remplacement du texte dans l'éditeur si le texte a été modifié
-        if modified_text and modified_text != textstring:	
+        if generated_code and generated_code != textstring:	
             ### si text selectionné dans le code à remplace
             self.editor.ReplaceSelection(modified_text)
         ### sinon on insert en place
@@ -145,7 +154,7 @@ def main():
     demo_code = ""
 
     # Création et affichage du dialogue
-    dialog = AIPrompterDialog(None, demo_code, DummyAdapter())
+    dialog = AIPrompterDialog(None, 'Test', demo_code, DummyAdapter())
     dialog.ShowModal()  # Affiche le dialogue
     dialog.Destroy()  # Détruit le dialogue après fermeture
 
@@ -153,4 +162,15 @@ def main():
     app.MainLoop()
 
 if __name__ == "__main__":
+    import builtins
+
+    builtin_dict = {
+				'ICON_PATH': 'icons',
+				'ICON_PATH_16_16': os.path.join('icons', '16x16'),
+				'GUI_FLAG':True
+				}
+	
+	# Sets the homepath variable to the directory where your application is located (sys.argv[0]).
+    builtins.__dict__.update(builtin_dict)
+
     main()

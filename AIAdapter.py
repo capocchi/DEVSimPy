@@ -185,6 +185,7 @@ class AdapterFactory:
         # Crée une nouvelle instance si nécessaire
         if AdapterFactory._instance is None:
             # Récupère les paramètres d'API et de port de PARAMS_IA
+
             api_key = params.get('CHATGPT_API_KEY') if params else None
             port = params.get('OLLAMA_PORT') if params else None
             
@@ -192,6 +193,7 @@ class AdapterFactory:
             if selected_ia == "ChatGPT":
                 if not api_key:
                     AdapterFactory._show_error(_("API key is required for ChatGPT."))
+                    return None
                     # raise ValueError(_("API key is required for ChatGPT."))
                 else:
                     AdapterFactory._instance = ChatGPTDevsAdapter(parent=parent, api_key=api_key)
@@ -200,6 +202,7 @@ class AdapterFactory:
             elif selected_ia == "Ollama":
                 if not port:
                     AdapterFactory._show_error(_("Port is required for Ollama."))
+                    return None
                     # raise ValueError(_("Port is required for Ollama."))
                 else:
                     AdapterFactory._instance = OllamaDevsAdapter(parent=parent, port=port)

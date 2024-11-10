@@ -1669,7 +1669,7 @@ class Base(object):
 			adapter = AdapterFactory.get_adapter_instance(param)
 				
 			# Créer le dialogue avec le code sélectionné
-			dialog = AIPrompterDialog(self, textstring, adapter)
+			dialog = AIPrompterDialog(self, _("AI Code Editor"), textstring, adapter)
 			dialog.Show()
 
 		else:
