@@ -656,9 +656,9 @@ class AIPanel(wx.Panel):
 
 	def InitUI(self):
 		""" Init interface"""
-		vbox = wx.BoxSizer(wx.VERTICAL)
 
-		# Choix de l'IA
+		### --------------------------------------------------------------------------------------------------
+		# Checkbox for enabling/disabling AI
 		self.st_ia = wx.StaticText(self, label=_("Select an AI:"))
 		self.choice_ia = wx.ComboBox(
 										self, wx.NewIdRef(), 
@@ -666,72 +666,104 @@ class AIPanel(wx.Panel):
 										choices=AIPanel.AI_SET, 
 										style=wx.CB_READONLY
 		)
-		if wx.VERSION_STRING >= '4.0':
-			self.choice_ia.SetToolTipString = self.choice_ia.SetToolTip
-		self.choice_ia.SetToolTipString(_("Select an AI for model code generation"))
 
-		# Sauvegarder la sélection d'IA par défaut
+		### ai parameters lauout
+		hbox_select_ai = wx.BoxSizer(wx.HORIZONTAL)
+		hbox_select_ai.Add(self.st_ia, 0, wx.RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 10)
+		hbox_select_ai.Add(self.choice_ia, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL)
+
+		### selected ai
 		self.selected_ia = self.choice_ia.GetValue()
 
-		# Champ pour l'API Key de ChatGPT
-		self.st_api_key = wx.StaticText(self, label=_("API Key:"))
+		### --------------------------------------------------------------------------------------------------
+		### ChatGPT API Key setting
+		st_api_key = wx.StaticText(self, label=_("API Key:"))
 		self.api_key_ctrl = wx.TextCtrl(self, style=wx.TE_PASSWORD)
 		self.api_key_ctrl.SetValue(builtins.__dict__.get('PARAMS_IA', {}).get('CHATGPT_API_KEY', ''))
-		self.api_key_ctrl.Hide()  # Masqué par défaut
+		
+		### GPT parameters lauout
+		hbox_chatgpt = wx.BoxSizer(wx.HORIZONTAL)
+		hbox_chatgpt.Add(st_api_key, 0, wx.RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 10)
+		hbox_chatgpt.Add(self.api_key_ctrl, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL)
 
-		# Champ pour le Port du serveur Ollama
-		self.st_port = wx.StaticText(self, label=_("Server port:"))
+		### Ollama server port setting
+		st_port = wx.StaticText(self, label=_("Server port:"))
 		self.port_ctrl = wx.TextCtrl(self)
 		self.port_ctrl.SetValue(builtins.__dict__.get('PARAMS_IA', {}).get('OLLAMA_PORT', '11434'))
-		self.port_ctrl.Hide()  # Masqué par défaut
 
-		# Ajouter les éléments au layout
-		vbox.Add(self.st_ia, flag=wx.ALL, border=5)
-		vbox.Add(self.choice_ia, flag=wx.ALL | wx.EXPAND, border=5)
-		vbox.Add(self.st_api_key, flag=wx.ALL, border=5)
-		vbox.Add(self.api_key_ctrl, flag=wx.ALL | wx.EXPAND, border=5)
-		vbox.Add(self.st_port, flag=wx.ALL, border=5)
-		vbox.Add(self.port_ctrl, flag=wx.ALL | wx.EXPAND, border=5)
+		### ollama parameters layout
+		hbox_ollama = wx.BoxSizer(wx.HORIZONTAL)
+		hbox_ollama.Add(st_port, 0, wx.RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 10)
+		hbox_ollama.Add(self.port_ctrl, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL)
 
-		# Créer un hbox pour le bouton Check
-		hbox_check = wx.BoxSizer(wx.HORIZONTAL)
-		self.check_button = wx.Button(self, label=_("Check"))
-		hbox_check.Add(self.check_button, flag=wx.ALL | wx.ALIGN_LEFT)
+		### all of the ai box - Add here the ai bow you want to show
+		self.ai_boxes = {'ChatGPT': hbox_chatgpt, 'Ollama': hbox_ollama}
 
-		vbox.Add(hbox_check, flag=wx.ALL | wx.EXPAND, border=5)
+		# ------------------------------------------------------------------------------------------------------
+		
+		### Check AI button
+		self.ai_check_button = wx.Button(self, label=_("Check"))
+		self.ai_check_button.Show(bool(self.selected_ia))
+
+		### info AI button
+		self.ai_info_button = wx.Button(self, label=_("Info"))
+		icon = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_BUTTON, (16, 16))  # Taille 16x16 pixels
+		self.ai_info_button.SetBitmap(icon)
+		self.ai_info_button.Show(bool(self.selected_ia))
+
+		### buttons layout
+		hbox_buttons = wx.BoxSizer(wx.HORIZONTAL)
+		hbox_buttons.Add(self.ai_info_button, flag=wx.RIGHT | wx.ALIGN_LEFT, border=10)
+		hbox_buttons.Add(self.ai_check_button, flag=wx.ALL | wx.ALIGN_LEFT)
+
+		### SetToolTipString
+		if wx.VERSION_STRING >= '4.0':
+			self.choice_ia.SetToolTipString = self.choice_ia.SetToolTip
+			self.ai_info_button.SetToolTipString = self.ai_info_button.SetToolTip
+			self.ai_check_button.SetToolTipString = self.ai_check_button.SetToolTip
+
+		self.choice_ia.SetToolTipString(_("Select an AI for model code generation"))
+		self.ai_info_button.SetToolTipString(_("More about the selected Gen AI"))
+		self.ai_check_button.SetToolTipString(_("Check if the selected AI Gen is ready to work"))
+
+		# ---------------------------------------------------------------------------------------------------------------------
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(hbox_select_ai, 0, wx.ALL, 10)
+		vbox.Add(self.ai_boxes['ChatGPT'], 0, wx.ALL|wx.EXPAND, 10)
+		vbox.Add(self.ai_boxes['Ollama'], 0, wx.ALL, 10)
+		vbox.Add(hbox_buttons, flag=wx.ALL | wx.EXPAND, border=5)
 
 		self.SetSizer(vbox)
 
 		### Bind
-		# Lier la sélection d'IA à la fonction de mise à jour de la visibilité
 		self.choice_ia.Bind(wx.EVT_COMBOBOX, self.OnAISelection)
-		# Lier le bouton Check à la fonction de rappel
-		self.check_button.Bind(wx.EVT_BUTTON, self.OnCheck)
+		self.ai_info_button.Bind(wx.EVT_BUTTON, self.OnInfoButtonClick)	
+		self.ai_check_button.Bind(wx.EVT_BUTTON, self.OnAICheck)
 	
-		# Afficher les champs pertinents en fonction de la sélection actuelle
-		self.UpdateFieldsVisibility()  # Appeler ici pour afficher la sélection initiale correctement
+		# ---------------------------------------------------------------------------------------------------------------------
+		self.UpdateFieldsVisibility()
 
 	def UpdateFieldsVisibility(self):
-		""" Affiche les champs pertinents selon l'IA sélectionnée. """
+		""" UI refresh depending on the selected AI (More Generic)"""
 		selected_ia = self.choice_ia.GetValue()
-		if selected_ia == "ChatGPT":
-			self.api_key_ctrl.Show()
-			self.st_api_key.Show()
-			self.port_ctrl.Hide()
-			self.st_port.Hide()
-		elif selected_ia == "Ollama":
-			self.port_ctrl.Show()
-			self.st_port.Show()
-			self.api_key_ctrl.Hide()
-			self.st_api_key.Hide()
-		else: 
-			self.api_key_ctrl.Hide()
-			self.st_api_key.Hide()
-			self.port_ctrl.Hide()
-			self.st_port.Hide()
+		
+		### Display the correct ai hbox depending on the selected ai name
+		for ai_name,ai_hbox in self.ai_boxes.items():
+			for item in ai_hbox.GetChildren():
+				item.GetWindow().Show(selected_ia == ai_name)
+
+		### update layout
 		self.Layout()
 
-	def OnCheck(self, event):
+	def OnAICheck(self, event):
+		""" Check the selected AI
+
+		Args:
+			event (_type_): _description_
+		"""
+
+		self.SaveAISettings()
+
 		param = builtins.__dict__.get('PARAMS_IA')
 
 		# Créer ou récupérer l'instance de ChatGPTDevsAdapter via la factory
@@ -739,32 +771,64 @@ class AIPanel(wx.Panel):
 		
 		if adapter:
 			wx.MessageBox(_(f"{self.selected_ia} Code Generator is ready."), _("Success"), wx.OK | wx.ICON_INFORMATION)
+
+	def OnInfoButtonClick(self, event):
+		"""_summary_
+
+		Args:
+			event (_type_): _description_
+		"""
+		selected_ai = self.choice_ia.GetValue()
+		
+		if selected_ai == "ChatGPT":
+			url = 'https://openai.com/research/chatgpt'
+		elif selected_ai == "Ollama":
+			url = 'https://ollama.com/'
 		else:
-			wx.MessageBox(_(f"{self.selected_ia} Code Generator is not available."), _("Error"), wx.OK | wx.ICON_ERROR)
+			return 
+		
+        ### open default browser
+		wx.LaunchDefaultBrowser(url)
 
 	def OnAISelection(self, event):
-		""" Met à jour la sélection d'IA et affiche les champs pertinents """
+		""" Select the AI """
 		self.selected_ia = self.choice_ia.GetValue()
+		
 		builtins.__dict__['SELECTED_IA'] = self.selected_ia
+		self.ai_check_button.Show(bool(self.selected_ia))
+		self.ai_info_button.Show(bool(self.selected_ia))
+		
 		self.UpdateFieldsVisibility()  # Appeler UpdateFieldsVisibility pour actualiser les sous-champs
 
 	def load_settings(self):
-		""" Charger les paramètres sauvegardés """
-		# Initialisation des valeurs dans builtins si elles ne sont pas encore définies
+		""" Load the AI settings from builtins """
+		### Init the builtins wirh AI info
 		builtins.__dict__.setdefault('SELECTED_IA', '')
 		builtins.__dict__['PARAMS_IA'].setdefault('CHATGPT_API_KEY', '')
 		builtins.__dict__['PARAMS_IA'].setdefault('OLLAMA_PORT', '11434')
 
 	def OnApply(self, evt):
-		""" Applique les modifications aux valeurs de configuration """
-		# Mettre à jour `builtins` avec la sélection actuelle
-		builtins.__dict__['SELECTED_IA'] = self.choice_ia.GetValue()
-		
-		# Sauvegarder l'API Key ou le Port selon l'IA sélectionnée
-		if builtins.__dict__['SELECTED_IA'] == "ChatGPT":
-			builtins.__dict__['PARAMS_IA']['CHATGPT_API_KEY'] = self.api_key_ctrl.GetValue()
-		elif builtins.__dict__['SELECTED_IA'] == "Ollama":
-			builtins.__dict__['PARAMS_IA']['OLLAMA_PORT'] = self.port_ctrl.GetValue()
+		""" Apply and save the current AI settings """
+		### save AI settings
+		self.SaveAISettings()
+
+	def SaveAISettings(self):
+		""" Save AI setting in builtins """
+	
+		### update selected AI
+		selected_ai = self.choice_ia.GetValue()
+		if builtins.__dict__['SELECTED_IA'] != selected_ai:
+			builtins.__dict__['SELECTED_IA'] = selected_ai
+
+		# update settings for all accessible Gen AI
+		if selected_ai == "ChatGPT":
+			chatgpt_api_key = self.api_key_ctrl.GetValue()
+			if builtins.__dict__['PARAMS_IA']['CHATGPT_API_KEY'] != chatgpt_api_key:
+				builtins.__dict__['PARAMS_IA']['CHATGPT_API_KEY'] = chatgpt_api_key
+		elif selected_ai == "Ollama":
+			ollama_port = self.port_ctrl.GetValue()
+			if builtins.__dict__['PARAMS_IA']['OLLAMA_PORT'] != ollama_port:
+				builtins.__dict__['PARAMS_IA']['OLLAMA_PORT'] = ollama_port
 
 ########################################################################
 class Preferences(wx.Toolbook):
