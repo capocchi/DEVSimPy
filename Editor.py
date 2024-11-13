@@ -2038,7 +2038,7 @@ class BlockBase(object):
 
 		if port is not None:
 			cp = self.nb.GetCurrentPage()
-			cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))"%int(port))
+			cp.AddText("return self.poke(self.OPorts[%d], Message(None), self.timeNext))"%int(port))
 			self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	def OnAllPeek(self, *args):
@@ -2090,7 +2090,7 @@ class BlockBase(object):
 				if "peek" in label:
 					cp.AddText("self.peek(self.IPorts[%d], *args)"%int(port))
 				elif "poke" in label:
-					cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))"%int(port))
+					cp.AddText("return self.poke(self.OPorts[%d], Message(None, self.timeNext))"%int(port))
 				self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	def OnInsertInitPhase(self, event):
