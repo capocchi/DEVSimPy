@@ -29,8 +29,7 @@ import urllib.request, urllib.parse, urllib.error
 import tempfile
 import zipfile
 
-import gettext
-_ = gettext.gettext
+_ = wx.GetTranslation
 
 __version_lib__ = 0.2
 

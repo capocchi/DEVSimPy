@@ -14,8 +14,7 @@ import wx
 import os
 import builtins
 
-import gettext
-_ = gettext.gettext
+_ = wx.GetTranslation
 
 from types import MethodType
 

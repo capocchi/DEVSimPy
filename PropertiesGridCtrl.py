@@ -440,7 +440,7 @@ class CustomDataTable(GridTableBase):
 
 			### if cls is class
 			if inspect.isclass(cls):
-				regex = re.compile('[@|-][param]*[\s]*([a-zA-Z0-9-_\s]*)[=|:]([a-zA-Z0-9-_\s]+)')
+				regex = re.compile(r'[@|-][param]*[\s]*([a-zA-Z0-9-_\s]*)[=|:]([a-zA-Z0-9-_\s]+)')
 				doc = cls.__init__.__doc__ or ""
 				for attr, val in regex.findall(doc):
 					### attr could be in model.args

@@ -156,7 +156,7 @@ def main():
     builtins.__dict__['ICON_PATH_16_16']=os.path.join('icons','16x16')
 
     ex = wx.App()
-    frame = YAMLExportGUI(None, -1, 'YAML Export', path='C:\\Users\capocchi_l.UDCPP\Downloads\plotly_test.yaml')
+    frame = YAMLExportGUI(None, -1, 'YAML Export', path=r'C:\\Users\capocchi_l.UDCPP\Downloads\plotly_test.yaml')
     frame.Show(True)
     ex.MainLoop()
 

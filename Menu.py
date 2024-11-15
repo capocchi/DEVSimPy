@@ -31,8 +31,7 @@ import Container
 from PluginManager import PluginManager
 from ExperimentGenerator import ExperimentGenerator
 
-import gettext
-_ = gettext.gettext
+_ = wx.GetTranslation
 
 if wx.VERSION_STRING > '4.0.1': wx.NewId = wx.ID_ANY
 

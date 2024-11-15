@@ -34,8 +34,7 @@ from pubsub import pub as Publisher
 from PlotGUI import *
 from Utilities import printOnStatusBar
 
-import gettext
-_ = gettext.gettext
+_ = wx.GetTranslation
 
 ###
 class MySheet(sheet.CSheet):

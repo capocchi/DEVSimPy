@@ -17,10 +17,10 @@ import sys
 import time
 import builtins
 import traceback
-import gettext
 import json
 import pusher
 
+import gettext
 _ = gettext.gettext
 
 

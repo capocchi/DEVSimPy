@@ -98,7 +98,7 @@ class PluginManager(object):
 			try:
 				if PLUGINS_PATH not in sys.path:
 					sys.path.append(PLUGINS_PATH)
-				name,ext = os.path.splitext(modulename)
+				name, _ = os.path.splitext(modulename)
 				pkg = '.'.join(modulename.split('.')[0:-1])
 				module = importlib.import_module(name, package=pkg)
 				return module

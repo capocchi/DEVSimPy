@@ -625,7 +625,7 @@ class EditorPanel(wx.Panel):
 			msg = _('All external editors are installed.')
 
 		dial = wx.MessageDialog(self.parent, msg, _("External Code Editor Installation"), wx.OK | wx.ICON_INFORMATION)
-		val = dial.ShowModal()
+		dial.ShowModal()
 
 		event.Skip()
 

@@ -15,8 +15,7 @@ import wx
 import sys
 import os
 
-import gettext
-_ = gettext.gettext
+_ = wx.GetTranslation
 
 from PluginManager import PluginManager
 

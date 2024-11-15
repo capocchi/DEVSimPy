@@ -47,8 +47,7 @@ from Utilities import path_to_module, printOnStatusBar
 import ReloadModule
 import ZipManager
 
-import gettext
-_ = gettext.gettext
+_ = wx.GetTranslation
 
 # Turn on verbose mode
 tabnanny.verbose = 1

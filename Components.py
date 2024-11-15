@@ -33,9 +33,6 @@ import subprocess
 import inspect
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
-    
-import gettext
-_ = gettext.gettext
 
 from tempfile import gettempdir
 
@@ -45,6 +42,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 	import Editor
 	from SimpleFrameEditor import FrameEditor
 
+	_ = wx.GetTranslation
+	
 import ZipManager
 
 from Utilities import replaceAll, GetActiveWindow, printOnStatusBar, install
