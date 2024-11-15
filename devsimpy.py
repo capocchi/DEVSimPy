@@ -2002,7 +2002,9 @@ class MainApplication(wx.Frame):
 
 	###
 	def OnFrench(self, event):
-		print(dir(event))
+		""" Change the language to French.
+		"""
+		
 		self.cfg.Write("language", f"'fr'")
 		
 		dlg = wx.MessageDialog(self, _('You need to restart DEVSimPy to take effect.\n\nDo you want to restart now ?'), _('Internationalization'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
@@ -2012,7 +2014,8 @@ class MainApplication(wx.Frame):
 		
 	###
 	def OnEnglish(self, event):
-		print(dir(event))
+		""" Change the language to English.
+		"""
 		
 		self.cfg.Write("language", "'en'")
 		
