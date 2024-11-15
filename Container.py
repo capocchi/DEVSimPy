@@ -39,7 +39,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 		wx.StockCursor = wx.Cursor
 
 	_ = wx.GetTranslation
-	
+
 import os
 import sys
 import copy
@@ -1236,7 +1236,7 @@ class Shape(ShapeEvtHandler):
 
 		# Convert hex to RGB only once and create the brush color
 		r, g, b = HEXToRGB(str(self.fill[0]))
-		brushclr = wx.Color(r, g, b, 128)   # half transparent
+		brushclr = wx.Colour(r, g, b, 128)   # half transparent
 
 		# Set the pen with exception handling for old models
 		pen_args = [self.pen[0], self.pen[1]]
