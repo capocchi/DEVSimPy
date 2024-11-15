@@ -104,5 +104,5 @@ class PluginManager(object):
 				return module
 			except Exception as info:
 				msg = _("Path of plugins directory is wrong.") if not os.path.exists(PLUGINS_PATH) else str(sys.exc_info()[0]) +"\r\n" + listf(format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
-				sys.stderr.write(_("Error trying to import plugin %s : %s\n%s")%(modulename, info, msg))
+				sys.stderr.write(f"Error trying to import plugin {modulename}: {info}\n{msg}")
 				return info
