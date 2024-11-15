@@ -29,7 +29,7 @@ if not hasattr(inspect, 'getargspec'):
 import Container
 import Menu
 
-from Utilities import getPYFileListFromInit, path_to_module, printOnStatusBar, NotificationMessage, install_and_import, module_list, getFilePathInfo
+from Utilities import getPYFileListFromInit, path_to_module, printOnStatusBar, NotificationMessage, install_and_import, module_list, getFilePathInfo, getTopLevelWindow
 from Decorators import BuzyCursorNotification
 from Components import BlockFactory, DEVSComponent, GetClass, PyComponent, GenericComponent
 from ZipManager import Zip, getPythonModelFileName
@@ -244,7 +244,7 @@ class LibraryTree(wx.TreeCtrl):
 		"""
 
 		self.UnselectAll()
-		mainW = wx.GetApp().GetTopWindow()
+		mainW = getTopLevelWindow()
 		printOnStatusBar(mainW.statusbar, {0:'', 1:''})
 		#self.SetFocus()
 		evt.Skip()
@@ -257,7 +257,7 @@ class LibraryTree(wx.TreeCtrl):
 
 		if not self.ItemHasChildren(item_selected):
 			path = self.GetItemPyData(item_selected)
-			mainW = wx.GetApp().GetTopWindow()
+			mainW = getTopLevelWindow()
 			nb2 = mainW.GetDiagramNotebook()
 			canvas = nb2.GetPage(nb2.GetSelection())
 			### define path for Python and model component
@@ -410,7 +410,7 @@ class LibraryTree(wx.TreeCtrl):
 		""" New model action has been invoked.
 		"""
 
-		mainW = wx.GetApp().GetTopWindow()
+		mainW = getTopLevelWindow()
 		nb2 = mainW.GetDiagramNotebook()
 		canvas = nb2.GetPage(nb2.GetSelection())
 
@@ -1034,7 +1034,7 @@ class LibraryTree(wx.TreeCtrl):
 
 		self.Delete(item)
 
-		mainW = wx.GetApp().GetTopWindow()
+		mainW = getTopLevelWindow()
 		mainW.SaveLibraryProfile()
 
 

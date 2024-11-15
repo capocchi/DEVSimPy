@@ -184,7 +184,7 @@ from ImportLibrary import ImportLibrary
 from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
 from PluginManager import PluginManager
-from Utilities import GetUserConfigDir, install, install_and_import, updatePiPPackages, updateFromGitRepo, updateFromGitArchive, NotificationMessage
+from Utilities import GetUserConfigDir, install, install_and_import, updatePiPPackages, updateFromGitRepo, updateFromGitArchive, NotificationMessage, getTopLevelWindow
 from Decorators import redirectStdout, BuzyCursorNotification, ProgressNotification, cond_decorator
 from DetachedFrame import DetachedFrame
 from LibraryTree import LibraryTree
@@ -1676,7 +1676,7 @@ class MainApplication(wx.Frame):
 			window = obj.GetTopLevelParent()
 		# si invocation depuis une Menu (pour le Show dans l'application principale)
 		elif isinstance(obj, wx.Menu):
-			window = wx.GetApp().GetTopWindow()
+			window = getTopLevelWindow()
 		else:
 			sys.stdout.write(_("This option has not been implemented yet."))
 			return False

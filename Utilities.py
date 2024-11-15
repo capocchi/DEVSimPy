@@ -693,6 +693,16 @@ def itersubclasses(cls, _seen=None):
 			for sub in itersubclasses(sub, _seen):
 				yield sub
 
+def relpath(path=''):
+	### change sep from platform
+	from sys import platform
+	if platform == "linux" or platform == "linux2":
+		return path.replace('\\',os.sep)
+	elif platform == "darwin":
+		return path.replace('\\',os.sep)
+	elif platform == "win32":
+		return path.replace('/',os.sep)
+	
 def getTopLevelWindow():
 	"""
 	"""
@@ -915,52 +925,6 @@ def IsAllDigits(str):
 			break
 	return ok
 
-def relpath(path=''):
-	### change sep from platform
-	from sys import platform
-	if platform == "linux" or platform == "linux2":
-		return path.replace('\\',os.sep)
-	elif platform == "darwin":
-		return path.replace('\\',os.sep)
-	elif platform == "win32":
-		return path.replace('/',os.sep)
-
-def RecurseSubDirs(directory, userDir, extensions):
-    """
-    Recurse one directory to include all the files and sub-folders in it.
-
-
-    **Parameters:**
-
-    * directory: the folder on which to recurse;
-    * userDir: the directory chosen by the user;
-    * extensions: the file extensions to be filtered.
-    """
-
-    config = []
-    baseStart = os.path.basename(directory)
-
-    normpath, join = os.path.normpath, os.path.join
-    splitext, match = os.path.splitext, fnmatch.fnmatch
-
-    # Loop over all the sub-folders in the top folder
-    for root, dirs, files in os.walk(directory):
-        start = root.find(baseStart) + len(baseStart)
-        dirName = userDir + root[start:]
-        dirName = dirName.replace("\\", "/")
-        paths = []
-        # Loop over all the files
-        for name in files:
-            # Loop over all extensions
-            for ext in extensions:
-                if match(name, ext):
-                    paths.append(normpath(join(root, name)))
-                    break
-
-        if paths:
-            config.append((dirName, paths))
-
-    return config
 
 def FormatSizeFile(size):
     """

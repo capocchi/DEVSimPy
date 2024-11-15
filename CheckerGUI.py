@@ -31,6 +31,7 @@ if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
     
 from traceback import format_exception
+from Utilities import getTopLevelWindow
 
 _ = wx.GetTranslation
 
@@ -118,7 +119,7 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 
 		### get selected item position
 		x,y = event.GetPosition() 
-		row,flags = self.HitTest((x,y)) 
+		row,_ = self.HitTest((x,y)) 
 
 		### select the item
 		self.Select(row)
@@ -133,7 +134,7 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 			from AttributeEditor import AttributeEditor
 
 			### get model from active diagram			
-			mainW = wx.GetApp().GetTopWindow()
+			mainW = getTopLevelWindow()
 			canvas = mainW.nb2.GetCurrentPage()
 			diagram = canvas.GetDiagram()
 

@@ -16,6 +16,7 @@ import gettext
 _ = gettext.gettext
 
 from Mixins.Attributable import Attributable
+from Utilities import getTopLevelWindow
 
 class Selectable:
     """ Allows Shape to be selected.
@@ -71,7 +72,7 @@ class Selectable:
 
                 ### update of panel properties
                 import wx
-                mainW = wx.GetApp().GetTopWindow()
+                mainW = getTopLevelWindow()
                 nb1 = mainW.GetControlNotebook()
                 if nb1.GetSelection() == 1:
                     newContent = AttributeEditor(nb1.propPanel, wx.NewIdRef(), self, canvas)

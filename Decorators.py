@@ -31,7 +31,7 @@ from tempfile import gettempdir
 import time
 import cProfile, pstats, io
 
-if builtins.__dict__.get('GUI_FLAG',True):
+if builtins.__dict__.get('GUI_FLAG', True):
 	import wx
 	if wx.VERSION_STRING < '4.0':
 		import wx.aui
@@ -41,6 +41,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 		AuiFloatingFrame = wx.lib.agw.aui.framemanager.AuiFloatingFrame
 
 	from pubsub import pub
+
+	from Utilities import getTopLevelWindow
 
 	_ = wx.GetTranslation
 	
@@ -123,7 +125,7 @@ def StatusBarNotification(f, arg):
 	def wrapper(*args):
 
 		# main window
-		mainW = wx.GetApp().GetTopWindow()
+		mainW = getTopLevelWindow()
 
 		### find if detachedFrame exists
 		for win in [w for w in mainW.GetChildren() if w.IsTopLevel()]:

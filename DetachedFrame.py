@@ -41,6 +41,7 @@ if __name__ == '__main__':
 import Container
 import Menu
 import PrintOut
+from Utilities import getTopLevelWindow
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
@@ -111,7 +112,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		toolbar.SetToolBitmapSize((16,16))
 
 		if self.parent:
-			self.toggle_list = wx.GetApp().GetTopWindow().toggle_list
+			self.toggle_list = getTopLevelWindow().toggle_list
 		else:
 			sys.stdout.write(_('Alone mode for DetachedFrame: Connector buttons are not binded\n'))
 			self.toggle_list = [wx.NewIdRef() for i in range(6)]
@@ -239,7 +240,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		""" Save button has been clicked
 		"""
 		### OnSaveFile of the mainW is activated
-		mainW = wx.GetApp().GetTopWindow()
+		mainW = getTopLevelWindow()
 		mainW.OnSaveFile(event)
 
 	def OnSaveAsFile(self, event):

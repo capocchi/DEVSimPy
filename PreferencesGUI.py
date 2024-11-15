@@ -45,7 +45,7 @@ if __name__ == '__main__':
 from HtmlWindow import HtmlFrame
 
 from PluginsGUI import PluginsPanel, GeneralPluginsList
-from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, AddToInitFile, DelToInitFile, install
+from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, AddToInitFile, DelToInitFile, install, getTopLevelWindow
 from Decorators import BuzyCursorNotification
 
 import ReloadModule
@@ -223,7 +223,7 @@ class GeneralPanel(wx.Panel):
 			builtins.__dict__['DOMAIN_PATH'] = new_domain_dir
 
 			### update all Domain (the process add in sys.path the path invoked when import is used
-			mainW = wx.GetApp().GetTopWindow()
+			mainW = getTopLevelWindow()
 			nb1 = mainW.GetControlNotebook()
 			tree = nb1.GetTree()
 			for item in tree.GetItemChildren(tree.GetRootItem()):
@@ -519,13 +519,13 @@ class SimulationPanel(wx.Panel):
 			ReloadModule.recompile("DomainInterface.DomainStructure")
 			ReloadModule.recompile("DomainInterface.MasterModel")
 
-			mainW = wx.GetApp().GetTopWindow()
+			mainW = getTopLevelWindow()
 			nb1 = mainW.GetControlNotebook()
 			tree = nb1.GetTree()
 			tree.UpdateAll()
 
 		### enable the priority (DEVS select function) icon depending on the selected DEVS kernel
-		mainW = wx.GetApp().GetTopWindow()
+		mainW = getTopLevelWindow()
 		tb = mainW.GetToolBar()
 		tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in builtins.__dict__['DEFAULT_DEVS_DIRNAME'])
 

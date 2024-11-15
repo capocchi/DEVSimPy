@@ -6,7 +6,7 @@ import wx
 _ = wx.GetTranslation
 
 from wxPyMail import SendMailWx
-from Utilities import FormatTrace, EnvironmentInfo, GetActiveWindow
+from Utilities import FormatTrace, EnvironmentInfo, GetActiveWindow, getTopLevelWindow
 
 ID_SEND = wx.NewIdRef()
 
@@ -280,7 +280,7 @@ class ErrorDialog(BaseDialog):
             msg = self.err_msg
             msg = msg.replace("'", '')
             frame.messageTxt.SetValue(msg)
-            mainW = wx.GetApp().GetTopWindow()
+            mainW = getTopLevelWindow()
             msg = _('DEVSimPy %s Error Report')%str( mainW.GetVersion())
             frame.subjectTxt.SetValue(msg)
             frame.Show()

@@ -138,8 +138,6 @@ def MsgBoxError(event, parent, msg):
 			typ, val, tb = msg
 			trace = format_exception(typ, val, tb)
 
-			# mainW = wx.GetApp().GetTopWindow()
-
 			### try to find if the error come from devs model
 			### paths in traceback
 			paths = [a for a in trace if a.split(',')[0].strip().startswith('File')]
@@ -806,7 +804,7 @@ class Diagram(Savable, Structurable):
 		if self.GetCount() != 0 :
 
 			## window that contain the diagram which will be simulate
-			win = wx.GetApp().GetTopWindow()
+			win = getTopLevelWindow()
 			obj = event.GetEventObject()
 
 #			obj = event.GetEventObject()
@@ -1594,7 +1592,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			try:
 				self.__state = {}
 				mainW = self.GetTopLevelParent()
-				mainW = isinstance(mainW, DetachedFrame) and wx.GetApp().GetTopWindow() or mainW
+				mainW = isinstance(mainW, DetachedFrame) and getTopLevelWindow() or mainW
 
 				self.attach(mainW.GetControlNotebook())
 
@@ -1940,7 +1938,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				if len(self.sourceNodeList) == 1 and len(self.targetNodeList) == 1:
 					self.makeConnectionShape(self.sourceNodeList[0], self.targetNodeList[0])
 				else:
-					self.dlgConnection = ConnectDialog.ConnectDialog(wx.GetApp().GetTopWindow(), wx.NewIdRef(), _("Connection Manager"), sourceName, self.sourceNodeList, targetName, self.targetNodeList)
+					self.dlgConnection = ConnectDialog.ConnectDialog(getTopLevelWindow(), wx.NewIdRef(), _("Connection Manager"), sourceName, self.sourceNodeList, targetName, self.targetNodeList)
 					self.dlgConnection.Bind(wx.EVT_BUTTON, self.OnDisconnect, self.dlgConnection._button_disconnect)
 					self.dlgConnection.Bind(wx.EVT_BUTTON, self.OnConnect, self.dlgConnection._button_connect)
 					self.dlgConnection.Bind(wx.EVT_CLOSE, self.OnCloseConnectionDialog)
@@ -2159,7 +2157,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			obj = event.GetEventObject()
 
 			### if right clic on canvas
-			parent = self if isinstance(obj, Menu.ShapeCanvasPopupMenu) else wx.GetApp().GetTopWindow().GetControlNotebook().GetTree()
+			parent = self if isinstance(obj, Menu.ShapeCanvasPopupMenu) else getTopLevelWindow().GetControlNotebook().GetTree()
 			gmwiz = ShapeCanvas.StartWizard(parent)
 
 			return gmwiz
@@ -2218,10 +2216,6 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 					sys.stdout.write(_("Adding DEVSimPy model: \n"))
 					sys.stdout.write(repr(m))
-
-					# try to update the library tree on left panel
-					#tree = wx.GetApp().GetTopWindow().tree
-					#tree.UpdateDomain(str(os.path.dirname(gmwiz.model_path)))
 
 					# focus
 					#wx.CallAfter(self.SetFocus)
@@ -2645,7 +2639,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 			if isinstance(win, DetachedFrame):
 				### main window
-				mainW = wx.GetApp().GetTopWindow()
+				mainW = getTopLevelWindow()
 
 				if not isinstance(mainW, DetachedFrame) and hasattr(mainW, 'GetDiagramNotebook'):
 					nb2 = mainW.GetDiagramNotebook()
@@ -3195,7 +3189,6 @@ class Testable(object):
 			# TODO: Testable :: OnTestEditor => Fix Editor importation
 			import Editor
 
-			#mainW = wx.GetApp().GetTopWindow()
 			### Editor instanciation and configuration---------------------
 			editorFrame = Editor.GetEditor(
 					None,
@@ -3688,7 +3681,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 			OnExport is invoked from Menu.py file and the id of sub_menu allows the selection of the appropriate save method in SaveFile (implemented in Savable.py)
 		"""
 
-		mainW = wx.GetApp().GetTopWindow()
+		mainW = getTopLevelWindow()
 		parent = event.GetClientData()
 		domain_path = os.path.dirname(self.model_path)
 
@@ -3845,8 +3838,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 
 					### try to find it in exportedPathList (after Domain check)
 					if not os.path.exists(path) and builtins.__dict__.get('GUI_FLAG',True):
-						import wx
-						mainW = wx.GetApp().GetTopWindow()
+						mainW = getTopLevelWindow()
 						for p in mainW.exportPathsList:
 							lib_name = os.path.basename(p)
 							if lib_name in path:
@@ -3952,9 +3944,8 @@ class CodeBlock(Achievable, Block, Iconizable):
 					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(python_path[python_path.index(dir_name):]).strip('[]')))
 
 					### try to find it in exportedPathList (after Domain check) and recent opened file
-					if not os.path.exists(path) and builtins.__dict__.get('GUI_FLAG',True):
-						import wx
-						mainW = wx.GetApp().GetTopWindow()
+					if not os.path.exists(path) and builtins.__dict__.get('GUI_FLAG', True):
+						mainW = getTopLevelWindow()
 						if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
 							for p in mainW.exportPathsList+mainW.openFileList:
 								lib_name = os.path.basename(p)
@@ -3976,7 +3967,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 				### try to find the python_path in recent opened file directory
 				if not os.path.exists(path) and builtins.__dict__.get('GUI_FLAG',True):
 					import wx
-					mainW = wx.GetApp().GetTopWindow()
+					mainW = getTopLevelWindow()
 					if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
 						for a in [os.path.dirname(p) for p in mainW.exportPathsList+mainW.openFileList]:
 							p = os.path.join(a,os.path.basename(python_path))
@@ -4031,7 +4022,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 						### for no-gui compatibility
 						if builtins.__dict__.get('GUI_FLAG',True):
 							import wx
-							mainW = wx.GetApp().GetTopWindow()
+							mainW = getTopLevelWindow()
 							if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
 								for a in [os.path.dirname(p) for p in mainW.exportPathsList+mainW.openFileList]:
 									path = os.path.join(a,fn_bn)
@@ -4235,8 +4226,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 
 					### try to find it in exportedPathList (after Domain check)
 					if not os.path.exists(path) and builtins.__dict__.get('GUI_FLAG',True):
-						import wx
-						mainW = wx.GetApp().GetTopWindow()
+						mainW = getTopLevelWindow()
 						for p in mainW.exportPathsList:
 							lib_name = os.path.basename(p)
 							if lib_name in path:
@@ -4431,7 +4421,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 			canvas = event.GetEventObject()
 			canvas.deselect()
 
-			mainW = wx.GetApp().GetTopWindow()
+			mainW = getTopLevelWindow()
 
 			frame = DetachedFrame(parent = mainW, title  = ''.join([canvas.name,' - ',self.label]), diagram = self, name = self.label)
 			frame.SetIcon(mainW.GetIcon())
@@ -5022,7 +5012,7 @@ class DiskGUI(CodeBlock):
 		devs = self.getDEVSModel()
 
 		if devs:
-			frame= SpreadSheet.Newt( wx.GetApp().GetTopWindow(),
+			frame= SpreadSheet.Newt( getTopLevelWindow(),
 									wx.NewIdRef(),
 									_("SpreadSheet %s")%self.label,
 									devs,

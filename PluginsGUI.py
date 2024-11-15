@@ -39,7 +39,7 @@ from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 
 from Decorators import BuzyCursorNotification
 from PluginManager import PluginManager 
-from Utilities import FormatSizeFile, getPYFileListFromInit
+from Utilities import FormatSizeFile, getPYFileListFromInit, getTopLevelWindow
 
 import ZipManager
 import Editor
@@ -279,7 +279,7 @@ class GeneralPluginsList(CheckListCtrl):
 		self.InsertColumn(2, _('Date'))
 		self.InsertColumn(3, _('Type'))
 
-		self.mainW = wx.GetApp().GetTopWindow()
+		self.mainW = getTopLevelWindow()
 
 		### Populate method is called ?
 		self.is_populate = False

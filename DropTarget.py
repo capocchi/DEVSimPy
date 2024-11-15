@@ -41,7 +41,7 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 		##local copy
 		self.canvas = canvas
 		
-		self.mainW = wx.GetApp().GetTopWindow()
+		self.mainW = Utilities.getTopLevelWindow()
 		
 		self.__setDo()
 
