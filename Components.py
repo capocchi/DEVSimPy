@@ -43,7 +43,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 	from SimpleFrameEditor import FrameEditor
 
 	_ = wx.GetTranslation
-	
+
 import ZipManager
 
 from Utilities import replaceAll, GetActiveWindow, printOnStatusBar, install
@@ -104,7 +104,7 @@ def GetClass(elem):
 
 		### try to catch and resolve instanciation of unknown class
 		if not cls:
-			sys.stderr.write(_("\nClass name and model name are different!\nWe try to instance the class %s that inherite of DomainClass!"%elem))
+			sys.stderr.write(_(f"\nClass name and model name are different!\nWe try to instance the class {elem} that inherite of DomainClass!"))
 			cls = next(filter(lambda c: c not in DomainClass and issubclass(c, DomainClass), clsmembers.values()), None)
 			if cls:
 				sys.stderr.write(_("\nClass instanciated but you need to verify if its a good one!\n"))
@@ -475,7 +475,7 @@ class CMDComponent(GenericComponent):
 		load_file_result = m.LoadFile(filename)
 
 		if isinstance(load_file_result, Exception):
-			wx.MessageBox(_('Error loading %s model : %s'%(label, str(load_file_result))), _('Error'), wx.OK | wx.ICON_ERROR)
+			wx.MessageBox(_(f"Error loading {label} model : {str(load_file_result)}"), _('Error'), wx.OK | wx.ICON_ERROR)
 			return None
 
 		else:
