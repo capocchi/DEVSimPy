@@ -198,7 +198,6 @@ from wxPyMail import SendMailWx
 from XMLModule import getDiagramFromXMLSES
 from StandaloneGUI import StandaloneGUI
 
-### only for wx 2.9 (bug)
 ### http://comments.gmane.org/gmane.comp.python.wxpython/98744
 wx.Log.SetLogLevel(0)
 
@@ -983,14 +982,7 @@ class MainApplication(wx.Frame):
 			if hasattr(self, '_mgr'):
 				self._mgr.UnInit()
 				del self._mgr
-			#self.Close()
-			
-			#win = wx.Window_FindFocus()
-			#if win != None:
-				## Note: you really have to use wx.wxEVT_KILL_FOCUS
-				## instead of wx.EVT_KILL_FOCUS here:
-				#win.Disconnect(-1, -1, wx.wxEVT_KILL_FOCUS)
-			#self.Destroy()
+		
 
 		event.Skip()
 
@@ -2450,7 +2442,7 @@ class PyOnDemandOutputWindow(threading.Thread):
 				self.text.AppendText(text)
 
 	def close(self):
-		if self.frame is not None:
+		if self.frame:
 			wx.CallAfter(self.frame.Close)
 
 	def flush(self):
@@ -2606,8 +2598,8 @@ if __name__ == '__main__':
 
 	### python devsimpy.py -d|-debug in order to define log file
 	elif len(sys.argv) >= 2 and sys.argv[1] in ('-d, -debug'):
-		log_file = 'log.txt'
-		sys.stdout.write(_('Writing %s file.\n')%log_file)
+		LOG_FILE = 'log.txt'
+		sys.stdout.write(_('Writing %s file.\n')%LOG_FILE)
 
 	### python devsimpy.py -h|-help in order to invoke command hepler
 	elif len(sys.argv) >= 2 and sys.argv[1] in ('-h, -help'):
