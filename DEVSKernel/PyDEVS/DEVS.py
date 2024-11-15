@@ -217,14 +217,14 @@ class AtomicDEVS(BaseDEVS):
 		"""Retrieves message from input port {\tt p}.
 		"""
 		value = self.myInput.get(p, None)
-		return value.copy() if value else value 
-		# return copy.deepcopy(value) if value else value
+		# return value.copy() if value else value 
+		return copy.deepcopy(value) if value else value
 
 	def peek_all(self):
 		"""Retrieves messages from all input port {\tt p}.
 		"""
-		# return [(p, copy.deepcopy(m)) for p,m in list(self.myInput.items())]
-		return [(p, m.copy()) for p,m in list(self.myInput.items())]
+		return [(p, copy.deepcopy(m)) for p,m in list(self.myInput.items())]
+		# return [(p, m.copy()) for p,m in list(self.myInput.items())]
 
 	###
 	def extTransition(self, *args, **kwargs):

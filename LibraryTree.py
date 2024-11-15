@@ -440,6 +440,7 @@ class LibraryTree(wx.TreeCtrl):
 					### sort all item
 					self.SortChildren(self.root)
 
+
 		# Cleanup
 		if gmwiz: gmwiz.Destroy()
 
