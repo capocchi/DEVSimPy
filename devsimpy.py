@@ -528,13 +528,13 @@ class MainApplication(wx.Frame):
 			try:
 				locale.setlocale(locale.LC_ALL, self.language)
 			except:
-				sys.stdout.write(_('new local (since wx 4.1.0) setting not applied'))
+				sys.stdout.write(_('new local (since wx 4.1.0) setting not applied\n'))
 			translation = gettext.translation(domain, localedir, languages=[self.language])
 		else:
 			try:
 				locale.setlocale(locale.LC_ALL, 'C')
 			except:
-				sys.stdout.write(_('new local (since wx 4.1.0) setting not applied'))
+				sys.stdout.write(_('new local (since wx 4.1.0) setting not applied\n'))
 			#installing os language by default
 			translation = gettext.translation(domain, localedir, [self.locale.GetCanonicalName()], fallback = True)
 

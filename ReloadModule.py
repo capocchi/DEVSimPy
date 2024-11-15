@@ -41,7 +41,8 @@ def recompile(modulename):
 		modulepath = pycfile.replace('.pyc', '.py') #string.replace(pycfile, ".pyc", ".py")
 
 		### Try to open the specified module as a file
-		code = open(modulepath, 'rU').read()
+		with open(modulepath, 'r', newline='') as f:
+			code = f.read()
 
 		### see if the file we opened can compile.  If not, return the error that it gives.
 		### if compile() fails, the module will not be replaced.
