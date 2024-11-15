@@ -1178,40 +1178,40 @@ class ShapeEvtHandler(ABC):
 	""" Handler class
 	"""
 
-	def OnLeftUp(self,event):
+	def OnLeftUp(self, event):
 		pass
 
-	def OnLeftDown(self,event):
+	def OnLeftDown(self, event):
 		pass
 
-	def leftUp(self,items):
+	def leftUp(self, items):
 		pass
 
-	def OnLeftDClick(self,event):
+	def OnLeftDClick(self, event):
 		pass
 
-	def OnRightUp(self,event):
+	def OnRightUp(self, event):
 		pass
 
-	def OnRightDown(self,event):
+	def OnRightDown(self, event):
 		pass
 
-	def OnRightDClick(self,event):
+	def OnRightDClick(self, event):
 		pass
 
-	def OnSelect(self,event):
+	def OnSelect(self, event):
 		pass
 
-	def OnDeselect(self,event):
+	def OnDeselect(self, event):
 		pass
 
-	def OnMove(self,event):
+	def OnMove(self, event):
 		pass
 
-	def OnResize(self,event):
+	def OnResize(self, event):
 		pass
 
-	def OnConnect(self,event):
+	def OnConnect(self, event):
 		pass
 
 # Generic Graphic items---------------------------------------------------------
@@ -1249,16 +1249,16 @@ class Shape(ShapeEvtHandler):
 
 		# Set the font for the label
 		dc.SetFont(wx.Font(self.font[0], self.font[1], self.font[2], self.font[3], False, self.font[4]))
-
-	def DynamicFont(self, dc):
-		"""Chnage the size font of the label when the block size is changed (by extending the reseazibleNode for exemple)
+		
+	def dynamicFont(self, dc):
+		"""Change the size font of the label when the block size is changed (by extending the reseazibleNode for exemple)
 
 		Args:
 			dc (_type_): _description_
 		"""
 		# If the object has a label, adjust the font size
 		if hasattr(self, 'label'):
-			
+
 			font = FONT_SIZE
 			margin = 25
 
@@ -2185,7 +2185,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			xm,ym = self.ScreenToClient(wx.Point(int(xwindow), int(ywindow)))
 
 			gmwiz = self.OnStartWizard(event)
-			
+
 			# if wizard is finished witout closing
 			if gmwiz :
 				
@@ -2795,7 +2795,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 						if isinstance(s, ResizeableNode) and cursor != wx.StockCursor(wx.CURSOR_SIZING):
 							cursor = wx.StockCursor(wx.CURSOR_SIZING)
 							### adapt the font size fo the label when the rezeableNode is moved (here because we have dc!)
-							s.item.DynamicFont(dc)
+							s.item.dynamicFont(dc)
 
 						### change cursor when connectionShape hit a node
 						elif isinstance(s, ConnectionShape):

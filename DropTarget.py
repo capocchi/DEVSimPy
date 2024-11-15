@@ -117,17 +117,6 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 		### abs (x - shape.x[0]) < w and abs (y - shape.y[0]) < h
 
 		return rect.ContainsXY(x,y) if wx.VERSION_STRING < '4.0' else rect.Contains(x,y)
-
-	#def OnDragOver(self, x, y, d):
-	#	sys.stdout.write("OnDragOver: %d, %d, %d\n" % (x, y, d))
-	#	return wx.DragCopy
-
-	#def OnLeave(self):
-		#sys.stdout.write("OnLeave\n")
-
-	#def OnDrop(self, x, y):
-		#sys.stdout.write("OnDrop: %d %d\n" % (x, y))
-		#return True
         
 	def OnData(self, x, y, d):
 		"""
@@ -203,6 +192,9 @@ class DropTarget(wx.PyDropTarget if wx.VERSION_STRING < '4.0' else wx.DropTarget
 				if block:
 					# Adding graphical model to diagram
 					self.canvas.AddShape(block)
+					# Set the Font dynamically
+					block.dynamicFont(wx.ClientDC(self.canvas))
+
 					sys.stdout.write(_("Adding DEVSimPy model: \n").strip())
 					sys.stdout.write(repr(block))
 				else:
