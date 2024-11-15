@@ -2003,7 +2003,7 @@ class MainApplication(wx.Frame):
 	###
 	def OnFrench(self, event):
 		print(dir(event))
-		self.cfg.Write("language", f"'{event.GetEventObject().data}'")
+		self.cfg.Write("language", f"'fr'")
 		
 		dlg = wx.MessageDialog(self, _('You need to restart DEVSimPy to take effect.\n\nDo you want to restart now ?'), _('Internationalization'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 		if dlg.ShowModal() == wx.ID_YES:
