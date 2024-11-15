@@ -1802,7 +1802,7 @@ class Base(object):
 			try:
 				self.Notification(True, msg, str(new_instance.args[0]), str(new_instance.args[1]))
 			except UnicodeDecodeError:
-				self.Notification(True, msg, str(new_instanceargs[0]).decode('latin-1').encode("utf-8"), str(new_instanceargs[1]).decode('latin-1').encode("utf-8"))
+				self.Notification(True, msg, str(new_instance.args[0]).decode('latin-1').encode("utf-8"), str(new_instance.args[1]).decode('latin-1').encode("utf-8"))
 
 	### NOTE: Editor :: Notification 			=> Notify something on the statusbar
 	def Notification(self, modify, *args):
