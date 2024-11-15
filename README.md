@@ -28,8 +28,6 @@ For users who prefer not to install Python with all dependencies, [Portable Pyth
 
 A virtual machine with XUbuntu 19.10, including DEVSimPy, can be downloaded from [DEVSimPy-on-XUbuntu19.10.ova](https://mycore.core-cloud.net/index.php/s/2EHfgPwJk6HIEHH). The login and password for the distribution (root) are: devsimpy-user/devsimpy. To get the latest version of DEVSimPy, execute 'git pull' in the DEVSimPy directory before starting or start DEVSimPy by double-clicking on the desktop icon and going to Help->Update->From Git Repository (pull).
 
-An archive of a conda environment, which includes all the binaries of the packages needed for the DEVSimPy environment, is available here: [py38.tar.gz](https://mycore.core-cloud.net/index.php/s/5nNgyvwps6O2kUy). This is useful when you want to reproduce a compatible environment for DEVSimPy and avoid all installation and dependency requirements.
-
 # Features
 With DEVSimPy, you can:
 
