@@ -873,12 +873,18 @@ def replaceAll(file,searchExp,replaceExp):
         sys.stdout.write(line)
 
 def listf(data):
-	"""
-	"""
-	buffer = ""
-	for line in data:
-		buffer = buffer + line + "\n"
-	return buffer
+    """
+    Concatenate a list of strings into a single string,
+    separated by newlines.
+
+    Args:
+        data: A list of strings.
+
+    Returns:
+        A string containing the concatenated elements.
+    """
+
+    return "\n".join(data)
 
 def RGBToHEX(rgb_tuple):
     """ convert an (R, G, B) tuple to #RRGGBB """
