@@ -30,6 +30,7 @@ from LibPanel import LibPanel
 from PropPanel import PropPanel
 from AttributeEditor import AttributeEditor
 from Mixins.Attributable import Attributable
+from Utilities import getTopLevelWindow
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
@@ -216,7 +217,7 @@ if USE_FLATNOTEBOOK:
 				We update the Show menu depending on the deleted tab.
 			"""
 
-			mainW = wx.GetApp().GetTopWindow()
+			mainW = getTopLevelWindow()
 
 			### label which will be deleted
 			label = self.GetPageText(evt.GetSelection())
