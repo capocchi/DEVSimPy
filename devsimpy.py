@@ -33,7 +33,6 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-from csv import excel_tab
 import datetime
 import copy
 import os
@@ -41,13 +40,11 @@ import sys
 import time
 import locale
 import re
-import gettext
 import builtins
 import platform
 import threading
 import subprocess
 import pickle
-import builtins
 import glob
 import pstats
 
@@ -77,11 +74,12 @@ ini_exist = parser.has_option(section, option)
 
 import wx
 
+_ = wx.GetTranslation
+
 ### check if an upgrade of wxpython is possible from pip !
 sys.stdout.write("Importing wxPython %s%s for python %s on %s (%s) platform...\n"%(wx.version(), " from devsimpy.ini" if ini_exist else '', platform.python_version(), platform.system(), platform.version()))
 
 import gettext
-_ = gettext.gettext
 
 try:
 	import wx.aui as aui
@@ -334,7 +332,7 @@ class MainApplication(wx.Frame):
 		self.Bind(wx.EVT_IDLE, self.OnIdle)
 		self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
 
-		sys.stdout.write("DEVSimPy is ready!\n")
+		sys.stdout.write("DEVSimPy is up!\n")
 
 		### load last size and position if exist
 		self.SetSize(DefineScreenSize() if not self.last_size else self.last_size)
@@ -522,20 +520,20 @@ class MainApplication(wx.Frame):
 
 		# Set locale for wxWidgets
 		self.locale = wx.Locale()
-		self.locale.Init(langid)
 		self.locale.AddCatalogLookupPathPrefix(localedir)
+		self.locale.Init(langid)
 		self.locale.AddCatalog(domain)
-	
+		
 		# language config from .devsimpy file
-		if self.language in ('en','fr'):
+		if self.language in ('en', 'fr'):
 			try:
 				locale.setlocale(locale.LC_ALL, self.language)
 			except:
 				sys.stdout.write(_('new local (since wx 4.1.0) setting not applied'))
-			translation = gettext.translation(domain, localedir, languages=[self.language]) 
+			translation = gettext.translation(domain, localedir, languages=[self.language])
 		else:
 			try:
-				locale.setlocale(locale.LC_ALL, '')
+				locale.setlocale(locale.LC_ALL, 'C')
 			except:
 				sys.stdout.write(_('new local (since wx 4.1.0) setting not applied'))
 			#installing os language by default
@@ -2004,27 +2002,25 @@ class MainApplication(wx.Frame):
 
 	###
 	def OnFrench(self, event):
-		self.cfg.Write("language", "'fr'")
-		if wx.Platform == '__WXGTK__':
-			dlg = wx.MessageDialog(self, _('You need to restart DEVSimPy to take effect.\n\nDo you want to restart now ?'), _('Internationalization'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-			if dlg.ShowModal() == wx.ID_YES:
-				wx.CallAfter(self.OnRestart())
-			dlg.Destroy()
-		else:
-			wx.MessageBox(_('You need to restart DEVSimPy to take effect.'), _('Info'), wx.OK|wx.ICON_INFORMATION)
-
+		print(dir(event))
+		self.cfg.Write("language", f"'{event.GetEventObject().data}'")
+		
+		dlg = wx.MessageDialog(self, _('You need to restart DEVSimPy to take effect.\n\nDo you want to restart now ?'), _('Internationalization'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		if dlg.ShowModal() == wx.ID_YES:
+			wx.CallAfter(self.OnRestartApp())
+		dlg.Destroy()
+		
 	###
 	def OnEnglish(self, event):
+		print(dir(event))
+		
 		self.cfg.Write("language", "'en'")
-
-		if wx.Platform == '__WXGTK__':
-			dlg = wx.MessageDialog(self, _('You need to restart DEVSimPy to take effect.\n\nDo you want to restart now ?'), _('Internationalization'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-			if dlg.ShowModal() == wx.ID_YES:
-				wx.CallAfter(self.OnRestart())
-			dlg.Destroy()
-		else:
-			wx.MessageBox(_('You need to restart DEVSimPy to take effect.'), _('Info'), wx.OK|wx.ICON_INFORMATION)
-
+		
+		dlg = wx.MessageDialog(self, _('You need to restart DEVSimPy to take effect.\n\nDo you want to restart now ?'), _('Internationalization'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+		if dlg.ShowModal() == wx.ID_YES:
+			wx.CallAfter(self.OnRestartApp())
+		dlg.Destroy()
+		
 	###
 	def OnAdvancedSettings(self, event):
 		frame = PreferencesGUI(self,_("Preferences Manager"))
@@ -2108,17 +2104,19 @@ class MainApplication(wx.Frame):
 		dlg.Destroy()
 
 	###
-	def OnRestart(self):
+	def OnRestartApp(self):
 		""" Restart application.
 		"""
 
 		# permanently writes all changes (otherwise, they’re only written from object’s destructor)
 		self.cfg.Flush()
 
-		# restart application on the same process (erase)
-		program = "python"
-		arguments = ["devsimpy.py"]
-		os.execvp(program, (program,) +  tuple(arguments))
+		self.Close()
+
+		# restart application on the same process (erase)	
+		python = sys.executable
+		os.execl(python, python, *sys.argv)
+	
 
 	def OnHelp(self, event):
 		""" Shows the DEVSimPy help file. """
@@ -2568,8 +2566,6 @@ class DEVSimPyApp(wx.App, wit.InspectionMixin):
 
 #-------------------------------------------------------------------
 if __name__ == '__main__':
-
-	_ = wx.GetTranslation
 
 	### python devsimpy.py -c|-clean in order to delete the config file
 	if len(sys.argv) >= 2 and sys.argv[1] in ('-c', '-clean'):

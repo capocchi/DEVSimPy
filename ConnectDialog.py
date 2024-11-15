@@ -23,8 +23,7 @@
 import wx
 import os
 
-import gettext
-_ = gettext.gettext
+_ = wx.GetTranslation
 
 def function(obj, i):
 	return 'iPort %d'%i if obj[i].__class__.__name__ == "INode" else 'oPort %d'%i

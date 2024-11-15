@@ -31,9 +31,6 @@ from tempfile import gettempdir
 import time
 import cProfile, pstats, io
 
-import gettext
-_ = gettext.gettext
-
 if builtins.__dict__.get('GUI_FLAG',True):
 	import wx
 	if wx.VERSION_STRING < '4.0':
@@ -45,6 +42,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 	from pubsub import pub
 
+	_ = wx.GetTranslation
+	
 def cond_decorator(flag, dec):
 	def decorate(fn):
 		return dec(fn) if flag else fn

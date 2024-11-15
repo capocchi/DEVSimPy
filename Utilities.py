@@ -48,6 +48,8 @@ from zipfile import ZipFile, ZIP_DEFLATED
 if builtins.__dict__.get('GUI_FLAG',True):
 	import wx
 	
+	_ = wx.GetTranslation
+
 	### for Phoenix
 	if wx.VERSION_STRING >= '4.0':
 		import wx.adv

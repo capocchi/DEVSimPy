@@ -29,7 +29,7 @@ ID_ADD = wx.NewIdRef()
 ID_REMOVE = wx.NewIdRef()
 ID_HELP = wx.NewIdRef()
 
-_ = gettext.gettext
+_ = wx.GetTranslation
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #

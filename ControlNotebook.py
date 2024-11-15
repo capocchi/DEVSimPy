@@ -23,8 +23,7 @@
 import wx
 import os
 
-import gettext
-_ = gettext.gettext
+_ = wx.GetTranslation
 
 from Patterns.Observer import Observer
 from LibPanel import LibPanel

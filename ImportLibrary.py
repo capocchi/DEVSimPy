@@ -27,15 +27,14 @@ if not hasattr(inspect, 'getargspec'):
     
 import wx
 import wx.lib.dialogs
-import wx.lib.filebrowsebutton as filebrowse
+
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 import wx.lib.dialogs
 from concurrent.futures import ThreadPoolExecutor
 
-import gettext
-_ = gettext.gettext
+_ = wx.GetTranslation
  
-from Utilities import checkURL, getDirectorySize, RecurseSubDirs, getPYFileListFromInit, NotificationMessage
+from Utilities import checkURL, getDirectorySize, getPYFileListFromInit, NotificationMessage
 from Decorators import BuzyCursorNotification
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##

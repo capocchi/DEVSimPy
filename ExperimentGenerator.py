@@ -5,8 +5,7 @@ import wx
 import Container
 import DetachedFrame
 
-import gettext
-_ = gettext.gettext
+_ = wx.GetTranslation
 
 class ExperimentGenerator:
     """

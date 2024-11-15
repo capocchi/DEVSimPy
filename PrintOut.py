@@ -7,8 +7,7 @@ import wx
 import sys
 import copy
 
-import gettext
-_ = gettext.gettext
+_ = wx.GetTranslation
 
 class Printout(wx.Printout):
 

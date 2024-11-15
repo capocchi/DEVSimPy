@@ -3,10 +3,10 @@
 import sys
 import wx
 
+_ = wx.GetTranslation
+
 from wxPyMail import SendMailWx
 from Utilities import FormatTrace, EnvironmentInfo, GetActiveWindow
-
-_ = wx.GetTranslation
 
 ID_SEND = wx.NewIdRef()
 

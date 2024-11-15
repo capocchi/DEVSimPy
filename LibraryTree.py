@@ -39,8 +39,7 @@ from Complexity import GetMacCabeMetric
 
 from pubsub import pub
 
-import gettext
-_ = gettext.gettext
+_ = wx.GetTranslation
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #

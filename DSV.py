@@ -112,7 +112,7 @@ To do:
 #   - Changed "from wxPython.wx import *" to "from wxPython import wx"
 #   - Changed sample csv file (darkwave.csv) to demonstrate embedded quotes
 
-import sys
+
 # import pre as re # sre was broken, appears okay now. Try this if there are problems.
 import re 
 import copy
@@ -125,11 +125,10 @@ import os
 from functools import reduce
 os.putenv('LANG', 'C')
 
-import gettext
-_ = gettext.gettext
-
 import wx
 import wx.grid
+
+_ = wx.GetTranslation
 
 class InvalidDelimiter(Exception): pass
 class InvalidTextQualifier(Exception): pass

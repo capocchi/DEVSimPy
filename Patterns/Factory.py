@@ -26,7 +26,8 @@ import gettext
 _ = gettext.gettext
 
 if builtins.__dict__.get('GUI_FLAG',True):
-    import wx
+	import wx
+	_ = wx.GetTranslation
 
 import threading
 import sys

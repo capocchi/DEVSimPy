@@ -26,8 +26,7 @@ import linecache
 
 import wx
 
-import gettext
-_ = gettext.gettext
+_ = wx.GetTranslation
 
 import DiagramNotebook
 

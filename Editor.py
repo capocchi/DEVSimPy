@@ -38,7 +38,7 @@ import inspect
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
     
-from tempfile import gettempdir
+from tempfile import gettempdir, TemporaryDirectory
 from wx import stc
 
 from Decorators import redirectStdout
@@ -47,8 +47,7 @@ from Utilities import path_to_module, printOnStatusBar
 import ReloadModule
 import ZipManager
 
-import gettext
-_ = gettext.gettext
+_ = wx.GetTranslation
 
 # Turn on verbose mode
 tabnanny.verbose = 1
@@ -1147,8 +1146,30 @@ class EditionNotebook(wx.Notebook):
 	def CheckIndent(fileName):
 		"""
 		"""
-		tabnanny.check(fileName)
+		### NOTE: tabnanny.check(fileName) => check the indentation of the fileName file
 
+		### if fileName is a python file
+		if os.path.isfile(fileName) and fileName.endswith('.py'):
+			tabnanny.check(fileName)
+		else:
+			### if fileName is a zipfile
+			zip_path = os.path.dirname(fileName)
+			
+			### if zipfile
+			if zipfile.is_zipfile(zip_path):
+				python_file = os.path.basename(fileName)
+
+				with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+					### Extraction
+					with TemporaryDirectory() as temp_dir:
+						extracted_path = zip_ref.extract(python_file, temp_dir)  # Extraction
+						### Check indentation
+						try:
+							tabnanny.check(extracted_path)
+						except Exception as e:
+							sys.stderr.write(_(f"Erreur dans {python_file} : {e}"))
+
+	
 	### NOTE: EditionNotebook :: OnReIndent 	=> Event on re-indent
 	def OnReIndent(self, event):
 		""" Reindent all the text
@@ -1744,6 +1765,7 @@ class Base(object):
 		fn = self.nb.GetCurrentPage().GetFilename()
 
 		output_checking = EditionNotebook.CheckIndent(fn)
+
 		if "indent not equal" in output_checking:
 			dial = wx.MessageDialog(self, _('Tab problem in %s.\n%s \
 				\nYou can try to re-indent it with Edit-> Re-indent sub-menu.' % (fn, output_checking)),
@@ -1756,7 +1778,7 @@ class Base(object):
 			try:
 				self.Notification(True, msg, str(new_instance.args[0]), str(new_instance.args[1]))
 			except UnicodeDecodeError:
-				self.Notification(True, msg, str(new_instanceargs[0]).decode('latin-1').encode("utf-8"), str(new_instanceargs[1]).decode('latin-1').encode("utf-8"))
+				self.Notification(True, msg, str(new_instance.args[0]).decode('latin-1').encode("utf-8"), str(new_instance.args[1]).decode('latin-1').encode("utf-8"))
 
 	### NOTE: Editor :: Notification 			=> Notify something on the statusbar
 	def Notification(self, modify, *args):
@@ -2038,7 +2060,7 @@ class BlockBase(object):
 
 		if port is not None:
 			cp = self.nb.GetCurrentPage()
-			cp.AddText("return self.poke(self.OPorts[%d], Message(None), self.timeNext))"%int(port))
+			cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))"%int(port))
 			self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	def OnAllPeek(self, *args):
@@ -2090,7 +2112,7 @@ class BlockBase(object):
 				if "peek" in label:
 					cp.AddText("self.peek(self.IPorts[%d], *args)"%int(port))
 				elif "poke" in label:
-					cp.AddText("return self.poke(self.OPorts[%d], Message(None, self.timeNext))"%int(port))
+					cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))"%int(port))
 				self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
 
 	def OnInsertInitPhase(self, event):
@@ -2301,7 +2323,6 @@ class BlockBase(object):
 				import Components
 				new_args = Components.GetArgs(new_class)
 				self.UpdateArgs(new_args)
-
 			### user would change the behavior during a simulation without saving
 			if on_simulation_flag and new_instance is not bool:
 
@@ -2321,6 +2342,7 @@ class BlockBase(object):
 		### some errors in file
 		else:
 			self.SavingErrors(new_instance)
+			
 
 	###
 	def UpdateModule(self):
@@ -2524,7 +2546,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		try:
 			tb.Realize()
 		except:
-			print("Toolbar not displayed on mac...")
+			sys.stdout.write(_("Toolbar not displayed on mac..."))
 			pass
 
 		if not self.cb.isCMD():

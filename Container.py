@@ -28,24 +28,18 @@ if builtins.__dict__.get('GUI_FLAG',True):
 	import wx.lib.dialogs
 	from wx.lib.newevent import NewEvent
 
-	_ = wx.GetTranslation
-
 	from pubsub import pub as Publisher
 
 	AttrUpdateEvent, EVT_ATTR_UPDATE = NewEvent()
 
 	### wx.color has been removed in wx. 2.9
-	if hasattr(wx, "Color"):
-	    wx.Colour = wx.Color
-	else:
-	    wx.Color = wx.Colour
+	wx.Colour = wx.Color if hasattr(wx, "Color") else wx.Colour
 
 	if wx.VERSION_STRING >= '4.0':
 		wx.StockCursor = wx.Cursor
-else:
-	import gettext
-	_ = gettext.gettext
 
+	_ = wx.GetTranslation
+	
 import os
 import sys
 import copy
