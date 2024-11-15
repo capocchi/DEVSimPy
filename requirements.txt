@@ -207,7 +207,7 @@ requests >= 2.22.0
 ruamel.yaml #>= 0.16.5
 
 # setup.py: 1
-#setuptools >= 41.6.0.post20191030
+setuptools
 
 # DEVSKernel\PyPDEVS\old\examples\trafficLightExperiment.py: 18
 # DEVSKernel\PyPDEVS\old\examples\trafficLightExperimentRT.py: 5
