@@ -45,11 +45,7 @@ if __name__ == '__main__':
 from HtmlWindow import HtmlFrame
 
 from PluginsGUI import PluginsPanel, GeneralPluginsList
-<<<<<<< HEAD
 from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, AddToInitFile, DelToInitFile, install, getTopLevelWindow
-=======
-from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, AddToInitFile, DelToInitFile, install
->>>>>>> 26c69fa (add check button in preference for AI panel)
 from Decorators import BuzyCursorNotification
 from AIAdapter import AdapterFactory
 
