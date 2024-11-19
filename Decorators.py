@@ -7,7 +7,7 @@
 #                    L. CAPOCCHI (capocchi@univ-corse.fr)
 #                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-# Version 2.0                                        last modified: 03/15/20
+# Version 2.0                                        last modified: 11/01/24
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -221,18 +221,21 @@ def ProgressNotification(f, arg):
 		if isinstance(new_path, str) and os.path.isfile(new_path):
 			message = _("Loading %s ...")%os.path.basename(new_path)
 		else:
-			message = _('Please wait..')
+			message = _('Please wait...')
 
 		progress_dlg = wx.ProgressDialog(title, message, style=wx.PD_APP_MODAL|wx.PD_CAN_ABORT)
 
 		thread = ThreadWithReturnValue(target = f, args = args)
 		thread.start()
 
+		cancelled = False
 		### isAlive is deprecated since python 3.9		
-		while thread.isAlive() if hasattr(thread,'isAlive') else thread.is_alive():
+		while thread.isAlive() if hasattr(thread, 'isAlive') else thread.is_alive() and not cancelled:
 
 			if progress_dlg.WasCancelled() or progress_dlg.WasSkipped():
 				thread.kill()
+				cancelled = True
+				break
 			else:
 				wx.MilliSleep(300)
 				progress_dlg.Pulse(thread.getLog())
@@ -240,7 +243,11 @@ def ProgressNotification(f, arg):
 
 		progress_dlg.Destroy()
 
-		return thread.join()
+		# Vérifier si le thread a été annulé et gérer la fin du thread
+		if not cancelled:
+			return thread.join()
+		else:
+			return None  # Retourner None en cas d'annulation pour indiquer l'interruption
 
 	return wrapper
 

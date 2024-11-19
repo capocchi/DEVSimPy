@@ -302,28 +302,29 @@ class Zip:
 			scaleH and scaleW are used to rescale image
 		"""
 
-		if zipfile.is_zipfile(self.fn):
+		if not zipfile.is_zipfile(self.fn):
 			return None
 
-		zf = zipfile.ZipFile(self.fn, 'r')
-
-		### find if python file has same name of model file
-		L = [f for f in zf.namelist() if f.endswith(('.jpg','jpeg','png','bmp'))]
-
-		if L:
-			import wx
-			f = zf.open(L.pop())
-			buf = f.read()
-			f.close()
-			zf.close()
-			sbuf = io.StringIO(buf)
-			image = wx.ImageFromStream(sbuf)
-			sbuf.close()
-			image.Rescale(scaleW, scaleH)
-			return image
-		else:
-			zf.close()
-			return None
+		with zipfile.ZipFile(self.fn, 'r') as zf:
+			# find image file in zip with the right format
+			image_files = [f for f in zf.namelist() if f.endswith(('.jpg', 'jpeg', 'png', 'bmp'))]
+			
+			if image_files:
+				import wx
+				# Open the first image file finded in zip
+				with zf.open(image_files[0]) as f:
+					buf = f.read()
+					
+				# load flow
+				sbuf = io.BytesIO(buf)
+				image = wx.Image(sbuf)  # Compatible
+				sbuf.close()
+				
+				# Resize
+				image.Rescale(scaleW, scaleH)
+				return image
+			else:
+				return None
 
 	@staticmethod
 	def GetBehavioralPythonFile(fn:str):

@@ -21,6 +21,7 @@ local.properties
 .vscode
 .idea
 .spyproject
+.env
 
 # External tool builders
 .externalToolBuilders/
