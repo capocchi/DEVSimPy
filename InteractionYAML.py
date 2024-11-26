@@ -37,7 +37,7 @@ class YAMLHandler:
         """ Constructor.
         """
 
-        assert(filename.endswith('.yaml'))
+        # assert(filename.endswith('.yaml'))
         
         from Container import Diagram
 
