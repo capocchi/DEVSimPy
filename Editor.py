@@ -2020,7 +2020,7 @@ class BlockBase(object):
 		### choices object is ordderd dict to associate handlers
 		if block:
 			if not block.isCMD():
-				self._choices = collections.OrderedDict([(_('New peek'),self.OnPeek), (_('New all peek'),self.OnAllPeek), 
+				self._choices = collections.OrderedDict([(_('New init phase'),self.OnInitPhase), (_('New peek'),self.OnPeek), (_('New all peek'),self.OnAllPeek), 
 					(_('New poke'),self.OnPoke), (_('New hold in state'),self.OnInsertHoldInState), (_('New passivate in state'),self.OnInsertPassivateInState), 
 					(_('New passivate state'),self.OnInsertPassivateState), (_('New Phase test'),self.OnInsertPhaseIs), (_('New debugger stdout'),self.OnInsertDebug), 
 					(_('Get state'),self.OnInsertGetState), (_('Get sigma'),self.OnInsertGetSigma), (_('Get message value'),self.OnInsertGetMsgValue), (_('Get message time'),self.OnInsertGetMsgTime)])
@@ -2037,6 +2037,13 @@ class BlockBase(object):
 		"""
 		return list(self._choices.keys())
 
+	def OnInitPhase(self, *args)->None:
+		"""Insert init Phase instruction.
+		"""
+		cp = self.nb.GetCurrentPage()
+		cp.AddText("self.initPhase(<status>,<sigma>)")
+		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		
 	def OnPeek(self, *args)->None:
 		""" Insert the peek statement.
 		"""

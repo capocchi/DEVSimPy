@@ -204,8 +204,8 @@ class DSPComponent:
 
 				return True
 			else:
-				info = _('Error opening file \n file : %s \n object : %s \n error : %s ')%(filename, load_file_result[1], load_file_result[0])
-				wx.MessageBox(info, _('Error'), wx.OK|wx.ICON_ERROR)
+				error_message = _('Error opening file \n file: %s \n error: %s') % (filename, str(load_file_result))
+				wx.MessageBox(error_message, _('Error'), wx.OK|wx.ICON_ERROR)
 				return False
 
 class PyComponent:
@@ -344,7 +344,7 @@ class GenericComponent:
 		### check if a filename is needed in args (bad_filename_path_flag)
 		### find all word containning 'filename' without considering the casse
 		m = [re.match('[_-a-zA-Z0-9]*filename[_-a-zA-Z0-9]*',s, re.IGNORECASE) for s in model.args]
-		filename_list = [a.group(0) for a in [s for s in m if s is not None]]
+		filename_list = (a.group(0) for a in [s for s in m if s])
 		### for all filename attr
 		for name in filename_list:
 			fn = model.args[name]

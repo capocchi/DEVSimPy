@@ -26,7 +26,7 @@ import gettext
 import importlib
 import subprocess
 import traceback
-
+import types
 import inspect
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
@@ -96,9 +96,9 @@ class PickledCollection(list):
 		self.__dict__.update(state)
 
 	def __iter__(self):
-	    """ Overwrite iterator protocol.
+		""" Overwrite iterator protocol.
 		"""
-	    yield from self.pickled_obj
+		yield from self.pickled_obj
 
 class DumpBase(object):
 	""" DumpBase class.
@@ -113,16 +113,16 @@ class DumpBase(object):
 	### extension is in whiteList
 	@staticmethod
 	def GetExt(fileName:str=""):
-	    ext = os.path.splitext(fileName)[-1]
+		ext = os.path.splitext(fileName)[-1]
 
-	    if ext == "":
-	    	return sys.stdout.write(_("\nPlease save the project."))
+		if ext == "":
+			return sys.stdout.write(_("\nPlease save the project."))
 
-	    if ext in DumpBase.WhiteList:
-	        return ext
+		if ext in DumpBase.WhiteList:
+			return ext
      
-	    sys.stdout.write(_("\nThis extension is unknown: %s.")%ext)
-	    return False
+		sys.stdout.write(_("\nThis extension is unknown: %s.")%ext)
+		return False
 
 	### Return the class in charge of saving or loading from ext of object.
 	@staticmethod
@@ -446,7 +446,7 @@ class DumpGZipFile(DumpBase):
 				dsp = pickle.load(f)
 			except Exception as info:
 				tb = traceback.format_exc()
-				sys.stderr.write(_("Problem loading: %s -- %s\n")%(str(fileName), str(tb)))
+				sys.stderr.write(_("Problem loading: %s -- %s\n")%(str(fileName), tb))
 				return info
 			finally:
 				f.close()

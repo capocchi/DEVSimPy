@@ -92,13 +92,15 @@ from Mixins.Rotatable import Rotatable
 from Mixins.Connectable import Connectable
 from Mixins.Plugable import Plugable
 from Mixins.Structurable import Structurable
-from Mixins.Savable import Savable
+from Mixins.Savable import Savable, PickledCollection
 from Mixins.Selectable import Selectable
 from Mixins.Abstractable import Abstractable
 from Mixins.Iconizable import Iconizable, Icon
 
 ### for all dsp model build with old version of DEVSimPy
 sys.modules['Savable'] = sys.modules['Mixins.Savable']
+sys.modules['Container.PickledCollection'] = PickledCollection
+
 
 from Decorators import BuzyCursorNotification, Post_Undo
 from Utilities import HEXToRGB, relpath, playSound, sendEvent, getInstance, FixedList, getObjectFromString, getTopLevelWindow, printOnStatusBar
@@ -1695,18 +1697,26 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				mainW = self.GetTopLevelParent()
 				tb = mainW.FindWindowByName('tb')
 
-				if isinstance(tb,wx.ToolBarBase):
-					tb = tb.GetToolBar()
-					
-				### find the tool from toolBar thanks to id
-				for tool in mainW.tools:
-					if tool.GetId() == wx.ID_UNDO:
-						button = tool
-						break
+				# Vérification que l'objet trouvé est bien une instance de wx.ToolBar
+				if not isinstance(tb, wx.ToolBar):
+					raise TypeError(_("Instance is not wx.ToolBar"))
 
-				if tb.GetToolEnabled(wx.ID_UNDO):
-					### send commandEvent to simulate undo action on the toolBar
-					sendEvent(tb, button, wx.CommandEvent(wx.EVT_TOOL.typeId))
+				# Trouver le bouton avec l'ID wx.ID_UNDO
+				button = next((tool for tool in mainW.tools if tool.GetId() == wx.ID_UNDO), None)
+
+				if not button:
+					raise ValueError(_("ID wx.ID_UNDO is not find in the toobar"))
+
+				tool = tb.FindById(wx.ID_UNDO)  # Renvoie l'objet de l'outil ou None
+
+				if tool is not None:  # L'outil existe
+					# Vérifier si l'outil est activé avant d'envoyer l'événement
+					if tb.GetToolEnabled(wx.ID_UNDO):
+						sendEvent(tb, button, wx.CommandEvent(wx.EVT_TOOL.typeId))  # Simuler l'action undo
+					else:
+						print(_("The wx.ID_UNDO tool is desactivate"))
+				else:
+					print(_("The wx.ID_UNDO tool is not found in the toolbar"))
 
 				event.Skip()
 			elif key == 90  and controlDown and shiftDown:# Redo
@@ -1737,7 +1747,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				self.OnCut(event)
 				event.Skip()
 			elif key == 65 and controlDown:  # ALL
-				for item in self.diagram.shapes:
+				for item in self.diagram.GetShapeList():
 					self.select(item)
 				event.Skip()
 			elif key == 82 and controlDown:  # Rotate model on the right
@@ -2425,7 +2435,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				for s in self.getSelectedShapes():
 					s.OnLeftDown(event) # send leftdown event to current shape
 
-				self.deselect(item)
+				# self.deselect(item)
 
 			### Update the nb1 panel properties only for Block and Port (call update in ControlNotebook)
 			win = getTopLevelWindow()
@@ -2597,10 +2607,11 @@ if builtins.__dict__.get('GUI_FLAG',True):
 								if self.permRect.Contains(recS):
 									self.select(s)
 				else:
-				
 					### shape is None and we remove the connectionShape
 					for item in [s for s in self.select() if isinstance(s, ConnectionShape)]:
-						self.diagram.DeleteShape(item)
+						### user dont reach to trace the connection (he left in canvas) so we remove the connectionShape
+						if not (item.input and item.output):
+							self.diagram.DeleteShape(item)
 						self.deselect()
 
 			self.Refresh()
@@ -2781,7 +2792,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 					if cursor != wx.StockCursor(wx.CURSOR_HAND):
 						cursor = wx.StockCursor(wx.CURSOR_HAND)
-			
+
 					for s in sc:
 						s.move(x,y)
 
@@ -2792,7 +2803,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 							s.item.dynamicFont(dc)
 
 						### change cursor when connectionShape hit a node
-						elif isinstance(s, ConnectionShape):
+						elif isinstance(s, ConnectionShape) and len(sc)==1:
 
 							### dot trace to prepare connection
 							if len(s.pen)>2:
@@ -3504,7 +3515,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		### destroy menu local variable
 		menu.Destroy()
 		event.Skip()
-	
+
 	###
 	def OnProperties(self, event):
 		"""
@@ -4510,6 +4521,7 @@ class ConnectableNode(Node):
 				else:
 					self.item.addOutputLabels(self.index, self.label)
 
+
 	def HitTest(self,x,y):
 		""" Collision detection method.
 		"""
@@ -4716,7 +4728,7 @@ class ResizeableNode(Node):
 		try:
 			self.moveto(self.item.x[self.index], self.item.y[self.index])
 		except IndexError:
-			pass
+			sys.stderr.write("Error drawing the resizeable Node")
 
 		PointShape.draw(self, dc)
 
