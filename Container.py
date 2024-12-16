@@ -1713,9 +1713,9 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					if tb.GetToolEnabled(wx.ID_UNDO):
 						sendEvent(tb, button, wx.CommandEvent(wx.EVT_TOOL.typeId))  # Simuler l'action undo
 					else:
-						print(_("The wx.ID_UNDO tool is desactivate"))
+						sys.stdout.write(_("The wx.ID_UNDO tool is desactivate"))
 				else:
-					print(_("The wx.ID_UNDO tool is not found in the toolbar"))
+					sys.stdout.write(_("The wx.ID_UNDO tool is not found in the toolbar"))
 
 				event.Skip()
 			elif key == 90  and controlDown and shiftDown:# Redo
@@ -2363,8 +2363,6 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			"""
 			"""
 
-			mainW = self.GetTopLevelParent()
-
 			### dump solution
 			### if parent is not none, the dumps dont work because parent is copy of a class
 			try:
@@ -2380,15 +2378,19 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				sys.stdout.write(_("Error trying to undo (TypeError): %s \n"%info))
 			except Exception as info:
 				sys.stdout.write(_("Error trying to undo: %s \n"%info))
-			else:
+			finally:
 
 				### just for init (white diagram)
 				if self.diagram.GetBlockCount()>=1:
+					mainW = self.GetTopLevelParent()
+
 					### toolBar
 					tb = mainW.FindWindowByName('tb')
-					tb.EnableTool(wx.ID_UNDO, True)
 
+					tb.EnableTool(wx.ID_UNDO, True)
+				
 					self.diagram.parent = self
+
 					### note that the diagram is modified
 					self.diagram.modify = True
 					self.DiagramModified()
@@ -4095,7 +4097,12 @@ class CodeBlock(Achievable, Block, Iconizable):
 
 			if not self.hide_icons:
 				### inform about the nature of the block using icon
-				name = 'atomic3' if self.model_path != "" else 'py' if self.python_path.endswith('.py') else 'pyc' 
+				if self.model_path != "":
+					name = 'atomic'
+				elif self.python_path.endswith('.py'):
+					name = 'py'
+				else:
+					name = 'pyc' 
 				icon = Icon(name, (4,2))
 				img = load_and_resize_image(icon.getFileName())
 				x,y = int(self.x[0]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
@@ -4366,7 +4373,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 		"""
 		if self.selected:
 			### inform about the nature of the block using icon
-			icon = Icon('coupled3', (4,2))
+			icon = Icon('coupled', (4,2))
 			img = img = load_and_resize_image(icon.getFileName())
 			x,y = int(self.x[0]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
 			dc.DrawBitmap(img, x, y)

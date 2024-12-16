@@ -179,6 +179,11 @@ class ImportLibrary(wx.Dialog):
 		"""
 		super(ImportLibrary, self).__init__(*args, **kwargs)
 
+		icon_bitmap = load_and_resize_image('properties.png')
+		icon = wx.Icon()
+		icon.CopyFromBitmap(icon_bitmap)
+		self.SetIcon(icon)
+		
 		### local copy
 		self.parent = args[0]
 
@@ -574,11 +579,9 @@ class TestApp(wx.App):
 	def OnInit(self):
 
 		import builtins
-		import gettext
+		from config import builtin_dict
 
-		builtins.__dict__['HOME_PATH'] = os.getcwd()
-		builtins.__dict__['DOMAIN_PATH'] = 'Domain'
-		builtins.__dict__['_'] = gettext.gettext
+		builtins.__dict__.update(builtin_dict)
 
 		frame = ImportLibrary(None, size=(600,600), id=-1, title="Test")
 		frame.Show()

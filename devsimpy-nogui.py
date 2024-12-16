@@ -38,6 +38,9 @@ def serialize_date(obj):
 
 from config import builtin_dict
 
+builtin_dict['GUI_FLAG'] = False
+builtin_dict['INFINITY'] = float('inf')
+
 builtins.__dict__.update(builtin_dict)
 
 ### import here becaause they need buitlins !

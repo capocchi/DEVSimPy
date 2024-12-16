@@ -66,7 +66,7 @@ class PrintPusher():
         pass
     
     def push(self, event, data):
-        print((json.dumps(data)))
+        sys.stdout.write((json.dumps(data)))
 
 def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, json_trace:bool=True):
     """

@@ -4,6 +4,7 @@ import json
 import os
 import traceback
 import re
+import sys
 
 import datetime
 
@@ -53,11 +54,11 @@ class YAMLHandler:
             if self.filename_is_valid != True :
                 self.report['success'] = False
                 self.report['info'] = 'YAML file load failed'
-                print((json.dumps(self.report)))
+                sys.stdout.write((json.dumps(self.report)))
         except:
             self.report['success'] = False
             self.report['info'] = traceback.format_exc()
-            print((json.dumps(self.report)))
+            sys.stdout.write((json.dumps(self.report)))
             raise
 
     def extractPythonPaths(self)->list:
@@ -228,7 +229,7 @@ class YAMLHandler:
             self.report['devs_instance'] = None
             self.report['success'] = False
             self.report['info'] = traceback.format_exc()
-            print((json.dumps(self.report)))
+            sys.stdout.write((json.dumps(self.report)))
             return False
 
     def getJS(self):

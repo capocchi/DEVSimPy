@@ -5,7 +5,7 @@ import threading
 import socketserver
 import traceback
 import sys
-from numpy import Infinity
+import numpy as np
 
 if sys.platform == "win32":
     Server = socketserver.TCPServer
@@ -37,7 +37,7 @@ class MySocketHandler(socketserver.BaseRequestHandler):
             # Simulation time is not reliable before thread is actually suspended
             # Infinity might be returned
             response['simulation_time'] = self.server.simulation_thread.model.myTimeAdvance
-            if response['simulation_time'] == Infinity:
+            if response['simulation_time'] == np.inf:
                 response['simulation_time'] = 'undefined'
 
         elif self.data == "RESUME":

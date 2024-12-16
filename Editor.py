@@ -1761,7 +1761,7 @@ class Base(object):
 
 		### some errors in file
 		else:
-			print("In checkErrors: ",new_instance)
+			sys.stdout.write("In checkErrors: ",new_instance)
 			self.SavingErrors(new_instance)
 
 	# NOTE: Editor :: SavingErrors			=> Errors treatment

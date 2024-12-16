@@ -590,7 +590,7 @@ class DumpYAMLFile(DumpBase):
 			# Ouvre et lit le fichier YAML
 			dsp = DumpYAMLFile.Open(fileName)
 
-		except Exception as error:
+		except Exception:
 			tb = traceback.format_exc()
 			sys.stderr.write(f"Problem loading file '{fileName}': {tb}\n")
 			return False
