@@ -643,7 +643,7 @@ class CustomDataTable(GridTableBase):
 			else: 
 				return self.data[row][col]
 		except Exception as e:
-			print(f"Exception in GetValue: {e}")  # Pour le débogage
+			sys.stdout.write(f"Exception in GetValue: {e}")  # Pour le débogage
 			return None
 
 	def SetValue(self, row, col, value):

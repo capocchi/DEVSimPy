@@ -109,8 +109,8 @@ class LibraryTree(wx.TreeCtrl):
 
 		self.fldridx = il.Add(load_and_resize_image('folder_close.png'))
 		self.fldropenidx = il.Add(load_and_resize_image('folder_open.png'))
-		self.atomicidx = il.Add(load_and_resize_image('atomic3.png'))
-		self.coupledidx = il.Add(load_and_resize_image('coupled3.png'))
+		self.atomicidx = il.Add(load_and_resize_image('atomic.png'))
+		self.coupledidx = il.Add(load_and_resize_image('coupled.png'))
 		self.pythonfileidx = il.Add(load_and_resize_image('py.png'))
 		self.pythoncfileidx = il.Add(load_and_resize_image('pyc.png'))
 		self.not_importedidx = il.Add(load_and_resize_image('no_ok.png'))

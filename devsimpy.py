@@ -563,7 +563,7 @@ class MainApplication(wx.Frame):
 							tb.AddTool(wx.ID_PREVIEW_PRINT, "", load_and_resize_image('print-preview.png'), shortHelp=_('Print Preview (Ctrl+P)')),
 							tb.AddTool(wx.ID_SAVE, "", load_and_resize_image('save.png'), wx.NullBitmap, shortHelp=_('Save File (Ctrl+S)'), longHelp=_('Save the current diagram'), clientData=currentPage),
 							tb.AddTool(wx.ID_SAVEAS, "", load_and_resize_image('save_as.png'), wx.NullBitmap, shortHelp=_('Save file as'), longHelp=_('Save the diagram with an another name'), clientData=currentPage),
-							tb.AddTool(wx.ID_UNDO, "", load_and_resize_image('undo.png'), wx.NullBitmap, shortHelp= _('Undo'), longHelp=_('Click to glongHelpString=o back, hold to see history'), clientData=currentPage),
+							tb.AddTool(wx.ID_UNDO, "", load_and_resize_image('undo.png'), wx.NullBitmap, shortHelp=_('Undo'), longHelp=_('Click to glongHelpString=o back, hold to see history'), clientData=currentPage),
 							tb.AddTool(wx.ID_REDO, "", load_and_resize_image('redo.png'), wx.NullBitmap, shortHelp=_('Redo'), longHelp=_('Click to go forward, hold to see history'), clientData=currentPage),
 							tb.AddTool(Menu.ID_ZOOMIN_DIAGRAM, "", load_and_resize_image('zoom+.png'), wx.NullBitmap, shortHelp=_('Zoom'), longHelp=_('Zoom +'), clientData=currentPage),
 							tb.AddTool(Menu.ID_ZOOMOUT_DIAGRAM, "", load_and_resize_image('zoom-.png'), wx.NullBitmap, shortHelp=_('UnZoom'), longHelp=_('Zoom -'), clientData=currentPage),
@@ -1246,6 +1246,7 @@ class MainApplication(wx.Frame):
 	def OnUndo(self, event):
 		""" Undo the diagram.
 		"""
+		
 		### get toolbar and clientData defined in AddTool
 		toolbar = event.GetEventObject()
 		currentPage = toolbar.GetToolClientData(event.GetId()) if isinstance(toolbar.GetParent(), DetachedFrame) else self.nb2.GetCurrentPage()

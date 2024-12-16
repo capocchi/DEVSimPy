@@ -27,6 +27,7 @@ import configparser
 import pathlib
 import json
 import pkg_resources
+import sys
 
 from Utilities import GetUserConfigDir
 from InteractionYAML import YAMLHandler
@@ -42,7 +43,7 @@ def get_pip_packages()->list:
         installed_packages = [distribution.project_name for distribution in pkg_resources.working_set]
         return installed_packages
     except Exception as e:
-        print(f"Error retrieving pip packages: {e}")
+        sys.stdout.write(f"Error retrieving pip packages: {e}")
         return []
 
 def retrieve_file_paths(dirName:str)->list:

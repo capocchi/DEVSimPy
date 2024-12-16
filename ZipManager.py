@@ -125,7 +125,7 @@ def get_imported_modules(module_name:str)->list:
 		return imported_modules
 
 	except Exception as e:
-		print(f"Error while analyzing {module.__file__}: {e}")
+		sys.stdout.write(f"Error while analyzing {module.__file__}: {e}")
 		return set()
 	
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
