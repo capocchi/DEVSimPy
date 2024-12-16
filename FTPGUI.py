@@ -22,7 +22,8 @@
 
 from ftplib import FTP, all_errors
 import wx
-import os
+
+from Utilities import load_and_resize_image
 
 class FTPStatusBar(wx.StatusBar):
 
@@ -32,7 +33,7 @@ class FTPStatusBar(wx.StatusBar):
 		self.SetFieldsCount(2)
 		self.SetStatusText('Welcome to DEVSimPy server', 0)
 		self.SetStatusWidths([-5, -2])
-		self.icon = wx.StaticBitmap(self, wx.NewIdRef(), wx.Bitmap(os.path.join(ICON_PATH_16_16, 'disconnect_network.png')))
+		self.icon = wx.StaticBitmap(self, wx.NewIdRef(), ('disconnect_network.png'))
 		self.Bind(wx.EVT_SIZE, self.OnSize)
 		self.PlaceIcon()
 
@@ -124,7 +125,7 @@ class FTPFrame(wx.Frame):
 			self.ftp = FTP(ftpsite)
 			var = self.ftp.login(login, password)
 			self.statusbar.SetStatusText(_('User connected'))
-			self.statusbar.icon.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'connect_network.png')))
+			self.statusbar.icon.SetBitmap(load_and_resize_image('connect_network.png'))
 			self.OnSend()
 		except AttributeError:
 			self.statusbar.SetForegroundColour(wx.RED)
@@ -147,7 +148,7 @@ class FTPFrame(wx.Frame):
 			self.ftp.quit()
 			self.ftp = None
 			self.statusbar.SetStatusText('User disconnected')
-			self.statusbar.icon.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'disconnect_network.png')))
+			self.statusbar.icon.SetBitmap(load_and_resize_image('disconnect_network.png'))
 
 ### ------------------------------------------------------------
 class TestApp(wx.App):
@@ -156,12 +157,11 @@ class TestApp(wx.App):
 
 	def OnInit(self):
 
-		import gettext
 		import builtins
 
-		builtins.__dict__['ICON_PATH']='icons'
-		builtins.__dict__['ICON_PATH_16_16']=os.path.join(ICON_PATH,'16x16')
-		builtins.__dict__['_'] = gettext.gettext
+		from config import builtin_dict
+
+		builtins.__dict__.update(builtin_dict)
 
 		self.frame = FTPFrame(None, -1, 'Test')
 		self.frame.Show()

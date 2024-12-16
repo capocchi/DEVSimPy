@@ -31,6 +31,8 @@ ID_HELP = wx.NewIdRef()
 
 _ = wx.GetTranslation
 
+from Utilities import load_and_resize_image
+
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # CLASS DEFIINTION
@@ -60,7 +62,7 @@ class DiagramConstantsDialog(wx.Dialog):
 		self.SetTitle(_("%s - Constants Manager")%(self.label))
 
 		icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
-		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "properties.png"), wx.BITMAP_TYPE_ANY))
+		icon.CopyFromBitmap(load_and_resize_image("properties.png"))
 		self.SetIcon(icon)
 
 		panel = wx.Panel(self)
@@ -72,11 +74,11 @@ class DiagramConstantsDialog(wx.Dialog):
 
 		tb.SetToolBitmapSize((16,16))
 
-		tb.AddTool(ID_ADD, "", wx.Bitmap(os.path.join(ICON_PATH,'comment_add.png')), shortHelp=_('New constant'))
-		tb.AddTool(ID_REMOVE, "", wx.Bitmap(os.path.join(ICON_PATH,'comment_remove.png')), shortHelp=_('Delete constant'))
-		tb.AddTool(ID_EXPORT, "", wx.Bitmap(os.path.join(ICON_PATH,'export.png')), shortHelp=_('Export constants into file'))
-		tb.AddTool(ID_IMPORT, "", wx.Bitmap(os.path.join(ICON_PATH,'import.png')), wx.NullBitmap, shortHelp=_('Import constants from file'))
-		tb.AddTool(ID_HELP, "", wx.Bitmap(os.path.join(ICON_PATH,'info.png')), wx.NullBitmap, shortHelp=_('Help'))
+		tb.AddTool(ID_ADD, "", load_and_resize_image('comment_add.png'), shortHelp=_('New constant'))
+		tb.AddTool(ID_REMOVE, "", load_and_resize_image('comment_remove.png'), shortHelp=_('Delete constant'))
+		tb.AddTool(ID_EXPORT, "", load_and_resize_image('export.png'), shortHelp=_('Export constants into file'))
+		tb.AddTool(ID_IMPORT, "", load_and_resize_image('import.png'), wx.NullBitmap, shortHelp=_('Import constants from file'))
+		tb.AddTool(ID_HELP, "", load_and_resize_image('info.png'), wx.NullBitmap, shortHelp=_('Help'))
 
 		tb.Realize()
 
@@ -215,8 +217,8 @@ class DiagramConstantsDialog(wx.Dialog):
 				dial = wx.MessageDialog(self, _('Import completed!'), _('Import Manager'), wx.OK|wx.ICON_INFORMATION)
 				dial.ShowModal()
 			else:
-	 			dlg.Destroy()
-
+				dlg.Destroy()
+				 
 		else:
 			dlg.Destroy()
 
@@ -292,10 +294,14 @@ class TestApp(wx.App):
 	"""
 
 	def OnInit(self):
+		"""_summary_
 
-		builtins.__dict__['ICON_PATH_16_16']=os.path.join('icons','16x16')
-		builtins.__dict__['ICON_PATH']=os.path.join('icons')
-		builtins.__dict__['_'] = gettext.gettext
+		Returns:
+			_type_: _description_
+		"""
+		from config import builtin_dict
+
+		builtins.__dict__.update(builtin_dict)
 
 		frame = DiagramConstantsDialog(None, -1, "Model")
 		frame.Populate({'a':1, 'b':2, 'c':3})

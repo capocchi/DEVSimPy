@@ -32,7 +32,7 @@ import Menu
 
 from DetachedFrame import DetachedFrame
 from PrintOut import Printable
-from Utilities import printOnStatusBar
+from Utilities import printOnStatusBar, load_and_resize_image
 
 _ = wx.GetTranslation
 
@@ -59,8 +59,8 @@ class GeneralNotebook(Printable):
 
 		#icon under tab
 		imgList = wx.ImageList(16, 16)
-		for img in [os.path.join(ICON_PATH_16_16,'network.png')]:
-			imgList.Add(wx.Bitmap(img))
+		for img in ['network.png']:
+			imgList.Add(load_and_resize_image(img))
 		self.AssignImageList(imgList)
 
 		### binding

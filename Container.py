@@ -101,9 +101,8 @@ from Mixins.Iconizable import Iconizable, Icon
 sys.modules['Savable'] = sys.modules['Mixins.Savable']
 sys.modules['Container.PickledCollection'] = PickledCollection
 
-
 from Decorators import BuzyCursorNotification, Post_Undo
-from Utilities import HEXToRGB, relpath, playSound, sendEvent, getInstance, FixedList, getObjectFromString, getTopLevelWindow, printOnStatusBar
+from Utilities import HEXToRGB, relpath, playSound, sendEvent, load_and_resize_image, getInstance, FixedList, getObjectFromString, getTopLevelWindow, printOnStatusBar
 from Patterns.Observer import Subject, Observer
 
 if builtins.__dict__.get('GUI_FLAG',True):
@@ -3587,7 +3586,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		self.h = self.y[1]- self.y[0]
 
 		if self.image_path != "" and not os.path.exists(self.image_path):
-			print(_(f"{self.image_path} does not exists in the {self.label} model!"))
+			sys.stdout.write(_(f"{self.image_path} does not exists in the {self.label} model!"))
 			self.image_path = ""
 		else:
 			### Draw background picture
@@ -3605,7 +3604,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 					image_path = self.image_path
 
 				if image_path != "" and not os.path.exists(image_path):
-					print(_(f"{image_path} does not exists in the {self.label} model!"))
+					sys.stdout.write(_(f"{image_path} does not exists in the {self.label} model!"))
 					image_path = ""
 				else:
 					img = wx.Image(image_path)
@@ -3615,17 +3614,14 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 
 		### Draw lock picture
 		if self.lock_flag:
-			img =  wx.Bitmap(os.path.join(ICON_PATH_16_16, 'lock.png'), wx.BITMAP_TYPE_ANY)
+			img =  load_and_resize_image('lock.png')
 			dc.DrawBitmap(img, int(self.x[0]), int(self.y[0]))
 
 		### Draw filename path flag picture
 		if self.bad_filename_path_flag:
-			img = wx.Bitmap(os.path.join(ICON_PATH_16_16, 'flag_exclamation.png'), wx.BITMAP_TYPE_ANY)
-			dc.DrawBitmap(img, int(self.x[0]+15), int(self.y[0]))
+			img = load_and_resize_image('flag_exclamation.png')
+			dc.DrawBitmap(img, int(self.x[0]+20), int(self.y[0]))
 		
-		#img = wx.Bitmap(os.path.join(ICON_PATH_16_16, 'atomic3.png'), wx.BITMAP_TYPE_ANY)
-		#dc.DrawBitmap( img, self.x[0]+30, self.y[0] )
-
 		### Draw label
 		dc.DrawText(self.label, int(mx), int(my))
 
@@ -3818,7 +3814,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 		Block.__init__(self, label, nb_inputs, nb_outputs)
 		Achievable.__init__(self)
 		Iconizable.__init__(self, ['trash', 'edit'])
-
+        
 	###
 	def __setstate__(self, state):
 		""" Restore state from the unpickled state values.
@@ -4061,6 +4057,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 		if 'output_direction' not in state: state['output_direction'] = 'est'
 		if '_input_labels' not in state: state['_input_labels'] = {}
 		if '_output_labels' not in state: state['_output_labels'] = {}
+		if 'hide_icons' not in state: state['hide_icons'] = False
  		##############################################
 
 		self.__dict__.update(state)
@@ -4095,17 +4092,19 @@ class CodeBlock(Achievable, Block, Iconizable):
 		""" Draw the block on DC.
 		"""
 		if self.selected:
-			### inform about the nature of the block using icon
-			name = 'atomic3' if self.model_path != "" else 'pythonFile' if self.python_path.endswith('.py') else 'pyc' 
-			icon = Icon(name, (4,2))
-			img = wx.Bitmap(icon.getImagePath(), wx.BITMAP_TYPE_ANY)
-			x,y = int(self.x[0]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
-			dc.DrawBitmap(img, x, y)
+
+			if not self.hide_icons:
+				### inform about the nature of the block using icon
+				name = 'atomic3' if self.model_path != "" else 'py' if self.python_path.endswith('.py') else 'pyc' 
+				icon = Icon(name, (4,2))
+				img = load_and_resize_image(icon.getFileName())
+				x,y = int(self.x[0]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
+				dc.DrawBitmap(img, x, y)
 			
 			### Draw the right icons (see constructor and Iconizable)
 			for name in self.getDisplayedIconNames():
 				icon = self.getIcon(name)
-				img = wx.Bitmap(icon.getImagePath(), wx.BITMAP_TYPE_ANY)
+				img = load_and_resize_image(icon.getFileName())
 				x,y = int(self.x[1]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
 				dc.DrawBitmap(img, x, y)
 				
@@ -4368,7 +4367,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 		if self.selected:
 			### inform about the nature of the block using icon
 			icon = Icon('coupled3', (4,2))
-			img = wx.Bitmap(icon.getImagePath(), wx.BITMAP_TYPE_ANY)
+			img = img = load_and_resize_image(icon.getFileName())
 			x,y = int(self.x[0]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
 			dc.DrawBitmap(img, x, y)
 			
@@ -4379,7 +4378,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 			### Draw the right icons (see constructor and Iconizable)
 			for name in self.getDisplayedIconNames():
 				icon = self.getIcon(name)
-				img = wx.Bitmap(icon.getImagePath(), wx.BITMAP_TYPE_ANY)
+				img = load_and_resize_image(icon.getFileName())
 				x,y = int(self.x[1]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
 				dc.DrawBitmap(img, x, y)
 
@@ -4854,7 +4853,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 		dc.DrawText(self.label, int(mx), int(my))
 
 		if self.lock_flag:
-			img = wx.Bitmap(os.path.join(ICON_PATH_16_16, 'lock.png'),wx.BITMAP_TYPE_ANY)
+			img = load_and_resize_image('lock.png')
 			dc.DrawBitmap(img, int(self.x[0]+w/3), int(self.y[0]))
 
 	def leftUp(self, event):

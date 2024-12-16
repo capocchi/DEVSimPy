@@ -26,6 +26,8 @@ import builtins
 
 _ = wx.GetTranslation
 
+from Utilities import load_and_resize_image
+
 def url_ok(url):
     """_summary_
 
@@ -51,7 +53,7 @@ class MyStatusBar(wx.StatusBar):
         self.SetStatusText(_('Insert url to upload'), 0)
         self.SetStatusWidths([-1, 50])
 
-        self.icon = wx.StaticBitmap(self, -1, wx.Bitmap(os.path.join(ICON_PATH_16_16, "disconnect_network.png")))
+        self.icon = wx.StaticBitmap(self, -1, load_and_resize_image("disconnect_network.png"))
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.PlaceIcon()
 
@@ -116,14 +118,14 @@ class YAMLExportGUI(wx.Frame):
     def OnTest(self, e):
 
         self.sb.SetStatusText('Test Rest server')
-        self.sb.icon.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "connect_network.png")))
+        self.sb.icon.SetBitmap(load_and_resize_image("connect_network.png"))
 
         if url_ok(self.url.GetValue()+':'+self.port.GetValue()):
             self.sb.SetStatusText('Rest server is ok!')
-            self.sb.icon.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "disconnect_network.png")))
+            self.sb.icon.SetBitmap(load_and_resize_image("disconnect_network.png"))
         else:
             self.sb.SetStatusText('Rest server is down!')
-            self.sb.icon.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "disconnect_network.png")))
+            self.sb.icon.SetBitmap(load_and_resize_image("disconnect_network.png"))
 
     def OnUpload(self, e):
 
@@ -133,27 +135,25 @@ class YAMLExportGUI(wx.Frame):
             port = self.port.GetValue()
 
             self.sb.SetStatusText('Test Rest server')
-            self.sb.icon.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "connect_network.png")))
+            self.sb.icon.SetBitmap(load_and_resize_image("connect_network.png"))
 
             try:
                 import requests
                 self.rest = requests.post(str(url)+':'+str(port)+'/upload', files={'file': open(str(self.path), 'rb')})
 
             except Exception as err:
-                self.sb.icon.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "exclamation.png")))
+                self.sb.icon.SetBitmap(load_and_resize_image("exclamation.png"))
                 self.sb.SetStatusText(str(err))
                 self.rest = None
             else:
                 self.sb.SetStatusText('Upload finished')
-                self.sb.icon.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "disconnect_network.png")))
+                self.sb.icon.SetBitmap(load_and_resize_image("disconnect_network.png"))
                 builtins.__dict__['URL_REST'] = url
 
     def OnClose(self, e):
         self.Close()
 
 def main():
-
-    builtins.__dict__['ICON_PATH_16_16']=os.path.join('icons','16x16')
 
     ex = wx.App()
     frame = YAMLExportGUI(None, -1, 'YAML Export', path=r'C:\\Users\capocchi_l.UDCPP\Downloads\plotly_test.yaml')

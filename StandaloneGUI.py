@@ -23,11 +23,11 @@
 
 import wx
 import os
-import builtins
 import wx.lib.filebrowsebutton as filebrowse
 
 from StandaloneNoGUI import StandaloneNoGUI
 from Decorators import BuzyCursorNotification
+from Utilities import load_and_resize_image
 
 _ = wx.GetTranslation
 
@@ -118,7 +118,7 @@ class StandaloneGUI(wx.Frame):
         """
         
         icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
-        icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "properties.png"), wx.BITMAP_TYPE_ANY))
+        icon.CopyFromBitmap(load_and_resize_image("properties.png"))
         self.SetIcon(icon)
   
         self.SetSize((-1, 250))
@@ -285,8 +285,6 @@ class StandaloneGUI(wx.Frame):
 def main():
     """To test the GUI
     """
-    
-    builtins.__dict__['ICON_PATH_16_16']=os.path.join('icons','16x16')
 
     ex = wx.App()
     frame = StandaloneGUI(None, -1, 'Standalone Export')

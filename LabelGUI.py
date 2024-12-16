@@ -29,12 +29,10 @@ from wx import xrc
 if __name__ == '__main__':
 	import builtins
 
-	builtins.__dict__['GUI_FLAG'] = True
-	builtins.__dict__['HOME_PATH'] = os.path.abspath(os.path.dirname(sys.argv[0]))
-	builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
-	builtins.__dict__['DEVS_DIR_PATH_DICT'] = {\
-	'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),\
-	'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS', 'old')}
+	from config import builtin_dict
+
+	builtins.__dict__.update(builtin_dict)
+
 else:
 	from AttributeEditor import AttributeBase
 

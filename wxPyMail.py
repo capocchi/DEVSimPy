@@ -36,7 +36,7 @@ except:
     from email.utils import formatdate
     from email import encoders as Encoders
 
-from email.message import Message
+from Utilities import load_and_resize_image
 
 class SendMailWx(wx.Frame):
     
@@ -79,7 +79,7 @@ class SendMailWx(wx.Frame):
     def createToolbar(self):
         tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
         tb.SetToolBitmapSize((16,16))
-        sendTool = tb.AddTool(wx.NewIdRef(), _('Send'), wx.Bitmap(os.path.join(ICON_PATH_16_16,'mail.png')), _('Sends Email'))
+        sendTool = tb.AddTool(wx.NewIdRef(), _('Send'), load_and_resize_image('mail.png'), _('Sends Email'))
         self.Bind(wx.EVT_MENU, self.OnSend, sendTool)        
         tb.Realize()
         self.SetToolBar(tb)
@@ -468,10 +468,10 @@ class TestApp(wx.App):
     def OnInit(self):
 
         import builtins
-        import gettext
 
-        builtins.__dict__.update({'HOME_PATH':os.getcwd(), 'DOMAIN_PATH':'Domain', 'ICON_PATH':'icons',
-        'ICON_PATH_16_16':os.path.join('icons','16x16'),'_':gettext.gettext})
+        from config import builtin_dict
+
+        builtins.__dict__.update(builtin_dict)
 
         frame = SendMailWx(None)
         frame.Show()

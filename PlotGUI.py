@@ -58,7 +58,7 @@ else:
 	#This module requires the Numeric/numarray or NumPy module, which could not be imported.
 	import wx.lib.plot as plot
 
-from Utilities import smooth
+from Utilities import smooth, get_downloads_folder, load_and_resize_image
 
 LColour = ('black', 'red', 'green', 'blue', 'yellow', 'gray', 'magenta', 'maroon', 'orange', 'salmon', 'pink', 'plum')
 Markers = ('circle', 'triangle', 'square',  'cross', 'triangle_down', 'plus', 'dot')
@@ -168,6 +168,9 @@ class PlotFrame(wx.Frame):
 		self.Layout()
 
 	def InitUI(self):
+
+		self.download_id = wx.NewIdRef()
+
 		##Now Create the menu bar and items
 		self.mainmenu = wx.MenuBar()
 
@@ -227,28 +230,30 @@ class PlotFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.OnSaveFile, file_save)
 		self.Bind(wx.EVT_MENU, self.OnExportFile, file_export)
 		self.Bind(wx.EVT_MENU, self.OnFileExit, file_exit)
-		self.Bind(wx.EVT_MENU,self.OnPlotRedraw, plotRedraw)
-		self.Bind(wx.EVT_MENU,self.OnPlotLine, line)
-		self.Bind(wx.EVT_MENU,self.OnPlotScatter, scatter)
-		self.Bind(wx.EVT_MENU,self.OnPlotBar, bar)
-		self.Bind(wx.EVT_MENU,self.OnPlotSquare, square)
-		self.Bind(wx.EVT_MENU,self.OnPlotScale, plotScale)
-		self.Bind(wx.EVT_MENU,self.OnEnableXStep, self.enableXStep)
-		self.Bind(wx.EVT_MENU,self.OnEnableXDefault, self.enableXDefault)
-		self.Bind(wx.EVT_MENU,self.OnEnableTitle, self.enableTitle)
-		self.Bind(wx.EVT_MENU,self.OnEnableZoom, self.enableZoom)
-		self.Bind(wx.EVT_MENU,self.OnEnableGrid,  self.enableGrid)
-		self.Bind(wx.EVT_MENU,self.OnEnableDrag, self.enableDrag)
-		self.Bind(wx.EVT_MENU,self.OnEnableLegend, self.enableLegend)
-		self.Bind(wx.EVT_MENU,self.OnEnablePointLabel, self.enablePointLabel)
-		self.Bind(wx.EVT_MENU,self.OnEnableNormalize, self.norm)
-		self.Bind(wx.EVT_MENU,self.OnTitleSetting, setTitle)
-		self.Bind(wx.EVT_MENU,self.OnXLabelSetting, setXLabel)
-		self.Bind(wx.EVT_MENU,self.OnYLabelSetting, setYLabel)
-		self.Bind(wx.EVT_MENU,self.OnScrUp, scrUp)
-		self.Bind(wx.EVT_MENU,self.OnScrRt, scrRt)
-		self.Bind(wx.EVT_MENU,self.OnReset, reset)
+		self.Bind(wx.EVT_MENU, self.OnPlotRedraw, plotRedraw)
+		self.Bind(wx.EVT_MENU, self.OnPlotLine, line)
+		self.Bind(wx.EVT_MENU, self.OnPlotScatter, scatter)
+		self.Bind(wx.EVT_MENU, self.OnPlotBar, bar)
+		self.Bind(wx.EVT_MENU, self.OnPlotSquare, square)
+		self.Bind(wx.EVT_MENU, self.OnPlotScale, plotScale)
+		self.Bind(wx.EVT_MENU, self.OnEnableXStep, self.enableXStep)
+		self.Bind(wx.EVT_MENU, self.OnEnableXDefault, self.enableXDefault)
+		self.Bind(wx.EVT_MENU, self.OnEnableTitle, self.enableTitle)
+		self.Bind(wx.EVT_MENU, self.OnEnableZoom, self.enableZoom)
+		self.Bind(wx.EVT_MENU, self.OnEnableGrid,  self.enableGrid)
+		self.Bind(wx.EVT_MENU, self.OnEnableDrag, self.enableDrag)
+		self.Bind(wx.EVT_MENU, self.OnEnableLegend, self.enableLegend)
+		self.Bind(wx.EVT_MENU, self.OnEnablePointLabel, self.enablePointLabel)
+		self.Bind(wx.EVT_MENU, self.OnEnableNormalize, self.norm)
+		self.Bind(wx.EVT_MENU, self.OnTitleSetting, setTitle)
+		self.Bind(wx.EVT_MENU, self.OnXLabelSetting, setXLabel)
+		self.Bind(wx.EVT_MENU, self.OnYLabelSetting, setYLabel)
+		self.Bind(wx.EVT_MENU, self.OnScrUp, scrUp)
+		self.Bind(wx.EVT_MENU, self.OnScrRt, scrRt)
+		self.Bind(wx.EVT_MENU, self.OnReset, reset)
 		
+		self.Bind(wx.EVT_MENU, self.OnDownload, self.download_id)
+
 		self.client.canvas.Bind(wx.EVT_LEFT_DOWN, self.OnMouseLeftDown)
 		self.client.canvas.Bind(wx.EVT_MOTION, self.OnMotion)
 		self.Bind(wx.EVT_CLOSE, self.OnQuit)
@@ -282,21 +287,25 @@ class PlotFrame(wx.Frame):
 		normalizedLabel, normalizedId = self.norm.GetItemLabelText(), self.norm.GetId()
 
 		if wx.VERSION_STRING < '4.0':
-			tb.AddCheckLabelTool(zoomId, zoomLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-zoom.png')), shortHelp=_('Enable zoom'), longHelp='')
-			titletb = tb.AddCheckLabelTool(titleId, titleLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-title.png')), shortHelp=_('Enable title'), longHelp='')
-			gridtb = tb.AddCheckLabelTool(gridId, gridLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-grid.png')), shortHelp='Enable grid', longHelp='')
-			tb.AddCheckLabelTool(legendId, legendLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-legend.png')), shortHelp=_('Turn on legend'), longHelp='')
-			tb.AddCheckLabelTool(dragId, dragLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-drag.png')), shortHelp=_('Enable drag'), longHelp='')
-			tb.AddCheckLabelTool(pointId, pointLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-point.png')), shortHelp=_('Show closest point'), longHelp='')
-			tb.AddCheckLabelTool(normalizedId, normalizedLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-norm.png')), shortHelp=_('Normalize'), longHelp=_('Normalize Y axis'))
+			tb.AddCheckLabelTool(zoomId, zoomLabel, load_and_resize_image('toggle-zoom.png'), shortHelp=_('Enable zoom'), longHelp='')
+			titletb = tb.AddCheckLabelTool(titleId, titleLabel, load_and_resize_image('toggle-title.png'), shortHelp=_('Enable title'), longHelp='')
+			gridtb = tb.AddCheckLabelTool(gridId, gridLabel, load_and_resize_image('toggle-grid.png'), shortHelp='Enable grid', longHelp='')
+			tb.AddCheckLabelTool(legendId, legendLabel, load_and_resize_image('toggle-legend.png'), shortHelp=_('Turn on legend'), longHelp='')
+			tb.AddCheckLabelTool(dragId, dragLabel, load_and_resize_image('toggle-drag.png'), shortHelp=_('Enable drag'), longHelp='')
+			tb.AddCheckLabelTool(pointId, pointLabel, load_and_resize_image('toggle-point.png'), shortHelp=_('Show closest point'), longHelp='')
+			tb.AddCheckLabelTool(normalizedId, normalizedLabel, load_and_resize_image('toggle-norm.png'), shortHelp=_('Normalize'), longHelp=_('Normalize Y axis'))
+			tb.AddCheckLabelTool(self.download_id, _("Download"), load_and_resize_image('donwload.png'), shortHelp=_('Download'), longHelp=_('Download the plot to the Download directory'))
+
 		else:
-			tb.AddCheckTool(zoomId, zoomLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-zoom.png')), shortHelp=_('Enable zoom'), longHelp='')
-			titletb = tb.AddCheckTool(titleId, titleLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-title.png')), shortHelp=_('Enable title'), longHelp='')
-			gridtb = tb.AddCheckTool(gridId, gridLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-grid.png')), shortHelp='Enable grid', longHelp='')
-			tb.AddCheckTool(legendId, legendLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-legend.png')), shortHelp=_('Turn on legend'), longHelp='')
-			tb.AddCheckTool(dragId, dragLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-drag.png')), shortHelp=_('Enable drag'), longHelp='')
-			tb.AddCheckTool(pointId, pointLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-point.png')), shortHelp=_('Show closest point'), longHelp='')
-			tb.AddCheckTool(normalizedId, normalizedLabel, wx.Bitmap(os.path.join(ICON_PATH_16_16,'toggle-norm.png')), shortHelp=_('Normalize'), longHelp=_('Normalize Y axis'))
+			tb.AddCheckTool(zoomId, zoomLabel, load_and_resize_image('toggle-zoom.png'), shortHelp=_('Enable zoom'), longHelp='')
+			titletb = tb.AddCheckTool(titleId, titleLabel, load_and_resize_image('toggle-title.png'), shortHelp=_('Enable title'), longHelp='')
+			gridtb = tb.AddCheckTool(gridId, gridLabel, load_and_resize_image('toggle-grid.png'), shortHelp='Enable grid', longHelp='')
+			tb.AddCheckTool(legendId, legendLabel, load_and_resize_image('toggle-legend.png'), shortHelp=_('Turn on legend'), longHelp='')
+			tb.AddCheckTool(dragId, dragLabel, load_and_resize_image('toggle-drag.png'), shortHelp=_('Enable drag'), longHelp='')
+			tb.AddCheckTool(pointId, pointLabel, load_and_resize_image('toggle-point.png'), shortHelp=_('Show closest point'), longHelp='')
+			tb.AddCheckTool(normalizedId, normalizedLabel, load_and_resize_image('toggle-norm.png'), shortHelp=_('Normalize'), longHelp=_('Normalize Y axis'))
+			tb.AddTool(self.download_id, _("Download"), load_and_resize_image('download.png'), shortHelp=_('Download the plot to the Download directory'))
+
 
 		titletb.Toggle(True)
 		gridtb.Toggle(True)
@@ -479,6 +488,14 @@ class PlotFrame(wx.Frame):
 		"""
 		self.client.Reset()
 
+	def OnDownload(self, event):
+		"""_summary_
+
+		Args:
+			event (_type_): _description_
+		"""
+		pass
+		
 	def resetDefaults(self):
 		"""Just to reset the fonts back to the PlotCanvas defaults"""
 		self.client.SetFont(wx.Font(10, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
@@ -943,6 +960,16 @@ class StaticPlot(PlotFrame):
 			with open(path, 'w') as csvFile:
 				writer = csv.writer(csvFile, delimiter=' ')
 				writer.writerows(d)
+
+	def OnDownload(self, event):
+		"""_summary_
+
+		Args:
+			event (_type_): _description_
+		"""
+		path = os.path.join(get_downloads_folder(),self.title+'.png')
+		self.client.SaveFile(path)
+		wx.MessageBox(_('File saved in %s')%path, _('Info'), wx.OK|wx.ICON_INFORMATION)
 
 class DynamicPlot(PlotFrame):
 	"""

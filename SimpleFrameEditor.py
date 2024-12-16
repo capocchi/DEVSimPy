@@ -5,6 +5,8 @@ import wx
 import wx.stc
 import os
 
+from Utilities import load_and_resize_image
+
 if wx.VERSION_STRING >= '4.0':
     
 	import wx.adv
@@ -39,10 +41,10 @@ class FrameEditor(wx.Frame):
         self.SetMenuBar(self.frame_1_menubar)
         self.File = wx.Menu()        
         self.Save = wx.MenuItem(self.File, wx.NewIdRef(), "Save &As", "", wx.ITEM_NORMAL)
-        self.Save.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')))
+        self.Save.SetBitmap(load_and_resize_image('save_as.png'))
         self.File.Append(self.Save)
         self.Open = wx.MenuItem(self.File, wx.NewIdRef(), "&Open", "", wx.ITEM_NORMAL)
-        self.Open.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'open.png')))
+        self.Open.SetBitmap(load_and_resize_image('open.png'))
         self.File.Append(self.Open)
         self.frame_1_menubar.Append(self.File, "&File")
         # Menu Bar end

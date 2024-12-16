@@ -31,17 +31,14 @@ if wx.VERSION_STRING >= '4.0':
 	wx.ST_SIZEGRIP = wx.STB_SIZEGRIP
 
 if __name__ == '__main__':
-	builtins.__dict__['GUI_FLAG'] = True
-	builtins.__dict__['HOME_PATH'] = os.path.abspath(os.path.dirname(sys.argv[0]))
-	builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
-	builtins.__dict__['DEVS_DIR_PATH_DICT'] = {\
-	'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),\
-	'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS', 'old')}
+	from config import builtin_dict
+
+	builtins.__dict__.update(builtin_dict)
 
 import Container
 import Menu
 import PrintOut
-from Utilities import getTopLevelWindow
+from Utilities import getTopLevelWindow, load_and_resize_image
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
@@ -118,34 +115,34 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.toggle_list = [wx.NewIdRef() for i in range(6)]
 		
 		if wx.VERSION_STRING < '2.9':
-			self.tools = [  toolbar.AddTool(Menu.ID_SAVE, wx.Bitmap(os.path.join(ICON_PATH,'save.png')), shortHelpString=_('Save File') ,longHelpString=_('Save the current diagram'), clientData=self.canvas),
-										toolbar.AddTool(Menu.ID_SAVEAS, wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')), shortHelpString=_('Save File As'), longHelpString=_('Save the diagram with an another name'), clientData=self.canvas),
-										toolbar.AddTool(wx.ID_UNDO, wx.Bitmap(os.path.join(ICON_PATH,'undo.png')), shortHelpString=_('Undo'), longHelpString=_('Click to go back, hold to see history'),clientData=self.canvas),
-										toolbar.AddTool(wx.ID_REDO, wx.Bitmap(os.path.join(ICON_PATH,'redo.png')), shortHelpString=_('Redo'), longHelpString=_('Click to go forward, hold to see history'),clientData=self.canvas),
-										toolbar.AddTool(Menu.ID_ZOOMIN_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'zoom+.png')), shortHelpString=_('Zoom +'), longHelpString=_('Zoom in'),clientData=self.canvas),
-										toolbar.AddTool(Menu.ID_ZOOMOUT_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'zoom-.png')), shortHelpString=_('Zoom -'), longHelpString=_('Zoom out'),clientData=self.canvas),
-										toolbar.AddTool(Menu.ID_UNZOOM_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'no_zoom.png')), shortHelpString=_('AnnuleZoom'),longHelpString=_('Initial view'),clientData=self.canvas),
-										toolbar.AddTool(Menu.ID_PRIORITY_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'priority.png')), shortHelpString=_('Priority'), longHelpString=_('Activation models priority')),
-										toolbar.AddTool(Menu.ID_CHECK_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'check_master.png')), shortHelpString=_('Check'), longHelpString=_('Check all models')),
-										toolbar.AddTool(Menu.ID_SIM_DIAGRAM, wx.Bitmap(os.path.join(ICON_PATH,'simulation.png')), shortHelpString=_('Simulation'), longHelpString=_('Simulate the diagram')),
-										toolbar.AddTool(self.toggle_list[0], wx.Bitmap(os.path.join(ICON_PATH,'direct_connector.png')), shortHelpString=_('Direct'), longHelpString=_('Direct connector'), isToggle=True),
-										toolbar.AddTool(self.toggle_list[1], wx.Bitmap(os.path.join(ICON_PATH,'square_connector.png')), shortHelpString=_('Square'), longHelpString=_('Square connector'), isToggle=True),
-										toolbar.AddTool(self.toggle_list[2], wx.Bitmap(os.path.join(ICON_PATH,'linear_connector.png')), shortHelpString=_('Linear'), longHelpString=_('Linear connector'), isToggle=True)
+			self.tools = [  toolbar.AddTool(Menu.ID_SAVE, load_and_resize_image('save.png'), shortHelpString=_('Save File') ,longHelpString=_('Save the current diagram'), clientData=self.canvas),
+										toolbar.AddTool(Menu.ID_SAVEAS, load_and_resize_image('save_as.png'), shortHelpString=_('Save File As'), longHelpString=_('Save the diagram with an another name'), clientData=self.canvas),
+										toolbar.AddTool(wx.ID_UNDO, load_and_resize_image('undo.png'), shortHelpString=_('Undo'), longHelpString=_('Click to go back, hold to see history'),clientData=self.canvas),
+										toolbar.AddTool(wx.ID_REDO, load_and_resize_image('redo.png'), shortHelpString=_('Redo'), longHelpString=_('Click to go forward, hold to see history'),clientData=self.canvas),
+										toolbar.AddTool(Menu.ID_ZOOMIN_DIAGRAM, load_and_resize_image('zoom+.png'), shortHelpString=_('Zoom +'), longHelpString=_('Zoom in'),clientData=self.canvas),
+										toolbar.AddTool(Menu.ID_ZOOMOUT_DIAGRAM, load_and_resize_image('zoom-.png'), shortHelpString=_('Zoom -'), longHelpString=_('Zoom out'),clientData=self.canvas),
+										toolbar.AddTool(Menu.ID_UNZOOM_DIAGRAM, load_and_resize_image('no_zoom.png'), shortHelpString=_('AnnuleZoom'),longHelpString=_('Initial view'),clientData=self.canvas),
+										toolbar.AddTool(Menu.ID_PRIORITY_DIAGRAM, load_and_resize_image('priority.png'), shortHelpString=_('Priority'), longHelpString=_('Activation models priority')),
+										toolbar.AddTool(Menu.ID_CHECK_DIAGRAM, load_and_resize_image('check_master.png'), shortHelpString=_('Check'), longHelpString=_('Check all models')),
+										toolbar.AddTool(Menu.ID_SIM_DIAGRAM, load_and_resize_image('simulation.png'), shortHelpString=_('Simulation'), longHelpString=_('Simulate the diagram')),
+										toolbar.AddTool(self.toggle_list[0], load_and_resize_image('direct_connector.png'), shortHelpString=_('Direct'), longHelpString=_('Direct connector'), isToggle=True),
+										toolbar.AddTool(self.toggle_list[1], load_and_resize_image('square_connector.png'), shortHelpString=_('Square'), longHelpString=_('Square connector'), isToggle=True),
+										toolbar.AddTool(self.toggle_list[2], load_and_resize_image('linear_connector.png'), shortHelpString=_('Linear'), longHelpString=_('Linear connector'), isToggle=True)
 						]
 		else:
-			self.tools = [  toolbar.AddTool(Menu.ID_SAVE, "", wx.Bitmap(os.path.join(ICON_PATH,'save.png')), wx.NullBitmap, shortHelp=_('Save File') ,longHelp=_('Save the current diagram'), clientData=self.canvas),
-										toolbar.AddTool(Menu.ID_SAVEAS, "", wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')), wx.NullBitmap, shortHelp=_('Save File As'), longHelp=_('Save the diagram with an another name'), clientData=self.canvas),
-										toolbar.AddTool(wx.ID_UNDO, "", wx.Bitmap(os.path.join(ICON_PATH,'undo.png')), wx.NullBitmap, shortHelp=_('Undo'), longHelp=_('Click to go back, hold to see history'),clientData=self.canvas),
-										toolbar.AddTool(wx.ID_REDO, "", wx.Bitmap(os.path.join(ICON_PATH,'redo.png')), wx.NullBitmap, shortHelp=_('Redo'), longHelp=_('Click to go forward, hold to see history'),clientData=self.canvas),
-										toolbar.AddTool(Menu.ID_ZOOMIN_DIAGRAM, "", wx.Bitmap(os.path.join(ICON_PATH,'zoom+.png')), wx.NullBitmap, shortHelp=_('Zoom +'), longHelp=_('Zoom in'),clientData=self.canvas),
-										toolbar.AddTool(Menu.ID_ZOOMOUT_DIAGRAM, "", wx.Bitmap(os.path.join(ICON_PATH,'zoom-.png')), wx.NullBitmap, shortHelp=_('Zoom -'), longHelp=_('Zoom out'),clientData=self.canvas),
-										toolbar.AddTool(Menu.ID_UNZOOM_DIAGRAM, "", wx.Bitmap(os.path.join(ICON_PATH,'no_zoom.png')), wx.NullBitmap, shortHelp=_('AnnuleZoom'), longHelp=_('Initial view'),clientData=self.canvas),
-										toolbar.AddTool(Menu.ID_PRIORITY_DIAGRAM, "", wx.Bitmap(os.path.join(ICON_PATH,'priority.png')), shortHelp=_('Priority')),
-										toolbar.AddTool(Menu.ID_CHECK_DIAGRAM, "", wx.Bitmap(os.path.join(ICON_PATH,'check_master.png')), shortHelp=_('Check')),
-										toolbar.AddTool(Menu.ID_SIM_DIAGRAM, "", wx.Bitmap(os.path.join(ICON_PATH,'simulation.png')), shortHelp=_('Simulation')),
-										toolbar.AddTool(self.toggle_list[0], "", wx.Bitmap(os.path.join(ICON_PATH,'direct_connector.png')), shortHelp=_('Direct'), kind=wx.ITEM_CHECK),
-										toolbar.AddTool(self.toggle_list[1], "", wx.Bitmap(os.path.join(ICON_PATH,'square_connector.png')), shortHelp=_('Square'), kind=wx.ITEM_CHECK),
-										toolbar.AddTool(self.toggle_list[2], "", wx.Bitmap(os.path.join(ICON_PATH,'linear_connector.png')), shortHelp=_('Linear'), kind=wx.ITEM_CHECK)
+			self.tools = [  toolbar.AddTool(Menu.ID_SAVE, "", load_and_resize_image('save.png'), wx.NullBitmap, shortHelp=_('Save File') ,longHelp=_('Save the current diagram'), clientData=self.canvas),
+										toolbar.AddTool(Menu.ID_SAVEAS, "", load_and_resize_image('save_as.png'), wx.NullBitmap, shortHelp=_('Save File As'), longHelp=_('Save the diagram with an another name'), clientData=self.canvas),
+										toolbar.AddTool(wx.ID_UNDO, "", load_and_resize_image('undo.png'), wx.NullBitmap, shortHelp=_('Undo'), longHelp=_('Click to go back, hold to see history'),clientData=self.canvas),
+										toolbar.AddTool(wx.ID_REDO, "", load_and_resize_image('redo.png'), wx.NullBitmap, shortHelp=_('Redo'), longHelp=_('Click to go forward, hold to see history'),clientData=self.canvas),
+										toolbar.AddTool(Menu.ID_ZOOMIN_DIAGRAM, "", load_and_resize_image('zoom+.png'), wx.NullBitmap, shortHelp=_('Zoom +'), longHelp=_('Zoom in'),clientData=self.canvas),
+										toolbar.AddTool(Menu.ID_ZOOMOUT_DIAGRAM, "", load_and_resize_image('zoom-.png'), wx.NullBitmap, shortHelp=_('Zoom -'), longHelp=_('Zoom out'),clientData=self.canvas),
+										toolbar.AddTool(Menu.ID_UNZOOM_DIAGRAM, "", load_and_resize_image('no_zoom.png'), wx.NullBitmap, shortHelp=_('AnnuleZoom'), longHelp=_('Initial view'),clientData=self.canvas),
+										toolbar.AddTool(Menu.ID_PRIORITY_DIAGRAM, "", load_and_resize_image('priority.png'), shortHelp=_('Priority')),
+										toolbar.AddTool(Menu.ID_CHECK_DIAGRAM, "", load_and_resize_image('check_master.png'), shortHelp=_('Check')),
+										toolbar.AddTool(Menu.ID_SIM_DIAGRAM, "", load_and_resize_image('simulation.png'), shortHelp=_('Simulation')),
+										toolbar.AddTool(self.toggle_list[0], "", load_and_resize_image('direct_connector.png'), shortHelp=_('Direct'), kind=wx.ITEM_CHECK),
+										toolbar.AddTool(self.toggle_list[1], "", load_and_resize_image('square_connector.png'), shortHelp=_('Square'), kind=wx.ITEM_CHECK),
+										toolbar.AddTool(self.toggle_list[2], "", load_and_resize_image('linear_connector.png'), shortHelp=_('Linear'), kind=wx.ITEM_CHECK)
 			]							
 		toolbar.EnableTool(wx.ID_UNDO, not self.canvas.stockUndo == [])
 		toolbar.EnableTool(wx.ID_REDO, not self.canvas.stockRedo == [])
@@ -170,11 +167,11 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			ID_DOWNWARD = self.toggle_list[5]
 
 			if wx.VERSION_STRING < '2.9':
-				self.tools.append(toolbar.AddTool(ID_DOWNWARD, wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelpString=_('Downward rules'), longHelpString=_('Define Downward rules atomic model')))
-				self.tools.append(toolbar.AddTool(ID_UPWARD, wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelpString=_('Upward rules'), longHelpString=_('Define Upward rules atomic model')))
+				self.tools.append(toolbar.AddTool(ID_DOWNWARD, load_and_resize_image('downward.png'), shortHelpString=_('Downward rules'), longHelpString=_('Define Downward rules atomic model')))
+				self.tools.append(toolbar.AddTool(ID_UPWARD, load_and_resize_image('upward.png'), shortHelpString=_('Upward rules'), longHelpString=_('Define Upward rules atomic model')))
 			else:
-				self.tools.append(toolbar.AddTool(ID_DOWNWARD, "", wx.Bitmap(os.path.join(ICON_PATH,'downward.png')), shortHelp=_('Downward rules')))
-				self.tools.append(toolbar.AddTool(ID_UPWARD, "", wx.Bitmap(os.path.join(ICON_PATH,'upward.png')), shortHelp=_('Upward rules')))
+				self.tools.append(toolbar.AddTool(ID_DOWNWARD, "", load_and_resize_image('downward.png'), shortHelp=_('Downward rules')))
+				self.tools.append(toolbar.AddTool(ID_UPWARD, "", load_and_resize_image('upward.png'), shortHelp=_('Upward rules')))
     				
 			### update downward and upward button
 			toolbar.EnableTool(ID_DOWNWARD, level != 0)
@@ -310,15 +307,9 @@ class TestApp(wx.App):
 		""" Init the user interface.
 		"""
 
-		import gettext
+		from config import builtin_dict
 
-		#builtins.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
-		#builtins.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}
-
-		builtins.__dict__['NB_HISTORY_UNDO'] = 5
-		builtins.__dict__['ICON_PATH']='icons'
-		builtins.__dict__['ICON_PATH_16_16']=os.path.join(ICON_PATH,'16x16')
-		builtins.__dict__['_'] = gettext.gettext
+		builtins.__dict__.update(builtin_dict)
 
 		diagram = Container.Diagram()
 

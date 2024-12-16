@@ -26,14 +26,10 @@ import re
 ### just for individual test
 if __name__ == '__main__':
 	import builtins
-	import os, sys
+	
+	from config import builtin_dict
 
-	builtins.__dict__['GUI_FLAG'] = True
-	builtins.__dict__['HOME_PATH'] = os.path.abspath(os.path.dirname(sys.argv[0]))
-	builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
-	builtins.__dict__['DEVS_DIR_PATH_DICT'] = {\
-	'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),\
-	'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS', 'old')}
+	builtins.__dict__.update(builtin_dict)
 
 class FindReplace(wx.Dialog):
 	def __init__(self, parent, id, title):

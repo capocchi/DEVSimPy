@@ -31,7 +31,7 @@ if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
     
 from traceback import format_exception
-from Utilities import getTopLevelWindow
+from Utilities import getTopLevelWindow, load_and_resize_image
 
 _ = wx.GetTranslation
 
@@ -40,13 +40,10 @@ if __name__ == '__main__':
 	path = os.path.dirname(os.getcwd())
 	if path not in sys.path:
 		sys.path.append(path)
-	builtins.__dict__['GUI_FLAG'] = True
-	builtins.__dict__['HOME_PATH'] = os.path.abspath(os.path.dirname(sys.argv[0]))
-	builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
-	builtins.__dict__['DEVS_DIR_PATH_DICT'] = {\
-	'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),\
-	'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS', 'old')}
 	
+	from config import builtin_dict
+
+	builtins.__dict__.update(builtin_dict)	
 
 from wx.lib.mixins.listctrl import ListCtrlAutoWidthMixin, ColumnSorterMixin
 from Utilities import GetMails, getInstance
@@ -159,9 +156,9 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 			menu = wx.Menu()
 
 			edit = wx.MenuItem(menu, wx.NewIdRef(),_("Edit"), _("Edit the source code"))
-			edit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'edit.png')))
+			edit.SetBitmap(load_and_resize_image('edit.png'))
 			report = wx.MenuItem(menu, wx.NewIdRef(),_("Report"), _("Report error by mail to the author"))
-			report.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'mail.png')))
+			report.SetBitmap(load_and_resize_image('mail.png'))
 
 			menu.AppendItem(edit)
 			menu.AppendItem(report)
@@ -300,7 +297,7 @@ class CheckerGUI(wx.Frame):
 		wx.Frame.__init__(self, parent, wx.NewIdRef(), _("DEVS Model Checking"), size=(900,400), style = wx.DEFAULT_FRAME_STYLE)
 
 		icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
-		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "check_master.png"), wx.BITMAP_TYPE_ANY))
+		icon.CopyFromBitmap(load_and_resize_image("check_master.png"))
 		self.SetIcon(icon)
 
 		### local copy
@@ -486,12 +483,11 @@ class TestApp(wx.App):
 
 	def OnInit(self):
 
-		import gettext
 		import builtins
 
-		builtins.__dict__['ICON_PATH']='icons'
-		builtins.__dict__['ICON_PATH_16_16']=os.path.join(ICON_PATH,'16x16')
-		builtins.__dict__['_'] = gettext.gettext
+		from config import builtin_dict
+
+		builtins.__dict__.update(builtin_dict)
 
 		self.frame = CheckerGUI(None, TestApp.musicdata)
 		self.frame.Show()

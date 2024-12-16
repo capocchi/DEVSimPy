@@ -34,14 +34,11 @@ from tempfile import gettempdir
 
 ### just for individual test
 if __name__ == '__main__':
-	builtins.__dict__['GUI_FLAG'] = True
-	builtins.__dict__['HOME_PATH'] = os.path.abspath(os.path.dirname(sys.argv[0]))
-	builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
-	builtins.__dict__['DEVS_DIR_PATH_DICT'] = {\
-	'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),\
-	'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS', 'old')}
+	from config import builtin_dict
 
-from Utilities import IsAllDigits, printOnStatusBar
+	builtins.__dict__.update(builtin_dict)
+
+from Utilities import IsAllDigits, printOnStatusBar, load_and_resize_image
 from PluginManager import PluginManager #trigger_event, is_enable
 from Patterns.Strategy import *
 from Patterns.Factory import simulator_factory, get_process_memory, get_total_ram
@@ -59,10 +56,10 @@ def timer():
 	delta = 0
 	time.time()
 	while True:
-	    now = time.time()
-	    delta += now - last
-	    yield delta
-	    last = now
+		now = time.time()
+		delta += now - last
+		yield delta
+		last = now
         
 if wx.VERSION_STRING >= '4.0':
 	wx.PyValidator = wx.Validator
@@ -837,7 +834,7 @@ class SimulationDialogFrame(Base, wx.Frame):
 
 	def __set_properties(self):
 		icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
-		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "simulation.png"), wx.BITMAP_TYPE_ANY))
+		icon.CopyFromBitmap(load_and_resize_image("simulation.png"))
 		self.SetIcon(icon)
 		self.Center()
 	
@@ -861,19 +858,8 @@ class TestApp(wx.App):
 
 	def OnInit(self):
 
-		builtins.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
-		builtins.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'classic':'SimStrategy4', 'distribued':'SimStrategy5', 'parallel':'SimStrategy6'}
-		
-		import gettext
-		#import DomainInterface.MasterModel
-
-		builtins.__dict__['ICON_PATH_16_16']=os.path.join('icons','16x16')
-		builtins.__dict__['DEFAULT_SIM_STRATEGY'] = 'original'
-		builtins.__dict__['DYNAMIC_STRUCTURE'] = False
-		builtins.__dict__['REAL_TIME'] = False
-		builtins.__dict__['VERBOSE'] = False
-		builtins.__dict__['NTL'] = False
-		builtins.__dict__['_'] = gettext.gettext
+		from config import builtin_dict
+		builtins.__dict__.update(builtin_dict)
 
 		self.frame = SimulationDialog(wx.Frame(), wx.NewIdRef(), 'Simulator')
 		#self.frame.SetMaster(DomainInterface.MasterModel.Master())

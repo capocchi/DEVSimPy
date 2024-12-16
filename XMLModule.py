@@ -25,13 +25,9 @@ from xml.dom import minidom
 if __name__ == '__main__':
     import builtins
     import sys
-    ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
-    builtins.__dict__['GUI_FLAG'] = True
-    builtins.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyDEVS'),
-									'PyPDEVS_221':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs221' ,'src'),
-									'PyPDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','old')}
-    builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyDEVS'
-    builtins.__dict__['HOME_PATH'] = ABS_HOME_PATH
+    from config import builtin_dict
+
+    builtins.__dict__ = builtin_dict
 
 import Container
 import Components
@@ -597,18 +593,10 @@ if __name__ == '__main__':
 
 			from . import DetachedFrame
 			import builtins
-			import gettext
-			from .DomainInterface.DomainStructure import DomainStructure
-			from .DomainInterface.DomainBehavior import DomainBehavior
-
-			builtins.__dict__['ICON_PATH']='icons'
-			builtins.__dict__['ICON_PATH_16_16']=os.path.join(ICON_PATH,'16x16')
-			builtins.__dict__['NB_HISTORY_UNDO']= 5
-			builtins.__dict__['DOMAIN_PATH']='Domain'
 			
-			builtins.__dict__['FONT_SIZE']=12
-			builtins.__dict__['_'] = gettext.gettext
-			builtins.__dict__['LOCAL_EDITOR'] = False
+			from config import builtin_dict
+
+			builtins.__dict__.update(builtin_dict)
 
 			diagram = Container.Diagram()
 			

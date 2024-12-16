@@ -39,7 +39,7 @@ from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 
 from Decorators import BuzyCursorNotification
 from PluginManager import PluginManager 
-from Utilities import FormatSizeFile, getPYFileListFromInit, getTopLevelWindow
+from Utilities import FormatSizeFile, getPYFileListFromInit, getTopLevelWindow, load_and_resize_image
 
 import ZipManager
 import Editor
@@ -75,11 +75,11 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		self.id = -100000000
 		self.map = {}
 
-		images = [os.path.join(ICON_PATH_16_16, s) for s in ('disable_plugin.png','enable_plugin.png','no_ok.png')]
+		images = [load_and_resize_image(s) for s in ('disable_plugin.png','enable_plugin.png','no_ok.png')]
 
 		self.il = wx.ImageList(16, 16)
 		for i in images:
-			self.il.Add(wx.Bitmap(i))
+			self.il.Add(i)
 		self.SetImageList(self.il, wx.IMAGE_LIST_SMALL)
 
 		#adding some art
@@ -129,9 +129,9 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		disable = wx.MenuItem(menu, wx.NewIdRef(), _('Disable'), _("Disable the plugin"))
 		edit = wx.MenuItem(menu, wx.NewIdRef(), _('Edit'), _("Edit the plugin"))
 		
-		enable.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'enable_plugin.png')))
-		disable.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'disable_plugin.png')))
-		edit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'edit.png')))
+		enable.SetBitmap(load_and_resize_image('enable_plugin.png'))
+		disable.SetBitmap(load_and_resize_image('disable_plugin.png'))
+		edit.SetBitmap(load_and_resize_image('edit.png'))
 
 		self.Bind(wx.EVT_MENU, self.OnEnable, id=enable.GetId() )
 		self.Bind(wx.EVT_MENU, self.OnDisable, id=disable.GetId())
@@ -1045,7 +1045,6 @@ class TestApp(wx.App):
 		import gettext
 
 		builtins.__dict__['HOME_PATH'] = os.getcwd()
-		builtins.__dict__['ICON_PATH_16_16']=os.path.join('icons','16x16')
 		builtins.__dict__['_'] = gettext.gettext
 
 		frame = ModelPluginsManager(parent=None, title="Test", model=None)

@@ -20,6 +20,8 @@ import sys
 import wx
 import os
 
+from Utilities import load_and_resize_image
+
 import inspect
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
@@ -267,7 +269,7 @@ def add_state_trajectory_menu(*args, **kwargs):
         PlotStateTrajectory(block.getDEVSModel())
 
     states = wx.MenuItem(menu, ID_SHAPE, _("State Trajectory"), _("State trajectory graph"))
-    states.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'graph.png')))
+    states.SetBitmap(load_and_resize_image('graph.png'))
 
     # States_menu = menu.Insert(2, states)
     menu.Bind(wx.EVT_MENU, OnPlot, id=ID_SHAPE)

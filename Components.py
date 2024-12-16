@@ -587,7 +587,7 @@ class AMDComponent(GenericComponent):
 			m = ScopeGUI(label)
 		else:
 			m = CodeBlock(label)
-
+        
 		# define behavioral args from python class
 		m.args = args
 

@@ -21,7 +21,8 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 import wx
-import os
+
+from Utilities import load_and_resize_image
 
 _ = wx.GetTranslation
 
@@ -70,7 +71,7 @@ class ConnectDialog(wx.Frame):
 
 	def __set_properties(self):
 		icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
-		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "connect.png"), wx.BITMAP_TYPE_ANY))
+		icon.CopyFromBitmap(load_and_resize_image("direct_connector.png"))
 		self.SetIcon(icon)
 
 	def __do_layout(self):
@@ -111,12 +112,11 @@ class TestApp(wx.App):
 
 	def OnInit(self):
 
-		import gettext
 		import builtins
 
-		builtins.__dict__['ICON_PATH']='icons'
-		builtins.__dict__['ICON_PATH_16_16']=os.path.join(ICON_PATH,'16x16')
-		builtins.__dict__['_'] = gettext.gettext
+		from config import builtin_dict
+
+		builtins.__dict__.update(builtin_dict)
 
 		self.frame = ConnectDialog(None, -1, 'Connect Manager')
 		self.frame.Show()

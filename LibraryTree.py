@@ -29,7 +29,7 @@ if not hasattr(inspect, 'getargspec'):
 import Container
 import Menu
 
-from Utilities import getPYFileListFromInit, path_to_module, printOnStatusBar, NotificationMessage, install_and_import, module_list, getFilePathInfo, getTopLevelWindow
+from Utilities import getPYFileListFromInit, path_to_module, printOnStatusBar, load_and_resize_image, NotificationMessage, install_and_import, module_list, getFilePathInfo, getTopLevelWindow
 from Decorators import BuzyCursorNotification
 from Components import BlockFactory, DEVSComponent, GetClass, PyComponent, GenericComponent
 from ZipManager import Zip, getPythonModelFileName
@@ -107,13 +107,13 @@ class LibraryTree(wx.TreeCtrl):
 		else:
 			self.fileidx = il.Add(wx.ArtProvider.GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, isz))
 
-		self.fldridx = il.Add(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'folder_close.png')))
-		self.fldropenidx = il.Add(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'folder_open.png')))
-		self.atomicidx = il.Add(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'atomic3.png')))
-		self.coupledidx = il.Add(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'coupled3.png')))
-		self.pythonfileidx = il.Add(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'pythonFile.png')))
-		self.pythoncfileidx = il.Add(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'pyc.png')))
-		self.not_importedidx = il.Add(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'no_ok.png')))
+		self.fldridx = il.Add(load_and_resize_image('folder_close.png'))
+		self.fldropenidx = il.Add(load_and_resize_image('folder_open.png'))
+		self.atomicidx = il.Add(load_and_resize_image('atomic3.png'))
+		self.coupledidx = il.Add(load_and_resize_image('coupled3.png'))
+		self.pythonfileidx = il.Add(load_and_resize_image('py.png'))
+		self.pythoncfileidx = il.Add(load_and_resize_image('pyc.png'))
+		self.not_importedidx = il.Add(load_and_resize_image('no_ok.png'))
 		self.SetImageList(il)
 		self.il = il
 

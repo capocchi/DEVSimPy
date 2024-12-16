@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import wx
-import os.path
-
-from sys import maxsize
 
 import DragList
+from Utilities import load_and_resize_image
 
 class PriorityGUI(wx.Frame):
 
@@ -18,7 +16,7 @@ class PriorityGUI(wx.Frame):
 							style = wx.FRAME_NO_WINDOW_MENU|wx.DEFAULT_FRAME_STYLE|wx.CLOSE_BOX)
 
 		icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
-		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "priority.png"), wx.BITMAP_TYPE_ANY))
+		icon.CopyFromBitmap(load_and_resize_image("priority.png"))
 		self.SetIcon(icon)
 
 		panel = wx.Panel(self, -1)
@@ -135,10 +133,8 @@ class TestApp(wx.App):
 		"""
 
 		import builtins
-		import gettext
-
-		builtins.__dict__['ICON_PATH_16_16']=os.path.join('icons','16x16')
-		builtins.__dict__['_'] = gettext.gettext
+		from config import builtin_dict
+		builtins.builtin_dict = builtin_dict
 
 		frame = PriorityGUI(None, -1, "Test", ['TOTO', 'TITI'])
 		frame.Show()

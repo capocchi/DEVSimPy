@@ -34,6 +34,7 @@ from tempfile import gettempdir
 import pathlib
 import types
 import inspect
+from functools import lru_cache
 
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
@@ -45,7 +46,7 @@ _ = gettext.gettext
 
 from zipfile import ZipFile, ZIP_DEFLATED 
 
-if builtins.__dict__.get('GUI_FLAG',True):
+if builtins.__dict__.get('GUI_FLAG', True):
 	import wx
 	
 	_ = wx.GetTranslation
@@ -62,6 +63,23 @@ if builtins.__dict__.get('GUI_FLAG',True):
 		import wx.lib.agw.pybusyinfo as PBI
 
 	from pubsub import pub
+	
+	@lru_cache(maxsize=128)
+	def load_and_resize_image(filename, width=16, height=16):
+		"""Charge une image et la redimensionne à width x height"""
+
+		image_path = os.path.join(ICON_PATH, filename)
+
+		if not os.path.isfile(image_path):
+			raise FileNotFoundError(f"Fichier introuvable : {image_path}")
+
+		bitmap = wx.Bitmap(image_path)
+		image = bitmap.ConvertToImage()  # Conversion en wx.Image
+		image = image.Scale(width, height, wx.IMAGE_QUALITY_HIGH)  # Redimensionner l'image
+		return wx.Bitmap(image)  # Reconvertir en wx.Bitmap
+else:
+	def load_and_resize_image(filename, width=16, height=16):
+		pass
 
 ### for replaceAll
 import fileinput
@@ -607,6 +625,44 @@ def getPYFileListFromInit(init_file, ext='.py'):
 
 	return file_list
 
+def get_downloads_folder():
+    """
+    Retourne le chemin du dossier Téléchargements quel que soit le système d'exploitation.
+    """
+    # Pour Windows
+    if os.name == 'nt':
+        import winreg
+        try:
+            key = winreg.OpenKey(
+                winreg.HKEY_CURRENT_USER, 
+                r"Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders"
+            )
+            downloads_path = winreg.QueryValueEx(key, "{374DE290-123F-4565-9164-39C4925E467B}")[0]
+            winreg.CloseKey(key)
+            return downloads_path
+        except WindowsError:
+            return os.path.join(os.path.expanduser('~'), 'Downloads')
+    
+    # Pour macOS
+    elif os.name == 'posix' and os.uname().sysname == 'Darwin':
+        return os.path.join(os.path.expanduser('~'), 'Downloads')
+    
+    # Pour Linux
+    elif os.name == 'posix':
+        xdg_downloads = os.path.join(os.path.expanduser('~'), 'Downloads')
+        
+        # Essayer de récupérer le chemin via XDG
+        try:
+            from xdg import BaseDirectory
+            xdg_downloads = BaseDirectory.get_xdg_download_dir()
+        except ImportError:
+            pass
+        
+        return xdg_downloads
+    
+    # Fallback
+    return os.path.join(os.path.expanduser('~'), 'Downloads')
+
 def path_to_module(abs_python_filename):
 	""" Convert and replace sep to . in abs_python_filename.
 	"""
@@ -616,7 +672,9 @@ def path_to_module(abs_python_filename):
 
 	## si Domain est dans le chemin du module à importer (le fichier .py est dans un sous repertoire du rep Domain)
 	if abs_python_filename.startswith(DOMAIN_PATH):
-		dir_name = os.path.basename(DOMAIN_PATH)
+		### if you want Domain in the path (Domain.)
+		### dir_name = os.path.basename(DOMAIN_PATH)
+		dir_name = os.path.basename(os.path.dirname(DOMAIN_PATH))
 		path = str(abs_python_filename[abs_python_filename.index(dir_name):]).strip('[]').replace(os.sep,'.').replace('/','.')
 	else:
 

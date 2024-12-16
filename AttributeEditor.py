@@ -35,6 +35,7 @@ from DetachedFrame import DetachedFrame
 from Patterns.Observer import Subject
 from Mixins.Achievable import Achievable
 from Decorators import Post_Undo
+from Utilities import load_and_resize_image
 
 class AttributeBase(object):
 	""" Base class to avoid multi inheritence with wx.Frame and wx.Panel used in the DEVSimPy 2.9 version
@@ -160,7 +161,7 @@ def AttributeEditor(*args,**kwargs):
 	parent = args[0]
 	# pour gerer l'affichage dans la page de gauche dans le notebook
 	if isinstance(parent, (DiagramNotebook.DiagramNotebook, DetachedFrame)):
- 			return AttributeEditorFrame(*args,**kwargs)
+			return AttributeEditorFrame(*args,**kwargs)
 	elif isinstance(parent, wx.Panel):
 			return AttributeEditorPanel(*args,**kwargs)
 	else:
@@ -191,7 +192,11 @@ class AttributeEditorFrame(AttributeBase, wx.Frame):
 		"""
 		
 		wx.Frame.__init__(self, parent, ID, model.label, size = wx.Size(400, 550), style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN )
-		self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'properties.png'), wx.BITMAP_TYPE_PNG)))
+		icon_bitmap = load_and_resize_image('properties.png')
+		icon = wx.Icon()
+		icon.CopyFromBitmap(icon_bitmap)
+		self.SetIcon(icon)
+	
 		self.Bind(wx.EVT_CLOSE, self.OnClose)		
 		
 		AttributeBase.__init__(self, parent, ID, model, canvas)
@@ -296,4 +301,8 @@ def main():
     pass
 
 if __name__ == '__main__':
-    main()
+	import builtins
+	from config import builtin_dict
+
+	builtins.__dict__.update(builtin_dict)
+	main()
