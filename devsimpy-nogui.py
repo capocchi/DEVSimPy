@@ -31,49 +31,13 @@ from datetime import date
 
 __version__ = '4.0'
 
-ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
-
 def serialize_date(obj):
     if isinstance(obj, date):
         return obj.isoformat()
     raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
-### specific builtin variables. (dont modify the defautls value. If you want to change it, go tot the PreferencesGUI from devsimpy interface.)
-builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'),
-				'DEVSIMPY_PNG': 'iconDEVSimPy.png',	# png file for devsimpy icon
-				'HOME_PATH': ABS_HOME_PATH,
-				'ICON_PATH': os.path.join(ABS_HOME_PATH, 'icons'),
-				'ICON_PATH_16_16': os.path.join(ABS_HOME_PATH, 'icons', '16x16'),
-				'SIMULATION_SUCCESS_SOUND_PATH': os.path.join(ABS_HOME_PATH,'sounds', 'Simulation-Success.wav'),
-				'SIMULATION_ERROR_SOUND_PATH': os.path.join(ABS_HOME_PATH,'sounds', 'Simulation-Error.wav'),
-				'DOMAIN_PATH': os.path.join(ABS_HOME_PATH, 'Domain'), # path of local lib directory
-				'NB_OPENED_FILE': 5, # number of recent files
-				'NB_HISTORY_UNDO': 5, # number of undo
-				'OUT_DIR': 'out', # name of local output directory (composed by all .dat, .txt files)
-				'PLUGINS_PATH': os.path.join(ABS_HOME_PATH, 'plugins'), # path of plug-ins directory
-				'FONT_SIZE': 12, # Block font size
-				'LOCAL_EDITOR': True, # for the use of local editor
-				'LOG_FILE': os.devnull, # log file (null by default)
-				'DEFAULT_SIM_STRATEGY': 'bag-based', #choose the default simulation strategy for PyDEVS
-				'PYDEVS_SIM_STRATEGY_DICT' : {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}, # list of available simulation strategy for PyDEVS package
-                'PYPDEVS_SIM_STRATEGY_DICT' : {'classic':'SimStrategy4', 'parallel':'SimStrategy5'}, # list of available simulation strategy for PyPDEVS package
-				'PYPDEVS_221_SIM_STRATEGY_DICT' : {'classic':'SimStrategy4', 'parallel':'SimStrategy5'}, # list of available simulation strategy for PyPDEVS package
-				'HELP_PATH' : os.path.join('doc', 'html'), # path of help directory
-				'NTL' : False, # No Time Limit for the simulation
-				'DYNAMIC_STRUCTURE' : False, #Dynamic structure for PyPDEVS simulation
-				'REAL_TIME': False, ### PyPDEVS threaded real time simulation
-				'VERBOSE':False,
-				'TRANSPARENCY' : True, # Transparancy for DetachedFrame
-				'DEFAULT_PLOT_DYN_FREQ' : 100, # frequence of dynamic plot of QuickScope (to avoid overhead),
-				'DEFAULT_DEVS_DIRNAME':'PyDEVS', # default DEVS Kernel directory
-				'DEVS_DIR_PATH_DICT':{'PyDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyDEVS'),
-									'PyPDEVS_221':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs221' ,'src'),
-									'PyPDEVS':os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','old')},
-				'GUI_FLAG' : False,
-				'INFINITY' : float('inf')
-				}
+from config import builtin_dict
 
-# Sets the homepath variable to the directory where your application is located (sys.argv[0]).
 builtins.__dict__.update(builtin_dict)
 
 ### import here becaause they need buitlins !

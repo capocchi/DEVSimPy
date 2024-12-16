@@ -30,9 +30,9 @@ import pubsub
 # to send event
 from pubsub import pub as Publisher
 
-#from Container import *
 from PlotGUI import *
-from Utilities import printOnStatusBar
+from Utilities import printOnStatusBar, load_and_resize_image
+from Decorators import BuzyCursorNotification
 
 _ = wx.GetTranslation
 
@@ -70,6 +70,7 @@ class MySheet(sheet.CSheet):
 		self.AutoSizeColumns()
 
 	###
+	@BuzyCursorNotification
 	def Populate(self, data):
 		"""
 		"""
@@ -86,7 +87,7 @@ class MySheet(sheet.CSheet):
 				self.SetCellValue(i,0,str(d[0]))
 				self.SetCellValue(i,1,str(d[1]))
 				Publisher.sendMessage("progress", msg=str(i/n))
-				self.Update()
+				# self.Update()
 			except:
 				pass
 
@@ -97,12 +98,12 @@ class MySheet(sheet.CSheet):
 		except pubsub.pub.SenderMissingReqdMsgDataError as info:
 			pass
 
-		try:
-			### resize and refresh the frame
-			self.AutoSize()
-			self.Refresh()
-		except Exception as info:
-			pass
+		# try:
+		# 	### resize and refresh the frame
+		# 	self.AutoSize()
+		# 	self.Refresh()
+		# except Exception as info:
+		# 	pass
 		
 	###
 	def IsFull(self):
@@ -152,32 +153,32 @@ class Newt(wx.Frame):
 
 		### for Phoenix version
 		if wx.VERSION_STRING < '4.0':
-			new = toolbar.AddTool(wx.NewIdRef(), wx.Bitmap(os.path.join(ICON_PATH,'new.png')), _('New'), '')
-			open_file = toolbar.AddTool(wx.NewIdRef(), wx.Bitmap(os.path.join(ICON_PATH,'open.png')), _('Open'), '')
-			saveas = toolbar.AddTool(wx.NewIdRef(), wx.Bitmap(os.path.join(ICON_PATH,'save.png')), _('SaveAs'), '')
+			new = toolbar.AddTool(wx.NewIdRef(), load_and_resize_image('new.png'), _('New'), '')
+			open_file = toolbar.AddTool(wx.NewIdRef(), load_and_resize_image('open.png'), _('Open'), '')
+			saveas = toolbar.AddTool(wx.NewIdRef(), load_and_resize_image('save.png'), _('SaveAs'), '')
 			toolbar.AddSeparator()
-			cut = toolbar.AddTool(wx.NewIdRef(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), _('Cut'), '')
-			copy = toolbar.AddTool(wx.NewIdRef(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), _('Copy'), '')
-			paste = toolbar.AddTool(wx.NewIdRef(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), _('Paste'), '')
-			self.delete = toolbar.AddTool(wx.NewIdRef(), wx.Bitmap(os.path.join(ICON_PATH,'close.png')), _('Delete'), '')
+			cut = toolbar.AddTool(wx.NewIdRef(), load_and_resize_image('cut.png'), _('Cut'), '')
+			copy = toolbar.AddTool(wx.NewIdRef(), load_and_resize_image('copy.png'), _('Copy'), '')
+			paste = toolbar.AddTool(wx.NewIdRef(), load_and_resize_image('paste.png'), _('Paste'), '')
+			self.delete = toolbar.AddTool(wx.NewIdRef(), load_and_resize_image('close.png'), _('Delete'), '')
 			toolbar.AddSeparator()
-			update = toolbar.AddTool(wx.NewIdRef(), wx.Bitmap(os.path.join(ICON_PATH,'reload.png')), _('Update'), '')
+			update = toolbar.AddTool(wx.NewIdRef(), load_and_resize_image('reload.png'), _('Update'), '')
 			toolbar.AddSeparator()
-			self.chart = toolbar.AddTool(wx.NewIdRef(), wx.Bitmap(os.path.join(ICON_PATH,'graph_guru.png')), _('Chart'), '')
+			self.chart = toolbar.AddTool(wx.NewIdRef(), load_and_resize_image('graph_guru.png'), _('Chart'), '')
 		else:
 
-			new = toolbar.AddTool(wx.NewIdRef(), "", wx.Bitmap(os.path.join(ICON_PATH,'new.png')), _('New'))
-			open_file = toolbar.AddTool(wx.NewIdRef(), "", wx.Bitmap(os.path.join(ICON_PATH,'open.png')), _('Open'))
-			saveas = toolbar.AddTool(wx.NewIdRef(), "", wx.Bitmap(os.path.join(ICON_PATH,'save.png')), _('SaveAs'))
+			new = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image('new.png'), _('New'))
+			open_file = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image('open.png'), _('Open'))
+			saveas = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image('save.png'), _('SaveAs'))
 			toolbar.AddSeparator()
-			cut = toolbar.AddTool(wx.NewIdRef(), "", wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), _('Cut'))
-			copy = toolbar.AddTool(wx.NewIdRef(), "" ,wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), _('Copy'))
-			paste = toolbar.AddTool(wx.NewIdRef(), "" ,wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), _('Paste'))
-			self.delete = toolbar.AddTool(wx.NewIdRef(), "", wx.Bitmap(os.path.join(ICON_PATH,'close.png')), _('Delete'))
+			cut = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image('cut.png'), _('Cut'))
+			copy = toolbar.AddTool(wx.NewIdRef(), "" , load_and_resize_image('copy.png'), _('Copy'))
+			paste = toolbar.AddTool(wx.NewIdRef(), "" , load_and_resize_image('paste.png'), _('Paste'))
+			self.delete = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image('close.png'), _('Delete'))
 			toolbar.AddSeparator()
-			update = toolbar.AddTool(wx.NewIdRef(), "", wx.Bitmap(os.path.join(ICON_PATH,'reload.png')), _('Update'))
+			update = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image('reload.png'), _('Update'))
 			toolbar.AddSeparator()
-			self.chart = toolbar.AddTool(wx.NewIdRef(), "", wx.Bitmap(os.path.join(ICON_PATH,'graph_guru.png')), _('Chart'))
+			self.chart = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image('graph_guru.png'), _('Chart'))
 
 		toolbar.EnableTool(self.chart.GetId(), False)
 		### Calling this method is not obligatory in Linux
@@ -219,11 +220,13 @@ class Newt(wx.Frame):
 
 	###
 	def LoadingDataInPage(self):
-
+		"""_summary_
+		"""
+		
 		### read and load the data in sheet
 		for i in range(len(self.model.IPorts)):
 			if hasattr(self.model, 'fileName'):
-				fn = "%s%d.dat"%(self.model.fileName, i)
+				fn = f"{self.model.fileName}{i}.dat"
 				if os.path.exists(fn):
 					iPort = self.model.IPorts[i]
 					if iPort.inLine:
@@ -232,7 +235,6 @@ class Newt(wx.Frame):
 						label = _('%s (on in_%s)')%(host.getBlockModel().label if hasattr(host, 'getBlockModel') else host.name, str(iPort.myID) if hasattr(iPort,'myID') else iPort.name)
 						data = self.FileToData(fn, self.sep)
 						self.AddPage(data, label)
-
 	###
 	def OnUpdate(self, event):
 
@@ -249,12 +251,11 @@ class Newt(wx.Frame):
 		"""
 		with open(fn, 'r') as f:
 			if separator != "":
-				data = [a.replace('\n','').split(separator) for a in f.readlines()]
+            	# Lire et traiter ligne par ligne avec le séparateur
+				data = [line.strip().split(separator) for line in f]
 			else:
-				L = f.readlines()
-				index = iter(list(range(len(L))))
-				data = [(next(index), a.replace('\n','')) for a in L]
-
+            	# Générer un index et collecter les lignes sans chargement complet en mémoire
+				data = [(i, line.strip()) for i, line in enumerate(f)]
 		return data
 
 	###
@@ -267,13 +268,13 @@ class Newt(wx.Frame):
 			activePage = self.notebook.GetSelection()
 		except Exception as info:
 			activePage = 0
-			sys.stdout.write(_("Error in SpreadSheet: %s"%info))
+			sys.stdout.write(_("Error 1 in SpreadSheet: %s"%info))
 
 		try:
 			sheet = self.notebook.GetPage(activePage)
 			sheet.UpdateColWidth()
 		except Exception as info:
-			sys.stdout.write(_("Error in SpreadSheet: %s"%info))
+			sys.stdout.write(_("Error 2 in SpreadSheet: %s"%info))
 		else:
 			toolbar = self.GetToolBar()
 			toolbar.EnableTool(self.chart.GetId(), msg)
@@ -495,9 +496,13 @@ class Newt(wx.Frame):
 
 			### values of y is digits
 			else:
-				frame = StaticPlot(None, wx.NewIdRef(), title, data)
+				frame = self.create_static_plot(title, data)
 				frame.Center()
 				frame.Show()
+
+	@BuzyCursorNotification
+	def create_static_plot(self, title, data):
+		return StaticPlot(None, wx.NewIdRef(), title, data)
 
 ##if __name__ == '__main__':
 ##	import builtins

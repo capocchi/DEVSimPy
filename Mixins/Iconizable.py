@@ -40,7 +40,7 @@ class Icon:
         self._offset_x, self._offset_y = offset_pos
         
         ### icon png path
-        self._image_path = os.path.join(ICON_PATH_16_16, self._name+'.png')
+        self._image_path = os.path.join(ICON_PATH, self.getFileName())
         
         assert(os.path.exists(self._image_path))
 
@@ -49,6 +49,10 @@ class Icon:
     
     def getName(self):
         return self._name
+    
+    def getFileName(self):
+        return f"{self._name}.png"
+
     
     def getOffSet(self, pos:str):
         assert(pos in ('x','y'))
@@ -69,6 +73,13 @@ class Iconizable():
             icon_names (list): list of picture name and its offset positions.
         """
         self.icons = {name:(-20*(i+1), +2) for i,name in enumerate(icon_names)}
+        self.hide_icons = False
+        
+    def onTimerTick(self):
+        """Cacher les icônes après le délai du minuteur."""
+        self.hide_icons = True
+        
+        # Vous pouvez forcer un rafraîchissement graphique si nécessaire (ex: self.Refresh())
 
     def getIcon(self, icon_name:str)->Icon:
         """Get icons from names list.

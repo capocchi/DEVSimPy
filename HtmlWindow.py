@@ -64,9 +64,9 @@ def main():
 
 if __name__ == '__main__':
     import builtins
-    import gettext
+    
+    from config import builtin_dict
 
-    builtins.__dict__['HOME_PATH'] = os.getcwd()
-    builtins.__dict__['_'] = gettext.gettext
+    builtins.__dict__.update(builtin_dict)
 
     main()

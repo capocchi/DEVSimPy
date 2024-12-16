@@ -30,7 +30,7 @@ from LibPanel import LibPanel
 from PropPanel import PropPanel
 from AttributeEditor import AttributeEditor
 from Mixins.Attributable import Attributable
-from Utilities import getTopLevelWindow
+from Utilities import getTopLevelWindow, load_and_resize_image
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
@@ -68,8 +68,8 @@ class GeneralNotebook(Observer):
 		"""
 		"""
 		imgList = wx.ImageList(16, 16)
-		for img in [os.path.join(ICON_PATH_16_16,'db.png'), os.path.join(ICON_PATH_16_16, 'properties.png'), os.path.join(ICON_PATH_16_16,'simulation.png')]:
-			imgList.Add(wx.Bitmap(img))
+		for img in ['db.png', 'properties.png', 'simulation.png']:
+			imgList.Add(load_and_resize_image(img))
 		self.AssignImageList(imgList)
 
 	def __PageChanged(self, evt):

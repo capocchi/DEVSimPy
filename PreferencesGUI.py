@@ -35,17 +35,14 @@ import wx.lib.filebrowsebutton as filebrowse
 _ = wx.GetTranslation
 
 if __name__ == '__main__':
-	builtins.__dict__['HOME_PATH'] = os.getcwd()
-	builtins.__dict__['NOTIFICATION'] = False
-	builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyDEVS'
-	builtins.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyDEVS'),
-									'PyPDEVS_221':os.path.join(HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs221' ,'src'),
-									'PyPDEVS':os.path.join(HOME_PATH,'DEVSKernel','PyPDEVS','old')}
+	from config import builtin_dict
+
+	builtins.__dict__.update(builtin_dict)
 
 from HtmlWindow import HtmlFrame
 
 from PluginsGUI import PluginsPanel, GeneralPluginsList
-from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, AddToInitFile, DelToInitFile, install, getTopLevelWindow
+from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, AddToInitFile, DelToInitFile, install, getTopLevelWindow, load_and_resize_image
 from Decorators import BuzyCursorNotification
 
 import ReloadModule
@@ -662,7 +659,7 @@ class Preferences(wx.Toolbook):
 
 		# make an image list using the LBXX images
 		il = wx.ImageList(25, 25)
-		for img in [wx.Bitmap(os.path.join(ICON_PATH, "%s_pref.png"%a[0])) for a in L]:
+		for img in [load_and_resize_image("%s_pref.png"%a[0], 25, 25) for a in L]:
 			il.Add(img)
 		self.AssignImageList(il)
 
@@ -829,7 +826,7 @@ class PreferencesGUI(wx.Frame):
 		""" Init the UI.
 		"""
 		_icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
-		_icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "preferences.png"), wx.BITMAP_TYPE_ANY))
+		_icon.CopyFromBitmap(load_and_resize_image("preferences.png"))
 		self.SetIcon(_icon)
 
 		self.SetMinSize((400,500))
@@ -891,28 +888,9 @@ class TestApp(wx.App):
 
 	def OnInit(self):
 
-		import gettext
+		from config import builtin_dict
 
-		builtins.__dict__['ICON_PATH'] = os.path.join('icons')
-		builtins.__dict__['ICON_PATH_16_16'] = os.path.join(ICON_PATH, '16x16')
-		builtins.__dict__['PLUGINS_PATH'] = os.path.join(HOME_PATH, 'plugins')
-		builtins.__dict__['DOMAIN_PATH'] = 'Domain'
-		builtins.__dict__['OUT_DIR'] = 'out'
-		builtins.__dict__['NB_OPENED_FILE'] = 20
-		builtins.__dict__['FONT_SIZE'] = 10
-		builtins.__dict__['NB_HISTORY_UNDO'] = 10
-		builtins.__dict__['TRANSPARENCY'] = False
-		builtins.__dict__['SIMULATION_ERROR_SOUND_PATH'] = os.path.join(HOME_PATH,'sounds', 'Simulation-Error.mp3')
-		builtins.__dict__['SIMULATION_SUCCESS_SOUND_PATH'] = os.path.join(HOME_PATH,'sounds', 'Simulation-Success.mp3')
-		builtins.__dict__['NTL'] = False
-		builtins.__dict__['DEFAULT_SIM_STRATEGY'] = 'bag-based'
-		builtins.__dict__['DEFAULT_PYPDEVS_SIM_STRATEGY'] = 'original'
-		builtins.__dict__['DEFAULT_PLOT_DYN_FREQ'] = 100
-		builtins.__dict__['LOCAL_EDITOR'] = False
-		builtins.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
-		builtins.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}
-
-		builtins.__dict__['_'] = gettext.gettext
+		builtins.__dict__.update(builtin_dict)
 
 
 		frame = PreferencesGUI(None, "Test")

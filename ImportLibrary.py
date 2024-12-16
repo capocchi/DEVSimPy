@@ -34,8 +34,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 _ = wx.GetTranslation
  
-from Utilities import checkURL, getDirectorySize, getPYFileListFromInit, NotificationMessage
+from Utilities import checkURL, getDirectorySize, getPYFileListFromInit, NotificationMessage, load_and_resize_image
 from Decorators import BuzyCursorNotification
+from config import ABS_HOME_PATH
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
@@ -296,7 +297,6 @@ class ImportLibrary(wx.Dialog):
 	def CheckDomainPath(self):
 		"""
 		"""
-		ABS_HOME_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 		if os.path.join(ABS_HOME_PATH, "Domain") != DOMAIN_PATH:
 			dlg = wx.MessageDialog(self, _("Local domain path is different from the .devsimpy.\n\
 				Go to options and preferences to change the domain path."), _('Import Manager'), wx.OK|wx.ICON_INFORMATION)
@@ -329,7 +329,7 @@ class ImportLibrary(wx.Dialog):
 		menu = wx.Menu()
 
 		doc = wx.MenuItem(menu, wx.NewIdRef(), _('Doc'), _('Documentation of item'))
-		doc.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'doc.png')))
+		doc.SetBitmap(load_and_resize_image('doc.png'))
 		menu.Append(doc)
 
 		self.Bind(wx.EVT_MENU, self.OnDoc, id = doc.GetId())
@@ -337,7 +337,7 @@ class ImportLibrary(wx.Dialog):
 		### delete option only for the export path
 		if label in self._d:
 			delete = wx.MenuItem(menu, wx.NewIdRef(), _('Delete'), _('Delete item'))
-			delete.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'delete.png')))
+			delete.SetBitmap(load_and_resize_image('delete.png'))
 			menu.Append(delete)
 			self.Bind(wx.EVT_MENU, self.OnDelete, id=delete.GetId())
 

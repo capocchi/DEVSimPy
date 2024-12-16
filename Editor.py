@@ -42,7 +42,7 @@ from tempfile import gettempdir, TemporaryDirectory
 from wx import stc
 
 from Decorators import redirectStdout
-from Utilities import path_to_module, printOnStatusBar
+from Utilities import path_to_module, printOnStatusBar, load_and_resize_image
 
 import ReloadModule
 import ZipManager
@@ -813,8 +813,8 @@ class EditionNotebook(wx.Notebook):
 
 		#icon under tab
 		imgList = wx.ImageList(16, 16)
-		for img in [os.path.join(ICON_PATH_16_16, 'featureFile.png')]:
-			imgList.Add(wx.Bitmap(img))
+		for img in ['code.png']:
+			imgList.Add(load_and_resize_image(img))
 		self.AssignImageList(imgList)
 
 		### binding
@@ -883,7 +883,7 @@ class EditionNotebook(wx.Notebook):
 		else:
 			if os.path.exists(path):
 				with open(path, 'r') as f:
-    					fileCode = f.read()
+					fileCode = f.read()
 			else:
 				### fileCode is path (user work with IOString code, not file object)
 				fileCode = path
@@ -1347,9 +1347,9 @@ class Base(object):
 		self.save_as = wx.MenuItem(file, wx.NewIdRef(), _('&Save As\tCtrl+S'), _('Save as an other file'))
 		self.quit = wx.MenuItem(file, wx.NewIdRef(), _('&Quit\tCtrl+Q'), _('Quit the application'))
 
-		self.save.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save.png')))
-		self.save_as.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'save_as.png')))
-		self.quit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'exit.png')))
+		self.save.SetBitmap(load_and_resize_image('save.png'))
+		self.save_as.SetBitmap(load_and_resize_image('save_as.png'))
+		self.quit.SetBitmap(load_and_resize_image('exit.png'))
 
 		items = [self.save, self.save_as, self.quit]
 
@@ -1375,13 +1375,13 @@ class Base(object):
 		uncomment = wx.MenuItem(edit, wx.NewIdRef(), _('&Uncomment\tCtrl+D'), _('uncomment current ligne'))
 		# uncomment = wx.MenuItem(edit, wx.NewIdRef(), _('&Uncomment\tCtrl+Shift+D'), _('uncomment current ligne'))
 
-		self.cut.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'cut.png')))
-		self.copy.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'copy.png')))
-		self.paste.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'paste.png')))
-		delete.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'delete.png')))
-		reindent.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 're-indent.png')))
-		comment.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'comment_add.png')))
-		uncomment.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'comment_remove.png')))
+		self.cut.SetBitmap(load_and_resize_image('cut.png'))
+		self.copy.SetBitmap(load_and_resize_image('copy.png'))
+		self.paste.SetBitmap(load_and_resize_image('paste.png'))
+		delete.SetBitmap(load_and_resize_image('delete.png'))
+		reindent.SetBitmap(load_and_resize_image('re-indent.png'))
+		comment.SetBitmap(load_and_resize_image('comment_add.png'))
+		uncomment.SetBitmap(load_and_resize_image('comment_remove.png'))
 
 		### Shortcut
 		accel_tbl = wx.AcceleratorTable([(wx.ACCEL_CTRL,  ord('S'), self.save.GetId()),
@@ -1435,7 +1435,7 @@ class Base(object):
 		help = wx.Menu()
 
 		about = wx.MenuItem(help, wx.NewIdRef(), _('&About\tF1'), _('About editor'))
-		about.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'info.png')))
+		about.SetBitmap(load_and_resize_image('info.png'))
 		if wx.VERSION_STRING < '4.0':
 			help.AppendItem(about)
 		else:
@@ -1477,30 +1477,30 @@ class Base(object):
 		if not self.parent:
 			
 			if wx.VERSION_STRING < '4.0':
-				self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(),wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), _('Save'), ''))
+				self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(),load_and_resize_image('save.png'), _('Save'), ''))
 				tb.AddSeparator()
-				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), _('Cut'), ''))
-				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), _('Copy'), ''))
-				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), _('Paste'), ''))
+				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), load_and_resize_image('cut.png'), _('Cut'), ''))
+				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), load_and_resize_image('copy.png'), _('Copy'), ''))
+				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), load_and_resize_image('paste.png'), _('Paste'), ''))
 			else:
-				self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH, 'save.png')),shortHelp=_('Save')))
+				self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(), "", load_and_resize_image('save.png'),shortHelp=_('Save')))
 				tb.AddSeparator()
-				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'cut.png')),  shortHelp=_('Cut')))
-				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'copy.png')),  shortHelp=_('Copy')))
-				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'paste.png')),  shortHelp=_('Paste')))
+				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), "", load_and_resize_image('cut.png'),  shortHelp=_('Cut')))
+				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), "", load_and_resize_image('copy.png'),  shortHelp=_('Copy')))
+				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), "", load_and_resize_image('paste.png'),  shortHelp=_('Paste')))
 			self.Bind(wx.EVT_TOOL, self.QuitApplication, id = self.quit.GetId())
 		else:
 
 			if wx.VERSION_STRING < '4.0':
-				tb.AddTool(self.save.GetId(), wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), shortHelpString=_('Save'), longHelpString=_('Save the file'))
-				tb.AddTool(self.cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), shortHelpString=_('Cut'), longHelpString=_('Cut the selection'))
-				tb.AddTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), shortHelpString=_('Copy'), longHelpString=_('Copy the selection'))
-				tb.AddTool(self.paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), shortHelpString=_('Paste'), longHelpString=_('Paste text from clipboard'))
+				tb.AddTool(self.save.GetId(), load_and_resize_image('save.png'), shortHelpString=_('Save'), longHelpString=_('Save the file'))
+				tb.AddTool(self.cut.GetId(), load_and_resize_image('cut.png'), shortHelpString=_('Cut'), longHelpString=_('Cut the selection'))
+				tb.AddTool(self.copy.GetId(), load_and_resize_image('copy.png'), shortHelpString=_('Copy'), longHelpString=_('Copy the selection'))
+				tb.AddTool(self.paste.GetId(), load_and_resize_image('paste.png'), shortHelpString=_('Paste'), longHelpString=_('Paste text from clipboard'))
 			else:
-				tb.AddTool(self.save.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), shortHelp=_('Save'))
-				tb.AddTool(self.cut.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), shortHelp=_('Cut'))
-				tb.AddTool(self.copy.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), shortHelp=_('Copy'))
-				tb.AddTool(self.paste.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), shortHelp=_('Paste'))
+				tb.AddTool(self.save.GetId(), "", load_and_resize_image('save.png'), shortHelp=_('Save'))
+				tb.AddTool(self.cut.GetId(), "", load_and_resize_image('cut.png'), shortHelp=_('Cut'))
+				tb.AddTool(self.copy.GetId(), "", load_and_resize_image('copy.png'), shortHelp=_('Copy'))
+				tb.AddTool(self.paste.GetId(), "", load_and_resize_image('paste.png'), shortHelp=_('Paste'))
 
 			self.Bind(wx.EVT_TOOL, self.OnSaveFile, id=self.save.GetId())
 			self.Bind(wx.EVT_TOOL, self.nb.OnCut, id=self.cut.GetId())
@@ -1516,8 +1516,12 @@ class Base(object):
 		"""
 		nb = self.GetNoteBook()
 		currentPage = nb.GetCurrentPage()
+		
 		self.txt = currentPage.GetValue()
 		self.data = wx.FindReplaceData()   # initializes and holds search parameters
+		selected_txt = currentPage.GetSelectedText()
+		if selected_txt:
+			self.data.SetFindString(selected_txt)  # Initialiser le texte de recherche
 		self.DoFind(text)
 		
 		#sys.stdout.write("DoSearch: %s\n" % text)
@@ -1634,6 +1638,9 @@ class Base(object):
 		currentPage = nb.GetCurrentPage()
 		self.txt = currentPage.GetValue()
 		self.data = wx.FindReplaceData()   # initializes and holds search parameters
+		selected_txt = currentPage.GetSelectedText()
+		if selected_txt:
+			self.data.SetFindString(selected_txt)  # Initialiser le texte de recherche
 		self.dlg = wx.FindReplaceDialog(currentPage, self.data, 'Find')
 		self.dlg.Show()
 	
@@ -2446,7 +2453,11 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		EditorFrame.__init__(self, parent, id, title)
 		BlockBase.__init__(self, parent, id, title, block)
 
-		self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'pythonFile.png'), wx.BITMAP_TYPE_PNG)))
+		icon_bitmap = load_and_resize_image('py_file.png')
+		icon = wx.Icon()
+		icon.CopyFromBitmap(icon_bitmap)
+		self.SetIcon(icon)
+		
 		self.ConfigureGUI()
 
 	###
@@ -2487,8 +2498,8 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 			setState = wx.MenuItem(set_submenu, wx.NewIdRef(), _('State object'), _("Set state object (self.setState({'status':'IDLE', 'sigma':0.0}))"))
 			setSigma = wx.MenuItem(set_submenu, wx.NewIdRef(), _('Sigma value'), _('Set sigma value (self.setSigma(0.0))'))
 
-			peek.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')))
-			poke.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')))
+			peek.SetBitmap(load_and_resize_image('peek.png'))
+			poke.SetBitmap(load_and_resize_image('poke.png'))
 			# getPortId.SetBitmap()
 			# getMsgValue.SetBitmap()
 			# getMsgTime.SetBitmap()
@@ -2524,7 +2535,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 			get_submenu.Append(getElapsed)
 
 		debug = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Debugger'), _('Generate new debugger code (print into the log of model)'))
-		debug.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'debugger.png')))
+		debug.SetBitmap(load_and_resize_image('debugger.png'))
 		new_submenu.Append(debug)
 
 		menu = self.GetMenuBar().GetMenu(1)
@@ -2605,12 +2616,6 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 		EditorPanel.__init__(self, parent, id, title)
 		BlockBase.__init__(self, parent, id, title, block)
 		
-	
-		#if not parent:
-			#self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH_16_16, 'pythonFile.png'), wx.BITMAP_TYPE_PNG)))
-			#self.ConfigureGUI()
-		#else:
-		#	### in panel
 		self.ConfigureTB()
 
 	def ConfigureTB(self):
@@ -2629,17 +2634,6 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 		self.toolbar.AddStretchableSpace()
 		self.finddlg = TestSearchCtrl(self.toolbar, size=(150,-1), doSearch=self.DoSearch)
 		self.toolbar.AddControl(self.finddlg)
-
-		# if wx.VERSION_STRING < '4.0':
-		# 	self.toolbar.AddTool(id[0], wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')),shortHelpString=_('New peek'), longHelpString=_('Insert a code for a new peek'))
-		# 	self.toolbar.AddTool(id[1], wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')),shortHelpString=_('New poke'), longHelpString=_('Insert a code for a new poke'))
-		# 	self.toolbar.AddTool(id[2], wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')),shortHelpString=_('New hold in state'), longHelpString=_('Insert a code for a new hold in state'))
-		# 	self.toolbar.AddTool(id[3], wx.Bitmap(os.path.join(ICON_PATH_16_16,'debugger.png')),shortHelpString=_('New debugger'), longHelpString=_('Insert a code for print information into the log of model'))
-		# else:
-		# 	self.toolbar.AddTool(id[0], "",wx.Bitmap(os.path.join(ICON_PATH_16_16,'peek.png')),shortHelp=_('New peek'))
-		# 	self.toolbar.AddTool(id[1], "",wx.Bitmap(os.path.join(ICON_PATH_16_16,'poke.png')),shortHelp=_('New poke'))
-		# 	self.toolbar.AddTool(id[2], "",wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_state.png')),shortHelp=_('New hold in state'))
-		# 	self.toolbar.AddTool(id[3], "",wx.Bitmap(os.path.join(ICON_PATH_16_16,'debugger.png')),shortHelp=_('New debugger'))
 		
 		self.toolbar.Realize()
 
@@ -2672,7 +2666,11 @@ class TestEditor(EditorFrame):
 		EditorFrame.__init__(self, parent, id, title)
 
 		if not parent:
-			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH, 'iconDEVSimPy.png'), wx.BITMAP_TYPE_PNG)))
+			icon_bitmap = load_and_resize_image('iconDEVSimPy.png')
+			icon = wx.Icon()
+			icon.CopyFromBitmap(icon_bitmap)
+			self.SetIcon(icon)
+		
 			self.ConfigureGUI()
 
 	# NOTE: TestEditor :: __str__		=> String representation of the class
@@ -2795,7 +2793,10 @@ class GeneralEditor(EditorFrame):
 
 		### if not parent, we configure a frame
 		if not parent:
-			self.SetIcon(self.MakeIcon(wx.Image(os.path.join(ICON_PATH, 'iconDEVSimPy.png'), wx.BITMAP_TYPE_PNG)))
+			icon_bitmap = load_and_resize_image('iconDEVSimPy.png')
+			icon = wx.Icon()
+			icon.CopyFromBitmap(icon_bitmap)
+			self.SetIcon(icon)
 			self.ConfigureGUI()
 
 	# NOTE: GeneralEditor :: __str__		=> String representation of the class
@@ -2832,8 +2833,8 @@ class GeneralEditor(EditorFrame):
 		self.toolbar.AddSeparator()
 		### ----------------------------------------------------------------
 		### Bind all new event----------------------------------------------
-		self.Bind(wx.EVT_TOOL, self.OnAddPage, self.toolbar.AddSimpleTool(add.GetId(), wx.Bitmap(os.path.join(ICON_PATH, 'new.png')), _('Add'), ''))
-		self.Bind(wx.EVT_TOOL, self.OnClosePage, self.toolbar.AddSimpleTool(close.GetId(), wx.Bitmap(os.path.join(ICON_PATH, 'close.png')), _('Close'), ''))
+		self.Bind(wx.EVT_TOOL, self.OnAddPage, self.toolbar.AddSimpleTool(add.GetId(), load_and_resize_image('new.png'), _('Add'), ''))
+		self.Bind(wx.EVT_TOOL, self.OnClosePage, self.toolbar.AddSimpleTool(close.GetId(), load_and_resize_image('close.png'), _('Close'), ''))
 		### ----------------------------------------------------------------
 		self.toolbar.Realize()
 
@@ -2878,13 +2879,10 @@ class TestApp(wx.App):
 	"""
 
 	def OnInit(self):
-		import gettext
 
-		builtins.__dict__['HOME_PATH'] = os.getcwd()
-		builtins.__dict__['ICON_PATH'] = os.path.join('icons')
-		builtins.__dict__['ICON_PATH_16_16'] = os.path.join(ICON_PATH, '16x16')
+		from config import builtin_dict
 
-		builtins.__dict__['_'] = gettext.gettext
+		builtins.__dict__.update(builtin_dict)
 
 		fn = os.path.join(os.path.realpath(gettempdir()), 'test.py')
 		with open(fn, 'w') as f:

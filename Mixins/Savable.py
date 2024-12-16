@@ -28,6 +28,7 @@ import subprocess
 import traceback
 import types
 import inspect
+import json
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
     
@@ -42,13 +43,14 @@ for lib_name in required_libs:
         subprocess.run(f'pip install {lib_name}'.split())
 
 try:
-	import yaml	
+	import yaml
 	builtins.__dict__['YAML_IMPORT'] = True
 except ImportError as info:
 	builtins.__dict__['YAML_IMPORT'] = False
 	sys.stdout.write("yaml module was not found! Install it if you want to save model in yaml format.\n")
 
 try:
+	from ruamel.yaml import YAML
 	import ruamel.yaml as ruamel
 	builtins.__dict__['YAML_IMPORT'] = True
 except ImportError as info:
@@ -165,80 +167,106 @@ class DumpZipFile(DumpBase):
 
 	ext = [".amd", ".cmd"]
 
-	def Save(self, obj_dumped, fileName = None)->bool:
-		""" Function that save the codeblock on the disk.
+	def Save(self, obj_dumped, fileName=None) -> bool:
+		""" 
+		Function that saves the codeblock on the disk.
 		"""
-		assert(fileName.endswith(tuple(DumpZipFile.ext)))
-
-		### Now, file paths are in the compressed file
-		#if os.path.isabs(python_path):
-		#	path = os.path.join(fileName, os.path.basename(obj_dumped.python_path))
-		#	if os.path.exists(path):
-		#		obj_dumped.python_path = path
-
-		#if os.path.isabs(image_path):
-		#	obj_dumped.image_path = os.path.join(fileName, os.path.basename(obj_dumped.image_path))
-
-		#obj_dumped.model_path = fileName
-
-		### args is constructor args and we save these and not the current value
+		if not fileName or not fileName.endswith(tuple(DumpZipFile.ext)):
+			raise ValueError(f"Invalid filename '{fileName}'. It must end with one of {DumpZipFile.ext}.")
+		
+		# # Convert absolute paths to relative paths if necessary
+		# if hasattr(obj_dumped, 'python_path') and os.path.isabs(obj_dumped.python_path):
+		# 	obj_dumped.python_path = os.path.join(fileName, os.path.basename(obj_dumped.python_path))
+		
+		# if hasattr(obj_dumped, 'image_path') and os.path.isabs(obj_dumped.image_path):
+		# 	obj_dumped.image_path = os.path.join(fileName, os.path.basename(obj_dumped.image_path))
+		
+		# Update obj_dumped args if applicable
 		if hasattr(obj_dumped, 'args'):
-			obj_dumped.args = Components.GetArgs(Components.GetClass(obj_dumped.python_path))
+			try:
+				obj_dumped.args = Components.GetArgs(Components.GetClass(obj_dumped.python_path))
+			except Exception as error:
+				sys.stderr.write(f"Problem updating args for '{fileName}': {error}\n")
+				return False
 
 		try:
-
-			fn = 'DEVSimPyModel.dat'
-
-			### dump attributes in fn file
-			pickle.dump(	obj = PickledCollection(obj_dumped),
-							file = open(fn, "wb"),
-							protocol = 0)
-
-		except Exception as info:
+			dump_filename = 'DEVSimPyModel.dat'
+			
+			with open(dump_filename, 'wb') as file:
+				pickle.dump(obj=PickledCollection(obj_dumped), file=file, protocol=pickle.HIGHEST_PROTOCOL)
+		
+		except (OSError, pickle.PickleError) as error:
 			tb = traceback.format_exc()
-			sys.stderr.write(_("Problem saving (during the dump): %s -- %s\n")%(str(fileName),str(tb)))
+			sys.stderr.write(f"Problem saving '{fileName}': {error}\n{tb}")
 			return False
+		
+		except Exception as error:
+			tb = traceback.format_exc()
+			sys.stderr.write(f"Unexpected error while saving '{fileName}': {error}\n{tb}")
+			return False
+		
 		else:
 
 			try:
-
+				 
 				zf = ZipManager.Zip(fileName)
 
-				### local copy of paths
-				python_path = obj_dumped.python_path
-				image_path = obj_dumped.image_path
+				# Local copy of paths
+				python_path = getattr(obj_dumped, 'python_path', None)
+				image_path = getattr(obj_dumped, 'image_path', None)
+				
+				# Vérifie si les chemins sont valides avant de les utiliser
+				files_to_add = [path for path in [python_path, image_path] if path]
 
-				### create or update fileName
+				# Create or update the zip file
 				if os.path.exists(fileName):
-					zf.Update(replace_files = [fn, python_path, image_path])
+					zf.Update(replace_files=[*files_to_add, dump_filename])
 				else:
-					zf.Create(add_files = [fn, python_path, image_path])
-					
-				os.remove(fn)
-
-				## abs path of the directory that contains the file to export (str() to avoid unicode)
-				newExportPath = str(os.path.dirname(fileName))
-
+					zf.Create(add_files=[*files_to_add, dump_filename])
+				
+				# Supprimer le fichier temporaire de dump
+				if os.path.exists(dump_filename):
+					os.remove(dump_filename)
+				
+				# Chemin absolu du répertoire parent
+				newExportPath = os.path.abspath(os.path.dirname(fileName))
+				
 				mainW = getTopLevelWindow()
 				
-				### if export on local directory, we insert the path in the config file
-				if os.path.basename(DOMAIN_PATH) not in newExportPath.split(os.sep):
-					### update of .devsimpy config file
-					mainW.exportPathsList = eval(mainW.cfg.Read("exportPathsList"))
+				# Si le chemin d'exportation n'est pas un sous-dossier de DOMAIN_PATH
+				if not os.path.commonpath([newExportPath, DOMAIN_PATH]).startswith(DOMAIN_PATH):
+					
+					# Charger et mettre à jour la liste des chemins d'export
+					try:
+						mainW.exportPathsList = json.loads(mainW.cfg.Read("exportPathsList"))
+					except json.JSONDecodeError:
+						mainW.exportPathsList = []
+					
 					if newExportPath not in mainW.exportPathsList:
-						mainW.exportPathsList.append(str(newExportPath))
-					mainW.cfg.Write("exportPathsList", str(eval("mainW.exportPathsList")))
+						mainW.exportPathsList.append(newExportPath)
+					
+					mainW.cfg.Write("exportPathsList", json.dumps(mainW.exportPathsList))
 
-				### if lib is already in the lib tree, we update the tree
+				# Mise à jour de l'arbre de la bibliothèque
 				mainW.tree.UpdateDomain(newExportPath)
-				### to sort lib tree
 				mainW.tree.SortChildren(mainW.tree.root)
 
-			except Exception as info:
+			except (OSError, FileNotFoundError, json.JSONDecodeError) as error:
 				tb = traceback.format_exc()
-				NotificationMessage(_('Error'), _("Problem saving (during the zip handling): %s -- %s\n")%(str(fileName),info), parent=getTopLevelWindow(), timeout=5)
-				sys.stderr.write(_("Problem saving (during the zip handling): %s -- %s\n")%(str(fileName),str(tb)))
+				NotificationMessage(_('Error'), 
+									_("Problem saving (during the zip handling): %s -- %s\n") % (fileName, error), 
+									parent=getTopLevelWindow(), timeout=5)
+				sys.stderr.write(_("Problem saving (during the zip handling): %s -- %s\n") % (fileName, tb))
 				return False
+			
+			except Exception as error:
+				tb = traceback.format_exc()
+				NotificationMessage(_('Unexpected Error'), 
+									_("Unexpected problem saving (during the zip handling): %s -- %s\n") % (fileName, error), 
+									parent=getTopLevelWindow(), timeout=5)
+				sys.stderr.write(_("Unexpected problem saving (during the zip handling): %s -- %s\n") % (fileName, tb))
+				return False
+
 			else:
 				return True
 
@@ -271,9 +299,8 @@ class DumpZipFile(DumpBase):
 
 		# try to load file
 		try:
-			f = open(path,'rb')
-			L = pickle.load(f)
-			f.close()
+			with open(path,'rb') as f:
+				L = pickle.load(f)
 		except Exception as info:
 			tb = traceback.format_exc()
 			sys.stderr.write(_("Problem loading: %s -- %s \n")%(str(fileName), str(tb)))
@@ -406,68 +433,69 @@ class DumpGZipFile(DumpBase):
 	ext = [".dsp"]
 
 	def Save(self, obj_dumped, fileName=None):
-		""" Function that save the dump on the disk under filename.
-		"""
-
-		assert(fileName.endswith(tuple(DumpGZipFile.ext)))
-
+		""" 
+    	Function that saves the dump on the disk under the given filename.
+    	"""
+		if not fileName or not fileName.endswith(tuple(DumpGZipFile.ext)):
+			raise ValueError(f"Invalid filename '{fileName}'. It must end with one of {DumpGZipFile.ext}.")
+		
 		try:
-			pickle.dump(   obj = PickledCollection(obj_dumped),
-							file = gzip.GzipFile(filename = fileName, mode = 'wb', compresslevel = 9),
-							protocol = 0)
-
-		except Exception as info:
+			# Utilisation d'un gestionnaire de contexte pour garantir la fermeture du fichier
+			with gzip.GzipFile(filename=fileName, mode='wb', compresslevel=9) as file:
+				pickle.dump(obj=PickledCollection(obj_dumped), file=file, protocol=pickle.HIGHEST_PROTOCOL)
+		
+		except (OSError, pickle.PickleError) as error:
 			tb = traceback.format_exc()
-			sys.stderr.write(_("\nProblem saving: %s -- %s\n")%(str(fileName),str(tb)))
+			sys.stderr.write(f"\nProblem saving '{fileName}': {error}\n{tb}")
+			return False
+		
+		except Exception as error:
+			tb = traceback.format_exc()
+			sys.stderr.write(f"\nUnexpected error while saving '{fileName}': {error}\n{tb}")
 			return False
 		
 		else:
 			return True
 
-	def Load(self, obj_loaded, fileName=None):
-		""" Function that load the diagram from its filename.
+	def Load(self, obj_loaded, fileName=None) -> bool:
+		""" 
+		Function that loads a diagram from its filename.
 		"""
-
-		# try to open filename with compressed mode
+		if not fileName:
+			raise ValueError("Filename must be provided to load the diagram.")
+		
 		try:
-			f = gzip.GzipFile(filename = fileName, mode='rb')
-			f.read(1) # trigger an exception if is not compressed
-			f.seek(0)
+			# Ouvre le fichier GZIP (gestion de contexte) et vérifie s'il est bien compressé
+			with gzip.GzipFile(filename=fileName, mode='rb') as f:
+				try:
+					f.read(1)  # Teste si le fichier est compressé
+					f.seek(0)  # Remet le curseur au début
+					dsp = pickle.load(f)  # Charge l'objet sérialisé
+				except Exception as error:
+					tb = traceback.format_exc()
+					sys.stderr.write(f"Problem loading: {fileName} -- {tb}\n")
+					return error
+		
+		except (OSError, IOError, gzip.BadGzipFile) as error:
+			tb = traceback.format_exc()
+			sys.stderr.write(f"Problem opening file '{fileName}': {tb}\n")
+			return error
+		
+		# Vérifie la correspondance entre les attributs de l'objet et les données chargées
+		if abs(len(obj_loaded.dump_attributes) - len(dsp)) == len(Abstractable.DUMP_ATTR):
+			obj_loaded.dump_attributes += Abstractable.DUMP_ATTR
 
-		except Exception as info:
-			exc_type, exc_obj, exc_tb = sys.exc_info()
-			fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-			sys.stderr.write(_("Problem opening: %s -- description: %s / type: %s / name: %s / line: %s\n")%(str(fileName), info, exc_type, fname, exc_tb.tb_lineno))
-			return info
+		if len(obj_loaded.dump_attributes) != len(dsp):
+			raise ValueError(f"Mismatch between attributes and dumped data: {len(obj_loaded.dump_attributes)} != {len(dsp)}")
 
-		else:
-			### try to load serialized file
-			try:
-				dsp = pickle.load(f)
-			except Exception as info:
-				tb = traceback.format_exc()
-				sys.stderr.write(_("Problem loading: %s -- %s\n")%(str(fileName), tb))
-				return info
-			finally:
-				f.close()
+		# Attribue les valeurs chargées aux attributs de l'objet
+		for attr, value in zip(obj_loaded.dump_attributes, dsp):
+			setattr(obj_loaded, attr, value)
 
-			#=======================================================================
+		# Mémorise le nom du fichier chargé
+		obj_loaded.last_name_saved = fileName
 
-			if abs(len(obj_loaded.dump_attributes)-len(dsp)) == len(Abstractable.DUMP_ATTR):
-				obj_loaded.dump_attributes += Abstractable.DUMP_ATTR
-
-			#=======================================================================
-
-			a,b = [len(a) for a in (obj_loaded.dump_attributes, dsp)]
-			assert(a==b)
-
-			### assisgn the specific attributs
-			for i,attr in enumerate(obj_loaded.dump_attributes):
-				setattr(obj_loaded, attr, dsp[i])
-
-			obj_loaded.last_name_saved = fileName
-
-			return True
+		return True
 
 ###-----------------------------------------------------------
 class DumpYAMLFile(DumpBase):
@@ -475,35 +503,44 @@ class DumpYAMLFile(DumpBase):
 	"""
 	ext = [".yaml", '.yml']
 
-	def Save(self, obj_dumped, fileName = None):
-		""" Function that save the dump on the disk under filename.
+	def Save(self, obj_dumped, fileName=None) -> bool:
+		""" 
+		Function that saves the dump to disk as a YAML file.
 		"""
-
-		assert(fileName.endswith(tuple(DumpYAMLFile.ext)))
-
+		# Vérification de la validité du nom de fichier
+		if not fileName or not fileName.endswith(tuple(DumpYAMLFile.ext)):
+			raise ValueError(f"Invalid filename '{fileName}'. It must end with one of {DumpYAMLFile.ext}.")
+		
 		try:
-			yaml = ruamel.YAML()
+			# Première tentative avec le mode "sûr"
+			yaml = YAML()
 			yaml.register_class(PickledCollection)
+
 			with open(fileName, 'w') as yf:
-				ruamel.dump(PickledCollection(obj_dumped), stream=yf, default_flow_style=False) 
-		except AttributeError as info:
+				yaml.dump(PickledCollection(obj_dumped), stream=yf, default_flow_style=False)
+		
+		except (AttributeError, Exception) as error:
+			sys.stderr.write(f"Warning: First attempt to save YAML failed, retrying in 'unsafe' mode: {error}\n")
+			
 			try:
-				yaml = ruamel.YAML(typ='unsafe', pure=True)
+				# Deuxième tentative avec le mode "unsafe" (moins sécurisé, mais plus permissif)
+				yaml = YAML(typ='unsafe', pure=True)
+
 				with open(fileName, 'w') as yf:
 					yaml.dump(PickledCollection(obj_dumped), stream=yf)
-			except Exception as info:
+			
+			except (OSError, Exception) as error:
 				tb = traceback.format_exc()
-				sys.stderr.write(_("\nProblem saving: %s -- %s\n")%(str(fileName),str(tb)))
+				sys.stderr.write(f"Problem saving YAML file '{fileName}': {error}\n{tb}")
 				return False
-			else:
-				return True	
-		except Exception as info:
+
+		except (OSError, Exception) as error:
 			tb = traceback.format_exc()
-			sys.stderr.write(_("\nProblem saving: %s -- %s\n")%(str(fileName),str(tb)))
+			sys.stderr.write(f"Problem saving YAML file '{fileName}': {error}\n{tb}")
 			return False
-		else:
-			return True
-		
+
+		return True
+
 	@staticmethod
 	def Open(fileName:str):
 		""" Open the YAML filename and return the coresponding object.
@@ -514,7 +551,7 @@ class DumpYAMLFile(DumpBase):
 
 		## try to open f with compressed mode
 		try:
-			yaml = ruamel.YAML()
+			yaml = YAML()
 			yaml.register_class(PickledCollection)
 			with open(fileName, 'r') as yf:
 				return ruamel.load(yf, Loader=ruamel.Loader)
@@ -534,19 +571,39 @@ class DumpYAMLFile(DumpBase):
 			sys.stderr.write(traceback.format_exc())
 			return info
 		
-	def Load(self, obj_loaded, fileName = None):
-		""" Function that load the dump from the filename.
+	def Load(self, obj_loaded, fileName=None) -> bool:
+		""" 
+		Function that loads the dump from a filename and assigns it to obj_loaded.
+
+		Args:
+			obj_loaded: The object to which the attributes will be assigned.
+			fileName (str): The path to the file to load.
+
+		Returns:
+			bool: True if the load was successful, False otherwise.
 		"""
+		# Vérification du nom de fichier
+		if not fileName or not isinstance(fileName, str):
+			raise ValueError("Filename must be a non-empty string.")
 
-		dsp = DumpYAMLFile.Open(fileName)
+		try:
+			# Ouvre et lit le fichier YAML
+			dsp = DumpYAMLFile.Open(fileName)
 
-		if not dsp:
+		except Exception as error:
+			tb = traceback.format_exc()
+			sys.stderr.write(f"Problem loading file '{fileName}': {tb}\n")
 			return False
-		
-		### assisgn the specific attributs
-		for i,attr in enumerate(obj_loaded.dump_attributes):
-			setattr(obj_loaded, attr, dsp[i])
 
+		# Vérification de la correspondance des longueurs
+		if len(dsp) != len(obj_loaded.dump_attributes):
+			raise ValueError(f"Mismatch between attributes and dumped data: {len(obj_loaded.dump_attributes)} != {len(dsp)}")
+
+		# Assignation des attributs en utilisant zip
+		for attr, value in zip(obj_loaded.dump_attributes, dsp):
+			setattr(obj_loaded, attr, value)
+
+		# Enregistrement du dernier nom de fichier chargé
 		obj_loaded.last_name_saved = fileName
 
 		return True

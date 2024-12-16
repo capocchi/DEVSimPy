@@ -29,13 +29,14 @@ def recompile(modulename):
 		zf = ZipManager.Zip(modulename)
 		return zf.ReImport()
 	else:
+		
 		try:
 		### first, see if the module can be imported at all...
-			tmp = __import__(modulename, globals(), locals(), fromlist = [modulename.split('.')[-1]])
-
+		#tmp = __import__(modulename, globals(), locals(), fromlist = [modulename.split('.')[-1]])
+			tmp = importlib.import_module(modulename)
 		except Exception as info:
 			return info
-
+		
 		### Use the imported module to determine its actual path
 		pycfile = os.path.abspath(tmp.__file__)
 		modulepath = pycfile.replace('.pyc', '.py') #string.replace(pycfile, ".pyc", ".py")

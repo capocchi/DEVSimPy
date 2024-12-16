@@ -26,6 +26,7 @@ import os
 _ = wx.GetTranslation
 
 from LibraryTree import LibraryTree
+from Utilities import load_and_resize_image
 
 import Menu
 
@@ -117,17 +118,16 @@ class LibPanel(wx.Panel):
 
 		### for Phoenix version
 		if wx.VERSION_STRING < '4.0':
-			tb.AddTool(Menu.ID_NEW_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db+2.png')), shortHelpString=_('Import'), longHelpString=_('Import new libraries from directory'))
-			tb.AddTool(Menu.ID_DELETE_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db-2.png')), shortHelpString=_('Delete'), longHelpString=_('Delete the selected libraries'))
-			tb.AddTool(Menu.ID_REFRESH_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')), shortHelpString=_('Reload'), longHelpString=_('Force to reload libraries'))
-			#tb.AddTool(Menu.ID_IMPORT_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16,'dbimport2.png')), shortHelpString=_('Import library'), longHelpString=_('Call the import manager'))
-			tb.AddTool(Menu.ID_HELP_LIB, wx.Bitmap(os.path.join(ICON_PATH_16_16, 'dbinfo2.png')), shortHelpString=_('Help'), longHelpString=_('Information about import manager'))
+			tb.AddTool(Menu.ID_NEW_LIB, load_and_resize_image('plus.png'), shortHelpString=_('Import'), longHelpString=_('Import new libraries from directory'))
+			tb.AddTool(Menu.ID_DELETE_LIB, load_and_resize_image('minus.png'), shortHelpString=_('Delete'), longHelpString=_('Delete the selected libraries'))
+			tb.AddTool(Menu.ID_REFRESH_LIB, load_and_resize_image('reload.png'), shortHelpString=_('Reload'), longHelpString=_('Force to reload libraries'))
+			tb.AddTool(Menu.ID_HELP_LIB, load_and_resize_image('info.png'), shortHelpString=_('Help'), longHelpString=_('Information about import manager'))
 		else:
-			tb.AddTool(Menu.ID_NEW_LIB, "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'db+2.png')), shortHelp=_('Import'))
-			tb.AddTool(Menu.ID_DELETE_LIB, "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'db-2.png')), shortHelp=_('Delete'))
-			tb.AddTool(Menu.ID_REFRESH_LIB, "", wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')), shortHelp=_('Reload'))
-			tb.AddTool(Menu.ID_HELP_LIB, "", wx.Bitmap(os.path.join(ICON_PATH_16_16, 'dbinfo2.png')), shortHelp=_('Help'))
-			tb.AddCheckTool(Menu.ID_MCC_LIB, '', wx.Bitmap(os.path.join(ICON_PATH_16_16,'a-z.png')), shortHelp='MacCabe')
+			tb.AddTool(Menu.ID_NEW_LIB, "", load_and_resize_image('plus.png'), shortHelp=_('Import'))
+			tb.AddTool(Menu.ID_DELETE_LIB, "", load_and_resize_image('minus.png'), shortHelp=_('Delete'))
+			tb.AddTool(Menu.ID_REFRESH_LIB, "", load_and_resize_image('reload.png'), shortHelp=_('Reload'))
+			tb.AddTool(Menu.ID_HELP_LIB, "", load_and_resize_image('info.png'), shortHelp=_('Help'))
+			tb.AddCheckTool(Menu.ID_MCC_LIB, '', load_and_resize_image('a-z.png'), shortHelp='MacCabe')
 			tb.ToggleTool(Menu.ID_MCC_LIB, True)
 
 		mainW = self.GetTopLevelParent()

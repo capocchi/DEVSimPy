@@ -30,6 +30,7 @@ import Container
 
 from PluginManager import PluginManager
 from ExperimentGenerator import ExperimentGenerator
+from Utilities import load_and_resize_image
 
 _ = wx.GetTranslation
 
@@ -208,16 +209,16 @@ class FileMenu(wx.Menu):
 		screenCapture=wx.MenuItem(self, ID_SCREEN_CAPTURE, _('ScreenShot'),_('Capture the screen into a image'))
 		exitModel=wx.MenuItem(self, wx.ID_EXIT, _('&Quit\tCtrl+Q'),_('Quit the DEVSimPy application'))
 
-		openModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'open.png')))
-		saveModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'save.png')))
-		saveAsModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'save_as.png')))
-		exportRest.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'export.png')))
-		exportStandalone.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'export.png')))
-		importRest.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'import.png')))
-		printModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'print.png')))
-		printPreviewModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'print-preview.png')))
-		screenCapture.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'ksnapshot.png')))
-		exitModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'exit.png')))
+		openModel.SetBitmap(load_and_resize_image('open.png'))
+		saveModel.SetBitmap(load_and_resize_image('save.png'))
+		saveAsModel.SetBitmap(load_and_resize_image('save_as.png'))
+		exportRest.SetBitmap(load_and_resize_image('export.png'))
+		exportStandalone.SetBitmap(load_and_resize_image('export.png'))
+		importRest.SetBitmap(load_and_resize_image('import.png'))
+		printModel.SetBitmap(load_and_resize_image('print.png'))
+		printPreviewModel.SetBitmap(load_and_resize_image('print-preview.png'))
+		screenCapture.SetBitmap(load_and_resize_image('ksnapshot.png'))
+		exitModel.SetBitmap(load_and_resize_image('exit.png'))
 
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 		
@@ -358,9 +359,9 @@ class PerspectiveMenu(wx.Menu):
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
 		new = wx.MenuItem(self, ID_NEW_PERSPECTIVE, _('New'),_('New perspective'))
-		new.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'new.png')))
+		new.SetBitmap(load_and_resize_image('new.png'))
 		deleteall = wx.MenuItem(self, ID_DELETE_PERSPECTIVE, _('Delete all'),_('Delete all perspectives'))
-		deleteall.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'delete.png')))
+		deleteall.SetBitmap(load_and_resize_image('delete.png'))
 
 		AppendItem(new)
 		AppendItem(deleteall)
@@ -409,19 +410,19 @@ class DiagramMenu(wx.Menu):
 		renameDiagram = wx.MenuItem(self, ID_RENAME_DIAGRAM, _('Rename'), _("Rename diagram"))
 		closeDiagram = wx.MenuItem(self, ID_EXIT_DIAGRAM, _('&Close\tCtrl+D'), _("Close the tab"))
 
-		newDiagram.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'new.png')))
-		detachDiagram.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'detach.png')))
-		zoomIn.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'zoom+.png')))
-		zoomOut.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'zoom-.png')))
-		annuleZoom.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'no_zoom.png')))
-		checkDiagram.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'check_master.png')))
-		simulationDiagram.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'simulation.png')))
-		constantsDiagram.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'properties.png')))
-		priorityDiagram.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'priority.png')))
-		infoDiagram.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'info.png')))
-		clearDiagram.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'delete.png')))
-		renameDiagram.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'rename.png')))
-		closeDiagram.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'close.png')))
+		newDiagram.SetBitmap(load_and_resize_image('new.png'))
+		detachDiagram.SetBitmap(load_and_resize_image('detach.png'))
+		zoomIn.SetBitmap(load_and_resize_image('zoom+.png'))
+		zoomOut.SetBitmap(load_and_resize_image('zoom-.png'))
+		annuleZoom.SetBitmap(load_and_resize_image('no_zoom.png'))
+		checkDiagram.SetBitmap(load_and_resize_image('check_master.png'))
+		simulationDiagram.SetBitmap(load_and_resize_image('simulation.png'))
+		constantsDiagram.SetBitmap(load_and_resize_image('properties.png'))
+		priorityDiagram.SetBitmap(load_and_resize_image('priority.png'))
+		infoDiagram.SetBitmap(load_and_resize_image('info.png'))
+		clearDiagram.SetBitmap(load_and_resize_image('delete.png'))
+		renameDiagram.SetBitmap(load_and_resize_image('rename.png'))
+		closeDiagram.SetBitmap(load_and_resize_image('close.png'))
 
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
@@ -473,9 +474,9 @@ class SettingsMenu(wx.Menu):
 		fritem = wx.MenuItem(languagesSubmenu, ID_FRENCH_LANGUAGE, _('French'), _("French interface"))
 		enitem = wx.MenuItem(languagesSubmenu, ID_ENGLISH_LANGUAGE, _('English'), _("English interface"))
 
-		pref_item.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'preferences.png')))
-		fritem.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'french-flag.png')))
-		enitem.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'united-states-flag.png')))
+		pref_item.SetBitmap(load_and_resize_image('preferences.png'))
+		fritem.SetBitmap(load_and_resize_image('french-flag.png'))
+		enitem.SetBitmap(load_and_resize_image('united-states-flag.png'))
 
 		if wx.VERSION_STRING < '4.0':
 			languagesSubmenu.AppendItem(fritem)
@@ -522,13 +523,13 @@ class HelpMenu(wx.Menu):
 		contactModel = wx.MenuItem(self, ID_CONTACT, _('Contact the Author...'), _("Send mail to the author"))
 		aboutModel = wx.MenuItem(self, ID_ABOUT, _('About DEVSimPy...'), _("About DEVSimPy"))
 
-		helpModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'search.png')))
-		updatePipPackage.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'update.png')))
-		updateFromGitArchive.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'zip.png')))
-		updateFromGitRepo.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'git.png')))
-		apiModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'api.png')))
-		contactModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'mail.png')))
-		aboutModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'info.png')))
+		helpModel.SetBitmap(load_and_resize_image('search.png'))
+		updatePipPackage.SetBitmap(load_and_resize_image('update.png'))
+		updateFromGitArchive.SetBitmap(load_and_resize_image('zip.png'))
+		updateFromGitRepo.SetBitmap(load_and_resize_image('git.png'))
+		apiModel.SetBitmap(load_and_resize_image('api.png'))
+		contactModel.SetBitmap(load_and_resize_image('mail.png'))
+		aboutModel.SetBitmap(load_and_resize_image('info.png'))
 
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
@@ -663,7 +664,7 @@ class DiagramNoTabPopupMenu(wx.Menu):
 		wx.Menu.__init__(self)
 
 		new_tab = wx.MenuItem(self, ID_NEW, _('New'), _("Create a new tab diagram"))
-		new_tab.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'new.png')))
+		new_tab.SetBitmap(load_and_resize_image('new.png'))
 
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
@@ -686,11 +687,11 @@ class DiagramTabPopupMenu(wx.Menu):
 		info = wx.MenuItem(self, ID_INFO_DIAGRAM, _('Info'), _('Information diagram'))
 		clear = wx.MenuItem(self, ID_CLEAR_DIAGRAM, _('Clear'), _('Clear diagram'))
 
-		close.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'close.png')))
-		detach.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'detach.png')))
-		rename.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'rename.png')))
-		info.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'info.png')))
-		clear.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'delete.png')))
+		close.SetBitmap(load_and_resize_image('close.png'))
+		detach.SetBitmap(load_and_resize_image('detach.png'))
+		rename.SetBitmap(load_and_resize_image('rename.png'))
+		info.SetBitmap(load_and_resize_image('info.png'))
+		clear.SetBitmap(load_and_resize_image('delete.png'))
 
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
@@ -712,7 +713,7 @@ class NodePopupMenu(wx.Menu):
 		wx.Menu.__init__(self)
 
 		edit_label = wx.MenuItem(self, -1, _('Edit'), _('Edit label'))
-		edit_label.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'label.png')))
+		edit_label.SetBitmap(load_and_resize_image('label.png'))
 		
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 		AppendItem(edit_label)
@@ -739,9 +740,9 @@ class PropertiesCtrlPopupMenu(wx.Menu):
 		insert = wx.MenuItem(self, ID_INSERT_ATTR, _('Insert'), _('Insert attribute'))
 		clear = wx.MenuItem(self, ID_CLEAR_ATTR, _('Clear'), _('Clear value'))
 		
-		edit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'edit.png')))
-		insert.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'insert.png')))
-		clear.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'edit-clear.png')))
+		edit.SetBitmap(load_and_resize_image('edit.png'))
+		insert.SetBitmap(load_and_resize_image('insert.png'))
+		clear.SetBitmap(load_and_resize_image('edit-clear.png'))
 
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
@@ -789,11 +790,11 @@ class ItemLibraryPopupMenu(wx.Menu):
 			update_lib = wx.MenuItem(self, ID_UPDATE_SUBLIB, _('Update'), _('Update all models of the selected library'))
 			doc = wx.MenuItem(self, wx.NewIdRef(), _('Documentation'), _('Documentation of selected library'))
 
-			new_model.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'new.png')))
-			new_dir.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'new.png')))
-			rename_dir.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'rename.png')))
-			update_lib.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'db_refresh2.png')))
-			doc.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'doc.png')))
+			new_model.SetBitmap(load_and_resize_image('new.png'))
+			new_dir.SetBitmap(load_and_resize_image('new.png'))
+			rename_dir.SetBitmap(load_and_resize_image('rename.png'))
+			update_lib.SetBitmap(load_and_resize_image('reload.png'))
+			doc.SetBitmap(load_and_resize_image('doc.png'))
 
 			new_submenu.Append(new_model)
 			new_submenu.Append(new_dir)
@@ -816,11 +817,11 @@ class ItemLibraryPopupMenu(wx.Menu):
 			doc = wx.MenuItem(self, wx.NewIdRef(), _('Documentation'), _('Documentation of selected library'))
 			update = wx.MenuItem(self, ID_UPDATE_LIB, _('Update'), _('Update selected module'))
 
-			edit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'edit.png')))
-			rename.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'rename.png')))
-			export.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'export.png')))
-			doc.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'doc.png')))
-			update.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')))
+			edit.SetBitmap(load_and_resize_image('edit.png'))
+			rename.SetBitmap(load_and_resize_image('rename.png'))
+			export.SetBitmap(load_and_resize_image('export.png'))
+			doc.SetBitmap(load_and_resize_image('doc.png'))
+			update.SetBitmap(load_and_resize_image('reload.png'))
 
 			AppendItem(edit)
 			AppendItem(rename)
@@ -839,7 +840,7 @@ class ItemLibraryPopupMenu(wx.Menu):
 
 		### menu for all item of tree
 		delete = wx.MenuItem(self, ID_DELETE_LIB, _('Delete'), _('Delete selected library'))
-		delete.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'delete.png')))
+		delete.SetBitmap(load_and_resize_image('delete.png'))
 
 		AppendItem(delete)
 
@@ -860,10 +861,10 @@ class LibraryPopupMenu(wx.Menu):
 		#upgrade = wx.MenuItem(self, ID_UPGRADE_LIB, _('Upgrade'), _('Upgrade library'))
 		info = wx.MenuItem(self, ID_HELP_LIB, _('Help'), _('Library description'))
 
-		new.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'db+2.png')))
-		refresh.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')))
-		#upgrade.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'upgrade.png')))
-		info.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'dbinfo2.png')))
+		new.SetBitmap(load_and_resize_image('plus.png'))
+		refresh.SetBitmap(load_and_resize_image('reload.png'))
+		#upgrade.SetBitmap(load_and_resize_image('upgrade.png'))
+		info.SetBitmap(load_and_resize_image('info.png'))
 
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
@@ -901,12 +902,12 @@ class ShapeCanvasPopupMenu(wx.Menu):
 		generate_experiment = wx.MenuItem(self, ID_GEN_EXPERIMENT, _('Generate PyPDEVS Experiment File'), _('Generate experiment model for PyPDEVS'))
 
 		### bitmap item setting
-		new.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'new_model.png')))
-		refresh.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'db_refresh2.png')))
-		paste.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'paste.png')))
-		add_constants.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'properties.png')))
-		preview_dia.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'print-preview.png')))
-		generate_experiment.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'generation.png')))
+		new.SetBitmap(load_and_resize_image('new_model.png'))
+		refresh.SetBitmap(load_and_resize_image('reload.png'))
+		paste.SetBitmap(load_and_resize_image('paste.png'))
+		add_constants.SetBitmap(load_and_resize_image('properties.png'))
+		preview_dia.SetBitmap(load_and_resize_image('print-preview.png'))
+		generate_experiment.SetBitmap(load_and_resize_image('generation.png'))
 	
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
@@ -922,10 +923,10 @@ class ShapeCanvasPopupMenu(wx.Menu):
 		if isinstance(self.parent.parent, wx.Frame):
 			if self.parent.parent.GetWindowStyle() == self.parent.parent.default_style:
 				stay_on_top = wx.MenuItem(self, ID_STAY_ON_TOP, _('Enable stay on top'), _('Coupled model frame stay on top'))
-				stay_on_top.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'pin_out.png')))
+				stay_on_top.SetBitmap(load_and_resize_image('pin_out.png'))
 			else:
 				stay_on_top = wx.MenuItem(self, ID_STAY_ON_TOP, _('Disable stay on top'), _('Coupled model frame not stay on top'))
-				stay_on_top.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'pin_in.png')))
+				stay_on_top.SetBitmap(load_and_resize_image('pin_in.png'))
 
 			AppendItem(stay_on_top)
 			parent.Bind(wx.EVT_MENU, parent.parent.OnStayOnTop, id=ID_STAY_ON_TOP)
@@ -989,26 +990,26 @@ class ShapePopupMenu(wx.Menu):
 		plugin = wx.MenuItem(self, ID_PLUGINS_SHAPE, _("Plug-in"), _("Plug-in manager"))
 		properties=wx.MenuItem(self, ID_PROPERTIES_SHAPE, _("Properties"), _("Edit the attributes"))
 
-		edit.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'edit.png')))
-		editModel.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'edit.png')))
-		editTest.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, 'test.png')))
-		log.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'log.png')))
-		copy.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'copy.png')))
-		paste.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'paste.png')))
-		cut.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'cut.png')))
-		rotateL.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'rotateL.png')))
-		rotateR.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'rotateR.png')))
-		rotateIL.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'rotateL.png')))
-		rotateIR.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'rotateR.png')))
-		rotateOL.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'rotateL.png')))
-		rotateOR.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'rotateR.png')))
-		rename.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'rename.png')))
-		export.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'export.png')))
-		delete.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'delete.png')))
-		lock.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'lock.png')))
-		unlock.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'unlock.png')))
-		plugin.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'plugin.png')))
-		properties.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16,'properties.png')))
+		edit.SetBitmap(load_and_resize_image('edit.png'))
+		editModel.SetBitmap(load_and_resize_image('edit.png'))
+		editTest.SetBitmap(load_and_resize_image( 'test.png'))
+		log.SetBitmap(load_and_resize_image('log.png'))
+		copy.SetBitmap(load_and_resize_image('copy.png'))
+		paste.SetBitmap(load_and_resize_image('paste.png'))
+		cut.SetBitmap(load_and_resize_image('cut.png'))
+		rotateL.SetBitmap(load_and_resize_image('rotateL.png'))
+		rotateR.SetBitmap(load_and_resize_image('rotateR.png'))
+		rotateIL.SetBitmap(load_and_resize_image('rotateL.png'))
+		rotateIR.SetBitmap(load_and_resize_image('rotateR.png'))
+		rotateOL.SetBitmap(load_and_resize_image('rotateL.png'))
+		rotateOR.SetBitmap(load_and_resize_image('rotateR.png'))
+		rename.SetBitmap(load_and_resize_image('rename.png'))
+		export.SetBitmap(load_and_resize_image('export.png'))
+		delete.SetBitmap(load_and_resize_image('delete.png'))
+		lock.SetBitmap(load_and_resize_image('lock.png'))
+		unlock.SetBitmap(load_and_resize_image('unlock.png'))
+		plugin.SetBitmap(load_and_resize_image('plugins.png'))
+		properties.SetBitmap(load_and_resize_image('properties.png'))
 
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
@@ -1172,7 +1173,7 @@ class ShapePopupMenu(wx.Menu):
 
 				# AMD specific binding
 				if shape.isAMD():
-				 	self.__canvas.Bind(wx.EVT_MENU, shape.OnTestEditor, id=ID_TESTING_SHAPE)
+					self.__canvas.Bind(wx.EVT_MENU, shape.OnTestEditor, id=ID_TESTING_SHAPE)
 				elif shape.isPY():
 					self.__canvas.Bind(wx.EVT_MENU, shape.OnEditor, id=ID_EDIT_SHAPE)
 				else:
