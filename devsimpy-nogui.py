@@ -70,8 +70,11 @@ def simulate(devs, duration, simu_name, is_remote):
 		builtins.__dict__['NTL'] = True
 		duration = 0.0
 
+	if not devs:
+		raise Exception(_("No model to simulate"))
+
 	### launch simulation
-	makeSimulation(devs, duration, simu_name, is_remote, True)
+	makeSimulation(master=devs, T=duration, simu_name=simu_name, is_remote=is_remote, stdout=True)
 
 #-------------------------------------------------------------------
 if __name__ == '__main__':

@@ -18,7 +18,7 @@ import time
 import builtins
 import traceback
 import json
-import pusher
+# import pusher
 
 import gettext
 _ = gettext.gettext
@@ -37,45 +37,44 @@ class Printer:
         sys.stdout.flush()
         
 
-def yes(prompt:str = 'Please enter Yes/No: ')->bool:
-    while True:
-        try:
-            i = input(prompt)
-        except KeyboardInterrupt:
-            return False
-        if i.lower() in ('yes','y'): return True
-        elif i.lower() in ('no','n'): return False
-        
+# def yes(prompt:str = 'Please enter Yes/No: ')->bool:
+#     while True:
+#         try:
+#             i = input(prompt)
+#         except KeyboardInterrupt:
+#             return False
+#         if i.lower() in ('yes','y'): return True
+#         elif i.lower() in ('no','n'): return False  
 
-class SimuPusher():
+# class SimuPusher():
     
-    def __init__(self, simu_name):
-        # app_id/key/secret might be linked to user TBC
-        self.app_id = '178867'
-        self.key    = 'c2d255356f53779e6020'
-        self.secret = '9d41a54d45d25274df63'
+#     def __init__(self, simu_name):
+#         # app_id/key/secret might be linked to user TBC
+#         self.app_id = '178867'
+#         self.key    = 'c2d255356f53779e6020'
+#         self.secret = '9d41a54d45d25274df63'
 
-        self.pusher = pusher.Pusher(app_id=self.app_id,key=self.key,secret=self.secret,ssl=True,port=443)
-        self.channel = simu_name
+#         self.pusher = pusher.Pusher(app_id=self.app_id, key=self.key, secret=self.secret, ssl=True, port=443)
+#         self.channel = simu_name
     
-    def push(self, event, data):
-        self.pusher.trigger(self.channel, event, json.dumps(data))
+#     def push(self, event, data):
+#         self.pusher.trigger(self.channel, event, json.dumps(data))
     
-class PrintPusher():
-    def __init__(self, simu_name):
-        pass
+# class PrintPusher():
+#     def __init__(self, simu_name):
+#         pass
     
-    def push(self, event, data):
-        sys.stdout.write((json.dumps(data)))
+#     def push(self, event, data):
+#         sys.stdout.write((json.dumps(data)))
 
-def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, json_trace:bool=True):
+def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, stdout:bool=False):
     """
     """
 
     from InteractionSocket import InteractionManager
 
-    json_report = {'date':time.strftime("%c")}
-    json_report['summary']  ="Simulation in batch mode with %s"%builtins.__dict__['DEFAULT_DEVS_DIRNAME']
+    json_report = {'date': time.strftime("%c")}
+    json_report['summary'] = "Simulation in batch mode with %s"%builtins.__dict__['DEFAULT_DEVS_DIRNAME']
     json_report['mode'] ='no-gui'
     json_report['time'] = T
     json_report['success'] = True
@@ -123,25 +122,42 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, json_t
             interactionManager = InteractionManager(socket_id=socket_id, simulation_thread=thread)
             interactionManager.start()
 
-        first_real_time = time.time()
+        # first_real_time = time.time()
         progress = 0
         
         if not builtins.__dict__['NTL']:
-            while thread.isAlive() if hasattr(thread,'isAlive') else thread.is_alive():
-                new_real_time = time.time()
-                CPUduration = new_real_time - first_real_time
-                new_progress = 100.0*(float(thread.model.timeLast) / float(T)) if float(T) != 0 else 100.0
-                if new_progress - progress > 5:
-                    progress = new_progress
-                    # simuPusher.push('progress', {'progress':progress}) 
-                if not json_trace:
-                    Printer(CPUduration)
+            is_alive = thread.isAlive if hasattr(thread, 'isAlive') else thread.is_alive
+            while is_alive():
+                try:
+                    # new_real_time = time.time()
+                    # CPUduration = new_real_time - first_real_time
+                    new_progress = 100.0 * (float(thread.model.timeLast) / float(T)) if float(T) != 0 else 100.0
+                    
+                    if new_progress - progress > 5:
+                        progress = new_progress
+                        # Print progress to debug
+                        if stdout:
+                            Printer(f"Progress: {progress:.2f}%\n")
+                        else:
+                            sys.stdout.flush()
+                        # simuPusher.push('progress', {'progress':progress})
+
+                    # if not json_trace:
+                        # Printer(CPUduration)
+                        
+                    # Add little wait to avoid the CPU overhead
+                    time.sleep(0.001)
+                except Exception as e:
+                    print(f"Error in the simulation loop : {e}")
+                    break
 
             if interactionManager != None:
                 interactionManager.stop()
                 interactionManager.join()
-                
-            # simuPusher.push('progress', {'progress':100}) 
+
+            if stdout:
+                Printer(f"Progress: 100%")    
+            # simuPusher.push('progress', {'progress':100})
         
     except:
         json_report['summary'] += " *** EXCEPTION raised in simulation ***"
@@ -153,7 +169,7 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, json_t
         ### if sim_name is in param, a log file is writed on the logs dir
         if simu_name:
             os.makedirs('logs', exist_ok=True)
-            with open(os.path.join('logs',simu_name+'.report'), 'w') as f:
+            with open(os.path.join('logs', simu_name+'.report'), 'w') as f:
                     f.write(json.dumps(json_report))
 
     json_report['summary'] += "...DEVS simulation completed!"
@@ -215,10 +231,12 @@ class runSimulation:
         """
 
         assert(self.master is not None)
+
         ### pour prendre en compte les simulations multiples sans relancer un SimulationDialog
         ### si le thread n'est pas lanc� (pas pendant un suspend)
         # if self.thread is not None and not self.thread.thread_suspend:
         diagram = self.master.getBlockModel()
+        
         ################################################################################################################
         ######### To Do : refaire l'enregistrement du chemin d'enregistrements des resultats du to_disk ###################
         for m in self.master.getComponentSet():
