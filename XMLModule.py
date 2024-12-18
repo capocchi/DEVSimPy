@@ -48,7 +48,7 @@ def makeDEVSXML(label, D, filename):
 	ioc = ET.SubElement(root, "inputCoupling")
 	eoc = ET.SubElement(root, "outputCoupling")
 	ic = ET.SubElement(root, "internalCoupling")
-	composants = ET.SubElement(root, "composants")
+	components = ET.SubElement(root, "components")
 
 	# for all models composing coupled model
 	for component in D:
@@ -102,7 +102,7 @@ def makeDEVSXML(label, D, filename):
 					pd.text = str(d[comp][1])
 			#D
 			class_name = os.path.splitext(os.path.basename(component.python_path))[0]
-			model = ET.SubElement(composants, "Model", {'xsi:type':class_name})
+			model = ET.SubElement(components, "Model", {'xsi:type':class_name})
 			n = ET.SubElement(model, "nom")
 			n.text = component.label
 			pi = ET.SubElement(model, "portsIn")

@@ -203,9 +203,13 @@ class MainApplication(wx.Frame):
 		self.stdioWin = None
 
 		# icon setting
-		icon_bitmap = load_and_resize_image(DEVSIMPY_PNG)
-		icon = wx.Icon()
-		icon.CopyFromBitmap(icon_bitmap)
+		
+		try:
+			icon = wx.Icon(os.path.join(ICON_PATH, DEVSIMPY_ICON), wx.BITMAP_TYPE_ANY)
+		except:
+			icon_bitmap = load_and_resize_image(DEVSIMPY_ICON.replace('.ico', '.png'))
+			icon = wx.Icon()
+			icon.CopyFromBitmap(icon_bitmap)
 		self.SetIcon(icon)
 
 		# tell FrameManager to manage this frame
@@ -533,7 +537,7 @@ class MainApplication(wx.Frame):
 		tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
 		tb.SetToolBitmapSize((16,16))
 
-		self.toggle_list = [wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef()]
+		self.toggle_list = [wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef()]
 
 		currentPage = self.nb2.GetCurrentPage()
 
@@ -555,7 +559,8 @@ class MainApplication(wx.Frame):
 							tb.AddTool(Menu.ID_SIM_DIAGRAM, load_and_resize_image('simulation.png'), shortHelpString=_('Simulation (F5)'), longHelpString=_('Simulate the diagram')),
 							tb.AddTool(self.toggle_list[0], load_and_resize_image('direct_connector.png'),shortHelpString= _('Direct'),longHelpString=_('Direct connector'), isToggle=True),
 							tb.AddTool(self.toggle_list[1], load_and_resize_image('square_connector.png'), shortHelpString=_('Square'), longHelpString=_('Square connector'), isToggle=True),
-							tb.AddTool(self.toggle_list[2], load_and_resize_image('linear_connector.png'), shortHelpString=_('Linear'), longHelpString=_('Linear connector'), isToggle=True)
+							tb.AddTool(self.toggle_list[2], load_and_resize_image('linear_connector.png'), shortHelpString=_('Linear'), longHelpString=_('Linear connector'), isToggle=True),
+							tb.AddTool(self.toggle_list[3], load_and_resize_image('curve_connector.png'), shortHelpString=_('Curve'), longHelpString=_('Curve connector'), isToggle=True)
 						]
 		else:
 			self.tools = [	tb.AddTool(wx.ID_NEW, "", load_and_resize_image('new.png'), shortHelp=_('New diagram (Ctrl+N)')),
@@ -574,7 +579,8 @@ class MainApplication(wx.Frame):
 							tb.AddTool(Menu.ID_SIM_DIAGRAM, "", load_and_resize_image('simulation.png'), shortHelp=_('Simulation (F5)')),
 							tb.AddTool(self.toggle_list[0], "", load_and_resize_image('direct_connector.png'),shortHelp= _('Direct'), kind=wx.ITEM_CHECK),
 							tb.AddTool(self.toggle_list[1], "", load_and_resize_image('square_connector.png'), shortHelp=_('Square'), kind = wx.ITEM_CHECK),
-							tb.AddTool(self.toggle_list[2], "", load_and_resize_image('linear_connector.png'), shortHelp=_('Linear'), kind = wx.ITEM_CHECK)
+							tb.AddTool(self.toggle_list[2], "", load_and_resize_image('linear_connector.png'), shortHelp=_('Linear'), kind = wx.ITEM_CHECK),
+							tb.AddTool(self.toggle_list[3], "", load_and_resize_image('curve_connector.png'), shortHelp=_('Curve'), kind = wx.ITEM_CHECK)
 						]
 
 		##################################################################### Abstraction hierarchy
@@ -633,6 +639,7 @@ class MainApplication(wx.Frame):
 		self.Bind(wx.EVT_TOOL, self.OnDirectConnector, self.tools[14])
 		self.Bind(wx.EVT_TOOL, self.OnSquareConnector, self.tools[15])
 		self.Bind(wx.EVT_TOOL, self.OnLinearConnector, self.tools[16])
+		self.Bind(wx.EVT_TOOL, self.OnCurveConnector, self.tools[17])
 
 		##################################################################### Abstraction hierarchy
 		self.Bind(wx.EVT_SPINCTRL, self.OnSpin, id=self.toggle_list[3])
@@ -693,6 +700,14 @@ class MainApplication(wx.Frame):
 		self.OnDirectConnector(event)
 		canvas = Container.ShapeCanvas
 		canvas.CONNECTOR_TYPE = 'linear'
+
+	def OnCurveConnector(self, event):
+		"""
+		"""
+
+		self.OnDirectConnector(event)
+		canvas = Container.ShapeCanvas
+		canvas.CONNECTOR_TYPE = 'curve'
 
 	def OnPaneClose(self, event):
 		""" Close pane has been invoked.

@@ -2141,7 +2141,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			### arguments of ModelGeneratorWizard when right clic appears in canvas
 			kargs = {'title' : _('DEVSimPy Model Generator'),
 						'parent' : parent,
-						'img_filename' : os.path.join('bitmaps', DEVSIMPY_PNG)}
+						'img_filename' : DEVSIMPY_ICON}
 
 			### right clic appears in a library
 			if not isinstance(parent, ShapeCanvas):
@@ -3046,7 +3046,7 @@ class LinesShape(Shape):
 		Shape.draw(self, dc)
 
 		L = list(zip(self.x,self.y)) #list(map(lambda a,b: (a,b), self.x, self.y))
-
+		
 		### line width
 		w = self.x[1] - self.x[0]
 
@@ -3076,12 +3076,19 @@ class LinesShape(Shape):
 			L.insert(1,(self.x[0]+w/2, self.y[0]))
 			L.insert(2,(self.x[0]+w/2, self.y[1]))
 
+		elif ShapeCanvas.CONNECTOR_TYPE == 'curve':
+			L = self.get_bezier_curve_points(L)
+			print('ddd')
+	
 		else:
 			pass
 
 		integer_list = [(int(x), int(y)) for x, y in L]
 
-		dc.DrawLines(integer_list)
+		if ShapeCanvas.CONNECTOR_TYPE == 'curve':
+			dc.DrawSpline(integer_list)
+		else:
+			dc.DrawLines(integer_list)
 	
 		### pour le rectangle en bout de connexion
 		dc.SetBrush(wx.Brush(RED_LIGHT))
@@ -3095,6 +3102,33 @@ class LinesShape(Shape):
 		#					wx.Point(self.x[-1], self.y[-1]),
 		#					wx.Point(self.x[-1]-10, self.y[-1]-10)))
 
+	def get_bezier_curve_points(self, points):
+		"""Generate control points for smooth curve."""
+		if len(points) < 3:
+			return points
+
+		bezier_points = []
+		bezier_points.append(points[0])
+
+		for i in range(1, len(points) - 1):
+			p0 = points[i - 1]
+			p1 = points[i]
+			p2 = points[i + 1]
+
+			cx1 = (p0[0] + p1[0]) / 2
+			cy1 = (p0[1] + p1[1]) / 2
+			
+			cx2 = (p1[0] + p2[0]) / 2
+			cy2 = (p1[1] + p2[1]) / 2
+
+			bezier_points.append((cx1, cy1))
+			bezier_points.append(p1)
+			bezier_points.append((cx2, cy2))
+
+		bezier_points.append(points[-1])
+
+		return bezier_points
+	
 	def HitTest(self, x, y):
 		"""
 		"""

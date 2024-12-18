@@ -7,7 +7,7 @@ ABS_HOME_PATH = os.path.abspath(os.path.dirname(__file__))
 # specific built-in variables. (don't modify the default value. If you want to change it, go to the PreferencesGUI from devsimpy interface.)
 builtin_dict = {
     'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'),
-    'DEVSIMPY_PNG': 'iconDEVSimPy.png',
+    'DEVSIMPY_ICON': 'iconDEVSimPy.ico',
     'HOME_PATH': ABS_HOME_PATH,
     'ICON_PATH': 'icons',
     'SIMULATION_SUCCESS_SOUND_PATH': os.path.join('sounds', 'Simulation-Success.wav'),
@@ -29,7 +29,7 @@ builtin_dict = {
     'NTL' : False,
     'DYNAMIC_STRUCTURE' : False,
     'REAL_TIME': False,
-    'VERBOSE':False,
+    'VERBOSE': False,
     'TRANSPARENCY' : True,
     'NOTIFICATION': True,
     'DEFAULT_PLOT_DYN_FREQ' : 100,

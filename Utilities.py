@@ -71,12 +71,14 @@ if builtins.__dict__.get('GUI_FLAG', True):
 		image_path = os.path.join(ICON_PATH, filename)
 
 		if not os.path.isfile(image_path):
-			raise FileNotFoundError(f"Fichier introuvable : {image_path}")
+			raise FileNotFoundError(f"File not found: {image_path}")
 
 		bitmap = wx.Bitmap(image_path)
 		image = bitmap.ConvertToImage()  # Conversion en wx.Image
 		image = image.Scale(width, height, wx.IMAGE_QUALITY_HIGH)  # Redimensionner l'image
 		return wx.Bitmap(image)  # Reconvertir en wx.Bitmap
+	
+		
 else:
 	def load_and_resize_image(filename, width=16, height=16):
 		pass
