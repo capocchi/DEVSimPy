@@ -289,17 +289,15 @@ class OllamaDevsAdapter(DevsAIAdapter):
         if not port:
             raise ValueError("Port is required for Ollama.")
         self.port = port
-        logging.info("OllamaDevsAdapter initialized with provided port.")
+        logging.info("OllamaDevsAdapter initialized with provided port.") # Vérification si le serveur est lancé au démarrage
+        if not self._is_server_running():
+            logging.info(_("The Ollama server is not running. Attempting to start..."))
+            self._start_server()
+        else:
+            logging.info(_("The Ollama server is already running."))
 
-            # Vérification si le serveur est lancé au démarrage
-            if not self._is_server_running():
-                logging.info(_("The Ollama server is not running. Attempting to start..."))
-                self._start_server()
-            else:
-                logging.info(_("The Ollama server is already running."))
-
-            # Téléchargement du modèle spécifié
-            self._ensure_model_downloaded()
+        # Téléchargement du modèle spécifié
+        self._ensure_model_downloaded()
 
     def _is_ollama_installed(self):
         """ Vérifie si Ollama est installé en cherchant son exécutable. """
