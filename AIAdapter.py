@@ -35,6 +35,8 @@ import urllib.request
 from Decorators import BuzyCursorNotification, cond_decorator, ProgressNotification
 from Utilities import check_internet
 
+from Decorators import BuzyCursorNotification, cond_decorator, ProgressNotification
+
 import gettext
 _ = gettext.gettext
 
