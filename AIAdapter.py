@@ -29,6 +29,8 @@ import builtins
 import wx
 import ollama
 
+from Decorators import BuzyCursorNotification, cond_decorator, ProgressNotification
+
 import gettext
 _ = gettext.gettext
 
