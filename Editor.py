@@ -40,9 +40,12 @@ if not hasattr(inspect, 'getargspec'):
     
 from tempfile import gettempdir, TemporaryDirectory
 from wx import stc
+from AIAdapter import AdapterFactory
 
 from Decorators import redirectStdout
+
 from Utilities import path_to_module, printOnStatusBar, load_and_resize_image
+from AIPrompterDialog import AIPrompterDialog
 
 import ReloadModule
 import ZipManager
@@ -217,6 +220,7 @@ class PythonSTC(stc.StyledTextCtrl):
 		stc.StyledTextCtrl.__init__(self, parent, ID, pos, size, style)
 		
 		# Do we want to automatically pop up command completion options?
+		
 		self.autoComplete = True
 		self.autoCompleteIncludeMagic = True
 		self.autoCompleteIncludeSingle = True
@@ -740,6 +744,7 @@ class CodeEditor(PythonSTC):
 		self.Bind(wx.stc.EVT_STC_CHANGE, eventHandler)
 
 
+
 ### EditionFile-----------------------------------------------------
 ### NOTE: EditionFile << CodeEditor :: Expect EditionFile objects to clearly separate file and notebook attributes
 class EditionFile(CodeEditor):
@@ -881,9 +886,9 @@ class EditionNotebook(wx.Notebook):
 				fileCode = importer.read(fileInfo)
 				importer.close()
 		else:
-			if os.path.exists(path):
+			if os.path.exists(path): 
 				with open(path, 'r') as f:
-					fileCode = f.read()
+						fileCode = f.read()
 			else:
 				### fileCode is path (user work with IOString code, not file object)
 				fileCode = path
@@ -1366,6 +1371,7 @@ class Base(object):
 		self.search = wx.MenuItem(edit, wx.NewIdRef(), _('&Search\tCtrl+F'), _('Search text'))
 
 		self.cut = wx.MenuItem(edit, wx.NewIdRef(), _('&Cut\tCtrl+X'), _('Cut the selection'))
+		self.ai = wx.MenuItem(edit, wx.NewIdRef(), _('&AI'), _('Modification by AI'))
 		self.copy = wx.MenuItem(edit, wx.NewIdRef(), _('&Copy\tCtrl+C'), _('Copy the selection'))
 		self.paste = wx.MenuItem(edit, wx.NewIdRef(), _('&Paste\tCtrl+V'), _('Paste text from clipboard'))
 		delete = wx.MenuItem(edit, wx.NewIdRef(), _('&Delete'), _('Delete the selected text'))
@@ -1375,13 +1381,15 @@ class Base(object):
 		uncomment = wx.MenuItem(edit, wx.NewIdRef(), _('&Uncomment\tCtrl+D'), _('uncomment current ligne'))
 		# uncomment = wx.MenuItem(edit, wx.NewIdRef(), _('&Uncomment\tCtrl+Shift+D'), _('uncomment current ligne'))
 
-		self.cut.SetBitmap(load_and_resize_image('cut.png'))
-		self.copy.SetBitmap(load_and_resize_image('copy.png'))
-		self.paste.SetBitmap(load_and_resize_image('paste.png'))
-		delete.SetBitmap(load_and_resize_image('delete.png'))
-		reindent.SetBitmap(load_and_resize_image('re-indent.png'))
-		comment.SetBitmap(load_and_resize_image('comment_add.png'))
-		uncomment.SetBitmap(load_and_resize_image('comment_remove.png'))
+		self.cut.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'cut.png')))
+		self.ai.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'puce_ai.png')))
+		self.copy.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'copy.png')))
+		self.paste.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'paste.png')))
+
+		delete.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'delete.png')))
+		reindent.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 're-indent.png')))
+		comment.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'comment_add.png')))
+		uncomment.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'comment_remove.png')))
 
 		### Shortcut
 		accel_tbl = wx.AcceleratorTable([(wx.ACCEL_CTRL,  ord('S'), self.save.GetId()),
@@ -1474,40 +1482,52 @@ class Base(object):
 		tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
 		tb.SetToolBitmapSize((16, 16))# this required for non-standard size buttons on MSW
 
+		ai_help = _('Generative AI based modification' if bool(builtins.__dict__['SELECTED_IA']) else 'Check the AI settings in Preferences')
+		
 		if not self.parent:
-			
+
 			if wx.VERSION_STRING < '4.0':
 				self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(),load_and_resize_image('save.png'), _('Save'), ''))
 				tb.AddSeparator()
-				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), load_and_resize_image('cut.png'), _('Cut'), ''))
-				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), load_and_resize_image('copy.png'), _('Copy'), ''))
-				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), load_and_resize_image('paste.png'), _('Paste'), ''))
+				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), _('Cut'), ''))
+				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), _('Copy'), ''))
+				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), _('Paste'), ''))
+				tb.AddSeparator()
+				self.Bind(wx.EVT_TOOL, self.OnAiHelp, tb.AddTool(self.ai.GetId(),wx.Bitmap(os.path.join(ICON_PATH, 'puce_ai.png')), ai_help, ''))
 			else:
 				self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(), "", load_and_resize_image('save.png'),shortHelp=_('Save')))
 				tb.AddSeparator()
-				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), "", load_and_resize_image('cut.png'),  shortHelp=_('Cut')))
-				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), "", load_and_resize_image('copy.png'),  shortHelp=_('Copy')))
-				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), "", load_and_resize_image('paste.png'),  shortHelp=_('Paste')))
+				self.Bind(wx.EVT_TOOL, self.nb.OnCut, tb.AddTool(self.cut.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'cut.png')),  shortHelp=_('Cut')))
+				self.Bind(wx.EVT_TOOL, self.nb.OnCopy, tb.AddTool(self.copy.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'copy.png')),  shortHelp=_('Copy')))
+				self.Bind(wx.EVT_TOOL, self.nb.OnPaste, tb.AddTool(self.paste.GetId(), "", wx.Bitmap(os.path.join(ICON_PATH,'paste.png')),  shortHelp=_('Paste')))
+				tb.AddSeparator()
+				self.Bind(wx.EVT_TOOL, self.OnAiHelp, tb.AddTool(self.ai.GetId (), "", wx.Bitmap(os.path.join(ICON_PATH, 'puce_ai.png')),shortHelp=ai_help))
 			self.Bind(wx.EVT_TOOL, self.QuitApplication, id = self.quit.GetId())
 		else:
 
 			if wx.VERSION_STRING < '4.0':
-				tb.AddTool(self.save.GetId(), load_and_resize_image('save.png'), shortHelpString=_('Save'), longHelpString=_('Save the file'))
-				tb.AddTool(self.cut.GetId(), load_and_resize_image('cut.png'), shortHelpString=_('Cut'), longHelpString=_('Cut the selection'))
-				tb.AddTool(self.copy.GetId(), load_and_resize_image('copy.png'), shortHelpString=_('Copy'), longHelpString=_('Copy the selection'))
-				tb.AddTool(self.paste.GetId(), load_and_resize_image('paste.png'), shortHelpString=_('Paste'), longHelpString=_('Paste text from clipboard'))
+				tb.AddTool(self.save.GetId(), wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), shortHelpString=_('Save'), longHelpString=_('Save the file'))
+				tb.AddTool(self.cut.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), shortHelpString=_('Cut'), longHelpString=_('Cut the selection'))
+				tb.AddTool(self.copy.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), shortHelpString=_('Copy'), longHelpString=_('Copy the selection'))
+				tb.AddTool(self.paste.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), shortHelpString=_('Paste'), longHelpString=_('Paste text from clipboard'))
+				tb.AddTool(self.ai.GetId(), wx.Bitmap(os.path.join(ICON_PATH,'puce_ai.png')), shortHelpString=ai_help, longHelpString=ai_help)
 			else:
-				tb.AddTool(self.save.GetId(), "", load_and_resize_image('save.png'), shortHelp=_('Save'))
-				tb.AddTool(self.cut.GetId(), "", load_and_resize_image('cut.png'), shortHelp=_('Cut'))
-				tb.AddTool(self.copy.GetId(), "", load_and_resize_image('copy.png'), shortHelp=_('Copy'))
-				tb.AddTool(self.paste.GetId(), "", load_and_resize_image('paste.png'), shortHelp=_('Paste'))
+				tb.AddTool(self.save.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH, 'save.png')), shortHelp=_('Save'))
+				tb.AddTool(self.cut.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH,'cut.png')), shortHelp=_('Cut'))
+				tb.AddTool(self.copy.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH,'copy.png')), shortHelp=_('Copy'))
+				tb.AddTool(self.paste.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH,'paste.png')), shortHelp=_('Paste'))
+				tb.AddTool(self.ai.GetId(), "",wx.Bitmap(os.path.join(ICON_PATH,'puce_ai.png')), shortHelp=ai_help)
 
 			self.Bind(wx.EVT_TOOL, self.OnSaveFile, id=self.save.GetId())
 			self.Bind(wx.EVT_TOOL, self.nb.OnCut, id=self.cut.GetId())
 			self.Bind(wx.EVT_TOOL, self.nb.OnCopy, id=self.copy.GetId())
 			self.Bind(wx.EVT_TOOL, self.nb.OnPaste, id= self.paste.GetId())
+			self.Bind(wx.EVT_TOOL, self.OnAiHelp, id=self.ai.GetId())
 
 		tb.Realize()
+
+		### Add: A. Dominici
+		tb.EnableTool(self.ai.GetId(), bool(builtins.__dict__['SELECTED_IA']))
 
 		return tb
 
@@ -1630,6 +1650,32 @@ class Base(object):
 		else:
 			### status bar notification
 			self.Notification(False, _('%s not saved' % fn), _('file in readonly'), '')
+
+		### NOTE: Editor :: OnAiHelp			=> Event when save menu has been clicked
+	def OnAiHelp(self, event):
+		""" Event handler for AI help menu option. """
+
+		# Vérifier l'IA sélectionnée
+		selected_ia = builtins.__dict__.get('SELECTED_IA', '')
+
+		# Exécuter uniquement si une IA est sélectionnée
+		if selected_ia:
+			# Récupération de l'éditeur et du texte sélectionné
+			nb = self.GetNoteBook()
+			editor = nb.GetCurrentPage()
+			selection = editor.GetSelection()
+			textstring = editor.GetRange(selection[0], selection[1])
+				
+			param = builtins.__dict__.get('PARAMS_IA')
+			adapter = AdapterFactory.get_adapter_instance(param)
+				
+			# Créer le dialogue avec le code sélectionné
+			dialog = AIPrompterDialog(self, _("AI Code Editor"), textstring, adapter)
+			dialog.Show()
+
+		else:
+			wx.MessageBox(_("No AI selected. Please select an AI before using AI assistance."), "Information", wx.OK | wx.ICON_INFORMATION)
+
 
 	def OnSearch(self, evt):
 		"""

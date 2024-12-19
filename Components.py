@@ -957,7 +957,7 @@ class BlockFactory:
 			### try to find the specification of module
 			spec = importlib.util.find_spec(name, dir_name)
 		
-			if spec:
+			if spec and spec.loader:
 				
 				### try to import module
 				try:
