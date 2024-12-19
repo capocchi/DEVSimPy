@@ -48,7 +48,6 @@ import pickle
 import glob
 import pstats
 
-# from dotenv import load_dotenv
 from configparser import ConfigParser
 from tempfile import gettempdir
 
