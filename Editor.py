@@ -43,10 +43,8 @@ from wx import stc
 from AIAdapter import AdapterFactory
 
 from Decorators import redirectStdout
-<<<<<<< HEAD
+
 from Utilities import path_to_module, printOnStatusBar, load_and_resize_image
-=======
-from Utilities import path_to_module, printOnStatusBar
 from AIPrompterDialog import AIPrompterDialog
 
 import ReloadModule
