@@ -28,18 +28,12 @@ import subprocess
 import builtins
 import wx
 import ollama
-import os
-import sys
-import urllib.request
-
-from Decorators import BuzyCursorNotification, cond_decorator, ProgressNotification
-from Utilities import check_internet
 
 import gettext
 _ = gettext.gettext
 
 # Configuration de base du logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class DevsAIAdapter(ABC):
     """
@@ -289,32 +283,13 @@ class OllamaDevsAdapter(DevsAIAdapter):
     Adaptateur spécifique pour Ollama, utilisé pour générer des modèles DEVS.
     """
 
-    def __init__(self, port='11434', model_name='qwen2.5-coder', parent=None):
+    def __init__(self, port):
         super().__init__()
 
         if not port:
-            raise ValueError("Le port est requis pour Ollama.")
-        
-        ### local copy
+            raise ValueError("Port is required for Ollama.")
         self.port = port
-        self.wxparent = parent
-        self.model_name = model_name
-        # logging.info(_(f"OllamaDevsAdapter initialized with port {port} and model {model_name}."))
-        
-        # Vérification de l'installation d'Ollama
-        if not self._is_ollama_installed():
-            if check_internet():
-                self._prompt_install_ollama()
-            else:
-                message = _("No internet connection. Please check your internet connection and try again.")
-                wx.CallAfter(wx.MessageBox, message, _("Information"), wx.ICON_INFORMATION)
-                logging.info(message)
-        else:    
-            # Obtenir la liste des modèles téléchargés localement
-            self.local_model = self._get_models()
-
-        # Téléchargement du modèle spécifié
-        self._ensure_model_downloaded()
+        logging.info("OllamaDevsAdapter initialized with provided port.")
 
             # Vérification si le serveur est lancé au démarrage
             if not self._is_server_running():
@@ -537,88 +512,9 @@ class OllamaDevsAdapter(DevsAIAdapter):
             logging.error(f"Error while downloading model {self.model_name}: {e.stderr}")
             raise RuntimeError(f"Failed to download model {self.model_name}.")
         except Exception as e:
-            logging.error(_("Failed to start the Ollama server: %s"), str(e))
-            raise RuntimeError(_("Failed to start the Ollama server"))
+            logging.error("Impossible de démarrer le serveur Ollama: %s", str(e))
+            raise RuntimeError("Failed to start Ollama server.")
 
-    def _stop_server(self):
-        """Stop the Ollama server."""
-        if not self._is_server_running():
-            return
-        
-        try:
-            # This is a placeholder command; replace it with the actual command to stop your server
-            subprocess.run(["ollama", "stop"], check=True)
-            logging.info("Ollama server stopped successfully.")
-        except subprocess.CalledProcessError as e:
-            logging.error("Failed to stop the Ollama server: %s", str(e))
-            raise RuntimeError("Could not stop the Ollama server.")
-
-    def _restart_server(self):
-        """Restart the Ollama server."""
-
-        if not self._is_server_running():
-            return
-        
-        if self._is_server_running():
-            logging.info("Stopping the Ollama server...")
-            self._stop_server()  # Stop the server first
-        
-        logging.info("Starting the Ollama server...")
-        self._start_server()  # Start it again
-
-    def _get_models(self):
-        # Commande pour lister les modèles disponibles localement
-        cmd = ["ollama", "list"]
-
-        try:
-            # Exécuter la commande et capturer la sortie
-            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
-            
-            # Affiche la liste des modèles disponibles localement
-            return result.stdout
-            
-        except subprocess.CalledProcessError as e:
-            logging.error("Erreur lors de l'exécution de la commande:", e)
-            logging.error(e.stderr)
-
-    @cond_decorator(builtins.__dict__.get('GUI_FLAG', True), ProgressNotification(_(f"Pulling process")))
-    def _pull(self):
-        try:
-            # Commande pour effectuer le pull via la ligne de commande
-            cmd = ["ollama", "pull", self.model_name]
-
-             # Lancer la commande sans redirection
-            result = subprocess.run(cmd, text=True, check=True)
-
-            # Vérifier si le processus a réussi
-            if result.returncode != 0:
-                logging.error(f"Error while downloading model {self.model_name}: {result.stderr.strip()}")
-                raise RuntimeError(f"Failed to download model {self.model_name}.")
-            
-        except subprocess.CalledProcessError as e:
-            logging.error(f"Error while downloading model {self.model_name}: {e.stderr}")
-            raise RuntimeError(f"Failed to download model {self.model_name}.")
-        except Exception as e:
-            logging.error(f"Error while downloading model {self.model_name}: {e}")
-            raise RuntimeError(f"Failed to download model {self.model_name}.")
-        else:
-            logging.info(f"Model '{self.model_name}' downloaded successfully.")
-
-    def _ensure_model_downloaded(self):
-        """Télécharge ou met à jour le modèle spécifié via Ollama."""
-        
-        if self.model_name in self.local_model:       
-            logging.info(f"The model '{self.model_name}' is already downloaded and is ready to start.")
-        else:
-            logging.info(f"The model '{self.model_name}' is not downloaded. Starting pull...")
-            if check_internet():
-                self._pull()
-            else:
-                message = _("No internet connection. Please check your internet connection and try again.")
-                wx.CallAfter(wx.MessageBox, message, _("Information"), wx.ICON_INFORMATION)
-                logging.info(message)
-    
-    @BuzyCursorNotification
     def generate_output(self, prompt):
         """
         Génère une sortie en utilisant l'API Ollama basée sur le prompt donné.
@@ -637,6 +533,6 @@ class OllamaDevsAdapter(DevsAIAdapter):
             )
             return response['message']['content']
         except Exception as e:
-            logging.error(_(f"Error while generating output: {e}"))
-            return _(f"An error occurred while generating the output: {e}")
+            logging.error("Erreur lors de la génération de la sortie: %s", str(e))
+            return f"An error occurred while generating the output: {e}"
 
