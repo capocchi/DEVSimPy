@@ -3078,7 +3078,6 @@ class LinesShape(Shape):
 
 		elif ShapeCanvas.CONNECTOR_TYPE == 'curve':
 			L = self.get_bezier_curve_points(L)
-			print('ddd')
 	
 		else:
 			pass

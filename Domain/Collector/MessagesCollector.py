@@ -4,7 +4,7 @@
 Name : MessagesCollector.py 
 Brief descritpion : collect to disk received messages 
 Author(s) : Laurent CAPOCCHI (capocchi@univ-corse.fr)
-Version :  1.0                                        
+Version : 1.0                                        
 Last modified : 26/10/20
 GENERAL NOTES AND REMARKS:
 GLOBAL VARIABLES AND FUNCTIONS:
@@ -35,13 +35,13 @@ class MessagesCollector(DomainBehavior):
 		DomainBehavior.__init__(self)
 
 		### a way to overcome the random initialization of the fileNam attr directly in the param list of the constructor!
-		fileName = fileName if fileName != "result" else os.path.join(tempfile.gettempdir(),"result%d"%random.randint(1,100))
+		fileName = fileName if fileName != "result" else os.path.join(tempfile.gettempdir(),"result%d"%random.randint(1,100000))
 
 		# local copy
 		self.fileName = fileName
 		self.ext = ext
 		self.comma = comma
-	
+
 		self.initPhase('IDLE',INFINITY)
 		
 		for np in range(10000):
@@ -56,13 +56,14 @@ class MessagesCollector(DomainBehavior):
 		for port in self.IPorts:
 			### adapted with PyPDEVS
 			msg = self.peek(port, *args)
-			np = self.getPortId(port)
 
 			if msg:
+				np = self.getPortId(port)
+
 				### filename
-				fn = "%s%s%s"%(self.fileName, str(np), self.ext)
+				fn = f"{self.fileName}{str(np)}{self.ext}"
 				
-				with open(fn,'a') as f: f.write("%s\n"%(str(msg)))
+				with open(fn,'a') as f: f.write(f"{msg}\n")
 				del msg
 
 		self.holdIn('ACTIF',0.0)

@@ -15,8 +15,12 @@
 from DomainInterface.DomainBehavior import DomainBehavior
 from DomainInterface.Object import Message
 
-import plotly.plotly as py
-from plotly.graph_objs import *
+import chart_studio.plotly as py
+import plotly.graph_objects as go
+
+#import plotly.plotly as py
+#from plotly.graph_objs import *
+
 import time
 
 # Patch TIC : 

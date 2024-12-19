@@ -59,23 +59,42 @@ class Generator(DomainBehavior):
 			s = INFINITY
 
 		self.state['sigma'] = s
-		return self.state
 
 	def outputFnc(self):
 		### si la listValues est vide, cela veux dire qu'on veut toutes les valeurs des lignes sur une sortie
-		if self.__listValues:
+		if self.__listValues != []:
 			assert(len(self.OPorts) == len(self.__listValues))
 			for item in self.__listValues:
 				data = [self.V[item].pop(0), 0.0, 0.0]
 				msg = Message(data, self.timeNext)
 				i = self.__listValues.index(item)
 
-				return self.poke(self.OPorts[i], msg)
+				self.poke(self.OPorts[i], msg)
 		else:
 			data = [self.V[0].pop(0), 0.0, 0.0]
 			msg = Message(data, self.timeNext)
-			return self.poke(self.OPorts[0], msg)
+			self.poke(self.OPorts[0], msg)
 
 	def timeAdvance(self): return self.state['sigma']
 
 	def __str__(self): return "Generator"
+
+##Gestion du temps (conversions)
+#
+#        def exploseTime(T,outPutTime):
+#            maliste = []
+#            for t in T:
+#                maliste += creerListTemps(outPutTime,t)
+#            print maliste
+#
+#        def exploseValue(V,outPutTime):
+#            maliste = []
+#            for v in V:
+#                maliste += creerListValeur(outPutTime,v)
+#                print maliste
+#
+#        def creerListTemps(num,temps):
+#            return map(lambda t: (t*num)+temps, range(1,int(1/num)+1))
+#
+#        def creerListValeur(num,valeur):
+#            return map(lambda v: num*valeur,range(1,int(1/num)+1))
