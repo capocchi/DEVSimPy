@@ -26,13 +26,15 @@ import os
 import gettext
 _ = gettext.gettext
 
+from Utilities import load_and_resize_image
+
 # Définition du dialogue personnalisé
 class AIPrompterDialog(wx.Dialog):
     def __init__(self, parent, title=_("AI Code Editor"), code_to_replace='', adapter=None):
         super().__init__(parent, id=wx.ID_ANY, title=title, size=(600, 400))
         
         _icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
-        _icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "puce_ai.png"), wx.BITMAP_TYPE_ANY))
+        _icon.CopyFromBitmap(load_and_resize_image("puce_ai.png"))
         self.SetIcon(_icon)
 
         ### local copy
@@ -177,12 +179,8 @@ def main():
 if __name__ == "__main__":
     import builtins
 
-    builtin_dict = {
-				'ICON_PATH': 'icons',
-				'ICON_PATH_16_16': os.path.join('icons', '16x16'),
-				'GUI_FLAG':True
-				}
-	
+    from config import builtin_dict
+
 	# Sets the homepath variable to the directory where your application is located (sys.argv[0]).
     builtins.__dict__.update(builtin_dict)
 

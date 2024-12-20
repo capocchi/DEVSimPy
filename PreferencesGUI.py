@@ -1078,32 +1078,11 @@ class TestApp(wx.App):
 
 	def OnInit(self):
 
-		import gettext
+		import builtins
 
-		builtins.__dict__['ICON_PATH'] = os.path.join('icons')
-		builtins.__dict__['ICON_PATH_16_16'] = os.path.join(ICON_PATH, '16x16')
-		builtins.__dict__['PLUGINS_PATH'] = os.path.join(HOME_PATH, 'plugins')
-		builtins.__dict__['DOMAIN_PATH'] = 'Domain'
-		builtins.__dict__['OUT_DIR'] = 'out'
-		builtins.__dict__['NB_OPENED_FILE'] = 20
-		builtins.__dict__['SELECTED_IA'] = ""
-		builtins.__dict__['FONT_SIZE'] = 10
-		builtins.__dict__['NB_HISTORY_UNDO'] = 10
-		builtins.__dict__['TRANSPARENCY'] = False
-		builtins.__dict__['SIMULATION_ERROR_SOUND_PATH'] = os.path.join(HOME_PATH,'sounds', 'Simulation-Error.mp3')
-		builtins.__dict__['SIMULATION_SUCCESS_SOUND_PATH'] = os.path.join(HOME_PATH,'sounds', 'Simulation-Success.mp3')
-		builtins.__dict__['NTL'] = False
-		builtins.__dict__['DEFAULT_SIM_STRATEGY'] = 'bag-based'
-		builtins.__dict__['DEFAULT_PYPDEVS_SIM_STRATEGY'] = 'original'
-		builtins.__dict__['DEFAULT_PLOT_DYN_FREQ'] = 100
-		builtins.__dict__['EXTERNAL_EDITOR_NAME'] = ""
-		builtins.__dict__['PARAMS_IA'] = {}
-		builtins.__dict__['LOCAL_EDITOR'] = False
-		builtins.__dict__['PYDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy1', 'bag-based':'SimStrategy2', 'direct-coupling':'SimStrategy3'}
-		builtins.__dict__['PYPDEVS_SIM_STRATEGY_DICT'] = {'original':'SimStrategy4', 'distributed':'SimStrategy5', 'parallel':'SimStrategy6'}
+		from config import builtin_dict
 
-		builtins.__dict__['_'] = gettext.gettext
-
+		builtins.__dict__.update(builtin_dict)
 
 		frame = PreferencesGUI(None, "Test")
 		frame.Show()
