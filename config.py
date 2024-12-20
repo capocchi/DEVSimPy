@@ -16,6 +16,12 @@ builtin_dict = {
     'NB_OPENED_FILE': 5,
     'NB_HISTORY_UNDO': 5,
     'OUT_DIR': 'out',
+    'SELECTED_IA' : "",
+				'PARAMS_IA' : {
+					'CHATGPT_API_KEY' : '',
+					'OLLAMA_PORT' : "11434",
+					'OLLAMA_MODEL' : "mistral",
+				},
     'PLUGINS_PATH': os.path.join(ABS_HOME_PATH, 'plugins'),
     'FONT_SIZE': 12,
     'LOCAL_EDITOR': True,
