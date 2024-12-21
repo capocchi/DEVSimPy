@@ -46,6 +46,7 @@ builtins.__dict__.update(builtin_dict)
 ### import here becaause they need buitlins !
 
 from InteractionYAML import YAMLHandler
+from InteractionJSON import JSONHandler
 from StandaloneNoGUI import StandaloneNoGUI
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -140,8 +141,9 @@ if __name__ == '__main__':
 		yamlHandler.getJS()
 
 	elif args.json:
-		# turn the YAML/DSP file to JSON
-		j = yamlHandler.getJSON()
+		# JSON generation
+		jsonHandler = JSONHandler(filename)
+		j = jsonHandler.getJSON()
 		sys.stdout.write(json.dumps(j))
 
 	elif args.blockslist:

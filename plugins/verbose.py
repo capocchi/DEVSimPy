@@ -5,9 +5,9 @@
 	Date: 05/11/2011
 	Description:
 		Give some informations about the simulation process on the standard output.
-		To use it, just send the SIM_VERBOSE event with the pluginmanager.trigger_event function and some parameters like msg, model or clock.
+		To use it, just send the SIM_VERBOSE event with the PluginManager.trigger_event function and some parameters like msg, model or clock.
 		Example:
-			pluginmanager.trigger_event("SIM_VERBOSE", model=aDEVS, msg=0) for print informations when an external event (msg=0) occurs on the model aDEVS.
+			PluginManager.trigger_event("SIM_VERBOSE", model=aDEVS, msg=0) for print informations when an external event (msg=0) occurs on the model aDEVS.
 		For more details see the verbose.py file in plug-ins directory.
 """
 
@@ -15,10 +15,10 @@ import wx
 import sys
 import os
 
-_ = wx.GetTranslation
+import gettext
+_ = gettext.gettext
 
 from PluginManager import PluginManager
-from Utilities import load_and_resize_image
 
 global show_ext_trans
 global show_int_trans
@@ -43,10 +43,8 @@ class RedirectText(object):
 		if wx.Platform == '__WXGTK__':
 			wx.CallAfter(self.out.WriteText, string)
 		else:
-			if self.out:
-				self.out.WriteText(string)
-			else:
-				sys.stdout.write("TextCtrl is deleted!")
+			self.out.WriteText(string)
+
 	def flush(self):
 		pass
 
@@ -60,7 +58,7 @@ def LongRunningProcess(*args, **kwargs):
 	global show_clock
 	global show_coll
 
-	if 'model' in kwargs and 'msg' in kwargs:
+	if kwargs.has_key('model') and kwargs.has_key('msg'):
 		### changing frame content: need global
 		global frame
 
@@ -96,7 +94,7 @@ def LongRunningProcess(*args, **kwargs):
 								_("\t  Output Port Configuration:\n")]
 
 						for m in model.OPorts:
-							if m in list(model.myOutput.keys()):
+							if m in model.myOutput.keys():
 								txt.append("\t    %s: %s\n"%(m, model.myOutput[m]))
 							else:
 								txt.append("\t    %s: None\n" %(m))
@@ -115,7 +113,7 @@ def LongRunningProcess(*args, **kwargs):
 		else:
 			sys.stdout.write(_("No verbose for %s dynamic model (%s)!\n")%(str(model), model.myID))
 
-	elif 'clock' in kwargs and show_clock:
+	elif kwargs.has_key('clock') and show_clock:
 		txt = "\n"+"* "* 10+"CLOCK : %f \n"%(kwargs['clock'])
 		sys.stdout.write(txt)
 
@@ -128,11 +126,11 @@ def start_print_data(*args, **kwargs):
 
 	global frame
 
-	frame = wx.Frame(parent, wx.NewIdRef(), _("Simulation Report"))
+	frame = wx.Frame(parent, wx.ID_ANY, _("Simulation Report"))
 
 	# Add a panel so it looks the correct on all platforms
-	panel = wx.Panel(frame, wx.NewIdRef())
-	log = wx.TextCtrl(panel, wx.NewIdRef(), size=(300,100), style = wx.TE_MULTILINE|wx.TE_READONLY|wx.HSCROLL)
+	panel = wx.Panel(frame, wx.ID_ANY)
+	log = wx.TextCtrl(panel, wx.ID_ANY, size=(300,100), style = wx.TE_MULTILINE|wx.TE_READONLY|wx.HSCROLL)
 
 	# Add widgets to a sizer
 	sizer = wx.BoxSizer(wx.VERTICAL)
@@ -152,13 +150,13 @@ class VerboseConfig(wx.Frame):
 		kwds["style"] = wx.STAY_ON_TOP|wx.DEFAULT_FRAME_STYLE
 		wx.Frame.__init__(self, *args, **kwds)
 
-		self.panel = wx.Panel(self, wx.NewIdRef())
+		self.panel = wx.Panel(self, wx.ID_ANY)
 
-		self.sizer_3_staticbox = wx.StaticBox(self.panel, wx.NewIdRef(), _("Display options"))
-		self.checkbox_3 = wx.CheckBox(self.panel, wx.NewIdRef(), _("Show clock"))
-		self.checkbox_4 = wx.CheckBox(self.panel,wx.NewIdRef(), _("Show external transition trace"))
-		self.checkbox_5 = wx.CheckBox(self.panel, wx.NewIdRef(), _("Show internal transition trace"))
-		self.checkbox_6 = wx.CheckBox(self.panel, wx.NewIdRef(), _("Show collision trace"))
+		self.sizer_3_staticbox = wx.StaticBox(self.panel, wx.ID_ANY, _("Display options"))
+		self.checkbox_3 = wx.CheckBox(self.panel, wx.ID_ANY, _("Show clock"))
+		self.checkbox_4 = wx.CheckBox(self.panel,wx.ID_ANY, _("Show external transition trace"))
+		self.checkbox_5 = wx.CheckBox(self.panel, wx.ID_ANY, _("Show internal transition trace"))
+		self.checkbox_6 = wx.CheckBox(self.panel, wx.ID_ANY, _("Show collision trace"))
 
 		self.button_2 = wx.Button(self.panel, wx.ID_CANCEL, "")
 		self.button_3 = wx.Button(self.panel, wx.ID_OK, "")
@@ -176,10 +174,9 @@ class VerboseConfig(wx.Frame):
 		global show_clock
 		global show_coll
 
-		_icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
-		_icon.CopyFromBitmap(load_and_resize_image(DEVSIMPY_PNG))
+		_icon = wx.EmptyIcon()
+		_icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH, DEVSIMPY_PNG), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(_icon)
-		if wx.VERSION_STRING >= '4.0': self.SetToolTipString = self.SetToolTip
 		self.SetToolTipString(_("Display options for the plug-in verbose"))
 		self.checkbox_3.SetValue(show_clock)
 		self.checkbox_4.SetValue(show_ext_trans)
@@ -206,11 +203,11 @@ class VerboseConfig(wx.Frame):
 		sizer_3.Add(self.checkbox_6, 0, wx.EXPAND, 2, 2)
 
 		### adding buttons
-		sizer_5.Add(self.button_2, 1, wx.ALIGN_CENTER)
-		sizer_5.Add(self.button_3, 1, wx.ALIGN_CENTER)
+		sizer_5.Add(self.button_2, 1, wx.ALIGN_CENTER_HORIZONTAL)
+		sizer_5.Add(self.button_3, 1, wx.ALIGN_CENTER_HORIZONTAL)
 
-		sizer_4.Add(sizer_3, 0, wx.ALL|wx.EXPAND,0)
-		sizer_4.Add(sizer_5, 1, wx.ALL|wx.EXPAND,0)
+		sizer_4.Add(sizer_3, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL,0)
+		sizer_4.Add(sizer_5, 1, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL,0)
 
 		self.panel.SetSizer(sizer_4)
 
@@ -244,5 +241,5 @@ def Config(parent):
 	""" Plug-in settings frame.
 	"""
 
-	config_frame = VerboseConfig(parent, wx.NewIdRef(), _("Verbose plug-in"), style = wx.DEFAULT_FRAME_STYLE)
+	config_frame = VerboseConfig(parent, wx.ID_ANY, _("Verbose plug-in"), style = wx.DEFAULT_FRAME_STYLE)
 	config_frame.Show()

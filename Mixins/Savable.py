@@ -107,7 +107,7 @@ class DumpBase(object):
 	"""
 
 	### list of available extension
-	WhiteList = ('.cmd','.amd', '.dsp', '.js', '.xml', '.yaml', '.yml', '.tar','.zip','.rar','.7zip','.tar','.gz','.7z','.s7z','.ace','.afa','.alz','.apk','.arc','.arj','.ba','.bh','.cab','.cfs','.cpt','.dra','.dd','.dgc','.dmg','.gca','.ha','hki.','.ice','.j','.kgb','.lzh','.lha','.lzx','.pak','.partimg','.paq6','.paq7','.paq8','.pea','.pim','.pit','.qda','.rk','.sda','.sea','.sen','.sfx','.sit','.sitx','.sqx','.tgz','.Z','.bz2','.tbz2','.lzma','.tlz','.uc','.uc0','.uc2','.ucn','.ur2','.ue2','.uca','.uha','.wim','.xar','.xp3','.yz1','.zipx','.zoo','.zz','.rz','.sfark')
+	WhiteList = ('.cmd','.amd', '.dsp', '.js', '.json', '.xml', '.yaml', '.yml', '.tar','.zip','.rar','.7zip','.tar','.gz','.7z','.s7z','.ace','.afa','.alz','.apk','.arc','.arj','.ba','.bh','.cab','.cfs','.cpt','.dra','.dd','.dgc','.dmg','.gca','.ha','hki.','.ice','.j','.kgb','.lzh','.lha','.lzx','.pak','.partimg','.paq6','.paq7','.paq8','.pea','.pim','.pit','.qda','.rk','.sda','.sea','.sen','.sfx','.sit','.sitx','.sqx','.tgz','.Z','.bz2','.tbz2','.lzma','.tlz','.uc','.uc0','.uc2','.ucn','.ur2','.ue2','.uca','.uha','.wim','.xar','.xp3','.yz1','.zipx','.zoo','.zz','.rz','.sfark')
 
 	### Dict of tuples extension/class
 	DB = {}
@@ -609,6 +609,31 @@ class DumpYAMLFile(DumpBase):
 		return True
 
 ###-----------------------------------------------------------
+class DumpJSONFile(DumpBase):
+	""" For save/load .json file.
+	"""
+	ext = [".json"]
+
+	def Save(self, obj_dumped, fileName = None):
+		""" Save method.
+		"""
+		assert(fileName.endswith(tuple(DumpJSONFile.ext)))
+
+		from InteractionJSON import JSONHandler
+
+		jsonHandler = JSONHandler()
+		j = jsonHandler.getJSON(obj_dumped)
+
+		with open(fileName, 'w') as outfile:
+			outfile.write(json.dumps(j, indent=4))
+
+		return True
+	
+	def Load(self, obj_loaded, fileName=None) -> bool:
+		pass
+
+
+###-----------------------------------------------------------
 class DumpJSFile(DumpBase):
 	""" For save .js file.
 	"""
@@ -646,6 +671,7 @@ class DumpXMLFile(DumpBase):
 		diagram = obj_dumped
 		D = diagram.__class__.makeDEVSGraph(diagram, {})
 		label = diagram.label if isinstance(diagram, Components.GenericComponent) else os.path.splitext(os.path.basename(fileName))[0]
+
 		makeDEVSXML(label, D, fileName)
 
 		return True
@@ -665,7 +691,8 @@ class Savable(object):
 	def SaveFile(self, fileName = None):
 		""" Save object in fileName.
 		"""
-		if fileName is None:
+
+		if not fileName:
 			return False
 
 		### test if ext is acceptable

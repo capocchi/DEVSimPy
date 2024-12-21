@@ -3088,19 +3088,39 @@ class LinesShape(Shape):
 			dc.DrawSpline(integer_list)
 		else:
 			dc.DrawLines(integer_list)
-	
-		### pour le rectangle en bout de connexion
-		dc.SetBrush(wx.Brush(RED_LIGHT))
-		pt1 = wx.Point(int(self.x[-1]-10/2), int(self.y[-1]-10/2)) 
-		pt2 = wx.Point(int(self.x[0]-10/2), int(self.y[0]-10/2))
-		wx.DC.DrawRectangle(dc, pt1, wx.Size(10, 10))
-		wx.DC.DrawRectangle(dc, pt2, wx.Size(10, 10))
-		
-		#dc.DrawPolygon((	wx.Point(self.x[-1]-10, self.y[-1]-10),
-		#					wx.Point(self.x[-1]-10, self.y[-1]+10),
-		#					wx.Point(self.x[-1], self.y[-1]),
-		#					wx.Point(self.x[-1]-10, self.y[-1]-10)))
 
+		### Draw rect at the start of the line
+		dc.SetBrush(wx.Brush(BLACK, wx.BRUSHSTYLE_SOLID))
+		p0 = wx.Point(int(self.x[0]-5), int(self.y[0]-5))
+		wx.DC.DrawRectangle(dc, p0, wx.Size(10, 10))
+
+		### Draw arrow at the end of the line
+		if len(L) > 1:
+			end_x, end_y = L[-1]  # Last point
+			prev_x, prev_y = L[-2]  # Second last point
+
+			# Calculate the angle of the line
+			angle = atan2(end_y - prev_y, end_x - prev_x)
+
+			# Arrow dimensions
+			arrow_length = 10
+			arrow_width = 5
+
+			# Calculate triangle points
+			p1 = (end_x, end_y)
+			p2 = (
+				end_x - arrow_length * cos(angle - pi / 6),
+				end_y - arrow_length * sin(angle - pi / 6),
+			)
+			p3 = (
+				end_x - arrow_length * cos(angle + pi / 6),
+				end_y - arrow_length * sin(angle + pi / 6),
+			)
+
+			# Draw the arrow as a filled polygon
+			dc.DrawPolygon([wx.Point(*map(int, p1)), wx.Point(*map(int, p2)), wx.Point(*map(int, p3))])
+
+		
 	def get_bezier_curve_points(self, points):
 		"""Generate control points for smooth curve."""
 		if len(points) < 3:

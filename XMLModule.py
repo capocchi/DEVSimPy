@@ -52,8 +52,12 @@ def makeDEVSXML(label, D, filename):
 
 	# for all models composing coupled model
 	for component in D:
+		# if container
+		if isinstance(component, Container.ContainerBlock):
+			label = component.label
+			makeDEVSXML(label, component.__class__.makeDEVSGraph(component, {}), filename)
 		# if iPort
-		if isinstance(component, Container.iPort):
+		elif isinstance(component, Container.iPort):
 			# nb iport
 			n = ET.SubElement(inp, "nom")
 			s = ET.SubElement(n, "string")
@@ -118,10 +122,9 @@ def makeDEVSXML(label, D, filename):
 				s.text = str(i)
 
 	# create a new XML file with the results
-	file = open(filename, "w")
-	file.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>" + "\n")
-	file.write(ET.tostring(root).decode("utf-8"))
-	file.close()
+	with open(filename, "w") as file:
+		file.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>" + "\n")
+		file.write(ET.tostring(root).decode("utf-8"))
 
 def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 	"""
