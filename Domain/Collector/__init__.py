@@ -3,5 +3,6 @@ __all__ = [
 	    "QuickScope",
 	    "To_Disk",
 		"To_Pusher",
-		"Plotly_For_Class"
+		"Plotly_For_Class",
+		"To_Stdout"
 ]

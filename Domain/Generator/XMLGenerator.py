@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-''' XMLGenerator Model.
-'''
 
 from Generator.Generator import *
 from xml.dom import minidom
@@ -50,7 +48,7 @@ class XMLGenerator(Generator):
 					self.V[value].append(d)
 
 		### if xml file and time data exists
-		sig = self.T[0] if self.T else INFINITY
+		sig = self.T[0] if self.T != [] else INFINITY
 
 		self.state = {'status':'ACTIVE','sigma':sig}
 

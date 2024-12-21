@@ -5,19 +5,16 @@ Name : To_Disk.py
 Brief descritpion : Atomic Model writing results in text file on the disk
 Author(s) : Laurent CAPOCCHI <capocchi@univ-corse.fr>
 Version :  2.0
-Last modified : 01/04/14
+Last modified : 29/10/20
 GENERAL NOTES AND REMARKS:
 GLOBAL VARIABLES AND FUNCTIONS:
 """
-
-### just for python 2.5
-
 
 from QuickScope import *
 import random
 from decimal import *
 import os
-from tempfile import gettempdir
+import tempfile
 
 def append_new_line(file_name, text_to_append):
 	"""Append given text as a new line at the end of file"""
@@ -41,17 +38,17 @@ class To_Disk(QuickScope):
 	def __init__(self, fileName = "result", eventAxis = False, comma = " ", ext = '.dat', col = 0):
 		""" Constructor.
 
-			@param fileName: Name of output fileName
-			@param eventAxis: Flag to plot depending events axis
-			@param comma: Comma symbol
-			@param ext: Output file extension
-			@param col: Considered column
+			@param fileName : Name of output fileName
+			@param eventAxis : Flag to plot depending events axis
+			@param comma : Comma symbol
+			@param ext : Output file extension
+			@param col : Considered column
 		"""
 		QuickScope.__init__(self)
 
 		### a way to overcome the random initialization of the fileNam attr directly in the param list of the constructor!
-		fileName = fileName if fileName!= 'result' else os.path.join(os.path.realpath(gettempdir()),"result%d"%random.randint(1,100))
-		
+		fileName = fileName if fileName!= 'result' else os.path.join(tempfile.gettempdir(),"result%d"%random.randint(1,100000))
+
 		# local copy
 		self.fileName = fileName
 		self.comma = comma

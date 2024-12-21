@@ -1,20 +1,13 @@
 # -*- coding: utf-8 -*-
-"""
-Name: RandomGenerator.py
-Brief descritpion: Generate random message.
-Author(s): L. Capocchi <capocchi@univ-corse.fr>, B. Poggi <bpoggi@univ-corse.fr>
-Version:  1.0
-Last modified: 2020.10.18
-GENERAL NOTES AND REMARKS:
-GLOBAL VARIABLES AND FUNCTIONS:
-"""
+
 from DomainInterface.DomainBehavior import DomainBehavior
 from DomainInterface.Object import Message
 
+import sys
 import random
 
 class RandomGenerator(DomainBehavior):
-    """ RandomGenerator Class.
+    """
     """
 
     def __init__(self, minValue=0, maxValue=10, minStep=1, maxStep=1, start=0, choice=[]):
@@ -46,21 +39,22 @@ class RandomGenerator(DomainBehavior):
         numberMessage = random.randint(1, len(self.OPorts))  # Number message to send
         portsToSend = random.sample(self.OPorts, numberMessage)  # The port with number message
 
+        outputs = {}
         for port in portsToSend:
-            if self.choice:
-                value = random.choice(self.choice) 
-            else:
-                value = random.randint(self.minValue, self.maxValue)
+            value = random.choice(self.choice) if self.choice else random.randint(self.minValue, self.maxValue)
             self.msg.value = [value, 0.0, 0.0]
             self.msg.time = self.timeNext
-            ### adapted with PyPDEVS
-            return self.poke(port, self.msg)
+            #adapted with PyPDEVS
+            o = self.poke(port, self.msg)
+            if o:
+               outputs.update(o)
+
+        return outputs
 
     def intTransition(self):
         """ DEVS Transition function
         """
-        self.state['sigma'] = random.randint(self.minStep, self.maxStep)
-        ### adapted with PyPDEVS
+        self.holdIn('START',random.randint(self.minStep, self.maxStep))
         return self.getState()
 
     def __str__(self):

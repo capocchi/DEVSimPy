@@ -38,45 +38,44 @@ class QuickScope(DomainBehavior):
 		
 		self.t = INFINITY
 
-		#  State variable
 		self.initPhase('INACTIF',INFINITY)
-		
+
 	###
 	def extTransition(self, *args):
 		"""
 		"""
 		
 		for np in range(len(self.IPorts)):
-			### adapted with PyPDEVS
 			msg = self.peek(self.IPorts[np], *args)
-			
-			if msg is not None:
-				# if step axis is chosen
+		
+			if msg:
+				### if step axis is chosen
 				if self.eventAxis:
 					self.eventAxis += 1
 					self.t = self.eventAxis
 				else:
 					### adapted with PyPDEVS
-					self.t = msg.time if hasattr(self, 'peek') else msg[1][0]
+					self.t = self.getMsgTime(msg)
 					
 				# ecriture dans la liste pour afficher le QuickScope et le SpreadSheet
-				# si il y a eu un changement du nombre de ports alors on creer la nouvelle entre dans results (on ne regenere pas d'instance)
-				### adapted with PyPDEVS
-				val = msg.value[0] if hasattr(self, 'peek') else msg[0][0]
+				# si il y a eu un changement du nombre de ports alors on creer la nouvelle entre dans results (on ne regenere pas d'instance)				### adapted with PyPDEVS
 				
+				val = self.getMsgValue(msg) 
+				if isinstance(msg.value, (list,tuple)):
+					val = val[0]
+
 				if np in self.results:
 					self.results[np].append((self.t, val))
 				else:
 					self.results[np]=[(self.t, val)]
-					
-				del msg
-				
-		self.state['sigma'] = 0
+
+		self.holdIn('ACTIF',0.0)
+
 		return self.getState()
 
 	###
 	def intTransition(self):
-		self.passivateIn('IDLE')
+		self.passivate()
 		return self.getState()
 			
 	###

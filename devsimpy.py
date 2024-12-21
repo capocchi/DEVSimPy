@@ -1377,6 +1377,7 @@ class MainApplication(wx.Frame):
 		msg = "DEVSimPy files (*.dsp)|*.dsp|"
 		if builtins.__dict__['YAML_IMPORT']:
 			msg+="YAML files (*.yaml)|*.yaml|"
+		msg+="JSON files (*.json)|*.json|"
 		msg+="XML files (*.xml)|*.xml|All files (*)|*)"
 
 		wcd = _(msg)
@@ -1405,8 +1406,12 @@ class MainApplication(wx.Frame):
 					if wcd_i == 1:
 						path=''.join([path,'.yaml'])
 					elif wcd_i == 2:
-						path=''.join([path,'.xml'])
+						path=''.join([path,'.json'])
+					elif wcd_i == 3:
+						path=''.join([path,'.xml'])		
 				elif wcd_i == 1:
+					path=''.join([path,'.json'])
+				elif wcd_i == 2:
 					path=''.join([path,'.xml'])
 
 			### diagram preparation
@@ -1438,7 +1443,7 @@ class MainApplication(wx.Frame):
 
 		save_dlg.Destroy()
 
-	def OnImportXMLSES(self,event):
+	def OnImportXMLSES(self, event):
     	
 		wcd = _("XML SES files (*.xmlsestree)|*.xmlsestree|XML SES files (*.sestree)|*.sestree|All files (*)|*")
 		home = os.getenv('USERPROFILE') or os.getenv('HOME') or HOME_PATH if self.openFileList == ['']*NB_OPENED_FILE else os.path.dirname(self.openFileList[0])
