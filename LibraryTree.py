@@ -295,7 +295,7 @@ class LibraryTree(wx.TreeCtrl):
 
 		# if no, evt.Skip is propagated to OnRightItemClick
 		if not item.IsOk():
-			self.PopupMenu(Menu.LibraryPopupMenu(self), pos)
+			self.PopupMenu(Menu.LibraryPopupMenu(self).get(), pos)
 		else:
 			self.SelectItem(item)
 			evt.Skip()
@@ -304,7 +304,7 @@ class LibraryTree(wx.TreeCtrl):
 	def OnRightItemClick(self, evt):
 		""" Right click on a item has been invoked.
 		"""
-		self.PopupMenu(Menu.ItemLibraryPopupMenu(self), evt.GetPoint())
+		self.PopupMenu(Menu.ItemLibraryPopupMenu(self).get(), evt.GetPoint())
 		evt.Skip()
 
 	###
