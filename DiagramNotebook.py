@@ -245,7 +245,7 @@ if USE_FLATNOTEBOOK:
 			""" Right click has been invoked and contextual menu is displayed.
 			"""
 
-			self._rmenu = Menu.DiagramTabPopupMenu(self)
+			self._rmenu = Menu.DiagramTabPopupMenu(self).get()
 
 			### 4 because 3 is the separator object in Menu.py !!!
 			close_item = self._rmenu.FindItemByPosition(4)
@@ -349,10 +349,10 @@ else:
 
 			### if no where click (don't hit with windows)
 			if flag == wx.BK_HITTEST_NOWHERE:
-				self.PopupMenu(Menu.DiagramNoTabPopupMenu(self), pos)
+				self.PopupMenu(Menu.DiagramNoTabPopupMenu(self).get(), pos)
 			### if tab has been clicked
 			elif flag == wx.BK_HITTEST_ONLABEL:
-				self.PopupMenu(Menu.DiagramTabPopupMenu(self), pos)
+				self.PopupMenu(Menu.DiagramTabPopupMenu(self).get(), pos)
 			else:
 				pass
 

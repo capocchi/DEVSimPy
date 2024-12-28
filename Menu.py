@@ -24,6 +24,7 @@ import wx
 import os
 import platform
 
+from abc import ABC, abstractmethod
 from tempfile import gettempdir
 
 import Container
@@ -164,6 +165,12 @@ ID_EDIT_ATTR = wx.NewIdRef()
 ID_INSERT_ATTR = wx.NewIdRef()
 ID_CLEAR_ATTR = wx.NewIdRef()
 
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# FUNCTION DEFINITION
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 def AppendMenu(menu, ID, label, submenu):
 	if wx.VERSION_STRING < '4.0':
 		return menu.AppendMenu(ID, label, submenu)
@@ -172,43 +179,59 @@ def AppendMenu(menu, ID, label, submenu):
 	else:
 		return menu.AppendSubMenu(submenu, label)
 
+# def AppendItem(menu, item):
+# 	return menu.AppendItem(item) if wx.VERSION_STRING < '4.0' else menu.Append(item)
+
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # CLASS DEFINITION
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-class TaskBarMenu(wx.Menu):
+class Menu(ABC):
+	def __init__(self, parent):
+		"""Initialize the base Menu."""
+		self.menu = wx.Menu()
+		
+		self.parent = parent
+
+		# redifine AppendItem and AppendSeparator for wxPython 4.0 compatibility
+		self.AppendItem = self.menu.AppendItem if wx.VERSION_STRING < '4.0' else self.menu.Append
+		self.AppendSeparator = self.menu.AppendSeparator
+
+		# add items to the menu
+		self._add_menu_items(parent)
+
+	@abstractmethod
+	def _add_menu_items(self, parent):
+		"""Abstract method to add items to the menu."""
+		pass
+
+	def get(self):
+		"""Return the encapsulated wx.Menu object."""
+		return self.menu
+	
+class FileMenu(Menu):
 	"""
 	"""
 	def __init__(self, parent):
-		""" Constructor.
-		"""
-		wx.Menu.__init__(self)
+		"""Initialize the FileMenu."""
+		Menu.__init__(self, parent)
+		
+	def _add_menu_items(self, parent):
 
-		self.Append(parent.TBMENU_RESTORE, _("Restore DEVSimPy"))
-		self.Append(parent.TBMENU_CLOSE,   _("Close"))
-
-class FileMenu(wx.Menu):
-	"""
-	"""
-	def __init__(self, parent):
-		""" Constructor.
-		"""
-		wx.Menu.__init__(self)
-
-		openModel=wx.MenuItem(self, ID_OPEN, _('&Open\tCtrl+O'),_('Open an existing diagram'))
-		recentFile=wx.MenuItem(self, ID_RECENT, _('Recent files'),_('Open recent files'))
-		saveModel=wx.MenuItem(self, ID_SAVE, _('&Save\tCtrl+S'), _('Save the current diagram'))
-		saveAsModel=wx.MenuItem(self, ID_SAVEAS, _('&SaveAs'),_('Save the diagram with an another name'))
-		exportRest=wx.MenuItem(self, ID_EXPORTREST, _('&Export to REST server'),_('Export the diagram to a Rest server (DEVSimPy-rest)'))
-		exportStandalone=wx.MenuItem(self, ID_EXPORTSTANDALONE, _('&Export Standalone'),_('Generate a zip file which can be used to execute simulation of a yaml file in a no-gui and standaolne mode using devsimpy-nogui'))
-		importRest=wx.MenuItem(self, ID_IMPORTXMLSES, _('&Import XML SES file'),_('Import SES specifications from the Python SES Editor'))
-		printModel=wx.MenuItem(self, ID_PRINT, _('&Print'),_('Print the current diagram'))
-		printPreviewModel=wx.MenuItem(self, ID_PREVIEW_PRINT, _('Preview'),_('Print preview for current diagram'))
-		screenCapture=wx.MenuItem(self, ID_SCREEN_CAPTURE, _('ScreenShot'),_('Capture the screen into a image'))
-		exitModel=wx.MenuItem(self, wx.ID_EXIT, _('&Quit\tCtrl+Q'),_('Quit the DEVSimPy application'))
-
+		openModel=wx.MenuItem(self.menu, ID_OPEN, _('&Open\tCtrl+O'),_('Open an existing diagram'))
+		recentFile=wx.MenuItem(self.menu, ID_RECENT, _('Recent files'),_('Open recent files'))
+		saveModel=wx.MenuItem(self.menu, ID_SAVE, _('&Save\tCtrl+S'), _('Save the current diagram'))
+		saveAsModel=wx.MenuItem(self.menu, ID_SAVEAS, _('&SaveAs'),_('Save the diagram with an another name'))
+		exportRest=wx.MenuItem(self.menu, ID_EXPORTREST, _('&Export to REST server'),_('Export the diagram to a Rest server (DEVSimPy-rest)'))
+		exportStandalone=wx.MenuItem(self.menu, ID_EXPORTSTANDALONE, _('&Export Standalone'),_('Generate a zip file which can be used to execute simulation of a yaml file in a no-gui and standaolne mode using devsimpy-nogui'))
+		importRest=wx.MenuItem(self.menu, ID_IMPORTXMLSES, _('&Import XML SES file'),_('Import SES specifications from the Python SES Editor'))
+		printModel=wx.MenuItem(self.menu, ID_PRINT, _('&Print'),_('Print the current diagram'))
+		printPreviewModel=wx.MenuItem(self.menu, ID_PREVIEW_PRINT, _('Preview'),_('Print preview for current diagram'))
+		screenCapture=wx.MenuItem(self.menu, ID_SCREEN_CAPTURE, _('ScreenShot'),_('Capture the screen into a image'))
+		exitModel=wx.MenuItem(self.menu, wx.ID_EXIT, _('&Quit\tCtrl+Q'),_('Quit the DEVSimPy application'))
+		
 		openModel.SetBitmap(load_and_resize_image('open.png'))
 		saveModel.SetBitmap(load_and_resize_image('save.png'))
 		saveAsModel.SetBitmap(load_and_resize_image('save_as.png'))
@@ -218,33 +241,31 @@ class FileMenu(wx.Menu):
 		printModel.SetBitmap(load_and_resize_image('print.png'))
 		printPreviewModel.SetBitmap(load_and_resize_image('print-preview.png'))
 		screenCapture.SetBitmap(load_and_resize_image('ksnapshot.png'))
-		exitModel.SetBitmap(load_and_resize_image('exit.png'))
+		exitModel.SetBitmap(load_and_resize_image('exit.png'))	
+	
+		self.AppendItem(openModel)
+		recentFile.SetSubMenu(RecentFileMenu(parent).get())
+		self.AppendItem(recentFile)
+		self.AppendSeparator()
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
+		self.AppendItem(saveModel)
+		self.AppendItem(saveAsModel)
+		self.AppendSeparator()
 		
-		AppendItem(openModel)
-		recentFile.SetSubMenu(RecentFileMenu(parent))
-		AppendItem(recentFile)
+		self.AppendItem(exportRest)
+		self.AppendItem(exportStandalone)
+		self.AppendItem(importRest)
+		self.AppendSeparator()
+		
+		self.AppendItem(printPreviewModel)
+		self.AppendItem(printModel)
+		self.AppendItem(screenCapture)
 		self.AppendSeparator()
 
-		AppendItem(saveModel)
-		AppendItem(saveAsModel)
+		self.AppendItem(exitModel)
 
-		self.AppendSeparator()
-		AppendItem(exportRest)
-		AppendItem(exportStandalone)
-		AppendItem(importRest)
-
-		self.AppendSeparator()
-		AppendItem(printPreviewModel)
-		AppendItem(printModel)
-		AppendItem(screenCapture)
-
-		self.AppendSeparator()
-		AppendItem(exitModel)
-
+		# bind the menu events to the methods that process them
 		parent = parent.GetParent()
-
 		parent.Bind(wx.EVT_MENU, parent.OnNew, id=ID_NEW)
 		parent.Bind(wx.EVT_MENU, parent.OnOpenFile, id=ID_OPEN)
 		parent.Bind(wx.EVT_MENU, parent.OnSaveFile, id=ID_SAVE)
@@ -256,43 +277,41 @@ class FileMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnPrintPreview, id=ID_PREVIEW_PRINT)
 		parent.Bind(wx.EVT_MENU, parent.OnScreenCapture, id=ID_SCREEN_CAPTURE)
 		parent.Bind(wx.EVT_MENU, parent.OnCloseWindow, id=ID_EXIT)
-
-class ProfileFileMenu(wx.Menu):
+	
+class ProfileFileMenu(Menu):
 	"""
 	"""
 	def __init__(self, parent):
-		""" Constructor.
-		"""
-		wx.Menu.__init__(self)
+		"""Initialize the FileMenu."""
+		Menu.__init__(self, parent)
+		
+	def _add_menu_items(self, parent):
 
 		parent = parent.GetParent()
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
-
 		for fn in [f for f in os.listdir(os.path.realpath(gettempdir())) if f.endswith('.prof')]:
 			id = wx.NewIdRef()
-			AppendItem(wx.MenuItem(self, id, fn))
+			self.AppendItem(wx.MenuItem(self.menu, id, fn))
 			parent.Bind(wx.EVT_MENU, parent.OnProfiling, id=id)
 
 		self.AppendSeparator()
 
-		AppendItem(wx.MenuItem(self, ID_DELETE_PROFILES, _("Delete all")))
-		self.Enable(ID_DELETE_PROFILES, self.GetMenuItemCount() > 2)
+		self.AppendItem(wx.MenuItem(self.menu, ID_DELETE_PROFILES, _("Delete all")))
+		self.menu.Enable(ID_DELETE_PROFILES, self.menu.GetMenuItemCount() > 2)
 		
 		parent.Bind(wx.EVT_MENU, parent.OnDeleteProfiles, id=ID_DELETE_PROFILES)
 
-class RecentFileMenu(wx.Menu):
+class RecentFileMenu(Menu):
 	"""
 	"""
 	def __init__(self, parent):
-		""" Constructor.
-		"""
-		wx.Menu.__init__(self)
+		"""Initialize the FileMenu."""
+		Menu.__init__(self, parent)
+		
+	def _add_menu_items(self, parent):
 
 		parent = parent.GetParent()
-		
-		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
-		
+			
 		# affichage du menu des derniers fichiers consultés avec gestion des fichiers qui n'existent plus
 		for path in [p for p in parent.openFileList if p!='']:
 			if not os.path.exists(path):
@@ -301,23 +320,25 @@ class RecentFileMenu(wx.Menu):
 				parent.openFileList.insert(-1,'')
 				parent.cfg.Write("openFileList", str(eval("parent.openFileList")))
 			else:
-				newItem = wx.MenuItem(self, wx.NewIdRef(), path)
-				AppendItem(newItem)
+				newItem = wx.MenuItem(self.menu, wx.NewIdRef(), path)
+				self.AppendItem(newItem)
 				parent.Bind(wx.EVT_MENU, parent.OnOpenRecentFile, id = newItem.GetId())
 				
 		self.AppendSeparator()
-		AppendItem(wx.MenuItem(self, ID_DELETE_RECENT, _("Delete all")))
-		self.Enable(ID_DELETE_RECENT, self.GetMenuItemCount() > 2)
+		
+		self.AppendItem(wx.MenuItem(self.menu, ID_DELETE_RECENT, _("Delete all")))
+		self.menu.Enable(ID_DELETE_RECENT, self.menu.GetMenuItemCount() > 2)
+		
 		parent.Bind(wx.EVT_MENU, parent.OnDeleteRecentFiles, id = ID_DELETE_RECENT)
 
-
-class ShowMenu(wx.Menu):
+class ShowMenu(Menu):
 	"""
 	"""
 	def __init__(self, parent):
-		""" Constructor.
-		"""
-		wx.Menu.__init__(self)
+		"""Initialize the FileMenu."""
+		Menu.__init__(self, parent)
+		
+	def _add_menu_items(self, parent):
 
 		parent = parent.GetParent()
 
@@ -326,18 +347,18 @@ class ShowMenu(wx.Menu):
 		control.Append(ID_SHOW_PROP, _('Properties'), _("Show properties tab"), wx.ITEM_CHECK)
 		control.Append(ID_SHOW_LIB, _('Libraries'), _("Show libraries tab"), wx.ITEM_CHECK)
 	
-		AppendMenu(self, ID_SHOW_CONTROL, _('Control'), control)
+		AppendMenu(self.menu, ID_SHOW_CONTROL, _('Control'), control)
 
-		self.Append(ID_SHOW_SHELL, _('Shell'), _("Show Python Shell console"), wx.ITEM_CHECK)
-		self.Append(ID_SHOW_TOOLBAR, _('Tools Bar'), _("Show icons tools bar"), wx.ITEM_CHECK)
-		self.Append(ID_SHOW_EDITOR, _('Editor'), _("Show editor tab"), wx.ITEM_CHECK)
+		self.menu.Append(ID_SHOW_SHELL, _('Shell'), _("Show Python Shell console"), wx.ITEM_CHECK)
+		self.menu.Append(ID_SHOW_TOOLBAR, _('Tools Bar'), _("Show icons tools bar"), wx.ITEM_CHECK)
+		self.menu.Append(ID_SHOW_EDITOR, _('Editor'), _("Show editor tab"), wx.ITEM_CHECK)
 
-		self.Check(ID_SHOW_SHELL, False)
-		self.Check(ID_SHOW_SIM, False)
-		self.Check(ID_SHOW_PROP, True)
-		self.Check(ID_SHOW_LIB, True)
-		self.Check(ID_SHOW_EDITOR, False)
-		self.Check(ID_SHOW_TOOLBAR, True)
+		self.menu.Check(ID_SHOW_SHELL, False)
+		self.menu.Check(ID_SHOW_SIM, False)
+		self.menu.Check(ID_SHOW_PROP, True)
+		self.menu.Check(ID_SHOW_LIB, True)
+		self.menu.Check(ID_SHOW_EDITOR, False)
+		self.menu.Check(ID_SHOW_TOOLBAR, True)
 
 		parent.Bind(wx.EVT_MENU, parent.OnShowShell, id = ID_SHOW_SHELL)
 		parent.Bind(wx.EVT_MENU, parent.OnShowSimulation, id = ID_SHOW_SIM)
@@ -346,25 +367,24 @@ class ShowMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnShowEditor, id = ID_SHOW_EDITOR)
 		parent.Bind(wx.EVT_MENU, parent.OnShowToolBar, id = ID_SHOW_TOOLBAR)
 
-class PerspectiveMenu(wx.Menu):
+class PerspectiveMenu(Menu):
 	"""
 	"""
 	def __init__(self, parent):
-		""" Constructor.
-		"""
-		wx.Menu.__init__(self)
+		"""Initialize the FileMenu."""
+		Menu.__init__(self, parent)
+		
+	def _add_menu_items(self, parent):
 
 		parent = parent.GetParent()
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
-
-		new = wx.MenuItem(self, ID_NEW_PERSPECTIVE, _('New'),_('New perspective'))
+		new = wx.MenuItem(self.menu, ID_NEW_PERSPECTIVE, _('New'),_('New perspective'))
 		new.SetBitmap(load_and_resize_image('new.png'))
-		deleteall = wx.MenuItem(self, ID_DELETE_PERSPECTIVE, _('Delete all'),_('Delete all perspectives'))
+		deleteall = wx.MenuItem(self.menu, ID_DELETE_PERSPECTIVE, _('Delete all'),_('Delete all perspectives'))
 		deleteall.SetBitmap(load_and_resize_image('delete.png'))
 
-		AppendItem(new)
-		AppendItem(deleteall)
+		self.AppendItem(new)
+		self.AppendItem(deleteall)
 		self.AppendSeparator()
 
 #		if _("Default Startup") not in parent.perspectives:
@@ -376,7 +396,7 @@ class PerspectiveMenu(wx.Menu):
 #		L.sort()
 		for name in L:
 			ID = wx.NewIdRef()
-			self.Append(ID, name)
+			self.menu.Append(ID, name)
 			parent.Bind(wx.EVT_MENU, parent.OnRestorePerspective, id=ID)
 
 		### Enable the delete function if the list of perspectives is not empty
@@ -386,29 +406,30 @@ class PerspectiveMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnDeletePerspective, id=ID_DELETE_PERSPECTIVE)
 		parent.Bind(wx.EVT_MENU, parent.OnRestorePerspective, id=ID_FIRST_PERSPECTIVE)
 
-class DiagramMenu(wx.Menu):
+class DiagramMenu(Menu):
 	"""
 	"""
 	def __init__(self, parent):
-		""" Constructor.
-		"""
-		wx.Menu.__init__(self)
+		"""Initialize the FileMenu."""
+		Menu.__init__(self, parent)
+		
+	def _add_menu_items(self, parent):
 
 		parent = parent.GetParent()
 
-		newDiagram = wx.MenuItem(self, ID_NEW, _('New'), _("Create a new tab diagram"))
-		detachDiagram = wx.MenuItem(self, ID_DETACH_DIAGRAM, _('Detach'), _("Detach the tab to a frame window"))
-		zoomIn = wx.MenuItem(self, ID_ZOOMIN_DIAGRAM, _('Zoom'), _("Zoom in"))
-		zoomOut = wx.MenuItem(self, ID_ZOOMOUT_DIAGRAM, _('UnZoom'), _("Zoom out"))
-		annuleZoom = wx.MenuItem(self, ID_UNZOOM_DIAGRAM, _('AnnuleZoom'), _("Normal view"))
-		checkDiagram = wx.MenuItem(self, ID_CHECK_DIAGRAM, _('Debugger\tF4'), _("Check DEVS master model of diagram"))
-		simulationDiagram = wx.MenuItem(self, ID_SIM_DIAGRAM, _('&Simulate\tF5'), _("Perform the simulation"))
-		constantsDiagram = wx.MenuItem(self, ID_CONST_DIAGRAM, _('Add constants'), _("Loading constants parameters"))
-		priorityDiagram = wx.MenuItem(self, ID_PRIORITY_DIAGRAM, _('Priority\tF3'), _("Priority for select function"))
-		infoDiagram = wx.MenuItem(self, ID_INFO_DIAGRAM, _('Information'), _("Information about diagram (number of models, connections, etc)"))
-		clearDiagram = wx.MenuItem(self, ID_CLEAR_DIAGRAM, _('Clear'), _("Remove all components in diagram"))
-		renameDiagram = wx.MenuItem(self, ID_RENAME_DIAGRAM, _('Rename'), _("Rename diagram"))
-		closeDiagram = wx.MenuItem(self, ID_EXIT_DIAGRAM, _('&Close\tCtrl+D'), _("Close the tab"))
+		newDiagram = wx.MenuItem(self.menu, ID_NEW, _('New'), _("Create a new tab diagram"))
+		detachDiagram = wx.MenuItem(self.menu, ID_DETACH_DIAGRAM, _('Detach'), _("Detach the tab to a frame window"))
+		zoomIn = wx.MenuItem(self.menu, ID_ZOOMIN_DIAGRAM, _('Zoom'), _("Zoom in"))
+		zoomOut = wx.MenuItem(self.menu, ID_ZOOMOUT_DIAGRAM, _('UnZoom'), _("Zoom out"))
+		annuleZoom = wx.MenuItem(self.menu, ID_UNZOOM_DIAGRAM, _('AnnuleZoom'), _("Normal view"))
+		checkDiagram = wx.MenuItem(self.menu, ID_CHECK_DIAGRAM, _('Debugger\tF4'), _("Check DEVS master model of diagram"))
+		simulationDiagram = wx.MenuItem(self.menu, ID_SIM_DIAGRAM, _('&Simulate\tF5'), _("Perform the simulation"))
+		constantsDiagram = wx.MenuItem(self.menu, ID_CONST_DIAGRAM, _('Add constants'), _("Loading constants parameters"))
+		priorityDiagram = wx.MenuItem(self.menu, ID_PRIORITY_DIAGRAM, _('Priority\tF3'), _("Priority for select function"))
+		infoDiagram = wx.MenuItem(self.menu, ID_INFO_DIAGRAM, _('Information'), _("Information about diagram (number of models, connections, etc)"))
+		clearDiagram = wx.MenuItem(self.menu, ID_CLEAR_DIAGRAM, _('Clear'), _("Remove all components in diagram"))
+		renameDiagram = wx.MenuItem(self.menu, ID_RENAME_DIAGRAM, _('Rename'), _("Rename diagram"))
+		closeDiagram = wx.MenuItem(self.menu, ID_EXIT_DIAGRAM, _('&Close\tCtrl+D'), _("Close the tab"))
 
 		newDiagram.SetBitmap(load_and_resize_image('new.png'))
 		detachDiagram.SetBitmap(load_and_resize_image('detach.png'))
@@ -424,28 +445,30 @@ class DiagramMenu(wx.Menu):
 		renameDiagram.SetBitmap(load_and_resize_image('rename.png'))
 		closeDiagram.SetBitmap(load_and_resize_image('close.png'))
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
+		self.AppendItem(newDiagram)
+		self.AppendItem(renameDiagram)
+		self.AppendItem(detachDiagram)
+		self.AppendSeparator()
+		
+		self.AppendItem(zoomIn)
+		self.AppendItem(zoomOut)
+		self.AppendItem(annuleZoom)
+		self.AppendSeparator()
+		
+		self.AppendItem(checkDiagram)
+		self.AppendItem(simulationDiagram)
+		self.AppendItem(constantsDiagram)
+		self.AppendItem(priorityDiagram)
+		self.AppendItem(infoDiagram)
+		self.AppendSeparator()
+		
+		self.AppendItem(clearDiagram)
+		self.AppendSeparator()
+		
+		self.AppendItem(closeDiagram)
 
-		AppendItem(newDiagram)
-		AppendItem(renameDiagram)
-		AppendItem(detachDiagram)
-		self.AppendSeparator()
-		AppendItem(zoomIn)
-		AppendItem(zoomOut)
-		AppendItem(annuleZoom)
-		self.AppendSeparator()
-		AppendItem(checkDiagram)
-		AppendItem(simulationDiagram)
-		AppendItem(constantsDiagram)
-		AppendItem(priorityDiagram)
-		AppendItem(infoDiagram)
-		self.AppendSeparator()
-		AppendItem(clearDiagram)
-		self.AppendSeparator()
-		AppendItem(closeDiagram)
-
+		# binding
 		nb2 = parent.GetDiagramNotebook()
-
 		parent.Bind(wx.EVT_MENU, parent.OnNew, id=ID_NEW)
 		parent.Bind(wx.EVT_MENU, nb2.OnDetachPage, id=ID_DETACH_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, nb2.OnRenamePage, id=ID_RENAME_DIAGRAM)
@@ -460,17 +483,18 @@ class DiagramMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.AnnuleZoom, id=ID_UNZOOM_DIAGRAM)
 		parent.Bind(wx.EVT_MENU, nb2.OnClosePage, id=ID_EXIT_DIAGRAM)
 
-class SettingsMenu(wx.Menu):
+class SettingsMenu(Menu):
 	"""
 	"""
 	def __init__(self, parent):
-		""" Constrcutor.
-		"""
-		wx.Menu.__init__(self)
+		"""Initialize the FileMenu."""
+		Menu.__init__(self, parent)
+		
+	def _add_menu_items(self, parent):
 
 		languagesSubmenu = wx.Menu()
 	
-		pref_item = wx.MenuItem(self, ID_PREFERENCES, _('Preferences'), _("Advanced setting options"))
+		pref_item = wx.MenuItem(self.menu, ID_PREFERENCES, _('Preferences'), _("Advanced setting options"))
 		fritem = wx.MenuItem(languagesSubmenu, ID_FRENCH_LANGUAGE, _('French'), _("French interface"))
 		enitem = wx.MenuItem(languagesSubmenu, ID_ENGLISH_LANGUAGE, _('English'), _("English interface"))
 
@@ -484,17 +508,15 @@ class SettingsMenu(wx.Menu):
 		else:
 			languagesSubmenu.Append(fritem)
 			languagesSubmenu.Append(enitem)
-
-		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 	
-		AppendMenu(self, wx.NewIdRef(), _('Languages'), languagesSubmenu)
+		AppendMenu(self.menu, wx.NewIdRef(), _('Languages'), languagesSubmenu)
 		
 		### Before Phoenix transition
-		AppendMenu(self, ID_PROFILE, _('Profile'), ProfileFileMenu(parent))
+		AppendMenu(self.menu, ID_PROFILE, _('Profile'), ProfileFileMenu(parent).get())
+
+		self.AppendItem(pref_item)
 
 		parent = parent.GetParent()
-		
-		AppendItem(pref_item)
 
 		fritem.Enable(not parent.language == 'fr')
 		enitem.Enable(not parent.language == 'en')
@@ -503,25 +525,22 @@ class SettingsMenu(wx.Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnEnglish, id=ID_ENGLISH_LANGUAGE)
 		parent.Bind(wx.EVT_MENU, parent.OnAdvancedSettings, id=ID_PREFERENCES)
 	
-class HelpMenu(wx.Menu):
+class HelpMenu(Menu):
 	"""
 	"""
 	def __init__(self, parent):
-		""" Constructor.
-		"""
-		wx.Menu.__init__(self)
-
-		parent = parent.GetParent()
-
-		update_subMenu = wx.Menu()
+		"""Initialize the FileMenu."""
+		Menu.__init__(self, parent)
 		
-		helpModel = wx.MenuItem(self, ID_HELP, _('&DEVSimPy Help\tF1'), _("Help for DEVSimPy user"))
-		apiModel = wx.MenuItem(self, ID_API_HELP, _('&DEVSimPy API\tF2'), _("API for DEVSimPy user")) 
-		updatePipPackage = wx.MenuItem(self, ID_UPDATE_PIP_PACKAGE, _('All Dependencies (PIP Packages)\tF3'), _("Update of dependant pip packages"))
-		updateFromGitArchive = wx.MenuItem(self, ID_UPDATE_FROM_GIT_ARCHIVE, _('DEVSimPy From Git Archive (zip)'), _("Update of DEVSimPy from Git archive"))
-		updateFromGitRepo = wx.MenuItem(self, ID_UPDATE_FROM_GIT_REPO, _('DEVSimPy From Git Repository (Pull)'), _("Update of DEVSimPy from its Git repo"))
-		contactModel = wx.MenuItem(self, ID_CONTACT, _('Contact the Author...'), _("Send mail to the author"))
-		aboutModel = wx.MenuItem(self, ID_ABOUT, _('About DEVSimPy...'), _("About DEVSimPy"))
+	def _add_menu_items(self, parent):
+		
+		helpModel = wx.MenuItem(self.menu, ID_HELP, _('&DEVSimPy Help\tF1'), _("Help for DEVSimPy user"))
+		apiModel = wx.MenuItem(self.menu, ID_API_HELP, _('&DEVSimPy API\tF2'), _("API for DEVSimPy user")) 
+		updatePipPackage = wx.MenuItem(self.menu, ID_UPDATE_PIP_PACKAGE, _('All Dependencies (PIP Packages)\tF3'), _("Update of dependant pip packages"))
+		updateFromGitArchive = wx.MenuItem(self.menu, ID_UPDATE_FROM_GIT_ARCHIVE, _('DEVSimPy From Git Archive (zip)'), _("Update of DEVSimPy from Git archive"))
+		updateFromGitRepo = wx.MenuItem(self.menu, ID_UPDATE_FROM_GIT_REPO, _('DEVSimPy From Git Repository (Pull)'), _("Update of DEVSimPy from its Git repo"))
+		contactModel = wx.MenuItem(self.menu, ID_CONTACT, _('Contact the Author...'), _("Send mail to the author"))
+		aboutModel = wx.MenuItem(self.menu, ID_ABOUT, _('About DEVSimPy...'), _("About DEVSimPy"))
 
 		helpModel.SetBitmap(load_and_resize_image('search.png'))
 		updatePipPackage.SetBitmap(load_and_resize_image('update.png'))
@@ -531,19 +550,23 @@ class HelpMenu(wx.Menu):
 		contactModel.SetBitmap(load_and_resize_image('mail.png'))
 		aboutModel.SetBitmap(load_and_resize_image('info.png'))
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
+		self.AppendItem(helpModel)
+		self.AppendItem(apiModel)
+		self.AppendSeparator()
 
-		AppendItem(helpModel)
-		AppendItem(apiModel)
-		self.AppendSeparator()
-		Update_menu = AppendMenu(self, -1, _("Update"), update_subMenu)
-		Update_SubMenu0 = update_subMenu.Append(updatePipPackage)
+		update_subMenu = wx.Menu()
+		AppendMenu(self.menu, -1, _("Update"), update_subMenu)
+		update_subMenu.Append(updatePipPackage)
 		update_subMenu.AppendSeparator()
-		Update_SubMenu1 = update_subMenu.Append(updateFromGitArchive)
-		Update_SubMenu2 = update_subMenu.Append(updateFromGitRepo)
+		
+		update_subMenu.Append(updateFromGitArchive)
+		update_subMenu.Append(updateFromGitRepo)
 		self.AppendSeparator()
-		AppendItem(aboutModel)
-		AppendItem(contactModel)
+		
+		self.AppendItem(aboutModel)
+		self.AppendItem(contactModel)
+
+		parent = parent.GetParent()
 
 		parent.Bind(wx.EVT_MENU, parent.OnHelp, id=ID_HELP)
 		parent.Bind(wx.EVT_MENU, parent.OnAPI, id=ID_API_HELP)
@@ -563,13 +586,13 @@ class MainMenuBar(wx.MenuBar):
 
 		self.parent = parent
 
-		self.Append(FileMenu(self),_("&File"))
-		self.Append(DiagramMenu(self),_("&Diagram"))
-		self.Append(ShowMenu(self), _("&Show"))
-		self.parent.perspectivesmenu = PerspectiveMenu(self)
+		self.Append(FileMenu(self).get(),_("&File"))
+		self.Append(DiagramMenu(self).get(),_("&Diagram"))
+		self.Append(ShowMenu(self).get(), _("&Show"))
+		self.parent.perspectivesmenu = PerspectiveMenu(self).get()
 		self.Append(self.parent.perspectivesmenu, _("&Perspectives"))
-		self.Append(SettingsMenu(self), _("&Options"))
-		self.Append(HelpMenu(self), _("&Help"))
+		self.Append(SettingsMenu(self).get(), _("&Options"))
+		self.Append(HelpMenu(self).get(), _("&Help"))
 
 		self.Bind(wx.EVT_MENU_HIGHLIGHT, self.OnMenuHighlight)
 
@@ -594,7 +617,7 @@ class MainMenuBar(wx.MenuBar):
 					if menu.FindItemById(ID_RECENT):menu.Delete(ID_RECENT)
 				
 					### we insert the recent files menu
-					menu.InsertMenu(1, ID_RECENT, _("Recent files"), RecentFileMenu(self))
+					menu.InsertMenu(1, ID_RECENT, _("Recent files"), RecentFileMenu(self).get())
 				else:
 					if platform.system() == 'Windows':
 						### After Pnoenix Transition
@@ -604,7 +627,8 @@ class MainMenuBar(wx.MenuBar):
 						ID = menu.FindItem(label)
 						item, pos = menu.FindChildItem(ID)
 						menu.Remove(ID)
-						menu.Insert(pos, ID, label, RecentFileMenu(self))
+						menu.Insert(pos, ID, label, RecentFileMenu(self).get())
+
 
 			elif isinstance(menu, SettingsMenu):
 			
@@ -614,7 +638,7 @@ class MainMenuBar(wx.MenuBar):
 					if menu.FindItemById(ID_PROFILE): menu.Delete(ID_PROFILE)
 				
 					### we insert the profile files menu
-					menu.InsertMenu(1, ID_PROFILE, _('Profile'),  ProfileFileMenu(self))
+					menu.InsertMenu(1, ID_PROFILE, _('Profile'),  ProfileFileMenu(self).get())
 				else:
 					### After Pnoenix Transition
 					if platform.system() == 'Windows':
@@ -624,7 +648,7 @@ class MainMenuBar(wx.MenuBar):
 						ID = menu.FindItem(label)
 						item, pos = menu.FindChildItem(ID)
 						menu.Remove(ID)
-						menu.Insert(pos, ID, label, ProfileFileMenu(self))
+						menu.Insert(pos, ID, label, ProfileFileMenu(self).get())
 
 					
 	#def OnCloseMenu(self, event):
@@ -654,38 +678,38 @@ class MainMenuBar(wx.MenuBar):
 	def GetParent(self):
 		return self.parent
 
-class DiagramNoTabPopupMenu(wx.Menu):
+class DiagramNoTabPopupMenu(Menu):
 	""" Diagram noteBook popup menu
 	"""
 
 	def __init__(self, parent):
-		""" Constructor.
-		"""
-		wx.Menu.__init__(self)
+		"""Initialize the FileMenu."""
+		Menu.__init__(self, parent)
+		
+	def _add_menu_items(self, parent):
 
-		new_tab = wx.MenuItem(self, ID_NEW, _('New'), _("Create a new tab diagram"))
+		new_tab = wx.MenuItem(self.menu, ID_NEW, _('New'), _("Create a new tab diagram"))
 		new_tab.SetBitmap(load_and_resize_image('new.png'))
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
-
-		AppendItem(new_tab)
+		self.AppendItem(new_tab)
 
 		### Bind is not necessary because ID_EXIT_DAIGRAM and ID_DETACH_DIAGRAM are already binded
 
-class DiagramTabPopupMenu(wx.Menu):
+class DiagramTabPopupMenu(Menu):
 	""" Diagram noteBook popup menu
 	"""
 
 	def __init__(self, parent):
-		""" Constructor.
-		"""
-		wx.Menu.__init__(self)
+		"""Initialize the FileMenu."""
+		Menu.__init__(self, parent)
+		
+	def _add_menu_items(self, parent):
 
-		close = wx.MenuItem(self, ID_EXIT_DIAGRAM, _('Close'), _('Close diagram'))
-		detach = wx.MenuItem(self, ID_DETACH_DIAGRAM, _('Detach'), _('Detach tab to window'))
-		rename = wx.MenuItem(self, ID_RENAME_DIAGRAM, _('Rename'), _('Rename diagram'))
-		info = wx.MenuItem(self, ID_INFO_DIAGRAM, _('Info'), _('Information diagram'))
-		clear = wx.MenuItem(self, ID_CLEAR_DIAGRAM, _('Clear'), _('Clear diagram'))
+		close = wx.MenuItem(self.menu, ID_EXIT_DIAGRAM, _('Close'), _('Close diagram'))
+		detach = wx.MenuItem(self.menu, ID_DETACH_DIAGRAM, _('Detach'), _('Detach tab to window'))
+		rename = wx.MenuItem(self.menu, ID_RENAME_DIAGRAM, _('Rename'), _('Rename diagram'))
+		info = wx.MenuItem(self.menu, ID_INFO_DIAGRAM, _('Info'), _('Information diagram'))
+		clear = wx.MenuItem(self.menu, ID_CLEAR_DIAGRAM, _('Clear'), _('Clear diagram'))
 
 		close.SetBitmap(load_and_resize_image('close.png'))
 		detach.SetBitmap(load_and_resize_image('detach.png'))
@@ -693,34 +717,32 @@ class DiagramTabPopupMenu(wx.Menu):
 		info.SetBitmap(load_and_resize_image('info.png'))
 		clear.SetBitmap(load_and_resize_image('delete.png'))
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
-
-		AppendItem(detach)
-		AppendItem(rename)
-		AppendItem(clear)
-		AppendItem(info)
+		self.AppendItem(detach)
+		self.AppendItem(rename)
+		self.AppendItem(clear)
+		self.AppendItem(info)
 		self.AppendSeparator()
-		AppendItem(close)
+		self.AppendItem(close)
 		
 		### Bind is not necessary because ID_EXIT_DAIGRAM and ID_DETACH_DIAGRAM are already binded
-class NodePopupMenu(wx.Menu):
+class NodePopupMenu(Menu):
 	""" Node popup menu
 	"""
 
-	def __init__(self, node):
-		""" Constructor.
-		"""
-		wx.Menu.__init__(self)
+	def __init__(self, parent):
+		"""Initialize the FileMenu."""
+		Menu.__init__(self, parent)
+		
+	def _add_menu_items(self, parent):
 
-		edit_label = wx.MenuItem(self, -1, _('Edit'), _('Edit label'))
+		edit_label = wx.MenuItem(self.menu, -1, _('Edit'), _('Edit label'))
 		edit_label.SetBitmap(load_and_resize_image('label.png'))
 		
-		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
-		AppendItem(edit_label)
+		self.AppendItem(edit_label)
 
 		### bind event with new OnEditLabel
-		self.Bind(wx.EVT_MENU, node.OnEditLabel, edit_label)
-		self.Bind(wx.EVT_MENU, node.OnEditLabel, edit_label)
+		self.menu.Bind(wx.EVT_MENU, parent.OnEditLabel, edit_label)
+		self.menu.Bind(wx.EVT_MENU, parent.OnEditLabel, edit_label)
 
 class PropertiesCtrlPopupMenu(wx.Menu):
 	""" PropertiesCtrl popup menu.
@@ -742,7 +764,7 @@ class PropertiesCtrlPopupMenu(wx.Menu):
 		
 		edit.SetBitmap(load_and_resize_image('edit.png'))
 		insert.SetBitmap(load_and_resize_image('insert.png'))
-		clear.SetBitmap(load_and_resize_image('edit-clear.png'))
+		clear.SetBitmap(load_and_resize_image('edit_clear.png'))
 
 		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
 
@@ -763,19 +785,18 @@ class PropertiesCtrlPopupMenu(wx.Menu):
 
 	def GetPosition(self):
 		return self.pos
-class ItemLibraryPopupMenu(wx.Menu):
+	
+class ItemLibraryPopupMenu(Menu):
 	""" Item library popup menu.
 	"""
 
 	def __init__(self, parent):
-		""" Constructor.
-		"""
-		wx.Menu.__init__(self)
+		"""Initialize the FileMenu."""
+		Menu.__init__(self, parent)
+		
+	def _add_menu_items(self, parent):
 
 		### last child of tree and not empty directory (then, has OnDocumentation method)
-
-		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
-		InsertItem = self.InsertItem if wx.VERSION_STRING < '4.0' else self.Insert
 
 		item = parent.GetSelection()
 		path = parent.GetItemPyData(item)
@@ -786,9 +807,9 @@ class ItemLibraryPopupMenu(wx.Menu):
 
 			new_model = wx.MenuItem(new_submenu, ID_NEW_MODEL_LIB, _('Model'), _('Add a new model to the selected library'))
 			new_dir = wx.MenuItem(new_submenu, ID_NEW_DIR_LIB, _('Sub-directory'), _('Add a new sub directory to the selected library'))
-			rename_dir = wx.MenuItem(self, ID_RENAME_DIR_LIB, _('Rename'), _('Rename selected librarie'))
-			update_lib = wx.MenuItem(self, ID_UPDATE_SUBLIB, _('Update'), _('Update all models of the selected library'))
-			doc = wx.MenuItem(self, wx.NewIdRef(), _('Documentation'), _('Documentation of selected library'))
+			rename_dir = wx.MenuItem(self.menu, ID_RENAME_DIR_LIB, _('Rename'), _('Rename selected librarie'))
+			update_lib = wx.MenuItem(self.menu, ID_UPDATE_SUBLIB, _('Update'), _('Update all models of the selected library'))
+			doc = wx.MenuItem(self.menu, wx.NewIdRef(), _('Documentation'), _('Documentation of selected library'))
 
 			new_model.SetBitmap(load_and_resize_image('new.png'))
 			new_dir.SetBitmap(load_and_resize_image('new.png'))
@@ -798,24 +819,25 @@ class ItemLibraryPopupMenu(wx.Menu):
 
 			new_submenu.Append(new_model)
 			new_submenu.Append(new_dir)
-			AppendMenu(self, -1, _('Add'), new_submenu)
-			AppendItem(rename_dir)
-			AppendItem(update_lib)
-			AppendItem(doc)
+			AppendMenu(self.menu, -1, _('Add'), new_submenu)
+			
+			self.AppendItem(rename_dir)
+			self.AppendItem(update_lib)
+			self.AppendItem(doc)
 
-			self.Bind(wx.EVT_MENU, parent.OnNewModel, id=ID_NEW_MODEL_LIB)
-			self.Bind(wx.EVT_MENU, parent.OnDirRename, id=ID_RENAME_DIR_LIB)
-			self.Bind(wx.EVT_MENU, parent.OnNewDir, id=ID_NEW_DIR_LIB)
-			self.Bind(wx.EVT_MENU, parent.OnUpdateSubLib, id=ID_UPDATE_SUBLIB)	
-			self.Bind(wx.EVT_MENU, parent.OnLibDocumentation, id = doc.GetId())	# put before the popUpMenu
+			self.menu.Bind(wx.EVT_MENU, parent.OnNewModel, id=ID_NEW_MODEL_LIB)
+			self.menu.Bind(wx.EVT_MENU, parent.OnDirRename, id=ID_RENAME_DIR_LIB)
+			self.menu.Bind(wx.EVT_MENU, parent.OnNewDir, id=ID_NEW_DIR_LIB)
+			self.menu.Bind(wx.EVT_MENU, parent.OnUpdateSubLib, id=ID_UPDATE_SUBLIB)	
+			self.menu.Bind(wx.EVT_MENU, parent.OnLibDocumentation, id = doc.GetId())	# put before the popUpMenu
 
 		else:
 
-			edit = wx.MenuItem(self, ID_EDIT_LIB, _('Edit'), _('Edit selected module'))
-			rename = wx.MenuItem(self, ID_RENAME_LIB, _('Rename'), _('Rename selected module'))
-			export = wx.MenuItem(self, ID_EXPORT_LIB, _('Export'), _('Rename selected module'))
-			doc = wx.MenuItem(self, wx.NewIdRef(), _('Documentation'), _('Documentation of selected library'))
-			update = wx.MenuItem(self, ID_UPDATE_LIB, _('Update'), _('Update selected module'))
+			edit = wx.MenuItem(self.menu, ID_EDIT_LIB, _('Edit'), _('Edit selected module'))
+			rename = wx.MenuItem(self.menu, ID_RENAME_LIB, _('Rename'), _('Rename selected module'))
+			export = wx.MenuItem(self.menu, ID_EXPORT_LIB, _('Export'), _('Rename selected module'))
+			doc = wx.MenuItem(self.menu, wx.NewIdRef(), _('Documentation'), _('Documentation of selected library'))
+			update = wx.MenuItem(self.menu, ID_UPDATE_LIB, _('Update'), _('Update selected module'))
 
 			edit.SetBitmap(load_and_resize_image('edit.png'))
 			rename.SetBitmap(load_and_resize_image('rename.png'))
@@ -823,83 +845,82 @@ class ItemLibraryPopupMenu(wx.Menu):
 			doc.SetBitmap(load_and_resize_image('doc.png'))
 			update.SetBitmap(load_and_resize_image('reload.png'))
 
-			AppendItem(edit)
-			AppendItem(rename)
-			AppendItem(export)
-			AppendItem(doc)
-			AppendItem(update)
+			self.AppendItem(edit)
+			self.AppendItem(rename)
+			self.AppendItem(export)
+			self.AppendItem(doc)
+			self.AppendItem(update)
 
 			path = parent.GetItemPyData(item)
-			self.Enable(ID_EDIT_LIB, not path.endswith('pyc'))
+			self.menu.Enable(ID_EDIT_LIB, not path.endswith('pyc'))
 			
-			self.Bind(wx.EVT_MENU, parent.OnItemEdit, id = ID_EDIT_LIB)	# put before the popUpMenu
-			self.Bind(wx.EVT_MENU, parent.OnItemRename, id = ID_RENAME_LIB)	# put before the popUpMenu
-			self.Bind(wx.EVT_MENU, parent.OnItemExport, id = ID_EXPORT_LIB)	# put before the popUpMenu
-			self.Bind(wx.EVT_MENU, parent.OnItemDocumentation, id = doc.GetId())	# put before the popUpMenu
-			self.Bind(wx.EVT_MENU, parent.OnItemRefresh, id = ID_UPDATE_LIB)	# put before the popUpMenu
+			self.menu.Bind(wx.EVT_MENU, parent.OnItemEdit, id = ID_EDIT_LIB)	# put before the popUpMenu
+			self.menu.Bind(wx.EVT_MENU, parent.OnItemRename, id = ID_RENAME_LIB)	# put before the popUpMenu
+			self.menu.Bind(wx.EVT_MENU, parent.OnItemExport, id = ID_EXPORT_LIB)	# put before the popUpMenu
+			self.menu.Bind(wx.EVT_MENU, parent.OnItemDocumentation, id = doc.GetId())	# put before the popUpMenu
+			self.menu.Bind(wx.EVT_MENU, parent.OnItemRefresh, id = ID_UPDATE_LIB)	# put before the popUpMenu
 
 		### menu for all item of tree
-		delete = wx.MenuItem(self, ID_DELETE_LIB, _('Delete'), _('Delete selected library'))
+		delete = wx.MenuItem(self.menu, ID_DELETE_LIB, _('Delete'), _('Delete selected library'))
 		delete.SetBitmap(load_and_resize_image('delete.png'))
 
-		AppendItem(delete)
+		self.AppendItem(delete)
 
-		self.Bind(wx.EVT_MENU, parent.OnDelete, id=ID_DELETE_LIB) # put before the popUpMenu
+		self.menu.Bind(wx.EVT_MENU, parent.OnDelete, id=ID_DELETE_LIB) # put before the popUpMenu
 
-
-class LibraryPopupMenu(wx.Menu):
+class LibraryPopupMenu(Menu):
 	""" Popup menu for panel library.
 	"""
 
 	def __init__(self, parent):
-		""" Constructor.
-		"""
-		wx.Menu.__init__(self)
+		"""Initialize the FileMenu."""
+		Menu.__init__(self, parent)
+		
+	def _add_menu_items(self, parent):
 
-		new = wx.MenuItem(self, ID_NEW_LIB, _('New/Import'), _('Create or import library'))
-		refresh = wx.MenuItem(self, ID_REFRESH_LIB, _('Reload'), _('Reload library'))
+		new = wx.MenuItem(self.menu, ID_NEW_LIB, _('New/Import'), _('Create or import library'))
+		refresh = wx.MenuItem(self.menu, ID_REFRESH_LIB, _('Reload'), _('Reload library'))
 		#upgrade = wx.MenuItem(self, ID_UPGRADE_LIB, _('Upgrade'), _('Upgrade library'))
-		info = wx.MenuItem(self, ID_HELP_LIB, _('Help'), _('Library description'))
+		info = wx.MenuItem(self.menu, ID_HELP_LIB, _('Help'), _('Library description'))
 
 		new.SetBitmap(load_and_resize_image('plus.png'))
 		refresh.SetBitmap(load_and_resize_image('reload.png'))
 		#upgrade.SetBitmap(load_and_resize_image('upgrade.png'))
 		info.SetBitmap(load_and_resize_image('info.png'))
 
-		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
-
-		AppendItem(new)
-		AppendItem(refresh)
+		self.AppendItem(new)
+		self.AppendItem(refresh)
 		#self.AppendItem(upgrade)
 		self.AppendSeparator()
-		AppendItem(info)
+		
+		self.AppendItem(info)
 
 		mainW = parent.GetTopLevelParent()
 
-		self.Bind(wx.EVT_MENU, mainW.OnImport, id= ID_NEW_LIB)
-		self.Bind(wx.EVT_MENU, parent.OnInfo, id=ID_HELP_LIB)
-		self.Bind(wx.EVT_MENU, parent.OnUpdateAll, id=ID_REFRESH_LIB)
+		self.menu.Bind(wx.EVT_MENU, mainW.OnImport, id= ID_NEW_LIB)
+		self.menu.Bind(wx.EVT_MENU, parent.OnInfo, id=ID_HELP_LIB)
+		self.menu.Bind(wx.EVT_MENU, parent.OnUpdateAll, id=ID_REFRESH_LIB)
 
-class ShapeCanvasPopupMenu(wx.Menu):
+class ShapeCanvasPopupMenu(Menu):
 	""" ShapeCanvas menu class.
 	"""
+
 	def __init__(self, parent):
-		""" Constructor.
-		"""
-		wx.Menu.__init__(self)
+		"""Initialize the FileMenu."""
+		Menu.__init__(self, parent)
+		
+	def _add_menu_items(self, parent):
 
-		### local copy
-		self.parent = parent
-
+		
 		### make all items
-		new = wx.MenuItem(self, ID_NEW_SHAPE, _('&New'), _('New model'))
-		refresh = wx.MenuItem(self, ID_REFRESH_SHAPE, _('&Refresh'), _('Refresh model'))
-		paste = wx.MenuItem(self, wx.NewIdRef(), _('&Paste\tCtrl+V'), _('Paste the model'))
-		add_constants = wx.MenuItem(self, ID_ADD_CONSTANTS, _('Add constants'), _('Add constants parameters'))
-		preview_dia = wx.MenuItem(self, ID_PREVIEW_PRINT, _('Print preview'), _('Print preveiw of the diagram'))
+		new = wx.MenuItem(self.menu, ID_NEW_SHAPE, _('&New'), _('New model'))
+		refresh = wx.MenuItem(self.menu, ID_REFRESH_SHAPE, _('&Refresh'), _('Refresh model'))
+		paste = wx.MenuItem(self.menu, wx.NewIdRef(), _('&Paste\tCtrl+V'), _('Paste the model'))
+		add_constants = wx.MenuItem(self.menu, ID_ADD_CONSTANTS, _('Add constants'), _('Add constants parameters'))
+		preview_dia = wx.MenuItem(self.menu, ID_PREVIEW_PRINT, _('Print preview'), _('Print preveiw of the diagram'))
 
 		### Experiment generation
-		generate_experiment = wx.MenuItem(self, ID_GEN_EXPERIMENT, _('Generate PyPDEVS Experiment File'), _('Generate experiment model for PyPDEVS'))
+		generate_experiment = wx.MenuItem(self.menu, ID_GEN_EXPERIMENT, _('Generate PyPDEVS Experiment File'), _('Generate experiment model for PyPDEVS'))
 
 		### bitmap item setting
 		new.SetBitmap(load_and_resize_image('new_model.png'))
@@ -909,29 +930,27 @@ class ShapeCanvasPopupMenu(wx.Menu):
 		preview_dia.SetBitmap(load_and_resize_image('print-preview.png'))
 		generate_experiment.SetBitmap(load_and_resize_image('generation.png'))
 	
-		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
-
 		### append items
-		AppendItem(new)
-		AppendItem(refresh)
-		AppendItem(paste)
-		AppendItem(add_constants)
-		AppendItem(preview_dia)
-		AppendItem(generate_experiment)
+		self.AppendItem(new)
+		self.AppendItem(refresh)
+		self.AppendItem(paste)
+		self.AppendItem(add_constants)
+		self.AppendItem(preview_dia)
+		self.AppendItem(generate_experiment)
 
 		### Stay on top always for the detached frame (not for diagram into devsimpy as tab of notebook)
 		if isinstance(self.parent.parent, wx.Frame):
 			if self.parent.parent.GetWindowStyle() == self.parent.parent.default_style:
-				stay_on_top = wx.MenuItem(self, ID_STAY_ON_TOP, _('Enable stay on top'), _('Coupled model frame stay on top'))
+				stay_on_top = wx.MenuItem(self.menu, ID_STAY_ON_TOP, _('Enable stay on top'), _('Coupled model frame stay on top'))
 				stay_on_top.SetBitmap(load_and_resize_image('pin_out.png'))
 			else:
-				stay_on_top = wx.MenuItem(self, ID_STAY_ON_TOP, _('Disable stay on top'), _('Coupled model frame not stay on top'))
+				stay_on_top = wx.MenuItem(self.menu, ID_STAY_ON_TOP, _('Disable stay on top'), _('Coupled model frame not stay on top'))
 				stay_on_top.SetBitmap(load_and_resize_image('pin_in.png'))
 
-			AppendItem(stay_on_top)
+			self.AppendItem(stay_on_top)
 			parent.Bind(wx.EVT_MENU, parent.parent.OnStayOnTop, id=ID_STAY_ON_TOP)
 
-		self.Enable(paste.GetId(), Container.clipboard != [])
+		self.menu.Enable(paste.GetId(), Container.clipboard != [])
 
 		### binding
 		parent.Bind(wx.EVT_MENU, parent.OnNewModel, id=ID_NEW_SHAPE)
@@ -1045,23 +1064,23 @@ class ShapePopupMenu(wx.Menu):
 			
 			if isinstance(shape, Container.CodeBlock) and shape.isAMD():
 					Edit_menu = AppendMenu(self, -1, _("Edit"), edit_subMenu)
-					Edit_SubMenu1 = edit_subMenu.AppendItem(editModel)
-					Edit_SubMenu2 = edit_subMenu.AppendItem(editTest)
+					edit_subMenu.AppendItem(editModel)
+					edit_subMenu.AppendItem(editTest)
 			else:
 				Edit_menu = AppendItem(edit)
 				
 			if isinstance(shape, Container.CodeBlock) and shape.isPYC():
 				Edit_menu.Enable(False)
 
-			Log_menu = AppendItem(log)
+			AppendItem(log)
 
 			self.AppendSeparator()
 
-			Copy_menu = AppendItem(copy)
-			Paste_menu = AppendItem(paste)
-			Cut_menu = AppendItem(cut)
-			Lock_item = AppendItem(lock)
-			UnLock_item = AppendItem(unlock)
+			AppendItem(copy)
+			AppendItem(paste)
+			AppendItem(cut)
+			AppendItem(lock)
+			AppendItem(unlock)
 
 			if wx.VERSION_STRING >= '4.0':
 				rotate_subMenu.AppendItem = rotate_subMenu.Append
@@ -1072,23 +1091,23 @@ class ShapePopupMenu(wx.Menu):
 
 			### for port, just right of left rotation
 			if isinstance(shape, Container.Port):    			
-				Rotate_SubMenu1 = rotate_subMenu.AppendItem(rotateR)
-				Rotate_SubMenu2 = rotate_subMenu.AppendItem(rotateL)
+				rotate_subMenu.AppendItem(rotateR)
+				rotate_subMenu.AppendItem(rotateL)
 
 			else:
-				Rotate_SubMenu11 = rotate_all_subMenu.AppendItem(rotateR)
-				Rotate_SubMenu12 = rotate_all_subMenu.AppendItem(rotateL)
-				Rotate_SubMenu21 = rotate_input_subMenu.AppendItem(rotateIR)
-				Rotate_SubMenu22 = rotate_input_subMenu.AppendItem(rotateIL)
-				Rotate_SubMenu31 = rotate_output_subMenu.AppendItem(rotateOR)
-				Rotate_SubMenu32 = rotate_output_subMenu.AppendItem(rotateOL)
+				rotate_all_subMenu.AppendItem(rotateR)
+				rotate_all_subMenu.AppendItem(rotateL)
+				rotate_input_subMenu.AppendItem(rotateIR)
+				rotate_input_subMenu.AppendItem(rotateIL)
+				rotate_output_subMenu.AppendItem(rotateOR)
+				rotate_output_subMenu.AppendItem(rotateOL)
 
-				Rotate_all_menu = rotate_subMenu.Append(ID_ROTATE_ALL_SHAPE, _("All"), rotate_all_subMenu)
-				Rotate_in_menu = rotate_subMenu.Append(ID_ROTATE_INPUT_SHAPE, _("Input"), rotate_input_subMenu)
-				Rotate_out_menu = rotate_subMenu.Append(ID_ROTATE_OUTPUT_SHAPE, _("Output"), rotate_output_subMenu)
+				rotate_subMenu.Append(ID_ROTATE_ALL_SHAPE, _("All"), rotate_all_subMenu)
+				rotate_subMenu.Append(ID_ROTATE_INPUT_SHAPE, _("Input"), rotate_input_subMenu)
+				rotate_subMenu.Append(ID_ROTATE_OUTPUT_SHAPE, _("Output"), rotate_output_subMenu)
 
-			Rotate_menu = AppendMenu(self, ID_ROTATE_SHAPE, _("Rotate"), rotate_subMenu)
-			Rename_menu = AppendItem(rename)
+			AppendMenu(self, ID_ROTATE_SHAPE, _("Rotate"), rotate_subMenu)
+			AppendItem(rename)
 
 			self.AppendSeparator()
 			
@@ -1100,11 +1119,12 @@ class ShapePopupMenu(wx.Menu):
 					connectable_subMenu.Append(new_item)
 					self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnConnectTo, id=new_item.GetId())
 			
-			AppendMenu(self,-1, _('Connect to'), connectable_subMenu)
+			if connectable_subMenu.GetMenuItems():
+				AppendMenu(self, -1, _('Connect to'), connectable_subMenu)
+				self.AppendSeparator()
 
 			if isinstance(shape, Container.CodeBlock):
-				self.AppendSeparator()
-				Export_menu = AppendMenu(self, -1, _("Export"), export_subMenu)
+				AppendMenu(self, -1, _("Export"), export_subMenu)
 				Export_SubMenu1 = export_subMenu.Append(exportAMD)
 
 				if shape.isPYC():
@@ -1115,16 +1135,17 @@ class ShapePopupMenu(wx.Menu):
 
 			elif isinstance(shape, Container.ContainerBlock):
 				self.AppendSeparator()
-				Export_menu = AppendMenu(self, -1, _("Export"), export_subMenu)
+				AppendMenu(self, -1, _("Export"), export_subMenu)
+				
 				Export_SubMenu1 = export_subMenu.Append(exportCMD)
-				Export_SubMenu2 = export_subMenu.Append(exportXML)
-				Export_SubMenu3 = export_subMenu.Append(exportJS)
+				export_subMenu.Append(exportXML)
+				export_subMenu.Append(exportJS)
 
 			else:
 				self.Enable(ID_EDIT_SHAPE, False)
 
 			self.AppendSeparator()
-			Delete_menu = AppendItem(delete)
+			AppendItem(delete)
 
 			### Plug-in manager only for Block model
 			if isinstance(shape, Container.CodeBlock) or isinstance(shape, Container.ContainerBlock):
@@ -1132,7 +1153,7 @@ class ShapePopupMenu(wx.Menu):
 				if shape.model_path != "":
 					self.AppendSeparator()
 					#if ZipManager.Zip.HasPlugin(shape.model_path):
-					Plugin_menu = AppendItem(plugin)
+					AppendItem(plugin)
 					self.__canvas.Bind(wx.EVT_MENU, shape.OnPluginsManager, id=ID_PLUGINS_SHAPE)
 
 					### if Wcomp general plug-in is enabled, sub menu appear in contextual menu of amd (right clic)
@@ -1142,7 +1163,7 @@ class ShapePopupMenu(wx.Menu):
 				PluginManager.trigger_event("ADD_STATE_TRAJECTORY_MENU", parent=self, model=shape)
 
 			self.AppendSeparator()
-			Properties_menu = AppendItem(properties)
+			AppendItem(properties)
 
 			self.Enable(ID_PASTE_SHAPE, not Container.clipboard == [])
 			self.Enable(ID_LOG_SHAPE, shape.getDEVSModel() is not None)

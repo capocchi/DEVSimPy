@@ -1881,7 +1881,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				### call OnRightDown of selected object
 				s.OnRightDown(event)
 			else:
-				menu = Menu.ShapeCanvasPopupMenu(self)
+				menu = Menu.ShapeCanvasPopupMenu(self).get()
 
 				### Show popup_menu
 				self.PopupMenu(menu, event.GetPosition())
@@ -4623,7 +4623,7 @@ class INode(ConnectableNode):
 		"""
 		### dialog to ask new port label
 		
-		menu = Menu.NodePopupMenu(self)
+		menu = Menu.NodePopupMenu(self).get()
 		### Show popup_menu
 		canvas = event.GetEventObject()
 		canvas.PopupMenu(menu, event.GetPosition())
@@ -4710,7 +4710,7 @@ class ONode(ConnectableNode):
 		"""
 		### dialog to ask new port label
 		
-		menu = Menu.NodePopupMenu(self)
+		menu = Menu.NodePopupMenu(self).get()
 		### Show popup_menu
 		canvas = event.GetEventObject()
 		canvas.PopupMenu(menu, event.GetPosition())
