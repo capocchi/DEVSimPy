@@ -622,24 +622,15 @@ class MainApplication(wx.Frame):
 		tb.ToggleTool(self.toggle_list[0], 1)
 
 		### Binding
-		self.Bind(wx.EVT_TOOL, self.OnNew, self.tools[0])
-		self.Bind(wx.EVT_TOOL, self.OnOpenFile, self.tools[1])
-		self.Bind(wx.EVT_TOOL, self.OnPrintPreview, self.tools[2])
-		self.Bind(wx.EVT_TOOL, self.OnSaveFile, self.tools[3])
-		self.Bind(wx.EVT_TOOL, self.OnSaveAsFile, self.tools[4])
-		self.Bind(wx.EVT_TOOL, self.OnUndo, self.tools[5])
-		self.Bind(wx.EVT_TOOL, self.OnRedo, self.tools[6])
-		self.Bind(wx.EVT_TOOL, self.OnZoom, self.tools[7])
-		self.Bind(wx.EVT_TOOL, self.OnUnZoom, self.tools[8])
-		self.Bind(wx.EVT_TOOL, self.AnnuleZoom, self.tools[9])
-		self.Bind(wx.EVT_TOOL, self.OnPriorityGUI, self.tools[10])
-		self.Bind(wx.EVT_TOOL, self.OnCheck, self.tools[11])
-		self.Bind(wx.EVT_TOOL, self.OnPlugins, self.tools[12])
-		self.Bind(wx.EVT_TOOL, self.OnSimulation, self.tools[13])
-		self.Bind(wx.EVT_TOOL, self.OnDirectConnector, self.tools[14])
-		self.Bind(wx.EVT_TOOL, self.OnSquareConnector, self.tools[15])
-		self.Bind(wx.EVT_TOOL, self.OnLinearConnector, self.tools[16])
-		self.Bind(wx.EVT_TOOL, self.OnCurveConnector, self.tools[17])
+		tool_bindings = [
+			self.OnNew, self.OnOpenFile, self.OnPrintPreview, self.OnSaveFile, self.OnSaveAsFile,
+			self.OnUndo, self.OnRedo, self.OnZoom, self.OnUnZoom, self.AnnuleZoom,
+			self.OnPriorityGUI, self.OnCheck, self.OnPlugins, self.OnSimulation,
+			self.OnDirectConnector, self.OnSquareConnector, self.OnLinearConnector, self.OnCurveConnector
+		]
+
+		for tool, handler in zip(self.tools, tool_bindings):
+			self.Bind(wx.EVT_TOOL, handler, tool)
 
 		##################################################################### Abstraction hierarchy
 		self.Bind(wx.EVT_SPINCTRL, self.OnSpin, id=self.toggle_list[3])

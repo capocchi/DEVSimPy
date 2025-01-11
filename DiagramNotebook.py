@@ -152,13 +152,12 @@ class GeneralNotebook(Printable):
 			@param  evt: Event Object, None by default
 		"""
 
-		mainW = self.GetTopLevelParent()
 		selection = self.GetSelection()
 		canvas = self.GetPage(selection)
 		title = self.GetPageText(selection)
 
 		frame = DetachedFrame(canvas, wx.NewIdRef(), title, canvas.GetDiagram())
-		frame.SetIcon(mainW.icon)
+		frame.SetIcon(self.parent.GetIcon())
 		frame.SetFocus()
 		frame.Show()
 

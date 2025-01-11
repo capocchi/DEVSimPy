@@ -223,20 +223,19 @@ class FileMenu(Menu):
 		openModel=wx.MenuItem(self.menu, ID_OPEN, _('&Open\tCtrl+O'),_('Open an existing diagram'))
 		recentFile=wx.MenuItem(self.menu, ID_RECENT, _('Recent files'),_('Open recent files'))
 		saveModel=wx.MenuItem(self.menu, ID_SAVE, _('&Save\tCtrl+S'), _('Save the current diagram'))
-		saveAsModel=wx.MenuItem(self.menu, ID_SAVEAS, _('&SaveAs'),_('Save the diagram with an another name'))
-		exportRest=wx.MenuItem(self.menu, ID_EXPORTREST, _('&Export to REST server'),_('Export the diagram to a Rest server (DEVSimPy-rest)'))
-		exportStandalone=wx.MenuItem(self.menu, ID_EXPORTSTANDALONE, _('&Export Standalone'),_('Generate a zip file which can be used to execute simulation of a yaml file in a no-gui and standaolne mode using devsimpy-nogui'))
+		saveAsModel=wx.MenuItem(self.menu, ID_SAVEAS, _('&SaveAs'),_('Save the diagram with a new name'))
+		export = wx.MenuItem(self.menu, ID_EXPORT, _('&Export'),_('Export the current diagram'))
 		importRest=wx.MenuItem(self.menu, ID_IMPORTXMLSES, _('&Import XML SES file'),_('Import SES specifications from the Python SES Editor'))
 		printModel=wx.MenuItem(self.menu, ID_PRINT, _('&Print'),_('Print the current diagram'))
 		printPreviewModel=wx.MenuItem(self.menu, ID_PREVIEW_PRINT, _('Preview'),_('Print preview for current diagram'))
-		screenCapture=wx.MenuItem(self.menu, ID_SCREEN_CAPTURE, _('ScreenShot'),_('Capture the screen into a image'))
+		screenCapture=wx.MenuItem(self.menu, ID_SCREEN_CAPTURE, _('ScreenShot'),_('Capture the screen into an image'))
 		exitModel=wx.MenuItem(self.menu, wx.ID_EXIT, _('&Quit\tCtrl+Q'),_('Quit the DEVSimPy application'))
 		
 		openModel.SetBitmap(load_and_resize_image('open.png'))
+		recentFile.SetBitmap(load_and_resize_image('recent.png'))
 		saveModel.SetBitmap(load_and_resize_image('save.png'))
 		saveAsModel.SetBitmap(load_and_resize_image('save_as.png'))
-		exportRest.SetBitmap(load_and_resize_image('export.png'))
-		exportStandalone.SetBitmap(load_and_resize_image('export.png'))
+		export.SetBitmap(load_and_resize_image('export.png'))
 		importRest.SetBitmap(load_and_resize_image('import.png'))
 		printModel.SetBitmap(load_and_resize_image('print.png'))
 		printPreviewModel.SetBitmap(load_and_resize_image('print-preview.png'))
@@ -252,8 +251,8 @@ class FileMenu(Menu):
 		self.AppendItem(saveAsModel)
 		self.AppendSeparator()
 		
-		self.AppendItem(exportRest)
-		self.AppendItem(exportStandalone)
+		export.SetSubMenu(ExportMenu(parent).get())
+		self.AppendItem(export)
 		self.AppendItem(importRest)
 		self.AppendSeparator()
 		
@@ -270,8 +269,6 @@ class FileMenu(Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnOpenFile, id=ID_OPEN)
 		parent.Bind(wx.EVT_MENU, parent.OnSaveFile, id=ID_SAVE)
 		parent.Bind(wx.EVT_MENU, parent.OnSaveAsFile, id=ID_SAVEAS)
-		parent.Bind(wx.EVT_MENU, parent.OnExportRest, id=ID_EXPORTREST)
-		parent.Bind(wx.EVT_MENU, parent.OnExportStandalone, id=ID_EXPORTSTANDALONE)
 		parent.Bind(wx.EVT_MENU, parent.OnImportXMLSES, id=ID_IMPORTXMLSES)
 		parent.Bind(wx.EVT_MENU, parent.OnPrint, id=ID_PRINT)
 		parent.Bind(wx.EVT_MENU, parent.OnPrintPreview, id=ID_PREVIEW_PRINT)
@@ -301,6 +298,29 @@ class ProfileFileMenu(Menu):
 		
 		parent.Bind(wx.EVT_MENU, parent.OnDeleteProfiles, id=ID_DELETE_PROFILES)
 
+class ExportMenu(Menu):
+	"""
+	"""
+	def __init__(self, parent):
+		"""Initialize the FileMenu."""
+		Menu.__init__(self, parent)
+		
+	def _add_menu_items(self, parent):
+
+		parent = parent.GetParent()
+			
+		exportRest=wx.MenuItem(self.menu, ID_EXPORTREST, _('To REST Server'),_('Export the diagram to a Rest server (DEVSimPy-rest)'))
+		exportStandalone=wx.MenuItem(self.menu, ID_EXPORTSTANDALONE, _('To Standalone'),_('Generate a zip file which can be used to execute simulation of a yaml file in a no-gui and standaolne mode using devsimpy-nogui'))
+		
+		exportRest.SetBitmap(load_and_resize_image('api.png'))
+		exportStandalone.SetBitmap(load_and_resize_image('zip.png'))
+
+		self.AppendItem(exportRest)
+		self.AppendItem(exportStandalone)
+
+		parent.Bind(wx.EVT_MENU, parent.OnExportRest, id=ID_EXPORTREST)
+		parent.Bind(wx.EVT_MENU, parent.OnExportStandalone, id=ID_EXPORTSTANDALONE)
+
 class RecentFileMenu(Menu):
 	"""
 	"""
@@ -321,13 +341,21 @@ class RecentFileMenu(Menu):
 				parent.cfg.Write("openFileList", str(eval("parent.openFileList")))
 			else:
 				newItem = wx.MenuItem(self.menu, wx.NewIdRef(), path)
+				if path.endswith('.yaml'):
+					img = load_and_resize_image('xml_file.png')
+				elif path.endswith('.dsp'):
+					img = load_and_resize_image('dsp_file.png')
+				else:
+					img = load_and_resize_image('file.png')
+				newItem.SetBitmap(img)
+
 				self.AppendItem(newItem)
 				parent.Bind(wx.EVT_MENU, parent.OnOpenRecentFile, id = newItem.GetId())
 				
 		self.AppendSeparator()
 		
 		self.AppendItem(wx.MenuItem(self.menu, ID_DELETE_RECENT, _("Delete all")))
-		self.menu.Enable(ID_DELETE_RECENT, self.menu.GetMenuItemCount() > 2)
+		self.menu.Enable(ID_DELETE_RECENT, self.menu.GetMenuItemCount() >= 2)
 		
 		parent.Bind(wx.EVT_MENU, parent.OnDeleteRecentFiles, id = ID_DELETE_RECENT)
 
@@ -343,6 +371,7 @@ class ShowMenu(Menu):
 		parent = parent.GetParent()
 
 		control = wx.Menu()
+
 		control.Append(ID_SHOW_SIM, _('Simulation'), _("Show simulation tab"), wx.ITEM_CHECK)
 		control.Append(ID_SHOW_PROP, _('Properties'), _("Show properties tab"), wx.ITEM_CHECK)
 		control.Append(ID_SHOW_LIB, _('Libraries'), _("Show libraries tab"), wx.ITEM_CHECK)
