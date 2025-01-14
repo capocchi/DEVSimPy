@@ -1803,10 +1803,10 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			items = iter(shapes + nodes) 
 
 			for item in items:
-				try:
-					item.draw(dc)
-				except Exception as info:
-					sys.stderr.write(_("Draw error: %s \n")%info)
+				# try:
+				item.draw(dc)
+				# except Exception as info:
+					# sys.stderr.write(_("Draw error: %s \n")%info)
 
 		def OnEraseBackground(self, evt):
 			"""
