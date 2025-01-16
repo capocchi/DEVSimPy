@@ -3474,8 +3474,6 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		Resizeable.__init__(self)
 		Structurable.__init__(self)
 
-		#Convertible.__init__(self, 'direct')
-
 		self.input = None
 		self.output = None
 		self.touch_list = []
