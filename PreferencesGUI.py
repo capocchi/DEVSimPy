@@ -1078,6 +1078,8 @@ class TestApp(wx.App):
 
 	def OnInit(self):
 
+		import builtins
+
 		from config import builtin_dict
 
 		from config import builtin_dict
