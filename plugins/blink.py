@@ -14,14 +14,15 @@ import wx
 import os
 import builtins
 
-_ = wx.GetTranslation
+import gettext
+_ = gettext.gettext
 
 from types import MethodType
 
 from PluginManager import PluginManager
-from Container import DetachedFrame
+from Container import DetachedFrame, ConnectionShape, CodeBlock, ContainerBlock
 from FindGUI import FindReplace
-from Utilities import MoveFromParent, printOnStatusBar
+from Utilities import MoveFromParent
 from Patterns.Observer import Subject
 
 if 'PyPDEVS' in builtins.__dict__['DEFAULT_DEVS_DIRNAME']:
@@ -74,7 +75,7 @@ def start_blink(*args, **kwargs):
 	global canvas
 
 	parent = kwargs['parent']
-	# master = kwargs['master']
+	master = kwargs['master']
 
 	### parent is simulationGUI and parent of it can be wx main app or DetachedFrame
 	mainW = parent.GetParent()
@@ -187,9 +188,10 @@ def blink_manager(*args, **kwargs):
 
 			if frame.colored_flag:
 				### assign the default color
-				color = block.__class__.FILL #CodeBlock.FILL if isinstance(block, CodeBlock) else ContainerBlock.FILL
+				color = CodeBlock.FILL if isinstance(block, CodeBlock) else ContainerBlock.FILL
 				state['fill'] = color
 				sender.notify()
+
 			### assign the additionnal status_label string and notify
 			if frame.status_flag:  
 				status = block.devsModel.getStatus()
@@ -202,10 +204,9 @@ def blink_manager(*args, **kwargs):
 			
 		### blink frame has been closed
 		else:
-			
-			### assign the default color tot the last colored block
+			### assign the default color to the last colored block
 			if frame.colored_flag:
-				color = block.__class__.FILL #CodeBlock.FILL if isinstance(block, CodeBlock) else ContainerBlock.FILL
+				color = CodeBlock.FILL if isinstance(block, CodeBlock) else ContainerBlock.FILL
 				state['fill'] = color
 				sender.notify()
 
@@ -220,7 +221,7 @@ def blink_manager(*args, **kwargs):
 
 	else:
 		wx.CallAfter(frame.txt.write,(_("No blink for %s dynamic model (%s)!\n")%(str(d), d.myID)))
-    		
+
 class BlinkFrame(wx.Frame):
 	"""
 	"""
@@ -347,27 +348,6 @@ class BlinkFrame(wx.Frame):
 			self.Close()
 			parent.OnStop(evt)
 		
-		### udpate the status bar of parent (simulation dialogue)
-		if parent.thread.end_flag:
-			### update the status bar
-			parent.statusbar.SetBackgroundColour('')
-			printOnStatusBar(parent.statusbar, {0:_("Completed!"), 1:parent.GetClock()})
-		
-			### is no time limit add some informations in status bar
-			if not parent.ntl:
-				if parent.statusbar.GetFieldsCount() > 2:
-					printOnStatusBar(parent.statusbar, {2:str(100)+"%"})
-					
-		elif not parent.thread.thread_suspend:
-			if parent.statusbar.GetBackgroundColour() != 'GREY': 
-				parent.statusbar.SetBackgroundColour('GREY')
-			wx.CallAfter(printOnStatusBar,parent.statusbar, {0:_("Processing..."), 1:parent.GetClock()})
-
-				### is no time limit, add some information in status bar
-			if not parent.ntl:
-				if parent.statusbar.GetFieldsCount() > 2:
-					wx.CallAfter(printOnStatusBar,parent.statusbar, {2:str(parent.count)[:4]+"%"})
-
 		self.flag = True
 		self.button_clear.Enable(True)
 
