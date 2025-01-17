@@ -35,9 +35,6 @@ import urllib.request
 from Decorators import BuzyCursorNotification, cond_decorator, ProgressNotification
 from Utilities import check_internet
 
-from Decorators import BuzyCursorNotification, cond_decorator, ProgressNotification
-from Utilities import check_internet
-
 import gettext
 _ = gettext.gettext
 
@@ -302,7 +299,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
         self.port = port
         self.wxparent = parent
         self.model_name = model_name
-        # logging.info(_(f"OllamaDevsAdapter initialized with port {port} and model {model_name}."))
+        logging.info(_(f"OllamaDevsAdapter initialized with port {port} and model {model_name}."))
         
         # Vérification de l'installation d'Ollama
         if not self._is_ollama_installed():
@@ -313,8 +310,6 @@ class OllamaDevsAdapter(DevsAIAdapter):
                 wx.CallAfter(wx.MessageBox, message, _("Information"), wx.ICON_INFORMATION)
                 logging.info(message)
         else:    
-            # Obtenir la liste des modèles téléchargés localement
-            self.local_model = self._get_models()
 
             # Vérification si le serveur est lancé au démarrage
             if not self._is_server_running():
@@ -323,6 +318,9 @@ class OllamaDevsAdapter(DevsAIAdapter):
             else:
                 logging.info(_("The Ollama server is already running."))
 
+            # Obtenir la liste des modèles téléchargés localement
+            self.local_model = self._get_models()
+            
             # Téléchargement du modèle spécifié
             self._ensure_model_downloaded()
 
@@ -403,14 +401,11 @@ class OllamaDevsAdapter(DevsAIAdapter):
     @cond_decorator(builtins.__dict__.get('GUI_FLAG', True), ProgressNotification(_("Starting Server")))
     def _start_server(self):
         """ Démarre le serveur Ollama en arrière-plan. """
-        frame = SpinningProgressBar(self.wxparent, title=_("Lancement du serveur Ollama"))
-        frame.show()
         try:
             subprocess.Popen(["ollama", "serve"])
             logging.info(_("Ollama starts with success."))
         except Exception as e:
             logging.error(_("Failed to start the Ollama server: %s"), str(e))
-            frame.stop()
             raise RuntimeError(_("Failed to start the Ollama server"))
         
     def _stop_server(self):
@@ -444,9 +439,13 @@ class OllamaDevsAdapter(DevsAIAdapter):
         cmd = ["ollama", "list"]
 
         try:
+            logging.info(_("Start the command 'ollama list'..."))
+
             # Exécuter la commande et capturer la sortie
             result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
             
+            logging.info(_(f"The command end with:{result.stdout}"))
+
             # Affiche la liste des modèles disponibles localement
             return result.stdout
             

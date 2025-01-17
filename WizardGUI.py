@@ -1068,39 +1068,39 @@ class ModelGeneratorWizard(Wizard):
 								string = atomicCode(self.label)
 
 						# elif self.type=='AtomicAI':
-						# 	selected_ia = builtins.__dict__.get('SELECTED_IA', '')  # '' par défaut si rien n'est sélectionné
+							# selected_ia = builtins.__dict__.get('SELECTED_IA', '')  # '' par défaut si rien n'est sélectionné
 
-							if selected_ia:
+							# if selected_ia:
 								# Code spécifique pour ChatGPT
-								param = builtins.__dict__.get('PARAMS_IA')
+								# param = builtins.__dict__.get('PARAMS_IA')
 
 						# 		# Créer ou récupérer l'instance de ChatGPTDevsAdapter via la factory
-						# 		adapter = AdapterFactory.get_adapter_instance(parent=self.GetParent().GetParent(), params=param)
+								# adapter = AdapterFactory.get_adapter_instance(parent=self.GetParent().GetParent(), params=param)
 
 						# 		# Définir les paramètres requis pour le prompt
-						# 		model_name = self.label
-						# 		num_inputs = self.inputs
-						# 		num_outputs = self.outputs
-						# 		model_type = self.specific_behavior
-						# 		prompt = self.detail
+								# model_name = self.label
+								# num_inputs = self.inputs
+								# num_outputs = self.outputs
+								# model_type = self.specific_behavior
+								# prompt = self.detail
 								
 						# 		# Appeler la méthode create_prompt pour générer le prompt
-						# 		full_prompt = adapter.create_prompt(model_name, num_inputs, num_outputs, model_type, prompt)
+								# full_prompt = adapter.create_prompt(model_name, num_inputs, num_outputs, model_type, prompt)
 
 						# 		# Utiliser generate_output pour obtenir le résultat
-						# 		string = adapter.generate_output(full_prompt)
+								# string = adapter.generate_output(full_prompt)
 
-						# 	else:
-						# 		print(_("No AI selected."))
+							# else:
+								# print(_("No AI selected."))
 						else:
 							string = coupledCode(self.label)
 
 						# elif self.type=='AtomicAI':
 						# 	selected_ia = builtins.__dict__.get('SELECTED_IA', '')  # '' par défaut si rien n'est sélectionné
 
-							if selected_ia and selected_ia:
+							# if selected_ia and selected_ia:
 								# Code spécifique pour ChatGPT
-								param = builtins.__dict__.get('PARAMS_IA')
+								# param = builtins.__dict__.get('PARAMS_IA')
 
 						# 		# Créer ou récupérer l'instance de ChatGPTDevsAdapter via la factory
 						# 		adapter = AdapterFactory.get_adapter_instance(parent=self.GetParent().GetParent(), params=param)
@@ -1120,8 +1120,8 @@ class ModelGeneratorWizard(Wizard):
 
 						# 	else:
 						# 		print(_("No AI selected."))
-							else:
-								string = coupledCode(self.label)
+							# else:
+								# string = coupledCode(self.label)
 
 						### python filename as the same name as the model_path						
 						py_name = os.path.basename(self.model_path).split('.')[0]
