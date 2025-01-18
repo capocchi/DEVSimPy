@@ -1666,7 +1666,7 @@ class Base(object):
 			textstring = editor.GetRange(selection[0], selection[1])
 				
 			param = builtins.__dict__.get('PARAMS_IA')
-			adapter = AdapterFactory.get_adapter_instance(param)
+			adapter = AdapterFactory.get_adapter_instance(self,param)
 				
 			# Créer le dialogue avec le code sélectionné
 			dialog = AIPrompterDialog(self, _("AI Code Editor"), textstring, adapter)
