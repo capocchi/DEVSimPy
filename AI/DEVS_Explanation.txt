@@ -72,6 +72,8 @@ class ModelName(DomainBehavior):
                 # State change or action logic based on the message
                 current_state = self.getState()  # Example usage of getState()
                 pass  # Customize based on intended behavior
+         
+         return self.getState()
 
     def outputFnc(self):
         ''' DEVS output function (only for models that send data) '''
@@ -83,6 +85,8 @@ class ModelName(DomainBehavior):
         current_state = self.getState()  # Example usage of getState()
         # Use self.holdIn() to change state or set an internal delay
         pass  # Customize as needed
+        
+        return self.getState()
 
     def timeAdvance(self):
         ''' DEVS Time Advance function '''
