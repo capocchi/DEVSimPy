@@ -177,7 +177,7 @@ class DSPComponent:
 
 		# load diagram in a new page
 		diagram = Diagram() if new_tab else canvas.GetDiagram()
-
+		
 		### if diagram is instantiated
 		if diagram:
 			load_file_result = diagram.LoadFile(filename)
