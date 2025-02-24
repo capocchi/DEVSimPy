@@ -305,8 +305,9 @@ class GeneralPluginsList(CheckListCtrl):
 	def Populate(self, pluginsList):
 		""" Populate method must be called just before constructor.
 		"""
-
+		
 		if not self.is_populate:
+			
 			# all plug_ins file in plug_ins directory and already loaded
 			# list of all file (without __init__.py)
 			for root, dirs, files in pluginsList:
@@ -487,8 +488,8 @@ class BlockPluginsList(CheckListCtrl):
 				future.done()
 			except:
 				self.Populate(PluginManager.pluginsList)
-			
-			self.is_populate = True
+			finally:
+				self.is_populate = True
 	
 	def OnEnable(self, event):
 		""" Ebnable the current item.

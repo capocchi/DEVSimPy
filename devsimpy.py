@@ -309,6 +309,13 @@ class MainApplication(wx.Frame):
 	def GetMGR(self):
 		return self._mgr
 
+	def LinkMGR(self):
+		### attach editor to notify event from ShapeCanvas
+		panel = self.GetEditorPanel()
+		nb2 = self.GetDiagramNotebook()
+		canvas = nb2.GetPage(nb2.GetSelection())
+		canvas.attach(panel)
+
 	def GetConfig(self):
 		""" Reads the config file for the application if it exists and return a configfile object for use later.
 		"""
@@ -765,6 +772,11 @@ class MainApplication(wx.Frame):
 
 			self.EnableAbstractionButton()
 
+			### link Editor panel with the diagram if is show
+			mgr = self.GetMGR()
+			if mgr.GetPane('editor').IsShown():
+				self.LinkMGR()
+
 	def EnableAbstractionButton(self):
 		""" Enable DAM and UAM button depending of the abstraction level
 		"""
@@ -819,8 +831,17 @@ class MainApplication(wx.Frame):
 		
 		id = event.GetId()
 		item = self.GetMenuBar().FindItemById(id)
+		
+		### __mgr
 		mgr = self.GetMGR()
 		mgr.LoadPerspective(self.perspectives[item.GetItemLabelText()])
+		
+		mgr.GetPane("editor").Show(True)
+
+		self.LinkMGR()
+
+		### update the mgr
+		mgr.Update()
 
 	def OnDeletePerspective(self, event):
 		"""
@@ -1172,6 +1193,11 @@ class MainApplication(wx.Frame):
 						self.cfg.Flush()
 
 			self.EnableAbstractionButton()
+
+			### link Editor panel with the diagram if is show
+			mgr = self.GetMGR()
+			if mgr.GetPane('editor').IsShown():
+				self.LinkMGR()
 
 	###
 	def OnPrint(self, event):

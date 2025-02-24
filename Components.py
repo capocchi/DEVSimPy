@@ -177,7 +177,7 @@ class DSPComponent:
 
 		# load diagram in a new page
 		diagram = Diagram() if new_tab else canvas.GetDiagram()
-
+		
 		### if diagram is instantiated
 		if diagram:
 			load_file_result = diagram.LoadFile(filename)
@@ -957,7 +957,7 @@ class BlockFactory:
 			### try to find the specification of module
 			spec = importlib.util.find_spec(name, dir_name)
 		
-			if spec:
+			if spec and spec.loader:
 				
 				### try to import module
 				try:

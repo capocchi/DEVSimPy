@@ -247,3 +247,8 @@ pyzo >=4.11.2
 psutil
 
 pyro4
+
+python-dotenv
+
+openai
+ollama

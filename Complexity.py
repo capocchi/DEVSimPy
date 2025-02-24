@@ -77,7 +77,7 @@ def GetMacCabeMetric(path):
                         visitor = codepaths.PathGraphingAstVisitor()
                         visitor.preorder(ast, visitor)
                     except Exception as info:
-                        sys.stdout.write("Error in Complexity module")
+                        sys.stdout.write("Error in Complexity module\n")
                     else:
                         for graph in visitor.graphs.values():
                             complexity += graph.complexity()

@@ -22,6 +22,7 @@ local.properties
 .idea
 .spyproject
 .vsdx
+.env
 
 # External tool builders
 .externalToolBuilders/
