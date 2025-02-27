@@ -54,9 +54,9 @@ from tempfile import gettempdir
 if sys.version_info[0] < 3:
     raise Exception("Must be using Python 3")
 
-__authors__ = "Laurent Capocchi <capocchi_l@univ-corse.fr>, SISU project group <santucci_j@univ-corse.fr>"
+__authors__ = "Laurent Capocchi <capocchi@univ-corse.fr>, <santucci@univ-corse.fr>"
 __date__ = str(datetime.datetime.now())
-__version__ = '4.0'
+__version__ = '5.0'
 __docformat__ = 'epytext'
 __min_wx_version__ = '4.0'
 
