@@ -10,28 +10,20 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/f5c94ecbfb6a3c8986be/maintainability)](https://codeclimate.com/github/capocchi/DEVSimPy/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/f5c94ecbfb6a3c8986be/test_coverage)](https://codeclimate.com/github/capocchi/DEVSimPy/test_coverage)
 
-![GitHub Stats](https://github-readme-stats.vercel.app/api?username=anuraghazra)
-
 ## What is DEVSimPy?
 DEVSimPy is an open-source framework (GPL v3) designed for **modeling and simulating discrete event systems (DEVS)** with a graphical user interface. Developed in Python with [wxPython](http://www.wxpython.org), it simplifies interaction with **PyDEVS** and **PyPDEVS** models.
 
-Supported by the [SPE-SISU](https://spe.universita.corsica/) research team at the **University of Corsica "Pasquale Paoli"**, DEVSimPy provides:
-- A GUI wrapper for PyDEVS, making DEVS modeling intuitive.
-- Compatibility with parallel DEVS modeling via [PyPDEVS](http://msdl.cs.mcgill.ca/projects/DEVS/PythonPDEVS).
-- A plugin-based system for extending features (e.g., tracking, visualization, REST API support).
-- etc.
-
----
-
-## Features
-- **Graphical Modeling**: Design, save, and export DEVS models.
-- **Simulation & Analysis**: Run, suspend, and analyze simulations in real-time.
-- **Code Editing**: Modify DEVS models on the fly.
-- **Model Libraries**: Import/export model libraries for domain-specific applications.
-- **Command-Line Execution**: Run simulations via CLI with `devsimpy-nogui.py`.
-- **Plugin System**: Extend functionality with custom plugins.
-- **YAML Export**: Generate YAML models for [DEVSimPy-mob](https://github.com/capocchi/DEVSimPy_mob).
-- **REST API**: Enable remote simulation execution via [DEVSimPy-REST](https://github.com/capocchi/DEVSimPy_rest).
+### Key Features 🚀
+| Feature               | Description |
+|----------------------|-------------|
+| **Graphical Modeling** | Design, save, and export DEVS models easily. |
+| **Simulation & Analysis** | Run, suspend, and analyze simulations in real-time. |
+| **Code Editing** | Modify DEVS models on the fly. |
+| **Model Libraries** | Import/export libraries for domain-specific applications. |
+| **Command-Line Execution** | Run simulations via CLI with `devsimpy-nogui.py`. |
+| **Plugin System** | Extend functionality with custom plugins. |
+| **YAML Export** | Generate YAML models for [DEVSimPy-mob](https://github.com/capocchi/DEVSimPy_mob). |
+| **REST API** | Enable remote simulation execution via [DEVSimPy-REST](https://github.com/capocchi/DEVSimPy_rest). |
 
 ---
 
@@ -41,7 +33,7 @@ Supported by the [SPE-SISU](https://spe.universita.corsica/) research team at th
 - **wxPython 4.0+**
 - **SciPy & NumPy** (for spectrum analysis, optional)
 
-### Install from Source
+### Standard Installation
 ```sh
 $ git clone --recurse-submodules -b version-4.0 --depth=1 https://github.com/capocchi/DEVSimPy.git
 $ git fetch --unshallow
@@ -80,14 +72,14 @@ $ python devsimpy-nogui.py -h
 
 ---
 
-## Documentation
+## Documentation 📖
 - **[DEVSimPy User Guide v2.8 (French)](http://portailweb.universita.corsica/stockage_public/portail/baaaaaes/files/DEVSimPy_guide_utilisateur.pdf)**
 - **[S. Toma Ph.D. Thesis (English)](https://hal.archives-ouvertes.fr/tel-01141844/document)** *(Winner of the 2014 DEVS PhD Dissertation Award)*
 - **[Technical Report (Polish)](http://portailweb.universita.corsica/stockage_public/portail/baaaaaes/files/report_Cezary.pdf)**
 
 ---
 
-## Citing DEVSimPy
+## Citing DEVSimPy 📌
 If you use DEVSimPy in your research, cite it using:
 ```bibtex
 @misc{capocchi2019devsimpy,
@@ -112,7 +104,7 @@ If you use DEVSimPy in your research, cite it using:
 
 ---
 
-## Videos & Resources
+## Videos & Resources 🎥
 - **[YouTube](https://www.youtube.com/results?search_query=devsimpy)**
 - **[Personal Website](https://capocchi-l.universita.corsica/)**
 
@@ -120,6 +112,6 @@ For extensions, see **[this repository](https://github.com/jscott-thompson/DEVSi
 
 ---
 
-### Contributions & Feedback
-We welcome **contributions and feedback**! Feel free to submit issues, pull requests, or join discussions to help improve DEVSimPy.
+## Contributions & Feedback 💡
+We welcome **contributions and feedback**! Feel free to submit issues, pull requests, or join discussions to help improve DEVSimPy. 🚀
 
