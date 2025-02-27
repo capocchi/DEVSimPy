@@ -3527,7 +3527,6 @@ msgid ""
 msgstr ""
 "Le noyau PyPDEVS 2.4.1 n'est pas chargé.\n"
 "Merci de l'installer dans le répertoire %s à partir de (https://github.com/kdheepak/pypdevs.git)."
-"git)"
 
 #: devsimpy.py:525
 #, fuzzy
