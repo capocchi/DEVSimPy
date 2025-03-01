@@ -59,15 +59,13 @@ class unzip:
                 sys.stdout.write(_("Extracting %s\n")%name)
             elif perc > 0 and (i % perc) == 0 and i > 0:
                 complete = int (i / perc) * percent
-                sys.stdout.write(_("%s \% complete\n")%complete)
+            sys.stdout.write(_("%s%% complete\n")%complete)
 
             if not name.endswith('/'):
-                outfile = open(os.path.join(dir, name), 'wb')
-                outfile.write(zf.read(name))
-                outfile.flush()
-                outfile.close()
-
-		zf.close()
+                with open(os.path.join(dir, name), 'wb') as outfile:
+                    outfile.write(zf.read(name))
+                    outfile.flush()
+        zf.close()
 
     def _createstructure(self, file, dir):
         self._makedirs(self._listdirs(file), dir)
@@ -83,15 +81,8 @@ class unzip:
         """ Grabs all the directories in the zip structure
         This is necessary to create the structure before trying
         to extract the file to it. """
-        zf = zipfile.ZipFile(file)
-
-        dirs = []
-
-        for name in zf.namelist():
-            if name.endswith('/'):
-                dirs.append(name)
-
-		zf.close()
+        with zipfile.ZipFile(file) as zf:
+            dirs = [name for name in zf.namelist() if name.endswith('/')]
 
         dirs.sort()
         return dirs

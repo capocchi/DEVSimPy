@@ -129,28 +129,11 @@ def GetArgs(cls = None):
 	"""
 
 	if inspect.isclass(cls):
-
 		try:
 			constructor = inspect.getargspec(cls.__init__)
 			return dict(zip(constructor.args[1:], constructor.defaults)) if constructor.defaults else {}
 		except:
 			sys.stderr.write(_("Error in GetArgs: First parameter is not a class\n"))
-
-		# try:
-		# 	constructor = inspect.getargspec(cls.__init__)
-		# 	return dict(list(zip(constructor[0][1:], constructor[3]))) if constructor[3] != None else {}
-		# except ValueError:
-		# 	constructor = inspect.signature(cls.__init__)
-		# 	parameters = constructor.parameters
-		# 	parameter_dict = {}
-
-		# 	for name, parameter in parameters.items():
-		# 		if name != 'self':
-		# 			if parameter.default != inspect.Parameter.empty:
-		# 				parameter_dict[name] = parameter.default
-
-		# 	return parameter_dict
-
 			
 	return None
 
@@ -161,14 +144,14 @@ def GetArgs(cls = None):
 ###########################################################
 
 class DSPComponent:
+	""" 
 	"""
-	"""
+
 	@staticmethod
 	def Load(filename, label, canvas):
 		""" Load component from filename.
 		"""
 		from Container import Diagram
-		#assert(filename.endswith('.dsp'))
 
 		# its possible to use the orignal copy of the droped diagram
 		dial = wx.MessageDialog(canvas, _('Do you want to open the orignal diagram in a new tab?'), label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
@@ -299,9 +282,6 @@ class GenericComponent:
 			self._oid = self._canvas.GetDiagram().GetoPortCount()
 		else:
 			self._oid = 0.0
-
-		#self._iid = kwargs['id'] if 'id' in kwargs else self._canvas.diagram.GetiPortCount()
-		#self._oid = kwargs['id'] if 'id' in kwargs else self._canvas.diagram.GetoPortCount()
 
 		self._inputs = kwargs.get('inputs',1)
 		self._outputs = kwargs.get('outputs',1)

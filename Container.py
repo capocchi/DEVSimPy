@@ -78,6 +78,7 @@ GREEN = '#90ee90'
 BLACK = '#000000'
 BLUE = '#add8e6'
 ORANGE = '#ffa500'
+GREY_LIGHT = '#d3d3d3'
 
 import Components
 
@@ -1226,7 +1227,8 @@ class Shape(ShapeEvtHandler):
 
 		self.x = array.array('d',x)                      # list of x coord
 		self.y = array.array('d',y)                      # list of y coords
-		self.fill= Shape.FILL          # fill color
+		self.fill = Shape.FILL          # fill color
+		self.dashed = False ## dashed line
 		self.pen = [self.fill[0] , 1, 100]   # pen color and size / 100 = wx.PENSTYLE_SOLID
 		self.font = [FONT_SIZE, 74, 93, 700, u'Arial']
 
@@ -1242,6 +1244,11 @@ class Shape(ShapeEvtHandler):
 		if len(self.pen) > 2:
 			pen_args.append(self.pen[2])
 		dc.SetPen(wx.Pen(*pen_args))
+
+		if self.dashed:
+			self.pen[2] = wx.PENSTYLE_SHORT_DASH
+		else:
+			self.pen[2] = wx.PENSTYLE_SOLID
 
 		# Set the brush color
 		dc.SetBrush(wx.Brush(brushclr))
@@ -1304,13 +1311,29 @@ class Shape(ShapeEvtHandler):
 	#	pass
 
 	def lock(self):
+		""" Lock the connection shape. It will not be moved.
+		"""
 		self.lock_flag = True
 
 	def unlock(self):
+		""" Unlock the connection shape. It will be moved.
+		"""
 		self.lock_flag = False
 
+	def enable(self):
+		""" Enable the connection shape. It will be drawn with a solid line.
+		"""
+		self.dashed = False
+		self.enabled_flag = True
+
+	def disable(self):
+		""" Disable the connection shape. It will be drawn with a dashed line.
+		"""
+		self.dashed = True
+		self.enabled_flag = False
+		
 	def Copy(self):
-		""" Function that return the deep copy of shape
+		""" Function that return the deep copy of shape.
 		"""
 		return copy.deepcopy(self)
 
@@ -1854,7 +1877,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			"""
 			"""
 			for s in self.getSelectedShapes():
-				if hasattr(s,'lock'):
+				if hasattr(s, 'lock'):
 					s.lock()
 
 		@Post_Undo
@@ -1864,6 +1887,22 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			for s in self.getSelectedShapes():
 				if hasattr(s,'unlock'):
 					s.unlock()
+
+		@Post_Undo
+		def OnEnable(self, event):
+			"""
+			"""
+			for s in self.getSelectedShapes():
+				if hasattr(s, 'enable'):
+					s.enable()
+
+		@Post_Undo
+		def OnDisable(self, event):
+			"""
+			"""
+			for s in self.getSelectedShapes():
+				if hasattr(s,'disable'):
+					s.disable()
 
 		def OnRightDown(self, event):
 			""" Mouse Right Down event manager.
@@ -3083,7 +3122,7 @@ class LinesShape(Shape):
 			pass
 
 		integer_list = [(int(x), int(y)) for x, y in L]
-
+			
 		if ShapeCanvas.CONNECTOR_TYPE == 'curve':
 			dc.DrawSpline(integer_list)
 		else:
@@ -3119,7 +3158,6 @@ class LinesShape(Shape):
 
 			# Draw the arrow as a filled polygon
 			dc.DrawPolygon([wx.Point(*map(int, p1)), wx.Point(*map(int, p2)), wx.Point(*map(int, p3))])
-
 		
 	def get_bezier_curve_points(self, points):
 		"""Generate control points for smooth curve."""
@@ -3478,6 +3516,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		self.output = None
 		self.touch_list = []
 		self.lock_flag = False                  # move lock
+		self.enabled_flag = False
 
 	def __setstate__(self, state):
 		""" Restore state from the unpickled state values.
@@ -3485,6 +3524,8 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		####################################" Just for old model
 		if 'touch_list' not in state: state['touch_list'] = []
 		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
+		if 'enabled_flag' not in state: state['enabled_flag'] = False
+		if 'dashed' not in state: state['dashed'] = False
 		##############################################
 
 		self.__dict__.update(state)
@@ -3519,10 +3560,10 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		if self.output:
 			self.x[-1],self.y[-1] = self.output[0].getPortXY('input', self.output[1])
 
-		LinesShape.draw(self,dc)
+		LinesShape.draw(self, dc)
 
 	def lock(self):
-		"""
+		""" Lock the connection shape and its connected models
 		"""
 
 		if self.input and self.output:
@@ -3535,8 +3576,10 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 			try: host2.lock()
 			except: pass
 
+			self.lock_flag = True
+
 	def unlock(self):
-		"""
+		""" Unlock the connection shape and its connected models
 		"""
 
 		if self.input and self.output:
@@ -3548,6 +3591,8 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 
 			try: host2.unlock()
 			except: pass
+
+			self.lock_flag = False
 
 	def OnLeftDClick(self, event):
 		""" Left Double click has been invoked.
@@ -3604,6 +3649,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		self.nb_copy = 0        # nombre de fois que le bloc est copié (pour le label des blocks copiés
 		self.last_name_saved = ""
 		self.lock_flag = False                  # move lock
+		self.enabled_flag = True               # enable/disable block flag
 		self.bad_filename_path_flag = False 
 
 	###
@@ -3682,7 +3728,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 			dc.DrawText(self.status_label, int(mx), int(my+20))
 		else:
 			self.status_label = ""
-
+	
 	#def OnResize(self):
 		#Shape.OnResize(self)
 
@@ -4099,6 +4145,8 @@ class CodeBlock(Achievable, Block, Iconizable):
 		####################################" Just for old model
 		if 'bad_filename_path_flag' not in state: state['bad_filename_path_flag'] = False
 		if 'lock_flag' not in state: state['lock_flag'] = False
+		if 'enabled_flag' not in state: state['enabled_flag'] = True
+		if 'dashed' not in state: state['dashed'] = False
 		if 'image_path' not in state:
 			state['image_path'] = ""
 			state['attributes'].insert(3,'image_path')
@@ -4165,7 +4213,13 @@ class CodeBlock(Achievable, Block, Iconizable):
 				img = load_and_resize_image(icon.getFileName())
 				x,y = int(self.x[1]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
 				dc.DrawBitmap(img, x, y)
-				
+
+		### Change the color depending on the state of the block (enabled or not)		
+		if self.enabled_flag:
+			self.fill[0] = Shape.FILL[0]
+		else:
+			self.fill[0] = GREY_LIGHT
+
 		Block.draw(self, dc)
 
 	###
@@ -4379,6 +4433,8 @@ class ContainerBlock(Block, Iconizable, Diagram):
 		####################################" Just for old model
 		if 'bad_filename_path_flag' not in state: state['bad_filename_path_flag'] = False
 		if 'lock_flag' not in state: state['lock_flag'] = False
+		if 'enabled_flag' not in state: state['enabled_flag'] = True
+		if 'dashed' not in state: state['dashed'] = False
 		if 'parent' not in state: state['parent'] = None
 		if 'image_path' not in state:
 			state['image_path'] = ""
@@ -4439,6 +4495,12 @@ class ContainerBlock(Block, Iconizable, Diagram):
 				img = load_and_resize_image(icon.getFileName())
 				x,y = int(self.x[1]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
 				dc.DrawBitmap(img, x, y)
+
+		### Change the color depending on the state of the block (enabled or not)
+		if self.enabled_flag:
+			self.fill[0] = ContainerBlock.FILL[0]
+		else:
+			self.fill[0] = GREY_LIGHT
 
 		Block.draw(self, dc)
 
@@ -4771,12 +4833,14 @@ class ResizeableNode(Node):
 	""" Resizeable(item, index, cf, type).
 	"""
 
+	FILL = [BLACK]
+
 	def __init__(self, item, index, cf, t = 'rect'):
 		""" Constructor.
 		"""
 		Node.__init__(self, item, index, cf, t)
 
-		self.fill = [BLACK]
+		self.fill = ResizeableNode.FILL
 
 	def draw(self, dc):
 		""" Drawing method.
@@ -4809,19 +4873,18 @@ class ResizeableNode(Node):
 			if (isinstance(self.item, Block) and X >= 50 and Y >= 50) or not isinstance(self.item, Block):
 				self.item.x[self.index] += x
 				self.item.y[self.index] += y
-				
-				#self.item.OnResize()
 
 	def OnDeleteNode(self, event):
 		"""
 		"""
+
 		if isinstance(self.item, ConnectionShape):
-			for x in self.item.x:
-				if x-3 <= event.GetX() <= x+3:
-					y = self.item.y[self.item.x.index(x)]
-					if y-3 <= event.GetY() <= y+3:
-						self.item.x.remove(x)
-						self.item.y.remove(y)
+			for x_coord in self.item.x:
+				if x_coord-3 <= event.GetX() <= x_coord+3:
+					y_coord = self.item.y[self.item.x.index(x_coord)]
+					if y_coord-3 <= event.GetY() <= y_coord+3:
+						self.item.x.remove(x_coord)
+						self.item.y.remove(y_coord)
 
 	###
 	def OnRightDown(self, event):
@@ -4871,6 +4934,9 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 		####################################" Just for old model
 		if 'r' not in state: state['r'] = 30.0
 		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
+		if 'dashed' not in state: state['dashed'] = False
+		if 'lock_flag' not in state: state['lock_flag'] = False
+		if 'enable_flag' not in state: state['enable_flag'] = True
 		if 'label_pos' not in state:
 			state['label_pos'] = 'center'
 			state['attributes'].insert(1,'label_pos')
