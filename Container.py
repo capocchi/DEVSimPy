@@ -387,7 +387,11 @@ class Diagram(Savable, Structurable):
 			diagram.setDEVSModel(DomainInterface.MasterModel.Master())
 
 		### shape list of diagram
-		shape_list = diagram.GetShapeList()
+		shape_list = [
+						shape for shape in diagram.GetShapeList() 
+						if not hasattr(shape, 'enabled_flag') or (hasattr(shape, 'enabled_flag') and shape.enabled_flag)
+					]
+	
 		block_list = {c for c in shape_list if isinstance(c, Block)}
 		
 		### for all codeBlock shape, we make the devs instance
@@ -3516,7 +3520,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		self.output = None
 		self.touch_list = []
 		self.lock_flag = False                  # move lock
-		self.enabled_flag = False
+		self.enabled_flag = True
 
 	def __setstate__(self, state):
 		""" Restore state from the unpickled state values.
