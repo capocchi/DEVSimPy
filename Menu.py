@@ -122,6 +122,8 @@ ID_LEFT_ROTATE_OUTPUT_SHAPE = wx.NewIdRef()
 ID_DELETE_SHAPE = wx.ID_DELETE
 ID_LOCK_SHAPE = wx.NewIdRef()
 ID_UNLOCK_SHAPE = wx.NewIdRef()
+ID_ENABLE_SHAPE = wx.NewIdRef()
+ID_DISABLE_SHAPE = wx.NewIdRef()
 ID_EXPORT_SHAPE = wx.NewIdRef()
 ID_EXPORT_AMD_SHAPE = wx.NewIdRef()
 ID_EXPORT_CMD_SHAPE = wx.NewIdRef()
@@ -1030,6 +1032,8 @@ class ShapePopupMenu(wx.Menu):
 		delete=wx.MenuItem(self, ID_DELETE_SHAPE, _("Delete"), _("Delete the model"))
 		lock=wx.MenuItem(self, ID_LOCK_SHAPE, _("Lock"), _("Lock the link"))
 		unlock=wx.MenuItem(self, ID_UNLOCK_SHAPE, _("Unlock"), _("Unlock the link"))
+		enable=wx.MenuItem(self, ID_ENABLE_SHAPE, _("Enable"), _("Enable the link for the simulation"))
+		disable=wx.MenuItem(self, ID_DISABLE_SHAPE, _("Disable"), _("Disable the link for the simulation"))
 		export=wx.MenuItem(self, ID_EXPORT_SHAPE, _("Export"), _("Export the model"))
 		exportAMD=wx.MenuItem(self, ID_EXPORT_AMD_SHAPE, _("AMD"), _("Model exported to a amd file"))
 		exportCMD=wx.MenuItem(self, ID_EXPORT_CMD_SHAPE, _("CMD"), _("Model exported to a cmd file"))
@@ -1056,6 +1060,8 @@ class ShapePopupMenu(wx.Menu):
 		delete.SetBitmap(load_and_resize_image('delete.png'))
 		lock.SetBitmap(load_and_resize_image('lock.png'))
 		unlock.SetBitmap(load_and_resize_image('unlock.png'))
+		enable.SetBitmap(load_and_resize_image('check.png'))
+		disable.SetBitmap(load_and_resize_image('no_ok.png'))
 		plugin.SetBitmap(load_and_resize_image('plugins.png'))
 		properties.SetBitmap(load_and_resize_image('properties.png'))
 
@@ -1070,14 +1076,24 @@ class ShapePopupMenu(wx.Menu):
 			export_subMenu.AppendItem = export_subMenu.Append
 			
 		if isinstance(shape, Container.ConnectionShape):
-    
+			
 			AppendItem(delete)
-			AppendItem(lock)
-			AppendItem(unlock)
+
+			if shape.lock_flag:
+				AppendItem(unlock) # Add unlock action to the menu
+			else:
+				AppendItem(lock)  # Add lock action to the menu
+
+			if (shape.enabled_flag):
+				AppendItem(disable)
+			else:
+				AppendItem(enable)
 
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnDelete, id=ID_DELETE_SHAPE)
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnLock, id=ID_LOCK_SHAPE)
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnUnLock, id=ID_UNLOCK_SHAPE)
+			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnEnable, id=ID_ENABLE_SHAPE)
+			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnDisable, id=ID_DISABLE_SHAPE)
 
 		elif isinstance(shape, Container.ResizeableNode):
 			Delete_menu = AppendItem(delete)
@@ -1108,8 +1124,16 @@ class ShapePopupMenu(wx.Menu):
 			AppendItem(copy)
 			AppendItem(paste)
 			AppendItem(cut)
-			AppendItem(lock)
-			AppendItem(unlock)
+
+			if(shape.lock_flag):
+				AppendItem(unlock) # Add unlock action to the menu
+			else:
+				AppendItem(lock) # Add lock action to the menu
+
+			if (shape.enabled_flag):
+				AppendItem(disable)
+			else:
+				AppendItem(enable)
 
 			if wx.VERSION_STRING >= '4.0':
 				rotate_subMenu.AppendItem = rotate_subMenu.Append
@@ -1213,6 +1237,8 @@ class ShapePopupMenu(wx.Menu):
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnPaste, id=ID_PASTE_SHAPE)
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnLock, id=ID_LOCK_SHAPE)
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnUnLock, id=ID_UNLOCK_SHAPE)
+			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnEnable, id=ID_ENABLE_SHAPE)
+			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnDisable, id=ID_DISABLE_SHAPE)
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnProperties, id=ID_PROPERTIES_SHAPE)
 
 			# Codeblock specific binding
