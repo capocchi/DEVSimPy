@@ -426,6 +426,21 @@ class Base(object):
 		# The activity tracking event occurs
 		PluginManager.trigger_event('VIEW_ACTIVITY_REPORT', parent=self, master=self.current_master)
 
+	def MsgBoxEmptyModel(self):
+		""" Pop-up alert for empty model
+		"""
+		dial = wx.MessageDialog(self,
+							_('You want to simulate an empty master model!'),
+							_('Simulation Manager'),
+							wx.OK|wx.ICON_EXCLAMATION)
+
+		if (dial.ShowModal() == wx.ID_OK) and (isinstance(self.parent, wx.Frame)):
+			self.PrepareDestroyWin()
+			### destroy the frame
+			self.Destroy()
+		else:
+			return
+
 	###
 	def OnOk(self, event):
 		""" When Run button is clicked.

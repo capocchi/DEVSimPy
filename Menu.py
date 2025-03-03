@@ -1125,15 +1125,10 @@ class ShapePopupMenu(wx.Menu):
 			AppendItem(paste)
 			AppendItem(cut)
 
-			if(shape.lock_flag):
+			if shape.lock_flag:
 				AppendItem(unlock) # Add unlock action to the menu
 			else:
 				AppendItem(lock) # Add lock action to the menu
-
-			if (shape.enabled_flag):
-				AppendItem(disable)
-			else:
-				AppendItem(enable)
 
 			if wx.VERSION_STRING >= '4.0':
 				rotate_subMenu.AppendItem = rotate_subMenu.Append
@@ -1198,6 +1193,12 @@ class ShapePopupMenu(wx.Menu):
 				self.Enable(ID_EDIT_SHAPE, False)
 
 			self.AppendSeparator()
+
+			if shape.enabled_flag:
+				AppendItem(disable)
+			else:
+				AppendItem(enable)
+				
 			AppendItem(delete)
 
 			### Plug-in manager only for Block model
