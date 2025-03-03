@@ -388,7 +388,7 @@ class Diagram(Savable, Structurable):
 
 		### shape list of diagram
 		shape_list = [
-						shape for shape in diagram.GetShapeList() 
+						shape for shape in diagram.GetShapeList()
 						if not hasattr(shape, 'enabled_flag') or (hasattr(shape, 'enabled_flag') and shape.enabled_flag)
 					]
 	
@@ -515,7 +515,7 @@ class Diagram(Savable, Structurable):
 		for m in (s for s in shape_list if isinstance(s, ConnectionShape)):
 			m1,n1 = m.input
 			m2,n2 = m.output
-			if isinstance(m1, Block) and isinstance(m2, Block):
+			if (isinstance(m1, Block) and m1.isEnabled()) and (isinstance(m2, Block) and m2.isEnabled()):
 				try:
 					p1 = m1.getDEVSModel().OPorts[n1]
 				except:
@@ -531,7 +531,7 @@ class Diagram(Savable, Structurable):
 
 				Structurable.ConnectDEVSPorts(diagram, p1, p2)
 
-			elif isinstance(m1, Block) and isinstance(m2, oPort):
+			elif (isinstance(m1, Block) and m1.isEnabled()) and isinstance(m2, oPort):
 				### TODO insert devs_uam
 				p1 = m1.getDEVSModel().OPorts[n1]
 
@@ -548,7 +548,7 @@ class Diagram(Savable, Structurable):
 				#p1 = m1.getDEVSModel().OPorts[n1]
 				#p2 = diagram.getDEVSModel().OPorts[m2.id]
 				#Structurable.ConnectDEVSPorts(diagram, p1, p2)
-			elif isinstance(m1, iPort) and isinstance(m2, Block):
+			elif isinstance(m1, iPort) and (isinstance(m2, Block) and m2.isEnabled()):
 				### TODO insert devs_dam
 
 				###==============================================================================
@@ -1250,7 +1250,7 @@ class Shape(ShapeEvtHandler):
 		dc.SetPen(wx.Pen(*pen_args))
 
 		if self.dashed:
-			self.pen[2] = wx.PENSTYLE_SHORT_DASH
+			self.pen[2] = wx.PENSTYLE_DOT_DASH
 		else:
 			self.pen[2] = wx.PENSTYLE_SOLID
 
@@ -1327,15 +1327,16 @@ class Shape(ShapeEvtHandler):
 	def enable(self):
 		""" Enable the connection shape. It will be drawn with a solid line.
 		"""
-		self.dashed = False
 		self.enabled_flag = True
 
 	def disable(self):
 		""" Disable the connection shape. It will be drawn with a dashed line.
 		"""
-		self.dashed = True
 		self.enabled_flag = False
 		
+	def isEnabled(self):
+		return self.enabled_flag
+	
 	def Copy(self):
 		""" Function that return the deep copy of shape.
 		"""
@@ -3528,7 +3529,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		####################################" Just for old model
 		if 'touch_list' not in state: state['touch_list'] = []
 		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
-		if 'enabled_flag' not in state: state['enabled_flag'] = False
+		if 'enabled_flag' not in state: state['enabled_flag'] = True
 		if 'dashed' not in state: state['dashed'] = False
 		##############################################
 
@@ -3563,6 +3564,9 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 
 		if self.output:
 			self.x[-1],self.y[-1] = self.output[0].getPortXY('input', self.output[1])
+
+		self.fill = Shape.FILL if self.enabled_flag else [GREY_LIGHT]
+		self.dashed = not self.enabled_flag
 
 		LinesShape.draw(self, dc)
 
@@ -3733,6 +3737,10 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		else:
 			self.status_label = ""
 	
+		### Change the color depending on the state of the block (enabled or not)
+		self.fill = getattr(self.__class__, 'FILL', [GREY_LIGHT]) if self.enabled_flag else [GREY_LIGHT]
+		self.dashed = not self.enabled_flag
+
 	#def OnResize(self):
 		#Shape.OnResize(self)
 
@@ -4218,12 +4226,6 @@ class CodeBlock(Achievable, Block, Iconizable):
 				x,y = int(self.x[1]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
 				dc.DrawBitmap(img, x, y)
 
-		### Change the color depending on the state of the block (enabled or not)		
-		if self.enabled_flag:
-			self.fill[0] = Shape.FILL[0]
-		else:
-			self.fill[0] = GREY_LIGHT
-
 		Block.draw(self, dc)
 
 	###
@@ -4500,13 +4502,21 @@ class ContainerBlock(Block, Iconizable, Diagram):
 				x,y = int(self.x[1]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
 				dc.DrawBitmap(img, x, y)
 
-		### Change the color depending on the state of the block (enabled or not)
-		if self.enabled_flag:
-			self.fill[0] = ContainerBlock.FILL[0]
-		else:
-			self.fill[0] = GREY_LIGHT
-
 		Block.draw(self, dc)
+
+	def enable(self):
+		""" Enable the block.
+		"""
+		self.enabled_flag = True
+		for shape in self.shapes:  
+			shape.enable()
+
+	def disable(self):
+		""" Disable the block.
+		"""
+		self.enabled_flag = False
+		for shape in self.shapes:  
+			shape.disable()
 
 	###
 	def OnLeftDown(self, event):
@@ -4929,7 +4939,8 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 		self.AddAttribute('id')
 		#self.id = 0
 		self.args = {}
-		self.lock_flag = False                  # move lock
+		self.lock_flag = False    # move lock
+		self.enabled_flag = True # enable flag
 
 	def __setstate__(self, state):
 		""" Restore state from the unpickled state values.
@@ -4940,7 +4951,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
 		if 'dashed' not in state: state['dashed'] = False
 		if 'lock_flag' not in state: state['lock_flag'] = False
-		if 'enable_flag' not in state: state['enable_flag'] = True
+		if 'enabled_flag' not in state: state['enabled_flag'] = True
 		if 'label_pos' not in state:
 			state['label_pos'] = 'center'
 			state['attributes'].insert(1,'label_pos')
@@ -4983,6 +4994,10 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 		if self.lock_flag:
 			img = load_and_resize_image('lock.png')
 			dc.DrawBitmap(img, int(self.x[0]+w/3), int(self.y[0]))
+
+		### Change the color depending on the state of the block (enabled or not)
+		self.fill = getattr(self.__class__, 'FILL', [GREY_LIGHT]) if self.enabled_flag else [GREY_LIGHT]
+		self.dashed = not self.enabled_flag
 
 	def leftUp(self, event):
 		""" Left up event has been invoked.
@@ -5051,12 +5066,14 @@ class iPort(Port):
 	""" IPort(label) for ContainerBlock (coupled model)
 	"""
 
+	FILL = [GREEN]
+
 	def __init__(self, label = 'iPort'):
 		""" Constructor.
 		"""
 
 		Port.__init__(self, 50, 60, 100, 120, label)
-		self.fill= [GREEN]
+		self.fill = iPort.FILL
 		#self.AddAttribute('id')
 		self.label_pos = 'bottom'
 		self.input = 0
@@ -5078,12 +5095,14 @@ class oPort(Port):
 	""" OPort(label) for ContainerBlock (coupled model)
 	"""
 
+	FILL = [RED]
+
 	def __init__(self, label = 'oPort'):
 		""" Construcotr
 		"""
 
 		Port.__init__(self, 50, 60, 100, 120, label)
-		self.fill = [RED]
+		self.fill = oPort.FILL
 		#self.AddAttribute('id')
 		self.label_pos = 'bottom'
 		self.input = 1
@@ -5105,13 +5124,15 @@ class ScopeGUI(CodeBlock):
 	""" ScopeGUI(label)
 	"""
 
+	FILL = [ORANGE]
+
 	def __init__(self, label = 'QuickScope'):
 		""" Constructor
 		"""
 
 		CodeBlock.__init__(self, label, 1, 0)
 
-		self.fill = [ORANGE]
+		self.fill = ScopeGUI.FILL
 
 		### enable edition on properties panel
 		self.AddAttribute("xlabel")
@@ -5138,12 +5159,14 @@ class DiskGUI(CodeBlock):
 	""" DiskGUI(label)
 	"""
 
+	FILL = [ORANGE]
+
 	def __init__(self, label='DiskGUI'):
 		""" Constructor.
 		"""
 		CodeBlock.__init__(self, label, 1, 0)
 
-		self.fill = [ORANGE]
+		self.fill = DiskGUI.FILL
 
 	def OnLeftDClick(self, event):
 		""" Left Double Click has been appeared.
