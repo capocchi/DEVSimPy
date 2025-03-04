@@ -7,7 +7,7 @@
 #                    L. CAPOCCHI (capocchi@univ-corse.fr)
 #                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-# Version 2.0                                        last modified: 03/15/20
+# Version 2.0                                        last modified: 03/04/25
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -106,7 +106,7 @@ from Decorators import BuzyCursorNotification, Post_Undo
 from Utilities import HEXToRGB, relpath, playSound, sendEvent, load_and_resize_image, getInstance, FixedList, getObjectFromString, getTopLevelWindow, printOnStatusBar
 from Patterns.Observer import Subject, Observer
 
-if builtins.__dict__.get('GUI_FLAG',True):
+if builtins.__dict__.get('GUI_FLAG', True):
 	from DetachedFrame import DetachedFrame
 	from AttributeEditor import AttributeEditor, QuickAttributeEditor
 	from PropertiesGridCtrl import PropertiesGridCtrl
@@ -114,7 +114,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 #Global Stuff -------------------------------------------------
 clipboard = []
 
-PORT_RESOLUTION = True
+# PORT_RESOLUTION = True
 
 ##############################################################
 #                                                            #
@@ -389,7 +389,7 @@ class Diagram(Savable, Structurable):
 		### shape list of diagram
 		shape_list = [
 						shape for shape in diagram.GetShapeList()
-						if not hasattr(shape, 'enabled_flag') or (hasattr(shape, 'enabled_flag') and shape.enabled_flag)
+						if not hasattr(shape, 'enable') or (hasattr(shape, 'enable') and shape.enable)
 					]
 	
 		block_list = {c for c in shape_list if isinstance(c, Block)}
@@ -603,18 +603,18 @@ class Diagram(Savable, Structurable):
 		return diagram.getDEVSModel()
 
 	def SetParent(self, parent):
-		"""
+		""" Set the parent of the diagram.
 		"""
 		assert isinstance(parent, ShapeCanvas)
 		self.parent =  parent
 
 	def GetParent(self):
-		"""
+		""" Get the parent of the diagram.
 		"""
 		return self.parent
 
 	def GetGrandParent(self):
-		"""
+		""" Get the grand parent of the diagram.
 		"""
 		return self.GetParent().GetParent()
 
@@ -686,7 +686,7 @@ class Diagram(Savable, Structurable):
 		dlg.Show()
 
 	def OnInformation(self, event):
-		"""
+		""" Method that show the information of the diagram
 		"""
 		stat_dico = self.GetStat({'Atomic_nbr':0, 'Coupled_nbr':0, 'Connection_nbr':0, 'Deep_level':0, 'iPort_nbr':0, 'oPort_nbr':0})
 		msg = "".join( [_("Path: %s\n")%self.last_name_saved,
@@ -983,6 +983,7 @@ class Diagram(Savable, Structurable):
 		else:
 			pass
 
+	# It is acceptable to ignore this AttributeError because the attribute might not exist in all cases.
 	def UpdateAddingCounter(self, shape):
 		""" Method that update the added shape counter
 		"""
@@ -1034,7 +1035,7 @@ class Diagram(Savable, Structurable):
 		self.parent.DiagramModified()
 
 	def ChangeShapeOrder(self, shape, pos=0):
-		"""
+		""" Function that change the position of the shape in the diagram
 		"""
 		self.shapes.remove(shape)
 		self.shapes.insert(pos,shape)
@@ -1206,6 +1207,12 @@ class ShapeEvtHandler(ABC):
 	def OnSelect(self, event):
 		pass
 
+	def OnEnable(self, event):
+		pass
+
+	def OnDisable(self, event):
+		pass
+
 	def OnDeselect(self, event):
 		pass
 
@@ -1229,10 +1236,10 @@ class Shape(ShapeEvtHandler):
 		""" Constructor
 		"""
 
-		self.x = array.array('d',x)                      # list of x coord
-		self.y = array.array('d',y)                      # list of y coords
+		self.x = array.array('d',x)     # list of x coord
+		self.y = array.array('d',y)     # list of y coords
 		self.fill = Shape.FILL          # fill color
-		self.dashed = False ## dashed line
+		self.dashed = False 			# dashed line used to enable/disbale the shape
 		self.pen = [self.fill[0] , 1, 100]   # pen color and size / 100 = wx.PENSTYLE_SOLID
 		self.font = [FONT_SIZE, 74, 93, 700, u'Arial']
 
@@ -1324,18 +1331,23 @@ class Shape(ShapeEvtHandler):
 		"""
 		self.lock_flag = False
 
-	def enable(self):
+	def OnEnable(self):
 		""" Enable the connection shape. It will be drawn with a solid line.
 		"""
-		self.enabled_flag = True
+		self.dashed = False
 
-	def disable(self):
+	def OnDisable(self):
 		""" Disable the connection shape. It will be drawn with a dashed line.
 		"""
-		self.enabled_flag = False
+		self.dashed = True
 		
 	def isEnabled(self):
-		return self.enabled_flag
+		""" Function that return the enable attribute of the shape.
+		"""
+		if hasattr(self, 'enable'):
+			return self.enable
+		else:
+			return None
 	
 	def Copy(self):
 		""" Function that return the deep copy of shape.
@@ -1488,15 +1500,22 @@ class PolygonShape(Shape):
 #-------------------------------------------------------------------------------
 class CircleShape(Shape):
 	def __init__(self,x=20, y=20, x2=120, y2=120, r=30.0):
+		""" Constructor
+		"""
 		Shape.__init__(self, [x,x2], [y,y2])
 		self.r = r
 
-	def draw(self,dc):
+	def draw(self, dc):
+		""" Draw method
+		"""
 		Shape.draw(self,dc)
 		dc.SetFont(wx.Font(10, self.font[1],self.font[2], self.font[3], False, self.font[4]))
 		dc.DrawCircle(int((self.x[0]+self.x[1])/2), int((self.y[0]+self.y[1])/2), int(self.r))
 
 	def HitTest(self, x, y):
+		""" Hitest method
+		"""
+
 		if x < self.x[0]: return False
 		if x > self.x[1]: return False
 		if y < self.y[0]: return False
@@ -1506,6 +1525,9 @@ class CircleShape(Shape):
 #-------------------------------------------------------------------------------
 class PointShape(Shape):
 	def __init__(self, x=20, y=20, size=4, type='rect'):
+		""" Constructor
+		"""
+
 		Shape.__init__(self, [x] , [y])
 		self.type = type
 		self.size = size
@@ -1522,8 +1544,8 @@ class PointShape(Shape):
 		self.graphic.pen = self.pen
 		self.graphic.fill = self.fill
 
-	def moveto(self,x,y):
-		"""
+	def moveto(self, x, y):
+		""" Move to method
 		"""
 		self.x = x
 		self.y = y
@@ -1532,8 +1554,8 @@ class PointShape(Shape):
 		self.graphic.x = [x-size, x+size]
 		self.graphic.y = [y-size, y+size]
 
-	def move(self,x,y):
-		"""
+	def move(self, x, y):
+		""" Move method
 		"""
 		
 		# self.x = array.array('d', [v+x for v in self.x])
@@ -1559,7 +1581,7 @@ class PointShape(Shape):
 		self.graphic.fill = self.fill
 		self.graphic.draw(dc)
 
-if builtins.__dict__.get('GUI_FLAG',True):
+if builtins.__dict__.get('GUI_FLAG', True):
 	#-------------------------------------------------------------------------------
 	class ShapeCanvas(wx.ScrolledWindow, Abstractable, Subject):
 		""" ShapeCanvas class.
@@ -1661,22 +1683,30 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 		@Post_Undo
 		def AddShape(self, shape, after = None):
+			""" Method that insert shape into the diagram at the position 'after
+			"""
 			self.diagram.AddShape(shape, after)
 			self.UpdateShapes([shape])
 
 		def InsertShape(self, shape, index = 0):
+			""" Method that insert shape into the diagram to the index position
+			"""
 			self.diagram.InsertShape(shape, index)
 
 		@Post_Undo
 		def DeleteShape(self, shape):
+			""" Method that delete all shape links
+			"""
 			self.diagram.DeleteShape(shape)
 
 		def RemoveShape(self, shape):
+			""" Method that remove shape from the diagram
+			"""
 			self.diagram.DeleteShape(shape)
 
 		@Post_Undo
 		def keyPress(self, event):
-			"""
+			""" Key press event
 			"""
 
 			key = event.GetKeyCode()
@@ -1806,17 +1836,17 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			self.Refresh()
 
 		def getWidth(self):
-			"""
+			""" Return the width of the canvas
 			"""
 			return self.GetSize()[0]
 
 		def getHeight(self):
-			"""
+			""" Return the height
 			"""
 			return self.GetSize()[1]
 
 		def DoDrawing(self, dc):
-			"""
+			""" Draw the shapes
 			"""
 
 			dc.SetUserScale(self.scalex, self.scaley)
@@ -1853,7 +1883,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				#dc.SetClippingRect(rect)
 
 		def OnPaint(self, event):
-			"""
+			""" Paint event manager
 			"""
 
 			#pdc = wx.PaintDC(self)
@@ -1879,7 +1909,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 		@Post_Undo
 		def OnLock(self, event):
-			"""
+			""" Lock the selected shape
 			"""
 			for s in self.getSelectedShapes():
 				if hasattr(s, 'lock'):
@@ -1887,7 +1917,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 		@Post_Undo
 		def OnUnLock(self, event):
-			"""
+			""" Unlock the selected shape
 			"""
 			for s in self.getSelectedShapes():
 				if hasattr(s,'unlock'):
@@ -1895,19 +1925,17 @@ if builtins.__dict__.get('GUI_FLAG',True):
 
 		@Post_Undo
 		def OnEnable(self, event):
-			"""
+			""" Enable the selected shape
 			"""
 			for s in self.getSelectedShapes():
-				if hasattr(s, 'enable'):
-					s.enable()
+				s.OnEnable()
 
 		@Post_Undo
 		def OnDisable(self, event):
-			"""
+			""" Disable the selected shape
 			"""
 			for s in self.getSelectedShapes():
-				if hasattr(s,'disable'):
-					s.disable()
+				s.OnDisable()
 
 		def OnRightDown(self, event):
 			""" Mouse Right Down event manager.
@@ -1939,7 +1967,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			event.Skip()
 
 		def GetNodeLists(self, source, target):
-			"""
+			""" Return the list of node for source and target
 			"""
 
 			# deselect and select target in order to get its list of node (because the node are generated dynamicly)
@@ -1965,8 +1993,9 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					yield m
 
 		def OnConnectTo(self, event):
+			""" Connect selected shape to another shape
 			"""
-			"""
+
 			id = event.GetId()
 			menu = event.GetEventObject()
 
@@ -2009,8 +2038,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			sp,tp = self.dlgConnection.GetSelectedIndex()
 
 			### local variables
-			snl = len(self.sourceNodeList)
-			tnl = len(self.targetNodeList)
+			# snl = len(self.sourceNodeList)
+			# tnl = len(self.targetNodeList)
 
 			### flag to inform if there are modifications
 			modify_flag = False
@@ -2113,7 +2142,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			self.select(ci)
 
 		def OnCloseConnectionDialog(self, event):
-			"""
+			""" Close the connection dialog
 			"""
 			### deselection de la dernier connection creer
 			self.deselect()
@@ -2128,17 +2157,17 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			event.Skip()
 
 		def OnMiddleDown(self, event):
-			"""
+			""" Middle button down event manager
 			"""
 			self.scroller.Start(event.GetPosition())
 
 		def OnMiddleUp(self, event):
-			"""
+			""" Middle button up event manager
 			"""
 			self.scroller.Stop()
 
 		def OnCopy(self, event):
-			"""
+			""" Copy menu has been clicked. Event is transmit to the model
 			"""
 			del clipboard[:]
 			for m in self.select():
@@ -2204,7 +2233,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 				return None
 
 		def OnStartWizard(self, event):
-			"""
+			""" New model menu has been pressed. Wizard is instanciate.
 			"""
 
 			obj = event.GetEventObject()
@@ -2364,7 +2393,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			self.deselect()
 
 		def DiagramReplace(self, d):
-			"""
+			""" Replace the current diagram by a new one
 			"""
 			self.diagram = d
 
@@ -2373,38 +2402,41 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			self.Refresh()
 
 		def OnRightUp(self,event):
-			"""
+			""" Right Up mouse bouton has been invoked in the canvas instance.
 			"""
 			try:
-				self.getInterceptedShape(event).OnRightUp(event)
+				shape = self.getInterceptedShape(event)
+				if shape:
+					shape.OnRightUp(event)
 			except AttributeError:
 				pass
 			event.Skip()
 
 		def OnRightDClick(self,event):
-			"""
+			""" Right double clic mouse bouton has been invoked in the canvas
 			"""
 			try:
-				self.getInterceptedShape(event).OnRightDClick(event)
+				shape = self.getInterceptedShape(event)
+				if shape:
+					shape.OnRightDClick(event)
 			except AttributeError:
 				pass
-
 			event.Skip()
 
 		def OnLeftDClick(self,event):
+			""" Left double clic mouse bouton has been invoked in the canvas
 			"""
-			"""
-			model = self.getInterceptedShape(event)
+			shape = self.getInterceptedShape(event)
 			
-			if model:
+			if shape:
 				try:
-					model.OnLeftDClick(event)
+					shape.OnLeftDClick(event)
 				except Exception as info:
 					wx.MessageBox(_("An error is occured during double clic: %s")%info)
 			event.Skip()
 
 		def Undo(self):
-			"""
+			""" Undo the last operation
 			"""
 
 			### dump solution
@@ -2504,7 +2536,7 @@ if builtins.__dict__.get('GUI_FLAG',True):
 		###
 		@Post_Undo
 		def OnLeftUp(self, event):
-			"""
+			""" Left Up mouse bouton has been invoked in the canvas instance
 			"""
 
 			cursor = self.GetCursor()
@@ -2664,18 +2696,18 @@ if builtins.__dict__.get('GUI_FLAG',True):
 			event.Skip()
 
 		def OnTimer(self, event):
-			"""
+			""" Timer event manager.
 			"""
 			if self.f:
 				self.f.Show()
 
 		def OnMouseEnter(self, event):
-			"""
+			""" Mouse enter event manager
 			"""
 			self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
 			
 		def OnMouseLeave(self, event):
-			"""
+			""" Mouse leave event manager
 			"""
 			pass
 			#self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
@@ -2776,8 +2808,8 @@ if builtins.__dict__.get('GUI_FLAG',True):
 					except AttributeError as info:
 						raise AttributeError(_("use >= wx-2.8-gtk-unicode library: %s")%info)
 
-		def OnIdle(self,event):
-			"""
+		def OnIdle(self, event):
+			""" Idle event
 			"""
 			if self.refresh_need:
 				self.Refresh(False)
@@ -2954,7 +2986,6 @@ if builtins.__dict__.get('GUI_FLAG',True):
 		def getEventCoordinates(self, event):
 			""" Return the coordinates from event.
 			"""
-			
 			return self.getScalledCoordinates(event.GetX(), event.GetY())
 
 		def getSelectedShapes(self):
@@ -3165,7 +3196,9 @@ class LinesShape(Shape):
 			dc.DrawPolygon([wx.Point(*map(int, p1)), wx.Point(*map(int, p2)), wx.Point(*map(int, p3))])
 		
 	def get_bezier_curve_points(self, points):
-		"""Generate control points for smooth curve."""
+		"""Generate control points for smooth curve.
+		"""
+
 		if len(points) < 3:
 			return points
 
@@ -3192,7 +3225,7 @@ class LinesShape(Shape):
 		return bezier_points
 	
 	def HitTest(self, x, y):
-		"""
+		""" Hit test for line
 		"""
 
 		if x < min(self.x)-3:return False
@@ -3284,7 +3317,7 @@ class Testable(object):
 
 	# NOTE: Testable :: OnTestEditor 		=> new event for AMD model. Open tests files in editor
 	def OnTestEditor(self, event):
-		"""
+		""" Test Editor
 		"""
 
 		L = self.GetTestFile()
@@ -3331,23 +3364,33 @@ class Testable(object):
 
 	# NOTE: Testable :: isAMD 				=> Test if the model is an AMD and if it's well-formed
 	def isAMD(self):
+		""" Test if the model is an AMD and if it's well-formed
+		"""
 		fn = os.path.dirname(self.python_path)
 		return zipfile.is_zipfile(fn) and fn.endswith(('.amd')) if os.path.isfile(fn) else False
 
 	def isCMD(self):
+		""" Test if the model is an AMD and if it's well-formed
+		"""
 		fn = os.path.dirname(self.python_path)
 		return zipfile.is_zipfile(fn) and fn.endswith(('.cmd')) if os.path.isfile(fn) else False
 
 	def isPYC(self):
+		""" Test if the model is an AMD and if it's well-formed
+		"""
 		return self.python_path.endswith('.pyc') if os.path.isfile(self.python_path) else False
 
 	def isPY(self):
+		""" Test if the model is an AMD and if it's well-formed
+		"""
 		return self.python_path.endswith('.py') if os.path.isfile(self.python_path) else False
 
 	# NOTE: Testable :: CreateTestsFiles	=> AMD tests files creation
 	def CreateTestsFiles(self):
+		""" Create tests files for AMD model
+		"""
 		devsPath = os.path.dirname(self.python_path)
-		name = os.path.splitext(os.path.basename(self.python_path))[0]
+		# name = os.path.splitext(os.path.basename(self.python_path))[0]
 		zf = ZipManager.Zip(devsPath)
 
 		feat, steps, env = self.CreateFeature(), self.CreateSteps(), Testable.CreateEnv()
@@ -3376,6 +3419,8 @@ class Testable(object):
 
 	# NOTE: Testable :: CreateFeature		=> Feature file creation
 	def CreateFeature(self):
+		""" Create feature file
+		"""
 		name = os.path.splitext(os.path.basename(self.python_path))[0]
 		feature = "%s.feature"%name
 		with open(feature, 'w+') as feat:
@@ -3385,6 +3430,8 @@ class Testable(object):
 
 	# NOTE: Testable :: CreateSteps		=> Steps file creation
 	def CreateSteps(self):
+		""" Create steps file
+		"""
 		steps = "steps.py"
 		with open(steps, 'w+') as step:
 			step.write("# -*- coding: utf-8 -*-\n")
@@ -3394,6 +3441,8 @@ class Testable(object):
 	# NOTE: Testable :: CreateEnv		=> Environment file creation
 	@staticmethod
 	def CreateEnv(path=None):
+		""" Create environment file
+		"""
 		if path:
 			environment = os.path.join(path, 'environment.py')
 		else:
@@ -3405,6 +3454,8 @@ class Testable(object):
 
 	# NOTE: Testable :: GetTempTests		=> Create tests on temporary folder for execution
 	def GetTempTests(self, global_env=None):
+		""" Create tests on temporary folder for execution
+		"""
 		if not global_env: global_env = False
 
 		### Useful vars definition-----------------------------------------------------------------
@@ -3485,6 +3536,8 @@ class Testable(object):
 	# NOTE: Testable :: RemoveTempTests		=> Remove tests on temporary folder
 	@staticmethod
 	def RemoveTempTests():
+		""" Remove tests on temporary folder
+		"""
 		tempdir = os.path.realpath(gettempdir())
 		feat_dir = os.path.join(tempdir, 'features')
 		if os.path.exists(feat_dir):
@@ -3521,7 +3574,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		self.output = None
 		self.touch_list = []
 		self.lock_flag = False                  # move lock
-		self.enabled_flag = True
+		self.enable = True
 
 	def __setstate__(self, state):
 		""" Restore state from the unpickled state values.
@@ -3529,34 +3582,34 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		####################################" Just for old model
 		if 'touch_list' not in state: state['touch_list'] = []
 		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
-		if 'enabled_flag' not in state: state['enabled_flag'] = True
+		if 'enable' not in state: state['enable'] = True
 		if 'dashed' not in state: state['dashed'] = False
 		##############################################
 
 		self.__dict__.update(state)
 
 	def setInput(self, item, index):
-		"""
+		""" Set input port of connection shape.
 		"""
 		self.input = (item, index)
 
 	def setOutput(self, item, index):
-		"""
+		""" Set output port of connection shape
 		"""
 		self.output = (item, index)
 
 	def getInput(self):
-		"""
+		""" Get input port of connection shape.
 		"""
 		return self.input
 
 	def getOutput(self):
-		"""
+		""" Get output port of connection shape.
 		"""
 		return self.output
 
 	def draw(self, dc):
-		"""
+		""" Drawing connection shape
 		"""
 
 		if self.input:
@@ -3565,8 +3618,8 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		if self.output:
 			self.x[-1],self.y[-1] = self.output[0].getPortXY('input', self.output[1])
 
-		self.fill = Shape.FILL if self.enabled_flag else [GREY_LIGHT]
-		self.dashed = not self.enabled_flag
+		self.fill = Shape.FILL if self.enable else [GREY_LIGHT]
+		# self.dashed = not self.enable
 
 		LinesShape.draw(self, dc)
 
@@ -3602,6 +3655,18 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 
 			self.lock_flag = False
 
+	def OnEnable(self):
+		""" Enable the connection shape
+		"""
+		self.enable = True
+		return super().OnEnable()
+
+	def OnDisable(self):
+		""" Disable the connection shape
+		"""
+		self.enable = False
+		return super().OnDisable()
+
 	def OnLeftDClick(self, event):
 		""" Left Double click has been invoked.
 		"""
@@ -3623,7 +3688,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 
 	###
 	def OnProperties(self, event):
-		"""
+		""" Properties event has been invoked.
 		"""
 		pass
 		#canvas = event.GetEventObject()
@@ -3631,6 +3696,8 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		#f.Show()
 
 	def __del__(self):
+		""" Destructor
+		"""
 		pass
 
 #Basic Graphical Components-----------------------------------------------------
@@ -3657,12 +3724,12 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		self.nb_copy = 0        # nombre de fois que le bloc est copié (pour le label des blocks copiés
 		self.last_name_saved = ""
 		self.lock_flag = False                  # move lock
-		self.enabled_flag = True               # enable/disable block flag
+		self.enable = True               # enable/disable block flag
 		self.bad_filename_path_flag = False 
 
 	###
 	def draw(self, dc):
-		"""
+		""" Drawing block
 		"""
 
 		# Mac's DC is already the same as a GCDC, and it causes
@@ -3738,18 +3805,22 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 			self.status_label = ""
 	
 		### Change the color depending on the state of the block (enabled or not)
-		self.fill = getattr(self.__class__, 'FILL', [GREY_LIGHT]) if self.enabled_flag else [GREY_LIGHT]
-		self.dashed = not self.enabled_flag
+		self.fill = getattr(self.__class__, 'FILL', [GREY_LIGHT]) if self.enable else [GREY_LIGHT]
+		# self.dashed = not self.enable
 
 	#def OnResize(self):
 		#Shape.OnResize(self)
 
 	###
 	def OnLeftUp(self, event):
+		""" Left up event has been invoked.
+		"""
 		event.Skip()
 
 	###
 	def leftUp(self, items):
+		""" Left up event has been invoked.
+		"""
 		pass
 
 	###
@@ -3776,14 +3847,14 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 
 	###
 	def OnProperties(self, event):
-		"""
+		""" Properties event has been invoked.
 		"""
 		canvas = event.GetEventObject()
 		f = AttributeEditor(canvas.GetParent(), wx.NewIdRef(), self, canvas)
 		f.Show()
 		
 	def OnPluginsManager(self, event):
-		"""
+		""" Method that open Plugin Manager.
 		"""
 		canvas = event.GetEventObject()
 		f = PluginsGUI.ModelPluginsManager(	parent=canvas.GetParent(),
@@ -3907,7 +3978,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 
 	###
 	def __repr__(self):
-		"""
+		""" Representation of the block.
 		"""
 		return "".join([_("\n\t Label: %s\n")%self.label,
 						_("\t Input/Output: %s,%s\n")%(str(self.input), str(self.output))]
@@ -3922,6 +3993,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 	def __init__(self, label = 'CodeBlock', nb_inputs = 1, nb_outputs = 1):
 		""" Constructor.
 		"""
+
 		Block.__init__(self, label, nb_inputs, nb_outputs)
 		Achievable.__init__(self)
 		Iconizable.__init__(self, ['trash', 'edit'])
@@ -4157,7 +4229,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 		####################################" Just for old model
 		if 'bad_filename_path_flag' not in state: state['bad_filename_path_flag'] = False
 		if 'lock_flag' not in state: state['lock_flag'] = False
-		if 'enabled_flag' not in state: state['enabled_flag'] = True
+		if 'enable' not in state: state['enable'] = True
 		if 'dashed' not in state: state['dashed'] = False
 		if 'image_path' not in state:
 			state['image_path'] = ""
@@ -4228,7 +4300,19 @@ class CodeBlock(Achievable, Block, Iconizable):
 
 		Block.draw(self, dc)
 
+	def OnEnable(self):
+		""" Enable the block.
+		"""
+		self.enable = True
+		return super().OnEnable()
+	
+	def OnDisable(self):
+		""" Disable the block.
+		"""
+		self.enable = False
+		return super().OnDisable()
 	###
+
 	def OnLeftDown(self, event):
 		""" On Left Click has been done.
 		""" 
@@ -4264,13 +4348,13 @@ class CodeBlock(Achievable, Block, Iconizable):
 
 	###
 	def OnSelect(self, event):
-		"""
+		""" On select event has been invoked.
 		"""
 		self.selected = True
 
 	###
 	def OnDeselect(self, event):
-		"""
+		""" On deselect event has been invoked.
 		"""
 		self.selected = False
 
@@ -4439,7 +4523,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 		####################################" Just for old model
 		if 'bad_filename_path_flag' not in state: state['bad_filename_path_flag'] = False
 		if 'lock_flag' not in state: state['lock_flag'] = False
-		if 'enabled_flag' not in state: state['enabled_flag'] = True
+		if 'enable' not in state: state['enable'] = True
 		if 'dashed' not in state: state['dashed'] = False
 		if 'parent' not in state: state['parent'] = None
 		if 'image_path' not in state:
@@ -4482,8 +4566,9 @@ class ContainerBlock(Block, Iconizable, Diagram):
 
 	###
 	def draw(self, dc):
+		""" Draw the block on DC.
 		"""
-		"""
+
 		if self.selected:
 			### inform about the nature of the block using icon
 			icon = Icon('coupled', (4,2))
@@ -4504,19 +4589,21 @@ class ContainerBlock(Block, Iconizable, Diagram):
 
 		Block.draw(self, dc)
 
-	def enable(self):
+	def OnEnable(self):
 		""" Enable the block.
 		"""
-		self.enabled_flag = True
+		self.enable = True
 		for shape in self.shapes:  
-			shape.enable()
-
-	def disable(self):
+			shape.OnEnable()
+		return super().OnEnable()
+	
+	def OnDisable(self):
 		""" Disable the block.
 		"""
-		self.enabled_flag = False
+		self.enable = False
 		for shape in self.shapes:  
-			shape.disable()
+			shape.OnDisable()
+		return super().OnDisable()
 
 	###
 	def OnLeftDown(self, event):
@@ -4544,13 +4631,13 @@ class ContainerBlock(Block, Iconizable, Diagram):
 
 	###
 	def OnSelect(self, event):
-		"""
+		""" On select event has been invoked.
 		"""
 		self.selected = True
 
 	###
 	def OnDeselect(self, event):
-		"""
+		""" On deselect event has been invoked.
 		"""
 		self.selected = False
 
@@ -4889,7 +4976,7 @@ class ResizeableNode(Node):
 				self.item.y[self.index] += y
 
 	def OnDeleteNode(self, event):
-		"""
+		""" Delete node method.
 		"""
 
 		if isinstance(self.item, ConnectionShape):
@@ -4940,7 +5027,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 		#self.id = 0
 		self.args = {}
 		self.lock_flag = False    # move lock
-		self.enabled_flag = True # enable flag
+		self.enable = True # enable flag
 
 	def __setstate__(self, state):
 		""" Restore state from the unpickled state values.
@@ -4951,7 +5038,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
 		if 'dashed' not in state: state['dashed'] = False
 		if 'lock_flag' not in state: state['lock_flag'] = False
-		if 'enabled_flag' not in state: state['enabled_flag'] = True
+		if 'enable' not in state: state['enable'] = True
 		if 'label_pos' not in state:
 			state['label_pos'] = 'center'
 			state['attributes'].insert(1,'label_pos')
@@ -4996,8 +5083,8 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 			dc.DrawBitmap(img, int(self.x[0]+w/3), int(self.y[0]))
 
 		### Change the color depending on the state of the block (enabled or not)
-		self.fill = getattr(self.__class__, 'FILL', [GREY_LIGHT]) if self.enabled_flag else [GREY_LIGHT]
-		self.dashed = not self.enabled_flag
+		self.fill = getattr(self.__class__, 'FILL', [GREY_LIGHT]) if self.enable else [GREY_LIGHT]
+		# self.dashed = not self.enable
 
 	def leftUp(self, event):
 		""" Left up event has been invoked.
@@ -5026,6 +5113,19 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 	# 		Selectable.OnRenameFromClick(self, event)
 	# 	event.Skip()
 
+	def OnEnable(self):
+		""" Enable the port.
+		"""
+		self.enable = True
+		return super().OnEnable()
+
+	def OnDisable(self):
+		""" Disable the port.
+		"""
+
+		self.enable = False
+		return super().OnDisable()
+	
 	def OnProperties(self, event):
 		""" Properties of port has been invoked.
 		"""
@@ -5056,7 +5156,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 				canvas.UpdateShapes([self])
 
 	def __repr__(self):
-		"""
+		""" Text representation.
 		"""
 		s=_("\t Label: %s\n")%self.label
 		return s
@@ -5080,9 +5180,13 @@ class iPort(Port):
 		self.output = 1
 
 	def getDEVSModel(self):
+		""" Get the DEVS model.
+		"""
 		return self
 
 	def setDEVSModel(self, devs):
+		""" Set the DEVS model.
+		"""
 		self = devs
 
 	def __repr__(self):
@@ -5109,9 +5213,13 @@ class oPort(Port):
 		self.output = 0
 
 	def getDEVSModel(self):
+		""" Get the DEVS model.
+		"""
 		return self
 
 	def setDEVSModel(self, devs):
+		""" Set the DEVS model.
+		"""
 		self = devs
 
 	def __repr__(self):
