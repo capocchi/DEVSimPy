@@ -1,4 +1,7 @@
 [run]
+source = DEVSimPy
 omit =
-    */pypdevs241/*
+   DEVSKernel/*
+    **/DEVSKernel/*
+    **/DEVSKernel/**/*.py
     

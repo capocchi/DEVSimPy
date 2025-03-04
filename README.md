@@ -4,11 +4,11 @@
 
 # DEVSimPy: Python-Based GUI for DEVS Simulation
 
-[![Build Status](https://travis-ci.org/capocchi/DEVSimPy.svg?branch=master)](https://travis-ci.org/capocchi/DEVSimPy)
+[![Build Status](https://github.com/capocchi/DEVSimPy/actions/workflows/main.yml/badge.svg)](https://github.com/capocchi/DEVSimPy/actions)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
-[![Coverage Status](https://coveralls.io/repos/github/capocchi/DEVSimPy/badge.svg?branch=master)](https://coveralls.io/github/capocchi/DEVSimPy?branch=master)
+[![codecov](https://codecov.io/gh/capocchi/DEVSimPy/branch/master/graph/badge.svg)](https://codecov.io/gh/capocchi/DEVSimPy)
 [![Maintainability](https://api.codeclimate.com/v1/badges/f5c94ecbfb6a3c8986be/maintainability)](https://codeclimate.com/github/capocchi/DEVSimPy/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/f5c94ecbfb6a3c8986be/test_coverage)](https://codeclimate.com/github/capocchi/DEVSimPy/test_coverage)
+[![Coverage Status](https://coveralls.io/repos/github/capocchi/DEVSimPy/badge.svg?branch=master)](https://coveralls.io/github/capocchi/DEVSimPy?branch=master)
 
 ## What is DEVSimPy?
 DEVSimPy is an open-source framework (GPL v3) designed for **modeling and simulating discrete event systems (DEVS)** with a graphical user interface. Developed in Python with [wxPython](http://www.wxpython.org), it simplifies interaction with **PyDEVS** and **PyPDEVS** models.
