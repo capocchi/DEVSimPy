@@ -1084,7 +1084,7 @@ class ShapePopupMenu(wx.Menu):
 			else:
 				AppendItem(lock)  # Add lock action to the menu
 
-			if (shape.enabled_flag):
+			if (shape.enable):
 				AppendItem(disable)
 			else:
 				AppendItem(enable)
@@ -1174,6 +1174,7 @@ class ShapePopupMenu(wx.Menu):
 			if isinstance(shape, Container.CodeBlock):
 				AppendMenu(self, -1, _("Export"), export_subMenu)
 				Export_SubMenu1 = export_subMenu.Append(exportAMD)
+				self.AppendSeparator()
 
 				if shape.isPYC():
 					Export_SubMenu1.Enable(False)
@@ -1182,9 +1183,10 @@ class ShapePopupMenu(wx.Menu):
 				PluginManager.trigger_event("ADD_WCOMP_EXPORT_MENU", parent=self, model=shape, submenu= export_subMenu)
 
 			elif isinstance(shape, Container.ContainerBlock):
-				self.AppendSeparator()
-				AppendMenu(self, -1, _("Export"), export_subMenu)
 				
+				AppendMenu(self, -1, _("Export"), export_subMenu)
+				self.AppendSeparator()
+
 				Export_SubMenu1 = export_subMenu.Append(exportCMD)
 				export_subMenu.Append(exportXML)
 				export_subMenu.Append(exportJS)
@@ -1192,9 +1194,7 @@ class ShapePopupMenu(wx.Menu):
 			else:
 				self.Enable(ID_EDIT_SHAPE, False)
 
-			self.AppendSeparator()
-
-			if shape.enabled_flag:
+			if shape.enable:
 				AppendItem(disable)
 			else:
 				AppendItem(enable)
