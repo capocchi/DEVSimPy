@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]  # Plateformes prises en charge
+        os: [ubuntu-latest] # Plateformes prises en charge - https://github.com/actions/runner-images
         python: ["3.10"]  # Version de Python stable
 
     steps:
@@ -24,7 +24,6 @@ jobs:
           architecture: x64
 
       - name: Install system dependencies (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -35,31 +34,14 @@ jobs:
             libgtk-3-dev \
             xvfb
 
-      - name: Install system dependencies (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install \
-            sdl2 \
-            gtk+3 \
-            wxpython \
-            libnotify
-
       - name: Upgrade pip, setuptools, and wheel
         run: |
           python -m pip install --upgrade pip setuptools wheel
 
-      - name: Cache pip dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: pip-${{ runner.os }}-${{ matrix.python }}-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            pip-${{ runner.os }}-${{ matrix.python }}-
-
       - name: Install Python dependencies
         run: |
           pip install --no-cache-dir --prefer-binary \
-            wxPython \
+            wxpython \
             psutil \
             pyYAML \
             PyPubSub \
@@ -68,12 +50,7 @@ jobs:
             openai \
             ollama
 
-      - name: Run DEVSimPy Test (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Run DEVSimPy Test
         run: |
           xvfb-run python devsimpy.py examples/model0/model0.dsp 10 start quit
 
-      - name: Run DEVSimPy Test (Windows & macOS)
-        if: matrix.os != 'ubuntu-latest'
-        run: |
-          python devsimpy.py examples/model0/model0.dsp 10 start quit
