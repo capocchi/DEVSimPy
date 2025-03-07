@@ -30,7 +30,7 @@ jobs:
 
       - name: Install GTK dependencies (for wxPython)
         run: |
-          choco install gtk3
+          run: choco install gtk-runtime --confirm
 
       - name: Install Python dependencies
         run: |
