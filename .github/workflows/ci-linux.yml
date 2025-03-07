@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  build:
+  build-linux:
     runs-on: ${{ matrix.os }}
 
     strategy:
