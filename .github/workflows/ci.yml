@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]  # Plateformes prises en charge
+        os: [ubuntu-latest, windows-latest]  # Plateformes prises en charge
         python: ["3.10"]  # Version de Python stable
 
     steps:
