@@ -2220,8 +2220,12 @@ if builtins.__dict__.get('GUI_FLAG', True):
 			if not isinstance(parent, ShapeCanvas):
 				### Get path of the selected lib in order to change the last step of wizard
 				### TODO: GetFocusedItem failed on Linux!
-				sdp = parent.GetItemPyData(parent.GetFocusedItem())
-				kargs['specific_domain_path']=sdp
+				focus_item = parent.GetFocusedItem()
+				if focus_item.IsOk():
+					sdp = parent.GetItemPyData(focus_item)
+					kargs['specific_domain_path'] = sdp
+				else:
+					sdp = None
 
 			gmwiz = WizardGUI.ModelGeneratorWizard(**kargs)
 			gmwiz.run()

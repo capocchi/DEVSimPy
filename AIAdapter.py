@@ -22,15 +22,16 @@
 
 import logging
 from abc import ABC, abstractmethod
-from openai import OpenAI
 import socket
 import subprocess
 import builtins
 import wx
-import ollama
 import os
 import sys
 import urllib.request
+
+from openai import OpenAI
+from ollama import chat
 
 from Decorators import BuzyCursorNotification, cond_decorator, ProgressNotification
 from Utilities import check_internet
@@ -503,7 +504,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
         try:
             # Send the prompt to the Ollama server
-            response = ollama.chat(
+            response = chat(
                 model=self.model_name,
                 messages=[{"role": "user", "content": prompt}]
             )

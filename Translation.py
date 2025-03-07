@@ -30,17 +30,3 @@ else:
 
 	#compile
 	os.system("msgfmt ./locale/fr/LC_MESSAGES/DEVSimPy.po -o ./locale/fr/LC_MESSAGES/DEVSimPy.mo")
-
-
-# import openai
-
-# openai.api_key = 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
-
-# prompt = f"Ecris moi une conclusion d'un article qui parle de l'utilisation de l'API ChatGPT"
-
-# completion = openai.ChatCompletion.create(
-#   model="gpt-3.5-turbo", 
-#   messages=[{"role": "user", "content": prompt}]
-# )
-
-# print(completion['choices'][0]['message']['content'])
