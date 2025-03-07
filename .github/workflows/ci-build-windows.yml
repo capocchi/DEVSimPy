@@ -24,17 +24,36 @@ jobs:
           architecture: x64
 
       - name: Upgrade pip, setuptools, and wheel
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
+        run: python -m pip install --upgrade pip setuptools wheel
 
-      - name: Install GTK dependencies (for wxPython)
+      - name: Download wxPython wheel
         run: |
-          choco install gtk-runtime --confirm
+          curl -L -o wxPython.whl https://extras.wxpython.org/wxPython4.2.2/wxPython-4.2.2-cp310-cp310-win_amd64.whl
+          ls -lh  # Vérifie les fichiers téléchargés
 
-      - name: Install Python dependencies
+      - name: Rename wxPython wheel
+        run: |
+          mv wxPython.whl wxPython-4.2.2-cp310-cp310-win_amd64.whl
+          ls -lh  # Vérifie le fichier renommé
+
+      - name: Vérifier l'architecture
+        run: python -c "import struct; print(struct.calcsize('P') * 8)"
+  
+      - name: Vérifier la compatibilité du .whl
+        run: python -m pip debug --verbose
+      
+      - name: Install wxPython from local wheel
+        run: |
+          python -m pip install wxPython-4.2.2-cp310-cp310-win_amd64.whl
+
+      
+      - name: Install wxPython from local wheel
+        run: python -m pip install wxPython.whl
+      
+      - name: Install other Python dependencies
         run: |
           python -m pip install --no-cache-dir --prefer-binary \
-            wxPython psutil pyYAML PyPubSub \
+            psutil pyYAML PyPubSub \
             ruamel.yaml matplotlib openai ollama
 
       - name: Run DEVSimPy Tests

@@ -40,15 +40,16 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          pip install --no-cache-dir --prefer-binary \
-            wxpython \
-            psutil \
-            pyYAML \
-            PyPubSub \
-            ruamel.yaml \
-            matplotlib \
-            openai \
-            ollama
+          pip install -r requirements.txt
+          # pip install --no-cache-dir --prefer-binary \
+          #   wxpython \
+          #   psutil \
+          #   pyYAML \
+          #   PyPubSub \
+          #   ruamel.yaml \
+          #   matplotlib \
+          #   openai \
+          #   ollama
 
       - name: Run DEVSimPy Test
         run: |
