@@ -1,6 +1,6 @@
 ### Requirements for the DEVSimPy-nogui.py file
 PyPubSub
-PyYAML 
+PyYAML
 chart_studio
 matildapeak-guesstag
 matplotlib
