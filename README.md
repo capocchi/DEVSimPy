@@ -4,7 +4,8 @@
 
 # DEVSimPy: Python-Based GUI for DEVS Simulation
 
-[![Build Status](https://img.shields.io/github/workflow/status/capocchi/DEVSimPy/CI-linux?label=Linux&logo=github)](https://github.com/capocchi/DEVSimPy/actions?query=workflow%3A%22CI-linux%22)
+[![Build-Ubuntu](https://github.com/capocchi/DEVSimPy/actions/workflows/ci-build-ubuntu.yml/badge.svg?branch=master&event=check_run)](https://github.com/capocchi/DEVSimPy/actions/workflows/ci-build-ubuntu.yml)
+[![Build-Windows](https://github.com/capocchi/DEVSimPy/actions/workflows/ci-build-windows.yml/badge.svg?branch=master&event=check_run)](https://github.com/capocchi/DEVSimPy/actions/workflows/ci-build-windows.yml)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 [![codecov](https://codecov.io/gh/capocchi/DEVSimPy/branch/master/graph/badge.svg)](https://codecov.io/gh/capocchi/DEVSimPy)
 [![Maintainability](https://api.codeclimate.com/v1/badges/f5c94ecbfb6a3c8986be/maintainability)](https://codeclimate.com/github/capocchi/DEVSimPy/maintainability)

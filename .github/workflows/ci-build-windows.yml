@@ -1,4 +1,4 @@
-name: CI-Windows
+name: CI-BUILD-Windows
 
 on:
   push:
@@ -29,7 +29,7 @@ jobs:
 
       - name: Install GTK dependencies (for wxPython)
         run: |
-          run: choco install gtk-runtime --confirm
+          choco install gtk-runtime --confirm
 
       - name: Install Python dependencies
         run: |
