@@ -1,0 +1,43 @@
+name: CI-Windows
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        python: ["3.10"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          architecture: x64
+
+      - name: Upgrade pip, setuptools, and wheel
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+
+      - name: Install GTK dependencies (for wxPython)
+        run: |
+          choco install gtk3
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --no-cache-dir --prefer-binary \
+            wxPython psutil pyYAML PyPubSub \
+            ruamel.yaml matplotlib openai ollama
+
+      - name: Run DEVSimPy Tests
+        run: |
+          python devsimpy.py examples/model0/model0.dsp 10 start quit
