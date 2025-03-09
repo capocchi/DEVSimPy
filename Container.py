@@ -2776,9 +2776,14 @@ if builtins.__dict__.get('GUI_FLAG', True):
 
 			mainW = self.GetTopLevelParent()
 
+			### list of childs  
+			childrens = mainW.GetChildren()
+			if not isinstance(childrens,list):
+				childrens = list(childrens)
+
 			flag = True
 			### find if window exists on the top of model, then inactive the QuickAttributeEditor
-			for win in [w for w in mainW.GetChildren() if w.IsTopLevel()]:
+			for win in [w for w in childrens if w.IsTopLevel()]:
 				if win.IsActive():
 					flag = False
 

@@ -1,57 +1,56 @@
-name: CI-BUILD-Ubuntu
+### local lauch: act -j build
+
+name: Test Installing DEVSimPy on Ubuntu (latest), using conda
 
 on:
-  push:
-    branches:
-      - master
+    push:
+      branches:
+        - master
 
 jobs:
-  build-linux:
-    runs-on: ${{ matrix.os }}
-
+  build-ubuntu:
+    runs-on: ubuntu-latest
     strategy:
+      max-parallel: 1
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest] # Plateformes prises en charge - https://github.com/actions/runner-images
-        python: ["3.10"]  # Version de Python stable
-
+        python-version: ['3.10','3.11','3.12','3.13']
+    defaults:
+      run:
+        shell: bash -l {0}
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python }}
-          architecture: x64
+    - name: Set up Python with Miniconda
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        miniconda-version: latest
+        conda-version: "*"
+        channels: conda-forge,defaults
+        channel-priority: true
+        activate-environment: anaconda-client-env
+        python-version: ${{ matrix.python-version }}
 
-      - name: Install system dependencies (Ubuntu)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            dpkg-dev \
-            build-essential \
-            libsdl2-dev \
-            libnotify-dev \
-            libgtk-3-dev \
-            xvfb
+    - name: Install conda dependencies
+      run: |
+        conda install -y -c conda-forge python=${{ matrix.python-version }} numpy=>1.22 matplotlib=>3.6 wxpython=>4.2 pip
+        conda info -a
+        conda list
 
-      - name: Upgrade pip, setuptools, and wheel
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-
-      - name: Install Python dependencies
-        run: |
-          pip install -r requirements.txt
-          # pip install --no-cache-dir --prefer-binary \
-          #   wxpython \
-          #   psutil \
-          #   pyYAML \
-          #   PyPubSub \
-          #   ruamel.yaml \
-          #   matplotlib \
-          #   openai \
-          #   ollama
-
-      - name: Run DEVSimPy Test
-        run: |
-          xvfb-run python devsimpy.py examples/model0/model0.dsp 10 start quit
-
+    - name: Install dependencies with pip
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install --no-cache-dir --prefer-binary \
+            psutil \
+            pyYAML \
+            PyPubSub \
+            ruamel.yaml \
+            matplotlib \
+            openai \
+            ollama
+    
+    - name: Test DEVSimPy with xvfb
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb
+        xvfb-run python devsimpy.py examples/model0/model0.dsp 10 start quit

@@ -696,7 +696,7 @@ def path_to_module(abs_python_filename):
 def getInstance(cls, args = {}):
 	""" Function that return the instance from class and args.
 	"""
-
+	
 	if inspect.isclass(cls):
 		try:
 			devs = cls(**args)

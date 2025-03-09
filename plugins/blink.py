@@ -20,7 +20,7 @@ _ = gettext.gettext
 from types import MethodType
 
 from PluginManager import PluginManager
-from Container import DetachedFrame, ConnectionShape, CodeBlock, ContainerBlock
+from Container import DetachedFrame, CodeBlock, ContainerBlock
 from FindGUI import FindReplace
 from Utilities import MoveFromParent
 from Patterns.Observer import Subject

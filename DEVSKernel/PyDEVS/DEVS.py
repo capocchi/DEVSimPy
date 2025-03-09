@@ -98,7 +98,7 @@ class BaseDEVS:
 
   ###
 	def addInPort(self, name=None):
-		"""Add an {\sl input port\/} to the DEVS model.
+		r"""Add an {\sl input port\/} to the DEVS model.
 
 			{\tt addInPort} and {\tt addOutPort} are the {\sl only\/} proper way to
 			add I/O ports to DEVS. As for {\tt CoupledDEVS.addSubModel} method, calls
@@ -119,7 +119,7 @@ class BaseDEVS:
 
 	###
 	def addOutPort(self, name=None):
-		"""Add an {\sl output port\/} to the DEVS model.
+		r"""Add an {\sl output port\/} to the DEVS model.
 
 			See comments for {\tt addInPort} above.
 		"""
@@ -133,7 +133,7 @@ class BaseDEVS:
 
 	###
 	def delOutPort(self, port):
-		"""Delete an {\sl output port\/} from the DEVS model.
+		r"""Delete an {\sl output port\/} from the DEVS model.
 
 			See comments for {\tt addInPort} above.
 		"""
@@ -142,7 +142,7 @@ class BaseDEVS:
 
 	###
 	def delInPort(self, port):
-		"""Delete an {\sl input port\/} from the DEVS model.
+		r"""Delete an {\sl input port\/} from the DEVS model.
 
 			See comments for {\tt addInPort} above.
 		"""
@@ -151,7 +151,7 @@ class BaseDEVS:
 
 	###
 	def delAllInPort(self):
-		"""Delete all {\sl input ports\/} from the DEVS model.
+		r"""Delete all {\sl input ports\/} from the DEVS model.
 
 			See comments for {\tt addInPort} above.
 		"""
@@ -160,7 +160,7 @@ class BaseDEVS:
 
 	###
 	def delAllOutPort(self):
-		"""Delete all {\sl output ports\/} from the DEVS model.
+		r"""Delete all {\sl output ports\/} from the DEVS model.
 
 		See comments for {\tt addInPort} above.
 		"""
@@ -251,7 +251,7 @@ class AtomicDEVS(BaseDEVS):
 
 	###
 	def timeAdvance(self):
-		"""DEFAULT Time Advance Function.
+		r"""DEFAULT Time Advance Function.
 			Accesses only {\tt state} attribute. Returns a real number in
 			$[0, +\infty]$.
 		"""
@@ -311,7 +311,7 @@ class CoupledDEVS(BaseDEVS):
 
 	###
 	def addSubModel(self, model):
-		"""Make {\tt model} a child of the coupled-DEVS (in the hierarchical
+		r"""Make {\tt model} a child of the coupled-DEVS (in the hierarchical
 		representation of the model).
 
 		This is the {\sl only\/} proper way to build a hierarchical model. Calls
