@@ -226,6 +226,3 @@ pip-log.txt
 .mr.developer.cfg
 
 .codegpt
-
-# local github actions
-act.exe

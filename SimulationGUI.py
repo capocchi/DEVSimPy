@@ -605,6 +605,14 @@ class Base(object):
 
 			wx.CallAfter(self._gauge.SetValue,int(self.count))
 
+		### list of childs  
+		childrens = self.GetChildren()
+		if not isinstance(childrens,list):
+			childrens = list(childrens)
+
+		# Vérifier s'il y a au moins un enfant de type BlinkFrame
+		is_blink_frame_alive = any(str(type(obj)) == "<class 'blink.BlinkFrame'>" for obj in childrens)
+		
 		### if simulation is over
 		if self.thread.end_flag:
 
@@ -619,9 +627,6 @@ class Base(object):
 			if self.count != 100 or self.ntl:
 				self.count = 100
 				wx.CallAfter(self._gauge.SetValue, int(self.count))
-
-			# Vérifier s'il y a au moins un enfant de type BlinkFrame
-			is_blink_frame_alive = any(str(type(obj)) == "<class 'blink.BlinkFrame'>" for obj in self.GetChildren())
 
 			if not is_blink_frame_alive:
 				### update the status bar
@@ -639,9 +644,6 @@ class Base(object):
 		### if the simulation is not suspended
 		elif not self.thread.thread_suspend:
 			
-			# Vérifier s'il y a au moins un enfant de type BlinkFrame
-			is_blink_frame_alive = any(str(type(obj)) == "<class 'blink.BlinkFrame'>" for obj in self.GetChildren())
-
 			if not is_blink_frame_alive:
 				### udpate the status bar
 				if self.statusbar.GetBackgroundColour() != 'GREY': 

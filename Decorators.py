@@ -124,11 +124,16 @@ def StatusBarNotification(f, arg):
 
 	def wrapper(*args):
 
-		# main window
+		### main window
 		mainW = getTopLevelWindow()
 
+		### list of childs  
+		childrens = mainW.GetChildren()
+		if not isinstance(childrens,list):
+			childrens = list(childrens)
+
 		### find if detachedFrame exists
-		for win in [w for w in mainW.GetChildren() if w.IsTopLevel()]:
+		for win in [w for w in childrens if w.IsTopLevel()]:
 			if win.IsActive() and isinstance(win, wx.Frame) and not isinstance(win, wx.aui.AuiFloatingFrame if wx.VERSION_STRING < '4.0' else wx.lib.agw.aui.framemanager.AuiFloatingFrame):
 				mainW = win
 

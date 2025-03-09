@@ -18,8 +18,6 @@ import sys
 import wx
 import os
 import inspect
-import subprocess
-import importlib
 
 import gettext
 _ = gettext.gettext
