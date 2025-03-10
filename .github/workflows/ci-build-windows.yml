@@ -1,6 +1,13 @@
-### act -j build-windows -P windows-latest=ghcr.io/catthehacker/ubuntu:act-latest
+### Test Installing DEVSimPy on Windows (latest), using conda
 
-name: Test Installing DEVSimPy on Windows (latest), using conda
+### To use from DEVSimPy local repo: 
+###   1. lauch Docker
+###   2. open a powershell terminal
+###   3. execute: act -j build-windows -P windows-latest=ghcr.io/catthehacker/ubuntu:act-latest
+###   4. if act is not installed, execute: winget install nektos.act
+###   5. restart the terminal
+  
+name: Windows build
 
 on:
     push:
@@ -14,7 +21,7 @@ jobs:
       max-parallel: 4
       fail-fast: true # Stop all jobs if one fails
       matrix:
-        python-version: ['3.10','3.11','3.12','3.13']
+        python-version: ['3.13']
     defaults:
       run:
         shell: bash -el {0}
