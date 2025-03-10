@@ -11,8 +11,8 @@ jobs:
   build-ubuntu:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 1
-      fail-fast: false
+      max-parallel: 1 # X Display is not supported on parallel jobs
+      fail-fast: true # Stop all jobs if one fails
       matrix:
         python-version: ['3.10','3.11','3.12','3.13']
     defaults:
@@ -22,7 +22,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Set up Python with Miniconda
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
       with:
         miniconda-version: latest
         conda-version: "*"
@@ -33,21 +33,18 @@ jobs:
 
     - name: Install conda dependencies
       run: |
-        conda install -y -c conda-forge python=${{ matrix.python-version }} numpy=>1.22 matplotlib=>3.6 wxpython=>4.2 pip
+        conda install -y -c conda-forge python=${{ matrix.python-version }} wxpython>=4.2.2
         conda info -a
         conda list
 
     - name: Install dependencies with pip
       run: |
-        python -m pip install --upgrade pip
         python -m pip install --no-cache-dir --prefer-binary \
             psutil \
             pyYAML \
             PyPubSub \
             ruamel.yaml \
-            matplotlib \
-            openai \
-            ollama
+            matplotlib
     
     - name: Test DEVSimPy with xvfb
       run: |
