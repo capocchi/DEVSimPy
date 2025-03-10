@@ -1,3 +1,5 @@
+### act -j build-windows -P windows-latest=ghcr.io/catthehacker/ubuntu:act-latest
+
 name: Test Installing DEVSimPy on Windows (latest), using conda
 
 on:
@@ -9,16 +11,18 @@ jobs:
   build-windows:
     runs-on: windows-latest  # Windows-only runner
     strategy:
+      max-parallel: 4
+      fail-fast: true # Stop all jobs if one fails
       matrix:
-        python-version: ['3.10']
-    # defaults:
-    #   run:
-    #     shell: pwsh  # PowerShell pour Windows
+        python-version: ['3.10','3.11','3.12','3.13']
+    defaults:
+      run:
+        shell: bash -el {0}
     steps:
     - uses: actions/checkout@v4
 
     - name: Set up Python with Miniconda
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
       with:
         miniconda-version: latest
         conda-version: "*"
@@ -29,22 +33,14 @@ jobs:
 
     - name: Install conda dependencies
       run: |
-        conda install -y -c conda-forge python=${{ matrix.python-version }} numpy=>1.22 matplotlib=>3.6 wxpython>=4.2.2 pip
+        conda install -y -c conda-forge python=${{ matrix.python-version }} wxpython>=4.2.2
         conda info -a
         conda list
 
     - name: Install dependencies with pip
       run: |
-        python -m pip install --upgrade pip
-        python -m pip install \
-            psutil \
-            pyYAML \
-            PyPubSub \
-            ruamel.yaml \
-            matplotlib \
-            openai \
-            ollama
-    
-    - name: Test DEVSimPy on Windows
+        python -m pip install psutil pyYAML PyPubSub ruamel.yaml matplotlib
+       
+    - name: Test DEVSimPy on Windows Server
       run: |
-        python devsimpy.py examples/model0/model0.dsp 10 start quit
+        python devsimpy-nogui.py examples/model0/model0.dsp 10

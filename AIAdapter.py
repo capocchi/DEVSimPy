@@ -30,9 +30,6 @@ import os
 import sys
 import urllib.request
 
-from openai import OpenAI
-from ollama import chat
-
 from Decorators import BuzyCursorNotification, cond_decorator, ProgressNotification
 from Utilities import check_internet
 
@@ -241,6 +238,7 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
             # raise ValueError(_("API key is required for ChatGPT."))
         self.api_key = api_key
         self.wxparent = parent
+        from openai import OpenAI
         self.api_client = OpenAI(api_key=self.api_key)  # Instancie le client API ici
         logging.info(_("ChatGPTDevsAdapter initialized with provided API key."))
 
@@ -295,6 +293,8 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
         if not port:
             raise ValueError("Le port est requis pour Ollama.")
+
+        from ollama import chat
         
         ### local copy
         self.port = port
