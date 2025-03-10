@@ -1,6 +1,13 @@
-### local lauch: act -j build
+### Test Installing DEVSimPy on Ubuntu (latest), using conda
 
-name: Test Installing DEVSimPy on Ubuntu (latest), using conda
+### To use from DEVSimPy local repo: 
+###   1. lauch Docker
+###   2. open a powershell terminal
+###   3. execute: act -j build-ubuntu
+###   4. if act is not installed, execute: winget install nektos.act
+###   5. restart the terminal
+
+name: Ubuntu build
 
 on:
     push:
