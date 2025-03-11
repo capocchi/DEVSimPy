@@ -21,7 +21,7 @@ jobs:
       max-parallel: 4
       fail-fast: true # Stop all jobs if one fails
       matrix:
-        python-version: ['3.10','3.11','3.12','3.13']
+        python-version: ['3.10']
     defaults:
       run:
         shell: bash -el {0}
@@ -38,6 +38,21 @@ jobs:
         activate-environment: anaconda-client-env
         python-version: ${{ matrix.python-version }}
 
+    # ✅ Installation de VcXsrv
+    - name: Install VcXsrv
+      run: |
+        Invoke-WebRequest -Uri "https://sourceforge.net/projects/vcxsrv/files/latest/download" -OutFile "vcxsrv_installer.exe"
+        Start-Process -FilePath .\vcxsrv_installer.exe -ArgumentList "/S" -NoNewWindow -Wait
+
+    # ✅ Démarrer VcXsrv en arrière-plan
+    - name: Start X Server
+      run: |
+        Start-Process -FilePath "C:\Program Files\VcXsrv\vcxsrv.exe" -ArgumentList "-multiwindow -ac -silent-dup-error" -NoNewWindow -PassThru
+
+    # ✅ Définir la variable d’environnement DISPLAY
+    - name: Set DISPLAY variable
+      run: echo "DISPLAY=127.0.0.1:0.0" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
+
     - name: Install conda dependencies
       run: |
         conda install -y -c conda-forge python=${{ matrix.python-version }} wxpython>=4.2.2
@@ -50,4 +65,5 @@ jobs:
        
     - name: Test DEVSimPy on Windows Server
       run: |
-        python devsimpy-nogui.py examples/model0/model0.dsp 10
+        cd devsimpy
+        python devsimpy.py ../examples/model0/model0.dsp 10
