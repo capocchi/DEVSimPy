@@ -28,6 +28,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Remove existing Miniconda directory if it exists
+      run: |
+        $miniconda_path = "C:/Users/capocchi_l/miniconda3"
+        if (Test-Path $miniconda_path) {
+          Remove-Item -Recurse -Force $miniconda_path
+        }
+      shell: powershell
+      
     - name: Set up Python with Miniconda
       uses: conda-incubator/setup-miniconda@v3
       with:
@@ -38,20 +46,17 @@ jobs:
         activate-environment: anaconda-client-env
         python-version: ${{ matrix.python-version }}
 
-    # ✅ Installation de VcXsrv
-    - name: Install VcXsrv
-      run: |
-        Invoke-WebRequest -Uri "https://sourceforge.net/projects/vcxsrv/files/latest/download" -OutFile "vcxsrv_installer.exe"
-        Start-Process -FilePath .\vcxsrv_installer.exe -ArgumentList "/S" -NoNewWindow -Wait
+    # - name: Install VcXsrv
+    #   run: |
+    #     Invoke-WebRequest -Uri "https://sourceforge.net/projects/vcxsrv/files/latest/download" -OutFile "$env:TEMP\vcxsrv_installer.exe"
+    #     Start-Process -Wait -FilePath "$env:TEMP\vcxsrv_installer.exe" -ArgumentList "/silent", "/verysilent", "/norestart"
+    #   shell: powershell
 
-    # ✅ Démarrer VcXsrv en arrière-plan
-    - name: Start X Server
-      run: |
-        Start-Process -FilePath "C:\Program Files\VcXsrv\vcxsrv.exe" -ArgumentList "-multiwindow -ac -silent-dup-error" -NoNewWindow -PassThru
-
-    # ✅ Définir la variable d’environnement DISPLAY
-    - name: Set DISPLAY variable
-      run: echo "DISPLAY=127.0.0.1:0.0" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
+    # - name: Start VcXsrv
+    #   run: |
+    #     Start-Process -NoNewWindow -FilePath "C:\Program Files\VcXsrv\vcxsrv.exe" -ArgumentList ":0 -multiwindow -clipboard -wgl"
+    #     echo "DISPLAY=127.0.0.1:0.0" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+    #   shell: powershell
 
     - name: Install conda dependencies
       run: |

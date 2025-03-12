@@ -2827,8 +2827,8 @@ class GeneralEditor(EditorFrame):
 		self.toolbar.AddSeparator()
 		### ----------------------------------------------------------------
 		### Bind all new event----------------------------------------------
-		self.Bind(wx.EVT_TOOL, self.OnAddPage, self.toolbar.AddSimpleTool(add.GetId(), load_and_resize_image('new.png'), _('Add'), ''))
-		self.Bind(wx.EVT_TOOL, self.OnClosePage, self.toolbar.AddSimpleTool(close.GetId(), load_and_resize_image('close.png'), _('Close'), ''))
+		self.Bind(wx.EVT_TOOL, self.OnAddPage, self.toolbar.AddTool(add.GetId(), "", load_and_resize_image('new.png'), shortHelp=_('Add')))
+		self.Bind(wx.EVT_TOOL, self.OnClosePage, self.toolbar.AddTool(close.GetId(), "", load_and_resize_image('close.png'), shortHelp=_('Close')))
 		### ----------------------------------------------------------------
 		self.toolbar.Realize()
 
@@ -2868,81 +2868,34 @@ class GeneralEditor(EditorFrame):
 		return True
 
 ### -----------------------------------------------------------------------------------------------
-class TestApp(wx.App):
-	""" Testing application
-	"""
-
-	def OnInit(self):
-
-		from config import builtin_dict
-
-		builtins.__dict__.update(builtin_dict)
-
-		fn = os.path.join(os.path.realpath(gettempdir()), 'test.py')
-		with open(fn, 'w') as f:
-			f.write("Hello world !")
-
-		frame1 = GetEditor(None, -1, 'Test1')
-		frame1.AddEditPage("Hello world", fn)
-		frame1.SetPosition((100, 100))
-		frame1.Show()
-
-		frame2 = GetEditor(None, -1, 'Test2', file_type='test')
-		frame2.AddEditPage("Hello world", fn)
-		frame2.AddEditPage("Hello world", fn)
-		frame2.SetPosition((200, 200))
-		frame2.Show()
-
-		frame3 = GetEditor(None, -1, 'Test3', None, file_type='block')
-		frame3.AddEditPage("Hello world", fn)
-		frame3.SetPosition((300, 300))
-		frame3.Show()
-
-		return True
-
-	def OnQuit(self, event):
-		self.Close()
-
-
-### -----------------------------------------------------------------------------------------------
-def manager(args):
-	os.system(['clear', 'cls'][os.name == 'nt'])
-	if args.start:
-		start()
-	if args.info:
-		info()
-
-
-def info():
-	sys.stdout.write(PythonSTC.__str__())
-	sys.stdout.write(CodeEditor.__str__())
-	sys.stdout.write(EditionFile.__str__())
-	sys.stdout.write(EditionNotebook.__str__())
-	sys.stdout.write(Editor.__str__())
-	sys.stdout.write(BlockEditor.__str__())
-	sys.stdout.write(TestEditor.__str__())
-	sys.stdout.write(GeneralEditor.__str__())
-
-
-def start():
-	app = TestApp(0)
-	app.MainLoop()
-
-
-def main():
-	parser = argparse.ArgumentParser(description='Text Editor for DEVSimPy')
-
-	### Class info---------------------------------------------------------------------------------
-	parser.add_argument('-c', '--class-info', action="store_true", dest="info", help='Show __str__ for each class')
-
-	### Start App----------------------------------------------------------------------------------
-	parser.add_argument('-s', '--start', action="store_true", dest="start", help='Start testing app')
-
-	args = parser.parse_args()
-	manager(args)
-
-
+### ------------------------------------------------------------
 if __name__ == '__main__':
-	import argparse
 
-	main()
+	from ApplicationController import TestApp
+
+	### Run the test
+	fn = os.path.join(os.path.realpath(gettempdir()), 'test.py')
+	with open(fn, 'w') as f:
+		f.write("Hello world !")
+	
+	# app1 = TestApp(0)
+	# frame1 = GetEditor(None, -1, 'Test1')
+	# frame1.AddEditPage("Hello world", fn)
+	# frame1.SetPosition((100, 100))
+	# app1.RunTest(frame1)
+
+	app2 = TestApp(0)
+	frame2 = GetEditor(None, -1, 'Test2', file_type='test')
+	frame2.AddEditPage("Hello world", fn)
+	frame2.AddEditPage("Hello world", fn)
+	frame2.SetPosition((200, 200))
+	app2.RunTest(frame2)
+
+	# frame3 = GetEditor(None, -1, 'Test3', None, file_type='block')
+	# frame3.AddEditPage("Hello world", fn)
+	# frame3.SetPosition((300, 300))
+	# frame3.Show()
+
+	### lauch the test 
+	### python Editor.py --autoclose
+	### python Editor.py --autoclose 10 (sleep time before to close the frame is 10s)

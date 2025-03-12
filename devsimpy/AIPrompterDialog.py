@@ -177,11 +177,11 @@ def main():
     app.MainLoop()
 
 if __name__ == "__main__":
-    import builtins
 
-    from config import builtin_dict
+    from config import UpdateBuiltins
 
-	# Sets the homepath variable to the directory where your application is located (sys.argv[0]).
-    builtins.__dict__.update(builtin_dict)
+	#### Update the builtins variables
+    UpdateBuiltins()
 
+    ### Run the main function
     main()

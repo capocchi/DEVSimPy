@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import os
 import wx
 import wx.html
+
+_ = wx.GetTranslation
 
 class HtmlFrame(wx.Frame):
     """ General Frame displaying Html doc
@@ -53,20 +54,15 @@ class HtmlFrame(wx.Frame):
         """
         self.html.SetPage("")
 
-def main():
-    app = wx.App()
-    # create a window/frame, no parent, -1 is default ID, title, size
-    frame = HtmlFrame(None, -1, "Alone Mode", size=(800,600))
-    # show the frame
-    frame.Show()
-    # start the event loop
-    app.MainLoop()
-
+### ------------------------------------------------------------
 if __name__ == '__main__':
-    import builtins
-    
-    from config import builtin_dict
 
-    builtins.__dict__.update(builtin_dict)
+    from ApplicationController import TestApp
+    ### Run the test
+    app = TestApp(0)
+    frame = HtmlFrame(None, -1, "Alone Mode", size=(800,600))
+    app.RunTest(frame)
 
-    main()
+	### lauch the test 
+	### python HtmlWindow.py --autoclose
+	### python HtmlWindow.py --autoclose 10 (sleep time before to close the frame is 10s)

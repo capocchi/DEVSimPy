@@ -29,9 +29,10 @@ _ = wx.GetTranslation
 wx.ST_SIZEGRIP = wx.STB_SIZEGRIP
 
 if __name__ == '__main__':
-	from config import builtin_dict
+	from config import UpdateBuiltins
 
-	builtins.__dict__.update(builtin_dict)
+	#### Update the builtins variables
+	UpdateBuiltins()
 
 import Container
 import Menu
@@ -277,27 +278,16 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-class TestApp(wx.App):
-	""" Testing application
-	"""
-
-	def OnInit(self):
-		""" Init the user interface.
-		"""
-
-		from config import builtin_dict
-
-		builtins.__dict__.update(builtin_dict)
-
-		diagram = Container.Diagram()
-
-		self.frame = DetachedFrame(None, -1, "Test", diagram)
-		self.frame.Show()
-		return True
-
-	def OnQuit(self, event):
-		self.Close()
-
 if __name__ == '__main__':
+
+	from ApplicationController import TestApp
+
+	### Run the test
 	app = TestApp(0)
-	app.MainLoop()
+	diagram = Container.Diagram()
+	frame = DetachedFrame(None, -1, "Test", diagram)
+	app.RunTest(frame)
+
+	### lauch the test 
+	### python DetachedFrame.py --autoclose
+	### python DetachedFrame.py --autoclose 10 (sleep time before to close the frame is 10s)

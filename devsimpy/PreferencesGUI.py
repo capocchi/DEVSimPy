@@ -23,7 +23,6 @@
 import wx
 import os
 import builtins
-import __main__
 import shutil
 import sys
 import configparser
@@ -35,9 +34,10 @@ import wx.lib.filebrowsebutton as filebrowse
 _ = wx.GetTranslation
 
 if __name__ == '__main__':
-	from config import builtin_dict
+	from config import UpdateBuiltins, USER_SETTINGS
 
-	builtins.__dict__.update(builtin_dict)
+	#### Update the builtins variables
+	UpdateBuiltins()
 
 from HtmlWindow import HtmlFrame
 
@@ -458,8 +458,8 @@ class SimulationPanel(wx.Panel):
 		if evt.GetEventObject().GetValue():
 			self.sim_success_sound_btn.Enable(True)
 			self.sim_error_sound_btn.Enable(True)
-			self.sim_success_sound_path = __main__.builtin_dict['SIMULATION_SUCCESS_SOUND_PATH']
-			self.sim_error_sound_path = __main__.builtin_dict['SIMULATION_ERROR_SOUND_PATH']
+			self.sim_success_sound_path = builtins.__dict__.get(['SIMULATION_SUCCESS_SOUND_PATH'])
+			self.sim_error_sound_path = builtins.__dict__.get(['SIMULATION_ERROR_SOUND_PATH'])
 		else:
 			self.sim_success_sound_btn.Enable(False)
 			self.sim_error_sound_btn.Enable(False)
@@ -1069,29 +1069,10 @@ class PreferencesGUI(wx.Frame):
 		evt.Skip()
 
 ### ------------------------------------------------------------
-class TestApp(wx.App):
-	""" Testing application
-	"""
-
-	def OnInit(self):
-
-		import builtins
-
-		from config import builtin_dict
-
-		from config import builtin_dict
-
-		builtins.__dict__.update(builtin_dict)
-
-		frame = PreferencesGUI(None, "Test")
-		frame.Show()
-
-		return True
-
-	def OnQuit(self, event):
-		self.Close()
-
 if __name__ == '__main__':
 
+	from ApplicationController import TestApp
+
 	app = TestApp(0)
-	app.MainLoop()
+	frame = PreferencesGUI(None, "Test")
+	app.RunTest(frame)

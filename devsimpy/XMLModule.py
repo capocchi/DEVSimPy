@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """
 Name: XML.py
 Brief descritpion: All classes and functions linked with xml aspects
@@ -23,11 +22,11 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
 if __name__ == '__main__':
-    import builtins
-    import sys
-    from config import builtin_dict
+    
+	from config import UpdateBuiltins
 
-    builtins.__dict__ = builtin_dict
+	#### Update the builtins variables
+	UpdateBuiltins()
 
 import Container
 import Components
@@ -130,7 +129,7 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 	"""
 	"""
 
-	from . import WizardGUI
+	import WizardGUI
 
 	xmldoc = minidom.parse(xml_file)
 
@@ -518,16 +517,19 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 		
 		return canvas.GetDiagram()
 
-	def XMLToDict(blocklist):		
+	def XMLToDict(blocklist):
+		""" 
+		"""		
 		### dictionary building
-		D = {}
+		xml_to_dict = {}
+
 		### Add high level coupled models
 		for cm in [a for a in blocklist if a.attributes['parentuid'].value == '1' and a.attributes['type'].value == "Aspect Node"]:
 			### change the name with parent (comparing uid and parentuid)
 			cm.attributes['name'].value = GetParent(cm).attributes['name'].value
 			name = cm.attributes['name'].value
 			uid = cm.attributes['uid'].value
-			D[cm] = {'node':cm, 'uid':uid, 'name':name, 'components':[]}
+			xml_to_dict[cm] = {'node':cm, 'uid':uid, 'name':name, 'components':[]}
 
 		### Add other sub coupled models
 		for uid in range(2,100):
@@ -537,16 +539,16 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 				sub_uid =  GetParent(sub_cm).attributes['parentuid'].value
 				sub_cm.attributes['name'].value = GetParent(sub_cm).attributes['name'].value
 
-				InsertElemFromUID({'node':GetParent(sub_cm),'uid':uid,'name':name,'components':[]}, sub_uid,D)
+				InsertElemFromUID({'node':GetParent(sub_cm),'uid':uid,'name':name,'components':[]}, sub_uid, xml_to_dict)
 
 		### Add atomic models
 		for am in [a for a in blocklist if a.attributes['type'].value == "Entity Node" and GetChild(a).attributes['type'].value != "Aspect Node"]:
 			am_parent_uid = am.attributes['parentuid'].value
-			InsertElemFromUID(am,am_parent_uid,D)
+			InsertElemFromUID(am,am_parent_uid, xml_to_dict)
 
-		return D
+		return xml_to_dict
 
-	from . import WizardGUI
+	import WizardGUI
 
 	try:
 		xmldoc = minidom.parse(xmlses_file)
@@ -559,65 +561,53 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 	global blocklist
 	blocklist = xmldoc.getElementsByTagName('treenode')
 
-	D = XMLToDict(blocklist)
+	xml_to_dict = XMLToDict(blocklist)
 	#import pprint 
 	#pprint.pprint(D)
 	
-	if D != {}:
+	if xml_to_dict != {}:
 		try:
 			### Make the DEVSimPy diagram
-			dia = GetDiagram(canvas, D, parent_block=canvas)
+			diagram = GetDiagram(canvas, xml_to_dict, parent_block=canvas)
 		except Exception as info:
 			sys.stdout.write(_('Error making the diagram from XML SES: %s\n')%info)
 			return False
 		else:
 			try:
 				### Make the DEVSimPy diagram coupling
-				dia = GetDiagramCoupling(canvas)
+				diagram = GetDiagramCoupling(canvas)
 			except Exception as info:
 				sys.stdout.write(_('Error making the coupling into the diagram from XML SES: %s\n')%info)
-				return dia
+				return diagram
 			else:
-				return dia
-			return dia
+				return diagram
 	else:
 		sys.stdout.write(_("XML SES file seems don't contain models!\n"))
 		return False
 
+### ------------------------------------------------------------
 if __name__ == '__main__':
+
+	from ApplicationController import TestApp
+	import DetachedFrame
 	import wx
 
-	### ------------------------------------------------------------
-	class TestApp(wx.App):
-		""" Testing application
-		"""
-
-		def OnInit(self):
-
-			from . import DetachedFrame
-			import builtins
-			
-			from config import builtin_dict
-
-			builtins.__dict__.update(builtin_dict)
-
-			diagram = Container.Diagram()
-			
-			self.frame = DetachedFrame.DetachedFrame(None, -1, "Test", diagram)
-			newPage = Container.ShapeCanvas(self.frame, wx.NewIdRef(), name='Test')
-			newPage.SetDiagram(diagram)
-
-			path = os.path.join(os.path.expanduser("~"),'Downloads','Watershed.xml')
-			#path = os.path.join(os.path.expanduser("~"),'Downloads','example.xmlsestree')
-			getDiagramFromXMLSES(path, canvas=newPage)
-			#diagram.SetParent(newPage)
-
-			self.frame.Show()
-
-			return True
-
-		def OnQuit(self, event):
-			self.Close()
-
+	### Run the test
 	app = TestApp(0)
-	app.MainLoop()
+	
+	diagram = Container.Diagram()
+			
+	frame = DetachedFrame.DetachedFrame(None, -1, "Test", diagram)
+	newPage = Container.ShapeCanvas(frame, wx.NewIdRef(), name='Test')
+	newPage.SetDiagram(diagram)
+
+	path = os.path.join(os.path.expanduser("~"),'Downloads','Watershed.xml')
+	#path = os.path.join(os.path.expanduser("~"),'Downloads','example.xmlsestree')
+	getDiagramFromXMLSES(path, canvas=newPage)
+	#diagram.SetParent(newPage)
+
+	app.RunTest(frame)
+
+	### lauch the test 
+	### python XMLModule.py --autoclose
+	### python XMLModule.py --autoclose 10 (sleep time before to close the frame is 10s)

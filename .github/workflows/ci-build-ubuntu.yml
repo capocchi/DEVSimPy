@@ -57,5 +57,26 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y xvfb
+        
         cd devsimpy
-        xvfb-run python devsimpy.py ../examples/model0/model0.dsp 10 start quit
+        
+        ### Test of DEVSimPy (open, start simulation during 10 time step and close)
+        xvfb-run python devsimpy.py ../examples/model0/model0.dsp 10 autostart autoclose
+        
+        ### Test of diag and sub frame
+        # xvfb-run python CheckGUI.py --autoclose
+        # xvfb-run python ConnectDialog.py --autoclose
+        # xvfb-run python DetachedFrame.py --autoclose
+        # xvfb-run python DiagramConstantsDialog.py --autoclose
+        # xvfb-run python Editor.py --autoclose
+        # xvfb-run python FindGUI.py --autoclose
+        # xvfb-run python FTPGui.py --autoclose
+        # xvfb-run python HtmlWindow.py --autoclose
+        # xvfb-run python ImportLibrary.py --autoclose
+        # xvfb-run python LabelGUI.py --autoclose
+        # xvfb-run python PreferencesGUI.py --autoclose
+        # xvfb-run python PriorityGUI.py --autoclose
+        # xvfb-run python SimulationGUI.py --autoclose
+        # xvfb-run python WizardGUI.py --autoclose
+        # xvfb-run python wxPyMail.py --autoclose
+        # xvfb-run python XMLModule.py --autoclose

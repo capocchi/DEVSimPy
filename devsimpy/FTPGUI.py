@@ -23,6 +23,8 @@
 from ftplib import FTP, all_errors
 import wx
 
+_ = wx.GetTranslation
+
 from Utilities import load_and_resize_image
 
 class FTPStatusBar(wx.StatusBar):
@@ -33,7 +35,7 @@ class FTPStatusBar(wx.StatusBar):
 		self.SetFieldsCount(2)
 		self.SetStatusText('Welcome to DEVSimPy server', 0)
 		self.SetStatusWidths([-5, -2])
-		self.icon = wx.StaticBitmap(self, wx.NewIdRef(), ('disconnect_network.png'))
+		self.icon = wx.StaticBitmap(self, wx.NewIdRef(), load_and_resize_image('disconnect_network.png'))
 		self.Bind(wx.EVT_SIZE, self.OnSize)
 		self.PlaceIcon()
 
@@ -151,26 +153,15 @@ class FTPFrame(wx.Frame):
 			self.statusbar.icon.SetBitmap(load_and_resize_image('disconnect_network.png'))
 
 ### ------------------------------------------------------------
-class TestApp(wx.App):
-	""" Testing application
-	"""
-
-	def OnInit(self):
-
-		import builtins
-
-		from config import builtin_dict
-
-		builtins.__dict__.update(builtin_dict)
-
-		self.frame = FTPFrame(None, -1, 'Test')
-		self.frame.Show()
-		return True
-
-	def OnQuit(self, event):
-		self.Close()
-
 if __name__ == '__main__':
+	
+	from ApplicationController import TestApp
 
+	### Run the test
 	app = TestApp(0)
-	app.MainLoop()
+	frame = FTPFrame(None, -1, 'Test')
+	app.RunTest(frame)
+
+	### lauch the test 
+	### python FTPGUI.py --autoclose
+	### python FTPGUI.py --autoclose 10 (sleep time before to close the frame is 10s)

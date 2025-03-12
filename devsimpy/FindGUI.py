@@ -23,13 +23,7 @@
 import wx
 import re
 
-### just for individual test
-if __name__ == '__main__':
-	import builtins
-	
-	from config import builtin_dict
-
-	builtins.__dict__.update(builtin_dict)
+_ = wx.GetTranslation
 
 class FindReplace(wx.Dialog):
 	def __init__(self, parent, id, title):
@@ -107,7 +101,7 @@ class FindReplace(wx.Dialog):
 		# panel5
 		panel5 = wx.Panel(panel)
 		sizer5 = wx.BoxSizer(wx.HORIZONTAL)
-		sizer5.Add((191, -1), 1, wx.EXPAND | wx.ALIGN_RIGHT)
+		sizer5.Add((191, -1), 1, wx.EXPAND)
 		close_btn = wx.Button(panel5, -1, _('Close'), size=(50, -1))
 		sizer5.Add(close_btn)
 
@@ -127,7 +121,8 @@ class FindReplace(wx.Dialog):
 		### for Windows users, put self.SetClientSize(panel.GetBestSize()) line before the ShowModal() method. (http://zetcode.com/wxpython/layout/)
 		self.SetClientSize(panel.GetBestSize())
 		
-		self.ShowModal()
+		if parent:
+			self.ShowModal()
 		
 	def OnClose(self, evt):
 		""" Close button has been pressed
@@ -154,25 +149,14 @@ class FindReplace(wx.Dialog):
 			pass
 
 ### ------------------------------------------------------------
-class TestApp(wx.App):
-	""" Testing application
-	"""
-	
-	def OnInit(self):
-		
-		import gettext
-		import builtins
-	
-		builtins.__dict__['_'] = gettext.gettext
-		
-		self.frame = FindReplace(None, -1, 'Test')
-		self.frame.Show()
-		return True
-	
-	def OnQuit(self, event):
-		self.Close()
-		
 if __name__ == '__main__':
 
+	from ApplicationController import TestApp
+	### Run the test
 	app = TestApp(0)
-	app.MainLoop()
+	frame = FindReplace(None, -1, 'Test')
+	app.RunTest(frame)
+
+	### lauch the test 
+	### python FindGUI.py --autoclose
+	### python FindGUI.py --autoclose 10 (sleep time before to close the frame is 10s)

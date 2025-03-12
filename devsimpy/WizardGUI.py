@@ -42,12 +42,10 @@ if not hasattr(inspect, 'getargspec'):
 
 if __name__ == '__main__':
 
-	import builtins
+	from config import UpdateBuiltins
 
-	from config import builtin_dict
-	
-	# Sets the homepath variable to the directory where your application is located (sys.argv[0]).
-	builtins.__dict__.update(builtin_dict)
+	#### Update the builtins variables
+	UpdateBuiltins()
 	
 import Container
 import Components
@@ -307,9 +305,9 @@ class Wizard(wizmod):
 		self.pages.append(page)
 
 	def run(self):
-		""" Run wizard.
+		""" Run wizard and return boolean.
 		"""
-		self.RunWizard(self.pages[0])
+		return self.RunWizard(self.pages[0])
 
 	def on_page_changed(self, evt):
 		"""Executed after the page has changed."""
@@ -768,17 +766,6 @@ class ModelGeneratorWizard(Wizard):
 				vbox2.GetItem(6).GetWindow().Enable(True)
 				vbox2.GetItem(7).GetWindow().Enable(True)
 
-				# ### Gestion pour la page GPT (flex_grid_sizer)
-				# flex_grid_sizer.GetItem(5).GetWindow().SetValue(0)
-				# if flex_grid_sizer.GetItem(7).GetWindow().GetValue() == 0:
-				# 	flex_grid_sizer.GetItem(7).GetWindow().SetValue(1)
-
-				# # Désactiver le choix des inputs pour la page GPT
-				# flex_grid_sizer.GetItem(4).GetWindow().Enable(False)
-				# flex_grid_sizer.GetItem(5).GetWindow().Enable(False)
-				# # Activer le choix des outputs pour la page GPT
-				# flex_grid_sizer.GetItem(6).GetWindow().Enable(True)
-				# flex_grid_sizer.GetItem(7).GetWindow().Enable(True)
 
 			### si 'Collector' ou 'Viewer', 0 output et x input (1 par défaut)
 			elif val in (_('Collector'), _('Viewer')):
@@ -794,18 +781,6 @@ class ModelGeneratorWizard(Wizard):
 				vbox2.GetItem(5).GetWindow().Enable(True)
 				vbox2.GetItem(4).GetWindow().Enable(True)
 
-				# ### Gestion pour la page GPT (flex_grid_sizer)
-				# flex_grid_sizer.GetItem(7).GetWindow().SetValue(0)
-				# if flex_grid_sizer.GetItem(5).GetWindow().GetValue() == 0:
-				# 	flex_grid_sizer.GetItem(5).GetWindow().SetValue(1)
-
-				# # Désactiver le choix des outputs pour la page GPT
-				# flex_grid_sizer.GetItem(7).GetWindow().Enable(False)
-				# flex_grid_sizer.GetItem(6).GetWindow().Enable(False)
-				# # Activer le choix des inputs pour la page GPT
-				# flex_grid_sizer.GetItem(5).GetWindow().Enable(True)
-				# flex_grid_sizer.GetItem(4).GetWindow().Enable(True)
-
 			### si 'Default', 1 output et 1 input
 			else:
 				# Activer tous les choix (inputs et outputs)
@@ -815,14 +790,6 @@ class ModelGeneratorWizard(Wizard):
 				vbox2.GetItem(7).GetWindow().Enable(True)
 				vbox2.GetItem(5).GetWindow().SetValue(1)
 				vbox2.GetItem(7).GetWindow().SetValue(1)
-
-				# ### Gestion pour la page GPT (flex_grid_sizer)
-				# flex_grid_sizer.GetItem(5).GetWindow().Enable(True)
-				# flex_grid_sizer.GetItem(4).GetWindow().Enable(True)
-				# flex_grid_sizer.GetItem(6).GetWindow().Enable(True)
-				# flex_grid_sizer.GetItem(7).GetWindow().Enable(True)
-				# flex_grid_sizer.GetItem(5).GetWindow().SetValue(1)
-				# flex_grid_sizer.GetItem(7).GetWindow().SetValue(1)
 
 		def OnInputAMDLabel(evt):
 			fb2.SetValue(os.path.join(domain_path, "%s.amd"%evt.GetString()))
@@ -922,27 +889,6 @@ class ModelGeneratorWizard(Wizard):
 				### give the specific behavior which can be Default, Generator or Collector (Scope and Disk)
 				specific_behavior = gridSizer.GetItem(3).GetWindow()
 				self.specific_behavior = specific_behavior.GetValue()
-
-			# elif self.type == 'AtomicAI':
-			# 	gridSizer = self.pages[6].sizer.GetItem(2).GetSizer().GetItem(0).GetSizer().GetItem(0).GetSizer()
-			# 	filebrowse_python = gridSizer.GetItem(9).GetWindow()
-			# 	filebrowse_plugin = gridSizer.GetItem(11).GetWindow()
-			# 	self.detail = gridSizer.GetItem(13).GetWindow().GetValue()
-			# 	filebrowse_model = self.pages[7].sizer.GetItem(2).GetWindow()
-
-			# 	### test if extention exists
-			# 	model_path = filebrowse_model.GetValue()
-			# 	if not model_path.endswith('.amd'):
-			# 		model_path +='.amd'
-
-			# 	# give the label
-			# 	textCtrl = gridSizer.GetItem(1).GetWindow()
-			# 	### give the python filename, inputs and outputs of corresponding model
-			# 	in_SpinCtrl = gridSizer.GetItem(5).GetWindow()
-			# 	out_SpinCtrl = gridSizer.GetItem(7).GetWindow()
-			# 	### give the specific behavior which can be Default, Generator or Collector (Scope and Disk)
-			# 	specific_behavior = gridSizer.GetItem(3).GetWindow()
-			# 	self.specific_behavior = specific_behavior.GetValue()
 				
 			elif self.type == 'Coupled':
 				gridSizer = self.pages[2].sizer.GetItem(2).GetSizer().GetItem(0).GetSizer().GetItem(0).GetSizer()
@@ -994,62 +940,8 @@ class ModelGeneratorWizard(Wizard):
 								string = self.generated_code
 							else:
 								string = atomicCode(self.label)
-
-						# elif self.type=='AtomicAI':
-							# selected_ia = builtins.__dict__.get('SELECTED_IA', '')  # '' par défaut si rien n'est sélectionné
-
-							# if selected_ia:
-								# Code spécifique pour ChatGPT
-								# param = builtins.__dict__.get('PARAMS_IA')
-
-						# 		# Créer ou récupérer l'instance de ChatGPTDevsAdapter via la factory
-								# adapter = AdapterFactory.get_adapter_instance(parent=self.GetParent().GetParent(), params=param)
-
-						# 		# Définir les paramètres requis pour le prompt
-								# model_name = self.label
-								# num_inputs = self.inputs
-								# num_outputs = self.outputs
-								# model_type = self.specific_behavior
-								# prompt = self.detail
-								
-						# 		# Appeler la méthode create_prompt pour générer le prompt
-								# full_prompt = adapter.create_prompt(model_name, num_inputs, num_outputs, model_type, prompt)
-
-						# 		# Utiliser generate_output pour obtenir le résultat
-								# string = adapter.generate_output(full_prompt)
-
-							# else:
-								# print(_("No AI selected."))
 						else:
 							string = coupledCode(self.label)
-
-						# elif self.type=='AtomicAI':
-						# 	selected_ia = builtins.__dict__.get('SELECTED_IA', '')  # '' par défaut si rien n'est sélectionné
-
-							# if selected_ia and selected_ia:
-								# Code spécifique pour ChatGPT
-								# param = builtins.__dict__.get('PARAMS_IA')
-
-						# 		# Créer ou récupérer l'instance de ChatGPTDevsAdapter via la factory
-						# 		adapter = AdapterFactory.get_adapter_instance(parent=self.GetParent().GetParent(), params=param)
-
-						# 		# Définir les paramètres requis pour le prompt
-						# 		model_name = self.label
-						# 		num_inputs = self.inputs
-						# 		num_outputs = self.outputs
-						# 		model_type = self.specific_behavior
-						# 		prompt = self.detail
-								
-						# 		# Appeler la méthode create_prompt pour générer le prompt
-						# 		full_prompt = adapter.create_prompt(model_name, num_inputs, num_outputs, model_type, prompt)
-
-						# 		# Utiliser generate_output pour obtenir le résultat
-						# 		string = adapter.generate_output(full_prompt)
-
-						# 	else:
-						# 		print(_("No AI selected."))
-							# else:
-								# string = coupledCode(self.label)
 
 						### python filename as the same name as the model_path						
 						py_name = os.path.basename(self.model_path).split('.')[0]
@@ -1100,14 +992,16 @@ class ModelGeneratorWizard(Wizard):
 
 		return True
 
+### ------------------------------------------------------------
 if __name__ == '__main__':
 
-	app = wx.App() 
+	from ApplicationController import TestApp
+	### Run the test
+	app = TestApp(0)
+	frame = ModelGeneratorWizard(parent=None, title=_('DEVSimPy Model Generator'), img_filename = os.path.join('bitmaps', DEVSIMPY_ICON))
+	# frame.run()
+	app.RunTest(frame)
 
-	# Create wizard and add any kind pages you'd like
-	mywiz = ModelGeneratorWizard(parent=None, title=_('DEVSimPy Model Generator'), img_filename = os.path.join('bitmaps', DEVSIMPY_PNG))
-	
-	# Show the main window
-	mywiz.run()
-
-	app.MainLoop()
+	### lauch the test 
+	### python WizardGUI.py --autoclose
+	### python WizardGUI.py --autoclose 10 (sleep time before to close the frame is 10s)

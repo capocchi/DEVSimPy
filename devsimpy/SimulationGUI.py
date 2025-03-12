@@ -34,9 +34,10 @@ from tempfile import gettempdir
 
 ### just for individual test
 if __name__ == '__main__':
-	from config import builtin_dict
+	from config import UpdateBuiltins
 
-	builtins.__dict__.update(builtin_dict)
+	#### Update the builtins variables
+	UpdateBuiltins()
 
 from Utilities import IsAllDigits, printOnStatusBar, load_and_resize_image
 from PluginManager import PluginManager #trigger_event, is_enable
@@ -865,23 +866,14 @@ def SimulationDialog(*args):
 		return SimulationDialogFrame(*args)
 
 ### ------------------------------------------------------------
-class TestApp(wx.App):
-	""" Testing application
-	"""
-
-	def OnInit(self):
-
-		from config import builtin_dict
-		builtins.__dict__.update(builtin_dict)
-
-		self.frame = SimulationDialog(wx.Frame(), wx.NewIdRef(), 'Simulator')
-		#self.frame.SetMaster(DomainInterface.MasterModel.Master())
-		self.frame.Show()
-		return True
-
-	def OnQuit(self, event):
-		self.Close()
-
 if __name__ == '__main__':
+
+	from ApplicationController import TestApp
+	### Run the test
 	app = TestApp(0)
-	app.MainLoop()
+	frame = SimulationDialog(wx.Frame(None), wx.NewIdRef(), 'Simulator')
+	app.RunTest(frame)
+
+	### lauch the test 
+	### python SimulationGUI.py --autoclose
+	### python SimulationGUI.py --autoclose 10 (sleep time before to close the frame is 10s)

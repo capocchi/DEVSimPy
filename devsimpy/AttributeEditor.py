@@ -295,8 +295,10 @@ def main():
     pass
 
 if __name__ == '__main__':
-	import builtins
-	from config import builtin_dict
 
-	builtins.__dict__.update(builtin_dict)
+	from config import UpdateBuiltins
+
+	#### Update the builtins variables
+	UpdateBuiltins()
+	
 	main()

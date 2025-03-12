@@ -288,29 +288,15 @@ class DiagramConstantsDialog(wx.Dialog):
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-### ------------------------------------------------------------
-class TestApp(wx.App):
-	""" Testing application
-	"""
-
-	def OnInit(self):
-		"""_summary_
-
-		Returns:
-			_type_: _description_
-		"""
-		from config import builtin_dict
-
-		builtins.__dict__.update(builtin_dict)
-
-		frame = DiagramConstantsDialog(None, -1, "Model")
-		frame.Populate({'a':1, 'b':2, 'c':3})
-		frame.Show()
-		return True
-
-	def OnQuit(self, event):
-		self.Close()
-
 if __name__ == '__main__':
+
+	from ApplicationController import TestApp
+
+	### Run the test
 	app = TestApp(0)
-	app.MainLoop()
+	frame = DiagramConstantsDialog(None, -1, "Model")
+	app.RunTest(frame)
+
+	### lauch the test 
+	### python DiagramConstantsDialog.py --autoclose
+	### python DiagramConstantsDialog.py --autoclose 10 (sleep time before to close the frame is 10s)

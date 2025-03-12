@@ -26,11 +26,10 @@ from wx import xrc
 
 ### just for individual test
 if __name__ == '__main__':
-	import builtins
+	from config import UpdateBuiltins
 
-	from config import builtin_dict
-
-	builtins.__dict__.update(builtin_dict)
+	#### Update the builtins variables
+	UpdateBuiltins()
 
 else:
 	from AttributeEditor import AttributeBase
@@ -196,26 +195,15 @@ class LabelDialog(wx.Dialog):
 		self.Destroy()
 
 ### ------------------------------------------------------------
-class TestApp(wx.App):
-	""" Testing application
-	"""
-
-	def OnInit(self):
-
-		import gettext
-
-		dia = LabelDialog(None, None)
-		if dia.ShowModal() == wx.ID_CANCEL:
-			dia.Destroy()
-		else:
-			dia.Destroy()
-
-		return True
-
-	def OnQuit(self, event):
-		self.Close()
-
 if __name__ == '__main__':
 
+	from ApplicationController import TestApp
+	
+	### Run the test
 	app = TestApp(0)
-	app.MainLoop()
+	frame = LabelDialog(None, None)
+	app.RunTest(frame)
+
+	### Run the test 
+	### python LabelGUI.py --autoclose
+	### python LabelGUI.py --autoclose 10 (sleep time before to close the frame is 10s)

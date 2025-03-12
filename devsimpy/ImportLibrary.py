@@ -564,25 +564,11 @@ class ImportLibrary(wx.Dialog):
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-class TestApp(wx.App):
-	""" Testing application
-	"""
-
-	def OnInit(self):
-
-		import builtins
-		from config import builtin_dict
-
-		builtins.__dict__.update(builtin_dict)
-
-		frame = ImportLibrary(None, size=(600,600), id=-1, title="Test")
-		frame.Show()
-		return True
-
-	def OnQuit(self, event):
-		self.Close()
-
 if __name__ == '__main__':
 
+	from ApplicationController import TestApp
+	
+	### Run the test
 	app = TestApp(0)
-	app.MainLoop()
+	frame = ImportLibrary(None, size=(600,600), id=-1, title="Test")
+	app.RunTest(frame)

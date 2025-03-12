@@ -73,15 +73,15 @@ if os.path.exists(path) and not len(os.listdir(path)) == 0:
 	GLOBAL_SETTINGS['DEVS_DIR_PATH_DICT'].update({'PyPDEVS_241': os.path.join(path, 'src', 'pypdevs')})
 else:
 	sys.stdout.write("PyPDEVS Kernel in version 2.4.1 is not loaded.\nPlease install it in the directory %s using git (https://github.com/kdheepak/pypdevs.git)\n"%path)
-	
+
+### All SETTINGS
+ALL_SETTINGS = GLOBAL_SETTINGS | USER_SETTINGS
+
 ###########################################
 ### Define functions
 ###########################################
-# def set(key, value):
-#     builtins.__dict__[key] = value
-#     return True
-# builtins.set = set
 
-# def get(key):
-# 	return builtins.__dict__[key]
-# builtins.get = get
+def UpdateBuiltins(new_settings=ALL_SETTINGS):
+    # Met à jour les variables globales de `builtins`
+    for key, value in new_settings.items():
+        setattr(builtins, key, value)

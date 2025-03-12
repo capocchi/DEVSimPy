@@ -75,7 +75,7 @@ def get_domain_path()->str:
         config_parser = configparser.RawConfigParser()
         config_parser.read_string(file_content)
 
-        built_in = eval(config_parser['dummy_section']['builtin_dict'])
+        built_in = eval(config_parser['dummy_section']['settings'])
 
         return os.path.abspath(built_in['DOMAIN_PATH'])
     else:

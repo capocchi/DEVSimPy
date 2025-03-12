@@ -5,6 +5,8 @@ import wx
 import DragList
 from Utilities import load_and_resize_image
 
+_ = wx.GetTranslation
+
 class PriorityGUI(wx.Frame):
 
 	def __init__(self, parent, id, title, priorityList):
@@ -123,25 +125,14 @@ class PriorityGUI(wx.Frame):
 			self.listCtrl.Select(new_pos, 1)
 
 ### ------------------------------------------------------------
-class TestApp(wx.App):
-	""" Testing application
-	"""
-
-	def OnInit(self):
-		"""
-		"""
-
-		import builtins
-		from config import builtin_dict
-		builtins.builtin_dict = builtin_dict
-
-		frame = PriorityGUI(None, -1, "Test", ['TOTO', 'TITI'])
-		frame.Show()
-		return True
-
-	def OnQuit(self, event):
-		self.Close()
-
 if __name__ == '__main__':
+
+	from ApplicationController import TestApp
+	### Run the test
 	app = TestApp(0)
-	app.MainLoop()
+	frame = PriorityGUI(None, -1, "Test", ['Model1', 'Model2'])
+	app.RunTest(frame)
+
+	### lauch the test 
+	### python PriorityGUI.py --autoclose
+	### python PriorityGUI.py --autoclose 10 (sleep time before to close the frame is 10s)

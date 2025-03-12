@@ -118,15 +118,14 @@ wx.OVERWRITE_PROMPT = wx.FD_OVERWRITE_PROMPT
 wx.AboutDialogInfo = wx.adv.AboutDialogInfo
 wx.AboutBox = wx.adv.AboutBox
 	
-from config import GLOBAL_SETTINGS, USER_SETTINGS
+from config import USER_SETTINGS, UpdateBuiltins
 
 ### here berfore the __main__ function
 ### warning, some module (like SimulationGUI) initialise GUI_FLAG macro before (import block below)
 #GLOBAL_SETTINGS['GUI_FLAG'] = False
 
-# Sets the homepath variable to the directory where your application is located (sys.argv[0]).
-builtins.__dict__.update(GLOBAL_SETTINGS)
-builtins.__dict__.update(USER_SETTINGS)
+# Init the builtins with ALL_SETTINGS in config.py
+UpdateBuiltins()
 
 ### Deprecation warnings with Python 3.8
 wx._core.WindowIDRef.__index__ = wx._core.WindowIDRef.__int__
@@ -1816,7 +1815,7 @@ class MainApplication(wx.Frame):
 				except IndexError:
 					pass
 				else:
-					if arg in ('start','go'):
+					if arg in ('start', 'autostart', 'go'):
 						for sf in L:
 							evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, sf._btn1.GetId())
 							wx.PostEvent(sf._btn1, evt)
@@ -1828,7 +1827,7 @@ class MainApplication(wx.Frame):
 			except IndexError:
 				pass
 			else:
-				if arg in ('close','quit'):
+				if arg in ('close','quit', 'autoquit', 'autoclose'):
 					self.Close()
 
 	##----------------------------------------------
@@ -2610,7 +2609,7 @@ if __name__ == '__main__':
 		sys.stdout.write(_('\t To load an existing dsp with a simulation frame initialized with no time limit: \n\t\t$ python devsimpy.py <absolute path of the .dsp file> ntl/inf/infinity\n'))
 		sys.stdout.write(_('\t To start simulation: \n\t\t$ python devsimpy.py <absolute path of the .dsp file> ntl/inf/infinity start/go\n'))
 		sys.stdout.write(_('\t To execute DEVSimPy cleaner: python devsimpy.py -c|-clean\n'))
-		sys.stdout.write(_('\t To close DEVSimPy: python devsimpy.py close|quit\n'))
+		sys.stdout.write(_('\t To close DEVSimPy: python devsimpy.py close|quit|autoquit|autoclose\n'))
 		sys.stdout.write(_('Authors: L. Capocchi (capocchi@univ-corse.fr)\n'))
 		sys.exit()
 
