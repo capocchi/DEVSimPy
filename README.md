@@ -3,11 +3,23 @@
 </p>
 
 # DEVSimPy: Python-Based GUI for DEVS Simulation
+## Status
+
+| Category  | Status |
+|-----------|--------|
+<!-- | **Docs**  | ![Docs](https://img.shields.io/readthedocs/domdf-wxpython-tools/latest?logo=read-the-docs) [![Docs Check](https://github.com/domdfcoding/domdf_wxpython_tools/workflows/Docs%20Check/badge.svg)](https://github.com/domdfcoding/domdf_wxpython_tools/actions?query=workflow%3A%22Docs+Check%22) | -->
+| **Tests** | [![Linux](https://github.com/capocchi/DEVSimPy/actions/workflows/ci-build-ubuntu.yml/badge.svg)](https://github.com/capocchi/DEVSimPy/actions/workflows/ci-build-ubuntu.yml) [![Windows](https://github.com/capocchi/DEVSimPy/actions/workflows/ci-build-windows.yml/badge.svg)](https://github.com/capocchi/DEVSimPy/actions/workflows/ci-build-windows.yml) |
+<!-- | **PyPI**  | [![PyPI Version](https://img.shields.io/pypi/v/domdf_wxpython_tools)](https://pypi.org/project/domdf_wxpython_tools/) [![Supported Versions](https://img.shields.io/pypi/pyversions/domdf_wxpython_tools?logo=python&logoColor=white)](https://pypi.org/project/domdf_wxpython_tools/) [![Supported Implementations](https://img.shields.io/pypi/implementation/domdf_wxpython_tools)](https://pypi.org/project/domdf_wxpython_tools/) [![Wheel](https://img.shields.io/pypi/wheel/domdf_wxpython_tools)](https://pypi.org/project/domdf_wxpython_tools/) | -->
+<!-- | **Activity** | ![Last Commit](https://img.shields.io/github/last-commit/domdfcoding/domdf_wxpython_tools) [![Commits Since](https://img.shields.io/github/commits-since/domdfcoding/domdf_wxpython_tools/v0.3.0.post1)](https://github.com/domdfcoding/domdf_wxpython_tools/pulse) ![Maintained](https://img.shields.io/maintenance/yes/2025) [![PyPI Downloads](https://img.shields.io/pypi/dm/domdf_wxpython_tools)](https://pypi.org/project/domdf_wxpython_tools/) | -->
+<!-- | **QA** | [![CodeFactor](https://img.shields.io/codefactor/grade/github/domdfcoding/domdf_wxpython_tools?logo=codefactor)](https://www.codefactor.io/repository/github/domdfcoding/domdf_wxpython_tools) [![Flake8](https://github.com/domdfcoding/domdf_wxpython_tools/workflows/Flake8/badge.svg)](https://github.com/domdfcoding/domdf_wxpython_tools/actions?query=workflow%3A%22Flake8%22) [![mypy](https://github.com/domdfcoding/domdf_wxpython_tools/workflows/mypy/badge.svg)](https://github.com/domdfcoding/domdf_wxpython_tools/actions?query=workflow%3A%22mypy%22) | -->
+<!-- | **Other** | [![License](https://img.shields.io/github/license/domdfcoding/domdf_wxpython_tools)](https://github.com/domdfcoding/domdf_wxpython_tools/blob/master/LICENSE) ![Language](https://img.shields.io/github/languages/top/domdfcoding/domdf_wxpython_tools) [![Requirements](https://dependency-dash.repo-helper.uk/github/domdfcoding/domdf_wxpython_tools/badge.svg)](https://dependency-dash.repo-helper.uk/github/domdfcoding/domdf_wxpython_tools/) | -->
+
+
 [![Ubuntu build](https://github.com/capocchi/DEVSimPy/actions/workflows/ci-build-ubuntu.yml/badge.svg)](https://github.com/capocchi/DEVSimPy/actions/workflows/ci-build-ubuntu.yml)
 [![Windows build](https://github.com/capocchi/DEVSimPy/actions/workflows/ci-build-windows.yml/badge.svg)](https://github.com/capocchi/DEVSimPy/actions/workflows/ci-build-windows.yml)
-[![codecov](https://codecov.io/gh/capocchi/DEVSimPy/branch/master/graph/badge.svg)](https://codecov.io/gh/capocchi/DEVSimPy)
-[![Maintainability](https://api.codeclimate.com/v1/badges/f5c94ecbfb6a3c8986be/maintainability)](https://codeclimate.com/github/capocchi/DEVSimPy/maintainability)
-[![Coverage Status](https://coveralls.io/repos/github/capocchi/DEVSimPy/badge.svg?branch=master)](https://coveralls.io/github/capocchi/DEVSimPy?branch=master)
+<!-- [![codecov](https://codecov.io/gh/capocchi/DEVSimPy/branch/master/graph/badge.svg)](https://codecov.io/gh/capocchi/DEVSimPy) -->
+<!-- [![Maintainability](https://api.codeclimate.com/v1/badges/f5c94ecbfb6a3c8986be/maintainability)](https://codeclimate.com/github/capocchi/DEVSimPy/maintainability) -->
+<!-- [![Coverage Status](https://coveralls.io/repos/github/capocchi/DEVSimPy/badge.svg?branch=master)](https://coveralls.io/github/capocchi/DEVSimPy?branch=master) -->
 
 ## What is DEVSimPy?
 DEVSimPy is an open-source framework (GPL v3) designed for **modeling and simulating discrete event systems (DEVS)** with a graphical user interface. Developed in Python with [wxPython](http://www.wxpython.org), it simplifies interaction with **PyDEVS** and **PyPDEVS** models.

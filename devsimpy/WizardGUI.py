@@ -40,13 +40,6 @@ import inspect
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
 
-if __name__ == '__main__':
-
-	from config import UpdateBuiltins
-
-	#### Update the builtins variables
-	UpdateBuiltins()
-	
 import Container
 import Components
 from AIAdapter import AdapterFactory
@@ -991,17 +984,3 @@ class ModelGeneratorWizard(Wizard):
 				zin.close()
 
 		return True
-
-### ------------------------------------------------------------
-if __name__ == '__main__':
-
-	from ApplicationController import TestApp
-	### Run the test
-	app = TestApp(0)
-	frame = ModelGeneratorWizard(parent=None, title=_('DEVSimPy Model Generator'), img_filename = os.path.join('bitmaps', DEVSIMPY_ICON))
-	# frame.run()
-	app.RunTest(frame)
-
-	### lauch the test 
-	### python WizardGUI.py --autoclose
-	### python WizardGUI.py --autoclose 10 (sleep time before to close the frame is 10s)

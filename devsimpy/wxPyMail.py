@@ -458,15 +458,3 @@ class LoginDlg(wx.Dialog):
     def OnClose(self, event):
         self.Close()
         
-### ------------------------------------------------------------
-if __name__ == '__main__':
-
-	from ApplicationController import TestApp
-	### Run the test
-	app = TestApp(0)
-	frame = SendMailWx(None)
-	app.RunTest(frame)
-
-	### lauch the test 
-	### python wxPyMail.py --autoclose
-	### python wxPyMail.py --autoclose 10 (sleep time before to close the frame is 10s)

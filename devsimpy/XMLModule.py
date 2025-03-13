@@ -21,14 +21,11 @@ _ = gettext.gettext
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
-if __name__ == '__main__':
-    
-	from config import UpdateBuiltins
+### avoid cyclic import during the test_xmlmodule.py execution
+import sys
+if 'XMLModule' not in sys.modules:
+	import Container
 
-	#### Update the builtins variables
-	UpdateBuiltins()
-
-import Container
 import Components
 
 def makeDEVSXML(label, D, filename):
@@ -584,30 +581,3 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 	else:
 		sys.stdout.write(_("XML SES file seems don't contain models!\n"))
 		return False
-
-### ------------------------------------------------------------
-if __name__ == '__main__':
-
-	from ApplicationController import TestApp
-	import DetachedFrame
-	import wx
-
-	### Run the test
-	app = TestApp(0)
-	
-	diagram = Container.Diagram()
-			
-	frame = DetachedFrame.DetachedFrame(None, -1, "Test", diagram)
-	newPage = Container.ShapeCanvas(frame, wx.NewIdRef(), name='Test')
-	newPage.SetDiagram(diagram)
-
-	path = os.path.join(os.path.expanduser("~"),'Downloads','Watershed.xml')
-	#path = os.path.join(os.path.expanduser("~"),'Downloads','example.xmlsestree')
-	getDiagramFromXMLSES(path, canvas=newPage)
-	#diagram.SetParent(newPage)
-
-	app.RunTest(frame)
-
-	### lauch the test 
-	### python XMLModule.py --autoclose
-	### python XMLModule.py --autoclose 10 (sleep time before to close the frame is 10s)

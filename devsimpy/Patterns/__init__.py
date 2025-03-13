@@ -5,3 +5,4 @@ __all__ = [
 	'Strategy',
 	'Factory'
  ]
+

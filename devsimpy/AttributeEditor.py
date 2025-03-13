@@ -20,7 +20,6 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-import os
 import sys
 import linecache
 
@@ -290,15 +289,3 @@ class QuickAttributeEditor(wx.Frame, Subject):
 		"""
 		self.Destroy()
 		event.Skip()
-
-def main():
-    pass
-
-if __name__ == '__main__':
-
-	from config import UpdateBuiltins
-
-	#### Update the builtins variables
-	UpdateBuiltins()
-	
-	main()

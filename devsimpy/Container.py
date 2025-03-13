@@ -22,7 +22,7 @@
 
 import builtins
 
-if builtins.__dict__.get('GUI_FLAG',True):
+if builtins.__dict__.get('GUI_FLAG', True):
 	import wx
 	import wx.lib.dragscroller
 	import wx.lib.dialogs

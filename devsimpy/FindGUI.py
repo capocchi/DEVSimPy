@@ -147,16 +147,3 @@ class FindReplace(wx.Dialog):
 			txt.SetSelection(pos,pos+len(self.input_find.GetValue()))
 		except StopIteration:
 			pass
-
-### ------------------------------------------------------------
-if __name__ == '__main__':
-
-	from ApplicationController import TestApp
-	### Run the test
-	app = TestApp(0)
-	frame = FindReplace(None, -1, 'Test')
-	app.RunTest(frame)
-
-	### lauch the test 
-	### python FindGUI.py --autoclose
-	### python FindGUI.py --autoclose 10 (sleep time before to close the frame is 10s)

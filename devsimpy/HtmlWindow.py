@@ -54,15 +54,3 @@ class HtmlFrame(wx.Frame):
         """
         self.html.SetPage("")
 
-### ------------------------------------------------------------
-if __name__ == '__main__':
-
-    from ApplicationController import TestApp
-    ### Run the test
-    app = TestApp(0)
-    frame = HtmlFrame(None, -1, "Alone Mode", size=(800,600))
-    app.RunTest(frame)
-
-	### lauch the test 
-	### python HtmlWindow.py --autoclose
-	### python HtmlWindow.py --autoclose 10 (sleep time before to close the frame is 10s)

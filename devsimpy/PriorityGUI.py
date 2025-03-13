@@ -123,16 +123,3 @@ class PriorityGUI(wx.Frame):
 			self.listCtrl.InsertItem(item)
 			self.listCtrl.SetItemState(new_pos, 1, wx.LIST_STATE_SELECTED)
 			self.listCtrl.Select(new_pos, 1)
-
-### ------------------------------------------------------------
-if __name__ == '__main__':
-
-	from ApplicationController import TestApp
-	### Run the test
-	app = TestApp(0)
-	frame = PriorityGUI(None, -1, "Test", ['Model1', 'Model2'])
-	app.RunTest(frame)
-
-	### lauch the test 
-	### python PriorityGUI.py --autoclose
-	### python PriorityGUI.py --autoclose 10 (sleep time before to close the frame is 10s)

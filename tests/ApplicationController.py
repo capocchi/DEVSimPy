@@ -39,6 +39,15 @@ if __name__ == '__main__':
 import wx
 import argparse
 import sys
+import os
+
+# Add parent dir to sys.path in order to avoid import from test files
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'devsimpy')))
+
+from config import UpdateBuiltins
+
+#### Update the builtins variables
+UpdateBuiltins()
 
 class ApplicationController:
     """Controls application lifecycle and shutdown behavior"""
@@ -141,11 +150,6 @@ class TestApp(wx.App):
     def OnInit(self):
         """ Init the frame.
         """
-
-        from config import UpdateBuiltins
-
-        #### Update the builtins variables
-        UpdateBuiltins()
 
         return True
         

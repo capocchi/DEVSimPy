@@ -28,12 +28,6 @@ _ = wx.GetTranslation
 
 wx.ST_SIZEGRIP = wx.STB_SIZEGRIP
 
-if __name__ == '__main__':
-	from config import UpdateBuiltins
-
-	#### Update the builtins variables
-	UpdateBuiltins()
-
 import Container
 import Menu
 import PrintOut
@@ -271,23 +265,3 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		self.Destroy()
 
 		event.Skip()
-
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-#
-# MAIN PROGRAM
-#
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-
-if __name__ == '__main__':
-
-	from ApplicationController import TestApp
-
-	### Run the test
-	app = TestApp(0)
-	diagram = Container.Diagram()
-	frame = DetachedFrame(None, -1, "Test", diagram)
-	app.RunTest(frame)
-
-	### lauch the test 
-	### python DetachedFrame.py --autoclose
-	### python DetachedFrame.py --autoclose 10 (sleep time before to close the frame is 10s)

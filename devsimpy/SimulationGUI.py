@@ -32,13 +32,6 @@ from pubsub import pub
 
 from tempfile import gettempdir
 
-### just for individual test
-if __name__ == '__main__':
-	from config import UpdateBuiltins
-
-	#### Update the builtins variables
-	UpdateBuiltins()
-
 from Utilities import IsAllDigits, printOnStatusBar, load_and_resize_image
 from PluginManager import PluginManager #trigger_event, is_enable
 from Patterns.Strategy import *
@@ -864,16 +857,3 @@ def SimulationDialog(*args):
 		return SimulationDialogPanel(*args)
 	else:
 		return SimulationDialogFrame(*args)
-
-### ------------------------------------------------------------
-if __name__ == '__main__':
-
-	from ApplicationController import TestApp
-	### Run the test
-	app = TestApp(0)
-	frame = SimulationDialog(wx.Frame(None), wx.NewIdRef(), 'Simulator')
-	app.RunTest(frame)
-
-	### lauch the test 
-	### python SimulationGUI.py --autoclose
-	### python SimulationGUI.py --autoclose 10 (sleep time before to close the frame is 10s)

@@ -33,12 +33,6 @@ import wx.lib.filebrowsebutton as filebrowse
 
 _ = wx.GetTranslation
 
-if __name__ == '__main__':
-	from config import UpdateBuiltins, USER_SETTINGS
-
-	#### Update the builtins variables
-	UpdateBuiltins()
-
 from HtmlWindow import HtmlFrame
 
 from PluginsGUI import PluginsPanel, GeneralPluginsList
@@ -1067,12 +1061,3 @@ class PreferencesGUI(wx.Frame):
 		"""
 		self.Close()
 		evt.Skip()
-
-### ------------------------------------------------------------
-if __name__ == '__main__':
-
-	from ApplicationController import TestApp
-
-	app = TestApp(0)
-	frame = PreferencesGUI(None, "Test")
-	app.RunTest(frame)

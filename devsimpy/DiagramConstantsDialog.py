@@ -21,7 +21,6 @@ import os
 import builtins
 import csv
 import DSV
-import gettext
 
 ID_IMPORT = wx.NewIdRef()
 ID_EXPORT = wx.NewIdRef()
@@ -281,22 +280,3 @@ class DiagramConstantsDialog(wx.Dialog):
 		"""
 		dial = wx.MessageDialog(self, _("In order to use constante:\n\nCall constante by using \"Name of Diagram\"[\'Name of constante\']\n"), _('Help Manager'), wx.OK|wx.ICON_INFORMATION)
 		dial.ShowModal()
-
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-#
-# MAIN PROGRAM
-#
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-
-if __name__ == '__main__':
-
-	from ApplicationController import TestApp
-
-	### Run the test
-	app = TestApp(0)
-	frame = DiagramConstantsDialog(None, -1, "Model")
-	app.RunTest(frame)
-
-	### lauch the test 
-	### python DiagramConstantsDialog.py --autoclose
-	### python DiagramConstantsDialog.py --autoclose 10 (sleep time before to close the frame is 10s)

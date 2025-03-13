@@ -282,7 +282,8 @@ class MainApplication(wx.Frame):
 		self.Bind(wx.EVT_IDLE, self.OnIdle)
 		self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
 
-		sys.stdout.write("DEVSimPy is up!\n")
+		if builtins.__dict__.get('GUI_FLAG', True):
+			sys.stdout.write("DEVSimPy is up!\n")
 
 		### load last size and position if exist
 		self.SetSize(DefineScreenSize() if not self.last_size else self.last_size)
@@ -973,6 +974,9 @@ class MainApplication(wx.Frame):
 				self._mgr.UnInit()
 				del self._mgr
 		
+
+		if builtins.__dict__.get('GUI_FLAG', True):
+			sys.stdout.write(_("DEVSimPy closed!"))
 
 		event.Skip()
 
@@ -2561,63 +2565,74 @@ class DEVSimPyApp(wx.App, wit.InspectionMixin):
 #-------------------------------------------------------------------
 if __name__ == '__main__':
 
-	### python devsimpy.py -c|-clean in order to delete the config file
-	if len(sys.argv) >= 2 and sys.argv[1] in ('-c', '-clean'):
-		config_file1 = os.path.join(GetUserConfigDir(), '.devsimpy')
-		config_file2 = os.path.join(GetUserConfigDir(), 'devsimpy.ini')
-		r = input(_('Are you sure to delete DEVSimPy config files (.devsimpy and devsimpy.ini)? (Yes,No):'))
-		if r in ('Y', 'y', 'yes', 'Yes', 'YES'):
-			try:
-				os.remove(config_file1)
-			except Exception as info:
-				#traceback.print_exc()
-				pass
-			else:
-				sys.stdout.write(_('%s has been deleted!\n')%config_file1)
-			
-			try:
-				os.remove(config_file2)
-			except Exception as info:
-				#traceback.print_exc()
-				pass
-			else:
-				sys.stdout.write(_('%s has been deleted!\n')%config_file2)
+	### if --nogui is in argv, we start devsimpy-nogui.py
+	start_devsimpy_nogui = '--nogui' in sys.argv
 
-		elif r in ('N','n','no', 'No'):
-			pass
+	### python devsimpy.py -c|-clean in order to delete the config file
+	if len(sys.argv) >= 2 and not start_devsimpy_nogui:
+		if sys.argv[1] in ('-c', '-clean'):
+			config_file1 = os.path.join(GetUserConfigDir(), '.devsimpy')
+			config_file2 = os.path.join(GetUserConfigDir(), 'devsimpy.ini')
+			r = input(_('Are you sure to delete DEVSimPy config files (.devsimpy and devsimpy.ini)? (Yes,No):'))
+			if r in ('Y', 'y', 'yes', 'Yes', 'YES'):
+				try:
+					os.remove(config_file1)
+				except Exception as info:
+					#traceback.print_exc()
+					pass
+				else:
+					sys.stdout.write(_('%s has been deleted!\n')%config_file1)
+				
+				try:
+					os.remove(config_file2)
+				except Exception as info:
+					#traceback.print_exc()
+					pass
+				else:
+					sys.stdout.write(_('%s has been deleted!\n')%config_file2)
+
+			elif r in ('N','n','no', 'No'):
+				pass
+			else:
+				pass
+		elif sys.argv[1] in ('-m'):
+			##########################################
+			import compileall
+
+			compileall.compile_dir('.', maxlevels=20, rx=re.compile(r'/\.svn'))
+			###########################################
+			sys.stdout.write(_('All .pyc has been updated!\n'))
+
+		### python devsimpy.py -d|-debug in order to define log file
+		elif sys.argv[1] in ('-d, -debug'):
+			LOG_FILE = 'log.txt'
+			sys.stdout.write(_('Writing %s file.\n')%LOG_FILE)
+
+		### python devsimpy.py -h|-help in order to invoke command hepler
+		elif sys.argv[1] in ('-h, -help'):
+			sys.stdout.write(_('Welcome to the DEVSimpy helper.\n'))
+			sys.stdout.write(_('\t To execute DEVSimPy GUI: python devsimpy.py\n'))
+			sys.stdout.write(_('\t To execute DEVSimPy No GUI: python devsimpy.py --nogui\n'))
+			sys.stdout.write(_('\t To load an existing dsp file / all .dsp files / all .yaml files in a directory: \n\t\t$ python devsimpy.py <absolute path of .dsp file/*.dsp/*.yaml>\n'))
+			sys.stdout.write(_('\t To load an existing dsp with a simulation frame initialized with a time 10: \n\t\t$ python devsimpy.py <absolute path of the .dsp file> 10\n'))
+			sys.stdout.write(_('\t To load an existing dsp with a simulation frame initialized with no time limit: \n\t\t$ python devsimpy.py <absolute path of the .dsp file> ntl/inf/infinity\n'))
+			sys.stdout.write(_('\t To start simulation: \n\t\t$ python devsimpy.py <absolute path of the .dsp file> ntl/inf/infinity autostart|start|go/go\n'))
+			sys.stdout.write(_('\t To execute DEVSimPy cleaner: python devsimpy.py -c|-clean\n'))
+			sys.stdout.write(_('\t To close DEVSimPy: python devsimpy.py close|quit|autoquit|autoclose\n'))
+			sys.stdout.write(_('Author: L. Capocchi (capocchi@univ-corse.fr)\n'))
+			sys.exit()
+
 		else:
 			pass
-	elif len(sys.argv) >= 2 and sys.argv[1] in ('-m'):
-		##########################################
-		import compileall
 
-		compileall.compile_dir('.', maxlevels=20, rx=re.compile(r'/\.svn'))
-		###########################################
-		sys.stdout.write(_('All .pyc has been updated!\n'))
-
-	### python devsimpy.py -d|-debug in order to define log file
-	elif len(sys.argv) >= 2 and sys.argv[1] in ('-d, -debug'):
-		LOG_FILE = 'log.txt'
-		sys.stdout.write(_('Writing %s file.\n')%LOG_FILE)
-
-	### python devsimpy.py -h|-help in order to invoke command hepler
-	elif len(sys.argv) >= 2 and sys.argv[1] in ('-h, -help'):
-		sys.stdout.write(_('Welcome to the DEVSimpy helper.\n'))
-		sys.stdout.write(_('\t To execute DEVSimPy GUI: python devsimpy.py\n'))
-		sys.stdout.write(_('\t To load an existing dsp file / all .dsp files / all .yaml files in a directory: \n\t\t$ python devsimpy.py <absolute path of .dsp file/*.dsp/*.yaml>\n'))
-		sys.stdout.write(_('\t To load an existing dsp with a simulation frame initialized with a time 10: \n\t\t$ python devsimpy.py <absolute path of the .dsp file> 10\n'))
-		sys.stdout.write(_('\t To load an existing dsp with a simulation frame initialized with no time limit: \n\t\t$ python devsimpy.py <absolute path of the .dsp file> ntl/inf/infinity\n'))
-		sys.stdout.write(_('\t To start simulation: \n\t\t$ python devsimpy.py <absolute path of the .dsp file> ntl/inf/infinity start/go\n'))
-		sys.stdout.write(_('\t To execute DEVSimPy cleaner: python devsimpy.py -c|-clean\n'))
-		sys.stdout.write(_('\t To close DEVSimPy: python devsimpy.py close|quit|autoquit|autoclose\n'))
-		sys.stdout.write(_('Authors: L. Capocchi (capocchi@univ-corse.fr)\n'))
-		sys.exit()
-
+	if start_devsimpy_nogui:
+		import subprocess
+		args = sys.argv[1:]
+		args.remove('--nogui')
+		subprocess.call(['python', os.path.join(ABS_HOME_PATH,'devsimpy-nogui.py')] + args)
 	else:
-		pass
-
-	## si redirect=True et filename=None alors redirection dans une fenetre
-	## si redirect=True et filename="fichier" alors redirection dans un fichier
-	## si redirect=False redirection dans la console
-	app = DEVSimPyApp(redirect = False, filename = None)
-	app.MainLoop()
+		## si redirect=True et filename=None alors redirection dans une fenetre
+		## si redirect=True et filename="fichier" alors redirection dans un fichier
+		## si redirect=False redirection dans la console
+		app = DEVSimPyApp(redirect = False, filename = None)
+		app.MainLoop()

@@ -557,18 +557,3 @@ class ImportLibrary(wx.Dialog):
 		"""
 		self.Destroy()
 		event.Skip()
-
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-#
-# MAIN PROGRAM
-#
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-
-if __name__ == '__main__':
-
-	from ApplicationController import TestApp
-	
-	### Run the test
-	app = TestApp(0)
-	frame = ImportLibrary(None, size=(600,600), id=-1, title="Test")
-	app.RunTest(frame)

@@ -24,14 +24,9 @@ import os
 import wx
 from wx import xrc
 
-### just for individual test
-if __name__ == '__main__':
-	from config import UpdateBuiltins
-
-	#### Update the builtins variables
-	UpdateBuiltins()
-
-else:
+### avoid cyclic import during the test_labelgui.py execution
+import sys
+if 'LabelGUI' not in sys.modules:
 	from AttributeEditor import AttributeBase
 
 __res = None
@@ -194,16 +189,3 @@ class LabelDialog(wx.Dialog):
 
 		self.Destroy()
 
-### ------------------------------------------------------------
-if __name__ == '__main__':
-
-	from ApplicationController import TestApp
-	
-	### Run the test
-	app = TestApp(0)
-	frame = LabelDialog(None, None)
-	app.RunTest(frame)
-
-	### Run the test 
-	### python LabelGUI.py --autoclose
-	### python LabelGUI.py --autoclose 10 (sleep time before to close the frame is 10s)

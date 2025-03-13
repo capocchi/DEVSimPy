@@ -105,16 +105,3 @@ class ConnectDialog(wx.Frame):
 
 	def GetLabelTarget(self):
 		return self._label_target.GetLabel()
-
-if __name__ == '__main__':
-
-	from ApplicationController import TestApp
-
-		### Run the test
-	app = TestApp(0)
-	frame = ConnectDialog(None, -1, 'Connect Manager')
-	app.RunTest(frame)
-
-	### lauch the test 
-	### python ConnectDialog.py --autoclose
-	### python ConnectDialog.py --autoclose 10 (sleep time before to close the frame is 10s)

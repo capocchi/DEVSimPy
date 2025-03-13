@@ -151,17 +151,3 @@ class FTPFrame(wx.Frame):
 			self.ftp = None
 			self.statusbar.SetStatusText('User disconnected')
 			self.statusbar.icon.SetBitmap(load_and_resize_image('disconnect_network.png'))
-
-### ------------------------------------------------------------
-if __name__ == '__main__':
-	
-	from ApplicationController import TestApp
-
-	### Run the test
-	app = TestApp(0)
-	frame = FTPFrame(None, -1, 'Test')
-	app.RunTest(frame)
-
-	### lauch the test 
-	### python FTPGUI.py --autoclose
-	### python FTPGUI.py --autoclose 10 (sleep time before to close the frame is 10s)
