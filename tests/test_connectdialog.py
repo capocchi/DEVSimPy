@@ -9,5 +9,5 @@ from ConnectDialog import ConnectDialog
 
 ### Run the test
 app = TestApp(0)
-frame = ConnectDialog(None, -1, 'Connect Manager')
+frame = ConnectDialog(None, -1, 'Test')
 app.RunTest(frame)

@@ -14,7 +14,7 @@ _ = gettext.gettext
 
 ### Run the test
 app = TestApp(0)
-frame = ModelGeneratorWizard(parent=None, title=_('DEVSimPy Model Generator'), img_filename = os.path.join('bitmaps', DEVSIMPY_ICON))
+frame = ModelGeneratorWizard(parent=None, title=_('Test'), img_filename = os.path.join('bitmaps', DEVSIMPY_ICON))
 # frame.run()
 app.RunTest(frame)
 

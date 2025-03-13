@@ -85,6 +85,10 @@ jobs:
           test_wizardgui.py
           test_pluginsgui.py
           test_wxpymail.py
+          test_aiprompterdialog.py
+          test_simpleframeeditor.py
+          test_yamlexportgui.py
+          test_spreadsheet.py
           test_xmlmodule.py
         )
 

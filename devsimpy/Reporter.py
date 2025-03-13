@@ -276,7 +276,7 @@ class ErrorDialog(BaseDialog):
             self.Close()
 
         elif e_id == ID_SEND:
-            frame = SendMailWx(None)
+            frame = SendMailWx(None, _('New Email Message (From Google account)'))
             msg = self.err_msg
             msg = msg.replace("'", '')
             frame.messageTxt.SetValue(msg)

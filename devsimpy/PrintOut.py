@@ -5,7 +5,6 @@
 
 import wx
 import sys
-import copy
 
 _ = wx.GetTranslation
 

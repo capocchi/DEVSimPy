@@ -21,7 +21,6 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 import wx
-import os
 
 _ = wx.GetTranslation
 

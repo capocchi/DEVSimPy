@@ -791,7 +791,7 @@ class Diagram(Savable, Structurable):
 				if dial.ShowModal() == wx.ID_YES:
 					self.OnSimulation(event)
 			else:
-				frame = CheckerGUI.CheckerGUI(win, self.DoCheck())
+				frame = CheckerGUI.CheckerGUI(win, _("DEVS Model Checking"), self.DoCheck())
 				frame.SetDiagram(self)
 				frame.Show()
 
@@ -830,7 +830,7 @@ class Diagram(Savable, Structurable):
 				playSound(SIMULATION_ERROR_SOUND_PATH)
 
 				if dial.ShowModal() == wx.ID_YES:
-					frame = CheckerGUI.CheckerGUI(win, D)
+					frame = CheckerGUI.CheckerGUI(win, _("DEVS Model Checking"), D)
 					frame.SetDiagram(self)
 					frame.Show()
 

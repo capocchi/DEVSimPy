@@ -9,6 +9,6 @@ from HtmlWindow import HtmlFrame
 
 ### Run the test
 app = TestApp(0)
-frame = HtmlFrame(None, -1, "Alone Mode", size=(800,600))
+frame = HtmlFrame(None, -1, "Test: Alone Mode", size=(800,600))
 app.RunTest(frame)
 

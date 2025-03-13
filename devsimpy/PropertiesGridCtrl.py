@@ -1201,9 +1201,3 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 		#grid.SaveEditControlValue()
 		#grid.HideCellEditControl()
 		#event.Skip()
-
-def main():
-    pass
-
-if __name__ == '__main__':
-    main()

@@ -52,7 +52,7 @@ class AIPrompterDialog(wx.Dialog):
         ### Code generated inside the self.code_text field
         self.generated_code = ""
 
-       # Sizer pour organiser les éléments
+    # Sizer pour organiser les éléments
         main_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Zone de texte pour le code sélectionné
@@ -127,7 +127,7 @@ class AIPrompterDialog(wx.Dialog):
         selection = self.editor.GetSelection()
         textstring = self.editor.GetRange(selection[0], selection[1])
 
-		# Remplacement du texte dans l'éditeur si le texte a été modifié
+        # Remplacement du texte dans l'éditeur si le texte a été modifié
         if generated_code and generated_code != textstring:	
             ### si text selectionné dans le code à remplace
             self.editor.ReplaceSelection(generated_code)
@@ -151,37 +151,4 @@ class AIPrompterDialog(wx.Dialog):
         if modified_code:
             self.code_text.SetValue(modified_code)
             self.insert_button.Enable(True)
-
-# Fonction principale pour exécuter l'application
-def main():
-    # Initialisation de l'application wxPython
-    app = wx.App(False)
-
-    # Crée un objet d'adaptateur fictif (à remplacer par votre propre logique)
-    class DummyAdapter:
-        def modify_model_part_prompt(self, code, prompt):
-            return f"{code}\n# Prompt: {prompt}"
-
-        def generate_output(self, full_prompt):
-            return f"# Modified Code based on prompt:\n{full_prompt}"
-
-    # Code de démonstration
-    demo_code = ""
-
-    # Création et affichage du dialogue
-    dialog = AIPrompterDialog(None, 'Test', demo_code, DummyAdapter())
-    dialog.ShowModal()  # Affiche le dialogue
-    dialog.Destroy()  # Détruit le dialogue après fermeture
-
-    # Démarre la boucle principale de l'application
-    app.MainLoop()
-
-if __name__ == "__main__":
-
-    from config import UpdateBuiltins
-
-	#### Update the builtins variables
-    UpdateBuiltins()
-
-    ### Run the main function
-    main()
+          

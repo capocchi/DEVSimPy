@@ -10,6 +10,6 @@ from wxPyMail import SendMailWx
 
 ### Run the test
 app = TestApp(0)
-frame = SendMailWx(None)
+frame = SendMailWx(None, title="Test")
 app.RunTest(frame)
 

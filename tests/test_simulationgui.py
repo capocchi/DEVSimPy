@@ -12,5 +12,5 @@ from SimulationGUI import SimulationDialog
 
 ### Run the test
 app = TestApp(0)
-frame = SimulationDialog(wx.Frame(None), wx.NewIdRef(), 'Simulator')
+frame = SimulationDialog(wx.Frame(None), wx.NewIdRef(), 'Test')
 app.RunTest(frame)

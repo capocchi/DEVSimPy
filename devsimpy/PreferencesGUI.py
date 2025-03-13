@@ -787,9 +787,10 @@ class AIPanel(wx.Panel):
 	def load_settings(self):
 		""" Load the AI settings from builtins """
 		### Init the builtins wirh AI info
-		builtins.__dict__.setdefault('SELECTED_IA', '')
-		builtins.__dict__['PARAMS_IA'].setdefault('CHATGPT_API_KEY', '')
-		builtins.__dict__['PARAMS_IA'].setdefault('OLLAMA_PORT', '11434')
+		setattr(builtins, "SELECTED_IA", getattr(builtins, "SELECTED_IA", ""))
+		setattr(builtins, "PARAMS_IA", getattr(builtins, "PARAMS_IA", {}))
+		builtins.PARAMS_IA.setdefault('CHATGPT_API_KEY', '')
+		builtins.PARAMS_IA.setdefault('OLLAMA_PORT', '11434')
 
 	def OnApply(self, evt):
 		""" Apply and save the current AI settings """

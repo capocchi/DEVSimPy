@@ -138,15 +138,16 @@ class Newt(wx.Frame):
 		""" Constructor
 		"""
 
+		### local copy
+		self.model = aDEVS
+		self.sep = separator
+
 		wx.Frame.__init__(self,
 						parent,
 						wx.NewIdRef(),
-						aDEVS.getBlockModel().label,
+						aDEVS.getBlockModel().label if aDEVS else "",
 						size = (550, 500),
 						style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
-
-		self.model = aDEVS
-		self.sep = separator
 
 		toolbar = self.CreateToolBar()
 		toolbar.SetToolBitmapSize((16,16))
@@ -177,7 +178,10 @@ class Newt(wx.Frame):
 		self.notebook = wx.Notebook(self, wx.NewIdRef())
 
 		### Load data form devs model
-		self.LoadingDataInPage()
+		if aDEVS:
+			self.LoadingDataInPage()
+		else:
+			sys.stdout.write(_('DEVS model is None.'))
 
 		### Layout
 		box = wx.BoxSizer(wx.VERTICAL)
@@ -487,13 +491,3 @@ class Newt(wx.Frame):
 	@BuzyCursorNotification
 	def create_static_plot(self, title, data):
 		return StaticPlot(None, wx.NewIdRef(), title, data)
-
-##if __name__ == '__main__':
-##	import builtins
-##	import Container
-##
-##	builtins.__dict__['FONT_SIZE'] = 12
-##	#app = wx.App(0)
-##	devs =  Container.DiskGUI()
-##	newt = Newt(None, wx.NewIdRef(), 'SpreadSheet', devs)
-##	app.MainLoop()

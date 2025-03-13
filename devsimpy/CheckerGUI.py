@@ -30,8 +30,8 @@ import inspect
 from wx.lib.mixins.listctrl import ListCtrlAutoWidthMixin, ColumnSorterMixin
 
 if not hasattr(inspect, 'getargspec'):
-    inspect.getargspec = inspect.getfullargspec
-    
+	inspect.getargspec = inspect.getfullargspec
+	
 from Utilities import getTopLevelWindow, load_and_resize_image
 
 _ = wx.GetTranslation
@@ -284,10 +284,10 @@ class CheckerGUI(wx.Frame):
 	""" Class which report the code checking of python file
 	"""
 
-	def __init__(self, parent, D):
+	def __init__(self, parent, title, D):
 		""" Constructor.
 		"""
-		wx.Frame.__init__(self, parent, wx.NewIdRef(), _("DEVS Model Checking"), size=(900,400), style = wx.DEFAULT_FRAME_STYLE)
+		wx.Frame.__init__(self, parent, wx.NewIdRef(), title, size=(900,400), style = wx.DEFAULT_FRAME_STYLE)
 
 		icon = wx.Icon()
 		icon.CopyFromBitmap(load_and_resize_image("check_master.png"))

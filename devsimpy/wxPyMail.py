@@ -143,8 +143,6 @@ class SendMailWx(wx.Frame):
         mainSizer.Add(attachSizer, 0, wx.ALL|wx.EXPAND, 5)
         mainSizer.Add(self.messageTxt, 1, wx.ALL|wx.EXPAND, 5)        
         mainSizer.Add(self.url, 1, wx.ALL|wx.EXPAND, 5)
-
-        self.SetTitle(('New Email Message (From Google account)'))
                 
         self.panel.SetSizerAndFit(mainSizer)
         self.panel.SetAutoLayout(True)

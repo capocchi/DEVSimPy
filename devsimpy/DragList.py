@@ -9,7 +9,6 @@ import pickle
 import wx
 
 # ----------------------------------------------------------------------
-# ----------------------------------------------------------------------
 # DragList
 
 class DragList(wx.ListCtrl):
@@ -135,39 +134,3 @@ class ListDrop(wx.PyDropTarget):
         # with the original data (move, copy, etc.)  In this
         # case we just return the suggested value given to us.
         return d
-
-# ----------------------------------------------------------------------
-# ----------------------------------------------------------------------
-# main
-
-if __name__ == '__main__':
-    items = ['Foo', 'Bar', 'Baz', 'Zif', 'Zaf', 'Zof']
-
-    class MyApp(wx.App):
-        def OnInit(self):
-            self.frame = wx.Frame(None, title='Main Frame')
-            self.frame.Show(True)
-            self.SetTopWindow(self.frame)
-            return True
-
-    app = MyApp(redirect=False)
-    dl1 = DragList(app.frame, style=wx.LC_LIST)
-    dl2 = DragList(app.frame, style=wx.LC_REPORT)
-    dl2.InsertColumn(0, "Column #0")
-    dl2.InsertColumn(1, "Column #1", wx.LIST_FORMAT_RIGHT)
-    dl2.InsertColumn(2, "Column #2")
-    sizer = wx.BoxSizer()
-    app.frame.SetSizer(sizer)
-    sizer.Add(dl1, proportion=1, flag=wx.EXPAND)
-    sizer.Add(dl2, proportion=1, flag=wx.EXPAND)
-
-    from random import choice
-    from sys import maxsize
-
-    for item in items:
-        dl1.InsertItem(maxint, item)
-        idx = dl2.InsertItem(maxint, item)
-        dl2.SetStringItem(idx, 1, choice(items))
-        dl2.SetStringItem(idx, 2, choice(items))
-    app.frame.Layout()
-    app.MainLoop()

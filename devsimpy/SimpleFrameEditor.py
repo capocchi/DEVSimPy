@@ -3,7 +3,6 @@
 
 import wx
 import wx.stc
-import os
 
 from Utilities import load_and_resize_image
     
@@ -90,12 +89,3 @@ class FrameEditor(wx.Frame):
 
     def AddText(self,txt):
         self.editor.AddText(txt)
-
-if __name__ == "__main__":
-    app = wx.App(0)
-    wx.InitAllImageHandlers()
-    frame_1 = FrameEditor(None, -1, "Test")
-    frame_1.AddText("Test \n zzeze")
-    app.SetTopWindow(frame_1)
-    frame_1.Show()
-    app.MainLoop()

@@ -20,8 +20,6 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-import builtins
-
 import os
 import sys
 import time
@@ -31,7 +29,7 @@ from tempfile import gettempdir
 import time
 import cProfile, pstats, io
 
-if getattr(builtins, 'GUI_FLAG', True):
+if GUI_FLAG:
 	import wx
 	import wx.lib.agw.aui.framemanager
 	AuiFloatingFrame = wx.lib.agw.aui.framemanager.AuiFloatingFrame
@@ -101,11 +99,11 @@ def BuzyCursorNotification(f):
 	""" Decorator which give the buzy cursor for long process
 	"""
 	def wrapper(*args):
-			if getattr(builtins, 'GUI_FLAG', True):
+			if GUI_FLAG:
 				wait = wx.BusyCursor()
 				#wx.SafeYield()
 			r =  f(*args)
-			if getattr(builtins, 'GUI_FLAG', True):
+			if GUI_FLAG:
 				del wait
 			return r
 	return wrapper

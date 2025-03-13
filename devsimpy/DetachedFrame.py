@@ -22,7 +22,6 @@
 
 import sys
 import wx
-import builtins
 
 _ = wx.GetTranslation
 

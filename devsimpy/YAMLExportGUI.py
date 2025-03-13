@@ -152,13 +152,3 @@ class YAMLExportGUI(wx.Frame):
 
     def OnClose(self, e):
         self.Close()
-
-def main():
-
-    ex = wx.App()
-    frame = YAMLExportGUI(None, -1, 'YAML Export', path=r'C:\\Users\capocchi_l.UDCPP\Downloads\plotly_test.yaml')
-    frame.Show(True)
-    ex.MainLoop()
-
-if __name__ == '__main__':
-    main()

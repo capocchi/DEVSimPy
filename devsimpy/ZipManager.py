@@ -24,7 +24,6 @@ import re
 import types
 import importlib
 from tempfile import gettempdir
-import builtins
 import gettext
 import ast
 

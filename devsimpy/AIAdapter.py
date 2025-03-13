@@ -16,6 +16,12 @@
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
+# TEST PART - invoque the correspond test file in strored in tests/
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
 # GLOBAL VARIABLES AND FUNCTIONS
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -372,26 +378,6 @@ class OllamaDevsAdapter(DevsAIAdapter):
         except subprocess.CalledProcessError as e:
             logging.error(_("Error during Ollama installation: %s"), e)
             raise RuntimeError(_("Ollama installation failed."))
-
-    # def _show_download_message(self, url, dest_path):
-    #     """Affiche une fenêtre wx avec le message de téléchargement sans interférer avec l'application wx existante."""
-    #     frame = wx.Frame(None, -1, _("Download"), size=(500, 100))
-    #     panel = wx.Panel(frame, -1)
-        
-    #     text = wx.StaticText(panel, -1, _("Downloading..."), pos=(50, 20))
-    #     font = text.GetFont()
-    #     font.PointSize += 2
-    #     font = font.Bold()
-    #     text.SetFont(font)
-        
-    #     frame.Centre()
-    #     frame.Show()
-
-    #     # Effectue le téléchargement
-    #     urllib.request.urlretrieve(url, dest_path)
-
-    #     # Ferme la fenêtre une fois le téléchargement terminé
-    #     frame.Close()
 
     def _is_server_running(self):
         """ Vérifie si le serveur Ollama est en cours d'exécution sur le port spécifié. """

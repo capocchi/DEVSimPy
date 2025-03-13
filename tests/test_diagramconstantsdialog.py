@@ -10,5 +10,5 @@ from DiagramConstantsDialog import DiagramConstantsDialog
 
 ### Run the test
 app = TestApp(0)
-frame = DiagramConstantsDialog(None, -1, "Model")
+frame = DiagramConstantsDialog(None, -1, "Test")
 app.RunTest(frame)

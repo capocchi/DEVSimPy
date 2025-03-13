@@ -67,5 +67,5 @@ musicdata = {
     
 ### Run the test
 app = TestApp(0)
-frame = CheckerGUI(None, musicdata)
+frame = CheckerGUI(None, "Test", musicdata)
 app.RunTest(frame)
