@@ -74,7 +74,7 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, stdout
     from InteractionSocket import InteractionManager
 
     json_report = {'date': time.strftime("%c")}
-    json_report['summary'] = "Simulation in batch mode with %s"%builtins.__dict__['DEFAULT_DEVS_DIRNAME']
+    json_report['summary'] = f"Simulation in batch mode with {DEFAULT_DEVS_DIRNAME}"
     json_report['mode'] ='no-gui'
     json_report['time'] = T
     json_report['success'] = True
@@ -125,7 +125,7 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, stdout
         # first_real_time = time.time()
         progress = 0
         
-        if not builtins.__dict__['NTL']:
+        if not NTL:
             is_alive = thread.isAlive if hasattr(thread, 'isAlive') else thread.is_alive
             while is_alive():
                 try:
@@ -208,12 +208,12 @@ class runSimulation:
         self.time = time
 
         ### No time limit simulation (defined in the builtin dico from .devsimpy file)
-        self.ntl = builtins.__dict__['NTL']
+        self.ntl = NTL
 
         # simulator strategy
         self.selected_strategy = DEFAULT_SIM_STRATEGY
-        self.dynamic_structure_flag = builtins.__dict__['DYNAMIC_STRUCTURE']
-        self.real_time_flag = builtins.__dict__['REAL_TIME']
+        self.dynamic_structure_flag = DYNAMIC_STRUCTURE
+        self.real_time_flag = REAL_TIME
          
         ### profiling simulation
         self.prof = False

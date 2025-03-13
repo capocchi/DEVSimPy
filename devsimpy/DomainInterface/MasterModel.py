@@ -18,24 +18,6 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-import builtins
-
-### just for individual test
-if __name__ == '__main__':
-	import os
-	import sys
-
-	builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
-	builtins.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}
-
-    ### permit correct import (based on fom instruction) in PyPDEVS directory (logger, util...) when this module executed (main)
-	d = sys.path.append(os.pardir)
-	if d not in sys.path:
-		sys.path.append(d)
-
-import re
-import os
-
 ### import the DEVS module depending on the selected DEVS package in DEVSKernel directory
 #for pydevs_dir in builtins.__dict__['DEVS_DIR_PATH_DICT']:
 #    if pydevs_dir == builtins.__dict__['DEFAULT_DEVS_DIRNAME']:
@@ -78,9 +60,3 @@ class Master(DomainInterface.DomainStructure):
 	###
 	def __str__(self):
 		return self.__class__.__name__
-
-def main():
-	master = Master()
-
-if __name__ == '__main__':
-	main()

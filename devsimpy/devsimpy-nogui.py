@@ -69,7 +69,7 @@ def simulate(devs, duration, simu_name, is_remote):
 	from SimulationNoGUI import makeSimulation
 
 	if str(duration) in ('inf', 'ntl'):
-		builtins.__dict__['NTL'] = True
+		setattr(builtins, 'NTL', True)
 		duration = 0.0
 
 	if not devs:
@@ -117,11 +117,11 @@ if __name__ == '__main__':
 
 	if args.kernel:
 		if 'PyPDEVS' in args.kernel:
-			builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyPDEVS_221'
-			builtins.__dict__['DEFAULT_SIM_STRATEGY'] = 'parallel'
+			setattr(builtins,'DEFAULT_DEVS_DIRNAME','PyPDEVS_221')
+			setattr(builtins, 'DEFAULT_SIM_STRATEGY', 'parallel')
 
 			### Real time only for PyPDEVS...
-			builtins.__dict__['REAL_TIME'] = args.rt
+			setattr(builtins, 'REAL_TIME', args.rt)
 
 	filename = args.filename
 	

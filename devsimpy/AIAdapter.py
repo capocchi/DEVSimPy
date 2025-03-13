@@ -172,7 +172,8 @@ class AdapterFactory:
         Retourne une instance unique de l'adaptateur sélectionné.
         Réinitialise l'instance si `selected_ia` a changé en cours d'exécution.
         """
-        selected_ia = builtins.__dict__.get("SELECTED_IA", "")
+
+        selected_ia = getattr(builtins,'SELECTED_IA',"")
 
         # Vérifie si l'IA sélectionnée a changé
         if AdapterFactory._current_selected_ia != selected_ia:
@@ -344,7 +345,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
                 
         dialog.Destroy()
 
-    @cond_decorator(builtins.__dict__.get('GUI_FLAG', True), ProgressNotification(_(f"Download")))        
+    @cond_decorator(getattr(builtins,'GUI_FLAG', True), ProgressNotification(_(f"Download")))        
     def _install_ollama(self):
         """ Installe Ollama selon le système d'exploitation. """
         platform = sys.platform
@@ -398,7 +399,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
             result = sock.connect_ex(('localhost', int(self.port)))
             return result == 0  # Renvoie True si le port est ouvert
 
-    @cond_decorator(builtins.__dict__.get('GUI_FLAG', True), ProgressNotification(_("Starting Server")))
+    @cond_decorator(getattr(builtins,'GUI_FLAG', True), ProgressNotification(_("Starting Server")))
     def _start_server(self):
         """ Démarre le serveur Ollama en arrière-plan. """
         try:
@@ -453,7 +454,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
             logging.error("Erreur lors de l'exécution de la commande:", e)
             logging.error(e.stderr)
 
-    @cond_decorator(builtins.__dict__.get('GUI_FLAG', True), ProgressNotification(_(f"Pulling process")))
+    @cond_decorator(getattr(builtins,'GUI_FLAG', True), ProgressNotification(_(f"Pulling process")))
     def _pull(self):
         try:
             # Commande pour effectuer le pull via la ligne de commande

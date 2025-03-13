@@ -160,7 +160,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			#toolbar.EnableTool(Menu.ID_SAVE, False)
 			#toolbar.EnableTool(Menu.ID_SAVEAS, False)
 			toolbar.EnableTool(Menu.ID_SIM_DIAGRAM, False)
-			toolbar.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in builtins.__dict__['DEFAULT_DEVS_DIRNAME'])
+			toolbar.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in DEFAULT_DEVS_DIRNAME)
 		else:
 			toolbar.EnableTool(Menu.ID_SAVEAS, False)
 

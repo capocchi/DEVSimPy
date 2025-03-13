@@ -1018,29 +1018,3 @@ class ModelPluginsManager(wx.Frame):
 		self.delBtn.Enable(False)
 		self.addBtn.Enable(True)
 		self.editBtn.Enable(False)
-
-### ------------------------------------------------------------
-class TestApp(wx.App):
-	""" Testing application
-	"""
-
-	def OnInit(self):
-
-
-		import builtins
-		import gettext
-
-		builtins.__dict__['DEVSIMPY_PACKAGE_PATH'] = os.getcwd()
-		builtins.__dict__['_'] = gettext.gettext
-
-		frame = ModelPluginsManager(parent=None, title="Test", model=None)
-		frame.Show()
-		return True
-
-	def OnQuit(self, event):
-		self.Close()
-
-if __name__ == '__main__':
-
-	app = TestApp(0)
-	app.MainLoop()

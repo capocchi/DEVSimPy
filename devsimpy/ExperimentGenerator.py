@@ -105,8 +105,8 @@ class ExperimentGenerator:
             
         txt =''.join(["\n\nsys.path.append(os.path.join('..','DEVSKernel','PyDEVS'))\n",
                     "sys.path.append(os.path.join('..'))\n",
-                    "builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = 'PyDEVS'\n",
-                    "builtins.__dict__['DEVS_DIR_PATH_DICT'] = {'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}\n\n"])
+                    "setattr(builtins,'DEFAULT_DEVS_DIRNAME','PyDEVS')\n",
+                    "setattr(builtins,'DEVS_DIR_PATH_DICT',{'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')})\n\n"])
         
         newFile.write(txt)
 

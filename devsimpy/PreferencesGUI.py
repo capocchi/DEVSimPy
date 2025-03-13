@@ -110,13 +110,13 @@ class GeneralPanel(wx.Panel):
 		self.cb1 = wx.CheckBox(self, wx.NewIdRef(), _('Transparency'))
 		self.cb1.SetToolTipString = self.cb1.SetToolTip
 		self.cb1.SetToolTipString(_("Transparency for the detached frame of diagrams"))
-		self.cb1.SetValue(builtins.__dict__['TRANSPARENCY'])
+		self.cb1.SetValue(getattr(builtins, 'TRANSPARENCY'))
 
 		### CheckBox for notification
 		self.cb11 = wx.CheckBox(self, wx.NewIdRef(), _('Notififcations'))
 		self.cb11.SetToolTipString = self.cb11.SetToolTip
 		self.cb11.SetToolTipString(_("Enable the notification messages"))
-		self.cb11.SetValue(builtins.__dict__['NOTIFICATION'])
+		self.cb11.SetValue(getattr(builtins, 'NOTIFICATION'))
 			
 		self.cb2 = wx.ComboBox(self, wx.NewIdRef(), GetWXVersionFromIni(), choices=GeneralPanel.wxv, style=wx.CB_READONLY)
 		self.cb2.SetToolTipString = self.cb2.SetToolTip
@@ -175,19 +175,19 @@ class GeneralPanel(wx.Panel):
 	def OnNbOpenedFileChanged(self, event):
 		""" Update the number opened files.
 		"""
-		builtins.__dict__['NB_OPENED_FILE'] = self.nb_opened_file.GetValue()		# number of recent files
+		setattr(builtins, 'NB_OPENED_FILE', self.nb_opened_file.GetValue())		# number of recent files
 
 	###
 	def OnNbHistoryUndoChanged(self, event):
 		""" Update the history for undo.
 		"""
-		builtins.__dict__['NB_HISTORY_UNDO'] = self.nb_history_undo.GetValue()		# number of history undo
+		setattr(builtins, 'NB_HISTORY_UNDO', self.nb_history_undo.GetValue())		# number of history undo
 
 	###
 	def OnFontSizeChanged(self, event):
 		""" Update font size.
 		"""
-		builtins.__dict__['FONT_SIZE'] = self.font_size.GetValue()		# Block font size
+		setattr(builtins, 'FONT_SIZE', self.font_size.GetValue())		# Block font size
 
 	###
 	def OnDomainPathChanged(self, event):
@@ -196,22 +196,22 @@ class GeneralPanel(wx.Panel):
 		new_domain_dir = self.domain_dir.GetValue()
 
 		### if value has been changed, we clean the library control panel
-		if builtins.__dict__['DOMAIN_PATH'] != new_domain_dir:
+		if getattr(builtins, 'DOMAIN_PATH') != new_domain_dir:
 
-			old_parent_domain_dir = os.path.dirname(builtins.__dict__['DOMAIN_PATH'])
+			old_parent_domain_dir = os.path.dirname(DOMAIN_PATH)
 
 			### remove the parent of Domain directory of this one is not the devsimpy directory
-			if old_parent_domain_dir != builtins.__dict__['DEVSIMPY_PACKAGE_PATH']:
+			if old_parent_domain_dir != DEVSIMPY_PACKAGE_PATH:
 				if old_parent_domain_dir in sys.path:
 					sys.path.remove(old_parent_domain_dir)
 			### remove the path from sys.path in order to update the import process
-			for path in [p for p in sys.path if builtins.__dict__['DOMAIN_PATH'] in p]:
+			for path in [p for p in sys.path if DOMAIN_PATH in p]:
 				sys.path.remove(path)
 
 			### TODO remove dirname of path from sys.modules ?
 
 			### update the builtin
-			builtins.__dict__['DOMAIN_PATH'] = new_domain_dir
+			setattr(builtins, 'DOMAIN_PATH', new_domain_dir)
 
 			### update all Domain (the process add in sys.path the path invoked when import is used
 			mainW = getTopLevelWindow()
@@ -227,25 +227,25 @@ class GeneralPanel(wx.Panel):
 	def OnPluginsDirChanged(self, event):
 		""" Update of plugins path has been invoked.
 		"""
-		builtins.__dict__['PLUGINS_PATH'] = self.plugin_dir.GetValue()
+		setattr(builtins, 'PLUGINS_PATH', self.plugin_dir.GetValue())
 
 	###
 	def OnOutDirChanged(self, event):
 		""" Update of output directory has been invoked.
 		"""
-		builtins.__dict__['OUT_DIR'] = os.path.basename(self.out_dir.GetValue())
+		setattr(builtins, 'OUT_DIR', os.path.basename(self.out_dir.GetValue()))
 
 	###
 	def OnTransparancyChanged(self, event):
 		""" Update of windwis transparency directory has been invoked.
 		"""
-		builtins.__dict__['TRANSPARENCY'] = self.cb1.GetValue()
+		setattr(builtins, 'TRANSPARENCY', self.cb1.GetValue())
 
 		###
 	def OnNotificationChanged(self, event):
 		""" Update of notifcation option directory has been invoked.
 		"""
-		builtins.__dict__['NOTIFICATION'] = self.cb11.GetValue()
+		setattr(builtins, 'NOTIFICATION', self.cb11.GetValue())
 
 	def OnwxPythonVersionChanged(self, event):
 		""" Update of wxpython version has been invoked.
@@ -305,8 +305,8 @@ class SimulationPanel(wx.Panel):
 		hbox5 = wx.BoxSizer(wx.HORIZONTAL)
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
-		self.sim_success_sound_path = builtins.__dict__['SIMULATION_SUCCESS_SOUND_PATH']
-		self.sim_error_sound_path = builtins.__dict__['SIMULATION_ERROR_SOUND_PATH']
+		self.sim_success_sound_path = SIMULATION_SUCCESS_SOUND_PATH
+		self.sim_error_sound_path = SIMULATION_ERROR_SOUND_PATH
 
 		### Buttons
 		self.sim_success_sound_btn = wx.Button(self, wx.NewIdRef(), os.path.basename(self.sim_success_sound_path), (25, 105), name='success')
@@ -331,7 +331,7 @@ class SimulationPanel(wx.Panel):
 
 		self.cb2 = wx.CheckBox(self, wx.NewIdRef(), _('No Time Limit'))
 		self.cb2.SetToolTipString = self.cb2.SetToolTip
-		self.cb2.SetValue(builtins.__dict__['NTL'])
+		self.cb2.SetValue(NTL)
 		self.cb2.SetToolTipString(_("No Time Limit allow the stop of simulation when all of models are idle."))
 
 		### StaticText for DEVS Kernel directory
@@ -352,7 +352,7 @@ class SimulationPanel(wx.Panel):
 		self.sim_defaut_strategy = DEFAULT_SIM_STRATEGY
 
 		### StaticText
-		self.sim_defaut_plot_dyn_freq = builtins.__dict__['DEFAULT_PLOT_DYN_FREQ']
+		self.sim_defaut_plot_dyn_freq = DEFAULT_PLOT_DYN_FREQ
 		self.txt2 = wx.StaticText(self, wx.NewIdRef(), _("Frequency of plotting refresh:"))
 		self.sc = wx.SpinCtrl(self, wx.NewIdRef(), str(self.sim_defaut_plot_dyn_freq), (55, 90), (60, -1), min=10, max=10000)
 		self.sc.SetToolTipString = self.sc.SetToolTip
@@ -404,7 +404,7 @@ class SimulationPanel(wx.Panel):
 		choice = self.cb3.GetValue()
 
 		### possible path of doc directory
-		path = os.path.join(os.path.dirname(builtins.__dict__['DEVS_DIR_PATH_DICT'][choice]), 'doc', 'index.html')
+		path = os.path.join(os.path.dirname(getattr(builtins,'DEVS_DIR_PATH_DICT').get(choice)), 'doc', 'index.html')
 
 		### Html frame
 		frame = HtmlFrame(self, wx.NewIdRef(), "Doc", (600,600))
@@ -452,8 +452,8 @@ class SimulationPanel(wx.Panel):
 		if evt.GetEventObject().GetValue():
 			self.sim_success_sound_btn.Enable(True)
 			self.sim_error_sound_btn.Enable(True)
-			self.sim_success_sound_path = builtins.__dict__.get(['SIMULATION_SUCCESS_SOUND_PATH'])
-			self.sim_error_sound_path = builtins.__dict__.get(['SIMULATION_ERROR_SOUND_PATH'])
+			self.sim_success_sound_path = SIMULATION_SUCCESS_SOUND_PATH
+			self.sim_error_sound_path = SIMULATION_ERROR_SOUND_PATH
 		else:
 			self.sim_success_sound_btn.Enable(False)
 			self.sim_error_sound_btn.Enable(False)
@@ -498,9 +498,9 @@ class SimulationPanel(wx.Panel):
 		"""
 
 		### Reload DomainBehavior and DomainStructure
-		if builtins.__dict__['DEFAULT_DEVS_DIRNAME'] != self.default_devs_dir:
+		if DEFAULT_DEVS_DIRNAME != self.default_devs_dir:
 			### change builtin before recompile the modules
-			builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = self.default_devs_dir
+			setattr(builtins, 'DEFAULT_DEVS_DIRNAME', self.default_devs_dir)
 
 			### recompile the modules.
 			### recompile DomainInterface.DomainBehavior , DomainInterfaceStructure and MasterModel
@@ -518,19 +518,19 @@ class SimulationPanel(wx.Panel):
 		### enable the priority (DEVS select function) icon depending on the selected DEVS kernel
 		mainW = getTopLevelWindow()
 		tb = mainW.GetToolBar()
-		tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in builtins.__dict__['DEFAULT_DEVS_DIRNAME'])
+		tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in DEFAULT_DEVS_DIRNAME)
 
-		builtins.__dict__['SIMULATION_SUCCESS_SOUND_PATH'] = self.sim_success_sound_path
-		builtins.__dict__['SIMULATION_ERROR_SOUND_PATH'] = self.sim_error_sound_path
-		builtins.__dict__['DEFAULT_SIM_STRATEGY'] = self.sim_defaut_strategy
-		builtins.__dict__['DEFAULT_PLOT_DYN_FREQ'] = self.sim_defaut_plot_dyn_freq
-		builtins.__dict__['NTL'] = self.cb2.GetValue()
+		setattr(builtins, 'SIMULATION_SUCCESS_SOUND_PATH', self.sim_success_sound_path)
+		setattr(builtins, 'SIMULATION_ERROR_SOUND_PATH', self.sim_error_sound_path)
+		setattr(builtins, 'DEFAULT_SIM_STRATEGY', self.sim_defaut_strategy)
+		setattr(builtins, 'DEFAULT_PLOT_DYN_FREQ', self.sim_defaut_plot_dyn_freq)
+		setattr(builtins, 'NTL', self.cb2.GetValue())
 
 class EditorPanel(wx.Panel):
 	""" Edition Panel.
 	"""
 
-	EDITORS = ('spyder','pyzo')
+	EDITORS = ('spyder', 'pyzo')
 
 	def __init__(self, parent):
 		""" Constructor.
@@ -549,7 +549,7 @@ class EditorPanel(wx.Panel):
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
 		self.cb = wx.CheckBox(self, wx.NewIdRef(), _("Use the DEVSimPy local code editor software"))
-		self.cb.SetValue(builtins.__dict__['LOCAL_EDITOR'])
+		self.cb.SetValue(LOCAL_EDITOR)
 		self.cb.SetToolTipString = self.cb.SetToolTip
 		self.cb.SetToolTipString(_("This option is available only for the python file. \n"
 			"Modification of python file during the simulation is disabled when this checkbox is checked."))
@@ -576,10 +576,10 @@ class EditorPanel(wx.Panel):
 		self.UpdateExternalEditorBtn.SetToolTipString(_("Update the list of available external editors"))
 
 		### if external editor name is never stored in config file (.devsimpy)
-		if builtins.__dict__['EXTERNAL_EDITOR_NAME'] == "":
+		if EXTERNAL_EDITOR_NAME == "":
 			self.choice.SetSelection(0)
 		else:
-			self.choice.SetSelection(EditorPanel.EDITORS.index(builtins.__dict__['EXTERNAL_EDITOR_NAME']))
+			self.choice.SetSelection(EditorPanel.EDITORS.index(EXTERNAL_EDITOR_NAME))
 
 		self.choice.Enable(not self.cb.IsChecked())
 
@@ -627,8 +627,8 @@ class EditorPanel(wx.Panel):
 	def OnApply(self, evt):
 		""" Apply changes.
 		"""
-		builtins.__dict__['LOCAL_EDITOR'] = self.cb.IsChecked()
-		builtins.__dict__['EXTERNAL_EDITOR_NAME'] = self.choice.GetString(self.choice.GetCurrentSelection()) if self.choice.IsEnabled() else ""
+		setattr(builtins, 'LOCAL_EDITOR', self.cb.IsChecked())
+		setattr(builtins,'EXTERNAL_EDITOR_NAME',self.choice.GetString(self.choice.GetCurrentSelection()) if self.choice.IsEnabled() else "")
 
 class AIPanel(wx.Panel):
 	""" AI Panel"""
@@ -668,7 +668,7 @@ class AIPanel(wx.Panel):
 		### ChatGPT API Key setting
 		st_api_key = wx.StaticText(self, label=_("API Key:"))
 		self.api_key_ctrl = wx.TextCtrl(self, style=wx.TE_PASSWORD)
-		self.api_key_ctrl.SetValue(builtins.__dict__.get('PARAMS_IA', {}).get('CHATGPT_API_KEY', ''))
+		self.api_key_ctrl.SetValue(getattr(builtins,'PARAMS_IA', {}).get('CHATGPT_API_KEY', ''))
 		
 		### GPT parameters lauout
 		hbox_chatgpt = wx.BoxSizer(wx.HORIZONTAL)
@@ -678,7 +678,7 @@ class AIPanel(wx.Panel):
 		### Ollama server port setting
 		st_port = wx.StaticText(self, label=_("Server port:"))
 		self.port_ctrl = wx.TextCtrl(self)
-		self.port_ctrl.SetValue(builtins.__dict__.get('PARAMS_IA', {}).get('OLLAMA_PORT', '11434'))
+		self.port_ctrl.SetValue(getattr(builtins,'PARAMS_IA', {}).get('OLLAMA_PORT', '11434'))
 
 		### ollama parameters layout
 		hbox_ollama = wx.BoxSizer(wx.HORIZONTAL)
@@ -752,12 +752,8 @@ class AIPanel(wx.Panel):
 
 		self.SaveAISettings()
 
-		param = builtins.__dict__.get('PARAMS_IA')
-
 		# Créer ou récupérer l'instance de ChatGPTDevsAdapter via la factory
-		adapter = AdapterFactory.get_adapter_instance(None, params=param)
-		
-		if adapter:
+		if AdapterFactory.get_adapter_instance(None, params=PARAMS_IA):
 			wx.MessageBox(_(f"{self.selected_ia} Code Generator is ready."), _("Success"), wx.OK | wx.ICON_INFORMATION)
 
 	def OnInfoButtonClick(self, event):
@@ -782,7 +778,7 @@ class AIPanel(wx.Panel):
 		""" Select the AI """
 		self.selected_ia = self.choice_ia.GetValue()
 		
-		builtins.__dict__['SELECTED_IA'] = self.selected_ia
+		setattr(builtins, 'SELECTED_IA', self.selected_ia)
 		self.ai_check_button.Show(bool(self.selected_ia))
 		self.ai_info_button.Show(bool(self.selected_ia))
 		
@@ -805,18 +801,18 @@ class AIPanel(wx.Panel):
 	
 		### update selected AI
 		selected_ai = self.choice_ia.GetValue()
-		if builtins.__dict__['SELECTED_IA'] != selected_ai:
-			builtins.__dict__['SELECTED_IA'] = selected_ai
+		if SELECTED_IA != selected_ai:
+			SELECTED_IA = selected_ai
 
 		# update settings for all accessible Gen AI
 		if selected_ai == "ChatGPT":
-			chatgpt_api_key = self.api_key_ctrl.GetValue()
-			if builtins.__dict__['PARAMS_IA']['CHATGPT_API_KEY'] != chatgpt_api_key:
-				builtins.__dict__['PARAMS_IA']['CHATGPT_API_KEY'] = chatgpt_api_key
+			new_chatgpt_api_key = self.api_key_ctrl.GetValue()
+			if getattr(builtins, 'PARAMS_IA').get('CHATGPT_API_KEY') != new_chatgpt_api_key:
+				builtins.__dict__['PARAMS_IA']['CHATGPT_API_KEY'] = new_chatgpt_api_key
 		elif selected_ai == "Ollama":
-			ollama_port = self.port_ctrl.GetValue()
-			if builtins.__dict__['PARAMS_IA']['OLLAMA_PORT'] != ollama_port:
-				builtins.__dict__['PARAMS_IA']['OLLAMA_PORT'] = ollama_port
+			new_ollama_port = self.port_ctrl.GetValue()
+			if getattr(builtins, 'PARAMS_IA').get('OLLAMA_PORT') != new_ollama_port:
+				builtins.__dict__['PARAMS_IA']['OLLAMA_PORT'] = new_ollama_port
 
 ########################################################################
 class Preferences(wx.Toolbook):

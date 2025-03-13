@@ -12,7 +12,6 @@
 
 import wx
 import os
-import builtins
 
 import gettext
 _ = gettext.gettext
@@ -25,7 +24,7 @@ from FindGUI import FindReplace
 from Utilities import MoveFromParent
 from Patterns.Observer import Subject
 
-if 'PyPDEVS' in builtins.__dict__['DEFAULT_DEVS_DIRNAME']:
+if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME:
 	raise AssertionError("Blink plug-in is not compatible with the PyPDEVS simulation kernel!")
 
 def InternalLog(model):

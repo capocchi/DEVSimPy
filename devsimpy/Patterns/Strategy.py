@@ -41,7 +41,7 @@ import re
 import os
 
 ### import the DEVS module depending on the selected DEVS package in DEVSKernel directory
-for pydevs_dir, path in builtins.__dict__['DEVS_DIR_PATH_DICT'].items():
+for pydevs_dir, path in getattr(builtins,'DEVS_DIR_PATH_DICT').items():
 	if os.path.exists(path):
 		### split from DEVSKernel string and replace separator with point
 		d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
@@ -530,7 +530,7 @@ class SimStrategy4(SimStrategy):
 		"""Simulate the model (Root-Coordinator).
 		"""		
 				
-		path = builtins.__dict__['DEVS_DIR_PATH_DICT'][builtins.__dict__['DEFAULT_DEVS_DIRNAME']]
+		path = getattr(builtins, 'DEVS_DIR_PATH_DICT')[DEFAULT_DEVS_DIRNAME]
 		d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
 		simulator = importlib.import_module("DEVSKernel%s.simulator"%d)
 		#exec("from DEVSKernel%s.simulator import Simulator"%d)

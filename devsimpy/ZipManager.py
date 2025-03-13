@@ -476,7 +476,7 @@ class Zip:
 			### get the package name
 			package = sys.exc_info()[1].name
 
-			if builtins.__dict__['GUI_FLAG'] and package not in Zip.MODULE_NOT_INSTALLED_ON_STARTING:
+			if GUI_FLAG and package not in Zip.MODULE_NOT_INSTALLED_ON_STARTING:
 				import wx
 				dial = wx.MessageDialog(None, _('%s package is needed by %s.\nDo you want to install it?')%(package,module_name), _('Required package'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 				if dial.ShowModal() == wx.ID_YES:

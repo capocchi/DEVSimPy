@@ -22,7 +22,7 @@
 
 import builtins
 
-if builtins.__dict__.get('GUI_FLAG', True):
+if getattr(builtins,'GUI_FLAG', True):
 	import wx
 	import wx.lib.dragscroller
 	import wx.lib.dialogs
@@ -57,7 +57,7 @@ from traceback import format_exception
 from math import * ### for eval
 from collections import Counter
 
-if builtins.__dict__.get('GUI_FLAG', True):
+if getattr(builtins, 'GUI_FLAG', True):
 	import ConnectDialog
 	import DiagramConstantsDialog
 	import SpreadSheet
@@ -81,7 +81,7 @@ GREY_LIGHT = '#d3d3d3'
 
 import Components
 
-if builtins.__dict__.get('GUI_FLAG', True):
+if getattr(builtins, 'GUI_FLAG', True):
 	import Menu
 
 ### Mixin
@@ -105,7 +105,7 @@ from Decorators import BuzyCursorNotification, Post_Undo
 from Utilities import HEXToRGB, relpath, playSound, sendEvent, load_and_resize_image, getInstance, FixedList, getObjectFromString, getTopLevelWindow, printOnStatusBar
 from Patterns.Observer import Subject, Observer
 
-if builtins.__dict__.get('GUI_FLAG', True):
+if getattr(builtins, 'GUI_FLAG', True):
 	from DetachedFrame import DetachedFrame
 	from AttributeEditor import AttributeEditor, QuickAttributeEditor
 	from PropertiesGridCtrl import PropertiesGridCtrl
@@ -639,13 +639,12 @@ class Diagram(Savable, Structurable):
 
 			return True
 
-	#@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), StatusBarNotification('Load'))
 	def LoadConstants(self, label):
 		""" Load Constants to general builtin.
 		"""
 
 		if self.constants_dico != {}:
-			builtins.__dict__[label] = self.constants_dico
+			setattr(builtins, label, self.constants_dico)
 
 		for s in [c for c in self.GetShapeList() if isinstance(c, ContainerBlock)]:
 			s.LoadConstants(s.label)
@@ -1577,7 +1576,7 @@ class PointShape(Shape):
 		self.graphic.fill = self.fill
 		self.graphic.draw(dc)
 
-if builtins.__dict__.get('GUI_FLAG', True):
+if getattr(builtins, 'GUI_FLAG', True):
 	#-------------------------------------------------------------------------------
 	class ShapeCanvas(wx.ScrolledWindow, Abstractable, Subject):
 		""" ShapeCanvas class.
@@ -4029,7 +4028,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 #									path = os.path.abspath(os.path.join(root, name))
 
 					### try to find it in exportedPathList (after Domain check)
-					if not os.path.exists(path) and builtins.__dict__.get('GUI_FLAG',True):
+					if not os.path.exists(path) and getattr(builtins, 'GUI_FLAG', True):
 						mainW = getTopLevelWindow()
 						for p in mainW.exportPathsList:
 							lib_name = os.path.basename(p)
@@ -4063,7 +4062,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 					state['bad_filename_path_flag'] = True
 
 			### load enventual Plugin
-			if 'plugins' in state and builtins.__dict__.get('GUI_FLAG',True):
+			if 'plugins' in state and getattr(builtins, 'GUI_FLAG', True):
 				wx.CallAfter(self.LoadPlugins, (state['model_path']))
 
 		### test if args from construcor in python file stored in library (on disk) and args from stored model in dsp are the same
@@ -4136,7 +4135,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(python_path[python_path.index(dir_name):]).strip('[]')))
 
 					### try to find it in exportedPathList (after Domain check) and recent opened file
-					if not os.path.exists(path) and builtins.__dict__.get('GUI_FLAG', True):
+					if not os.path.exists(path) and getattr(builtins, 'GUI_FLAG', True):
 						mainW = getTopLevelWindow()
 						if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
 							for p in mainW.exportPathsList+mainW.openFileList:
@@ -4157,7 +4156,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 							break
 					
 				### try to find the python_path in recent opened file directory
-				if not os.path.exists(path) and builtins.__dict__.get('GUI_FLAG',True):
+				if not os.path.exists(path) and getattr(builtins, 'GUI_FLAG', True):
 					import wx
 					mainW = getTopLevelWindow()
 					if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
@@ -4212,7 +4211,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 					### try to find the filename in the recent opened recent file directory or exported lib diretory
 					else:
 						### for no-gui compatibility
-						if builtins.__dict__.get('GUI_FLAG',True):
+						if getattr(builtins, 'GUI_FLAG', True):
 							import wx
 							mainW = getTopLevelWindow()
 							if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
@@ -4439,7 +4438,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(model_path[model_path.index(dir_name):]).strip('[]')))
 
 					### try to find it in exportedPathList (after Domain check)
-					if not os.path.exists(path) and builtins.__dict__.get('GUI_FLAG',True):
+					if not os.path.exists(path) and getattr(builtins, 'GUI_FLAG', True):
 						mainW = getTopLevelWindow()
 						for p in mainW.exportPathsList:
 							lib_name = os.path.basename(p)
@@ -4472,7 +4471,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 					state['bad_filename_path_flag'] = True
 
 			### load enventual Plugin
-			if 'plugins' in state and builtins.__dict__.get('GUI_FLAG',True):
+			if 'plugins' in state and getattr(builtins, 'GUI_FLAG', True):
 				wx.CallAfter(self.LoadPlugins, (state['model_path']))
 
 			### test if args from construcor in python file stored in library (on disk) and args from stored model in dsp are the same

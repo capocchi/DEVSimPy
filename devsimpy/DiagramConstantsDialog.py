@@ -259,7 +259,7 @@ class DiagramConstantsDialog(wx.Dialog):
 					pass
 
 		if self.data != {}:
-			builtins.__dict__[os.path.splitext(self.label)[0]] = self.data
+			setattr(builtins, os.path.splitext(self.label)[0], self.data)
 		elif os.path.splitext(self.label)[0] in builtins.__dict__:
 			del builtins.__dict__[os.path.splitext(self.label)[0]]
 

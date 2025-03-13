@@ -84,7 +84,7 @@ class YAMLExportGUI(wx.Frame):
         wx.StaticText(panel, -1, label='port', pos=(10, 60))
         wx.StaticText(panel, -1, label='filename', pos=(10, 100))
 
-        self.url = wx.TextCtrl(panel, value="http://" if not 'URL_REST' in builtins.__dict__ else builtins.__dict__['URL_REST'], pos=(110, 15), size=(160, -1))
+        self.url = wx.TextCtrl(panel, value="http://" if not 'URL_REST' in builtins.__dict__ else URL_REST, pos=(110, 15), size=(160, -1))
         self.port = wx.TextCtrl(panel, value="8080", pos=(110, 55), size=(50, -1))
         self.fn = wx.TextCtrl(panel, value=os.path.basename(self.path), pos=(110, 95), size=(120, -1))
 
@@ -148,7 +148,7 @@ class YAMLExportGUI(wx.Frame):
             else:
                 self.sb.SetStatusText('Upload finished')
                 self.sb.icon.SetBitmap(load_and_resize_image("disconnect_network.png"))
-                builtins.__dict__['URL_REST'] = url
+                setattr(builtins, 'URL_REST', url)
 
     def OnClose(self, e):
         self.Close()

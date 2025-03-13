@@ -83,6 +83,7 @@ jobs:
           test_prioritygui.py
           test_simulationgui.py
           test_wizardgui.py
+          test_pluginsgui.py
           test_wxpymail.py
           test_xmlmodule.py
         )

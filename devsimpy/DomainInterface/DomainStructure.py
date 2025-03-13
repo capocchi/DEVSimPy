@@ -20,26 +20,11 @@
 
 import builtins
 
-### jsut for individual test
-if __name__ == '__main__':
-	import os
-	import sys
-
-	builtins.__dict__['DEFAULT_DEVS_DIRNAME'] = "PyDEVS"
-	builtins.__dict__['DEVS_DIR_PATH_DICT'] = {\
-	'PyDEVS':os.path.join(os.pardir,'DEVSKernel','PyDEVS'),\
-	'PyPDEVS':os.path.join(os.pardir,'DEVSKernel','PyPDEVS')}
-
-    ### permit correct import (based on fom instruction) in PyPDEVS directory (logger, util...) when this module executed (main)
-	d = sys.path.append(os.pardir)
-	if d not in sys.path:
-		sys.path.append(d)
-
 import re
 import os
 import importlib
 
-path = builtins.__dict__['DEVS_DIR_PATH_DICT'][builtins.__dict__['DEFAULT_DEVS_DIRNAME']]
+path = getattr(builtins,'DEVS_DIR_PATH_DICT').get(DEFAULT_DEVS_DIRNAME)
 d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
 BaseDEVS = importlib.import_module("DEVSKernel%s.DEVS"%d)
 
@@ -114,9 +99,3 @@ class DomainStructure(BaseDEVS.CoupledDEVS):
 	# 	"""
 	# 	if 'PyPDEVS' in builtins.__dict__['DEFAULT_DEVS_DIRNAME']:
 	# 		self.removeSubModel(self, model)
-
-def main():
-	DS = DomainStructure()
-
-if __name__ == '__main__':
-	main()

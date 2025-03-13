@@ -46,7 +46,7 @@ _ = gettext.gettext
 
 from zipfile import ZipFile, ZIP_DEFLATED 
 
-if builtins.__dict__.get('GUI_FLAG', True):
+if GUI_FLAG:
 	import wx
 	
 	_ = wx.GetTranslation
@@ -133,7 +133,7 @@ def printOnStatusBar(statusbar, data={}):
 def NotificationMessage(title, message, parent, flag=2048, timeout=False):
 	""" 2048 is wx.ICON_INFORMATION
 	"""
-	if builtins.__dict__['NOTIFICATION']:
+	if NOTIFICATION:
 		
 		notify = wx.adv.NotificationMessage(
 		title=title,

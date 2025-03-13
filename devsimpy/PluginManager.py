@@ -80,7 +80,7 @@ class PluginManager(object):
 			have registered themselves to the event. Any additional arguments or
 			keyword arguments you pass in will be passed to the plugins.
 		"""
-		if builtins.__dict__['GUI_FLAG']:
+		if getattr(builtins, 'GUI_FLAG', True):
 			for plugin in PluginManager.plugins[event]:
 				if event not in PluginManager.disabled_event:
 					plugin(*args, **kwargs)

@@ -30,9 +30,7 @@ show_int_trans = True
 show_clock = True
 show_coll = True
 
-import builtins
-
-if 'PyPDEVS' in builtins.__dict__['DEFAULT_DEVS_DIRNAME']:
+if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME:
 	raise AssertionError("Verbose plug-in is not compatible with the PyPDEVS simulation kernel!")
 
 class RedirectText(object):

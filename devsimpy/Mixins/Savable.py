@@ -44,20 +44,20 @@ for lib_name in required_libs:
 
 try:
 	import yaml
-	builtins.__dict__['YAML_IMPORT'] = True
+	setattr(builtins,'YAML_IMPORT', True)
 except ImportError as info:
-	builtins.__dict__['YAML_IMPORT'] = False
+	setattr(builtins,'YAML_IMPORT', False)
 	sys.stdout.write("yaml module was not found! Install it if you want to save model in yaml format.\n")
 
 try:
 	from ruamel.yaml import YAML
 	import ruamel.yaml as ruamel
-	builtins.__dict__['YAML_IMPORT'] = True
+	setattr(builtins,'YAML_IMPORT', True)
 except ImportError as info:
 	try:
 		import ruamel_yaml as ruamel
 	except ImportError as info:
-		builtins.__dict__['YAML_IMPORT'] = False
+		setattr(builtins,'YAML_IMPORT', False)
 		sys.stdout.write("ruamel.yaml module was not found! Install it if you want to save model in yaml format.\n")
 
 from tempfile import gettempdir
@@ -686,8 +686,8 @@ class Savable(object):
 	### static attribut to store le extention/class available
 	DB  = DumpBase.PopulateDB()
 
-	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), BuzyCursorNotification)
-	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), StatusBarNotification('Sav'))
+	@cond_decorator(getattr(builtins, 'GUI_FLAG', True), BuzyCursorNotification)
+	@cond_decorator(getattr(builtins, 'GUI_FLAG', True), StatusBarNotification('Sav'))
 	def SaveFile(self, fileName = None):
 		""" Save object in fileName.
 		"""
@@ -710,7 +710,7 @@ class Savable(object):
 			sys.stdout.write(_("\nUnknown extension: %s")%fileName)
 			return False
 
-	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), StatusBarNotification('Load'))
+	@cond_decorator(GUI_FLAG, StatusBarNotification('Load'))
 	def LoadFile(self, fileName = None):
 		""" Load object from fileName.
 		"""

@@ -1457,7 +1457,7 @@ class Base(object):
 		tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
 		tb.SetToolBitmapSize((16, 16))# this required for non-standard size buttons on MSW
 
-		ai_help = _('Generative AI based modification' if bool(builtins.__dict__['SELECTED_IA']) else 'Check the AI settings in Preferences')
+		ai_help = _('Generative AI based modification' if bool(getattr(builtins, 'SELECTED_IA')) else 'Check the AI settings in Preferences')
 		
 		if not self.parent:
 			self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(), "", load_and_resize_image('save.png'), shortHelp=_('Save')))
@@ -1485,7 +1485,7 @@ class Base(object):
 		tb.Realize()
 
 		### Add: A. Dominici
-		tb.EnableTool(self.ai.GetId(), bool(builtins.__dict__['SELECTED_IA']))
+		tb.EnableTool(self.ai.GetId(), bool(getattr(builtins,'SELECTED_IA')))
 
 		return tb
 
@@ -1614,7 +1614,7 @@ class Base(object):
 		""" Event handler for AI help menu option. """
 
 		# Vérifier l'IA sélectionnée
-		selected_ia = builtins.__dict__.get('SELECTED_IA', '')
+		selected_ia = getattr(builtins, 'SELECTED_IA', '')
 
 		# Exécuter uniquement si une IA est sélectionnée
 		if selected_ia:
@@ -1624,7 +1624,7 @@ class Base(object):
 			selection = editor.GetSelection()
 			textstring = editor.GetRange(selection[0], selection[1])
 				
-			param = builtins.__dict__.get('PARAMS_IA')
+			param = getattr(builtins, 'PARAMS_IA')
 			adapter = AdapterFactory.get_adapter_instance(self,param)
 				
 			# Créer le dialogue avec le code sélectionné
@@ -2035,7 +2035,7 @@ class BlockBase(object):
 					(_('New passivate state'),self.OnInsertPassivateState), (_('New Phase test'),self.OnInsertPhaseIs), (_('New debugger stdout'),self.OnInsertDebug), 
 					(_('Get state'),self.OnInsertGetState), (_('Get sigma'),self.OnInsertGetSigma), (_('Get message value'),self.OnInsertGetMsgValue), (_('Get message time'),self.OnInsertGetMsgTime)])
 			else:
-				if 'PyPDEVS' in builtins.__dict__['DEFAULT_DEVS_DIRNAME']:
+				if 'PyPDEVS' in getattr(builtins, 'DEFAULT_DEVS_DIRNAME'):
 					self._choices = collections.OrderedDict([(_("New add sub model"),self.OnAddModel),(_("New remove sub model"),self.OnRemoveModel),(_("New port connection"),self.OnDisConnectPorts),(_("New port connection"),self.OnConnectPorts),(_('New debugger stdout'),self.OnInsertDebug)])
 				else:
 					self._choices = collections.OrderedDict([(_('New debugger stdout'),self.OnInsertDebug)])

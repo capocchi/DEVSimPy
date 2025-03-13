@@ -36,7 +36,7 @@ def Error(message = '', esc = 1):
 	if esc:
 		sys.exit(1)
 
-builtins.__dict__['INFINITY'] = float('inf')
+setattr(builtins, 'INFINITY', float('inf'))
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 ##  CLASS HIERARCHY

@@ -373,14 +373,6 @@ class ModelGeneratorWizard(Wizard):
 		page1 = CustomPage(self, _('Type of DEVS Model'))
 		bt1 = wx.RadioButton(page1, wx.NewIdRef(), _('Atomic model'), style = wx.RB_GROUP )
 		bt2 = wx.RadioButton(page1, wx.NewIdRef(), _('Coupled model'))
-		
-		### Add: A. Dominici
-		# Vérification que l'IA sélectionnée est différente de ""
-		# if not builtins.__dict__.get('SELECTED_IA', ''):
-		# 	btgpt = wx.RadioButton(page1, wx.NewIdRef(), _('Atomic model with AI (disabled: no IA selected)'))
-		# 	btgpt.Disable()
-		# else:
-		# 	btgpt = wx.RadioButton(page1, wx.NewIdRef(), _('Atomic model with AI'))
 
 		bt1.SetToolTipString = bt1.SetToolTip
 		bt2.SetToolTipString = bt2.SetToolTip
@@ -680,11 +672,11 @@ class ModelGeneratorWizard(Wizard):
 				evt (_type_): _description_
 			"""
 			# Check the selected AI (in preferences AI panel)
-			selected_ia = builtins.__dict__.get('SELECTED_IA', '')
+			selected_ia = getattr(builtins, 'SELECTED_IA', '')
 
 			if selected_ia:
 				### load the AI params
-				param = builtins.__dict__.get('PARAMS_IA')
+				param = PARAMS_IA
 				
 				adapter = AdapterFactory.get_adapter_instance(parent=None, params=param)
 				
@@ -707,7 +699,7 @@ class ModelGeneratorWizard(Wizard):
 			""" Python file selector is checked.
 			"""
 			# Check the selected AI (in preferences AI panel)
-			selected_ia = builtins.__dict__.get('SELECTED_IA', '')
+			selected_ia = getattr(builtins, 'SELECTED_IA', '')
 
 			fb1.Enable(not evt.GetEventObject().GetValue())
 			bt_ai.Enable(not evt.GetEventObject().GetValue() and selected_ia != '')

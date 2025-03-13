@@ -166,17 +166,17 @@ class CollapsiblePanel(wx.Panel):
 		cb5 = wx.CheckBox(pane, wx.NewIdRef(), name='real_time')
 		
 		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
-			self.cb2.SetValue(builtins.__dict__['NTL'])
+			self.cb2.SetValue(NTL)
 			self.cb3.Enable(False)
 			cb4.Enable(False)
 			cb5.Enable(False)
 			
 		else:
 			cb1.Enable(False)
-			self.cb2.SetValue(builtins.__dict__['NTL'])
-			self.cb3.SetValue(builtins.__dict__['VERBOSE'])
-			cb4.SetValue(builtins.__dict__['DYNAMIC_STRUCTURE'])
-			cb5.SetValue(builtins.__dict__['REAL_TIME'] and not builtins.__dict__['NTL'])
+			self.cb2.SetValue(NTL)
+			self.cb3.SetValue(VERBOSE)
+			cb4.SetValue(DYNAMIC_STRUCTURE)
+			cb5.SetValue(REAL_TIME and not NTL)
 
 		### default strategy
 		#if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
@@ -225,7 +225,7 @@ class CollapsiblePanel(wx.Panel):
 		### update of ntl checkbox depending on the choosing strategy
 		self.cb2.Enable(not (self.simdia.selected_strategy == 'original' and  DEFAULT_DEVS_DIRNAME == 'PyDEVS'))
 
-		builtins.__dict__['DEFAULT_SIM_STRATEGY'] = self.simdia.selected_strategy
+		setattr(builtins, 'DEFAULT_SIM_STRATEGY', self.simdia.selected_strategy)
 
 	def OnNTL(self, event):
 		cb2 = event.GetEventObject()
@@ -233,7 +233,7 @@ class CollapsiblePanel(wx.Panel):
 		self.simdia.ntl = cb2.GetValue()
 		self.simdia._text1.Enable(not self.simdia.ntl)
 		self.simdia._value.Enable(not self.simdia.ntl)
-		builtins.__dict__['NTL'] = self.simdia.ntl
+		setattr(builtins, 'NTL', self.simdia.ntl)
 
 	def OnProfiling(self, event):
 		cb1 = event.GetEventObject()
@@ -242,17 +242,17 @@ class CollapsiblePanel(wx.Panel):
 	def OnVerbose(self, event):
 		cb3 = event.GetEventObject()
 		self.simdia.verbose = cb3.GetValue()
-		builtins.__dict__['VERBOSE'] = self.simdia.verbose
+		setattr(builtins, 'VERBOSE', self.simdia.verbose)
 		
 	def OnDynamicStructure(self, event):
 		cb4 = event.GetEventObject()
 		self.simdia.dynamic_structure_flag = cb4.GetValue()
-		builtins.__dict__['DYNAMIC_STRUCTURE'] = self.simdia.dynamic_structure_flag
+		setattr(builtins, 'DYNAMIC_STRUCTURE', self.simdia.dynamic_structure_flag)
 
 	def OnRealTime(self, event):
 		cb5 = event.GetEventObject()
 		self.simdia.real_time_flag = cb5.GetValue()
-		builtins.__dict__['REAL_TIME'] = self.simdia.real_time_flag
+		setattr(builtins, 'REAL_TIME', self.simdia.real_time_flag)
 		
 #-----------------------------------------------------------------
 class Base(object):
@@ -276,10 +276,10 @@ class Base(object):
 		self.selected_strategy = DEFAULT_SIM_STRATEGY
 
 		### dynamic structure only for local PyPDEVS simulation
-		self.dynamic_structure_flag = builtins.__dict__['DYNAMIC_STRUCTURE']
+		self.dynamic_structure_flag = DYNAMIC_STRUCTURE
 
 		### PyPDEVS threaded real time simulation
-		self.real_time_flag = builtins.__dict__['REAL_TIME']
+		self.real_time_flag = REAL_TIME
 		
 		### profiling simulation
 		self.prof = False
@@ -289,9 +289,9 @@ class Base(object):
 		self.total_ram = get_total_ram()
 
 		### No time limit simulation (defined in the builtin dictionary from .devsimpy file)
-		self.ntl = builtins.__dict__['NTL']
+		self.ntl = NTL
 
-		self.verbose = builtins.__dict__['VERBOSE']
+		self.verbose = VERBOSE
 
 		# definition of the thread, the timer and the counter for the simulation progress
 		self.thread = None

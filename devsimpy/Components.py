@@ -37,7 +37,7 @@ if not hasattr(inspect, 'getargspec'):
 
 from tempfile import gettempdir
 
-if builtins.__dict__.get('GUI_FLAG',True):
+if getattr(builtins,'GUI_FLAG', True):
 	import wx
 	from pubsub import pub as Publisher
 	import Editor
@@ -618,7 +618,7 @@ class DEVSComponent:
 
 	@staticmethod
 	def debugger(m, msg, print_stdout=False):
-		if builtins.__dict__.get('GUI_FLAG', True):
+		if getattr(builtins,'GUI_FLAG', True):
 			bm = m.getBlockModel()
 			path = os.path.join(gettempdir(),'%s.%d.devsimpy.log'%(str(bm.label), id(bm)))
 		
@@ -695,7 +695,7 @@ class DEVSComponent:
 			if not hasattr(devs, 'debugger'):
 				setattr(devs.__class__, DEVSComponent.debugger.__name__, DEVSComponent.debugger)
 			
-			if builtins.__dict__.get('GUI_FLAG',True):
+			if getattr(builtins,'GUI_FLAG', True):
 				### to execute finish method of devs model (look at the SimulationGUI for message interception)
 				if hasattr(devs, 'finish'):
 					Publisher.subscribe(devs.finish, "%d.finished"%(id(devs)))
@@ -802,7 +802,7 @@ class DEVSComponent:
 		if isinstance(mainW, ShapeCanvas):
 			mainW = mainW.GetParent()
 
-		if not builtins.__dict__['LOCAL_EDITOR'] and not zipfile.is_zipfile(model_path) and not python_path.startswith('http'):
+		if not getattr(builtins,'LOCAL_EDITOR') and not zipfile.is_zipfile(model_path) and not python_path.startswith('http'):
 			dial = wx.MessageDialog(mainW, _('Do you want to use your local code editor software?\n\n If you always want to always use the local DEVSimPy code editor\n change the option in the Editor panel preference.'), name, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 			val = dial.ShowModal()
 		else:
@@ -814,7 +814,7 @@ class DEVSComponent:
 			if wx.Platform == '__WXMAC__':
 				subprocess.call(" ".join(['open -a',python_path]), shell=True)
 			elif "wxMSW" in wx.PlatformInfo:
-				editor = builtins.__dict__['EXTERNAL_EDITOR_NAME']
+				editor = getattr(builtins,'EXTERNAL_EDITOR_NAME')
 				
 				### try to import the editor
 				try:

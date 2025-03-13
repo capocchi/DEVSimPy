@@ -282,7 +282,7 @@ class MainApplication(wx.Frame):
 		self.Bind(wx.EVT_IDLE, self.OnIdle)
 		self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
 
-		if builtins.__dict__.get('GUI_FLAG', True):
+		if GUI_FLAG:
 			sys.stdout.write("DEVSimPy is up!\n")
 
 		### load last size and position if exist
@@ -386,7 +386,7 @@ class MainApplication(wx.Frame):
 				  the values are the corresponding settings from the built-in
 				  namespace.
 		"""
-		return {k: builtins.__dict__[k] for k in USER_SETTINGS}
+		return {k: getattr(builtins, k) for k in USER_SETTINGS}
 
 	def SetConfig(self, cfg):
 		""" Set all config entry like language, external importpath, recent files...
@@ -450,8 +450,6 @@ class MainApplication(wx.Frame):
 					wx.MessageBox('Error trying to read the builtin dictionary from config file. So, we load the default builtin',
 								'Configuration',
 								wx.OK | wx.ICON_INFORMATION)
-					#sys.stdout.write('Error trying to read the builtin dictionary from config file. So, we load the default builtin \n')
-					# settings_dict = builtins.__dict__
 				else:
 					### try to start without error when .devsimpy need update (new version installed)
 					# if not os.path.isdir(D['DEVSIMPY_PACKAGE_PATH']):
@@ -631,7 +629,7 @@ class MainApplication(wx.Frame):
 		tb.EnableTool(wx.ID_UNDO, False)
 		tb.EnableTool(wx.ID_REDO, False)
 	
-		tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in builtins.__dict__['DEFAULT_DEVS_DIRNAME'])
+		tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in DEFAULT_DEVS_DIRNAME)
 
 		### default direct connector toogled
 		tb.ToggleTool(self.toggle_list[0], 1)
@@ -975,7 +973,7 @@ class MainApplication(wx.Frame):
 				del self._mgr
 		
 
-		if builtins.__dict__.get('GUI_FLAG', True):
+		if GUI_FLAG:
 			sys.stdout.write(_("DEVSimPy closed!"))
 
 		event.Skip()
@@ -2145,7 +2143,7 @@ class MainApplication(wx.Frame):
 			self.DoUpdatPiPPackage()	
 		dlg.Destroy()
 
-	@cond_decorator(builtins.__dict__.get('GUI_FLAG', True), ProgressNotification(_("Update of dependant pip packages")))
+	@cond_decorator(getattr(builtins, 'GUI_FLAG', True), ProgressNotification(_("Update of dependant pip packages")))
 	def DoUpdatPiPPackage(self):
 		if updatePiPPackages():
 			args = (_('Information'), _('All pip packages that DEVSimPy depends have been updated! \nYou need to restart DEVSimPy to take effect'))
@@ -2167,7 +2165,7 @@ class MainApplication(wx.Frame):
 				self.DoUpdatFromGitRepo()
 		dlg.Destroy()
 
-	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git repo")))
+	@cond_decorator(getattr(builtins, 'GUI_FLAG', True), ProgressNotification(_("DEVSimPy Update from git repo")))
 	def DoUpdatFromGitRepo(self):
 		if updateFromGitRepo():
 			args = (_('Information'), _('Update of DEVSimPy from git done! \nYou need to restart DEVSimPy to take effect.'))
@@ -2188,7 +2186,7 @@ class MainApplication(wx.Frame):
 			self.DoUpdatFromGitArchive()
 		dlg.Destroy()
 
-	@cond_decorator(builtins.__dict__.get('GUI_FLAG',True), ProgressNotification(_("DEVSimPy Update from git.")))
+	@cond_decorator(getattr(builtins, 'GUI_FLAG', True), ProgressNotification(_("DEVSimPy Update from git.")))
 	def DoUpdatFromGitArchive(self):
 		if updateFromGitArchive():
 			args = (_('Information'), _('Update of DEVSimPy from git archive done! \nYou need to restart DEVSimPy to take effect.'))
@@ -2460,7 +2458,7 @@ class DEVSimPyApp(wx.App, wit.InspectionMixin):
 		wx.App.__init__(self, redirect, filename)
 
 		# make sure we can create a GUI
-		if not self.IsDisplayAvailable() and not builtins.__dict__.get('GUI_FLAG',True):
+		if not self.IsDisplayAvailable() and not GUI_FLAG:
 
 			if wx.Platform == '__WXMAC__':
 				msg = """This program needs access to the screen.

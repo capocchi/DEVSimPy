@@ -22,12 +22,12 @@
 
 import builtins
 
-import gettext
-_ = gettext.gettext
-
-if builtins.__dict__.get('GUI_FLAG',True):
+if GUI_FLAG:
 	import wx
 	_ = wx.GetTranslation
+else:
+	import gettext
+	_ = gettext.gettext
 
 import threading
 import sys
@@ -73,8 +73,8 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 	"""
 
 	### find the correct simulator module depending on the
-	for pydevs_dir, _ in list(builtins.__dict__['DEVS_DIR_PATH_DICT'].items()):
-		if pydevs_dir == builtins.__dict__['DEFAULT_DEVS_DIRNAME']:
+	for pydevs_dir, _ in list(getattr(builtins,'DEVS_DIR_PATH_DICT').items()):
+		if pydevs_dir == DEFAULT_DEVS_DIRNAME:
 			from DEVSKernel.PyDEVS.simulator import Simulator as BaseSimulator
 
 	class Simulator(BaseSimulator):
@@ -188,7 +188,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 					sys.stderr.write('Traceback: ' + str(etb) + '\n')
 
 					### only for displayed application (-nogui)
-					if builtins.__dict__.get('GUI_FLAG', True):
+					if GUI_FLAG:
 						wx.CallAfter(pub.sendMessage,"error", msg=msg)
 
 						### error sound
@@ -196,7 +196,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 				else:
 					for m in [a for a in list(self.model.getFlatComponentSet().values()) if hasattr(a, 'finish')]:
 						### call finished method
-						if builtins.__dict__.get('GUI_FLAG', True):
+						if GUI_FLAG:
 							try:
 								pub.sendMessage('%d.finished'%(id(m)))
 							except Exception:
@@ -208,7 +208,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 							m.finish(None)
 
 					### resionly for displayed application (-nogui)
-					if builtins.__dict__.get('GUI_FLAG',True):
+					if GUI_FLAG:
 						if self.prof:
 							try:
 								NotificationMessage(_("Information"), _("Profiling report is available on Options->Profile"), None, timeout=5)
@@ -217,7 +217,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 
 						wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
 
-			if not builtins.__dict__.get('GUI_FLAG',True):
+			if not GUI_FLAG:
 				elapsed_time = elapsed_since(self.start_time)
 				mem_after = get_process_memory()
 
