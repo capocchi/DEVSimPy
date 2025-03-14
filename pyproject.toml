@@ -2,9 +2,13 @@
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
+# allow to run devsimpy as a command by executing the main function of the devsimpy.py file
+[project.scripts]
+devsimpy = "devsimpy.devsimpy:main"
+
 [project]
 name = "devsimpy"
-version = "5.0.0"
+version = "5.0.3"
 dependencies = [
   "wxpython>=4.2.2",
   "psutil",
@@ -12,7 +16,21 @@ dependencies = [
     "PyPubSub",
     "ruamel.yaml",
     "matplotlib",
-    "chart_studio"
+    "chart_studio",
+    "setuptools",
+    "pusher",
+    "ollama",
+    "openai",
+    "plotly",
+    "pyzo",
+    "pyro4",
+    "whichpy",
+    "requests",
+    "pluginmanager",
+    "numpy",
+    "pydot",
+    "networkx",
+    "lxml"
 ]
 requires-python = ">=3.9"
 authors = [
@@ -49,6 +67,7 @@ classifiers = [
 
 [tool.setuptools]
 license-files = []
+packages = ["devsimpy"]
 
 [project.urls]
 "Homepage" = "https://capocchi-l.universita.corsica/article.php?id_site=58&id_menu=0&id_rub=663&id_cat=0&id_art=3257&lang=fr"
@@ -58,18 +77,6 @@ license-files = []
 
 [project.optional-dependencies]
 gui = ["spyder"]
-cli = [
-  "pyzo",
-  "openai",
-  "ollama",
-  "pyro4",
-  "plotly >= 4.1.0",
-  "whichpy >= 0.1",
-  "requests >= 2.22.0",
-  "pusher >= 2.1.4",
-  "pluginmanager >= 0.4.1",
-  "numpy"
-]
 
 
 

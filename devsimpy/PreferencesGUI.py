@@ -802,8 +802,8 @@ class AIPanel(wx.Panel):
 	
 		### update selected AI
 		selected_ai = self.choice_ia.GetValue()
-		if SELECTED_IA != selected_ai:
-			SELECTED_IA = selected_ai
+		if getattr(builtins, "SELECTED_IA", "") != selected_ai:
+			setattr(builtins, "SELECTED_IA",selected_ai)
 
 		# update settings for all accessible Gen AI
 		if selected_ai == "ChatGPT":

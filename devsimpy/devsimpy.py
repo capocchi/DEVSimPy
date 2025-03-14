@@ -118,6 +118,8 @@ wx.OVERWRITE_PROMPT = wx.FD_OVERWRITE_PROMPT
 wx.AboutDialogInfo = wx.adv.AboutDialogInfo
 wx.AboutBox = wx.adv.AboutBox
 	
+# Ajouter le répertoire devsimpy au sys.path
+sys.path.append(os.path.dirname(__file__))
 from config import USER_SETTINGS, UpdateBuiltins
 
 ### here berfore the __main__ function
@@ -2560,9 +2562,7 @@ class DEVSimPyApp(wx.App, wit.InspectionMixin):
 		# Set up the exception handler...
 		sys.excepthook = ExceptionHook
 
-#-------------------------------------------------------------------
-if __name__ == '__main__':
-
+def main():
 	### if --nogui is in argv, we start devsimpy-nogui.py
 	start_devsimpy_nogui = '--nogui' in sys.argv
 
@@ -2633,4 +2633,9 @@ if __name__ == '__main__':
 		## si redirect=True et filename="fichier" alors redirection dans un fichier
 		## si redirect=False redirection dans la console
 		app = DEVSimPyApp(redirect = False, filename = None)
-		app.MainLoop()
+		return app.MainLoop()
+
+#-------------------------------------------------------------------
+if __name__ == '__main__':
+	main()
+	
