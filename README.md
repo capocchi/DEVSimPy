@@ -15,8 +15,6 @@
 <!-- | **Other** | [![License](https://img.shields.io/github/license/domdfcoding/domdf_wxpython_tools)](https://github.com/domdfcoding/domdf_wxpython_tools/blob/master/LICENSE) ![Language](https://img.shields.io/github/languages/top/domdfcoding/domdf_wxpython_tools) [![Requirements](https://dependency-dash.repo-helper.uk/github/domdfcoding/domdf_wxpython_tools/badge.svg)](https://dependency-dash.repo-helper.uk/github/domdfcoding/domdf_wxpython_tools/) | -->
 
 
-[![Ubuntu build](https://github.com/capocchi/DEVSimPy/actions/workflows/ci-build-ubuntu.yml/badge.svg)](https://github.com/capocchi/DEVSimPy/actions/workflows/ci-build-ubuntu.yml)
-[![Windows build](https://github.com/capocchi/DEVSimPy/actions/workflows/ci-build-windows.yml/badge.svg)](https://github.com/capocchi/DEVSimPy/actions/workflows/ci-build-windows.yml)
 <!-- [![codecov](https://codecov.io/gh/capocchi/DEVSimPy/branch/master/graph/badge.svg)](https://codecov.io/gh/capocchi/DEVSimPy) -->
 <!-- [![Maintainability](https://api.codeclimate.com/v1/badges/f5c94ecbfb6a3c8986be/maintainability)](https://codeclimate.com/github/capocchi/DEVSimPy/maintainability) -->
 <!-- [![Coverage Status](https://coveralls.io/repos/github/capocchi/DEVSimPy/badge.svg?branch=master)](https://coveralls.io/github/capocchi/DEVSimPy?branch=master) -->

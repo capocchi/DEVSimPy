@@ -1,3 +1,75 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "devsimpy"
+version = "5.0.0"
+dependencies = [
+  "wxpython>=4.2.2",
+  "psutil",
+   "pyYAML",
+    "PyPubSub",
+    "ruamel.yaml",
+    "matplotlib",
+    "chart_studio"
+]
+requires-python = ">=3.9"
+authors = [
+  {name = "Laurent Capocchi", email = "capocchi@univ-corse.fr"},
+  {name = "Jean-Francois santucci", email = "santuccig@univ-corse.fr"},
+]
+maintainers = [
+  {name = "Laurent Capocchi", email = "capocchi@univ-corse.fr"}
+]
+readme = "README.md"
+description = "Python-Based GUI for Discrete Event system Specification (DEVS) Simulation"
+license = { text = "LICENSE" }
+keywords = ["Simulation", "Modeling", "Discrete Event", "DEVS", "GUI"]
+classifiers = [
+  # How mature is this project? Common values are
+  #   3 - Alpha
+  #   4 - Beta
+  #   5 - Production/Stable
+  "Development Status :: 5 - Production/Stable",
+
+  # Indicate who your project is intended for
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Build Tools",
+
+  # Specify the Python versions you support here.
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python",
+]
+
+[tool.setuptools]
+license-files = []
+
+[project.urls]
+"Homepage" = "https://capocchi-l.universita.corsica/article.php?id_site=58&id_menu=0&id_rub=663&id_cat=0&id_art=3257&lang=fr"
+"Source Code" = "https://github.com/capocchi/DEVSimPy"
+"Bug Tracker" = "https://github.com/capocchi/DEVSimPy/issues"
+"Changelog" = "https://github.com/capocchi/DEVSimPy/blob/master/CHANGELOG.md"
+
+[project.optional-dependencies]
+gui = ["spyder"]
+cli = [
+  "pyzo",
+  "openai",
+  "ollama",
+  "pyro4",
+  "plotly >= 4.1.0",
+  "whichpy >= 0.1",
+  "requests >= 2.22.0",
+  "pusher >= 2.1.4",
+  "pluginmanager >= 0.4.1",
+  "numpy"
+]
+
+
+

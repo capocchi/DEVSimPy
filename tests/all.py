@@ -1,3 +1,5 @@
+### lauch tests of all test_ files.
+### use: python all.py
 
 import subprocess
 import sys
@@ -11,16 +13,12 @@ tests_dir = os.path.join(os.path.dirname(script_dir), 'tests')  # Dossier tests/
 # Trouver tous les fichiers Python commençant par "test_"
 test_files = glob.glob(os.path.join(tests_dir, 'test_*.py'))
 
-if not test_files:
-    print("Aucun fichier de test trouvé dans 'tests/'")
-    sys.exit(1)
-
 # Arguments à passer aux tests (ou '--autoclose' par défaut)
 args = sys.argv[1:] or ['--autoclose']
 
 # Exécuter chaque fichier de test
 for test_file in test_files:
-    print(f"Exécution du test : {test_file}")
+    print(f"{test_file} testing...")
     subprocess.call(['python', test_file] + args)
 
-print("Tous les tests ont été exécutés.")
+print("All tests executed")

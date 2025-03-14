@@ -8,6 +8,7 @@
 bin/
 tmp/
 out/
+dist/
 *.tmp
 *.dat
 *.bak
@@ -217,6 +218,9 @@ pip-log.txt
 
 # Unit test / coverage reports
 .coverage
+.coveragerc
+.coveralls.yml
+.dockerignore
 .tox
 
 #Translations
