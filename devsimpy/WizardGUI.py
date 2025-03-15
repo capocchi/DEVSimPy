@@ -68,8 +68,8 @@ def atomicCode(label):
 \"\"\"
 
 ### Specific import ------------------------------------------------------------
-from DomainInterface.DomainBehavior import DomainBehavior
-from DomainInterface.Object import Message
+from DomainInterface import DomainBehavior
+from DomainInterface import Message
 
 ### Model class ----------------------------------------------------------------
 class %s(DomainBehavior):
@@ -149,7 +149,7 @@ def coupledCode(label):
 -------------------------------------------------------------------------------
 \"\"\"
 
-from DomainInterface.DomainStructure import DomainStructure
+from DomainInterface import DomainStructure
 #    ======================================================================    #
 class %s(DomainStructure):
 
@@ -430,8 +430,8 @@ class ModelGeneratorWizard(Wizard):
 			if inspect.isclass(cls):
 				
                 ### import are here because the simulator (PyDEVS or PyPDEVS) require it
-				from DomainInterface.DomainBehavior import DomainBehavior
-				from DomainInterface.DomainStructure import DomainStructure
+				from DomainInterface import DomainBehavior
+				from DomainInterface import DomainStructure
 				if not (issubclass(cls, DomainBehavior) or issubclass(cls, DomainStructure)):
 					dlg = wx.MessageDialog(parent, _('The python file must contain a class that inherit of DomainBehavior or DomainStructure master class.\n Please choose a correct python file.'), _('Wizard Manager'), wx.ID_OK|wx.ICON_ERROR)
 					dlg.ShowModal()

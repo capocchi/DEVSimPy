@@ -31,8 +31,8 @@ import DiagramNotebook
 
 from PropertiesGridCtrl import PropertiesGridCtrl, CodeCB
 from DetachedFrame import DetachedFrame
-from Patterns.Observer import Subject
-from Mixins.Achievable import Achievable
+from Patterns import Subject
+from Mixins import Achievable
 from Decorators import Post_Undo
 from Utilities import load_and_resize_image
 

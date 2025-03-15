@@ -10,7 +10,7 @@ GENERAL NOTES AND REMARKS:
 GLOBAL VARIABLES AND FUNCTIONS
 """
 
-from DomainInterface.DomainBehavior import DomainBehavior
+from DomainInterface import DomainBehavior
 
 class Atomic(DomainBehavior):
 	"""	Basic atomic model.

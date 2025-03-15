@@ -40,7 +40,7 @@ import psutil
 from pubsub import pub
 
 from Utilities import playSound, NotificationMessage
-from Patterns.Strategy import *
+from .Strategy import *
 from Decorators import hotshotit
 
 def elapsed_since(start):

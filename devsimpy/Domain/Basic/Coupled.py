@@ -10,7 +10,7 @@ GENERAL NOTES AND REMARKS:
 GLOBAL VARIABLES AND FUNCTIONS
 """
 
-from DomainInterface.DomainStructure import DomainStructure
+from DomainInterface import DomainStructure
 
 class Coupled(DomainStructure):
 	""" Basic coupled model. 

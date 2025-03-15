@@ -117,9 +117,3 @@ class Iconizable():
                 return name
         
         return ""
-
-def main():
-    pass
-
-if __name__ == '__main__':
-    main()

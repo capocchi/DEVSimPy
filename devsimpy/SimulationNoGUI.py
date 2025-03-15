@@ -15,7 +15,6 @@ GLOBAL VARIABLES AND FUNCTIONS:
 import os
 import sys
 import time
-import builtins
 import traceback
 import json
 # import pusher
@@ -247,7 +246,7 @@ class runSimulation:
         ################################################################################################################
         ################################################################################################################
         if self.master:
-            from Patterns.Factory import simulator_factory
+            from Patterns import simulator_factory
             if not self.ntl:
                 self.master.FINAL_TIME = float(self.time)
             

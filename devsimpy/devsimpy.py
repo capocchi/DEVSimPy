@@ -104,7 +104,6 @@ except Exception:
 	sys.stdout.write('Last version for Python2 is PyPubSub 3.3.0 \n pip install PyPubSub==3.3.0')
 	sys.exit()
 
-
 import wx.adv
 
 wx.FutureCall = wx.CallLater

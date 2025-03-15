@@ -100,9 +100,3 @@ class Rotatable:
 		"""
 		self.OnRotateOutputL(event)
 		self.OnRotateInputL(event)
-
-def main():
-    pass
-
-if __name__ == '__main__':
-    main()

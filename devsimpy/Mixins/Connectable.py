@@ -119,9 +119,3 @@ class Connectable:
 			y+=dy*(num+1)
 
 		return (x,y)
-
-def main():
-    pass
-
-if __name__ == '__main__':
-    main()

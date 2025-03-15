@@ -78,8 +78,8 @@ def getPythonModelFileName(fn:str)->str:
 				import Components
 				cls = Components.GetClass(os.path.join(fn, python_file))
 
-				from DomainInterface.DomainBehavior import DomainBehavior
-				from DomainInterface.DomainStructure import DomainStructure
+				from DomainInterface import DomainBehavior
+				from DomainInterface import DomainStructure
 
 				if inspect.isclass(cls):
 					if issubclass(cls, DomainBehavior) or issubclass(cls, DomainStructure):

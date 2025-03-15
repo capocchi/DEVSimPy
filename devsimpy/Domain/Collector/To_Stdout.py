@@ -12,8 +12,8 @@
 """
 
 ### Specific import ------------------------------------------------------------
-from DomainInterface.DomainBehavior import DomainBehavior
-from DomainInterface.Object import Message
+from DomainInterface import DomainBehavior
+from DomainInterface import Message
 
 import sys
 

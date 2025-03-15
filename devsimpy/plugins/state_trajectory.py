@@ -136,8 +136,8 @@ def GetFlatDEVSList(coupled_devs, l=[]):
     """ Get the flat list of devs model composing coupled_devs (recursively)
     """
 
-    from DomainInterface.DomainBehavior import DomainBehavior
-    from DomainInterface.DomainStructure import DomainStructure
+    from DomainInterface import DomainBehavior
+    from DomainInterface import DomainStructure
 
     for devs in coupled_devs.componentSet:
         if isinstance(devs, DomainBehavior):
@@ -583,8 +583,8 @@ def GetFlatDEVSList(coupled_devs, l=[]):
     """ Get the flat list of devs model composing coupled_devs (recursively)
     """
 
-    from DomainInterface.DomainBehavior import DomainBehavior
-    from DomainInterface.DomainStructure import DomainStructure
+    from DomainInterface import DomainBehavior
+    from DomainInterface import DomainStructure
 
     for devs in coupled_devs.componentSet:
         if isinstance(devs, DomainBehavior):

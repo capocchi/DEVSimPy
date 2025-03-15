@@ -18,8 +18,6 @@ import threading
 import array
 
 from .DEVS import CoupledDEVS
-#from Patterns.Strategy import SimStrategy1
-
 from PluginManager import PluginManager
 
 ### avec ce flag, on gere a totalité des messages sur les ports une seul fois dans delta_ext.

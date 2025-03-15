@@ -98,9 +98,3 @@ class Plugable:
 					setattr(self, name, types.MethodType(method, self))
 					
 		return True
-
-def main():
-    pass
-
-if __name__ == '__main__':
-    main()

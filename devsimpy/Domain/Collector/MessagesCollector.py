@@ -17,7 +17,7 @@ import os
 import random
 import tempfile
 
-from DomainInterface.DomainBehavior import DomainBehavior
+from DomainInterface import DomainBehavior
 
 #  ================================================================    #
 class MessagesCollector(DomainBehavior):

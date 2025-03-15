@@ -10,6 +10,7 @@ from XMLModule import getDiagramFromXMLSES
 import Container
 import DetachedFrame
 
+
 ### Run the test
 app = TestApp(0)
 

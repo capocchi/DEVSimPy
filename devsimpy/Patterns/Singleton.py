@@ -29,10 +29,3 @@ def Singleton(myClass):
             instances[myClass] = myClass(*args, **kwargs)
         return instances[myClass]
     return getInstance
-
-if __name__ == '__main__':
-    @Singleton
-    class SingletonTest(object):
-        pass
-
-    SingletonTest()

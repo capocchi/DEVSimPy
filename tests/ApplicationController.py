@@ -38,8 +38,7 @@ if __name__ == '__main__':
 """
 import wx
 import argparse
-import sys
-import os
+import sys, os
 
 # Add parent dir to sys.path in order to avoid import from test files
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'devsimpy')))
@@ -153,7 +152,7 @@ class TestApp(wx.App):
 
         return True
         
-    def RunTest(self, frame=None):
+    def RunTest(self, frame=None, show=True):
         """ Run the test.
         """
 
@@ -167,7 +166,7 @@ class TestApp(wx.App):
         #     frame.SetWindowStyleFlag(style & ~wx.DIALOG_MODAL)
 
         # Show the frame
-        frame.Show()
+        frame.Show(show)
         # Activate the controller to launc and stop the frame automatically
         controller = ApplicationController(self)
         controller.configure_startup_shutdown(sys.argv)

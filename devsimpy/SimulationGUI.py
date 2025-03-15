@@ -35,7 +35,7 @@ from tempfile import gettempdir
 from Utilities import IsAllDigits, printOnStatusBar, load_and_resize_image
 from PluginManager import PluginManager #trigger_event, is_enable
 from Patterns.Strategy import *
-from Patterns.Factory import simulator_factory, get_process_memory, get_total_ram
+from Patterns import simulator_factory, get_process_memory, get_total_ram
 from Decorators import BuzyCursorNotification
 
 import Container

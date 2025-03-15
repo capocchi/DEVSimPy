@@ -102,9 +102,3 @@ class Structurable(Components.DEVSComponent):
 		"""
 		if hasattr(self.devsModel, 'disconnectPorts'):
 			self.devsModel.disconnectPorts(p1, p2)
-
-def main():
-    pass
-
-if __name__ == '__main__':
-    main()

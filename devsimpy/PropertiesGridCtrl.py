@@ -45,10 +45,9 @@ import Components
 import Menu
 import ZipManager
 
-from Mixins.Attributable import Attributable
-from Mixins.Achievable import Achievable
+from Mixins import Attributable, Achievable
 from Utilities import RGBToHEX
-from Patterns.Observer import Subject
+from Patterns import Subject
 
 from collections import OrderedDict
 

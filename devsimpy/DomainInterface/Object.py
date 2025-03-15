@@ -51,6 +51,4 @@ class Message:
 			@rtype: str
 		'''
 		return "<< value = %s; time = %s>>"%(self.value, self.time)
-	
-if __name__ == "__main__":
-	pass
+

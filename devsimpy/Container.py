@@ -85,17 +85,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 	import Menu
 
 ### Mixin
-from Mixins.Attributable import Attributable
-from Mixins.Achievable import Achievable
-from Mixins.Resizeable import Resizeable
-from Mixins.Rotatable import Rotatable
-from Mixins.Connectable import Connectable
-from Mixins.Plugable import Plugable
-from Mixins.Structurable import Structurable
-from Mixins.Savable import Savable, PickledCollection
-from Mixins.Selectable import Selectable
-from Mixins.Abstractable import Abstractable
-from Mixins.Iconizable import Iconizable, Icon
+from Mixins import *
 
 ### for all dsp model build with old version of DEVSimPy
 sys.modules['Savable'] = sys.modules['Mixins.Savable']
@@ -103,7 +93,7 @@ sys.modules['Container.PickledCollection'] = PickledCollection
 
 from Decorators import BuzyCursorNotification, Post_Undo
 from Utilities import HEXToRGB, relpath, playSound, sendEvent, load_and_resize_image, getInstance, FixedList, getObjectFromString, getTopLevelWindow, printOnStatusBar
-from Patterns.Observer import Subject, Observer
+from Patterns import Subject, Observer
 
 if getattr(builtins, 'GUI_FLAG', True):
 	from DetachedFrame import DetachedFrame
@@ -382,8 +372,8 @@ class Diagram(Savable, Structurable):
 		if diagram.getDEVSModel():
 			diagram.ClearAllPorts()
 		else:
-			import DomainInterface.MasterModel
-			diagram.setDEVSModel(DomainInterface.MasterModel.Master())
+			from DomainInterface import Master
+			diagram.setDEVSModel(Master())
 
 		### shape list of diagram
 		shape_list = [

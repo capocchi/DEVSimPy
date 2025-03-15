@@ -11,8 +11,8 @@ GLOBAL VARIABLES AND FUNCTIONS:
 """
 
 
-from DomainInterface.DomainBehavior import DomainBehavior
-from Basic.Object import Message
+from DomainInterface import DomainBehavior
+from DomainInterface import Message
 
 import os.path
 

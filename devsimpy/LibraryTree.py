@@ -515,8 +515,8 @@ class LibraryTree(wx.TreeCtrl):
 		"""
 		
 		### import are here because the simulator (PyDEVS or PyPDEVS) require it
-		from DomainInterface.DomainBehavior import DomainBehavior
-		from DomainInterface.DomainStructure import DomainStructure
+		from DomainInterface import DomainBehavior
+		from DomainInterface import DomainStructure
 		
 		try:
 			name_list = getPYFileListFromInit(os.path.join(dName,'__init__.py'), ext)

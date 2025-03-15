@@ -24,11 +24,11 @@ import wx
 
 _ = wx.GetTranslation
 
-from Patterns.Observer import Observer
+from Patterns import Observer
 from LibPanel import LibPanel
 from PropPanel import PropPanel
 from AttributeEditor import AttributeEditor
-from Mixins.Attributable import Attributable
+from Mixins import Attributable
 from Utilities import getTopLevelWindow, load_and_resize_image
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##

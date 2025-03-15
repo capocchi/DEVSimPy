@@ -77,8 +77,8 @@ def GetClass(elem):
  
 	if isinstance(clsmembers, dict):
 	
-		from DomainInterface.DomainBehavior import DomainBehavior
-		from DomainInterface.DomainStructure import DomainStructure
+		from DomainInterface import DomainBehavior
+		from DomainInterface import DomainStructure
 
 		# moduleName = path_to_module(elem)
 
@@ -1009,8 +1009,8 @@ class BlockFactory:
 		
 		from Container import iPort, oPort, MsgBoxError
 		### import are here because the simulator (PyDEVS or PyPDEVS) require it
-		from DomainInterface.DomainBehavior import DomainBehavior
-		from DomainInterface.DomainStructure import DomainStructure
+		from DomainInterface import DomainBehavior
+		from DomainInterface import DomainStructure
 
 		python_file = kwargs['python_file']
 		canvas = kwargs['canvas'] if 'canvas' in kwargs else None

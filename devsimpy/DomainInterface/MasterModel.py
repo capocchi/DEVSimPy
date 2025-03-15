@@ -31,11 +31,11 @@
 #        
 #        #exec("import DEVSKernel%s.DEVS as BaseDEVS"%(d))
         
-import DomainInterface.DomainStructure
+from  DomainInterface import DomainStructure
 
 ###    ======================================================================    #
 #class Master(BaseDEVS.CoupledDEVS):
-class Master(DomainInterface.DomainStructure):
+class Master(DomainStructure):
 	""" Master class represent the high abstract level DEVS coupled model.
 	"""
 	FINAL_TIME = 10.0
@@ -44,7 +44,7 @@ class Master(DomainInterface.DomainStructure):
 	def __init__(self, name=""):
 		"""	Constructor method.
 		"""
-		DomainInterface.DomainStructure.__init__(self, name=name)
+		DomainStructure.__init__(self, name=name)
 #		BaseDEVS.CoupledDEVS.__init__(self, name=name)
 
 		self.FINAL_TIME = Master.FINAL_TIME

@@ -12,7 +12,7 @@
 """
 
 ### Specific import ------------------------------------------------------------
-from DomainInterface.DomainBehavior import DomainBehavior
+from DomainInterface import DomainBehavior
 
 import chart_studio.plotly as py
 

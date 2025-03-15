@@ -15,7 +15,7 @@ import gettext
 
 _ = gettext.gettext
 
-from Mixins.Attributable import Attributable
+from Mixins import Attributable
 from Utilities import getTopLevelWindow
 
 class Selectable:

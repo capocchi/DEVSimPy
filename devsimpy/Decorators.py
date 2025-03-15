@@ -45,19 +45,6 @@ def cond_decorator(flag, dec):
 		return dec(fn) if flag else fn
 	return decorate
 
-class memoize:
-    # from http://avinashv.net/2008/04/python-decorators-syntactic-sugar/
-    def __init__(self, function):
-        self.function = function
-        self.memoized = {}
-
-    def __call__(self, *args):
-        try:
-            return self.memoized[args]
-        except KeyError:
-            self.memoized[args] = self.function(*args)
-            return self.memoized[args]
-
 def hotshotit(func):
 	def wrapper(*args, **kw):
 		sim_thread = args[0]
