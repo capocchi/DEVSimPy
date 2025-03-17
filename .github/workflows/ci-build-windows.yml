@@ -1,12 +1,12 @@
-### Test Installing DEVSimPy on Windows (latest), using conda
+### Test Installing DEVSimPy on Windows (latest), using venv
 
 ### To use from DEVSimPy local repo: 
 ###   1. lauch Docker
 ###   2. open a powershell terminal
-###   3. execute: act -j build-windows -P windows-latest=ghcr.io/catthehacker/ubuntu:act-latest
-###   4. if act is not installed, execute: winget install nektos.act
-###   5. restart the terminal
-  
+###   3. if act is not installed, execute: winget install nektos.act
+###   4. restart the terminal
+###   5. execute à partir d'un os window: act -j build-windows -P windows-latest=-self-hosted
+
 name: Windows build
 
 on:
@@ -21,54 +21,52 @@ jobs:
       max-parallel: 4
       fail-fast: true # Stop all jobs if one fails
       matrix:
-        python-version: ['3.10']
-    defaults:
-      run:
-        shell: bash -el {0}
+        python-version: ['3.13']
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Test DEVSimPy
+        run: |
+          python -m venv venv3
+          venv3\Scripts\Activate.ps1
+          python -m pip install --upgrade pip
+          python -m pip install devsimpy
+          devsimpy examples/model0/model0.dsp 10 autostart autoclose
+          
+        ### Test of diag and sub frame
+      - name: Test DEVSimPy Frame and Dialog
+        run: |
 
-    - name: Remove existing Miniconda directory if it exists
-      run: |
-        $miniconda_path = "C:/Users/capocchi_l/miniconda3"
-        if (Test-Path $miniconda_path) {
-          Remove-Item -Recurse -Force $miniconda_path
-        }
-      shell: powershell
-      
-    - name: Set up Python with Miniconda
-      uses: conda-incubator/setup-miniconda@v3
-      with:
-        miniconda-version: latest
-        conda-version: "*"
-        channels: conda-forge,defaults
-        channel-priority: true
-        activate-environment: anaconda-client-env
-        python-version: ${{ matrix.python-version }}
+          python -m pip install wxpython>=4.2.2 PyPubSub psutil
+          
+          cd tests
 
-    # - name: Install VcXsrv
-    #   run: |
-    #     Invoke-WebRequest -Uri "https://sourceforge.net/projects/vcxsrv/files/latest/download" -OutFile "$env:TEMP\vcxsrv_installer.exe"
-    #     Start-Process -Wait -FilePath "$env:TEMP\vcxsrv_installer.exe" -ArgumentList "/silent", "/verysilent", "/norestart"
-    #   shell: powershell
+          $FILES = @(
+          "test_checkergui.py",
+          "test_connectdialog.py",
+          "test_detachedframe.py",
+          "test_diagramconstantsdialog.py",
+          "test_editor.py",
+          "test_findgui.py",
+          "test_ftpgui.py",
+          "test_htmlwindow.py",
+          "test_importlibrary.py",
+          "test_labelgui.py",
+          "test_preferencesgui.py",
+          "test_prioritygui.py",
+          "test_simulationgui.py",
+          "test_wizardgui.py",
+          "test_pluginsgui.py",
+          "test_wxpymail.py",
+          "test_aiprompterdialog.py",
+          "test_simpleframeeditor.py",
+          "test_yamlexportgui.py",
+          "test_spreadsheet.py",
+          "test_xmlmodule.py"
+          )
 
-    # - name: Start VcXsrv
-    #   run: |
-    #     Start-Process -NoNewWindow -FilePath "C:\Program Files\VcXsrv\vcxsrv.exe" -ArgumentList ":0 -multiwindow -clipboard -wgl"
-    #     echo "DISPLAY=127.0.0.1:0.0" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-    #   shell: powershell
-
-    - name: Install conda dependencies
-      run: |
-        conda install -y -c conda-forge python=${{ matrix.python-version }} wxpython>=4.2.2
-        conda info -a
-        conda list
-
-    - name: Install dependencies with pip
-      run: |
-        python -m pip install psutil pyYAML PyPubSub ruamel.yaml matplotlib
-       
-    - name: Test DEVSimPy on Windows Server
-      run: |
-        cd devsimpy
-        python devsimpy.py ../examples/model0/model0.dsp 10
+          foreach ($file in $FILES) {
+            python $file --autoclose 
+          }

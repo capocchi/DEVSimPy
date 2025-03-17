@@ -12,5 +12,5 @@ from SimpleFrameEditor import FrameEditor
 ### Run the test
 app = TestApp(0)
 frame = FrameEditor(None, -1, "Test")
-frame.AddText("Test \n Hello word!")
+frame.AddText("Hello word!")
 app.RunTest(frame)

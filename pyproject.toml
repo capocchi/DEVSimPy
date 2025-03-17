@@ -8,29 +8,29 @@ devsimpy = "devsimpy.devsimpy:main"
 
 [project]
 name = "devsimpy"
-version = "5.0.3"
+version = "5.0.4"
 dependencies = [
   "wxpython>=4.2.2",
   "psutil",
-   "pyYAML",
-    "PyPubSub",
-    "ruamel.yaml",
-    "matplotlib",
-    "chart_studio",
-    "setuptools",
-    "pusher",
-    "ollama",
-    "openai",
-    "plotly",
-    "pyzo",
-    "pyro4",
-    "whichpy",
-    "requests",
-    "pluginmanager",
-    "numpy",
-    "pydot",
-    "networkx",
-    "lxml"
+  "pyYAML",
+  "PyPubSub",
+  "ruamel.yaml",
+  "matplotlib",
+  "chart_studio",
+  "setuptools",
+  "pusher",
+  "ollama",
+  "openai",
+  "plotly",
+  "pyzo",
+  "pyro4",
+  "whichpy",
+  "requests",
+  "pluginmanager",
+  "numpy",
+  "pydot",
+  "networkx",
+  "lxml"
 ]
 requires-python = ">=3.9"
 authors = [

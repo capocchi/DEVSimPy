@@ -71,10 +71,12 @@ Examples:
   python XMLModule.py --autoclose            # Start automatically and close after 2 seconds (defautl sleep time)
   python XMLModule.py --autoclose 5          # Start autoatically and close after 5 seconds
   python XMLModule.py --autostart --autoclose 3 # Start automatically and close after 3 seconds
+  python XMLModule.py --autoclose --nogui # Start automatically the test with nogui activated
   
 Additional Information:
   - The autostart option shows the window immediately
   - The autoclose option takes seconds as parameter
+  - The nogui option set the show option of the frame at False
   - Both options can be combined
 """)
         
@@ -88,6 +90,9 @@ Additional Information:
                       default=None,  # Default value when --autoclose is not used
                       metavar='SECONDS',
                       help='Automatically close the application after specified seconds (default: 2)')
+    
+        parser.add_argument('--nogui', action='store_true',
+                          help='Run the application without showing the GUI')
     
         parser.add_argument('--version', action='version', 
                           version='%(prog)s 1.0',
@@ -165,11 +170,17 @@ class TestApp(wx.App):
         # if style & wx.DIALOG_MODAL:
         #     frame.SetWindowStyleFlag(style & ~wx.DIALOG_MODAL)
 
+        controller = ApplicationController(self)
+
+        args = controller.parse_arguments()
+        show = not args.nogui
+
         # Show the frame
         frame.Show(show)
+
         # Activate the controller to launc and stop the frame automatically
-        controller = ApplicationController(self)
-        controller.configure_startup_shutdown(sys.argv)
+        controller.configure_startup_shutdown(args)
+        
         # Start the main loop
         self.MainLoop()
 

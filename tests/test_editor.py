@@ -21,7 +21,7 @@ with open(fn, 'w') as f:
 # app1.RunTest(frame1)
 
 app2 = TestApp(0)
-frame2 = GetEditor(None, -1, 'Test2', file_type='test')
+frame2 = GetEditor(None, -1, 'Test', file_type='test')
 frame2.AddEditPage("Hello world", fn)
 frame2.AddEditPage("Hello world", fn)
 frame2.SetPosition((200, 200))

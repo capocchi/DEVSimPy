@@ -9,5 +9,5 @@ from LabelGUI import LabelDialog
 
 ### Run the test
 app = TestApp(0)
-frame = LabelDialog(None, None)
+frame = LabelDialog(None, None, title="Test")
 app.RunTest(frame)

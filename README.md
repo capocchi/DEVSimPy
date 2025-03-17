@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="460" height="300" src="https://github.com/capocchi/DEVSimPy/blob/version-4.0/splash/splash.png" alt="DEVSimPy">
+  <img width="460" height="300" src="https://github.com/capocchi/DEVSimPy/blob/version-5.0/devsimpy/splash/splash.png" alt="DEVSimPy">
 </p>
 
 # DEVSimPy: Python-Based GUI for DEVS Simulation

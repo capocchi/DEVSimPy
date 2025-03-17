@@ -58,16 +58,18 @@ class LabelDialog(wx.Dialog):
 		"""
 		pass
 
-	def __init__(self, parent, block=None):
+	def __init__(self, parent, block=None, title=""):
 		""" Constructor.
 		"""
 
 		wx.Dialog.__init__(self)
 		
+
 		### local copy
 		self.block = block
 		self.parent = parent
-		
+		self.title = title
+
 		_xrcName = "LabelEditorFrame"
 		
 		### with Phoenix, no need to pre definde the dialogue windows.
@@ -105,6 +107,10 @@ class LabelDialog(wx.Dialog):
 	def SetProperties(self):
 		"""
 		"""
+
+		### default title is defined in XRC
+		if self.title:
+			self.SetTitle(self.title)
 
 		### default label
 		txt = self.block.label if self.block else ""
