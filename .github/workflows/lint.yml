@@ -1,0 +1,17 @@
+name: Linter Flake8
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Installer Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Installer Flake8
+        run: pip install flake8
+      - name: Lancer Flake8
+        run: flake8 devsimpy/
