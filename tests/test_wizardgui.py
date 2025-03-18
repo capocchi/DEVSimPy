@@ -1,6 +1,6 @@
 ### lauch the test 
-### python WizardGUI.py --autoclose
-### python WizardGUI.py --autoclose 10 (sleep time before to close the frame is 10s)
+### python test_wizardgui.py --autoclose
+### python test_wizardgui.py --autoclose 10 (sleep time before to close the frame is 10s)
 
 import os
 

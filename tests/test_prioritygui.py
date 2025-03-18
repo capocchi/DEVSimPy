@@ -1,6 +1,6 @@
 ### lauch the test 
-### python PriorityGUI.py --autoclose
-### python PriorityGUI.py --autoclose 10 (sleep time before to close the frame is 10s)
+### python test_prioritygui.py --autoclose
+### python test_prioritygui.py --autoclose 10 (sleep time before to close the frame is 10s)
 
 from ApplicationController import TestApp
 

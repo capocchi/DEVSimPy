@@ -1,5 +1,5 @@
 ### lauch the test 
-### python test_draglit.py --autoclose
+### python test_draglist.py --autoclose
 ### python test_draglist.py --autoclose 10 (sleep time before to close the frame is 10s)
 
 from random import choice

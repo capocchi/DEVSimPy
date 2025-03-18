@@ -10,5 +10,5 @@ from YAMLExportGUI import YAMLExportGUI
 
 ### Run the test
 app = TestApp(0)
-frame = YAMLExportGUI(None, -1, 'Test', path=r'C:\\Users\capocchi_l.UDCPP\Downloads\plotly_test.yaml')
+frame = YAMLExportGUI(None, -1, 'Test', path=r'test.yaml')
 app.RunTest(frame)

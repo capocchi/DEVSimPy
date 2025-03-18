@@ -1,6 +1,6 @@
 ### lauch the test 
-### python FTPGUI.py --autoclose
-### python FTPGUI.py --autoclose 10 (sleep time before to close the frame is 10s)
+### python test_ftpgui.py --autoclose
+### python test_ftpgui.py --autoclose 10 (sleep time before to close the frame is 10s)
 
 from ApplicationController import TestApp
 
