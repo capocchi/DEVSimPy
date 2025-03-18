@@ -217,11 +217,11 @@ develop-eggs/
 pip-log.txt
 
 # Unit test / coverage reports
-*.coverage
-*.coveragerc
-*.coveralls.yml
-*.dockerignore
-*.tox
+.coverage
+.coveragerc
+.coveralls.yml
+.dockerignore
+.tox
 
 #Translations
 #*.mo
