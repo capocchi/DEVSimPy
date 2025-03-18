@@ -39,14 +39,24 @@ DEVSimPy is an open-source framework (GPL v3) designed for **modeling and simula
 - **wxPython 4.0+**
 - **SciPy & NumPy** (for spectrum analysis, optional)
 
-### Standard Installation
+### From PIP
+## Installation
+```sh
+$ pip install devsimpy
+```
+## Running
+```sh
+$ devsimpy
+```
+
+### From Repo (for dev)
+## Installation
 ```sh
 $ git clone --recurse-submodules -b version-4.0 --depth=1 https://github.com/capocchi/DEVSimPy.git
 $ git fetch --unshallow
 $ pip install -r requirements.txt
 ```
-
-### Running DEVSimPy
+## Running
 ```sh
 $ python devsimpy.py
 ```
@@ -66,6 +76,10 @@ $ pythonw devsimpy.py  # Required due to wxPython dependencies
 Execute DEVSimPy models without the GUI:
 ```sh
 $ python devsimpy-nogui.py test.dsp -sim 10 -kernel pdevs
+```
+or 
+```sh
+$ python devsimpy.py --nogui test.dsp -sim 10 -kernel pdevs
 ```
 For PyDEVS kernel:
 ```sh
