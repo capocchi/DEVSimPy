@@ -3,7 +3,6 @@
 </p>
 
 # DEVSimPy: Python-Based GUI for DEVS Simulation
-## Status
 
 | Category    | Status |
 |------------|--------|
