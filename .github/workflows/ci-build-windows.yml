@@ -21,7 +21,7 @@ jobs:
       max-parallel: 4
       fail-fast: true # Stop all jobs if one fails
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.10','3.11','3.12','3.13']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v3
@@ -71,7 +71,8 @@ jobs:
           "test_simpleframeeditor.py",
           "test_yamlexportgui.py",
           "test_spreadsheet.py",
-          "test_xmlmodule.py"
+          "test_xmlmodule.py",
+          "test_standalonegui.py"
           )
 
           foreach ($file in $FILES) {
