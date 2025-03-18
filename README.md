@@ -42,9 +42,9 @@ DEVSimPy is an open-source framework (GPL v3) designed for **modeling and simula
 ```sh
 $ pip install devsimpy
 ```
-and
+and to start:
 ```sh
-$ python devsimpy.py
+$ devsimpy
 ```
 
 ### From Repo (for dev)
@@ -53,11 +53,11 @@ $ git clone --recurse-submodules -b version-4.0 --depth=1 https://github.com/cap
 $ git fetch --unshallow
 $ pip install -r requirements.txt
 ```
-and
+and to start:
 ```sh
 $ python devsimpy.py
 ```
-For macOS users:
+or for macOS user:
 ```sh
 $ pythonw devsimpy.py  # Required due to wxPython dependencies
 ```
