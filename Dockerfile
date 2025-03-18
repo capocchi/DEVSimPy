@@ -1,25 +1,38 @@
-# Use an official Python runtime as a parent image
-FROM python:3.13-slim-buster
+# Utiliser une base Ubuntu
+FROM ubuntu:22.04
 
-# Set the working directory in the container
-WORKDIR /app
+# Mettre à jour et installer les dépendances nécessaires
+RUN apt-get update && apt-get install -y \
+    xfce4 xfce4-goodies \
+    x11vnc xvfb \
+    python3 python3-pip python3-venv \
+    supervisor wget curl git \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install additional dependencies for wxPython
-RUN apt-get update && apt-get install -y build-essential libgtk-3-dev
-RUN pip install --upgrade pip
+# Installer noVNC
+RUN mkdir -p /opt/novnc \
+    && git clone https://github.com/novnc/noVNC.git /opt/novnc \
+    && git clone https://github.com/novnc/websockify /opt/novnc/utils/websockify \
+    && ln -s /opt/novnc/vnc.html /opt/novnc/index.html
 
-RUN pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/debian-9 wxPython
+# Installer TigerVNC
+RUN apt-get update && apt-get install -y tigervnc-standalone-server
 
-# RUN pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-22.04 wxPython
+# Installer DEVSimPy
+RUN python3 -m venv /opt/devsimpy-env \
+    && /opt/devsimpy-env/bin/pip install --upgrade pip \
+    && /opt/devsimpy-env/bin/pip install devsimpy wxpython
 
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+# Configurer un mot de passe VNC (par défaut "password")
+RUN mkdir -p /root/.vnc \
+    && echo "password" | vncpasswd -f > /root/.vnc/passwd \
+    && chmod 600 /root/.vnc/passwd
 
-# Copy the local wxPython app source code into the container
-COPY . .
+# Configurer Supervisor pour gérer les services
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Set the display environment variable for GUI support
-ENV DISPLAY=:0
+# Exposer les ports VNC et noVNC
+EXPOSE 5901 6080
 
-# Run the wxPython GUI app
-CMD ["python", "devsimpy.py"]
+# Lancer les services
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

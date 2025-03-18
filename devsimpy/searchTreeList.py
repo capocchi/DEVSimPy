@@ -2,6 +2,8 @@ import wx
 import sys
 
 class TreeItem(object):
+	"""
+	"""
 	def __init__(self, text, data=None, filterable=True):
 		self._children = []
 		self._text = text

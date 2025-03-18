@@ -264,18 +264,11 @@ class GeneralPanel(wx.Panel):
 
 		### if ini file exist we remove old section and option
 		if os.path.exists(path):
-			try:
+			if parser.has_option(section, option):
 				parser.remove_option(section, option)
-			except:
-				pass
-			try:
+			if parser.has_section(section):
 				parser.remove_section(section)
-			except:
-				pass
-			try:
-				parser.add_section(section)
-			except:
-				pass
+			parser.add_section(section)
 
 		if not parser.has_section(section):
 			parser.add_section(section)
@@ -400,21 +393,15 @@ class SimulationPanel(wx.Panel):
 	def OnAbout(self, evt):
 		""" Search doc directory into 'doc' directory of DEVS package
 		"""
-		### DEVS package
 		choice = self.cb3.GetValue()
+		doc_path = os.path.join(os.path.dirname(getattr(builtins, 'DEVS_DIR_PATH_DICT').get(choice)), 'doc', 'index.html')
 
-		### possible path of doc directory
-		path = os.path.join(os.path.dirname(getattr(builtins,'DEVS_DIR_PATH_DICT').get(choice)), 'doc', 'index.html')
-
-		### Html frame
-		frame = HtmlFrame(self, wx.NewIdRef(), "Doc", (600,600))
-		### if page exist in <package_dir>/<doc>
-		if os.path.exists(path):
-			frame.LoadFile(path)
+		frame = HtmlFrame(self, wx.NewIdRef(), "Doc", (600, 600))
+		if os.path.exists(doc_path):
+			frame.LoadFile(doc_path)
 		else:
-			frame.SetPage(_("<p> %s documentation directory not found! <p>")%choice)
+			frame.SetPage(_("<p> %s documentation directory not found! <p>") % choice)
 
-		### Show frame
 		frame.Show()
 
 	def OnSelectSound(self, evt):
@@ -463,8 +450,7 @@ class SimulationPanel(wx.Panel):
 	def onCb4(self, evt):
 		""" ComboBox has been checked.
 		"""
-		val = evt.GetEventObject().GetValue()
-		self.sim_defaut_strategy = val
+		self.sim_defaut_strategy = evt.GetEventObject().GetValue()
 
 	def onCb3(self, evt):
 		""" ComboBox has been checked.
@@ -490,8 +476,7 @@ class SimulationPanel(wx.Panel):
 	def onSc(self, evt):
 		""" CheckBox has been checked.
 		"""
-		val = evt.GetEventObject().GetValue()
-		self.sim_defaut_plot_dyn_freq = val
+		self.sim_defaut_plot_dyn_freq = evt.GetEventObject().GetValue()
 
 	def OnApply(self, evt):
 		""" Apply changes.
@@ -559,11 +544,7 @@ class EditorPanel(wx.Panel):
 		choices = []
 
 		for editor in EditorPanel.EDITORS:
-			try:
-				importlib.import_module(editor)
-			except:
-				pass
-			else:
+			if importlib.util.find_spec(editor) is not None:
 				choices.append(editor)
 
 		### add the choice object to select one external code editor
@@ -602,17 +583,16 @@ class EditorPanel(wx.Panel):
 		""" Update Button has been clicked in order to update the list of available external editors.
 		"""
 
-		installed = False
+		installed_editors = []
 		for editor in EditorPanel.EDITORS:
 			if self.choice.FindString(editor) == wx.NOT_FOUND and BuzyCursorNotification(install(editor)):
-				installed = True
-				items = self.choice.GetItems()+[editor]
-				self.choice.SetItems(items)
+				installed_editors.append(editor)
 				
-		if installed:
-			msg = _('You need to restart DEVSimPy to use the new installed code editor.')
+		if installed_editors:
+			self.choice.AppendItems(installed_editors)
+			msg = _('You need to restart DEVSimPy to use the newly installed code editor(s).')
 		else:
-			msg = _('All external editors are installed.')
+			msg = _('All external editors are already installed.')
 
 		dial = wx.MessageDialog(self.parent, msg, _("External Code Editor Installation"), wx.OK | wx.ICON_INFORMATION)
 		dial.ShowModal()
