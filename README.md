@@ -39,25 +39,22 @@ DEVSimPy is an open-source framework (GPL v3) designed for **modeling and simula
 - **wxPython 4.0+**
 - **SciPy & NumPy** (for spectrum analysis, optional)
 
-### Install & Runing
-<details open>
-<summary>From PIP</summary>
+### From PIP
 ```sh
 $ pip install devsimpy
 ```
+and
 ```sh
-$ devsimpy
+$ python devsimpy.py
 ```
-</details>
 
-<details open>
-<summary>From Repo (for dev)</summary>
+### From Repo (for dev)
 ```sh
 $ git clone --recurse-submodules -b version-4.0 --depth=1 https://github.com/capocchi/DEVSimPy.git
 $ git fetch --unshallow
 $ pip install -r requirements.txt
 ```
-#### Running
+and
 ```sh
 $ python devsimpy.py
 ```
@@ -65,7 +62,6 @@ For macOS users:
 ```sh
 $ pythonw devsimpy.py  # Required due to wxPython dependencies
 ```
-</details>
 
 ### Alternative Installation Methods
 - **Conda Environment**: Use the [`conda_devsimpy_env.yml`](https://github.com/capocchi/DEVSimPy-site/raw/gh-pages/conda_devsimpy_env.yml) file.
