@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+'''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # SpreadSheet.py ---
 #                     --------------------------------
@@ -19,6 +20,7 @@
 # GLOBAL VARIABLES AND FUNCTIONS
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+'''
 
 ### at the beginning to prevent with statement for python version <=2.5
 

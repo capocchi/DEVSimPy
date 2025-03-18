@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+'''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # ImportLibrary.py --- Importing library dialog
 #                     --------------------------------
@@ -14,6 +15,7 @@
 #
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+'''
 
 ### at the beginning to prevent with statement for python vetrsion <=2.5
 

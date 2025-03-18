@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+'''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # DiagramConstantsDialog.py --- Dialog to define constantes in a diagram.
 #                     --------------------------------
@@ -15,6 +16,7 @@
 #
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+'''
 
 import wx
 import os

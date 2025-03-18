@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+'''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # AiAdapter.py ---
 #                    --------------------------------
@@ -25,6 +26,7 @@
 # GLOBAL VARIABLES AND FUNCTIONS
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+'''
 
 import logging
 from abc import ABC, abstractmethod
@@ -36,13 +38,16 @@ import os
 import sys
 import urllib.request
 import gettext
-_ = gettext.gettext
-
-from Decorators import BuzyCursorNotification, cond_decorator, ProgressNotification
+from Decorators import BuzyCursorNotification
+from Decorators import cond_decorator
+from Decorators import ProgressNotification
 from Utilities import check_internet
 
+_ = gettext.gettext
+
 # Configuration de base du logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, 
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 class DevsAIAdapter(ABC):
     """

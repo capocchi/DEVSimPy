@@ -1,3 +1,4 @@
+'''
 ################################################################################################################################################################################
 # wxPyMail_gui.py
 #
@@ -13,6 +14,7 @@
 # Ex. cmd /C "SET PYTHONHOME=c:\path\to\Python24&&c:\path\to\python24\python.exe c:\path\to\wxPyMail.py %1"
 #     "C:\Program Files\PyMail\wxPyMail.exe" %1
 #################################################################################################################################################################################
+'''
 
 import math
 import os
@@ -24,12 +26,12 @@ import wx.lib.agw.hyperlink as hl
 _ = wx.GetTranslation
 
 try:
-    from email.MIMEMultipart import MIMEMultipart
-    from email.MIMEBase import MIMEBase
-    from email.MIMEText import MIMEText
-    from email.Utils import formatdate
-    from email import Encoders
-except:
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.base import MIMEBase
+    from email.mime.text import MIMEText
+    from email.utils import formatdate
+    from email import encoders as Encoders
+except ImportError as e:
     from email.mime.multipart import MIMEMultipart
     from email.mime.base import MIMEBase
     from email.mime.text import MIMEText
@@ -39,7 +41,7 @@ except:
 from Utilities import load_and_resize_image
 
 class SendMailWx(wx.Frame):
-    
+
     def __init__(self, *args, **kw):
         super(SendMailWx, self).__init__(*args, **kw)
 

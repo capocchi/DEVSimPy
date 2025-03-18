@@ -5,8 +5,6 @@
 """
 from __future__ import with_statement
 
-import subprocess
-import importlib
 import sys
 
 #required_libs = ['ast','optparse', 'tokenize']

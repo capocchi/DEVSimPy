@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+'''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # devsimpy-nogui.py --- DEVSimPy - The Python DEVS no GUI modeling and simulation software
 #                     --------------------------------
@@ -15,6 +15,7 @@
 #
 # Bach version of DEVSimPy (whitout GUI)
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+'''
 
 import os
 import sys
