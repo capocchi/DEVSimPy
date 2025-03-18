@@ -103,14 +103,16 @@ class StandaloneGUI(wx.Frame):
         """
 
         ### local copy
-        self.yaml = kw['yaml']
-        del kw['yaml']
-        assert(os.path.exists(self.yaml))
+        if 'yaml' in kw:
+            self.yaml = kw['yaml']
+            del kw['yaml']
+            assert(os.path.exists(self.yaml))
+            self.yaml_model_name = os.path.basename(self.yaml.split('.')[0])
+        else:
+            self.yaml_model_name = "Test.yaml"
 
         # This line calls the __init__ method of the parent class to initialize the GUI window.
         super(StandaloneGUI, self).__init__(*args, **kw)
-       
-        self.yaml_model_name = os.path.basename(self.yaml.split('.')[0])
 
         self.InitUI()
         self.Center()
@@ -283,15 +285,3 @@ class StandaloneGUI(wx.Frame):
             event (wx.Event): wx event
         """
         self.Close()
-             
-def main():
-    """To test the GUI
-    """
-
-    ex = wx.App()
-    frame = StandaloneGUI(None, -1, 'Standalone Export')
-    frame.Show(True)
-    ex.MainLoop()
-
-if __name__ == '__main__':
-    main()
