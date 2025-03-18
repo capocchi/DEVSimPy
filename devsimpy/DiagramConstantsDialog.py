@@ -46,11 +46,11 @@ class DiagramConstantsDialog(wx.Dialog):
 	def __init__(self, *args, **kw):
 		""" Constructor.
 		"""
+		# Si on est dans GitHub Actions, changer wx.Dialog en wx.Frame
 		if os.environ.get("GITHUB_ACTIONS") == "true":
-			super().__init__(*args, **kw)
-			self.SetStyle(wx.DEFAULT_FRAME_STYLE)  # Simule un Frame pour GitHub Actions
-		else:
-			super().__init__(*args, **kw)
+			kw["style"] = wx.DEFAULT_FRAME_STYLE  # Utilise un style de Frame
+
+		super().__init__(*args, **kw)
 
 		### local copy
 		self.label = args[2]
