@@ -1,0 +1,12 @@
+ignore_patterns:
+  - "tests/*"  # Ignore les fichiers de test
+  - "docs/*"   # Ignore la documentation
+
+exclude_files:
+  - "setup.py"   # Exclut ce fichier spécifique
+  - "config.py"  # Exclut les fichiers de configuration
+
+language_rules:
+  python:
+    max_line_length: 100  # Définit la longueur max des lignes (par défaut 79 en PEP8)
+    pylint: true          # Active Pylint pour les analyses avancées
