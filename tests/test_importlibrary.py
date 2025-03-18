@@ -1,4 +1,3 @@
-
 ### lauch the test 
 ### python test_importlibrary.py --autoclose
 ### python test_importlibrary.py --autoclose 10 (sleep time before to close the frame is 10s)
