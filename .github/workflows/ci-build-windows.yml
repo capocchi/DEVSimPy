@@ -46,7 +46,7 @@ jobs:
       - name: Test DEVSimPy Frame and Dialog
         run: |
 
-          python -m pip install wxpython>=4.2.2 PyPubSub psutil
+          python -m pip install wxpython>=4.2.2 PyPubSub psutil tomllib
           
           cd tests
 

@@ -401,7 +401,7 @@ class MainApplication(wx.Frame):
 		if self.cfg.Exists('version'):
 
 			### rewrite old configuration file
-			rewrite = float(self.cfg.Read("version")) != float(self.GetVersion())
+			rewrite = self.cfg.Read("version") != self.GetVersion()
 
 			if not rewrite:
 

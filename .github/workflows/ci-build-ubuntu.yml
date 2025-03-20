@@ -46,7 +46,8 @@ jobs:
             pyYAML \
             PyPubSub \
             ruamel.yaml \
-            matplotlib
+            matplotlib \
+            tomllib
     
     - name: Install X serveur
       run: |
