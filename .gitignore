@@ -222,6 +222,7 @@ pip-log.txt
 .coveralls.yml
 .dockerignore
 .tox
+.mypycahe/
 
 #Translations
 #*.mo
