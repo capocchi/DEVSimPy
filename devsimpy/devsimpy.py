@@ -1289,7 +1289,6 @@ class MainApplication(wx.Frame):
 	def OnUndo(self, event):
 		""" Undo the diagram.
 		"""
-		print("Undo")
 
 		### get toolbar and clientData defined in AddTool
 		toolbar = event.GetEventObject()
@@ -1320,7 +1319,6 @@ class MainApplication(wx.Frame):
 	def OnRedo(self, event):
 		""" Redo the diagram
 		"""
-		print("Redo")
 		
 		toolbar = event.GetEventObject()
 		currentPage = toolbar.GetToolClientData(event.GetId()) if isinstance(toolbar.GetParent(), DetachedFrame) else self.nb2.GetCurrentPage()
