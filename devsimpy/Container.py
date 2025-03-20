@@ -2445,13 +2445,14 @@ if getattr(builtins, 'GUI_FLAG', True):
 				sys.stdout.write(_("Error trying to undo: %s \n"%info))
 			finally:
 
+			
 				### just for init (white diagram)
 				if self.diagram.GetBlockCount()>=1:
 					mainW = self.GetTopLevelParent()
 
 					### toolBar
-					tb = mainW.FindWindowByName('tb')
-
+					tb = mainW.GetToolBar()
+					
 					tb.EnableTool(wx.ID_UNDO, True)
 				
 					self.diagram.parent = self

@@ -175,7 +175,7 @@ class GeneralNotebook(Printable):
 			canvas = self.GetPage(id)
 			self.print_canvas = canvas
 			self.print_size = self.GetSize()
-
+			
 			### action history
 			if hasattr(self.parent, 'tb'):
 				self.parent.tb.EnableTool(wx.ID_UNDO, not len(canvas.stockUndo) == 0)
