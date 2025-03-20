@@ -40,7 +40,6 @@ jobs:
       
       - name: Test DEVSimPy
         run: |
-          if: success()   
           devsimpy --nogui examples/model0/model0.dsp 10
           
         ### Test of diag and sub frame
