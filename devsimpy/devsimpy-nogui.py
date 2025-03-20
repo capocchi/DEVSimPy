@@ -30,7 +30,7 @@ from datetime import date
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-__version__ = '5.0'
+__version__ = '5.1'
 
 def serialize_date(obj):
     if isinstance(obj, date):

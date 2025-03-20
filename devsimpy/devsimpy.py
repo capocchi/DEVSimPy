@@ -58,7 +58,7 @@ if sys.version_info[0] < 3:
 
 __authors__ = "Laurent Capocchi <capocchi@univ-corse.fr>, <santucci@univ-corse.fr>"
 __date__ = str(datetime.datetime.now())
-__version__ = '5.0'
+__version__ = '5.1'
 __docformat__ = 'epytext'
 __min_wx_version__ = '4.0'
 
