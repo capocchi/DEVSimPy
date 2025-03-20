@@ -111,7 +111,19 @@ except ImportError:
 		sys.stdout.write("Unknown operating system.\n")
 		sys.exit()
 
+import tomllib
+from pathlib import Path
+
 #-------------------------------------------------------------------------------
+
+def get_version():
+	"""Récupère la version du package depuis pyproject.toml."""
+	pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
+	
+	with pyproject_path.open("rb") as f:
+		pyproject_data = tomllib.load(f)
+	return pyproject_data["project"]["version"]
+
 
 def getFilePathInfo(path):
 	"""
