@@ -79,10 +79,10 @@ jobs:
           foreach ($file in $FILES) {
             python $file --autoclose --nogui
           }
-          
+
       ### Upload test results
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: windows-test-results
           path: ./windows-test-results/
