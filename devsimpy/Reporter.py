@@ -82,6 +82,12 @@ def ExceptionHook(exctype, value, trace):
 
     ftrace = FormatTrace(exctype, value, trace)
 
+    if not sys.stdout:
+        sys.stdout = sys.__stdout__
+
+    if not sys.stderr:
+        sys.stderr = sys.__stderr__
+    
     # Ensure that error gets raised to console as well
     sys.stdout.write(ftrace)
 
