@@ -8,7 +8,7 @@
 #                              Laurent CAPOCCHI
 #                        SPE - University of Corsica
 #                     --------------------------------
-# Version 5.0                                      last modified:  03/11/25
+# Version 5.1.0                                      last modified:  03/11/25
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -30,8 +30,6 @@ from datetime import date
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-__version__ = '5.1'
-
 def serialize_date(obj):
     if isinstance(obj, date):
         return obj.isoformat()
@@ -50,6 +48,9 @@ builtins.__dict__.update(USER_SETTINGS)
 from InteractionYAML import YAMLHandler
 from InteractionJSON import JSONHandler
 from StandaloneNoGUI import StandaloneNoGUI
+from Utilities import get_version
+
+__version__ = get_version()
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #

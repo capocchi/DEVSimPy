@@ -9,7 +9,7 @@
 #                    L. CAPOCCHI (capocchi@univ-corse.fr)
 #                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-# Version 4.0                                      last modified:  03/11/25
+# Version 5.1.0                                      last modified:  03/11/25
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -55,12 +55,6 @@ from tempfile import gettempdir
 
 if sys.version_info[0] < 3:
     raise Exception("Must be using Python 3")
-
-__authors__ = "Laurent Capocchi <capocchi@univ-corse.fr>, <santucci@univ-corse.fr>"
-__date__ = str(datetime.datetime.now())
-__version__ = '5.1'
-__docformat__ = 'epytext'
-__min_wx_version__ = '4.0'
 
 ################################################################
 ### Loading wx python library
@@ -142,7 +136,7 @@ from ImportLibrary import ImportLibrary
 from Reporter import ExceptionHook
 from PreferencesGUI import PreferencesGUI
 from PluginManager import PluginManager
-from Utilities import GetUserConfigDir, install, install_and_import, updatePiPPackages, load_and_resize_image, updateFromGitRepo, updateFromGitArchive, NotificationMessage, getTopLevelWindow
+from Utilities import GetUserConfigDir, install, install_and_import, updatePiPPackages, load_and_resize_image, updateFromGitRepo, updateFromGitArchive, NotificationMessage, getTopLevelWindow, get_version
 from Decorators import redirectStdout, BuzyCursorNotification, ProgressNotification, cond_decorator
 from DetachedFrame import DetachedFrame
 from LibraryTree import LibraryTree
@@ -155,6 +149,12 @@ from YAMLExportGUI import YAMLExportGUI
 from wxPyMail import SendMailWx
 from XMLModule import getDiagramFromXMLSES
 from StandaloneGUI import StandaloneGUI
+
+__authors__ = "Laurent Capocchi <capocchi@univ-corse.fr>, <santucci@univ-corse.fr>"
+__date__ = str(datetime.datetime.now())
+__version__ = get_version()
+__docformat__ = 'epytext'
+__min_wx_version__ = '4.0'
 
 ### http://comments.gmane.org/gmane.comp.python.wxpython/98744
 wx.Log.SetLogLevel(0)
