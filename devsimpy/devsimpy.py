@@ -975,7 +975,6 @@ class MainApplication(wx.Frame):
 				self._mgr.UnInit()
 				del self._mgr
 		
-
 		if GUI_FLAG:
 			sys.stdout.write(_("DEVSimPy closed!"))
 

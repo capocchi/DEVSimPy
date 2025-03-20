@@ -453,10 +453,10 @@ class Base(object):
 			else:
 				self.current_master = self.master
 
-			if isinstance(self.parent, wx.Panel):
-				# stdout redirect only for the Panel mode (if not in OnSimulation)
-				mainW = self.parent.GetTopLevelParent()
-				sys.stdout = mainW.stdioWin
+			# if isinstance(self.parent, wx.Panel):
+			# 	# stdout redirect only for the Panel mode (if not in OnSimulation)
+			# 	mainW = self.parent.GetTopLevelParent()
+			# 	sys.stdout = mainW.stdioWin
 
 			### check is model is well loaded
 			if (self.current_master is None) or (len(self.current_master.getComponentSet()) == 0):

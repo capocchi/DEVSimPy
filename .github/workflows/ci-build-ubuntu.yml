@@ -91,3 +91,10 @@ jobs:
         for file in "${FILES[@]}"; do
           xvfb-run -a python "$file" --autoclose
         done
+
+    ### Upload test results
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ubuntu-test-results
+        path: ./ubuntu-test-results/

@@ -39,7 +39,8 @@ jobs:
           python -m pip install devsimpy
       
       - name: Test DEVSimPy
-        run: |   
+        run: |
+          if: success()   
           devsimpy --nogui examples/model0/model0.dsp 10
           
         ### Test of diag and sub frame
@@ -78,3 +79,10 @@ jobs:
           foreach ($file in $FILES) {
             python $file --autoclose --nogui
           }
+          
+      ### Upload test results
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-test-results
+          path: ./windows-test-results/
