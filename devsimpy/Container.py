@@ -46,6 +46,7 @@ import re
 import pickle
 import zipfile
 import array
+import importlib
 
 import inspect
 if not hasattr(inspect, 'getargspec'):

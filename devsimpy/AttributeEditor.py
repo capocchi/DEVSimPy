@@ -90,6 +90,16 @@ class AttributeBase(object):
 		self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 		self._list.Bind(wx.EVT_SIZE, self.OnSize)
 
+	def UpdateLabel(self, label):
+		""" Update label in the grid
+		"""
+		self._list.SetCellValue(0, 1, label)
+
+	def UpdatePosition(self, pos):
+		""" Update position in the grid
+		"""
+		self._list.SetCellValue(1, 1, pos)
+
 	def OnSize(self, event):
 		""" Frame has been resized.
 		"""

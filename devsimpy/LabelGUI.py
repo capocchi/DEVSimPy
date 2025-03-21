@@ -23,13 +23,9 @@
 '''
 
 import os
+import sys
 import wx
 from wx import xrc
-
-### avoid cyclic import during the test_labelgui.py execution
-import sys
-if 'LabelGUI' not in sys.modules:
-	from AttributeEditor import AttributeBase
 
 __res = None
 
@@ -142,9 +138,10 @@ class LabelDialog(wx.Dialog):
 
 			### update of block from canvas
 			self.canvas.UpdateShapes([self.block])
-			if isinstance(self.parent, AttributeBase):
-				### update of label filed in properties dialogue
-				self.parent._list.SetCellValue(0, 1, self.block.label)
+
+			### update of label filed in properties dialogue
+			if hasattr(self.parent, "UpdateLabel"):
+				self.parent.UpdateLabel(self.block.label)
 
 		evt.Skip()
 
@@ -160,9 +157,8 @@ class LabelDialog(wx.Dialog):
 
 			### update of block from canvas
 			self.canvas.UpdateShapes([self.block])
-			if isinstance(self.parent, AttributeBase):
-				### update of label_pos filed in properties dialogue
-				self.parent._list.SetCellValue(1, 1, self.block.label_pos)
+			if hasattr(self.parent, "UpdatePosition"):
+				self.parent.UpdatePosition(self.block.label_pos)
 
 	def OnOk(self, evt):
 		""" Ok button has been clicked
