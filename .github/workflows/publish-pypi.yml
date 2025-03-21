@@ -1,4 +1,4 @@
-### action execute when the commands are executed:
+### This action is executed when the following commands are executed in a terminal:
 ### git tag v1.0.0
 ### git push origin v1.0.0
 
