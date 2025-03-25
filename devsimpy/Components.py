@@ -372,14 +372,13 @@ class GenericComponent:
 						new_temp_file = os.path.join(os.path.realpath(gettempdir()), new_name+'.py')
 
 					
-					# if os.path.exists(new_temp_file):
-						# os.remove(new_temp_file)
-						
-					### rename temp_file to new_temp_file according to the correspondance between the name of the python file and the name of the archive
-					### for exemple C:\Users\Laurent\AppData\Local\Temp\MyOld.py C:\Users\Laurent\AppData\Local\Temp\MyNew.py
-					os.rename(temp_file, new_temp_file)
+					# Rename immediately after extraction
+					if os.path.exists(temp_file):
+						if os.path.exists(new_temp_file):
+							os.remove(new_temp_file)
+						os.rename(temp_file, new_temp_file)
 
-		if temp_file:
+		if temp_file and os.path.exists(new_temp_file):
 
 			### replace in new_temp_file file
 			replaceAll(new_temp_file, old_name, new_name)

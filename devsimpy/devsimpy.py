@@ -1579,7 +1579,8 @@ class MainApplication(wx.Frame):
 				absdName = str(os.path.join(DOMAIN_PATH, s)) if s not in dlg._d else str(dlg._d[s])
 				progress_dlg = wx.ProgressDialog(_('Importing library'), _("Loading %s ...")%s, parent=self, style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
 				progress_dlg.Pulse()
-
+				wx.SafeYield()  # Allow the GUI to process pending events
+				
     			### add correct path to sys.path (always before InsertNewDomain)
 				LibraryTree.AddToSysPath(absdName)
     			### add NewDomain
