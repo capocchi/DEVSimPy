@@ -22,7 +22,7 @@ from PluginManager import PluginManager
 from Container import DetachedFrame, CodeBlock, ContainerBlock
 from FindGUI import FindReplace
 from Utilities import MoveFromParent
-from Observer import Subject
+from Patterns.Observer import Subject
 
 if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME:
 	raise AssertionError("Blink plug-in is not compatible with the PyPDEVS simulation kernel!")
