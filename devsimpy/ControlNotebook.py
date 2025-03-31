@@ -47,7 +47,7 @@ class GeneralNotebook(Observer):
 		"""
 
 		### label list
-		self.labelList = (_("Libraries"), _("Properties"))
+		self.labelList = (_("Libraries"), _("Properties"), ("Simulation"))
 
 		### Create panels with name used for label tab definition...
 		libPanel = LibPanel(self, self.labelList[0])

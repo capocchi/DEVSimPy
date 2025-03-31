@@ -29,6 +29,8 @@ from matplotlib.backends.backend_wxagg import (
     FigureCanvasWxAgg as FigureCanvas,
     NavigationToolbar2WxAgg as NavigationToolbar)
 
+from Utilities import load_and_resize_image
+
 class PlotPanel(wx.Panel):
     def __init__(self, parent, id=-1, dpi=None, **kwargs):
 
@@ -263,9 +265,9 @@ def add_state_trajectory_menu(*args, **kwargs):
         PlotStateTrajectory(block.getDEVSModel())
 
     states = wx.MenuItem(menu, ID_SHAPE, _("State Trajectory"), _("State trajectory graph"))
-    states.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'graph.png')))
+    states.SetBitmap(load_and_resize_image('graph.png'))
 
-    States_menu = menu.Insert(2, states)
+    states_menu = menu.Insert(2, states)
     menu.Bind(wx.EVT_MENU, OnPlot, id=ID_SHAPE)
 
 ######################################################################
@@ -710,9 +712,9 @@ def add_state_trajectory_menu(*args, **kwargs):
         PlotStateTrajectory(block.getDEVSModel())
 
     states = wx.MenuItem(menu, ID_SHAPE, _("State Trajectory"), _("State trajectory graph"))
-    states.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH, 'graph.png')))
+    states.SetBitmap(load_and_resize_image('graph.png'))
 
-    States_menu = menu.Insert(2, states)
+    states_menu = menu.Insert(2, states)
     menu.Bind(wx.EVT_MENU, OnPlot, id=ID_SHAPE)
 
 ######################################################################

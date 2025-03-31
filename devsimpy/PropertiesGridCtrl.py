@@ -165,7 +165,7 @@ class DictionaryEditor(wx.Dialog):
 ###
 class ListEditor(wx.Dialog):
 	def __init__(self, parent, id, title, values):
-		wx.Dialog.__init__(self, parent, id, _("List editor"), pos = (50,50), size = (250, 250), style = wx.DEFAULT_FRAME_STYLE)
+		wx.Dialog.__init__(self, parent, id, title = _("List editor"), pos = (50,50), size = (250, 250), style = wx.DEFAULT_FRAME_STYLE)
 
 		self.parent = parent
 
