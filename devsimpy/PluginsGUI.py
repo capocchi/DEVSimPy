@@ -280,15 +280,15 @@ class GeneralPluginsList(CheckListCtrl):
 			sys.stderr.write(_("Plugin not stored in configuration file!"))
 			self.active_plugins_list = []
 
-		### if pluginsList (2 parameters in constructor) is in constructor, we can populate
-		try:
-			pluginsList = args[1]
-		except IndexError:
-			#sys.stdout.write(_("Don't forget to call Populate method!\n"))
-			pass
-		else:
-			self.Populate(pluginsList)
-			self.is_populate = True
+		# ### if pluginsList (2 parameters in constructor) is in constructor, we can populate
+		# try:
+		# 	pluginsList = args[1]
+		# except IndexError:
+		# 	sys.stdout.write(_("Don't forget to call Populate method!\n"))
+		# 	pass
+		# else:
+		# 	self.Populate(pluginsList)
+		# 	self.is_populate = True
 
 	@BuzyCursorNotification
 	def Populate(self, pluginsList):
@@ -762,12 +762,12 @@ class PluginsPanel(wx.Panel):
 		"""
 		return self.rightPanel
 
-	def SetPluginsList(self, Checklist = None):
+	def SetPluginsList(self, check_list = None):
 		""" Update right panel with new check_list
 		"""
 		### DONT USE DETACH FOR WINDOWS, PREFER HIDE !!!
 		self.vbox1.Hide(self.check_list)
-		self.check_list = Checklist
+		self.check_list = check_list
 		self.vbox1.Insert(0, self.check_list, 1, wx.EXPAND | wx.TOP, 3)
 		self.rightPanel.SetSizer(self.vbox1)
 		self.Refresh()
@@ -854,7 +854,7 @@ class ModelPluginsManager(wx.Frame):
 		### checklist to insert in right panel
 		self.CheckList = BlockPluginsList(parent=rpanel, style=wx.LC_REPORT|wx.SUNKEN_BORDER|wx.LC_SORT_ASCENDING)
 		wx.CallAfter(self.CheckList.Populate, (self.model))
-
+		
 		### Buttons for insert or delete plug-ins
 		self.addBtn = wx.Button(lpanel, wx.ID_ADD, size=(140, -1))
 		self.delBtn = wx.Button(lpanel, wx.ID_DELETE, size=(140, -1))
@@ -901,7 +901,7 @@ class ModelPluginsManager(wx.Frame):
 
 		self.CenterOnParent(wx.BOTH)
 		self.Layout()
-		#self.Fit()
+		# self.Fit()
 
 	@staticmethod
 	def GetEditor(parent, model, filename=None):

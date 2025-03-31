@@ -831,6 +831,9 @@ class Preferences(wx.Toolbook):
 		self.pluginPanel = self.GetPage(self.GetPageCount()-1)
 
 		self.CheckList = GeneralPluginsList(self.pluginPanel.GetRightPanel(), style= wx.LC_REPORT|wx.SUNKEN_BORDER|wx.LC_SORT_ASCENDING)
+		### populate checklist with file in plug-ins directory
+		wx.CallAfter(self.CheckList.Populate, (list(os.walk(PLUGINS_PATH))))
+
 		self.pluginPanel.SetPluginsList(self.CheckList)
 
 		lpanel = self.pluginPanel.GetLeftPanel()

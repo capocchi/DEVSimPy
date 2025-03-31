@@ -843,7 +843,7 @@ class Diagram(Savable, Structurable):
 					title = win.GetTitle()
 				else:
 					nb2 = win.GetDiagramNotebook()
-					title =nb2.GetPageText(nb2.GetSelection()).rstrip()
+					title = nb2.GetPageText(nb2.GetSelection()).rstrip()
 
 				diagram.label = os.path.splitext(os.path.basename(title))[0]
 
@@ -882,7 +882,7 @@ class Diagram(Savable, Structurable):
 					## si invocation par le menu (apparition de la frame de simulation dans le panel)
 					elif isinstance(obj, (wx.Menu, wx.Frame)):
 						sizer3 = wx.BoxSizer(wx.VERTICAL)
-						win.panel3.Show()
+						win.panel3 = wx.Panel(win, wx.NewIdRef())
 						win.SimDiag = SimulationGUI.SimulationDialog(win.panel3, wx.NewIdRef(), _("Simulation Manager"))
 						win.SimDiag.SetMaster(master)
 						sizer3.Add(win.SimDiag, 0, wx.EXPAND)
@@ -3850,6 +3850,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		""" Method that open Plugin Manager.
 		"""
 		canvas = event.GetEventObject()
+		
 		f = PluginsGUI.ModelPluginsManager(	parent=canvas.GetParent(),
 									id=wx.NewIdRef(),
 									title =_('%s - plugin manager')%self.label,

@@ -1580,7 +1580,7 @@ class MainApplication(wx.Frame):
 				progress_dlg = wx.ProgressDialog(_('Importing library'), _("Loading %s ...")%s, parent=self, style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
 				progress_dlg.Pulse()
 				wx.SafeYield()  # Allow the GUI to process pending events
-				
+
     			### add correct path to sys.path (always before InsertNewDomain)
 				LibraryTree.AddToSysPath(absdName)
     			### add NewDomain
@@ -1878,7 +1878,7 @@ class MainApplication(wx.Frame):
 
 		if menu.IsChecked():
 			mgr = self.GetMGR()
-			### Control panel is  not hide
+			### Control panel is not hide
 			if mgr.GetPane('nb1').IsShown():
 				menu.Check(self.OnSimulation(evt))
 			else:
