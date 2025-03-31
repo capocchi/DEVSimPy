@@ -280,16 +280,6 @@ class GeneralPluginsList(CheckListCtrl):
 			sys.stderr.write(_("Plugin not stored in configuration file!"))
 			self.active_plugins_list = []
 
-		# ### if pluginsList (2 parameters in constructor) is in constructor, we can populate
-		# try:
-		# 	pluginsList = args[1]
-		# except IndexError:
-		# 	sys.stdout.write(_("Don't forget to call Populate method!\n"))
-		# 	pass
-		# else:
-		# 	self.Populate(pluginsList)
-		# 	self.is_populate = True
-
 	@BuzyCursorNotification
 	def Populate(self, pluginsList):
 		""" Populate method must be called just before constructor.
