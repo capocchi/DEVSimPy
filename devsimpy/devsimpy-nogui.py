@@ -46,7 +46,6 @@ builtins.__dict__.update(USER_SETTINGS)
 ### import here becaause they need buitlins !
 
 from InteractionYAML import YAMLHandler
-from InteractionJSON import JSONHandler
 from StandaloneNoGUI import StandaloneNoGUI
 from Utilities import get_version
 
@@ -92,7 +91,7 @@ if __name__ == '__main__':
 	# required filename
 	parser.add_argument("filename", help=_("dsp or yaml devsimpy file only"))
 	# optional simulation_time for simulation
-	parser.add_argument("simulation_time", nargs='?', help=_("Simulation time [inf|ntl]"), default='10', type=str)
+	parser.add_argument("simulation_time", nargs='?', help=_("Simulation time [inf|ntl]"), default='', type=str)
 	# optional simulation_name for remote execution
 	parser.add_argument("-remote", help=_("Remote execution"), action="store_true")
 	parser.add_argument("-name", help=_("Simulation name"), type=str, default="simu")
@@ -144,11 +143,11 @@ if __name__ == '__main__':
 		yamlHandler.getJS()
 
 	elif args.json:
-		# JSON generation
-		jsonHandler = JSONHandler(filename)
-		j = jsonHandler.getJSON()
+		# Just output JSON
+		diagram = yamlHandler.getDiagram()
+		j = diagram.toJSON()
 		sys.stdout.write(json.dumps(j))
-
+			
 	elif args.blockslist:
 		# get the list of models in a master model
 		models_list = yamlHandler.getYAMLBlockModelsList()
@@ -175,6 +174,7 @@ if __name__ == '__main__':
 		duration_val = args.simulation_time		
 		duration = float('inf') if duration_val in ('ntl', 'inf') else int(duration_val)
 		devs = yamlHandler.getDevsInstance()
+		
 		if devs:
 			# if args.tracemalloc:
 			# 	tracemalloc.start()

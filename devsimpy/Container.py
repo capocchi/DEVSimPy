@@ -39,6 +39,10 @@ if getattr(builtins,'GUI_FLAG', True):
 
 	_ = wx.GetTranslation
 
+else:
+	import gettext
+	_ = gettext.gettext
+
 import os
 import sys
 import copy
@@ -46,7 +50,6 @@ import re
 import pickle
 import zipfile
 import array
-import importlib
 
 import inspect
 if not hasattr(inspect, 'getargspec'):
@@ -307,6 +310,104 @@ class Diagram(Savable, Structurable):
 		else:
 			raise AttributeError(name)
 
+	def toJSON(self, diagram=None, with_graph_data=False, json_obj={"cells":[], "description": "No description"}
+):
+		""" Make JSON representation of the model from the diagram.
+		"""
+
+		# Initialize JSON object if it does not exist (makeJSON is called recursively)
+		if not diagram:
+			diagram  = self
+		
+		for c in diagram.GetShapeList():
+			### if c is coupled model
+			if isinstance(c, ContainerBlock):
+				D = {"type": "devs.Coupled",
+						"id": c.id,
+						"label": c.label,
+						"inPorts":[f"in{i}" for i in range(c.input)],
+						"outPorts":[f"out{i}" for i in range(c.output)],
+						"behavior": {
+						"python_path": c.python_path,
+						"model_path": c.model_path,
+						"attrs":{"text": {"text": c.label}}
+						},
+						"embeds": [s.label for s in c.GetFlatBlockShapeList()]
+						}
+				
+				if with_graph_data:
+					D.update({
+						"size":{"width": c.w, "height": c.h},
+						"position":{"x": c.x[0], "y": c.y[0]},
+						})
+
+				json_obj['cells'].append(D)
+
+				# recursion
+				self.toJSON(diagram=c, json_obj=json_obj)
+
+			else:
+				### if c is a connection
+				if isinstance(c, ConnectionShape):
+					D = {"type": "devs.Link",
+							"id": str(id(c)),
+							"z":0,
+							"attrs":{},
+							'source':{},
+							'target':{}}
+					
+					model1, portNumber1 = c.input
+					model2, portNumber2 = c.output
+
+					D['source']['id'] = model1.label
+					D['target']['id'] = model2.label
+				
+					D['source']['port'] = portNumber1
+					D['target']['port'] = portNumber2
+
+				### if c is an atomic model
+				elif isinstance(c, CodeBlock): 
+					D = {"type": "devs.Atomic",
+							"id": c.id,
+							"label": c.label,
+							"inPorts":[f"in{i}" for i in range(c.input)],
+							"outPorts":[f"out{i}" for i in range(c.output)],
+							"behavior": {
+							"python_path": c.python_path,
+							"model_path": c.model_path,
+							"attrs":{"text": {"text": c.label}},
+							"prop" :{"data": c.args}}
+							}
+
+					if with_graph_data:
+						D.update({
+						"size":{"width": c.w, "height": c.h},
+						"position":{"x": c.x[0], "y": c.y[0]},
+						})
+					
+						for i in range(c.input):
+							D["behavior"]["attrs"].update( {f".inPorts>.port{i}>.port-label":{"text":f"in{i}"},
+											f".inPorts>.port{i}>.port-body":{ "port":{"id":f"in{i}",
+																						"type":"in"}},
+											f".inPorts>.port{i}":{ "ref":".body",
+																	"ref-y": float(i+1)/(c.input+1)}
+											})
+						for j in range(c.output):
+							D["behavior"]["attrs"].update( {f".outPorts>.port{j}>.port-label":{"text":f"out{j}"},
+											f".outPorts>.port{j}>.port-body":{ "port":{"id":f"out{j}",
+																						"type":"out"}},
+											f".outPorts>.port{j}":{ "ref":".body",
+																	"ref-y": float(j+1)/(c.output+1)}
+																	})
+
+				else: #Input or Output port
+					D = None
+					
+				if D:
+					json_obj['cells'].append(D)
+
+		return json_obj
+	
 	@staticmethod
 	def makeDEVSGraph(diagram, D = {}, type = object):
 		""" Make a formated dictionnary to make the graph of the DEVS Network: {'S1': [{'C1': (1, 0)}, {'M': (0, 1)}], port 1 of S1 is connected to the port 0 of C1...

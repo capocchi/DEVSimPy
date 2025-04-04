@@ -1,0 +1,78 @@
+{
+    "cells": [
+        {
+            "type": "devs.Link",
+            "id": "1709314780176",
+            "z": 0,
+            "attrs": {},
+            "source": {
+                "id": "RandomGenerator_1",
+                "port": 0
+            },
+            "target": {
+                "id": "To_Disk_0",
+                "port": 0
+            }
+        },
+        {
+            "type": "devs.Atomic",
+            "id": 0,
+            "label": "RandomGenerator_1",
+            "inPorts": [
+                "in0"
+            ],
+            "outPorts": [
+                "out0"
+            ],
+            "behavior": {
+                "python_path": "C:\\Users\\capocchi_l\\Dropbox\\devsimpy\\py3x\\Domain\\Generator\\RandomGenerator.py",
+                "model_path": "",
+                "attrs": {
+                    "text": {
+                        "text": "RandomGenerator_1"
+                    }
+                },
+                "prop": {
+                    "data": {
+                        "minValue": 0,
+                        "maxValue": 10,
+                        "minStep": 1,
+                        "maxStep": 1,
+                        "start": 0,
+                        "choice": []
+                    }
+                }
+            }
+        },
+        {
+            "type": "devs.Atomic",
+            "id": 1,
+            "label": "To_Disk_0",
+            "inPorts": [
+                "in0"
+            ],
+            "outPorts": [
+                "out0"
+            ],
+            "behavior": {
+                "python_path": "C:\\Users\\capocchi_l\\Dropbox\\devsimpy\\py3x\\Domain\\Collector\\To_Disk.py",
+                "model_path": "",
+                "attrs": {
+                    "text": {
+                        "text": "To_Disk_0"
+                    }
+                },
+                "prop": {
+                    "data": {
+                        "fileName": "result",
+                        "eventAxis": false,
+                        "comma": " ",
+                        "ext": ".dat",
+                        "col": 0
+                    }
+                }
+            }
+        }
+    ],
+    "description": "No description"
+}
