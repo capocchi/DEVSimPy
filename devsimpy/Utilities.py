@@ -96,6 +96,8 @@ import importlib
 
 from subprocess import check_call, Popen, PIPE
 
+from importlib.metadata import version, PackageNotFoundError
+
 # Used for smooth (spectrum)
 try:
 	from numpy import *
@@ -117,12 +119,23 @@ from pathlib import Path
 #-------------------------------------------------------------------------------
 
 def get_version():
-	"""Récupère la version du package depuis pyproject.toml."""
-	pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
-	
-	with pyproject_path.open("rb") as f:
-		pyproject_data = tomllib.load(f)
-	return pyproject_data["project"]["version"]
+    """Récupère la version du package depuis pyproject.toml ou via importlib.metadata."""
+    try:
+        pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
+        if pyproject_path.exists():
+            with pyproject_path.open("rb") as f:
+                pyproject_data = tomllib.load(f)
+            return pyproject_data["project"]["version"]
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        print(f"Warning: Could not retrieve version from pyproject.toml. {e}")
+    
+    # Fallback to importlib.metadata
+    try:
+        return version("devsimpy")
+    except PackageNotFoundError:
+        return "unknown"
 
 
 def getFilePathInfo(path):
