@@ -2,7 +2,7 @@
 
 Usage:
     python test_draglist.py --autoclose
-    python test_draglist.py --autoclose 10  # Sleep time before closing frame is 10s
+    python test_draglist.py --autoclose 10  # Auto-close after 10s delay
 """
 
 from random import choice
@@ -10,7 +10,7 @@ import wx
 
 from ApplicationController import TestApp
 
-# import after ApplicationController that init sys.path ot avoid this import
+# import after ApplicationController that inits sys.path ot avoid this import
 from DragList import DragList 
 
 items = ['Foo', 'Bar', 'Baz', 'Zif', 'Zaf', 'Zof']

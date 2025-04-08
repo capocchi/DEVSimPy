@@ -2,12 +2,12 @@
 
 Usage:
     python test_checkergui.py --autoclose
-    python test_checkergui.py --autoclose 10  # Sleep time before closing frame is 10s
+    python test_checkergui.py --autoclose 10  # Auto-close after 10s delay
 """
 
 from ApplicationController import TestApp
 
-# import after ApplicationController that init sys.path ot avoid this import
+# import after ApplicationController that inits sys.path ot avoid this import
 from CheckerGUI import CheckerGUI 
 
 # Some input data to test case
