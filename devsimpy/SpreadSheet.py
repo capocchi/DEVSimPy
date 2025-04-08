@@ -222,7 +222,7 @@ class Newt(wx.Frame):
 					if iPort.inLine:
 						oPort = iPort.inLine[0]
 						host = oPort.host if hasattr(oPort, 'host') else oPort.hostDEVS
-						label = _('%s (on in_%s)')%(host.getBlockModel().label if hasattr(host, 'getBlockModel') else host.name, str(iPort.myID) if hasattr(iPort,'myID') else iPort.name)
+						label = _('%s (on in_%s)')%(host.getBlockModel().label if hasattr(host, 'getBlockModel') else host.name, str(iPort.name) if hasattr(iPort,'name') else iPort.myID)
 						data = self.FileToData(fn, self.sep)
 						self.AddPage(data, label)
 	###

@@ -6,7 +6,7 @@ import traceback
 import re
 import sys
 
-import datetime
+from datetime import datetime
 
 def to_Python(val):
     if val in ('true', 'True'):
@@ -50,6 +50,7 @@ class YAMLHandler:
         self.diagram  = Diagram()
         try :
             self.filename_is_valid = self.diagram.LoadFile(self.filename)
+        
             if self.filename_is_valid != True :
                 self.report['success'] = False
                 self.report['info'] = 'YAML file load failed'
@@ -129,6 +130,12 @@ class YAMLHandler:
                 'old_args':old_args, 
                 'new_args':new_args}
 
+    def getDiagram(self):
+        """ Returns the diagram object built from YAML file.
+        """
+        if not self.filename_is_valid: return False
+        return self.diagram
+    
     def getDevsInstance(self):
         """ Returns the DEVS instance built from YAML file.
         """
@@ -168,3 +175,4 @@ class YAMLHandler:
 
         model, liaison, addInner = makeJoin(self.diagram, addInner, liaison, model, bool, x, y, labelEnCours)
         makeDEVSConf(model, liaison, addInner, f"{labelEnCours}.js")
+

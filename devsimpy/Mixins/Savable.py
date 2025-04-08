@@ -65,7 +65,7 @@ from tempfile import gettempdir
 from Decorators import BuzyCursorNotification, StatusBarNotification, cond_decorator
 from Utilities import itersubclasses, getTopLevelWindow, NotificationMessage
 
-from XMLModule import makeDEVSXML, getDiagramFromXMLSES
+from XMLModule import makeDEVSXML
 from Join import makeJoin, makeDEVSConf
 from .Abstractable import Abstractable
 
@@ -619,19 +619,129 @@ class DumpJSONFile(DumpBase):
 		"""
 		assert(fileName.endswith(tuple(DumpJSONFile.ext)))
 
-		from InteractionJSON import JSONHandler
-
-		jsonHandler = JSONHandler()
-		j = jsonHandler.getJSON(obj_dumped)
-
+		j = obj_dumped.toJSON()
 		with open(fileName, 'w') as outfile:
 			outfile.write(json.dumps(j, indent=4))
 
 		return True
 	
-	def Load(self, obj_loaded, fileName=None) -> bool:
-		pass
+	def Load(self, obj_loaded, fileName=None):
+		""" Load method.
+		"""
 
+		assert(fileName.endswith(tuple(DumpJSONFile.ext)))
+
+		with open(fileName, 'r') as f:
+			json_data = json.load(f)
+
+		DumpJSONFile.Open(json_data, obj_loaded)
+
+		# Enregistrement du dernier nom de fichier chargé
+		obj_loaded.last_name_saved = fileName
+
+		return True
+
+	@staticmethod 
+	def Open(json_data, diagram=None, processed_blocks=None):
+		"""Open the JSON data and convert it into a Diagram instance."""
+		from Container import Diagram, ConnectionShape, CodeBlock, ContainerBlock, iPort, oPort
+
+		# Initialize diagram and tracking sets
+		if not diagram:
+			diagram = Diagram()
+		if processed_blocks is None:
+			processed_blocks = set()
+		
+		blocks = {}  # Map block IDs/labels to instances
+		connections = []  # Store connection data for second pass
+
+		# First pass: Create all blocks
+		for cell in json_data.get('cells', []):
+			cell_type = cell.get('type')
+			
+			if cell_type in ('devs.Atomic', 'devs.Coupled'):
+				label = cell.get('label')
+				if label in processed_blocks:
+					continue
+				
+				processed_blocks.add(label)
+				
+				# Create appropriate block type
+				if cell_type == 'devs.Atomic':
+					block = CodeBlock()
+				else:  # devs.Coupled
+					block = ContainerBlock()
+					
+					# Create input/output ports for coupled model
+					in_ports = cell.get('inPorts', [])
+					out_ports = cell.get('outPorts', [])
+					
+					# Add input ports
+					for i, port_name in enumerate(in_ports):
+						iport = iPort()
+						iport.label = port_name
+						iport.id = f"in{i}"
+						block.AddShape(iport)
+						blocks[f"{label}_{port_name}"] = iport
+					
+					# Add output ports  
+					for i, port_name in enumerate(out_ports):
+						oport = oPort()
+						oport.label = port_name
+						oport.id = f"out{i}"
+						block.AddShape(oport)
+						blocks[f"{label}_{port_name}"] = oport
+				
+				# Set basic properties
+				block.id = cell.get('id')
+				block.label = label
+				block.input = len(cell.get('inPorts', []))
+				block.output = len(cell.get('outPorts', []))
+				
+				# Handle behavior properties
+				behavior = cell.get('behavior', {})
+				block.python_path = behavior.get('python_path', '')
+				block.model_path = behavior.get('model_path', '')
+				block.args = behavior.get('prop', {}).get('data', {})
+				
+				# Handle nested models in coupled blocks
+				if cell_type == 'devs.Coupled' and 'embeds' in cell:
+					embedded_cells = [
+						c for c in json_data['cells'] 
+						if c.get('label') in cell['embeds'] and 
+						c.get('label') not in processed_blocks
+					]
+					
+					if embedded_cells:
+						nested_data = {'cells': embedded_cells}
+						nested_diagram = Diagram()
+						block.diagram = nested_diagram
+						nested_diagram.parent = block
+						DumpJSONFile.Open(nested_data, nested_diagram, processed_blocks)
+				
+				# Store block references
+				blocks[str(block.id)] = block
+				blocks[block.label] = block
+				diagram.shapes.append(block)
+				
+			elif cell_type == 'devs.Link':
+				connections.append(cell)
+
+		# Second pass: Create all connections
+		for conn_data in connections:
+			source = conn_data.get('source', {})
+			target = conn_data.get('target', {})
+			
+			source_block = blocks.get(str(source.get('id'))) or blocks.get(source.get('id'))
+			target_block = blocks.get(str(target.get('id'))) or blocks.get(target.get('id'))
+			
+			if source_block and target_block:
+				conn = ConnectionShape()
+				conn.setInput(source_block, source.get('port'))
+				conn.setOutput(target_block, target.get('port'))
+				diagram.shapes.append(conn)
+
+		return diagram
 
 ###-----------------------------------------------------------
 class DumpJSFile(DumpBase):

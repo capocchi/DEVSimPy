@@ -1,19 +1,17 @@
 !!python/object/new:Mixins.Savable.PickledCollection
 listitems:
-- &id004
+- &id007
   - !!python/object:Container.ConnectionShape
     args: {}
+    dashed: false
     devsModel: null
-    fill:
-    - '#d91e1e'
-    font:
-    - 12
-    - 74
-    - 93
-    - 700
-    - Arial
+    enable: true
+    fill: &id001 ['#add8e6']
+    font: [12, 74, 93, 700, Arial]
     input: !!python/tuple
-    - &id002 !!python/object:Container.CodeBlock
+    - &id005 !!python/object:Container.CodeBlock
+      _input_labels: {}
+      _output_labels: {}
       args:
         choice: []
         maxStep: 1
@@ -21,32 +19,20 @@ listitems:
         minStep: 1
         minValue: 0
         start: 0
-      attributes:
-      - label
-      - label_pos
-      - pen
-      - fill
-      - font
-      - image_path
-      - input
-      - output
+      attributes: [label, label_pos, pen, fill, font, image_path, input, output]
       bad_filename_path_flag: false
+      dashed: false
       devsModel: null
-      dir: &id001 !!python/tuple
-      - ouest
-      - nord
-      - est
-      - sud
-      fill:
-      - '#add8e6'
-      font:
-      - 7
-      - 74
-      - 93
-      - 700
-      - Arial
+      dir: &id002 !!python/tuple [ouest, nord, est, sud]
+      enable: true
+      fill: *id001
+      font: [5, 74, 93, 700, Arial]
       h: 100.0
-      id: 1
+      hide_icons: false
+      icons:
+        edit: !!python/tuple [-40, 2]
+        trash: !!python/tuple [-20, 2]
+      id: 0
       image_path: ''
       input: 1
       input_direction: ouest
@@ -61,55 +47,41 @@ listitems:
       pen:
       - '#add8e6'
       - 1
-      - 100
-      python_path: C:\Users\Laurent\Dropbox\devsimpy\py3x\Domain\Generator\RandomGenerator.py
+      - !!python/object/apply:copyreg._reconstructor [&id003 !!python/name:wx._core.PenStyle '',
+        &id004 !!python/name:builtins.int '', 100]
+      python_path: C:\Users\capocchi_l\Dropbox\devsimpy\py3x\Domain\Generator\RandomGenerator.py
       selected: false
       status_label: ''
       w: 100.0
-      x: !!python/object/apply:array.array
-      - d
-      - - 69.0
-        - 169.0
-      y: !!python/object/apply:array.array
-      - d
-      - - 176.0
-        - 276.0
+      x: [96.0, 196.0]
+      y: [165.0, 265.0]
     - 0
     lock_flag: false
     output: !!python/tuple
-    - &id003 !!python/object:Container.ScopeGUI
-      args:
-        eventAxis: false
-        fusion: true
-      attributes:
-      - label
-      - label_pos
-      - pen
-      - fill
-      - font
-      - image_path
-      - input
-      - output
-      - xlabel
-      - ylabel
+    - &id006 !!python/object:Container.DiskGUI
+      _input_labels: {}
+      _output_labels: {}
+      args: {col: 0, comma: ' ', eventAxis: false, ext: .dat, fileName: result}
+      attributes: [label, label_pos, pen, fill, font, image_path, input, output]
       bad_filename_path_flag: false
+      dashed: false
       devsModel: null
-      dir: *id001
-      fill:
-      - '#ffa500'
-      font:
-      - 12
-      - 74
-      - 93
-      - 700
-      - Arial
+      dir: *id002
+      enable: true
+      fill: ['#ffa500']
+      font: [11, 74, 93, 700, Arial]
       h: 100.0
-      id: 0
+      hide_icons: false
+      icons:
+        edit: !!python/tuple [-40, 2]
+        trash: !!python/tuple [-20, 2]
+      id: 1
       image_path: ''
       input: 1
       input_direction: ouest
       label: To_Disk_0
       label_pos: center
+      last_cursor_pos: 30
       last_name_saved: ''
       lock_flag: false
       model_path: ''
@@ -119,42 +91,28 @@ listitems:
       pen:
       - '#add8e6'
       - 1
-      - 100
-      python_path: C:\Users\Laurent\Dropbox\devsimpy\py3x\Domain\Collector\To_Disk.py
+      - !!python/object/apply:copyreg._reconstructor [*id003, *id004, 100]
+      python_path: C:\Users\capocchi_l\Dropbox\devsimpy\py3x\Domain\Collector\To_Disk.py
       selected: false
       status_label: ''
       w: 100.0
-      x: !!python/object/apply:array.array
-      - d
-      - - 345.0
-        - 445.0
-      xlabel: ''
-      y: !!python/object/apply:array.array
-      - d
-      - - 211.0
-        - 311.0
-      ylabel: ''
+      x: [317.0, 417.0]
+      y: [107.0, 207.0]
     - 0
     pen:
     - '#add8e6'
     - 1
-    - 100
+    - !!python/object/apply:copyreg._reconstructor [*id003, *id004, 100]
     python_path: ''
     touch_list: []
-    x: !!python/object/apply:array.array
-    - d
-    - - 169.0
-      - 345.0
-    y: !!python/object/apply:array.array
-    - d
-    - - 226.0
-      - 261.0
-  - *id002
-  - *id003
-- &id005 []
-- &id006 {}
-state:
-  pickled_obj:
-  - *id004
+    x: [196.0, 317.0]
+    y: [215.0, 157.0]
   - *id005
   - *id006
+- &id008 []
+- &id009 {}
+state:
+  pickled_obj:
+  - *id007
+  - *id008
+  - *id009
