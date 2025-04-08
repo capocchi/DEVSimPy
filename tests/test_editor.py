@@ -1,6 +1,9 @@
-### lauch the test 
-### python test_editor.py --autoclose
-### python test_editor.py --autoclose 10 (sleep time before to close the frame is 10s)
+"""Test script for Editor functionality.
+
+Usage:
+    python test_editor.py --autoclose
+    python test_editor.py --autoclose 10  # Sleep time before closing frame is 10s
+"""
 
 from tempfile import gettempdir
 import os
@@ -9,7 +12,7 @@ from ApplicationController import TestApp
 
 from Editor import GetEditor
 
-### Run the test
+# Run the test
 fn = os.path.join(os.path.realpath(gettempdir()), 'test.py')
 with open(fn, 'w') as f:
     f.write("Hello world !")
@@ -31,4 +34,3 @@ app2.RunTest(frame2)
 # frame3.AddEditPage("Hello world", fn)
 # frame3.SetPosition((300, 300))
 # frame3.Show()
-

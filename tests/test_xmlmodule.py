@@ -1,6 +1,9 @@
-### lauch the test 
-### python test_xmlmodule.py --autoclose
-### python test_xmlmodule.py --autoclose 10 (sleep time before to close the frame is 10s)
+"""Test script for XMLModule functionality.
+
+Usage:
+    python test_xmlmodule.py --autoclose
+    python test_xmlmodule.py --autoclose 10  # Sleep time before closing frame is 10s
+"""
 
 import wx, os
 
@@ -11,7 +14,7 @@ import Container
 import DetachedFrame
 
 
-### Run the test
+# Run the test
 app = TestApp(0)
 
 diagram = Container.Diagram()
