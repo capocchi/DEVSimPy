@@ -6,7 +6,7 @@ import traceback
 import re
 import sys
 
-import datetime
+from datetime import datetime
 
 def to_Python(val):
     if val in ('true', 'True'):

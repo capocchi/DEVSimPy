@@ -153,6 +153,9 @@ class DSPComponent:
 	def Load(filename, label, canvas):
 		""" Load component from filename.
 		"""
+
+		assert(filename.endswith('.dsp'))
+
 		from Container import Diagram
 
 		# its possible to use the orignal copy of the droped diagram
