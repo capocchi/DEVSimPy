@@ -1,5 +1,6 @@
-### lauch tests of all test_ files.
-### use: python all.py
+""" Launch tests of all test_ files.
+    Usage: python all.py
+""" 
 
 import subprocess
 import sys

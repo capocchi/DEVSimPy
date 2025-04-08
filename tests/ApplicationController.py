@@ -45,7 +45,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'd
 
 from config import UpdateBuiltins
 
-#### Update the builtins variables
+# Update the builtins variables
 UpdateBuiltins()
 
 class ApplicationController:
@@ -165,7 +165,7 @@ class TestApp(wx.App):
         if not frame:
             frame = wx.GetTopLevelWindows()[0]
 
-        ### remove the show modal mode in order to close automatically
+        # Remove the show modal mode in order to close automatically
         # style = frame.GetWindowStyleFlag()
         # if style & wx.DIALOG_MODAL:
         #     frame.SetWindowStyleFlag(style & ~wx.DIALOG_MODAL)
