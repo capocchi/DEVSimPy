@@ -2,7 +2,7 @@
 
 Usage:
     python test_xmlmodule.py --autoclose
-    python test_xmlmodule.py --autoclose 10  # Sleep time before closing frame is 10s
+    python test_xmlmodule.py --autoclose 10  # Auto-close after 10s delay
 """
 
 import wx, os

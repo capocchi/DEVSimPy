@@ -3,12 +3,12 @@
 
 Usage:
     python test_yamlexportgui.py --autoclose
-    python test_yamlexportgui.py --autoclose 10  # Sleep time before closing frame is 10s
+    python test_yamlexportgui.py --autoclose 10  # Auto-close after 10s delay
 """
 
 from ApplicationController import TestApp
 
-# import after ApplicationController that init sys.path ot avoid this import
+# Import after ApplicationController that inits sys.path to avoid import issues
 from YAMLExportGUI import YAMLExportGUI
 
 # Run the test

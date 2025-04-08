@@ -22,4 +22,4 @@ for test_file in test_files:
     print(f"{test_file} testing...")
     subprocess.call(['python', test_file] + args)
 
-print("All tests executed")
+print("All tests executed!")

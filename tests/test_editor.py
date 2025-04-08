@@ -2,7 +2,7 @@
 
 Usage:
     python test_editor.py --autoclose
-    python test_editor.py --autoclose 10  # Sleep time before closing frame is 10s
+    python test_editor.py --autoclose 10  # Auto-close after 10s delay
 """
 
 from tempfile import gettempdir
