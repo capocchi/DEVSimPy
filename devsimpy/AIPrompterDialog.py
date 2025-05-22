@@ -22,6 +22,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
+import json
 import wx
 import os
 
@@ -54,7 +55,10 @@ class AIPrompterDialog(wx.Dialog):
         ### Code generated inside the self.code_text field
         self.generated_code = ""
 
-    # Sizer pour organiser les éléments
+        # generated JSON representing a newly created model
+        self.model_json = None
+
+        # Sizer pour organiser les éléments
         main_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Zone de texte pour le code sélectionné
@@ -96,7 +100,19 @@ class AIPrompterDialog(wx.Dialog):
             self.insert_button.Enable(False)
             button_sizer.Add(self.insert_button, 0, wx.ALL, 10)  # Ajout du bouton avec un espacement de 10
 
-        main_sizer.Add(button_sizer, 0, wx.ALIGN_CENTER)  # Ajout du sizer de boutons au sizer principal
+            self.download_json_button = wx.Button(self, label=_("Download JSON"))
+            self.download_json_button.Bind(wx.EVT_BUTTON, self.on_download_json)
+            self.download_json_button.SetToolTip(
+                _("Download the JSON corresponding to the atomic model")
+            )  # Ajouter un tooltip
+            self.download_json_button.Enable(False)
+            button_sizer.Add(
+                self.download_json_button, 0, wx.ALL, 10
+            )  # Ajout du bouton avec un espacement de 10
+
+        main_sizer.Add(
+            button_sizer, 0, wx.ALIGN_CENTER
+        )  # Ajout du sizer de boutons au sizer principal
 
         self.SetSizer(main_sizer)
         self.Layout()
@@ -146,11 +162,32 @@ class AIPrompterDialog(wx.Dialog):
         code = self.code_text.GetValue()
 
         # Appel à l'IA via la méthode modify_model_part_prompt
-        full_prompt = self.adapter.modify_model_part_prompt(code, prompt)
-        modified_code = self.adapter.generate_output(full_prompt)
+        if not self.editor:
+            self.model_json = self.adapter.generate_model_json(prompt)
+            modified_code = self.adapter.generate_model_code(self.model_json)
+
+        else:
+            full_prompt = self.adapter.modify_model_part_prompt(code, prompt)
+            modified_code = self.adapter.generate_output(full_prompt)
 
         # Mise à jour de la zone de texte avec le code modifié si une modification a été effectuée
         if modified_code:
             self.code_text.SetValue(modified_code)
             self.insert_button.Enable(True)
-          
+            # Activate download json button if json created
+            if self.model_json:
+                self.download_json_button.Enable(True)
+
+    def on_download_json(self, event):
+        dlg = wx.FileDialog(
+            self,
+            message=_("Save file as..."),
+            defaultFile="atomic_model.json",
+            wildcard="*.json*",
+            style=wx.FD_SAVE,
+        )
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            with open(path, "w") as file:
+                file.write(json.dumps(self.model_json, indent=2))
+        dlg.Destroy()

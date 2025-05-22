@@ -1,0 +1,61 @@
+**External Transition (`extTransition`):**
+   - Executed when the model receives a message via its input ports. Only applicable to models that handle incoming data, such as the default model.
+   - Use `self.peek(self.IPorts[0], *args) to retrieve a message from a port. Change the index to peek at a specific port.
+    *Example : retrieve a message for every ports :*
+    for port in self.IPorts:
+        msg = self.peek(port, *args)
+
+   - `Message` is a class with the following variables : `value` which is the content of the message, and `time` representing the simulation time it was sent.
+   - Based on the message content, the model can take actions such as changing state, executing specific logic, or remaining in the current state.
+   - Use `self.holdIn()` to set the new state and delay until the next transition as needed
+   - the line **`return self.getState()`** is required
+
+
+**Handle and change state: **
+    - Use `self.getState()` to retrieve the model’s current state at any point in the code. This can help conditionally control actions based on the model’s state.
+   - Use `self.phaseIs()` to test if the model's current state name is equal to the provided string. Example : `if self.phaseIs("State_Name"):`.
+   - Use `self.getStatus()` to get the model's current state name. Use this if only the current state name is needed.
+
+**Example: the model has at least one input port**
+def extTransition(self, *args):
+    ''' DEVS external transition function (only for models that receive data) '''
+    for port in self.IPorts:
+        msg = self.peek(port, *args)
+        if msg:
+            # State change or action logic based on the message
+            current_state = self.getState()  # Example usage of getState()
+            # Customize based on intended behavior
+        
+        return self.getState()
+
+
+**Example: The model doesn't have any input ports**
+def extTransition(self, *args):
+	''' DEVS external transition function (only for models that receive data) '''
+	pass
+
+
+## Steps
+1. Use the number of input ports to identify if the function is necessary
+2. Use the 'parameters' field to add the eventually needed parameters.
+3. Use the 'description' and 'input_ports' fields to infer if you need to peek at every ports or only a specific one.
+4. Use the information in the 'states' array when using `self.holdIn()`. If the 'time' field is a string, assume that a class variable has been created. For example : `self.holdIn("state",self.variable_name)`.
+*Exception:* if the time is marked as 'infinity', use it directly, as a constant, without the quotes.
+Example : 
+"states": [
+      { "name": "IDLE", "time": "INFINITY"},
+      { "name": "SEND", "time": "duration"},
+      { "name": "GENERATE", "time": 0}
+    ],
+Where :
+- INFINITY represents the DEVSimPy constant
+- period, or any other string, represents a class variable
+- 0, or any other number, directly represent the state duration
+is used :
+- `self.holdIn("IDLE",INFINITY)`
+- `self.holdIn("SEND",self.duration)`
+- `self.holdIn("GENERATE",0)`
+5. Except told otherwise, there is no need to check the state before changing it.
+6. Only use the json's data value, the keys and structure must not appear in the code.
+7. Assume that every variable in 'model_properties' has been initialized and can be used directly, with the provided type and value.
+8. the function self.peek() should always be present if the function is needed.

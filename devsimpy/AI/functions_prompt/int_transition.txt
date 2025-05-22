@@ -1,0 +1,51 @@
+**Internal Transition (`intTransition`):**
+   - Executed when the internal transition time expires, based on the model’s current state.
+   - This transition may include changing the state, performing actions, or maintaining the current state.
+   - To modify the model’s state during an internal transition, **use `self.holdIn("State_Name", timeUntilNextTransition)`**.
+   - `timeUntilNextTransition` can directly be a number or a variable
+   - the line **`return self.getState()`** is required
+
+
+**Handle and change state: **
+    - Use `self.getState()` to retrieve the model’s current state at any point in the code. This can help conditionally control actions based on the model’s state.
+   - Use `self.phaseIs()` to test if the model's current state name is equal to the provided string. Example : `if self.phaseIs("State_Name"):`.
+   - Use `self.getStatus()` to get the model's current state name. Use this if only the current state name is needed.
+
+
+**Example: **
+
+ def intTransition(self):
+	''' DEVS internal transition function '''
+	current_state = self.getState()  # Example usage of getState()
+	# Use self.holdIn() to change state or set an internal delay
+	# Customize as needed
+	
+	return self.getState()
+
+
+## Steps 
+1. Use the 'parameters' field to add the eventual needed parameters.
+2. Write code to follow the 'description' field.
+3. Check if you need to directly access the state or only change it. In the second case, directly use `holdIn()`
+4. Pay attention to how you need to access the state : 
+    - the full state object (getState())
+    - only the name
+5. Use the information in the 'states' array when using `self.holdIn()`. If the 'time' is a string, assume that a class variable has been created. For example : `self.holdIn("state",self.variable_name)`.
+Example : 
+JSON states array :
+"states": [
+      { "name": "IDLE", "time": "INFINITY"},
+      { "name": "SEND", "time": "duration"},
+      { "name": "GENERATE", "time": 0}
+    ],
+Where :
+- INFINITY represents the DEVSimPy constant
+- period, or any other string, represents a class variable
+- 0, or any other number, directly represent the state duration
+is used in code :
+- `self.holdIn("IDLE",INFINITY)`
+- `self.holdIn("SEND",self.duration)`
+- `self.holdIn("GENERATE",0)`
+*Exception:* if the time is marked as 'INFINITY', use it directly, as a constant (without the quotes).
+6. Only use the json's data value, the keys and structure must not appear in the code.
+7. Assume that every variable in 'model_properties' has been initialized and can be used directly, with the provided type and value.
