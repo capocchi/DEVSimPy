@@ -127,7 +127,7 @@ class StandaloneNoGUI:
         
         ### if simulation kernel need to by zipped
         if self.add_sim_kernel:
-            StandaloneNoGUI.DIRNAMES.append('DEVSKernel/')    
+            StandaloneNoGUI.DIRNAMES.append('DEVSKernel/')
         
     def GetDockerSpec(self):
         """
@@ -187,7 +187,7 @@ CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
             if self.add_sim_kernel:
                 ### add all dependencies python files needed to execute devsimpy-nogui
                 for fn in StandaloneNoGUI.FILENAMES:
-                    archive.write(fn)
+                    archive.write(os.path.join('devsimpy',fn), arcname=fn)
             
             ###################################################################
             ###
@@ -245,6 +245,8 @@ CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
                 ### add all dependancies (directories) needed to execute devsimpy-nogui
                 for dirname in self.dirnames_abs:
             
+                    dirname = os.path.join('devsimpy', dirname)
+
                     # Call the function to retrieve all files and folders of the assigned directory
                     filePaths = retrieve_file_paths(dirname)
 
@@ -258,7 +260,7 @@ CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
 
                     for file in filePaths:
                         if '__pycache__' not in file:
-                            archive.write(file)
+                            archive.write(file, arcname=file.split('devsimpy')[1])
             
                 ###################################################################
                 ###
