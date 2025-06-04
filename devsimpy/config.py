@@ -1,18 +1,17 @@
-import os, sys
+import os
+import sys
 import builtins
 
-##########################################################
-### PATHS defined from the current dir used to execute devsimpy 
-##########################################################
+""" PATHS defined from the current dir used to execute devsimpy 
+"""
 ABS_HOME_PATH = os.path.abspath(os.path.dirname(__file__))
 DEVS_SIM_KERNEL_PATH = os.path.join(ABS_HOME_PATH, 'DEVSKernel')
 
 builtins.ABS_HOME_PATH = ABS_HOME_PATH
 builtins.DEVS_SIM_KERNEL_PATH = DEVS_SIM_KERNEL_PATH
 
-##########################################################
-### GLOBAL_SETTINGS for handle the paths of the DEVSimPy package
-##########################################################
+""" GLOBAL_SETTINGS for handle the paths of the DEVSimPy package
+"""
 
 GLOBAL_SETTINGS = {
     'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'),
@@ -33,11 +32,12 @@ GLOBAL_SETTINGS = {
     'GUI_FLAG': True
 }
 
-##########################################################
-### USER_SETTINGS for handle the user preferences
-##########################################################
-
-# specific built-in variables. (don't modify the default value. If you want to change it, go to the PreferencesGUI from devsimpy interface.)
+""" USER_SETTINGS for handle the user preferences
+"""
+# Specific built-in variables. 
+# (don't modify the default value. 
+# If you want to change it, 
+# go to the PreferencesGUI from devsimpy interface.)
 USER_SETTINGS = {
     'SIMULATION_SUCCESS_SOUND_PATH': os.path.join('sounds', 'Simulation-Success.wav'),
     'SIMULATION_ERROR_SOUND_PATH': os.path.join('sounds', 'Simulation-Error.wav'),
@@ -66,7 +66,8 @@ USER_SETTINGS = {
     'DEFAULT_PLOT_DYN_FREQ': 100
 }
 
-### Check if the pypdevs241 directory is empty (not --recursive option when the devsimpy git has been cloned)
+# Check if the pypdevs241 directory is empty 
+# (not --recursive option when the devsimpy git has been cloned)
 path = os.path.join(DEVS_SIM_KERNEL_PATH, 'PyPDEVS', 'pypdevs241')
 if os.path.exists(path) and not len(os.listdir(path)) == 0:
 	GLOBAL_SETTINGS['PYPDEVS_241_SIM_STRATEGY_DICT'] = {'classic': 'SimStrategy4', 'parallel': 'SimStrategy5'}
@@ -74,14 +75,18 @@ if os.path.exists(path) and not len(os.listdir(path)) == 0:
 else:
 	sys.stdout.write("PyPDEVS Kernel in version 2.4.1 is not loaded.\nPlease install it in the directory %s using git (https://github.com/kdheepak/pypdevs.git)\n"%path)
 
-### All SETTINGS
+# All SETTINGS
 ALL_SETTINGS = GLOBAL_SETTINGS | USER_SETTINGS
 
-###########################################
-### Define functions
-###########################################
+""" Define functions
+"""
 
 def UpdateBuiltins(new_settings=ALL_SETTINGS):
-    # Met à jour les variables globales de `builtins`
+    """Update builtins with new settings.
+	"""
+    # Check if the new settings are valid
+    if not isinstance(new_settings, dict):
+        raise ValueError("new_settings must be a dictionary")
+    
     for key, value in new_settings.items():
         setattr(builtins, key, value)

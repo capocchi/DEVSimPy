@@ -1,0 +1,39 @@
+1. **Required Imports:**
+
+   from DomainInterface.DomainBehavior import DomainBehavior
+   from DomainInterface.Object import Message
+
+
+2. **Inheritance:** The class should inherit from `DomainBehavior`.
+
+3. **Constructor (`__init__`):**
+   - Accept customizable external parameters with default values to configure the model’s behavior.
+   - Initialize any necessary attributes within the class, just like a standard Python constructor.
+   - Important: Use `self.initPhase()` to define the initial state and corresponding duration.
+   - The ports aren't initialized here.
+
+
+**Example:**
+from DomainInterface.DomainBehavior import DomainBehavior
+from DomainInterface.Object import Message
+
+class ModelName(DomainBehavior):
+	''' DEVS Class for a generic model '''
+
+    def __init__(self, param1=10, param2="default"):
+        ''' Constructor '''
+        DomainBehavior.__init__(self)
+        self.param1 = param1
+        self.param2 = param2
+        # Initialize any other required attributes
+        self.initPhase('INITIAL_STATE', INFINITY)  # Customizable initial state and duration
+
+
+## Steps
+1. Include the required imports
+2. Use the 'model_name' field to complete de class name.
+3. Initialize the needed variables (informations in the 'model_properties' array : a dictionary represents all the needed information for one variable). Only put the variables in the constructor parameters if they are in the 'parameters' field of the function, or if stated directly, else, only initialize them in the function's body. Some may be present in the 'model_description', you can add them too.
+4. Add additional imports if they seem relevant or necessary.
+5. Use the 'initial_state' field to get the name and time for the self.initPhase() function.
+6. You can write additional code to answer the 'description' request.
+7. Only output the imports, class declaration and __init__().

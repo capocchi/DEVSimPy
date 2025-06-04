@@ -9,7 +9,7 @@ import os
 
 from ApplicationController import TestApp
 
-# import after ApplicationController that inits sys.path ot avoid this import
+# Import after ApplicationController that inits sys.path ot avoid this import
 from WizardGUI import ModelGeneratorWizard
 
 # Run the test

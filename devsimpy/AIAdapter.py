@@ -28,11 +28,14 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
+import json
 import logging
 from abc import ABC, abstractmethod
+import re
 import socket
 import subprocess
 import builtins
+from ollama import chat
 import wx
 import os
 import sys
@@ -42,6 +45,7 @@ from Decorators import BuzyCursorNotification
 from Decorators import cond_decorator
 from Decorators import ProgressNotification
 from Utilities import check_internet
+from atomic_model_scheme import AtomicModel
 
 _ = gettext.gettext
 
@@ -57,8 +61,8 @@ class DevsAIAdapter(ABC):
     """
     def __init__(self, parent=None):
         logging.info("DevsAIAdapter initialized.")
-        self.base_prompt = self._load_base_prompt("AI/DEVS_Explanation.txt")
-    
+        self.base_prompt = self._load_base_prompt("devsimpy/AI/DEVS_Explanation.txt")
+
     def _load_base_prompt(self, file_path):
         """
         Loads the base prompt from the DEVS model explanation file.
@@ -146,11 +150,84 @@ class DevsAIAdapter(ABC):
         return full_prompt
 
     @abstractmethod
-    def generate_output(self, prompt, **kwargs):
+    def generate_output(
+        self,
+        prompt,
+        system_prompt="",
+        messages_history=None,
+        output_format=None,
+        **kwargs,
+    ):
         """
         Abstract method to generate an output from the AI model.
         Child classes should override this method to specify how the generative AI produces outputs based on a prompt.
         `**kwargs` can include parameters such as the API key for models that require it.
+        """
+        pass
+
+    def generate_model_code(self, model_json=None):
+        """Generates code for an atomic model function by function, using a JSON representation of the atomic model. Use the chat history to simulate a conversation between the llm and the user.
+
+        The functions are : init (class init), intTransition, extTransition, outputFunction and timeAdvance()
+        """
+        system_prompt = f"""You are an expert in DEVS modeling. You need to generate code for different functions of an atomic model.
+        All the information needed is in the json. The fields 'input_ports' and 'output_ports' refer to the number of ports.
+
+        Use the 'specification' dictionary for basic informations on the model.
+        The user will tell you which function to generate, and will give you indications to follow. Only output code for the function asked, without any textual explanations.
+
+        Focus only on what is asked of you, ignore information unrelated to the model's specifications or the specific function needed. If the class has already been defined, there's no need to define it a second time.
+        
+        The model specification:
+        {json.dumps(model_json["specifications"])}
+        """
+
+        # store chat messages for current discussion
+        messages_history = [{"role": "system", "content": system_prompt}]
+
+        model_code = ""
+
+        json_fields_functions = [
+            "init_function",
+            "ext_transition",
+            "int_transition",
+            "output_function",
+            "time_advance",
+        ]
+
+        # generates a response for every function
+        for function_name in json_fields_functions:
+            function_guidelines = self._load_base_prompt(
+                f"devsimpy/AI/functions_prompt/{function_name}.txt"
+            )
+            user_prompt = f"""Generate code for the {function_name} function.
+            Use the following guidelines :
+            {function_guidelines}
+            and {model_json[function_name]} for specific details.
+            """
+
+            messages_history.append({"role": "user", "content": user_prompt})
+            response = self.generate_output("", "", messages_history)
+
+            # handle indentation and codeblock markers
+            response = self.parse_codeblock_marker(response)
+            if function_name != json_fields_functions[0]:
+                response = self.indent_code(response)
+
+            messages_history.append({"role": "assistant", "content": response})
+
+            model_code += f"{response}\n"
+        # check indentation in code before return
+        model_code = model_code.replace("    ", "\t")
+        return model_code
+
+    @abstractmethod
+    def generate_model_json(self, prompt):
+        """Abstract method used to generate a json representing an atomic model. The json describes the model specifications (states, properties) and its behaviors.
+        Json generated with llm using structured outputs.
+
+        Args:
+            prompt (_type_): _description_
         """
         pass
 
@@ -160,6 +237,32 @@ class DevsAIAdapter(ABC):
         """
         logging.info("Validation not implemented for model: %s", model_name)
         pass
+
+    def parse_codeblock_marker(self, code):
+        """Return code without codeblock marker."""
+        pattern = r"^```(?:\w+)?\s*\n(.*?)(?=^```)```"
+        match = re.search(
+            pattern, code, re.DOTALL | re.MULTILINE
+        )  # .DOTALL permet à `.` de correspondre aux sauts de ligne
+
+        if match:
+            # Si un bloc est trouvé, on retourne le code à l'intérieur des backticks
+            return match.group(1)
+        else:
+            # Sinon, on retourne le code original sans modification
+            return code
+
+    def indent_code(self, code: str):
+        """Add a tab to every line in the provided code.
+        Used to avoid indentation errors when generating a class function by function
+        """
+        indented_lines = []
+        for line in code.splitlines(True):
+            indented_lines.append("\t")
+            indented_lines.append(line)
+
+        return "".join(indented_lines)
+
 
 ##########################################################
 ###
@@ -253,23 +356,53 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
         self.api_client = OpenAI(api_key=self.api_key)  # Instancie le client API ici
         logging.info(_("ChatGPTDevsAdapter initialized with provided API key."))
 
-    @BuzyCursorNotification
-    def generate_output(self, prompt):
+    def generate_model_json(self, prompt):
+        """Generate a json representing an atomic model based on user's natural language description.
+        Use openai chat API with structured output.
+        Handle response to return the json as dict
         """
-        Génère une sortie en utilisant l'API ChatGPT basée sur le prompt donné.
+        system_prompt = self._load_base_prompt("devsimpy/AI/json_gen_prompt.txt")
+        try:
+            completion = self.api_client.beta.chat.completions.parse(
+                model="gpt-4.1-nano",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt},
+                ],
+                response_format=AtomicModel,
+            )
+            response = completion.choices[0].message
+            if not response.refusal:
+                return response.parsed.model_dump()
+        except ValueError as ve:
+            logging.error(_(f"Validation error: {ve}"))
+            return _(f"Validation error: {ve}")
+
+        except Exception as e:
+            # Journalisation de l'erreur avec les détails de l'exception
+            logging.error(_(f"Error while generating output: {e}"))
+            return _(f"An error occurred while generating the output: {e}")
+
+    @BuzyCursorNotification
+    def generate_output(self, prompt="", system_prompt="", messages_history=None):
+        """
+        Génère une sortie en utilisant l'API ChatGPT basée sur le prompt donné (génération unique) ou un historique de conversation.
+
         """
         try:
-            # Validation de la présence du prompt
-            if not prompt:
+            # Validation de la présence du prompt ou de l'historique
+            if not prompt and not messages_history:
                 raise ValueError("Prompt cannot be empty")
 
             # Envoi de la requête à l'API
             response = self.api_client.chat.completions.create(
-                model="gpt-4-turbo",
-                messages=[
-                    {"role": "system", "content": "You are an expert in DEVS modeling."},
-                    {"role": "user", "content": prompt}
-                ]
+                model="gpt-4.1-nano",
+                messages=messages_history
+                if messages_history
+                else [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt},
+                ],
             )
             
             # Validation de la réponse
@@ -481,9 +614,34 @@ class OllamaDevsAdapter(DevsAIAdapter):
                 message = _("No internet connection. Please check your internet connection and try again.")
                 wx.CallAfter(wx.MessageBox, message, _("Information"), wx.ICON_INFORMATION)
                 logging.info(message)
-    
+
+    def generate_model_json(self, prompt):
+        """Generate a json representing an atomic model based on user's natural language description.
+        Use Ollama's API with structured output.
+        Handle response to return the json as dict
+        """
+        if not self._is_server_running():
+            logging.info(_("The Ollama server is not active. Attempting to start..."))
+            self._start_server()
+        try:
+            system_prompt = self._load_base_prompt("devsimpy/AI/json_gen_prompt.txt")
+            # Send the prompt to the Ollama server
+            # Sends the conversation history (if it exists) or the prompt
+            response = chat(
+                model=self.model_name,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt},
+                ],
+                format=AtomicModel.model_json_schema(),
+            )
+            return json.loads(response.message.content)
+        except Exception as e:
+            logging.error(_(("Error while generating output: %s", str(e))))
+            return _(f"An error occurred while generating the output: {e}")
+
     @BuzyCursorNotification
-    def generate_output(self, prompt):
+    def generate_output(self, prompt, system_prompt="", messages_history=None):
         """
         Génère une sortie en utilisant l'API Ollama basée sur le prompt donné.
         Vérifie d'abord si le serveur est en cours d'exécution, et le démarre si nécessaire.
@@ -495,12 +653,18 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
         try:
             # Send the prompt to the Ollama server
+            # Sends the conversation history (if it exists) or the prompt
             response = chat(
                 model=self.model_name,
-                messages=[{"role": "user", "content": prompt}]
+                messages=messages_history
+                if messages_history
+                else [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt},
+                ],
             )
-            return response['message']['content']
+            return response["message"]["content"]
         except Exception as e:
-            logging.error(_("Error while generating output: %s", str(e)))
+            logging.error(_(("Error while generating output: %s", str(e))))
             return _(f"An error occurred while generating the output: {e}")
 

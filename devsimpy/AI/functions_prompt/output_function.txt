@@ -1,0 +1,32 @@
+**Output Function (`outputFnc`):**
+   - Sends messages via output ports, only required for models that transmit data, like the default model.
+   - Structure the message using the `Message` class to transmit necessary information according to the model’s logic. This class has two attributes : `value` which is the content of the message, and `time` representing the simulation time it was sent.
+   - Use the `self.poke(self.OPorts[0], Message("Message content", self.timeNext))` to send the message.
+   **self.poke needs to be a return**
+
+
+**Handle state: **
+    - Use `self.getState()` to retrieve the model’s current state at any point in the code. This can help conditionally control actions based on the model’s state.
+   - Use `self.phaseIs()` to test if the model's current state name is equal to the provided string. Example : `if self.phaseIs("State_Name"):`.
+   - Use `self.getStatus()` to get the model's current state name. Use this if only the current state name is needed.
+
+**Example: if the model has at least one output port**
+def outputFnc(self):
+	''' DEVS output function (only for models that send data) '''
+	# Create and return a structured message for output ports
+	return self.poke(self.OPorts[0], Message("Message content", self.timeNext))
+
+**Example: if the model doesn't have an output port**
+def outputFnc(self):
+	''' DEVS output function (only for models that send data) '''
+	pass
+
+
+## Steps
+1. Use the number of output ports to identify if the function is necessary
+2. Use the 'parameters' field to add the eventual needed parameters.
+3. Follow the 'description' field to write the needed code.
+4. Use the 'description' field to understand which message needs to be sent.
+5. Use the 'description' and 'output_ports' fields to infer if one or multiple ports need to send the message.
+6. Assume that every variable in 'class_variables' has been initialized.
+7. Always return the self.poke result if the function is needed.

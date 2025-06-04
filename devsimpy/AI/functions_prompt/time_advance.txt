@@ -1,0 +1,10 @@
+**Time Advance (`timeAdvance`):**
+   - Controls time advancement in the simulation by returning `self.getSigma()` for the time until the next transition.
+
+**Example:**
+def timeAdvance(self):
+	''' DEVS Time Advance function '''
+	return self.getSigma()
+
+## Steps
+1. Unless the 'description' and 'parameters' fields are specified, you can just return the provided example.
