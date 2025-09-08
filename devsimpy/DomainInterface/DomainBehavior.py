@@ -77,7 +77,7 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 		self.state = {'status':phase, 'sigma':sigma}
 
 	def setSigma(self,sigma:float=0.0)->None:
-		self.state['sgima'] = sigma
+		self.state['sigma'] = sigma
 
 	def setStatus(self, phase:str)->None:
 		self.state['status'] = phase
