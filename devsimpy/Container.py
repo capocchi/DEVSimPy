@@ -1347,9 +1347,9 @@ class Shape(ShapeEvtHandler):
 		dc.SetPen(wx.Pen(*pen_args))
 
 		if self.dashed:
-			self.pen[2] = wx.PENSTYLE_DOT_DASH
+			self.pen[2] = 104 # wx.PENSTYLE_DOT_DASH
 		else:
-			self.pen[2] = wx.PENSTYLE_SOLID
+			self.pen[2] = 100 # wx.PENSTYLE_SOLID
 
 		# Set the brush color
 		dc.SetBrush(wx.Brush(brushclr))
@@ -2981,7 +2981,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 
 							### dot trace to prepare connection
 							if len(s.pen)>2:
-								s.pen[2]= wx.PENSTYLE_DOT
+								s.pen[2]= 101 #wx.PENSTYLE_DOT
 
 							if cursor != wx.StockCursor(wx.CURSOR_HAND):
 								cursor = wx.StockCursor(wx.CURSOR_HAND)
