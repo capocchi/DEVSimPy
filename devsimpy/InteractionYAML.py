@@ -26,8 +26,11 @@ def to_Python(val):
             return val
         elif str(val).replace('.','').replace('-','').isdigit():
             return eval(str(val))
-    elif isinstance(eval(val),list) or isinstance(eval(val),tuple):
-        return eval(val)
+        elif isinstance(eval(val), (list, tuple)):
+            return eval(val)
+    elif isinstance(val, (list, tuple)):
+        val = [to_Python(v) for v in val]
+        return val
 
     return val
 

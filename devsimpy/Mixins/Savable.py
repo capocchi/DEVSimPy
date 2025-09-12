@@ -517,7 +517,7 @@ class DumpYAMLFile(DumpBase):
 			yaml.register_class(PickledCollection)
 
 			with open(fileName, 'w') as yf:
-				yaml.dump(PickledCollection(obj_dumped), stream=yf, default_flow_style=False)
+				yaml.dump(PickledCollection(obj_dumped), stream=yf)
 		
 		except (AttributeError, Exception) as error:
 			sys.stderr.write(f"Warning: First attempt to save YAML failed, retrying in 'unsafe' mode: {error}\n")
@@ -548,6 +548,7 @@ class DumpYAMLFile(DumpBase):
 		Args:
 			fileName (str): YAML filename
 		"""
+		global _
 
 		## try to open f with compressed mode
 		try:
@@ -595,8 +596,12 @@ class DumpYAMLFile(DumpBase):
 			sys.stderr.write(f"Problem loading file '{fileName}': {tb}\n")
 			return False
 
+		if not dsp:
+			sys.stderr.write(f"Failed to load data from file '{fileName}'.\n")
+			return False
+		
 		# Vérification de la correspondance des longueurs
-		if len(dsp) != len(obj_loaded.dump_attributes):
+		if (len(dsp) != len(obj_loaded.dump_attributes)):
 			raise ValueError(f"Mismatch between attributes and dumped data: {len(obj_loaded.dump_attributes)} != {len(dsp)}")
 
 		# Assignation des attributs en utilisant zip

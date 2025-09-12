@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from DomainInterface import DomainBehavior
-from DomainInterface import Message
+from DomainInterface.Object import Message
 
-import sys
 import random
 
 class RandomGenerator(DomainBehavior):
