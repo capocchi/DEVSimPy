@@ -13,9 +13,7 @@
 
 ### Specific import ------------------------------------------------------------
 from DomainInterface import DomainBehavior
-from DomainInterface import Message
 
-import sys
 
 ### Model class ----------------------------------------------------------------
 class To_Stdout(DomainBehavior):

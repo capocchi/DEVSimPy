@@ -13,7 +13,6 @@
 
 ### Specific import ------------------------------------------------------------
 from DomainInterface import DomainBehavior
-from DomainInterface import Message
 
 import chart_studio.plotly as py
 import plotly.graph_objects as go

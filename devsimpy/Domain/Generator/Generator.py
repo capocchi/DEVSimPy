@@ -12,7 +12,7 @@ GLOBAL VARIABLES AND FUNCTIONS:
 
 
 from DomainInterface import DomainBehavior
-from DomainInterface import Message
+from DomainInterface.Object import Message
 
 import os.path
 
