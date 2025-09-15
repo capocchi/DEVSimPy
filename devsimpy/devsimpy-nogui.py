@@ -57,7 +57,7 @@ __version__ = get_version()
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-def simulate(devs, duration, simu_name, is_remote, stdout=True):
+def simulate(devs, duration, simu_name, is_remote, with_progress=True):
 	"""Simulate the devs model during a specific duration.
 
 	Args:
@@ -77,7 +77,7 @@ def simulate(devs, duration, simu_name, is_remote, stdout=True):
 		raise Exception(_("No model to simulate"))
 
 	### launch simulation
-	makeSimulation(master=devs, T=duration, simu_name=simu_name, is_remote=is_remote, stdout=stdout)
+	makeSimulation(master=devs, T=duration, simu_name=simu_name, is_remote=is_remote, stdout=with_progress)
 
 #-------------------------------------------------------------------
 if __name__ == '__main__':
@@ -177,16 +177,6 @@ if __name__ == '__main__':
 		devs = yamlHandler.getDevsInstance()
 		
 		if devs:
-			# if args.tracemalloc:
-			# 	tracemalloc.start()
-			# 	snapshot1 = tracemalloc.take_snapshot()
-
 			simulate(devs, duration, args.name, args.remote, args.with_progress)
 
-			# if args.tracemalloc:
-			# 	snapshot2 = tracemalloc.take_snapshot()
-			# 	top_stats = snapshot2.compare_to(snapshot1, 'lineno')
-				
-			# 	print("Tracemalloc option is activated and the top 10 differences are:")
-			# 	for stat in top_stats[:10]:
-			# 		print(stat)
+			
