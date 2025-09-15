@@ -66,7 +66,7 @@ class Printer:
 #     def push(self, event, data):
 #         sys.stdout.write((json.dumps(data)))
 
-def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, stdout:bool=False):
+def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, with_progress:bool=False):
     """
     """
 
@@ -135,7 +135,7 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, stdout
                     if new_progress - progress > 5:
                         progress = new_progress
                         # Print progress to debug
-                        if stdout:
+                        if with_progress:
                             Printer(f"Progress: {progress:.2f}%\n")
                         else:
                             sys.stdout.flush()
@@ -154,7 +154,7 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, stdout
                 interactionManager.stop()
                 interactionManager.join()
 
-            if stdout:
+            if with_progress:
                 Printer(f"Progress: 100%")    
             # simuPusher.push('progress', {'progress':100})
         

@@ -77,7 +77,7 @@ def simulate(devs, duration, simu_name, is_remote, with_progress=True):
 		raise Exception(_("No model to simulate"))
 
 	### launch simulation
-	makeSimulation(master=devs, T=duration, simu_name=simu_name, is_remote=is_remote, stdout=with_progress)
+	makeSimulation(master=devs, T=duration, simu_name=simu_name, is_remote=is_remote, with_progress=with_progress)
 
 #-------------------------------------------------------------------
 if __name__ == '__main__':
