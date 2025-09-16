@@ -49,7 +49,7 @@ $ devsimpy
 
 ### From Repo (for dev)
 ```sh
-$ git clone --recurse-submodules -b version-4.0 --depth=1 https://github.com/capocchi/DEVSimPy.git
+$ git clone --recurse-submodules -b version-5.1 --depth=1 https://github.com/capocchi/DEVSimPy.git
 $ git fetch --unshallow
 $ pip install -r requirements.txt
 ```
