@@ -36,6 +36,14 @@ import types
 import traceback
 import collections
 
+import subprocess
+import requests
+import time
+
+OLLAMA_PORT = 11434
+OLLAMA_MODEL = "mistral"
+OLLAMA_SERVER_CMD = ["ollama", "serve"]
+
 import inspect
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
@@ -348,6 +356,160 @@ class PythonSTC(stc.StyledTextCtrl):
 		self.StyleSetSpec(stc.STC_P_STRINGEOL, "fore:#000000,face:%(mono)s,back:#E0C0E0,eol,size:%(size)d" % faces)
 
 		self.SetCaretForeground("BLUE")
+
+		# Associer les événements clavier
+		self.Bind(wx.EVT_KEY_UP, self.on_key_up)
+
+		# Analyse statique
+		self.classes = {}   # nom_classe -> set(attributs/méthodes)
+		self.instances = {} # nom_instance -> nom_classe
+
+
+	# ------------------ Ollama ------------------
+	def start_ollama_server(self):
+		try:
+			self.ollama_process = subprocess.Popen(
+				OLLAMA_SERVER_CMD,
+				stdout=subprocess.PIPE,
+				stderr=subprocess.PIPE
+			)
+			# Attendre qu'il soit prêt dans un thread
+			threading.Thread(target=self.wait_for_server, daemon=True).start()
+		except Exception as e:
+			print("Erreur démarrage Ollama:", e)
+
+	def wait_for_server(self, timeout=10):
+		url = f"http://localhost:{OLLAMA_PORT}/api/generate"
+		start = time.time()
+		while time.time() - start < timeout:
+			try:
+				requests.get(url, timeout=0.5)
+			except requests.exceptions.RequestException:
+				time.sleep(0.5)
+			else:
+				self.ollama_ready = True
+				print("Serveur Ollama prêt !")
+				return
+		print("Impossible de joindre le serveur Ollama")
+		self.ollama_ready = False
+
+	def fetch_ollama_suggestions(self, prompt, length):
+		if not self.ollama_ready:
+			return
+		def worker():
+			try:
+				response = requests.post(
+					f"http://localhost:{OLLAMA_PORT}/api/generate",
+					json={"model": OLLAMA_MODEL, "prompt": prompt},
+					timeout=30  # plus long
+				)
+				response.raise_for_status()
+				text = response.json().get("text", "").strip()
+				if text:
+					self.AutoCompShow(length, text)
+			except requests.exceptions.ReadTimeout:
+				# Timeout temporaire, on ignore
+				pass
+			except Exception as e:
+				print("Erreur Ollama:", e)
+		threading.Thread(target=worker, daemon=True).start()
+
+	# ------------------ Analyse statique ------------------
+	def update_classes_and_instances(self):
+		self.classes.clear()
+		self.instances.clear()
+		text = self.GetText()
+		lines = text.splitlines()
+
+		class_name = None
+		indent_level = 0
+		for line in lines:
+			stripped = line.strip()
+			# Début d'une classe
+			class_match = re.match(r'class\s+(\w+)\s*[:\(]', stripped)
+			if class_match:
+				class_name = class_match.group(1)
+				self.classes[class_name] = set()
+				indent_level = len(line) - len(line.lstrip())
+				continue
+			# Fin de classe
+			if class_name and (len(line) - len(line.lstrip()) <= indent_level and stripped):
+				class_name = None
+			if class_name:
+				# Méthodes
+				method_match = re.match(r'def\s+(\w+)\s*\(', stripped)
+				if method_match:
+					self.classes[class_name].add(method_match.group(1))
+				# Attributs existants
+				attr_match = re.match(r'self\.(\w+)', stripped)
+				if attr_match:
+					self.classes[class_name].add(attr_match.group(1))
+
+		# Détection instances
+		for m in re.finditer(r'(\w+)\s*=\s*(\w+)\s*\(', text):
+			var_name, cls_name = m.groups()
+			if cls_name in self.classes:
+				self.instances[var_name] = cls_name
+
+	def get_current_class(self, pos):
+		text_up_to_pos = self.GetTextRange(0, pos)
+		lines = text_up_to_pos.splitlines()
+		class_name = None
+		indent_level = 0
+		for line in lines:
+			stripped = line.strip()
+			class_match = re.match(r'class\s+(\w+)\s*[:\(]', stripped)
+			if class_match:
+				class_name = class_match.group(1)
+				indent_level = len(line) - len(line.lstrip())
+				continue
+			if class_name and (len(line) - len(line.lstrip()) <= indent_level and stripped):
+				class_name = None
+		return class_name
+
+	# ------------------ Événement frappe ------------------
+	def on_key_up(self, event):
+		key = event.GetKeyCode()
+		if (65 <= key <= 90) or (97 <= key <= 122) or key == ord('_') or key == ord('.'):
+			pos = self.GetCurrentPos()
+			start = self.WordStartPosition(pos, True)
+			length = pos - start
+			current_word = self.GetTextRange(start, pos)
+
+			self.update_classes_and_instances()
+
+			suggestions = set(keyword.kwlist)
+			words = set(self.GetText().split())
+			suggestions |= words
+
+			if '.' in current_word:
+				obj_name, prefix = current_word.rsplit('.', 1)
+				if obj_name == 'self':
+					cls_name = self.get_current_class(pos)
+					if cls_name and cls_name in self.classes:
+						suggestions |= self.classes[cls_name]
+						length = len(prefix)
+				else:
+					cls_name = self.instances.get(obj_name)
+					if cls_name and cls_name in self.classes:
+						suggestions |= self.classes[cls_name]
+						length = len(prefix)
+
+			# Affiche suggestions locales immédiatement
+			self.AutoCompShow(length, " ".join(sorted(suggestions)))
+
+			# Appel IA avec délai pour ne pas spammer
+			# self.last_key_time = time.time()
+			# threading.Thread(target=self.delayed_ia_call, args=(current_word, length), daemon=True).start()
+
+		event.Skip()
+
+	def delayed_ia_call(self, current_word, length):
+		time.sleep(self.ia_delay)
+		# Si aucune frappe depuis le délai
+		if time.time() - self.last_key_time >= self.ia_delay:
+			prompt = f"Complète le code suivant Python : {current_word}\n"
+			self.fetch_ollama_suggestions(prompt, length)
 
 	# NOTE: PythonSTC :: __str__		=> String representation of the class
 	@classmethod
@@ -735,6 +897,7 @@ class CodeEditor(PythonSTC):
 
 		self.SetSelBackground(True, wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT) )
 		self.SetSelForeground(True, wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHTTEXT))
+
 
 	### NOTE: CodeEditor :: RegisterModifiedEvent => todo
 	def RegisterModifiedEvent(self, eventHandler):
