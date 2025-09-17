@@ -469,7 +469,18 @@ class PythonSTC(stc.StyledTextCtrl):
 
 	# ------------------ Événement frappe ------------------
 	def on_key_up(self, event):
+		"""On key up event handler for auto-completion.
+
+		Args:
+			event: _key up event
+		"""
 		key = event.GetKeyCode()
+
+		# Ignore si Ctrl est appuyé (ex: Ctrl+S)
+		if event.ControlDown():
+			event.Skip()
+			return
+
 		if (65 <= key <= 90) or (97 <= key <= 122) or key == ord('_') or key == ord('.'):
 			pos = self.GetCurrentPos()
 			start = self.WordStartPosition(pos, True)
