@@ -57,7 +57,7 @@ __version__ = get_version()
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-def simulate(devs, duration, simu_name, is_remote):
+def simulate(devs, duration, simu_name, is_remote, with_progress=True):
 	"""Simulate the devs model during a specific duration.
 
 	Args:
@@ -77,7 +77,7 @@ def simulate(devs, duration, simu_name, is_remote):
 		raise Exception(_("No model to simulate"))
 
 	### launch simulation
-	makeSimulation(master=devs, T=duration, simu_name=simu_name, is_remote=is_remote, stdout=True)
+	makeSimulation(master=devs, T=duration, simu_name=simu_name, is_remote=is_remote, with_progress=with_progress)
 
 #-------------------------------------------------------------------
 if __name__ == '__main__':
@@ -113,7 +113,8 @@ if __name__ == '__main__':
 	parser.add_argument("-updateblockargs", help=_('''Update parameters (ex. -blockargs <label of block> -updateblockargs <"""{'<key1>':<val1>, '<key2>':<val2>, etc.}""">'''), type=str, default="")
 	parser.add_argument("-docker", help=_("Add a dockerfile to the zip"), action="store_true")
 	parser.add_argument("-sim_kernel", help=_("Add the sim kernel to the zip"), action="store_true")
- 
+	parser.add_argument("-with_progress", help=_("Add the progress info in the stdout trace"), action="store_true")
+
 	args = parser.parse_args()
 
 	if args.kernel:
@@ -176,16 +177,6 @@ if __name__ == '__main__':
 		devs = yamlHandler.getDevsInstance()
 		
 		if devs:
-			# if args.tracemalloc:
-			# 	tracemalloc.start()
-			# 	snapshot1 = tracemalloc.take_snapshot()
+			simulate(devs, duration, args.name, args.remote, args.with_progress)
 
-			simulate(devs, duration, args.name, args.remote)
-
-			# if args.tracemalloc:
-			# 	snapshot2 = tracemalloc.take_snapshot()
-			# 	top_stats = snapshot2.compare_to(snapshot1, 'lineno')
-				
-			# 	print("Tracemalloc option is activated and the top 10 differences are:")
-			# 	for stat in top_stats[:10]:
-			# 		print(stat)
+			

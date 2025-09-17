@@ -2814,8 +2814,14 @@ if getattr(builtins, 'GUI_FLAG', True):
 			if not self.diagram.modify:
 				return
 
-			### window where modification is performed
-			win = self.GetTopLevelParent()
+			# Vérifier que le canvas n'est pas détruit
+			try:
+				win = self.GetTopLevelParent()
+			except RuntimeError:
+				return  # Le widget est déjà détruit
+
+			if not win:
+				return
 
 			if isinstance(win, DetachedFrame):
 				### main window
