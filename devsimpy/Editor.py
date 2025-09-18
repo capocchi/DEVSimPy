@@ -2748,7 +2748,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		finddlg = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
 		tb.AddControl(finddlg)
 
-		# safe_realize(tb)
+		self._safe_realize_tool_bar(tb)
 
 		if not self.cb.isCMD():
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
@@ -2774,6 +2774,56 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		self.Bind(wx.EVT_COMBOBOX, self.OnCombo, id=cbID)
 		self.Bind(wx.EVT_MENU, self.OnInsertDebug, id=debug.GetId())
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
+
+	def _safe_realize_tool_bar(self, tb, retries=6, delay_ms=100):
+		"""
+		Réalise la toolbar de façon sûre sur macOS :
+		- évite lambda qui capture un tb éventuellement détruit
+		- attend que la frame / toolbar soit affichée
+		- retente quelques fois avant d'abandonner
+		"""
+		# validations rapides
+		if tb is None:
+			sys.stdout.write("No toolbar to realize\n")
+			return
+		# s'assure que c'est bien une toolbar
+		try:
+			is_toolbar = isinstance(tb, wx.ToolBar)
+		except Exception:
+			is_toolbar = False
+
+		if not is_toolbar:
+			sys.stdout.write("Object is not a wx.ToolBar, skipping Realize\n")
+			return
+
+		# si pas d'outils, rien à faire
+		if tb.GetToolsCount() == 0:
+			sys.stdout.write("Toolbar empty, skipping Realize\n")
+			return
+
+		# fonction qui effectue le Realize — méthode d'instance, pas de lambda
+		def _attempt_realize():
+			# re-vérifier que tb est toujours valide / visible
+			if tb is None:
+				return
+			try:
+				# IsShownOnScreen est un bon signal que la fenêtre est prête
+				if tb.IsShownOnScreen():
+					tb.Realize()
+				else:
+					raise RuntimeError("Toolbar not shown yet")
+			except Exception as e:
+				# si on a encore des retries -> replanifier, sinon abandonner proprement
+				nonlocal retries
+				retries -= 1
+				if retries > 0:
+					# replanifier après delay_ms ms — évite d'utiliser lambda
+					wx.CallLater(delay_ms, _attempt_realize)
+				else:
+					sys.stdout.write(f"safe_realize: giving up after retries: {e}\n")
+
+		# démarrer la première tentative via CallAfter (exécute dans la loop principale)
+		wx.CallAfter(_attempt_realize)
 
 	def OnClose(self,event):
 		"""
