@@ -331,7 +331,6 @@ class Wizard(wizmod):
 	def on_close(self, evt):
 		""" Close button has been pressed. Destroy the wizard.
 		"""
-		self.canceled_flag = True
 		wx.CallAfter(self.Destroy)
 		
 

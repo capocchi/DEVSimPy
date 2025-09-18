@@ -69,6 +69,10 @@ if GUI_FLAG:
 		"""Charge une image et la redimensionne à width x height"""
 		image_path = os.path.join(ICON_PATH, filename)
 
+		# Vérifier si on est sur un écran Retina
+		factor = wx.GetDisplayPPI()[0] / 96  # 96 = base DPI
+		target_size = (int(width*factor), int(height*factor))
+
 		if not os.path.isfile(image_path):
 			raise FileNotFoundError(f"File not found: {image_path}")
 
@@ -80,7 +84,7 @@ if GUI_FLAG:
 		if not image.IsOk():  # idem pour l'image
 			return wx.ArtProvider.GetBitmap(wx.ART_MISSING_IMAGE, wx.ART_TOOLBAR, (width,height))
 
-		image = image.Scale(width, height, wx.IMAGE_QUALITY_HIGH)
+		image = image.Scale(target_size[0], target_size[1], wx.IMAGE_QUALITY_HIGH)
 		return wx.Bitmap(image)
 		
 else:
