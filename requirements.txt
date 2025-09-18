@@ -52,7 +52,7 @@
 # searchTreeList.py: 1
 # wxPyMail.py: 22
 ### --only-binary :all:
-wxPython <= 4.2.2 ; python_version >= '3.10'
+wxPython <= 4.2.3 ; python_version >= '3.10'
 wxPython <= 4.1.1 ; python_version >= '3.8' and python_version < '3.10'
 
 # Components.py: 44
