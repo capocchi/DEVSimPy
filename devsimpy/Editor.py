@@ -1626,11 +1626,12 @@ class Base(object):
 
 		return menubar
 
-	def CreateTB(self):
+	def CreateTB(self, frame):
 		""" Create tool-bar.
 		"""
 
-		tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL)
+		# tb = self.CreateToolBar( wx.TB_FLAT|wx.TB_HORIZONTAL, wx.ID_ANY )
+		tb = wx.ToolBar(frame, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
 		tb.SetToolBitmapSize((16, 16))# this required for non-standard size buttons on MSW
 
 		ai_help = _('Generative AI based modification' if bool(getattr(builtins, 'SELECTED_IA')) else 'Check the AI settings in Preferences')
@@ -2107,7 +2108,7 @@ class EditorPanel(Base, wx.Panel):
 		### create juste for the bind of action (save,...) of the toolbar - Warning it must stay here !
 		self.menuBar = self.CreateMenu()
 		### create toolbar
-		self.toolbar = self.CreateTB()
+		self.toolbar = self.CreateTB(self)
 		###recover the statusbar of mainW
 		self.statusbar = parent.GetStatusBar()
 
@@ -2137,7 +2138,7 @@ class EditorFrame(Base, wx.Frame):
 		self.parent = parent
 		
 		### call constructor
-		wx.Frame.__init__(self, self.parent, id, title, size=(800, 500), style=wx.DEFAULT_FRAME_STYLE)
+		wx.Frame.__init__(self, self.parent, id, title, size=(800, 500), style=wx.DEFAULT_FRAME_STYLE|wx.STAY_ON_TOP)
 
 		### Create notebook
 		self.nb = EditionNotebook(self, wx.NewIdRef(), style=wx.CLIP_CHILDREN)
@@ -2148,7 +2149,7 @@ class EditorFrame(Base, wx.Frame):
 		self.statusbar= self.GetStatusBar()
 
 		### create and set the tool bar
-		self.toolbar = self.CreateTB()
+		self.toolbar = self.CreateTB(self)
 		self.SetToolBar(self.toolbar)
 
 
