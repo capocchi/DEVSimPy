@@ -1630,7 +1630,7 @@ class Base(object):
 		""" Create tool-bar.
 		"""
 
-		tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
+		tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL)
 		tb.SetToolBitmapSize((16, 16))# this required for non-standard size buttons on MSW
 
 		ai_help = _('Generative AI based modification' if bool(getattr(builtins, 'SELECTED_IA')) else 'Check the AI settings in Preferences')
@@ -2137,7 +2137,7 @@ class EditorFrame(Base, wx.Frame):
 		self.parent = parent
 		
 		### call constructor
-		wx.Frame.__init__(self, self.parent, id, title, size=(800, 500), style=wx.DEFAULT_FRAME_STYLE|wx.STAY_ON_TOP)
+		wx.Frame.__init__(self, self.parent, id, title, size=(800, 500), style=wx.DEFAULT_FRAME_STYLE)
 
 		### Create notebook
 		self.nb = EditionNotebook(self, wx.NewIdRef(), style=wx.CLIP_CHILDREN)
