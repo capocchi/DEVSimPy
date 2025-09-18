@@ -574,9 +574,9 @@ class MainApplication(wx.Frame):
 
 		# for spash screen
 		pub.sendMessage('object.added',  message=_('Making tools bar ...\n'))
+		
 		tb = self.CreateToolBar()
 
-		# tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
 		tb.SetToolBitmapSize((16,16))
 
 		self.toggle_list = [wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef()]
