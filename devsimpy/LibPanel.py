@@ -111,7 +111,6 @@ class LibPanel(wx.Panel):
 		"""
 
 		tb = wx.ToolBar(self, wx.NewIdRef())
-		#self.ToolBar = tb
 		tb.SetToolBitmapSize((16,16))# this required for non-standard size buttons on MSW
 
 		### Add tool
