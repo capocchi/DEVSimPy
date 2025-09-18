@@ -574,7 +574,7 @@ class MainApplication(wx.Frame):
 
 		# for spash screen
 		pub.sendMessage('object.added',  message=_('Making tools bar ...\n'))
-		tb = self.CreateToolBar()
+		tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
 
 		# Ajouter un bouton avec l’image
 		tool_id = wx.NewIdRef()
