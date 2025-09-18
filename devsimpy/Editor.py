@@ -2152,10 +2152,12 @@ class EditorFrame(Base, wx.Frame):
 		### create menu, toolbar and statusbar for the frame
 		self.menuBar = self.CreateMenu()
 		self.SetMenuBar(self.menuBar)
-		self.toolbar = self.CreateTB()
 		self.statusbar= self.GetStatusBar()
 
-		### set the tool bar
+		self.Show(True)
+
+		### create and set the tool bar
+		self.toolbar = self.CreateTB()
 		self.SetToolBar(self.toolbar)
 
 		### binding
@@ -2645,7 +2647,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		icon.CopyFromBitmap(icon_bitmap)
 		self.SetIcon(icon)
 		
-		# self.ConfigureGUI()
+		self.ConfigureGUI()
 
 	###
 	def ConfigureGUI(self):
@@ -2881,9 +2883,7 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 def BlockEditor(*args):
 	parent = args[0]
 	if not parent:
-		frame = BlockEditorFrame(*args)
-		frame.ConfigureGUI()
-		return frame
+		return BlockEditorFrame(*args)
 	else:
 		return BlockEditorPanel(*args)
 	
