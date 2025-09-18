@@ -576,93 +576,88 @@ class MainApplication(wx.Frame):
 		pub.sendMessage('object.added',  message=_('Making tools bar ...\n'))
 		tb = self.CreateToolBar()
 
-		# Ajouter un bouton avec l’image
-		tool_id = wx.NewIdRef()
-		tb.AddTool(tool_id, "Hello",  load_and_resize_image('new.png'), "Clique-moi")
-	
-		tb.Realize()
 		# tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
 		# # tb.SetToolBitmapSize((16,16))
 
-		# self.toggle_list = [wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef()]
+		self.toggle_list = [wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef()]
 
-		# currentPage = self.nb2.GetCurrentPage()
+		currentPage = self.nb2.GetCurrentPage()
 
-		# ### Tools List - IDs come from Menu.py file
-		# self.tools = [	tb.AddTool(wx.ID_NEW, "", load_and_resize_image('new.png'), shortHelp=_('New diagram (Ctrl+N)')),
-		# 					tb.AddTool(wx.ID_OPEN, "", load_and_resize_image('open.png'), shortHelp=_('Open File (Ctrl+O)')),
-		# 					tb.AddTool(wx.ID_PREVIEW_PRINT, "", load_and_resize_image('print-preview.png'), shortHelp=_('Print Preview (Ctrl+P)')),
-		# 					tb.AddTool(wx.ID_SAVE, "", load_and_resize_image('save.png'), wx.NullBitmap, shortHelp=_('Save File (Ctrl+S)'), longHelp=_('Save the current diagram'), clientData=currentPage),
-		# 					tb.AddTool(wx.ID_SAVEAS, "", load_and_resize_image('save_as.png'), wx.NullBitmap, shortHelp=_('Save file as'), longHelp=_('Save the diagram with an another name'), clientData=currentPage),
-		# 					tb.AddTool(wx.ID_UNDO, "", load_and_resize_image('undo.png'), wx.NullBitmap, shortHelp=_('Undo'), longHelp=_('Click to glongHelpString=o back, hold to see history'), clientData=currentPage),
-		# 					tb.AddTool(wx.ID_REDO, "", load_and_resize_image('redo.png'), wx.NullBitmap, shortHelp=_('Redo'), longHelp=_('Click to go forward, hold to see history'), clientData=currentPage),
-		# 					tb.AddTool(Menu.ID_ZOOMIN_DIAGRAM, "", load_and_resize_image('zoom+.png'), wx.NullBitmap, shortHelp=_('Zoom'), longHelp=_('Zoom +'), clientData=currentPage),
-		# 					tb.AddTool(Menu.ID_ZOOMOUT_DIAGRAM, "", load_and_resize_image('zoom-.png'), wx.NullBitmap, shortHelp=_('UnZoom'), longHelp=_('Zoom -'), clientData=currentPage),
-		# 					tb.AddTool(Menu.ID_UNZOOM_DIAGRAM, "", load_and_resize_image('no_zoom.png'), wx.NullBitmap, shortHelp=_('AnnuleZoom'), longHelp=_('Normal size'), clientData=currentPage),
-		# 					tb.AddTool(Menu.ID_PRIORITY_DIAGRAM, "", load_and_resize_image('priority.png'), shortHelp=_('Priority (F3)')),
-		# 					tb.AddTool(Menu.ID_CHECK_DIAGRAM, "", load_and_resize_image('check_master.png'), shortHelp=_('Debugger (F4)')),
-		# 					tb.AddTool(Menu.ID_PLUGINS_SHAPE, "", load_and_resize_image('plugins.png'), shortHelp=_('Plugins Manager')),
-		# 					tb.AddTool(Menu.ID_SIM_DIAGRAM, "", load_and_resize_image('simulation.png'), shortHelp=_('Simulation (F5)')),
-		# 					tb.AddTool(self.toggle_list[0], "", load_and_resize_image('direct_connector.png'),shortHelp= _('Direct'), kind=wx.ITEM_CHECK),
-		# 					tb.AddTool(self.toggle_list[1], "", load_and_resize_image('square_connector.png'), shortHelp=_('Square'), kind = wx.ITEM_CHECK),
-		# 					tb.AddTool(self.toggle_list[2], "", load_and_resize_image('linear_connector.png'), shortHelp=_('Linear'), kind = wx.ITEM_CHECK),
-		# 					tb.AddTool(self.toggle_list[3], "", load_and_resize_image('curve_connector.png'), shortHelp=_('Curve'), kind = wx.ITEM_CHECK)
-		# 				]
+		### Tools List - IDs come from Menu.py file
+		self.tools = [	tb.AddTool(wx.ID_NEW, "", load_and_resize_image('new.png'), shortHelp=_('New diagram (Ctrl+N)')),
+							tb.AddTool(wx.ID_OPEN, "", load_and_resize_image('open.png'), shortHelp=_('Open File (Ctrl+O)')),
+							tb.AddTool(wx.ID_PREVIEW_PRINT, "", load_and_resize_image('print-preview.png'), shortHelp=_('Print Preview (Ctrl+P)')),
+							tb.AddTool(wx.ID_SAVE, "", load_and_resize_image('save.png'), wx.NullBitmap, shortHelp=_('Save File (Ctrl+S)'), longHelp=_('Save the current diagram'), clientData=currentPage),
+							tb.AddTool(wx.ID_SAVEAS, "", load_and_resize_image('save_as.png'), wx.NullBitmap, shortHelp=_('Save file as'), longHelp=_('Save the diagram with an another name'), clientData=currentPage),
+							tb.AddTool(wx.ID_UNDO, "", load_and_resize_image('undo.png'), wx.NullBitmap, shortHelp=_('Undo'), longHelp=_('Click to glongHelpString=o back, hold to see history'), clientData=currentPage),
+							tb.AddTool(wx.ID_REDO, "", load_and_resize_image('redo.png'), wx.NullBitmap, shortHelp=_('Redo'), longHelp=_('Click to go forward, hold to see history'), clientData=currentPage),
+							tb.AddTool(Menu.ID_ZOOMIN_DIAGRAM, "", load_and_resize_image('zoom+.png'), wx.NullBitmap, shortHelp=_('Zoom'), longHelp=_('Zoom +'), clientData=currentPage),
+							tb.AddTool(Menu.ID_ZOOMOUT_DIAGRAM, "", load_and_resize_image('zoom-.png'), wx.NullBitmap, shortHelp=_('UnZoom'), longHelp=_('Zoom -'), clientData=currentPage),
+							tb.AddTool(Menu.ID_UNZOOM_DIAGRAM, "", load_and_resize_image('no_zoom.png'), wx.NullBitmap, shortHelp=_('AnnuleZoom'), longHelp=_('Normal size'), clientData=currentPage),
+							tb.AddTool(Menu.ID_PRIORITY_DIAGRAM, "", load_and_resize_image('priority.png'), shortHelp=_('Priority (F3)')),
+							tb.AddTool(Menu.ID_CHECK_DIAGRAM, "", load_and_resize_image('check_master.png'), shortHelp=_('Debugger (F4)')),
+							tb.AddTool(Menu.ID_PLUGINS_SHAPE, "", load_and_resize_image('plugins.png'), shortHelp=_('Plugins Manager')),
+							tb.AddTool(Menu.ID_SIM_DIAGRAM, "", load_and_resize_image('simulation.png'), shortHelp=_('Simulation (F5)')),
+							tb.AddTool(self.toggle_list[0], "", load_and_resize_image('direct_connector.png'),shortHelp= _('Direct'), kind=wx.ITEM_CHECK),
+							tb.AddTool(self.toggle_list[1], "", load_and_resize_image('square_connector.png'), shortHelp=_('Square'), kind = wx.ITEM_CHECK),
+							tb.AddTool(self.toggle_list[2], "", load_and_resize_image('linear_connector.png'), shortHelp=_('Linear'), kind = wx.ITEM_CHECK),
+							tb.AddTool(self.toggle_list[3], "", load_and_resize_image('curve_connector.png'), shortHelp=_('Curve'), kind = wx.ITEM_CHECK)
+						]
 
-		# ##################################################################### Abstraction hierarchy
-		# # diagram = currentPage.GetDiagram()
-		# level = currentPage.GetCurrentLevel()
+		##################################################################### Abstraction hierarchy
+		# diagram = currentPage.GetDiagram()
+		level = currentPage.GetCurrentLevel()
 
-		# level_label = wx.StaticText(tb, -1, _("Level "))
-		# self.spin = wx.SpinCtrl(tb, self.toggle_list[3], str(level), pos=(55, 90), size=(50, -1), min=0, max=20)
+		level_label = wx.StaticText(tb, -1, _("Level "))
+		self.spin = wx.SpinCtrl(tb, self.toggle_list[3], str(level), pos=(55, 90), size=(50, -1), min=0, max=20)
 
-		# tb.AddControl(level_label)
-		# tb.AddControl(self.spin)
+		tb.AddControl(level_label)
+		tb.AddControl(self.spin)
 
-		# ### add button to define downward and upward rules
-		# ID_UPWARD = self.toggle_list[4]
-		# ID_DOWNWARD = self.toggle_list[5]
+		### add button to define downward and upward rules
+		ID_UPWARD = self.toggle_list[4]
+		ID_DOWNWARD = self.toggle_list[5]
 
-		# self.tools.append(tb.AddTool(ID_DOWNWARD, "", load_and_resize_image('downward.png'), shortHelp=_('Downward rules')))
-		# self.tools.append(tb.AddTool(ID_UPWARD, "", load_and_resize_image('upward.png'), shortHelp=_('Upward rules')))
+		self.tools.append(tb.AddTool(ID_DOWNWARD, "", load_and_resize_image('downward.png'), shortHelp=_('Downward rules')))
+		self.tools.append(tb.AddTool(ID_UPWARD, "", load_and_resize_image('upward.png'), shortHelp=_('Upward rules')))
 
-		# tb.EnableTool(ID_DOWNWARD, False)
-		# tb.EnableTool(ID_UPWARD, False)
+		tb.EnableTool(ID_DOWNWARD, False)
+		tb.EnableTool(ID_UPWARD, False)
 
-		# ##############################################################################################
+		##############################################################################################
 
-		# for i in (3,8,12,17,21):
-		# 	tb.InsertSeparator(i)
+		for i in (3,8,12,17,21):
+			tb.InsertSeparator(i)
 		
-		# ### undo and redo button desabled
-		# tb.EnableTool(wx.ID_UNDO, False)
-		# tb.EnableTool(wx.ID_REDO, False)
+		### undo and redo button desabled
+		tb.EnableTool(wx.ID_UNDO, False)
+		tb.EnableTool(wx.ID_REDO, False)
 	
-		# tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in DEFAULT_DEVS_DIRNAME)
+		tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in DEFAULT_DEVS_DIRNAME)
 
-		# ### default direct connector toogled
-		# tb.ToggleTool(self.toggle_list[0], 1)
+		### default direct connector toogled
+		tb.ToggleTool(self.toggle_list[0], 1)
 
-		# ### Binding
-		# tool_bindings = [
-		# 	self.OnNew, self.OnOpenFile, self.OnPrintPreview, self.OnSaveFile, self.OnSaveAsFile,
-		# 	self.OnUndo, self.OnRedo, self.OnZoom, self.OnUnZoom, self.AnnuleZoom,
-		# 	self.OnPriorityGUI, self.OnCheck, self.OnPlugins, self.OnSimulation,
-		# 	self.OnDirectConnector, self.OnSquareConnector, self.OnLinearConnector, self.OnCurveConnector
-		# ]
+		### Binding
+		tool_bindings = [
+			self.OnNew, self.OnOpenFile, self.OnPrintPreview, self.OnSaveFile, self.OnSaveAsFile,
+			self.OnUndo, self.OnRedo, self.OnZoom, self.OnUnZoom, self.AnnuleZoom,
+			self.OnPriorityGUI, self.OnCheck, self.OnPlugins, self.OnSimulation,
+			self.OnDirectConnector, self.OnSquareConnector, self.OnLinearConnector, self.OnCurveConnector
+		]
 
-		# for tool, handler in zip(self.tools, tool_bindings):
-		# 	self.Bind(wx.EVT_TOOL, handler, tool)
+		for tool, handler in zip(self.tools, tool_bindings):
+			self.Bind(wx.EVT_TOOL, handler, tool)
 
-		# ##################################################################### Abstraction hierarchy
-		# self.Bind(wx.EVT_SPINCTRL, self.OnSpin, id=self.toggle_list[3])
-		# self.Bind(wx.EVT_TEXT, self.OnSpin, id=self.toggle_list[3])
-		# ##############################################################################################
+		##################################################################### Abstraction hierarchy
+		self.Bind(wx.EVT_SPINCTRL, self.OnSpin, id=self.toggle_list[3])
+		self.Bind(wx.EVT_TEXT, self.OnSpin, id=self.toggle_list[3])
+		##############################################################################################
 
-		# self.Bind(wx.EVT_TOOL, self.OnUpWard, id=ID_UPWARD)
-		# self.Bind(wx.EVT_TOOL, self.OnDownWard, id=ID_DOWNWARD)
+		self.Bind(wx.EVT_TOOL, self.OnUpWard, id=ID_UPWARD)
+		self.Bind(wx.EVT_TOOL, self.OnDownWard, id=ID_DOWNWARD)
 
-		# tb.Realize()
+		tb.Realize()
 
 		# self.SetToolBar(tb)
 
