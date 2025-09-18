@@ -505,9 +505,7 @@ class Base(object):
 				if self.thread.end_flag:
 					self.OnTimer(event)
 				else:
-					# self.timer.Start(-1)
-					# self.timer.Stop()
-					# Déclenchement quasi immédiat (1 ms), une seule fois
+					# Déclenchement quasi immédiat (1 ms)
 					self.timer.Start(1)
 
 				### timer for real time

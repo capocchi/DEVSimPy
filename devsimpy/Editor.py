@@ -2740,11 +2740,10 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		finddlg = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
 		tb.AddControl(finddlg)
 
-		try:
+		if tb and tb.GetToolsCount() > 0:
 			tb.Realize()
-		except:
+		else:
 			sys.stdout.write(_("Toolbar not displayed on mac..."))
-			pass
 
 		if not self.cb.isCMD():
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
