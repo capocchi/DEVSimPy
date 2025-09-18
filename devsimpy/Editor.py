@@ -1658,10 +1658,9 @@ class Base(object):
 			self.Bind(wx.EVT_TOOL, self.nb.OnPaste, id= self.paste.GetId())
 			self.Bind(wx.EVT_TOOL, self.OnAiHelp, id=self.ai.GetId())
 
-		tb.Realize()
-
-		### Add: A. Dominici
 		tb.EnableTool(self.ai.GetId(), bool(getattr(builtins,'SELECTED_IA')))
+
+		tb.Realize()
 
 		return tb
 
@@ -2730,10 +2729,6 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		### insert new icon in toolbar (icon are not available in embeded editor (Show menu)
 		tb = self.GetToolBar()
 		
-		if tb is None:
-			sys.stdout.write("Toolbar not available\n")
-			return
-
 		tb.AddSeparator()
 		#tb.InsertSeparator(tb.GetToolsCount())
 
@@ -2745,14 +2740,11 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		tb.AddStretchableSpace()
 		finddlg = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
 		tb.AddControl(finddlg)
+	
+		self.toolbar.Realize()
 
-		# Realize maintenant que la frame est visible et toolbar attachée
-		# if tb.GetToolsCount() > 0:
-		# 	try:
-		# 		tb.Realize()
-		# 	except Exception:
-		# 		sys.stdout.write("Toolbar could not be realized on mac\n")
-
+		# tb.Realize()
+	
 		if not self.cb.isCMD():
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=poke.GetId())
@@ -2835,10 +2827,7 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 def BlockEditor(*args):
 	parent = args[0]
 	if not parent:
-		frame = BlockEditorFrame(*args)
-		tb = frame.GetToolBar()
-		tb.Realize()
-		return frame
+		return BlockEditorFrame(*args)
 	else:
 		return BlockEditorPanel(*args)
 	
