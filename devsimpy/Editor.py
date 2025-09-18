@@ -1660,6 +1660,21 @@ class Base(object):
 
 		tb.EnableTool(self.ai.GetId(), bool(getattr(builtins,'SELECTED_IA')))
 
+		
+		# tb.AddSeparator()
+		tb.InsertSeparator(tb.GetToolsCount())
+
+		# ### combo to insert tips text
+		cbID = wx.NewIdRef()
+		
+		tb.AddControl(wx.ComboBox(tb, cbID, _("Choose to insert in place"), choices=[],size=(160,-1), style=wx.CB_DROPDOWN))
+			
+		# ### search text box 
+		tb.AddStretchableSpace()
+		finddlg = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
+		tb.AddControl(finddlg)
+
+	
 		tb.Realize()
 
 		return tb
@@ -2151,6 +2166,7 @@ class EditorFrame(Base, wx.Frame):
 		self.toolbar = self.CreateTB()
 		self.SetToolBar(self.toolbar)
 
+
 		### binding
 		self.Bind(wx.EVT_CLOSE, self.QuitApplication)
 
@@ -2639,7 +2655,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 			icon.CopyFromBitmap(icon_bitmap)
 			self.SetIcon(icon)
 
-		# self.ConfigureGUI()
+		self.ConfigureGUI()
 
 	###
 	def ConfigureGUI(self):
@@ -2730,20 +2746,23 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		### insert new icon in toolbar (icon are not available in embeded editor (Show menu)
 		# tb = self.GetToolBar()
 		
-		self.toolbar.AddSeparator()
-		#tb.InsertSeparator(tb.GetToolsCount())
+		# # tb.AddSeparator()
+		# tb.InsertSeparator(tb.GetToolsCount())
 
-		### combo to insert tips text
-		cbID = wx.NewIdRef()
-		self.toolbar.AddControl(wx.ComboBox(self.toolbar, cbID, _("Choose to insert in place"), choices=self.getChoices(),size=(160,-1), style=wx.CB_DROPDOWN))
+		# # ### combo to insert tips text
+		# cbID = wx.NewIdRef()
 		
-		### search text box 
-		self.toolbar.AddStretchableSpace()
-		finddlg = TestSearchCtrl(self.toolbar, size=(150,-1), doSearch=self.DoSearch)
-		self.toolbar.AddControl(finddlg)
+		# tb.AddControl(wx.ComboBox(tb, cbID, _("Choose to insert in place"), choices=self.getChoices(),size=(160,-1), style=wx.CB_DROPDOWN))
+		
+		
+		# # ### search text box 
+		# tb.AddStretchableSpace()
+		# finddlg = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
+		# tb.AddControl(finddlg)
 
-		self.toolbar.Realize()
-	
+		# # tb.Realize()
+		
+
 		if not self.cb.isCMD():
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=poke.GetId())
@@ -2765,7 +2784,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 			self.Bind(wx.EVT_MENU, self.OnInsertSetSigma, id=setSigma.GetId())
 			self.Bind(wx.EVT_MENU, self.OnInsertSetStatus, id=setStatus.GetId())
 
-		self.Bind(wx.EVT_COMBOBOX, self.OnCombo, id=cbID)
+		# self.Bind(wx.EVT_COMBOBOX, self.OnCombo, id=cbID)
 		self.Bind(wx.EVT_MENU, self.OnInsertDebug, id=debug.GetId())
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 
