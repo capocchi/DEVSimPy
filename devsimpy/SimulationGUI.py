@@ -508,7 +508,7 @@ class Base(object):
 					# self.timer.Start(-1)
 					# self.timer.Stop()
 					# Déclenchement quasi immédiat (1 ms), une seule fois
-					self.timer.Start(1, oneShot=True)
+					self.timer.Start(1)
 
 				### timer for real time
 				if self.real_time_flag: 
