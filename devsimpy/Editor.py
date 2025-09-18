@@ -80,6 +80,14 @@ wx.SystemSettings_GetColour = wx.SystemSettings.GetColour
 ###
 #################################################################
 
+def safe_realize(tb):
+    if tb and tb.GetToolsCount() > 0:
+        try:
+            wx.CallAfter(tb.Realize)  # évite crash sur mac
+        except Exception:
+            sys.stdout.write(_("Toolbar not displayed on mac..."))
+
+
 ### NOTE: Editor.py :: isError 				=> check if file is well-formed and if requirements are corrects
 def isError(scriptlet):
 	"""
@@ -2740,10 +2748,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		finddlg = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
 		tb.AddControl(finddlg)
 
-		if tb and tb.GetToolsCount() > 0:
-			tb.Realize()
-		else:
-			sys.stdout.write(_("Toolbar not displayed on mac..."))
+		safe_realize(tb)
 
 		if not self.cb.isCMD():
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
