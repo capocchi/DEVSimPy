@@ -550,7 +550,8 @@ class ModelGeneratorWizard(Wizard):
 		# Create a page 4_1
 		page4_1 = CustomPage(self, _('Finish'))
 		# save filebrowse
-		init = os.path.join(domain_path, "%s.amd"%vbox2.GetItem(1).GetWindow().GetValue())
+		filename = vbox3.GetItem(1).GetWindow().GetValue() if self.type == "Coupled" else vbox2.GetItem(1).GetWindow().GetValue()
+		init = os.path.join(domain_path, f"{filename}.amd")
 		fb2 = filebrowse.FileBrowseButton(	page4_1,
 											wx.NewIdRef(),
 											initialValue = init,
