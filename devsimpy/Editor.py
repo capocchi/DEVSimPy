@@ -2645,7 +2645,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		icon.CopyFromBitmap(icon_bitmap)
 		self.SetIcon(icon)
 		
-		self.ConfigureGUI()
+		# self.ConfigureGUI()
 
 	###
 	def ConfigureGUI(self):
@@ -2685,14 +2685,8 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 			setState = wx.MenuItem(set_submenu, wx.NewIdRef(), _('State object'), _("Set state object (self.setState({'status':'IDLE', 'sigma':0.0}))"))
 			setSigma = wx.MenuItem(set_submenu, wx.NewIdRef(), _('Sigma value'), _('Set sigma value (self.setSigma(0.0))'))
 
-			bmp = load_and_resize_image('peek.png')
-			if bmp is not None:
-				peek.SetBitmap(bmp)
-			
-			bmp = load_and_resize_image('poke.png')
-			if bmp is not None:
-				poke.SetBitmap(bmp)
-
+			peek.SetBitmap(load_and_resize_image('peek.png'))
+			poke.SetBitmap(load_and_resize_image('poke.png'))
 			# getPortId.SetBitmap()
 			# getMsgValue.SetBitmap()
 			# getMsgTime.SetBitmap()
@@ -2728,9 +2722,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 			get_submenu.Append(getElapsed)
 
 		debug = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Debugger'), _('Generate new debugger code (print into the log of model)'))
-		bmp = load_and_resize_image('debugger.png')
-		if bmp is not None:
-			debug.SetBitmap(bmp)
+		debug.SetBitmap(load_and_resize_image('debugger.png'))
 		new_submenu.Append(debug)
 
 		menu = self.GetMenuBar().GetMenu(1)
@@ -2889,7 +2881,9 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 def BlockEditor(*args):
 	parent = args[0]
 	if not parent:
-		return BlockEditorFrame(*args)
+		frame = BlockEditorFrame(*args)
+		frame.ConfigureGUI()
+		return frame
 	else:
 		return BlockEditorPanel(*args)
 	
