@@ -321,7 +321,7 @@ class Wizard(wizmod):
 	def on_cancel(self, evt):
 		"""Cancel button has been pressed.  Clean up and exit without continuing."""
 		self.canceled_flag = True
-		self.on_close(evt)
+		wx.CallAfter(self.Destroy)
 
 	def on_finished(self, evt):
 		"""Finish button has been pressed.  Give the specified values
@@ -332,8 +332,8 @@ class Wizard(wizmod):
 		""" Close button has been pressed. Destroy the wizard.
 		"""
 		self.canceled_flag = True
-		self.Destroy()
-		evt.skip()
+		wx.CallAfter(self.Destroy)
+		
 
 class ModelGeneratorWizard(Wizard):
 	""" Model Generator Wizard Class.
