@@ -77,9 +77,6 @@ if GUI_FLAG:
 			raise RuntimeError(f"Failed to load bitmap: {image_path}")
 
 		image = bitmap.ConvertToImage()
-		if not image.IsOk():  # idem pour l'image
-			return wx.ArtProvider.GetBitmap(wx.ART_MISSING_IMAGE, wx.ART_TOOLBAR, (width,height))
-
 		image = image.Scale(width, height, wx.IMAGE_QUALITY_HIGH)
 		return wx.Bitmap(image)
 		
