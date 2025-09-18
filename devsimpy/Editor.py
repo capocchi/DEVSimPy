@@ -2638,7 +2638,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 			icon.CopyFromBitmap(icon_bitmap)
 			self.SetIcon(icon)
 
-		self.ConfigureGUI()
+		# self.ConfigureGUI()
 
 	###
 	def ConfigureGUI(self):
@@ -2727,23 +2727,21 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		### -------------------------------------------------------------------
 
 		### insert new icon in toolbar (icon are not available in embeded editor (Show menu)
-		tb = self.GetToolBar()
+		# tb = self.GetToolBar()
 		
-		tb.AddSeparator()
+		self.toolbar.AddSeparator()
 		#tb.InsertSeparator(tb.GetToolsCount())
 
 		### combo to insert tips text
 		cbID = wx.NewIdRef()
-		tb.AddControl(wx.ComboBox(tb, cbID, _("Choose to insert in place"), choices=self.getChoices(),size=(160,-1), style=wx.CB_DROPDOWN))
+		self.toolbar.AddControl(wx.ComboBox(self.toolbar, cbID, _("Choose to insert in place"), choices=self.getChoices(),size=(160,-1), style=wx.CB_DROPDOWN))
 		
 		### search text box 
-		tb.AddStretchableSpace()
-		finddlg = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
-		tb.AddControl(finddlg)
-	
-		self.toolbar.Realize()
+		self.toolbar.AddStretchableSpace()
+		finddlg = TestSearchCtrl(self.toolbar, size=(150,-1), doSearch=self.DoSearch)
+		self.toolbar.AddControl(finddlg)
 
-		# tb.Realize()
+		self.toolbar.Realize()
 	
 		if not self.cb.isCMD():
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
