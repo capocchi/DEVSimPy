@@ -2689,7 +2689,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 			if bmp is not None:
 				peek.SetBitmap(bmp)
 			
-			bmp = load_and_resize_image('peek.png')
+			bmp = load_and_resize_image('poke.png')
 			if bmp is not None:
 				poke.SetBitmap(bmp)
 
@@ -2730,7 +2730,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		debug = wx.MenuItem(new_submenu, wx.NewIdRef(), _('Debugger'), _('Generate new debugger code (print into the log of model)'))
 		bmp = load_and_resize_image('debugger.png')
 		if bmp is not None:
-			debug.SetBitmap()
+			debug.SetBitmap(bmp)
 		new_submenu.Append(debug)
 
 		menu = self.GetMenuBar().GetMenu(1)
