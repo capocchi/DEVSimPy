@@ -577,7 +577,7 @@ class MainApplication(wx.Frame):
 		tb = self.CreateToolBar()
 
 		# tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
-		# # tb.SetToolBitmapSize((16,16))
+		tb.SetToolBitmapSize((16,16))
 
 		self.toggle_list = [wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef()]
 
