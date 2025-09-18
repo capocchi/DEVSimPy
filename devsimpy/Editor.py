@@ -80,14 +80,6 @@ wx.SystemSettings_GetColour = wx.SystemSettings.GetColour
 ###
 #################################################################
 
-def safe_realize(tb):
-    if tb and tb.GetToolsCount() > 0:
-        try:
-            wx.CallAfter(tb.Realize)  # évite crash sur mac
-        except Exception:
-            sys.stdout.write(_("Toolbar not displayed on mac..."))
-
-
 ### NOTE: Editor.py :: isError 				=> check if file is well-formed and if requirements are corrects
 def isError(scriptlet):
 	"""
@@ -2154,8 +2146,6 @@ class EditorFrame(Base, wx.Frame):
 		self.SetMenuBar(self.menuBar)
 		self.statusbar= self.GetStatusBar()
 
-		self.Show(True)
-
 		### create and set the tool bar
 		self.toolbar = self.CreateTB()
 		self.SetToolBar(self.toolbar)
@@ -2642,12 +2632,15 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		EditorFrame.__init__(self, parent, id, title)
 		BlockBase.__init__(self, parent, id, title, block)
 
+		# Icon
 		icon_bitmap = load_and_resize_image('py_file.png')
-		icon = wx.Icon()
-		icon.CopyFromBitmap(icon_bitmap)
-		self.SetIcon(icon)
-		
-		self.ConfigureGUI()
+		if icon_bitmap and icon_bitmap.IsOk():
+			icon = wx.Icon()
+			icon.CopyFromBitmap(icon_bitmap)
+			self.SetIcon(icon)
+
+		# Afficher la frame AVANT toute toolbar/menu
+		self.Show(True)
 
 	###
 	def ConfigureGUI(self):
@@ -2738,6 +2731,10 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		### insert new icon in toolbar (icon are not available in embeded editor (Show menu)
 		tb = self.GetToolBar()
 		
+		if tb is None:
+			sys.stdout.write("Toolbar not available\n")
+			return
+
 		tb.AddSeparator()
 		#tb.InsertSeparator(tb.GetToolsCount())
 
@@ -2750,7 +2747,12 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		finddlg = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
 		tb.AddControl(finddlg)
 
-		self._safe_realize_tool_bar(tb)
+		# Realize maintenant que la frame est visible et toolbar attachée
+		if tb.GetToolsCount() > 0:
+			try:
+				tb.Realize()
+			except Exception:
+				sys.stdout.write("Toolbar could not be realized on mac\n")
 
 		if not self.cb.isCMD():
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
@@ -2777,55 +2779,6 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		self.Bind(wx.EVT_MENU, self.OnInsertDebug, id=debug.GetId())
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 
-	def _safe_realize_tool_bar(self, tb, retries=6, delay_ms=100):
-		"""
-		Réalise la toolbar de façon sûre sur macOS :
-		- évite lambda qui capture un tb éventuellement détruit
-		- attend que la frame / toolbar soit affichée
-		- retente quelques fois avant d'abandonner
-		"""
-		# validations rapides
-		if tb is None:
-			sys.stdout.write("No toolbar to realize\n")
-			return
-		# s'assure que c'est bien une toolbar
-		try:
-			is_toolbar = isinstance(tb, wx.ToolBar)
-		except Exception:
-			is_toolbar = False
-
-		if not is_toolbar:
-			sys.stdout.write("Object is not a wx.ToolBar, skipping Realize\n")
-			return
-
-		# si pas d'outils, rien à faire
-		if tb.GetToolsCount() == 0:
-			sys.stdout.write("Toolbar empty, skipping Realize\n")
-			return
-
-		# fonction qui effectue le Realize — méthode d'instance, pas de lambda
-		def _attempt_realize():
-			# re-vérifier que tb est toujours valide / visible
-			if tb is None:
-				return
-			try:
-				# IsShownOnScreen est un bon signal que la fenêtre est prête
-				if tb.IsShownOnScreen():
-					tb.Realize()
-				else:
-					raise RuntimeError("Toolbar not shown yet")
-			except Exception as e:
-				# si on a encore des retries -> replanifier, sinon abandonner proprement
-				nonlocal retries
-				retries -= 1
-				if retries > 0:
-					# replanifier après delay_ms ms — évite d'utiliser lambda
-					wx.CallLater(delay_ms, _attempt_realize)
-				else:
-					sys.stdout.write(f"safe_realize: giving up after retries: {e}\n")
-
-		# démarrer la première tentative via CallAfter (exécute dans la loop principale)
-		wx.CallAfter(_attempt_realize)
 
 	def OnClose(self,event):
 		"""
