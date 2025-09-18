@@ -342,8 +342,8 @@ class ModelGeneratorWizard(Wizard):
 		""" Constructor.
 		"""
 
-		if 'specific_domain_path' in kwargs and kwargs['specific_domain_path']:
-			domain_path = kwargs['specific_domain_path']
+		if 'specific_domain_path' in kwargs:
+			domain_path = kwargs['specific_domain_path'] if kwargs['specific_domain_path'] else DOMAIN_PATH
 			del kwargs['specific_domain_path']
 		else:
 			domain_path = DOMAIN_PATH
