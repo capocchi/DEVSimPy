@@ -1626,12 +1626,12 @@ class Base(object):
 
 		return menubar
 
-	def CreateTB(self, frame):
+	def CreateTB(self, tb):
 		""" Create tool-bar.
 		"""
 
-		# tb = self.CreateToolBar( wx.TB_FLAT|wx.TB_HORIZONTAL, wx.ID_ANY )
-		tb = wx.ToolBar(frame, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
+		# tb = self.CreateToolBar()
+		# tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
 		tb.SetToolBitmapSize((16, 16))# this required for non-standard size buttons on MSW
 
 		ai_help = _('Generative AI based modification' if bool(getattr(builtins, 'SELECTED_IA')) else 'Check the AI settings in Preferences')
@@ -2108,7 +2108,7 @@ class EditorPanel(Base, wx.Panel):
 		### create juste for the bind of action (save,...) of the toolbar - Warning it must stay here !
 		self.menuBar = self.CreateMenu()
 		### create toolbar
-		self.toolbar = self.CreateTB(self)
+		self.toolbar = self.CreateTB(self.parent.CreateToolBar())
 		###recover the statusbar of mainW
 		self.statusbar = parent.GetStatusBar()
 
@@ -2117,7 +2117,7 @@ class EditorPanel(Base, wx.Panel):
 		sizer.Add(self.nb, 1 ,wx.EXPAND)
 
 		### set sizer and layout of panel
-		self.SetSizer(sizer)
+		# self.SetSizer(sizer)
 		self.SetAutoLayout(True)
 	
 		Base.__init__(self, parent, id, title)
@@ -2149,7 +2149,7 @@ class EditorFrame(Base, wx.Frame):
 		self.statusbar= self.GetStatusBar()
 
 		### create and set the tool bar
-		self.toolbar = self.CreateTB(self)
+		self.toolbar = self.CreateTB(self.CreateToolBar())
 		self.SetToolBar(self.toolbar)
 
 
