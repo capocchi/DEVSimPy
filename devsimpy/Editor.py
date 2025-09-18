@@ -2153,7 +2153,6 @@ class EditorFrame(Base, wx.Frame):
 		self.toolbar = self.CreateTB(self.CreateToolBar(wx.TB_HORIZONTAL | wx.NO_BORDER))
 		self.SetToolBar(self.toolbar)
 
-
 		### binding
 		self.Bind(wx.EVT_CLOSE, self.QuitApplication)
 
@@ -2746,8 +2745,8 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		finddlg = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
 		tb.AddControl(finddlg)
 
-		if wx.Platform != '__WXMAC__':
-			tb.Realize()
+		# if wx.Platform != '__WXMAC__':
+		tb.Realize()
 		
 		if not self.cb.isCMD():
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
