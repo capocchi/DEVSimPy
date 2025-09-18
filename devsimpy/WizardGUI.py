@@ -344,10 +344,11 @@ class ModelGeneratorWizard(Wizard):
 
 		if 'specific_domain_path' in kwargs:
 			domain_path = kwargs['specific_domain_path']
+			print("1", domain_path)
 			del kwargs['specific_domain_path']
 		else:
 			domain_path = DOMAIN_PATH
-
+			print("2", domain_path)
 		Wizard.__init__(self, *args, **kwargs)
 
         # properties of model
@@ -550,9 +551,8 @@ class ModelGeneratorWizard(Wizard):
 		# Create a page 4_1
 		page4_1 = CustomPage(self, _('Finish'))
 		# save filebrowse
-		filename = vbox3.GetItem(1).GetWindow().GetValue() if self.type == "Coupled" else vbox2.GetItem(1).GetWindow().GetValue()
-		print(domain_path, filename)
-		init = os.path.join(domain_path, f"{filename if filename else "model"}.amd")
+		filename = vbox2.GetItem(1).GetWindow().GetValue()
+		init = os.path.join(domain_path, f"{filename}.amd")
 		fb2 = filebrowse.FileBrowseButton(	page4_1,
 											wx.NewIdRef(),
 											initialValue = init,
