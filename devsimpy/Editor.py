@@ -2748,7 +2748,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		finddlg = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
 		tb.AddControl(finddlg)
 
-		safe_realize(tb)
+		# safe_realize(tb)
 
 		if not self.cb.isCMD():
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
