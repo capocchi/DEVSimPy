@@ -2640,7 +2640,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 			self.SetIcon(icon)
 
 		# Afficher la frame AVANT toute toolbar/menu
-		self.Show(True)
+		# self.Show(True)
 
 	###
 	def ConfigureGUI(self):
