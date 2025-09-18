@@ -2131,6 +2131,8 @@ class EditorFrame(Base, wx.Frame):
 		""" Constructor.
 		"""
 
+		Base.__init__(self, parent, id, title)
+		
 		### copy
 		self.parent = parent
 		
@@ -2158,7 +2160,6 @@ class EditorFrame(Base, wx.Frame):
 		e = wx.SizeEvent(self.GetSize())
 		self.ProcessEvent(e)
 
-		Base.__init__(self, parent, id, title)
 
 class BlockBase(object):
 	### 
