@@ -342,13 +342,12 @@ class ModelGeneratorWizard(Wizard):
 		""" Constructor.
 		"""
 
-		if 'specific_domain_path' in kwargs:
+		if 'specific_domain_path' in kwargs and kwargs['specific_domain_path']:
 			domain_path = kwargs['specific_domain_path']
-			print("1", domain_path)
 			del kwargs['specific_domain_path']
 		else:
 			domain_path = DOMAIN_PATH
-			print("2", domain_path)
+		
 		Wizard.__init__(self, *args, **kwargs)
 
         # properties of model
