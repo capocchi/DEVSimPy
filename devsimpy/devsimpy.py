@@ -574,11 +574,11 @@ class MainApplication(wx.Frame):
 
 		# for spash screen
 		pub.sendMessage('object.added',  message=_('Making tools bar ...\n'))
-		tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
+		tb = self.CreateToolBar()
 
 		# Ajouter un bouton avec l’image
 		tool_id = wx.NewIdRef()
-		tb.AddTool(tool_id, "Hello",  wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_TOOLBAR, (16, 16)), "Clique-moi")
+		tb.AddTool(tool_id, "Hello",  load_and_resize_image('new.png'), "Clique-moi")
 	
 		tb.Realize()
 		# tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
