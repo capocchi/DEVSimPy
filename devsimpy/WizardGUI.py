@@ -333,6 +333,7 @@ class Wizard(wizmod):
 		"""
 		self.canceled_flag = True
 		self.Destroy()
+		evt.skip()
 
 class ModelGeneratorWizard(Wizard):
 	""" Model Generator Wizard Class.
