@@ -78,12 +78,10 @@ if GUI_FLAG:
 
 		image = bitmap.ConvertToImage()
 		if not image.IsOk():  # idem pour l'image
-			raise RuntimeError(f"Failed to convert bitmap to image: {image_path}")
+			return wx.ArtProvider.GetBitmap(wx.ART_MISSING_IMAGE, wx.ART_TOOLBAR, (width,height))
 
 		image = image.Scale(width, height, wx.IMAGE_QUALITY_HIGH)
 		return wx.Bitmap(image)
-
-	
 		
 else:
 	def load_and_resize_image(filename, width=16, height=16):

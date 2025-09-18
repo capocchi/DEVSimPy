@@ -2736,8 +2736,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		tb.InsertSeparator(tb.GetToolsCount())
 
 		# ### combo to insert tips text
-		cbID = wx.NewIdRef()
-		
+		cbID = wx.NewIdRef()		
 		tb.AddControl(wx.ComboBox(tb, cbID, _("Choose to insert in place"), choices=self.getChoices(),size=(160,-1), style=wx.CB_DROPDOWN))
 			
 		# ### search text box 
@@ -2745,7 +2744,6 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		finddlg = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
 		tb.AddControl(finddlg)
 
-		# if wx.Platform != '__WXMAC__':
 		tb.Realize()
 		
 		if not self.cb.isCMD():
