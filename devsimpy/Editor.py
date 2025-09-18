@@ -2639,9 +2639,6 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 			icon.CopyFromBitmap(icon_bitmap)
 			self.SetIcon(icon)
 
-		# Afficher la frame AVANT toute toolbar/menu
-		self.Show(True)
-
 		self.ConfigureGUI()
 
 	###
@@ -2750,11 +2747,11 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		tb.AddControl(finddlg)
 
 		# Realize maintenant que la frame est visible et toolbar attachée
-		if tb.GetToolsCount() > 0:
-			try:
-				tb.Realize()
-			except Exception:
-				sys.stdout.write("Toolbar could not be realized on mac\n")
+		# if tb.GetToolsCount() > 0:
+		# 	try:
+		# 		tb.Realize()
+		# 	except Exception:
+		# 		sys.stdout.write("Toolbar could not be realized on mac\n")
 
 		if not self.cb.isCMD():
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
@@ -2838,7 +2835,10 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 def BlockEditor(*args):
 	parent = args[0]
 	if not parent:
-		return BlockEditorFrame(*args)
+		frame = BlockEditorFrame(*args)
+		tb = frame.GetToolBar()
+		tb.Realize()
+		return frame
 	else:
 		return BlockEditorPanel(*args)
 	
