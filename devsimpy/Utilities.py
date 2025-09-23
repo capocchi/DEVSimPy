@@ -67,17 +67,18 @@ if GUI_FLAG:
 	@lru_cache(maxsize=128)
 	def load_and_resize_image(filename, width=16, height=16):
 		"""Charge une image et la redimensionne à width x height"""
-
 		image_path = os.path.join(ICON_PATH, filename)
 
 		if not os.path.isfile(image_path):
 			raise FileNotFoundError(f"File not found: {image_path}")
 
 		bitmap = wx.Bitmap(image_path)
-		image = bitmap.ConvertToImage()  # Conversion en wx.Image
-		image = image.Scale(width, height, wx.IMAGE_QUALITY_HIGH)  # Redimensionner l'image
-		return wx.Bitmap(image)  # Reconvertir en wx.Bitmap
-	
+		if not bitmap.IsOk():  # vérification essentielle sur macOS
+			raise RuntimeError(f"Failed to load bitmap: {image_path}")
+
+		image = bitmap.ConvertToImage()
+		image = image.Scale(width, height, wx.IMAGE_QUALITY_HIGH)
+		return wx.Bitmap(image)
 		
 else:
 	def load_and_resize_image(filename, width=16, height=16):

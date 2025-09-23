@@ -14,9 +14,6 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-#import collections
-
-#Message = collections.namedtuple('Message', 'value time')
 
 class Message:
 	'''	The class Message provide the activation of all DEVS components.
@@ -27,6 +24,7 @@ class Message:
 		@type value: None
 		@type operation: string
 	'''
+	__slots__ = ("value", "time", "name")
 
 	###
 	def __init__(self, v=None, t=None):

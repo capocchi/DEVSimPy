@@ -321,7 +321,7 @@ class Wizard(wizmod):
 	def on_cancel(self, evt):
 		"""Cancel button has been pressed.  Clean up and exit without continuing."""
 		self.canceled_flag = True
-		self.on_close(evt)
+		wx.CallAfter(self.Destroy)
 
 	def on_finished(self, evt):
 		"""Finish button has been pressed.  Give the specified values
@@ -331,8 +331,8 @@ class Wizard(wizmod):
 	def on_close(self, evt):
 		""" Close button has been pressed. Destroy the wizard.
 		"""
-		self.canceled_flag = True
-		self.Destroy()
+		wx.CallAfter(self.Destroy)
+		
 
 class ModelGeneratorWizard(Wizard):
 	""" Model Generator Wizard Class.
@@ -343,11 +343,11 @@ class ModelGeneratorWizard(Wizard):
 		"""
 
 		if 'specific_domain_path' in kwargs:
-			domain_path = kwargs['specific_domain_path']
+			domain_path = kwargs['specific_domain_path'] if kwargs['specific_domain_path'] else DOMAIN_PATH
 			del kwargs['specific_domain_path']
 		else:
 			domain_path = DOMAIN_PATH
-
+		
 		Wizard.__init__(self, *args, **kwargs)
 
         # properties of model
@@ -550,7 +550,8 @@ class ModelGeneratorWizard(Wizard):
 		# Create a page 4_1
 		page4_1 = CustomPage(self, _('Finish'))
 		# save filebrowse
-		init = os.path.join(domain_path, "%s.amd"%vbox2.GetItem(1).GetWindow().GetValue())
+		filename = vbox2.GetItem(1).GetWindow().GetValue()
+		init = os.path.join(domain_path, f"{filename}.amd")
 		fb2 = filebrowse.FileBrowseButton(	page4_1,
 											wx.NewIdRef(),
 											initialValue = init,

@@ -99,7 +99,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.canvas.stockRedo = []
 
 		### Menu ToolBar
-		toolbar = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
+		toolbar = self.CreateToolBar()
 		toolbar.SetToolBitmapSize((16,16))
 
 		if self.parent:

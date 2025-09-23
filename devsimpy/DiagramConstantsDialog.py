@@ -279,7 +279,7 @@ class DiagramConstantsDialog(wx.Dialog):
 	def OnCancel(self,evt):
 		"""	Close dialog.
 		"""
-		self.Destroy()
+		self.CallAfter(self.Destroy)
 
 	def OnHelp(self, event):
 		""" Help message dialogue.

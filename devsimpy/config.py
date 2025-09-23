@@ -1,6 +1,8 @@
 import os
 import sys
 import builtins
+import logging
+logging.getLogger("pydot").setLevel(logging.WARNING)
 
 """ PATHS defined from the current dir used to execute devsimpy 
 """

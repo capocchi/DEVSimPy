@@ -494,7 +494,7 @@ class Base(object):
 
 				### clear all log file
 				for fn in [f for f in os.listdir(gettempdir()) if f.endswith('.devsimpy.log')]:
-					os.remove(os.path.join(gettempdir(),fn))
+					os.remove(os.path.join(gettempdir(), fn))
 
 				self.mem_offset = get_process_memory()
 
@@ -505,7 +505,8 @@ class Base(object):
 				if self.thread.end_flag:
 					self.OnTimer(event)
 				else:
-					self.timer.Start(-1)
+					# Déclenchement quasi immédiat (1 ms)
+					self.timer.Start(1)
 
 				### timer for real time
 				if self.real_time_flag: 

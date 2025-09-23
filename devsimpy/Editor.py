@@ -228,8 +228,7 @@ class PythonSTC(stc.StyledTextCtrl):
 		"""
 		stc.StyledTextCtrl.__init__(self, parent, ID, pos, size, style)
 		
-		# Do we want to automatically pop up command completion options?
-		
+		# Do we want to automatically pop up command completion options?		
 		self.autoComplete = True
 		self.autoCompleteIncludeMagic = True
 		self.autoCompleteIncludeSingle = True
@@ -469,8 +468,16 @@ class PythonSTC(stc.StyledTextCtrl):
 
 	# ------------------ Événement frappe ------------------
 	def on_key_up(self, event):
+		"""On key up event handler for auto-completion.
+
+		Args:
+			event: _key up event
+		"""
 		key = event.GetKeyCode()
-		if (65 <= key <= 90) or (97 <= key <= 122) or key == ord('_') or key == ord('.'):
+
+		return 
+
+		if (65 <= key <= 90) or (97 <= key <= 122) or key in (ord('_'), ord('.')):
 			pos = self.GetCurrentPos()
 			start = self.WordStartPosition(pos, True)
 			length = pos - start
@@ -478,25 +485,33 @@ class PythonSTC(stc.StyledTextCtrl):
 
 			self.update_classes_and_instances()
 
-			suggestions = set(keyword.kwlist)
-			words = set(self.GetText().split())
-			suggestions |= words
+			final_suggestions = []
 
-			if '.' in current_word:
-				obj_name, prefix = current_word.rsplit('.', 1)
-				if obj_name == 'self':
-					cls_name = self.get_current_class(pos)
-					if cls_name and cls_name in self.classes:
-						suggestions |= self.classes[cls_name]
-						length = len(prefix)
-				else:
-					cls_name = self.instances.get(obj_name)
-					if cls_name and cls_name in self.classes:
-						suggestions |= self.classes[cls_name]
-						length = len(prefix)
+			print(current_word)
+			# --- CAS SPECIAL : self. ---
+			if current_word.startswith("self."):
+				prefix = current_word.split(".", 1)[1]  # ce qui est après self.
+				cls_name = self.get_current_class(pos)
+				print(cls_name, prefix, self.classes)
+				if cls_name and cls_name in self.classes:
+					
+					candidates = self.classes[cls_name]
+					# On ne garde que ce qui commence par le préfixe
+					final_suggestions = sorted(
+						[c for c in candidates if c.startswith(prefix)]
+					)
+					length = len(prefix)
 
-			# Affiche suggestions locales immédiatement
-			self.AutoCompShow(length, " ".join(sorted(suggestions)))
+			# --- CAS GENERAL ---
+			# else:
+			# 	suggestions = set(keyword.kwlist)
+			# 	words = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", self.GetText()))
+			# 	suggestions |= words
+			# 	final_suggestions = sorted(suggestions)
+
+			# Affiche uniquement si on a quelque chose à proposer
+			if final_suggestions:
+				self.AutoCompShow(length, " ".join(final_suggestions))
 
 			# Appel IA avec délai pour ne pas spammer
 			# self.last_key_time = time.time()
@@ -1615,11 +1630,13 @@ class Base(object):
 
 		return menubar
 
-	def CreateTB(self):
+	def CreateTB(self, tb=None):
 		""" Create tool-bar.
 		"""
 
-		tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
+		if not tb:
+			tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
+		
 		tb.SetToolBitmapSize((16, 16))# this required for non-standard size buttons on MSW
 
 		ai_help = _('Generative AI based modification' if bool(getattr(builtins, 'SELECTED_IA')) else 'Check the AI settings in Preferences')
@@ -1647,10 +1664,9 @@ class Base(object):
 			self.Bind(wx.EVT_TOOL, self.nb.OnPaste, id= self.paste.GetId())
 			self.Bind(wx.EVT_TOOL, self.OnAiHelp, id=self.ai.GetId())
 
-		tb.Realize()
-
-		### Add: A. Dominici
 		tb.EnableTool(self.ai.GetId(), bool(getattr(builtins,'SELECTED_IA')))
+
+		tb.Realize()
 
 		return tb
 
@@ -2121,6 +2137,8 @@ class EditorFrame(Base, wx.Frame):
 		""" Constructor.
 		"""
 
+		Base.__init__(self, parent, id, title)
+		
 		### copy
 		self.parent = parent
 		
@@ -2133,10 +2151,10 @@ class EditorFrame(Base, wx.Frame):
 		### create menu, toolbar and statusbar for the frame
 		self.menuBar = self.CreateMenu()
 		self.SetMenuBar(self.menuBar)
-		self.toolbar = self.CreateTB()
 		self.statusbar= self.GetStatusBar()
 
-		### set the tool bar
+		### create and set the tool bar
+		self.toolbar = self.CreateTB(self.CreateToolBar(wx.TB_HORIZONTAL | wx.NO_BORDER))
 		self.SetToolBar(self.toolbar)
 
 		### binding
@@ -2148,7 +2166,6 @@ class EditorFrame(Base, wx.Frame):
 		e = wx.SizeEvent(self.GetSize())
 		self.ProcessEvent(e)
 
-		Base.__init__(self, parent, id, title)
 
 class BlockBase(object):
 	### 
@@ -2621,11 +2638,13 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		EditorFrame.__init__(self, parent, id, title)
 		BlockBase.__init__(self, parent, id, title, block)
 
+		# Icon
 		icon_bitmap = load_and_resize_image('py_file.png')
-		icon = wx.Icon()
-		icon.CopyFromBitmap(icon_bitmap)
-		self.SetIcon(icon)
-		
+		if icon_bitmap and icon_bitmap.IsOk():
+			icon = wx.Icon()
+			icon.CopyFromBitmap(icon_bitmap)
+			self.SetIcon(icon)
+
 		self.ConfigureGUI()
 
 	###
@@ -2717,24 +2736,20 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		### insert new icon in toolbar (icon are not available in embeded editor (Show menu)
 		tb = self.GetToolBar()
 		
-		tb.AddSeparator()
-		#tb.InsertSeparator(tb.GetToolsCount())
+		# tb.AddSeparator()
+		tb.InsertSeparator(tb.GetToolsCount())
 
-		### combo to insert tips text
-		cbID = wx.NewIdRef()
+		# ### combo to insert tips text
+		cbID = wx.NewIdRef()		
 		tb.AddControl(wx.ComboBox(tb, cbID, _("Choose to insert in place"), choices=self.getChoices(),size=(160,-1), style=wx.CB_DROPDOWN))
-		
-		### search text box 
+			
+		# ### search text box 
 		tb.AddStretchableSpace()
 		finddlg = TestSearchCtrl(tb, size=(150,-1), doSearch=self.DoSearch)
 		tb.AddControl(finddlg)
 
-		try:
-			tb.Realize()
-		except:
-			sys.stdout.write(_("Toolbar not displayed on mac..."))
-			pass
-
+		tb.Realize()
+		
 		if not self.cb.isCMD():
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=peek.GetId())
 			self.Bind(wx.EVT_MENU, self.OnInsertPeekPoke, id=poke.GetId())
@@ -2759,6 +2774,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 		self.Bind(wx.EVT_COMBOBOX, self.OnCombo, id=cbID)
 		self.Bind(wx.EVT_MENU, self.OnInsertDebug, id=debug.GetId())
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
+
 
 	def OnClose(self,event):
 		"""

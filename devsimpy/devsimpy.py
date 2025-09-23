@@ -575,7 +575,8 @@ class MainApplication(wx.Frame):
 		# for spash screen
 		pub.sendMessage('object.added',  message=_('Making tools bar ...\n'))
 		
-		tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
+		tb = self.CreateToolBar()
+
 		tb.SetToolBitmapSize((16,16))
 
 		self.toggle_list = [wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef()]
@@ -604,7 +605,7 @@ class MainApplication(wx.Frame):
 						]
 
 		##################################################################### Abstraction hierarchy
-		diagram = currentPage.GetDiagram()
+		# diagram = currentPage.GetDiagram()
 		level = currentPage.GetCurrentLevel()
 
 		level_label = wx.StaticText(tb, -1, _("Level "))
@@ -658,7 +659,7 @@ class MainApplication(wx.Frame):
 
 		tb.Realize()
 
-		self.SetToolBar(tb)
+		# self.SetToolBar(tb)
 
 	def GetExportPathsList(self):
 		""" Return the list of exported path.

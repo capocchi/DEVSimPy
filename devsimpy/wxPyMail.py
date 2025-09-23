@@ -79,7 +79,7 @@ class SendMailWx(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnClose, close_menu_item)
 
     def createToolbar(self):
-        tb = wx.ToolBar(self, wx.NewIdRef(), name='tb', style=wx.TB_HORIZONTAL | wx.NO_BORDER)
+        tb = self.CreateToolBar()
         tb.SetToolBitmapSize((16,16))
         sendTool = tb.AddTool(wx.NewIdRef(), _('Send'), load_and_resize_image('mail.png'), _('Sends Email'))
         self.Bind(wx.EVT_MENU, self.OnSend, sendTool)        

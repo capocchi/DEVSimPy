@@ -277,7 +277,6 @@ class PlotFrame(wx.Frame):
 		"""
 
 		tb = self.CreateToolBar()
-		#tb = wx.ToolBar(self, style=wx.TB_HORIZONTAL|wx.NO_BORDER|wx.TB_FLAT)
 		tb.SetToolBitmapSize((16,16))
 
 		zoomLabel, zoomId = self.enableZoom.GetItemLabelText(), self.enableZoom.GetId()
