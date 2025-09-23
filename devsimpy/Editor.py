@@ -228,8 +228,7 @@ class PythonSTC(stc.StyledTextCtrl):
 		"""
 		stc.StyledTextCtrl.__init__(self, parent, ID, pos, size, style)
 		
-		# Do we want to automatically pop up command completion options?
-		
+		# Do we want to automatically pop up command completion options?		
 		self.autoComplete = True
 		self.autoCompleteIncludeMagic = True
 		self.autoCompleteIncludeSingle = True
@@ -476,12 +475,9 @@ class PythonSTC(stc.StyledTextCtrl):
 		"""
 		key = event.GetKeyCode()
 
-		# Ignore si Ctrl est appuyé (ex: Ctrl+S)
-		if event.ControlDown():
-			event.Skip()
-			return
+		return 
 
-		if (65 <= key <= 90) or (97 <= key <= 122) or key == ord('_') or key == ord('.'):
+		if (65 <= key <= 90) or (97 <= key <= 122) or key in (ord('_'), ord('.')):
 			pos = self.GetCurrentPos()
 			start = self.WordStartPosition(pos, True)
 			length = pos - start
@@ -489,25 +485,33 @@ class PythonSTC(stc.StyledTextCtrl):
 
 			self.update_classes_and_instances()
 
-			suggestions = set(keyword.kwlist)
-			words = set(self.GetText().split())
-			suggestions |= words
+			final_suggestions = []
 
-			if '.' in current_word:
-				obj_name, prefix = current_word.rsplit('.', 1)
-				if obj_name == 'self':
-					cls_name = self.get_current_class(pos)
-					if cls_name and cls_name in self.classes:
-						suggestions |= self.classes[cls_name]
-						length = len(prefix)
-				else:
-					cls_name = self.instances.get(obj_name)
-					if cls_name and cls_name in self.classes:
-						suggestions |= self.classes[cls_name]
-						length = len(prefix)
+			print(current_word)
+			# --- CAS SPECIAL : self. ---
+			if current_word.startswith("self."):
+				prefix = current_word.split(".", 1)[1]  # ce qui est après self.
+				cls_name = self.get_current_class(pos)
+				print(cls_name, prefix, self.classes)
+				if cls_name and cls_name in self.classes:
+					
+					candidates = self.classes[cls_name]
+					# On ne garde que ce qui commence par le préfixe
+					final_suggestions = sorted(
+						[c for c in candidates if c.startswith(prefix)]
+					)
+					length = len(prefix)
 
-			# Affiche suggestions locales immédiatement
-			self.AutoCompShow(length, " ".join(sorted(suggestions)))
+			# --- CAS GENERAL ---
+			# else:
+			# 	suggestions = set(keyword.kwlist)
+			# 	words = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", self.GetText()))
+			# 	suggestions |= words
+			# 	final_suggestions = sorted(suggestions)
+
+			# Affiche uniquement si on a quelque chose à proposer
+			if final_suggestions:
+				self.AutoCompShow(length, " ".join(final_suggestions))
 
 			# Appel IA avec délai pour ne pas spammer
 			# self.last_key_time = time.time()
