@@ -16,20 +16,27 @@
 from itertools import *
 import threading
 import array
+import builtins
 
 from .DEVS import CoupledDEVS
 from PluginManager import PluginManager
 
 ### avec ce flag, on gere a totalité des messages sur les ports une seul fois dans delta_ext.
 WITHOUT_DELTA_EXT_FOR_ALL_PORT = True
-### avec ce flag on peut faire de l'execution en paralle de modèle qui s'active en meme emps mais pas avec des modèles couplé dans des modèle couplé
+### avec ce flag on peut faire de l'execution en paralle de modèle qui s'active en meme temps mais pas avec des modèles couplés dans des modèles couplés
 WITH_PARALLEL_EXECUTION = False
+### avec ce flag les simulation en nogui sont plus rapides
+ENABLE_SIM_LOGS = getattr(builtins,'GUI_FLAG', True)
 
 ###############################################################################
 # GLOBAL VARIABLES AND FUNCTIONS
 ###############################################################################
 
-def Error(message = '', esc = 1):
+def sim_log(event, **kwargs):
+    if ENABLE_SIM_LOGS:
+        PluginManager.trigger_event(event, **kwargs)
+
+def Error(message ='', esc=1):
 	"""Error-handling function: reports an error and exits interpreter if
 	esc evaluates to true.
 
@@ -69,8 +76,11 @@ class Sender:
 			AS = AtomicSolver()
 			r = AS.receive(d, msg)
 
-			PluginManager.trigger_event("SIM_BLINK", model=d, msg=msg)
-			PluginManager.trigger_event("SIM_TEST", model=d, msg=msg)
+			# PluginManager.trigger_event("SIM_BLINK", model=d, msg=msg)
+			# PluginManager.trigger_event("SIM_TEST", model=d, msg=msg)
+
+			sim_log("SIM_BLINK", model=d, msg=msg)
+			sim_log("SIM_TEST", model=d, msg=msg)
 
 		return r
 
@@ -146,7 +156,8 @@ class AtomicSolver:
 			aDEVS.elapsed = 0
 
 			# The SIM_VERBOSE event occurs
-			PluginManager.trigger_event("SIM_VERBOSE", model=aDEVS, msg=0)
+			# PluginManager.trigger_event("SIM_VERBOSE", model=aDEVS, msg=0)
+			sim_log("SIM_VERBOSE", model=aDEVS, msg=0)
 
 			# Return the DEVS' output to the parent coupled-DEVS (rather than
 			# sending $(y,\,t)$ message).
@@ -290,10 +301,14 @@ class CoupledSolver(Sender):
 
 			self.threading_send(send(dStar, msg), cDEVS, t)
 
-			cDEVS.myTimeAdvance = min(array.array('d',[c.myTimeAdvance for c in cDEVS.componentSet]+[cDEVS.myTimeAdvance]))
+			# cDEVS.myTimeAdvance = min(array.array('d',[c.myTimeAdvance for c in cDEVS.componentSet]+[cDEVS.myTimeAdvance]))
 
 			###each to the coupled DEVS' immChildren list
-			cDEVS.immChildren = [d for d in cDEVS.componentSet if cDEVS.myTimeAdvance == d.myTimeAdvance]
+			# cDEVS.immChildren = [d for d in cDEVS.componentSet if cDEVS.myTimeAdvance == d.myTimeAdvance]
+			
+			time_advances = [c.myTimeAdvance for c in cDEVS.componentSet]
+			cDEVS.myTimeAdvance = min(time_advances + [cDEVS.myTimeAdvance])
+			cDEVS.immChildren = [d for d, ta in zip(cDEVS.componentSet, time_advances) if cDEVS.myTimeAdvance == ta]
 
 			return cDEVS.myOutput
 
@@ -342,11 +357,6 @@ class CoupledSolver(Sender):
 
 		else:
 			Error("Unrecognized message", 1)
-
-#def worker(d, msg, q):
-	#CS = CoupledSolver()
-	#r = CS.receive(d, msg)
-	#q.put((r,d.myInput, d.myOutput, d.myTimeAdvance, d.timeLast))
 
 ###############################################################################
 
