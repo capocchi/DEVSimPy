@@ -69,6 +69,7 @@ def atomicCode(label):
 -------------------------------------------------------------------------------
 \"\"\"
 
+
 ### Specific import ------------------------------------------------------------
 from DomainInterface import DomainBehavior
 from DomainInterface.Object import Message
