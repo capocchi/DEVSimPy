@@ -2215,7 +2215,7 @@ class BlockBase(object):
 				self._choices = collections.OrderedDict([(_('New init phase'),self.OnInitPhase), (_('New peek'),self.OnPeek), (_('New all peek'),self.OnAllPeek), 
 					(_('New poke'),self.OnPoke), (_('New hold in state'),self.OnInsertHoldInState), (_('New passivate in state'),self.OnInsertPassivateInState), 
 					(_('New passivate state'),self.OnInsertPassivateState), (_('New Phase test'),self.OnInsertPhaseIs), (_('New debugger stdout'),self.OnInsertDebug), 
-					(_('Get state'),self.OnInsertGetState), (_('Get sigma'),self.OnInsertGetSigma), (_('Get message value'),self.OnInsertGetMsgValue), (_('Get message time'),self.OnInsertGetMsgTime)])
+					(_('Get state'),self.OnInsertGetState), (_('Get sigma'),self.OnInsertGetSigma), (_('Get elasped'),self.OnInsertGetElapsed), (_('Get message value'),self.OnInsertGetMsgValue), (_('Get message time'),self.OnInsertGetMsgTime)])
 			else:
 				if 'PyPDEVS' in getattr(builtins, 'DEFAULT_DEVS_DIRNAME'):
 					self._choices = collections.OrderedDict([(_("New add sub model"),self.OnAddModel),(_("New remove sub model"),self.OnRemoveModel),(_("New port connection"),self.OnDisConnectPorts),(_("New port connection"),self.OnConnectPorts),(_('New debugger stdout'),self.OnInsertDebug)])
@@ -2355,7 +2355,7 @@ class BlockBase(object):
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.getStatus()")
 		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
-
+		
 	def OnInsertGetSigma(self, event):
 		""" Insert a sentence to get the sigma value.
 		"""

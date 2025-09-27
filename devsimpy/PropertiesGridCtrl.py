@@ -34,7 +34,6 @@ if not hasattr(inspect, 'getargspec'):
 import wx
 import wx.grid as gridlib
 from wx.lib import wordwrap
-import wx.gizmos as gizmos
 import wx.lib.imagebrowser as ib
 
 ### Phoenix
@@ -57,6 +56,25 @@ wx.OPEN =  wx.FD_OPEN
 wx.CHANGE_DIR = wx.FD_CHANGE_DIR
 
 _ = wx.GetTranslation
+
+if DEFAULT_DEVS_DIRNAME=='PyDEVS':
+	sim_doc = '''######################################
+
+λ → δint (if internal),
+δext (if external),
+λ → δconf (if conflict).
+
+Requires select in coupled models.
+'''  
+else:
+	sim_doc = '''######################################
+
+(1) λ for all imminents →
+(2) Route outputs →
+(3) For each model: δint / δext / δconf.
+
+No select needed.
+''' 
 
 class ListCellRenderer(gridlib.GridCellRenderer):
     def __init__(self):
@@ -274,7 +292,7 @@ class CodeCB(wx.Choicebook):
 			except:
 				h = info
 
-			pageTexts = {_('Doc'): a,
+			pageTexts = {_('Doc'): a+'\n'+sim_doc,
 						 _('Class'): b,
 						 _('Constructor'): c,
 						 _('Internal Transition'): d,
