@@ -155,10 +155,12 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 			### define the simulation strategy
 			args = {'simulator':self}
 			### TODO: isinstance(self, PyDEVSSimulator)
-			if DEFAULT_DEVS_DIRNAME == "PyDEVS":
-				cls_str = eval(PYDEVS_SIM_STRATEGY_DICT[self.strategy])
-			else:
-				cls_str = eval(PYPDEVS_SIM_STRATEGY_DICT[self.strategy])
+			cls_str = eval(getattr(builtins, f'{DEFAULT_DEVS_DIRNAME.upper()}_SIM_STRATEGY_DICT')[self.strategy])
+			
+			# if DEFAULT_DEVS_DIRNAME == "PyDEVS":
+			# 	cls_str = eval(PYDEVS_SIM_STRATEGY_DICT[self.strategy])
+			# else:
+			# 	cls_str = eval(PYPDEVS_SIM_STRATEGY_DICT[self.strategy])
 
 			self.setAlgorithm(cls_str(*(), **args))
 
