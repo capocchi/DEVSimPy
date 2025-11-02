@@ -612,41 +612,6 @@ class SimStrategy5(SimStrategy4):
     def SetClassicDEVSOption(self):
         return False
 
-def _handle_message(self, msg):
-    """Handle incoming Kafka message"""
-    try:
-        data = json.loads(msg.value().decode('utf-8'))
-        source_model = msg.topic().split('.')[1]
-        
-        logger.info("Received message from %s: %s", source_model, data)
-        
-        if data['type'] == 'internal':
-            # Handle internal transition
-            model = self.child_models.get(source_model)
-            if model:
-                # Get output before transition
-                output = model.outputFnc()
-                if output:
-                    logger.info("Model %s produced output: %s", source_model, output)
-                    self.producer.produce(
-                        f'devs.{source_model}.out',
-                        json.dumps({
-                            'type': 'output',
-                            'time': data['time'],
-                            'data': output
-                        }).encode('utf-8')
-                    )
-                    self.producer.flush()
-                
-                # Perform internal transition
-                model.intTransition()
-                model.timeLast = data['time']
-                model.myTimeAdvance = model.timeAdvance()
-                logger.info("Model %s completed internal transition", source_model)
-                
-    except Exception as e:
-        logger.exception("Error handling message: %s", e)
-
 class SimStrategyKafka(SimStrategy):
     def __init__(self, simulator=None):
         """Initialize Kafka simulation strategy"""
