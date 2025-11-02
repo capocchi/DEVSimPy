@@ -23,18 +23,18 @@ GLOBAL_SETTINGS = {
         'PyDEVS': os.path.join(DEVS_SIM_KERNEL_PATH, 'PyDEVS'),
         'PyPDEVS_221': os.path.join(DEVS_SIM_KERNEL_PATH, 'PyPDEVS', 'pypdevs221' , 'src'),
         'PyPDEVS': os.path.join(DEVS_SIM_KERNEL_PATH, 'PyPDEVS', 'old'),
-        'KafkaDEVS': os.path.join(DEVS_SIM_KERNEL_PATH, 'KAFKADEVS')
+        'KafkaDEVS': os.path.join(DEVS_SIM_KERNEL_PATH, 'KafkaDEVS')
     },
     'HELP_PATH': os.path.join('doc', 'html'),
     'DEVSIMPY_ICON': 'iconDEVSimPy.ico',
-    'DEFAULT_SIM_STRATEGY': 'bag-based',
     'PYDEVS_SIM_STRATEGY_DICT': {'original': 'SimStrategy1', 'bag-based': 'SimStrategy2', 'direct-coupling': 'SimStrategy3'},
     'PYPDEVS_SIM_STRATEGY_DICT': {'classic': 'SimStrategy4', 'parallel': 'SimStrategy5'},
-    'KAFKADEVS_SIM_STRATEGY_DICT':{'original': 'SimStrategyKafka'},
+    'KAFKADEVS_SIM_STRATEGY_DICT':{'original': 'SimStrategy4'},
     'PYPDEVS_221_SIM_STRATEGY_DICT': {'classic': 'SimStrategy4', 'parallel': 'SimStrategy5'},
-    'DEFAULT_DEVS_DIRNAME': 'PyDEVS',
-    # 'DEFAULT_DEVS_DIRNAME': 'KafkaDEVS',
-    # 'DEFAULT_SIM_STRATEGY': 'original',
+    # 'DEFAULT_DEVS_DIRNAME': 'PyDEVS',
+    # 'DEFAULT_SIM_STRATEGY': 'bag-based',
+    'DEFAULT_DEVS_DIRNAME': 'KafkaDEVS',
+    'DEFAULT_SIM_STRATEGY': 'original',
     'GUI_FLAG': True
 }
 

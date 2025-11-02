@@ -98,25 +98,49 @@ def GetClass(elem):
 		### return only the class that inherite of DomainBehavoir or DomainStructure which are present in the clsmembers dict
 		# return next(filter(lambda c: c != DomainClass and issubclass(c, DomainClass), clsmembers.values()), None)
 
-		DomainClass = (DomainBehavior,DomainStructure,)
+		 # Build base domain class tuple
+		DomainClass = (DomainBehavior, DomainStructure)
 		if 'Port' in clsmembers:
 			DomainClass += (clsmembers['Port'],)
-  
-		cls = next(filter(lambda c: c not in DomainClass and issubclass(c, DomainClass) and c.__name__ in elem, clsmembers.values()), None)
-
-		### try to catch and resolve instanciation of unknown class
+		
+		# First attempt: find class matching element name
+		cls = next(
+			(c for c in clsmembers.values() 
+			if c not in DomainClass 
+			and issubclass(c, DomainClass) 
+			and c.__name__ in elem),
+			None
+		)
+		
+		# Second attempt: find any valid subclass if exact match fails
 		if not cls:
-			sys.stderr.write(_(f"\nClass name and model name are different!\nWe try to instance the class {elem} that inherite of DomainClass!"))
-			cls = next(filter(lambda c: c not in DomainClass and issubclass(c, DomainClass), clsmembers.values()), None)
+			sys.stderr.write(_(
+				f"\nWarning: Class name and model name mismatch!\n"
+				f"Attempting to instantiate class '{elem}' that inherits from DomainClass...\n"
+			))
+			
+			cls = next(
+				(c for c in clsmembers.values() 
+				if c not in DomainClass 
+				and issubclass(c, DomainClass)),
+				None
+			)
+			
 			if cls:
-				sys.stderr.write(_("\nClass instanciated but you need to verify if its a good one!\n"))
+				sys.stderr.write(_(
+					f"Class '{cls.__name__}' instantiated, but please verify it's the correct one!\n"
+				))
+		
+		# Report failure if no valid class found
 		if not cls:
-
-			sys.stderr.write(_("\nClass unknown..."))
-			# sys.stderr.write(f"path: {elem} \n clsmembers:{clsmembers}\n")
+			sys.stderr.write(_(f"\nError: Unknown class '{elem}'\n"))
+			# Uncomment for debugging:
+			# sys.stderr.write(f"Path: {elem}\nClass members: {clsmembers}\n")
 			# for c in clsmembers.values():
-				# print(c.__name__, c not in DomainClass, issubclass(c, DomainClass), c.__name__ in elem)
-
+			#     print(f"{c.__name__}: not in DomainClass={c not in DomainClass}, "
+			#           f"is subclass={issubclass(c, DomainClass)}, "
+			#           f"name matches={c.__name__ in elem}")
+		
 		return cls
 
 		#for cls in [c for c in clsmembers.values() if c != DomainClass]:

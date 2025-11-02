@@ -194,7 +194,7 @@ class StandaloneGUI(wx.Frame):
         hbox5 = wx.BoxSizer(wx.HORIZONTAL)
         self._cb4 = wx.CheckBox(panel, label=_('Real Time'))
         self._cb4.Enable(False)
-        self.kernel = wx.Choice(panel, -1, choices=["PyDEVS", "PyPDEVS"])
+        self.kernel = wx.Choice(panel, -1, choices=["PyDEVS", "PyPDEVS", "KafkaDEVS"])
         self.kernel.SetSelection(0)
         self.kernel.Enable(False)
         self.kernel_label = wx.StaticText(panel, -1, _("Kernel:"))

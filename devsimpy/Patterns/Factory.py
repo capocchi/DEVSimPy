@@ -72,10 +72,21 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
         disallow direct access to the classes
 	"""
 
-	### find the correct simulator module depending on the
-	for pydevs_dir, _ in list(getattr(builtins,'DEVS_DIR_PATH_DICT').items()):
-		if pydevs_dir == DEFAULT_DEVS_DIRNAME:
-			from DEVSKernel.PyDEVS.simulator import Simulator as BaseSimulator
+	# ### find the correct simulator module depending on the
+	# for pydevs_dir, _ in list(getattr(builtins,'DEVS_DIR_PATH_DICT').items()):
+	# 	if pydevs_dir == DEFAULT_DEVS_DIRNAME:
+			
+	# 		from DEVSKernel.PyDEVS.simulator import Simulator as BaseSimulator
+	
+	module_name = f'DEVSKernel.{DEFAULT_DEVS_DIRNAME}.simulator'
+
+	try:
+		module = importlib.import_module(module_name)
+		BaseSimulator = getattr(module, 'Simulator', None)
+	except (ImportError, AttributeError) as e:
+		sys.stderr.write(_(f"\nFailed to load simulator from {module_name}: {e}\n"))
+		return None
+
 
 	class Simulator(BaseSimulator):
 		"""

@@ -28,7 +28,7 @@ import weakref
 import heapq
 import threading
 import importlib
-import json
+
 
 import inspect
 if not hasattr(inspect, 'getargspec'):
@@ -36,8 +36,7 @@ if not hasattr(inspect, 'getargspec'):
     
 from PluginManager import PluginManager #trigger_event
 from Utilities import getOutDir
-from DEVSKernel.KAFKADEVS.simulator import Simulator
-from DEVSKernel.KAFKADEVS.coordinator import KafkaCoordinator 
+
 
 import logging
 logger = logging.getLogger('SimStrategyKafka')
@@ -539,10 +538,9 @@ class SimStrategy4(SimStrategy):
         path = getattr(builtins, 'DEVS_DIR_PATH_DICT')[DEFAULT_DEVS_DIRNAME]
         d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
         simulator = importlib.import_module("DEVSKernel%s.simulator"%d)
-        #exec("from DEVSKernel%s.simulator import Simulator"%d)
 
         S = simulator.Simulator(self._simulator.model)
-
+        
         ### old version of PyPDEVS
         if len(inspect.getargspec(S.simulate).args) > 1:
 
@@ -613,228 +611,7 @@ class SimStrategy5(SimStrategy4):
         return False
 
 class SimStrategyKafka(SimStrategy):
-    def __init__(self, simulator=None):
-        """Initialize Kafka simulation strategy"""
-        SimStrategy.__init__(self, simulator)
-        
-        # Initialize simulation time
-        self.ts = Clock(0.0)
-        
-        # Get master model 
-        self.master = self._simulator.getMaster()
-        logger.info("Master model initialized: %s", self.master.name)
-        
-        # Get flat list of atomic models
-        self.flat_priority_list = []
-        self._collect_atomic_models(self.master)
-        logger.info("Found %d atomic models", len(self.flat_priority_list))
-        
-        # Initialize all atomic models with time references
-        self._initialize_atomic_models()
-        
-        # Create coordinator
-        self.coordinator = KafkaCoordinator(
-            model=self.master,
-            clock=weakref.ref(self.ts)
-        )
-
-        # Initialize all atomic models with time references
-        for model in self.flat_priority_list:
-            model.timeLast = 0.0
-            model.timeNext = model.timeAdvance()
-
-        # Store model connections
-        self.connections = {}
-        self._build_connections(self.master)
-        logger.info("Built connection map: %s", self.connections)
-
-    def _initialize_atomic_models(self):
-        """Initialize atomic models with time references"""
-        for model in self.flat_priority_list:
-            # Set time reference
-            model.timeLast = 0.0
-            model.myTimeAdvance = model.timeAdvance()
-            model.clock = weakref.ref(self.ts)
-            
-            # Initialize model state
-            if hasattr(model, 'initPhase'):
-                model.initPhase()
-            
-            logger.debug("Initialized atomic model: %s", model.name)
-    
-    
-    def _build_connections(self, model):
-        """Build map of model connections"""
-        self.connections = {}
-        
-        # Handle IC (Internal Couplings)
-        for coupling in model.IC:
-            # Extract source and destination from coupling
-            (src, dst) = coupling
-            src_model, src_port = src
-            dst_model, dst_port = dst
-            
-            if src_model.name not in self.connections:
-                self.connections[src_model.name] = []
-                
-            self.connections[src_model.name].append({
-                'target': dst_model.name,
-                'src_port': src_port,
-                'dst_port': dst_port
-            })
-            logger.debug("Added IC connection: %s.%s -> %s.%s", 
-                        src_model.name, src_port.name,
-                        dst_model.name, dst_port.name)
-
-        # Handle EIC (External Input Couplings) 
-        for coupling in model.EIC:
-            (src, dst) = coupling
-            _, src_port = src
-            dst_model, dst_port = dst
-            
-            model_name = model.name
-            if model_name not in self.connections:
-                self.connections[model_name] = []
-                
-            self.connections[model_name].append({
-                'target': dst_model.name,
-                'src_port': src_port,
-                'dst_port': dst_port
-            })
-            logger.debug("Added EIC connection: %s.%s -> %s.%s",
-                        model_name, src_port.name, 
-                        dst_model.name, dst_port.name)
-
-        # Handle EOC (External Output Couplings)
-        for coupling in model.EOC:
-            (src, dst) = coupling
-            src_model, src_port = src
-            _, dst_port = dst
-            
-            if src_model.name not in self.connections:
-                self.connections[src_model.name] = []
-                
-            self.connections[src_model.name].append({
-                'target': model.name,
-                'src_port': src_port,
-                'dst_port': dst_port
-            })
-            logger.debug("Added EOC connection: %s.%s -> %s.%s",
-                        src_model.name, src_port.name,
-                        model.name, dst_port.name)
-        
-        logger.info("Built connection map with %d source models", len(self.connections))
-
-    def _collect_atomic_models(self, model):
-        """Recursively collect atomic models"""
-        if not hasattr(model, 'componentSet'):
-            self.flat_priority_list.append(model)
-            logger.debug("Added atomic model: %s", model.name)
-            return
-            
-        for component in model.componentSet:
-            if hasattr(component, 'componentSet'):
-                self._collect_atomic_models(component)
-            else:
-                self.flat_priority_list.append(component)
-                logger.debug("Added atomic model: %s", component.name)
-
-    def simulate(self, T=100000000):
-        """Main simulation loop"""
-        if not self.flat_priority_list:
-            logger.error("No atomic models found - cannot simulate")
-            return
-            
-        logger.info("Starting simulation with %d models", len(self.flat_priority_list))
-        
-        # Start coordinator
-        coord_thread = threading.Thread(target=self.coordinator.start)
-        coord_thread.daemon = True
-        coord_thread.start()
-        
-        # Initialize timing
-        t_start = time.time()
-        old_cpu_time = 0
-        
-        while (self.ts.Get() <= T or self._simulator.ntl) and not self._simulator.end_flag:
-            try:
-                current_time = self.ts.Get()
-                
-                # Find imminent models
-                imm_models = []
-                next_ta = INFINITY
-                
-                for model in self.flat_priority_list:
-                    if abs(model.timeNext - current_time) < 0.000001:
-                        imm_models.append(model)
-                    elif model.timeNext > current_time and model.timeNext < next_ta:
-                        next_ta = model.timeNext
-                
-                # Process imminent models
-                if imm_models:
-                    for model in imm_models:
-                        logger.info("Processing model %s at time %f", model.name, current_time)
-                        
-                        # Get output
-                        output = model.outputFnc()
-                        if output and model.name in self.connections:
-                            # Route output to connected models via Kafka
-                            for connection in self.connections[model.name]:
-                                if connection['src_port'] in output:
-                                    message = {
-                                        'type': 'output',
-                                        'time': current_time,
-                                        'port': connection['dst_port'].name,
-                                        'data': output[connection['src_port']]
-                                    }
-                                    
-                                    # Produce to source model's output topic
-                                    self.coordinator.producer.produce(
-                                        f'devs.{model.name}.out',
-                                        json.dumps(message).encode('utf-8')
-                                    )
-                                    
-                                    # Produce to destination model's input topic
-                                    self.coordinator.producer.produce(
-                                        f'devs.{connection["target"]}.in',
-                                        json.dumps(message).encode('utf-8')
-                                    )
-                                    
-                                    logger.debug("Routed message from %s to %s", 
-                                               model.name, connection['target'])
-                        
-                        # Internal transition
-                        model.intTransition()
-                        model.timeLast = current_time
-                        model.timeNext = current_time + model.timeAdvance()
-                        logger.info("Model %s completed internal transition", model.name)
-                
-                # Update simulation time
-                if next_ta != INFINITY:
-                    self.ts.Set(next_ta)
-                    logger.info("Advanced simulation to time %f", next_ta)
-                else:
-                    logger.info("No more events - simulation complete")
-                    break
-                    
-                # Handle simulation control
-                if self._simulator.thread_sleep:
-                    time.sleep(self._simulator._sleeptime)
-                elif self._simulator.thread_suspend:
-                    while self._simulator.thread_suspend:
-                        time.sleep(1.0)
-                        old_cpu_time = self._simulator.cpu_time
-                        t_start = time.time()
-                
-                # Update CPU time
-                self._simulator.cpu_time = old_cpu_time + (time.time() - t_start)
-                
-            except Exception as e:
-                logger.exception("Error in simulation loop: %s", e)
-                break
-        
-        # Cleanup
-        logger.info("Simulation complete - cleaning up")
-        self.coordinator.stop()
-        coord_thread.join(timeout=1.0)
-        self._simulator.terminate()
+    def __init__(self, simulator = None):
+        """ Constructor.
+        """
+        SimStrategy4.__init__(self, simulator)

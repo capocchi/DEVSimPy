@@ -1,1 +1,1 @@
-__all__ = ['PyDEVS', 'PyPDEVS']
+__all__ = ['PyDEVS', 'PyPDEVS', 'KafkaDEVS']
