@@ -80,8 +80,9 @@ RED_LIGHT = '#f2a2a2'
 GREEN = '#90ee90'
 BLACK = '#000000'
 BLUE = '#add8e6'
-ORANGE = '#ffa500'
+ORANGE = "#faad1f"
 GREY_LIGHT = '#d3d3d3'
+VIOLET_LIGHT = "#b8b8ec"	
 
 import Components
 
@@ -5328,20 +5329,42 @@ class oPort(Port):
 		s+="\t id: %d \n"%self.id
 		return s
 
-#--------------------------------------------------
-class ScopeGUI(CodeBlock):
-	""" ScopeGUI(label)
+class GeneratorGUI(CodeBlock):
+	""" CollectorGUI(label)
 	"""
+	FILL = [VIOLET_LIGHT]
 
-	FILL = [ORANGE]
-
-	def __init__(self, label = 'QuickScope'):
+	def __init__(self, label = 'Generator'):
 		""" Constructor
 		"""
 
 		CodeBlock.__init__(self, label, 1, 0)
 
-		self.fill = ScopeGUI.FILL
+		self.fill = GeneratorGUI.FILL
+
+class CollectorGUI(CodeBlock):
+	""" CollectorGUI(label)
+	"""
+	FILL = [ORANGE]
+
+	def __init__(self, label = 'Collector'):
+		""" Constructor
+		"""
+
+		CodeBlock.__init__(self, label, 1, 0)
+
+		self.fill = CollectorGUI.FILL
+
+#--------------------------------------------------
+class ScopeGUI(CollectorGUI):
+	""" ScopeGUI(label)
+	"""
+
+	def __init__(self, label = 'QuickScope'):
+		""" Constructor
+		"""
+
+		super().__init__(label)
 
 		### enable edition on properties panel
 		self.AddAttribute("xlabel")
@@ -5364,19 +5387,15 @@ class ScopeGUI(CodeBlock):
 		event.Skip()
 
 #------------------------------------------------
-class DiskGUI(CodeBlock):
+class DiskGUI(CollectorGUI):
 	""" DiskGUI(label)
 	"""
-
-	FILL = [ORANGE]
 
 	def __init__(self, label='DiskGUI'):
 		""" Constructor.
 		"""
-		CodeBlock.__init__(self, label, 1, 0)
-
-		self.fill = DiskGUI.FILL
-
+		super().__init__(label)
+		
 	def OnLeftDClick(self, event):
 		""" Left Double Click has been appeared.
 		"""

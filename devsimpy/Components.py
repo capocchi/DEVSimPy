@@ -32,6 +32,7 @@ import types
 import importlib
 import subprocess
 from shutil import which
+from pathlib import Path
 
 import inspect
 if not hasattr(inspect, 'getargspec'):
@@ -557,16 +558,8 @@ class AMDComponent(GenericComponent):
 		""" Return block model considering its class hierarchy
 			The implementation depends only of the argument of the class. There is no dependance with the collector module (in comment bellow)
 		"""
-		from Container import DiskGUI, ScopeGUI, CodeBlock
-		#from  Domain.Collector import *
-		#if issubclass(cls, QuickScope.QuickScope):
-				#m = ScopeGUI(label)
-			#elif issubclass(cls, (To_Disk.To_Disk, Messagecollector.Messagecollector)):
-				#m = DiskGUI(label)
-			#else:
-				## mew CodeBlock instance
-				#m = CodeBlock()
-
+		from Container import DiskGUI, ScopeGUI, CodeBlock, CollectorGUI, GeneratorGUI
+	
 		# associated python class membre
 
 		clsmbr = getClassMember(inspect.getfile(cls))
@@ -588,11 +581,18 @@ class AMDComponent(GenericComponent):
 		match = [re.match('[-_a-zA-z]*collector[-_a-zA-z]*',s, re.IGNORECASE) for s in list(clsmbr.keys())+[specific_behavior]]
 		messagecollector_model = [a.group(0) for a in [s for s in match if s is not None]] != []
 
+		cls_path = Path(inspect.getfile(cls)).resolve()
+
 		# new codeBlcok instance
-		if disk_model or messagecollector_model:
-			m = DiskGUI(label)
-		elif scope_model:
-			m = ScopeGUI(label)
+		if "Collector" in cls_path.parts:
+			if disk_model or messagecollector_model:
+				m = DiskGUI(label)
+			elif scope_model:
+				m = ScopeGUI(label)
+			else:
+				m = CollectorGUI(label)
+		elif "Generator" in cls_path.parts:
+			m = GeneratorGUI(label)
 		else:
 			m = CodeBlock(label)
         
