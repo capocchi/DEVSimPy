@@ -83,6 +83,64 @@ def get_domain_path()->str:
     else:
         return 'Domain/'
 
+def add_library_to_archive(archive, lib_path, added_files):
+    """
+    Add library files to archive with proper path formatting.
+    
+    Args:
+        archive: Archive object (ZipFile/TarFile)
+        lib_path: Path to the library
+        added_files: Set tracking added files to prevent duplicates
+        
+    Returns:
+        int: Number of files successfully added
+    """
+    if not os.path.exists(lib_path):
+        sys.stderr.write(_(f"\nWarning: Library path does not exist: {lib_path}\n"))
+        return 0
+    
+    is_domain_lib = "Domain" in lib_path
+    lib_name = os.path.basename(os.path.dirname(lib_path) if is_domain_lib else lib_path)
+    files_added = 0
+    
+    try:
+        for file_path in retrieve_file_paths(lib_path):
+            # Skip cache and hidden directories
+            if any(skip in file_path for skip in ['__pycache__', '.git', '.svn']):
+                continue
+            
+            # Calculate relative archive path
+            try:
+                file_suffix = file_path.split(lib_name, 1)[1].lstrip(os.sep)
+            except IndexError:
+                sys.stderr.write(_(f"\nWarning: Cannot parse path for {file_path}\n"))
+                continue
+            
+            # Build target path in archive
+            if is_domain_lib:
+                relative_path = os.path.join('Domain', file_suffix)
+            else:
+                relative_path = os.path.join('Domain', lib_name, file_suffix)
+            
+            # Normalize path separators
+            relative_path = relative_path.replace(os.sep, '/')
+            
+            # Add to archive if unique
+            if relative_path not in added_files:
+                try:
+                    archive.write(file_path, arcname=relative_path)
+                    added_files.add(relative_path)
+                    files_added += 1
+                except Exception as e:
+                    sys.stderr.write(_(
+                        f"\nError adding {file_path} to archive: {e}\n"
+                    ))
+    
+    except Exception as e:
+        sys.stderr.write(_(f"\nError processing library {lib_path}: {e}\n"))
+    
+    return files_added
+
 class StandaloneNoGUI:
     
     ### list of files to zip
@@ -187,7 +245,10 @@ CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
             if self.add_sim_kernel:
                 ### add all dependencies python files needed to execute devsimpy-nogui
                 for fn in StandaloneNoGUI.FILENAMES:
-                    archive.write(os.path.join('devsimpy',fn), arcname=fn)
+                    # Use current directory to find the files
+                    current_dir = os.path.dirname(os.path.abspath(__file__))
+                    file_path = os.path.join(current_dir, fn)
+                    archive.write(file_path, arcname=fn)
             
             ###################################################################
             ###
@@ -214,16 +275,8 @@ CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
                         domain_module_lib.add(os.path.basename(lib_path).split('.')[0])
                         lib_path = os.path.dirname(lib_path)
                     
-                    # domain_lib.add(os.path.basename(lib_path))
-                    
-                    ### format the path of the library to include in the archive
-                    lib_name = os.path.basename(os.path.dirname(lib_path))
-                    for file in retrieve_file_paths(lib_path):
-                        if '__pycache__' not in file:
-                            relative_path = 'Domain'+file.split(lib_name)[1]
-                            if relative_path not in added_files:
-                                archive.write(file, arcname=relative_path)
-                                added_files.add(relative_path)
+                    ### Add lib dir to the archive
+                    add_library_to_archive(archive, lib_path, added_files)
             else:
                 ### path of the Domain dir (depending on the .devsimpy config file)
                 domain_path = get_domain_path()
@@ -245,23 +298,24 @@ CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
                 ### add all dependancies (directories) needed to execute devsimpy-nogui
                 for dirname in self.dirnames_abs:
             
-                    dirname = os.path.join('devsimpy', dirname)
+                    dirname = os.path.join(dirname)
 
                     # Call the function to retrieve all files and folders of the assigned directory
                     filePaths = retrieve_file_paths(dirname)
 
                     ### select only the selected simulation kernel
                     if 'DEVSKernel' in os.path.abspath(dirname):
-                        new_dirname = os.path.join(dirname,self.kernel)
+                        new_dirname = os.path.join(dirname, self.kernel)
                         filePaths = retrieve_file_paths(new_dirname)
-                        ### add __init__.py of Kernel dir
-                        if not os.path.exists(os.path.join(dirname, '__init__.py')):
-                            filePaths.append(os.path.join(dirname, '__init__.py'))
+                        ### add __init__.py of Kernel dir only if it exists
+                        init_file = os.path.join(dirname, '__init__.py')
+                        if os.path.exists(init_file):
+                            filePaths.append(init_file)
 
                     for file in filePaths:
-                        if '__pycache__' not in file:
-                            archive.write(file, arcname=file.split('devsimpy')[1])
-            
+                        if '__pycache__' not in file and os.path.exists(file):
+                            archive.write(file)
+
                 ###################################################################
                 ###
                 ### Docker files
@@ -297,19 +351,37 @@ CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
                         if not 'DomainInterface' in name and name in installed_pip_packages:
                             pip_packages_used_to_add_in_requirements.add(name)
 
+                ### Get the requirements file path
+                current_dir = os.path.dirname(os.path.abspath(__file__))
+                requirements_file = os.path.join(current_dir, 'requirements-nogui.txt')
+                
                 ### if additionnal pip package are used in devs atomic model, we need to add them in the requirements.txt file
                 if pip_packages_used_to_add_in_requirements:
-                    
-                    # Read the existing content of the txt file
-                    with open('requirements-nogui.txt', 'r') as file:
-                        to_write_in_requirements = file.read()
+                    try:
+                        # Read the existing content of the txt file if it exists
+                        if os.path.exists(requirements_file):
+                            with open(requirements_file, 'r') as file:
+                                to_write_in_requirements = file.read()
+                        else:
+                            to_write_in_requirements = "# DEVSimPy requirements\n"
 
-                    ### Add the pip_packages_to_add_in_requirements
-                    to_write_in_requirements += '\n' + '\n### Additionnal requirements for model librairies\n' + '\n'.join(pip_packages_used_to_add_in_requirements)
+                        ### Add the pip_packages_to_add_in_requirements
+                        to_write_in_requirements += '\n' + '\n### Additionnal requirements for model librairies\n' + '\n'.join(pip_packages_used_to_add_in_requirements)
 
-                    archive.writestr('requirements-devsimpy-nogui.txt', to_write_in_requirements)
+                        archive.writestr('requirements-devsimpy-nogui.txt', to_write_in_requirements)
+                    except Exception as e:
+                        sys.stdout.write(f"Error handling requirements file: {e}\n")
+                        return False
                 else:
-                    ### add requirements.txt file in the arche from the requirements-nogui.txt file
-                    archive.write('requirements-nogui.txt', 'requirements-devsimpy-nogui.txt')
-
+                    try:
+                        ### add requirements.txt file in the archive from the requirements-nogui.txt file
+                        if os.path.exists(requirements_file):
+                            archive.write(requirements_file, 'requirements-devsimpy-nogui.txt')
+                        else:
+                            ### Create a basic requirements file if none exists
+                            basic_requirements = "# DEVSimPy requirements\n"
+                            archive.writestr('requirements-devsimpy-nogui.txt', basic_requirements)
+                    except Exception as e:
+                        sys.stdout.write(f"Error handling requirements file: {e}\n")
+                        return False
         return True 
