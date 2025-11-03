@@ -29,7 +29,7 @@ GLOBAL_SETTINGS = {
     'DEVSIMPY_ICON': 'iconDEVSimPy.ico',
     'PYDEVS_SIM_STRATEGY_DICT': {'original': 'SimStrategy1', 'bag-based': 'SimStrategy2', 'direct-coupling': 'SimStrategy3'},
     'PYPDEVS_SIM_STRATEGY_DICT': {'classic': 'SimStrategy4', 'parallel': 'SimStrategy5'},
-    'KAFKADEVS_SIM_STRATEGY_DICT':{'original': 'SimStrategy4'},
+    'KAFKADEVS_SIM_STRATEGY_DICT':{'original': 'SimStrategy2'},
     'PYPDEVS_221_SIM_STRATEGY_DICT': {'classic': 'SimStrategy4', 'parallel': 'SimStrategy5'},
     # 'DEFAULT_DEVS_DIRNAME': 'PyDEVS',
     # 'DEFAULT_SIM_STRATEGY': 'bag-based',

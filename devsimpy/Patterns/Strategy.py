@@ -37,10 +37,6 @@ if not hasattr(inspect, 'getargspec'):
 from PluginManager import PluginManager #trigger_event
 from Utilities import getOutDir
 
-
-import logging
-logger = logging.getLogger('SimStrategyKafka')
-
 import builtins
 import re
 import os
@@ -533,64 +529,49 @@ class SimStrategy4(SimStrategy):
 
     def simulate(self, T = 100000000):
         """Simulate the model (Root-Coordinator).
-        """		
-                
-        path = getattr(builtins, 'DEVS_DIR_PATH_DICT')[DEFAULT_DEVS_DIRNAME]
-        d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
-        simulator = importlib.import_module("DEVSKernel%s.simulator"%d)
-
-        S = simulator.Simulator(self._simulator.model)
+        """
         
-        ### old version of PyPDEVS
-        if len(inspect.getargspec(S.simulate).args) > 1:
+        # Import the correct simulator module dynamically
+        path = getattr(builtins, 'DEVS_DIR_PATH_DICT').get('KafkaDEVS')
+        if not path:
+            raise ValueError("KafkaDEVS path not found in DEVS_DIR_PATH_DICT")
 
-            kwargs = {'verbose':True}
+        d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
+        simulator_module = importlib.import_module(f"DEVSKernel{d}.simulator")
 
-            ### TODO
-            if self._simulator.ntl:
-                kwargs['termination_condition'] = terminate_never
-            else:
-                kwargs['termination_time'] = T
+        print("\nAvailable classes and methods:")
+        for item in dir(simulator_module.Simulator):
+            if not item.startswith('_'):
+                print(f"- {item}")
 
-            S.simulate(**kwargs)
+        # Create simulator instance with the model
+        sim = simulator_module.Simulator(self._simulator.model)
 
-        ### new version of PyPDEVS (due to the number of config param which is growing)
-        else:
-
-            ### see simconfig.py to have informations about setters
-
-            ### verbose manager, if None print are displayed in stdout, else in the out/verbose.txt file
+        # Configure simulation parameters
+        if hasattr(sim, 'setVerbose'):
             if self._simulator.verbose:
-                S.setVerbose(None)
+                sim.setVerbose(None)
             else:
-                out_dir = os.path.join(DEVSIMPY_PACKAGE_PATH, 'out')
+                out_dir = os.path.join(getOutDir())
                 if not os.path.exists(out_dir):
-                    os.mkdir(out_dir)
+                    os.makedirs(out_dir)
+                verbose_file = os.path.join(out_dir, 'verbose.txt')
+                sim.setVerbose(verbose_file)
 
-                verbose_file = os.path.join(getOutDir(), 'verbose.txt')
-                S.setVerbose(verbose_file)
-
-            ### TODO
+        # Set termination condition
+        if hasattr(sim, 'setTerminationTime'):
             if self._simulator.ntl:
-                S.setTerminationCondition(terminate_never)
+                sim.setTerminationCondition(terminate_never)
             else:
-                S.setTerminationTime(T)
+                sim.setTerminationTime(T)
 
-            S.setClassicDEVS(self.SetClassicDEVSOption())
-
-            ### dynamic structure for local PyPDEVS simulation
-            S.setDSDEVS(self._simulator.dynamic_structure_flag)
-            
-            #S.setMemoization(self._simulator.memoization_flag)
-
-            ### real time simulation
-            if self._simulator.real_time_flag:
-                S.setRealTime(self._simulator.real_time_flag)
-                S.setRealTimeInputFile(None)
-                #S.setRealTimePorts(refs)
-                S.setRealTimePlatformThreads()
-
-            S.simulate()
+        # Run simulation using available method
+        if hasattr(sim, 'simulate'):
+            sim.simulate()
+        elif hasattr(sim, 'run'):
+            sim.run()
+        else:
+            raise AttributeError("Simulator has no 'simulate' or 'run' method")
 
         self._simulator.terminate()
 
@@ -610,8 +591,8 @@ class SimStrategy5(SimStrategy4):
     def SetClassicDEVSOption(self):
         return False
 
-class SimStrategyKafka(SimStrategy):
-    def __init__(self, simulator = None):
-        """ Constructor.
-        """
-        SimStrategy4.__init__(self, simulator)
+# class SimStrategyKafka(SimStrategy):
+#     def __init__(self, simulator = None):
+#         """ Constructor.
+#         """
+#         SimStrategy4.__init__(self, simulator)
