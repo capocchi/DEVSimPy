@@ -83,7 +83,7 @@ def get_domain_path()->str:
     else:
         return 'Domain/'
 
-def add_library_to_archive(archive, lib_path, added_files):
+def add_library_to_archive(archive, lib_path):
     """
     Add library files to archive with proper path formatting.
     
@@ -99,6 +99,9 @@ def add_library_to_archive(archive, lib_path, added_files):
         sys.stderr.write(_(f"\nWarning: Library path does not exist: {lib_path}\n"))
         return 0
     
+    ### to not insert two times the same file
+    added_files = set()
+        
     is_domain_lib = "Domain" in lib_path
     lib_name = os.path.basename(os.path.dirname(lib_path) if is_domain_lib else lib_path)
     files_added = 0
@@ -264,19 +267,18 @@ CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
                 ### add the Domain libairies according to the DOAMIN_PATH var
                 yaml = YAMLHandler(path)
             
-                ### to not insert two times the same file
-                added_files = set()
                 ### lib_path is the directory of the library involved in the yaml model
                 for path in yaml.extractPythonPaths():
-                    domain_module_lib.add(os.path.basename(path).split('.')[0])
+                    a = os.path.basename(path).split('.')[0]
+                    domain_module_lib.add(a)
                     lib_path = os.path.dirname(path)
                     if lib_path.endswith(('.amd','.cmd')):
-                        domain_module_lib.remove(os.path.basename(path).split('.')[0])
+                        domain_module_lib.remove(a)
                         domain_module_lib.add(os.path.basename(lib_path).split('.')[0])
                         lib_path = os.path.dirname(lib_path)
                     
                     ### Add lib dir to the archive
-                    add_library_to_archive(archive, lib_path, added_files)
+                    add_library_to_archive(archive, lib_path)
             else:
                 ### path of the Domain dir (depending on the .devsimpy config file)
                 domain_path = get_domain_path()
@@ -286,7 +288,6 @@ CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
                     if file.endswith(('.py', '.amd', '.cmd')) and \
                                     '__pycache__' not in file:
                         archive.write(file, arcname='Domain'+os.path.join(file.split('Domain')[1], os.path.basename(file)))
-                        # domain_lib.add(os.path.basename(file))
 
             ###################################################################
             ###
