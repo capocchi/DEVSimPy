@@ -164,7 +164,13 @@ if __name__ == '__main__':
 			args = json.loads(args.updateblockargs)
 			if isinstance(args,str):
 				args = eval(args)
-			new_args = yamlHandler.setYAMLBlockModelArgs(label, args)
+			new_args = list(args.keys())
+			real_args = yamlHandler.getYAMLBlockModelArgs(label)
+			if all(elem in real_args for elem in new_args):
+				new_args = yamlHandler.setYAMLBlockModelArgs(label, args)
+			else:
+				print(f"ERROR: Invalid arguments keys for the model: {list(set(new_args) - set(real_args))}\n")
+				sys.exit(1)
 		else:
 			new_args = yamlHandler.getYAMLBlockModelArgs(label)
 			
