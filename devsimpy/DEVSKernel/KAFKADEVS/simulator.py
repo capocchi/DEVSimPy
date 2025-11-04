@@ -33,6 +33,52 @@ WITH_PARALLEL_EXECUTION = False
 ### avec ce flag les simulation en nogui sont plus rapides
 ENABLE_SIM_LOGS = getattr(builtins,'GUI_FLAG', True)
 
+try:
+    from .broker_adapter import KafkaBrokerAdapter, MessageTransformer
+    from .kafka_config import KAFKA_CONFIG
+    KAFKA_AVAILABLE = True
+except ImportError as e:
+    KAFKA_AVAILABLE = False
+    print(f"Warning: Kafka broker not available: {e}")
+
+import logging
+
+# ============================================================================
+# CONFIGURATION KAFKA AVEC BOOLÉENS DE CONTRÔLE
+# ============================================================================
+
+# Activer/désactiver Kafka
+USE_KAFKA_BROKER = False  # True pour activer Kafka
+
+# Contrôle du logging Kafka
+ENABLE_KAFKA_LOGGING = True  # True pour activer les logs Kafka
+KAFKA_LOG_TO_FILE = True     # True pour écrire dans un fichier
+KAFKA_LOG_TO_CONSOLE = False # True pour afficher en console
+KAFKA_LOG_LEVEL = 'INFO'     # 'DEBUG', 'INFO', 'WARNING', 'ERROR'
+
+# Contrôle détaillé de ce qui est loggé
+KAFKA_LOG_SEND = True        # Logger les envois
+KAFKA_LOG_RECEIVE = True     # Logger les réceptions
+KAFKA_LOG_TRANSFORM = False  # Logger les transformations (verbose)
+KAFKA_LOG_ERRORS = True      # Logger les erreurs
+KAFKA_LOG_STATS = True       # Logger les statistiques finales
+
+# Mode strict (erreur si Kafka échoue)
+KAFKA_STRICT_MODE = False
+
+from .kafka_logger import get_kafka_logger
+
+
+# Exceptions personnalisées
+class KafkaBrokerError(Exception):
+    """Exception levée quand le broker Kafka échoue en mode strict"""
+    pass
+
+class MessageTransformError(Exception):
+    """Exception levée quand la transformation de message échoue"""
+    pass
+
+
 ###############################################################################
 # GLOBAL VARIABLES AND FUNCTIONS
 ###############################################################################
@@ -180,12 +226,122 @@ class CoupledSolver(Sender):
 	Description of eventList and dStar (to be completed)
 	"""
 
-	_instance = None
-	def __new__(cls, *args, **kwargs):
-		if not cls._instance:
-			cls._instance = super(Sender, cls).__new__(cls, *args, **kwargs)
-		return cls._instance
+	_broker_instance = None
+	_transformer_instance = None
+    
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		
+		# Initialiser le broker et le transformer si activé
+		if USE_KAFKA_BROKER:
+			if CoupledSolver._broker_instance is None:
+				CoupledSolver._broker_instance = KafkaBrokerAdapter()
+				CoupledSolver._transformer_instance = MessageTransformer()
+				logging.info("Kafka broker and MessageTransformer initialized")
+			
+			self.broker = CoupledSolver._broker_instance
+			self.transformer = CoupledSolver._transformer_instance
+		else:
+			self.broker = None
+			self.transformer = None
 
+	def send(self, d, msg):
+		""" Dispatch messages to the right solver via broker si activé """
+		
+		# Si le broker Kafka est activé et disponible
+		if USE_KAFKA_BROKER and self.broker and self.transformer:
+			return self._send_via_broker(d, msg, self.broker)
+		else:
+			# Comportement classique (envoi direct)
+			# return self._send_direct(d, msg)
+			pass
+
+	def _send_via_broker(self, d, msg, broker):
+		"""
+		Envoie un message via le broker Kafka avec gestion d'erreurs stricte
+		"""
+		model_id = d.myID if hasattr(d, 'myID') else str(id(d))
+		
+		# Déterminer le type de message
+		msg_type = 'unknown'
+		if isinstance(msg, (tuple, list)) and len(msg) > 0:
+			if msg[0] == 0:
+				msg_type = 'init'
+			elif msg[0] == 1:
+				msg_type = 'internal'
+			elif isinstance(msg[0], dict):
+				msg_type = 'external'
+		
+		# Tentative d'envoi via Kafka
+		try:
+			# Envoyer via le broker
+			success = broker.send_message(model_id, msg, msg_type)
+			
+			if not success:
+				error_msg = f"Broker send to {model_id} failed"
+				logging.error(error_msg)
+				
+				# En mode strict, lever une exception au lieu de faire fallback
+				if KAFKA_STRICT_MODE:
+					raise KafkaBrokerError(error_msg)
+			
+			logging.debug(f"Message successfully sent to {model_id} via broker")
+			
+		except Exception as e:
+			error_msg = f"Error sending message to {model_id} via broker: {e}"
+			logging.error(error_msg)
+			
+			# En mode strict, propager l'exception
+			if KAFKA_STRICT_MODE:
+				raise KafkaBrokerError(error_msg) from e
+		
+		# Si on arrive ici en mode strict, c'est que tout s'est bien passé
+		# On fait quand même l'envoi direct pour compatibilité (phase de transition)
+		if isinstance(d, CoupledDEVS):
+			CS = CoupledSolver()
+			return CS.receive(d, msg)
+		else:
+			AS = AtomicSolver()
+			r = AS.receive(d, msg)
+			sim_log("SIM_BLINK", model=d, msg=msg)
+			sim_log("SIM_TEST", model=d, msg=msg)
+			return r
+
+	def _send_direct(self, d, msg):
+		"""
+		Envoi direct classique (code original)
+		Conserve le comportement existant
+		"""
+		if isinstance(d, CoupledDEVS):
+			CS = CoupledSolver()
+			return CS.receive(d, msg)
+		else:
+			AS = AtomicSolver()
+			r = AS.receive(d, msg)
+			sim_log("SIM_BLINK", model=d, msg=msg)
+			sim_log("SIM_TEST", model=d, msg=msg)
+			return r
+
+	def enable_broker_response_handling(self, model_id: str):
+		"""
+		Active la réception des réponses via Kafka pour un modèle donné
+		
+		Args:
+			model_id: Identifiant du modèle
+		"""
+		if not self.broker or not self.transformer:
+			logging.warning("Broker not available, cannot enable response handling")
+			return
+		
+		def response_callback(devs_msg):
+			"""Callback appelé lors de la réception d'une réponse via Kafka"""
+			logging.info(f"Received response from {model_id}: {devs_msg}")
+			# Ici, vous pouvez traiter la réponse reçue
+			# Par exemple, mettre à jour l'état du modèle
+		
+		self.broker.create_consumer(model_id, response_callback)
+		logging.info(f"Response handling enabled for model {model_id}")
+		
 	def threading_send(self, Y, cDEVS, t):
 		send = self.send
 		send_parallel = self.t_send
@@ -355,3 +511,9 @@ class Simulator(Sender):
 			# time of next event.
 			for subd in d.componentSet:
 				self.__augment(subd)
+
+	def __del__(self):
+		"""Affiche les stats Kafka à la fin"""
+		if USE_KAFKA_BROKER:
+			logger = get_kafka_logger()
+			logger.log_stats()

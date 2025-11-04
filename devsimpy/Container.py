@@ -1327,8 +1327,8 @@ class Shape(ShapeEvtHandler):
 		""" Constructor
 		"""
 
-		self.x = array.array('d',x)     # list of x coord
-		self.y = array.array('d',y)     # list of y coords
+		self.x = array.array('d', x)     # list of x coord
+		self.y = array.array('d', y)     # list of y coords
 		self.fill = Shape.FILL          # fill color
 		self.dashed = False 			# dashed line used to enable/disbale the shape
 		self.pen = [self.fill[0] , 1, 100]   # pen color and size / 100 = wx.PENSTYLE_SOLID
@@ -1395,7 +1395,7 @@ class Shape(ShapeEvtHandler):
 			# Update the font size attribute
 			self.font[0] = font
 
-	def move(self,x,y):
+	def move(self, x, y):
 		""" Move method
 		"""
 	
@@ -1524,17 +1524,17 @@ class RectangleShape(Shape):
 	""" RectangleShape class
 	"""
 
-	def __init__(self,x = 20, y = 20, x2 = 120, y2 = 120):
+	def __init__(self, x = 20, y = 20, x2 = 120, y2 = 120):
 		""" Constructor
 		"""
 
-		Shape.__init__(self, [x,x2] ,  [y,y2])
+		Shape.__init__(self, [x, x2] ,  [y, y2])
 
 	def draw(self,dc):
 		""" Draw paint method
 		"""
 
-		Shape.draw(self,dc)
+		Shape.draw(self, dc)
 		x,y = int(self.x[0]), int(self.y[0])
 		width, height = int(self.x[1]-self.x[0]), int(self.y[1]-self.y[0])
 		dc.DrawRectangle(x, y, width, height)
@@ -1554,11 +1554,11 @@ class RectangleShape(Shape):
 class PolygonShape(Shape):
 	""" PolygonShape class
 	"""
-	def __init__(self,x = 20, y = 20, x2 = 120, y2 = 120):
+	def __init__(self, x=20, y=20, x2=120, y2=120):
 		""" Constructor
 		"""
 
-		Shape.__init__(self, [x,x2] , [y,y2])
+		Shape.__init__(self, [x, x2] , [y, y2])
 
 	def draw(self, dc):
 		"""
@@ -1587,17 +1587,17 @@ class PolygonShape(Shape):
 
 #-------------------------------------------------------------------------------
 class CircleShape(Shape):
-	def __init__(self,x=20, y=20, x2=120, y2=120, r=30.0):
+	def __init__(self, x=20, y=20, x2=120, y2=120, r=30.0):
 		""" Constructor
 		"""
-		Shape.__init__(self, [x,x2], [y,y2])
+		Shape.__init__(self, [x, x2], [y, y2])
 		self.r = r
 
 	def draw(self, dc):
 		""" Draw method
 		"""
-		Shape.draw(self,dc)
-		dc.SetFont(wx.Font(10, self.font[1],self.font[2], self.font[3], False, self.font[4]))
+		Shape.draw(self, dc)
+		dc.SetFont(wx.Font(10, self.font[1], self.font[2], self.font[3], False, self.font[4]))
 		dc.DrawCircle(int((self.x[0]+self.x[1])/2), int((self.y[0]+self.y[1])/2), int(self.r))
 
 	def HitTest(self, x, y):
@@ -1621,13 +1621,13 @@ class PointShape(Shape):
 		self.size = size
 
 		if self.type=='rondedrect':
-			self.graphic = RoundedRectangleShape(x-size,y-size,x+size,y+size)
+			self.graphic = RoundedRectangleShape(x-size, y-size, x+size, y+size)
 		elif self.type=='rect':
-			self.graphic = RectangleShape(x-size,y-size,x+size,y+size)
+			self.graphic = RectangleShape(x-size, y-size, x+size, y+size)
 		elif self.type=='circ':
-			self.graphic = CircleShape(x-size,y-size,x+size,y+size, size)
+			self.graphic = CircleShape(x-size, y-size, x+size, y+size, size)
 		elif self.type=='poly':
-			self.graphic = PolygonShape(x-size,y-size,x+size,y+size)
+			self.graphic = PolygonShape(x-size, y-size, x+size, y+size)
 
 		self.graphic.pen = self.pen
 		self.graphic.fill = self.fill
@@ -1651,10 +1651,10 @@ class PointShape(Shape):
 		self.x = [v+x for v in self.x]
 		self.y = [v+y for v in self.y]
 		
-		self.graphic.move(x,y)
+		self.graphic.move(x, y)
 
 	def HitTest(self, x, y):
-		return self.graphic.HitTest(x,y)
+		return self.graphic.HitTest(x, y)
 
 	def draw(self,dc):
 		"""
@@ -2354,7 +2354,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 
 			### mouse positions
 			xwindow, ywindow = wx.GetMousePosition()
-			xm,ym = self.ScreenToClient(wx.Point(int(xwindow), int(ywindow)))
+			xm, ym = self.ScreenToClient(wx.Point(int(xwindow), int(ywindow)))
 
 			gmwiz = self.OnStartWizard(event)
 
@@ -2767,7 +2767,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 
 							## gestion des shapes qui sont dans le rectangle permRect
 							for s in self.diagram.GetShapeList():
-								x,y = self.getScalledCoordinates(s.x[0],s.y[0])
+								x, y = self.getScalledCoordinates(s.x[0],s.y[0])
 								w = (s.x[1]-s.x[0])*self.scalex
 								h = (s.y[1]-s.y[0])*self.scaley
 								
@@ -2975,7 +2975,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 						cursor = wx.StockCursor(wx.CURSOR_HAND)
 
 					for s in sc:
-						s.move(x,y)
+						s.move(x, y)
 
 						### change cursor when resizing model
 						if isinstance(s, ResizeableNode) and cursor != wx.StockCursor(wx.CURSOR_SIZING):
@@ -3373,27 +3373,26 @@ class LinesShape(Shape):
 		try:
 			### mouse positions
 			xwindow, ywindow = wx.GetMousePosition()
-			x,y = canvas.ScreenToClient(wx.Point(int(xwindow), int(ywindow)))
+			x, y = canvas.ScreenToClient(wx.Point(int(xwindow), int(ywindow)))
 
 		except Exception as info:
 			sys.stdout.write(_("Error in OnLeftDClick for %s : %s\n")%(self,info))
 		else:
 			### add point at the position according to the possible zoom (use of getScalledCoordinates)
-			self.AddPoint(canvas.getScalledCoordinates(x,y))
+			self.AddPoint(canvas.getScalledCoordinates(x, y))
 
 		event.Skip()
 
 	def HasPoint(self, point):
 		""" Point is included in line ?
 		"""
-
-		x,y = point
+		x, y = point
 		return (x in self.x) and (y in self.y)
 
 	def AddPoint(self, point = (0,0)):
 		""" Add point under LineShape.
 		"""
-		x,y = point
+		x, y = point
 
 		# insertion sur les morceaux de droites d'affines
 		for i in range(len(self.x)-1):
@@ -4390,14 +4389,14 @@ class CodeBlock(Achievable, Block, Iconizable):
 					name = 'pyc' 
 				icon = Icon(name, (4,2))
 				img = load_and_resize_image(icon.getFileName())
-				x,y = int(self.x[0]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
+				x, y = int(self.x[0]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
 				dc.DrawBitmap(img, x, y)
 			
 			### Draw the right icons (see constructor and Iconizable)
 			for name in self.getDisplayedIconNames():
 				icon = self.getIcon(name)
 				img = load_and_resize_image(icon.getFileName())
-				x,y = int(self.x[1]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
+				x, y = int(self.x[1]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
 				dc.DrawBitmap(img, x, y)
 
 		Block.draw(self, dc)
@@ -4675,7 +4674,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 			### inform about the nature of the block using icon
 			icon = Icon('coupled', (4,2))
 			img = img = load_and_resize_image(icon.getFileName())
-			x,y = int(self.x[0]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
+			x, y = int(self.x[0]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
 			dc.DrawBitmap(img, x, y)
 			
 			### Draw the number of devs models inside
@@ -4686,7 +4685,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 			for name in self.getDisplayedIconNames():
 				icon = self.getIcon(name)
 				img = load_and_resize_image(icon.getFileName())
-				x,y = int(self.x[1]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
+				x, y = int(self.x[1]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
 				dc.DrawBitmap(img, x, y)
 
 		Block.draw(self, dc)
@@ -4844,7 +4843,7 @@ class ConnectableNode(Node):
 					self.item.addOutputLabels(self.index, self.label)
 
 
-	def HitTest(self,x,y):
+	def HitTest(self, x, y):
 		""" Collision detection method.
 		"""
 
@@ -4913,7 +4912,7 @@ class INode(ConnectableNode):
 		""" Drawing method.
 		"""
 
-		x,y = self.item.getPortXY('input', self.index)
+		x, y = self.item.getPortXY('input', self.index)
 		self.moveto(x, y)
 
 		self.fill = [GREEN]
@@ -5102,10 +5101,10 @@ class ResizeableNode(Node):
 
 		event.Skip()
 
-	def HitTest(self,x,y):
+	def HitTest(self, x, y):
 		""" Collision detection method.
 		"""
-		return self.graphic.HitTest(x,y)
+		return self.graphic.HitTest(x, y)
 
 #---------------------------------------------------------
 class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observer):
