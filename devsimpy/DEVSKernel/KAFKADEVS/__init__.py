@@ -1,1 +1,1 @@
-__all__ = ["DEVS","simulator","kafka_devs"]
+__all__ = ["DEVS","simulator","atomic_worker"]

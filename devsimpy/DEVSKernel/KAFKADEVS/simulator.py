@@ -1,243 +1,336 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-simulator_kafka_full.py
-----------------------
-Simulateur DEVS distribué via Kafka, avec retour sur topic output.
-Compatible Windows.
-"""
 
-import multiprocessing as mp
-import time
-import json
-from kafka import KafkaProducer, KafkaConsumer
+###############################################################################
+# simulator.py --- Classes and Tools for 'Classic' DEVS Model Spec
+#                     --------------------------------
+#                            Copyright (c) 2025
+#                            Laurent Capocchi
+#							 SPE UMR CNRS 6134
+#                       Corsican University (France)
+#                     --------------------------------
+# Version                                        last modified: 09/27/2025
+###############################################################################
+# NOTES:
+# To mesure the performance of the simulator, one can use:
+# conda install -c anaconda snakeviz
+# python -m CProfile -o profile.out devsimpy-nogui.py <model.dsp> 100 && snakeviz profile.out 
+###############################################################################
 
-# ============================================================================
-#  CLASSES DE BASE DEVS
-# ============================================================================
+from itertools import *
 
-from .DEVS import AtomicDEVS, CoupledDEVS
-# ============================================================================
-#  WORKERS KAFKA
-# ============================================================================
+import array
+import builtins
 
-class BaseSolverWorker:
-    def __init__(self, model, bootstrap_servers="localhost:9092"):
-        self.model = model
-        self.bootstrap_servers = bootstrap_servers
-        self.producer = KafkaProducer(
-            bootstrap_servers=self.bootstrap_servers,
-            value_serializer=lambda v: json.dumps(v).encode("utf-8")
-        )
-        self.consumer = KafkaConsumer(
-            f"devs.{model.name}.input",
-            bootstrap_servers=self.bootstrap_servers,
-            value_deserializer=lambda m: json.loads(m.decode("utf-8")),
-            group_id=f"group_{model.name}",
-            auto_offset_reset="latest"
-        )
-        self.running = True
+from DEVS import CoupledDEVS
+from PluginManager import PluginManager
 
-    def send_output(self, data):
-        topic = f"devs.{self.model.name}.output"
-        self.producer.send(topic, data)
-        self.producer.flush()
+### avec ce flag les simulation en nogui sont plus rapides
+ENABLE_SIM_LOGS = getattr(builtins,'GUI_FLAG', True)
 
-    def run(self):
-        print(f"[{self.__class__.__name__}] Started for '{self.model.name}'")
-        for msg in self.consumer:
-            if not self.running:
-                break
-            self.process_message(msg.value)
+###############################################################################
+# GLOBAL VARIABLES AND FUNCTIONS
+###############################################################################
 
-    def stop(self):
-        self.running = False
-        self.consumer.close()
-        self.producer.close()
-        print(f"[{self.__class__.__name__}] Stopped '{self.model.name}'")
+def sim_log(event, **kwargs):
+    if ENABLE_SIM_LOGS:
+        PluginManager.trigger_event(event, **kwargs)
 
-class AtomicSolverWorker(BaseSolverWorker):
-    def process_message(self, msg):
-        t = msg.get("time", 0)
-        kind = msg.get("type")
-        data = msg.get("data", {})
+def Error(message ='', esc=1):
+	"""Error-handling function: reports an error and exits interpreter if
+	esc evaluates to true.
 
-        if kind == "i":
-            self.model.timeLast = 0
-            self.model.myTimeAdvance = self.model.timeAdvance()
-            self.model.timeNext = self.model.timeLast + self.model.myTimeAdvance
-            self.send_output({"event": "init_done", "time": 0})
+	To be replaced later by exception-handling mechanism.
+	"""
+	from sys import exit, stderr
+	stderr.write("ERROR: %s\n" % message)
+	if esc: exit(1)
 
-        elif kind == "*":
-            if t != self.model.timeNext:
-                print(f"[AtomicSolver] Warning: desync on {self.model.name}")
-            self.model.outputFnc()
-            self.send_output({"event": "output", "data": self.model.myOutput, "time": t})
-            self.model.intTransition()
-            self.model.timeLast = t
-            self.model.myTimeAdvance = self.model.timeAdvance()
-            self.model.timeNext = self.model.timeLast + self.model.myTimeAdvance
+###############################################################################
+# SIMULATOR CLASSES
+###############################################################################
 
-        elif kind == "x":
-            self.model.myInput = data
-            self.model.extTransition()
-            self.model.timeLast = t
-            self.model.myTimeAdvance = self.model.timeAdvance()
-            self.model.timeNext = self.model.timeLast + self.model.myTimeAdvance
+class Sender:
+	"""
+	Optimized Sender class with non-parallel execution.
+	"""
 
-        elif kind == "stop":
-            self.stop()
+	@staticmethod
+	def send(d, msg):
+		""" Dispatch messages to the right solver. """
+		if isinstance(d, CoupledDEVS):
+			CS = CoupledSolver()
+			return CS.receive(d, msg)
+		else:
+			AS = AtomicSolver()
+			r = AS.receive(d, msg)
+			sim_log("SIM_BLINK", model=d, msg=msg)
+			sim_log("SIM_TEST", model=d, msg=msg)
+			return r
 
-class CoupledSolverWorker(BaseSolverWorker):
-    def process_message(self, msg):
-        t = msg.get("time", 0)
-        kind = msg.get("type")
-        data = msg.get("data", {})
+class AtomicSolver:
+	"""Simulator for atomic-DEVS.
 
-        if kind == "i":
-            for comp in self.model.componentSet:
-                topic = f"devs.{comp.name}.input"
-                self.producer.send(topic, {"type": "i", "time": 0})
-            self.producer.flush()
-            self.send_output({"event": "init_done", "time": 0})
+		Singleton class.
 
-        elif kind == "*":
-            imm_children = [c for c in self.model.componentSet if c.timeNext <= t]
-            self.model.immChildren = imm_children
-            dStar = self.model.select(imm_children)
-            if dStar:
-                topic = f"devs.{dStar.name}.input"
-                self.producer.send(topic, {"type": "*", "time": t})
-                self.producer.flush()
-            self.send_output({"event": "internal_done", "time": t})
+		Atomic-DEVS can receive three types of messages: $(i,t)$, $(x,t)$ and
+		$(*,t)$. The latter is the only one that triggers another message-
+		sending, namely, $(y,t)$ is sent back to the parent coupled-DEVS. This is
+		actually implemented as a return value (to be completed).
+	"""
+	_instance = None
+	def __new__(cls, *args, **kwargs):
+		if not cls._instance:
+			cls._instance=super(AtomicSolver, cls).__new__(cls,*args, **kwargs)
+		return cls._instance
 
-        elif kind == "x":
-            for comp in self.model.componentSet:
-                topic = f"devs.{comp.name}.input"
-                self.producer.send(topic, {"type": "x", "time": t, "data": data})
-            self.producer.flush()
+	###
+	@staticmethod
+	def receive(aDEVS, msg):
 
-        elif kind == "stop":
-            for comp in self.model.componentSet:
-                topic = f"devs.{comp.name}.input"
-                self.producer.send(topic, {"type": "stop"})
-            self.stop()
+		# For any received message, the time {\tt t} (time at which the message
+		# is sent) is the second item in the list {\tt msg}.
+		t = msg[2]
 
-# ============================================================================
-#  FONCTION GLOBALE POUR WINDOWS
-# ============================================================================
+		# $(*,\,t)$ message --- triggers internal transition and returns
+		# $(y,\,t)$ message for parent coupled-DEVS:
+		if msg[0] == 1:
+			time_next = aDEVS.timeNext
+			if t != time_next:
+				Error("Bad synchronization...1", 1)
+				
+			my_output = {}
+			aDEVS.myOutput = my_output
+			aDEVS.outputFnc()
 
-def worker_process(model_type, model_name, model_obj, kafka_bootstrap):
-    if model_type == "atomic":
-        worker = AtomicSolverWorker(model_obj, bootstrap_servers=kafka_bootstrap)
-    else:
-        worker = CoupledSolverWorker(model_obj, bootstrap_servers=kafka_bootstrap)
-    worker.run()
+			time_last = aDEVS.timeLast
+			aDEVS.elapsed = t - time_last
 
-# ============================================================================
-#  SIMULATOR
-# ============================================================================
+			aDEVS.intTransition()
+
+			aDEVS.timeLast = t
+			aDEVS.myTimeAdvance = aDEVS.timeAdvance()
+			aDEVS.timeNext = aDEVS.timeLast + aDEVS.myTimeAdvance
+			if aDEVS.myTimeAdvance != INFINITY: aDEVS.myTimeAdvance += t
+			aDEVS.elapsed = 0
+
+			# The SIM_VERBOSE event occurs
+			sim_log("SIM_VERBOSE", model=aDEVS, msg=0)
+
+			# Return the DEVS' output to the parent coupled-DEVS (rather than
+			# sending $(y,\,t)$ message).
+			return aDEVS.myOutput
+
+		# ${x,\,t)$ message --- triggers external transition, where $x$ is the
+		# input dictionnary to the DEVS:
+		elif isinstance(msg[0], dict):
+			if not(aDEVS.timeLast <= t <= aDEVS.timeNext):
+				Error("Bad synchronization...2", 1)
+
+			aDEVS.myInput = msg[0]
+
+			# update elapsed time. This is necessary for the call to the external
+			# transition function, which is used to update the DEVS' state.
+			aDEVS.elapsed = t - aDEVS.timeLast
+			aDEVS.extTransition()
+
+			# Udpate time variables:
+			aDEVS.timeLast = t
+			aDEVS.myTimeAdvance = aDEVS.timeAdvance()
+			aDEVS.timeNext = aDEVS.timeLast + aDEVS.myTimeAdvance
+			if aDEVS.myTimeAdvance != INFINITY: aDEVS.myTimeAdvance += t
+			aDEVS.elapsed = 0
+
+			# The SIM_VERBOSE event occurs
+			PluginManager.trigger_event("SIM_VERBOSE", model=aDEVS, msg=1)
+
+		# $(i,\,t)$ message --- sets origin of time at {\tt t}:
+		elif msg[0] == 0:
+			aDEVS.timeLast = t - aDEVS.elapsed
+			aDEVS.myTimeAdvance = aDEVS.timeAdvance()
+			aDEVS.timeNext = aDEVS.timeLast + aDEVS.myTimeAdvance
+			if aDEVS.myTimeAdvance != INFINITY: aDEVS.myTimeAdvance += t
+
+		else:
+			Error("Unrecognized message", 1)
+
+###############################################################################
+
+class CoupledSolver(Sender):
+	"""Simulator (coordinator) for coupled-DEVS.
+
+	Coupled-DEVS can receive the same three types of messages as for atomic-
+	DEVS, plus the $(y,t)$ message. The latter is implemented as a returned
+	value rather than a message. This is possible because the $(y,t)$ message
+	is always sent to a coupled-DEVS in response from its sending a $(*,t)$
+	message. (This implementation makes it possible to easily distinguish
+	$(y,t)$ from $(x,t)$ messages... to be completed)
+	Description of eventList and dStar (to be completed)
+	"""
+
+	_instance = None
+	def __new__(cls, *args, **kwargs):
+		if not cls._instance:
+			cls._instance = super(Sender, cls).__new__(cls, *args, **kwargs)
+		return cls._instance
+
+	def send(self, Y, cDEVS, t):
+		send = Sender.send
+
+		cDEVS.timeLast = t
+		cDEVS.myTimeAdvance = INFINITY
+		cDEVS.myOutput.clear()
+
+		imm = cDEVS.immChildren
+
+		X = {}
+		for p, a in Y.items():
+			for pp in p.outLine:
+				b = pp.host
+				if b in X:
+					X[b].append((pp, a))
+				else:
+					X[b] = [(pp, a)]
+
+				if b is CoupledDEVS:
+					cDEVS.myOutput[b] = a
+
+		# Conversion minimale en dict juste avant l’envoi
+		for m, val in X.items():
+			if len(val) == 1:
+				# cas le plus fréquent → évite dict() lourd
+				send(m, ({val[0][0]: val[0][1]}, imm, t))
+			else:
+				send(m, (dict(val), imm, t))
+
+	###
+	def receive(self, cDEVS, msg):
+
+		send = Sender.send
+
+		# For any received message, the time {\tt t} (time at which the message
+		# is sent) is the second item in the list {\tt msg}.
+		t = msg[2]
+
+		# $(*,\,t)$ message --- triggers internal transition and returns
+		# $(y,\,t)$ message for parent coupled-DEVS:
+		if msg[0] == 1:
+			if t != cDEVS.myTimeAdvance:
+				Error("Bad synchronization...3", 1)
+
+			# Build the list {\tt immChildren} of {\sl imminent children\/} based
+			# on the sorted event-list, and select the active-child {\tt dStar}.
+			# The coupled-DEVS {\tt select} function is used to decide the active-child.
+
+			try:
+				dStar = cDEVS.select(cDEVS.immChildren)
+			# si pas d'imminentChildren il faut stoper la simulation
+			except IndexError:
+				raise IndexError
+
+			# Send $(*,\,t)$ message to active children, which returns (or sends
+			# back) message $(y,\,t)$. In the present implementation, just the
+			# sub-DEVS output dictionnary $y$ is returned and stored in {\tt Y}:
+
+			self.send(send(dStar, msg), cDEVS, t)
+			
+			min_ta = cDEVS.myTimeAdvance
+			imm = []
+			for c in cDEVS.componentSet:
+				ta = c.myTimeAdvance
+				if ta < min_ta:
+					min_ta = ta
+					imm = [c]
+				elif ta == min_ta:
+					imm.append(c)
+			cDEVS.myTimeAdvance = min_ta
+			cDEVS.immChildren = imm
+
+			return cDEVS.myOutput
+
+		# ${x,\,t)$ message --- triggers external transition, where $x$ is the
+		# input dictionnary to the DEVS:
+		elif isinstance(msg[0], dict):
+			if not(cDEVS.timeLast <= t <= cDEVS.myTimeAdvance):
+				Error("Bad synchronization...4", 1)
+
+			cDEVS.myInput = msg[0]
+
+			# Send $(x,\,t)$ messages to those sub-DEVS influenced by the coupled-
+			# DEVS input ports (ref. {\tt EIC}). This is essentially the same code
+			# as above that also updates the coupled-DEVS' time variables in
+			# parallel.
+
+			self.send(cDEVS.myInput, cDEVS, t)
+
+			for t in array.array('d', [d.myTimeAdvance for d in cDEVS.componentSet]):
+				if cDEVS.myTimeAdvance > t:
+					cDEVS.myTimeAdvance = t
+
+			# Get all components which tied for the smallest time advance and append
+			# each to the coupled DEVS' immChildren list
+
+			cDEVS.immChildren = [d for d in cDEVS.componentSet if cDEVS.myTimeAdvance == d.myTimeAdvance]
+
+		# $(i,\,t)$cDEVS.myOutput message --- sets origin of time at {\tt t}:
+		elif msg[0] == 0:
+			# Rebuild event-list and update time variables, by sending the
+			# initialization message to all the children of the coupled-DEVS. Note
+			# that the event-list is not sorted here, but only when the list of
+			# {\sl imminent children\/} is needed. Also note that {\tt None} is
+			# defined as bigger than any number in Python (stands for $+\infty$).
+			cDEVS.timeLast = 0
+			cDEVS.myTimeAdvance = INFINITY
+
+			for d in cDEVS.componentSet:
+				send(d, msg)
+				cDEVS.myTimeAdvance = min(cDEVS.myTimeAdvance, d.myTimeAdvance)
+				cDEVS.timeLast = max(cDEVS.timeLast, d.timeLast)
+
+			# Get all the components which have tied for the smallest time advance
+			# and put them into the coupled DEVS' immChildren list
+			cDEVS.immChildren = [d for d in cDEVS.componentSet if cDEVS.myTimeAdvance == d.myTimeAdvance]
+
+		else:
+			Error("Unrecognized message", 1)
+
+###############################################################################
 
 class Simulator:
-    def __init__(self, model, kafka_bootstrap="localhost:9092", auto_distributed=True):
-        self.model = model
-        self.kafka_bootstrap = kafka_bootstrap
-        self.auto_distributed = auto_distributed
-        self.worker_processes = {}
+	""" Simulator(model)
 
-        self.producer = KafkaProducer(
-            bootstrap_servers=self.kafka_bootstrap,
-            value_serializer=lambda v: json.dumps(v).encode("utf-8")
-        )
+		Associates a hierarchical DEVS model with the simulation engine.
+		To simulate the model, use simulate(T) strategy method.
+	"""
 
-        self.__augment(self.model)
+	###
+	def __init__(self, model = None):
+		"""Constructor.
 
-        if self.auto_distributed:
-            self.__init_kafka_workers(self.model)
+		model is an instance of a valid hierarchical DEVS model. The
+		constructor stores a local reference to this model and augments it with
+		time variables required by the simulator.
+		"""
 
-    def __augment(self, devs):
-        devs.timeLast = 0
-        devs.timeNext = float('inf')
-        devs.myTimeAdvance = 0
-        if isinstance(devs, CoupledDEVS):
-            for sub in devs.componentSet:
-                self.__augment(sub)
+		self.model = model
+		self.__augment(self.model)
 
-    def __init_kafka_workers(self, devs):
-        if isinstance(devs, CoupledDEVS):
-            for subd in devs.componentSet:
-                self.__init_kafka_workers(subd)
-            self.__spawn_worker(devs, "coupled")
-        else:
-            self.__spawn_worker(devs, "atomic")
+	###
+	def __augment(self, d = None):
+		"""Recusively augment model d with time variables.
+		"""
 
-    def __spawn_worker(self, model, worker_type):
-        p = mp.Process(
-            target=worker_process,
-            args=(worker_type, model.name, model, self.kafka_bootstrap),
-            daemon=True
-        )
-        p.start()
-        self.worker_processes[model.name] = p
-        print(f"[Simulator] Spawned {worker_type} worker for '{model.name}'")
+		# {\tt timeLast} holds the simulation time when the last event occured
+		# within the given DEVS, and (\tt myTimeAdvance} holds the amount of time until
+		# the next event.
+		d.timeLast = d.myTimeAdvance = 0.
 
-    def send(self, target_name, msg_type="x", data=None, t=0):
-        payload = {"type": msg_type, "time": t, "data": data or {}}
-        topic = f"devs.{target_name}.input"
-        self.producer.send(topic, payload)
-        self.producer.flush()
-        print(f"[Simulator] → Sent {msg_type} to {target_name} at t={t}")
+		if isinstance(d, CoupledDEVS):
+			# {\tt eventList} is the list of pairs $(tn_d,\,d)$, where $d$ is a
+			# reference to a sub-model of the coupled-DEVS and $tn_d$ is $d$'s
+			# time of next event.
+			for subd in d.componentSet:
+				self.__augment(subd)
 
-    def receive(self, target_name, timeout=5):
-        """Attend un message sur le topic output du modèle cible"""
-        consumer = KafkaConsumer(
-            f"devs.{target_name}.output",
-            bootstrap_servers=self.kafka_bootstrap,
-            value_deserializer=lambda m: json.loads(m.decode("utf-8")),
-            auto_offset_reset="latest",
-            consumer_timeout_ms=int(timeout*1000)
-        )
-        try:
-            for msg in consumer:
-                return msg.value
-        finally:
-            consumer.close()
-
-    def stop_all_workers(self):
-        for name, proc in self.worker_processes.items():
-            if proc.is_alive():
-                proc.terminate()
-                print(f"[Simulator] Worker '{name}' terminated.")
-        self.worker_processes.clear()
-        self.producer.close()
-
-# ============================================================================
-#  EXEMPLE D’UTILISATION
-# ============================================================================
-
-if __name__ == "__main__":
-    atom1 = AtomicDEVS("A1")
-    atom2 = AtomicDEVS("A2")
-    coupled = CoupledDEVS("C1", [atom1, atom2])
-
-    sim = Simulator(coupled, kafka_bootstrap="localhost:9092")
-
-    # Init racine
-    sim.send("C1", msg_type="i", t=0)
-    print("Init sent. Waiting for outputs...")
-    print(sim.receive("C1"))
-
-    # Envoyer un message externe à A1
-    sim.send("A1", msg_type="x", data={"ping": 1}, t=10)
-    print(sim.receive("A1"))
-
-    # Trigger transition interne C1
-    sim.send("C1", msg_type="*", t=20)
-    print(sim.receive("C1"))
-
-    print("\n[Main] Simulation progressing… Press Ctrl+C to stop.")
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        sim.stop_all_workers()
+	def send(self, d, msg):
+		return Sender.send(d, msg)
