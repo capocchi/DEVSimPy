@@ -1,519 +1,243 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+simulator_kafka_full.py
+----------------------
+Simulateur DEVS distribué via Kafka, avec retour sur topic output.
+Compatible Windows.
+"""
 
-###############################################################################
-# simulator.py --- Classes and Tools for 'Classic' DEVS Model Spec
-#                     --------------------------------
-#                            Copyright (c) 2025
-#                            Laurent Capocchi
-#							 SPE UMR CNRS 6134
-#                       Corsican University (France)
-#                     --------------------------------
-# Version                                        last modified: 09/27/2025
-###############################################################################
-# NOTES:
-# To mesure the performance of the simulator, one can use:
-# conda install -c anaconda snakeviz
-# python -m CProfile -o profile.out devsimpy-nogui.py <model.dsp> 100 && snakeviz profile.out 
-###############################################################################
-
-from itertools import *
-
-import array
-import builtins
-from collections import defaultdict
-
-from .DEVS import CoupledDEVS
-from PluginManager import PluginManager
-
-### avec ce flag, on gere a totalité des messages sur les ports une seul fois dans delta_ext.
-WITHOUT_DELTA_EXT_FOR_ALL_PORT = True
-### avec ce flag on peut faire de l'execution en paralle de modèle qui s'active en meme temps mais pas avec des modèles couplés dans des modèles couplés
-WITH_PARALLEL_EXECUTION = False
-### avec ce flag les simulation en nogui sont plus rapides
-ENABLE_SIM_LOGS = getattr(builtins,'GUI_FLAG', True)
-
-try:
-    from .broker_adapter import KafkaBrokerAdapter, MessageTransformer
-    from .kafka_config import KAFKA_CONFIG
-    KAFKA_AVAILABLE = True
-except ImportError as e:
-    KAFKA_AVAILABLE = False
-    print(f"Warning: Kafka broker not available: {e}")
-
-import logging
+import multiprocessing as mp
+import time
+import json
+from kafka import KafkaProducer, KafkaConsumer
 
 # ============================================================================
-# CONFIGURATION KAFKA AVEC BOOLÉENS DE CONTRÔLE
+#  CLASSES DE BASE DEVS
 # ============================================================================
 
-# Activer/désactiver Kafka
-USE_KAFKA_BROKER = False  # True pour activer Kafka
-
-# Contrôle du logging Kafka
-ENABLE_KAFKA_LOGGING = True  # True pour activer les logs Kafka
-KAFKA_LOG_TO_FILE = True     # True pour écrire dans un fichier
-KAFKA_LOG_TO_CONSOLE = False # True pour afficher en console
-KAFKA_LOG_LEVEL = 'INFO'     # 'DEBUG', 'INFO', 'WARNING', 'ERROR'
-
-# Contrôle détaillé de ce qui est loggé
-KAFKA_LOG_SEND = True        # Logger les envois
-KAFKA_LOG_RECEIVE = True     # Logger les réceptions
-KAFKA_LOG_TRANSFORM = False  # Logger les transformations (verbose)
-KAFKA_LOG_ERRORS = True      # Logger les erreurs
-KAFKA_LOG_STATS = True       # Logger les statistiques finales
-
-# Mode strict (erreur si Kafka échoue)
-KAFKA_STRICT_MODE = False
-
-from .kafka_logger import get_kafka_logger
-
-
-# Exceptions personnalisées
-class KafkaBrokerError(Exception):
-    """Exception levée quand le broker Kafka échoue en mode strict"""
-    pass
-
-class MessageTransformError(Exception):
-    """Exception levée quand la transformation de message échoue"""
-    pass
-
-
-###############################################################################
-# GLOBAL VARIABLES AND FUNCTIONS
-###############################################################################
-
-def sim_log(event, **kwargs):
-    if ENABLE_SIM_LOGS:
-        PluginManager.trigger_event(event, **kwargs)
-
-def Error(message ='', esc=1):
-	"""Error-handling function: reports an error and exits interpreter if
-	esc evaluates to true.
-
-	To be replaced later by exception-handling mechanism.
-	"""
-	from sys import exit, stderr
-	stderr.write("ERROR: %s\n" % message)
-	if esc: exit(1)
-
-###############################################################################
-# SIMULATOR CLASSES
-###############################################################################
-
-class Sender:
-	"""
-	Optimized Sender class with non-parallel execution.
-	"""
-
-
-	def t_send(self, X, imm, t):
-		"""
-		Non-parallel send: dispatch messages sequentially.
-		"""
-		for m, val in X.items():
-			# Pass the list directly; AtomicSolver/CoupledSolver will convert if needed
-			self.send(m, (val, imm, t))
-
-
-	def send(self, d, msg):
-		""" Dispatch messages to the right solver. """
-		if isinstance(d, CoupledDEVS):
-			CS = CoupledSolver()
-			return CS.receive(d, msg)
-		else:
-			AS = AtomicSolver()
-			r = AS.receive(d, msg)
-			sim_log("SIM_BLINK", model=d, msg=msg)
-			sim_log("SIM_TEST", model=d, msg=msg)
-			return r
-
-class AtomicSolver:
-	"""Simulator for atomic-DEVS.
-
-		Singleton class.
-
-		Atomic-DEVS can receive three types of messages: $(i,t)$, $(x,t)$ and
-		$(*,t)$. The latter is the only one that triggers another message-
-		sending, namely, $(y,t)$ is sent back to the parent coupled-DEVS. This is
-		actually implemented as a return value (to be completed).
-	"""
-	_instance = None
-	def __new__(cls, *args, **kwargs):
-		if not cls._instance:
-			cls._instance=super(AtomicSolver, cls).__new__(cls,*args, **kwargs)
-		return cls._instance
-
-	###
-	@staticmethod
-	def receive(aDEVS, msg):
-
-		# For any received message, the time {\tt t} (time at which the message
-		# is sent) is the second item in the list {\tt msg}.
-		t = msg[2]
-
-		# $(*,\,t)$ message --- triggers internal transition and returns
-		# $(y,\,t)$ message for parent coupled-DEVS:
-		if msg[0] == 1:
-			if t != aDEVS.timeNext:
-				Error("Bad synchronization...1", 1)
-
-			# First call the output function, which (amongst other things) rebuilds
-			# the output dictionnary {\tt myOutput}:
-			aDEVS.myOutput = {}
-			aDEVS.outputFnc()
-
-			aDEVS.elapsed = t - aDEVS.timeLast
-			aDEVS.intTransition()
-
-			aDEVS.timeLast = t
-			aDEVS.myTimeAdvance = aDEVS.timeAdvance()
-			aDEVS.timeNext = aDEVS.timeLast + aDEVS.myTimeAdvance
-			if aDEVS.myTimeAdvance != INFINITY: aDEVS.myTimeAdvance += t
-			aDEVS.elapsed = 0
-
-			# The SIM_VERBOSE event occurs
-			sim_log("SIM_VERBOSE", model=aDEVS, msg=0)
-
-			# Return the DEVS' output to the parent coupled-DEVS (rather than
-			# sending $(y,\,t)$ message).
-			return aDEVS.myOutput
-
-		# ${x,\,t)$ message --- triggers external transition, where $x$ is the
-		# input dictionnary to the DEVS:
-		elif isinstance(msg[0], dict):
-			if not(aDEVS.timeLast <= t <= aDEVS.timeNext):
-				Error("Bad synchronization...2", 1)
-
-			aDEVS.myInput = msg[0]
-
-			# update elapsed time. This is necessary for the call to the external
-			# transition function, which is used to update the DEVS' state.
-			aDEVS.elapsed = t - aDEVS.timeLast
-			aDEVS.extTransition()
-
-			# Udpate time variables:
-			aDEVS.timeLast = t
-			aDEVS.myTimeAdvance = aDEVS.timeAdvance()
-			aDEVS.timeNext = aDEVS.timeLast + aDEVS.myTimeAdvance
-			if aDEVS.myTimeAdvance != INFINITY: aDEVS.myTimeAdvance += t
-			aDEVS.elapsed = 0
-
-			# The SIM_VERBOSE event occurs
-			PluginManager.trigger_event("SIM_VERBOSE", model=aDEVS, msg=1)
-
-		# $(i,\,t)$ message --- sets origin of time at {\tt t}:
-		elif msg[0] == 0:
-			aDEVS.timeLast = t - aDEVS.elapsed
-			aDEVS.myTimeAdvance = aDEVS.timeAdvance()
-			aDEVS.timeNext = aDEVS.timeLast + aDEVS.myTimeAdvance
-			if aDEVS.myTimeAdvance != INFINITY: aDEVS.myTimeAdvance += t
-
-		else:
-			Error("Unrecognized message", 1)
-
-###############################################################################
-
-class CoupledSolver(Sender):
-	"""Simulator (coordinator) for coupled-DEVS.
-
-	Coupled-DEVS can receive the same three types of messages as for atomic-
-	DEVS, plus the $(y,t)$ message. The latter is implemented as a returned
-	value rather than a message. This is possible because the $(y,t)$ message
-	is always sent to a coupled-DEVS in response from its sending a $(*,t)$
-	message. (This implementation makes it possible to easily distinguish
-	$(y,t)$ from $(x,t)$ messages... to be completed)
-	Description of eventList and dStar (to be completed)
-	"""
-
-	_broker_instance = None
-	_transformer_instance = None
-    
-	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
-		
-		# Initialiser le broker et le transformer si activé
-		if USE_KAFKA_BROKER:
-			if CoupledSolver._broker_instance is None:
-				CoupledSolver._broker_instance = KafkaBrokerAdapter()
-				CoupledSolver._transformer_instance = MessageTransformer()
-				logging.info("Kafka broker and MessageTransformer initialized")
-			
-			self.broker = CoupledSolver._broker_instance
-			self.transformer = CoupledSolver._transformer_instance
-		else:
-			self.broker = None
-			self.transformer = None
-
-	def send(self, d, msg):
-		""" Dispatch messages to the right solver via broker si activé """
-		
-		# Si le broker Kafka est activé et disponible
-		if USE_KAFKA_BROKER and self.broker and self.transformer:
-			return self._send_via_broker(d, msg, self.broker)
-		else:
-			# Comportement classique (envoi direct)
-			# return self._send_direct(d, msg)
-			pass
-
-	def _send_via_broker(self, d, msg, broker):
-		"""
-		Envoie un message via le broker Kafka avec gestion d'erreurs stricte
-		"""
-		model_id = d.myID if hasattr(d, 'myID') else str(id(d))
-		
-		# Déterminer le type de message
-		msg_type = 'unknown'
-		if isinstance(msg, (tuple, list)) and len(msg) > 0:
-			if msg[0] == 0:
-				msg_type = 'init'
-			elif msg[0] == 1:
-				msg_type = 'internal'
-			elif isinstance(msg[0], dict):
-				msg_type = 'external'
-		
-		# Tentative d'envoi via Kafka
-		try:
-			# Envoyer via le broker
-			success = broker.send_message(model_id, msg, msg_type)
-			
-			if not success:
-				error_msg = f"Broker send to {model_id} failed"
-				logging.error(error_msg)
-				
-				# En mode strict, lever une exception au lieu de faire fallback
-				if KAFKA_STRICT_MODE:
-					raise KafkaBrokerError(error_msg)
-			
-			logging.debug(f"Message successfully sent to {model_id} via broker")
-			
-		except Exception as e:
-			error_msg = f"Error sending message to {model_id} via broker: {e}"
-			logging.error(error_msg)
-			
-			# En mode strict, propager l'exception
-			if KAFKA_STRICT_MODE:
-				raise KafkaBrokerError(error_msg) from e
-		
-		# Si on arrive ici en mode strict, c'est que tout s'est bien passé
-		# On fait quand même l'envoi direct pour compatibilité (phase de transition)
-		if isinstance(d, CoupledDEVS):
-			CS = CoupledSolver()
-			return CS.receive(d, msg)
-		else:
-			AS = AtomicSolver()
-			r = AS.receive(d, msg)
-			sim_log("SIM_BLINK", model=d, msg=msg)
-			sim_log("SIM_TEST", model=d, msg=msg)
-			return r
-
-	def _send_direct(self, d, msg):
-		"""
-		Envoi direct classique (code original)
-		Conserve le comportement existant
-		"""
-		if isinstance(d, CoupledDEVS):
-			CS = CoupledSolver()
-			return CS.receive(d, msg)
-		else:
-			AS = AtomicSolver()
-			r = AS.receive(d, msg)
-			sim_log("SIM_BLINK", model=d, msg=msg)
-			sim_log("SIM_TEST", model=d, msg=msg)
-			return r
-
-	def enable_broker_response_handling(self, model_id: str):
-		"""
-		Active la réception des réponses via Kafka pour un modèle donné
-		
-		Args:
-			model_id: Identifiant du modèle
-		"""
-		if not self.broker or not self.transformer:
-			logging.warning("Broker not available, cannot enable response handling")
-			return
-		
-		def response_callback(devs_msg):
-			"""Callback appelé lors de la réception d'une réponse via Kafka"""
-			logging.info(f"Received response from {model_id}: {devs_msg}")
-			# Ici, vous pouvez traiter la réponse reçue
-			# Par exemple, mettre à jour l'état du modèle
-		
-		self.broker.create_consumer(model_id, response_callback)
-		logging.info(f"Response handling enabled for model {model_id}")
-		
-	def threading_send(self, Y, cDEVS, t):
-		send = self.send
-		send_parallel = self.t_send
-
-		cDEVS.timeLast = t
-		cDEVS.myTimeAdvance = INFINITY
-		cDEVS.myOutput.clear()
-
-		imm = cDEVS.immChildren
-
-		if WITHOUT_DELTA_EXT_FOR_ALL_PORT:
-			X = defaultdict(list)
-
-			for p, a in Y.items():
-				for pp in p.outLine:
-					b = pp.host
-					X[b].append((pp, a))
-
-					if b is CoupledDEVS:
-						cDEVS.myOutput[b] = a
-
-			if WITH_PARALLEL_EXECUTION:
-				# Ici on garde X sous forme defaultdict(list)
-				# si send_parallel peut gérer directement → pas besoin de dict()
-				send_parallel(X, imm, t)
-			else:
-				# Conversion minimale en dict juste avant l’envoi
-				for m, val in X.items():
-					if len(val) == 1:
-						# cas le plus fréquent → évite dict() lourd
-						send(m, ({val[0][0]: val[0][1]}, imm, t))
-					else:
-						send(m, (dict(val), imm, t))
-
-		else:
-			for p, a in Y.items():
-				for pp in p.outLine:
-					b = pp.host
-					if b is CoupledDEVS:
-						cDEVS.myOutput[b] = a
-					# envoi direct avec dict minimal
-					send(b, ({pp: a}, imm, t))
-
-	###
-	def receive(self, cDEVS, msg):
-
-		# For any received message, the time {\tt t} (time at which the message
-		# is sent) is the second item in the list {\tt msg}.
-		t = msg[2]
-
-		send = self.send
-
-		# $(*,\,t)$ message --- triggers internal transition and returns
-		# $(y,\,t)$ message for parent coupled-DEVS:
-		if msg[0] == 1:
-			if t != cDEVS.myTimeAdvance:
-				Error("Bad synchronization...3", 1)
-
-			# Build the list {\tt immChildren} of {\sl imminent children\/} based
-			# on the sorted event-list, and select the active-child {\tt dStar}.
-			# The coupled-DEVS {\tt select} function is used to decide the active-child.
-
-			try:
-				dStar = cDEVS.select(cDEVS.immChildren)
-			# si pas d'imminentChildren il faut stoper la simulation
-			except IndexError:
-				raise IndexError
-
-			# Send $(*,\,t)$ message to active children, which returns (or sends
-			# back) message $(y,\,t)$. In the present implementation, just the
-			# sub-DEVS output dictionnary $y$ is returned and stored in {\tt Y}:
-
-			self.threading_send(send(dStar, msg), cDEVS, t)
-
-			# cDEVS.myTimeAdvance = min(array.array('d',[c.myTimeAdvance for c in cDEVS.componentSet]+[cDEVS.myTimeAdvance]))
-
-			###each to the coupled DEVS' immChildren list
-			# cDEVS.immChildren = [d for d in cDEVS.componentSet if cDEVS.myTimeAdvance == d.myTimeAdvance]
-			
-			time_advances = [c.myTimeAdvance for c in cDEVS.componentSet]
-			cDEVS.myTimeAdvance = min(time_advances + [cDEVS.myTimeAdvance])
-			cDEVS.immChildren = [d for d, ta in zip(cDEVS.componentSet, time_advances) if cDEVS.myTimeAdvance == ta]
-
-			return cDEVS.myOutput
-
-		# ${x,\,t)$ message --- triggers external transition, where $x$ is the
-		# input dictionnary to the DEVS:
-		elif isinstance(msg[0], dict):
-			if not(cDEVS.timeLast <= t <= cDEVS.myTimeAdvance):
-				Error("Bad synchronization...4", 1)
-
-			cDEVS.myInput = msg[0]
-
-			# Send $(x,\,t)$ messages to those sub-DEVS influenced by the coupled-
-			# DEVS input ports (ref. {\tt EIC}). This is essentially the same code
-			# as above that also updates the coupled-DEVS' time variables in
-			# parallel.
-
-			self.threading_send(cDEVS.myInput, cDEVS, t)
-
-			for t in array.array('d', [d.myTimeAdvance for d in cDEVS.componentSet]):
-				if cDEVS.myTimeAdvance > t:
-					cDEVS.myTimeAdvance = t
-
-			# Get all components which tied for the smallest time advance and append
-			# each to the coupled DEVS' immChildren list
-
-			cDEVS.immChildren = [d for d in cDEVS.componentSet if cDEVS.myTimeAdvance == d.myTimeAdvance]
-
-		# $(i,\,t)$cDEVS.myOutput message --- sets origin of time at {\tt t}:
-		elif msg[0] == 0:
-			# Rebuild event-list and update time variables, by sending the
-			# initialization message to all the children of the coupled-DEVS. Note
-			# that the event-list is not sorted here, but only when the list of
-			# {\sl imminent children\/} is needed. Also note that {\tt None} is
-			# defined as bigger than any number in Python (stands for $+\infty$).
-			cDEVS.timeLast = 0
-			cDEVS.myTimeAdvance = INFINITY
-
-			for d in cDEVS.componentSet:
-				self.send(d, msg)
-				cDEVS.myTimeAdvance = min(cDEVS.myTimeAdvance, d.myTimeAdvance)
-				cDEVS.timeLast = max(cDEVS.timeLast, d.timeLast)
-
-			# Get all the components which have tied for the smallest time advance
-			# and put them into the coupled DEVS' immChildren list
-			cDEVS.immChildren = [d for d in cDEVS.componentSet if cDEVS.myTimeAdvance == d.myTimeAdvance]
-
-		else:
-			Error("Unrecognized message", 1)
-
-###############################################################################
-
-class Simulator(Sender):
-	""" Simulator(model)
-
-		Associates a hierarchical DEVS model with the simulation engine.
-		To simulate the model, use simulate(T) strategy method.
-	"""
-
-	###
-	def __init__(self, model = None):
-		"""Constructor.
-
-		model is an instance of a valid hierarchical DEVS model. The
-		constructor stores a local reference to this model and augments it with
-		time variables required by the simulator.
-		"""
-
-		self.model = model
-		self.__augment(self.model)
-#		self.__algorithm = SimStrategy1(self)
-
-	###
-	def __augment(self, d = None):
-		"""Recusively augment model d with time variables.
-		"""
-
-		# {\tt timeLast} holds the simulation time when the last event occured
-		# within the given DEVS, and (\tt myTimeAdvance} holds the amount of time until
-		# the next event.
-		d.timeLast = d.myTimeAdvance = 0.
-
-		if isinstance(d, CoupledDEVS):
-			# {\tt eventList} is the list of pairs $(tn_d,\,d)$, where $d$ is a
-			# reference to a sub-model of the coupled-DEVS and $tn_d$ is $d$'s
-			# time of next event.
-			for subd in d.componentSet:
-				self.__augment(subd)
-
-	def __del__(self):
-		"""Affiche les stats Kafka à la fin"""
-		if USE_KAFKA_BROKER:
-			logger = get_kafka_logger()
-			logger.log_stats()
+from .DEVS import AtomicDEVS, CoupledDEVS
+# ============================================================================
+#  WORKERS KAFKA
+# ============================================================================
+
+class BaseSolverWorker:
+    def __init__(self, model, bootstrap_servers="localhost:9092"):
+        self.model = model
+        self.bootstrap_servers = bootstrap_servers
+        self.producer = KafkaProducer(
+            bootstrap_servers=self.bootstrap_servers,
+            value_serializer=lambda v: json.dumps(v).encode("utf-8")
+        )
+        self.consumer = KafkaConsumer(
+            f"devs.{model.name}.input",
+            bootstrap_servers=self.bootstrap_servers,
+            value_deserializer=lambda m: json.loads(m.decode("utf-8")),
+            group_id=f"group_{model.name}",
+            auto_offset_reset="latest"
+        )
+        self.running = True
+
+    def send_output(self, data):
+        topic = f"devs.{self.model.name}.output"
+        self.producer.send(topic, data)
+        self.producer.flush()
+
+    def run(self):
+        print(f"[{self.__class__.__name__}] Started for '{self.model.name}'")
+        for msg in self.consumer:
+            if not self.running:
+                break
+            self.process_message(msg.value)
+
+    def stop(self):
+        self.running = False
+        self.consumer.close()
+        self.producer.close()
+        print(f"[{self.__class__.__name__}] Stopped '{self.model.name}'")
+
+class AtomicSolverWorker(BaseSolverWorker):
+    def process_message(self, msg):
+        t = msg.get("time", 0)
+        kind = msg.get("type")
+        data = msg.get("data", {})
+
+        if kind == "i":
+            self.model.timeLast = 0
+            self.model.myTimeAdvance = self.model.timeAdvance()
+            self.model.timeNext = self.model.timeLast + self.model.myTimeAdvance
+            self.send_output({"event": "init_done", "time": 0})
+
+        elif kind == "*":
+            if t != self.model.timeNext:
+                print(f"[AtomicSolver] Warning: desync on {self.model.name}")
+            self.model.outputFnc()
+            self.send_output({"event": "output", "data": self.model.myOutput, "time": t})
+            self.model.intTransition()
+            self.model.timeLast = t
+            self.model.myTimeAdvance = self.model.timeAdvance()
+            self.model.timeNext = self.model.timeLast + self.model.myTimeAdvance
+
+        elif kind == "x":
+            self.model.myInput = data
+            self.model.extTransition()
+            self.model.timeLast = t
+            self.model.myTimeAdvance = self.model.timeAdvance()
+            self.model.timeNext = self.model.timeLast + self.model.myTimeAdvance
+
+        elif kind == "stop":
+            self.stop()
+
+class CoupledSolverWorker(BaseSolverWorker):
+    def process_message(self, msg):
+        t = msg.get("time", 0)
+        kind = msg.get("type")
+        data = msg.get("data", {})
+
+        if kind == "i":
+            for comp in self.model.componentSet:
+                topic = f"devs.{comp.name}.input"
+                self.producer.send(topic, {"type": "i", "time": 0})
+            self.producer.flush()
+            self.send_output({"event": "init_done", "time": 0})
+
+        elif kind == "*":
+            imm_children = [c for c in self.model.componentSet if c.timeNext <= t]
+            self.model.immChildren = imm_children
+            dStar = self.model.select(imm_children)
+            if dStar:
+                topic = f"devs.{dStar.name}.input"
+                self.producer.send(topic, {"type": "*", "time": t})
+                self.producer.flush()
+            self.send_output({"event": "internal_done", "time": t})
+
+        elif kind == "x":
+            for comp in self.model.componentSet:
+                topic = f"devs.{comp.name}.input"
+                self.producer.send(topic, {"type": "x", "time": t, "data": data})
+            self.producer.flush()
+
+        elif kind == "stop":
+            for comp in self.model.componentSet:
+                topic = f"devs.{comp.name}.input"
+                self.producer.send(topic, {"type": "stop"})
+            self.stop()
+
+# ============================================================================
+#  FONCTION GLOBALE POUR WINDOWS
+# ============================================================================
+
+def worker_process(model_type, model_name, model_obj, kafka_bootstrap):
+    if model_type == "atomic":
+        worker = AtomicSolverWorker(model_obj, bootstrap_servers=kafka_bootstrap)
+    else:
+        worker = CoupledSolverWorker(model_obj, bootstrap_servers=kafka_bootstrap)
+    worker.run()
+
+# ============================================================================
+#  SIMULATOR
+# ============================================================================
+
+class Simulator:
+    def __init__(self, model, kafka_bootstrap="localhost:9092", auto_distributed=True):
+        self.model = model
+        self.kafka_bootstrap = kafka_bootstrap
+        self.auto_distributed = auto_distributed
+        self.worker_processes = {}
+
+        self.producer = KafkaProducer(
+            bootstrap_servers=self.kafka_bootstrap,
+            value_serializer=lambda v: json.dumps(v).encode("utf-8")
+        )
+
+        self.__augment(self.model)
+
+        if self.auto_distributed:
+            self.__init_kafka_workers(self.model)
+
+    def __augment(self, devs):
+        devs.timeLast = 0
+        devs.timeNext = float('inf')
+        devs.myTimeAdvance = 0
+        if isinstance(devs, CoupledDEVS):
+            for sub in devs.componentSet:
+                self.__augment(sub)
+
+    def __init_kafka_workers(self, devs):
+        if isinstance(devs, CoupledDEVS):
+            for subd in devs.componentSet:
+                self.__init_kafka_workers(subd)
+            self.__spawn_worker(devs, "coupled")
+        else:
+            self.__spawn_worker(devs, "atomic")
+
+    def __spawn_worker(self, model, worker_type):
+        p = mp.Process(
+            target=worker_process,
+            args=(worker_type, model.name, model, self.kafka_bootstrap),
+            daemon=True
+        )
+        p.start()
+        self.worker_processes[model.name] = p
+        print(f"[Simulator] Spawned {worker_type} worker for '{model.name}'")
+
+    def send(self, target_name, msg_type="x", data=None, t=0):
+        payload = {"type": msg_type, "time": t, "data": data or {}}
+        topic = f"devs.{target_name}.input"
+        self.producer.send(topic, payload)
+        self.producer.flush()
+        print(f"[Simulator] → Sent {msg_type} to {target_name} at t={t}")
+
+    def receive(self, target_name, timeout=5):
+        """Attend un message sur le topic output du modèle cible"""
+        consumer = KafkaConsumer(
+            f"devs.{target_name}.output",
+            bootstrap_servers=self.kafka_bootstrap,
+            value_deserializer=lambda m: json.loads(m.decode("utf-8")),
+            auto_offset_reset="latest",
+            consumer_timeout_ms=int(timeout*1000)
+        )
+        try:
+            for msg in consumer:
+                return msg.value
+        finally:
+            consumer.close()
+
+    def stop_all_workers(self):
+        for name, proc in self.worker_processes.items():
+            if proc.is_alive():
+                proc.terminate()
+                print(f"[Simulator] Worker '{name}' terminated.")
+        self.worker_processes.clear()
+        self.producer.close()
+
+# ============================================================================
+#  EXEMPLE D’UTILISATION
+# ============================================================================
+
+if __name__ == "__main__":
+    atom1 = AtomicDEVS("A1")
+    atom2 = AtomicDEVS("A2")
+    coupled = CoupledDEVS("C1", [atom1, atom2])
+
+    sim = Simulator(coupled, kafka_bootstrap="localhost:9092")
+
+    # Init racine
+    sim.send("C1", msg_type="i", t=0)
+    print("Init sent. Waiting for outputs...")
+    print(sim.receive("C1"))
+
+    # Envoyer un message externe à A1
+    sim.send("A1", msg_type="x", data={"ping": 1}, t=10)
+    print(sim.receive("A1"))
+
+    # Trigger transition interne C1
+    sim.send("C1", msg_type="*", t=20)
+    print(sim.receive("C1"))
+
+    print("\n[Main] Simulation progressing… Press Ctrl+C to stop.")
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        sim.stop_all_workers()
