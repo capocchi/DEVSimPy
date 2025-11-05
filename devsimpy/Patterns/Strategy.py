@@ -351,27 +351,26 @@ def setAtomicModels(atomic_model_list, ts):
         m.myTimeAdvance = m.timeAdvance()
         m.poke = poke
         m.peek = peek
-        funcType = type(PyDEVS.AtomicDEVS.peek_all)
-        m.peek_all = funcType(peek_all, m, PyDEVS.AtomicDEVS)
+        # Fix: Directly bind the peek_all method instead of using funcType
+        m.peek_all = lambda self=m: peek_all(self)
         setattr(m, 'priority', i)
         setattr(m, 'ts', ts())
 
     for m in atomic_model_list:
         for p1 in m.OPorts:
-            if not hasattr(p1, 'weak'): setattr(p1, 'weak', WeakValue(p1))
+            if not hasattr(p1, 'weak'): 
+                setattr(p1, 'weak', WeakValue(p1))
             for p2 in p1.outLine:
-                if not hasattr(p2, 'weak'): setattr(p2, 'weak', WeakValue(p2))
-
-                #p2.weak = p1.weak
+                if not hasattr(p2, 'weak'): 
+                    setattr(p2, 'weak', WeakValue(p2))
                 FlatConnection(p1,p2)
 
         for p1 in m.IPorts:
-            if not hasattr(p1, 'weak'): setattr(p1, 'weak', WeakValue(p1))
+            if not hasattr(p1, 'weak'): 
+                setattr(p1, 'weak', WeakValue(p1))
             for p2 in p1.inLine:
-                if not hasattr(p2, 'weak'): setattr(p2, 'weak', WeakValue(p2))
-
-                #p1.weak = p2.weak
-                #FlatConnection(p1,p2)
+                if not hasattr(p2, 'weak'): 
+                    setattr(p2, 'weak', WeakValue(p2))
 
 ###
 def execExtTransition(m):

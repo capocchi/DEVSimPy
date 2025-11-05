@@ -60,96 +60,114 @@ from NetManager import Net
 ###
 ###########################################################
 
-def getClassMember(python_file = ''):
-	""" Get class member from python file.
-	"""
-	module  = BlockFactory.GetModule(python_file)
-	
-	if inspect.ismodule(module):
-		## classes composing the imported module
-		return dict(inspect.getmembers(module, inspect.isclass))
-		
-	### exception in module
-	return module
+def getClassMember(python_file=''):
+    """ Get class member from python file. """
+    module = BlockFactory.GetModule(python_file)
+
+    if inspect.ismodule(module):
+        return dict(inspect.getmembers(module, inspect.isclass))
+
+    return module
+
+
+def _is_subclass_of_any(candidate, bases):
+    """
+    Safe check: returns True if candidate is a subclass of any class in bases.
+    Guards against non-class objects.
+    """
+    if not inspect.isclass(candidate):
+        return False
+
+    for base in bases:
+        if not inspect.isclass(base):
+            continue
+        try:
+            if issubclass(candidate, base):
+                return True
+        except TypeError:
+            # shouldn't happen because we filter for isclass, but keep safe
+            continue
+    return False
+
+
+def _mro_name_match(candidate, bases):
+    """Fallback: check if any base class name appears in candidate.__mro__ names."""
+    if not inspect.isclass(candidate):
+        return False
+    mro_names = {cls.__name__ for cls in candidate.__mro__}
+    base_names = {b.__name__ for b in bases if inspect.isclass(b)}
+    return not mro_names.isdisjoint(base_names)
+
 
 def GetClass(elem):
-	""" Get python class from filename.
-	"""
+    """ Get python class from filename/module elem.
+        Returns the first class that:
+          - is not one of the base Domain classes
+          - inherits from DomainBehavior or DomainStructure (or Port), if any
+        Falls back to name/MRO-based heuristics when subclass checks are not reliable.
+    """
 
-	clsmembers = getClassMember(elem)
- 
-	if isinstance(clsmembers, dict):
-	
-		from DomainInterface import DomainBehavior
-		from DomainInterface import DomainStructure
+    clsmembers = getClassMember(elem)
 
-		# moduleName = path_to_module(elem)
+    if not isinstance(clsmembers, dict):
+        # module import error or other: return as-is (existing behaviour)
+        return clsmembers
 
-		# if 'DomainBehavior' in clsmembers:
-			# DomainClass = clsmembers['DomainBehavior']
-		# elif 'DomainStructure' in clsmembers:
-			# DomainClass = clsmembers['DomainStructure']
-		# elif 'Port' in clsmembers:
-			# DomainClass = clsmembers['Port']
-		# else:
-			# DomainClass = clsmembers[os.path.basename(elem).split('.')[0]]
-			# sys.stderr.write(_("Class unknown..."))
-			# return None
+    # Import the domain base classes you want to match against
+    from DomainInterface import DomainBehavior, DomainStructure
 
-		### return only the class that inherite of DomainBehavoir or DomainStructure which are present in the clsmembers dict
-		# return next(filter(lambda c: c != DomainClass and issubclass(c, DomainClass), clsmembers.values()), None)
+    # Build tuple/list of base domain classes (filter to real classes)
+    domain_bases = [DomainBehavior, DomainStructure]
+    if 'Port' in clsmembers and inspect.isclass(clsmembers['Port']):
+        domain_bases.append(clsmembers['Port'])
 
-		 # Build base domain class tuple
-		DomainClass = (DomainBehavior, DomainStructure)
-		if 'Port' in clsmembers:
-			DomainClass += (clsmembers['Port'],)
-		
-		# First attempt: find class matching element name
-		cls = next(
-			(c for c in clsmembers.values() 
-			if c not in DomainClass 
-			and issubclass(c, DomainClass) 
-			and c.__name__ in elem),
-			None
-		)
-		
-		# Second attempt: find any valid subclass if exact match fails
-		if not cls:
-			sys.stderr.write(_(
-				f"\nWarning: Class name and model name mismatch!\n"
-				f"Attempting to instantiate class '{elem}' that inherits from DomainClass...\n"
-			))
-			
-			cls = next(
-				(c for c in clsmembers.values() 
-				if c not in DomainClass 
-				and issubclass(c, DomainClass)),
-				None
-			)
-			
-			if cls:
-				sys.stderr.write(_(
-					f"Class '{cls.__name__}' instantiated, but please verify it's the correct one!\n"
-				))
-		
-		# Report failure if no valid class found
-		if not cls:
-			sys.stderr.write(_(f"\nError: Unknown class '{elem}'\n"))
-			# Uncomment for debugging:
-			# sys.stderr.write(f"Path: {elem}\nClass members: {clsmembers}\n")
-			# for c in clsmembers.values():
-			#     print(f"{c.__name__}: not in DomainClass={c not in DomainClass}, "
-			#           f"is subclass={issubclass(c, DomainClass)}, "
-			#           f"name matches={c.__name__ in elem}")
-		
-		return cls
+    # Convert to tuple for issubclass convenience (not strictly necessary)
+    domain_bases_tuple = tuple(domain_bases)
 
-		#for cls in [c for c in clsmembers.values() if c != DomainClass]:
-		#	if issubclass(cls, DomainClass):
-			#if str(cls.__module__) in str(moduleName):
-		#		return cls
-	else:
-		return clsmembers
+    # 1) Try direct match: class whose name matches module name (common case)
+    module_basename = os.path.basename(elem).split('.')[0]
+    cls = next(
+        (c for c in clsmembers.values()
+         if inspect.isclass(c)
+         and c not in domain_bases_tuple
+         and (c.__name__ == module_basename or module_basename in c.__name__)),
+        None
+    )
+    if cls is not None:
+        # ensure it actually inherits domain base if possible
+        if _is_subclass_of_any(cls, domain_bases_tuple) or _mro_name_match(cls, domain_bases_tuple):
+            return cls
+        # else we still accept name match if you prefer; if not, continue to next step
+
+    # 2) Try to find a class that is subclass of any domain base (safe)
+    cls = next(
+        (c for c in clsmembers.values()
+         if inspect.isclass(c)
+         and c not in domain_bases_tuple
+         and _is_subclass_of_any(c, domain_bases_tuple)),
+        None
+    )
+    if cls is not None:
+        return cls
+
+    # 3) Fallback: MRO/name-based heuristic (useful when base classes cannot be compared directly)
+    cls = next(
+        (c for c in clsmembers.values()
+         if inspect.isclass(c)
+         and c not in domain_bases_tuple
+         and _mro_name_match(c, domain_bases_tuple)),
+        None
+    )
+    if cls is not None:
+        return cls
+
+    # 4) As a last resort: return the first non-domain class found
+    cls = next(
+        (c for c in clsmembers.values()
+         if inspect.isclass(c) and c not in domain_bases_tuple),
+        None
+    )
+    return cls
 
 def GetArgs(cls = None):
 	""" Get behavioral attribute from python file through constructor class.
