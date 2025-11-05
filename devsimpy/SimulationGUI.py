@@ -146,11 +146,8 @@ class CollapsiblePanel(wx.Panel):
 
 		text2 = wx.StaticText(pane, wx.NewIdRef(), _("%s algorithm:")%DEFAULT_DEVS_DIRNAME)
 
-		### list of possible strategy depending on the PyDEVS version
-		#if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
+		### list of possible strategy depending on the PyDEVS version	
 		c = list(eval("%s_SIM_STRATEGY_DICT.keys()"%DEFAULT_DEVS_DIRNAME.upper()))
-		#else:
-		#	c = list(PYPDEVS_SIM_STRATEGY_DICT.keys())
 
 		### choice of strategy
 		ch1 = wx.Choice(pane, wx.NewIdRef(), choices=c)
@@ -181,10 +178,7 @@ class CollapsiblePanel(wx.Panel):
 			cb5.SetValue(REAL_TIME and not NTL)
 
 		### default strategy
-		#if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
 		ch1.SetSelection(list(eval("%s_SIM_STRATEGY_DICT.keys()"%DEFAULT_DEVS_DIRNAME.upper())).index(DEFAULT_SIM_STRATEGY))
-		#else:
-		#	ch1.SetSelection(list(PYPDEVS_SIM_STRATEGY_DICT.keys()).index(DEFAULT_SIM_STRATEGY))
 
 		ch1.SetToolTipString=ch1.SetToolTip
 		cb1.SetToolTipString=cb1.SetToolTip

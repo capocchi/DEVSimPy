@@ -337,7 +337,9 @@ class SimulationPanel(wx.Panel):
 		### StaticText for strategy
 		self.txt = wx.StaticText(self, wx.NewIdRef(), _("Default strategy:"))
 		### choice of combo-box depends on the default DEVS package directory
-		c = list(PYDEVS_SIM_STRATEGY_DICT.keys()) if DEFAULT_DEVS_DIRNAME == 'PyDEVS' else list(PYPDEVS_SIM_STRATEGY_DICT.keys())
+		# c = list(PYDEVS_SIM_STRATEGY_DICT.keys()) if DEFAULT_DEVS_DIRNAME == 'PyDEVS' else list(PYPDEVS_SIM_STRATEGY_DICT.keys())
+		c = list(getattr(builtins, f'{self.cb3.GetValue().upper()}_SIM_STRATEGY_DICT').keys())
+		
 
 		self.cb4 = wx.ComboBox(self, wx.NewIdRef(), DEFAULT_SIM_STRATEGY, choices=c, style=wx.CB_READONLY)
 		self.cb4.SetToolTipString = self.cb4.SetToolTip
@@ -457,21 +459,17 @@ class SimulationPanel(wx.Panel):
 		"""
 		val = evt.GetEventObject().GetValue()
 
-		### update cb below cb3
-		self.cb4.Clear()
-		if val == 'PyDEVS':
-			for k in PYDEVS_SIM_STRATEGY_DICT:
-				self.cb4.Append(k)
-			self.cb4.SetValue('bag-based')
-		else:
-			### PyPDEVS
-			for k in PYPDEVS_SIM_STRATEGY_DICT:
-				self.cb4.Append(k)
-			self.cb4.SetValue('classic')
+		### update cb 4 depending on the selected DEVS package	
+		c = list(getattr(builtins, f'{val.upper()}_SIM_STRATEGY_DICT').keys())
+		
+		if c:
+			self.cb4.Clear()
+			self.cb4.Set(c)
+			self.cb4.SetValue(c[0])
 
-		### update default value for devs dir et sim strategy
-		self.default_devs_dir = val
-		self.sim_defaut_strategy = self.cb4.GetValue()
+			### update default value for devs dir et sim strategy
+			self.default_devs_dir = val
+			self.sim_defaut_strategy = self.cb4.GetValue()
 
 	def onSc(self, evt):
 		""" CheckBox has been checked.
@@ -508,6 +506,7 @@ class SimulationPanel(wx.Panel):
 		setattr(builtins, 'SIMULATION_SUCCESS_SOUND_PATH', self.sim_success_sound_path)
 		setattr(builtins, 'SIMULATION_ERROR_SOUND_PATH', self.sim_error_sound_path)
 		setattr(builtins, 'DEFAULT_SIM_STRATEGY', self.sim_defaut_strategy)
+		setattr(builtins, 'DEFAULT_DEVS_DIRNAME', self.default_devs_dir)
 		setattr(builtins, 'DEFAULT_PLOT_DYN_FREQ', self.sim_defaut_plot_dyn_freq)
 		setattr(builtins, 'NTL', self.cb2.GetValue())
 

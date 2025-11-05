@@ -21,15 +21,10 @@ from itertools import *
 
 import array
 import builtins
-from collections import defaultdict
 
 from .DEVS import CoupledDEVS
 from PluginManager import PluginManager
 
-### avec ce flag, on gere a totalité des messages sur les ports une seul fois dans delta_ext.
-WITHOUT_DELTA_EXT_FOR_ALL_PORT = True
-### avec ce flag on peut faire de l'execution en paralle de modèle qui s'active en meme temps mais pas avec des modèles couplés dans des modèles couplés
-WITH_PARALLEL_EXECUTION = False
 ### avec ce flag les simulation en nogui sont plus rapides
 ENABLE_SIM_LOGS = getattr(builtins,'GUI_FLAG', True)
 
@@ -60,17 +55,8 @@ class Sender:
 	Optimized Sender class with non-parallel execution.
 	"""
 
-
-	def t_send(self, X, imm, t):
-		"""
-		Non-parallel send: dispatch messages sequentially.
-		"""
-		for m, val in X.items():
-			# Pass the list directly; AtomicSolver/CoupledSolver will convert if needed
-			self.send(m, (val, imm, t))
-
-
-	def send(self, d, msg):
+	@staticmethod
+	def send(d, msg):
 		""" Dispatch messages to the right solver. """
 		if isinstance(d, CoupledDEVS):
 			CS = CoupledSolver()
@@ -109,15 +95,17 @@ class AtomicSolver:
 		# $(*,\,t)$ message --- triggers internal transition and returns
 		# $(y,\,t)$ message for parent coupled-DEVS:
 		if msg[0] == 1:
-			if t != aDEVS.timeNext:
+			time_next = aDEVS.timeNext
+			if t != time_next:
 				Error("Bad synchronization...1", 1)
-
-			# First call the output function, which (amongst other things) rebuilds
-			# the output dictionnary {\tt myOutput}:
-			aDEVS.myOutput = {}
+				
+			my_output = {}
+			aDEVS.myOutput = my_output
 			aDEVS.outputFnc()
 
-			aDEVS.elapsed = t - aDEVS.timeLast
+			time_last = aDEVS.timeLast
+			aDEVS.elapsed = t - time_last
+
 			aDEVS.intTransition()
 
 			aDEVS.timeLast = t
@@ -186,9 +174,8 @@ class CoupledSolver(Sender):
 			cls._instance = super(Sender, cls).__new__(cls, *args, **kwargs)
 		return cls._instance
 
-	def threading_send(self, Y, cDEVS, t):
-		send = self.send
-		send_parallel = self.t_send
+	def send(self, Y, cDEVS, t):
+		send = Sender.send
 
 		cDEVS.timeLast = t
 		cDEVS.myTimeAdvance = INFINITY
@@ -196,47 +183,34 @@ class CoupledSolver(Sender):
 
 		imm = cDEVS.immChildren
 
-		if WITHOUT_DELTA_EXT_FOR_ALL_PORT:
-			X = defaultdict(list)
-
-			for p, a in Y.items():
-				for pp in p.outLine:
-					b = pp.host
+		X = {}
+		for p, a in Y.items():
+			for pp in p.outLine:
+				b = pp.host
+				if b in X:
 					X[b].append((pp, a))
+				else:
+					X[b] = [(pp, a)]
 
-					if b is CoupledDEVS:
-						cDEVS.myOutput[b] = a
+				if b is CoupledDEVS:
+					cDEVS.myOutput[b] = a
 
-			if WITH_PARALLEL_EXECUTION:
-				# Ici on garde X sous forme defaultdict(list)
-				# si send_parallel peut gérer directement → pas besoin de dict()
-				send_parallel(X, imm, t)
+		# Conversion minimale en dict juste avant l’envoi
+		for m, val in X.items():
+			if len(val) == 1:
+				# cas le plus fréquent → évite dict() lourd
+				send(m, ({val[0][0]: val[0][1]}, imm, t))
 			else:
-				# Conversion minimale en dict juste avant l’envoi
-				for m, val in X.items():
-					if len(val) == 1:
-						# cas le plus fréquent → évite dict() lourd
-						send(m, ({val[0][0]: val[0][1]}, imm, t))
-					else:
-						send(m, (dict(val), imm, t))
-
-		else:
-			for p, a in Y.items():
-				for pp in p.outLine:
-					b = pp.host
-					if b is CoupledDEVS:
-						cDEVS.myOutput[b] = a
-					# envoi direct avec dict minimal
-					send(b, ({pp: a}, imm, t))
+				send(m, (dict(val), imm, t))
 
 	###
 	def receive(self, cDEVS, msg):
 
+		send = Sender.send
+
 		# For any received message, the time {\tt t} (time at which the message
 		# is sent) is the second item in the list {\tt msg}.
 		t = msg[2]
-
-		send = self.send
 
 		# $(*,\,t)$ message --- triggers internal transition and returns
 		# $(y,\,t)$ message for parent coupled-DEVS:
@@ -258,16 +232,19 @@ class CoupledSolver(Sender):
 			# back) message $(y,\,t)$. In the present implementation, just the
 			# sub-DEVS output dictionnary $y$ is returned and stored in {\tt Y}:
 
-			self.threading_send(send(dStar, msg), cDEVS, t)
-
-			# cDEVS.myTimeAdvance = min(array.array('d',[c.myTimeAdvance for c in cDEVS.componentSet]+[cDEVS.myTimeAdvance]))
-
-			###each to the coupled DEVS' immChildren list
-			# cDEVS.immChildren = [d for d in cDEVS.componentSet if cDEVS.myTimeAdvance == d.myTimeAdvance]
+			self.send(send(dStar, msg), cDEVS, t)
 			
-			time_advances = [c.myTimeAdvance for c in cDEVS.componentSet]
-			cDEVS.myTimeAdvance = min(time_advances + [cDEVS.myTimeAdvance])
-			cDEVS.immChildren = [d for d, ta in zip(cDEVS.componentSet, time_advances) if cDEVS.myTimeAdvance == ta]
+			min_ta = cDEVS.myTimeAdvance
+			imm = []
+			for c in cDEVS.componentSet:
+				ta = c.myTimeAdvance
+				if ta < min_ta:
+					min_ta = ta
+					imm = [c]
+				elif ta == min_ta:
+					imm.append(c)
+			cDEVS.myTimeAdvance = min_ta
+			cDEVS.immChildren = imm
 
 			return cDEVS.myOutput
 
@@ -284,7 +261,7 @@ class CoupledSolver(Sender):
 			# as above that also updates the coupled-DEVS' time variables in
 			# parallel.
 
-			self.threading_send(cDEVS.myInput, cDEVS, t)
+			self.send(cDEVS.myInput, cDEVS, t)
 
 			for t in array.array('d', [d.myTimeAdvance for d in cDEVS.componentSet]):
 				if cDEVS.myTimeAdvance > t:
@@ -306,7 +283,7 @@ class CoupledSolver(Sender):
 			cDEVS.myTimeAdvance = INFINITY
 
 			for d in cDEVS.componentSet:
-				self.send(d, msg)
+				send(d, msg)
 				cDEVS.myTimeAdvance = min(cDEVS.myTimeAdvance, d.myTimeAdvance)
 				cDEVS.timeLast = max(cDEVS.timeLast, d.timeLast)
 
@@ -319,7 +296,7 @@ class CoupledSolver(Sender):
 
 ###############################################################################
 
-class Simulator(Sender):
+class Simulator:
 	""" Simulator(model)
 
 		Associates a hierarchical DEVS model with the simulation engine.
@@ -337,7 +314,6 @@ class Simulator(Sender):
 
 		self.model = model
 		self.__augment(self.model)
-#		self.__algorithm = SimStrategy1(self)
 
 	###
 	def __augment(self, d = None):
@@ -355,3 +331,6 @@ class Simulator(Sender):
 			# time of next event.
 			for subd in d.componentSet:
 				self.__augment(subd)
+
+	def send(self, d, msg):
+		return Sender.send(d, msg)

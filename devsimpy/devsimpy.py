@@ -49,6 +49,7 @@ import subprocess
 import pickle
 import glob
 import pstats
+from pathlib import Path
 
 from configparser import ConfigParser
 from tempfile import gettempdir
@@ -1353,9 +1354,6 @@ class MainApplication(wx.Frame):
 
 		obj = event.GetEventObject()
 
-		#if isinstance(obj, wx.ToolBar) and isinstance(obj.GetParent(), DetachedFrame):
-		#	currentPage = obj.GetToolClientData(event.GetId())
-		#else:
 		currentPage = self.nb2.GetCurrentPage()
 
 		### deselect all model to initialize select attribut for all models
@@ -1367,12 +1365,10 @@ class MainApplication(wx.Frame):
 		diagram.modify = False
 
 		### save cmd file consists to export it
-		#if isinstance(diagram, Container.ContainerBlock):
-		#	Container.Block.OnExport(diagram, event)
-		#else:
 		if getattr(diagram,'last_name_saved', False):
 
-			assert(os.path.isabs(diagram.last_name_saved))
+			if not os.path.isabs(diagram.last_name_saved):
+				diagram.last_name_saved = str(Path(diagram.last_name_saved).resolve())
 
 			if Container.Diagram.SaveFile(diagram, diagram.last_name_saved):
 				# Refresh canvas
