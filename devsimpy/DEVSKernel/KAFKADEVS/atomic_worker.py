@@ -1,7 +1,7 @@
 # atomic_worker.py
 import os, json, argparse, sys
 from confluent_kafka import Consumer, Producer
-from simulator import AtomicSolver
+from DEVSKernel.KafkaDEVS.simulator import AtomicSolver
 
 def build_atomic_instance(atomic_id: str):
     # TODO: adapter à votre modèle: soit via une fabrique, soit via un registre picklable.
