@@ -4,11 +4,11 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # StandaloneNoGUI.py ---
 #                    --------------------------------
-#                            Copyright (c) 2022
+#                            Copyright (c) 2025
 #                    L. CAPOCCHI (capocchi@univ-corse.fr)
 #                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-# Version 1.0                                        last modified:  12/11/23
+# Version 2.0                                        last modified:  11/107/25
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -28,8 +28,13 @@ import zipfile
 import configparser
 import pathlib
 import json
-import pkg_resources
 import sys
+
+try:
+    from importlib.metadata import distributions
+except ImportError:
+    # Fallback pour Python < 3.8
+    from importlib_metadata import distributions
 
 from Utilities import GetUserConfigDir
 from InteractionYAML import YAMLHandler
@@ -42,7 +47,7 @@ def get_pip_packages()->list:
         list: list of names of installed pip package
     """
     try:
-        installed_packages = [distribution.project_name for distribution in pkg_resources.working_set]
+        installed_packages = [dist.name for dist in distributions()]
         return installed_packages
     except Exception as e:
         sys.stdout.write(f"Error retrieving pip packages: {e}")

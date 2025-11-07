@@ -40,11 +40,11 @@ import psutil
 from pubsub import pub
 
 from Utilities import playSound, NotificationMessage
-from .Strategy import *
+from DEVSKernel.Strategies import *
 from Decorators import hotshotit
 
 def elapsed_since(start):
-    return time.strftime("%H:%M:%S", time.gmtime(time.time() - start))
+	return time.strftime("%H:%M:%S", time.gmtime(time.time() - start))
 
 def get_total_ram():
 	"""Total memory (RAM) on the machine
@@ -57,19 +57,18 @@ def get_total_ram():
 	return ram_info.total / 1048576  # Convert bytes to Mb
 	# return ram_info.total / (1024 ** 3)  # Convert bytes to GB
 	
-
 def get_process_memory():
 	process = psutil.Process(os.getpid())
 	mem_bytes = process.memory_info().rss
 	return float(mem_bytes)/1048576 # Convert bytes to Mb
 
 def elapsed_since(start_time):
-    # Fonction pour calculer le temps écoulé
-    return time.time() - start_time
+	# Fonction pour calculer le temps écoulé
+	return time.time() - start_time
 
 def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_flag, real_time_flag):
 	""" Preventing direct creation for Simulator
-        disallow direct access to the classes
+		disallow direct access to the classes
 	"""
 
 	# ### find the correct simulator module depending on the
@@ -99,7 +98,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 			BaseSimulator.__init__(self, model)
 
 			self.model = model
-			self.__algorithm = SimStrategy1(self)
+			self.__algorithm = OriginalPyDEVSSimStrategy(self)
 
 		def simulate(self, T = 100000000):
 			""" Simulate for T
