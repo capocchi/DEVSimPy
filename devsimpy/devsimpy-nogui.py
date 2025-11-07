@@ -96,7 +96,7 @@ if __name__ == '__main__':
 	parser.add_argument("-remote", help=_("Remote execution"), action="store_true")
 	parser.add_argument("-name", help=_("Simulation name"), type=str, default="simu")
 	# optional kernel for simulation kernel
-	parser.add_argument("-kernel", help=_("Simulation kernel [pyDEVS|PyPDEVS]"), type=str, default="pyDEVS")
+	parser.add_argument("-kernel", help=_("Simulation kernel [PyDEVS|PyPDEVS|KafkaDEVS]"), type=str, default="PyDEVS")
 	# optional real time 
 	parser.add_argument("-rt", help=_("Real time simulation (only for PyPDEVS)"), action="store_true")
  
@@ -124,6 +124,15 @@ if __name__ == '__main__':
 
 			### Real time only for PyPDEVS...
 			setattr(builtins, 'REAL_TIME', args.rt)
+		elif 'PyDEVS' in args.kernel:
+			setattr(builtins,'DEFAULT_DEVS_DIRNAME','PyDEVS')
+			setattr(builtins, 'DEFAULT_SIM_STRATEGY', 'bag-based')
+		elif 'KafkaDEVS' in args.kernel:
+			setattr(builtins,'DEFAULT_DEVS_DIRNAME','KafkaDEVS')
+			setattr(builtins, 'DEFAULT_SIM_STRATEGY', 'original')
+		else:
+			sys.stdout.write(_("ERROR: Invalid kernel name (must be PyDEVS, PyPDEVS or KafkaDEVS)!\n"))
+			sys.exit(1)
 
 	filename = args.filename
 	
