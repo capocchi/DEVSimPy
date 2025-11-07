@@ -22,7 +22,7 @@ from itertools import *
 import array
 import builtins
 
-from DEVS import CoupledDEVS
+from .DEVS import CoupledDEVS
 from PluginManager import PluginManager
 
 ### avec ce flag les simulation en nogui sont plus rapides

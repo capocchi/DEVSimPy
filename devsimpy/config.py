@@ -27,10 +27,10 @@ GLOBAL_SETTINGS = {
     },
     'HELP_PATH': os.path.join('doc', 'html'),
     'DEVSIMPY_ICON': 'iconDEVSimPy.ico',
-    'PYDEVS_SIM_STRATEGY_DICT': {'original': 'SimStrategy1', 'bag-based': 'SimStrategy2', 'direct-coupling': 'SimStrategy3'},
-    'PYPDEVS_SIM_STRATEGY_DICT': {'classic': 'SimStrategy4', 'parallel': 'SimStrategy5'},
+    'PYDEVS_SIM_STRATEGY_DICT': {'original': 'OriginalPyDEVSSimStrategy', 'bag-based': 'BagBasedPyDEVSSimStrategy', 'direct-coupling': 'DirectCouplingPyDEVSSimStrategy'},
+    'PYPDEVS_SIM_STRATEGY_DICT': {'classic': 'ClassicPyPDEVSSimStrategy', 'parallel': 'ParallelPyPDEVSSimStrategy'},
     'KAFKADEVS_SIM_STRATEGY_DICT':{'original': 'SimStrategyKafka'},
-    'PYPDEVS_221_SIM_STRATEGY_DICT': {'classic': 'SimStrategy4', 'parallel': 'SimStrategy5'},
+    'PYPDEVS_221_SIM_STRATEGY_DICT': {'classic': 'ClassicPyPDEVSSimStrategy', 'parallel': 'ParallelPyPDEVSSimStrategy'},
     'GUI_FLAG': True
 }
 
@@ -74,7 +74,7 @@ USER_SETTINGS = {
 # (not --recursive option when the devsimpy git has been cloned)
 path = os.path.join(DEVS_SIM_KERNEL_PATH, 'PyPDEVS', 'pypdevs241')
 if os.path.exists(path) and not len(os.listdir(path)) == 0:
-	GLOBAL_SETTINGS['PYPDEVS_241_SIM_STRATEGY_DICT'] = {'classic': 'SimStrategy4', 'parallel': 'SimStrategy5'}
+	GLOBAL_SETTINGS['PYPDEVS_241_SIM_STRATEGY_DICT'] = {'classic': 'ClassicPyPDEVSSimStrategy', 'parallel': 'ParallelPyPDEVSSimStrategy'}
 	GLOBAL_SETTINGS['DEVS_DIR_PATH_DICT'].update({'PyPDEVS_241': os.path.join(path, 'src', 'pypdevs')})
 else:
 	sys.stdout.write("PyPDEVS Kernel in version 2.4.1 is not loaded.\nPlease install it in the directory %s using git (https://github.com/kdheepak/pypdevs.git)\n"%path)
