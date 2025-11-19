@@ -199,7 +199,7 @@ class StandaloneNoGUI:
         """
         """
         return f"""
-FROM python:3.11-slim-buster
+FROM python:3.11-slim
 
 WORKDIR /app
 
@@ -214,7 +214,7 @@ RUN pip install -r requirements-devsimpy-nogui.txt
 
 COPY . .
 
-CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
+CMD ["python", "devsimpy-nogui.py", "-kernel {self.kernel}", "{os.path.basename(self.yaml)}", "ntl"]
 
                 """
                 
