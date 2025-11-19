@@ -6,17 +6,10 @@ import threading
 import json
 import logging
 
-logging.basicConfig(
-	level=logging.DEBUG,  # DEBUG pour le dev et WARNING pour la prod
-	format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
-	handlers=[
-		logging.StreamHandler(),                    # console
-		logging.FileHandler("kafka_devssim.log")    # fichier
-	]
-)
+from .logconfig import LOGGING_LEVEL, kafka_logger
 
-logger = logging.getLogger(__name__)
-kafka_logger = logging.getLogger("kafka.trace")
+logger = logging.getLogger("DEVSKernel.KafkaDEVS.InMemoryKafkaWorker")
+logger.setLevel(LOGGING_LEVEL)
 
 try:
 	from confluent_kafka import Producer, Consumer

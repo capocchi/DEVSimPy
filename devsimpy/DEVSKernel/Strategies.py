@@ -606,12 +606,19 @@ class ParallelPyPDEVSSimStrategy(ClassicPyPDEVSSimStrategy):
 # ---------------------------------------------------------------------------
 # Kafka-based distributed strategy with IN-MEMORY workers (threads)
 # ---------------------------------------------------------------------------
-# Requires: pip install confluent-kafka
+
+import logging
+
+### LOGGING LEVEL: 
+###  - logging.DEBUG for development
+###  - logging.WARNING for production
+LOGGING_LEVEL = logging.DEBUG
+
 import threading
 import json
 import time
-import logging
 
+# Requires: pip install confluent-kafka
 try:
 	from confluent_kafka import Producer, Consumer
 	from confluent_kafka.admin import AdminClient, NewTopic
@@ -634,26 +641,13 @@ from DEVSKernel.KafkaDEVS.devs_kafka_messages import (
 	TransitionDone,
 	SimulationDone,
 )
+from DEVSKernel.KafkaDEVS.auto_kafka import ensure_kafka_broker 
+from DEVSKernel.KafkaDEVS.logconfig import configure_logging, LOGGING_LEVEL, kafka_logger
+from DEVSKernel.KafkaDEVS.kafkaconfig import KAFKA_MODE, KAFKA_BOOTSTRAP, AUTO_START_KAFKA_BROKER
 
-from DEVSKernel.KafkaDEVS.auto_kafka import ensure_kafka_broker  # ta fonction utilitaire
-
-logging.basicConfig(
-	level=logging.DEBUG,  # DEBUG pour le dev et WARNING pour la prod
-	format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
-	handlers=[
-		logging.StreamHandler(),                    # console
-		logging.FileHandler("kafka_devssim.log")    # fichier
-	]
-)
-
-logger = logging.getLogger(__name__)
-kafka_logger = logging.getLogger("kafka.trace")
-
-### MODE OPTIONS: "local" or "standard"
-###  - local: topics work_i and atomic_results
-###  - standard: topics ms4meXXXIn and ms4meOut
-### Default:
-MODE = "standard"
+configure_logging()
+logger = logging.getLogger("DEVSKernel.Strategies")
+logger.setLevel(LOGGING_LEVEL)
 
 class SimStrategyKafka(DirectCouplingPyDEVSSimStrategy):
 	"""
@@ -662,17 +656,20 @@ class SimStrategyKafka(DirectCouplingPyDEVSSimStrategy):
 	"""
 
 	def __init__(self, simulator=None,
-				 kafka_bootstrap="localhost:9092",
+				 kafka_bootstrap=KAFKA_BOOTSTRAP,
 				 request_timeout=30.0,
-				 mode=MODE):
+				 mode=KAFKA_MODE):
 		super().__init__(simulator)
 
 		if Producer is None or Consumer is None:
 			raise RuntimeError("confluent-kafka not available. Please install it.")
 
 		# Assurer qu'un broker Kafka tourne
-		self.bootstrap = ensure_kafka_broker(bootstrap=kafka_bootstrap)
-
+		if AUTO_START_KAFKA_BROKER:
+			self.bootstrap = ensure_kafka_broker(bootstrap=kafka_bootstrap)
+		else:
+			self.bootstrap = kafka_bootstrap
+			
 		self.mode = mode
 
 		# Choix de l'adaptateur de wire

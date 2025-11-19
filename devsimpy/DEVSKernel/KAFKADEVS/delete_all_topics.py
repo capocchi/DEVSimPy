@@ -1,18 +1,15 @@
 from confluent_kafka.admin import AdminClient
 import logging
 
-logging.basicConfig(
-    level=logging.DEBUG,  # tu verras aussi les DEBUG
-    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
-    handlers=[
-        logging.StreamHandler(),                    # console
-        logging.FileHandler("kafka_devssim.log")    # fichier
-    ]
-)
+from .logconfig import configure_logging, LOGGING_LEVEL, kafka_logger
+configure_logging()
+logger = logging.getLogger("DEVSKernel.Strategies")
+logger.setLevel(LOGGING_LEVEL)
 
-logger = logging.getLogger(__name__)
+from .kafkaconfig import KAFKA_BOOTSTRAP
 
-def delete_all_topics(bootstrap_servers="localhost:9092"):
+
+def delete_all_topics(bootstrap_servers=KAFKA_BOOTSTRAP):
     admin = AdminClient({"bootstrap.servers": bootstrap_servers})
 
     # Récupérer la métadonnée du cluster

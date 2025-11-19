@@ -1,9 +1,11 @@
 import subprocess
 
+from .kafkaconfig import KAFKA_BOOTSTRAP, KAFKA_CONATINER_NAME, KAFKA_IMAGE
+
 def ensure_kafka_broker(
-    container_name: str = "kafkabroker",
-    image: str = "apache/kafka:latest",
-    bootstrap: str = "localhost:9092",
+    container_name: str = KAFKA_CONATINER_NAME,
+    image: str = KAFKA_IMAGE,
+    bootstrap: str = KAFKA_BOOTSTRAP,
 ):
     """
     Vérifie si un conteneur Kafka tourne déjà, sinon lance :
