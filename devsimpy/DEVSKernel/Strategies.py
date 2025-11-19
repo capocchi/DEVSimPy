@@ -615,11 +615,27 @@ import logging
 try:
 	from confluent_kafka import Producer, Consumer
 	from confluent_kafka.admin import AdminClient, NewTopic
+	from confluent_kafka import KafkaException, KafkaError
 except Exception:
 	Producer = None
 	Consumer = None
 
 from DEVSKernel.KafkaDEVS.InMemoryKafkaWorker import InMemoryKafkaWorker
+from DEVSKernel.KafkaDEVS.devs_kafka_wire_adapters import StandardWireAdapter
+from DEVSKernel.KafkaDEVS.devs_kafka_messages import (
+	BaseMessage,
+	SimTime,
+	InitSim,
+	NextTime,
+	ExecuteTransition,
+	SendOutput,
+	ModelOutputMessage,
+	PortValue,
+	TransitionDone,
+	SimulationDone,
+)
+
+from DEVSKernel.KafkaDEVS.auto_kafka import ensure_kafka_broker  # ta fonction utilitaire
 
 logging.basicConfig(
 	level=logging.DEBUG,  # DEBUG pour le dev et WARNING pour la prod
@@ -631,296 +647,334 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+kafka_logger = logging.getLogger("kafka.trace")
 
-import subprocess
-
-def ensure_kafka_broker(
-    container_name: str = "kafkabroker",
-    image: str = "apache/kafka:latest",
-    bootstrap: str = "localhost:9092",
-):
-    """
-    Vérifie si un conteneur Kafka tourne déjà, sinon lance :
-      docker run -d --name broker ... apache/kafka:latest
-    Retourne l'adresse bootstrap à utiliser dans KafkaDEVS.
-    """
-
-    # 1) Vérifier si le conteneur existe déjà
-    try:
-        result = subprocess.run(
-            ["docker", "ps", "-a", "--filter", f"name={container_name}", "--format", "{{.Names}}"],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        existing = result.stdout.strip().splitlines()
-    except subprocess.CalledProcessError as e:
-        raise RuntimeError(f"Impossible d'appeler docker: {e}") from e
-
-    # 2) S'il existe mais est arrêté, on le démarre
-    if container_name in existing:
-        subprocess.run(["docker", "start", container_name], check=True)
-        return bootstrap
-
-    # 3) Sinon, on le crée avec docker run
-    cmd = [
-        "docker", "run", "-d",
-        "--name", container_name,
-        "-p", "9092:9092",
-        "-e", "KAFKA_NODE_ID=1",
-        "-e", "KAFKA_PROCESS_ROLES=broker,controller",
-        "-e", "KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093",
-        "-e", "KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092",
-        "-e", "KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER",
-        "-e", "KAFKA_CONTROLLER_QUORUM_VOTERS=1@localhost:9093",
-        "-e", "KAFKA_LOG_DIRS=/var/lib/kafka/data",
-        "-e", "KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1",
-        "-e", "KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1",
-        "-e", "KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1",
-        "-e", "KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0",
-        "-e", "KAFKA_AUTO_CREATE_TOPICS_ENABLE=true",
-        "-e", "KAFKA_DELETE_TOPIC_ENABLE=true",
-        # CLUSTER_ID : UUID base64 valide, fixe pour ce broker
-        "-e", "CLUSTER_ID=VkFMSTEwMDAtMDAwMC00MDAwLTAwMDAtMDAwMDAwMDAwMDAw",
-        image,
-    ]
-
-    subprocess.run(cmd, check=True)
-    return bootstrap
+### MODE OPTIONS: "local" or "standard"
+###  - local: topics work_i and atomic_results
+###  - standard: topics ms4meXXXIn and ms4meOut
+### Default:
+MODE = "standard"
 
 class SimStrategyKafka(DirectCouplingPyDEVSSimStrategy):
 	"""
-	Kafka strategy with in-memory workers (threads instead of processes)
-	No serialization issues, models stay in memory with all their parameters
+	Kafka strategy with in-memory workers (threads instead of processes),
+	utilisant des messages DEVS typés et un adaptateur de wire (Standard/Local).
 	"""
-	def __init__(self, simulator=None, 
-				 kafka_bootstrap="localhost:9092",
-				 group_id=None,
-				 request_timeout=30.0):
-		super().__init__(simulator)
 
+	def __init__(self, simulator=None,
+				 kafka_bootstrap="localhost:9092",
+				 request_timeout=30.0,
+				 mode=MODE):
+		super().__init__(simulator)
 
 		if Producer is None or Consumer is None:
 			raise RuntimeError("confluent-kafka not available. Please install it.")
-		
+
+		# Assurer qu'un broker Kafka tourne
 		self.bootstrap = ensure_kafka_broker(bootstrap=kafka_bootstrap)
-		
-		# Unique group ID per execution
-		if group_id is None:
-			group_id = f"coordinator-{int(time.time() * 1000)}"
-		
-		self.group_id = group_id
+
+		self.mode = mode
+
+		# Choix de l'adaptateur de wire
+		if mode == "standard":	
+			self.wire = StandardWireAdapter
+		else:
+			self.wire = None
+
+		# Group ID unique pour ce run
+		group_id = f"coordinator-{int(time.time() * 1000)}"
+
 		self.request_timeout = request_timeout
-		
+
 		# Kafka producer/consumer
 		self._producer = Producer({
 			"bootstrap.servers": self.bootstrap,
 			"enable.idempotence": True,
 			"acks": "all",
 		})
-		
+
 		self._consumer = Consumer({
 			"bootstrap.servers": self.bootstrap,
-			"group.id": self.group_id,
-			"auto.offset.reset": "earliest",  # ← Garder earliest
-			"enable.auto.commit": False,      # ← Désactiver auto-commit
-			"session.timeout.ms": 30000
+			"group.id": group_id,
+			"auto.offset.reset": "earliest",
+			"enable.auto.commit": False,
+			"session.timeout.ms": 30000,
 		})
-		self._consumer.subscribe(["atomic_results"])
-		
-		# Use in-memory models
+		results_topic = self._get_topic(None)
+		self._consumer.subscribe([results_topic])
+
+		# Models atomiques en mémoire
 		self._atomic_models = list(self.flat_priority_list)
 		self._num_atomics = len(self._atomic_models)
 		self._index2model = {i: m for i, m in enumerate(self._atomic_models)}
 
-
 		self._workers = []
-		
+
 		logger.info("KafkaDEVS SimStrategy initialized (In-Memory Workers)")
 		logger.info("  Bootstrap servers: %s", self.bootstrap)
-		logger.info("  Consumer group: %s", self.group_id)
+		logger.info("  Consumer group: %s", group_id)
 		logger.info("  Number of atomic models: %s", self._num_atomics)
 		logger.info("  Index Mapping:")
 		for i, m in enumerate(self._atomic_models):
 			logger.info("    Index %s -> %s (%s)", i, m.myID, type(m).__name__)
 
+	# ------------------------------------------------------------------
+	#  Topics & workers
+	# ------------------------------------------------------------------
+
+	def _get_topic(self, index: int | None) -> str:
+		"""
+		Retourne le nom de topic à utiliser.
+		- index != None : topic 'entrée' d'un worker (work_i ou ms4meXXXIn)
+		- index == None : topic 'sortie' du coordinateur (atomic_results ou ms4meOut)
+		"""
+		if self.mode == "standard":
+			if index is None:
+				# Topic côté coordinateur (collecte des réponses)
+				return "ms4meOut"
+			else:
+				model = self._index2model[index]
+				# Par ex. label MS4ME
+				return f"ms4me{model.getBlockModel().label}In"
+		else:
+			if index is None:
+				return "atomic_results"
+			else:
+				return f"work_{index}"
+
 
 	def _create_topics(self):
-		"""Create Kafka topics"""
-		admin = AdminClient({'bootstrap.servers': self.bootstrap})
-		metadata = admin.list_topics(timeout=10)
-		existing = set(metadata.topics.keys())
+		"""Create Kafka topics for local or standard mode."""
+		admin = AdminClient({"bootstrap.servers": self.bootstrap})
 
-		new_topics = []
-		
+		# Topics déjà présents dans le cluster
+		existing = set(admin.list_topics(timeout=10).topics.keys())
+
+		# Construire l'ensemble des noms à créer (évite les doublons d'emblée)
+		desired = set()
+
+		# Topics d'entrée des workers
 		for i in range(self._num_atomics):
-			topic = f'work_{i}'
-			if topic not in existing:
-				new_topics.append(NewTopic(topic, num_partitions=1, replication_factor=1))
-		
-		if 'atomic_results' not in existing:
-			new_topics.append(NewTopic('atomic_results', num_partitions=3, replication_factor=1))
-		
-		if new_topics:
-			logger.info("Creating %s Kafka topics...", len(new_topics))
-			fs = admin.create_topics(new_topics)
-			for topic, f in fs.items():
-				try:
-					f.result()
-				except Exception:
-					pass
-		else:
-			admin = AdminClient({"bootstrap.servers": self.bootstrap})
+			desired.add(self._get_topic(i))
 
-			# Récupérer la métadonnée du cluster
-			md = admin.list_topics(timeout=10)
-			topics = list(md.topics.keys())
-			logger.info(f"All required Kafka topics already exist: {topics}")
+		# Topic de sortie (coordinateur / collecteur)
+		desired.add(self._get_topic(None))
+
+		# Filtrer ceux qui n'existent pas encore
+		topics_to_create = [t for t in desired if t not in existing]
+
+		if not topics_to_create:
+			logger.info(
+				"All required Kafka topics already exist: %s",
+				sorted(existing),
+			)
+			return
+
+		logger.info("  Topics to create: %s", topics_to_create)
+
+		new_topics = [
+			NewTopic(
+				t,
+				num_partitions=(3 if t == self._get_topic(None) else 1),
+				replication_factor=1,
+			)
+			for t in topics_to_create
+		]
+
+		fs = admin.create_topics(new_topics)
+
+		for topic, f in fs.items():
+			try:
+				logger.info("Waiting for topic %s creation...", topic)
+				f.result()
+				logger.info("  Topic %s created", topic)
+			except KafkaException as e:
+				err = e.args[0]
+				if err.code() == KafkaError.TOPIC_ALREADY_EXISTS:
+					logger.info("  Topic %s already exists", topic)
+				else:
+					logger.error(
+						"  Error creating topic %s: code=%s, reason=%s",
+						topic, err.code(), err.str(),
+					)
+					raise
+			except Exception as e:
+				logger.exception("  Unexpected error creating topic %s", topic)
+				raise
 
 
 	def _spawn_workers(self):
 		"""Spawn in-memory worker threads"""
 		logger.info("Spawning %s worker threads...", self._num_atomics)
-		
+
+		# Topic de sortie (même pour tous les workers)
+		results_topic = self._get_topic(None)
+
 		for i, model in enumerate(self._atomic_models):
 			logger.info("  Model %s (%s - %s):", i, model.myID, type(model).__name__)
 			logger.info("    Real class: %s.%s", model.__class__.__module__, model.__class__.__name__)
 			logger.info("    Python file: %s", model.__class__.__module__)
-			
-			if hasattr(model, 'minStep'):
+
+			if hasattr(model, "minStep"):
 				logger.info("    -> This is a Generator (has minStep=%s)", model.minStep)
-			
+
 			logger.info("    OPorts: %s", [p.name for p in model.OPorts])
 			logger.info("    IPorts: %s", [p.name for p in model.IPorts])
-			logger.info("    OUT0 connected to:")
+
+			in_topic = self._get_topic(i)
+
+			logger.info("  Model %s (%s - %s): in_topic=%s, out_topic=%s",
+                    i, model.myID, model.getBlockModel().label, in_topic, results_topic)
 			
-			worker = InMemoryKafkaWorker(model, i, self.bootstrap)
+			worker = InMemoryKafkaWorker(model, i, self.bootstrap, mode=self.mode, in_topic=in_topic,
+            out_topic=results_topic)
+
 			worker.start()
 			self._workers.append(worker)
-		
-		logger.info("  All %s threads started", self._num_atomics)
 
+		logger.info("  All %s threads started", self._num_atomics)
 
 	def _terminate_workers(self):
 		"""Stop all worker threads"""
 		logger.info("Stopping worker threads...")
-		
+
 		for worker in self._workers:
 			worker.stop()
-		
+
 		for worker in self._workers:
 			worker.join(timeout=2.0)
-		
+
 		logger.info("  All workers stopped")
 
+	# ------------------------------------------------------------------
+	#  Envoi / réception via messages typés + adaptateur de wire
+	# ------------------------------------------------------------------
 
-	def _send_work_to_atomic(self, index: int, operation: str, correlation_id: float, inputs=None, current_time=None):
-		"""Send work to atomic model"""
-		work_message = {
-			'correlation_id': correlation_id,
-			'operation': operation,
-			'inputs': inputs or {},
-			'current_time': current_time if current_time is not None else self.ts.Get()
-		}
-		
-		self._producer.produce(
-			f'work_{index}',
-			value=json.dumps(work_message).encode('utf-8')
-		)
+	def _send_work_to_atomic(self, index: int, corr_id: float, **kwargs):
+		if self.mode == "standard":
+			msg: BaseMessage = kwargs["msg"]
+			wire_dict = self.wire.to_wire(msg, corr_id, index)
+		else:
+			operation = kwargs["operation"]
+			inputs = kwargs.get("inputs")
+			current_time = kwargs.get("current_time")
+			wire_dict = {
+				"correlation_id": corr_id,
+				"operation": operation,
+				"inputs": inputs or {},
+				"current_time": current_time if current_time is not None else self.ts.Get(),
+			}
+
+		topic = self._get_topic(index)
+		payload = json.dumps(wire_dict).encode("utf-8")
+
+		self._producer.produce(topic, value=payload)
+
+		kafka_logger.debug("COORD-KAFKA-OUT topic=%s value=%s", topic, json.dumps(wire_dict))
+
 		self._producer.flush()
 
 
-	def _await_results(self, expected_indices, correlation_id, timeout=None):
-		"""Wait for results from worker threads"""
+	def _await_msgs(self, expected_indices, correlation_id, timeout=None, *, typed=False):
+		"""
+		Attend les réponses des workers pour les indices donnés.
+
+		- Si typed=True : retourne {index: BaseMessage} via self.wire.from_wire(...)
+		- Si typed=False : retourne {index: dict} (format legacy brut)
+		"""
 		if timeout is None:
 			timeout = self.request_timeout
-		
+
 		pending = set(expected_indices)
 		received = {}
 		deadline = time.time() + timeout
-		
+
 		while pending and time.time() < deadline:
 			msg = self._consumer.poll(timeout=0.5)
-			
-			if msg is None:
+			if msg is None or msg.error():
 				continue
-			
-			if msg.error():
-				continue
-			
+
 			try:
-				data = json.loads(msg.value().decode('utf-8'))
-				msg_corr_id = data.get('correlation_id')
-				msg_index = data.get('atomic_index')
+				data = json.loads(msg.value().decode("utf-8"))
+				msg_corr_id = data.get("correlation_id")
+				msg_index = data.get("atomic_index")
 				
-				# Vérifier correlation_id
+				if msg_corr_id == correlation_id and msg_index in pending:
+					kafka_logger.debug(
+						"COORD-KAFKA-IN topic=%s value=%s",
+						msg.topic(),
+						json.dumps(data),
+					)
+
+				# Filtrage de base
 				if msg_corr_id != correlation_id:
 					continue
-				
-				# Vérifier index attendu
 				if msg_index not in pending:
 					continue
-				
-				# Vérifier que le résultat est valide
-				result_data = data.get('result', {})
-				if isinstance(result_data, dict):
-					actual_result = result_data.get('result')
-					
-					# Ignorer les résultats clairement invalides
-					# (inf isolé sans être un timeAdvance légitime)
-					if isinstance(actual_result, float) and actual_result == float('inf'):
-						# Pour les output_function, inf n'est jamais valide
-						# Seul time_advance peut retourner inf
-						if actual_result == float('inf') and not isinstance(actual_result, dict):
-							# C'est probablement un timeAdvance, on accepte
-							pass
-				
-				# Message valide
-				received[msg_index] = data
+
+				if typed:
+					# Chemin "messages typés" (StandardWireAdapter)
+					devs_msg = self.wire.from_wire(data)
+					received[msg_index] = devs_msg
+				else:
+					# Chemin legacy : dict brut, avec ton éventuelle logique de filtrage
+					# (optionnel : tu peux remettre ici tes vérifications sur result/inf)
+					received[msg_index] = data
+
 				pending.remove(msg_index)
-				
+
 			except Exception:
 				continue
-		
+
 		if pending:
-			raise TimeoutError(f"Kafka timeout: missing indices {sorted(pending)} for corr_id={correlation_id}")
-		
+			raise TimeoutError(
+				f"Kafka timeout: missing indices {sorted(pending)} for corr_id={correlation_id}"
+			)
+
 		return received
 
+
+	# ------------------------------------------------------------------
+	#  Simulation
+	# ------------------------------------------------------------------
 
 	def simulate(self, T=1e8, spawn_workers=True, **kwargs):
 		"""Main simulation loop with Kafka coordination and message routing"""
 		if self._simulator is None:
 			raise ValueError("Simulator instance must be provided.")
-		
+
 		logger.info("=" * 60)
 		logger.info("  KafkaDEVS Simulation Starting (In-Memory)")
 		logger.info("=" * 60)
-		
-		# Create topics
+
 		self._create_topics()
 		
-		# Spawn worker threads
 		if spawn_workers:
 			self._spawn_workers()
-		
+
 		logger.info("Waiting for workers to initialize (2s)...")
 		time.sleep(2)
-		
-		# Warm up consumer and FLUSH old messages
+
+		# Flush des anciens messages
 		logger.info("Warming up consumer...")
 		flushed = 0
 		start_flush = time.time()
-		while time.time() - start_flush < 2.0:  # Flush pendant 2 secondes
+		while time.time() - start_flush < 2.0:
 			msg = self._consumer.poll(timeout=0.1)
 			if msg is None:
 				break
 			flushed += 1
-		
+
 		if flushed > 0:
 			logger.info("  Flushed %s old messages", flushed)
 		logger.info("System ready")
-		
+
+		if self.mode == "local":
+			return self._simulate_local(spawn_workers, T)
+		else:
+			return self._simulate_standard(spawn_workers, T)
+
+	def _simulate_local(self, spawn_workers, T=1e8):
 		try:
 			corr_id = 0.0
 			all_indices = list(range(self._num_atomics))
@@ -930,10 +984,10 @@ class SimStrategyKafka(DirectCouplingPyDEVSSimStrategy):
 			# STEP 0 : envoyer une opération 'init' à chaque modèle atomique
 			for i in all_indices:
 				# Pas d'inputs ni de current_time particulier pour init
-				self._send_work_to_atomic(i, 'init', corr_id)
+				self._send_work_to_atomic(i, corr_id, operation='init')
 
 			# Attendre les réponses de tous les modèles
-			init_results = self._await_results(all_indices, corr_id)
+			init_results = self._await_msgs(all_indices, corr_id)
 
 			# Construire myTimeAdvance / myTimeNext à partir des réponses 'init'
 			for i in all_indices:
@@ -990,9 +1044,9 @@ class SimStrategyKafka(DirectCouplingPyDEVSSimStrategy):
 				# STEP 1: OUTPUT FUNCTION
 				logger.info("[1/4] Executing output functions...")
 				for i in imminents:
-					self._send_work_to_atomic(i, 'output_function', corr_id, current_time=tmin)
+					self._send_work_to_atomic(i, corr_id, operation='output_function', current_time=tmin)
 				
-				outputs = self._await_results(imminents, corr_id)
+				outputs = self._await_msgs(imminents, corr_id)
 				corr_id += 1.0
 
 
@@ -1053,21 +1107,20 @@ class SimStrategyKafka(DirectCouplingPyDEVSSimStrategy):
 				if externals_to_send:
 					logger.info("  Sending external transitions to %s models...", len(externals_to_send))
 					for dest_idx, inputs in externals_to_send.items():
-						self._send_work_to_atomic(dest_idx, 'external_transition', corr_id, inputs=inputs, current_time=tmin)
+						self._send_work_to_atomic(dest_idx, corr_id, operation='external_transition', inputs=inputs, current_time=tmin)
 					
-					self._await_results(list(externals_to_send.keys()), corr_id)
+					self._await_msgs(list(externals_to_send.keys()), corr_id)
 				else:
 					logger.info("  No outputs to route")
-
 
 				corr_id += 1.0
 				
 				# STEP 3: INTERNAL TRANSITIONS
 				logger.info("[3/4] Executing internal transitions...")
 				for i in imminents:
-					self._send_work_to_atomic(i, 'internal_transition', corr_id)
+					self._send_work_to_atomic(i, corr_id, operation='internal_transition')
 				
-				self._await_results(imminents, corr_id)
+				self._await_msgs(imminents, corr_id)
 				corr_id += 1.0
 				
 				# STEP 4: UPDATE TIME ADVANCES
@@ -1075,10 +1128,9 @@ class SimStrategyKafka(DirectCouplingPyDEVSSimStrategy):
 				affected = set(imminents) | set(externals_to_send.keys())
 				
 				for i in affected:
-					self._send_work_to_atomic(i, 'time_advance', corr_id)
+					self._send_work_to_atomic(i, corr_id, operation='time_advance')
 				
-				results = self._await_results(list(affected), corr_id)
-
+				results = self._await_msgs(list(affected), corr_id)
 
 				for i, data in results.items():
 					result_data = data.get('result', {})
@@ -1126,6 +1178,231 @@ class SimStrategyKafka(DirectCouplingPyDEVSSimStrategy):
 			if spawn_workers:
 				self._terminate_workers()
 			
+			logger.info("=" * 60)
+			logger.info("  KafkaDEVS Simulation Ended")
+			logger.info("=" * 60)
+
+	def _simulate_standard(self, spawn_workers, T=1e8):
+		try:
+			corr_id = 0.0
+			all_indices = list(range(self._num_atomics))
+
+			# STEP 0 : init distribué
+			logger.info("Initializing atomic models...")
+
+			for i in all_indices:
+				init_msg = InitSim(SimTime(t=self.ts.Get()))
+			  
+				self._send_work_to_atomic(i, corr_id, msg=init_msg)
+			
+			init_results = self._await_msgs(all_indices, corr_id, typed=True)
+		
+			corr_id += 1.0
+
+		
+			for i in all_indices:
+				model = self._index2model[i]
+				devs_msg = init_results[i]
+				if isinstance(devs_msg, NextTime):
+					ta = devs_msg.time.t
+				else:
+					# fallback si l'adaptateur renvoie autre chose
+					ta = float("inf")
+
+				model.myTimeAdvance = ta
+				model.myTimeNext = self.ts.Get() + ta
+				logger.info("  Model %s (%s): ta=%s, next=%s",
+							i, model.myID, ta, model.myTimeNext)
+
+			# BOUCLE PRINCIPALE
+			logger.info("Simulation loop starting (T=%s)...", T)
+			iteration = 0
+			t_start = time.time()
+			old_cpu_time = 0.0
+
+			while self.ts.Get() < T and not self._simulator.end_flag:
+				iteration += 1
+
+				tmin = min(m.myTimeNext for m in self._atomic_models)
+				if tmin == float("inf"):
+					logger.info("No more events - simulation complete")
+					break
+				if tmin > T:
+					logger.info("Next event at t=%s exceeds T=%s", tmin, T)
+					break
+
+				self.ts.Set(tmin)
+				imminents = [
+					i for i in all_indices if self._index2model[i].myTimeNext == tmin
+				]
+
+				logger.info("=" * 60)
+				logger.info("Iteration %s: t=%.2f", iteration, tmin)
+				logger.info("  Imminent models: %s",
+							[f"{i}({self._index2model[i].myID})"
+							 for i in imminents])
+				logger.info("=" * 60)
+
+				# STEP 1 : output
+				logger.info("[1/4] Executing output functions...")
+				for i in imminents:
+					msg = SendOutput(SimTime(t=tmin))
+					self._send_work_to_atomic(i, corr_id, msg=msg)
+
+				output_msgs = self._await_msgs(imminents, corr_id, typed=True)
+				corr_id += 1.0
+
+				# STEP 2 : routing (à partir des ModelOutputMessage)
+				logger.info("[2/4] Routing outputs to destinations...")
+				externals_to_send = {}
+				parent_model = (
+					self._atomic_models[0].parent if self._atomic_models else None
+				)
+
+				if parent_model is None:
+					logger.warning("  WARNING: No parent model, cannot route outputs")
+				else:
+					for src_idx, devs_msg in output_msgs.items():
+
+						if devs_msg is None:
+							continue
+						
+						if not isinstance(devs_msg, ModelOutputMessage):
+							logger.debug("  Ignoring non-output message from %s: %s",
+                         src_idx, type(devs_msg).__name__)
+							continue
+
+						src_model = self._index2model[src_idx]
+						outputs = devs_msg.modelOutput
+						if not outputs:
+							continue
+
+						logger.info("  Model %s (%s) produced %s outputs",
+									src_idx, src_model.myID, len(outputs))
+
+						for pv in outputs:
+							port_name = pv.portIdentifier
+							value = pv.value
+
+							src_port = None
+							for p in src_model.OPorts:
+								if p.name == port_name:
+									src_port = p
+									break
+							if src_port is None:
+								continue
+
+							for coupling in parent_model.IC:
+								try:
+									(src_m, src_p), (dest_m, dest_p) = coupling
+								except Exception:
+									continue
+
+								if src_m is src_model and src_p is src_port:
+									dest_idx = None
+									for idx, m in self._index2model.items():
+										if m is dest_m:
+											dest_idx = idx
+											break
+									if dest_idx is None:
+										continue
+
+									logger.info(
+										"    -> Routing %s.%s -> %s.%s (value=%s)",
+										src_model.myID, port_name,
+										dest_m.myID, dest_p.name, value
+									)
+
+									if dest_idx not in externals_to_send:
+										externals_to_send[dest_idx] = {}
+									externals_to_send[dest_idx][dest_p.name] = value
+
+				corr_id += 1.0
+
+				# STEP 2b : envoyer external_transition
+				transition_done_msgs = {}  # <-- nouveau dict commun
+
+				if externals_to_send:
+					logger.info("  Sending external transitions to %s models...",
+								len(externals_to_send))
+					for dest_idx, inputs in externals_to_send.items():
+						pv_list = [
+							PortValue(v, port, type(v).__name__)
+							for port, v in inputs.items()
+						]
+						msg = ExecuteTransition(SimTime(t=tmin), pv_list)
+						self._send_work_to_atomic(dest_idx, corr_id, msg=msg)
+
+					# récupérer les TransitionDone des modèles qui ont reçu une external
+					td_ext = self._await_msgs(list(externals_to_send.keys()), corr_id, typed=True)
+					transition_done_msgs.update(td_ext)
+				else:
+					logger.info("  No outputs to route")
+
+				corr_id += 1.0
+
+				# STEP 3 : internal_transition
+				logger.info("[3/4] Executing internal transitions...")
+				for i in imminents:
+					# ici tu peux mettre InternalTransition(...) si tu en définis un
+					msg = ExecuteTransition(SimTime(t=tmin), {})  # ou [] suivant ta signature
+					self._send_work_to_atomic(i, corr_id, msg=msg)
+
+				td_int = self._await_msgs(imminents, corr_id, typed=True)
+				transition_done_msgs.update(td_int)
+
+				corr_id += 1.0
+
+				# STEP 4 : mise à jour des ta
+				logger.info("[4/4] Updating time advances (from TransitionDone)...")
+				affected = set(imminents) | set(externals_to_send.keys())
+
+				for i in affected:
+					devs_msg = transition_done_msgs.get(i)
+					ta = float("inf")
+					if isinstance(devs_msg, TransitionDone):
+						ta = devs_msg.nextTime.t
+
+					model = self._index2model[i]
+					model.myTimeAdvance = ta
+					model.myTimeNext = tmin + ta
+					logger.info("  Model %s (%s): ta=%s -> next=%s",
+								i, model.myID, ta, model.myTimeNext)
+
+				self.master.timeLast = tmin
+				self._simulator.cpu_time = old_cpu_time + (time.time() - t_start)
+
+				if iteration >= 20:  # garde‑fou
+					logger.info("Reached iteration limit (%s iterations)", iteration)
+					break
+
+			logger.info("=" * 60)
+			logger.info("Simulation completed:")
+			logger.info("  Final time: %.2f", self.ts.Get())
+			logger.info("  Total iterations: %s", iteration)
+			logger.info("  CPU time: %.3fs", self._simulator.cpu_time)
+			logger.info("=" * 60)
+
+			self._simulator.terminate()
+
+		except KeyboardInterrupt:
+			logger.warning("Simulation interrupted by user")
+
+		except Exception as e:
+			logger.exception("Simulation error: %s", e)
+
+		finally:
+
+			# Après la boucle principale, quand tu sais que la simu est finie
+			logger.info("Broadcasting SimulationDone to all workers...")
+
+			for i in range(self._num_atomics):
+				msg = SimulationDone(time=SimTime(t=self.ts.Get()))
+				self._send_work_to_atomic(i, corr_id, msg=msg)
+
+			if spawn_workers:
+				self._terminate_workers()
+
 			logger.info("=" * 60)
 			logger.info("  KafkaDEVS Simulation Ended")
 			logger.info("=" * 60)

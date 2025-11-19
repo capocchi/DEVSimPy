@@ -67,8 +67,7 @@ class MessagesCollector(DomainBehavior):
 					f.write(f"{msg}\n")
 				del msg
 
-		self.holdIn('ACTIF',0.0)
-
+		self.passivateIn('IDLE')
 		return self.getState()
 		
 	###
