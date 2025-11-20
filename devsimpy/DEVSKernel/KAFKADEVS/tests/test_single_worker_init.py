@@ -6,6 +6,10 @@ import json
 import argparse
 import logging
 from pathlib import Path
+import zipfile
+import importlib.util
+import tempfile
+import shutil
 
 from confluent_kafka import Producer, Consumer
 
@@ -45,6 +49,61 @@ from DEVSKernel.KafkaDEVS.logconfig import configure_logging
 from Domain.Generator.RandomGenerator import RandomGenerator
 from Domain.Collector.MessagesCollector import MessagesCollector
 
+def load_atomic_from_amd(amd_path: str, class_name: str = None):
+	"""
+	Charge dynamiquement un modèle atomique DEVSimPy depuis un .amd (zip).
+	- amd_path : chemin du .amd
+	- class_name : nom explicite de la classe à instancier (sinon, auto-détection naïve)
+	Retourne : instance du modèle atomique.
+	"""
+	amd_path = Path(amd_path).resolve()
+
+
+	lib_dir = amd_path.parent 
+	sys.path.insert(0, str(lib_dir))
+
+	# 1) dossier temporaire pour extraire le contenu
+	tmp_dir = Path(tempfile.mkdtemp(prefix="devsimpy_amd_"))
+
+	try:
+		# 2) extraire le zip
+		with zipfile.ZipFile(amd_path, "r") as zf:
+			zf.extractall(tmp_dir)
+
+		# 3) trouver le .py principal (ici on prend le premier .py trouvé)
+		py_files = list(tmp_dir.rglob("*.py"))
+		if not py_files:
+			raise RuntimeError(f"Aucun fichier .py trouvé dans {amd_path}")
+
+		main_py = py_files[0]
+
+		# 4) import dynamique du module
+		spec = importlib.util.spec_from_file_location(main_py.stem, main_py)
+		module = importlib.util.module_from_spec(spec)
+		spec.loader.exec_module(module)  # type: ignore
+
+		# 5) trouver la classe du modèle
+		if class_name is not None:
+			model_cls = getattr(module, class_name)
+		else:
+			# heuristique simple : première classe définie dans le module
+			candidates = [
+				obj for obj in module.__dict__.values()
+				if isinstance(obj, type)
+			]
+			if not candidates:
+				raise RuntimeError(f"Aucune classe trouvée dans {main_py}")
+			model_cls = candidates[0]
+
+		# 6) instancier le modèle
+		model = model_cls()
+		return model
+
+	finally:
+		# tu peux choisir de garder le dossier pour debug,
+		# sinon on le supprime
+		shutil.rmtree(tmp_dir, ignore_errors=True)
+
 # --------------------------------------------------------------------
 # CLI + logging
 # --------------------------------------------------------------------
@@ -74,7 +133,11 @@ class _MockBlockModel:
 
 def build_workers(bootstrap):
 	"""Crée les modèles DEVS, les workers Kafka in-memory, et retourne la liste (worker, in_topic, out_topic)."""
-	
+
+	amd_path = project_root / "Domain" / "FSM" / "QFSM.amd"
+	qfsm_model = load_atomic_from_amd(str(amd_path), class_name="QFSM")
+	print(f"Modèle chargé depuis AMD : {qfsm_model}")
+
 	randomGen = RandomGenerator()
 	randomGen.addOutPort("out")
 	randomGen.timeNext = 0.0
@@ -342,62 +405,62 @@ def run_test_execute_transition_internal(workers, producer, bootstrap, mode="bot
 			print(" -", line)
 
 def run_test_execute_transition_external_for_collector(workers, producer, bootstrap, mode="both"):
-    """
-    Teste une transition externe pour MessagesCollector :
-      - on suppose que les modèles ont reçu InitSim juste avant
-      - on envoie ExecuteTransition(time=t, inputs=[PortValue(...)] ) sur le worker MessagesCollector
-      - on attend un TransitionDone correspondant
-    """
-    summaries = []
-    out_topics = [ot for _, _, ot in workers]
+	"""
+	Teste une transition externe pour MessagesCollector :
+	  - on suppose que les modèles ont reçu InitSim juste avant
+	  - on envoie ExecuteTransition(time=t, inputs=[PortValue(...)] ) sur le worker MessagesCollector
+	  - on attend un TransitionDone correspondant
+	"""
+	summaries = []
+	out_topics = [ot for _, _, ot in workers]
 
-    consumer = build_consumer(bootstrap, out_topics, group_id="test-coord-exectrans-collector")
+	consumer = build_consumer(bootstrap, out_topics, group_id="test-coord-exectrans-collector")
 
-    # temps de l'événement d'entrée (par ex. t = 1.0)
-    trans_time = SimTime(t=1.0)
+	# temps de l'événement d'entrée (par ex. t = 1.0)
+	trans_time = SimTime(t=1.0)
 
-    for idx, (_, in_topic, _) in enumerate(workers):
-        # On ne cible que MessagesCollector
-        # (RandomGenerator n'a pas d'entrée IN0 dans ce scénario)
-        worker_label = "RandomGenerator" if "RandomGenerator" in in_topic else "MessagesCollector"
+	for idx, (_, in_topic, _) in enumerate(workers):
+		# On ne cible que MessagesCollector
+		# (RandomGenerator n'a pas d'entrée IN0 dans ce scénario)
+		worker_label = "RandomGenerator" if "RandomGenerator" in in_topic else "MessagesCollector"
 
-        corr_id = 4000.0 + idx
+		corr_id = 4000.0 + idx
 
-        if worker_label == "MessagesCollector":
-            # Construire un PortValue sur IN0 avec une valeur de test
-            input_pv = PortValue(
-                value=[42, 0.0, 0.0],       # ta payload de test
-                portIdentifier="IN0",
-                portType="list",
-            )
-            inputs = [input_pv]
-        else:
-            # Pas d'inputs pour RandomGenerator dans ce scénario
-            inputs = None
+		if worker_label == "MessagesCollector":
+			# Construire un PortValue sur IN0 avec une valeur de test
+			input_pv = PortValue(
+				value=[42, 0.0, 0.0],       # ta payload de test
+				portIdentifier="IN0",
+				portType="list",
+			)
+			inputs = [input_pv]
+		else:
+			# Pas d'inputs pour RandomGenerator dans ce scénario
+			inputs = None
 
-        exec_msg = ExecuteTransition(trans_time, inputs)
+		exec_msg = ExecuteTransition(trans_time, inputs)
 
-        reply, summary = send_and_wait_reply(
-            producer,
-            consumer,
-            in_topic=in_topic,
-            out_topics=out_topics,
-            devs_msg=exec_msg,
-            corr_id=corr_id,
-            index=0,
-            timeout=5.0,
-            tag=f"ExecuteTransition ext worker {idx} ({worker_label})",
-            expected_type=TransitionDone,
-            mode=mode,
-        )
-        summaries.append(summary)
+		reply, summary = send_and_wait_reply(
+			producer,
+			consumer,
+			in_topic=in_topic,
+			out_topics=out_topics,
+			devs_msg=exec_msg,
+			corr_id=corr_id,
+			index=0,
+			timeout=5.0,
+			tag=f"ExecuteTransition ext worker {idx} ({worker_label})",
+			expected_type=TransitionDone,
+			mode=mode,
+		)
+		summaries.append(summary)
 
-    consumer.close()
+	consumer.close()
 
-    if mode in ("summary", "both"):
-        print("\n=== RÉSUMÉ DES ExecuteTransition (externe MessagesCollector) ===")
-        for line in summaries:
-            print(" -", line)
+	if mode in ("summary", "both"):
+		print("\n=== RÉSUMÉ DES ExecuteTransition (externe MessagesCollector) ===")
+		for line in summaries:
+			print(" -", line)
 			
 def run_scenario_init(bootstrap, mode):
 	workers = build_workers(bootstrap)
@@ -442,18 +505,18 @@ def run_scenario_execute_transition_internal(bootstrap, mode):
 		worker.join()
 
 def run_scenario_execute_transition_external_collector(bootstrap, mode):
-    workers = build_workers(bootstrap)
-    producer = Producer({"bootstrap.servers": bootstrap})
+	workers = build_workers(bootstrap)
+	producer = Producer({"bootstrap.servers": bootstrap})
 
-    # 1) InitSim pour initialiser les modèles
-    run_test_init_sim(workers, producer, bootstrap, mode=mode)
+	# 1) InitSim pour initialiser les modèles
+	run_test_init_sim(workers, producer, bootstrap, mode=mode)
 
-    # 2) ExecuteTransition externe avec un PortValue sur IN0 pour MessagesCollector
-    run_test_execute_transition_external_for_collector(workers, producer, bootstrap, mode=mode)
+	# 2) ExecuteTransition externe avec un PortValue sur IN0 pour MessagesCollector
+	run_test_execute_transition_external_for_collector(workers, producer, bootstrap, mode=mode)
 
-    for worker, _, _ in workers:
-        worker.stop()
-        worker.join()
+	for worker, _, _ in workers:
+		worker.stop()
+		worker.join()
 
 # --------------------------------------------------------------------
 # main
