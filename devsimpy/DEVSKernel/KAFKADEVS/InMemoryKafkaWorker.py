@@ -32,11 +32,30 @@ from .devs_kafka_messages import (
 )
 from .devs_kafka_wire_adapters import StandardWireAdapter
 
+from contextlib import contextmanager
+
+@contextmanager
+def _temporary_peek(self, port_inputs):
+    old_peek = getattr(self.atomic_model, "peek", None)
+
+    def temp_peek(port, *args):
+        if args and isinstance(args[0], dict):
+            return args[0].get(port)
+        return port_inputs.get(port)
+
+    self.atomic_model.peek = temp_peek
+    try:
+        yield
+    finally:
+        if old_peek is not None:
+            self.atomic_model.peek = old_peek
+        elif hasattr(self.atomic_model, "peek"):
+            delattr(self.atomic_model, "peek")
 
 class InMemoryKafkaWorker(threading.Thread):
 	"""Worker thread that manages one atomic model in memory."""
 
-	def __init__(self, atomic_model, atomic_index, bootstrap_servers, mode="local",in_topic=None, out_topic=None):
+	def __init__(self, atomic_model, atomic_index, bootstrap_servers, mode="local", in_topic=None, out_topic=None):
 		super().__init__(daemon=True)
 		self.atomic_model = atomic_model
 		self.atomic_index = atomic_index
@@ -77,7 +96,7 @@ class InMemoryKafkaWorker(threading.Thread):
             atomic_index, atomic_model.getBlockModel().label, self.in_topic, self.out_topic, mode
         )
 
-	def execute_operation(self, operation, work_data):
+	def _execute_operation(self, operation, work_data):
 		"""Execute DEVS operation on the in-memory model"""
 		try: 
 			if operation == 'init':
@@ -124,6 +143,7 @@ class InMemoryKafkaWorker(threading.Thread):
 				self.atomic_model.peek = temp_peek
 				
 				try:
+					# with self._temporary_peek(port_inputs):
 					# Appeler extTransition avec le dictionnaire
 					result = self.atomic_model.extTransition(port_inputs)
 				finally:
@@ -212,6 +232,7 @@ class InMemoryKafkaWorker(threading.Thread):
 				self.atomic_model.peek = temp_peek
 
 				try:
+					# with self._temporary_peek(port_inputs):
 					self.atomic_model.extTransition(port_inputs)
 				finally:
 					if old_peek is not None:
@@ -265,6 +286,7 @@ class InMemoryKafkaWorker(threading.Thread):
 			)
 
 		if isinstance(msg, SimulationDone):
+			self.running = False
 			return ModelDone(
 				time=msg.time,
 				sender=self.atomic_model.getBlockModel().label,
@@ -275,6 +297,59 @@ class InMemoryKafkaWorker(threading.Thread):
 		# Ces types sont normalement utilisés comme réponses, pas comme requêtes
 		# côté worker, donc on ne les traite pas ici.
 		raise ValueError(f"Unsupported message type in worker: {type(msg).__name__}")
+
+	def _process_standard(self, data, msg):
+		"""Process standard DEVS message format."""
+		# Nouveau mode : messages typés
+		devs_msg = self.wire.from_wire(data)
+		corr_id = data.get("correlation_id")
+		atomic_index = data.get("atomic_index", self.atomic_index)
+
+		# Traiter le message DEVS
+		try:
+			reply_msg = self._handle_devs_message(devs_msg)
+		except Exception as e:
+			logger.exception("  [Thread-%s] Error handling message: %s",self.atomic_index, e)
+
+		# Préparer le message de réponse
+		reply_wire = self.wire.to_wire(reply_msg, corr_id, atomic_index)					
+		reply_json = json.dumps(reply_wire).encode("utf-8")
+
+		# Log et envoi de la réponse
+		kafka_logger.debug(
+			f"  [Thread-{self.atomic_index}] KAFKA-OUT topic={self.out_topic} value={reply_json.decode("utf-8")}"
+		)
+		
+		# Envoi de la réponse
+		self.producer.produce(
+			self.out_topic,
+			value=reply_json,
+		)
+		self.producer.flush()
+		
+	def _process_local(self, data):
+		# Mode local : ancien comportement (operation / execute_operation)
+		operation = data["operation"]
+		correlation_id = data["correlation_id"]
+
+		result = self._execute_operation(operation, data)
+
+		response = {
+			"correlation_id": correlation_id,
+			"atomic_index": self.atomic_index,
+			"result": result,
+		}
+
+		response_json = json.dumps(response).encode("utf-8")
+		kafka_logger.debug(
+			f"  [Thread-{self.atomic_index}] KAFKA-OUT topic={self.out_topic} value={response_json.decode("utf-8")}",
+		)
+
+		self.producer.produce(
+			self.out_topic,
+			value=response_json,
+		)
+		self.producer.flush()
 
 	# ------------------------------------------------------------------
 	#  Boucle principale
@@ -292,7 +367,6 @@ class InMemoryKafkaWorker(threading.Thread):
 				raw = msg.value().decode("utf-8")
 				data = json.loads(raw)
 
-				# Log brut de ce qui arrive sur work_{atomic_index}
 				kafka_logger.debug(
 					"  [Thread-%s] KAFKA-IN topic=%s key=%s value=%s",
 					self.atomic_index,
@@ -302,54 +376,10 @@ class InMemoryKafkaWorker(threading.Thread):
 				)
 
 				if self.wire:
-					# Nouveau mode : messages typés
-					devs_msg = self.wire.from_wire(data)
-					corr_id = data.get("correlation_id")
-					atomic_index = data.get("atomic_index", self.atomic_index)
-
-					try:
-						reply_msg = self._handle_devs_message(devs_msg)
-					except Exception as e:
-						logger.exception("  [Thread-%s] Error handling message: %s",
-										self.atomic_index, e)
-						continue
-
-					reply_wire = self.wire.to_wire(reply_msg, corr_id, atomic_index)
-					
-					reply_json = json.dumps(reply_wire).encode("utf-8")
-					kafka_logger.debug(
-						f"  [Thread-{self.atomic_index}] KAFKA-OUT topic={self.out_topic} value={reply_json.decode("utf-8")}"
-					)
-					
-					self.producer.produce(
-						self.out_topic,
-						value=json.dumps(reply_wire).encode("utf-8"),
-					)
-					self.producer.flush()
+					self._process_standard(data, msg)
 
 				else:
-					# Mode local : ancien comportement (operation / execute_operation)
-					operation = data["operation"]
-					correlation_id = data["correlation_id"]
-
-					result = self.execute_operation(operation, data)
-
-					response = {
-						"correlation_id": correlation_id,
-						"atomic_index": self.atomic_index,
-						"result": result,
-					}
-
-					response_json = json.dumps(response).encode("utf-8")
-					kafka_logger.debug(
-						f"  [Thread-{self.atomic_index}] KAFKA-OUT topic={self.out_topic} value={response_json.decode("utf-8")}",
-					)
-
-					self.producer.produce(
-						self.out_topic,
-						value=json.dumps(response).encode("utf-8"),
-					)
-					self.producer.flush()
+					self._process_local(data)
 
 			except Exception as e:
 				logger.exception("  [Thread-%s] Error in run loop: %s", self.atomic_index, e)

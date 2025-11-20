@@ -666,7 +666,17 @@ class SimStrategyKafka(DirectCouplingPyDEVSSimStrategy):
 
 		# Assurer qu'un broker Kafka tourne
 		if AUTO_START_KAFKA_BROKER:
-			self.bootstrap = ensure_kafka_broker(bootstrap=kafka_bootstrap)
+			try:
+				self.bootstrap = ensure_kafka_broker(bootstrap=kafka_bootstrap)
+			except RuntimeError as e:
+				logger.error("%s", e)
+				# si GUI : afficher une boîte de dialogue
+				# sinon, côté CLI :
+				print(
+					"ERREUR : impossible de démarrer KafkaDEVS.\n"
+					"Vérifie que Docker Desktop est lancé puis relance la simulation."
+				)
+				raise
 		else:
 			self.bootstrap = kafka_bootstrap
 			
@@ -745,7 +755,21 @@ class SimStrategyKafka(DirectCouplingPyDEVSSimStrategy):
 		admin = AdminClient({"bootstrap.servers": self.bootstrap})
 
 		# Topics déjà présents dans le cluster
-		existing = set(admin.list_topics(timeout=10).topics.keys())
+		try:
+			metadata = admin.list_topics(timeout=10)
+		except KafkaException as e:
+			err = e.args[0]
+			if err.code() == KafkaError._TRANSPORT:
+				logger.error(
+					"Impossible de se connecter au broker Kafka sur %s.\n"
+					"Vérifie que le conteneur 'kafkabroker' est démarré et que Kafka écoute bien.",
+					self.bootstrap,
+				)
+			else:
+				logger.error("Erreur Kafka lors de list_topics: %s", err)
+			raise
+
+		existing = set(metadata.topics.keys())
 
 		# Construire l'ensemble des noms à créer (évite les doublons d'emblée)
 		desired = set()
