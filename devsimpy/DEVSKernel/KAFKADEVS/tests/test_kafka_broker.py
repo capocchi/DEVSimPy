@@ -10,8 +10,6 @@ sys.path.insert(0, str(project_root))
 
 # Adapter l'import au chemin réel de ton package
 from DEVSKernel.KafkaDEVS.auto_kafka import ensure_kafka_broker
-from DEVSKernel.KafkaDEVS.kafkaconfig import KAFKA_BOOTSTRAP
-
 
 def main():
     print("=== Test ensure_kafka_broker ===")
@@ -31,7 +29,7 @@ def main():
     here = Path(__file__).resolve().parent
 
     # racine devsimpy (qui contient devsimpy-nogui.py)
-    devsimpy_root = here.parents[2]          # .../devsimpy
+    devsimpy_root = here.parents[2]
 
     devsimpy_nogui = devsimpy_root / "devsimpy-nogui.py"
     test_dsp = "test.dsp"
@@ -48,7 +46,6 @@ def main():
     print("Commande :", " ".join(cmd))
     result = subprocess.run(cmd)
     sys.exit(result.returncode)
-
 
 if __name__ == "__main__":
     main()

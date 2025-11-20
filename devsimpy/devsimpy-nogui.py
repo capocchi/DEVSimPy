@@ -186,12 +186,19 @@ if __name__ == '__main__':
 		sys.stdout.write(json.dumps(new_args, default=serialize_date))
 
 	else:
-		# simulation
+		### simulation mode
+
+		### get the simulation duration
 		duration_val = args.simulation_time	
 		duration = float('inf') if duration_val in ('ntl', 'inf') else int(duration_val)
-		devs = yamlHandler.getDevsInstance()
 		
-		if devs:
-			simulate(devs, duration, args.name, args.remote, args.with_progress)
-
+		### get the devs model
+		devs_model = yamlHandler.getDevsInstance()
+		
+		### launch simulation
+		if devs_model:
+			simulate(devs_model, duration, args.name, args.remote, args.with_progress)
+		else:
+			sys.stdout.write(_("ERROR: No model to simulate!\n"))
+			sys.exit(1)
 			

@@ -8,6 +8,7 @@ from pathlib import Path
 ###  - logging.WARNING pour la prod
 
 LOGGING_LEVEL = logging.DEBUG
+LOGFILE = "kafkadevs_local.log"
 
 def configure_logging():
     # Racine DEVSimPy = dossier contenant devsimpy-nogui.py / devsimpy.py
@@ -17,7 +18,7 @@ def configure_logging():
     log_dir = base_dir / "logs"
     log_dir.mkdir(exist_ok=True)
 
-    log_file = log_dir / f"kafkadevs.log"
+    log_file = log_dir / f"{LOGFILE}"
 
     logging.basicConfig(
         level=LOGGING_LEVEL,
