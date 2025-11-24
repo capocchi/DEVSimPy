@@ -8,7 +8,7 @@ logger.setLevel(LOGGING_LEVEL)
 
 from DEVSKernel.KafkaDEVS.InMemoryKafkaWorker import InMemoryKafkaWorker
 
-from .ms4me_kafka_messages import (
+from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_messages import (
 	BaseMessage,
 	SimTime,
 	InitSim,
@@ -22,7 +22,7 @@ from .ms4me_kafka_messages import (
 	ModelDone,
 )
 
-from .ms4me_kafka_wire_adapters import StandardWireAdapter
+from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
 from DomainInterface.Object import Message
 
 class MS4MeKafkaWorker(InMemoryKafkaWorker):
@@ -191,7 +191,7 @@ class MS4MeKafkaWorker(InMemoryKafkaWorker):
 
 		# Log et envoi de la réponse
 		worker_kafka_logger.debug(
-			f"[Thread-{self.index}] OUT: topic={self.out_topic} value={reply_json.decode("utf-8")}"
+			f"[Thread-{self.index}] OUT: topic={self.out_topic} value={reply_json.decode('utf-8')}"
 		)
 		
 		# Envoi de la réponse

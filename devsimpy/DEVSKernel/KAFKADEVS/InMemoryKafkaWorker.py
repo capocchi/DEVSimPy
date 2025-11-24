@@ -7,7 +7,7 @@ import json
 import logging
 import time
 
-from .logconfig import LOGGING_LEVEL, worker_kafka_logger
+from DEVSKernel.KafkaDEVS.logconfig import LOGGING_LEVEL, worker_kafka_logger
 
 logger = logging.getLogger("DEVSKernel.KafkaDEVS.InMemoryKafkaWorker")
 logger.setLevel(LOGGING_LEVEL)

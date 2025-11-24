@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import Any, Dict
 
-from .ms4me_kafka_messages import BaseMessage
+from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_messages import BaseMessage
 
 class StandardWireAdapter:
     """
