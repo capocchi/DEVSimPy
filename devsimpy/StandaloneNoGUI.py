@@ -199,7 +199,7 @@ class StandaloneNoGUI:
         """
         """
         return f"""
-FROM python:3.11-slim-buster
+FROM python:3.13-slim
 
 WORKDIR /app
 
@@ -214,10 +214,29 @@ RUN pip install -r requirements-devsimpy-nogui.txt
 
 COPY . .
 
-CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
+CMD ["python", "devsimpy-nogui.py", "-kernel {self.kernel}", "{os.path.basename(self.yaml)}", "ntl"]
 
                 """
-                
+
+    def GetDockerComposeSpec(self):
+        """
+        """
+        return f"""
+version: '3.8'
+
+services:
+  {os.path.basename(self.yaml).split('.')[0].lower()}:
+    container_name: {os.path.basename(self.yaml).split('.')[0].lower()}-app
+    build: .
+    image: {os.path.basename(self.yaml).split('.')[0].lower()}:latest
+    # Ajoutez d'autres configurations si nécessaire :
+    # volumes:
+    #   - ./data:/app/data
+    # ports:
+    #   - "8080:8080"
+    restart: unless-stopped
+"""                  
+    
     def GetConfigSpec(self):
         """
         """
@@ -330,7 +349,8 @@ CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
 
                 if self.add_dockerfile:
                     archive.writestr('Dockerfile', self.GetDockerSpec())
-                    
+                    archive.writestr('docker-compose.yml', self.GetDockerComposeSpec())
+
                 ###################################################################
                 ###
                 ### Config files
@@ -358,7 +378,8 @@ CMD ["python", "devsimpy-nogui.py", "{os.path.basename(self.yaml)}","ntl"]
                             pip_packages_used_to_add_in_requirements.add(name)
 
                 ### Get the requirements file path
-                current_dir = os.path.dirname(os.path.abspath(__file__))
+                current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                print(os.path.join(current_dir, 'requirements-nogui.txt'))
                 requirements_file = os.path.join(current_dir, 'requirements-nogui.txt')
                 
                 ### if additionnal pip package are used in devs atomic model, we need to add them in the requirements.txt file

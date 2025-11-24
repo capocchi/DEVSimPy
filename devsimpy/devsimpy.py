@@ -184,8 +184,8 @@ class MainApplication(wx.Frame):
 		"""
 
 		## Create Config file -------------------------------------------------------
-		self.cfg = self.GetConfig()
-		self.SetConfig(self.cfg)
+		self.cfg = MainApplication.GetConfig()
+		self.SetConfig()
 
 		## Set i18n locales --------------------------------------------------------
 		self.Seti18n()
@@ -312,7 +312,8 @@ class MainApplication(wx.Frame):
 		canvas = nb2.GetPage(nb2.GetSelection())
 		canvas.attach(panel)
 
-	def GetConfig(self):
+	@staticmethod
+	def GetConfig():
 		""" Reads the config file for the application if it exists and return a configfile object for use later.
 		"""
 		return wx.FileConfig(localFilename = os.path.join(GetUserConfigDir(),'.devsimpy'))
@@ -392,11 +393,9 @@ class MainApplication(wx.Frame):
 		"""
 		return {k: getattr(builtins, k) for k in USER_SETTINGS}
 
-	def SetConfig(self, cfg):
+	def SetConfig(self):
 		""" Set all config entry like language, external importpath, recent files...
 		"""
-
-		self.cfg = cfg
 
 		### if .devsimpy config file already exist, load it
 		if self.cfg.Exists('version'):
@@ -448,26 +447,26 @@ class MainApplication(wx.Frame):
 							self.last_size = None
 
 				### restore the builtin dict
-				try:
-					builtins.__dict__.update(eval(self.cfg.Read("settings")))
-				except SyntaxError:
-					wx.MessageBox('Error trying to read the builtin dictionary from config file. So, we load the default builtin',
-								'Configuration',
-								wx.OK | wx.ICON_INFORMATION)
-				else:
-					### try to start without error when .devsimpy need update (new version installed)
-					# if not os.path.isdir(D['DEVSIMPY_PACKAGE_PATH']):
-					# 	wx.MessageBox('.devsimpy file appears to be not liked with the DEVSimPy code source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(GetUserConfigDir()),
-					# 				'Configuration',
-					# 				wx.OK | wx.ICON_INFORMATION)
-					# 	#sys.stdout.write('.devsimpy file appear to be not liked with the DEVSimPy source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(GetUserConfigDir()))
-					# 	D['DEVSIMPY_PACKAGE_PATH'] = ABS_HOME_PATH
+				# try:
+				# 	builtins.__dict__.update(eval(self.cfg.Read("settings")))
+				# except SyntaxError:
+				# 	wx.MessageBox('Error trying to read the builtin dictionary from config file. So, we load the default builtin',
+				# 				'Configuration',
+				# 				wx.OK | wx.ICON_INFORMATION)
+				# else:
+				# 	### try to start without error when .devsimpy need update (new version installed)
+				# 	# if not os.path.isdir(D['DEVSIMPY_PACKAGE_PATH']):
+				# 	# 	wx.MessageBox('.devsimpy file appears to be not liked with the DEVSimPy code source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(GetUserConfigDir()),
+				# 	# 				'Configuration',
+				# 	# 				wx.OK | wx.ICON_INFORMATION)
+				# 	# 	#sys.stdout.write('.devsimpy file appear to be not liked with the DEVSimPy source. Please, delete this configuration from %s file and restart DEVSimPy. \n'%(GetUserConfigDir()))
+				# 	# 	D['DEVSIMPY_PACKAGE_PATH'] = ABS_HOME_PATH
 					
 
-					# ### if pypdevs_241 is detected, it is added in the builtin in order to be able to select him from the simulation Preference panel
-					# if builtin_dict['DEVS_DIR_PATH_DICT'] != D['DEVS_DIR_PATH_DICT']:
-					# 	D['DEVS_DIR_PATH_DICT'].update(builtin_dict['DEVS_DIR_PATH_DICT'])
-					pass
+				# 	# ### if pypdevs_241 is detected, it is added in the builtin in order to be able to select him from the simulation Preference panel
+				# 	# if builtin_dict['DEVS_DIR_PATH_DICT'] != D['DEVS_DIR_PATH_DICT']:
+				# 	# 	D['DEVS_DIR_PATH_DICT'].update(builtin_dict['DEVS_DIR_PATH_DICT'])
+				# 	pass
 						
 				# try:
 				# 	### recompile DomainInterface if DEFAULT_DEVS_DIRNAME != PyDEVS

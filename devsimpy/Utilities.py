@@ -48,7 +48,8 @@ _ = gettext.gettext
 
 from zipfile import ZipFile, ZIP_DEFLATED 
 
-if GUI_FLAG:
+
+if getattr(builtins,'GUI_FLAG', True):
 	import wx
 	
 	_ = wx.GetTranslation

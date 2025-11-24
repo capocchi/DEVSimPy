@@ -52,7 +52,7 @@ class MessagesCollector(DomainBehavior):
 	def extTransition(self, *args):
 		"""
 		"""
-		
+	
 		for port in self.IPorts:
 			### adapted with PyPDEVS
 			msg = self.peek(port, *args)
@@ -63,11 +63,11 @@ class MessagesCollector(DomainBehavior):
 				### filename
 				fn = f"{self.fileName}{str(np)}{self.ext}"
 				
-				with open(fn,'a') as f: f.write(f"{msg}\n")
+				with open(fn,'a') as f: 
+					f.write(f"{msg}\n")
 				del msg
 
-		self.holdIn('ACTIF',0.0)
-
+		self.passivateIn('IDLE')
 		return self.getState()
 		
 	###

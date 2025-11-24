@@ -2,7 +2,11 @@ import os
 import sys
 import builtins
 import logging
+import ast
 logging.getLogger("pydot").setLevel(logging.WARNING)
+
+
+from Utilities import GetUserConfigDir
 
 """ PATHS defined from the current dir used to execute devsimpy 
 """
@@ -85,12 +89,48 @@ ALL_SETTINGS = GLOBAL_SETTINGS | USER_SETTINGS
 """ Define functions
 """
 
+def read_dev_sim_py_config_file_without_wx(path):
+    config = {}
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if "=" not in line:
+                continue
+
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip()
+
+            try:
+                # essayer d'interpréter la valeur comme expression Python
+                config[key] = ast.literal_eval(value)
+            except Exception:
+                # si ce n'est pas une expression Python (ex: version=5.1.1)
+                config[key] = value
+    return config
+
 def UpdateBuiltins(new_settings=ALL_SETTINGS):
     """Update builtins with new settings.
 	"""
     # Check if the new settings are valid
     if not isinstance(new_settings, dict):
         raise ValueError("new_settings must be a dictionary")
-    
+
     for key, value in new_settings.items():
-        setattr(builtins, key, value)
+            setattr(builtins, key, value)
+
+    ### update user settings from .devsimpy config file if existe
+    # ### here because some imports (DomainBehavior, DomainStrucutre, etc) are needed early in the devsimpy.py file. 
+    cfg_path = os.path.join(GetUserConfigDir(), ".devsimpy")
+    
+    if os.path.exists(cfg_path):
+        import wx
+        App = wx.App()
+        
+        cfg = wx.FileConfig(localFilename = cfg_path)
+        builtins.__dict__.update(eval(cfg.Read("settings")))
+    else:
+         sys.stdout.write('Error trying to read the builtin dictionary from config file. So, we load the default builtin')
+    

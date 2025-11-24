@@ -216,6 +216,7 @@ class AtomicDEVS(BaseDEVS):
 	def peek(self, p):
 		"""Retrieves message from input port {\tt p}.
 		"""
+
 		value = self.myInput.get(p, None)
 		# return value.copy() if value else value 
 		return copy.deepcopy(value) if value else value
