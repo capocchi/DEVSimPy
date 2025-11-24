@@ -21,7 +21,7 @@ def wait_for_kafka(bootstrap: str, timeout: float = 30.0, interval: float = 1.0)
 				if time.time() - start > timeout:
 					raise RuntimeError(
 						f"Kafka ne répond pas sur {bootstrap} après {timeout} secondes.\n"
-						f"Vérifie que le conteneur '{KAFKA_CONATINER_NAME}' est démarré et en bonne santé."
+						f"Vérifier que le conteneur '{KAFKA_CONATINER_NAME}' est démarré et en bonne santé."
 					) from e
 				time.sleep(interval)
 			else:
@@ -57,7 +57,8 @@ def ensure_kafka_broker(
 		existing = result.stdout.strip().splitlines()
 	except subprocess.CalledProcessError as e:
 		raise RuntimeError(f"Impossible d'appeler docker: {e}") from e
-
+	
+	
 	# 2) S'il existe déjà
 	if container_name in existing:
 		# Vérifier s'il est en cours d'exécution

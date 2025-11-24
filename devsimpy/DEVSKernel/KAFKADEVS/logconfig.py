@@ -1,17 +1,17 @@
-### Fichier de configuration du logging pour KafkaDEVS
+### conf file for KafkaDEVS
 import logging
 from pathlib import Path
 
-### Niveau de logging:
-###  - logging.DEBUG pour le dev
-###  - logging.INFO pour des traces plus légères
-###  - logging.WARNING pour la prod
+### logging level:
+###  - logging.DEBUG for dev
+###  - logging.INFO for light traces
+###  - logging.WARNING for prod
 
 LOGGING_LEVEL = logging.DEBUG
 LOGFILE = "kafkadevs_local.log"
 
 def configure_logging():
-    # Racine DEVSimPy = dossier contenant devsimpy-nogui.py / devsimpy.py
+    # DEVSimPy root dir
     filename = Path(__file__).resolve()
     # filename_without_ext = filename.stem 
     base_dir = filename.parents[2]   # DEVSimPy/
@@ -25,10 +25,13 @@ def configure_logging():
         format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
         handlers=[
             logging.FileHandler(log_file, encoding="utf-8"),
-            logging.StreamHandler(),   # console (optionnel)
+            logging.StreamHandler(),   # console (opt.)
         ],
     )
 
-# logger dédié pour les traces Kafka
-kafka_logger = logging.getLogger("kafka.trace")
-kafka_logger.setLevel(LOGGING_LEVEL)
+# logger dedicated to Kafka
+worker_kafka_logger = logging.getLogger("worker.kafka.trace")
+worker_kafka_logger.setLevel(LOGGING_LEVEL)
+
+coord_kafka_logger = logging.getLogger("coord.kafka.trace")
+coord_kafka_logger.setLevel(LOGGING_LEVEL)

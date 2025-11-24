@@ -1,8 +1,7 @@
-### KAFKA_MODE OPTIONS: "local" or "standard"
-###  - local: topics work_i and atomic_results
-###  - standard: topics ms4meXXXIn and ms4meOut
+### KAFKA_MODE OPTIONS:
+###  - fromMe4Me: topics ms4meXXXIn and ms4meOut
 ### Default:
-KAFKA_MODE = "standard"
+KAFKA_MODE = "fromMe4Me"
 
 ### Whether to auto-start a Kafka broker if not already running
 AUTO_START_KAFKA_BROKER=True

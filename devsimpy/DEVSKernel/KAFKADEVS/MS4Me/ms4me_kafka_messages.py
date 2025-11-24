@@ -1,9 +1,8 @@
-# devs_kafka_messages.py
-from __future__ import annotations
+# ms4me_kafka_messages.py
 
+from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
-
 
 # ---------- Types de base ----------
 

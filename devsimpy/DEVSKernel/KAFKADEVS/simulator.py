@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 
 ###############################################################################
-# simulator.py --- Classes and Tools for 'Classic' DEVS Model Spec
+# simulator.py --- Classes and Tools for 'Kafka' DEVS Model Spec
 #                     --------------------------------
 #                            Copyright (c) 2025
 #                            Laurent Capocchi
 #							 SPE UMR CNRS 6134
 #                       Corsican University (France)
 #                     --------------------------------
-# Version                                        last modified: 09/27/2025
+# Version                                        last modified: 11/24/2025
 ###############################################################################
 # NOTES:
 # To mesure the performance of the simulator, one can use:
@@ -18,282 +18,15 @@
 ###############################################################################
 
 from itertools import *
-
-import array
 import builtins
 
 from DEVSKernel.KafkaDEVS.DEVS import CoupledDEVS
-from PluginManager import PluginManager
 
 ### avec ce flag les simulation en nogui sont plus rapides
 ENABLE_SIM_LOGS = getattr(builtins,'GUI_FLAG', True)
 
 ###############################################################################
-# GLOBAL VARIABLES AND FUNCTIONS
-###############################################################################
-
-def sim_log(event, **kwargs):
-    if ENABLE_SIM_LOGS:
-        PluginManager.trigger_event(event, **kwargs)
-
-def Error(message ='', esc=1):
-	"""Error-handling function: reports an error and exits interpreter if
-	esc evaluates to true.
-
-	To be replaced later by exception-handling mechanism.
-	"""
-	from sys import exit, stderr
-	stderr.write("ERROR: %s\n" % message)
-	if esc: exit(1)
-
-###############################################################################
-# SIMULATOR CLASSES
-###############################################################################
-
-class Sender:
-	"""
-	Optimized Sender class with non-parallel execution.
-	"""
-
-	@staticmethod
-	def send(d, msg):
-		""" Dispatch messages to the right solver. """
-		if isinstance(d, CoupledDEVS):
-			CS = CoupledSolver()
-			return CS.receive(d, msg)
-		else:
-			AS = AtomicSolver()
-			r = AS.receive(d, msg)
-			sim_log("SIM_BLINK", model=d, msg=msg)
-			sim_log("SIM_TEST", model=d, msg=msg)
-			return r
-
-class AtomicSolver:
-	"""Simulator for atomic-DEVS.
-
-		Singleton class.
-
-		Atomic-DEVS can receive three types of messages: $(i,t)$, $(x,t)$ and
-		$(*,t)$. The latter is the only one that triggers another message-
-		sending, namely, $(y,t)$ is sent back to the parent coupled-DEVS. This is
-		actually implemented as a return value (to be completed).
-	"""
-	_instance = None
-	def __new__(cls, *args, **kwargs):
-		if not cls._instance:
-			cls._instance=super(AtomicSolver, cls).__new__(cls,*args, **kwargs)
-		return cls._instance
-
-	###
-	@staticmethod
-	def receive(aDEVS, msg):
-
-		# For any received message, the time {\tt t} (time at which the message
-		# is sent) is the second item in the list {\tt msg}.
-		t = msg[2]
-
-		# $(*,\,t)$ message --- triggers internal transition and returns
-		# $(y,\,t)$ message for parent coupled-DEVS:
-		if msg[0] == 1:
-			time_next = aDEVS.timeNext
-			if t != time_next:
-				Error("Bad synchronization...1", 1)
-				
-			my_output = {}
-			aDEVS.myOutput = my_output
-			aDEVS.outputFnc()
-
-			time_last = aDEVS.timeLast
-			aDEVS.elapsed = t - time_last
-
-			aDEVS.intTransition()
-
-			aDEVS.timeLast = t
-			aDEVS.myTimeAdvance = aDEVS.timeAdvance()
-			aDEVS.timeNext = aDEVS.timeLast + aDEVS.myTimeAdvance
-			if aDEVS.myTimeAdvance != INFINITY: aDEVS.myTimeAdvance += t
-			aDEVS.elapsed = 0
-
-			# The SIM_VERBOSE event occurs
-			sim_log("SIM_VERBOSE", model=aDEVS, msg=0)
-
-			# Return the DEVS' output to the parent coupled-DEVS (rather than
-			# sending $(y,\,t)$ message).
-			return aDEVS.myOutput
-
-		# ${x,\,t)$ message --- triggers external transition, where $x$ is the
-		# input dictionnary to the DEVS:
-		elif isinstance(msg[0], dict):
-			if not(aDEVS.timeLast <= t <= aDEVS.timeNext):
-				Error("Bad synchronization...2", 1)
-
-			aDEVS.myInput = msg[0]
-
-			# update elapsed time. This is necessary for the call to the external
-			# transition function, which is used to update the DEVS' state.
-			aDEVS.elapsed = t - aDEVS.timeLast
-			aDEVS.extTransition()
-
-			# Udpate time variables:
-			aDEVS.timeLast = t
-			aDEVS.myTimeAdvance = aDEVS.timeAdvance()
-			aDEVS.timeNext = aDEVS.timeLast + aDEVS.myTimeAdvance
-			if aDEVS.myTimeAdvance != INFINITY: aDEVS.myTimeAdvance += t
-			aDEVS.elapsed = 0
-
-			# The SIM_VERBOSE event occurs
-			PluginManager.trigger_event("SIM_VERBOSE", model=aDEVS, msg=1)
-
-		# $(i,\,t)$ message --- sets origin of time at {\tt t}:
-		elif msg[0] == 0:
-			aDEVS.timeLast = t - aDEVS.elapsed
-			aDEVS.myTimeAdvance = aDEVS.timeAdvance()
-			aDEVS.timeNext = aDEVS.timeLast + aDEVS.myTimeAdvance
-			if aDEVS.myTimeAdvance != INFINITY: aDEVS.myTimeAdvance += t
-
-		else:
-			Error("Unrecognized message", 1)
-
-###############################################################################
-
-class CoupledSolver(Sender):
-	"""Simulator (coordinator) for coupled-DEVS.
-
-	Coupled-DEVS can receive the same three types of messages as for atomic-
-	DEVS, plus the $(y,t)$ message. The latter is implemented as a returned
-	value rather than a message. This is possible because the $(y,t)$ message
-	is always sent to a coupled-DEVS in response from its sending a $(*,t)$
-	message. (This implementation makes it possible to easily distinguish
-	$(y,t)$ from $(x,t)$ messages... to be completed)
-	Description of eventList and dStar (to be completed)
-	"""
-
-	_instance = None
-	def __new__(cls, *args, **kwargs):
-		if not cls._instance:
-			cls._instance = super(Sender, cls).__new__(cls, *args, **kwargs)
-		return cls._instance
-
-	def send(self, Y, cDEVS, t):
-		send = Sender.send
-
-		cDEVS.timeLast = t
-		cDEVS.myTimeAdvance = INFINITY
-		cDEVS.myOutput.clear()
-
-		imm = cDEVS.immChildren
-
-		X = {}
-		for p, a in Y.items():
-			for pp in p.outLine:
-				b = pp.host
-				if b in X:
-					X[b].append((pp, a))
-				else:
-					X[b] = [(pp, a)]
-
-				if b is CoupledDEVS:
-					cDEVS.myOutput[b] = a
-
-		# Conversion minimale en dict juste avant l’envoi
-		for m, val in X.items():
-			if len(val) == 1:
-				# cas le plus fréquent → évite dict() lourd
-				send(m, ({val[0][0]: val[0][1]}, imm, t))
-			else:
-				send(m, (dict(val), imm, t))
-
-	###
-	def receive(self, cDEVS, msg):
-
-		send = Sender.send
-
-		# For any received message, the time {\tt t} (time at which the message
-		# is sent) is the second item in the list {\tt msg}.
-		t = msg[2]
-
-		# $(*,\,t)$ message --- triggers internal transition and returns
-		# $(y,\,t)$ message for parent coupled-DEVS:
-		if msg[0] == 1:
-			if t != cDEVS.myTimeAdvance:
-				Error("Bad synchronization...3", 1)
-
-			# Build the list {\tt immChildren} of {\sl imminent children\/} based
-			# on the sorted event-list, and select the active-child {\tt dStar}.
-			# The coupled-DEVS {\tt select} function is used to decide the active-child.
-
-			try:
-				dStar = cDEVS.select(cDEVS.immChildren)
-			# si pas d'imminentChildren il faut stoper la simulation
-			except IndexError:
-				raise IndexError
-
-			# Send $(*,\,t)$ message to active children, which returns (or sends
-			# back) message $(y,\,t)$. In the present implementation, just the
-			# sub-DEVS output dictionnary $y$ is returned and stored in {\tt Y}:
-
-			self.send(send(dStar, msg), cDEVS, t)
-			
-			min_ta = cDEVS.myTimeAdvance
-			imm = []
-			for c in cDEVS.componentSet:
-				ta = c.myTimeAdvance
-				if ta < min_ta:
-					min_ta = ta
-					imm = [c]
-				elif ta == min_ta:
-					imm.append(c)
-			cDEVS.myTimeAdvance = min_ta
-			cDEVS.immChildren = imm
-
-			return cDEVS.myOutput
-
-		# ${x,\,t)$ message --- triggers external transition, where $x$ is the
-		# input dictionnary to the DEVS:
-		elif isinstance(msg[0], dict):
-			if not(cDEVS.timeLast <= t <= cDEVS.myTimeAdvance):
-				Error("Bad synchronization...4", 1)
-
-			cDEVS.myInput = msg[0]
-
-			# Send $(x,\,t)$ messages to those sub-DEVS influenced by the coupled-
-			# DEVS input ports (ref. {\tt EIC}). This is essentially the same code
-			# as above that also updates the coupled-DEVS' time variables in
-			# parallel.
-
-			self.send(cDEVS.myInput, cDEVS, t)
-
-			for t in array.array('d', [d.myTimeAdvance for d in cDEVS.componentSet]):
-				if cDEVS.myTimeAdvance > t:
-					cDEVS.myTimeAdvance = t
-
-			# Get all components which tied for the smallest time advance and append
-			# each to the coupled DEVS' immChildren list
-
-			cDEVS.immChildren = [d for d in cDEVS.componentSet if cDEVS.myTimeAdvance == d.myTimeAdvance]
-
-		# $(i,\,t)$cDEVS.myOutput message --- sets origin of time at {\tt t}:
-		elif msg[0] == 0:
-			# Rebuild event-list and update time variables, by sending the
-			# initialization message to all the children of the coupled-DEVS. Note
-			# that the event-list is not sorted here, but only when the list of
-			# {\sl imminent children\/} is needed. Also note that {\tt None} is
-			# defined as bigger than any number in Python (stands for $+\infty$).
-			cDEVS.timeLast = 0
-			cDEVS.myTimeAdvance = INFINITY
-
-			for d in cDEVS.componentSet:
-				send(d, msg)
-				cDEVS.myTimeAdvance = min(cDEVS.myTimeAdvance, d.myTimeAdvance)
-				cDEVS.timeLast = max(cDEVS.timeLast, d.timeLast)
-
-			# Get all the components which have tied for the smallest time advance
-			# and put them into the coupled DEVS' immChildren list
-			cDEVS.immChildren = [d for d in cDEVS.componentSet if cDEVS.myTimeAdvance == d.myTimeAdvance]
-
-		else:
-			Error("Unrecognized message", 1)
-
+# SIMULATOR CLASSE
 ###############################################################################
 
 class Simulator:
@@ -331,6 +64,3 @@ class Simulator:
 			# time of next event.
 			for subd in d.componentSet:
 				self.__augment(subd)
-
-	def send(self, d, msg):
-		return Sender.send(d, msg)

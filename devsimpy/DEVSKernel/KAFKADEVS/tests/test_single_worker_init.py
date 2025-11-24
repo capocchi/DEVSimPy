@@ -158,10 +158,9 @@ def build_workers(bootstrap):
 		out_topic = f"test_{label}_out"
 
 		worker = InMemoryKafkaWorker(
-			atomic_model=model,
-			atomic_index=0,
+			aDEVS=model,
+			aDEVS_index=0,
 			bootstrap_servers=bootstrap,
-			mode="standard",
 			in_topic=in_topic,
 			out_topic=out_topic,
 		)

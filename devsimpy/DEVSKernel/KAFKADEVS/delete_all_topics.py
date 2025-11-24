@@ -1,12 +1,12 @@
 from confluent_kafka.admin import AdminClient
 import logging
 
-from .logconfig import configure_logging, LOGGING_LEVEL, kafka_logger
+from logconfig import configure_logging, LOGGING_LEVEL, kafka_logger
 configure_logging()
 logger = logging.getLogger("DEVSKernel.Strategies")
 logger.setLevel(LOGGING_LEVEL)
 
-from .kafkaconfig import KAFKA_BOOTSTRAP
+from kafkaconfig import KAFKA_BOOTSTRAP
 
 
 def delete_all_topics(bootstrap_servers=KAFKA_BOOTSTRAP):
