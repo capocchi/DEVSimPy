@@ -129,7 +129,7 @@ if __name__ == '__main__':
 			setattr(builtins, 'DEFAULT_SIM_STRATEGY', 'bag-based')
 		elif 'KafkaDEVS' in args.kernel:
 			setattr(builtins,'DEFAULT_DEVS_DIRNAME','KafkaDEVS')
-			setattr(builtins, 'DEFAULT_SIM_STRATEGY', 'original')
+			setattr(builtins, 'DEFAULT_SIM_STRATEGY', 'ms4Me')
 		else:
 			sys.stdout.write(_("ERROR: Invalid kernel name (must be PyDEVS, PyPDEVS or KafkaDEVS)!\n"))
 			sys.exit(1)

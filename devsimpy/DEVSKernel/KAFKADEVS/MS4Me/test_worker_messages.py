@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Script de test pour envoyer des messages DEVS à des workers Kafka.
-S'inspire de SimStrategyKafka de Strategies.py
+S'inspire de SimStrategyKafkaMS4Me de Strategies.py
 Usage: python test_worker_messages.py --scenario <init|output|transition|full>
 exemple à exécuter dans un console après run_worker.py: python test_worker_messages.py --scenario init --models MessagesCollector
 """
@@ -28,7 +28,7 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
     print(f"Added to PYTHONPATH: {project_root}")
 
-setattr(builtins, 'DEFAULT_SIM_STRATEGY', 'original')
+setattr(builtins, 'DEFAULT_SIM_STRATEGY', 'ms4Me')
 setattr(builtins, 'DEFAULT_DEVS_DIRNAME', 'KafkaDEVS')
 setattr(builtins, 'DEVS_SIM_KERNEL_PATH', devskernel_path)
 setattr(builtins, 'DEVS_DIR_PATH_DICT', {'KafkaDEVS': os.path.join(devskernel_path, 'KafkaDEVS')})

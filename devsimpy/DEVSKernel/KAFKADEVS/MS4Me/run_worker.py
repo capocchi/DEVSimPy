@@ -93,12 +93,12 @@ def load_model(model_path: str, class_name: str = None):
         raise ValueError(f"Unsupported file type: {path.suffix}")
 
 
-def create_mock_block_model(label: str):
-    """Crée un objet mock pour getBlockModel()"""
-    class MockBlockModel:
-        def __init__(self, label):
-            self.label = label
-    return MockBlockModel(label)
+# def create_mock_block_model(label: str):
+#     """Crée un objet mock pour getBlockModel()"""
+#     class MockBlockModel:
+#         def __init__(self, label):
+#             self.label = label
+#     return MockBlockModel(label)
 
 
 def main():
@@ -159,7 +159,7 @@ def main():
     label = args.label or model.__class__.__name__
     
     # Ajouter le mock getBlockModel
-    model.getBlockModel = lambda: create_mock_block_model(label)
+    # model.getBlockModel = lambda: create_mock_block_model(label)
     
     # Déterminer le topic d'entrée
     in_topic = args.in_topic or f"ms4me{label}_{args.index}In"
@@ -174,6 +174,7 @@ def main():
     
     # Créer et lancer le worker
     worker = MS4MeKafkaWorker(
+        label,
         aDEVS=model,
         index=args.index,
         bootstrap_servers=args.bootstrap
@@ -221,7 +222,7 @@ if __name__ == "__main__":
         sys.path.insert(0, str(project_root))
         print(f"Added to PYTHONPATH: {project_root}")
     
-    setattr(builtins, 'DEFAULT_SIM_STRATEGY', 'original')
+    setattr(builtins, 'DEFAULT_SIM_STRATEGY', 'ms4Me')
     setattr(builtins, 'DEFAULT_DEVS_DIRNAME', 'KafkaDEVS')
     setattr(builtins, 'DEVS_SIM_KERNEL_PATH', devskernel_path)
     setattr(builtins, 'DEVS_DIR_PATH_DICT', {'KafkaDEVS': os.path.join(devskernel_path, 'KafkaDEVS')})

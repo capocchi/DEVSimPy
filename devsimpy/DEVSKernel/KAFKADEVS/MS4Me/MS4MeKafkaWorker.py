@@ -30,8 +30,8 @@ class MS4MeKafkaWorker(InMemoryKafkaWorker):
 
 	OUT_TOPIC = "ms4meOut"
 
-	def __init__(self, aDEVS, index, bootstrap_servers):
-		super().__init__(aDEVS, index, bootstrap_servers, in_topic=f"ms4me{aDEVS.getBlockModel().label}In", out_topic=MS4MeKafkaWorker.OUT_TOPIC)
+	def __init__(self, model_name, aDEVS, bootstrap_servers):
+		super().__init__(model_name, aDEVS, bootstrap_servers, in_topic=f"ms4me{model_name}In", out_topic=MS4MeKafkaWorker.OUT_TOPIC)
 
 		self.wire = StandardWireAdapter
 
@@ -94,7 +94,7 @@ class MS4MeKafkaWorker(InMemoryKafkaWorker):
 		# --- InitSim : initialisation + timeAdvance initial ---
 		if isinstance(msg, InitSim):
 			self.do_initialize(t)
-			return NextTime(SimTime(t=float(self.aDEVS.timeNext)), sender=self.aBlock.label)
+			return NextTime(SimTime(t=float(self.aDEVS.timeNext)), sender=self.model_name)
 
 		# --- ExecuteTransition
 		if isinstance(msg, ExecuteTransition):
@@ -146,7 +146,7 @@ class MS4MeKafkaWorker(InMemoryKafkaWorker):
 			
 			ta = float(ta) if ta is not None else float("inf")
 		
-			return TransitionDone(time=SimTime(t=t), nextTime=SimTime(t=ta), sender=self.aBlock.label)
+			return TransitionDone(time=SimTime(t=t), nextTime=SimTime(t=ta), sender=self.model_name)
 		
 		# --- SendOutput : outputFnc + calcul des sorties ---
 		if isinstance(msg, SendOutput):
@@ -159,14 +159,14 @@ class MS4MeKafkaWorker(InMemoryKafkaWorker):
 			return ModelOutputMessage(
 				modelOutput = port_values,
 				nextTime = next_time,
-				sender = self.aBlock.label,
+				sender = self.model_name,
 			)		
 
 		if isinstance(msg, SimulationDone):
 			self.running = False
 			return ModelDone(
 				time = msg.time,
-				sender = self.aDEVS.getBlockModel().label,
+				sender = self.model_name,
 			)
 
 		# --- NextTime, ModelOutputMessage, etc. ---
@@ -183,7 +183,7 @@ class MS4MeKafkaWorker(InMemoryKafkaWorker):
 		try:
 			reply_msg = self._handle_devs_message(devs_msg)
 		except Exception as e:
-			logger.exception("  [Thread-%s] Error handling message: %s", self.index, e)
+			logger.exception("  [Thread-%s] Error handling message: %s", self.aDEVS.myID, e)
 
 		# Préparer le message de réponse
 		reply_wire = self.wire.to_wire(reply_msg)					
@@ -191,7 +191,7 @@ class MS4MeKafkaWorker(InMemoryKafkaWorker):
 
 		# Log et envoi de la réponse
 		worker_kafka_logger.debug(
-			f"[Thread-{self.index}] OUT: topic={self.out_topic} value={reply_json.decode('utf-8')}"
+			f"[Thread-{self.aDEVS.myID}] OUT: topic={self.out_topic} value={reply_json.decode('utf-8')}"
 		)
 		
 		# Envoi de la réponse
