@@ -2,10 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 Script pour lancer un worker Kafka DEVS à partir du chemin d'un modèle atomique.
-Usage: python run_worker.py --model-path <path> --index <int> [options]
+Usage: python run_worker.py --model-path <path> --label <model_name> [options]
 Exemple à éxécuter dans une console avant test_worker_messages:
-Attention, index ne sert pas à créer le topic mais il est obligatoire dans la classe MS4MeKafkaWorker 
-python run_worker.py --model-path ..\..\..\Domain\Collector\MessagesCollector.py --class-name MessagesCollector --index 0 --bootstrap localhost:9092
+python run_worker.py --model-path ..\..\..\Domain\Collector\MessagesCollector.py --label MessageCollector --class-name MessagesCollector --bootstrap localhost:9092
 """
 
 import sys
@@ -23,7 +22,7 @@ logger = logging.getLogger("WorkerLauncher")
 
 # Fonction pour charger dynamiquement un modèle depuis un .amd
 def load_model_from_amd(amd_path: str, class_name: str = None):
-    """Charge un modèle atomique depuis un fichier .amd (zip)"""
+    """Load atomic modele from its .amd (zip)"""
     import zipfile
     import tempfile
     import shutil
@@ -61,7 +60,7 @@ def load_model_from_amd(amd_path: str, class_name: str = None):
 
 
 def load_model_from_py(py_path: str, class_name: str):
-    """Charge un modèle atomique depuis un fichier .py"""
+    """Load atomic model from its .py"""
     import importlib.util
     
     py_path = Path(py_path).resolve()
@@ -73,9 +72,8 @@ def load_model_from_py(py_path: str, class_name: str):
     model_cls = getattr(module, class_name)
     return model_cls()
 
-
 def load_model(model_path: str, class_name: str = None):
-    """Charge un modèle depuis .py ou .amd"""
+    """Load model from .py or .amd"""
     path = Path(model_path)
     
     if not path.exists():
@@ -92,95 +90,76 @@ def load_model(model_path: str, class_name: str = None):
     else:
         raise ValueError(f"Unsupported file type: {path.suffix}")
 
-
-# def create_mock_block_model(label: str):
-#     """Crée un objet mock pour getBlockModel()"""
-#     class MockBlockModel:
-#         def __init__(self, label):
-#             self.label = label
-#     return MockBlockModel(label)
-
-
 def main():
     parser = argparse.ArgumentParser(
-        description="Lance un worker Kafka DEVS pour un modèle atomique"
+        description="Execute the runner in charge of execution an atomic model simulator"
     )
     parser.add_argument(
         "--model-path",
         required=True,
-        help="Chemin vers le fichier du modèle (.py ou .amd)"
+        help="Model file path (.py or .amd)"
     )
     parser.add_argument(
         "--class-name",
-        help="Nom de la classe du modèle (requis pour .py, optionnel pour .amd)"
-    )
-    parser.add_argument(
-        "--index",
-        type=int,
-        required=True,
-        help="Index du modèle atomique dans la simulation"
+        help="Classe name (required for .py, optional for .amd)"
     )
     parser.add_argument(
         "--bootstrap",
         default="localhost:9092",
-        help="Adresse du serveur Kafka (défaut: localhost:9092)"
+        help="Kafka url (default: localhost:9092)"
     )
     parser.add_argument(
         "--in-topic",
-        help="Topic d'entrée (par défaut: généré depuis le label)"
+        help="Input Topic (default: generate from the label)"
     )
     parser.add_argument(
         "--out-topic",
         default="ms4meOut",
-        help="Topic de sortie (défaut: ms4meOut)"
+        help="Output Topic (default: ms4meOut)"
     )
     parser.add_argument(
         "--label",
-        help="Label du modèle (par défaut: nom de la classe)"
+        required=True,
+        help="Lable of the model (default: classe name)"
     )
     
     args = parser.parse_args()
     
-    # Import des classes nécessaires
+    # Import
     try:
         from MS4MeKafkaWorker import MS4MeKafkaWorker
     except ImportError:
         logger.error("Impossible d'importer MS4MeKafkaWorker. Vérifiez votre installation.")
         sys.exit(1)
     
-    # Charger le modèle
+    # Model loading
     try:
         model = load_model(args.model_path, args.class_name)
     except Exception as e:
         logger.error(f"Erreur lors du chargement du modèle: {e}")
         sys.exit(1)
     
-    # Déterminer le label
+    # label of the model (the class if is not passesd to the args)
     label = args.label or model.__class__.__name__
     
-    # Ajouter le mock getBlockModel
-    # model.getBlockModel = lambda: create_mock_block_model(label)
-    
-    # Déterminer le topic d'entrée
-    in_topic = args.in_topic or f"ms4me{label}_{args.index}In"
+    # input topic definition
+    in_topic = args.in_topic or f"ms4me{label}In"
     
     logger.info("=" * 60)
     logger.info(f"Lancement du worker pour {label}")
-    logger.info(f"  Index: {args.index}")
     logger.info(f"  Bootstrap: {args.bootstrap}")
     logger.info(f"  In topic: {in_topic}")
     logger.info(f"  Out topic: {args.out_topic}")
     logger.info("=" * 60)
     
-    # Créer et lancer le worker
+    # Create and execute the worker
     worker = MS4MeKafkaWorker(
         label,
         aDEVS=model,
-        index=args.index,
         bootstrap_servers=args.bootstrap
     )
     
-    # Gestion du signal pour arrêt propre
+    # stop in a clean mode
     def signal_handler(sig, frame):
         logger.info("\nArrêt du worker en cours...")
         worker.stop()
@@ -191,11 +170,11 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     
-    # Démarrer le worker
+    # Start the worker
     worker.start()
     logger.info(f"Worker démarré (PID: {worker.ident})")
     
-    # Attendre que le worker se termine
+    # wait the work's end
     try:
         while worker.is_alive():
             time.sleep(1)

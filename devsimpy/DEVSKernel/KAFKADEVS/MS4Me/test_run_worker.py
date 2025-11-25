@@ -4,7 +4,7 @@
 Script de test pour envoyer des messages DEVS à des workers Kafka.
 S'inspire de SimStrategyKafkaMS4Me de Strategies.py
 Usage: python test_worker_messages.py --scenario <init|output|transition|full>
-exemple à exécuter dans un console après run_worker.py: python test_worker_messages.py --scenario init --models MessagesCollector
+exemple à exécuter dans un console après run_worker.py: python test_worker_messages.py --scenario init --models MessagesCollector --bootstrap localhost:9092
 """
 
 import sys
@@ -52,10 +52,6 @@ from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_messages import (
     SimulationDone,
     SimTime,
     PortValue,
-    NextTime,
-    ModelOutputMessage,
-    TransitionDone,
-    ModelDone,
 )
 from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
 from DEVSKernel.KafkaDEVS.MS4Me.MS4MeKafkaWorker import MS4MeKafkaWorker
