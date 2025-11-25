@@ -2,9 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Script de test pour envoyer des messages DEVS à des workers Kafka.
-S'inspire de SimStrategyKafkaMS4Me de Strategies.py
-Usage: python test_worker_messages.py --scenario <init|output|transition|full>
-exemple à exécuter dans un console après run_worker.py: python test_worker_messages.py --scenario init --models MessagesCollector --bootstrap localhost:9092
+Example : python test_run_worker.py --scenario full --models MessagesCollector --bootstrap localhost:9092
 """
 
 import sys
@@ -18,11 +16,9 @@ import builtins
 import os
 
 # Ajouter le répertoire racine du projet au PYTHONPATH
-# Le script est dans DEVSKernel/KafkaDEVS/MS4Me/
-# On remonte de 3 niveaux pour atteindre la racine devsimpy/
 script_dir = Path(__file__).parent.resolve()
 devskernel_path = script_dir.parents[1]
-project_root = script_dir.parents[2]  # Remonte de MS4Me -> KafkaDEVS -> DEVSKernel -> devsimpy
+project_root = script_dir.parents[2]
 
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
@@ -40,7 +36,7 @@ logging.basicConfig(
 logger = logging.getLogger("WorkerTester")
 
 try:
-    from confluent_kafka import Producer, Consumer
+    from confluent_kafka import Producer, Consumer, TopicPartition
 except ImportError:
     logger.error("confluent-kafka not installed. Run: pip install confluent-kafka")
     sys.exit(1)
@@ -59,8 +55,8 @@ from DEVSKernel.KafkaDEVS.MS4Me.MS4MeKafkaWorker import MS4MeKafkaWorker
 
 class WorkerCoordinatorTester:
     """
-    Testeur compatible avec le format MS4MeKafkaWorker actuel
-    (envoie et reçoit des messages DEVS directs, sans enveloppe)
+    Testeur compatible avec le format MS4MeKafkaWorker
+    Version corrigée avec meilleure gestion du consumer
     """
     
     def __init__(self, bootstrap_servers, model_labels):
@@ -77,13 +73,17 @@ class WorkerCoordinatorTester:
             "acks": "all",
         })
         
+        # Configuration améliorée du consumer
         self.consumer = Consumer({
             "bootstrap.servers": self.bootstrap,
             "group.id": group_id,
             "auto.offset.reset": "latest",
             "enable.auto.commit": True,
             "session.timeout.ms": 30000,
+            "max.poll.interval.ms": 300000,  # 5 minutes
         })
+        
+        # Subscribe et attendre l'assignation des partitions
         self.consumer.subscribe([MS4MeKafkaWorker.OUT_TOPIC])
         
         logger.info(f"Coordinator Tester initialized")
@@ -92,33 +92,38 @@ class WorkerCoordinatorTester:
         logger.info(f"  Bootstrap: {self.bootstrap}")
         logger.info(f"  Consumer group: {group_id}")
         
-        self._purge_kafka_topic()
+        self._wait_for_consumer_ready()
     
-    def _purge_kafka_topic(self, max_seconds=2.0):
-        """Purge des anciens messages"""
-        logger.info("Warming up consumer...")
-        flushed = 0
-        start_flush = time.time()
-        while time.time() - start_flush < max_seconds:
-            msg = self.consumer.poll(timeout=0.1)
-            if msg is None:
-                break
-            flushed += 1
-        if flushed > 0:
-            logger.info(f"  Flushed {flushed} old messages")
-        
-        # AJOUT : Attendre que le consumer soit vraiment prêt
+    def _wait_for_consumer_ready(self, max_seconds=10.0):
+        """Attend que le consumer soit prêt et assigné à des partitions"""
         logger.info("Waiting for consumer to be ready...")
-        time.sleep(1.0)
         
-        logger.info("System ready")
-
+        start = time.time()
+        while time.time() - start < max_seconds:
+            # Poll pour déclencher le rebalancing
+            msg = self.consumer.poll(timeout=0.5)
+            
+            # Vérifier si des partitions sont assignées
+            assignment = self.consumer.assignment()
+            if assignment:
+                logger.info(f"  Consumer assigned to {len(assignment)} partition(s)")
+                # Purger les anciens messages
+                flushed = 0
+                while True:
+                    msg = self.consumer.poll(timeout=0.1)
+                    if msg is None:
+                        break
+                    flushed += 1
+                if flushed > 0:
+                    logger.info(f"  Flushed {flushed} old messages")
+                logger.info("Consumer ready!")
+                return True
+        
+        logger.warning("Consumer may not be fully ready yet")
+        return False
     
     def _send_msg_to_kafka(self, topic, devs_msg):
-        """
-        Envoie un message DEVS directement (sans enveloppe)
-        Compatible avec MS4MeKafkaWorker actuel
-        """
+        """Envoie un message DEVS directement (sans enveloppe)"""
         msg_dict = devs_msg.to_dict()
         payload = json.dumps(msg_dict).encode("utf-8")
         
@@ -127,20 +132,35 @@ class WorkerCoordinatorTester:
         
         logger.debug(f"COORD-OUT topic={topic} value={msg_dict}")
     
-    def _await_msgs_from_kafka(self, expected_count, timeout=5.0):
+    def _await_msgs_from_kafka(self, expected_count, timeout=10.0):
         """
-        Attend les réponses des workers (format direct, sans enveloppe)
+        Attend les réponses des workers
+        Timeout augmenté pour laisser le temps au rebalancing
         """
         received = []
         deadline = time.time() + timeout
+        consecutive_none = 0
+        max_consecutive_none = 20  # Arrêter après 20 polls vides consécutifs
+        
+        logger.info(f"Waiting for {expected_count} message(s)...")
         
         while len(received) < expected_count and time.time() < deadline:
             msg = self.consumer.poll(timeout=0.5)
-            if msg is None or msg.error():
+            
+            if msg is None:
+                consecutive_none += 1
+                if consecutive_none >= max_consecutive_none:
+                    logger.warning(f"No messages after {max_consecutive_none} consecutive polls")
+                    break
+                continue
+            
+            consecutive_none = 0  # Reset counter
+            
+            if msg.error():
+                logger.error(f"Consumer error: {msg.error()}")
                 continue
             
             try:
-                # Vérifier que le message a un contenu
                 if msg.value() is None:
                     logger.warning("Received message with None value, skipping")
                     continue
@@ -153,21 +173,19 @@ class WorkerCoordinatorTester:
                 sender = data.get('sender', 'unknown')
                 received.append((sender, devs_msg))
                 
+                logger.info(f"  Received {len(received)}/{expected_count} from {sender}")
+                
             except json.JSONDecodeError as e:
                 logger.error(f"JSON decode error: {e}")
                 continue
-            except AttributeError as e:
-                logger.error(f"Message parsing error: {e}")
-                continue
             except Exception as e:
-                logger.error(f"Unexpected error parsing message: {e}")
+                logger.error(f"Error parsing message: {e}")
                 continue
         
         if len(received) < expected_count:
             logger.warning(f"Timeout: expected {expected_count}, got {len(received)}")
         
         return received
-
     
     def test_init(self):
         """Test InitSim"""
@@ -182,13 +200,13 @@ class WorkerCoordinatorTester:
             logger.info(f"→ Sending InitSim to {label} (topic={topic})")
             self._send_msg_to_kafka(topic, InitSim(st))
         
-        # AJOUT : Attendre un peu que le worker traite et réponde
+        # Attendre un peu que le worker traite
         logger.info("Waiting for workers to process...")
-        time.sleep(0.5)
+        time.sleep(1.0)
         
         responses = self._await_msgs_from_kafka(len(self.model_labels))
         
-        logger.info(f"← Received {len(responses)} responses:")
+        logger.info(f"\n← Received {len(responses)} responses:")
         for sender, devs_msg in responses:
             msg_type = type(devs_msg).__name__
             if hasattr(devs_msg, 'time'):
@@ -197,7 +215,6 @@ class WorkerCoordinatorTester:
                 logger.info(f"  {sender}: {msg_type}")
         
         return responses
-
     
     def test_send_output(self, current_time=0.0, imminent_labels=None):
         """Test SendOutput"""
@@ -215,9 +232,10 @@ class WorkerCoordinatorTester:
             logger.info(f"→ Sending SendOutput to {label} at t={current_time}")
             self._send_msg_to_kafka(topic, SendOutput(st))
         
+        time.sleep(1.0)
         responses = self._await_msgs_from_kafka(len(imminent_labels))
         
-        logger.info(f"← Received {len(responses)} outputs:")
+        logger.info(f"\n← Received {len(responses)} outputs:")
         for sender, devs_msg in responses:
             msg_type = type(devs_msg).__name__
             if hasattr(devs_msg, 'modelOutput'):
@@ -243,9 +261,10 @@ class WorkerCoordinatorTester:
             logger.info(f"→ Sending ExecuteTransition (internal) to {label}")
             self._send_msg_to_kafka(topic, ExecuteTransition(st, None))
         
+        time.sleep(1.0)
         responses = self._await_msgs_from_kafka(len(imminent_labels))
         
-        logger.info(f"← Received {len(responses)} TransitionDone:")
+        logger.info(f"\n← Received {len(responses)} TransitionDone:")
         for sender, devs_msg in responses:
             msg_type = type(devs_msg).__name__
             if hasattr(devs_msg, 'nextTime'):
@@ -272,15 +291,16 @@ class WorkerCoordinatorTester:
         logger.info(f"  Input: {port}={value}")
         self._send_msg_to_kafka(topic, ExecuteTransition(st, [pv]))
         
+        time.sleep(1.0)
         responses = self._await_msgs_from_kafka(1)
         
         if responses:
             sender, devs_msg = responses[0]
             msg_type = type(devs_msg).__name__
             if hasattr(devs_msg, 'nextTime'):
-                logger.info(f"← {sender}: {msg_type}(nextTime={devs_msg.nextTime.t})")
+                logger.info(f"\n← {sender}: {msg_type}(nextTime={devs_msg.nextTime.t})")
             else:
-                logger.info(f"← {sender}: {msg_type}")
+                logger.info(f"\n← {sender}: {msg_type}")
         
         return responses
     
@@ -297,9 +317,10 @@ class WorkerCoordinatorTester:
             logger.info(f"→ Broadcasting SimulationDone to {label}")
             self._send_msg_to_kafka(topic, SimulationDone(time=st))
         
-        responses = self._await_msgs_from_kafka(len(self.model_labels), timeout=3.0)
+        time.sleep(1.0)
+        responses = self._await_msgs_from_kafka(len(self.model_labels), timeout=5.0)
         
-        logger.info(f"← Received {len(responses)} ModelDone:")
+        logger.info(f"\n← Received {len(responses)} ModelDone:")
         for sender, devs_msg in responses:
             logger.info(f"  {sender}: {type(devs_msg).__name__}")
         
@@ -317,17 +338,17 @@ class WorkerCoordinatorTester:
             logger.error("Init failed, stopping")
             return
         
-        time.sleep(0.5)
+        time.sleep(1.0)
         
         # STEP 1: SendOutput
         output_responses = self.test_send_output(current_time=0.0)
         
-        time.sleep(0.5)
+        time.sleep(1.0)
         
         # STEP 3: Transition interne
         trans_responses = self.test_execute_transition_internal(current_time=0.0)
         
-        time.sleep(0.5)
+        time.sleep(1.0)
         
         # Fin: SimulationDone
         self.test_simulation_done(current_time=0.0)
@@ -338,7 +359,8 @@ class WorkerCoordinatorTester:
     
     def close(self):
         """Ferme les connexions Kafka"""
-        self.consumer.close()
+        if hasattr(self, 'consumer'):
+            self.consumer.close()
         logger.info("Coordinator Tester closed")
 
 
