@@ -36,7 +36,7 @@ logging.basicConfig(
 logger = logging.getLogger("WorkerTester")
 
 try:
-    from confluent_kafka import Producer, Consumer, TopicPartition
+    from confluent_kafka import Producer, Consumer
 except ImportError:
     logger.error("confluent-kafka not installed. Run: pip install confluent-kafka")
     sys.exit(1)

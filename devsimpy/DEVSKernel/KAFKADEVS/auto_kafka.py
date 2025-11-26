@@ -57,8 +57,8 @@ def ensure_kafka_broker(
 		existing = result.stdout.strip().splitlines()
 	except subprocess.CalledProcessError as e:
 		raise RuntimeError(f"Impossible d'appeler docker: {e}") from e
-	
-	
+
+
 	# 2) S'il existe déjà
 	if container_name in existing:
 		# Vérifier s'il est en cours d'exécution
@@ -81,7 +81,7 @@ def ensure_kafka_broker(
 			"-e", "KAFKA_NODE_ID=1",
 			"-e", "KAFKA_PROCESS_ROLES=broker,controller",
 			"-e", "KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093",
-			"-e", f"KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://{KAFKA_BOOTSTRAP}",
+			"-e", f"KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://{bootstrap}",
 			"-e", "KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER",
 			"-e", "KAFKA_CONTROLLER_QUORUM_VOTERS=1@localhost:9093",
 			"-e", "KAFKA_LOG_DIRS=/var/lib/kafka/data",

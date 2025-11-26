@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
+r"""
 Script pour lancer un worker Kafka DEVS à partir du chemin d'un modèle atomique.
 Usage: python run_worker.py --model-path <path> --label <model_name> [options]
 Exemple à éxécuter dans une console avant test_worker_messages:
-python run_worker.py --model-path ..\..\..\Domain\Collector\MessagesCollector.py --label MessageCollector --class-name MessagesCollector --bootstrap localhost:9092
+python run_worker.py --model-path ..\..\..\Domain\Collector\MessagesCollector.py --label MessagesCollector --class-name MessagesCollector --bootstrap localhost:9092
 """
 
 import sys
