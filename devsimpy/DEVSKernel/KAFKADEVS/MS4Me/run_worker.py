@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-r"""
+"""
 Script pour lancer un worker Kafka DEVS à partir du chemin d'un modèle atomique.
 Usage: python run_worker.py --model-path <path> --label <model_name> [options]
 Exemple à éxécuter dans une console avant test_worker_messages:
-python run_worker.py --model-path ..\..\..\Domain\Collector\MessagesCollector.py --label MessagesCollector --class-name MessagesCollector --bootstrap localhost:9092
+python run_worker.py --model-path ..\..\..\Domain\Collector\MessagesCollector.py --label MessageCollector --class-name MessagesCollector --bootstrap localhost:9092
 """
 
 import sys
@@ -33,8 +33,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("WorkerLauncher")
 
-from DEVSKernel.KafkaDEVS.kafkaconfig import KAFKA_BOOTSTRAP, KAFKA_IMAGE, KAFKA_CONATINER_NAME
-from DEVSKernel.KafkaDEVS.auto_kafka import ensure_kafka_broker
+from DEVSKernel.KafkaDEVS.kafkaconfig import KAFKA_BOOTSTRAP
 
 # Fonction pour charger dynamiquement un modèle depuis un .amd
 def load_model_from_amd(amd_path: str, class_name: str = None):
@@ -160,16 +159,10 @@ def main():
     
     # input topic definition
     in_topic = args.in_topic or f"ms4me{label}In"
-    
-    bootstrap = ensure_kafka_broker(
-        KAFKA_CONATINER_NAME,
-        KAFKA_IMAGE,
-        args.bootstrap
-    )
 
     logger.info("=" * 60)
     logger.info(f"Lancement du worker pour {label}")
-    logger.info(f"  Bootstrap: {bootstrap}")
+    logger.info(f"  Bootstrap: {args.bootstrap}")
     logger.info(f"  In topic: {in_topic}")
     logger.info(f"  Out topic: {args.out_topic}")
     logger.info("=" * 60)
@@ -178,7 +171,7 @@ def main():
     worker = MS4MeKafkaWorker(
         label,
         aDEVS=model,
-        bootstrap_server=bootstrap
+        bootstrap_server=args.bootstrap
     )
     
     # stop in a clean mode

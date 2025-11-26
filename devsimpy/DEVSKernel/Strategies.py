@@ -1006,8 +1006,9 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 				self._send_msg_to_kafka(msg=InitSim(st), 
 										topic=worker.get_topic_to_write())
 
+			
 			init_workers_results = self._await_msgs_from_kafka()
-
+			
 			### Check time consistency - TODO: remove to improve sim performance
 			for model in self._atomic_models:
 				label = model.getBlockModel().label
