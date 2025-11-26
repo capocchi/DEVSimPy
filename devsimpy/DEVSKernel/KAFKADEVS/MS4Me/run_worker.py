@@ -12,6 +12,19 @@ import argparse
 import time
 import signal
 import logging
+import os
+import builtins
+
+from pathlib import Path
+
+# Ajouter le répertoire racine du projet au PYTHONPATH
+script_dir = Path(__file__).parent.resolve()
+devskernel_path = script_dir.parents[1]
+project_root = script_dir.parents[2]
+
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+    print(f"Added to PYTHONPATH: {project_root}")
 
 # Configuration du logging
 logging.basicConfig(
@@ -19,6 +32,9 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s - %(message)s"
 )
 logger = logging.getLogger("WorkerLauncher")
+
+from DEVSKernel.KafkaDEVS.kafkaconfig import KAFKA_BOOTSTRAP, KAFKA_IMAGE, KAFKA_CONATINER_NAME
+from DEVSKernel.KafkaDEVS.auto_kafka import ensure_kafka_broker
 
 # Fonction pour charger dynamiquement un modèle depuis un .amd
 def load_model_from_amd(amd_path: str, class_name: str = None):
@@ -105,8 +121,8 @@ def main():
     )
     parser.add_argument(
         "--bootstrap",
-        default="localhost:9092",
-        help="Kafka url (default: localhost:9092)"
+        default=KAFKA_BOOTSTRAP,
+        help=f"Kafka url (default: {KAFKA_BOOTSTRAP})"
     )
     parser.add_argument(
         "--in-topic",
@@ -145,9 +161,15 @@ def main():
     # input topic definition
     in_topic = args.in_topic or f"ms4me{label}In"
     
+    bootstrap = ensure_kafka_broker(
+        KAFKA_CONATINER_NAME,
+        KAFKA_IMAGE,
+        args.bootstrap
+    )
+
     logger.info("=" * 60)
     logger.info(f"Lancement du worker pour {label}")
-    logger.info(f"  Bootstrap: {args.bootstrap}")
+    logger.info(f"  Bootstrap: {bootstrap}")
     logger.info(f"  In topic: {in_topic}")
     logger.info(f"  Out topic: {args.out_topic}")
     logger.info("=" * 60)
@@ -156,7 +178,7 @@ def main():
     worker = MS4MeKafkaWorker(
         label,
         aDEVS=model,
-        bootstrap_servers=args.bootstrap
+        bootstrap_server=bootstrap
     )
     
     # stop in a clean mode

@@ -51,7 +51,8 @@ from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_messages import (
 )
 from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
 from DEVSKernel.KafkaDEVS.MS4Me.MS4MeKafkaWorker import MS4MeKafkaWorker
-
+from DEVSKernel.KafkaDEVS.kafkaconfig import KAFKA_BOOTSTRAP, KAFKA_CONATINER_NAME, KAFKA_IMAGE
+from DEVSKernel.KafkaDEVS.auto_kafka import ensure_kafka_broker
 
 class WorkerCoordinatorTester:
     """
@@ -59,8 +60,12 @@ class WorkerCoordinatorTester:
     Version corrigée avec meilleure gestion du consumer
     """
     
-    def __init__(self, bootstrap_servers, model_labels):
-        self.bootstrap = bootstrap_servers
+    def __init__(self, bootstrap_server, model_labels):
+        self.bootstrap = ensure_kafka_broker(
+        KAFKA_CONATINER_NAME,
+        KAFKA_IMAGE,
+        bootstrap_server
+    )
         self.model_labels = model_labels if isinstance(model_labels, list) else [model_labels]
         
         self.wire = StandardWireAdapter
@@ -382,7 +387,7 @@ def main():
     )
     parser.add_argument(
         "--bootstrap",
-        default="localhost:9092",
+        default=KAFKA_BOOTSTRAP,
         help="Adresse Kafka"
     )
     parser.add_argument(
@@ -403,7 +408,7 @@ def main():
         logging.getLogger().setLevel(logging.DEBUG)
     
     tester = WorkerCoordinatorTester(
-        bootstrap_servers=args.bootstrap,
+        bootstrap_server=args.bootstrap,
         model_labels=args.models
     )
     

@@ -30,10 +30,10 @@ class MS4MeKafkaWorker(InMemoryKafkaWorker):
 
 	OUT_TOPIC = "ms4meOut"
 
-	def __init__(self, model_name, aDEVS, bootstrap_servers):
+	def __init__(self, model_name, aDEVS, bootstrap_server):
 		""" Constructor
 		"""
-		super().__init__(model_name, aDEVS, bootstrap_servers, in_topic=f"ms4me{model_name}In", out_topic=MS4MeKafkaWorker.OUT_TOPIC)
+		super().__init__(model_name, aDEVS, bootstrap_server, in_topic=f"ms4me{model_name}In", out_topic=MS4MeKafkaWorker.OUT_TOPIC)
 
 		self.wire = StandardWireAdapter
 

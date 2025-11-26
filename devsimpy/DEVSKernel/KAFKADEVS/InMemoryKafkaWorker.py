@@ -21,11 +21,11 @@ except Exception:
 class InMemoryKafkaWorker(threading.Thread):
 	"""Worker thread that manages one atomic model in memory."""
 
-	def __init__(self, model_name, aDEVS, bootstrap_servers, in_topic=None, out_topic=None):
+	def __init__(self, model_name, aDEVS, bootstrap_server, in_topic=None, out_topic=None):
 		super().__init__(daemon=True)
 		self.aDEVS = aDEVS
 		self.model_name = model_name
-		self.bootstrap_servers = bootstrap_servers
+		self.bootstrap_server = bootstrap_server
 		self.running = True
 
 		# Topics explicitement fournis par la stratégie
@@ -36,7 +36,7 @@ class InMemoryKafkaWorker(threading.Thread):
 
 		# Kafka consumer pour le topic de travail dédié
 		self.consumer = Consumer({
-			"bootstrap.servers": bootstrap_servers,
+			"bootstrap.servers": bootstrap_server,
 			"group.id": group_id,
 			"auto.offset.reset": "latest",
 			"enable.auto.commit": True,
@@ -45,7 +45,7 @@ class InMemoryKafkaWorker(threading.Thread):
 
 		# Kafka producer pour renvoyer les réponses
 		self.producer = Producer({
-			"bootstrap.servers": bootstrap_servers
+			"bootstrap.servers": bootstrap_server
 		})
 
 		logger.info(
