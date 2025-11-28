@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Script de test pour envoyer des messages DEVS à des workers Kafka.
-Example : python test_run_worker.py --scenario full --models MessagesCollector --bootstrap localhost:9092
+Example : python test_run_worker.py --scenario full --models MessagesCollector --bootstrap localhost:9094
 """
 
 import sys
@@ -51,8 +51,7 @@ from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_messages import (
 )
 from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
 from DEVSKernel.KafkaDEVS.MS4Me.MS4MeKafkaWorker import MS4MeKafkaWorker
-from DEVSKernel.KafkaDEVS.kafkaconfig import KAFKA_BOOTSTRAP, KAFKA_CONATINER_NAME, KAFKA_IMAGE
-from DEVSKernel.KafkaDEVS.auto_kafka import ensure_kafka_broker
+from DEVSKernel.KafkaDEVS.kafkaconfig import KAFKA_BOOTSTRAP
 
 class WorkerCoordinatorTester:
     """
@@ -61,11 +60,7 @@ class WorkerCoordinatorTester:
     """
     
     def __init__(self, bootstrap_server, model_labels):
-        self.bootstrap = ensure_kafka_broker(
-        KAFKA_CONATINER_NAME,
-        KAFKA_IMAGE,
-        bootstrap_server
-    )
+        self.bootstrap = bootstrap_server
         self.model_labels = model_labels if isinstance(model_labels, list) else [model_labels]
         
         self.wire = StandardWireAdapter
@@ -99,19 +94,21 @@ class WorkerCoordinatorTester:
         
         self._wait_for_consumer_ready()
     
-    def _wait_for_consumer_ready(self, max_seconds=10.0):
+    def _wait_for_consumer_ready(self, max_seconds=30.0):
         """Attend que le consumer soit prêt et assigné à des partitions"""
         logger.info("Waiting for consumer to be ready...")
-        
         start = time.time()
+        assignment_attempts = 0
+        
         while time.time() - start < max_seconds:
             # Poll pour déclencher le rebalancing
-            msg = self.consumer.poll(timeout=0.5)
+            msg = self.consumer.poll(timeout=1.0)  # Augmenté de 0.5 à 1.0
             
             # Vérifier si des partitions sont assignées
             assignment = self.consumer.assignment()
             if assignment:
                 logger.info(f"  Consumer assigned to {len(assignment)} partition(s)")
+                
                 # Purger les anciens messages
                 flushed = 0
                 while True:
@@ -119,10 +116,20 @@ class WorkerCoordinatorTester:
                     if msg is None:
                         break
                     flushed += 1
+                
                 if flushed > 0:
                     logger.info(f"  Flushed {flushed} old messages")
+                
                 logger.info("Consumer ready!")
                 return True
+            
+            assignment_attempts += 1
+            if assignment_attempts % 5 == 0:
+                logger.info(f"  Still waiting for partition assignment... ({int(time.time() - start)}s elapsed)")
+        
+        logger.warning(f"Consumer not ready after {max_seconds}s - topics may not exist yet")
+        return False
+
         
         logger.warning("Consumer may not be fully ready yet")
         return False

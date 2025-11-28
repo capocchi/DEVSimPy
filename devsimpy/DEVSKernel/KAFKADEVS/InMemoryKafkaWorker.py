@@ -7,6 +7,8 @@ import json
 import logging
 import time
 
+from abc import ABC, abstractmethod
+
 from DEVSKernel.KafkaDEVS.logconfig import LOGGING_LEVEL, worker_kafka_logger
 
 logger = logging.getLogger("DEVSKernel.KafkaDEVS.InMemoryKafkaWorker")
@@ -125,6 +127,17 @@ class InMemoryKafkaWorker(threading.Thread):
 		"""Appelle outputFnc() sur le modèle atomique et retourne les sorties."""
 
 		self.aDEVS.outputFnc()
+
+	@abstractmethod
+	def _process_standard(self, data):
+		"""
+		Process standard DEVS message format.
+		Must be implemented by subclasses.
+		
+		Args:
+			data (dict): Parsed JSON message data
+		"""
+		pass
 
 	# ------------------------------------------------------------------
 	#  Boucle principale
