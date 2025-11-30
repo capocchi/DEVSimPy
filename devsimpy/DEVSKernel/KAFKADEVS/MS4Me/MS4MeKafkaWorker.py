@@ -30,33 +30,25 @@ class MS4MeKafkaWorker(InMemoryKafkaWorker):
 
 	OUT_TOPIC = "ms4meOut"
 
-	def __init__(self, aDEVS, index, bootstrap_servers):
-		super().__init__(aDEVS, index, bootstrap_servers, in_topic=f"ms4me{aDEVS.getBlockModel().label}In", out_topic=MS4MeKafkaWorker.OUT_TOPIC)
+	def __init__(self, model_name, aDEVS, bootstrap_server):
+		""" Constructor
+		"""
+		super().__init__(model_name, aDEVS, bootstrap_server, in_topic=f"ms4me{model_name}In", out_topic=MS4MeKafkaWorker.OUT_TOPIC)
 
 		self.wire = StandardWireAdapter
 
 	def get_topic_to_write(self) -> str:
+		""" Return the topic used to contact the model
 		"""
-		Retourne le nom de topic à utiliser pour contacter ce modèle (obj)
-		"""
-		
 		return self.in_topic
-	
-	@staticmethod
-	def get_topic_to_read() -> str:
+
+	def get_topic_to_read(self) -> str:
+		""" Return the name of the topic to used to read the results od the model
 		"""
-		Retourne le nom de topic à utiliser pour lire les résultats de tous les modèles
-		"""
-		return MS4MeKafkaWorker.OUT_TOPIC
+		return self.out_topic
 	
 	def output_msg_mapping(self) -> ModelOutputMessage:
-		"""
-
-		Args:
-			aDEVS (AtomicDEVS): DEVS atomic model from DomainBehaviorInterface
-
-		Returns:
-			ModelOutputMessage: ModelOutputMessage containing the output port values from Ms4me
+		""" Returns aModelOutputMessage message that contain the output port values from Ms4me
 		"""
 
 		result_portvalue_list = []
@@ -85,16 +77,15 @@ class MS4MeKafkaWorker(InMemoryKafkaWorker):
 		return result_portvalue_list
 
 	def _handle_devs_message(self, msg: BaseMessage) -> BaseMessage:
-		"""
-		Reçoit un BaseMessage (InitSim, ExecuteTransition, SendOutput, ...)
-		et renvoie un BaseMessage de réponse (NextTime, ModelOutputMessage, ...).
+		""" Receive a BaseMessage (InitSim, ExecuteTransition, SendOutput, ...)
+		and send a BasMessage in repsonce (NextTime, ModelOutputMessage, ...).
 		"""
 		t = msg.time.t
 
 		# --- InitSim : initialisation + timeAdvance initial ---
 		if isinstance(msg, InitSim):
 			self.do_initialize(t)
-			return NextTime(SimTime(t=float(self.aDEVS.timeNext)), sender=self.aBlock.label)
+			return NextTime(SimTime(t=float(self.aDEVS.timeNext)), sender=self.model_name)
 
 		# --- ExecuteTransition
 		if isinstance(msg, ExecuteTransition):
@@ -146,7 +137,7 @@ class MS4MeKafkaWorker(InMemoryKafkaWorker):
 			
 			ta = float(ta) if ta is not None else float("inf")
 		
-			return TransitionDone(time=SimTime(t=t), nextTime=SimTime(t=ta), sender=self.aBlock.label)
+			return TransitionDone(time=SimTime(t=t), nextTime=SimTime(t=ta), sender=self.model_name)
 		
 		# --- SendOutput : outputFnc + calcul des sorties ---
 		if isinstance(msg, SendOutput):
@@ -159,19 +150,16 @@ class MS4MeKafkaWorker(InMemoryKafkaWorker):
 			return ModelOutputMessage(
 				modelOutput = port_values,
 				nextTime = next_time,
-				sender = self.aBlock.label,
+				sender = self.model_name,
 			)		
 
 		if isinstance(msg, SimulationDone):
 			self.running = False
 			return ModelDone(
 				time = msg.time,
-				sender = self.aDEVS.getBlockModel().label,
+				sender = self.model_name,
 			)
-
-		# --- NextTime, ModelOutputMessage, etc. ---
-		# Ces types sont normalement utilisés comme réponses, pas comme requêtes
-		# côté worker, donc on ne les traite pas ici.
+		
 		raise ValueError(f"Unsupported message type in worker: {type(msg).__name__}")
 
 	def _process_standard(self, data):
@@ -179,22 +167,22 @@ class MS4MeKafkaWorker(InMemoryKafkaWorker):
 		
 		devs_msg = self.wire.from_wire(data)
 		
-		# Traiter le message DEVS
+		# handel the DEVS msessage
 		try:
 			reply_msg = self._handle_devs_message(devs_msg)
 		except Exception as e:
-			logger.exception("  [Thread-%s] Error handling message: %s", self.index, e)
+			logger.exception("  [Thread-%s] Error handling message: %s", self.aDEVS.myID, e)
 
-		# Préparer le message de réponse
+		# define a msg to send
 		reply_wire = self.wire.to_wire(reply_msg)					
 		reply_json = json.dumps(reply_wire).encode("utf-8")
 
-		# Log et envoi de la réponse
+		# Log
 		worker_kafka_logger.debug(
-			f"[Thread-{self.index}] OUT: topic={self.out_topic} value={reply_json.decode('utf-8')}"
+			f"[Thread-{self.aDEVS.myID}] OUT: topic={self.out_topic} value={reply_json.decode('utf-8')}"
 		)
 		
-		# Envoi de la réponse
+		# send the msg to the out_topic
 		self.producer.produce(
 			self.out_topic,
 			value=reply_json,

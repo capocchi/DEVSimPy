@@ -6,11 +6,8 @@ configure_logging()
 logger = logging.getLogger("DEVSKernel.Strategies")
 logger.setLevel(LOGGING_LEVEL)
 
-from kafkaconfig import KAFKA_BOOTSTRAP
-
-
-def delete_all_topics(bootstrap_servers=KAFKA_BOOTSTRAP):
-    admin = AdminClient({"bootstrap.servers": bootstrap_servers})
+def delete_all_topics(bootstrap_server):
+    admin = AdminClient({"bootstrap.servers": bootstrap_server})
 
     # Récupérer la métadonnée du cluster
     md = admin.list_topics(timeout=10)

@@ -33,7 +33,7 @@ GLOBAL_SETTINGS = {
     'DEVSIMPY_ICON': 'iconDEVSimPy.ico',
     'PYDEVS_SIM_STRATEGY_DICT': {'original': 'OriginalPyDEVSSimStrategy', 'bag-based': 'BagBasedPyDEVSSimStrategy', 'direct-coupling': 'DirectCouplingPyDEVSSimStrategy'},
     'PYPDEVS_SIM_STRATEGY_DICT': {'classic': 'ClassicPyPDEVSSimStrategy', 'parallel': 'ParallelPyPDEVSSimStrategy'},
-    'KAFKADEVS_SIM_STRATEGY_DICT':{'original': 'SimStrategyKafka'},
+    'KAFKADEVS_SIM_STRATEGY_DICT':{'ms4Me': 'SimStrategyKafkaMS4Me'},
     'PYPDEVS_221_SIM_STRATEGY_DICT': {'classic': 'ClassicPyPDEVSSimStrategy', 'parallel': 'ParallelPyPDEVSSimStrategy'},
     'GUI_FLAG': True
 }
@@ -126,11 +126,14 @@ def UpdateBuiltins(new_settings=ALL_SETTINGS):
     cfg_path = os.path.join(GetUserConfigDir(), ".devsimpy")
     
     if os.path.exists(cfg_path):
-        import wx
-        App = wx.App()
-        
-        cfg = wx.FileConfig(localFilename = cfg_path)
-        builtins.__dict__.update(eval(cfg.Read("settings")))
+        try:
+            import wx
+            App = wx.App()
+        except Exception as e:
+            sys.stdout.write(f"wx package not installed {e}.\nUser Settings ignored.")
+        else:
+             cfg = wx.FileConfig(localFilename = cfg_path)
+             builtins.__dict__.update(eval(cfg.Read("settings")))
     else:
          sys.stdout.write('Error trying to read the builtin dictionary from config file. So, we load the default builtin')
     

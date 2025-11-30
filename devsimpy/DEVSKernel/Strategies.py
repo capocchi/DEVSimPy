@@ -506,11 +506,13 @@ class DirectCouplingPyDEVSSimStrategy(SimStrategy):
 
 			else:
 
+				ts = self.ts.Get()
+				
 				### The SIM_VERBOSE event occurs
-				PluginManager.trigger_event("SIM_VERBOSE", self.master, None, clock = self.ts.Get())
+				PluginManager.trigger_event("SIM_VERBOSE", self.master, None, clock = )
 
 				### tree-like data structure ordered by devsimpy priority
-				priority_scheduler = [a for a in formated_priority_list if self.ts.Get() == a[1].myTimeAdvance]
+				priority_scheduler = [a for a in formated_priority_list if ts == a[1].myTimeAdvance]
 				heapq.heapify(priority_scheduler)
 
 				### TODO: execute with process of model are parallel !
@@ -523,7 +525,7 @@ class DirectCouplingPyDEVSSimStrategy(SimStrategy):
 				self.ts.Set(min([m.myTimeAdvance for m in self.flat_priority_list]))
 
 				### just for progress bar
-				self.master.timeLast = self.ts.Get() if self.ts.Get() != INFINITY else self.master.timeLast
+				self.master.timeLast = ts if ts != INFINITY else self.master.timeLast
 				self._simulator.cpu_time = old_cpu_time + (time.time()-t_start)
 
 		self._simulator.terminate()
@@ -708,7 +710,7 @@ def purge_kafka_topic(consumer, max_seconds=2.0):
         logger.info("  Flushed %s old messages", flushed)
     logger.info("System ready")
 	
-class SimStrategyKafka(DirectCouplingPyDEVSSimStrategy):
+class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 	"""
 	Kafka strategy with in-memory workers (threads instead of processes),
 	utilisant des messages DEVS typés et un adaptateur de wire (Standard/Local).
@@ -772,12 +774,12 @@ class SimStrategyKafka(DirectCouplingPyDEVSSimStrategy):
 		self._workers = MultiKeyDict()
 		
 		logger.info("KafkaDEVS SimStrategy initialized (In-Memory Workers)")
-		logger.info("  Bootstrap servers: %s", self.bootstrap)
-		logger.info("  Consumer group: %s", group_id)
-		logger.info("  Number of atomic models: %s", self._num_atomics)
-		logger.info("  Index Mapping:")
+		logger.info(f"  Bootstrap servers: {self.bootstrap}")
+		logger.info(f"  Consumer group: {group_id}")
+		logger.info(f"  Number of atomic models: {self._num_atomics}")
+		logger.info(f"  Index Mapping:")
 		for i, m in enumerate(self._atomic_models):
-			logger.info("    Index %s -> %s (%s)", i, m.myID, type(m).__name__)
+			logger.info(f"    Index {i} -> {m.myID} ({m.getBlockModel().label})")
 
 	# ------------------------------------------------------------------
 	#  Simulation
@@ -814,16 +816,15 @@ class SimStrategyKafka(DirectCouplingPyDEVSSimStrategy):
 		logger.info("Spawning %s worker threads...", self._num_atomics)
 
 		for i, model in enumerate(self._atomic_models):
-			logger.info("  Model %s (%s - %s):", i, model.myID, type(model).__name__)
-			logger.info("    Real class: %s.%s", model.__class__.__module__, model.__class__.__name__)
-			logger.info("    Python file: %s", model.__class__.__module__)
-			logger.info("    OPorts: %s", [p.name for p in model.OPorts])
-			logger.info("    IPorts: %s", [p.name for p in model.IPorts])
-			
-			worker = MS4MeKafkaWorker(model, i, self.bootstrap)
 
-			logger.info("  Model %s (%s - %s): in_topic=%s, out_topic=%s",
-                    i, model.myID, worker.get_model_label(), worker.get_topic_to_write(), worker.get_topic_to_read())
+			worker = MS4MeKafkaWorker(model.getBlockModel().label, model, self.bootstrap)
+
+			logger.info(f"  Model {model.myID} ({ worker.get_model_label()}):")
+			logger.info(f"    Real class: {model.__class__.__module__}.{model.__class__.__name__}")
+			logger.info(f"    Python file: {model.__class__.__module__}")
+			logger.info(f"    OPorts: {[p.name for p in model.OPorts]}")
+			logger.info(f"    IPorts: {[p.name for p in model.IPorts]}")
+			logger.info(f"  Model {model.myID} ({ worker.get_model_label()}) - %s): in_topic={worker.get_topic_to_write()}, out_topic={worker.get_topic_to_read()}")
 
 			worker.start()
 
@@ -1007,8 +1008,9 @@ class SimStrategyKafka(DirectCouplingPyDEVSSimStrategy):
 				self._send_msg_to_kafka(msg=InitSim(st), 
 										topic=worker.get_topic_to_write())
 
+			
 			init_workers_results = self._await_msgs_from_kafka()
-
+			
 			### Check time consistency - TODO: remove to improve sim performance
 			for model in self._atomic_models:
 				label = model.getBlockModel().label

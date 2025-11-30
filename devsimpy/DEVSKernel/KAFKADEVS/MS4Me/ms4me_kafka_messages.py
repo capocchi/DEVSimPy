@@ -3,15 +3,17 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
-
+import numpy as np
 # ---------- Types de base ----------
 
 @dataclass
 class SimTime:
-    timeType: str = "devs.msg.time.LongSimTime"
+    timeType: str = "devs.msg.time.DoubleSimTime"
     t: float = 0.0
 
     def to_dict(self) -> Dict[str, Any]:
+        if self.t == float("inf"): 
+            self.t = np.finfo(np.float64).max
         return {
             "timeType": self.timeType,
             "t": self.t,
@@ -19,9 +21,12 @@ class SimTime:
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> "SimTime":
+        time =float(d.get("t", 0.0))
+        if time == np.finfo(np.float64).max:
+            time = float("inf")
         return SimTime(
-            timeType=d.get("timeType", "devs.msg.time.LongSimTime"),
-            t=float(d.get("t", 0.0)),
+            timeType=d.get("timeType", "devs.msg.time.DoubleSimTime"),
+            t=time,
         )
 
 

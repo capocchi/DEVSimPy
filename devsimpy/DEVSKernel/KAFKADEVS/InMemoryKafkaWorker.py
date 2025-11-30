@@ -7,6 +7,8 @@ import json
 import logging
 import time
 
+from abc import ABC, abstractmethod
+
 from DEVSKernel.KafkaDEVS.logconfig import LOGGING_LEVEL, worker_kafka_logger
 
 logger = logging.getLogger("DEVSKernel.KafkaDEVS.InMemoryKafkaWorker")
@@ -21,24 +23,22 @@ except Exception:
 class InMemoryKafkaWorker(threading.Thread):
 	"""Worker thread that manages one atomic model in memory."""
 
-	def __init__(self, aDEVS, index, bootstrap_servers, in_topic=None, out_topic=None):
+	def __init__(self, model_name, aDEVS, bootstrap_server, in_topic=None, out_topic=None):
 		super().__init__(daemon=True)
 		self.aDEVS = aDEVS
-		self.index = index
-		self.bootstrap_servers = bootstrap_servers
+		self.model_name = model_name
+		self.bootstrap_server = bootstrap_server
 		self.running = True
 
 		# Topics explicitement fournis par la stratégie
 		self.in_topic = in_topic  ### from coodinator
 		self.out_topic = out_topic ### to coordinator
-	
-		self.aBlock = aDEVS.getBlockModel()
 		
-		group_id = f"worker-thread-{index}-{int(time.time() * 1000)}"
+		group_id = f"worker-thread-{self.aDEVS.myID}-{int(time.time() * 1000)}"
 
 		# Kafka consumer pour le topic de travail dédié
 		self.consumer = Consumer({
-			"bootstrap.servers": bootstrap_servers,
+			"bootstrap.servers": bootstrap_server,
 			"group.id": group_id,
 			"auto.offset.reset": "latest",
 			"enable.auto.commit": True,
@@ -47,24 +47,20 @@ class InMemoryKafkaWorker(threading.Thread):
 
 		# Kafka producer pour renvoyer les réponses
 		self.producer = Producer({
-			"bootstrap.servers": bootstrap_servers
+			"bootstrap.servers": bootstrap_server
 		})
 
 		logger.info(
             "  [Thread-%s] Created for model %s (in topic=%s, out topic=%s)",
-            index, self.aBlock.label, self.in_topic, self.out_topic
+            self.aDEVS.myID, self.model_name, self.in_topic, self.out_topic
         )
-
-	def get_index(self):
-		"""Returns the index of the model"""
-		return self.index
 	
 	def get_model(self):
 		"""Returns the atomic DEVS model managed by this worker."""
 		return self.aDEVS
 	
 	def get_model_label(self):
-		return self.aDEVS.getBlockModel().label
+		return self.model_name
 	
 	def get_model_time_next(self):
 		return self.aDEVS.timeNext
@@ -132,12 +128,23 @@ class InMemoryKafkaWorker(threading.Thread):
 
 		self.aDEVS.outputFnc()
 
+	@abstractmethod
+	def _process_standard(self, data):
+		"""
+		Process standard DEVS message format.
+		Must be implemented by subclasses.
+		
+		Args:
+			data (dict): Parsed JSON message data
+		"""
+		pass
+
 	# ------------------------------------------------------------------
 	#  Boucle principale
 	# ------------------------------------------------------------------
 
 	def run(self):
-		logger.info("  [Thread-%s] Started", self.index)
+		logger.info(f"  [Thread-{self.aDEVS.myID}] Started")
 
 		while self.running:
 			msg = self.consumer.poll(timeout=0.5)
@@ -148,20 +155,15 @@ class InMemoryKafkaWorker(threading.Thread):
 				raw = msg.value().decode("utf-8")
 				data = json.loads(raw)
 
-				worker_kafka_logger.debug(
-					"[Thread-%s] IN: topic=%s value=%s",
-					self.index,
-					msg.topic(),
-					raw,
-				)
+				worker_kafka_logger.debug(f"[Thread-{self.aDEVS.myID}] IN: topic={msg.topic()} value={raw}")
 				
 				self._process_standard(data)
 
 			except Exception as e:
-				logger.exception("[Thread-%s] Error in run loop: %s", self.index, e)
+				logger.exception("[Thread-%s] Error in run loop: %s", self.aDEVS.myID, e)
 
 		self.consumer.close()
-		logger.info("  [Thread-%s] Stopped", self.index)
+		logger.info(f"  [Thread-{self.aDEVS.myID}] Stopped")
 
 
 	def stop(self):

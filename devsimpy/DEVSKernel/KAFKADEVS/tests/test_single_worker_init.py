@@ -151,8 +151,6 @@ def build_workers(bootstrap):
 	workers = []
 	for model in models:
 		label = model.__class__.__name__
-		# Mock getBlockModel() -> objet avec attribut .label
-		model.getBlockModel = (lambda lbl=label: _MockBlockModel(lbl))
 
 		in_topic = f"test_{label}_0In"
 		out_topic = f"test_{label}_out"
@@ -160,7 +158,7 @@ def build_workers(bootstrap):
 		worker = InMemoryKafkaWorker(
 			aDEVS=model,
 			aDEVS_index=0,
-			bootstrap_servers=bootstrap,
+			bootstrap_server=bootstrap,
 			in_topic=in_topic,
 			out_topic=out_topic,
 		)
