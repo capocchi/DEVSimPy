@@ -506,11 +506,13 @@ class DirectCouplingPyDEVSSimStrategy(SimStrategy):
 
 			else:
 
+				ts = self.ts.Get()
+				
 				### The SIM_VERBOSE event occurs
-				PluginManager.trigger_event("SIM_VERBOSE", self.master, None, clock = self.ts.Get())
+				PluginManager.trigger_event("SIM_VERBOSE", self.master, None, clock = )
 
 				### tree-like data structure ordered by devsimpy priority
-				priority_scheduler = [a for a in formated_priority_list if self.ts.Get() == a[1].myTimeAdvance]
+				priority_scheduler = [a for a in formated_priority_list if ts == a[1].myTimeAdvance]
 				heapq.heapify(priority_scheduler)
 
 				### TODO: execute with process of model are parallel !
@@ -523,7 +525,7 @@ class DirectCouplingPyDEVSSimStrategy(SimStrategy):
 				self.ts.Set(min([m.myTimeAdvance for m in self.flat_priority_list]))
 
 				### just for progress bar
-				self.master.timeLast = self.ts.Get() if self.ts.Get() != INFINITY else self.master.timeLast
+				self.master.timeLast = ts if ts != INFINITY else self.master.timeLast
 				self._simulator.cpu_time = old_cpu_time + (time.time()-t_start)
 
 		self._simulator.terminate()

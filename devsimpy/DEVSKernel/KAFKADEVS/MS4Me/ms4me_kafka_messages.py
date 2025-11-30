@@ -3,7 +3,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
-import sys
 import numpy as np
 # ---------- Types de base ----------
 
