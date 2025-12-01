@@ -74,8 +74,8 @@ def ensure_kafka_broker(
 			subprocess.run(["docker", "start", container_name], check=True)
 	else:
 
-		kafka_port = bootstrap.split(':')[-1]
-		
+		kafka_port = bootstrap.split(':')[-1] or "9092"
+
 		# 3) Sinon, on le crée avec docker run
 		cmd = [
 			"docker", "run", "-d",
