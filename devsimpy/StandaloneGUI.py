@@ -11,16 +11,6 @@
 #                     --------------------------------
 # Version 1.0                                        last modified: 12/11/23
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-#
-# GENERAL NOTES AND REMARKS:
-#
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-#
-# GLOBAL VARIABLES AND FUNCTIONS
-#
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
 import wx
@@ -55,14 +45,14 @@ class ZipNameValidator(wx.Validator):
         textCtrl = self.GetWindow()
         text = textCtrl.GetValue()
         
-        if len(text) == 0 :
+        if len(text) == 0:
             wx.MessageBox(_("A text object must contain some text!"), "Error")
             textCtrl.SetBackgroundColour("pink")
             textCtrl.SetFocus()
             textCtrl.Refresh()
             return False
-        elif text.endswith('.zip') == 0 :
-            wx.MessageBox(_("Zip name must end with .zip extention!"), "Error")
+        elif not text.endswith('.zip'):
+            wx.MessageBox(_("Zip name must end with .zip extension!"), "Error")
             textCtrl.SetBackgroundColour("pink")
             textCtrl.SetFocus()
             textCtrl.Refresh()
@@ -79,7 +69,7 @@ class ZipNameValidator(wx.Validator):
             The default implementation returns False, indicating that an error
             occurred.  We simply return True, as we don't do any data transfer.
         """
-        return True # Prevent wxDialog from complaining.
+        return True
 
     def TransferFromWindow(self):
         """ Transfer data from window to validator.
@@ -87,7 +77,7 @@ class ZipNameValidator(wx.Validator):
             The default implementation returns False, indicating that an error
             occurred.  We simply return True, as we don't do any data transfer.
         """
-        return True # Prevent wxDialog from complaining.
+        return True
     
 class StandaloneGUI(wx.Frame):
     """ Class used to generate the standalone version of DEVSimPy-nogui as a zip file.
@@ -96,7 +86,7 @@ class StandaloneGUI(wx.Frame):
         wx (wx.Frame): GUI to configure the exportation of the zip file.
     """
 
-    last_opened_directory = "."  # Class variable to store the last opened directory
+    last_opened_directory = "."
 
     def __init__(self, *args, **kw):
         """Constructor.
@@ -111,7 +101,6 @@ class StandaloneGUI(wx.Frame):
         else:
             self.yaml_model_name = "Test.yaml"
 
-        # This line calls the __init__ method of the parent class to initialize the GUI window.
         super(StandaloneGUI, self).__init__(*args, **kw)
 
         self.InitUI()
@@ -125,112 +114,137 @@ class StandaloneGUI(wx.Frame):
         icon.CopyFromBitmap(load_and_resize_image("properties.png"))
         self.SetIcon(icon)
   
-        self.SetSize((-1, 250))
+        # Taille adaptée au contenu
+        self.SetSize((650, 450))
+        self.SetMinSize((600, 450))
+        
         panel = wx.Panel(self)
+        panel.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOW))
         
-        vbox = wx.BoxSizer(wx.VERTICAL)
- 
-        ### Zip name field
-        hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-        self.st1 = wx.StaticText(panel, label=_('Filename:'))
-        self.st1.SetToolTip(_("Select a name for the standalone package"))
+        # Sizer principal avec marges uniformes
+        main_sizer = wx.BoxSizer(wx.VERTICAL)
         
-        hbox1.Add(self.st1, flag=wx.RIGHT|wx.ALIGN_CENTER_VERTICAL, border=8)
-        self._tc = wx.TextCtrl(panel, -1, f"{self.yaml_model_name}-nogui-pkg.zip", style=wx.TE_RICH2|wx.BORDER_NONE, validator=ZipNameValidator())
+        # --- Section Package Configuration ---
+        config_box = wx.StaticBoxSizer(wx.VERTICAL, panel, _("Package Configuration"))
+        
+        # Grille pour filename et directory
+        config_grid = wx.FlexGridSizer(rows=3, cols=2, vgap=10, hgap=10)
+        config_grid.AddGrowableCol(1, 1)
+        
+        # Filename
+        filename_label = wx.StaticText(panel, label=_('Filename:'))
+        filename_label.SetToolTip(_("Select a name for the standalone package"))
+        config_grid.Add(filename_label, flag=wx.ALIGN_CENTER_VERTICAL)
+        
+        self._tc = wx.TextCtrl(panel, -1, 
+                               f"{self.yaml_model_name}-nogui-pkg.zip",
+                               validator=ZipNameValidator())
         self._tc.SetToolTip(_("Must end with .zip"))
-
-        hbox1.Add(self._tc, proportion=1)
-        vbox.Add(hbox1, flag=wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, border=10)
-
-        # Set focus to StaticText object
-        self.st1.SetFocus()
-
-        vbox.Add((-1, 10))
-
-        ### Zip directory field
-        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-        self._dbb = filebrowse.DirBrowseButton(panel, 
-                                               -1, 
-                                               size=(450, -1), 
-                                               labelText = "Select Directory:",
-                                               startDirectory = StandaloneGUI.last_opened_directory,
-                                               toolTip=_("Select a target directory to create the standalone package"))
-        # Set the initial directory
-        self._dbb.startDirectory = StandaloneGUI.last_opened_directory
-
-        hbox2.Add(self._dbb)
-        vbox.Add(hbox2, flag=wx.LEFT | wx.TOP, border=10)
-        vbox.Add((-1, 10))
-
-        ### minimal (optimal) or full export
-        hbox3 = wx.BoxSizer(wx.HORIZONTAL)
-
-        label_format = wx.StaticText(panel, -1, _("Format:"))
-        label_format.SetToolTip("""The minimal format includes in the archive only the necessary library files\n (may lead to errors depending on your model's architecture).\n The full format includes all library dependencies (less optimal but more secure).""")
+        config_grid.Add(self._tc, flag=wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)
+        
+        # Directory
+        dir_label = wx.StaticText(panel, label=_('Directory:'))
+        dir_label.SetToolTip(_("Select a target directory"))
+        config_grid.Add(dir_label, flag=wx.ALIGN_CENTER_VERTICAL)
+        
+        self._dbb = filebrowse.DirBrowseButton(
+            panel, 
+            -1,
+            labelText="",
+            buttonText=_("Browse..."),
+            startDirectory=StandaloneGUI.last_opened_directory,
+            toolTip=_("Select a target directory to create the standalone package"),
+            dialogTitle=_("Choose a directory")
+        )
+        config_grid.Add(self._dbb, flag=wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)
+        
+        # Format
+        format_label = wx.StaticText(panel, -1, _("Format:"))
+        format_label.SetToolTip(_("The minimal format includes only necessary library files.\n"
+                                   "The full format includes all library dependencies (more secure)."))
+        config_grid.Add(format_label, flag=wx.ALIGN_CENTER_VERTICAL)
+        
         self.format = wx.Choice(panel, -1, choices=["Minimal", "Full"])
         self.format.SetSelection(0)
-
-        hbox3.Add(label_format, flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL)
-        hbox3.Add(self.format, flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=10)    
-        vbox.Add(hbox3, flag=wx.LEFT, border=10)
-        vbox.Add((-1, 10))
+        config_grid.Add(self.format, flag=wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)
         
-        ### Options
-        hbox4 = wx.BoxSizer(wx.HORIZONTAL)
+        config_box.Add(config_grid, flag=wx.ALL|wx.EXPAND, border=10)
+        main_sizer.Add(config_box, flag=wx.ALL|wx.EXPAND, border=15)
+        
+        # --- Section Simulation Options ---
+        sim_box = wx.StaticBoxSizer(wx.VERTICAL, panel, _("Simulation Options"))
+        
+        # Checkboxes
+        cb_sizer = wx.BoxSizer(wx.VERTICAL)
+        
         self._cb1 = wx.CheckBox(panel, label=_('Add Simulation Kernel'))
         self._cb1.SetToolTip(_("Add all files needed to simulate the model."))
+        cb_sizer.Add(self._cb1, flag=wx.ALL, border=5)
+        
         self._cb2 = wx.CheckBox(panel, label=_('Add Docker File'))
-        self._cb2.SetToolTip(_("Add Docker file to execute the simulation in a nogui model in a Docker Container."))
-        self._cb3 = wx.CheckBox(panel, label=_('Add NTL Flag'))
-        self._cb3.SetToolTip(_("Add the flag -ntl to the simulation in order to define an infinit simulation loop."))
-    
-        hbox4.Add(self._cb1)
-        hbox4.Add(self._cb2, flag=wx.LEFT, border=10)    
-        hbox4.Add(self._cb3, flag=wx.LEFT, border=10)
-        vbox.Add(hbox4, flag=wx.LEFT, border=10)
-
-        vbox.Add((-1, 10))
-    
-        hbox5 = wx.BoxSizer(wx.HORIZONTAL)
-        self._cb4 = wx.CheckBox(panel, label=_('Real Time'))
-        self._cb4.Enable(False)
+        self._cb2.SetToolTip(_("Add Docker file to execute the simulation in a Docker Container."))
+        cb_sizer.Add(self._cb2, flag=wx.ALL, border=5)
+        
+        self._cb3 = wx.CheckBox(panel, label=_('Add NTL Flag (Infinite Loop)'))
+        self._cb3.SetToolTip(_("Add the flag -ntl to define an infinite simulation loop."))
+        cb_sizer.Add(self._cb3, flag=wx.ALL, border=5)
+        
+        sim_box.Add(cb_sizer, flag=wx.ALL, border=5)
+        main_sizer.Add(sim_box, flag=wx.LEFT|wx.RIGHT|wx.BOTTOM|wx.EXPAND, border=15)
+        
+        # --- Section Kernel Configuration ---
+        kernel_box = wx.StaticBoxSizer(wx.VERTICAL, panel, _("Kernel Configuration"))
+        
+        kernel_grid = wx.FlexGridSizer(rows=2, cols=2, vgap=8, hgap=10)
+        kernel_grid.AddGrowableCol(1, 1)
+        
+        # Kernel choice
+        self.kernel_label = wx.StaticText(panel, -1, _("Kernel:"))
+        self.kernel_label.Enable(False)
+        kernel_grid.Add(self.kernel_label, flag=wx.ALIGN_CENTER_VERTICAL)
+        
         self.kernel = wx.Choice(panel, -1, choices=["PyDEVS", "PyPDEVS", "KafkaDEVS"])
         self.kernel.SetSelection(0)
         self.kernel.Enable(False)
-        self.kernel_label = wx.StaticText(panel, -1, _("Kernel:"))
-        self.kernel_label.Enable(False)
-
-        box = wx.BoxSizer(wx.HORIZONTAL)
-        box.Add(self.kernel_label, 0, wx.ALIGN_CENTER_VERTICAL)
-        box.Add(self.kernel, 0, wx.ALIGN_CENTER_VERTICAL, border=5)
+        kernel_grid.Add(self.kernel, flag=wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)
         
-        hbox5.Add(box)
-        hbox5.Add(self._cb4, flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=10)
-        vbox.Add(hbox5, flag=wx.LEFT, border=10)
+        # Real Time checkbox
+        rt_label = wx.StaticText(panel, -1, _("Mode:"))
+        rt_label.Enable(False)
+        kernel_grid.Add(rt_label, flag=wx.ALIGN_CENTER_VERTICAL)
         
-        vbox.Add((-1, 10))
-
-        ### Buttons
-        hbox5 = wx.BoxSizer(wx.HORIZONTAL)
-        btn1 = wx.Button(panel, wx.ID_OK, _("Ok"), size=(70, 30))
-        # btn2 = wx.Button(panel, wx.ID_CLOSE, _("Close"), size=(70, 30))
-        # hbox5.Add(btn2)
-        hbox5.Add(btn1, flag=wx.LEFT|wx.BOTTOM)
-        vbox.Add(hbox5, flag=wx.ALIGN_RIGHT|wx.RIGHT, border=10)
-
-        panel.SetSizer(vbox)
+        self._cb4 = wx.CheckBox(panel, label=_('Real Time'))
+        self._cb4.Enable(False)
+        kernel_grid.Add(self._cb4, flag=wx.ALIGN_CENTER_VERTICAL)
+        
+        kernel_box.Add(kernel_grid, flag=wx.ALL|wx.EXPAND, border=10)
+        main_sizer.Add(kernel_box, flag=wx.LEFT|wx.RIGHT|wx.BOTTOM|wx.EXPAND, border=15)
+        
+        # --- Buttons ---
+        button_sizer = wx.StdDialogButtonSizer()
+        
+        btn_ok = wx.Button(panel, wx.ID_OK, _("Generate Package"))
+        btn_ok.SetDefault()
+        button_sizer.AddButton(btn_ok)
+        
+        btn_cancel = wx.Button(panel, wx.ID_CANCEL, _("Cancel"))
+        button_sizer.AddButton(btn_cancel)
+        
+        button_sizer.Realize()
+        
+        main_sizer.Add(button_sizer, flag=wx.ALL|wx.ALIGN_RIGHT, border=15)
+        
+        panel.SetSizer(main_sizer)
     
         ### Binds
-        self.Bind(wx.EVT_BUTTON, self.OnOk, id=btn1.GetId())
-        # self.Bind(wx.EVT_BUTTON, self.OnClose, id=btn2.GetId())
-        self.Bind(wx.EVT_CHECKBOX,self.OnChecked, id=self._cb1.GetId()) 
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.OnClose, id=wx.ID_CANCEL)
+        self.Bind(wx.EVT_CHECKBOX, self.OnChecked, id=self._cb1.GetId()) 
         self.Bind(wx.EVT_CHOICE, self.OnChoice, id=self.kernel.GetId())
-        self.Bind(wx.EVT_DIRPICKER_CHANGED, self.OnDirChanged, id=self._dbb.GetId())
-    
-    def OnDirChanged(self, event):
-        # Get the selected directory
-        selected_dir = event.GetPath()
-        StandaloneGUI.last_opened_directory = selected_dir
+        
+        # Focus sur le champ de texte
+        self._tc.SetFocus()
+        self._tc.SetInsertionPointEnd()
 
     def OnChoice(self, event):
         selected_option = self.kernel.GetStringSelection()
@@ -242,11 +256,18 @@ class StandaloneGUI(wx.Frame):
         Args:
             event (Event): event
         """
-        cb = event.GetEventObject() 
-    #   cb.GetLabel(),' is clicked',cb.GetValue()
-
-        self.kernel.Enable(cb.IsChecked())
-        self.kernel_label.Enable(cb.IsChecked())
+        cb = event.GetEventObject()
+        is_checked = cb.IsChecked()
+        
+        self.kernel.Enable(is_checked)
+        self.kernel_label.Enable(is_checked)
+        
+        # Enable/disable real-time based on kernel selection
+        if is_checked:
+            selected_kernel = self.kernel.GetStringSelection()
+            self._cb4.Enable(selected_kernel == 'PyPDEVS')
+        else:
+            self._cb4.Enable(False)
 
     @BuzyCursorNotification
     def OnOk(self, event):
@@ -256,27 +277,59 @@ class StandaloneGUI(wx.Frame):
         """
     
         ### call validator for zip name textctrl
-        if self._tc.GetValidator().Validate(self._tc):
+        if not self._tc.GetValidator().Validate(self._tc):
+            return
+            
+        format = self.format.GetString(self.format.GetSelection())
+        zip_name = self._tc.GetValue()
+        zip_dir = self._dbb.GetValue()
         
-            format = self.format.GetString(self.format.GetSelection())
-            zip_name = self._tc.GetLineText(0)
-            zip_dir = self._dbb.GetValue()
-            sim_cb = self._cb1.GetValue()
-            docker_cb = self._cb2.GetValue()
-            ntl_cb = self._cb3.GetValue()
-            rt = self._cb3.GetValue()
-            kernel = self.kernel.GetString(self.kernel.GetSelection())
+        if not zip_dir:
+            wx.MessageBox(_("Please select a directory!"), _("Error"), 
+                         wx.OK | wx.ICON_ERROR)
+            return
+        
+        sim_cb = self._cb1.GetValue()
+        docker_cb = self._cb2.GetValue()
+        ntl_cb = self._cb3.GetValue()
+        rt = self._cb4.GetValue()
+        kernel = self.kernel.GetString(self.kernel.GetSelection())
+        
+        try:
+            ### call the StandaloneNoGUI class to build the package
+            standalone = StandaloneNoGUI(
+                self.yaml,
+                zip_name,
+                format=format,
+                outdir=zip_dir,
+                add_sim_kernel=sim_cb,
+                add_dockerfile=docker_cb,
+                sim_time=ntl_cb,
+                rt=rt,
+                kernel=kernel
+            )
             
-            ### call the StandaloneNoGui class to build the package depending on the settings from the frame.
-            standalone = StandaloneNoGUI(self.yaml,zip_name,format=format,outdir=zip_dir,add_sim_kernel=sim_cb,add_dockerfile=docker_cb,sim_time=ntl_cb,rt=rt, kernel=kernel)
-            
-            ### Try to build de zip package of the standalone version of DEVSimPy-nogui
+            ### Try to build the zip package of the standalone version
             if standalone.BuildZipPackage():
-                resp = wx.MessageBox(_("Zip file exported!"), _("Information"), wx.OK | wx.ICON_INFORMATION)
+                resp = wx.MessageBox(
+                    _("Zip file exported successfully!"), 
+                    _("Success"), 
+                    wx.OK | wx.ICON_INFORMATION
+                )
                 if resp == wx.OK:
                     self.Close()
             else:
-                resp = wx.MessageBox(_("Exportation failed! - Check the yaml file..."), _("Error"), wx.OK | wx.ICON_ERROR)
+                wx.MessageBox(
+                    _("Export failed! Please check the YAML file."), 
+                    _("Error"), 
+                    wx.OK | wx.ICON_ERROR
+                )
+        except Exception as e:
+            wx.MessageBox(
+                _("An error occurred: {}").format(str(e)), 
+                _("Error"), 
+                wx.OK | wx.ICON_ERROR
+            )
             
     def OnClose(self, event):
         """Event handler of the close event

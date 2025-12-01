@@ -99,6 +99,7 @@ sys.modules['Container.PickledCollection'] = PickledCollection
 from Decorators import BuzyCursorNotification, Post_Undo
 from Utilities import HEXToRGB, relpath, playSound, sendEvent, load_and_resize_image, getInstance, FixedList, getObjectFromString, getTopLevelWindow, printOnStatusBar
 from Patterns import Subject, Observer
+from StandaloneGUIKafkaPKG import StandaloneGUIKafkaPKG
 
 if getattr(builtins, 'GUI_FLAG', True):
 	from DetachedFrame import DetachedFrame
@@ -4022,6 +4023,13 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 									label, \
 									wx.OK | wx.ICON_ERROR)
 				dlg.ShowModal()
+
+	def OnExportKafkaPkg(self, evt):
+		""" Create the standalone package that contains the kafka-based worker for the atomic model
+		"""
+
+		frame = StandaloneGUIKafkaPKG(None, -1, _('Standalone Settings'), block_model=self)
+		frame.Show(True)
 
 	def update(self, concret_subject = None):
 		""" Update method to respond to notify call.

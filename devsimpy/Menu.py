@@ -128,6 +128,7 @@ ID_ENABLE_SHAPE = wx.NewIdRef()
 ID_DISABLE_SHAPE = wx.NewIdRef()
 ID_EXPORT_SHAPE = wx.NewIdRef()
 ID_EXPORT_AMD_SHAPE = wx.NewIdRef()
+ID_EXPORT_KAFKA_WORKER_PKG = wx.NewIdRef()
 ID_EXPORT_CMD_SHAPE = wx.NewIdRef()
 ID_EXPORT_XML_SHAPE = wx.NewIdRef()
 ID_EXPORT_JS_SHAPE = wx.NewIdRef()
@@ -1010,6 +1011,7 @@ class ShapePopupMenu(wx.Menu):
 		disable=wx.MenuItem(self, ID_DISABLE_SHAPE, _("Disable"), _("Disable the link for the simulation"))
 		export=wx.MenuItem(self, ID_EXPORT_SHAPE, _("Export"), _("Export the model"))
 		exportAMD=wx.MenuItem(self, ID_EXPORT_AMD_SHAPE, _("AMD"), _("Model exported to a amd file"))
+		exportKAFKA_WORKER=wx.MenuItem(self, ID_EXPORT_KAFKA_WORKER_PKG, _("Kafka Worker"), _("Model exported as a standalone package runnable with a Kafka-based simulator."))
 		exportCMD=wx.MenuItem(self, ID_EXPORT_CMD_SHAPE, _("CMD"), _("Model exported to a cmd file"))
 		exportXML=wx.MenuItem(self, ID_EXPORT_XML_SHAPE, _("XML"), _("Model exported to a xml file"))
 		exportJS=wx.MenuItem(self, ID_EXPORT_JS_SHAPE, _("JS"), _("Model exported to a js (join) file"))
@@ -1148,8 +1150,15 @@ class ShapePopupMenu(wx.Menu):
 				Export_SubMenu1 = export_subMenu.Append(exportAMD)
 				self.AppendSeparator()
 
+				if DEFAULT_DEVS_DIRNAME == "KafkaDEVS":
+					print("eeee")
+					if shape.isPY():
+						### TODO : impelmented but not tested for AMD model
+						Export_SubMenu2 = export_subMenu.Append(exportKAFKA_WORKER)
+
 				if shape.isPYC():
 					Export_SubMenu1.Enable(False)
+					
 
 				### if Wcomp general plugin is enabled, sub menu appear in contextual menu of amd (right clic)
 				PluginManager.trigger_event("ADD_WCOMP_EXPORT_MENU", parent=self, model=shape, submenu= export_subMenu)
@@ -1219,6 +1228,7 @@ class ShapePopupMenu(wx.Menu):
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnEditor, id=ID_EDIT_MODEL_SHAPE)
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnLog, id=ID_LOG_SHAPE)
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnExport, id=ID_EXPORT_AMD_SHAPE)
+				self.__canvas.Bind(wx.EVT_MENU, shape.OnExportKafkaPkg, id=ID_EXPORT_KAFKA_WORKER_PKG)
 
 				# AMD specific binding
 				if shape.isAMD():

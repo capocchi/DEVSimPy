@@ -509,7 +509,7 @@ class DirectCouplingPyDEVSSimStrategy(SimStrategy):
 				ts = self.ts.Get()
 				
 				### The SIM_VERBOSE event occurs
-				PluginManager.trigger_event("SIM_VERBOSE", self.master, None, clock = )
+				PluginManager.trigger_event("SIM_VERBOSE", self.master, None, clock = ts)
 
 				### tree-like data structure ordered by devsimpy priority
 				priority_scheduler = [a for a in formated_priority_list if ts == a[1].myTimeAdvance]
