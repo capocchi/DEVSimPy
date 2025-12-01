@@ -73,14 +73,17 @@ def ensure_kafka_broker(
 			# Conteneur existant mais arrêté : on le démarre
 			subprocess.run(["docker", "start", container_name], check=True)
 	else:
+
+		kafka_port = bootstrap.split(':')[-1]
+		
 		# 3) Sinon, on le crée avec docker run
 		cmd = [
 			"docker", "run", "-d",
 			"--name", container_name,
-			"-p", "9092:9092",
+			"-p", f"{kafka_port}:{kafka_port}",
 			"-e", "KAFKA_NODE_ID=1",
 			"-e", "KAFKA_PROCESS_ROLES=broker,controller",
-			"-e", "KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093",
+			"-e", f"KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:{kafka_port},CONTROLLER://0.0.0.0:9093",
 			"-e", f"KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://{KAFKA_BOOTSTRAP}",
 			"-e", "KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER",
 			"-e", "KAFKA_CONTROLLER_QUORUM_VOTERS=1@localhost:9093",
