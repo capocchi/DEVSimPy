@@ -709,22 +709,26 @@ def purge_kafka_topic(consumer, max_seconds=2.0):
     if flushed > 0:
         logger.info("  Flushed %s old messages", flushed)
     logger.info("System ready")
-	
+
+from DEVSKernel.KafkaDEVS.Proxies import KafkaReceiverProxy, KafkaStreamProxy
 class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 	"""
-	Kafka strategy with in-memory workers (threads instead of processes),
-	utilisant des messages DEVS typés et un adaptateur de wire (Standard/Local).
-	"""
+    Kafka strategy with in-memory workers (threads instead of processes),
+    utilisant des messages DEVS typés et un adaptateur de wire (Standard/Local).
+    Architecture refactorisée avec le pattern Proxy (Stream/Receiver).
+    """
 
 	def __init__(self, simulator=None,
 				 kafka_bootstrap=KAFKA_BOOTSTRAP,
-				 request_timeout=30.0):
+				 request_timeout=30.0,
+				 stream_proxy_class=None,
+        receiver_proxy_class=None):
 		super().__init__(simulator)
 
 		if Producer is None or Consumer is None:
 			raise RuntimeError("confluent-kafka not available. Please install it.")
 
-		# sure thate Kafka broker is alive
+		# Ensure that Kafka broker is alive
 		if AUTO_START_KAFKA_BROKER:
 			try:
 				self.bootstrap = ensure_kafka_broker(bootstrap=kafka_bootstrap)
@@ -737,43 +741,45 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 				raise
 		else:
 			self.bootstrap = kafka_bootstrap
-			
+		
 		# Choix de l'adaptateur de wire
 		self.wire = StandardWireAdapter
 		
 		# Group ID unique pour ce run
 		group_id = f"coordinator-{int(time.time() * 1000)}"
-
 		self.request_timeout = request_timeout
 
-		# Kafka producer/consumer
-		self._producer = Producer({
-			"bootstrap.servers": self.bootstrap,
-			"enable.idempotence": True,
-			"acks": "all",
-		})
+		# Dependency injection: use provided proxy classes or defaults
+		StreamProxyClass = stream_proxy_class or KafkaStreamProxy
+		ReceiverProxyClass = receiver_proxy_class or KafkaReceiverProxy
 
-		self._consumer = Consumer({
-			"bootstrap.servers": self.bootstrap,
-			"group.id": group_id,
-			"auto.offset.reset": "latest",
-			"enable.auto.commit": True,
-			"session.timeout.ms": 30000,
-		})
-		self._consumer.subscribe([MS4MeKafkaWorker.OUT_TOPIC])
+		# Instantiate proxies (replaces direct Producer/Consumer)
+		self._stream_proxy = StreamProxyClass(
+			self.bootstrap,
+			wire_adapter=self.wire
+		)
+		
+		self._receiver_proxy = ReceiverProxyClass(
+			self.bootstrap,
+			group_id,
+			wire_adapter=self.wire
+		)
+		
+		# Subscribe to output topic
+		self._receiver_proxy.subscribe([MS4MeKafkaWorker.OUT_TOPIC])
 
-		### check if atomic models have been loaded properly
-		assert(self.flat_priority_list != [])
+		# Check if atomic models have been loaded properly
+		assert self.flat_priority_list != []
 
 		# DEVS Atomic models list
 		self._atomic_models = list(self.flat_priority_list)
 		self._num_atomics = len(self._atomic_models)
 		self._index2model = {i: m for i, m in enumerate(self._atomic_models)}
 
-		### workers threads
+		# Workers threads
 		self._workers = MultiKeyDict()
 		
-		logger.info("KafkaDEVS SimStrategy initialized (In-Memory Workers)")
+		logger.info("KafkaDEVS SimStrategy initialized (Proxy Pattern)")
 		logger.info(f"  Bootstrap servers: {self.bootstrap}")
 		logger.info(f"  Consumer group: {group_id}")
 		logger.info(f"  Number of atomic models: {self._num_atomics}")
@@ -791,7 +797,7 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 			raise ValueError("Simulator instance must be provided.")
 
 		logger.info("=" * 60)
-		logger.info("  KafkaDEVS Simulation Starting (In-Memory)")
+		logger.info("  KafkaDEVS Simulation Starting (Proxy Pattern)")
 		logger.info("=" * 60)
 		
 		self._create_workers()
@@ -800,12 +806,13 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 		logger.info("Waiting for workers to initialize (2s)...")
 		time.sleep(2)
 
-		### Purge old messages
-		purge_kafka_topic(self._consumer, max_seconds=2.0)
+		# Purge old messages via proxy
+		flushed = self._receiver_proxy.purge_old_messages(max_seconds=2.0)
+		logger.info(f"System ready (flushed {flushed} old messages)")
 
-		### chose the specific message type used
+		# Chose the specific message type used
 		return self._simulate_for_ms4me(T)
-	
+
 	# ------------------------------------------------------------------
 	#  Topics & workers
 	# ------------------------------------------------------------------
@@ -817,18 +824,26 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 
 		for i, model in enumerate(self._atomic_models):
 
-			worker = MS4MeKafkaWorker(model.getBlockModel().label, model, self.bootstrap)
+			worker = MS4MeKafkaWorker(
+				model.getBlockModel().label,
+				model,
+				self.bootstrap
+			)
 
-			logger.info(f"  Model {model.myID} ({ worker.get_model_label()}):")
+			logger.info(f"  Model {model.myID} ({worker.get_model_label()}):")
 			logger.info(f"    Real class: {model.__class__.__module__}.{model.__class__.__name__}")
 			logger.info(f"    Python file: {model.__class__.__module__}")
 			logger.info(f"    OPorts: {[p.name for p in model.OPorts]}")
 			logger.info(f"    IPorts: {[p.name for p in model.IPorts]}")
-			logger.info(f"  Model {model.myID} ({ worker.get_model_label()}) - %s): in_topic={worker.get_topic_to_write()}, out_topic={worker.get_topic_to_read()}")
+			logger.info(
+				f"  Model {model.myID} ({worker.get_model_label()}): "
+				f"in_topic={worker.get_topic_to_write()}, "
+				f"out_topic={worker.get_topic_to_read()}"
+			)
 
 			worker.start()
 
-			### is a dict with multiple keys
+			# Is a dict with multiple keys
 			self._workers.add([i, model.myID], worker)
 
 		logger.info("  All %s threads started", self._num_atomics)
@@ -920,111 +935,68 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 		logger.info("  All workers stopped")
 
 	# ------------------------------------------------------------------
-	#  Envoi / réception via messages typés + adaptateur de wire
+	#  Envoi / réception via proxies
 	# ------------------------------------------------------------------
 
 	def _send_msg_to_kafka(self, topic: str, msg: BaseMessage):
-		""" 
-
+		"""
+		Envoie un message via le StreamProxy.
+		
 		Args:
-			topic (str): _description_
-			msg (BaseMessage): _description_
+			topic (str): Le topic Kafka de destination
+			msg (BaseMessage): Le message DEVS typé
 		"""
-		msg_dict = msg.to_dict()
-	
-		payload = json.dumps(msg_dict).encode("utf-8")
+		self._stream_proxy.send_message(topic, msg)
 
-		self._producer.produce(topic, value=payload)
-		self._producer.flush()
-
-		coord_kafka_logger.debug("OUT: topic=%s value=%s", topic, payload)
-
-
-	def _await_msgs_from_kafka(self, pending:list = None):
+	def _await_msgs_from_kafka(self, pending: list = None):
 		"""
-		Attend les réponses des workers pour les indices donnés.
-		"""
+		Attend les réponses des workers via le ReceiverProxy.
 		
-		timeout = self.request_timeout
-
+		Args:
+			pending (list): Liste des modèles dont on attend une réponse
+			
+		Returns:
+			dict: Dictionnaire {model: message} des réponses
+		"""
 		if not pending:
-			pending = [model for model in self._atomic_models]
+			pending = list(self._atomic_models)
 		
-		received = {}
-		deadline = time.time() + timeout
-
-		while pending and time.time() < deadline:
-			msg = self._consumer.poll(timeout=0.5)
-			if msg is None or msg.error():
-				continue
-
-			data = json.loads(msg.value().decode("utf-8"))
-		
-			coord_kafka_logger.debug(
-				"IN: topic=%s value=%s",
-				msg.topic(),
-				json.dumps(data),
-			)
-			
-			devs_msg = self.wire.from_wire(data)
-			
-			model_name = data['sender']
-
-			### find the index corresponding to the current model
-			index_to_delete = 0
-			for i,m in enumerate(pending):
-				if m.getBlockModel().label == model_name:
-					index_to_delete = i
-					break
-
-			### pop the right model
-			model = pending.pop(index_to_delete)
-			
-			### store the model and the assiated msg
-			received[model] = devs_msg
-
-		if pending:
-			raise TimeoutError(
-				f"Kafka timeout: missing indices {sorted(pending)}"
-			)
-		
-		return received
+		return self._receiver_proxy.receive_messages(pending, self.request_timeout)
 
 	def _simulate_for_ms4me(self, T=1e8):
 		"""Simulate using standard KafkaDEVS message routing.
 
 		Args:
-			T (_type_, optional): _description_. Defaults to 1e8.
+			T (float): Temps de simulation maximum
 		"""
 		try:
 
 			# STEP 0 : distributed init
 			logger.info("Initializing atomic models...")
 
-			### simulation time
+			# Simulation time
 			st = SimTime(t=self.ts.Get())
 
 			for worker in self._workers.values():
-				self._send_msg_to_kafka(msg=InitSim(st), 
-										topic=worker.get_topic_to_write())
+				self._send_msg_to_kafka(
+					msg=InitSim(st), 
+					topic=worker.get_topic_to_write()
+				)
 
-			
 			init_workers_results = self._await_msgs_from_kafka()
 			
-			### Check time consistency - TODO: remove to improve sim performance
+			# Check time consistency
 			for model in self._atomic_models:
 				label = model.getBlockModel().label
 				devs_msg = init_workers_results[model]
 				ta = devs_msg.time.t
 
-				### message received after a InitSim is NextTime
-				assert(isinstance(devs_msg, NextTime))
-				### confirmation of the time matching
-				assert(ta==model.timeNext)
+				# Message received after a InitSim is NextTime
+				assert isinstance(devs_msg, NextTime)
+				# Confirmation of the time matching
+				assert ta == model.timeNext
 
 				logger.info(f"  Model {label}: next={model.timeNext}")
-
-			# sys.exit(1)
 
 			# MAIN SIMULATION LOOP
 			logger.info(f"Simulation loop starting (T={T})...")
@@ -1032,10 +1004,10 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 			t_start = time.time()
 			old_cpu_time = 0.0
 
-			### first tmin is calculated form kafka init messages sended by all atomic models
+			# First tmin is calculated from kafka init messages sent by all atomic models
 			tmin = min(a.time.t for a in init_workers_results.values())
 
-			### This is the main simulation loop
+			# This is the main simulation loop
 			while self.ts.Get() < T and not self._simulator.end_flag:
 				iteration += 1
 				
@@ -1046,48 +1018,43 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 					logger.info("Next event at t=%s exceeds T=%s", tmin, T)
 					break
 
-				### update the simulation time
+				# Update the simulation time
 				self.ts.Set(tmin)
 				
-				### take imminents worker and model
+				# Take imminents worker and model
 				imminents_worker, imminents_model = zip(*[
-			    									(w, w.get_model())
-    												for w in self._workers.values()
-    												if w.get_model_time_next() == tmin
-												]) if tmin is not None else ((), ())
+					(w, w.get_model())
+					for w in self._workers.values()
+					if w.get_model_time_next() == tmin
+				]) if tmin is not None else ((), ())
 
 				imminents_model = list(imminents_model)
 
 				logger.info("=" * 60)
 				logger.info(f"Iteration {iteration}: t={tmin}")
-				logger.info(f"  Imminent models: {list(map(str,imminents_model))}")
+				logger.info(f"  Imminent models: {list(map(str, imminents_model))}")
 				logger.info("=" * 60)
-				
-				# sys.exit(1)
 
 				# STEP 1: send msg to execute output of imminents
 				logger.info("[1/4] Executing output functions...")
 				st = SimTime(t=tmin)
 				for w in imminents_worker:
-					self._send_msg_to_kafka(msg=SendOutput(st), 
-							 				topic=w.get_topic_to_write())
+					self._send_msg_to_kafka(
+						msg=SendOutput(st), 
+						topic=w.get_topic_to_write()
+					)
 
 				output_msgs = self._await_msgs_from_kafka(imminents_model)
 
-				### check msg consistency
-				assert(all(isinstance(msg, ModelOutputMessage) for msg in output_msgs.values()))
+				# Check msg consistency
+				assert all(isinstance(msg, ModelOutputMessage) for msg in output_msgs.values())
 				
-				# sys.exit(1)
-				
-				### juste for trace
+				# Just for trace
 				for model in imminents_model:
-					# model = w.get_model()
 					logger.info(f"  Model {model}")
 
-					for k,v in model.myOutput.items():
+					for k, v in model.myOutput.items():
 						logger.info(f"    - {str(k)}: {str(v)}")
-
-				# sys.exit(1)
 
 				# STEP 2: routing (from ModelOutputMessage)
 				logger.info("[2/4] Routing outputs to destinations...")
@@ -1105,7 +1072,10 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 							continue
 						
 						if not isinstance(devs_msg, ModelOutputMessage):
-							logger.debug(f"  Ignoring non-output message from {model.getBlockModel().label}: {type(devs_msg).__name__}")
+							logger.debug(
+								f"  Ignoring non-output message from {model.getBlockModel().label}: "
+								f"{type(devs_msg).__name__}"
+							)
 							continue
 
 						outputs = devs_msg.modelOutput
@@ -1151,10 +1121,9 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 										externals_to_send[dest_idx] = {}
 									externals_to_send[dest_idx][dest_p.name] = value
 
-				# sys.exit(1)
-
 				# STEP 2b: external transition execution
 				transition_done_msgs = {}
+				td_ext = {}
 
 				if externals_to_send:
 					for dest_idx, inputs in externals_to_send.items():
@@ -1165,56 +1134,61 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 
 						current_worker = self._workers.get(dest_idx)
 
-						logger.info(f"  Sending external transitions to {current_worker.get_model_label()} model...")
+						logger.info(
+							f"  Sending external transitions to "
+							f"{current_worker.get_model_label()} model..."
+						)
 						
-						self._send_msg_to_kafka(msg=ExecuteTransition(st, pv_list), 
-							  					topic=current_worker.get_topic_to_write())
+						self._send_msg_to_kafka(
+							msg=ExecuteTransition(st, pv_list), 
+							topic=current_worker.get_topic_to_write()
+						)
 
-					# récupérer les TransitionDone des modèles qui ont reçu une external
-					td_ext = self._await_msgs_from_kafka([self._workers.get(i).get_model() for i in externals_to_send.keys()])
+					# Récupérer les TransitionDone des modèles qui ont reçu une external
+					td_ext = self._await_msgs_from_kafka([
+						self._workers.get(i).get_model() 
+						for i in externals_to_send.keys()
+					])
 					transition_done_msgs.update(td_ext)
 
-					### check msg consistency
-					assert(all(isinstance(msg, TransitionDone) for msg in td_ext.values()))
+					# Check msg consistency
+					assert all(isinstance(msg, TransitionDone) for msg in td_ext.values())
 
 				else:
 					logger.info("  No outputs to route!")
 
-				# sys.exit(1)
-
 				# STEP 3: internal_transition
-				### take imminents worker and model
+				# Take imminents worker and model
 				imminents_worker, imminents_model = zip(*[
-			    									(w, w.get_model())
-    												for w in self._workers.values()
-    												if w.get_model_time_next() == tmin
-												]) if tmin is not None else ((), ())
+					(w, w.get_model())
+					for w in self._workers.values()
+					if w.get_model_time_next() == tmin
+				]) if tmin is not None else ((), ())
 				imminents_model = list(imminents_model)
 
 				logger.info(f"[3/4] Executing internal transitions for: {imminents_model}")
 				for w in imminents_worker:
-					self._send_msg_to_kafka(msg=ExecuteTransition(st), 
-							 				topic=w.get_topic_to_write())
+					self._send_msg_to_kafka(
+						msg=ExecuteTransition(st), 
+						topic=w.get_topic_to_write()
+					)
 
 				td_int = self._await_msgs_from_kafka(imminents_model)
 				transition_done_msgs.update(td_int)
 
-				### check msg consistency
-				assert(all(isinstance(msg, TransitionDone) for msg in td_int.values()))
+				# Check msg consistency
+				assert all(isinstance(msg, TransitionDone) for msg in td_int.values())
 
-				### update tmin
-				tmin = min([t.nextTime.t for _,t in td_int.items()]+[t.nextTime.t for _,t in td_ext.items()])
+				# Update tmin
+				tmin = min(
+					[t.nextTime.t for _, t in td_int.items()] +
+					[t.nextTime.t for _, t in td_ext.items()]
+				)
 				
-				### for the progress bar of devsimpy
+				# For the progress bar of devsimpy
 				self.master.timeLast = tmin
-				### for stat
+				# For stat
 				self._simulator.cpu_time = old_cpu_time + (time.time() - t_start)
-
-				# if iteration >= 3:  # garde‑fou
-				# 	logger.info("Reached iteration limit (%s iterations)", iteration)
-				# 	break
-
-				# sys.exit(1)
 
 			logger.info("=" * 60)
 			logger.info("Simulation completed:")
@@ -1231,17 +1205,551 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 		except Exception as e:
 			logger.exception("Simulation error: %s", e)
 
-		# Après la boucle principale, quand tu sais que la simu est finie
-		logger.info("Broadcasting SimulationDone to all workers...")
+		finally:
+			# Broadcast SimulationDone to all workers
+			logger.info("Broadcasting SimulationDone to all workers...")
 
-		st = SimTime(t=self.ts.Get())
-		for w in self._workers.values():
-			self._send_msg_to_kafka(msg=SimulationDone(time=st), 
-						   			topic=w.get_topic_to_write())
+			st = SimTime(t=self.ts.Get())
+			for w in self._workers.values():
+				self._send_msg_to_kafka(
+					msg=SimulationDone(time=st), 
+					topic=w.get_topic_to_write()
+				)
 
-		self._terminate_workers()
+			self._terminate_workers()
 
-		logger.info("=" * 60)
-		logger.info("  MS4Me KafkaDEVS Simulation Ended")
-		logger.info("=" * 60)
+			logger.info("=" * 60)
+			logger.info("  MS4Me KafkaDEVS Simulation Ended")
+			logger.info("=" * 60)
+
+	def __del__(self):
+		"""Cleanup: ferme proprement les proxies lors de la destruction"""
+		if hasattr(self, '_stream_proxy'):
+			self._stream_proxy.close()
+		if hasattr(self, '_receiver_proxy'):
+			self._receiver_proxy.close()
+
+	# 	if Producer is None or Consumer is None:
+	# 		raise RuntimeError("confluent-kafka not available. Please install it.")
+
+	# 	# sure thate Kafka broker is alive
+	# 	if AUTO_START_KAFKA_BROKER:
+	# 		try:
+	# 			self.bootstrap = ensure_kafka_broker(bootstrap=kafka_bootstrap)
+	# 		except RuntimeError as e:
+	# 			logger.error("%s", e)
+	# 			print(
+	# 				"ERREUR : impossible de démarrer KafkaDEVS.\n"
+	# 				"Vérifie que Docker Desktop est lancé puis relance la simulation."
+	# 			)
+	# 			raise
+	# 	else:
+	# 		self.bootstrap = kafka_bootstrap
+			
+	# 	# Choix de l'adaptateur de wire
+	# 	self.wire = StandardWireAdapter
+		
+	# 	# Group ID unique pour ce run
+	# 	group_id = f"coordinator-{int(time.time() * 1000)}"
+
+	# 	self.request_timeout = request_timeout
+
+	# 	# Kafka producer/consumer
+	# 	self._producer = Producer({
+	# 		"bootstrap.servers": self.bootstrap,
+	# 		"enable.idempotence": True,
+	# 		"acks": "all",
+	# 	})
+
+	# 	self._consumer = Consumer({
+	# 		"bootstrap.servers": self.bootstrap,
+	# 		"group.id": group_id,
+	# 		"auto.offset.reset": "latest",
+	# 		"enable.auto.commit": True,
+	# 		"session.timeout.ms": 30000,
+	# 	})
+	# 	self._consumer.subscribe([MS4MeKafkaWorker.OUT_TOPIC])
+
+	# 	### check if atomic models have been loaded properly
+	# 	assert(self.flat_priority_list != [])
+
+	# 	# DEVS Atomic models list
+	# 	self._atomic_models = list(self.flat_priority_list)
+	# 	self._num_atomics = len(self._atomic_models)
+	# 	self._index2model = {i: m for i, m in enumerate(self._atomic_models)}
+
+	# 	### workers threads
+	# 	self._workers = MultiKeyDict()
+		
+	# 	logger.info("KafkaDEVS SimStrategy initialized (In-Memory Workers)")
+	# 	logger.info(f"  Bootstrap servers: {self.bootstrap}")
+	# 	logger.info(f"  Consumer group: {group_id}")
+	# 	logger.info(f"  Number of atomic models: {self._num_atomics}")
+	# 	logger.info(f"  Index Mapping:")
+	# 	for i, m in enumerate(self._atomic_models):
+	# 		logger.info(f"    Index {i} -> {m.myID} ({m.getBlockModel().label})")
+
+	# # ------------------------------------------------------------------
+	# #  Simulation
+	# # ------------------------------------------------------------------
+
+	# def simulate(self, T=1e8, **kwargs):
+	# 	"""Main simulation loop with Kafka coordination and message routing"""
+	# 	if self._simulator is None:
+	# 		raise ValueError("Simulator instance must be provided.")
+
+	# 	logger.info("=" * 60)
+	# 	logger.info("  KafkaDEVS Simulation Starting (In-Memory)")
+	# 	logger.info("=" * 60)
+		
+	# 	self._create_workers()
+	# 	self._create_topics()
+
+	# 	logger.info("Waiting for workers to initialize (2s)...")
+	# 	time.sleep(2)
+
+	# 	### Purge old messages
+	# 	purge_kafka_topic(self._consumer, max_seconds=2.0)
+
+	# 	### chose the specific message type used
+	# 	return self._simulate_for_ms4me(T)
+	
+	# # ------------------------------------------------------------------
+	# #  Topics & workers
+	# # ------------------------------------------------------------------
+
+	# def _create_workers(self):
+	# 	"""Spawn in-memory worker threads"""
+
+	# 	logger.info("Spawning %s worker threads...", self._num_atomics)
+
+	# 	for i, model in enumerate(self._atomic_models):
+
+	# 		worker = MS4MeKafkaWorker(model.getBlockModel().label, model, self.bootstrap)
+
+	# 		logger.info(f"  Model {model.myID} ({ worker.get_model_label()}):")
+	# 		logger.info(f"    Real class: {model.__class__.__module__}.{model.__class__.__name__}")
+	# 		logger.info(f"    Python file: {model.__class__.__module__}")
+	# 		logger.info(f"    OPorts: {[p.name for p in model.OPorts]}")
+	# 		logger.info(f"    IPorts: {[p.name for p in model.IPorts]}")
+	# 		logger.info(f"  Model {model.myID} ({ worker.get_model_label()}) - %s): in_topic={worker.get_topic_to_write()}, out_topic={worker.get_topic_to_read()}")
+
+	# 		worker.start()
+
+	# 		### is a dict with multiple keys
+	# 		self._workers.add([i, model.myID], worker)
+
+	# 	logger.info("  All %s threads started", self._num_atomics)
+
+	# def _create_topics(self):
+	# 	"""Create Kafka topics for local or standard mode."""
+		
+	# 	admin = AdminClient({"bootstrap.servers": self.bootstrap})
+
+	# 	# Topics already existants
+	# 	try:
+	# 		metadata = admin.list_topics(timeout=10)
+	# 	except KafkaException as e:
+	# 		err = e.args[0]
+	# 		if err.code() == KafkaError._TRANSPORT:
+	# 			logger.error(
+	# 				"Unable to connect to Kafka broker at %s.\n"
+	# 				"Please verify that the 'kafkabroker' container is running and that Kafka is listening.",
+	# 				self.bootstrap,
+	# 			)
+	# 		else:
+	# 			logger.error("Kafka error while listing topics: %s", err)
+	# 		raise
+
+	# 	existing = set(metadata.topics.keys())
+
+	# 	# Build the set of topic names to create (avoids duplicates up front)
+	# 	desired = set()
+
+	# 	# Topics d'entrée des workers
+	# 	for w in self._workers.values():
+	# 		desired.add(w.get_topic_to_write())
+
+	# 	# Topic de sortie (coordinateur / collecteur)
+	# 	desired.add(MS4MeKafkaWorker.OUT_TOPIC)
+
+	# 	# Filtrer ceux qui n'existent pas encore
+	# 	topics_to_create = [t for t in desired if t not in existing]
+
+	# 	if not topics_to_create:
+	# 		logger.info(
+	# 			"All required Kafka topics already exist: %s",
+	# 			sorted(existing),
+	# 		)
+	# 		return
+
+	# 	logger.info("  Topics to create: %s", topics_to_create)
+
+	# 	new_topics = [
+	# 		NewTopic(
+	# 			t,
+	# 			num_partitions=(3 if t == MS4MeKafkaWorker.OUT_TOPIC else 1),
+	# 			replication_factor=1,
+	# 		)
+	# 		for t in topics_to_create
+	# 	]
+
+	# 	fs = admin.create_topics(new_topics)
+
+	# 	for topic, f in fs.items():
+	# 		try:
+	# 			logger.info("Waiting for topic %s creation...", topic)
+	# 			f.result()
+	# 			logger.info("  Topic %s created", topic)
+	# 		except KafkaException as e:
+	# 			err = e.args[0]
+	# 			if err.code() == KafkaError.TOPIC_ALREADY_EXISTS:
+	# 				logger.info("  Topic %s already exists", topic)
+	# 			else:
+	# 				logger.error(
+	# 					"  Error creating topic %s: code=%s, reason=%s",
+	# 					topic, err.code(), err.str(),
+	# 				)
+	# 				raise
+	# 		except Exception as e:
+	# 			logger.exception("  Unexpected error creating topic %s", topic)
+	# 			raise
+
+	# def _terminate_workers(self):
+	# 	"""Stop all worker threads"""
+	# 	logger.info("Stopping worker threads...")
+
+	# 	for worker in self._workers.values():
+	# 		worker.stop()
+
+	# 	for worker in self._workers.values():
+	# 		worker.join(timeout=2.0)
+
+	# 	logger.info("  All workers stopped")
+
+	# # ------------------------------------------------------------------
+	# #  Envoi / réception via messages typés + adaptateur de wire
+	# # ------------------------------------------------------------------
+
+	# def _send_msg_to_kafka(self, topic: str, msg: BaseMessage):
+	# 	""" 
+
+	# 	Args:
+	# 		topic (str): _description_
+	# 		msg (BaseMessage): _description_
+	# 	"""
+	# 	msg_dict = msg.to_dict()
+	
+	# 	payload = json.dumps(msg_dict).encode("utf-8")
+
+	# 	self._producer.produce(topic, value=payload)
+	# 	self._producer.flush()
+
+	# 	coord_kafka_logger.debug("OUT: topic=%s value=%s", topic, payload)
+
+
+	# def _await_msgs_from_kafka(self, pending:list = None):
+	# 	"""
+	# 	Attend les réponses des workers pour les indices donnés.
+	# 	"""
+		
+	# 	timeout = self.request_timeout
+
+	# 	if not pending:
+	# 		pending = [model for model in self._atomic_models]
+		
+	# 	received = {}
+	# 	deadline = time.time() + timeout
+
+	# 	while pending and time.time() < deadline:
+	# 		msg = self._consumer.poll(timeout=0.5)
+	# 		if msg is None or msg.error():
+	# 			continue
+
+	# 		data = json.loads(msg.value().decode("utf-8"))
+		
+	# 		coord_kafka_logger.debug(
+	# 			"IN: topic=%s value=%s",
+	# 			msg.topic(),
+	# 			json.dumps(data),
+	# 		)
+			
+	# 		devs_msg = self.wire.from_wire(data)
+			
+	# 		model_name = data['sender']
+
+	# 		### find the index corresponding to the current model
+	# 		index_to_delete = 0
+	# 		for i,m in enumerate(pending):
+	# 			if m.getBlockModel().label == model_name:
+	# 				index_to_delete = i
+	# 				break
+
+	# 		### pop the right model
+	# 		model = pending.pop(index_to_delete)
+			
+	# 		### store the model and the assiated msg
+	# 		received[model] = devs_msg
+
+	# 	if pending:
+	# 		raise TimeoutError(
+	# 			f"Kafka timeout: missing indices {sorted(pending)}"
+	# 		)
+		
+	# 	return received
+
+	# def _simulate_for_ms4me(self, T=1e8):
+	# 	"""Simulate using standard KafkaDEVS message routing.
+
+	# 	Args:
+	# 		T (_type_, optional): _description_. Defaults to 1e8.
+	# 	"""
+	# 	try:
+
+	# 		# STEP 0 : distributed init
+	# 		logger.info("Initializing atomic models...")
+
+	# 		### simulation time
+	# 		st = SimTime(t=self.ts.Get())
+
+	# 		for worker in self._workers.values():
+	# 			self._send_msg_to_kafka(msg=InitSim(st), 
+	# 									topic=worker.get_topic_to_write())
+
+			
+	# 		init_workers_results = self._await_msgs_from_kafka()
+			
+	# 		### Check time consistency - TODO: remove to improve sim performance
+	# 		for model in self._atomic_models:
+	# 			label = model.getBlockModel().label
+	# 			devs_msg = init_workers_results[model]
+	# 			ta = devs_msg.time.t
+
+	# 			### message received after a InitSim is NextTime
+	# 			assert(isinstance(devs_msg, NextTime))
+	# 			### confirmation of the time matching
+	# 			assert(ta==model.timeNext)
+
+	# 			logger.info(f"  Model {label}: next={model.timeNext}")
+
+	# 		# sys.exit(1)
+
+	# 		# MAIN SIMULATION LOOP
+	# 		logger.info(f"Simulation loop starting (T={T})...")
+	# 		iteration = 0
+	# 		t_start = time.time()
+	# 		old_cpu_time = 0.0
+
+	# 		### first tmin is calculated form kafka init messages sended by all atomic models
+	# 		tmin = min(a.time.t for a in init_workers_results.values())
+
+	# 		### This is the main simulation loop
+	# 		while self.ts.Get() < T and not self._simulator.end_flag:
+	# 			iteration += 1
+				
+	# 			if tmin == float("inf"):
+	# 				logger.info("No more events - simulation complete")
+	# 				break
+	# 			if tmin > T:
+	# 				logger.info("Next event at t=%s exceeds T=%s", tmin, T)
+	# 				break
+
+	# 			### update the simulation time
+	# 			self.ts.Set(tmin)
+				
+	# 			### take imminents worker and model
+	# 			imminents_worker, imminents_model = zip(*[
+	# 		    									(w, w.get_model())
+    # 												for w in self._workers.values()
+    # 												if w.get_model_time_next() == tmin
+	# 											]) if tmin is not None else ((), ())
+
+	# 			imminents_model = list(imminents_model)
+
+	# 			logger.info("=" * 60)
+	# 			logger.info(f"Iteration {iteration}: t={tmin}")
+	# 			logger.info(f"  Imminent models: {list(map(str,imminents_model))}")
+	# 			logger.info("=" * 60)
+				
+	# 			# sys.exit(1)
+
+	# 			# STEP 1: send msg to execute output of imminents
+	# 			logger.info("[1/4] Executing output functions...")
+	# 			st = SimTime(t=tmin)
+	# 			for w in imminents_worker:
+	# 				self._send_msg_to_kafka(msg=SendOutput(st), 
+	# 						 				topic=w.get_topic_to_write())
+
+	# 			output_msgs = self._await_msgs_from_kafka(imminents_model)
+
+	# 			### check msg consistency
+	# 			assert(all(isinstance(msg, ModelOutputMessage) for msg in output_msgs.values()))
+				
+	# 			# sys.exit(1)
+				
+	# 			### juste for trace
+	# 			for model in imminents_model:
+	# 				# model = w.get_model()
+	# 				logger.info(f"  Model {model}")
+
+	# 				for k,v in model.myOutput.items():
+	# 					logger.info(f"    - {str(k)}: {str(v)}")
+
+	# 			# sys.exit(1)
+
+	# 			# STEP 2: routing (from ModelOutputMessage)
+	# 			logger.info("[2/4] Routing outputs to destinations...")
+	# 			externals_to_send = {}
+	# 			parent_model = (
+	# 				self._atomic_models[0].parent if self._atomic_models else None
+	# 			)
+
+	# 			if parent_model is None:
+	# 				logger.warning("  WARNING: No parent model, cannot route outputs")
+	# 			else:
+	# 				for model, devs_msg in output_msgs.items():
+
+	# 					if devs_msg is None:
+	# 						continue
+						
+	# 					if not isinstance(devs_msg, ModelOutputMessage):
+	# 						logger.debug(f"  Ignoring non-output message from {model.getBlockModel().label}: {type(devs_msg).__name__}")
+	# 						continue
+
+	# 					outputs = devs_msg.modelOutput
+	# 					if not outputs:
+	# 						continue
+
+	# 					logger.info("  Model %s produced %s", model.myID, str(outputs))
+
+	# 					for pv in outputs:
+	# 						port_name = pv.portIdentifier
+	# 						value = pv.value
+
+	# 						src_port = None
+	# 						for p in model.OPorts:
+	# 							if p.name == port_name:
+	# 								src_port = p
+	# 								break
+	# 						if src_port is None:
+	# 							continue
+
+	# 						for coupling in parent_model.IC:
+	# 							try:
+	# 								(src_m, src_p), (dest_m, dest_p) = coupling
+	# 							except Exception:
+	# 								continue
+
+	# 							if src_m is model and src_p is src_port:
+	# 								dest_idx = None
+	# 								for idx, m in self._index2model.items():
+	# 									if m is dest_m:
+	# 										dest_idx = idx
+	# 										break
+	# 								if dest_idx is None:
+	# 									continue
+
+	# 								logger.info(
+	# 									"    -> Routing %s.%s -> %s.%s (value=%s)",
+	# 									model.myID, port_name,
+	# 									dest_m.myID, dest_p.name, value
+	# 								)
+
+	# 								if dest_idx not in externals_to_send:
+	# 									externals_to_send[dest_idx] = {}
+	# 								externals_to_send[dest_idx][dest_p.name] = value
+
+	# 			# sys.exit(1)
+
+	# 			# STEP 2b: external transition execution
+	# 			transition_done_msgs = {}
+
+	# 			if externals_to_send:
+	# 				for dest_idx, inputs in externals_to_send.items():
+	# 					pv_list = [
+	# 						PortValue(v, port, type(v).__name__)
+	# 						for port, v in inputs.items()
+	# 					]
+
+	# 					current_worker = self._workers.get(dest_idx)
+
+	# 					logger.info(f"  Sending external transitions to {current_worker.get_model_label()} model...")
+						
+	# 					self._send_msg_to_kafka(msg=ExecuteTransition(st, pv_list), 
+	# 						  					topic=current_worker.get_topic_to_write())
+
+	# 				# récupérer les TransitionDone des modèles qui ont reçu une external
+	# 				td_ext = self._await_msgs_from_kafka([self._workers.get(i).get_model() for i in externals_to_send.keys()])
+	# 				transition_done_msgs.update(td_ext)
+
+	# 				### check msg consistency
+	# 				assert(all(isinstance(msg, TransitionDone) for msg in td_ext.values()))
+
+	# 			else:
+	# 				logger.info("  No outputs to route!")
+
+	# 			# sys.exit(1)
+
+	# 			# STEP 3: internal_transition
+	# 			### take imminents worker and model
+	# 			imminents_worker, imminents_model = zip(*[
+	# 		    									(w, w.get_model())
+    # 												for w in self._workers.values()
+    # 												if w.get_model_time_next() == tmin
+	# 											]) if tmin is not None else ((), ())
+	# 			imminents_model = list(imminents_model)
+
+	# 			logger.info(f"[3/4] Executing internal transitions for: {imminents_model}")
+	# 			for w in imminents_worker:
+	# 				self._send_msg_to_kafka(msg=ExecuteTransition(st), 
+	# 						 				topic=w.get_topic_to_write())
+
+	# 			td_int = self._await_msgs_from_kafka(imminents_model)
+	# 			transition_done_msgs.update(td_int)
+
+	# 			### check msg consistency
+	# 			assert(all(isinstance(msg, TransitionDone) for msg in td_int.values()))
+
+	# 			### update tmin
+	# 			tmin = min([t.nextTime.t for _,t in td_int.items()]+[t.nextTime.t for _,t in td_ext.items()])
+				
+	# 			### for the progress bar of devsimpy
+	# 			self.master.timeLast = tmin
+	# 			### for stat
+	# 			self._simulator.cpu_time = old_cpu_time + (time.time() - t_start)
+
+	# 			# if iteration >= 3:  # garde‑fou
+	# 			# 	logger.info("Reached iteration limit (%s iterations)", iteration)
+	# 			# 	break
+
+	# 			# sys.exit(1)
+
+	# 		logger.info("=" * 60)
+	# 		logger.info("Simulation completed:")
+	# 		logger.info("  Final time: %.2f", self.ts.Get())
+	# 		logger.info("  Total iterations: %s", iteration)
+	# 		logger.info("  CPU time: %.3fs", self._simulator.cpu_time)
+	# 		logger.info("=" * 60)
+
+	# 		self._simulator.terminate()
+
+	# 	except KeyboardInterrupt:
+	# 		logger.warning("Simulation interrupted by user")
+
+	# 	except Exception as e:
+	# 		logger.exception("Simulation error: %s", e)
+
+	# 	# Après la boucle principale, quand tu sais que la simu est finie
+	# 	logger.info("Broadcasting SimulationDone to all workers...")
+
+	# 	st = SimTime(t=self.ts.Get())
+	# 	for w in self._workers.values():
+	# 		self._send_msg_to_kafka(msg=SimulationDone(time=st), 
+	# 					   			topic=w.get_topic_to_write())
+
+	# 	self._terminate_workers()
+
+	# 	logger.info("=" * 60)
+	# 	logger.info("  MS4Me KafkaDEVS Simulation Ended")
+	# 	logger.info("=" * 60)
 
