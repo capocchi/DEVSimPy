@@ -39,7 +39,10 @@ for pydevs_dir, path in getattr(builtins,'DEVS_DIR_PATH_DICT').items():
 
 		### for py 3.X
 		import importlib
-		exec("%s = importlib.import_module('DEVSKernel%s.DEVS')"%(pydevs_dir,d))
+		try:
+			exec("%s = importlib.import_module('DEVSKernel%s.DEVS')"%(pydevs_dir,d))
+		except:
+			pass
 		
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
