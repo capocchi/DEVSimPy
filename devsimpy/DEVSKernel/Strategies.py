@@ -22,10 +22,17 @@ import weakref
 import heapq
 import threading
 import importlib
-import json
 import builtins
 import re
 import os
+
+# Ensure the package root (the 'devsimpy' directory) is on sys.path so imports
+# such as 'PluginManager' or 'DEVSKernel.*' are resolvable when running from the repo root.
+_pkg_dir = os.path.dirname(__file__)
+_pkg_root = os.path.dirname(_pkg_dir)
+if _pkg_root not in sys.path:
+	# insert at front to prefer local package over any installed packages
+	sys.path.insert(0, _pkg_root)
 
 from PluginManager import PluginManager #trigger_event
 from Utilities import getOutDir
@@ -40,6 +47,7 @@ for pydevs_dir, path in getattr(builtins,'DEVS_DIR_PATH_DICT').items():
 		### for py 3.X
 		import importlib
 		exec("%s = importlib.import_module('DEVSKernel%s.DEVS')"%(pydevs_dir,d))
+		
 		
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
