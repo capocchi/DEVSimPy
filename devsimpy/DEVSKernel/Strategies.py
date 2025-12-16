@@ -26,14 +26,6 @@ import builtins
 import re
 import os
 
-# Ensure the package root (the 'devsimpy' directory) is on sys.path so imports
-# such as 'PluginManager' or 'DEVSKernel.*' are resolvable when running from the repo root.
-_pkg_dir = os.path.dirname(__file__)
-_pkg_root = os.path.dirname(_pkg_dir)
-if _pkg_root not in sys.path:
-	# insert at front to prefer local package over any installed packages
-	sys.path.insert(0, _pkg_root)
-
 from PluginManager import PluginManager #trigger_event
 from Utilities import getOutDir
 from Patterns.Strategy import SimStrategy
@@ -46,16 +38,7 @@ for pydevs_dir, path in getattr(builtins,'DEVS_DIR_PATH_DICT').items():
 
 		### for py 3.X
 		import importlib
-		# Try importing as top-level package (DEVSKernel...), otherwise
-		# fallback to package-qualified name (devsimpy.DEVSKernel...)
-		modname = f"DEVSKernel{d}.DEVS"
-		try:
-			module = importlib.import_module(modname)
-		except ModuleNotFoundError:
-			fallback = f"devsimpy.DEVSKernel{d}.DEVS"
-			module = importlib.import_module(fallback)
-		# expose under the expected name (PyDEVS, KafkaDEVS, ...)
-		globals()[pydevs_dir] = module
+		exec("%s = importlib.import_module('DEVSKernel%s.DEVS')"%(pydevs_dir,d))
 		
 		
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
