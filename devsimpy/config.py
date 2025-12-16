@@ -135,5 +135,5 @@ def UpdateBuiltins(new_settings=ALL_SETTINGS):
              cfg = wx.FileConfig(localFilename = cfg_path)
              builtins.__dict__.update(eval(cfg.Read("settings")))
     else:
-         sys.stdout.write('Error trying to read the builtin dictionary from config file. So, we load the default builtin')
+         sys.stdout.write(f"Error trying to read the builtin dictionary from config file ({cfg_path}). So, we load the default builtin")
     

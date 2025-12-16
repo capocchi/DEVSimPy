@@ -131,7 +131,7 @@ wx._core.WindowIDRef.__index__ = wx._core.WindowIDRef.__int__
 ### import Container much faster loading than from Container import ... for os windows only
 import Container
 import Menu
-import ReloadModule
+# import ReloadModule
 
 from ImportLibrary import ImportLibrary
 from Reporter import ExceptionHook
