@@ -1,3 +1,25 @@
+# -*- coding: utf-8 -*-
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+# Proxies.py ---
+#                    --------------------------------
+#                            Copyright (c) 2025
+#                    L. CAPOCCHI (capocchi@univ-corse.fr)
+#                SPE Lab - SISU Group - University of Corsica
+#                     --------------------------------
+# Version 1.0                                        last modified: 12/21/25
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GENERAL NOTES AND REMARKS:
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GLOBAL VARIABLES AND FUNCTIONS
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 import time
 from typing import Protocol, Dict, Any, List
 import json
@@ -15,17 +37,17 @@ class BaseMessage(Protocol):
 
 class KafkaStreamProxy(AbstractStreamProxy):
     """
-    Implémentation concrète du proxy d'envoi utilisant Kafka Producer.
-    Encapsule toute la logique d'envoi de messages vers Kafka.
+    Concrete implementation of the sending proxy using Kafka Producer.
+    Encapsulates all message sending logic to Kafka.
     """
     
     def __init__(self, bootstrap_servers: str, wire_adapter=None):
         """
-        Initialise le proxy d'envoi Kafka.
+        Initialize the Kafka sending proxy.
         
         Args:
-            bootstrap_servers: Adresse du broker Kafka
-            wire_adapter: Adaptateur pour la sérialisation (par défaut: StandardWireAdapter)
+            bootstrap_servers: Kafka broker address
+            wire_adapter: Adapter for serialization (default: StandardWireAdapter)
         """
         self._producer = Producer({
             "bootstrap.servers": bootstrap_servers,
@@ -39,11 +61,11 @@ class KafkaStreamProxy(AbstractStreamProxy):
     
     def send_message(self, topic: str, msg: BaseMessage):
         """
-        Envoie un message typé DEVS vers un topic Kafka.
+        Send a typed DEVS message to a Kafka topic.
         
         Args:
-            topic: Le topic Kafka de destination
-            msg: Le message DEVS typé à envoyer
+            topic: The destination Kafka topic
+            msg: The typed DEVS message to send
         """
         msg_dict = msg.to_dict()
         payload = json.dumps(msg_dict).encode("utf-8")
@@ -54,29 +76,29 @@ class KafkaStreamProxy(AbstractStreamProxy):
         self._logger.debug("OUT: topic=%s value=%s", topic, payload)
     
     def flush(self):
-        """Force l'envoi immédiat de tous les messages en attente"""
+        """Force immediate sending of all pending messages"""
         self._producer.flush()
     
     def close(self):
-        """Ferme proprement le producer Kafka"""
+        """Cleanly close the Kafka producer"""
         self._producer.flush()
         self._logger.info("KafkaStreamProxy closed")
 
 
 class KafkaReceiverProxy(AbstractReceiverProxy):
     """
-    Implémentation concrète du proxy de réception utilisant Kafka Consumer.
-    Encapsule toute la logique de réception et traitement des messages Kafka.
+    Concrete implementation of the receiving proxy using Kafka Consumer.
+    Encapsulates all Kafka message reception and processing logic.
     """
     
     def __init__(self, bootstrap_servers: str, group_id: str, wire_adapter=None):
         """
-        Initialise le proxy de réception Kafka.
+        Initialize the Kafka receiving proxy.
         
         Args:
-            bootstrap_servers: Adresse du broker Kafka
-            group_id: Identifiant du groupe de consommateurs
-            wire_adapter: Adaptateur pour la désérialisation (par défaut: StandardWireAdapter)
+            bootstrap_servers: Kafka broker address
+            group_id: Consumer group identifier
+            wire_adapter: Adapter for deserialization (default: StandardWireAdapter)
         """
         self._consumer = Consumer({
             "bootstrap.servers": bootstrap_servers,
@@ -92,10 +114,10 @@ class KafkaReceiverProxy(AbstractReceiverProxy):
     
     def subscribe(self, topics: List[str]):
         """
-        S'abonne à une liste de topics Kafka.
+        Subscribe to a list of Kafka topics.
         
         Args:
-            topics: Liste des noms de topics à écouter
+            topics: List of topic names to listen to
         """
         self._consumer.subscribe(topics)
         self._subscribed_topics = topics
@@ -103,22 +125,22 @@ class KafkaReceiverProxy(AbstractReceiverProxy):
     
     def receive_messages(self, pending: List, timeout: float) -> Dict:
         """
-        Attend et collecte les messages des workers spécifiés.
+        Wait for and collect messages from specified workers.
         
         Args:
-            pending: Liste des modèles DEVS dont on attend une réponse
-            timeout: Temps maximum d'attente en secondes
+            pending: List of DEVS models from which a response is expected
+            timeout: Maximum wait time in seconds
             
         Returns:
-            Dictionnaire mappant chaque modèle à son message reçu
+            Dictionary mapping each model to its received message
             
         Raises:
-            TimeoutError: Si tous les messages attendus ne sont pas reçus
+            TimeoutError: If all expected messages are not received
         """
         received = {}
         deadline = time.time() + timeout
         
-        # Copie de la liste pour ne pas modifier l'originale
+        # Copy the list to avoid modifying the original
         remaining = list(pending)
         
         while remaining and time.time() < deadline:
@@ -135,7 +157,7 @@ class KafkaReceiverProxy(AbstractReceiverProxy):
                     json.dumps(data),
                 )
                 
-                # Désérialisation du message DEVS
+                # Deserialize the DEVS message
                 devs_msg = self.wire.from_wire(data)
                 model_name = data.get('sender')
                 
@@ -143,7 +165,7 @@ class KafkaReceiverProxy(AbstractReceiverProxy):
                     self._logger.warning("Message without sender field: %s", data)
                     continue
                 
-                # Trouve et retire le modèle correspondant
+                # Find and remove the corresponding model
                 for i, model in enumerate(remaining):
                     if model.getBlockModel().label == model_name:
                         matched_model = remaining.pop(i)
@@ -165,13 +187,13 @@ class KafkaReceiverProxy(AbstractReceiverProxy):
     
     def purge_old_messages(self, max_seconds: float = 2.0) -> int:
         """
-        Vide les anciens messages présents dans le topic.
+        Purge old messages present in the topic.
         
         Args:
-            max_seconds: Temps maximum pour purger les messages
+            max_seconds: Maximum time to purge messages
             
         Returns:
-            Nombre de messages purgés
+            Number of purged messages
         """
         flushed = 0
         start_flush = time.time()
@@ -191,6 +213,6 @@ class KafkaReceiverProxy(AbstractReceiverProxy):
         return flushed
     
     def close(self):
-        """Ferme proprement le consumer Kafka"""
+        """Cleanly close the Kafka consumer"""
         self._consumer.close()
         self._logger.info("KafkaReceiverProxy closed")

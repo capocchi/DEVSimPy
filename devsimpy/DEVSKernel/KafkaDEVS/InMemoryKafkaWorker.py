@@ -1,6 +1,25 @@
-# ---------------------------------------------------------------------------
-# Kafka-based IN-MEMORY worker (thread) Class
-# ---------------------------------------------------------------------------
+# -*- coding: utf-8 -*-
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+# InMemoryKafkaWorker.py ---
+#                    --------------------------------
+#                            Copyright (c) 2025
+#                    L. CAPOCCHI (capocchi@univ-corse.fr)
+#                SPE Lab - SISU Group - University of Corsica
+#                     --------------------------------
+# Version 1.0                                        last modified: 12/21/25
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GENERAL NOTES AND REMARKS:
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GLOBAL VARIABLES AND FUNCTIONS
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 # Requires: pip install confluent-kafka
 import threading
 import json
@@ -8,6 +27,7 @@ import logging
 import time
 
 from abc import ABC, abstractmethod
+from typing import Dict, Any
 
 from DEVSKernel.KafkaDEVS.logconfig import LOGGING_LEVEL, worker_kafka_logger
 
@@ -20,7 +40,7 @@ except Exception:
 	Producer = None
 	Consumer = None
 
-class InMemoryKafkaWorker(threading.Thread):
+class InMemoryKafkaWorker(threading.Thread, ABC):
 	"""Worker thread that manages one atomic model in memory."""
 
 	def __init__(self, model_name, aDEVS, bootstrap_server, in_topic=None, out_topic=None):
@@ -30,13 +50,13 @@ class InMemoryKafkaWorker(threading.Thread):
 		self.bootstrap_server = bootstrap_server
 		self.running = True
 
-		# Topics explicitement fournis par la stratégie
-		self.in_topic = in_topic  ### from coodinator
+		# Topics explicitly provided by the strategy
+		self.in_topic = in_topic  ### from coordinator
 		self.out_topic = out_topic ### to coordinator
 		
 		group_id = f"worker-thread-{self.aDEVS.myID}-{int(time.time() * 1000)}"
 
-		# Kafka consumer pour le topic de travail dédié
+		# Kafka consumer for the dedicated work topic
 		self.consumer = Consumer({
 			"bootstrap.servers": bootstrap_server,
 			"group.id": group_id,
@@ -45,7 +65,7 @@ class InMemoryKafkaWorker(threading.Thread):
 		})
 		self.consumer.subscribe([self.in_topic])
 
-		# Kafka producer pour renvoyer les réponses
+		# Kafka producer to send responses back
 		self.producer = Producer({
 			"bootstrap.servers": bootstrap_server
 		})
@@ -66,11 +86,11 @@ class InMemoryKafkaWorker(threading.Thread):
 		return self.aDEVS.timeNext
 	
 	# ------------------------------------------------------------------
-	#  Traduction message DEVS -> appels sur le modèle
+	#  DEVS message translation -> model calls
 	# ------------------------------------------------------------------
 
 	def do_initialize(self, t:float):
-		"""Initialise le modèle atomique avant de démarrer la boucle."""
+		"""Initialize the atomic model before starting the loop."""
 		self.aDEVS.sigma = 0.0
 		self.aDEVS.timeLast = 0.0
 		self.aDEVS.myTimeAdvance = self.aDEVS.timeAdvance()
@@ -80,14 +100,14 @@ class InMemoryKafkaWorker(threading.Thread):
 			self.aDEVS.myTimeAdvance += t
 
 	def do_external_transition(self, t, msg):
-		"""Effectue une transition interne sur le modèle atomique."""
+		"""Perform an external transition on the atomic model."""
 		
 		port_inputs = {}
 
-		# Construire dict {port_obj -> Message(value, time)}
+		# Build dict {port_obj -> Message(value, time)}
 		from DomainInterface.Object import Message
 		for pv in msg.portValueList:
-			# pv.portIdentifier doit matcher le nom du port d'entrée
+			# pv.portIdentifier must match the input port name
 			for iport in self.aDEVS.IPorts:
 				if iport.name == pv.portIdentifier:
 					m = Message(pv.value, t)
@@ -102,7 +122,7 @@ class InMemoryKafkaWorker(threading.Thread):
 
 		self.aDEVS.extTransition()
 
-		# Udpate time variables:
+		# Update time variables:
 		self.aDEVS.timeLast = t
 		self.aDEVS.myTimeAdvance = self.aDEVS.timeAdvance()
 		self.aDEVS.timeNext = self.aDEVS.timeLast + self.aDEVS.myTimeAdvance
@@ -110,7 +130,7 @@ class InMemoryKafkaWorker(threading.Thread):
 		self.aDEVS.elapsed = 0
 
 	def do_internal_transition(self, t:float):
-		"""Effectue une transition interne sur le modèle atomique."""
+		"""Perform an internal transition on the atomic model."""
 		
 		time_last = self.aDEVS.timeLast
 		self.aDEVS.elapsed = t - time_last
@@ -124,12 +144,12 @@ class InMemoryKafkaWorker(threading.Thread):
 		self.aDEVS.elapsed = 0
 
 	def do_output_function(self):
-		"""Appelle outputFnc() sur le modèle atomique et retourne les sorties."""
+		"""Call outputFnc() on the atomic model and return the outputs."""
 
 		self.aDEVS.outputFnc()
 
 	@abstractmethod
-	def _process_standard(self, data):
+	def _process_standard(self, data: Dict[str, Any]) -> None:
 		"""
 		Process standard DEVS message format.
 		Must be implemented by subclasses.
@@ -137,10 +157,10 @@ class InMemoryKafkaWorker(threading.Thread):
 		Args:
 			data (dict): Parsed JSON message data
 		"""
-		pass
+		...
 
 	# ------------------------------------------------------------------
-	#  Boucle principale
+	#  Main loop
 	# ------------------------------------------------------------------
 
 	def run(self):
