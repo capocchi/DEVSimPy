@@ -51,7 +51,7 @@ from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_messages import (
 )
 from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
 from DEVSKernel.KafkaDEVS.MS4Me.MS4MeKafkaWorker import MS4MeKafkaWorker
-from DEVSKernel.KafkaDEVS.kafkaconfig import KAFKA_BOOTSTRAP
+from DEVSKernel.KafkaDEVS.MS4Me.kafkaconfig import KAFKA_BOOTSTRAP
 
 class WorkerCoordinatorTester:
     """

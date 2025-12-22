@@ -28,9 +28,9 @@ from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_messages import (
     SimulationDone,
 )
 from DEVSKernel.KafkaDEVS.Proxies import KafkaReceiverProxy, KafkaStreamProxy
-from DEVSKernel.KafkaDEVS.auto_kafka import ensure_kafka_broker
+from DEVSKernel.KafkaDEVS.MS4Me.auto_kafka import ensure_kafka_broker
 from DEVSKernel.KafkaDEVS.logconfig import configure_logging, LOGGING_LEVEL
-from DEVSKernel.KafkaDEVS.kafkaconfig import KAFKA_BOOTSTRAP, AUTO_START_KAFKA_BROKER
+from DEVSKernel.KafkaDEVS.MS4Me.kafkaconfig import KAFKA_BOOTSTRAP, AUTO_START_KAFKA_BROKER
 
 configure_logging()
 logger = logging.getLogger("DEVSKernel.KafkaDEVS.SimStrategyKafkaMS4Me")

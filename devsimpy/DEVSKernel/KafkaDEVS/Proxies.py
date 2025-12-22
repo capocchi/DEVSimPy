@@ -25,7 +25,6 @@ from typing import Protocol, Dict, Any, List
 import json
 
 from confluent_kafka import Producer, Consumer
-from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
 from DEVSKernel.KafkaDEVS.logconfig import coord_kafka_logger
 from Patterns.Proxy import AbstractStreamProxy, AbstractReceiverProxy
 
@@ -35,6 +34,29 @@ class BaseMessage(Protocol):
         """Convert message to dictionary"""
         ...
 
+    def from_dict(d: Dict[str, Any]) -> "BaseMessage":
+        """Create message from dictionary"""
+        ...
+
+class StandardWireAdapter:
+    """
+    Msg adaptator.
+    """
+
+    @staticmethod
+    def to_wire(msg: BaseMessage) -> Dict[str, Any]:
+        """
+        Transform BaseMessage to dict in order to be sended on Broker.
+        """
+        ...
+
+    @staticmethod
+    def from_wire(d: Dict[str, Any]) -> BaseMessage:
+        """
+        Transform  a dict in BaseMessage.
+        """
+        ...
+    
 class KafkaStreamProxy(AbstractStreamProxy):
     """
     Concrete implementation of the sending proxy using Kafka Producer.

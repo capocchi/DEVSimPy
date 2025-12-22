@@ -33,7 +33,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("WorkerLauncher")
 
-from DEVSKernel.KafkaDEVS.kafkaconfig import KAFKA_BOOTSTRAP
+from DEVSKernel.KafkaDEVS.MS4Me.kafkaconfig import KAFKA_BOOTSTRAP
 
 # Fonction pour charger dynamiquement un modèle depuis un .amd
 def load_model_from_amd(amd_path: str, class_name: str = None):

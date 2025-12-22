@@ -2,8 +2,9 @@ import subprocess
 import shutil
 import time
 from confluent_kafka.admin import AdminClient
-from .kafkaconfig import KAFKA_BOOTSTRAP, KAFKA_CONATINER_NAME, KAFKA_IMAGE
 from confluent_kafka import KafkaException, KafkaError
+
+from .kafkaconfig import KAFKA_BOOTSTRAP, KAFKA_CONATINER_NAME, KAFKA_IMAGE
 
 def wait_for_kafka(bootstrap: str, timeout: float = 30.0, interval: float = 1.0):
     """Wait for the Kafka broker to respond on bootstrap, or raise after timeout."""
