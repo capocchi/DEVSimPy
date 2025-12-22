@@ -27,6 +27,9 @@ import pathlib
 import zipfile
 import sys
 
+import gettext
+_ = gettext.gettext
+
 from StandaloneNoGUI import retrieve_file_paths
 
 class StandaloneNoGUIKafkaPKG:
