@@ -54,7 +54,7 @@ class PortValue:
 
 # ---------- Classe racine des messages ----------
 
-@dataclass
+@dataclass(slots=True)
 class BaseMessage:
     devsType: str
 

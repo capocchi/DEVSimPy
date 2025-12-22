@@ -1,12 +1,17 @@
 import time
-from typing import Dict, List
+from typing import Protocol, Dict, Any, List
 import json
 
 from confluent_kafka import Producer, Consumer
 from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
 from DEVSKernel.KafkaDEVS.logconfig import coord_kafka_logger
 from Patterns.Proxy import AbstractStreamProxy, AbstractReceiverProxy
-from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_messages import BaseMessage
+
+class BaseMessage(Protocol):
+    """Protocol for any message type with serialization support"""
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert message to dictionary"""
+        ...
 
 class KafkaStreamProxy(AbstractStreamProxy):
     """
