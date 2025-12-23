@@ -11,7 +11,7 @@ class AbstractStreamProxy(ABC):
         """
         Send messages.
         """
-        pass
+        ...
 
 
 class AbstractReceiverProxy(ABC):
@@ -24,4 +24,4 @@ class AbstractReceiverProxy(ABC):
     def receive_messages(self, *args, **kargs):
         """ Wait messages.
         """
-        pass
+        ...

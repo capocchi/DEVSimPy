@@ -9,7 +9,7 @@ project_root = here.parents[2]  # .../devsimpy
 sys.path.insert(0, str(project_root))
 
 # Adapter l'import au chemin réel de ton package
-from DEVSKernel.KafkaDEVS.auto_kafka import ensure_kafka_broker
+from DEVSKernel.KafkaDEVS.MS4Me.auto_kafka import ensure_kafka_broker
 
 def main():
     print("=== Test ensure_kafka_broker ===")

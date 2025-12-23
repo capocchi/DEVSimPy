@@ -1,15 +1,36 @@
-# ---------------------------------------------------------------------------
-# Kafka-based IN-MEMORY worker (thread) Class
-# ---------------------------------------------------------------------------
-# Requires: pip install confluent-kafka
-import threading
-import json
+# -*- coding: utf-8 -*-
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+# InMemoryKafkaWorker.py ---
+#                    --------------------------------
+#                            Copyright (c) 2025
+#                    L. CAPOCCHI (capocchi@univ-corse.fr)
+#                SPE Lab - SISU Group - University of Corsica
+#                     --------------------------------
+# Version 1.0                                        last modified: 12/22/25
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GENERAL NOTES AND REMARKS:
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# GLOBAL VARIABLES AND FUNCTIONS
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+# ------------------------------------------------------------------
+#  Kafka-specific implementation
+# ------------------------------------------------------------------
+
 import logging
 import time
 
-from abc import ABC, abstractmethod
+from DEVSKernel.KafkaDEVS.InMemoryMessagingWorker import InMemoryMessagingWorker, MessageAdapter, MessageConsumer, MessageProducer
+from typing import Dict, Any
 
-from DEVSKernel.KafkaDEVS.logconfig import LOGGING_LEVEL, worker_kafka_logger
+from DEVSKernel.KafkaDEVS.logconfig import LOGGING_LEVEL
 
 logger = logging.getLogger("DEVSKernel.KafkaDEVS.InMemoryKafkaWorker")
 logger.setLevel(LOGGING_LEVEL)
@@ -20,152 +41,74 @@ except Exception:
 	Producer = None
 	Consumer = None
 
-class InMemoryKafkaWorker(threading.Thread):
-	"""Worker thread that manages one atomic model in memory."""
+class KafkaMessageAdapter(MessageAdapter):
+    """Kafka-specific implementation of MessageAdapter"""
+    
+    def create_consumer(self, config: Dict[str, Any]) -> MessageConsumer:
+        """Create a Kafka consumer"""
+        return Consumer(config)
+    
+    def create_producer(self, config: Dict[str, Any]) -> MessageProducer:
+        """Create a Kafka producer"""
+        return Producer(config)
+    
+    def extract_message_value(self, message: Any) -> bytes:
+        """Extract value from Kafka message"""
+        return message.value()
+    
+    def has_error(self, message: Any) -> bool:
+        """Check if Kafka message has an error"""
+        return message.error() is not None
+    
+    def get_topic(self, message: Any) -> str:
+        """Get topic from Kafka message"""
+        return message.topic()
 
-	def __init__(self, model_name, aDEVS, bootstrap_server, in_topic=None, out_topic=None):
-		super().__init__(daemon=True)
-		self.aDEVS = aDEVS
-		self.model_name = model_name
-		self.bootstrap_server = bootstrap_server
-		self.running = True
-
-		# Topics explicitement fournis par la stratégie
-		self.in_topic = in_topic  ### from coodinator
-		self.out_topic = out_topic ### to coordinator
-		
-		group_id = f"worker-thread-{self.aDEVS.myID}-{int(time.time() * 1000)}"
-
-		# Kafka consumer pour le topic de travail dédié
-		self.consumer = Consumer({
-			"bootstrap.servers": bootstrap_server,
-			"group.id": group_id,
-			"auto.offset.reset": "latest",
-			"enable.auto.commit": True,
-		})
-		self.consumer.subscribe([self.in_topic])
-
-		# Kafka producer pour renvoyer les réponses
-		self.producer = Producer({
-			"bootstrap.servers": bootstrap_server
-		})
-
-		logger.info(
-            "  [Thread-%s] Created for model %s (in topic=%s, out topic=%s)",
-            self.aDEVS.myID, self.model_name, self.in_topic, self.out_topic
+class InMemoryKafkaWorker(InMemoryMessagingWorker):
+    """
+    Kafka-specific worker thread that manages one atomic model in memory.
+    This is a concrete implementation of InMemoryMessagingWorker for Kafka.
+    """
+    
+    def __init__(
+        self, 
+        model_name: str, 
+        aDEVS, 
+        bootstrap_server: str, 
+        in_topic: str = None, 
+        out_topic: str = None
+    ):
+        """
+        Initialize the Kafka worker.
+        
+        Args:
+            model_name: Name of the DEVS model
+            aDEVS: The atomic DEVS model instance
+            bootstrap_server: Kafka bootstrap server address
+            in_topic: Topic to receive messages from coordinator
+            out_topic: Topic to send messages to coordinator
+        """
+        group_id = f"worker-thread-{aDEVS.myID}-{int(time.time() * 1000)}"
+        
+        consumer_config = {
+            "bootstrap.servers": bootstrap_server,
+            "group.id": group_id,
+            "auto.offset.reset": "latest",
+            "enable.auto.commit": True,
+        }
+        
+        producer_config = {
+            "bootstrap.servers": bootstrap_server
+        }
+        
+        adapter = KafkaMessageAdapter()
+        
+        super().__init__(
+            model_name=model_name,
+            aDEVS=aDEVS,
+            adapter=adapter,
+            consumer_config=consumer_config,
+            producer_config=producer_config,
+            in_topic=in_topic,
+            out_topic=out_topic
         )
-	
-	def get_model(self):
-		"""Returns the atomic DEVS model managed by this worker."""
-		return self.aDEVS
-	
-	def get_model_label(self):
-		return self.model_name
-	
-	def get_model_time_next(self):
-		return self.aDEVS.timeNext
-	
-	# ------------------------------------------------------------------
-	#  Traduction message DEVS -> appels sur le modèle
-	# ------------------------------------------------------------------
-
-	def do_initialize(self, t:float):
-		"""Initialise le modèle atomique avant de démarrer la boucle."""
-		self.aDEVS.sigma = 0.0
-		self.aDEVS.timeLast = 0.0
-		self.aDEVS.myTimeAdvance = self.aDEVS.timeAdvance()
-		self.aDEVS.timeNext = self.aDEVS.timeLast + self.aDEVS.myTimeAdvance
-	
-		if self.aDEVS.myTimeAdvance != float("inf"): 
-			self.aDEVS.myTimeAdvance += t
-
-	def do_external_transition(self, t, msg):
-		"""Effectue une transition interne sur le modèle atomique."""
-		
-		port_inputs = {}
-
-		# Construire dict {port_obj -> Message(value, time)}
-		from DomainInterface.Object import Message
-		for pv in msg.portValueList:
-			# pv.portIdentifier doit matcher le nom du port d'entrée
-			for iport in self.aDEVS.IPorts:
-				if iport.name == pv.portIdentifier:
-					m = Message(pv.value, t)
-					port_inputs[iport] = m
-					break
-		
-		self.aDEVS.myInput = port_inputs
-
-		# update elapsed time. This is necessary for the call to the external
-		# transition function, which is used to update the DEVS' state.
-		self.aDEVS.elapsed = t - self.aDEVS.timeLast
-
-		self.aDEVS.extTransition()
-
-		# Udpate time variables:
-		self.aDEVS.timeLast = t
-		self.aDEVS.myTimeAdvance = self.aDEVS.timeAdvance()
-		self.aDEVS.timeNext = self.aDEVS.timeLast + self.aDEVS.myTimeAdvance
-		if self.aDEVS.myTimeAdvance != float("inf"): self.aDEVS.myTimeAdvance += t
-		self.aDEVS.elapsed = 0
-
-	def do_internal_transition(self, t:float):
-		"""Effectue une transition interne sur le modèle atomique."""
-		
-		time_last = self.aDEVS.timeLast
-		self.aDEVS.elapsed = t - time_last
-
-		self.aDEVS.intTransition()
-
-		self.aDEVS.timeLast = t
-		self.aDEVS.myTimeAdvance = self.aDEVS.timeAdvance()
-		self.aDEVS.timeNext = self.aDEVS.timeLast + self.aDEVS.myTimeAdvance
-		if self.aDEVS.myTimeAdvance != float('inf'): self.aDEVS.myTimeAdvance += t
-		self.aDEVS.elapsed = 0
-
-	def do_output_function(self):
-		"""Appelle outputFnc() sur le modèle atomique et retourne les sorties."""
-
-		self.aDEVS.outputFnc()
-
-	@abstractmethod
-	def _process_standard(self, data):
-		"""
-		Process standard DEVS message format.
-		Must be implemented by subclasses.
-		
-		Args:
-			data (dict): Parsed JSON message data
-		"""
-		pass
-
-	# ------------------------------------------------------------------
-	#  Boucle principale
-	# ------------------------------------------------------------------
-
-	def run(self):
-		logger.info(f"  [Thread-{self.aDEVS.myID}] Started")
-
-		while self.running:
-			msg = self.consumer.poll(timeout=0.5)
-			if msg is None or msg.error():
-				continue
-
-			try:
-				raw = msg.value().decode("utf-8")
-				data = json.loads(raw)
-
-				worker_kafka_logger.debug(f"[Thread-{self.aDEVS.myID}] IN: topic={msg.topic()} value={raw}")
-				
-				self._process_standard(data)
-
-			except Exception as e:
-				logger.exception("[Thread-%s] Error in run loop: %s", self.aDEVS.myID, e)
-
-		self.consumer.close()
-		logger.info(f"  [Thread-{self.aDEVS.myID}] Stopped")
-
-
-	def stop(self):
-		"""Stop the worker thread."""
-		self.running = False

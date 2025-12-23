@@ -115,8 +115,8 @@ class StandaloneGUI(wx.Frame):
         self.SetIcon(icon)
   
         # Taille adaptée au contenu
-        self.SetSize((650, 450))
-        self.SetMinSize((600, 450))
+        self.SetSize((650, 500))
+        # self.SetMinSize((600, 450))
         
         panel = wx.Panel(self)
         panel.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOW))

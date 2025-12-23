@@ -28,8 +28,8 @@ GLOBAL_SETTINGS["INFINITY"] = float("inf")
 builtins.__dict__.update(GLOBAL_SETTINGS)
 builtins.__dict__.update(USER_SETTINGS)
 
-from DEVSKernel.KafkaDEVS.auto_kafka import ensure_kafka_broker
-from DEVSKernel.KafkaDEVS.kafkaconfig import KAFKA_BOOTSTRAP
+from DEVSKernel.KafkaDEVS.MS4Me.auto_kafka import ensure_kafka_broker
+from DEVSKernel.KafkaDEVS.MS4Me.kafkaconfig import KAFKA_BOOTSTRAP
 from DEVSKernel.KafkaDEVS.InMemoryKafkaWorker import InMemoryKafkaWorker
 from DEVSKernel.KafkaDEVS.devs_kafka_messages import (
 	SimTime,
