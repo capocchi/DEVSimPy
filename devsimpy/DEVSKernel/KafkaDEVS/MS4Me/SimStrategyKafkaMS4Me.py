@@ -8,7 +8,6 @@ import logging
 import time
 from typing import Dict, List, Optional
 
-from confluent_kafka import Producer, Consumer
 from confluent_kafka.admin import AdminClient, NewTopic
 from confluent_kafka import KafkaException, KafkaError
 
@@ -95,7 +94,7 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 
         # Ensure confluent-kafka is available
         try:
-            from confluent_kafka import Producer, Consumer
+            import confluent_kafka
         except ImportError:
             raise RuntimeError("confluent-kafka not available. Please install it: pip install confluent-kafka")
 
