@@ -100,6 +100,7 @@ from Decorators import BuzyCursorNotification, Post_Undo
 from Utilities import HEXToRGB, relpath, playSound, sendEvent, load_and_resize_image, getInstance, FixedList, getObjectFromString, getTopLevelWindow, printOnStatusBar
 from Patterns import Subject, Observer
 from StandaloneGUIKafkaPKG import StandaloneGUIKafkaPKG
+from DiagramInfoDialog import DiagramInfoDialog
 
 if getattr(builtins, 'GUI_FLAG', True):
 	from DetachedFrame import DetachedFrame
@@ -790,8 +791,21 @@ class Diagram(Savable, Structurable):
 						_("Number of output port models: %d\n")%stat_dico['oPort_nbr']]
 					)
 
-		dlg = wx.lib.dialogs.ScrolledMessageDialog(self.GetParent(), msg, _("Diagram Information"), style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
-		dlg.ShowModal()
+		from Utilities import generate_plantuml_from_diagram_recursive
+
+		try:
+			# Générer le code PlantUML en mémoire
+			puml_content = generate_plantuml_from_diagram_recursive(self, level=0)
+			
+			# Afficher le dialogue
+			dlg = DiagramInfoDialog(self.GetParent(), msg, puml_content)
+			dlg.ShowModal()
+			dlg.Destroy()
+		except Exception as e:
+			wx.MessageBox(_("An error occurred while generating the PlantUML diagram: %s") % str(e), _("Error"), wx.OK | wx.ICON_ERROR)	
+			dlg = wx.lib.dialogs.ScrolledMessageDialog(self.GetParent(), msg, _("Diagram Information"), style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+			dlg.ShowModal()
+
 
 	def OnClosePriorityGUI(self, event):
 		""" Method that update the self.priority_list and close the priorityGUI Frame
@@ -956,7 +970,7 @@ class Diagram(Savable, Structurable):
 				## make DEVS instance from diagram
 				master = Diagram.makeDEVSInstance(diagram)
 
-				if not master or isinstance(master,str):
+				if not master or isinstance(master, str):
 					wx.MessageBox(master, _("Simulation Manager"))
 					return False
 				## test of filename model attribute
