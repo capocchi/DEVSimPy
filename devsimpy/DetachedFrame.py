@@ -152,6 +152,10 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			toolbar.EnableTool(ID_UPWARD, level != 0)
 		#=======================================================================
 
+		# Bouton d'information (NOUVEAU)
+		ID_DETACHED_INFO = self.toggle_list[6]
+		self.tools.append(toolbar.AddTool(ID_DETACHED_INFO, "", load_and_resize_image('info.png'), shortHelp=_('Help')))
+
 		toolbar.Realize()
 		self.SetToolBar(toolbar)
 		

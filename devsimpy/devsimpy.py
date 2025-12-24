@@ -614,6 +614,7 @@ class MainApplication(wx.Frame):
 		tb.AddControl(level_label)
 		tb.AddControl(self.spin)
 
+	
 		### add button to define downward and upward rules
 		ID_UPWARD = self.toggle_list[4]
 		ID_DOWNWARD = self.toggle_list[5]
@@ -626,7 +627,11 @@ class MainApplication(wx.Frame):
 
 		##############################################################################################
 
-		for i in (3,8,12,17,21):
+		# Bouton d'information de la toolbar (NOUVEAU)
+		ID_TOOLBAR_INFO = self.toggle_list[6]
+		self.tools.append(tb.AddTool(ID_TOOLBAR_INFO, "", load_and_resize_image("info.png"), shortHelp="Toolbar Help"))
+
+		for i in (3,8,12,17,21,23):
 			tb.InsertSeparator(i)
 		
 		### undo and redo button desabled
@@ -638,12 +643,30 @@ class MainApplication(wx.Frame):
 		### default direct connector toogled
 		tb.ToggleTool(self.toggle_list[0], 1)
 
-		### Binding
+		# Bindings
 		tool_bindings = [
-			self.OnNew, self.OnOpenFile, self.OnPrintPreview, self.OnSaveFile, self.OnSaveAsFile,
-			self.OnUndo, self.OnRedo, self.OnZoom, self.OnUnZoom, self.AnnuleZoom,
-			self.OnPriorityGUI, self.OnCheck, self.OnPlugins, self.OnSimulation,
-			self.OnDirectConnector, self.OnSquareConnector, self.OnLinearConnector, self.OnCurveConnector
+			self.OnNew,
+			self.OnOpenFile,
+			self.OnPrintPreview,
+			self.OnSaveFile,
+			self.OnSaveAsFile,
+			self.OnUndo,
+			self.OnRedo,
+			self.OnZoom,
+			self.OnUnZoom,
+			self.AnnuleZoom,
+			self.OnPriorityGUI,
+			self.OnCheck,
+			self.OnPlugins,
+			self.OnSimulation,
+			self.OnDirectConnector,
+			self.OnSquareConnector,
+			self.OnLinearConnector,
+			self.OnCurveConnector,
+			None,  # Placeholder for level_label (no binding)
+			None,  # Placeholder for spin (has its own binding)
+			self.OnDownWard,
+			self.OnUpWard
 		]
 
 		for tool, handler in zip(self.tools, tool_bindings):
@@ -657,9 +680,107 @@ class MainApplication(wx.Frame):
 		self.Bind(wx.EVT_TOOL, self.OnUpWard, id=ID_UPWARD)
 		self.Bind(wx.EVT_TOOL, self.OnDownWard, id=ID_DOWNWARD)
 
+		self.Bind(wx.EVT_TOOL, self.OnShowToolbarHelp, id=ID_TOOLBAR_INFO)
 		tb.Realize()
 
 		# self.SetToolBar(tb)
+
+	def OnShowToolbarHelp(self, event):
+		"""Show help dialog about toolbar buttons"""
+		
+		help_msg = _(
+			"DEVSimPy TOOLBAR GUIDE\n\n"
+			"═══════════════════════════════════════\n\n"
+			"FILE OPERATIONS:\n\n"
+			"• New (📄): Create a new empty DEVS diagram\n"
+			"  Shortcut: Ctrl+N\n\n"
+			"• Open (📂): Load an existing .dsp or .yaml diagram file\n"
+			"  Shortcut: Ctrl+O\n\n"
+			"• Print Preview (🖨️): Preview diagram before printing\n"
+			"  Shortcut: Ctrl+P\n\n"
+			"• Save (💾): Save current diagram to file\n"
+			"  Shortcut: Ctrl+S\n"
+			"  If file is new, will prompt for filename\n\n"
+			"• Save As (💾+): Save diagram with a new name\n"
+			"  Creates a copy with different filename\n\n"
+			"═══════════════════════════════════════\n\n"
+			"EDITING OPERATIONS:\n\n"
+			"• Undo (↶): Undo last action\n"
+			"  Click to undo once\n"
+			"  Hold to see full history\n\n"
+			"• Redo (↷): Redo previously undone action\n"
+			"  Click to redo once\n"
+			"  Hold to see forward history\n\n"
+			"═══════════════════════════════════════\n\n"
+			"VIEW OPERATIONS:\n\n"
+			"• Zoom In (🔍+): Enlarge diagram view\n"
+			"  Makes models appear bigger\n\n"
+			"• Zoom Out (🔍-): Reduce diagram view\n"
+			"  Makes models appear smaller\n\n"
+			"• Reset Zoom (🔍): Return to 100% normal size\n"
+			"  Cancels all zoom operations\n\n"
+			"═══════════════════════════════════════\n\n"
+			"DEVS TOOLS:\n\n"
+			"• Priority (F3): Define execution order for coupled models\n"
+			"  (PyDEVS only - not available in PyPDEVS)\n\n"
+			"• Debugger (F4): Check diagram for errors\n"
+			"  Validates model connections and structure\n"
+			"  Must run before simulation\n\n"
+			"• Plugins: Manage DEVSimPy plugins\n"
+			"  Enable/disable extensions\n"
+			"  Configure plugin settings\n\n"
+			"• Simulation (F5): Launch simulation dialog\n"
+			"  Start DEVS simulation process\n"
+			"  Configure simulation parameters\n\n"
+			"═══════════════════════════════════════\n\n"
+			"CONNECTION TYPES:\n\n"
+			"Choose how connections between models are drawn:\n\n"
+			"• Direct (—): Straight line connections\n"
+			"  Shortest path between ports\n\n"
+			"• Square (⌐⌙): Right-angle connections\n"
+			"  Horizontal then vertical routing\n\n"
+			"• Linear (╱): Diagonal straight lines\n"
+			"  Direct but with angle constraints\n\n"
+			"• Curve (∿): Curved/bezier connections\n"
+			"  Smooth rounded paths\n\n"
+			"═══════════════════════════════════════\n\n"
+			"ABSTRACTION HIERARCHY:\n\n"
+			"• Level: Select abstraction level (0-20)\n"
+			"  Level 0: Base diagram\n"
+			"  Level 1+: Abstract views with DAM/UAM\n\n"
+			"• Downward (⬇): Configure downward abstraction rules\n"
+			"  Define how to aggregate lower levels\n\n"
+			"• Upward (⬆): Configure upward abstraction rules\n"
+			"  Define how to detail higher levels\n\n"
+			"Note: DAM (Downward Abstraction Manager) and UAM (Upward\n"
+			"Abstraction Manager) are only available at level > 0\n\n"
+			"═══════════════════════════════════════\n\n"
+			"TIPS:\n\n"
+			"- Always save before simulation\n"
+			"- Run Debugger (F4) before Simulation (F5)\n"
+			"- Use connection types for cleaner diagrams\n"
+			"- Undo/Redo support most editing operations\n"
+			"- Zoom controls help with large diagrams\n"
+			"- Abstraction levels enable hierarchical modeling"
+		)
+		
+		try:
+			import wx.lib.dialogs
+			dlg = wx.lib.dialogs.ScrolledMessageDialog(
+				self, 
+				help_msg, 
+				_("Toolbar Help"),
+				size=(650, 600)
+			)
+			dlg.ShowModal()
+			dlg.Destroy()
+		except Exception as e:
+			# Fallback
+			wx.MessageBox(
+				help_msg,
+				_("Toolbar Help"),
+				wx.OK | wx.ICON_INFORMATION
+			)
 
 	def GetExportPathsList(self):
 		""" Return the list of exported path.
