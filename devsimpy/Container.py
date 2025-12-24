@@ -2332,7 +2332,8 @@ if getattr(builtins, 'GUI_FLAG', True):
 			obj = event.GetEventObject()
 
 			### if right clic on canvas
-			parent = self if isinstance(obj, Menu.ShapeCanvasPopupMenu) else getTopLevelWindow().GetControlNotebook().GetTree()
+			# parent = self if isinstance(obj, Menu.ShapeCanvasPopupMenu) else getTopLevelWindow().GetControlNotebook().GetTree()
+			parent = obj.GetWindow()
 			gmwiz = ShapeCanvas.StartWizard(parent)
 
 			return gmwiz
