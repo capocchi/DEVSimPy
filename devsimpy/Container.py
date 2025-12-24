@@ -97,9 +97,21 @@ sys.modules['Savable'] = sys.modules['Mixins.Savable']
 sys.modules['Container.PickledCollection'] = PickledCollection
 
 from Decorators import BuzyCursorNotification, Post_Undo
-from Utilities import HEXToRGB, relpath, playSound, sendEvent, load_and_resize_image, getInstance, FixedList, getObjectFromString, getTopLevelWindow, printOnStatusBar
+from Utilities import (HEXToRGB,
+						relpath, 
+						playSound, 
+						sendEvent, 
+						load_and_resize_image, 
+						getInstance, FixedList, 
+						getObjectFromString, 
+						getTopLevelWindow, 
+						printOnStatusBar, 
+						generate_plantuml_from_diagram_recursive,
+						generate_detailed_class_diagram_recursive)
+
 from Patterns import Subject, Observer
 from StandaloneGUIKafkaPKG import StandaloneGUIKafkaPKG
+from DiagramInfoDialog import DiagramInfoDialog
 
 if getattr(builtins, 'GUI_FLAG', True):
 	from DetachedFrame import DetachedFrame
@@ -790,8 +802,20 @@ class Diagram(Savable, Structurable):
 						_("Number of output port models: %d\n")%stat_dico['oPort_nbr']]
 					)
 
-		dlg = wx.lib.dialogs.ScrolledMessageDialog(self.GetParent(), msg, _("Diagram Information"), style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
-		dlg.ShowModal()
+		try:
+			# Générer le code PlantUML en mémoire
+			puml_component = generate_plantuml_from_diagram_recursive(self, level=0)
+			puml_class = generate_detailed_class_diagram_recursive(self, level=0)
+			
+			# Afficher le dialogue avec les 3 onglets
+			dlg = DiagramInfoDialog(self.GetParent(), msg, puml_component, puml_class)
+			dlg.ShowModal()
+			dlg.Destroy()
+		except Exception as e:
+			wx.MessageBox(_("An error occurred while generating the PlantUML diagram: %s") % str(e), _("Error"), wx.OK | wx.ICON_ERROR)	
+			dlg = wx.lib.dialogs.ScrolledMessageDialog(self.GetParent(), msg, _("Diagram Information"), style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+			dlg.ShowModal()
+
 
 	def OnClosePriorityGUI(self, event):
 		""" Method that update the self.priority_list and close the priorityGUI Frame
@@ -956,7 +980,7 @@ class Diagram(Savable, Structurable):
 				## make DEVS instance from diagram
 				master = Diagram.makeDEVSInstance(diagram)
 
-				if not master or isinstance(master,str):
+				if not master or isinstance(master, str):
 					wx.MessageBox(master, _("Simulation Manager"))
 					return False
 				## test of filename model attribute
@@ -2332,7 +2356,8 @@ if getattr(builtins, 'GUI_FLAG', True):
 			obj = event.GetEventObject()
 
 			### if right clic on canvas
-			parent = self if isinstance(obj, Menu.ShapeCanvasPopupMenu) else getTopLevelWindow().GetControlNotebook().GetTree()
+			# parent = self if isinstance(obj, Menu.ShapeCanvasPopupMenu) else getTopLevelWindow().GetControlNotebook().GetTree()
+			parent = obj.GetWindow()
 			gmwiz = ShapeCanvas.StartWizard(parent)
 
 			return gmwiz

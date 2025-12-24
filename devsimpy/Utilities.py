@@ -1046,6 +1046,762 @@ def FormatTrace(etype, value, trace):
     exc.insert(0, "*** %s ***%s" % (now(), os.linesep))
     return "".join(exc)
 
+
+def generate_plantuml_from_diagram_recursive(diagram, level=0, parent_package=None):
+    """
+    Generate PlantUML recursively by exploring ContainerBlock's internal shapes.
+    ContainerBlock IS a Diagram, so we can call GetShapeList() directly on it.
+    """
+    indent = "  " * level
+    uml_code = []
+    
+    if level == 0:
+        uml_code.append("@startuml")
+        uml_code.append("!theme plain")
+        uml_code.append("skinparam linetype polyline")
+        uml_code.append("")
+    
+    # Get diagram name
+    diagram_name = getattr(diagram, 'name', getattr(diagram, 'label', f'Model_Level_{level}'))
+    safe_name = diagram_name.replace(' ', '_').replace('-', '_')
+    
+    # Start package
+    uml_code.append(f'{indent}package "{diagram_name}" {{')
+    uml_code.append("")
+    
+    blocks = {}
+    connections = []
+    
+    # STEP 1: Collect all blocks
+    for shape in diagram.GetShapeList():
+        shape_type = shape.__class__.__name__
+        
+        # Skip connections and port shapes
+        if shape_type in ['iPort', 'oPort', 'ConnectionShape']:
+            continue
+        
+        if hasattr(shape, 'label'):
+            block_label = shape.label
+            block_id = id(shape)
+            safe_label = block_label.replace(' ', '_').replace('-', '_')
+            
+            is_coupled = (shape_type == 'ContainerBlock')
+            
+            # Extract ports
+            input_ports = []
+            output_ports = []
+            
+            try:
+                if hasattr(shape, 'input'):
+                    inp = shape.input
+                    if isinstance(inp, int):
+                        input_ports = [f'in{i}' for i in range(inp)] if inp > 0 else []
+                    elif isinstance(inp, list):
+                        for p in inp:
+                            if isinstance(p, dict):
+                                input_ports.append(p.get('name', 'in'))
+                            elif hasattr(p, 'label'):
+                                input_ports.append(p.label)
+                            elif isinstance(p, str):
+                                input_ports.append(p)
+            except:
+                pass
+            
+            try:
+                if hasattr(shape, 'output'):
+                    out = shape.output
+                    if isinstance(out, int):
+                        output_ports = [f'out{i}' for i in range(out)] if out > 0 else []
+                    elif isinstance(out, list):
+                        for p in out:
+                            if isinstance(p, dict):
+                                output_ports.append(p.get('name', 'out'))
+                            elif hasattr(p, 'label'):
+                                output_ports.append(p.label)
+                            elif isinstance(p, str):
+                                output_ports.append(p)
+            except:
+                pass
+            
+            blocks[block_id] = {
+                'label': block_label,
+                'safe_label': safe_label,
+                'type': shape_type,
+                'is_coupled': is_coupled,
+                'input_ports': input_ports,
+                'output_ports': output_ports,
+                'shape': shape
+            }
+    
+    # STEP 2: Extract connections
+    block_labels = {bid: binfo['safe_label'] for bid, binfo in blocks.items()}
+    
+    for shape in diagram.GetShapeList():
+        if shape.__class__.__name__ == 'ConnectionShape':
+            try:
+                src_shape = None
+                dst_shape = None
+                src_port_idx = 0
+                dst_port_idx = 0
+                
+                if hasattr(shape, 'input') and shape.input:
+                    if isinstance(shape.input, tuple) and len(shape.input) >= 2:
+                        src_shape = shape.input[0]
+                        src_port_idx = shape.input[1]
+                
+                if hasattr(shape, 'output') and shape.output:
+                    if isinstance(shape.output, tuple) and len(shape.output) >= 2:
+                        dst_shape = shape.output[0]
+                        dst_port_idx = shape.output[1]
+                
+                if src_shape and dst_shape:
+                    src_id = id(src_shape)
+                    dst_id = id(dst_shape)
+                    
+                    if src_id in block_labels and dst_id in block_labels:
+                        src_block = blocks[src_id]
+                        dst_block = blocks[dst_id]
+                        
+                        src_port_name = ''
+                        if src_block['output_ports'] and src_port_idx < len(src_block['output_ports']):
+                            src_port_name = src_block['output_ports'][src_port_idx]
+                        else:
+                            src_port_name = f'out{src_port_idx}'
+                        
+                        dst_port_name = ''
+                        if dst_block['input_ports'] and dst_port_idx < len(dst_block['input_ports']):
+                            dst_port_name = dst_block['input_ports'][dst_port_idx]
+                        else:
+                            dst_port_name = f'in{dst_port_idx}'
+                        
+                        connections.append({
+                            'src': block_labels[src_id],
+                            'dst': block_labels[dst_id],
+                            'src_port': src_port_name,
+                            'dst_port': dst_port_name
+                        })
+            except:
+                pass
+    
+    # STEP 3: Generate components
+    for block_id, block_info in blocks.items():
+        safe_label = block_info['safe_label']
+        label = block_info['label']
+        
+        if block_info['is_coupled']:
+            # ContainerBlock IS a Diagram - recurse directly!
+            container_shape = block_info['shape']
+            
+            # print(f"{'  '*level}Recursing into ContainerBlock: {label}")
+            
+            # Recursive call on the ContainerBlock itself (it's a Diagram)
+            internal_uml = generate_plantuml_from_diagram_recursive(
+                container_shape,  # Pass the ContainerBlock directly
+                level + 1,
+                safe_label
+            )
+            
+            # Extract only the package content (remove @startuml/@enduml)
+            lines = internal_uml.split('\n')
+            for line in lines:
+                stripped = line.strip()
+                if stripped and not stripped.startswith('@'):
+                    uml_code.append(line)
+        else:
+            # Atomic model
+            uml_code.append(f'{indent}  component "{label}" as {safe_label} {{')
+            
+            for port in block_info['input_ports']:
+                uml_code.append(f'{indent}    portin {port}')
+            
+            for port in block_info['output_ports']:
+                uml_code.append(f'{indent}    portout {port}')
+            
+            uml_code.append(f'{indent}  }}')
+        
+        uml_code.append('')
+    
+    # STEP 4: Add connections
+    if connections:
+        uml_code.append(f'{indent}  \' Connections')
+        
+        unique_connections = []
+        seen = set()
+        for conn in connections:
+            key = (conn['src'], conn['dst'], conn['src_port'], conn['dst_port'])
+            if key not in seen:
+                seen.add(key)
+                unique_connections.append(conn)
+        
+        for conn in unique_connections:
+            conn_str = f'{indent}  {conn["src"]} --> {conn["dst"]}'
+            if conn['src_port'] or conn['dst_port']:
+                port_label = f'{conn["src_port"]}→{conn["dst_port"]}' if conn['src_port'] and conn['dst_port'] else (conn['src_port'] or conn['dst_port'])
+                conn_str += f' : {port_label}'
+            
+            uml_code.append(conn_str)
+        uml_code.append('')
+    
+    uml_code.append(f'{indent}}}')
+    
+    if level == 0:
+        uml_code.append("")
+        uml_code.append("@enduml")
+    
+    return '\n'.join(uml_code)
+
+def export_diagram_to_plantuml(diagram, output_path="diagram.puml", detailed=False):
+    """
+    Export DEVSimPy diagram to PlantUML with recursive exploration.
+    
+    Args:
+        diagram: DEVSimPy Diagram instance
+        output_path: Output file path
+        detailed: If True, generate class diagram; If False, component diagram
+    """
+    try:
+        if detailed:
+            uml_code = generate_detailed_class_diagram_recursive(diagram)
+        else:
+            uml_code = generate_plantuml_from_diagram_recursive(diagram)
+    except Exception as e:
+        print(f"Generation failed: {e}")
+        import traceback
+        traceback.print_exc()
+        uml_code = f"@startuml\nnote \"Error: {e}\" as N1\n@enduml"
+    
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(uml_code)
+    
+    print(f"PlantUML diagram exported to {output_path}")
+    return uml_code
+
+
+# def generate_detailed_class_diagram_recursive(diagram, level=0):
+#     """
+#     Generate detailed class diagram with inheritance and relationships.
+#     Explores coupled models recursively.
+#     """
+#     uml_code = []
+    
+#     if level == 0:
+#         uml_code.append("@startuml")
+#         uml_code.append("!theme plain")
+#         uml_code.append("skinparam classAttributeIconSize 0")
+#         uml_code.append("")
+        
+#         # Framework classes
+#         uml_code.append("abstract class AtomicModelImpl {")
+#         uml_code.append("  + initialize() : void")
+#         uml_code.append("  + internalTransition() : void")
+#         uml_code.append("  + externalTransition(e, x) : void")
+#         uml_code.append("  + getOutput() : MessageBag")
+#         uml_code.append("  + getTimeAdvance() : Double")
+#         uml_code.append("}")
+#         uml_code.append("")
+        
+#         uml_code.append("class CoupledModelImpl {")
+#         uml_code.append("  + addChildModel(model) : void")
+#         uml_code.append("  + addCoupling(from, to) : void")
+#         uml_code.append("}")
+#         uml_code.append("")
+    
+#     all_blocks = {}
+#     all_connections = []
+#     coupled_diagrams = []
+    
+#     # Collect all blocks including from coupled models
+#     def collect_blocks(diag, prefix=''):
+#         blocks = {}
+#         for shape in diag.GetShapeList():
+#             if shape.__class__.__name__ in ['iPort', 'oPort']:
+#                 continue
+            
+#             if hasattr(shape, 'label'):
+#                 block_label = shape.label
+#                 full_label = f"{prefix}{block_label}" if prefix else block_label
+#                 block_id = id(shape)
+                
+#                 # Get model class
+#                 model_class = block_label
+#                 if hasattr(shape, 'model') and shape.model:
+#                     model_class = shape.model.__class__.__name__
+                
+#                 is_coupled = (shape.__class__.__name__ == 'ContainerBlock' or
+#                             (hasattr(shape, 'model') and hasattr(shape.model, 'componentSet')))
+                
+#                 # Extract ports
+#                 input_ports = []
+#                 output_ports = []
+                
+#                 try:
+#                     if hasattr(shape, 'input'):
+#                         inp = shape.input
+#                         if isinstance(inp, int):
+#                             input_ports = [f'in{i}' for i in range(inp)] if inp > 0 else []
+#                         elif isinstance(inp, list):
+#                             for p in inp:
+#                                 if isinstance(p, dict):
+#                                     input_ports.append(p.get('name', 'in'))
+#                                 elif hasattr(p, 'label'):
+#                                     input_ports.append(p.label)
+#                 except:
+#                     pass
+                
+#                 try:
+#                     if hasattr(shape, 'output'):
+#                         out = shape.output
+#                         if isinstance(out, int):
+#                             output_ports = [f'out{i}' for i in range(out)] if out > 0 else []
+#                         elif isinstance(out, list):
+#                             for p in out:
+#                                 if isinstance(p, dict):
+#                                     output_ports.append(p.get('name', 'out'))
+#                                 elif hasattr(p, 'label'):
+#                                     output_ports.append(p.label)
+#                 except:
+#                     pass
+                
+#                 blocks[block_id] = {
+#                     'class': model_class,
+#                     'full_label': full_label,
+#                     'is_coupled': is_coupled,
+#                     'input_ports': input_ports,
+#                     'output_ports': output_ports,
+#                     'shape': shape
+#                 }
+                
+#                 # Recurse into coupled models
+#                 if is_coupled and hasattr(shape, 'GetDiagram'):
+#                     internal_diag = shape.GetDiagram()
+#                     if internal_diag:
+#                         nested_blocks = collect_blocks(internal_diag, f"{model_class}.")
+#                         blocks.update(nested_blocks)
+        
+#         return blocks
+    
+#     all_blocks = collect_blocks(diagram)
+    
+#     # Generate class definitions
+#     seen_classes = set()
+#     for block_id, block_info in all_blocks.items():
+#         class_name = block_info['class']
+        
+#         if class_name in seen_classes:
+#             continue
+#         seen_classes.add(class_name)
+        
+#         uml_code.append(f"class {class_name} {{")
+        
+#         if not block_info['is_coupled']:
+#             uml_code.append("  - phase : String")
+#             uml_code.append("  - sigma : Double")
+        
+#         if block_info['input_ports'] or block_info['output_ports']:
+#             uml_code.append("  --")
+        
+#         for port in block_info['input_ports']:
+#             uml_code.append(f"  + {port} : InputPort")
+        
+#         for port in block_info['output_ports']:
+#             uml_code.append(f"  + {port} : OutputPort")
+        
+#         uml_code.append("}")
+#         uml_code.append("")
+    
+#     # Generate inheritance
+#     atomic_classes = set()
+#     coupled_classes = set()
+    
+#     for block_info in all_blocks.values():
+#         if block_info['is_coupled']:
+#             coupled_classes.add(block_info['class'])
+#         else:
+#             atomic_classes.add(block_info['class'])
+    
+#     for cls in atomic_classes:
+#         uml_code.append(f"AtomicModelImpl <|-- {cls}")
+    
+#     for cls in coupled_classes:
+#         uml_code.append(f"CoupledModelImpl <|-- {cls}")
+    
+#     uml_code.append("")
+    
+#     # Generate connections (from all levels)
+#     def extract_connections(diag):
+#         conns = []
+#         block_map = {}
+        
+#         for shape in diag.GetShapeList():
+#             if hasattr(shape, 'label'):
+#                 block_map[id(shape)] = shape
+        
+#         for shape in diag.GetShapeList():
+#             if shape.__class__.__name__ == 'ConnectionShape':
+#                 try:
+#                     src_id = None
+#                     dst_id = None
+#                     src_port = ''
+#                     dst_port = ''
+                    
+#                     if hasattr(shape, 'output') and isinstance(shape.output, list) and len(shape.output) > 0:
+#                         sp = shape.output[0]
+#                         if hasattr(sp, 'parent'):
+#                             src_id = id(sp.parent)
+#                             src_port = getattr(sp, 'label', 'out')
+                    
+#                     if hasattr(shape, 'input') and isinstance(shape.input, list) and len(shape.input) > 0:
+#                         dp = shape.input[0]
+#                         if hasattr(dp, 'parent'):
+#                             dst_id = id(dp.parent)
+#                             dst_port = getattr(dp, 'label', 'in')
+                    
+#                     if src_id in block_map and dst_id in block_map:
+#                         src_shape = block_map[src_id]
+#                         dst_shape = block_map[dst_id]
+                        
+#                         src_class = src_shape.model.__class__.__name__ if hasattr(src_shape, 'model') and src_shape.model else src_shape.label
+#                         dst_class = dst_shape.model.__class__.__name__ if hasattr(dst_shape, 'model') and dst_shape.model else dst_shape.label
+                        
+#                         conns.append((src_class, src_port, dst_class, dst_port))
+#                 except:
+#                     pass
+        
+#         # Recurse into coupled models
+#         for shape in diag.GetShapeList():
+#             if shape.__class__.__name__ == 'ContainerBlock' and hasattr(shape, 'GetDiagram'):
+#                 internal_diag = shape.GetDiagram()
+#                 if internal_diag:
+#                     conns.extend(extract_connections(internal_diag))
+        
+#         return conns
+    
+#     connections = extract_connections(diagram)
+    
+#     for src_class, src_port, dst_class, dst_port in connections:
+#         uml_code.append(f"{src_class}::{src_port} --> {dst_class}::{dst_port}")
+    
+#     if level == 0:
+#         uml_code.append("")
+#         uml_code.append("@enduml")
+    
+#     return '\n'.join(uml_code)
+
+def generate_detailed_class_diagram_recursive(diagram, level=0):
+    """
+    Generate detailed class diagram with REAL inheritance hierarchy.
+    Uses Components.GetClass to load classes from pythonpath WITHOUT needing DEVS instantiation.
+    """
+    import inspect
+    import Components
+    
+    print("\n=== STARTING CLASS DIAGRAM GENERATION ===")
+    
+    uml_code = []
+    
+    if level == 0:
+        uml_code.append("@startuml")
+        uml_code.append("!theme plain")
+        uml_code.append("skinparam classAttributeIconSize 0")
+        uml_code.append("skinparam class {")
+        uml_code.append("  BackgroundColor<<atomic>> LightBlue")
+        uml_code.append("  BackgroundColor<<coupled>> LightGreen")
+        uml_code.append("  BackgroundColor<<framework>> WhiteSmoke")
+        uml_code.append("}")
+        uml_code.append("")
+    
+    all_classes = {}
+    
+    def collect_blocks(diag, prefix=''):
+        """Recursively collect all Block models and their class hierarchies"""
+        
+        shapes = diag.GetShapeList()
+        print(f"\n{prefix}Diagram has {len(shapes)} shapes")
+        
+        for shape in shapes:
+            shape_type = shape.__class__.__name__
+            
+            if shape_type in ['iPort', 'oPort', 'ConnectionShape']:
+                continue
+            
+            if shape_type not in ['CodeBlock', 'ContainerBlock']:
+                continue
+            
+            label = getattr(shape, 'label', 'Unknown')
+            
+            print(f"\n  Block: {shape_type} - Label: {label}")
+            
+            # STRATEGY 1: Try to get pythonpath directly from shape
+            python_path = getattr(shape, 'python_path', None)
+            if not python_path:
+                python_path = getattr(shape, 'pythonpath', None)
+            if not python_path:
+                python_path = getattr(shape, 'model_path', None)
+            if not python_path:
+                python_path = getattr(shape, 'modelpath', None)
+            
+            # STRATEGY 2: If no path on shape, try to get from DEVS model instance
+            if not python_path:
+                devs_model = getattr(shape, 'model', None)
+                if devs_model:
+                    python_path = getattr(devs_model, 'pythonpath', None)
+                    if python_path:
+                        print(f"    -> Got pythonpath from DEVS instance: {python_path}")
+            
+            if not python_path:
+                print(f"    -> No pythonpath found, skipping")
+                continue
+            
+            print(f"    -> Python path: {python_path}")
+            
+            # Load the Python class using Components.GetClass
+            try:
+                python_class = Components.GetClass(python_path)
+                
+                if python_class is None:
+                    print(f"    -> ERROR: Components.GetClass returned None")
+                    continue
+                
+                if isinstance(python_class, ImportError):
+                    print(f"    -> ERROR: ImportError - {python_class}")
+                    continue
+                
+                if isinstance(python_class, tuple):
+                    print(f"    -> ERROR: Tuple returned (error) - {python_class}")
+                    continue
+                
+                print(f"    -> SUCCESS: Loaded class {python_class.__name__}")
+                
+            except Exception as e:
+                print(f"    -> EXCEPTION loading class: {e}")
+                import traceback
+                traceback.print_exc()
+                continue
+            
+            # Analyze the complete MRO
+            try:
+                mro = inspect.getmro(python_class)
+                print(f"    -> MRO: {[c.__name__ for c in mro]}")
+            except Exception as e:
+                print(f"    -> ERROR getting MRO: {e}")
+                continue
+            
+            # Analyze each class in the hierarchy
+            for cls in mro:
+                class_name = cls.__name__
+                
+                # Skip object
+                if class_name == 'object':
+                    continue
+                
+                # Already processed
+                if class_name in all_classes:
+                    continue
+                
+                print(f"      -> Processing class: {class_name}")
+                
+                # Get module info
+                module = cls.__module__
+                is_framework = ('DomainInterface' in module or 
+                              'Components' in module or 
+                              'Domain' in module or
+                              'PyPDEVS' in module or
+                              'pypdevs' in module.lower())
+                
+                # Get parent class
+                parent_class = None
+                mro_list = list(mro)
+                cls_index = mro_list.index(cls)
+                if cls_index + 1 < len(mro_list):
+                    parent = mro_list[cls_index + 1]
+                    if parent.__name__ != 'object':
+                        parent_class = parent.__name__
+                
+                # Extract methods defined in THIS class (not inherited)
+                methods = []
+                for method_name in dir(cls):
+                    if method_name.startswith('_'):
+                        continue
+                    
+                    if method_name in cls.__dict__:
+                        attr = getattr(cls, method_name)
+                        if callable(attr):
+                            try:
+                                sig = inspect.signature(attr)
+                                params = str(sig).replace('self, ', '').replace('self', '').replace('()', '')
+                                if params:
+                                    methods.append(f"{method_name}({params})")
+                                else:
+                                    methods.append(f"{method_name}()")
+                            except:
+                                methods.append(f"{method_name}()")
+                
+                # Extract attributes defined in THIS class
+                attributes = []
+                for attr_name in dir(cls):
+                    if attr_name.startswith('_'):
+                        continue
+                    
+                    if attr_name in cls.__dict__:
+                        attr = getattr(cls, attr_name)
+                        if not callable(attr):
+                            attr_type = type(attr).__name__
+                            attributes.append((attr_name, attr_type))
+                
+                # For the main class, get ports
+                ports_in = []
+                ports_out = []
+                
+                if cls == python_class:
+                    # Try to get ports from class definition
+                    if hasattr(cls, 'IPorts'):
+                        iports = getattr(cls, 'IPorts')
+                        if isinstance(iports, list):
+                            ports_in = [p if isinstance(p, str) else f'in{i}' 
+                                       for i, p in enumerate(iports)]
+                    
+                    if hasattr(cls, 'OPorts'):
+                        oports = getattr(cls, 'OPorts')
+                        if isinstance(oports, list):
+                            ports_out = [p if isinstance(p, str) else f'out{i}' 
+                                        for i, p in enumerate(oports)]
+                    
+                    # Fallback to shape ports
+                    if not ports_in and hasattr(shape, 'input') and isinstance(shape.input, int):
+                        ports_in = [f'in{i}' for i in range(shape.input)] if shape.input > 0 else []
+                    
+                    if not ports_out and hasattr(shape, 'output') and isinstance(shape.output, int):
+                        ports_out = [f'out{i}' for i in range(shape.output)] if shape.output > 0 else []
+                
+                # Store class info
+                all_classes[class_name] = {
+                    'class_name': class_name,
+                    'parent_class': parent_class,
+                    'module': module,
+                    'is_framework': is_framework,
+                    'is_coupled': shape_type == 'ContainerBlock',
+                    'is_abstract': inspect.isabstract(cls),
+                    'attributes': attributes[:8],
+                    'methods': methods[:10],
+                    'ports_in': ports_in if cls == python_class else [],
+                    'ports_out': ports_out if cls == python_class else []
+                }
+                
+                print(f"         -> Added class {class_name} (parent: {parent_class})")
+            
+            # Recurse into ContainerBlock
+            if shape_type == 'ContainerBlock':
+                print(f"    -> Recursing into ContainerBlock: {label}")
+                nested_blocks = collect_blocks(shape, f"{prefix}  {label}.")
+                # Merge nested blocks
+                for nested_class, nested_info in nested_blocks.items():
+                    if nested_class not in all_classes:
+                        all_classes[nested_class] = nested_info
+        
+        return all_classes
+    
+    # Collect all classes
+    all_classes = collect_blocks(diagram)
+    
+    print(f"\n=== TOTAL CLASSES FOUND: {len(all_classes)} ===")
+    print(f"Classes: {list(all_classes.keys())}")
+    
+    if level == 0:
+        # No classes found
+        if not all_classes:
+            uml_code.append("note \"No classes found.\\n\\nMake sure blocks have valid pythonpath,\\nor run 'Check' to instantiate DEVS models.\" as N1")
+            uml_code.append("")
+            uml_code.append("@enduml")
+            return '\n'.join(uml_code)
+        
+        # Separate framework and user classes
+        framework_classes = {k: v for k, v in all_classes.items() if v['is_framework']}
+        user_classes = {k: v for k, v in all_classes.items() if not v['is_framework']}
+        
+        print(f"Framework classes: {len(framework_classes)}")
+        print(f"User classes: {len(user_classes)}")
+        
+        # Generate framework package
+        if framework_classes:
+            uml_code.append("package \"DEVS Framework\" {")
+            uml_code.append("")
+            
+            for class_name in sorted(framework_classes.keys()):
+                info = framework_classes[class_name]
+                
+                class_keyword = "abstract class" if info['is_abstract'] else "class"
+                uml_code.append(f"  {class_keyword} {class_name} <<framework>> {{")
+                
+                if info['module']:
+                    uml_code.append(f"    ' {info['module']}")
+                
+                # Attributes
+                if info['attributes']:
+                    for attr_name, attr_type in info['attributes'][:4]:
+                        uml_code.append(f"    # {attr_name} : {attr_type}")
+                    if info['methods']:
+                        uml_code.append("    --")
+                
+                # Methods
+                for method in info['methods'][:8]:
+                    uml_code.append(f"    + {method}")
+                
+                uml_code.append("  }")
+                uml_code.append("")
+            
+            uml_code.append("}")
+            uml_code.append("")
+        
+        # Generate user classes package
+        if user_classes:
+            uml_code.append("package \"User Models\" {")
+            uml_code.append("")
+            
+            for class_name in sorted(user_classes.keys()):
+                info = user_classes[class_name]
+                
+                stereotype = "coupled" if info['is_coupled'] else "atomic"
+                uml_code.append(f"  class {class_name} <<{stereotype}>> {{")
+                
+                if info['module'] and info['module'] != '__main__':
+                    uml_code.append(f"    ' {info['module']}")
+                
+                # Attributes
+                if info['attributes']:
+                    for attr_name, attr_type in info['attributes']:
+                        uml_code.append(f"    - {attr_name} : {attr_type}")
+                
+                # Ports
+                if info['ports_in'] or info['ports_out']:
+                    uml_code.append("    --")
+                    for port in info['ports_in']:
+                        uml_code.append(f"    + {port} : InputPort")
+                    for port in info['ports_out']:
+                        uml_code.append(f"    + {port} : OutputPort")
+                
+                # Methods
+                if info['methods']:
+                    uml_code.append("    --")
+                    for method in info['methods']:
+                        uml_code.append(f"    + {method}")
+                
+                uml_code.append("  }")
+                uml_code.append("")
+            
+            uml_code.append("}")
+            uml_code.append("")
+        
+        # Generate inheritance relationships
+        uml_code.append("' Inheritance relationships")
+        for class_name, info in all_classes.items():
+            if info['parent_class']:
+                uml_code.append(f"{info['parent_class']} <|-- {class_name}")
+        
+        uml_code.append("")
+        uml_code.append("@enduml")
+    
+    return '\n'.join(uml_code)
+
 def smooth(x,window_len=10,window='hanning'):
     """smooth the data using a window with requested size.
 

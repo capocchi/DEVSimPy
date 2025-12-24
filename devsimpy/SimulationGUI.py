@@ -28,6 +28,7 @@ import os
 import sys
 import traceback
 import psutil
+import wx.lib.dialogs
 
 # to send event
 from pubsub import pub
@@ -315,6 +316,11 @@ class Base(object):
 		self._btn2 = wx.Button(self.panel, wx.NewIdRef(), _('Stop'))
 		self._btn3 = wx.Button(self.panel, wx.NewIdRef(), _('Suspend'))
 		self._btn4 = wx.Button(self.panel, wx.NewIdRef(), _('Log'))
+		
+		# Bouton d'information
+		self._btn_info = wx.Button(self.panel, wx.NewIdRef(), "?", size=(25, 25))
+		self._btn_info.SetToolTip(_("Show information about simulation options"))
+		
 		self._gauge = wx.Gauge(self.panel, wx.NewIdRef(), 100, size=(-1, 25), style=wx.GA_HORIZONTAL|wx.GA_SMOOTH)
 		self._cp = CollapsiblePanel(self.panel, self)
 
@@ -329,6 +335,7 @@ class Base(object):
 		self._btn2.SetToolTipString(_("Stop the simulation process."))
 		self._btn3.SetToolTipString(_("Suspend the simulation process."))
 		self._btn4.SetToolTipString(_("Launch the log window (often depends on some plug-ins (verbose, activity, ...))."))
+
 
 	def SetNTL(self, ntl):
 		self.ntl = ntl
@@ -350,10 +357,15 @@ class Base(object):
 
 		vbox_body = wx.BoxSizer(wx.VERTICAL)
 
-		#panel 1
-		grid1 = wx.GridSizer(1, 2, 0, 0)
-		grid1.Add(self._text1, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL)
-		grid1.Add(self._value, 1, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)
+		# panel 1 avec bouton info
+		grid1 = wx.BoxSizer(wx.HORIZONTAL)
+		
+		time_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		time_sizer.Add(self._text1, 0, wx.ALIGN_CENTER_VERTICAL|wx.RIGHT, 5)
+		time_sizer.Add(self._value, 1, wx.EXPAND)  # Enlever wx.ALIGN_CENTER_VERTICAL
+		
+		grid1.Add(time_sizer, 1, wx.EXPAND)
+		grid1.Add(self._btn_info, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5)
 
 		# panel2
 		grid2 = wx.GridSizer(3, 2, 2, 2)
@@ -376,7 +388,7 @@ class Base(object):
 		self._btn2.Disable()
 		self._btn3.Disable()
 
-	###
+
 	def __set_events(self):
 
 		### binding event
@@ -384,9 +396,60 @@ class Base(object):
 		self.Bind(wx.EVT_BUTTON, self.OnStop, self._btn2)
 		self.Bind(wx.EVT_BUTTON, self.OnSuspend, self._btn3)
 		self.Bind(wx.EVT_BUTTON, self.OnViewLog, self._btn4)
+		self.Bind(wx.EVT_BUTTON, self.OnShowInfo, self._btn_info)
 		self.Bind(wx.EVT_TIMER, self.OnTimer, self.timer)
-		self.Bind(wx.EVT_TEXT,self.OnText, self._value)
+		self.Bind(wx.EVT_TEXT, self.OnText, self._value)
 		self.Bind(wx.EVT_CLOSE, self.OnQuit)
+
+	def OnShowInfo(self, event):
+		"""Show information dialog about simulation options"""
+		
+		info_msg = _(
+			"DEVS Simulation Control Panel\n\n"
+			"═══════════════════════════════════════\n\n"
+			"MAIN CONTROLS:\n\n"
+			"• Final Time: Duration of the simulation in model time units.\n"
+			"  Leave empty or use 'No time limit' option for continuous simulation.\n\n"
+			"• Run: Start or resume the simulation.\n\n"
+			"• Stop: Terminate the simulation completely.\n\n"
+			"• Suspend: Pause the simulation (can be resumed with Run).\n\n"
+			"• Log: View simulation logs and activity reports.\n\n"
+			"═══════════════════════════════════════\n\n"
+			"ADVANCED OPTIONS (More settings...):\n\n"
+			"• Algorithm: Choose the simulation strategy:\n"
+			"  - 'original': Classic DEVS algorithm\n"
+			"  - 'bag': Optimized with message bags\n"
+			"  - 'direct': Direct coupling (fastest)\n\n"
+			"• Profiling: Enable performance profiling (shows bottlenecks).\n\n"
+			"• No time limit: Simulation runs until all models are inactive.\n"
+			"  Useful for event-driven simulations.\n\n"
+			"• Verbose: Show detailed simulation traces in console.\n"
+			"  (PyPDEVS only)\n\n"
+			"• Dynamic Structure: Allow models to change structure during simulation.\n"
+			"  (PyPDEVS only)\n\n"
+			"• Real time: Synchronize simulation with wall clock time.\n"
+			"  (PyPDEVS only, incompatible with 'No time limit')\n\n"
+			"═══════════════════════════════════════\n\n"
+			"STATUS BAR:\n\n"
+			"• Left: Simulation state (Processing, Completed, Suspended...)\n"
+			"• Center: Elapsed time and memory usage\n"
+			"• Right: Progress percentage (if time limit is set)\n\n"
+			"═══════════════════════════════════════\n\n"
+			"TIPS:\n\n"
+			"- Use 'No time limit' for reactive systems without fixed duration\n"
+			"- Enable 'Verbose' for debugging model behavior\n"
+			"- Use 'Profiling' to optimize slow simulations\n"
+			"- 'Real time' mode is useful for hardware-in-the-loop testing"
+		)
+		
+		dlg = wx.lib.dialogs.ScrolledMessageDialog(
+			self, 
+			info_msg, 
+			_("Simulation Options Help"),
+			size=(600, 500)
+		)
+		dlg.ShowModal()
+		dlg.Destroy()
 
 	###
 	def ChangeButtonLabel(self, btn, new_label):

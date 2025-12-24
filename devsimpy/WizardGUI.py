@@ -389,6 +389,7 @@ class ModelGeneratorWizard(Wizard):
 		page1.add_stuff(bt2)
 		# page1.add_stuff(btgpt)
 
+		print(is_detached_framed, parent, parent.GetTopLevelParent())
 		### if left click on the DetachedFrame, port instance can be created
 		if is_detached_framed:
 			bt3 = wx.RadioButton(page1, wx.NewIdRef(), _('Input Port'))

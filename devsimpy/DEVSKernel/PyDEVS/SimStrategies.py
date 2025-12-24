@@ -427,6 +427,8 @@ class DirectCouplingPyDEVSSimStrategy(SimStrategy):
 		self.master = self._simulator.getMaster()
 		self.flat_priority_list = getFlatPriorityList(self.master, [])
 
+		assert self.flat_priority_list, "No atomic models found for Kafka strategy"
+		
 		### init all atomic model from flat list
 		setAtomicModels(self.flat_priority_list, weakref.ref(self.ts))
 

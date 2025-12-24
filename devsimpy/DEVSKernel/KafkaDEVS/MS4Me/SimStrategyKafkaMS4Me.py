@@ -11,7 +11,8 @@ from typing import Dict, List, Optional
 from confluent_kafka.admin import AdminClient, NewTopic
 from confluent_kafka import KafkaException, KafkaError
 
-from DEVSKernel.Strategies import DirectCouplingPyDEVSSimStrategy
+from DEVSKernel.PyDEVS.SimStrategies import DirectCouplingPyDEVSSimStrategy
+from DomainInterface import DomainStructure, DomainBehavior
 from DEVSKernel.KafkaDEVS.MS4Me.MS4MeKafkaWorker import MS4MeKafkaWorker
 from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
 from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_messages import (
@@ -31,6 +32,7 @@ from DEVSKernel.KafkaDEVS.MS4Me.auto_kafka import ensure_kafka_broker
 from DEVSKernel.KafkaDEVS.logconfig import configure_logging, LOGGING_LEVEL
 from DEVSKernel.KafkaDEVS.MS4Me.kafkaconfig import KAFKA_BOOTSTRAP, AUTO_START_KAFKA_BROKER
 
+
 configure_logging()
 logger = logging.getLogger("DEVSKernel.KafkaDEVS.SimStrategyKafkaMS4Me")
 logger.setLevel(LOGGING_LEVEL)
@@ -38,44 +40,152 @@ logger.setLevel(LOGGING_LEVEL)
 
 class MultiKeyDict:
     """Dictionary that supports multiple keys pointing to the same value"""
-    
+
     def __init__(self):
         self._data = {}
         self._keys = {}  # valeur → liste de clés
-    
+
     def add(self, keys, value):
         """Associate multiple keys to a value"""
         for key in keys:
             self._data[key] = value
         self._keys[value] = keys
-    
+
     def get(self, key):
         return self._data.get(key)
-    
+
     def values(self):
         """Return unique values"""
         return set(self._data.values())
-    
+
     def keys(self):
         """Return all keys"""
         return self._data.keys()
-    
+
     def items(self):
         """Return all (key, value) pairs"""
         return self._data.items()
-    
+
     def __getitem__(self, key):
         return self._data[key]
-    
+
     def __setitem__(self, key, value):
         self._data[key] = value
-    
+
     def __len__(self):
         """Return number of unique values"""
         return len(set(self._data.values()))
-    
+
     def __contains__(self, key):
         return key in self._data
+
+def build_routing_table(atomic_models):
+    """
+    Table de routage HYBRIDE : ports aplatis + résolution complète EIC/IC
+    """
+    routing_table = {}
+    logger.info("=== Building HYBRID routing table ===")
+	
+    # PHASE 1: Connexions directes via outLine (rapides)
+    logger.info("PHASE 1: Direct atomic connections (outLine)")
+    for src in atomic_models:
+        for op in getattr(src, "OPorts", []):
+            key = (src, op.name)
+            destinations = []
+			
+            for ip in getattr(op, "outLine", []):
+                if hasattr(ip, 'host') and hasattr(ip.host, 'myID'):
+                    dest_model = ip.host
+                    dest_port = ip.name
+                    if isinstance(dest_model, DomainBehavior):  # atomic only
+                        destinations.append((dest_model, dest_port))
+                        logger.info("  DIRECT: %s.%s -> %s.%s", 
+                                  src.myID, op.name, dest_model.myID, dest_port)
+			
+            if destinations:
+                routing_table[key] = destinations
+	
+    # PHASE 2: Résolution complète via IC/EIC de TOUS les couplés
+    logger.info("PHASE 2: Hierarchical resolution via IC/EIC")
+    def resolve_hierarchical(model, target_port, visited=None):
+        """Résout récursivement une destination via la hiérarchie IC/EIC"""
+        if visited is None:
+            visited = set()
+        if model in visited:
+            return []
+        visited.add(model)
+		
+        destinations = []
+		
+        # Si atomique → fin de résolution
+        if isinstance(model, DomainBehavior):
+            return [(model, target_port.name)]
+		
+        # Si couplé → parcourir EIC puis IC récursivement
+        if isinstance(model, DomainStructure):
+            if hasattr(model, 'EIC'):
+                for eic in model.EIC:
+                    try:
+                        # Formats EIC possibles: (ext_port, int_model, int_port) ou tuples
+                        if len(eic) == 3:
+                            ext_port, int_model, int_port = eic
+                        elif len(eic) == 2 and isinstance(eic[0], tuple):
+                            _, ext_port = eic[0]
+                            int_model, int_port = eic[1]
+                        else:
+                            continue
+						
+                        # Matching port externe
+                        if (hasattr(ext_port, 'name') and ext_port.name == target_port.name) or \
+                           (hasattr(target_port, 'name') and ext_port == target_port.name):
+                            destinations.extend(resolve_hierarchical(int_model, int_port, visited))
+                    except Exception:
+                        continue
+			
+            # Parcourir IC pour propagation interne
+            if hasattr(model, 'IC'):
+                for ic in model.IC:
+                    try:
+                        if len(ic) == 2 and isinstance(ic[0], tuple):
+                            src_m, src_p = ic[0]
+                            dest_m, dest_p = ic[1]
+                        elif len(ic) == 4:
+                            src_m, src_p, dest_m, dest_p = ic
+                        else:
+                            continue
+						
+                        destinations.extend(resolve_hierarchical(dest_m, dest_p, visited))
+                    except Exception:
+                        continue
+		
+        return destinations
+	
+    # Appliquer résolution hiérarchique sur TOUS les outLine
+    for src in atomic_models:
+        for op in getattr(src, "OPorts", []):
+            key = (src, op.name)
+            if key not in routing_table:
+                routing_table[key] = []
+			
+            for ip in getattr(op, "outLine", []):
+                if hasattr(ip, 'host') and hasattr(ip.host, 'EIC'):  # Couplé détecté
+                    hierarchical_dests = resolve_hierarchical(ip.host, ip, set())
+                    for dest_model, dest_port in hierarchical_dests:
+                        if dest_model in atomic_models:
+                            routing_table[key].append((dest_model, dest_port))
+                            logger.info("  HIERARCHICAL: %s.%s -> %s.%s (via %s)", 
+                                      src.myID, op.name, dest_model.myID, dest_port, ip.host.myID)
+	
+    # Éliminer doublons
+    for key in routing_table:
+        routing_table[key] = list(set(routing_table[key]))
+	
+    logger.info("=== HYBRID table: %d routes ===", len(routing_table))
+    for key, dests in routing_table.items():
+        logger.info("  %s.%s -> [%s]", key[0].myID, key[1], 
+                   ', '.join(f"{d[0].myID}.{d[1]}" for d in dests))
+	
+    return routing_table
 
 
 class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
@@ -85,18 +195,23 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
     Refactored architecture with Proxy pattern (Stream/Receiver).
     """
 
-    def __init__(self, simulator=None,
-                 kafka_bootstrap=KAFKA_BOOTSTRAP,
-                 request_timeout=30.0,
-                 stream_proxy_class=None,
-                 receiver_proxy_class=None):
+    def __init__(
+        self,
+        simulator=None,
+        kafka_bootstrap=KAFKA_BOOTSTRAP,
+        request_timeout=30.0,
+        stream_proxy_class=None,
+        receiver_proxy_class=None,
+    ):
         super().__init__(simulator)
 
         # Ensure confluent-kafka is available
         try:
-            import confluent_kafka
+            import confluent_kafka  # noqa: F401
         except ImportError:
-            raise RuntimeError("confluent-kafka not available. Please install it: pip install confluent-kafka")
+            raise RuntimeError(
+                "confluent-kafka not available. Please install it: pip install confluent-kafka"
+            )
 
         # Ensure Kafka broker is alive
         if AUTO_START_KAFKA_BROKER:
@@ -107,10 +222,10 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
                 raise
         else:
             self.bootstrap = kafka_bootstrap
-        
+
         # Wire adapter choice
         self.wire = StandardWireAdapter
-        
+
         # Unique group ID for this run
         group_id = f"coordinator-{int(time.time() * 1000)}"
         self.request_timeout = request_timeout
@@ -122,36 +237,49 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
         # Instantiate proxies (replaces direct Producer/Consumer)
         self._stream_proxy = StreamProxyClass(
             self.bootstrap,
-            wire_adapter=self.wire
+            wire_adapter=self.wire,
         )
-        
+
         self._receiver_proxy = ReceiverProxyClass(
             self.bootstrap,
             group_id,
-            wire_adapter=self.wire
+            wire_adapter=self.wire,
         )
-        
+
         # Subscribe to output topic
         self._receiver_proxy.subscribe([MS4MeKafkaWorker.OUT_TOPIC])
-
-        # Check if atomic models have been loaded properly
-        assert self.flat_priority_list != []
 
         # DEVS Atomic models list
         self._atomic_models = list(self.flat_priority_list)
         self._num_atomics = len(self._atomic_models)
         self._index2model = {i: m for i, m in enumerate(self._atomic_models)}
 
+        # Build routing table from flattened ports
+        logger.info(
+            "Building routing table for %d models (using flattened port connections)",
+            len(self.flat_priority_list),
+        )
+        self._routing_table = build_routing_table(self.flat_priority_list)
+
+        # Debug routes
+        for key, dests in self._routing_table.items():
+            logger.info(
+                "  %s.%s -> %s",
+                key[0].myID,
+                key[1],
+                [(d[0].myID, d[1]) for d in dests],
+            )
+
         # Worker threads
         self._workers = MultiKeyDict()
-        
+
         logger.info("KafkaDEVS SimStrategy initialized (Proxy Pattern)")
-        logger.info(f"  Bootstrap servers: {self.bootstrap}")
-        logger.info(f"  Consumer group: {group_id}")
-        logger.info(f"  Number of atomic models: {self._num_atomics}")
-        logger.info(f"  Index Mapping:")
+        logger.info("  Bootstrap servers: %s", self.bootstrap)
+        logger.info("  Consumer group: %s", group_id)
+        logger.info("  Number of atomic models: %d", self._num_atomics)
+        logger.info("  Index Mapping:")
         for i, m in enumerate(self._atomic_models):
-            logger.info(f"    Index {i} -> {m.myID} ({m.getBlockModel().label})")
+            logger.info("    Index %d -> %s (%s)", i, m.myID, m.getBlockModel().label)
 
     # ------------------------------------------------------------------
     #  Simulation
@@ -165,7 +293,7 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
         logger.info("=" * 60)
         logger.info("  KafkaDEVS Simulation Starting (Proxy Pattern)")
         logger.info("=" * 60)
-        
+
         self._create_workers()
         self._create_topics()
 
@@ -174,9 +302,8 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 
         # Purge old messages via proxy
         flushed = self._receiver_proxy.purge_old_messages(max_seconds=2.0)
-        logger.info(f"System ready (flushed {flushed} old messages)")
+        logger.info("System ready (flushed %d old messages)", flushed)
 
-        # Chose the specific message type used
         return self._simulate_for_ms4me(T)
 
     # ------------------------------------------------------------------
@@ -189,35 +316,35 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
         logger.info("Spawning %s worker threads...", self._num_atomics)
 
         for i, model in enumerate(self._atomic_models):
-
             worker = MS4MeKafkaWorker(
                 model.getBlockModel().label,
                 model,
-                self.bootstrap
+                self.bootstrap,
             )
 
-            logger.info(f"  Model {model.myID} ({worker.get_model_label()}):")
-            logger.info(f"    Real class: {model.__class__.__module__}.{model.__class__.__name__}")
-            logger.info(f"    OPorts: {[p.name for p in model.OPorts]}")
-            logger.info(f"    IPorts: {[p.name for p in model.IPorts]}")
+            logger.info("  Model %s (%s):", model.myID, worker.get_model_label())
             logger.info(
-                f"    in_topic={worker.get_topic_to_write()}, "
-                f"out_topic={worker.get_topic_to_read()}"
+                "    Real class: %s.%s",
+                model.__class__.__module__,
+                model.__class__.__name__,
+            )
+            logger.info("    OPorts: %s", [p.name for p in model.OPorts])
+            logger.info("    IPorts: %s", [p.name for p in model.IPorts])
+            logger.info(
+                "    in_topic=%s, out_topic=%s",
+                worker.get_topic_to_write(),
+                worker.get_topic_to_read(),
             )
 
             worker.start()
-
-            # Dict with multiple keys
             self._workers.add([i, model.myID], worker)
 
         logger.info("  All %s threads started", self._num_atomics)
 
     def _create_topics(self):
         """Create Kafka topics for local or standard mode."""
-        
         admin = AdminClient({"bootstrap.servers": self.bootstrap})
 
-        # Existing topics
         try:
             metadata = admin.list_topics(timeout=10)
         except KafkaException as e:
@@ -233,18 +360,13 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
             raise
 
         existing = set(metadata.topics.keys())
-
-        # Build the set of topic names to create
         desired = set()
 
-        # Worker input topics
         for w in self._workers.values():
             desired.add(w.get_topic_to_write())
 
-        # Coordinator output topic
         desired.add(MS4MeKafkaWorker.OUT_TOPIC)
 
-        # Filter topics that don't exist yet
         topics_to_create = [t for t in desired if t not in existing]
 
         if not topics_to_create:
@@ -303,22 +425,22 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
     def _await_msgs_from_kafka(self, pending: Optional[List] = None) -> Dict:
         """
         Wait for worker responses via the ReceiverProxy.
-        
-        Args:
-            pending: List of models to wait for responses from
-            
+
         Returns:
             Dictionary {model: message} of responses
         """
         if not pending:
             pending = list(self._atomic_models)
-        
+
         return self._receiver_proxy.receive_messages(pending, self.request_timeout)
+
+    # ------------------------------------------------------------------
+    #  Main simulation loop
+    # ------------------------------------------------------------------
 
     def _simulate_for_ms4me(self, T=1e8):
         """Simulate using standard KafkaDEVS message routing."""
         try:
-
             # STEP 0: distributed init
             logger.info("Initializing atomic models...")
 
@@ -326,21 +448,19 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 
             for worker in self._workers.values():
                 self._send_msg_to_kafka(
-                    msg=InitSim(st), 
-                    topic=worker.get_topic_to_write()
+                    msg=InitSim(st),
+                    topic=worker.get_topic_to_write(),
                 )
 
             init_workers_results = self._await_msgs_from_kafka()
-            
-            # Check time consistency
+
             for model in self._atomic_models:
                 label = model.getBlockModel().label
                 devs_msg = init_workers_results[model]
                 assert isinstance(devs_msg, NextTime)
-                logger.info(f"  Model {label}: next={model.timeNext}")
+                logger.info("  Model %s: next=%s", label, model.timeNext)
 
-            # MAIN SIMULATION LOOP
-            logger.info(f"Simulation loop starting (T={T})...")
+            logger.info("Simulation loop starting (T=%s)...", T)
             iteration = 0
             t_start = time.time()
             old_cpu_time = 0.0
@@ -349,7 +469,7 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 
             while self.ts.Get() < T and not self._simulator.end_flag:
                 iteration += 1
-                
+
                 if tmin == float("inf"):
                     logger.info("No more events - simulation complete")
                     break
@@ -358,19 +478,20 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
                     break
 
                 self.ts.Set(tmin)
-                
-                # Get imminent workers and models
-                imminents_worker, imminents_model = zip(*[
-                    (w, w.get_model())
-                    for w in self._workers.values()
-                    if w.get_model_time_next() == tmin
-                ]) if tmin is not None else ((), ())
+
+                imminents_worker, imminents_model = zip(
+                    *[
+                        (w, w.get_model())
+                        for w in self._workers.values()
+                        if w.get_model_time_next() == tmin
+                    ]
+                ) if tmin is not None else ((), ())
 
                 imminents_model = list(imminents_model)
 
                 logger.info("=" * 60)
-                logger.info(f"Iteration {iteration}: t={tmin}")
-                logger.info(f"  Imminent models: {list(map(str, imminents_model))}")
+                logger.info("Iteration %d: t=%s", iteration, tmin)
+                logger.info("  Imminent models: %s", list(map(str, imminents_model)))
                 logger.info("=" * 60)
 
                 # STEP 1: execute output functions
@@ -378,64 +499,83 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
                 st = SimTime(t=tmin)
                 for w in imminents_worker:
                     self._send_msg_to_kafka(
-                        msg=SendOutput(st), 
-                        topic=w.get_topic_to_write()
+                        msg=SendOutput(st),
+                        topic=w.get_topic_to_write(),
                     )
 
                 output_msgs = self._await_msgs_from_kafka(imminents_model)
-                assert all(isinstance(msg, ModelOutputMessage) for msg in output_msgs.values())
-                
+                assert all(
+                    isinstance(msg, ModelOutputMessage)
+                    for msg in output_msgs.values()
+                )
+
                 # STEP 2: routing outputs to destinations
                 logger.info("[2/4] Routing outputs to destinations...")
                 externals_to_send = {}
-                parent_model = (
-                    self._atomic_models[0].parent if self._atomic_models else None
+
+                logger.info(
+                    "Routing table exists with %d entries", len(self._routing_table)
                 )
+                for key, dests in self._routing_table.items():
+                    logger.info(
+                        "  Route: %s.%s -> %d destinations",
+                        key[0].myID,
+                        key[1],
+                        len(dests),
+                    )
 
-                if parent_model is not None:
-                    for model, devs_msg in output_msgs.items():
-                        if devs_msg is None or not isinstance(devs_msg, ModelOutputMessage):
-                            continue
+                for model, devsmsg in output_msgs.items():
+                    if devsmsg is None or not isinstance(
+                        devsmsg, ModelOutputMessage
+                    ):
+                        continue
 
-                        outputs = devs_msg.modelOutput
-                        if not outputs:
-                            continue
+                    outputs = devsmsg.modelOutput
+                    if not outputs:
+                        continue
 
-                        logger.info("  Model %s produced %s outputs", model.myID, len(outputs))
+                    logger.info(
+                        "Model %s produced %d outputs", model.myID, len(outputs)
+                    )
 
-                        for pv in outputs:
-                            src_port = None
-                            for p in model.OPorts:
-                                if p.name == pv.portIdentifier:
-                                    src_port = p
-                                    break
-                            if src_port is None:
-                                continue
+                    for pv in outputs:
+                        key = (model, pv.portIdentifier)
+                        logger.info(
+                            "  Looking for route key: (%s, %s)",
+                            model.myID,
+                            pv.portIdentifier,
+                        )
 
-                            for coupling in parent_model.IC:
-                                try:
-                                    (src_m, src_p), (dest_m, dest_p) = coupling
-                                except Exception:
-                                    continue
+                        if key in self._routing_table:
+                            destinations = self._routing_table[key]
+                            logger.info(
+                                "  Port %s has %d destinations",
+                                pv.portIdentifier,
+                                len(destinations),
+                            )
 
-                                if src_m is model and src_p is src_port:
-                                    dest_idx = None
-                                    for idx, m in self._index2model.items():
-                                        if m is dest_m:
-                                            dest_idx = idx
-                                            break
-                                    if dest_idx is None:
-                                        continue
+                            for dest_model, dest_port_name in destinations:
+                                destidx = None
+                                for idx, m in self._index2model.items():
+                                    if m is dest_model:
+                                        destidx = idx
+                                        break
 
+                                if destidx is not None:
                                     logger.info(
-                                        "    -> Routing %s.%s -> %s.%s",
-                                        model.myID, pv.portIdentifier,
-                                        dest_m.myID, dest_p.name
+                                        "  - Routing %s.%s -> %s.%s",
+                                        model.myID,
+                                        pv.portIdentifier,
+                                        dest_model.myID,
+                                        dest_port_name,
                                     )
-
-                                    if dest_idx not in externals_to_send:
-                                        externals_to_send[dest_idx] = {}
-                                    externals_to_send[dest_idx][dest_p.name] = pv.value
+                                    if destidx not in externals_to_send:
+                                        externals_to_send[destidx] = {}
+                                    externals_to_send[destidx][
+                                        dest_port_name
+                                    ] = pv.value
+                        else:
+                            logger.warning("  No route found for key %s", key)
 
                 # STEP 2b: external transitions
                 td_ext = {}
@@ -448,44 +588,52 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
                         ]
 
                         current_worker = self._workers.get(dest_idx)
-                        logger.info(f"  Sending external transitions to {current_worker.get_model_label()}...")
-                        
-                        self._send_msg_to_kafka(
-                            msg=ExecuteTransition(st, pv_list), 
-                            topic=current_worker.get_topic_to_write()
+                        logger.info(
+                            "  Sending external transitions to %s...",
+                            current_worker.get_model_label(),
                         )
 
-                    td_ext = self._await_msgs_from_kafka([
-                        self._workers.get(i).get_model() 
-                        for i in externals_to_send.keys()
-                    ])
-                    assert all(isinstance(msg, TransitionDone) for msg in td_ext.values())
+                        self._send_msg_to_kafka(
+                            msg=ExecuteTransition(st, pv_list),
+                            topic=current_worker.get_topic_to_write(),
+                        )
+
+                    td_ext = self._await_msgs_from_kafka(
+                        [self._workers.get(i).get_model() for i in externals_to_send]
+                    )
+                    assert all(
+                        isinstance(msg, TransitionDone) for msg in td_ext.values()
+                    )
                 else:
                     logger.info("  No outputs to route!")
 
                 # STEP 3: internal transitions
-                logger.info(f"[3/4] Executing internal transitions...")
+                logger.info("[3/4] Executing internal transitions...")
                 for w in imminents_worker:
                     self._send_msg_to_kafka(
-                        msg=ExecuteTransition(st), 
-                        topic=w.get_topic_to_write()
+                        msg=ExecuteTransition(st),
+                        topic=w.get_topic_to_write(),
                     )
 
                 td_int = self._await_msgs_from_kafka(imminents_model)
-                assert all(isinstance(msg, TransitionDone) for msg in td_int.values())
+                assert all(
+                    isinstance(msg, TransitionDone) for msg in td_int.values()
+                )
 
                 # Update tmin
-                all_next_times = [t.nextTime.t for _, t in td_int.items()] + [t.nextTime.t for _, t in td_ext.items()]
+                all_next_times = [t.nextTime.t for t in td_int.values()] + [
+                    t.nextTime.t for t in td_ext.values()
+                ]
                 tmin = min(all_next_times) if all_next_times else float("inf")
-                
+
                 # Update progress
                 self.master.timeLast = tmin
                 self._simulator.cpu_time = old_cpu_time + (time.time() - t_start)
 
             logger.info("=" * 60)
-            logger.info(f"Simulation completed at t={self.ts.Get()}")
-            logger.info(f"  Iterations: {iteration}")
-            logger.info(f"  CPU time: {self._simulator.cpu_time:.3f}s")
+            logger.info("Simulation completed at t=%s", self.ts.Get())
+            logger.info("  Iterations: %d", iteration)
+            logger.info("  CPU time: %.3fs", self._simulator.cpu_time)
             logger.info("=" * 60)
 
             self._simulator.terminate()
@@ -495,13 +643,12 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
         except Exception as e:
             logger.exception("Simulation error: %s", e)
         finally:
-            # Broadcast SimulationDone to all workers
             logger.info("Broadcasting SimulationDone...")
             st = SimTime(t=self.ts.Get())
             for w in self._workers.values():
                 self._send_msg_to_kafka(
-                    msg=SimulationDone(time=st), 
-                    topic=w.get_topic_to_write()
+                    msg=SimulationDone(time=st),
+                    topic=w.get_topic_to_write(),
                 )
 
             self._terminate_workers()
@@ -509,7 +656,7 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 
     def __del__(self):
         """Cleanup: close proxies properly"""
-        if hasattr(self, '_stream_proxy'):
+        if hasattr(self, "_stream_proxy"):
             self._stream_proxy.close()
-        if hasattr(self, '_receiver_proxy'):
+        if hasattr(self, "_receiver_proxy"):
             self._receiver_proxy.close()
