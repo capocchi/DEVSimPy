@@ -32,7 +32,7 @@ class DiagramInfoDialog(wx.Dialog):
 		"""
 		wx.Dialog.__init__(self, parent, wx.ID_ANY, _("Diagram Information"), 
 						  style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
-		self.SetSize((700, 500))
+		self.SetSize((750, 550))
 		
 		self.puml_component = puml_component
 		self.puml_class = puml_class
@@ -48,10 +48,35 @@ class DiagramInfoDialog(wx.Dialog):
 		info_panel = wx.Panel(notebook)
 		info_sizer = wx.BoxSizer(wx.VERTICAL)
 		
+		# Header avec bouton info
+		info_header = wx.BoxSizer(wx.HORIZONTAL)
+		info_label = wx.StaticText(info_panel, wx.ID_ANY, _("Diagram Statistics"))
+		info_label.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
+		info_help_btn = wx.Button(info_panel, wx.ID_ANY, "?", size=(25, 25))
+		info_help_btn.SetToolTip(_("Show information about this tab"))
+		
+		info_header.Add(info_label, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+		info_header.Add(info_help_btn, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5)
+		info_header.AddStretchSpacer()
+		
+		info_sizer.Add(info_header, 0, wx.EXPAND|wx.ALL, 5)
+		
 		text_ctrl = wx.TextCtrl(info_panel, wx.ID_ANY, diagram_info, 
 							   style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_WORDWRAP)
 		info_sizer.Add(text_ctrl, 1, wx.EXPAND|wx.ALL, 10)
 		info_panel.SetSizer(info_sizer)
+		
+		# Event handler for info button
+		info_help_btn.Bind(wx.EVT_BUTTON, lambda e: wx.MessageBox(
+			_("This tab shows general statistics about your DEVS model:\n\n"
+			  "• Number of atomic models (basic components)\n"
+			  "• Number of coupled models (hierarchical components)\n"
+			  "• Number of connections between models\n"
+			  "• Hierarchy depth level\n"
+			  "• Number of input/output ports"),
+			_("Diagram Statistics Help"),
+			wx.OK|wx.ICON_INFORMATION
+		))
 		
 		notebook.AddPage(info_panel, _("Information"))
 		
@@ -59,10 +84,40 @@ class DiagramInfoDialog(wx.Dialog):
 		comp_panel = wx.Panel(notebook)
 		comp_sizer = wx.BoxSizer(wx.VERTICAL)
 		
+		# Header avec bouton info
+		comp_header = wx.BoxSizer(wx.HORIZONTAL)
+		comp_label = wx.StaticText(comp_panel, wx.ID_ANY, _("Component Diagram (PlantUML)"))
+		comp_label.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
+		comp_help_btn = wx.Button(comp_panel, wx.ID_ANY, "?", size=(25, 25))
+		comp_help_btn.SetToolTip(_("Show information about this tab"))
+		
+		comp_header.Add(comp_label, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+		comp_header.Add(comp_help_btn, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5)
+		comp_header.AddStretchSpacer()
+		
+		comp_sizer.Add(comp_header, 0, wx.EXPAND|wx.ALL, 5)
+		
 		comp_text = wx.TextCtrl(comp_panel, wx.ID_ANY, puml_component, 
 							  style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_WORDWRAP|wx.HSCROLL)
 		comp_text.SetFont(wx.Font(9, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		comp_sizer.Add(comp_text, 1, wx.EXPAND|wx.ALL, 10)
+		
+		# Event handler for component help button
+		comp_help_btn.Bind(wx.EVT_BUTTON, lambda e: wx.MessageBox(
+			_("Component Diagram shows the STRUCTURAL view of your DEVS model:\n\n"
+			  "• Packages represent coupled models (hierarchical structure)\n"
+			  "• Components represent atomic models (basic components)\n"
+			  "• Arrows show connections between components\n"
+			  "• Ports (in/out) are displayed on each component\n\n"
+			  "This diagram is useful for understanding:\n"
+			  "- Model architecture and composition\n"
+			  "- Data flow between components\n"
+			  "- Hierarchical organization\n\n"
+			  "Use 'Copy to Clipboard' to paste in PlantUML editor\n"
+			  "or 'View Online' to see it rendered directly."),
+			_("Component Diagram Help"),
+			wx.OK|wx.ICON_INFORMATION
+		))
 		
 		# Boutons pour Component diagram
 		comp_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -83,10 +138,45 @@ class DiagramInfoDialog(wx.Dialog):
 		class_panel = wx.Panel(notebook)
 		class_sizer = wx.BoxSizer(wx.VERTICAL)
 		
+		# Header avec bouton info
+		class_header = wx.BoxSizer(wx.HORIZONTAL)
+		class_label = wx.StaticText(class_panel, wx.ID_ANY, _("Class Diagram (PlantUML)"))
+		class_label.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
+		class_help_btn = wx.Button(class_panel, wx.ID_ANY, "?", size=(25, 25))
+		class_help_btn.SetToolTip(_("Show information about this tab"))
+		
+		class_header.Add(class_label, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+		class_header.Add(class_help_btn, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5)
+		class_header.AddStretchSpacer()
+		
+		class_sizer.Add(class_header, 0, wx.EXPAND|wx.ALL, 5)
+		
 		class_text = wx.TextCtrl(class_panel, wx.ID_ANY, puml_class, 
 							   style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_WORDWRAP|wx.HSCROLL)
 		class_text.SetFont(wx.Font(9, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		class_sizer.Add(class_text, 1, wx.EXPAND|wx.ALL, 10)
+		
+		# Event handler for class help button
+		class_help_btn.Bind(wx.EVT_BUTTON, lambda e: wx.MessageBox(
+			_("Class Diagram shows the IMPLEMENTATION view with inheritance:\n\n"
+			  "• 'DEVS Framework' package: base classes from the framework\n"
+			  "  (DomainBehavior, DomainStructure, Coupled, etc.)\n"
+			  "• 'User Models' package: your custom model classes\n"
+			  "• Arrows show inheritance relationships (parent ← child)\n"
+			  "• Methods and attributes are listed for each class\n"
+			  "• Ports (IPorts/OPorts) are shown as attributes\n\n"
+			  "This diagram is useful for understanding:\n"
+			  "- Complete Python class hierarchy\n"
+			  "- Which framework classes your models inherit from\n"
+			  "- Methods implemented in each class\n"
+			  "- Object-oriented structure of your models\n\n"
+			  "Colors:\n"
+			  "- Blue: Atomic models\n"
+			  "- Green: Coupled models\n"
+			  "- Gray: Framework classes"),
+			_("Class Diagram Help"),
+			wx.OK|wx.ICON_INFORMATION
+		))
 		
 		# Boutons pour Class diagram
 		class_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
