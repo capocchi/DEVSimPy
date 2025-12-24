@@ -97,7 +97,18 @@ sys.modules['Savable'] = sys.modules['Mixins.Savable']
 sys.modules['Container.PickledCollection'] = PickledCollection
 
 from Decorators import BuzyCursorNotification, Post_Undo
-from Utilities import HEXToRGB, relpath, playSound, sendEvent, load_and_resize_image, getInstance, FixedList, getObjectFromString, getTopLevelWindow, printOnStatusBar
+from Utilities import (HEXToRGB,
+						relpath, 
+						playSound, 
+						sendEvent, 
+						load_and_resize_image, 
+						getInstance, FixedList, 
+						getObjectFromString, 
+						getTopLevelWindow, 
+						printOnStatusBar, 
+						generate_plantuml_from_diagram_recursive,
+						generate_detailed_class_diagram_recursive)
+
 from Patterns import Subject, Observer
 from StandaloneGUIKafkaPKG import StandaloneGUIKafkaPKG
 from DiagramInfoDialog import DiagramInfoDialog
@@ -791,14 +802,13 @@ class Diagram(Savable, Structurable):
 						_("Number of output port models: %d\n")%stat_dico['oPort_nbr']]
 					)
 
-		from Utilities import generate_plantuml_from_diagram_recursive
-
 		try:
 			# Générer le code PlantUML en mémoire
-			puml_content = generate_plantuml_from_diagram_recursive(self, level=0)
+			puml_component = generate_plantuml_from_diagram_recursive(self, level=0)
+			puml_class = generate_detailed_class_diagram_recursive(self, level=0)
 			
-			# Afficher le dialogue
-			dlg = DiagramInfoDialog(self.GetParent(), msg, puml_content)
+			# Afficher le dialogue avec les 3 onglets
+			dlg = DiagramInfoDialog(self.GetParent(), msg, puml_component, puml_class)
 			dlg.ShowModal()
 			dlg.Destroy()
 		except Exception as e:

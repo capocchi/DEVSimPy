@@ -20,26 +20,28 @@ import wx
 _ = wx.GetTranslation
 
 class DiagramInfoDialog(wx.Dialog):
-	"""Dialogue pour afficher les informations du diagramme et le code PlantUML"""
+	"""Dialogue pour afficher les informations du diagramme et les codes PlantUML"""
 	
-	def __init__(self, parent, diagram_info, puml_content):
+	def __init__(self, parent, diagram_info, puml_component, puml_class):
 		"""
 		Args:
 			parent: Parent window
 			diagram_info: String avec les informations du diagramme
-			puml_content: String avec le code PlantUML généré
+			puml_component: String avec le code PlantUML du diagramme de composants
+			puml_class: String avec le code PlantUML du diagramme de classes
 		"""
 		wx.Dialog.__init__(self, parent, wx.ID_ANY, _("Diagram Information"), 
 						  style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 		self.SetSize((700, 500))
 		
-		self.puml_content = puml_content
+		self.puml_component = puml_component
+		self.puml_class = puml_class
 		
 		# Panel principal
 		panel = wx.Panel(self)
 		main_sizer = wx.BoxSizer(wx.VERTICAL)
 		
-		# Notebook pour séparer Info et PlantUML
+		# Notebook avec 3 onglets
 		notebook = wx.Notebook(panel)
 		
 		# --- PAGE 1: Information ---
@@ -53,29 +55,53 @@ class DiagramInfoDialog(wx.Dialog):
 		
 		notebook.AddPage(info_panel, _("Information"))
 		
-		# --- PAGE 2: PlantUML ---
-		uml_panel = wx.Panel(notebook)
-		uml_sizer = wx.BoxSizer(wx.VERTICAL)
+		# --- PAGE 2: PlantUML Component Diagram ---
+		comp_panel = wx.Panel(notebook)
+		comp_sizer = wx.BoxSizer(wx.VERTICAL)
 		
-		uml_text = wx.TextCtrl(uml_panel, wx.ID_ANY, puml_content, 
+		comp_text = wx.TextCtrl(comp_panel, wx.ID_ANY, puml_component, 
 							  style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_WORDWRAP|wx.HSCROLL)
-		uml_text.SetFont(wx.Font(9, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
-		uml_sizer.Add(uml_text, 1, wx.EXPAND|wx.ALL, 10)
+		comp_text.SetFont(wx.Font(9, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+		comp_sizer.Add(comp_text, 1, wx.EXPAND|wx.ALL, 10)
 		
-		# Boutons pour PlantUML
-		uml_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		# Boutons pour Component diagram
+		comp_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
 		
-		btn_copy = wx.Button(uml_panel, wx.ID_ANY, _("Copy to Clipboard"))
-		btn_view_online = wx.Button(uml_panel, wx.ID_ANY, _("View Online"))
+		btn_comp_copy = wx.Button(comp_panel, wx.ID_ANY, _("Copy to Clipboard"))
+		btn_comp_view = wx.Button(comp_panel, wx.ID_ANY, _("View Online"))
 		
-		uml_btn_sizer.Add(btn_copy, 0, wx.ALL, 5)
-		uml_btn_sizer.Add(btn_view_online, 0, wx.ALL, 5)
-		uml_btn_sizer.AddStretchSpacer()
+		comp_btn_sizer.Add(btn_comp_copy, 0, wx.ALL, 5)
+		comp_btn_sizer.Add(btn_comp_view, 0, wx.ALL, 5)
+		comp_btn_sizer.AddStretchSpacer()
 		
-		uml_sizer.Add(uml_btn_sizer, 0, wx.EXPAND|wx.ALL, 5)
-		uml_panel.SetSizer(uml_sizer)
+		comp_sizer.Add(comp_btn_sizer, 0, wx.EXPAND|wx.ALL, 5)
+		comp_panel.SetSizer(comp_sizer)
 		
-		notebook.AddPage(uml_panel, _("PlantUML"))
+		notebook.AddPage(comp_panel, _("Component Diagram"))
+		
+		# --- PAGE 3: PlantUML Class Diagram ---
+		class_panel = wx.Panel(notebook)
+		class_sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		class_text = wx.TextCtrl(class_panel, wx.ID_ANY, puml_class, 
+							   style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_WORDWRAP|wx.HSCROLL)
+		class_text.SetFont(wx.Font(9, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+		class_sizer.Add(class_text, 1, wx.EXPAND|wx.ALL, 10)
+		
+		# Boutons pour Class diagram
+		class_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		
+		btn_class_copy = wx.Button(class_panel, wx.ID_ANY, _("Copy to Clipboard"))
+		btn_class_view = wx.Button(class_panel, wx.ID_ANY, _("View Online"))
+		
+		class_btn_sizer.Add(btn_class_copy, 0, wx.ALL, 5)
+		class_btn_sizer.Add(btn_class_view, 0, wx.ALL, 5)
+		class_btn_sizer.AddStretchSpacer()
+		
+		class_sizer.Add(class_btn_sizer, 0, wx.EXPAND|wx.ALL, 5)
+		class_panel.SetSizer(class_sizer)
+		
+		notebook.AddPage(class_panel, _("Class Diagram"))
 		
 		main_sizer.Add(notebook, 1, wx.EXPAND|wx.ALL, 5)
 		
@@ -89,28 +115,37 @@ class DiagramInfoDialog(wx.Dialog):
 		
 		panel.SetSizer(main_sizer)
 		
-		# Event handlers
-		btn_copy.Bind(wx.EVT_BUTTON, self.OnCopyToClipboard)
-		btn_view_online.Bind(wx.EVT_BUTTON, self.OnViewOnline)
+		# Event handlers - Component diagram
+		btn_comp_copy.Bind(wx.EVT_BUTTON, lambda e: self.OnCopyToClipboard('component'))
+		btn_comp_view.Bind(wx.EVT_BUTTON, lambda e: self.OnViewOnline('component'))
+		
+		# Event handlers - Class diagram
+		btn_class_copy.Bind(wx.EVT_BUTTON, lambda e: self.OnCopyToClipboard('class'))
+		btn_class_view.Bind(wx.EVT_BUTTON, lambda e: self.OnViewOnline('class'))
+		
 		btn_close.Bind(wx.EVT_BUTTON, lambda e: self.EndModal(wx.ID_OK))
 	
-	def OnCopyToClipboard(self, evt):
+	def OnCopyToClipboard(self, diagram_type):
 		"""Copier le code PlantUML dans le presse-papier"""
+		content = self.puml_component if diagram_type == 'component' else self.puml_class
+		
 		if wx.TheClipboard.Open():
-			wx.TheClipboard.SetData(wx.TextDataObject(self.puml_content))
+			wx.TheClipboard.SetData(wx.TextDataObject(content))
 			wx.TheClipboard.Close()
 			wx.MessageBox(_("PlantUML code copied to clipboard!"), 
 						 _("Success"), wx.OK|wx.ICON_INFORMATION)
 	
-	def OnViewOnline(self, evt):
+	def OnViewOnline(self, diagram_type):
 		"""Ouvrir PlantUML web viewer avec encodage correct"""
 		import webbrowser
+		
+		content = self.puml_component if diagram_type == 'component' else self.puml_class
 		
 		try:
 			import zlib
 			
 			# PlantUML utilise DEFLATE (pas de header zlib)
-			compressed = zlib.compress(self.puml_content.encode('utf-8'), 9)
+			compressed = zlib.compress(content.encode('utf-8'), 9)
 			# Enlever les 2 premiers bytes (header zlib) et 4 derniers (checksum)
 			compressed = compressed[2:-4]
 			
@@ -151,7 +186,7 @@ class DiagramInfoDialog(wx.Dialog):
 		except Exception as e:
 			# Fallback : copier dans le presse-papier et ouvrir le site
 			if wx.TheClipboard.Open():
-				wx.TheClipboard.SetData(wx.TextDataObject(self.puml_content))
+				wx.TheClipboard.SetData(wx.TextDataObject(content))
 				wx.TheClipboard.Close()
 			
 			wx.MessageBox(
@@ -159,3 +194,4 @@ class DiagramInfoDialog(wx.Dialog):
 				_("Info"), wx.OK|wx.ICON_INFORMATION
 			)
 			webbrowser.open("https://editor.plantuml.com/uml/")
+
