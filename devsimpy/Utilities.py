@@ -1192,7 +1192,7 @@ def generate_plantuml_from_diagram_recursive(diagram, level=0, parent_package=No
             # ContainerBlock IS a Diagram - recurse directly!
             container_shape = block_info['shape']
             
-            # print(f"{'  '*level}Recursing into ContainerBlock: {label}")
+            print(f"{'  '*level}Recursing into ContainerBlock: {label}")
             
             # Recursive call on the ContainerBlock itself (it's a Diagram)
             internal_uml = generate_plantuml_from_diagram_recursive(
