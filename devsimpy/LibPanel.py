@@ -105,7 +105,7 @@ class LibPanel(wx.Panel):
 		self.__set_tips()
 
 	def BuildToolbar(self):
-		"""	creates one of the tool-bars
+		""" creates one of the tool-bars
 		The buttons act like radio buttons, setting a mode for the Panel
 		Only one of them is pressed at a time. The SetMode() method handles this
 		"""
@@ -128,12 +128,106 @@ class LibPanel(wx.Panel):
 		self.Bind(wx.EVT_TOOL, self.tree.OnDelete, id=Menu.ID_DELETE_LIB)
 		#wx.EVT_TOOL(self, Menu.ID_IMPORT_LIB, mainW.OnImport)
 		self.Bind(wx.EVT_TOOL, self.tree.OnUpdateAll, id=Menu.ID_REFRESH_LIB)
-		self.Bind(wx.EVT_TOOL, self.tree.OnInfo, id=Menu.ID_HELP_LIB)
+		self.Bind(wx.EVT_TOOL, self.OnShowLibraryHelp, id=Menu.ID_HELP_LIB)  # Modifié ici
 		self.Bind(wx.EVT_TOOL, self.tree.OnMCCClick, id=Menu.ID_MCC_LIB) 
 
 		tb.Realize()
 
 		return tb
+
+	def OnShowLibraryHelp(self, event):
+		"""Show help dialog about library management"""
+		
+		help_msg = _(
+			"LIBRARY MANAGEMENT PANEL\n\n"
+			"═══════════════════════════════════════\n\n"
+			"OVERVIEW:\n\n"
+			"The library panel allows you to manage DEVS model libraries.\n"
+			"Libraries are collections of reusable DEVS components that can be\n"
+			"instantiated in your diagrams using drag-and-drop.\n\n"
+			"═══════════════════════════════════════\n\n"
+			"TOOLBAR BUTTONS:\n\n"
+			"• Import (+): Add a new library to DEVSimPy.\n"
+			"  You can import:\n"
+			"  - Local directories containing Python DEVS models\n"
+			"  - ZIP archives (.zip) with model collections\n"
+			"  - Remote libraries from URLs\n\n"
+			"• Delete (-): Remove selected library from the tree.\n"
+			"  Warning: This only removes from DEVSimPy, not from disk.\n\n"
+			"• Reload (⟳): Refresh all libraries to detect new models.\n"
+			"  Use this after modifying model files externally.\n\n"
+			"• Help (i): Show this help message.\n\n"
+			"• A-Z: Toggle alphabetical sorting of models in libraries.\n"
+			"  When enabled, models are sorted by name.\n"
+			"  When disabled, models appear in directory order.\n\n"
+			"═══════════════════════════════════════\n\n"
+			"LIBRARY TREE:\n\n"
+			"• Folders: Represent library directories\n"
+			"• Green blocks: Atomic DEVS models (CodeBlock)\n"
+			"• Yellow blocks: Coupled DEVS models (ContainerBlock)\n"
+			"• Gray items: Invalid or incompatible models\n\n"
+			"Right-click on items for context menu options:\n"
+			"- Edit: Open model Python file in editor\n"
+			"- Documentation: View model documentation\n"
+			"- Properties: Inspect model metadata\n"
+			"- Rename: Change model label\n"
+			"- Export: Save model to file\n\n"
+			"═══════════════════════════════════════\n\n"
+			"SEARCH FIELD:\n\n"
+			"Type to search for models by name across all libraries.\n"
+			"Results appear in a temporary search tree.\n"
+			"Click the X button to clear search and return to main tree.\n\n"
+			"═══════════════════════════════════════\n\n"
+			"HOW TO USE MODELS:\n\n"
+			"1. Expand library folders to see available models\n"
+			"2. Drag a model from the library tree\n"
+			"3. Drop it onto the diagram canvas (right panel)\n"
+			"4. The model is instantiated and ready to use\n"
+			"5. Connect models by dragging from output to input ports\n\n"
+			"═══════════════════════════════════════\n\n"
+			"LIBRARY TYPES:\n\n"
+			"• Domain Libraries: Official DEVSimPy model collections\n"
+			"  (Physics, Networks, Control, etc.)\n\n"
+			"• User Libraries: Your custom model collections\n"
+			"  Add them via Import button\n\n"
+			"• Remote Libraries: Libraries loaded from URLs\n"
+			"  Automatically updated when available\n\n"
+			"═══════════════════════════════════════\n\n"
+			"TIPS:\n\n"
+			"- Use search to quickly find models in large libraries\n"
+			"- Keep libraries organized in thematic folders\n"
+			"- Reload after editing model Python files\n"
+			"- Right-click models to view documentation\n"
+			"- Use alphabetical sorting for easier navigation\n"
+			"- Import ZIP archives to share library collections\n\n"
+			"═══════════════════════════════════════\n\n"
+			"CREATING YOUR OWN LIBRARIES:\n\n"
+			"1. Create a folder with your Python DEVS models\n"
+			"2. Each model should inherit from DomainBehavior/DomainStructure\n"
+			"3. Use Import button to add your folder to DEVSimPy\n"
+			"4. Your models appear in the library tree\n"
+			"5. Optionally, create a ZIP archive for distribution\n\n"
+			"For more information, consult the DEVSimPy documentation."
+		)
+		
+		try:
+			import wx.lib.dialogs
+			dlg = wx.lib.dialogs.ScrolledMessageDialog(
+				self, 
+				help_msg, 
+				_("Library Management Help"),
+				size=(650, 600)
+			)
+			dlg.ShowModal()
+			dlg.Destroy()
+		except Exception as e:
+			# Fallback si wx.lib.dialogs n'est pas disponible
+			wx.MessageBox(
+				help_msg,
+				_("Library Management Help"),
+				wx.OK | wx.ICON_INFORMATION
+			)
+
 
 	def __set_tips(self):
 		"""
