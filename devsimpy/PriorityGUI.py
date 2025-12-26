@@ -1,125 +1,129 @@
 # -*- coding: utf-8 -*-
 
+
 import wx
+
 
 import DragList
 from Utilities import load_and_resize_image
 
+
 _ = wx.GetTranslation
+
 
 class PriorityGUI(wx.Frame):
 
-	def __init__(self, parent, id, title, priorityList):
-		wx.Frame.__init__(	self,
-							parent,
-							id,
-							title,
-							size = (350, 300),
-							style = wx.FRAME_NO_WINDOW_MENU|wx.DEFAULT_FRAME_STYLE|wx.CLOSE_BOX)
+    def __init__(self, parent, id, title, priorityList):
+        wx.Frame.__init__(  self,
+                            parent,
+                            id,
+                            title,
+                            size = (350, 300),
+                            style = wx.FRAME_NO_WINDOW_MENU|wx.DEFAULT_FRAME_STYLE|wx.CLOSE_BOX)
 
-		icon = wx.Icon()
-		icon.CopyFromBitmap(load_and_resize_image("priority.png"))
-		self.SetIcon(icon)
+        icon = wx.Icon()
+        icon.CopyFromBitmap(load_and_resize_image("priority.png"))
+        self.SetIcon(icon)
 
-		panel = wx.Panel(self, -1)
+        panel = wx.Panel(self, -1)
 
-		### ------------------------------------------------------------------
-		#self.listCtrl = DragList.DragList(panel, style = wx.LC_ICON|wx.LC_AUTOARRANGE)
+        self.listCtrl = DragList.DragList(panel, style = wx.LC_LIST)
 
-		#il = wx.ImageList(16, 16, True)
-		#il.Add(wx.ArtProvider.GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, (16, 16)))
+        # append to list
+        for item in priorityList:
+            self.listCtrl.InsertItem(100000000, item)
 
-		#self.listCtrl.AssignImageList(il, wx.IMAGE_LIST_NORMAL)
+        self.listCtrl.SetToolTip(_('Drag and drop a model in order to define its priority.'))
 
-		self.listCtrl = DragList.DragList(panel, style = wx.LC_LIST)
+        ### if list not empty, first item is selected
+        if self.listCtrl.GetItemCount():
+            self.listCtrl.Select(0, 1)
 
-		# append to list
-		for item in priorityList:
-			#self.listCtrl.InsertImageStringItem(maxint,item,0)
-			self.listCtrl.InsertItem(100000000, item)
+        ### -------------------------------------------------------------------
 
-		self.listCtrl.SetToolTipString = self.listCtrl.SetToolTip
-		
-		self.listCtrl.SetToolTipString(_('Drag and drop a model in order to define its priority.'))
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
 
-		### id list not empty, first item is selected
-		if self.listCtrl.GetItemCount():
-			self.listCtrl.Select(0, 1)
+        # Up button with icon
+        up_btn = wx.Button(panel, wx.ID_UP, _("Up"))
+        up_btn.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_GO_UP, wx.ART_BUTTON))
+        up_btn.SetToolTip(_("Move selected item up"))
+        
+        # Down button with icon
+        down_btn = wx.Button(panel, wx.ID_DOWN, _("Down"))
+        down_btn.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_GO_DOWN, wx.ART_BUTTON))
+        down_btn.SetToolTip(_("Move selected item down"))
+        
+        # Apply button with icon
+        apply_btn = wx.Button(panel, wx.ID_APPLY, _("Apply"))
+        apply_btn.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_TICK_MARK, wx.ART_BUTTON))
+        apply_btn.SetToolTip(_("Apply priority changes and close"))
 
-		### -------------------------------------------------------------------
+        up_btn.Enable(self.listCtrl.GetItemCount() != 0)
+        down_btn.Enable(self.listCtrl.GetItemCount() != 0)
 
-		hbox = wx.BoxSizer(wx.HORIZONTAL)
+        hbox.Add(up_btn, 1, wx.ALL, 2)
+        hbox.Add(down_btn, 1, wx.ALL, 2)
+        hbox.Add(apply_btn, 1, wx.ALL, 2)
 
-		up_btn = wx.Button(panel, wx.ID_UP)
-		down_btn = wx.Button(panel, wx.ID_DOWN)
-		apply_btn = wx.Button(panel, wx.ID_APPLY)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        vbox.Add(self.listCtrl, 1, wx.EXPAND | wx.ALL , 5)
+        vbox.Add(hbox, 0, wx.EXPAND | wx.ALL, 5)
 
-		up_btn.Enable(self.listCtrl.GetItemCount() != 0)
-		down_btn.Enable(self.listCtrl.GetItemCount() != 0)
+        panel.SetSizer(vbox)
 
-		hbox.Add(up_btn, 1)
-		hbox.Add(down_btn, 1)
-		hbox.Add(apply_btn, 1)
+        self.Bind(wx.EVT_BUTTON, self.OnApply, id=wx.ID_APPLY)
+        self.Bind(wx.EVT_BUTTON, self.OnUp, id=wx.ID_UP)
+        self.Bind(wx.EVT_BUTTON, self.OnDown, id=wx.ID_DOWN)
 
-		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.Add(self.listCtrl, 1, wx.EXPAND | wx.ALL , 5)
-		vbox.Add(hbox, 0, wx.EXPAND | wx.ALL, 5)
+        self.Center()
 
-		panel.SetSizer(vbox)
+    def OnApply(self, evt):
+        self.Close()
 
-		self.Bind(wx.EVT_BUTTON, self.OnApply, id=wx.ID_APPLY)
-		self.Bind(wx.EVT_BUTTON, self.OnUp, id=wx.ID_UP)
-		self.Bind(wx.EVT_BUTTON, self.OnDown, id=wx.ID_DOWN)
+    def GetSelectedItems(self):
+        """    Gets the selected items for the list control.
+        Selection is returned as a list of selected indices,
+        low to high.
+        """
+        selection = []
+        index = self.listCtrl.GetFirstSelected()
+        if index != -1:
+            selection.append(index)
 
-		self.Center()
+        while len(selection) != self.listCtrl.GetSelectedItemCount():
+            index = self.listCtrl.GetNextSelected(index)
+            selection.append(index)
 
-	def OnApply(self, evt):
-		self.Close()
+        return selection
 
-	def GetSelectedItems(self):
-		"""    Gets the selected items for the list control.
-		Selection is returned as a list of selected indices,
-		low to high.
-		"""
-		selection = []
-		index = self.listCtrl.GetFirstSelected()
-		if index != -1:
-			selection.append(index)
+    def OnUp(self, evt):
+        """ Allow up moving for selected items.
+        """
 
-		while len(selection) != self.listCtrl.GetSelectedItemCount():
-			index = self.listCtrl.GetNextSelected(index)
-			selection.append(index)
+        for pos in self.GetSelectedItems():
+            item = self.listCtrl.GetItem(pos)
+            current_item = item
 
-		return selection
+            new_pos = pos-1 if pos != 0 else self.listCtrl.GetItemCount()-1
 
-	def OnUp(self, evt):
-		""" Allow up moving for selected items.
-		"""
+            current_item.SetId(new_pos)
+            self.listCtrl.DeleteItem(pos)
+            self.listCtrl.InsertItem(item)
+            self.listCtrl.SetItemState(new_pos, 1, wx.LIST_STATE_SELECTED)
+            self.listCtrl.Select(new_pos,1)
 
-		for pos in self.GetSelectedItems():
-			item = self.listCtrl.GetItem(pos)
-			current_item = item
+    def OnDown(self, evt):
+        """ Allow down moving for selected items.
+        """
 
-			new_pos = pos-1 if pos != 0 else self.listCtrl.GetItemCount()-1
+        for pos in self.GetSelectedItems():
+            item = self.listCtrl.GetItem(pos)
+            current_item = item
 
-			current_item.SetId(new_pos)
-			self.listCtrl.DeleteItem(pos)
-			self.listCtrl.InsertItem(item)
-			self.listCtrl.SetItemState(new_pos, 1, wx.LIST_STATE_SELECTED)
-			self.listCtrl.Select(new_pos,1)
+            new_pos = pos+1 if pos != self.listCtrl.GetItemCount()-1 else 0
 
-	def OnDown(self, evt):
-		""" Allow down moving for selected items.
-		"""
-
-		for pos in self.GetSelectedItems():
-			item = self.listCtrl.GetItem(pos)
-			current_item = item
-
-			new_pos = pos+1 if pos != self.listCtrl.GetItemCount()-1 else 0
-
-			current_item.SetId(new_pos)
-			self.listCtrl.DeleteItem(pos)
-			self.listCtrl.InsertItem(item)
-			self.listCtrl.SetItemState(new_pos, 1, wx.LIST_STATE_SELECTED)
-			self.listCtrl.Select(new_pos, 1)
+            current_item.SetId(new_pos)
+            self.listCtrl.DeleteItem(pos)
+            self.listCtrl.InsertItem(item)
+            self.listCtrl.SetItemState(new_pos, 1, wx.LIST_STATE_SELECTED)
+            self.listCtrl.Select(new_pos, 1)
