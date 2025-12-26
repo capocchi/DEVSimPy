@@ -48,7 +48,8 @@ class StandaloneGUIKafkaPKG(wx.Frame):
                 elif self.block_model.isPY():
                     assert(os.path.exists(self.block_model.python_path))
             else:
-                raise ValueError(_("The 'block_model' param must be not None"))
+                if args[0]:
+                    raise ValueError(_("The 'block_model' param must be not None"))
         else:
             raise KeyError(_("The 'block_model' keyword argument is required but was not provided."))
 
@@ -65,6 +66,8 @@ class StandaloneGUIKafkaPKG(wx.Frame):
         icon.CopyFromBitmap(load_and_resize_image("properties.png"))
         self.SetIcon(icon)
         
+        block_model_label = self.block_model.label if self.block_model else "model"
+
         panel = wx.Panel(self)
         panel.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOW))
         
@@ -83,7 +86,7 @@ class StandaloneGUIKafkaPKG(wx.Frame):
         filename_grid.Add(self.st1, flag=wx.ALIGN_CENTER_VERTICAL)
         
         self._tc = wx.TextCtrl(panel, -1, 
-                               f"{self.block_model.label}-nogui-pkg.zip",
+                               f"{block_model_label}-nogui-pkg.zip",
                                validator=ZipNameValidator())
         self._tc.SetToolTip(_("Must end with .zip"))
         filename_grid.Add(self._tc, flag=wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)
@@ -137,7 +140,7 @@ class StandaloneGUIKafkaPKG(wx.Frame):
 
         # Label
         kafka_grid.Add(wx.StaticText(panel, label=_("Label:")), flag=wx.ALIGN_CENTER_VERTICAL)
-        self.kf_label = wx.TextCtrl(panel, -1, self.block_model.label)
+        self.kf_label = wx.TextCtrl(panel, -1, block_model_label)
         kafka_grid.Add(self.kf_label, flag=wx.EXPAND)
 
         # Container name

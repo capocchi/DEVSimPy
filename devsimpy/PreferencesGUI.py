@@ -50,767 +50,1497 @@ import Menu
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 class GeneralPanel(wx.Panel):
-	""" General preferences panel
+	""" General preferences panel with modern UI
 	"""
 
 	### wxPython version
 	wxv = [wx.VERSION_STRING]
 
 	def __init__(self, parent):
-		"""
-			Constructor.
-		"""
+		"""Constructor."""
 		wx.Panel.__init__(self, parent)
-
+		self.default_wxv = GetWXVersionFromIni()
 		self.InitUI()
 
 	def InitUI(self):
-
-		### FileBrowse
-		self.plugin_dir = filebrowse.DirBrowseButton(self, wx.NewIdRef(), startDirectory=PLUGINS_PATH, labelText=_("Plug-ins directory:"), toolTip=_("Change the plug-ins directory"), dialogTitle=_("Plug-ins directory..."))
-		self.domain_dir = filebrowse.DirBrowseButton(self, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText=_("Library directory:"), toolTip=_("Change the library directory"), dialogTitle=_("Libraries directory..."))
-		self.out_dir = filebrowse.DirBrowseButton(self, wx.NewIdRef(), startDirectory=OUT_DIR, labelText=_("Output directory:"), toolTip=_("Change the output directory"), dialogTitle=_("Output directory..."))
-
+		"""Initialize user interface with modern layout"""
+		
+		# Main sizer
+		mainSizer = wx.BoxSizer(wx.VERTICAL)
+		
+		# ============================================================
+		# Section 1: Directories
+		# ============================================================
+		dirBox = wx.StaticBoxSizer(wx.VERTICAL, self, _('Directories'))
+		
+		# Plugins directory
+		self.plugin_dir = filebrowse.DirBrowseButton(
+			self, wx.NewIdRef(), 
+			startDirectory=PLUGINS_PATH,
+			labelText=_("Plugins:"),
+			toolTip=_("Change the plugins directory"),
+			dialogTitle=_("Select plugins directory...")
+		)
 		self.plugin_dir.SetValue(PLUGINS_PATH)
+		dirBox.Add(self.plugin_dir, 0, wx.EXPAND|wx.ALL, 5)
+		
+		# Library directory
+		self.domain_dir = filebrowse.DirBrowseButton(
+			self, wx.NewIdRef(),
+			startDirectory=DOMAIN_PATH,
+			labelText=_("Libraries:"),
+			toolTip=_("Change the library directory"),
+			dialogTitle=_("Select libraries directory...")
+		)
 		self.domain_dir.SetValue(DOMAIN_PATH)
+		dirBox.Add(self.domain_dir, 0, wx.EXPAND|wx.ALL, 5)
+		
+		# Output directory
+		self.out_dir = filebrowse.DirBrowseButton(
+			self, wx.NewIdRef(),
+			startDirectory=OUT_DIR,
+			labelText=_("Output:"),
+			toolTip=_("Change the output directory"),
+			dialogTitle=_("Select output directory...")
+		)
 		self.out_dir.SetValue(OUT_DIR)
-
-		### StaticText
-		self.st1 = wx.StaticText(self, wx.NewIdRef(), _("Number of recent files:"))
-		self.st2 = wx.StaticText(self, wx.NewIdRef(), _("Font size:"))
-		self.st3 = wx.StaticText(self, wx.NewIdRef(), _("Deep of history item:"))
-		self.st4 = wx.StaticText(self, wx.NewIdRef(), _("wxPython version:"))
-
-		self.st1.SetToolTipString = self.st1.SetToolTip 
-		self.st2.SetToolTipString = self.st2.SetToolTip
-		self.st3.SetToolTipString = self.st3.SetToolTip
-		self.st4.SetToolTipString = self.st4.SetToolTip
-
-		self.st1.SetToolTipString(_("Feel free to change the length of list defining the recent opened files."))
-		self.st2.SetToolTipString(_("Feel free to change the font size of DEVSimpy."))
-		self.st3.SetToolTipString(_("Feel free to change the number of item for undo/redo command."))
-		self.st4.SetToolTipString(_("Feel free to change the version of wxpython used loaded by DEVSimPy."))
-
-		### number of opened file
+		dirBox.Add(self.out_dir, 0, wx.EXPAND|wx.ALL, 5)
+		
+		mainSizer.Add(dirBox, 0, wx.EXPAND|wx.ALL, 10)
+		
+		# ============================================================
+		# Section 2: General Settings
+		# ============================================================
+		settingsBox = wx.StaticBoxSizer(wx.VERTICAL, self, _('General Settings'))
+		settingsGrid = wx.FlexGridSizer(4, 2, 10, 10)
+		settingsGrid.AddGrowableCol(1, 1)
+		
+		# Number of recent files
+		st1 = wx.StaticText(self, label=_("Recent files:"))
+		st1.SetToolTip(_("Maximum number of recent opened files in the menu"))
 		self.nb_opened_file = wx.SpinCtrl(self, wx.NewIdRef(), '')
 		self.nb_opened_file.SetRange(2, 20)
 		self.nb_opened_file.SetValue(NB_OPENED_FILE)
-
-		### Block font size
-		self.font_size = wx.SpinCtrl(self, wx.NewIdRef(), '')
-		self.font_size.SetRange(2, 20)
-		self.font_size.SetValue(FONT_SIZE)
-
-		### number of undo/redo items
+		settingsGrid.Add(st1, 0, wx.ALIGN_CENTER_VERTICAL)
+		settingsGrid.Add(self.nb_opened_file, 1, wx.EXPAND)
+		
+		# Undo/Redo history depth
+		st3 = wx.StaticText(self, label=_("History depth:"))
+		st3.SetToolTip(_("Number of undo/redo operations to keep in memory"))
 		self.nb_history_undo = wx.SpinCtrl(self, wx.NewIdRef(), '')
 		self.nb_history_undo.SetRange(2, 100)
 		self.nb_history_undo.SetValue(NB_HISTORY_UNDO)
-
-		### CheckBox for transparancy
-		self.cb1 = wx.CheckBox(self, wx.NewIdRef(), _('Transparency'))
-		self.cb1.SetToolTipString = self.cb1.SetToolTip
-		self.cb1.SetToolTipString(_("Transparency for the detached frame of diagrams"))
+		settingsGrid.Add(st3, 0, wx.ALIGN_CENTER_VERTICAL)
+		settingsGrid.Add(self.nb_history_undo, 1, wx.EXPAND)
+		
+		# Font size
+		st2 = wx.StaticText(self, label=_("Font size:"))
+		st2.SetToolTip(_("Default font size for block labels"))
+		self.font_size = wx.SpinCtrl(self, wx.NewIdRef(), '')
+		self.font_size.SetRange(6, 24)
+		self.font_size.SetValue(FONT_SIZE)
+		settingsGrid.Add(st2, 0, wx.ALIGN_CENTER_VERTICAL)
+		settingsGrid.Add(self.font_size, 1, wx.EXPAND)
+		
+		# wxPython version
+		st4 = wx.StaticText(self, label=_("wxPython version:"))
+		st4.SetToolTip(_("wxPython version to use (requires restart)"))
+		self.cb2 = wx.ComboBox(self, wx.NewIdRef(), self.default_wxv, 
+							   choices=GeneralPanel.wxv, style=wx.CB_READONLY)
+		settingsGrid.Add(st4, 0, wx.ALIGN_CENTER_VERTICAL)
+		settingsGrid.Add(self.cb2, 1, wx.EXPAND)
+		
+		settingsBox.Add(settingsGrid, 0, wx.EXPAND|wx.ALL, 5)
+		mainSizer.Add(settingsBox, 0, wx.EXPAND|wx.ALL, 10)
+		
+		# ============================================================
+		# Section 3: Options
+		# ============================================================
+		optionsBox = wx.StaticBoxSizer(wx.VERTICAL, self, _('Options'))
+		
+		# Transparency checkbox
+		self.cb1 = wx.CheckBox(self, wx.NewIdRef(), _('Enable window transparency'))
+		self.cb1.SetToolTip(_("Apply transparency to detached diagram frames"))
 		self.cb1.SetValue(getattr(builtins, 'TRANSPARENCY'))
-
-		### CheckBox for notification
-		self.cb11 = wx.CheckBox(self, wx.NewIdRef(), _('Notififcations'))
-		self.cb11.SetToolTipString = self.cb11.SetToolTip
-		self.cb11.SetToolTipString(_("Enable the notification messages"))
+		optionsBox.Add(self.cb1, 0, wx.ALL, 5)
+		
+		# Notification checkbox
+		self.cb11 = wx.CheckBox(self, wx.NewIdRef(), _('Enable notifications'))
+		self.cb11.SetToolTip(_("Show notification messages for important events"))
 		self.cb11.SetValue(getattr(builtins, 'NOTIFICATION'))
-			
-		self.cb2 = wx.ComboBox(self, wx.NewIdRef(), GetWXVersionFromIni(), choices=GeneralPanel.wxv, style=wx.CB_READONLY)
-		self.cb2.SetToolTipString = self.cb2.SetToolTip
-		self.cb2.SetToolTipString(_("Default version of wxPython."))
-		self.default_wxv = self.cb2.GetValue()
-
-		### Sizer
-		box1 = wx.StaticBoxSizer(wx.StaticBox(self, wx.NewIdRef(), _('Properties')), orient=wx.VERTICAL)
-		vsizer = wx.BoxSizer(wx.VERTICAL)
-		hsizer = wx.GridSizer(5, 2, 20, 20)
-
-		hsizer.AddMany( [	(self.st1, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
-							(self.nb_opened_file, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
-							(self.st3, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
-							(self.nb_history_undo, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
-							(self.st2, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
-							(self.font_size, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
-					(self.st4, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5),
-					(self.cb2, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5)])
-
-		vsizer.Add(self.plugin_dir, 1, wx.EXPAND)
-		vsizer.Add(self.domain_dir, 1, wx.EXPAND)
-		vsizer.Add(self.out_dir, 1, wx.EXPAND)
-		vsizer.Add(hsizer, 0, wx.EXPAND)
-		vsizer.Add(self.cb1, 1, wx.EXPAND)
-		vsizer.Add(self.cb11, 1, wx.EXPAND)
-		box1.Add(vsizer, 1, wx.EXPAND)
-
-		### Set sizer
-		self.SetSizer(box1)
+		optionsBox.Add(self.cb11, 0, wx.ALL, 5)
+		
+		mainSizer.Add(optionsBox, 0, wx.EXPAND|wx.ALL, 10)
+		
+		# ============================================================
+		# Section 4: Information
+		# ============================================================
+		infoBox = wx.StaticBoxSizer(wx.VERTICAL, self, _('Information'))
+		
+		infoGrid = wx.FlexGridSizer(3, 2, 5, 10)
+		infoGrid.AddGrowableCol(1, 1)
+		
+		# wxPython version info
+		infoGrid.Add(wx.StaticText(self, label=_("Current wxPython:")), 0, 
+					wx.ALIGN_CENTER_VERTICAL)
+		infoGrid.Add(wx.StaticText(self, label=wx.VERSION_STRING), 0, 
+					wx.ALIGN_CENTER_VERTICAL)
+		
+		# Python version info
+		infoGrid.Add(wx.StaticText(self, label=_("Python version:")), 0, 
+					wx.ALIGN_CENTER_VERTICAL)
+		infoGrid.Add(wx.StaticText(self, label=sys.version.split()[0]), 0, 
+					wx.ALIGN_CENTER_VERTICAL)
+		
+		# Platform info
+		infoGrid.Add(wx.StaticText(self, label=_("Platform:")), 0, 
+					wx.ALIGN_CENTER_VERTICAL)
+		infoGrid.Add(wx.StaticText(self, label=sys.platform), 0, 
+					wx.ALIGN_CENTER_VERTICAL)
+		
+		infoBox.Add(infoGrid, 0, wx.EXPAND|wx.ALL, 5)
+		mainSizer.Add(infoBox, 0, wx.EXPAND|wx.ALL, 10)
+		
+		# Add stretch spacer at the end
+		mainSizer.AddStretchSpacer(1)
+		
+		# Set sizer
+		self.SetSizer(mainSizer)
 		self.SetAutoLayout(True)
 
 	def OnApply(self, event):
-		""" Apply change.
-		"""
-
-		### safe copy of default_wxv to manage the wx version changing
-		default_wxv = copy.copy(self.default_wxv)
-
-		self.OnNbOpenedFileChanged(event)
-		self.OnNbHistoryUndoChanged(event)
-		self.OnFontSizeChanged(event)
-		self.OnDomainPathChanged(event)
-		self.OnPluginsDirChanged(event)
-		self.OnOutDirChanged(event)
-		self.OnTransparancyChanged(event)
-		self.OnNotificationChanged(event)
-		self.OnwxPythonVersionChanged(event)
-
-		### if the version of wx has been changed in OnwxPythonVersionChanged, we inform the user.
-		if self.default_wxv != default_wxv:
-			dlg = wx.MessageDialog(self, _("wxPython version has been changed.\nDEVSimPy requires a reboot to load the new version of wxPython."), _('wxPython Version Manager'), wx.OK|wx.ICON_INFORMATION)
+		"""Apply all changes"""
+		
+		# Safe copy of default_wxv to manage wx version changing
+		old_wxv = copy.copy(self.default_wxv)
+		
+		# Apply all changes
+		changes = []
+		
+		if self.OnNbOpenedFileChanged(event):
+			changes.append(_("Recent files limit"))
+		if self.OnNbHistoryUndoChanged(event):
+			changes.append(_("History depth"))
+		if self.OnFontSizeChanged(event):
+			changes.append(_("Font size"))
+		if self.OnDomainPathChanged(event):
+			changes.append(_("Library directory"))
+		if self.OnPluginsDirChanged(event):
+			changes.append(_("Plugins directory"))
+		if self.OnOutDirChanged(event):
+			changes.append(_("Output directory"))
+		if self.OnTransparancyChanged(event):
+			changes.append(_("Transparency"))
+		if self.OnNotificationChanged(event):
+			changes.append(_("Notifications"))
+		if self.OnwxPythonVersionChanged(event):
+			changes.append(_("wxPython version"))
+		
+		# Show summary of changes
+		if changes:
+			msg = _("The following settings have been updated:\n\n")
+			msg += "\n".join(f"• {c}" for c in changes)
+			
+			# Check if restart is required
+			if self.default_wxv != old_wxv:
+				msg += _("\n\nDEVSimPy requires a restart to load the new wxPython version.")
+				icon = wx.ICON_WARNING
+			else:
+				icon = wx.ICON_INFORMATION
+			
+			dlg = wx.MessageDialog(self, msg, _('Settings Updated'), 
+								  wx.OK | icon)
 			dlg.ShowModal()
 			dlg.Destroy()
-	###
+
 	def OnNbOpenedFileChanged(self, event):
-		""" Update the number opened files.
-		"""
-		setattr(builtins, 'NB_OPENED_FILE', self.nb_opened_file.GetValue())		# number of recent files
+		"""Update the number of recent opened files"""
+		new_val = self.nb_opened_file.GetValue()
+		old_val = getattr(builtins, 'NB_OPENED_FILE')
+		
+		if new_val != old_val:
+			setattr(builtins, 'NB_OPENED_FILE', new_val)
+			return True
+		return False
 
-	###
 	def OnNbHistoryUndoChanged(self, event):
-		""" Update the history for undo.
-		"""
-		setattr(builtins, 'NB_HISTORY_UNDO', self.nb_history_undo.GetValue())		# number of history undo
+		"""Update the history depth for undo/redo"""
+		new_val = self.nb_history_undo.GetValue()
+		old_val = getattr(builtins, 'NB_HISTORY_UNDO')
+		
+		if new_val != old_val:
+			setattr(builtins, 'NB_HISTORY_UNDO', new_val)
+			return True
+		return False
 
-	###
 	def OnFontSizeChanged(self, event):
-		""" Update font size.
-		"""
-		setattr(builtins, 'FONT_SIZE', self.font_size.GetValue())		# Block font size
+		"""Update font size"""
+		new_val = self.font_size.GetValue()
+		old_val = getattr(builtins, 'FONT_SIZE')
+		
+		if new_val != old_val:
+			setattr(builtins, 'FONT_SIZE', new_val)
+			return True
+		return False
 
-	###
 	def OnDomainPathChanged(self, event):
-		""" Update the domain path.
-		"""
+		"""Update the domain path"""
 		new_domain_dir = self.domain_dir.GetValue()
-
-		### if value has been changed, we clean the library control panel
-		if getattr(builtins, 'DOMAIN_PATH') != new_domain_dir:
-
-			old_parent_domain_dir = os.path.dirname(DOMAIN_PATH)
-
-			### remove the parent of Domain directory of this one is not the devsimpy directory
+		old_domain_dir = getattr(builtins, 'DOMAIN_PATH')
+		
+		# If value has changed, clean the library control panel
+		if old_domain_dir != new_domain_dir:
+			
+			old_parent_domain_dir = os.path.dirname(old_domain_dir)
+			
+			# Remove the parent of Domain directory if not in devsimpy package
 			if old_parent_domain_dir != DEVSIMPY_PACKAGE_PATH:
 				if old_parent_domain_dir in sys.path:
 					sys.path.remove(old_parent_domain_dir)
-			### remove the path from sys.path in order to update the import process
-			for path in [p for p in sys.path if DOMAIN_PATH in p]:
-				sys.path.remove(path)
-
-			### TODO remove dirname of path from sys.modules ?
-
-			### update the builtin
-			setattr(builtins, 'DOMAIN_PATH', new_domain_dir)
-
-			### update all Domain (the process add in sys.path the path invoked when import is used
-			mainW = getTopLevelWindow()
-			nb1 = mainW.GetControlNotebook()
-			tree = nb1.GetTree()
-			for item in tree.GetItemChildren(tree.GetRootItem()):
-				tree.RemoveItem(item)
 			
-			### save in the config file
-			mainW.SaveUserSettings()
+			# Remove paths from sys.path to update import process
+			for path in [p for p in sys.path if old_domain_dir in p]:
+				sys.path.remove(path)
+			
+			# Update builtin
+			setattr(builtins, 'DOMAIN_PATH', new_domain_dir)
+			
+			# Update library tree
+			try:
+				mainW = getTopLevelWindow()
+				nb1 = mainW.GetControlNotebook()
+				tree = nb1.GetTree()
+				root = tree.GetRootItem()
+				
+				# Remove all children
+				for item in tree.GetItemChildren(root):
+					tree.Delete(item)
+				
+				# Save settings
+				mainW.SaveUserSettings()
+			except Exception as e:
+				wx.LogError(f"Error updating library tree: {str(e)}")
+			
+			return True
+		return False
 
-	###
 	def OnPluginsDirChanged(self, event):
-		""" Update of plugins path has been invoked.
-		"""
-		setattr(builtins, 'PLUGINS_PATH', self.plugin_dir.GetValue())
+		"""Update plugins path"""
+		new_val = self.plugin_dir.GetValue()
+		old_val = getattr(builtins, 'PLUGINS_PATH')
+		
+		if new_val != old_val:
+			setattr(builtins, 'PLUGINS_PATH', new_val)
+			return True
+		return False
 
-	###
 	def OnOutDirChanged(self, event):
-		""" Update of output directory has been invoked.
-		"""
-		setattr(builtins, 'OUT_DIR', os.path.basename(self.out_dir.GetValue()))
+		"""Update output directory"""
+		new_val = os.path.basename(self.out_dir.GetValue())
+		old_val = getattr(builtins, 'OUT_DIR')
+		
+		if new_val != old_val:
+			setattr(builtins, 'OUT_DIR', new_val)
+			return True
+		return False
 
-	###
 	def OnTransparancyChanged(self, event):
-		""" Update of windwis transparency directory has been invoked.
-		"""
-		setattr(builtins, 'TRANSPARENCY', self.cb1.GetValue())
+		"""Update window transparency option"""
+		new_val = self.cb1.GetValue()
+		old_val = getattr(builtins, 'TRANSPARENCY')
+		
+		if new_val != old_val:
+			setattr(builtins, 'TRANSPARENCY', new_val)
+			return True
+		return False
 
-		###
 	def OnNotificationChanged(self, event):
-		""" Update of notifcation option directory has been invoked.
-		"""
-		setattr(builtins, 'NOTIFICATION', self.cb11.GetValue())
+		"""Update notification option"""
+		new_val = self.cb11.GetValue()
+		old_val = getattr(builtins, 'NOTIFICATION')
+		
+		if new_val != old_val:
+			setattr(builtins, 'NOTIFICATION', new_val)
+			return True
+		return False
 
 	def OnwxPythonVersionChanged(self, event):
-		""" Update of wxpython version has been invoked.
-			This option has been deprecated when wxversion has been removed from wx v. 4.x.
-		"""
-
-		### new value
-		self.default_wxv = self.cb2.GetValue()
-
-		### update the init file into GetUserConfigDir
+		"""Update wxPython version (deprecated with wx 4.x)"""
+		
+		# New value
+		new_wxv = self.cb2.GetValue()
+		
+		if new_wxv == self.default_wxv:
+			return False
+		
+		self.default_wxv = new_wxv
+		
+		# Update ini file in user config directory
 		parser = configparser.ConfigParser()
 		path = os.path.join(GetUserConfigDir(), 'devsimpy.ini')
-		parser.read(path)
-
-		section, option = ('wxversion', 'to_load')
-
-		### if ini file exist we remove old section and option
+		
+		# Read existing config
 		if os.path.exists(path):
-			if parser.has_option(section, option):
-				parser.remove_option(section, option)
-			if parser.has_section(section):
-				parser.remove_section(section)
-			parser.add_section(section)
-
-		if not parser.has_section(section):
-			parser.add_section(section)
-
+			parser.read(path)
+		
+		section, option = ('wxversion', 'to_load')
+		
+		# Remove old section if exists
+		if parser.has_section(section):
+			parser.remove_section(section)
+		
+		# Add new section and value
+		parser.add_section(section)
 		parser.set(section, option, self.default_wxv)
-		parser.write(open(path,'w'))
+		
+		# Write config
+		try:
+			with open(path, 'w') as f:
+				parser.write(f)
+			return True
+		except IOError as e:
+			wx.LogError(f"Error saving wxPython version: {str(e)}")
+			return False
+
 
 class SimulationPanel(wx.Panel):
-	""" Simulation Panel.
+	""" Simulation Panel with modern UI
 	"""
 
 	def __init__(self, parent):
 		""" Constructor.
 		"""
 		wx.Panel.__init__(self, parent)
-
+		
+		# Initialize paths
+		self.sim_success_sound_path = SIMULATION_SUCCESS_SOUND_PATH
+		self.sim_error_sound_path = SIMULATION_ERROR_SOUND_PATH
+		self.default_devs_dir = DEFAULT_DEVS_DIRNAME
+		self.sim_defaut_strategy = DEFAULT_SIM_STRATEGY
+		self.sim_defaut_plot_dyn_freq = DEFAULT_PLOT_DYN_FREQ
+		
 		self.InitUI()
 	
 	def InitUI(self):
-		""" Init the UI.
+		""" Initialize the UI with modern layout
 		"""
-		### Sizer
-		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox3 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox4 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox5 = wx.BoxSizer(wx.HORIZONTAL)
-		vbox = wx.BoxSizer(wx.VERTICAL)
-
-		self.sim_success_sound_path = SIMULATION_SUCCESS_SOUND_PATH
-		self.sim_error_sound_path = SIMULATION_ERROR_SOUND_PATH
-
-		### Buttons
-		self.sim_success_sound_btn = wx.Button(self, wx.NewIdRef(), os.path.basename(self.sim_success_sound_path), (25, 105), name='success')
-		self.sim_success_sound_btn.Enable(self.sim_success_sound_path is not os.devnull)
-		self.sim_success_sound_btn.SetToolTipString = self.sim_success_sound_btn.SetToolTip
-		self.sim_success_sound_btn.SetToolTipString(_("Press this button in order to change the song arriving at the end of the simulation."))
-
-		self.sim_error_sound_btn = wx.Button(self, wx.NewIdRef(), os.path.basename(self.sim_error_sound_path), (25, 105), name='error')
-		self.sim_error_sound_btn.Enable(self.sim_error_sound_path is not os.devnull)
-		self.sim_error_sound_btn.SetToolTipString = self.sim_error_sound_btn.SetToolTip
-		self.sim_error_sound_btn.SetToolTipString(_("Press this button in order to change the song arriving when an error occur in a model during the simulation."))
-
-		self.devs_doc_btn = wx.Button(self, wx.ID_ABOUT, name='doc')
-		self.devs_doc_btn.SetToolTipString = self.devs_doc_btn.SetToolTip
-		self.devs_doc_btn.SetToolTipString(_("Press this button to read the documentation of the selected DEVS package"))
-
-		### CheckBox
-		self.cb1 = wx.CheckBox(self, wx.NewIdRef(), _('Notification'))
-		self.cb1.SetToolTipString = self.cb1.SetToolTip
-		self.cb1.SetToolTipString(_("Notification song is generate when the simulation is over."))
-		self.cb1.SetValue(self.sim_success_sound_path is not os.devnull)
-
-		self.cb2 = wx.CheckBox(self, wx.NewIdRef(), _('No Time Limit'))
-		self.cb2.SetToolTipString = self.cb2.SetToolTip
-		self.cb2.SetValue(NTL)
-		self.cb2.SetToolTipString(_("No Time Limit allow the stop of simulation when all of models are idle."))
-
-		### StaticText for DEVS Kernel directory
-		self.txt3 = wx.StaticText(self, wx.NewIdRef(), _("DEVS packages:"))
-		self.cb3 = wx.ComboBox(self, wx.NewIdRef(), DEFAULT_DEVS_DIRNAME, choices=list(DEVS_DIR_PATH_DICT.keys()), style=wx.CB_READONLY)
-		self.cb3.SetToolTipString = self.cb3.SetToolTip
-		self.cb3.SetToolTipString(_("Default DEVS Kernel package (PyDEVS, PyPDEVS, ect.)."))
-		self.default_devs_dir = DEFAULT_DEVS_DIRNAME
-
-		### StaticText for strategy
-		self.txt = wx.StaticText(self, wx.NewIdRef(), _("Default strategy:"))
-		### choice of combo-box depends on the default DEVS package directory
-		# c = list(PYDEVS_SIM_STRATEGY_DICT.keys()) if DEFAULT_DEVS_DIRNAME == 'PyDEVS' else list(PYPDEVS_SIM_STRATEGY_DICT.keys())
-		c = list(getattr(builtins, f'{self.cb3.GetValue().upper()}_SIM_STRATEGY_DICT').keys())
 		
-
-		self.cb4 = wx.ComboBox(self, wx.NewIdRef(), DEFAULT_SIM_STRATEGY, choices=c, style=wx.CB_READONLY)
-		self.cb4.SetToolTipString = self.cb4.SetToolTip
-		self.cb4.SetToolTipString(_("Default strategy for the simulation algorithm. Please see the DEVSimPy doc for more information of possible strategy."))
-		self.sim_defaut_strategy = DEFAULT_SIM_STRATEGY
-
-		### StaticText
-		self.sim_defaut_plot_dyn_freq = DEFAULT_PLOT_DYN_FREQ
-		self.txt2 = wx.StaticText(self, wx.NewIdRef(), _("Frequency of plotting refresh:"))
-		self.sc = wx.SpinCtrl(self, wx.NewIdRef(), str(self.sim_defaut_plot_dyn_freq), (55, 90), (60, -1), min=10, max=10000)
-		self.sc.SetToolTipString = self.sc.SetToolTip
-		self.sc.SetToolTipString(_("Default frequency for dynamic plotting."))
-
-		### Adding sizer
-		hbox1.Add(self.cb1, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 15)
-		hbox1.Add(self.sim_success_sound_btn, 1, wx.EXPAND|wx.ALL, 15)
-		hbox1.Add(self.sim_error_sound_btn, 1, wx.EXPAND|wx.ALL, 15)
-
-		hbox5.Add(self.txt3, 0, wx.EXPAND|wx.ALL, 15)
-		hbox5.Add(self.cb3, 1, wx.EXPAND|wx.ALL, 15)
-		hbox5.Add(self.devs_doc_btn, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL)
-
-		hbox2.Add(self.txt, 0, wx.ALL|wx.EXPAND, 15)
-		hbox2.Add(self.cb4, 1, wx.ALL|wx.EXPAND, 15)
-
-		hbox3.Add(self.cb2, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 15)
-
-		hbox4.Add(self.txt2, 0, wx.ALL, 15)
-		hbox4.Add(self.sc, 1, wx.ALL, 15)
-
-		#hbox4.Add(information, 1, wx.ALIGN_CENTER_VERTICAL, 15)
-		##hbox4.Add(self.strategy_info, 1, wx.ALIGN_CENTER_VERTICAL, 15)
-
-		vbox.Add(hbox1, 0, wx.EXPAND|wx.ALL, 10)
-		vbox.Add(hbox5, 0, wx.EXPAND|wx.ALL, 10)
-		vbox.Add(hbox2, 0, wx.EXPAND|wx.ALL, 10)
-		vbox.Add(hbox3, 0, wx.EXPAND|wx.ALL, 10)
-		vbox.Add(hbox4, 0, wx.EXPAND|wx.ALL, 10)
-
-		### Set sizer
-		self.SetSizer(vbox)
+		# Main sizer
+		mainSizer = wx.BoxSizer(wx.VERTICAL)
+		
+		# ============================================================
+		# Section 1: DEVS Kernel
+		# ============================================================
+		devsBox = wx.StaticBoxSizer(wx.VERTICAL, self, _('DEVS Kernel'))
+		
+		devsGrid = wx.FlexGridSizer(2, 3, 10, 10)
+		devsGrid.AddGrowableCol(1, 1)
+		
+		# DEVS Package selection
+		devsLabel = wx.StaticText(self, label=_("Package:"))
+		devsLabel.SetToolTip(_("Select the DEVS kernel package (PyDEVS, PyPDEVS, etc.)"))
+		self.cb3 = wx.ComboBox(self, wx.NewIdRef(), DEFAULT_DEVS_DIRNAME, 
+							   choices=list(DEVS_DIR_PATH_DICT.keys()), 
+							   style=wx.CB_READONLY)
+		self.cb3.Bind(wx.EVT_COMBOBOX, self.onCb3)
+		
+		# Documentation button
+		self.devs_doc_btn = wx.Button(self, wx.ID_HELP, _("Help"))
+		self.devs_doc_btn.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_HELP, wx.ART_BUTTON))
+		self.devs_doc_btn.SetToolTip(_("View documentation for the selected DEVS package"))
+		self.devs_doc_btn.Bind(wx.EVT_BUTTON, self.OnAbout)
+		
+		devsGrid.Add(devsLabel, 0, wx.ALIGN_CENTER_VERTICAL)
+		devsGrid.Add(self.cb3, 1, wx.EXPAND)
+		devsGrid.Add(self.devs_doc_btn, 0, wx.ALIGN_CENTER_VERTICAL)
+		
+		# Strategy selection
+		strategyLabel = wx.StaticText(self, label=_("Strategy:"))
+		strategyLabel.SetToolTip(_("Select the default simulation strategy"))
+		
+		# Get strategies based on current DEVS package
+		strategies = list(getattr(builtins, 
+								  f'{self.cb3.GetValue().upper()}_SIM_STRATEGY_DICT').keys())
+		self.cb4 = wx.ComboBox(self, wx.NewIdRef(), DEFAULT_SIM_STRATEGY, 
+							   choices=strategies, style=wx.CB_READONLY)
+		self.cb4.SetToolTip(_("Simulation algorithm strategy (see documentation for details)"))
+		self.cb4.Bind(wx.EVT_COMBOBOX, self.onCb4)
+		
+		# Info button for strategy
+		strategyInfoBtn = wx.Button(self, wx.NewIdRef(), _("Info"))
+		strategyInfoBtn.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_BUTTON))
+		strategyInfoBtn.SetToolTip(_("Information about the selected strategy"))
+		strategyInfoBtn.Bind(wx.EVT_BUTTON, self.OnStrategyInfo)
+		
+		devsGrid.Add(strategyLabel, 0, wx.ALIGN_CENTER_VERTICAL)
+		devsGrid.Add(self.cb4, 1, wx.EXPAND)
+		devsGrid.Add(strategyInfoBtn, 0, wx.ALIGN_CENTER_VERTICAL)
+		
+		devsBox.Add(devsGrid, 0, wx.EXPAND|wx.ALL, 5)
+		mainSizer.Add(devsBox, 0, wx.EXPAND|wx.ALL, 10)
+		
+		# ============================================================
+		# Section 2: Simulation Options
+		# ============================================================
+		optionsBox = wx.StaticBoxSizer(wx.VERTICAL, self, _('Simulation Options'))
+		
+		# No Time Limit checkbox
+		self.cb2 = wx.CheckBox(self, wx.NewIdRef(), 
+							   _('No Time Limit (stop when all models are idle)'))
+		self.cb2.SetValue(NTL)
+		self.cb2.SetToolTip(_("Simulation stops automatically when all models are idle"))
+		optionsBox.Add(self.cb2, 0, wx.ALL, 5)
+		
+		# Plot refresh frequency
+		plotSizer = wx.BoxSizer(wx.HORIZONTAL)
+		plotLabel = wx.StaticText(self, label=_("Plot refresh frequency (ms):"))
+		plotLabel.SetToolTip(_("Frequency for dynamic plot updates during simulation"))
+		self.sc = wx.SpinCtrl(self, wx.NewIdRef(), 
+							 str(self.sim_defaut_plot_dyn_freq),
+							 min=10, max=10000)
+		self.sc.Bind(wx.EVT_SPINCTRL, self.onSc)
+		
+		plotSizer.Add(plotLabel, 0, wx.ALIGN_CENTER_VERTICAL|wx.RIGHT, 10)
+		plotSizer.Add(self.sc, 0)
+		optionsBox.Add(plotSizer, 0, wx.ALL, 5)
+		
+		mainSizer.Add(optionsBox, 0, wx.EXPAND|wx.ALL, 10)
+		
+		# ============================================================
+		# Section 3: Sound Notifications
+		# ============================================================
+		soundBox = wx.StaticBoxSizer(wx.VERTICAL, self, _('Sound Notifications'))
+		
+		# Enable notifications checkbox
+		self.cb1 = wx.CheckBox(self, wx.NewIdRef(), _('Enable sound notifications'))
+		self.cb1.SetValue(self.sim_success_sound_path != os.devnull)
+		self.cb1.SetToolTip(_("Play sounds when simulation completes or encounters errors"))
+		self.cb1.Bind(wx.EVT_CHECKBOX, self.onCb1Check)
+		soundBox.Add(self.cb1, 0, wx.ALL, 5)
+		
+		# Sound selection grid
+		soundGrid = wx.FlexGridSizer(2, 3, 10, 10)
+		soundGrid.AddGrowableCol(1, 1)
+		
+		# Success sound
+		successLabel = wx.StaticText(self, label=_("Success:"))
+		self.sim_success_sound_btn = wx.Button(self, wx.NewIdRef(), 
+											   os.path.basename(self.sim_success_sound_path),
+											   name='success')
+		self.sim_success_sound_btn.SetToolTip(_("Sound played when simulation completes successfully"))
+		self.sim_success_sound_btn.Enable(self.sim_success_sound_path != os.devnull)
+		self.sim_success_sound_btn.Bind(wx.EVT_BUTTON, self.OnSelectSound)
+		
+		successPlayBtn = wx.Button(self, wx.NewIdRef(), _("Play"))
+		successPlayBtn.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_GO_FORWARD, wx.ART_BUTTON))
+		successPlayBtn.SetToolTip(_("Preview this sound"))
+		successPlayBtn.Bind(wx.EVT_BUTTON, lambda e: self.OnPlaySound('success'))
+		
+		soundGrid.Add(successLabel, 0, wx.ALIGN_CENTER_VERTICAL)
+		soundGrid.Add(self.sim_success_sound_btn, 1, wx.EXPAND)
+		soundGrid.Add(successPlayBtn, 0)
+		
+		# Error sound
+		errorLabel = wx.StaticText(self, label=_("Error:"))
+		self.sim_error_sound_btn = wx.Button(self, wx.NewIdRef(),
+											 os.path.basename(self.sim_error_sound_path),
+											 name='error')
+		self.sim_error_sound_btn.SetToolTip(_("Sound played when simulation encounters an error"))
+		self.sim_error_sound_btn.Enable(self.sim_error_sound_path != os.devnull)
+		self.sim_error_sound_btn.Bind(wx.EVT_BUTTON, self.OnSelectSound)
+		
+		errorPlayBtn = wx.Button(self, wx.NewIdRef(), _("Play"))
+		errorPlayBtn.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_GO_FORWARD, wx.ART_BUTTON))
+		errorPlayBtn.SetToolTip(_("Preview this sound"))
+		errorPlayBtn.Bind(wx.EVT_BUTTON, lambda e: self.OnPlaySound('error'))
+		
+		soundGrid.Add(errorLabel, 0, wx.ALIGN_CENTER_VERTICAL)
+		soundGrid.Add(self.sim_error_sound_btn, 1, wx.EXPAND)
+		soundGrid.Add(errorPlayBtn, 0)
+		
+		soundBox.Add(soundGrid, 0, wx.EXPAND|wx.ALL, 5)
+		mainSizer.Add(soundBox, 0, wx.EXPAND|wx.ALL, 10)
+		
+		# Add stretch spacer
+		mainSizer.AddStretchSpacer(1)
+		
+		# Set sizer
+		self.SetSizer(mainSizer)
 		self.SetAutoLayout(True)
 
-		### Binding
-		self.sim_success_sound_btn.Bind(wx.EVT_BUTTON, self.OnSelectSound)
-		self.sim_error_sound_btn.Bind(wx.EVT_BUTTON, self.OnSelectSound)
-		self.devs_doc_btn.Bind(wx.EVT_BUTTON, self.OnAbout)
-		self.cb1.Bind(wx.EVT_CHECKBOX, self.onCb1Check)
-		self.cb4.Bind(wx.EVT_COMBOBOX, self.onCb4)
-		self.cb3.Bind(wx.EVT_COMBOBOX, self.onCb3)
-		self.sc.Bind(wx.EVT_SPINCTRL, self.onSc)
-
 	def OnAbout(self, evt):
-		""" Search doc directory into 'doc' directory of DEVS package
+		""" Show documentation for selected DEVS package
 		"""
 		choice = self.cb3.GetValue()
-		doc_path = os.path.join(os.path.dirname(getattr(builtins, 'DEVS_DIR_PATH_DICT').get(choice)), 'doc', 'index.html')
+		doc_path = os.path.join(
+			os.path.dirname(getattr(builtins, 'DEVS_DIR_PATH_DICT').get(choice)), 
+			'doc', 'index.html'
+		)
 
-		frame = HtmlFrame(self, wx.NewIdRef(), "Doc", (600, 600))
+		frame = HtmlFrame(self, wx.NewIdRef(), f"{choice} Documentation", (800, 600))
+		
 		if os.path.exists(doc_path):
 			frame.LoadFile(doc_path)
 		else:
-			frame.SetPage(_("<p> %s documentation directory not found! <p>") % choice)
+			html_content = f"""
+			<html>
+			<body>
+			<h2>{choice} Documentation</h2>
+			<p>Documentation directory not found at:</p>
+			<p><code>{doc_path}</code></p>
+			<p>Please check that the documentation is installed.</p>
+			</body>
+			</html>
+			"""
+			frame.SetPage(html_content)
 
 		frame.Show()
 
+	def OnStrategyInfo(self, evt):
+		""" Show information about the selected strategy
+		"""
+		strategy = self.cb4.GetValue()
+		devs_package = self.cb3.GetValue()
+		
+		strategy_dict = getattr(builtins, 
+							   f'{devs_package.upper()}_SIM_STRATEGY_DICT')
+		
+		if strategy in strategy_dict:
+			strategy_class = strategy_dict[strategy]
+			doc = strategy_class.__doc__ or _("No documentation available")
+			
+			msg = f"{_('Strategy')}: {strategy}\n\n"
+			msg += f"{_('Class')}: {strategy_class.__name__}\n\n"
+			msg += f"{_('Description')}:\n{doc}"
+			
+			dlg = wx.MessageDialog(self, msg, 
+								  _('Strategy Information'),
+								  wx.OK | wx.ICON_INFORMATION)
+			dlg.ShowModal()
+			dlg.Destroy()
+
 	def OnSelectSound(self, evt):
+		""" Select a sound file
 		"""
-		"""
-		dlg = wx.FileDialog(wx.GetTopLevelParent(self),
-							_("Choose a sound file"),
-							defaultDir = os.path.join(DEVSIMPY_PACKAGE_PATH,'sounds'),
-							wildcard = _("MP3 files (*.mp3)|*.mp3| WAV files (*.wav)|*.wav"),
-							style = wx.OPEN)
+		dlg = wx.FileDialog(
+			wx.GetTopLevelParent(self),
+			_("Choose a sound file"),
+			defaultDir=os.path.join(DEVSIMPY_PACKAGE_PATH, 'sounds'),
+			wildcard=_("Sound files (*.mp3;*.wav)|*.mp3;*.wav|MP3 files (*.mp3)|*.mp3|WAV files (*.wav)|*.wav"),
+			style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
+		)
 
 		if dlg.ShowModal() == wx.ID_OK:
 			val = dlg.GetPath()
-			name = evt.GetEventObject().GetName()
+			btn = evt.GetEventObject()
+			name = btn.GetName()
+			
 			try:
-
-				playSound(val)
-
+				# Update button label and path
+				btn.SetLabel(os.path.basename(val))
+				
 				if name == 'success':
 					self.sim_success_sound_path = val
 				elif name == 'error':
 					self.sim_error_sound_path = val
-				else:
-					pass
-
-			except NotImplementedError as v:
-				wx.MessageBox(str(v), _("Exception Message"))
+				
+				# Auto-play the selected sound
+				playSound(val)
+				
+			except Exception as e:
+				wx.MessageBox(str(e), _("Error"), wx.OK | wx.ICON_ERROR)
 
 		dlg.Destroy()
 
-	def onCb1Check(self, evt):
-		""" CheckBox has been checked.
+	def OnPlaySound(self, sound_type):
+		""" Preview a sound
 		"""
+		try:
+			if sound_type == 'success':
+				path = self.sim_success_sound_path
+			elif sound_type == 'error':
+				path = self.sim_error_sound_path
+			else:
+				return
+			
+			if path and path != os.devnull and os.path.exists(path):
+				playSound(path)
+			else:
+				wx.MessageBox(_("No sound file selected"), _("Info"), 
+							wx.OK | wx.ICON_INFORMATION)
+				
+		except Exception as e:
+			wx.MessageBox(str(e), _("Error"), wx.OK | wx.ICON_ERROR)
 
-		if evt.GetEventObject().GetValue():
-			self.sim_success_sound_btn.Enable(True)
-			self.sim_error_sound_btn.Enable(True)
+	def onCb1Check(self, evt):
+		""" Enable/disable sound notifications
+		"""
+		enabled = evt.GetEventObject().GetValue()
+		
+		self.sim_success_sound_btn.Enable(enabled)
+		self.sim_error_sound_btn.Enable(enabled)
+		
+		if enabled:
 			self.sim_success_sound_path = SIMULATION_SUCCESS_SOUND_PATH
 			self.sim_error_sound_path = SIMULATION_ERROR_SOUND_PATH
+			self.sim_success_sound_btn.SetLabel(os.path.basename(self.sim_success_sound_path))
+			self.sim_error_sound_btn.SetLabel(os.path.basename(self.sim_error_sound_path))
 		else:
-			self.sim_success_sound_btn.Enable(False)
-			self.sim_error_sound_btn.Enable(False)
 			self.sim_success_sound_path = os.devnull
 			self.sim_error_sound_path = os.devnull
 
 	def onCb4(self, evt):
-		""" ComboBox has been checked.
+		""" Strategy selection changed
 		"""
 		self.sim_defaut_strategy = evt.GetEventObject().GetValue()
 
 	def onCb3(self, evt):
-		""" ComboBox has been checked.
+		""" DEVS package selection changed
 		"""
 		val = evt.GetEventObject().GetValue()
 
-		### update cb 4 depending on the selected DEVS package	
-		c = list(getattr(builtins, f'{val.upper()}_SIM_STRATEGY_DICT').keys())
+		# Update strategy list based on selected DEVS package  
+		strategies = list(getattr(builtins, 
+								 f'{val.upper()}_SIM_STRATEGY_DICT').keys())
 		
-		if c:
+		if strategies:
 			self.cb4.Clear()
-			self.cb4.Set(c)
-			self.cb4.SetValue(c[0])
+			self.cb4.Set(strategies)
+			self.cb4.SetValue(strategies[0])
 
-			### update default value for devs dir et sim strategy
+			# Update default values
 			self.default_devs_dir = val
 			self.sim_defaut_strategy = self.cb4.GetValue()
 
 	def onSc(self, evt):
-		""" CheckBox has been checked.
+		""" Plot frequency changed
 		"""
 		self.sim_defaut_plot_dyn_freq = evt.GetEventObject().GetValue()
 
 	def OnApply(self, evt):
-		""" Apply changes.
+		""" Apply all changes
 		"""
-
-		### Reload DomainBehavior and DomainStructure
+		changes = []
+		
+		# Check if DEVS kernel changed
 		if DEFAULT_DEVS_DIRNAME != self.default_devs_dir:
-			### change builtin before recompile the modules
+			# Change builtin before recompiling modules
 			setattr(builtins, 'DEFAULT_DEVS_DIRNAME', self.default_devs_dir)
 
-			### recompile the modules.
-			### recompile DomainInterface.DomainBehavior , DomainInterfaceStructure and MasterModel
-			### recompile all librairies that depend on DomainBehavior (all loaded lib)
-			
-			ReloadModule.recompile("DomainInterface.DomainBehavior")
-			ReloadModule.recompile("DomainInterface.DomainStructure")
-			ReloadModule.recompile("DomainInterface.MasterModel")
+			try:
+				# Recompile core modules
+				ReloadModule.recompile("DomainInterface.DomainBehavior")
+				ReloadModule.recompile("DomainInterface.DomainStructure")
+				ReloadModule.recompile("DomainInterface.MasterModel")
 
+				# Update library tree
+				mainW = getTopLevelWindow()
+				nb1 = mainW.GetControlNotebook()
+				tree = nb1.GetTree()
+				tree.UpdateAll()
+				
+				changes.append(_("DEVS kernel package"))
+				
+			except Exception as e:
+				wx.LogError(f"Error reloading modules: {str(e)}")
+
+		# Enable/disable priority icon based on DEVS kernel
+		try:
 			mainW = getTopLevelWindow()
-			nb1 = mainW.GetControlNotebook()
-			tree = nb1.GetTree()
-			tree.UpdateAll()
+			tb = mainW.GetToolBar()
+			tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, 
+						 'PyPDEVS' not in self.default_devs_dir)
+		except:
+			pass
 
-		### enable the priority (DEVS select function) icon depending on the selected DEVS kernel
-		mainW = getTopLevelWindow()
-		tb = mainW.GetToolBar()
-		tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in DEFAULT_DEVS_DIRNAME)
-
+		# Update all settings
+		old_sound_success = getattr(builtins, 'SIMULATION_SUCCESS_SOUND_PATH')
+		old_sound_error = getattr(builtins, 'SIMULATION_ERROR_SOUND_PATH')
+		old_strategy = getattr(builtins, 'DEFAULT_SIM_STRATEGY')
+		old_freq = getattr(builtins, 'DEFAULT_PLOT_DYN_FREQ')
+		old_ntl = getattr(builtins, 'NTL')
+		
+		# Apply changes
 		setattr(builtins, 'SIMULATION_SUCCESS_SOUND_PATH', self.sim_success_sound_path)
 		setattr(builtins, 'SIMULATION_ERROR_SOUND_PATH', self.sim_error_sound_path)
 		setattr(builtins, 'DEFAULT_SIM_STRATEGY', self.sim_defaut_strategy)
 		setattr(builtins, 'DEFAULT_DEVS_DIRNAME', self.default_devs_dir)
 		setattr(builtins, 'DEFAULT_PLOT_DYN_FREQ', self.sim_defaut_plot_dyn_freq)
 		setattr(builtins, 'NTL', self.cb2.GetValue())
+		
+		# Track changes
+		if old_sound_success != self.sim_success_sound_path:
+			changes.append(_("Success sound"))
+		if old_sound_error != self.sim_error_sound_path:
+			changes.append(_("Error sound"))
+		if old_strategy != self.sim_defaut_strategy:
+			changes.append(_("Simulation strategy"))
+		if old_freq != self.sim_defaut_plot_dyn_freq:
+			changes.append(_("Plot refresh frequency"))
+		if old_ntl != self.cb2.GetValue():
+			changes.append(_("No Time Limit option"))
+		
+		# Show summary
+		if changes:
+			msg = _("The following simulation settings have been updated:\n\n")
+			msg += "\n".join(f"• {c}" for c in changes)
+			
+			dlg = wx.MessageDialog(self, msg, _('Settings Updated'),
+								  wx.OK | wx.ICON_INFORMATION)
+			dlg.ShowModal()
+			dlg.Destroy()
+
 
 class EditorPanel(wx.Panel):
-	""" Edition Panel.
+	""" Editor preferences panel with modern UI
 	"""
 
-	EDITORS = ('spyder', 'pyzo')
+	EDITORS = {
+		'spyder': {
+			'name': 'Spyder',
+			'description': _('Scientific Python Development Environment'),
+			'url': 'https://www.spyder-ide.org/'
+		},
+		'pyzo': {
+			'name': 'Pyzo',
+			'description': _('Python IDE for scientific computing'),
+			'url': 'https://pyzo.org/'
+		}
+	}
 
 	def __init__(self, parent):
 		""" Constructor.
 		"""
-
 		wx.Panel.__init__(self, parent)
-
 		self.parent = parent
-
 		self.InitUI()
 	
 	def InitUI(self):
-		""" Init the UI.
+		""" Initialize the UI with modern layout
 		"""
-
-		vbox = wx.BoxSizer(wx.VERTICAL)
-
-		self.cb = wx.CheckBox(self, wx.NewIdRef(), _("Use the DEVSimPy local code editor software"))
-		self.cb.SetValue(LOCAL_EDITOR)
-		self.cb.SetToolTipString = self.cb.SetToolTip
-		self.cb.SetToolTipString(_("This option is available only for the python file. \n"
-			"Modification of python file during the simulation is disabled when this checkbox is checked."))
-
-		### populate the choices array depending on the code editor installed
-		### if the code editor is not installed, we propose to install it
-		choices = []
-
-		for editor in EditorPanel.EDITORS:
-			if importlib.util.find_spec(editor) is not None:
-				choices.append(editor)
-
-		### add the choice object to select one external code editor
-		hbox = wx.BoxSizer(wx.HORIZONTAL)
-		txt = wx.StaticText(self, -1, _("Select an external code editor:"))
-		self.choice = wx.Choice(self, -1, choices=choices)
 		
-		self.UpdateExternalEditorBtn = wx.Button(self, wx.ID_REFRESH, size=(140, -1))
-		self.UpdateExternalEditorBtn.SetToolTipString = self.UpdateExternalEditorBtn.SetToolTip			
-		self.UpdateExternalEditorBtn.SetToolTipString(_("Update the list of available external editors"))
-
-		### if external editor name is never stored in config file (.devsimpy)
-		if EXTERNAL_EDITOR_NAME == "":
-			self.choice.SetSelection(0)
+		# Main sizer
+		mainSizer = wx.BoxSizer(wx.VERTICAL)
+		
+		# ============================================================
+		# Section 1: Editor Selection
+		# ============================================================
+		editorBox = wx.StaticBoxSizer(wx.VERTICAL, self, _('Code Editor'))
+		
+		# Local editor checkbox
+		self.cb = wx.CheckBox(self, wx.NewIdRef(), 
+							 _('Use DEVSimPy built-in code editor'))
+		self.cb.SetValue(LOCAL_EDITOR)
+		self.cb.SetToolTip(
+			_("Use the integrated editor for Python files.\n"
+			  "Note: Code modification during simulation is disabled with this option."))
+		self.cb.Bind(wx.EVT_CHECKBOX, self.OnCheck)
+		editorBox.Add(self.cb, 0, wx.ALL, 5)
+		
+		# Separator
+		editorBox.Add(wx.StaticLine(self), 0, wx.EXPAND|wx.ALL, 5)
+		
+		# External editor section
+		externalLabel = wx.StaticText(self, label=_('External Editor'))
+		font = externalLabel.GetFont()
+		font.SetWeight(wx.FONTWEIGHT_BOLD)
+		externalLabel.SetFont(font)
+		editorBox.Add(externalLabel, 0, wx.ALL, 5)
+		
+		# External editor selection grid
+		externalGrid = wx.FlexGridSizer(2, 3, 10, 10)
+		externalGrid.AddGrowableCol(1, 1)
+		
+		# Choice label and control
+		choiceLabel = wx.StaticText(self, label=_("Select editor:"))
+		
+		# Populate choices based on installed editors
+		choices = []
+		self.editor_status = {}
+		
+		for editor_key, editor_info in EditorPanel.EDITORS.items():
+			is_installed = importlib.util.find_spec(editor_key) is not None
+			self.editor_status[editor_key] = is_installed
+			
+			if is_installed:
+				choices.append(editor_info['name'])
+		
+		self.choice = wx.Choice(self, wx.NewIdRef(), choices=choices)
+		
+		# Set selection based on config
+		if EXTERNAL_EDITOR_NAME == "" or not choices:
+			self.choice.SetSelection(0 if choices else wx.NOT_FOUND)
 		else:
-			self.choice.SetSelection(EditorPanel.EDITORS.index(EXTERNAL_EDITOR_NAME))
-
+			# Find the editor in EDITORS dict
+			for idx, (key, info) in enumerate(EditorPanel.EDITORS.items()):
+				if key == EXTERNAL_EDITOR_NAME or info['name'] == EXTERNAL_EDITOR_NAME:
+					if idx < len(choices):
+						self.choice.SetSelection(idx)
+					break
+		
 		self.choice.Enable(not self.cb.IsChecked())
+		
+		# Info button
+		infoBtn = wx.Button(self, wx.NewIdRef(), _("Info"))
+		infoBtn.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_BUTTON))
+		infoBtn.SetToolTip(_("Information about the selected editor"))
+		infoBtn.Bind(wx.EVT_BUTTON, self.OnEditorInfo)
+		
+		externalGrid.Add(choiceLabel, 0, wx.ALIGN_CENTER_VERTICAL)
+		externalGrid.Add(self.choice, 1, wx.EXPAND)
+		externalGrid.Add(infoBtn, 0, wx.ALIGN_CENTER_VERTICAL)
+		
+		# Update and install buttons
+		updateBtn = wx.Button(self, wx.ID_REFRESH, _("Refresh"))
+		updateBtn.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_REDO, wx.ART_BUTTON))
+		updateBtn.SetToolTip(_("Refresh the list of installed editors"))
+		updateBtn.Bind(wx.EVT_BUTTON, self.OnRefreshEditors)
+		
+		installBtn = wx.Button(self, wx.NewIdRef(), _("Install"))
+		installBtn.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_PLUS, wx.ART_BUTTON))
+		installBtn.SetToolTip(_("Install additional code editors"))
+		installBtn.Bind(wx.EVT_BUTTON, self.OnInstallEditor)
+		
+		externalGrid.Add(wx.StaticText(self, label=""), 0)  # Spacer
+		
+		btnSizer = wx.BoxSizer(wx.HORIZONTAL)
+		btnSizer.Add(updateBtn, 0, wx.RIGHT, 5)
+		btnSizer.Add(installBtn, 0)
+		externalGrid.Add(btnSizer, 0)
+		
+		editorBox.Add(externalGrid, 0, wx.EXPAND|wx.ALL, 5)
+		
+		mainSizer.Add(editorBox, 0, wx.EXPAND|wx.ALL, 10)
+		
+		# ============================================================
+		# Section 2: Installed Editors
+		# ============================================================
+		installedBox = wx.StaticBoxSizer(wx.VERTICAL, self, _('Installed Editors'))
+		
+		# List of installed editors
+		self.editorList = wx.ListCtrl(self, style=wx.LC_REPORT|wx.LC_SINGLE_SEL)
+		self.editorList.InsertColumn(0, _('Editor'), width=150)
+		self.editorList.InsertColumn(1, _('Status'), width=100)
+		self.editorList.InsertColumn(2, _('Description'), width=300)
+		
+		self.UpdateEditorList()
+		
+		installedBox.Add(self.editorList, 1, wx.EXPAND|wx.ALL, 5)
+		mainSizer.Add(installedBox, 1, wx.EXPAND|wx.ALL, 10)
+		
+		# ============================================================
+		# Section 3: Information
+		# ============================================================
+		infoBox = wx.StaticBoxSizer(wx.VERTICAL, self, _('Information'))
+		
+		infoText = wx.StaticText(self, label=
+			_("• Built-in editor: Simple integrated editor for quick edits\n"
+			  "• External editors: Professional IDEs with advanced features\n"
+			  "• Spyder: Ideal for scientific computing and data analysis\n"
+			  "• Pyzo: Lightweight IDE with interactive shell"))
+		
+		infoBox.Add(infoText, 0, wx.ALL, 5)
+		mainSizer.Add(infoBox, 0, wx.EXPAND|wx.ALL, 10)
+		
+		self.SetSizer(mainSizer)
+		self.SetAutoLayout(True)
 
-		### horizontal box
-		hbox.Add(txt, 0, wx.ALL, 10)
-		hbox.Add(self.choice, 0, wx.ALL, 10)
-		hbox.Add(self.UpdateExternalEditorBtn, 0, wx.ALL, 10)
+	def UpdateEditorList(self):
+		"""Update the list of installed editors"""
+		self.editorList.DeleteAllItems()
+		
+		for idx, (editor_key, editor_info) in enumerate(EditorPanel.EDITORS.items()):
+			is_installed = importlib.util.find_spec(editor_key) is not None
+			
+			self.editorList.InsertItem(idx, editor_info['name'])
+			self.editorList.SetItem(idx, 1, 
+								   _('Installed') if is_installed else _('Not installed'))
+			self.editorList.SetItem(idx, 2, editor_info['description'])
+			
+			# Color code the status
+			if is_installed:
+				self.editorList.SetItemTextColour(idx, wx.Colour(0, 128, 0))
+			else:
+				self.editorList.SetItemTextColour(idx, wx.Colour(128, 128, 128))
 
-		### vertical box
-		vbox.Add(self.cb, 0, wx.ALL, 10)
-		vbox.Add(hbox, 0, wx.ALL, 10)
-
-		### bind the checkbox in order to enable the choice object
-		self.Bind(wx.EVT_CHECKBOX, self.OnCheck, self.cb)
-		self.Bind(wx.EVT_BUTTON, self.OnUpdateExternalEditors, id=self.UpdateExternalEditorBtn.GetId())
-	
-		self.SetSizer(vbox)
-
-	def OnUpdateExternalEditors(self, event):
-		""" Update Button has been clicked in order to update the list of available external editors.
-		"""
-
-		installed_editors = []
-		for editor in EditorPanel.EDITORS:
-			if self.choice.FindString(editor) == wx.NOT_FOUND and BuzyCursorNotification(install(editor)):
-				installed_editors.append(editor)
+	def OnEditorInfo(self, event):
+		"""Show information about selected editor"""
+		selection = self.choice.GetSelection()
+		
+		if selection == wx.NOT_FOUND:
+			wx.MessageBox(_("No editor selected"), _("Info"), 
+						 wx.OK | wx.ICON_INFORMATION)
+			return
+		
+		editor_name = self.choice.GetString(selection)
+		
+		# Find editor info
+		for key, info in EditorPanel.EDITORS.items():
+			if info['name'] == editor_name:
+				msg = f"{_('Editor')}: {info['name']}\n\n"
+				msg += f"{_('Description')}: {info['description']}\n\n"
+				msg += f"{_('Website')}: {info['url']}\n\n"
+				msg += f"{_('Status')}: "
+				msg += _("Installed") if self.editor_status.get(key, False) else _("Not installed")
 				
-		if installed_editors:
-			self.choice.AppendItems(installed_editors)
-			msg = _('You need to restart DEVSimPy to use the newly installed code editor(s).')
+				dlg = wx.MessageDialog(self, msg, _('Editor Information'),
+									  wx.OK | wx.ICON_INFORMATION)
+				dlg.ShowModal()
+				dlg.Destroy()
+				break
+
+	def OnRefreshEditors(self, event):
+		"""Refresh the list of available editors"""
+		old_count = self.choice.GetCount()
+		
+		# Re-scan for installed editors
+		choices = []
+		self.editor_status = {}
+		
+		for editor_key, editor_info in EditorPanel.EDITORS.items():
+			is_installed = importlib.util.find_spec(editor_key) is not None
+			self.editor_status[editor_key] = is_installed
+			
+			if is_installed:
+				choices.append(editor_info['name'])
+		
+		# Update choice control
+		current_selection = self.choice.GetStringSelection()
+		self.choice.Clear()
+		self.choice.AppendItems(choices)
+		
+		# Restore selection if possible
+		if current_selection:
+			idx = self.choice.FindString(current_selection)
+			if idx != wx.NOT_FOUND:
+				self.choice.SetSelection(idx)
+			else:
+				self.choice.SetSelection(0 if choices else wx.NOT_FOUND)
+		
+		# Update list
+		self.UpdateEditorList()
+		
+		new_count = self.choice.GetCount()
+		
+		if new_count > old_count:
+			msg = _("Found {} new editor(s)!").format(new_count - old_count)
+			icon = wx.ICON_INFORMATION
+		elif new_count == old_count:
+			msg = _("No new editors found.")
+			icon = wx.ICON_INFORMATION
 		else:
-			msg = _('All external editors are already installed.')
+			msg = _("Editor list updated.")
+			icon = wx.ICON_INFORMATION
+		
+		wx.MessageBox(msg, _("Refresh Complete"), wx.OK | icon)
 
-		dial = wx.MessageDialog(self.parent, msg, _("External Code Editor Installation"), wx.OK | wx.ICON_INFORMATION)
-		dial.ShowModal()
-
-		event.Skip()
+	def OnInstallEditor(self, event):
+		"""Show dialog to install editors"""
+		# Get list of non-installed editors
+		not_installed = []
+		for key, info in EditorPanel.EDITORS.items():
+			if not self.editor_status.get(key, False):
+				not_installed.append(info['name'])
+		
+		if not not_installed:
+			wx.MessageBox(_("All supported editors are already installed!"),
+						 _("Info"), wx.OK | wx.ICON_INFORMATION)
+			return
+		
+		dlg = wx.SingleChoiceDialog(
+			self,
+			_("Select an editor to install:"),
+			_("Install Editor"),
+			not_installed
+		)
+		
+		if dlg.ShowModal() == wx.ID_OK:
+			selected = dlg.GetStringSelection()
+			
+			# Find the key for this editor
+			editor_key = None
+			for key, info in EditorPanel.EDITORS.items():
+				if info['name'] == selected:
+					editor_key = key
+					break
+			
+			if editor_key:
+				# Show progress
+				wx.BeginBusyCursor()
+				
+				try:
+					success = BuzyCursorNotification(install(editor_key))
+					wx.EndBusyCursor()
+					
+					if success:
+						msg = _("Installation successful!\n\n"
+							   "Please restart DEVSimPy to use {}.").format(selected)
+						icon = wx.ICON_INFORMATION
+					else:
+						msg = _("Installation failed.\n\n"
+							   "Please install {} manually using pip.").format(selected)
+						icon = wx.ICON_ERROR
+					
+				except Exception as e:
+					wx.EndBusyCursor()
+					msg = _("Error during installation:\n{}").format(str(e))
+					icon = wx.ICON_ERROR
+				
+				wx.MessageBox(msg, _("Installation"), wx.OK | icon)
+				
+				# Refresh the list
+				self.OnRefreshEditors(None)
+		
+		dlg.Destroy()
 
 	def OnCheck(self, event):
-		"""
-		"""
+		"""Handle local editor checkbox"""
 		self.choice.Enable(not self.cb.IsChecked())
 		
 	def OnApply(self, evt):
-		""" Apply changes.
-		"""
-		setattr(builtins, 'LOCAL_EDITOR', self.cb.IsChecked())
-		setattr(builtins,'EXTERNAL_EDITOR_NAME',self.choice.GetString(self.choice.GetCurrentSelection()) if self.choice.IsEnabled() else "")
+		"""Apply changes"""
+		old_local = getattr(builtins, 'LOCAL_EDITOR')
+		old_external = getattr(builtins, 'EXTERNAL_EDITOR_NAME')
+		
+		new_local = self.cb.IsChecked()
+		
+		# Get external editor key (not display name)
+		new_external = ""
+		if self.choice.IsEnabled() and self.choice.GetSelection() != wx.NOT_FOUND:
+			selected_name = self.choice.GetString(self.choice.GetSelection())
+			# Find the key for this name
+			for key, info in EditorPanel.EDITORS.items():
+				if info['name'] == selected_name:
+					new_external = key
+					break
+		
+		# Apply changes
+		setattr(builtins, 'LOCAL_EDITOR', new_local)
+		setattr(builtins, 'EXTERNAL_EDITOR_NAME', new_external)
+		
+		# Show summary
+		changes = []
+		if old_local != new_local:
+			changes.append(_("Editor mode: {}").format(
+				_("Built-in") if new_local else _("External")))
+		
+		if old_external != new_external and not new_local:
+			editor_name = EditorPanel.EDITORS.get(new_external, {}).get('name', new_external)
+			changes.append(_("External editor: {}").format(editor_name))
+		
+		if changes:
+			msg = _("The following editor settings have been updated:\n\n")
+			msg += "\n".join(f"• {c}" for c in changes)
+			
+			dlg = wx.MessageDialog(self, msg, _('Settings Updated'),
+								  wx.OK | wx.ICON_INFORMATION)
+			dlg.ShowModal()
+			dlg.Destroy()
+
 
 class AIPanel(wx.Panel):
-	""" AI Panel"""
+	""" AI Integration Panel with modern UI
+	"""
 
-	AI_SET = ("", "ChatGPT", "Ollama")
+	AI_PROVIDERS = {
+		'': {
+			'name': _('None'),
+			'description': _('No AI assistant selected'),
+			'url': '',
+			'icon': wx.ART_MISSING_IMAGE
+		},
+		'ChatGPT': {
+			'name': 'ChatGPT',
+			'description': _('OpenAI GPT-4 powered code generation'),
+			'url': 'https://openai.com/research/chatgpt',
+			'icon': wx.ART_TIP,
+			'requires': ['API Key']
+		},
+		'Ollama': {
+			'name': 'Ollama',
+			'description': _('Local LLM running on your machine'),
+			'url': 'https://ollama.com/',
+			'icon': wx.ART_HARDDISK,
+			'requires': ['Server Port']
+		}
+	}
 
 	def __init__(self, parent):
 		wx.Panel.__init__(self, parent)
-
-		# Charger les paramètres sauvegardés au démarrage
+		
+		# Load saved settings
 		self.load_settings()
-
 		self.InitUI()
 
 	def InitUI(self):
-		""" Init interface"""
-
-		### --------------------------------------------------------------------------------------------------
-		# Checkbox for enabling/disabling AI
-		self.st_ia = wx.StaticText(self, label=_("Select an AI:"))
+		""" Initialize interface with modern layout
+		"""
+		
+		# Main sizer
+		mainSizer = wx.BoxSizer(wx.VERTICAL)
+		
+		# ============================================================
+		# Section 1: AI Provider Selection
+		# ============================================================
+		providerBox = wx.StaticBoxSizer(wx.VERTICAL, self, _('AI Provider'))
+		
+		# Provider selection grid
+		providerGrid = wx.FlexGridSizer(1, 3, 10, 10)
+		providerGrid.AddGrowableCol(1, 1)
+		
+		providerLabel = wx.StaticText(self, label=_("Select AI:"))
+		
 		self.choice_ia = wx.ComboBox(
-										self, wx.NewIdRef(), 
-										value=builtins.__dict__.get('SELECTED_IA', ''),
-										choices=AIPanel.AI_SET, 
-										style=wx.CB_READONLY
+			self, wx.NewIdRef(),
+			value=getattr(builtins, 'SELECTED_IA', ''),
+			choices=[info['name'] for info in AIPanel.AI_PROVIDERS.values()],
+			style=wx.CB_READONLY
 		)
-
-		### ai parameters lauout
-		hbox_select_ai = wx.BoxSizer(wx.HORIZONTAL)
-		hbox_select_ai.Add(self.st_ia, 0, wx.RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 10)
-		hbox_select_ai.Add(self.choice_ia, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL)
-
-		### selected ai
-		self.selected_ia = self.choice_ia.GetValue()
-
-		### --------------------------------------------------------------------------------------------------
-		### ChatGPT API Key setting
-		st_api_key = wx.StaticText(self, label=_("API Key:"))
-		self.api_key_ctrl = wx.TextCtrl(self, style=wx.TE_PASSWORD)
-		self.api_key_ctrl.SetValue(getattr(builtins,'PARAMS_IA', {}).get('CHATGPT_API_KEY', ''))
-		
-		### GPT parameters lauout
-		hbox_chatgpt = wx.BoxSizer(wx.HORIZONTAL)
-		hbox_chatgpt.Add(st_api_key, 0, wx.RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 10)
-		hbox_chatgpt.Add(self.api_key_ctrl, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL)
-
-		### Ollama server port setting
-		st_port = wx.StaticText(self, label=_("Server port:"))
-		self.port_ctrl = wx.TextCtrl(self)
-		self.port_ctrl.SetValue(getattr(builtins,'PARAMS_IA', {}).get('OLLAMA_PORT', '11434'))
-
-		### ollama parameters layout
-		hbox_ollama = wx.BoxSizer(wx.HORIZONTAL)
-		hbox_ollama.Add(st_port, 0, wx.RIGHT|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 10)
-		hbox_ollama.Add(self.port_ctrl, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL)
-
-		### all of the ai box - Add here the ai bow you want to show
-		self.ai_boxes = {'ChatGPT': hbox_chatgpt, 'Ollama': hbox_ollama}
-
-		# ------------------------------------------------------------------------------------------------------
-		
-		### Check AI button
-		self.ai_check_button = wx.Button(self, label=_("Check"))
-		self.ai_check_button.Show(bool(self.selected_ia))
-
-		### info AI button
-		self.ai_info_button = wx.Button(self, label=_("Info"))
-		icon = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_BUTTON, (16, 16))  # Taille 16x16 pixels
-		self.ai_info_button.SetBitmap(icon)
-		self.ai_info_button.Show(bool(self.selected_ia))
-
-		### buttons layout
-		hbox_buttons = wx.BoxSizer(wx.HORIZONTAL)
-		hbox_buttons.Add(self.ai_info_button, flag=wx.RIGHT | wx.ALIGN_LEFT, border=10)
-		hbox_buttons.Add(self.ai_check_button, flag=wx.ALL | wx.ALIGN_LEFT)
-
-		### SetToolTipString
-		self.choice_ia.SetToolTipString = self.choice_ia.SetToolTip
-		self.ai_info_button.SetToolTipString = self.ai_info_button.SetToolTip
-		self.ai_check_button.SetToolTipString = self.ai_check_button.SetToolTip
-
-		self.choice_ia.SetToolTipString(_("Select an AI for model code generation"))
-		self.ai_info_button.SetToolTipString(_("More about the selected Gen AI"))
-		self.ai_check_button.SetToolTipString(_("Check if the selected AI Gen is ready to work"))
-
-		# ---------------------------------------------------------------------------------------------------------------------
-		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.Add(hbox_select_ai, 0, wx.ALL, 10)
-		vbox.Add(self.ai_boxes['ChatGPT'], 0, wx.ALL|wx.EXPAND, 10)
-		vbox.Add(self.ai_boxes['Ollama'], 0, wx.ALL, 10)
-		vbox.Add(hbox_buttons, flag=wx.ALL | wx.EXPAND, border=5)
-
-		self.SetSizer(vbox)
-
-		### Bind
+		self.choice_ia.SetToolTip(_("Select an AI provider for code generation"))
 		self.choice_ia.Bind(wx.EVT_COMBOBOX, self.OnAISelection)
-		self.ai_info_button.Bind(wx.EVT_BUTTON, self.OnInfoButtonClick)	
+		
+		# Info button
+		self.ai_info_button = wx.Button(self, wx.NewIdRef(), _("Info"))
+		self.ai_info_button.SetBitmap(
+			wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_BUTTON))
+		self.ai_info_button.SetToolTip(_("More about the selected AI provider"))
+		self.ai_info_button.Bind(wx.EVT_BUTTON, self.OnInfoButtonClick)
+		
+		providerGrid.Add(providerLabel, 0, wx.ALIGN_CENTER_VERTICAL)
+		providerGrid.Add(self.choice_ia, 1, wx.EXPAND)
+		providerGrid.Add(self.ai_info_button, 0, wx.ALIGN_CENTER_VERTICAL)
+		
+		providerBox.Add(providerGrid, 0, wx.EXPAND|wx.ALL, 5)
+		mainSizer.Add(providerBox, 0, wx.EXPAND|wx.ALL, 10)
+		
+		# ============================================================
+		# Section 2: Provider Configuration
+		# ============================================================
+		self.configBox = wx.StaticBoxSizer(wx.VERTICAL, self, _('Configuration'))
+		
+		# ChatGPT Configuration
+		self.chatgpt_panel = wx.Panel(self)
+		chatgpt_sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		# API Key
+		apiGrid = wx.FlexGridSizer(1, 2, 10, 10)
+		apiGrid.AddGrowableCol(1, 1)
+		
+		apiLabel = wx.StaticText(self.chatgpt_panel, label=_("API Key:"))
+		self.api_key_ctrl = wx.TextCtrl(self.chatgpt_panel, style=wx.TE_PASSWORD)
+		self.api_key_ctrl.SetValue(
+			getattr(builtins, 'PARAMS_IA', {}).get('CHATGPT_API_KEY', ''))
+		self.api_key_ctrl.SetToolTip(_("Your OpenAI API key"))
+		
+		apiGrid.Add(apiLabel, 0, wx.ALIGN_CENTER_VERTICAL)
+		apiGrid.Add(self.api_key_ctrl, 1, wx.EXPAND)
+		
+		chatgpt_sizer.Add(apiGrid, 0, wx.EXPAND|wx.ALL, 5)
+		
+		# Get API Key button
+		getKeyBtn = wx.Button(self.chatgpt_panel, wx.NewIdRef(), _("Get API Key"))
+		getKeyBtn.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_GO_FORWARD, wx.ART_BUTTON))
+		getKeyBtn.SetToolTip(_("Open OpenAI website to get your API key"))
+		getKeyBtn.Bind(wx.EVT_BUTTON, 
+					  lambda e: wx.LaunchDefaultBrowser('https://platform.openai.com/api-keys'))
+		chatgpt_sizer.Add(getKeyBtn, 0, wx.ALL, 5)
+		
+		self.chatgpt_panel.SetSizer(chatgpt_sizer)
+		self.configBox.Add(self.chatgpt_panel, 0, wx.EXPAND|wx.ALL, 5)
+		
+		# Ollama Configuration
+		self.ollama_panel = wx.Panel(self)
+		ollama_sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		# Server Port
+		portGrid = wx.FlexGridSizer(2, 2, 10, 10)
+		portGrid.AddGrowableCol(1, 1)
+		
+		portLabel = wx.StaticText(self.ollama_panel, label=_("Server Port:"))
+		self.port_ctrl = wx.SpinCtrl(self.ollama_panel, 
+									 value='11434',
+									 min=1024, max=65535)
+		self.port_ctrl.SetValue(
+			int(getattr(builtins, 'PARAMS_IA', {}).get('OLLAMA_PORT', '11434')))
+		self.port_ctrl.SetToolTip(_("Port where Ollama server is running"))
+		
+		portGrid.Add(portLabel, 0, wx.ALIGN_CENTER_VERTICAL)
+		portGrid.Add(self.port_ctrl, 1, wx.EXPAND)
+		
+		# Server Host
+		hostLabel = wx.StaticText(self.ollama_panel, label=_("Server Host:"))
+		self.host_ctrl = wx.TextCtrl(self.ollama_panel)
+		self.host_ctrl.SetValue(
+			getattr(builtins, 'PARAMS_IA', {}).get('OLLAMA_HOST', 'localhost'))
+		self.host_ctrl.SetToolTip(_("Host where Ollama server is running"))
+		
+		portGrid.Add(hostLabel, 0, wx.ALIGN_CENTER_VERTICAL)
+		portGrid.Add(self.host_ctrl, 1, wx.EXPAND)
+		
+		ollama_sizer.Add(portGrid, 0, wx.EXPAND|wx.ALL, 5)
+		
+		# Install Ollama button
+		installBtn = wx.Button(self.ollama_panel, wx.NewIdRef(), _("Install Ollama"))
+		installBtn.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_PLUS, wx.ART_BUTTON))
+		installBtn.SetToolTip(_("Download and install Ollama"))
+		installBtn.Bind(wx.EVT_BUTTON, 
+					   lambda e: wx.LaunchDefaultBrowser('https://ollama.com/download'))
+		ollama_sizer.Add(installBtn, 0, wx.ALL, 5)
+		
+		self.ollama_panel.SetSizer(ollama_sizer)
+		self.configBox.Add(self.ollama_panel, 0, wx.EXPAND|wx.ALL, 5)
+		
+		mainSizer.Add(self.configBox, 0, wx.EXPAND|wx.ALL, 10)
+		
+		# ============================================================
+		# Section 3: Status and Testing
+		# ============================================================
+		statusBox = wx.StaticBoxSizer(wx.VERTICAL, self, _('Status'))
+		
+		# Status indicator
+		statusGrid = wx.FlexGridSizer(2, 2, 10, 10)
+		statusGrid.AddGrowableCol(1, 1)
+		
+		statusLabelText = wx.StaticText(self, label=_("Connection:"))
+		self.status_indicator = wx.StaticText(self, label=_("Not tested"))
+		self.status_indicator.SetForegroundColour(wx.Colour(128, 128, 128))
+		
+		statusGrid.Add(statusLabelText, 0, wx.ALIGN_CENTER_VERTICAL)
+		statusGrid.Add(self.status_indicator, 0, wx.ALIGN_CENTER_VERTICAL)
+		
+		# Test button
+		self.ai_check_button = wx.Button(self, wx.NewIdRef(), _("Test Connection"))
+		self.ai_check_button.SetBitmap(
+			wx.ArtProvider.GetBitmap(wx.ART_EXECUTABLE_FILE, wx.ART_BUTTON))
+		self.ai_check_button.SetToolTip(_("Test if the AI provider is ready"))
 		self.ai_check_button.Bind(wx.EVT_BUTTON, self.OnAICheck)
-	
-		# ---------------------------------------------------------------------------------------------------------------------
+		
+		statusGrid.Add(wx.StaticText(self, label=""), 0)
+		statusGrid.Add(self.ai_check_button, 0, wx.ALIGN_LEFT)
+		
+		statusBox.Add(statusGrid, 0, wx.EXPAND|wx.ALL, 5)
+		mainSizer.Add(statusBox, 0, wx.EXPAND|wx.ALL, 10)
+		
+		# ============================================================
+		# Section 4: Information
+		# ============================================================
+		infoBox = wx.StaticBoxSizer(wx.VERTICAL, self, _('Information'))
+		
+		self.info_text = wx.StaticText(self, label="")
+		self.info_text.Wrap(500)
+		infoBox.Add(self.info_text, 0, wx.ALL, 5)
+		
+		mainSizer.Add(infoBox, 0, wx.EXPAND|wx.ALL, 10)
+		
+		# Add stretch spacer
+		mainSizer.AddStretchSpacer(1)
+		
+		self.SetSizer(mainSizer)
+		self.SetAutoLayout(True)
+		
+		# Initialize visibility and info
+		self.selected_ia = self.choice_ia.GetValue()
 		self.UpdateFieldsVisibility()
+		self.UpdateInfoText()
 
 	def UpdateFieldsVisibility(self):
-		""" UI refresh depending on the selected AI (More Generic)"""
-		selected_ia = self.choice_ia.GetValue()
+		""" Update UI based on selected AI provider
+		"""
+		selected_name = self.choice_ia.GetValue()
 		
-		### Display the correct ai hbox depending on the selected ai name
-		for ai_name,ai_hbox in self.ai_boxes.items():
-			for item in ai_hbox.GetChildren():
-				item.GetWindow().Show(selected_ia == ai_name)
-
-		### update layout
+		# Find the key for selected provider
+		selected_key = ''
+		for key, info in AIPanel.AI_PROVIDERS.items():
+			if info['name'] == selected_name:
+				selected_key = key
+				break
+		
+		# Show/hide configuration panels
+		self.chatgpt_panel.Show(selected_key == 'ChatGPT')
+		self.ollama_panel.Show(selected_key == 'Ollama')
+		
+		# Show/hide buttons
+		has_selection = bool(selected_key)
+		self.ai_info_button.Show(has_selection and selected_key != '')
+		self.ai_check_button.Show(has_selection and selected_key != '')
+		
+		# Show/hide config box
+		self.configBox.GetStaticBox().Show(has_selection and selected_key != '')
+		
 		self.Layout()
 
-	def OnAICheck(self, event):
-		""" Check the selected AI
-
-		Args:
-			event (_type_): _description_
+	def UpdateInfoText(self):
+		""" Update the information text based on selected AI
 		"""
+		selected_name = self.choice_ia.GetValue()
+		
+		for key, info in AIPanel.AI_PROVIDERS.items():
+			if info['name'] == selected_name:
+				if key:
+					text = f"{info['description']}\n\n"
+					if 'requires' in info:
+						text += _("Required: ") + ", ".join(info['requires'])
+					self.info_text.SetLabel(text)
+				else:
+					self.info_text.SetLabel(
+						_("Select an AI provider to enable code generation assistance."))
+				break
+		
+		self.info_text.Wrap(500)
 
+	def OnAICheck(self, event):
+		""" Test the AI connection
+		"""
 		self.SaveAISettings()
-
-		# Créer ou récupérer l'instance de ChatGPTDevsAdapter via la factory
-		if AdapterFactory.get_adapter_instance(None, params=PARAMS_IA):
-			wx.MessageBox(_(f"{self.selected_ia} Code Generator is ready."), _("Success"), wx.OK | wx.ICON_INFORMATION)
+		
+		self.status_indicator.SetLabel(_("Testing..."))
+		self.status_indicator.SetForegroundColour(wx.Colour(255, 165, 0))
+		self.Layout()
+		wx.SafeYield()
+		
+		try:
+			# Test connection via adapter
+			adapter = AdapterFactory.get_adapter_instance(None, params=PARAMS_IA)
+			
+			if adapter:
+				self.status_indicator.SetLabel(_("Connected"))
+				self.status_indicator.SetForegroundColour(wx.Colour(0, 128, 0))
+				
+				wx.MessageBox(
+					_(f"{self.selected_ia} is ready for code generation!"),
+					_("Connection Successful"),
+					wx.OK | wx.ICON_INFORMATION
+				)
+			else:
+				raise Exception(_("Failed to create adapter"))
+				
+		except Exception as e:
+			self.status_indicator.SetLabel(_("Failed"))
+			self.status_indicator.SetForegroundColour(wx.Colour(255, 0, 0))
+			
+			wx.MessageBox(
+				_(f"Connection failed:\n{str(e)}"),
+				_("Connection Error"),
+				wx.OK | wx.ICON_ERROR
+			)
+		
+		self.Layout()
 
 	def OnInfoButtonClick(self, event):
-		"""_summary_
-
-		Args:
-			event (_type_): _description_
+		""" Open information about selected AI provider
 		"""
-		selected_ai = self.choice_ia.GetValue()
+		selected_name = self.choice_ia.GetValue()
 		
-		if selected_ai == "ChatGPT":
-			url = 'https://openai.com/research/chatgpt'
-		elif selected_ai == "Ollama":
-			url = 'https://ollama.com/'
-		else:
-			return 
-		
-        ### open default browser
-		wx.LaunchDefaultBrowser(url)
+		for key, info in AIPanel.AI_PROVIDERS.items():
+			if info['name'] == selected_name and info['url']:
+				wx.LaunchDefaultBrowser(info['url'])
+				break
 
 	def OnAISelection(self, event):
-		""" Select the AI """
-		self.selected_ia = self.choice_ia.GetValue()
+		""" Handle AI provider selection change
+		"""
+		selected_name = self.choice_ia.GetValue()
 		
-		setattr(builtins, 'SELECTED_IA', self.selected_ia)
-		self.ai_check_button.Show(bool(self.selected_ia))
-		self.ai_info_button.Show(bool(self.selected_ia))
+		# Find the key
+		for key, info in AIPanel.AI_PROVIDERS.items():
+			if info['name'] == selected_name:
+				self.selected_ia = key
+				setattr(builtins, 'SELECTED_IA', key)
+				break
 		
-		self.UpdateFieldsVisibility()  # Appeler UpdateFieldsVisibility pour actualiser les sous-champs
+		# Reset status
+		self.status_indicator.SetLabel(_("Not tested"))
+		self.status_indicator.SetForegroundColour(wx.Colour(128, 128, 128))
+		
+		self.UpdateFieldsVisibility()
+		self.UpdateInfoText()
 
 	def load_settings(self):
-		""" Load the AI settings from builtins """
-		### Init the builtins wirh AI info
+		""" Load AI settings from builtins
+		"""
+		# Initialize builtins with AI info
 		setattr(builtins, "SELECTED_IA", getattr(builtins, "SELECTED_IA", ""))
 		setattr(builtins, "PARAMS_IA", getattr(builtins, "PARAMS_IA", {}))
+		
+		# Default parameters
 		builtins.PARAMS_IA.setdefault('CHATGPT_API_KEY', '')
 		builtins.PARAMS_IA.setdefault('OLLAMA_PORT', '11434')
+		builtins.PARAMS_IA.setdefault('OLLAMA_HOST', 'localhost')
 
 	def OnApply(self, evt):
-		""" Apply and save the current AI settings """
-		### save AI settings
+		""" Apply and save current AI settings
+		"""
+		old_ia = getattr(builtins, "SELECTED_IA", "")
 		self.SaveAISettings()
+		new_ia = getattr(builtins, "SELECTED_IA", "")
+		
+		changes = []
+		
+		if old_ia != new_ia:
+			provider_name = AIPanel.AI_PROVIDERS.get(new_ia, {}).get('name', _('None'))
+			changes.append(_("AI Provider: {}").format(provider_name))
+		
+		# Check configuration changes
+		if new_ia == "ChatGPT":
+			changes.append(_("ChatGPT API Key updated"))
+		elif new_ia == "Ollama":
+			changes.append(_("Ollama configuration updated"))
+		
+		if changes:
+			msg = _("The following AI settings have been updated:\n\n")
+			msg += "\n".join(f"• {c}" for c in changes)
+			
+			dlg = wx.MessageDialog(self, msg, _('Settings Updated'),
+								  wx.OK | wx.ICON_INFORMATION)
+			dlg.ShowModal()
+			dlg.Destroy()
 
 	def SaveAISettings(self):
-		""" Save AI setting in builtins """
-	
-		### update selected AI
-		selected_ai = self.choice_ia.GetValue()
-		if getattr(builtins, "SELECTED_IA", "") != selected_ai:
-			setattr(builtins, "SELECTED_IA",selected_ai)
+		""" Save AI settings to builtins
+		"""
+		selected_name = self.choice_ia.GetValue()
+		
+		# Find key from name
+		selected_key = ''
+		for key, info in AIPanel.AI_PROVIDERS.items():
+			if info['name'] == selected_name:
+				selected_key = key
+				break
+		
+		# Update selected AI
+		if getattr(builtins, "SELECTED_IA", "") != selected_key:
+			setattr(builtins, "SELECTED_IA", selected_key)
+		
+		# Update provider-specific settings
+		if selected_key == "ChatGPT":
+			new_api_key = self.api_key_ctrl.GetValue()
+			if getattr(builtins, 'PARAMS_IA').get('CHATGPT_API_KEY') != new_api_key:
+				builtins.PARAMS_IA['CHATGPT_API_KEY'] = new_api_key
+				
+		elif selected_key == "Ollama":
+			new_port = str(self.port_ctrl.GetValue())
+			new_host = self.host_ctrl.GetValue()
+			
+			if getattr(builtins, 'PARAMS_IA').get('OLLAMA_PORT') != new_port:
+				builtins.PARAMS_IA['OLLAMA_PORT'] = new_port
+			
+			if getattr(builtins, 'PARAMS_IA').get('OLLAMA_HOST') != new_host:
+				builtins.PARAMS_IA['OLLAMA_HOST'] = new_host
 
-		# update settings for all accessible Gen AI
-		if selected_ai == "ChatGPT":
-			new_chatgpt_api_key = self.api_key_ctrl.GetValue()
-			if getattr(builtins, 'PARAMS_IA').get('CHATGPT_API_KEY') != new_chatgpt_api_key:
-				builtins.__dict__['PARAMS_IA']['CHATGPT_API_KEY'] = new_chatgpt_api_key
-		elif selected_ai == "Ollama":
-			new_ollama_port = self.port_ctrl.GetValue()
-			if getattr(builtins, 'PARAMS_IA').get('OLLAMA_PORT') != new_ollama_port:
-				builtins.__dict__['PARAMS_IA']['OLLAMA_PORT'] = new_ollama_port
 
 ########################################################################
 class Preferences(wx.Toolbook):
-	""" Based Toolbook Preference class
+	""" Based Toolbook Preference class with auto-sizing
 	"""
 
 	def __init__(self, parent):
-		"""Constructor.
-		"""
-
+		"""Constructor."""
 		wx.Toolbook.__init__(self, parent, wx.NewIdRef(), style=wx.BK_DEFAULT)
-
 		self.InitUI()
 	
 	def InitUI(self):
 		""" Init the UI.
 		"""
-
 		### don't try to translate this labels with _() because there are used to find png
 		L = [('General',"(self)"),('Simulation',"(self)"), ('Editor',"(self)"), ('AI',"(self)"), ('Plugins',"(self)")]
 
@@ -829,7 +1559,8 @@ class Preferences(wx.Toolbook):
 		### Plug-in page setting (populate is done when page is changed)
 		self.pluginPanel = self.GetPage(self.GetPageCount()-1)
 
-		self.CheckList = GeneralPluginsList(self.pluginPanel.GetRightPanel(), style= wx.LC_REPORT|wx.SUNKEN_BORDER|wx.LC_SORT_ASCENDING)
+		self.CheckList = GeneralPluginsList(self.pluginPanel.GetRightPanel(), 
+										   style=wx.LC_REPORT|wx.SUNKEN_BORDER|wx.LC_SORT_ASCENDING)
 		### populate checklist with file in plug-ins directory
 		wx.CallAfter(self.CheckList.Populate, (list(os.walk(PLUGINS_PATH))))
 
@@ -842,13 +1573,9 @@ class Preferences(wx.Toolbook):
 		self.delBtn = wx.Button(lpanel, wx.ID_DELETE, size=(140, -1))
 		self.refBtn = wx.Button(lpanel, wx.ID_REFRESH, size=(140, -1))
 	
-		self.addBtn.SetToolTipString = self.addBtn.SetToolTip
-		self.delBtn.SetToolTipString = self.delBtn.SetToolTip
-		self.refBtn.SetToolTipString = self.refBtn.SetToolTip
-
-		self.addBtn.SetToolTipString(_("Add new plug-ins"))
-		self.delBtn.SetToolTipString(_("Delete all existing plug-ins"))
-		self.refBtn.SetToolTipString(_("Refresh plug-ins list"))
+		self.addBtn.SetToolTip(_("Add new plug-ins"))
+		self.delBtn.SetToolTip(_("Delete all existing plug-ins"))
+		self.refBtn.SetToolTip(_("Refresh plug-ins list"))
 
 		### add widget to plug-in panel
 		self.pluginPanel.AddWidget(3, self.addBtn)
@@ -863,26 +1590,55 @@ class Preferences(wx.Toolbook):
 		self.Bind(wx.EVT_BUTTON, self.OnRefresh, id=self.refBtn.GetId())
 
 	def OnPageChanged(self, event):
-		""" Page has been changed.
+		""" Page has been changed - auto resize window
 		"""
-#		old = event.GetOldSelection()
-		new = event.GetSelection()
-#		sel = self.GetSelection()
-		parent = self.GetTopLevelParent()
-		### plug-ins page
-		if new == 3:
-			parent.SetSize((700,500))
-		else:
-			parent.SetSize((700,450))
-
+		# Let the event propagate first
 		event.Skip()
+		
+		# Use CallAfter to ensure the page is fully displayed before calculating size
+		wx.CallAfter(self.ResizeForTab)
+
+	def ResizeForTab(self):
+		""" Resize window to fit current tab
+		"""
+		try:
+			parent = self.GetTopLevelParent()
+			if not parent:
+				return
+			
+			current_idx = self.GetSelection()
+			if current_idx == wx.NOT_FOUND:
+				return
+			
+			tab_sizes = {
+				0: (750, 680),  # General
+				1: (750, 700),  # Simulation
+				2: (750, 680),  # Editor
+				3: (750, 650),  # AI
+				4: (800, 600),  # Plugins
+			}
+			
+			optimal_width, optimal_height = tab_sizes.get(current_idx, (750, 600))
+			
+			# Always update minimum size
+			parent.SetMinSize((optimal_width, optimal_height))
+			
+			# Resize to optimal size
+			parent.SetSize((optimal_width, optimal_height))
+			
+			parent.Layout()
+			parent.Refresh()
+			
+		except:
+			pass  # Silent fail
+
 
 	def OnPageChanging(self, event):
-		""" Pas is changing.
+		""" Page is changing.
 		"""
 		new = event.GetSelection()
 		### plug-in page
-		if new == 3:
+		if new == 4:  # Plugins tab (index 4)
 			### list of plug-ins file in plug-in directory
 			l = list(os.walk(PLUGINS_PATH))
 			### populate checklist with file in plug-ins directory
@@ -978,8 +1734,7 @@ class PreferencesGUI(wx.Frame):
 		wx.Frame.__init__(self, parent, wx.NewIdRef(), title, style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN)
 
 		self.InitUI()
-
-		self.Layout()
+		
 		self.Center()
 
 	def InitUI(self):
@@ -989,7 +1744,7 @@ class PreferencesGUI(wx.Frame):
 		icon.CopyFromBitmap(load_and_resize_image("preferences.png"))
 		self.SetIcon(icon)
 		
-		self.SetMinSize((400,500))
+		self.SetSize((400,680))
 		
 		panel = wx.Panel(self, wx.NewIdRef())
 		self.pref = Preferences(panel)
