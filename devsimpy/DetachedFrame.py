@@ -106,7 +106,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.toggle_list = getTopLevelWindow().toggle_list
 		else:
 			sys.stdout.write(_('Alone mode for DetachedFrame: Connector buttons are not binded\n'))
-			self.toggle_list = [wx.NewIdRef() for i in range(6)]
+			self.toggle_list = [wx.NewIdRef() for i in range(7)]
 		
 		self.tools = [  toolbar.AddTool(Menu.ID_SAVE, "", load_and_resize_image('save.png'), wx.NullBitmap, shortHelp=_('Save File') ,longHelp=_('Save the current diagram'), clientData=self.canvas),
 										toolbar.AddTool(Menu.ID_SAVEAS, "", load_and_resize_image('save_as.png'), wx.NullBitmap, shortHelp=_('Save File As'), longHelp=_('Save the diagram with an another name'), clientData=self.canvas),
