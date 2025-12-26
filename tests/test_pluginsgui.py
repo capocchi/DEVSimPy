@@ -12,5 +12,5 @@ from PluginsGUI import ModelPluginsManager
 
 # Run the test
 app = TestApp(0)
-frame = ModelPluginsManager(parent=None, title="Test", model=None)
+frame = ModelPluginsManager(parent=None, title="Test", size=(500,400), model=None)
 app.RunTest(frame)
