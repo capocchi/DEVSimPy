@@ -437,13 +437,15 @@ def UnConfig():
     global diagram
 
     main = wx.GetApp().GetTopWindow()
-    nb2 = main.GetDiagramNotebook()
-    currentPage = nb2.GetCurrentPage()
-    diagram = currentPage.diagram
 
-    lst  = [a.label for a in [s for s in diagram.GetShapeList() if isinstance(s, CodeBlock)]]
+    if hasattr(main, 'GetDiagramNotebook'):
+        nb2 = main.GetDiagramNotebook()
+        currentPage = nb2.GetCurrentPage()
+        diagram = currentPage.diagram
 
-    for label in lst:
-        shape = diagram.GetShapeByLabel(label)
-        if hasattr(shape, 'state_trajectory'):
-            del shape.state_trajectory
+        lst = [a.label for a in [s for s in diagram.GetShapeList() if isinstance(s, CodeBlock)]]
+
+        for label in lst:
+            shape = diagram.GetShapeByLabel(label)
+            if hasattr(shape, 'state_trajectory'):
+                del shape.state_trajectory

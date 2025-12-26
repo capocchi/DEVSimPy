@@ -985,43 +985,173 @@ class PreferencesGUI(wx.Frame):
 	def InitUI(self):
 		""" Init the UI.
 		"""
-		_icon = wx.Icon()
-		_icon.CopyFromBitmap(load_and_resize_image("preferences.png"))
-		self.SetIcon(_icon)
-
+		icon = wx.Icon()
+		icon.CopyFromBitmap(load_and_resize_image("preferences.png"))
+		self.SetIcon(icon)
+		
 		self.SetMinSize((400,500))
-
-		### Panel
+		
 		panel = wx.Panel(self, wx.NewIdRef())
 		self.pref = Preferences(panel)
-
-		### Buttons
+		
+		# Boutons Apply et Cancel
 		self.cancel = wx.Button(panel, wx.ID_CANCEL)
 		self.apply = wx.Button(panel, wx.ID_OK)
-
+		
+		# Bouton d'aide générale (NOUVEAU)
+		self.help_btn = wx.Button(panel, wx.ID_HELP, "?")
+		self.help_btn.SetToolTip(_("Show help about preferences"))
+		
 		self.apply.SetToolTipString = self.apply.SetToolTip
 		self.cancel.SetToolTipString = self.cancel.SetToolTip
-
+		
 		self.apply.SetToolTipString(_("Apply all changing"))
 		self.cancel.SetToolTipString(_("Cancel without changing"))
+		
 		self.apply.SetDefault()
-
-		### Sizers
-		vsizer = wx.BoxSizer(wx.VERTICAL)
-		hsizer = wx.BoxSizer(wx.HORIZONTAL)
-
-		hsizer.Add(self.cancel, 0)
-		hsizer.Add(self.apply, 0, wx.EXPAND|wx.LEFT, 5)
-		vsizer.Add(self.pref, 1, wx.ALL|wx.EXPAND, 5)
-		vsizer.Add(hsizer, 0, wx.ALL|wx.ALIGN_RIGHT, 5)
-
-		panel.SetSizer(vsizer)
-		vsizer.Fit(panel)
-
-		### Binding
+		
+		# Layout
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		hbox_buttons = wx.BoxSizer(wx.HORIZONTAL)
+		
+		hbox_buttons.Add(self.help_btn, 0, wx.ALL, 5)
+		hbox_buttons.AddStretchSpacer()
+		hbox_buttons.Add(self.cancel, 0, wx.ALL, 5)
+		hbox_buttons.Add(self.apply, 0, wx.ALL, 5)
+		
+		vbox.Add(self.pref, 1, wx.EXPAND | wx.ALL, 10)
+		vbox.Add(hbox_buttons, 0, wx.EXPAND | wx.ALL, 5)
+		
+		panel.SetSizer(vbox)
+		
+		# Binding
+		self.Bind(wx.EVT_BUTTON, self.OnShowPreferencesHelp, id=wx.ID_HELP)
 		self.Bind(wx.EVT_BUTTON, self.OnApply, id=wx.ID_OK)
 		self.Bind(wx.EVT_BUTTON, self.OnCancel, id=wx.ID_CANCEL)
-		self.Bind(wx.EVT_BUTTON, self.OnClose, id=wx.ID_CLOSE)
+
+
+	def OnShowPreferencesHelp(self, event):
+		"""Show help about preferences dialog"""
+		
+		help_msg = _(
+			"DEVSimPy PREFERENCES\n\n"
+			"═══════════════════════════════════════\n\n"
+			"This dialog allows you to configure DEVSimPy settings.\n"
+			"Navigate through tabs to access different preference categories.\n\n"
+			"═══════════════════════════════════════\n\n"
+			"GENERAL TAB:\n\n"
+			"• Plug-ins Directory: Location of DEVSimPy plugins\n"
+			"  Change to use custom plugin collections\n\n"
+			"• Library Directory: Location of DEVS model libraries\n"
+			"  Main directory containing all model libraries\n\n"
+			"• Output Directory: Where simulation outputs are saved\n"
+			"  Results, logs, and generated files location\n\n"
+			"• Number of Recent Files: Length of recent files list\n"
+			"  Range: 2-20 files\n\n"
+			"• Font Size: Size of text in block diagrams\n"
+			"  Range: 2-20 points\n\n"
+			"• Deep of History: Number of undo/redo levels\n"
+			"  Range: 2-100 operations\n\n"
+			"• wxPython Version: Select wxPython version to use\n"
+			"  Requires restart to take effect\n\n"
+			"• Transparency: Enable transparency for detached frames\n"
+			"  Makes windows semi-transparent when moving\n\n"
+			"• Notifications: Enable notification messages\n"
+			"  Show pop-up notifications for events\n\n"
+			"═══════════════════════════════════════\n\n"
+			"SIMULATION TAB:\n\n"
+			"• DEVS Kernel: Choose between PyDEVS and PyPDEVS\n"
+			"  PyDEVS: Classic DEVS simulator\n"
+			"  PyPDEVS: Parallel DEVS simulator (recommended)\n\n"
+			"• Default Strategy: Simulation algorithm to use\n"
+			"  - original: Standard DEVS algorithm\n"
+			"  - bag: Optimized message handling\n"
+			"  - direct: Direct coupling (fastest)\n\n"
+			"• Sound on Success: Play sound when simulation completes\n"
+			"  Select custom MP3/WAV file\n\n"
+			"• Sound on Error: Play sound when simulation fails\n"
+			"  Helps detect problems quickly\n\n"
+			"• No Time Limit: Default state for NTL checkbox\n"
+			"  Run simulations until all models inactive\n\n"
+			"• Plot Dynamic Frequency: How often to update plots\n"
+			"  Higher = more frequent updates (slower)\n"
+			"  Lower = less frequent updates (faster)\n\n"
+			"═══════════════════════════════════════\n\n"
+			"EDITOR TAB:\n\n"
+			"• Use DEVSimPy Local Editor: Use built-in code editor\n"
+			"  When checked: Use internal editor\n"
+			"  When unchecked: Use external editor\n\n"
+			"• Select External Editor: Choose external code editor\n"
+			"  Available: Spyder, Pyzo, or others\n"
+			"  Click Refresh to detect newly installed editors\n\n"
+			"Note: External editor must be installed separately\n"
+			"Use 'Update' button to install missing editors\n\n"
+			"═══════════════════════════════════════\n\n"
+			"AI TAB:\n\n"
+			"• Select an AI: Choose AI code generation service\n"
+			"  - ChatGPT: OpenAI's language model\n"
+			"  - Ollama: Local AI models\n\n"
+			"• API Key (ChatGPT): Your OpenAI API key\n"
+			"  Get from: https://platform.openai.com/api-keys\n"
+			"  Stored securely, never shared\n\n"
+			"• Port (Ollama): Local Ollama server port\n"
+			"  Default: 11434\n"
+			"  Ollama must be running locally\n\n"
+			"• Check Button: Verify AI configuration\n"
+			"  Tests connection and validates settings\n\n"
+			"• Info Button: Open AI documentation\n"
+			"  Learn more about selected AI service\n\n"
+			"═══════════════════════════════════════\n\n"
+			"PLUGINS TAB:\n\n"
+			"• Plugin List: All available DEVSimPy plugins\n"
+			"  Checkbox = enabled/disabled state\n\n"
+			"• Add (+): Install new plugins\n"
+			"  Browse for plugin files to add\n\n"
+			"• Delete (-): Remove all plugins\n"
+			"  Warning: Deletes all plugin files!\n\n"
+			"• Refresh (⟳): Update plugin list\n"
+			"  Detects newly added plugins\n\n"
+			"Double-click plugin name to enable/disable\n"
+			"Changes take effect after restart\n\n"
+			"═══════════════════════════════════════\n\n"
+			"APPLYING CHANGES:\n\n"
+			"• Apply: Save all changes and close dialog\n"
+			"  Settings are written to .devsimpy config file\n\n"
+			"• Cancel: Discard changes and close\n"
+			"  All modifications are lost\n\n"
+			"Some changes require DEVSimPy restart:\n"
+			"- wxPython version change\n"
+			"- DEVS kernel change (PyDEVS ↔ PyPDEVS)\n"
+			"- Plugin enable/disable\n"
+			"- Library directory change\n\n"
+			"═══════════════════════════════════════\n\n"
+			"TIPS:\n\n"
+			"- Save preferences before closing DEVSimPy\n"
+			"- Test AI configuration before using code generation\n"
+			"- Increase undo history for complex modeling\n"
+			"- Use PyPDEVS for better performance\n"
+			"- External editors provide better code assistance\n"
+			"- Plugins extend DEVSimPy functionality\n"
+			"- Check 'Output Directory' has write permissions"
+		)
+		
+		try:
+			import wx.lib.dialogs
+			dlg = wx.lib.dialogs.ScrolledMessageDialog(
+				self, 
+				help_msg, 
+				_("Preferences Help"),
+				size=(700, 650)
+			)
+			dlg.ShowModal()
+			dlg.Destroy()
+		except Exception as e:
+			# Fallback
+			wx.MessageBox(
+				help_msg,
+				_("Preferences Help"),
+				wx.OK | wx.ICON_INFORMATION
+			)
 
 	def OnApply(self, evt):
 		""" Apply button has been clicked.

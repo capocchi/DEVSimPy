@@ -113,16 +113,33 @@ class StandaloneGUI(wx.Frame):
         icon = wx.Icon()
         icon.CopyFromBitmap(load_and_resize_image("properties.png"))
         self.SetIcon(icon)
-  
+
         # Taille adaptée au contenu
-        self.SetSize((650, 500))
-        # self.SetMinSize((600, 450))
+        self.SetSize((650, 550))
         
         panel = wx.Panel(self)
         panel.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOW))
         
         # Sizer principal avec marges uniformes
         main_sizer = wx.BoxSizer(wx.VERTICAL)
+        
+        # --- En-tête avec titre et bouton d'aide (NOUVEAU) ---
+        header_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        
+        title_label = wx.StaticText(panel, label=_("Standalone Package Generator"))
+        title_font = title_label.GetFont()
+        title_font.PointSize += 2
+        title_font = title_font.Bold()
+        title_label.SetFont(title_font)
+        
+        help_btn = wx.Button(panel, wx.ID_HELP, "?", size=(30, 30))
+        help_btn.SetToolTip(_("Show help about standalone package generation"))
+        
+        header_sizer.Add(title_label, 0, wx.ALIGN_CENTER_VERTICAL)
+        header_sizer.AddStretchSpacer()
+        header_sizer.Add(help_btn, 0, wx.ALIGN_CENTER_VERTICAL)
+        
+        main_sizer.Add(header_sizer, 0, wx.ALL|wx.EXPAND, border=15)
         
         # --- Section Package Configuration ---
         config_box = wx.StaticBoxSizer(wx.VERTICAL, panel, _("Package Configuration"))
@@ -137,8 +154,8 @@ class StandaloneGUI(wx.Frame):
         config_grid.Add(filename_label, flag=wx.ALIGN_CENTER_VERTICAL)
         
         self._tc = wx.TextCtrl(panel, -1, 
-                               f"{self.yaml_model_name}-nogui-pkg.zip",
-                               validator=ZipNameValidator())
+                            f"{self.yaml_model_name}-nogui-pkg.zip",
+                            validator=ZipNameValidator())
         self._tc.SetToolTip(_("Must end with .zip"))
         config_grid.Add(self._tc, flag=wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)
         
@@ -161,7 +178,7 @@ class StandaloneGUI(wx.Frame):
         # Format
         format_label = wx.StaticText(panel, -1, _("Format:"))
         format_label.SetToolTip(_("The minimal format includes only necessary library files.\n"
-                                   "The full format includes all library dependencies (more secure)."))
+                                "The full format includes all library dependencies (more secure)."))
         config_grid.Add(format_label, flag=wx.ALIGN_CENTER_VERTICAL)
         
         self.format = wx.Choice(panel, -1, choices=["Minimal", "Full"])
@@ -235,16 +252,167 @@ class StandaloneGUI(wx.Frame):
         main_sizer.Add(button_sizer, flag=wx.ALL|wx.ALIGN_RIGHT, border=15)
         
         panel.SetSizer(main_sizer)
-    
+
         ### Binds
         self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
         self.Bind(wx.EVT_BUTTON, self.OnClose, id=wx.ID_CANCEL)
+        self.Bind(wx.EVT_BUTTON, self.OnShowStandaloneHelp, id=wx.ID_HELP)  # NOUVEAU
         self.Bind(wx.EVT_CHECKBOX, self.OnChecked, id=self._cb1.GetId()) 
         self.Bind(wx.EVT_CHOICE, self.OnChoice, id=self.kernel.GetId())
         
         # Focus sur le champ de texte
         self._tc.SetFocus()
         self._tc.SetInsertionPointEnd()
+
+
+    def OnShowStandaloneHelp(self, event):
+        """Show help dialog about standalone package generation"""
+        
+        help_msg = _(
+            "STANDALONE PACKAGE GENERATOR\n\n"
+            "═══════════════════════════════════════\n\n"
+            "OVERVIEW:\n\n"
+            "This tool creates a standalone, executable package of your DEVS model.\n"
+            "The generated package can run simulations WITHOUT DEVSimPy installed,\n"
+            "making it perfect for deployment, distribution, and production use.\n\n"
+            "═══════════════════════════════════════\n\n"
+            "PACKAGE CONFIGURATION:\n\n"
+            "• Filename: Name of the ZIP package to create\n"
+            "  - Must end with .zip extension\n"
+            "  - Example: MyModel-nogui-pkg.zip\n"
+            "  - Default based on your model name\n\n"
+            "• Directory: Where to save the generated package\n"
+            "  - Click 'Browse...' to select location\n"
+            "  - Package will be created in this directory\n"
+            "  - Ensure you have write permissions\n\n"
+            "• Format: Package complexity level\n"
+            "  - Minimal: Only essential library files (smaller size)\n"
+            "    • Faster to generate and transfer\n"
+            "    • May miss some dependencies\n"
+            "    • Good for simple models\n\n"
+            "  - Full: All library dependencies included (larger size)\n"
+            "    • More reliable and self-contained\n"
+            "    • Works on any system\n"
+            "    • Recommended for distribution\n\n"
+            "═══════════════════════════════════════\n\n"
+            "SIMULATION OPTIONS:\n\n"
+            "• Add Simulation Kernel:\n"
+            "  - Includes DEVS simulation engine files\n"
+            "  - Required if package will run simulations\n"
+            "  - Enables kernel selection below\n"
+            "  - Uncheck only for model-only packages\n\n"
+            "• Add Docker File:\n"
+            "  - Includes Dockerfile for containerization\n"
+            "  - Allows running in Docker containers\n"
+            "  - Useful for cloud deployment\n"
+            "  - Creates isolated, reproducible environment\n\n"
+            "• Add NTL Flag (Infinite Loop):\n"
+            "  - NTL = No Time Limit\n"
+            "  - Simulation runs until models are inactive\n"
+            "  - Good for event-driven simulations\n"
+            "  - Package will use -ntl command line flag\n\n"
+            "═══════════════════════════════════════\n\n"
+            "KERNEL CONFIGURATION:\n\n"
+            "(Only available when 'Add Simulation Kernel' is checked)\n\n"
+            "• Kernel: Choose DEVS simulation engine\n\n"
+            "  - PyDEVS:\n"
+            "    • Classic DEVS simulator\n"
+            "    • Single-threaded execution\n"
+            "    • Simple and reliable\n"
+            "    • Good for small models\n\n"
+            "  - PyPDEVS:\n"
+            "    • Parallel DEVS simulator (recommended)\n"
+            "    • Multi-threaded execution\n"
+            "    • Better performance\n"
+            "    • Supports real-time mode\n\n"
+            "  - KafkaDEVS:\n"
+            "    • Distributed DEVS over Apache Kafka\n"
+            "    • For large-scale simulations\n"
+            "    • Requires Kafka infrastructure\n"
+            "    • Advanced use only\n\n"
+            "• Real Time Mode:\n"
+            "  - Only available with PyPDEVS kernel\n"
+            "  - Synchronizes simulation with wall clock\n"
+            "  - Useful for hardware-in-the-loop\n"
+            "  - Slower but matches real time\n\n"
+            "═══════════════════════════════════════\n\n"
+            "WHAT'S IN THE PACKAGE:\n\n"
+            "The generated ZIP file contains:\n\n"
+            "• Your DEVS model in YAML format\n"
+            "• All referenced Python model files\n"
+            "• Required library dependencies\n"
+            "• Simulation kernel (if selected)\n"
+            "• Dockerfile (if selected)\n"
+            "• README with usage instructions\n"
+            "• Command-line execution script\n\n"
+            "═══════════════════════════════════════\n\n"
+            "HOW TO USE THE PACKAGE:\n\n"
+            "After generation:\n\n"
+            "1. Extract the ZIP file on target system\n"
+            "2. Install Python 3.x if not present\n"
+            "3. Run the provided script:\n"
+            "   python run_simulation.py\n\n"
+            "4. (Optional) Build Docker image:\n"
+            "   docker build -t mymodel .\n"
+            "   docker run mymodel\n\n"
+            "No DEVSimPy installation required!\n\n"
+            "═══════════════════════════════════════\n\n"
+            "USE CASES:\n\n"
+            "• Deployment: Send model to users without DEVSimPy\n"
+            "• Production: Run simulations on servers\n"
+            "• Cloud: Deploy in Docker containers\n"
+            "• Distribution: Share models with colleagues\n"
+            "• Archiving: Preserve complete model state\n"
+            "• Testing: Run models in isolated environments\n\n"
+            "═══════════════════════════════════════\n\n"
+            "REQUIREMENTS:\n\n"
+            "• Valid YAML model file\n"
+            "• All model Python files accessible\n"
+            "• Write permissions in target directory\n"
+            "• Sufficient disk space (varies by format)\n\n"
+            "═══════════════════════════════════════\n\n"
+            "TIPS:\n\n"
+            "- Use 'Full' format for maximum compatibility\n"
+            "- Include simulation kernel for executable packages\n"
+            "- Add Docker file for cloud deployment\n"
+            "- Test package on target system before distribution\n"
+            "- PyPDEVS is recommended for better performance\n"
+            "- Real-time mode useful for IoT/embedded systems\n"
+            "- Check README in generated package for details\n\n"
+            "═══════════════════════════════════════\n\n"
+            "TROUBLESHOOTING:\n\n"
+            "• Package generation fails:\n"
+            "  → Check YAML file is valid\n"
+            "  → Ensure all Python files are accessible\n"
+            "  → Verify write permissions\n\n"
+            "• Package won't run:\n"
+            "  → Use 'Full' format instead of 'Minimal'\n"
+            "  → Check Python version compatibility\n"
+            "  → Install missing dependencies\n\n"
+            "• Docker build fails:\n"
+            "  → Ensure Docker is installed\n"
+            "  → Check Dockerfile syntax\n"
+            "  → Review Docker logs for errors"
+        )
+        
+        try:
+            import wx.lib.dialogs
+            dlg = wx.lib.dialogs.ScrolledMessageDialog(
+                self, 
+                help_msg, 
+                _("Standalone Package Generator Help"),
+                size=(700, 650)
+            )
+            dlg.ShowModal()
+            dlg.Destroy()
+        except Exception as e:
+            # Fallback
+            wx.MessageBox(
+                help_msg,
+                _("Standalone Package Generator Help"),
+                wx.OK | wx.ICON_INFORMATION
+            )
+
 
     def OnChoice(self, event):
         selected_option = self.kernel.GetStringSelection()
