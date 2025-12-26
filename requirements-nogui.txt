@@ -14,3 +14,4 @@ whichpy
 redis
 psutil
 python-dotenv
+pydantic
