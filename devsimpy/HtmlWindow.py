@@ -1,56 +1,45 @@
 # -*- coding: utf-8 -*-
 
 import wx
-import wx.html
+import wx.html2
 
 _ = wx.GetTranslation
 
 class HtmlFrame(wx.Frame):
-    """ General Frame displaying Html doc
-    """
+    """ General Frame displaying Html doc """
 
-    ###
-    def __init__(self, parent, id, title, size):
-        wx.Frame.__init__(self, parent, id, title, size, style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN )
+    def __init__(self, parent=None, title="HTML", size=(800, 600)):
+        super().__init__(
+            parent,
+            title=title,
+            size=size,
+            style=wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN
+        )
 
-        file = wx.Menu()
-        file.Append(wx.ID_FILE, _('&File\tCtrl+F'), _('Open Html local file'))
+        file_menu = wx.Menu()
+        file_menu.Append(wx.ID_OPEN, _('&Open\tCtrl+O'), _('Open Html local file'))
 
         menubar = wx.MenuBar()
-        menubar.Append(file, _('&File'))
+        menubar.Append(file_menu, _('&File'))
         self.SetMenuBar(menubar)
 
-        self.html = wx.html.HtmlWindow(self, wx.NewIdRef())
+        self.html = wx.html2.WebView.New(self)
         if "gtk2" in wx.PlatformInfo:
             self.html.SetStandardFonts()
 
-        self.Bind(wx.EVT_MENU, self.OnLoadFile, id=wx.ID_FILE)
+        self.Bind(wx.EVT_MENU, self.OnLoadFile, id=wx.ID_OPEN)
 
-    ###
     def LoadFile(self, path):
-        """ Load Html File from local path
-        """
         self.html.LoadFile(path)
 
-    ###
     def SetPage(self, s):
-        """ Set Html page from string
-        """
-        self.html.SetPage(s)
+        self.html.SetPage(s, "")
 
-    ###
     def OnLoadFile(self, event):
-        """ Load Html file from dialog
-        """
-        dlg = wx.FileDialog(self, wildcard = '*.htm*', style=wx.OPEN)
-        if dlg.ShowModal():
-            path = dlg.GetPath()
-            self.html.LoadPage(path)
+        dlg = wx.FileDialog(self, wildcard='*.htm*', style=wx.FD_OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
+            self.html.LoadPage(dlg.GetPath())
         dlg.Destroy()
 
-    ###
     def OnClearPage(self, event):
-        """ Clear page
-        """
         self.html.SetPage("")
-

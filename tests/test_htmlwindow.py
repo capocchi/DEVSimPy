@@ -12,5 +12,6 @@ from HtmlWindow import HtmlFrame
 
 # Run the test
 app = TestApp(0)
-frame = HtmlFrame(None, -1, "Test", size=(800,600))
+frame = HtmlFrame(None, "Test", size=(800,600))
+frame.SetPage("<h3>HTML OK</h3>")
 app.RunTest(frame)
