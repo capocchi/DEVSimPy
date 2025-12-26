@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # ImportLibrary.py --- Importing library dialog
@@ -17,22 +18,27 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
+
 ### at the beginning to prevent with statement for python vetrsion <=2.5
+
 
 import os
 import sys
 import shutil
 
+
 import inspect
 if not hasattr(inspect, 'getargspec'):
-    inspect.getargspec = inspect.getfullargspec
-    
+	inspect.getargspec = inspect.getfullargspec
+	
 import wx
 import wx.lib.dialogs
+
 
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 import wx.lib.dialogs
 from concurrent.futures import ThreadPoolExecutor
+
 
 _ = wx.GetTranslation
  
@@ -40,17 +46,20 @@ from Utilities import checkURL, getDirectorySize, getPYFileListFromInit, Notific
 from Decorators import BuzyCursorNotification
 from config import ABS_HOME_PATH
 
+
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GLOBAL VARIABLES AND FUNCTIONS
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
+
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # CLASS DEFIINTION
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 
 class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	"""
@@ -64,10 +73,12 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		self.EnableCheckBoxes(True)
 		self.IsChecked = self.IsItemChecked
 
+
 		self.InsertColumn(0, _('Name'), width=140)
 		self.InsertColumn(1, _('Size [Ko]'), width=80)
 		self.InsertColumn(2, _('Repository'), width=90)
 		self.InsertColumn(3, _('Path'), width=100)
+
 
 		### for itemData
 		self.map = {}
@@ -76,23 +87,15 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		self.InsertStringItem = self.InsertItem
 		font = wx.SystemSettings.GetFont(wx.SYS_SYSTEM_FONT)
 
+
 		self.SetFont(font)
 
-	# 	self.Bind(wx.EVT_LIST_ITEM_CHECKED, self.OnCheck)
-	# 	self.Bind(wx.EVT_LIST_ITEM_UNCHECKED, self.OnUnCheck)
-
-	# def OnCheck(self, evt):
-	# 	index = evt.GetItem().GetId()
-	# 	self.CheckItem(index, True)
-
-	# def OnUnCheck(self, evt):
-	# 	index = evt.GetItem().GetId()
-	# 	self.CheckItem(index, False)
 
 	###
 	def AddItem(self, path, dName, check=False):
 		""" Add item to the list.
 		"""
+
 
 		index = self.InsertStringItem(100000000, dName) 
 		self.SetStringItem(index, 1, str(getDirectorySize(path)) if os.path.exists(path) else '0')
@@ -103,13 +106,16 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		self.SetData(index, path)
 		self.SetItemData(index, index)
 
+
 	###
 	def GetData(self, id):
 		return self.map[id]
 
+
 	###
 	def SetData(self, id, data):
 		self.map.update({id:data})
+
 
 	@BuzyCursorNotification
 	def Populate(self, D={}):
@@ -118,15 +124,18 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		for path, dName in D.items():
 			self.AddItem(path, dName)
 
+
 class DeleteBox(wx.Dialog):
 	""" Delete box for libraries manager.
 	"""
+
 
 	###
 	def __init__(self, *args, **kwargs):
 		""" Constructor.
 		"""
 		super(DeleteBox, self).__init__(*args, **kwargs)
+
 
 		self.InitUI()
 		self.SetSize((250, 200))
@@ -136,6 +145,7 @@ class DeleteBox(wx.Dialog):
 	def InitUI(self):
 		""" Init the user interface.
 		"""
+
 
 		panel = wx.Panel(self) 
 		vbox = wx.BoxSizer(wx.VERTICAL) 
@@ -150,12 +160,14 @@ class DeleteBox(wx.Dialog):
 		nmbox.Add(self.rb2, 0, wx.ALL|wx.LEFT, 5)  
 		nmSizer.Add(nmbox, 0, wx.ALL|wx.EXPAND, 10)  
 
+
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		okButton = wx.Button(panel, wx.ID_OK, label='Ok')
 		closeButton = wx.Button(panel, wx.ID_CANCEL, label='Close')
 	
 		hbox.Add(closeButton, 0, wx.ALL|wx.LEFT, 10)
 		hbox.Add(okButton, 0, wx.ALL|wx.LEFT, 10)
+
 
 		vbox.Add(nmSizer,0, wx.ALL|wx.EXPAND, 5) 
 		vbox.Add(hbox,0, wx.ALL|wx.CENTER, 5) 
@@ -167,6 +179,7 @@ class DeleteBox(wx.Dialog):
 class ImportLibrary(wx.Dialog):
 	"""
 	"""
+
 
 	def __init__(self, *args, **kwargs):
 		""" Constructor.
@@ -183,6 +196,10 @@ class ImportLibrary(wx.Dialog):
 
 		### selected item list
 		self._selectedItem = {}
+		
+		### Variables pour le filtrage
+		self._all_items = []
+		self._current_filter = ""
 
 		### get libs from tree D (library)
 		lst = [s for s in self.parent.tree.GetDomainList(DOMAIN_PATH) if not self.parent.tree.IsChildRoot(s)] if self.parent else []
@@ -224,37 +241,59 @@ class ImportLibrary(wx.Dialog):
 		leftPanel = wx.Panel(panel, wx.NewIdRef())
 		rightPanel = wx.Panel(panel, wx.NewIdRef())
 
+		### Search panel at the top
+		searchPanel = wx.Panel(rightPanel, wx.NewIdRef())
+		searchBox = wx.BoxSizer(wx.HORIZONTAL)
+
+		searchIcon = wx.StaticBitmap(searchPanel, wx.NewIdRef(),
+									wx.ArtProvider.GetBitmap(wx.ART_FIND, wx.ART_OTHER, (16, 16)))
+		searchLabel = wx.StaticText(searchPanel, label=_("Search:"))
+		self.searchCtrl = wx.SearchCtrl(searchPanel, wx.NewIdRef(), size=(250, -1))
+		self.searchCtrl.ShowCancelButton(True)
+		self.searchCtrl.SetDescriptiveText(_("Filter by name or path..."))
+		self.searchCtrl.SetToolTip(_("Type to filter libraries by name or path"))
+
+		searchBox.Add(searchIcon, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
+		searchBox.Add(searchLabel, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
+		searchBox.Add(self.searchCtrl, 1, wx.EXPAND)
+		searchPanel.SetSizer(searchBox)
+
 		### Check list of libraries
 		self._cb = CheckListCtrl(parent=rightPanel, style=wx.LC_REPORT | wx.SUNKEN_BORDER|wx.LC_SORT_ASCENDING)
 		
-		try:
-			if wx.Platform == '__WXMSW__':
-				pool = ThreadPoolExecutor(3)
-				future = pool.submit(self._cb.Populate, (D))
-				future.done()
-			else:
-				### Populate Check List dynamicaly	
-				with ThreadPoolExecutor(max_workers=5) as executor:
-					executor.submit(self._cb.Populate, (D))
-		except:
-			self._cb.Populate(D)
+		# Population synchrone (pas de threading pour éviter les problèmes)
+		self._cb.Populate(D)
+		
+		# Sauvegarder tous les items immédiatement
+		self._SaveAllItems()
 			
-		### Static box sizer
-		#sbox = wx.StaticBox(leftPanel, -1, '')
-		#vbox2 = wx.StaticBoxSizer(sbox, wx.VERTICAL) 
-
 		### Box Sizer
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox2 = wx.BoxSizer(wx.VERTICAL)
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
 
-		### Buttons
-		new = wx.Button(leftPanel, id = wx.ID_NEW, size=(120, -1))
-		sel = wx.Button(leftPanel, id = wx.ID_SELECTALL, size=(120, -1))
-		des = wx.Button(leftPanel, wx.NewIdRef(), _('Deselect All'), size=(120, -1))
+		### Buttons with icons
+		new = wx.Button(leftPanel, id = wx.ID_NEW, size=(135, -1))
+		new.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_NEW, wx.ART_BUTTON, (16, 16)))
+		new.SetToolTip(_("Add a new library from local directory or URL"))
+
+		sel = wx.Button(leftPanel, id = wx.ID_SELECTALL, size=(135, -1))
+		sel.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_TICK_MARK, wx.ART_BUTTON, (16, 16)))
+		sel.SetToolTip(_("Select all visible libraries"))
+
+		des = wx.Button(leftPanel, wx.NewIdRef(), _('Deselect All'), size=(135, -1))
+		des.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_CROSS_MARK, wx.ART_BUTTON, (16, 16)))
+		des.SetToolTip(_("Deselect all visible libraries"))
+
 		apply = wx.Button(rightPanel, id=wx.ID_OK, size=(100, -1))
+		apply.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_TICK_MARK, wx.ART_BUTTON, (16, 16)))
+		apply.SetToolTip(_("Apply changes and close"))
+		apply.SetDefault()
+
 		cancel = wx.Button(rightPanel, id=wx.ID_CANCEL, size=(100, -1))
+		cancel.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_CLOSE, wx.ART_BUTTON, (16, 16)))
+		cancel.SetToolTip(_("Cancel and close"))
 
 		vbox2.Add(new, 0, wx.TOP|wx.LEFT, 6)
 		vbox2.Add((-1, 5))
@@ -264,6 +303,7 @@ class ImportLibrary(wx.Dialog):
 		hbox1.Add(cancel, 1,  wx.ALL|wx.ALIGN_CENTER, 2)
 		hbox1.Add(apply, 1,  wx.ALL|wx.ALIGN_CENTER, 2)
 
+		vbox.Add(searchPanel, 0, wx.EXPAND | wx.ALL, 5)
 		vbox.Add(self._cb, 1, wx.EXPAND | wx.TOP, 3)
 		vbox.Add((-1, 10))
 		vbox.Add(hbox1, 0, wx.ALL|wx.ALIGN_CENTER)
@@ -284,6 +324,10 @@ class ImportLibrary(wx.Dialog):
 		self.Bind(wx.EVT_BUTTON, self.OnDeselectAll, id = des.GetId())
 		self.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnItemRightClick)
 		self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
+		
+		### Binding pour la recherche
+		self.Bind(wx.EVT_TEXT, self.OnSearch, id=self.searchCtrl.GetId())
+		self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnSearchCancel, id=self.searchCtrl.GetId())
 
 		self.Centre()
 		self.Layout()
@@ -291,6 +335,102 @@ class ImportLibrary(wx.Dialog):
 		### just for windows
 		e = wx.SizeEvent(self.GetSize())
 		self.ProcessEvent(e)
+
+
+	def _SaveAllItems(self):
+		"""Save all items from the list for filtering"""
+		# Ne sauvegarder que si la liste n'est pas déjà sauvegardée
+		if self._all_items:
+			return
+		
+		self._all_items = []
+		num = self._cb.GetItemCount()
+		
+		for i in range(num):
+			try:
+				id_data = self._cb.GetItemData(i)
+				item_data = {
+					'name': self._cb.GetItemText(i, 0),
+					'size': self._cb.GetItemText(i, 1),
+					'repo': self._cb.GetItemText(i, 2),
+					'path': self._cb.GetItemText(i, 3),
+					'checked': self._cb.IsChecked(i),
+					'full_path': self._cb.GetData(id_data) if (id_data is not None and id_data in self._cb.map) else None
+				}
+				self._all_items.append(item_data)
+			except Exception as e:
+				sys.stderr.write(f"Error saving item {i}: {str(e)}\n")
+
+	###
+	def _UpdateCheckedState(self):
+		"""Update checked state in _all_items from current list"""
+		# Créer un dictionnaire pour accès rapide
+		checked_dict = {}
+		num = self._cb.GetItemCount()
+		
+		for i in range(num):
+			name = self._cb.GetItemText(i, 0)
+			checked_dict[name] = self._cb.IsChecked(i)
+		
+		# Mettre à jour _all_items
+		for item in self._all_items:
+			if item['name'] in checked_dict:
+				item['checked'] = checked_dict[item['name']]
+
+
+	###
+	def OnSearch(self, event):
+		"""Filter libraries based on search text"""
+		search_text = self.searchCtrl.GetValue().lower()
+		self._current_filter = search_text
+		
+		# Sauvegarder l'état actuel des checkboxes avant de rafraîchir
+		self._UpdateCheckedState()
+		
+		# Vider la liste
+		self._cb.DeleteAllItems()
+		
+		# Repeupler avec les éléments filtrés
+		visible_count = 0
+		for item in self._all_items:
+			name = item['name'].lower()
+			path_display = item['path'].lower() if item['path'] else ""
+			full_path = item['full_path'].lower() if item['full_path'] else ""
+			
+			# Vérifier si le texte de recherche correspond
+			if not search_text or search_text in name or search_text in path_display or search_text in full_path:
+				index = self._cb.InsertStringItem(100000000, item['name'])
+				self._cb.SetStringItem(index, 1, item['size'])
+				self._cb.SetStringItem(index, 2, item['repo'])
+				self._cb.SetStringItem(index, 3, item['path'])
+				self._cb.CheckItem(index, item['checked'])
+				
+				if item['full_path']:
+					self._cb.SetData(index, item['full_path'])
+					self._cb.SetItemData(index, index)
+				
+				visible_count += 1
+		
+		# Mettre à jour le titre avec le nombre de résultats
+		if search_text:
+			total = len(self._all_items)
+			self.SetTitle(_("Import Library Manager - %d/%d libraries") % (visible_count, total))
+		else:
+			self.SetTitle(_("Import Library Manager"))
+
+
+	###
+	def OnSearchCancel(self, event):
+		"""Reset search when cancel button is clicked"""
+		self.searchCtrl.SetValue("")
+		self._current_filter = ""
+		
+		# Sauvegarder l'état des checkboxes
+		self._UpdateCheckedState()
+		
+		# Restaurer tous les items
+		self.OnSearch(event)
+
 
 	###
 	def CheckDomainPath(self):
@@ -302,21 +442,28 @@ class ImportLibrary(wx.Dialog):
 			dlg.ShowModal()
 			dlg.Destroy()
 
+
 	###
 	def OnSelectAll(self, event):
-		"""
-		"""
+		"""Select all visible items"""
 		num = self._cb.GetItemCount()
 		for i in range(num):
-			self._cb.CheckItem(i,True)
+			self._cb.CheckItem(i, True)
+		
+		# Mettre à jour aussi dans _all_items
+		self._UpdateCheckedState()
+
 
 	###
 	def OnDeselectAll(self, event):
-		"""
-		"""
+		"""Deselect all visible items"""
 		num = self._cb.GetItemCount()
 		for i in range(num):
 			self._cb.CheckItem(i, False)
+		
+		# Mettre à jour aussi dans _all_items
+		self._UpdateCheckedState()
+
 
 	###
 	def OnItemRightClick(self, evt):
@@ -325,13 +472,17 @@ class ImportLibrary(wx.Dialog):
 		index = self._cb.GetFocusedItem()
 		label = self._cb.GetItemText(index)
 
+
 		menu = wx.Menu()
+
 
 		doc = wx.MenuItem(menu, wx.NewIdRef(), _('Doc'), _('Documentation of item'))
 		doc.SetBitmap(load_and_resize_image('doc.png'))
 		menu.Append(doc)
 
+
 		self.Bind(wx.EVT_MENU, self.OnDoc, id = doc.GetId())
+
 
 		### delete option only for the export path
 		if label in self._d:
@@ -340,6 +491,7 @@ class ImportLibrary(wx.Dialog):
 			menu.Append(delete)
 			self.Bind(wx.EVT_MENU, self.OnDelete, id=delete.GetId())
 
+
 		try:
 			self.PopupMenu(menu, evt.GetPosition())
 		except AttributeError as info:
@@ -347,7 +499,9 @@ class ImportLibrary(wx.Dialog):
 		else:
 			sys.stdout.write("Error in OnItemRightClick for ImportLibrary class.")
 
+
 		menu.Destroy() # destroy to avoid mem leak
+
 
 	###
 	def DocDirectory(self, path):
@@ -355,6 +509,7 @@ class ImportLibrary(wx.Dialog):
 		"""
 		### init_file at first level !
 		init_file = os.path.join(path, '__init__.py')
+
 
 		doc = ""
 		### if init_file exists in module
@@ -368,7 +523,7 @@ class ImportLibrary(wx.Dialog):
 					t = inspect.getmoduleinfo(fn_path)
 					if t is not None:
 						name, suffix, mode, module_type = t
-						doc += 	_("---------- %s module:\n")%fn+ \
+						doc +=  _("---------- %s module:\n")%fn+ \
 								_("\tname: %s\n")%name+ \
 								_("\tsuffix: %s\n")%suffix+ \
 								_("\tmode: %s\n")%mode+ \
@@ -376,16 +531,13 @@ class ImportLibrary(wx.Dialog):
 								_("\tpath: %s\n\n")%fn_path
 					else:
 						doc +=_("----------%s module not inspectable!\n")%fn
-			#else:
-				#pass
-				#doc += _("%s is empty !\n")%init_file
-		#else:
-			#pass
-			#doc += _("%s dont exist !\n")%init_file
+
 
 			### TODO take in charge also amd and cmd !
 
+
 		return doc
+
 
 	###
 	def OnDoc(self, evt):
@@ -396,17 +548,21 @@ class ImportLibrary(wx.Dialog):
 		id = self._cb.GetItemData(index)
 		path = self._cb.GetData(id)
 
+
 		doc = "---------- %s Directory ----------\n\n"%label
 		doc += self.DocDirectory(path)
+
 
 		for root, dirs, files in os.walk(path):
 			if not root.startswith('.'):
 				doc += "---------- %s Sub-Directory ----------\n\n"%os.path.basename(root)
 				doc += self.DocDirectory(root)
 
+
 		d = wx.lib.dialogs.ScrolledMessageDialog(self, doc, _("Documentation of library %s")%label, style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 		d.CenterOnParent(wx.BOTH)
 		d.ShowModal()
+
 
 	###
 	def OnDelete(self, evt):
@@ -415,10 +571,13 @@ class ImportLibrary(wx.Dialog):
 		index = self._cb.GetFocusedItem()
 		label = self._cb.GetItemText(index)
 
+
 		### diag to choose to delete label and/or source files
 		db = DeleteBox(self, wx.NewIdRef(), _("Delete Options"))
 
+
 		if db.ShowModal() == wx.ID_OK:
+
 
 			### delete files
 			if db.rb2.GetValue():
@@ -431,7 +590,9 @@ class ImportLibrary(wx.Dialog):
 					except Exception as info:
 						sys.stdout.write(_("%s not deleted!\n Error: %s")%(label,info))
 
+
 				dial.Destroy()
+
 
 			### update .devsimpy
 			if label in self._d:
@@ -442,7 +603,18 @@ class ImportLibrary(wx.Dialog):
 				except Exception:
 					pass
 
+
+			# Mettre à jour _all_items
+			self._all_items = [item for item in self._all_items if item['name'] != label]
+			
 			self._cb.DeleteItem(index)
+			
+			# Mettre à jour le titre si filtré
+			if self._current_filter:
+				visible = self._cb.GetItemCount()
+				total = len(self._all_items)
+				self.SetTitle(_("Import Library Manager - %d/%d libraries") % (visible, total))
+
 
 	###
 	def EvtCheckListBox(self, evt):
@@ -457,14 +629,17 @@ class ImportLibrary(wx.Dialog):
 		elif not self._cb.IsChecked(index) and label in self._selectedItem:
 			del self._selectedItem[str(label)]
 
+
 	@staticmethod
 	def CreateInitFile(path):
 		""" Static method to create the __init_.py file which contain the name of accessing models.
 		"""
 
+
 		dial = wx.MessageDialog(None, _('If %s contain python files, do you want to insert it in __all__ variable of __init__.py file?')%os.path.basename(path), _('New file Manager'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 		### if there is python file in the importing directory
 		L = [f for f in os.listdir(path) if f.endswith(".py")] if dial.ShowModal() == wx.ID_YES else []
+
 
 		### how many python file to insert on __init__.py file
 		if L:
@@ -473,6 +648,7 @@ class ImportLibrary(wx.Dialog):
 			dlg.Destroy()
 		else:
 			select = []
+
 
 		### if path exist, we create the __init__.py file with __all__ empty
 		if os.path.isdir(path):
@@ -483,15 +659,16 @@ class ImportLibrary(wx.Dialog):
 					f.write("\t\t'%s', \n"%name)
 				f.write('\t\t ]')
 
+
 	###
 	def OnNew(self, event):
 		"""
 		"""
-		#dlg1 = wx.TextEntryDialog(self, _('Enter new directory name'), _('New Library'), _("New_lib"))
 		### Get path to add
 		dialog = wx.DirDialog(self, _("Choose a new directory:"), DOMAIN_PATH, style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
 		path = dialog.GetPath() if dialog.ShowModal() == wx.ID_OK else None
 		dialog.Destroy()
+
 
 		if path:
 			# Getting the list of directories 
@@ -502,14 +679,14 @@ class ImportLibrary(wx.Dialog):
 				if not '__init__.py' in dir:
 					ImportLibrary.CreateInitFile(path)
 
+
 				self.DoAdd(path, os.path.basename(path))
 				
 			### selected directory exist, we import it
 			else:
 				dName = os.path.basename(path) if not path.startswith('http') else [a for a in path.split('/') if a!=''][-1]
 
-				# si la lib n'est pas deja importee
-				#if (not self.parent.tree.IsChildRoot(dName), (dName not in self._d or (dName in self._d and self._d[dName] != path)))
+
 				if dName not in self._d or (dName in self._d and self._d[dName] != path):
 					### import form local or web
 					if os.path.isdir(path) or checkURL(path):
@@ -523,12 +700,27 @@ class ImportLibrary(wx.Dialog):
 					dial = wx.MessageDialog(self, _('%s is already imported!')%dName, _('New librarie manager'), wx.OK|wx.ICON_INFORMATION)
 					dial.ShowModal()
 
+
 	###
 	def DoAdd(self, path, dName):
 		"""
 		"""
-		### ajout dans la liste box
-		self._cb.AddItem(path, dName, True)
+		# Ajouter l'item à la sauvegarde
+		item_data = {
+			'name': dName,
+			'size': str(getDirectorySize(path)) if os.path.exists(path) else '0',
+			'repo': 'local' if not path.startswith('http') else 'web',
+			'path': "..%s%s"%(os.sep,os.path.basename(DOMAIN_PATH) if path.startswith(DOMAIN_PATH) else path),
+			'checked': True,
+			'full_path': path
+		}
+		self._all_items.append(item_data)
+		
+		# Ajouter dans la liste visible (si correspond au filtre)
+		search_text = self._current_filter.lower()
+		if not search_text or search_text in dName.lower() or search_text in path.lower():
+			self._cb.AddItem(path, dName, True)
+
 
 		### mise a jour du fichier .devsimpy
 		if path not in self.parent.exportPathsList:
@@ -538,6 +730,7 @@ class ImportLibrary(wx.Dialog):
 		### ajout dans le dictionnaire pour recupere le chemin à l'insertion dans DEVSimPy (voir OnImport)
 		self._d.update({dName:path})
 
+
 		### create the __init__.py file if doesn't exist
 		if not path.startswith('http') and (not os.path.exists(os.path.join(path,'__init__.py') and len(os.listdir(path)) == 0)):
 			dial = wx.MessageDialog(self, _('%s directory has no __init__.py file.\nDo you want to create it?')%path, _('New librarie Manager'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
@@ -545,7 +738,14 @@ class ImportLibrary(wx.Dialog):
 				ImportLibrary.CreateInitFile(path)
 			dial.Destroy()
 		
-		NotificationMessage(_('Information'), _("Library %s has been succeffully added!")%dName, self, timeout=5)
+		NotificationMessage(_('Information'), _("Library %s has been successfully added!")%dName, self, timeout=5)
+		
+		# Mettre à jour le titre
+		if self._current_filter:
+			visible = self._cb.GetItemCount()
+			total = len(self._all_items)
+			self.SetTitle(_("Import Library Manager - %d/%d libraries") % (visible, total))
+
 
 	###
 	def OnAdd(self, evt):
@@ -553,7 +753,8 @@ class ImportLibrary(wx.Dialog):
 		"""
 		self.OnNew(evt)
 
-	###		
+
+	###     
 	def OnCloseWindow(self, event):
 		"""
 		"""
