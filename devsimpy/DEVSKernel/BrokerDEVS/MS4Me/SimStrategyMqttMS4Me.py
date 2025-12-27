@@ -97,10 +97,11 @@ class MultiKeyDict:
 
 def build_routing_table(atomic_models):
     """
-    Build hybrid routing table: flattened ports + complete EIC/IC resolution
+    Build hybrid routing table with FULL hierarchical EIC/IC resolution.
+    Inspired by Kafka implementation - properly handles nested coupled models.
     """
     routing_table = {}
-    logger.info("=== Building HYBRID routing table ===")
+    logger.info("=== Building HYBRID routing table (HIERARCHICAL) ===")
 
     # PHASE 1: Direct atomic connections via outLine (fast path)
     logger.info("PHASE 1: Direct atomic connections (outLine)")
@@ -113,50 +114,112 @@ def build_routing_table(atomic_models):
                 if hasattr(ip, 'host') and hasattr(ip.host, 'myID'):
                     dest_model = ip.host
                     dest_port = ip.name
-                    destinations.append((dest_model, dest_port))
-                    logger.info(
-                        "  %s.%s → %s.%s (outLine)",
-                        src.myID, op.name,
-                        dest_model.myID, dest_port,
-                    )
+                    if isinstance(dest_model, DomainBehavior):  # atomic only
+                        destinations.append((dest_model, dest_port))
+                        logger.info(
+                            "  DIRECT: %s.%s → %s.%s", 
+                            src.myID, op.name,
+                            dest_model.myID, dest_port
+                        )
 
             if destinations:
                 routing_table[key] = destinations
 
-    # PHASE 2: EIC (External Input Coupling) - from coupled to atomic
-    logger.info("PHASE 2: External Input Coupling (EIC)")
+    # PHASE 2: Hierarchical resolution via IC/EIC (handles nested coupled models)
+    logger.info("PHASE 2: Hierarchical resolution via IC/EIC")
+    
+    def resolve_hierarchical(model, target_port, visited=None):
+        """Recursively resolve a destination through the hierarchy using IC/EIC"""
+        if visited is None:
+            visited = set()
+        if model in visited:
+            return []
+        visited.add(model)
+        
+        destinations = []
+        
+        # If atomic → end of resolution
+        if isinstance(model, DomainBehavior):
+            if hasattr(target_port, 'name'):
+                return [(model, target_port.name)]
+            else:
+                return [(model, str(target_port))]
+        
+        # If coupled → traverse EIC then IC recursively
+        if isinstance(model, DomainStructure):
+            if hasattr(model, 'EIC'):
+                for eic in model.EIC:
+                    try:
+                        # Possible EIC formats: (ext_port, int_model, int_port) or tuples
+                        if len(eic) == 3:
+                            ext_port, int_model, int_port = eic
+                        elif len(eic) == 2 and isinstance(eic[0], tuple):
+                            _, ext_port = eic[0]
+                            int_model, int_port = eic[1]
+                        else:
+                            continue
+                        
+                        # Match external port
+                        if (hasattr(ext_port, 'name') and hasattr(target_port, 'name') and 
+                            ext_port.name == target_port.name) or \
+                           (hasattr(ext_port, 'name') and ext_port.name == target_port) or \
+                           (hasattr(target_port, 'name') and ext_port == target_port.name):
+                            destinations.extend(resolve_hierarchical(int_model, int_port, visited))
+                    except Exception as e:
+                        logger.debug("Error processing EIC: %s", e)
+                        continue
+            
+            # Traverse IC for internal propagation
+            if hasattr(model, 'IC'):
+                for ic in model.IC:
+                    try:
+                        if len(ic) == 2 and isinstance(ic[0], tuple):
+                            src_m, src_p = ic[0]
+                            dest_m, dest_p = ic[1]
+                        elif len(ic) == 4:
+                            src_m, src_p, dest_m, dest_p = ic
+                        else:
+                            continue
+                        
+                        destinations.extend(resolve_hierarchical(dest_m, dest_p, visited))
+                    except Exception as e:
+                        logger.debug("Error processing IC: %s", e)
+                        continue
+        
+        return destinations
+    
+    # Apply hierarchical resolution to ALL outLine connections
     for src in atomic_models:
-        src_struct = src.getBlockModel()
-        for ic in getattr(src_struct, 'EIC', []):
-            src_port, dest_atomic, dest_port = ic
-            key = (src, src_port)
-            destinations = [(dest_atomic, dest_port)]
+        for op in getattr(src, "OPorts", []):
+            key = (src, op.name)
             if key not in routing_table:
-                routing_table[key] = destinations
-                logger.info(
-                    "  EIC: %s.%s → %s.%s",
-                    src.myID, src_port,
-                    dest_atomic.myID, dest_port,
-                )
-
-    # PHASE 3: IC (Internal Coupling) - between atomics within coupled model
-    logger.info("PHASE 3: Internal Coupling (IC)")
-    for src in atomic_models:
-        src_struct = src.getBlockModel()
-        for ic in getattr(src_struct, 'IC', []):
-            src_atomic, src_port, dest_atomic, dest_port = ic
-            if src_atomic in atomic_models:
-                key = (src_atomic, src_port)
-                if key not in routing_table:
-                    routing_table[key] = []
-                routing_table[key].append((dest_atomic, dest_port))
-                logger.info(
-                    "  IC: %s.%s → %s.%s",
-                    src_atomic.myID, src_port,
-                    dest_atomic.myID, dest_port,
-                )
-
-    logger.info("Routing table built: %d routes", len(routing_table))
+                routing_table[key] = []
+            
+            for ip in getattr(op, "outLine", []):
+                if hasattr(ip, 'host') and hasattr(ip.host, 'EIC'):  # Coupled detected
+                    hierarchical_dests = resolve_hierarchical(ip.host, ip, set())
+                    for dest_model, dest_port in hierarchical_dests:
+                        if dest_model in atomic_models:
+                            routing_table[key].append((dest_model, dest_port))
+                            logger.info(
+                                "  HIERARCHICAL: %s.%s → %s.%s (via %s)", 
+                                src.myID, op.name,
+                                dest_model.myID, dest_port,
+                                ip.host.myID if hasattr(ip.host, 'myID') else '?'
+                            )
+    
+    # Remove duplicates
+    for key in routing_table:
+        routing_table[key] = list(set(routing_table[key]))
+    
+    logger.info("=== HYBRID routing table: %d routes ===", len(routing_table))
+    for key, dests in routing_table.items():
+        logger.info(
+            "  %s.%s -> [%s]",
+            key[0].myID, key[1],
+            ', '.join(f"{d[0].myID}.{d[1]}" for d in dests)
+        )
+    
     return routing_table
 
 
@@ -195,6 +258,8 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
         request_timeout: float = 30.0,
         stream_proxy_class=None,
         receiver_proxy_class=None,
+        mqtt_username: str = None,
+        mqtt_password: str = None,
     ):
         """
         Initialize MQTT MS4Me simulation strategy.
@@ -206,6 +271,8 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
             request_timeout: Timeout for message responses (seconds)
             stream_proxy_class: Custom MqttStreamProxy class
             receiver_proxy_class: Custom MqttReceiverProxy class
+            mqtt_username: MQTT username (optional)
+            mqtt_password: MQTT password (optional)
         """
         super().__init__(simulator)
 
@@ -237,6 +304,41 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
         # Unique group ID for this run
         group_id = f"coordinator-{int(time.time() * 1000)}"
         self.request_timeout = request_timeout
+        
+        # Load MQTT config from file if not provided as arguments
+        import builtins
+        import configparser
+        import os
+        
+        # Try to load credentials from config file first
+        if mqtt_username is None or mqtt_password is None:
+            try:
+                from Utilities import GetUserConfigDir
+                config_file = os.path.join(GetUserConfigDir(), 'devsimpy')
+                if os.path.exists(config_file):
+                    cfg = configparser.ConfigParser()
+                    cfg.read(config_file)
+                    
+                    if cfg.has_section('BROKER_MQTT'):
+                        if mqtt_username is None:
+                            mqtt_username = cfg.get('BROKER_MQTT', 'username', fallback='')
+                            mqtt_username = mqtt_username if mqtt_username else None
+                        if mqtt_password is None:
+                            mqtt_password = cfg.get('BROKER_MQTT', 'password', fallback='')
+                            mqtt_password = mqtt_password if mqtt_password else None
+            except Exception as e:
+                logger.debug(f"Could not load MQTT credentials from config file: {e}")
+        
+        # Use provided credentials or fall back to builtins/defaults
+        self.mqtt_username = mqtt_username or getattr(builtins, 'MQTT_USERNAME', None)
+        self.mqtt_password = mqtt_password or getattr(builtins, 'MQTT_PASSWORD', None)
+        
+        # Also get address/port from builtins if not explicitly set
+        if mqtt_broker_address == MQTT_BROKER_ADDRESS and mqtt_broker_port == MQTT_BROKER_PORT:
+            self.broker_address = getattr(builtins, 'MQTT_BROKER_ADDRESS', mqtt_broker_address)
+            self.broker_port = getattr(builtins, 'MQTT_BROKER_PORT', mqtt_broker_port)
+        
+        logger.info(f"MQTT Connection: {self.broker_address}:{self.broker_port}, username={self.mqtt_username is not None}")
 
         # Dependency injection: use provided proxy classes or defaults
         StreamProxyClass = stream_proxy_class or MqttStreamProxy
@@ -248,6 +350,8 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
             self.broker_port,
             client_id=f"coordinator-{group_id}",
             wire_adapter=self.wire,
+            username=self.mqtt_username,
+            password=self.mqtt_password,
         )
 
         self._receiver_proxy = ReceiverProxyClass(
@@ -255,6 +359,8 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
             self.broker_port,
             client_id=f"receiver-{group_id}",
             wire_adapter=self.wire,
+            username=self.mqtt_username,
+            password=self.mqtt_password,
         )
 
         # Subscribe to output topic
@@ -313,6 +419,8 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
                 in_topic=in_topic,
                 out_topic=out_topic,
                 wire_adapter=self.wire,
+                username=self.mqtt_username,
+                password=self.mqtt_password,
             )
 
             self._workers.add([atomic_model, i], worker)
@@ -515,6 +623,10 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
                             "  Sending external transitions to %s...",
                             current_worker.get_model_label(),
                         )
+                        logger.info(
+                            "    Inputs being sent: %s",
+                            [(pv.portIdentifier, pv.value, pv.portType) for pv in pv_list]
+                        )
 
                         self._send_msg_to_mqtt(
                             msg=ExecuteTransition(st, pv_list),
@@ -543,10 +655,14 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
                     isinstance(msg, TransitionDone) for msg in td_int.values()
                 )
 
-                # Update tmin
+                # Update tmin - include ALL models' next times, not just transitioning ones
                 all_next_times = [t.nextTime.t for t in td_int.values()] + [
                     t.nextTime.t for t in td_ext.values()
                 ]
+                # Also include models that didn't transition (they may have moved to INFINITY)
+                for model in self._atomic_models:
+                    if model not in td_int and model not in td_ext:
+                        all_next_times.append(model.timeNext)
                 tmin = min(all_next_times) if all_next_times else float("inf")
 
                 # Update progress
@@ -572,6 +688,9 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
 
             self._terminate_workers()
             logger.info("MS4Me MqttMS4Me Simulation Ended")
+            
+            # Call terminate to set end_flag and exit the simulation thread loop
+            self._simulator.terminate()
 
         except Exception as e:
             logger.error("Simulation error: %s", e, exc_info=True)

@@ -28,10 +28,13 @@ import sys
 import configparser
 import copy
 import importlib
+import logging
 
 import wx.lib.filebrowsebutton as filebrowse
 
 _ = wx.GetTranslation
+
+logger = logging.getLogger(__name__)
 
 from HtmlWindow import HtmlFrame
 
@@ -421,22 +424,32 @@ class BrokerConfigDialog(wx.Dialog):
 			parent: Parent window
 			broker_name: Name of the broker (MQTT, Kafka, etc.)
 		"""
-		wx.Dialog.__init__(self, parent, wx.ID_ANY, 
-						 f"{broker_name} " + _("Broker Configuration"),
-						 size=(500, 400))
-		
 		self.broker_name = broker_name
 		self.config = {}
 		
 		# Load existing configuration if available
 		self._load_config()
 		
+		# Calculate dialog size based on number of config items
+		# Each field needs ~35 pixels, plus title, info, and buttons
+		num_fields = len(self.config)
+		dialog_width = 550
+		dialog_height = min(200 + (num_fields * 40), 600)  # Cap at 600px
+		
+		wx.Dialog.__init__(self, parent, wx.ID_ANY, 
+						 f"{broker_name} " + _("Broker Configuration"),
+						 size=(dialog_width, dialog_height))
+		
 		# Create UI
 		self._create_ui()
 
 	def _load_config(self):
-		""" Load broker configuration from builtins
+		""" Load broker configuration from config file or builtins
 		"""
+		import builtins
+		import configparser
+		from Utilities import GetUserConfigDir
+		
 		broker_lower = self.broker_name.lower()
 		
 		# Default configurations per broker
@@ -444,6 +457,8 @@ class BrokerConfigDialog(wx.Dialog):
 			'mqtt': {
 				'address': 'localhost',
 				'port': '1883',
+				'username': '',
+				'password': '',
 				'qos': '1',
 				'keepalive': '60',
 				'use_tls': False,
@@ -462,6 +477,37 @@ class BrokerConfigDialog(wx.Dialog):
 		}
 		
 		self.config = defaults.get(broker_lower, {})
+		
+		# Try to load from config file
+		try:
+			config_file = os.path.join(GetUserConfigDir(), 'devsimpy')
+			if os.path.exists(config_file):
+				cfg = configparser.ConfigParser()
+				cfg.read(config_file)
+				
+				section_name = f'BROKER_{broker_lower.upper()}'
+				if cfg.has_section(section_name):
+					for key in self.config.keys():
+						if cfg.has_option(section_name, key):
+							value = cfg.get(section_name, key)
+							# Convert boolean strings
+							if value.lower() in ('true', 'false'):
+								self.config[key] = value.lower() == 'true'
+							else:
+								self.config[key] = value
+					logger.info(f"Loaded {self.broker_name} configuration from file")
+					return
+		except Exception as e:
+			logger.warning(f"Could not load config from file: {e}")
+		
+		# Fall back to builtins
+		try:
+			saved_key = f'BROKER_CONFIG_{broker_lower.upper()}'
+			if hasattr(builtins, saved_key):
+				saved_config = getattr(builtins, saved_key, {})
+				self.config.update(saved_config)
+		except Exception as e:
+			logger.warning(f"Could not load config from builtins: {e}")
 
 	def _create_ui(self):
 		""" Create the configuration UI
@@ -522,6 +568,72 @@ class BrokerConfigDialog(wx.Dialog):
 		sizer.Add(btn_sizer, 0, wx.ALIGN_RIGHT|wx.ALL, 10)
 		
 		self.SetSizer(sizer)
+		
+		# Bind OK button to save configuration
+		self.Bind(wx.EVT_BUTTON, self.OnOK, id=wx.ID_OK)
+
+	def OnOK(self, evt):
+		""" Save configuration when OK is clicked
+		"""
+		import builtins
+		import configparser
+		from Utilities import GetUserConfigDir
+		
+		# Gather configuration from controls
+		config = {}
+		for key, ctrl in self.config_controls.items():
+			if isinstance(ctrl, wx.CheckBox):
+				config[key] = str(ctrl.GetValue())
+			else:
+				config[key] = ctrl.GetValue()
+		
+		# Save to builtins
+		broker_lower = self.broker_name.lower()
+		saved_key = f'BROKER_CONFIG_{broker_lower.upper()}'
+		setattr(builtins, saved_key, config)
+		
+		# Save to .devsimpy config file
+		try:
+			config_file = os.path.join(GetUserConfigDir(), 'devsimpy')
+			cfg = configparser.ConfigParser()
+			
+			# Read existing config
+			if os.path.exists(config_file):
+				cfg.read(config_file)
+			
+			# Ensure BROKERS section exists
+			if not cfg.has_section('BROKERS'):
+				cfg.add_section('BROKERS')
+			
+			# Save broker-specific config
+			section_name = f'BROKER_{broker_lower.upper()}'
+			if not cfg.has_section(section_name):
+				cfg.add_section(section_name)
+			
+			for key, value in config.items():
+				cfg.set(section_name, key, str(value))
+			
+			# Write to file
+			with open(config_file, 'w') as f:
+				cfg.write(f)
+			
+			logger.info(f"Saved {self.broker_name} configuration to {config_file}")
+		except Exception as e:
+			logger.error(f"Error saving broker config to file: {e}")
+		
+		# Also update mqttconfig if MQTT
+		if self.broker_name == 'MQTT':
+			try:
+				setattr(builtins, 'MQTT_BROKER_ADDRESS', config.get('address', 'localhost'))
+				setattr(builtins, 'MQTT_BROKER_PORT', int(config.get('port', 1883)))
+				setattr(builtins, 'MQTT_USERNAME', config.get('username') or None)
+				setattr(builtins, 'MQTT_PASSWORD', config.get('password') or None)
+				logger.info(f"Saved MQTT configuration: {config.get('address')}:{config.get('port')}")
+			except Exception as e:
+				logger.error(f"Error saving MQTT config: {e}")
+		
+		# Close dialog
+		self.EndModal(wx.ID_OK)
 
 	def _get_broker_info(self):
 		""" Get information about the broker
@@ -571,12 +683,32 @@ class BrokerConfigDialog(wx.Dialog):
 		try:
 			import paho.mqtt.client as mqtt
 			
-			client = mqtt.Client(client_id="devsimpy-test")
 			address = config.get('address', 'localhost')
 			port = int(config.get('port', 1883))
+			username = config.get('username', '') or None
+			password = config.get('password', '') or None
 			keepalive = int(config.get('keepalive', 60))
 			
+			# Try VERSION2 API first (paho-mqtt 2.x)
+			try:
+				client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id="devsimpy-test")
+			except (TypeError, AttributeError):
+				try:
+					client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, client_id="devsimpy-test")
+				except (TypeError, AttributeError):
+					client = mqtt.Client(client_id="devsimpy-test")
+			
+			if username:
+				client.username_pw_set(username, password or "")
+			
 			client.connect(address, port, keepalive)
+			client.loop_start()
+			
+			# Give it time to connect
+			import time
+			time.sleep(1)
+			
+			client.loop_stop()
 			client.disconnect()
 			
 			wx.MessageBox(
@@ -675,7 +807,40 @@ class SimulationPanel(wx.Panel):
 		self.selected_message_format = getattr(builtins, 'SELECTED_MESSAGE_FORMAT', 'MS4Me')
 		self.selected_broker = getattr(builtins, 'SELECTED_BROKER', 'Kafka')
 		
+		# Load MQTT configuration from config file at startup
+		self._load_mqtt_config_from_file()
+		
 		self.InitUI()
+	
+	def _load_mqtt_config_from_file(self):
+		""" Load MQTT configuration from .devsimpy file into builtins
+		"""
+		import configparser
+		from Utilities import GetUserConfigDir
+		
+		try:
+			config_file = os.path.join(GetUserConfigDir(), 'devsimpy')
+			if os.path.exists(config_file):
+				cfg = configparser.ConfigParser()
+				cfg.read(config_file)
+				
+				section_name = 'BROKER_MQTT'
+				if cfg.has_section(section_name):
+					address = cfg.get(section_name, 'address', fallback='localhost')
+					port = cfg.get(section_name, 'port', fallback='1883')
+					username = cfg.get(section_name, 'username', fallback='')
+					password = cfg.get(section_name, 'password', fallback='')
+					
+					setattr(builtins, 'MQTT_BROKER_ADDRESS', address)
+					setattr(builtins, 'MQTT_BROKER_PORT', int(port))
+					setattr(builtins, 'MQTT_USERNAME', username or None)
+					setattr(builtins, 'MQTT_PASSWORD', password or None)
+					
+					logger.info(f"Loaded MQTT config from file: {address}:{port}, username={'(set)' if username else 'None'}")
+			else:
+				logger.info(f"No BROKER_MQTT section found in config file")
+		except Exception as e:
+			logger.warning(f"Could not load MQTT config from file: {e}")
 	
 	def InitUI(self):
 		""" Initialize the UI with modern layout
@@ -887,7 +1052,7 @@ class SimulationPanel(wx.Panel):
 			'doc', 'index.html'
 		)
 
-		frame = HtmlFrame(self, wx.NewIdRef(), f"{choice} Documentation", (800, 600))
+		frame = HtmlFrame(self, f"{choice} Documentation", (800, 600))
 		
 		if os.path.exists(doc_path):
 			frame.LoadFile(doc_path)
@@ -917,6 +1082,23 @@ class SimulationPanel(wx.Panel):
 		
 		if strategy in strategy_dict:
 			strategy_class = strategy_dict[strategy]
+			
+			# Handle nested strategy dicts (BrokerDEVS)
+			if isinstance(strategy_class, dict):
+				# For nested dicts, get the selected message format and broker
+				msg_format = getattr(builtins, 'SELECTED_MESSAGE_FORMAT', 'MS4Me')
+				broker = getattr(builtins, 'SELECTED_BROKER', 'Kafka')
+				
+				if msg_format in strategy_class and broker in strategy_class[msg_format]:
+					strategy_class = strategy_class[msg_format][broker]
+				else:
+					wx.MessageBox(
+						_("Strategy configuration not found for selected message format and broker"),
+						_("Strategy Information"),
+						wx.OK | wx.ICON_WARNING
+					)
+					return
+			
 			doc = strategy_class.__doc__ or _("No documentation available")
 			
 			msg = f"{_('Strategy')}: {strategy}\n\n"

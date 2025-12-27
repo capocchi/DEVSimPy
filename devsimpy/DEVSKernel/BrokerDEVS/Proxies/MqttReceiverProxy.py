@@ -45,6 +45,8 @@ class MqttReceiverProxy:
         wire_adapter=None,
         qos: int = 1,
         keepalive: int = 60,
+        username: str = None,
+        password: str = None,
     ):
         """
         Initialize MQTT receiver proxy (consumer).
@@ -56,12 +58,16 @@ class MqttReceiverProxy:
             wire_adapter: Message deserialization adapter
             qos: MQTT QoS level
             keepalive: MQTT keepalive interval
+            username: MQTT username (optional)
+            password: MQTT password (optional)
         """
         self.broker_address = broker_address
         self.broker_port = broker_port
         self.qos = qos
         self.keepalive = keepalive
         self.wire_adapter = wire_adapter
+        self.username = username
+        self.password = password
 
         # Create MQTT client - compatible with paho-mqtt 2.x
         client_id_str = client_id or f"receiver-{int(time.time() * 1000)}"
@@ -80,6 +86,10 @@ class MqttReceiverProxy:
         self.client.on_disconnect = self._on_disconnect
         self.client.on_message = self._on_message
 
+        # Set credentials if provided
+        if self.username:
+            self.client.username_pw_set(self.username, self.password or "")
+
         # Message buffer: topic -> list of messages
         self._message_buffer = defaultdict(list)
         self._buffer_lock = threading.Lock()
@@ -96,27 +106,39 @@ class MqttReceiverProxy:
         # VERSION2 passes reason_code as 4th arg, VERSION1 passes rc as 3rd arg
         reason_code = rc if rc is not None else flags
         
-        if reason_code == 0:
+        # Convert ReasonCode to int for logging compatibility
+        reason_code_int = reason_code.value if hasattr(reason_code, 'value') else (int(reason_code) if reason_code is not None else 0)
+        
+        if reason_code_int == 0:
             logger.info("MqttReceiverProxy: Connected to MQTT broker")
             self._connected = True
             # Resubscribe to topics if we have any
             for topic in self._subscribed_topics:
                 self.client.subscribe(topic, qos=self.qos)
         else:
-            logger.error("MqttReceiverProxy: Connection failed with code %d: %s", reason_code, self._get_error_message(reason_code))
+            logger.error("MqttReceiverProxy: Connection failed with code %d: %s", reason_code_int, self._get_error_message(reason_code))
 
     def _on_disconnect(self, client, userdata, flags=None, rc=None, properties=None):
         """Called when disconnected (compatible with VERSION1 and VERSION2)"""
         # VERSION2 passes reason_code as 4th arg, VERSION1 passes rc as 3rd arg
         reason_code = rc if rc is not None else flags
         
+        # Convert ReasonCode to int for logging compatibility
+        reason_code_int = reason_code.value if hasattr(reason_code, 'value') else (int(reason_code) if reason_code is not None else 0)
+        
         self._connected = False
-        if reason_code != 0:
-            logger.warning("MqttReceiverProxy: Unexpected disconnection (code: %d): %s", reason_code, self._get_error_message(reason_code))
+        if reason_code_int != 0:
+            logger.warning("MqttReceiverProxy: Unexpected disconnection (code: %d): %s", reason_code_int, self._get_error_message(reason_code))
     
     @staticmethod
     def _get_error_message(rc):
         """Get human-readable MQTT error message"""
+        # Convert ReasonCode object to int for paho-mqtt 2.x compatibility
+        if hasattr(rc, 'value'):
+            rc_int = rc.value
+        else:
+            rc_int = int(rc)
+        
         error_messages = {
             0: "Connection successful",
             1: "Connection refused - incorrect protocol version",
@@ -127,7 +149,7 @@ class MqttReceiverProxy:
             6: "Currently unused",
             7: "Connection refused - bad protocol version or broker rejected",
         }
-        return error_messages.get(rc, f"Unknown error code {rc}")
+        return error_messages.get(rc_int, f"Unknown error code {rc_int}")
         
 
     def _on_message(self, client, userdata, msg):

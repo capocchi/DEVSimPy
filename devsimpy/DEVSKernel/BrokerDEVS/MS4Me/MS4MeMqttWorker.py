@@ -79,6 +79,8 @@ class MS4MeMqttWorker(threading.Thread):
         wire_adapter=None,
         qos: int = 1,
         keepalive: int = 60,
+        username: str = None,
+        password: str = None,
     ):
         """
         Initialize MQTT worker.
@@ -93,6 +95,8 @@ class MS4MeMqttWorker(threading.Thread):
             wire_adapter: Message serialization adapter (StandardWireAdapter)
             qos: MQTT QoS level (0, 1, or 2)
             keepalive: MQTT keepalive interval in seconds
+            username: MQTT username (optional)
+            password: MQTT password (optional)
         """
         super().__init__(daemon=True)
 
@@ -111,15 +115,25 @@ class MS4MeMqttWorker(threading.Thread):
         self.broker_port = broker_port
         self.qos = qos
         self.keepalive = keepalive
+        self.username = username
+        self.password = password
 
         # Wire adapter for message serialization
         self.wire_adapter = wire_adapter
 
-        # MQTT client
-        self.client = mqtt.Client(
-            client_id=f"worker-{model_name}-{int(time.time() * 1000)}",
-            protocol=mqtt.MQTTv311,
-        )
+        # MQTT client - try VERSION2 API first (paho-mqtt 2.x)
+        try:
+            self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=f"worker-{model_name}-{int(time.time() * 1000)}")
+        except (TypeError, AttributeError):
+            try:
+                self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, client_id=f"worker-{model_name}-{int(time.time() * 1000)}")
+            except (TypeError, AttributeError):
+                self.client = mqtt.Client(client_id=f"worker-{model_name}-{int(time.time() * 1000)}", protocol=mqtt.MQTTv311)
+        
+        # Set credentials if provided
+        if self.username:
+            self.client.username_pw_set(self.username, self.password or "")
+        
         self.client.on_connect = self._on_connect
         self.client.on_disconnect = self._on_disconnect
         self.client.on_message = self._on_message
@@ -142,9 +156,12 @@ class MS4MeMqttWorker(threading.Thread):
     #  MQTT Callbacks
     # ------------------------------------------------------------------
 
-    def _on_connect(self, client, userdata, flags, rc):
-        """Called when connected to MQTT broker"""
-        if rc == 0:
+    def _on_connect(self, client, userdata, flags=None, rc=None, properties=None):
+        """Called when connected to MQTT broker (compatible with VERSION1 and VERSION2)"""
+        # VERSION2 passes reason_code as 4th arg, VERSION1 passes rc as 3rd arg
+        reason_code = rc if rc is not None else flags
+        
+        if reason_code == 0:
             logger.info("Worker %s: Connected to MQTT broker", self.model_name)
             self._connected = True
             # Subscribe to input topic
@@ -153,16 +170,17 @@ class MS4MeMqttWorker(threading.Thread):
         else:
             logger.error(
                 "Worker %s: Failed to connect to MQTT broker (code: %d)",
-                self.model_name, rc
+                self.model_name, reason_code
             )
 
-    def _on_disconnect(self, client, userdata, rc):
-        """Called when disconnected from MQTT broker"""
+    def _on_disconnect(self, client, userdata, flags=None, rc=None, properties=None):
+        """Called when disconnected from MQTT broker (compatible with VERSION1 and VERSION2)"""
         self._connected = False
-        if rc != 0:
+        reason_code = rc if rc is not None else flags
+        if reason_code != 0:
             logger.warning(
                 "Worker %s: Unexpected disconnection from MQTT broker (code: %d)",
-                self.model_name, rc
+                self.model_name, reason_code
             )
 
     def _on_message(self, client, userdata, msg):
@@ -315,17 +333,16 @@ class MS4MeMqttWorker(threading.Thread):
         """Handle InitSim command"""
         logger.info("Worker %s: Handling InitSim at t=%s", self.model_name, msg.time.t)
 
-        self.aDEVS.init(msg.time.t)
-
-        next_time = NextTime(
-            time=msg.time,
-            nextTime=SimTime(t=self.aDEVS.timeNext)
-        )
+        # Initialize the model (no need to call init() for PyDEVS)
+        # The model is already initialized, just get the next event time
+        
+        # For PyDEVS models, timeNext is already set by the model
+        result = NextTime(SimTime(t=float(self.aDEVS.timeNext)), sender=self.model_name)
         logger.info(
             "Worker %s: InitSim complete, next transition at t=%s",
             self.model_name, self.aDEVS.timeNext
         )
-        return next_time
+        return result
 
     def _handle_send_output(self, msg: SendOutput) -> ModelOutputMessage:
         """Handle SendOutput command"""
@@ -334,17 +351,24 @@ class MS4MeMqttWorker(threading.Thread):
         # Execute output function
         self.aDEVS.outputFnc()
 
-        # Collect port values
+        # Collect port values from myOutput dictionary
         port_values = []
-        for port in getattr(self.aDEVS, 'OPorts', []):
-            if port.values:
-                for value in port.values:
-                    pv = PortValue(value, port.name, type(value).__name__)
-                    port_values.append(pv)
+        for port, value in getattr(self.aDEVS, 'myOutput', {}).items():
+            # Handle both Message and raw values
+            from DomainInterface.Object import Message
+            if isinstance(value, Message):
+                actual_value = getattr(value, "value", value)
+            else:
+                actual_value = value
+            
+            port_name = getattr(port, "name", str(port))
+            pv = PortValue(actual_value, port_name, type(actual_value).__name__)
+            port_values.append(pv)
 
         output_msg = ModelOutputMessage(
-            time=msg.time,
-            modelOutput=port_values
+            modelOutput=port_values,
+            nextTime=msg.time,
+            sender=self.model_name
         )
         logger.info(
             "Worker %s: SendOutput complete, produced %d outputs",
@@ -358,19 +382,89 @@ class MS4MeMqttWorker(threading.Thread):
             "Worker %s: Handling ExecuteTransition at t=%s",
             self.model_name, msg.time.t
         )
+        
+        t = msg.time.t
 
-        # Apply external inputs if provided
-        if msg.inputs:
-            for pv in msg.inputs:
-                for port in getattr(self.aDEVS, 'IPorts', []):
-                    if port.name == pv.portIdentifier:
-                        port.put(pv.value)
+        # Determine if this is external or internal transition based on inputs
+        has_external_inputs = msg.portValueList and len(msg.portValueList) > 0
+        
+        logger.info(
+            "Worker %s: has_external_inputs=%s, portValueList=%s",
+            self.model_name, has_external_inputs, msg.portValueList
+        )
 
-        # Execute internal transition
-        self.aDEVS.intTransition()
+        # Apply external inputs if provided (following Kafka pattern from MS4MeKafkaWorker)
+        if has_external_inputs:
+            logger.info("Worker %s: Applying %d external inputs", self.model_name, len(msg.portValueList))
+            
+            port_inputs = {}
+            
+            # Build dict {port_obj -> Message(value, time)} matching Kafka pattern
+            from DomainInterface.Object import Message
+            for pv in msg.portValueList:
+                logger.info(
+                    "Worker %s:   Input: portIdentifier=%s, value=%s, portType=%s",
+                    self.model_name, pv.portIdentifier, pv.value, pv.portType
+                )
+                # pv.portIdentifier must match the input port name
+                for iport in self.aDEVS.IPorts:
+                    if iport.name == pv.portIdentifier:
+                        m = Message(pv.value, t)
+                        port_inputs[iport] = m
+                        logger.info(
+                            "Worker %s:     Matched port %s, created Message",
+                            self.model_name, iport.name
+                        )
+                        break
+
+            # Save the original peek method
+            old_peek = getattr(self.aDEVS, "peek", None)
+            
+            # Override peek() temporarily to use port_inputs (avoids port object identity mismatch)
+            # IMPORTANT: Return Message objects directly, not extracted values
+            # This matches the Kafka pattern and allows models to extract .value when needed
+            def temp_peek(port, *args):
+                """Temporary peek that returns Message objects from port_inputs dict"""
+                if args and isinstance(args[0], dict):
+                    return args[0].get(port)
+                return port_inputs.get(port)
+            
+            # Replace peek temporarily
+            self.aDEVS.peek = temp_peek
+            
+            try:
+                logger.info("Worker %s: Calling extTransition with %d port inputs", self.model_name, len(port_inputs))
+                self.aDEVS.extTransition()
+                logger.info("Worker %s: extTransition executed", self.model_name)
+            finally:
+                # Restore original peek
+                if old_peek is not None:
+                    self.aDEVS.peek = old_peek
+                else:
+                    # Remove attribute if it didn't exist before
+                    if hasattr(self.aDEVS, "peek"):
+                        delattr(self.aDEVS, "peek")
+        else:
+            # Internal transition - no inputs
+            logger.info("Worker %s: Calling intTransition", self.model_name)
+            self.aDEVS.intTransition()
+            logger.info("Worker %s: intTransition executed", self.model_name)
+
+        # CRITICAL: Update the model's time tracking after transition
+        # In PyDEVS: timeNext = timeLast + timeAdvance()
+        # We must update timeLast to current simulation time, then recalculate timeNext
+        self.aDEVS.timeLast = msg.time.t
+        time_advance = self.aDEVS.timeAdvance()
+        self.aDEVS.timeNext = self.aDEVS.timeLast + time_advance
+        
+        logger.info(
+            "Worker %s: transition complete - timeLast=%s, timeAdvance=%s, timeNext=%s",
+            self.model_name, self.aDEVS.timeLast, time_advance, self.aDEVS.timeNext
+        )
 
         transition_done = TransitionDone(
             time=msg.time,
+            sender=self.model_name,
             nextTime=SimTime(t=self.aDEVS.timeNext)
         )
         logger.info(

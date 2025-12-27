@@ -24,6 +24,8 @@ AUTO_START_MQTT_BROKER = True
 ### MQTT broker configuration
 MQTT_BROKER_ADDRESS = "localhost"
 MQTT_BROKER_PORT = 1883
+MQTT_USERNAME = None  # Set to username if broker requires authentication
+MQTT_PASSWORD = None  # Set to password if broker requires authentication
 
 ### MQTT connection defaults
 MQTT_QOS = 1  # Quality of Service (0=at most once, 1=at least once, 2=exactly once)
