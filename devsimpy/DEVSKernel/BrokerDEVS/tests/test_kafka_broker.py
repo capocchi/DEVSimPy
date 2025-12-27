@@ -2,14 +2,14 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Répertoire du script : .../devsimpy/DEVSKernel/KafkaDEVS/tests
+# Répertoire du script : .../devsimpy/DEVSKernel/BrokerDEVS/tests
 here = Path(__file__).resolve().parent
 # Racine du projet devsimpy : deux niveaux au-dessus
 project_root = here.parents[2]  # .../devsimpy
 sys.path.insert(0, str(project_root))
 
 # Adapter l'import au chemin réel de ton package
-from DEVSKernel.KafkaDEVS.MS4Me.auto_kafka import ensure_kafka_broker
+from DEVSKernel.BrokerDEVS.MS4Me.auto_kafka import ensure_kafka_broker
 
 def main():
     print("=== Test ensure_kafka_broker ===")
@@ -25,7 +25,7 @@ def main():
 
     print("=== Lancement de la simulation DEVSimPy (test.dsp, T=10) ===")
 
-    # dossier du script: .../devsimpy/DEVSKernel/KafkaDEVS/tests
+    # dossier du script: .../devsimpy/DEVSKernel/BrokerDEVS/tests
     here = Path(__file__).resolve().parent
 
     # racine devsimpy (qui contient devsimpy-nogui.py)
@@ -38,7 +38,7 @@ def main():
         sys.executable,
         str(devsimpy_nogui),
         "-with_progress",
-        "-kernel", "KafkaDEVS",
+        "-kernel", "BrokerDEVS",
         str(test_dsp),
         "10",
     ]

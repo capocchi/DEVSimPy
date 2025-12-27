@@ -56,7 +56,7 @@ class StandaloneNoGUIKafkaPKG:
         self.model_label = label
         self.outfn = outfn
         self.outdir = outdir
-        self.kernel = 'KafkaDEVS'
+        self.kernel = 'BrokerDEVS'
         self.kafka_contianer_name = kafka_container_name
         self.kafka_boostrap = kafka_boostrap
         self.input_topic = input_topic
@@ -164,7 +164,7 @@ services:
     networks:
       - kafka-network
     command: >
-      python DEVSKernel/KafkaDEVS/MS4Me/run_worker.py
+      python DEVSKernel/BrokerDEVS/MS4Me/run_worker.py
       --model-path ${{MODEL_PATH}}
       --class-name ${{MODEL_CLASS}}
       --label {self.model_label}

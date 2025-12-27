@@ -28,10 +28,10 @@ GLOBAL_SETTINGS["INFINITY"] = float("inf")
 builtins.__dict__.update(GLOBAL_SETTINGS)
 builtins.__dict__.update(USER_SETTINGS)
 
-from DEVSKernel.KafkaDEVS.MS4Me.auto_kafka import ensure_kafka_broker
-from DEVSKernel.KafkaDEVS.MS4Me.kafkaconfig import KAFKA_BOOTSTRAP
-from DEVSKernel.KafkaDEVS.InMemoryKafkaWorker import InMemoryKafkaWorker
-from DEVSKernel.KafkaDEVS.devs_kafka_messages import (
+from DEVSKernel.BrokerDEVS.MS4Me.auto_kafka import ensure_kafka_broker
+from DEVSKernel.BrokerDEVS.MS4Me.kafkaconfig import KAFKA_BOOTSTRAP
+from DEVSKernel.BrokerDEVS.InMemoryKafkaWorker import InMemoryKafkaWorker
+from DEVSKernel.BrokerDEVS.Core.BrokerMessageTypes import (
 	SimTime,
 	InitSim,
 	SimulationDone,
@@ -43,8 +43,8 @@ from DEVSKernel.KafkaDEVS.devs_kafka_messages import (
 	TransitionDone,
 	PortValue,
 )
-from DEVSKernel.KafkaDEVS.devs_kafka_wire_adapters import StandardWireAdapter
-from DEVSKernel.KafkaDEVS.logconfig import configure_logging 
+from DEVSKernel.BrokerDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
+from DEVSKernel.BrokerDEVS.logconfig import configure_logging 
 
 from Domain.Generator.RandomGenerator import RandomGenerator
 from Domain.Collector.MessagesCollector import MessagesCollector
@@ -156,11 +156,9 @@ def build_workers(bootstrap):
 		out_topic = f"test_{label}_out"
 
 		worker = InMemoryKafkaWorker(
-			aDEVS=model,
-			aDEVS_index=0,
-			bootstrap_server=bootstrap,
-			in_topic=in_topic,
-			out_topic=out_topic,
+			model_name=label,
+			model=model,
+			bootstrap_servers=bootstrap,
 		)
 		worker.start()
 		workers.append((worker, in_topic, out_topic))
@@ -194,7 +192,7 @@ def send_and_wait_reply(
 	expected_type=None,  # ex: NextTime ou ModelDone
 	mode="both",  # "summary", "details", "both"
 ):
-	wire_payload = StandardWireAdapter.to_wire(devs_msg, corr_id, index=index)
+	wire_payload = StandardWireAdapter.to_wire(devs_msg)
 	payload_bytes = json.dumps(wire_payload).encode("utf-8")
 
 	sent_desc = (
@@ -223,9 +221,6 @@ def send_and_wait_reply(
 		raw = msg.value().decode("utf-8")
 		data = json.loads(raw)
 
-		if data.get("correlation_id") != corr_id:
-			continue  # autre test
-
 		candidate = StandardWireAdapter.from_wire(data)
 
 		# Si on a un type attendu, on ignore les autres (ex: ignorer ModelDone ici)
@@ -241,8 +236,8 @@ def send_and_wait_reply(
 		summary = f"{in_topic} -> aucune réponse (timeout) pour {sent_desc}"
 	else:
 		summary = (
-			f"{in_topic} -> a répondu {reply.__class__.__name__}"
-			f"(corr_id={corr_id}) sur l'un des {out_topics} pour {sent_desc}"
+			f"{in_topic} -> a répondu {reply.__class__.__name__} "
+			f"sur l'un des {out_topics} pour {sent_desc}"
 		)
 
 	return reply, summary

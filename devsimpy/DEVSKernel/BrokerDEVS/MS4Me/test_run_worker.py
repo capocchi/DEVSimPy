@@ -25,9 +25,9 @@ if str(project_root) not in sys.path:
     print(f"Added to PYTHONPATH: {project_root}")
 
 setattr(builtins, 'DEFAULT_SIM_STRATEGY', 'ms4Me')
-setattr(builtins, 'DEFAULT_DEVS_DIRNAME', 'KafkaDEVS')
+setattr(builtins, 'DEFAULT_DEVS_DIRNAME', 'BrokerDEVS')
 setattr(builtins, 'DEVS_SIM_KERNEL_PATH', devskernel_path)
-setattr(builtins, 'DEVS_DIR_PATH_DICT', {'KafkaDEVS': os.path.join(devskernel_path, 'KafkaDEVS')})
+setattr(builtins, 'DEVS_DIR_PATH_DICT', {'BrokerDEVS': os.path.join(devskernel_path, 'BrokerDEVS')})
 
 logging.basicConfig(
     level=logging.INFO,
@@ -41,7 +41,7 @@ except ImportError:
     logger.error("confluent-kafka not installed. Run: pip install confluent-kafka")
     sys.exit(1)
 
-from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_messages import (
+from DEVSKernel.BrokerDEVS.Core.BrokerMessageTypes import (
     InitSim,
     SendOutput,
     ExecuteTransition,
@@ -49,9 +49,9 @@ from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_messages import (
     SimTime,
     PortValue,
 )
-from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
-from DEVSKernel.KafkaDEVS.MS4Me.MS4MeKafkaWorker import MS4MeKafkaWorker
-from DEVSKernel.KafkaDEVS.MS4Me.kafkaconfig import KAFKA_BOOTSTRAP
+from DEVSKernel.BrokerDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
+from DEVSKernel.BrokerDEVS.MS4Me.MS4MeKafkaWorker import MS4MeKafkaWorker
+from DEVSKernel.BrokerDEVS.MS4Me.kafkaconfig import KAFKA_BOOTSTRAP
 
 class WorkerCoordinatorTester:
     """
@@ -77,7 +77,7 @@ class WorkerCoordinatorTester:
         self.consumer = Consumer({
             "bootstrap.servers": self.bootstrap,
             "group.id": group_id,
-            "auto.offset.reset": "latest",
+            "auto.offset.reset": "earliest",
             "enable.auto.commit": True,
             "session.timeout.ms": 30000,
             "max.poll.interval.ms": 300000,  # 5 minutes
@@ -271,7 +271,7 @@ class WorkerCoordinatorTester:
         for label in imminent_labels:
             topic = f"ms4me{label}In"
             logger.info(f"→ Sending ExecuteTransition (internal) to {label}")
-            self._send_msg_to_kafka(topic, ExecuteTransition(st, None))
+            self._send_msg_to_kafka(topic, ExecuteTransition(st, []))
         
         time.sleep(1.0)
         responses = self._await_msgs_from_kafka(len(imminent_labels))

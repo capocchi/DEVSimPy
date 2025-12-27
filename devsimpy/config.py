@@ -27,13 +27,26 @@ GLOBAL_SETTINGS = {
         'PyDEVS': os.path.join(DEVS_SIM_KERNEL_PATH, 'PyDEVS'),
         'PyPDEVS_221': os.path.join(DEVS_SIM_KERNEL_PATH, 'PyPDEVS', 'pypdevs221' , 'src'),
         'PyPDEVS': os.path.join(DEVS_SIM_KERNEL_PATH, 'PyPDEVS', 'old'),
-        'KafkaDEVS': os.path.join(DEVS_SIM_KERNEL_PATH, 'KafkaDEVS')
+        'BrokerDEVS': os.path.join(DEVS_SIM_KERNEL_PATH, 'BrokerDEVS')
     },
     'HELP_PATH': os.path.join('doc', 'html'),
     'DEVSIMPY_ICON': 'iconDEVSimPy.ico',
     'PYDEVS_SIM_STRATEGY_DICT': {'original': 'OriginalPyDEVSSimStrategy', 'bag-based': 'BagBasedPyDEVSSimStrategy', 'direct-coupling': 'DirectCouplingPyDEVSSimStrategy'},
     'PYPDEVS_SIM_STRATEGY_DICT': {'classic': 'ClassicPyPDEVSSimStrategy', 'parallel': 'ParallelPyPDEVSSimStrategy'},
-    'KAFKADEVS_SIM_STRATEGY_DICT':{'ms4Me': 'SimStrategyKafkaMS4Me'},
+    # BrokerDEVS: Nested structure separating Message Standardization from Broker Choice
+    # Allows flexible combinations like: Kafka+MS4Me, MQTT+MS4Me, etc.
+    'BROKERDEVS_SIM_STRATEGY_DICT': {
+        'MS4Me': {  # Message Standardization
+            'Kafka': 'SimStrategyKafkaMS4Me',
+            'MQTT': 'SimStrategyMqttMS4Me',
+            'RabbitMQ': 'SimStrategyRabbitMQMS4Me',
+        }
+        # Future: Add more message standardizations here
+        # 'CustomFormat': {
+        #     'Kafka': 'SimStrategyKafkaCustom',
+        #     'MQTT': 'SimStrategyMqttCustom',
+        # }
+    },
     'PYPDEVS_221_SIM_STRATEGY_DICT': {'classic': 'ClassicPyPDEVSSimStrategy', 'parallel': 'ParallelPyPDEVSSimStrategy'},
     'GUI_FLAG': True
 }
@@ -55,11 +68,13 @@ USER_SETTINGS = {
     'NB_HISTORY_UNDO': 5,
     'OUT_DIR': 'out',
     'SELECTED_IA': "",
-				'PARAMS_IA': {
-					'CHATGPT_API_KEY': '',
-					'OLLAMA_PORT': "11434",
-					'OLLAMA_MODEL': "mistral"
-				},
+	'PARAMS_IA': {
+		'CHATGPT_API_KEY': '',
+		'OLLAMA_PORT': "11434",
+		'OLLAMA_MODEL': "mistral"
+	},
+    'SELECTED_MESSAGE_FORMAT': 'MS4Me',  # For BrokerDEVS
+    'SELECTED_BROKER': 'Kafka',  # For BrokerDEVS
     
     'FONT_SIZE': 12,
     'LOCAL_EDITOR': True,

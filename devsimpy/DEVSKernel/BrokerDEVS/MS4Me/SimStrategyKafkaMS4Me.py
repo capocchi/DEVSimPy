@@ -13,9 +13,9 @@ from confluent_kafka import KafkaException, KafkaError
 
 from DEVSKernel.PyDEVS.SimStrategies import DirectCouplingPyDEVSSimStrategy
 from DomainInterface import DomainStructure, DomainBehavior
-from DEVSKernel.KafkaDEVS.MS4Me.MS4MeKafkaWorker import MS4MeKafkaWorker
-from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
-from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_messages import (
+from DEVSKernel.BrokerDEVS.MS4Me.MS4MeKafkaWorker import MS4MeKafkaWorker
+from DEVSKernel.BrokerDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
+from DEVSKernel.BrokerDEVS.Core.BrokerMessageTypes import (
     BaseMessage,
     SimTime,
     InitSim,
@@ -27,14 +27,15 @@ from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_messages import (
     TransitionDone,
     SimulationDone,
 )
-from DEVSKernel.KafkaDEVS.Proxies import KafkaReceiverProxy, KafkaStreamProxy
-from DEVSKernel.KafkaDEVS.MS4Me.auto_kafka import ensure_kafka_broker
-from DEVSKernel.KafkaDEVS.logconfig import configure_logging, LOGGING_LEVEL
-from DEVSKernel.KafkaDEVS.MS4Me.kafkaconfig import KAFKA_BOOTSTRAP, AUTO_START_KAFKA_BROKER
+from DEVSKernel.BrokerDEVS.Proxies.BrokerReceiverProxy import KafkaReceiverProxy
+from DEVSKernel.BrokerDEVS.Proxies.BrokerStreamProxy import KafkaStreamProxy
+from DEVSKernel.BrokerDEVS.MS4Me.auto_kafka import ensure_kafka_broker
+from DEVSKernel.BrokerDEVS.logconfig import configure_logging, LOGGING_LEVEL
+from DEVSKernel.BrokerDEVS.MS4Me.kafkaconfig import KAFKA_BOOTSTRAP, AUTO_START_KAFKA_BROKER
 
 
 configure_logging()
-logger = logging.getLogger("DEVSKernel.KafkaDEVS.SimStrategyKafkaMS4Me")
+logger = logging.getLogger("DEVSKernel.BrokerDEVS.SimStrategyKafkaMS4Me")
 logger.setLevel(LOGGING_LEVEL)
 
 
@@ -273,7 +274,7 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
         # Worker threads
         self._workers = MultiKeyDict()
 
-        logger.info("KafkaDEVS SimStrategy initialized (Proxy Pattern)")
+        logger.info("BrokerDEVS SimStrategy initialized (Proxy Pattern)")
         logger.info("  Bootstrap servers: %s", self.bootstrap)
         logger.info("  Consumer group: %s", group_id)
         logger.info("  Number of atomic models: %d", self._num_atomics)
@@ -291,7 +292,7 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
             raise ValueError("Simulator instance must be provided.")
 
         logger.info("=" * 60)
-        logger.info("  KafkaDEVS Simulation Starting (Proxy Pattern)")
+        logger.info("  BrokerDEVS Simulation Starting (Proxy Pattern)")
         logger.info("=" * 60)
 
         self._create_workers()
@@ -439,7 +440,7 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
     # ------------------------------------------------------------------
 
     def _simulate_for_ms4me(self, T=1e8):
-        """Simulate using standard KafkaDEVS message routing."""
+        """Simulate using standard MS4ME message routing."""
         try:
             # STEP 0: distributed init
             logger.info("Initializing atomic models...")
@@ -454,10 +455,23 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
 
             init_workers_results = self._await_msgs_from_kafka()
 
+            logger.info("Received %d initialization responses:", len(init_workers_results))
+            for model, msg in init_workers_results.items():
+                label = model.getBlockModel().label if hasattr(model, 'getBlockModel') else model.label
+                logger.info("  Model %s: %s", label, type(msg).__name__)
+
             for model in self._atomic_models:
                 label = model.getBlockModel().label
                 devs_msg = init_workers_results[model]
-                assert isinstance(devs_msg, NextTime)
+                if not isinstance(devs_msg, NextTime):
+                    logger.error(
+                        "Expected NextTime message for model %s, got %s: %s",
+                        label,
+                        type(devs_msg).__name__,
+                        devs_msg,
+                    )
+                    assert isinstance(devs_msg, NextTime), \
+                        f"Expected NextTime for {label}, got {type(devs_msg).__name__}: {devs_msg}"
                 logger.info("  Model %s: next=%s", label, model.timeNext)
 
             logger.info("Simulation loop starting (T=%s)...", T)
@@ -652,7 +666,7 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
                 )
 
             self._terminate_workers()
-            logger.info("MS4Me KafkaDEVS Simulation Ended")
+            logger.info("MS4Me BrokerDEVS Simulation Ended")
 
     def __del__(self):
         """Cleanup: close proxies properly"""
