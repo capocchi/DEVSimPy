@@ -43,3 +43,8 @@ openai
 ollama
 
 pydantic
+
+msgpack
+
+paho-mqtt
+kafka-python

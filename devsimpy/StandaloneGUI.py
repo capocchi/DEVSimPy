@@ -220,7 +220,7 @@ class StandaloneGUI(wx.Frame):
         self.kernel_label.Enable(False)
         kernel_grid.Add(self.kernel_label, flag=wx.ALIGN_CENTER_VERTICAL)
         
-        self.kernel = wx.Choice(panel, -1, choices=["PyDEVS", "PyPDEVS", "KafkaDEVS"])
+        self.kernel = wx.Choice(panel, -1, choices=["PyDEVS", "PyPDEVS", "BrokerDEVS"])
         self.kernel.SetSelection(0)
         self.kernel.Enable(False)
         kernel_grid.Add(self.kernel, flag=wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)
@@ -325,7 +325,7 @@ class StandaloneGUI(wx.Frame):
             "    • Multi-threaded execution\n"
             "    • Better performance\n"
             "    • Supports real-time mode\n\n"
-            "  - KafkaDEVS:\n"
+            "  - BrokerDEVS:\n"
             "    • Distributed DEVS over Apache Kafka\n"
             "    • For large-scale simulations\n"
             "    • Requires Kafka infrastructure\n"

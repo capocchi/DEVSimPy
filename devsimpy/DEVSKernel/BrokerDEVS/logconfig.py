@@ -1,4 +1,4 @@
-### conf file for KafkaDEVS
+### conf file for BrokerDEVS
 import logging
 from pathlib import Path
 

@@ -116,7 +116,7 @@ class StandaloneGUIKafkaPKG(wx.Frame):
         self.kernel_label = wx.StaticText(panel, -1, _("Kernel:"))
         kernel_box.Add(self.kernel_label, flag=wx.ALIGN_CENTER_VERTICAL|wx.LEFT, border=10)
         
-        self.kernel = wx.Choice(panel, -1, choices=["KafkaDEVS"])
+        self.kernel = wx.Choice(panel, -1, choices=["BrokerDEVS"])
         self.kernel.SetSelection(0)
         kernel_box.Add(self.kernel, flag=wx.ALIGN_CENTER_VERTICAL|wx.LEFT, border=10)
         
@@ -126,7 +126,7 @@ class StandaloneGUIKafkaPKG(wx.Frame):
         self.strategy_label = wx.StaticText(panel, -1, _("Strategy:"))
         kernel_box.Add(self.strategy_label, flag=wx.ALIGN_CENTER_VERTICAL|wx.LEFT, border=10)
         
-        self.strategy = wx.Choice(panel, -1, choices=list(KAFKADEVS_SIM_STRATEGY_DICT.keys()))
+        self.strategy = wx.Choice(panel, -1, choices=list(BROKERDEVS_SIM_STRATEGY_DICT.keys()))
         self.strategy.SetSelection(0)
         kernel_box.Add(self.strategy, flag=wx.ALIGN_CENTER_VERTICAL|wx.LEFT, border=10)
         

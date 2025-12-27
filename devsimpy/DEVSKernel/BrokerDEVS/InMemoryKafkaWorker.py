@@ -27,12 +27,12 @@
 import logging
 import time
 
-from DEVSKernel.KafkaDEVS.InMemoryMessagingWorker import InMemoryMessagingWorker, MessageAdapter, MessageConsumer, MessageProducer
+from DEVSKernel.BrokerDEVS.InMemoryMessagingWorker import InMemoryMessagingWorker, MessageAdapter, MessageConsumer, MessageProducer
 from typing import Dict, Any
 
-from DEVSKernel.KafkaDEVS.logconfig import LOGGING_LEVEL
+from DEVSKernel.BrokerDEVS.logconfig import LOGGING_LEVEL
 
-logger = logging.getLogger("DEVSKernel.KafkaDEVS.InMemoryKafkaWorker")
+logger = logging.getLogger("DEVSKernel.BrokerDEVS.InMemoryKafkaWorker")
 logger.setLevel(LOGGING_LEVEL)
 
 try:
@@ -93,7 +93,7 @@ class InMemoryKafkaWorker(InMemoryMessagingWorker):
         consumer_config = {
             "bootstrap.servers": bootstrap_server,
             "group.id": group_id,
-            "auto.offset.reset": "latest",
+            "auto.offset.reset": "latest",  # Only read NEW messages, not old ones from previous runs
             "enable.auto.commit": True,
         }
         

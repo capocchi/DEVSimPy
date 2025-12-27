@@ -165,13 +165,21 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 			### define the simulation strategy
 			args = {'simulator':self}
 			### TODO: isinstance(self, PyDEVSSimulator)
-			cls_str = eval(getattr(builtins, f'{DEFAULT_DEVS_DIRNAME.upper()}_SIM_STRATEGY_DICT')[self.strategy])
 			
-			# if DEFAULT_DEVS_DIRNAME == "PyDEVS":
-			# 	cls_str = eval(PYDEVS_SIM_STRATEGY_DICT[self.strategy])
-			# else:
-			# 	cls_str = eval(PYPDEVS_SIM_STRATEGY_DICT[self.strategy])
-
+			# Get the strategy dictionary for the current DEVS package
+			strategy_dict = getattr(builtins, f'{DEFAULT_DEVS_DIRNAME.upper()}_SIM_STRATEGY_DICT')
+			
+			# Check if strategy_dict is nested (for BrokerDEVS) or flat (for PyDEVS/PyPDEVS)
+			if isinstance(strategy_dict.get(self.strategy, {}), dict):
+				# Nested structure (BrokerDEVS): strategy points to message format
+				# Get the selected broker and message format from builtins
+				msg_format = getattr(builtins, 'SELECTED_MESSAGE_FORMAT', self.strategy)
+				broker = getattr(builtins, 'SELECTED_BROKER', list(strategy_dict.get(msg_format, {}).keys())[0] if strategy_dict.get(msg_format) else 'Kafka')
+				cls_str = eval(strategy_dict[msg_format][broker])
+			else:
+				# Flat structure (PyDEVS/PyPDEVS): strategy points directly to class string
+				cls_str = eval(strategy_dict[self.strategy])
+			
 			self.setAlgorithm(cls_str(*(), **args))
 
 			while not self.end_flag:

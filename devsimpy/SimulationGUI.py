@@ -148,7 +148,17 @@ class CollapsiblePanel(wx.Panel):
 		text2 = wx.StaticText(pane, wx.NewIdRef(), _("%s algorithm:")%DEFAULT_DEVS_DIRNAME)
 
 		### list of possible strategy depending on the PyDEVS version	
-		c = list(eval("%s_SIM_STRATEGY_DICT.keys()"%DEFAULT_DEVS_DIRNAME.upper()))
+		strategy_dict = eval("%s_SIM_STRATEGY_DICT"%DEFAULT_DEVS_DIRNAME.upper())
+		
+		# Handle both flat (PyDEVS/PyPDEVS) and nested (BrokerDEVS) strategy dicts
+		if isinstance(list(strategy_dict.values())[0] if strategy_dict else {}, dict):
+			# Nested structure (BrokerDEVS) - show message formats
+			c = list(strategy_dict.keys())
+			default_choice = SELECTED_MESSAGE_FORMAT if SELECTED_MESSAGE_FORMAT in c else (c[0] if c else '')
+		else:
+			# Flat structure (PyDEVS/PyPDEVS) - show strategies
+			c = list(strategy_dict.keys())
+			default_choice = DEFAULT_SIM_STRATEGY
 
 		### choice of strategy
 		ch1 = wx.Choice(pane, wx.NewIdRef(), choices=c)
@@ -179,7 +189,12 @@ class CollapsiblePanel(wx.Panel):
 			cb5.SetValue(REAL_TIME and not NTL)
 
 		### default strategy
-		ch1.SetSelection(list(eval("%s_SIM_STRATEGY_DICT.keys()"%DEFAULT_DEVS_DIRNAME.upper())).index(DEFAULT_SIM_STRATEGY))
+		try:
+			ch1.SetSelection(c.index(default_choice))
+		except (ValueError, IndexError):
+			# Fallback to first item if default_choice not found
+			if c:
+				ch1.SetSelection(0)
 
 		ch1.SetToolTipString=ch1.SetToolTip
 		cb1.SetToolTipString=cb1.SetToolTip
@@ -218,6 +233,14 @@ class CollapsiblePanel(wx.Panel):
 		"""
 		selected_string = event.GetString()
 		self.simdia.selected_strategy = selected_string
+
+		# For BrokerDEVS, the selected_string is the message format
+		if DEFAULT_DEVS_DIRNAME == 'BrokerDEVS':
+			setattr(builtins, 'SELECTED_MESSAGE_FORMAT', selected_string)
+			# Keep the previously selected broker
+			setattr(builtins, 'DEFAULT_SIM_STRATEGY', selected_string)
+		else:
+			setattr(builtins, 'DEFAULT_SIM_STRATEGY', selected_string)
 
 		### update of ntl checkbox depending on the choosing strategy
 		self.cb2.Enable(not (self.simdia.selected_strategy == 'original' and  DEFAULT_DEVS_DIRNAME == 'PyDEVS'))

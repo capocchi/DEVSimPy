@@ -1,14 +1,14 @@
 import logging
 import json
 
-from DEVSKernel.KafkaDEVS.logconfig import LOGGING_LEVEL, worker_kafka_logger
+from DEVSKernel.BrokerDEVS.logconfig import LOGGING_LEVEL, worker_kafka_logger
 
-logger = logging.getLogger("DEVSKernel.KafkaDEVS.InMemoryKafkaWorker")
+logger = logging.getLogger("DEVSKernel.BrokerDEVS.InMemoryKafkaWorker")
 logger.setLevel(LOGGING_LEVEL)
 
-from DEVSKernel.KafkaDEVS.InMemoryKafkaWorker import InMemoryKafkaWorker
+from DEVSKernel.BrokerDEVS.InMemoryKafkaWorker import InMemoryKafkaWorker
 
-from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_messages import (
+from DEVSKernel.BrokerDEVS.Core.BrokerMessageTypes import (
 	BaseMessage,
 	SimTime,
 	InitSim,
@@ -17,12 +17,12 @@ from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_messages import (
 	NextTime,
 	TransitionDone,
 	ModelOutputMessage,
+	ModelDone,
 	PortValue,
 	SimulationDone,
-	ModelDone,
 )
 
-from DEVSKernel.KafkaDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
+from DEVSKernel.BrokerDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
 from DomainInterface.Object import Message
 
 class MS4MeKafkaWorker(InMemoryKafkaWorker):
@@ -80,12 +80,22 @@ class MS4MeKafkaWorker(InMemoryKafkaWorker):
 		""" Receive a BaseMessage (InitSim, ExecuteTransition, SendOutput, ...)
 		and send a BasMessage in repsonce (NextTime, ModelOutputMessage, ...).
 		"""
+		logger.debug(f"[{self.model_name}] Received message type: {type(msg).__name__}, devsType: {getattr(msg, 'devsType', 'UNKNOWN')}")
+		
+		# Ensure we have the time attribute
+		if not hasattr(msg, 'time'):
+			logger.error(f"[{self.model_name}] Message missing 'time' attribute: {msg}")
+			raise ValueError(f"Message missing 'time' attribute: {type(msg).__name__}")
+		
 		t = msg.time.t
 
 		# --- InitSim : initialisation + timeAdvance initial ---
 		if isinstance(msg, InitSim):
+			logger.debug(f"[{self.model_name}] Processing InitSim message")
 			self.do_initialize(t)
-			return NextTime(SimTime(t=float(self.aDEVS.timeNext)), sender=self.model_name)
+			result = NextTime(SimTime(t=float(self.aDEVS.timeNext)), sender=self.model_name)
+			logger.debug(f"[{self.model_name}] Returning NextTime with timeNext={self.aDEVS.timeNext}")
+			return result
 
 		# --- ExecuteTransition
 		if isinstance(msg, ExecuteTransition):
@@ -165,13 +175,23 @@ class MS4MeKafkaWorker(InMemoryKafkaWorker):
 	def _process_standard(self, data):
 		"""Process standard DEVS message format."""
 		
-		devs_msg = self.wire.from_wire(data)
+		# Handle both raw data and already-deserialized BaseMessage objects
+		if isinstance(data, BaseMessage):
+			# Already deserialized, use directly
+			devs_msg = data
+			logger.debug(f"[{self.model_name}] Message already deserialized: {type(devs_msg).__name__}")
+		else:
+			# Raw data (dict or bytes), deserialize it
+			logger.debug(f"[{self.model_name}] Deserializing raw data: {type(data).__name__}")
+			devs_msg = self.wire.from_wire(data)
+			logger.debug(f"[{self.model_name}] Deserialized to: {type(devs_msg).__name__}")
 		
 		# handel the DEVS msessage
 		try:
 			reply_msg = self._handle_devs_message(devs_msg)
 		except Exception as e:
 			logger.exception("  [Thread-%s] Error handling message: %s", self.aDEVS.myID, e)
+			return  # Exit early if message handling fails
 
 		# define a msg to send
 		reply_wire = self.wire.to_wire(reply_msg)					

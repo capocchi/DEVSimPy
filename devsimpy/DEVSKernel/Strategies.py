@@ -13,7 +13,7 @@
 # GENERAL NOTES AND REMARKS:
 #
 # This module implements various simulation strategies for DEVSimPy,
-# depending on the selected DEVS package (PyDEVS, PyPDEVS, KafkaDEVS).
+# depending on the selected DEVS package (PyDEVS, PyPDEVS, BrokerDEVS,...).
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
@@ -51,7 +51,30 @@ from DEVSKernel.PyDEVS.SimStrategies import OriginalPyDEVSSimStrategy, BagBasedP
 from DEVSKernel.PyPDEVS.SimStrategies import ClassicPyPDEVSSimStrategy, ParallelPyPDEVSSimStrategy
 
 # ---------------------------------------------------------------------------
-# Kafka-based distributed strategy with IN-MEMORY workers (threads)
+# Broker-based distributed strategies with MS4Me message standardization
+# Supports multiple brokers (Kafka, MQTT, RabbitMQ, etc.)
 # ---------------------------------------------------------------------------
 
-from DEVSKernel.KafkaDEVS.MS4Me.SimStrategyKafkaMS4Me import SimStrategyKafkaMS4Me
+# Kafka + MS4Me
+from DEVSKernel.BrokerDEVS.MS4Me.SimStrategyKafkaMS4Me import SimStrategyKafkaMS4Me
+
+# MQTT + MS4Me
+try:
+    from DEVSKernel.BrokerDEVS.MS4Me.SimStrategyMqttMS4Me import SimStrategyMqttMS4Me
+except ImportError as e:
+    logger = __import__('logging').getLogger(__name__)
+    logger.debug("MQTT strategy not available: %s", e)
+    SimStrategyMqttMS4Me = None
+
+# Generic Broker-based distributed strategies (for other brokers)
+# Available for future use - currently under development
+try:
+    from DEVSKernel.BrokerDEVS.SimStrategyBroker import (
+        SimStrategyBroker,
+        KafkaSimStrategy,
+        BrokerSimStrategyFactory,
+    )
+except ImportError as e:
+    # Generic broker strategies not yet ready
+    logger = __import__('logging').getLogger(__name__)
+    logger.debug("Generic broker strategies not available: %s", e)

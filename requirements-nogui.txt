@@ -15,3 +15,6 @@ redis
 psutil
 python-dotenv
 pydantic
+msgpack
+paho-mqtt
+kafka-python

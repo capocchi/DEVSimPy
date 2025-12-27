@@ -20,7 +20,7 @@
 from itertools import *
 import builtins
 
-from DEVSKernel.KafkaDEVS.DEVS import CoupledDEVS
+from DEVSKernel.BrokerDEVS.DEVS import CoupledDEVS
 
 ### avec ce flag les simulation en nogui sont plus rapides
 ENABLE_SIM_LOGS = getattr(builtins,'GUI_FLAG', True)
