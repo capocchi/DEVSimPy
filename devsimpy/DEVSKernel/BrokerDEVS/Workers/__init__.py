@@ -14,12 +14,14 @@
 
 from DEVSKernel.BrokerDEVS.Workers.InMemoryMessagingWorker import InMemoryMessagingWorker
 from DEVSKernel.BrokerDEVS.Workers.InMemoryKafkaWorker import InMemoryKafkaWorker
+from DEVSKernel.BrokerDEVS.Workers.InMemoryMqttWorker import InMemoryMqttWorker
 from DEVSKernel.BrokerDEVS.Workers.InMemoryBrokerWorker import InMemoryBrokerWorker
 from DEVSKernel.BrokerDEVS.Workers.BrokerMS4MeWorker import BrokerMS4MeWorker
 
 __all__ = [
     'InMemoryMessagingWorker',
     'InMemoryKafkaWorker',
+    'InMemoryMqttWorker',
     'InMemoryBrokerWorker',
     'BrokerMS4MeWorker',
 ]
