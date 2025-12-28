@@ -130,7 +130,7 @@ def create_broker_adapter(
     Raises:
         ValueError: If broker configuration invalid
     """
-    from devsimpy.DEVSKernel.BrokerDEVS.MS4Me.auto_broker import (
+    from devsimpy.DEVSKernel.BrokerDEVS.auto_broker import (
         AutoBrokerConfig,
         AutoBrokerAdapterFactory,
         BrokerType,
@@ -151,7 +151,7 @@ def create_broker_adapter(
         if host:
             config.selected_broker = config._from_environment()
             if not config.selected_broker:
-                from devsimpy.DEVSKernel.BrokerDEVS.MS4Me.auto_broker import BrokerInfo, BrokerStatus
+                from devsimpy.DEVSKernel.BrokerDEVS.auto_broker import BrokerInfo, BrokerStatus
 
                 config.selected_broker = BrokerInfo(
                     broker_type=btype,
@@ -163,7 +163,7 @@ def create_broker_adapter(
             # Use defaults for this broker type
             config.selected_broker = config._from_environment()
             if not config.selected_broker:
-                from devsimpy.DEVSKernel.BrokerDEVS.MS4Me.auto_broker import (
+                from devsimpy.DEVSKernel.BrokerDEVS.auto_broker import (
                     BrokerDetector,
                     BrokerInfo,
                     BrokerStatus,
