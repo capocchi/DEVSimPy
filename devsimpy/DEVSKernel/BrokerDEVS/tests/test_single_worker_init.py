@@ -30,7 +30,7 @@ builtins.__dict__.update(USER_SETTINGS)
 
 from DEVSKernel.BrokerDEVS.MS4Me.auto_kafka import ensure_kafka_broker
 from DEVSKernel.BrokerDEVS.MS4Me.kafkaconfig import KAFKA_BOOTSTRAP
-from DEVSKernel.BrokerDEVS.InMemoryKafkaWorker import InMemoryKafkaWorker
+from DEVSKernel.BrokerDEVS.Workers.InMemoryKafkaWorker import InMemoryKafkaWorker
 from DEVSKernel.BrokerDEVS.Core.BrokerMessageTypes import (
 	SimTime,
 	InitSim,

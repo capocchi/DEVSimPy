@@ -27,7 +27,7 @@
 import logging
 import time
 
-from DEVSKernel.BrokerDEVS.InMemoryMessagingWorker import InMemoryMessagingWorker, MessageAdapter, MessageConsumer, MessageProducer
+from DEVSKernel.BrokerDEVS.Workers.InMemoryMessagingWorker import InMemoryMessagingWorker, MessageAdapter, MessageConsumer, MessageProducer
 from typing import Dict, Any
 
 from DEVSKernel.BrokerDEVS.logconfig import LOGGING_LEVEL

@@ -6,7 +6,7 @@ from DEVSKernel.BrokerDEVS.logconfig import LOGGING_LEVEL, worker_kafka_logger
 logger = logging.getLogger("DEVSKernel.BrokerDEVS.InMemoryKafkaWorker")
 logger.setLevel(LOGGING_LEVEL)
 
-from DEVSKernel.BrokerDEVS.InMemoryKafkaWorker import InMemoryKafkaWorker
+from DEVSKernel.BrokerDEVS.Workers.InMemoryKafkaWorker import InMemoryKafkaWorker
 
 from DEVSKernel.BrokerDEVS.Core.BrokerMessageTypes import (
 	BaseMessage,
