@@ -49,9 +49,9 @@ from DEVSKernel.BrokerDEVS.Core.BrokerMessageTypes import (
     SimTime,
     PortValue,
 )
-from DEVSKernel.BrokerDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
-from DEVSKernel.BrokerDEVS.MS4Me.MS4MeKafkaWorker import MS4MeKafkaWorker
-from DEVSKernel.BrokerDEVS.MS4Me.kafkaconfig import KAFKA_BOOTSTRAP
+from DEVSKernel.BrokerDEVS.DEVSStreaming.ms4me_kafka_wire_adapters import StandardWireAdapter
+from DEVSKernel.BrokerDEVS.DEVSStreaming.MS4MeKafkaWorker import MS4MeKafkaWorker
+from DEVSKernel.BrokerDEVS.DEVSStreaming.kafkaconfig import KAFKA_BOOTSTRAP
 
 class WorkerCoordinatorTester:
     """

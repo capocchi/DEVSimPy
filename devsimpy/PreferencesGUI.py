@@ -804,7 +804,7 @@ class SimulationPanel(wx.Panel):
 		self.msgFormatLabel = None
 		self.brokerLabel = None
 		self.brokerInfoBtn = None
-		self.selected_message_format = getattr(builtins, 'SELECTED_MESSAGE_FORMAT', 'MS4Me')
+		self.selected_message_format = getattr(builtins, 'SELECTED_MESSAGE_FORMAT', 'DEVSStreaming')
 		self.selected_broker = getattr(builtins, 'SELECTED_BROKER', 'Kafka')
 		
 		# Load MQTT configuration from config file at startup
@@ -908,7 +908,7 @@ class SimulationPanel(wx.Panel):
 		if self._has_broker_selection:
 			# Message Format selection
 			self.msgFormatLabel = wx.StaticText(self, label=_("Message Format:"))
-			self.msgFormatLabel.SetToolTip(_("Select the message standardization (MS4Me, Custom, etc.)"))
+			self.msgFormatLabel.SetToolTip(_("Select the message standardization (DEVSStreaming, Custom, etc.)"))
 			
 			msg_formats = list(strategy_dict.keys())
 			# Use saved message format if it exists in the list
@@ -1086,7 +1086,7 @@ class SimulationPanel(wx.Panel):
 			# Handle nested strategy dicts (BrokerDEVS)
 			if isinstance(strategy_class, dict):
 				# For nested dicts, get the selected message format and broker
-				msg_format = getattr(builtins, 'SELECTED_MESSAGE_FORMAT', 'MS4Me')
+				msg_format = getattr(builtins, 'SELECTED_MESSAGE_FORMAT', 'DEVSStreaming')
 				broker = getattr(builtins, 'SELECTED_BROKER', 'Kafka')
 				
 				if msg_format in strategy_class and broker in strategy_class[msg_format]:
@@ -1322,7 +1322,7 @@ class SimulationPanel(wx.Panel):
 		old_strategy = getattr(builtins, 'DEFAULT_SIM_STRATEGY')
 		old_freq = getattr(builtins, 'DEFAULT_PLOT_DYN_FREQ')
 		old_ntl = getattr(builtins, 'NTL')
-		old_msg_format = getattr(builtins, 'SELECTED_MESSAGE_FORMAT', 'MS4Me')
+		old_msg_format = getattr(builtins, 'SELECTED_MESSAGE_FORMAT', 'DEVSStreaming')
 		old_broker = getattr(builtins, 'SELECTED_BROKER', 'Kafka')
 		
 		# Apply changes

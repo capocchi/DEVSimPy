@@ -28,8 +28,8 @@ GLOBAL_SETTINGS["INFINITY"] = float("inf")
 builtins.__dict__.update(GLOBAL_SETTINGS)
 builtins.__dict__.update(USER_SETTINGS)
 
-from DEVSKernel.BrokerDEVS.MS4Me.auto_kafka import ensure_kafka_broker
-from DEVSKernel.BrokerDEVS.MS4Me.kafkaconfig import KAFKA_BOOTSTRAP
+from DEVSKernel.BrokerDEVS.DEVSStreaming.auto_kafka import ensure_kafka_broker
+from DEVSKernel.BrokerDEVS.DEVSStreaming.kafkaconfig import KAFKA_BOOTSTRAP
 from DEVSKernel.BrokerDEVS.Workers.InMemoryKafkaWorker import InMemoryKafkaWorker
 from DEVSKernel.BrokerDEVS.Core.BrokerMessageTypes import (
 	SimTime,
@@ -43,7 +43,7 @@ from DEVSKernel.BrokerDEVS.Core.BrokerMessageTypes import (
 	TransitionDone,
 	PortValue,
 )
-from DEVSKernel.BrokerDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
+from DEVSKernel.BrokerDEVS.DEVSStreaming.ms4me_kafka_wire_adapters import StandardWireAdapter
 from DEVSKernel.BrokerDEVS.logconfig import configure_logging 
 
 from Domain.Generator.RandomGenerator import RandomGenerator

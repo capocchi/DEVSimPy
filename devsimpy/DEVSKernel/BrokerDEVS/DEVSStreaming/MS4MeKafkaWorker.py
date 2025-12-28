@@ -22,7 +22,7 @@ from DEVSKernel.BrokerDEVS.Core.BrokerMessageTypes import (
 	SimulationDone,
 )
 
-from DEVSKernel.BrokerDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
+from DEVSKernel.BrokerDEVS.DEVSStreaming.ms4me_kafka_wire_adapters import StandardWireAdapter
 from DomainInterface.Object import Message
 
 class MS4MeKafkaWorker(InMemoryKafkaWorker):

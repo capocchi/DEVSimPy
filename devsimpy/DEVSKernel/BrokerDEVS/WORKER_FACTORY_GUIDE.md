@@ -45,7 +45,7 @@ config = SimulationConfig(
     broker_type='mqtt',
     broker_host='localhost',
     broker_port=1883,
-    message_standard='ms4me',
+    message_standard='devs-streaming',
     username='user',
     password='pass',
 )
@@ -74,7 +74,7 @@ from devsimpy.DEVSKernel.BrokerDEVS import (
 worker = WorkerFactory.create_worker_from_env(
     model_name='MyModel',
     model=my_devs_model,
-    standard='ms4me',  # Can override standard
+    standard='devs-streaming',  # Can override standard
 )
 ```
 
@@ -88,7 +88,7 @@ from devsimpy.DEVSKernel.BrokerDEVS import (
 
 # Auto-configure everything
 config = auto_configure_simulation(
-    standard='ms4me',
+    standard='devs-streaming',
     broker='mqtt',  # Can specify, or auto-detect
     host='broker.example.com',
     port=1883,
@@ -122,7 +122,7 @@ The `AutoSimulationConfig` respects the following environment variables:
 
 ```bash
 # Message standard selection
-DEVS_MESSAGE_STANDARD=ms4me
+DEVS_MESSAGE_STANDARD=devs-streaming
 
 # Broker configuration
 DEVS_BROKER_TYPE=mqtt
@@ -134,7 +134,7 @@ DEVS_BROKER_PASSWORD=pass
 
 Example:
 ```bash
-export DEVS_MESSAGE_STANDARD=ms4me
+export DEVS_MESSAGE_STANDARD=devs-streaming
 export DEVS_BROKER_TYPE=kafka
 export DEVS_BROKER_HOST=kafka.example.com
 export DEVS_BROKER_PORT=9092
@@ -214,7 +214,7 @@ To add a new broker type (e.g., RabbitMQ, Redis):
 ### Step 1: Create Workers for Each Standard
 
 ```python
-# For MS4Me standard
+# For DEVSStreaming standard
 class MS4MeRabbitMqWorker(StandardWorkerBase):
     # Implementation...
     pass
@@ -232,7 +232,7 @@ from devsimpy.DEVSKernel.BrokerDEVS import StandardRegistry, BrokerType, Message
 
 # Add to existing standards
 StandardRegistry.register_worker(
-    MessageStandard.MS4ME,
+    MessageStandard.DEVS_STREAMING,
     BrokerType.RABBITMQ,
     MS4MeRabbitMqWorker,
 )
@@ -248,7 +248,7 @@ config = SimulationConfig(
     broker_type='rabbitmq',
     broker_host='localhost',
     broker_port=5672,
-    message_standard='ms4me',
+    message_standard='devs-streaming',
 )
 
 worker = WorkerFactory.create_worker('Model_0', model, config)
@@ -278,12 +278,12 @@ try:
         broker_type='nonexistent_broker',
         broker_host='localhost',
         broker_port=9999,
-        message_standard='ms4me',
+        message_standard='devs-streaming',
     )
     worker = WorkerFactory.create_worker('Model', model, config)
 except ValueError as e:
     print(f"Configuration error: {e}")
-    # Output: "Unsupported combination: standard=ms4me, broker=nonexistent_broker"
+    # Output: "Unsupported combination: standard=devs-streaming, broker=nonexistent_broker"
 except RuntimeError as e:
     print(f"Worker creation error: {e}")
 ```
@@ -295,7 +295,7 @@ except RuntimeError as e:
 **Before:**
 ```python
 from devsimpy.DEVSKernel.BrokerDEVS.standard_registry import BrokerDetector
-from devsimpy.DEVSKernel.BrokerDEVS.MS4Me.MS4MeMqttWorker import MS4MeMqttWorker
+from devsimpy.DEVSKernel.BrokerDEVS.DEVSStreaming.MS4MeMqttWorker import MS4MeMqttWorker
 
 detector = BrokerDetector()
 info = detector.detect()
@@ -335,7 +335,7 @@ config = SimulationConfig(
     broker_type=broker_type,
     broker_host=host,
     broker_port=port,
-    message_standard='ms4me',
+    message_standard='devs-streaming',
 )
 
 worker = WorkerFactory.create_worker('Model', model, config)
@@ -396,7 +396,7 @@ def test_worker_creation():
         broker_type='mqtt',
         broker_host='localhost',
         broker_port=1883,
-        message_standard='ms4me',
+        message_standard='devs-streaming',
     )
     
     worker = WorkerFactory.create_worker(
@@ -415,7 +415,7 @@ def test_unsupported_combination():
         broker_type='unsupported_broker',
         broker_host='localhost',
         broker_port=9999,
-        message_standard='ms4me',
+        message_standard='devs-streaming',
     )
     
     with pytest.raises(ValueError):
@@ -424,9 +424,9 @@ def test_unsupported_combination():
 def test_standard_discovery():
     """Test standard discovery."""
     standards = WorkerFactory.get_supported_standards()
-    assert 'ms4me' in standards
+    assert 'devs-streaming' in standards
     
-    brokers = WorkerFactory.get_supported_brokers('ms4me')
+    brokers = WorkerFactory.get_supported_brokers('devs-streaming')
     assert 'mqtt' in brokers
     assert 'kafka' in brokers
 ```

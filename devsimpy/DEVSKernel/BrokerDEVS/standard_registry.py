@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 class MessageStandard(Enum):
     """Available message standards for distributed DEVS simulation."""
     
-    MS4ME = "ms4me"
+    DEVS_STREAMING = "devs-streaming"
     GENERIC = "generic"
     # Add more standards here
     # YOUR_STANDARD = "yourstandard"
@@ -495,7 +495,7 @@ class StandardRegistry:
             
         Example:
             worker = StandardRegistry.create_worker(
-                MessageStandard.MS4ME,
+                MessageStandard.DEVS_STREAMING,
                 BrokerType.MQTT,
                 'MyModel', model_instance,
                 broker_host='localhost',
@@ -532,19 +532,19 @@ def register_builtin_standards():
     """Register built-in message standards and their workers."""
     
     try:
-        from DEVSKernel.BrokerDEVS.MS4Me.MS4MeKafkaWorker import MS4MeKafkaWorker
-        from DEVSKernel.BrokerDEVS.MS4Me.MS4MeMqttWorker import MS4MeMqttWorker
+        from DEVSKernel.BrokerDEVS.DEVSStreaming.MS4MeKafkaWorker import MS4MeKafkaWorker
+        from DEVSKernel.BrokerDEVS.DEVSStreaming.MS4MeMqttWorker import MS4MeMqttWorker
         
         StandardRegistry.register_standard(
-            MessageStandard.MS4ME,
+            MessageStandard.DEVS_STREAMING,
             {
                 BrokerType.KAFKA: MS4MeKafkaWorker,
                 BrokerType.MQTT: MS4MeMqttWorker,
             }
         )
-        logger.info("Registered built-in MS4Me standard")
+        logger.info("Registered built-in DEVS-Streaming standard")
     except ImportError as e:
-        logger.warning("Failed to register MS4Me standard: %s", e)
+        logger.warning("Failed to register DEVSStreaming standard: %s", e)
 
 
 # Auto-register built-in standards on module load

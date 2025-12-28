@@ -7,7 +7,7 @@ The original architecture separated concerns horizontally but lacked integration
 ```
 Message Standards    Broker Types
     |                   |
-  MS4Me ───────────── Kafka
+  DEVSStreaming ───────────── Kafka
                    ✗ No unified API
   Generic ───────── MQTT
 ```
@@ -30,7 +30,7 @@ Issues:
               │            │            │
         ┌─────┼────────┬───┼────────┬──┴──────┐
         │     │        │   │        │         │
-      MS4Me Generic  MQTT KAFKA RABBITMQ    Worker
+      DEVSStreaming Generic  MQTT KAFKA RABBITMQ    Worker
         │             │    │       │        Classes
         └─────────────┴────┴───────┴────────┘
                         │
@@ -46,13 +46,13 @@ Key insight: **Message Standards and Brokers are Orthogonal Concerns**
 
 ### 1. MessageStandard Enum
 Defines available message protocols:
-- `MS4ME` - Semantic model interchange standard
+- `DEVS_STREAMING` - DEVS-Streaming standard (MS4Me compatible)
 - `GENERIC` - Minimal generic protocol
 - Extensible for new standards
 
 ```python
 class MessageStandard(Enum):
-    MS4ME = "ms4me"
+    DEVS_STREAMING = "devs-streaming"
     GENERIC = "generic"
 ```
 
@@ -90,15 +90,15 @@ Central registration point mapping (Standard + Broker) → WorkerClass:
 ```
 Registry Contents:
 ─────────────────────────────────────────────────────────
-Standard │ Broker      │ Worker Class
-─────────┼─────────────┼──────────────────────────────
-MS4ME    │ MQTT        │ MS4MeMqttWorker
-         │ KAFKA       │ MS4MeKafkaWorker
-         │ RABBITMQ    │ MS4MeRabbitMqWorker
-─────────┼─────────────┼──────────────────────────────
-GENERIC  │ MQTT        │ GenericMqttWorker
-         │ KAFKA       │ GenericKafkaWorker
-         │ RABBITMQ    │ GenericRabbitMqWorker
+Standard         │ Broker      │ Worker Class
+─────────────────┼─────────────┼──────────────────────────────
+DEVS_STREAMING   │ MQTT        │ MS4MeMqttWorker
+                 │ KAFKA       │ MS4MeKafkaWorker
+                 │ RABBITMQ    │ MS4MeRabbitMqWorker
+─────────────────┼─────────────┼──────────────────────────────
+GENERIC          │ MQTT        │ GenericMqttWorker
+                 │ KAFKA       │ GenericKafkaWorker
+                 │ RABBITMQ    │ GenericRabbitMqWorker
 ─────────────────────────────────────────────────────────
 ```
 
@@ -129,7 +129,7 @@ Priority Order:
    (BrokerDetector finds available brokers)
    
 3. Defaults
-   (Kafka on localhost:9092, MS4Me standard)
+   (Kafka on localhost:9092, DEVSStreaming standard)
 ```
 
 ### 7. WorkerFactory
@@ -170,7 +170,7 @@ User Code
        └─→ StandardRegistry.get_worker_class(standard, broker)
            │
            ├─ Look up in registry
-           │ `_standards[MessageStandard.MS4ME][BrokerType.MQTT]`
+           │ `_standards[MessageStandard.DEVS_STREAMING][BrokerType.MQTT]`
            │
            └─ Return WorkerClass
                │
@@ -214,7 +214,7 @@ User Code
 1. Create worker classes for each standard:
    ```python
    class MS4MeRabbitMqWorker(StandardWorkerBase):
-       # Implementation for MS4Me + RabbitMQ
+       # Implementation for DEVSStreaming + RabbitMQ
    
    class GenericRabbitMqWorker(StandardWorkerBase):
        # Implementation for Generic + RabbitMQ
@@ -223,7 +223,7 @@ User Code
 2. Register workers:
    ```python
    StandardRegistry.register_worker(
-       MessageStandard.MS4ME,
+       MessageStandard.DEVS_STREAMING,
        BrokerType.RABBITMQ,
        MS4MeRabbitMqWorker,
    )
@@ -306,7 +306,7 @@ config = SimulationConfig(
     broker_type='mqtt',
     broker_host='broker.example.com',
     broker_port=1883,
-    message_standard='ms4me',
+    message_standard='devs-streaming',
     username='user',
     password='pass',
 )
@@ -315,7 +315,7 @@ worker = WorkerFactory.create_worker('Model', model, config)
 
 ### Example 2: Environment Variables
 ```bash
-export DEVS_MESSAGE_STANDARD=ms4me
+export DEVS_MESSAGE_STANDARD=devs-streaming
 export DEVS_BROKER_TYPE=kafka
 export DEVS_BROKER_HOST=kafka.example.com
 export DEVS_BROKER_PORT=9092
@@ -328,7 +328,7 @@ worker = WorkerFactory.create_worker_from_env('Model', model)
 ```python
 # Detects available brokers, uses sensible defaults
 config = auto_configure_simulation(
-    standard='ms4me',
+    standard='devs-streaming',
     auto_detect=True,  # detect available brokers
 )
 worker = WorkerFactory.create_worker('Model', model, config)

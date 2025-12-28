@@ -164,7 +164,7 @@ services:
     networks:
       - kafka-network
     command: >
-      python DEVSKernel/BrokerDEVS/MS4Me/run_worker.py
+      python DEVSKernel/BrokerDEVS/DEVSStreaming/run_worker.py
       --model-path ${{MODEL_PATH}}
       --class-name ${{MODEL_CLASS}}
       --label {self.model_label}

@@ -69,7 +69,7 @@ class MqttReceiverProxy(BrokerReceiverProxy):
             ImportError: If paho-mqtt is not installed
         """
         from DEVSKernel.BrokerDEVS.Brokers.mqtt.MqttAdapter import MqttAdapter
-        from DEVSKernel.BrokerDEVS.MS4Me.ms4me_mqtt_wire_adapters import StandardWireAdapter as MS4MeStandardWireAdapter
+        from DEVSKernel.BrokerDEVS.DEVSStreaming.ms4me_mqtt_wire_adapters import StandardWireAdapter as MS4MeStandardWireAdapter
 
         mqtt_config = consumer_config or {}
         
