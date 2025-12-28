@@ -247,7 +247,8 @@ class BrokerReceiverProxy(AbstractReceiverProxy):
                     continue
 
                 try:
-                    msg = BaseMessage.from_bytes(msg_bytes)
+                    # Use wire adapter to deserialize (supports pickle, JSON, etc.)
+                    msg = self.wire_adapter.from_wire(msg_bytes)
                 except Exception as e:
                     logger.error(
                         "Failed to deserialize message from bytes: %s. Raw data: %s",
@@ -334,7 +335,7 @@ class BrokerReceiverProxy(AbstractReceiverProxy):
                 if msg_bytes is None:
                     continue
 
-                msg = BaseMessage.from_bytes(msg_bytes)
+                msg = self.wire_adapter.from_wire(msg_bytes)
 
                 # Filter by sender if specified
                 if sender_id:
@@ -536,78 +537,7 @@ class BrokerReceiverProxy(AbstractReceiverProxy):
         return None
 
 
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-#
-# BROKER-SPECIFIC RECEIVER PROXIES (Convenience Classes)
-#
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-
-class KafkaReceiverProxy(BrokerReceiverProxy):
-    """
-    Kafka-specific receiver proxy.
-    Convenience class for Kafka usage.
-    """
-
-    def __init__(
-        self,
-        bootstrap_servers: str = "localhost:9092",
-        group_id: str = "devsimpy-receiver",
-        consumer_config: Optional[Dict[str, Any]] = None,
-        wire_adapter: Optional[BrokerWireAdapter] = None,
-    ):
-        """
-        Initialize Kafka receiver proxy.
-        
-        Args:
-            bootstrap_servers: Kafka bootstrap servers
-            group_id: Consumer group ID
-            consumer_config: Custom consumer configuration
-            wire_adapter: Message deserialization adapter
-        """
-        from DEVSKernel.BrokerDEVS.Brokers.kafka.KafkaAdapter import KafkaAdapter
-
-        kafka_config = consumer_config or {}
-        kafka_config["group.id"] = group_id
-
-        kafka_adapter = KafkaAdapter(bootstrap_servers)
-        super().__init__(kafka_adapter, kafka_config, wire_adapter)
-
-
-class MqttReceiverProxy(BrokerReceiverProxy):
-    """
-    MQTT-specific receiver proxy.
-    Convenience class for MQTT usage.
-    """
-
-    def __init__(
-        self,
-        broker_host: str = "localhost",
-        broker_port: int = 1883,
-        client_id: str = "devsimpy-receiver",
-        consumer_config: Optional[Dict[str, Any]] = None,
-        wire_adapter: Optional[BrokerWireAdapter] = None,
-    ):
-        """
-        Initialize MQTT receiver proxy.
-        
-        Args:
-            broker_host: MQTT broker hostname
-            broker_port: MQTT broker port
-            client_id: MQTT client ID
-            consumer_config: Custom consumer configuration
-            wire_adapter: Message deserialization adapter
-        """
-        from DEVSKernel.BrokerDEVS.Brokers.mqtt.MqttAdapter import MqttAdapter
-
-        mqtt_config = consumer_config or {}
-        mqtt_config.update({
-            "broker": broker_host,
-            "port": broker_port,
-            "client_id": client_id,
-        })
-        mqtt_adapter = MqttAdapter(broker_host)
-        super().__init__(mqtt_adapter, mqtt_config, wire_adapter)
 
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -645,24 +575,22 @@ class BrokerReceiverProxyFactory:
         broker_type = broker_type.lower()
 
         if broker_type == "kafka":
+            from Proxies.kafka import KafkaReceiverProxy
             bootstrap = kwargs.get("bootstrap_servers", "localhost:9092")
             group_id = kwargs.get("group_id", "devsimpy-receiver")
             return KafkaReceiverProxy(bootstrap, group_id, wire_adapter=wire_adapter)
 
         elif broker_type == "mqtt":
+            from Proxies.mqtt import MqttReceiverProxy
             host = kwargs.get("host", "localhost")
             port = kwargs.get("port", 1883)
             client_id = kwargs.get("client_id", "devsimpy-receiver")
             return MqttReceiverProxy(host, port, client_id, wire_adapter=wire_adapter)
 
         elif broker_type == "rabbitmq":
-            from DEVSKernel.BrokerDEVS.Brokers.rabbitmq.RabbitmqAdapter import (
-                RabbitmqAdapter,
-            )
-
+            from Proxies.rabbitmq import RabbitmqReceiverProxy
             url = kwargs.get("url", "amqp://localhost")
-            adapter = RabbitmqAdapter(url)
-            return BrokerReceiverProxy(adapter, wire_adapter=wire_adapter)
+            return RabbitmqReceiverProxy(url, wire_adapter=wire_adapter)
 
         else:
             raise ValueError(

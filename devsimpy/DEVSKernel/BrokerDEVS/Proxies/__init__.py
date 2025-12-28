@@ -12,15 +12,14 @@
 
 from DEVSKernel.BrokerDEVS.Proxies.BrokerStreamProxy import (
     BrokerStreamProxy,
-    KafkaStreamProxy,
-    MqttStreamProxy,
     BrokerStreamProxyFactory,
 )
 
+from DEVSKernel.BrokerDEVS.Proxies.kafka import KafkaStreamProxy, KafkaReceiverProxy
+from DEVSKernel.BrokerDEVS.Proxies.mqtt import MqttStreamProxy, MqttReceiverProxy
+
 from DEVSKernel.BrokerDEVS.Proxies.BrokerReceiverProxy import (
     BrokerReceiverProxy,
-    KafkaReceiverProxy,
-    MqttReceiverProxy,
     BrokerReceiverProxyFactory,
 )
 

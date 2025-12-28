@@ -119,7 +119,12 @@ class MS4MeMqttWorker(threading.Thread):
         self.password = password
 
         # Wire adapter for message serialization
-        self.wire_adapter = wire_adapter
+        if wire_adapter is None:
+            # Default to StandardWireAdapter (pickle-based) to match proxy defaults
+            from DEVSKernel.BrokerDEVS.MS4Me.ms4me_mqtt_wire_adapters import StandardWireAdapter
+            self.wire_adapter = StandardWireAdapter()
+        else:
+            self.wire_adapter = wire_adapter
 
         # MQTT client - try VERSION2 API first (paho-mqtt 2.x)
         try:

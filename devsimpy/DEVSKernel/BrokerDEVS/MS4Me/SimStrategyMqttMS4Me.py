@@ -27,8 +27,8 @@ from DEVSKernel.BrokerDEVS.Core.BrokerMessageTypes import (
     TransitionDone,
     SimulationDone,
 )
-from DEVSKernel.BrokerDEVS.Proxies.MqttReceiverProxy import MqttReceiverProxy
-from DEVSKernel.BrokerDEVS.Proxies.MqttStreamProxy import MqttStreamProxy
+from DEVSKernel.BrokerDEVS.Proxies.mqtt import MqttReceiverProxy
+from DEVSKernel.BrokerDEVS.Proxies.mqtt import MqttStreamProxy
 from DEVSKernel.BrokerDEVS.MS4Me.auto_mqtt import ensure_mqtt_broker
 from DEVSKernel.BrokerDEVS.logconfig import configure_logging, LOGGING_LEVEL
 from DEVSKernel.BrokerDEVS.MS4Me.mqttconfig import MQTT_BROKER_ADDRESS, MQTT_BROKER_PORT, AUTO_START_MQTT_BROKER
@@ -349,7 +349,6 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
             self.broker_address,
             self.broker_port,
             client_id=f"coordinator-{group_id}",
-            wire_adapter=self.wire,
             username=self.mqtt_username,
             password=self.mqtt_password,
         )
@@ -358,7 +357,6 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
             self.broker_address,
             self.broker_port,
             client_id=f"receiver-{group_id}",
-            wire_adapter=self.wire,
             username=self.mqtt_username,
             password=self.mqtt_password,
         )
@@ -418,7 +416,6 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
                 broker_port=self.broker_port,
                 in_topic=in_topic,
                 out_topic=out_topic,
-                wire_adapter=self.wire,
                 username=self.mqtt_username,
                 password=self.mqtt_password,
             )
