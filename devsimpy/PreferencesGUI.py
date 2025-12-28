@@ -807,9 +807,6 @@ class SimulationPanel(wx.Panel):
 		self.selected_message_format = getattr(builtins, 'SELECTED_MESSAGE_FORMAT', 'DEVSStreaming')
 		self.selected_broker = getattr(builtins, 'SELECTED_BROKER', 'Kafka')
 		
-		# Load MQTT configuration from config file at startup
-		self._load_mqtt_config_from_file()
-		
 		self.InitUI()
 	
 	def _load_mqtt_config_from_file(self):
@@ -836,11 +833,10 @@ class SimulationPanel(wx.Panel):
 					setattr(builtins, 'MQTT_USERNAME', username or None)
 					setattr(builtins, 'MQTT_PASSWORD', password or None)
 					
-					logger.info(f"Loaded MQTT config from file: {address}:{port}, username={'(set)' if username else 'None'}")
-			else:
-				logger.info(f"No BROKER_MQTT section found in config file")
+					# Only log at debug level, not info
+					logger.debug(f"Loaded MQTT config from file: {address}:{port}, username={'(set)' if username else 'None'}")
 		except Exception as e:
-			logger.warning(f"Could not load MQTT config from file: {e}")
+			logger.debug(f"Could not load MQTT config from file: {e}")
 	
 	def InitUI(self):
 		""" Initialize the UI with modern layout
@@ -854,7 +850,7 @@ class SimulationPanel(wx.Panel):
 		# ============================================================
 		devsBox = wx.StaticBoxSizer(wx.VERTICAL, self, _('DEVS Kernel'))
 		
-		devsGrid = wx.FlexGridSizer(4, 3, 10, 10)
+		devsGrid = wx.FlexGridSizer(0, 3, 10, 10)  # 0 rows means auto-calculate
 		devsGrid.AddGrowableCol(1, 1)
 		
 		# DEVS Package selection
@@ -898,58 +894,45 @@ class SimulationPanel(wx.Panel):
 		devsGrid.Add(strategyInfoBtn, 0, wx.ALIGN_CENTER_VERTICAL)
 		
 		# Message Format and Broker selection (for BrokerDEVS with nested strategies)
-		self._init_broker_ui_elements()
+		# Create broker UI elements (will be added to grid conditionally)
+		self.msgFormatLabel = wx.StaticText(self, label=_("Message Format:"))
+		self.msgFormatLabel.SetToolTip(_("Select the message standardization (DEVSStreaming, Custom, etc.)"))
+		self.msgFormatLabel.Hide()  # Hidden by default
+		
+		self.cb_msg_format = wx.ComboBox(self, wx.NewIdRef(), "", choices=[], style=wx.CB_READONLY)
+		self.cb_msg_format.SetToolTip(_("Message format for broker communication"))
+		self.cb_msg_format.Bind(wx.EVT_COMBOBOX, self.onMessageFormatChange)
+		self.cb_msg_format.Hide()  # Hidden by default
+		
+		# Broker selection
+		self.brokerLabel = wx.StaticText(self, label=_("Broker:"))
+		self.brokerLabel.SetToolTip(_("Select the message broker (Kafka, MQTT, etc.)"))
+		self.brokerLabel.Hide()  # Hidden by default
+		
+		self.cb_broker = wx.ComboBox(self, wx.NewIdRef(), "", choices=[], style=wx.CB_READONLY)
+		self.cb_broker.SetToolTip(_("Message broker for distributed simulation"))
+		self.cb_broker.Bind(wx.EVT_COMBOBOX, self.onBrokerChange)
+		self.cb_broker.Hide()  # Hidden by default
+		
+		# Broker info button
+		self.brokerInfoBtn = wx.Button(self, wx.NewIdRef(), _("Config"))
+		self.brokerInfoBtn.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_CDROM, wx.ART_BUTTON))
+		self.brokerInfoBtn.SetToolTip(_("Configure broker settings"))
+		self.brokerInfoBtn.Bind(wx.EVT_BUTTON, self.OnBrokerConfig)
+		self.brokerInfoBtn.Hide()  # Hidden by default
+		
+		# Store reference to the grid for dynamic updates
+		self.devsGrid = devsGrid
 		
 		# Check if current strategy dict is nested (message format + broker)
 		strategy_dict = getattr(builtins, 
 							   f'{self.cb3.GetValue().upper()}_SIM_STRATEGY_DICT')
 		self._has_broker_selection = isinstance(list(strategy_dict.values())[0] if strategy_dict else {}, dict)
 		
+		# Add broker UI to grid only if package supports it
 		if self._has_broker_selection:
-			# Message Format selection
-			self.msgFormatLabel = wx.StaticText(self, label=_("Message Format:"))
-			self.msgFormatLabel.SetToolTip(_("Select the message standardization (DEVSStreaming, Custom, etc.)"))
-			
-			msg_formats = list(strategy_dict.keys())
-			# Use saved message format if it exists in the list
-			default_msg_format = self.selected_message_format if self.selected_message_format in msg_formats else (msg_formats[0] if msg_formats else "")
-			
-			self.cb_msg_format = wx.ComboBox(self, wx.NewIdRef(), default_msg_format, 
-											 choices=msg_formats, style=wx.CB_READONLY)
-			self.cb_msg_format.SetToolTip(_("Message format for broker communication"))
-			self.cb_msg_format.Bind(wx.EVT_COMBOBOX, self.onMessageFormatChange)
-			
-			devsGrid.Add(self.msgFormatLabel, 0, wx.ALIGN_CENTER_VERTICAL)
-			devsGrid.Add(self.cb_msg_format, 1, wx.EXPAND)
-			devsGrid.Add(wx.StaticText(self, label=""), 0)  # Empty cell for button column
-			
-			# Broker selection
-			self.brokerLabel = wx.StaticText(self, label=_("Broker:"))
-			self.brokerLabel.SetToolTip(_("Select the message broker (Kafka, MQTT, etc.)"))
-			
-			if msg_formats and default_msg_format in strategy_dict:
-				brokers = list(strategy_dict[default_msg_format].keys())
-				# Use saved broker if it exists in the list
-				default_broker = self.selected_broker if self.selected_broker in brokers else (brokers[0] if brokers else "")
-				self.cb_broker = wx.ComboBox(self, wx.NewIdRef(), default_broker, 
-											choices=brokers, style=wx.CB_READONLY)
-			else:
-				self.cb_broker = wx.ComboBox(self, wx.NewIdRef(), "", choices=[], style=wx.CB_READONLY)
-			
-			self.cb_broker.SetToolTip(_("Message broker for distributed simulation"))
-			self.cb_broker.Bind(wx.EVT_COMBOBOX, self.onBrokerChange)
-			
-			# Broker info button
-			self.brokerInfoBtn = wx.Button(self, wx.NewIdRef(), _("Config"))
-			self.brokerInfoBtn.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_CDROM, wx.ART_BUTTON))
-			self.brokerInfoBtn.SetToolTip(_("Configure broker settings"))
-			self.brokerInfoBtn.Bind(wx.EVT_BUTTON, self.OnBrokerConfig)
-			
-			devsGrid.Add(self.brokerLabel, 0, wx.ALIGN_CENTER_VERTICAL)
-			devsGrid.Add(self.cb_broker, 1, wx.EXPAND)
-			devsGrid.Add(self.brokerInfoBtn, 0, wx.ALIGN_CENTER_VERTICAL)
-		else:
-			self._has_broker_selection = False
+			self._populate_broker_ui_elements(strategy_dict)
+			self._add_broker_rows_to_grid()
 		
 		devsBox.Add(devsGrid, 0, wx.EXPAND|wx.ALL, 5)
 		mainSizer.Add(devsBox, 0, wx.EXPAND|wx.ALL, 10)
@@ -1204,22 +1187,80 @@ class SimulationPanel(wx.Panel):
 			self.default_devs_dir = val
 			self.sim_defaut_strategy = self.cb4.GetValue()
 		
-		# Show/hide broker UI elements based on whether BrokerDEVS is selected
-		is_broker_devs = val.upper() == 'BROKERDEVS'
+		# Check if new package has broker selection (nested strategy dict)
+		strategy_dict = getattr(builtins, f'{val.upper()}_SIM_STRATEGY_DICT')
+		has_broker_selection = isinstance(list(strategy_dict.values())[0] if strategy_dict else {}, dict)
 		
-		if self.msgFormatLabel:
-			self.msgFormatLabel.Show(is_broker_devs)
-		if self.cb_msg_format:
-			self.cb_msg_format.Show(is_broker_devs)
-		if self.brokerLabel:
-			self.brokerLabel.Show(is_broker_devs)
-		if self.cb_broker:
-			self.cb_broker.Show(is_broker_devs)
-		if self.brokerInfoBtn:
-			self.brokerInfoBtn.Show(is_broker_devs)
+		# Update broker UI based on package type
+		if has_broker_selection and not self._has_broker_selection:
+			# Transitioning TO BrokerDEVS - add rows
+			self._populate_broker_ui_elements(strategy_dict)
+			self._add_broker_rows_to_grid()
+			self._has_broker_selection = True
+		elif not has_broker_selection and self._has_broker_selection:
+			# Transitioning FROM BrokerDEVS - remove rows
+			self._remove_broker_rows_from_grid()
+			self._has_broker_selection = False
+		elif has_broker_selection and self._has_broker_selection:
+			# Already in broker mode - just update options
+			self._populate_broker_ui_elements(strategy_dict)
 		
-		# Refresh layout
+		# Force complete layout refresh
+		self.devsGrid.Layout()
+		self.Layout()
 		self.GetParent().Layout()
+		self.GetParent().Refresh()
+		self.GetParent().Update()
+	
+	def _add_broker_rows_to_grid(self):
+		""" Add broker UI rows to the grid
+		"""
+		# Show widgets before adding to grid
+		self.msgFormatLabel.Show()
+		self.cb_msg_format.Show()
+		self.brokerLabel.Show()
+		self.cb_broker.Show()
+		self.brokerInfoBtn.Show()
+		
+		self.devsGrid.Add(self.msgFormatLabel, 0, wx.ALIGN_CENTER_VERTICAL)
+		self.devsGrid.Add(self.cb_msg_format, 1, wx.EXPAND)
+		self.devsGrid.Add(wx.StaticText(self, label=""), 0)  # Empty cell for button column
+		
+		self.devsGrid.Add(self.brokerLabel, 0, wx.ALIGN_CENTER_VERTICAL)
+		self.devsGrid.Add(self.cb_broker, 1, wx.EXPAND)
+		self.devsGrid.Add(self.brokerInfoBtn, 0, wx.ALIGN_CENTER_VERTICAL)
+	
+	def _remove_broker_rows_from_grid(self):
+		""" Remove broker UI rows from the grid
+		"""
+		# Hide broker widgets
+		self.msgFormatLabel.Hide()
+		self.cb_msg_format.Hide()
+		self.brokerLabel.Hide()
+		self.cb_broker.Hide()
+		self.brokerInfoBtn.Hide()
+		
+		# Remove broker rows by clearing and re-adding only non-broker items
+		self.devsGrid.Clear(False)  # False to NOT delete child windows
+		
+		# Re-add non-broker rows
+		devsLabel = wx.StaticText(self, label=_("Package:"))
+		self.devsGrid.Add(devsLabel, 0, wx.ALIGN_CENTER_VERTICAL)
+		self.devsGrid.Add(self.cb3, 1, wx.EXPAND)
+		self.devsGrid.Add(self.devs_doc_btn, 0, wx.ALIGN_CENTER_VERTICAL)
+		
+		strategyLabel = wx.StaticText(self, label=_("Strategy:"))
+		self.devsGrid.Add(strategyLabel, 0, wx.ALIGN_CENTER_VERTICAL)
+		self.devsGrid.Add(self.cb4, 1, wx.EXPAND)
+		
+		# Strategy info button - need to recreate since we cleared
+		strategyInfoBtn = wx.Button(self, wx.NewIdRef(), _("Info"))
+		strategyInfoBtn.SetBitmap(wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_BUTTON))
+		strategyInfoBtn.SetToolTip(_("Information about the selected strategy"))
+		strategyInfoBtn.Bind(wx.EVT_BUTTON, self.OnStrategyInfo)
+		self.devsGrid.Add(strategyInfoBtn, 0, wx.ALIGN_CENTER_VERTICAL)
+	
+
 	
 	def _init_broker_ui_elements(self):
 		""" Initialize broker UI elements as None (created dynamically if needed)
@@ -1229,6 +1270,34 @@ class SimulationPanel(wx.Panel):
 		self.msgFormatLabel = None
 		self.brokerLabel = None
 		self.brokerInfoBtn = None
+	
+	def _populate_broker_ui_elements(self, strategy_dict):
+		""" Populate broker UI elements with options from the strategy dict
+		"""
+		# Get message formats
+		msg_formats = list(strategy_dict.keys())
+		default_msg_format = self.selected_message_format if self.selected_message_format in msg_formats else (msg_formats[0] if msg_formats else "")
+		
+		# Update message format dropdown
+		self.cb_msg_format.Clear()
+		self.cb_msg_format.Set(msg_formats)
+		if default_msg_format:
+			self.cb_msg_format.SetValue(default_msg_format)
+			self.selected_message_format = default_msg_format
+		
+		# Update broker list based on selected message format
+		if msg_formats and default_msg_format in strategy_dict:
+			brokers = list(strategy_dict[default_msg_format].keys())
+			default_broker = self.selected_broker if self.selected_broker in brokers else (brokers[0] if brokers else "")
+		else:
+			brokers = []
+			default_broker = ""
+		
+		self.cb_broker.Clear()
+		self.cb_broker.Set(brokers)
+		if default_broker:
+			self.cb_broker.SetValue(default_broker)
+			self.selected_broker = default_broker
 	
 	def onMessageFormatChange(self, evt):
 		""" Message format selection changed
@@ -1261,6 +1330,10 @@ class SimulationPanel(wx.Panel):
 		
 		# Update global config
 		builtins.SELECTED_BROKER = broker
+		
+		# Load MQTT config if MQTT is selected
+		if broker and broker.upper() == 'MQTT':
+			self._load_mqtt_config_from_file()
 	
 	def OnBrokerConfig(self, evt):
 		""" Open broker configuration dialog
