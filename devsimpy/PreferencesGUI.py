@@ -1364,7 +1364,26 @@ class SimulationPanel(wx.Panel):
 			setattr(builtins, 'DEFAULT_DEVS_DIRNAME', self.default_devs_dir)
 
 			try:
-				# Recompile core modules
+				# Clear old kernel modules from sys.modules cache
+				# This prevents conflicts when switching between PyDEVS, PyPDEVS, BrokerDEVS
+				import sys
+				import importlib
+				kernel_modules_to_remove = []
+				for module_name in list(sys.modules.keys()):
+					# Remove all DEVSKernel submodules (PyDEVS, PyPDEVS, BrokerDEVS, etc.)
+					# Also remove DomainInterface modules as they import kernel classes
+					# NOTE: We don't remove Container or Components as they have living instances
+					if 'DEVSKernel' in module_name or 'DomainInterface' in module_name:
+						kernel_modules_to_remove.append(module_name)
+				
+				for module_name in kernel_modules_to_remove:
+					if module_name in sys.modules:
+						del sys.modules[module_name]
+				
+				# Invalidate import caches to force fresh module discovery
+				importlib.invalidate_caches()
+					
+				# Recompile core modules with clean module cache
 				ReloadModule.recompile("DomainInterface.DomainBehavior")
 				ReloadModule.recompile("DomainInterface.DomainStructure")
 				ReloadModule.recompile("DomainInterface.MasterModel")

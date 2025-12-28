@@ -107,8 +107,11 @@ class CollapsiblePanel(wx.Panel):
 
 		self.org_w,self.org_h = self.simdia.GetSize()
 
-		self.label1 = _("More settings...")
-		self.label2 = _("Extra options")
+		# Get current kernel name for display
+		kernel_name = DEFAULT_DEVS_DIRNAME
+		
+		self.label1 = _("More settings... [%s]") % kernel_name
+		self.label2 = _("Extra options [%s]") % kernel_name
 
 		self.cp = wx.CollapsiblePane(self, label=self.label1,
 											style=wx.CP_DEFAULT_STYLE|wx.CP_NO_TLW_RESIZE)
