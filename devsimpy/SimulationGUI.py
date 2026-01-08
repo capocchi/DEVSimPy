@@ -107,8 +107,11 @@ class CollapsiblePanel(wx.Panel):
 
 		self.org_w,self.org_h = self.simdia.GetSize()
 
-		self.label1 = _("More settings...")
-		self.label2 = _("Extra options")
+		# Get current kernel name for display
+		kernel_name = DEFAULT_DEVS_DIRNAME
+		
+		self.label1 = _("More settings... [%s]") % kernel_name
+		self.label2 = _("Extra options [%s]") % kernel_name
 
 		self.cp = wx.CollapsiblePane(self, label=self.label1,
 											style=wx.CP_DEFAULT_STYLE|wx.CP_NO_TLW_RESIZE)
@@ -143,84 +146,158 @@ class CollapsiblePanel(wx.Panel):
 			self.simdia.SetSize(-1, self.org_h)
 
 	def MakePaneContent(self, pane):
-		'''Just make a few controls to put on the collapsible pane'''
-
-		text2 = wx.StaticText(pane, wx.NewIdRef(), _("%s algorithm:")%DEFAULT_DEVS_DIRNAME)
+		'''Create an ergonomic layout for simulation options'''
 
 		### list of possible strategy depending on the PyDEVS version	
 		strategy_dict = eval("%s_SIM_STRATEGY_DICT"%DEFAULT_DEVS_DIRNAME.upper())
 		
-		# Handle both flat (PyDEVS/PyPDEVS) and nested (BrokerDEVS) strategy dicts
-		if isinstance(list(strategy_dict.values())[0] if strategy_dict else {}, dict):
-			# Nested structure (BrokerDEVS) - show message formats
+		# Check if we have a nested structure (BrokerDEVS)
+		self._has_broker_options = isinstance(list(strategy_dict.values())[0] if strategy_dict else {}, dict)
+		
+		# Main vertical sizer for better organization
+		main_sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		# ============================================================
+		# Section 1: Simulation Strategy/Configuration
+		# ============================================================
+		config_box = wx.StaticBoxSizer(wx.VERTICAL, pane, _('Simulation Configuration'))
+		config_grid = wx.FlexGridSizer(0, 2, 8, 10)
+		config_grid.AddGrowableCol(1, 1)
+		
+		if self._has_broker_options:
+			# BrokerDEVS: Show message format and broker
+			text_format = wx.StaticText(pane, wx.NewIdRef(), _("Message Format:"))
 			c = list(strategy_dict.keys())
 			default_choice = SELECTED_MESSAGE_FORMAT if SELECTED_MESSAGE_FORMAT in c else (c[0] if c else '')
+			self.ch1 = wx.Choice(pane, wx.NewIdRef(), choices=c)
+			self.ch1.SetToolTip(_("Select the message format standard for broker communication"))
+			
+			config_grid.Add(text_format, 0, wx.ALIGN_CENTER_VERTICAL)
+			config_grid.Add(self.ch1, 1, wx.EXPAND)
+			
+			# Broker selection
+			text_broker = wx.StaticText(pane, wx.NewIdRef(), _("Broker:"))
+			selected_msg_format = default_choice if default_choice in strategy_dict else (list(strategy_dict.keys())[0] if strategy_dict else '')
+			broker_list = list(strategy_dict[selected_msg_format].keys()) if selected_msg_format in strategy_dict else []
+			default_broker = SELECTED_BROKER if SELECTED_BROKER in broker_list else (broker_list[0] if broker_list else '')
+			self.ch_broker = wx.Choice(pane, wx.NewIdRef(), choices=broker_list)
+			self.ch_broker.SetToolTip(_("Select the message broker (Kafka, MQTT, RabbitMQ, etc.)"))
+			
+			config_grid.Add(text_broker, 0, wx.ALIGN_CENTER_VERTICAL)
+			config_grid.Add(self.ch_broker, 1, wx.EXPAND)
+			
+			try:
+				self.ch_broker.SetSelection(broker_list.index(default_broker))
+			except (ValueError, IndexError):
+				if broker_list:
+					self.ch_broker.SetSelection(0)
 		else:
-			# Flat structure (PyDEVS/PyPDEVS) - show strategies
+			# PyDEVS/PyPDEVS: Show strategy
+			text_strategy = wx.StaticText(pane, wx.NewIdRef(), _("Algorithm:"))
 			c = list(strategy_dict.keys())
 			default_choice = DEFAULT_SIM_STRATEGY
+			self.ch1 = wx.Choice(pane, wx.NewIdRef(), choices=c)
+			self.ch1.SetToolTip(_("Select the simulation algorithm/strategy"))
+			
+			config_grid.Add(text_strategy, 0, wx.ALIGN_CENTER_VERTICAL)
+			config_grid.Add(self.ch1, 1, wx.EXPAND)
+			self.ch_broker = None
 
-		### choice of strategy
-		ch1 = wx.Choice(pane, wx.NewIdRef(), choices=c)
-
-		text3 = wx.StaticText(pane, wx.NewIdRef(), _("Profiling"))
-		cb1 = wx.CheckBox(pane, wx.NewIdRef(), name='check_prof')
-		text4 = wx.StaticText(pane, wx.NewIdRef(), _("No time limit"))
+		### Set default selection
+		try:
+			self.ch1.SetSelection(c.index(default_choice))
+		except (ValueError, IndexError):
+			if c:
+				self.ch1.SetSelection(0)
+		
+		config_box.Add(config_grid, 0, wx.EXPAND|wx.ALL, 5)
+		main_sizer.Add(config_box, 0, wx.EXPAND|wx.ALL, 5)
+		
+		# ============================================================
+		# Section 2: Simulation Options
+		# ============================================================
+		options_box = wx.StaticBoxSizer(wx.VERTICAL, pane, _('Simulation Options'))
+		options_grid = wx.FlexGridSizer(0, 2, 8, 10)
+		options_grid.AddGrowableCol(1, 1)
+		
+		# No time limit
+		text_ntl = wx.StaticText(pane, wx.NewIdRef(), _("No Time Limit:"))
 		self.cb2 = wx.CheckBox(pane, wx.NewIdRef(), name='check_ntl')
-		text5 = wx.StaticText(pane, wx.NewIdRef(), _("Verbose"))
+		self.cb2.SetToolTip(_("Simulation stops when all models are idle (no specific time limit)"))
+		options_grid.Add(text_ntl, 0, wx.ALIGN_CENTER_VERTICAL)
+		options_grid.Add(self.cb2, 0, wx.ALIGN_CENTER_VERTICAL)
+		
+		# Verbose
+		text_verbose = wx.StaticText(pane, wx.NewIdRef(), _("Verbose Output:"))
 		self.cb3 = wx.CheckBox(pane, wx.NewIdRef(), name='verbose')
-		text6 = wx.StaticText(pane, wx.NewIdRef(), _("Dynamic Structure"))
+		self.cb3.SetToolTip(_("Display detailed simulation information"))
+		options_grid.Add(text_verbose, 0, wx.ALIGN_CENTER_VERTICAL)
+		options_grid.Add(self.cb3, 0, wx.ALIGN_CENTER_VERTICAL)
+		
+		options_box.Add(options_grid, 0, wx.EXPAND|wx.ALL, 5)
+		main_sizer.Add(options_box, 0, wx.EXPAND|wx.ALL, 5)
+		
+		# ============================================================
+		# Section 3: Advanced Options (package-specific)
+		# ============================================================
+		advanced_box = wx.StaticBoxSizer(wx.VERTICAL, pane, _('Advanced Options'))
+		advanced_grid = wx.FlexGridSizer(0, 4, 8, 10)
+		advanced_grid.AddGrowableCol(1, 0)
+		advanced_grid.AddGrowableCol(3, 0)
+		
+		# Profiling (PyDEVS only)
+		text_prof = wx.StaticText(pane, wx.NewIdRef(), _("Profiling:"))
+		cb1 = wx.CheckBox(pane, wx.NewIdRef(), name='check_prof')
+		cb1.SetToolTip(_("Enable performance profiling (PyDEVS only)"))
+		advanced_grid.Add(text_prof, 0, wx.ALIGN_CENTER_VERTICAL)
+		advanced_grid.Add(cb1, 0, wx.ALIGN_CENTER_VERTICAL)
+		
+		# Dynamic Structure (PyPDEVS only)
+		text_dyn = wx.StaticText(pane, wx.NewIdRef(), _("Dynamic Structure:"))
 		cb4 = wx.CheckBox(pane, wx.NewIdRef(), name='dyn_struct')
+		cb4.SetToolTip(_("Enable dynamic structure modification during simulation (PyPDEVS only)"))
+		advanced_grid.Add(text_dyn, 0, wx.ALIGN_CENTER_VERTICAL)
+		advanced_grid.Add(cb4, 0, wx.ALIGN_CENTER_VERTICAL)
 		
-		text7 = wx.StaticText(pane, wx.NewIdRef(), _("Real time"))
+		# Add empty spacers for second row to maintain layout
+		advanced_grid.Add((0, 0))  # Empty cell
+		advanced_grid.Add((0, 0))  # Empty cell
+		
+		# Real time (PyPDEVS only)
+		text_rt = wx.StaticText(pane, wx.NewIdRef(), _("Real-Time Mode:"))
 		cb5 = wx.CheckBox(pane, wx.NewIdRef(), name='real_time')
+		cb5.SetToolTip(_("Run simulation in real-time mode (PyPDEVS only)"))
+		advanced_grid.Add(text_rt, 0, wx.ALIGN_CENTER_VERTICAL)
+		advanced_grid.Add(cb5, 0, wx.ALIGN_CENTER_VERTICAL)
 		
+		advanced_box.Add(advanced_grid, 0, wx.EXPAND|wx.ALL, 5)
+		main_sizer.Add(advanced_box, 0, wx.EXPAND|wx.ALL, 5)
+		
+		# Set initial values and enable/disable based on package
 		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
 			self.cb2.SetValue(NTL)
 			self.cb3.Enable(False)
 			cb4.Enable(False)
 			cb5.Enable(False)
-			
-		else:
+		elif DEFAULT_DEVS_DIRNAME == 'BrokerDEVS':
+			cb1.Enable(False)
+			self.cb2.SetValue(NTL)
+			self.cb3.SetValue(VERBOSE)
+			cb4.Enable(False)
+			cb5.Enable(False)
+		else:  # PyPDEVS
 			cb1.Enable(False)
 			self.cb2.SetValue(NTL)
 			self.cb3.SetValue(VERBOSE)
 			cb4.SetValue(DYNAMIC_STRUCTURE)
 			cb5.SetValue(REAL_TIME and not NTL)
-
-		### default strategy
-		try:
-			ch1.SetSelection(c.index(default_choice))
-		except (ValueError, IndexError):
-			# Fallback to first item if default_choice not found
-			if c:
-				ch1.SetSelection(0)
-
-		ch1.SetToolTipString=ch1.SetToolTip
-		cb1.SetToolTipString=cb1.SetToolTip
-		self.cb2.SetToolTipString=self.cb2.SetToolTip
-
-		ch1.SetToolTipString(_("Select the simulator strategy."))
-		cb1.SetToolTipString(_("For simulation profiling using hotshot"))
-		self.cb2.SetToolTipString(_("No time limit for the simulation. Simulation is over when childs are no active."))
 		
-		grid3 = wx.GridSizer(6, 2, 1, 1)
-		grid3.Add(text2, 0, wx.ALIGN_CENTER_VERTICAL, 19)
-		grid3.Add(ch1, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL)
-		grid3.Add(text3, 0, wx.ALIGN_CENTER_VERTICAL, 19)
-		grid3.Add(cb1, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
-		grid3.Add(text4, 0, wx.ALIGN_CENTER_VERTICAL, 19)
-		grid3.Add(self.cb2, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
-		grid3.Add(text5, 0, wx.ALIGN_CENTER_VERTICAL, 19)
-		grid3.Add(self.cb3, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
-		grid3.Add(text6, 0, wx.ALIGN_CENTER_VERTICAL, 19)
-		grid3.Add(cb4, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
-		grid3.Add(text7, 0, wx.ALIGN_CENTER_VERTICAL, 19)
-		grid3.Add(cb5, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 19)
-		
-		pane.SetSizer(grid3)
+		pane.SetSizer(main_sizer)
 
-		self.Bind(wx.EVT_CHOICE, self.OnChoice, ch1)
+		# Bind events
+		self.Bind(wx.EVT_CHOICE, self.OnChoice, self.ch1)
+		if self._has_broker_options and self.ch_broker:
+			self.Bind(wx.EVT_CHOICE, self.OnBrokerChoice, self.ch_broker)
 		self.Bind(wx.EVT_CHECKBOX, self.OnProfiling, cb1)
 		self.Bind(wx.EVT_CHECKBOX, self.OnNTL, self.cb2)
 		self.Bind(wx.EVT_CHECKBOX, self.OnVerbose, self.cb3)
@@ -232,21 +309,44 @@ class CollapsiblePanel(wx.Panel):
 		""" strategy choice has been invoked
 		"""
 		selected_string = event.GetString()
-		self.simdia.selected_strategy = selected_string
 
-		# For BrokerDEVS, the selected_string is the message format
-		if DEFAULT_DEVS_DIRNAME == 'BrokerDEVS':
+		# Check if we have broker options (nested structure)
+		if self._has_broker_options:
+			# For BrokerDEVS, selected_string is the message format
 			setattr(builtins, 'SELECTED_MESSAGE_FORMAT', selected_string)
-			# Keep the previously selected broker
 			setattr(builtins, 'DEFAULT_SIM_STRATEGY', selected_string)
+			
+			# Update broker list based on selected message format
+			strategy_dict = eval("%s_SIM_STRATEGY_DICT"%DEFAULT_DEVS_DIRNAME.upper())
+			if selected_string in strategy_dict and isinstance(strategy_dict[selected_string], dict):
+				broker_list = list(strategy_dict[selected_string].keys())
+				self.ch_broker.Clear()
+				self.ch_broker.AppendItems(broker_list)
+				if broker_list:
+					# Select first broker or keep current if it exists
+					current_broker = getattr(builtins, 'SELECTED_BROKER', '')
+					if current_broker in broker_list:
+						self.ch_broker.SetStringSelection(current_broker)
+					else:
+						self.ch_broker.SetSelection(0)
+						setattr(builtins, 'SELECTED_BROKER', broker_list[0])
+			
+			self.simdia.selected_strategy = selected_string
 		else:
+			# For PyDEVS/PyPDEVS, selected_string is the strategy
+			self.simdia.selected_strategy = selected_string
 			setattr(builtins, 'DEFAULT_SIM_STRATEGY', selected_string)
 
 		### update of ntl checkbox depending on the choosing strategy
-		self.cb2.Enable(not (self.simdia.selected_strategy == 'original' and  DEFAULT_DEVS_DIRNAME == 'PyDEVS'))
-
-		setattr(builtins, 'DEFAULT_SIM_STRATEGY', self.simdia.selected_strategy)
-
+		if not self._has_broker_options:
+			self.cb2.Enable(not (self.simdia.selected_strategy == 'original' and DEFAULT_DEVS_DIRNAME == 'PyDEVS'))
+	
+	def OnBrokerChoice(self, event):
+		""" broker choice has been invoked (for BrokerDEVS)
+		"""
+		selected_broker = event.GetString()
+		setattr(builtins, 'SELECTED_BROKER', selected_broker)
+	
 	def OnNTL(self, event):
 		cb2 = event.GetEventObject()
 
@@ -335,13 +435,15 @@ class Base(object):
 
 		self._text1 = wx.StaticText(self.panel, wx.NewIdRef(), _('Final time:'))
 		self._value = wx.TextCtrl(self.panel, wx.NewIdRef(), validator=TextObjectValidator())
+		self._value.SetMinSize((100, -1))
+		
 		self._btn1 = wx.Button(self.panel, wx.NewIdRef(), _('Run'))
 		self._btn2 = wx.Button(self.panel, wx.NewIdRef(), _('Stop'))
 		self._btn3 = wx.Button(self.panel, wx.NewIdRef(), _('Suspend'))
 		self._btn4 = wx.Button(self.panel, wx.NewIdRef(), _('Log'))
 		
-		# Bouton d'information
-		self._btn_info = wx.Button(self.panel, wx.NewIdRef(), "?", size=(25, 25))
+		# Info button
+		self._btn_info = wx.Button(self.panel, wx.NewIdRef(), "?", size=(30, 30))
 		self._btn_info.SetToolTip(_("Show information about simulation options"))
 		
 		self._gauge = wx.Gauge(self.panel, wx.NewIdRef(), 100, size=(-1, 25), style=wx.GA_HORIZONTAL|wx.GA_SMOOTH)
@@ -349,15 +451,13 @@ class Base(object):
 
 		self.SetNTL(self.ntl)
 
-		self._btn1.SetToolTipString = self._btn1.SetToolTip
-		self._btn2.SetToolTipString = self._btn2.SetToolTip
-		self._btn3.SetToolTipString = self._btn3.SetToolTip
-		self._btn4.SetToolTipString = self._btn4.SetToolTip
-
-		self._btn1.SetToolTipString(_("Begin simulation process."))
-		self._btn2.SetToolTipString(_("Stop the simulation process."))
-		self._btn3.SetToolTipString(_("Suspend the simulation process."))
-		self._btn4.SetToolTipString(_("Launch the log window (often depends on some plug-ins (verbose, activity, ...))."))
+		# Set tooltips
+		self._btn1.SetToolTip(_("Start the simulation"))
+		self._btn2.SetToolTip(_("Stop the simulation"))
+		self._btn3.SetToolTip(_("Pause the simulation"))
+		self._btn4.SetToolTip(_("View simulation logs"))
+		self._text1.SetToolTip(_("Specify the simulation end time"))
+		self._value.SetToolTip(_("Enter a positive number for simulation duration"))
 
 
 	def SetNTL(self, ntl):
@@ -380,27 +480,39 @@ class Base(object):
 
 		vbox_body = wx.BoxSizer(wx.VERTICAL)
 
-		# panel 1 avec bouton info
-		grid1 = wx.BoxSizer(wx.HORIZONTAL)
+		# ============================================================
+		# Section 1: Time Configuration
+		# ============================================================
+		time_box = wx.StaticBoxSizer(wx.HORIZONTAL, self.panel, _('Time Configuration'))
 		
-		time_sizer = wx.BoxSizer(wx.HORIZONTAL)
-		time_sizer.Add(self._text1, 0, wx.ALIGN_CENTER_VERTICAL|wx.RIGHT, 5)
-		time_sizer.Add(self._value, 1, wx.EXPAND)  # Enlever wx.ALIGN_CENTER_VERTICAL
+		time_box.Add(self._text1, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+		time_box.Add(self._value, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+		time_box.Add(self._btn_info, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 		
-		grid1.Add(time_sizer, 1, wx.EXPAND)
-		grid1.Add(self._btn_info, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5)
+		vbox_body.Add(time_box, 0, wx.EXPAND|wx.ALL, 10)
 
-		# panel2
-		grid2 = wx.GridSizer(3, 2, 2, 2)
-		grid2.Add(self._btn1, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
-		grid2.Add(self._btn3, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
-		grid2.Add(self._btn2, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
-		grid2.Add(self._btn4, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
+		# ============================================================
+		# Section 2: Control Buttons
+		# ============================================================
+		control_box = wx.StaticBoxSizer(wx.HORIZONTAL, self.panel, _('Simulation Controls'))
+		
+		button_grid = wx.GridSizer(2, 2, 5, 5)
+		button_grid.Add(self._btn1, 0, wx.EXPAND)
+		button_grid.Add(self._btn3, 0, wx.EXPAND)
+		button_grid.Add(self._btn2, 0, wx.EXPAND)
+		button_grid.Add(self._btn4, 0, wx.EXPAND)
+		
+		control_box.Add(button_grid, 1, wx.EXPAND|wx.ALL, 5)
+		
+		vbox_body.Add(control_box, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)
 
-		vbox_body.Add(grid1, 0, wx.EXPAND|wx.TOP, 9)
-		vbox_body.Add((-1, 10))
-		vbox_body.Add(grid2, 0, wx.EXPAND, 9)
-		vbox_body.Add(self._gauge, 0, wx.EXPAND, 9)
+		# ============================================================
+		# Section 3: Progress Bar
+		# ============================================================
+		progress_box = wx.StaticBoxSizer(wx.VERTICAL, self.panel, _('Progress'))
+		progress_box.Add(self._gauge, 0, wx.EXPAND|wx.ALL, 5)
+		
+		vbox_body.Add(progress_box, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)
 		vbox_body.Add(self._cp, 0, wx.EXPAND, 9)
 
 		# fin panel
@@ -909,10 +1021,10 @@ class SimulationDialogFrame(Base, wx.Frame):
 
 		assert(isinstance(parent, wx.Frame))
 		
-		wx.Frame.__init__(self, parent, id, title, style= wx.DEFAULT_FRAME_STYLE)
+		wx.Frame.__init__(self, parent, id, title, style= wx.DEFAULT_FRAME_STYLE, size=(500, 350))
 
-		# disable the roll out of the frame
-		self.SetMinSize(self.GetSize())
+		# Set minimum size
+		self.SetMinSize((480, 320))
 
 		self.panel = wx.Panel(self)
 

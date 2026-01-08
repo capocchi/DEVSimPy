@@ -51,16 +51,16 @@ from DEVSKernel.PyDEVS.SimStrategies import OriginalPyDEVSSimStrategy, BagBasedP
 from DEVSKernel.PyPDEVS.SimStrategies import ClassicPyPDEVSSimStrategy, ParallelPyPDEVSSimStrategy
 
 # ---------------------------------------------------------------------------
-# Broker-based distributed strategies with MS4Me message standardization
+# Broker-based distributed strategies with DEVSStreaming message standardization
 # Supports multiple brokers (Kafka, MQTT, RabbitMQ, etc.)
 # ---------------------------------------------------------------------------
 
-# Kafka + MS4Me
-from DEVSKernel.BrokerDEVS.MS4Me.SimStrategyKafkaMS4Me import SimStrategyKafkaMS4Me
+# Kafka + DEVSStreaming
+from DEVSKernel.BrokerDEVS.DEVSStreaming.SimStrategyKafkaMS4Me import SimStrategyKafkaMS4Me
 
-# MQTT + MS4Me
+# MQTT + DEVSStreaming
 try:
-    from DEVSKernel.BrokerDEVS.MS4Me.SimStrategyMqttMS4Me import SimStrategyMqttMS4Me
+    from DEVSKernel.BrokerDEVS.DEVSStreaming.SimStrategyMqttMS4Me import SimStrategyMqttMS4Me
 except ImportError as e:
     logger = __import__('logging').getLogger(__name__)
     logger.debug("MQTT strategy not available: %s", e)

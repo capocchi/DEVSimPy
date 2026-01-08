@@ -13,8 +13,8 @@ from confluent_kafka import KafkaException, KafkaError
 
 from DEVSKernel.PyDEVS.SimStrategies import DirectCouplingPyDEVSSimStrategy
 from DomainInterface import DomainStructure, DomainBehavior
-from DEVSKernel.BrokerDEVS.MS4Me.MS4MeKafkaWorker import MS4MeKafkaWorker
-from DEVSKernel.BrokerDEVS.MS4Me.ms4me_kafka_wire_adapters import StandardWireAdapter
+from DEVSKernel.BrokerDEVS.DEVSStreaming.MS4MeKafkaWorker import MS4MeKafkaWorker
+from DEVSKernel.BrokerDEVS.DEVSStreaming.ms4me_kafka_wire_adapters import StandardWireAdapter
 from DEVSKernel.BrokerDEVS.Core.BrokerMessageTypes import (
     BaseMessage,
     SimTime,
@@ -27,11 +27,11 @@ from DEVSKernel.BrokerDEVS.Core.BrokerMessageTypes import (
     TransitionDone,
     SimulationDone,
 )
-from DEVSKernel.BrokerDEVS.Proxies.BrokerReceiverProxy import KafkaReceiverProxy
-from DEVSKernel.BrokerDEVS.Proxies.BrokerStreamProxy import KafkaStreamProxy
-from DEVSKernel.BrokerDEVS.MS4Me.auto_kafka import ensure_kafka_broker
+from DEVSKernel.BrokerDEVS.Proxies.kafka import KafkaReceiverProxy
+from DEVSKernel.BrokerDEVS.Proxies.kafka import KafkaStreamProxy
+from DEVSKernel.BrokerDEVS.DEVSStreaming.auto_kafka import ensure_kafka_broker
 from DEVSKernel.BrokerDEVS.logconfig import configure_logging, LOGGING_LEVEL
-from DEVSKernel.BrokerDEVS.MS4Me.kafkaconfig import KAFKA_BOOTSTRAP, AUTO_START_KAFKA_BROKER
+from DEVSKernel.BrokerDEVS.DEVSStreaming.kafkaconfig import KAFKA_BOOTSTRAP, AUTO_START_KAFKA_BROKER
 
 
 configure_logging()
@@ -238,13 +238,11 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
         # Instantiate proxies (replaces direct Producer/Consumer)
         self._stream_proxy = StreamProxyClass(
             self.bootstrap,
-            wire_adapter=self.wire,
         )
 
         self._receiver_proxy = ReceiverProxyClass(
             self.bootstrap,
             group_id,
-            wire_adapter=self.wire,
         )
 
         # Subscribe to output topic
@@ -666,7 +664,7 @@ class SimStrategyKafkaMS4Me(DirectCouplingPyDEVSSimStrategy):
                 )
 
             self._terminate_workers()
-            logger.info("MS4Me BrokerDEVS Simulation Ended")
+            logger.info("DEVSStreaming BrokerDEVS Simulation Ended")
 
     def __del__(self):
         """Cleanup: close proxies properly"""

@@ -22,6 +22,7 @@ import time
 import json
 from typing import Any, Dict, Optional, Callable
 from threading import Event
+from queue import Queue
 
 from DEVSKernel.BrokerDEVS.Core.BrokerAdapter import BrokerAdapter
 
@@ -99,9 +100,8 @@ class MqttConsumer:
         self.port = port
         self.client = mqtt.Client()
         self.subscribed_topics = []
-        self.message_queue = []
+        self.message_queue = Queue()  # Thread-safe queue for messages
         self.connected_event = Event()
-        self.last_message = None
         
         # Set up callbacks
         self.client.on_connect = self._on_connect
@@ -145,7 +145,7 @@ class MqttConsumer:
     def _on_message(self, client, userdata, msg):
         """Callback for when a PUBLISH message is received from the broker."""
         mqtt_message = MqttMessage(msg.topic, msg.payload, msg.qos)
-        self.last_message = mqtt_message
+        self.message_queue.put(mqtt_message)
     
     def _on_disconnect(self, client, userdata, rc):
         """Callback for when client disconnects from broker."""
@@ -181,14 +181,12 @@ class MqttConsumer:
         Returns:
             MqttMessage if available, None otherwise
         """
-        if self.last_message is not None:
-            msg = self.last_message
-            self.last_message = None
-            return msg
-        
-        # Wait for a message
-        time.sleep(min(timeout, 0.1))
-        return self.last_message
+        try:
+            # Try to get a message from the queue with timeout
+            return self.message_queue.get(timeout=timeout)
+        except:
+            # Queue is empty or timeout occurred
+            return None
     
     def close(self) -> None:
         """Close the consumer connection."""

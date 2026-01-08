@@ -12,7 +12,7 @@
 #
 # GENERAL NOTES AND REMARKS:
 #
-# MS4Me (Multi-Server Multi-Core Messaging Execution) distributed worker
+# DEVSStreaming (Multi-Server Multi-Core Messaging Execution) distributed worker
 # for broker-based DEVS simulation.
 #
 # Implements a state-preserving, multi-core aware worker that coordinates
@@ -53,7 +53,7 @@ logger = logging.getLogger(__name__)
 
 
 class WorkerPhase(Enum):
-    """MS4Me worker execution phases."""
+    """DEVSStreaming worker execution phases."""
 
     IDLE = "idle"
     INITIALIZING = "initializing"
@@ -113,9 +113,9 @@ class ModelState:
 
 class BrokerMS4MeWorker(InMemoryBrokerWorker):
     """
-    MS4Me (Multi-Server Multi-Core Messaging Execution) distributed worker.
+    DEVSStreaming (Multi-Server Multi-Core Messaging Execution) distributed worker.
 
-    Extends InMemoryBrokerWorker with MS4Me-specific features:
+    Extends InMemoryBrokerWorker with DEVSStreaming-specific features:
     - State preservation and checkpointing
     - Multi-phase execution (init → execute → output → next_time)
     - Coordinated barrier synchronization
@@ -132,7 +132,7 @@ class BrokerMS4MeWorker(InMemoryBrokerWorker):
 
     Architecture:
     - Extends generic InMemoryBrokerWorker
-    - Adds MS4Me-specific message handling
+    - Adds DEVSStreaming-specific message handling
     - Maintains model state snapshots
     - Tracks execution metrics
     - Supports distributed checkpointing
@@ -150,7 +150,7 @@ class BrokerMS4MeWorker(InMemoryBrokerWorker):
         **kwargs,
     ):
         """
-        Initialize MS4Me worker.
+        Initialize DEVSStreaming worker.
 
         Args:
             model: DEVS model to execute
@@ -170,7 +170,7 @@ class BrokerMS4MeWorker(InMemoryBrokerWorker):
         self.max_retries = max_retries
         self.retry_backoff_ms = retry_backoff_ms
 
-        # MS4Me state tracking
+        # DEVSStreaming state tracking
         self.state = ModelState(model_id=self._get_model_id())
         self.checkpoints: Dict[int, ModelState] = {}  # transition_count -> state
 
@@ -195,7 +195,7 @@ class BrokerMS4MeWorker(InMemoryBrokerWorker):
 
     def _handle_message(self, msg: BaseMessage):
         """
-        Handle MS4Me-specific messages.
+        Handle DEVSStreaming-specific messages.
 
         Args:
             msg: Incoming message from broker
@@ -585,7 +585,7 @@ class BrokerMS4MeWorker(InMemoryBrokerWorker):
         model_id = self.state.model_id
 
         logger.info("=" * 70)
-        logger.info("MS4Me Worker Metrics: %s", model_id)
+        logger.info("DEVSStreaming Worker Metrics: %s", model_id)
         logger.info("=" * 70)
 
         if self.metrics["transitions_executed"] > 0:

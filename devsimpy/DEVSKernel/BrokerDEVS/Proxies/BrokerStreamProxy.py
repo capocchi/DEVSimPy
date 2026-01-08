@@ -250,72 +250,6 @@ class BrokerStreamProxy(AbstractStreamProxy):
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
-# BROKER-SPECIFIC STREAM PROXIES (Convenience Classes)
-#
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-
-
-class KafkaStreamProxy(BrokerStreamProxy):
-    """
-    Kafka-specific stream proxy.
-    Convenience class for Kafka usage.
-    """
-
-    def __init__(
-        self,
-        bootstrap_servers: str = "localhost:9092",
-        producer_config: Optional[Dict[str, Any]] = None,
-        wire_adapter: Optional[BrokerWireAdapter] = None,
-    ):
-        """
-        Initialize Kafka stream proxy.
-        
-        Args:
-            bootstrap_servers: Kafka bootstrap servers
-            producer_config: Custom producer configuration
-            wire_adapter: Message serialization adapter
-        """
-        from DEVSKernel.BrokerDEVS.Brokers.kafka.KafkaAdapter import KafkaAdapter
-
-        kafka_adapter = KafkaAdapter(bootstrap_servers)
-        super().__init__(kafka_adapter, producer_config, wire_adapter)
-
-
-class MqttStreamProxy(BrokerStreamProxy):
-    """
-    MQTT-specific stream proxy.
-    Convenience class for MQTT usage.
-    """
-
-    def __init__(
-        self,
-        broker_host: str = "localhost",
-        broker_port: int = 1883,
-        producer_config: Optional[Dict[str, Any]] = None,
-        wire_adapter: Optional[BrokerWireAdapter] = None,
-    ):
-        """
-        Initialize MQTT stream proxy.
-        
-        Args:
-            broker_host: MQTT broker hostname
-            broker_port: MQTT broker port
-            producer_config: Custom producer configuration
-            wire_adapter: Message serialization adapter
-        """
-        from DEVSKernel.BrokerDEVS.Brokers.mqtt.MqttAdapter import MqttAdapter
-
-        mqtt_config = producer_config or {}
-        mqtt_config.update({
-            "broker": broker_host,
-            "port": broker_port,
-        })
-        mqtt_adapter = MqttAdapter(broker_host)
-        super().__init__(mqtt_adapter, mqtt_config, wire_adapter)
-
-
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-#
 # STREAM PROXY FACTORY
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -349,10 +283,12 @@ class BrokerStreamProxyFactory:
         broker_type = broker_type.lower()
 
         if broker_type == "kafka":
+            from Proxies.kafka import KafkaStreamProxy
             bootstrap = kwargs.get("bootstrap_servers", "localhost:9092")
             return KafkaStreamProxy(bootstrap, wire_adapter=wire_adapter)
 
         elif broker_type == "mqtt":
+            from Proxies.mqtt import MqttStreamProxy
             host = kwargs.get("host", "localhost")
             port = kwargs.get("port", 1883)
             return MqttStreamProxy(host, port, wire_adapter=wire_adapter)

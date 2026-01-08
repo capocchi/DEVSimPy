@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 SimStrategyMqttMS4Me - MQTT-based distributed DEVS simulation strategy
-with in-memory workers (threads) using typed DEVS messages (MS4Me format).
+with in-memory workers (threads) using typed DEVS messages (DEVSStreaming format).
 
 Mirrors SimStrategyKafkaMS4Me but uses MQTT as the message broker instead of Kafka.
-Maintains compatibility with MS4Me message standardization and worker coordination.
+Maintains compatibility with DEVSStreaming message standardization and worker coordination.
 """
 
 import logging
@@ -13,8 +13,8 @@ from typing import Dict, List, Optional
 
 from DEVSKernel.PyDEVS.SimStrategies import DirectCouplingPyDEVSSimStrategy
 from DomainInterface import DomainStructure, DomainBehavior
-from DEVSKernel.BrokerDEVS.MS4Me.MS4MeMqttWorker import MS4MeMqttWorker
-from DEVSKernel.BrokerDEVS.MS4Me.ms4me_mqtt_wire_adapters import StandardWireAdapter
+from DEVSKernel.BrokerDEVS.DEVSStreaming.MS4MeMqttWorker import MS4MeMqttWorker
+from DEVSKernel.BrokerDEVS.DEVSStreaming.ms4me_mqtt_wire_adapters import StandardWireAdapter
 from DEVSKernel.BrokerDEVS.Core.BrokerMessageTypes import (
     BaseMessage,
     SimTime,
@@ -27,11 +27,11 @@ from DEVSKernel.BrokerDEVS.Core.BrokerMessageTypes import (
     TransitionDone,
     SimulationDone,
 )
-from DEVSKernel.BrokerDEVS.Proxies.MqttReceiverProxy import MqttReceiverProxy
-from DEVSKernel.BrokerDEVS.Proxies.MqttStreamProxy import MqttStreamProxy
-from DEVSKernel.BrokerDEVS.MS4Me.auto_mqtt import ensure_mqtt_broker
+from DEVSKernel.BrokerDEVS.Proxies.mqtt import MqttReceiverProxy
+from DEVSKernel.BrokerDEVS.Proxies.mqtt import MqttStreamProxy
+from DEVSKernel.BrokerDEVS.DEVSStreaming.auto_mqtt import ensure_mqtt_broker
 from DEVSKernel.BrokerDEVS.logconfig import configure_logging, LOGGING_LEVEL
-from DEVSKernel.BrokerDEVS.MS4Me.mqttconfig import MQTT_BROKER_ADDRESS, MQTT_BROKER_PORT, AUTO_START_MQTT_BROKER
+from DEVSKernel.BrokerDEVS.DEVSStreaming.mqttconfig import MQTT_BROKER_ADDRESS, MQTT_BROKER_PORT, AUTO_START_MQTT_BROKER
 
 
 configure_logging()
@@ -225,20 +225,20 @@ def build_routing_table(atomic_models):
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
-# MQTT SIMULATION STRATEGY WITH MS4Me MESSAGES
+# MQTT SIMULATION STRATEGY WITH DEVSStreaming MESSAGES
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 
 class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
     """
-    MQTT-based distributed DEVS simulation strategy with MS4Me message format.
+    MQTT-based distributed DEVS simulation strategy with DEVSStreaming message format.
     
     Orchestrates distributed DEVS simulation where:
     - Each atomic model runs in a worker thread
     - Workers communicate via MQTT topics
     - Coordinator manages simulation timing and routing
-    - Messages follow MS4Me standardization
+    - Messages follow DEVSStreaming standardization
     
     Features:
     - Thread-based in-memory workers
@@ -262,7 +262,7 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
         mqtt_password: str = None,
     ):
         """
-        Initialize MQTT MS4Me simulation strategy.
+        Initialize MQTT DEVSStreaming simulation strategy.
         
         Args:
             simulator: PyDEVS simulator instance
@@ -349,7 +349,6 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
             self.broker_address,
             self.broker_port,
             client_id=f"coordinator-{group_id}",
-            wire_adapter=self.wire,
             username=self.mqtt_username,
             password=self.mqtt_password,
         )
@@ -358,7 +357,6 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
             self.broker_address,
             self.broker_port,
             client_id=f"receiver-{group_id}",
-            wire_adapter=self.wire,
             username=self.mqtt_username,
             password=self.mqtt_password,
         )
@@ -418,7 +416,6 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
                 broker_port=self.broker_port,
                 in_topic=in_topic,
                 out_topic=out_topic,
-                wire_adapter=self.wire,
                 username=self.mqtt_username,
                 password=self.mqtt_password,
             )
@@ -470,7 +467,7 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
     # ------------------------------------------------------------------
 
     def _simulate_for_ms4me(self, T=1e8):
-        """Simulate using standard MQTT MS4Me message routing."""
+        """Simulate using standard MQTT DEVSStreaming message routing."""
         try:
             # STEP 0: distributed init
             logger.info("Initializing atomic models...")
@@ -687,7 +684,7 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
                 )
 
             self._terminate_workers()
-            logger.info("MS4Me MqttMS4Me Simulation Ended")
+            logger.info("DEVSStreaming MqttMS4Me Simulation Ended")
             
             # Call terminate to set end_flag and exit the simulation thread loop
             self._simulator.terminate()

@@ -12,7 +12,7 @@
 #
 # GENERAL NOTES AND REMARKS:
 #
-# MQTT-specific worker for MS4Me distributed DEVS simulation.
+# MQTT-specific worker for DEVSStreaming distributed DEVS simulation.
 # Mirrors MS4MeKafkaWorker but uses MQTT as the message broker.
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -53,7 +53,7 @@ logger = logging.getLogger(__name__)
 
 class MS4MeMqttWorker(threading.Thread):
     """
-    MQTT-based worker thread for MS4Me distributed DEVS simulation.
+    MQTT-based worker thread for DEVSStreaming distributed DEVS simulation.
     
     Manages one atomic DEVS model running in-memory while communicating
     with the coordinator via MQTT topics.
@@ -61,7 +61,7 @@ class MS4MeMqttWorker(threading.Thread):
     Features:
     - Receives commands from coordinator on input topic
     - Sends model outputs to coordinator on output topic
-    - Handles MS4Me message serialization/deserialization
+    - Handles DEVSStreaming message serialization/deserialization
     - Thread-safe operations
     - Automatic reconnection on disconnect
     """
@@ -119,7 +119,12 @@ class MS4MeMqttWorker(threading.Thread):
         self.password = password
 
         # Wire adapter for message serialization
-        self.wire_adapter = wire_adapter
+        if wire_adapter is None:
+            # Default to StandardWireAdapter (pickle-based) to match proxy defaults
+            from DEVSKernel.BrokerDEVS.DEVSStreaming.ms4me_mqtt_wire_adapters import StandardWireAdapter
+            self.wire_adapter = StandardWireAdapter()
+        else:
+            self.wire_adapter = wire_adapter
 
         # MQTT client - try VERSION2 API first (paho-mqtt 2.x)
         try:

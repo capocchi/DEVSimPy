@@ -12,7 +12,7 @@
 #
 # GENERAL NOTES AND REMARKS:
 #
-# MQTT configuration for MS4Me distributed DEVS simulation.
+# MQTT configuration for DEVSStreaming distributed DEVS simulation.
 #
 # To lunch a container: docker run -d --name mqtt -p 1883:1883 -p 9001:9001 eclipse-mosquitto
 #

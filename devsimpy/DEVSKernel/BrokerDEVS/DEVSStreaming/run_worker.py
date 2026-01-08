@@ -28,7 +28,7 @@
 #   # Explicit Kafka configuration
 #   python run_worker.py models/system.py Model1 --broker kafka --host localhost --port 9092
 #
-#   # Use MQTT with MS4Me worker
+#   # Use MQTT with DEVSStreaming worker
 #   python run_worker.py models/system.py Model1 --broker mqtt --ms4me
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -130,9 +130,7 @@ def create_broker_adapter(
     Raises:
         ValueError: If broker configuration invalid
     """
-    from devsimpy.DEVSKernel.BrokerDEVS.MS4Me.auto_broker import (
-        AutoBrokerConfig,
-        AutoBrokerAdapterFactory,
+    from devsimpy.DEVSKernel.BrokerDEVS.standard_registry import (
         BrokerType,
     )
 
@@ -151,7 +149,7 @@ def create_broker_adapter(
         if host:
             config.selected_broker = config._from_environment()
             if not config.selected_broker:
-                from devsimpy.DEVSKernel.BrokerDEVS.MS4Me.auto_broker import BrokerInfo, BrokerStatus
+                from devsimpy.DEVSKernel.BrokerDEVS.standard_registry import BrokerInfo, BrokerStatus
 
                 config.selected_broker = BrokerInfo(
                     broker_type=btype,
@@ -163,7 +161,7 @@ def create_broker_adapter(
             # Use defaults for this broker type
             config.selected_broker = config._from_environment()
             if not config.selected_broker:
-                from devsimpy.DEVSKernel.BrokerDEVS.MS4Me.auto_broker import (
+                from devsimpy.DEVSKernel.BrokerDEVS.standard_registry import (
                     BrokerDetector,
                     BrokerInfo,
                     BrokerStatus,
@@ -220,7 +218,7 @@ def create_worker(
     Args:
         model_instance: DEVS model instance
         adapter: BrokerAdapter instance
-        use_ms4me: Use MS4Me worker if True, else generic worker
+        use_ms4me: Use DEVSStreaming worker if True, else generic worker
         **worker_kwargs: Additional arguments for worker
 
     Returns:
@@ -231,7 +229,7 @@ def create_worker(
             BrokerMS4MeWorker,
         )
 
-        logger.info("Creating MS4Me worker")
+        logger.info("Creating DEVSStreaming worker")
         return BrokerMS4MeWorker(model_instance, adapter, **worker_kwargs)
     else:
         from DEVSKernel.BrokerDEVS.Workers.InMemoryBrokerWorker import (
@@ -310,14 +308,14 @@ def parse_arguments():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Auto-detect broker and run with MS4Me worker
+  # Auto-detect broker and run with DEVSStreaming worker
   python run_worker.py models/system.py SimpleModel
 
   # Use explicit Kafka configuration
   python run_worker.py models/system.py Model1 \\
     --broker kafka --host kafka-broker.local --port 9092
 
-  # Use MQTT with standard worker (no MS4Me)
+  # Use MQTT with standard worker (no DEVSStreaming)
   python run_worker.py models/system.py Model1 \\
     --broker mqtt --host mqtt.local --no-ms4me
 
@@ -363,7 +361,7 @@ Examples:
         "--ms4me / --no-ms4me",
         dest="use_ms4me",
         default=True,
-        help="Use MS4Me worker (default: True)",
+        help="Use DEVSStreaming worker (default: True)",
     )
     worker_group.add_argument(
         "--checkpoint-interval",

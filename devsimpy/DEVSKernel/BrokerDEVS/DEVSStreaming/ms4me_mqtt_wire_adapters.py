@@ -12,7 +12,7 @@
 #
 # GENERAL NOTES AND REMARKS:
 #
-# Wire adapters for MS4Me message serialization over MQTT.
+# Wire adapters for DEVSStreaming message serialization over MQTT.
 # Handles encoding/decoding of DEVS messages for MQTT transport.
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##

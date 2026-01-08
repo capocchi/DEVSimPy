@@ -34,9 +34,9 @@ GLOBAL_SETTINGS = {
     'PYDEVS_SIM_STRATEGY_DICT': {'original': 'OriginalPyDEVSSimStrategy', 'bag-based': 'BagBasedPyDEVSSimStrategy', 'direct-coupling': 'DirectCouplingPyDEVSSimStrategy'},
     'PYPDEVS_SIM_STRATEGY_DICT': {'classic': 'ClassicPyPDEVSSimStrategy', 'parallel': 'ParallelPyPDEVSSimStrategy'},
     # BrokerDEVS: Nested structure separating Message Standardization from Broker Choice
-    # Allows flexible combinations like: Kafka+MS4Me, MQTT+MS4Me, etc.
+    # Allows flexible combinations like: Kafka+DEVSStreaming, MQTT+DEVSStreaming, etc.
     'BROKERDEVS_SIM_STRATEGY_DICT': {
-        'MS4Me': {  # Message Standardization
+        'DEVSStreaming': {  # Message Standardization
             'Kafka': 'SimStrategyKafkaMS4Me',
             'MQTT': 'SimStrategyMqttMS4Me',
             'RabbitMQ': 'SimStrategyRabbitMQMS4Me',
@@ -73,7 +73,7 @@ USER_SETTINGS = {
 		'OLLAMA_PORT': "11434",
 		'OLLAMA_MODEL': "mistral"
 	},
-    'SELECTED_MESSAGE_FORMAT': 'MS4Me',  # For BrokerDEVS
+    'SELECTED_MESSAGE_FORMAT': 'DEVSStreaming',  # For BrokerDEVS
     'SELECTED_BROKER': 'Kafka',  # For BrokerDEVS
     
     'FONT_SIZE': 12,
