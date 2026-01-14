@@ -43,7 +43,7 @@ except ImportError:
     # Fallback pour Python < 3.8
     from importlib_metadata import distributions
 
-from Utilities import GetUserConfigDir
+from Utilities import GetUserConfigDir, getDirectorySize
 from InteractionYAML import YAMLHandler
 from ZipManager import get_imported_modules
 
@@ -75,31 +75,6 @@ def retrieve_file_paths(dirName:str)->list:
                  for root, _, files in os.walk(r'{}'.format(dirName).encode('latin').decode('utf-8')) \
                  for filename in files \
                  if '__pycache__' not in filename]
-
-def get_directory_size(directory_path: str) -> int:
-    """Calculate the total size of a directory in bytes.
-    
-    Args:
-        directory_path (str): Path to the directory
-        
-    Returns:
-        int: Total size in bytes
-    """
-    total_size = 0
-    try:
-        for dirpath, dirnames, filenames in os.walk(directory_path):
-            # Skip __pycache__ directories
-            dirnames[:] = [d for d in dirnames if d != '__pycache__']
-            for filename in filenames:
-                if '__pycache__' not in filename:
-                    filepath = os.path.join(dirpath, filename)
-                    try:
-                        total_size += os.path.getsize(filepath)
-                    except (OSError, FileNotFoundError):
-                        pass
-    except (OSError, PermissionError):
-        pass
-    return total_size
 
 def get_domain_path()->str:
     """ Find domain from .devsimpy file.
@@ -364,14 +339,14 @@ services:
                         domain_module_lib.add(os.path.basename(lib_path).split('.')[0])
                         lib_path = os.path.dirname(lib_path)
                     
-                    ### Check directory size (10 MB = 10 * 1024 * 1024 bytes)
+                    ### Check directory size (10 MB = 10 * 1024 KB, getDirectorySize returns KB)
                     lib_path_abs = os.path.abspath(lib_path)
-                    dir_size = get_directory_size(lib_path_abs)
-                    size_mb = dir_size / (1024 * 1024)
+                    size_kb = getDirectorySize(lib_path_abs)
+                    size_mb = size_kb / 1024
                     
                     self.logger.info(f"Library path: {lib_path_abs} (Size: {size_mb:.2f} MB)")
                     
-                    if dir_size > 10 * 1024 * 1024:  # More than 10 MB
+                    if size_kb > 10 * 1024:  # More than 10 MB (10240 KB)
                         self.logger.warning(f"Large directory detected: {lib_path_abs} ({size_mb:.2f} MB)")
                         
                         ### Ask for confirmation if wx is available
