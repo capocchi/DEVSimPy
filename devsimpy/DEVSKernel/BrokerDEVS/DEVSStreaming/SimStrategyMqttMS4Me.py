@@ -498,7 +498,7 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
             while self.ts.Get() < T and not self._simulator.end_flag:
                 iteration += 1
 
-                if tmin == float("inf"):
+                if tmin == INFINITY:
                     logger.info("No more events - simulation complete")
                     break
                 if tmin > T:
@@ -660,7 +660,7 @@ class SimStrategyMqttMS4Me(DirectCouplingPyDEVSSimStrategy):
                 for model in self._atomic_models:
                     if model not in td_int and model not in td_ext:
                         all_next_times.append(model.timeNext)
-                tmin = min(all_next_times) if all_next_times else float("inf")
+                tmin = min(all_next_times) if all_next_times else INFINITY
 
                 # Update progress
                 cpu_time = time.time() - t_start
