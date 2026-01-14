@@ -166,6 +166,18 @@ class StandaloneGUIKafkaPKG(wx.Frame):
         kafka_box.Add(kafka_grid, flag=wx.ALL | wx.EXPAND, border=10)
 
         main_sizer.Add(kafka_box, flag=wx.LEFT|wx.RIGHT|wx.BOTTOM|wx.EXPAND, border=15)
+        
+        # --- Section Build Options ---
+        build_box = wx.StaticBoxSizer(wx.VERTICAL, panel, _("Build Options"))
+        
+        build_sizer = wx.BoxSizer(wx.VERTICAL)
+        
+        self._cb_log = wx.CheckBox(panel, label=_('Enable Logging'))
+        self._cb_log.SetToolTip(_("Enable detailed logging during package generation to track the build process."))
+        build_sizer.Add(self._cb_log, flag=wx.ALL, border=5)
+        
+        build_box.Add(build_sizer, flag=wx.ALL, border=5)
+        main_sizer.Add(build_box, flag=wx.LEFT|wx.RIGHT|wx.BOTTOM|wx.EXPAND, border=15)
 
         # --- Buttons ---
         button_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -230,6 +242,7 @@ class StandaloneGUIKafkaPKG(wx.Frame):
             return
         
         kernel = self.kernel.GetString(self.kernel.GetSelection())
+        log_cb = self._cb_log.GetValue()
         
         try:
             ### call the StandaloneNoGUIKafkaPKG class to build the package
@@ -241,7 +254,8 @@ class StandaloneGUIKafkaPKG(wx.Frame):
                 kafka_container_name=self.kf_container.GetValue(),
                 kafka_boostrap=self.kf_bootstrap.GetValue(),
                 input_topic=self.kf_input_topic.GetValue(),
-                output_topic=self.kf_output_topic.GetValue()
+                output_topic=self.kf_output_topic.GetValue(),
+                enable_log=log_cb
             )
             
             ### Try to build the zip package

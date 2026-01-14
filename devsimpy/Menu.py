@@ -1011,7 +1011,7 @@ class ShapePopupMenu(wx.Menu):
 		disable=wx.MenuItem(self, ID_DISABLE_SHAPE, _("Disable"), _("Disable the link for the simulation"))
 		export=wx.MenuItem(self, ID_EXPORT_SHAPE, _("Export"), _("Export the model"))
 		exportAMD=wx.MenuItem(self, ID_EXPORT_AMD_SHAPE, _("AMD"), _("Model exported to a amd file"))
-		exportKAFKA_WORKER=wx.MenuItem(self, ID_EXPORT_KAFKA_WORKER_PKG, _("Kafka Worker"), _("Model exported as a standalone package runnable with a Kafka-based simulator."))
+		exportKAFKA_WORKER=wx.MenuItem(self, ID_EXPORT_KAFKA_WORKER_PKG, _("Broker Worker"), _("Model exported as a standalone package runnable with a Kafka-based simulator."))
 		exportCMD=wx.MenuItem(self, ID_EXPORT_CMD_SHAPE, _("CMD"), _("Model exported to a cmd file"))
 		exportXML=wx.MenuItem(self, ID_EXPORT_XML_SHAPE, _("XML"), _("Model exported to a xml file"))
 		exportJS=wx.MenuItem(self, ID_EXPORT_JS_SHAPE, _("JS"), _("Model exported to a js (join) file"))
@@ -1148,14 +1148,22 @@ class ShapePopupMenu(wx.Menu):
 			if isinstance(shape, Container.CodeBlock):
 				AppendMenu(self, -1, _("Export"), export_subMenu)
 				Export_SubMenu1 = export_subMenu.Append(exportAMD)
+				Export_SubMenu2 = export_subMenu.Append(exportKAFKA_WORKER)
 				self.AppendSeparator()
 
-				if DEFAULT_DEVS_DIRNAME == "BrokerDEVS":
-					if shape.isPY():
-						### TODO : impelmented but not tested for AMD model
-						Export_SubMenu2 = export_subMenu.Append(exportKAFKA_WORKER)
+				
+				if shape.isPY():
+					if DEFAULT_DEVS_DIRNAME != "BrokerDEVS":
+						Export_SubMenu2.Enable(False)
 
-				if shape.isPYC():
+				elif shape.isAMD():
+					if DEFAULT_DEVS_DIRNAME != "BrokerDEVS":
+						Export_SubMenu2.Enable(False)
+					else:
+						### TODO: need to be implemented
+						Export_SubMenu2.Enable(False)
+
+				elif shape.isPYC():
 					Export_SubMenu1.Enable(False)
 					
 
