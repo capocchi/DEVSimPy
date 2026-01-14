@@ -217,7 +217,7 @@ class AutoSimulationConfig:
 
 
 def auto_configure_simulation(
-    standard: str = "ms4me",
+    standard: str = "devs-streaming",
     broker: Optional[str] = None,
     host: Optional[str] = None,
     port: Optional[int] = None,
@@ -227,7 +227,7 @@ def auto_configure_simulation(
     Auto-configure simulation with sensible defaults.
     
     Args:
-        standard: Message standard to use (default: ms4me)
+        standard: Message standard to use (default: devs-streaming)
         broker: Broker type (kafka, mqtt, rabbitmq)
         host: Broker host
         port: Broker port
@@ -245,7 +245,7 @@ def auto_configure_simulation(
         
         # Fully manual
         config = auto_configure_simulation(
-            standard='ms4me',
+            standard='devs-streaming',
             broker='mqtt',
             host='broker.example.com',
             port=1883
