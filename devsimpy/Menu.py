@@ -1151,7 +1151,6 @@ class ShapePopupMenu(wx.Menu):
 				self.AppendSeparator()
 
 				if DEFAULT_DEVS_DIRNAME == "BrokerDEVS":
-					print("eeee")
 					if shape.isPY():
 						### TODO : impelmented but not tested for AMD model
 						Export_SubMenu2 = export_subMenu.Append(exportKAFKA_WORKER)

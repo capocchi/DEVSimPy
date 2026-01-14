@@ -115,7 +115,7 @@ class StandaloneGUI(wx.Frame):
         self.SetIcon(icon)
 
         # Taille adaptée au contenu
-        self.SetSize((650, 550))
+        self.SetSize((650, 640))
         
         panel = wx.Panel(self)
         panel.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOW))
@@ -208,6 +208,18 @@ class StandaloneGUI(wx.Frame):
         
         sim_box.Add(cb_sizer, flag=wx.ALL, border=5)
         main_sizer.Add(sim_box, flag=wx.LEFT|wx.RIGHT|wx.BOTTOM|wx.EXPAND, border=15)
+        
+        # --- Section Build Options ---
+        build_box = wx.StaticBoxSizer(wx.VERTICAL, panel, _("Build Options"))
+        
+        build_sizer = wx.BoxSizer(wx.VERTICAL)
+        
+        self._cb_log = wx.CheckBox(panel, label=_('Enable Logging'))
+        self._cb_log.SetToolTip(_("Enable detailed logging during package generation to track the build process."))
+        build_sizer.Add(self._cb_log, flag=wx.ALL, border=5)
+        
+        build_box.Add(build_sizer, flag=wx.ALL, border=5)
+        main_sizer.Add(build_box, flag=wx.LEFT|wx.RIGHT|wx.BOTTOM|wx.EXPAND, border=15)
         
         # --- Section Kernel Configuration ---
         kernel_box = wx.StaticBoxSizer(wx.VERTICAL, panel, _("Kernel Configuration"))
@@ -460,6 +472,7 @@ class StandaloneGUI(wx.Frame):
         sim_cb = self._cb1.GetValue()
         docker_cb = self._cb2.GetValue()
         ntl_cb = self._cb3.GetValue()
+        log_cb = self._cb_log.GetValue()
         rt = self._cb4.GetValue()
         kernel = self.kernel.GetString(self.kernel.GetSelection())
         
@@ -474,7 +487,8 @@ class StandaloneGUI(wx.Frame):
                 add_dockerfile=docker_cb,
                 sim_time=ntl_cb,
                 rt=rt,
-                kernel=kernel
+                kernel=kernel,
+                enable_log=log_cb
             )
             
             ### Try to build the zip package of the standalone version
