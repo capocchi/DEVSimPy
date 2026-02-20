@@ -131,6 +131,9 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 	def getStatus(self)->str:
 		return self.state['status']
 
+	def getPhase(self)->str:
+		return self.getStatus()
+	
 	def getState(self)->dict:
 		return self.state
 

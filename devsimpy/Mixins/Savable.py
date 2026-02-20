@@ -194,6 +194,8 @@ class DumpZipFile(DumpBase):
 			
 			with open(dump_filename, 'wb') as file:
 				pickle.dump(obj=PickledCollection(obj_dumped), file=file, protocol=pickle.HIGHEST_PROTOCOL)
+				file.flush()  # Ensure data is written to disk
+				os.fsync(file.fileno())  # Force OS to write to disk
 		
 		except (OSError, pickle.PickleError) as error:
 			tb = traceback.format_exc()
@@ -301,6 +303,16 @@ class DumpZipFile(DumpBase):
 		try:
 			with open(path,'rb') as f:
 				L = pickle.load(f)
+		except (pickle.UnpicklingError, EOFError) as info:
+			tb = traceback.format_exc()
+			file_size = os.path.getsize(path)
+			sys.stderr.write(_("Problem loading: %s -- %s \n")%(str(fileName), str(tb)))
+			sys.stderr.write(_("The pickle file appears to be corrupted or truncated (size: %d bytes).\n") % file_size)
+			sys.stderr.write(_("This file cannot be loaded. Possible solutions:\n"))
+			sys.stderr.write(_("1. Restore from a backup if available\n"))
+			sys.stderr.write(_("2. Delete the corrupted file and recreate the model\n"))
+			sys.stderr.write(_("File location: %s\n") % path)
+			return info
 		except Exception as info:
 			tb = traceback.format_exc()
 			sys.stderr.write(_("Problem loading: %s -- %s \n")%(str(fileName), str(tb)))
@@ -471,6 +483,15 @@ class DumpGZipFile(DumpBase):
 					f.read(1)  # Teste si le fichier est compressé
 					f.seek(0)  # Remet le curseur au début
 					dsp = pickle.load(f)  # Charge l'objet sérialisé
+				except (pickle.UnpicklingError, EOFError) as error:
+					tb = traceback.format_exc()
+					file_size = os.path.getsize(fileName)
+					sys.stderr.write(f"Problem loading: {fileName} -- The pickle file appears to be corrupted or truncated (size: {file_size} bytes).\n")
+					sys.stderr.write(f"This file cannot be loaded. Possible solutions:\n")
+					sys.stderr.write(f"1. Restore from a backup if available\n")
+					sys.stderr.write(f"2. Delete the corrupted file and recreate the diagram\n")
+					sys.stderr.write(f"Full traceback: {tb}\n")
+					return error
 				except Exception as error:
 					tb = traceback.format_exc()
 					sys.stderr.write(f"Problem loading: {fileName} -- {tb}\n")
