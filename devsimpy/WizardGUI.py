@@ -216,7 +216,7 @@ class TextObjectValidator(wx.Validator):
 				textCtrl.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOW))
 			finally:
 				textCtrl.Refresh()
-				return True
+			return True
 
 	def TransferToWindow(self):
 		""" Prevent wxDialog from complaining.

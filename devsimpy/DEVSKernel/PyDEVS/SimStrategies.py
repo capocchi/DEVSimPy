@@ -29,28 +29,20 @@ from Patterns.Strategy import SimStrategy
 from DEVSKernel.PyDEVS.DEVS import AtomicDEVS, CoupledDEVS, IPort, OPort
 
 def getFlatImmChildrenList(model, flat_imm_list: list = None) -> list:
-	"""Set priority flat list compatible avec DEFAULT_DEVS_DIRNAME."""
-	if flat_imm_list is None:
-		flat_imm_list = []
+    """Set priority flat list compatible avec DEFAULT_DEVS_DIRNAME."""
+    if flat_imm_list is None:
+        flat_imm_list = []
 
-	devs_backend_name = getattr(builtins, 'DEFAULT_DEVS_DIRNAME', 'PyDEVS')
-	devs_mod = globals().get(devs_backend_name, None)
-	if devs_mod is None:
-		raise RuntimeError(f"Backend DEVS '{devs_backend_name}' non importé")
+    # Use the imported classes directly instead of trying to get them from globals()
+    for m in model.immChildren:
+        if isinstance(m, AtomicDEVS):
+            flat_imm_list.append(m)
+        elif isinstance(m, CoupledDEVS):
+            getFlatImmChildrenList(m, flat_imm_list)
+        else:
+            sys.stdout.write(_(f'Unknown model {m}'))
 
-	AtomicDEVS = getattr(devs_mod, 'AtomicDEVS', None)
-	CoupledDEVS = getattr(devs_mod, 'CoupledDEVS', None)
-	if AtomicDEVS is None or CoupledDEVS is None:
-		raise RuntimeError(f"Classes AtomicDEVS/CoupledDEVS introuvables dans backend '{devs_backend_name}'")
-
-	for m in model.immChildren:
-		if isinstance(m, AtomicDEVS):
-			flat_imm_list.append(m)
-		elif isinstance(m, CoupledDEVS):
-			getFlatImmChildrenList(m, flat_imm_list)
-
-	return flat_imm_list
-
+    return flat_imm_list
 
 def getFlatPriorityList(model, flat_priority_list: list = None) -> list:
 	"""Set priority flat list."""

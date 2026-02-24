@@ -4,6 +4,8 @@
 wxPython <= 4.2.3 ; python_version >= '3.10'
 wxPython <= 4.1.1 ; python_version >= '3.8' and python_version < '3.10'
 
+wxPython > 4.2 ; python_version >= '3.14'
+
 PyPubSub #<= 3.3.0
 
 PyYAML #>= 5.1.2
@@ -48,3 +50,5 @@ msgpack
 
 paho-mqtt
 kafka-python
+
+confluent_kafka
