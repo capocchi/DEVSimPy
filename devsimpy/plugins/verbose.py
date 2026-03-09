@@ -181,10 +181,27 @@ def start_print_data(*args, **kwargs):
 	global verbose_log
 
 	frame = wx.Frame(parent, wx.ID_ANY, _("Simulation Report"))
-
+	# create a toolbar with copy icon
+	tb = frame.CreateToolBar()
+	copy_tool = tb.AddTool(wx.ID_COPY, _("Copy"), wx.ArtProvider.GetBitmap(wx.ART_COPY, wx.ART_TOOLBAR))
+	saveas_tool = tb.AddTool(wx.ID_SAVEAS, _("Save As"), wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE, wx.ART_TOOLBAR))
+	tb.Realize()
+	
 	# Add a panel so it looks the correct on all platforms
 	panel = wx.Panel(frame, wx.ID_ANY)
 	log = wx.richtext.RichTextCtrl(panel, wx.ID_ANY, size=wx.DefaultSize, style=wx.richtext.RE_READONLY|wx.richtext.RE_MULTILINE)
+
+	# copy button action
+	def on_copy(event):
+		text = log.GetValue()
+		if wx.TheClipboard.Open():
+			wx.TheClipboard.SetData(wx.TextDataObject(text))
+			wx.TheClipboard.Close()
+		else:
+			wx.MessageBox(_("Unable to open clipboard"), _("Error"))
+	
+	tb.Bind(wx.EVT_TOOL, on_copy, copy_tool)
+
 
 	# Filter controls
 	filter_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -339,6 +356,8 @@ def start_print_data(*args, **kwargs):
 				wx.LogError(_("Cannot save current data in file '%s'.") % pathname)
 
 	frame.Bind(wx.EVT_MENU, on_save_as, saveas_item)
+	# also bind toolbar save button
+	tb.Bind(wx.EVT_TOOL, on_save_as, saveas_tool)
 
 	# Add widgets to a sizer
 	sizer = wx.BoxSizer(wx.VERTICAL)
