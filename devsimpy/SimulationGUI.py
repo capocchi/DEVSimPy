@@ -276,7 +276,7 @@ class CollapsiblePanel(wx.Panel):
 		# Set initial values and enable/disable based on package
 		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
 			self.cb2.SetValue(NTL)
-			self.cb3.Enable(False)
+			self.cb3.SetValue(VERBOSE)
 			cb4.Enable(False)
 			cb5.Enable(False)
 		elif DEFAULT_DEVS_DIRNAME == 'BrokerDEVS':
@@ -291,6 +291,11 @@ class CollapsiblePanel(wx.Panel):
 			self.cb3.SetValue(VERBOSE)
 			cb4.SetValue(DYNAMIC_STRUCTURE)
 			cb5.SetValue(REAL_TIME and not NTL)
+		
+		# Disable and uncheck verbose if plugin is not enabled
+		if not PluginManager.is_enable('verbose'):
+			self.cb3.SetValue(False)
+			self.cb3.Enable(False)
 		
 		pane.SetSizer(main_sizer)
 
@@ -606,8 +611,9 @@ class Base(object):
 	def OnViewLog(self, event):
 		"""	When View button is clicked
 		"""
-		# The simulation verbose event occurs
-		PluginManager.trigger_event('START_SIM_VERBOSE', parent=self)
+		# The simulation verbose event occurs only if verbose is enabled
+		if self.verbose:
+			PluginManager.trigger_event('START_SIM_VERBOSE', parent=self)
 
 		# The activity tracking event occurs
 		PluginManager.trigger_event('VIEW_ACTIVITY_REPORT', parent=self, master=self.current_master)
@@ -947,39 +953,55 @@ class Base(object):
 
 		### try to find the file which have the error from traceback
 		devs_error = False
+		# the pubsub call may pass whatever it likes; the original code assumed a
+		# (type, value, traceback) tuple and would crash if msg was anything else.
+		# be defensive: if unpacking fails treat it as a non‑devs error and fall
+		# through to the generic handler below.
 		try:
-			typ, val, tb = msg
-			trace = traceback.format_exception(typ, val, tb)
+			if isinstance(msg, tuple) and len(msg) == 3:
+				typ, val, tb = msg
+				trace = traceback.format_exception(typ, val, tb)
 
-			### paths in traceback
-			paths = [a for a in trace if a.split(',')[0].strip().startswith('File')]
-	
-			### find if DOMAIN_PATH is in the first file path of the trace
-			path = paths[-1]
-			devs_error = DOMAIN_PATH in path or DEVSIMPY_PACKAGE_PATH not in path
-				
+				### paths in traceback
+				paths = [a for a in trace if a.split(',')[0].strip().startswith('File')]
+				if paths:
+					# find if DOMAIN_PATH is in the last file path of the trace
+					p = paths[-1]
+					devs_error = DOMAIN_PATH in p or DEVSIMPY_PACKAGE_PATH not in p
+			else:
+				# msg didnt look like a tuple, maybe pubsub gave keyword args
+				sys.stdout.write(_("ErrorManager received unexpected message type %r\n") % (msg,))
 		except Exception as info:
-			sys.stdout.write(_("Error in ErrorManager: %s"%info))
-	
+			sys.stdout.write(_("Error in ErrorManager: %s" % info))
+
 		### if error come from devs python file
 		if devs_error:
 
 			try:
 				### simulate event button for the code editor
 				event = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self._btn1.GetId())
-			except:
+			except Exception:
 				pass
 			else:
 				### Error dialog
-				if not Container.MsgBoxError(event, self.parent, msg):
-				### if user dont want correct the error, we destroy the simulation windows
+				if not Container.MsgBoxError(event, getattr(self, 'parent', None), msg):
+					### if user dont want correct the error, we destroy the simulation windows
 					self.PrepareDestroyWin()
 					self.Destroy()
 				else:
-				### if user want to correct error through an editor, we stop simulation process for trying again after the error is corrected.
+					### if user want to correct error through an editor, we stop simulation process for trying again after the error is corrected.
 					self.OnStop(event)
 		else:
-			raise MyBad(msg)
+			# treat any other error the same way instead of raising; on  real
+			# non‑devs errors we simply show a message box and tear down the
+			# simulation so the program can continue gracefully.
+			try:
+				Container.MsgBoxError(None, getattr(self, 'parent', None), msg)
+			except Exception as info2:
+				sys.stdout.write(_("Error displaying error dialog: %s\nOriginal: %r") % (info2, msg))
+			# ensure simulation windows are cleaned up
+			self.PrepareDestroyWin()
+		self.Destroy()
 
 class SimulationDialogPanel(Base, wx.Panel):
 	""" Simulation Dialog Panel 
