@@ -8,29 +8,49 @@
 		To use it, just send the SIM_VERBOSE event with the PluginManager.trigger_event function and some parameters like msg, model or clock.
 		Example:
 			PluginManager.trigger_event("SIM_VERBOSE", model=aDEVS, msg=0) for print informations when an external event (msg=0) occurs on the model aDEVS.
+		The configuration dialog now also provides an option for writing the
+		verbose output to a text file; if enabled, all messages are appended to the
+		specified filename.
 		For more details see the verbose.py file in plug-ins directory.
 """
 
 import wx
+import wx.richtext
 import sys
 import os
+import builtins
 
 import gettext
 _ = gettext.gettext
 
 from PluginManager import PluginManager
+from config import GLOBAL_SETTINGS
+
+# Constants
+INFINITY = float('inf')
+ICON_PATH = GLOBAL_SETTINGS['ICON_PATH']
+DEVSIMPY_ICON = GLOBAL_SETTINGS['DEVSIMPY_ICON']
 
 global show_ext_trans
 global show_int_trans
 global show_clock
 global show_coll
 
+# path of the file where verbose output should be appended.  An empty
+# string disables file logging.
+global logfile_path
+
+# list to store verbose output lines for display after simulation
+global verbose_log
+
 show_ext_trans = True
 show_int_trans = True
 show_clock = True
 show_coll = True
+logfile_path = ""
+verbose_log = []
 
-if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME:
+if 'PyPDEVS' in getattr(builtins, 'DEFAULT_DEVS_DIRNAME', ''):
 	raise AssertionError("Verbose plug-in is not compatible with the PyPDEVS simulation kernel!")
 
 class RedirectText(object):
@@ -56,9 +76,11 @@ def LongRunningProcess(*args, **kwargs):
 	global show_clock
 	global show_coll
 
-	if kwargs.has_key('model') and kwargs.has_key('msg'):
+	if 'model' in kwargs and 'msg' in kwargs:
 		### changing frame content: need global
 		global frame
+		global logfile_path
+		global verbose_log
 
 		model = kwargs['model']
 		msg = kwargs['msg']
@@ -75,8 +97,8 @@ def LongRunningProcess(*args, **kwargs):
 			if isinstance(model, DomainBehavior):
 				if msg == 1 and show_ext_trans:
 					txt = [	_("\n\tEXTERNAL TRANSITION: %s (%s)\n")%(block.label,model.myID),
-							_("\t  New State: %s\n")%(model.state),
-							_("\t  Input Port Configuration:\n")]
+						_("\t  New State: %s\n")%(model.state),
+						_("\t  Input Port Configuration:\n")]
 
 
 					txt.extend(["\t    %s: %s\n"%(m, model.peek(m)) for m in model.IPorts])
@@ -88,8 +110,8 @@ def LongRunningProcess(*args, **kwargs):
 				elif show_int_trans:
 
 						txt = [	_("\n\tINTERNAL TRANSITION: %s (%s)\n")%(block.label,model.myID),
-								_("\t  New State: %s\n")%(model.state),
-								_("\t  Output Port Configuration:\n")]
+							_("\t  New State: %s\n")%(model.state),
+							_("\t  Output Port Configuration:\n")]
 
 						for m in model.OPorts:
 							if m in model.myOutput.keys():
@@ -106,38 +128,244 @@ def LongRunningProcess(*args, **kwargs):
 				txt.extend([_("    \t   %s\n")%(m.__class__.__name__) for m in model.immChildren])
 				txt.append(_("\t  select chooses %s\n")%(kwargs['dstar'].__class__.__name__))
 
-			sys.stdout.write(''.join(txt))
+			output = ''.join(txt)
+			sys.stdout.write(output)
+			verbose_log.append(output)
+			if logfile_path:
+				try:
+					with open(logfile_path, 'a', encoding='utf-8') as f:
+						f.write(output)
+				except Exception:
+					pass
 
 		else:
-			sys.stdout.write(_("No verbose for %s dynamic model (%s)!\n")%(str(model), model.myID))
+			msg2 = _("No verbose for %s dynamic model (%s)!\n")%(str(model), model.myID)
+			sys.stdout.write(msg2)
+			verbose_log.append(msg2)
+			if logfile_path:
+				try:
+					with open(logfile_path, 'a', encoding='utf-8') as f:
+						f.write(msg2)
+				except Exception:
+					pass
 
-	elif kwargs.has_key('clock') and show_clock:
+	elif 'clock' in kwargs and show_clock:
 		txt = "\n"+"* "* 10+"CLOCK : %f \n"%(kwargs['clock'])
 		sys.stdout.write(txt)
+		verbose_log.append(txt)
+		if logfile_path:
+			try:
+				with open(logfile_path, 'a', encoding='utf-8') as f:
+					f.write(txt)
+			except Exception:
+				pass
+
+# start_print_data used to be part of LongRunningProcess; it should be a
+# separate handler for the START_SIM_VERBOSE event.  The original refactor
+# accidentally left the code inside LongRunningProcess, causing a KeyError when
+# the event was triggered without a 'parent' key.  Move it out and make the
+# parent lookup defensive.
 
 @PluginManager.register("START_SIM_VERBOSE")
 def start_print_data(*args, **kwargs):
-	""" Start the log frame.
+	"""Start the log frame for simulation verbose output.
+
+	This function is called when the GUI requests that the verbose log window
+	be shown.  The <parent> keyword argument is optional; if it is missing the
+	window will be created without a valid parent (wx will handle that).
 	"""
 
-	parent = kwargs['parent']
+	parent = kwargs.get('parent', None)
 
 	global frame
+	global verbose_log
 
 	frame = wx.Frame(parent, wx.ID_ANY, _("Simulation Report"))
-
+	# create a toolbar with copy icon
+	tb = frame.CreateToolBar()
+	copy_tool = tb.AddTool(wx.ID_COPY, _("Copy"), wx.ArtProvider.GetBitmap(wx.ART_COPY, wx.ART_TOOLBAR))
+	saveas_tool = tb.AddTool(wx.ID_SAVEAS, _("Save As"), wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE, wx.ART_TOOLBAR))
+	tb.Realize()
+	
 	# Add a panel so it looks the correct on all platforms
 	panel = wx.Panel(frame, wx.ID_ANY)
-	log = wx.TextCtrl(panel, wx.ID_ANY, size=(300,100), style = wx.TE_MULTILINE|wx.TE_READONLY|wx.HSCROLL)
+	log = wx.richtext.RichTextCtrl(panel, wx.ID_ANY, size=wx.DefaultSize, style=wx.richtext.RE_READONLY|wx.richtext.RE_MULTILINE)
+
+	# copy button action
+	def on_copy(event):
+		text = log.GetValue()
+		if wx.TheClipboard.Open():
+			wx.TheClipboard.SetData(wx.TextDataObject(text))
+			wx.TheClipboard.Close()
+		else:
+			wx.MessageBox(_("Unable to open clipboard"), _("Error"))
+	
+	tb.Bind(wx.EVT_TOOL, on_copy, copy_tool)
+
+
+	# Filter controls
+	filter_sizer = wx.BoxSizer(wx.HORIZONTAL)
+	filter_label = wx.StaticText(panel, wx.ID_ANY, _("Filter by model name:"))
+	filter_text = wx.TextCtrl(panel, wx.ID_ANY, "", style=wx.TE_PROCESS_ENTER)
+	filter_button = wx.Button(panel, wx.ID_ANY, _("Filter"))
+	clear_button = wx.Button(panel, wx.ID_ANY, _("Show All"))
+	
+	# Clock navigation
+	clock_label = wx.StaticText(panel, wx.ID_ANY, _("Go to clock:"))
+	clock_combo = wx.Choice(panel, wx.ID_ANY)
+	
+	filter_sizer.Add(filter_label, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+	filter_sizer.Add(filter_text, 1, wx.ALL|wx.EXPAND, 5)
+	filter_sizer.Add(filter_button, 0, wx.ALL, 5)
+	filter_sizer.Add(clear_button, 0, wx.ALL, 5)
+	filter_sizer.Add(clock_label, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+	filter_sizer.Add(clock_combo, 0, wx.ALL, 5)
+
+	# Extract clock times
+	clock_times = []
+	for i, line in enumerate(verbose_log):
+		if "CLOCK :" in line:
+			parts = line.split("CLOCK :")
+			if len(parts) > 1:
+				time_str = parts[1].strip().rstrip('\n')
+				try:
+					time_val = float(time_str)
+					clock_times.append((time_val, i))
+				except ValueError:
+					pass
+	clock_times.sort()
+	clock_choices = ["All"] + [str(time) for time, idx in clock_times]
+	clock_combo.SetItems(clock_choices)
+	clock_combo.SetSelection(0)
+
+	current_max_index = None
+	current_clock_positions = []
+	model_colors = {}  # Dictionary to store model name -> color mapping
+	
+	# Color palette for different models
+	color_palette = [
+		wx.Colour(255, 0, 0),      # Red
+		wx.Colour(0, 128, 0),      # Green
+		wx.Colour(0, 0, 255),      # Blue
+		wx.Colour(255, 165, 0),    # Orange
+		wx.Colour(128, 0, 128),    # Purple
+		wx.Colour(0, 128, 128),    # Teal
+		wx.Colour(255, 192, 203),  # Pink
+		wx.Colour(165, 42, 42),    # Brown
+		wx.Colour(0, 100, 0),      # Dark Green
+		wx.Colour(139, 69, 19),    # Saddle Brown
+	]
+
+	def get_model_color(model_name):
+		"""Get or assign a color to a model name"""
+		if model_name not in model_colors:
+			color_index = len(model_colors) % len(color_palette)
+			model_colors[model_name] = color_palette[color_index]
+		return model_colors[model_name]
+
+	def update_display(filter_str="", max_index=None):
+		import re
+		if max_index is None:
+			max_index = len(verbose_log)
+		log.Clear()
+		current_clock_positions.clear()
+		clock_indices = {idx for time, idx in clock_times}
+		
+		# Create styles
+		clock_attr = wx.richtext.RichTextAttr()
+		clock_attr.SetTextColour(wx.Colour(0, 0, 255))  # Blue for clock lines
+		clock_attr.SetFontWeight(wx.FONTWEIGHT_BOLD)
+		
+		normal_attr = wx.richtext.RichTextAttr()
+		normal_attr.SetTextColour(wx.Colour(0, 0, 0))  # Black for normal lines
+		
+		for j, line in enumerate(verbose_log[:max_index]):
+			if not filter_str or filter_str.lower() in line.lower() or "clock" in line.lower():
+				if j in clock_indices:
+					current_clock_positions.append(log.GetLastPosition())
+					log.SetDefaultStyle(clock_attr)
+					log.WriteText(line)
+				else:
+					log.SetDefaultStyle(normal_attr)
+					# Check for model transitions and apply coloring to model names
+					model_match = re.search(r'(EXTERNAL TRANSITION|INTERNAL TRANSITION|Collision occurred in):\s+(.+?)\s+\(', line)
+					if model_match:
+						model_name = model_match.group(2)
+						# Write text before model name
+						prefix_end = model_match.start(2)
+						log.WriteText(line[:prefix_end])
+						# Write model name with assigned color
+						model_attr = wx.richtext.RichTextAttr()
+						model_attr.SetTextColour(get_model_color(model_name))
+						model_attr.SetFontWeight(wx.FONTWEIGHT_BOLD)
+						log.SetDefaultStyle(model_attr)
+						log.WriteText(model_name)
+						# Write rest of line with normal style
+						log.SetDefaultStyle(normal_attr)
+						log.WriteText(line[model_match.end(2):])
+					else:
+						log.WriteText(line)
+
+	# Display the stored verbose output
+	update_display()
+
+	def on_filter(event):
+		filter_str = filter_text.GetValue().strip()
+		update_display(filter_str)
+
+	def on_clear(event):
+		filter_text.SetValue("")
+		update_display()
+
+	def on_clock_select(event):
+		selection = clock_combo.GetSelection()
+		if selection == 0:  # All
+			pass  # already showing all
+		else:
+			index = selection - 1
+			if index < len(current_clock_positions):
+				log.ShowPosition(current_clock_positions[index])
+
+	filter_button.Bind(wx.EVT_BUTTON, on_filter)
+	clear_button.Bind(wx.EVT_BUTTON, on_clear)
+	filter_text.Bind(wx.EVT_TEXT_ENTER, on_filter)
+	filter_text.Bind(wx.EVT_KILL_FOCUS, on_filter)
+	clock_combo.Bind(wx.EVT_CHOICE, on_clock_select)
+
+	filter_button.Bind(wx.EVT_BUTTON, on_filter)
+	clear_button.Bind(wx.EVT_BUTTON, on_clear)
+	filter_text.Bind(wx.EVT_TEXT_ENTER, on_filter)
+	filter_text.Bind(wx.EVT_KILL_FOCUS, on_filter)
+
+	# Add menu bar with Save As option
+	menubar = wx.MenuBar()
+	filemenu = wx.Menu()
+	saveas_item = filemenu.Append(wx.ID_SAVEAS, "&Save As\tCtrl+S")
+	menubar.Append(filemenu, "&File")
+	frame.SetMenuBar(menubar)
+
+	def on_save_as(event):
+		with wx.FileDialog(frame, _("Save verbose log"), wildcard=_("Text files (*.txt)|*.txt"), style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as fileDialog:
+			if fileDialog.ShowModal() == wx.ID_CANCEL:
+				return
+			pathname = fileDialog.GetPath()
+			try:
+				with open(pathname, 'w', encoding='utf-8') as file:
+					file.write(log.GetValue())
+			except IOError:
+				wx.LogError(_("Cannot save current data in file '%s'.") % pathname)
+
+	frame.Bind(wx.EVT_MENU, on_save_as, saveas_item)
+	# also bind toolbar save button
+	tb.Bind(wx.EVT_TOOL, on_save_as, saveas_tool)
 
 	# Add widgets to a sizer
 	sizer = wx.BoxSizer(wx.VERTICAL)
+	sizer.Add(filter_sizer, 0, wx.EXPAND)
 	sizer.Add(log, 1, wx.ALL|wx.EXPAND, 5)
 	panel.SetSizer(sizer)
 
-	# redirect text here
-	redir = RedirectText(log)
-	sys.stdout=redir
+	frame.SetSize((600, 400))
 	frame.Show()
 
 class VerboseConfig(wx.Frame):
@@ -156,6 +384,11 @@ class VerboseConfig(wx.Frame):
 		self.checkbox_5 = wx.CheckBox(self.panel, wx.ID_ANY, _("Show internal transition trace"))
 		self.checkbox_6 = wx.CheckBox(self.panel, wx.ID_ANY, _("Show collision trace"))
 
+		# file output controls
+		self.checkbox_file = wx.CheckBox(self.panel, wx.ID_ANY, _("Write verbose output to file"))
+		self.text_filename = wx.TextCtrl(self.panel, wx.ID_ANY, "", style=wx.TE_PROCESS_ENTER)
+		self.button_browse = wx.Button(self.panel, wx.ID_ANY, _("Browse…"))
+
 		self.button_2 = wx.Button(self.panel, wx.ID_CANCEL, "")
 		self.button_3 = wx.Button(self.panel, wx.ID_OK, "")
 
@@ -164,6 +397,7 @@ class VerboseConfig(wx.Frame):
 
 		self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
 		self.Bind(wx.EVT_BUTTON, self.OnCancel, id=wx.ID_CANCEL)
+		self.Bind(wx.EVT_BUTTON, self.OnBrowse, self.button_browse)
 
 	def __set_properties(self):
 
@@ -172,14 +406,19 @@ class VerboseConfig(wx.Frame):
 		global show_clock
 		global show_coll
 
-		_icon = wx.EmptyIcon()
-		_icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH, DEVSIMPY_PNG), wx.BITMAP_TYPE_ANY))
+		_icon = wx.Icon()
+		_icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH, DEVSIMPY_ICON), wx.BITMAP_TYPE_ANY))
+
 		self.SetIcon(_icon)
-		self.SetToolTipString(_("Display options for the plug-in verbose"))
+		self.SetToolTip(_("Display options for the plug-in verbose"))
 		self.checkbox_3.SetValue(show_clock)
 		self.checkbox_4.SetValue(show_ext_trans)
 		self.checkbox_5.SetValue(show_int_trans)
 		self.checkbox_6.SetValue(show_coll)
+
+		# file output initial state
+		self.checkbox_file.SetValue(bool(logfile_path))
+		self.text_filename.SetValue(logfile_path)
 
 		self.button_3.SetDefault()
 		# end wxGlade
@@ -194,18 +433,32 @@ class VerboseConfig(wx.Frame):
 		sizer_4 = wx.BoxSizer(wx.VERTICAL)
 		sizer_5 = wx.BoxSizer(wx.HORIZONTAL)
 
-		### adding check-box
-		sizer_3.Add(self.checkbox_3, 0, wx.EXPAND, 2, 2)
-		sizer_3.Add(self.checkbox_4, 0, wx.EXPAND, 2, 2)
-		sizer_3.Add(self.checkbox_5, 0, wx.EXPAND, 2, 2)
-		sizer_3.Add(self.checkbox_6, 0, wx.EXPAND, 2, 2)
+		### adding checkboxes inside static box
+		# give each control a small border and allow it to expand to
+		# the width of the static box (wx.EXPAND).  the extra numeric
+		# argument that was previously present is not part of the
+		# Add() signature and caused confusion; use wx.ALL for the
+		# border flag instead.
+		sizer_3.Add(self.checkbox_3, 0, wx.ALL|wx.EXPAND, 2)
+		sizer_3.Add(self.checkbox_4, 0, wx.ALL|wx.EXPAND, 2)
+		sizer_3.Add(self.checkbox_5, 0, wx.ALL|wx.EXPAND, 2)
+		sizer_3.Add(self.checkbox_6, 0, wx.ALL|wx.EXPAND, 2)
+
+		### file output row
+		file_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		file_sizer.Add(self.checkbox_file, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
+		file_sizer.Add(self.text_filename, 1, wx.ALL|wx.EXPAND, 2)
+		file_sizer.Add(self.button_browse, 0, wx.ALL, 2)
+		sizer_3.Add(file_sizer, 0, wx.EXPAND, 2)
 
 		### adding buttons
-		sizer_5.Add(self.button_2, 1, wx.ALIGN_CENTER_HORIZONTAL)
-		sizer_5.Add(self.button_3, 1, wx.ALIGN_CENTER_HORIZONTAL)
+		# horizontal sizer - align controls vertically and give them
+		# some space around them so they don't touch the edge.
+		sizer_5.Add(self.button_2, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+		sizer_5.Add(self.button_3, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
-		sizer_4.Add(sizer_3, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL,0)
-		sizer_4.Add(sizer_5, 1, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL,0)
+		sizer_4.Add(sizer_3, 0, wx.ALL|wx.EXPAND, 8)
+		sizer_4.Add(sizer_5, 1, wx.ALL|wx.EXPAND, 8)
 
 		self.panel.SetSizer(sizer_4)
 
@@ -227,6 +480,13 @@ class VerboseConfig(wx.Frame):
 		show_int_trans = self.checkbox_5.GetValue()
 		show_coll = self.checkbox_6.GetValue()
 
+		# file logging
+		global logfile_path
+		if self.checkbox_file.GetValue():
+			logfile_path = self.text_filename.GetValue()
+		else:
+			logfile_path = ""
+
 		self.Close()
 
 	###
@@ -234,6 +494,16 @@ class VerboseConfig(wx.Frame):
 		""" cancel button has been checked.
 		"""
 		self.Close()
+
+	###
+	def OnBrowse(self, evt):
+		"""Show a file dialog to pick the logfile path."""
+		with wx.FileDialog(self, message=_("Select log file"),
+			defaultDir=os.getcwd(),
+			defaultFile=self.text_filename.GetValue(),
+			style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as dlg:
+			if dlg.ShowModal() == wx.ID_OK:
+				self.text_filename.SetValue(dlg.GetPath())
 ###
 def Config(parent):
 	""" Plug-in settings frame.

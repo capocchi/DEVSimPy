@@ -332,7 +332,9 @@ class Wizard(wizmod):
 	def on_close(self, evt):
 		""" Close button has been pressed. Destroy the wizard.
 		"""
-		wx.CallAfter(self.Destroy)
+		# wx.CallAfter(self.Destroy)
+		self.canceled_flag = True
+		evt.Skip() 
 		
 
 class ModelGeneratorWizard(Wizard):
@@ -905,7 +907,7 @@ class ModelGeneratorWizard(Wizard):
 			self.inputs = in_SpinCtrl.GetValue()
 			self.outputs = out_SpinCtrl.GetValue()
 
-			print("the path : %s\nthe name : %s\nThe inputs ports:%s\n the ouputports%s\n"%(self.model_path, self.label, self.inputs, self.outputs))
+			# print("the path : %s\nthe name: %s\nThe inputs ports:%s\n the ouputports:%s\n"%(self.model_path, self.label, self.inputs, self.outputs))
 			
 			### model path exist ?
 			if os.path.exists(self.model_path):
