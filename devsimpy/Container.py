@@ -2385,7 +2385,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 			gmwiz = self.OnStartWizard(event)
 
 			# if wizard is finished witout closing
-			if gmwiz :
+			if gmwiz:
 				
 				m = Components.BlockFactory.CreateBlock( canvas = self,
 													x = xm,
@@ -2420,8 +2420,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 					# focus
 					#wx.CallAfter(self.SetFocus)
 
-				# Cleanup
-				gmwiz.Destroy()
+					# gmwiz.Destroy()
 
 		@BuzyCursorNotification
 		def OnPaste(self, event):
