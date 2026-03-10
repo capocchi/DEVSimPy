@@ -223,27 +223,54 @@ def blink_manager(*args, **kwargs):
 
 class BlinkFrame(wx.Frame):
 	"""
+	Blink Logger Frame - Enhanced UI with modern design
 	"""
 	def __init__(self, *args, **kwds):
-		""" Constructor.
+		""" Constructor with optimized UI
 		"""
 
-		kwds["style"] = wx.DEFAULT_FRAME_STYLE |wx.STAY_ON_TOP
-		kwds["size"] = (400, 420)
+		kwds["style"] = wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP
+		kwds["size"] = (700, 550)
 
 		wx.Frame.__init__(self, *args, **kwds)
 
 		global canvas
 		
 		self.panel = wx.Panel(self)
-		self.button_clear = wx.Button(self.panel, wx.ID_CLEAR)
-		self.button_step = wx.Button(self.panel, wx.ID_FORWARD)
-		self.button_find = wx.Button(self.panel, wx.ID_FIND)
-		self.button_selectall = wx.Button(self.panel, wx.ID_SELECTALL)
-		self.txt = wx.TextCtrl(self.panel, style = wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_RICH2)
+
+		# ===== TITLE SECTION =====
+		title_font = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
+		self.title = wx.StaticText(self.panel, wx.ID_ANY, _("Simulation Blink Logger"))
+		self.title.SetFont(title_font)
+		title_color = wx.SystemSettings.GetColour(wx.SYS_COLOUR_HOTLIGHT)
+		self.title.SetForegroundColour(title_color)
+
+		# ===== OUTPUT SECTION =====
+		self.txt = wx.TextCtrl(self.panel, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
+		self.txt.SetMinSize((680, 300))
+
+		# ===== CONTROL BUTTONS =====
+		self.button_selectall = wx.Button(self.panel, wx.ID_SELECTALL, _("Select All"), size=(90, -1))
+		self.button_find = wx.Button(self.panel, wx.ID_FIND, _("Find..."), size=(90, -1))
+		self.button_clear = wx.Button(self.panel, wx.ID_CLEAR, _("Clear"), size=(90, -1))
+
+		# Set tooltips
+		self.button_selectall.SetToolTip(_("Select all text in the log"))
+		self.button_find.SetToolTip(_("Open find/replace dialog"))
+		self.button_clear.SetToolTip(_("Clear selected text or entire log"))
+
+		# ===== DISPLAY OPTIONS SECTION =====
 		self.cb1 = wx.CheckBox(self.panel, label=_('Display activity'))
 		self.cb2 = wx.CheckBox(self.panel, label=_('Display phase'))
 		self.cb3 = wx.CheckBox(self.panel, label=_('Display sigma'))
+
+		self.cb1.SetToolTip(_("Block is colored depending on the transition function."))
+		self.cb2.SetToolTip(_("Phase of DEVS model is displayed below the label of block."))
+		self.cb3.SetToolTip(_("Sigma (time to next event) of DEVS model is displayed below the label of block."))
+
+		# ===== STEP/FORWARD BUTTON =====
+		self.button_step = wx.Button(self.panel, wx.ID_FORWARD, _("Forward"), size=(90, -1))
+		self.button_step.SetToolTip(_("Go to next step in step-by-step simulation."))
 
 		MoveFromParent(self, interval=10, direction='right')
 
@@ -272,75 +299,70 @@ class BlinkFrame(wx.Frame):
 		self.Bind(wx.EVT_CHECKBOX, self.OnChecked3, id=self.cb3.GetId()) 
                 
 	def __set_properties(self):
+		""" Set properties for all widgets
 		"""
-		"""
-		self.txt.SetMinSize((390, 300))
-		self.button_step.SetToolTip(_("Press this button in order to go step by step in the simulation."))
-		self.button_clear.SetToolTip(_("Press this button in order to clean the output of the simulation."))
-		self.button_find.SetToolTip(_("Press this button in order to launch the search window."))
-		self.cb1.SetToolTip(_("Block is colored depending on the transition function."))
-		self.cb2.SetToolTip(_("Phase of devs model is displayed below the label of block."))
-		self.cb3.SetToolTip(_("Sigma of devs model is displayed below the label of block."))
-
 		self.button_step.SetDefault()
 
 	def __do_layout(self):
+		""" Layout of the frame with improved organization
 		"""
-		"""
-		sizer_2 = wx.BoxSizer(wx.VERTICAL)
-		sizer_2.Add(self.txt, 1, wx.EXPAND)
+		main_sizer = wx.BoxSizer(wx.VERTICAL)
 
-		grid_sizer_1 = wx.BoxSizer(wx.HORIZONTAL)
-		grid_sizer_1.Add(self.button_selectall, 1, wx.ALIGN_CENTER|wx.ADJUST_MINSIZE)
-		grid_sizer_1.Add(self.button_find, 1, wx.ALIGN_CENTER|wx.ADJUST_MINSIZE)
-		grid_sizer_1.Add(self.button_clear, 1, wx.ALIGN_CENTER|wx.ADJUST_MINSIZE)
+		# ===== TITLE =====
+		main_sizer.Add(self.title, 0, wx.ALL, 10)
 
-		sizer_2.Add(grid_sizer_1, 0, wx.EXPAND)
+		# ===== OUTPUT SECTION =====
+		output_sizer = wx.StaticBoxSizer(wx.VERTICAL, self.panel, _("Transition Log"))
+		output_sizer.Add(self.txt, 1, wx.EXPAND | wx.ALL, 5)
+		main_sizer.Add(output_sizer, 1, wx.EXPAND | wx.ALL, 10)
 
-		sizer_2.Add((-1, 25))
+		# ===== CONTROL BUTTONS SECTION =====
+		control_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		control_sizer.Add(self.button_selectall, 0, wx.RIGHT, 5)
+		control_sizer.Add(self.button_find, 0, wx.RIGHT, 5)
+		control_sizer.Add(self.button_clear, 0, wx.RIGHT, 0)
+		main_sizer.Add(control_sizer, 0, wx.ALL | wx.EXPAND, 10)
 
-		hbox4 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox4.Add(self.cb1)
-		hbox4.Add(self.cb2, flag=wx.LEFT, border=10)
-		hbox4.Add(self.cb3, flag=wx.LEFT, border=10)
+		# ===== DISPLAY OPTIONS SECTION =====
+		options_sizer = wx.StaticBoxSizer(wx.HORIZONTAL, self.panel, _("Display Options"))
+		options_sizer.Add(self.cb1, 0, wx.RIGHT, 20)
+		options_sizer.Add(self.cb2, 0, wx.RIGHT, 20)
+		options_sizer.Add(self.cb3, 0, wx.RIGHT, 0)
+		main_sizer.Add(options_sizer, 0, wx.ALL | wx.EXPAND, 10)
 
-	#	cb3 = wx.CheckBox(self.panel, label='Non-Project classes')
-	#	hbox4.Add(cb3, flag=wx.LEFT, border=10)
+		# ===== FORWARD/STEP BUTTON =====
+		step_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		step_sizer.AddStretchSpacer()
+		step_sizer.Add(self.button_step, 0, wx.RIGHT, 0)
+		main_sizer.Add(step_sizer, 0, wx.ALL | wx.EXPAND, 10)
 
-		sizer_2.Add(hbox4, flag=wx.LEFT, border=10)
-
-		sizer_2.Add(self.button_step, 0, wx.ALIGN_RIGHT)
-
-		self.panel.SetSizerAndFit(sizer_2)
+		self.panel.SetSizerAndFit(main_sizer)
 
 	def OnChecked1(self, evt):
-		"""
+		""" Display activity checkbox changed
 		"""
 		cb = evt.GetEventObject()
 		self.colored_flag = cb.GetValue()
-		#print(cb.GetLabel(),' is clicked',cb.GetValue())
 
 	def OnChecked2(self, evt):
-		"""
+		""" Display phase checkbox changed
 		"""
 		cb = evt.GetEventObject()
 		self.status_flag = cb.GetValue()
-		#print(cb.GetLabel(),' is clicked',cb.GetValue())
 
 	def OnChecked3(self, evt):
-		"""
+		""" Display sigma checkbox changed
 		"""
 		cb = evt.GetEventObject()
 		self.sigma_flag = cb.GetValue()
-		#print(cb.GetLabel(),' is clicked',cb.GetValue())
 
 	def OnStep(self, evt):
-		""" Forward button has been ckicled.
+		""" Forward button clicked - step to next transition
 		"""
 		nb = self.txt.GetNumberOfLines()
 		parent = self.GetParent()
 		
-		### si plus de sortie text dans le Logger, alors on ferme la fenêtre et on stop la simulation
+		### if no new output in the Logger, close window and stop simulation
 		if nb != self.lenght:
 			self.lenght = nb
 		else:
@@ -350,34 +372,33 @@ class BlinkFrame(wx.Frame):
 		self.flag = True
 		self.button_clear.Enable(True)
 
-	###
 	def OnClear(self, evt):
-		""" Clear selection or all text.
+		""" Clear button clicked - remove selected or all text
 		"""
 		s = self.txt.GetSelection()
-		### if no text selected, we select all
+		### if no text selected, select all
 		if s[0] == s[1]:
 			s = self.txt.SelectAll()
 
 		s = self.txt.GetSelection()
 		self.txt.Remove(s[0], s[1])
 
-	###
 	def OnSelectAll(self, evt):
-		""" Select all text.
+		""" Select All button clicked - select all text
 		"""
 		self.txt.SelectAll()
 
-	###
 	def OnFindReplace(self, evt):
-		""" Call find and replace dialogue.
+		""" Find button clicked - open find/replace dialog
 		"""
 		FindReplace(self, wx.ID_ANY, _('Find/Replace'))
 
 	def OnClose(self, evt):
+		""" Frame closing - cleanup and refresh diagram
+		"""
 		### to stop the while in SIM_BLINK
 		self.flag = True
-		### Refresh all block on the diagram to clear the stauts_label info (color is already updated)
+		### Refresh all blocks on the diagram to clear the status_label info (color is already updated)
 		canvas.OnRefreshModels(evt)
 		evt.Skip()
 		
