@@ -370,36 +370,60 @@ def start_print_data(*args, **kwargs):
 
 class VerboseConfig(wx.Frame):
 	def __init__(self, *args, **kwds):
-		""" Constructor
+		""" Constructor with optimized UI
 		"""
 
-		kwds["style"] = wx.STAY_ON_TOP|wx.DEFAULT_FRAME_STYLE
+		kwds["style"] = wx.STAY_ON_TOP | wx.DEFAULT_FRAME_STYLE
 		wx.Frame.__init__(self, *args, **kwds)
+		self.SetSize((600, 450))
 
 		self.panel = wx.Panel(self, wx.ID_ANY)
 
-		self.sizer_3_staticbox = wx.StaticBox(self.panel, wx.ID_ANY, _("Display options"))
-		self.checkbox_3 = wx.CheckBox(self.panel, wx.ID_ANY, _("Show clock"))
-		self.checkbox_4 = wx.CheckBox(self.panel,wx.ID_ANY, _("Show external transition trace"))
-		self.checkbox_5 = wx.CheckBox(self.panel, wx.ID_ANY, _("Show internal transition trace"))
-		self.checkbox_6 = wx.CheckBox(self.panel, wx.ID_ANY, _("Show collision trace"))
+		# ===== TITLE SECTION =====
+		title_font = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
+		self.title = wx.StaticText(self.panel, wx.ID_ANY, _("Simulation Verbose Output Configuration"))
+		self.title.SetFont(title_font)
+		title_color = wx.SystemSettings.GetColour(wx.SYS_COLOUR_HOTLIGHT)
+		self.title.SetForegroundColour(title_color)
 
-		# file output controls
+		# ===== DISPLAY OPTIONS SECTION =====
+		self.sizer_display_box = wx.StaticBox(self.panel, wx.ID_ANY, _("Display Options"))
+		self.checkbox_clock = wx.CheckBox(self.panel, wx.ID_ANY, _("Show clock"))
+		self.checkbox_ext = wx.CheckBox(self.panel, wx.ID_ANY, _("Show external transition trace"))
+		self.checkbox_int = wx.CheckBox(self.panel, wx.ID_ANY, _("Show internal transition trace"))
+		self.checkbox_collision = wx.CheckBox(self.panel, wx.ID_ANY, _("Show collision trace"))
+
+		# Add tooltips for better UX
+		self.checkbox_clock.SetToolTip(_("Display simulation clock/time for each event"))
+		self.checkbox_ext.SetToolTip(_("Display when external events are received"))
+		self.checkbox_int.SetToolTip(_("Display when internal transitions occur"))
+		self.checkbox_collision.SetToolTip(_("Display when messages collide in ports"))
+
+		# ===== FILE OUTPUT SECTION =====
+		self.sizer_file_box = wx.StaticBox(self.panel, wx.ID_ANY, _("File Logging"))
 		self.checkbox_file = wx.CheckBox(self.panel, wx.ID_ANY, _("Write verbose output to file"))
-		self.text_filename = wx.TextCtrl(self.panel, wx.ID_ANY, "", style=wx.TE_PROCESS_ENTER)
-		self.button_browse = wx.Button(self.panel, wx.ID_ANY, _("Browse…"))
+		self.checkbox_file.SetToolTip(_("Save all verbose output to a log file"))
 
-		self.button_2 = wx.Button(self.panel, wx.ID_CANCEL, "")
-		self.button_3 = wx.Button(self.panel, wx.ID_OK, "")
+		self.text_filename = wx.TextCtrl(self.panel, wx.ID_ANY, "", style=wx.TE_PROCESS_ENTER)
+		self.button_browse = wx.Button(self.panel, wx.ID_ANY, _("Browse…"), size=(100, -1))
+
+		# ===== BUTTON SECTION =====
+		self.button_help = wx.Button(self.panel, wx.ID_HELP, _("Help"), size=(100, -1))
+		self.button_cancel = wx.Button(self.panel, wx.ID_CANCEL, _("Cancel"), size=(100, -1))
+		self.button_ok = wx.Button(self.panel, wx.ID_OK, _("Apply"), size=(100, -1))
 
 		self.__set_properties()
 		self.__do_layout()
 
 		self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
 		self.Bind(wx.EVT_BUTTON, self.OnCancel, id=wx.ID_CANCEL)
+		self.Bind(wx.EVT_BUTTON, self.OnHelp, id=wx.ID_HELP)
 		self.Bind(wx.EVT_BUTTON, self.OnBrowse, self.button_browse)
+		self.Bind(wx.EVT_CHECKBOX, self.OnFileCheckbox, self.checkbox_file)
 
 	def __set_properties(self):
+		""" Set properties for all widgets
+		"""
 
 		global show_ext_trans
 		global show_int_trans
@@ -410,78 +434,83 @@ class VerboseConfig(wx.Frame):
 		_icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH, DEVSIMPY_ICON), wx.BITMAP_TYPE_ANY))
 
 		self.SetIcon(_icon)
-		self.SetToolTip(_("Display options for the plug-in verbose"))
-		self.checkbox_3.SetValue(show_clock)
-		self.checkbox_4.SetValue(show_ext_trans)
-		self.checkbox_5.SetValue(show_int_trans)
-		self.checkbox_6.SetValue(show_coll)
+		self.SetToolTip(_("Display options for the verbose plug-in"))
+		self.checkbox_clock.SetValue(show_clock)
+		self.checkbox_ext.SetValue(show_ext_trans)
+		self.checkbox_int.SetValue(show_int_trans)
+		self.checkbox_collision.SetValue(show_coll)
 
 		# file output initial state
 		self.checkbox_file.SetValue(bool(logfile_path))
 		self.text_filename.SetValue(logfile_path)
+		self.text_filename.Enable(bool(logfile_path))
 
-		self.button_3.SetDefault()
-		# end wxGlade
+		self.button_ok.SetDefault()
 
-	###
 	def __do_layout(self):
-		""" Layout of the frame.
+		""" Layout of the frame with improved organization
 		"""
 
-		### create sizers
-		sizer_3 = wx.StaticBoxSizer(self.sizer_3_staticbox, wx.VERTICAL)
-		sizer_4 = wx.BoxSizer(wx.VERTICAL)
-		sizer_5 = wx.BoxSizer(wx.HORIZONTAL)
+		main_sizer = wx.BoxSizer(wx.VERTICAL)
 
-		### adding checkboxes inside static box
-		# give each control a small border and allow it to expand to
-		# the width of the static box (wx.EXPAND).  the extra numeric
-		# argument that was previously present is not part of the
-		# Add() signature and caused confusion; use wx.ALL for the
-		# border flag instead.
-		sizer_3.Add(self.checkbox_3, 0, wx.ALL|wx.EXPAND, 2)
-		sizer_3.Add(self.checkbox_4, 0, wx.ALL|wx.EXPAND, 2)
-		sizer_3.Add(self.checkbox_5, 0, wx.ALL|wx.EXPAND, 2)
-		sizer_3.Add(self.checkbox_6, 0, wx.ALL|wx.EXPAND, 2)
+		# ===== TITLE =====
+		main_sizer.Add(self.title, 0, wx.ALL, 10)
 
-		### file output row
-		file_sizer = wx.BoxSizer(wx.HORIZONTAL)
-		file_sizer.Add(self.checkbox_file, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
-		file_sizer.Add(self.text_filename, 1, wx.ALL|wx.EXPAND, 2)
-		file_sizer.Add(self.button_browse, 0, wx.ALL, 2)
-		sizer_3.Add(file_sizer, 0, wx.EXPAND, 2)
+		# ===== DISPLAY OPTIONS SECTION =====
+		display_sizer = wx.StaticBoxSizer(self.sizer_display_box, wx.VERTICAL)
+		display_sizer.Add(self.checkbox_clock, 0, wx.ALL | wx.EXPAND, 5)
+		display_sizer.Add(self.checkbox_ext, 0, wx.ALL | wx.EXPAND, 5)
+		display_sizer.Add(self.checkbox_int, 0, wx.ALL | wx.EXPAND, 5)
+		display_sizer.Add(self.checkbox_collision, 0, wx.ALL | wx.EXPAND, 5)
+		main_sizer.Add(display_sizer, 0, wx.ALL | wx.EXPAND, 10)
 
-		### adding buttons
-		# horizontal sizer - align controls vertically and give them
-		# some space around them so they don't touch the edge.
-		sizer_5.Add(self.button_2, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-		sizer_5.Add(self.button_3, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+		# ===== FILE LOGGING SECTION =====
+		file_desc = wx.StaticText(self.panel, wx.ID_ANY, 
+			_("Log file path (leave empty to disable file logging):"))
+		small_font = wx.Font(9, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL)
+		file_desc.SetFont(small_font)
+		file_desc.SetForegroundColour(wx.Colour(100, 100, 100))
 
-		sizer_4.Add(sizer_3, 0, wx.ALL|wx.EXPAND, 8)
-		sizer_4.Add(sizer_5, 1, wx.ALL|wx.EXPAND, 8)
+		file_sizer = wx.StaticBoxSizer(self.sizer_file_box, wx.VERTICAL)
+		file_sizer.Add(self.checkbox_file, 0, wx.ALL | wx.EXPAND, 5)
+		
+		desc_sizer = wx.BoxSizer(wx.VERTICAL)
+		desc_sizer.Add(file_desc, 0, wx.ALL, 5)
+		file_sizer.Add(desc_sizer, 0, wx.ALL | wx.EXPAND, 0)
 
-		self.panel.SetSizer(sizer_4)
+		path_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		path_sizer.Add(self.text_filename, 1, wx.ALL | wx.EXPAND, 5)
+		path_sizer.Add(self.button_browse, 0, wx.ALL, 5)
+		file_sizer.Add(path_sizer, 0, wx.ALL | wx.EXPAND, 0)
+		main_sizer.Add(file_sizer, 0, wx.ALL | wx.EXPAND, 10)
 
+		# ===== BUTTONS =====
+		button_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		button_sizer.Add(self.button_help, 0, wx.RIGHT, 10)
+		button_sizer.AddStretchSpacer()
+		button_sizer.Add(self.button_cancel, 0, wx.RIGHT, 5)
+		button_sizer.Add(self.button_ok, 0, wx.RIGHT, 0)
+		main_sizer.Add(button_sizer, 0, wx.ALL | wx.EXPAND, 10)
+
+		self.panel.SetSizer(main_sizer)
 		self.Centre()
-		# end wxGlade
 
-	###
 	def OnOk(self, evt):
-		""" Ok button, has been clicked.
+		""" Apply button clicked - save settings
 		"""
 
 		global show_ext_trans
 		global show_int_trans
 		global show_clock
 		global show_coll
+		global logfile_path
 
-		show_clock = self.checkbox_3.GetValue()
-		show_ext_trans = self.checkbox_4.GetValue()
-		show_int_trans = self.checkbox_5.GetValue()
-		show_coll = self.checkbox_6.GetValue()
+		show_clock = self.checkbox_clock.GetValue()
+		show_ext_trans = self.checkbox_ext.GetValue()
+		show_int_trans = self.checkbox_int.GetValue()
+		show_coll = self.checkbox_collision.GetValue()
 
 		# file logging
-		global logfile_path
 		if self.checkbox_file.GetValue():
 			logfile_path = self.text_filename.GetValue()
 		else:
@@ -489,22 +518,49 @@ class VerboseConfig(wx.Frame):
 
 		self.Close()
 
-	###
 	def OnCancel(self, evt):
-		""" cancel button has been checked.
+		""" Cancel button clicked - close without saving
 		"""
 		self.Close()
 
-	###
+	def OnHelp(self, evt):
+		""" Help button clicked - show help dialog
+		"""
+		help_msg = _(
+			"Verbose Plug-in Configuration\n\n"
+			"Display Options:\n"
+			"• Show clock: Display simulation time for each event\n"
+			"• Show external transition trace: Log external state changes\n"
+			"• Show internal transition trace: Log internal state changes\n"
+			"• Show collision trace: Log message collisions on ports\n\n"
+			"File Logging:\n"
+			"• Enable 'Write verbose output to file' to save all output\n"
+			"• Use 'Browse' to select or create a log file\n"
+			"• Leave file path empty to disable file logging\n\n"
+			"Click 'Apply' to save your settings."
+		)
+		dlg = wx.MessageDialog(self, help_msg, _("Verbose Plug-in Help"), 
+			wx.OK | wx.ICON_INFORMATION)
+		dlg.ShowModal()
+		dlg.Destroy()
+
+	def OnFileCheckbox(self, evt):
+		""" Enable/disable file path controls based on checkbox
+		"""
+		enabled = self.checkbox_file.GetValue()
+		self.text_filename.Enable(enabled)
+		self.button_browse.Enable(enabled)
+
 	def OnBrowse(self, evt):
-		"""Show a file dialog to pick the logfile path."""
+		""" Browse button clicked - show file dialog
+		"""
 		with wx.FileDialog(self, message=_("Select log file"),
 			defaultDir=os.getcwd(),
 			defaultFile=self.text_filename.GetValue(),
 			style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as dlg:
 			if dlg.ShowModal() == wx.ID_OK:
 				self.text_filename.SetValue(dlg.GetPath())
-###
+
 def Config(parent):
 	""" Plug-in settings frame.
 	"""

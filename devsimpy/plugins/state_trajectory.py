@@ -276,7 +276,7 @@ def add_state_trajectory_menu(*args, **kwargs):
 ######################################################################
 
 def Config(parent):
-    """ Plug-in settings frame.
+    """ Plug-in settings frame with optimized UI.
     """
 
     global cb1
@@ -292,96 +292,182 @@ def Config(parent):
     frame = wx.Frame(parent,
                     wx.ID_ANY,
                     title = _('State Trajectory Plotting'),
-                    style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN | wx.STAY_ON_TOP)
+                    style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN | wx.STAY_ON_TOP,
+                    size=(700, 500))
     panel = wx.Panel(frame, wx.ID_ANY)
 
     lst_1 = GetFlatShapesList(diagram,[])
     lst_2  = ('confTransition', 'extTransition', 'intTransition')
 
-    vbox = wx.BoxSizer(wx.VERTICAL)
-    hbox = wx.BoxSizer(wx.HORIZONTAL)
-    hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+    # Main sizers
+    main_sizer = wx.BoxSizer(wx.VERTICAL)
+    
+    # ===== TITLE SECTION =====
+    title_font = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
+    title = wx.StaticText(panel, wx.ID_ANY, _("Select Models & Transition Functions"))
+    title.SetFont(title_font)
+    title_color = wx.SystemSettings.GetColour(wx.SYS_COLOUR_HOTLIGHT)
+    title.SetForegroundColour(title_color)
+    main_sizer.Add(title, 0, wx.ALL, 10)
+    
+    # ===== CONTENT AREA WITH SPLITTER =====
+    content_panel = wx.Panel(panel, wx.ID_ANY)
+    content_sizer = wx.BoxSizer(wx.HORIZONTAL)
+    
+    # --- LEFT PANEL: MODELS ---
+    left_box = wx.StaticBoxSizer(wx.VERTICAL, content_panel, _("Models"))
+    search_box1 = wx.SearchCtrl(content_panel, wx.ID_ANY, size=(200, -1))
+    search_box1.ShowSearchButton(True)
+    search_box1.ShowCancelButton(True)
+    search_box1.SetHint(_("Search models..."))
+    
+    cb1 = wx.CheckListBox(content_panel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, lst_1, style=wx.LB_SORT)
+    cb1.SetMinSize((250, 250))
+    
+    left_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
+    sel_btn1 = wx.Button(content_panel, wx.ID_ANY, _('Select All'), size=(100, -1))
+    desel_btn1 = wx.Button(content_panel, wx.ID_ANY, _('Deselect All'), size=(100, -1))
+    left_btn_sizer.Add(sel_btn1, 0, wx.RIGHT, 5)
+    left_btn_sizer.Add(desel_btn1, 0, wx.RIGHT, 5)
+    
+    left_box.Add(search_box1, 0, wx.EXPAND | wx.BOTTOM, 8)
+    left_box.Add(cb1, 1, wx.EXPAND, 0)
+    left_box.Add(left_btn_sizer, 0, wx.TOP | wx.EXPAND, 8)
+    content_sizer.Add(left_box, 1, wx.EXPAND | wx.RIGHT, 10)
+    
+    # --- RIGHT PANEL: TRANSITION FUNCTIONS ---
+    right_box = wx.StaticBoxSizer(wx.VERTICAL, content_panel, _("Transition Functions"))
+    desc_text = wx.StaticText(content_panel, wx.ID_ANY, 
+        _("• confTransition: Confluent transition\n"
+          "• extTransition: External transition\n"
+          "• intTransition: Internal transition"))
+    desc_text.SetForegroundColour(wx.Colour(100, 100, 100))
+    small_font = wx.Font(9, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL)
+    desc_text.SetFont(small_font)
+    
+    cb2 = wx.CheckListBox(content_panel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, lst_2)
+    cb2.SetMinSize((200, 250))
+    
+    right_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
+    sel_btn2 = wx.Button(content_panel, wx.ID_ANY, _('Select All'), size=(100, -1))
+    desel_btn2 = wx.Button(content_panel, wx.ID_ANY, _('Deselect All'), size=(100, -1))
+    right_btn_sizer.Add(sel_btn2, 0, wx.RIGHT, 5)
+    right_btn_sizer.Add(desel_btn2, 0, wx.RIGHT, 5)
+    
+    right_box.Add(desc_text, 0, wx.EXPAND | wx.BOTTOM, 10)
+    right_box.Add(cb2, 1, wx.EXPAND, 0)
+    right_box.Add(right_btn_sizer, 0, wx.TOP | wx.EXPAND, 8)
+    content_sizer.Add(right_box, 1, wx.EXPAND, 0)
+    
+    content_panel.SetSizer(content_sizer)
+    main_sizer.Add(content_panel, 1, wx.EXPAND | wx.ALL, 10)
+    
+    # ===== BUTTON SECTION =====
+    btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
+    okBtn = wx.Button(panel, wx.ID_OK, _('Apply'), size=(100, -1))
+    cancelBtn = wx.Button(panel, wx.ID_CANCEL, _('Cancel'), size=(100, -1))
+    helpBtn = wx.Button(panel, wx.ID_HELP, _('Help'), size=(100, -1))
+    
+    btn_sizer.Add(helpBtn, 0, wx.RIGHT, 10)
+    btn_sizer.AddStretchSpacer()
+    btn_sizer.Add(cancelBtn, 0, wx.RIGHT, 5)
+    btn_sizer.Add(okBtn, 0, wx.RIGHT, 0)
+    
+    main_sizer.Add(btn_sizer, 0, wx.EXPAND | wx.ALL, 10)
+    panel.SetSizer(main_sizer)
 
-    st = wx.StaticText(panel, wx.ID_ANY, _("Select models and functions:"), (10,10))
-
-    cb1 = wx.CheckListBox(panel, wx.ID_ANY, (10, 30), wx.DefaultSize, lst_1, style=wx.LB_SORT)
-    cb2 = wx.CheckListBox(panel, wx.ID_ANY, (10, 30), wx.DefaultSize, lst_2)
-
-    selBtn = wx.Button(panel, wx.ID_SELECTALL)
-    desBtn = wx.Button(panel, wx.ID_ANY, _('Deselect All'))
-    okBtn = wx.Button(panel, wx.ID_OK)
-    #reportBtn = wx.Button(panel, wx.ID_ANY, _('Report'))
-
-    hbox2.Add(cb1, 1, wx.EXPAND, 5)
-    hbox2.Add(cb2, 1, wx.EXPAND, 5)
-
-    hbox.Add(selBtn, 0, wx.LEFT)
-    hbox.Add(desBtn, 0, wx.CENTER)
-    hbox.Add(okBtn, 0, wx.RIGHT)
-
-    vbox.Add(st, 0, wx.ALL, 5)
-    vbox.Add(hbox2, 1, wx.EXPAND, 5, 5)
-    vbox.Add(hbox, 0, wx.CENTER, 10, 10)
-
-    panel.SetSizer(vbox)
-
-    ### si des mod les sont deja activ s pour le plugin il faut les checker
+    # ===== LOAD PREVIOUS SETTINGS =====
     num = cb1.GetCount()
-    L1=[] ### liste des shapes   checker
-    L2={} ### la liste des function tracer (identique pour tous les block pour l'instant)
+    L1 = []  # indices of checked shapes
+    L2 = {}  # function dictionary per block
     for index in range(num):
-        block=diagram.GetShapeByLabel(cb1.GetString(index))
-        if hasattr(block,'state_trajectory'):
+        block = diagram.GetShapeByLabel(cb1.GetString(index))
+        if hasattr(block, 'state_trajectory'):
             L1.append(index)
             L2[block.label] = block.state_trajectory.keys()
 
     if L1:
         cb1.SetCheckedItems(L1)
-        ### tout les blocks on la meme liste de function active pour le trace, donc on prend la premi re
         cb2.SetCheckedItems(list(L2.values())[0])
+    else:
+        # Default: select extTransition and intTransition
+        cb2.SetCheckedItems([1, 2])
 
-    ### ckeck par defaut delta_ext et delta_int
-    if L2 == {}:
-        cb2.SetCheckedItems([1,2])
+    # ===== EVENT HANDLERS =====
+    def OnSearchModels(event):
+        """Filter/highlight models based on search text"""
+        search_text = search_box1.GetValue().lower()
+        for i in range(cb1.GetCount()):
+            item_text = cb1.GetString(i).lower()
+            # Show/hide items based on search match (visual feedback)
+            if search_text == "" or search_text in item_text:
+                cb1.SetSelection(i)  # Highlight matching items
+                break  # Select first match
+            
+        # Optional: Update checklist to reflect search results
+        # This is visual-only feedback; actual selection happens on Apply
 
-    def OnPlot(event):
-        ''' State trajectory plotting has been invoked
-        '''
-
-        cb1 = event.GetEventObject()
-        index = cb1.GetSelection()
-        selected_label = cb1.GetString(cb1.GetSelection())
-        if cb1.IsChecked(index):
-            Plot(diagram, selected_label)
-
-    def OnSelectAll(evt):
-        """ Select All button has been pressed and all plug-ins are enabled.
-        """
+    def OnSelectAllModels(evt):
+        """Select all models"""
         cb1.SetCheckedItems(range(cb1.GetCount()))
 
-    def OnDeselectAll(evt):
-        """ Deselect All button has been pressed and all plugins are disabled.
-        """
+    def OnDeselectAllModels(evt):
+        """Deselect all models"""
         cb1.SetCheckedItems([])
 
+    def OnSelectAllFunctions(evt):
+        """Select all transition functions"""
+        cb2.SetCheckedItems(range(cb2.GetCount()))
+
+    def OnDeselectAllFunctions(evt):
+        """Deselect all transition functions"""
+        cb2.SetCheckedItems([])
+
+    def OnPlot(event):
+        """State trajectory plotting has been invoked via double-click"""
+        cb1_obj = event.GetEventObject()
+        index = cb1_obj.GetSelection()
+        if index >= 0:
+            selected_label = cb1_obj.GetString(index)
+            if cb1_obj.IsChecked(index):
+                Plot(diagram, selected_label)
+
+    def OnHelp(event):
+        """Show help dialog"""
+        help_msg = _(
+            "State Trajectory Plotting Plugin\n\n"
+            "1. Select Models: Choose which atomic models to track\n"
+            "2. Select Functions: Choose which transition functions to plot\n"
+            "   • confTransition: Confluent transition\n"
+            "   • extTransition: External transition\n"
+            "   • intTransition: Internal transition\n"
+            "3. Use 'Select All' / 'Deselect All' for quick actions\n"
+            "4. Search field to filter models by name\n"
+            "5. Double-click a model name to plot immediately (if checked)\n"
+            "6. Click 'Apply' to confirm your selections"
+        )
+        dlg = wx.MessageDialog(frame, help_msg, _("Help"), wx.OK | wx.ICON_INFORMATION)
+        dlg.ShowModal()
+        dlg.Destroy()
+
     def OnOk(evt):
+        """Apply button - save selections and close"""
         btn = evt.GetEventObject()
-        frame = btn.GetTopLevelParent()
+        frame_obj = btn.GetTopLevelParent()
         num1 = cb1.GetCount()
         num2 = cb2.GetCount()
 
         for index in range(num1):
             label = cb1.GetString(index)
-
             shape = diagram.GetShapeByLabel(label)
             plotting_condition = hasattr(shape, 'state_trajectory')
 
             assert(isinstance(shape, Block))
 
             if cb1.IsChecked(index):
-                ### dictionnaire avec des cles correspondant aux index de la liste de function de transition et avec des valeurs correspondant aux noms de ces fonctions
-                D = dict([(index,cb2.GetString(index)) for index in range(num2) if cb2.IsChecked(index)])
-
+                # Create dictionary: {func_index: func_name} for checked functions
+                D = {idx: cb2.GetString(idx) for idx in range(num2) if cb2.IsChecked(idx)}
+                
                 if not plotting_condition:
                     setattr(shape, 'state_trajectory', D)
                 else:
@@ -389,47 +475,26 @@ def Config(parent):
             elif plotting_condition:
                 del shape.state_trajectory
 
-        frame.Destroy()
+        frame_obj.Destroy()
 
-    selBtn.Bind(wx.EVT_BUTTON, OnSelectAll)
-    desBtn.Bind(wx.EVT_BUTTON, OnDeselectAll)
+    # ===== BIND EVENT HANDLERS =====
+    search_box1.Bind(wx.EVT_SEARCHCTRL_SEARCH_BTN, OnSearchModels)
+    search_box1.Bind(wx.EVT_TEXT, OnSearchModels)
+    sel_btn1.Bind(wx.EVT_BUTTON, OnSelectAllModels)
+    desel_btn1.Bind(wx.EVT_BUTTON, OnDeselectAllModels)
+    sel_btn2.Bind(wx.EVT_BUTTON, OnSelectAllFunctions)
+    desel_btn2.Bind(wx.EVT_BUTTON, OnDeselectAllFunctions)
     okBtn.Bind(wx.EVT_BUTTON, OnOk)
+    cancelBtn.Bind(wx.EVT_BUTTON, lambda e: frame.Close())
+    helpBtn.Bind(wx.EVT_BUTTON, OnHelp)
+    cb1.Bind(wx.EVT_LEFT_DCLICK, OnPlot)
 
-    def showPopupMenu(event):
-        """
-        Create and display a popup menu on right-click event
-        """
-
-        win  = event.GetEventObject()
-
-        ### make a menu
-        menu = wx.Menu()
-        # Show how to put an icon in the menu
-        item = wx.MenuItem(menu, wx.NewIdRef(), "Aext")
-        menu.AppendItem(item)
-        menu.Append(wx.NewIdRef(), "Aint")
-        menu.Append(wx.NewIdRef(), "A=Aext+Aint")
-
-        # Popup the menu.  If an item is selected then its handler
-        # will be called before PopupMenu returns.
-        win.PopupMenu(menu)
-        menu.Destroy()
-
-    def OnRightClickCb1(evt):
-        showPopupMenu(evt)
-
-    def OnRightDClickCb1(evt):
-        OnPlot(evt)
-
-    ### 1. Register source's EVT_s to inOvoke launcher.
-    #cb1.Bind(wx.EVT_RIGHT_DOWN, OnRightClickCb1)
-    cb1.Bind(wx.EVT_LEFT_DCLICK, OnRightDClickCb1)
-
+    # ===== FRAME SETUP =====
     frame.CenterOnParent(wx.BOTH)
     frame.Show()
 
 def UnConfig():
-    """ Reset the plugin effects
+    """ Reset the plugin effects when disabled
     """
 
     global cb1
