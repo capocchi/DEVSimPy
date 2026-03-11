@@ -347,6 +347,7 @@ def GetTimeIt(m):
 			#LL = []
 			#for i in range(10):
 			### add message to the first input port
+			random.seed(42)
 			devs.myInput[devs.IPorts[0]] = Message([random.random(),random.random(),random.random()], 0.0)
 
 			### define delta_ext function from method
@@ -1472,10 +1473,10 @@ def Config(parent):
 	L1 = [] ### list of shapes to check
 	L2 = {} ### list of functions to track
 	for index in range(len(lst_1)):
-	 	block = diagram.GetShapeByLabel(cb1.GetString(index))
-	 	if hasattr(block, 'activity'):
-	 		L1.append(index)
-	 		L2[block.label] = block.activity.keys()
+		block = diagram.GetShapeByLabel(cb1.GetString(index))
+		if hasattr(block, 'activity'):
+			L1.append(index)
+			L2[block.label] = block.activity.keys()
 
 	if L1:
 		cb1.SetCheckedItems(L1)

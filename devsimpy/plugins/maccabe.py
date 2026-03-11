@@ -5,17 +5,8 @@
 """
 from __future__ import with_statement
 
-import subprocess
-import importlib
+
 import sys
-
-#required_libs = ['ast','optparse', 'tokenize']
-
-#for lib_name in required_libs:
-#    try:
-#        importlib.import_module(lib_name)
-#    except:
-#        subprocess.run(f'pip install {lib_name}'.split())
 
 import optparse
 import tokenize
