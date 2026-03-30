@@ -1,0 +1,11 @@
+cff-version: 1.0
+title: "DEVSimPy: A Python framework for the simulation of discrete-event systems"
+authors:
+  - name: "Laurent Capocchi"
+    email: "capocchi@univ-corse.fr"
+    orcid: "0000-0002-0793-8742"
+    affiliation: "University of Corsica, France"
+    role: "Author"  
+    corresponding: true
+version: "1.0.0"
+date-released: "2026-03-30"
