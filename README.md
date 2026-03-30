@@ -11,6 +11,7 @@
 | **Activity** | ![Last Commit](https://img.shields.io/github/last-commit/capocchi/devsimpy) [![Commits Since](https://img.shields.io/github/commits-since/capocchi/devsimpy/v5.1)](https://github.com/capocchi/devsimpy/commits) ![Maintained](https://img.shields.io/maintenance/yes/2025) [![PyPI Downloads](https://img.shields.io/pypi/dm/devsimpy)](https://pypi.org/project/devsimpy/) |
 | **QA** | [![CodeFactor](https://img.shields.io/codefactor/grade/github/capocchi/devsimpy?logo=codefactor)](https://www.codefactor.io/repository/github/capocchi/devsimpy) [![Flake8 & mypy](https://github.com/capocchi/DEVSimPy/actions/workflows/lint.yml/badge.svg)](https://github.com/capocchi/DEVSimPy/actions/workflows/lint.yml) |
 | **Other**  | [![License](https://img.shields.io/github/license/capocchi/devsimpy)](https://github.com/capocchi/DEVSimPy/blob/master/License) ![Language](https://img.shields.io/github/languages/top/capocchi/devsimpy) [![Requirements](https://dependency-dash.repo-helper.uk/github/capocchi/devsimpy/badge.svg)](https://dependency-dash.repo-helper.uk/github/capocchi/devsimpy/) |
+[![DOI](https://zenodo.org/badge/586533.svg)](https://doi.org/10.5281/zenodo.19336231)
 
 
 <!-- | **Docs**  | ![Docs](https://img.shields.io/readthedocs/domdf-wxpython-tools/latest?logo=read-the-docs) [![Docs Check](https://github.com/domdfcoding/domdf_wxpython_tools/workflows/Docs%20Check/badge.svg)](https://github.com/domdfcoding/domdf_wxpython_tools/actions?query=workflow%3A%22Docs+Check%22) | -->
@@ -106,6 +107,7 @@ If you use DEVSimPy in your research, cite it using:
     publisher = {GitHub},
     journal = {GitHub repository},
     howpublished = {\url{https://github.com/capocchi/DEVSimPy}},
+    doi={https://doi.org/10.5281/zenodo.19336231}
 }
 ```
 ```bibtex
