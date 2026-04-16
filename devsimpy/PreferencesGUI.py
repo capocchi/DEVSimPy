@@ -29,6 +29,8 @@ import configparser
 import copy
 import importlib
 import logging
+import subprocess
+import re
 
 import wx.lib.filebrowsebutton as filebrowse
 
@@ -1919,7 +1921,7 @@ class AIPanel(wx.Panel):
 		ollama_sizer = wx.BoxSizer(wx.VERTICAL)
 		
 		# Server Port
-		portGrid = wx.FlexGridSizer(2, 2, 10, 10)
+		portGrid = wx.FlexGridSizer(4, 2, 10, 10)
 		portGrid.AddGrowableCol(1, 1)
 		
 		portLabel = wx.StaticText(self.ollama_panel, label=_("Server Port:"))
@@ -1943,6 +1945,25 @@ class AIPanel(wx.Panel):
 		portGrid.Add(hostLabel, 0, wx.ALIGN_CENTER_VERTICAL)
 		portGrid.Add(self.host_ctrl, 1, wx.EXPAND)
 		
+		modelLabel = wx.StaticText(self.ollama_panel, label=_("Model:"))
+		self.model_choice = wx.ComboBox(
+			self.ollama_panel, wx.NewIdRef(),
+			choices=[],
+			style=wx.CB_READONLY
+		)
+		self.model_choice.SetToolTip(_("Select an installed Ollama model"))
+		self.model_choice.SetValue(
+			getattr(builtins, 'PARAMS_IA', {}).get('OLLAMA_MODEL', 'mistral'))
+
+		refreshModelBtn = wx.Button(self.ollama_panel, wx.NewIdRef(), _("Refresh Models"))
+		refreshModelBtn.SetToolTip(_("Refresh the local Ollama model list"))
+		refreshModelBtn.Bind(wx.EVT_BUTTON, self.OnRefreshOllamaModels)
+		
+		portGrid.Add(modelLabel, 0, wx.ALIGN_CENTER_VERTICAL)
+		portGrid.Add(self.model_choice, 1, wx.EXPAND)
+		portGrid.Add(wx.StaticText(self.ollama_panel, label=""), 0)
+		portGrid.Add(refreshModelBtn, 0, wx.ALIGN_RIGHT)
+		
 		ollama_sizer.Add(portGrid, 0, wx.EXPAND|wx.ALL, 5)
 		
 		# Install Ollama button
@@ -1954,6 +1975,7 @@ class AIPanel(wx.Panel):
 		ollama_sizer.Add(installBtn, 0, wx.ALL, 5)
 		
 		self.ollama_panel.SetSizer(ollama_sizer)
+		self.RefreshOllamaModelList()
 		self.configBox.Add(self.ollama_panel, 0, wx.EXPAND|wx.ALL, 5)
 		
 		mainSizer.Add(self.configBox, 0, wx.EXPAND|wx.ALL, 10)
@@ -2066,8 +2088,8 @@ class AIPanel(wx.Panel):
 		
 		try:
 			# Test connection via adapter
-			adapter = AdapterFactory.get_adapter_instance(None, params=PARAMS_IA)
-			
+			adapter = AdapterFactory.get_adapter_instance(None, params=getattr(builtins, 'PARAMS_IA', {}))
+
 			if adapter:
 				self.status_indicator.SetLabel(_("Connected"))
 				self.status_indicator.SetForegroundColour(wx.Colour(0, 128, 0))
@@ -2121,6 +2143,47 @@ class AIPanel(wx.Panel):
 		self.UpdateFieldsVisibility()
 		self.UpdateInfoText()
 
+	def GetInstalledOllamaModels(self):
+		"""Return the list of locally installed Ollama models."""
+		try:
+			result = subprocess.run(
+				["ollama", "list"],
+				stdout=subprocess.PIPE,
+				stderr=subprocess.PIPE,
+				text=True,
+				check=True
+			)
+		except (subprocess.CalledProcessError, FileNotFoundError):
+			return []
+
+		models = []
+		for line in result.stdout.splitlines():
+			line = line.strip()
+			if not line or line.lower().startswith('model'):
+				continue
+			parts = re.split(r"\s{2,}|\t", line)
+			if parts:
+				models.append(parts[0].strip())
+		return models
+
+	def RefreshOllamaModelList(self):
+		models = self.GetInstalledOllamaModels()
+		self.model_choice.Clear()
+		default_model = getattr(builtins, 'PARAMS_IA', {}).get('OLLAMA_MODEL', 'mistral')
+
+		if models:
+			self.model_choice.AppendItems(models)
+			if default_model in models:
+				self.model_choice.SetValue(default_model)
+			else:
+				self.model_choice.SetValue(models[0])
+		else:
+			self.model_choice.Append(default_model)
+			self.model_choice.SetValue(default_model)
+
+	def OnRefreshOllamaModels(self, event):
+		self.RefreshOllamaModelList()
+
 	def load_settings(self):
 		""" Load AI settings from builtins
 		"""
@@ -2132,6 +2195,7 @@ class AIPanel(wx.Panel):
 		builtins.PARAMS_IA.setdefault('CHATGPT_API_KEY', '')
 		builtins.PARAMS_IA.setdefault('OLLAMA_PORT', '11434')
 		builtins.PARAMS_IA.setdefault('OLLAMA_HOST', 'localhost')
+		builtins.PARAMS_IA.setdefault('OLLAMA_MODEL', 'mistral')
 
 	def OnApply(self, evt):
 		""" Apply and save current AI settings
@@ -2186,12 +2250,16 @@ class AIPanel(wx.Panel):
 		elif selected_key == "Ollama":
 			new_port = str(self.port_ctrl.GetValue())
 			new_host = self.host_ctrl.GetValue()
+			new_model = self.model_choice.GetValue()
 			
 			if getattr(builtins, 'PARAMS_IA').get('OLLAMA_PORT') != new_port:
 				builtins.PARAMS_IA['OLLAMA_PORT'] = new_port
 			
 			if getattr(builtins, 'PARAMS_IA').get('OLLAMA_HOST') != new_host:
 				builtins.PARAMS_IA['OLLAMA_HOST'] = new_host
+			
+			if getattr(builtins, 'PARAMS_IA').get('OLLAMA_MODEL') != new_model:
+				builtins.PARAMS_IA['OLLAMA_MODEL'] = new_model
 
 
 ########################################################################
