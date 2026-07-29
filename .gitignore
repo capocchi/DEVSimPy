@@ -24,6 +24,7 @@ local.properties
 .spyproject
 .vsdx
 .env
+*.code-workspace
 
 # External tool builders
 .externalToolBuilders/
