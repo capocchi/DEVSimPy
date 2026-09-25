@@ -223,8 +223,37 @@ class FixedList(list):
 	def GetSize(self):
 		return self.__size
 
+	def SetSize(self, size):
+		""" Change the maximum size of the list and drop the oldest elements if needed.
+		"""
+		### NB: do not use the builtin max() here, it is shadowed by numpy in this module
+		try:
+			new_size = int(size)
+		except (TypeError, ValueError):
+			return
+
+		### the size must be at least 1
+		if new_size < 1:
+			new_size = 1
+
+		self.__size = new_size
+
+		### truncate the oldest elements when the new size is smaller
+		while len(self) > self.__size:
+			del self[0]
+
+	def is_empty(self):
+		""" Return True if the list is empty.
+		"""
+		return len(self) == 0
+
+	def top(self):
+		""" Return the last inserted element without removing it (None if empty).
+		"""
+		return self[-1] if self else None
+
 	def append(self, v):
-		if len(self) == self.GetSize():
+		if len(self) >= self.GetSize():
 			del self[0]
 
 		self.insert(len(self),v)

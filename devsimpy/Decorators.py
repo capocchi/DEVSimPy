@@ -248,11 +248,40 @@ def print_timing(func):
 		return res
 	return wrapper
 
+def resolveUndoCanvas(obj):
+	""" Return the object that owns the undo/redo history for a decorated method owner.
+
+		The owner can be a ShapeCanvas (which exposes PushUndoState), an
+		AttributeEditor (which exposes a *canvas* attribute) or any object whose
+		diagram exposes a parent canvas. None is returned when no history owner
+		can be found (the operation is then simply not recorded).
+	"""
+	### ShapeCanvas itself
+	if obj is not None and hasattr(obj, 'PushUndoState'):
+		return obj
+
+	### AttributeEditor (or any object) that exposes a canvas attribute
+	canvas = getattr(obj, 'canvas', None)
+	if canvas is not None and hasattr(canvas, 'PushUndoState'):
+		return canvas
+
+	### fallback: the parent canvas of the owner diagram
+	diagram = getattr(obj, 'diagram', None)
+	parent = getattr(diagram, 'parent', None)
+	if parent is not None and hasattr(parent, 'PushUndoState'):
+		return parent
+
+	return None
+
 def Pre_Undo(f):
 	def wrapper(*args):
 
-		diagram = args[0]
-		diagram.Undo()
+		### record the diagram state before the operation
+		if args:
+			canvas = resolveUndoCanvas(args[0])
+			if canvas is not None:
+				canvas.PushUndoState()
+
 		r = f(*args)
 
 		return r
@@ -261,9 +290,13 @@ def Pre_Undo(f):
 def Post_Undo(f):
 	def wrapper(*args):
 
-		diagram = args[0]
 		r = f(*args)
-		diagram.Undo()
+
+		### record the diagram state after the operation
+		if args:
+			canvas = resolveUndoCanvas(args[0])
+			if canvas is not None:
+				canvas.PushUndoState()
 
 		return r
 	return wrapper

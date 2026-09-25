@@ -65,7 +65,7 @@ USER_SETTINGS = {
     'DOMAIN_PATH': os.path.join(GLOBAL_SETTINGS['DEVSIMPY_PACKAGE_PATH'], 'Domain'),
     'PLUGINS_PATH': os.path.join(GLOBAL_SETTINGS['DEVSIMPY_PACKAGE_PATH'], 'plugins'),
     'NB_OPENED_FILE': 5,
-    'NB_HISTORY_UNDO': 5,
+    'NB_HISTORY_UNDO': 50,
     'OUT_DIR': 'out',
     'SELECTED_IA': "",
 	'PARAMS_IA': {

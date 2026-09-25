@@ -1033,8 +1033,8 @@ class MainApplication(wx.Frame):
 		""" Update config file with the librairies opened during the last use of DEVSimPy.
 		"""
 		
-		### Show is in position 2 on Menu Bar
-		show_menu = self.menuBar.GetMenu(2)
+		### Show is in position 3 on Menu Bar
+		show_menu = self.menuBar.GetMenu(3)
 		### Control is in position 1
 		control_item = show_menu.FindItemByPosition(0)
 		### Libraries is in position 2
@@ -1408,64 +1408,48 @@ class MainApplication(wx.Frame):
 			NotificationMessage(_('Error'), _('%s is not installed. \n Check the trace in background for more informations.'%(package)), parent=self, flag=wx.ICON_ERROR, timeout=5)
 
 	###
-	def OnUndo(self, event):
-		""" Undo the diagram.
+	def GetUndoRedoCanvas(self, event=None):
+		""" Return the canvas on which the undo/redo operation must be applied.
+
+			@event : optional event coming from the main window or a detached frame toolbar
+			@return: the ShapeCanvas instance (None when no canvas can be found)
 		"""
+		### event coming from a toolbar (main window or detached frame)
+		if event is not None:
+			try:
+				obj = event.GetEventObject()
+				if isinstance(obj, wx.ToolBar) and isinstance(obj.GetParent(), DetachedFrame):
+					canvas = obj.GetToolClientData(event.GetId())
+					if canvas is not None:
+						return canvas
+			except Exception:
+				pass
 
-		### get toolbar and clientData defined in AddTool
-		toolbar = event.GetEventObject()
-		currentPage = toolbar.GetToolClientData(event.GetId()) if isinstance(toolbar.GetParent(), DetachedFrame) else self.nb2.GetCurrentPage()
+		### active detached frame, if any
+		try:
+			focused = wx.Window.FindFocus()
+			frame = focused.GetTopLevelParent() if focused is not None else None
+			if isinstance(frame, DetachedFrame):
+				return frame.canvas
+		except Exception:
+			pass
 
-		### append the stockredo and active it
-		currentPage.stockRedo.append(pickle.dumps(obj=currentPage.GetDiagram(),protocol=0))
-		toolbar.EnableTool(wx.ID_REDO, True)
+		return self.nb2.GetCurrentPage()
 
-		### change the current diagram with the last undo
-		new_diagram = pickle.loads(currentPage.stockUndo.pop())
-		new_diagram.parent = currentPage
-		currentPage.DiagramReplace(new_diagram)
-		original_diagram = currentPage.GetDiagram()
-
-		## if model is containerBlock, the grand parent is DetachedFrame and we could update the diagram withou update the original canvas
-		if isinstance(original_diagram.GetGrandParent(), DetachedFrame):
-			## update of all shapes in the original diagram
-			original_diagram.shapes = new_diagram.shapes
-		else:
-			## refresh original canvas with new diagram
-			original_canvas = original_diagram.parent
-			original_canvas.DiagramReplace(new_diagram)
-
-		### desable undo btn if the stockUndo list is empty
-		toolbar.EnableTool(wx.ID_UNDO, not currentPage.stockUndo == [])
+	###
+	def OnUndo(self, event):
+		""" Undo the last operation of the current diagram.
+		"""
+		canvas = self.GetUndoRedoCanvas(event)
+		if canvas is not None:
+			canvas.ApplyUndo()
 
 	def OnRedo(self, event):
-		""" Redo the diagram
+		""" Redo the last undone operation of the current diagram.
 		"""
-		
-		toolbar = event.GetEventObject()
-		currentPage = toolbar.GetToolClientData(event.GetId()) if isinstance(toolbar.GetParent(), DetachedFrame) else self.nb2.GetCurrentPage()
-
-		### append the stockundo and active it
-		currentPage.stockUndo.append(pickle.dumps(obj=currentPage.GetDiagram(), protocol=0))
-		toolbar.EnableTool(wx.ID_UNDO, True)
-
-		### change the current canvas with the last undo
-		new_diagram = pickle.loads(currentPage.stockRedo.pop())
-		new_diagram.parent = currentPage
-		currentPage.DiagramReplace(new_diagram)
-		original_diagram = currentPage.GetDiagram()
-
-		## if model is containerBlock, the grand parent is DetachedFrame and we could update the diagram withou update the original canvas
-		if isinstance(original_diagram.GetGrandParent(), DetachedFrame):
-			## update of all shapes in the original diagram
-			original_diagram.shapes = new_diagram.shapes
-		else:
-			## refresh original canvas with new diagram
-			original_canvas = original_diagram.parent
-			original_canvas.DiagramReplace(new_diagram)
-
-		### desable undo btn if the stockRedo list is empty
-		toolbar.EnableTool(wx.ID_REDO, not currentPage.stockRedo == [])
+		canvas = self.GetUndoRedoCanvas(event)
+		if canvas is not None:
+			canvas.ApplyRedo()
 
 	###
 	def OnSaveFile(self, event):
