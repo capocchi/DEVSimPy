@@ -6,14 +6,21 @@ Usage:
 """
 
 import os
+import builtins
 
+from config import UpdateBuiltins
 from ApplicationController import TestApp
-
-# Import after ApplicationController that inits sys.path ot avoid this import
 from WizardGUI import ModelGeneratorWizard
 
-# Run the test
+UpdateBuiltins()
+
+DEVSIMPY_ICON = getattr(builtins, "DEVSIMPY_ICON", "iconDEVSimPy.ico")
+ICON_PATH = getattr(builtins, "ICON_PATH", os.path.join(os.path.dirname(__file__), "..", "devsimpy", "icons"))
+
 app = TestApp(0)
-frame = ModelGeneratorWizard(parent=None, title='Test', img_filename = os.path.join('bitmaps', DEVSIMPY_ICON))
-# frame.run()
+frame = ModelGeneratorWizard(
+    parent=None,
+    title='Test',
+    img_filename=os.path.join(ICON_PATH, DEVSIMPY_ICON)
+)
 app.RunTest(frame)
