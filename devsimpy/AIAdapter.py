@@ -108,7 +108,7 @@ class DevsAIAdapter(ABC):
 	"""
 	def __init__(self, parent=None):
 		logging.info("DevsAIAdapter initialized.")
-		self.base_prompt = self._load_base_prompt("devsimpy/AI/DEVS_Explanation.txt")
+		self.base_prompt = self._load_base_prompt(os.path.join(os.getcwd(),"AI","DEVS_Explanation.txt"))
 
 	def _load_base_prompt(self, file_path):
 		"""
@@ -245,7 +245,7 @@ class DevsAIAdapter(ABC):
 		# generates a response for every function
 		for function_name in json_fields_functions:
 			function_guidelines = self._load_base_prompt(
-				f"devsimpy/AI/functions_prompt/{function_name}.txt"
+				os.path.join(os.getcwd(),"AI","functions_prompt",f"{function_name}.txt")
 			)
 			user_prompt = f"""Generate code for the {function_name} function.
 			Use the following guidelines :
@@ -364,8 +364,10 @@ class AdapterFactory:
 					return None
 					# raise ValueError(_("Port is required for Ollama."))
 				else:
-					AdapterFactory._instance = OllamaDevsAdapter(parent=parent, port=port)
-
+					model_name = params.get('OLLAMA_MODEL') if params else None
+					if not model_name:
+						model_name = 'mistral'
+					AdapterFactory._instance = OllamaDevsAdapter(parent=parent, port=port, model_name=model_name)
 			else:
 				AdapterFactory._show_error(_("No AI selected or unknown AI."))
 				# raise ValueError(_("No AI selected or unknown AI."))
@@ -387,7 +389,6 @@ class AdapterFactory:
 ###
 ### CHATGPT
 ###
-##########################################################
 class ChatGPTDevsAdapter(DevsAIAdapter):
 	"""
 	Adaptateur spécifique pour ChatGPT, utilisant GPT-4 pour générer des modèles DEVS.
@@ -408,7 +409,7 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 		Use openai chat API with structured output.
 		Handle response to return the json as dict
 		"""
-		system_prompt = self._load_base_prompt("devsimpy/AI/json_gen_prompt.txt")
+		system_prompt = self._load_base_prompt(os.path.join(os.getcwd(),"AI","json_gen_prompt.txt"))
 		try:
 			completion = self.api_client.beta.chat.completions.parse(
 				model="gpt-4.1-nano",
@@ -614,14 +615,21 @@ class OllamaDevsAdapter(DevsAIAdapter):
 			# Exécuter la commande et capturer la sortie
 			result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
 			
-			logging.info(_(f"The command end with:{result.stdout}"))
+			models = []
+			for line in result.stdout.splitlines():
+				line = line.strip()
+				if not line or line.lower().startswith('model'):
+					continue
+				parts = re.split(r"\s{2,}|\t", line)
+				if parts:
+					models.append(parts[0].strip())
 
-			# Affiche la liste des modèles disponibles localement
-			return result.stdout
+			logging.info(_(f"Found Ollama models: {models}"))
+			return models
 			
-		except subprocess.CalledProcessError as e:
-			logging.error("Erreur lors de l'exécution de la commande:", e)
-			logging.error(e.stderr)
+		except (subprocess.CalledProcessError, FileNotFoundError) as e:
+			logging.error("Erreur lors de l'exécution de la commande ollama list:", e)
+			return []
 
 	@cond_decorator(getattr(builtins,'GUI_FLAG', True), ProgressNotification(_(f"Pulling process")))
 	def _pull(self):
@@ -649,7 +657,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 	def _ensure_model_downloaded(self):
 		"""Télécharge ou met à jour le modèle spécifié via Ollama."""
 		
-		if self.model_name in self.local_model:       
+		if self.model_name in self.local_model:
 			logging.info(f"The model '{self.model_name}' is already downloaded and is ready to start.")
 		else:
 			logging.info(f"The model '{self.model_name}' is not downloaded. Starting pull...")
@@ -669,7 +677,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 			logging.info(_("The Ollama server is not active. Attempting to start..."))
 			self._start_server()
 		try:
-			system_prompt = self._load_base_prompt("devsimpy/AI/json_gen_prompt.txt")
+			system_prompt = self._load_base_prompt(os.path.join(os.getcwd(),"AI","json_gen_prompt.txt"))
 			# Send the prompt to the Ollama server
 			# Sends the conversation history (if it exists) or the prompt
 			response = chat(

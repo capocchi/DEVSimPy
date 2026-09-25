@@ -24,6 +24,7 @@ local.properties
 .spyproject
 .vsdx
 .env
+*.code-workspace
 
 # External tool builders
 .externalToolBuilders/
@@ -231,3 +232,6 @@ pip-log.txt
 .mr.developer.cfg
 
 .codegpt
+
+#Opencode config
+opencode.json
