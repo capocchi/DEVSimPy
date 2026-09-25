@@ -232,3 +232,6 @@ pip-log.txt
 .mr.developer.cfg
 
 .codegpt
+
+#Opencode config
+opencode.json

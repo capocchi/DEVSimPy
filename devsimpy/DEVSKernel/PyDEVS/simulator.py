@@ -46,6 +46,33 @@ def Error(message ='', esc=1):
 	stderr.write("ERROR: %s\n" % message)
 	if esc: exit(1)
 
+def resolve_transition(model, kind):
+    """Prefer decorated transition, else keep legacy method name."""
+    for name in dir(model.__class__):
+        method = getattr(model, name, None)
+        if callable(method) and getattr(method, "__devs_transition__", None) == kind:
+            return method
+
+    if kind == "internal":
+        return getattr(model, "intTransition")
+    if kind == "external":
+        return getattr(model, "extTransition")
+    raise ValueError(f"Unknown transition kind: {kind}")
+
+
+def resolve_handler(model, kind):
+    """Prefer decorated handler, else keep legacy method name."""
+    for name in dir(model.__class__):
+        method = getattr(model, name, None)
+        if callable(method) and getattr(method, "__devs_handler__", None) == kind:
+            return method
+
+    if kind == "output":
+        return getattr(model, "outputFnc")
+    if kind == "time_advance":
+        return getattr(model, "timeAdvance")
+    raise ValueError(f"Unknown handler kind: {kind}")
+
 ###############################################################################
 # SIMULATOR CLASSES
 ###############################################################################
@@ -101,15 +128,18 @@ class AtomicSolver:
 				
 			my_output = {}
 			aDEVS.myOutput = my_output
-			aDEVS.outputFnc()
+			output_fn = resolve_handler(aDEVS, "output")
+			output_fn()
 
 			time_last = aDEVS.timeLast
 			aDEVS.elapsed = t - time_last
 
-			aDEVS.intTransition()
+			transition_fn = resolve_transition(aDEVS, "internal")
+			transition_fn()
 
 			aDEVS.timeLast = t
-			aDEVS.myTimeAdvance = aDEVS.timeAdvance()
+			ta_fn = resolve_handler(aDEVS, "time_advance")
+			aDEVS.myTimeAdvance = ta_fn()
 			aDEVS.timeNext = aDEVS.timeLast + aDEVS.myTimeAdvance
 			if aDEVS.myTimeAdvance != INFINITY: aDEVS.myTimeAdvance += t
 			aDEVS.elapsed = 0
@@ -132,11 +162,13 @@ class AtomicSolver:
 			# update elapsed time. This is necessary for the call to the external
 			# transition function, which is used to update the DEVS' state.
 			aDEVS.elapsed = t - aDEVS.timeLast
-			aDEVS.extTransition()
+			transition_fn = resolve_transition(aDEVS, "external")
+			transition_fn()
 
 			# Udpate time variables:
 			aDEVS.timeLast = t
-			aDEVS.myTimeAdvance = aDEVS.timeAdvance()
+			ta_fn = resolve_handler(aDEVS, "time_advance")
+			aDEVS.myTimeAdvance = ta_fn()
 			aDEVS.timeNext = aDEVS.timeLast + aDEVS.myTimeAdvance
 			if aDEVS.myTimeAdvance != INFINITY: aDEVS.myTimeAdvance += t
 			aDEVS.elapsed = 0
@@ -147,7 +179,8 @@ class AtomicSolver:
 		# $(i,\,t)$ message --- sets origin of time at {\tt t}:
 		elif msg[0] == 0:
 			aDEVS.timeLast = t - aDEVS.elapsed
-			aDEVS.myTimeAdvance = aDEVS.timeAdvance()
+			ta_fn = resolve_handler(aDEVS, "time_advance")
+			aDEVS.myTimeAdvance = ta_fn()
 			aDEVS.timeNext = aDEVS.timeLast + aDEVS.myTimeAdvance
 			if aDEVS.myTimeAdvance != INFINITY: aDEVS.myTimeAdvance += t
 

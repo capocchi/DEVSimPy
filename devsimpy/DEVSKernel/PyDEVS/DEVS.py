@@ -38,6 +38,20 @@ def Error(message = '', esc = 1):
 
 setattr(builtins, 'INFINITY', float('inf'))
 
+def transition(kind):
+    """Decorator for DEVS transition hooks."""
+    def decorator(fn):
+        fn.__devs_transition__ = kind
+        return fn
+    return decorator
+
+def handler(kind):
+    """Decorator for DEVS output/time-advance hooks."""
+    def decorator(fn):
+        fn.__devs_handler__ = kind
+        return fn
+    return decorator
+
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 ##  CLASS HIERARCHY
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -227,6 +241,7 @@ class AtomicDEVS(BaseDEVS):
 		# return [(p, m.copy()) for p,m in list(self.myInput.items())]
 
 	###
+	@transition('external')
 	def extTransition(self, *args, **kwargs):
 		"""	DEFAULT External Transition Function.
 			Accesses {\tt state} and {\tt elapsed} attributes, as well as inputs
@@ -235,6 +250,7 @@ class AtomicDEVS(BaseDEVS):
 		pass
 
 	###
+	@transition('internal')
 	def intTransition(self):
 		"""	DEFAULT Internal Transition Function.
 			Accesses only {\tt state} attribute. Returns nothing but modifing {\tt state} attribut.
@@ -242,6 +258,7 @@ class AtomicDEVS(BaseDEVS):
 		pass
 
 	###
+	@handler("output")
 	def outputFnc(self):
 		"""	DEFAULT Output Function.
 			Accesses only {\tt state} attribute. Modify the output ports by means of
@@ -250,6 +267,7 @@ class AtomicDEVS(BaseDEVS):
 		pass
 
 	###
+	@handler("time_advance")
 	def timeAdvance(self):
 		r"""DEFAULT Time Advance Function.
 			Accesses only {\tt state} attribute. Returns a real number in

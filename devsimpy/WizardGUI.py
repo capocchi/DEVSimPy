@@ -4,11 +4,11 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # WizardGUI.py ---
 #                    --------------------------------
-#                            Copyright (c) 2020
+#                            Copyright (c) 2026
 #                    L. CAPOCCHI (capocchi@univ-corse.fr)
 #                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-# Version 1.0                                        last modified: 20/15/20
+# Version 2.0                                        last modified: 09/25/26
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -85,22 +85,26 @@ class %s(DomainBehavior):
 		DomainBehavior.__init__(self)
 
 		self.initPhase('IDLE',INFINITY)
-
+	
+	@transition("external")
 	def extTransition(self, *args):
 		''' DEVS external transition function.
 		'''
 		return self.getState()
 
+	@handler("output")
 	def outputFnc(self):
 		''' DEVS output function.
 		'''
 		return {}
 
+	@transition("internal")
 	def intTransition(self):
 		''' DEVS internal transition function.
 		'''
 		return self.getState()
 
+	@handler("time_advance")
 	def timeAdvance(self):
 		''' DEVS Time Advance function.
 		'''
