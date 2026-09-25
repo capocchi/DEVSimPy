@@ -1794,6 +1794,10 @@ if getattr(builtins, 'GUI_FLAG', True):
 			### for quickattribute
 			self.Bind(wx.EVT_TIMER, self.OnTimer)
 
+			### initialize the undo/redo history using the current diagram as baseline
+			if self.diagram is not None:
+				self.ResetHistory()
+
 		@Post_Undo
 		def AddShape(self, shape, after = None):
 			""" Method that insert shape into the diagram at the position 'after
@@ -1812,12 +1816,12 @@ if getattr(builtins, 'GUI_FLAG', True):
 			"""
 			self.diagram.DeleteShape(shape)
 
+		@Post_Undo
 		def RemoveShape(self, shape):
 			""" Method that remove shape from the diagram
 			"""
 			self.diagram.DeleteShape(shape)
 
-		@Post_Undo
 		def keyPress(self, event):
 			""" Key press event
 			"""
@@ -1834,7 +1838,10 @@ if getattr(builtins, 'GUI_FLAG', True):
 					move = True
 					if not self.diagram.modify:
 						self.diagram.modify = True
-				if not move: event.Skip()
+				if move:
+					self.PushUndoState()
+				else:
+					event.Skip()
 			elif key == 314:  # left
 				move = False
 				step = 1 if controlDown else 10
@@ -1843,7 +1850,10 @@ if getattr(builtins, 'GUI_FLAG', True):
 					move = True
 					if not self.diagram.modify:
 						self.diagram.modify = True
-				if not move: event.Skip()
+				if move:
+					self.PushUndoState()
+				else:
+					event.Skip()
 			elif key == 315:  # -> up
 				move = False
 				step = 1 if controlDown else 10
@@ -1852,7 +1862,10 @@ if getattr(builtins, 'GUI_FLAG', True):
 					move = True
 					if not self.diagram.modify:
 						self.diagram.modify = True
-				if not move: event.Skip()
+				if move:
+					self.PushUndoState()
+				else:
+					event.Skip()
 			elif key == 317:  # -> down
 				move = False
 				step = 1 if controlDown else 10
@@ -1861,48 +1874,25 @@ if getattr(builtins, 'GUI_FLAG', True):
 					move = True
 					if not self.diagram.modify:
 						self.diagram.modify = True
-				if not move: event.Skip()
-			elif key == 90 and controlDown and not shiftDown:  # Undo
-
-				mainW = self.GetTopLevelParent()
-				tb = mainW.FindWindowByName('tb')
-
-				# Vérification que l'objet trouvé est bien une instance de wx.ToolBar
-				if not isinstance(tb, wx.ToolBar):
-					raise TypeError(_("Instance is not wx.ToolBar"))
-
-				# Trouver le bouton avec l'ID wx.ID_UNDO
-				button = next((tool for tool in mainW.tools if tool.GetId() == wx.ID_UNDO), None)
-
-				if not button:
-					raise ValueError(_("ID wx.ID_UNDO is not find in the toobar"))
-
-				tool = tb.FindById(wx.ID_UNDO)  # Renvoie l'objet de l'outil ou None
-
-				if tool is not None:  # L'outil existe
-					# Vérifier si l'outil est activé avant d'envoyer l'événement
-					if tb.GetToolEnabled(wx.ID_UNDO):
-						sendEvent(tb, button, wx.CommandEvent(wx.EVT_TOOL.typeId))  # Simuler l'action undo
-					else:
-						sys.stdout.write(_("The wx.ID_UNDO tool is desactivate"))
+				if move:
+					self.PushUndoState()
 				else:
-					sys.stdout.write(_("The wx.ID_UNDO tool is not found in the toolbar"))
-
+					event.Skip()
+			elif key == 90 and controlDown and not shiftDown:  # Undo (Ctrl+Z)
+				### the main window handles undo through the Edit menu accelerator.
+				### A detached frame has no menu bar, so undo is handled here.
+				if isinstance(self.GetTopLevelParent(), DetachedFrame):
+					self.ApplyUndo()
 				event.Skip()
-			elif key == 90  and controlDown and shiftDown:# Redo
-
-				mainW = self.GetTopLevelParent()
-				tb = mainW.FindWindowByName('tb')
-
-				### find the tool from toolBar thanks to id
-				for tool in mainW.tools:
-					if tool.GetId() == wx.ID_REDO:
-						button = tool
-						break
-
-				if tb.GetToolEnabled(wx.ID_REDO):
-					### send commandEvent to simulate undo action on the toolBar
-					sendEvent(tb, button, wx.CommandEvent(wx.EVT_TOOL.typeId))
+			elif key == 89 and controlDown:  # Redo (Ctrl+Y)
+				### see the comment of the Ctrl+Z branch above
+				if isinstance(self.GetTopLevelParent(), DetachedFrame):
+					self.ApplyRedo()
+				event.Skip()
+			elif key == 90 and controlDown and shiftDown:  # Redo (Ctrl+Shift+Z)
+				### see the comment of the Ctrl+Z branch above
+				if isinstance(self.GetTopLevelParent(), DetachedFrame):
+					self.ApplyRedo()
 				event.Skip()
 			elif key == 127:  # DELETE
 				self.OnDelete(event)
@@ -2423,6 +2413,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 					# gmwiz.Destroy()
 
 		@BuzyCursorNotification
+		@Post_Undo
 		def OnPaste(self, event):
 			""" Paste menu has been clicked.
 			"""
@@ -2481,6 +2472,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 
 			event.Skip()
 
+		@Post_Undo
 		def OnDelete(self, event):
 			""" Delete menu has been clicked. Delete all selected shape.
 			"""
@@ -2552,42 +2544,158 @@ if getattr(builtins, 'GUI_FLAG', True):
 					wx.MessageBox(_("An error is occured during double clic: %s")%info)
 			event.Skip()
 
-		def Undo(self):
-			""" Undo the last operation
+		def ResetHistory(self):
+			""" Reset the undo/redo history using the current diagram as baseline.
+
+				The top of the undo stack always represents the current diagram state.
 			"""
+			size = getattr(builtins, 'NB_HISTORY_UNDO', NB_HISTORY_UNDO)
+			self.stockUndo.SetSize(size)
+			self.stockRedo.SetSize(size)
+			self.stockUndo.clear()
+			self.stockRedo.clear()
 
-			### dump solution
-			### if parent is not none, the dumps dont work because parent is copy of a class
+			dump = self.__dumpDiagram()
+			if dump is not None:
+				self.stockUndo.append(dump)
+
+			self._syncHistoryToolState()
+
+		def __dumpDiagram(self):
+			""" Return a serialized snapshot of the current diagram (None on error).
+			"""
 			try:
-				t = pickle.loads(self.stockUndo[-1])
-
-				### we add new undo of diagram has been modified or one of the shape in diagram sotried in stockUndo has been modified.
-				if any(objA.__dict__ != objB.__dict__ for objA in self.diagram.GetShapeList() for objB in t.GetShapeList()):
-					self.stockUndo.append(pickle.dumps(obj=self.diagram, protocol=0))
-			except IndexError:
-				### this is the first call of Undo and StockUndo is empty
-				self.stockUndo.append(pickle.dumps(obj=self.diagram, protocol=0))
-			except TypeError as info:
-				sys.stdout.write(_("Error trying to undo (TypeError): %s \n"%info))
+				return pickle.dumps(obj=self.diagram, protocol=0)
 			except Exception as info:
-				sys.stdout.write(_("Error trying to undo: %s \n"%info))
-			finally:
+				sys.stdout.write(_("Error trying to serialize diagram for undo: %s \n"%info))
+				return None
 
-			
-				### just for init (white diagram)
-				if self.diagram.GetBlockCount()>=1:
-					mainW = self.GetTopLevelParent()
+		def PushUndoState(self):
+			""" Record the current diagram state into the undo history.
 
-					### toolBar
-					tb = mainW.GetToolBar()
-					
-					tb.EnableTool(wx.ID_UNDO, True)
-				
-					self.diagram.parent = self
+				A new snapshot is stored only if the diagram changed since the last
+				recorded state. Any pending redo history is then invalidated.
+			"""
+			size = getattr(builtins, 'NB_HISTORY_UNDO', NB_HISTORY_UNDO)
+			self.stockUndo.SetSize(size)
+			self.stockRedo.SetSize(size)
 
-					### note that the diagram is modified
-					self.diagram.modify = True
-					self.DiagramModified()
+			dump = self.__dumpDiagram()
+			if dump is None:
+				return False
+
+			### nothing changed since the last recorded state
+			if self.stockUndo.top() == dump:
+				return False
+
+			### the new state becomes the top of the undo stack while the previous
+			### state remains available for the next undo
+			self.stockUndo.append(dump)
+
+			### a new action invalidates the redo history
+			self.stockRedo.clear()
+
+			self._syncHistoryToolState()
+			return True
+
+		def Undo(self):
+			""" Backward compatible alias used to record a snapshot (see AttributeEditor).
+			"""
+			return self.PushUndoState()
+
+		def ApplyUndo(self):
+			""" Restore the previous diagram state (undo the last operation).
+
+				@return: True if the diagram has been restored.
+			"""
+			### the first snapshot is the baseline, there is nothing before it
+			if len(self.stockUndo) <= 1:
+				self._syncHistoryToolState()
+				return False
+
+			### the current state goes to the redo history
+			self.stockRedo.append(self.stockUndo.pop())
+
+			restored = self.__restoreDiagram(self.stockUndo.top())
+			self._syncHistoryToolState()
+			return restored
+
+		def ApplyRedo(self):
+			""" Restore the next diagram state (redo the last undone operation).
+
+				@return: True if the diagram has been restored.
+			"""
+			if self.stockRedo.is_empty():
+				self._syncHistoryToolState()
+				return False
+
+			### the restored state goes back to the undo history
+			self.stockUndo.append(self.stockRedo.pop())
+
+			restored = self.__restoreDiagram(self.stockUndo.top())
+			self._syncHistoryToolState()
+			return restored
+
+		def __restoreDiagram(self, dump):
+			""" Restore the diagram from a serialized snapshot.
+			"""
+			if dump is None:
+				return False
+
+			try:
+				new_diagram = pickle.loads(dump)
+			except Exception as info:
+				sys.stdout.write(_("Error trying to restore diagram: %s \n"%info))
+				return False
+
+			new_diagram.parent = self
+			new_diagram.modify = True
+
+			try:
+				self.DiagramReplace(new_diagram)
+			except Exception as info:
+				### the notification chain may not be available (detached/alone canvas):
+				### fall back to a direct replacement of the diagram
+				sys.stdout.write(_("Error during diagram replacement: %s \n"%info))
+				self.diagram = new_diagram
+				self.Refresh()
+
+			return True
+
+		def _syncHistoryToolState(self):
+			""" Enable/disable the undo/redo toolbar buttons and menu items.
+			"""
+			undo_enabled = len(self.stockUndo) > 1
+			redo_enabled = not self.stockRedo.is_empty()
+
+			try:
+				win = self.GetTopLevelParent()
+			except Exception:
+				return
+
+			if win is None:
+				return
+
+			### toolbar buttons of the window that owns the canvas
+			try:
+				tb = win.GetToolBar()
+				if tb is not None:
+					tb.EnableTool(wx.ID_UNDO, undo_enabled)
+					tb.EnableTool(wx.ID_REDO, redo_enabled)
+			except Exception:
+				pass
+
+			### menu items (the menu bar always belongs to the main window)
+			try:
+				mainW = getTopLevelWindow() if isinstance(win, DetachedFrame) else win
+				mb = mainW.GetMenuBar()
+				if mb is not None:
+					for entry in mb.GetMenus():
+						menu = entry[0] if isinstance(entry, tuple) else entry
+						menu.Enable(wx.ID_UNDO, undo_enabled)
+						menu.Enable(wx.ID_REDO, redo_enabled)
+			except Exception:
+				pass
 
 		def OnLeftDown(self,event):
 			""" Left Down mouse bouton has been invoked in the canvas instance.
@@ -2849,6 +2957,10 @@ if getattr(builtins, 'GUI_FLAG', True):
 			if not win:
 				return
 
+			### nb2/label are not always defined (e.g. detached frame without a main window)
+			nb2 = None
+			label = None
+
 			if isinstance(win, DetachedFrame):
 				### main window
 				mainW = getTopLevelWindow()
@@ -2880,7 +2992,8 @@ if getattr(builtins, 'GUI_FLAG', True):
 				D = {label : win}
 
 			### update the text of the notebook tab to notifiy that the file is modified
-			nb2.SetPageText(nb2.GetSelection(), "%s*"%label.replace('*',''))
+			if nb2 is not None and label is not None:
+				nb2.SetPageText(nb2.GetSelection(), "%s*"%label.replace('*',''))
 
 			### statusbar printing
 			for string,win in list(D.items()):
@@ -3069,6 +3182,14 @@ if getattr(builtins, 'GUI_FLAG', True):
 #			""" Setter for diagram attribute.
 #			"""
 #			self.diagram = diagram
+
+		def SetDiagram(self, diagram):
+			""" Set the diagram and reset the undo/redo history.
+
+				The new diagram becomes the baseline of the undo/redo history.
+			"""
+			Abstractable.SetDiagram(self, diagram)
+			self.ResetHistory()
 
 		def GetDiagram(self):
 			""" Return Diagram instance.

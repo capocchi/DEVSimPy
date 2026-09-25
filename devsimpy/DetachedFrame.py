@@ -23,6 +23,7 @@
 '''
 
 import sys
+import builtins
 import wx
 
 _ = wx.GetTranslation
@@ -32,7 +33,7 @@ wx.ST_SIZEGRIP = wx.STB_SIZEGRIP
 import Container
 import Menu
 import PrintOut
-from Utilities import getTopLevelWindow, load_and_resize_image
+from Utilities import getTopLevelWindow, load_and_resize_image, FixedList
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
@@ -95,8 +96,9 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.canvas.stockRedo = self.diagram.parent.stockRedo
 		except Exception:
 			diagram.SetParent(self.canvas)
-			self.canvas.stockUndo = []
-			self.canvas.stockRedo = []
+			self.canvas.stockUndo = FixedList(getattr(builtins, 'NB_HISTORY_UNDO', 5))
+			self.canvas.stockRedo = FixedList(getattr(builtins, 'NB_HISTORY_UNDO', 5))
+			self.canvas.ResetHistory()
 
 		### Menu ToolBar
 		toolbar = self.CreateToolBar()
@@ -122,8 +124,8 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 										toolbar.AddTool(self.toggle_list[1], "", load_and_resize_image('square_connector.png'), shortHelp=_('Square'), kind=wx.ITEM_CHECK),
 										toolbar.AddTool(self.toggle_list[2], "", load_and_resize_image('linear_connector.png'), shortHelp=_('Linear'), kind=wx.ITEM_CHECK)
 			]							
-		toolbar.EnableTool(wx.ID_UNDO, not self.canvas.stockUndo == [])
-		toolbar.EnableTool(wx.ID_REDO, not self.canvas.stockRedo == [])
+		toolbar.EnableTool(wx.ID_UNDO, len(self.canvas.stockUndo) > 1)
+		toolbar.EnableTool(wx.ID_REDO, len(self.canvas.stockRedo) > 0)
 		toolbar.InsertSeparator(2)
 		toolbar.InsertSeparator(5)
 		toolbar.InsertSeparator(9)
@@ -200,7 +202,19 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		self.Bind(wx.EVT_MOVE, self.OnMove)
 		self.Bind(wx.EVT_TOOL, self.OnSaveFile, id=Menu.ID_SAVE)
 		self.Bind(wx.EVT_TOOL, self.OnSaveAsFile, id=Menu.ID_SAVEAS)
+		self.Bind(wx.EVT_TOOL, self.OnUndo, id=wx.ID_UNDO)
+		self.Bind(wx.EVT_TOOL, self.OnRedo, id=wx.ID_REDO)
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
+
+	def OnUndo(self, event):
+		""" Undo the last operation of the detached diagram.
+		"""
+		self.canvas.ApplyUndo()
+
+	def OnRedo(self, event):
+		""" Redo the last undone operation of the detached diagram.
+		"""
+		self.canvas.ApplyRedo()
 
 	def OnStayOnTop(self, event):
 		"""

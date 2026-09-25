@@ -55,6 +55,10 @@ ID_SCREEN_CAPTURE = wx.NewIdRef()
 ID_PRINT = wx.ID_PRINT
 #ID_PAGE_SETUP = wx.NewIdRef()
 
+# Edit menu identifiers
+ID_UNDO = wx.ID_UNDO
+ID_REDO = wx.ID_REDO
+
 # Recent file menu identifiers
 ID_RECENT = wx.NewIdRef()
 ID_DELETE_RECENT = wx.NewIdRef()
@@ -275,6 +279,33 @@ class FileMenu(Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnScreenCapture, id=ID_SCREEN_CAPTURE)
 		parent.Bind(wx.EVT_MENU, parent.OnCloseWindow, id=ID_EXIT)
 	
+class EditMenu(Menu):
+	"""
+	"""
+	def __init__(self, parent):
+		"""Initialize the EditMenu."""
+		Menu.__init__(self, parent)
+
+	def _add_menu_items(self, parent):
+
+		undo = wx.MenuItem(self.menu, ID_UNDO, _('&Undo\tCtrl+Z'), _("Undo the last operation"))
+		redo = wx.MenuItem(self.menu, ID_REDO, _('&Redo\tCtrl+Y'), _("Redo the last undone operation"))
+
+		undo.SetBitmap(load_and_resize_image('undo.png'))
+		redo.SetBitmap(load_and_resize_image('redo.png'))
+
+		self.AppendItem(undo)
+		self.AppendItem(redo)
+
+		### both items are disabled by default; their state is managed by the canvas
+		self.menu.Enable(ID_UNDO, False)
+		self.menu.Enable(ID_REDO, False)
+
+		# bind the menu events to the methods that process them
+		target = parent.GetParent()
+		target.Bind(wx.EVT_MENU, target.OnUndo, id=ID_UNDO)
+		target.Bind(wx.EVT_MENU, target.OnRedo, id=ID_REDO)
+
 class ProfileFileMenu(Menu):
 	"""
 	"""
@@ -612,6 +643,7 @@ class MainMenuBar(wx.MenuBar):
 		self.parent = parent
 
 		self.Append(FileMenu(self).get(),_("&File"))
+		self.Append(EditMenu(self).get(), _("&Edit"))
 		self.Append(DiagramMenu(self).get(),_("&Diagram"))
 		self.Append(ShowMenu(self).get(), _("&Show"))
 		self.parent.perspectivesmenu = PerspectiveMenu(self).get()

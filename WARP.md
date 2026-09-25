@@ -202,6 +202,17 @@ The GUI is built from many composable components:
   - Panels and trees: `LibPanel`, `LibraryTree`, `PropPanel`, `ControlNotebook`, `DiagramNotebook`.
   - Tools: `Editor` (code editor), `PlotGUI`, `SpreadSheet`, `YAMLExportGUI`, `ZipManager`, `StandaloneGUI`, etc.
 
+### Undo/Redo
+
+Diagram editing history is snapshot-based and lives on the canvas (`Container.ShapeCanvas`):
+
+- Each canvas owns `stockUndo` / `stockRedo` (`Utilities.FixedList`) whose depth is `NB_HISTORY_UNDO` (Options → Preferences, applied live).
+- The top of `stockUndo` is always the current diagram state; the first entry is the baseline captured when the diagram is set (`ShapeCanvas.SetDiagram` → `ResetHistory`).
+- Mutating handlers are decorated with `@Post_Undo` (`Decorators.Post_Undo`) which calls `ShapeCanvas.PushUndoState()`. A new snapshot is stored only when the serialized diagram changed, and it invalidates `stockRedo`.
+- `ShapeCanvas.ApplyUndo()` / `ApplyRedo()` restore a snapshot through `DiagramReplace`; `devsimpy.OnUndo` / `OnRedo` and `DetachedFrame.OnUndo` / `OnRedo` route toolbar and menu events to them.
+- UI: Edit → Undo/Redo (`Ctrl+Z` / `Ctrl+Y`) plus the toolbar buttons; detached frames handle `Ctrl+Z` / `Ctrl+Y` / `Ctrl+Shift+Z` in `ShapeCanvas.keyPress` (they have no menu bar).
+- Test: `tests/test_undo_redo.py`.
+
 The `tests/` directory mirrors many of these components with targeted GUI tests (`test_*.py` files) that instantiate dialogs/frames, interact with them, and rely on `--autoclose` flags for unattended runs.
 
 ### No-GUI / batch simulation and integration points

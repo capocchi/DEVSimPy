@@ -1,1 +1,13 @@
+v6.1 -- Undo/Redo
+  * Add an Edit menu with Undo (Ctrl+Z) and Redo (Ctrl+Y) items
+    (devsimpy/Menu.py) wired to the canvas history.
+  * Harden the snapshot-based undo/redo engine of ShapeCanvas
+    (devsimpy/Container.py): correct baseline, proper redo invalidation
+    on new edits, dynamic history depth (NB_HISTORY_UNDO).
+  * Record additional operations: delete, paste, move (arrows/drag),
+    lock/unlock, enable/disable, connection and attribute edits.
+  * Fix the keyboard shortcuts (Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z) and add
+    undo/redo support to detached frames.
+  * Add tests/test_undo_redo.py.
+
 v6.0, March 14 2025 -- Finale release.

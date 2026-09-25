@@ -1948,7 +1948,7 @@ class AIPanel(wx.Panel):
 		modelLabel = wx.StaticText(self.ollama_panel, label=_("Model:"))
 		self.model_choice = wx.ComboBox(
 			self.ollama_panel, wx.NewIdRef(),
-			choices=[],
+			choices=[getattr(builtins, 'PARAMS_IA', {}).get('OLLAMA_MODEL', 'mistral')],
 			style=wx.CB_READONLY
 		)
 		self.model_choice.SetToolTip(_("Select an installed Ollama model"))
@@ -1975,7 +1975,6 @@ class AIPanel(wx.Panel):
 		ollama_sizer.Add(installBtn, 0, wx.ALL, 5)
 		
 		self.ollama_panel.SetSizer(ollama_sizer)
-		self.RefreshOllamaModelList()
 		self.configBox.Add(self.ollama_panel, 0, wx.EXPAND|wx.ALL, 5)
 		
 		mainSizer.Add(self.configBox, 0, wx.EXPAND|wx.ALL, 10)
@@ -2295,8 +2294,6 @@ class Preferences(wx.Toolbook):
 
 		self.CheckList = GeneralPluginsList(self.pluginPanel.GetRightPanel(), 
 										   style=wx.LC_REPORT|wx.SUNKEN_BORDER|wx.LC_SORT_ASCENDING)
-		### populate checklist with file in plug-ins directory
-		wx.CallAfter(self.CheckList.Populate, (list(os.walk(PLUGINS_PATH))))
 
 		self.pluginPanel.SetPluginsList(self.CheckList)
 
@@ -2373,11 +2370,12 @@ class Preferences(wx.Toolbook):
 		new = event.GetSelection()
 		### plug-in page
 		if new == 4:  # Plugins tab (index 4)
-			### list of plug-ins file in plug-in directory
-			l = list(os.walk(PLUGINS_PATH))
-			### populate checklist with file in plug-ins directory
-			wx.CallAfter(self.CheckList.Populate, (l))
+			wx.CallAfter(self.PopulatePluginList)
 		event.Skip()
+
+	def PopulatePluginList(self):
+		"""Load plug-ins when their preferences page is opened."""
+		self.CheckList.Populate(list(os.walk(PLUGINS_PATH)))
 
 	def OnAdd(self, event):
 		""" Add plug-in.
@@ -2446,9 +2444,7 @@ class Preferences(wx.Toolbook):
 		""" Refresh list of plugins.
 		"""
 		self.CheckList.Clear()
-		l = list(os.walk(PLUGINS_PATH))
-		### populate checklist with file in plug-ins directory
-		wx.CallAfter(self.CheckList.Populate, (l))
+		wx.CallAfter(self.PopulatePluginList)
 
 	def OnApply(self,evt):
 		""" Apply button has been pressed and we must take into account all changes for each panel
