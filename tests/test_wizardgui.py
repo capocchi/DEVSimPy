@@ -8,8 +8,8 @@ Usage:
 import os
 import builtins
 
-from config import UpdateBuiltins
 from ApplicationController import TestApp
+from config import UpdateBuiltins
 from WizardGUI import ModelGeneratorWizard
 
 UpdateBuiltins()
