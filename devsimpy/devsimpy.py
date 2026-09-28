@@ -71,9 +71,6 @@ import wx
 
 _ = wx.GetTranslation
 
-### check if an upgrade of wxpython is possible from pip !
-sys.stdout.write("Importing wxPython %s%s for python %s on %s (%s) platform...\n"%(wx.version(), " from devsimpy.ini" if ini_exist else '', platform.python_version(), platform.system(), platform.version()))
-
 import gettext
 
 try:
@@ -2663,6 +2660,8 @@ class DEVSimPyApp(wx.App, wit.InspectionMixin):
 		sys.excepthook = ExceptionHook
 
 def main():
+	sys.stdout.write("Importing wxPython %s%s for python %s on %s (%s) platform...\n"%(wx.version(), " from devsimpy.ini" if ini_exist else '', platform.python_version(), platform.system(), platform.version()))
+
 	### if --nogui is in argv, we start devsimpy-nogui.py
 	start_devsimpy_nogui = '--nogui' in sys.argv
 
