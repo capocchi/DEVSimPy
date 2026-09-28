@@ -255,7 +255,7 @@ class AIPrompterDialog(wx.Dialog):
 
         self.parent.Notification(
             True, 
-            _('%s modified' % (os.path.basename(self.editor.GetFilename()))), 
+            _('{} modified'.format(os.path.basename(self.editor.GetFilename()))), 
             '', 
             ''
         )
