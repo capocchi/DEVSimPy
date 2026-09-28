@@ -150,11 +150,11 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		mailto = mails_list[0] if mails_list else ""
 		cc = ""
 		for mail in mails_list[1:]:
-			cc += '%s,' % mail
+			cc += f'{mail},'
 		
 		body = _("Dear DEVSimPy developers, \n Error in %s, line %s :\n %s") % (model_name, line, info)
 		subject = _("Error in %s DEVSimPy model") % (model_name)
-		webbrowser.open_new("mailto:%s?subject=%s&cc=%s&body=%s" % (mailto, subject, cc, body))
+		webbrowser.open_new(f"mailto:{mailto}?subject={subject}&cc={cc}&body={body}")
 
 
 	def OnItemDeselected(self, event):
@@ -436,7 +436,7 @@ class CheckerGUI(wx.Frame):
 						line = self.list.getColumnText(i, 2)
 						f.write(f"{name}: {error} (Line: {line})\n")
 			except IOError:
-				wx.LogError("Cannot save current data in file '%s'." % pathname)
+				wx.LogError(f"Cannot save current data in file '{pathname}'.")
 
 
 	def SetDiagram(self, diagram):
