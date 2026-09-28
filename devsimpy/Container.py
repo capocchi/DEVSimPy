@@ -2687,8 +2687,8 @@ if getattr(builtins, 'GUI_FLAG', True):
 
 			### menu items (the menu bar always belongs to the main window)
 			try:
-				mainW = getTopLevelWindow() if isinstance(win, DetachedFrame) else win
-				mb = mainW.GetMenuBar()
+				main_w = getTopLevelWindow() if isinstance(win, DetachedFrame) else win
+				mb = main_w.GetMenuBar()
 				if mb is not None:
 					for entry in mb.GetMenus():
 						menu = entry[0] if isinstance(entry, tuple) else entry
