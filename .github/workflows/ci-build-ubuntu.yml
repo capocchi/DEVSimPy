@@ -46,6 +46,7 @@ jobs:
             pyYAML \
             PyPubSub \
             ruamel.yaml \
+            requests \
             matplotlib
     
     - name: Install X serveur
