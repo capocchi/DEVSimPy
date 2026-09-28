@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-  # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -26,7 +26,7 @@ import wx
 
 _ = wx.GetTranslation
 
-from Patterns import Observer
+from Patterns import Observer  
 from LibPanel import LibPanel
 from PropPanel import PropPanel
 from AttributeEditor import AttributeEditor
@@ -66,7 +66,7 @@ class GeneralNotebook(Observer):
 		self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.__PageChanged)
 
 	def __set_properties(self):
-		"""
+		""" Set properties of the Notebook
 		"""
 		imgList = wx.ImageList(16, 16)
 		for img in ['db.png', 'properties.png', 'simulation.png']:
@@ -74,7 +74,7 @@ class GeneralNotebook(Observer):
 		self.AssignImageList(imgList)
 
 	def __PageChanged(self, evt):
-		"""
+		""" Event handler for page change in the Notebook.
 		"""
 		if evt.GetSelection() == 1:
 			pass
@@ -88,7 +88,7 @@ class GeneralNotebook(Observer):
 		try:
 			### try to find if panel exist from label
 			index = labelList.index(self.labelList[0])
-		except ValueError as info:
+		except ValueError:
 			### index not match, panel not existing
 			return None
 		else:
@@ -103,7 +103,7 @@ class GeneralNotebook(Observer):
 		try:
 			### try to find if panel exist from label
 			index = labelList.index(self.labelList[1])
-		except ValueError as info:
+		except ValueError:
 			### index not match, panel not existing
 			return None
 		else:
@@ -118,7 +118,7 @@ class GeneralNotebook(Observer):
 		try:
 			### try to find if panel exist from label
 			index = labelList.index(self.labelList[2])
-		except ValueError as info:
+		except ValueError:
 			### index not match, panel not existing
 			return None
 		else:
@@ -180,9 +180,9 @@ try:
 	if (wx.VERSION >= (2, 8, 9, 2)):
 		import wx.lib.agw.flatnotebook as fnb
 	else:
-		import wx.lib.flatnotebook as fnb
+		import wx.lib.flatnotebook as fnb # type: ignore  
 	USE_FLATNOTEBOOK = True
-except:
+except:  # noqa: E722, S110
 	pass
 
 MENU_EDIT_DELETE_PAGE = wx.NewIdRef()
@@ -190,7 +190,7 @@ MENU_EDIT_DELETE_PAGE = wx.NewIdRef()
 if USE_FLATNOTEBOOK:
 	#-------------------------------------------------------------------
 	class ControlNotebook(fnb.FlatNotebook, GeneralNotebook):
-		"""
+		""" FlatNotebook class that allows overriding and adding methods for the left pane of DEVSimPy
 		"""
 
 		def __init__(self, *args, **kwargs):
@@ -237,12 +237,12 @@ if USE_FLATNOTEBOOK:
 					item.Check(False)
 
 		def __OnClosePage(self, evt):
-			"""
+			""" The right click menu has been invoked to close the current tab.
 			"""
 			self.DeletePage(self.GetSelection())
 
 		def CreateRightClickMenu(self):
-			"""
+			""" Create the right click menu for the FlatNotebook.
 			"""
 			self._rmenu = wx.Menu()
 			item = wx.MenuItem(self._rmenu, MENU_EDIT_DELETE_PAGE, _("Close\tCtrl+F4"), _("Close Tab"))
@@ -253,7 +253,7 @@ else:
 
 	#-------------------------------------------------------------------
 	class ControlNotebook(wx.Notebook, GeneralNotebook):
-		"""
+		""" Notebook class that allows overriding and adding methods for the left pane of DEVSimPy.
 		"""
 
 		def __init__(self, *args, **kwargs):

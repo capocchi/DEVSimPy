@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -13,7 +13,7 @@
 # ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import wx
+import wx  
 import wx.grid
 import os
 import builtins
@@ -216,7 +216,7 @@ class DiagramConstantsDialog(wx.Dialog):
 	def OnCellChanged(self, evt):
 		""" Update row color when cell is modified
 		"""
-		row = evt.GetRow()
+		# row = evt.GetRow()
 		# Visual feedback that the row has been modified
 		evt.Skip()
 
@@ -245,7 +245,7 @@ class DiagramConstantsDialog(wx.Dialog):
 				row = self._grid.GetGridCursorRow()
 				self._grid.DeleteRows(row)
 
-		except Exception as e:
+		except Exception:  # noqa: BLE001
 			### Fallback: delete current row
 			row = self._grid.GetGridCursorRow()
 			if row >= 0 and row < self._grid.GetNumberRows():
@@ -273,7 +273,7 @@ class DiagramConstantsDialog(wx.Dialog):
 		dlg.Destroy()
 
 		try:
-			errorLog = open('import_error.log', 'a+')
+			errorLog = open('import_error.log', 'a+')  # noqa: SIM115
 			
 			def logErrors(oldrow, newrow, expectedColumns, maxColumns, file=errorLog):
 				file.write(oldrow + '\n')
@@ -313,7 +313,7 @@ class DiagramConstantsDialog(wx.Dialog):
 			else:
 				dlg.Destroy()
 				
-		except Exception as e:
+		except Exception as e:  # noqa: BLE001
 			wx.MessageBox(
 				_('Error during import: {}').format(str(e)), 
 				_('Import Error'), 
@@ -373,7 +373,7 @@ class DiagramConstantsDialog(wx.Dialog):
 				wx.OK | wx.ICON_INFORMATION
 			)
 
-		except Exception as info:
+		except Exception as info:  # noqa: BLE001
 			wx.MessageBox(
 				_('Error exporting data: {}\n').format(info), 
 				_('Export Error'), 
@@ -408,7 +408,7 @@ class DiagramConstantsDialog(wx.Dialog):
 				try:
 					# Try to evaluate as number
 					self.data[const] = eval(val)
-				except:
+				except:  # noqa: E722
 					# Keep as string
 					self.data[const] = val
 

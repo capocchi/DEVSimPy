@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-  # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,7 +22,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import os
+import os  
 import sys
 
 import wx
@@ -104,10 +104,10 @@ class UpgradeLibThread(Thread):
 		self.start()
 
 	def LoadZip(self, url):
-		"""
+		""" Load zip file from url and unzip it in the domain path.
 		"""
 
-		temp = tempfile.NamedTemporaryFile()
+		temp = tempfile.NamedTemporaryFile()  # noqa: SIM115
 		zip = urllib.request.urlopen(url).read()
 		try:
 			temp.write(zip)
@@ -121,7 +121,7 @@ class UpgradeLibThread(Thread):
 			if dlg.ShowModal() == wx.ID_YES:
 				unzipper = unzip()
 				zipsource = temp.name
-				zipdest = DOMAIN_PATH
+				zipdest = DOMAIN_PATH # pyright: ignore[reportUndefinedVariable]  # noqa: F821
 				unzipper.extract(zipsource, zipdest)
 
 			temp.close()
@@ -170,14 +170,14 @@ class UpgradeLibThread(Thread):
 			url = "http://code.google.com/p/devsimpy/downloads/list"
 			text = urllib.request.urlopen(url).read()
 			wx.CallAfter(self.CheckVersion, text)
-		except IOError:
+		except OSError:
 			# Unable to get to the internet
 			wx.CallAfter(self.CheckVersion, None)
-		except Exception:
+		except Exception:  # noqa: BLE001
 			# Some other strange error...
 			wx.CallAfter(self.CheckVersion, None)
 
-		return
+		return  # noqa: PLR1711
 
 	def finish(self):
 		""" Return final value.

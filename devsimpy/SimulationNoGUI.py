@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 """
 Name: SimulationNoGUI.py
@@ -12,12 +12,12 @@ GENERAL NOTES AND REMARKS:
 GLOBAL VARIABLES AND FUNCTIONS:
 """
 
-import os
+import os  
 import sys
 import time
 import traceback
 import json
-# import pusher
+
 
 import gettext
 _ = gettext.gettext
@@ -34,46 +34,16 @@ class Printer:
     def __init__(self,data):
         sys.stdout.write("\r\x1b[K"+data.__str__())
         sys.stdout.flush()
-        
-
-# def yes(prompt:str = 'Please enter Yes/No: ')->bool:
-#     while True:
-#         try:
-#             i = input(prompt)
-#         except KeyboardInterrupt:
-#             return False
-#         if i.lower() in ('yes','y'): return True
-#         elif i.lower() in ('no','n'): return False  
-
-# class SimuPusher():
     
-#     def __init__(self, simu_name):
-#         # app_id/key/secret might be linked to user TBC
-#         self.app_id = '178867'
-#         self.key    = 'c2d255356f53779e6020'
-#         self.secret = '9d41a54d45d25274df63'
-
-#         self.pusher = pusher.Pusher(app_id=self.app_id, key=self.key, secret=self.secret, ssl=True, port=443)
-#         self.channel = simu_name
-    
-#     def push(self, event, data):
-#         self.pusher.trigger(self.channel, event, json.dumps(data))
-    
-# class PrintPusher():
-#     def __init__(self, simu_name):
-#         pass
-    
-#     def push(self, event, data):
-#         sys.stdout.write((json.dumps(data)))
 
 def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, with_progress:bool=False):
-    """
+    """ Make Simulation
     """
 
     from InteractionSocket import InteractionManager
 
     json_report = {'date': time.strftime("%c")}
-    json_report['summary'] = f"Simulation in batch mode with {DEFAULT_DEVS_DIRNAME}"
+    json_report['summary'] = f"Simulation in batch mode with {DEFAULT_DEVS_DIRNAME}" # type: ignore  # noqa: F821
     json_report['mode'] ='no-gui'
     json_report['time'] = T
     json_report['success'] = True
@@ -83,7 +53,7 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, with_p
     
     json_report['devs_instance'] = str(master)
     if isinstance(master, tuple):
-        json_report['summary'] += "...DEVS instance not created: %s\n"%str(master)
+        json_report['summary'] += f"...DEVS instance not created: {master!s}\n"
         sys.stdout.write(json.dumps(json_report))
         return False
     
@@ -97,21 +67,6 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, with_p
     interactionManager = None
     try:
         
-        # # Pusher service for Simulation --> User communication
-        # simuPusher = SimuPusher(simu_name) if is_remote else PrintPusher(simu_name)
-        
-        # ### Get live stream URL if exist :
-        # for m in [a for a in master.getComponentSet() if hasattr(a, 'plotUrl') and a.plotUrl != '']:
-        #     json_report['output'].append({'label':m.name, 'plotUrl':m.plotUrl})     
-        
-        # ### Get live stream URL if exist :
-        # for m in [a for a in master.getComponentSet() if hasattr(a, 'pusherChannel')]:
-        #     m.pusherChannel = simu_name
-        #     json_report['output'].append({'label':m.name, 'pusherChannel':m.pusherChannel}) 
-        
-        # # Send to user 
-        # simuPusher.push('live_streams', {'live_streams': json_report['output']})
-        
         sim = runSimulation(master, T)
         thread = sim.Run()
         
@@ -124,7 +79,7 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, with_p
         # first_real_time = time.time()
         progress = 0
         
-        if not NTL:
+        if not NTL:  # type: ignore # noqa: F821
             is_alive = thread.isAlive if hasattr(thread, 'isAlive') else thread.is_alive
             while is_alive():
                 try:
@@ -146,7 +101,7 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, with_p
                         
                     # Add little wait to avoid the CPU overhead
                     time.sleep(0.001)
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     print(f"Error in the simulation loop : {e}")
                     break
 
@@ -155,10 +110,10 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, with_p
                 interactionManager.join()
 
             if with_progress:
-                Printer(f"Progress: 100%")    
+                Printer("Progress: 100%")    
             # simuPusher.push('progress', {'progress':100})
         
-    except:
+    except:  # noqa: E722
         json_report['summary'] += " *** EXCEPTION raised in simulation ***"
         json_report['success'] = False
         sys.stderr.write(traceback.format_exc())
@@ -195,7 +150,7 @@ def makeSimulation(master, T, simu_name:str="simu", is_remote:bool=False, with_p
     return True
 
 class runSimulation:
-    """
+    """ Run simulation
     """
 
     def __init__(self, master, time):
@@ -207,12 +162,12 @@ class runSimulation:
         self.time = time
 
         ### No time limit simulation (defined in the builtin dico from .devsimpy file)
-        self.ntl = NTL
+        self.ntl = NTL # type: ignore  # noqa: F821
 
         # simulator strategy
-        self.selected_strategy = DEFAULT_SIM_STRATEGY
-        self.dynamic_structure_flag = DYNAMIC_STRUCTURE
-        self.real_time_flag = REAL_TIME
+        self.selected_strategy = DEFAULT_SIM_STRATEGY # type: ignore  # noqa: F821
+        self.dynamic_structure_flag = DYNAMIC_STRUCTURE # type: ignore  # noqa: F821
+        self.real_time_flag = REAL_TIME # type: ignore  # noqa: F821
          
         ### profiling simulation
         self.prof = False
@@ -242,7 +197,7 @@ class runSimulation:
             if str(m)=='To_Disk':
                 dir_fn = os.path.dirname(diagram.last_name_saved).replace('\t','').replace(' ','')
                 # label = m.getBlockModel()
-                m.fileName = os.path.join(dir_fn,"%s_%s"%(os.path.basename(diagram.last_name_saved).split('.')[0],os.path.basename(m.fileName)))
+                m.fileName = os.path.join(dir_fn,"{}_{}".format(os.path.basename(diagram.last_name_saved).split('.')[0],os.path.basename(m.fileName)))
         ################################################################################################################
         ################################################################################################################
         if self.master:

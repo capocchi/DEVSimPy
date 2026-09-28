@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -13,7 +13,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import wx
+import wx  
 import os
 import wx.lib.filebrowsebutton as filebrowse
 
@@ -101,7 +101,7 @@ class StandaloneGUI(wx.Frame):
 		else:
 			self.yaml_model_name = "Test.yaml"
 
-		super(StandaloneGUI, self).__init__(*args, **kw)
+		super().__init__(*args, **kw)
 
 		self.InitUI()
 		self.Center()
@@ -415,7 +415,7 @@ class StandaloneGUI(wx.Frame):
 			)
 			dlg.ShowModal()
 			dlg.Destroy()
-		except Exception as e:
+		except Exception:  # noqa: BLE001
 			# Fallback
 			wx.MessageBox(
 				help_msg,
@@ -504,7 +504,7 @@ class StandaloneGUI(wx.Frame):
 					_("Error"), 
 					wx.OK | wx.ICON_ERROR
 				)
-		except Exception as e:
+		except Exception as e:  # noqa: BLE001
 			wx.MessageBox(
 				_("An error occurred: {}").format(str(e)), 
 				_("Error"), 

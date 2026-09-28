@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 """
 Name: Components.py
@@ -13,7 +13,7 @@ GENERAL NOTES AND REMARKS:
 GLOBAL VARIABLES AND FUNCTIONS:
 """
 
-import wx
+import wx  
 import os
 import sys
 
@@ -43,7 +43,7 @@ class DropTarget(wx.DropTarget):
 		self.__setDo()
 
 	def __setDo(self):
-		"""
+		""" Set the data object for the drop target. This is a composite data object that allows for multiple formats to be dropped on the target.
 		"""
 	
 		# file and text names
@@ -61,7 +61,7 @@ class DropTarget(wx.DropTarget):
 		#sys.stdout.write("OnEnter: %d, %d, %d\n" % (x, y, d))
 		#return wx.DragCopy
 	def OnDragOver(self,x,y,d):
-		"""
+		""" DragOver(x, y, d) -> d
 		"""
 
 		### list of ContainerBlock shape in canvas
@@ -86,7 +86,7 @@ class DropTarget(wx.DropTarget):
 		return wx.DragCopy
 
 	def OnDetachedFrame(self, shape):
-		"""
+		""" Frame to display the shape in a detached frame when the mouse is over a ContainerBlock shape
 		"""
 		### Detached Frame
 		frame = DetachedFrame.DetachedFrame(self.canvas, wx.NewIdRef(), shape.label, shape)
@@ -102,7 +102,7 @@ class DropTarget(wx.DropTarget):
 		return timer
 
 	def HitTest(self, shape, x, y):
-		"""
+		""" Test if the point (x,y) is in the rect of the shape
 		"""
 
 		w = shape.x[1]-shape.x[0]
@@ -116,7 +116,7 @@ class DropTarget(wx.DropTarget):
 		return rect.Contains(x,y)
         
 	def OnData(self, x, y, d):
-		"""
+		""" Data(x, y, d) -> d
 		"""
 		
 		if self.GetData():
@@ -132,7 +132,7 @@ class DropTarget(wx.DropTarget):
 				# text is the filename
 				text = os.path.splitext(filename)[0]
 				### label is composed by the number of block in diagram
-				label = "%s_%s"%(os.path.basename(text),str(self.canvas.GetDiagram().GetBlockCount()))
+				label = f"{os.path.basename(text)}_{self.canvas.GetDiagram().GetBlockCount()!s}"
 				
 				m = self.GetBlock(filename, label, x, y)
 		
@@ -200,7 +200,7 @@ class DropTarget(wx.DropTarget):
 			return d
 			
 	def GetBlock(self, filename, label, x, y):
-		"""
+		""" GetBlock(filename, label, x, y) -> block
 		"""
 		### Block factory
 		bf = Components.BlockFactory()

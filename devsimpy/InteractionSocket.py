@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
-import json
+import json  
 import threading
 import socketserver
 import traceback
@@ -71,10 +71,10 @@ class MySocketHandler(socketserver.BaseRequestHandler):
         self.request.send(json.dumps(response))
 
 class MySocketServer(Server):
-    """
+    """ Class to manage the socket server for interaction with the simulation thread.
     """
     def __init__(self, server_address, RequestHandlerClass, simulation_thread):
-        """
+        """ Constructor of the socket server. It is called by the InteractionManager thread.
         """
         if sys.platform == "win32":
             socketserver.TCPServer.__init__(self, server_address, RequestHandlerClass)
@@ -91,10 +91,10 @@ class MySocketServer(Server):
         sys.stderr.write(' ***')
 
 class InteractionManager(threading.Thread):
-    """
+    """ Class to manage the socket server for interaction with the simulation thread.
     """
     def __init__(self, socket_id, simulation_thread):
-        """
+        """ Constructor of the InteractionManager thread. It is called by the SimulationThread.
         """
         threading.Thread.__init__(self)
         self.daemon = True
@@ -116,14 +116,14 @@ class InteractionManager(threading.Thread):
 
 
     def run(self):
-        """
+        """ Run the socket server. It is called by the InteractionManager thread.
         """
         if self.server:
             log('SocketServer serve_forever ** ')
             self.server.serve_forever()
 
     def stop(self):
-        """
+        """ Stop the socket server. It is called by the InteractionManager thread.
         """
         if self.server:
             log('SocketSserver shutdown')

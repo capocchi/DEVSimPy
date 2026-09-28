@@ -1,13 +1,11 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
-import wx
+import wx  
 import wx.stc
 
 from Utilities import load_and_resize_image
     
-import wx.adv
-
 wx.FutureCall = wx.CallLater
 wx.SAVE = wx.FD_SAVE
 wx.OPEN = wx.FD_OPEN
@@ -21,7 +19,7 @@ class SimpleEditor(wx.stc.StyledTextCtrl):
             pos = wx.DefaultPosition, \
             size = wx.DefaultSize,\
             style = 0,\
-            name = "editor"):
+            name = "editor"):  # noqa: B008
         wx.stc.StyledTextCtrl.__init__ (self, parent, id, pos, size, style, name)
 
 
@@ -65,11 +63,11 @@ class FrameEditor(wx.Frame):
         if label in ('Rapport','logger'):
             label = self.title.split(' ')[1]
 
-        dialog = wx.FileDialog( None, "Save %s file"%label, style = wx.SAVE, defaultFile="%s.dat"%label )
+        dialog = wx.FileDialog( None, f"Save {label} file", style = wx.SAVE, defaultFile=f"{label}.dat" )
         # Show the dialog and get user input
         if dialog.ShowModal() == wx.ID_OK:
             file_path = dialog.GetPath()
-            file = open(file_path,'w')
+            file = open(file_path,'w')  # noqa: SIM115
             file_content = self.editor.GetValue()
             file.write(file_content)
         
@@ -82,7 +80,7 @@ class FrameEditor(wx.Frame):
         dialog = wx.FileDialog ( None, message = 'Open something....', wildcard = filters, style = wx.OPEN|wx.MULTIPLE )
         if dialog.ShowModal() == wx.ID_OK:
             filename = dialog.GetPath()
-            file = open(filename,'r')
+            file = open(filename,'r')  # noqa: SIM115
             file_content = file.read()
             wx.CallAfter(self.editor.SetValue,file_content)
         dialog.Destroy()

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,21 +22,22 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import wx
+import bisect
+import csv
+import math
 import os
 import sys
-import math
 import threading
-import csv
-import bisect
+
+import wx
 
 _ = wx.GetTranslation
 
 import wx.lib.agw.aui as aui
 
 try:
-	import matplotlib as mpl
-	import matplotlib.figure as fig
+	
+	import matplotlib.figure as fig  
 	from matplotlib.backends.backend_wxagg import (
 		FigureCanvasWxAgg as FigureCanvas,
 		NavigationToolbar2WxAgg as NavigationToolbar)
@@ -60,7 +61,7 @@ else:
 	#This module requires the Numeric/numarray or NumPy module, which could not be imported.
 	import wx.lib.plot as plot
 
-from Utilities import smooth, get_downloads_folder, load_and_resize_image
+from Utilities import smooth, get_downloads_folder, load_and_resize_image  
 
 LColour = ('black', 'red', 'green', 'blue', 'yellow', 'gray', 'magenta', 'maroon', 'orange', 'salmon', 'pink', 'plum')
 Markers = ('circle', 'triangle', 'square',  'cross', 'triangle_down', 'plus', 'dot')
@@ -153,7 +154,7 @@ class PlotNotebook(wx.Panel):
 		return page.figure
 
 class PlotFrame(wx.Frame):
-	def __init__(self, parent=None, id=wx.NewIdRef(), title="Time Plotting"):
+	def __init__(self, parent=None, id=wx.NewIdRef(), title="Time Plotting"):  # noqa: B008
 		"""	Constructor.
 		"""
 
@@ -161,7 +162,7 @@ class PlotFrame(wx.Frame):
 
 		self.type = "PlotLine"
 		self.normalize = False
-		self.home = DEVSIMPY_PACKAGE_PATH
+		self.home = DEVSIMPY_PACKAGE_PATH # type: ignore
 
 		self.client = plot.PlotCanvas(self)
 
@@ -303,18 +304,18 @@ class PlotFrame(wx.Frame):
 		tb.Realize()
 
 	def OnMove(self, event):
-		"""
+		""" Move
 		"""
 		event.Skip()
 
 	def OnMouseLeftDown(self,event):
-		"""
+		""" Mouse Left Down
 		"""
 		self.SetStatusText(_("Left Mouse Down at Point: (%.4f, %.4f)") % self.client._getXY(event))
 		event.Skip()            #allows plotCanvas OnMouseLeftDown to be called
 
 	def drawPointLabel(self, dc, nearest):
-		"""
+		""" Draw
 		"""
 		ptx, pty = nearest["scaledXY"]
 
@@ -326,10 +327,10 @@ class PlotFrame(wx.Frame):
 		dc.SetLogicalFunction(wx.COPY)
 
 		x,y = nearest["pointXY"] # data values
-		self.SetStatusText("%s: x = %.4f, y = %.4f" % (nearest['legend'],x,y))
+		self.SetStatusText("{}: x = {:.4f}, y = {:.4f}".format(nearest['legend'],x,y))
 
 	def OnMotion(self, event):
-		"""
+		""" Motion
 		"""
 		#show closest point (when enbled)
 		if self.client.enablePointLabel and self.client.pointLabelFunc:
@@ -337,7 +338,7 @@ class PlotFrame(wx.Frame):
 			#I've decided to mark the closest point on the closest curve
 			dlst= self.client.GetClosestPoint(self.client._getXY(event), pointScaled= True)
 			if dlst:    #returns [] if none
-				curveNum, legend, pIndex, pointXY, scaledXY, distance = dlst
+				curveNum, legend, pIndex, pointXY, scaledXY, _ = dlst
 				#make up dictionary to pass to my user function (see DrawPointLabel)
 				mDataDict = {"curveNum":curveNum, "legend":legend, "pIndex":pIndex, "pointXY":pointXY, "scaledXY":scaledXY}
 				#pass dict to update the pointLabel
@@ -346,30 +347,30 @@ class PlotFrame(wx.Frame):
 		event.Skip()           #go to next handler
 
 	def OnFilePageSetup(self, event):
-		"""
+		""" Page Setup
 		"""
 		self.client.PageSetup()
 
 	def OnFilePrintPreview(self, event):
-		"""
+		""" Print Preview
 		"""
 		self.client.PrintPreview()
 
 	def OnFilePrint(self, event):
-		"""
+		""" File Print
 		"""
 		try:
 			self.client.Printout()
 		except AttributeError as info:
-			sys.stderr.write("Error: %s"%info)
+			sys.stderr.write(f"Error: {info}")
 
 	def OnExportFile(self, event):
+		""" Export
 		"""
-		"""
-		pass
+		pass  # noqa: PIE790
 
 	def OnSaveFile(self, event):
-		"""
+		""" Save
 		"""
 		dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=self.home, defaultFile='', wildcard="*.jpg*", style=wx.SAVE | wx.OVERWRITE_PROMPT)
 		if dlg.ShowModal() == wx.ID_OK:
@@ -383,98 +384,98 @@ class PlotFrame(wx.Frame):
 			self.client.SaveFile(path)
 
 	def OnFileExit(self, event):
-		"""
+		""" Exit
 		"""
 		self.Close()
 
 	def OnPlotRedraw(self,event):
+		""" Redraw
 		"""
-		"""
-		eval("self.On%s(event)"%self.type)
+		eval(f"self.On{self.type}(event)")
 		self.client.Redraw()
 
 	def OnEnableNormalize(self, event):
-		"""
+		""" Normalize
 		"""
 		self.normalize = not self.normalize
 		self.OnPlotRedraw(event)
 
 	def OnPlotScale(self, event):
-		"""
+		""" Plot Scale
 		"""
 		if self.client.last_draw != None:
-			graphics, xAxis, yAxis= self.client.last_draw
+			graphics, _, _= self.client.last_draw
 			self.client.Draw(graphics,(1,3.05),(0,1))
 
 	def OnEnableZoom(self, event):
-		"""
+		""" +Zoom
 		"""
 		self.client.enableZoom = event.IsChecked()
 		#self.mainmenu.Check(self.enableZoom.GetId(), not event.IsChecked())
 
 	def OnEnableGrid(self, event):
-		"""
+		""" Grid
 		"""
 		self.client.enableGrid = event.IsChecked()
 
 	def OnEnableDrag(self, event):
-		"""
+		""" Drag
 		"""
 		self.client.enableDrag = event.IsChecked()
 		#self.mainmenu.Check(self.enableDrag.GetId(), not event.IsChecked())
 
 	def OnEnableTitle(self, event):
-		"""
+		""" Title
 		"""
 		self.client.enableTitle = event.IsChecked()
 
 	def OnEnableLegend(self, event):
-		"""
+		""" Legend
 		"""
 		self.client.enableLegend = event.IsChecked()
 
 	def OnEnablePointLabel(self, event):
-		"""
+		""" Point Label
 		"""
 		self.client.enablePointLabel = event.IsChecked()
 
 	def OnEnableXStep(self, event):
+		""" XStep
 		"""
-		"""
-		pass
+		pass  # noqa: PIE790
 
 	def OnEnableXDefault(self, event):
+		""" XDefault
 		"""
-		"""
-		pass
+		pass # noqa: PIE790
 
 	def OnTitleSetting(self, event):
+		""" Titel setting
 		"""
-		"""
-		pass
+		pass # noqa: PIE790
 
 	def OnXLabelSetting(self, event):
+		""" XLabel Setting
 		"""
-		"""
-		pass
+		pass # noqa: PIE790
 
 	def OnYLabelSetting(self, event):
+		""" Label Setting
 		"""
-		"""
-		pass
+		pass # noqa: PIE790
 
 	def OnScrUp(self, event):
-		"""
+		""" Scrup
 		"""
 		self.client.ScrollUp(1)
 
 	def OnScrRt(self,event):
-		"""
+		""" Rt
 		"""
 		self.client.ScrollRight(2)
 
 	def OnReset(self,event):
-		"""
+		""" rest
 		"""
 		self.client.Reset()
 
@@ -484,7 +485,7 @@ class PlotFrame(wx.Frame):
 		Args:
 			event (_type_): _description_
 		"""
-		pass
+		pass # noqa: PIE790
 		
 	def resetDefaults(self):
 		"""Just to reset the fonts back to the PlotCanvas defaults"""
@@ -496,15 +497,15 @@ class PlotFrame(wx.Frame):
 		self.client.SetYSpec('auto')
 
 	def OnQuit(self, event):
-		"""
+		""" Quit
 		"""
 		self.Destroy()
 
 class StaticPlot(PlotFrame):
-	"""
+	""" Static Plot Class
 	"""
 
-	def __init__(self, parent = None, id = wx.NewIdRef(), title = "Time Plotting", data = None, xLabel = 'Time [s]', yLabel = 'Amplitude [A]', typ = 'PlotLine', legend='', fusion=False):
+	def __init__(self, parent = None, id = wx.NewIdRef(), title = "Time Plotting", data = None, xLabel = 'Time [s]', yLabel = 'Amplitude [A]', typ = 'PlotLine', legend='', fusion=False):  # noqa: B008
 		"""	@data : [(t,y)...]
 		"""
 
@@ -563,7 +564,7 @@ class StaticPlot(PlotFrame):
 			self.mainmenu.Append(menu, _('&Mean'))
 
 			### call self.On<PlotLine>()
-			getattr(self,'On%s'%self.typ)()
+			getattr(self,f'On{self.typ}')()
 
 	def Normalize(self, data):
 		m = max(a[1] for a in data)
@@ -573,11 +574,11 @@ class StaticPlot(PlotFrame):
 		self.block = block
   
 		### call self.On<PlotLine>()
-		getattr(self,'On%s'%self.typ)()
+		getattr(self,f'On{self.typ}')()
   
 	def getInputLabels(self,data):
 		### find input label if it is defined b the user
-		input_labels = {i:f"in{i}" for i in data.keys()}   
+		input_labels = {i:f"in{i}" for i in data}   
 		if self.block:
 			a = self.block.getBlockModel().getInputLabels()
 			if a!={}:
@@ -585,7 +586,7 @@ class StaticPlot(PlotFrame):
 		return input_labels
 
 	def OnPlotStep(self, event=None)-> None:
-		"""
+		""" Plot Step
 		"""
 		data = self.data
 
@@ -605,7 +606,7 @@ class StaticPlot(PlotFrame):
 				for k,v in data.items():
 					if v != data[0]:
 						x,y = zip(*v)
-						axes1.step(x, y, LColour[k+1],label='Inport %s'%str(k))
+						axes1.step(x, y, LColour[k+1],label=f'Inport {k!s}')
 
 				### show legend only of mulitple inputs
 				axes1.legend()
@@ -624,7 +625,7 @@ class StaticPlot(PlotFrame):
 						#axes1.set_title(_("Plotting %s")%label)
 
 	def OnPlotLine(self, event=None)-> None:
-		"""
+		""" Plot Line
 		"""
 		data = self.data
 
@@ -636,7 +637,7 @@ class StaticPlot(PlotFrame):
 			if self.normalize:
 				data = self.Normalize(data)
 
-			line = plot.PolyLine(data, legend = 'Port 0 (%s)'%self.legend, colour = 'black', width = 1)
+			line = plot.PolyLine(data, legend = f'Port 0 ({self.legend})', colour = 'black', width = 1)
 
 			self.gc = plot.PlotGraphics([line], self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
@@ -673,7 +674,7 @@ class StaticPlot(PlotFrame):
 		self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
 
 	def OnPlotSquare(self, event=None)->None:
-		"""
+		""" Plot Square
 		"""
 
 		data = self.data
@@ -690,7 +691,7 @@ class StaticPlot(PlotFrame):
 			if self.normalize:
 				data = self.Normalize(data)
 
-			line = plot.PolyLine(data, legend = 'Port 0 (%s)'%self.legend, colour = 'black', width = 1)
+			line = plot.PolyLine(data, legend = f'Port 0 ({self.legend})', colour = 'black', width = 1)
 			self.gc = plot.PlotGraphics([line], self.title, self.xLabel, self.yLabel)
 			### gestion automatique des bornes
 			xMin,xMax,yMin,yMax = get_limit(data)
@@ -746,7 +747,7 @@ class StaticPlot(PlotFrame):
 				data = self.Normalize(data)
 			
 			markers = plot.PolyMarker(data, colour = LColour[0], marker = Markers[0], size = 1)
-			line = plot.PolyLine(data, legend = 'Port 0 (%s)'%self.legend, colour = LColour[0], width = 1)
+			line = plot.PolyLine(data, legend = f'Port 0 ({self.legend})', colour = LColour[0], width = 1)
 			
 			self.gc = plot.PlotGraphics([line, markers], self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
@@ -772,7 +773,7 @@ class StaticPlot(PlotFrame):
 					m = max([a[1] for a in dd])
 					d = [(b[0], b[1]/m) for b in dd]
 
-				L.append(plot.PolyLine(dd, legend = 'Port 0 %s'%self.legend, colour=c, width=1))
+				L.append(plot.PolyLine(dd, legend = f'Port 0 {self.legend}', colour=c, width=1))
 				L.append(plot.PolyMarker(dd, colour=c, marker=m, size=1))
 
 				a,b,c,d = get_limit(dd)
@@ -817,14 +818,14 @@ class StaticPlot(PlotFrame):
 		self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
 
 	def OnMean(self, evt):
-		"""
+		""" Mean
 		"""
 		if isinstance(self.data, dict):
 			r = 0.0
 		else:
 			r = sum(c[-1] for c in self.data) / len(self.data)
 
-		wx.MessageBox('Mean: %f'%r, _('Info'), wx.OK|wx.ICON_INFORMATION)
+		wx.MessageBox(f'Mean: {r:f}', _('Info'), wx.OK|wx.ICON_INFORMATION)
 
 	def OnRMSE(self,evt):
 		""" Get RMSE.
@@ -835,7 +836,7 @@ class StaticPlot(PlotFrame):
 			diffcarr = map(lambda a,b: pow(float(a[-1])-float(b[-1]),2), c1,c2)
 			r = sqrt(sum(diffcarr)/len(c1))
 		
-			wx.MessageBox('RMSE: %f'%r, _('Info'), wx.OK|wx.ICON_INFORMATION)
+			wx.MessageBox(f'RMSE: {r:f}', _('Info'), wx.OK|wx.ICON_INFORMATION)
 		else:
 			wx.MessageBox('RMSE needs two curves!', _('Error'), wx.OK|wx.ICON_ERROR)
 
@@ -845,7 +846,7 @@ class StaticPlot(PlotFrame):
 	#		frame.Show()
 
 	def OnPlotAllSpectrum(self, evt=None):
-		"""
+		""" Plot All Spectrum
 		"""
 		for k,s in list(self.data.items()):
 			frame = Spectrum(self,wx.NewIdRef(), title= _("Spectrum of signal %d")%k,data=s)
@@ -853,7 +854,7 @@ class StaticPlot(PlotFrame):
 			frame.Show()
 
 	def OnPlotSpectrum(self, evt=None):
-		"""
+		""" Plot Spectrum
 		"""
 
 		# si mode fusion
@@ -871,23 +872,23 @@ class StaticPlot(PlotFrame):
 		frame.Show()
 
 	def OnEnableXStep(self, event):
-		"""
+		""" XStep
 		"""
 		self.step = True
-		eval("self.On%s()"%self.typ)
+		eval(f"self.On{self.typ}()")
 		self.gc.setXLabel("Step")
 		self.client.Redraw()
 
 	def OnEnableXDefault(self, event):
-		"""
+		""" XDefault
 		"""
 		self.step = False
-		eval("self.On%s()"%self.typ)
+		eval(f"self.On{self.typ}()")
 		self.gc.setXLabel("Time [s]")
 		self.client.Redraw()
 
 	def OnTitleSetting(self, event):
-		"""
+		""" Title Setting
 		"""
 		dlg = wx.TextEntryDialog(self, _('Enter new title'),_('Title Entry'))
 		dlg.SetValue(self.title)
@@ -898,7 +899,7 @@ class StaticPlot(PlotFrame):
 		dlg.Destroy()
 
 	def OnXLabelSetting(self, event):
-		"""
+		""" XLabel Setting
 		"""
 		dlg = wx.TextEntryDialog(self, _('Enter new X label'),_('Label Entry'))
 		dlg.SetValue(self.xLabel)
@@ -909,7 +910,7 @@ class StaticPlot(PlotFrame):
 		dlg.Destroy()
 
 	def OnYLabelSetting(self, event):
-		"""
+		"""Y Label Setting
 		"""
 		dlg = wx.TextEntryDialog(self, _('Enter new Y label'),_('Label Entry'))
 		dlg.SetValue(self.yLabel)
@@ -962,10 +963,10 @@ class StaticPlot(PlotFrame):
 		wx.MessageBox(_('File saved in %s')%path, _('Info'), wx.OK|wx.ICON_INFORMATION)
 
 class DynamicPlot(PlotFrame):
-	"""
+	""" Dynamic Plot Class
 	"""
 
-	def __init__(self, parent=None, id=wx.NewIdRef(), title="", atomicModel=None, xLabel="", yLabel="", iport=None):
+	def __init__(self, parent=None, id=wx.NewIdRef(), title="", atomicModel=None, xLabel="", yLabel="", iport=None):  # noqa: B008
 		"""
 			@parent: parent class
 			@id: class id
@@ -1011,14 +1012,14 @@ class DynamicPlot(PlotFrame):
 
 		self.timer = wx.Timer(self)
 		### DEFAULT_PLOT_DYN_FREQ can be configured in preference-> simulation
-		self.timer.Start(milliseconds=DEFAULT_PLOT_DYN_FREQ)
+		self.timer.Start(milliseconds=DEFAULT_PLOT_DYN_FREQ) # type: ignore
 
 		self.Bind(wx.EVT_TIMER, self.OnPlotRedraw)
 		#self.Bind(wx.EVT_TIMER, self.OnTimerEvent)
 		#self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
 		self.Bind(wx.EVT_CLOSE, self.OnQuit)
 
-		getattr(self, "On%s"%self.type)()
+		getattr(self, f"On{self.type}")()
 
 	def OnTimerEvent(self, event):
 		#self.GetEventHandler().ProcessEvent(wx.PaintEvent())
@@ -1048,7 +1049,7 @@ class DynamicPlot(PlotFrame):
 			if self.normalize:
 				data = self.Normalize(data)
 
-			line = plot.PolyLine(data, legend = 'Port 0 (%s)'%self.atomicModel.getBlockModel().label, colour = 'black', width = 1)
+			line = plot.PolyLine(data, legend = f'Port 0 ({self.atomicModel.getBlockModel().label})', colour = 'black', width = 1)
 			self.gc = plot.PlotGraphics([line], self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
 		
@@ -1073,7 +1074,7 @@ class DynamicPlot(PlotFrame):
 					m = max([a[1] for a in dd])
 					dd = [(b[0], b[1]/m) for b in dd]
 				
-				L.append(plot.PolyLine(dd, legend = 'Port %s (%s)'%(str(ind), label), colour = cc, width=1))
+				L.append(plot.PolyLine(dd, legend = f'Port {ind!s} ({label})', colour = cc, width=1))
 
 				a,b,c,d = get_limit(dd)
 
@@ -1086,7 +1087,7 @@ class DynamicPlot(PlotFrame):
 
 		try:
 			self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
-		except Exception:
+		except Exception:  # noqa: BLE001
 			sys.stdout.write(_("Error trying to plot"))
 		
 		# if self.sim_thread is None or not self.sim_thread.isAlive():
@@ -1116,7 +1117,7 @@ class DynamicPlot(PlotFrame):
 				m = max([a[1] for a in data])
 				data = [(b[0], b[1]/m) for b in data]
 
-			line = plot.PolyLine(data, legend='Port 0 (%s)'%self.atomicModel.getBlockModel().label, colour='black', width=1)
+			line = plot.PolyLine(data, legend=f'Port 0 ({self.atomicModel.getBlockModel().label})', colour='black', width=1)
 			self.gc = plot.PlotGraphics([line], self.title, self.xLabel, self.yLabel)
 
 			### dynamic managment of bounds
@@ -1152,7 +1153,7 @@ class DynamicPlot(PlotFrame):
 					dd = [(b[0], b[1]/m) for b in dd]
 
 				### data construct
-				L.append(plot.PolyLine(dd, legend='Port %s (%s)'%(str(ind),label), colour=c, width=1))
+				L.append(plot.PolyLine(dd, legend=f'Port {ind!s} ({label})', colour=c, width=1))
 
 				### limit managment 
 				a,b,c,d = get_limit(dd)
@@ -1166,7 +1167,7 @@ class DynamicPlot(PlotFrame):
 
 		try:
 			self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
-		except Exception:
+		except Exception:  # noqa: BLE001
 			sys.stdout.write(_("Error trying to plot"))
 
 		cond = self.sim_thread.isAlive() if hasattr(self.sim_thread,'isAlive') else self.sim_thread.is_alive()
@@ -1175,15 +1176,8 @@ class DynamicPlot(PlotFrame):
 			self.timer.Stop()
 
 	def OnPlotScatter(self, event):
+		""" Plot Scatter
 		"""
-		"""
-
-		#if self.timer.IsRunning():
-		### unbinding paint event
-		# if self.type != "PlotScatter":
-		# 	self.type = "PlotScatter"
-		# 	self.Unbind(wx.EVT_PAINT)
-		# 	self.Bind(wx.EVT_PAINT, getattr(self, "On%s"%self.type))
 
 		## without fusion
 		if self.iport is not None:
@@ -1194,7 +1188,7 @@ class DynamicPlot(PlotFrame):
 				data = self.Normalize(data)
 
 			markers = plot.PolyMarker(data, colour=LColour[0], marker=Markers[0], size=1)
-			line = plot.PolyLine(data, legend='Port 0 (%s)'%self.atomicModel.getBlockModel().label, colour=LColour[0], width=1)
+			line = plot.PolyLine(data, legend=f'Port 0 ({self.atomicModel.getBlockModel().label})', colour=LColour[0], width=1)
 			
 			self.gc = plot.PlotGraphics([line, markers], self.title, self.xLabel, self.yLabel)
 			xMin,xMax,yMin,yMax = get_limit(data)
@@ -1227,7 +1221,7 @@ class DynamicPlot(PlotFrame):
 					dd = [(b[0], b[1]/m) for b in dd]
 
 				L.append(plot.PolyLine(dd, colour=c, width=1))
-				L.append(plot.PolyMarker(dd, legend='Port %s (%s)'%(str(ind), label), colour=c, marker=m, size=1))
+				L.append(plot.PolyMarker(dd, legend=f'Port {ind!s} ({label})', colour=c, marker=m, size=1))
 
 				a,b,c,d = get_limit(dd)
 
@@ -1240,7 +1234,7 @@ class DynamicPlot(PlotFrame):
 
 		try:
 			self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
-		except Exception:
+		except Exception:  # noqa: BLE001
 			sys.stdout.write(_("Error trying to plot"))
 
 		cond = self.sim_thread.isAlive() if hasattr(self.sim_thread,'isAlive') else self.sim_thread.is_alive()
@@ -1294,7 +1288,7 @@ class DynamicPlot(PlotFrame):
 		try:
 
 			self.client.Draw(self.gc, xAxis = (float(xMin),float(xMax)), yAxis = (float(yMin),float(yMax)))
-		except Exception:
+		except Exception:  # noqa: BLE001
 			sys.stdout.write(_("Error trying to plot"))
 
 		cond = self.sim_thread.isAlive() if hasattr(self.sim_thread,'isAlive') else self.sim_thread.is_alive()
@@ -1350,7 +1344,7 @@ class DynamicPlot(PlotFrame):
 		dlg.Destroy()
 
 class Spectrum(StaticPlot):
-	def __init__(self, parent=None, id=wx.NewIdRef(), title="", data=[]):
+	def __init__(self, parent=None, id=wx.NewIdRef(), title="", data=[]):  # noqa: B006, B008
 		"""	@data : [(x,y)...]
 		"""
 
@@ -1388,7 +1382,7 @@ class Spectrum(StaticPlot):
 
 		### normalization
 		Max = max(Y)
-		Y = [20*math.log(i/Max,10) for i in Y]
+		Y = [20*math.log(i/Max,10) for i in Y]  # noqa: FURB163
 
 		### freqencies max and min for the plot
 		FMin, FMax=0,200
@@ -1425,7 +1419,7 @@ class Spectrum(StaticPlot):
 #		posv = self.sldv.GetValue()
 #		self.Redraw(self.Rescale(posv,posh))
 
-	def Redraw(self,data:list=[]):
+	def Redraw(self,data:list=[]):  # noqa: B006
 		"""Redraw the client
 
 		Args:

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,7 +22,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import wx
+import wx  
 import os
 import sys
 import keyword
@@ -44,11 +44,11 @@ OLLAMA_PORT = 11434
 OLLAMA_MODEL = "mistral"
 OLLAMA_SERVER_CMD = ["ollama", "serve"]
 
-import inspect
+import inspect  
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
     
-from tempfile import gettempdir, TemporaryDirectory
+from tempfile import gettempdir, TemporaryDirectory  
 from wx import stc
 from AIAdapter import AdapterFactory
 
@@ -65,11 +65,11 @@ _ = wx.GetTranslation
 tabnanny.verbose = 1
 
 if wx.Platform == '__WXMSW__':
-	faces = dict(times='Times New Roman', mono='Courier New', helv='Arial', other='Comic Sans MS', size=10, size2=8)
+	faces = dict(times='Times New Roman', mono='Courier New', helv='Arial', other='Comic Sans MS', size=10, size2=8)  # noqa: C408
 elif wx.Platform == '__WXMAC__':
-	faces = dict(times='Times New Roman', mono='Monaco', helv='Arial', other='Comic Sans MS', size=12, size2=10)
+	faces = dict(times='Times New Roman', mono='Monaco', helv='Arial', other='Comic Sans MS', size=12, size2=10)  # noqa: C408
 else:
-	faces = dict(times='Times', mono='Courier', helv='Helvetica', other='new century schoolbook', size=12, size2=10)
+	faces = dict(times='Times', mono='Courier', helv='Helvetica', other='new century schoolbook', size=12, size2=10)  # noqa: C408
 
 wx.SystemSettings_GetColour = wx.SystemSettings.GetColour
 
@@ -82,19 +82,19 @@ wx.SystemSettings_GetColour = wx.SystemSettings.GetColour
 
 ### NOTE: Editor.py :: isError 				=> check if file is well-formed and if requirements are corrects
 def isError(scriptlet):
-	"""
+	""" Check if the scriptlet is well-formed and if requirements are corrects
 	"""
 	try:
 		code = compile(scriptlet, '<string>', 'exec')
-		exec(code)
-	except Exception as info:
+		exec(code)  # noqa: S102
+	except Exception as info:  # noqa: BLE001
 		return info
 	else:
 		return False
 
 ### NOTE: Editor.py :: getObjectFromString	=> todo
 def getObjectFromString(scriptlet):
-	"""
+	""" Get the object from a scriptlet string.
 	"""
 
 	assert scriptlet != ''
@@ -102,12 +102,12 @@ def getObjectFromString(scriptlet):
 	# Compile the scriptlet.
 	try:
 		code = compile(scriptlet, '<string>', 'exec')
-	except Exception as info:
+	except Exception as info:  # noqa: BLE001
 		### Add line number to the error trace
 		for frame in traceback.extract_tb(sys.exc_info()[2]):
-			fname,lineno,fn,text = frame
+			_,lineno,_,_ = frame
 		L = list(info.args)
-		L.append("line %i"%lineno)
+		L.append("line %i"%lineno)  # noqa: UP031
 		info.args = tuple(L)
 		return info
 
@@ -118,14 +118,14 @@ def getObjectFromString(scriptlet):
 
 		### there is syntaxe error ?
 		try:
-			exec(code, temp.__dict__)
+			exec(code, temp.__dict__)  # noqa: S102
 
-		except Exception as info:
+		except Exception as info:  # noqa: BLE001
 			### Add line number to the error trace
 			for frame in traceback.extract_tb(sys.exc_info()[2]):
-				fname,lineno,fn,text = frame
+				_,lineno,_,_ = frame
 			L = list(info.args)
-			L.append("line %i"%lineno)
+			L.append("line %i"%lineno)  # noqa: UP031
 			info.args = tuple(L)
 
 			return info
@@ -136,14 +136,14 @@ def getObjectFromString(scriptlet):
 				if value.__module__ == "temp":
 					# Create the instance.
 					try:
-						return eval("temp.%s" % name)()
+						return eval(f"temp.{name}")()
 
-					except Exception as info:
+					except Exception as info:  # noqa: BLE001
 						### Add line number to the error trace
 						for frame in traceback.extract_tb(sys.exc_info()[2]):
-							fname,lineno,fn,text = frame
+							_,lineno,_,_ = frame
 						L = list(info.args)
-						L.append("line %i"%lineno)
+						L.append("line %i"%lineno)  # noqa: UP031
 						info.args = tuple(L)
 
 						return info
@@ -217,14 +217,14 @@ class TestSearchCtrl(wx.SearchCtrl):
 
 ### NOTE: PythonSTC << stc.StyledTextCtrl :: todo
 class PythonSTC(stc.StyledTextCtrl):
-	"""
+	""" PythonSTC << stc.StyledTextCtrl
 	"""
 
 	fold_symbols = 2
 
 	### NOTE: PythonSTC:: constructor => __init__(self, parent, ID, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0)
 	def __init__(self, parent, ID, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0):
-		"""
+		""" Constructor.
 		"""
 		stc.StyledTextCtrl.__init__(self, parent, ID, pos, size, style)
 		
@@ -311,48 +311,48 @@ class PythonSTC(stc.StyledTextCtrl):
 		# Scintilla sample property files.
 
 		# Global default styles for all languages
-		self.StyleSetSpec(stc.STC_STYLE_DEFAULT, "face:%(helv)s,size:%(size)d" % faces)
+		self.StyleSetSpec(stc.STC_STYLE_DEFAULT, "face:%(helv)s,size:%(size)d" % faces)  # noqa: UP031
 		#self.StyleSetSpec(STC_CODE_ERROR, 'fore:#FF0000,back:#FFFF00,size:%(size)d' % faces)
 		#self.StyleSetSpec(STC_CODE_SEARCH_RESULT, 'fore:#FFFFFF,back:#FFA500,size:%(size)d' % faces)
 
 		self.StyleClearAll()  # Reset all to be like the default
 
 		# Global default styles for all languages
-		self.StyleSetSpec(stc.STC_STYLE_DEFAULT, "face:%(helv)s,size:%(size)d" % faces)
-		self.StyleSetSpec(stc.STC_STYLE_LINENUMBER, "back:#C0C0C0,face:%(helv)s,size:%(size2)d" % faces)
-		self.StyleSetSpec(stc.STC_STYLE_CONTROLCHAR, "face:%(other)s" % faces)
+		self.StyleSetSpec(stc.STC_STYLE_DEFAULT, "face:%(helv)s,size:%(size)d" % faces)  # noqa: UP031
+		self.StyleSetSpec(stc.STC_STYLE_LINENUMBER, "back:#C0C0C0,face:%(helv)s,size:%(size2)d" % faces)  # noqa: UP031
+		self.StyleSetSpec(stc.STC_STYLE_CONTROLCHAR, "face:%(other)s" % faces)  # noqa: UP031
 		self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, "fore:#FFFFFF,back:#0000FF,bold")
 		self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:#000000,back:#FF0000,bold")
 
 		# Python styles
 		# Default
-		self.StyleSetSpec(stc.STC_P_DEFAULT, "fore:#000000,face:%(helv)s,size:%(size)d" % faces)
+		self.StyleSetSpec(stc.STC_P_DEFAULT, "fore:#000000,face:%(helv)s,size:%(size)d" % faces) # noqa: UP031
 		# Comments
-		self.StyleSetSpec(stc.STC_P_COMMENTLINE, "fore:#007F00,face:%(other)s,size:%(size)d" % faces)
+		self.StyleSetSpec(stc.STC_P_COMMENTLINE, "fore:#007F00,face:%(other)s,size:%(size)d" % faces) # noqa: UP031
 		# Number
-		self.StyleSetSpec(stc.STC_P_NUMBER, "fore:#007F7F,size:%(size)d" % faces)
+		self.StyleSetSpec(stc.STC_P_NUMBER, "fore:#007F7F,size:%(size)d" % faces) # noqa: UP031
 		# String
-		self.StyleSetSpec(stc.STC_P_STRING, "fore:#7F007F,face:%(helv)s,size:%(size)d" % faces)
+		self.StyleSetSpec(stc.STC_P_STRING, "fore:#7F007F,face:%(helv)s,size:%(size)d" % faces) # noqa: UP031
 		# Single quoted string
-		self.StyleSetSpec(stc.STC_P_CHARACTER, "fore:#7F007F,face:%(helv)s,size:%(size)d" % faces)
+		self.StyleSetSpec(stc.STC_P_CHARACTER, "fore:#7F007F,face:%(helv)s,size:%(size)d" % faces) # noqa: UP031
 		# Keyword
-		self.StyleSetSpec(stc.STC_P_WORD, "fore:#00007F,bold,size:%(size)d" % faces)
+		self.StyleSetSpec(stc.STC_P_WORD, "fore:#00007F,bold,size:%(size)d" % faces) # noqa: UP031
 		# Triple quotes
-		self.StyleSetSpec(stc.STC_P_TRIPLE, "fore:#7F0000,size:%(size)d" % faces)
+		self.StyleSetSpec(stc.STC_P_TRIPLE, "fore:#7F0000,size:%(size)d" % faces) # noqa: UP031
 		# Triple double quotes
-		self.StyleSetSpec(stc.STC_P_TRIPLEDOUBLE, "fore:#7F0000,size:%(size)d" % faces)
-		# Class name definition
-		self.StyleSetSpec(stc.STC_P_CLASSNAME, "fore:#0000FF,bold,underline,size:%(size)d" % faces)
+		self.StyleSetSpec(stc.STC_P_TRIPLEDOUBLE, "fore:#7F0000,size:%(size)d" % faces) # noqa: UP031
+		# Class name definition 
+		self.StyleSetSpec(stc.STC_P_CLASSNAME, "fore:#0000FF,bold,underline,size:%(size)d" % faces) # noqa: UP031
 		# Function or method name definition
-		self.StyleSetSpec(stc.STC_P_DEFNAME, "fore:#007F7F,bold,size:%(size)d" % faces)
+		self.StyleSetSpec(stc.STC_P_DEFNAME, "fore:#007F7F,bold,size:%(size)d" % faces) # noqa: UP031
 		# Operators
-		self.StyleSetSpec(stc.STC_P_OPERATOR, "bold,size:%(size)d" % faces)
+		self.StyleSetSpec(stc.STC_P_OPERATOR, "bold,size:%(size)d" % faces) # noqa: UP031
 		# Identifiers
-		self.StyleSetSpec(stc.STC_P_IDENTIFIER, "fore:#000000,face:%(helv)s,size:%(size)d" % faces)
+		self.StyleSetSpec(stc.STC_P_IDENTIFIER, "fore:#000000,face:%(helv)s,size:%(size)d" % faces) # noqa: UP031
 		# Comment-blocks
-		self.StyleSetSpec(stc.STC_P_COMMENTBLOCK, "fore:#7F7F7F,size:%(size)d" % faces)
+		self.StyleSetSpec(stc.STC_P_COMMENTBLOCK, "fore:#7F7F7F,size:%(size)d" % faces) # noqa: UP031
 		# End of line where string is not closed
-		self.StyleSetSpec(stc.STC_P_STRINGEOL, "fore:#000000,face:%(mono)s,back:#E0C0E0,eol,size:%(size)d" % faces)
+		self.StyleSetSpec(stc.STC_P_STRINGEOL, "fore:#000000,face:%(mono)s,back:#E0C0E0,eol,size:%(size)d" % faces) # noqa: UP031
 
 		self.SetCaretForeground("BLUE")
 
@@ -374,7 +374,7 @@ class PythonSTC(stc.StyledTextCtrl):
 			)
 			# Attendre qu'il soit prêt dans un thread
 			threading.Thread(target=self.wait_for_server, daemon=True).start()
-		except Exception as e:
+		except Exception as e:  # noqa: BLE001
 			print("Erreur démarrage Ollama:", e)
 
 	def wait_for_server(self, timeout=10):
@@ -409,7 +409,7 @@ class PythonSTC(stc.StyledTextCtrl):
 			except requests.exceptions.ReadTimeout:
 				# Timeout temporaire, on ignore
 				pass
-			except Exception as e:
+			except Exception as e:  # noqa: BLE001
 				print("Erreur Ollama:", e)
 		threading.Thread(target=worker, daemon=True).start()
 
@@ -540,7 +540,7 @@ class PythonSTC(stc.StyledTextCtrl):
 			('OnMarginClick', 'self, event')
 		]
 		return "\n--------------------------------------------------\
-		\n\tClass :\t\t%s\n\n\tInherit from :\t%s\n\n\tAttributes :\t%s\n\n\tMethods :\t%s\n" % (
+		\n\tClass :\t\t{}\n\n\tInherit from :\t{}\n\n\tAttributes :\t{}\n\n\tMethods :\t{}\n".format(
 			class_name, parent, '\n\t\t\t'.join([attr + "\t:: " + typ for attr, typ in attrs]),
 			"\n\t\t\t".join([method + "\tparams :: " + params for method, params in methods])
 		)
@@ -725,7 +725,7 @@ class CodeEditor(PythonSTC):
 			('RegisterModifiedEvent', 'self, eventHandler')
 		]
 		return "\n--------------------------------------------------\
-		\n\tClass :\t\t%s\n\n\tInherit from :\t%s\n\n\tAttributes :\t%s\n\n\tMethods :\t%s\n" % (
+		\n\tClass :\t\t{}\n\n\tInherit from :\t{}\n\n\tAttributes :\t{}\n\n\tMethods :\t{}\n".format(
 			class_name, parent, '\n\t\t\t'.join([attr + "\t:: " + typ for attr, typ in attrs]),
 			"\n\t\t\t".join([method + "\tparams :: " + params for method, params in methods])
 		)
@@ -916,7 +916,7 @@ class CodeEditor(PythonSTC):
 
 	### NOTE: CodeEditor :: RegisterModifiedEvent => todo
 	def RegisterModifiedEvent(self, eventHandler):
-		"""
+		""" Register a handler for the modified event.  This is called when the text is modified.  The handler should be a callable that takes one argument, the event.  The event will have a GetEventObject() method that returns the CodeEditor instance that was modified.
 		"""
 		self.Bind(wx.stc.EVT_STC_CHANGE, eventHandler)
 
@@ -925,10 +925,10 @@ class CodeEditor(PythonSTC):
 ### EditionFile-----------------------------------------------------
 ### NOTE: EditionFile << CodeEditor :: Expect EditionFile objects to clearly separate file and notebook attributes
 class EditionFile(CodeEditor):
-	"""
+	""" EditionFile class that allows overriding and adding methods.
 	"""
 
-	#
+	# NOTE: EditionFile :: constructor 	=> __init__(self, parent, path, code)
 	def __init__(self, parent, path, code):
 		""" Constructor
 		"""
@@ -951,14 +951,14 @@ class EditionFile(CodeEditor):
 			('ContainError', 'self')
 		]
 		return "\n--------------------------------------------------\
-		\n\tClass :\t\t%s\n\n\tInherit from :\t%s\n\n\tAttributes :\t%s\n\n\tMethods :\t%s\n" % (
+		\n\tClass :\t\t{}\n\n\tInherit from :\t{}\n\n\tAttributes :\t{}\n\n\tMethods :\t{}\n".format(
 			class_name, parent, '\n\t\t\t'.join([attr + "\t:: " + typ for attr, typ in attrs]),
 			"\n\t\t\t".join([method + "\tparams :: " + params for method, params in methods])
 		)
 
 	# NOTE: EditionFile :: ContainError 		=> Getter of the error flag
 	def ContainError(self):
-		"""
+		""" Error
 		"""
 		return self.error_flag
 
@@ -968,7 +968,7 @@ class EditionFile(CodeEditor):
 ### EditionNotebook-------------------------------------------------
 ### NOTE: EditionNotebook << wx.Notebook :: Notebook for multiple file edition
 class EditionNotebook(wx.Notebook):
-	"""
+	""" Editor Notebook Class
 	"""
 
 	### NOTE: EditionNotebook :: constructor 	=> __init__(self, *args, **kwargs)
@@ -1030,14 +1030,14 @@ class EditionNotebook(wx.Notebook):
 			('<static> CheckIndent', 'filename')
 		]
 		return "\n--------------------------------------------------\
-		\n\tClass :\t\t%s\n\n\tInherit from :\t%s\n\n\tAttributes :\t%s\n\n\tMethods :\t%s\n" % (
+		\n\tClass :\t\t{}\n\n\tInherit from :\t{}\n\n\tAttributes :\t{}\n\n\tMethods :\t{}\n".format(
 			class_name, parent, '\n\t\t\t'.join([attr + "\t:: " + typ for attr, typ in attrs]),
 			"\n\t\t\t".join([method + "\tparams :: " + params for method, params in methods])
 		)
 
 	### NOTE: EditionNotebook :: GetPages 		=> Get the list of created pages
 	def GetPages(self):
-		"""
+		""" Get the list of created pages
 		"""
 		return self.pages
 
@@ -1053,7 +1053,7 @@ class EditionNotebook(wx.Notebook):
 		fileCode = ""
 		
 		### FIXME: try to consider zipfile in zipfile
-		L = re.findall(r"(.*\.(amd|cmd))\%s(.*)" % os.sep, path)
+		L = re.findall(rf"(.*\.(amd|cmd))\{os.sep}(.*)", path)
 
 		if L:
 			model_path, _, name = L.pop(0)
@@ -1084,7 +1084,7 @@ class EditionNotebook(wx.Notebook):
 
 	### NOTE: EditionNotebook :: GetPageByName => Return the page with the required name
 	def GetPageByName(self, name=''):
-		"""
+		""" Get the page with the required name
 		"""
 		for i in range(len(self.pages)):
 			if name == self.GetPageText(i):
@@ -1093,7 +1093,7 @@ class EditionNotebook(wx.Notebook):
 
 	### NOTE: EditionNotebook :: __PageChanged => Event when page changed
 	def __PageChanged(self, evt):
-		"""
+		""" Page changed event handler.  This is called when the user changes pages in the notebook.  It updates the undo/redo buttons and deselects any selected text in the new page.
 		"""
 
 		try:
@@ -1106,7 +1106,7 @@ class EditionNotebook(wx.Notebook):
 			canvas.deselect()
 			canvas.Refresh()
 
-		except Exception:
+		except Exception:  # noqa: BLE001, S110
 			pass
 		evt.Skip()
 
@@ -1126,7 +1126,7 @@ class EditionNotebook(wx.Notebook):
 
 	### NOTE: EditionNotebook :: OnKeyDown 	=> Event when key is pressed
 	def OnKeyDown(self, event):
-		"""
+		""" On key down event handler.  This is called when the user presses a key in the editor.  It handles auto-completion and other key events.
 		"""
 		keycode = event.GetKeyCode()
 		controlDown = event.CmdDown()
@@ -1135,7 +1135,7 @@ class EditionNotebook(wx.Notebook):
 		if keycode == wx.WXK_UP or keycode == wx.WXK_DOWN:
 			event.Skip()
 		elif keycode == 32 and controlDown:
-			pos = currentPage.GetCurrentPos()
+			# pos = currentPage.GetCurrentPos()
 
 			kw = keyword.kwlist[:]
 			#kw.append("this_is_a_much_much_much_much_much_much_much_longer_value")
@@ -1187,11 +1187,11 @@ class EditionNotebook(wx.Notebook):
 
 	### NOTE: EditionNotebook :: DoOpenFile 	=> Opening file method
 	def DoOpenFile(self):
-		"""
+		""" Open a file and load its content into the current page of the notebook.
 		"""
 		currentPage = self.GetCurrentPage()
 		wcd = 'All files (*)|*|Editor files (*.py)|*.py'
-		dir = DEVSIMPY_PACKAGE_PATH
+		dir = DEVSIMPY_PACKAGE_PATH # type: ignore  # noqa: F821
 		open_dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=dir, defaultFile='', wildcard=wcd,
 		                         style=wx.OPEN | wx.CHANGE_DIR)
 		if open_dlg.ShowModal() == wx.ID_OK:
@@ -1208,7 +1208,7 @@ class EditionNotebook(wx.Notebook):
 
 				currentPage.modify = False
 
-			except Exception as info:
+			except Exception as info:  # noqa: BLE001
 				wx.MessageBox(_('Error opening file:\n%s\n')%str(info),\
 							"Open file function",\
 							wx.OK | wx.ICON_ERROR)
@@ -1217,7 +1217,7 @@ class EditionNotebook(wx.Notebook):
 
 	### NOTE: EditionNotebook :: DoSaveFile 	=> Saving file method
 	def DoSaveFile(self, code):
-		"""
+		""" Save the current page of the notebook to a file.  If the file is in a zip archive, it will update the archive instead of saving to disk.  If the file is not in a zip archive, it will save to disk.  The code parameter is the text to save.
 		"""
 
 		currentPage = self.GetCurrentPage()
@@ -1229,7 +1229,7 @@ class EditionNotebook(wx.Notebook):
 		### if zipfile
 		if zipfile.is_zipfile(model_dir):
 
-			model_name, model_ext = os.path.basename(model_dir).split('.')        # toto, .amd or .cmd
+			model_name, _ = os.path.basename(model_dir).split('.')        # toto, .amd or .cmd
 			fic_name, fic_ext = fic_filename.split('.')            # toto, *
 
 			### write code in base_name temporary file
@@ -1242,9 +1242,9 @@ class EditionNotebook(wx.Notebook):
 			### Clean up the temporary file yourself
 			try:
 				os.remove(fic_filename)
-			except Exception as info:
+			except Exception as info:  # noqa: BLE001
 				sys.exc_info()
-				sys.stderr.write(_('File has not been deleted: %s'%info))
+				sys.stderr.write(_(f'File has not been deleted: {info}'))  # noqa: INT001
 
 			### reload module only if zipped python file is not plugins
 			### update only for python file of model which have path like .../name.amd(.cmd)/name.ext
@@ -1257,7 +1257,7 @@ class EditionNotebook(wx.Notebook):
 			r_file = os.path.join(os.path.basename(model_dir), fic_filename)
 			model_dir = os.path.dirname(model_dir)
 
-			model_name, model_ext = os.path.basename(model_dir).split('.')        # toto, .amd or .cmd
+			model_name, _ = os.path.basename(model_dir).split('.')        # toto, .amd or .cmd
 			fic_name, fic_ext = fic_filename.split('.')            # toto, *
 
 			### write code in base_name temporary file
@@ -1326,7 +1326,7 @@ class EditionNotebook(wx.Notebook):
 	@staticmethod
 	@redirectStdout
 	def CheckIndent(fileName):
-		"""
+		""" Check the code indentation of the fileName file
 		"""
 		### NOTE: tabnanny.check(fileName) => check the indentation of the fileName file
 
@@ -1341,15 +1341,15 @@ class EditionNotebook(wx.Notebook):
 			if zipfile.is_zipfile(zip_path):
 				python_file = os.path.basename(fileName)
 
-				with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+				with zipfile.ZipFile(zip_path, 'r') as zip_ref:  # noqa: SIM117
 					### Extraction
 					with TemporaryDirectory() as temp_dir:
 						extracted_path = zip_ref.extract(python_file, temp_dir)  # Extraction
 						### Check indentation
 						try:
 							tabnanny.check(extracted_path)
-						except Exception as e:
-							sys.stderr.write(_(f"Erreur dans {python_file} : {e}"))
+						except Exception as e:  # noqa: BLE001
+							sys.stderr.write(_(f"Erreur dans {python_file} : {e}"))  # noqa: INT001
 
 	
 	### NOTE: EditionNotebook :: OnReIndent 	=> Event on re-indent
@@ -1378,7 +1378,7 @@ class EditionNotebook(wx.Notebook):
 			python_file = cp.GetFilename()
 
 		### reindent from file
-		os.system("python %s" % os.path.join(DEVSIMPY_PACKAGE_PATH, "reindent.py") + " " + python_file)
+		os.system("python {}".format(os.path.join(DEVSIMPY_PACKAGE_PATH, "reindent.py")) + " " + python_file) # type: ignore  # noqa: F821
 
 		### only with python 2.6
 		with codecs.open(str(python_file), 'r', 'utf-8') as f:
@@ -1389,7 +1389,7 @@ class EditionNotebook(wx.Notebook):
 		cp.SetValue(text)
 
 		### status bar notification
-		self.parent.Notification(True, _('%s re-indented' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.parent.Notification(True, _(f'{os.path.basename(cp.GetFilename())} re-indented'), '', '')  # noqa: INT001
 
 	def OnCommentUnComment(self, event):
 		""" Comment/Uncomment current line(s)
@@ -1447,7 +1447,7 @@ class EditionNotebook(wx.Notebook):
 				cp.InsertText(cp.PositionFromLine(cur_line), symbol)
 		
 		### status bar notification
-		self.parent.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.parent.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 
 	# def OnUnComment(self, event):
 		# """ Uncomment current line(s)
@@ -1474,7 +1474,7 @@ class EditionNotebook(wx.Notebook):
 		self.GetCurrentPage().SelectAll()
 
 ###------------------------------------------------------------
-class Base(object):
+class Base:
 	""" Editor Base class
 	"""
 
@@ -1639,7 +1639,7 @@ class Base(object):
 		
 		tb.SetToolBitmapSize((16, 16))# this required for non-standard size buttons on MSW
 
-		ai_help = _('Generative AI based modification' if bool(getattr(builtins, 'SELECTED_IA')) else 'Check the AI settings in Preferences')
+		ai_help = _('Generative AI based modification' if bool(builtins.SELECTED_IA) else 'Check the AI settings in Preferences')
 		
 		if not self.parent:
 			self.Bind(wx.EVT_TOOL, self.OnSaveFile, tb.AddTool(self.save.GetId(), "", load_and_resize_image('save.png'), shortHelp=_('Save')))
@@ -1664,15 +1664,16 @@ class Base(object):
 			self.Bind(wx.EVT_TOOL, self.nb.OnPaste, id= self.paste.GetId())
 			self.Bind(wx.EVT_TOOL, self.OnAiHelp, id=self.ai.GetId())
 
-		tb.EnableTool(self.ai.GetId(), bool(getattr(builtins,'SELECTED_IA')))
+		tb.EnableTool(self.ai.GetId(), bool(builtins.SELECTED_IA))
 
 		tb.Realize()
 
 		return tb
 
 	def DoSearch(self, text):
+		""" Search for the given text in the current page of the notebook.  If the text is found, it will be selected and highlighted.  If the text is not found, a message box will be displayed.
 		"""
-		"""
+
 		nb = self.GetNoteBook()
 		currentPage = nb.GetCurrentPage()
 		
@@ -1716,7 +1717,7 @@ class Base(object):
 			('OnAbout', 'self, event')
 		]
 		return "\n--------------------------------------------------\
-		\n\tClass :\t\t%s\n\n\tInherit from :\t%s\n\n\tAttributes :\t%s\n\n\tMethods :\t%s\n" % (
+		\n\tClass :\t\t{}\n\n\tInherit from :\t{}\n\n\tAttributes :\t{}\n\n\tMethods :\t{}\n".format(
 			class_name, parent, '\n\t\t\t'.join([attr + "\t:: " + typ for attr, typ in attrs]),
 			"\n\t\t\t".join([method + "\tparams :: " + params for method, params in methods])
 		)
@@ -1788,7 +1789,7 @@ class Base(object):
 
 		else:
 			### status bar notification
-			self.Notification(False, _('%s not saved' % fn), _('file in readonly'), '')
+			self.Notification(False, _(f'{fn} not saved'), _('file in readonly'), '')  # noqa: INT001
 
 		### NOTE: Editor :: OnAiHelp			=> Event when save menu has been clicked
 	def OnAiHelp(self, event):
@@ -1805,7 +1806,7 @@ class Base(object):
 			selection = editor.GetSelection()
 			textstring = editor.GetRange(selection[0], selection[1])
 				
-			param = getattr(builtins, 'PARAMS_IA')
+			param = builtins.PARAMS_IA
 			adapter = AdapterFactory.get_adapter_instance(self,param)
 				
 			# Créer le dialogue avec le code sélectionné
@@ -1816,7 +1817,7 @@ class Base(object):
 			wx.MessageBox(_("No AI selected. Please select an AI before using AI assistance."), "Information", wx.OK | wx.ICON_INFORMATION)
 
 	def OnSearch(self, evt):
-		"""
+		""" Search menu has been clicked.  This will open a find dialog to search for text in the current page of the notebook.
 		"""
 		nb = self.GetNoteBook()
 		currentPage = nb.GetCurrentPage()
@@ -1829,13 +1830,13 @@ class Base(object):
 		self.dlg.Show()
 	
 	def OnFind(self, evt):
-		"""
+		""" Find menu has been clicked.  This will search for the text in the current page of the notebook.
 		"""
 		findstring = self.data.GetFindString().lower()
 		self.DoFind(findstring)
 
 	def DoFind(self, findstring:str)->None:
-		"""
+		""" Find the given string in the current page of the notebook.  If the string is found, it will be selected and highlighted.  If the string is not found, a message box will be displayed.
 		"""
 		nb = self.GetNoteBook()
 		editor = nb.GetCurrentPage()
@@ -1876,7 +1877,7 @@ class Base(object):
 		editor.SetSelection(loc, loc + len(findstring))
 
 	def OnSaveAsFile(self, event):
-		"""
+		""" Save As menu has been clicked.
 		"""
 
 		currentPage = self.nb.GetCurrentPage()
@@ -1891,7 +1892,7 @@ class Base(object):
 			msg = "Python files (*.py)|*.py|All files (*)|*"
 
 			wcd = _(msg)
-			home = dir_name or DEVSIMPY_PACKAGE_PATH
+			home = dir_name or DEVSIMPY_PACKAGE_PATH # type: ignore  # noqa: F821
 			save_dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=home, defaultFile='', wildcard=wcd, style=wx.SAVE | wx.OVERWRITE_PROMPT)
 
 		if save_dlg.ShowModal() == wx.ID_OK:
@@ -1909,7 +1910,7 @@ class Base(object):
 
 	### NOTE: Editor :: ConfigSaving 			=> Configure save vars
 	def ConfigSaving(self, base_name, dir_name, code):
-		"""
+		""" Configure saving variables and save the file if no error in code
 		"""
 
 		new_instance = None
@@ -1923,7 +1924,7 @@ class Base(object):
 
 	# NOTE: Editor :: CheckErrors 			=> Check errors in files before saving
 	def CheckErrors(self, base_name, code, new_instance):
-		"""
+		""" Check errors in files before saving
 		"""
 		if not self.nb.GetCurrentPage().ContainError():
 			self.nb.DoSaveFile(code)
@@ -1945,7 +1946,7 @@ class Base(object):
 
 		### some errors in file
 		else:
-			sys.stdout.write("In checkErrors: ",new_instance)
+			sys.stdout.write(f"In checkErrors: {new_instance}")
 			self.SavingErrors(new_instance)
 
 	# NOTE: Editor :: SavingErrors			=> Errors treatment
@@ -1958,8 +1959,8 @@ class Base(object):
 		output_checking = EditionNotebook.CheckIndent(fn)
 
 		if "indent not equal" in output_checking:
-			dial = wx.MessageDialog(self, _('Tab problem in %s.\n%s \
-				\nYou can try to re-indent it with Edit-> Re-indent sub-menu.' % (fn, output_checking)),
+			dial = wx.MessageDialog(self, _(f'Tab problem in {fn}.\n{output_checking} \
+				\nYou can try to re-indent it with Edit-> Re-indent sub-menu.'),  # noqa: INT001
 			                        _('Code Editor'), wx.OK | wx.ICON_INFORMATION)
 			dial.ShowModal()
 		else:
@@ -1992,7 +1993,7 @@ class Base(object):
 
 	### NOTE: Editor :: ToggleStatusBar 		=> Event for show or hide status bar
 	def ToggleStatusBar(self, event):
-		"""
+		""" Toggle the status bar
 		"""
 		if self.statusbar.IsShown():
 			self.statusbar.Hide()
@@ -2001,18 +2002,18 @@ class Base(object):
 
 	### NOTE: Editor :: OnChar 				=> Event when a char is typed
 	def OnChar(self, event):
-		"""
+		""" Handle character input
 		"""
 
 		### enable save icon in toolbar
 		self.toolbar.EnableTool(self.save.GetId(), True)
 		### status bar notification
-		self.Notification(True, _('%s modified' % (os.path.basename(self.nb.GetCurrentPage().GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(self.nb.GetCurrentPage().GetFilename())} modified'), '', '')  # noqa: INT001
 		event.Skip()
 
 	### NOTE: Editor :: OnOpenFile 			=> Event OnOpenFile
-	def OnOpenFile(self, event):
-		"""
+	def OnOpenFile(self, event):  # noqa: F811
+		""" Open File has been invoked
 		"""
 		if self.nb.GetCurrentPage().isModified():
 			dlg = wx.MessageDialog(self, _('Save changes?'), _('Code Editor'),
@@ -2029,7 +2030,7 @@ class Base(object):
 			self.DoOpenFile()
 
 	### NOTE: Editor :: OnSaveFile			=> Event when save menu has been clicked
-	def OnSaveFile(self, event):
+	def OnSaveFile(self, event):  # noqa: F811
 		""" Save menu has been clicked.
 		"""
 		currentPage = self.nb.GetCurrentPage()
@@ -2055,11 +2056,11 @@ class Base(object):
 
 		else:
 			### status bar notification
-			self.Notification(False, _('%s not saved' % (currentPage.GetFilename())), _('file in readonly'))
+			self.Notification(False, _(f'{currentPage.GetFilename()} not saved'), _('file in readonly'))  # noqa: INT001
 
 	### NOTE: Editor :: QuitApplication 		=> Event on quit application
 	def QuitApplication(self, event):
-		"""
+		""" Quit application event
 		"""
 		# FIXME: Editor :: QuitApplication 		=> Corrupted file saving crash DEVSimPY
 
@@ -2167,7 +2168,7 @@ class EditorFrame(Base, wx.Frame):
 		self.ProcessEvent(e)
 
 
-class BlockBase(object):
+class BlockBase:
 	### 
 	def __init__(self, parent, id, title, block):
 		""" Constructor.
@@ -2217,7 +2218,7 @@ class BlockBase(object):
 					(_('New passivate state'),self.OnInsertPassivateState), (_('New Phase test'),self.OnInsertPhaseIs), (_('New debugger stdout'),self.OnInsertDebug), 
 					(_('Get state'),self.OnInsertGetState), (_('Get phase'),self.OnInsertGetPhase), (_('Get sigma'),self.OnInsertGetSigma), (_('Get elapsed'),self.OnInsertGetElapsed), (_('Get message value'),self.OnInsertGetMsgValue), (_('Get message time'),self.OnInsertGetMsgTime)])
 			else:
-				if 'PyPDEVS' in getattr(builtins, 'DEFAULT_DEVS_DIRNAME'):
+				if 'PyPDEVS' in builtins.DEFAULT_DEVS_DIRNAME:
 					self._choices = collections.OrderedDict([(_("New add sub model"),self.OnAddModel),(_("New remove sub model"),self.OnRemoveModel),(_("New port connection"),self.OnDisConnectPorts),(_("New port connection"),self.OnConnectPorts),(_('New debugger stdout'),self.OnInsertDebug)])
 				else:
 					self._choices = collections.OrderedDict([(_('New debugger stdout'),self.OnInsertDebug)])
@@ -2234,7 +2235,7 @@ class BlockBase(object):
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.initPhase(<status>,<sigma>)")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 		
 	def OnPeek(self, *args)->None:
 		""" Insert the peek statement.
@@ -2246,8 +2247,8 @@ class BlockBase(object):
 
 		if port is not None:
 			cp = self.nb.GetCurrentPage()
-			cp.AddText("self.peek(self.IPorts[%d], *args)" % int(port))
-			self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+			cp.AddText("self.peek(self.IPorts[%d], *args)" % int(port))  # noqa: UP031
+			self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 	
 	def OnPoke(self, *args)->None:
 		"""Insert the poke statement.
@@ -2259,8 +2260,8 @@ class BlockBase(object):
 
 		if port is not None:
 			cp = self.nb.GetCurrentPage()
-			cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))"%int(port))
-			self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+			cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))"%int(port))  # noqa: UP031
+			self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 
 	def OnAllPeek(self, *args):
 		""" Insert the loop to peek all input ports.
@@ -2274,7 +2275,7 @@ class BlockBase(object):
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText(txt)
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 
 	def OnCombo(self, event):
 		""" Combobox for the text insert function.
@@ -2309,94 +2310,94 @@ class BlockBase(object):
 			if port is not None:
 				cp = self.nb.GetCurrentPage()
 				if "peek" in label:
-					cp.AddText("self.peek(self.IPorts[%d], *args)"%int(port))
+					cp.AddText("self.peek(self.IPorts[%d], *args)"%int(port))  # noqa: UP031
 				elif "poke" in label:
-					cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))"%int(port))
-				self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+					cp.AddText("return self.poke(self.OPorts[%d], Message(<>, self.timeNext))"%int(port))  # noqa: UP031
+				self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 
 	def OnInsertInitPhase(self, event):
 		""" Insert a sentence to get the init phase (status and sigma)
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.initPhase(<status>,<sigma>)")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 
 	def OnInsertSetState(self, event):
 		""" Insert a sentence to set the state (status and sigma)
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.setState({'status':'<phase>', 'sigma':<time>})")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 
 	def OnInsertSetStatus(self, event):
 		""" Insert a sentence to set the status of the state
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.setStatus('<phase>')")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 
 	def OnInsertSetSigma(self, event):
 		""" Insert a sentence to set the sigma of the state
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.setSigma(<time>)")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 
 	def OnInsertGetState(self, event):
 		""" Insert a sentence to get the state object.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.getState()")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 
 	def OnInsertGetPhase(self, event):
 		""" Insert a sentence to get the status.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.getPhase()")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _('%s modified') % os.path.basename(cp.GetFilename()), '', '')
 		
 	def OnInsertGetStatus(self, event):
 		""" Insert a sentence to get the status.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.getStatus()")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _('%s modified') % os.path.basename(cp.GetFilename()), '', '')
 
 	def OnInsertGetSigma(self, event):
 		""" Insert a sentence to get the sigma value.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.getSigma()")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _('%s modified') % os.path.basename(cp.GetFilename()), '', '')
 
 	def OnInsertGetPortId(self, event):
 		""" Insert a sentence to get the port ID.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.getPortId(<port>)")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 
 	def OnInsertGetMsgValue(self, event):
 		""" Insert a sentence to get the message value.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.getMsgValue(<msg>)")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 	
 	def OnInsertGetMsgTime(self, event):
 		""" Insert a sentence to get the message time.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.getMsgTime(<msg>)")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _('%s modified') % os.path.basename(cp.GetFilename()), '', '')
 
 	def OnInsertGetElapsed(self, event):
 		""" Insert a sentence to get the elapsed time.
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.getElapsed()")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _('%s modified') % os.path.basename(cp.GetFilename()), '', '')
 
 	###
 	def OnInsertHoldInState(self, event):
@@ -2404,7 +2405,7 @@ class BlockBase(object):
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.holdIn('<phase>',<sigma>)")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 
 	###
 	def OnInsertPhaseIs(self, event):
@@ -2412,7 +2413,7 @@ class BlockBase(object):
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.phaseIs('<phase>')")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 		
 	###
 	def OnInsertPassivateInState(self, event):
@@ -2420,7 +2421,7 @@ class BlockBase(object):
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.passivateIn('<phase>')")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 
 	###
 	def OnInsertPassivateState(self, event):
@@ -2428,7 +2429,7 @@ class BlockBase(object):
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.passivate()")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _('{} modified'.format(os.path.basename(cp.GetFilename()))), '', '')  # noqa: INT002, UP032
 
 	###
 	def OnInsertDebug(self, event):
@@ -2436,7 +2437,7 @@ class BlockBase(object):
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.debugger('<message>')")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 
 	###
 	def OnAddModel(self, event):
@@ -2444,7 +2445,7 @@ class BlockBase(object):
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.addSubModel(<model>)")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 
 	###
 	def OnRemoveModel(self, event):
@@ -2452,7 +2453,7 @@ class BlockBase(object):
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.removeSubModel(<model>)")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 
 	###
 	def OnConnectPorts(self, event):
@@ -2460,7 +2461,7 @@ class BlockBase(object):
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.connectPorts(<p1>,<p2>)")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 
 	###
 	def OnDisConnectPorts(self, event):
@@ -2468,7 +2469,7 @@ class BlockBase(object):
 		"""
 		cp = self.nb.GetCurrentPage()
 		cp.AddText("self.disconnectPorts(<p1>,<p2>)")
-		self.Notification(True, _('%s modified' % (os.path.basename(cp.GetFilename()))), '', '')
+		self.Notification(True, _(f'{os.path.basename(cp.GetFilename())} modified'), '', '')  # noqa: INT001
 
 	###
 	def ConfigSaving(self, base_name, dir_name, code):
@@ -2515,7 +2516,7 @@ class BlockBase(object):
 
 	###
 	def CheckErrors(self, base_name, code, new_instance):
-		"""
+		""" Check errors in files before saving
 		"""
 
 		if not self.nb.GetCurrentPage().ContainError():
@@ -2592,7 +2593,7 @@ class BlockBase(object):
 						new_args = {}
 
 						for name, parameter in parameters.items():
-							if name != 'self':
+							if name != 'self':  # noqa: SIM102
 								if parameter.default != inspect.Parameter.empty:
 									new_args[name] = parameter.default
 				
@@ -2612,7 +2613,7 @@ class BlockBase(object):
 	###
 	@classmethod
 	def __str__(cls):
-		"""
+		""" Return a string representation of the BlockEditor class, including its attributes and methods.
 		"""
 		attrs = [('cb', 'Block')]
 		class_name = "BlockEditor"
@@ -2627,7 +2628,7 @@ class BlockBase(object):
 			('OnInsertHoldInState', 'self, event')
 		]
 		return "\n--------------------------------------------------\
-		\n\tClass :\t\t%s\n\n\tInherit from :\t%s\n\n\tAttributes :\t%s\n\n\tMethods :\t%s\n" % (
+		\n\tClass :\t\t{}\n\n\tInherit from :\t{}\n\n\tAttributes :\t{}\n\n\tMethods :\t{}\n".format(
 			class_name, parent, '\n\t\t\t'.join([attr + "\t:: " + typ for attr, typ in attrs]),
 			"\n\t\t\t".join([method + "\tparams :: " + params for method, params in methods])
 		)
@@ -2656,7 +2657,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 
 	###
 	def ConfigureGUI(self):
-		"""
+		""" Configure the GUI of the BlockEditorFrame, including menus, toolbars, and event bindings.
 		"""
 
 		### insert sub menu-------------------------------------------------
@@ -2784,7 +2785,7 @@ class BlockEditorFrame(BlockBase, EditorFrame):
 
 
 	def OnClose(self,event):
-		"""
+		""" Handle the close event for the BlockEditorFrame, saving the cursor position and quitting the application.
 		"""
 
 		### save the postion of the cursor in the block
@@ -2810,7 +2811,7 @@ class BlockEditorPanel(BlockBase, EditorPanel):
 		self.ConfigureTB()
 
 	def ConfigureTB(self):
-		"""
+		""" Configure the toolbar of the BlockEditorPanel, including adding controls and binding events.
 		"""
 		id = [wx.NewIdRef()]*4
 		self.toolbar.InsertSeparator(self.toolbar.GetToolsCount())
@@ -2867,7 +2868,7 @@ class TestEditor(EditorFrame):
 	# NOTE: TestEditor :: __str__		=> String representation of the class
 	@classmethod
 	def __str__(cls):
-		"""
+		""" Return a string representation of the TestEditor class, including its attributes and methods.
 		"""
 		attrs = []
 		class_name = "TestEditor"
@@ -2880,14 +2881,14 @@ class TestEditor(EditorFrame):
 			('OnHeaderGeneration', 'self, event')
 		]
 		return "\n--------------------------------------------------\
-		\n\tClass :\t\t%s\n\n\tInherit from :\t%s\n\n\tAttributes :\t%s\n\n\tMethods :\t%s\n" % (
+		\n\tClass :\t\t{}\n\n\tInherit from :\t{}\n\n\tAttributes :\t{}\n\n\tMethods :\t{}\n".format(
 			class_name, parent, '\n\t\t\t'.join([attr + "\t:: " + typ for attr, typ in attrs]),
 			"\n\t\t\t".join([method + "\tparams :: " + params for method, params in methods])
 		)
 
 	# NOTE: TestEditor :: ConfigureGUI 		=> Configure the interface for tests edition
 	def ConfigureGUI(self):
-		"""
+		""" Configure the GUI of the TestEditor, including menus, toolbars, and event bindings.
 		"""
 		### insert sub menu-------------------------------------------------
 		insert = wx.Menu()
@@ -2931,11 +2932,11 @@ class TestEditor(EditorFrame):
 
 	# NOTE: TestEditor :: OnHeaderGeneration		=> note
 	def OnHeaderGeneration(self, event):
-		HEADER = """
-import os\nimport builtins\nimport sys\nimport pickle\nfrom tempfile import gettempdir\nABS_PATH = '%s'\nsys.path.append(ABS_PATH)
+		HEADER = f"""
+import os\nimport builtins\nimport sys\nimport pickle\nfrom tempfile import gettempdir\nABS_PATH = '{DEVSIMPY_PACKAGE_PATH}'\nsys.path.append(ABS_PATH) # type: ignore # type: ignore # type: ignore # type: ignore # type: ignore # pyright: ignore[reportUndefinedVariable] # type: ignore
 builtins.__dict__['DEVSIMPY_PACKAGE_PATH'] = ABS_PATH\nbuiltins.__dict__['DOMAIN_PATH'] = os.path.join(ABS_PATH, 'Domain')
-builtins.__dict__['GUI_FLAG'] = True\n\nsys.path.append(os.path.join(gettempdir(), "AtomicDEVS"))\n\nmodels = {}
-""" % DEVSIMPY_PACKAGE_PATH
+builtins.__dict__['GUI_FLAG'] = True\n\nsys.path.append(os.path.join(gettempdir(), "AtomicDEVS"))\n\nmodels = {{}}
+"""  # noqa: F821
 		self.nb.GetCurrentPage().AddText(HEADER)
 
 	# NOTE: TestEditor :: OnGenEnvDefGeneration		=> note
@@ -2984,7 +2985,7 @@ class GeneralEditor(EditorFrame):
 	# NOTE: GeneralEditor :: __str__		=> String representation of the class
 	@classmethod
 	def __str__(cls):
-		"""
+		""" Return a string representation of the GeneralEditor class, including its attributes and methods.
 		"""
 		attrs = []
 		class_name = "GeneralEditor"
@@ -2996,14 +2997,14 @@ class GeneralEditor(EditorFrame):
 			('OnClosePage', 'self, event')
 		]
 		return "\n--------------------------------------------------\
-		\n\tClass :\t\t%s\n\n\tInherit from :\t%s\n\n\tAttributes :\t%s\n\n\tMethods :\t%s\n" % (
+		\n\tClass :\t\t{}\n\n\tInherit from :\t{}\n\n\tAttributes :\t{}\n\n\tMethods :\t{}\n".format(
 			class_name, parent, '\n\t\t\t'.join([attr + "\t:: " + typ for attr, typ in attrs]),
 			"\n\t\t\t".join([method + "\tparams :: " + params for method, params in methods])
 		)
 
 	### NOTE: GeneralEditor :: ConfigureGUI 	=> Configure the interface by default
 	def ConfigureGUI(self):
-		"""
+		""" Configure the GUI of the GeneralEditor, including menus, toolbars, and event bindings.
 		"""
 
 		### AddPage button in toolbar---------------------------------------

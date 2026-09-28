@@ -34,7 +34,7 @@ you'd prefer. You can always use the --nobackup option to prevent this.
 
 __version__ = "1"
 
-import tokenize
+import tokenize  
 import os
 import shutil
 import sys
@@ -107,13 +107,13 @@ def check(file):
     try:
         with open(file, encoding=encoding) as f:
             r = Reindenter(f)
-    except IOError as msg:
-        errprint("%s: I/O Error: %s" % (file, str(msg)))
+    except OSError as msg:
+        errprint(f"{file}: I/O Error: {msg!s}")
         return
 
     newline = r.newlines
     if isinstance(newline, tuple):
-        errprint("%s: mixed newlines detected; cannot process file" % file)
+        errprint(f"{file}: mixed newlines detected; cannot process file")
         return
 
     if r.run():

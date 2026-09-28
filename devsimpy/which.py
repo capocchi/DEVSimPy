@@ -69,7 +69,7 @@ __revision__ = "$Id: which.py 430 2005-08-20 03:11:58Z trentm $"
 __version_info__ = (1, 1, 0)
 __version__ = '.'.join(list(map(str, __version_info__)))
 
-import os
+import os  
 import sys
 import getopt
 import stat
@@ -120,19 +120,18 @@ def _cull(potential, matches, verbose=0):
     for match in matches:  # don't yield duplicates
         if _samefile(potential[0], match[0]):
             if verbose:
-                sys.stderr.write("duplicate: %s (%s)\n" % potential)
+                sys.stderr.write("duplicate: {} ({})\n".format(*potential))
             return None
-    else:
-        if not stat.S_ISREG(os.stat(potential[0]).st_mode):
-            if verbose:
-                sys.stderr.write("not a regular file: %s (%s)\n" % potential)
-        elif not os.access(potential[0], os.X_OK):
-            if verbose:
-                sys.stderr.write("no executable access: %s (%s)\n"\
-                                 % potential)
         else:
-            matches.append(potential)
-            return potential
+            if not stat.S_ISREG(os.stat(potential[0]).st_mode):
+                if verbose:
+                    sys.stderr.write("not a regular file: {} ({})\n".format(*potential))
+            elif not os.access(potential[0], os.X_OK):
+                if verbose:
+                    sys.stderr.write("no executable access: {} ({})\n".format(*potential))
+            else:
+                matches.append(potential)
+                return potential
 
         
 #---- module API
@@ -182,7 +181,7 @@ def whichgen(command, path=None, verbose=0, exts=None):
     else:
         if exts is not None:
             raise WhichError("'exts' argument is not supported on "\
-                             "platform '%s'" % sys.platform)
+                             f"platform '{sys.platform}'")
         exts = []
 
     # File name cannot have path separators because PATH lookup does not
@@ -201,13 +200,13 @@ def whichgen(command, path=None, verbose=0, exts=None):
                     os.path.normpath(os.path.join(dirName, command+ext)))
                 if os.path.isfile(absName):
                     if usingGivenPath:
-                        fromWhere = "from given path element %d" % i
+                        fromWhere = "from given path element %d" % i  # noqa: UP031
                     elif not sys.platform.startswith("win"):
-                        fromWhere = "from PATH element %d" % i
+                        fromWhere = "from PATH element %d" % i  # noqa: UP031
                     elif i == 0:
                         fromWhere = "from current directory"
                     else:
-                        fromWhere = "from PATH element %d" % (i-1)
+                        fromWhere = "from PATH element %d" % (i-1)  # noqa: UP031
                     match = _cull((absName, fromWhere), matches, verbose)
                     if match:
                         if verbose:
@@ -245,7 +244,7 @@ def which(command, path=None, verbose=0, exts=None):
     try:
         match = next(whichgen(command, path, verbose, exts))
     except StopIteration:
-        raise WhichError("Could not find '%s' on the path." % command)
+        raise WhichError(f"Could not find '{command}' on the path.")
     return match
 
 
@@ -281,8 +280,7 @@ def main(argv):
         optlist, args = getopt.getopt(argv[1:], 'haVvqp:e:',
             ['help', 'all', 'version', 'verbose', 'quiet', 'path=', 'exts='])
     except getopt.GetoptError as msg:
-        sys.stderr.write("which: error: %s. Your invocation was: %s\n"\
-                         % (msg, argv))
+        sys.stderr.write(f"which: error: {msg}. Your invocation was: {argv}\n")
         sys.stderr.write("Try 'which --help'.\n")
         return 1
     for opt, optarg in optlist:
@@ -290,7 +288,7 @@ def main(argv):
             print(_cmdlnUsage)
             return 0
         elif opt in ('-V', '--version'):
-            print("which %s" % __version__)
+            print(f"which {__version__}")
             return 0
         elif opt in ('-a', '--all'):
             all = 1
@@ -318,7 +316,7 @@ def main(argv):
         nmatches = 0
         for match in whichgen(arg, path=altpath, verbose=verbose, exts=exts):
             if verbose:
-                print("%s (%s)" % match)
+                print("{} ({})".format(*match))
             else:
                 print(match)
             nmatches += 1

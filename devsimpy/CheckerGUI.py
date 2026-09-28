@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-  # noqa: UP009
 
 
-import wx
+import wx  
 import os
 import sys
 import webbrowser
@@ -14,13 +14,13 @@ from wx.lib.mixins.listctrl import ListCtrlAutoWidthMixin, ColumnSorterMixin
 if not hasattr(inspect, 'getargspec'):
 	inspect.getargspec = inspect.getfullargspec
 	
-from Utilities import getTopLevelWindow, load_and_resize_image
+from Utilities import getTopLevelWindow, load_and_resize_image  
 
 
 _ = wx.GetTranslation
 
 
-from Utilities import GetMails, getInstance
+from Utilities import GetMails, getInstance  
 import Components
 
 
@@ -192,7 +192,7 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		item = self.GetItem(index, col)
 		try:
 			return item.GetItemLabelText()
-		except:
+		except:  # noqa: E722
 			return item.GetText()
 
 
@@ -249,7 +249,7 @@ class CheckerGUI(wx.Frame):
 		# Prepare dictionary - IMPORTANT: créer la liste APRÈS le panel
 		try:
 			self.list = self.getList(D, panel)
-		except:
+		except:  # noqa: E722
 			self.list = VirtualList(panel, D)
 			sys.stdout.write(_('Alone mode for CheckerGUI: List of plugins is not generated from a diagram.\n'))
 		
@@ -435,7 +435,7 @@ class CheckerGUI(wx.Frame):
 						error = self.list.getColumnText(i, 1)
 						line = self.list.getColumnText(i, 2)
 						f.write(f"{name}: {error} (Line: {line})\n")
-			except IOError:
+			except OSError:
 				wx.LogError(f"Cannot save current data in file '{pathname}'.")
 
 
@@ -443,7 +443,7 @@ class CheckerGUI(wx.Frame):
 		self.diagram = diagram
 
 
-	def getList(self, D, parent=None):
+	def getList(self, D, parent=None):  # noqa: F811
 		"""parent parameter permet de spécifier le parent du VirtualList"""
 		if parent is None:
 			parent = self
@@ -480,7 +480,7 @@ class CheckerGUI(wx.Frame):
 		return VirtualList(parent, dict(zip(range(len(L)), L))) if L != [] else L
 
 
-	def OnUpdate(self, evt):
+	def OnUpdate(self, evt):  # noqa: F811
 		if hasattr(self, 'diagram'):
 			D = self.diagram.DoCheck()
 			# Récupérer le panel parent existant

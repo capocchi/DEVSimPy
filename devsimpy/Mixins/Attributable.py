@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Attributable.py ---
@@ -33,7 +33,7 @@ class Attributable:
 						'font',\
 						'image_path',\
 					 	'input',\
-					  	'output']
+					  	'output']  # noqa: RUF012
 
 	###
 	def __init__(self):

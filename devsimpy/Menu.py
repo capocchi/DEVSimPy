@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,7 +22,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import wx
+import wx  
 import os
 import platform
 
@@ -209,14 +209,14 @@ class Menu(ABC):
 	@abstractmethod
 	def _add_menu_items(self, parent):
 		"""Abstract method to add items to the menu."""
-		pass
+		pass  # noqa: PIE790
 
 	def get(self):
 		"""Return the encapsulated wx.Menu object."""
 		return self.menu
 	
 class FileMenu(Menu):
-	"""
+	""" File menu class for the main application window.
 	"""
 	def __init__(self, parent):
 		"""Initialize the FileMenu."""
@@ -280,7 +280,7 @@ class FileMenu(Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnCloseWindow, id=ID_EXIT)
 	
 class EditMenu(Menu):
-	"""
+	""" Edit menu class for the main application window.
 	"""
 	def __init__(self, parent):
 		"""Initialize the EditMenu."""
@@ -307,7 +307,7 @@ class EditMenu(Menu):
 		target.Bind(wx.EVT_MENU, target.OnRedo, id=ID_REDO)
 
 class ProfileFileMenu(Menu):
-	"""
+	""" Profile menu class for the main application window.
 	"""
 	def __init__(self, parent):
 		"""Initialize the FileMenu."""
@@ -330,7 +330,7 @@ class ProfileFileMenu(Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnDeleteProfiles, id=ID_DELETE_PROFILES)
 
 class ExportMenu(Menu):
-	"""
+	""" Export menu class for the main application window.
 	"""
 	def __init__(self, parent):
 		"""Initialize the FileMenu."""
@@ -353,7 +353,7 @@ class ExportMenu(Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnExportStandalone, id=ID_EXPORTSTANDALONE)
 
 class RecentFileMenu(Menu):
-	"""
+	""" Recent file menu class for the main application window.
 	"""
 	def __init__(self, parent):
 		"""Initialize the FileMenu."""
@@ -391,7 +391,7 @@ class RecentFileMenu(Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnDeleteRecentFiles, id = ID_DELETE_RECENT)
 
 class ShowMenu(Menu):
-	"""
+	""" Show menu class for the main application window.
 	"""
 	def __init__(self, parent):
 		"""Initialize the FileMenu."""
@@ -428,7 +428,7 @@ class ShowMenu(Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnShowToolBar, id = ID_SHOW_TOOLBAR)
 
 class PerspectiveMenu(Menu):
-	"""
+	""" Perspective Menu
 	"""
 	def __init__(self, parent):
 		"""Initialize the FileMenu."""
@@ -447,13 +447,8 @@ class PerspectiveMenu(Menu):
 		self.AppendItem(deleteall)
 		self.AppendSeparator()
 
-#		if _("Default Startup") not in parent.perspectives:
-#			self.Append(ID_FIRST_PERSPECTIVE, _("Default Startup"))
-#			parent.perspectives.update({_("Default Startup"):parent._mgr.SavePerspective()})
-
 		### default perspective
 		L = list(parent.perspectives.keys())
-#		L.sort()
 		for name in L:
 			ID = wx.NewIdRef()
 			self.menu.Append(ID, name)
@@ -464,10 +459,9 @@ class PerspectiveMenu(Menu):
 
 		parent.Bind(wx.EVT_MENU, parent.OnCreatePerspective, id=ID_NEW_PERSPECTIVE)
 		parent.Bind(wx.EVT_MENU, parent.OnDeletePerspective, id=ID_DELETE_PERSPECTIVE)
-		# parent.Bind(wx.EVT_MENU, parent.OnRestorePerspective, id=ID_FIRST_PERSPECTIVE)
 
 class DiagramMenu(Menu):
-	"""
+	""" Diagram Menu
 	"""
 	def __init__(self, parent):
 		"""Initialize the FileMenu."""
@@ -544,7 +538,7 @@ class DiagramMenu(Menu):
 		parent.Bind(wx.EVT_MENU, nb2.OnClosePage, id=ID_EXIT_DIAGRAM)
 
 class SettingsMenu(Menu):
-	"""
+	""" Settings Menu
 	"""
 	def __init__(self, parent):
 		"""Initialize the FileMenu."""
@@ -574,15 +568,15 @@ class SettingsMenu(Menu):
 
 		parent = parent.GetParent()
 
-		fritem.Enable(not parent.language == 'fr')
-		enitem.Enable(not parent.language == 'en')
+		fritem.Enable(parent.language != 'fr')
+		enitem.Enable(parent.language != 'en')
 
 		parent.Bind(wx.EVT_MENU, parent.OnFrench, id=ID_FRENCH_LANGUAGE)
 		parent.Bind(wx.EVT_MENU, parent.OnEnglish, id=ID_ENGLISH_LANGUAGE)
 		parent.Bind(wx.EVT_MENU, parent.OnAdvancedSettings, id=ID_PREFERENCES)
 	
 class HelpMenu(Menu):
-	"""
+	""" Help Menu
 	"""
 	def __init__(self, parent):
 		"""Initialize the FileMenu."""
@@ -633,7 +627,7 @@ class HelpMenu(Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnContact, id=ID_CONTACT)
 
 class MainMenuBar(wx.MenuBar):
-	"""
+	""" Main Menu Bar
 	"""
 	def __init__(self, parent):
 		""" Constructor.
@@ -674,7 +668,7 @@ class MainMenuBar(wx.MenuBar):
 				else:
 					label = _("Recent files")
 					ID = menu.FindItem(label)
-					item, pos = menu.FindChildItem(ID)
+					_, pos = menu.FindChildItem(ID)
 					menu.Remove(ID)
 					menu.Insert(pos, ID, label, RecentFileMenu(self).get())
 
@@ -686,22 +680,10 @@ class MainMenuBar(wx.MenuBar):
 				else:
 					label = _('Profile')
 					ID = menu.FindItem(label)
-					item, pos = menu.FindChildItem(ID)
+					_, pos = menu.FindChildItem(ID)
 					menu.Remove(ID)
 					menu.Insert(pos, ID, label, ProfileFileMenu(self).get())
 
-					
-	#def OnCloseMenu(self, event):
-		#""" Close menu has been detected
-		#"""
-
-		#menu = event.GetEventObject()
-
-		#### if the closed menu is FileMenu, we delete the recent menu
-		#if isinstance(menu, FileMenu):
-			#wx.CallAfter(menu.Delete, ID_RECENT)
-		#elif isinstance(event.GetEventObject(), SettingsMenu):
-			#wx.CallAfter(menu.Delete, ID_PROFILE)
 
 	####
 	def OnMenuHighlight(self, event):
@@ -996,7 +978,7 @@ class ShapeCanvasPopupMenu(Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnPaste, id=paste.GetId())
 		parent.Bind(wx.EVT_MENU, parent.diagram.OnAddConstants, id=ID_ADD_CONSTANTS)
 		parent.Bind(wx.EVT_MENU, parent.parent.PrintPreview, id=ID_PREVIEW_PRINT)
-		parent.Bind(wx.EVT_MENU, ExperimentGenerator(os.path.join(DEVSIMPY_PACKAGE_PATH,'out')).OnExperiment, id=ID_GEN_EXPERIMENT)
+		parent.Bind(wx.EVT_MENU, ExperimentGenerator(os.path.join(DEVSIMPY_PACKAGE_PATH,'out')).OnExperiment, id=ID_GEN_EXPERIMENT) # type: ignore  # noqa: F821
 
 class ShapePopupMenu(wx.Menu):
 	""" Shape menu class
@@ -1026,9 +1008,9 @@ class ShapePopupMenu(wx.Menu):
 		copy=wx.MenuItem(self, ID_COPY_SHAPE, _("&Copy\tCtrl+C"), _("Copy the model"))
 		paste=wx.MenuItem(self, ID_PASTE_SHAPE, _("&Paste\tCtrl+V"), _("Paste the model"))
 		cut=wx.MenuItem(self, ID_CUT_SHAPE, _("&Cut\tCtrl+X"), _("Cut the model"))
-		rotateAll=wx.MenuItem(self, ID_ROTATE_ALL_SHAPE, _("&All"), _("Rotate all ports"))
-		rotateInput=wx.MenuItem(self, ID_ROTATE_INPUT_SHAPE, _("&Input ports"), _("Rotate input ports"))
-		rotateOutput=wx.MenuItem(self, ID_ROTATE_OUTPUT_SHAPE, _("&Output ports"), _("Rotate output ports"))
+		# rotateAll=wx.MenuItem(self, ID_ROTATE_ALL_SHAPE, _("&All"), _("Rotate all ports"))
+		# rotateInput=wx.MenuItem(self, ID_ROTATE_INPUT_SHAPE, _("&Input ports"), _("Rotate input ports"))
+		# rotateOutput=wx.MenuItem(self, ID_ROTATE_OUTPUT_SHAPE, _("&Output ports"), _("Rotate output ports"))
 		rotateR=wx.MenuItem(self, ID_RIGHT_ROTATE_SHAPE, _("&Right Rotate\tCtrl+R"), _("Rotate on the right"))
 		rotateL=wx.MenuItem(self, ID_LEFT_ROTATE_SHAPE, _("&Left Rotate\tCtrl+L"), _("Rotate on the left"))
 		rotateIR=wx.MenuItem(self, ID_RIGHT_ROTATE_INPUT_SHAPE, _("&Right Rotate\tCtrl+R"), _("Rotate on the right"))
@@ -1103,7 +1085,8 @@ class ShapePopupMenu(wx.Menu):
 			self.__canvas.Bind(wx.EVT_MENU, self.__canvas.OnDisable, id=ID_DISABLE_SHAPE)
 
 		elif isinstance(shape, Container.ResizeableNode):
-			Delete_menu = AppendItem(delete)
+			# Delete_menu = AppendItem(delete)
+			pass
 
 		elif isinstance(shape, Container.Node):
 			pass
@@ -1185,11 +1168,11 @@ class ShapePopupMenu(wx.Menu):
 
 				
 				if shape.isPY():
-					if DEFAULT_DEVS_DIRNAME != "BrokerDEVS":
+					if DEFAULT_DEVS_DIRNAME != "BrokerDEVS": # type: ignore  # noqa: F821
 						Export_SubMenu2.Enable(False)
 
 				elif shape.isAMD():
-					if DEFAULT_DEVS_DIRNAME != "BrokerDEVS":
+					if DEFAULT_DEVS_DIRNAME != "BrokerDEVS": # type: ignore  # noqa: F821
 						Export_SubMenu2.Enable(False)
 					else:
 						### TODO: need to be implemented
@@ -1222,7 +1205,7 @@ class ShapePopupMenu(wx.Menu):
 			AppendItem(delete)
 
 			### Plug-in manager only for Block model
-			if isinstance(shape, Container.CodeBlock) or isinstance(shape, Container.ContainerBlock):
+			if isinstance(shape, Container.CodeBlock) or isinstance(shape, Container.ContainerBlock):  # noqa: SIM101
 				### only for amd or cmd
 				if shape.model_path != "":
 					self.AppendSeparator()
@@ -1239,7 +1222,7 @@ class ShapePopupMenu(wx.Menu):
 			self.AppendSeparator()
 			AppendItem(properties)
 
-			self.Enable(ID_PASTE_SHAPE, not Container.clipboard == [])
+			self.Enable(ID_PASTE_SHAPE, Container.clipboard != [])
 			self.Enable(ID_LOG_SHAPE, shape.getDEVSModel() is not None)
 
 			# binding events

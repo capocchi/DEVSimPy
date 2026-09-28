@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-  # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,18 +22,17 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import os, sys
+import os, sys  
 import Components
 import textwrap
 
 import inspect
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
-    
-from Utilities import getInstance
 
 def GetMacCabeMetric(path):
-    """
+    """ Get the McCabe complexity metric of a model defined in a python file.
+    The complexity is computed on the transition functions of the model.
     """
 
     complexity = 0.0
@@ -51,8 +50,6 @@ def GetMacCabeMetric(path):
         
         cls = Components.GetClass(path)
         if inspect.isclass(cls):
-            args = Components.GetArgs(cls)
-            devs = getInstance(cls, args)
 
             ### Get class of model
             if not path.endswith('.pyc'):
@@ -65,7 +62,7 @@ def GetMacCabeMetric(path):
                 ### when model is created, the transition functions are empty...
                 try:
                     source_list = list(map(inspect.getsource, L))
-                except Exception as info:
+                except Exception:  # noqa: BLE001
                     source_list = []
 
                 # L_args = []
@@ -78,7 +75,7 @@ def GetMacCabeMetric(path):
                         ast = codepaths.ast.parse(textwrap.dedent(text).strip())
                         visitor = codepaths.PathGraphingAstVisitor()
                         visitor.preorder(ast, visitor)
-                    except Exception as info:
+                    except Exception as info:  # noqa: BLE001
                         sys.stdout.write(f"Error in Complexity module: {info} for class {cls}\n")
                     else:
                         for graph in visitor.graphs.values():

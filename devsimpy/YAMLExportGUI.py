@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,13 +22,13 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import wx
+import wx  
 import os
 import builtins
 
 _ = wx.GetTranslation
 
-from Utilities import load_and_resize_image
+from Utilities import load_and_resize_image  
 
 def url_ok(url):
     """_summary_
@@ -42,7 +42,7 @@ def url_ok(url):
     import requests
     try:
         r = requests.head(url)
-    except Exception as info:
+    except Exception:  # noqa: BLE001
         return False
     else:
         return r.status_code == 200
@@ -86,7 +86,7 @@ class YAMLExportGUI(wx.Frame):
         wx.StaticText(panel, -1, label='port', pos=(10, 60))
         wx.StaticText(panel, -1, label='filename', pos=(10, 100))
 
-        self.url = wx.TextCtrl(panel, value="http://" if not 'URL_REST' in builtins.__dict__ else URL_REST, pos=(110, 15), size=(160, -1))
+        self.url = wx.TextCtrl(panel, value="http://" if not 'URL_REST' in builtins.__dict__ else URL_REST, pos=(110, 15), size=(160, -1)) # type: ignore  # noqa: F821
         self.port = wx.TextCtrl(panel, value="8080", pos=(110, 55), size=(50, -1))
         self.fn = wx.TextCtrl(panel, value=os.path.basename(self.path), pos=(110, 95), size=(120, -1))
 
@@ -141,16 +141,16 @@ class YAMLExportGUI(wx.Frame):
 
             try:
                 import requests
-                self.rest = requests.post(str(url)+':'+str(port)+'/upload', files={'file': open(str(self.path), 'rb')})
+                self.rest = requests.post(str(url)+':'+str(port)+'/upload', files={'file': open(str(self.path), 'rb')})  # noqa: SIM115
 
-            except Exception as err:
+            except Exception as err:  # noqa: BLE001
                 self.sb.icon.SetBitmap(load_and_resize_image("exclamation.png"))
                 self.sb.SetStatusText(str(err))
                 self.rest = None
             else:
                 self.sb.SetStatusText('Upload finished')
                 self.sb.icon.SetBitmap(load_and_resize_image("disconnect_network.png"))
-                setattr(builtins, 'URL_REST', url)
+                builtins.URL_REST = url
 
     def OnClose(self, e):
         self.Close()

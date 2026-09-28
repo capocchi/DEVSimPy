@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-  # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -28,7 +28,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import json
+import json  
 import logging
 from abc import ABC, abstractmethod
 import re
@@ -41,7 +41,7 @@ try:
 except ImportError:
 	pass
 
-import wx
+import wx  
 import os
 import sys
 import urllib.request
@@ -66,12 +66,12 @@ logging.basicConfig(level=logging.DEBUG,
 ##########################################################
 class State(BaseModel):
     name: str
-    time: str | int | float
+    time: str | int | float  # noqa: FA102
 
 class ModelProperty(BaseModel):
     name: str
     var_type: str
-    value: str | float | int
+    value: str | float | int  # noqa: FA102
     description: str
 
 class Function(BaseModel):
@@ -107,7 +107,7 @@ class DevsAIAdapter(ABC):
 	or use as is to interact with specific generative AI models.
 	"""
 	def __init__(self, parent=None):
-		logging.info("DevsAIAdapter initialized.")
+		logging.info("DevsAIAdapter initialized.")  # noqa: LOG015
 		self.base_prompt = self._load_base_prompt(os.path.join(os.getcwd(),"AI","DEVS_Explanation.txt"))
 
 	def _load_base_prompt(self, file_path):
@@ -118,7 +118,7 @@ class DevsAIAdapter(ABC):
 			with open(file_path, "r") as file:
 				return file.read()
 		except FileNotFoundError:
-			logging.error("File not found: %s", file_path)
+			logging.error("File not found: %s", file_path)  # noqa: LOG015
 			raise
 
 	def create_prompt(self, model_name, num_inputs, num_outputs, model_type, prompt):
@@ -126,7 +126,7 @@ class DevsAIAdapter(ABC):
 		Creates a prompt to generate a DEVS model based on the type and the provided details.
 		The prompt is based on instructions from the DEVS explanation file.
 		"""
-		logging.info("Creating prompt for model: %s, type: %s", model_name, model_type)
+		logging.info("Creating prompt for model: %s, type: %s", model_name, model_type)  # noqa: LOG015
 		
 		# Constructing the prompt for the AI
 		full_prompt = f"""
@@ -143,7 +143,7 @@ class DevsAIAdapter(ABC):
 		Additional details:
 		{prompt}
 		"""
-		logging.debug("Prompt created successfully for model: %s", model_name)
+		logging.debug(f"Prompt created successfully for model: {model_name}")  # noqa: LOG015
 		return full_prompt
 
 	def modify_model_prompt(self, code, prompt):
@@ -151,7 +151,7 @@ class DevsAIAdapter(ABC):
 		Generates a prompt to modify an existing DEVS model.
 		Takes into account the model name, the current code, and additional details.
 		"""
-		logging.info("Modifying model")
+		logging.info("Modifying model")  # noqa: LOG015
 		
 		# Constructing the prompt for the AI
 		full_prompt = f"""
@@ -168,7 +168,7 @@ class DevsAIAdapter(ABC):
 		Include only the modified model code. Do not include any code block markers like ```python.
 		Do not provide any explanations, only the code.
 		"""
-		logging.debug("Modification prompt created for model.")
+		logging.debug("Modification prompt created for model.")  # noqa: LOG015
 		return full_prompt
 	
 	def modify_model_part_prompt(self, code, prompt):
@@ -176,7 +176,7 @@ class DevsAIAdapter(ABC):
 		Generates a prompt to modify a specific part of an existing DEVS model.
 		Takes into account the model name, the current code, and details about the part to modify.
 		"""
-		logging.info("Modifying part of model.")
+		logging.info("Modifying part of model.")  # noqa: LOG015
 		
 		# Constructing the prompt for the AI
 		full_prompt = f"""
@@ -193,7 +193,7 @@ class DevsAIAdapter(ABC):
 		Include only the code of the modified part of the model. Do not include any code block markers like ```python.
 		Do not provide any explanations, only the code. Keep the indentation, it is really important.
 		"""
-		logging.debug("Modification part prompt created for model")
+		logging.debug("Modification part prompt created for model")  # noqa: LOG015
 		return full_prompt
 
 	@abstractmethod
@@ -210,7 +210,7 @@ class DevsAIAdapter(ABC):
 		Child classes should override this method to specify how the generative AI produces outputs based on a prompt.
 		`**kwargs` can include parameters such as the API key for models that require it.
 		"""
-		pass
+		pass  # noqa: PIE790
 
 	def generate_model_code(self, model_json=None):
 		"""Generates code for an atomic model function by function, using a JSON representation of the atomic model. Use the chat history to simulate a conversation between the llm and the user.
@@ -276,14 +276,14 @@ class DevsAIAdapter(ABC):
 		Args:
 			prompt (_type_): _description_
 		"""
-		pass
+		pass  # noqa: PIE790
 
 	def validate_model(self, model_name):
 		"""
 		Placeholder method for future implementation.
 		"""
-		logging.info("Validation not implemented for model: %s", model_name)
-		pass
+		logging.info("Validation not implemented for model: %s", model_name)  # noqa: LOG015
+		pass  # noqa: PIE790
 
 	def parse_codeblock_marker(self, code):
 		"""Return code without codeblock marker."""
@@ -389,6 +389,8 @@ class AdapterFactory:
 ###
 ### CHATGPT
 ###
+##########################################################
+
 class ChatGPTDevsAdapter(DevsAIAdapter):
 	"""
 	Adaptateur spécifique pour ChatGPT, utilisant GPT-4 pour générer des modèles DEVS.
@@ -402,7 +404,7 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 		self.wxparent = parent
 		from openai import OpenAI
 		self.api_client = OpenAI(api_key=self.api_key)  # Instancie le client API ici
-		logging.info(_("ChatGPTDevsAdapter initialized with provided API key."))
+		logging.info(_("ChatGPTDevsAdapter initialized with provided API key."))  # noqa: LOG015
 
 	def generate_model_json(self, prompt):
 		"""Generate a json representing an atomic model based on user's natural language description.
@@ -423,13 +425,13 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 			if not response.refusal:
 				return response.parsed.model_dump()
 		except ValueError as ve:
-			logging.error(_(f"Validation error: {ve}"))
-			return _(f"Validation error: {ve}")
+			logging.error(_(f"Validation error: {ve}"))  # noqa: INT001, LOG015
+			return _(f"Validation error: {ve}")  # noqa: INT001
 
-		except Exception as e:
+		except Exception as e:  # noqa: BLE001
 			# Journalisation de l'erreur avec les détails de l'exception
-			logging.error(_(f"Error while generating output: {e}"))
-			return _(f"An error occurred while generating the output: {e}")
+			logging.error(_(f"Error while generating output: {e}"))  # noqa: INT001, LOG015
+			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
 
 	@BuzyCursorNotification
 	def generate_output(self, prompt="", system_prompt="", messages_history=None):
@@ -455,20 +457,20 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 			
 			# Validation de la réponse
 			if not hasattr(response, 'choices') or not response.choices:
-				logging.error("No choices found in response.")
+				logging.error("No choices found in response.")  # noqa: LOG015
 				return _("No response received from the AI model.")
 			
 			# Retourner le contenu du message
 			return response.choices[0].message.content
 		
 		except ValueError as ve:
-			logging.error(_(f"Validation error: {ve}"))
-			return _(f"Validation error: {ve}")
+			logging.error(_(f"Validation error: {ve}"))  # noqa: INT001, LOG015
+			return _(f"Validation error: {ve}")  # noqa: INT001
 		
-		except Exception as e:
+		except Exception as e:  # noqa: BLE001
 			# Journalisation de l'erreur avec les détails de l'exception
-			logging.error(_(f"Error while generating output: {e}"))
-			return _(f"An error occurred while generating the output: {e}")
+			logging.error(_(f"Error while generating output: {e}"))  # noqa: INT001, LOG015
+			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
 
 ##########################################################
 ###
@@ -490,7 +492,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 		self.port = port
 		self.wxparent = parent
 		self.model_name = model_name
-		logging.info(_(f"OllamaDevsAdapter initialized with port {port} and model {model_name}."))
+		logging.info(_(f"OllamaDevsAdapter initialized with port {port} and model {model_name}."))  # noqa: INT001, LOG015
 		
 		# Vérification de l'installation d'Ollama
 		if not self._is_ollama_installed():
@@ -499,15 +501,15 @@ class OllamaDevsAdapter(DevsAIAdapter):
 			else:
 				message = _("No internet connection. Please check your internet connection and try again.")
 				wx.CallAfter(wx.MessageBox, message, _("Information"), wx.ICON_INFORMATION)
-				logging.info(message)
+				logging.info(message)  # noqa: LOG015
 		else:    
 
 			# Vérification si le serveur est lancé au démarrage
 			if not self._is_server_running():
-				logging.info(_("The Ollama server is not running. Attempting to start..."))
+				logging.info(_("The Ollama server is not running. Attempting to start..."))  # noqa: LOG015
 				self._start_server()
 			else:
-				logging.info(_("The Ollama server is already running."))
+				logging.info(_("The Ollama server is already running."))  # noqa: LOG015
 
 			# Obtenir la liste des modèles téléchargés localement
 			self.local_model = self._get_models()
@@ -518,7 +520,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 	def _is_ollama_installed(self):
 		""" Vérifie si Ollama est installé en cherchant son exécutable. """
 		command = ["where", "ollama"] if sys.platform == "win32" else ["which", "ollama"]
-		return subprocess.run(command, capture_output=True).returncode == 0
+		return subprocess.run(command, check=False, capture_output=True).returncode == 0
 
 	def _prompt_install_ollama(self):
 		""" Affiche une fenêtre `wx` pour proposer l'installation d'Ollama. """
@@ -527,15 +529,15 @@ class OllamaDevsAdapter(DevsAIAdapter):
 		dialog = wx.MessageDialog(None, message, _("Ollama install"), wx.YES_NO | wx.ICON_QUESTION)
 		
 		if dialog.ShowModal() == wx.ID_YES:
-			logging.info(_("Starting the installation of Ollama..."))
+			logging.info(_("Starting the installation of Ollama..."))  # noqa: LOG015
 			self._install_ollama()
 		else:
-			logging.error(_("Ollama is required to run this class."))
+			logging.error(_("Ollama is required to run this class."))  # noqa: LOG015
 			raise RuntimeError(_("Ollama is not installed and is required to run this class."))
 				
 		dialog.Destroy()
 
-	@cond_decorator(getattr(builtins,'GUI_FLAG', True), ProgressNotification(_(f"Download")))        
+	@cond_decorator(getattr(builtins,'GUI_FLAG', True), ProgressNotification(_("Download")))        
 	def _install_ollama(self):
 		""" Installe Ollama selon le système d'exploitation. """
 		platform = sys.platform
@@ -557,10 +559,10 @@ class OllamaDevsAdapter(DevsAIAdapter):
 				# Exécution de l'installateur
 				subprocess.run([ollama_path], check=True)
 
-			logging.info(_("Ollama installation completed. Restart devsimpy and the terminal if necessary."))
+			logging.info(_("Ollama installation completed. Restart devsimpy and the terminal if necessary."))  # noqa: LOG015
 
 		except subprocess.CalledProcessError as e:
-			logging.error(_("Error during Ollama installation: %s"), e)
+			logging.error(_("Error during Ollama installation: %s"), e)  # noqa: LOG015
 			raise RuntimeError(_("Ollama installation failed."))
 
 	def _is_server_running(self):
@@ -574,9 +576,9 @@ class OllamaDevsAdapter(DevsAIAdapter):
 		""" Démarre le serveur Ollama en arrière-plan. """
 		try:
 			subprocess.Popen(["ollama", "serve"])
-			logging.info(_("Ollama starts with success."))
-		except Exception as e:
-			logging.error(_("Failed to start the Ollama server: %s"), str(e))
+			logging.info(_("Ollama starts with success."))  # noqa: LOG015
+		except Exception as e:  # noqa: BLE001
+			logging.error(_("Failed to start the Ollama server: %s"), str(e))  # noqa: LOG015
 			raise RuntimeError(_("Failed to start the Ollama server"))
 		
 	def _stop_server(self):
@@ -587,9 +589,9 @@ class OllamaDevsAdapter(DevsAIAdapter):
 		try:
 			# This is a placeholder command; replace it with the actual command to stop your server
 			subprocess.run(["ollama", "stop"], check=True)
-			logging.info("Ollama server stopped successfully.")
+			logging.info("Ollama server stopped successfully.")  # noqa: LOG015
 		except subprocess.CalledProcessError as e:
-			logging.error("Failed to stop the Ollama server: %s", str(e))
+			logging.error("Failed to stop the Ollama server: %s", str(e))  # noqa: LOG015
 			raise RuntimeError("Could not stop the Ollama server.")
 
 	def _restart_server(self):
@@ -599,10 +601,10 @@ class OllamaDevsAdapter(DevsAIAdapter):
 			return
 		
 		if self._is_server_running():
-			logging.info("Stopping the Ollama server...")
+			logging.info("Stopping the Ollama server...")  # noqa: LOG015
 			self._stop_server()  # Stop the server first
 		
-		logging.info("Starting the Ollama server...")
+		logging.info("Starting the Ollama server...")  # noqa: LOG015
 		self._start_server()  # Start it again
 
 	def _get_models(self):
@@ -610,10 +612,10 @@ class OllamaDevsAdapter(DevsAIAdapter):
 		cmd = ["ollama", "list"]
 
 		try:
-			logging.info(_("Start the command 'ollama list'..."))
+			logging.info(_("Start the command 'ollama list'..."))  # noqa: LOG015
 
 			# Exécuter la commande et capturer la sortie
-			result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+			result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 			
 			models = []
 			for line in result.stdout.splitlines():
@@ -624,14 +626,14 @@ class OllamaDevsAdapter(DevsAIAdapter):
 				if parts:
 					models.append(parts[0].strip())
 
-			logging.info(_(f"Found Ollama models: {models}"))
+			logging.info(_(f"Found Ollama models: {models}"))  # noqa: INT001, LOG015
 			return models
 			
 		except (subprocess.CalledProcessError, FileNotFoundError) as e:
-			logging.error("Erreur lors de l'exécution de la commande ollama list:", e)
+			logging.error("Erreur lors de l'exécution de la commande ollama list:", e)  # noqa: LOG015, PLE1205
 			return []
 
-	@cond_decorator(getattr(builtins,'GUI_FLAG', True), ProgressNotification(_(f"Pulling process")))
+	@cond_decorator(getattr(builtins,'GUI_FLAG', True), ProgressNotification(_("Pulling process")))
 	def _pull(self):
 		try:
 			# Commande pour effectuer le pull via la ligne de commande
@@ -642,31 +644,31 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
 			# Vérifier si le processus a réussi
 			if result.returncode != 0:
-				logging.error(f"Error while downloading model {self.model_name}: {result.stderr.strip()}")
+				logging.error(f"Error while downloading model {self.model_name}: {result.stderr.strip()}")  # noqa: LOG015
 				raise RuntimeError(f"Failed to download model {self.model_name}.")
 			
 		except subprocess.CalledProcessError as e:
-			logging.error(f"Error while downloading model {self.model_name}: {e.stderr}")
+			logging.error(f"Error while downloading model {self.model_name}: {e.stderr}")  # noqa: LOG015
 			raise RuntimeError(f"Failed to download model {self.model_name}.")
-		except Exception as e:
-			logging.error(f"Error while downloading model {self.model_name}: {e}")
+		except Exception as e:  # noqa: BLE001
+			logging.error(f"Error while downloading model {self.model_name}: {e}")  # noqa: LOG015
 			raise RuntimeError(f"Failed to download model {self.model_name}.")
 		else:
-			logging.info(f"Model '{self.model_name}' downloaded successfully.")
+			logging.info(f"Model '{self.model_name}' downloaded successfully.")  # noqa: LOG015
 
 	def _ensure_model_downloaded(self):
 		"""Télécharge ou met à jour le modèle spécifié via Ollama."""
 		
 		if self.model_name in self.local_model:
-			logging.info(f"The model '{self.model_name}' is already downloaded and is ready to start.")
+			logging.info(f"The model '{self.model_name}' is already downloaded and is ready to start.")  # noqa: LOG015
 		else:
-			logging.info(f"The model '{self.model_name}' is not downloaded. Starting pull...")
+			logging.info(f"The model '{self.model_name}' is not downloaded. Starting pull...")  # noqa: LOG015
 			if check_internet():
 				self._pull()
 			else:
 				message = _("No internet connection. Please check your internet connection and try again.")
 				wx.CallAfter(wx.MessageBox, message, _("Information"), wx.ICON_INFORMATION)
-				logging.info(message)
+				logging.info(message)  # noqa: LOG015
 
 	def generate_model_json(self, prompt):
 		"""Generate a json representing an atomic model based on user's natural language description.
@@ -674,7 +676,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 		Handle response to return the json as dict
 		"""
 		if not self._is_server_running():
-			logging.info(_("The Ollama server is not active. Attempting to start..."))
+			logging.info(_("The Ollama server is not active. Attempting to start..."))  # noqa: LOG015
 			self._start_server()
 		try:
 			system_prompt = self._load_base_prompt(os.path.join(os.getcwd(),"AI","json_gen_prompt.txt"))
@@ -689,9 +691,9 @@ class OllamaDevsAdapter(DevsAIAdapter):
 				format=AtomicModel.model_json_schema(),
 			)
 			return json.loads(response.message.content)
-		except Exception as e:
-			logging.error(_(("Error while generating output: %s", str(e))))
-			return _(f"An error occurred while generating the output: {e}")
+		except Exception as e:  # noqa: BLE001
+			logging.error(_(("Error while generating output: %s", str(e))))  # noqa: LOG015
+			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
 
 	@BuzyCursorNotification
 	def generate_output(self, prompt, system_prompt="", messages_history=None):
@@ -701,7 +703,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 		"""
 		# Check if the server is running before sending the prompt
 		if not self._is_server_running():
-			logging.info(_("The Ollama server is not active. Attempting to start..."))
+			logging.info(_("The Ollama server is not active. Attempting to start..."))  # noqa: LOG015
 			self._start_server()
 
 		try:
@@ -717,7 +719,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 				],
 			)
 			return response["message"]["content"]
-		except Exception as e:
-			logging.error(_(("Error while generating output: %s", str(e))))
-			return _(f"An error occurred while generating the output: {e}")
+		except Exception as e:  # noqa: BLE001
+			logging.error(_(("Error while generating output: %s", str(e))))  # noqa: LOG015
+			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
 

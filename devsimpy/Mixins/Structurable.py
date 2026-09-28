@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Structurable.py ---
@@ -20,7 +20,7 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-import Components
+import Components  
 class Structurable(Components.DEVSComponent):
 	""" Structurable class interface for DEVS coupled model integration.
 	"""

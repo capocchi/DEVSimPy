@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -24,7 +24,7 @@
 
 ### at the beginning to prevent with statement for python version <=2.5
 
-import wx
+import wx  
 from wx.lib import sheet
 
 import pubsub
@@ -40,7 +40,7 @@ _ = wx.GetTranslation
 
 ###
 class MySheet(sheet.CSheet):
-	"""
+	""" Sheet
 	"""
 
 	###
@@ -74,7 +74,7 @@ class MySheet(sheet.CSheet):
 	###
 	@BuzyCursorNotification
 	def Populate(self, data):
-		"""
+		""" Populate
 		"""
 		self._full_flag = False
 
@@ -90,14 +90,14 @@ class MySheet(sheet.CSheet):
 				self.SetCellValue(i,1,str(d[1]))
 				Publisher.sendMessage("progress", msg=str(i/n))
 				# self.Update()
-			except:
+			except:  # noqa: E722, S110
 				pass
 
 		self._full_flag = True
 		try:
 			### inform Frame that table us full for graph icon enabling
 			Publisher.sendMessage("isfull", msg=self._full_flag)
-		except pubsub.pub.SenderMissingReqdMsgDataError as info:
+		except pubsub.pub.SenderMissingReqdMsgDataError:
 			pass
 
 		# try:
@@ -112,27 +112,20 @@ class MySheet(sheet.CSheet):
 		return self._full_flag
 
 	def OnLeftClick(self, event):
-		"""
+		""" Left Click
 		"""
 		### veto because bug exist (TypeError: PaintBackground() takes 3 positional arguments but 4 were given)
 		event.Veto()
 
 	def OnLeftDoubleClick(self, event):
-		"""
+		""" Left Double Click
 		"""
 		### veto because bug exist (TypeError: PaintBackground() takes 3 positional arguments but 4 were given)
 		event.Veto()
 
-	##def OnGridSelectCell(self, event):
-		##self.row, self.col = event.GetRow(), event.GetCol()
-		##control = self.GetParent().GetParent().position
-		##value =  self.GetColLabelValue(self.col) + self.GetRowLabelValue(self.row)
-		##control.SetValue(value)
-		##event.Skip()
-
 ###
 class Newt(wx.Frame):
-	"""
+	""" Newt
 	"""
 
 	###
@@ -256,15 +249,15 @@ class Newt(wx.Frame):
 		### update the column width
 		try:
 			activePage = self.notebook.GetSelection()
-		except Exception as info:
+		except Exception as info:  # noqa: BLE001
 			activePage = 0
-			sys.stdout.write(_("Error 1 in SpreadSheet: %s"%info))
+			sys.stdout.write(_(f"Error 1 in SpreadSheet: {info}"))  # noqa: INT001
 
 		try:
 			sheet = self.notebook.GetPage(activePage)
 			sheet.UpdateColWidth()
-		except Exception as info:
-			sys.stdout.write(_("Error 2 in SpreadSheet: %s"%info))
+		except Exception as info:  # noqa: BLE001
+			sys.stdout.write(_(f"Error 2 in SpreadSheet: {info}"))  # noqa: INT001
 		else:
 			toolbar = self.GetToolBar()
 			toolbar.EnableTool(self.chart.GetId(), msg)
@@ -285,7 +278,7 @@ class Newt(wx.Frame):
 		printOnStatusBar(self.statusbar, {0:_("Loading data... (%d %%)")%int(pourcent)})
 
 	###
-	def AddPage(self, data = [[]], label = ""):
+	def AddPage(self, data = [[]], label = ""):  # noqa: B006
 		""" Add new page to notebook knowing data and label
 		"""
 		sheet = MySheet(self.notebook, data)
@@ -300,8 +293,7 @@ class Newt(wx.Frame):
 	def OnNew(self, event):
 		""" New button bas been pressed.
 		"""
-		data = [[]]
-		label = _('New %d'%self.notebook.GetPageCount())
+		label = _('New %d'%self.notebook.GetPageCount())  # noqa: INT003, UP031
 		self.AddPage(label=label)
 
 	###
@@ -309,7 +301,7 @@ class Newt(wx.Frame):
 		""" Open button has been pressed.
 		"""
 		wcd = _("DataSheet file (*.dat)|*.dat|All files (*)|*")
-		home = os.getenv('USERPROFILE') or os.getenv('HOME') or DEVSIMPY_PACKAGE_PATH
+		home = os.getenv('USERPROFILE') or os.getenv('HOME') or DEVSIMPY_PACKAGE_PATH # type: ignore
 		open_dlg = wx.FileDialog(self, message = _('Choose a file'), defaultDir = home, defaultFile = "", wildcard = wcd, style = wx.OPEN|wx.MULTIPLE|wx.CHANGE_DIR)
 		# get the new path from open file dialogue
 		if open_dlg.ShowModal() == wx.ID_OK:
@@ -326,7 +318,7 @@ class Newt(wx.Frame):
 					dlg.Destroy()
 
 					data = self.FileToData(fn, separator)
-					label = _('New %d'%self.notebook.GetPageCount())
+					label = _('New %d'%self.notebook.GetPageCount())  # noqa: INT003, UP031
 					self.AddPage(data, label)
 
 
@@ -335,7 +327,7 @@ class Newt(wx.Frame):
 		""" SaveAs button has been pressed.
 		"""
 		wcd = _("DataSheet file (*.dat)|*.dat|All files (*)|*")
-		home = DEVSIMPY_PACKAGE_PATH
+		home = DEVSIMPY_PACKAGE_PATH # type: ignore
 		save_dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=home, defaultFile='', wildcard=wcd, style=wx.SAVE | wx.OVERWRITE_PROMPT)
 		if save_dlg.ShowModal() == wx.ID_OK:
 			fn = os.path.normpath(save_dlg.GetPath())
@@ -343,12 +335,10 @@ class Newt(wx.Frame):
 			activePage = self.notebook.GetSelection()
 			sheet = self.notebook.GetPage(activePage)
 			nbr = sheet.GetNumberRows()
-			nbc = sheet.GetNumberCols()
+			# nbc = sheet.GetNumberCols()
 			#print "sdf", fn
 			with open(fn,'w') as f:
-				for row in range(nbr):
-					#print sheet.GetCellValue(row,0),sheet.GetCellValue(row,1)
-					f.write("%s %s\n"%(sheet.GetCellValue(row,0),sheet.GetCellValue(row,1)))
+				f.writelines(f"{sheet.GetCellValue(row,0)} {sheet.GetCellValue(row,1)}\n" for row in range(nbr))
 
 	###
 	def OnCopy(self, event):
@@ -416,7 +406,7 @@ class Newt(wx.Frame):
 		
 		selected_rows = list(range(i,j))
 		
-		nbc = range(sheet.GetNumberCols())
+		# nbc = range(sheet.GetNumberCols())
 		nbr = range(sheet.GetNumberRows()) if selected_rows == [] else selected_rows
 
 		data = []
@@ -427,18 +417,18 @@ class Newt(wx.Frame):
 			if '<<' in v or '>>' in v: 
 				s = sheet.GetCellValue(i,sheet.GetNumberCols()-1).replace('<< ', '').replace('<<', '').replace('>>','').replace('],','];')
 			else:
-				s = "value = %s; time = %s"%(v,sheet.GetCellValue(i,0))
+				s = f"value = {v}; time = {sheet.GetCellValue(i,0)}"
 			try:
 				### globals containt the time and value variables after exec of the statement
-				exec(str(s), globals())
-			except Exception as info:
+				exec(str(s), globals())  # noqa: S102
+			except Exception as info:  # noqa: BLE001
 				sys.stdout.write(str(info))
 			else:
 				### if value is a list, we must choose an index to plot amoung the values of the list
-				if isinstance(value, list):
+				if isinstance(value, list): # type: ignore
 					if select == -1:
-						if len(value) > 1 :
-							dlg = wx.TextEntryDialog(self, _('Choose one index between [%d-%d] to plot into the list of values.')%(0,len(value)-1),_('Plotting Manager'), value="0")
+						if len(value) > 1 : # type: ignore
+							dlg = wx.TextEntryDialog(self, _('Choose one index between [%d-%d] to plot into the list of values.')%(0,len(value)-1),_('Plotting Manager'), value="0") # type: ignore
 							if dlg.ShowModal() == wx.ID_OK:
 								select=int(dlg.GetValue())
 								dlg.Destroy()
@@ -450,21 +440,21 @@ class Newt(wx.Frame):
 
 					### choice is digit else we break
 					# if value[select]:
-					if select == 0 or select in range(0,len(value)-1):
-						if not isinstance(value[select], str):
-							data.append((time, float(value[select])))
+					if select == 0 or select in range(len(value)-1): # type: ignore
+						if not isinstance(value[select], str): # type: ignore
+							data.append((time, float(value[select]))) # type: ignore
 						else:
 							#wx.MessageBox(_('Value to plot must be digit!'), _('Warning'), wx.OK | wx.ICON_WARNING)
-							data.append((time, value[select]))
+							data.append((time, value[select])) # type: ignore
 					
 				### first if int is digit or if float is digit
 				else:
-					v = str(format(value,'f')).lstrip('-')
+					v = str(format(value,'f')).lstrip('-') # type: ignore
 					if v.isdigit() or v.replace(".", "", 1).isdigit():
-						data.append((time,float(value)))
+						data.append((time, float(value))) # type: ignore
 					else:
 						#wx.MessageBox(_('Type of data should be float or int: %s')%str(value), _('Info'))
-						data.append((time, value))
+						data.append((time, value)) # type: ignore
 
 		if data:
 			### if the first value of y is str, we plot with tick in y axe

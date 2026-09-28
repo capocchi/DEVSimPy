@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,7 +22,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import builtins
+import builtins  
 import wx
 import os
 import sys
@@ -46,7 +46,7 @@ import Container
 import gettext
 _ = gettext.gettext
 
-import time
+import time  
 
 def timer():
 	last = time.time()
@@ -69,7 +69,7 @@ class TextObjectValidator(wx.PyValidator):
 	"""
 
 	def __init__(self, *args, **kwargs):
-		super(TextObjectValidator, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 
 	def Clone(self):
 		return TextObjectValidator()
@@ -108,7 +108,7 @@ class CollapsiblePanel(wx.Panel):
 		self.org_w,self.org_h = self.simdia.GetSize()
 
 		# Get current kernel name for display
-		kernel_name = DEFAULT_DEVS_DIRNAME
+		kernel_name = DEFAULT_DEVS_DIRNAME # type: ignore
 		
 		self.label1 = _("More settings... [%s]") % kernel_name
 		self.label2 = _("Extra options [%s]") % kernel_name
@@ -149,10 +149,10 @@ class CollapsiblePanel(wx.Panel):
 		'''Create an ergonomic layout for simulation options'''
 
 		### list of possible strategy depending on the PyDEVS version	
-		strategy_dict = eval("%s_SIM_STRATEGY_DICT"%DEFAULT_DEVS_DIRNAME.upper())
+		strategy_dict = eval(f"{DEFAULT_DEVS_DIRNAME.upper()}_SIM_STRATEGY_DICT") # type: ignore
 		
 		# Check if we have a nested structure (BrokerDEVS)
-		self._has_broker_options = isinstance(list(strategy_dict.values())[0] if strategy_dict else {}, dict)
+		self._has_broker_options = isinstance(next(iter(strategy_dict.values())) if strategy_dict else {}, dict)
 		
 		# Main vertical sizer for better organization
 		main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -168,7 +168,7 @@ class CollapsiblePanel(wx.Panel):
 			# BrokerDEVS: Show message format and broker
 			text_format = wx.StaticText(pane, wx.NewIdRef(), _("Message Format:"))
 			c = list(strategy_dict.keys())
-			default_choice = SELECTED_MESSAGE_FORMAT if SELECTED_MESSAGE_FORMAT in c else (c[0] if c else '')
+			default_choice = SELECTED_MESSAGE_FORMAT if SELECTED_MESSAGE_FORMAT in c else (c[0] if c else '') # type: ignore
 			self.ch1 = wx.Choice(pane, wx.NewIdRef(), choices=c)
 			self.ch1.SetToolTip(_("Select the message format standard for broker communication"))
 			
@@ -177,9 +177,9 @@ class CollapsiblePanel(wx.Panel):
 			
 			# Broker selection
 			text_broker = wx.StaticText(pane, wx.NewIdRef(), _("Broker:"))
-			selected_msg_format = default_choice if default_choice in strategy_dict else (list(strategy_dict.keys())[0] if strategy_dict else '')
+			selected_msg_format = default_choice if default_choice in strategy_dict else (next(iter(strategy_dict.keys())) if strategy_dict else '')
 			broker_list = list(strategy_dict[selected_msg_format].keys()) if selected_msg_format in strategy_dict else []
-			default_broker = SELECTED_BROKER if SELECTED_BROKER in broker_list else (broker_list[0] if broker_list else '')
+			default_broker = SELECTED_BROKER if SELECTED_BROKER in broker_list else (broker_list[0] if broker_list else '') # type: ignore
 			self.ch_broker = wx.Choice(pane, wx.NewIdRef(), choices=broker_list)
 			self.ch_broker.SetToolTip(_("Select the message broker (Kafka, MQTT, RabbitMQ, etc.)"))
 			
@@ -195,7 +195,7 @@ class CollapsiblePanel(wx.Panel):
 			# PyDEVS/PyPDEVS: Show strategy
 			text_strategy = wx.StaticText(pane, wx.NewIdRef(), _("Algorithm:"))
 			c = list(strategy_dict.keys())
-			default_choice = DEFAULT_SIM_STRATEGY
+			default_choice = DEFAULT_SIM_STRATEGY # type: ignore
 			self.ch1 = wx.Choice(pane, wx.NewIdRef(), choices=c)
 			self.ch1.SetToolTip(_("Select the simulation algorithm/strategy"))
 			
@@ -274,23 +274,23 @@ class CollapsiblePanel(wx.Panel):
 		main_sizer.Add(advanced_box, 0, wx.EXPAND|wx.ALL, 5)
 		
 		# Set initial values and enable/disable based on package
-		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
-			self.cb2.SetValue(NTL)
-			self.cb3.SetValue(VERBOSE)
+		if DEFAULT_DEVS_DIRNAME == 'PyDEVS': # type: ignore
+			self.cb2.SetValue(NTL) # type: ignore
+			self.cb3.SetValue(VERBOSE) # type: ignore
 			cb4.Enable(False)
 			cb5.Enable(False)
-		elif DEFAULT_DEVS_DIRNAME == 'BrokerDEVS':
+		elif DEFAULT_DEVS_DIRNAME == 'BrokerDEVS': # type: ignore
 			cb1.Enable(False)
-			self.cb2.SetValue(NTL)
-			self.cb3.SetValue(VERBOSE)
+			self.cb2.SetValue(NTL) # type: ignore
+			self.cb3.SetValue(VERBOSE) # type: ignore
 			cb4.Enable(False)
 			cb5.Enable(False)
 		else:  # PyPDEVS
 			cb1.Enable(False)
-			self.cb2.SetValue(NTL)
-			self.cb3.SetValue(VERBOSE)
-			cb4.SetValue(DYNAMIC_STRUCTURE)
-			cb5.SetValue(REAL_TIME and not NTL)
+			self.cb2.SetValue(NTL) # type: ignore
+			self.cb3.SetValue(VERBOSE) # type: ignore
+			cb4.SetValue(DYNAMIC_STRUCTURE) # type: ignore
+			cb5.SetValue(REAL_TIME and not NTL) # type: ignore
 		
 		# Disable and uncheck verbose if plugin is not enabled
 		if not PluginManager.is_enable('verbose'):
@@ -318,11 +318,11 @@ class CollapsiblePanel(wx.Panel):
 		# Check if we have broker options (nested structure)
 		if self._has_broker_options:
 			# For BrokerDEVS, selected_string is the message format
-			setattr(builtins, 'SELECTED_MESSAGE_FORMAT', selected_string)
-			setattr(builtins, 'DEFAULT_SIM_STRATEGY', selected_string)
+			builtins.SELECTED_MESSAGE_FORMAT = selected_string
+			builtins.DEFAULT_SIM_STRATEGY = selected_string
 			
 			# Update broker list based on selected message format
-			strategy_dict = eval("%s_SIM_STRATEGY_DICT"%DEFAULT_DEVS_DIRNAME.upper())
+			strategy_dict = eval(f"{DEFAULT_DEVS_DIRNAME.upper()}_SIM_STRATEGY_DICT") # type: ignore
 			if selected_string in strategy_dict and isinstance(strategy_dict[selected_string], dict):
 				broker_list = list(strategy_dict[selected_string].keys())
 				self.ch_broker.Clear()
@@ -334,23 +334,23 @@ class CollapsiblePanel(wx.Panel):
 						self.ch_broker.SetStringSelection(current_broker)
 					else:
 						self.ch_broker.SetSelection(0)
-						setattr(builtins, 'SELECTED_BROKER', broker_list[0])
+						builtins.SELECTED_BROKER = broker_list[0]
 			
 			self.simdia.selected_strategy = selected_string
 		else:
 			# For PyDEVS/PyPDEVS, selected_string is the strategy
 			self.simdia.selected_strategy = selected_string
-			setattr(builtins, 'DEFAULT_SIM_STRATEGY', selected_string)
+			builtins.DEFAULT_SIM_STRATEGY = selected_string
 
 		### update of ntl checkbox depending on the choosing strategy
 		if not self._has_broker_options:
-			self.cb2.Enable(not (self.simdia.selected_strategy == 'original' and DEFAULT_DEVS_DIRNAME == 'PyDEVS'))
+			self.cb2.Enable(not (self.simdia.selected_strategy == 'original' and DEFAULT_DEVS_DIRNAME == 'PyDEVS')) # type: ignore
 	
 	def OnBrokerChoice(self, event):
 		""" broker choice has been invoked (for BrokerDEVS)
 		"""
 		selected_broker = event.GetString()
-		setattr(builtins, 'SELECTED_BROKER', selected_broker)
+		builtins.SELECTED_BROKER = selected_broker
 	
 	def OnNTL(self, event):
 		cb2 = event.GetEventObject()
@@ -358,7 +358,7 @@ class CollapsiblePanel(wx.Panel):
 		self.simdia.ntl = cb2.GetValue()
 		self.simdia._text1.Enable(not self.simdia.ntl)
 		self.simdia._value.Enable(not self.simdia.ntl)
-		setattr(builtins, 'NTL', self.simdia.ntl)
+		builtins.NTL = self.simdia.ntl
 
 	def OnProfiling(self, event):
 		cb1 = event.GetEventObject()
@@ -367,20 +367,20 @@ class CollapsiblePanel(wx.Panel):
 	def OnVerbose(self, event):
 		cb3 = event.GetEventObject()
 		self.simdia.verbose = cb3.GetValue()
-		setattr(builtins, 'VERBOSE', self.simdia.verbose)
+		builtins.VERBOSE = self.simdia.verbose
 		
 	def OnDynamicStructure(self, event):
 		cb4 = event.GetEventObject()
 		self.simdia.dynamic_structure_flag = cb4.GetValue()
-		setattr(builtins, 'DYNAMIC_STRUCTURE', self.simdia.dynamic_structure_flag)
+		builtins.DYNAMIC_STRUCTURE = self.simdia.dynamic_structure_flag
 
 	def OnRealTime(self, event):
 		cb5 = event.GetEventObject()
 		self.simdia.real_time_flag = cb5.GetValue()
-		setattr(builtins, 'REAL_TIME', self.simdia.real_time_flag)
+		builtins.REAL_TIME = self.simdia.real_time_flag
 		
 #-----------------------------------------------------------------
-class Base(object):
+class Base:
 	"""Base class for Simulation Dialog
 		Frame or Panel with progress bar
 	"""
@@ -398,13 +398,13 @@ class Base(object):
 		self.current_master = None
 
 		# simulator strategy
-		self.selected_strategy = DEFAULT_SIM_STRATEGY
+		self.selected_strategy = DEFAULT_SIM_STRATEGY # type: ignore
 
 		### dynamic structure only for local PyPDEVS simulation
-		self.dynamic_structure_flag = DYNAMIC_STRUCTURE
+		self.dynamic_structure_flag = DYNAMIC_STRUCTURE # type: ignore
 
 		### PyPDEVS threaded real time simulation
-		self.real_time_flag = REAL_TIME
+		self.real_time_flag = REAL_TIME # type: ignore
 		
 		### profiling simulation
 		self.prof = False
@@ -414,9 +414,9 @@ class Base(object):
 		self.total_ram = get_total_ram()
 
 		### No time limit simulation (defined in the builtin dictionary from .devsimpy file)
-		self.ntl = NTL
+		self.ntl = NTL # type: ignore
 
-		self.verbose = VERBOSE
+		self.verbose = VERBOSE # type: ignore
 
 		# definition of the thread, the timer and the counter for the simulation progress
 		self.thread = None
@@ -479,7 +479,7 @@ class Base(object):
 		self._value.SetValue(str(float(self.master.FINAL_TIME)))
 
 	def GetMaster(self):
-		self.master
+		self.master  # noqa: B018
 
 	def __do_layout(self):
 
@@ -602,7 +602,7 @@ class Base(object):
 
 	###
 	def OnText(self, event):
-		"""
+		""" Text
 		"""
 		self._gauge.SetValue(0)
 
@@ -827,9 +827,8 @@ class Base(object):
 				printOnStatusBar(self.statusbar, {0:_("Completed!"), 1:self.GetClock()})
 			
 				### is no time limit add some informations in status bar
-				if not self.ntl:
-					if self.statusbar.GetFieldsCount() > 2:
-						printOnStatusBar(self.statusbar, {2:str(100)+"%"})
+				if not self.ntl and self.statusbar.GetFieldsCount() > 2:
+					printOnStatusBar(self.statusbar, {2:str(100)+"%"})
 
 			### stop the timer
 			self.timer.Stop()
@@ -844,9 +843,8 @@ class Base(object):
 				wx.CallAfter(printOnStatusBar,self.statusbar, {0:_("Processing..."), 1:self.GetClock()})
 
 				### is no time limit, add some information in status bar
-				if not self.ntl:
-					if self.statusbar.GetFieldsCount() > 2:
-						wx.CallAfter(printOnStatusBar,self.statusbar, {2:str(self.count)[:4]+"%"})
+				if not self.ntl and self.statusbar.GetFieldsCount() > 2:
+					wx.CallAfter(printOnStatusBar,self.statusbar, {2:str(self.count)[:4]+"%"})
 
 			#wx.Yield()
 			#wx.YieldIfNeeded()
@@ -864,7 +862,7 @@ class Base(object):
 		v = get_process_memory()-self.mem_offset
 		if v<0: v=0.0
 
-		return "%d:%02d:%02d:%03d / %.2f MB (%.2f%%)" % (h, m, int(s), int(ms), v, 100*v/self.total_ram)
+		return "%d:%02d:%02d:%03d / %.2f MB (%.2f%%)" % (h, m, int(s), int(ms), v, 100*v/self.total_ram)  # noqa: UP031
 
 	###
 	def MsgBox(self, msg:str):
@@ -883,7 +881,7 @@ class Base(object):
 			return
 
 	def SetFields(self):
-		"""
+		""" Fields
 		"""
 		
 		printOnStatusBar(self.statusbar, {i:'' for i in range(self.statusbar.GetFieldsCount())})
@@ -899,7 +897,7 @@ class Base(object):
 		### try to hidden stdioWin
 		try:
 			self.parent.stdioWin.frame.Show(False)
-		except:
+		except:  # noqa: E722, S110
 			pass
 
 		try:
@@ -919,7 +917,7 @@ class Base(object):
 				if p != nb2.GetSelection():
 					nb2.GetPage(p).Enable()
 
-		except Exception:
+		except Exception:  # noqa: BLE001, S110
 			#sys.stdout.write(_("Empty mode over\n"))
 			pass
 
@@ -967,12 +965,12 @@ class Base(object):
 				if paths:
 					# find if DOMAIN_PATH is in the last file path of the trace
 					p = paths[-1]
-					devs_error = DOMAIN_PATH in p or DEVSIMPY_PACKAGE_PATH not in p
+					devs_error = DOMAIN_PATH in p or DEVSIMPY_PACKAGE_PATH not in p # type: ignore
 			else:
 				# msg didnt look like a tuple, maybe pubsub gave keyword args
 				sys.stdout.write(_("ErrorManager received unexpected message type %r\n") % (msg,))
-		except Exception as info:
-			sys.stdout.write(_("Error in ErrorManager: %s" % info))
+		except Exception as info:  # noqa: BLE001
+			sys.stdout.write(_(f"Error in ErrorManager: {info}"))  # noqa: INT001
 
 		### if error come from devs python file
 		if devs_error:
@@ -980,7 +978,7 @@ class Base(object):
 			try:
 				### simulate event button for the code editor
 				event = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self._btn1.GetId())
-			except Exception:
+			except Exception:  # noqa: BLE001, S110
 				pass
 			else:
 				### Error dialog
@@ -997,7 +995,7 @@ class Base(object):
 			# simulation so the program can continue gracefully.
 			try:
 				Container.MsgBoxError(None, getattr(self, 'parent', None), msg)
-			except Exception as info2:
+			except Exception as info2:  # noqa: BLE001
 				sys.stdout.write(_("Error displaying error dialog: %s\nOriginal: %r") % (info2, msg))
 			# ensure simulation windows are cleaned up
 			self.PrepareDestroyWin()

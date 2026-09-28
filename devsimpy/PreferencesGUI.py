@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # PreferencesGUI.py ---
@@ -20,27 +20,27 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-import wx
-import os
 import builtins
-import shutil
-import sys
 import configparser
 import copy
 import importlib
 import logging
-import subprocess
+import os
 import re
+import shutil
+import subprocess
+import sys
 
+import wx
 import wx.lib.filebrowsebutton as filebrowse
 
 _ = wx.GetTranslation
 
 logger = logging.getLogger(__name__)
 
-from HtmlWindow import HtmlFrame
+from HtmlWindow import HtmlFrame  
 
-from PluginsGUI import PluginsPanel, GeneralPluginsList
+from PluginsGUI import PluginsPanel, GeneralPluginsList  # noqa: F401
 from Utilities import playSound, GetUserConfigDir, GetWXVersionFromIni, AddToInitFile, DelToInitFile, install, getTopLevelWindow, load_and_resize_image
 from Decorators import BuzyCursorNotification
 from AIAdapter import AdapterFactory
@@ -59,7 +59,7 @@ class GeneralPanel(wx.Panel):
 	"""
 
 	### wxPython version
-	wxv = [wx.VERSION_STRING]
+	wxv = [wx.VERSION_STRING]  # noqa: RUF012
 
 	def __init__(self, parent):
 		"""Constructor."""
@@ -81,34 +81,34 @@ class GeneralPanel(wx.Panel):
 		# Plugins directory
 		self.plugin_dir = filebrowse.DirBrowseButton(
 			self, wx.NewIdRef(), 
-			startDirectory=PLUGINS_PATH,
+			startDirectory=PLUGINS_PATH,  # noqa: F821 # type: ignore
 			labelText=_("Plugins:"),
 			toolTip=_("Change the plugins directory"),
 			dialogTitle=_("Select plugins directory...")
 		)
-		self.plugin_dir.SetValue(PLUGINS_PATH)
+		self.plugin_dir.SetValue(PLUGINS_PATH) # noqa: F821 # type: ignore
 		dirBox.Add(self.plugin_dir, 0, wx.EXPAND|wx.ALL, 5)
 		
 		# Library directory
 		self.domain_dir = filebrowse.DirBrowseButton(
 			self, wx.NewIdRef(),
-			startDirectory=DOMAIN_PATH,
+			startDirectory=DOMAIN_PATH, # noqa: F821 # type: ignore
 			labelText=_("Libraries:"),
 			toolTip=_("Change the library directory"),
 			dialogTitle=_("Select libraries directory...")
 		)
-		self.domain_dir.SetValue(DOMAIN_PATH)
+		self.domain_dir.SetValue(DOMAIN_PATH) # noqa: F821 # type: ignore
 		dirBox.Add(self.domain_dir, 0, wx.EXPAND|wx.ALL, 5)
 		
 		# Output directory
 		self.out_dir = filebrowse.DirBrowseButton(
 			self, wx.NewIdRef(),
-			startDirectory=OUT_DIR,
+			startDirectory=OUT_DIR, # noqa: F821 # type: ignore
 			labelText=_("Output:"),
 			toolTip=_("Change the output directory"),
 			dialogTitle=_("Select output directory...")
 		)
-		self.out_dir.SetValue(OUT_DIR)
+		self.out_dir.SetValue(OUT_DIR) # noqa: F821 # type: ignore
 		dirBox.Add(self.out_dir, 0, wx.EXPAND|wx.ALL, 5)
 		
 		mainSizer.Add(dirBox, 0, wx.EXPAND|wx.ALL, 10)
@@ -125,7 +125,7 @@ class GeneralPanel(wx.Panel):
 		st1.SetToolTip(_("Maximum number of recent opened files in the menu"))
 		self.nb_opened_file = wx.SpinCtrl(self, wx.NewIdRef(), '')
 		self.nb_opened_file.SetRange(2, 20)
-		self.nb_opened_file.SetValue(NB_OPENED_FILE)
+		self.nb_opened_file.SetValue(NB_OPENED_FILE) # noqa: F821 # type: ignore
 		settingsGrid.Add(st1, 0, wx.ALIGN_CENTER_VERTICAL)
 		settingsGrid.Add(self.nb_opened_file, 1, wx.EXPAND)
 		
@@ -134,7 +134,7 @@ class GeneralPanel(wx.Panel):
 		st3.SetToolTip(_("Number of undo/redo operations to keep in memory"))
 		self.nb_history_undo = wx.SpinCtrl(self, wx.NewIdRef(), '')
 		self.nb_history_undo.SetRange(2, 100)
-		self.nb_history_undo.SetValue(NB_HISTORY_UNDO)
+		self.nb_history_undo.SetValue(NB_HISTORY_UNDO) # noqa: F821 # type: ignore
 		settingsGrid.Add(st3, 0, wx.ALIGN_CENTER_VERTICAL)
 		settingsGrid.Add(self.nb_history_undo, 1, wx.EXPAND)
 		
@@ -143,7 +143,7 @@ class GeneralPanel(wx.Panel):
 		st2.SetToolTip(_("Default font size for block labels"))
 		self.font_size = wx.SpinCtrl(self, wx.NewIdRef(), '')
 		self.font_size.SetRange(6, 24)
-		self.font_size.SetValue(FONT_SIZE)
+		self.font_size.SetValue(FONT_SIZE) # noqa: F821 # type: ignore
 		settingsGrid.Add(st2, 0, wx.ALIGN_CENTER_VERTICAL)
 		settingsGrid.Add(self.font_size, 1, wx.EXPAND)
 		
@@ -166,13 +166,13 @@ class GeneralPanel(wx.Panel):
 		# Transparency checkbox
 		self.cb1 = wx.CheckBox(self, wx.NewIdRef(), _('Enable window transparency'))
 		self.cb1.SetToolTip(_("Apply transparency to detached diagram frames"))
-		self.cb1.SetValue(getattr(builtins, 'TRANSPARENCY'))
+		self.cb1.SetValue(builtins.TRANSPARENCY)
 		optionsBox.Add(self.cb1, 0, wx.ALL, 5)
 		
 		# Notification checkbox
 		self.cb11 = wx.CheckBox(self, wx.NewIdRef(), _('Enable notifications'))
 		self.cb11.SetToolTip(_("Show notification messages for important events"))
-		self.cb11.SetValue(getattr(builtins, 'NOTIFICATION'))
+		self.cb11.SetValue(builtins.NOTIFICATION)
 		optionsBox.Add(self.cb11, 0, wx.ALL, 5)
 		
 		mainSizer.Add(optionsBox, 0, wx.EXPAND|wx.ALL, 10)
@@ -261,37 +261,37 @@ class GeneralPanel(wx.Panel):
 	def OnNbOpenedFileChanged(self, event):
 		"""Update the number of recent opened files"""
 		new_val = self.nb_opened_file.GetValue()
-		old_val = getattr(builtins, 'NB_OPENED_FILE')
+		old_val = builtins.NB_OPENED_FILE
 		
 		if new_val != old_val:
-			setattr(builtins, 'NB_OPENED_FILE', new_val)
+			builtins.NB_OPENED_FILE = new_val
 			return True
 		return False
 
 	def OnNbHistoryUndoChanged(self, event):
 		"""Update the history depth for undo/redo"""
 		new_val = self.nb_history_undo.GetValue()
-		old_val = getattr(builtins, 'NB_HISTORY_UNDO')
+		old_val = builtins.NB_HISTORY_UNDO
 		
 		if new_val != old_val:
-			setattr(builtins, 'NB_HISTORY_UNDO', new_val)
+			builtins.NB_HISTORY_UNDO = new_val
 			return True
 		return False
 
 	def OnFontSizeChanged(self, event):
 		"""Update font size"""
 		new_val = self.font_size.GetValue()
-		old_val = getattr(builtins, 'FONT_SIZE')
+		old_val = builtins.FONT_SIZE
 		
 		if new_val != old_val:
-			setattr(builtins, 'FONT_SIZE', new_val)
+			builtins.FONT_SIZE = new_val
 			return True
 		return False
 
 	def OnDomainPathChanged(self, event):
 		"""Update the domain path"""
 		new_domain_dir = self.domain_dir.GetValue()
-		old_domain_dir = getattr(builtins, 'DOMAIN_PATH')
+		old_domain_dir = builtins.DOMAIN_PATH
 		
 		# If value has changed, clean the library control panel
 		if old_domain_dir != new_domain_dir:
@@ -299,7 +299,7 @@ class GeneralPanel(wx.Panel):
 			old_parent_domain_dir = os.path.dirname(old_domain_dir)
 			
 			# Remove the parent of Domain directory if not in devsimpy package
-			if old_parent_domain_dir != DEVSIMPY_PACKAGE_PATH:
+			if old_parent_domain_dir != DEVSIMPY_PACKAGE_PATH:  # type: ignore # noqa: F821, SIM102
 				if old_parent_domain_dir in sys.path:
 					sys.path.remove(old_parent_domain_dir)
 			
@@ -308,7 +308,7 @@ class GeneralPanel(wx.Panel):
 				sys.path.remove(path)
 			
 			# Update builtin
-			setattr(builtins, 'DOMAIN_PATH', new_domain_dir)
+			builtins.DOMAIN_PATH = new_domain_dir
 			
 			# Update library tree
 			try:
@@ -323,8 +323,8 @@ class GeneralPanel(wx.Panel):
 				
 				# Save settings
 				mainW.SaveUserSettings()
-			except Exception as e:
-				wx.LogError(f"Error updating library tree: {str(e)}")
+			except Exception as e:  # noqa: BLE001
+				wx.LogError(f"Error updating library tree: {e!s}")
 			
 			return True
 		return False
@@ -332,40 +332,40 @@ class GeneralPanel(wx.Panel):
 	def OnPluginsDirChanged(self, event):
 		"""Update plugins path"""
 		new_val = self.plugin_dir.GetValue()
-		old_val = getattr(builtins, 'PLUGINS_PATH')
+		old_val = builtins.PLUGINS_PATH
 		
 		if new_val != old_val:
-			setattr(builtins, 'PLUGINS_PATH', new_val)
+			builtins.PLUGINS_PATH = new_val
 			return True
 		return False
 
 	def OnOutDirChanged(self, event):
 		"""Update output directory"""
 		new_val = os.path.basename(self.out_dir.GetValue())
-		old_val = getattr(builtins, 'OUT_DIR')
+		old_val = builtins.OUT_DIR
 		
 		if new_val != old_val:
-			setattr(builtins, 'OUT_DIR', new_val)
+			builtins.OUT_DIR = new_val
 			return True
 		return False
 
 	def OnTransparancyChanged(self, event):
 		"""Update window transparency option"""
 		new_val = self.cb1.GetValue()
-		old_val = getattr(builtins, 'TRANSPARENCY')
+		old_val = builtins.TRANSPARENCY
 		
 		if new_val != old_val:
-			setattr(builtins, 'TRANSPARENCY', new_val)
+			builtins.TRANSPARENCY = new_val
 			return True
 		return False
 
 	def OnNotificationChanged(self, event):
 		"""Update notification option"""
 		new_val = self.cb11.GetValue()
-		old_val = getattr(builtins, 'NOTIFICATION')
+		old_val = builtins.NOTIFICATION
 		
 		if new_val != old_val:
-			setattr(builtins, 'NOTIFICATION', new_val)
+			builtins.NOTIFICATION = new_val
 			return True
 		return False
 
@@ -403,8 +403,8 @@ class GeneralPanel(wx.Panel):
 			with open(path, 'w') as f:
 				parser.write(f)
 			return True
-		except IOError as e:
-			wx.LogError(f"Error saving wxPython version: {str(e)}")
+		except OSError as e:
+			wx.LogError(f"Error saving wxPython version: {e!s}")
 			return False
 
 
@@ -448,7 +448,7 @@ class BrokerConfigDialog(wx.Dialog):
 	def _load_config(self):
 		""" Load broker configuration from config file or builtins
 		"""
-		import builtins
+		import builtins  
 		import configparser
 		from Utilities import GetUserConfigDir
 		
@@ -489,7 +489,7 @@ class BrokerConfigDialog(wx.Dialog):
 				
 				section_name = f'BROKER_{broker_lower.upper()}'
 				if cfg.has_section(section_name):
-					for key in self.config.keys():
+					for key in self.config.keys():  # noqa: SIM118
 						if cfg.has_option(section_name, key):
 							value = cfg.get(section_name, key)
 							# Convert boolean strings
@@ -499,7 +499,7 @@ class BrokerConfigDialog(wx.Dialog):
 								self.config[key] = value
 					logger.info(f"Loaded {self.broker_name} configuration from file")
 					return
-		except Exception as e:
+		except Exception as e:  # noqa: BLE001
 			logger.warning(f"Could not load config from file: {e}")
 		
 		# Fall back to builtins
@@ -508,7 +508,7 @@ class BrokerConfigDialog(wx.Dialog):
 			if hasattr(builtins, saved_key):
 				saved_config = getattr(builtins, saved_key, {})
 				self.config.update(saved_config)
-		except Exception as e:
+		except Exception as e:  # noqa: BLE001
 			logger.warning(f"Could not load config from builtins: {e}")
 
 	def _create_ui(self):
@@ -577,7 +577,7 @@ class BrokerConfigDialog(wx.Dialog):
 	def OnOK(self, evt):
 		""" Save configuration when OK is clicked
 		"""
-		import builtins
+		import builtins  
 		import configparser
 		from Utilities import GetUserConfigDir
 		
@@ -620,18 +620,18 @@ class BrokerConfigDialog(wx.Dialog):
 				cfg.write(f)
 			
 			logger.info(f"Saved {self.broker_name} configuration to {config_file}")
-		except Exception as e:
+		except Exception as e:  # noqa: BLE001
 			logger.error(f"Error saving broker config to file: {e}")
 		
 		# Also update mqttconfig if MQTT
 		if self.broker_name == 'MQTT':
 			try:
-				setattr(builtins, 'MQTT_BROKER_ADDRESS', config.get('address', 'localhost'))
-				setattr(builtins, 'MQTT_BROKER_PORT', int(config.get('port', 1883)))
-				setattr(builtins, 'MQTT_USERNAME', config.get('username') or None)
-				setattr(builtins, 'MQTT_PASSWORD', config.get('password') or None)
+				builtins.MQTT_BROKER_ADDRESS = config.get('address', 'localhost')
+				builtins.MQTT_BROKER_PORT = int(config.get('port', 1883))
+				builtins.MQTT_USERNAME = config.get('username') or None
+				builtins.MQTT_PASSWORD = config.get('password') or None
 				logger.info(f"Saved MQTT configuration: {config.get('address')}:{config.get('port')}")
-			except Exception as e:
+			except Exception as e:  # noqa: BLE001
 				logger.error(f"Error saving MQTT config: {e}")
 		
 		# Close dialog
@@ -672,9 +672,9 @@ class BrokerConfigDialog(wx.Dialog):
 					_("Not Implemented"),
 					wx.OK | wx.ICON_INFORMATION
 				)
-		except Exception as e:
+		except Exception as e:  # noqa: BLE001
 			wx.MessageBox(
-				f"{_('Connection failed')}:\n{str(e)}",
+				f"{_('Connection failed')}:\n{e!s}",
 				_("Error"),
 				wx.OK | wx.ICON_ERROR
 			)
@@ -683,7 +683,7 @@ class BrokerConfigDialog(wx.Dialog):
 		""" Test MQTT broker connection
 		"""
 		try:
-			import paho.mqtt.client as mqtt
+			import paho.mqtt.client as mqtt # type: ignore  
 			
 			address = config.get('address', 'localhost')
 			port = int(config.get('port', 1883))
@@ -724,7 +724,7 @@ class BrokerConfigDialog(wx.Dialog):
 				_("Missing Library"),
 				wx.OK | wx.ICON_ERROR
 			)
-		except Exception as e:
+		except Exception:
 			raise
 
 	def _test_kafka_connection(self, config):
@@ -748,14 +748,14 @@ class BrokerConfigDialog(wx.Dialog):
 				_("Missing Library"),
 				wx.OK | wx.ICON_ERROR
 			)
-		except Exception as e:
+		except Exception:
 			raise
 
 	def _test_rabbitmq_connection(self, config):
 		""" Test RabbitMQ broker connection
 		"""
 		try:
-			import pika
+			import pika # type: ignore  
 			
 			host = config.get('host', 'localhost')
 			port = int(config.get('port', 5672))
@@ -779,7 +779,7 @@ class BrokerConfigDialog(wx.Dialog):
 				_("Missing Library"),
 				wx.OK | wx.ICON_ERROR
 			)
-		except Exception as e:
+		except Exception:
 			raise
 
 
@@ -793,11 +793,11 @@ class SimulationPanel(wx.Panel):
 		wx.Panel.__init__(self, parent)
 		
 		# Initialize paths
-		self.sim_success_sound_path = SIMULATION_SUCCESS_SOUND_PATH
-		self.sim_error_sound_path = SIMULATION_ERROR_SOUND_PATH
-		self.default_devs_dir = DEFAULT_DEVS_DIRNAME
-		self.sim_defaut_strategy = DEFAULT_SIM_STRATEGY
-		self.sim_defaut_plot_dyn_freq = DEFAULT_PLOT_DYN_FREQ
+		self.sim_success_sound_path = SIMULATION_SUCCESS_SOUND_PATH # noqa: F821 # type: ignore
+		self.sim_error_sound_path = SIMULATION_ERROR_SOUND_PATH # noqa: F821 # type: ignore
+		self.default_devs_dir = DEFAULT_DEVS_DIRNAME # noqa: F821 # type: ignore
+		self.sim_defaut_strategy = DEFAULT_SIM_STRATEGY # noqa: F821 # type: ignore
+		self.sim_defaut_plot_dyn_freq = DEFAULT_PLOT_DYN_FREQ # noqa: F821 # type: ignore
 		
 		# Broker selection attributes - initialize from saved settings
 		self._has_broker_selection = False
@@ -814,7 +814,7 @@ class SimulationPanel(wx.Panel):
 	def _load_mqtt_config_from_file(self):
 		""" Load MQTT configuration from .devsimpy file into builtins
 		"""
-		import configparser
+		import configparser  
 		from Utilities import GetUserConfigDir
 		
 		try:
@@ -830,14 +830,14 @@ class SimulationPanel(wx.Panel):
 					username = cfg.get(section_name, 'username', fallback='')
 					password = cfg.get(section_name, 'password', fallback='')
 					
-					setattr(builtins, 'MQTT_BROKER_ADDRESS', address)
-					setattr(builtins, 'MQTT_BROKER_PORT', int(port))
-					setattr(builtins, 'MQTT_USERNAME', username or None)
-					setattr(builtins, 'MQTT_PASSWORD', password or None)
+					builtins.MQTT_BROKER_ADDRESS = address
+					builtins.MQTT_BROKER_PORT = int(port)
+					builtins.MQTT_USERNAME = username or None
+					builtins.MQTT_PASSWORD = password or None
 					
 					# Only log at debug level, not info
 					logger.debug(f"Loaded MQTT config from file: {address}:{port}, username={'(set)' if username else 'None'}")
-		except Exception as e:
+		except Exception as e:  # noqa: BLE001
 			logger.debug(f"Could not load MQTT config from file: {e}")
 	
 	def InitUI(self):
@@ -858,8 +858,8 @@ class SimulationPanel(wx.Panel):
 		# DEVS Package selection
 		devsLabel = wx.StaticText(self, label=_("Package:"))
 		devsLabel.SetToolTip(_("Select the DEVS kernel package (PyDEVS, PyPDEVS, etc.)"))
-		self.cb3 = wx.ComboBox(self, wx.NewIdRef(), DEFAULT_DEVS_DIRNAME, 
-							   choices=list(DEVS_DIR_PATH_DICT.keys()), 
+		self.cb3 = wx.ComboBox(self, wx.NewIdRef(), DEFAULT_DEVS_DIRNAME,  # noqa: F821 # type: ignore
+							   choices=list(DEVS_DIR_PATH_DICT.keys()),  # noqa: F821 # type: ignore
 							   style=wx.CB_READONLY)
 		self.cb3.Bind(wx.EVT_COMBOBOX, self.onCb3)
 		
@@ -880,7 +880,7 @@ class SimulationPanel(wx.Panel):
 		# Get strategies based on current DEVS package
 		strategies = list(getattr(builtins, 
 								  f'{self.cb3.GetValue().upper()}_SIM_STRATEGY_DICT').keys())
-		self.cb4 = wx.ComboBox(self, wx.NewIdRef(), DEFAULT_SIM_STRATEGY, 
+		self.cb4 = wx.ComboBox(self, wx.NewIdRef(), DEFAULT_SIM_STRATEGY, # noqa: F821 # type: ignore
 							   choices=strategies, style=wx.CB_READONLY)
 		self.cb4.SetToolTip(_("Simulation algorithm strategy (see documentation for details)"))
 		self.cb4.Bind(wx.EVT_COMBOBOX, self.onCb4)
@@ -929,7 +929,7 @@ class SimulationPanel(wx.Panel):
 		# Check if current strategy dict is nested (message format + broker)
 		strategy_dict = getattr(builtins, 
 							   f'{self.cb3.GetValue().upper()}_SIM_STRATEGY_DICT')
-		self._has_broker_selection = isinstance(list(strategy_dict.values())[0] if strategy_dict else {}, dict)
+		self._has_broker_selection = isinstance(next(iter(strategy_dict.values())) if strategy_dict else {}, dict)
 		
 		# Add broker UI to grid only if package supports it
 		if self._has_broker_selection:
@@ -947,7 +947,7 @@ class SimulationPanel(wx.Panel):
 		# No Time Limit checkbox
 		self.cb2 = wx.CheckBox(self, wx.NewIdRef(), 
 							   _('No Time Limit (stop when all models are idle)'))
-		self.cb2.SetValue(NTL)
+		self.cb2.SetValue(NTL) # noqa: F821 # type: ignore
 		self.cb2.SetToolTip(_("Simulation stops automatically when all models are idle"))
 		optionsBox.Add(self.cb2, 0, wx.ALL, 5)
 		
@@ -1033,7 +1033,7 @@ class SimulationPanel(wx.Panel):
 		"""
 		choice = self.cb3.GetValue()
 		doc_path = os.path.join(
-			os.path.dirname(getattr(builtins, 'DEVS_DIR_PATH_DICT').get(choice)), 
+			os.path.dirname(builtins.DEVS_DIR_PATH_DICT.get(choice)), 
 			'doc', 'index.html'
 		)
 
@@ -1102,7 +1102,7 @@ class SimulationPanel(wx.Panel):
 		dlg = wx.FileDialog(
 			wx.GetTopLevelParent(self),
 			_("Choose a sound file"),
-			defaultDir=os.path.join(DEVSIMPY_PACKAGE_PATH, 'sounds'),
+			defaultDir=os.path.join(DEVSIMPY_PACKAGE_PATH, 'sounds'), # noqa: F821 # type: ignore
 			wildcard=_("Sound files (*.mp3;*.wav)|*.mp3;*.wav|MP3 files (*.mp3)|*.mp3|WAV files (*.wav)|*.wav"),
 			style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
 		)
@@ -1124,7 +1124,7 @@ class SimulationPanel(wx.Panel):
 				# Auto-play the selected sound
 				playSound(val)
 				
-			except Exception as e:
+			except Exception as e:  # noqa: BLE001
 				wx.MessageBox(str(e), _("Error"), wx.OK | wx.ICON_ERROR)
 
 		dlg.Destroy()
@@ -1146,7 +1146,7 @@ class SimulationPanel(wx.Panel):
 				wx.MessageBox(_("No sound file selected"), _("Info"), 
 							wx.OK | wx.ICON_INFORMATION)
 				
-		except Exception as e:
+		except Exception as e:  # noqa: BLE001
 			wx.MessageBox(str(e), _("Error"), wx.OK | wx.ICON_ERROR)
 
 	def onCb1Check(self, evt):
@@ -1158,8 +1158,8 @@ class SimulationPanel(wx.Panel):
 		self.sim_error_sound_btn.Enable(enabled)
 		
 		if enabled:
-			self.sim_success_sound_path = SIMULATION_SUCCESS_SOUND_PATH
-			self.sim_error_sound_path = SIMULATION_ERROR_SOUND_PATH
+			self.sim_success_sound_path = SIMULATION_SUCCESS_SOUND_PATH # noqa: F821 # type: ignore
+			self.sim_error_sound_path = SIMULATION_ERROR_SOUND_PATH # noqa: F821 # type: ignore
 			self.sim_success_sound_btn.SetLabel(os.path.basename(self.sim_success_sound_path))
 			self.sim_error_sound_btn.SetLabel(os.path.basename(self.sim_error_sound_path))
 		else:
@@ -1191,7 +1191,7 @@ class SimulationPanel(wx.Panel):
 		
 		# Check if new package has broker selection (nested strategy dict)
 		strategy_dict = getattr(builtins, f'{val.upper()}_SIM_STRATEGY_DICT')
-		has_broker_selection = isinstance(list(strategy_dict.values())[0] if strategy_dict else {}, dict)
+		has_broker_selection = isinstance(next(iter(strategy_dict.values())) if strategy_dict else {}, dict)
 		
 		# Update broker UI based on package type
 		if has_broker_selection and not self._has_broker_selection:
@@ -1361,14 +1361,14 @@ class SimulationPanel(wx.Panel):
 		changes = []
 		
 		# Check if DEVS kernel changed
-		if DEFAULT_DEVS_DIRNAME != self.default_devs_dir:
+		if DEFAULT_DEVS_DIRNAME != self.default_devs_dir: # noqa: F821 # type: ignore
 			# Change builtin before recompiling modules
-			setattr(builtins, 'DEFAULT_DEVS_DIRNAME', self.default_devs_dir)
+			builtins.DEFAULT_DEVS_DIRNAME = self.default_devs_dir
 
 			try:
 				# Clear old kernel modules from sys.modules cache
 				# This prevents conflicts when switching between PyDEVS, PyPDEVS, BrokerDEVS
-				import sys
+				import sys  
 				import importlib
 				kernel_modules_to_remove = []
 				for module_name in list(sys.modules.keys()):
@@ -1398,8 +1398,8 @@ class SimulationPanel(wx.Panel):
 				
 				changes.append(_("DEVS kernel package"))
 				
-			except Exception as e:
-				wx.LogError(f"Error reloading modules: {str(e)}")
+			except Exception as e:  # noqa: BLE001
+				wx.LogError(f"Error reloading modules: {e!s}")
 
 		# Enable/disable priority icon based on DEVS kernel
 		try:
@@ -1407,30 +1407,30 @@ class SimulationPanel(wx.Panel):
 			tb = mainW.GetToolBar()
 			tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, 
 						 'PyPDEVS' not in self.default_devs_dir)
-		except:
+		except:  # noqa: E722, S110
 			pass
 
 		# Update all settings
-		old_sound_success = getattr(builtins, 'SIMULATION_SUCCESS_SOUND_PATH')
-		old_sound_error = getattr(builtins, 'SIMULATION_ERROR_SOUND_PATH')
-		old_strategy = getattr(builtins, 'DEFAULT_SIM_STRATEGY')
-		old_freq = getattr(builtins, 'DEFAULT_PLOT_DYN_FREQ')
-		old_ntl = getattr(builtins, 'NTL')
+		old_sound_success = builtins.SIMULATION_SUCCESS_SOUND_PATH
+		old_sound_error = builtins.SIMULATION_ERROR_SOUND_PATH
+		old_strategy = builtins.DEFAULT_SIM_STRATEGY
+		old_freq = builtins.DEFAULT_PLOT_DYN_FREQ
+		old_ntl = builtins.NTL
 		old_msg_format = getattr(builtins, 'SELECTED_MESSAGE_FORMAT', 'DEVSStreaming')
 		old_broker = getattr(builtins, 'SELECTED_BROKER', 'Kafka')
 		
 		# Apply changes
-		setattr(builtins, 'SIMULATION_SUCCESS_SOUND_PATH', self.sim_success_sound_path)
-		setattr(builtins, 'SIMULATION_ERROR_SOUND_PATH', self.sim_error_sound_path)
-		setattr(builtins, 'DEFAULT_SIM_STRATEGY', self.sim_defaut_strategy)
-		setattr(builtins, 'DEFAULT_DEVS_DIRNAME', self.default_devs_dir)
-		setattr(builtins, 'DEFAULT_PLOT_DYN_FREQ', self.sim_defaut_plot_dyn_freq)
-		setattr(builtins, 'NTL', self.cb2.GetValue())
+		builtins.SIMULATION_SUCCESS_SOUND_PATH = self.sim_success_sound_path
+		builtins.SIMULATION_ERROR_SOUND_PATH = self.sim_error_sound_path
+		builtins.DEFAULT_SIM_STRATEGY = self.sim_defaut_strategy
+		builtins.DEFAULT_DEVS_DIRNAME = self.default_devs_dir
+		builtins.DEFAULT_PLOT_DYN_FREQ = self.sim_defaut_plot_dyn_freq
+		builtins.NTL = self.cb2.GetValue()
 		
 		# Save broker and message format settings if BrokerDEVS is selected
 		if self._has_broker_selection and self.cb_msg_format and self.cb_broker:
-			setattr(builtins, 'SELECTED_MESSAGE_FORMAT', self.cb_msg_format.GetValue())
-			setattr(builtins, 'SELECTED_BROKER', self.cb_broker.GetValue())
+			builtins.SELECTED_MESSAGE_FORMAT = self.cb_msg_format.GetValue()
+			builtins.SELECTED_BROKER = self.cb_broker.GetValue()
 			if old_msg_format != self.cb_msg_format.GetValue():
 				changes.append(_("Message format"))
 			if old_broker != self.cb_broker.GetValue():
@@ -1463,7 +1463,7 @@ class EditorPanel(wx.Panel):
 	""" Editor preferences panel with modern UI
 	"""
 
-	EDITORS = {
+	EDITORS = {  # noqa: RUF012
 		'spyder': {
 			'name': 'Spyder',
 			'description': _('Scientific Python Development Environment'),
@@ -1498,7 +1498,7 @@ class EditorPanel(wx.Panel):
 		# Local editor checkbox
 		self.cb = wx.CheckBox(self, wx.NewIdRef(), 
 							 _('Use DEVSimPy built-in code editor'))
-		self.cb.SetValue(LOCAL_EDITOR)
+		self.cb.SetValue(LOCAL_EDITOR) # noqa: F821 # type: ignore
 		self.cb.SetToolTip(
 			_("Use the integrated editor for Python files.\n"
 			  "Note: Code modification during simulation is disabled with this option."))
@@ -1536,12 +1536,12 @@ class EditorPanel(wx.Panel):
 		self.choice = wx.Choice(self, wx.NewIdRef(), choices=choices)
 		
 		# Set selection based on config
-		if EXTERNAL_EDITOR_NAME == "" or not choices:
+		if EXTERNAL_EDITOR_NAME == "" or not choices: # noqa: F821 # type: ignore
 			self.choice.SetSelection(0 if choices else wx.NOT_FOUND)
 		else:
 			# Find the editor in EDITORS dict
 			for idx, (key, info) in enumerate(EditorPanel.EDITORS.items()):
-				if key == EXTERNAL_EDITOR_NAME or info['name'] == EXTERNAL_EDITOR_NAME:
+				if key == EXTERNAL_EDITOR_NAME or info['name'] == EXTERNAL_EDITOR_NAME: # noqa: F821 # type: ignore
 					if idx < len(choices):
 						self.choice.SetSelection(idx)
 					break
@@ -1749,7 +1749,7 @@ class EditorPanel(wx.Panel):
 							   "Please install {} manually using pip.").format(selected)
 						icon = wx.ICON_ERROR
 					
-				except Exception as e:
+				except Exception as e:  # noqa: BLE001
 					wx.EndBusyCursor()
 					msg = _("Error during installation:\n{}").format(str(e))
 					icon = wx.ICON_ERROR
@@ -1767,8 +1767,8 @@ class EditorPanel(wx.Panel):
 		
 	def OnApply(self, evt):
 		"""Apply changes"""
-		old_local = getattr(builtins, 'LOCAL_EDITOR')
-		old_external = getattr(builtins, 'EXTERNAL_EDITOR_NAME')
+		old_local = builtins.LOCAL_EDITOR
+		old_external = builtins.EXTERNAL_EDITOR_NAME
 		
 		new_local = self.cb.IsChecked()
 		
@@ -1783,8 +1783,8 @@ class EditorPanel(wx.Panel):
 					break
 		
 		# Apply changes
-		setattr(builtins, 'LOCAL_EDITOR', new_local)
-		setattr(builtins, 'EXTERNAL_EDITOR_NAME', new_external)
+		builtins.LOCAL_EDITOR = new_local
+		builtins.EXTERNAL_EDITOR_NAME = new_external
 		
 		# Show summary
 		changes = []
@@ -1810,7 +1810,7 @@ class AIPanel(wx.Panel):
 	""" AI Integration Panel with modern UI
 	"""
 
-	AI_PROVIDERS = {
+	AI_PROVIDERS = {  # noqa: RUF012
 		'': {
 			'name': _('None'),
 			'description': _('No AI assistant selected'),
@@ -2094,19 +2094,19 @@ class AIPanel(wx.Panel):
 				self.status_indicator.SetForegroundColour(wx.Colour(0, 128, 0))
 				
 				wx.MessageBox(
-					_(f"{self.selected_ia} is ready for code generation!"),
+					_(f"{self.selected_ia} is ready for code generation!"),  # noqa: INT001
 					_("Connection Successful"),
 					wx.OK | wx.ICON_INFORMATION
 				)
 			else:
-				raise Exception(_("Failed to create adapter"))
+				raise Exception(_("Failed to create adapter"))  # noqa: TRY002
 				
-		except Exception as e:
+		except Exception as e:  # noqa: BLE001
 			self.status_indicator.SetLabel(_("Failed"))
 			self.status_indicator.SetForegroundColour(wx.Colour(255, 0, 0))
 			
 			wx.MessageBox(
-				_(f"Connection failed:\n{str(e)}"),
+				_(f"Connection failed:\n{e!s}"),  # noqa: INT001
 				_("Connection Error"),
 				wx.OK | wx.ICON_ERROR
 			)
@@ -2118,7 +2118,7 @@ class AIPanel(wx.Panel):
 		"""
 		selected_name = self.choice_ia.GetValue()
 		
-		for key, info in AIPanel.AI_PROVIDERS.items():
+		for info in AIPanel.AI_PROVIDERS.values():
 			if info['name'] == selected_name and info['url']:
 				wx.LaunchDefaultBrowser(info['url'])
 				break
@@ -2132,7 +2132,7 @@ class AIPanel(wx.Panel):
 		for key, info in AIPanel.AI_PROVIDERS.items():
 			if info['name'] == selected_name:
 				self.selected_ia = key
-				setattr(builtins, 'SELECTED_IA', key)
+				builtins.SELECTED_IA = key
 				break
 		
 		# Reset status
@@ -2147,8 +2147,7 @@ class AIPanel(wx.Panel):
 		try:
 			result = subprocess.run(
 				["ollama", "list"],
-				stdout=subprocess.PIPE,
-				stderr=subprocess.PIPE,
+				capture_output=True,
 				text=True,
 				check=True
 			)
@@ -2187,8 +2186,8 @@ class AIPanel(wx.Panel):
 		""" Load AI settings from builtins
 		"""
 		# Initialize builtins with AI info
-		setattr(builtins, "SELECTED_IA", getattr(builtins, "SELECTED_IA", ""))
-		setattr(builtins, "PARAMS_IA", getattr(builtins, "PARAMS_IA", {}))
+		builtins.SELECTED_IA = getattr(builtins, "SELECTED_IA", "")
+		builtins.PARAMS_IA = getattr(builtins, "PARAMS_IA", {})
 		
 		# Default parameters
 		builtins.PARAMS_IA.setdefault('CHATGPT_API_KEY', '')
@@ -2238,12 +2237,12 @@ class AIPanel(wx.Panel):
 		
 		# Update selected AI
 		if getattr(builtins, "SELECTED_IA", "") != selected_key:
-			setattr(builtins, "SELECTED_IA", selected_key)
+			builtins.SELECTED_IA = selected_key
 		
 		# Update provider-specific settings
 		if selected_key == "ChatGPT":
 			new_api_key = self.api_key_ctrl.GetValue()
-			if getattr(builtins, 'PARAMS_IA').get('CHATGPT_API_KEY') != new_api_key:
+			if builtins.PARAMS_IA.get('CHATGPT_API_KEY') != new_api_key:
 				builtins.PARAMS_IA['CHATGPT_API_KEY'] = new_api_key
 				
 		elif selected_key == "Ollama":
@@ -2251,13 +2250,13 @@ class AIPanel(wx.Panel):
 			new_host = self.host_ctrl.GetValue()
 			new_model = self.model_choice.GetValue()
 			
-			if getattr(builtins, 'PARAMS_IA').get('OLLAMA_PORT') != new_port:
+			if builtins.PARAMS_IA.get('OLLAMA_PORT') != new_port:
 				builtins.PARAMS_IA['OLLAMA_PORT'] = new_port
 			
-			if getattr(builtins, 'PARAMS_IA').get('OLLAMA_HOST') != new_host:
+			if builtins.PARAMS_IA.get('OLLAMA_HOST') != new_host:
 				builtins.PARAMS_IA['OLLAMA_HOST'] = new_host
 			
-			if getattr(builtins, 'PARAMS_IA').get('OLLAMA_MODEL') != new_model:
+			if builtins.PARAMS_IA.get('OLLAMA_MODEL') != new_model:
 				builtins.PARAMS_IA['OLLAMA_MODEL'] = new_model
 
 
@@ -2279,13 +2278,13 @@ class Preferences(wx.Toolbook):
 
 		# make an image list using the LBXX images
 		il = wx.ImageList(25, 25)
-		for img in [load_and_resize_image("%s_pref.png"%a[0], 25, 25) for a in L]:
+		for img in [load_and_resize_image(f"{a[0]}_pref.png", 25, 25) for a in L]:
 			il.Add(img)
 		self.AssignImageList(il)
 
 		imageIdGenerator = iter(range(il.GetImageCount()))
 
-		for p, label in [("%sPanel%s"%(s,str(args)), _(s)) for s,args in L]:
+		for p, label in [(f"{s}Panel{args!s}", _(s)) for s,args in L]:
 			page = eval(p)
 			self.AddPage(page, label, imageId=next(imageIdGenerator))
 
@@ -2360,7 +2359,7 @@ class Preferences(wx.Toolbook):
 			parent.Layout()
 			parent.Refresh()
 			
-		except:
+		except:  # noqa: E722, S110
 			pass  # Silent fail
 
 
@@ -2375,30 +2374,30 @@ class Preferences(wx.Toolbook):
 
 	def PopulatePluginList(self):
 		"""Load plug-ins when their preferences page is opened."""
-		self.CheckList.Populate(list(os.walk(PLUGINS_PATH)))
+		self.CheckList.Populate(list(os.walk(PLUGINS_PATH))) # noqa: F821 # type: ignore
 
 	def OnAdd(self, event):
 		""" Add plug-in.
 		"""
 		wcd = 'All files (*)|*|Editor files (*.py)|*.py'
-		open_dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=DEVSIMPY_PACKAGE_PATH, defaultFile='', wildcard=wcd, style=wx.OPEN|wx.CHANGE_DIR)
+		open_dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=DEVSIMPY_PACKAGE_PATH, defaultFile='', wildcard=wcd, style=wx.OPEN|wx.CHANGE_DIR)  # type: ignore # noqa: F821, F823
 		if open_dlg.ShowModal() == wx.ID_OK:
 			filename = open_dlg.GetPath()
 			### sure is python file
 			if filename.endswith(('.py','pyc')):
 				### Insert item in list
-				basename,ext = os.path.splitext(os.path.basename(filename))
+				basename, _ = os.path.splitext(os.path.basename(filename))
 				root = os.path.dirname(filename)
 				self.CheckList.Importing(root, basename)
 				
 				### trying to copy file in plug-in directory in order to find it again when the plugins list is populate (depending on the __init__.py file)
 				try:
-					shutil.copy2(filename, PLUGINS_PATH)
-				except Exception as info:
+					shutil.copy2(filename, PLUGINS_PATH) # noqa: F821 # type: ignore
+				except Exception as info:  # noqa: BLE001
 					sys.stderr.write(_('ERROR: %s copy failed!\n%s')%(os.path.basename(filename), str(info)))
 				else:
 					### rewrite the new __init__.py file that contain the new imported plugin (basename) in order to populate the future generale plugins list
-					AddToInitFile(PLUGINS_PATH, [basename])
+					AddToInitFile(PLUGINS_PATH, [basename]) # noqa: F821 # type: ignore
 
 			else:
 				sys.stderr.write(_('ERROR: %s is not a python file.\nOnly python file can be added as plugin.')%(os.path.basename(filename)))
@@ -2412,26 +2411,26 @@ class Preferences(wx.Toolbook):
 		for i in range(self.CheckList.GetItemCount()):
 			if self.CheckList.IsSelected(i):
 				### Delete query
-				dial = wx.MessageDialog(self, _('Do you want to delete the selected %s plugins?'%self.CheckList.GetItemText(i)), _('Plugin MAnager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+				dial = wx.MessageDialog(self, _(f'Do you want to delete the selected {self.CheckList.GetItemText(i)} plugins?'), _('Plugin MAnager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)  # noqa: F823, INT001
 				if dial.ShowModal() == wx.ID_YES:
 					### for selected plug-ins
 				
 					module = self.CheckList.GetPyData(i)[0]
-					basename,ext = os.path.splitext(os.path.basename(module.__file__))
+					basename, _ = os.path.splitext(os.path.basename(module.__file__))
 
 					### delete item
 					self.CheckList.DeleteItem(i)
 
 					### TODO: remove also into __init__.py
 					### delete the selected plugin from__init__.py
-					DelToInitFile(PLUGINS_PATH, [basename])
+					DelToInitFile(PLUGINS_PATH, [basename]) # noqa: F821 # type: ignore
 
 					try:
 						#name, ext = os.path.splitext(module.__file__)
 						dlg = wx.MessageDialog(self, _('Do you want to remove the corresponding file %s?')%basename, _('Preference Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 						if dlg.ShowModal() == wx.ID_YES:
 							os.remove(module.__file__)			
-					except Exception:
+					except Exception:  # noqa: BLE001
 						sys.stderr.write(_('ERROR: plugin file not deleted!'))
 					else:
 						dlg.Destroy()	
@@ -2630,7 +2629,7 @@ class PreferencesGUI(wx.Frame):
 			)
 			dlg.ShowModal()
 			dlg.Destroy()
-		except Exception as e:
+		except Exception:  # noqa: BLE001
 			# Fallback
 			wx.MessageBox(
 				help_msg,

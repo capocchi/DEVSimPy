@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,7 +22,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import wx
+import wx  
 	
 from wx.adv import Wizard as wizmod
 wizmod.EVT_WIZARD_PAGE_CHANGED = wx.adv.EVT_WIZARD_PAGE_CHANGED
@@ -31,7 +31,7 @@ wizmod.EVT_WIZARD_CANCEL = wx.adv.EVT_WIZARD_CANCEL
 wizmod.EVT_WIZARD_FINISHED = wx.adv.EVT_WIZARD_FINISHED
 WizardPage = wx.adv.WizardPage
 
-import os
+import os  
 import sys
 import zipfile
 import wx.lib.filebrowsebutton as filebrowse
@@ -42,7 +42,7 @@ import inspect
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
 
-import Container
+import Container  
 import Components
 from AIAdapter import AdapterFactory
 from AIPrompterDialog import AIPrompterDialog
@@ -114,9 +114,9 @@ class %s(DomainBehavior):
 		''' Additional function which is lunched just before the end of the simulation.
 		'''
 		pass
-"""%(label,
+"""%(label,  # noqa: UP031
 	os.path.split(USERHOME)[-1],
-	datetime.datetime.now(),
+	datetime.datetime.now(),  # noqa: DTZ005
 	label,
 	label)
 
@@ -127,7 +127,7 @@ class %s(DomainBehavior):
 		'''
 		self.state = self.intTransition()
 		self.state = self.extTransition(inputs)
-		return self.getState()""" if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME else ''
+		return self.getState()""" if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME else '' # type: ignore  # noqa: F821
 
 	### Dynamic structure only for PyPDEVS
 	code += """
@@ -140,7 +140,7 @@ class %s(DomainBehavior):
 			but only for local simulation.
 		'''
 		# Notify parent of structural change
-		return True""" if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME else ''
+		return True""" if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME else '' # type: ignore  # noqa: F821
 
 	return code
 
@@ -162,9 +162,9 @@ class %s(DomainStructure):
 
 	def __init__(self):
 		DomainStructure.__init__(self)
-"""%(label,
+"""%(label,  # noqa: UP031
 	os.path.split(USERHOME)[-1],
-	datetime.datetime.now(),
+	datetime.datetime.now(),  # noqa: DTZ005
 	label)
 
 	### Dynamic structure only for PyPDEVS
@@ -177,7 +177,7 @@ class %s(DomainStructure):
 			but only for local simulation.
 		'''
 		### False if Top Level
-		return True""" if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME else ''
+		return True""" if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME else '' # type: ignore  # noqa: F821
 
 	return code
 
@@ -314,14 +314,14 @@ class Wizard(wizmod):
 		#if evt.GetDirection():  dir = "forward"
 		#else:                   dir = "backward"
 		#page = evt.GetPage()
-		pass
+		pass # noqa: PIE790
 
 	def on_page_changing(self, evt):
 		"""Executed before the page changes, so we might veto it."""
 		#if evt.GetDirection():  dir = "forward"
 		#else:                   dir = "backward"
 		#page = evt.GetPage()
-		pass
+		pass  # noqa: PIE790
 
 	def on_cancel(self, evt):
 		"""Cancel button has been pressed.  Clean up and exit without continuing."""
@@ -331,7 +331,7 @@ class Wizard(wizmod):
 	def on_finished(self, evt):
 		"""Finish button has been pressed.  Give the specified values
 		"""
-		pass
+		pass  # noqa: PIE790
 
 	def on_close(self, evt):
 		""" Close button has been pressed. Destroy the wizard.
@@ -350,10 +350,10 @@ class ModelGeneratorWizard(Wizard):
 		"""
 
 		if 'specific_domain_path' in kwargs:
-			domain_path = kwargs['specific_domain_path'] if kwargs['specific_domain_path'] else DOMAIN_PATH
+			domain_path = kwargs['specific_domain_path'] if kwargs['specific_domain_path'] else DOMAIN_PATH # type: ignore  # noqa: F821
 			del kwargs['specific_domain_path']
 		else:
-			domain_path = DOMAIN_PATH
+			domain_path = DOMAIN_PATH # type: ignore  # noqa: F821
 		
 		Wizard.__init__(self, *args, **kwargs)
 
@@ -439,7 +439,7 @@ class ModelGeneratorWizard(Wizard):
 			if inspect.isclass(cls):
 				
                 ### import are here because the simulator (PyDEVS or PyPDEVS) require it
-				from DomainInterface import DomainBehavior
+				from DomainInterface import DomainBehavior  
 				from DomainInterface import DomainStructure
 				if not (issubclass(cls, DomainBehavior) or issubclass(cls, DomainStructure)):
 					dlg = wx.MessageDialog(parent, _('The python file must contain a class that inherit of DomainBehavior or DomainStructure master class.\n Please choose a correct python file.'), _('Wizard Manager'), wx.ID_OK|wx.ICON_ERROR)
@@ -474,8 +474,8 @@ class ModelGeneratorWizard(Wizard):
 		bt_ai.Disable()
 
 		# filebrowse properties
-		fb1 = filebrowse.FileBrowseButton(page2, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='Python File (*.py)|*.py|Compliled Python File (*.pyc)|*.pyc', toolTip=bt5.GetToolTip().GetTip(), changeCallback=python_path_call_back)
-		fb12 = filebrowse.FileBrowseButton(page2, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='plugins.py', toolTip=bt51.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
+		fb1 = filebrowse.FileBrowseButton(page2, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='Python File (*.py)|*.py|Compliled Python File (*.pyc)|*.pyc', toolTip=bt5.GetToolTip().GetTip(), changeCallback=python_path_call_back) # type: ignore  # noqa: F821
+		fb12 = filebrowse.FileBrowseButton(page2, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='plugins.py', toolTip=bt51.GetToolTip().GetTip(), changeCallback=plugin_path_call_back) # type: ignore  # noqa: F821
 		fb1.Enable(False)
 		fb12.Enable(False)
 
@@ -534,8 +534,8 @@ class ModelGeneratorWizard(Wizard):
 		bt61.SetValue(True)
 
 		# filebrowse properties
-		fb4 = filebrowse.FileBrowseButton(page3, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='Python File (*.py)|*.py|Compliled Python File (*.pyc)|*.pyc', toolTip=bt6.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
-		fb41 = filebrowse.FileBrowseButton(page3, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='plugins.py', toolTip=bt61.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
+		fb4 = filebrowse.FileBrowseButton(page3, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='Python File (*.py)|*.py|Compliled Python File (*.pyc)|*.pyc', toolTip=bt6.GetToolTip().GetTip(), changeCallback=plugin_path_call_back) # type: ignore  # noqa: F821
+		fb41 = filebrowse.FileBrowseButton(page3, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='plugins.py', toolTip=bt61.GetToolTip().GetTip(), changeCallback=plugin_path_call_back) # type: ignore  # noqa: F821
 		fb4.Enable(False)
 		fb41.Enable(False)
 		vbox3.AddMany([ (wx.StaticText(page3, wx.NewIdRef(), _('Label')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
@@ -571,7 +571,7 @@ class ModelGeneratorWizard(Wizard):
 
 		# Create a page 4_2
 		page4_2 = CustomPage(self, _('Finish'))
-		init =  os.path.join(domain_path, "%s.cmd"%vbox3.GetItem(1).GetWindow().GetValue())
+		init =  os.path.join(domain_path, f"{vbox3.GetItem(1).GetWindow().GetValue()}.cmd")
 		# save filebrowse
 		fb3 = filebrowse.FileBrowseButton(	page4_2,
 											wx.NewIdRef(),
@@ -686,7 +686,7 @@ class ModelGeneratorWizard(Wizard):
 
 			if selected_ia:
 				### load the AI params
-				param = PARAMS_IA
+				param = PARAMS_IA # type: ignore  # noqa: F821
 				
 				adapter = AdapterFactory.get_adapter_instance(parent=None, params=param)
 				
@@ -732,12 +732,12 @@ class ModelGeneratorWizard(Wizard):
 			fb41.Enable(not evt.GetEventObject().GetValue())
 			
 		def onCbId1(evt):
-			"""
+			""" CbId1
 			"""
 			spin_id1.Enable(not evt.GetEventObject().GetValue())
 			
 		def onCbId2(evt):
-			"""
+			""" CbId2
 			"""
 			spin_id2.Enable(not evt.GetEventObject().GetValue())
 
@@ -787,13 +787,13 @@ class ModelGeneratorWizard(Wizard):
 				vbox2.GetItem(7).GetWindow().SetValue(1)
 
 		def OnInputAMDLabel(evt):
-			fb2.SetValue(os.path.join(domain_path, "%s.amd"%evt.GetString()))
+			fb2.SetValue(os.path.join(domain_path, f"{evt.GetString()}.amd"))
 			
 		# def OnInputAMDLabelGPT(evt):
 		# 	fb_gpt.SetValue(os.path.join(domain_path, "%s.amd"%evt.GetString()))
 
 		def OnInputCMDLabel(evt):
-			fb3.SetValue(os.path.join(domain_path, "%s.cmd"%evt.GetString()))
+			fb3.SetValue(os.path.join(domain_path, f"{evt.GetString()}.cmd"))
 
 		# Binding
 		bt1.Bind(wx.EVT_RADIOBUTTON, onBt1Click)
@@ -855,7 +855,7 @@ class ModelGeneratorWizard(Wizard):
 			textCtrl = gridSizer.GetItem(1).GetWindow()
 			self.label = textCtrl.GetValue()
 			self.id = gridSizer.GetItem(3).GetWindow().GetValue()
-			self.python_path = os.path.join(DOMAIN_PATH, 'Basic', self.type+'.py')
+			self.python_path = os.path.join(DOMAIN_PATH, 'Basic', self.type+'.py') # type: ignore  # noqa: F821
 
 		else:
 
@@ -924,8 +924,8 @@ class ModelGeneratorWizard(Wizard):
 				### create the model on the disk
 				try:
 					zout = zipfile.ZipFile(self.model_path, "w")
-				except Exception as info:
-					sys.stdout.write(_("ERROR: Enable to create Zip file in Wizard GUI (%s)"%info))
+				except Exception as info:  # noqa: BLE001
+					sys.stdout.write(_(f"ERROR: Enable to create Zip file in Wizard GUI ({info})"))  # noqa: INT001
 					return False
 				else:
 					if self.python_path == '':
@@ -972,7 +972,7 @@ class ModelGeneratorWizard(Wizard):
 				zin = zipfile.ZipFile(self.model_path, 'r')
 				info_list = zin.infolist()
 				### si le nom du fichier python py est le meme que le self.makeConnectionShape(sn, tn) nom du modèle .amd ou .cmd
-				name = "%s.py"%os.path.splitext(os.path.basename(self.model_path))[0]
+				name = f"{os.path.splitext(os.path.basename(self.model_path))[0]}.py"
 				if name in info_list:
 					self.python_path = os.path.join(self.model_path, name)
 				### sinon on cherche le .py dans le modèle en excluant plugins.py

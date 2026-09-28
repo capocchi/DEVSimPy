@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 """
     DirTreeCtrl
@@ -29,7 +29,7 @@
         
 """
 
-import wx
+import wx  
 import os
 import sys
 
@@ -85,13 +85,13 @@ class DirTreeCtrl(wx.TreeCtrl):
             if os.path.exists(filepath):
                 key = self.imagelist.Add(wx.Bitmap(filepath, wxBitmapType))
                 self.iconentries[name] = key
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             sys.stdout.write(e)
         
     def SetDeleteOnCollapse(self, selection):
         """Sets the tree option to delete leaf items when the node is
         collapsed. Will slow down the tree slightly but will probably save memory."""
-        if type(selection) == type(True):
+        if type(selection) == bool:
             self.DELETEONCOLLAPSE = selection
             
     def SetRootDir(self, directory):
@@ -102,7 +102,7 @@ class DirTreeCtrl(wx.TreeCtrl):
 
         # check if directory exists and is a directory
         if not os.path.isdir(directory):
-            raise Exception("%s is not a valid directory" % directory)
+            raise Exception(f"{directory} is not a valid directory")  # noqa: TRY002
         
         # delete existing root, if any
         self.DeleteAllItems()
@@ -125,7 +125,7 @@ class DirTreeCtrl(wx.TreeCtrl):
 
         # check if directory exists and is a directory
         if not os.path.isdir(directory):
-            raise Exception("%s is not a valid directory" % directory)
+            raise Exception(f"{directory} is not a valid directory")  # noqa: TRY002
 
         # check if node already has children
         if self.GetChildrenCount(item) == 0:
@@ -197,7 +197,7 @@ class DirTreeCtrl(wx.TreeCtrl):
 
                                 # return new key
                                 return iconkey
-                except:
+                except:  # noqa: E722
                     return self.iconentries['default']
                         
             # already have icon, return key
@@ -216,7 +216,7 @@ class DirTreeCtrl(wx.TreeCtrl):
                 if icon.IsOk():
                     return self.imagelist.AddIcon(icon)
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 sys.stdout.write(e)
                 return self.iconentries['default']
 

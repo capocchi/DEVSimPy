@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
+
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Factory.py ---
@@ -22,14 +23,14 @@
 
 import builtins
 
-if GUI_FLAG:
+if GUI_FLAG: # type: ignore  # noqa: F821
 	import wx
 	_ = wx.GetTranslation
 else:
 	import gettext
 	_ = gettext.gettext
 
-import threading
+import threading  
 import sys
 import traceback
 import os
@@ -62,7 +63,7 @@ def get_process_memory():
 	mem_bytes = process.memory_info().rss
 	return float(mem_bytes)/1048576 # Convert bytes to Mb
 
-def elapsed_since(start_time):
+def elapsed_since(start_time):  # noqa: F811
 	# Fonction pour calculer le temps écoulé
 	return time.time() - start_time
 
@@ -77,18 +78,18 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 			
 	# 		from DEVSKernel.PyDEVS.simulator import Simulator as BaseSimulator
 	
-	module_name = f'DEVSKernel.{DEFAULT_DEVS_DIRNAME}.simulator'
+	module_name = f'DEVSKernel.{DEFAULT_DEVS_DIRNAME}.simulator' # type: ignore
 
 	try:
 		module = importlib.import_module(module_name)
 		BaseSimulator = getattr(module, 'Simulator', None)
 	except (ImportError, AttributeError) as e:
-		sys.stderr.write(_(f"\nFailed to load simulator from {module_name}: {e}\n"))
+		sys.stderr.write(_(f"\nFailed to load simulator from {module_name}: {e}\n"))  # noqa: INT001
 		return None
 
 
 	class Simulator(BaseSimulator):
-		"""
+		""" Simulator class which is a wrapper for the BaseSimulator class.
 		"""
 		###
 		def __init__(self, model):
@@ -167,14 +168,14 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 			### TODO: isinstance(self, PyDEVSSimulator)
 			
 			# Get the strategy dictionary for the current DEVS package
-			strategy_dict = getattr(builtins, f'{DEFAULT_DEVS_DIRNAME.upper()}_SIM_STRATEGY_DICT')
+			strategy_dict = getattr(builtins, f'{DEFAULT_DEVS_DIRNAME.upper()}_SIM_STRATEGY_DICT') # type: ignore
 			
 			# Check if strategy_dict is nested (for BrokerDEVS) or flat (for PyDEVS/PyPDEVS)
 			if isinstance(strategy_dict.get(self.strategy, {}), dict):
 				# Nested structure (BrokerDEVS): strategy points to message format
 				# Get the selected broker and message format from builtins
 				msg_format = getattr(builtins, 'SELECTED_MESSAGE_FORMAT', self.strategy)
-				broker = getattr(builtins, 'SELECTED_BROKER', list(strategy_dict.get(msg_format, {}).keys())[0] if strategy_dict.get(msg_format) else 'Kafka')
+				broker = getattr(builtins, 'SELECTED_BROKER', list(strategy_dict.get(msg_format, {}).keys())[0] if strategy_dict.get(msg_format) else 'Kafka')  # noqa: RUF015
 				cls_str = eval(strategy_dict[msg_format][broker])
 			else:
 				# Flat structure (PyDEVS/PyPDEVS): strategy points directly to class string
@@ -186,7 +187,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 				### traceback exception engine for .py file
 				try:
 					self.simulate(self.model.FINAL_TIME)
-				except Exception as info:
+				except Exception:  # noqa: BLE001
 					self.terminate(error=True, msg=sys.exc_info())
 
 		def terminate(self, error = False, msg = None):
@@ -208,36 +209,36 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 					sys.stderr.write('Traceback: ' + str(etb) + '\n')
 
 					### only for displayed application (-nogui)
-					if GUI_FLAG:
+					if GUI_FLAG: # type: ignore
 						wx.CallAfter(pub.sendMessage,"error", msg=msg)
 
 						### error sound
-						wx.CallAfter(playSound, SIMULATION_ERROR_SOUND_PATH)
+						wx.CallAfter(playSound, SIMULATION_ERROR_SOUND_PATH) # type: ignore
 				else:
 					for m in [a for a in list(self.model.getFlatComponentSet().values()) if hasattr(a, 'finish')]:
 						### call finished method
-						if GUI_FLAG:
+						if GUI_FLAG: # type: ignore
 							try:
-								pub.sendMessage('%d.finished'%(id(m)))
-							except Exception:
+								pub.sendMessage('%d.finished'%(id(m)))  # noqa: UP031
+							except Exception:  # noqa: BLE001
 								try:
-									pub.sendMessage('%d.finished'%(id(m)), msg="")
-								except:
+									pub.sendMessage('%d.finished'%(id(m)), msg="")  # noqa: UP031
+								except:  # noqa: E722, S110
 									pass
 						else:
 							m.finish(None)
 
 					### resionly for displayed application (-nogui)
-					if GUI_FLAG:
+					if GUI_FLAG: # type: ignore
 						if self.prof:
 							try:
 								NotificationMessage(_("Information"), _("Profiling report is available on Options->Profile"), None, timeout=5)
-							except:
+							except:  # noqa: E722
 								NotificationMessage("Information", "Profiling report is available on Options->Profile", None, timeout=5)
 
-						wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
+						wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH) # type: ignore
 
-			if not GUI_FLAG:
+			if not GUI_FLAG: # type: ignore
 				elapsed_time = elapsed_since(self.start_time)
 				mem_after = get_process_memory()
 

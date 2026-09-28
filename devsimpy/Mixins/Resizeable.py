@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Resizeable.py ---
@@ -28,4 +28,4 @@ class Resizeable:
 	def __init__(self):
 		""" Constructor.
 		"""
-		pass
+		pass  # noqa: PIE790

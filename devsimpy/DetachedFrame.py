@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,7 +22,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import sys
+import sys  
 import builtins
 import wx
 
@@ -30,7 +30,7 @@ _ = wx.GetTranslation
 
 wx.ST_SIZEGRIP = wx.STB_SIZEGRIP
 
-import Container
+import Container  
 import Menu
 import PrintOut
 from Utilities import getTopLevelWindow, load_and_resize_image, FixedList
@@ -45,7 +45,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 	""" Detached Frame including a diagram.
 	"""
 
-	def __init__(self, parent=None, ID=wx.NewIdRef(), title="", diagram=None, name=""):
+	def __init__(self, parent=None, ID=wx.NewIdRef(), title="", diagram=None, name=""):  # noqa: B008
 		""" Constructor.
 
 			@parent : window parent of the frame
@@ -94,7 +94,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		try:
 			self.canvas.stockUndo = self.diagram.parent.stockUndo
 			self.canvas.stockRedo = self.diagram.parent.stockRedo
-		except Exception:
+		except Exception:  # noqa: BLE001
 			diagram.SetParent(self.canvas)
 			self.canvas.stockUndo = FixedList(getattr(builtins, 'NB_HISTORY_UNDO', 5))
 			self.canvas.stockRedo = FixedList(getattr(builtins, 'NB_HISTORY_UNDO', 5))
@@ -167,7 +167,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			#toolbar.EnableTool(Menu.ID_SAVE, False)
 			#toolbar.EnableTool(Menu.ID_SAVEAS, False)
 			toolbar.EnableTool(Menu.ID_SIM_DIAGRAM, False)
-			toolbar.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in DEFAULT_DEVS_DIRNAME)
+			toolbar.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in DEFAULT_DEVS_DIRNAME) # type: ignore  # noqa: F821
 		else:
 			toolbar.EnableTool(Menu.ID_SAVEAS, False)
 
@@ -217,7 +217,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		self.canvas.ApplyRedo()
 
 	def OnStayOnTop(self, event):
-		"""
+		""" Toggle the stay on top option of the detached frame.
 		"""
 
 		if self.GetWindowStyle()==self.default_style:
@@ -247,7 +247,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.transparent = 140
 			try:
 				self.SetTransparent(self.transparent)
-			except:
+			except:  # noqa: E722
 				sys.stdout.write(_("No transparency"))
 		event.Skip()
 
@@ -258,7 +258,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.transparent = wx.ALPHA_OPAQUE
 			try:
 				self.SetTransparent(self.transparent)
-			except:
+			except:  # noqa: E722
 				sys.stderr.write(_("No transparency"))
 		event.Skip()
 
@@ -276,7 +276,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			try:
 				canvas.OnLeftDown(event)
 				canvas.OnLeftUp(event)
-			except:
+			except:  # noqa: E722, S110
 				pass
 
 		canvas.Refresh()

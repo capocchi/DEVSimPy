@@ -1,16 +1,15 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
-import sys
+import sys  
 import os
 
 import Container
 from Utilities import getOutDir
 
-def makeJoin(diagram = None, addInner = [], liaison = [], model = {}, bool = False, x = [40], y = [40], labelEnCours = ""):
+def makeJoin(diagram = None, addInner = [], liaison = [], model = {}, bool = False, x = [40], y = [40], labelEnCours = ""):  # noqa: B006
+	""" Make the join of a diagram and its components recursively. It is used to generate the DEVS configuration file for visualization on web site.
 	"""
-	"""
-	# print "--------------------------------------"
-	#Largeurs et hauteurs d'un modele de base
+
 	dim_m_width = 100
 	dim_m_height = 60
 
@@ -84,7 +83,7 @@ def makeAddInner(c, addInner):
 		shapeList = c.GetShapeList()
 		for s in shapeList:
 			#Si il s'agit d'un modele atom ou couple, alors on l'ajoute a notre liste addInner
-			if (isinstance(s, Container.CodeBlock) or isinstance(s, Container.ContainerBlock)):
+			if (isinstance(s, Container.CodeBlock) or isinstance(s, Container.ContainerBlock)):  # noqa: SIM101
 				addInner.append(str(c.label.replace(' ', '_')+".addInner("+s.label.replace(' ', '_')+");"))
 	return addInner
 '''
@@ -133,10 +132,7 @@ def typeDefine(comp):
 	return type
 
 def exist(dico,label):
-	if label in list(dico.keys()):
-		return True
-	else:
-		return False
+	return label in list(dico.keys())
 
 def constructModel(type, name, x, y, dim_width, dim_height, iPorts, oPorts):
 	if (type == "atom"):
@@ -245,10 +241,8 @@ def makeDEVSConf(model, liaison, addInner, filename):
 	m_y = 0
 	labelDiagramme = ""
 	for m in model:
-		if model[m][forme_model["x"]] > m_x:
-			m_x = model[m][forme_model["x"]]
-		if model[m][forme_model["y"]] > m_y:
-			m_y = model[m][forme_model["y"]]
+		m_x = max(m_x, model[m][forme_model["x"]])
+		m_y = max(m_y, model[m][forme_model["y"]])
 		if model[m][forme_model["y"]] == 20 and model[m][forme_model["x"]] == 20:
 			labelDiagramme = m
 			var = model[m][forme_model["var"]]
@@ -314,7 +308,7 @@ def makeDEVSConf(model, liaison, addInner, filename):
 	try:
 		with open(fn, "wb") as f:
 			f.write(text.encode("utf-8"))
-	except Exception as info:
-		sys.stdout.write("%s file not %s.\n"%(fn, 'updated' if update else 'completed'))
+	except Exception:  # noqa: BLE001
+		sys.stdout.write("{} file not {}.\n".format(fn, 'updated' if update else 'completed'))
 	else:
-		sys.stdout.write("%s file %s.\n"%(fn, 'updated' if update else 'completed'))
+		sys.stdout.write("{} file {}.\n".format(fn, 'updated' if update else 'completed'))

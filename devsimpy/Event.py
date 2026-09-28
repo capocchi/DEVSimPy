@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 import wx
+
 
 class LockEvent(wx.PyCommandEvent):
 	""" Lock Event

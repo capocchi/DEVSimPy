@@ -5,10 +5,10 @@ Usage:
     python test_htmlwindow.py --autoclose 10  # Auto-close after 10s delay
 """
 
-from ApplicationController import TestApp
+from ApplicationController import TestApp  
 
 # import after ApplicationController that inits sys.path ot avoid this import
-from HtmlWindow import HtmlFrame
+from HtmlWindow import HtmlFrame # type: ignore
 
 # Run the test
 app = TestApp(0)

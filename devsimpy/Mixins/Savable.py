@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Savable.py --- Class based on pickle module and dedicated to save and load components.
@@ -15,7 +15,7 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-import os
+import os  
 import sys
 import pickle
 import zipfile
@@ -39,28 +39,28 @@ required_libs = ['yaml','ruamel']
 for lib_name in required_libs:
     try:
         importlib.import_module(lib_name)
-    except:
-        subprocess.run(f'pip install {lib_name}'.split())
+    except:  # noqa: E722
+        subprocess.run(f'pip install {lib_name}'.split())  # noqa: PLW1510
 
 try:
-	import yaml
-	setattr(builtins,'YAML_IMPORT', True)
-except ImportError as info:
-	setattr(builtins,'YAML_IMPORT', False)
+	import yaml  # noqa: F401
+	setattr(builtins,'YAML_IMPORT', True)  # noqa: B010
+except ImportError:
+	builtins.YAML_IMPORT = False
 	sys.stdout.write("yaml module was not found! Install it if you want to save model in yaml format.\n")
 
 try:
-	from ruamel.yaml import YAML
+	from ruamel.yaml import YAML  
 	import ruamel.yaml as ruamel
-	setattr(builtins,'YAML_IMPORT', True)
-except ImportError as info:
+	builtins.YAML_IMPORT = True
+except ImportError:
 	try:
-		import ruamel_yaml as ruamel
-	except ImportError as info:
-		setattr(builtins,'YAML_IMPORT', False)
+		import ruamel_yaml as ruamel # type: ignore  
+	except ImportError:
+		builtins.YAML_IMPORT = False
 		sys.stdout.write("ruamel.yaml module was not found! Install it if you want to save model in yaml format.\n")
 
-from tempfile import gettempdir
+from tempfile import gettempdir  
 
 from Decorators import BuzyCursorNotification, StatusBarNotification, cond_decorator
 from Utilities import itersubclasses, getTopLevelWindow, NotificationMessage
@@ -102,7 +102,7 @@ class PickledCollection(list):
 		"""
 		yield from self.pickled_obj
 
-class DumpBase(object):
+class DumpBase(object):  # noqa: UP004
 	""" DumpBase class.
 	"""
 
@@ -110,7 +110,7 @@ class DumpBase(object):
 	WhiteList = ('.cmd','.amd', '.dsp', '.js', '.json', '.xml', '.yaml', '.yml', '.tar','.zip','.rar','.7zip','.tar','.gz','.7z','.s7z','.ace','.afa','.alz','.apk','.arc','.arj','.ba','.bh','.cab','.cfs','.cpt','.dra','.dd','.dgc','.dmg','.gca','.ha','hki.','.ice','.j','.kgb','.lzh','.lha','.lzx','.pak','.partimg','.paq6','.paq7','.paq8','.pea','.pim','.pit','.qda','.rk','.sda','.sea','.sen','.sfx','.sit','.sitx','.sqx','.tgz','.Z','.bz2','.tbz2','.lzma','.tlz','.uc','.uc0','.uc2','.ucn','.ur2','.ue2','.uca','.uha','.wim','.xar','.xp3','.yz1','.zipx','.zoo','.zz','.rz','.sfark')
 
 	### Dict of tuples extension/class
-	DB = {}
+	DB = {}  # noqa: RUF012
 
 	### extension is in whiteList
 	@staticmethod
@@ -153,19 +153,19 @@ class DumpBase(object):
 	def Load(self, filename):
 		"""Retrieve data from the file source.
 		"""
-		pass
+		pass  # noqa: PIE790
 
 	def Save(self, filename):
 		"""Save the data object to the file.
 		"""
-		pass
+		pass  # noqa: PIE790
 
 ###-----------------------------------------------------------
 class DumpZipFile(DumpBase):
 	""" For save .amd or cmd file
 	"""
 
-	ext = [".amd", ".cmd"]
+	ext = [".amd", ".cmd"]  # noqa: RUF012
 
 	def Save(self, obj_dumped, fileName=None) -> bool:
 		""" 
@@ -185,7 +185,7 @@ class DumpZipFile(DumpBase):
 		if hasattr(obj_dumped, 'args'):
 			try:
 				obj_dumped.args = Components.GetArgs(Components.GetClass(obj_dumped.python_path))
-			except Exception as error:
+			except Exception as error:  # noqa: BLE001
 				sys.stderr.write(f"Problem updating args for '{fileName}': {error}\n")
 				return False
 
@@ -202,7 +202,7 @@ class DumpZipFile(DumpBase):
 			sys.stderr.write(f"Problem saving '{fileName}': {error}\n{tb}")
 			return False
 		
-		except Exception as error:
+		except Exception as error:  # noqa: BLE001
 			tb = traceback.format_exc()
 			sys.stderr.write(f"Unexpected error while saving '{fileName}': {error}\n{tb}")
 			return False
@@ -236,7 +236,7 @@ class DumpZipFile(DumpBase):
 				mainW = getTopLevelWindow()
 				
 				# Si le chemin d'exportation n'est pas un sous-dossier de DOMAIN_PATH
-				if not os.path.commonpath([newExportPath, DOMAIN_PATH]).startswith(DOMAIN_PATH):
+				if not os.path.commonpath([newExportPath, DOMAIN_PATH]).startswith(DOMAIN_PATH): # type: ignore  # noqa: F821
 					
 					# Charger et mettre à jour la liste des chemins d'export
 					try:
@@ -261,7 +261,7 @@ class DumpZipFile(DumpBase):
 				sys.stderr.write(_("Problem saving (during the zip handling): %s -- %s\n") % (fileName, tb))
 				return False
 			
-			except Exception as error:
+			except Exception as error:  # noqa: BLE001
 				tb = traceback.format_exc()
 				NotificationMessage(_('Unexpected Error'), 
 									_("Unexpected problem saving (during the zip handling): %s -- %s\n") % (fileName, error), 
@@ -286,7 +286,7 @@ class DumpZipFile(DumpBase):
 			tb = traceback.format_exc()
 			sys.stderr.write(_("ERROR: Did not %s find in zip file %s --\n%s \n")%(data_file, str(fileName), str(tb)))
 			return info
-		except Exception as info:
+		except Exception as info:  # noqa: BLE001
 			tb = traceback.format_exc()
 			sys.stderr.write(_("Problem extracting: %s -- %s \n")%(str(fileName),str(tb)))
 			return info
@@ -313,7 +313,7 @@ class DumpZipFile(DumpBase):
 			sys.stderr.write(_("2. Delete the corrupted file and recreate the model\n"))
 			sys.stderr.write(_("File location: %s\n") % path)
 			return info
-		except Exception as info:
+		except Exception as info:  # noqa: BLE001
 			tb = traceback.format_exc()
 			sys.stderr.write(_("Problem loading: %s -- %s \n")%(str(fileName), str(tb)))
 			return info
@@ -405,7 +405,7 @@ class DumpZipFile(DumpBase):
 						module = importer.load_module('plugins')
 					except ImportError as info:
 						tb = traceback.format_exc()
-						sys.stdout.write("%s\n"%str(tb))
+						sys.stdout.write(f"{tb!s}\n")
 						return info
 
 					for m in [e for e in [module.__dict__.get(a) for a in dir(module)] if not inspect.ismodule(e) and inspect.getmodule(e) is module]:
@@ -414,16 +414,16 @@ class DumpZipFile(DumpBase):
 						if name in obj.plugins:
 							try:
 								### new object to assaign
-								new = eval("module.%s"%name)
+								new = eval(f"module.{name}")
 								if inspect.isfunction(new):
 									setattr(obj, name, types.MethodType(new, obj))
 								elif inspect.isclass(new):
 									### TODO: monkey patchin !!! (most simple is to change python file for override class)
 									pass
 
-							except Exception as info:
+							except Exception as info:  # noqa: BLE001
 								tb = traceback.format_exc()
-								sys.stdout.write(_('plugins %s not loaded : %s\n'%(name,str(tb))))
+								sys.stdout.write(_(f'plugins {name} not loaded : {tb!s}\n'))  # noqa: INT001
 								return info
 
 		### restor method which was assigned to None before being pickled
@@ -442,7 +442,7 @@ class DumpZipFile(DumpBase):
 class DumpGZipFile(DumpBase):
 	""" For save .dsp file.
 	"""
-	ext = [".dsp"]
+	ext = [".dsp"]  # noqa: RUF012
 
 	def Save(self, obj_dumped, fileName=None):
 		""" 
@@ -461,7 +461,7 @@ class DumpGZipFile(DumpBase):
 			sys.stderr.write(f"\nProblem saving '{fileName}': {error}\n{tb}")
 			return False
 		
-		except Exception as error:
+		except Exception as error:  # noqa: BLE001
 			tb = traceback.format_exc()
 			sys.stderr.write(f"\nUnexpected error while saving '{fileName}': {error}\n{tb}")
 			return False
@@ -487,17 +487,17 @@ class DumpGZipFile(DumpBase):
 					tb = traceback.format_exc()
 					file_size = os.path.getsize(fileName)
 					sys.stderr.write(f"Problem loading: {fileName} -- The pickle file appears to be corrupted or truncated (size: {file_size} bytes).\n")
-					sys.stderr.write(f"This file cannot be loaded. Possible solutions:\n")
-					sys.stderr.write(f"1. Restore from a backup if available\n")
-					sys.stderr.write(f"2. Delete the corrupted file and recreate the diagram\n")
+					sys.stderr.write("This file cannot be loaded. Possible solutions:\n")
+					sys.stderr.write("1. Restore from a backup if available\n")
+					sys.stderr.write("2. Delete the corrupted file and recreate the diagram\n")
 					sys.stderr.write(f"Full traceback: {tb}\n")
 					return error
-				except Exception as error:
+				except Exception as error:  # noqa: BLE001
 					tb = traceback.format_exc()
 					sys.stderr.write(f"Problem loading: {fileName} -- {tb}\n")
 					return error
 		
-		except (OSError, IOError, gzip.BadGzipFile) as error:
+		except (OSError, gzip.BadGzipFile) as error:
 			tb = traceback.format_exc()
 			sys.stderr.write(f"Problem opening file '{fileName}': {tb}\n")
 			return error
@@ -522,7 +522,7 @@ class DumpGZipFile(DumpBase):
 class DumpYAMLFile(DumpBase):
 	""" For save .yaml file.
 	"""
-	ext = [".yaml", '.yml']
+	ext = [".yaml", '.yml']  # noqa: RUF012
 
 	def Save(self, obj_dumped, fileName=None) -> bool:
 		""" 
@@ -540,7 +540,7 @@ class DumpYAMLFile(DumpBase):
 			with open(fileName, 'w') as yf:
 				yaml.dump(PickledCollection(obj_dumped), stream=yf)
 		
-		except (AttributeError, Exception) as error:
+		except (AttributeError, Exception) as error:  # noqa: BLE001
 			sys.stderr.write(f"Warning: First attempt to save YAML failed, retrying in 'unsafe' mode: {error}\n")
 			
 			try:
@@ -550,12 +550,12 @@ class DumpYAMLFile(DumpBase):
 				with open(fileName, 'w') as yf:
 					yaml.dump(PickledCollection(obj_dumped), stream=yf)
 			
-			except (OSError, Exception) as error:
+			except (OSError, Exception) as error:  # noqa: BLE001
 				tb = traceback.format_exc()
 				sys.stderr.write(f"Problem saving YAML file '{fileName}': {error}\n{tb}")
 				return False
 
-		except (OSError, Exception) as error:
+		except (OSError, Exception) as error:  # noqa: B025, BLE001
 			tb = traceback.format_exc()
 			sys.stderr.write(f"Problem saving YAML file '{fileName}': {error}\n{tb}")
 			return False
@@ -577,16 +577,16 @@ class DumpYAMLFile(DumpBase):
 			yaml.register_class(PickledCollection)
 			with open(fileName, 'r') as yf:
 				return ruamel.load(yf, Loader=ruamel.Loader)
-		except AttributeError as info:
+		except AttributeError:
 			try:
 				yaml = ruamel.YAML(typ='unsafe', pure=True)
 				with open(fileName, 'r') as yf:
 					return yaml.load(yf)
-			except Exception as info:
+			except Exception:  # noqa: BLE001
 				tb = traceback.format_exc()
 				sys.stderr.write(_("\nProblem loading: %s -- %s\n")%(str(fileName),str(tb)))
 				return False
-		except Exception as info:
+		except Exception as info:  # noqa: BLE001
 			exc_type, _, exc_tb = sys.exc_info()
 			fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
 			sys.stderr.write(_("Problem opening: %s -- description: %s / type: %s / name: %s / line: %s\n")%(str(fileName), info, exc_type, fname, exc_tb.tb_lineno))
@@ -612,7 +612,7 @@ class DumpYAMLFile(DumpBase):
 			# Ouvre et lit le fichier YAML
 			dsp = DumpYAMLFile.Open(fileName)
 
-		except Exception:
+		except Exception:  # noqa: BLE001
 			tb = traceback.format_exc()
 			sys.stderr.write(f"Problem loading file '{fileName}': {tb}\n")
 			return False
@@ -638,7 +638,7 @@ class DumpYAMLFile(DumpBase):
 class DumpJSONFile(DumpBase):
 	""" For save/load .json file.
 	"""
-	ext = [".json"]
+	ext = [".json"]  # noqa: RUF012
 
 	def Save(self, obj_dumped, fileName = None):
 		""" Save method.
@@ -670,7 +670,7 @@ class DumpJSONFile(DumpBase):
 	@staticmethod 
 	def Open(json_data, diagram=None, processed_blocks=None):
 		"""Open the JSON data and convert it into a Diagram instance."""
-		from Container import Diagram, ConnectionShape, CodeBlock, ContainerBlock, iPort, oPort
+		from Container import Diagram, ConnectionShape, CodeBlock, ContainerBlock, iPort, oPort  
 
 		# Initialize diagram and tracking sets
 		if not diagram:
@@ -773,7 +773,7 @@ class DumpJSONFile(DumpBase):
 class DumpJSFile(DumpBase):
 	""" For save .js file.
 	"""
-	ext = [".js"]
+	ext = [".js"]  # noqa: RUF012
 
 	def Save(self, obj_dumped, fileName = None):
 		""" Save method.
@@ -797,10 +797,10 @@ class DumpJSFile(DumpBase):
 class DumpXMLFile(DumpBase):
 	""" For save .xml file
 	"""
-	ext = [".xml"]
+	ext = [".xml"]  # noqa: RUF012
 
 	def Save(self, obj_dumped, fileName = None):
-		"""
+		""" Save method.
 		"""
 		assert(fileName.endswith(tuple(DumpXMLFile.ext)))
 
@@ -813,7 +813,7 @@ class DumpXMLFile(DumpBase):
 		return True
 
 ###-----------------------------------------------------------
-class Savable(object):
+class Savable:
 	""" Savable class that allows methods to save and load diagram into file.
 
 		cond_decorator is used to enable/diseable the cursor notification depending on the GUI/NO_GUI use of DEVsimPy.
@@ -846,7 +846,7 @@ class Savable(object):
 			sys.stdout.write(_("\nUnknown extension: %s")%fileName)
 			return False
 
-	@cond_decorator(GUI_FLAG, StatusBarNotification('Load'))
+	@cond_decorator(GUI_FLAG, StatusBarNotification('Load')) # type: ignore  # noqa: F821
 	def LoadFile(self, fileName = None):
 		""" Load object from fileName.
 		"""

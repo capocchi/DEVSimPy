@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Plugable.py ---
@@ -20,7 +20,7 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##-
 
-import sys
+import sys  
 import os
 import zipimport
 import types
@@ -30,7 +30,7 @@ import inspect
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
     
-import Decorators
+import Decorators  
 
 class Plugable:
 	""" Plugable Mixin.
@@ -48,7 +48,7 @@ class Plugable:
 
 			### change module name
 			old_plugin_name = 'plugins'
-			new_plugin_name = '%s.%s'%(os.path.basename(os.path.splitext(fileName)[0]), old_plugin_name)
+			new_plugin_name = f'{os.path.basename(os.path.splitext(fileName)[0])}.{old_plugin_name}'
 
 			### get code of plug-ins
 			code =  importer.get_code(old_plugin_name)
@@ -59,8 +59,8 @@ class Plugable:
 
 			### there is syntax error ?
 			try:
-				exec(code, temp.__dict__)
-			except Exception as info:
+				exec(code, temp.__dict__)  # noqa: S102
+			except Exception as info:  # noqa: BLE001
 				return info
 
 			return sys.modules[new_plugin_name]

@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 
-import wx
-
-
+import wx  
 import DragList
+
 from Utilities import load_and_resize_image
 
 

@@ -1,11 +1,12 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 import sys
+
 import wx
 
 _ = wx.GetTranslation
 
-from wxPyMail import SendMailWx
+from wxPyMail import SendMailWx  
 from Utilities import FormatTrace, EnvironmentInfo, GetActiveWindow, getTopLevelWindow
 
 ID_SEND = wx.NewIdRef()
@@ -94,7 +95,7 @@ def ExceptionHook(exctype, value, trace):
     if not ErrorDialog.REPORTER_ACTIVE:
         ErrorDialog(ftrace)
 
-class ErrorReporter(object):
+class ErrorReporter:
     """Crash/Error Reporter Service
     @summary: Stores all errors caught during the current session and
     is implemented as a singleton so that all errors pushed
@@ -122,7 +123,7 @@ class ErrorReporter(object):
         if self._first:
             object.__init__(self)
             self._first = False
-            self._sessionerr = list()
+            self._sessionerr = []
         else:
             pass
 
@@ -204,7 +205,7 @@ class ErrorDialog(BaseDialog):
         self.SetTitle(_("Error/Crash Reporter"))
 
         # Attributes
-        self.err_msg = "%s\n\n%s\n%s\n%s" % (EnvironmentInfo(), \
+        self.err_msg = "{}\n\n{}\n{}\n{}".format(EnvironmentInfo(), \
                                              "---- Traceback Info ----", \
                                              str(ErrorReporter().GetErrorStack()), \
                                              "---- End Traceback Info ----")

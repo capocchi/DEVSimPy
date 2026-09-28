@@ -1,4 +1,4 @@
-import os
+import os  
 import sys
 import builtins
 import logging
@@ -92,11 +92,11 @@ USER_SETTINGS = {
 # Check if the pypdevs241 directory is empty 
 # (not --recursive option when the devsimpy git has been cloned)
 path = os.path.join(DEVS_SIM_KERNEL_PATH, 'PyPDEVS', 'pypdevs241')
-if os.path.exists(path) and not len(os.listdir(path)) == 0:
+if os.path.exists(path) and not len(os.listdir(path)) == 0:  # noqa: SIM201
 	GLOBAL_SETTINGS['PYPDEVS_241_SIM_STRATEGY_DICT'] = {'classic': 'ClassicPyPDEVSSimStrategy', 'parallel': 'ParallelPyPDEVSSimStrategy'}
 	GLOBAL_SETTINGS['DEVS_DIR_PATH_DICT'].update({'PyPDEVS_241': os.path.join(path, 'src', 'pypdevs')})
 else:
-	sys.stdout.write("PyPDEVS Kernel in version 2.4.1 is not loaded.\nPlease install it in the directory %s using git (https://github.com/kdheepak/pypdevs.git)\n"%path)
+	sys.stdout.write(f"PyPDEVS Kernel in version 2.4.1 is not loaded.\nPlease install it in the directory {path} using git (https://github.com/kdheepak/pypdevs.git)\n")
 
 # All SETTINGS
 ALL_SETTINGS = GLOBAL_SETTINGS | USER_SETTINGS
@@ -121,7 +121,7 @@ def read_dev_sim_py_config_file_without_wx(path):
             try:
                 # essayer d'interpréter la valeur comme expression Python
                 config[key] = ast.literal_eval(value)
-            except Exception:
+            except Exception:  # noqa: BLE001
                 # si ce n'est pas une expression Python (ex: version=5.1.1)
                 config[key] = value
     return config
@@ -131,7 +131,7 @@ def UpdateBuiltins(new_settings=ALL_SETTINGS):
 	"""
     # Check if the new settings are valid
     if not isinstance(new_settings, dict):
-        raise ValueError("new_settings must be a dictionary")
+        raise ValueError("new_settings must be a dictionary")  # noqa: TRY004
 
     for key, value in new_settings.items():
             setattr(builtins, key, value)
@@ -143,8 +143,8 @@ def UpdateBuiltins(new_settings=ALL_SETTINGS):
     if os.path.exists(cfg_path):
         try:
             import wx
-            App = wx.App()
-        except Exception as e:
+            App = wx.App()  # noqa: F841
+        except Exception as e:  # noqa: BLE001
             sys.stdout.write(f"wx package not installed {e}.\nUser Settings ignored.")
         else:
              cfg = wx.FileConfig(localFilename = cfg_path)

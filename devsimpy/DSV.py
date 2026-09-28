@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
+
 """
 DSV.py - Cliff Wells, 2002
   Import/export DSV (delimiter separated values, a generalization of CSV).
@@ -114,10 +115,8 @@ To do:
 
 
 # import pre as re # sre was broken, appears okay now. Try this if there are problems.
-import re 
+import re  
 import copy
-#import exceptions
-import string
 # RedHat 8.0 (or rather GTK2?) sets LANG = en_us.UTF-8 and apparently some
 # older apps (including wxGTK) can't handle this.  The fix is to set LANG=C
 # before running the app.  Thanks to Ahmad Baitalmal for supplying this info.
@@ -159,7 +158,7 @@ def guessTextQualifier(input):
     
     regexp = re.compile('(?:(?:^|\n)(?P<b_quote>["\']).*?(?P=b_quote))|'
                         '(?:(?P<delim>.)(?P<quote>["\']).*?(?P=quote)(?=(?P=delim)|\n))|'
-                        '(?:(?P<e_quote>["\']).*?(?P=e_quote)$)', re.M | re.S)
+                        '(?:(?P<e_quote>["\']).*?(?P=e_quote)$)', re.M | re.S)  # noqa: FURB167
     matches = [i for i in regexp.findall(data) if reduce(lambda a, b: a + b, i)]
     if not matches: return None
     
@@ -207,7 +206,7 @@ def guessDelimiter(input, textQualifier = '"'):
 
     if textQualifier:
         # eliminate text inside textQualifiers
-        regexp = re.compile('%s(.*?)%s' % (textQualifier, textQualifier), re.S)
+        regexp = re.compile('%s(.*?)%s' % (textQualifier, textQualifier), re.S)  # noqa: FURB167, UP031
         subCode = compile("regexp.sub('', line)", '', 'eval')
     else:
         subCode = compile("line", '', 'eval')
@@ -251,13 +250,13 @@ def guessDelimiter(input, textQualifier = '"'):
         threshold = 0.9  # minimum consistency threshold
         while len(delims) == 0 and consistency >= threshold:
             for k, v in modeList:
-                if v[0] > 0 and v[1] > 0:
+                if v[0] > 0 and v[1] > 0:  # noqa: SIM102
                     if (v[1]/total) >= consistency:
                         delims[k] = v
             consistency -= 0.01
 
         if len(delims) == 1:
-            return list(delims.keys())[0]
+            return list(delims.keys())[0]  # noqa: RUF015
 
         # analyze another chunkLength lines
         start = end
@@ -269,14 +268,14 @@ def guessDelimiter(input, textQualifier = '"'):
     # while any character may be quoted, any delimiter that occurs as a
     # part of the data /must/ be quoted.
     if len(delims) > 1 and textQualifier is not None:
-        regexp = re.compile('%s(.*?)%s' % (textQualifier, textQualifier), re.S)
+        regexp = re.compile('%s(.*?)%s' % (textQualifier, textQualifier), re.S)  # noqa: FURB167, UP031
         for line in input:
             inQuotes = "".join(regexp.findall(line))
             for d in list(delims.keys()):
                 if not d in inQuotes:
                     del delims[d]
                 if len(delims) == 1:
-                    return list(delims.keys())[0]
+                    return list(delims.keys())[0]  # noqa: RUF015
     
     # if there's *still* more than one, fall back to a 'preferred' list
     if len(delims) > 1:
@@ -285,7 +284,7 @@ def guessDelimiter(input, textQualifier = '"'):
                 return d
             
     # finally, just return the first damn character in the list
-    return list(delims.keys())[0]
+    return list(delims.keys())[0]  # noqa: RUF015
 
 # ------------------------------------------------------------------------------
 def modeOfLengths(input):
@@ -348,8 +347,8 @@ def guessHeaders(input, columns = 0):
                 except OverflowError:
                     # a long int?
                     thisType = type(eval(row[col] + 'L'))
-                    thisType = type(0) # treat long ints as int
-            except:
+                    thisType = type(0) # treat long ints as int  # noqa: UP003
+            except:  # noqa: E722
                 # fallback to length of string
                 thisType = len(row[col])
 
@@ -362,15 +361,15 @@ def guessHeaders(input, columns = 0):
     # finally, compare results against first row and vote on whether it's a header
     hasHeader = 0
     for col, colType in list(columnTypes.items()):
-        if type(colType) == type(0): # it's a length
+        if type(colType) == type(0): # it's a length  # noqa: UP003
             if len(input[0][col]) != colType:
                 hasHeader += 1
             else:
                 hasHeader -= 1
         else: # attempt typecast
             try:
-                eval("%s(%s)" % (colType.__name__, input[0][col]))
-            except:
+                eval("%s(%s)" % (colType.__name__, input[0][col]))  # noqa: UP031
+            except:  # noqa: E722
                 hasHeader += 1
             else:
                 hasHeader -= 1
@@ -409,7 +408,7 @@ def organizeIntoLines(input, textQualifier = '"', limit = None):
             if limit and line > limit:
                 del data[limit:] # kill any lines that weren't processed
                 break
-        except:
+        except:  # noqa: E722
             break
         
     # filter out empty lines
@@ -428,7 +427,7 @@ def padRow(oldrow, newrow, columns, maxColumns):
 
 def skipRow(oldrow, newrow, columns, maxColumns):
     "skips any inconsistent rows"
-    return None
+    return None  # noqa: RET501
 
 def useRow(oldrow, newrow, columns, maxColumns):
     "returns row unchanged"
@@ -465,7 +464,7 @@ def importDSV(input, delimiter = ',', textQualifier = '"', columns = 0,
     """
     if type(input) != type([]):
         raise InvalidData("expected list of lists of strings")  
-    if type(delimiter) != type('') or not delimiter:
+    if type(delimiter) != type('') or not delimiter:  # noqa: UP003
         raise InvalidDelimiter(repr(delimiter))
 
 ##    if textQualifier:
@@ -508,7 +507,7 @@ def importDSV(input, delimiter = ',', textQualifier = '"', columns = 0,
                 odd = s.count(textQualifier) % 2
                 if inquotes:
                     accu += delimiter + s.replace(textQualifier * 2, delimiter).\
-                            replace(textQualifier, '').replace(delimiter, textQualifier)
+                            replace(textQualifier, '').replace(delimiter, textQualifier)  # noqa: F821
                     if odd:
                         record.append(accu)
                         inquotes = 0
@@ -527,7 +526,7 @@ def importDSV(input, delimiter = ',', textQualifier = '"', columns = 0,
                     else:
                         record.append(accu)
         else:
-            record = list(map(lambda x: x.strip(), line.split(delimiter)))
+            record = list(map(lambda x: x.strip(), line.split(delimiter)))  # noqa: C417
             #record = list(map(string.strip, line.split(delimiter)))
 
         newdata.append(record)
@@ -577,8 +576,8 @@ def exportDSV(input, delimiter = ',', textQualifier = '"', quoteall = 0):
     RETURNS:
       data as string
     """
-    if not delimiter or type(delimiter) != type(''): raise InvalidDelimiter
-    if not textQualifier or type(delimiter) != type(''): raise InvalidTextQualifier
+    if not delimiter or type(delimiter) != type(''): raise InvalidDelimiter  # noqa: UP003
+    if not textQualifier or type(delimiter) != type(''): raise InvalidTextQualifier  # noqa: UP003
 
     # double-up all text qualifiers in data (i.e. can't becomes can''t)
     data = list(map(lambda i, q = textQualifier:
@@ -815,7 +814,7 @@ if wx is not None:
 
         def OnTextPreviewRows(self, event):
             try:    v = int(self.previewRowsText.GetValue())
-            except: v = self.displayRows
+            except: v = self.displayRows  # noqa: E722
             v = max(self.displayRows, v)
             v = min(v, 100)
             self.previewRowsText.SetValue(str(v))
@@ -856,7 +855,7 @@ if wx is not None:
                                         textQualifier = textQualifier,
                                         delimiter = delimiter,
                                         errorHandler = padRow)
-            except InvalidDelimiter as e:
+            except InvalidDelimiter:
                 previewData = [[i] for i in newdata[:rows]]
 
             rows = min(rows, len(previewData))
@@ -869,7 +868,7 @@ if wx is not None:
                 self.preview.SetColLabelSize(self.preview.GetRowSize(0))
                 for col in range(cols):
                     try:    self.preview.SetColLabelValue(col, str(previewData[0][col]))
-                    except: self.preview.SetColLabelValue(col, "")
+                    except: self.preview.SetColLabelValue(col, "")  # noqa: E722
                 # self.preview.AutoSizeColumns(wx.true) # size columns to headers
             else:
                 self.preview.SetColLabelSize(0)
@@ -877,7 +876,7 @@ if wx is not None:
             for row in range(hasHeaders, rows):
                 for col in range(cols):
                     try:    self.preview.SetCellValue(row - hasHeaders, col, str(previewData[row][col]))
-                    except: pass
+                    except: pass  # noqa: E722, S110
 
             # if not hasHeaders:
             self.preview.AutoSizeColumns(True) # size columns to data
@@ -939,7 +938,7 @@ if wx is not None:
             self.SetAutoLayout(True)
 
             self.file = file
-            f = open(file, 'r')
+            f = open(file, 'r')  # noqa: SIM115
             self.data = f.read()
             f.close()
 
@@ -1021,12 +1020,12 @@ if __name__ == '__main__':
                     path = dlg.GetPath()
                     dlg.Destroy()
 
-                    errorLog = open('import_error.log', 'a+') 
+                    errorLog = open('import_error.log', 'a+')  # noqa: SIM115
                     def logErrors(oldrow, newrow, expectedColumns, maxColumns, file = errorLog):
                         # log the bad row to a file
                         file.write(oldrow + '\n')
 
-                    dlg = ImportWizardDialog(None, -1, 'CSV Import Wizard (v.%s)' % __version__, path)
+                    dlg = ImportWizardDialog(None, -1, 'CSV Import Wizard (v.%s)' % __version__, path)  # noqa: UP031
                     if dlg.ShowModal() == wx.ID_OK:
                         results = dlg.ImportData(errorHandler = logErrors)
                         dlg.Destroy()

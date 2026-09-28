@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-  # noqa: UP009
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Abstractable.py ---
@@ -20,12 +20,12 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-import sys
+import sys  
 
 import gettext
 _ = gettext.gettext
 
-import Container
+import Container  
 
 #---------------------------------------------------------
 class Abstractable:
@@ -33,7 +33,7 @@ class Abstractable:
         Adds dynamically the 'layers' attribute. This one contains the list of diagrams associated with one level.
     """
 
-    DUMP_ATTR = ['layers', 'current_level', 'DAM', 'UAM']
+    DUMP_ATTR = ['layers', 'current_level', 'DAM', 'UAM']  # noqa: RUF012
 
     ###
     def __init__(self, dia):
@@ -46,9 +46,9 @@ class Abstractable:
 
         ### dico of layers, dico of Downward and Upward functions according to layers
         if hasattr(dia, 'layers'):
-            self.layers = getattr(dia, 'layers')
-            self.DAM = getattr(dia, 'DAM')
-            self.UAM = getattr(dia, 'UAM')
+            self.layers = dia.layers
+            self.DAM = dia.DAM
+            self.UAM = dia.UAM
         else:
             self.layers = {0:dia}
             self.DAM = {}
@@ -118,12 +118,12 @@ class Abstractable:
         return self.DAM
 
     def SetDAM(self, cl, val):
-        """
+        """ DAM setter.
         """
         self.DAM[cl] = val
 
     def SetUAM(self, cl, val):
-        """
+        """ UAM setter.
         """
         self.UAM[cl] = val
 
@@ -157,8 +157,8 @@ class Abstractable:
             import WizardGUI
             
             ### add new DAM and UAM according to new layer
-            self.SetUAM(l, WizardGUI.atomicCode('UAM%d'%l))
-            self.SetDAM(l, WizardGUI.atomicCode('DAM%d'%l))
+            self.SetUAM(l, WizardGUI.atomicCode('UAM%d'%l))  # noqa: UP031
+            self.SetDAM(l, WizardGUI.atomicCode('DAM%d'%l))  # noqa: UP031
 
     ###
     def LoadDiagram(self, l):
@@ -172,7 +172,7 @@ class Abstractable:
         if l in layers:
             dia = canvas.GetDiagramByLevel(l)
             canvas.SetCurrentLevel(l)
-            sys.stdout.write("load diagram %d"%l)
+            sys.stdout.write("load diagram %d"%l)  # noqa: UP031
 
         else:
 
@@ -182,22 +182,22 @@ class Abstractable:
             canvas.SetCurrentLevel(l)
             #canvas.SetDiagram(dia)
 
-            sys.stdout.write("New diagram at level %s"%l)
+            sys.stdout.write(f"New diagram at level {l}")
 
         sys.stdout.write(str(self.layers))
 
         ### add new or update new attributes layers and current_layer to diagram
-        setattr(dia, 'layers', canvas.GetLayers())
-        setattr(dia, 'current_level', canvas.GetCurrentLevel())
-        setattr(dia, 'DAM', canvas.GetDAM())
-        setattr(dia, 'UAM', canvas.GetUAM())
+        dia.layers = canvas.GetLayers()
+        dia.current_level = canvas.GetCurrentLevel()
+        dia.DAM = canvas.GetDAM()
+        dia.UAM = canvas.GetUAM()
 
         ### add new or update new attributes layers and current_layer to diagram at level 0
         d0 = canvas.GetDiagramByLevel(0)
-        setattr(d0, 'layers', canvas.GetLayers())
-        setattr(d0, 'current_level', canvas.GetCurrentLevel())
-        setattr(d0, 'DAM', canvas.GetDAM())
-        setattr(d0, 'UAM', canvas.GetUAM())
+        d0.layers = canvas.GetLayers()
+        d0.current_level = canvas.GetCurrentLevel()
+        d0.DAM = canvas.GetDAM()
+        d0.UAM = canvas.GetUAM()
 
         #=======================================================================
         # ### Add Attributes for dump only for ContainerBlock

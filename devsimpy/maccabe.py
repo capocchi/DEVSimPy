@@ -6,15 +6,6 @@
 from __future__ import with_statement
 
 import sys
-
-#required_libs = ['ast','optparse', 'tokenize']
-
-#for lib_name in required_libs:
-#    try:
-#        importlib.import_module(lib_name)
-#    except:
-#        subprocess.run(f'pip install {lib_name}'.split())
-
 import optparse
 import tokenize
 import ast
@@ -24,7 +15,7 @@ from ast import iter_child_nodes
 
 __version__ = "0.0.0"
 
-class ASTVisitor(object):
+class ASTVisitor:
     """Performs a depth-first walk of the AST."""
 
     def __init__(self):
@@ -52,20 +43,20 @@ class ASTVisitor(object):
         self.dispatch(tree, *args)  # XXX *args make sense?
 
 
-class PathNode(object):
+class PathNode:
     def __init__(self, name, look="circle"):
         self.name = name
         self.look = look
 
     def to_dot(self):
-        print('node [shape=%s,label="%s"] %d;' % (
+        print('node [shape=%s,label="%s"] %d;' % (  # noqa: UP031
             self.look, self.name, self.dot_id()))
 
     def dot_id(self):
         return id(self)
 
 
-class PathGraph(object):
+class PathGraph:
     def __init__(self, name, entity, lineno, column=0):
         self.name = name
         self.entity = entity
@@ -84,7 +75,7 @@ class PathGraph(object):
             node.to_dot()
         for node, nexts in self.nodes.items():
             for next in nexts:
-                print('%s -- %s;' % (node.dot_id(), next.dot_id()))
+                print(f'{node.dot_id()} -- {next.dot_id()};')
         print('}')
 
     def complexity(self):
@@ -102,7 +93,7 @@ class PathGraphingAstVisitor(ASTVisitor):
     """
 
     def __init__(self):
-        super(PathGraphingAstVisitor, self).__init__()
+        super().__init__()
         self.classname = ""
         self.graphs = {}
         self.reset()
@@ -118,11 +109,11 @@ class PathGraphingAstVisitor(ASTVisitor):
     def visitFunctionDef(self, node):
 
         if self.classname:
-            entity = '%s%s' % (self.classname, node.name)
+            entity = f'{self.classname}{node.name}'
         else:
             entity = node.name
 
-        name = '%d:%d: %r' % (node.lineno, node.col_offset, entity)
+        name = '%d:%d: %r' % (node.lineno, node.col_offset, entity)  # noqa: UP031
 
         if self.graph is not None:
             # closure
@@ -138,7 +129,7 @@ class PathGraphingAstVisitor(ASTVisitor):
             pathnode = PathNode(name)
             self.tail = pathnode
             self.dispatch_list(node.body)
-            self.graphs["%s%s" % (self.classname, node.name)] = self.graph
+            self.graphs[f"{self.classname}{node.name}"] = self.graph
             self.reset()
 
     visitAsyncFunctionDef = visitFunctionDef
@@ -162,23 +153,23 @@ class PathGraphingAstVisitor(ASTVisitor):
             lineno = 0
         else:
             lineno = node.lineno
-        name = "Stmt %d" % lineno
+        name = "Stmt %d" % lineno  # noqa: UP031
         self.appendPathNode(name)
 
     def default(self, node, *args):
         if isinstance(node, ast.stmt):
             self.visitSimpleStatement(node)
         else:
-            super(PathGraphingAstVisitor, self).default(node, *args)
+            super().default(node, *args)
 
     def visitLoop(self, node):
-        name = "Loop %d" % node.lineno
+        name = "Loop %d" % node.lineno  # noqa: UP031
         self._subgraph(node, name)
 
     visitAsyncFor = visitFor = visitWhile = visitLoop
 
     def visitIf(self, node):
-        name = "If %d" % node.lineno
+        name = "If %d" % node.lineno  # noqa: UP031
         self._subgraph(node, name)
 
     def _subgraph(self, node, name, extra_blocks=()):
@@ -188,7 +179,7 @@ class PathGraphingAstVisitor(ASTVisitor):
             self.graph = PathGraph(name, name, node.lineno, node.col_offset)
             pathnode = PathNode(name)
             self._subgraph_parse(node, pathnode, extra_blocks)
-            self.graphs["%s%s" % (self.classname, name)] = self.graph
+            self.graphs[f"{self.classname}{name}"] = self.graph
             self.reset()
         else:
             pathnode = self.appendPathNode(name)
@@ -217,20 +208,20 @@ class PathGraphingAstVisitor(ASTVisitor):
             self.tail = bottom
 
     def visitTryExcept(self, node):
-        name = "TryExcept %d" % node.lineno
+        name = "TryExcept %d" % node.lineno  # noqa: UP031
         self._subgraph(node, name, extra_blocks=node.handlers)
 
     visitTry = visitTryExcept
 
     def visitWith(self, node):
-        name = "With %d" % node.lineno
+        name = "With %d" % node.lineno  # noqa: UP031
         self.appendPathNode(name)
         self.dispatch_list(node.body)
 
     visitAsyncWith = visitWith
 
 
-class McCabeChecker(object):
+class McCabeChecker:
     """McCabe cyclomatic complexity checker."""
     name = 'mccabe'
     version = __version__
@@ -280,13 +271,13 @@ def get_code_complexity(code, threshold=7, filename='stdin'):
         tree = compile(code, filename, "exec", ast.PyCF_ONLY_AST)
     except SyntaxError:
         e = sys.exc_info()[1]
-        sys.stderr.write("Unable to parse %s: %s\n" % (filename, e))
+        sys.stderr.write(f"Unable to parse {filename}: {e}\n")
         return 0
 
     complx = []
     McCabeChecker.max_complexity = threshold
     for lineno, offset, text, check in McCabeChecker(tree, filename).run():
-        complx.append('%s:%d:1: %s' % (filename, lineno, text))
+        complx.append(f'{filename}:{lineno}:1: {text}') 
 
     if len(complx) == 0:
         return 0

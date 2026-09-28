@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-  # noqa: UP009
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Object.py ---
@@ -50,5 +50,5 @@ class Message:
 			@return: Object representation.
 			@rtype: str
 		'''
-		return "<< value = %s; time = %s>>"%(self.value, self.time)
+		return f"<< value = {self.value}; time = {self.time}>>"
 

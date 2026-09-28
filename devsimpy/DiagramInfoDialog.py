@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -273,7 +273,7 @@ class DiagramInfoDialog(wx.Dialog):
 			
 			webbrowser.open(url)
 			
-		except Exception as e:
+		except Exception:  # noqa: BLE001
 			# Fallback : copier dans le presse-papier et ouvrir le site
 			if wx.TheClipboard.Open():
 				wx.TheClipboard.SetData(wx.TextDataObject(content))

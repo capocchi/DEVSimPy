@@ -5,12 +5,12 @@ Usage:
     python test_editor.py --autoclose 10  # Auto-close after 10s delay
 """
 
-from tempfile import gettempdir
+from tempfile import gettempdir  
 import os
 
 from ApplicationController import TestApp
 
-from Editor import GetEditor
+from Editor import GetEditor # type: ignore
 
 # Run the test
 fn = os.path.join(os.path.realpath(gettempdir()), 'test.py')

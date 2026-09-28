@@ -232,6 +232,7 @@ pip-log.txt
 .mr.developer.cfg
 
 .codegpt
+.ruff_cache
 
 #Opencode config
 opencode.json

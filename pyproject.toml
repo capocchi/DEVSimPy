@@ -78,5 +78,35 @@ packages = ["devsimpy"]
 [project.optional-dependencies]
 gui = ["spyder"]
 
+[tool.ruff]
+line-length = 100
+
+exclude = [
+    "examples",
+    "DEVSKernel",
+    "design",
+    "doc",
+    "AI",
+    "Domain",
+    "icons",
+    "locale",
+    "logs",
+    "out",
+    "sounds",
+    "splash",
+    "plugins",
+    "XRC"
+]
+
+[tool.ruff.lint]
+ignore = ["N999", "I001", "UP010", "PLR0402"]
+
+[tool.ruff.format]
+indent-style = "tab"
+quote-style = "double"
+
+[tool.ruff.lint.per-file-ignores]
+"legacy/**/*.py" = ["UP031", "UP032"]
+"examples/**/*.py" = ["UP031"]
 
 

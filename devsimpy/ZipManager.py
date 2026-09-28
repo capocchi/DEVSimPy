@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -17,7 +17,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import os
+import os  
 import sys
 import zipfile
 import zipimport
@@ -35,7 +35,7 @@ if not hasattr(inspect, 'getargspec'):
     
 _ = gettext.gettext
 
-from PluginManager import PluginManager #trigger_event
+from PluginManager import PluginManager #trigger_event  
 from traceback import format_exception
 from Utilities import listf, path_to_module,install_and_import, getFilePathInfo
 
@@ -80,15 +80,15 @@ def getPythonModelFileName(fn:str)->str:
 				import Components
 				cls = Components.GetClass(os.path.join(fn, python_file))
 
-				from DomainInterface import DomainBehavior
+				from DomainInterface import DomainBehavior  
 				from DomainInterface import DomainStructure
 
-				if inspect.isclass(cls):
+				if inspect.isclass(cls):  # noqa: SIM102
 					if issubclass(cls, DomainBehavior) or issubclass(cls, DomainStructure):
 						return python_file
 
-		sys.stdout.write(_(f"Behavioral python file not found in {fn} file"))
-		raise Exception
+		sys.stdout.write(_(f"Behavioral python file not found in {fn} file"))  # noqa: INT001
+		raise Exception  # noqa: TRY002
 	
 	elif py_file_list:
 		### zip file must contain python file
@@ -125,7 +125,7 @@ def get_imported_modules(module_name:str)->list:
 
 		return imported_modules
 
-	except Exception as e:
+	except Exception as e:  # noqa: BLE001
 		sys.stdout.write(f"Error while analyzing {module.__file__}: {e}")
 		return set()
 	
@@ -139,9 +139,9 @@ class Zip:
 	"""	Zip class.
 	"""
 
-	MODULE_NOT_INSTALLED_ON_STARTING = []
+	MODULE_NOT_INSTALLED_ON_STARTING = []  # noqa: RUF012
 
-	def __init__(self, fn:str, files:[str]=[]):
+	def __init__(self, fn:str, files:[str]=[]): # type: ignore  # noqa: B006
 		""" Constructor.
 		"""
 		### local copy
@@ -153,11 +153,11 @@ class Zip:
 		if files:
 			self.Create(files)
 
-	def Create(self, add_files:[str]=[])->None:
+	def Create(self, add_files:[str]=[])->None: # type: ignore  # noqa: B006
 		""" Create the Zip with files.
 		"""
 
-		dir_name, base_name, name, ext = getFilePathInfo(self.fn)
+		_, _, name, _ = getFilePathInfo(self.fn)
 		#dir_name, base_name = os.path.split(self.fn)
 		#name, ext = os.path.splitext(base_name)
 
@@ -175,9 +175,9 @@ class Zip:
 				pycode = buffer.decode()
 				### if not .dat file and the name of file is not the same with the zip file
 				### we replace in the python code (inside te buffer) the old name (fn_name) of class by the new (name)
-				if fn_ext == '.py' and not ('class %s(DomainBehavior)'%name in pycode or 'class %s(DomainStructure)'%name in pycode):
+				if fn_ext == '.py' and not ('class %s(DomainBehavior)'%name in pycode or 'class %s(DomainStructure)'%name in pycode):  # noqa: UP031
 					pycode = pycode.replace(fn_name,name)
-					zout.writestr("%s%s"%(name,fn_ext), pycode.encode())
+					zout.writestr(f"{name}{fn_ext}", pycode.encode())
 				else:
 					zout.writestr(fn_base_name, buffer)
 				zin.close()
@@ -186,7 +186,7 @@ class Zip:
 
 		zout.close()
 
-	def Update(self, replace_files:[str]=[])->None:
+	def Update(self, replace_files:[str]=[])->None: # type: ignore  # noqa: B006
 		""" Update zip archive with the new replace file names.
 		"""
 
@@ -213,7 +213,7 @@ class Zip:
 				### if zip file contain image file we can not encode it.
 				try:
 					zout.writestr(base_name, data)
-				except UnicodeDecodeError as info:
+				except UnicodeDecodeError:
 					zout.writestr(base_name, data)
 				else:
 					exclude_file.append(replace_files.index(fn))
@@ -240,7 +240,7 @@ class Zip:
 			if s not in map(os.path.basename, replace_files) and info_list.index(item) not in exclude_file:
 				buffer = zin.read(item.filename)
 				zout.writestr(item, buffer)
-				sys.stdout.write("%s rewrite\n"%(item.filename))
+				sys.stdout.write(f"{item.filename} rewrite\n")
 		#except Exception as e:
 		#	sys.stdout.write("%s not updated\n"%(self.fn))
 
@@ -251,7 +251,7 @@ class Zip:
 		### remove and rename the zip file
 		self.ClearFiles()
 
-	def Delete(self, delete_files:[str]=[])->None:
+	def Delete(self, delete_files:[str]=[])->None: # type: ignore  # noqa: B006
 		""" Remove file in zip archive.
 		"""
 
@@ -337,15 +337,15 @@ class Zip:
 			return False
 
 		bn = os.path.basename(fn)
-		name, ext = os.path.splitext(bn)
+		name, _ = os.path.splitext(bn)
 
 		with zipfile.ZipFile(fn) as zf:
 			### find all python files
 			for file in zf.namelist():
 				if file.endswith(".py"):
 					r = repr(zf.read(file))
-					n, e = os.path.splitext(file)
-					if n == name and ('class %s(DomainBehavior)'%name in r or 'class %s(DomainStructure)'%name in r):
+					n, _ = os.path.splitext(file)
+					if n == name and ('class %s(DomainBehavior)'%name in r or 'class %s(DomainStructure)'%name in r):  # noqa: UP031
 						return file
 
 		info = _("Please check this: \n \
@@ -385,7 +385,7 @@ class Zip:
 		zf.close()
 
 		### plugin file is plugins.pi in root of zipfile or in plugins zipedd directory
-		return any([re.search(r"^(plugins[/]*[\w]*.py)$", s) for s in nl])
+		return any(re.search(r"^(plugins[/]*[\w]*.py)$", s) for s in nl)
 
 	# BDD Test----------------------------------------------------------------------
 	@staticmethod
@@ -398,10 +398,10 @@ class Zip:
 		nl = zf.namelist()
 		zf.close()
 
-		return any([re.search(r"^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.feature)$", s) for s in nl])
+		return any(re.search(r"^(BDD/[\w*/]*\.py|BDD/[\w*/]*\.feature)$", s) for s in nl)
 
 	@staticmethod
-	def GetTests(fn:str)->[str]:
+	def GetTests(fn:str)->[str]: # type: ignore
 		""" Return feature, steps and environment files from .amd
 		"""
 		zf = zipfile.ZipFile(fn, 'r')
@@ -444,7 +444,7 @@ class Zip:
 			
 			return module
 		### model has not python file !
-		except Exception as e:
+		except Exception as e:  # noqa: BLE001
 			return e
 		
 	def ImportModule(self) -> types.ModuleType:
@@ -457,11 +457,11 @@ class Zip:
 			sys.path.append(p)
 
 		### load all paths from the lib dir to DOAMIN_PATH (external paths are added at the start of devsimpy)
-		a = len(DOMAIN_PATH)
-		if DOMAIN_PATH in p:
+		a = len(DOMAIN_PATH) # type: ignore  # noqa: F821
+		if DOMAIN_PATH in p: # type: ignore  # noqa: F821
 			p = os.path.dirname(p)
 			# Add paths p until we reach the DOMAIN_PATH
-			while(p!=DOMAIN_PATH and len(p)>=a):
+			while(p!=DOMAIN_PATH and len(p)>=a): # type: ignore  # noqa: F821
 				if p not in sys.path:
 					sys.path.append(p)
 				p = os.path.dirname(p)
@@ -473,11 +473,11 @@ class Zip:
 			module = importer.load_module(module_name.split('.py')[0])
 
 		### package is needed by the self.module_name (dependency)
-		except ModuleNotFoundError as info:
+		except ModuleNotFoundError:
 			### get the package name
 			package = sys.exc_info()[1].name
 
-			if GUI_FLAG and package not in Zip.MODULE_NOT_INSTALLED_ON_STARTING:
+			if GUI_FLAG and package not in Zip.MODULE_NOT_INSTALLED_ON_STARTING: # type: ignore  # noqa: F821
 				import wx
 				dial = wx.MessageDialog(None, _('%s package is needed by %s.\nDo you want to install it?')%(package,module_name), _('Required package'), wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 				if dial.ShowModal() == wx.ID_YES:
@@ -492,9 +492,9 @@ class Zip:
 					
 				dial.Destroy()
 			else:
-				sys.stdout.write(_(f"Please install {package}"))
+				sys.stdout.write(_(f"Please install {package}"))  # noqa: INT001
 
-		except Exception as e:
+		except Exception as e:  # noqa: BLE001
 			return e
 		
 		if module:
@@ -534,7 +534,7 @@ class Zip:
 			module = self.ImportModule()
 #			return module
 
-		except Exception as info:
+		except Exception as info:  # noqa: BLE001
 			msg_i = _("Error in execution: ")
 			msg_o = listf(format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
 			try:
@@ -560,9 +560,9 @@ class Zip:
 		"""
 		try:
 			os.remove(self.fn)
-		except Exception as info:
+		except Exception as info:  # noqa: BLE001
 			#sys.exc_info()
-			sys.stderr.write(_('File has not been deleted: %s'%info))
+			sys.stderr.write(_(f'File has not been deleted: {info}'))  # noqa: INT001
 
 		try:
 			os.rename("new_arch.zip", self.fn)
@@ -572,5 +572,5 @@ class Zip:
 			if os.path.exists(self.fn):
 				try:
 					shutil.move("new_arch.zip", self.fn)
-				except:
+				except:  # noqa: E722, S110
 					pass

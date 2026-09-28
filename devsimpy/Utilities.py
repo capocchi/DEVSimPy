@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,7 +22,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import builtins
+import builtins  
 import os
 import sys
 import time
@@ -41,12 +41,12 @@ from functools import lru_cache
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
     
-from datetime import datetime
+from datetime import datetime  
 
 import gettext
 _ = gettext.gettext
 
-from zipfile import ZipFile, ZIP_DEFLATED 
+from zipfile import ZipFile, ZIP_DEFLATED  
 
 
 if getattr(builtins,'GUI_FLAG', True):
@@ -59,7 +59,7 @@ if getattr(builtins,'GUI_FLAG', True):
 	wx.SOUND_ASYNC = wx.adv.SOUND_ASYNC	
 
 	try:
-		from agw import pybusyinfo as PBI
+		from agw import pybusyinfo as PBI # type: ignore  
 	except ImportError: # if it's not there locally, try the wxPython lib.
 		import wx.lib.agw.pybusyinfo as PBI
 
@@ -68,7 +68,7 @@ if getattr(builtins,'GUI_FLAG', True):
 	@lru_cache(maxsize=128)
 	def load_and_resize_image(filename, width=16, height=16):
 		"""Charge une image et la redimensionne à width x height"""
-		image_path = os.path.join(ICON_PATH, filename)
+		image_path = os.path.join(ICON_PATH, filename) # type: ignore
 
 		if not os.path.isfile(image_path):
 			raise FileNotFoundError(f"File not found: {image_path}")
@@ -86,7 +86,7 @@ else:
 		pass
 
 ### for replaceAll
-import fileinput
+import fileinput  
 
 # Used to recurse subdirectories
 import fnmatch
@@ -115,7 +115,7 @@ except ImportError:
 		sys.stdout.write("Unknown operating system.\n")
 		sys.exit()
 
-import tomllib
+import tomllib  
 from pathlib import Path
 
 #-------------------------------------------------------------------------------
@@ -130,7 +130,7 @@ def get_version():
             return pyproject_data["project"]["version"]
     except FileNotFoundError:
         pass
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"Warning: Could not retrieve version from pyproject.toml. {e}")
     
     # Fallback to importlib.metadata
@@ -141,7 +141,7 @@ def get_version():
 
 
 def getFilePathInfo(path):
-	"""
+	""" File Path
 	"""
 	assert os.path.isabs(path)
 
@@ -153,7 +153,7 @@ def getFilePathInfo(path):
 
 	return dirname, basename, filename, extend
 
-def printOnStatusBar(statusbar, data={}):
+def printOnStatusBar(statusbar, data={}):  # noqa: B006
 	""" Send data on status bar
 	"""
 	for k,v in list(data.items()):
@@ -162,22 +162,13 @@ def printOnStatusBar(statusbar, data={}):
 def NotificationMessage(title, message, parent, flag=2048, timeout=False):
 	""" 2048 is wx.ICON_INFORMATION
 	"""
-	if NOTIFICATION:
+	if NOTIFICATION: # type: ignore
 		
 		notify = wx.adv.NotificationMessage(
 		title=title,
 		message=message,
 		parent=parent, flags=flag)
-	
 
-		# Various options can be set after the message is created if desired.
-		# notify.SetFlags(# wx.ICON_INFORMATION
-		#                 wx.ICON_WARNING
-		#                 # wx.ICON_ERROR
-		#                 )
-		# notify.SetTitle("Wooot")
-		# notify.SetMessage("It's a message!")
-		# notify.SetParent(self)
 		if timeout:
 			wx.CallAfter(notify.Show,timeout=timeout) # 1 for short timeout, 100 for long timeout
 		else:
@@ -191,7 +182,7 @@ def now()->str:
 
     return st
 
-def module_list(topdir:str)->[str]:
+def module_list(topdir:str)->[str]: # type: ignore
 	for root,_,files in os.walk(topdir):
 		modpath = os.path.basename(topdir)
 		r = os.path.relpath(root,topdir)
@@ -233,8 +224,7 @@ class FixedList(list):
 			return
 
 		### the size must be at least 1
-		if new_size < 1:
-			new_size = 1
+		new_size = builtins.max(new_size, 1)
 
 		self.__size = new_size
 
@@ -259,15 +249,15 @@ class FixedList(list):
 		self.insert(len(self),v)
 
 def getOutDir():
+	""" Out Dir
 	"""
-	"""
-	out_dir = os.path.join(DEVSIMPY_PACKAGE_PATH, 'out')
+	out_dir = os.path.join(DEVSIMPY_PACKAGE_PATH, 'out') # type: ignore
 	if not os.path.exists(out_dir):
 		os.mkdir(out_dir)
 	return out_dir
 
 def PyBuzyInfo(msg, time):
-	"""
+	""" Buzy Info
 	"""
 	busy = PBI.PyBusyInfo(msg, parent=None, title=_("Info"))
 
@@ -284,21 +274,21 @@ def check_internet():
 	try:
 		
 		_ = urllib.request.urlopen(url, timeout=timeout)
-	except Exception as e:
+	except Exception as e:  # noqa: BLE001
 		print(e)
 		return False
 	else:
 		return True
 
 def updatePiP():
-	"""
+	""" Update Pip
 	"""
 
 	if check_internet():	
 		try:
 			command = "python -m pip install --upgrade pip"
 			run_command(command, "to_progress_diag")
-		except Exception as ee:
+		except Exception as ee:  # noqa: BLE001
 			print(ee.output)
 			return False
 		else:
@@ -307,15 +297,15 @@ def updatePiP():
 		return False
 
 def downloadFromURL(url):
-	"""
+	""" Dowload From URL
 	"""
 	
 	try:
 		# downloading with request
 		# download the file contents in binary format
-		pub.sendMessage("to_progress_diag", message=_(f"Download git archive from:\n{url}"))
+		pub.sendMessage("to_progress_diag", message=_(f"Download git archive from:\n{url}"))  # noqa: INT001
 		r = urllib.request.urlopen(url)
-	except Exception as e:
+	except Exception as e:  # noqa: BLE001
 		print(e)
 		return None
 	else:
@@ -325,9 +315,9 @@ def downloadFromURL(url):
 			fn = os.path.join(tempdir, "DEVSimPy.zip")
 			# downloading with urllib
 			# Copy a network object to a local file
-			pub.sendMessage("to_progress_diag", message=_(f"Copy a network object to:\n{fn}"))
+			pub.sendMessage("to_progress_diag", message=_(f"Copy a network object to:\n{fn}"))  # noqa: INT001
 			urlretrieve(url, fn)
-			pub.sendMessage("to_progress_diag", message=_(f"Copy done!"))
+			pub.sendMessage("to_progress_diag", message=_("Copy done!"))
 			return fn
 
 		else:
@@ -354,14 +344,14 @@ def copy_dir(src, dst):
 def updateFromGitRepo():
 	""" Updated DEVSimPy from Git with a zip (not with git command)
 	"""
-	import git
+	import git # type: ignore  
 
 	try:
 		pub.sendMessage("to_progress_diag", message=_("Pull..."))
-		repo = git.Repo(DEVSIMPY_PACKAGE_PATH)
+		repo = git.Repo(DEVSIMPY_PACKAGE_PATH) # type: ignore
 		o = repo.remotes.origin
 		o.pull()
-	except Exception as err:
+	except Exception:  # noqa: BLE001
 		print('print_exc():')
 		traceback.print_exc(file=sys.stdout)
 		print('\n')
@@ -382,16 +372,16 @@ def updateFromGitArchive():
 	if fn:
 
 		tempdir = os.path.realpath(gettempdir())
-		now = datetime.now() # current date and time
+		now = datetime.now() # current date and time  # noqa: DTZ005
 
 		try:
 			### make a backup of DEVSimPy sources to temp directory with the file DEVSimPy-backup-m_d_y
-			pub.sendMessage("to_progress_diag", message=_(f"Backup DEVSimPy in {tempdir} directory..."))
+			pub.sendMessage("to_progress_diag", message=_(f"Backup DEVSimPy in {tempdir} directory..."))  # noqa: INT001
 			
 			zipf = ZipFile(os.path.join(tempdir,''.join(['DEVSimPy-backup-',now.strftime("%m_%d_%Y"),'.zip'])), 'w', ZIP_DEFLATED)
 			zipdir(os.getcwd(), zipf)
 			zipf.close()
-		except Exception as err:
+		except Exception:  # noqa: BLE001
 			print('print_exc():')
 			traceback.print_exc(file=sys.stdout)
 			print('\n')
@@ -399,7 +389,7 @@ def updateFromGitArchive():
 			traceback.print_exc(limit=1, file=sys.stdout)
 			return False
 		else:
-			pub.sendMessage("to_progress_diag", message=_(f"Done!"))
+			pub.sendMessage("to_progress_diag", message=_("Done!"))
 
 		# opening the downloaded zip file in READ mode 
 		with ZipFile(fn, 'a') as zip:
@@ -410,13 +400,13 @@ def updateFromGitArchive():
 				time.sleep(0.1)
 				
 				p = pathlib.PurePosixPath(elem.filename)
-				pub.sendMessage("to_progress_diag", message=_(f"Extract...\n{p.relative_to('DEVSimPy-master')}"))
+				pub.sendMessage("to_progress_diag", message=_(f"Extract...\n{p.relative_to('DEVSimPy-master')}"))  # noqa: INT001
 			
 			### effective extraction in temp directory
 			zip.extractall(tempdir)
 
 			### Copy the extracted files into the DEVSimPy folder.
-			pub.sendMessage("to_progress_diag", message=_(f"Copy...\n{p.relative_to('DEVSimPy-master')}"))
+			pub.sendMessage("to_progress_diag", message=_(f"Copy...\n{p.relative_to('DEVSimPy-master')}"))  # noqa: INT001
 			try:
 				if platform.python_version() >= '3.8':
 					shutil.copytree(os.path.join(tempdir, 'DEVSimPy-master'), os.path.join(tempdir, 'test'), dirs_exist_ok=True) 
@@ -424,7 +414,7 @@ def updateFromGitArchive():
 					src = pathlib.Path(os.path.join(tempdir, 'DEVSimPy-master'))
 					dest = pathlib.Path(os.path.join(tempdir, os.getcwd()))
 					copy_dir(src, dest)
-			except Exception as err:
+			except Exception:  # noqa: BLE001
 				print('print_exc():')
 				traceback.print_exc(file=sys.stdout)
 				print('\n')
@@ -456,7 +446,7 @@ def run_command(command, message=None):
 			if output and message:
 				pub.sendMessage(message, message=output.strip())
 		process.poll()
-	except:
+	except:  # noqa: E722
 		check_call(command, shell=True)
 
 def updatePiPPackages():
@@ -473,7 +463,7 @@ def updatePiPPackages():
 
 		try:
 			run_command(command, "to_progress_diag")
-		except Exception as err:
+		except Exception:  # noqa: BLE001
 			print('print_exc():')
 			traceback.print_exc(file=sys.stdout)
 			print('\n')
@@ -508,7 +498,7 @@ def install(package_to_install, package_to_import=None):
 		importlib.import_module(package_to_import)
 	except ImportError:
 		if pip.main(['search', package_to_install]) != 23:
-			dial = wx.MessageDialog(None, _('We find that the package %s is missing. \n\n Do you want to install him using pip?'%(package_to_install)), _('Package Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			dial = wx.MessageDialog(None, _(f'We find that the package {package_to_install} is missing. \n\n Do you want to install him using pip?'), _('Package Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)  # noqa: INT001
 
 			if dial.ShowModal() == wx.ID_YES:
 				installed = not pip.main(['install', package_to_install])
@@ -522,7 +512,7 @@ def install(package_to_install, package_to_import=None):
 	return installed
 
 def getObjectFromString(scriptlet):
-	"""
+	""" Object from String
 	"""
 
 	assert scriptlet != ''
@@ -530,7 +520,7 @@ def getObjectFromString(scriptlet):
 	# Compile the scriptlet.
 	try:
 		code = compile(scriptlet, '<string>', 'exec')
-	except Exception as info:
+	except Exception as info:  # noqa: BLE001
 		return info
 	else:
 		# Create the new 'temp' module.
@@ -539,8 +529,8 @@ def getObjectFromString(scriptlet):
 
 		### there is syntaxe error ?
 		try:
-			exec(code, temp.__dict__)
-		except Exception as info:
+			exec(code, temp.__dict__)  # noqa: S102
+		except Exception as info:  # noqa: BLE001
 			return info
 
 		else:
@@ -549,8 +539,8 @@ def getObjectFromString(scriptlet):
 				if value.__module__ == "temp":
 					# Create the instance.
 					try:
-						return eval("temp.%s" % name)()
-					except Exception as info:
+						return eval(f"temp.{name}")()
+					except Exception as info:  # noqa: BLE001
 						return info
 
 def vibrate(windowName, distance=15, times=5, speed=0.05, direction='horizontal'):
@@ -558,7 +548,7 @@ def vibrate(windowName, distance=15, times=5, speed=0.05, direction='horizontal'
 		If times is odd, it increments so that window ends up in same location
 	"""
 
-	if not times % 2 == 0:
+	if times % 2 != 0:
 		times += 1
 	
 	location = windowName.GetPositionTuple()
@@ -593,7 +583,7 @@ def GetWXVersionFromIni():
 	### if ini file exist we remove old section and option
 	try:
 		return parser.get(section, option)
-	except:
+	except:  # noqa: E722
 		return  wx.VERSION_STRING
 
 def AddToInitFile(init_dir_path, L):
@@ -609,28 +599,28 @@ def AddToInitFile(init_dir_path, L):
 		for r, d, f in os.walk(init_dir_path):
 			for file in f:
 				if file.endswith(('.py','.pyc')):
-					b,e=os.path.splitext(file)
+					b, _=os.path.splitext(file)
 					files.append(b)
 
 		### str of __all__ variable extracted from __init__.py file
-		f = open(init_path,"r")
-		init_str = "".join([a.replace('\n','\t') for a in f.readlines()])
+		f = open(init_path,"r")  # noqa: SIM115
+		init_str = "".join([a.replace('\n','\t') for a in f])
 
 		### rewrite __init__.py file with the new basename plugin
 		with open(init_path,"w+") as f:
 			f.write('__all__ = [\n')
 			for n in files:
 				if n in init_str:
-					f.write("'%s',\n"%n)
+					f.write(f"'{n}',\n")
 			for basename in L[:-1]:
 				if basename not in init_str:
-					f.write("'%s',\n"%basename)
+					f.write(f"'{basename}',\n")
 			if L[-1] not in init_str:
-				f.write("'%s'\n]"%L[-1])
+				f.write(f"'{L[-1]}'\n]")
 			else:
 				f.write("\n]")
 	else:
-		sys.stderr.write(_("__init__.py file doesn't exists in %s directory!"%init_dir_path))
+		sys.stderr.write(_(f"__init__.py file doesn't exists in {init_dir_path} directory!"))  # noqa: INT001
 
 def DelToInitFile(init_dir_path, L):
 	""" Delete the name of file in L to the __init__.py file located to init_path
@@ -645,22 +635,21 @@ def DelToInitFile(init_dir_path, L):
 		for r, d, f in os.walk(init_dir_path):
 			for file in f:
 				if file.endswith(('.py','.pyc')):
-					b,e=os.path.splitext(file)
+					b, _=os.path.splitext(file)
 					files.append(b)
 
 		### str of __all__ variable extracted from __init__.py file
-		f = open(init_path,"r")
-		init_str = "".join([a.replace('\n','\t') for a in f.readlines()])
+		f = open(init_path,"r")  # noqa: SIM115
+		init_str = "".join([a.replace('\n','\t') for a in f])
 
 		### rewrite __init__.py file with the new basename plugin
 		with open(init_path,"w+") as f:
 			f.write('__all__ = [\n')
 			L = [f for f in files if f not in L and f in init_str]
-			for n in L[:-1]:
-				f.write("'%s',\n"%n)
-			f.write("'%s'\n]"%L[-1])
+			f.writelines(f"'{n}',\n" for n in L[:-1])
+			f.write(f"'{L[-1]}'\n]")
 	else:
-		sys.stderr.write(_("__init__.py file doesn't exists in %s directory!"%init_dir_path))
+		sys.stderr.write(_(f"__init__.py file doesn't exists in {init_dir_path} directory!"))  # noqa: INT001
 
 def getPYFileListFromInit(init_file, ext='.py'):
 	""" Return list of name composing all variable in __init__.py file.
@@ -698,7 +687,7 @@ def get_downloads_folder():
             downloads_path = winreg.QueryValueEx(key, "{374DE290-123F-4565-9164-39C4925E467B}")[0]
             winreg.CloseKey(key)
             return downloads_path
-        except WindowsError:
+        except OSError:
             return os.path.join(os.path.expanduser('~'), 'Downloads')
     
     # Pour macOS
@@ -729,10 +718,10 @@ def path_to_module(abs_python_filename):
 	abs_python_filename = os.path.splitext(abs_python_filename)[0]
 
 	## si Domain est dans le chemin du module à importer (le fichier .py est dans un sous repertoire du rep Domain)
-	if abs_python_filename.startswith(DOMAIN_PATH):
+	if abs_python_filename.startswith(DOMAIN_PATH): # type: ignore
 		### if you want Domain in the path (Domain.)
 		### dir_name = os.path.basename(DOMAIN_PATH)
-		dir_name = os.path.basename(os.path.dirname(DOMAIN_PATH))
+		dir_name = os.path.basename(os.path.dirname(DOMAIN_PATH)) # type: ignore
 		path = str(abs_python_filename[abs_python_filename.index(dir_name):]).strip('[]').replace(os.sep,'.').replace('/','.')
 	else:
 
@@ -744,20 +733,19 @@ def path_to_module(abs_python_filename):
 			sys.path.insert(0, domainPath)
 
 		# si commence par . (transfo de /) supprime le
-		if path.startswith('.'):
-			path = path[1:]
+		path = path.removeprefix('.')
 
 	return path
 
-def getInstance(cls, args = {}):
+def getInstance(cls, args = {}):  # noqa: B006
 	""" Function that return the instance from class and args.
 	"""
 	
 	if inspect.isclass(cls):
 		try:
 			devs = cls(**args)
-		except Exception as info:
-			sys.stderr.write(_("Error in getInstance: %s not instanciated with %s.\n"%(cls,str(args))))
+		except Exception:  # noqa: BLE001
+			sys.stderr.write(_(f"Error in getInstance: {cls} not instanciated with {args!s}.\n"))  # noqa: INT001
 			sys.stderr.write(traceback.format_exc())
 			return sys.exc_info()
 		else:
@@ -792,7 +780,7 @@ def itersubclasses(cls, _seen=None):
 	"""
 
 	if not isinstance(cls, type):
-		raise TypeError('itersubclasses must be called with '
+		raise TypeError('itersubclasses must be called with '  # noqa: UP031
 						'new-style classes, not %.100r' % cls)
 	
 	if _seen is None: _seen = set()
@@ -806,26 +794,24 @@ def itersubclasses(cls, _seen=None):
 		if sub not in _seen:
 			_seen.add(sub)
 			yield sub
-			for sub in itersubclasses(sub, _seen):
+			for sub in itersubclasses(sub, _seen):  # noqa: B020
 				yield sub
 
 def relpath(path=''):
 	### change sep from platform
 	from sys import platform
-	if platform == "linux" or platform == "linux2":
-		return path.replace('\\',os.sep)
-	elif platform == "darwin":
+	if platform == "linux" or platform == "linux2" or platform == "darwin":
 		return path.replace('\\',os.sep)
 	elif platform == "win32":
 		return path.replace('/',os.sep)
 	
 def getTopLevelWindow():
-	"""
+	""" Top Window
 	"""
 	return wx.GetApp().GetTopWindow()
 
 def GetActiveWindow(event=None):
-	"""
+	""" Active Window
 	"""
 	aW = None
 
@@ -837,7 +823,7 @@ def GetActiveWindow(event=None):
 		try:
 			child = wx.Window.FindFocus()
 			aW = wx.GetTopLevelParent(child)
-		except:
+		except:  # noqa: E722, S110
 			pass
 			
 	if aW is None and event is not None:
@@ -875,7 +861,7 @@ def GetMails(string):
 	return regex.findall(string)
 
 def MoveFromParent(frame=None, interval=10, direction='right'):
-	"""
+	""" Move
 	"""
 	assert(isinstance(frame, wx.Frame))
 
@@ -897,7 +883,7 @@ def MoveFromParent(frame=None, interval=10, direction='right'):
 	frame.Move(x,y)
 
 def getDirectorySize(directory):
-	"""
+	""" Size
 	"""
 	dir_size = 0
 	for (path, dirs, files) in os.walk(str(directory)):
@@ -907,7 +893,7 @@ def getDirectorySize(directory):
 	return dir_size/1000
 
 def exists(site, path):
-	"""
+	""" Exits
 	"""
 	conn = http.client.HTTPConnection(site)
 	conn.request('HEAD', path)
@@ -916,7 +902,7 @@ def exists(site, path):
 	return response.status == 200
 
 def checkURL(url):
-	"""
+	""" Check URL
 	"""
 	class Authentification_Dialog(wx.Dialog):
 
@@ -930,27 +916,27 @@ def checkURL(url):
 			self.login = wx.TextCtrl(self, -1, '',  (110, 15), (120, -1))
 			self.password = wx.TextCtrl(self, -1, '',  (110, 55), (120, -1), style=wx.TE_PASSWORD)
 
-			con = wx.Button(self, wx.ID_OK, 'Connect', (10, 120))
-			btn_cancel = wx.Button(self, wx.ID_CANCEL, pos = (120, 120))
+			# con = wx.Button(self, wx.ID_OK, 'Connect', (10, 120))
+			# btn_cancel = wx.Button(self, wx.ID_CANCEL, pos = (120, 120))
 
 			self.Bind(wx.EVT_BUTTON, self.OnConnect, id=wx.ID_OK)
 
 			self.Centre()
 
 		def OnConnect(self, event):
-			login = self.login.GetValue()
-			password = self.password.GetValue()
+			# login = self.login.GetValue()
+			# password = self.password.GetValue()
 			event.Skip()
 
 	if url.startswith('https'):
-		req = urllib.request.Request(url)
+		# req = urllib.request.Request(url)
 		password_manager = urllib.request.HTTPPasswordMgrWithDefaultRealm()
 
 		flag = False
 
 		### while login and password is no good
 		while(not flag):
-			dlg = Authentification_Dialog(None, -1, _('Login to %s'%url))
+			dlg = Authentification_Dialog(None, -1, _(f'Login to {url}'))  # noqa: INT001
 
 			if dlg.ShowModal() == wx.ID_OK:
 				login = dlg.login.GetValue()
@@ -966,10 +952,10 @@ def checkURL(url):
 					### try to access at the url with login and password
 					try:
 						urllib.request.install_opener(opener)
-						handler = urllib.request.urlopen(req)
+						# handler = urllib.request.urlopen(req)
 						flag = True
 						deadLinkFound = True
-					except:
+					except:  # noqa: E722
 						flag = False
 						deadLinkFound = False
 				else:
@@ -991,9 +977,9 @@ def checkURL(url):
 		return False
 
 def replaceAll(file,searchExp,replaceExp):
+    """ Replace all
     """
-    """
-    for line in fileinput.input(file, inplace=1):
+    for line in fileinput.input(file, inplace=1):  # noqa: SIM115
         if searchExp in line:
                 line = line.replace(searchExp,replaceExp)
         sys.stdout.write(line)
@@ -1015,7 +1001,7 @@ def listf(data):
 def RGBToHEX(rgb_tuple):
     """ convert an (R, G, B) tuple to #RRGGBB """
 
-    hexcolor = f'#%02x%02x%02x'%rgb_tuple[:-1]
+    hexcolor = '#{:02x}{:02x}{:02x}'.format(*rgb_tuple[:-1])
     # that's it! '%02x' means zero-padded, 2-digit hex values
     return hexcolor
     
@@ -1025,7 +1011,7 @@ def HEXToRGB(colorstring):
     colorstring = colorstring.strip()
     if colorstring[0] == '#': colorstring = colorstring[1:]
     if len(colorstring) != 6:
-        raise ValueError("input #%s is not in #RRGGBB format" % colorstring)
+        raise ValueError(f"input #{colorstring} is not in #RRGGBB format")
     r, g, b = colorstring[:2], colorstring[2:4], colorstring[4:]
     r, g, b = [int(n, 16) for n in (r, g, b)]
     return (r, g, b)
@@ -1043,7 +1029,7 @@ def IsAllDigits(str):
 
 
 def FormatSizeFile(size):
-    """
+    """ Format Size File
     """
     if 0 <= size <1000 :
         txt = str(size) + " bytes"
@@ -1053,7 +1039,7 @@ def FormatSizeFile(size):
         txt = str(size/1000000) + " Mo"
     return txt
 
-def listf(data):
+def listf(data):  # noqa: F811
 	buffer = ""
 	for line in data:
 		buffer = buffer + line + "\n"
@@ -1072,7 +1058,7 @@ def FormatTrace(etype, value, trace):
     """
 
     exc = traceback.format_exception(etype, value, trace)
-    exc.insert(0, "*** %s ***%s" % (now(), os.linesep))
+    exc.insert(0, f"*** {now()} ***{os.linesep}")
     return "".join(exc)
 
 
@@ -1092,7 +1078,7 @@ def generate_plantuml_from_diagram_recursive(diagram, level=0, parent_package=No
     
     # Get diagram name
     diagram_name = getattr(diagram, 'name', getattr(diagram, 'label', f'Model_Level_{level}'))
-    safe_name = diagram_name.replace(' ', '_').replace('-', '_')
+    # safe_name = diagram_name.replace(' ', '_').replace('-', '_')
     
     # Start package
     uml_code.append(f'{indent}package "{diagram_name}" {{')
@@ -1133,7 +1119,7 @@ def generate_plantuml_from_diagram_recursive(diagram, level=0, parent_package=No
                                 input_ports.append(p.label)
                             elif isinstance(p, str):
                                 input_ports.append(p)
-            except:
+            except:  # noqa: E722, S110
                 pass
             
             try:
@@ -1149,7 +1135,7 @@ def generate_plantuml_from_diagram_recursive(diagram, level=0, parent_package=No
                                 output_ports.append(p.label)
                             elif isinstance(p, str):
                                 output_ports.append(p)
-            except:
+            except:  # noqa: E722, S110
                 pass
             
             blocks[block_id] = {
@@ -1173,12 +1159,12 @@ def generate_plantuml_from_diagram_recursive(diagram, level=0, parent_package=No
                 src_port_idx = 0
                 dst_port_idx = 0
                 
-                if hasattr(shape, 'input') and shape.input:
+                if hasattr(shape, 'input') and shape.input:  # noqa: SIM102
                     if isinstance(shape.input, tuple) and len(shape.input) >= 2:
                         src_shape = shape.input[0]
                         src_port_idx = shape.input[1]
                 
-                if hasattr(shape, 'output') and shape.output:
+                if hasattr(shape, 'output') and shape.output:  # noqa: SIM102
                     if isinstance(shape.output, tuple) and len(shape.output) >= 2:
                         dst_shape = shape.output[0]
                         dst_port_idx = shape.output[1]
@@ -1209,7 +1195,7 @@ def generate_plantuml_from_diagram_recursive(diagram, level=0, parent_package=No
                             'src_port': src_port_name,
                             'dst_port': dst_port_name
                         })
-            except:
+            except:  # noqa: E722, S110
                 pass
     
     # STEP 3: Generate components
@@ -1293,7 +1279,7 @@ def export_diagram_to_plantuml(diagram, output_path="diagram.puml", detailed=Fal
             uml_code = generate_detailed_class_diagram_recursive(diagram)
         else:
             uml_code = generate_plantuml_from_diagram_recursive(diagram)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"Generation failed: {e}")
         import traceback
         traceback.print_exc()
@@ -1305,223 +1291,13 @@ def export_diagram_to_plantuml(diagram, output_path="diagram.puml", detailed=Fal
     print(f"PlantUML diagram exported to {output_path}")
     return uml_code
 
-
-# def generate_detailed_class_diagram_recursive(diagram, level=0):
-#     """
-#     Generate detailed class diagram with inheritance and relationships.
-#     Explores coupled models recursively.
-#     """
-#     uml_code = []
-    
-#     if level == 0:
-#         uml_code.append("@startuml")
-#         uml_code.append("!theme plain")
-#         uml_code.append("skinparam classAttributeIconSize 0")
-#         uml_code.append("")
-        
-#         # Framework classes
-#         uml_code.append("abstract class AtomicModelImpl {")
-#         uml_code.append("  + initialize() : void")
-#         uml_code.append("  + internalTransition() : void")
-#         uml_code.append("  + externalTransition(e, x) : void")
-#         uml_code.append("  + getOutput() : MessageBag")
-#         uml_code.append("  + getTimeAdvance() : Double")
-#         uml_code.append("}")
-#         uml_code.append("")
-        
-#         uml_code.append("class CoupledModelImpl {")
-#         uml_code.append("  + addChildModel(model) : void")
-#         uml_code.append("  + addCoupling(from, to) : void")
-#         uml_code.append("}")
-#         uml_code.append("")
-    
-#     all_blocks = {}
-#     all_connections = []
-#     coupled_diagrams = []
-    
-#     # Collect all blocks including from coupled models
-#     def collect_blocks(diag, prefix=''):
-#         blocks = {}
-#         for shape in diag.GetShapeList():
-#             if shape.__class__.__name__ in ['iPort', 'oPort']:
-#                 continue
-            
-#             if hasattr(shape, 'label'):
-#                 block_label = shape.label
-#                 full_label = f"{prefix}{block_label}" if prefix else block_label
-#                 block_id = id(shape)
-                
-#                 # Get model class
-#                 model_class = block_label
-#                 if hasattr(shape, 'model') and shape.model:
-#                     model_class = shape.model.__class__.__name__
-                
-#                 is_coupled = (shape.__class__.__name__ == 'ContainerBlock' or
-#                             (hasattr(shape, 'model') and hasattr(shape.model, 'componentSet')))
-                
-#                 # Extract ports
-#                 input_ports = []
-#                 output_ports = []
-                
-#                 try:
-#                     if hasattr(shape, 'input'):
-#                         inp = shape.input
-#                         if isinstance(inp, int):
-#                             input_ports = [f'in{i}' for i in range(inp)] if inp > 0 else []
-#                         elif isinstance(inp, list):
-#                             for p in inp:
-#                                 if isinstance(p, dict):
-#                                     input_ports.append(p.get('name', 'in'))
-#                                 elif hasattr(p, 'label'):
-#                                     input_ports.append(p.label)
-#                 except:
-#                     pass
-                
-#                 try:
-#                     if hasattr(shape, 'output'):
-#                         out = shape.output
-#                         if isinstance(out, int):
-#                             output_ports = [f'out{i}' for i in range(out)] if out > 0 else []
-#                         elif isinstance(out, list):
-#                             for p in out:
-#                                 if isinstance(p, dict):
-#                                     output_ports.append(p.get('name', 'out'))
-#                                 elif hasattr(p, 'label'):
-#                                     output_ports.append(p.label)
-#                 except:
-#                     pass
-                
-#                 blocks[block_id] = {
-#                     'class': model_class,
-#                     'full_label': full_label,
-#                     'is_coupled': is_coupled,
-#                     'input_ports': input_ports,
-#                     'output_ports': output_ports,
-#                     'shape': shape
-#                 }
-                
-#                 # Recurse into coupled models
-#                 if is_coupled and hasattr(shape, 'GetDiagram'):
-#                     internal_diag = shape.GetDiagram()
-#                     if internal_diag:
-#                         nested_blocks = collect_blocks(internal_diag, f"{model_class}.")
-#                         blocks.update(nested_blocks)
-        
-#         return blocks
-    
-#     all_blocks = collect_blocks(diagram)
-    
-#     # Generate class definitions
-#     seen_classes = set()
-#     for block_id, block_info in all_blocks.items():
-#         class_name = block_info['class']
-        
-#         if class_name in seen_classes:
-#             continue
-#         seen_classes.add(class_name)
-        
-#         uml_code.append(f"class {class_name} {{")
-        
-#         if not block_info['is_coupled']:
-#             uml_code.append("  - phase : String")
-#             uml_code.append("  - sigma : Double")
-        
-#         if block_info['input_ports'] or block_info['output_ports']:
-#             uml_code.append("  --")
-        
-#         for port in block_info['input_ports']:
-#             uml_code.append(f"  + {port} : InputPort")
-        
-#         for port in block_info['output_ports']:
-#             uml_code.append(f"  + {port} : OutputPort")
-        
-#         uml_code.append("}")
-#         uml_code.append("")
-    
-#     # Generate inheritance
-#     atomic_classes = set()
-#     coupled_classes = set()
-    
-#     for block_info in all_blocks.values():
-#         if block_info['is_coupled']:
-#             coupled_classes.add(block_info['class'])
-#         else:
-#             atomic_classes.add(block_info['class'])
-    
-#     for cls in atomic_classes:
-#         uml_code.append(f"AtomicModelImpl <|-- {cls}")
-    
-#     for cls in coupled_classes:
-#         uml_code.append(f"CoupledModelImpl <|-- {cls}")
-    
-#     uml_code.append("")
-    
-#     # Generate connections (from all levels)
-#     def extract_connections(diag):
-#         conns = []
-#         block_map = {}
-        
-#         for shape in diag.GetShapeList():
-#             if hasattr(shape, 'label'):
-#                 block_map[id(shape)] = shape
-        
-#         for shape in diag.GetShapeList():
-#             if shape.__class__.__name__ == 'ConnectionShape':
-#                 try:
-#                     src_id = None
-#                     dst_id = None
-#                     src_port = ''
-#                     dst_port = ''
-                    
-#                     if hasattr(shape, 'output') and isinstance(shape.output, list) and len(shape.output) > 0:
-#                         sp = shape.output[0]
-#                         if hasattr(sp, 'parent'):
-#                             src_id = id(sp.parent)
-#                             src_port = getattr(sp, 'label', 'out')
-                    
-#                     if hasattr(shape, 'input') and isinstance(shape.input, list) and len(shape.input) > 0:
-#                         dp = shape.input[0]
-#                         if hasattr(dp, 'parent'):
-#                             dst_id = id(dp.parent)
-#                             dst_port = getattr(dp, 'label', 'in')
-                    
-#                     if src_id in block_map and dst_id in block_map:
-#                         src_shape = block_map[src_id]
-#                         dst_shape = block_map[dst_id]
-                        
-#                         src_class = src_shape.model.__class__.__name__ if hasattr(src_shape, 'model') and src_shape.model else src_shape.label
-#                         dst_class = dst_shape.model.__class__.__name__ if hasattr(dst_shape, 'model') and dst_shape.model else dst_shape.label
-                        
-#                         conns.append((src_class, src_port, dst_class, dst_port))
-#                 except:
-#                     pass
-        
-#         # Recurse into coupled models
-#         for shape in diag.GetShapeList():
-#             if shape.__class__.__name__ == 'ContainerBlock' and hasattr(shape, 'GetDiagram'):
-#                 internal_diag = shape.GetDiagram()
-#                 if internal_diag:
-#                     conns.extend(extract_connections(internal_diag))
-        
-#         return conns
-    
-#     connections = extract_connections(diagram)
-    
-#     for src_class, src_port, dst_class, dst_port in connections:
-#         uml_code.append(f"{src_class}::{src_port} --> {dst_class}::{dst_port}")
-    
-#     if level == 0:
-#         uml_code.append("")
-#         uml_code.append("@enduml")
-    
-#     return '\n'.join(uml_code)
-
 def generate_detailed_class_diagram_recursive(diagram, level=0):
     """
     Generate detailed class diagram with REAL inheritance hierarchy.
     Uses Components.GetClass to load classes from pythonpath WITHOUT needing DEVS instantiation.
     """
     import inspect
+
     import Components
     
     print("\n=== STARTING CLASS DIAGRAM GENERATION ===")
@@ -1578,7 +1354,7 @@ def generate_detailed_class_diagram_recursive(diagram, level=0):
                         print(f"    -> Got pythonpath from DEVS instance: {python_path}")
             
             if not python_path:
-                print(f"    -> No pythonpath found, skipping")
+                print("    -> No pythonpath found, skipping")
                 continue
             
             print(f"    -> Python path: {python_path}")
@@ -1588,7 +1364,7 @@ def generate_detailed_class_diagram_recursive(diagram, level=0):
                 python_class = Components.GetClass(python_path)
                 
                 if python_class is None:
-                    print(f"    -> ERROR: Components.GetClass returned None")
+                    print("    -> ERROR: Components.GetClass returned None")
                     continue
                 
                 if isinstance(python_class, ImportError):
@@ -1601,7 +1377,7 @@ def generate_detailed_class_diagram_recursive(diagram, level=0):
                 
                 print(f"    -> SUCCESS: Loaded class {python_class.__name__}")
                 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 print(f"    -> EXCEPTION loading class: {e}")
                 import traceback
                 traceback.print_exc()
@@ -1611,7 +1387,7 @@ def generate_detailed_class_diagram_recursive(diagram, level=0):
             try:
                 mro = inspect.getmro(python_class)
                 print(f"    -> MRO: {[c.__name__ for c in mro]}")
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 print(f"    -> ERROR getting MRO: {e}")
                 continue
             
@@ -1662,7 +1438,7 @@ def generate_detailed_class_diagram_recursive(diagram, level=0):
                                     methods.append(f"{method_name}({params})")
                                 else:
                                     methods.append(f"{method_name}()")
-                            except:
+                            except:  # noqa: E722
                                 methods.append(f"{method_name}()")
                 
                 # Extract attributes defined in THIS class
@@ -1684,13 +1460,13 @@ def generate_detailed_class_diagram_recursive(diagram, level=0):
                 if cls == python_class:
                     # Try to get ports from class definition
                     if hasattr(cls, 'IPorts'):
-                        iports = getattr(cls, 'IPorts')
+                        iports = cls.IPorts
                         if isinstance(iports, list):
                             ports_in = [p if isinstance(p, str) else f'in{i}' 
                                        for i, p in enumerate(iports)]
                     
                     if hasattr(cls, 'OPorts'):
-                        oports = getattr(cls, 'OPorts')
+                        oports = cls.OPorts
                         if isinstance(oports, list):
                             ports_out = [p if isinstance(p, str) else f'out{i}' 
                                         for i, p in enumerate(oports)]
@@ -1903,19 +1679,17 @@ def EnvironmentInfo():
     info = "---- Notes ----\n"
     info += "Please provide additional information about the crash here \n"
     info += "---- System Information ----\n"
-    info += "Operating System: %s\n" % wx.GetOsDescription()
+    info += f"Operating System: {wx.GetOsDescription()}\n"
     if sys.platform == 'darwin':
-        info += "Mac OSX: %s\n" % platform.mac_ver()[0]
-    info += "Python Version: %s\n" % sys.version
-    info += "wxPython Version: %s\n" % wx.version()
-    info += "wxPython Info: (%s)\n" % ", ".join(wx.PlatformInfo)
-    info += "Python Encoding: Default=%s  File=%s\n" % \
-                (sys.getdefaultencoding(), sys.getfilesystemencoding())
-    info += "wxPython Encoding: %s\n" %  str(wx.Font.GetDefaultEncoding())
-    info += "System Architecture: %s %s\n" % (platform.architecture()[0], \
-                                                platform.machine())
-    info += "Byte order: %s\n" % sys.byteorder
-    info += "Frozen: %s\n" % str(getattr(sys, 'frozen', 'False'))
+        info += f"Mac OSX: {platform.mac_ver()[0]}\n"
+    info += f"Python Version: {sys.version}\n"
+    info += f"wxPython Version: {wx.version()}\n"
+    info += "wxPython Info: ({})\n".format(", ".join(wx.PlatformInfo))
+    info += f"Python Encoding: Default={sys.getdefaultencoding()}  File={sys.getfilesystemencoding()}\n"
+    info += f"wxPython Encoding: {wx.Font.GetDefaultEncoding()!s}\n"
+    info += f"System Architecture: {platform.architecture()[0]} {platform.machine()}\n"
+    info += f"Byte order: {sys.byteorder}\n"
+    info += "Frozen: {}\n".format(str(getattr(sys, 'frozen', 'False')))
     info += "---- End System Information ----"
 
     return info

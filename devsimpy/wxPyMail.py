@@ -11,7 +11,7 @@
 #################################################################################################################################################################################
 '''
 
-import math
+import math  
 import os
 import smtplib
 import urllib.request, urllib.parse, urllib.error
@@ -21,24 +21,24 @@ import wx.lib.agw.hyperlink as hl
 _ = wx.GetTranslation
 
 try:
-    from email.mime.multipart import MIMEMultipart
+    from email.mime.multipart import MIMEMultipart  
     from email.mime.base import MIMEBase
     from email.mime.text import MIMEText
     from email.utils import formatdate
     from email import encoders as Encoders
-except ImportError as e:
-    from email.mime.multipart import MIMEMultipart
+except ImportError:
+    from email.mime.multipart import MIMEMultipart  
     from email.mime.base import MIMEBase
     from email.mime.text import MIMEText
     from email.utils import formatdate
     from email import encoders as Encoders
 
-from Utilities import load_and_resize_image
+from Utilities import load_and_resize_image  
 
 class SendMailWx(wx.Frame):
 
     def __init__(self, *args, **kw):
-        super(SendMailWx, self).__init__(*args, **kw)
+        super().__init__(*args, **kw)
 
         # set your email address here
         self.email = 'your_email@gmail.com'
@@ -210,9 +210,9 @@ class SendMailWx(wx.Frame):
             
             # modify the attachment's label based on it's current contents
             if attachments == '':
-                attachments = '%s (%s)' % (os.path.basename(filepath), fSize)
+                attachments = f'{os.path.basename(filepath)} ({fSize})'
             else:
-                temp = '%s (%s)' % (os.path.basename(filepath), fSize)
+                temp = f'{os.path.basename(filepath)} ({fSize})'
                 attachments = attachments + '; ' + temp
             self.attachTxt.SetLabel(attachments)
         dialog.Destroy()
@@ -238,9 +238,9 @@ class SendMailWx(wx.Frame):
                 fSize = self.getFileSize(path)
                 # Edit the attachments listed
                 if attachments == '':
-                    attachments = '%s (%s)' % (os.path.basename(path), fSize)
+                    attachments = f'{os.path.basename(path)} ({fSize})'
                 else:
-                    temp = '%s (%s)' % (os.path.basename(path), fSize)
+                    temp = f'{os.path.basename(path)} ({fSize})'
                     attachments = attachments + '; ' + temp            
 
             self.attachTxt.SetLabel(attachments)
@@ -249,16 +249,16 @@ class SendMailWx(wx.Frame):
         ''' Get the file's approx. size '''
         fSize = os.stat(f).st_size
         if fSize >= 1073741824: # gigabyte
-            fSize = int(math.ceil(fSize/1073741824.0))
-            size = '%s GB' % fSize
+            fSize = math.ceil(fSize/1073741824.0)
+            size = f'{fSize} GB'
         elif fSize >= 1048576:  # megabyte
-            fSize = int(math.ceil(fSize/1048576.0))
-            size = '%s MB' % fSize
+            fSize = math.ceil(fSize/1048576.0)
+            size = f'{fSize} MB'
         elif fSize >= 1024:           # kilobyte
-            fSize = int(math.ceil(fSize/1024.0))
-            size = '%s KB' % fSize
+            fSize = math.ceil(fSize/1024.0)
+            size = f'{fSize} KB'
         else:
-            size = '%s bytes' % fSize
+            size = f'{fSize} bytes'
         return size
     
     def OnSend(self, event):
@@ -293,7 +293,7 @@ class SendMailWx(wx.Frame):
             dlg.ShowModal()
             dlg.Destroy()
         elif From == '':
-            lg = wx.MessageDialog(None, _('Please add an address to the "From" field and try again'),
+            wx.MessageDialog(None, _('Please add an address to the "From" field and try again'),
                                   _('Error'), wx.OK|wx.ICON_EXCLAMATION)
             dlg.ShowModal()
             dlg.Destroy()  
@@ -309,9 +309,9 @@ class SendMailWx(wx.Frame):
                 print('attaching file(s)...')
                 for path in self.filepaths:
                     part = MIMEBase('application', "octet-stream")
-                    part.set_payload( open(path,"rb").read() )
+                    part.set_payload( open(path,"rb").read() )  # noqa: SIM115
                     Encoders.encode_base64(part)
-                    part.add_header('Content-Disposition', 'attachment; filename="%s"' % os.path.basename(path))
+                    part.add_header('Content-Disposition', f'attachment; filename="{os.path.basename(path)}"')
                     msg.attach(part)
 
             # edit this to match your mail server (i.e. mail.myserver.com)
@@ -320,14 +320,14 @@ class SendMailWx(wx.Frame):
             # open login dialog
             dlg = LoginDlg(server)
 
-            res = dlg.ShowModal()
+            dlg.ShowModal()
             if dlg.loggedIn:
                 dlg.Destroy()   # destroy the dialog
                 try:
                     failed = server.sendmail(From, To, msg.as_string())
                     server.quit()                    
                     self.Close()    # close the program
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     print('Error - send failed!')
                     print(e)
                 else:
@@ -441,10 +441,10 @@ class LoginDlg(wx.Dialog):
             pw   = self.passwordTxt.GetValue()
             self.server.starttls()
             self.server.ehlo()
-            res = self.server.login(user, pw)
+            self.server.login(user, pw)
             self.loggedIn = True
             self.OnClose('')            
-        except:
+        except:  # noqa: E722
             message = _('Your username or password is incorrect. Please try again.')
             dlg = wx.MessageDialog(None, message, _('Login Error'), wx.OK|wx.ICON_EXCLAMATION)
             dlg.ShowModal()

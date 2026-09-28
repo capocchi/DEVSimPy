@@ -1,21 +1,22 @@
 ### Exposed when "from Mixins import *"" is used
-__all__ = [	"Attributable",
+__all__ = [
+			"Abstractable",
 			"Achievable",
+			"Attributable",
+			"Connectable",
+			"Icon",
+			"Iconizable",
+			"PickledCollection",
+			"Plugable",
 			"Resizeable",
 			"Rotatable",
-			"Connectable",
-			"Plugable",
-			"Structurable",
 			"Savable",
-            "Icon",
-            "PickledCollection",
-            "Abstractable",
-            "Iconizable",
-            "Selectable"
+			"Selectable",
+			"Structurable"
 ]
 
 ### Allows invoking the class as from Mixins import Attributable, for example, anywhere in the code!
-from .Attributable import Attributable
+from .Attributable import Attributable  
 from .Achievable import Achievable
 from .Resizeable import Resizeable
 from .Rotatable import Rotatable

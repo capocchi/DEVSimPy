@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 ################################################################################
 # file: printout.py
 ################################################################################
 
-import wx
+import wx  
 import sys
 
 _ = wx.GetTranslation
@@ -18,25 +18,22 @@ class Printout(wx.Printout):
         self.print_size = size
 	
     def OnBeginDocument(self, start, end):
-        return super(Printout, self).OnBeginDocument(start, end)
+        return super().OnBeginDocument(start, end)
 
     def OnEndDocument(self):
-        super(Printout, self).OnEndDocument()
+        super().OnEndDocument()
 
     def OnBeginPrinting(self):
-        super(Printout, self).OnBeginPrinting()
+        super().OnBeginPrinting()
 
     def OnEndPrinting(self):
-        super(Printout, self).OnEndPrinting()
+        super().OnEndPrinting()
 
     def OnPreparePrinting(self):
-        super(Printout, self).OnPreparePrinting()
+        super().OnPreparePrinting()
 
     def HasPage(self, page):
-        if page <= 2:
-            return True
-        else:
-            return False
+        return page <= 2
 
     def GetPageInfo(self):
         """ Number of page for the print

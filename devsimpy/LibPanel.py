@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -26,19 +26,19 @@ import wx
 
 _ = wx.GetTranslation
 
-from LibraryTree import LibraryTree
+from LibraryTree import LibraryTree  
 from Utilities import load_and_resize_image
 
 import Menu
 
 #-----------------------------------------------------------------------
 class SearchLib(wx.SearchCtrl):
-	"""
+	""" Search Library
 	"""
 	def __init__(self, *args, **kwargs):
+		""" Constructor
 		"""
-		"""
-		super(SearchLib, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 
 		self.treeChildren = []
 		self.treeCopy = None
@@ -49,22 +49,22 @@ class SearchLib(wx.SearchCtrl):
 		self.SetToolTip(_("Find model in the library depending its name."))
 
 	def OnCancel(self, evt):
-		"""
+		""" Cancel button has been clicked
 		"""
 		self.Clear()
 
 	def OnSearch(self, evt):
-		"""
+		""" Search button has been clicked
 		"""
 		mainW = evt.GetEventObject().GetTopLevelParent()
 		mainW.OnSearch(evt)
 
 #-----------------------------------------------------------------------
 class LibPanel(wx.Panel):
-	"""
+	""" LibPanel
 	"""
 	def __init__(self, parent, name):
-		super(LibPanel, self).__init__(parent, name=name)
+		super().__init__(parent, name=name)
 
 		libSizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -220,7 +220,7 @@ class LibPanel(wx.Panel):
 			)
 			dlg.ShowModal()
 			dlg.Destroy()
-		except Exception as e:
+		except Exception:  # noqa: BLE001
 			# Fallback si wx.lib.dialogs n'est pas disponible
 			wx.MessageBox(
 				help_msg,
@@ -230,7 +230,7 @@ class LibPanel(wx.Panel):
 
 
 	def __set_tips(self):
-		"""
+		""" Set tooltips for the library panel
 		"""
 
 		self.propToolTip =[_("Select model and instantiate it in the diagram (right part) using a drag-and-drop.")]

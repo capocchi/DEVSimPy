@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 # pluginmanager.py
 
-from collections import defaultdict
+from collections import defaultdict  
 from Utilities import listf
 from traceback import format_exception
 
@@ -13,17 +13,17 @@ import builtins
 import gettext
 _ = gettext.gettext
 
-class PluginManager(object):
+class PluginManager:
 
 	#def __init__(self):
 	# list of registred plug-ins
-	plugins = defaultdict(list)
+	plugins = defaultdict(list)  # noqa: RUF012
 	# list of enable/disable event plug-in
-	enabled_event = []
-	disabled_event = []
+	enabled_event = []  # noqa: RUF012
+	disabled_event = []  # noqa: RUF012
 	# list of enable/disabled plug-ins
-	enabled_plugin = []
-	disabled_plugin = []
+	enabled_plugin = []  # noqa: RUF012
+	disabled_plugin = []  # noqa: RUF012
 
 	@staticmethod
 	def register(*events):
@@ -96,13 +96,13 @@ class PluginManager(object):
 			return sys.modules[modulename]
 		else:
 			try:
-				if PLUGINS_PATH not in sys.path:
-					sys.path.append(PLUGINS_PATH)
+				if PLUGINS_PATH not in sys.path: # type: ignore  # noqa: F821
+					sys.path.append(PLUGINS_PATH) # type: ignore  # noqa: F821
 				name, _ = os.path.splitext(modulename)
 				pkg = '.'.join(modulename.split('.')[0:-1])
 				module = importlib.import_module(name, package=pkg)
 				return module
-			except Exception as info:
-				msg = _("Path of plugins directory is wrong.") if not os.path.exists(PLUGINS_PATH) else str(sys.exc_info()[0]) +"\r\n" + listf(format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
+			except Exception as info:  # noqa: BLE001
+				msg = _("Path of plugins directory is wrong.") if not os.path.exists(PLUGINS_PATH) else str(sys.exc_info()[0]) +"\r\n" + listf(format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])) # type: ignore  # noqa: F821
 				sys.stderr.write(f"Error trying to import plugin {modulename}: {info}\n{msg}")
 				return info

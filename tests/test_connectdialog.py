@@ -8,7 +8,7 @@ Usage:
 from ApplicationController import TestApp
 
 # import after ApplicationController that inits sys.path ot avoid this import
-from ConnectDialog import ConnectDialog 
+from ConnectDialog import ConnectDialog  # type: ignore
 
 # Run the test
 app = TestApp(0)

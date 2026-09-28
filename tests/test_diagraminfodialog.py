@@ -148,10 +148,10 @@ Number of deep level (description hierarchy): 2
 Number of input port models: 0
 Number of output port models: 0"""
 
-import wx
+import wx  # noqa: F401
 
-from ApplicationController import TestApp
-from DiagramInfoDialog import DiagramInfoDialog
+from ApplicationController import TestApp  # noqa: F811
+from DiagramInfoDialog import DiagramInfoDialog # type: ignore
 
 # Run the test
 app = TestApp(0)

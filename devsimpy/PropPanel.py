@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -27,7 +27,7 @@ import wx
 _ = wx.GetTranslation
 
 class PropPanel(wx.Panel):
-	"""
+	""" Prop
 	"""
 	def __init__(self, parent, name):
 		wx.Panel.__init__(self, parent=parent, id=wx.NewIdRef(), name=name)
@@ -45,7 +45,7 @@ class PropPanel(wx.Panel):
 		self.__set_tips()
 
 	def defaultPropertiesPage(self):
-		"""
+		""" Prop Page
 		"""
 
 		propContent = wx.StaticText(self, wx.NewIdRef(), _("Select a model from diagram \n to see their properties."))
@@ -70,7 +70,7 @@ class PropPanel(wx.Panel):
 		self.frame.Layout()
 
 	def __set_tips(self):
-		"""
+		""" Tips
 		"""
 
 		self.propToolTip =[_("No model selected.\nChoose a model to show in this panel its properties."),_("You can change the properties by editing the cell.")]

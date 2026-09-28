@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-  # noqa: UP009
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Container.py ---
@@ -23,7 +23,7 @@
 import builtins
 
 if getattr(builtins,'GUI_FLAG', True):
-	import wx
+	import wx  
 	import wx.lib.dragscroller
 	import wx.lib.dialogs
 	from wx.lib.newevent import NewEvent
@@ -43,7 +43,7 @@ else:
 	import gettext
 	_ = gettext.gettext
 
-import os
+import os  
 import sys
 import copy
 import re
@@ -55,14 +55,14 @@ import inspect
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
     
-from abc import ABC
+from abc import ABC  
 from tempfile import gettempdir
 from traceback import format_exception
 from math import * ### for eval
 from collections import Counter
 
 if getattr(builtins, 'GUI_FLAG', True):
-	import ConnectDialog
+	import ConnectDialog  
 	import DiagramConstantsDialog
 	import SpreadSheet
 	import ZipManager
@@ -96,11 +96,11 @@ from Mixins import *
 sys.modules['Savable'] = sys.modules['Mixins.Savable']
 sys.modules['Container.PickledCollection'] = PickledCollection
 
-from Decorators import BuzyCursorNotification, Post_Undo
+from Decorators import BuzyCursorNotification, Post_Undo  
 from Utilities import (HEXToRGB,
 						relpath, 
 						playSound, 
-						sendEvent, 
+						sendEvent,  # noqa: F401
 						load_and_resize_image, 
 						getInstance, FixedList, 
 						getObjectFromString, 
@@ -114,7 +114,7 @@ from StandaloneGUIKafkaPKG import StandaloneGUIKafkaPKG
 from DiagramInfoDialog import DiagramInfoDialog
 
 if getattr(builtins, 'GUI_FLAG', True):
-	from DetachedFrame import DetachedFrame
+	from DetachedFrame import DetachedFrame  
 	from AttributeEditor import AttributeEditor, QuickAttributeEditor
 	from PropertiesGridCtrl import PropertiesGridCtrl
 
@@ -157,26 +157,26 @@ def MsgBoxError(event, parent, msg):
 
 			### find if DOMAIN_PATH is in the first file path of the trace
 			p = paths[-1]
-			if DOMAIN_PATH in p or DEVSIMPY_PACKAGE_PATH not in p:
+			if DOMAIN_PATH in p or DEVSIMPY_PACKAGE_PATH not in p: # type: ignore
 				path,line,fct = p.split(',')[0:3]
 
-		except Exception as info:
+		except Exception:  # noqa: BLE001
 			path = None
 			line = None
 			fct = None
 
 		if path is not None:
-			python_path = "File: %s\n"%(path.split(' ')[-1])
+			python_path = "File: {}\n".format(path.split(' ')[-1])
 		else:
 			python_path = ""
 
 		if line is not None:
-			line_number = "Line: %s\n"%(line.split(' ')[-1])
+			line_number = "Line: {}\n".format(line.split(' ')[-1])
 		else:
 			line_number = ""
 
 		if fct is not None:
-			fct = "Function: %s\n"%(fct.split('\n')[0])
+			fct = "Function: {}\n".format(fct.split('\n')[0])
 		else:
 			fct = ""
 
@@ -324,7 +324,7 @@ class Diagram(Savable, Structurable):
 		else:
 			raise AttributeError(name)
 
-	def toJSON(self, diagram=None, with_graph_data=False, json_obj={"cells":[], "description": "No description"}
+	def toJSON(self, diagram=None, with_graph_data=False, json_obj={"cells":[], "description": "No description"}  # noqa: B006
 ):
 		""" Make JSON representation of the model from the diagram.
 		"""
@@ -423,12 +423,14 @@ class Diagram(Savable, Structurable):
 		return json_obj
 	
 	@staticmethod
-	def makeDEVSGraph(diagram, D = {}, type = object):
+	def makeDEVSGraph(diagram, D = None, type = object):
 		""" Make a formated dictionnary to make the graph of the DEVS Network: {'S1': [{'C1': (1, 0)}, {'M': (0, 1)}], port 1 of S1 is connected to the port 0 of C1...
 		"""
 
 
 		# for all components in the diagram
+		if D is None:
+			D = {}
 		for c in diagram.GetShapeList():
 			# if the component is the conncetionShape, then add the new element in the D dictionnary
 			if isinstance(c, ConnectionShape):
@@ -507,7 +509,7 @@ class Diagram(Savable, Structurable):
 
 			### Class is wrong ?
 			if isinstance(cls, (ImportError, tuple)) or cls is None:
-				sys.stdout.write(_('Error making DEVS instances for:\n%s (class:%s)\n'%(m.python_path,str(cls))))
+				sys.stdout.write(_(f'Error making DEVS instances for:\n{m.python_path} (class:{cls!s})\n'))  # noqa: INT001
 				return False
 			else:
 				### DEVS model recovery
@@ -590,7 +592,7 @@ class Diagram(Savable, Structurable):
 		###==============================================================================
 		if hasattr(diagram, 'current_level') and diagram.current_level>0:
 			# for all iPort shape, we make the devs instance
-			for i,m in enumerate((s for s in shapeL0 if isinstance(s, iPort))):
+			for i,m in enumerate(s for s in shapeL0 if isinstance(s, iPort)):
 				p1 = diagram.getDEVSModel().IPorts[i]
 				p2 = devs_dam.IPorts[i]
 				Structurable.ConnectDEVSPorts(diagram, p1, p2)
@@ -605,7 +607,7 @@ class Diagram(Savable, Structurable):
 		### Add abstraction level manager
 		if hasattr(diagram, 'current_level') and diagram.current_level>0:
 			# for all oPort shape, we make the devs instance
-			for i,m in enumerate((s for s in shapeL0 if isinstance(s, oPort))):
+			for i,m in enumerate(s for s in shapeL0 if isinstance(s, oPort)):
 				p1 = devs_uam.OPorts[i]
 				p2 = diagram.getDEVSModel().OPorts[i]
 				Structurable.ConnectDEVSPorts(diagram, p1, p2)
@@ -623,13 +625,13 @@ class Diagram(Savable, Structurable):
 			if (isinstance(m1, Block) and m1.isEnabled()) and (isinstance(m2, Block) and m2.isEnabled()):
 				try:
 					p1 = m1.getDEVSModel().OPorts[n1]
-				except:
+				except:  # noqa: E722
 					msg = _("It seems that the number of internal output ports (%d) of the coupled model %s is not enough!\nPlease check this.")%(len(m1.getDEVSModel().OPorts),m1.label)
 					sys.stdout.write(msg)
 					return msg
 				try:
 					p2 = m2.getDEVSModel().IPorts[n2]
-				except:
+				except:  # noqa: E722
 					msg = _("It seems that the number of internal input ports (%d) of the coupled model %s is not enough!\nPlease check this.")%(len(m2.getDEVSModel().IPorts),m2.label)
 					sys.stdout.write(msg)
 					return msg
@@ -684,7 +686,7 @@ class Diagram(Savable, Structurable):
 
 			# 	Structurable.ConnectDEVSPorts(diagram, p1, p2)
 			else:
-				msg = _('Direct connections between ports inside the coupled model %s have been founded.\n There are not considered by the simulation!\n'%(diagram.label))
+				msg = _(f'Direct connections between ports inside the coupled model {diagram.label} have been founded.\n There are not considered by the simulation!\n')  # noqa: INT001
 				sys.stdout.write(msg)
 				#return msg
 
@@ -774,7 +776,7 @@ class Diagram(Savable, Structurable):
 				if s in self.priority_list :
 					try:
 						result[self.priority_list.index(s)]=s
-					except:
+					except:  # noqa: E722, S110
 						pass
 				else:
 					result[lenght-cpt] = s
@@ -811,7 +813,7 @@ class Diagram(Savable, Structurable):
 			dlg = DiagramInfoDialog(self.GetParent(), msg, puml_component, puml_class)
 			dlg.ShowModal()
 			dlg.Destroy()
-		except Exception as e:
+		except Exception as e:  # noqa: BLE001
 			wx.MessageBox(_("An error occurred while generating the PlantUML diagram: %s") % str(e), _("Error"), wx.OK | wx.ICON_ERROR)	
 			dlg = wx.lib.dialogs.ScrolledMessageDialog(self.GetParent(), msg, _("Diagram Information"), style=wx.OK|wx.ICON_EXCLAMATION|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 			dlg.ShowModal()
@@ -863,7 +865,7 @@ class Diagram(Savable, Structurable):
 			dlg.Destroy()
 
 	@BuzyCursorNotification
-	def checkDEVSInstance(self, diagram=None, D={}):
+	def checkDEVSInstance(self, diagram=None, D=None):
 		""" Recursive DEVS instance checker for a diagram.
 
 			@param diagram: diagram instance
@@ -871,6 +873,8 @@ class Diagram(Savable, Structurable):
 
 		"""
 		### shape list of diagram
+		if D is None:
+			D = {}
 		shape_list = set(diagram.GetShapeList())
 
 		#### for all codeBlock and containerBlock shapes, we make the devs instance
@@ -945,7 +949,7 @@ class Diagram(Savable, Structurable):
 									_('Simulation Manager'), \
 									wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
 
-				playSound(SIMULATION_ERROR_SOUND_PATH)
+				playSound(SIMULATION_ERROR_SOUND_PATH) # pyright: ignore[reportUndefinedVariable]
 
 				if dial.ShowModal() == wx.ID_YES:
 					frame = CheckerGUI.CheckerGUI(win, _("DEVS Model Checking"), D)
@@ -1003,7 +1007,7 @@ class Diagram(Savable, Structurable):
 ##					obj = event.GetEventObject()
 					# si invocation à partir du bouton dans la toolBar (apparition de la frame de simulation dans une fenetre)
 					if isinstance(obj, wx.ToolBar) or 'Diagram' in obj.GetTitle():
-						frame = SimulationGUI.SimulationDialog(win, wx.NewIdRef(), _(" %s Simulator"%diagram.label))
+						frame = SimulationGUI.SimulationDialog(win, wx.NewIdRef(), _(f" {diagram.label} Simulator"))  # noqa: INT001
 						frame.SetMaster(master)
 						frame.Show()
 					## si invocation par le menu (apparition de la frame de simulation dans le panel)
@@ -1050,14 +1054,13 @@ class Diagram(Savable, Structurable):
 
 		### delete all shape connected with connection shape
 		for cs in [c for c in self.GetShapeList() if isinstance(c, ConnectionShape)]:
-			if cs.input is not None and cs.output is not None:
+			if cs.input is not None and cs.output is not None:  # noqa: SIM102
 				if shape in cs.input+cs.output:
 					self.shapes.remove(cs)
 
-		if isinstance(shape, Block):
-			if shape.label in self.priority_list:
-				### update priority list
-				self.priority_list.remove(shape.label)
+		if isinstance(shape, Block) and shape.label in self.priority_list:
+			### update priority list
+			self.priority_list.remove(shape.label)
 
 
 		if isinstance(shape, Block):
@@ -1161,9 +1164,11 @@ class Diagram(Savable, Structurable):
 		"""
 		return len(self.shapes)
 
-	def GetFlatBlockShapeList(self, l=[]):
+	def GetFlatBlockShapeList(self, l=None):
 		""" Get the flat list of Block (Code and Container) shape using recursion process
 		"""
+		if l is None:
+			l = []
 		for shape in self.shapes:
 			if isinstance(shape, CodeBlock):
 				l.append(shape)
@@ -1191,7 +1196,7 @@ class Diagram(Savable, Structurable):
 			if m.label.strip() == label.strip():
 				return m
 
-		sys.stderr.write(_("Block %s not found.\n"%(label)))
+		sys.stderr.write(_(f"Block {label} not found.\n"))  # noqa: INT001
 		return False
 
 	def GetShapeList(self):
@@ -1237,8 +1242,8 @@ class Diagram(Savable, Structurable):
 
 		for devs in [a for a in list(self.devsModel.getFlatComponentSet().values()) if hasattr(a, 'finish')]:
 			try:
-				Publisher.unsubscribe(devs.finish, "%d.finished"%(id(devs)))
-			except:
+				Publisher.unsubscribe(devs.finish, "%d.finished"%(id(devs)))  # noqa: UP031
+			except:  # noqa: E722
 				sys.stdout.write(_("Impossible to execute the finish method for the model %s!\n")%devs)
 				devs.finish(None)
 
@@ -1279,10 +1284,12 @@ class Diagram(Savable, Structurable):
 
 		return d
 
-	def GetLabelList(self, l=[]):
+	def GetLabelList(self, l=None):
 		""" Get Labels of all models
 		"""
 
+		if l is None:
+			l = []
 		for m in [a for a in self.GetShapeList() if isinstance(a, Block)]:
 			l.append(m.label)
 			if isinstance(m, ContainerBlock):
@@ -1346,18 +1353,22 @@ class Shape(ShapeEvtHandler):
 	""" Shape class
 	"""
 	
-	FILL = [BLUE]
+	FILL = [BLUE]  # noqa: RUF012
 	
-	def __init__(self, x=[], y=[]):
+	def __init__(self, x=None, y=None):
 		""" Constructor
 		"""
 
+		if x is None:
+			x = []
+		if y is None:
+			y = []
 		self.x = array.array('d', x)     # list of x coord
 		self.y = array.array('d', y)     # list of y coords
 		self.fill = Shape.FILL          # fill color
 		self.dashed = False 			# dashed line used to enable/disbale the shape
 		self.pen = [self.fill[0] , 1, 100]   # pen color and size / 100 = wx.PENSTYLE_SOLID
-		self.font = [FONT_SIZE, 74, 93, 700, u'Arial']
+		self.font = [FONT_SIZE, 74, 93, 700, u'Arial'] # type: ignore  # noqa: UP025
 
 	def draw(self, dc):
 		""" Draw method """
@@ -1392,7 +1403,7 @@ class Shape(ShapeEvtHandler):
 		# If the object has a label, adjust the font size
 		if hasattr(self, 'label'):
 
-			font = FONT_SIZE
+			font = FONT_SIZE # type: ignore
 			margin = 25
 
 			# Create the font object only once
@@ -1472,7 +1483,7 @@ class Shape(ShapeEvtHandler):
 
 #-------------------------------------------------------------------------------
 class LineShape(Shape):
-	"""
+	""" LineShape class
 	"""
 
 	def __init__(self, x1 = 20, y1 = 20, x2 = 50, y2 = 50):
@@ -1504,7 +1515,7 @@ class LineShape(Shape):
 
 		dist = pow(pow(newx-x, 2) + pow(newy-y, 2), .5)
 
-		return False if dist > 7 else True
+		return not dist > 7
 
 #-------------------------------------------------------------------------------
 class RoundedRectangleShape(Shape):
@@ -1540,9 +1551,7 @@ class RoundedRectangleShape(Shape):
 		if x < self.x[0]: return False
 		if x > self.x[1]: return False
 		if y < self.y[0]: return False
-		if y > self.y[1]: return False
-
-		return True
+		return not y > self.y[1]
 
 #-------------------------------------------------------------------------------
 class RectangleShape(Shape):
@@ -1571,9 +1580,7 @@ class RectangleShape(Shape):
 		if x < self.x[0]: return False
 		if x > self.x[1]: return False
 		if y < self.y[0]: return False
-		if y > self.y[1]: return False
-
-		return True
+		return not y > self.y[1]
 
 #-------------------------------------------------------------------------------
 class PolygonShape(Shape):
@@ -1586,7 +1593,7 @@ class PolygonShape(Shape):
 		Shape.__init__(self, [x, x2] , [y, y2])
 
 	def draw(self, dc):
-		"""
+		""" Draw method
 		"""
 
 		Shape.draw(self, dc)
@@ -1607,8 +1614,7 @@ class PolygonShape(Shape):
 		if x < self.x[0]: return False
 		if x > self.x[1]: return False
 		if y < self.y[0]: return False
-		if y > self.y[1]: return False
-		return True
+		return not y > self.y[1]
 
 #-------------------------------------------------------------------------------
 class CircleShape(Shape):
@@ -1632,8 +1638,7 @@ class CircleShape(Shape):
 		if x < self.x[0]: return False
 		if x > self.x[1]: return False
 		if y < self.y[0]: return False
-		if y > self.y[1]: return False
-		return True
+		return not y > self.y[1]
 
 #-------------------------------------------------------------------------------
 class PointShape(Shape):
@@ -1682,7 +1687,7 @@ class PointShape(Shape):
 		return self.graphic.HitTest(x, y)
 
 	def draw(self,dc):
-		"""
+		""" Draw method
 		"""
 		# Mac's DC is already the same as a GCDC, and it causes
         # problems with the overlay if we try to use an actual
@@ -1710,7 +1715,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 			  		size=(-1,-1), \
 				  	style=wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN, \
 				  	name="", \
-				  	diagram = None):
+				  	diagram = None):  # noqa: B008
 			""" Construcotr
 			"""
 			#super(wx.ScrolledWindow, self).__init__(parent, id, pos, size, style, name)
@@ -1742,8 +1747,8 @@ if getattr(builtins, 'GUI_FLAG', True):
 
 			self.scroller = wx.lib.dragscroller.DragScroller(self)
 
-			self.stockUndo = FixedList(NB_HISTORY_UNDO)
-			self.stockRedo = FixedList(NB_HISTORY_UNDO)
+			self.stockUndo = FixedList(NB_HISTORY_UNDO) # type: ignore
+			self.stockRedo = FixedList(NB_HISTORY_UNDO) # type: ignore
 
 			### subject init
 			self.canvas = self
@@ -1884,12 +1889,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 				if isinstance(self.GetTopLevelParent(), DetachedFrame):
 					self.ApplyUndo()
 				event.Skip()
-			elif key == 89 and controlDown:  # Redo (Ctrl+Y)
-				### see the comment of the Ctrl+Z branch above
-				if isinstance(self.GetTopLevelParent(), DetachedFrame):
-					self.ApplyRedo()
-				event.Skip()
-			elif key == 90 and controlDown and shiftDown:  # Redo (Ctrl+Shift+Z)
+			elif key == 89 and controlDown or key == 90 and controlDown and shiftDown:  # Redo (Ctrl+Y)
 				### see the comment of the Ctrl+Z branch above
 				if isinstance(self.GetTopLevelParent(), DetachedFrame):
 					self.ApplyRedo()
@@ -1928,7 +1928,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 					self.deselect()
 					try:
 						self.select(self.diagram.shapes[ind+1])
-					except:
+					except:  # noqa: E722
 						self.select(self.diagram.shapes[0])
 				else:
 					self.select(self.diagram.shapes[0])
@@ -1977,7 +1977,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 			# This is intentionally empty, because we are using the combination
 	        # of wx.BufferedPaintDC + an empty OnEraseBackground event to
 	        # reduce flicker
-			pass
+			pass  # noqa: PIE790
 
 			#dc = evt.GetDC()
 			#if not dc:
@@ -2193,7 +2193,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 						sn = self.sourceNodeList[i]
 						tn = self.targetNodeList[i]
 						self.makeConnectionShape(sn, tn)
-					except:
+					except:  # noqa: E722, S110
 						pass
 			elif sp == 0:
 				for i in range(snl):
@@ -2201,7 +2201,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 						sn = self.sourceNodeList[i]
 						tn = self.targetNodeList[tp]
 						self.makeConnectionShape(sn, tn)
-					except:
+					except:  # noqa: E722, S110
 						pass
 			elif tp == 0:
 				for i in range(tnl):
@@ -2209,7 +2209,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 						sn = self.sourceNodeList[sp]
 						tn = self.targetNodeList[i]
 						self.makeConnectionShape(sn, tn)
-					except:
+					except:  # noqa: E722, S110
 						pass
 			else:
 				sn = self.sourceNodeList[sp-1]
@@ -2254,7 +2254,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 			### Destroy the dialog
 			try:
 				self.dlgConnection.Destroy()
-			except:
+			except:  # noqa: E722, S110
 				pass
 			
 			event.Skip()
@@ -2274,7 +2274,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 			"""
 			del clipboard[:]
 			for m in self.select():
-				clipboard.append(m)
+				clipboard.append(m)  # noqa: PERF402
 
 			# main windows statusbar update
 			printOnStatusBar(self.GetTopLevelParent().statusbar, {0:_('Copy'), 1:''})
@@ -2317,7 +2317,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 			### arguments of ModelGeneratorWizard when right clic appears in canvas
 			kargs = {'title' : _('DEVSimPy Model Generator'),
 						'parent' : parent,
-						'img_filename' : DEVSIMPY_ICON}
+						'img_filename' : DEVSIMPY_ICON} # type: ignore
 
 			### right clic appears in a library
 			if not isinstance(parent, ShapeCanvas):
@@ -2428,7 +2428,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 					# make new shape
 					try:
 						newShape = m.Copy()
-					except:
+					except:  # noqa: E722
 						sys.stdout.write(_('Error in Past'))
 					else:
 						# store correspondance (for coupling)
@@ -2447,7 +2447,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 							newShape.label = re.sub(r'([0-9]+)', str(int(number_part)+1), newShape.label)
 						### label has not number and we add it
 						else:
-							newShape.label = ''.join([newShape.label,'_1'])
+							newShape.label = f'{newShape.label}_1'
 
 						### adding model
 						self.AddShape(newShape)
@@ -2540,7 +2540,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 			if shape:
 				try:
 					shape.OnLeftDClick(event)
-				except Exception as info:
+				except Exception as info:  # noqa: BLE001
 					wx.MessageBox(_("An error is occured during double clic: %s")%info)
 			event.Skip()
 
@@ -2549,7 +2549,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 
 				The top of the undo stack always represents the current diagram state.
 			"""
-			size = getattr(builtins, 'NB_HISTORY_UNDO', NB_HISTORY_UNDO)
+			size = getattr(builtins, 'NB_HISTORY_UNDO', NB_HISTORY_UNDO) # type: ignore
 			self.stockUndo.SetSize(size)
 			self.stockRedo.SetSize(size)
 			self.stockUndo.clear()
@@ -2566,8 +2566,8 @@ if getattr(builtins, 'GUI_FLAG', True):
 			"""
 			try:
 				return pickle.dumps(obj=self.diagram, protocol=0)
-			except Exception as info:
-				sys.stdout.write(_("Error trying to serialize diagram for undo: %s \n"%info))
+			except Exception as info:  # noqa: BLE001
+				sys.stdout.write(_(f"Error trying to serialize diagram for undo: {info} \n"))  # noqa: INT001
 				return None
 
 		def PushUndoState(self):
@@ -2576,7 +2576,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 				A new snapshot is stored only if the diagram changed since the last
 				recorded state. Any pending redo history is then invalidated.
 			"""
-			size = getattr(builtins, 'NB_HISTORY_UNDO', NB_HISTORY_UNDO)
+			size = getattr(builtins, 'NB_HISTORY_UNDO', NB_HISTORY_UNDO) # type: ignore
 			self.stockUndo.SetSize(size)
 			self.stockRedo.SetSize(size)
 
@@ -2644,8 +2644,8 @@ if getattr(builtins, 'GUI_FLAG', True):
 
 			try:
 				new_diagram = pickle.loads(dump)
-			except Exception as info:
-				sys.stdout.write(_("Error trying to restore diagram: %s \n"%info))
+			except Exception as info:  # noqa: BLE001
+				sys.stdout.write(_(f"Error trying to restore diagram: {info} \n"))  # noqa: INT001
 				return False
 
 			new_diagram.parent = self
@@ -2653,10 +2653,10 @@ if getattr(builtins, 'GUI_FLAG', True):
 
 			try:
 				self.DiagramReplace(new_diagram)
-			except Exception as info:
+			except Exception as info:  # noqa: BLE001
 				### the notification chain may not be available (detached/alone canvas):
 				### fall back to a direct replacement of the diagram
-				sys.stdout.write(_("Error during diagram replacement: %s \n"%info))
+				sys.stdout.write(_(f"Error during diagram replacement: {info} \n"))  # noqa: INT001
 				self.diagram = new_diagram
 				self.Refresh()
 
@@ -2670,7 +2670,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 
 			try:
 				win = self.GetTopLevelParent()
-			except Exception:
+			except Exception:  # noqa: BLE001
 				return
 
 			if win is None:
@@ -2682,7 +2682,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 				if tb is not None:
 					tb.EnableTool(wx.ID_UNDO, undo_enabled)
 					tb.EnableTool(wx.ID_REDO, redo_enabled)
-			except Exception:
+			except Exception:  # noqa: BLE001, S110
 				pass
 
 			### menu items (the menu bar always belongs to the main window)
@@ -2694,7 +2694,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 						menu = entry[0] if isinstance(entry, tuple) else entry
 						menu.Enable(wx.ID_UNDO, undo_enabled)
 						menu.Enable(wx.ID_REDO, redo_enabled)
-			except Exception:
+			except Exception:  # noqa: BLE001, S110
 				pass
 
 		def OnLeftDown(self,event):
@@ -2881,7 +2881,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 				if self.HasCapture():
 					try:
 						self.ReleaseMouse()
-					except:
+					except:  # noqa: E722
 						sys.stdout.write(_("Error in Release Mouse!"))
 					else:
 						self.permRect = None
@@ -2935,7 +2935,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 		def OnMouseLeave(self, event):
 			""" Mouse leave event manager
 			"""
-			pass
+			pass  # noqa: PIE790
 			#self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
 
 		def DiagramModified(self):
@@ -2993,11 +2993,11 @@ if getattr(builtins, 'GUI_FLAG', True):
 
 			### update the text of the notebook tab to notifiy that the file is modified
 			if nb2 is not None and label is not None:
-				nb2.SetPageText(nb2.GetSelection(), "%s*"%label.replace('*',''))
+				nb2.SetPageText(nb2.GetSelection(), "{}*".format(label.replace('*','')))
 
 			### statusbar printing
 			for string,win in list(D.items()):
-				printOnStatusBar(win.statusbar, {0:"%s %s"%(string.replace('*','') ,_("modified")), 1:diagram.last_name_saved, 2:''})
+				printOnStatusBar(win.statusbar, {0:"{} {}".format(string.replace('*','') ,_("modified")), 1:diagram.last_name_saved, 2:''})
 
 			### update the toolbar
 			tb = win.GetToolBar()
@@ -3038,7 +3038,7 @@ if getattr(builtins, 'GUI_FLAG', True):
 					# if mousse over hight the shape
 					try:
 
-						if (x<=xm and xm < x+w) and (y<=ym and ym < y+h):
+						if (x<=xm < x+w) and (y<=ym < y+h):
 							#if self.isSelected(s) and flag:
 							self.f = QuickAttributeEditor(self, wx.NewIdRef(), s)
 							self.timer.Start(1000)
@@ -3196,10 +3196,12 @@ if getattr(builtins, 'GUI_FLAG', True):
 			"""
 			return self.diagram
 
-		def getInterceptedShape(self, event, exclude=[]):
+		def getInterceptedShape(self, event, exclude=None):
 			""" Return the intercepted current shape.
 			"""
 			# get coordinate of click in our coordinate system
+			if exclude is None:
+				exclude = []
 			if isinstance(event, wx.MouseEvent):
 				point = self.getEventCoordinates(event)
 				self.currentPoint = point
@@ -3429,7 +3431,6 @@ class LinesShape(Shape):
 
 			# Arrow dimensions
 			arrow_length = 10
-			arrow_width = 5
 
 			# Calculate triangle points
 			p1 = (end_x, end_y)
@@ -3504,7 +3505,7 @@ class LinesShape(Shape):
 					return True
 				ind = ind + 1
 
-		except:
+		except:  # noqa: E722, S110
 			pass
 
 		return False
@@ -3521,7 +3522,7 @@ class LinesShape(Shape):
 			xwindow, ywindow = wx.GetMousePosition()
 			x, y = canvas.ScreenToClient(wx.Point(int(xwindow), int(ywindow)))
 
-		except Exception as info:
+		except Exception as info:  # noqa: BLE001
 			sys.stdout.write(_("Error in OnLeftDClick for %s : %s\n")%(self,info))
 		else:
 			### add point at the position according to the possible zoom (use of getScalledCoordinates)
@@ -3559,7 +3560,7 @@ class LinesShape(Shape):
 # Mixins------------------------------------------------------------------------
 ###---------------------------------------------------------------------------------------------------------
 # NOTE: Testable << object :: Testable mixin is needed to manage tests files and tests executions. It add the OnTestEditor event for the tests files edition
-class Testable(object):
+class Testable:
 
 	# NOTE: Testable :: OnTestEditor 		=> new event for AMD model. Open tests files in editor
 	def OnTestEditor(self, event):
@@ -3613,13 +3614,13 @@ class Testable(object):
 		""" Test if the model is an AMD and if it's well-formed
 		"""
 		fn = os.path.dirname(self.python_path)
-		return zipfile.is_zipfile(fn) and fn.endswith(('.amd')) if os.path.isfile(fn) else False
+		return zipfile.is_zipfile(fn) and fn.endswith('.amd') if os.path.isfile(fn) else False
 
 	def isCMD(self):
 		""" Test if the model is an AMD and if it's well-formed
 		"""
 		fn = os.path.dirname(self.python_path)
-		return zipfile.is_zipfile(fn) and fn.endswith(('.cmd')) if os.path.isfile(fn) else False
+		return zipfile.is_zipfile(fn) and fn.endswith('.cmd') if os.path.isfile(fn) else False
 
 	def isPYC(self):
 		""" Test if the model is an AMD and if it's well-formed
@@ -3668,7 +3669,7 @@ class Testable(object):
 		""" Create feature file
 		"""
 		name = os.path.splitext(os.path.basename(self.python_path))[0]
-		feature = "%s.feature"%name
+		feature = f"{name}.feature"
 		with open(feature, 'w+') as feat:
 			feat.write("# -*- coding: utf-8 -*-\n")
 
@@ -3731,16 +3732,16 @@ class Testable(object):
 		### Tests code retriever-------------------------------------------------------------------
 		importer = zipfile.ZipFile(model_path)
 
-		feat_name = [t for t in tests_files if t.endswith('.feature')][0]
+		feat_name = next(t for t in tests_files if t.endswith('.feature'))
 		featInfo = importer.getinfo(feat_name)
 		feat_code = importer.read(featInfo)
 
-		steps_name = [t for t in tests_files if t.endswith('steps.py')][0]
+		steps_name = next(t for t in tests_files if t.endswith('steps.py'))
 		stepsInfo = importer.getinfo(steps_name)
 		steps_code = importer.read(stepsInfo)
 
 		if not global_env:
-			environment_name = [t for t in tests_files if t.endswith('environment.py')][0]
+			environment_name = next(t for t in tests_files if t.endswith('environment.py'))
 			envInfo = importer.getinfo(environment_name)
 			env_code = importer.read(envInfo)
 		else:
@@ -3760,9 +3761,9 @@ class Testable(object):
 		### ---------------------------------------------------------------------------------------
 
 		### Tests files creation in temporary directory--------------------------------------------
-		tempFeature = os.path.join(feat_dir, "%s.feature"%name)
+		tempFeature = os.path.join(feat_dir, f"{name}.feature")
 		tempEnv = os.path.join(feat_dir, "environment.py")
-		tempSteps = os.path.join(steps_dir, "%s_steps.py"%name)
+		tempSteps = os.path.join(steps_dir, f"{name}_steps.py")
 
 		tempAMD = os.path.join(amd_dir, amd_name)
 
@@ -3827,7 +3828,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 		"""
 		####################################" Just for old model
 		if 'touch_list' not in state: state['touch_list'] = []
-		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
+		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial'] # type: ignore  # noqa: UP025
 		if 'enable' not in state: state['enable'] = True
 		if 'dashed' not in state: state['dashed'] = False
 		##############################################
@@ -3878,10 +3879,10 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 			host2 = self.output[0]
 
 			try: host1.lock()
-			except: pass
+			except: pass  # noqa: E722, S110
 
 			try: host2.lock()
-			except: pass
+			except: pass  # noqa: E722, S110
 
 			self.lock_flag = True
 
@@ -3894,10 +3895,11 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 			host2 = self.output[0]
 
 			try: host1.unlock()
-			except: pass
+			except: pass # noqa: E722, S110
+
 
 			try: host2.unlock()
-			except: pass
+			except: pass # noqa: E722, S110
 
 			self.lock_flag = False
 
@@ -3936,7 +3938,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 	def OnProperties(self, event):
 		""" Properties event has been invoked.
 		"""
-		pass
+		pass  # noqa: PIE790
 		#canvas = event.GetEventObject()
 		#f = AttributeEditor(canvas.GetParent(), wx.NewIdRef(), self, canvas)
 		#f.Show()
@@ -3944,7 +3946,7 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 	def __del__(self):
 		""" Destructor
 		"""
-		pass
+		pass  # noqa: PIE790
 
 #Basic Graphical Components-----------------------------------------------------
 class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attributable, Rotatable, Plugable, Observer, Testable, Savable):
@@ -4006,7 +4008,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		self.h = self.y[1]- self.y[0]
 
 		if self.image_path != "" and not os.path.exists(self.image_path):
-			sys.stdout.write(_(f"{self.image_path} does not exists in the {self.label} model!"))
+			sys.stdout.write(_(f"{self.image_path} does not exists in the {self.label} model!"))  # noqa: INT001
 			self.image_path = ""
 		else:
 			### Draw background picture
@@ -4024,7 +4026,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 					image_path = self.image_path
 
 				if image_path != "" and not os.path.exists(image_path):
-					sys.stdout.write(_(f"{image_path} does not exists in the {self.label} model!"))
+					sys.stdout.write(_(f"{image_path} does not exists in the {self.label} model!"))  # noqa: INT001
 					image_path = ""
 				else:
 					img = wx.Image(image_path)
@@ -4067,7 +4069,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 	def leftUp(self, items):
 		""" Left up event has been invoked.
 		"""
-		pass
+		pass  # noqa: PIE790
 
 	###
 	def OnRightDown(self, event):
@@ -4139,7 +4141,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 		save_dlg = wx.FileDialog(parent,
 								message = _('Export file as...'),
 								defaultDir = domain_path,
-								defaultFile = str(self.label)+'.%s'%ext,
+								defaultFile = str(self.label)+f'.{ext}',
 								wildcard = wcd,
 								style = wx.SAVE | wx.OVERWRITE_PROMPT)
 
@@ -4162,7 +4164,7 @@ class Block(RoundedRectangleShape, Connectable, Resizeable, Selectable, Attribut
 				
 				printOnStatusBar(mainW.statusbar, {0:_('%s Exported')%label, 1:''})
 
-			except IOError as error:
+			except OSError as error:
 				dlg = wx.MessageDialog(parent, \
 									_('Error exported file %s\n')%error, \
 									label, \
@@ -4261,7 +4263,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 		model_path = state['model_path']
 		# image_path = state['image_path']
 		new_class = None
-		dir_name = os.path.basename(DOMAIN_PATH)
+		dir_name = os.path.basename(DOMAIN_PATH) # type: ignore
 
 		### if the model path is wrong
 		if model_path != '':
@@ -4269,7 +4271,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 				# try to find it in the Domain (firstly)
 				if dir_name in python_path:
 
-					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(model_path[model_path.index(dir_name):]).strip('[]')))
+					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(model_path[model_path.index(dir_name):]).strip('[]'))) # type: ignore
 
 					### perhaps path is wrong due to a change in the Domain lib !
 					### Try to find the model by its name in the Domain directories (multipe path can be occur)
@@ -4310,7 +4312,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 							### Is this up-to-date???
 							### we find the python file using re module
 							### because path can comes from windows and then sep is not the same and os.path.basename don't work !
-							state['python_path'] = os.path.join(path, re.findall(r"([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
+							state['python_path'] = os.path.join(path, re.findall(r"([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])  # noqa: UP031
 				else:
 					state['bad_filename_path_flag'] = True
 
@@ -4338,7 +4340,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 				if L:
 					for arg in L:
 						if not arg in args_from_stored_constructor_py:
-							sys.stdout.write(_("Warning: %s come is old ('%s' arg is deprecated). We update it...\n"%(state['python_path'],arg)))
+							sys.stdout.write(_("Warning: {} come is old ('{}' arg is deprecated). We update it...\n".format(state['python_path'],arg)))  # noqa: INT002
 							del state['args'][arg]
 						else:
 							try:
@@ -4356,7 +4358,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 				### find all members that is class
 				try:
 					module = sys.modules[cls.__name__]
-				except :
+				except:  # noqa: E722
 					module = inspect.getmodule(cls)
 				finally:
 					clsmembers = inspect.getmembers(module, inspect.isclass)
@@ -4372,7 +4374,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 				else:
 					new_class = None
 			else:
-				sys.stderr.write(_("Error in setstate for CodeBlock class which is %s\n"%str(cls)))
+				sys.stderr.write(_(f"Error in setstate for CodeBlock class which is {cls!s}\n"))  # noqa: INT001
 
 		state['bad_filename_path_flag'] = False
 		### if the python path is wrong
@@ -4385,7 +4387,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 				if dir_name in python_path:
 					
 					### try to find in DOMAIN directory
-					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(python_path[python_path.index(dir_name):]).strip('[]')))
+					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(python_path[python_path.index(dir_name):]).strip('[]'))) # type: ignore
 
 					### try to find it in exportedPathList (after Domain check) and recent opened file
 					if not os.path.exists(path) and getattr(builtins, 'GUI_FLAG', True):
@@ -4399,18 +4401,17 @@ class CodeBlock(Achievable, Block, Iconizable):
 				else:
 					### try to find if python_path contains a directory wich is also in Domain
 					### subdirectories of Domain
-					subdirectories = os.listdir(DOMAIN_PATH)
+					subdirectories = os.listdir(DOMAIN_PATH) # type: ignore
 					### for all directories if the directory is in python_path (excluding the file .py (-1))
 					for dir in subdirectories:
 						if dir in python_path.split(os.sep)[0:-1]:
 							### yes, the python_path is wrong but we find that in the Domain there is a directory with the same name
 							a = python_path.split(dir+os.sep)
-							path = os.path.join(DOMAIN_PATH,dir,a[-1])
+							path = os.path.join(DOMAIN_PATH,dir,a[-1]) # type: ignore
 							break
 					
 				### try to find the python_path in recent opened file directory
 				if not os.path.exists(path) and getattr(builtins, 'GUI_FLAG', True):
-					import wx
 					mainW = getTopLevelWindow()
 					if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
 						for a in [os.path.dirname(p) for p in mainW.exportPathsList+mainW.openFileList]:
@@ -4460,12 +4461,11 @@ class CodeBlock(Achievable, Block, Iconizable):
 					### try to redefi[ne the path
 					### if Domain is in the path
 					if dir_name in fn:
-						fn = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(fn[fn.index(dir_name):]).strip('[]')))
+						fn = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(fn[fn.index(dir_name):]).strip('[]'))) # type: ignore
 					### try to find the filename in the recent opened recent file directory or exported lib diretory
 					else:
 						### for no-gui compatibility
 						if getattr(builtins, 'GUI_FLAG', True):
-							import wx
 							mainW = getTopLevelWindow()
 							if hasattr(mainW,'exportPathsList') and hasattr(mainW,'openFileList'):
 								for a in [os.path.dirname(p) for p in mainW.exportPathsList+mainW.openFileList]:
@@ -4488,7 +4488,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 		if 'image_path' not in state:
 			state['image_path'] = ""
 			state['attributes'].insert(3,'image_path')
-		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
+		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial'] # type: ignore  # noqa: UP025
 		if 'font' not in state['attributes']: state['attributes'].insert(3,'font')
 		if 'selected' not in state: state['selected'] = False
 		if 'label_pos' not in state: state['label_pos'] = 'center'
@@ -4636,7 +4636,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 					for name in filename_list:
 						val = state[prop]
 						# if behavioral propertie
-						if prop in self.args:
+						if prop in self.args:  # noqa: SIM102
 							### is abs fileName ?
 							if os.path.isabs(val):
 								### if there is an extention, then if the field path exist we color in red and update the bad_filename_path_flag
@@ -4659,7 +4659,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 	""" ContainerBlock(label, inputs, outputs)
 	"""
 
-	FILL = [GREEN]
+	FILL = [GREEN]  # noqa: RUF012
 	
 	###
 	def __init__(self, label = 'ContainerBlock', nb_inputs = 1, nb_outputs = 1):
@@ -4680,7 +4680,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 		python_path = state['python_path']
 		model_path = state['model_path']
 
-		dir_name = os.path.basename(DOMAIN_PATH)
+		dir_name = os.path.basename(DOMAIN_PATH) # type: ignore
 
 		### if the model path is wrong
 		if model_path != '':
@@ -4688,7 +4688,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 				### try to find it in the Domain (firstly)
 				if dir_name in python_path:
 
-					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(model_path[model_path.index(dir_name):]).strip('[]')))
+					path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(model_path[model_path.index(dir_name):]).strip('[]'))) # type: ignore
 
 					### try to find it in exportedPathList (after Domain check)
 					if not os.path.exists(path) and getattr(builtins, 'GUI_FLAG', True):
@@ -4719,7 +4719,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 							### Is this up-to-date???
 							### we find the python file using re module
 							### because path can comes from windows and then sep is not the same and os.path.basename don't work !
-							state['python_path'] = os.path.join(path, re.findall(r"([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])
+							state['python_path'] = os.path.join(path, re.findall(r"([\w]*[%s])*([\w]*.py)"%os.sep, python_path)[0][-1])  # noqa: UP031
 				else:
 					state['bad_filename_path_flag'] = True
 
@@ -4733,7 +4733,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 				if not isinstance(cls, tuple):
 					try:
 						args_from_stored_constructor_py = inspect.getargspec(cls.__init__).args[1:]
-					except:
+					except:  # noqa: E722
 						constructor = inspect.signature(cls.__init__)
 						parameters = constructor.parameters
 						args_from_stored_constructor_py = [name for name, _ in parameters.items() if name != 'self']
@@ -4744,7 +4744,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 						if L:
 							for arg in L:
 								if not arg in args_from_stored_constructor_py:
-									sys.stdout.write(_("Warning: %s come is old ('%s' arg is deprecated). We update it...\n"%(state['python_path'],arg)))
+									sys.stdout.write(_("Warning: {} come is old ('{}' arg is deprecated). We update it...\n".format(state['python_path'],arg)))  # noqa: INT002
 									del state['args'][arg]
 								else:
 									try:
@@ -4760,13 +4760,13 @@ class ContainerBlock(Block, Iconizable, Diagram):
 						#sys.stderr.write(_("args is None in setstate for ContainerBlock: %s\n"%str(cls)))
 						state['args'] = {}
 				else:
-					sys.stderr.write(_("Error in setstate for ContainerBlock: %s\n"%str(cls)))
+					sys.stderr.write(_(f"Error in setstate for ContainerBlock: {cls!s}\n"))  # noqa: INT001
 
 		### if the model path is empty and the python path is wrong
 		elif not (os.path.exists(python_path) and zipfile.is_zipfile(os.path.dirname(python_path))):
 			if dir_name in python_path:
 
-				path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(python_path[python_path.index(dir_name):]).strip('[]')))
+				path = os.path.join(os.path.dirname(DOMAIN_PATH), relpath(str(python_path[python_path.index(dir_name):]).strip('[]'))) # type: ignore
 				state['python_path'] = path
 
 				if not os.path.exists(path):
@@ -4783,7 +4783,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 		if 'image_path' not in state:
 			state['image_path'] = ""
 			state['attributes'].insert(3,'image_path')
-		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
+		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial'] # type: ignore  # noqa: UP025
 		if 'font' not in state['attributes']: state['attributes'].insert(3,'font')
 		if 'selected' not in state: state['selected'] = False
 		if 'label_pos' not in state:state['label_pos'] = 'center'
@@ -4826,7 +4826,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 		if self.selected:
 			### inform about the nature of the block using icon
 			icon = Icon('coupled', (4,2))
-			img = img = load_and_resize_image(icon.getFileName())
+			img = load_and_resize_image(icon.getFileName())
 			x, y = int(self.x[0]+icon.getOffSet('x')), int(self.y[0]+icon.getOffSet('y'))
 			dc.DrawBitmap(img, x, y)
 			
@@ -4908,7 +4908,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 
 			mainW = getTopLevelWindow()
 
-			frame = DetachedFrame(parent = mainW, title  = ''.join([canvas.name,' - ',self.label]), diagram = self, name = self.label)
+			frame = DetachedFrame(parent = mainW, title  = f'{canvas.name} - {self.label}', diagram = self, name = self.label)
 			frame.SetIcon(mainW.GetIcon())
 			frame.Show()
 		
@@ -4916,7 +4916,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 
 	def __repr__(self):
 		return "".join([Block.__repr__(self),
-					_("\t DEVS module path: %s\n"%str(self.python_path)),
+					_(f"\t DEVS module path: {self.python_path!s}\n"),  # noqa: INT001
 					_("\t DEVSimPy model path: %s\n")%str(self.model_path),
 					_("\t DEVSimPy image path: %s\n")%str(self.image_path)]
 				)
@@ -4980,7 +4980,7 @@ class ConnectableNode(Node):
 		isINode = isinstance(self, INode)
 
 		### ask tne new label
-		d = wx.TextEntryDialog(None, _('New label for the %s port %d:'%("input" if isINode else "output",self.index)), value = old_label, style=wx.OK)
+		d = wx.TextEntryDialog(None, _('New label for the %s port %d:'%("input" if isINode else "output",self.index)), value = old_label, style=wx.OK)  # noqa: INT003, UP031
 
 		if d.ShowModal() == wx.ID_OK:
 			### new label
@@ -5007,7 +5007,7 @@ class ConnectableNode(Node):
 			yy = self.y[0] if isinstance(self.y, array.array) else self.y
 
 			return not ((x < xx-r or x > xx+r) or (y < yy-r or y > yy+r))
-		except Exception as info:
+		except Exception as info:  # noqa: BLE001
 			sys.stdout.write(_("Error in Hitest for %s : %s\n")%(self,info))
 			return False
 
@@ -5107,7 +5107,7 @@ class ONode(ConnectableNode):
 		"""
 		ConnectableNode.__init__(self, item, index, cf)
 
-		self.label = "out%d"%self.index if not label else label
+		self.label = "out%d"%self.index if not label else label  # noqa: UP031
 		
 	def move(self, x, y):
 		""" Moving method.
@@ -5188,7 +5188,7 @@ class ResizeableNode(Node):
 	""" Resizeable(item, index, cf, type).
 	"""
 
-	FILL = [BLACK]
+	FILL = [BLACK]  # noqa: RUF012
 
 	def __init__(self, item, index, cf, t = 'rect'):
 		""" Constructor.
@@ -5223,7 +5223,7 @@ class ResizeableNode(Node):
 
 	
 		### if no lock
-		if not lines_shape.lock_flag:
+		if not lines_shape.lock_flag:  # noqa: SIM102
 			### Block and minimal size (50,50) or not Block
 			if (isinstance(self.item, Block) and X >= 50 and Y >= 50) or not isinstance(self.item, Block):
 				self.item.x[self.index] += x
@@ -5289,7 +5289,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 
 		####################################" Just for old model
 		if 'r' not in state: state['r'] = 30.0
-		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial']
+		if 'font' not in state: state['font'] = [FONT_SIZE, 74, 93, 700, u'Arial'] # type: ignore  # noqa: UP025
 		if 'dashed' not in state: state['dashed'] = False
 		if 'lock_flag' not in state: state['lock_flag'] = False
 		if 'enable' not in state: state['enable'] = True
@@ -5343,7 +5343,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 	def leftUp(self, event):
 		""" Left up event has been invoked.
 		"""
-		pass
+		pass  # noqa: PIE790
 
 	###
 	def OnRightDown(self, event):
@@ -5420,7 +5420,7 @@ class iPort(Port):
 	""" IPort(label) for ContainerBlock (coupled model)
 	"""
 
-	FILL = [GREEN]
+	FILL = [GREEN]  # noqa: RUF012
 
 	def __init__(self, label = 'iPort'):
 		""" Constructor.
@@ -5441,11 +5441,11 @@ class iPort(Port):
 	def setDEVSModel(self, devs):
 		""" Set the DEVS model.
 		"""
-		self = devs
+		self = devs  # noqa: F841, PLW0642
 
 	def __repr__(self):
 		s = Port.__repr__(self)
-		s+="\t id: %d \n"%self.id
+		s+="\t id: %d \n"%self.id  # noqa: UP031
 		return s
 
 #----------------------------------------------------------------
@@ -5453,7 +5453,7 @@ class oPort(Port):
 	""" OPort(label) for ContainerBlock (coupled model)
 	"""
 
-	FILL = [RED]
+	FILL = [RED]  # noqa: RUF012
 
 	def __init__(self, label = 'oPort'):
 		""" Construcotr
@@ -5474,17 +5474,17 @@ class oPort(Port):
 	def setDEVSModel(self, devs):
 		""" Set the DEVS model.
 		"""
-		self = devs
+		self = devs  # noqa: F841, PLW0642
 
 	def __repr__(self):
 		s = Port.__repr__(self)
-		s+="\t id: %d \n"%self.id
+		s+="\t id: %d \n"%self.id  # noqa: UP031
 		return s
 
 class GeneratorGUI(CodeBlock):
 	""" CollectorGUI(label)
 	"""
-	FILL = [VIOLET_LIGHT]
+	FILL = [VIOLET_LIGHT]  # noqa: RUF012
 
 	def __init__(self, label = 'Generator'):
 		""" Constructor
@@ -5497,7 +5497,7 @@ class GeneratorGUI(CodeBlock):
 class CollectorGUI(CodeBlock):
 	""" CollectorGUI(label)
 	"""
-	FILL = [ORANGE]
+	FILL = [ORANGE]  # noqa: RUF012
 
 	def __init__(self, label = 'Collector'):
 		""" Constructor

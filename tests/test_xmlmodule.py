@@ -5,14 +5,14 @@ Usage:
     python test_xmlmodule.py --autoclose 10  # Auto-close after 10s delay
 """
 
-import wx
+import wx  
 import os
 
 from ApplicationController import TestApp
 
-from XMLModule import getDiagramFromXMLSES
-import Container
-import DetachedFrame
+from XMLModule import getDiagramFromXMLSES # type: ignore
+import Container # type: ignore
+import DetachedFrame # type: ignore
 
 
 # Run the test

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-  # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,24 +22,24 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
+import gettext
+import logging
 import os
 import pathlib
-import zipfile
 import sys
-import logging
+import zipfile
 
-import gettext
 _ = gettext.gettext
 
-from StandaloneNoGUI import retrieve_file_paths, add_library_to_archive
+from StandaloneNoGUI import retrieve_file_paths, add_library_to_archive  
 
 class StandaloneNoGUIKafkaPKG:
     
     ### list of files to zip
-    FILENAMES = []
+    FILENAMES = []  # noqa: RUF012
 
     ## list of dir to zip
-    DIRNAMES = ['DomainInterface/','Patterns/', 'DEVSKernel/']
+    DIRNAMES = ['DomainInterface/','Patterns/', 'DEVSKernel/']  # noqa: RUF012
 
     def __init__(self, model_instance:None,
                  label:str="",
@@ -107,7 +107,7 @@ class StandaloneNoGUIKafkaPKG:
         self.dirnames_abs = map(pathlib.Path, StandaloneNoGUIKafkaPKG.DIRNAMES)
         
     def GetDockerSpec(self):
-        """
+        """ Docker Spec
         """
         return r"""
 FROM python:3.11-slim
@@ -125,7 +125,7 @@ COPY . .
 """
     
     def GetDockerComposeKafkaSpec(self):
-        """
+        """ Docker Compose Kafka Spec
         """
         return """
 services:
@@ -199,7 +199,7 @@ networks:
 """
      
     def GetConfigSpec(self):
-        """
+        """ Config
         """
         data = f"""
 # ========================================
@@ -224,9 +224,9 @@ PYTHONPATH=/app
         return data
 
     def BuildZipPackage(self) -> None:
+        """ Zip Package
         """
-        """
-        self.logger.info(f"Starting BuildZipPackage process for Kafka worker")
+        self.logger.info("Starting BuildZipPackage process for Kafka worker")
         self.logger.info(f"Output file: {os.path.join(self.outdir, self.outfn)}")
         self.logger.info(f"Model: {self.model_label}, Kernel: {self.kernel}")
      
@@ -247,7 +247,7 @@ PYTHONPATH=/app
                 file_path = os.path.join(current_dir, fn)
                 self.logger.info(f"Adding Python file: {fn}")
                 archive.write(file_path, arcname=fn)
-            self.logger.info(f"Python dependency files added successfully")
+            self.logger.info("Python dependency files added successfully")
             
             ###################################################################
             ###
@@ -255,7 +255,7 @@ PYTHONPATH=/app
             ###
             ###################################################################
 
-            self.logger.info(f"Adding Domain library files")
+            self.logger.info("Adding Domain library files")
             # Get the absolute directory path where the model Python file is located
             domain_path = os.path.dirname(self.model_instance.python_path)
             self.logger.info(f"Domain path: {domain_path}")
@@ -263,7 +263,7 @@ PYTHONPATH=/app
             # Use add_library_to_archive which properly handles the path
             files_added = add_library_to_archive(archive, domain_path)
             self.logger.info(f"Added {files_added} files from {domain_path}")
-            self.logger.info(f"Domain library files added successfully")
+            self.logger.info("Domain library files added successfully")
 
             ###################################################################
             ###
@@ -318,11 +318,11 @@ PYTHONPATH=/app
             ###
             ###################################################################
 
-            self.logger.info(f"Adding Docker files")
+            self.logger.info("Adding Docker files")
             archive.writestr('Dockerfile', self.GetDockerSpec())
             archive.writestr('docker-compose-kafka.yml', self.GetDockerComposeKafkaSpec())
             archive.writestr('docker-compose-worker.yml', self.GetDockerComposeWorkerSpec())
-            self.logger.info(f"Docker files added successfully")
+            self.logger.info("Docker files added successfully")
 
             ###################################################################
             ###
@@ -330,10 +330,10 @@ PYTHONPATH=/app
             ###
             ###################################################################
 
-            self.logger.info(f"Adding configuration file (.env)")
+            self.logger.info("Adding configuration file (.env)")
             ### write config file
             archive.writestr('.env', self.GetConfigSpec())
-            self.logger.info(f"Configuration file added successfully")
+            self.logger.info("Configuration file added successfully")
             
             ###################################################################
             ###
@@ -341,13 +341,13 @@ PYTHONPATH=/app
             ###
             ###################################################################
 
-            self.logger.info(f"Adding requirements file")
+            self.logger.info("Adding requirements file")
             try:
                 ### Create a basic requirements file if none exists
                 basic_requirements = "confluent-kafka>=2.3.0"
                 archive.writestr('requirements.txt', basic_requirements)
-                self.logger.info(f"Requirements file added successfully")
-            except Exception as e:
+                self.logger.info("Requirements file added successfully")
+            except Exception as e:  # noqa: BLE001
                 self.logger.error(f"Error handling requirements file: {e}")
                 sys.stdout.write(f"Error handling requirements file: {e}\n")
                 return False

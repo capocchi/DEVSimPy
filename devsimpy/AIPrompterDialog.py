@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-  # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -12,18 +12,18 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import json
+import json  
 import wx
 import os
 
 import gettext
 _ = gettext.gettext
 
-from Utilities import load_and_resize_image
+from Utilities import load_and_resize_image  
 
 # Définition du dialogue personnalisé
 class AIPrompterDialog(wx.Dialog):
-    def __init__(self, parent, title=_("AI Code Editor"), code_to_replace='', adapter=None):
+    def __init__(self, parent, title=_("AI Code Editor"), code_to_replace='', adapter=None):  # noqa: B008
         super().__init__(parent, id=wx.ID_ANY, title=title)
 
         _icon = wx.Icon()
@@ -255,7 +255,7 @@ class AIPrompterDialog(wx.Dialog):
 
         self.parent.Notification(
             True, 
-            _('{} modified'.format(os.path.basename(self.editor.GetFilename()))), 
+            _(f'{os.path.basename(self.editor.GetFilename())} modified'),  # noqa: INT001
             '', 
             ''
         )
@@ -297,7 +297,7 @@ class AIPrompterDialog(wx.Dialog):
                     wx.OK | wx.ICON_WARNING
                 )
         
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             wx.MessageBox(
                 _("An error occurred while processing your request:\n{}").format(str(e)),
                 _("Error"),
@@ -329,7 +329,7 @@ class AIPrompterDialog(wx.Dialog):
                     _("Success"),
                     wx.OK | wx.ICON_INFORMATION
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 wx.MessageBox(
                     _("Error saving file:\n{}").format(str(e)),
                     _("Error"),

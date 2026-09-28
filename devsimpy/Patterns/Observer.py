@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
+
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Observer.py ---
@@ -26,7 +27,7 @@ class Observer:
 	def update(self, theChangedSubject = None):
 		""" update method with changed subject param
 		"""
-		pass
+		pass  # noqa: PIE790
 
 class Subject:
 	""" Subject class

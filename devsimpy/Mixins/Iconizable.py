@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Iconizable.py ---
@@ -21,7 +21,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##-
 
 
-import os
+import os  
 
 import gettext
 _ = gettext.gettext
@@ -40,7 +40,7 @@ class Icon:
         self._offset_x, self._offset_y = offset_pos
         
         ### icon png path
-        self._image_path = os.path.join(ICON_PATH, self.getFileName())
+        self._image_path = os.path.join(ICON_PATH, self.getFileName()) # type: ignore  # noqa: F821
         
         assert(os.path.exists(self._image_path))
 
@@ -59,7 +59,7 @@ class Icon:
         return self._offset_x if pos == 'x' else self._offset_y
     
 #-------------------------------------------------------------------------------
-class Iconizable():
+class Iconizable:
     """ Iconizable mixin to create binding icin on Block.
     """
     # Assuming your bitmap is 16x16 pixels

@@ -1,17 +1,15 @@
-import wx
+import wx  
 import sys
 
-class TreeItem(object):
-	"""
+class TreeItem:
+	""" Tree
 	"""
 	def __init__(self, text, data=None, filterable=True):
 		self._children = []
 		self._text = text
 		self.data = data
 		self.filterable = filterable
-		#if self.parent:
-		#	self.parent.children.append(self)
-	
+		
 	@property
 	def text(self):
 		return self._text
@@ -53,10 +51,10 @@ def model_from_list(items):
 	return root
 
 class SearchCtrl(wx.SearchCtrl):
-	keys_to_pass_on = [wx.WXK_UP, wx.WXK_DOWN, wx.WXK_RETURN]
+	keys_to_pass_on = [wx.WXK_UP, wx.WXK_DOWN, wx.WXK_RETURN]  # noqa: RUF012
 
 	def __init__(self, parent):
-		super(SearchCtrl, self).__init__(parent, style=wx.WANTS_CHARS)
+		super().__init__(parent, style=wx.WANTS_CHARS)
 		self.bind_source = self.find_bind_source()
 		self.bind_source.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
 
@@ -91,7 +89,7 @@ class FilterableTree(wx.PyPanel):
 	blank_text = "Search"
 	def __init__(self, parent, model):
 		self.model = model
-		super(FilterableTree, self).__init__(parent)
+		super().__init__(parent)
 
 		self.bound = False
 		

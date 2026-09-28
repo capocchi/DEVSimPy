@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python 
+# -*- coding: utf-8 -*- # noqa: UP009
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # devsimpy-nogui.py --- DEVSimPy - The Python DEVS no GUI modeling and simulation software
@@ -17,7 +17,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import os
+import os  
 import sys
 import builtins
 import json
@@ -70,11 +70,11 @@ def simulate(devs, duration, simu_name, is_remote, with_progress=True):
 	from SimulationNoGUI import makeSimulation
 
 	if str(duration) in ('inf', 'ntl'):
-		setattr(builtins, 'NTL', True)
+		setattr(builtins, 'NTL', True)  # noqa: B010
 		duration = 0.0
 
 	if not devs:
-		raise Exception(_("No model to simulate"))
+		raise Exception(_("No model to simulate"))  # noqa: TRY002
 
 	### launch simulation
 	makeSimulation(master=devs, T=duration, simu_name=simu_name, is_remote=is_remote, with_progress=with_progress)
@@ -119,32 +119,32 @@ if __name__ == '__main__':
 
 	if args.kernel:
 		if 'PyPDEVS' in args.kernel:
-			setattr(builtins,'DEFAULT_DEVS_DIRNAME','PyPDEVS_221')
-			setattr(builtins, 'DEFAULT_SIM_STRATEGY', 'parallel')
+			builtins.DEFAULT_DEVS_DIRNAME = 'PyPDEVS_221'
+			builtins.DEFAULT_SIM_STRATEGY = 'parallel'
 
 			### Real time only for PyPDEVS...
-			setattr(builtins, 'REAL_TIME', args.rt)
+			builtins.REAL_TIME = args.rt
 		elif 'PyDEVS' in args.kernel:
-			setattr(builtins,'DEFAULT_DEVS_DIRNAME','PyDEVS')
-			setattr(builtins, 'DEFAULT_SIM_STRATEGY', 'bag-based')
+			builtins.DEFAULT_DEVS_DIRNAME = 'PyDEVS'
+			builtins.DEFAULT_SIM_STRATEGY = 'bag-based'
 		elif 'BrokerDEVS' in args.kernel:
-			setattr(builtins,'DEFAULT_DEVS_DIRNAME','BrokerDEVS')
-			setattr(builtins, 'DEFAULT_SIM_STRATEGY', 'ms4Me')
+			builtins.DEFAULT_DEVS_DIRNAME = 'BrokerDEVS'
+			builtins.DEFAULT_SIM_STRATEGY = 'ms4Me'
 		else:
 			sys.stdout.write(_("ERROR: Invalid kernel name (must be PyDEVS, PyPDEVS or BrokerDEVS)!\n"))
 			sys.exit(1)
 
 	filename = args.filename
 	
-	assert os.path.exists(filename), _(f"ERROR: {filename} file does not exist!\n")
+	assert os.path.exists(filename), _(f"ERROR: {filename} file does not exist!\n")  # noqa: INT001
 	
 	yamlHandler = YAMLHandler(filename)
 
-	assert yamlHandler.filename_is_valid, _(f"ERROR: {filename} is invalid!\n")
+	assert yamlHandler.filename_is_valid, _(f"ERROR: {filename} is invalid!\n")  # noqa: INT001
 
 	if args.zip:
 		# zip exportation
-		assert args.zip.endswith('.zip'), _(f"ERROR: {filename} Invalid file type (must be zip file)!\n")		
+		assert args.zip.endswith('.zip'), _(f"ERROR: {filename} Invalid file type (must be zip file)!\n")  # noqa: INT001
 		standalone = StandaloneNoGUI(filename, args.zip, add_sim_kernel=args.sim_kernel, add_dockerfile=args.docker, rt=args.rt, kernel=args.kernel)
 		standalone.BuildZipPackage()
 
@@ -167,7 +167,7 @@ if __name__ == '__main__':
 		# model block parameters read or update
 		label = args.blockargs
 		models_list = yamlHandler.getYAMLBlockModelsList()
-		assert label in models_list, _(f"ERROR: Model must belong to the list {models_list}\n")
+		assert label in models_list, _(f"ERROR: Model must belong to the list {models_list}\n")  # noqa: INT001
 		if args.updateblockargs:
 			# model block is updated
 			args = json.loads(args.updateblockargs)

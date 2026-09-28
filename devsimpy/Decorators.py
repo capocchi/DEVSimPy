@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,21 +22,19 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import os
+import os  
 import sys
-import time
 from datetime import datetime
 import threading
 from tempfile import gettempdir
-import time
 import cProfile, pstats, io
 
-if GUI_FLAG:
+if GUI_FLAG: # type: ignore  # noqa: F821
 	import wx
 	import wx.lib.agw.aui.framemanager
 	AuiFloatingFrame = wx.lib.agw.aui.framemanager.AuiFloatingFrame
 
-	from pubsub import pub
+	from pubsub import pub  
 
 	from Utilities import getTopLevelWindow
 
@@ -56,9 +54,9 @@ def hotshotit(func):
 			
 			### name of .prof file
 			label = sim_thread.model.getBlockModel().label
-			now = datetime.now() # current date and time
+			now = datetime.now() # current date and time  # noqa: DTZ005
 			date_time = now.strftime('%m-%d-%Y_%H-%M-%S')
-			prof_name = os.path.join(os.path.realpath(gettempdir()),"%s_%s_%s%s"%(func.__name__, label, date_time ,'.prof'))
+			prof_name = os.path.join(os.path.realpath(gettempdir()),"{}_{}_{}{}".format(func.__name__, label, date_time ,'.prof'))
 
 			### profiling section with cProfile
 			pr = cProfile.Profile()
@@ -88,11 +86,11 @@ def BuzyCursorNotification(f):
 	""" Decorator which give the buzy cursor for long process
 	"""
 	def wrapper(*args):
-			if GUI_FLAG:
+			if GUI_FLAG: # type: ignore  # noqa: F821
 				wait = wx.BusyCursor()
 				#wx.SafeYield()
 			r =  f(*args)
-			if GUI_FLAG:
+			if GUI_FLAG: # type: ignore  # noqa: F821
 				del wait
 			return r
 	return wrapper
@@ -127,7 +125,7 @@ def StatusBarNotification(f, arg):
 			fn = os.path.basename(args[-1])
 			txt = arg
 
-			mainW.statusbar.SetStatusText('%s %sed'%(fn, txt), 0)
+			mainW.statusbar.SetStatusText(f'{fn} {txt}ed', 0)
 			mainW.statusbar.SetStatusText(diagram.last_name_saved, 1)
 			mainW.statusbar.SetStatusText('', 2)
 
@@ -139,7 +137,7 @@ class ThreadWithReturnValue(threading.Thread):
 	""" https://www.geeksforgeeks.org/python-different-ways-to-kill-a-thread/
 	"""
 	def __init__(self, *args, **kwargs): 
-		super(ThreadWithReturnValue, self).__init__(*args, **kwargs) 
+		super().__init__(*args, **kwargs) 
 		#self._return = None
 		self.killed = False
 		self._log = ""
@@ -164,9 +162,8 @@ class ThreadWithReturnValue(threading.Thread):
 			return None
 	
 	def localtrace(self, frame, event, arg): 
-		if self.killed: 
-			if event == 'line': 
-				raise SystemExit()
+		if self.killed and event == 'line': 
+			raise SystemExit()
 		return self.localtrace 
 	
 	def my_listener(self, message, arg2=None):
@@ -241,10 +238,7 @@ def ProgressNotification(f, arg):
 
 def print_timing(func):
 	def wrapper(*arg):
-		t1 = time.time()
 		res = func(*arg)
-		t2 = time.time()
-		final_t = (t2-t1)*1000.0
 		return res
 	return wrapper
 

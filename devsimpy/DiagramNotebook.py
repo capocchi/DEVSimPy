@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,7 +22,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import wx
+import wx  
 import os
 import sys
 import builtins
@@ -40,7 +40,7 @@ _ = wx.GetTranslation
 
 #-------------------------------------------------------------------
 class GeneralNotebook(Printable):
-	"""
+	""" General Notebook class for Diagram Notebook on the right part of DEVSimPy.
 	"""
 
 	def __init__(self, *args, **kwargs):
@@ -91,7 +91,7 @@ class GeneralNotebook(Printable):
 
 		### occurrence of title in existing title pages
 		c = title_pages.count(title)
-		title = title+"(%d)"%c if c != 0 else title
+		title = title+"(%d)"%c if c != 0 else title  # noqa: UP031
 
 		### new page
 		newPage = Container.ShapeCanvas(self, wx.NewIdRef(), name=title)
@@ -178,8 +178,8 @@ class GeneralNotebook(Printable):
 			
 			### action history
 			if hasattr(self.parent, 'tb'):
-				self.parent.tb.EnableTool(wx.ID_UNDO, not len(canvas.stockUndo) == 0)
-				self.parent.tb.EnableTool(wx.ID_REDO, not len(canvas.stockRedo) == 0)
+				self.parent.tb.EnableTool(wx.ID_UNDO, len(canvas.stockUndo) != 0)
+				self.parent.tb.EnableTool(wx.ID_REDO, len(canvas.stockRedo) != 0)
 
 			### refresh canvas
 			canvas.deselect()
@@ -200,7 +200,7 @@ class GeneralNotebook(Printable):
 		try:
 			name = self.GetPageText(self.GetSelection())
 			del builtins.__dict__[str(os.path.splitext(name)[0])]
-		except Exception:
+		except Exception:  # noqa: BLE001, S110
 			pass
 			#sys.stdout.write("Constants builtin not delete for %s : %s"%(name, info))
 
@@ -214,9 +214,9 @@ try:
 	if (wx.VERSION >= (2, 8, 9, 2)):
 		import wx.lib.agw.flatnotebook as fnb
 	else:
-		import wx.lib.flatnotebook as fnb
+		import wx.lib.flatnotebook as fnb # type: ignore  
 	USE_FLATNOTEBOOK = True
-except:
+except:  # noqa: E722, S110
 	pass
 
 if USE_FLATNOTEBOOK:
@@ -308,7 +308,7 @@ if USE_FLATNOTEBOOK:
 			except IndexError:
 				return False
 			else:
-				result = fnb.FlatNotebook.DeletePage(self, *args, **kwargs)
+				# result = fnb.FlatNotebook.DeletePage(self, *args, **kwargs)
 				return canvas not in self.pages
 
 		def OnClosePage(self, evt):
@@ -346,7 +346,7 @@ else:
 			### mouse position
 			pos = evt.GetPosition()
 			### pointed page and flag
-			page,flag = self.HitTest(pos)
+			_,flag = self.HitTest(pos)
 
 			### if no where click (don't hit with windows)
 			if flag == wx.BK_HITTEST_NOWHERE:
@@ -384,7 +384,7 @@ else:
 					self.DeleteBuiltinConstants()
 					self.pages.remove(canvas)
 					if not self.DeletePage(id):
-						sys.stdout.write(_("%s not deleted! \n"%(title)))
+						sys.stdout.write(_(f"{title} not deleted! \n"))  # noqa: INT001
 				else:
 					dlg.Destroy()
 
@@ -398,7 +398,7 @@ else:
 				self.pages.remove(canvas)
 
 				if not self.DeletePage(id):
-					sys.stdout.write(_("%s not deleted ! \n"%(title)))
+					sys.stdout.write(_(f"{title} not deleted ! \n"))  # noqa: INT001
 
 			### clear "property" notebook
 			nb1 = mainW.GetControlNotebook()

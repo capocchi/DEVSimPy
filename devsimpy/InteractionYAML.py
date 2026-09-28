@@ -1,12 +1,12 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
-import json
+import json  
 import os
-import traceback
 import re
 import sys
+import traceback
+# from datetime import datetime
 
-from datetime import datetime
 
 def to_Python(val):
     if val in ('true', 'True'):
@@ -16,7 +16,7 @@ def to_Python(val):
     elif type(val) is str:
         # Try to parse the string as a date
         try:
-            datetime_object = datetime.strptime(val, "%Y-%m-%d")
+            # datetime_object = datetime.strptime(val, "%Y-%m-%d")
             is_valid_date = True
         except ValueError:
             is_valid_date = False
@@ -57,11 +57,11 @@ class YAMLHandler:
             if self.filename_is_valid != True :
                 self.report['success'] = False
                 self.report['info'] = 'YAML file load failed'
-                sys.stdout.write((json.dumps(self.report)))
+                sys.stdout.write(json.dumps(self.report))
         except:
             self.report['success'] = False
             self.report['info'] = traceback.format_exc()
-            sys.stdout.write((json.dumps(self.report)))
+            sys.stdout.write(json.dumps(self.report))
             raise
 
     def extractPythonPaths(self)->list:
@@ -148,15 +148,15 @@ class YAMLHandler:
 
         try :
             return Diagram.makeDEVSInstance(self.diagram)
-        except:
+        except:  # noqa: E722
             self.report['devs_instance'] = None
             self.report['success'] = False
             self.report['info'] = traceback.format_exc()
-            sys.stdout.write((json.dumps(self.report)))
+            sys.stdout.write(json.dumps(self.report))
             return False
 
     def getJS(self):
-        """ 
+        """  Returns the JS code of the model built from YAML file.
         """
 
         from Join import makeDEVSConf, makeJoin

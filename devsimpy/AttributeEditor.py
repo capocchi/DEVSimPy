@@ -1,6 +1,4 @@
-﻿# -*- coding: utf-8 -*-
-
-'''
+﻿'''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # AttributeEditor.py ---
 #                    --------------------------------
@@ -22,14 +20,14 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import sys
+import sys  
 import linecache
 
 import wx
 
 _ = wx.GetTranslation
 
-import DiagramNotebook
+import DiagramNotebook  
 
 from PropertiesGridCtrl import PropertiesGridCtrl, CodeCB
 from DetachedFrame import DetachedFrame
@@ -38,7 +36,7 @@ from Mixins import Achievable
 from Decorators import Post_Undo
 from Utilities import load_and_resize_image
 
-class AttributeBase(object):
+class AttributeBase:
 	""" Base class to avoid multi inheritence with wx.Frame and wx.Panel used in the DEVSimPy 2.9 version
 	"""
 	
@@ -104,7 +102,7 @@ class AttributeBase(object):
 		""" Frame has been resized.
 		"""
 		### widt and weight of frame
-		width, height = wx.Window.GetClientSize(self)
+		width, _ = wx.Window.GetClientSize(self)
 		### number of column of wx.grid
 		nb_cols = self._list.GetNumberCols()
 		### width of new column depending of new wx.grid column
@@ -211,7 +209,7 @@ class AttributeEditorFrame(AttributeBase, wx.Frame):
 		
 ###
 class QuickAttributeEditor(wx.Frame, Subject):
-	"""
+	"""    Quick Model attributes in Frame
 	"""
 	def __init__(self, parent, id, model):
 		""" Constructor.
@@ -252,7 +250,7 @@ class QuickAttributeEditor(wx.Frame, Subject):
 
 	###
 	def __do_layout(self):
-		"""
+		""" Frame layout
 		"""
 		sizer_1 = wx.BoxSizer(wx.HORIZONTAL)
 		sizer_1.Add(self._sb_input, 0, wx.ADJUST_MINSIZE, 0)
@@ -263,7 +261,7 @@ class QuickAttributeEditor(wx.Frame, Subject):
 
 	###
 	def __set_binding(self):
-		"""
+		""" Frame binding
 		"""
 		self._sb_input.Bind(wx.EVT_TEXT, self.OnInput)
 		self._sb_output.Bind(wx.EVT_TEXT, self.OnOuput)
@@ -271,33 +269,33 @@ class QuickAttributeEditor(wx.Frame, Subject):
 
 	@Post_Undo
 	def OnInput(self, event):
-		"""
+		""" Frame binding
 		"""
 		self.__state['input'] = self._sb_input.GetValue()
 		self.notify()
 
 	@Post_Undo
 	def OnOuput(self, event):
-		"""
+		""" Frame binding
 		"""
 		self.__state['output'] = self._sb_output.GetValue()
 		self.notify()
 
 	###
 	def GetState(self):
-		"""
+		""" Function to get the state of the QuickAttributeEditor
 		"""
 		return self.__state
 
 	###
 	def Undo(self):
-		"""
+		""" Function to undo the last change made in the QuickAttributeEditor
 		"""
 		self.canvas.Undo()
 
 	###
 	def OnClose(self, event):
-		"""
+		""" Function to handle the close event of the QuickAttributeEditor
 		"""
 		self.Destroy()
 		event.Skip()

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 """
 Name: ZipManager.py
@@ -11,7 +11,7 @@ GENERAL NOTES AND REMARKS:
 GLOBAL VARIABLES AND FUNCTIONS:
 """
 
-import sys
+import sys  
 import http.client
 import types
 from urllib.parse import urlparse
@@ -19,7 +19,7 @@ from urllib.parse import urlparse
 class Net:
 	
 	def __init__(self, py_net_file):
-		"""
+		""" Constructor
 		"""
 		
 		assert(py_net_file.startswith('http'))
@@ -32,7 +32,7 @@ class Net:
 		"""
 
 		# See if the module has already been imported
-		module_name = self._py_net_file.split('/')[-1].split('.py')[0]
+		module_name = self._py_net_file.split('/')[-1].split('.py')[0]  # type: ignore # noqa: F821
 
 		try:
 			return sys.modules[module_name]
@@ -42,10 +42,10 @@ class Net:
 		### make new module
 		mod = types.ModuleType(module_name)
 		sys.modules[module_name] = mod
-		mod.__file__ = self._py_net_file
+		mod.__file__ = self._py_net_file  # type: ignore # noqa: F821
 
 		### parse url to extract the path(/devsimpy/domain...) and the network location (lcapocchi.free.fr)
-		o = urlparse(self._py_net_file)
+		o = urlparse(self._py_net_file)  # type: ignore # noqa: F821
 
 		### open conenction
 		c = http.client.HTTPConnection(o.netloc)
@@ -60,9 +60,9 @@ class Net:
 		### try to execute module code
 		if r.status == 200:
 			try:
-				exec(code, mod.__dict__)
+				exec(code, mod.__dict__)  # type: ignore  # noqa: S102
 				return mod
-			except Exception as info:
+			except Exception as info:  # type: ignore  # noqa: BLE001
 				return info
 		else:
 			return r.status

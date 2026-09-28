@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -13,14 +13,14 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import wx
-import wx.lib.filebrowsebutton as filebrowse
 import os
 
-from StandaloneNoGUIKafkaPKG import StandaloneNoGUIKafkaPKG
+import wx
+import wx.lib.filebrowsebutton as filebrowse
 from Decorators import BuzyCursorNotification
-from Utilities import load_and_resize_image
 from StandaloneGUI import ZipNameValidator
+from StandaloneNoGUIKafkaPKG import StandaloneNoGUIKafkaPKG
+from Utilities import load_and_resize_image
 
 _ = wx.GetTranslation
     
@@ -126,7 +126,7 @@ class StandaloneGUIKafkaPKG(wx.Frame):
         self.strategy_label = wx.StaticText(panel, -1, _("Strategy:"))
         kernel_box.Add(self.strategy_label, flag=wx.ALIGN_CENTER_VERTICAL|wx.LEFT, border=10)
         
-        self.strategy = wx.Choice(panel, -1, choices=list(BROKERDEVS_SIM_STRATEGY_DICT.keys()))
+        self.strategy = wx.Choice(panel, -1, choices=list(BROKERDEVS_SIM_STRATEGY_DICT.keys())) # type: ignore  # noqa: F821
         self.strategy.SetSelection(0)
         kernel_box.Add(self.strategy, flag=wx.ALIGN_CENTER_VERTICAL|wx.LEFT, border=10)
         
@@ -217,10 +217,12 @@ class StandaloneGUIKafkaPKG(wx.Frame):
         self._tc.SetInsertionPointEnd()
     
     def OnChoiceKernel(self, event):
-        selected_option = self.kernel.GetStringSelection()
+        # selected_option = self.kernel.GetStringSelection()
+        pass
         
     def OnChoiceStrategy(self, event):
-        selected_option = self.strategy.GetStringSelection()
+        # selected_option = self.strategy.GetStringSelection()
+        pass
 
     @BuzyCursorNotification
     def OnOk(self, event):
@@ -241,7 +243,7 @@ class StandaloneGUIKafkaPKG(wx.Frame):
                          wx.OK | wx.ICON_ERROR)
             return
         
-        kernel = self.kernel.GetString(self.kernel.GetSelection())
+        # kernel = self.kernel.GetString(self.kernel.GetSelection())
         log_cb = self._cb_log.GetValue()
         
         try:
@@ -273,7 +275,7 @@ class StandaloneGUIKafkaPKG(wx.Frame):
                     _("Error"), 
                     wx.OK | wx.ICON_ERROR
                 )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             wx.MessageBox(
                 _("An error occurred: {}").format(str(e)), 
                 _("Error"), 

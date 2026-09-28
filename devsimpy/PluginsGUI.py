@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,7 +22,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import wx
+import wx  
 import os
 import datetime
 import sys
@@ -35,7 +35,7 @@ import inspect
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
 
-from abc import abstractmethod
+from abc import abstractmethod  
 from concurrent.futures import ThreadPoolExecutor
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 
@@ -77,13 +77,6 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 			self.il.Add(i)
 		self.SetImageList(self.il, wx.IMAGE_LIST_SMALL)
 
-		#adding some art
-		#self.il = wx.ImageList(16, 16)
-		#a={"idx1":"CROSS_MARK","idx2":"TICK_MARK","idx3":"DELETE"}
-		#for k,v in a.items():
-		#	exec "self.%s= self.il.Add(wx.ArtProvider_GetBitmap(wx.ART_%s,wx.ART_TOOLBAR,(16,16)))" % (k,v)
-		#self.SetImageList(self.il, wx.IMAGE_LIST_SMALL)
-
 		# for wxMSW
 		self.Bind(wx.EVT_COMMAND_RIGHT_CLICK, self.OnRightClick)
 
@@ -93,25 +86,6 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 		### Layout
 		self.Centre()
 		self.Show(True)
-
-		#self.Bind(wx.EVT_MOTION, self.OnMotion)
-
-	# def OnMotion(self, evt):
-	# 	"""
-	# 	"""
-	# 	item, flags = self.HitTest(evt.GetPosition())
-		
-	# 	try:
-	# 		path = self.GetPyData(item)
-	# 		self.SetToolTip(path[0].__file__)
-	# 	except:
-	# 		self.SetToolTip(None)
-		
-	# 	### only from wx 4.1.0
-	# 	self.EnableCheckBoxes(True)
-
-	# 	### else the drag and drop dont run
-	# 	evt.Skip()
 
 	def OnRightClick(self, event):
 		""" Right click has been invoked.
@@ -215,7 +189,7 @@ class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
 	def OnEdit(self, event):
 		""" Abstract method to edit plug-ins python file.
 		"""
-		pass
+		pass  # noqa: PIE790
 		
 	def SetPyData(self, item, data):
 		""" Set python object Data.
@@ -321,19 +295,19 @@ class GeneralPluginsList(CheckListCtrl):
 
 		### absolute name
 		ext = 'py'
-		absname = os.path.join(root,"%s.%s"%(basename,ext))
+		absname = os.path.join(root,f"{basename}.{ext}")
 
 		### try for pyc if py not exists
 		if not os.path.exists(absname):
 			ext = 'pyc'
-			absname = os.path.join(root,"%s.%s"%(basename,ext))
+			absname = os.path.join(root,f"{basename}.{ext}")
 
 		if os.path.exists(absname):
 			### file size
 			size = FormatSizeFile(os.path.getsize(absname))
 
 			### date manager
-			date = datetime.datetime.fromtimestamp(os.path.getmtime(absname))
+			date = datetime.datetime.fromtimestamp(os.path.getmtime(absname))  # noqa: DTZ006
 			if hasattr(self.mainW,'language') and self.mainW.language == 'fr':
 				date = date.strftime("%d/%m/%y")
 			else:
@@ -388,7 +362,7 @@ class GeneralPluginsList(CheckListCtrl):
 		self.is_populate = False
 
 	def OnEdit(self, event):
-		"""
+		""" Edit
 		"""
 		index = self.currentItem
 		path = self.GetPath(index)
@@ -424,7 +398,7 @@ class GeneralPluginsList(CheckListCtrl):
 				### built-in module coming from empty module create by error manager
 				if path:
 					### get abspath and exclude .pyc
-					name,ext = os.path.splitext(os.path.basename(path))
+					name,_ = os.path.splitext(os.path.basename(path))
 					### if plug-in is checked, we activate it
 					
 					if self.IsChecked(i):
@@ -465,7 +439,7 @@ class BlockPluginsList(CheckListCtrl):
 				pool = ThreadPoolExecutor(3)
 				future = pool.submit(self.Populate, (PluginManager.pluginsList))
 				future.done()
-			except:
+			except:  # noqa: E722
 				self.Populate(PluginManager.pluginsList)
 			finally:
 				self.is_populate = True
@@ -485,7 +459,7 @@ class BlockPluginsList(CheckListCtrl):
 		event.Skip()
 
 	def DoChekItem(self, index):
-		"""
+		""" Check Item
 		"""
 
 		pluginName = self.GetItemText(index)
@@ -503,7 +477,7 @@ class BlockPluginsList(CheckListCtrl):
 			else:
 				### delete dynamic attribute
 				if old is None:
-					exec("del self.model.%s"%(pluginName))
+					exec(f"del self.model.{pluginName}")  # noqa: S102
 				### restore overwriting attribute
 				else:
 					setattr(self.model, pluginName, types.MethodType(old, self.model))
@@ -536,7 +510,7 @@ class BlockPluginsList(CheckListCtrl):
 			plugins_list = self.GetPluginsList(self.model.model_path) if self.model else []
 
 			if not isinstance(plugins_list, list):
-				msg = _('Error in plugins.py file:\n\n%s\n\nDo you want to edit this file?'%plugins_list)
+				msg = _(f'Error in plugins.py file:\n\n{plugins_list}\n\nDo you want to edit this file?')  # noqa: INT001
 
 				dial = wx.MessageDialog(None, msg, _('Plug-ins Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_ERROR)
 
@@ -558,7 +532,7 @@ class BlockPluginsList(CheckListCtrl):
 
 					### if plug-ins contains error, error is stored in doc object and icon is changed
 					if isinstance(new, Exception):
-						new.__doc__ = srt(new)
+						new.__doc__ = srt(new)  # type: ignore # noqa: F821
 						self.SetItemImage(index, 2)
 
 					#### set the pydata object
@@ -580,7 +554,7 @@ class BlockPluginsList(CheckListCtrl):
 		zf = zipfile.ZipFile(model_path, 'r')
 		nl = zf.namelist()
 		zf.close()
-		return any([re.search("^plugins%s[a-zA-Z]*"%os.sep, s) for s in nl])
+		return any(re.search(f"^plugins{os.sep}[a-zA-Z]*", s) for s in nl)
 
 	@staticmethod
 	def IsInRoot(model_path):
@@ -590,7 +564,7 @@ class BlockPluginsList(CheckListCtrl):
 		zf = zipfile.ZipFile(model_path, 'r')
 		nl = zf.namelist()
 		zf.close()
-		return any([re.search("^plugins.py$", s) for s in nl])
+		return any(re.search("^plugins.py$", s) for s in nl)
 
 	def GetPluginsList(self, model_path):
 		""" Get plug-ins list from plug-in file
@@ -615,8 +589,8 @@ class BlockPluginsList(CheckListCtrl):
 				try:
 					module = importer.load_module(fullname)
 
-				except Exception as info:
-					sys.stderr.write(_("Error loading plug-ins: %s\n"%info))
+				except Exception as info:  # noqa: BLE001
+					sys.stderr.write(_(f"Error loading plug-ins: {info}\n"))  # noqa: INT001
 					return info
 			else:
 				module = None
@@ -629,13 +603,12 @@ class BlockPluginsList(CheckListCtrl):
 				for name,m in inspect.getmembers(module, inspect.isfunction):
 
 					### it's a method
-					#if 'self' in inspect.getargspec(m).args:
 					if 'self' in list(inspect.signature(m).parameters):
 
 						### trying to eval new element to assign
 						try:
-							new = eval("module.%s"%name)
-						except Exception as info:
+							new = eval(f"module.{name}")
+						except Exception as info:  # noqa: BLE001
 							new = info
 							new.__doc__ = str(info)
 
@@ -647,11 +620,8 @@ class BlockPluginsList(CheckListCtrl):
 							### object don't have attribute (create)
 							else:
 								old = None
-						### new element is class
-						#elif inspect.isclass(new):
-							#old = self.model.__class__
 						else:
-							sys.stdout.write(_('WARNING: plug-in type (%s) not supported!'%(name)))
+							sys.stdout.write(_(f'WARNING: plug-in type ({name}) not supported!'))  # noqa: INT001
 
 						L.append((m,new,old))
 
@@ -781,7 +751,7 @@ class PluginsPanel(wx.Panel):
 #		sel = self.check_list.GetFirstSelected()
 
 		if sel != -1:
-			item = self.check_list.GetItem(sel)
+			# item = self.check_list.GetItem(sel)
 			new_element = self.check_list.GetPyData(sel)[0]
 			doc = new_element.__doc__
 			self.log.ChangeValue(doc + '\n' if doc else _("No documentation available for this plug-in."))
@@ -821,7 +791,7 @@ class PluginsPanel(wx.Panel):
 				sys.stderr.write(_("Warning: Type of list object unknown in PluginsGUI"))
 
 			# call the Config plug-in function
-			module.Config(*(), **{'parent':self})
+			module.Config(*(), **{'parent':self})  # noqa: PIE804
 
 class ModelPluginsManager(wx.Frame):
 	""" Plug-ins Manager for DEVSimPy Block
@@ -895,7 +865,7 @@ class ModelPluginsManager(wx.Frame):
 
 	@staticmethod
 	def GetEditor(parent, model, filename=None):
-		"""
+		""" Editor
 		"""
 		path = os.path.join(model.model_path, ZipManager.Zip.GetPluginFile(model.model_path)) if not filename else filename
 		name = os.path.basename(path)
@@ -940,7 +910,7 @@ class ModelPluginsManager(wx.Frame):
 		"""
 		filename = None
 		wcd = 'All files (*)|*|Editor files (*.py)|*.py'
-		dir = DEVSIMPY_PACKAGE_PATH
+		dir = DEVSIMPY_PACKAGE_PATH # type: ignore  # noqa: F821
 		open_dlg = wx.FileDialog(self, message=_('Choose a file'), defaultDir=dir, defaultFile='plugins.py', wildcard=wcd, style=wx.OPEN|wx.CHANGE_DIR)
 		if open_dlg.ShowModal() == wx.ID_OK:
 			### TODO
@@ -954,14 +924,14 @@ class ModelPluginsManager(wx.Frame):
 		open_dlg.Destroy()
 
 		if filename:
-			source = open(filename, 'r').read() + '\n'
+			source = open(filename, 'r').read() + '\n'  # noqa: SIM115
 			code = compile(source, filename, 'exec')
 
 			### try to find error before compressed in the archive model
 			try:
 				eval(code)
 			### Error occur
-			except Exception as info:
+			except Exception as info:  # noqa: BLE001
 				msg = _('Error trying to load plug-in.\nInfo : %s\nDo you want to edit this plug-in file?')%info
 				dial = wx.MessageDialog(None, msg, self.model.label, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_ERROR)
 

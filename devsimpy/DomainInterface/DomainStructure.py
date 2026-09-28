@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
+
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # DomainStructure.py --- Domaine Structure virtual class
@@ -18,15 +19,15 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-import builtins
+import builtins  
 
 import re
 import os
 import importlib
 
-path = getattr(builtins,'DEVS_DIR_PATH_DICT').get(DEFAULT_DEVS_DIRNAME)
+path = builtins.DEVS_DIR_PATH_DICT.get(DEFAULT_DEVS_DIRNAME) # type: ignore  # noqa: F821
 d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
-BaseDEVS = importlib.import_module("DEVSKernel%s.DEVS"%d)
+BaseDEVS = importlib.import_module(f"DEVSKernel{d}.DEVS")
 
 #exec("import DEVSKernel%s.DEVS as BaseDEVS"%(d))
 
@@ -43,12 +44,12 @@ class DomainStructure(BaseDEVS.CoupledDEVS):
 		BaseDEVS.CoupledDEVS.__init__(self, name=name)
 
 	def getFlatComponentSet (self):
-	    """ get the list of composing submodels - recursive build
-	    """
-	    submodelList = {}
-	    for submodel in self.getComponentSet():
-	        submodelList.update(submodel.getFlatComponentSet())
-	    return submodelList
+		""" get the list of composing submodels - recursive build
+		"""
+		submodelList = {}
+		for submodel in self.getComponentSet():
+			submodelList.update(submodel.getFlatComponentSet())
+		return submodelList
 
 	def getComponentSet(self)->list:
 		""" return the component set attribute depending on the definition finded in the DEVS.py file

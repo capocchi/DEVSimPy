@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-  # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,7 +22,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import builtins
+import builtins  
 
 import os
 import sys
@@ -41,14 +41,14 @@ if not hasattr(inspect, 'getargspec'):
 from tempfile import gettempdir
 
 if getattr(builtins,'GUI_FLAG', True):
-	import wx
+	import wx  
 	from pubsub import pub as Publisher
 	import Editor
 	from SimpleFrameEditor import FrameEditor
 
 	_ = wx.GetTranslation
 
-import ZipManager
+import ZipManager  
 
 from Utilities import replaceAll, GetActiveWindow, printOnStatusBar, install
 from Decorators import BuzyCursorNotification
@@ -133,7 +133,7 @@ def GetClass(elem):
          and (c.__name__ == module_basename or module_basename in c.__name__)),
         None
     )
-    if cls is not None:
+    if cls is not None:  # noqa: SIM102
         # ensure it actually inherits domain base if possible
         if _is_subclass_of_any(cls, domain_bases_tuple) or _mro_name_match(cls, domain_bases_tuple):
             return cls
@@ -177,7 +177,7 @@ def GetArgs(cls = None):
 		try:
 			constructor = inspect.getargspec(cls.__init__)
 			return dict(zip(constructor.args[1:], constructor.defaults)) if constructor.defaults else {}
-		except:
+		except:  # noqa: E722
 			sys.stderr.write(_("Error in GetArgs: First parameter is not a class\n"))
 			
 	return None
@@ -189,7 +189,7 @@ def GetArgs(cls = None):
 ###########################################################
 
 class DSPComponent:
-	""" 
+	""" Class DSPComponent is used to create a DSP component from a python file and a model file. 
 	"""
 
 	@staticmethod
@@ -261,11 +261,11 @@ class PyComponent:
 		new_filepath = "".join([os.path.join(dn, new_name),ext])
 
 		#read input file
-		fin = open(filename, "rt")
+		fin = open(filename, "rt")  # noqa: SIM115
 		#read file contents to string
 		data = fin.read()
 		
-		if 'class %s(DomainBehavior):'%old_name in data or 'class %s(DomainStructure):'%old_name:
+		if 'class %s(DomainBehavior):'%old_name in data or 'class %s(DomainStructure):'%old_name:  # noqa: UP031
 			
 			#replace all occurrences of the required string
 			data = data.replace(old_name, new_name)
@@ -298,7 +298,7 @@ class PyComponent:
 		"""
 		fn = filename.strip()
 	
-		assert(fn.endswith(('.py','.pyc','.pyd'))),"File %s is not python file!"%fn
+		assert(fn.endswith(('.py','.pyc','.pyd'))),f"File {fn} is not python file!"
 
 		if os.path.exists(fn):
 			return BlockFactory.CreateBlock(python_file = fn, label = label)
@@ -306,13 +306,13 @@ class PyComponent:
 			return None
 
 class GenericComponent:
-	"""
+	""" Class GenericComponent is used to create a generic component from a python file and a model file.
 	"""
 	def __init__(self, *argv, **kwargs):
 		""" Constructor.
 		"""
 		# local copy
-		self._canvas = kwargs['canvas'] if 'id' in kwargs else None
+		self._canvas = kwargs.get('canvas', None)
 		self._x = kwargs.get('x',None)
 		self._y = kwargs.get('y',None)
 		self._label = kwargs.get('label',None)
@@ -340,13 +340,13 @@ class GenericComponent:
 	def Create(self):
 		""" Abstract method to create component from attributes.
 		"""
-		pass
+		pass  # noqa: PIE790
 
 	@staticmethod
 	def Load(filename, label, x, y, canvas):
 		""" Abstract method to load stored component form filename.
 		"""
-		pass
+		pass  # noqa: PIE790
 
 	@staticmethod
 	def ChekFilename(filename, model):
@@ -454,7 +454,7 @@ class GenericComponent:
 			return False
 			
 class CMDComponent(GenericComponent):
-	""" 
+	""" CMDComponent class is used to create a CMD component from a python file and a model file.
 	"""
 
 	def __init__(self, *argv, **kwargs):
@@ -471,14 +471,14 @@ class CMDComponent(GenericComponent):
 
 		# input and output ports
 		for id in range(self._inputs):
-			iport = iPort(label='IPort %d'%(id))
+			iport = iPort(label='IPort %d'%(id))  # noqa: UP031
 			iport.id = id
 			self.__m.AddShape(iport)
 			self.__m.nbiPort = id
 			iport.move(50,100*(self.__m.nbiPort))
 
 		for id in range(self._outputs):
-			oport = oPort(label='OPort %d'%(id))
+			oport = oPort(label='OPort %d'%(id))  # noqa: UP031
 			oport.id = id
 			self.__m.AddShape(oport)
 			self.__m.nboPort = id
@@ -502,7 +502,7 @@ class CMDComponent(GenericComponent):
 		load_file_result = m.LoadFile(filename)
 
 		if isinstance(load_file_result, Exception):
-			wx.MessageBox(_(f"Error loading {label} model : {str(load_file_result)}"), _('Error'), wx.OK | wx.ICON_ERROR)
+			wx.MessageBox(_(f"Error loading {label} model : {load_file_result!s}"), _('Error'), wx.OK | wx.ICON_ERROR)  # noqa: INT001
 			return None
 
 		else:
@@ -520,7 +520,7 @@ class CMDComponent(GenericComponent):
 			return CMDComponent.ChekFilename(filename, m)
 
 class AMDComponent(GenericComponent):
-	"""
+	""" AMDComponent class is used to create a AMD component from a python file and a model file.
 	"""
 
 	def __init__(self, *argv, **kwargs):
@@ -564,7 +564,7 @@ class AMDComponent(GenericComponent):
 		load_file_result = m.LoadFile(filename)
 		
 		if isinstance(load_file_result, Exception):
-			wx.MessageBox(_('Error loading %s model : %s '%(label, load_file_result)), _('Error'), wx.OK | wx.ICON_ERROR)
+			wx.MessageBox(_(f'Error loading {label} model : {load_file_result} '), _('Error'), wx.OK | wx.ICON_ERROR)  # noqa: INT001
 			return None
 		else:
 			### mandatory due to the LoadFile call before
@@ -572,11 +572,11 @@ class AMDComponent(GenericComponent):
 			return AMDComponent.ChekFilename(filename, m)
 
 	@staticmethod
-	def BlockModelAdapter(cls, label="", specific_behavior=""):
+	def BlockModelAdapter(cls, label="", specific_behavior=""):  # noqa: PLW0211
 		""" Return block model considering its class hierarchy
 			The implementation depends only of the argument of the class. There is no dependance with the collector module (in comment bellow)
 		"""
-		from Container import DiskGUI, ScopeGUI, CodeBlock, CollectorGUI, GeneratorGUI
+		from Container import DiskGUI, ScopeGUI, CodeBlock, CollectorGUI, GeneratorGUI  
 	
 		# associated python class membre
 
@@ -589,7 +589,7 @@ class AMDComponent(GenericComponent):
 		L = [os.path.isabs(str(a)) or str(a)=='result' for a in list(args.values())]
 		filename_without_ext_flag = L.index(True) if True in L else -1
 		### if there is a filename and if there is no extention -> its a to disk like object
-		disk_model = filename_without_ext_flag >= 0 and not os.path.splitext(list(args.values())[filename_without_ext_flag])[-1] != ''
+		disk_model = filename_without_ext_flag >= 0 and not os.path.splitext(list(args.values())[filename_without_ext_flag])[-1] != ''  # noqa: SIM202
 
 		### find if scope is present in class name
 		match = [re.match('[-_a-zA-z]*scope[-_a-zA-z]*',s, re.IGNORECASE) for s in list(clsmbr.keys())+[specific_behavior]]
@@ -621,7 +621,7 @@ class AMDComponent(GenericComponent):
 
 #---------------------------------------------------------
 class DEVSComponent:
-	"""
+	""" Class DEVSComponent is used to create a DEVS component from a python file and a model file.
 	"""
 
 	def __init__(self):
@@ -666,11 +666,11 @@ class DEVSComponent:
 	def debugger(m, msg, print_stdout=False):
 		if getattr(builtins,'GUI_FLAG', True):
 			bm = m.getBlockModel()
-			path = os.path.join(gettempdir(),'%s.%d.devsimpy.log'%(str(bm.label), id(bm)))
+			path = os.path.join(gettempdir(),'%s.%d.devsimpy.log'%(str(bm.label), id(bm)))  # noqa: UP031
 		
 			try:
 				txt = f"clock {m.timeNext}: {msg}\n"
-			except Exception:
+			except Exception:  # noqa: BLE001
 				txt = f"clock {0.0}: {msg}\n"
 
 			with open(path,'a') as f:
@@ -741,10 +741,10 @@ class DEVSComponent:
 			if not hasattr(devs, 'debugger'):
 				setattr(devs.__class__, DEVSComponent.debugger.__name__, DEVSComponent.debugger)
 			
-			if getattr(builtins,'GUI_FLAG', True):
+			if getattr(builtins,'GUI_FLAG', True):  # noqa: SIM102
 				### to execute finish method of devs model (look at the SimulationGUI for message interception)
 				if hasattr(devs, 'finish'):
-					Publisher.subscribe(devs.finish, "%d.finished"%(id(devs)))
+					Publisher.subscribe(devs.finish, "%d.finished"%(id(devs)))  # noqa: UP031
 
 			DEVSComponent.setBlockModel(devs, self)
 
@@ -761,14 +761,14 @@ class DEVSComponent:
 		""" Return True if the python file is embedded in CMD file
 		"""
 		fn = os.path.dirname(self.getDEVSPythonPath())
-		return zipfile.is_zipfile(fn) and fn.endswith(('.cmd')) if os.path.isfile(fn) else False
+		return zipfile.is_zipfile(fn) and fn.endswith('.cmd') if os.path.isfile(fn) else False
 
 	###
 	def isAMD(self):
 		""" Return True if the python file is embedded in AMD file
 		"""
 		fn = os.path.dirname(self.getDEVSPythonPath())
-		return zipfile.is_zipfile(fn) and fn.endswith(('.amd')) if os.path.isfile(fn) else False
+		return zipfile.is_zipfile(fn) and fn.endswith('.amd') if os.path.isfile(fn) else False
 
 	def isPYC(self):
 		""" Return True if the python path point to a python file
@@ -789,7 +789,7 @@ class DEVSComponent:
 		devs = self.getDEVSModel()
 		block = devs.getBlockModel()
 		label = str(block.label)
-		log_file = os.path.join(os.path.realpath(gettempdir()),'%s.%d.devsimpy.log'%(label,id(block)))
+		log_file = os.path.join(os.path.realpath(gettempdir()),'%s.%d.devsimpy.log'%(label,id(block)))  # noqa: UP031
 		parent = event.GetClientData()
 
 		if os.path.exists(log_file):
@@ -812,7 +812,7 @@ class DEVSComponent:
 	def updateDEVSPriorityList(self):
 		""" Update the componentSet order from priority_list for corresponding diagram
 		"""
-		from Container import ContainerBlock, Diagram, Block
+		from Container import ContainerBlock, Diagram, Block  
 		assert(isinstance(self, (ContainerBlock, Diagram)))
 
 		### if devs instance is not none and priority_list has been invoked (else componentSet order is considered)
@@ -848,7 +848,7 @@ class DEVSComponent:
 		if isinstance(mainW, ShapeCanvas):
 			mainW = mainW.GetParent()
 
-		if not getattr(builtins,'LOCAL_EDITOR') and not zipfile.is_zipfile(model_path) and not python_path.startswith('http'):
+		if not builtins.LOCAL_EDITOR and not zipfile.is_zipfile(model_path) and not python_path.startswith('http'):
 			dial = wx.MessageDialog(mainW, _('Do you want to use your local code editor software?\n\n If you always want to always use the local DEVSimPy code editor\n change the option in the Editor panel preference.'), name, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 			val = dial.ShowModal()
 		else:
@@ -858,9 +858,9 @@ class DEVSComponent:
 		if val == wx.ID_NO:
 			### open with local editor
 			if wx.Platform == '__WXMAC__':
-				subprocess.call(" ".join(['open -a',python_path]), shell=True)
+				subprocess.call(f'open -a {python_path}', shell=True)
 			elif "wxMSW" in wx.PlatformInfo:
-				editor = getattr(builtins,'EXTERNAL_EDITOR_NAME')
+				editor = builtins.EXTERNAL_EDITOR_NAME
 				
 				### try to import the editor
 				try:
@@ -882,16 +882,16 @@ class DEVSComponent:
 				if os.system('pidof gedit') == 256:
 					try:
 						soft = which('gedit')
-					except:
+					except:  # noqa: E722
 						sys.stdout.write(_("Local programmer software not found!\n"))
 					else:
-						subprocess.call(" ".join([soft,python_path]), shell=True)
+						subprocess.call(f'{soft} {python_path}', shell=True)
 
 				### with kde
 				elif os.system('pidof ksmserver') == 256:
 					try:
 						soft = which('kfmclient')
-					except:
+					except:  # noqa: E722
 						sys.stdout.write(_("Local programmer software not found!\n"))
 					else:
 						os.system(soft+" openURL " + python_path)
@@ -902,17 +902,17 @@ class DEVSComponent:
 			# loading file in DEVSimPy editor windows (self.text)
 			try:
 				
-				editorFrame = Editor.GetEditor(None, wx.NewIdRef(), ''.join([name,' - ',model_path]), obj=self, file_type='block')
+				editorFrame = Editor.GetEditor(None, wx.NewIdRef(), f'{name} - {model_path}', obj=self, file_type='block')
 				
 				# if zipfile.is_zipfile(model_path):
 				# 	importer = zipimport.zipimporter(model_path)
 				# 	text = importer.get_source(os.path.splitext(name)[0])
 
-				if not zipfile.is_zipfile(model_path):
+				if not zipfile.is_zipfile(model_path):  # noqa: SIM102
 					### if python_path is not found (because have an external origin)
 					if not os.path.exists(python_path) and os.path.basename(
-						DOMAIN_PATH) in python_path.split(os.sep):
-						python_path = os.path.join(DEVSIMPY_PACKAGE_PATH, python_path[python_path.index(os.path.basename(DOMAIN_PATH)):].strip('[]'))
+						DOMAIN_PATH) in python_path.split(os.sep): # pyright: ignore[reportUndefinedVariable]  # noqa: F821
+						python_path = os.path.join(DEVSIMPY_PACKAGE_PATH, python_path[python_path.index(os.path.basename(DOMAIN_PATH)):].strip('[]')) # pyright: ignore[reportUndefinedVariable]  # noqa: F821
 						self.python_path = python_path
 
 									# ### only with python 2.6
@@ -934,10 +934,10 @@ class DEVSComponent:
 
 				return editorFrame
 
-			except Exception as info:
+			except Exception as info:  # noqa: BLE001
 				dlg = wx.MessageDialog(
 				    mainW,
-				    _('Editor frame not instanciated: %s\n' % info),
+				    _(f'Editor frame not instanciated: {info}\n'),  # noqa: INT001
 				    name,
 				    wx.OK | wx.ICON_ERROR,
 				)
@@ -978,7 +978,7 @@ class BlockFactory:
 				current_dirname = os.path.dirname(current_dirname)
 
 			module_name = os.path.basename(filename).split('.py')[0]
-			name, ext = os.path.splitext(module_name)
+			name, _ = os.path.splitext(module_name)
 
 			### try to find the specification of module
 			spec = importlib.util.find_spec(name, dir_name)
@@ -989,7 +989,7 @@ class BlockFactory:
 				try:
 					module = spec.loader.load_module(module_name)
 				except (ValueError, ImportError) as msg:
-					sys.stderr.write(_("Module %s not imported from %s: %s!\n"%(module_name,dir_name,str(msg))))
+					sys.stderr.write(_(f"Module {module_name} not imported from {dir_name}: {msg!s}!\n"))  # noqa: INT001
 					module = sys.exc_info()
 				else:
 					### if module are finded, we add on sys.modules all of the paths allowing to reach the module 
@@ -999,13 +999,13 @@ class BlockFactory:
 					### or SinGen import SinGen
 
 					### replace os.sep by . from DOMAIN_PATH into the path of the python module file
-					if DOMAIN_PATH in dir_name:
-						L = dir_name.replace(DOMAIN_PATH+os.sep,'').split(os.sep)
+					if DOMAIN_PATH in dir_name: # pyright: ignore[reportUndefinedVariable]  # noqa: F821
+						L = dir_name.replace(DOMAIN_PATH+os.sep,'').split(os.sep) # pyright: ignore[reportUndefinedVariable]  # noqa: F821
 						names = ['.'.join(L[i:]+[name]) for i in range(len(L))]
 					else:
 						### external lib
 						### we add the directory of the lib (So, for example, you can import module by using form Dir.module import ... or from module import ...)
-						names = ['.'.join([name,module_name])]
+						names = [f'{name}.{module_name}']
 					
 					### add all combination of path to reach the module
 					for n in names:
@@ -1016,7 +1016,7 @@ class BlockFactory:
 					# search_path = [dir_name] # set to None to see all modules importable from sys.path
 					# all_modules = [x[1] for x in pkgutil.iter_modules(path=search_path)]
 			else:
-				sys.stdout.write("Import Error:\n module %s not found\n"%name)
+				sys.stdout.write(f"Import Error:\n module {name} not found\n")
 				module = None
 					
 			return module
@@ -1033,7 +1033,7 @@ class BlockFactory:
 
 		### exclude all chinese character (just for mac)
 		if wx.Platform == '__WXMAC__':
-			L = re.findall(u'[^\u4E00-\u9FA5]', filename)		
+			# L = re.findall(u'[^\u4E00-\u9FA5]', filename)
 			filename = ''.join(filename)
 			
 		ext = os.path.splitext(filename)[-1]
@@ -1053,15 +1053,15 @@ class BlockFactory:
 		""" Create Block from python_file and other info coming from wizard.
 		"""
 		
-		from Container import iPort, oPort, MsgBoxError
+		from Container import iPort, oPort, MsgBoxError  
 		### import are here because the simulator (PyDEVS or PyPDEVS) require it
 		from DomainInterface import DomainBehavior
 		from DomainInterface import DomainStructure
 
 		python_file = kwargs['python_file']
-		canvas = kwargs['canvas'] if 'canvas' in kwargs else None
-		x = kwargs['x'] if 'x' in kwargs else None
-		y = kwargs['y'] if 'y' in kwargs else None
+		canvas = kwargs.get('canvas', None)
+		x = kwargs.get('x', None)
+		y = kwargs.get('y', None)
 
 		# associated python class
 		cls = GetClass(python_file)
@@ -1092,14 +1092,14 @@ class BlockFactory:
 			elif  'IPort' in cls.__name__:
 				label = kwargs['label']
 				iid = kwargs['id'] if 'id' in kwargs else canvas.GetDiagram().GetiPortCount()
-				m = iPort(label = "%s %d"%(label,iid))
+				m = iPort(label = "%s %d"%(label,iid))  # noqa: UP031
 				m.id = iid
 				m.move(x-70, y-70)
 				return m
 			elif  'OPort' in cls.__name__:
 				label = kwargs['label']
 				oid = kwargs['id'] if 'id' in kwargs else canvas.GetDiagram().GetoPortCount()
-				m = oPort(label = "%s %d"%(label,oid))
+				m = oPort(label = "%s %d"%(label,oid))  # noqa: UP031
 				m.id = oid
 				m.move(x-70, y-70)
 				return m

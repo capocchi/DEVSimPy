@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,14 +22,13 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import os
-import sys
+import os  
 import wx
 from wx import xrc
 
 __res = None
 
-RESFILE = os.path.join(DEVSIMPY_PACKAGE_PATH,'XRC','LabelEditorDialog.xrc')
+RESFILE = os.path.join(DEVSIMPY_PACKAGE_PATH,'XRC','LabelEditorDialog.xrc') # type: ignore  # noqa: F821
 
 def __init_resources():
 	global __res
@@ -39,13 +38,13 @@ def __init_resources():
 	
 def get_resources():
     """ This function provides access to the XML resources in this module."""
-    global __res
+    global __res  # noqa: PLW0602
     if __res == None:
         __init_resources()
     return __res
 
 class LabelDialog(wx.Dialog):
-	"""
+	""" Label Dialog
 	"""
 
 	def PreCreate(self, pre):
@@ -54,7 +53,7 @@ class LabelDialog(wx.Dialog):
 		Override it for custom setup before the window is created usually to
 		set additional window styles using SetWindowStyle() and SetExtraStyle().
 		"""
-		pass
+		pass  # noqa: PIE790
 
 	def __init__(self, parent, block=None, title=""):
 		""" Constructor.
@@ -103,7 +102,7 @@ class LabelDialog(wx.Dialog):
 		self.m_radioBtn3 = xrc.XRCCTRL(self, 'm_radioBtn3')
 
 	def SetProperties(self):
-		"""
+		""" Set properties of the dialogue window
 		"""
 
 		### default title is defined in XRC
@@ -124,7 +123,7 @@ class LabelDialog(wx.Dialog):
 			self.m_radioBtn3.SetValue(self.old_pos == 'bottom')
 
 	def SetCanvas(self, canvas):
-		"""
+		""" Set the canvas of the dialogue window
 		"""
 		self.canvas = canvas
 

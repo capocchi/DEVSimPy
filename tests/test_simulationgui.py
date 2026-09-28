@@ -6,12 +6,12 @@ Usage:
     python test_simulationgui.py --autoclose 10  # Auto-close after 10s delay
 """
 
-import wx
+import wx  
 
 from ApplicationController import TestApp
 
 # import after ApplicationController that inits sys.path ot avoid this import
-from SimulationGUI import SimulationDialog
+from SimulationGUI import SimulationDialog # type: ignore
 
 # Run the test
 app = TestApp(0)

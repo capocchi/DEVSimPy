@@ -1,11 +1,13 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
+
 """DnD demo with listctrl.
 - Dragging of multiple selected items.
 - Dropping on an empty list.
 - Dropping of items on a list with a different number of columns.
-- Dropping on a different applications."""
+- Dropping on a different applications.
+"""
 
-import pickle
+import pickle  
 import wx
 
 # ----------------------------------------------------------------------
@@ -95,7 +97,7 @@ class DragList(wx.ListCtrl):
             for j in range(1, self.GetColumnCount()):
                 try: # Target list can have more columns than source
                     self.SetStringItem(idx, j, i[2+j])
-                except:
+                except:  # noqa: E722, S110
                     pass # ignore the extra columns
             index += 1
 

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,14 +22,16 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import os
-import zipfile
+import os  
 import zipfile
 import configparser
 import pathlib
 import json
 import sys
 import logging
+
+import gettext
+_ = gettext.gettext
 
 try:
     import wx
@@ -41,9 +43,9 @@ try:
     from importlib.metadata import distributions
 except ImportError:
     # Fallback pour Python < 3.8
-    from importlib_metadata import distributions
+    from importlib_metadata import distributions # type: ignore  
 
-from Utilities import GetUserConfigDir, getDirectorySize
+from Utilities import GetUserConfigDir, getDirectorySize  
 from InteractionYAML import YAMLHandler
 from ZipManager import get_imported_modules
 
@@ -56,7 +58,7 @@ def get_pip_packages()->list:
     try:
         installed_packages = [dist.name for dist in distributions()]
         return installed_packages
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         sys.stdout.write(f"Error retrieving pip packages: {e}")
         return []
 
@@ -72,7 +74,7 @@ def retrieve_file_paths(dirName:str)->list:
     ### Read all directory, subdirectories and file lists
     ### Create the full filepath by using os module.
     return [ os.path.join(root, filename) 
-                 for root, _, files in os.walk(r'{}'.format(dirName).encode('latin').decode('utf-8')) \
+                 for root, _, files in os.walk(rf'{dirName}'.encode('latin').decode('utf-8')) \
                  for filename in files \
                  if '__pycache__' not in filename]
 
@@ -108,7 +110,7 @@ def add_library_to_archive(archive, lib_path):
         int: Number of files successfully added
     """
     if not os.path.exists(lib_path):
-        sys.stderr.write(_(f"\nWarning: Library path does not exist: {lib_path}\n"))
+        sys.stderr.write(_(f"\nWarning: Library path does not exist: {lib_path}\n"))  # noqa: INT001
         return 0
     
     ### to not insert two times the same file
@@ -128,7 +130,7 @@ def add_library_to_archive(archive, lib_path):
             try:
                 file_suffix = file_path.split(lib_name, 1)[1].lstrip(os.sep)
             except IndexError:
-                sys.stderr.write(_(f"\nWarning: Cannot parse path for {file_path}\n"))
+                sys.stderr.write(_(f"\nWarning: Cannot parse path for {file_path}\n"))  # noqa: INT001
                 continue
             
             # Build target path in archive
@@ -146,25 +148,25 @@ def add_library_to_archive(archive, lib_path):
                     archive.write(file_path, arcname=relative_path)
                     added_files.add(relative_path)
                     files_added += 1
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     sys.stderr.write(_(
-                        f"\nError adding {file_path} to archive: {e}\n"
+                        f"\nError adding {file_path} to archive: {e}\n"  # noqa: INT001
                     ))
     
-    except Exception as e:
-        sys.stderr.write(_(f"\nError processing library {lib_path}: {e}\n"))
+    except Exception as e:  # noqa: BLE001
+        sys.stderr.write(_(f"\nError processing library {lib_path}: {e}\n"))  # noqa: INT001
     
     return files_added
 
 class StandaloneNoGUI:
     
     ### list of files to zip
-    FILENAMES = ['Components.py','Container.py','Decorators.py','devsimpy-nogui.py','DSV.py','InteractionSocket.py','InteractionYAML.py',
+    FILENAMES = ['Components.py','Container.py','Decorators.py','devsimpy-nogui.py','DSV.py','InteractionSocket.py','InteractionYAML.py',  # noqa: RUF012
 				'Join.py','NetManager.py','PluginManager.py','SimulationNoGUI.py','SpreadSheet.py','Utilities.py','XMLModule.py','ZipManager.py',
                 'StandaloneNoGUI.py', 'config.py']
 
     ## list of dir to zip
-    DIRNAMES = ['DomainInterface/','Mixins/','Patterns/']
+    DIRNAMES = ['DomainInterface/','Mixins/','Patterns/']  # noqa: RUF012
 
     def __init__(self, yaml:str="", outfn:str="devsimpy-nogui-pkg.zip", format:str="Minimal", outdir:str=os.getcwd(), add_sim_kernel:bool=True, add_dockerfile:bool=False, sim_time:str="ntl", rt:bool=False, kernel:str='PyDEVS', enable_log:bool=False):
         """ Generates the zip file with all files needed to execute the devsimpy-nogui script.
@@ -222,7 +224,7 @@ class StandaloneNoGUI:
             StandaloneNoGUI.DIRNAMES.append('DEVSKernel/')
         
     def GetDockerSpec(self):
-        """
+        """ docker Spec
         """
         return f"""
 FROM python:3.13-slim
@@ -245,7 +247,7 @@ CMD ["python", "devsimpy-nogui.py", "-kernel {self.kernel}", "{os.path.basename(
                 """
 
     def GetDockerComposeSpec(self):
-        """
+        """ Docker Compose Spec
         """
         return f"""
 version: '3.8'
@@ -264,7 +266,7 @@ services:
 """                  
     
     def GetConfigSpec(self):
-        """
+        """ Config
         """
         data = {
             'simulation' : [
@@ -279,9 +281,9 @@ services:
         return json.dumps(data)
 
     def BuildZipPackage(self) -> None:
+        """ Zip Package
         """
-        """
-        self.logger.info(f"Starting BuildZipPackage process")
+        self.logger.info("Starting BuildZipPackage process")
         self.logger.info(f"Output file: {os.path.join(self.outdir, self.outfn)}")
         self.logger.info(f"Format: {self.format}, Kernel: {self.kernel}, Add Sim Kernel: {self.add_sim_kernel}")
      
@@ -292,7 +294,7 @@ services:
             path = os.path.abspath(self.yaml)
             self.logger.info(f"Adding YAML file: {path}")
             archive.write(path, os.path.basename(path))
-            self.logger.info(f"YAML file added successfully")
+            self.logger.info("YAML file added successfully")
 
             ###################################################################
             ###
@@ -309,7 +311,7 @@ services:
                     file_path = os.path.join(current_dir, fn)
                     self.logger.info(f"Adding Python file: {fn}")
                     archive.write(file_path, arcname=fn)
-                self.logger.info(f"Python dependency files added successfully")
+                self.logger.info("Python dependency files added successfully")
             
             ###################################################################
             ###
@@ -322,7 +324,7 @@ services:
             domain_module_lib = set()
 
             if self.format == 'Minimal':
-                self.logger.info(f"Using Minimal format - extracting domain libraries from YAML")
+                self.logger.info("Using Minimal format - extracting domain libraries from YAML")
                 ### add the Domain libairies according to the DOAMIN_PATH var
                 yaml = YAMLHandler(path)
             
@@ -351,13 +353,13 @@ services:
                         
                         ### Ask for confirmation if wx is available
                         if HAS_WX and wx.App.Get() is not None:
-                            msg = _(f"The library directory:\n\n{lib_path_abs}\n\n"
+                            msg = _(f"The library directory:\n\n{lib_path_abs}\n\n"  # noqa: INT001
                                    f"is quite large: {size_mb:.2f} MB\n\n"
                                    f"Including this directory may significantly increase package size "
                                    f"and build time.\n\n"
                                    f"Do you want to include this directory?")
                             
-                            dlg = wx.MessageDialog(None, msg, _(f"Confirm Large Directory ({size_mb:.2f} MB)"), 
+                            dlg = wx.MessageDialog(None, msg, _(f"Confirm Large Directory ({size_mb:.2f} MB)"),  # noqa: INT001
                                                  wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
                             result = dlg.ShowModal()
                             dlg.Destroy()
@@ -377,7 +379,7 @@ services:
                     self.logger.info(f"Added {files_added} files from {lib_path}")
                 self.logger.info(f"Domain libraries added: {len(domain_module_lib)} modules")
             else:
-                self.logger.info(f"Using Full format - including all Domain directory")
+                self.logger.info("Using Full format - including all Domain directory")
                 ### path of the Domain dir (depending on the .devsimpy config file)
                 domain_path = get_domain_path()
                 self.logger.info(f"Domain path: {domain_path}")
@@ -433,10 +435,10 @@ services:
                 ###################################################################
 
                 if self.add_dockerfile:
-                    self.logger.info(f"Adding Docker files")
+                    self.logger.info("Adding Docker files")
                     archive.writestr('Dockerfile', self.GetDockerSpec())
                     archive.writestr('docker-compose.yml', self.GetDockerComposeSpec())
-                    self.logger.info(f"Docker files added successfully")
+                    self.logger.info("Docker files added successfully")
 
                 ###################################################################
                 ###
@@ -445,9 +447,9 @@ services:
                 ###################################################################
 
                 ### write config file
-                self.logger.info(f"Adding configuration file")
+                self.logger.info("Adding configuration file")
                 archive.writestr('config.json', self.GetConfigSpec())
-                self.logger.info(f"Configuration file added successfully")
+                self.logger.info("Configuration file added successfully")
                 
                 ###################################################################
                 ###
@@ -455,15 +457,15 @@ services:
                 ###
                 ###################################################################
 
-                self.logger.info(f"Processing pip packages for requirements")
+                self.logger.info("Processing pip packages for requirements")
                 pip_packages_used_to_add_in_requirements = set()
 
                 # Get the list of available pip packages
-                self.logger.info(f"Retrieving installed pip packages")
+                self.logger.info("Retrieving installed pip packages")
                 installed_pip_packages = get_pip_packages()
-                self.logger.info(f"Found {len(installed_pip_packages)} installed packages")
+                self.logger.info("Found {len(installed_pip_packages)} installed packages")
 
-                self.logger.info(f"Scanning {len(domain_module_lib)} domain modules for dependencies")
+                self.logger.info("Scanning {len(domain_module_lib)} domain modules for dependencies")
                 for mod in domain_module_lib:
                     imported_modules = get_imported_modules(mod)
                     for name in imported_modules:
@@ -487,19 +489,19 @@ services:
                             self.logger.info(f"Read existing requirements file: {requirements_file}")
                         else:
                             to_write_in_requirements = "# DEVSimPy requirements\n"
-                            self.logger.info(f"Creating new requirements file")
+                            self.logger.info("Creating new requirements file")
 
                         ### Add the pip_packages_to_add_in_requirements
                         to_write_in_requirements += '\n' + '\n### Additionnal requirements for model librairies\n' + '\n'.join(pip_packages_used_to_add_in_requirements)
 
                         archive.writestr('requirements-devsimpy-nogui.txt', to_write_in_requirements)
                         self.logger.info(f"Requirements file added with {len(pip_packages_used_to_add_in_requirements)} additional packages")
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         self.logger.error(f"Error handling requirements file: {e}")
                         sys.stdout.write(f"Error handling requirements file: {e}\n")
                         return False
                 else:
-                    self.logger.info(f"No additional pip packages required")
+                    self.logger.info("No additional pip packages required")
                     try:
                         ### add requirements.txt file in the archive from the requirements-nogui.txt file
                         if os.path.exists(requirements_file):
@@ -508,9 +510,9 @@ services:
                         else:
                             ### Create a basic requirements file if none exists
                             basic_requirements = "# DEVSimPy requirements\n"
-                            self.logger.info(f"Creating basic requirements file")
+                            self.logger.info("Creating basic requirements file")
                             archive.writestr('requirements-devsimpy-nogui.txt', basic_requirements)
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         self.logger.error(f"Error handling requirements file: {e}")
                         sys.stdout.write(f"Error handling requirements file: {e}\n")
                         return False

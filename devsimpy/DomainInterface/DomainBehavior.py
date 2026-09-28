@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
+
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # DomainBehavior.py --- Domain Behavior virtual class
@@ -18,21 +19,21 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-import re
+import re  
 import os
 import importlib
 import builtins
 
-path = getattr(builtins, 'DEVS_DIR_PATH_DICT').get(DEFAULT_DEVS_DIRNAME)
+path = builtins.DEVS_DIR_PATH_DICT.get(DEFAULT_DEVS_DIRNAME) # type: ignore  # noqa: F821
 d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
-BaseDEVS = importlib.import_module("DEVSKernel%s.DEVS"%d)
+BaseDEVS = importlib.import_module(f"DEVSKernel{d}.DEVS")
 
 #    ======================================================================    #
 class DomainBehavior(BaseDEVS.AtomicDEVS):
 	""" Abstract DomainBehavior class.
 	"""
 	
-	__slots__ = ('state')
+	__slots__ = ('state')  # noqa: PLC0205
 
 	###
 	def __init__(self, name:str=""):
@@ -77,7 +78,7 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 		return self.passivateIn('passive')
 
 	def passivateIn(self, phase:str="")->dict:
-		return self.holdIn(phase, sigma=INFINITY)
+		return self.holdIn(phase, sigma=INFINITY) # type: ignore  # noqa: F821
 
 	def holdIn(self, phase:str="", sigma:float=0.0)->dict:
 		''' "Holding in phase " + phase + " for time " + sigma
@@ -141,7 +142,7 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 		return self.elapsed
 		
 	def __str__(self)->str:
-		"""
+		""" return the string representation of the DomainBehavior class
 		"""
 		if hasattr(self, 'bloclModel'):
 			return self.blockModel.label

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-  # noqa:  UP009
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # ConnectDialog.py ---
@@ -14,10 +14,10 @@
 import wx
 
 _ = wx.GetTranslation
-from Utilities import load_and_resize_image
+from Utilities import load_and_resize_image  
 
 def function(obj, i):
-    return 'iPort %d' % i if obj[i].__class__.__name__ == "INode" else 'oPort %d' % i
+    return 'iPort %d' % i if obj[i].__class__.__name__ == "INode" else 'oPort %d' % i  # noqa: UP031
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
@@ -26,7 +26,11 @@ def function(obj, i):
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 class ConnectDialog(wx.Dialog):
-    def __init__(self, parent, id, title, sn="Source", snL=[None, None], tn="Target", tnL=[None, None]):
+    def __init__(self, parent, id, title, sn="Source", snL=None, tn="Target", tnL=None):
+        if tnL is None:
+            tnL = [None, None]
+        if snL is None:
+            snL = [None, None]
         super().__init__(parent, id, title, style=wx.DEFAULT_DIALOG_STYLE)
         
         # local copy
@@ -38,8 +42,8 @@ class ConnectDialog(wx.Dialog):
         # Construire les listes de ports
         L1 = [function(snL, i) for i in range(len(snL))]
         L2 = [function(tnL, i) for i in range(len(tnL))]
-        L1.insert(0, "%s" % _('All'))
-        L2.insert(0, "%s" % _('All'))
+        L1.insert(0, "{}".format(_('All')))
+        L2.insert(0, "{}".format(_('All')))
         
         self._source_list = L1
         self._target_list = L2

@@ -5,10 +5,10 @@ Usage:
     python test_ftpgui.py --autoclose 10  # Auto-close after 10s delay
 """
 
-from ApplicationController import TestApp
+from ApplicationController import TestApp  
 
 # import after ApplicationController that inits sys.path ot avoid this import
-from FTPGUI import FTPFrame
+from FTPGUI import FTPFrame # type: ignore
 
 # Run the test
 app = TestApp(0)

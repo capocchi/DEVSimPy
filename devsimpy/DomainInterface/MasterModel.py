@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-  # noqa: UP009
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # MasterModel.py --- DEVS Coupled Master  Model
@@ -31,7 +31,7 @@
 #        
 #        #exec("import DEVSKernel%s.DEVS as BaseDEVS"%(d))
         
-from  DomainInterface import DomainStructure
+from  DomainInterface import DomainStructure  
 
 ###    ======================================================================    #
 #class Master(BaseDEVS.CoupledDEVS):

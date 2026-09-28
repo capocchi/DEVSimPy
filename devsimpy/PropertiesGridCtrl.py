@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -22,7 +22,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import os
+import os  
 import sys
 import re
 import zipfile
@@ -31,7 +31,7 @@ import inspect
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
     
-import wx
+import wx  
 import wx.grid as gridlib
 from wx.lib import wordwrap
 import wx.lib.imagebrowser as ib
@@ -41,7 +41,7 @@ GridCellRenderer = gridlib.GridCellRenderer
 GridTableBase = gridlib.GridTableBase
 EditableListBox = wx.adv.EditableListBox
 
-import Container
+import Container  
 import Components
 import Menu
 import ZipManager
@@ -57,7 +57,12 @@ wx.CHANGE_DIR = wx.FD_CHANGE_DIR
 
 _ = wx.GetTranslation
 
-if DEFAULT_DEVS_DIRNAME=='PyDEVS':
+
+def is_valid_module_name(name):
+	"""Return whether *name* is a valid snake_case module name."""
+	return re.match(r'^[a-z_][a-z0-9_]*$', name) is not None
+
+if DEFAULT_DEVS_DIRNAME=='PyDEVS':  # type: ignore # noqa: F821
 	sim_doc = '''######################################
 
 λ → δint (if internal),
@@ -78,7 +83,7 @@ No select needed.
 
 class ListCellRenderer(gridlib.GridCellRenderer):
     def __init__(self):
-        super(ListCellRenderer, self).__init__()
+        super().__init__()
 
     def Draw(self, grid, attr, dc, rect, row, col, isSelected):
         dc.SetClippingRegion(rect)
@@ -115,7 +120,7 @@ class DictionaryEditor(wx.Dialog):
 
 		D = eval(values) if values!='' else {}
 
-		self.elb.SetStrings(list(map(lambda a,b: "(\"%s\",\"%s\")"%(str(a),str(b)), list(D.keys()), list(D.values()))))
+		self.elb.SetStrings(list(map(lambda a,b: f"(\"{a!s}\",\"{b!s}\")", list(D.keys()), list(D.values()))))
 
 		vbox.Add(self.elb, 1, wx.EXPAND | wx.ALL)
 		panel.SetSizer(vbox)
@@ -128,7 +133,7 @@ class DictionaryEditor(wx.Dialog):
 		self.ProcessEvent(e)
 
 	def OnExcludesChange(self, evt):
-		"""
+		""" Excludes
 		"""
 		### try to catch exception for new expression in the list
 		try:
@@ -138,7 +143,7 @@ class DictionaryEditor(wx.Dialog):
 			if txt != '' and not txt.startswith('#'):
 				eval(txt)
 
-		except Exception as info:
+		except Exception as info:  # noqa: BLE001
 			dial = wx.MessageDialog(self, _("Error editing attribute: %s")%info, _("Dictionary manager"), wx.OK | wx.ICON_ERROR)
 			dial.ShowModal()
 
@@ -152,7 +157,7 @@ class DictionaryEditor(wx.Dialog):
 			return dict(eval, self.elb.GetStrings())
 		except SyntaxError:
 			return dict(eval, dict(repr, eval(str(self.elb.GetStrings()))))
-		except Exception as info:
+		except Exception as info:  # noqa: BLE001
 			return info
 
 	def GetValueAsString(self):
@@ -173,7 +178,7 @@ class DictionaryEditor(wx.Dialog):
 				e = eval(k)
 				if isinstance(e, tuple): k=e
 			### if k is not tuple, eval gives an error
-			except Exception:
+			except Exception:  # noqa: BLE001, S110
 				pass
 
 			r.update({k:v})
@@ -207,7 +212,7 @@ class ListEditor(wx.Dialog):
 		self.ProcessEvent(e)
 
 	def OnExcludesChange(self, evt):
-		"""
+		""" Excludes
 		"""
 		### try to catch exception for new expression in the list
 		try:
@@ -217,7 +222,7 @@ class ListEditor(wx.Dialog):
 			if txt != '' and not txt.startswith('#'):
 				eval(txt)
 
-		except Exception as info:
+		except Exception as info:  # noqa: BLE001
 			dial = wx.MessageDialog(self, _("Error editing attribute: %s")%info, _("List manager"), wx.OK | wx.ICON_ERROR)
 			dial.ShowModal()
 
@@ -231,7 +236,7 @@ class ListEditor(wx.Dialog):
 			return [eval(a) for a in self.elb.GetStrings()]
 		except SyntaxError:
 			return [eval(b) for b in [repr(a) for a in eval(str(self.elb.GetStrings()))]]
-		except Exception as info:
+		except Exception as info:  # noqa: BLE001
 			return info
 
 	def GetValueAsString(self):
@@ -267,29 +272,29 @@ class CodeCB(wx.Choicebook):
 			info = _("Unable to load sources")
 
 			try:a = inspect.getdoc(cls)
-			except:a = info
+			except:a = info  # noqa: E722
 
 			try:b = inspect.getsource(cls)
-			except:b = info
+			except:b = info  # noqa: E722
 
 			try: c = inspect.getsource(cls.__init__)
-			except: c = info
+			except: c = info  # noqa: E722
 
 			try: d = inspect.getsource(cls.intTransition)
-			except: d = info
+			except: d = info  # noqa: E722
 
 			try: e = inspect.getsource(cls.extTransition)
-			except: e = info
+			except: e = info  # noqa: E722
 
 			try: f = inspect.getsource(cls.outputFnc)
-			except: f = info
+			except: f = info  # noqa: E722
 
 			try: g = inspect.getsource(cls.timeAdvance)
-			except: g = info
+			except: g = info  # noqa: E722
 
 			try:
 				h = inspect.getsource(cls.finish) if  hasattr(cls, 'finish') else "\tpass"
-			except:
+			except:  # noqa: E722
 				h = info
 
 			pageTexts = {_('Doc'): a+'\n'+sim_doc,
@@ -302,7 +307,7 @@ class CodeCB(wx.Choicebook):
 						 _('Finish Function'): h
 						}
 		else:
-			pageTexts = {_("Importing Error"): _("Error trying to import the module: %s.\nChange the python path by clicking in the above 'python_path' cell.\n %s"%(model.python_path,str(cls)))}
+			pageTexts = {_("Importing Error"): _(f"Error trying to import the module: {model.python_path}.\nChange the python path by clicking in the above 'python_path' cell.\n {cls!s}")}  # noqa: INT001
 
 		# Now make a bunch of panels for the choice book
 		for nameFunc in pageTexts:
@@ -321,7 +326,7 @@ class CodeCB(wx.Choicebook):
 					box.Add(st,1,wx.EXPAND)
 					win.SetSizer(box)
 				else:
-					sys.stdout.write(_("Method %s of class %s unknown!\n"%(nameFunc,cls.__name__)))
+					sys.stdout.write(_(f"Method {nameFunc} of class {cls.__name__} unknown!\n"))  # noqa: INT001
 
 			self.AddPage(win, nameFunc)
 
@@ -379,11 +384,11 @@ class CutomGridCellAutoWrapStringRenderer(GridCellRenderer):
 		text = wordwrap.wordwrap(text, grid.GetColSize(col), dc, breakLongWords = False)
 		### if colom info (mutliline)
 		if col == 2:
-			w, h, lineHeight = dc.GetFullMultiLineTextExtent(text)
+			w, h, _ = dc.GetFullMultiLineTextExtent(text)
 			return wx.Size(w, h)
 		### if colom label
 		elif col == 0:
-			w, h, lineHeight, a = dc.GetFullTextExtent(text)
+			w, h, _, _ = dc.GetFullTextExtent(text)
 			return wx.Size(w, h)
 		### if colom choices elem
 		else:
@@ -444,7 +449,7 @@ class CustomDataTable(GridTableBase):
 
 		### default behavioral attributes dictionary
 		if model.args:
-			infoBlockBehavioralDict = dict([(attr, _('Unknown information')) for attr in list(model.args.keys())])
+			infoBlockBehavioralDict = {attr: _('Unknown information') for attr in list(model.args.keys())}
 		else:
 			infoBlockBehavioralDict = {}
 		
@@ -539,7 +544,7 @@ class CustomDataTable(GridTableBase):
 			self.nb_behavior_var += 1
 
 	def GetAttr(self, row, col, kind):
-		"""
+		""" Get Attr
 		"""
 
 		attr = gridlib.GridCellAttr()
@@ -573,7 +578,7 @@ class CustomDataTable(GridTableBase):
 				attr.SetRenderer(renderer)
 			else:
 				### if the type of cell is string
-				if isinstance(val, str):
+				if isinstance(val, str):  # noqa: SIM102
 
 					if col == 1:
 
@@ -588,7 +593,7 @@ class CustomDataTable(GridTableBase):
 							attr.SetBackgroundColour("pink")
 
 						### if the python path is not found
-						if v == "python_path":
+						if v == "python_path":  # noqa: SIM102
 							### si un le modèle est un fichier python et que le path n'existe pas ou si c'est un amd ou cmd et que le fichier modèle n'existe pas
 							if (not os.path.exists(self.model.python_path) and not zipfile.is_zipfile(self.model.model_path)) or\
 								(not os.path.exists(self.model.model_path) and zipfile.is_zipfile(self.model.model_path)):
@@ -597,12 +602,12 @@ class CustomDataTable(GridTableBase):
 
 			return attr
 
-		except Exception as info:
-			sys.stderr.write(_('Error in GetAttr : %s'%info))
+		except Exception as info:  # noqa: BLE001
+			sys.stderr.write(_(f'Error in GetAttr : {info}'))  # noqa: INT001
 			return
 
 	def GetTypeList(self, val):
-		"""
+		""" type List
 		"""
 
 		if isinstance(val, bool):
@@ -657,16 +662,16 @@ class CustomDataTable(GridTableBase):
 		# 	return None
 
 		try:
-			if isinstance(self.data[row][col],tuple) or isinstance(self.data[row][col],list):
+			if isinstance(self.data[row][col],tuple) or isinstance(self.data[row][col],list):  # noqa: SIM101
 				return self.data[row][col]
 			else: 
 				return self.data[row][col]
-		except Exception as e:
+		except Exception as e:  # noqa: BLE001
 			sys.stdout.write(f"Exception in GetValue: {e}")  # Pour le débogage
 			return None
 
 	def SetValue(self, row, col, value):
-		"""
+		""" Set Value
 		"""
 		### Attention si value est une expression et qu'elle contient des contantes litterale il faut que celle ci soient def par le ConstanteDialog
 
@@ -735,11 +740,11 @@ class CustomDataTable(GridTableBase):
 		self.GetView().ProcessTableMessage(msg)
 
 	def GetInformation(self, info):
-		"""
+		""" Get Info
 		"""
 		try:
 			return self.info[info] if info in list(self.info.keys()) else None
-		except :
+		except:  # noqa: E722
 			return None
 
 #--------------------------------------------------------------------------
@@ -778,7 +783,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 
 		### based on OnSize of AttributeEditor frame
 		### define width of columns from column table number.
-		width, height = self.parent.GetSize()
+		width, _ = self.parent.GetSize()
 		width /= nb_cols
 		for col in range(nb_cols):
 			self.SetColSize(int(col), int(width))
@@ -804,7 +809,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 		
 	###
 	def InstallGridHint(self, grid, rowcolhintcallback=None):
-		"""
+		""" Grid Hint
 		"""
 		prev_rowcol = [None, None]
 		def OnMouseMotion(evt):
@@ -847,7 +852,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 		row = event.GetRow()
 		col = event.GetCol()
 		pos = event.GetPosition()
-		prop = self.GetCellValue(row, col-1)
+		# prop = self.GetCellValue(row, col-1)
 
 		### menu popup onlu on the column 1
 		if col == 1:
@@ -856,7 +861,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 			menu.Destroy()
 
 	def OnGridColSort(self, event):
-		"""
+		""" Grid Col Sort
 		"""
 		try:
 			self.SetSortingColumn(event.Getcol())
@@ -864,13 +869,13 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 			pass
 	###
 	def OnEditCell(self, evt):
-		"""
+		""" Edit Cell
 		"""
 		self.SelectProp(evt.GetEventObject())
 
 	###
 	def OnInsertCell(self, evt):
-		"""
+		""" Insert
 		"""
 		evt = evt.GetEventObject()
 		row, col = evt.GetRow(), evt.GetCol()
@@ -883,22 +888,22 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 
 	###
 	def OnClearCell(self, event):
-		"""
+		""" Clear
 		"""
 		obj = event.GetEventObject()
 		row = obj.row
 		col = obj.col
-		val = self.GetCellValue(row,col)
+		# val = self.GetCellValue(row,col)
 		self.SetCellValue(row,col,"")
 
 		self.AcceptProp(row,col)
 
 	###
 	def OnEnterWindow(self, event):
-		"""
+		""" Enter
 		"""
 		#self.parent.SetFocus()
-		pass
+		pass  # noqa: PIE790
 
 	###
 	def onMouseOver(self, event):
@@ -913,11 +918,11 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 		col = coords[1]
 		row = coords[0]
 
-		event.GetEventObject().SetToolTipString == event.GetEventObject().SetToolTip
+		event.GetEventObject().SetToolTipString == event.GetEventObject().SetToolTip  # noqa: B015
 
 		# Note: This only sets the tooltip for the cells in the column
 		if col == 1:
-			msg = "This is Row %s, Column %s!" % (row, col)
+			msg = f"This is Row {row}, Column {col}!"
 			event.GetEventObject().SetToolTipString(msg)
 		else:
 			event.GetEventObject().SetToolTipString('')
@@ -971,17 +976,17 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 
 	###
 	def OnAcceptProp(self, evt):
-		"""
+		""" Accept Prop
 		"""
 		self.AcceptProp(evt.GetRow(),1)
 		evt.Skip()
 
 	###
 	def SelectProp(self, evt):
-		"""
+		""" Select Prop
 		"""
 
-		row, col, pos= evt.GetRow(), evt.GetCol(), evt.GetPosition()
+		row, col, _= evt.GetRow(), evt.GetCol(), evt.GetPosition()
 
 		table = self.GetTable()
 
@@ -1040,7 +1045,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 
 		elif prop == 'image_path':
 			
-			dlg = ib.ImageDialog(self, os.path.join(DEVSIMPY_PACKAGE_PATH))
+			dlg = ib.ImageDialog(self, os.path.join(DEVSIMPY_PACKAGE_PATH))  # type: ignore # noqa: F821
 			dlg.Centre()
 			
 			if dlg.ShowModal() == wx.ID_OK:
@@ -1059,7 +1064,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 		elif 'filename' in str(prop).lower():
 			wcd = _('Data files All files (*)|*')
 			val = self.GetCellValue(row, 1)
-			default_dir = os.path.dirname(val) if os.path.exists(os.path.dirname(val)) else DEVSIMPY_PACKAGE_PATH
+			default_dir = os.path.dirname(val) if os.path.exists(os.path.dirname(val)) else DEVSIMPY_PACKAGE_PATH # type: ignore  # noqa: F821
 			dlg = wx.FileDialog(self, message=_("Select file ..."), defaultDir=default_dir, defaultFile="", wildcard=wcd, style=wx.OPEN | wx.CHANGE_DIR)
 			if dlg.ShowModal() == wx.ID_OK:
 				val = os.path.normpath(dlg.GetPath())
@@ -1088,7 +1093,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 			else:
 				wcd = _('All files (*)|*')
 
-			default_dir = os.path.dirname(model.python_path) if os.path.exists(os.path.dirname(model.python_path)) else DOMAIN_PATH
+			default_dir = os.path.dirname(model.python_path) if os.path.exists(os.path.dirname(model.python_path)) else DOMAIN_PATH # type: ignore  # noqa: F821
 			dlg = wx.FileDialog(self, message=_("Select file ..."), defaultDir=default_dir, defaultFile="", wildcard=wcd, style=wx.OPEN | wx.CHANGE_DIR)
 			if dlg.ShowModal() == wx.ID_OK:
 				new_python_path = os.path.normpath(dlg.GetPath())
@@ -1096,7 +1101,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 				### if the user would like to load a compressed python file, he just give the name of compressed file that contain the python file
 				if zipfile.is_zipfile(new_python_path):
 					zf = zipfile.ZipFile(new_python_path, 'r')
-					new_python_path = os.path.join(new_python_path, [f for f in  zf.namelist() if f.endswith('.py') and f!='plugins.py'][0])
+					new_python_path = os.path.join(new_python_path, next(f for f in  zf.namelist() if f.endswith('.py') and f!='plugins.py'))
 					### update model path
 					model.model_path = os.path.dirname(new_python_path)
 
@@ -1200,7 +1205,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 
 	###
 	def OnSelectProp(self, evt):
-		"""
+		""" Select Prop
 		"""
 		self.SelectProp(evt)
 		evt.Skip()
@@ -1208,15 +1213,3 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 	def GetState(self):
 		return self.__state
 
-	#def OnGridEditorCreated(self, event):
-		#""" Bind the kill focus event to the newly instantiated cell editor """
-		#editor = event.GetControl()
-		#editor.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
-		#event.Skip()
-
-	#def OnKillFocus(self, event):
-		## Cell editor's grandparent, the grid GridWindow's parent, is the grid.
-		#grid = event.GetEventObject().GetGrandParent()
-		#grid.SaveEditControlValue()
-		#grid.HideCellEditControl()
-		#event.Skip()

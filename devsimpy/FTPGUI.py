@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -16,10 +16,9 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-from ftplib import FTP, all_errors
+from ftplib import FTP, all_errors  
 import wx
 import os
-import threading
 
 _ = wx.GetTranslation
 
@@ -30,7 +29,7 @@ class FTPStatusBar(wx.StatusBar):
 	"""Enhanced status bar with connection indicator"""
 
 	def __init__(self, *args, **kw):
-		super(FTPStatusBar, self).__init__(*args, **kw)
+		super().__init__(*args, **kw)
 
 		self.SetFieldsCount(3)
 		self.SetStatusWidths([-5, -2, 100])
@@ -74,7 +73,7 @@ class FTPFrame(wx.Frame):
 	"""Modern FTP client interface for DEVSimPy"""
 	
 	def __init__(self, *args, **kw):
-		super(FTPFrame, self).__init__(*args, **kw)
+		super().__init__(*args, **kw)
 
 		self.ftp = None
 		self.current_dir = "/"
@@ -253,7 +252,7 @@ class FTPFrame(wx.Frame):
 		if self.ftp:
 			try:
 				self.ftp.quit()
-			except:
+			except:  # noqa: E722, S110
 				pass
 			
 			self.ftp = None

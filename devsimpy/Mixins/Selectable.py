@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 """
 Name: Savable.py
@@ -15,7 +15,7 @@ import gettext
 
 _ = gettext.gettext
 
-from Mixins import Attributable
+from Mixins import Attributable  
 from Utilities import getTopLevelWindow
 
 class Selectable:
@@ -51,7 +51,7 @@ class Selectable:
         if isinstance(self, Attributable):
 
             ### here for no-gui mode
-            import LabelGUI
+            import LabelGUI  
             import AttributeEditor
 
             diagram = canvas.GetDiagram()

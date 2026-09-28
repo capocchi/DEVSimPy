@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 '''
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -35,7 +35,7 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 '''
 
-import datetime
+import datetime  
 import copy
 import os
 import sys
@@ -46,7 +46,6 @@ import builtins
 import platform
 import threading
 import subprocess
-import pickle
 import glob
 import pstats
 from pathlib import Path
@@ -54,8 +53,8 @@ from pathlib import Path
 from configparser import ConfigParser
 from tempfile import gettempdir
 
-if sys.version_info[0] < 3:
-    raise Exception("Must be using Python 3")
+if sys.version_info[0] < 3:  # noqa: UP036
+    raise Exception("Must be using Python 3")  # noqa: TRY002
 
 ################################################################
 ### Loading wx python library
@@ -75,7 +74,7 @@ import gettext
 
 try:
 	import wx.aui as aui
-except:
+except:  # noqa: E722
 	import wx.lib.agw.aui as aui
 
 import wx.py as py
@@ -94,7 +93,7 @@ except ImportError:
 # to send event
 try:
 	from pubsub import pub
-except Exception:
+except Exception:  # noqa: BLE001
 	sys.stdout.write('Last version for Python2 is PyPubSub 3.3.0 \n pip install PyPubSub==3.3.0')
 	sys.exit()
 
@@ -126,7 +125,7 @@ UpdateBuiltins()
 wx._core.WindowIDRef.__index__ = wx._core.WindowIDRef.__int__
 
 ### import Container much faster loading than from Container import ... for os windows only
-import Container
+import Container  
 import Menu
 # import ReloadModule
 
@@ -149,7 +148,7 @@ from XMLModule import getDiagramFromXMLSES
 from StandaloneGUI import StandaloneGUI
 
 __authors__ = "Laurent Capocchi <capocchi@univ-corse.fr>, <santucci@univ-corse.fr>"
-__date__ = str(datetime.datetime.now())
+__date__ = str(datetime.datetime.now())  # noqa: DTZ005
 __version__ = get_version()
 __docformat__ = 'epytext'
 __min_wx_version__ = '4.0'
@@ -167,7 +166,7 @@ def DefineScreenSize(percentscreen = None, size = None):
 	if size:
 		l, h = size
 	elif percentscreen:
-		x1, x2, l, h = wx.Display().GetClientArea()
+		_, _, l, h = wx.Display().GetClientArea()
 		l, h = percentscreen * l, percentscreen * h
 	return round(l), round(h)
 
@@ -197,9 +196,9 @@ class MainApplication(wx.Frame):
 		# icon setting
 		
 		try:
-			icon = wx.Icon(os.path.join(ICON_PATH, DEVSIMPY_ICON), wx.BITMAP_TYPE_ANY)
-		except:
-			icon_bitmap = load_and_resize_image(DEVSIMPY_ICON.replace('.ico', '.png'))
+			icon = wx.Icon(os.path.join(ICON_PATH, DEVSIMPY_ICON), wx.BITMAP_TYPE_ANY) # type: ignore  # noqa: F821
+		except:  # noqa: E722
+			icon_bitmap = load_and_resize_image(DEVSIMPY_ICON.replace('.ico', '.png')) # type: ignore  # noqa: F821
 			icon = wx.Icon()
 			icon.CopyFromBitmap(icon_bitmap)
 		self.SetIcon(icon)
@@ -237,7 +236,7 @@ class MainApplication(wx.Frame):
 		# Create a Notebook 2
 		self.nb2 = DiagramNotebook(self, wx.NewIdRef(), style = wx.CLIP_CHILDREN)
 
-		self.nb2.AddEditPage(_("Diagram%d"%Container.ShapeCanvas.ID))
+		self.nb2.AddEditPage(_("Diagram%d"%Container.ShapeCanvas.ID))  # noqa: INT003, UP031
 
 		self._mgr.AddPane(self.nb2, aui.AuiPaneInfo().Name("nb2").CenterPane().Hide())
 
@@ -283,7 +282,7 @@ class MainApplication(wx.Frame):
 		self.Bind(wx.EVT_IDLE, self.OnIdle)
 		self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
 
-		if GUI_FLAG:
+		if GUI_FLAG: # type: ignore  # noqa: F821
 			sys.stdout.write("DEVSimPy is up!\n")
 
 		### load last size and position if exist
@@ -346,13 +345,13 @@ class MainApplication(wx.Frame):
 		### for spash screen
 		pub.sendMessage('object.added',  message=_('Writing .devsimpy settings file...\n'))
 
-		sys.stdout.write("Writing default .devsimpy settings file on %s directory..."%GetUserConfigDir())
+		sys.stdout.write(f"Writing default .devsimpy settings file on {GetUserConfigDir()} directory...")
 
 		### getdefaultlocale() is deprecated from python 3.11
 		current_locale = locale.getlocale() if sys.version_info >= (3, 11) else locale.getdefaultlocale()
 		
 		self.exportPathsList = []					# export path list
-		self.openFileList = ['']*NB_OPENED_FILE		# number of last opened files
+		self.openFileList = ['']*NB_OPENED_FILE		# type: ignore # number of last opened files  # noqa: F821
 		self.language = 'fr' if current_locale and 'fr' in current_locale else 'en' # default language
 		self.perspectives = {}	# perpsective is void
 		self.last_position = None
@@ -366,8 +365,8 @@ class MainApplication(wx.Frame):
 		cfg.Write('ChargedDomainList', str([]))
 		### list des 5 derniers fichier ouvert
 		cfg.Write('openFileList', str(eval("self.openFileList")))
-		cfg.Write('language', "'%s'"%str(eval("self.language")))
-		cfg.Write('active_plugins', str("[]"))
+		cfg.Write('language', "'{}'".format(str(eval("self.language"))))
+		cfg.Write('active_plugins', "[]")
 		cfg.Write('perspectives', str(eval("self.perspectives")))
 		cfg.Write('settings', str(eval("USER_SETTINGS")))
 		cfg.Write('last_position', str(eval("self.last_position")))
@@ -405,7 +404,7 @@ class MainApplication(wx.Frame):
 				### for spash screen
 				pub.sendMessage('object.added',  message=_('Loading .devsimpy settings file...\n'))
 
-				sys.stdout.write("Loading DEVSimPy %s settings file from %s.devsimpy\n"%(self.GetVersion(), GetUserConfigDir()+os.sep))
+				sys.stdout.write(f"Loading DEVSimPy {self.GetVersion()} settings file from {GetUserConfigDir()+os.sep}.devsimpy\n")
 
 				### load external import path
 				self.exportPathsList = [path for path in eval(self.cfg.Read("exportPathsList")) if os.path.isdir(path)]
@@ -415,7 +414,7 @@ class MainApplication(wx.Frame):
 				### load recent files list
 				self.openFileList = eval(self.cfg.Read("openFileList"))
 				### update chargedDomainList
-				chargedDomainList = [path for path in eval(self.cfg.Read('ChargedDomainList')) if path.startswith('http') or os.path.isdir(path)]
+				chargedDomainList = [path for path in eval(self.cfg.Read('ChargedDomainList')) if path.startswith('http') or os.path.isdir(path)]  # noqa: F841
 
 				self.cfg.DeleteEntry('ChargedDomainList')
 				self.cfg.Write('ChargedDomainList', str(eval('chargedDomainList')))
@@ -429,7 +428,7 @@ class MainApplication(wx.Frame):
 				try:
 					self.last_position = eval(self.cfg.Read("last_position"))
 					self.last_size = eval(self.cfg.Read("last_size"))
-				except:
+				except:  # noqa: E722
 					self.last_position = None
 					self.last_size = None
 				else:
@@ -511,7 +510,7 @@ class MainApplication(wx.Frame):
 		# for spash screen
 		pub.sendMessage('object.added',  message=_('Loading locale configuration...\n'))
 
-		localedir = os.path.join(DEVSIMPY_PACKAGE_PATH, "locale")
+		localedir = os.path.join(DEVSIMPY_PACKAGE_PATH, "locale") # type: ignore  # noqa: F821
 		langid = wx.LANGUAGE_FRENCH if self.language == 'fr' else wx.LANGUAGE_ENGLISH    # use OS default; or use LANGUAGE_FRENCH, etc.
 		domain = "DEVSimPy"             # the translation file is messages.mo
 
@@ -525,13 +524,13 @@ class MainApplication(wx.Frame):
 		if self.language in ('en', 'fr'):
 			try:
 				locale.setlocale(locale.LC_ALL, self.language)
-			except:
+			except:  # noqa: E722
 				sys.stdout.write(_('new local (since wx 4.1.0) setting not applied\n'))
 			translation = gettext.translation(domain, localedir, languages=[self.language])
 		else:
 			try:
 				locale.setlocale(locale.LC_ALL, 'C')
-			except:
+			except:  # noqa: E722
 				sys.stdout.write(_('new local (since wx 4.1.0) setting not applied\n'))
 			#installing os language by default
 			translation = gettext.translation(domain, localedir, [self.locale.GetCanonicalName()], fallback = True)
@@ -635,7 +634,7 @@ class MainApplication(wx.Frame):
 		tb.EnableTool(wx.ID_UNDO, False)
 		tb.EnableTool(wx.ID_REDO, False)
 	
-		tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in DEFAULT_DEVS_DIRNAME)
+		tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in DEFAULT_DEVS_DIRNAME) # type: ignore  # noqa: F821
 
 		### default direct connector toogled
 		tb.ToggleTool(self.toggle_list[0], 1)
@@ -771,7 +770,7 @@ class MainApplication(wx.Frame):
 			)
 			dlg.ShowModal()
 			dlg.Destroy()
-		except Exception as e:
+		except Exception:  # noqa: BLE001
 			# Fallback
 			wx.MessageBox(
 				help_msg,
@@ -800,7 +799,7 @@ class MainApplication(wx.Frame):
 		return self.editor
 
 	def OnDirectConnector(self, event):
-		"""
+		""" For direct connector, the event is binded to all connector button. So, we need to check which button has been pressed and toggle it.
 		"""
 		toolbar = event.GetEventObject()
 		for id in self.toggle_list:
@@ -812,7 +811,7 @@ class MainApplication(wx.Frame):
 		#canvas.OnRefreshModel(canvas, event)
 
 	def OnSquareConnector(self, event):
-		"""
+		""" For square connector, the event is binded to all connector button. So, we need to check which button has been pressed and toggle it.
 		"""
 		self.OnDirectConnector(event)
 		canvas = Container.ShapeCanvas
@@ -820,7 +819,7 @@ class MainApplication(wx.Frame):
 
 
 	def OnLinearConnector(self, event):
-		"""
+		""" For linear connector, the event is binded to all connector button. So, we need to check which button has been pressed and toggle it.
 		"""
 
 		self.OnDirectConnector(event)
@@ -828,7 +827,7 @@ class MainApplication(wx.Frame):
 		canvas.CONNECTOR_TYPE = 'linear'
 
 	def OnCurveConnector(self, event):
-		"""
+		""" For curve connector, the event is binded to all connector button. So, we need to check which button has been pressed and toggle it.
 		"""
 
 		self.OnDirectConnector(event)
@@ -862,7 +861,7 @@ class MainApplication(wx.Frame):
 					menuItemList.append(menu.FindItemById(Menu.ID_SHOW_SIM))
 
 				for menu_item in menuItemList:
-					getattr(menu_item, 'Check')(False)
+					menu_item.Check(False)
 
 			dlg.Destroy()
 
@@ -922,14 +921,14 @@ class MainApplication(wx.Frame):
 		"""
 	
 		# update openFileList variable
-		self.openFileList = ['']*NB_OPENED_FILE
+		self.openFileList = ['']*NB_OPENED_FILE  # type: ignore # noqa: F821
 		
 		# update config file
 		self.cfg.Write("openFileList", str(eval("self.openFileList")))
 		self.cfg.Flush()
 		
 	def OnCreatePerspective(self, event):
-		"""
+		""" Create a new perspective and add it to the perspective menu.
 		"""
 
 		dlg = wx.TextEntryDialog(self, _("Enter a new perspective:"), _("Perspective Manager"), _("Perspective %d")%(len(self.perspectives)))
@@ -954,7 +953,7 @@ class MainApplication(wx.Frame):
 		dlg.Destroy()
 
 	def OnRestorePerspective(self, event):
-		"""
+		""" Restore a perspective from the perspective menu.
 		"""
 		
 		id = event.GetId()
@@ -972,7 +971,7 @@ class MainApplication(wx.Frame):
 		mgr.Update()
 
 	def OnDeletePerspective(self, event):
-		"""
+		""" Delete all perspectives from the perspective menu and update the config file.
 		"""
 		
 		# delete all path items
@@ -992,7 +991,7 @@ class MainApplication(wx.Frame):
 
 	###
 	def OnDragInit(self, event):
-		"""
+		""" Initialize the drag operation.
 		"""
 
 		# version avec arbre
@@ -1013,12 +1012,12 @@ class MainApplication(wx.Frame):
 				tds = wx.DropSource(tree)
 				tds.SetData(tdo)
 				tds.DoDragDrop(True)
-			except:
+			except:  # noqa: E722
 				sys.stderr.write(_("OnDragInit avorting \n"))
 
 	###
 	def OnIdle(self, event):
-		"""
+		""" Handle idle events to raise the other window if it exists.
 		"""
 
 		if self.otherWin:
@@ -1077,7 +1076,7 @@ class MainApplication(wx.Frame):
 			try:
 				### select the first page
 				self.nb2.SetSelection(0)
-			except:
+			except:  # noqa: E722, S110
 				pass
 			if not self.nb2.OnClosePage(event):
 				exit = True
@@ -1094,7 +1093,7 @@ class MainApplication(wx.Frame):
 				self._mgr.UnInit()
 				del self._mgr
 		
-		if GUI_FLAG:
+		if GUI_FLAG: # type: ignore  # noqa: F821
 			sys.stdout.write(_("DEVSimPy closed!"))
 
 		event.Skip()
@@ -1150,7 +1149,7 @@ class MainApplication(wx.Frame):
 	################################################################################ Abstraction hierarchy
 	###
 	def OnUpWard(self, event):
-		"""
+		""" Upward button has been pressed. Open the UAM frame for the current level.
 		"""
 
 		### toolbar object
@@ -1174,14 +1173,14 @@ class MainApplication(wx.Frame):
 		cl =  dia.current_level
 
 		### Editor frame
-		frame = GetEditor(canvas, -1, 'UAM%d'%cl)
-		frame.AddEditPage('UAM%d'%cl, canvas.UAM[cl])
+		frame = GetEditor(canvas, -1, 'UAM%d'%cl)  # noqa: UP031
+		frame.AddEditPage('UAM%d'%cl, canvas.UAM[cl])  # noqa: UP031
 		frame.SetPosition((100, 100))
 		frame.Show()
 
 	###
 	def OnDownWard(self, event):
-		"""
+		""" Downward button has been pressed. Open the DAM frame for the current level.
 		"""
 
 				### toolbar object
@@ -1205,8 +1204,8 @@ class MainApplication(wx.Frame):
 		cl =  dia.current_level
 
 		### Editor frame
-		frame = GetEditor(canvas, -1, 'DAM%d'%cl)
-		frame.AddEditPage('DAM%d'%cl, canvas.DAM[cl])
+		frame = GetEditor(canvas, -1, 'DAM%d'%cl)  # noqa: UP031
+		frame.AddEditPage('DAM%d'%cl, canvas.DAM[cl])  # noqa: UP031
 		frame.SetPosition((100, 100))
 		frame.Show()
 
@@ -1248,7 +1247,7 @@ class MainApplication(wx.Frame):
 
 	###
 	def AnnuleZoom(self, event):
-		"""
+		""" Reset zoom icon has been pressed. Reset the current diagram to its original size.
 		"""
 		obj = event.GetEventObject()
 
@@ -1267,7 +1266,7 @@ class MainApplication(wx.Frame):
 	def OnNew(self, event):
 		""" New diagram has been invocked.
 		"""
-		self.nb2.AddEditPage("Diagram%d"%Container.ShapeCanvas.ID)
+		self.nb2.AddEditPage("Diagram%d"%Container.ShapeCanvas.ID)  # noqa: UP031
 		return self.nb2.GetCurrentPage()
 
 	###
@@ -1276,7 +1275,7 @@ class MainApplication(wx.Frame):
 		"""
 
 		wcd = _("DEVSimPy files (*.dsp)|*.dsp|YAML files (*.yaml)|*.yaml|All files (*)|*")
-		home = self.home or os.getenv('USERPROFILE') or os.getenv('HOME') or DEVSIMPY_PACKAGE_PATH if self.openFileList == ['']*NB_OPENED_FILE else self.home or os.path.dirname(self.openFileList[0])
+		home = self.home or os.getenv('USERPROFILE') or os.getenv('HOME') or DEVSIMPY_PACKAGE_PATH if self.openFileList == ['']*NB_OPENED_FILE else self.home or os.path.dirname(self.openFileList[0]) # type: ignore  # noqa: F821
 		
 		open_dlg = wx.FileDialog(self, message = _('Choose a file'), defaultDir = home, defaultFile = "", wildcard = wcd, style = wx.OPEN|wx.MULTIPLE|wx.CHANGE_DIR)
 
@@ -1307,7 +1306,7 @@ class MainApplication(wx.Frame):
 				open_file_result = diagram.LoadFile(path)
 
 				if isinstance(open_file_result, Exception):
-					type, value, traceback = sys.exc_info()
+					_, value, _ = sys.exc_info()
 					if value:
 						wx.MessageBox(_('Error opening %s: %s')%(value.filename, value.strerror), 'Error', wx.OK | wx.ICON_ERROR)
 					else:	
@@ -1361,26 +1360,26 @@ class MainApplication(wx.Frame):
 
 		### gi is in the pyobject package
 		try:
-			import gi
+			import gi # type: ignore  
 			package_installed = True
 		except ImportError:
 			package = "pygobject"
 			package_installed = install(package)
 			
 		if package_installed:
-			import gi
+			import gi # type: ignore  
 			gi.require_version("Gdk", "3.0")
-			import gi.repository.Gdk as gdk
+			import gi.repository.Gdk as gdk # type: ignore  
 
 			currentPage = self.nb2.GetCurrentPage()
 			currentPage.deselect()
 			diagram = currentPage.GetDiagram()
 			
-			last_name_saved = getattr(diagram,'last_name_saved', os.path.join(DEVSIMPY_PACKAGE_PATH, 'screenshot.png'))
+			last_name_saved = getattr(diagram,'last_name_saved', os.path.join(DEVSIMPY_PACKAGE_PATH, 'screenshot.png')) # type: ignore  # noqa: F821
 			
 			### options building
 			wcd = _("PNG files (*.png)|*.png|All files (*)|*)")
-			home = self.home or os.path.dirname(last_name_saved) or DEVSIMPY_PACKAGE_PATH if self.openFileList == ['']*NB_OPENED_FILE else self.home or os.path.dirname(self.openFileList[0])
+			home = self.home or os.path.dirname(last_name_saved) or DEVSIMPY_PACKAGE_PATH if self.openFileList == ['']*NB_OPENED_FILE else self.home or os.path.dirname(self.openFileList[0]) # type: ignore  # noqa: F821
 			save_dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=home, defaultFile=os.path.basename(last_name_saved), wildcard=wcd, style=wx.SAVE | wx.OVERWRITE_PROMPT)
 
 			if save_dlg.ShowModal() == wx.ID_OK:
@@ -1402,7 +1401,7 @@ class MainApplication(wx.Frame):
 				else:
 					NotificationMessage(_('Error'), _("Unable to get the screenshot. \n Check the trace in background for more informations."), parent=self, flag=wx.ICON_ERROR, timeout=5)
 		else:
-			NotificationMessage(_('Error'), _('%s is not installed. \n Check the trace in background for more informations.'%(package)), parent=self, flag=wx.ICON_ERROR, timeout=5)
+			NotificationMessage(_('Error'), _(f'{package} is not installed. \n Check the trace in background for more informations.'), parent=self, flag=wx.ICON_ERROR, timeout=5)  # noqa: INT001
 
 	###
 	def GetUndoRedoCanvas(self, event=None):
@@ -1419,7 +1418,7 @@ class MainApplication(wx.Frame):
 					canvas = obj.GetToolClientData(event.GetId())
 					if canvas is not None:
 						return canvas
-			except Exception:
+			except Exception:  # noqa: BLE001, S110
 				pass
 
 		### active detached frame, if any
@@ -1428,7 +1427,7 @@ class MainApplication(wx.Frame):
 			frame = focused.GetTopLevelParent() if focused is not None else None
 			if isinstance(frame, DetachedFrame):
 				return frame.canvas
-		except Exception:
+		except Exception:  # noqa: BLE001, S110
 			pass
 
 		return self.nb2.GetCurrentPage()
@@ -1453,7 +1452,7 @@ class MainApplication(wx.Frame):
 		""" Save file button has been pressed.
 		"""
 
-		obj = event.GetEventObject()
+		# obj = event.GetEventObject()
 
 		currentPage = self.nb2.GetCurrentPage()
 
@@ -1480,7 +1479,7 @@ class MainApplication(wx.Frame):
 				tb.EnableTool(Menu.ID_SAVE, diagram.modify)
 
 				### update the txt of the notebook tab (remove *that indicate that the file was modified)
-				self.nb2.SetPageText(self.nb2.GetSelection(), "%s"%self.nb2.GetPageText(self.nb2.GetSelection()).replace('*',''))
+				self.nb2.SetPageText(self.nb2.GetSelection(), "{}".format(self.nb2.GetPageText(self.nb2.GetSelection()).replace('*','')))
 				
 			else:
 				wx.MessageBox( _('Error saving file.') ,_('Error'), wx.OK | wx.ICON_ERROR)
@@ -1501,7 +1500,7 @@ class MainApplication(wx.Frame):
 
 		### options building
 		msg = "DEVSimPy files (*.dsp)|*.dsp|"
-		if YAML_IMPORT:
+		if YAML_IMPORT: # type: ignore  # noqa: F821
 			msg+="YAML files (*.yaml)|*.yaml|"
 		msg+="JSON files (*.json)|*.json|"
 		msg+="XML files (*.xml)|*.xml|All files (*)|*)"
@@ -1511,8 +1510,8 @@ class MainApplication(wx.Frame):
 		home = self.home or os.path.dirname(diagram.last_name_saved)
 
 		if not home:
-			if self.openFileList == ['']*NB_OPENED_FILE:
-				home = DEVSIMPY_PACKAGE_PATH 
+			if self.openFileList == ['']*NB_OPENED_FILE: # type: ignore  # noqa: F821
+				home = DEVSIMPY_PACKAGE_PATH  # type: ignore  # noqa: F821
 			else: 
 				home = self.home or os.path.dirname(self.openFileList[0])
 	
@@ -1527,18 +1526,18 @@ class MainApplication(wx.Frame):
 			### add extention depending on the wcd (default .dsp)
 			if ext == '':
 				if wcd_i == 0:
-					path=''.join([path,'.dsp'])
-				elif YAML_IMPORT:
+					path=f"{path}.dsp"
+				elif YAML_IMPORT: # type: ignore  # noqa: F821
 					if wcd_i == 1:
-						path=''.join([path,'.yaml'])
+						path=f"{path}.yaml"
 					elif wcd_i == 2:
-						path=''.join([path,'.json'])
+						path=f"{path}.json"
 					elif wcd_i == 3:
-						path=''.join([path,'.xml'])		
+						path=f"{path}.xml"		
 				elif wcd_i == 1:
-					path=''.join([path,'.json'])
+					path=f"{path}.json"
 				elif wcd_i == 2:
-					path=''.join([path,'.xml'])
+					path=f"{path}.xml"
 
 			### diagram preparation
 			label = os.path.splitext(file_name)[0]
@@ -1572,11 +1571,11 @@ class MainApplication(wx.Frame):
 	def OnImportXMLSES(self, event):
     	
 		wcd = _("XML SES files (*.xmlsestree)|*.xmlsestree|XML SES files (*.sestree)|*.sestree|All files (*)|*")
-		home = os.getenv('USERPROFILE') or os.getenv('HOME') or DEVSIMPY_PACKAGE_PATH if self.openFileList == ['']*NB_OPENED_FILE else os.path.dirname(self.openFileList[0])
+		home = os.getenv('USERPROFILE') or os.getenv('HOME') or DEVSIMPY_PACKAGE_PATH if self.openFileList == ['']*NB_OPENED_FILE else os.path.dirname(self.openFileList[0]) # type: ignore  # noqa: F821
 		open_dlg = wx.FileDialog(self, message = _('Choose a file'), defaultDir = home, defaultFile = "", wildcard = wcd, style = wx.OPEN|wx.MULTIPLE|wx.CHANGE_DIR)
 
 		### path,diagram dictionary
-		new_paths = {}
+		# new_paths = {}
 
 		### get the new path from open file dialogue
 		if open_dlg.ShowModal() == wx.ID_OK:
@@ -1674,7 +1673,7 @@ class MainApplication(wx.Frame):
 
 			for s in dlg._selectedItem:
 
-				absdName = str(os.path.join(DOMAIN_PATH, s)) if s not in dlg._d else str(dlg._d[s])
+				absdName = str(os.path.join(DOMAIN_PATH, s)) if s not in dlg._d else str(dlg._d[s]) # type: ignore  # noqa: F821
 				progress_dlg = wx.ProgressDialog(_('Importing library'), _("Loading %s ...")%s, parent=self, style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
 				progress_dlg.Pulse()
 				wx.SafeYield()  # Allow the GUI to process pending events
@@ -1683,7 +1682,7 @@ class MainApplication(wx.Frame):
 				LibraryTree.AddToSysPath(absdName)
     			### add NewDomain
 
-				self.tree.InsertNewDomain(absdName, self.tree.GetRootItem(), list(self.tree.GetSubDomain(absdName, self.tree.GetDomainList(absdName)).values())[0])
+				self.tree.InsertNewDomain(absdName, self.tree.GetRootItem(), list(self.tree.GetSubDomain(absdName, self.tree.GetDomainList(absdName)).values())[0])  # noqa: RUF015
 
 				progress_dlg.Destroy()
 				wx.SafeYield()
@@ -1886,12 +1885,12 @@ class MainApplication(wx.Frame):
 				## make DEVS instance from diagram
 					master = Container.Diagram.makeDEVSInstance(diagram)
 					if not isinstance(master, tuple):
-						simFrame = SimulationGUI.SimulationDialog(self, wx.NewIdRef(), _(" %s Simulator"%diagram.label))
+						simFrame = SimulationGUI.SimulationDialog(self, wx.NewIdRef(), _(f" {diagram.label} Simulator"))  # noqa: INT001
 						simFrame.SetMaster(master)
 
 						### center and shit to avoid superposition
 						if simFrame:								
-							junk, junk, dw, dh = wx.ClientDisplayRect()
+							_, _, dw, dh = wx.ClientDisplayRect()
 							w, h = simFrame.GetSize()
 							g = 15*i
 							x = dw - w + g
@@ -2101,7 +2100,7 @@ class MainApplication(wx.Frame):
 		""" Change the language to French.
 		"""
 		
-		self.cfg.Write("language", f"'fr'")
+		self.cfg.Write("language", "'fr'")
 		
 		dlg = wx.MessageDialog(self, _('You need to restart DEVSimPy to take effect.\n\nDo you want to restart now ?'), _('Internationalization'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 		if dlg.ShowModal() == wx.ID_YES:
@@ -2153,7 +2152,7 @@ class MainApplication(wx.Frame):
 						args=(response,prof_file_path),
 						).start()
 					else:
-						wx.MessageBox(_('%s is not installed.'%(response)), _('Error'), wx.OK | wx.ICON_ERROR)
+						wx.MessageBox(_(f'{response} is not installed.'), _('Error'), wx.OK | wx.ICON_ERROR)  # noqa: INT001
 				elif response == 'gprof2dot':
 					dlg.Destroy()
 					if install_and_import(response):
@@ -2161,7 +2160,7 @@ class MainApplication(wx.Frame):
 						args=(response,prof_file_path),
 						).start()
 					else:
-						wx.MessageBox(_('%s is not installed.'%(response)), _('Error'), wx.OK | wx.ICON_ERROR)
+						wx.MessageBox(_(f'{response} is not installed.'), _('Error'), wx.OK | wx.ICON_ERROR)  # noqa: INT001
 				elif response == _('Embedded in DEVSimPy'):
 					dlg.Destroy()
 					output = self.LoadProfFile(prof_file_path)
@@ -2171,16 +2170,16 @@ class MainApplication(wx.Frame):
 				else:
 					dlg.Destroy()
 		else:
-			wx.MessageBox(_('The profile file %s does not exist.'%(prof_file_path)), _('Error'), wx.OK | wx.ICON_ERROR)
+			wx.MessageBox(_(f'The profile file {prof_file_path} does not exist.'), _('Error'), wx.OK | wx.ICON_ERROR)  # noqa: INT001
 
 	@staticmethod
 	def longRunning1(response, prof_file_path):
-		subprocess.call(" ".join([response,prof_file_path]), shell=True)
+		subprocess.call(f"{response} {prof_file_path}", shell=True)
 
 	@staticmethod
 	def longRunning2(response, prof_file_path):
 		png_file_path = prof_file_path.replace('.prof', '.png')
-		subprocess.call(" ".join([response,'-f pstats',prof_file_path,"|", "dot", "-Tpng", "-o", png_file_path, "&&", "eog", png_file_path]),  shell=True)
+		subprocess.call(f"{response} -f pstats {prof_file_path} | dot -Tpng -o {png_file_path} && eog {png_file_path}",  shell=True)
 
 	@staticmethod
 	@redirectStdout
@@ -2222,7 +2221,7 @@ class MainApplication(wx.Frame):
 
 		lang = eval('self.language')
 
-		filename = os.path.join(DEVSIMPY_PACKAGE_PATH, 'doc', 'html', lang, 'Help.zip')
+		filename = os.path.join(DEVSIMPY_PACKAGE_PATH, 'doc', 'html', lang, 'Help.zip') # type: ignore  # noqa: F821
 		
 		wx.FileSystem.AddHandler(wx.ArchiveFSHandler())     # add the Zip filesystem (only before HtmlHelpControler instance)
 
@@ -2259,7 +2258,7 @@ class MainApplication(wx.Frame):
 		#info = ""
 		dlg = wx.RichMessageDialog(self, msg, _("Update Manager"), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 		#dlg.ShowDetailedText(info)
-		if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:
+		if dlg.ShowModal() not in [wx.ID_NO, wx.ID_CANCEL]:  # noqa: SIM102
 			if install_and_import('gitpython', 'git'):
 				self.DoUpdatFromGitRepo()
 		dlg.Destroy()
@@ -2307,11 +2306,11 @@ class MainApplication(wx.Frame):
 		""" About menu has been pressed.
 		"""
 
-		description = _("""DEVSimPy is an advanced wxPython framework for the modeling and simulation of systems based on the DEVS formalism.
+		description = _(f"""DEVSimPy is an advanced wxPython framework for the modeling and simulation of systems based on the DEVS formalism.
 Features include powerful built-in editor, advanced modeling approach, powerful discrete event simulation algorithm,
 import/export DEVS components library and more.
 
-wxPython %s - python %s"""%(wx.version(),platform.python_version()))
+wxPython {wx.version()} - python {platform.python_version()}""")  # noqa: INT001
 
 		licence =_( """DEVSimPy is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the Free Software Foundation;
@@ -2325,7 +2324,7 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
 
 		info = wx.AboutDialogInfo()
 
-		icon_bitmap = load_and_resize_image(SPLASH_PNG, 520,333)
+		icon_bitmap = load_and_resize_image(SPLASH_PNG, 520,333) # type: ignore  # noqa: F821
 		icon = wx.Icon()
 		icon.CopyFromBitmap(icon_bitmap)
 
@@ -2381,7 +2380,7 @@ class AdvancedSplashScreen(AdvancedSplash):
 		### for Phoenix version ()
 		splashStyle = wx.adv.SPLASH_CENTRE_ON_SCREEN | wx.adv.SPLASH_TIMEOUT
 
-		splashBmp = wx.Bitmap(SPLASH_PNG)
+		splashBmp = wx.Bitmap(SPLASH_PNG) # type: ignore  # noqa: F821
 		splashDuration = 2000
 		if old:
 			AdvancedSplash.__init__(self, splashBmp, splashStyle, splashDuration, None)
@@ -2431,11 +2430,11 @@ class AdvancedSplashScreen(AdvancedSplash):
 		except AttributeError:
 			try:
 				self.PushStatusText(data)
-			except:
+			except:  # noqa: E722, S110
 				pass
 
-		with open(LOG_FILE, 'a') as f:
-			f.write("%s - %s"%(time.strftime("%Y-%m-%d %H:%M:%S"), data))
+		with open(LOG_FILE, 'a') as f: # type: ignore  # noqa: F821
+			f.write("{} - {}".format(time.strftime("%Y-%m-%d %H:%M:%S"), data))
 
 	def OnClose(self, event):
 		""" Handles the wx.EVT_CLOSE event for SplashScreen. """
@@ -2457,15 +2456,15 @@ class AdvancedSplashScreen(AdvancedSplash):
 		# Call after the loading diagram method which depends on the invocked command line
 		try:
 			wx.CallAfter(self.app.frame.OnLoadDiagram)
-		except:
+		except:  # noqa: E722, S110
 			pass
 		
 	def ShowMain(self):
 		""" Shows the main application (DEVSimPy). """
 
-		self.app.frame = MainApplication(None, wx.NewIdRef(), 'DEVSimPy %s'%__version__)
+		self.app.frame = MainApplication(None, wx.NewIdRef(), f'DEVSimPy {__version__}')
 
-		self.app.frame.statusbar.SetStatusText(_('wxPython %s - python %s'%(wx.version(),platform.python_version())),1)
+		self.app.frame.statusbar.SetStatusText(_(f'wxPython {wx.version()} - python {platform.python_version()}'),1)  # noqa: INT001
 
 		# keep in a attribute of stdio which is invisible until now
 		self.app.frame.stdioWin = self.app.stdioWin
@@ -2557,7 +2556,7 @@ class DEVSimPyApp(wx.App, wit.InspectionMixin):
 		wx.App.__init__(self, redirect, filename)
 
 		# make sure we can create a GUI
-		if not self.IsDisplayAvailable() and not GUI_FLAG:
+		if not self.IsDisplayAvailable() and not GUI_FLAG: # type: ignore  # noqa: F821
 
 			if wx.Platform == '__WXMAC__':
 				msg = """This program needs access to the screen.
@@ -2588,7 +2587,7 @@ class DEVSimPyApp(wx.App, wit.InspectionMixin):
 	def RedirectStdio(self, filename=None):
 		"""Redirect sys.stdout and sys.stderr to a file or a popup window."""
 		if filename:
-			sys.stdout = sys.stderr = open(filename, 'a')
+			sys.stdout = sys.stderr = open(filename, 'a')  # noqa: SIM115
 		else:
 			# ici on cree la fenetre !
 			DEVSimPyApp.outputWindowClass.parent=self
@@ -2598,7 +2597,7 @@ class DEVSimPyApp(wx.App, wit.InspectionMixin):
 	def RestoreStdio(self):
 		try:
 			sys.stdout, sys.stderr = self.saveStdio
-		except:
+		except:  # noqa: E722, S110
 			pass
 
 	def MainLoop(self):
@@ -2660,7 +2659,7 @@ class DEVSimPyApp(wx.App, wit.InspectionMixin):
 		sys.excepthook = ExceptionHook
 
 def main():
-	sys.stdout.write("Importing wxPython %s%s for python %s on %s (%s) platform...\n"%(wx.version(), " from devsimpy.ini" if ini_exist else '', platform.python_version(), platform.system(), platform.version()))
+	sys.stdout.write("Importing wxPython {}{} for python {} on {} ({}) platform...\n".format(wx.version(), " from devsimpy.ini" if ini_exist else '', platform.python_version(), platform.system(), platform.version()))
 
 	### if --nogui is in argv, we start devsimpy-nogui.py
 	start_devsimpy_nogui = '--nogui' in sys.argv
@@ -2674,7 +2673,7 @@ def main():
 			if r in ('Y', 'y', 'yes', 'Yes', 'YES'):
 				try:
 					os.remove(config_file1)
-				except Exception as info:
+				except Exception:  # noqa: BLE001, S110
 					#traceback.print_exc()
 					pass
 				else:
@@ -2682,7 +2681,7 @@ def main():
 				
 				try:
 					os.remove(config_file2)
-				except Exception as info:
+				except Exception:  # noqa: BLE001, S110
 					#traceback.print_exc()
 					pass
 				else:
@@ -2726,7 +2725,7 @@ def main():
 		import subprocess
 		args = sys.argv[1:]
 		args.remove('--nogui')
-		subprocess.call(['python', os.path.join(ABS_HOME_PATH,'devsimpy-nogui.py')] + args)
+		subprocess.call(['python', os.path.join(ABS_HOME_PATH,'devsimpy-nogui.py')] + args) # type: ignore  # noqa: F821
 	else:
 		## si redirect=True et filename=None alors redirection dans une fenetre
 		## si redirect=True et filename="fichier" alors redirection dans un fichier

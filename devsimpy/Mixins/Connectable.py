@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Connectable.py ---
@@ -23,7 +23,7 @@
 class Connectable:
 	""" Mixin to create connectable nodes or ports.
 	"""
-	DUMP_ATTR = ['_input_labels','_output_labels']
+	DUMP_ATTR = ['_input_labels','_output_labels']  # noqa: RUF012
 
 	###
 	def __init__(self, nb_in:int=1, nb_out:int=3)->None:

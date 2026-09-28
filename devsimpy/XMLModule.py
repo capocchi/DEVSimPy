@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 """
 Name: XML.py
 Brief descritpion: All classes and functions linked with xml aspects
@@ -10,7 +10,7 @@ GENERAL NOTES AND REMARKS: XMLToDict function must integrate the coupling info i
 GLOBAL VARIABLES AND FUNCTIONS:
 """
 
-import os
+import os  
 import sys
 import re
 import tempfile
@@ -22,11 +22,10 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
 ### avoid cyclic import during the test_xmlmodule.py execution
-import sys
 if 'XMLModule' not in sys.modules:
 	import Container
 
-import Components
+import Components  
 
 def makeDEVSXML(label, D, filename):
 	""" Make XML file from D graph of the diagram
@@ -122,8 +121,8 @@ def makeDEVSXML(label, D, filename):
 		file.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>" + "\n")
 		file.write(ET.tostring(root).decode("utf-8"))
 
-def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
-	"""
+def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):  # noqa: B006
+	""" Diagram From XML
 	"""
 
 	import WizardGUI
@@ -161,7 +160,7 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 			### coupled model have swimlane style or *couple{d}* in value filed
 			if s.attributes['style'].value == 'swimlane' or re.match('[a-zA-Z0-9_ ]*[c|C]oupl[ed|e|é][a-zA-Z0-9_ ]*',name, re.IGNORECASE):
 				attr = s.getElementsByTagName('mxGeometry')[0].attributes
-				temp = tempfile.NamedTemporaryFile(suffix='.py')
+				temp = tempfile.NamedTemporaryFile(suffix='.py')  # noqa: SIM115
 				temp.write(WizardGUI.coupledCode('CoupledModel'))
 				temp.seek(0)
 
@@ -186,7 +185,7 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 
 			elif re.match('[a-zA-Z0-9_ ]*[a|A]tomi[c|que][a-zA-Z0-9_ ]*',name, re.IGNORECASE):
 				attr = s.getElementsByTagName('mxGeometry')[0].attributes
-				temp = tempfile.NamedTemporaryFile(suffix='.py')
+				temp = tempfile.NamedTemporaryFile(suffix='.py')  # noqa: SIM115
 				temp.write(WizardGUI.atomicCode('AtomicModel'))
 				temp.seek(0)
 
@@ -213,7 +212,7 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 		elif 'vertex' in s.attributes:
 			if s.attributes['vertex'].value == '1' or re.match('[a-zA-Z0-9_ ]*[a|A]tomi[c|que][a-zA-Z0-9_ ]*',name, re.IGNORECASE):
 				attr = s.getElementsByTagName('mxGeometry')[0].attributes
-				temp = tempfile.NamedTemporaryFile(suffix='.py')
+				temp = tempfile.NamedTemporaryFile(suffix='.py')  # noqa: SIM115
 				temp.write(WizardGUI.atomicCode('AtomicModel'))
 				temp.seek(0)
 
@@ -249,7 +248,7 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 
 		source = D[source_id]
 		target = D[target_id]
-		c = D[parent_id]
+		# c = D[parent_id]
 
 		if source in canvas.diagram.shapes and target in canvas.diagram.shapes:
 			a,b = canvas.GetNodeLists(source, target)
@@ -263,7 +262,7 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):
 		del connectionlist[0]
 
 def getDiagramFromXMLSES(xmlses_file="", canvas=None):
-	"""
+	""" Diagram FromXML SES
 	"""
 
 	def GetParent(node):
@@ -314,7 +313,7 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 				if 'components' in v:
     				### coupled model
 					name = k.attributes['name'].value
-					temp = tempfile.NamedTemporaryFile(suffix='.py', delete=False)
+					temp = tempfile.NamedTemporaryFile(suffix='.py', delete=False)  # noqa: SIM115
 					temp.write(WizardGUI.coupledCode('CoupledModel'))
 					temp.seek(0)
 
@@ -338,7 +337,7 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 				else:
     				### atomic model
 					name = k.attributes['name'].value
-					temp = tempfile.NamedTemporaryFile(suffix='.py', delete=False)
+					temp = tempfile.NamedTemporaryFile(suffix='.py', delete=False)  # noqa: SIM115
 					temp.write(WizardGUI.atomicCode('AtomicModel'))
 					temp.seek(0)
 					
@@ -368,8 +367,8 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 
 		for c in connectionlist:
 			if name == c.attributes['sinkname'].value:
-				p = u''.join([i for i in c.attributes['sinkport'].value if i.isdigit()])
-				if p ==u'': p=u'1'
+				p = u''.join([i for i in c.attributes['sinkport'].value if i.isdigit()])  # noqa: UP025
+				if p ==u'': p=u'1'  # noqa: UP025
 				if HasChild(node):
 					if p not in oport:
 						oport.append(p)
@@ -377,8 +376,8 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 					if p not in iport:
 						iport.append(p)	
 			elif name == c.attributes['sourcename'].value:
-				p = u''.join([i for i in c.attributes['sourceport'].value if i.isdigit()])
-				if p ==u'': p=u'1'
+				p = u''.join([i for i in c.attributes['sourceport'].value if i.isdigit()]) # noqa: UP025
+				if p ==u'': p=u'1' # noqa: UP025
 				if HasChild(node):
 					if p not in iport:
 						iport.append(p)
@@ -391,8 +390,8 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 			uid = node.attributes['uid'].value
 			for c in connectionlist:
 				if uid == c.attributes['sinkuid'].value:
-					p = u''.join([i for i in c.attributes['sinkport'].value if i.isdigit()])
-					if p ==u'': p=u'1'
+					p = u''.join([i for i in c.attributes['sinkport'].value if i.isdigit()]) # noqa: UP025
+					if p ==u'': p=u'1' # noqa: UP025
 					if HasChild(node):
 						if p not in oport:
 							oport.append(p)
@@ -400,8 +399,8 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 						if p not in iport:
 							iport.append(p)	
 				elif uid == c.attributes['sourceuid'].value:
-					p = u''.join([i for i in c.attributes['sourceport'].value if i.isdigit()])
-					if p ==u'': p=u'1'
+					p = u''.join([i for i in c.attributes['sourceport'].value if i.isdigit()]) # noqa: UP025
+					if p ==u'': p=u'1' # noqa: UP025
 					if HasChild(node):
 						if p not in iport:
 							iport.append(p)
@@ -414,7 +413,7 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 		return (iport, oport)
 	
 	def GetNodeLists(canvas, source, target):
-		"""
+		""" Node List
 		"""
 
 		# deselect and select target in order to get its list of node (because the node are generated dynamicly)
@@ -453,12 +452,12 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 			diagram_name = s.parentNode.attributes['name'].value
 
 			### Get the port id removing caracter form str if port has specified with label
-			source_port_num = u''.join([i for i in s.attributes['sourceport'].value if i.isdigit()])
-			target_port_num = u''.join([i for i in s.attributes['sinkport'].value if i.isdigit()])
+			source_port_num = u''.join([i for i in s.attributes['sourceport'].value if i.isdigit()]) # noqa: UP025
+			target_port_num = u''.join([i for i in s.attributes['sinkport'].value if i.isdigit()]) # noqa: UP025
 
 			### if no port number is specified in the XML, there is one port and its id is 1 (not 0 but it can be depending on the rule chose by the SES modeler!) 
-			if source_port_num ==u'': source_port_num=u'1'
-			if target_port_num ==u'': target_port_num=u'1'
+			if source_port_num ==u'': source_port_num=u'1' # noqa: UP025
+			if target_port_num ==u'': target_port_num=u'1' # noqa: UP025
 
 			### find the graphic block of the source, target and diagram
 			source = target = diagram = None
@@ -490,8 +489,8 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 
 			#print a,b
 
-			if len(a) == 1: source_port_num = u'1'
-			if len(b) == 1: target_port_num = u'1'
+			if len(a) == 1: source_port_num = u'1' # noqa: UP025
+			if len(b) == 1: target_port_num = u'1' # noqa: UP025
 			#print source_name,int(source_port_num)-1,target_name,int(target_port_num)-1
 			sourceNode, targetNode = a[int(source_port_num)-1],b[int(target_port_num)-1]
 	
@@ -515,7 +514,7 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 		return canvas.GetDiagram()
 
 	def XMLToDict(blocklist):
-		""" 
+		""" XML to Dict
 		"""		
 		### dictionary building
 		xml_to_dict = {}
@@ -549,8 +548,8 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 
 	try:
 		xmldoc = minidom.parse(xmlses_file)
-	except Exception as info:
-		sys.stdout.write('Error importing %s: %s\n' % (xmlses_file, info))
+	except Exception as info:  # noqa: BLE001
+		sys.stdout.write(f'Error importing {xmlses_file}: {info}\n')
 		sys.stdout.write('Please check the XML SES file\n')
 		return False
 
@@ -566,14 +565,14 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 		try:
 			### Make the DEVSimPy diagram
 			diagram = GetDiagram(canvas, xml_to_dict, parent_block=canvas)
-		except Exception as info:
+		except Exception as info:  # noqa: BLE001
 			sys.stdout.write(_('Error making the diagram from XML SES: %s\n')%info)
 			return False
 		else:
 			try:
 				### Make the DEVSimPy diagram coupling
 				diagram = GetDiagramCoupling(canvas)
-			except Exception as info:
+			except Exception as info:  # noqa: BLE001
 				sys.stdout.write(_('Error making the coupling into the diagram from XML SES: %s\n')%info)
 				return diagram
 			else:
