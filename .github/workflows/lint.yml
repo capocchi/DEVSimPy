@@ -7,7 +7,7 @@ on:
 
 jobs:
   lint:
-    name: Run Flake8 and mypy
+    name: Run ruff and mypy
     runs-on: ubuntu-latest
 
     steps:
@@ -22,10 +22,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 mypy
+          pip install ruff mypy
 
-      - name: Run Flake8
-        run: flake8 .
+      - name: Run ruff
+        run: ruff check .
 
       - name: Run mypy
         run: mypy .

@@ -8,11 +8,6 @@
 #
 # Feel free to email with questions, comments, or suggestions
 #
-# Need to edit HKEY_CLASSES_ROOT\mailto\shell\open\command and point it to this
-# file.
-#
-# Ex. cmd /C "SET PYTHONHOME=c:\path\to\Python24&&c:\path\to\python24\python.exe c:\path\to\wxPyMail.py %1"
-#     "C:\Program Files\PyMail\wxPyMail.exe" %1
 #################################################################################################################################################################################
 '''
 
