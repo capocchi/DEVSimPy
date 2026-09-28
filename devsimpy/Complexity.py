@@ -44,7 +44,7 @@ def GetMacCabeMetric(path):
             sys.path.append(p)
         import maccabe as codepaths
     except ImportError as info:
-        msg = 'ERROR: maccabe module not imported: %s\n'%info
+        msg = f'ERROR: maccabe module not imported: {info}\n'
         sys.stderr.write(msg)
         return complexity
     else:
