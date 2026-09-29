@@ -365,9 +365,9 @@ else:
 			diagram = canvas.GetDiagram()
 
 			mainW = self.GetTopLevelParent()
-
+			title = self.GetPageText(id).replace("*", "")
 			if diagram.modify:
-				title = self.GetPageText(id).replace("*", "")
+				
 				dlg = wx.MessageDialog(
 					self,
 					_("%s\nSave changes to the current diagram?") % (title),

@@ -3141,9 +3141,16 @@ def main():
 	if start_devsimpy_nogui:
 		import subprocess
 
-		args = sys.argv[1:]
-		args.remove("--nogui")
-		subprocess.call(["python", os.path.join(ABS_HOME_PATH, "devsimpy-nogui.py")] + args)  # type: ignore  # noqa: F821
+		args = [arg for arg in sys.argv[1:] if arg != "--nogui"]
+
+		subprocess.run(
+			[
+				sys.executable,
+				os.path.join(ABS_HOME_PATH, "devsimpy-nogui.py"),  # noqa: F821 # type: ignore
+				*args,
+			],
+			check=True,
+		)
 	else:
 		## si redirect=True et filename=None alors redirection dans une fenetre
 		## si redirect=True et filename="fichier" alors redirection dans un fichier

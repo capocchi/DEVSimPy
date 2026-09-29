@@ -523,8 +523,6 @@ class PythonSTC(stc.StyledTextCtrl):
 		"""
 		key = event.GetKeyCode()
 
-		return
-
 		if (65 <= key <= 90) or (97 <= key <= 122) or key in (ord("_"), ord(".")):
 			pos = self.GetCurrentPos()
 			start = self.WordStartPosition(pos, True)

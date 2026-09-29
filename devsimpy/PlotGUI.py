@@ -686,7 +686,7 @@ class StaticPlot(PlotFrame):
 					self.Bind(
 						wx.EVT_MENU,
 						self.OnPlotSpectrum,
-						menu.Append(wx.NewIdRef(), _("Signal %d") % i, _("Spectrum Plot")),
+						menu.Append(wx.NewIdRef(), _(f"Signal {i}"), _("Spectrum Plot")),  # noqa: INT001
 					)
 				self.Bind(
 					wx.EVT_MENU,

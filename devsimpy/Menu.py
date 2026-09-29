@@ -1351,16 +1351,8 @@ class ShapePopupMenu(wx.Menu):
 				Export_SubMenu2 = export_subMenu.Append(exportKAFKA_WORKER)
 				self.AppendSeparator()
 
-				if shape.isPY():
-					if DEFAULT_DEVS_DIRNAME != "BrokerDEVS":  # type: ignore  # noqa: F821
-						Export_SubMenu2.Enable(False)
-
-				elif shape.isAMD():
-					if DEFAULT_DEVS_DIRNAME != "BrokerDEVS":  # type: ignore  # noqa: F821
-						Export_SubMenu2.Enable(False)
-					else:
-						### TODO: need to be implemented
-						Export_SubMenu2.Enable(False)
+				if shape.isPY() or shape.isAMD():
+					Export_SubMenu2.Enable(False)
 
 				elif shape.isPYC():
 					Export_SubMenu1.Enable(False)

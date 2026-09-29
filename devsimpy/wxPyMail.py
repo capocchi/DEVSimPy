@@ -341,8 +341,9 @@ class SendMailWx(wx.Frame):
 					msg.attach(part)
 
 			# edit this to match your mail server (i.e. mail.myserver.com)
-			server = smtplib.SMTP("smtp.gmail.com:587")
-
+			server = smtplib.SMTP("smtp.gmail.com", 587)
+			server.starttls()
+			
 			# open login dialog
 			dlg = LoginDlg(server)
 

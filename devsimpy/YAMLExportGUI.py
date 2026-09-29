@@ -91,7 +91,7 @@ class YAMLExportGUI(wx.Frame):
 
 		self.url = wx.TextCtrl(
 			panel,
-			value="http://" if not "URL_REST" in builtins.__dict__ else URL_REST, # type: ignore  # noqa: F821
+			value="https://" if not "URL_REST" in builtins.__dict__ else URL_REST, # type: ignore  # noqa: F821
 			pos=(110, 15),
 			size=(160, -1),
 		)  
