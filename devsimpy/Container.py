@@ -1767,11 +1767,7 @@ class PointShape(Shape):
 
 	def draw(self, dc):
 		"""Draw method"""
-		# Mac's DC is already the same as a GCDC, and it causes
-		# problems with the overlay if we try to use an actual
-		# wx.GCDC so don't try it.
-		if "wxMac" not in wx.PlatformInfo:
-			dc = wx.GCDC(dc)
+		# Modern wxPython handles GCDC internally; no need to wrap DC.
 
 		self.graphic.pen = self.pen
 		self.graphic.fill = self.fill
@@ -4055,11 +4051,7 @@ class Block(
 	def draw(self, dc):
 		"""Drawing block"""
 
-		# Mac's DC is already the same as a GCDC, and it causes
-		# problems with the overlay if we try to use an actual
-		# wx.GCDC so don't try it.
-		if "wxMac" not in wx.PlatformInfo:
-			dc = wx.GCDC(dc)
+		# Modern wxPython handles GCDC internally; no need to wrap DC.
 
 		### Draw rectangle shape
 		RoundedRectangleShape.draw(self, dc)
@@ -5432,11 +5424,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 	def draw(self, dc):
 		"""Drawing method."""
 
-		# Mac's DC is already the same as a GCDC, and it causes
-		# problems with the overlay if we try to use an actual
-		# wx.GCDC so don't try it.
-		if "wxMac" not in wx.PlatformInfo:
-			dc = wx.GCDC(dc)
+		# Modern wxPython handles GCDC internally; no need to wrap DC.
 
 		CircleShape.draw(self, dc)
 
