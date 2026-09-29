@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*- # noqa: UP009
+
+# -*- coding: utf-8 -*-
 
 """
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -18,7 +19,6 @@
 import wx
 
 _ = wx.GetTranslation
-
 
 class DiagramInfoDialog(wx.Dialog):
 	"""Dialogue pour afficher les informations du diagramme et les codes PlantUML"""

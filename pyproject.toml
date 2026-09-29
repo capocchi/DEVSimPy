@@ -109,4 +109,21 @@ quote-style = "double"
 "legacy/**/*.py" = ["UP031", "UP032"]
 "examples/**/*.py" = ["UP031"]
 
-
+[tool.mypy]
+explicit_package_bases = true
+exclude = [
+    "^examples/",
+    "^DEVSKernel/",
+    "^design/",
+    "^doc/",
+    "^AI/",
+    "^Domain/",
+    "^icons/",
+    "^locale/",
+    "^logs/",
+    "^out/",
+    "^sounds/",
+    "^splash/",
+    "^plugins/",
+    "^XRC/"
+]
