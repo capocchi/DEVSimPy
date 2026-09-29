@@ -876,10 +876,9 @@ def playSound(sound_path):
 
 
 def GetMails(string):
-	"""Get list of mails from string."""
-
-	regex = re.compile("([a-zA-Z0-9-_.]+[@][a-zA-Z0-9-_.]+)")
-	return regex.findall(string)
+    """Get list of mails from string."""
+    regex = re.compile(r"[A-Za-z0-9_.-]+@[A-Za-z0-9_.-]+")
+    return regex.findall(string)
 
 
 def MoveFromParent(frame=None, interval=10, direction="right"):

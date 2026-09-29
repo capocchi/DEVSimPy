@@ -185,7 +185,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 				broker = getattr(
 					builtins,
 					"SELECTED_BROKER",
-					list(strategy_dict.get(msg_format, {}).keys())[0]  # noqa: RUF015
+					next(iter(strategy_dict.get(msg_format, {})))
 					if strategy_dict.get(msg_format)
 					else "Kafka",
 				) 

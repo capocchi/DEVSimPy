@@ -281,7 +281,7 @@ def guessDelimiter(input, textQualifier='"'):
 			consistency -= 0.01
 
 		if len(delims) == 1:
-			return list(delims.keys())[0]  # noqa: RUF015
+			return next(iter(delims))
 
 		# analyze another chunkLength lines
 		start = end
@@ -301,8 +301,7 @@ def guessDelimiter(input, textQualifier='"'):
 				if not d in inQuotes:
 					del delims[d]
 				if len(delims) == 1:
-					return list(delims.keys())[0]  # noqa: RUF015
-
+					return next(iter(delims))
 	# if there's *still* more than one, fall back to a 'preferred' list
 	if len(delims) > 1:
 		for d in ["\t", ",", ";", " ", ":"]:
@@ -310,7 +309,7 @@ def guessDelimiter(input, textQualifier='"'):
 				return d
 
 	# finally, just return the first damn character in the list
-	return list(delims.keys())[0]  # noqa: RUF015
+	return next(iter(delims))
 
 
 # ------------------------------------------------------------------------------

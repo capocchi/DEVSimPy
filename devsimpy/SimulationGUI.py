@@ -927,8 +927,10 @@ class Base:
 
 	def SetFields(self):
 		"""Fields"""
-
-		printOnStatusBar(self.statusbar, {i: "" for i in range(self.statusbar.GetFieldsCount())})
+		printOnStatusBar(
+			self.statusbar,
+			dict.fromkeys(range(self.statusbar.GetFieldsCount()), ""),
+		)
 
 	def PrepareDestroyWin(self):
 		"""To destroy the simulation frame."""

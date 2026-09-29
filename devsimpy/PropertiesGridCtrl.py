@@ -524,7 +524,7 @@ class CustomDataTable(GridTableBase):
 
 			### if cls is class
 			if inspect.isclass(cls):
-				regex = re.compile(r"[@|-][param]*[\s]*([a-zA-Z0-9-_\s]*)[=|:]([a-zA-Z0-9-_\s]+)")
+				regex = re.compile(r"[@-]param\s*([A-Za-z0-9_-]+)\s*[=:]\s*([A-Za-z0-9_-]+)")
 				doc = cls.__init__.__doc__ or ""
 				for attr, val in regex.findall(doc):
 					### attr could be in model.args
@@ -729,7 +729,7 @@ class CustomDataTable(GridTableBase):
 	def GetValue(self, row, col):
 
 		try:
-			# if isinstance(self.data[row][col], tuple) or isinstance(self.data[row][col], list):  # noqa: SIM101
+			# if isinstance(self.data[row][col], tuple) or isinstance(self.data[row][col], list):
 			return self.data[row][col]
 			# else:
 				# return self.data[row][col]
