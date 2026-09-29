@@ -239,7 +239,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 							except Exception:  
 								try:
 									pub.sendMessage("%d.finished" % (id(m)), msg="")  # noqa: UP031
-								except Exception:
+								except Exception:  # noqa: S110
 									pass
 						else:
 							m.finish(None)

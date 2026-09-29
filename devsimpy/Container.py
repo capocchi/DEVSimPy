@@ -820,7 +820,7 @@ class Diagram(Savable, Structurable):
 				if s in self.priority_list:
 					try:
 						result[self.priority_list.index(s)] = s
-					except Exception:
+					except Exception:  # noqa: S110
 						pass
 				else:
 					result[lenght - cpt] = s
@@ -2288,7 +2288,7 @@ if getattr(builtins, "GUI_FLAG", True):
 						sn = self.sourceNodeList[i]
 						tn = self.targetNodeList[i]
 						self.makeConnectionShape(sn, tn)
-					except Exception:
+					except Exception:  # noqa: S110
 						pass
 			elif sp == 0:
 				for i in range(snl):
@@ -2296,7 +2296,7 @@ if getattr(builtins, "GUI_FLAG", True):
 						sn = self.sourceNodeList[i]
 						tn = self.targetNodeList[tp]
 						self.makeConnectionShape(sn, tn)
-					except Exception:
+					except Exception:  # noqa: S110
 						pass
 			elif tp == 0:
 				for i in range(tnl):
@@ -2304,7 +2304,7 @@ if getattr(builtins, "GUI_FLAG", True):
 						sn = self.sourceNodeList[sp]
 						tn = self.targetNodeList[i]
 						self.makeConnectionShape(sn, tn)
-					except Exception:
+					except Exception:  # noqa: S110
 						pass
 			else:
 				sn = self.sourceNodeList[sp - 1]
@@ -2347,7 +2347,7 @@ if getattr(builtins, "GUI_FLAG", True):
 			### Destroy the dialog
 			try:
 				self.dlgConnection.Destroy()
-			except Exception:
+			except Exception:  # noqa: S110
 				pass
 
 			event.Skip()
@@ -2762,7 +2762,7 @@ if getattr(builtins, "GUI_FLAG", True):
 				if tb is not None:
 					tb.EnableTool(wx.ID_UNDO, undo_enabled)
 					tb.EnableTool(wx.ID_REDO, redo_enabled)
-			except Exception:
+			except Exception:  # noqa: S110
 				pass
 
 			### menu items (the menu bar always belongs to the main window)
@@ -2774,7 +2774,7 @@ if getattr(builtins, "GUI_FLAG", True):
 						menu = entry[0] if isinstance(entry, tuple) else entry
 						menu.Enable(wx.ID_UNDO, undo_enabled)
 						menu.Enable(wx.ID_REDO, redo_enabled)
-			except Exception:
+			except Exception:  # noqa: S110
 				pass
 
 		def OnLeftDown(self, event):
@@ -3587,7 +3587,7 @@ class LinesShape(Shape):
 					return True
 				ind = ind + 1
 
-		except Exception:
+		except Exception:  # noqa: S110
 			pass
 
 		return False

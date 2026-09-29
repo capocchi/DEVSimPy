@@ -606,5 +606,5 @@ class Zip:
 			if os.path.exists(self.fn):
 				try:
 					shutil.move("new_arch.zip", self.fn)
-				except Exception: 
+				except Exception:  # noqa: S110
 					pass

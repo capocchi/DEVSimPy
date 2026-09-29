@@ -194,7 +194,7 @@ class GeneralNotebook(Printable):
 		try:
 			name = self.GetPageText(self.GetSelection())
 			del builtins.__dict__[str(os.path.splitext(name)[0])]
-		except Exception:
+		except Exception:  # noqa: S110
 			pass
 			# sys.stdout.write("Constants builtin not delete for %s : %s"%(name, info))
 

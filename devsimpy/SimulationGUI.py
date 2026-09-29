@@ -940,7 +940,7 @@ class Base:
 		### try to hidden stdioWin
 		try:
 			self.parent.stdioWin.frame.Show(False)
-		except Exception:
+		except Exception:  # noqa: S110
 			pass
 
 		try:
@@ -960,7 +960,7 @@ class Base:
 				if p != nb2.GetSelection():
 					nb2.GetPage(p).Enable()
 
-		except Exception:
+		except Exception:  # noqa: S110
 			# sys.stdout.write(_("Empty mode over\n"))
 			pass
 

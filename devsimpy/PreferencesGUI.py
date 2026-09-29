@@ -1413,7 +1413,7 @@ class SimulationPanel(wx.Panel):
 			mainW = getTopLevelWindow()
 			tb = mainW.GetToolBar()
 			tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, "PyPDEVS" not in self.default_devs_dir)
-		except Exception:
+		except Exception:  # noqa: S110
 			pass
 
 		# Update all settings

@@ -1266,7 +1266,7 @@ class MainApplication(wx.Frame):
 			try:
 				### select the first page
 				self.nb2.SetSelection(0)
-			except Exception:
+			except Exception:  # noqa: S110
 				pass
 			if not self.nb2.OnClosePage(event):
 				exit = True
@@ -1670,7 +1670,7 @@ class MainApplication(wx.Frame):
 					canvas = obj.GetToolClientData(event.GetId())
 					if canvas is not None:
 						return canvas
-			except Exception:
+			except Exception:  # noqa: S110
 				pass
 
 		### active detached frame, if any
@@ -1679,7 +1679,7 @@ class MainApplication(wx.Frame):
 			frame = focused.GetTopLevelParent() if focused is not None else None
 			if isinstance(frame, DetachedFrame):
 				return frame.canvas
-		except Exception:
+		except Exception:  # noqa: S110
 			pass
 
 		return self.nb2.GetCurrentPage()
@@ -2810,7 +2810,7 @@ class AdvancedSplashScreen(AdvancedSplash):
 		except AttributeError:
 			try:
 				self.PushStatusText(data)
-			except Exception:
+			except Exception:  # noqa: S110
 				pass
 
 		with open(LOG_FILE, "a") as f:  # type: ignore  # noqa: F821
@@ -2836,7 +2836,7 @@ class AdvancedSplashScreen(AdvancedSplash):
 		# Call after the loading diagram method which depends on the invocked command line
 		try:
 			wx.CallAfter(self.app.frame.OnLoadDiagram)
-		except Exception:
+		except Exception:  # noqa: S110
 			pass
 
 	def ShowMain(self):
@@ -2979,7 +2979,7 @@ class DEVSimPyApp(wx.App, wit.InspectionMixin):
 	def RestoreStdio(self):
 		try:
 			sys.stdout, sys.stderr = self.saveStdio
-		except Exception:
+		except Exception:  # noqa: S110
 			pass
 
 	def MainLoop(self):
@@ -3072,7 +3072,7 @@ def main():
 			if r in ("Y", "y", "yes", "Yes", "YES"):
 				try:
 					os.remove(config_file1)
-				except Exception:
+				except Exception:  # noqa: S110
 					# traceback.print_exc()
 					pass
 				else:
@@ -3080,7 +3080,7 @@ def main():
 
 				try:
 					os.remove(config_file2)
-				except Exception:
+				except Exception:  # noqa: S110
 					# traceback.print_exc()
 					pass
 				else:

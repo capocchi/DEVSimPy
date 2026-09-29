@@ -848,7 +848,7 @@ def GetActiveWindow(event=None):
 		try:
 			child = wx.Window.FindFocus()
 			aW = wx.GetTopLevelParent(child)
-		except Exception:
+		except Exception:  # noqa: S110
 			pass
 
 	if aW is None and event is not None:
@@ -1229,7 +1229,7 @@ def generate_plantuml_from_diagram_recursive(diagram, level=0, parent_package=No
 								"dst_port": dst_port_name,
 							}
 						)
-			except Exception:
+			except Exception:  # noqa: S110
 				pass
 
 	# STEP 3: Generate components
