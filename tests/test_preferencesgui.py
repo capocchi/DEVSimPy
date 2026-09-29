@@ -5,10 +5,10 @@ Usage:
     python test_preferencesgui.py --autoclose 10  # Auto-close after 10s delay
 """
 
-from ApplicationController import TestApp
+from ApplicationController import TestApp  
 
 # import after ApplicationController that inits sys.path ot avoid this import
-from PreferencesGUI import PreferencesGUI
+from PreferencesGUI import PreferencesGUI # type: ignore
 
 app = TestApp(0)
 frame = PreferencesGUI(None, "Test")

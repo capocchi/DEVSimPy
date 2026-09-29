@@ -5,11 +5,11 @@ Usage:
     python test_spreadsheet.py --autoclose 10  # Auto-close after 10s delay
 """
 
-from ApplicationController import TestApp
+from ApplicationController import TestApp  
 
 # import after ApplicationController that inits sys.path ot avoid this import
-from SpreadSheet import Newt
-import Container
+from SpreadSheet import Newt # type: ignore
+import Container # type: ignore
 
 # Run the test
 app = TestApp(0)

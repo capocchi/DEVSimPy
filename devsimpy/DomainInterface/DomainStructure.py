@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
+
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # DomainStructure.py --- Domaine Structure virtual class
@@ -24,63 +25,57 @@ import re
 import os
 import importlib
 
-path = getattr(builtins,'DEVS_DIR_PATH_DICT').get(DEFAULT_DEVS_DIRNAME)
-d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
-BaseDEVS = importlib.import_module("DEVSKernel%s.DEVS"%d)
+path = builtins.DEVS_DIR_PATH_DICT.get(DEFAULT_DEVS_DIRNAME)  # type: ignore  # noqa: F821
+d = re.split("DEVSKernel", path)[-1].replace(os.sep, ".")
+BaseDEVS = importlib.import_module(f"DEVSKernel{d}.DEVS")
 
-#exec("import DEVSKernel%s.DEVS as BaseDEVS"%(d))
+# exec("import DEVSKernel%s.DEVS as BaseDEVS"%(d))
+
 
 #    ======================================================================    #
 class DomainStructure(BaseDEVS.CoupledDEVS):
-	""" Abstract DomainStrucutre class.
-	"""
+	"""Abstract DomainStrucutre class."""
 
 	###
 	def __init__(self, name=""):
-		"""	Constructor.
-		"""
+		"""Constructor."""
 
 		BaseDEVS.CoupledDEVS.__init__(self, name=name)
 
-	def getFlatComponentSet (self):
-	    """ get the list of composing submodels - recursive build
-	    """
-	    submodelList = {}
-	    for submodel in self.getComponentSet():
-	        submodelList.update(submodel.getFlatComponentSet())
-	    return submodelList
+	def getFlatComponentSet(self):
+		"""get the list of composing submodels - recursive build"""
+		submodelList = {}
+		for submodel in self.getComponentSet():
+			submodelList.update(submodel.getFlatComponentSet())
+		return submodelList
 
-	def getComponentSet(self)->list:
-		""" return the component set attribute depending on the definition finded in the DEVS.py file
-		"""
-		if hasattr(self, 'componentSet'):
+	def getComponentSet(self) -> list:
+		"""return the component set attribute depending on the definition finded in the DEVS.py file"""
+		if hasattr(self, "componentSet"):
 			return self.componentSet
-		elif hasattr(self, 'component_set'):
+		elif hasattr(self, "component_set"):
 			return self.component_set
 
-	def setComponentSet(self,V:list)->None:
-		""" set the component set attribute depending on the definition finded in the DEVS.py file
-		"""
-		if hasattr(self, 'componentSet'):
+	def setComponentSet(self, V: list) -> None:
+		"""set the component set attribute depending on the definition finded in the DEVS.py file"""
+		if hasattr(self, "componentSet"):
 			self.componentSet = V
-		elif hasattr(self, 'component_set'):
+		elif hasattr(self, "component_set"):
 			self.component_set = V
 
-	def addToComponentSet(self,V:list)->None:
-		""" add values in components set attribute
-		"""
-		if hasattr(self, 'componentSet'):
+	def addToComponentSet(self, V: list) -> None:
+		"""add values in components set attribute"""
+		if hasattr(self, "componentSet"):
 			self.componentSet.extend(V)
-		elif hasattr(self, 'component_set'):
+		elif hasattr(self, "component_set"):
 			self.component_set.extend(V)
 
-	def delToComponentSet(self,V:list)->None:
-		""" del values in the components set attribute
-		"""
-		if hasattr(self, 'componentSet'):
+	def delToComponentSet(self, V: list) -> None:
+		"""del values in the components set attribute"""
+		if hasattr(self, "componentSet"):
 			for v in V:
 				self.componentSet.remove(v)
-		elif hasattr(self, 'component_set'):
+		elif hasattr(self, "component_set"):
 			for v in V:
 				self.component_set.remove(v)
 

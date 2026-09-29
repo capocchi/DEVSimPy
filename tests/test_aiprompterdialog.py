@@ -5,10 +5,10 @@ Usage:
     python test_aiprompterdialog.py --autoclose 10  # Auto-close after 10s delay
 """
 
-from ApplicationController import TestApp
+from ApplicationController import TestApp  
 
 # import after ApplicationController that inits sys.path ot avoid this import
-from AIPrompterDialog import AIPrompterDialog
+from AIPrompterDialog import AIPrompterDialog # type: ignore
 
 # Crée un objet d'adaptateur fictif (à remplacer par votre propre logique)
 class DummyAdapter:

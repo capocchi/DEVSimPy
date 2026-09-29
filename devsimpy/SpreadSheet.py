@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
-'''
+"""
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # SpreadSheet.py ---
 #                     --------------------------------
@@ -20,7 +20,7 @@
 # GLOBAL VARIABLES AND FUNCTIONS
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-'''
+"""
 
 ### at the beginning to prevent with statement for python version <=2.5
 
@@ -38,15 +38,14 @@ from Decorators import BuzyCursorNotification
 
 _ = wx.GetTranslation
 
+
 ###
 class MySheet(sheet.CSheet):
-	"""
-	"""
+	"""Sheet"""
 
 	###
 	def __init__(self, parent, data):
-		""" Constructor.
-		"""
+		"""Constructor."""
 		sheet.CSheet.__init__(self, parent)
 
 		### local copy
@@ -62,8 +61,8 @@ class MySheet(sheet.CSheet):
 
 		# set column label titles at the top
 		self.SetRowLabelAlignment(wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
-		self.SetColLabelValue(0, _('Event'))
-		self.SetColLabelValue(1, _('Message'))
+		self.SetColLabelValue(0, _("Event"))
+		self.SetColLabelValue(1, _("Message"))
 
 		wx.CallAfter(self.Populate, (data))
 
@@ -74,8 +73,7 @@ class MySheet(sheet.CSheet):
 	###
 	@BuzyCursorNotification
 	def Populate(self, data):
-		"""
-		"""
+		"""Populate"""
 		self._full_flag = False
 
 		size = len(data)
@@ -86,18 +84,18 @@ class MySheet(sheet.CSheet):
 		for i in range(size):
 			try:
 				d = data[i]
-				self.SetCellValue(i,0,str(d[0]))
-				self.SetCellValue(i,1,str(d[1]))
-				Publisher.sendMessage("progress", msg=str(i/n))
+				self.SetCellValue(i, 0, str(d[0]))
+				self.SetCellValue(i, 1, str(d[1]))
+				Publisher.sendMessage("progress", msg=str(i / n))
 				# self.Update()
-			except:
+			except:  # noqa: E722, S110
 				pass
 
 		self._full_flag = True
 		try:
 			### inform Frame that table us full for graph icon enabling
 			Publisher.sendMessage("isfull", msg=self._full_flag)
-		except pubsub.pub.SenderMissingReqdMsgDataError as info:
+		except pubsub.pub.SenderMissingReqdMsgDataError:
 			pass
 
 		# try:
@@ -106,73 +104,71 @@ class MySheet(sheet.CSheet):
 		# 	self.Refresh()
 		# except Exception as info:
 		# 	pass
-		
+
 	###
 	def IsFull(self):
 		return self._full_flag
 
 	def OnLeftClick(self, event):
-		"""
-		"""
+		"""Left Click"""
 		### veto because bug exist (TypeError: PaintBackground() takes 3 positional arguments but 4 were given)
 		event.Veto()
 
 	def OnLeftDoubleClick(self, event):
-		"""
-		"""
+		"""Left Double Click"""
 		### veto because bug exist (TypeError: PaintBackground() takes 3 positional arguments but 4 were given)
 		event.Veto()
 
-	##def OnGridSelectCell(self, event):
-		##self.row, self.col = event.GetRow(), event.GetCol()
-		##control = self.GetParent().GetParent().position
-		##value =  self.GetColLabelValue(self.col) + self.GetRowLabelValue(self.row)
-		##control.SetValue(value)
-		##event.Skip()
 
 ###
 class Newt(wx.Frame):
-	"""
-	"""
+	"""Newt"""
 
 	###
 	def __init__(self, parent, id, title, aDEVS, separator=" "):
-		""" Constructor
-		"""
+		"""Constructor"""
 
 		### local copy
 		self.model = aDEVS
 		self.sep = separator
 
-		wx.Frame.__init__(self,
-						parent,
-						wx.NewIdRef(),
-						aDEVS.getBlockModel().label if aDEVS else "",
-						size = (550, 500),
-						style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
+		wx.Frame.__init__(
+			self,
+			parent,
+			wx.NewIdRef(),
+			aDEVS.getBlockModel().label if aDEVS else "",
+			size=(550, 500),
+			style=wx.DEFAULT_FRAME_STYLE | wx.NO_FULL_REPAINT_ON_RESIZE,
+		)
 
 		toolbar = self.CreateToolBar()
-		toolbar.SetToolBitmapSize((16,16))
+		toolbar.SetToolBitmapSize((16, 16))
 
-		new = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image('new.png'), _('New'))
-		open_file = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image('open.png'), _('Open'))
-		saveas = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image('save.png'), _('SaveAs'))
+		new = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image("new.png"), _("New"))
+		open_file = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image("open.png"), _("Open"))
+		saveas = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image("save.png"), _("SaveAs"))
 		toolbar.AddSeparator()
-		cut = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image('cut.png'), _('Cut'))
-		copy = toolbar.AddTool(wx.NewIdRef(), "" , load_and_resize_image('copy.png'), _('Copy'))
-		paste = toolbar.AddTool(wx.NewIdRef(), "" , load_and_resize_image('paste.png'), _('Paste'))
-		self.delete = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image('close.png'), _('Delete'))
+		cut = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image("cut.png"), _("Cut"))
+		copy = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image("copy.png"), _("Copy"))
+		paste = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image("paste.png"), _("Paste"))
+		self.delete = toolbar.AddTool(
+			wx.NewIdRef(), "", load_and_resize_image("close.png"), _("Delete")
+		)
 		toolbar.AddSeparator()
-		update = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image('reload.png'), _('Update'))
+		update = toolbar.AddTool(
+			wx.NewIdRef(), "", load_and_resize_image("reload.png"), _("Update")
+		)
 		toolbar.AddSeparator()
-		self.chart = toolbar.AddTool(wx.NewIdRef(), "", load_and_resize_image('graph_guru.png'), _('Chart'))
+		self.chart = toolbar.AddTool(
+			wx.NewIdRef(), "", load_and_resize_image("graph_guru.png"), _("Chart")
+		)
 
 		toolbar.EnableTool(self.chart.GetId(), False)
 		### Calling this method is not obligatory in Linux
 		### On Windows it is!
 		toolbar.Realize()
 
-		#self.SetToolBar(toolbar)
+		# self.SetToolBar(toolbar)
 
 		self.statusbar = self.CreateStatusBar()
 
@@ -183,7 +179,7 @@ class Newt(wx.Frame):
 		if aDEVS:
 			self.LoadingDataInPage()
 		else:
-			sys.stdout.write(_('DEVS model is None.'))
+			sys.stdout.write(_("DEVS model is None."))
 
 		### Layout
 		box = wx.BoxSizer(wx.VERTICAL)
@@ -210,21 +206,26 @@ class Newt(wx.Frame):
 
 	###
 	def LoadingDataInPage(self):
-		"""_summary_
-		"""
-		
+		"""_summary_"""
+
 		### read and load the data in sheet
 		for i in range(len(self.model.IPorts)):
-			if hasattr(self.model, 'fileName'):
+			if hasattr(self.model, "fileName"):
 				fn = f"{self.model.fileName}{i}.dat"
 				if os.path.exists(fn):
 					iPort = self.model.IPorts[i]
 					if iPort.inLine:
 						oPort = iPort.inLine[0]
-						host = oPort.host if hasattr(oPort, 'host') else oPort.hostDEVS
-						label = _('%s (on in_%s)')%(host.getBlockModel().label if hasattr(host, 'getBlockModel') else host.name, str(iPort.name) if hasattr(iPort,'name') else iPort.myID)
+						host = oPort.host if hasattr(oPort, "host") else oPort.hostDEVS
+						label = _("%s (on in_%s)") % (
+							host.getBlockModel().label
+							if hasattr(host, "getBlockModel")
+							else host.name,
+							str(iPort.name) if hasattr(iPort, "name") else iPort.myID,
+						)
 						data = self.FileToData(fn, self.sep)
 						self.AddPage(data, label)
+
 	###
 	def OnUpdate(self, event):
 
@@ -237,38 +238,36 @@ class Newt(wx.Frame):
 
 	###
 	def FileToData(self, fn, separator):
-		""" Create data from file.
-		"""
-		with open(fn, 'r') as f:
+		"""Create data from file."""
+		with open(fn, "r") as f:
 			if separator != "":
-            	# Lire et traiter ligne par ligne avec le séparateur
+				# Lire et traiter ligne par ligne avec le séparateur
 				data = [line.strip().split(separator) for line in f]
 			else:
-            	# Générer un index et collecter les lignes sans chargement complet en mémoire
+				# Générer un index et collecter les lignes sans chargement complet en mémoire
 				data = [(i, line.strip()) for i, line in enumerate(f)]
 		return data
 
 	###
 	def EnableGraphIcon(self, msg):
-		""" Enable graph button when loading data is finished and clear the statusbar.
-		"""
+		"""Enable graph button when loading data is finished and clear the statusbar."""
 
 		### update the column width
 		try:
 			activePage = self.notebook.GetSelection()
-		except Exception as info:
+		except Exception as info:  # noqa: BLE001
 			activePage = 0
-			sys.stdout.write(_("Error 1 in SpreadSheet: %s"%info))
+			sys.stdout.write(_(f"Error 1 in SpreadSheet: {info}"))  # noqa: INT001
 
 		try:
 			sheet = self.notebook.GetPage(activePage)
 			sheet.UpdateColWidth()
-		except Exception as info:
-			sys.stdout.write(_("Error 2 in SpreadSheet: %s"%info))
+		except Exception as info:  # noqa: BLE001
+			sys.stdout.write(_(f"Error 2 in SpreadSheet: {info}"))  # noqa: INT001
 		else:
 			toolbar = self.GetToolBar()
 			toolbar.EnableTool(self.chart.GetId(), msg)
-			printOnStatusBar(self.statusbar, {0:""})
+			printOnStatusBar(self.statusbar, {0: ""})
 
 	###
 	def OnTab(self, event):
@@ -279,46 +278,60 @@ class Newt(wx.Frame):
 
 	###
 	def OnProgress(self, msg):
-		""" Update status bar with loading data progression
-		"""
-		pourcent = 100*float(msg)
-		printOnStatusBar(self.statusbar, {0:_("Loading data... (%d %%)")%int(pourcent)})
+		"""Update status bar with loading data progression"""
+		pourcent = 100 * float(msg)
+		printOnStatusBar(self.statusbar, {0: _("Loading data... (%d %%)") % int(pourcent)})
 
 	###
-	def AddPage(self, data = [[]], label = ""):
-		""" Add new page to notebook knowing data and label
-		"""
+	def AddPage(self, data=[[]], label=""):  # noqa: B006
+		"""Add new page to notebook knowing data and label"""
 		sheet = MySheet(self.notebook, data)
 		sheet.SetFocus()
 		self.notebook.AddPage(sheet, label)
-		
+
 		### enable delete button
 		toolbar = self.GetToolBar()
 		toolbar.EnableTool(self.delete.GetId(), True)
 
 	###
 	def OnNew(self, event):
-		""" New button bas been pressed.
-		"""
-		data = [[]]
-		label = _('New %d'%self.notebook.GetPageCount())
+		"""New button bas been pressed."""
+		label = _("New %d" % self.notebook.GetPageCount())  # noqa: INT003, UP031
 		self.AddPage(label=label)
 
 	###
 	def OnOpen(self, event):
-		""" Open button has been pressed.
-		"""
+		"""Open button has been pressed."""
 		wcd = _("DataSheet file (*.dat)|*.dat|All files (*)|*")
-		home = os.getenv('USERPROFILE') or os.getenv('HOME') or DEVSIMPY_PACKAGE_PATH
-		open_dlg = wx.FileDialog(self, message = _('Choose a file'), defaultDir = home, defaultFile = "", wildcard = wcd, style = wx.OPEN|wx.MULTIPLE|wx.CHANGE_DIR)
+		home = os.getenv("USERPROFILE") or os.getenv("HOME") or DEVSIMPY_PACKAGE_PATH  # type: ignore
+		open_dlg = wx.FileDialog(
+			self,
+			message=_("Choose a file"),
+			defaultDir=home,
+			defaultFile="",
+			wildcard=wcd,
+			style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR,
+		)
 		# get the new path from open file dialogue
 		if open_dlg.ShowModal() == wx.ID_OK:
 			### for selected paths
 			for fn in open_dlg.GetPaths():
 				if os.path.exists(fn):
 					### separator request
-					separator_dico = {"EMPTY":"","SPACE":" ","SEMICOLON":";","COMMA":",","POINT":"."}
-					dlg = wx.SingleChoiceDialog(self, _("Choose a separator:"), _('Separator Manager'), list(separator_dico.keys()), wx.CHOICEDLG_STYLE)
+					separator_dico = {
+						"EMPTY": "",
+						"SPACE": " ",
+						"SEMICOLON": ";",
+						"COMMA": ",",
+						"POINT": ".",
+					}
+					dlg = wx.SingleChoiceDialog(
+						self,
+						_("Choose a separator:"),
+						_("Separator Manager"),
+						list(separator_dico.keys()),
+						wx.CHOICEDLG_STYLE,
+					)
 					if dlg.ShowModal() == wx.ID_OK:
 						separator = separator_dico[dlg.GetStringSelection()]
 					else:
@@ -326,42 +339,46 @@ class Newt(wx.Frame):
 					dlg.Destroy()
 
 					data = self.FileToData(fn, separator)
-					label = _('New %d'%self.notebook.GetPageCount())
+					label = _("New %d" % self.notebook.GetPageCount())  # noqa: INT003, UP031
 					self.AddPage(data, label)
-
 
 	###
 	def OnSaveAs(self, event):
-		""" SaveAs button has been pressed.
-		"""
+		"""SaveAs button has been pressed."""
 		wcd = _("DataSheet file (*.dat)|*.dat|All files (*)|*")
-		home = DEVSIMPY_PACKAGE_PATH
-		save_dlg = wx.FileDialog(self, message=_('Save file as...'), defaultDir=home, defaultFile='', wildcard=wcd, style=wx.SAVE | wx.OVERWRITE_PROMPT)
+		home = DEVSIMPY_PACKAGE_PATH  # type: ignore
+		save_dlg = wx.FileDialog(
+			self,
+			message=_("Save file as..."),
+			defaultDir=home,
+			defaultFile="",
+			wildcard=wcd,
+			style=wx.SAVE | wx.OVERWRITE_PROMPT,
+		)
 		if save_dlg.ShowModal() == wx.ID_OK:
 			fn = os.path.normpath(save_dlg.GetPath())
 
 			activePage = self.notebook.GetSelection()
 			sheet = self.notebook.GetPage(activePage)
 			nbr = sheet.GetNumberRows()
-			nbc = sheet.GetNumberCols()
-			#print "sdf", fn
-			with open(fn,'w') as f:
-				for row in range(nbr):
-					#print sheet.GetCellValue(row,0),sheet.GetCellValue(row,1)
-					f.write("%s %s\n"%(sheet.GetCellValue(row,0),sheet.GetCellValue(row,1)))
+			# nbc = sheet.GetNumberCols()
+			# print "sdf", fn
+			with open(fn, "w") as f:
+				f.writelines(
+					f"{sheet.GetCellValue(row, 0)} {sheet.GetCellValue(row, 1)}\n"
+					for row in range(nbr)
+				)
 
 	###
 	def OnCopy(self, event):
-		""" Copy button has been pressed.
-		"""
+		"""Copy button has been pressed."""
 		activePage = self.notebook.GetSelection()
 		sheet = self.notebook.GetPage(activePage)
 		sheet.Copy()
 
 	###
 	def OnCut(self, event):
-		""" Cut button has been pressed.
-		"""
+		"""Cut button has been pressed."""
 		activePage = self.notebook.GetSelection()
 		sheet = self.notebook.GetPage(activePage)
 		sheet.Copy()
@@ -369,16 +386,14 @@ class Newt(wx.Frame):
 
 	###
 	def OnPaste(self, event):
-		""" Paste button has been pressed.
-		"""
+		"""Paste button has been pressed."""
 		activePage = self.notebook.GetSelection()
 		sheet = self.notebook.GetPage(activePage)
 		sheet.Paste()
 
 	###
 	def OnDelete(self, event):
-		""" Delete button has been pressed.
-		"""
+		"""Delete button has been pressed."""
 
 		### remove page
 		if self.notebook.GetPageCount() >= 1:
@@ -391,15 +406,14 @@ class Newt(wx.Frame):
 
 	###
 	def OnGraph(self, event):
-		""" Graph button has been pressed.
-		"""
+		"""Graph button has been pressed."""
 
 		activePage = self.notebook.GetSelection()
 		sheet = self.notebook.GetPage(activePage)
 		title = self.notebook.GetPageText(activePage)
 
 		### selected rows with mouse but on label colonn
-		#selected_rows = sheet.GetSelectedRows()
+		# selected_rows = sheet.GetSelectedRows()
 
 		### really selected cells with mouse
 		a = sheet.GetSelectionBlockTopLeft()
@@ -407,40 +421,54 @@ class Newt(wx.Frame):
 
 		### selected rows with mouse
 		try:
-			i=a[0][0]
-			j=b[0][0]
+			i = a[0][0]
+			j = b[0][0]
 		### selected all rows
 		except IndexError:
-			i=0
-			j=sheet.GetNumberRows()
-		
-		selected_rows = list(range(i,j))
-		
-		nbc = range(sheet.GetNumberCols())
+			i = 0
+			j = sheet.GetNumberRows()
+
+		selected_rows = list(range(i, j))
+
+		# nbc = range(sheet.GetNumberCols())
 		nbr = range(sheet.GetNumberRows()) if selected_rows == [] else selected_rows
 
 		data = []
 		select = -1
 		for i in nbr:
-			v = sheet.GetCellValue(i,sheet.GetNumberCols()-1)
-			
-			if '<<' in v or '>>' in v: 
-				s = sheet.GetCellValue(i,sheet.GetNumberCols()-1).replace('<< ', '').replace('<<', '').replace('>>','').replace('],','];')
+			v = sheet.GetCellValue(i, sheet.GetNumberCols() - 1)
+
+			if "<<" in v or ">>" in v:
+				s = (
+					sheet.GetCellValue(i, sheet.GetNumberCols() - 1)
+					.replace("<< ", "")
+					.replace("<<", "")
+					.replace(">>", "")
+					.replace("],", "];")
+				)
 			else:
-				s = "value = %s; time = %s"%(v,sheet.GetCellValue(i,0))
+				s = f"value = {v}; time = {sheet.GetCellValue(i, 0)}"
 			try:
 				### globals containt the time and value variables after exec of the statement
-				exec(str(s), globals())
-			except Exception as info:
+				exec(str(s), globals())  # noqa: S102
+			except Exception as info:  # noqa: BLE001
 				sys.stdout.write(str(info))
 			else:
 				### if value is a list, we must choose an index to plot amoung the values of the list
-				if isinstance(value, list):
+				if isinstance(value, list):  # type: ignore
 					if select == -1:
-						if len(value) > 1 :
-							dlg = wx.TextEntryDialog(self, _('Choose one index between [%d-%d] to plot into the list of values.')%(0,len(value)-1),_('Plotting Manager'), value="0")
+						if len(value) > 1:  # type: ignore
+							dlg = wx.TextEntryDialog(
+								self,
+								_(
+									"Choose one index between [%d-%d] to plot into the list of values."
+								)
+								% (0, len(value) - 1), # type: ignore
+								_("Plotting Manager"),
+								value="0",
+							)  
 							if dlg.ShowModal() == wx.ID_OK:
-								select=int(dlg.GetValue())
+								select = int(dlg.GetValue())
 								dlg.Destroy()
 							else:
 								dlg.Destroy()
@@ -450,38 +478,38 @@ class Newt(wx.Frame):
 
 					### choice is digit else we break
 					# if value[select]:
-					if select == 0 or select in range(0,len(value)-1):
-						if not isinstance(value[select], str):
-							data.append((time, float(value[select])))
+					if select == 0 or select in range(len(value) - 1):  # type: ignore
+						if not isinstance(value[select], str):  # type: ignore
+							data.append((time, float(value[select])))  # type: ignore
 						else:
-							#wx.MessageBox(_('Value to plot must be digit!'), _('Warning'), wx.OK | wx.ICON_WARNING)
-							data.append((time, value[select]))
-					
+							# wx.MessageBox(_('Value to plot must be digit!'), _('Warning'), wx.OK | wx.ICON_WARNING)
+							data.append((time, value[select]))  # type: ignore
+
 				### first if int is digit or if float is digit
 				else:
-					v = str(format(value,'f')).lstrip('-')
+					v = str(format(value, "f")).lstrip("-")  # type: ignore
 					if v.isdigit() or v.replace(".", "", 1).isdigit():
-						data.append((time,float(value)))
+						data.append((time, float(value)))  # type: ignore
 					else:
-						#wx.MessageBox(_('Type of data should be float or int: %s')%str(value), _('Info'))
-						data.append((time, value))
+						# wx.MessageBox(_('Type of data should be float or int: %s')%str(value), _('Info'))
+						data.append((time, value))  # type: ignore
 
 		if data:
 			### if the first value of y is str, we plot with tick in y axe
 			if isinstance(data[0][-1], str):
-				x,y = zip(*data)
-				frame = wx.Frame(None, -1, _('Plotter'))
+				x, y = zip(*data)
+				frame = wx.Frame(None, -1, _("Plotter"))
 				plotter = PlotNotebook(frame)
 				axes1 = plotter.add(title).gca()
-				axes1.set_xlabel(_('Time'), fontsize=16)
-				axes1.set_ylabel(_('State'), fontsize=16)
+				axes1.set_xlabel(_("Time"), fontsize=16)
+				axes1.set_ylabel(_("State"), fontsize=16)
 				axes1.step(x, y)
 				axes1.grid(True)
 				axes1.set_title(title)
 
-				#axes2 = plotter.add('figure 2').gca()
-				#axes2.plot([1, 2, 3, 4, 5], [2, 1, 4, 2, 3])
-				
+				# axes2 = plotter.add('figure 2').gca()
+				# axes2.plot([1, 2, 3, 4, 5], [2, 1, 4, 2, 3])
+
 				frame.Show()
 
 			### values of y is digits

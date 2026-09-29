@@ -8,11 +8,11 @@ Usage:
     python test_undo_redo.py --autoclose 10  # Auto-close after 10s delay
 """
 
-from ApplicationController import TestApp
+from ApplicationController import TestApp  
 
 # import after ApplicationController that inits sys.path to avoid this import
-import Container
-from DetachedFrame import DetachedFrame
+import Container # type: ignore
+from DetachedFrame import DetachedFrame # type: ignore
 
 
 class UndoRedoTester:
@@ -73,7 +73,7 @@ def main():
 
 	print('\n=== UNDO/REDO TEST RESULTS ===')
 	for name, ok, extra in results:
-		print('[%s] %s (%s)' % ('PASS' if ok else 'FAIL', name, extra))
+		print('[{}] {} ({})'.format('PASS' if ok else 'FAIL', name, extra))
 	all_ok = len(results) > 0 and all(ok for _, ok, _ in results)
 	print('ALL PASS:', all_ok)
 	print('==============================\n')

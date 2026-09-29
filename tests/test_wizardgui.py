@@ -5,12 +5,12 @@ Usage:
     python test_wizardgui.py --autoclose 10  # Auto-close after 10s delay
 """
 
-import os
+import os  
 import builtins
 
 from ApplicationController import TestApp
-from config import UpdateBuiltins
-from WizardGUI import ModelGeneratorWizard
+from config import UpdateBuiltins # pyright: ignore[reportMissingImports]
+from WizardGUI import ModelGeneratorWizard # type: ignore
 
 UpdateBuiltins()
 

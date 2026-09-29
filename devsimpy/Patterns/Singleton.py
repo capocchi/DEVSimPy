@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
+
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Observer.py ---
@@ -20,12 +21,14 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
+
 def Singleton(myClass):
-    """ Signleton used as Decorator
-    """
-    instances={}
-    def getInstance(*args, **kwargs):
-        if myClass not in instances:
-            instances[myClass] = myClass(*args, **kwargs)
-        return instances[myClass]
-    return getInstance
+	"""Signleton used as Decorator"""
+	instances = {}
+
+	def getInstance(*args, **kwargs):
+		if myClass not in instances:
+			instances[myClass] = myClass(*args, **kwargs)
+		return instances[myClass]
+
+	return getInstance

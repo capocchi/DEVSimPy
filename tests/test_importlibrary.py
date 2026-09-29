@@ -5,10 +5,10 @@ Usage:
     python test_importlibrary.py --autoclose 10  # Auto-close after 10s delay
 """
 
-from ApplicationController import TestApp
+from ApplicationController import TestApp  
 
 # import after ApplicationController that inits sys.path ot avoid this import
-from ImportLibrary import ImportLibrary
+from ImportLibrary import ImportLibrary # type: ignore
 
 # Run the test
 app = TestApp(0)

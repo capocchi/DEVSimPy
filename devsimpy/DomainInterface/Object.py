@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-  # noqa: UP009
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Object.py ---
@@ -14,41 +14,41 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
+
 class Message:
-	'''	The class Message provide the activation of all DEVS components.
+	"""The class Message provide the activation of all DEVS components.
 
 
-		@ivar value: 
-	
-		@type value: None
-		@type operation: string
-	'''
+	@ivar value:
+
+	@type value: None
+	@type operation: string
+	"""
 
 	###
-	def __init__(self, v = None, t = None):
-		''''	Constructor method.
+	def __init__(self, v=None, t=None):
+		"""'	Constructor method.
 
-			@param v: Value of the transaction
-			@param t : simulation time
-		'''
+		@param v: Value of the transaction
+		@param t : simulation time
+		"""
 
 		# make local copy
-		self.value 	= v
-		self.time	= t
+		self.value = v
+		self.time = t
 		self.name = ""
 
 	def copy(self):
-		''' Create a copy of the current instance.
-			@return: A new instance of Message with the same attributes.
-			@rtype: Message
-		'''
+		"""Create a copy of the current instance.
+		@return: A new instance of Message with the same attributes.
+		@rtype: Message
+		"""
 		return Message(self.value, self.time)
-	
+
 	###
 	def __str__(self):
-		'''	Printer method.
-			@return: Object representation.
-			@rtype: str
-		'''
-		return "<< value = %s; time = %s>>"%(self.value, self.time)
-
+		"""Printer method.
+		@return: Object representation.
+		@rtype: str
+		"""
+		return f"<< value = {self.value}; time = {self.time}>>"

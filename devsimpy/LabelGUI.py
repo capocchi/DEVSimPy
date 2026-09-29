@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
-'''
+"""
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # LabelGUI.py ---
 #                    --------------------------------
@@ -20,48 +20,47 @@
 # GLOBAL VARIABLES AND FUNCTIONS
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-'''
+"""
 
 import os
-import sys
 import wx
 from wx import xrc
 
 __res = None
 
-RESFILE = os.path.join(DEVSIMPY_PACKAGE_PATH,'XRC','LabelEditorDialog.xrc')
+RESFILE = os.path.join(DEVSIMPY_PACKAGE_PATH, "XRC", "LabelEditorDialog.xrc")  # type: ignore  # noqa: F821
+
 
 def __init_resources():
 	global __res
-	__res = xrc.EmptyXmlResource() 
-	#home = os.path.abspath(os.path.dirname(sys.argv[0]))
+	__res = xrc.EmptyXmlResource()
+	# home = os.path.abspath(os.path.dirname(sys.argv[0]))
 	__res.Load(RESFILE)
-	
+
+
 def get_resources():
-    """ This function provides access to the XML resources in this module."""
-    global __res
-    if __res == None:
-        __init_resources()
-    return __res
+	"""This function provides access to the XML resources in this module."""
+	global __res  # noqa: PLW0602
+	if __res == None:
+		__init_resources()
+	return __res
+
 
 class LabelDialog(wx.Dialog):
-	"""
-	"""
+	"""Label Dialog"""
 
 	def PreCreate(self, pre):
-		""" This function is called during the class's initialization.
+		"""This function is called during the class's initialization.
 
 		Override it for custom setup before the window is created usually to
 		set additional window styles using SetWindowStyle() and SetExtraStyle().
 		"""
-		pass
+		pass  # noqa: PIE790
 
 	def __init__(self, parent, block=None, title=""):
-		""" Constructor.
-		"""
+		"""Constructor."""
 
 		wx.Dialog.__init__(self)
-		
 
 		### local copy
 		self.block = block
@@ -69,22 +68,21 @@ class LabelDialog(wx.Dialog):
 		self.title = title
 
 		_xrcName = "LabelEditorFrame"
-		
+
 		### with Phoenix, no need to pre definde the dialogue windows.
 		### https://wxpython.org/Phoenix/docs/html/MigrationGuide.html?highlight=postcreate
 		### no need to ues the self.Create methode because LoadDialog already does what's necessary.
 		# XML Resources can be loaded from a file like this:
-		res = xrc.XmlResource(RESFILE)		
+		res = xrc.XmlResource(RESFILE)
 		# Now create a panel from the resource data
 		res.LoadDialog(self, parent, _xrcName)
-			
+
 		self.XrcResourceLoadAll()
 		self.EventBinding()
 		self.SetProperties()
 
 	def EventBinding(self):
-		""" Event Binding
-		"""
+		"""Event Binding"""
 		self.ok_btn.Bind(wx.EVT_BUTTON, self.OnOk)
 		self.cancel_btn.Bind(wx.EVT_BUTTON, self.OnCancel)
 		self.m_radioBtn1.Bind(wx.EVT_RADIOBUTTON, self.OnButton)
@@ -93,18 +91,16 @@ class LabelDialog(wx.Dialog):
 		self.label_txtCtrl.Bind(wx.EVT_TEXT, self.OnTextChange)
 
 	def XrcResourceLoadAll(self):
-		"""Loading Resource from XRC file
-		"""
-		self.ok_btn = xrc.XRCCTRL(self, 'ok_btn')
-		self.cancel_btn = xrc.XRCCTRL(self, 'cancel_btn')
-		self.label_txtCtrl = xrc.XRCCTRL(self, 'label_txtCtrl')
-		self.m_radioBtn1 = xrc.XRCCTRL(self, 'm_radioBtn1')
-		self.m_radioBtn2 = xrc.XRCCTRL(self, 'm_radioBtn2')
-		self.m_radioBtn3 = xrc.XRCCTRL(self, 'm_radioBtn3')
+		"""Loading Resource from XRC file"""
+		self.ok_btn = xrc.XRCCTRL(self, "ok_btn")
+		self.cancel_btn = xrc.XRCCTRL(self, "cancel_btn")
+		self.label_txtCtrl = xrc.XRCCTRL(self, "label_txtCtrl")
+		self.m_radioBtn1 = xrc.XRCCTRL(self, "m_radioBtn1")
+		self.m_radioBtn2 = xrc.XRCCTRL(self, "m_radioBtn2")
+		self.m_radioBtn3 = xrc.XRCCTRL(self, "m_radioBtn3")
 
 	def SetProperties(self):
-		"""
-		"""
+		"""Set properties of the dialogue window"""
 
 		### default title is defined in XRC
 		if self.title:
@@ -117,24 +113,23 @@ class LabelDialog(wx.Dialog):
 		if txt != "":
 			self.old_label = txt
 			self.old_pos = self.block.label_pos
-			
+
 			### update the radio button position depending on the model position label
-			self.m_radioBtn1.SetValue(self.old_pos == 'center')
-			self.m_radioBtn2.SetValue(self.old_pos == 'top')
-			self.m_radioBtn3.SetValue(self.old_pos == 'bottom')
+			self.m_radioBtn1.SetValue(self.old_pos == "center")
+			self.m_radioBtn2.SetValue(self.old_pos == "top")
+			self.m_radioBtn3.SetValue(self.old_pos == "bottom")
 
 	def SetCanvas(self, canvas):
-		"""
-		"""
+		"""Set the canvas of the dialogue window"""
 		self.canvas = canvas
 
 	def OnTextChange(self, evt):
-		""" Text in CtrlText change
-			dynamic update of label during edition
+		"""Text in CtrlText change
+		dynamic update of label during edition
 		"""
 		txt = self.label_txtCtrl.GetValue()
-		if hasattr(self, 'canvas') and txt != "" and self.block:
-			self.block.label=txt
+		if hasattr(self, "canvas") and txt != "" and self.block:
+			self.block.label = txt
 
 			### update of block from canvas
 			self.canvas.UpdateShapes([self.block])
@@ -146,8 +141,7 @@ class LabelDialog(wx.Dialog):
 		evt.Skip()
 
 	def OnButton(self, event):
-		""" Radio button has been clicked
-		"""
+		"""Radio button has been clicked"""
 		btn = event.GetEventObject()
 		label = btn.GetLabel()
 
@@ -161,8 +155,7 @@ class LabelDialog(wx.Dialog):
 				self.parent.UpdatePosition(self.block.label_pos)
 
 	def OnOk(self, evt):
-		""" Ok button has been clicked
-		"""
+		"""Ok button has been clicked"""
 		if self.block:
 			new_val = self.label_txtCtrl.GetValue()
 
@@ -170,11 +163,11 @@ class LabelDialog(wx.Dialog):
 				self.block.label = new_val
 
 			if self.m_radioBtn1.GetValue():
-				self.block.label_pos = 'center'
+				self.block.label_pos = "center"
 			elif self.m_radioBtn2.GetValue():
-				self.block.label_pos = 'top'
+				self.block.label_pos = "top"
 			else:
-				self.block.label_pos = 'bottom'
+				self.block.label_pos = "bottom"
 
 			### update of block from canvas
 			self.canvas.UpdateShapes([self.block])
@@ -182,8 +175,7 @@ class LabelDialog(wx.Dialog):
 		self.Close()
 
 	def OnCancel(self, evt):
-		""" Cancel button has been clicked
-		"""
+		"""Cancel button has been clicked"""
 		if self.block:
 			self.block.label = self.old_label
 			self.block.label_pos = self.old_pos
@@ -192,4 +184,3 @@ class LabelDialog(wx.Dialog):
 			self.canvas.UpdateShapes([self.block])
 
 		self.Destroy()
-

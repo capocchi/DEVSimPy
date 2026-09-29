@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
+
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Observer.py ---
@@ -20,37 +21,33 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
+
 class Observer:
-	""" Observer class (abstract or interface)
-	"""
-	def update(self, theChangedSubject = None):
-		""" update method with changed subject param
-		"""
-		pass
+	"""Observer class (abstract or interface)"""
+
+	def update(self, theChangedSubject=None):
+		"""update method with changed subject param"""
+		pass  # noqa: PIE790
+
 
 class Subject:
-	""" Subject class
-	"""
-	
+	"""Subject class"""
+
 	def __init__(self):
-		""" Constructor
-		"""
+		"""Constructor"""
 		self.observerList = []
-		
+
 	def attach(self, observer):
-		""" Attach method with observer param
-		"""
+		"""Attach method with observer param"""
 		if observer not in self.observerList:
 			self.observerList.append(observer)
-		
+
 	def detach(self, observer):
-		""" Detach method with observer param
-		"""
+		"""Detach method with observer param"""
 		if observer in self.observerList:
 			self.observerList.remove(observer)
-	
+
 	def notify(self):
-		""" Notify method which invokes the observer's update method
-		"""
+		"""Notify method which invokes the observer's update method"""
 		for observer in self.observerList:
 			observer.update(self)

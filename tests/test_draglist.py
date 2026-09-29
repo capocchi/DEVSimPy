@@ -5,13 +5,13 @@ Usage:
     python test_draglist.py --autoclose 10  # Auto-close after 10s delay
 """
 
-from random import choice
+from random import choice  
 import wx
 
 from ApplicationController import TestApp
 
 # import after ApplicationController that inits sys.path ot avoid this import
-from DragList import DragList 
+from DragList import DragList  # type: ignore
 
 items = ['Foo', 'Bar', 'Baz', 'Zif', 'Zaf', 'Zof']
 

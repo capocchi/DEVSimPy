@@ -6,10 +6,10 @@ Usage:
     python test_yamlexportgui.py --autoclose 10  # Auto-close after 10s delay
 """
 
-from ApplicationController import TestApp
+from ApplicationController import TestApp  
 
 # Import after ApplicationController that inits sys.path to avoid import issues
-from YAMLExportGUI import YAMLExportGUI
+from YAMLExportGUI import YAMLExportGUI # type: ignore
 
 # Run the test
 app = TestApp(0)

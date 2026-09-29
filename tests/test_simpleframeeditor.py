@@ -6,10 +6,10 @@ Usage:
 """
 
 
-from ApplicationController import TestApp
+from ApplicationController import TestApp  
 
 # import after ApplicationController that inits sys.path ot avoid this import
-from SimpleFrameEditor import FrameEditor
+from SimpleFrameEditor import FrameEditor # type: ignore
 
 # Run the test
 app = TestApp(0)

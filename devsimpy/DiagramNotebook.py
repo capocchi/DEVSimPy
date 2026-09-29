@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
-'''
+"""
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # DiagramNoteBook.py ---
 #                     --------------------------------
@@ -20,7 +20,7 @@
 # GLOBAL VARIABLES AND FUNCTIONS
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-'''
+"""
 
 import wx
 import os
@@ -38,30 +38,29 @@ from Utilities import printOnStatusBar, load_and_resize_image
 
 _ = wx.GetTranslation
 
-#-------------------------------------------------------------------
+
+# -------------------------------------------------------------------
 class GeneralNotebook(Printable):
-	"""
-	"""
+	"""General Notebook class for Diagram Notebook on the right part of DEVSimPy."""
 
 	def __init__(self, *args, **kwargs):
-		""" General Notebook class for Diagram Notebook on the right part of DEVSimPy.
-		"""
+		"""General Notebook class for Diagram Notebook on the right part of DEVSimPy."""
 
 		# for splash screen
-		pub.sendMessage('object.added', message='Loading notebook diagram...\n')
-		
+		pub.sendMessage("object.added", message="Loading notebook diagram...\n")
+
 		Printable.__init__(self)
 
 		# local copy
 		self.parent = args[0]
-		self.pages = []			# keeps track of pages
+		self.pages = []  # keeps track of pages
 
 		### to propagate the dsp file path in __setstate__ of Block object
 		self.current_dsp_file_path = ""
 
-		#icon under tab
+		# icon under tab
 		imgList = wx.ImageList(16, 16)
-		for img in ['network.png']:
+		for img in ["network.png"]:
 			imgList.Add(load_and_resize_image(img))
 		self.AssignImageList(imgList)
 
@@ -69,21 +68,19 @@ class GeneralNotebook(Printable):
 		self.Bind(wx.EVT_LEFT_DCLICK, self.__AddPage)
 
 	def GetPages(self):
-		""" Return pages array.
-		"""
+		"""Return pages array."""
 		return self.pages
 
 	def __AddPage(self, event):
-		""" Add page.
-		"""
+		"""Add page."""
 
-		self.AddEditPage(_("Diagram%d")%len(self.pages))
+		self.AddEditPage(_("Diagram%d") % len(self.pages))
 
-	def AddEditPage(self, title, defaultDiagram = None):
-		""" Adds a new page for editing to the notebook and keeps track of it.
+	def AddEditPage(self, title, defaultDiagram=None):
+		"""Adds a new page for editing to the notebook and keeps track of it.
 
-			@type title: string
-			@param title: Title for a new page
+		@type title: string
+		@param title: Title for a new page
 		"""
 
 		### title page list
@@ -91,7 +88,7 @@ class GeneralNotebook(Printable):
 
 		### occurrence of title in existing title pages
 		c = title_pages.count(title)
-		title = title+"(%d)"%c if c != 0 else title
+		title = title + "(%d)" % c if c != 0 else title  # noqa: UP031
 
 		### new page
 		newPage = Container.ShapeCanvas(self, wx.NewIdRef(), name=title)
@@ -110,13 +107,13 @@ class GeneralNotebook(Printable):
 		self.pages.append(newPage)
 		self.AddPage(newPage, title, imageId=0)
 
-		self.SetSelection(self.GetPageCount()-1)
+		self.SetSelection(self.GetPageCount() - 1)
 
 	def OnClearPage(self, evt):
-		""" Clear page.
+		"""Clear page.
 
-			@type evt: event
-			@param  evt: Event Object, None by default
+		@type evt: event
+		@param  evt: Event Object, None by default
 		"""
 		id = self.GetSelection()
 
@@ -131,10 +128,10 @@ class GeneralNotebook(Printable):
 			canvas.Refresh()
 
 	def OnRenamePage(self, evt):
-		""" Rename the title of notebook page.
+		"""Rename the title of notebook page.
 
-			@type evt: event
-			@param  evt: Event Object, None by default
+		@type evt: event
+		@param  evt: Event Object, None by default
 		"""
 		selection = self.GetSelection()
 		dlg = wx.TextEntryDialog(self, _("Enter a new name:"), _("Diagram Manager"))
@@ -142,16 +139,16 @@ class GeneralNotebook(Printable):
 
 		if dlg.ShowModal() == wx.ID_OK:
 			txt = dlg.GetValue()
-			self.SetPageText(selection,txt)
+			self.SetPageText(selection, txt)
 
 		dlg.Destroy()
 
 	def OnDetachPage(self, evt):
 		"""
-			Detach the notebook page on frame.
+		Detach the notebook page on frame.
 
-			@type evt: event
-			@param  evt: Event Object, None by default
+		@type evt: event
+		@param  evt: Event Object, None by default
 		"""
 
 		selection = self.GetSelection()
@@ -164,45 +161,43 @@ class GeneralNotebook(Printable):
 		frame.Show()
 
 	def OnPageChanged(self, evt):
-		""" Page has been changed.
-		"""
+		"""Page has been changed."""
 
 		id = self.GetSelection()
 
 		### id is -1 when DEVSimPy is starting
 		if id != -1 and self.GetPageCount() > 0:
-
 			canvas = self.GetPage(id)
 			self.print_canvas = canvas
 			self.print_size = self.GetSize()
-			
+
 			### action history
-			if hasattr(self.parent, 'tb'):
-				self.parent.tb.EnableTool(wx.ID_UNDO, not len(canvas.stockUndo) == 0)
-				self.parent.tb.EnableTool(wx.ID_REDO, not len(canvas.stockRedo) == 0)
+			if hasattr(self.parent, "tb"):
+				self.parent.tb.EnableTool(wx.ID_UNDO, len(canvas.stockUndo) != 0)
+				self.parent.tb.EnableTool(wx.ID_REDO, len(canvas.stockRedo) != 0)
 
 			### refresh canvas
 			canvas.deselect()
 			canvas.Refresh()
 
 			### update status bar depending on the diagram modification
-			if hasattr(self.parent, 'statusbar'):
+			if hasattr(self.parent, "statusbar"):
 				diagram = canvas.GetDiagram()
-				txt = _('%s modified')%(self.GetPageText(id)) if diagram.modify else ""
-				printOnStatusBar(self.parent.statusbar,{0:txt})
+				txt = _("%s modified") % (self.GetPageText(id)) if diagram.modify else ""
+				printOnStatusBar(self.parent.statusbar, {0: txt})
 
 		### propagate event also error in OnClosePage because GetSelection is wrong
 		evt.Skip()
 
 	def DeleteBuiltinConstants(self):
-		""" Delete builtin constants for the diagram.
-		"""
+		"""Delete builtin constants for the diagram."""
 		try:
 			name = self.GetPageText(self.GetSelection())
 			del builtins.__dict__[str(os.path.splitext(name)[0])]
-		except Exception:
+		except Exception:  # noqa: BLE001, S110
 			pass
-			#sys.stdout.write("Constants builtin not delete for %s : %s"%(name, info))
+			# sys.stdout.write("Constants builtin not delete for %s : %s"%(name, info))
+
 
 ### ---------------------------------------------
 ### if flatnotebook can be imported, we work with it
@@ -211,12 +206,12 @@ class GeneralNotebook(Printable):
 USE_FLATNOTEBOOK = False
 
 try:
-	if (wx.VERSION >= (2, 8, 9, 2)):
+	if wx.VERSION >= (2, 8, 9, 2):
 		import wx.lib.agw.flatnotebook as fnb
 	else:
-		import wx.lib.flatnotebook as fnb
+		import wx.lib.flatnotebook as fnb  # type: ignore
 	USE_FLATNOTEBOOK = True
-except:
+except:  # noqa: E722, S110
 	pass
 
 if USE_FLATNOTEBOOK:
@@ -225,13 +220,12 @@ if USE_FLATNOTEBOOK:
 	#
 
 	class DiagramNotebook(fnb.FlatNotebook, GeneralNotebook):
-		""" Diagram FlatNotebook class.
-		"""
+		"""Diagram FlatNotebook class."""
 
 		###
 		def __init__(self, *args, **kwargs):
-			""" Constructor.
-				FlatNotebook class that allows overriding and adding methods for the right pane of DEVSimPy
+			"""Constructor.
+			FlatNotebook class that allows overriding and adding methods for the right pane of DEVSimPy
 			"""
 			fnb.FlatNotebook.__init__(self, *args, **kwargs)
 			GeneralNotebook.__init__(self, *args, **kwargs)
@@ -243,14 +237,13 @@ if USE_FLATNOTEBOOK:
 			self.SetRightClickMenu(self._rmenu)
 
 		def CreateRightClickMenu(self):
-			""" Right click has been invoked and contextual menu is displayed.
-			"""
+			"""Right click has been invoked and contextual menu is displayed."""
 
 			self._rmenu = Menu.DiagramTabPopupMenu(self).get()
 
 			### 4 because 3 is the separator object in Menu.py !!!
 			close_item = self._rmenu.FindItemByPosition(4)
-			#close_item.Enable(self.GetPageCount() > 1)
+			# close_item.Enable(self.GetPageCount() > 1)
 
 			### unbind last event binding with OnClose Page
 			self.Unbind(wx.EVT_MENU, close_item)
@@ -260,21 +253,26 @@ if USE_FLATNOTEBOOK:
 
 		###
 		def OnClosingPage(self, evt):
-			""" Called when tab is closed.
-				With FlatNoteBock, this method is used to ask if diagram should be saved and to update properties panel.
+			"""Called when tab is closed.
+			With FlatNoteBock, this method is used to ask if diagram should be saved and to update properties panel.
 			"""
 
 			id = self.GetSelection()
 			canvas = self.GetPage(id)
 			diagram = canvas.GetDiagram()
 
-			mainW =  self.GetTopLevelParent()
+			mainW = self.GetTopLevelParent()
 
 			val = None
 
 			if diagram.modify:
-				title = self.GetPageText(id).replace("*",'')
-				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram?')%(title), _("Save diagram"), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
+				title = self.GetPageText(id).replace("*", "")
+				dlg = wx.MessageDialog(
+					self,
+					_("%s\nSave changes to the current diagram?") % (title),
+					_("Save diagram"),
+					wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL | wx.ICON_QUESTION,
+				)
 				val = dlg.ShowModal()
 
 				if val == wx.ID_YES:
@@ -301,52 +299,47 @@ if USE_FLATNOTEBOOK:
 				evt.Skip()
 
 		def DeletePage(self, *args, **kwargs):
-			""" Delete the current diagram.
-			"""
+			"""Delete the current diagram."""
 			try:
 				canvas = self.GetPage(args[0])
 			except IndexError:
 				return False
 			else:
-				result = fnb.FlatNotebook.DeletePage(self, *args, **kwargs)
+				# result = fnb.FlatNotebook.DeletePage(self, *args, **kwargs)
 				return canvas not in self.pages
 
 		def OnClosePage(self, evt):
-			""" Close the page.
-			"""
+			"""Close the page."""
 			return self.DeletePage(self.GetSelection())
 
 else:
-
 	#
 	# Classic Notebook class
 	#
 
 	class DiagramNotebook(wx.Notebook, GeneralNotebook):
-		""" Diagram classic NoteBook class.
-		"""
+		"""Diagram classic NoteBook class."""
 
 		def __init__(self, *args, **kwargs):
-			""" Notebook class that allows overriding and adding methods for the right pane of DEVSimPy.
-			"""
+			"""Notebook class that allows overriding and adding methods for the right pane of DEVSimPy."""
 
 			wx.Notebook.__init__(self, *args, **kwargs)
-			GeneralNotebook.__init__(self,*args, **kwargs)
+			GeneralNotebook.__init__(self, *args, **kwargs)
 
 			self.Bind(wx.EVT_RIGHT_DOWN, self.__ShowMenu)
 			self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
 
 		def __ShowMenu(self, evt):
-			"""	Callback for the right click on a tab. Displays the menu.
+			"""Callback for the right click on a tab. Displays the menu.
 
-				@type   evt: event
-				@param  evt: Event Object, None by default
+			@type   evt: event
+			@param  evt: Event Object, None by default
 			"""
 
 			### mouse position
 			pos = evt.GetPosition()
 			### pointed page and flag
-			page,flag = self.HitTest(pos)
+			_, flag = self.HitTest(pos)
 
 			### if no where click (don't hit with windows)
 			if flag == wx.BK_HITTEST_NOWHERE:
@@ -358,10 +351,10 @@ else:
 				pass
 
 		def OnClosePage(self, evt):
-			""" Close current page.
+			"""Close current page.
 
-				@type evt: event
-				@param  evt: Event Object, None by default
+			@type evt: event
+			@param  evt: Event Object, None by default
 			"""
 
 			if self.GetPageCount() <= 0:
@@ -371,11 +364,16 @@ else:
 			canvas = self.GetPage(id)
 			diagram = canvas.GetDiagram()
 
-			mainW =  self.GetTopLevelParent()
+			mainW = self.GetTopLevelParent()
 
 			if diagram.modify:
-				title = self.GetPageText(id).replace('*','')
-				dlg = wx.MessageDialog(self, _('%s\nSave changes to the current diagram?')%(title), _("Save diagram"), wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL |wx.ICON_QUESTION)
+				title = self.GetPageText(id).replace("*", "")
+				dlg = wx.MessageDialog(
+					self,
+					_("%s\nSave changes to the current diagram?") % (title),
+					_("Save diagram"),
+					wx.YES_NO | wx.YES_DEFAULT | wx.CANCEL | wx.ICON_QUESTION,
+				)
 				val = dlg.ShowModal()
 
 				if val == wx.ID_YES:
@@ -384,7 +382,7 @@ else:
 					self.DeleteBuiltinConstants()
 					self.pages.remove(canvas)
 					if not self.DeletePage(id):
-						sys.stdout.write(_("%s not deleted! \n"%(title)))
+						sys.stdout.write(_(f"{title} not deleted! \n"))  # noqa: INT001
 				else:
 					dlg.Destroy()
 
@@ -393,12 +391,11 @@ else:
 				dlg.Destroy()
 
 			else:
-
 				self.DeleteBuiltinConstants()
 				self.pages.remove(canvas)
 
 				if not self.DeletePage(id):
-					sys.stdout.write(_("%s not deleted ! \n"%(title)))
+					sys.stdout.write(_(f"{title} not deleted ! \n"))  # noqa: INT001
 
 			### clear "property" notebook
 			nb1 = mainW.GetControlNotebook()

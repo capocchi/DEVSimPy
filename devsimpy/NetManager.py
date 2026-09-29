@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 """
 Name: ZipManager.py
@@ -16,23 +16,20 @@ import http.client
 import types
 from urllib.parse import urlparse
 
+
 class Net:
-	
 	def __init__(self, py_net_file):
-		"""
-		"""
-		
-		assert(py_net_file.startswith('http'))
-		
+		"""Constructor"""
+
+		assert py_net_file.startswith("http")
+
 		self._py_net_file = py_net_file
-		
-	
+
 	def GetMoldule(python_file=""):
-		""" Give module object from url.
-		"""
+		"""Give module object from url."""
 
 		# See if the module has already been imported
-		module_name = self._py_net_file.split('/')[-1].split('.py')[0]
+		module_name = self._py_net_file.split("/")[-1].split(".py")[0]  # type: ignore # noqa: F821
 
 		try:
 			return sys.modules[module_name]
@@ -42,27 +39,27 @@ class Net:
 		### make new module
 		mod = types.ModuleType(module_name)
 		sys.modules[module_name] = mod
-		mod.__file__ = self._py_net_file
+		mod.__file__ = self._py_net_file  # type: ignore # noqa: F821
 
 		### parse url to extract the path(/devsimpy/domain...) and the network location (lcapocchi.free.fr)
-		o = urlparse(self._py_net_file)
+		o = urlparse(self._py_net_file)  # type: ignore # noqa: F821
 
 		### open conenction
 		c = http.client.HTTPConnection(o.netloc)
 		### request with GET mode
 
-		c.request('GET', o.path)
+		c.request("GET", o.path)
 		### get response of request
 		r = c.getresponse()
 		### convert file into string
 		code = r.read()
-		
+
 		### try to execute module code
 		if r.status == 200:
 			try:
-				exec(code, mod.__dict__)
+				exec(code, mod.__dict__)  # type: ignore  # noqa: S102
 				return mod
-			except Exception as info:
+			except Exception as info:  # type: ignore  # noqa: BLE001
 				return info
 		else:
 			return r.status

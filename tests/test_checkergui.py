@@ -1,6 +1,5 @@
-from ApplicationController import TestApp
-from CheckerGUI import CheckerGUI
-import time
+from ApplicationController import TestApp  
+from CheckerGUI import CheckerGUI # type: ignore
 
 # Données de test (adaptées à votre structure)
 test_data = {

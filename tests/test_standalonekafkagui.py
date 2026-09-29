@@ -5,10 +5,10 @@ Usage:
     python test_standalonegui.py --autoclose 10  # Auto-close after 10s delay
 """
 
-from ApplicationController import TestApp
+from ApplicationController import TestApp  
 
 # import after ApplicationController that inits sys.path ot avoid this import
-from StandaloneGUIKafkaPKG import StandaloneGUIKafkaPKG
+from StandaloneGUIKafkaPKG import StandaloneGUIKafkaPKG # type: ignore
 
 # Run the test
 app = TestApp(0)

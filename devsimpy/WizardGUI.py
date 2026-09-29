@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
-'''
+"""
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # WizardGUI.py ---
 #                    --------------------------------
@@ -20,11 +20,12 @@
 # GLOBAL VARIABLES AND FUNCTIONS
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-'''
+"""
 
 import wx
-	
+
 from wx.adv import Wizard as wizmod
+
 wizmod.EVT_WIZARD_PAGE_CHANGED = wx.adv.EVT_WIZARD_PAGE_CHANGED
 wizmod.EVT_WIZARD_PAGE_CHANGING = wx.adv.EVT_WIZARD_PAGE_CHANGING
 wizmod.EVT_WIZARD_CANCEL = wx.adv.EVT_WIZARD_CANCEL
@@ -39,8 +40,9 @@ import datetime
 import builtins
 
 import inspect
-if not hasattr(inspect, 'getargspec'):
-    inspect.getargspec = inspect.getfullargspec
+
+if not hasattr(inspect, "getargspec"):
+	inspect.getargspec = inspect.getfullargspec
 
 import Container
 import Components
@@ -53,7 +55,8 @@ padding = 5
 MAX_NB_PORT = 1000000
 MIN_NB_PORT = 0
 # Gives user's home directory
-USERHOME = os.path.expanduser('~')
+USERHOME = os.path.expanduser("~")
+
 
 def atomicCode(label):
 	code = """# -*- coding: utf-8 -*-
@@ -114,23 +117,30 @@ class %s(DomainBehavior):
 		''' Additional function which is lunched just before the end of the simulation.
 		'''
 		pass
-"""%(label,
-	os.path.split(USERHOME)[-1],
-	datetime.datetime.now(),
-	label,
-	label)
+""" % (  # noqa: UP031
+		label,
+		os.path.split(USERHOME)[-1],
+		datetime.datetime.now(),  # noqa: DTZ005
+		label,
+		label,
+	)
 
 	### add confluent function only for PyPDEVS.
-	code += """
+	code += (
+		"""
 	def confTransition(self, inputs):
 		'''DEFAULT Confluent Transition Function.
 		'''
 		self.state = self.intTransition()
 		self.state = self.extTransition(inputs)
-		return self.getState()""" if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME else ''
+		return self.getState()"""
+		if "PyPDEVS" in DEFAULT_DEVS_DIRNAME # type: ignore  # noqa: F821
+		else ""
+	)  
 
 	### Dynamic structure only for PyPDEVS
-	code += """
+	code += (
+		"""
 
 	def modelTransition(self, state):
 		''' modelTransition method will be called at every step
@@ -140,9 +150,13 @@ class %s(DomainBehavior):
 			but only for local simulation.
 		'''
 		# Notify parent of structural change
-		return True""" if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME else ''
+		return True"""
+		if "PyPDEVS" in DEFAULT_DEVS_DIRNAME # type: ignore  # noqa: F821
+		else ""
+	) 
 
 	return code
+
 
 def coupledCode(label):
 	code = """# -*- coding: utf-8 -*-
@@ -162,13 +176,16 @@ class %s(DomainStructure):
 
 	def __init__(self):
 		DomainStructure.__init__(self)
-"""%(label,
-	os.path.split(USERHOME)[-1],
-	datetime.datetime.now(),
-	label)
+""" % (  # noqa: UP031
+		label,
+		os.path.split(USERHOME)[-1],
+		datetime.datetime.now(),  # noqa: DTZ005
+		label,
+	)
 
 	### Dynamic structure only for PyPDEVS
-	code += """
+	code += (
+		"""
 	def modelTransition(self, state):
 		''' modelTransition method will be called at every step
 			in simulated time on every model that transitioned
@@ -177,9 +194,13 @@ class %s(DomainStructure):
 			but only for local simulation.
 		'''
 		### False if Top Level
-		return True""" if 'PyPDEVS' in DEFAULT_DEVS_DIRNAME else ''
+		return True"""
+		if "PyPDEVS" in DEFAULT_DEVS_DIRNAME # type: ignore  # noqa: F821
+		else ""
+	) 
 
 	return code
+
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
@@ -187,28 +208,25 @@ class %s(DomainStructure):
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
+
 class TextObjectValidator(wx.Validator):
-	""" TextObjectValidator()
-	"""
+	"""TextObjectValidator()"""
 
 	def __init__(self):
-		""" Constructor.
-		"""
+		"""Constructor."""
 		wx.Validator.__init__(self)
 
 	def Clone(self):
-		""" Clone method.
-		"""
+		"""Clone method."""
 		return TextObjectValidator()
 
 	def Validate(self, win):
-		""" Validate fields.
-		"""
+		"""Validate fields."""
 		textCtrl = self.GetWindow()
 		text = textCtrl.GetValue()
 
-		if len(text.strip().split(' ')) > 1 :
-			wx.MessageBox(_("The field must contain a string without space!"),_("Info"))
+		if len(text.strip().split(" ")) > 1:
+			wx.MessageBox(_("The field must contain a string without space!"), _("Info"))
 			textCtrl.SetBackgroundColour("pink")
 			textCtrl.SetFocus()
 			textCtrl.Refresh()
@@ -223,36 +241,36 @@ class TextObjectValidator(wx.Validator):
 			return True
 
 	def TransferToWindow(self):
-		""" Prevent wxDialog from complaining.
-		"""
+		"""Prevent wxDialog from complaining."""
 		return True
 
 	def TransferFromWindow(self):
-		""" Prevent wxDialog from complaining.
-		"""
+		"""Prevent wxDialog from complaining."""
 		return True
 
+
 class CustomPage(WizardPage):
-	""" An extended panel obj with a few methods to keep track of its siblings.
+	"""An extended panel obj with a few methods to keep track of its siblings.
 	This should be modified and added to the wizard.  Season to taste."""
-	
+
 	def __init__(self, parent, title):
-		""" Constructor.
-		"""
+		"""Constructor."""
 		WizardPage.__init__(self, parent)
 		self.next = self.prev = None
 		self.sizer = wx.BoxSizer(wx.VERTICAL)
 		self.parent = parent
 		self.title = wx.StaticText(self, wx.NewIdRef(), title)
-		self.title.SetFont(wx.Font(18, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
-		self.sizer.Add(self.title, 0, wx.ALIGN_LEFT|wx.ALL, padding)
-		self.sizer.Add(wx.StaticLine(self, wx.NewIdRef()), 0, wx.EXPAND|wx.ALL, padding)
+		self.title.SetFont(
+			wx.Font(18, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
+		)
+		self.sizer.Add(self.title, 0, wx.ALIGN_LEFT | wx.ALL, padding)
+		self.sizer.Add(wx.StaticLine(self, wx.NewIdRef()), 0, wx.EXPAND | wx.ALL, padding)
 
 		self.SetSizer(self.sizer)
 
 	def add_stuff(self, stuff):
 		"""Add aditional widgets to the bottom of the page"""
-		self.sizer.Add(stuff, 0, wx.EXPAND|wx.ALL, padding)
+		self.sizer.Add(stuff, 0, wx.EXPAND | wx.ALL, padding)
 
 	def SetNext(self, next):
 		"""Set the next page"""
@@ -270,22 +288,26 @@ class CustomPage(WizardPage):
 		"""Return the previous page"""
 		return self.prev
 
+
 class Wizard(wizmod):
 	"""Add pages to this wizard object to make it useful."""
 
-	def __init__(self, title, parent, img_filename = ""):
-		""" Constructor.
-		"""
-		img = wx.Bitmap(img_filename) if img_filename and os.path.exists(img_filename) else wx.NullBitmap
+	def __init__(self, title, parent, img_filename=""):
+		"""Constructor."""
+		img = (
+			wx.Bitmap(img_filename)
+			if img_filename and os.path.exists(img_filename)
+			else wx.NullBitmap
+		)
 
 		wizmod.__init__(self, parent, wx.NewIdRef(), title, img)
 
-		self.SetPageSize((500,400))
+		self.SetPageSize((500, 400))
 
 		# pages list
 		self.pages = []
 
-		#flag
+		# flag
 		self.canceled_flag = False
 		self.overwrite_flag = True
 
@@ -299,29 +321,28 @@ class Wizard(wizmod):
 	def add_page(self, page):
 		"""Add a wizard page to the list."""
 		if self.pages:
-				previous_page = self.pages[-1]
-				page.SetPrev(previous_page)
-				previous_page.SetNext(page)
+			previous_page = self.pages[-1]
+			page.SetPrev(previous_page)
+			previous_page.SetNext(page)
 		self.pages.append(page)
 
 	def run(self):
-		""" Run wizard and return boolean.
-		"""
+		"""Run wizard and return boolean."""
 		return self.RunWizard(self.pages[0])
 
 	def on_page_changed(self, evt):
 		"""Executed after the page has changed."""
-		#if evt.GetDirection():  dir = "forward"
-		#else:                   dir = "backward"
-		#page = evt.GetPage()
-		pass
+		# if evt.GetDirection():  dir = "forward"
+		# else:                   dir = "backward"
+		# page = evt.GetPage()
+		pass  # noqa: PIE790
 
 	def on_page_changing(self, evt):
 		"""Executed before the page changes, so we might veto it."""
-		#if evt.GetDirection():  dir = "forward"
-		#else:                   dir = "backward"
-		#page = evt.GetPage()
-		pass
+		# if evt.GetDirection():  dir = "forward"
+		# else:                   dir = "backward"
+		# page = evt.GetPage()
+		pass  # noqa: PIE790
 
 	def on_cancel(self, evt):
 		"""Cancel button has been pressed.  Clean up and exit without continuing."""
@@ -329,35 +350,33 @@ class Wizard(wizmod):
 		wx.CallAfter(self.Destroy)
 
 	def on_finished(self, evt):
-		"""Finish button has been pressed.  Give the specified values
-		"""
-		pass
+		"""Finish button has been pressed.  Give the specified values"""
+		pass  # noqa: PIE790
 
 	def on_close(self, evt):
-		""" Close button has been pressed. Destroy the wizard.
-		"""
+		"""Close button has been pressed. Destroy the wizard."""
 		# wx.CallAfter(self.Destroy)
 		self.canceled_flag = True
-		evt.Skip() 
-		
+		evt.Skip()
+
 
 class ModelGeneratorWizard(Wizard):
-	""" Model Generator Wizard Class.
-	"""
+	"""Model Generator Wizard Class."""
 
 	def __init__(self, *args, **kwargs):
-		""" Constructor.
-		"""
+		"""Constructor."""
 
-		if 'specific_domain_path' in kwargs:
-			domain_path = kwargs['specific_domain_path'] if kwargs['specific_domain_path'] else DOMAIN_PATH
-			del kwargs['specific_domain_path']
+		if "specific_domain_path" in kwargs:
+			domain_path = (
+				kwargs["specific_domain_path"] if kwargs["specific_domain_path"] else DOMAIN_PATH # type: ignore  # noqa: F821
+			)  
+			del kwargs["specific_domain_path"]
 		else:
-			domain_path = DOMAIN_PATH
-		
+			domain_path = DOMAIN_PATH  # type: ignore  # noqa: F821
+
 		Wizard.__init__(self, *args, **kwargs)
 
-        # properties of model
+		# properties of model
 		self.type = "Atomic"
 		self.label = ""
 		self.inputs = 1
@@ -376,29 +395,39 @@ class ModelGeneratorWizard(Wizard):
 		# canvas parent
 		parent = self.GetParent()
 
-		is_detached_framed = parent and isinstance(parent.GetTopLevelParent(), Container.DetachedFrame)
+		is_detached_framed = parent and isinstance(
+			parent.GetTopLevelParent(), Container.DetachedFrame
+		)
 
 		# Create a page 1
-		page1 = CustomPage(self, _('Type of DEVS Model'))
-		bt1 = wx.RadioButton(page1, wx.NewIdRef(), _('Atomic model'), style = wx.RB_GROUP )
-		bt2 = wx.RadioButton(page1, wx.NewIdRef(), _('Coupled model'))
+		page1 = CustomPage(self, _("Type of DEVS Model"))
+		bt1 = wx.RadioButton(page1, wx.NewIdRef(), _("Atomic model"), style=wx.RB_GROUP)
+		bt2 = wx.RadioButton(page1, wx.NewIdRef(), _("Coupled model"))
 
 		bt1.SetToolTipString = bt1.SetToolTip
 		bt2.SetToolTipString = bt2.SetToolTip
 		# btgpt.SetToolTipString = btgpt.SetToolTip
 
-		bt1.SetToolTipString(_("DEVS classic atomic model. It is used to define the behavior (or a part of behavior) of the system"))
-		bt2.SetToolTipString(_("DEVS classic coupled model. It is used to define the structure (or a part of structure) of the system"))
+		bt1.SetToolTipString(
+			_(
+				"DEVS classic atomic model. It is used to define the behavior (or a part of behavior) of the system"
+			)
+		)
+		bt2.SetToolTipString(
+			_(
+				"DEVS classic coupled model. It is used to define the structure (or a part of structure) of the system"
+			)
+		)
 		# btgpt.SetToolTipString(_("DEVS classic atomic model made by GPT. It is used to define the behavior (or a part of behavior) of the system."))
-		page1.add_stuff(wx.StaticText(page1, wx.NewIdRef(), _('Choose the DEVS model type:')))
+		page1.add_stuff(wx.StaticText(page1, wx.NewIdRef(), _("Choose the DEVS model type:")))
 		page1.add_stuff(bt1)
 		page1.add_stuff(bt2)
 		# page1.add_stuff(btgpt)
 
 		### if left click on the DetachedFrame, port instance can be created
 		if is_detached_framed:
-			bt3 = wx.RadioButton(page1, wx.NewIdRef(), _('Input Port'))
-			bt4 = wx.RadioButton(page1, wx.NewIdRef(), _('Output Port'))
+			bt3 = wx.RadioButton(page1, wx.NewIdRef(), _("Input Port"))
+			bt4 = wx.RadioButton(page1, wx.NewIdRef(), _("Output Port"))
 			bt3.SetToolTipString = bt3.SetToolTip
 			bt4.SetToolTipString = bt4.SetToolTip
 
@@ -408,8 +437,7 @@ class ModelGeneratorWizard(Wizard):
 			page1.add_stuff(bt4)
 
 			def onBt3Click(evt):
-				""" input port radio button has been pressed. We redefine its action
-				"""
+				"""input port radio button has been pressed. We redefine its action"""
 
 				self.type = "IPort"
 				page1.SetNext(page6)
@@ -419,8 +447,7 @@ class ModelGeneratorWizard(Wizard):
 				page6.SetPrev(page1)
 
 			def onBt4Click(evt):
-				""" input port radio button has been pressed. We redefine its action
-				"""
+				"""input port radio button has been pressed. We redefine its action"""
 
 				self.type = "OPort"
 				page1.SetNext(page7)
@@ -435,47 +462,92 @@ class ModelGeneratorWizard(Wizard):
 		def python_path_call_back(evt):
 			fn = evt.GetEventObject().GetValue()
 			cls = Components.GetClass(fn)
-			
+
 			if inspect.isclass(cls):
-				
-                ### import are here because the simulator (PyDEVS or PyPDEVS) require it
+				### import are here because the simulator (PyDEVS or PyPDEVS) require it
 				from DomainInterface import DomainBehavior
 				from DomainInterface import DomainStructure
+
 				if not (issubclass(cls, DomainBehavior) or issubclass(cls, DomainStructure)):
-					dlg = wx.MessageDialog(parent, _('The python file must contain a class that inherit of DomainBehavior or DomainStructure master class.\n Please choose a correct python file.'), _('Wizard Manager'), wx.ID_OK|wx.ICON_ERROR)
+					dlg = wx.MessageDialog(
+						parent,
+						_(
+							"The python file must contain a class that inherit of DomainBehavior or DomainStructure master class.\n Please choose a correct python file."
+						),
+						_("Wizard Manager"),
+						wx.ID_OK | wx.ICON_ERROR,
+					)
 					dlg.ShowModal()
 			else:
-				dlg = wx.MessageDialog(parent, _('The python file not includes a class definition.\n Please choose a correct python file.'), _('Wizard Manager'), wx.ID_OK|wx.ICON_ERROR)
+				dlg = wx.MessageDialog(
+					parent,
+					_(
+						"The python file not includes a class definition.\n Please choose a correct python file."
+					),
+					_("Wizard Manager"),
+					wx.ID_OK | wx.ICON_ERROR,
+				)
 				dlg.ShowModal()
 
 		def plugin_path_call_back(evt):
 			fn = evt.GetEventObject().GetValue()
-			if os.path.basename(fn) != 'plugins.py':
-				dlg = wx.MessageDialog(parent, _('The name of plugin python file must be plugins.py.\n Please choose a correct plugin python file.'), _('Wizard Manager'), wx.ID_OK|wx.ICON_ERROR)
+			if os.path.basename(fn) != "plugins.py":
+				dlg = wx.MessageDialog(
+					parent,
+					_(
+						"The name of plugin python file must be plugins.py.\n Please choose a correct plugin python file."
+					),
+					_("Wizard Manager"),
+					wx.ID_OK | wx.ICON_ERROR,
+				)
 				dlg.ShowModal()
 
 		# Create a page 2
-		page2 = CustomPage(self, _('Atomic Model (AMD)'))
-		
-		bt5 = wx.CheckBox(page2, wx.NewIdRef(), _('Default python file'))
+		page2 = CustomPage(self, _("Atomic Model (AMD)"))
+
+		bt5 = wx.CheckBox(page2, wx.NewIdRef(), _("Default python file"))
 		bt5.SetValue(True)
-		bt5.SetToolTipString = bt5.SetToolTip 
+		bt5.SetToolTipString = bt5.SetToolTip
 		bt5.SetToolTipString(_("Choose python file from specific directory"))
-		bt51 = wx.CheckBox(page2, wx.NewIdRef(), _('No plugin file'))
+		bt51 = wx.CheckBox(page2, wx.NewIdRef(), _("No plugin file"))
 		bt51.SetToolTipString = bt51.SetToolTip
 		bt51.SetToolTipString(_("Choose plugin file from specific directory"))
 		bt51.SetValue(True)
-		cb0 = wx.ComboBox(page2, wx.NewIdRef(), _('Default'), choices=[_('Default'),_('Generator'),_('Viewer'), _('Collector')], style=wx.CB_READONLY)
-		
+		cb0 = wx.ComboBox(
+			page2,
+			wx.NewIdRef(),
+			_("Default"),
+			choices=[_("Default"), _("Generator"), _("Viewer"), _("Collector")],
+			style=wx.CB_READONLY,
+		)
+
 		# AI button
-		bt_ai = wx.Button(page2, wx.NewIdRef(), _('AI Prompt'))
+		bt_ai = wx.Button(page2, wx.NewIdRef(), _("AI Prompt"))
 		bt_ai.SetToolTipString = bt_ai.SetToolTip
-		bt_ai.SetToolTipString(_("Allow to generate the Python code from a Generative AI using a prompt"))
+		bt_ai.SetToolTipString(
+			_("Allow to generate the Python code from a Generative AI using a prompt")
+		)
 		bt_ai.Disable()
 
 		# filebrowse properties
-		fb1 = filebrowse.FileBrowseButton(page2, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='Python File (*.py)|*.py|Compliled Python File (*.pyc)|*.pyc', toolTip=bt5.GetToolTip().GetTip(), changeCallback=python_path_call_back)
-		fb12 = filebrowse.FileBrowseButton(page2, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='plugins.py', toolTip=bt51.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
+		fb1 = filebrowse.FileBrowseButton(
+			page2,
+			wx.NewIdRef(),
+			startDirectory=DOMAIN_PATH, # type: ignore  # noqa: F821
+			labelText="",
+			fileMask="Python File (*.py)|*.py|Compliled Python File (*.pyc)|*.pyc",
+			toolTip=bt5.GetToolTip().GetTip(),
+			changeCallback=python_path_call_back,
+		)  
+		fb12 = filebrowse.FileBrowseButton(
+			page2,
+			wx.NewIdRef(),
+			startDirectory=DOMAIN_PATH, # type: ignore  # noqa: F821
+			labelText="",
+			fileMask="plugins.py",
+			toolTip=bt51.GetToolTip().GetTip(),
+			changeCallback=plugin_path_call_back,
+		)  
 		fb1.Enable(False)
 		fb12.Enable(False)
 
@@ -490,96 +562,188 @@ class ModelGeneratorWizard(Wizard):
 		vbox2.AddGrowableCol(0)
 		vbox2.AddGrowableCol(1)
 
-		vbox2.AddMany([ (wx.StaticText(page2, wx.NewIdRef(), _('Label')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(wx.TextCtrl(page2, wx.NewIdRef(), value = _("Atomic_Name"), validator=TextObjectValidator()), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(wx.StaticText(page2, wx.NewIdRef(), _('Specific Behavior')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(cb0, 0,wx.EXPAND),
-				(wx.StaticText(page2, wx.NewIdRef(), _('Inputs')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(wx.SpinCtrl(page2, wx.NewIdRef(), '1', min=MIN_NB_PORT, max=MAX_NB_PORT), 0, wx.EXPAND),
-				(wx.StaticText(page2, wx.NewIdRef(), _('Outputs')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(wx.SpinCtrl(page2, wx.NewIdRef(), '1', min=MIN_NB_PORT, max=MAX_NB_PORT), 0, wx.EXPAND),
+		vbox2.AddMany(
+			[
+				(
+					wx.StaticText(page2, wx.NewIdRef(), _("Label")),
+					0,
+					wx.EXPAND | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL,
+				),
+				(
+					wx.TextCtrl(
+						page2,
+						wx.NewIdRef(),
+						value=_("Atomic_Name"),
+						validator=TextObjectValidator(),
+					),
+					0,
+					wx.EXPAND | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL,
+				),
+				(
+					wx.StaticText(page2, wx.NewIdRef(), _("Specific Behavior")),
+					0,
+					wx.EXPAND | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL,
+				),
+				(cb0, 0, wx.EXPAND),
+				(
+					wx.StaticText(page2, wx.NewIdRef(), _("Inputs")),
+					0,
+					wx.EXPAND | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL,
+				),
+				(
+					wx.SpinCtrl(page2, wx.NewIdRef(), "1", min=MIN_NB_PORT, max=MAX_NB_PORT),
+					0,
+					wx.EXPAND,
+				),
+				(
+					wx.StaticText(page2, wx.NewIdRef(), _("Outputs")),
+					0,
+					wx.EXPAND | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL,
+				),
+				(
+					wx.SpinCtrl(page2, wx.NewIdRef(), "1", min=MIN_NB_PORT, max=MAX_NB_PORT),
+					0,
+					wx.EXPAND,
+				),
 				(bt5, 0),
-				(file_sizer, 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(bt51,0),
-				(fb12,0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL)
-				])
-		
+				(file_sizer, 0, wx.EXPAND | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL),
+				(bt51, 0),
+				(fb12, 0, wx.EXPAND | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL),
+			]
+		)
+
 		vb1 = wx.BoxSizer(wx.VERTICAL)
 		vb1.Add(vbox2, 0, wx.EXPAND)
-		
-		sb1 = wx.StaticBoxSizer(wx.StaticBox(page2, wx.NewIdRef(), _('Properties')), orient=wx.VERTICAL)
+
+		sb1 = wx.StaticBoxSizer(
+			wx.StaticBox(page2, wx.NewIdRef(), _("Properties")), orient=wx.VERTICAL
+		)
 		sb1.Add(vb1, 0, wx.EXPAND)
 
 		page2.add_stuff(sb1)
 
 		# Create a page 3
-		page3 = CustomPage(self, _('Coupled Model (CMD)'))
-		sb2 = wx.StaticBoxSizer(wx.StaticBox(page3, wx.NewIdRef(), _('Properties')), orient=wx.VERTICAL)
+		page3 = CustomPage(self, _("Coupled Model (CMD)"))
+		sb2 = wx.StaticBoxSizer(
+			wx.StaticBox(page3, wx.NewIdRef(), _("Properties")), orient=wx.VERTICAL
+		)
 		vb2 = wx.BoxSizer(wx.VERTICAL)
-		
+
 		vbox3 = wx.FlexGridSizer(6, 2, 3, 3)
 
 		# Make both columns growable, so each item will resize equally in width
 		vbox3.AddGrowableCol(0)
 		vbox3.AddGrowableCol(1)
-		
-		bt6 = wx.CheckBox(page3, wx.NewIdRef(), _('Default python file'))
+
+		bt6 = wx.CheckBox(page3, wx.NewIdRef(), _("Default python file"))
 		bt6.SetToolTipString = bt6.SetToolTip
 		bt6.SetToolTipString(bt5.GetToolTip().GetTip())
 		bt6.SetValue(True)
 
-		bt61 = wx.CheckBox(page3, wx.NewIdRef(), _('No plugin file'))
+		bt61 = wx.CheckBox(page3, wx.NewIdRef(), _("No plugin file"))
 		bt61.SetToolTipString = bt61.SetToolTip
 		bt61.SetToolTipString(bt51.GetToolTip().GetTip())
 		bt61.SetValue(True)
 
 		# filebrowse properties
-		fb4 = filebrowse.FileBrowseButton(page3, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='Python File (*.py)|*.py|Compliled Python File (*.pyc)|*.pyc', toolTip=bt6.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
-		fb41 = filebrowse.FileBrowseButton(page3, wx.NewIdRef(), startDirectory=DOMAIN_PATH, labelText="", fileMask='plugins.py', toolTip=bt61.GetToolTip().GetTip(), changeCallback=plugin_path_call_back)
+		fb4 = filebrowse.FileBrowseButton(
+			page3,
+			wx.NewIdRef(),
+			startDirectory=DOMAIN_PATH, # type: ignore  # noqa: F821
+			labelText="",
+			fileMask="Python File (*.py)|*.py|Compliled Python File (*.pyc)|*.pyc",
+			toolTip=bt6.GetToolTip().GetTip(),
+			changeCallback=plugin_path_call_back,
+		) 
+		fb41 = filebrowse.FileBrowseButton(
+			page3,
+			wx.NewIdRef(),
+			startDirectory=DOMAIN_PATH, # type: ignore  # noqa: F821
+			labelText="",
+			fileMask="plugins.py",
+			toolTip=bt61.GetToolTip().GetTip(),
+			changeCallback=plugin_path_call_back,
+		)  
 		fb4.Enable(False)
 		fb41.Enable(False)
-		vbox3.AddMany([ (wx.StaticText(page3, wx.NewIdRef(), _('Label')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(wx.TextCtrl(page3, wx.NewIdRef(), value = _("Coupled_Name"),validator=TextObjectValidator()), 0,  wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(wx.StaticText(page3, wx.NewIdRef(), _('Inputs')), 0,  wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(wx.SpinCtrl(page3, wx.NewIdRef(), '1', min = MIN_NB_PORT, max = MAX_NB_PORT), 0, wx.EXPAND),
-				(wx.StaticText(page3, wx.NewIdRef(), _('Outputs')), 0,  wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(wx.SpinCtrl(page3, wx.NewIdRef(), '1', min = MIN_NB_PORT, max = MAX_NB_PORT), 0, wx.EXPAND),
-				(bt6,0),
-				(fb4,0,wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-				(bt61,0),
-				(fb41,0,wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL)
-				])
-		
-		vb2.Add(vbox3,0,wx.EXPAND)
-		sb2.Add(vb2,0,wx.EXPAND)
+		vbox3.AddMany(
+			[
+				(
+					wx.StaticText(page3, wx.NewIdRef(), _("Label")),
+					0,
+					wx.EXPAND | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL,
+				),
+				(
+					wx.TextCtrl(
+						page3,
+						wx.NewIdRef(),
+						value=_("Coupled_Name"),
+						validator=TextObjectValidator(),
+					),
+					0,
+					wx.EXPAND | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL,
+				),
+				(
+					wx.StaticText(page3, wx.NewIdRef(), _("Inputs")),
+					0,
+					wx.EXPAND | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL,
+				),
+				(
+					wx.SpinCtrl(page3, wx.NewIdRef(), "1", min=MIN_NB_PORT, max=MAX_NB_PORT),
+					0,
+					wx.EXPAND,
+				),
+				(
+					wx.StaticText(page3, wx.NewIdRef(), _("Outputs")),
+					0,
+					wx.EXPAND | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL,
+				),
+				(
+					wx.SpinCtrl(page3, wx.NewIdRef(), "1", min=MIN_NB_PORT, max=MAX_NB_PORT),
+					0,
+					wx.EXPAND,
+				),
+				(bt6, 0),
+				(fb4, 0, wx.EXPAND | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL),
+				(bt61, 0),
+				(fb41, 0, wx.EXPAND | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL),
+			]
+		)
+
+		vb2.Add(vbox3, 0, wx.EXPAND)
+		sb2.Add(vb2, 0, wx.EXPAND)
 		page3.add_stuff(sb2)
 
 		# Create a page 4_1
-		page4_1 = CustomPage(self, _('Finish'))
+		page4_1 = CustomPage(self, _("Finish"))
 		# save filebrowse
 		filename = vbox2.GetItem(1).GetWindow().GetValue()
 		init = os.path.join(domain_path, f"{filename}.amd")
-		fb2 = filebrowse.FileBrowseButton(	page4_1,
-											wx.NewIdRef(),
-											initialValue = init,
-											fileMode=wx.FD_SAVE,
-											#startDirectory = DOMAIN_PATH,
-											labelText = _("Save as"),
-											fileMask = '*.amd')
+		fb2 = filebrowse.FileBrowseButton(
+			page4_1,
+			wx.NewIdRef(),
+			initialValue=init,
+			fileMode=wx.FD_SAVE,
+			# startDirectory = DOMAIN_PATH,
+			labelText=_("Save as"),
+			fileMask="*.amd",
+		)
 
 		page4_1.add_stuff(fb2)
 
 		# Create a page 4_2
-		page4_2 = CustomPage(self, _('Finish'))
-		init =  os.path.join(domain_path, "%s.cmd"%vbox3.GetItem(1).GetWindow().GetValue())
+		page4_2 = CustomPage(self, _("Finish"))
+		init = os.path.join(domain_path, f"{vbox3.GetItem(1).GetWindow().GetValue()}.cmd")
 		# save filebrowse
-		fb3 = filebrowse.FileBrowseButton(	page4_2,
-											wx.NewIdRef(),
-											initialValue = init,
-											fileMode=wx.FD_SAVE,
-											#startDirectory = DOMAIN_PATH,
-											labelText = _("Save as"),
-											fileMask = '*.cmd')
+		fb3 = filebrowse.FileBrowseButton(
+			page4_2,
+			wx.NewIdRef(),
+			initialValue=init,
+			fileMode=wx.FD_SAVE,
+			# startDirectory = DOMAIN_PATH,
+			labelText=_("Save as"),
+			fileMask="*.cmd",
+		)
 		page4_2.add_stuff(fb3)
 
 		# Create a page 4_3 - chat gpt
@@ -596,55 +760,93 @@ class ModelGeneratorWizard(Wizard):
 		# page4_3.add_stuff(fb_gpt)
 
 		# Create a page 5
-		page5 = CustomPage(self, _('Finish'))
-		page5.add_stuff(wx.StaticText(page5, wx.NewIdRef(), _('Port model has been created.')))
+		page5 = CustomPage(self, _("Finish"))
+		page5.add_stuff(wx.StaticText(page5, wx.NewIdRef(), _("Port model has been created.")))
 
 		### if left click on the DetachedFrame, port instance can be created
 		if is_detached_framed:
 			# Create a page 6
-			page6 = CustomPage(self, _('Input Port'))
-			sb3 = wx.StaticBoxSizer(wx.StaticBox(page6, wx.NewIdRef(), _('Properties')), orient = wx.VERTICAL)
+			page6 = CustomPage(self, _("Input Port"))
+			sb3 = wx.StaticBoxSizer(
+				wx.StaticBox(page6, wx.NewIdRef(), _("Properties")), orient=wx.VERTICAL
+			)
 			vb3 = wx.BoxSizer(wx.VERTICAL)
-			#page6.add_stuff(wx.StaticBox(page6, -1, _('Properties')))
-			cb_id1 = wx.CheckBox(page6, wx.NewIdRef(), _('Automatic Id'))
-			spin_id1 = wx.SpinCtrl(page6, wx.NewIdRef(), str(parent.diagram.GetiPortCount()), min = MIN_NB_PORT, max = MAX_NB_PORT)
+			# page6.add_stuff(wx.StaticBox(page6, -1, _('Properties')))
+			cb_id1 = wx.CheckBox(page6, wx.NewIdRef(), _("Automatic Id"))
+			spin_id1 = wx.SpinCtrl(
+				page6,
+				wx.NewIdRef(),
+				str(parent.diagram.GetiPortCount()),
+				min=MIN_NB_PORT,
+				max=MAX_NB_PORT,
+			)
 			cb_id1.SetValue(True)
 			spin_id1.Enable(False)
 			vbox6 = wx.GridSizer(2, 2, 3, 3)
-			vbox6.AddMany([ (wx.StaticText(page6, wx.NewIdRef(), _('Label')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-						(wx.TextCtrl(page6, wx.NewIdRef(), value = _("IPort ")), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-						(cb_id1, 0),
-						(spin_id1, 0, wx.EXPAND)
-						])
+			vbox6.AddMany(
+				[
+					(
+						wx.StaticText(page6, wx.NewIdRef(), _("Label")),
+						0,
+						wx.EXPAND | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL,
+					),
+					(
+						wx.TextCtrl(page6, wx.NewIdRef(), value=_("IPort ")),
+						0,
+						wx.EXPAND | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL,
+					),
+					(cb_id1, 0),
+					(spin_id1, 0, wx.EXPAND),
+				]
+			)
 			vb3.Add(vbox6, 0, wx.EXPAND)
 			sb3.Add(vb3, 0, wx.EXPAND)
 
 			page6.add_stuff(sb3)
-			#page6.add_stuff(vbox6)
+			# page6.add_stuff(vbox6)
 
 			# Create a page 7
-			page7 = CustomPage(self, _('Output Port'))
-			#page7.add_stuff(wx.StaticBox(page7, -1, _('Properties')))
-			sb4 = wx.StaticBoxSizer(wx.StaticBox(page7, wx.NewIdRef(), _('Properties')), orient=wx.VERTICAL)
+			page7 = CustomPage(self, _("Output Port"))
+			# page7.add_stuff(wx.StaticBox(page7, -1, _('Properties')))
+			sb4 = wx.StaticBoxSizer(
+				wx.StaticBox(page7, wx.NewIdRef(), _("Properties")), orient=wx.VERTICAL
+			)
 			vb4 = wx.BoxSizer(wx.VERTICAL)
-			cb_id2 = wx.CheckBox(page7, wx.NewIdRef(), _('Automatic Id'))
-			spin_id2 = wx.SpinCtrl(page7, wx.NewIdRef(), str(parent.diagram.GetoPortCount()), min = MIN_NB_PORT, max = MAX_NB_PORT)
+			cb_id2 = wx.CheckBox(page7, wx.NewIdRef(), _("Automatic Id"))
+			spin_id2 = wx.SpinCtrl(
+				page7,
+				wx.NewIdRef(),
+				str(parent.diagram.GetoPortCount()),
+				min=MIN_NB_PORT,
+				max=MAX_NB_PORT,
+			)
 			cb_id2.SetValue(True)
 			spin_id2.Enable(False)
 			vbox7 = wx.GridSizer(2, 2, 3, 3)
-			vbox7.AddMany([ (wx.StaticText(page7, wx.NewIdRef(), _('Label')), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-							(wx.TextCtrl(page7, wx.NewIdRef(), value = _("OPort ")), 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL),
-							(cb_id2,0),
-							(spin_id2, 0,wx.EXPAND)
-						])
-			vb4.Add(vbox7,0,wx.EXPAND)
-			sb4.Add(vb4,0,wx.EXPAND)
+			vbox7.AddMany(
+				[
+					(
+						wx.StaticText(page7, wx.NewIdRef(), _("Label")),
+						0,
+						wx.EXPAND | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL,
+					),
+					(
+						wx.TextCtrl(page7, wx.NewIdRef(), value=_("OPort ")),
+						0,
+						wx.EXPAND | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL,
+					),
+					(cb_id2, 0),
+					(spin_id2, 0, wx.EXPAND),
+				]
+			)
+			vb4.Add(vbox7, 0, wx.EXPAND)
+			sb4.Add(vb4, 0, wx.EXPAND)
 
 			page7.add_stuff(sb4)
 
 		def onBt1Click(evt):
-			""" Atomic radio button has been pressed. 
-				We redefine its action.
+			"""Atomic radio button has been pressed.
+			We redefine its action.
 			"""
 
 			self.type = "Atomic"
@@ -654,8 +856,8 @@ class ModelGeneratorWizard(Wizard):
 			page4_1.SetPrev(page2)
 
 		def onBt2Click(evt):
-			""" Coupled radio button has been pressed. 
-				We redefine its action.
+			"""Coupled radio button has been pressed.
+			We redefine its action.
 			"""
 
 			self.type = "Coupled"
@@ -665,7 +867,7 @@ class ModelGeneratorWizard(Wizard):
 			page4_2.SetPrev(page3)
 
 		# def onBtAIClick(evt):
-		# 	""" Atomic radio button has been pressed. 
+		# 	""" Atomic radio button has been pressed.
 		# 		We redefine its action.
 		# 	"""
 
@@ -682,73 +884,72 @@ class ModelGeneratorWizard(Wizard):
 				evt (_type_): _description_
 			"""
 			# Check the selected AI (in preferences AI panel)
-			selected_ia = getattr(builtins, 'SELECTED_IA', '')
+			selected_ia = getattr(builtins, "SELECTED_IA", "")
 
 			if selected_ia:
 				### load the AI params
-				param = PARAMS_IA
-				
+				param = PARAMS_IA  # type: ignore  # noqa: F821
+
 				adapter = AdapterFactory.get_adapter_instance(parent=None, params=param)
-				
+
 				# Dialog to play with the AI chat
 				dialog = AIPrompterDialog(None, _("AI Code Generator"), "", adapter)
-				
+
 				# Show the dialog modally and retrieve the result
 				result = dialog.ShowModal()
 				if result == wx.ID_OK:
-        		# Access the user input after the dialog has closed
+					# Access the user input after the dialog has closed
 					self.generated_code = dialog.generated_code
-				
+
 				dialog.Destroy()
 			else:
-				dlg = wx.MessageDialog(parent, _('Generative AI must be selected in the Preferences.'), _('Wizard Manager'), wx.ID_OK|wx.ICON_INFORMATION)
+				dlg = wx.MessageDialog(
+					parent,
+					_("Generative AI must be selected in the Preferences."),
+					_("Wizard Manager"),
+					wx.ID_OK | wx.ICON_INFORMATION,
+				)
 				dlg.ShowModal()
 
 		# event handler for check button
 		def onBt5Check(evt):
-			""" Python file selector is checked.
-			"""
+			"""Python file selector is checked."""
 			# Check the selected AI (in preferences AI panel)
-			selected_ia = getattr(builtins, 'SELECTED_IA', '')
+			selected_ia = getattr(builtins, "SELECTED_IA", "")
 
 			fb1.Enable(not evt.GetEventObject().GetValue())
-			bt_ai.Enable(not evt.GetEventObject().GetValue() and selected_ia != '')
-			
+			bt_ai.Enable(not evt.GetEventObject().GetValue() and selected_ia != "")
+
 		# event handler for check button
 		def onBt51Check(evt):
-			""" Python file selector is checked.
-			"""
+			"""Python file selector is checked."""
 			fb12.Enable(not evt.GetEventObject().GetValue())
 
 		def onBt6Check(evt):
-			""" Python file selector is checked.
-			"""
+			"""Python file selector is checked."""
 			fb4.Enable(not evt.GetEventObject().GetValue())
 
 		# event handler for check button
 		def onBt61Check(evt):
-			""" Python file selector is checked.
-			"""
+			"""Python file selector is checked."""
 			fb41.Enable(not evt.GetEventObject().GetValue())
-			
+
 		def onCbId1(evt):
-			"""
-			"""
+			"""CbId1"""
 			spin_id1.Enable(not evt.GetEventObject().GetValue())
-			
+
 		def onCbId2(evt):
-			"""
-			"""
+			"""CbId2"""
 			spin_id2.Enable(not evt.GetEventObject().GetValue())
 
 		def OnSpecificBehavior(evt):
-			""" Active ou désactive les champs de contrôle en fonction du comportement spécifique pour la page 2 et GPT """
-			
+			"""Active ou désactive les champs de contrôle en fonction du comportement spécifique pour la page 2 et GPT"""
+
 			### Récupération de la valeur du comportement spécifique sélectionné
 			val = evt.GetEventObject().GetValue()
 
 			### si 'Generator', 0 input et x output (1 par défaut)
-			if val == _('Generator'):
+			if val == _("Generator"):
 				# Aucun input
 				vbox2.GetItem(5).GetWindow().SetValue(0)
 				if vbox2.GetItem(7).GetWindow().GetValue() == 0:
@@ -761,9 +962,8 @@ class ModelGeneratorWizard(Wizard):
 				vbox2.GetItem(6).GetWindow().Enable(True)
 				vbox2.GetItem(7).GetWindow().Enable(True)
 
-
 			### si 'Collector' ou 'Viewer', 0 output et x input (1 par défaut)
-			elif val in (_('Collector'), _('Viewer')):
+			elif val in (_("Collector"), _("Viewer")):
 				# Aucun output
 				vbox2.GetItem(7).GetWindow().SetValue(0)
 				if vbox2.GetItem(5).GetWindow().GetValue() == 0:
@@ -787,13 +987,13 @@ class ModelGeneratorWizard(Wizard):
 				vbox2.GetItem(7).GetWindow().SetValue(1)
 
 		def OnInputAMDLabel(evt):
-			fb2.SetValue(os.path.join(domain_path, "%s.amd"%evt.GetString()))
-			
+			fb2.SetValue(os.path.join(domain_path, f"{evt.GetString()}.amd"))
+
 		# def OnInputAMDLabelGPT(evt):
 		# 	fb_gpt.SetValue(os.path.join(domain_path, "%s.amd"%evt.GetString()))
 
 		def OnInputCMDLabel(evt):
-			fb3.SetValue(os.path.join(domain_path, "%s.cmd"%evt.GetString()))
+			fb3.SetValue(os.path.join(domain_path, f"{evt.GetString()}.cmd"))
 
 		# Binding
 		bt1.Bind(wx.EVT_RADIOBUTTON, onBt1Click)
@@ -844,37 +1044,44 @@ class ModelGeneratorWizard(Wizard):
 		page4_2.SetNext(None)
 
 	def on_finished(self, evt):
-		"""	Finish button has been pressed. 
-			Give the specified values.
+		"""Finish button has been pressed.
+		Give the specified values.
 		"""
 
 		# gridsizer depending on the type of choosing model
-		if self.type in ('IPort', 'OPort'):
-			page = self.pages[8] if self.type == 'IPort' else self.pages[9]
+		if self.type in ("IPort", "OPort"):
+			page = self.pages[8] if self.type == "IPort" else self.pages[9]
 			gridSizer = page.sizer.GetItem(2).GetSizer().GetItem(0).GetSizer().GetItem(0).GetSizer()
 			textCtrl = gridSizer.GetItem(1).GetWindow()
 			self.label = textCtrl.GetValue()
 			self.id = gridSizer.GetItem(3).GetWindow().GetValue()
-			self.python_path = os.path.join(DOMAIN_PATH, 'Basic', self.type+'.py')
+			self.python_path = os.path.join(DOMAIN_PATH, "Basic", self.type + ".py")  # type: ignore  # noqa: F821
 
 		else:
-
-			if self.type == 'Atomic':
-				gridSizer = self.pages[1].sizer.GetItem(2).GetSizer().GetItem(0).GetSizer().GetItem(0).GetSizer()
+			if self.type == "Atomic":
+				gridSizer = (
+					self.pages[1]
+					.sizer.GetItem(2)
+					.GetSizer()
+					.GetItem(0)
+					.GetSizer()
+					.GetItem(0)
+					.GetSizer()
+				)
 				file_sizer = gridSizer.GetItem(9).GetSizer()
 				# Vérifiez si file_sizer est bien un BoxSizer
 				if isinstance(file_sizer, wx.BoxSizer):
 					filebrowse_python = file_sizer.GetItem(0).GetWindow()
 				else:
 					filebrowse_python = gridSizer.GetItem(9).GetWindow()
-				
+
 				filebrowse_plugin = gridSizer.GetItem(11).GetWindow()
 				filebrowse_model = self.pages[3].sizer.GetItem(2).GetWindow()
 
 				### test if extention exists
 				model_path = filebrowse_model.GetValue()
-				if not model_path.endswith('.amd'):
-					model_path +='.amd'
+				if not model_path.endswith(".amd"):
+					model_path += ".amd"
 
 				# give the label
 				textCtrl = gridSizer.GetItem(1).GetWindow()
@@ -884,17 +1091,25 @@ class ModelGeneratorWizard(Wizard):
 				### give the specific behavior which can be Default, Generator or Collector (Scope and Disk)
 				specific_behavior = gridSizer.GetItem(3).GetWindow()
 				self.specific_behavior = specific_behavior.GetValue()
-				
-			elif self.type == 'Coupled':
-				gridSizer = self.pages[2].sizer.GetItem(2).GetSizer().GetItem(0).GetSizer().GetItem(0).GetSizer()
+
+			elif self.type == "Coupled":
+				gridSizer = (
+					self.pages[2]
+					.sizer.GetItem(2)
+					.GetSizer()
+					.GetItem(0)
+					.GetSizer()
+					.GetItem(0)
+					.GetSizer()
+				)
 				filebrowse_python = gridSizer.GetItem(7).GetWindow()
 				filebrowse_plugin = gridSizer.GetItem(9).GetWindow()
 				filebrowse_model = self.pages[4].sizer.GetItem(2).GetWindow()
 
 				### test if extention exists
 				model_path = filebrowse_model.GetValue()
-				if not model_path.endswith('.cmd'):
-					model_path +='.cmd'
+				if not model_path.endswith(".cmd"):
+					model_path += ".cmd"
 
 				# give the label
 				textCtrl = gridSizer.GetItem(1).GetWindow()
@@ -912,11 +1127,13 @@ class ModelGeneratorWizard(Wizard):
 			self.outputs = out_SpinCtrl.GetValue()
 
 			# print("the path : %s\nthe name: %s\nThe inputs ports:%s\n the ouputports:%s\n"%(self.model_path, self.label, self.inputs, self.outputs))
-			
+
 			### model path exist ?
 			if os.path.exists(self.model_path):
-				msg = _("%s already exist.\nDo you want to rewrite it ?")%(self.model_path)
-				dlg = wx.MessageDialog(self, msg, _('Wizard Manager'), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+				msg = _("%s already exist.\nDo you want to rewrite it ?") % (self.model_path)
+				dlg = wx.MessageDialog(
+					self, msg, _("Wizard Manager"), wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION
+				)
 				if dlg.ShowModal() in (wx.ID_NO, wx.ID_CANCEL):
 					self.overwrite_flag = False
 
@@ -924,13 +1141,13 @@ class ModelGeneratorWizard(Wizard):
 				### create the model on the disk
 				try:
 					zout = zipfile.ZipFile(self.model_path, "w")
-				except Exception as info:
-					sys.stdout.write(_("ERROR: Enable to create Zip file in Wizard GUI (%s)"%info))
+				except Exception as info:  # noqa: BLE001
+					sys.stdout.write(_(f"ERROR: Enable to create Zip file in Wizard GUI ({info})"))  # noqa: INT001
 					return False
 				else:
-					if self.python_path == '':
+					if self.python_path == "":
 						### generate the class code as string
-						if self.type=='Atomic':
+						if self.type == "Atomic":
 							if self.generated_code:
 								string = self.generated_code
 							else:
@@ -938,10 +1155,10 @@ class ModelGeneratorWizard(Wizard):
 						else:
 							string = coupledCode(self.label)
 
-						### python filename as the same name as the model_path						
-						py_name = os.path.basename(self.model_path).split('.')[0]
+						### python filename as the same name as the model_path
+						py_name = os.path.basename(self.model_path).split(".")[0]
 						py_fn = f"{py_name}.py"
-						
+
 						### if the user change the filename before the end
 						if self.label != py_name:
 							string = string.replace(self.label, py_name)
@@ -958,28 +1175,31 @@ class ModelGeneratorWizard(Wizard):
 						self.python_path = os.path.join(self.model_path, py_file)
 
 						### force model file (.amd or cmd) to have same name with the python file
-						#ext = os.path.basename(self.model_path).split('.')[1]
-						#self.model_path = os.path.join(os.path.dirname(self.model_path), "%s.%s"%(py_file.split('.')[0],ext))
+						# ext = os.path.basename(self.model_path).split('.')[1]
+						# self.model_path = os.path.join(os.path.dirname(self.model_path), "%s.%s"%(py_file.split('.')[0],ext))
 
-					zout.writestr('DEVSimPyModel.dat', _("Call SaveFile method first!"))
+					zout.writestr("DEVSimPyModel.dat", _("Call SaveFile method first!"))
 
-					if self.plugin_path != '':
-						zout.write(self.plugin_path, os.path.join('plugins', os.path.basename(self.plugin_path)))
+					if self.plugin_path != "":
+						zout.write(
+							self.plugin_path,
+							os.path.join("plugins", os.path.basename(self.plugin_path)),
+						)
 
 					zout.close()
 			else:
 				### search python file in archive
-				zin = zipfile.ZipFile(self.model_path, 'r')
+				zin = zipfile.ZipFile(self.model_path, "r")
 				info_list = zin.infolist()
 				### si le nom du fichier python py est le meme que le self.makeConnectionShape(sn, tn) nom du modèle .amd ou .cmd
-				name = "%s.py"%os.path.splitext(os.path.basename(self.model_path))[0]
+				name = f"{os.path.splitext(os.path.basename(self.model_path))[0]}.py"
 				if name in info_list:
 					self.python_path = os.path.join(self.model_path, name)
 				### sinon on cherche le .py dans le modèle en excluant plugins.py
 				else:
 					for item in info_list:
 						name, ext = os.path.splitext(item.filename)
-						if ext == ".py" and name != 'plugins':
+						if ext == ".py" and name != "plugins":
 							self.python_path = os.path.join(self.model_path, item.filename)
 							### TODO: get class from python file and test with insepct module if is submodule of DomainBehavior
 							break

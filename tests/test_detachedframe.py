@@ -5,11 +5,11 @@ Usage:
     python test_detachedframe.py --autoclose 10  # Auto-close after 10s delay
 """
 
-from ApplicationController import TestApp
+from ApplicationController import TestApp  
 
 # import after ApplicationController that inits sys.path ot avoid this import
-import Container
-from DetachedFrame import DetachedFrame
+import Container # type: ignore
+from DetachedFrame import DetachedFrame # type: ignore
 
 # Run the test
 app = TestApp(0)

@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
-'''
+"""
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # PropPanel.py ---
 #                     --------------------------------
@@ -20,22 +20,23 @@
 # GLOBAL VARIABLES AND FUNCTIONS
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-'''
+"""
 
 import wx
 
 _ = wx.GetTranslation
 
+
 class PropPanel(wx.Panel):
-	"""
-	"""
+	"""Prop"""
+
 	def __init__(self, parent, name):
 		wx.Panel.__init__(self, parent=parent, id=wx.NewIdRef(), name=name)
 
 		self.frame = parent
-		
+
 		propSizer = wx.BoxSizer(wx.VERTICAL)
-		propSizer.Add(self.defaultPropertiesPage(), 1, wx.EXPAND|wx.ALL, 10)
+		propSizer.Add(self.defaultPropertiesPage(), 1, wx.EXPAND | wx.ALL, 10)
 
 		self.SetAutoLayout(True)
 		self.SetSizerAndFit(propSizer)
@@ -45,10 +46,11 @@ class PropPanel(wx.Panel):
 		self.__set_tips()
 
 	def defaultPropertiesPage(self):
-		"""
-		"""
+		"""Prop Page"""
 
-		propContent = wx.StaticText(self, wx.NewIdRef(), _("Select a model from diagram \n to see their properties."))
+		propContent = wx.StaticText(
+			self, wx.NewIdRef(), _("Select a model from diagram \n to see their properties.")
+		)
 		sum_font = propContent.GetFont()
 		sum_font.SetWeight(700)
 		propContent.SetFont(sum_font)
@@ -56,22 +58,23 @@ class PropPanel(wx.Panel):
 		return propContent
 
 	def UpdatePropertiesPage(self, panel=None):
-		"""	Update the propPanel with the new panel parameter of the model.
-		"""
+		"""Update the propPanel with the new panel parameter of the model."""
 		sizer = self.GetSizer()
-		
+
 		sizer.Clear(True)
-		 
-		sizer.Add(panel, 1, wx.EXPAND|wx.ALL, 10)
-		
+
+		sizer.Add(panel, 1, wx.EXPAND | wx.ALL, 10)
+
 		self.SetSizerAndFit(sizer)
 		self.Layout()
 
 		self.frame.Layout()
 
 	def __set_tips(self):
-		"""
-		"""
+		"""Tips"""
 
-		self.propToolTip =[_("No model selected.\nChoose a model to show in this panel its properties."),_("You can change the properties by editing the cell.")]
+		self.propToolTip = [
+			_("No model selected.\nChoose a model to show in this panel its properties."),
+			_("You can change the properties by editing the cell."),
+		]
 		self.SetToolTip(self.propToolTip[0])

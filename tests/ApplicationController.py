@@ -1,5 +1,4 @@
-"""
-ApplicationController class manages the lifecycle and shutdown behavior of the application.
+"""ApplicationController class manages the lifecycle and shutdown behavior of the application.
 Attributes:
     DEFAULT_SHUTDOWN_DELAY (int): Default delay for shutdown in milliseconds.
     DEFAULT_STARTUP_DELAY (int): Default delay for startup in milliseconds.
@@ -36,14 +35,15 @@ if __name__ == '__main__':
 	frame = MyFrameToTest(None, "Test")
 	app.RunTest(frame)
 """
-import wx
+
+import wx  
 import argparse
 import sys, os
 
 # Add parent dir to sys.path in order to avoid import from test files
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'devsimpy')))
 
-from config import UpdateBuiltins
+from config import UpdateBuiltins # type: ignore  
 
 # Update the builtins variables
 UpdateBuiltins()
@@ -114,7 +114,7 @@ Additional Information:
                 delay = args.autoclose * 1000  # Convert to milliseconds
                 self._schedule_shutdown(delay)
         except Exception as e:
-            print(f"Error configuring startup/shutdown: {str(e)}")
+            print(f"Error configuring startup/shutdown: {e!s}")
             raise
     
     def _schedule_startup(self):

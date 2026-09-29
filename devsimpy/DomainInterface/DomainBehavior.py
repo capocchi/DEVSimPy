@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
+
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # DomainBehavior.py --- Domain Behavior virtual class
@@ -23,29 +24,28 @@ import os
 import importlib
 import builtins
 
-path = getattr(builtins, 'DEVS_DIR_PATH_DICT').get(DEFAULT_DEVS_DIRNAME)
-d = re.split("DEVSKernel", path)[-1].replace(os.sep, '.')
-BaseDEVS = importlib.import_module("DEVSKernel%s.DEVS"%d)
+path = builtins.DEVS_DIR_PATH_DICT.get(DEFAULT_DEVS_DIRNAME)  # type: ignore  # noqa: F821
+d = re.split("DEVSKernel", path)[-1].replace(os.sep, ".")
+BaseDEVS = importlib.import_module(f"DEVSKernel{d}.DEVS")
+
 
 #    ======================================================================    #
 class DomainBehavior(BaseDEVS.AtomicDEVS):
-	""" Abstract DomainBehavior class.
-	"""
-	
-	__slots__ = ('state')
+	"""Abstract DomainBehavior class."""
+
+	__slots__ = "state"  # noqa: PLC0205
 
 	###
-	def __init__(self, name:str=""):
-		"""	Constructor.
-		"""
+	def __init__(self, name: str = ""):
+		"""Constructor."""
 
 		BaseDEVS.AtomicDEVS.__init__(self, name=name)
 
-		self.state = {'status':'NOT_DEFINED', 'sigma':0.0}
-		
+		self.state = {"status": "NOT_DEFINED", "sigma": 0.0}
+
 		### if BaseDEVS AtomicDEVS class has the peek method, we have the PyDEVS simulator kernel
-		### else its the PyPDEVS simulator kernel and we adapt the peek and poke method for compatibility aspects 
-		if hasattr(BaseDEVS.AtomicDEVS, 'peek'):
+		### else its the PyPDEVS simulator kernel and we adapt the peek and poke method for compatibility aspects
+		if hasattr(BaseDEVS.AtomicDEVS, "peek"):
 			DomainBehavior.peek = BaseDEVS.AtomicDEVS.peek
 			DomainBehavior.poke = BaseDEVS.AtomicDEVS.poke
 			DomainBehavior.getMsgValue = DomainBehavior.getMsgPyDEVSValue
@@ -58,42 +58,42 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 			DomainBehavior.getMsgTime = DomainBehavior.getMsgPyPDEVSTime
 			DomainBehavior.getPortId = DomainBehavior.getPortIdFromPyPDEVS
 
-	def initPhase(self, phase:str="IDLE", sigma:float=0.0)->None:
-		self.state = {'status':phase, 'sigma':sigma}
+	def initPhase(self, phase: str = "IDLE", sigma: float = 0.0) -> None:
+		self.state = {"status": phase, "sigma": sigma}
 
-	def setSigma(self,sigma:float=0.0)->None:
-		self.state['sigma'] = sigma
+	def setSigma(self, sigma: float = 0.0) -> None:
+		self.state["sigma"] = sigma
 
-	def setStatus(self, phase:str)->None:
-		self.state['status'] = phase
+	def setStatus(self, phase: str) -> None:
+		self.state["status"] = phase
 
-	def setState(self, s:dict)->None:
+	def setState(self, s: dict) -> None:
 		self.state = s
 
-	def phaseIs(self, phase:str)->bool:
-		return phase == self.state['status']
+	def phaseIs(self, phase: str) -> bool:
+		return phase == self.state["status"]
 
-	def passivate(self)->dict:
-		return self.passivateIn('passive')
+	def passivate(self) -> dict:
+		return self.passivateIn("passive")
 
-	def passivateIn(self, phase:str="")->dict:
-		return self.holdIn(phase, sigma=INFINITY)
+	def passivateIn(self, phase: str = "") -> dict:
+		return self.holdIn(phase, sigma=INFINITY)  # type: ignore  # noqa: F821
 
-	def holdIn(self, phase:str="", sigma:float=0.0)->dict:
-		''' "Holding in phase " + phase + " for time " + sigma
-		'''
-		self.state['status'] = phase
-		self.state['sigma'] = sigma
+	def holdIn(self, phase: str = "", sigma: float = 0.0) -> dict:
+		""" "Holding in phase " + phase + " for time " + sigma"""
+		self.state["status"] = phase
+		self.state["sigma"] = sigma
 
 		return self.state
 
 	###
-	def pokePyPDEVS(self, p, v)->dict:
+	def pokePyPDEVS(self, p, v) -> dict:
 		### adapted with PyPDEVS
 		from .Object import Message
+
 		if isinstance(v, Message):
-			v = (v.value,v.time)
-		return {p:v}
+			v = (v.value, v.time)
+		return {p: v}
 
 	def peekPyPDEVS(self, port, *args):
 		### adapted with PyPDEVS
@@ -104,50 +104,48 @@ class DomainBehavior(BaseDEVS.AtomicDEVS):
 	def getPortIdFromPyDEVS(self, p):
 		return p.myID
 
-	def getPortIdFromPyPDEVS(self,p):
-		if hasattr(p, 'myID'):
+	def getPortIdFromPyPDEVS(self, p):
+		if hasattr(p, "myID"):
 			return p.myID
 		else:
 			return p.port_id
 
 	def getMsgPyDEVSValue(self, msg):
-		return msg.value if msg else "Msg is none"		
-		
+		return msg.value if msg else "Msg is none"
+
 	def getMsgPyPDEVSValue(self, msg):
 		return msg[0] if msg else "Msg is none"
 
 	def getMsgPyDEVSTime(self, msg):
-		return msg.time	if msg else "Msg is none"
-		
+		return msg.time if msg else "Msg is none"
+
 	def getMsgPyPDEVSTime(self, msg):
 		return msg[1][0] if msg else "Msg is nore"
 
 	def getFlatComponentSet(self):
-		return {self.name:self}
+		return {self.name: self}
 
-	def getSigma(self)->float:
-		return self.state['sigma']
+	def getSigma(self) -> float:
+		return self.state["sigma"]
 
-	def getStatus(self)->str:
-		return self.state['status']
+	def getStatus(self) -> str:
+		return self.state["status"]
 
-	def getPhase(self)->str:
+	def getPhase(self) -> str:
 		return self.getStatus()
-	
-	def getState(self)->dict:
+
+	def getState(self) -> dict:
 		return self.state
 
-	def getElapsed(self)->float:
+	def getElapsed(self) -> float:
 		return self.elapsed
-		
-	def __str__(self)->str:
-		"""
-		"""
-		if hasattr(self, 'bloclModel'):
+
+	def __str__(self) -> str:
+		"""return the string representation of the DomainBehavior class"""
+		if hasattr(self, "bloclModel"):
 			return self.blockModel.label
 		else:
 			return self.__class__.__name__
 
 	def __lt__(self, other):
-		return self.state['sigma'] > other.state['sigma']
-		
+		return self.state["sigma"] > other.state["sigma"]

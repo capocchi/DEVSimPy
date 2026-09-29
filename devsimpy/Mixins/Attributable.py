@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Attributable.py ---
@@ -20,32 +20,22 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-#---------------------------------------------------------
+# ---------------------------------------------------------
 class Attributable:
-	"""  AttributeEditor mixin class to edit shape properties
-	"""
+	"""AttributeEditor mixin class to edit shape properties"""
 
 	### Static variable for default graphical properties display
-	GRAPHICAL_ATTR = [	'label',\
-						'label_pos',\
-						'pen',\
-						'fill',\
-						'font',\
-						'image_path',\
-					 	'input',\
-					  	'output']
+	GRAPHICAL_ATTR = ["label", "label_pos", "pen", "fill", "font", "image_path", "input", "output"]  # noqa: RUF012
 
 	###
 	def __init__(self):
-		""" Constructor.
-		"""
+		"""Constructor."""
 		### list of attributes
 		self.attributes = []
 
 	###
 	def AddAttribute(self, name, typ=""):
-		""" Add attribute if not exist
-		"""
+		"""Add attribute if not exist"""
 
 		if not hasattr(self, name):
 			setattr(self, name, typ)
@@ -53,45 +43,43 @@ class Attributable:
 
 	###
 	def GetAttributes(self):
-		""" Return attributes attribute
-		"""
+		"""Return attributes attribute"""
 		return self.attributes
 
 	###
 	def SetAttributes(self, L):
-		""" Set attributes list
-		"""
-		assert(isinstance(L,list))
+		"""Set attributes list"""
+		assert isinstance(L, list)
 
 		### set attribute
 		for name in L:
 			if not hasattr(self, name):
-				setattr(self, name, '')
+				setattr(self, name, "")
 
 		### set attributes list
 		self.attributes = L
 
 	###
 	def AddAttributes(self, attrs):
-		""" Extend attributes list
-		"""
+		"""Extend attributes list"""
 		for attr in [a for a in attrs if a not in self.attributes]:
 			self.attributes.append(attr)
 
 	###
 	def RemoveAttribute(self, name):
-		""" Remove attribute name
-		"""
+		"""Remove attribute name"""
 		### delete the attribute
-		if hasattr(self,name):
+		if hasattr(self, name):
 			delattr(self, name)
 
 		### remove name from attributes list
 		if name in self.attributes:
 			self.attributes.remove(name)
 
-def main():
-    pass
 
-if __name__ == '__main__':
-    main()
+def main():
+	pass
+
+
+if __name__ == "__main__":
+	main()

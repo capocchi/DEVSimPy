@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-  # noqa: UP009
 
-'''
+"""
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # ControlNotebook.py ---
 #                     --------------------------------
@@ -20,7 +20,7 @@
 # GLOBAL VARIABLES AND FUNCTIONS
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-'''
+"""
 
 import wx
 
@@ -38,6 +38,7 @@ from Utilities import getTopLevelWindow, load_and_resize_image
 # CLASSES DEFINITION
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
 
 ### --------------------------------------------------------------------------
 class GeneralNotebook(Observer):
@@ -66,29 +67,26 @@ class GeneralNotebook(Observer):
 		self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.__PageChanged)
 
 	def __set_properties(self):
-		"""
-		"""
+		"""Set properties of the Notebook"""
 		imgList = wx.ImageList(16, 16)
-		for img in ['db.png', 'properties.png', 'simulation.png']:
+		for img in ["db.png", "properties.png", "simulation.png"]:
 			imgList.Add(load_and_resize_image(img))
 		self.AssignImageList(imgList)
 
 	def __PageChanged(self, evt):
-		"""
-		"""
+		"""Event handler for page change in the Notebook."""
 		if evt.GetSelection() == 1:
 			pass
 		evt.Skip()
 
 	def GetLibPanel(self):
-		""" Get Libraries panel if exist
-		"""
+		"""Get Libraries panel if exist"""
 		### list of label of all existing panel
 		labelList = [self.GetPageText(a) for a in iter(range(self.GetPageCount()))]
 		try:
 			### try to find if panel exist from label
 			index = labelList.index(self.labelList[0])
-		except ValueError as info:
+		except ValueError:
 			### index not match, panel not existing
 			return None
 		else:
@@ -96,14 +94,13 @@ class GeneralNotebook(Observer):
 			return self.GetPage(index)
 
 	def GetPropPanel(self):
-		""" Get Properties panel if exist
-		"""
+		"""Get Properties panel if exist"""
 		### list of label of all existing panel
 		labelList = [self.GetPageText(a) for a in iter(range(self.GetPageCount()))]
 		try:
 			### try to find if panel exist from label
 			index = labelList.index(self.labelList[1])
-		except ValueError as info:
+		except ValueError:
 			### index not match, panel not existing
 			return None
 		else:
@@ -111,14 +108,13 @@ class GeneralNotebook(Observer):
 			return self.GetPage(index)
 
 	def GetSimPanel(self):
-		""" Get Simulation panel if exist
-		"""
+		"""Get Simulation panel if exist"""
 		### list of label of all existing panel
 		labelList = [self.GetPageText(a) for a in iter(range(self.GetPageCount()))]
 		try:
 			### try to find if panel exist from label
 			index = labelList.index(self.labelList[2])
-		except ValueError as info:
+		except ValueError:
 			### index not match, panel not existing
 			return None
 		else:
@@ -126,49 +122,47 @@ class GeneralNotebook(Observer):
 			return self.GetPage(index)
 
 	def GetTree(self):
-		""" Get tree attribute from libraries panel
-		"""
+		"""Get tree attribute from libraries panel"""
 		libPanel = self.GetLibPanel()
 		return libPanel.tree if libPanel else None
 
 	def GetSearchTree(self):
-		""" Get search tree attribute from libraries panel
-		"""
+		"""Get search tree attribute from libraries panel"""
 		libPanel = self.GetLibPanel()
 		return libPanel.searchTree if libPanel else None
 
 	def GetSearch(self):
-		""" Get search attribute from libraries panel
-		"""
+		"""Get search attribute from libraries panel"""
 		libPanel = self.GetLibPanel()
 		return libPanel.search
 
 	def update(self, concret_subject=None):
-		""" Update method that manages the panel properties depending of the selected model in the canvas
-		"""
+		"""Update method that manages the panel properties depending of the selected model in the canvas"""
 
 		state = concret_subject.GetState()
-		canvas = state['canvas']
-		model = state['model']
+		canvas = state["canvas"]
+		model = state["model"]
 
 		propPanel = self.GetPropPanel()
-		
+
 		### update only of panel properties is present (but not necessarily active)
 		if propPanel:
-			str=None
+			str = None
 			if isinstance(model, Attributable):
 				if model != self.selected_model:
 					newContent = AttributeEditor(propPanel, wx.NewIdRef(), model, canvas)
 					propPanel.UpdatePropertiesPage(newContent)
-					
+
 					self.selected_model = model
 					str = propPanel.propToolTip[1]
 			else:
 				propPanel.UpdatePropertiesPage(propPanel.defaultPropertiesPage())
 				self.selected_model = None
 				str = propPanel.propToolTip[0]
-			
-			if str: propPanel.SetToolTip(str)
+
+			if str:
+				propPanel.SetToolTip(str)
+
 
 ### ---------------------------------------------
 ### if flatnotebook can be imported, we work with it
@@ -177,21 +171,20 @@ class GeneralNotebook(Observer):
 USE_FLATNOTEBOOK = False
 
 try:
-	if (wx.VERSION >= (2, 8, 9, 2)):
+	if wx.VERSION >= (2, 8, 9, 2):
 		import wx.lib.agw.flatnotebook as fnb
 	else:
-		import wx.lib.flatnotebook as fnb
+		import wx.lib.flatnotebook as fnb  # type: ignore
 	USE_FLATNOTEBOOK = True
-except:
+except:  # noqa: E722, S110
 	pass
 
 MENU_EDIT_DELETE_PAGE = wx.NewIdRef()
 
 if USE_FLATNOTEBOOK:
-	#-------------------------------------------------------------------
+	# -------------------------------------------------------------------
 	class ControlNotebook(fnb.FlatNotebook, GeneralNotebook):
-		"""
-		"""
+		"""FlatNotebook class that allows overriding and adding methods for the left pane of DEVSimPy"""
 
 		def __init__(self, *args, **kwargs):
 			"""
@@ -202,11 +195,13 @@ if USE_FLATNOTEBOOK:
 			GeneralNotebook.__init__(self)
 
 			### FlatNotebook can be styled
-			self.SetWindowStyleFlag(fnb.FNB_DROPDOWN_TABS_LIST|\
-									fnb.FNB_FF2|\
-									fnb.FNB_SMART_TABS|\
-									fnb.FNB_X_ON_TAB|\
-									fnb.FNB_HIDE_ON_SINGLE_TAB)
+			self.SetWindowStyleFlag(
+				fnb.FNB_DROPDOWN_TABS_LIST
+				| fnb.FNB_FF2
+				| fnb.FNB_SMART_TABS
+				| fnb.FNB_X_ON_TAB
+				| fnb.FNB_HIDE_ON_SINGLE_TAB
+			)
 
 			self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.__OnClosingPage)
 
@@ -214,8 +209,8 @@ if USE_FLATNOTEBOOK:
 			self.SetRightClickMenu(self._rmenu)
 
 		def __OnClosingPage(self, evt):
-			""" The close button of FlatNotebook has been invoked.
-				We update the Show menu depending on the deleted tab.
+			"""The close button of FlatNotebook has been invoked.
+			We update the Show menu depending on the deleted tab.
 			"""
 
 			mainW = getTopLevelWindow()
@@ -224,37 +219,37 @@ if USE_FLATNOTEBOOK:
 			label = self.GetPageText(evt.GetSelection())
 
 			### find the corresponding sub-menu in the Show menu and deselect the label
-			### Show menu is in position 2 on the Menu Bar of DEVSimPy
-			show_menu = mainW.GetMenuBar().GetMenu(2)
+			show_menu = mainW.GetMenuBar().GetMenu(3)
 			### Control menu is in position 0 (first)
 			control_item = show_menu.FindItemByPosition(0)
-			### list of sub-menu for the Control menu
-			items_list = control_item.GetSubMenu().GetMenuItems()
-			### for all items (Simulation, Properties, Libraries)
-			for item in items_list:
-				### if label that will be deleted is equal to the label of current item, we deselect it
-				if item.GetItemLabel() == label:
-					item.Check(False)
+			if control_item is not None:
+				control_menu = control_item.GetSubMenu()
+				if control_menu is not None:
+					### list of sub-menu for the Control menu
+					items_list = control_menu.GetMenuItems()
+					### for all items (Simulation, Properties, Libraries)
+					for item in items_list:
+						### if label that will be deleted is equal to the label of current item, we deselect it
+						if item.GetItemLabel() == label:
+							item.Check(False)
 
 		def __OnClosePage(self, evt):
-			"""
-			"""
+			"""The right click menu has been invoked to close the current tab."""
 			self.DeletePage(self.GetSelection())
 
 		def CreateRightClickMenu(self):
-			"""
-			"""
+			"""Create the right click menu for the FlatNotebook."""
 			self._rmenu = wx.Menu()
-			item = wx.MenuItem(self._rmenu, MENU_EDIT_DELETE_PAGE, _("Close\tCtrl+F4"), _("Close Tab"))
-			self._rmenu.Append(item) 
+			item = wx.MenuItem(
+				self._rmenu, MENU_EDIT_DELETE_PAGE, _("Close\tCtrl+F4"), _("Close Tab")
+			)
+			self._rmenu.Append(item)
 			self.Bind(wx.EVT_MENU, self.__OnClosePage, item)
 
 else:
-
-	#-------------------------------------------------------------------
+	# -------------------------------------------------------------------
 	class ControlNotebook(wx.Notebook, GeneralNotebook):
-		"""
-		"""
+		"""Notebook class that allows overriding and adding methods for the left pane of DEVSimPy."""
 
 		def __init__(self, *args, **kwargs):
 			"""

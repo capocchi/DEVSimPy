@@ -1,6 +1,4 @@
-﻿# -*- coding: utf-8 -*-
-
-'''
+"""
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # AttributeEditor.py ---
 #                    --------------------------------
@@ -20,7 +18,7 @@
 # GLOBAL VARIABLES AND FUNCTIONS
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-'''
+"""
 
 import sys
 import linecache
@@ -38,24 +36,24 @@ from Mixins import Achievable
 from Decorators import Post_Undo
 from Utilities import load_and_resize_image
 
-class AttributeBase(object):
-	""" Base class to avoid multi inheritence with wx.Frame and wx.Panel used in the DEVSimPy 2.9 version
-	"""
-	
+
+class AttributeBase:
+	"""Base class to avoid multi inheritence with wx.Frame and wx.Panel used in the DEVSimPy 2.9 version"""
+
 	def __init__(self, parent, ID, model, canvas):
-		"""     Constructor.
+		"""Constructor.
 
-				@param parent: wxWindows parent
-				@param ID: Id
-				@param model: considered model
-				@param canvas: canvas object
+		@param parent: wxWindows parent
+		@param ID: Id
+		@param model: considered model
+		@param canvas: canvas object
 
-				@type parent: instance
-				@type ID: integer
-				@type title: String
-				@type canvas: canvas object
+		@type parent: instance
+		@type ID: integer
+		@type title: String
+		@type canvas: canvas object
 		"""
-		#local copy
+		# local copy
 		self.model = model
 		self.parent = parent
 		self.canvas = canvas
@@ -68,19 +66,19 @@ class AttributeBase(object):
 
 		# Create a box sizer for self
 		self._box = wx.BoxSizer(wx.VERTICAL)
-		self._box.Add(self._list, 1, wx.EXPAND|wx.ALL)
+		self._box.Add(self._list, 1, wx.EXPAND | wx.ALL)
 
 		###linecache module which inspect uses. It caches the file contents and does not reload it accordingly.
 		linecache.clearcache()
 
 		## text doc de la classe
-		#doc=inspect.getdoc(self.model.getDEVSModel().__class__)
+		# doc=inspect.getdoc(self.model.getDEVSModel().__class__)
 
 		if isinstance(self.model, Achievable):
 			self._boxH = wx.BoxSizer(wx.HORIZONTAL)
 			self._code = CodeCB(self, wx.NewIdRef(), self.model)
-			self._boxH.Add(self._code, 1, wx.ALL|wx.EXPAND, userData='code')
-			self._box.Add(self._boxH, 1, wx.ALL|wx.EXPAND, userData='code')
+			self._boxH.Add(self._code, 1, wx.ALL | wx.EXPAND, userData="code")
+			self._box.Add(self._boxH, 1, wx.ALL | wx.EXPAND, userData="code")
 
 		self.SetSizer(self._box)
 
@@ -91,20 +89,17 @@ class AttributeBase(object):
 		self._list.Bind(wx.EVT_SIZE, self.OnSize)
 
 	def UpdateLabel(self, label):
-		""" Update label in the grid
-		"""
+		"""Update label in the grid"""
 		self._list.SetCellValue(0, 1, label)
 
 	def UpdatePosition(self, pos):
-		""" Update position in the grid
-		"""
+		"""Update position in the grid"""
 		self._list.SetCellValue(1, 1, pos)
 
 	def OnSize(self, event):
-		""" Frame has been resized.
-		"""
+		"""Frame has been resized."""
 		### widt and weight of frame
-		width, height = wx.Window.GetClientSize(self)
+		width, _ = wx.Window.GetClientSize(self)
 		### number of column of wx.grid
 		nb_cols = self._list.GetNumberCols()
 		### width of new column depending of new wx.grid column
@@ -115,8 +110,7 @@ class AttributeBase(object):
 		self._list.Refresh()
 
 	def OnKeyDown(self, event):
-		""" Keyboard has been pressed
-		"""
+		"""Keyboard has been pressed"""
 		keycode = event.GetKeyCode()
 
 		x, y = self._list.CalcUnscrolledPosition(event.GetPosition())
@@ -138,8 +132,8 @@ class AttributeBase(object):
 			if not self._list.MoveCursorDown(False):
 				self._list.MovePageUp()
 		elif keycode == wx.WXK_DELETE:
-			if not self._list.IsReadOnly(row,col):
-				self._list.SetCellValue(row,col,"")
+			if not self._list.IsReadOnly(row, col):
+				self._list.SetCellValue(row, col, "")
 		else:
 			event.Skip()
 
@@ -163,67 +157,71 @@ class AttributeBase(object):
 		self.Destroy()
 		event.Skip()
 
-def AttributeEditor(*args,**kwargs):
-	""" Factory function
-	"""
+
+def AttributeEditor(*args, **kwargs):
+	"""Factory function"""
 	parent = args[0]
 	# pour gerer l'affichage dans la page de gauche dans le notebook
 	if isinstance(parent, (DiagramNotebook.DiagramNotebook, DetachedFrame)):
-			return AttributeEditorFrame(*args,**kwargs)
+		return AttributeEditorFrame(*args, **kwargs)
 	elif isinstance(parent, wx.Panel):
-			return AttributeEditorPanel(*args,**kwargs)
+		return AttributeEditorPanel(*args, **kwargs)
 	else:
 		sys.stdout.write(_("Parent not defined for AttributeEditor class"))
 		return None
-	
+
+
 ###
 class AttributeEditorPanel(AttributeBase, wx.Panel):
-	"""     Model attributes in Panel
-	"""
+	"""Model attributes in Panel"""
 
 	def __init__(self, parent, ID, model, canvas):
-		"""     Constructor.
-		"""
+		"""Constructor."""
 		# pour gerer l'affichage dans la page de gauche dans le notebook
 		wx.Panel.__init__(self, parent, ID)
 		self.SetBackgroundColour(wx.WHITE)
-		
+
 		AttributeBase.__init__(self, parent, ID, model, canvas)
+
 
 ###
 class AttributeEditorFrame(AttributeBase, wx.Frame):
-	"""     Model attributes in Frame
-	"""
+	"""Model attributes in Frame"""
 
 	def __init__(self, parent, ID, model, canvas):
-		"""     Constructor.
-		"""
-		
-		wx.Frame.__init__(self, parent, ID, model.label, size = wx.Size(400, 550), style = wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN )
-		icon_bitmap = load_and_resize_image('properties.png')
+		"""Constructor."""
+
+		wx.Frame.__init__(
+			self,
+			parent,
+			ID,
+			model.label,
+			size=wx.Size(400, 550),
+			style=wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN,
+		)
+		icon_bitmap = load_and_resize_image("properties.png")
 		icon = wx.Icon()
 		icon.CopyFromBitmap(icon_bitmap)
 		self.SetIcon(icon)
-	
-		self.Bind(wx.EVT_CLOSE, self.OnClose)		
-		
+
+		self.Bind(wx.EVT_CLOSE, self.OnClose)
+
 		AttributeBase.__init__(self, parent, ID, model, canvas)
-		
+
+
 ###
 class QuickAttributeEditor(wx.Frame, Subject):
-	"""
-	"""
+	"""Quick Model attributes in Frame"""
+
 	def __init__(self, parent, id, model):
-		""" Constructor.
-		"""
-		wx.Frame.__init__(self, \
-						parent, \
-						id, \
-						size=(120, 30), \
-						style=wx.CLIP_CHILDREN|\
-								wx.FRAME_NO_TASKBAR|\
-								wx.NO_BORDER|\
-								wx.FRAME_SHAPED)
+		"""Constructor."""
+		wx.Frame.__init__(
+			self,
+			parent,
+			id,
+			size=(120, 30),
+			style=wx.CLIP_CHILDREN | wx.FRAME_NO_TASKBAR | wx.NO_BORDER | wx.FRAME_SHAPED,
+		)
 		Subject.__init__(self)
 
 		### Subject init
@@ -232,18 +230,18 @@ class QuickAttributeEditor(wx.Frame, Subject):
 		self.attach(model)
 		self.attach(self.canvas.GetDiagram())
 
-		#spinCtrl for input and output port numbers
-		self._sb_input = wx.SpinCtrl(self, wx.NewIdRef(), size=(60,-1), min=0, max=100000)
-		self._sb_output = wx.SpinCtrl(self, wx.NewIdRef(), size=(60,-1), min=0, max=100000)
+		# spinCtrl for input and output port numbers
+		self._sb_input = wx.SpinCtrl(self, wx.NewIdRef(), size=(60, -1), min=0, max=100000)
+		self._sb_output = wx.SpinCtrl(self, wx.NewIdRef(), size=(60, -1), min=0, max=100000)
 
 		# mouse positions
 		xwindow, ywindow = wx.GetMousePosition()
 
-		xm,ym = self.ScreenToClient(wx.Point(int(xwindow), int(ywindow)))
+		xm, ym = self.ScreenToClient(wx.Point(int(xwindow), int(ywindow)))
 
-		self.SetPosition((int(xm),int(ym)))
+		self.SetPosition((int(xm), int(ym)))
 
-		#default value for spinCtrl
+		# default value for spinCtrl
 		self._sb_input.SetValue(model.input)
 		self._sb_output.SetValue(model.output)
 
@@ -252,8 +250,7 @@ class QuickAttributeEditor(wx.Frame, Subject):
 
 	###
 	def __do_layout(self):
-		"""
-		"""
+		"""Frame layout"""
 		sizer_1 = wx.BoxSizer(wx.HORIZONTAL)
 		sizer_1.Add(self._sb_input, 0, wx.ADJUST_MINSIZE, 0)
 		sizer_1.Add(self._sb_output, 0, wx.ADJUST_MINSIZE, 0)
@@ -263,41 +260,35 @@ class QuickAttributeEditor(wx.Frame, Subject):
 
 	###
 	def __set_binding(self):
-		"""
-		"""
+		"""Frame binding"""
 		self._sb_input.Bind(wx.EVT_TEXT, self.OnInput)
 		self._sb_output.Bind(wx.EVT_TEXT, self.OnOuput)
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 
 	@Post_Undo
 	def OnInput(self, event):
-		"""
-		"""
-		self.__state['input'] = self._sb_input.GetValue()
+		"""Frame binding"""
+		self.__state["input"] = self._sb_input.GetValue()
 		self.notify()
 
 	@Post_Undo
 	def OnOuput(self, event):
-		"""
-		"""
-		self.__state['output'] = self._sb_output.GetValue()
+		"""Frame binding"""
+		self.__state["output"] = self._sb_output.GetValue()
 		self.notify()
 
 	###
 	def GetState(self):
-		"""
-		"""
+		"""Function to get the state of the QuickAttributeEditor"""
 		return self.__state
 
 	###
 	def Undo(self):
-		"""
-		"""
+		"""Function to undo the last change made in the QuickAttributeEditor"""
 		self.canvas.Undo()
 
 	###
 	def OnClose(self, event):
-		"""
-		"""
+		"""Function to handle the close event of the QuickAttributeEditor"""
 		self.Destroy()
 		event.Skip()

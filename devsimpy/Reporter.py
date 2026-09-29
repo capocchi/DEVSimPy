@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
 import sys
+
 import wx
 
 _ = wx.GetTranslation
@@ -10,307 +11,322 @@ from Utilities import FormatTrace, EnvironmentInfo, GetActiveWindow, getTopLevel
 
 ID_SEND = wx.NewIdRef()
 
+
 class BaseDialog(wx.Dialog):
-    """ A wx.Dialog base class.
-    """
+	"""A wx.Dialog base class."""
 
-    def __init__(self, parent):
-        """ Constructor.
-        """
+	def __init__(self, parent):
+		"""Constructor."""
 
-        wx.Dialog.__init__(self, parent, size=(500,600), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
-        self.MainFrame = parent
+		wx.Dialog.__init__(
+			self, parent, size=(500, 600), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER
+		)
+		self.MainFrame = parent
 
-    def CreateButtons(self):
-        """ Creates the Ok and cancel bitmap buttons. """
+	def CreateButtons(self):
+		"""Creates the Ok and cancel bitmap buttons."""
 
-        # Build a couple of fancy and useless buttons
-        self.cancelButton= wx.Button(self.panel, wx.ID_CANCEL, "")
-        self.obButton = wx.Button(self.panel, wx.ID_OK, "")
+		# Build a couple of fancy and useless buttons
+		self.cancelButton = wx.Button(self.panel, wx.ID_CANCEL, "")
+		self.obButton = wx.Button(self.panel, wx.ID_OK, "")
 
-    def SetProperties(self, title):
-        """ Sets few properties for the dialog. """
+	def SetProperties(self, title):
+		"""Sets few properties for the dialog."""
 
-        self.SetTitle(title)
-        self.okButton.SetDefault()
+		self.SetTitle(title)
+		self.okButton.SetDefault()
 
-    def BindEvents(self):
-        """ Binds the events to specific methods. """
+	def BindEvents(self):
+		"""Binds the events to specific methods."""
 
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
-        self.Bind(wx.EVT_CHAR_HOOK, self.OnKeyUp)
+		self.Bind(wx.EVT_CLOSE, self.OnClose)
+		self.Bind(wx.EVT_CHAR_HOOK, self.OnKeyUp)
 
-    def OnOk(self, event):
-        """ Handles the Ok wx.EVT_BUTTON event for the dialog. """
+	def OnOk(self, event):
+		"""Handles the Ok wx.EVT_BUTTON event for the dialog."""
 
-        self.EndModal(wx.ID_OK)
+		self.EndModal(wx.ID_OK)
 
-    def OnCancel(self, event):
-        """ Handles the Cancel wx.EVT_BUTTON event for the dialog. """
+	def OnCancel(self, event):
+		"""Handles the Cancel wx.EVT_BUTTON event for the dialog."""
 
-        self.OnClose(event)
+		self.OnClose(event)
 
-    def OnClose(self, event):
-        """ User canceled the dialog. """
+	def OnClose(self, event):
+		"""User canceled the dialog."""
 
-        self.EndModal(wx.ID_CANCEL)
-        event.Skip()
+		self.EndModal(wx.ID_CANCEL)
+		event.Skip()
 
-    def OnKeyUp(self, event):
-        """ Handles the wx.EVT_CHAR_HOOK event for the dialog. """
+	def OnKeyUp(self, event):
+		"""Handles the wx.EVT_CHAR_HOOK event for the dialog."""
 
-        if event.GetKeyCode() == wx.WXK_ESCAPE:
-            # Close the dialog, no action
-            self.OnClose(event)
-        elif event.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
-            # Close the dialog, the user wants to continue
-            self.OnOk(event)
+		if event.GetKeyCode() == wx.WXK_ESCAPE:
+			# Close the dialog, no action
+			self.OnClose(event)
+		elif event.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
+			# Close the dialog, the user wants to continue
+			self.OnOk(event)
 
-        event.Skip()
+		event.Skip()
+
 
 def ExceptionHook(exctype, value, trace):
-    """
-    Handler for all unhandled exceptions.
+	"""
+	Handler for all unhandled exceptions.
 
 
-    **Parameters:**
+	**Parameters:**
 
-    * exctype: Exception Type
-    * value: Error Value
-    * trace: Trace back info
-    """
+	* exctype: Exception Type
+	* value: Error Value
+	* trace: Trace back info
+	"""
 
-    ftrace = FormatTrace(exctype, value, trace)
+	ftrace = FormatTrace(exctype, value, trace)
 
-    if not sys.stdout:
-        sys.stdout = sys.__stdout__
+	if not sys.stdout:
+		sys.stdout = sys.__stdout__
 
-    if not sys.stderr:
-        sys.stderr = sys.__stderr__
-    
-    # Ensure that error gets raised to console as well
-    sys.stdout.write(ftrace)
+	if not sys.stderr:
+		sys.stderr = sys.__stderr__
 
-    if not ErrorDialog.REPORTER_ACTIVE:
-        ErrorDialog(ftrace)
+	# Ensure that error gets raised to console as well
+	sys.stdout.write(ftrace)
 
-class ErrorReporter(object):
-    """Crash/Error Reporter Service
-    @summary: Stores all errors caught during the current session and
-    is implemented as a singleton so that all errors pushed
-    onto it are kept in one central location no matter where
-    the object is called from.
+	if not ErrorDialog.REPORTER_ACTIVE:
+		ErrorDialog(ftrace)
 
-    **Note:**
 
-    * from Editra.dev_tool
+class ErrorReporter:
+	"""Crash/Error Reporter Service
+	@summary: Stores all errors caught during the current session and
+	is implemented as a singleton so that all errors pushed
+	onto it are kept in one central location no matter where
+	the object is called from.
 
-    """
+	**Note:**
 
-    instance = None
-    _first = True
+	* from Editra.dev_tool
 
-    def __init__(self):
-        """Initialize the reporter
+	"""
 
-        **Note:**
+	instance = None
+	_first = True
 
-        * The ErrorReporter is a singleton.
+	def __init__(self):
+		"""Initialize the reporter
 
-        """
-        # Ensure init only happens once
-        if self._first:
-            object.__init__(self)
-            self._first = False
-            self._sessionerr = list()
-        else:
-            pass
+		**Note:**
 
-    def __new__(cls, *args, **kargs):
-        """Maintain only a single instance of this object
+		* The ErrorReporter is a singleton.
 
-        **Returns:**
+		"""
+		# Ensure init only happens once
+		if self._first:
+			object.__init__(self)
+			self._first = False
+			self._sessionerr = []
+		else:
+			pass
 
-        * instance of this class
+	def __new__(cls, *args, **kargs):
+		"""Maintain only a single instance of this object
 
-        """
-        if not cls.instance:
-            cls.instance = object.__new__(cls, *args, **kargs)
-        return cls.instance
+		**Returns:**
 
-    def AddMessage(self, msg):
-        """Adds a message to the reporters list of session errors
+		* instance of this class
 
-        **Parameters:**
+		"""
+		if not cls.instance:
+			cls.instance = object.__new__(cls, *args, **kargs)
+		return cls.instance
 
-        * msg: The Error Message to save
+	def AddMessage(self, msg):
+		"""Adds a message to the reporters list of session errors
 
-        """
-        if msg not in self._sessionerr:
-            self._sessionerr.append(msg)
+		**Parameters:**
 
-    def GetErrorStack(self):
-        """Returns all the errors caught during this session
+		* msg: The Error Message to save
 
-        **Returns:**
+		"""
+		if msg not in self._sessionerr:
+			self._sessionerr.append(msg)
 
-        * formatted log message of errors
+	def GetErrorStack(self):
+		"""Returns all the errors caught during this session
 
-        """
-        return "\n\n".join(self._sessionerr)
+		**Returns:**
 
-    def GetLastError(self):
-        """Gets the last error from the current session
+		* formatted log message of errors
 
-        **Returns:**
+		"""
+		return "\n\n".join(self._sessionerr)
 
-        * Error Message String
+	def GetLastError(self):
+		"""Gets the last error from the current session
 
-        """
-        if len(self._sessionerr):
-            return self._sessionerr[-1]
+		**Returns:**
+
+		* Error Message String
+
+		"""
+		if len(self._sessionerr):
+			return self._sessionerr[-1]
+
 
 class ErrorDialog(BaseDialog):
-    """
-    Dialog for showing errors and and notifying gui2exe-users should the
-    user choose so.
+	"""
+	Dialog for showing errors and and notifying gui2exe-users should the
+	user choose so.
 
-    **Note:**
+	**Note:**
 
-    * partially from Editra.dev_tool
-    """
-    ABORT = False
-    REPORTER_ACTIVE = False
+	* partially from Editra.dev_tool
+	"""
 
-    def __init__(self, message):
-        """
-        Initialize the dialog
+	ABORT = False
+	REPORTER_ACTIVE = False
 
-        **Parameters:**
+	def __init__(self, message):
+		"""
+		Initialize the dialog
 
-        * message: Error message to display
-        """
-        ErrorDialog.REPORTER_ACTIVE = True
+		**Parameters:**
 
-        # Get version from the app since the main window may be dead or
-        # not even ready yet.
-        #version = wx.GetApp().GetVersion()
+		* message: Error message to display
+		"""
+		ErrorDialog.REPORTER_ACTIVE = True
 
-        BaseDialog.__init__(self, GetActiveWindow())
+		# Get version from the app since the main window may be dead or
+		# not even ready yet.
+		# version = wx.GetApp().GetVersion()
 
-        # Give message to ErrorReporter
-        ErrorReporter().AddMessage(message)
-        
-        self.SetTitle(_("Error/Crash Reporter"))
+		BaseDialog.__init__(self, GetActiveWindow())
 
-        # Attributes
-        self.err_msg = "%s\n\n%s\n%s\n%s" % (EnvironmentInfo(), \
-                                             "---- Traceback Info ----", \
-                                             str(ErrorReporter().GetErrorStack()), \
-                                             "---- End Traceback Info ----")
+		# Give message to ErrorReporter
+		ErrorReporter().AddMessage(message)
 
-        self.textCtrl = wx.TextCtrl(self, value=self.err_msg, size=(-1,200),style=wx.TE_MULTILINE | wx.TE_READONLY)
-        self.abortButton = wx.Button(self, wx.ID_CANCEL, size=(-1, 26))
-        self.sendButton = wx.Button(self, ID_SEND, _("Report Error"), size=(-1, 26))
-        self.sendButton.SetDefault()
-        self.closeButton = wx.Button(self, wx.ID_CLOSE, size=(-1, 26))
+		self.SetTitle(_("Error/Crash Reporter"))
 
-        # Layout
-        self.DoLayout()
+		# Attributes
+		self.err_msg = "{}\n\n{}\n{}\n{}".format(
+			EnvironmentInfo(),
+			"---- Traceback Info ----",
+			str(ErrorReporter().GetErrorStack()),
+			"---- End Traceback Info ----",
+		)
 
-        # Event Handlers
-        self.Bind(wx.EVT_BUTTON, self.OnButton)
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
+		self.textCtrl = wx.TextCtrl(
+			self, value=self.err_msg, size=(-1, 200), style=wx.TE_MULTILINE | wx.TE_READONLY
+		)
+		self.abortButton = wx.Button(self, wx.ID_CANCEL, size=(-1, 26))
+		self.sendButton = wx.Button(self, ID_SEND, _("Report Error"), size=(-1, 26))
+		self.sendButton.SetDefault()
+		self.closeButton = wx.Button(self, wx.ID_CLOSE, size=(-1, 26))
 
-        # Auto show at end of init
-        self.CenterOnParent()
-        self.ShowModal()
+		# Layout
+		self.DoLayout()
 
-    def DoLayout(self):
-        """ Layout the dialog and prepare it to be shown
-            
-            **Note:**
+		# Event Handlers
+		self.Bind(wx.EVT_BUTTON, self.OnButton)
+		self.Bind(wx.EVT_CLOSE, self.OnClose)
 
-            *  Do not call this method in your code
-        """
+		# Auto show at end of init
+		self.CenterOnParent()
+		self.ShowModal()
 
-        # Objects
-        mainmsg = wx.StaticText(self,
-                                label=_("Help improve DEVSimPy by clicking on "
-                                        "Report Error\nto send the Error "
-                                        "Traceback shown below."))
-        t_lbl = wx.StaticText(self, label=_("Error Traceback:"))
+	def DoLayout(self):
+		"""Layout the dialog and prepare it to be shown
 
-        t_lbl.SetFont(wx.Font(8, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False))
-        # Layout
-        mainSizer = wx.BoxSizer(wx.VERTICAL)
-        topSizer = wx.BoxSizer(wx.HORIZONTAL)
-        bottomSizer = wx.BoxSizer(wx.HORIZONTAL)
+		**Note:**
 
-        #topSizer.Add(self.errorBmp, 0, wx.LEFT|wx.RIGHT|wx.ALIGN_CENTER, 20)
-        topSizer.Add(mainmsg, 0, wx.EXPAND|wx.RIGHT, 20)
-        mainSizer.Add(topSizer, 0, wx.EXPAND|wx.TOP|wx.BOTTOM, 20)
-        mainSizer.Add(t_lbl, 0, wx.LEFT|wx.TOP|wx.RIGHT, 5)
-        mainSizer.Add((0, 2))
-        mainSizer.Add(self.textCtrl, 1, wx.EXPAND|wx.ALL, 5)
-        bottomSizer.Add(self.abortButton, 0, wx.ALL, 5)
-        bottomSizer.Add((0, 0), 1, wx.EXPAND)
-        bottomSizer.Add(self.sendButton, 0, wx.TOP|wx.BOTTOM, 5)
-        bottomSizer.Add((0, 10))
-        bottomSizer.Add(self.closeButton, 0, wx.TOP|wx.BOTTOM|wx.RIGHT, 5)
-        mainSizer.Add(bottomSizer, 0, wx.EXPAND)
+		*  Do not call this method in your code
+		"""
 
-        self.SetSizerAndFit(mainSizer)
-        self.SetAutoLayout(True)
-        self.Fit()
+		# Objects
+		mainmsg = wx.StaticText(
+			self,
+			label=_(
+				"Help improve DEVSimPy by clicking on "
+				"Report Error\nto send the Error "
+				"Traceback shown below."
+			),
+		)
+		t_lbl = wx.StaticText(self, label=_("Error Traceback:"))
 
-    def OnButton(self, evt):
-        """Handles button events
+		t_lbl.SetFont(
+			wx.Font(8, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False)
+		)
+		# Layout
+		mainSizer = wx.BoxSizer(wx.VERTICAL)
+		topSizer = wx.BoxSizer(wx.HORIZONTAL)
+		bottomSizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        **Parameters:**
+		# topSizer.Add(self.errorBmp, 0, wx.LEFT|wx.RIGHT|wx.ALIGN_CENTER, 20)
+		topSizer.Add(mainmsg, 0, wx.EXPAND | wx.RIGHT, 20)
+		mainSizer.Add(topSizer, 0, wx.EXPAND | wx.TOP | wx.BOTTOM, 20)
+		mainSizer.Add(t_lbl, 0, wx.LEFT | wx.TOP | wx.RIGHT, 5)
+		mainSizer.Add((0, 2))
+		mainSizer.Add(self.textCtrl, 1, wx.EXPAND | wx.ALL, 5)
+		bottomSizer.Add(self.abortButton, 0, wx.ALL, 5)
+		bottomSizer.Add((0, 0), 1, wx.EXPAND)
+		bottomSizer.Add(self.sendButton, 0, wx.TOP | wx.BOTTOM, 5)
+		bottomSizer.Add((0, 10))
+		bottomSizer.Add(self.closeButton, 0, wx.TOP | wx.BOTTOM | wx.RIGHT, 5)
+		mainSizer.Add(bottomSizer, 0, wx.EXPAND)
 
-        * evt: event that called this handler
+		self.SetSizerAndFit(mainSizer)
+		self.SetAutoLayout(True)
+		self.Fit()
 
-        **Post-Conditions:**
+	def OnButton(self, evt):
+		"""Handles button events
 
-        * Dialog is closed
-        * If Report Event then email program is opened
+		**Parameters:**
 
-        """
-        e_id = evt.GetId()
-        if e_id == wx.ID_CLOSE:
-            self.Close()
+		* evt: event that called this handler
 
-        elif e_id == ID_SEND:
-            frame = SendMailWx(None, _('New Email Message (From Google account)'))
-            msg = self.err_msg
-            msg = msg.replace("'", '')
-            frame.messageTxt.SetValue(msg)
-            mainW = getTopLevelWindow()
-            msg = _('DEVSimPy %s Error Report')%str( mainW.GetVersion())
-            frame.subjectTxt.SetValue(msg)
-            frame.Show()
-            self.Close()
+		**Post-Conditions:**
 
-        elif e_id == wx.ID_ABORT:
-            ErrorDialog.ABORT = True
-            # Try a nice shutdown first time through
-            wx.CallLater(500, wx.GetApp().Destroy(),
-                         wx.MenuEvent(wx.wxEVT_MENU_OPEN, wx.ID_EXIT),
-                         True)
-            self.Close()
+		* Dialog is closed
+		* If Report Event then email program is opened
 
-        else:
-            evt.Skip()
+		"""
+		e_id = evt.GetId()
+		if e_id == wx.ID_CLOSE:
+			self.Close()
 
-    def OnClose(self, evt):
-        """Cleans up the dialog when it is closed
+		elif e_id == ID_SEND:
+			frame = SendMailWx(None, _("New Email Message (From Google account)"))
+			msg = self.err_msg
+			msg = msg.replace("'", "")
+			frame.messageTxt.SetValue(msg)
+			mainW = getTopLevelWindow()
+			msg = _("DEVSimPy %s Error Report") % str(mainW.GetVersion())
+			frame.subjectTxt.SetValue(msg)
+			frame.Show()
+			self.Close()
 
-        **Parameters:**
+		elif e_id == wx.ID_ABORT:
+			ErrorDialog.ABORT = True
+			# Try a nice shutdown first time through
+			wx.CallLater(
+				500, wx.GetApp().Destroy(), wx.MenuEvent(wx.wxEVT_MENU_OPEN, wx.ID_EXIT), True
+			)
+			self.Close()
 
-        * evt: Event that called this handler
+		else:
+			evt.Skip()
 
-        """
-        ErrorDialog.REPORTER_ACTIVE = False
-        self.Destroy()
-        evt.Skip()
+	def OnClose(self, evt):
+		"""Cleans up the dialog when it is closed
+
+		**Parameters:**
+
+		* evt: Event that called this handler
+
+		"""
+		ErrorDialog.REPORTER_ACTIVE = False
+		self.Destroy()
+		evt.Skip()

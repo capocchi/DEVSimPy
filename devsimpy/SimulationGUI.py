@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- # noqa: UP009
 
-'''
+"""
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # SimulationGUI.py ---
 #                    --------------------------------
@@ -20,7 +20,7 @@
 # GLOBAL VARIABLES AND FUNCTIONS
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-'''
+"""
 
 import builtins
 import wx
@@ -36,7 +36,7 @@ from pubsub import pub
 from tempfile import gettempdir
 
 from Utilities import IsAllDigits, printOnStatusBar, load_and_resize_image
-from PluginManager import PluginManager #trigger_event, is_enable
+from PluginManager import PluginManager  # trigger_event, is_enable
 from Patterns.Strategy import *
 from Patterns import simulator_factory, get_process_memory, get_total_ram
 from Decorators import BuzyCursorNotification
@@ -44,9 +44,11 @@ from Decorators import BuzyCursorNotification
 import Container
 
 import gettext
+
 _ = gettext.gettext
 
 import time
+
 
 def timer():
 	last = time.time()
@@ -57,19 +59,21 @@ def timer():
 		delta += now - last
 		yield delta
 		last = now
-        
+
 
 wx.PyValidator = wx.Validator
 
-class MyBad(Exception):pass
+
+class MyBad(Exception):
+	pass
+
 
 ###
 class TextObjectValidator(wx.PyValidator):
-	""" TextObjectValidator()
-	"""
+	"""TextObjectValidator()"""
 
 	def __init__(self, *args, **kwargs):
-		super(TextObjectValidator, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 
 	def Clone(self):
 		return TextObjectValidator()
@@ -78,8 +82,8 @@ class TextObjectValidator(wx.PyValidator):
 		textCtrl = self.GetWindow()
 		text = textCtrl.GetValue()
 
-		if (len(text) == 0) or (not IsAllDigits(text)) or (float(text) <=0.0) :
-			wx.MessageBox(_("The field must contain some positive numbers!"),_("Error Manager"))
+		if (len(text) == 0) or (not IsAllDigits(text)) or (float(text) <= 0.0):
+			wx.MessageBox(_("The field must contain some positive numbers!"), _("Error Manager"))
 			textCtrl.SetBackgroundColour("pink")
 			textCtrl.SetFocus()
 			textCtrl.Refresh()
@@ -90,10 +94,11 @@ class TextObjectValidator(wx.PyValidator):
 			return True
 
 	def TransferToWindow(self):
-		return True # Prevent wxDialog from complaining.
+		return True  # Prevent wxDialog from complaining.
 
 	def TransferFromWindow(self):
-		return True # Prevent wxDialog from complaining.
+		return True  # Prevent wxDialog from complaining.
+
 
 class CollapsiblePanel(wx.Panel):
 	def __init__(self, parent, simdia):
@@ -105,16 +110,17 @@ class CollapsiblePanel(wx.Panel):
 		### frame or panel !!!
 		self.simdia = simdia
 
-		self.org_w,self.org_h = self.simdia.GetSize()
+		self.org_w, self.org_h = self.simdia.GetSize()
 
 		# Get current kernel name for display
-		kernel_name = DEFAULT_DEVS_DIRNAME
-		
+		kernel_name = DEFAULT_DEVS_DIRNAME  # type: ignore
+
 		self.label1 = _("More settings... [%s]") % kernel_name
 		self.label2 = _("Extra options [%s]") % kernel_name
 
-		self.cp = wx.CollapsiblePane(self, label=self.label1,
-											style=wx.CP_DEFAULT_STYLE|wx.CP_NO_TLW_RESIZE)
+		self.cp = wx.CollapsiblePane(
+			self, label=self.label1, style=wx.CP_DEFAULT_STYLE | wx.CP_NO_TLW_RESIZE
+		)
 
 		self.Bind(wx.EVT_COLLAPSIBLEPANE_CHANGED, self.OnPaneChanged, self.cp)
 		self.MakePaneContent(self.cp.GetPane())
@@ -129,16 +135,16 @@ class CollapsiblePanel(wx.Panel):
 		self.Layout()
 
 		### new height to apply
-		new_h = self.simdia.GetSize()[-1] #self.cp.GetSize()[-1]
+		new_h = self.simdia.GetSize()[-1]  # self.cp.GetSize()[-1]
 
 		# and also change the labels
 		if self.cp.IsExpanded():
 			### change the collapsible label
 			self.cp.SetLabel(self.label2)
 			### adapt the window size
-			self.simdia.SetSize(-1, self.org_h+new_h)
+			self.simdia.SetSize(-1, self.org_h + new_h)
 			### Max limit
-			self.simdia.SetMaxSize(wx.Size(self.simdia.GetSize()[0], self.org_h+new_h))
+			self.simdia.SetMaxSize(wx.Size(self.simdia.GetSize()[0], self.org_h + new_h))
 		else:
 			### change the collapsible label
 			self.cp.SetLabel(self.label1)
@@ -146,46 +152,62 @@ class CollapsiblePanel(wx.Panel):
 			self.simdia.SetSize(-1, self.org_h)
 
 	def MakePaneContent(self, pane):
-		'''Create an ergonomic layout for simulation options'''
+		"""Create an ergonomic layout for simulation options"""
 
-		### list of possible strategy depending on the PyDEVS version	
-		strategy_dict = eval("%s_SIM_STRATEGY_DICT"%DEFAULT_DEVS_DIRNAME.upper())
-		
+		### list of possible strategy depending on the PyDEVS version
+		strategy_dict = eval(f"{DEFAULT_DEVS_DIRNAME.upper()}_SIM_STRATEGY_DICT")  # type: ignore
+
 		# Check if we have a nested structure (BrokerDEVS)
-		self._has_broker_options = isinstance(list(strategy_dict.values())[0] if strategy_dict else {}, dict)
-		
+		self._has_broker_options = isinstance(
+			next(iter(strategy_dict.values())) if strategy_dict else {}, dict
+		)
+
 		# Main vertical sizer for better organization
 		main_sizer = wx.BoxSizer(wx.VERTICAL)
-		
+
 		# ============================================================
 		# Section 1: Simulation Strategy/Configuration
 		# ============================================================
-		config_box = wx.StaticBoxSizer(wx.VERTICAL, pane, _('Simulation Configuration'))
+		config_box = wx.StaticBoxSizer(wx.VERTICAL, pane, _("Simulation Configuration"))
 		config_grid = wx.FlexGridSizer(0, 2, 8, 10)
 		config_grid.AddGrowableCol(1, 1)
-		
+
 		if self._has_broker_options:
 			# BrokerDEVS: Show message format and broker
 			text_format = wx.StaticText(pane, wx.NewIdRef(), _("Message Format:"))
 			c = list(strategy_dict.keys())
-			default_choice = SELECTED_MESSAGE_FORMAT if SELECTED_MESSAGE_FORMAT in c else (c[0] if c else '')
+			default_choice = (
+				SELECTED_MESSAGE_FORMAT if SELECTED_MESSAGE_FORMAT in c else (c[0] if c else "")  # type: ignore
+			) 
 			self.ch1 = wx.Choice(pane, wx.NewIdRef(), choices=c)
 			self.ch1.SetToolTip(_("Select the message format standard for broker communication"))
-			
+
 			config_grid.Add(text_format, 0, wx.ALIGN_CENTER_VERTICAL)
 			config_grid.Add(self.ch1, 1, wx.EXPAND)
-			
+
 			# Broker selection
 			text_broker = wx.StaticText(pane, wx.NewIdRef(), _("Broker:"))
-			selected_msg_format = default_choice if default_choice in strategy_dict else (list(strategy_dict.keys())[0] if strategy_dict else '')
-			broker_list = list(strategy_dict[selected_msg_format].keys()) if selected_msg_format in strategy_dict else []
-			default_broker = SELECTED_BROKER if SELECTED_BROKER in broker_list else (broker_list[0] if broker_list else '')
+			selected_msg_format = (
+				default_choice
+				if default_choice in strategy_dict
+				else (next(iter(strategy_dict.keys())) if strategy_dict else "")
+			)
+			broker_list = (
+				list(strategy_dict[selected_msg_format].keys())
+				if selected_msg_format in strategy_dict
+				else []
+			)
+			default_broker = (
+				SELECTED_BROKER  # type: ignore
+				if SELECTED_BROKER in broker_list  # type: ignore
+				else (broker_list[0] if broker_list else "")
+			) 
 			self.ch_broker = wx.Choice(pane, wx.NewIdRef(), choices=broker_list)
 			self.ch_broker.SetToolTip(_("Select the message broker (Kafka, MQTT, RabbitMQ, etc.)"))
-			
+
 			config_grid.Add(text_broker, 0, wx.ALIGN_CENTER_VERTICAL)
 			config_grid.Add(self.ch_broker, 1, wx.EXPAND)
-			
+
 			try:
 				self.ch_broker.SetSelection(broker_list.index(default_broker))
 			except (ValueError, IndexError):
@@ -195,10 +217,10 @@ class CollapsiblePanel(wx.Panel):
 			# PyDEVS/PyPDEVS: Show strategy
 			text_strategy = wx.StaticText(pane, wx.NewIdRef(), _("Algorithm:"))
 			c = list(strategy_dict.keys())
-			default_choice = DEFAULT_SIM_STRATEGY
+			default_choice = DEFAULT_SIM_STRATEGY  # type: ignore
 			self.ch1 = wx.Choice(pane, wx.NewIdRef(), choices=c)
 			self.ch1.SetToolTip(_("Select the simulation algorithm/strategy"))
-			
+
 			config_grid.Add(text_strategy, 0, wx.ALIGN_CENTER_VERTICAL)
 			config_grid.Add(self.ch1, 1, wx.EXPAND)
 			self.ch_broker = None
@@ -209,94 +231,94 @@ class CollapsiblePanel(wx.Panel):
 		except (ValueError, IndexError):
 			if c:
 				self.ch1.SetSelection(0)
-		
-		config_box.Add(config_grid, 0, wx.EXPAND|wx.ALL, 5)
-		main_sizer.Add(config_box, 0, wx.EXPAND|wx.ALL, 5)
-		
+
+		config_box.Add(config_grid, 0, wx.EXPAND | wx.ALL, 5)
+		main_sizer.Add(config_box, 0, wx.EXPAND | wx.ALL, 5)
+
 		# ============================================================
 		# Section 2: Simulation Options
 		# ============================================================
-		options_box = wx.StaticBoxSizer(wx.VERTICAL, pane, _('Simulation Options'))
+		options_box = wx.StaticBoxSizer(wx.VERTICAL, pane, _("Simulation Options"))
 		options_grid = wx.FlexGridSizer(0, 2, 8, 10)
 		options_grid.AddGrowableCol(1, 1)
-		
+
 		# No time limit
 		text_ntl = wx.StaticText(pane, wx.NewIdRef(), _("No Time Limit:"))
-		self.cb2 = wx.CheckBox(pane, wx.NewIdRef(), name='check_ntl')
+		self.cb2 = wx.CheckBox(pane, wx.NewIdRef(), name="check_ntl")
 		self.cb2.SetToolTip(_("Simulation stops when all models are idle (no specific time limit)"))
 		options_grid.Add(text_ntl, 0, wx.ALIGN_CENTER_VERTICAL)
 		options_grid.Add(self.cb2, 0, wx.ALIGN_CENTER_VERTICAL)
-		
+
 		# Verbose
 		text_verbose = wx.StaticText(pane, wx.NewIdRef(), _("Verbose Output:"))
-		self.cb3 = wx.CheckBox(pane, wx.NewIdRef(), name='verbose')
+		self.cb3 = wx.CheckBox(pane, wx.NewIdRef(), name="verbose")
 		self.cb3.SetToolTip(_("Display detailed simulation information"))
 		options_grid.Add(text_verbose, 0, wx.ALIGN_CENTER_VERTICAL)
 		options_grid.Add(self.cb3, 0, wx.ALIGN_CENTER_VERTICAL)
-		
-		options_box.Add(options_grid, 0, wx.EXPAND|wx.ALL, 5)
-		main_sizer.Add(options_box, 0, wx.EXPAND|wx.ALL, 5)
-		
+
+		options_box.Add(options_grid, 0, wx.EXPAND | wx.ALL, 5)
+		main_sizer.Add(options_box, 0, wx.EXPAND | wx.ALL, 5)
+
 		# ============================================================
 		# Section 3: Advanced Options (package-specific)
 		# ============================================================
-		advanced_box = wx.StaticBoxSizer(wx.VERTICAL, pane, _('Advanced Options'))
+		advanced_box = wx.StaticBoxSizer(wx.VERTICAL, pane, _("Advanced Options"))
 		advanced_grid = wx.FlexGridSizer(0, 4, 8, 10)
 		advanced_grid.AddGrowableCol(1, 0)
 		advanced_grid.AddGrowableCol(3, 0)
-		
+
 		# Profiling (PyDEVS only)
 		text_prof = wx.StaticText(pane, wx.NewIdRef(), _("Profiling:"))
-		cb1 = wx.CheckBox(pane, wx.NewIdRef(), name='check_prof')
+		cb1 = wx.CheckBox(pane, wx.NewIdRef(), name="check_prof")
 		cb1.SetToolTip(_("Enable performance profiling (PyDEVS only)"))
 		advanced_grid.Add(text_prof, 0, wx.ALIGN_CENTER_VERTICAL)
 		advanced_grid.Add(cb1, 0, wx.ALIGN_CENTER_VERTICAL)
-		
+
 		# Dynamic Structure (PyPDEVS only)
 		text_dyn = wx.StaticText(pane, wx.NewIdRef(), _("Dynamic Structure:"))
-		cb4 = wx.CheckBox(pane, wx.NewIdRef(), name='dyn_struct')
+		cb4 = wx.CheckBox(pane, wx.NewIdRef(), name="dyn_struct")
 		cb4.SetToolTip(_("Enable dynamic structure modification during simulation (PyPDEVS only)"))
 		advanced_grid.Add(text_dyn, 0, wx.ALIGN_CENTER_VERTICAL)
 		advanced_grid.Add(cb4, 0, wx.ALIGN_CENTER_VERTICAL)
-		
+
 		# Add empty spacers for second row to maintain layout
 		advanced_grid.Add((0, 0))  # Empty cell
 		advanced_grid.Add((0, 0))  # Empty cell
-		
+
 		# Real time (PyPDEVS only)
 		text_rt = wx.StaticText(pane, wx.NewIdRef(), _("Real-Time Mode:"))
-		cb5 = wx.CheckBox(pane, wx.NewIdRef(), name='real_time')
+		cb5 = wx.CheckBox(pane, wx.NewIdRef(), name="real_time")
 		cb5.SetToolTip(_("Run simulation in real-time mode (PyPDEVS only)"))
 		advanced_grid.Add(text_rt, 0, wx.ALIGN_CENTER_VERTICAL)
 		advanced_grid.Add(cb5, 0, wx.ALIGN_CENTER_VERTICAL)
-		
-		advanced_box.Add(advanced_grid, 0, wx.EXPAND|wx.ALL, 5)
-		main_sizer.Add(advanced_box, 0, wx.EXPAND|wx.ALL, 5)
-		
+
+		advanced_box.Add(advanced_grid, 0, wx.EXPAND | wx.ALL, 5)
+		main_sizer.Add(advanced_box, 0, wx.EXPAND | wx.ALL, 5)
+
 		# Set initial values and enable/disable based on package
-		if DEFAULT_DEVS_DIRNAME == 'PyDEVS':
-			self.cb2.SetValue(NTL)
-			self.cb3.SetValue(VERBOSE)
+		if DEFAULT_DEVS_DIRNAME == "PyDEVS":  # type: ignore
+			self.cb2.SetValue(NTL)  # type: ignore
+			self.cb3.SetValue(VERBOSE)  # type: ignore
 			cb4.Enable(False)
 			cb5.Enable(False)
-		elif DEFAULT_DEVS_DIRNAME == 'BrokerDEVS':
+		elif DEFAULT_DEVS_DIRNAME == "BrokerDEVS":  # type: ignore
 			cb1.Enable(False)
-			self.cb2.SetValue(NTL)
-			self.cb3.SetValue(VERBOSE)
+			self.cb2.SetValue(NTL)  # type: ignore
+			self.cb3.SetValue(VERBOSE)  # type: ignore
 			cb4.Enable(False)
 			cb5.Enable(False)
 		else:  # PyPDEVS
 			cb1.Enable(False)
-			self.cb2.SetValue(NTL)
-			self.cb3.SetValue(VERBOSE)
-			cb4.SetValue(DYNAMIC_STRUCTURE)
-			cb5.SetValue(REAL_TIME and not NTL)
-		
+			self.cb2.SetValue(NTL)  # type: ignore
+			self.cb3.SetValue(VERBOSE)  # type: ignore
+			cb4.SetValue(DYNAMIC_STRUCTURE)  # type: ignore
+			cb5.SetValue(REAL_TIME and not NTL)  # type: ignore
+
 		# Disable and uncheck verbose if plugin is not enabled
-		if not PluginManager.is_enable('verbose'):
+		if not PluginManager.is_enable("verbose"):
 			self.cb3.SetValue(False)
 			self.cb3.Enable(False)
-		
+
 		pane.SetSizer(main_sizer)
 
 		# Bind events
@@ -308,57 +330,61 @@ class CollapsiblePanel(wx.Panel):
 		self.Bind(wx.EVT_CHECKBOX, self.OnVerbose, self.cb3)
 		self.Bind(wx.EVT_CHECKBOX, self.OnDynamicStructure, cb4)
 		self.Bind(wx.EVT_CHECKBOX, self.OnRealTime, cb5)
-		
+
 	###
 	def OnChoice(self, event):
-		""" strategy choice has been invoked
-		"""
+		"""strategy choice has been invoked"""
 		selected_string = event.GetString()
 
 		# Check if we have broker options (nested structure)
 		if self._has_broker_options:
 			# For BrokerDEVS, selected_string is the message format
-			setattr(builtins, 'SELECTED_MESSAGE_FORMAT', selected_string)
-			setattr(builtins, 'DEFAULT_SIM_STRATEGY', selected_string)
-			
+			builtins.SELECTED_MESSAGE_FORMAT = selected_string
+			builtins.DEFAULT_SIM_STRATEGY = selected_string
+
 			# Update broker list based on selected message format
-			strategy_dict = eval("%s_SIM_STRATEGY_DICT"%DEFAULT_DEVS_DIRNAME.upper())
-			if selected_string in strategy_dict and isinstance(strategy_dict[selected_string], dict):
+			strategy_dict = eval(f"{DEFAULT_DEVS_DIRNAME.upper()}_SIM_STRATEGY_DICT")  # type: ignore
+			if selected_string in strategy_dict and isinstance(
+				strategy_dict[selected_string], dict
+			):
 				broker_list = list(strategy_dict[selected_string].keys())
 				self.ch_broker.Clear()
 				self.ch_broker.AppendItems(broker_list)
 				if broker_list:
 					# Select first broker or keep current if it exists
-					current_broker = getattr(builtins, 'SELECTED_BROKER', '')
+					current_broker = getattr(builtins, "SELECTED_BROKER", "")
 					if current_broker in broker_list:
 						self.ch_broker.SetStringSelection(current_broker)
 					else:
 						self.ch_broker.SetSelection(0)
-						setattr(builtins, 'SELECTED_BROKER', broker_list[0])
-			
+						builtins.SELECTED_BROKER = broker_list[0]
+
 			self.simdia.selected_strategy = selected_string
 		else:
 			# For PyDEVS/PyPDEVS, selected_string is the strategy
 			self.simdia.selected_strategy = selected_string
-			setattr(builtins, 'DEFAULT_SIM_STRATEGY', selected_string)
+			builtins.DEFAULT_SIM_STRATEGY = selected_string
 
 		### update of ntl checkbox depending on the choosing strategy
 		if not self._has_broker_options:
-			self.cb2.Enable(not (self.simdia.selected_strategy == 'original' and DEFAULT_DEVS_DIRNAME == 'PyDEVS'))
-	
+			self.cb2.Enable(
+				not (
+					self.simdia.selected_strategy == "original" and DEFAULT_DEVS_DIRNAME == "PyDEVS" # type: ignore
+				)
+			)  
+
 	def OnBrokerChoice(self, event):
-		""" broker choice has been invoked (for BrokerDEVS)
-		"""
+		"""broker choice has been invoked (for BrokerDEVS)"""
 		selected_broker = event.GetString()
-		setattr(builtins, 'SELECTED_BROKER', selected_broker)
-	
+		builtins.SELECTED_BROKER = selected_broker
+
 	def OnNTL(self, event):
 		cb2 = event.GetEventObject()
 
 		self.simdia.ntl = cb2.GetValue()
 		self.simdia._text1.Enable(not self.simdia.ntl)
 		self.simdia._value.Enable(not self.simdia.ntl)
-		setattr(builtins, 'NTL', self.simdia.ntl)
+		builtins.NTL = self.simdia.ntl
 
 	def OnProfiling(self, event):
 		cb1 = event.GetEventObject()
@@ -367,45 +393,45 @@ class CollapsiblePanel(wx.Panel):
 	def OnVerbose(self, event):
 		cb3 = event.GetEventObject()
 		self.simdia.verbose = cb3.GetValue()
-		setattr(builtins, 'VERBOSE', self.simdia.verbose)
-		
+		builtins.VERBOSE = self.simdia.verbose
+
 	def OnDynamicStructure(self, event):
 		cb4 = event.GetEventObject()
 		self.simdia.dynamic_structure_flag = cb4.GetValue()
-		setattr(builtins, 'DYNAMIC_STRUCTURE', self.simdia.dynamic_structure_flag)
+		builtins.DYNAMIC_STRUCTURE = self.simdia.dynamic_structure_flag
 
 	def OnRealTime(self, event):
 		cb5 = event.GetEventObject()
 		self.simdia.real_time_flag = cb5.GetValue()
-		setattr(builtins, 'REAL_TIME', self.simdia.real_time_flag)
-		
-#-----------------------------------------------------------------
-class Base(object):
+		builtins.REAL_TIME = self.simdia.real_time_flag
+
+
+# -----------------------------------------------------------------
+class Base:
 	"""Base class for Simulation Dialog
-		Frame or Panel with progress bar
+	Frame or Panel with progress bar
 	"""
 
 	def __init__(self, parent, id, title):
-		""" Constructor
-		"""
+		"""Constructor"""
 
 		# local copy
 		self.parent = parent
-		#self.master = master
+		# self.master = master
 		self.title = title
 
 		### current master for multi-simulation without simulationDialog reloading (show OnOk)
 		self.current_master = None
 
 		# simulator strategy
-		self.selected_strategy = DEFAULT_SIM_STRATEGY
+		self.selected_strategy = DEFAULT_SIM_STRATEGY  # type: ignore
 
 		### dynamic structure only for local PyPDEVS simulation
-		self.dynamic_structure_flag = DYNAMIC_STRUCTURE
+		self.dynamic_structure_flag = DYNAMIC_STRUCTURE  # type: ignore
 
 		### PyPDEVS threaded real time simulation
-		self.real_time_flag = REAL_TIME
-		
+		self.real_time_flag = REAL_TIME  # type: ignore
+
 		### profiling simulation
 		self.prof = False
 
@@ -414,9 +440,9 @@ class Base(object):
 		self.total_ram = get_total_ram()
 
 		### No time limit simulation (defined in the builtin dictionary from .devsimpy file)
-		self.ntl = NTL
+		self.ntl = NTL  # type: ignore
 
-		self.verbose = VERBOSE
+		self.verbose = VERBOSE  # type: ignore
 
 		# definition of the thread, the timer and the counter for the simulation progress
 		self.thread = None
@@ -438,20 +464,22 @@ class Base(object):
 
 	def __widgets(self):
 
-		self._text1 = wx.StaticText(self.panel, wx.NewIdRef(), _('Final time:'))
+		self._text1 = wx.StaticText(self.panel, wx.NewIdRef(), _("Final time:"))
 		self._value = wx.TextCtrl(self.panel, wx.NewIdRef(), validator=TextObjectValidator())
 		self._value.SetMinSize((100, -1))
-		
-		self._btn1 = wx.Button(self.panel, wx.NewIdRef(), _('Run'))
-		self._btn2 = wx.Button(self.panel, wx.NewIdRef(), _('Stop'))
-		self._btn3 = wx.Button(self.panel, wx.NewIdRef(), _('Suspend'))
-		self._btn4 = wx.Button(self.panel, wx.NewIdRef(), _('Log'))
-		
+
+		self._btn1 = wx.Button(self.panel, wx.NewIdRef(), _("Run"))
+		self._btn2 = wx.Button(self.panel, wx.NewIdRef(), _("Stop"))
+		self._btn3 = wx.Button(self.panel, wx.NewIdRef(), _("Suspend"))
+		self._btn4 = wx.Button(self.panel, wx.NewIdRef(), _("Log"))
+
 		# Info button
 		self._btn_info = wx.Button(self.panel, wx.NewIdRef(), "?", size=(30, 30))
 		self._btn_info.SetToolTip(_("Show information about simulation options"))
-		
-		self._gauge = wx.Gauge(self.panel, wx.NewIdRef(), 100, size=(-1, 25), style=wx.GA_HORIZONTAL|wx.GA_SMOOTH)
+
+		self._gauge = wx.Gauge(
+			self.panel, wx.NewIdRef(), 100, size=(-1, 25), style=wx.GA_HORIZONTAL | wx.GA_SMOOTH
+		)
 		self._cp = CollapsiblePanel(self.panel, self)
 
 		self.SetNTL(self.ntl)
@@ -463,7 +491,6 @@ class Base(object):
 		self._btn4.SetToolTip(_("View simulation logs"))
 		self._text1.SetToolTip(_("Specify the simulation end time"))
 		self._value.SetToolTip(_("Enter a positive number for simulation duration"))
-
 
 	def SetNTL(self, ntl):
 		self.ntl = ntl
@@ -479,7 +506,7 @@ class Base(object):
 		self._value.SetValue(str(float(self.master.FINAL_TIME)))
 
 	def GetMaster(self):
-		self.master
+		self.master  # noqa: B018
 
 	def __do_layout(self):
 
@@ -488,36 +515,36 @@ class Base(object):
 		# ============================================================
 		# Section 1: Time Configuration
 		# ============================================================
-		time_box = wx.StaticBoxSizer(wx.HORIZONTAL, self.panel, _('Time Configuration'))
-		
-		time_box.Add(self._text1, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-		time_box.Add(self._value, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-		time_box.Add(self._btn_info, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-		
-		vbox_body.Add(time_box, 0, wx.EXPAND|wx.ALL, 10)
+		time_box = wx.StaticBoxSizer(wx.HORIZONTAL, self.panel, _("Time Configuration"))
+
+		time_box.Add(self._text1, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+		time_box.Add(self._value, 1, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+		time_box.Add(self._btn_info, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+
+		vbox_body.Add(time_box, 0, wx.EXPAND | wx.ALL, 10)
 
 		# ============================================================
 		# Section 2: Control Buttons
 		# ============================================================
-		control_box = wx.StaticBoxSizer(wx.HORIZONTAL, self.panel, _('Simulation Controls'))
-		
+		control_box = wx.StaticBoxSizer(wx.HORIZONTAL, self.panel, _("Simulation Controls"))
+
 		button_grid = wx.GridSizer(2, 2, 5, 5)
 		button_grid.Add(self._btn1, 0, wx.EXPAND)
 		button_grid.Add(self._btn3, 0, wx.EXPAND)
 		button_grid.Add(self._btn2, 0, wx.EXPAND)
 		button_grid.Add(self._btn4, 0, wx.EXPAND)
-		
-		control_box.Add(button_grid, 1, wx.EXPAND|wx.ALL, 5)
-		
-		vbox_body.Add(control_box, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)
+
+		control_box.Add(button_grid, 1, wx.EXPAND | wx.ALL, 5)
+
+		vbox_body.Add(control_box, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
 
 		# ============================================================
 		# Section 3: Progress Bar
 		# ============================================================
-		progress_box = wx.StaticBoxSizer(wx.VERTICAL, self.panel, _('Progress'))
-		progress_box.Add(self._gauge, 0, wx.EXPAND|wx.ALL, 5)
-		
-		vbox_body.Add(progress_box, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)
+		progress_box = wx.StaticBoxSizer(wx.VERTICAL, self.panel, _("Progress"))
+		progress_box.Add(self._gauge, 0, wx.EXPAND | wx.ALL, 5)
+
+		vbox_body.Add(progress_box, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
 		vbox_body.Add(self._cp, 0, wx.EXPAND, 9)
 
 		# fin panel
@@ -527,7 +554,6 @@ class Base(object):
 		self._btn1.SetDefault()
 		self._btn2.Disable()
 		self._btn3.Disable()
-
 
 	def __set_events(self):
 
@@ -543,7 +569,7 @@ class Base(object):
 
 	def OnShowInfo(self, event):
 		"""Show information dialog about simulation options"""
-		
+
 		info_msg = _(
 			"DEVS Simulation Control Panel\n\n"
 			"═══════════════════════════════════════\n\n"
@@ -581,50 +607,45 @@ class Base(object):
 			"- Use 'Profiling' to optimize slow simulations\n"
 			"- 'Real time' mode is useful for hardware-in-the-loop testing"
 		)
-		
+
 		dlg = wx.lib.dialogs.ScrolledMessageDialog(
-			self, 
-			info_msg, 
-			_("Simulation Options Help"),
-			size=(600, 500)
+			self, info_msg, _("Simulation Options Help"), size=(600, 500)
 		)
 		dlg.ShowModal()
 		dlg.Destroy()
 
 	###
 	def ChangeButtonLabel(self, btn, new_label):
-		""" Change the label of the Log button depending on the active plug-in
-		"""
+		"""Change the label of the Log button depending on the active plug-in"""
 
 		### if activity plug-in is enabled
-		if PluginManager.is_enable('start_activity_tracking'):
+		if PluginManager.is_enable("start_activity_tracking"):
 			self._btn4.SetLabel("Activity")
 
 	###
 	def OnText(self, event):
-		"""
-		"""
+		"""Text"""
 		self._gauge.SetValue(0)
 
 	###
 	@BuzyCursorNotification
 	def OnViewLog(self, event):
-		"""	When View button is clicked
-		"""
+		"""When View button is clicked"""
 		# The simulation verbose event occurs only if verbose is enabled
 		if self.verbose:
-			PluginManager.trigger_event('START_SIM_VERBOSE', parent=self)
+			PluginManager.trigger_event("START_SIM_VERBOSE", parent=self)
 
 		# The activity tracking event occurs
-		PluginManager.trigger_event('VIEW_ACTIVITY_REPORT', parent=self, master=self.current_master)
+		PluginManager.trigger_event("VIEW_ACTIVITY_REPORT", parent=self, master=self.current_master)
 
 	def MsgBoxEmptyModel(self):
-		""" Pop-up alert for empty model
-		"""
-		dial = wx.MessageDialog(self,
-							_('You want to simulate an empty master model!'),
-							_('Simulation Manager'),
-							wx.OK|wx.ICON_EXCLAMATION)
+		"""Pop-up alert for empty model"""
+		dial = wx.MessageDialog(
+			self,
+			_("You want to simulate an empty master model!"),
+			_("Simulation Manager"),
+			wx.OK | wx.ICON_EXCLAMATION,
+		)
 
 		if (dial.ShowModal() == wx.ID_OK) and (isinstance(self.parent, wx.Frame)):
 			self.PrepareDestroyWin()
@@ -635,13 +656,11 @@ class Base(object):
 
 	###
 	def OnOk(self, event):
-		""" When Run button is clicked.
-		"""
+		"""When Run button is clicked."""
 
-		assert(self.master is not None)
+		assert self.master is not None
 
 		if self._value.GetValidator().Validate(self._value) or self.ntl:
-
 			### pour prendre en compte les simulations multiples sans relancer un SimulationDialog
 			### si le thread n'est pas lancé (pas pendant un suspend)
 			if self.thread is not None and not self.thread.thread_suspend:
@@ -659,44 +678,63 @@ class Base(object):
 			### check is model is well loaded
 			if (self.current_master is None) or (len(self.current_master.getComponentSet()) == 0):
 				return self.MsgBoxEmptyModel()
-			
+
 			### dont erase the gauge if ntl
 			if not self.ntl:
 				# simulation time stored in the master model
 				self.current_master.FINAL_TIME = float(self._value.GetValue())
 				self._gauge.SetValue(0)
 				### if _gauge is wx.Slider
-				#self._gauge.SetMax(self.current_master.FINAL_TIME)
+				# self._gauge.SetMax(self.current_master.FINAL_TIME)
 
-			self.statusbar.SetBackgroundColour('')
-			printOnStatusBar(self.statusbar, {1:""})
+			self.statusbar.SetBackgroundColour("")
+			printOnStatusBar(self.statusbar, {1: ""})
 			if self.statusbar.GetFieldsCount() > 2:
-				printOnStatusBar(self.statusbar, {2:""})
+				printOnStatusBar(self.statusbar, {2: ""})
 
 			if (self.thread is None) or (not self.timer.IsRunning()):
-
 				PluginManager.trigger_event("START_BLINK", parent=self, master=self.current_master)
 				PluginManager.trigger_event("START_TEST", parent=self, master=self.current_master)
 
 				### The START_ACTIVITY_TRACKING event occurs
-				PluginManager.trigger_event("START_ACTIVITY_TRACKING", parent=self, master=self.current_master)
+				PluginManager.trigger_event(
+					"START_ACTIVITY_TRACKING", parent=self, master=self.current_master
+				)
 
 				### The START_ACTIVITY_TRACKING event occurs
-				PluginManager.trigger_event("START_STATE_TRAJECTORY", parent=self, master=self.current_master)
+				PluginManager.trigger_event(
+					"START_STATE_TRAJECTORY", parent=self, master=self.current_master
+				)
 
 				### The START_CONCURRENT_SIMULATION event occurs
-				PluginManager.trigger_event("START_CONCURRENT_SIMULATION", parent=self, master=self.current_master)
+				PluginManager.trigger_event(
+					"START_CONCURRENT_SIMULATION", parent=self, master=self.current_master
+				)
 
 				### future call is required because the simulator is flattened during the execution of the strategy 3
-				wx.FutureCall(1, PluginManager.trigger_event, 'START_DIAGRAM', parent=self, master=self.current_master)
+				wx.FutureCall(
+					1,
+					PluginManager.trigger_event,
+					"START_DIAGRAM",
+					parent=self,
+					master=self.current_master,
+				)
 
 				### clear all log file
-				for fn in [f for f in os.listdir(gettempdir()) if f.endswith('.devsimpy.log')]:
+				for fn in [f for f in os.listdir(gettempdir()) if f.endswith(".devsimpy.log")]:
 					os.remove(os.path.join(gettempdir(), fn))
 
 				self.mem_offset = get_process_memory()
 
-				self.thread = simulator_factory(self.current_master, self.selected_strategy, self.prof, self.ntl, self.verbose, self.dynamic_structure_flag, self.real_time_flag)
+				self.thread = simulator_factory(
+					self.current_master,
+					self.selected_strategy,
+					self.prof,
+					self.ntl,
+					self.verbose,
+					self.dynamic_structure_flag,
+					self.real_time_flag,
+				)
 				self.thread.setName(self.title)
 
 				### if simulation model has no connection or no generators, no need to simulate
@@ -707,13 +745,13 @@ class Base(object):
 					self.timer.Start(1)
 
 				### timer for real time
-				if self.real_time_flag: 
+				if self.real_time_flag:
 					self.t = timer()
-		
+
 			else:
 				### for back simulation
-				#self.thread.s = shelve.open(self.thread.f.name+'.db',flag='r')
-				#self.thread.model = self.thread.s['s'][str(float(self._gauge.GetValue()))]
+				# self.thread.s = shelve.open(self.thread.f.name+'.db',flag='r')
+				# self.thread.model = self.thread.s['s'][str(float(self._gauge.GetValue()))]
 
 				### restart the hiding gauge
 				if self.ntl:
@@ -726,13 +764,12 @@ class Base(object):
 
 			if self.count >= 100:
 				return
-				
-			### interaction with the model is not possible
-			#self.parent.Enable(False)
 
-	def Interact(self, access = True):
-		""" Enabling and disabling options (buttons, checkbox, ...)
-		"""
+			### interaction with the model is not possible
+			# self.parent.Enable(False)
+
+	def Interact(self, access=True):
+		"""Enabling and disabling options (buttons, checkbox, ...)"""
 
 		self._btn1.Enable(access)
 		self._btn2.Enable(not access)
@@ -742,8 +779,7 @@ class Base(object):
 
 	###
 	def OnStop(self, event):
-		""" When Stop button is clicked
-		"""
+		"""When Stop button is clicked"""
 
 		self.Interact()
 
@@ -751,20 +787,19 @@ class Base(object):
 			self.thread.terminate(False)
 
 		self.timer.Stop()
-		
+
 		wx.Bell()
 
 		self._gauge.SetValue(0)
-		self.statusbar.SetBackgroundColour('')
-		printOnStatusBar(self.statusbar, {0:_('Interrupted')})
-		printOnStatusBar(self.statusbar, {1:""})
+		self.statusbar.SetBackgroundColour("")
+		printOnStatusBar(self.statusbar, {0: _("Interrupted")})
+		printOnStatusBar(self.statusbar, {1: ""})
 		if self.statusbar.GetFieldsCount() > 2:
-			printOnStatusBar(self.statusbar, {2:""})
+			printOnStatusBar(self.statusbar, {2: ""})
 
 	###
 	def OnSuspend(self, event):
-		""" When suspend button is clicked
-		"""
+		"""When suspend button is clicked"""
 
 		self.Interact()
 		self.thread.suspend()
@@ -775,16 +810,15 @@ class Base(object):
 		if self.count == 0 or self.count >= 100 or not self.timer.IsRunning():
 			return
 
-		printOnStatusBar(self.statusbar, {0:_('Suspended')})
+		printOnStatusBar(self.statusbar, {0: _("Suspended")})
 
 		# way to interact with the model
-		#self.parent.Enable(True)
+		# self.parent.Enable(True)
 		wx.Bell()
 
 	###
 	def OnTimer(self, event):
-		""" Give the pourcentage of simulation progress
-		"""
+		"""Give the pourcentage of simulation progress"""
 
 		### if no time limit, gauge pulse
 		if self.ntl:
@@ -794,21 +828,22 @@ class Base(object):
 			if isinstance(self.thread.model.timeLast, tuple):
 				timeLast = timeLast[0]
 
-			self.count = (timeLast/self.thread.model.FINAL_TIME)*100
+			self.count = (timeLast / self.thread.model.FINAL_TIME) * 100
 
-			wx.CallAfter(self._gauge.SetValue,int(self.count))
+			wx.CallAfter(self._gauge.SetValue, int(self.count))
 
-		### list of childs  
+		### list of childs
 		childrens = self.GetChildren()
-		if not isinstance(childrens,list):
+		if not isinstance(childrens, list):
 			childrens = list(childrens)
 
 		# Vérifier s'il y a au moins un enfant de type BlinkFrame
-		is_blink_frame_alive = any(str(type(obj)) == "<class 'blink.BlinkFrame'>" for obj in childrens)
-		
+		is_blink_frame_alive = any(
+			str(type(obj)) == "<class 'blink.BlinkFrame'>" for obj in childrens
+		)
+
 		### if simulation is over
 		if self.thread.end_flag:
-
 			### update the status of buttons
 			self._btn1.Enable(True)
 			self._btn2.Disable()
@@ -823,57 +858,65 @@ class Base(object):
 
 			if not is_blink_frame_alive:
 				### update the status bar
-				self.statusbar.SetBackgroundColour('')
-				printOnStatusBar(self.statusbar, {0:_("Completed!"), 1:self.GetClock()})
-			
+				self.statusbar.SetBackgroundColour("")
+				printOnStatusBar(self.statusbar, {0: _("Completed!"), 1: self.GetClock()})
+
 				### is no time limit add some informations in status bar
-				if not self.ntl:
-					if self.statusbar.GetFieldsCount() > 2:
-						printOnStatusBar(self.statusbar, {2:str(100)+"%"})
+				if not self.ntl and self.statusbar.GetFieldsCount() > 2:
+					printOnStatusBar(self.statusbar, {2: str(100) + "%"})
 
 			### stop the timer
 			self.timer.Stop()
 
 		### if the simulation is not suspended
 		elif not self.thread.thread_suspend:
-			
 			if not is_blink_frame_alive:
 				### udpate the status bar
-				if self.statusbar.GetBackgroundColour() != 'GREY': 
-					self.statusbar.SetBackgroundColour('GREY')
-				wx.CallAfter(printOnStatusBar,self.statusbar, {0:_("Processing..."), 1:self.GetClock()})
+				if self.statusbar.GetBackgroundColour() != "GREY":
+					self.statusbar.SetBackgroundColour("GREY")
+				wx.CallAfter(
+					printOnStatusBar, self.statusbar, {0: _("Processing..."), 1: self.GetClock()}
+				)
 
 				### is no time limit, add some information in status bar
-				if not self.ntl:
-					if self.statusbar.GetFieldsCount() > 2:
-						wx.CallAfter(printOnStatusBar,self.statusbar, {2:str(self.count)[:4]+"%"})
+				if not self.ntl and self.statusbar.GetFieldsCount() > 2:
+					wx.CallAfter(printOnStatusBar, self.statusbar, {2: str(self.count)[:4] + "%"})
 
-			#wx.Yield()
-			#wx.YieldIfNeeded()
+			# wx.Yield()
+			# wx.YieldIfNeeded()
 
 	def GetClock(self):
-		if self.real_time_flag:	
+		if self.real_time_flag:
 			return str(next(self.t))
-		
+
 		total_cpu_time = self.thread.get_elapsed_time()
 
 		ms = (total_cpu_time % 1) * 1000
 		m, s = divmod(total_cpu_time, 60)
 		h, m = divmod(m, 60)
 
-		v = get_process_memory()-self.mem_offset
-		if v<0: v=0.0
+		v = get_process_memory() - self.mem_offset
+		if v < 0:
+			v = 0.0
 
-		return "%d:%02d:%02d:%03d / %.2f MB (%.2f%%)" % (h, m, int(s), int(ms), v, 100*v/self.total_ram)
+		return "%d:%02d:%02d:%03d / %.2f MB (%.2f%%)" % ( # noqa: UP031
 
+			h,
+			m,
+			int(s),
+			int(ms),
+			v,
+			100 * v / self.total_ram,
+		)  
 	###
-	def MsgBox(self, msg:str):
-		""" Pop-up alert for empty model.
-		"""
-		dial = wx.MessageDialog(self,
-							_('You want to simulate an empty master model!'),
-							_('Simulation Manager'),
-							wx.OK|wx.ICON_EXCLAMATION)
+	def MsgBox(self, msg: str):
+		"""Pop-up alert for empty model."""
+		dial = wx.MessageDialog(
+			self,
+			_("You want to simulate an empty master model!"),
+			_("Simulation Manager"),
+			wx.OK | wx.ICON_EXCLAMATION,
+		)
 
 		if (dial.ShowModal() == wx.ID_OK) and isinstance(self.parent, wx.Frame):
 			self.PrepareDestroyWin()
@@ -883,34 +926,32 @@ class Base(object):
 			return
 
 	def SetFields(self):
-		"""
-		"""
-		
-		printOnStatusBar(self.statusbar, {i:'' for i in range(self.statusbar.GetFieldsCount())})
+		"""Fields"""
+
+		printOnStatusBar(self.statusbar, {i: "" for i in range(self.statusbar.GetFieldsCount())})
 
 	def PrepareDestroyWin(self):
-		""" To destroy the simulation frame.
-		"""
+		"""To destroy the simulation frame."""
 
 		### clean status bar
-		self.statusbar.SetBackgroundColour('')
+		self.statusbar.SetBackgroundColour("")
 		self.SetFields()
 
 		### try to hidden stdioWin
 		try:
 			self.parent.stdioWin.frame.Show(False)
-		except:
+		except:  # noqa: E722, S110
 			pass
 
 		try:
-		## left panel enabled
+			## left panel enabled
 			nb1 = self.parent.mainW.GetControlNotebook()
 			nb1.Enable()
 
 			## menu enabled
 			self.parent.tb.Enable()
 			for i in range(self.parent.menuBar.GetMenuCount()):
-				self.parent.menuBar.EnableTop(i,True)
+				self.parent.menuBar.EnableTop(i, True)
 
 			### other tab diagram enabled
 			nb2 = self.parent.GetDiagramNotebook()
@@ -919,20 +960,21 @@ class Base(object):
 				if p != nb2.GetSelection():
 					nb2.GetPage(p).Enable()
 
-		except Exception:
-			#sys.stdout.write(_("Empty mode over\n"))
+		except Exception:  # noqa: BLE001, S110
+			# sys.stdout.write(_("Empty mode over\n"))
 			pass
 
 	def OnQuit(self, event):
-		""" When the simulation are stopping.
-		"""
+		"""When the simulation are stopping."""
 
 		# if the simulation is running
 		if self.timer.IsRunning():
-			dial = wx.MessageDialog(self,
-									_('Are you sure to stop simulation?'),
-									_('Simulation Manager'),
-									wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			dial = wx.MessageDialog(
+				self,
+				_("Are you sure to stop simulation?"),
+				_("Simulation Manager"),
+				wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION,
+			)
 			self.thread.suspend()
 
 			### if user wants to stop simulation process
@@ -948,8 +990,7 @@ class Base(object):
 		event.Skip()
 
 	def ErrorManager(self, msg):
-		""" An error is occurred.
-		"""
+		"""An error is occurred."""
 
 		### try to find the file which have the error from traceback
 		devs_error = False
@@ -963,28 +1004,27 @@ class Base(object):
 				trace = traceback.format_exception(typ, val, tb)
 
 				### paths in traceback
-				paths = [a for a in trace if a.split(',')[0].strip().startswith('File')]
+				paths = [a for a in trace if a.split(",")[0].strip().startswith("File")]
 				if paths:
 					# find if DOMAIN_PATH is in the last file path of the trace
 					p = paths[-1]
-					devs_error = DOMAIN_PATH in p or DEVSIMPY_PACKAGE_PATH not in p
+					devs_error = DOMAIN_PATH in p or DEVSIMPY_PACKAGE_PATH not in p  # type: ignore
 			else:
 				# msg didnt look like a tuple, maybe pubsub gave keyword args
 				sys.stdout.write(_("ErrorManager received unexpected message type %r\n") % (msg,))
-		except Exception as info:
-			sys.stdout.write(_("Error in ErrorManager: %s" % info))
+		except Exception as info:  # noqa: BLE001
+			sys.stdout.write(_(f"Error in ErrorManager: {info}"))  # noqa: INT001
 
 		### if error come from devs python file
 		if devs_error:
-
 			try:
 				### simulate event button for the code editor
 				event = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self._btn1.GetId())
-			except Exception:
+			except Exception:  # noqa: BLE001, S110
 				pass
 			else:
 				### Error dialog
-				if not Container.MsgBoxError(event, getattr(self, 'parent', None), msg):
+				if not Container.MsgBoxError(event, getattr(self, "parent", None), msg):
 					### if user dont want correct the error, we destroy the simulation windows
 					self.PrepareDestroyWin()
 					self.Destroy()
@@ -996,22 +1036,24 @@ class Base(object):
 			# non‑devs errors we simply show a message box and tear down the
 			# simulation so the program can continue gracefully.
 			try:
-				Container.MsgBoxError(None, getattr(self, 'parent', None), msg)
-			except Exception as info2:
-				sys.stdout.write(_("Error displaying error dialog: %s\nOriginal: %r") % (info2, msg))
+				Container.MsgBoxError(None, getattr(self, "parent", None), msg)
+			except Exception as info2:  # noqa: BLE001
+				sys.stdout.write(
+					_("Error displaying error dialog: %s\nOriginal: %r") % (info2, msg)
+				)
 			# ensure simulation windows are cleaned up
 			self.PrepareDestroyWin()
 		self.Destroy()
 
+
 class SimulationDialogPanel(Base, wx.Panel):
-	""" Simulation Dialog Panel 
-	""" 
+	"""Simulation Dialog Panel"""
+
 	def __init__(self, parent, id, title):
-		""" Constructor
-		"""
-	
-		assert(isinstance(parent, wx.Panel))
-		
+		"""Constructor"""
+
+		assert isinstance(parent, wx.Panel)
+
 		wx.Panel.__init__(self, parent, id)
 		self.SetBackgroundColour(wx.NullColour)
 		self.panel = self
@@ -1021,9 +1063,9 @@ class SimulationDialogPanel(Base, wx.Panel):
 
 		# status bar of main application
 		self.statusbar = parent.GetTopLevelParent().statusbar
-		
+
 		Base.__init__(self, parent, id, title)
-		#self.SetMaster(master)
+		# self.SetMaster(master)
 
 	def SetMaster(self, master):
 		Base.SetMaster(self, master)
@@ -1031,19 +1073,19 @@ class SimulationDialogPanel(Base, wx.Panel):
 	def GetMaster(self):
 		return Base.GetMaster(self)
 
-class SimulationDialogFrame(Base, wx.Frame):
-	""" SimulationDialog(parent, id, title, master)
 
-		Frame or Panel with progress bar
+class SimulationDialogFrame(Base, wx.Frame):
+	"""SimulationDialog(parent, id, title, master)
+
+	Frame or Panel with progress bar
 	"""
 
 	def __init__(self, parent, id, title):
-		""" Constructor
-		"""
+		"""Constructor"""
 
-		assert(isinstance(parent, wx.Frame))
-		
-		wx.Frame.__init__(self, parent, id, title, style= wx.DEFAULT_FRAME_STYLE, size=(500, 350))
+		assert isinstance(parent, wx.Frame)
+
+		wx.Frame.__init__(self, parent, id, title, style=wx.DEFAULT_FRAME_STYLE, size=(500, 350))
 
 		# Set minimum size
 		self.SetMinSize((480, 320))
@@ -1051,7 +1093,7 @@ class SimulationDialogFrame(Base, wx.Frame):
 		self.panel = wx.Panel(self)
 
 		wx.CallAfter(self.CreateBar)
-		
+
 		Base.__init__(self, parent, id, title)
 
 		self.__set_properties()
@@ -1061,13 +1103,14 @@ class SimulationDialogFrame(Base, wx.Frame):
 		icon.CopyFromBitmap(load_and_resize_image("simulation.png"))
 		self.SetIcon(icon)
 		self.Center()
-	
+
 	def SetMaster(self, master):
 		Base.SetMaster(self, master)
 
 	def GetMaster(self):
 		return Base.GetMaster(self)
-		
+
+
 def SimulationDialog(*args):
 	parent = args[0]
 	if isinstance(parent, wx.Panel):
