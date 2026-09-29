@@ -111,19 +111,21 @@ quote-style = "double"
 
 [tool.mypy]
 explicit_package_bases = true
+no_implicit_optional = false
+ignore_missing_imports = true
 exclude = [
-    "^examples/",
-    "^DEVSKernel/",
-    "^design/",
-    "^doc/",
-    "^AI/",
-    "^Domain/",
-    "^icons/",
-    "^locale/",
-    "^logs/",
-    "^out/",
-    "^sounds/",
-    "^splash/",
-    "^plugins/",
-    "^XRC/"
+    "examples/",
+    "design/",
+    "doc/",
+    "AI/",
+    "Domain/",
+    "icons/",
+    "locale/",
+    "logs/",
+    "out/",
+    "sounds/",
+    "splash/",
+    "plugins/",
+    "XRC/",
+    "DEVSKernel/"
 ]
