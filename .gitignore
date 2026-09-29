@@ -233,6 +233,7 @@ pip-log.txt
 
 .codegpt
 .ruff_cache
+.lens
 
 #Opencode config
 opencode.json
@@ -240,5 +241,4 @@ opencode.json
 ############
 ### MARKDOWN
 ############
-
 WARP.md
