@@ -36,9 +36,6 @@ from pathlib import Path
 
 import inspect
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 from tempfile import gettempdir
 
 if getattr(builtins, "GUI_FLAG", True):
@@ -180,17 +177,21 @@ def GetClass(elem):
 
 
 def GetArgs(cls=None):
-	"""Get behavioral attribute from python file through constructor class."""
+	"""Get behavioral attribute from python file through constructor class.
+
+	Return a dictionary which contains, for each parameter of the constructor that has
+	a default value, its name and its default value (the "self" parameter is excluded).
+	"""
 
 	if inspect.isclass(cls):
 		try:
-			constructor = inspect.getargspec(cls.__init__)
-			return (
-				dict(zip(constructor.args[1:], constructor.defaults))
-				if constructor.defaults
-				else {}
-			)
-		except:  # noqa: E722
+			parameters = inspect.signature(cls.__init__).parameters
+			return {
+				name: parameter.default
+				for name, parameter in parameters.items()
+				if name != "self" and parameter.default != inspect.Parameter.empty
+			}
+		except Exception:  
 			sys.stderr.write(_("Error in GetArgs: First parameter is not a class\n"))
 
 	return None
@@ -709,7 +710,7 @@ class DEVSComponent:
 
 			try:
 				txt = f"clock {m.timeNext}: {msg}\n"
-			except Exception:  # noqa: BLE001
+			except Exception:
 				txt = f"clock {0.0}: {msg}\n"
 
 			with open(path, "a") as f:
@@ -943,7 +944,7 @@ class DEVSComponent:
 				if os.system("pidof gedit") == 256:
 					try:
 						soft = which("gedit")
-					except:  # noqa: E722
+					except Exception:  
 						sys.stdout.write(_("Local programmer software not found!\n"))
 					else:
 						subprocess.call(f"{soft} {python_path}", shell=True)
@@ -952,7 +953,7 @@ class DEVSComponent:
 				elif os.system("pidof ksmserver") == 256:
 					try:
 						soft = which("kfmclient")
-					except:  # noqa: E722
+					except Exception:  
 						sys.stdout.write(_("Local programmer software not found!\n"))
 					else:
 						os.system(soft + " openURL " + python_path)
@@ -1002,7 +1003,7 @@ class DEVSComponent:
 
 				return editorFrame
 
-			except Exception as info:  # noqa: BLE001
+			except Exception as info:
 				dlg = wx.MessageDialog(
 					mainW,
 					_(f"Editor frame not instanciated: {info}\n"),  # noqa: INT001
@@ -1043,7 +1044,7 @@ class BlockFactory:
 				current_dirname = os.path.dirname(current_dirname)
 
 			module_name = os.path.basename(filename).split(".py")[0]
-			name, _ = os.path.splitext(module_name)
+			name, _ext = os.path.splitext(module_name)
 
 			### try to find the specification of module
 			spec = importlib.util.find_spec(name, dir_name)

@@ -182,7 +182,7 @@ def blink_manager(*args, **kwargs):
 				frame.flag = False
 				while not frame.flag and frame.IsShown():
 					pass
-			except:
+			except Exception:
 				pass
 
 			if frame.colored_flag:

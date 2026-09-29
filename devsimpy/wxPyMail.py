@@ -353,7 +353,7 @@ class SendMailWx(wx.Frame):
 					failed = server.sendmail(From, To, msg.as_string())
 					server.quit()
 					self.Close()  # close the program
-				except Exception as e:  # noqa: BLE001
+				except Exception as e:  
 					print("Error - send failed!")
 					print(e)
 				else:
@@ -472,7 +472,7 @@ class LoginDlg(wx.Dialog):
 			self.server.login(user, pw)
 			self.loggedIn = True
 			self.OnClose("")
-		except:  # noqa: E722
+		except Exception:  
 			message = _("Your username or password is incorrect. Please try again.")
 			dlg = wx.MessageDialog(None, message, _("Login Error"), wx.OK | wx.ICON_EXCLAMATION)
 			dlg.ShowModal()

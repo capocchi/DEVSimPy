@@ -26,9 +26,6 @@ import os
 import shutil
 import sys
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 import wx
 import wx.lib.dialogs
 
@@ -362,7 +359,7 @@ class ImportLibrary(wx.Dialog):
 					else None,
 				}
 				self._all_items.append(item_data)
-			except Exception as e:  # noqa: BLE001
+			except Exception as e:  
 				sys.stderr.write(f"Error saving item {i}: {e!s}\n")
 
 	###
@@ -585,7 +582,7 @@ class ImportLibrary(wx.Dialog):
 					try:
 						### delete directory
 						shutil.rmtree(self._d[label])
-					except Exception as info:  # noqa: BLE001
+					except Exception as info:  
 						sys.stdout.write(f"{label} not deleted!\n Error: {info}")
 
 				dial.Destroy()
@@ -598,7 +595,7 @@ class ImportLibrary(wx.Dialog):
 					]
 					del self._d[label]
 					self.parent.cfg.Write("exportPathsList", str(self.parent.exportPathsList))
-				except Exception:  # noqa: BLE001, S110
+				except Exception:  # noqa: S110
 					pass
 
 			# Mettre à jour _all_items
@@ -630,7 +627,7 @@ class ImportLibrary(wx.Dialog):
 
 		dial = wx.MessageDialog(
 			None,
-			_( # type: ignore  # noqa: F823
+			_( # type: ignore
 				"If %s contain python files, do you want to insert it in __all__ variable of __init__.py file?"
 			)
 			% os.path.basename(path),
@@ -662,7 +659,7 @@ class ImportLibrary(wx.Dialog):
 			with open(os.path.join(path, "__init__.py"), "w") as f:
 				f.write("__all__ = [ \n")
 				for fn in select:
-					name, _ = fn.split(".")
+					name, _ext = fn.split(".")
 					f.write(f"\t\t'{name}', \n")
 				f.write("\t\t ]")
 

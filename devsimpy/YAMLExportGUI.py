@@ -44,7 +44,7 @@ def url_ok(url):
 
 	try:
 		r = requests.head(url)
-	except Exception:  # noqa: BLE001
+	except Exception:  
 		return False
 	else:
 		return r.status_code == 200
@@ -156,7 +156,7 @@ class YAMLExportGUI(wx.Frame):
 					files={"file": open(str(self.path), "rb")}, # noqa: SIM115
 				)  
 
-			except Exception as err:  # noqa: BLE001
+			except Exception as err:  
 				self.sb.icon.SetBitmap(load_and_resize_image("exclamation.png"))
 				self.sb.SetStatusText(str(err))
 				self.rest = None

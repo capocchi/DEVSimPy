@@ -181,7 +181,7 @@ class UpgradeLibThread(Thread):
 		except OSError:
 			# Unable to get to the internet
 			wx.CallAfter(self.CheckVersion, None)
-		except Exception:  # noqa: BLE001
+		except Exception:
 			# Some other strange error...
 			wx.CallAfter(self.CheckVersion, None)
 

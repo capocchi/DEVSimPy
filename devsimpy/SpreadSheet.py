@@ -88,7 +88,7 @@ class MySheet(sheet.CSheet):
 				self.SetCellValue(i, 1, str(d[1]))
 				Publisher.sendMessage("progress", msg=str(i / n))
 				# self.Update()
-			except:  # noqa: E722, S110
+			except Exception:  # noqa: S110
 				pass
 
 		self._full_flag = True
@@ -255,14 +255,14 @@ class Newt(wx.Frame):
 		### update the column width
 		try:
 			activePage = self.notebook.GetSelection()
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			activePage = 0
 			sys.stdout.write(_(f"Error 1 in SpreadSheet: {info}"))  # noqa: INT001
 
 		try:
 			sheet = self.notebook.GetPage(activePage)
 			sheet.UpdateColWidth()
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			sys.stdout.write(_(f"Error 2 in SpreadSheet: {info}"))  # noqa: INT001
 		else:
 			toolbar = self.GetToolBar()
@@ -451,7 +451,7 @@ class Newt(wx.Frame):
 			try:
 				### globals containt the time and value variables after exec of the statement
 				exec(str(s), globals())  # noqa: S102
-			except Exception as info:  # noqa: BLE001
+			except Exception as info:  
 				sys.stdout.write(str(info))
 			else:
 				### if value is a list, we must choose an index to plot amoung the values of the list

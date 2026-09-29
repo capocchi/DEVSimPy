@@ -46,9 +46,6 @@ OLLAMA_SERVER_CMD = ["ollama", "serve"]
 
 import inspect
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 from tempfile import gettempdir, TemporaryDirectory
 from wx import stc
 from AIAdapter import AdapterFactory
@@ -109,7 +106,7 @@ def isError(scriptlet):
 	try:
 		code = compile(scriptlet, "<string>", "exec")
 		exec(code)  # noqa: S102
-	except Exception as info:  # noqa: BLE001
+	except Exception as info:  
 		return info
 	else:
 		return False
@@ -124,7 +121,7 @@ def getObjectFromString(scriptlet):
 	# Compile the scriptlet.
 	try:
 		code = compile(scriptlet, "<string>", "exec")
-	except Exception as info:  # noqa: BLE001
+	except Exception as info:  
 		### Add line number to the error trace
 		for frame in traceback.extract_tb(sys.exc_info()[2]):
 			_, lineno, _, _ = frame
@@ -142,7 +139,7 @@ def getObjectFromString(scriptlet):
 		try:
 			exec(code, temp.__dict__)  # noqa: S102
 
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			### Add line number to the error trace
 			for frame in traceback.extract_tb(sys.exc_info()[2]):
 				_, lineno, _, _ = frame
@@ -160,7 +157,7 @@ def getObjectFromString(scriptlet):
 					try:
 						return eval(f"temp.{name}")()
 
-					except Exception as info:  # noqa: BLE001
+					except Exception as info:  
 						### Add line number to the error trace
 						for frame in traceback.extract_tb(sys.exc_info()[2]):
 							_, lineno, _, _ = frame
@@ -423,7 +420,7 @@ class PythonSTC(stc.StyledTextCtrl):
 			)
 			# Attendre qu'il soit prêt dans un thread
 			threading.Thread(target=self.wait_for_server, daemon=True).start()
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:  
 			print("Erreur démarrage Ollama:", e)
 
 	def wait_for_server(self, timeout=10):
@@ -459,7 +456,7 @@ class PythonSTC(stc.StyledTextCtrl):
 			except requests.exceptions.ReadTimeout:
 				# Timeout temporaire, on ignore
 				pass
-			except Exception as e:  # noqa: BLE001
+			except Exception as e:  
 				print("Erreur Ollama:", e)
 
 		threading.Thread(target=worker, daemon=True).start()
@@ -1163,7 +1160,7 @@ class EditionNotebook(wx.Notebook):
 			canvas.deselect()
 			canvas.Refresh()
 
-		except Exception:  # noqa: BLE001, S110
+		except Exception:  # noqa: S110
 			pass
 		evt.Skip()
 
@@ -1268,7 +1265,7 @@ class EditionNotebook(wx.Notebook):
 
 				currentPage.modify = False
 
-			except Exception as info:  # noqa: BLE001
+			except Exception as info:  
 				wx.MessageBox(
 					_("Error opening file:\n%s\n") % str(info),
 					"Open file function",
@@ -1289,7 +1286,7 @@ class EditionNotebook(wx.Notebook):
 
 		### if zipfile
 		if zipfile.is_zipfile(model_dir):
-			model_name, _ = os.path.basename(model_dir).split(".")  # toto, .amd or .cmd
+			model_name, _ext = os.path.basename(model_dir).split(".")  # toto, .amd or .cmd
 			fic_name, fic_ext = fic_filename.split(".")  # toto, *
 
 			### write code in base_name temporary file
@@ -1302,7 +1299,7 @@ class EditionNotebook(wx.Notebook):
 			### Clean up the temporary file yourself
 			try:
 				os.remove(fic_filename)
-			except Exception as info:  # noqa: BLE001
+			except Exception as info:  
 				sys.exc_info()
 				sys.stderr.write(_(f"File has not been deleted: {info}"))  # noqa: INT001
 
@@ -1316,7 +1313,7 @@ class EditionNotebook(wx.Notebook):
 			r_file = os.path.join(os.path.basename(model_dir), fic_filename)
 			model_dir = os.path.dirname(model_dir)
 
-			model_name, _ = os.path.basename(model_dir).split(".")  # toto, .amd or .cmd
+			model_name, _ext = os.path.basename(model_dir).split(".")  # toto, .amd or .cmd
 			fic_name, fic_ext = fic_filename.split(".")  # toto, *
 
 			### write code in base_name temporary file
@@ -1402,7 +1399,7 @@ class EditionNotebook(wx.Notebook):
 						### Check indentation
 						try:
 							tabnanny.check(extracted_path)
-						except Exception as e:  # noqa: BLE001
+						except Exception as e:  
 							sys.stderr.write(_(f"Erreur dans {python_file} : {e}"))  # noqa: INT001
 
 	### NOTE: EditionNotebook :: OnReIndent 	=> Event on re-indent
@@ -2738,22 +2735,7 @@ class BlockBase:
 				if inspect.isclass(classe):
 					# get behavioral attribute from python file through constructor class
 					# args must have default value in the constructor
-					try:
-						constructor = inspect.getargspec(classe.__init__)
-						new_args = (
-							dict(list(zip(constructor.args[1:], constructor.defaults)))
-							if constructor.defaults
-							else {}
-						)
-					except ValueError:
-						constructor = inspect.signature(classe.__init__)
-						parameters = constructor.parameters
-						new_args = {}
-
-						for name, parameter in parameters.items():
-							if name != "self":  # noqa: SIM102
-								if parameter.default != inspect.Parameter.empty:
-									new_args[name] = parameter.default
+					new_args = Components.GetArgs(classe)
 
 					self.UpdateArgs(new_args)
 

@@ -328,7 +328,7 @@ class GeneralPanel(wx.Panel):
 
 				# Save settings
 				mainW.SaveUserSettings()
-			except Exception as e:  # noqa: BLE001
+			except Exception as e:  
 				wx.LogError(f"Error updating library tree: {e!s}")
 
 			return True
@@ -506,7 +506,7 @@ class BrokerConfigDialog(wx.Dialog):
 								self.config[key] = value
 					logger.info(f"Loaded {self.broker_name} configuration from file")
 					return
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:  
 			logger.warning(f"Could not load config from file: {e}")
 
 		# Fall back to builtins
@@ -515,7 +515,7 @@ class BrokerConfigDialog(wx.Dialog):
 			if hasattr(builtins, saved_key):
 				saved_config = getattr(builtins, saved_key, {})
 				self.config.update(saved_config)
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:  
 			logger.warning(f"Could not load config from builtins: {e}")
 
 	def _create_ui(self):
@@ -622,7 +622,7 @@ class BrokerConfigDialog(wx.Dialog):
 				cfg.write(f)
 
 			logger.info(f"Saved {self.broker_name} configuration to {config_file}")
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:  
 			logger.error(f"Error saving broker config to file: {e}")
 
 		# Also update mqttconfig if MQTT
@@ -635,7 +635,7 @@ class BrokerConfigDialog(wx.Dialog):
 				logger.info(
 					f"Saved MQTT configuration: {config.get('address')}:{config.get('port')}"
 				)
-			except Exception as e:  # noqa: BLE001
+			except Exception as e:  
 				logger.error(f"Error saving MQTT config: {e}")
 
 		# Close dialog
@@ -674,7 +674,7 @@ class BrokerConfigDialog(wx.Dialog):
 					_("Not Implemented"),
 					wx.OK | wx.ICON_INFORMATION,
 				)
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:  
 			wx.MessageBox(f"{_('Connection failed')}:\n{e!s}", _("Error"), wx.OK | wx.ICON_ERROR)
 
 	def _test_mqtt_connection(self, config):
@@ -834,7 +834,7 @@ class SimulationPanel(wx.Panel):
 					logger.debug(
 						f"Loaded MQTT config from file: {address}:{port}, username={'(set)' if username else 'None'}"
 					)
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:  
 			logger.debug(f"Could not load MQTT config from file: {e}")
 
 	def InitUI(self):
@@ -1135,7 +1135,7 @@ class SimulationPanel(wx.Panel):
 				# Auto-play the selected sound
 				playSound(val)
 
-			except Exception as e:  # noqa: BLE001
+			except Exception as e:  
 				wx.MessageBox(str(e), _("Error"), wx.OK | wx.ICON_ERROR)
 
 		dlg.Destroy()
@@ -1155,7 +1155,7 @@ class SimulationPanel(wx.Panel):
 			else:
 				wx.MessageBox(_("No sound file selected"), _("Info"), wx.OK | wx.ICON_INFORMATION)
 
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:  
 			wx.MessageBox(str(e), _("Error"), wx.OK | wx.ICON_ERROR)
 
 	def onCb1Check(self, evt):
@@ -1405,7 +1405,7 @@ class SimulationPanel(wx.Panel):
 
 				changes.append(_("DEVS kernel package"))
 
-			except Exception as e:  # noqa: BLE001
+			except Exception as e:  
 				wx.LogError(f"Error reloading modules: {e!s}")
 
 		# Enable/disable priority icon based on DEVS kernel
@@ -1413,7 +1413,7 @@ class SimulationPanel(wx.Panel):
 			mainW = getTopLevelWindow()
 			tb = mainW.GetToolBar()
 			tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, "PyPDEVS" not in self.default_devs_dir)
-		except:  # noqa: E722, S110
+		except Exception:  # noqa: S110
 			pass
 
 		# Update all settings
@@ -1758,7 +1758,7 @@ class EditorPanel(wx.Panel):
 						).format(selected)
 						icon = wx.ICON_ERROR
 
-				except Exception as e:  # noqa: BLE001
+				except Exception as e:  
 					wx.EndBusyCursor()
 					msg = _("Error during installation:\n{}").format(str(e))
 					icon = wx.ICON_ERROR
@@ -2108,7 +2108,7 @@ class AIPanel(wx.Panel):
 			else:
 				raise Exception(_("Failed to create adapter"))  # noqa: TRY002
 
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:  
 			self.status_indicator.SetLabel(_("Failed"))
 			self.status_indicator.SetForegroundColour(wx.Colour(255, 0, 0))
 
@@ -2359,7 +2359,7 @@ class Preferences(wx.Toolbook):
 			parent.Layout()
 			parent.Refresh()
 
-		except:  # noqa: E722, S110
+		except Exception:  # noqa: S110
 			pass  # Silent fail
 
 	def OnPageChanging(self, event):
@@ -2379,7 +2379,7 @@ class Preferences(wx.Toolbook):
 		wcd = "All files (*)|*|Editor files (*.py)|*.py"
 		open_dlg = wx.FileDialog(
 			self,
-			message=_("Choose a file"),  # noqa: F823
+			message=_("Choose a file"),
 			defaultDir=DEVSIMPY_PACKAGE_PATH,  # type: ignore  # noqa: F821
 			defaultFile="",
 			wildcard=wcd,
@@ -2390,14 +2390,14 @@ class Preferences(wx.Toolbook):
 			### sure is python file
 			if filename.endswith((".py", "pyc")):
 				### Insert item in list
-				basename, _ = os.path.splitext(os.path.basename(filename))
+				basename, _ext = os.path.splitext(os.path.basename(filename))
 				root = os.path.dirname(filename)
 				self.CheckList.Importing(root, basename)
 
 				### trying to copy file in plug-in directory in order to find it again when the plugins list is populate (depending on the __init__.py file)
 				try:
 					shutil.copy2(filename, PLUGINS_PATH)  # noqa: F821 # type: ignore
-				except Exception as info:  # noqa: BLE001
+				except Exception as info:  
 					sys.stderr.write(
 						_("ERROR: %s copy failed!\n%s") % (os.path.basename(filename), str(info))
 					)
@@ -2421,7 +2421,7 @@ class Preferences(wx.Toolbook):
 				### Delete query
 				dial = wx.MessageDialog(
 					self,
-					_(  # noqa: F823
+					_(
 						f"Do you want to delete the selected {self.CheckList.GetItemText(i)} plugins?"  # noqa: INT001
 					),
 					_("Plugin MAnager"),
@@ -2431,7 +2431,7 @@ class Preferences(wx.Toolbook):
 					### for selected plug-ins
 
 					module = self.CheckList.GetPyData(i)[0]
-					basename, _ = os.path.splitext(os.path.basename(module.__file__))
+					basename, _ext = os.path.splitext(os.path.basename(module.__file__))
 
 					### delete item
 					self.CheckList.DeleteItem(i)
@@ -2450,7 +2450,7 @@ class Preferences(wx.Toolbook):
 						)
 						if dlg.ShowModal() == wx.ID_YES:
 							os.remove(module.__file__)
-					except Exception:  # noqa: BLE001
+					except Exception:  
 						sys.stderr.write(_("ERROR: plugin file not deleted!"))
 					else:
 						dlg.Destroy()
@@ -2645,7 +2645,7 @@ class PreferencesGUI(wx.Frame):
 			)
 			dlg.ShowModal()
 			dlg.Destroy()
-		except Exception:  # noqa: BLE001
+		except Exception:  
 			# Fallback
 			wx.MessageBox(help_msg, _("Preferences Help"), wx.OK | wx.ICON_INFORMATION)
 

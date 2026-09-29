@@ -297,7 +297,7 @@ class AIPrompterDialog(wx.Dialog):
 					wx.OK | wx.ICON_WARNING,
 				)
 
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:
 			wx.MessageBox(
 				_("An error occurred while processing your request:\n{}").format(str(e)),
 				_("Error"),
@@ -327,7 +327,7 @@ class AIPrompterDialog(wx.Dialog):
 				wx.MessageBox(
 					_("JSON file saved successfully!"), _("Success"), wx.OK | wx.ICON_INFORMATION
 				)
-			except Exception as e:  # noqa: BLE001
+			except Exception as e:
 				wx.MessageBox(
 					_("Error saving file:\n{}").format(str(e)), _("Error"), wx.OK | wx.ICON_ERROR
 				)

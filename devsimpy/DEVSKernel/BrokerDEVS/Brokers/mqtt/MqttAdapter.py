@@ -184,7 +184,7 @@ class MqttConsumer:
         try:
             # Try to get a message from the queue with timeout
             return self.message_queue.get(timeout=timeout)
-        except:
+        except Exception:
             # Queue is empty or timeout occurred
             return None
     

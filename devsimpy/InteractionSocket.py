@@ -110,7 +110,7 @@ class InteractionManager(threading.Thread):
 
 			log("SocketServer created ** ")
 
-		except:
+		except Exception:
 			self.server = None
 			log("SocketServer creation failed ** ")
 			# log (traceback.format_exc())

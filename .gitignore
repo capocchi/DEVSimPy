@@ -62,6 +62,7 @@ develop-eggs/
 *.log
 *.out
 *.report
+mypy-report.txt
 
 #################
 # Profiling

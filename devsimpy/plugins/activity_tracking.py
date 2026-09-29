@@ -51,7 +51,7 @@ required_libs = ['pydot','pylab','networkx','psutil','radon']
 for lib_name in required_libs:
     try:
         importlib.import_module(lib_name)
-    except:
+    except Exception:
         subprocess.run(f'pip install {lib_name}'.split())
 
 # for graph
@@ -509,7 +509,7 @@ class ActivityData:
 					halstead_list = list(p.imap(GetHalsteadMetrics, model_list))
 					raw_list = list(p.imap(GetRawMetrics, model_list))
 					timeIt_list = list(p.imap(GetTimeIt, model_list))
-			except:
+			except Exception:
 
 				mcCabe_list = list(map(GetMacCabeMetric, model_list))
 				halstead_list = list(map(GetHalsteadMetrics, model_list))
@@ -531,7 +531,7 @@ class ActivityData:
 					l = list(p.imap(sum, (mcCabe_list, h, N, vol, calculated_lenght, loc, lloc, sloc, worst_case, best_case)))
 
 				data.append(['Total', '-']+l)
-			except:
+			except Exception:
 				data.append(['Total', '-', sum(mcCabe_list), sum(h), sum(N), sum(vol), sum(calculated_lenght), sum(loc), sum(lloc), sum(sloc), sum(worst_case), sum(best_case)])
 
 			rowLabels = [str(a) for a in range(len(data)+1)]
@@ -1110,7 +1110,7 @@ class ActivityReport(wx.Frame):
 					table.data[i][2] = c[0]
 					table.data[i][3] = c[1]
 					table.data[i][4] = c[2]
-				except:
+				except Exception:
 					pass
 
 				if WRITE_DYNAMIC_METRICS:
@@ -1173,7 +1173,7 @@ class ActivityReport(wx.Frame):
 
 		try:
 			msg=L[col]
-		except:
+		except Exception:
 			msg = ''
 
 		self.ReportGrid.GetGridColLabelWindow().SetToolTip(msg)

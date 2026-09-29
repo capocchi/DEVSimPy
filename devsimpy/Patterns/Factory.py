@@ -200,7 +200,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 				### traceback exception engine for .py file
 				try:
 					self.simulate(self.model.FINAL_TIME)
-				except Exception:  # noqa: BLE001
+				except Exception:  
 					self.terminate(error=True, msg=sys.exc_info())
 
 		def terminate(self, error=False, msg=None):
@@ -236,10 +236,10 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 						if GUI_FLAG:  # type: ignore
 							try:
 								pub.sendMessage("%d.finished" % (id(m)))  # noqa: UP031
-							except Exception:  # noqa: BLE001
+							except Exception:  
 								try:
 									pub.sendMessage("%d.finished" % (id(m)), msg="")  # noqa: UP031
-								except:  # noqa: E722, S110
+								except Exception:  # noqa: S110
 									pass
 						else:
 							m.finish(None)
@@ -254,7 +254,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 									None,
 									timeout=5,
 								)
-							except:  # noqa: E722
+							except Exception:  
 								NotificationMessage(
 									"Information",
 									"Profiling report is available on Options->Profile",

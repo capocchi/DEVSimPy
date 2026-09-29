@@ -16,7 +16,7 @@ from .Object import Message  # noqa: F401
 
 try:
 	from devsimpy.DEVSKernel.PyDEVS.DEVS import transition as _transition, handler as _handler
-except Exception:  # noqa: BLE001
+except Exception:  
 
 	def _transition(kind):
 		def decorator(fn):

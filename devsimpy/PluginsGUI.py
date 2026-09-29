@@ -33,9 +33,6 @@ import types
 
 import inspect
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 from abc import abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
@@ -425,7 +422,7 @@ class BlockPluginsList(CheckListCtrl):
 				pool = ThreadPoolExecutor(3)
 				future = pool.submit(self.Populate, (PluginManager.pluginsList))
 				future.done()
-			except:  # noqa: E722
+			except Exception:  
 				self.Populate(PluginManager.pluginsList)
 			finally:
 				self.is_populate = True
@@ -574,7 +571,7 @@ class BlockPluginsList(CheckListCtrl):
 				try:
 					module = importer.load_module(fullname)
 
-				except Exception as info:  # noqa: BLE001
+				except Exception as info:  
 					sys.stderr.write(_(f"Error loading plug-ins: {info}\n"))  # noqa: INT001
 					return info
 			else:
@@ -591,7 +588,7 @@ class BlockPluginsList(CheckListCtrl):
 						### trying to eval new element to assign
 						try:
 							new = eval(f"module.{name}")
-						except Exception as info:  # noqa: BLE001
+						except Exception as info:  
 							new = info
 							new.__doc__ = str(info)
 
@@ -922,7 +919,7 @@ class ModelPluginsManager(wx.Frame):
 			try:
 				eval(code)
 			### Error occur
-			except Exception as info:  # noqa: BLE001
+			except Exception as info:  
 				msg = (
 					_(
 						"Error trying to load plug-in.\nInfo : %s\nDo you want to edit this plug-in file?"

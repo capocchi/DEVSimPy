@@ -32,7 +32,7 @@ class AsynchronousComboGenerator:
             # First perform a sanity check on the input
             try:
                 (a, b) = result.split()
-            except:
+            except Exception:
                 if result != "":
                     print("ERROR: input should be of the form PORT VALUE, exiting!")
                 result = ""

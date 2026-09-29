@@ -31,9 +31,6 @@ import ast
 
 import inspect
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 _ = gettext.gettext
 
 from PluginManager import PluginManager  # trigger_event
@@ -134,7 +131,7 @@ def get_imported_modules(module_name: str) -> list:
 
 		return imported_modules
 
-	except Exception as e:  # noqa: BLE001
+	except Exception as e:  
 		sys.stdout.write(f"Error while analyzing {module.__file__}: {e}")
 		return set()
 
@@ -350,14 +347,14 @@ class Zip:
 			return False
 
 		bn = os.path.basename(fn)
-		name, _ = os.path.splitext(bn)
+		name, _ext = os.path.splitext(bn)
 
 		with zipfile.ZipFile(fn) as zf:
 			### find all python files
 			for file in zf.namelist():
 				if file.endswith(".py"):
 					r = repr(zf.read(file))
-					n, _ = os.path.splitext(file)
+					n, _ext = os.path.splitext(file)
 					if n == name and (
 						"class %s(DomainBehavior)" % name in r  # noqa: UP031
 						or "class %s(DomainStructure)" % name in r  # noqa: UP031
@@ -467,7 +464,7 @@ class Zip:
 
 			return module
 		### model has not python file !
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:  
 			return e
 
 	def ImportModule(self) -> types.ModuleType:
@@ -523,7 +520,7 @@ class Zip:
 			else:
 				sys.stdout.write(_(f"Please install {package}"))  # noqa: INT001
 
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:  
 			return e
 
 		if module:
@@ -563,7 +560,7 @@ class Zip:
 			module = self.ImportModule()
 		# 			return module
 
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			msg_i = _("Error in execution: ")
 			msg_o = listf(format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
 			try:
@@ -593,7 +590,7 @@ class Zip:
 		"""remove and rename the zip file."""
 		try:
 			os.remove(self.fn)
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			# sys.exc_info()
 			sys.stderr.write(_(f"File has not been deleted: {info}"))  # noqa: INT001
 
@@ -606,5 +603,5 @@ class Zip:
 			if os.path.exists(self.fn):
 				try:
 					shutil.move("new_arch.zip", self.fn)
-				except:  # noqa: E722, S110
+				except Exception:  # noqa: S110
 					pass

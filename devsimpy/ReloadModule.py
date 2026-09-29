@@ -36,7 +36,7 @@ def recompile(modulename):
 			### first, see if the module can be imported at all...
 			# tmp = __import__(modulename, globals(), locals(), fromlist = [modulename.split('.')[-1]])
 			tmp = importlib.import_module(modulename)
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			return info
 
 		### Use the imported module to determine its actual path
@@ -51,7 +51,7 @@ def recompile(modulename):
 		### if compile() fails, the module will not be replaced.
 		try:
 			compile(code, modulename, "exec")
-		except:  # noqa: E722
+		except Exception:  
 			return (
 				"Error in compilation: "
 				+ str(sys.exc_info()[0])
@@ -62,7 +62,7 @@ def recompile(modulename):
 			### Ok, it compiled.  But will it execute without error?
 			try:
 				exec(compile(open(modulepath).read(), modulepath, "exec"), globals())  # noqa: S102, SIM115
-			except Exception:  # noqa: BLE001
+			except Exception:  
 				# return "Error '%s' happened on line %d" % (info[0], info[1][1])
 				return (
 					"Error in execution: "
@@ -79,7 +79,7 @@ def recompile(modulename):
 				### reload recursivelly!
 				try:
 					reloadall(tmp)
-				except Exception as info:  # noqa: BLE001
+				except Exception as info:  
 					sys.stdout.write(
 						_("Error trying to reload dependencies in recompile module: %s\n") % info
 					)
@@ -108,7 +108,7 @@ def recompile2(modulename):
 			### first, see if the module can be imported at all...
 			tmp = __import__(modulename, globals(), locals(), fromlist=[modulename.split(".")[-1]])
 
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			return info
 
 		### Use the imported module to determine its actual path

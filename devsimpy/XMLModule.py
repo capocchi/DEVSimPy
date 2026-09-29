@@ -615,7 +615,7 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 
 	try:
 		xmldoc = minidom.parse(xmlses_file)
-	except Exception as info:  # noqa: BLE001
+	except Exception as info:  
 		sys.stdout.write(f"Error importing {xmlses_file}: {info}\n")
 		sys.stdout.write("Please check the XML SES file\n")
 		return False
@@ -632,14 +632,14 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 		try:
 			### Make the DEVSimPy diagram
 			diagram = GetDiagram(canvas, xml_to_dict, parent_block=canvas)
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			sys.stdout.write(_("Error making the diagram from XML SES: %s\n") % info)
 			return False
 		else:
 			try:
 				### Make the DEVSimPy diagram coupling
 				diagram = GetDiagramCoupling(canvas)
-			except Exception as info:  # noqa: BLE001
+			except Exception as info:  
 				sys.stdout.write(
 					_("Error making the coupling into the diagram from XML SES: %s\n") % info
 				)

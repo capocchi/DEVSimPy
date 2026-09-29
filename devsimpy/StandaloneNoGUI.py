@@ -61,7 +61,7 @@ def get_pip_packages() -> list:
 	try:
 		installed_packages = [dist.name for dist in distributions()]
 		return installed_packages
-	except Exception as e:  # noqa: BLE001
+	except Exception as e:  
 		sys.stdout.write(f"Error retrieving pip packages: {e}")
 		return []
 
@@ -155,14 +155,14 @@ def add_library_to_archive(archive, lib_path):
 					archive.write(file_path, arcname=relative_path)
 					added_files.add(relative_path)
 					files_added += 1
-				except Exception as e:  # noqa: BLE001
+				except Exception as e:  
 					sys.stderr.write(
 						_(
 							f"\nError adding {file_path} to archive: {e}\n"  # noqa: INT001
 						)
 					)
 
-	except Exception as e:  # noqa: BLE001
+	except Exception as e:  
 		sys.stderr.write(_(f"\nError processing library {lib_path}: {e}\n"))  # noqa: INT001
 
 	return files_added
@@ -551,7 +551,7 @@ services:
 						self.logger.info(
 							f"Requirements file added with {len(pip_packages_used_to_add_in_requirements)} additional packages"
 						)
-					except Exception as e:  # noqa: BLE001
+					except Exception as e:  
 						self.logger.error(f"Error handling requirements file: {e}")
 						sys.stdout.write(f"Error handling requirements file: {e}\n")
 						return False
@@ -567,7 +567,7 @@ services:
 							basic_requirements = "# DEVSimPy requirements\n"
 							self.logger.info("Creating basic requirements file")
 							archive.writestr("requirements-devsimpy-nogui.txt", basic_requirements)
-					except Exception as e:  # noqa: BLE001
+					except Exception as e:  
 						self.logger.error(f"Error handling requirements file: {e}")
 						sys.stdout.write(f"Error handling requirements file: {e}\n")
 						return False

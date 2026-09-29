@@ -75,7 +75,7 @@ import gettext
 
 try:
 	import wx.aui as aui
-except:  # noqa: E722
+except Exception:  
 	import wx.lib.agw.aui as aui
 
 import wx.py as py
@@ -95,7 +95,7 @@ except ImportError:
 # to send event
 try:
 	from pubsub import pub
-except Exception:  # noqa: BLE001
+except Exception:  
 	sys.stdout.write("Last version for Python2 is PyPubSub 3.3.0 \n pip install PyPubSub==3.3.0")
 	sys.exit()
 
@@ -216,7 +216,7 @@ class MainApplication(wx.Frame):
 
 		try:
 			icon = wx.Icon(os.path.join(ICON_PATH, DEVSIMPY_ICON), wx.BITMAP_TYPE_ANY)  # type: ignore  # noqa: F821
-		except:  # noqa: E722
+		except Exception:  
 			icon_bitmap = load_and_resize_image(DEVSIMPY_ICON.replace(".ico", ".png"))  # type: ignore  # noqa: F821
 			icon = wx.Icon()
 			icon.CopyFromBitmap(icon_bitmap)
@@ -493,7 +493,7 @@ class MainApplication(wx.Frame):
 				try:
 					self.last_position = eval(self.cfg.Read("last_position"))
 					self.last_size = eval(self.cfg.Read("last_size"))
-				except:  # noqa: E722
+				except Exception:  
 					self.last_position = None
 					self.last_size = None
 				else:
@@ -591,13 +591,13 @@ class MainApplication(wx.Frame):
 		if self.language in ("en", "fr"):
 			try:
 				locale.setlocale(locale.LC_ALL, self.language)
-			except:  # noqa: E722
+			except Exception:  
 				sys.stdout.write(_("new local (since wx 4.1.0) setting not applied\n"))
 			translation = gettext.translation(domain, localedir, languages=[self.language])
 		else:
 			try:
 				locale.setlocale(locale.LC_ALL, "C")
-			except:  # noqa: E722
+			except Exception:  
 				sys.stdout.write(_("new local (since wx 4.1.0) setting not applied\n"))
 			# installing os language by default
 			translation = gettext.translation(
@@ -970,7 +970,7 @@ class MainApplication(wx.Frame):
 			)
 			dlg.ShowModal()
 			dlg.Destroy()
-		except Exception:  # noqa: BLE001
+		except Exception:  
 			# Fallback
 			wx.MessageBox(help_msg, _("Toolbar Help"), wx.OK | wx.ICON_INFORMATION)
 
@@ -1205,7 +1205,7 @@ class MainApplication(wx.Frame):
 				tds = wx.DropSource(tree)
 				tds.SetData(tdo)
 				tds.DoDragDrop(True)
-			except:  # noqa: E722
+			except Exception:  
 				sys.stderr.write(_("OnDragInit avorting \n"))
 
 	###
@@ -1266,7 +1266,7 @@ class MainApplication(wx.Frame):
 			try:
 				### select the first page
 				self.nb2.SetSelection(0)
-			except:  # noqa: E722, S110
+			except Exception:  # noqa: S110
 				pass
 			if not self.nb2.OnClosePage(event):
 				exit = True
@@ -1670,7 +1670,7 @@ class MainApplication(wx.Frame):
 					canvas = obj.GetToolClientData(event.GetId())
 					if canvas is not None:
 						return canvas
-			except Exception:  # noqa: BLE001, S110
+			except Exception:  # noqa: S110
 				pass
 
 		### active detached frame, if any
@@ -1679,7 +1679,7 @@ class MainApplication(wx.Frame):
 			frame = focused.GetTopLevelParent() if focused is not None else None
 			if isinstance(frame, DetachedFrame):
 				return frame.canvas
-		except Exception:  # noqa: BLE001, S110
+		except Exception:  # noqa: S110
 			pass
 
 		return self.nb2.GetCurrentPage()
@@ -2176,7 +2176,7 @@ class MainApplication(wx.Frame):
 
 						### center and shit to avoid superposition
 						if simFrame:
-							_, _, dw, dh = wx.ClientDisplayRect()
+							_x, _y, dw, dh = wx.ClientDisplayRect()
 							w, h = simFrame.GetSize()
 							g = 15 * i
 							x = dw - w + g
@@ -2810,7 +2810,7 @@ class AdvancedSplashScreen(AdvancedSplash):
 		except AttributeError:
 			try:
 				self.PushStatusText(data)
-			except:  # noqa: E722, S110
+			except Exception:  # noqa: S110
 				pass
 
 		with open(LOG_FILE, "a") as f:  # type: ignore  # noqa: F821
@@ -2836,7 +2836,7 @@ class AdvancedSplashScreen(AdvancedSplash):
 		# Call after the loading diagram method which depends on the invocked command line
 		try:
 			wx.CallAfter(self.app.frame.OnLoadDiagram)
-		except:  # noqa: E722, S110
+		except Exception:  # noqa: S110
 			pass
 
 	def ShowMain(self):
@@ -2979,7 +2979,7 @@ class DEVSimPyApp(wx.App, wit.InspectionMixin):
 	def RestoreStdio(self):
 		try:
 			sys.stdout, sys.stderr = self.saveStdio
-		except:  # noqa: E722, S110
+		except Exception:  # noqa: S110
 			pass
 
 	def MainLoop(self):
@@ -3072,7 +3072,7 @@ def main():
 			if r in ("Y", "y", "yes", "Yes", "YES"):
 				try:
 					os.remove(config_file1)
-				except Exception:  # noqa: BLE001, S110
+				except Exception:  # noqa: S110
 					# traceback.print_exc()
 					pass
 				else:
@@ -3080,7 +3080,7 @@ def main():
 
 				try:
 					os.remove(config_file2)
-				except Exception:  # noqa: BLE001, S110
+				except Exception:  # noqa: S110
 					# traceback.print_exc()
 					pass
 				else:

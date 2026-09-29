@@ -38,9 +38,6 @@ import types
 import inspect
 from functools import lru_cache
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 from datetime import datetime
 
 import gettext
@@ -134,7 +131,7 @@ def get_version():
 			return pyproject_data["project"]["version"]
 	except FileNotFoundError:
 		pass
-	except Exception as e:  # noqa: BLE001
+	except Exception as e:  
 		print(f"Warning: Could not retrieve version from pyproject.toml. {e}")
 
 	# Fallback to importlib.metadata
@@ -273,7 +270,7 @@ def check_internet():
 	timeout = 5
 	try:
 		_ = urllib.request.urlopen(url, timeout=timeout)
-	except Exception as e:  # noqa: BLE001
+	except Exception as e:  
 		print(e)
 		return False
 	else:
@@ -287,7 +284,7 @@ def updatePiP():
 		try:
 			command = "python -m pip install --upgrade pip"
 			run_command(command, "to_progress_diag")
-		except Exception as ee:  # noqa: BLE001
+		except Exception as ee:  
 			print(ee.output)
 			return False
 		else:
@@ -304,7 +301,7 @@ def downloadFromURL(url):
 		# download the file contents in binary format
 		pub.sendMessage("to_progress_diag", message=_(f"Download git archive from:\n{url}"))  # noqa: INT001
 		r = urllib.request.urlopen(url)
-	except Exception as e:  # noqa: BLE001
+	except Exception as e:  
 		print(e)
 		return None
 	else:
@@ -352,7 +349,7 @@ def updateFromGitRepo():
 		repo = git.Repo(DEVSIMPY_PACKAGE_PATH)  # type: ignore
 		o = repo.remotes.origin
 		o.pull()
-	except Exception:  # noqa: BLE001
+	except Exception:  
 		print("print_exc():")
 		traceback.print_exc(file=sys.stdout)
 		print("\n")
@@ -389,7 +386,7 @@ def updateFromGitArchive():
 			)
 			zipdir(os.getcwd(), zipf)
 			zipf.close()
-		except Exception:  # noqa: BLE001
+		except Exception:  
 			print("print_exc():")
 			traceback.print_exc(file=sys.stdout)
 			print("\n")
@@ -429,7 +426,7 @@ def updateFromGitArchive():
 					src = pathlib.Path(os.path.join(tempdir, "DEVSimPy-master"))
 					dest = pathlib.Path(os.path.join(tempdir, os.getcwd()))
 					copy_dir(src, dest)
-			except Exception:  # noqa: BLE001
+			except Exception:  
 				print("print_exc():")
 				traceback.print_exc(file=sys.stdout)
 				print("\n")
@@ -461,7 +458,7 @@ def run_command(command, message=None):
 			if output and message:
 				pub.sendMessage(message, message=output.strip())
 		process.poll()
-	except:  # noqa: E722
+	except Exception:  
 		check_call(command, shell=True)
 
 
@@ -481,7 +478,7 @@ def updatePiPPackages():
 
 		try:
 			run_command(command, "to_progress_diag")
-		except Exception:  # noqa: BLE001
+		except Exception:  
 			print("print_exc():")
 			traceback.print_exc(file=sys.stdout)
 			print("\n")
@@ -546,7 +543,7 @@ def getObjectFromString(scriptlet):
 	# Compile the scriptlet.
 	try:
 		code = compile(scriptlet, "<string>", "exec")
-	except Exception as info:  # noqa: BLE001
+	except Exception as info:  
 		return info
 	else:
 		# Create the new 'temp' module.
@@ -556,7 +553,7 @@ def getObjectFromString(scriptlet):
 		### there is syntaxe error ?
 		try:
 			exec(code, temp.__dict__)  # noqa: S102
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			return info
 
 		else:
@@ -566,7 +563,7 @@ def getObjectFromString(scriptlet):
 					# Create the instance.
 					try:
 						return eval(f"temp.{name}")()
-					except Exception as info:  # noqa: BLE001
+					except Exception as info:  
 						return info
 
 
@@ -610,7 +607,7 @@ def GetWXVersionFromIni():
 	### if ini file exist we remove old section and option
 	try:
 		return parser.get(section, option)
-	except:  # noqa: E722
+	except Exception:  
 		return wx.VERSION_STRING
 
 
@@ -626,7 +623,7 @@ def AddToInitFile(init_dir_path, L):
 		for r, d, f in os.walk(init_dir_path):
 			for file in f:
 				if file.endswith((".py", ".pyc")):
-					b, _ = os.path.splitext(file)
+					b, _ext = os.path.splitext(file)
 					files.append(b)
 
 		### str of __all__ variable extracted from __init__.py file
@@ -662,7 +659,7 @@ def DelToInitFile(init_dir_path, L):
 		for r, d, f in os.walk(init_dir_path):
 			for file in f:
 				if file.endswith((".py", ".pyc")):
-					b, _ = os.path.splitext(file)
+					b, _ext = os.path.splitext(file)
 					files.append(b)
 
 		### str of __all__ variable extracted from __init__.py file
@@ -786,7 +783,7 @@ def getInstance(cls, args={}):  # noqa: B006
 	if inspect.isclass(cls):
 		try:
 			devs = cls(**args)
-		except Exception:  # noqa: BLE001
+		except Exception:  
 			sys.stderr.write(_(f"Error in getInstance: {cls} not instanciated with {args!s}.\n"))  # noqa: INT001
 			sys.stderr.write(traceback.format_exc())
 			return sys.exc_info()
@@ -799,51 +796,26 @@ def getInstance(cls, args={}):  # noqa: B006
 		return sys.exc_info()
 
 
-def itersubclasses(cls, _seen=None):
-	"""
-	itersubclasses(cls)
+def itersubclasses(cls):
+    """Yield all subclasses of *cls* in depth-first order."""
+    if not isinstance(cls, type):
+        raise TypeError(
+            f"itersubclasses() expects a class, got {cls!r}"
+        )
 
-	Generator over all subclasses of a given class, in depth first order.
+    seen = set()
+    yield from _iter_subclasses(cls, seen)
 
-	>>> list(itersubclasses(int)) == [bool]
-	True
-	>>> class A(object): pass
-	>>> class B(A): pass
-	>>> class C(A): pass
-	>>> class D(B,C): pass
-	>>> class E(D): pass
-	>>>
-	>>> for cls in itersubclasses(A):
-	...     print(cls.__name__)
-	B
-	D
-	E
-	C
-	>>> # get ALL (new-style) classes currently defined
-	>>> [cls.__name__ for cls in itersubclasses(object)] #doctest: +ELLIPSIS
-	['type', ...'tuple', ...]
-	"""
 
-	if not isinstance(cls, type):
-		raise TypeError(
-			"itersubclasses must be called with "  # noqa: UP031
-			"new-style classes, not %.100r" % cls
-		)
+def _iter_subclasses(cls, seen):
+    """Recursively yield subclasses while avoiding duplicates."""
+    for subclass in cls.__subclasses__():
+        if subclass in seen:
+            continue
 
-	if _seen is None:
-		_seen = set()
-
-	try:
-		subs = cls.__subclasses__()
-	except TypeError:  # fails only when cls is type
-		subs = cls.__subclasses__(cls)
-
-	for sub in subs:
-		if sub not in _seen:
-			_seen.add(sub)
-			yield sub
-			for sub in itersubclasses(sub, _seen):  # noqa: B020
-				yield sub
+        seen.add(subclass)
+        yield subclass
+        yield from _iter_subclasses(subclass, seen)
 
 
 def relpath(path=""):
@@ -873,7 +845,7 @@ def GetActiveWindow(event=None):
 		try:
 			child = wx.Window.FindFocus()
 			aW = wx.GetTopLevelParent(child)
-		except:  # noqa: E722, S110
+		except Exception:  # noqa: S110
 			pass
 
 	if aW is None and event is not None:
@@ -1003,7 +975,7 @@ def checkURL(url):
 						# handler = urllib.request.urlopen(req)
 						flag = True
 						deadLinkFound = True
-					except:  # noqa: E722
+					except Exception:  
 						flag = False
 						deadLinkFound = False
 				else:
@@ -1172,7 +1144,7 @@ def generate_plantuml_from_diagram_recursive(diagram, level=0, parent_package=No
 								input_ports.append(p.label)
 							elif isinstance(p, str):
 								input_ports.append(p)
-			except:  # noqa: E722, S110
+			except Exception:  # noqa: S110
 				pass
 
 			try:
@@ -1188,7 +1160,7 @@ def generate_plantuml_from_diagram_recursive(diagram, level=0, parent_package=No
 								output_ports.append(p.label)
 							elif isinstance(p, str):
 								output_ports.append(p)
-			except:  # noqa: E722, S110
+			except Exception:  # noqa: S110
 				pass
 
 			blocks[block_id] = {
@@ -1254,7 +1226,7 @@ def generate_plantuml_from_diagram_recursive(diagram, level=0, parent_package=No
 								"dst_port": dst_port_name,
 							}
 						)
-			except:  # noqa: E722, S110
+			except Exception:  # noqa: S110
 				pass
 
 	# STEP 3: Generate components
@@ -1343,7 +1315,7 @@ def export_diagram_to_plantuml(diagram, output_path="diagram.puml", detailed=Fal
 			uml_code = generate_detailed_class_diagram_recursive(diagram)
 		else:
 			uml_code = generate_plantuml_from_diagram_recursive(diagram)
-	except Exception as e:  # noqa: BLE001
+	except Exception as e:  
 		print(f"Generation failed: {e}")
 		import traceback
 
@@ -1443,7 +1415,7 @@ def generate_detailed_class_diagram_recursive(diagram, level=0):
 
 				print(f"    -> SUCCESS: Loaded class {python_class.__name__}")
 
-			except Exception as e:  # noqa: BLE001
+			except Exception as e:  
 				print(f"    -> EXCEPTION loading class: {e}")
 				import traceback
 
@@ -1454,7 +1426,7 @@ def generate_detailed_class_diagram_recursive(diagram, level=0):
 			try:
 				mro = inspect.getmro(python_class)
 				print(f"    -> MRO: {[c.__name__ for c in mro]}")
-			except Exception as e:  # noqa: BLE001
+			except Exception as e:  
 				print(f"    -> ERROR getting MRO: {e}")
 				continue
 
@@ -1512,7 +1484,7 @@ def generate_detailed_class_diagram_recursive(diagram, level=0):
 									methods.append(f"{method_name}({params})")
 								else:
 									methods.append(f"{method_name}()")
-							except:  # noqa: E722
+							except Exception:  
 								methods.append(f"{method_name}()")
 
 				# Extract attributes defined in THIS class

@@ -194,7 +194,7 @@ class GeneralNotebook(Printable):
 		try:
 			name = self.GetPageText(self.GetSelection())
 			del builtins.__dict__[str(os.path.splitext(name)[0])]
-		except Exception:  # noqa: BLE001, S110
+		except Exception:  # noqa: S110
 			pass
 			# sys.stdout.write("Constants builtin not delete for %s : %s"%(name, info))
 
@@ -211,7 +211,7 @@ try:
 	else:
 		import wx.lib.flatnotebook as fnb  # type: ignore
 	USE_FLATNOTEBOOK = True
-except:  # noqa: E722, S110
+except Exception:  # noqa: S110
 	pass
 
 if USE_FLATNOTEBOOK:

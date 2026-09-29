@@ -59,7 +59,7 @@ class Net:
 			try:
 				exec(code, mod.__dict__)  # type: ignore  # noqa: S102
 				return mod
-			except Exception as info:  # type: ignore  # noqa: BLE001
+			except Exception as info:  # type: ignore  
 				return info
 		else:
 			return r.status

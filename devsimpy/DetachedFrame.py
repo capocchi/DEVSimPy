@@ -95,7 +95,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		try:
 			self.canvas.stockUndo = self.diagram.parent.stockUndo
 			self.canvas.stockRedo = self.diagram.parent.stockRedo
-		except Exception:  # noqa: BLE001
+		except Exception:  
 			diagram.SetParent(self.canvas)
 			self.canvas.stockUndo = FixedList(getattr(builtins, "NB_HISTORY_UNDO", 5))
 			self.canvas.stockRedo = FixedList(getattr(builtins, "NB_HISTORY_UNDO", 5))
@@ -349,7 +349,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.transparent = 140
 			try:
 				self.SetTransparent(self.transparent)
-			except:  # noqa: E722
+			except Exception:  
 				sys.stdout.write(_("No transparency"))
 		event.Skip()
 
@@ -359,7 +359,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.transparent = wx.ALPHA_OPAQUE
 			try:
 				self.SetTransparent(self.transparent)
-			except:  # noqa: E722
+			except Exception:  
 				sys.stderr.write(_("No transparency"))
 		event.Skip()
 
@@ -375,7 +375,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			try:
 				canvas.OnLeftDown(event)
 				canvas.OnLeftUp(event)
-			except:  # noqa: E722, S110
+			except Exception:  # noqa: S110
 				pass
 
 		canvas.Refresh()

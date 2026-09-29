@@ -135,7 +135,7 @@ def read_dev_sim_py_config_file_without_wx(path):
 			try:
 				# essayer d'interpréter la valeur comme expression Python
 				config[key] = ast.literal_eval(value)
-			except Exception:  # noqa: BLE001
+			except Exception: 
 				# si ce n'est pas une expression Python (ex: version=5.1.1)
 				config[key] = value
 	return config
@@ -159,7 +159,7 @@ def UpdateBuiltins(new_settings=ALL_SETTINGS):
 			import wx
 
 			App = wx.App()  # noqa: F841
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:
 			sys.stdout.write(f"wx package not installed {e}.\nUser Settings ignored.")
 		else:
 			cfg = wx.FileConfig(localFilename=cfg_path)

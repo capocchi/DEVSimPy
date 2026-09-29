@@ -279,7 +279,7 @@ class StandaloneGUIKafkaPKG(wx.Frame):
 					_("Error"),
 					wx.OK | wx.ICON_ERROR,
 				)
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:  
 			wx.MessageBox(
 				_("An error occurred: {}").format(str(e)), _("Error"), wx.OK | wx.ICON_ERROR
 			)

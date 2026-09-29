@@ -759,7 +759,7 @@ class MainMenuBar(wx.MenuBar):
 				else:
 					label = _("Recent files")
 					ID = menu.FindItem(label)
-					_, pos = menu.FindChildItem(ID)
+					_itemid, pos = menu.FindChildItem(ID)
 					menu.Remove(ID)
 					menu.Insert(pos, ID, label, RecentFileMenu(self).get())
 
@@ -770,7 +770,7 @@ class MainMenuBar(wx.MenuBar):
 				else:
 					label = _("Profile")
 					ID = menu.FindItem(label)
-					_, pos = menu.FindChildItem(ID)
+					_itemid, pos = menu.FindChildItem(ID)
 					menu.Remove(ID)
 					menu.Insert(pos, ID, label, ProfileFileMenu(self).get())
 

@@ -24,9 +24,6 @@ import shutil
 
 import inspect
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 import Container
 import Menu
 
@@ -351,7 +348,7 @@ class LibraryTree(wx.TreeCtrl):
 								### delete item
 								self.RemoveItem(item)
 
-							except Exception as info:  # noqa: BLE001
+							except Exception as info:  
 								sys.stdout.write(_("%s not deleted!\n Error: %s") % (label, info))
 
 						dial.Destroy()
@@ -371,7 +368,7 @@ class LibraryTree(wx.TreeCtrl):
 								### delete item
 								self.RemoveItem(item)
 
-							except Exception as info:  # noqa: BLE001
+							except Exception as info:  
 								info = str(info)
 								sys.stdout.write(_("%s not deleted! \n Error: %s") % (label, info))
 
@@ -401,7 +398,7 @@ class LibraryTree(wx.TreeCtrl):
 							return False
 					else:
 						importlib.reload(module)
-				except:  # noqa: E722
+				except Exception:  
 					return False
 		return True
 
@@ -559,7 +556,7 @@ class LibraryTree(wx.TreeCtrl):
 
 		try:
 			name_list = getPYFileListFromInit(os.path.join(dName, "__init__.py"), ext)
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			py_file_list = []
 			# if dName contains a python file, __init__.py is forced
 			if os.path.isdir(dName):
@@ -875,7 +872,7 @@ class LibraryTree(wx.TreeCtrl):
 				else " ".join([item, "from", os.path.basename(dName)])
 			)
 			pub.sendMessage("object.added", message=f"Loading {info} domain...")
-		except:  # noqa: E722, S110
+		except Exception:  # noqa: S110
 			pass
 
 		### managment of the recursion
@@ -884,7 +881,7 @@ class LibraryTree(wx.TreeCtrl):
 
 		try:
 			self.SortChildren(parent)
-		except:  # noqa: E722, S110
+		except Exception:  # noqa: S110
 			pass
 
 		return self.InsertNewDomain(dName, parent, L)
@@ -1123,7 +1120,7 @@ class LibraryTree(wx.TreeCtrl):
 				self.CheckItem(os.path.splitext(path)[0])
 			else:
 				self.CheckItem(path)
-		except:  # noqa: E722
+		except Exception:  
 			NotificationMessage(
 				_("Error"),
 				_("Error updating the model %s") % self.GetItemText(item),
@@ -1191,7 +1188,7 @@ class LibraryTree(wx.TreeCtrl):
 
 				try:
 					os.rename(old_dirname, new_dirname)
-				except:  # noqa: E722
+				except Exception:  
 					sys.stdout.write(_("Rename failed!"))
 				else:
 					### change the path of the item and its childrens...
