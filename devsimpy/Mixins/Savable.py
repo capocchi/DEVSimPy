@@ -682,7 +682,7 @@ class DumpYAMLFile(DumpBase):
 				sys.stderr.write(f"Problem saving YAML file '{fileName}': {error}\n{tb}")
 				return False
 
-		except (OSError, Exception) as error:  # noqa: B025
+		except Exception as error:  # noqa: B025
 			tb = traceback.format_exc()
 			sys.stderr.write(f"Problem saving YAML file '{fileName}': {error}\n{tb}")
 			return False

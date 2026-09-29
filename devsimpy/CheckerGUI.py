@@ -514,11 +514,24 @@ class CheckerGUI(wx.Frame):
 
 
 if __name__ == "__main__":
-	import subprocess
 
+	import subprocess
+	
 	test_file = "test_checkergui.py"
-	args = sys.argv[1:] or ["--autoclose"]
+
+	args = sys.argv[1:]
+
+	if args and args != ["--autoclose"]:
+		raise ValueError("Only --autoclose is supported")
+
 	subprocess.call(
-		["python", os.path.join(os.path.dirname(os.path.dirname(__file__)), "tests", test_file)]
-		+ args
+		[
+			sys.executable,
+			os.path.join(
+				os.path.dirname(os.path.dirname(__file__)),
+				"tests",
+				test_file,
+			),
+			*args,
+		]
 	)

@@ -728,26 +728,11 @@ class CustomDataTable(GridTableBase):
 	# C++ version.
 	def GetValue(self, row, col):
 
-		# if col == 1:
-		# 	init_type = self.dataTypes[row][col]
-		# 	if 'list' in init_type:
-		# 		return self.data[row][col][0]
-		# 	else:
-		# 		return self.data[row][col]
-		# else:
-		# 	return self.data[row][col]
-
-		# print(init_type, self.data[row][col])
-		# try:
-		# 	return self.data[row][col][0] if isinstance(self.data[row][col], tuple) else self.data[row][col]
-		# except IndexError:
-		# 	return None
-
 		try:
-			if isinstance(self.data[row][col], tuple) or isinstance(self.data[row][col], list):  # noqa: SIM101
-				return self.data[row][col]
-			else:
-				return self.data[row][col]
+			# if isinstance(self.data[row][col], tuple) or isinstance(self.data[row][col], list):  # noqa: SIM101
+			return self.data[row][col]
+			# else:
+				# return self.data[row][col]
 		except Exception as e:  
 			sys.stdout.write(f"Exception in GetValue: {e}")  # Pour le débogage
 			return None
@@ -1004,7 +989,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 		col = coords[1]
 		row = coords[0]
 
-		event.GetEventObject().SetToolTipString == event.GetEventObject().SetToolTip  # noqa: B015
+		# event.GetEventObject().SetToolTipString == event.GetEventObject().SetToolTip 
 
 		# Note: This only sets the tooltip for the cells in the column
 		if col == 1:

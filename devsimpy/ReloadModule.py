@@ -83,11 +83,8 @@ def recompile(modulename):
 					sys.stdout.write(
 						_("Error trying to reload dependencies in recompile module: %s\n") % info
 					)
-				finally:
-					### failed when modifycations are done in py file
-					# return importlib.reload(sys.modules[modulename])
-
-					return importlib.reload(tmp)  # noqa: B012
+				
+				return importlib.reload(tmp)
 
 
 def recompile2(modulename):

@@ -129,7 +129,7 @@ def makeDEVSXML(label, D, filename):
 		file.write(ET.tostring(root).decode("utf-8"))
 
 
-def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):  # noqa: B006
+def getDiagramFromXML(xml_file="", canvas=None, D={}):  # noqa: B006
 	"""Diagram From XML"""
 
 	import WizardGUI

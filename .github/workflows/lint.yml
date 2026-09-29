@@ -27,7 +27,7 @@ jobs:
           python -m pip install --upgrade pip
           # pinned versions: "ruff check ." and "mypy ." results must be reproducible
           # (a newer ruff/mypy release may report checks that did not exist before)
-          pip install ruff==0.16.9 mypy==2.3.1
+          python -m pip install --only-binary=:all: ruff==0.16.9 mypy==2.3.1
 
       - name: Run ruff
         run: ruff check .
