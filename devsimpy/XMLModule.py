@@ -2,7 +2,7 @@
 """
 Name: XML.py
 Brief descritpion: All classes and functions linked with xml aspects
-Author(s): L. Capocchi <capocchi@univ-corse.fr>, J.F. Santucci <santucci@univ-corse.fr> 
+Author(s): L. Capocchi <capocchi@univ-corse.fr>, J.F. Santucci <santucci@univ-corse.fr>
 Version:  1.0
 Last modified: 2018.08.02
 GENERAL NOTES AND REMARKS: XMLToDict function must integrate the coupling info into D in order to be independant of the XML.
@@ -10,29 +10,36 @@ GENERAL NOTES AND REMARKS: XMLToDict function must integrate the coupling info i
 GLOBAL VARIABLES AND FUNCTIONS:
 """
 
-import os  
+import os
 import sys
 import re
 import tempfile
 
 import gettext
+
 _ = gettext.gettext
 
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
 ### avoid cyclic import during the test_xmlmodule.py execution
-if 'XMLModule' not in sys.modules:
+if "XMLModule" not in sys.modules:
 	import Container
 
-import Components  
+import Components
+
 
 def makeDEVSXML(label, D, filename):
-	""" Make XML file from D graph of the diagram
-	"""
+	"""Make XML file from D graph of the diagram"""
 
 	# build a tree structure
-	root = ET.Element("CoupledModel", {'xmlns:xsi':"http://www.w3.org/2001/XMLSchema-instance", 'xmlns:xsd':"http://www.w3.org/2001/XMLSchema"})
+	root = ET.Element(
+		"CoupledModel",
+		{
+			"xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+			"xmlns:xsd": "http://www.w3.org/2001/XMLSchema",
+		},
+	)
 
 	nom = ET.SubElement(root, "nom")
 	nom.text = label
@@ -99,9 +106,9 @@ def makeDEVSXML(label, D, filename):
 					dest.text = comp.label
 					pd = ET.SubElement(c, "portDestination")
 					pd.text = str(d[comp][1])
-			#D
+			# D
 			class_name = os.path.splitext(os.path.basename(component.python_path))[0]
-			model = ET.SubElement(components, "Model", {'xsi:type':class_name})
+			model = ET.SubElement(components, "Model", {"xsi:type": class_name})
 			n = ET.SubElement(model, "nom")
 			n.text = component.label
 			pi = ET.SubElement(model, "portsIn")
@@ -118,58 +125,64 @@ def makeDEVSXML(label, D, filename):
 
 	# create a new XML file with the results
 	with open(filename, "w") as file:
-		file.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>" + "\n")
+		file.write('<?xml version="1.0" encoding="utf-8"?>' + "\n")
 		file.write(ET.tostring(root).decode("utf-8"))
 
+
 def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):  # noqa: B006
-	""" Diagram From XML
-	"""
+	"""Diagram From XML"""
 
 	import WizardGUI
 
 	xmldoc = minidom.parse(xml_file)
 
 	### all item [2:] for id 0 and 1
-	itemlist = xmldoc.getElementsByTagName('mxCell')[2:]
+	itemlist = xmldoc.getElementsByTagName("mxCell")[2:]
 
 	### item corresponding to the block
 	blocklist = []
 	### item corresponding to the connection
 	connectionlist = []
 	for s in itemlist:
-		if 'source' in s.attributes and 'target' in s.attributes:
+		if "source" in s.attributes and "target" in s.attributes:
 			connectionlist.append(s)
 		else:
 			blocklist.append(s)
 
-	#mxGraphModel = xmldoc.getElementsByTagName('mxGraphModel')[0]
-	#dx = int(mxGraphModel.attributes['dx'].value)
-	#dy = int(mxGraphModel.attributes['dy'].value)
+	# mxGraphModel = xmldoc.getElementsByTagName('mxGraphModel')[0]
+	# dx = int(mxGraphModel.attributes['dx'].value)
+	# dy = int(mxGraphModel.attributes['dy'].value)
 
 	### parent of all block is canvas
-	D['1'] = canvas
+	D["1"] = canvas
 
 	### make block (atomic or coupled model)
-	while(blocklist!=[]):
-
+	while blocklist != []:
 		s = blocklist[0]
 
-		name = s.attributes['value'].value
-		if 'style' in s.attributes:
-
+		name = s.attributes["value"].value
+		if "style" in s.attributes:
 			### coupled model have swimlane style or *couple{d}* in value filed
-			if s.attributes['style'].value == 'swimlane' or re.match('[a-zA-Z0-9_ ]*[c|C]oupl[ed|e|é][a-zA-Z0-9_ ]*',name, re.IGNORECASE):
-				attr = s.getElementsByTagName('mxGeometry')[0].attributes
-				temp = tempfile.NamedTemporaryFile(suffix='.py')  # noqa: SIM115
-				temp.write(WizardGUI.coupledCode('CoupledModel'))
+			if s.attributes["style"].value == "swimlane" or re.match(
+				"[a-zA-Z0-9_ ]*[c|C]oupl[ed|e|é][a-zA-Z0-9_ ]*", name, re.IGNORECASE
+			):
+				attr = s.getElementsByTagName("mxGeometry")[0].attributes
+				temp = tempfile.NamedTemporaryFile(suffix=".py")  # noqa: SIM115
+				temp.write(WizardGUI.coupledCode("CoupledModel"))
 				temp.seek(0)
 
-				block = Components.BlockFactory.CreateBlock(x=int(attr['x'].value), y=int(attr['y'].value), name=name, python_file=temp.name, canvas=canvas)
+				block = Components.BlockFactory.CreateBlock(
+					x=int(attr["x"].value),
+					y=int(attr["y"].value),
+					name=name,
+					python_file=temp.name,
+					canvas=canvas,
+				)
 				block.label = name
 
-				parent_id = s.attributes['parent'].value
-				id = str(s.attributes['id'].value)
-				if parent_id == '1':
+				parent_id = s.attributes["parent"].value
+				id = str(s.attributes["id"].value)
+				if parent_id == "1":
 					canvas.AddShape(block)
 					D[id] = block
 					del blocklist[0]
@@ -181,21 +194,27 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):  # noqa: B006
 					del blocklist[0]
 
 				else:
-					blocklist.insert(len(blocklist),blocklist.pop(0))
+					blocklist.insert(len(blocklist), blocklist.pop(0))
 
-			elif re.match('[a-zA-Z0-9_ ]*[a|A]tomi[c|que][a-zA-Z0-9_ ]*',name, re.IGNORECASE):
-				attr = s.getElementsByTagName('mxGeometry')[0].attributes
-				temp = tempfile.NamedTemporaryFile(suffix='.py')  # noqa: SIM115
-				temp.write(WizardGUI.atomicCode('AtomicModel'))
+			elif re.match("[a-zA-Z0-9_ ]*[a|A]tomi[c|que][a-zA-Z0-9_ ]*", name, re.IGNORECASE):
+				attr = s.getElementsByTagName("mxGeometry")[0].attributes
+				temp = tempfile.NamedTemporaryFile(suffix=".py")  # noqa: SIM115
+				temp.write(WizardGUI.atomicCode("AtomicModel"))
 				temp.seek(0)
 
-				block = Components.BlockFactory.CreateBlock(x=int(attr['x'].value), y=int(attr['y'].value), name=name, python_file=temp.name, canvas=canvas)
+				block = Components.BlockFactory.CreateBlock(
+					x=int(attr["x"].value),
+					y=int(attr["y"].value),
+					name=name,
+					python_file=temp.name,
+					canvas=canvas,
+				)
 				block.label = name
 
-				parent_id = s.attributes['parent'].value
-				id = str(s.attributes['id'].value)
+				parent_id = s.attributes["parent"].value
+				id = str(s.attributes["id"].value)
 
-				if parent_id == '1':
+				if parent_id == "1":
 					canvas.AddShape(block)
 					D[id] = block
 					del blocklist[0]
@@ -207,21 +226,29 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):  # noqa: B006
 					del blocklist[0]
 
 				else:
-					blocklist.insert(len(blocklist),blocklist.pop(0))
+					blocklist.insert(len(blocklist), blocklist.pop(0))
 
-		elif 'vertex' in s.attributes:
-			if s.attributes['vertex'].value == '1' or re.match('[a-zA-Z0-9_ ]*[a|A]tomi[c|que][a-zA-Z0-9_ ]*',name, re.IGNORECASE):
-				attr = s.getElementsByTagName('mxGeometry')[0].attributes
-				temp = tempfile.NamedTemporaryFile(suffix='.py')  # noqa: SIM115
-				temp.write(WizardGUI.atomicCode('AtomicModel'))
+		elif "vertex" in s.attributes:
+			if s.attributes["vertex"].value == "1" or re.match(
+				"[a-zA-Z0-9_ ]*[a|A]tomi[c|que][a-zA-Z0-9_ ]*", name, re.IGNORECASE
+			):
+				attr = s.getElementsByTagName("mxGeometry")[0].attributes
+				temp = tempfile.NamedTemporaryFile(suffix=".py")  # noqa: SIM115
+				temp.write(WizardGUI.atomicCode("AtomicModel"))
 				temp.seek(0)
 
-				block = Components.BlockFactory.CreateBlock(x=int(attr['x'].value), y=int(attr['y'].value), name=name, python_file=temp.name, canvas=canvas)
+				block = Components.BlockFactory.CreateBlock(
+					x=int(attr["x"].value),
+					y=int(attr["y"].value),
+					name=name,
+					python_file=temp.name,
+					canvas=canvas,
+				)
 				block.label = name
 
-				parent_id = s.attributes['parent'].value
-				id = str(s.attributes['id'].value)
-				if parent_id == '1':
+				parent_id = s.attributes["parent"].value
+				id = str(s.attributes["id"].value)
+				if parent_id == "1":
 					canvas.AddShape(block)
 					D[id] = block
 					del blocklist[0]
@@ -233,151 +260,166 @@ def getDiagramFromXML(xml_file="", name="", canvas=None, D={}):  # noqa: B006
 					del blocklist[0]
 
 				else:
-					blocklist.insert(len(blocklist),blocklist.pop(0))
+					blocklist.insert(len(blocklist), blocklist.pop(0))
 		else:
-			sys.stdout.write(_('Element not considered!\n'))
+			sys.stdout.write(_("Element not considered!\n"))
 
 	### make connection
-	while(connectionlist):
+	while connectionlist:
 		s = connectionlist[0]
 
-		source_id = s.attributes['target'].value
-		target_id = s.attributes['source'].value
-		parent_id = s.attributes['parent'].value
-		#style = s.attributes['style'].value.split(';')
+		source_id = s.attributes["target"].value
+		target_id = s.attributes["source"].value
+		parent_id = s.attributes["parent"].value
+		# style = s.attributes['style'].value.split(';')
 
 		source = D[source_id]
 		target = D[target_id]
 		# c = D[parent_id]
 
 		if source in canvas.diagram.shapes and target in canvas.diagram.shapes:
-			a,b = canvas.GetNodeLists(source, target)
+			a, b = canvas.GetNodeLists(source, target)
 			if a == [] or b == []:
-				a,b = canvas.GetNodeLists(target,source)
-			canvas.sourceNodeList, canvas.targetNodeList = a,b
-			
+				a, b = canvas.GetNodeLists(target, source)
+			canvas.sourceNodeList, canvas.targetNodeList = a, b
+
 			if canvas.sourceNodeList and canvas.targetNodeList:
 				canvas.makeConnectionShape(canvas.sourceNodeList[0], canvas.targetNodeList[0])
 
 		del connectionlist[0]
 
+
 def getDiagramFromXMLSES(xmlses_file="", canvas=None):
-	""" Diagram FromXML SES
-	"""
+	"""Diagram FromXML SES"""
 
 	def GetParent(node):
 		for s in blocklist:
-			if node.attributes['parentuid'].value == s.attributes['uid'].value:
+			if node.attributes["parentuid"].value == s.attributes["uid"].value:
 				return s
 		return False
 
 	def GetChild(node):
 		for s in blocklist:
-			if s.attributes['parentuid'].value == node.attributes['uid'].value:
+			if s.attributes["parentuid"].value == node.attributes["uid"].value:
 				return s
-		return node	
+		return node
 
 	def HasChild(node):
 		for s in blocklist:
-			if s.attributes['parentuid'].value == node.attributes['uid'].value:
+			if s.attributes["parentuid"].value == node.attributes["uid"].value:
 				return True
 		return False
 
 	def GetNodeFromUID(uid):
-		''' Return node form uid
-		'''
+		"""Return node form uid"""
 		for b in blocklist:
-			if b.attributes['uid'].value == uid:
+			if b.attributes["uid"].value == uid:
 				return b
-	
-	def InsertElemFromUID(elem,uid,D):
-		''' Update and return the new D with new elem into the components of the uid coupled model
-			elem: new element
-			uid: uid of the coupled model 
-			D: the dictionary to udpade
-		'''
+
+	def InsertElemFromUID(elem, uid, D):
+		"""Update and return the new D with new elem into the components of the uid coupled model
+		elem: new element
+		uid: uid of the coupled model
+		D: the dictionary to udpade
+		"""
 		if D != {}:
-			for k,v in list(D.items()):
-				if v['uid'] == uid:
-					D[k]['components'].append(elem)
+			for k, v in list(D.items()):
+				if v["uid"] == uid:
+					D[k]["components"].append(elem)
 					return D
 				else:
-					for d in [a for a in v['components'] if isinstance(a,dict)]:	
-						InsertElemFromUID(elem,uid,{d['node']:d})
+					for d in [a for a in v["components"] if isinstance(a, dict)]:
+						InsertElemFromUID(elem, uid, {d["node"]: d})
 
 	def GetDiagram(canvas, D, parent_block=None):
-		''' Build the DEVSimpy diagram with the creation of the block models (atomic and coupled) and ports (input and output)
-		'''
+		"""Build the DEVSimpy diagram with the creation of the block models (atomic and coupled) and ports (input and output)"""
 		if D != {}:
-			for k,v in list(D.items()):
-				if 'components' in v:
-    				### coupled model
-					name = k.attributes['name'].value
-					temp = tempfile.NamedTemporaryFile(suffix='.py', delete=False)  # noqa: SIM115
-					temp.write(WizardGUI.coupledCode('CoupledModel'))
+			for k, v in list(D.items()):
+				if "components" in v:
+					### coupled model
+					name = k.attributes["name"].value
+					temp = tempfile.NamedTemporaryFile(suffix=".py", delete=False)  # noqa: SIM115
+					temp.write(WizardGUI.coupledCode("CoupledModel"))
 					temp.seek(0)
 
-					nbi,nbo = [len(a) for a in GetNbPort(k)]
-					cp_block = Components.BlockFactory.CreateBlock(x=100, y=100, inputs = nbi, outputs = nbo, name=name, python_file=temp.name, canvas=canvas)
+					nbi, nbo = [len(a) for a in GetNbPort(k)]
+					cp_block = Components.BlockFactory.CreateBlock(
+						x=100,
+						y=100,
+						inputs=nbi,
+						outputs=nbo,
+						name=name,
+						python_file=temp.name,
+						canvas=canvas,
+					)
 					cp_block.label = name
 					### if True, the flag for bad python file is activated
-					#cp_block.bad_filename_path_flag = True
-					
-					parent_block.AddShape(cp_block)
-					
-					#print cp_block
+					# cp_block.bad_filename_path_flag = True
 
-					for d in v['components']:
+					parent_block.AddShape(cp_block)
+
+					# print cp_block
+
+					for d in v["components"]:
 						if isinstance(d, dict):
-							GetDiagram(canvas,{d['node']:d}, cp_block)
+							GetDiagram(canvas, {d["node"]: d}, cp_block)
 						else:
-							GetDiagram(canvas,{d:{}}, cp_block)
+							GetDiagram(canvas, {d: {}}, cp_block)
 
 					return parent_block
 				else:
-    				### atomic model
-					name = k.attributes['name'].value
-					temp = tempfile.NamedTemporaryFile(suffix='.py', delete=False)  # noqa: SIM115
-					temp.write(WizardGUI.atomicCode('AtomicModel'))
+					### atomic model
+					name = k.attributes["name"].value
+					temp = tempfile.NamedTemporaryFile(suffix=".py", delete=False)  # noqa: SIM115
+					temp.write(WizardGUI.atomicCode("AtomicModel"))
 					temp.seek(0)
-					
-					nbi,nbo = [len(a) for a in GetNbPort(k)]
-					am_block = Components.BlockFactory.CreateBlock(x=250, y=100*(1+parent_block.nbCodeBlock), inputs = nbi, outputs = nbo, name=name, python_file=temp.name, canvas=canvas)
+
+					nbi, nbo = [len(a) for a in GetNbPort(k)]
+					am_block = Components.BlockFactory.CreateBlock(
+						x=250,
+						y=100 * (1 + parent_block.nbCodeBlock),
+						inputs=nbi,
+						outputs=nbo,
+						name=name,
+						python_file=temp.name,
+						canvas=canvas,
+					)
 					am_block.label = name
 
 					### if True, the flag for bad python file is activated
-					#cp_block.bad_filename_path_flag = True
+					# cp_block.bad_filename_path_flag = True
 
-					#print am_block
+					# print am_block
 					parent_block.AddShape(am_block)
 
 					return True
 
 	def GetNbPort(node):
-		''' Get a tuple that contain a list of input an output ports
-		'''
+		"""Get a tuple that contain a list of input an output ports"""
 		iport = []
 		oport = []
-		name = node.attributes['name'].value
+		name = node.attributes["name"].value
 
 		if not HasChild(node):
-			connectionlist = xmldoc.getElementsByTagName('coupling')
+			connectionlist = xmldoc.getElementsByTagName("coupling")
 		else:
-			connectionlist = GetChild(node).getElementsByTagName('coupling')
+			connectionlist = GetChild(node).getElementsByTagName("coupling")
 
 		for c in connectionlist:
-			if name == c.attributes['sinkname'].value:
-				p = u''.join([i for i in c.attributes['sinkport'].value if i.isdigit()])  # noqa: UP025
-				if p ==u'': p=u'1'  # noqa: UP025
+			if name == c.attributes["sinkname"].value:
+				p = "".join([i for i in c.attributes["sinkport"].value if i.isdigit()]) 
+				if p == "":
+					p = "1" 
 				if HasChild(node):
 					if p not in oport:
 						oport.append(p)
 				else:
 					if p not in iport:
-						iport.append(p)	
-			elif name == c.attributes['sourcename'].value:
-				p = u''.join([i for i in c.attributes['sourceport'].value if i.isdigit()]) # noqa: UP025
-				if p ==u'': p=u'1' # noqa: UP025
+						iport.append(p)
+			elif name == c.attributes["sourcename"].value:
+				p = "".join([i for i in c.attributes["sourceport"].value if i.isdigit()]) 
+				if p == "":
+					p = "1" 
 				if HasChild(node):
 					if p not in iport:
 						iport.append(p)
@@ -386,21 +428,23 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 						oport.append(p)
 
 		### if numer od ports processing faild with name, try with uid (node correspond by uid often for multiaspect)
-		if iport==oport==[]:
-			uid = node.attributes['uid'].value
+		if iport == oport == []:
+			uid = node.attributes["uid"].value
 			for c in connectionlist:
-				if uid == c.attributes['sinkuid'].value:
-					p = u''.join([i for i in c.attributes['sinkport'].value if i.isdigit()]) # noqa: UP025
-					if p ==u'': p=u'1' # noqa: UP025
+				if uid == c.attributes["sinkuid"].value:
+					p = "".join([i for i in c.attributes["sinkport"].value if i.isdigit()]) 
+					if p == "":
+						p = "1"  
 					if HasChild(node):
 						if p not in oport:
 							oport.append(p)
 					else:
 						if p not in iport:
-							iport.append(p)	
-				elif uid == c.attributes['sourceuid'].value:
-					p = u''.join([i for i in c.attributes['sourceport'].value if i.isdigit()]) # noqa: UP025
-					if p ==u'': p=u'1' # noqa: UP025
+							iport.append(p)
+				elif uid == c.attributes["sourceuid"].value:
+					p = "".join([i for i in c.attributes["sourceport"].value if i.isdigit()]) 
+					if p == "":
+						p = "1" 
 					if HasChild(node):
 						if p not in iport:
 							iport.append(p)
@@ -408,13 +452,12 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 						if p not in oport:
 							oport.append(p)
 
-		#print name, iport, oport
-		
+		# print name, iport, oport
+
 		return (iport, oport)
-	
+
 	def GetNodeLists(canvas, source, target):
-		""" Node List
-		"""
+		"""Node List"""
 
 		# deselect and select target in order to get its list of node (because the node are generated dynamicly)
 		canvas.deselect()
@@ -424,40 +467,44 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 		nodesList = [n for n in canvas.nodes if not isinstance(n, Container.ResizeableNode)]
 
 		# list of node list for
-		sourceNodeList = [n for n in nodesList if n.item == source and isinstance(n, Container.ONode)]
-		targetNodeList = [n for n in nodesList if n.item == target and isinstance(n, Container.INode)]
+		sourceNodeList = [
+			n for n in nodesList if n.item == source and isinstance(n, Container.ONode)
+		]
+		targetNodeList = [
+			n for n in nodesList if n.item == target and isinstance(n, Container.INode)
+		]
 
 		canvas.deselect()
 
 		return (sourceNodeList, targetNodeList)
 
 	def GetDiagramCoupling(canvas):
-		''' Build the DEVSimpy diagram coupling 
-		'''
+		"""Build the DEVSimpy diagram coupling"""
 		### make connection
-		connectionlist = xmldoc.getElementsByTagName('coupling')
+		connectionlist = xmldoc.getElementsByTagName("coupling")
 
 		### all blocks
 		blocks = canvas.diagram.GetFlatBlockShapeList()
 
 		### make connection
-		while(connectionlist):
-    		
+		while connectionlist:
 			### take the first connection object (deleted at the end of while)
 			s = connectionlist[0]
 
 			### Get the names of blocks
-			source_name = GetNodeFromUID(s.attributes['sourceuid'].value).attributes['name'].value
-			target_name = GetNodeFromUID(s.attributes['sinkuid'].value).attributes['name'].value
-			diagram_name = s.parentNode.attributes['name'].value
+			source_name = GetNodeFromUID(s.attributes["sourceuid"].value).attributes["name"].value
+			target_name = GetNodeFromUID(s.attributes["sinkuid"].value).attributes["name"].value
+			diagram_name = s.parentNode.attributes["name"].value
 
 			### Get the port id removing caracter form str if port has specified with label
-			source_port_num = u''.join([i for i in s.attributes['sourceport'].value if i.isdigit()]) # noqa: UP025
-			target_port_num = u''.join([i for i in s.attributes['sinkport'].value if i.isdigit()]) # noqa: UP025
+			source_port_num = "".join([i for i in s.attributes["sourceport"].value if i.isdigit()]) 
+			target_port_num = "".join([i for i in s.attributes["sinkport"].value if i.isdigit()])  
 
-			### if no port number is specified in the XML, there is one port and its id is 1 (not 0 but it can be depending on the rule chose by the SES modeler!) 
-			if source_port_num ==u'': source_port_num=u'1' # noqa: UP025
-			if target_port_num ==u'': target_port_num=u'1' # noqa: UP025
+			### if no port number is specified in the XML, there is one port and its id is 1 (not 0 but it can be depending on the rule chose by the SES modeler!)
+			if source_port_num == "":
+				source_port_num = "1" 
+			if target_port_num == "":
+				target_port_num = "1"  
 
 			### find the graphic block of the source, target and diagram
 			source = target = diagram = None
@@ -469,31 +516,33 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 				if b.label == diagram_name:
 					diagram = b
 
-			### if source or target is the diagram, we change them with the corresponding iPort or oPort 
+			### if source or target is the diagram, we change them with the corresponding iPort or oPort
 			if diagram == source:
-				for s in [a for a in source.GetShapeList() if isinstance(a,Container.iPort)]:
-					if int(s.id) == int(source_port_num)-1:
+				for s in [a for a in source.GetShapeList() if isinstance(a, Container.iPort)]:
+					if int(s.id) == int(source_port_num) - 1:
 						source = s
 						break
 
 			if diagram == target:
-				for t in [a for a in target.GetShapeList() if isinstance(a,Container.oPort)]:
-					if int(t.id) == int(target_port_num)-1:
+				for t in [a for a in target.GetShapeList() if isinstance(a, Container.oPort)]:
+					if int(t.id) == int(target_port_num) - 1:
 						target = t
 						break
 
-			#print "------------------------------------------------"
-			#print source, target
-			
-			a,b = GetNodeLists(canvas, source, target)
+			# print "------------------------------------------------"
+			# print source, target
 
-			#print a,b
+			a, b = GetNodeLists(canvas, source, target)
 
-			if len(a) == 1: source_port_num = u'1' # noqa: UP025
-			if len(b) == 1: target_port_num = u'1' # noqa: UP025
-			#print source_name,int(source_port_num)-1,target_name,int(target_port_num)-1
-			sourceNode, targetNode = a[int(source_port_num)-1],b[int(target_port_num)-1]
-	
+			# print a,b
+
+			if len(a) == 1:
+				source_port_num = "1"  
+			if len(b) == 1:
+				target_port_num = "1"  
+			# print source_name,int(source_port_num)-1,target_name,int(target_port_num)-1
+			sourceNode, targetNode = a[int(source_port_num) - 1], b[int(target_port_num) - 1]
+
 			### item of node must be overwritted
 			sourceNode.item = source
 			targetNode.item = target
@@ -501,46 +550,64 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 			### add the connexion to the diagram
 			ci = Container.ConnectionShape()
 			ci.setInput(sourceNode.item, sourceNode.index)
-			ci.x[0], ci.y[0] = sourceNode.item.getPortXY('output', sourceNode.index)
-			ci.x[1], ci.y[1] = targetNode.item.getPortXY('input', targetNode.index)
+			ci.x[0], ci.y[0] = sourceNode.item.getPortXY("output", sourceNode.index)
+			ci.x[1], ci.y[1] = targetNode.item.getPortXY("input", targetNode.index)
 			ci.setOutput(targetNode.item, targetNode.index)
 			diagram.shapes.insert(0, ci)
 
-			#print "------------------------------------------------"
+			# print "------------------------------------------------"
 
 			### delete the first selected cinnection objet
 			del connectionlist[0]
-		
+
 		return canvas.GetDiagram()
 
 	def XMLToDict(blocklist):
-		""" XML to Dict
-		"""		
+		"""XML to Dict"""
 		### dictionary building
 		xml_to_dict = {}
 
 		### Add high level coupled models
-		for cm in [a for a in blocklist if a.attributes['parentuid'].value == '1' and a.attributes['type'].value == "Aspect Node"]:
+		for cm in [
+			a
+			for a in blocklist
+			if a.attributes["parentuid"].value == "1"
+			and a.attributes["type"].value == "Aspect Node"
+		]:
 			### change the name with parent (comparing uid and parentuid)
-			cm.attributes['name'].value = GetParent(cm).attributes['name'].value
-			name = cm.attributes['name'].value
-			uid = cm.attributes['uid'].value
-			xml_to_dict[cm] = {'node':cm, 'uid':uid, 'name':name, 'components':[]}
+			cm.attributes["name"].value = GetParent(cm).attributes["name"].value
+			name = cm.attributes["name"].value
+			uid = cm.attributes["uid"].value
+			xml_to_dict[cm] = {"node": cm, "uid": uid, "name": name, "components": []}
 
 		### Add other sub coupled models
-		for uid in range(2,100):
-			for sub_cm in [a for a in blocklist if str(a.attributes['parentuid'].value) == str(uid) and a.attributes['type'].value == "Aspect Node"]:
-				uid = sub_cm.attributes['uid'].value
-				name = sub_cm.attributes['name'].value
-				sub_uid =  GetParent(sub_cm).attributes['parentuid'].value
-				sub_cm.attributes['name'].value = GetParent(sub_cm).attributes['name'].value
+		for uid in range(2, 100):
+			for sub_cm in [
+				a
+				for a in blocklist
+				if str(a.attributes["parentuid"].value) == str(uid)
+				and a.attributes["type"].value == "Aspect Node"
+			]:
+				uid = sub_cm.attributes["uid"].value
+				name = sub_cm.attributes["name"].value
+				sub_uid = GetParent(sub_cm).attributes["parentuid"].value
+				sub_cm.attributes["name"].value = GetParent(sub_cm).attributes["name"].value
 
-				InsertElemFromUID({'node':GetParent(sub_cm),'uid':uid,'name':name,'components':[]}, sub_uid, xml_to_dict)
+				InsertElemFromUID(
+					{"node": GetParent(sub_cm), "uid": uid, "name": name, "components": []},
+					sub_uid,
+					xml_to_dict,
+				)
 
 		### Add atomic models
-		for am in [a for a in blocklist if a.attributes['type'].value == "Entity Node" and GetChild(a).attributes['type'].value != "Aspect Node"]:
-			am_parent_uid = am.attributes['parentuid'].value
-			InsertElemFromUID(am,am_parent_uid, xml_to_dict)
+		for am in [
+			a
+			for a in blocklist
+			if a.attributes["type"].value == "Entity Node"
+			and GetChild(a).attributes["type"].value != "Aspect Node"
+		]:
+			am_parent_uid = am.attributes["parentuid"].value
+			InsertElemFromUID(am, am_parent_uid, xml_to_dict)
 
 		return xml_to_dict
 
@@ -549,31 +616,33 @@ def getDiagramFromXMLSES(xmlses_file="", canvas=None):
 	try:
 		xmldoc = minidom.parse(xmlses_file)
 	except Exception as info:  # noqa: BLE001
-		sys.stdout.write(f'Error importing {xmlses_file}: {info}\n')
-		sys.stdout.write('Please check the XML SES file\n')
+		sys.stdout.write(f"Error importing {xmlses_file}: {info}\n")
+		sys.stdout.write("Please check the XML SES file\n")
 		return False
 
 	### blocklist contains all the treenode xml nodes
 	global blocklist
-	blocklist = xmldoc.getElementsByTagName('treenode')
+	blocklist = xmldoc.getElementsByTagName("treenode")
 
 	xml_to_dict = XMLToDict(blocklist)
-	#import pprint 
-	#pprint.pprint(D)
-	
+	# import pprint
+	# pprint.pprint(D)
+
 	if xml_to_dict != {}:
 		try:
 			### Make the DEVSimPy diagram
 			diagram = GetDiagram(canvas, xml_to_dict, parent_block=canvas)
 		except Exception as info:  # noqa: BLE001
-			sys.stdout.write(_('Error making the diagram from XML SES: %s\n')%info)
+			sys.stdout.write(_("Error making the diagram from XML SES: %s\n") % info)
 			return False
 		else:
 			try:
 				### Make the DEVSimPy diagram coupling
 				diagram = GetDiagramCoupling(canvas)
 			except Exception as info:  # noqa: BLE001
-				sys.stdout.write(_('Error making the coupling into the diagram from XML SES: %s\n')%info)
+				sys.stdout.write(
+					_("Error making the coupling into the diagram from XML SES: %s\n") % info
+				)
 				return diagram
 			else:
 				return diagram

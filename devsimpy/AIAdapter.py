@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-  # noqa: UP009
 
-'''
+"""
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # AiAdapter.py ---
 #                    --------------------------------
@@ -26,9 +26,9 @@
 # GLOBAL VARIABLES AND FUNCTIONS
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-'''
+"""
 
-import json  
+import json
 import logging
 from abc import ABC, abstractmethod
 import re
@@ -41,7 +41,7 @@ try:
 except ImportError:
 	pass
 
-import wx  
+import wx
 import os
 import sys
 import urllib.request
@@ -57,48 +57,53 @@ from Utilities import check_internet
 _ = gettext.gettext
 
 # Configuration de base du logging
-logging.basicConfig(level=logging.DEBUG, 
-					format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 ##########################################################
 ### Atomic Model JSON STRUCTURE
 ##########################################################
 class State(BaseModel):
-    name: str
-    time: str | int | float  # noqa: FA102
+	name: str
+	time: str | int | float  # noqa: FA102
+
 
 class ModelProperty(BaseModel):
-    name: str
-    var_type: str
-    value: str | float | int  # noqa: FA102
-    description: str
+	name: str
+	var_type: str
+	value: str | float | int  # noqa: FA102
+	description: str
+
 
 class Function(BaseModel):
-    description: str
-    parameters: str
+	description: str
+	parameters: str
+
 
 class Specifications(BaseModel):
-    input_port: int
-    output_port: int
-    model_name: str
-    model_type: Literal["Generator", "Collector", "Default"]
-    states: list[State]
-    model_description: str
-    initial_state: State
-    model_properties: list[ModelProperty]
+	input_port: int
+	output_port: int
+	model_name: str
+	model_type: Literal["Generator", "Collector", "Default"]
+	states: list[State]
+	model_description: str
+	initial_state: State
+	model_properties: list[ModelProperty]
+
 
 class AtomicModel(BaseModel):
-    specifications: Specifications
-    init_function: Function
-    ext_transition: Function
-    int_transition: Function
-    output_function: Function
-    time_advance: Function
+	specifications: Specifications
+	init_function: Function
+	ext_transition: Function
+	int_transition: Function
+	output_function: Function
+	time_advance: Function
+
 
 ##########################################################
 ### BASE ADAPTER CLASS
 ##########################################################
+
 
 class DevsAIAdapter(ABC):
 	"""
@@ -106,9 +111,12 @@ class DevsAIAdapter(ABC):
 	This class defines the base methods that child classes can override
 	or use as is to interact with specific generative AI models.
 	"""
+
 	def __init__(self, parent=None):
 		logging.info("DevsAIAdapter initialized.")  # noqa: LOG015
-		self.base_prompt = self._load_base_prompt(os.path.join(os.getcwd(),"AI","DEVS_Explanation.txt"))
+		self.base_prompt = self._load_base_prompt(
+			os.path.join(os.getcwd(), "AI", "DEVS_Explanation.txt")
+		)
 
 	def _load_base_prompt(self, file_path):
 		"""
@@ -127,7 +135,7 @@ class DevsAIAdapter(ABC):
 		The prompt is based on instructions from the DEVS explanation file.
 		"""
 		logging.info("Creating prompt for model: %s, type: %s", model_name, model_type)  # noqa: LOG015
-		
+
 		# Constructing the prompt for the AI
 		full_prompt = f"""
 		You are an expert in DEVS modeling. Create a DEVS model called '{model_name}'.
@@ -152,7 +160,7 @@ class DevsAIAdapter(ABC):
 		Takes into account the model name, the current code, and additional details.
 		"""
 		logging.info("Modifying model")  # noqa: LOG015
-		
+
 		# Constructing the prompt for the AI
 		full_prompt = f"""
 		You are an expert in DEVS modeling. You need to modify a DEVS model.
@@ -170,14 +178,14 @@ class DevsAIAdapter(ABC):
 		"""
 		logging.debug("Modification prompt created for model.")  # noqa: LOG015
 		return full_prompt
-	
+
 	def modify_model_part_prompt(self, code, prompt):
 		"""
 		Generates a prompt to modify a specific part of an existing DEVS model.
 		Takes into account the model name, the current code, and details about the part to modify.
 		"""
 		logging.info("Modifying part of model.")  # noqa: LOG015
-		
+
 		# Constructing the prompt for the AI
 		full_prompt = f"""
 		You are an expert in DEVS modeling. You need to modify a specific part of a DEVS model.
@@ -245,7 +253,7 @@ class DevsAIAdapter(ABC):
 		# generates a response for every function
 		for function_name in json_fields_functions:
 			function_guidelines = self._load_base_prompt(
-				os.path.join(os.getcwd(),"AI","functions_prompt",f"{function_name}.txt")
+				os.path.join(os.getcwd(), "AI", "functions_prompt", f"{function_name}.txt")
 			)
 			user_prompt = f"""Generate code for the {function_name} function.
 			Use the following guidelines :
@@ -322,19 +330,19 @@ class AdapterFactory:
 
 	@staticmethod
 	def verify_adapter_instance():
-		""" 
+		"""
 		Verifie que l'instance de l'adapteur fonctionne
 		"""
 		return not AdapterFactory._instance is None
 
 	@staticmethod
 	def get_adapter_instance(parent=None, params=None):
-		""" 
+		"""
 		Retourne une instance unique de l'adaptateur sélectionné.
 		Réinitialise l'instance si `selected_ia` a changé en cours d'exécution.
 		"""
 
-		selected_ia = getattr(builtins,'SELECTED_IA',"")
+		selected_ia = getattr(builtins, "SELECTED_IA", "")
 
 		# Vérifie si l'IA sélectionnée a changé
 		if AdapterFactory._current_selected_ia != selected_ia:
@@ -345,9 +353,9 @@ class AdapterFactory:
 		if AdapterFactory._instance is None:
 			# Récupère les paramètres d'API et de port de PARAMS_IA
 
-			api_key = params.get('CHATGPT_API_KEY') if params else None
-			port = params.get('OLLAMA_PORT') if params else None
-			
+			api_key = params.get("CHATGPT_API_KEY") if params else None
+			port = params.get("OLLAMA_PORT") if params else None
+
 			# Validation pour ChatGPT
 			if selected_ia == "ChatGPT":
 				if not api_key:
@@ -364,10 +372,12 @@ class AdapterFactory:
 					return None
 					# raise ValueError(_("Port is required for Ollama."))
 				else:
-					model_name = params.get('OLLAMA_MODEL') if params else None
+					model_name = params.get("OLLAMA_MODEL") if params else None
 					if not model_name:
-						model_name = 'mistral'
-					AdapterFactory._instance = OllamaDevsAdapter(parent=parent, port=port, model_name=model_name)
+						model_name = "mistral"
+					AdapterFactory._instance = OllamaDevsAdapter(
+						parent=parent, port=port, model_name=model_name
+					)
 			else:
 				AdapterFactory._show_error(_("No AI selected or unknown AI."))
 				# raise ValueError(_("No AI selected or unknown AI."))
@@ -376,20 +386,22 @@ class AdapterFactory:
 
 	@staticmethod
 	def reset_instance():
-		""" Réinitialise manuellement l'instance et l'IA sélectionnée. """
+		"""Réinitialise manuellement l'instance et l'IA sélectionnée."""
 		AdapterFactory._instance = None
 		AdapterFactory._current_selected_ia = None
 
 	@staticmethod
 	def _show_error(message):
-		""" Affiche un message d'erreur sous forme de toast avec wx. """
+		"""Affiche un message d'erreur sous forme de toast avec wx."""
 		wx.MessageBox(message, _("Error"), wx.ICON_ERROR)
+
 
 ##########################################################
 ###
 ### CHATGPT
 ###
 ##########################################################
+
 
 class ChatGPTDevsAdapter(DevsAIAdapter):
 	"""
@@ -399,10 +411,11 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 	def __init__(self, api_key=None, parent=None):
 		super().__init__()
 		# if not api_key:
-			# raise ValueError(_("API key is required for ChatGPT."))
+		# raise ValueError(_("API key is required for ChatGPT."))
 		self.api_key = api_key
 		self.wxparent = parent
 		from openai import OpenAI
+
 		self.api_client = OpenAI(api_key=self.api_key)  # Instancie le client API ici
 		logging.info(_("ChatGPTDevsAdapter initialized with provided API key."))  # noqa: LOG015
 
@@ -411,7 +424,9 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 		Use openai chat API with structured output.
 		Handle response to return the json as dict
 		"""
-		system_prompt = self._load_base_prompt(os.path.join(os.getcwd(),"AI","json_gen_prompt.txt"))
+		system_prompt = self._load_base_prompt(
+			os.path.join(os.getcwd(), "AI", "json_gen_prompt.txt")
+		)
 		try:
 			completion = self.api_client.beta.chat.completions.parse(
 				model="gpt-4.1-nano",
@@ -454,23 +469,24 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 					{"role": "user", "content": prompt},
 				],
 			)
-			
+
 			# Validation de la réponse
-			if not hasattr(response, 'choices') or not response.choices:
+			if not hasattr(response, "choices") or not response.choices:
 				logging.error("No choices found in response.")  # noqa: LOG015
 				return _("No response received from the AI model.")
-			
+
 			# Retourner le contenu du message
 			return response.choices[0].message.content
-		
+
 		except ValueError as ve:
 			logging.error(_(f"Validation error: {ve}"))  # noqa: INT001, LOG015
 			return _(f"Validation error: {ve}")  # noqa: INT001
-		
+
 		except Exception as e:  # noqa: BLE001
 			# Journalisation de l'erreur avec les détails de l'exception
 			logging.error(_(f"Error while generating output: {e}"))  # noqa: INT001, LOG015
 			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
+
 
 ##########################################################
 ###
@@ -482,28 +498,29 @@ class OllamaDevsAdapter(DevsAIAdapter):
 	Adaptateur spécifique pour Ollama, utilisé pour générer des modèles DEVS.
 	"""
 
-	def __init__(self, port='11434', model_name='qwen2.5-coder', parent=None):
+	def __init__(self, port="11434", model_name="qwen2.5-coder", parent=None):
 		super().__init__()
 
 		if not port:
 			raise ValueError("Le port est requis pour Ollama.")
-		
+
 		### local copy
 		self.port = port
 		self.wxparent = parent
 		self.model_name = model_name
 		logging.info(_(f"OllamaDevsAdapter initialized with port {port} and model {model_name}."))  # noqa: INT001, LOG015
-		
+
 		# Vérification de l'installation d'Ollama
 		if not self._is_ollama_installed():
 			if check_internet():
 				self._prompt_install_ollama()
 			else:
-				message = _("No internet connection. Please check your internet connection and try again.")
+				message = _(
+					"No internet connection. Please check your internet connection and try again."
+				)
 				wx.CallAfter(wx.MessageBox, message, _("Information"), wx.ICON_INFORMATION)
 				logging.info(message)  # noqa: LOG015
-		else:    
-
+		else:
 			# Vérification si le serveur est lancé au démarrage
 			if not self._is_server_running():
 				logging.info(_("The Ollama server is not running. Attempting to start..."))  # noqa: LOG015
@@ -513,44 +530,52 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
 			# Obtenir la liste des modèles téléchargés localement
 			self.local_model = self._get_models()
-			
+
 			# Téléchargement du modèle spécifié
 			self._ensure_model_downloaded()
 
 	def _is_ollama_installed(self):
-		""" Vérifie si Ollama est installé en cherchant son exécutable. """
+		"""Vérifie si Ollama est installé en cherchant son exécutable."""
 		command = ["where", "ollama"] if sys.platform == "win32" else ["which", "ollama"]
 		return subprocess.run(command, check=False, capture_output=True).returncode == 0
 
 	def _prompt_install_ollama(self):
-		""" Affiche une fenêtre `wx` pour proposer l'installation d'Ollama. """
-		
+		"""Affiche une fenêtre `wx` pour proposer l'installation d'Ollama."""
+
 		message = _("Ollama is not installed. Would you like to install it now?")
 		dialog = wx.MessageDialog(None, message, _("Ollama install"), wx.YES_NO | wx.ICON_QUESTION)
-		
+
 		if dialog.ShowModal() == wx.ID_YES:
 			logging.info(_("Starting the installation of Ollama..."))  # noqa: LOG015
 			self._install_ollama()
 		else:
 			logging.error(_("Ollama is required to run this class."))  # noqa: LOG015
 			raise RuntimeError(_("Ollama is not installed and is required to run this class."))
-				
+
 		dialog.Destroy()
 
-	@cond_decorator(getattr(builtins,'GUI_FLAG', True), ProgressNotification(_("Download")))        
+	@cond_decorator(getattr(builtins, "GUI_FLAG", True), ProgressNotification(_("Download")))
 	def _install_ollama(self):
-		""" Installe Ollama selon le système d'exploitation. """
+		"""Installe Ollama selon le système d'exploitation."""
 		platform = sys.platform
 
 		try:
 			if platform == "darwin":  # macOS
-				subprocess.run("curl -O https://ollama.com/download/Ollama-darwin.zip && unzip Ollama-darwin.zip -d /usr/local/bin && rm Ollama-darwin.zip", shell=True, check=True)
+				subprocess.run(
+					"curl -O https://ollama.com/download/Ollama-darwin.zip && unzip Ollama-darwin.zip -d /usr/local/bin && rm Ollama-darwin.zip",
+					shell=True,
+					check=True,
+				)
 			elif platform.startswith("linux"):  # Linux
-				subprocess.run("curl -fsSL https://ollama.com/install.sh | sh", shell=True, check=True)
+				subprocess.run(
+					"curl -fsSL https://ollama.com/install.sh | sh", shell=True, check=True
+				)
 			elif platform == "win32":  # Windows
-				ollama_path = os.path.join(os.environ['USERPROFILE'], "Downloads", "OllamaSetup.exe")
+				ollama_path = os.path.join(
+					os.environ["USERPROFILE"], "Downloads", "OllamaSetup.exe"
+				)
 				download_url = "https://ollama.com/download/OllamaSetup.exe"
-				
+
 				# Téléchargement avec message de chargement
 				# self._show_download_message(download_url, ollama_path)
 				# Effectue le téléchargement
@@ -559,33 +584,35 @@ class OllamaDevsAdapter(DevsAIAdapter):
 				# Exécution de l'installateur
 				subprocess.run([ollama_path], check=True)
 
-			logging.info(_("Ollama installation completed. Restart devsimpy and the terminal if necessary."))  # noqa: LOG015
+			logging.info(  # noqa: LOG015
+				_("Ollama installation completed. Restart devsimpy and the terminal if necessary.")
+			) 
 
 		except subprocess.CalledProcessError as e:
 			logging.error(_("Error during Ollama installation: %s"), e)  # noqa: LOG015
 			raise RuntimeError(_("Ollama installation failed."))
 
 	def _is_server_running(self):
-		""" Vérifie si le serveur Ollama est en cours d'exécution sur le port spécifié. """
+		"""Vérifie si le serveur Ollama est en cours d'exécution sur le port spécifié."""
 		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-			result = sock.connect_ex(('localhost', int(self.port)))
+			result = sock.connect_ex(("localhost", int(self.port)))
 			return result == 0  # Renvoie True si le port est ouvert
 
-	@cond_decorator(getattr(builtins,'GUI_FLAG', True), ProgressNotification(_("Starting Server")))
+	@cond_decorator(getattr(builtins, "GUI_FLAG", True), ProgressNotification(_("Starting Server")))
 	def _start_server(self):
-		""" Démarre le serveur Ollama en arrière-plan. """
+		"""Démarre le serveur Ollama en arrière-plan."""
 		try:
 			subprocess.Popen(["ollama", "serve"])
 			logging.info(_("Ollama starts with success."))  # noqa: LOG015
 		except Exception as e:  # noqa: BLE001
 			logging.error(_("Failed to start the Ollama server: %s"), str(e))  # noqa: LOG015
 			raise RuntimeError(_("Failed to start the Ollama server"))
-		
+
 	def _stop_server(self):
 		"""Stop the Ollama server."""
 		if not self._is_server_running():
 			return
-		
+
 		try:
 			# This is a placeholder command; replace it with the actual command to stop your server
 			subprocess.run(["ollama", "stop"], check=True)
@@ -599,11 +626,11 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
 		if not self._is_server_running():
 			return
-		
+
 		if self._is_server_running():
 			logging.info("Stopping the Ollama server...")  # noqa: LOG015
 			self._stop_server()  # Stop the server first
-		
+
 		logging.info("Starting the Ollama server...")  # noqa: LOG015
 		self._start_server()  # Start it again
 
@@ -616,11 +643,11 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
 			# Exécuter la commande et capturer la sortie
 			result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-			
+
 			models = []
 			for line in result.stdout.splitlines():
 				line = line.strip()
-				if not line or line.lower().startswith('model'):
+				if not line or line.lower().startswith("model"):
 					continue
 				parts = re.split(r"\s{2,}|\t", line)
 				if parts:
@@ -628,25 +655,27 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
 			logging.info(_(f"Found Ollama models: {models}"))  # noqa: INT001, LOG015
 			return models
-			
+
 		except (subprocess.CalledProcessError, FileNotFoundError) as e:
 			logging.error("Erreur lors de l'exécution de la commande ollama list:", e)  # noqa: LOG015, PLE1205
 			return []
 
-	@cond_decorator(getattr(builtins,'GUI_FLAG', True), ProgressNotification(_("Pulling process")))
+	@cond_decorator(getattr(builtins, "GUI_FLAG", True), ProgressNotification(_("Pulling process")))
 	def _pull(self):
 		try:
 			# Commande pour effectuer le pull via la ligne de commande
 			cmd = ["ollama", "pull", self.model_name]
 
-			 # Lancer la commande sans redirection
+			# Lancer la commande sans redirection
 			result = subprocess.run(cmd, text=True, check=True)
 
 			# Vérifier si le processus a réussi
 			if result.returncode != 0:
-				logging.error(f"Error while downloading model {self.model_name}: {result.stderr.strip()}")  # noqa: LOG015
+				logging.error(  # noqa: LOG015
+					f"Error while downloading model {self.model_name}: {result.stderr.strip()}"
+				)
 				raise RuntimeError(f"Failed to download model {self.model_name}.")
-			
+
 		except subprocess.CalledProcessError as e:
 			logging.error(f"Error while downloading model {self.model_name}: {e.stderr}")  # noqa: LOG015
 			raise RuntimeError(f"Failed to download model {self.model_name}.")
@@ -658,15 +687,19 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
 	def _ensure_model_downloaded(self):
 		"""Télécharge ou met à jour le modèle spécifié via Ollama."""
-		
+
 		if self.model_name in self.local_model:
-			logging.info(f"The model '{self.model_name}' is already downloaded and is ready to start.")  # noqa: LOG015
+			logging.info(  # noqa: LOG015
+				f"The model '{self.model_name}' is already downloaded and is ready to start."
+			)
 		else:
 			logging.info(f"The model '{self.model_name}' is not downloaded. Starting pull...")  # noqa: LOG015
 			if check_internet():
 				self._pull()
 			else:
-				message = _("No internet connection. Please check your internet connection and try again.")
+				message = _(
+					"No internet connection. Please check your internet connection and try again."
+				)
 				wx.CallAfter(wx.MessageBox, message, _("Information"), wx.ICON_INFORMATION)
 				logging.info(message)  # noqa: LOG015
 
@@ -679,7 +712,9 @@ class OllamaDevsAdapter(DevsAIAdapter):
 			logging.info(_("The Ollama server is not active. Attempting to start..."))  # noqa: LOG015
 			self._start_server()
 		try:
-			system_prompt = self._load_base_prompt(os.path.join(os.getcwd(),"AI","json_gen_prompt.txt"))
+			system_prompt = self._load_base_prompt(
+				os.path.join(os.getcwd(), "AI", "json_gen_prompt.txt")
+			)
 			# Send the prompt to the Ollama server
 			# Sends the conversation history (if it exists) or the prompt
 			response = chat(
@@ -722,4 +757,3 @@ class OllamaDevsAdapter(DevsAIAdapter):
 		except Exception as e:  # noqa: BLE001
 			logging.error(_(("Error while generating output: %s", str(e))))  # noqa: LOG015
 			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
-

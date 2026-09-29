@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*- # noqa: UP009
 
-'''
+"""
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # Decorators.py ---
 #                    --------------------------------
@@ -20,30 +20,34 @@
 # GLOBAL VARIABLES AND FUNCTIONS
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-'''
+"""
 
-import os  
+import os
 import sys
 from datetime import datetime
 import threading
 from tempfile import gettempdir
 import cProfile, pstats, io
 
-if GUI_FLAG: # type: ignore  # noqa: F821
+if GUI_FLAG:  # type: ignore  # noqa: F821
 	import wx
 	import wx.lib.agw.aui.framemanager
+
 	AuiFloatingFrame = wx.lib.agw.aui.framemanager.AuiFloatingFrame
 
-	from pubsub import pub  
+	from pubsub import pub
 
 	from Utilities import getTopLevelWindow
 
 	_ = wx.GetTranslation
-	
+
+
 def cond_decorator(flag, dec):
 	def decorate(fn):
 		return dec(fn) if flag else fn
+
 	return decorate
+
 
 def hotshotit(func):
 	def wrapper(*args, **kw):
@@ -51,127 +55,141 @@ def hotshotit(func):
 		prof = sim_thread.prof
 		### if profiling check-box is checked in the simulationDialog
 		if prof:
-			
 			### name of .prof file
 			label = sim_thread.model.getBlockModel().label
-			now = datetime.now() # current date and time  # noqa: DTZ005
-			date_time = now.strftime('%m-%d-%Y_%H-%M-%S')
-			prof_name = os.path.join(os.path.realpath(gettempdir()),"{}_{}_{}{}".format(func.__name__, label, date_time ,'.prof'))
+			now = datetime.now()  # current date and time  # noqa: DTZ005
+			date_time = now.strftime("%m-%d-%Y_%H-%M-%S")
+			prof_name = os.path.join(
+				os.path.realpath(gettempdir()),
+				"{}_{}_{}{}".format(func.__name__, label, date_time, ".prof"),
+			)
 
 			### profiling section with cProfile
 			pr = cProfile.Profile()
 			pr.enable()
 			r = func(*args, **kw)
 			pr.disable()
-			#Sort the statistics by the cumulative time spent in the function
-			sortby = 'cumulative'
+			# Sort the statistics by the cumulative time spent in the function
+			sortby = "cumulative"
 			ps = pstats.Stats(pr).sort_stats(sortby)
 			ps.dump_stats(prof_name)
 
 		else:
 			r = func(*args, **kw)
 		return r
+
 	return wrapper
 
+
 def run_in_thread(fn):
-	''' decorator to execute a method in a specific thread
-	'''
+	"""decorator to execute a method in a specific thread"""
 
 	def run(*k, **kw):
 		t = threading.Thread(target=fn, args=k, kwargs=kw)
 		t.start()
+
 	return run
 
+
 def BuzyCursorNotification(f):
-	""" Decorator which give the buzy cursor for long process
-	"""
+	"""Decorator which give the buzy cursor for long process"""
+
 	def wrapper(*args):
-			if GUI_FLAG: # type: ignore  # noqa: F821
-				wait = wx.BusyCursor()
-				#wx.SafeYield()
-			r =  f(*args)
-			if GUI_FLAG: # type: ignore  # noqa: F821
-				del wait
-			return r
+		if GUI_FLAG:  # type: ignore  # noqa: F821
+			wait = wx.BusyCursor()
+			# wx.SafeYield()
+		r = f(*args)
+		if GUI_FLAG:  # type: ignore  # noqa: F821
+			del wait
+		return r
+
 	return wrapper
 
+
 # allows  arguments for a decorator
-decorator_with_args = lambda decorator: lambda *args, **kwargs: lambda func: decorator(func, *args, **kwargs)
+decorator_with_args = lambda decorator: (
+	lambda *args, **kwargs: lambda func: decorator(func, *args, **kwargs)
+)
+
 
 @decorator_with_args
 def StatusBarNotification(f, arg):
-	""" Decorator which give information into status bar for the load and the save diagram operations
-	"""
+	"""Decorator which give information into status bar for the load and the save diagram operations"""
 
 	def wrapper(*args):
 
 		### main window
 		mainW = getTopLevelWindow()
 
-		### list of childs  
+		### list of childs
 		childrens = mainW.GetChildren()
-		if not isinstance(childrens,list):
+		if not isinstance(childrens, list):
 			childrens = list(childrens)
 
 		### find if detachedFrame exists
 		for win in [w for w in childrens if w.IsTopLevel()]:
-			if win.IsActive() and isinstance(win, wx.Frame) and not isinstance(win,  wx.lib.agw.aui.framemanager.AuiFloatingFrame):
+			if (
+				win.IsActive()
+				and isinstance(win, wx.Frame)
+				and not isinstance(win, wx.lib.agw.aui.framemanager.AuiFloatingFrame)
+			):
 				mainW = win
 
 		r = f(*args)
 
-		if hasattr(mainW, 'statusbar'):
+		if hasattr(mainW, "statusbar"):
 			diagram = args[0]
 			fn = os.path.basename(args[-1])
 			txt = arg
 
-			mainW.statusbar.SetStatusText(f'{fn} {txt}ed', 0)
+			mainW.statusbar.SetStatusText(f"{fn} {txt}ed", 0)
 			mainW.statusbar.SetStatusText(diagram.last_name_saved, 1)
-			mainW.statusbar.SetStatusText('', 2)
+			mainW.statusbar.SetStatusText("", 2)
 
 		return r
 
 	return wrapper
 
+
 class ThreadWithReturnValue(threading.Thread):
-	""" https://www.geeksforgeeks.org/python-different-ways-to-kill-a-thread/
-	"""
-	def __init__(self, *args, **kwargs): 
-		super().__init__(*args, **kwargs) 
-		#self._return = None
+	"""https://www.geeksforgeeks.org/python-different-ways-to-kill-a-thread/"""
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		# self._return = None
 		self.killed = False
 		self._log = ""
 		self._status = ""
 		pub.subscribe(self.my_listener, "to_progress_diag")
 
-	def start(self): 
-		self.__run_backup = self.run 
-		self.run = self.__run       
+	def start(self):
+		self.__run_backup = self.run
+		self.run = self.__run
 		threading.Thread.start(self)
-		self._status = 'alive'
-	
-	def __run(self): 
-		sys.settrace(self.globaltrace) 
-		self._return = self.__run_backup() 
-		self.run = self.__run_backup 
+		self._status = "alive"
 
-	def globaltrace(self, frame, event, arg): 
-		if event == 'call': 
-			return self.localtrace 
-		else: 
+	def __run(self):
+		sys.settrace(self.globaltrace)
+		self._return = self.__run_backup()
+		self.run = self.__run_backup
+
+	def globaltrace(self, frame, event, arg):
+		if event == "call":
+			return self.localtrace
+		else:
 			return None
-	
-	def localtrace(self, frame, event, arg): 
-		if self.killed and event == 'line': 
+
+	def localtrace(self, frame, event, arg):
+		if self.killed and event == "line":
 			raise SystemExit()
-		return self.localtrace 
-	
+		return self.localtrace
+
 	def my_listener(self, message, arg2=None):
 		"""
 		Listener function
 		"""
 		self._log = message
-		if arg2 == 'stop':
+		if arg2 == "stop":
 			self.kill()
 		elif arg2 is not None:
 			self._status = arg2
@@ -182,7 +200,7 @@ class ThreadWithReturnValue(threading.Thread):
 	def getLog(self):
 		return self._log
 
-	def kill(self): 
+	def kill(self):
 		self.killed = True
 
 	# def run(self):
@@ -191,11 +209,12 @@ class ThreadWithReturnValue(threading.Thread):
 	# 			self._return = self._target(*self._args, **self._kwargs)
 	# 		except Exception as e:
 	# 			self._return = e
-			
+
 	# def join(self):
 	# 	if not isinstance(self._return, Exception):
 	# 		threading.Thread.join(self)
 	# 	return self._return
+
 
 @decorator_with_args
 def ProgressNotification(f, arg):
@@ -204,19 +223,20 @@ def ProgressNotification(f, arg):
 		title = arg
 		new_path = args[-1]
 		if isinstance(new_path, str) and os.path.isfile(new_path):
-			message = _("Loading %s ...")%os.path.basename(new_path)
+			message = _("Loading %s ...") % os.path.basename(new_path)
 		else:
-			message = _('Please wait...')
+			message = _("Please wait...")
 
-		progress_dlg = wx.ProgressDialog(title, message, style=wx.PD_APP_MODAL|wx.PD_CAN_ABORT)
+		progress_dlg = wx.ProgressDialog(title, message, style=wx.PD_APP_MODAL | wx.PD_CAN_ABORT)
 
-		thread = ThreadWithReturnValue(target = f, args = args)
+		thread = ThreadWithReturnValue(target=f, args=args)
 		thread.start()
 
 		cancelled = False
-		### isAlive is deprecated since python 3.9		
-		while thread.isAlive() if hasattr(thread, 'isAlive') else thread.is_alive() and not cancelled:
-
+		### isAlive is deprecated since python 3.9
+		while (
+			thread.isAlive() if hasattr(thread, "isAlive") else thread.is_alive() and not cancelled
+		):
 			if progress_dlg.WasCancelled() or progress_dlg.WasSkipped():
 				thread.kill()
 				cancelled = True
@@ -236,36 +256,40 @@ def ProgressNotification(f, arg):
 
 	return wrapper
 
+
 def print_timing(func):
 	def wrapper(*arg):
 		res = func(*arg)
 		return res
+
 	return wrapper
 
-def resolve_undo_canvas(obj):
-	""" Return the object that owns the undo/redo history for a decorated method owner.
 
-		The owner can be a ShapeCanvas (which exposes PushUndoState), an
-		AttributeEditor (which exposes a *canvas* attribute) or any object whose
-		diagram exposes a parent canvas. None is returned when no history owner
-		can be found (the operation is then simply not recorded).
+def resolve_undo_canvas(obj):
+	"""Return the object that owns the undo/redo history for a decorated method owner.
+
+	The owner can be a ShapeCanvas (which exposes PushUndoState), an
+	AttributeEditor (which exposes a *canvas* attribute) or any object whose
+	diagram exposes a parent canvas. None is returned when no history owner
+	can be found (the operation is then simply not recorded).
 	"""
 	### ShapeCanvas itself
-	if obj is not None and hasattr(obj, 'PushUndoState'):
+	if obj is not None and hasattr(obj, "PushUndoState"):
 		return obj
 
 	### AttributeEditor (or any object) that exposes a canvas attribute
-	canvas = getattr(obj, 'canvas', None)
-	if canvas is not None and hasattr(canvas, 'PushUndoState'):
+	canvas = getattr(obj, "canvas", None)
+	if canvas is not None and hasattr(canvas, "PushUndoState"):
 		return canvas
 
 	### fallback: the parent canvas of the owner diagram
-	diagram = getattr(obj, 'diagram', None)
-	parent = getattr(diagram, 'parent', None)
-	if parent is not None and hasattr(parent, 'PushUndoState'):
+	diagram = getattr(obj, "diagram", None)
+	parent = getattr(diagram, "parent", None)
+	if parent is not None and hasattr(parent, "PushUndoState"):
 		return parent
 
 	return None
+
 
 def Pre_Undo(f):
 	def wrapper(*args):
@@ -279,7 +303,9 @@ def Pre_Undo(f):
 		r = f(*args)
 
 		return r
+
 	return wrapper
+
 
 def Post_Undo(f):
 	def wrapper(*args):
@@ -293,7 +319,9 @@ def Post_Undo(f):
 				canvas.PushUndoState()
 
 		return r
+
 	return wrapper
+
 
 def redirectStdout(f):
 	def wrapper(*args):
@@ -306,4 +334,5 @@ def redirectStdout(f):
 		finally:
 			sys.stdout = stdout
 		return output
+
 	return wrapper

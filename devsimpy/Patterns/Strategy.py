@@ -28,16 +28,15 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
+
 class SimStrategy:
-	""" Strategy abstract class or interface.
-	"""
+	"""Strategy abstract class or interface."""
 
 	def __init__(self, simulator=None):
-		""" Constructor.
-		"""
+		"""Constructor."""
 		self._simulator = simulator
 
-	def simulate(self, T = 1e8):
+	def simulate(self, T=1e8):
 		"""Abstract simulation method."""
 
 		cls_name = self.__class__.__name__

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*- # noqa: UP009
 
-'''
+"""
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # DetachedFrame.py ---
 #                     --------------------------------
@@ -20,9 +20,9 @@
 # GLOBAL VARIABLES AND FUNCTIONS
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-'''
+"""
 
-import sys  
+import sys
 import builtins
 import wx
 
@@ -30,7 +30,7 @@ _ = wx.GetTranslation
 
 wx.ST_SIZEGRIP = wx.STB_SIZEGRIP
 
-import Container  
+import Container
 import Menu
 import PrintOut
 from Utilities import getTopLevelWindow, load_and_resize_image, FixedList
@@ -41,29 +41,31 @@ from Utilities import getTopLevelWindow, load_and_resize_image, FixedList
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
+
 class DetachedFrame(wx.Frame, PrintOut.Printable):
-	""" Detached Frame including a diagram.
-	"""
+	"""Detached Frame including a diagram."""
 
 	def __init__(self, parent=None, ID=wx.NewIdRef(), title="", diagram=None, name=""):  # noqa: B008
-		""" Constructor.
+		"""Constructor.
 
-			@parent : window parent of the frame
-			@ID : ID of the frame
-			@title : title of the frame
-			@diagram : diagram included in the canvas embedded in the frame
-			@name : name of the frame
+		@parent : window parent of the frame
+		@ID : ID of the frame
+		@title : title of the frame
+		@diagram : diagram included in the canvas embedded in the frame
+		@name : name of the frame
 		"""
 
 		### inherit call
-		wx.Frame.__init__(      self,
-								parent,
-								ID,
-								title,
-								wx.DefaultPosition,
-								wx.Size(600, 450),
-								name=name,
-								style=wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN)
+		wx.Frame.__init__(
+			self,
+			parent,
+			ID,
+			title,
+			wx.DefaultPosition,
+			wx.Size(600, 450),
+			name=name,
+			style=wx.DEFAULT_FRAME_STYLE | wx.CLIP_CHILDREN,
+		)
 
 		self.default_style = self.GetWindowStyle()
 
@@ -72,19 +74,18 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		self.parent = parent
 		self.diagram = diagram
 
-
 		### current abstract level
-		#=======================================================================
-		if hasattr(diagram, 'layers') and hasattr(diagram, 'current_level'):
+		# =======================================================================
+		if hasattr(diagram, "layers") and hasattr(diagram, "current_level"):
 			level = diagram.layers[0].current_level
 			self.diagram = diagram.layers[level]
 		else:
 			level = 0
 			self.diagram = diagram
-		#=======================================================================
+		# =======================================================================
 
 		### Canvas Stuff -----------------------------------
-		self.canvas = Container.ShapeCanvas(self, wx.NewIdRef(), name=title, diagram = self.diagram)
+		self.canvas = Container.ShapeCanvas(self, wx.NewIdRef(), name=title, diagram=self.diagram)
 		self.canvas.scalex = 1.0
 		self.canvas.scaley = 1.0
 
@@ -96,34 +97,124 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			self.canvas.stockRedo = self.diagram.parent.stockRedo
 		except Exception:  # noqa: BLE001
 			diagram.SetParent(self.canvas)
-			self.canvas.stockUndo = FixedList(getattr(builtins, 'NB_HISTORY_UNDO', 5))
-			self.canvas.stockRedo = FixedList(getattr(builtins, 'NB_HISTORY_UNDO', 5))
+			self.canvas.stockUndo = FixedList(getattr(builtins, "NB_HISTORY_UNDO", 5))
+			self.canvas.stockRedo = FixedList(getattr(builtins, "NB_HISTORY_UNDO", 5))
 			self.canvas.ResetHistory()
 
 		### Menu ToolBar
 		toolbar = self.CreateToolBar()
-		toolbar.SetToolBitmapSize((16,16))
+		toolbar.SetToolBitmapSize((16, 16))
 
 		if self.parent:
 			self.toggle_list = getTopLevelWindow().toggle_list
 		else:
-			sys.stdout.write(_('Alone mode for DetachedFrame: Connector buttons are not binded\n'))
+			sys.stdout.write(_("Alone mode for DetachedFrame: Connector buttons are not binded\n"))
 			self.toggle_list = [wx.NewIdRef() for i in range(7)]
-		
-		self.tools = [  toolbar.AddTool(Menu.ID_SAVE, "", load_and_resize_image('save.png'), wx.NullBitmap, shortHelp=_('Save File') ,longHelp=_('Save the current diagram'), clientData=self.canvas),
-										toolbar.AddTool(Menu.ID_SAVEAS, "", load_and_resize_image('save_as.png'), wx.NullBitmap, shortHelp=_('Save File As'), longHelp=_('Save the diagram with an another name'), clientData=self.canvas),
-										toolbar.AddTool(wx.ID_UNDO, "", load_and_resize_image('undo.png'), wx.NullBitmap, shortHelp=_('Undo'), longHelp=_('Click to go back, hold to see history'),clientData=self.canvas),
-										toolbar.AddTool(wx.ID_REDO, "", load_and_resize_image('redo.png'), wx.NullBitmap, shortHelp=_('Redo'), longHelp=_('Click to go forward, hold to see history'),clientData=self.canvas),
-										toolbar.AddTool(Menu.ID_ZOOMIN_DIAGRAM, "", load_and_resize_image('zoom+.png'), wx.NullBitmap, shortHelp=_('Zoom +'), longHelp=_('Zoom in'),clientData=self.canvas),
-										toolbar.AddTool(Menu.ID_ZOOMOUT_DIAGRAM, "", load_and_resize_image('zoom-.png'), wx.NullBitmap, shortHelp=_('Zoom -'), longHelp=_('Zoom out'),clientData=self.canvas),
-										toolbar.AddTool(Menu.ID_UNZOOM_DIAGRAM, "", load_and_resize_image('no_zoom.png'), wx.NullBitmap, shortHelp=_('AnnuleZoom'), longHelp=_('Initial view'),clientData=self.canvas),
-										toolbar.AddTool(Menu.ID_PRIORITY_DIAGRAM, "", load_and_resize_image('priority.png'), shortHelp=_('Priority')),
-										toolbar.AddTool(Menu.ID_CHECK_DIAGRAM, "", load_and_resize_image('check_master.png'), shortHelp=_('Check')),
-										toolbar.AddTool(Menu.ID_SIM_DIAGRAM, "", load_and_resize_image('simulation.png'), shortHelp=_('Simulation')),
-										toolbar.AddTool(self.toggle_list[0], "", load_and_resize_image('direct_connector.png'), shortHelp=_('Direct'), kind=wx.ITEM_CHECK),
-										toolbar.AddTool(self.toggle_list[1], "", load_and_resize_image('square_connector.png'), shortHelp=_('Square'), kind=wx.ITEM_CHECK),
-										toolbar.AddTool(self.toggle_list[2], "", load_and_resize_image('linear_connector.png'), shortHelp=_('Linear'), kind=wx.ITEM_CHECK)
-			]							
+
+		self.tools = [
+			toolbar.AddTool(
+				Menu.ID_SAVE,
+				"",
+				load_and_resize_image("save.png"),
+				wx.NullBitmap,
+				shortHelp=_("Save File"),
+				longHelp=_("Save the current diagram"),
+				clientData=self.canvas,
+			),
+			toolbar.AddTool(
+				Menu.ID_SAVEAS,
+				"",
+				load_and_resize_image("save_as.png"),
+				wx.NullBitmap,
+				shortHelp=_("Save File As"),
+				longHelp=_("Save the diagram with an another name"),
+				clientData=self.canvas,
+			),
+			toolbar.AddTool(
+				wx.ID_UNDO,
+				"",
+				load_and_resize_image("undo.png"),
+				wx.NullBitmap,
+				shortHelp=_("Undo"),
+				longHelp=_("Click to go back, hold to see history"),
+				clientData=self.canvas,
+			),
+			toolbar.AddTool(
+				wx.ID_REDO,
+				"",
+				load_and_resize_image("redo.png"),
+				wx.NullBitmap,
+				shortHelp=_("Redo"),
+				longHelp=_("Click to go forward, hold to see history"),
+				clientData=self.canvas,
+			),
+			toolbar.AddTool(
+				Menu.ID_ZOOMIN_DIAGRAM,
+				"",
+				load_and_resize_image("zoom+.png"),
+				wx.NullBitmap,
+				shortHelp=_("Zoom +"),
+				longHelp=_("Zoom in"),
+				clientData=self.canvas,
+			),
+			toolbar.AddTool(
+				Menu.ID_ZOOMOUT_DIAGRAM,
+				"",
+				load_and_resize_image("zoom-.png"),
+				wx.NullBitmap,
+				shortHelp=_("Zoom -"),
+				longHelp=_("Zoom out"),
+				clientData=self.canvas,
+			),
+			toolbar.AddTool(
+				Menu.ID_UNZOOM_DIAGRAM,
+				"",
+				load_and_resize_image("no_zoom.png"),
+				wx.NullBitmap,
+				shortHelp=_("AnnuleZoom"),
+				longHelp=_("Initial view"),
+				clientData=self.canvas,
+			),
+			toolbar.AddTool(
+				Menu.ID_PRIORITY_DIAGRAM,
+				"",
+				load_and_resize_image("priority.png"),
+				shortHelp=_("Priority"),
+			),
+			toolbar.AddTool(
+				Menu.ID_CHECK_DIAGRAM,
+				"",
+				load_and_resize_image("check_master.png"),
+				shortHelp=_("Check"),
+			),
+			toolbar.AddTool(
+				Menu.ID_SIM_DIAGRAM,
+				"",
+				load_and_resize_image("simulation.png"),
+				shortHelp=_("Simulation"),
+			),
+			toolbar.AddTool(
+				self.toggle_list[0],
+				"",
+				load_and_resize_image("direct_connector.png"),
+				shortHelp=_("Direct"),
+				kind=wx.ITEM_CHECK,
+			),
+			toolbar.AddTool(
+				self.toggle_list[1],
+				"",
+				load_and_resize_image("square_connector.png"),
+				shortHelp=_("Square"),
+				kind=wx.ITEM_CHECK,
+			),
+			toolbar.AddTool(
+				self.toggle_list[2],
+				"",
+				load_and_resize_image("linear_connector.png"),
+				shortHelp=_("Linear"),
+				kind=wx.ITEM_CHECK,
+			),
+		]
 		toolbar.EnableTool(wx.ID_UNDO, len(self.canvas.stockUndo) > 1)
 		toolbar.EnableTool(wx.ID_REDO, len(self.canvas.stockRedo) > 0)
 		toolbar.InsertSeparator(2)
@@ -132,13 +223,15 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		toolbar.InsertSeparator(13)
 		toolbar.InsertSeparator(17)
 
-		toolbar.ToggleTool(self.toggle_list[0],1)
+		toolbar.ToggleTool(self.toggle_list[0], 1)
 
-		#=======================================================================
+		# =======================================================================
 		### spin control for abstraction hierarchy
 		if isinstance(diagram, Container.Diagram):
 			level_label = wx.StaticText(toolbar, -1, _("Level "))
-			self.spin = wx.SpinCtrl(toolbar, self.toggle_list[3], str(level), (55, 90), (50, -1), min=0, max=10)
+			self.spin = wx.SpinCtrl(
+				toolbar, self.toggle_list[3], str(level), (55, 90), (50, -1), min=0, max=10
+			)
 
 			toolbar.AddControl(level_label)
 			toolbar.AddControl(self.spin)
@@ -146,28 +239,43 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 			ID_UPWARD = self.toggle_list[4]
 			ID_DOWNWARD = self.toggle_list[5]
 
-			self.tools.append(toolbar.AddTool(ID_DOWNWARD, "", load_and_resize_image('downward.png'), shortHelp=_('Downward rules')))
-			self.tools.append(toolbar.AddTool(ID_UPWARD, "", load_and_resize_image('upward.png'), shortHelp=_('Upward rules')))
-    				
+			self.tools.append(
+				toolbar.AddTool(
+					ID_DOWNWARD,
+					"",
+					load_and_resize_image("downward.png"),
+					shortHelp=_("Downward rules"),
+				)
+			)
+			self.tools.append(
+				toolbar.AddTool(
+					ID_UPWARD, "", load_and_resize_image("upward.png"), shortHelp=_("Upward rules")
+				)
+			)
+
 			### update downward and upward button
 			toolbar.EnableTool(ID_DOWNWARD, level != 0)
 			toolbar.EnableTool(ID_UPWARD, level != 0)
-		#=======================================================================
+		# =======================================================================
 
 		# Bouton d'information (NOUVEAU)
 		ID_DETACHED_INFO = self.toggle_list[6]
-		self.tools.append(toolbar.AddTool(ID_DETACHED_INFO, "", load_and_resize_image('info.png'), shortHelp=_('Help')))
+		self.tools.append(
+			toolbar.AddTool(
+				ID_DETACHED_INFO, "", load_and_resize_image("info.png"), shortHelp=_("Help")
+			)
+		)
 
 		toolbar.Realize()
 		self.SetToolBar(toolbar)
-		
+
 		### if Detached frame from block (container or Code)
 		### save, save-as and simulation are disabled
 		if not isinstance(self.parent, Container.ShapeCanvas):
-			#toolbar.EnableTool(Menu.ID_SAVE, False)
-			#toolbar.EnableTool(Menu.ID_SAVEAS, False)
+			# toolbar.EnableTool(Menu.ID_SAVE, False)
+			# toolbar.EnableTool(Menu.ID_SAVEAS, False)
 			toolbar.EnableTool(Menu.ID_SIM_DIAGRAM, False)
-			toolbar.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in DEFAULT_DEVS_DIRNAME) # type: ignore  # noqa: F821
+			toolbar.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not "PyPDEVS" in DEFAULT_DEVS_DIRNAME)  # type: ignore  # noqa: F821
 		else:
 			toolbar.EnableTool(Menu.ID_SAVEAS, False)
 
@@ -176,8 +284,8 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 
 		### vertical box
 		vbox = wx.BoxSizer(wx.VERTICAL)
-		#vbox.Add(toolbar, 0, wx.EXPAND, border = 5)
-		vbox.Add(self.canvas, 1, wx.EXPAND, border = 5)
+		# vbox.Add(toolbar, 0, wx.EXPAND, border = 5)
+		vbox.Add(self.canvas, 1, wx.EXPAND, border=5)
 
 		self.SetSizer(vbox)
 
@@ -190,10 +298,10 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		self.__binding()
 
 	def __binding(self):
-		""" Binding event.
-				ClOSE event, IDLE event and MOVE event are binding here.
-				All other event are binding in the main application thanks to general identifiers
-				NB: ID are defined on the Menu.py file
+		"""Binding event.
+		ClOSE event, IDLE event and MOVE event are binding here.
+		All other event are binding in the main application thanks to general identifiers
+		NB: ID are defined on the Menu.py file
 		"""
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 
@@ -207,42 +315,36 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 
 	def OnUndo(self, event):
-		""" Undo the last operation of the detached diagram.
-		"""
+		"""Undo the last operation of the detached diagram."""
 		self.canvas.ApplyUndo()
 
 	def OnRedo(self, event):
-		""" Redo the last undone operation of the detached diagram.
-		"""
+		"""Redo the last undone operation of the detached diagram."""
 		self.canvas.ApplyRedo()
 
 	def OnStayOnTop(self, event):
-		""" Toggle the stay on top option of the detached frame.
-		"""
+		"""Toggle the stay on top option of the detached frame."""
 
-		if self.GetWindowStyle()==self.default_style:
+		if self.GetWindowStyle() == self.default_style:
 			self.SetWindowStyle(wx.CLIP_CHILDREN | wx.STAY_ON_TOP)
 		else:
 			self.SetWindowStyle(self.default_style)
 
 	def OnSaveFile(self, event):
-		""" Save button has been clicked
-		"""
+		"""Save button has been clicked"""
 		### OnSaveFile of the mainW is activated
 		mainW = getTopLevelWindow()
 		mainW.OnSaveFile(event)
 
 	def OnSaveAsFile(self, event):
-		""" Save button has been clicked
-		"""
+		"""Save button has been clicked"""
 
 		### OnSaveAsFile of the mainW is activated
 		self.diagram.modify = False
 		Container.Block.OnExport(self.diagram, event)
 
 	def OnMove(self, event):
-		""" alpha manager
-		"""
+		"""alpha manager"""
 		if self.transparent == wx.ALPHA_OPAQUE:
 			self.transparent = 140
 			try:
@@ -252,8 +354,7 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		event.Skip()
 
 	def OnIdle(self, event):
-		""" alpha manager
-		"""
+		"""alpha manager"""
 		if self.transparent == 140:
 			self.transparent = wx.ALPHA_OPAQUE
 			try:
@@ -263,16 +364,14 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		event.Skip()
 
 	def GetCanvas(self):
-		""" Return the canvas
-		"""
+		"""Return the canvas"""
 		return self.canvas
 
 	def OnClose(self, event):
-		""" Close event has been received.
-		"""
+		"""Close event has been received."""
 		canvas = self.GetCanvas()
 		### bug fixe for windows since wx 4.0
-		if sys.platform.startswith('win'):
+		if sys.platform.startswith("win"):
 			try:
 				canvas.OnLeftDown(event)
 				canvas.OnLeftUp(event)

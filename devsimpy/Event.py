@@ -4,8 +4,8 @@ import wx
 
 
 class LockEvent(wx.PyCommandEvent):
-	""" Lock Event
-	"""
+	"""Lock Event"""
+
 	def __init__(self, evtType, id):
 		wx.PyCommandEvent.__init__(self, evtType, id)
 		### position of the pop up menu
@@ -17,8 +17,9 @@ class LockEvent(wx.PyCommandEvent):
 	def GetPosition(self):
 		return self.pos
 
+
 class UnLockEvent(LockEvent):
-	""" UnLock Event
-	"""
+	"""UnLock Event"""
+
 	def __init__(self, evtType, id):
 		LockEvent.__init__(self, evtType, id)

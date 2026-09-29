@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*- # noqa: UP009
 
-import json  
+import json
 import threading
 import socketserver
 import traceback
@@ -8,124 +8,123 @@ import sys
 import numpy as np
 
 if sys.platform == "win32":
-    Server = socketserver.TCPServer
+	Server = socketserver.TCPServer
 else:
-    Server = socketserver.UnixStreamServer
+	Server = socketserver.UnixStreamServer
+
 
 def log(s):
-    sys.stdout.write(s)
+	sys.stdout.write(s)
+
 
 class MySocketHandler(socketserver.BaseRequestHandler):
-    """
-    The RequestHandler class for our server.
-    It is instantiated once per connection to the server, and must
-    override the handle() method to implement communication to the
-    client.
-    """
-    def handle(self):
-        # request is the socket connected to the client
-        self.data = self.request.recv(1024).strip()
+	"""
+	The RequestHandler class for our server.
+	It is instantiated once per connection to the server, and must
+	override the handle() method to implement communication to the
+	client.
+	"""
 
-        log("*** reception " + self.data)
-        response = {}
-        
-        if self.data == "PAUSE":
-            self.server.simulation_thread.suspend()
-            #while not self.server.simulation_thread.suspension_applied: pass TODO? modif Strategy needed
-            response['status'] = 'PAUSED'
+	def handle(self):
+		# request is the socket connected to the client
+		self.data = self.request.recv(1024).strip()
 
-            # Simulation time is not reliable before thread is actually suspended
-            # Infinity might be returned
-            response['simulation_time'] = self.server.simulation_thread.model.myTimeAdvance
-            if response['simulation_time'] == np.inf:
-                response['simulation_time'] = 'undefined'
+		log("*** reception " + self.data)
+		response = {}
 
-        elif self.data == "RESUME":
-            response['simulation_time'] = self.server.simulation_thread.model.myTimeAdvance
-            self.server.simulation_thread.resume_thread()
-            #while self.server.simulation_thread.suspension_applied:pass TODO? modif Strategy needed
-            response['status'] = 'RESUMED'
+		if self.data == "PAUSE":
+			self.server.simulation_thread.suspend()
+			# while not self.server.simulation_thread.suspension_applied: pass TODO? modif Strategy needed
+			response["status"] = "PAUSED"
 
-        else:
-            data       = json.loads(self.data)
-            model_name = data['block_label']
-            params     = data['block']
+			# Simulation time is not reliable before thread is actually suspended
+			# Infinity might be returned
+			response["simulation_time"] = self.server.simulation_thread.model.myTimeAdvance
+			if response["simulation_time"] == np.inf:
+				response["simulation_time"] = "undefined"
 
-            if self.server.simulation_thread.thread_suspend:
-                response['status'] = 'OK'
-                response['simulation_time'] = self.server.simulation_thread.model.myTimeAdvance
-                
-                if model_name in self.server._componentSet:
+		elif self.data == "RESUME":
+			response["simulation_time"] = self.server.simulation_thread.model.myTimeAdvance
+			self.server.simulation_thread.resume_thread()
+			# while self.server.simulation_thread.suspension_applied:pass TODO? modif Strategy needed
+			response["status"] = "RESUMED"
 
-                    for param_name, param_value in list(params.items()) :
-                        if param_name in dir(self.server._componentSet[model_name]):                       
-                            setattr(self.server._componentSet[model_name], param_name, param_value)
-                        else:
-                            response['status'] += ' - UNKNOWN_PARAM ' + param_name
+		else:
+			data = json.loads(self.data)
+			model_name = data["block_label"]
+			params = data["block"]
 
-                else:
-                    response['status'] = 'UNKNOWN_MODEL_NAME ' + model_name
-            else:
-                response['status'] = 'SIM_NOT_PAUSED'
+			if self.server.simulation_thread.thread_suspend:
+				response["status"] = "OK"
+				response["simulation_time"] = self.server.simulation_thread.model.myTimeAdvance
 
-        self.request.send(json.dumps(response))
+				if model_name in self.server._componentSet:
+					for param_name, param_value in list(params.items()):
+						if param_name in dir(self.server._componentSet[model_name]):
+							setattr(self.server._componentSet[model_name], param_name, param_value)
+						else:
+							response["status"] += " - UNKNOWN_PARAM " + param_name
+
+				else:
+					response["status"] = "UNKNOWN_MODEL_NAME " + model_name
+			else:
+				response["status"] = "SIM_NOT_PAUSED"
+
+		self.request.send(json.dumps(response))
+
 
 class MySocketServer(Server):
-    """ Class to manage the socket server for interaction with the simulation thread.
-    """
-    def __init__(self, server_address, RequestHandlerClass, simulation_thread):
-        """ Constructor of the socket server. It is called by the InteractionManager thread.
-        """
-        if sys.platform == "win32":
-            socketserver.TCPServer.__init__(self, server_address, RequestHandlerClass)
-        else:
-            socketserver.UnixStreamServer.__init__(self, server_address, RequestHandlerClass)
+	"""Class to manage the socket server for interaction with the simulation thread."""
 
-        self.simulation_thread = simulation_thread
-        self._componentSet = self.simulation_thread.model.getFlatComponentSet()
+	def __init__(self, server_address, RequestHandlerClass, simulation_thread):
+		"""Constructor of the socket server. It is called by the InteractionManager thread."""
+		if sys.platform == "win32":
+			socketserver.TCPServer.__init__(self, server_address, RequestHandlerClass)
+		else:
+			socketserver.UnixStreamServer.__init__(self, server_address, RequestHandlerClass)
 
-    def handle_error(self, request, client_address):
-        sys.stderr.write('*** EXCEPTION handling msg in InteractionManager')
-        sys.stderr.write(client_address)
-        sys.stderr.write(traceback.format_exc())
-        sys.stderr.write(' ***')
+		self.simulation_thread = simulation_thread
+		self._componentSet = self.simulation_thread.model.getFlatComponentSet()
+
+	def handle_error(self, request, client_address):
+		sys.stderr.write("*** EXCEPTION handling msg in InteractionManager")
+		sys.stderr.write(client_address)
+		sys.stderr.write(traceback.format_exc())
+		sys.stderr.write(" ***")
+
 
 class InteractionManager(threading.Thread):
-    """ Class to manage the socket server for interaction with the simulation thread.
-    """
-    def __init__(self, socket_id, simulation_thread):
-        """ Constructor of the InteractionManager thread. It is called by the SimulationThread.
-        """
-        threading.Thread.__init__(self)
-        self.daemon = True
-        log('SocketServer thread init ** ')
-        try:
-            # TCP socket server initialization
-            #self.server = MySocketServer(('localhost', 5555), MySocketHandler, simulation_thread)
+	"""Class to manage the socket server for interaction with the simulation thread."""
 
-            # UNIX socket server initialization
-            self.server = MySocketServer('\0' + socket_id, MySocketHandler, simulation_thread)
+	def __init__(self, socket_id, simulation_thread):
+		"""Constructor of the InteractionManager thread. It is called by the SimulationThread."""
+		threading.Thread.__init__(self)
+		self.daemon = True
+		log("SocketServer thread init ** ")
+		try:
+			# TCP socket server initialization
+			# self.server = MySocketServer(('localhost', 5555), MySocketHandler, simulation_thread)
 
-            log('SocketServer created ** ')
-                
-        except:
-            self.server = None
-            log ('SocketServer creation failed ** ')
-            #log (traceback.format_exc())
-            raise
+			# UNIX socket server initialization
+			self.server = MySocketServer("\0" + socket_id, MySocketHandler, simulation_thread)
 
+			log("SocketServer created ** ")
 
-    def run(self):
-        """ Run the socket server. It is called by the InteractionManager thread.
-        """
-        if self.server:
-            log('SocketServer serve_forever ** ')
-            self.server.serve_forever()
+		except:
+			self.server = None
+			log("SocketServer creation failed ** ")
+			# log (traceback.format_exc())
+			raise
 
-    def stop(self):
-        """ Stop the socket server. It is called by the InteractionManager thread.
-        """
-        if self.server:
-            log('SocketSserver shutdown')
-            self.server.shutdown()
-            self.server.server_close()
+	def run(self):
+		"""Run the socket server. It is called by the InteractionManager thread."""
+		if self.server:
+			log("SocketServer serve_forever ** ")
+			self.server.serve_forever()
+
+	def stop(self):
+		"""Stop the socket server. It is called by the InteractionManager thread."""
+		if self.server:
+			log("SocketSserver shutdown")
+			self.server.shutdown()
+			self.server.server_close()

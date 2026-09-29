@@ -20,200 +20,187 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-import sys  
+import sys
 
 import gettext
+
 _ = gettext.gettext
 
-import Container  
+import Container
 
-#---------------------------------------------------------
+
+# ---------------------------------------------------------
 class Abstractable:
-    """  Mixin class for the abstraction hierarchy.
-        Adds dynamically the 'layers' attribute. This one contains the list of diagrams associated with one level.
-    """
+	"""Mixin class for the abstraction hierarchy.
+	Adds dynamically the 'layers' attribute. This one contains the list of diagrams associated with one level.
+	"""
 
-    DUMP_ATTR = ['layers', 'current_level', 'DAM', 'UAM']  # noqa: RUF012
+	DUMP_ATTR = ["layers", "current_level", "DAM", "UAM"]  # noqa: RUF012
 
-    ###
-    def __init__(self, dia):
-        """ Constructor.
-        """
-        ### current level
-        self.current_level = 0
+	###
+	def __init__(self, dia):
+		"""Constructor."""
+		### current level
+		self.current_level = 0
 
-        self.diagram = dia
+		self.diagram = dia
 
-        ### dico of layers, dico of Downward and Upward functions according to layers
-        if hasattr(dia, 'layers'):
-            self.layers = dia.layers
-            self.DAM = dia.DAM
-            self.UAM = dia.UAM
-        else:
-            self.layers = {0:dia}
-            self.DAM = {}
-            self.UAM = {}
+		### dico of layers, dico of Downward and Upward functions according to layers
+		if hasattr(dia, "layers"):
+			self.layers = dia.layers
+			self.DAM = dia.DAM
+			self.UAM = dia.UAM
+		else:
+			self.layers = {0: dia}
+			self.DAM = {}
+			self.UAM = {}
 
-#===============================================================================
-# overwriting for Diagram class
-#===============================================================================
-    ###
-    def SetDiagram(self, diagram):
-        """ Set the diagram.
-        """
+	# ===============================================================================
+	# overwriting for Diagram class
+	# ===============================================================================
+	###
+	def SetDiagram(self, diagram):
+		"""Set the diagram."""
 
-        ### if diagram has layers attribute and layer exist, then load it
-        if hasattr(diagram, 'layers') and diagram.current_level in diagram.layers:
-            self.diagram = diagram.layers[self.GetCurrentLevel()]
-            #self.layers = diagram.layers
-            #self.current_level = diagram.current_level
-            self.DAM  = diagram.DAM
-            self.UAM = diagram.UAM
-        else:
-            self.diagram = diagram
-            self.AddLayer(diagram, self.GetCurrentLevel())
+		### if diagram has layers attribute and layer exist, then load it
+		if hasattr(diagram, "layers") and diagram.current_level in diagram.layers:
+			self.diagram = diagram.layers[self.GetCurrentLevel()]
+			# self.layers = diagram.layers
+			# self.current_level = diagram.current_level
+			self.DAM = diagram.DAM
+			self.UAM = diagram.UAM
+		else:
+			self.diagram = diagram
+			self.AddLayer(diagram, self.GetCurrentLevel())
 
-    ###
-    def GetDiagram(self):
-        """ Return Diagram instance.
-        """
-        return self.diagram
-#===============================================================================
-#
-#===============================================================================
+	###
+	def GetDiagram(self):
+		"""Return Diagram instance."""
+		return self.diagram
 
-    ###
-    def GetDiagramByLevel(self, l):
-        """ Return layer form level l.
-            if layer dosen't exist, None is returned.
-        """
-        return self.layers.get(l, None)
+	# ===============================================================================
+	#
+	# ===============================================================================
 
-    ###
-    def SetDiagramByLevel(self, d, l):
-        """ Update the layers form diagram d at level l.
-        """
-        self.layers.update({l:d})
+	###
+	def GetDiagramByLevel(self, l):
+		"""Return layer form level l.
+		if layer dosen't exist, None is returned.
+		"""
+		return self.layers.get(l, None)
 
-    ###
-    def GetLayers(self):
-        """ Get layers dico.
-        """
-        return self.layers
+	###
+	def SetDiagramByLevel(self, d, l):
+		"""Update the layers form diagram d at level l."""
+		self.layers.update({l: d})
 
-    ###
-    def GetCurrentLevel(self):
-        """ Return the current layer viewed in the canvas.
-        """
-        return self.current_level
+	###
+	def GetLayers(self):
+		"""Get layers dico."""
+		return self.layers
 
-    def GetUAM(self):
-        """ Return the dictionary of the code of Upward Atomic Model.
-        """
-        return self.UAM
+	###
+	def GetCurrentLevel(self):
+		"""Return the current layer viewed in the canvas."""
+		return self.current_level
 
-    def GetDAM(self):
-        """ Return the dictionary of the code of Downward Atomic Model.
-        """
-        return self.DAM
+	def GetUAM(self):
+		"""Return the dictionary of the code of Upward Atomic Model."""
+		return self.UAM
 
-    def SetDAM(self, cl, val):
-        """ DAM setter.
-        """
-        self.DAM[cl] = val
+	def GetDAM(self):
+		"""Return the dictionary of the code of Downward Atomic Model."""
+		return self.DAM
 
-    def SetUAM(self, cl, val):
-        """ UAM setter.
-        """
-        self.UAM[cl] = val
+	def SetDAM(self, cl, val):
+		"""DAM setter."""
+		self.DAM[cl] = val
 
-    def SetCurrentLevel(self, l):
-        """ Set the current level viewed in the canvas.
-        """
-        self.current_level = l
+	def SetUAM(self, cl, val):
+		"""UAM setter."""
+		self.UAM[cl] = val
 
-    ###
-    def NextLevel(self):
-        """ return the last depth abstract level.
-        """
-        return self.GetLevelLenght()
+	def SetCurrentLevel(self, l):
+		"""Set the current level viewed in the canvas."""
+		self.current_level = l
 
-    ###
-    def GetLevelLenght(self):
-        """ Get the number of layers defined in the canvas.
-        """
-        return len(self.GetLayers())
+	###
+	def NextLevel(self):
+		"""return the last depth abstract level."""
+		return self.GetLevelLenght()
 
-    ###
-    def AddLayer(self, d, l):
-        """ Add the diagram d at level l/
-        """
-        if l in self.layers:
-            self.SetDiagramByLevel(d, l)
-        else:
-            ### add new diagram according the new layer
-            self.layers[l] = d
+	###
+	def GetLevelLenght(self):
+		"""Get the number of layers defined in the canvas."""
+		return len(self.GetLayers())
 
-            import WizardGUI
-            
-            ### add new DAM and UAM according to new layer
-            self.SetUAM(l, WizardGUI.atomicCode('UAM%d'%l))  # noqa: UP031
-            self.SetDAM(l, WizardGUI.atomicCode('DAM%d'%l))  # noqa: UP031
+	###
+	def AddLayer(self, d, l):
+		"""Add the diagram d at level l/"""
+		if l in self.layers:
+			self.SetDiagramByLevel(d, l)
+		else:
+			### add new diagram according the new layer
+			self.layers[l] = d
 
-    ###
-    def LoadDiagram(self, l):
-        """ Load diagram at the level l in the current canvas.
-        """
-        layers = self.GetLayers()
-        canvas = self
+			import WizardGUI
 
-        print("current level is", l, layers)
+			### add new DAM and UAM according to new layer
+			self.SetUAM(l, WizardGUI.atomicCode("UAM%d" % l))  # noqa: UP031
+			self.SetDAM(l, WizardGUI.atomicCode("DAM%d" % l))  # noqa: UP031
 
-        if l in layers:
-            dia = canvas.GetDiagramByLevel(l)
-            canvas.SetCurrentLevel(l)
-            sys.stdout.write("load diagram %d"%l)  # noqa: UP031
+	###
+	def LoadDiagram(self, l):
+		"""Load diagram at the level l in the current canvas."""
+		layers = self.GetLayers()
+		canvas = self
 
-        else:
+		print("current level is", l, layers)
 
-            dia = Container.Diagram()
-            dia.SetParent(canvas)
+		if l in layers:
+			dia = canvas.GetDiagramByLevel(l)
+			canvas.SetCurrentLevel(l)
+			sys.stdout.write("load diagram %d" % l)  # noqa: UP031
 
-            canvas.SetCurrentLevel(l)
-            #canvas.SetDiagram(dia)
+		else:
+			dia = Container.Diagram()
+			dia.SetParent(canvas)
 
-            sys.stdout.write(f"New diagram at level {l}")
+			canvas.SetCurrentLevel(l)
+			# canvas.SetDiagram(dia)
 
-        sys.stdout.write(str(self.layers))
+			sys.stdout.write(f"New diagram at level {l}")
 
-        ### add new or update new attributes layers and current_layer to diagram
-        dia.layers = canvas.GetLayers()
-        dia.current_level = canvas.GetCurrentLevel()
-        dia.DAM = canvas.GetDAM()
-        dia.UAM = canvas.GetUAM()
+		sys.stdout.write(str(self.layers))
 
-        ### add new or update new attributes layers and current_layer to diagram at level 0
-        d0 = canvas.GetDiagramByLevel(0)
-        d0.layers = canvas.GetLayers()
-        d0.current_level = canvas.GetCurrentLevel()
-        d0.DAM = canvas.GetDAM()
-        d0.UAM = canvas.GetUAM()
+		### add new or update new attributes layers and current_layer to diagram
+		dia.layers = canvas.GetLayers()
+		dia.current_level = canvas.GetCurrentLevel()
+		dia.DAM = canvas.GetDAM()
+		dia.UAM = canvas.GetUAM()
 
-        #=======================================================================
-        # ### Add Attributes for dump only for ContainerBlock
-        #=======================================================================
-        # frame = canvas.GetTopLevelParent()
-        # is_detached_frame = isinstance(frame, DetachedFrame.DetachedFrame)
-        # parent_frame_is_canvas = isinstance(frame.GetParent(), Container.ShapeCanvas)
-        # if is_detached_frame and not parent_frame_is_canvas:
-        #     d0 = canvas.GetDiagramByLevel(0)
-        #     ### only once
-        #     if not (d0.HasAttr('layers') and d0.HasAttr('current_level')):
-        #         d0.AddAttributes(['layers', 'current_level'])
-        #         self.SetDiagramByLevel(0, d0)
-        #=======================================================================
+		### add new or update new attributes layers and current_layer to diagram at level 0
+		d0 = canvas.GetDiagramByLevel(0)
+		d0.layers = canvas.GetLayers()
+		d0.current_level = canvas.GetCurrentLevel()
+		d0.DAM = canvas.GetDAM()
+		d0.UAM = canvas.GetUAM()
 
-        ### update canvas
-        canvas.SetDiagram(dia)
-        canvas.deselect()
-        canvas.Refresh()
+		# =======================================================================
+		# ### Add Attributes for dump only for ContainerBlock
+		# =======================================================================
+		# frame = canvas.GetTopLevelParent()
+		# is_detached_frame = isinstance(frame, DetachedFrame.DetachedFrame)
+		# parent_frame_is_canvas = isinstance(frame.GetParent(), Container.ShapeCanvas)
+		# if is_detached_frame and not parent_frame_is_canvas:
+		#     d0 = canvas.GetDiagramByLevel(0)
+		#     ### only once
+		#     if not (d0.HasAttr('layers') and d0.HasAttr('current_level')):
+		#         d0.AddAttributes(['layers', 'current_level'])
+		#         self.SetDiagramByLevel(0, d0)
+		# =======================================================================
+
+		### update canvas
+		canvas.SetDiagram(dia)
+		canvas.deselect()
+		canvas.Refresh()

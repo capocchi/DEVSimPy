@@ -20,22 +20,23 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##-
 
-import Components  
+import Components
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 class Achievable(Components.DEVSComponent):
-	""" Achievable mixin to create corresponding behavioral model (DEVS) of block.
-	"""
+	"""Achievable mixin to create corresponding behavioral model (DEVS) of block."""
 
 	###
 	def __init__(self):
-		""" Constructor.
-		"""
+		"""Constructor."""
 
 		Components.DEVSComponent.__init__(self)
 
-def main():
-    pass
 
-if __name__ == '__main__':
-    main()
+def main():
+	pass
+
+
+if __name__ == "__main__":
+	main()

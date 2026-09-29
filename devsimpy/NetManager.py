@@ -11,28 +11,25 @@ GENERAL NOTES AND REMARKS:
 GLOBAL VARIABLES AND FUNCTIONS:
 """
 
-import sys  
+import sys
 import http.client
 import types
 from urllib.parse import urlparse
 
+
 class Net:
-	
 	def __init__(self, py_net_file):
-		""" Constructor
-		"""
-		
-		assert(py_net_file.startswith('http'))
-		
+		"""Constructor"""
+
+		assert py_net_file.startswith("http")
+
 		self._py_net_file = py_net_file
-		
-	
+
 	def GetMoldule(python_file=""):
-		""" Give module object from url.
-		"""
+		"""Give module object from url."""
 
 		# See if the module has already been imported
-		module_name = self._py_net_file.split('/')[-1].split('.py')[0]  # type: ignore # noqa: F821
+		module_name = self._py_net_file.split("/")[-1].split(".py")[0]  # type: ignore # noqa: F821
 
 		try:
 			return sys.modules[module_name]
@@ -51,12 +48,12 @@ class Net:
 		c = http.client.HTTPConnection(o.netloc)
 		### request with GET mode
 
-		c.request('GET', o.path)
+		c.request("GET", o.path)
 		### get response of request
 		r = c.getresponse()
 		### convert file into string
 		code = r.read()
-		
+
 		### try to execute module code
 		if r.status == 200:
 			try:

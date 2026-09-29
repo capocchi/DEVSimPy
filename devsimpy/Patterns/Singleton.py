@@ -21,12 +21,14 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
+
 def Singleton(myClass):
-    """ Signleton used as Decorator
-    """
-    instances={}
-    def getInstance(*args, **kwargs):
-        if myClass not in instances:
-            instances[myClass] = myClass(*args, **kwargs)
-        return instances[myClass]
-    return getInstance
+	"""Signleton used as Decorator"""
+	instances = {}
+
+	def getInstance(*args, **kwargs):
+		if myClass not in instances:
+			instances[myClass] = myClass(*args, **kwargs)
+		return instances[myClass]
+
+	return getInstance

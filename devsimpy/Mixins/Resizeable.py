@@ -20,12 +20,12 @@
 #
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##-
 
-#---------------------------------------------------------
+# ---------------------------------------------------------
 class Resizeable:
-	""" Mixin that creates resizable nodes that can be drug around the canvas
-	 	to alter the shape or size of the Shape.
+	"""Mixin that creates resizable nodes that can be drug around the canvas
+	to alter the shape or size of the Shape.
 	"""
+
 	def __init__(self):
-		""" Constructor.
-		"""
+		"""Constructor."""
 		pass  # noqa: PIE790
