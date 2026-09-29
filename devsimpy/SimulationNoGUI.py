@@ -109,7 +109,7 @@ def makeSimulation(
 
 					# Add little wait to avoid the CPU overhead
 					time.sleep(0.001)
-				except Exception as e:  # noqa: BLE001
+				except Exception as e:  
 					print(f"Error in the simulation loop : {e}")
 					break
 
@@ -121,7 +121,7 @@ def makeSimulation(
 				Printer("Progress: 100%")
 			# simuPusher.push('progress', {'progress':100})
 
-	except:  # noqa: E722
+	except Exception:  
 		json_report["summary"] += " *** EXCEPTION raised in simulation ***"
 		json_report["success"] = False
 		sys.stderr.write(traceback.format_exc())

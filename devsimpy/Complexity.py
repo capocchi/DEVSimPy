@@ -65,7 +65,7 @@ def GetMacCabeMetric(path):
 				### when model is created, the transition functions are empty...
 				try:
 					source_list = list(map(inspect.getsource, L))
-				except Exception:  # noqa: BLE001
+				except Exception:
 					source_list = []
 
 				# L_args = []
@@ -78,7 +78,7 @@ def GetMacCabeMetric(path):
 						ast = codepaths.ast.parse(textwrap.dedent(text).strip())
 						visitor = codepaths.PathGraphingAstVisitor()
 						visitor.preorder(ast, visitor)
-					except Exception as info:  # noqa: BLE001
+					except Exception as info:
 						sys.stdout.write(f"Error in Complexity module: {info} for class {cls}\n")
 					else:
 						for graph in visitor.graphs.values():

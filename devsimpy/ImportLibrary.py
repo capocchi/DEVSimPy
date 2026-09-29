@@ -362,7 +362,7 @@ class ImportLibrary(wx.Dialog):
 					else None,
 				}
 				self._all_items.append(item_data)
-			except Exception as e:  # noqa: BLE001
+			except Exception as e:  
 				sys.stderr.write(f"Error saving item {i}: {e!s}\n")
 
 	###
@@ -585,7 +585,7 @@ class ImportLibrary(wx.Dialog):
 					try:
 						### delete directory
 						shutil.rmtree(self._d[label])
-					except Exception as info:  # noqa: BLE001
+					except Exception as info:  
 						sys.stdout.write(f"{label} not deleted!\n Error: {info}")
 
 				dial.Destroy()
@@ -598,7 +598,7 @@ class ImportLibrary(wx.Dialog):
 					]
 					del self._d[label]
 					self.parent.cfg.Write("exportPathsList", str(self.parent.exportPathsList))
-				except Exception:  # noqa: BLE001, S110
+				except Exception:  # noqa: S110
 					pass
 
 			# Mettre à jour _all_items

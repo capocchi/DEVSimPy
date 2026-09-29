@@ -241,7 +241,7 @@ class DiagramConstantsDialog(wx.Dialog):
 				row = self._grid.GetGridCursorRow()
 				self._grid.DeleteRows(row)
 
-		except Exception:  # noqa: BLE001
+		except Exception:  
 			### Fallback: delete current row
 			row = self._grid.GetGridCursorRow()
 			if row >= 0 and row < self._grid.GetNumberRows():
@@ -308,7 +308,7 @@ class DiagramConstantsDialog(wx.Dialog):
 			else:
 				dlg.Destroy()
 
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:  
 			wx.MessageBox(
 				_("Error during import: {}").format(str(e)),
 				_("Import Error"),
@@ -363,7 +363,7 @@ class DiagramConstantsDialog(wx.Dialog):
 				wx.OK | wx.ICON_INFORMATION,
 			)
 
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			wx.MessageBox(
 				_("Error exporting data: {}\n").format(info),
 				_("Export Error"),
@@ -397,7 +397,7 @@ class DiagramConstantsDialog(wx.Dialog):
 				try:
 					# Try to evaluate as number
 					self.data[const] = eval(val)
-				except:  # noqa: E722
+				except Exception:  
 					# Keep as string
 					self.data[const] = val
 

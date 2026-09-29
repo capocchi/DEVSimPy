@@ -167,7 +167,7 @@ def MsgBoxError(event, parent, msg):
 			if DOMAIN_PATH in p or DEVSIMPY_PACKAGE_PATH not in p:  # type: ignore
 				path, line, fct = p.split(",")[0:3]
 
-		except Exception:  # noqa: BLE001
+		except Exception:
 			path = None
 			line = None
 			fct = None
@@ -670,7 +670,7 @@ class Diagram(Savable, Structurable):
 			):
 				try:
 					p1 = m1.getDEVSModel().OPorts[n1]
-				except:  # noqa: E722
+				except Exception:  
 					msg = _(
 						"It seems that the number of internal output ports (%d) of the coupled model %s is not enough!\nPlease check this."
 					) % (len(m1.getDEVSModel().OPorts), m1.label)
@@ -678,7 +678,7 @@ class Diagram(Savable, Structurable):
 					return msg
 				try:
 					p2 = m2.getDEVSModel().IPorts[n2]
-				except:  # noqa: E722
+				except Exception:  
 					msg = _(
 						"It seems that the number of internal input ports (%d) of the coupled model %s is not enough!\nPlease check this."
 					) % (len(m2.getDEVSModel().IPorts), m2.label)
@@ -820,7 +820,7 @@ class Diagram(Savable, Structurable):
 				if s in self.priority_list:
 					try:
 						result[self.priority_list.index(s)] = s
-					except:  # noqa: E722, S110
+					except Exception:
 						pass
 				else:
 					result[lenght - cpt] = s
@@ -870,7 +870,7 @@ class Diagram(Savable, Structurable):
 			dlg = DiagramInfoDialog(self.GetParent(), msg, puml_component, puml_class)
 			dlg.ShowModal()
 			dlg.Destroy()
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:
 			wx.MessageBox(
 				_("An error occurred while generating the PlantUML diagram: %s") % str(e),
 				_("Error"),
@@ -1322,7 +1322,7 @@ class Diagram(Savable, Structurable):
 		]:
 			try:
 				Publisher.unsubscribe(devs.finish, "%d.finished" % (id(devs)))  # noqa: UP031
-			except:  # noqa: E722
+			except Exception:  
 				sys.stdout.write(
 					_("Impossible to execute the finish method for the model %s!\n") % devs
 				)
@@ -2011,7 +2011,7 @@ if getattr(builtins, "GUI_FLAG", True):
 					self.deselect()
 					try:
 						self.select(self.diagram.shapes[ind + 1])
-					except:  # noqa: E722
+					except Exception:  
 						self.select(self.diagram.shapes[0])
 				else:
 					self.select(self.diagram.shapes[0])
@@ -2288,7 +2288,7 @@ if getattr(builtins, "GUI_FLAG", True):
 						sn = self.sourceNodeList[i]
 						tn = self.targetNodeList[i]
 						self.makeConnectionShape(sn, tn)
-					except:  # noqa: E722, S110
+					except Exception:
 						pass
 			elif sp == 0:
 				for i in range(snl):
@@ -2296,7 +2296,7 @@ if getattr(builtins, "GUI_FLAG", True):
 						sn = self.sourceNodeList[i]
 						tn = self.targetNodeList[tp]
 						self.makeConnectionShape(sn, tn)
-					except:  # noqa: E722, S110
+					except Exception:
 						pass
 			elif tp == 0:
 				for i in range(tnl):
@@ -2304,7 +2304,7 @@ if getattr(builtins, "GUI_FLAG", True):
 						sn = self.sourceNodeList[sp]
 						tn = self.targetNodeList[i]
 						self.makeConnectionShape(sn, tn)
-					except:  # noqa: E722, S110
+					except Exception:
 						pass
 			else:
 				sn = self.sourceNodeList[sp - 1]
@@ -2347,7 +2347,7 @@ if getattr(builtins, "GUI_FLAG", True):
 			### Destroy the dialog
 			try:
 				self.dlgConnection.Destroy()
-			except:  # noqa: E722, S110
+			except Exception:
 				pass
 
 			event.Skip()
@@ -2514,7 +2514,7 @@ if getattr(builtins, "GUI_FLAG", True):
 					# make new shape
 					try:
 						newShape = m.Copy()
-					except:  # noqa: E722
+					except Exception:  
 						sys.stdout.write(_("Error in Past"))
 					else:
 						# store correspondance (for coupling)
@@ -2624,7 +2624,7 @@ if getattr(builtins, "GUI_FLAG", True):
 			if shape:
 				try:
 					shape.OnLeftDClick(event)
-				except Exception as info:  # noqa: BLE001
+				except Exception as info:  
 					wx.MessageBox(_("An error is occured during double clic: %s") % info)
 			event.Skip()
 
@@ -2649,7 +2649,7 @@ if getattr(builtins, "GUI_FLAG", True):
 			"""Return a serialized snapshot of the current diagram (None on error)."""
 			try:
 				return pickle.dumps(obj=self.diagram, protocol=0)
-			except Exception as info:  # noqa: BLE001
+			except Exception as info:  
 				sys.stdout.write(_(f"Error trying to serialize diagram for undo: {info} \n"))  # noqa: INT001
 				return None
 
@@ -2725,7 +2725,7 @@ if getattr(builtins, "GUI_FLAG", True):
 
 			try:
 				new_diagram = pickle.loads(dump)
-			except Exception as info:  # noqa: BLE001
+			except Exception as info:  
 				sys.stdout.write(_(f"Error trying to restore diagram: {info} \n"))  # noqa: INT001
 				return False
 
@@ -2734,7 +2734,7 @@ if getattr(builtins, "GUI_FLAG", True):
 
 			try:
 				self.DiagramReplace(new_diagram)
-			except Exception as info:  # noqa: BLE001
+			except Exception as info:  
 				### the notification chain may not be available (detached/alone canvas):
 				### fall back to a direct replacement of the diagram
 				sys.stdout.write(_(f"Error during diagram replacement: {info} \n"))  # noqa: INT001
@@ -2750,7 +2750,7 @@ if getattr(builtins, "GUI_FLAG", True):
 
 			try:
 				win = self.GetTopLevelParent()
-			except Exception:  # noqa: BLE001
+			except Exception:  
 				return
 
 			if win is None:
@@ -2762,7 +2762,7 @@ if getattr(builtins, "GUI_FLAG", True):
 				if tb is not None:
 					tb.EnableTool(wx.ID_UNDO, undo_enabled)
 					tb.EnableTool(wx.ID_REDO, redo_enabled)
-			except Exception:  # noqa: BLE001, S110
+			except Exception:
 				pass
 
 			### menu items (the menu bar always belongs to the main window)
@@ -2774,7 +2774,7 @@ if getattr(builtins, "GUI_FLAG", True):
 						menu = entry[0] if isinstance(entry, tuple) else entry
 						menu.Enable(wx.ID_UNDO, undo_enabled)
 						menu.Enable(wx.ID_REDO, redo_enabled)
-			except Exception:  # noqa: BLE001, S110
+			except Exception:
 				pass
 
 		def OnLeftDown(self, event):
@@ -2961,7 +2961,7 @@ if getattr(builtins, "GUI_FLAG", True):
 				if self.HasCapture():
 					try:
 						self.ReleaseMouse()
-					except:  # noqa: E722
+					except Exception:  
 						sys.stdout.write(_("Error in Release Mouse!"))
 					else:
 						self.permRect = None
@@ -3587,7 +3587,7 @@ class LinesShape(Shape):
 					return True
 				ind = ind + 1
 
-		except:  # noqa: E722, S110
+		except Exception:
 			pass
 
 		return False
@@ -3603,7 +3603,7 @@ class LinesShape(Shape):
 			xwindow, ywindow = wx.GetMousePosition()
 			x, y = canvas.ScreenToClient(wx.Point(int(xwindow), int(ywindow)))
 
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			sys.stdout.write(_("Error in OnLeftDClick for %s : %s\n") % (self, info))
 		else:
 			### add point at the position according to the possible zoom (use of getScalledCoordinates)
@@ -3945,12 +3945,12 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 
 			try:
 				host1.lock()
-			except: # noqa: E722, S110
+			except Exception:  # noqa: S110
 				pass  
 
 			try:
 				host2.lock()
-			except: # noqa: E722, S110
+			except Exception:  # noqa: S110
 				pass  
 
 			self.lock_flag = True
@@ -3964,12 +3964,12 @@ class ConnectionShape(LinesShape, Resizeable, Selectable, Structurable):
 
 			try:
 				host1.unlock()
-			except: # noqa: E722, S110
+			except Exception:  # noqa: S110
 				pass  
 
 			try:
 				host2.unlock()
-			except: # noqa: E722, S110
+			except Exception:  # noqa: S110
 				pass  
 
 			self.lock_flag = False
@@ -4435,7 +4435,7 @@ class CodeBlock(Achievable, Block, Iconizable):
 				### find all members that is class
 				try:
 					module = sys.modules[cls.__name__]
-				except:  # noqa: E722
+				except Exception:  
 					module = inspect.getmodule(cls)
 				finally:
 					clsmembers = inspect.getmembers(module, inspect.isclass)
@@ -4837,7 +4837,7 @@ class ContainerBlock(Block, Iconizable, Diagram):
 				if not isinstance(cls, tuple):
 					try:
 						args_from_stored_constructor_py = inspect.getargspec(cls.__init__).args[1:]
-					except:  # noqa: E722
+					except Exception:  
 						constructor = inspect.signature(cls.__init__)
 						parameters = constructor.parameters
 						args_from_stored_constructor_py = [
@@ -5147,7 +5147,7 @@ class ConnectableNode(Node):
 			yy = self.y[0] if isinstance(self.y, array.array) else self.y
 
 			return not ((x < xx - r or x > xx + r) or (y < yy - r or y > yy + r))
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			sys.stdout.write(_("Error in Hitest for %s : %s\n") % (self, info))
 			return False
 

@@ -58,7 +58,7 @@ class YAMLHandler:
 				self.report["success"] = False
 				self.report["info"] = "YAML file load failed"
 				sys.stdout.write(json.dumps(self.report))
-		except:
+		except Exception:
 			self.report["success"] = False
 			self.report["info"] = traceback.format_exc()
 			sys.stdout.write(json.dumps(self.report))
@@ -155,7 +155,7 @@ class YAMLHandler:
 
 		try:
 			return Diagram.makeDEVSInstance(self.diagram)
-		except:  # noqa: E722
+		except Exception:  
 			self.report["devs_instance"] = None
 			self.report["success"] = False
 			self.report["info"] = traceback.format_exc()

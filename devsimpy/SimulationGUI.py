@@ -940,7 +940,7 @@ class Base:
 		### try to hidden stdioWin
 		try:
 			self.parent.stdioWin.frame.Show(False)
-		except:  # noqa: E722, S110
+		except Exception:
 			pass
 
 		try:
@@ -960,7 +960,7 @@ class Base:
 				if p != nb2.GetSelection():
 					nb2.GetPage(p).Enable()
 
-		except Exception:  # noqa: BLE001, S110
+		except Exception:
 			# sys.stdout.write(_("Empty mode over\n"))
 			pass
 
@@ -1012,7 +1012,7 @@ class Base:
 			else:
 				# msg didnt look like a tuple, maybe pubsub gave keyword args
 				sys.stdout.write(_("ErrorManager received unexpected message type %r\n") % (msg,))
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			sys.stdout.write(_(f"Error in ErrorManager: {info}"))  # noqa: INT001
 
 		### if error come from devs python file
@@ -1020,7 +1020,7 @@ class Base:
 			try:
 				### simulate event button for the code editor
 				event = wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self._btn1.GetId())
-			except Exception:  # noqa: BLE001, S110
+			except Exception:  # noqa: S110
 				pass
 			else:
 				### Error dialog
@@ -1037,7 +1037,7 @@ class Base:
 			# simulation so the program can continue gracefully.
 			try:
 				Container.MsgBoxError(None, getattr(self, "parent", None), msg)
-			except Exception as info2:  # noqa: BLE001
+			except Exception as info2:  
 				sys.stdout.write(
 					_("Error displaying error dialog: %s\nOriginal: %r") % (info2, msg)
 				)

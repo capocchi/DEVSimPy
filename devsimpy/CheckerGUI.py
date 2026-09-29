@@ -196,7 +196,7 @@ class VirtualList(wx.ListCtrl, ListCtrlAutoWidthMixin, ColumnSorterMixin):
 		item = self.GetItem(index, col)
 		try:
 			return item.GetItemLabelText()
-		except:  # noqa: E722
+		except Exception:
 			return item.GetText()
 
 	def OnGetItemText(self, item, col):
@@ -252,7 +252,7 @@ class CheckerGUI(wx.Frame):
 		# Prepare dictionary - IMPORTANT: créer la liste APRÈS le panel
 		try:
 			self.list = self.getList(D, panel)
-		except:  # noqa: E722
+		except Exception:
 			self.list = VirtualList(panel, D)
 			sys.stdout.write(
 				_("Alone mode for CheckerGUI: List of plugins is not generated from a diagram.\n")

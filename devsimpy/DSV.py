@@ -379,7 +379,7 @@ def guessHeaders(input, columns=0):
 					# a long int?
 					thisType = type(eval(row[col] + "L"))
 					thisType = type(0)  # treat long ints as int  # noqa: UP003
-			except:  # noqa: E722
+			except Exception:  
 				# fallback to length of string
 				thisType = len(row[col])
 
@@ -400,7 +400,7 @@ def guessHeaders(input, columns=0):
 		else:  # attempt typecast
 			try:
 				eval("%s(%s)" % (colType.__name__, input[0][col]))  # noqa: UP031
-			except:  # noqa: E722
+			except Exception:  
 				hasHeader += 1
 			else:
 				hasHeader -= 1
@@ -440,7 +440,7 @@ def organizeIntoLines(input, textQualifier='"', limit=None):
 			if limit and line > limit:
 				del data[limit:]  # kill any lines that weren't processed
 				break
-		except:  # noqa: E722
+		except Exception:  
 			break
 
 	# filter out empty lines
@@ -924,7 +924,7 @@ if wx is not None:
 		def OnTextPreviewRows(self, event):
 			try:
 				v = int(self.previewRowsText.GetValue())
-			except: # noqa: E722
+			except Exception: 
 				v = self.displayRows  
 			v = max(self.displayRows, v)
 			v = min(v, 100)
@@ -989,7 +989,7 @@ if wx is not None:
 				for col in range(cols):
 					try:
 						self.preview.SetColLabelValue(col, str(previewData[0][col]))
-					except: # noqa: E722
+					except Exception: 
 						self.preview.SetColLabelValue(col, "")  
 				# self.preview.AutoSizeColumns(wx.true) # size columns to headers
 			else:
@@ -999,7 +999,7 @@ if wx is not None:
 				for col in range(cols):
 					try:
 						self.preview.SetCellValue(row - hasHeaders, col, str(previewData[row][col]))
-					except:  # noqa: E722, S110
+					except Exception:  # noqa: S110
 						pass 
 
 			# if not hasHeaders:

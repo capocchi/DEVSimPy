@@ -394,7 +394,7 @@ def makeDEVSConf(model, liaison, addInner, filename):
 	try:
 		with open(fn, "wb") as f:
 			f.write(text.encode("utf-8"))
-	except Exception:  # noqa: BLE001
+	except Exception:  
 		sys.stdout.write("{} file not {}.\n".format(fn, "updated" if update else "completed"))
 	else:
 		sys.stdout.write("{} file {}.\n".format(fn, "updated" if update else "completed"))

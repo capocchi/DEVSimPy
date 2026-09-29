@@ -110,7 +110,7 @@ class Simulator(object):
             # But only if none is already running
             try:
                 getProxy(controller).getName()
-            except:
+            except Exception:
                 # No matter what happens, it probably doesn't mean anything good
                 # Most likely, the server was killed so we will have to restart it
                 self.process = threading.Thread(target=startServer, args=[controller])

@@ -240,7 +240,7 @@ class LibPanel(wx.Panel):
 			)
 			dlg.ShowModal()
 			dlg.Destroy()
-		except Exception:  # noqa: BLE001
+		except Exception:  
 			# Fallback si wx.lib.dialogs n'est pas disponible
 			wx.MessageBox(help_msg, _("Library Management Help"), wx.OK | wx.ICON_INFORMATION)
 

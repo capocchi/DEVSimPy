@@ -61,7 +61,7 @@ class Plugable:
 			### there is syntax error ?
 			try:
 				exec(code, temp.__dict__)  # noqa: S102
-			except Exception as info:  # noqa: BLE001
+			except Exception as info:  
 				return info
 
 			return sys.modules[new_plugin_name]

@@ -69,7 +69,7 @@ class TraceDumper(threading.Thread):
         try:
             if os.path.isfile(self.fpath):
                 os.unlink(self.fpath)
-        except:
+        except Exception:
             pass
     
     def stacktraces(self):

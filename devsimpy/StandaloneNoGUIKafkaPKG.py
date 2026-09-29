@@ -350,7 +350,7 @@ PYTHONPATH=/app
 				basic_requirements = "confluent-kafka>=2.3.0"
 				archive.writestr("requirements.txt", basic_requirements)
 				self.logger.info("Requirements file added successfully")
-			except Exception as e:  # noqa: BLE001
+			except Exception as e:  
 				self.logger.error(f"Error handling requirements file: {e}")
 				sys.stdout.write(f"Error handling requirements file: {e}\n")
 				return False

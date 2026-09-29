@@ -250,7 +250,7 @@ class Server(object): #cython-remove
             if len(self.simstack) == 1:
                 try:
                     self.daemon.shutdown()
-                except:
+                except Exception:
                     pass
         # Release the simlock, since we are possibly working in one of the layers
         #  which will try to grab the simlock
@@ -271,7 +271,7 @@ def startServer(name):
     # Run the loop until something happens (probably keyboardinterrupt...)
     try:
         daemon.requestLoop()
-    except:
+    except Exception:
         daemon.shutdown()
 
 if __name__ == "__main__":

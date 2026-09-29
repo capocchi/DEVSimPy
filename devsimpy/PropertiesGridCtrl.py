@@ -156,7 +156,7 @@ class DictionaryEditor(wx.Dialog):
 			if txt != "" and not txt.startswith("#"):
 				eval(txt)
 
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			dial = wx.MessageDialog(
 				self,
 				_("Error editing attribute: %s") % info,
@@ -174,7 +174,7 @@ class DictionaryEditor(wx.Dialog):
 			return dict(eval, self.elb.GetStrings())
 		except SyntaxError:
 			return dict(eval, dict(repr, eval(str(self.elb.GetStrings()))))
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			return info
 
 	def GetValueAsString(self):
@@ -194,7 +194,7 @@ class DictionaryEditor(wx.Dialog):
 				if isinstance(e, tuple):
 					k = e
 			### if k is not tuple, eval gives an error
-			except Exception:  # noqa: BLE001, S110
+			except Exception:  # noqa: S110
 				pass
 
 			r.update({k: v})
@@ -246,7 +246,7 @@ class ListEditor(wx.Dialog):
 			if txt != "" and not txt.startswith("#"):
 				eval(txt)
 
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			dial = wx.MessageDialog(
 				self,
 				_("Error editing attribute: %s") % info,
@@ -264,7 +264,7 @@ class ListEditor(wx.Dialog):
 			return [eval(a) for a in self.elb.GetStrings()]
 		except SyntaxError:
 			return [eval(b) for b in [repr(a) for a in eval(str(self.elb.GetStrings()))]]
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			return info
 
 	def GetValueAsString(self):
@@ -299,42 +299,42 @@ class CodeCB(wx.Choicebook):
 
 			try:
 				a = inspect.getdoc(cls)
-			except: # noqa: E722
+			except Exception: 
 				a = info  
 
 			try:
 				b = inspect.getsource(cls)
-			except: # noqa: E722
+			except Exception: 
 				b = info 
 
 			try:
 				c = inspect.getsource(cls.__init__)
-			except: # noqa: E722
+			except Exception: 
 				c = info 
 
 			try:
 				d = inspect.getsource(cls.intTransition)
-			except: # noqa: E722
+			except Exception: 
 				d = info  
 
 			try:
 				e = inspect.getsource(cls.extTransition)
-			except: # noqa: E722
+			except Exception: 
 				e = info  
 
 			try:
 				f = inspect.getsource(cls.outputFnc)
-			except: # noqa: E722
+			except Exception: 
 				f = info 
 
 			try:
 				g = inspect.getsource(cls.timeAdvance)
-			except: # noqa: E722
+			except Exception: 
 				g = info 
 
 			try:
 				h = inspect.getsource(cls.finish) if hasattr(cls, "finish") else "\tpass"
-			except:  # noqa: E722
+			except Exception:  
 				h = info
 
 			pageTexts = {
@@ -670,7 +670,7 @@ class CustomDataTable(GridTableBase):
 
 			return attr
 
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			sys.stderr.write(_(f"Error in GetAttr : {info}"))  # noqa: INT001
 			return
 
@@ -751,7 +751,7 @@ class CustomDataTable(GridTableBase):
 				return self.data[row][col]
 			else:
 				return self.data[row][col]
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:  
 			sys.stdout.write(f"Exception in GetValue: {e}")  # Pour le débogage
 			return None
 
@@ -829,7 +829,7 @@ class CustomDataTable(GridTableBase):
 		"""Get Info"""
 		try:
 			return self.info[info] if info in list(self.info.keys()) else None
-		except:  # noqa: E722
+		except Exception:  
 			return None
 
 

@@ -1290,7 +1290,7 @@ class DynamicPlot(PlotFrame):
 			self.client.Draw(
 				self.gc, xAxis=(float(xMin), float(xMax)), yAxis=(float(yMin), float(yMax))
 			)
-		except Exception:  # noqa: BLE001
+		except Exception:  
 			sys.stdout.write(_("Error trying to plot"))
 
 		# if self.sim_thread is None or not self.sim_thread.isAlive():
@@ -1378,7 +1378,7 @@ class DynamicPlot(PlotFrame):
 			self.client.Draw(
 				self.gc, xAxis=(float(xMin), float(xMax)), yAxis=(float(yMin), float(yMax))
 			)
-		except Exception:  # noqa: BLE001
+		except Exception:  
 			sys.stdout.write(_("Error trying to plot"))
 
 		cond = (
@@ -1461,7 +1461,7 @@ class DynamicPlot(PlotFrame):
 			self.client.Draw(
 				self.gc, xAxis=(float(xMin), float(xMax)), yAxis=(float(yMin), float(yMax))
 			)
-		except Exception:  # noqa: BLE001
+		except Exception:  
 			sys.stdout.write(_("Error trying to plot"))
 
 		cond = (
@@ -1529,7 +1529,7 @@ class DynamicPlot(PlotFrame):
 			self.client.Draw(
 				self.gc, xAxis=(float(xMin), float(xMax)), yAxis=(float(yMin), float(yMax))
 			)
-		except Exception:  # noqa: BLE001
+		except Exception:  
 			sys.stdout.write(_("Error trying to plot"))
 
 		cond = (

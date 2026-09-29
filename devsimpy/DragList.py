@@ -100,7 +100,7 @@ class DragList(wx.ListCtrl):
 			for j in range(1, self.GetColumnCount()):
 				try:  # Target list can have more columns than source
 					self.SetStringItem(idx, j, i[2 + j])
-				except:  # noqa: E722, S110
+				except Exception:  # noqa: S110
 					pass  # ignore the extra columns
 			index += 1
 

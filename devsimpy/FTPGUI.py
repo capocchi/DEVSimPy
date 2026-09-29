@@ -252,7 +252,7 @@ class FTPFrame(wx.Frame):
 		if self.ftp:
 			try:
 				self.ftp.quit()
-			except:  # noqa: E722, S110
+			except Exception:  # noqa: S110
 				pass
 
 			self.ftp = None

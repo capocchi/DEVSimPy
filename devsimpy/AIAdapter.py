@@ -126,7 +126,7 @@ class DevsAIAdapter(ABC):
 			with open(file_path, "r") as file:
 				return file.read()
 		except FileNotFoundError:
-			logging.error("File not found: %s", file_path)  # noqa: LOG015
+			logging.exception(f"File not found: {file_path}")  # noqa: LOG015
 			raise
 
 	def create_prompt(self, model_name, num_inputs, num_outputs, model_type, prompt):
@@ -440,12 +440,12 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 			if not response.refusal:
 				return response.parsed.model_dump()
 		except ValueError as ve:
-			logging.error(_(f"Validation error: {ve}"))  # noqa: INT001, LOG015
+			logging.exception(_("Validation error"))  # noqa: LOG015
 			return _(f"Validation error: {ve}")  # noqa: INT001
 
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:
 			# Journalisation de l'erreur avec les détails de l'exception
-			logging.error(_(f"Error while generating output: {e}"))  # noqa: INT001, LOG015
+			logging.exception(_("Error while generating output"))  # noqa: LOG015
 			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
 
 	@BuzyCursorNotification
@@ -472,19 +472,19 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 
 			# Validation de la réponse
 			if not hasattr(response, "choices") or not response.choices:
-				logging.error("No choices found in response.")  # noqa: LOG015
+				logging.exception("No choices found in response.")  # noqa: LOG015
 				return _("No response received from the AI model.")
 
 			# Retourner le contenu du message
 			return response.choices[0].message.content
 
 		except ValueError as ve:
-			logging.error(_(f"Validation error: {ve}"))  # noqa: INT001, LOG015
+			logging.exception(_("Validation error"))  # noqa: LOG015
 			return _(f"Validation error: {ve}")  # noqa: INT001
 
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:
 			# Journalisation de l'erreur avec les détails de l'exception
-			logging.error(_(f"Error while generating output: {e}"))  # noqa: INT001, LOG015
+			logging.exception(_("Error while generating output"))  # noqa: LOG015
 			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
 
 
@@ -549,7 +549,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 			logging.info(_("Starting the installation of Ollama..."))  # noqa: LOG015
 			self._install_ollama()
 		else:
-			logging.error(_("Ollama is required to run this class."))  # noqa: LOG015
+			logging.exception(_("Ollama is required to run this class."))  # noqa: LOG015
 			raise RuntimeError(_("Ollama is not installed and is required to run this class."))
 
 		dialog.Destroy()
@@ -588,8 +588,8 @@ class OllamaDevsAdapter(DevsAIAdapter):
 				_("Ollama installation completed. Restart devsimpy and the terminal if necessary.")
 			) 
 
-		except subprocess.CalledProcessError as e:
-			logging.error(_("Error during Ollama installation: %s"), e)  # noqa: LOG015
+		except subprocess.CalledProcessError:
+			logging.exception(_("Error during Ollama installation"))  # noqa: LOG015
 			raise RuntimeError(_("Ollama installation failed."))
 
 	def _is_server_running(self):
@@ -604,8 +604,8 @@ class OllamaDevsAdapter(DevsAIAdapter):
 		try:
 			subprocess.Popen(["ollama", "serve"])
 			logging.info(_("Ollama starts with success."))  # noqa: LOG015
-		except Exception as e:  # noqa: BLE001
-			logging.error(_("Failed to start the Ollama server: %s"), str(e))  # noqa: LOG015
+		except Exception:
+			logging.exception(_("Failed to start the Ollama server"))  # noqa: LOG015
 			raise RuntimeError(_("Failed to start the Ollama server"))
 
 	def _stop_server(self):
@@ -617,8 +617,8 @@ class OllamaDevsAdapter(DevsAIAdapter):
 			# This is a placeholder command; replace it with the actual command to stop your server
 			subprocess.run(["ollama", "stop"], check=True)
 			logging.info("Ollama server stopped successfully.")  # noqa: LOG015
-		except subprocess.CalledProcessError as e:
-			logging.error("Failed to stop the Ollama server: %s", str(e))  # noqa: LOG015
+		except subprocess.CalledProcessError:
+			logging.exception("Failed to stop the Ollama server")  # noqa: LOG015
 			raise RuntimeError("Could not stop the Ollama server.")
 
 	def _restart_server(self):
@@ -656,8 +656,8 @@ class OllamaDevsAdapter(DevsAIAdapter):
 			logging.info(_(f"Found Ollama models: {models}"))  # noqa: INT001, LOG015
 			return models
 
-		except (subprocess.CalledProcessError, FileNotFoundError) as e:
-			logging.error("Erreur lors de l'exécution de la commande ollama list:", e)  # noqa: LOG015, PLE1205
+		except (subprocess.CalledProcessError, FileNotFoundError):
+			logging.exception("Erreur lors de l'exécution de la commande ollama list")  # noqa: LOG015
 			return []
 
 	@cond_decorator(getattr(builtins, "GUI_FLAG", True), ProgressNotification(_("Pulling process")))
@@ -671,16 +671,16 @@ class OllamaDevsAdapter(DevsAIAdapter):
 
 			# Vérifier si le processus a réussi
 			if result.returncode != 0:
-				logging.error(  # noqa: LOG015
+				logging.exception(  # noqa: LOG015
 					f"Error while downloading model {self.model_name}: {result.stderr.strip()}"
 				)
 				raise RuntimeError(f"Failed to download model {self.model_name}.")
 
-		except subprocess.CalledProcessError as e:
-			logging.error(f"Error while downloading model {self.model_name}: {e.stderr}")  # noqa: LOG015
+		except subprocess.CalledProcessError:
+			logging.exception(f"Error while downloading model {self.model_name}")  # noqa: LOG015
 			raise RuntimeError(f"Failed to download model {self.model_name}.")
-		except Exception as e:  # noqa: BLE001
-			logging.error(f"Error while downloading model {self.model_name}: {e}")  # noqa: LOG015
+		except Exception:
+			logging.exception(f"Error while downloading model {self.model_name}")  # noqa: LOG015
 			raise RuntimeError(f"Failed to download model {self.model_name}.")
 		else:
 			logging.info(f"Model '{self.model_name}' downloaded successfully.")  # noqa: LOG015
@@ -726,8 +726,8 @@ class OllamaDevsAdapter(DevsAIAdapter):
 				format=AtomicModel.model_json_schema(),
 			)
 			return json.loads(response.message.content)
-		except Exception as e:  # noqa: BLE001
-			logging.error(_(("Error while generating output: %s", str(e))))  # noqa: LOG015
+		except Exception as e:
+			logging.exception(_("Error while generating output"))  # noqa: LOG015
 			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
 
 	@BuzyCursorNotification
@@ -754,6 +754,6 @@ class OllamaDevsAdapter(DevsAIAdapter):
 				],
 			)
 			return response["message"]["content"]
-		except Exception as e:  # noqa: BLE001
-			logging.error(_(("Error while generating output: %s", str(e))))  # noqa: LOG015
+		except Exception as e:
+			logging.exception(_("Error while generating output"))  # noqa: LOG015
 			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001

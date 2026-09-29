@@ -40,7 +40,7 @@ required_libs = ["yaml", "ruamel"]
 for lib_name in required_libs:
 	try:
 		importlib.import_module(lib_name)
-	except:  # noqa: E722
+	except Exception:  
 		subprocess.run(f"pip install {lib_name}".split())  # noqa: PLW1510
 
 try:
@@ -273,7 +273,7 @@ class DumpZipFile(DumpBase):
 		if hasattr(obj_dumped, "args"):
 			try:
 				obj_dumped.args = Components.GetArgs(Components.GetClass(obj_dumped.python_path))
-			except Exception as error:  # noqa: BLE001
+			except Exception as error:  
 				sys.stderr.write(f"Problem updating args for '{fileName}': {error}\n")
 				return False
 
@@ -292,7 +292,7 @@ class DumpZipFile(DumpBase):
 			sys.stderr.write(f"Problem saving '{fileName}': {error}\n{tb}")
 			return False
 
-		except Exception as error:  # noqa: BLE001
+		except Exception as error:  
 			tb = traceback.format_exc()
 			sys.stderr.write(f"Unexpected error while saving '{fileName}': {error}\n{tb}")
 			return False
@@ -353,7 +353,7 @@ class DumpZipFile(DumpBase):
 				)
 				return False
 
-			except Exception as error:  # noqa: BLE001
+			except Exception as error:  
 				tb = traceback.format_exc()
 				NotificationMessage(
 					_("Unexpected Error"),
@@ -387,7 +387,7 @@ class DumpZipFile(DumpBase):
 				% (data_file, str(fileName), str(tb))
 			)
 			return info
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			tb = traceback.format_exc()
 			sys.stderr.write(_("Problem extracting: %s -- %s \n") % (str(fileName), str(tb)))
 			return info
@@ -417,7 +417,7 @@ class DumpZipFile(DumpBase):
 			sys.stderr.write(_("2. Delete the corrupted file and recreate the model\n"))
 			sys.stderr.write(_("File location: %s\n") % path)
 			return info
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			tb = traceback.format_exc()
 			sys.stderr.write(_("Problem loading: %s -- %s \n") % (str(fileName), str(tb)))
 			return info
@@ -533,7 +533,7 @@ class DumpZipFile(DumpBase):
 									### TODO: monkey patchin !!! (most simple is to change python file for override class)
 									pass
 
-							except Exception as info:  # noqa: BLE001
+							except Exception as info:  
 								tb = traceback.format_exc()
 								sys.stdout.write(_(f"plugins {name} not loaded : {tb!s}\n"))  # noqa: INT001
 								return info
@@ -582,7 +582,7 @@ class DumpGZipFile(DumpBase):
 			sys.stderr.write(f"\nProblem saving '{fileName}': {error}\n{tb}")
 			return False
 
-		except Exception as error:  # noqa: BLE001
+		except Exception as error:  
 			tb = traceback.format_exc()
 			sys.stderr.write(f"\nUnexpected error while saving '{fileName}': {error}\n{tb}")
 			return False
@@ -615,7 +615,7 @@ class DumpGZipFile(DumpBase):
 					sys.stderr.write("2. Delete the corrupted file and recreate the diagram\n")
 					sys.stderr.write(f"Full traceback: {tb}\n")
 					return error
-				except Exception as error:  # noqa: BLE001
+				except Exception as error:  
 					tb = traceback.format_exc()
 					sys.stderr.write(f"Problem loading: {fileName} -- {tb}\n")
 					return error
@@ -668,7 +668,7 @@ class DumpYAMLFile(DumpBase):
 			with open(fileName, "w") as yf:
 				yaml.dump(PickledCollection(obj_dumped), stream=yf)
 
-		except (AttributeError, Exception) as error:  # noqa: BLE001
+		except (AttributeError, Exception) as error:  
 			sys.stderr.write(
 				f"Warning: First attempt to save YAML failed, retrying in 'unsafe' mode: {error}\n"
 			)
@@ -680,12 +680,12 @@ class DumpYAMLFile(DumpBase):
 				with open(fileName, "w") as yf:
 					yaml.dump(PickledCollection(obj_dumped), stream=yf)
 
-			except (OSError, Exception) as error:  # noqa: BLE001
+			except (OSError, Exception) as error:  
 				tb = traceback.format_exc()
 				sys.stderr.write(f"Problem saving YAML file '{fileName}': {error}\n{tb}")
 				return False
 
-		except (OSError, Exception) as error:  # noqa: B025, BLE001
+		except (OSError, Exception) as error:  # noqa: B025
 			tb = traceback.format_exc()
 			sys.stderr.write(f"Problem saving YAML file '{fileName}': {error}\n{tb}")
 			return False
@@ -712,11 +712,11 @@ class DumpYAMLFile(DumpBase):
 				yaml = ruamel.YAML(typ="unsafe", pure=True)
 				with open(fileName, "r") as yf:
 					return yaml.load(yf)
-			except Exception:  # noqa: BLE001
+			except Exception:  
 				tb = traceback.format_exc()
 				sys.stderr.write(_("\nProblem loading: %s -- %s\n") % (str(fileName), str(tb)))
 				return False
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			exc_type, _, exc_tb = sys.exc_info()
 			fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
 			sys.stderr.write(
@@ -745,7 +745,7 @@ class DumpYAMLFile(DumpBase):
 			# Ouvre et lit le fichier YAML
 			dsp = DumpYAMLFile.Open(fileName)
 
-		except Exception:  # noqa: BLE001
+		except Exception:  
 			tb = traceback.format_exc()
 			sys.stderr.write(f"Problem loading file '{fileName}': {tb}\n")
 			return False

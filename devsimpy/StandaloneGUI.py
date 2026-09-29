@@ -416,7 +416,7 @@ class StandaloneGUI(wx.Frame):
 			)
 			dlg.ShowModal()
 			dlg.Destroy()
-		except Exception:  # noqa: BLE001
+		except Exception:  
 			# Fallback
 			wx.MessageBox(
 				help_msg, _("Standalone Package Generator Help"), wx.OK | wx.ICON_INFORMATION
@@ -499,7 +499,7 @@ class StandaloneGUI(wx.Frame):
 					_("Error"),
 					wx.OK | wx.ICON_ERROR,
 				)
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:  
 			wx.MessageBox(
 				_("An error occurred: {}").format(str(e)), _("Error"), wx.OK | wx.ICON_ERROR
 			)

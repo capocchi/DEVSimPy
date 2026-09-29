@@ -110,7 +110,7 @@ class PluginManager:
 				pkg = ".".join(modulename.split(".")[0:-1])
 				module = importlib.import_module(name, package=pkg)
 				return module
-			except Exception as info:  # noqa: BLE001
+			except Exception as info:  
 				msg = (
 					_("Path of plugins directory is wrong.")
 					if not os.path.exists(PLUGINS_PATH) # type: ignore  # noqa: F821

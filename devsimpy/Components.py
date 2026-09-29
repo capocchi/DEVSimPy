@@ -190,7 +190,7 @@ def GetArgs(cls=None):
 				if constructor.defaults
 				else {}
 			)
-		except:  # noqa: E722
+		except Exception:  
 			sys.stderr.write(_("Error in GetArgs: First parameter is not a class\n"))
 
 	return None
@@ -709,7 +709,7 @@ class DEVSComponent:
 
 			try:
 				txt = f"clock {m.timeNext}: {msg}\n"
-			except Exception:  # noqa: BLE001
+			except Exception:
 				txt = f"clock {0.0}: {msg}\n"
 
 			with open(path, "a") as f:
@@ -943,7 +943,7 @@ class DEVSComponent:
 				if os.system("pidof gedit") == 256:
 					try:
 						soft = which("gedit")
-					except:  # noqa: E722
+					except Exception:  
 						sys.stdout.write(_("Local programmer software not found!\n"))
 					else:
 						subprocess.call(f"{soft} {python_path}", shell=True)
@@ -952,7 +952,7 @@ class DEVSComponent:
 				elif os.system("pidof ksmserver") == 256:
 					try:
 						soft = which("kfmclient")
-					except:  # noqa: E722
+					except Exception:  
 						sys.stdout.write(_("Local programmer software not found!\n"))
 					else:
 						os.system(soft + " openURL " + python_path)
@@ -1002,7 +1002,7 @@ class DEVSComponent:
 
 				return editorFrame
 
-			except Exception as info:  # noqa: BLE001
+			except Exception as info:
 				dlg = wx.MessageDialog(
 					mainW,
 					_(f"Editor frame not instanciated: {info}\n"),  # noqa: INT001

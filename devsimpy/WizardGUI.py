@@ -1141,7 +1141,7 @@ class ModelGeneratorWizard(Wizard):
 				### create the model on the disk
 				try:
 					zout = zipfile.ZipFile(self.model_path, "w")
-				except Exception as info:  # noqa: BLE001
+				except Exception as info:  
 					sys.stdout.write(_(f"ERROR: Enable to create Zip file in Wizard GUI ({info})"))  # noqa: INT001
 					return False
 				else:

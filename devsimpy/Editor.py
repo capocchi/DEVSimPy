@@ -109,7 +109,7 @@ def isError(scriptlet):
 	try:
 		code = compile(scriptlet, "<string>", "exec")
 		exec(code)  # noqa: S102
-	except Exception as info:  # noqa: BLE001
+	except Exception as info:  
 		return info
 	else:
 		return False
@@ -124,7 +124,7 @@ def getObjectFromString(scriptlet):
 	# Compile the scriptlet.
 	try:
 		code = compile(scriptlet, "<string>", "exec")
-	except Exception as info:  # noqa: BLE001
+	except Exception as info:  
 		### Add line number to the error trace
 		for frame in traceback.extract_tb(sys.exc_info()[2]):
 			_, lineno, _, _ = frame
@@ -142,7 +142,7 @@ def getObjectFromString(scriptlet):
 		try:
 			exec(code, temp.__dict__)  # noqa: S102
 
-		except Exception as info:  # noqa: BLE001
+		except Exception as info:  
 			### Add line number to the error trace
 			for frame in traceback.extract_tb(sys.exc_info()[2]):
 				_, lineno, _, _ = frame
@@ -160,7 +160,7 @@ def getObjectFromString(scriptlet):
 					try:
 						return eval(f"temp.{name}")()
 
-					except Exception as info:  # noqa: BLE001
+					except Exception as info:  
 						### Add line number to the error trace
 						for frame in traceback.extract_tb(sys.exc_info()[2]):
 							_, lineno, _, _ = frame
@@ -423,7 +423,7 @@ class PythonSTC(stc.StyledTextCtrl):
 			)
 			# Attendre qu'il soit prêt dans un thread
 			threading.Thread(target=self.wait_for_server, daemon=True).start()
-		except Exception as e:  # noqa: BLE001
+		except Exception as e:  
 			print("Erreur démarrage Ollama:", e)
 
 	def wait_for_server(self, timeout=10):
@@ -459,7 +459,7 @@ class PythonSTC(stc.StyledTextCtrl):
 			except requests.exceptions.ReadTimeout:
 				# Timeout temporaire, on ignore
 				pass
-			except Exception as e:  # noqa: BLE001
+			except Exception as e:  
 				print("Erreur Ollama:", e)
 
 		threading.Thread(target=worker, daemon=True).start()
@@ -1163,7 +1163,7 @@ class EditionNotebook(wx.Notebook):
 			canvas.deselect()
 			canvas.Refresh()
 
-		except Exception:  # noqa: BLE001, S110
+		except Exception:  # noqa: S110
 			pass
 		evt.Skip()
 
@@ -1268,7 +1268,7 @@ class EditionNotebook(wx.Notebook):
 
 				currentPage.modify = False
 
-			except Exception as info:  # noqa: BLE001
+			except Exception as info:  
 				wx.MessageBox(
 					_("Error opening file:\n%s\n") % str(info),
 					"Open file function",
@@ -1302,7 +1302,7 @@ class EditionNotebook(wx.Notebook):
 			### Clean up the temporary file yourself
 			try:
 				os.remove(fic_filename)
-			except Exception as info:  # noqa: BLE001
+			except Exception as info:  
 				sys.exc_info()
 				sys.stderr.write(_(f"File has not been deleted: {info}"))  # noqa: INT001
 
@@ -1402,7 +1402,7 @@ class EditionNotebook(wx.Notebook):
 						### Check indentation
 						try:
 							tabnanny.check(extracted_path)
-						except Exception as e:  # noqa: BLE001
+						except Exception as e:  
 							sys.stderr.write(_(f"Erreur dans {python_file} : {e}"))  # noqa: INT001
 
 	### NOTE: EditionNotebook :: OnReIndent 	=> Event on re-indent

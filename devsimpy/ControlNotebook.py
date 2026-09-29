@@ -176,7 +176,7 @@ try:
 	else:
 		import wx.lib.flatnotebook as fnb  # type: ignore
 	USE_FLATNOTEBOOK = True
-except:  # noqa: E722, S110
+except Exception:
 	pass
 
 MENU_EDIT_DELETE_PAGE = wx.NewIdRef()

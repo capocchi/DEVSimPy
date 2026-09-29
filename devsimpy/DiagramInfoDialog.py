@@ -317,7 +317,7 @@ class DiagramInfoDialog(wx.Dialog):
 
 			webbrowser.open(url)
 
-		except Exception:  # noqa: BLE001
+		except Exception:  
 			# Fallback : copier dans le presse-papier et ouvrir le site
 			if wx.TheClipboard.Open():
 				wx.TheClipboard.SetData(wx.TextDataObject(content))

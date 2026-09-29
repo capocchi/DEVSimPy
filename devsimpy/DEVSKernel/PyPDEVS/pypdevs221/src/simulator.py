@@ -62,7 +62,7 @@ def loadCheckpoint(name):
         infile = open("%s_SIM.pdc" % (name), 'r')
         simulator = pickle.load(infile)
         infile.close()
-    except:
+    except Exception:
         return
     # Use an rsplit, as it is possible that the user defined name contains _ too
     files = [f for f in listdir if (f.endswith(".pdc")) and not (f.endswith("SIM.pdc")) and (f.rsplit('_', 2)[0] == name)]
@@ -397,7 +397,7 @@ class Simulator(object):
             for model_id in locs:
                 self.model_ids[model_id].location = locs[model_id]
             return True
-        except:
+        except Exception:
             return False
 
     def reinit(self):
@@ -675,7 +675,7 @@ class Simulator(object):
             import sys
             # Return an errorcode, as we ended abruptly
             sys.exit(1)
-        except:
+        except Exception:
             # Try to stop the progress bar thread if this exists, otherwise we hang forever
             if self.progress:
                 self.fillchar = "E"
