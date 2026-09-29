@@ -184,7 +184,13 @@ def DefineScreenSize(percentscreen=None, size=None):
 		l, h = percentscreen * l, percentscreen * h
 	return round(l), round(h)
 
+if sys.platform == "win32":
+    import ctypes
 
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+        "DEVSimPy.DEVSimPy"
+    )
+	
 # -------------------------------------------------------------------
 class MainApplication(wx.Frame):
 	"""DEVSimPy main application."""
