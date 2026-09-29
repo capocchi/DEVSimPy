@@ -41,9 +41,6 @@ import builtins
 
 import inspect
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 import Container
 import Components
 from AIAdapter import AdapterFactory

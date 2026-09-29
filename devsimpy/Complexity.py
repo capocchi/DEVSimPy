@@ -28,9 +28,6 @@ import textwrap
 
 import inspect
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 
 def GetMacCabeMetric(path):
 	"""Get the McCabe complexity metric of a model defined in a python file.

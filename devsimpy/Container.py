@@ -54,9 +54,6 @@ import array
 
 import inspect
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 from abc import ABC
 from tempfile import gettempdir
 from traceback import format_exception
@@ -85,6 +82,10 @@ BLUE = "#add8e6"
 ORANGE = "#faad1f"
 GREY_LIGHT = "#d3d3d3"
 VIOLET_LIGHT = "#b8b8ec"
+
+### parameter kinds of a constructor which are considered as behavioral attributes
+### (equivalent to the "args" attribute returned by inspect.getfullargspec)
+ARGS_KINDS = (inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD)
 
 import Components
 
@@ -4389,14 +4390,13 @@ class CodeBlock(Achievable, Block, Iconizable):
 			### TODO
 			### local package imported into amd or cmd generates error ! (fcts...)
 			if cls and not isinstance(cls, tuple):
-				try:
-					args_from_stored_constructor_py = inspect.getargspec(cls.__init__).args[1:]
-				except ValueError:
-					constructor = inspect.signature(cls.__init__)
-					parameters = constructor.parameters
-					args_from_stored_constructor_py = [
-						name for name, _ in parameters.items() if name != "self"
-					]
+				constructor = inspect.signature(cls.__init__)
+				parameters = constructor.parameters
+				args_from_stored_constructor_py = [
+					name
+					for name, parameter in parameters.items()
+					if name != "self" and parameter.kind in ARGS_KINDS
+				]
 
 				args_from_stored_block_model = state["args"]
 				L = list(
@@ -4416,19 +4416,16 @@ class CodeBlock(Achievable, Block, Iconizable):
 							)  
 							del state["args"][arg]
 						else:
-							try:
-								arg_values = inspect.getargspec(cls.__init__).defaults
-							except ValueError:
-								constructor = inspect.signature(cls.__init__)
-								parameters = constructor.parameters
-								arg_values = [
-									parameter.default
-									for parameter in parameters.values()
-									if parameter.default != inspect.Parameter.empty
-								]
-							finally:
-								index = args_from_stored_constructor_py.index(arg)
-								state["args"].update({arg: arg_values[index]})
+							constructor = inspect.signature(cls.__init__)
+							parameters = constructor.parameters
+							arg_values = [
+								parameter.default
+								for parameter in parameters.values()
+								if parameter.kind in ARGS_KINDS
+								and parameter.default != inspect.Parameter.empty
+							]
+							index = args_from_stored_constructor_py.index(arg)
+							state["args"].update({arg: arg_values[index]})
 
 				### Class redefinition if the class inherite to QuickScope, To_Disk or MessagesCollector
 
@@ -4835,14 +4832,13 @@ class ContainerBlock(Block, Iconizable, Diagram):
 			if os.path.exists(python_path) or zipfile.is_zipfile(os.path.dirname(python_path)):
 				cls = Components.GetClass(state["python_path"])
 				if not isinstance(cls, tuple):
-					try:
-						args_from_stored_constructor_py = inspect.getargspec(cls.__init__).args[1:]
-					except Exception:  
-						constructor = inspect.signature(cls.__init__)
-						parameters = constructor.parameters
-						args_from_stored_constructor_py = [
-							name for name, _ in parameters.items() if name != "self"
-						]
+					constructor = inspect.signature(cls.__init__)
+					parameters = constructor.parameters
+					args_from_stored_constructor_py = [
+						name
+						for name, parameter in parameters.items()
+						if name != "self" and parameter.kind in ARGS_KINDS
+					]
 
 					args_from_stored_block_model = state["args"]
 					if args_from_stored_block_model:
@@ -4863,19 +4859,16 @@ class ContainerBlock(Block, Iconizable, Diagram):
 									)  
 									del state["args"][arg]
 								else:
-									try:
-										arg_values = inspect.getargspec(cls.__init__).defaults
-									except ValueError:
-										constructor = inspect.signature(cls.__init__)
-										parameters = constructor.parameters
-										arg_values = [
-											parameter.default
-											for parameter in parameters.values()
-											if parameter.default != inspect.Parameter.empty
-										]
-									finally:
-										index = args_from_stored_constructor_py.index(arg)
-										state["args"].update({arg: arg_values[index]})
+									constructor = inspect.signature(cls.__init__)
+									parameters = constructor.parameters
+									arg_values = [
+										parameter.default
+										for parameter in parameters.values()
+										if parameter.kind in ARGS_KINDS
+										and parameter.default != inspect.Parameter.empty
+									]
+									index = args_from_stored_constructor_py.index(arg)
+									state["args"].update({arg: arg_values[index]})
 					else:
 						# sys.stderr.write(_("args is None in setstate for ContainerBlock: %s\n"%str(cls)))
 						state["args"] = {}

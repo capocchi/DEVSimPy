@@ -2379,7 +2379,7 @@ class Preferences(wx.Toolbook):
 		wcd = "All files (*)|*|Editor files (*.py)|*.py"
 		open_dlg = wx.FileDialog(
 			self,
-			message=_("Choose a file"),  # noqa: F823
+			message=_("Choose a file"),
 			defaultDir=DEVSIMPY_PACKAGE_PATH,  # type: ignore  # noqa: F821
 			defaultFile="",
 			wildcard=wcd,
@@ -2390,7 +2390,7 @@ class Preferences(wx.Toolbook):
 			### sure is python file
 			if filename.endswith((".py", "pyc")):
 				### Insert item in list
-				basename, _ = os.path.splitext(os.path.basename(filename))
+				basename, _ext = os.path.splitext(os.path.basename(filename))
 				root = os.path.dirname(filename)
 				self.CheckList.Importing(root, basename)
 
@@ -2421,7 +2421,7 @@ class Preferences(wx.Toolbook):
 				### Delete query
 				dial = wx.MessageDialog(
 					self,
-					_(  # noqa: F823
+					_(
 						f"Do you want to delete the selected {self.CheckList.GetItemText(i)} plugins?"  # noqa: INT001
 					),
 					_("Plugin MAnager"),
@@ -2431,7 +2431,7 @@ class Preferences(wx.Toolbook):
 					### for selected plug-ins
 
 					module = self.CheckList.GetPyData(i)[0]
-					basename, _ = os.path.splitext(os.path.basename(module.__file__))
+					basename, _ext = os.path.splitext(os.path.basename(module.__file__))
 
 					### delete item
 					self.CheckList.DeleteItem(i)

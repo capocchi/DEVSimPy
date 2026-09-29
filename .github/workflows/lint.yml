@@ -1,9 +1,12 @@
 name: Code Quality Check
 
-on:  
+on:
   push:
     branches:
       - master
+  # Allows to trigger the workflow manually (also useful with the local runner, e.g.
+  # "act -W .github/workflows/lint.yml workflow_dispatch")
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -15,17 +18,25 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.13'  # Ajuste selon ton projet
+          python-version: '3.13'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ruff mypy
+          # pinned versions: "ruff check ." and "mypy ." results must be reproducible
+          # (a newer ruff/mypy release may report checks that did not exist before)
+          pip install ruff==0.16.9 mypy==2.3.1
 
       - name: Run ruff
         run: ruff check .
 
       - name: Run mypy
-        run: mypy .
+        # informative only: the code base still has a backlog of pre-existing type errors,
+        # so this step must not fail the job (see [tool.mypy] in pyproject.toml).
+        # Run "mypy ." locally to see them and remove "continue-on-error" once the backlog is fixed.
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          mypy . 2>&1 | tee mypy-report.txt

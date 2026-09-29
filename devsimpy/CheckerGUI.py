@@ -10,10 +10,6 @@ from traceback import format_exception
 import inspect
 from wx.lib.mixins.listctrl import ListCtrlAutoWidthMixin, ColumnSorterMixin
 
-
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 from Utilities import getTopLevelWindow, load_and_resize_image
 
 

@@ -26,9 +26,6 @@ import os
 import shutil
 import sys
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 import wx
 import wx.lib.dialogs
 
@@ -630,7 +627,7 @@ class ImportLibrary(wx.Dialog):
 
 		dial = wx.MessageDialog(
 			None,
-			_( # type: ignore  # noqa: F823
+			_( # type: ignore
 				"If %s contain python files, do you want to insert it in __all__ variable of __init__.py file?"
 			)
 			% os.path.basename(path),
@@ -662,7 +659,7 @@ class ImportLibrary(wx.Dialog):
 			with open(os.path.join(path, "__init__.py"), "w") as f:
 				f.write("__all__ = [ \n")
 				for fn in select:
-					name, _ = fn.split(".")
+					name, _ext = fn.split(".")
 					f.write(f"\t\t'{name}', \n")
 				f.write("\t\t ]")
 

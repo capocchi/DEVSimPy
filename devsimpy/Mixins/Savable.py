@@ -30,9 +30,6 @@ import types
 import inspect
 import json
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 _ = gettext.gettext
 
 required_libs = ["yaml", "ruamel"]
@@ -699,7 +696,6 @@ class DumpYAMLFile(DumpBase):
 		Args:
 			fileName (str): YAML filename
 		"""
-		global _
 
 		## try to open f with compressed mode
 		try:
@@ -717,7 +713,7 @@ class DumpYAMLFile(DumpBase):
 				sys.stderr.write(_("\nProblem loading: %s -- %s\n") % (str(fileName), str(tb)))
 				return False
 		except Exception as info:  
-			exc_type, _, exc_tb = sys.exc_info()
+			exc_type, _value, exc_tb = sys.exc_info()
 			fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
 			sys.stderr.write(
 				_("Problem opening: %s -- description: %s / type: %s / name: %s / line: %s\n")

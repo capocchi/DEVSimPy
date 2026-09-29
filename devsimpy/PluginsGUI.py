@@ -33,9 +33,6 @@ import types
 
 import inspect
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 from abc import abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin

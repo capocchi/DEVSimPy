@@ -29,9 +29,6 @@ import zipfile
 
 import inspect
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 import wx
 import wx.grid as gridlib
 from wx.lib import wordwrap
@@ -1076,7 +1073,7 @@ class PropertiesGridCtrl(gridlib.Grid, Subject):
 	def SelectProp(self, evt):
 		"""Select Prop"""
 
-		row, col, _ = evt.GetRow(), evt.GetCol(), evt.GetPosition()
+		row, col, _pos = evt.GetRow(), evt.GetCol(), evt.GetPosition()
 
 		table = self.GetTable()
 

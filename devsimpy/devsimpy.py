@@ -2176,7 +2176,7 @@ class MainApplication(wx.Frame):
 
 						### center and shit to avoid superposition
 						if simFrame:
-							_, _, dw, dh = wx.ClientDisplayRect()
+							_x, _y, dw, dh = wx.ClientDisplayRect()
 							w, h = simFrame.GetSize()
 							g = 15 * i
 							x = dw - w + g

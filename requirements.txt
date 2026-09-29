@@ -51,3 +51,5 @@ paho-mqtt
 kafka-python
 
 confluent_kafka
+
+pygobject

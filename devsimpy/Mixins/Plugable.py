@@ -28,9 +28,6 @@ import zipfile
 
 import inspect
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 import Decorators
 
 
@@ -82,7 +79,7 @@ class Plugable:
 			if inspect.ismodule(module):
 				for name, m in inspect.getmembers(module, inspect.isfunction):
 					### import only plug-ins in plug-ins list (dynamic attribute) and only method
-					if name in self.plugins and "self" in inspect.getargspec(m).args:
+					if name in self.plugins and "self" in inspect.signature(m).parameters:
 						# setattr(self, name, types.MethodType(m, self, self.__class__))
 						setattr(self, name, m.__get__(self, self.__class__))
 			else:

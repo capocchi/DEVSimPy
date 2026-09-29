@@ -38,9 +38,6 @@ import types
 import inspect
 from functools import lru_cache
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 from datetime import datetime
 
 import gettext
@@ -626,7 +623,7 @@ def AddToInitFile(init_dir_path, L):
 		for r, d, f in os.walk(init_dir_path):
 			for file in f:
 				if file.endswith((".py", ".pyc")):
-					b, _ = os.path.splitext(file)
+					b, _ext = os.path.splitext(file)
 					files.append(b)
 
 		### str of __all__ variable extracted from __init__.py file
@@ -662,7 +659,7 @@ def DelToInitFile(init_dir_path, L):
 		for r, d, f in os.walk(init_dir_path):
 			for file in f:
 				if file.endswith((".py", ".pyc")):
-					b, _ = os.path.splitext(file)
+					b, _ext = os.path.splitext(file)
 					files.append(b)
 
 		### str of __all__ variable extracted from __init__.py file

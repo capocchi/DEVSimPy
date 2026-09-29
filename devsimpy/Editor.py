@@ -46,9 +46,6 @@ OLLAMA_SERVER_CMD = ["ollama", "serve"]
 
 import inspect
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 from tempfile import gettempdir, TemporaryDirectory
 from wx import stc
 from AIAdapter import AdapterFactory
@@ -1289,7 +1286,7 @@ class EditionNotebook(wx.Notebook):
 
 		### if zipfile
 		if zipfile.is_zipfile(model_dir):
-			model_name, _ = os.path.basename(model_dir).split(".")  # toto, .amd or .cmd
+			model_name, _ext = os.path.basename(model_dir).split(".")  # toto, .amd or .cmd
 			fic_name, fic_ext = fic_filename.split(".")  # toto, *
 
 			### write code in base_name temporary file
@@ -1316,7 +1313,7 @@ class EditionNotebook(wx.Notebook):
 			r_file = os.path.join(os.path.basename(model_dir), fic_filename)
 			model_dir = os.path.dirname(model_dir)
 
-			model_name, _ = os.path.basename(model_dir).split(".")  # toto, .amd or .cmd
+			model_name, _ext = os.path.basename(model_dir).split(".")  # toto, .amd or .cmd
 			fic_name, fic_ext = fic_filename.split(".")  # toto, *
 
 			### write code in base_name temporary file
@@ -2738,22 +2735,7 @@ class BlockBase:
 				if inspect.isclass(classe):
 					# get behavioral attribute from python file through constructor class
 					# args must have default value in the constructor
-					try:
-						constructor = inspect.getargspec(classe.__init__)
-						new_args = (
-							dict(list(zip(constructor.args[1:], constructor.defaults)))
-							if constructor.defaults
-							else {}
-						)
-					except ValueError:
-						constructor = inspect.signature(classe.__init__)
-						parameters = constructor.parameters
-						new_args = {}
-
-						for name, parameter in parameters.items():
-							if name != "self":  # noqa: SIM102
-								if parameter.default != inspect.Parameter.empty:
-									new_args[name] = parameter.default
+					new_args = Components.GetArgs(classe)
 
 					self.UpdateArgs(new_args)
 

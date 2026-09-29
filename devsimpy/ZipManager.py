@@ -31,9 +31,6 @@ import ast
 
 import inspect
 
-if not hasattr(inspect, "getargspec"):
-	inspect.getargspec = inspect.getfullargspec
-
 _ = gettext.gettext
 
 from PluginManager import PluginManager  # trigger_event
@@ -350,14 +347,14 @@ class Zip:
 			return False
 
 		bn = os.path.basename(fn)
-		name, _ = os.path.splitext(bn)
+		name, _ext = os.path.splitext(bn)
 
 		with zipfile.ZipFile(fn) as zf:
 			### find all python files
 			for file in zf.namelist():
 				if file.endswith(".py"):
 					r = repr(zf.read(file))
-					n, _ = os.path.splitext(file)
+					n, _ext = os.path.splitext(file)
 					if n == name and (
 						"class %s(DomainBehavior)" % name in r  # noqa: UP031
 						or "class %s(DomainStructure)" % name in r  # noqa: UP031
