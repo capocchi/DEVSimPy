@@ -48,6 +48,7 @@ jobs:
             ruamel.yaml \
             requests \
             pydantic \
+            confluent_kafka \
             matplotlib
     
     - name: Install X serveur
