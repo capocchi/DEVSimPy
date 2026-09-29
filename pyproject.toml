@@ -99,7 +99,7 @@ exclude = [
 ]
 
 [tool.ruff.lint]
-ignore = ["N999", "I001", "UP010", "PLR0402", "BLE001"]
+ignore = ["N999", "I001", "UP010", "PLR0402", "BLE001", "EXE001"]
 
 [tool.ruff.format]
 indent-style = "tab"
