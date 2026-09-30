@@ -1263,6 +1263,10 @@ class MainApplication(wx.Frame):
 		self.cfg.Flush()
 
 	###
+	def OnQuit(self, event):
+		"""Start the normal frame-close flow from the Quit menu command."""
+		self.Close()
+
 	def OnCloseWindow(self, event):
 		"""Close icon has been pressed. Closing DEVSimPy."""
 
@@ -1277,6 +1281,10 @@ class MainApplication(wx.Frame):
 			if not self.nb2.OnClosePage(event):
 				exit = True
 				break
+
+		if exit:
+			event.Veto()
+			return
 
 		if not exit:
 			### Save process
@@ -1590,76 +1598,71 @@ class MainApplication(wx.Frame):
 			package_installed = install(package)
 
 		if package_installed:
-			import gi  # type: ignore
+			try:
+				import gi  # type: ignore
 
-			gi.require_version("Gdk", "3.0")
-			import gi.repository.Gdk as gdk  # type: ignore
+				gi.require_version("Gdk", "3.0")
+				import gi.repository.Gdk as gdk  # type: ignore
 
-			currentPage = self.nb2.GetCurrentPage()
-			currentPage.deselect()
-			diagram = currentPage.GetDiagram()
+				currentPage = self.nb2.GetCurrentPage()
+				currentPage.deselect()
+				diagram = currentPage.GetDiagram()
 
-			last_name_saved = getattr(
-				diagram, "last_name_saved", os.path.join(DEVSIMPY_PACKAGE_PATH, "screenshot.png") # type: ignore  # noqa: F821
-			)  
+				last_name_saved = getattr(
+					diagram, "last_name_saved", os.path.join(DEVSIMPY_PACKAGE_PATH, "screenshot.png") # type: ignore  # noqa: F821
+				)  
 
-			### options building
-			wcd = _("PNG files (*.png)|*.png|All files (*)|*)")
-			home = (
-				self.home or os.path.dirname(last_name_saved) or DEVSIMPY_PACKAGE_PATH # type: ignore  # noqa: F821
-				if self.openFileList == [""] * NB_OPENED_FILE # type: ignore  # noqa: F821
-				else self.home or os.path.dirname(self.openFileList[0])
-			) 
-			save_dlg = wx.FileDialog(
-				self,
-				message=_("Save file as..."),
-				defaultDir=home,
-				defaultFile=os.path.basename(last_name_saved),
-				wildcard=wcd,
-				style=wx.SAVE | wx.OVERWRITE_PROMPT,
-			)
+				### options building
+				wcd = _("PNG files (*.png)|*.png|All files (*)|*)")
+				home = (
+					self.home or os.path.dirname(last_name_saved) or DEVSIMPY_PACKAGE_PATH # type: ignore  # noqa: F821
+					if self.openFileList == [""] * NB_OPENED_FILE # type: ignore  # noqa: F821
+					else self.home or os.path.dirname(self.openFileList[0])
+				) 
+				save_dlg = wx.FileDialog(
+					self,
+					message=_("Save file as..."),
+					defaultDir=home,
+					defaultFile=os.path.basename(last_name_saved),
+					wildcard=wcd,
+					style=wx.SAVE | wx.OVERWRITE_PROMPT,
+				)
 
-			if save_dlg.ShowModal() == wx.ID_OK:
-				save_dlg.Destroy()
+				if save_dlg.ShowModal() == wx.ID_OK:
+					save_dlg.Destroy()
 
-				### wait to avoid the message box that appear when a png already existe and ask to replace it !
-				time.sleep(2)
+					### wait to avoid the message box that appear when a png already existe and ask to replace it !
+					time.sleep(2)
 
-				### screenshot for the whole window w
-				w = gdk.get_default_root_window()
-				pb = gdk.pixbuf_get_from_window(w, 0, 0, w.get_width(), w.get_height())
-				### saving
-				if pb != None:
-					path = os.path.normpath(save_dlg.GetPath())
-					ext = os.path.splitext(path)[-1][1:]
-					pb.savev(path, ext, ["quality"], ["100"])
+					### screenshot for the whole window w
+					w = gdk.get_default_root_window()
+					pb = gdk.pixbuf_get_from_window(w, 0, 0, w.get_width(), w.get_height())
+					### saving
+					if pb != None:
+						path = os.path.normpath(save_dlg.GetPath())
+						ext = os.path.splitext(path)[-1][1:]
+						pb.savev(path, ext, ["quality"], ["100"])
 
-					NotificationMessage(
-						_("Information"),
-						_("Screenshot saved in %s.") % path,
-						parent=self,
-						timeout=5,
-					)
-				else:
-					NotificationMessage(
-						_("Error"),
-						_(
-							"Unable to get the screenshot. \n Check the trace in background for more informations."
-						),
-						parent=self,
-						flag=wx.ICON_ERROR,
-						timeout=5,
-					)
-		else:
-			NotificationMessage(
-				_("Error"),
-				_(
-					f"{package} is not installed. \n Check the trace in background for more informations." # noqa: INT001
-				),
-				parent=self,
-				flag=wx.ICON_ERROR,
-				timeout=5,
-			)  
+						NotificationMessage(
+							_("Information"),
+							_("Screenshot saved in %s.") % path,
+							parent=self,
+							timeout=5,
+						)
+					else:
+						NotificationMessage(
+							_("Error"),
+							_(
+								"Unable to get the screenshot. \n Check the trace in background for more informations."
+							),
+							parent=self,
+							flag=wx.ICON_ERROR,
+							timeout=5,
+						)
+			except (ValueError, ImportError):
+				# Gdk not available on Windows; skip screen capture feature
+				pass
+
 
 	###
 	def GetUndoRedoCanvas(self, event=None):
