@@ -1265,7 +1265,8 @@ class MainApplication(wx.Frame):
 	###
 	def OnQuit(self, event):
 		"""Start the normal frame-close flow from the Quit menu command."""
-		self.Close()
+		if not self.Close():
+			sys.stdout.write(_("DEVSimPy: quit cancelled (see the page closing dialog).\n"))
 
 	def OnCloseWindow(self, event):
 		"""Close icon has been pressed. Closing DEVSimPy."""
