@@ -68,13 +68,22 @@ class Iconizable:
 	bitmap_width, bitmap_height = 16, 16
 
 	###
+	@staticmethod
+	def makeIcons(icon_names: list) -> dict:
+		"""Build the default icons dictionary (icon name --> offset position).
+
+		Args:
+		    icon_names (list): list of picture name and its offset positions.
+		"""
+		return {name: (-20 * (i + 1), +2) for i, name in enumerate(icon_names)}
+
 	def __init__(self, icon_names: list):
 		"""Constructor.
 
 		Args:
 		    icon_names (list): list of picture name and its offset positions.
 		"""
-		self.icons = {name: (-20 * (i + 1), +2) for i, name in enumerate(icon_names)}
+		self.icons = Iconizable.makeIcons(icon_names)
 		self.hide_icons = False
 
 	def onTimerTick(self):
