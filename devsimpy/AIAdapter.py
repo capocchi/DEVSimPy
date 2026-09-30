@@ -59,6 +59,7 @@ _ = gettext.gettext
 # Configuration de base du logging
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
+ERR_MSG = _("Error while generating output")
 
 ##########################################################
 ### Atomic Model JSON STRUCTURE
@@ -445,7 +446,7 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 
 		except Exception as e:
 			# Journalisation de l'erreur avec les détails de l'exception
-			logging.exception(_("Error while generating output"))  # noqa: LOG015
+			logging.exception(ERR_MSG)  # noqa: LOG015
 			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
 
 	@BuzyCursorNotification
@@ -484,7 +485,7 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 
 		except Exception as e:
 			# Journalisation de l'erreur avec les détails de l'exception
-			logging.exception(_("Error while generating output"))  # noqa: LOG015
+			logging.exception(ERR_MSG)  # noqa: LOG015
 			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
 
 
@@ -727,7 +728,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 			)
 			return json.loads(response.message.content)
 		except Exception as e:
-			logging.exception(_("Error while generating output"))  # noqa: LOG015
+			logging.exception(ERR_MSG)  # noqa: LOG015
 			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
 
 	@BuzyCursorNotification
@@ -755,5 +756,5 @@ class OllamaDevsAdapter(DevsAIAdapter):
 			)
 			return response["message"]["content"]
 		except Exception as e:
-			logging.exception(_("Error while generating output"))  # noqa: LOG015
+			logging.exception(ERR_MSG)  # noqa: LOG015
 			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001

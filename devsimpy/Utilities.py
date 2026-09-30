@@ -876,10 +876,9 @@ def playSound(sound_path):
 
 
 def GetMails(string):
-	"""Get list of mails from string."""
-
-	regex = re.compile("([a-zA-Z0-9-_.]+[@][a-zA-Z0-9-_.]+)")
-	return regex.findall(string)
+    """Get list of mails from string."""
+    regex = re.compile(r"[A-Za-z0-9_.-]+@[A-Za-z0-9_.-]+")
+    return regex.findall(string)
 
 
 def MoveFromParent(frame=None, interval=10, direction="right"):
@@ -1703,14 +1702,17 @@ def smooth(x, window_len=10, window="hanning"):
 	if not window in ["flat", "hanning", "hamming", "bartlett", "blackman"]:
 		raise ValueError("Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
 
-	s = [2 * x[0] - x[window_len:1:-1], x, 2 * x[-1] - x[-1:-window_len:-1]]
+	left = x[window_len:1:-1]
+	if left.size < window_len - 1:
+		left = x[window_len:0:-1]
+	s = concatenate([2 * x[0] - left, x, 2 * x[-1] - x[-1:-window_len:-1]])
 
 	if window == "flat":  # moving average
 		w = ones(window_len, "d")
 	else:
 		w = eval(window + "(window_len)")
 
-	y = convolve(w / w.sum(), [float(val) for val in s], mode="same")
+	y = convolve(w / w.sum(), s, mode="same")
 	return y[window_len - 1 : -window_len + 1]
 
 

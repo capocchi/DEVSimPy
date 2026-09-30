@@ -665,7 +665,7 @@ class DumpYAMLFile(DumpBase):
 			with open(fileName, "w") as yf:
 				yaml.dump(PickledCollection(obj_dumped), stream=yf)
 
-		except (AttributeError, Exception) as error:  
+		except AttributeError as error:  
 			sys.stderr.write(
 				f"Warning: First attempt to save YAML failed, retrying in 'unsafe' mode: {error}\n"
 			)
@@ -682,7 +682,7 @@ class DumpYAMLFile(DumpBase):
 				sys.stderr.write(f"Problem saving YAML file '{fileName}': {error}\n{tb}")
 				return False
 
-		except Exception as error:  # noqa: B025
+		except Exception as error:
 			tb = traceback.format_exc()
 			sys.stderr.write(f"Problem saving YAML file '{fileName}': {error}\n{tb}")
 			return False

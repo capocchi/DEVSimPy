@@ -298,7 +298,7 @@ class FileMenu(Menu):
 		parent.Bind(wx.EVT_MENU, parent.OnPrint, id=ID_PRINT)
 		parent.Bind(wx.EVT_MENU, parent.OnPrintPreview, id=ID_PREVIEW_PRINT)
 		parent.Bind(wx.EVT_MENU, parent.OnScreenCapture, id=ID_SCREEN_CAPTURE)
-		parent.Bind(wx.EVT_MENU, parent.OnCloseWindow, id=ID_EXIT)
+		parent.Bind(wx.EVT_MENU, parent.OnQuit, id=ID_EXIT)
 
 
 class EditMenu(Menu):

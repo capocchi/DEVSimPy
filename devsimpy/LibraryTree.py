@@ -174,16 +174,16 @@ class LibraryTree(wx.TreeCtrl):
 		for absdName in chargedDomainList:
 			### add absdName to sys.path (always before InsertNewDomain)
 			LibraryTree.AddToSysPath(absdName)
-
-			### add new domain
-			# threading.Thread(target=self.InsertNewDomain,
-			# args=(absdName, self.root, list(self.GetSubDomain(absdName, self.GetDomainList(absdName)).values())[0],)
-			# ).start()
+			
+			subdomains = self.GetSubDomain(
+			    absdName,
+    			self.GetDomainList(absdName),
+			)
 
 			self.InsertNewDomain(
 				absdName,
 				self.root,
-				list(self.GetSubDomain(absdName, self.GetDomainList(absdName)).values())[0], # noqa: RUF015
+				next(iter(subdomains.values()))
 			)  
 
 		wx.CallAfter(self.SortChildren, self.root)

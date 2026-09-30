@@ -1767,11 +1767,7 @@ class PointShape(Shape):
 
 	def draw(self, dc):
 		"""Draw method"""
-		# Mac's DC is already the same as a GCDC, and it causes
-		# problems with the overlay if we try to use an actual
-		# wx.GCDC so don't try it.
-		if "wxMac" not in wx.PlatformInfo:
-			dc = wx.GCDC(dc)
+		# Modern wxPython handles GCDC internally; no need to wrap DC.
 
 		self.graphic.pen = self.pen
 		self.graphic.fill = self.fill
@@ -4055,11 +4051,7 @@ class Block(
 	def draw(self, dc):
 		"""Drawing block"""
 
-		# Mac's DC is already the same as a GCDC, and it causes
-		# problems with the overlay if we try to use an actual
-		# wx.GCDC so don't try it.
-		if "wxMac" not in wx.PlatformInfo:
-			dc = wx.GCDC(dc)
+		# Modern wxPython handles GCDC internally; no need to wrap DC.
 
 		### Draw rectangle shape
 		RoundedRectangleShape.draw(self, dc)
@@ -4598,6 +4590,9 @@ class CodeBlock(Achievable, Block, Iconizable):
 			state["_output_labels"] = {}
 		if "hide_icons" not in state:
 			state["hide_icons"] = False
+		if not state.get("icons"):
+			### models saved without the icons refactoring must get the default icons back
+			state["icons"] = Iconizable.makeIcons(["trash", "edit"])
 			##############################################
 
 		self.__dict__.update(state)
@@ -4629,6 +4624,10 @@ class CodeBlock(Achievable, Block, Iconizable):
 	###
 	def draw(self, dc):
 		"""Draw the block on DC."""
+
+		### the body must be drawn first because the icons are drawn on the top of it
+		Block.draw(self, dc)
+
 		if self.selected:
 			if not self.hide_icons:
 				### inform about the nature of the block using icon
@@ -4649,8 +4648,6 @@ class CodeBlock(Achievable, Block, Iconizable):
 				img = load_and_resize_image(icon.getFileName())
 				x, y = int(self.x[1] + icon.getOffSet("x")), int(self.y[0] + icon.getOffSet("y"))
 				dc.DrawBitmap(img, x, y)
-
-		Block.draw(self, dc)
 
 	def OnEnable(self):
 		"""Enable the block."""
@@ -4919,6 +4916,9 @@ class ContainerBlock(Block, Iconizable, Diagram):
 			state["_intput_labels"] = {}
 		if "_output_labels" not in state:
 			state["_output_labels"] = {}
+		if not state.get("icons"):
+			### models saved without the icons refactoring must get the default icons back
+			state["icons"] = Iconizable.makeIcons(["trash"])
 		# if isinstance(state['shapes'],dict): state['shapes'] = list(state['shapes'].values())
 		#####################################
 
@@ -4957,6 +4957,9 @@ class ContainerBlock(Block, Iconizable, Diagram):
 	def draw(self, dc):
 		"""Draw the block on DC."""
 
+		### the body must be drawn first because the icons are drawn on the top of it
+		Block.draw(self, dc)
+
 		if self.selected:
 			### inform about the nature of the block using icon
 			icon = Icon("coupled", (4, 2))
@@ -4974,8 +4977,6 @@ class ContainerBlock(Block, Iconizable, Diagram):
 				img = load_and_resize_image(icon.getFileName())
 				x, y = int(self.x[1] + icon.getOffSet("x")), int(self.y[0] + icon.getOffSet("y"))
 				dc.DrawBitmap(img, x, y)
-
-		Block.draw(self, dc)
 
 	def OnEnable(self):
 		"""Enable the block."""
@@ -5432,11 +5433,7 @@ class Port(CircleShape, Connectable, Selectable, Attributable, Rotatable, Observ
 	def draw(self, dc):
 		"""Drawing method."""
 
-		# Mac's DC is already the same as a GCDC, and it causes
-		# problems with the overlay if we try to use an actual
-		# wx.GCDC so don't try it.
-		if "wxMac" not in wx.PlatformInfo:
-			dc = wx.GCDC(dc)
+		# Modern wxPython handles GCDC internally; no need to wrap DC.
 
 		CircleShape.draw(self, dc)
 

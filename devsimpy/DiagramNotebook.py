@@ -299,17 +299,25 @@ if USE_FLATNOTEBOOK:
 				evt.Skip()
 
 		def DeletePage(self, *args, **kwargs):
-			"""Delete the current diagram."""
+			"""Delete the current diagram.
+
+			Return False if the page could not be deleted (cancel of the save dialog).
+			"""
 			try:
 				canvas = self.GetPage(args[0])
 			except IndexError:
 				return False
 			else:
-				# result = fnb.FlatNotebook.DeletePage(self, *args, **kwargs)
+				# real deletion: fires EVT_FLATNOTEBOOK_PAGE_CLOSING -> OnClosingPage which
+				# asks to save the diagram and removes the canvas from self.pages
+				fnb.FlatNotebook.DeletePage(self, *args, **kwargs)
 				return canvas not in self.pages
 
 		def OnClosePage(self, evt):
-			"""Close the page."""
+			"""Close the page. Return True if the page has been closed."""
+			if self.GetPageCount() == 0:
+				return True
+
 			return self.DeletePage(self.GetSelection())
 
 else:
