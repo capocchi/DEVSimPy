@@ -721,9 +721,34 @@ class StaticPlot(PlotFrame):
 			### call self.On<PlotLine>()
 			getattr(self, f"On{self.typ}")()
 
+
 	def Normalize(self, data):
-		m = max(a[1] for a in data)
-		return [(b[0], b[1] / m) for b in data]
+		if not data:
+			return []
+
+		data_list = list(data)
+
+		values = [a[1] for a in data_list]
+
+		min_value = min(values)
+		max_value = max(values)
+
+		if max_value == min_value:
+			return [(a[0], 0.0) for a in data_list]
+
+		normalized = []
+
+		for a in data_list:
+			x = a[0]
+			y = a[1]
+
+			normalized_y = (y - min_value) / (max_value - min_value)
+
+			normalized.append((x, normalized_y))
+
+		return normalized
+		
+
 
 	def SetBlockModel(self, block):
 		self.block = block
@@ -1004,16 +1029,21 @@ class StaticPlot(PlotFrame):
 		wx.MessageBox(f"Mean: {r:f}", _("Info"), wx.OK | wx.ICON_INFORMATION)
 
 	def OnRMSE(self, evt):
-		"""Get RMSE."""
-		if isinstance(self.data, dict):
-			c1, c2 = self.data.values()
-			assert len(c1) == len(c2)
-			diffcarr = map(lambda a, b: pow(float(a[-1]) - float(b[-1]), 2), c1, c2)
-			r = sqrt(sum(diffcarr) / len(c1))
+		"""Get RMSE between two curves."""
+		if not isinstance(self.data, dict) or len(self.data) != 2:
+			wx.MessageBox(_("RMSE needs two curves!"), _("Error"), wx.OK | wx.ICON_ERROR)
+			return
 
-			wx.MessageBox(f"RMSE: {r:f}", _("Info"), wx.OK | wx.ICON_INFORMATION)
-		else:
-			wx.MessageBox("RMSE needs two curves!", _("Error"), wx.OK | wx.ICON_ERROR)
+		c1, c2 = self.data.values()
+
+		if len(c1) != len(c2):
+			wx.MessageBox(_("Curves must have the same number of points!"),
+						_("Error"), wx.OK | wx.ICON_ERROR)
+			return
+
+		r = sqrt(sum((p1[1] - p2[1]) ** 2 for p1, p2 in zip(c1, c2)) / len(c1))
+
+		wx.MessageBox(f"RMSE: {r:.6f}", _("Info"), wx.OK | wx.ICON_INFORMATION)
 
 	# 	for k,s in self.atomicModel.results.items():
 	# 		frame = Spectrum(self,wx.NewIdRef(), title= _("Spectrum of signal %d")%k,data = s)
@@ -1035,12 +1065,12 @@ class StaticPlot(PlotFrame):
 			# menu = evt.GetEventObject()
 			item = self.mainmenu.FindItemById(evt.GetId())
 			# permet d'identifier le numero du signal
-			i = int(item.GetLabel().split(" ")[-1])
-			frame = Spectrum(self, wx.NewIdRef(), title=_("Spectrum of signal "), data=self.data[i])
-
+			i = int(item.GetItemLabelText().split(" ")[-1])
+			d = self.data[i]
 		else:
-			frame = Spectrum(self, wx.NewIdRef(), title=_("Spectrum of signal "), data=self.data)
+			d = self.data
 
+		frame = Spectrum(self, wx.NewIdRef(), title=_("Spectrum of signal "), data=d)
 		frame.Center()
 		frame.Show()
 
@@ -1221,8 +1251,11 @@ class DynamicPlot(PlotFrame):
 		self.OnPlotRedraw(event)
 
 	def Normalize(self, data):
-		m = max(a[1] for a in data)
-		return [(b[0], b[1] / m) for b in data]
+		if not data:
+			return []
+		m = max(a[1] for a in list(data))
+		data_list = list(data)
+		return [(b[0], b[1] / m) for b in data_list]
 
 	def OnPlotLine(self, event=None) -> None:
 		"""Plot process depends to the timer event."""

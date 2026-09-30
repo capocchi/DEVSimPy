@@ -1709,7 +1709,7 @@ def smooth(x, window_len=10, window="hanning"):
 	else:
 		w = eval(window + "(window_len)")
 
-	y = convolve(w / w.sum(), [float(val) for val in s], mode="same")
+	y = convolve(w / w.sum(), [val.item() if hasattr(val, 'item') else float(val) for val in s], mode="same")
 	return y[window_len - 1 : -window_len + 1]
 
 
