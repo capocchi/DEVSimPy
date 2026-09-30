@@ -72,7 +72,6 @@ jobs:
 
         print("wx:", wx.version())
         print("WebView class:", wx.html2.WebView)
-        print("WebView backends:", wx.html2.WebView.GetAvailableBackends())
 
         app = wx.App(False)
         frame = wx.Frame(None)
