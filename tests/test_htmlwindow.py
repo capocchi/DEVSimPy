@@ -7,6 +7,12 @@ Usage:
 
 from ApplicationController import TestApp  
 
+import wx.html2
+
+if not wx.html2.USE_WEBVIEW:
+    print("Skipping HtmlWindow test: wxPython was built without WebView support")
+    raise SystemExit(0)
+
 # import after ApplicationController that inits sys.path ot avoid this import
 from HtmlWindow import HtmlFrame # type: ignore
 

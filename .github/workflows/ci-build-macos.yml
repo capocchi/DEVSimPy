@@ -1,0 +1,95 @@
+name: macOS build
+
+"on":
+  push:
+    branches:
+      - master
+
+jobs:
+  build-macos:
+    runs-on: macos-14
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        python-version: ['3.11', '3.12', '3.13','3.14']
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set up Python with Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniconda-version: latest
+          conda-version: "*"
+          channels: conda-forge,defaults
+          channel-priority: true
+          activate-environment: anaconda-client-env
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install conda dependencies
+        run: |
+          conda install -y -c conda-forge \
+            "python=${{ matrix.python-version }}" \
+            "wxpython=4.2.2"
+
+      - name: Install dependencies with pip
+        run: |
+          python -m pip install --no-cache-dir --prefer-binary \
+            psutil \
+            pyYAML \
+            PyPubSub \
+            ruamel.yaml \
+            requests \
+            pydantic \
+            confluent_kafka \
+            matplotlib
+
+      - name: Test DEVSimPy
+        run: |
+          python devsimpy/devsimpy.py examples/model0/model0.dsp 10 autostart autoclose
+
+      - name: Test DEVSimPy Frame and Dialog
+        run: |
+          cd tests
+
+          FILES=(
+            test_checkergui.py
+            test_connectdialog.py
+            test_detachedframe.py
+            test_diagramconstantsdialog.py
+            test_editor.py
+            test_findgui.py
+            test_ftpgui.py
+            test_htmlwindow.py
+            test_importlibrary.py
+            test_labelgui.py
+            test_preferencesgui.py
+            test_prioritygui.py
+            test_simulationgui.py
+            test_wizardgui.py
+            test_pluginsgui.py
+            test_wxpymail.py
+            test_aiprompterdialog.py
+            test_simpleframeeditor.py
+            test_yamlexportgui.py
+            test_spreadsheet.py
+            test_xmlmodule.py
+            test_standalonegui.py
+          )
+
+          for file in "${FILES[@]}"; do
+            python "$file" --autoclose
+          done
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-test-results
+          path: ./macos-test-results/
