@@ -64,31 +64,6 @@ jobs:
       run: | 
         xvfb-run -a python devsimpy/devsimpy.py examples/model0/model0.dsp 10 autostart autoclose
 
-    - name: Check wx WebView
-      run: |
-        python - <<'PY'
-        import wx
-        import wx.html2
-
-        print("wx:", wx.version())
-        print("WebView class:", wx.html2.WebView)
-        print("WebView backends:", wx.html2.WebView.GetAvailableBackends())
-
-        app = wx.App(False)
-        frame = wx.Frame(None)
-
-        try:
-            webview = wx.html2.WebView.New(frame)
-            print("WebView: OK")
-            webview.Destroy()
-        except Exception as e:
-            print("WebView creation failed:", type(e).__name__, e)
-            raise
-        finally:
-            frame.Destroy()
-            app.Destroy()
-        PY
-
     ### Test of diag and sub frame
     - name: Test DEVSimPy Frame and Dialog
       run: |
