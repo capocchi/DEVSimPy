@@ -1,39 +1,14 @@
-1. **Required Imports:**
+Generate only the imports, atomic class declaration, and __init__ method requested by the JSON.
 
-   from DomainInterface.DomainBehavior import DomainBehavior
-   from DomainInterface.Object import Message
-
-
-2. **Inheritance:** The class should inherit from `DomainBehavior`.
-
-3. **Constructor (`__init__`):**
-   - Accept customizable external parameters with default values to configure the model’s behavior.
-   - Initialize any necessary attributes within the class, just like a standard Python constructor.
-   - Important: Use `self.initPhase()` to define the initial state and corresponding duration.
-   - The ports aren't initialized here.
-
-
-**Example:**
-from DomainInterface.DomainBehavior import DomainBehavior
-from DomainInterface.Object import Message
-
-class ModelName(DomainBehavior):
-	''' DEVS Class for a generic model '''
-
-    def __init__(self, param1=10, param2="default"):
-        ''' Constructor '''
-        DomainBehavior.__init__(self)
-        self.param1 = param1
-        self.param2 = param2
-        # Initialize any other required attributes
-        self.initPhase('INITIAL_STATE', INFINITY)  # Customizable initial state and duration
-
-
-## Steps
-1. Include the required imports
-2. Use the 'model_name' field to complete de class name.
-3. Initialize the needed variables (informations in the 'model_properties' array : a dictionary represents all the needed information for one variable). Only put the variables in the constructor parameters if they are in the 'parameters' field of the function, or if stated directly, else, only initialize them in the function's body. Some may be present in the 'model_description', you can add them too.
-4. Add additional imports if they seem relevant or necessary.
-5. Use the 'initial_state' field to get the name and time for the self.initPhase() function.
-6. You can write additional code to answer the 'description' request.
-7. Only output the imports, class declaration and __init__().
+DEVSimPy API:
+- Import `DomainBehavior` from `DomainInterface` (or `DomainInterface.DomainBehavior`) and inherit from it.
+- Call `DomainBehavior.__init__(self)` first.
+- Initialize instance attributes from model_properties and explicitly requested constructor parameters. Do not use mutable objects as default parameter values.
+- Set the initial phase exactly once with `self.initPhase(initial_state_name, initial_state_time)`.
+- For a periodic source, initialize the period attribute from the specified property and start the SEND phase with sigma equal to that period (for example, `self.initPhase("SEND", self.period)`). This schedules the first output after one period.
+- `INFINITY` is supplied by DEVSimPy as a built-in constant; use it without quotes when the JSON time is the string "INFINITY". Use a property such as `self.period` for symbolic delays.
+- Do not call initPhase from a transition method.
+- Do not create ports in an atomic CodeBlock constructor. DEVSimPy creates IPorts/OPorts from the CodeBlock's diagram metadata after construction. Explicit port creation belongs only to standalone models whose interface is not supplied by a CodeBlock.
+- Add the `Message` import only if this constructor itself needs it; output functions normally construct messages.
+- The generated class name must be a valid Python identifier derived from model_name.
+- Add imports only when required by the described behavior. Output code only, with tabs for indentation.

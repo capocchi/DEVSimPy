@@ -1772,7 +1772,9 @@ class AIEditorAssistantPanel(wx.Panel):
 						{
 							"role": "system",
 							"content": (
-								"Use the following active source code as context. Respond naturally to "
+								"Follow this DEVSimPy model and simulator context when relevant:\n"
+								+ adapter.base_prompt
+								+ "\n\nUse the following active source code as context. Respond naturally to "
 								"the user's actual prompt; do not summarize or modify the code unless "
 								"asked. A greeting or general question should receive a normal response."
 								f"\n\n```python\n{target_text}\n```"

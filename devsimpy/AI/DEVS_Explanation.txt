@@ -1,93 +1,212 @@
-Create a generic Python class to be used as an atomic model within a DEVS environment using the DEVSimpy tool. The class should follow these characteristics and structure, based on the model type. The tabulation wil be made with a \t. I don't want you to write anything else than the actual class and the import.
+DEVSimPy model-authoring guide
+==============================
 
-### Types of Atomic Models
+Generate valid model code for DEVSimPy, not generic raw-PyDEVS code. The active
+kernel is selected by DEFAULT_DEVS_DIRNAME. Import the application interfaces
+from DomainInterface so model code remains compatible with the configured
+kernel:
 
-1. **Generator Model:**
-   - The generator model only sends data while alternating states; it does not have an external transition (`extTransition`) since it does not receive data.
+    from DomainInterface import DomainBehavior
+    from DomainInterface import DomainStructure
+    from DomainInterface.Object import Message
 
-2. **Default Model:**
-   - This model receives data via external transitions (`extTransition`) and sends data via `outputFnc`. It will use both `extTransition` and `outputFnc` methods.
+Use only the imports required by the requested class. Output only the requested
+Python imports and class code, with no Markdown fences or explanatory prose.
 
-3. **Viewer or Collector Models:**
-   - Viewer and collector models only gather data without sending it. Viewers display data visually (e.g., using Turtle or other tools), while collectors log data to a file.
-   - These models do not need an `outputFnc` since they only retrieve data.
+Model types and responsibilities
+-------------------------------
 
-### General Class Structure and Functions
+Atomic model:
+- Inherit from DomainBehavior and call DomainBehavior.__init__(self) first.
+- Keep model state in the inherited state dictionary. Its standard fields are
+  "status" and "sigma"; use getState(), getStatus(), getPhase(), getSigma(),
+  getElapsed(), phaseIs(), holdIn(), passivate(), passivateIn(), setStatus(),
+  setSigma(), and setState().
+- Port/message helpers are peek(port, *args), peek_all(), poke(port, value),
+  getMsgValue(message), getMsgTime(message), and getPortId(port). DomainBehavior
+  selects compatible helper implementations for the active kernel.
+- Use initPhase(phase, sigma) only in __init__ to set the initial state.
+- Implement intTransition, extTransition, outputFnc, and timeAdvance only as
+  needed by the requested behavior. The inherited base methods are defaults.
+- timeAdvance returns getSigma(), which is the relative delay until the next
+  internal event. Use INFINITY to passivate indefinitely.
 
-1. **Required Imports:**
-   
-   from DomainInterface.DomainBehavior import DomainBehavior
-   from DomainInterface.Object import Message
-   
+DEVSimPy CodeBlock port ownership:
+- For an atomic Python CodeBlock placed in a diagram, Container.makeDEVSInstance
+  creates IPorts and OPorts from the block's configured input/output counts
+  after constructing the Python class. Do not add those ports again in the
+  atomic class constructor; doing so creates duplicate ports.
+- Read inputs from self.IPorts and write outputs to self.OPorts. The port order
+  must match the block's configured port order.
+- If writing a standalone model that is not instantiated as a diagram CodeBlock,
+  ports may instead be declared explicitly with addInPort() and addOutPort().
 
-2. **Inheritance:** The class should inherit from `DomainBehavior`.
+Bundled Domain library
+----------------------
 
-3. **Constructor (`__init__`):**
-   - Accept customizable external parameters with default values to configure the model’s behavior.
-   - Initialize any necessary attributes within the class, just like a standard Python constructor.
-   - Important: Use `self.initPhase()` **only in the constructor** to define the initial state and corresponding duration. Do not use `initPhase` in transition functions.
+The shipped `Domain` directory contains reusable atomic blocks. There is no
+generic Collector superclass: the collector blocks are separate DomainBehavior
+classes. Prefer a matching existing block over recreating its behavior, but do
+not assume a block supports options not listed here. Verify the user's desired
+ports and payload shape before reusing one.
 
-4. **External Transition (`extTransition`):**
-   - Executed when the model receives a message via its input ports. Only applicable to models that handle incoming data, such as the default model.
-   - For each port in `self.IPorts`, use `self.peek(port, *args)` to retrieve the message.
-   - Based on the message content, the model can take actions such as changing state, executing specific logic, or remaining in the current state.
-   - Use `self.holdIn()` to set the new state and delay until the next transition as needed. **Do not use `initPhase` here.**
+Generators:
+- `Domain.Generator.RandomGenerator.RandomGenerator` accepts minValue, maxValue,
+  minStep, maxStep, start, and choice. It emits random numeric values from
+  minValue..maxValue or values from choice, to a random non-empty subset of its
+  output ports. It schedules each next event with a random delay between
+  minStep and maxStep. Set minStep=maxStep=N for a fixed N-unit interval. Its
+  first event is delayed by start. It is not a deterministic sequence source.
+- `Domain.Generator.FileGenerator.FileGenerator` reads a delimited data file.
+  Its parameters include fileName, listValues (selected data columns), time
+  (time-column index), outPutFrequency, and comma. An empty listValues means
+  output each row on one port; selected columns map to corresponding outputs.
+  Use it only when the user supplied or requested file-backed data.
+- `Domain.Generator.XMLGenerator.XMLGenerator` reads time/value tags from an XML
+  file and is appropriate only when that input format is requested.
+- `Domain.Generator.Generator.Generator` is a base/helper for prepared T/V
+  sequences, not a ready-to-use generic periodic source. Prefer RandomGenerator,
+  FileGenerator, XMLGenerator, or a purpose-built DomainBehavior subclass.
 
-5. **Output Function (`outputFnc`):**
-   - Sends messages via output ports, only required for models that transmit data, like the default model.
-   - Structure the message using the `Message` class to transmit necessary information according to the model’s logic.
+Collectors and viewers:
+- `Domain.Collector.To_Stdout.To_Stdout(at_end=False, tag="output")` prints
+  received payloads immediately; with at_end=True it buffers them and prints in
+  finish(). It consumes inputs and emits no output.
+- `Domain.Collector.MessagesCollector.MessagesCollector(fileName="result",
+  ext=".dat", comma="")` appends received message representations to one file
+  per input-port ID. Its default name is randomized in the temporary directory.
+  Its constructor deletes existing files matching that base name and port-ID
+  range, so never choose it without considering that side effect.
+- `Domain.Collector.QuickScope.QuickScope(fusion=True, eventAxis=False)` records
+  received values and timestamps in its results dictionary for GUI plotting; it
+  is a viewer, not a data-transformation model.
+- `Domain.Collector.To_Disk.To_Disk(fileName="result", eventAxis=False,
+  comma=" ", ext=".dat", col=0)` is built on QuickScope and writes received
+  series to disk. Its constructor also removes existing output files matching
+  its base name; respect this destructive behavior.
+- Plotly_For_Class and PlotlyStream require Plotly credentials/network access.
+  Use them only when the user explicitly asks for online Plotly output; do not
+  assume credentials or connectivity.
 
-6. **Internal Transition (`intTransition`):**
-   - Executed when the internal transition time expires, based on the model’s current state.
-   - This transition may include changing the state, performing actions, or maintaining the current state.
-   - To modify the model’s state during an internal transition, **use `self.holdIn("State_Name", timeUntilNextTransition)`**.
+Library reuse rules:
+- Match a library block's actual class and constructor signature. Do not import
+  `Collector` as though a common base class existed.
+- Existing library blocks are usually instantiated and connected by DEVSimPy's
+  diagram/container machinery. Their atomic CodeBlock ports are taken from the
+  diagram metadata.
+- If an existing block does not match the requested timing, deterministic data,
+  input/output semantics, or side effects, generate a focused new model instead
+  of misusing that block.
+- `Domain.Basic.Atomic.Atomic` and `Domain.Basic.Coupled.Coupled` are minimal
+  structural skeletons, not complete behavior blocks. Implement requested
+  behavior in a DomainBehavior or DomainStructure subclass.
+- `Domain.FSM.FSM.FSM` is a plain Python finite-state-machine helper, not a DEVS
+  component. It accepts initState and transitionDict; next(event) returns the
+  current state and associated output list. initFromSCXML(path) loads a QFSM
+  exported SCXML file. Compose it inside an atomic model only when the request
+  calls for event-driven FSM behavior.
+- `Domain.Web.Server.Server` is a Pyro4 service utility, not a DEVS model.
+  WebGenerator.amd and WebCollector.amd are legacy web-oriented blocks. Do not
+  use them for normal simulation messaging; use DEVS ports and couplings unless
+  the user specifically requests the web/Pyro integration.
 
-7. **Retrieve Current State (`getState`):**
-   - Use `self.getState()` to retrieve the model’s current state at any point in the code. This can help conditionally control actions based on the model’s state.
+Atomic simulation lifecycle
+--------------------------
 
-8. **Time Advance (`timeAdvance`):**
-   - Controls time advancement in the simulation by returning `self.getSigma()` for the time until the next transition.
+- initPhase is called by the constructor to establish the initial state/sigma.
+- When an internal event is imminent, DEVSimPy calls outputFnc before
+  intTransition. outputFnc must describe output for the current state and must
+  not advance or mutate the state.
+- For a periodic source that emits every N simulation-time units, schedule the
+  first event in __init__ with initPhase("SEND", self.period). outputFnc emits
+  once when SEND is imminent. Then intTransition must call
+  self.holdIn("SEND", self.period) to schedule the next event. timeAdvance
+  returns getSigma(), so this repeats every period. Do not try to repeat an
+  output by changing sigma in outputFnc or only in timeAdvance.
+- For a one-shot source, intTransition should passivate after its output instead
+  of rescheduling. For a source that emits only after an input, schedule its
+  first SEND event from extTransition. An event count (for example, every two
+  incoming messages) is different from a simulation-time period and requires an
+  explicit counter.
+- Unless the user explicitly means a count of other events, interpret "every N
+  simulation steps" as a recurring simulation-time duration of N time units;
+  use a named period property when it is configurable.
+- extTransition is called when input arrives. Its args vary by kernel; keep the
+  signature extTransition(self, *args) and use self.peek(port, *args).
+- In transitions, update state with holdIn(phase, sigma), passivate(), or other
+  DomainBehavior helpers. Do not call initPhase outside __init__.
+- Current model conventions return self.getState() from transition methods.
+- Prefer one pass over every input port, use getMsgValue(msg) to obtain payloads,
+  and use getMsgTime(msg) only when message time is needed. Check msg is not
+  None; do not assume every port has input on every external transition.
 
-Sample Class Structure:
+Messages and output
+-------------------
 
-from DomainInterface.DomainBehavior import DomainBehavior
-from DomainInterface.Object import Message
+- Construct messages as Message(value, time). For outputs, the usual time is
+  self.timeNext, the imminent time of the atomic model.
+- Send with self.poke(output_port, Message(value, self.timeNext)). poke is a
+  side effect in PyDEVS and returns a mapping in the PyPDEVS compatibility
+  adapter. For code intended to work with both, collect non-empty poke results
+  and return the resulting output mapping; do not depend on a truthy return
+  from poke. If there are no outputs, return an empty mapping.
+- Do not directly edit simulator-owned myInput, myOutput, IPorts, or OPorts.
 
-class ModelName(DomainBehavior):
-    ''' DEVS Class for a generic model '''
+Coupled models
+--------------
 
-    def __init__(self, param1=10, param2="default"):
-        ''' Constructor '''
-        DomainBehavior.__init__(self)
-        self.param1 = param1
-        self.param2 = param2
-        # Initialize any other required attributes
-        self.initPhase('INITIAL_STATE', INFINITY)  # Customizable initial state and duration
+- Inherit from DomainStructure and call DomainStructure.__init__(self, name).
+- A coupled model composes atomic/coupled children and routes ports; it does not
+  implement atomic transition functions or a timeAdvance function.
+- Add children only through child = self.addSubModel(Model(...)). This records
+  the parent relationship and component set. Do not mutate componentSet by hand.
+- DomainStructure provides getComponentSet(), setComponentSet(),
+  addToComponentSet(), delToComponentSet(), and getFlatComponentSet(); use these
+  helpers when component access or modification is required.
+- For a coupled model constructed as a Python object, declare any required
+  external ports with self.addInPort() and self.addOutPort(). As with atomic
+  CodeBlocks, DEVSimPy may create the outer CodeBlock ports from diagram port
+  counts; do not duplicate those ports.
+- Connect only valid output-to-input port pairs with self.connectPorts(source,
+  destination):
+  * Internal coupling (IC): child output to another child input.
+  * External input coupling (EIC): coupled input to a child input.
+  * External output coupling (EOC): child output to coupled output.
+- Example topology:
 
-    def extTransition(self, *args):
-        ''' DEVS external transition function (only for models that receive data) '''
-        for port in self.IPorts:
-            msg = self.peek(port, *args)
-            if msg:
-                # State change or action logic based on the message
-                current_state = self.getState()  # Example usage of getState()
-                pass  # Customize based on intended behavior
-         
-         return self.getState()
+    self.in_port = self.addInPort()
+    self.out_port = self.addOutPort()
+    self.source = self.addSubModel(Source())
+    self.worker = self.addSubModel(Worker())
+    self.connectPorts(self.in_port, self.worker.IPorts[0])
+    self.connectPorts(self.source.OPorts[0], self.worker.IPorts[1])
+    self.connectPorts(self.worker.OPorts[0], self.out_port)
 
-    def outputFnc(self):
-        ''' DEVS output function (only for models that send data) '''
-        # Create and return a structured message for output ports
-        return self.poke(self.OPorts[0], Message("Message content", self.timeNext))
+  In this example Worker has two input ports: one exposed to the coupled input
+  and one connected to Source.
 
-    def intTransition(self):
-        ''' DEVS internal transition function '''
-        current_state = self.getState()  # Example usage of getState()
-        # Use self.holdIn() to change state or set an internal delay
-        pass  # Customize as needed
-        
-        return self.getState()
+- Avoid direct self-coupling and invalid port directions. Use a child output as
+  the source and a child input as the destination for IC; reverse endpoints for
+  neither EIC nor EOC.
+- DEVSimPy's coupled scheduler recursively flattens the hierarchy and routes
+  messages through these connections. Preserve component and port references;
+  do not implement message routing manually.
+- Coupled select behavior is provided by the configured kernel. Override select
+  only when the model requires a specific simultaneous-event priority, and
+  choose from the imminent children passed to it.
+- The inherited coupled API also provides disconnectPorts() for removing an
+  existing coupling. Do not create a custom scheduler or manually invoke child
+  transitions; DEVSimPy's selected simulation strategy owns event scheduling.
 
-    def timeAdvance(self):
-        ''' DEVS Time Advance function '''
-        return self.getSigma()
+Modeling quality
+----------------
+
+- Derive behavior from the user's requested states, transitions, timing,
+  properties, and port meanings. Do not invent ports, states, or parameters.
+- Use finite non-negative delays or INFINITY; do not return absolute event time
+  from timeAdvance.
+- Keep atomic and coupled responsibilities separate. If asked for a coupled
+  topology, generate a DomainStructure class; if asked for one component's
+  behavior, generate a DomainBehavior class.
+- The structured JSON model-generation workflow describes atomic models only.
+  Coupled topology code should be generated directly as DomainStructure code.

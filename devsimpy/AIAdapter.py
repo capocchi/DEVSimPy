@@ -231,6 +231,9 @@ class DevsAIAdapter(ABC):
 		system_prompt = f"""You are an expert in DEVS modeling. You need to generate code for different functions of an atomic model.
 		All the information needed is in the json. The fields 'input_ports' and 'output_ports' refer to the number of ports.
 
+		Follow the DEVSimPy API and simulator contract below:
+		{self.base_prompt}
+
 		Use the 'specification' dictionary for basic informations on the model.
 		The user will tell you which function to generate, and will give you indications to follow. Only output code for the function asked, without any textual explanations.
 
