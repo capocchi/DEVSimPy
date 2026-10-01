@@ -257,7 +257,7 @@ class DevsAIAdapter(ABC):
 		# generates a response for every function
 		for function_name in json_fields_functions:
 			function_guidelines = self._load_base_prompt(
-				os.path.join(os.getcwd(), "AI", "functions_prompt", f"{function_name}.txt")
+				AI_DIR / "functions_prompt" / f"{function_name}.txt"
 			)
 			user_prompt = f"""Generate code for the {function_name} function.
 			Use the following guidelines :
@@ -357,8 +357,9 @@ class AdapterFactory:
 		if AdapterFactory._instance is None:
 			# Récupère les paramètres d'API et de port de PARAMS_IA
 
-			api_key = params.get("CHATGPT_API_KEY") if params else None
-			port = params.get("OLLAMA_PORT") if params else None
+			params = params or {}
+			api_key = params.get("CHATGPT_API_KEY")
+			port = params.get("OLLAMA_PORT")
 
 			# Validation pour ChatGPT
 			if selected_ia == "ChatGPT":
@@ -382,6 +383,15 @@ class AdapterFactory:
 					AdapterFactory._instance = OllamaDevsAdapter(
 						parent=parent, port=port, model_name=model_name
 					)
+			elif selected_ia == "LM Studio":
+				base_url = params.get("LMSTUDIO_BASE_URL", "http://localhost:1234/v1")
+				model_name = params.get("LMSTUDIO_MODEL", "")
+				if not model_name:
+					AdapterFactory._show_error(_("Select an LM Studio model first."))
+					return None
+				AdapterFactory._instance = LMStudioDevsAdapter(
+					base_url=base_url, model_name=model_name, parent=parent
+				)
 			else:
 				AdapterFactory._show_error(_("No AI selected or unknown AI."))
 				# raise ValueError(_("No AI selected or unknown AI."))
@@ -429,7 +439,7 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 		Handle response to return the json as dict
 		"""
 		system_prompt = self._load_base_prompt(
-			os.path.join(os.getcwd(), "AI", "json_gen_prompt.txt")
+			AI_DIR / "json_gen_prompt.txt"
 		)
 		try:
 			completion = self.api_client.beta.chat.completions.parse(
@@ -717,7 +727,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 			self._start_server()
 		try:
 			system_prompt = self._load_base_prompt(
-				os.path.join(os.getcwd(), "AI", "json_gen_prompt.txt")
+					AI_DIR / "json_gen_prompt.txt"
 			)
 			# Send the prompt to the Ollama server
 			# Sends the conversation history (if it exists) or the prompt
@@ -733,6 +743,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 		except Exception as e:
 			logging.exception(ERR_MSG)  # noqa: LOG015
 			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
+
 
 	@BuzyCursorNotification
 	def generate_output(self, prompt, system_prompt="", messages_history=None):
@@ -761,3 +772,71 @@ class OllamaDevsAdapter(DevsAIAdapter):
 		except Exception as e:
 			logging.exception(ERR_MSG)  # noqa: LOG015
 			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
+
+
+class LMStudioDevsAdapter(DevsAIAdapter):
+	"""Adapter for LM Studio's OpenAI-compatible local server."""
+
+	def __init__(self, base_url="http://localhost:1234/v1", model_name="", parent=None):
+		super().__init__(parent)
+		from openai import OpenAI
+
+		self.base_url = base_url.rstrip("/")
+		self.model_name = model_name.strip()
+		self.wxparent = parent
+		self.api_client = OpenAI(base_url=self.base_url, api_key="lm-studio")
+
+	def get_available_models(self):
+		"""Return the model IDs currently served by LM Studio."""
+		return [model.id for model in self.api_client.models.list().data]
+
+	def test_connection(self):
+		"""Verify that LM Studio is reachable and the selected model is served."""
+		models = self.get_available_models()
+		if not models:
+			raise RuntimeError("LM Studio is reachable, but no model is loaded.")
+		if self.model_name not in models:
+			raise RuntimeError(
+				f"Model '{self.model_name}' is not available. Loaded models: {', '.join(models)}"
+			)
+		return True
+
+	def generate_model_json(self, prompt):
+		system_prompt = self._load_base_prompt(AI_DIR / "json_gen_prompt.txt")
+		system_prompt += (
+			"\nReturn a single JSON object conforming to this schema:\n"
+			+ json.dumps(AtomicModel.model_json_schema())
+		)
+		try:
+			response = self.api_client.chat.completions.create(
+				model=self.model_name,
+				messages=[
+					{"role": "system", "content": system_prompt},
+					{"role": "user", "content": prompt},
+				],
+				response_format={"type": "json_object"},
+			)
+			content = response.choices[0].message.content
+			return AtomicModel.model_validate_json(content).model_dump()
+		except Exception as error:
+			logging.exception(ERR_MSG)  # noqa: LOG015
+			return _(f"An error occurred while generating the output: {error}")  # noqa: INT001
+
+	@BuzyCursorNotification
+	def generate_output(self, prompt="", system_prompt="", messages_history=None):
+		try:
+			if not prompt and not messages_history:
+				raise ValueError("Prompt cannot be empty")
+			response = self.api_client.chat.completions.create(
+				model=self.model_name,
+				messages=messages_history
+				if messages_history
+				else [
+					{"role": "system", "content": system_prompt},
+					{"role": "user", "content": prompt},
+				],
+			)
+			return response.choices[0].message.content
+		except Exception as error:
+			logging.exception(ERR_MSG)  # noqa: LOG015
+			return _(f"An error occurred while generating the output: {error}")  # noqa: INT001

@@ -79,7 +79,13 @@ USER_SETTINGS = {
 	"NB_HISTORY_UNDO": 50,
 	"OUT_DIR": "out",
 	"SELECTED_IA": "",
-	"PARAMS_IA": {"CHATGPT_API_KEY": "", "OLLAMA_PORT": "11434", "OLLAMA_MODEL": "mistral"},
+	"PARAMS_IA": {
+		"CHATGPT_API_KEY": "",
+		"OLLAMA_PORT": "11434",
+		"OLLAMA_MODEL": "mistral",
+		"LMSTUDIO_BASE_URL": "http://localhost:1234/v1",
+		"LMSTUDIO_MODEL": "",
+	},
 	"SELECTED_MESSAGE_FORMAT": "DEVSStreaming",  # For BrokerDEVS
 	"SELECTED_BROKER": "Kafka",  # For BrokerDEVS
 	"FONT_SIZE": 12,
