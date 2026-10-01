@@ -37,7 +37,7 @@ jobs:
       run: |
         conda install -y -c conda-forge \
           "python=${{ matrix.python-version }}" \
-          "wxpython=4.2.2"
+          "wxpython>=4.2.2"
 
     - name: Install dependencies with pip
       run: |
