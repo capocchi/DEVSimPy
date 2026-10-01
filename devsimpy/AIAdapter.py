@@ -46,6 +46,8 @@ import os
 import sys
 import urllib.request
 import gettext
+import pathlib
+
 from typing import Literal
 from pydantic import BaseModel
 
@@ -60,6 +62,7 @@ _ = gettext.gettext
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
 ERR_MSG = _("Error while generating output")
+AI_DIR = pathlib.Path(__file__).resolve().parent / "AI"
 
 ##########################################################
 ### Atomic Model JSON STRUCTURE
@@ -116,7 +119,7 @@ class DevsAIAdapter(ABC):
 	def __init__(self, parent=None):
 		logging.info("DevsAIAdapter initialized.")  # noqa: LOG015
 		self.base_prompt = self._load_base_prompt(
-			os.path.join(os.getcwd(), "AI", "DEVS_Explanation.txt")
+			AI_DIR / "DEVS_Explanation.txt"
 		)
 
 	def _load_base_prompt(self, file_path):
