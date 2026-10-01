@@ -48,7 +48,7 @@ import inspect
 
 from tempfile import gettempdir, TemporaryDirectory
 from wx import stc
-from AIAdapter import AdapterFactory
+from AIAdapter import AdapterFactory, ChatGPTDevsAdapter, LMStudioDevsAdapter, OllamaDevsAdapter
 
 from Decorators import redirectStdout
 from Utilities import path_to_module, printOnStatusBar, load_and_resize_image
@@ -1523,6 +1523,362 @@ class EditionNotebook(wx.Notebook):
 		self.GetCurrentPage().SelectAll()
 
 
+class AIEditorAssistantPanel(wx.Panel):
+	"""Bottom-docked Ask/Build assistant for the active code editor."""
+
+	def __init__(self, parent, editor_host=None):
+		super().__init__(parent)
+		self.editor_host = editor_host or parent
+		self._busy = False
+		self._stop_event = None
+		self._target_page = None
+		self._target_start = 0
+		self._target_end = 0
+		self._target_text = ""
+		self._whole_document = False
+		self._ask_messages = []
+		self._ask_context_signature = None
+
+		self.SetMinSize((-1, 100))
+		main_sizer = wx.BoxSizer(wx.VERTICAL)
+
+		header = wx.BoxSizer(wx.HORIZONTAL)
+		self.mode_choice = wx.RadioBox(
+			self,
+			label=_("Mode"),
+			choices=[_("Ask"), _("Build")],
+			majorDimension=2,
+			style=wx.RA_SPECIFY_COLS,
+		)
+		self.mode_choice.Bind(wx.EVT_RADIOBOX, self._on_mode_changed)
+		params = getattr(builtins, "PARAMS_IA", {})
+		self.mode_choice.SetSelection(1 if params.get("AI_EDITOR_MODE", 0) == 1 else 0)
+		header.Add(self.mode_choice, 0, wx.RIGHT | wx.EXPAND, 8)
+
+		self.prompt_input = wx.TextCtrl(
+			self, style=wx.TE_MULTILINE | wx.TE_PROCESS_ENTER, size=(-1, 55)
+		)
+		self.prompt_input.SetHint(_("Ask a question or describe the code change..."))
+		self.prompt_input.Bind(wx.EVT_TEXT, self._on_prompt_changed)
+		self.prompt_input.Bind(wx.EVT_KEY_DOWN, self._on_prompt_key_down)
+		header.Add(self.prompt_input, 1, wx.RIGHT | wx.EXPAND, 8)
+		self.clear_prompt_button = wx.Button(self, label=_("Clear"))
+		self.clear_prompt_button.Bind(wx.EVT_BUTTON, self._on_clear_prompt)
+		self.clear_prompt_button.Disable()
+		header.Add(self.clear_prompt_button, 0, wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, 5)
+
+		self.run_button = wx.Button(self, label=_("Ask"))
+		self.run_button.Bind(wx.EVT_BUTTON, self._on_run)
+		header.Add(self.run_button, 0, wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, 5)
+
+		self.stop_button = wx.Button(self, label=_("Stop"))
+		self.stop_button.Bind(wx.EVT_BUTTON, self._on_stop)
+		self.stop_button.Disable()
+		header.Add(self.stop_button, 0, wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, 5)
+
+		main_sizer.Add(header, 0, wx.ALL | wx.EXPAND, 8)
+
+		model_row = wx.BoxSizer(wx.HORIZONTAL)
+		self.model_label = wx.StaticText(self, label=_("Model:"))
+		model_row.Add(self.model_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 8)
+		self.model_choice = wx.ComboBox(
+			self,
+			wx.NewIdRef(),
+			value=self._get_current_model(),
+			choices=[self._get_current_model()] if self._get_current_model() else [],
+			style=wx.CB_READONLY,
+		)
+		self.model_choice.Bind(wx.EVT_COMBOBOX, self._on_model_changed)
+		model_row.Add(self.model_choice, 1, wx.RIGHT | wx.EXPAND, 8)
+		self.refresh_models_button = wx.BitmapButton(
+			self,
+			wx.NewIdRef(),
+			load_and_resize_image("db_refresh.png"),
+			size=(28, 28),
+		)
+		self.refresh_models_button.SetToolTip(_("Refresh available models"))
+		self.refresh_models_button.Bind(wx.EVT_BUTTON, self._on_refresh_models)
+		model_row.Add(self.refresh_models_button, 0)
+		main_sizer.Add(model_row, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, 8)
+
+		self.include_code_context = wx.CheckBox(self, label=_("Use active code as context"))
+		self.include_code_context.SetValue(True)
+		main_sizer.Add(self.include_code_context, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+
+		self.output = wx.TextCtrl(
+			self,
+			style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2,
+			size=(-1, 110),
+		)
+		main_sizer.Add(self.output, 1, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, 8)
+		self.SetSizer(main_sizer)
+		self._on_mode_changed(None)
+		self._update_model_controls()
+
+	@staticmethod
+	def _model_setting_key(provider):
+		return {
+			"ChatGPT": "CHATGPT_MODEL",
+			"Ollama": "OLLAMA_MODEL",
+			"LM Studio": "LMSTUDIO_MODEL",
+		}.get(provider)
+
+	def _get_current_model(self):
+		provider = getattr(builtins, "SELECTED_IA", "")
+		key = self._model_setting_key(provider)
+		defaults = {"ChatGPT": "gpt-4.1-nano", "Ollama": "mistral", "LM Studio": ""}
+		return getattr(builtins, "PARAMS_IA", {}).get(key, defaults.get(provider, "")) if key else ""
+
+	def _update_model_controls(self):
+		provider = getattr(builtins, "SELECTED_IA", "")
+		show_model = provider in ("ChatGPT", "Ollama", "LM Studio")
+		current_model = self._get_current_model()
+		self.model_choice.Clear()
+		if current_model:
+			self.model_choice.Append(current_model)
+			self.model_choice.SetValue(current_model)
+		self.model_label.Show(show_model)
+		self.model_choice.Show(show_model)
+		self.refresh_models_button.Show(show_model)
+		self.Layout()
+
+	def _on_refresh_models(self, event):
+		provider = getattr(builtins, "SELECTED_IA", "")
+		params = getattr(builtins, "PARAMS_IA", {})
+		try:
+			if provider == "ChatGPT":
+				adapter = ChatGPTDevsAdapter(
+					api_key=params.get("CHATGPT_API_KEY"), model_name=self._get_current_model()
+				)
+				models = adapter.get_available_models()
+			elif provider == "Ollama":
+				models = OllamaDevsAdapter.get_available_models()
+			elif provider == "LM Studio":
+				adapter = LMStudioDevsAdapter(
+					base_url=params.get("LMSTUDIO_BASE_URL", "http://localhost:1234/v1"),
+					model_name=self._get_current_model(),
+				)
+				models = adapter.get_available_models()
+			else:
+				return
+			if not models:
+				raise RuntimeError(_("No models are available from the selected provider."))
+			current_model = self._get_current_model()
+			self.model_choice.Clear()
+			self.model_choice.AppendItems(models)
+			self.model_choice.SetValue(current_model if current_model in models else models[0])
+			self._on_model_changed(None)
+		except Exception as error:
+			wx.MessageBox(
+				_(f"Could not refresh models:\n{error!s}"),  # noqa: INT001
+				_("Model Refresh Failed"),
+				wx.OK | wx.ICON_ERROR,
+			)
+
+	def _on_model_changed(self, event):
+		key = self._model_setting_key(getattr(builtins, "SELECTED_IA", ""))
+		if key is None:
+			return
+		model_name = self.model_choice.GetValue().strip()
+		params = getattr(builtins, "PARAMS_IA", {})
+		if params.get(key) != model_name:
+			params[key] = model_name
+			builtins.PARAMS_IA = params
+			AdapterFactory.reset_instance()
+			self._ask_context_signature = None
+
+	def _on_mode_changed(self, event):
+		ask_mode = self.mode_choice.GetSelection() == 0
+		params = getattr(builtins, "PARAMS_IA", {})
+		params["AI_EDITOR_MODE"] = 0 if ask_mode else 1
+		builtins.PARAMS_IA = params
+		self.run_button.SetLabel(_("Ask") if ask_mode else _("Build"))
+		self.include_code_context.Show(ask_mode)
+		self.Layout()
+
+	def _on_prompt_changed(self, event):
+		self.clear_prompt_button.Enable(
+			bool(self.prompt_input.GetValue()) and not self._busy
+		)
+		event.Skip()
+
+	def _on_prompt_key_down(self, event):
+		if event.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
+			if event.ShiftDown():
+				self.prompt_input.WriteText("\n")
+			else:
+				self._on_run(event)
+			return
+		event.Skip()
+
+	def _on_clear_prompt(self, event):
+		if self._busy:
+			return
+		self.prompt_input.Clear()
+		self.prompt_input.SetFocus()
+
+	def _on_run(self, event):
+		if self._busy:
+			return
+		prompt = self.prompt_input.GetValue().strip()
+		if not prompt:
+			return
+
+		selected_ia = getattr(builtins, "SELECTED_IA", "")
+		if not selected_ia:
+			self.output.SetValue(_("Select an AI provider in Preferences first."))
+			return
+
+		try:
+			page = self.editor_host.GetNoteBook().GetCurrentPage()
+			if page is None:
+				raise RuntimeError(_("Open a code file before using the AI assistant."))
+			start, end = page.GetSelection()
+			start, end = min(start, end), max(start, end)
+			self._whole_document = start == end
+			if self._whole_document:
+				start, end = 0, page.GetLength()
+				target_text = page.GetText()
+			else:
+				target_text = page.GetTextRange(start, end)
+			adapter = AdapterFactory.get_adapter_instance(
+				self.editor_host, getattr(builtins, "PARAMS_IA", {})
+			)
+			if adapter is None:
+				return
+		except Exception as error:
+			self.output.SetValue(str(error))
+			return
+
+		self._target_page = page
+		self._target_start = start
+		self._target_end = end
+		self._target_text = target_text
+		mode = self.mode_choice.GetSelection()
+		messages_history = None
+		if mode == 0:
+			include_context = self.include_code_context.GetValue()
+			context_signature = (
+				selected_ia,
+				self._get_current_model(),
+				target_text if include_context else "",
+			)
+			if context_signature != self._ask_context_signature:
+				self._ask_messages = []
+				self._ask_context_signature = context_signature
+				self.output.Clear()
+				if include_context and target_text:
+					self._ask_messages.append(
+						{
+							"role": "system",
+							"content": (
+								"Use the following active source code as context. Respond naturally to "
+								"the user's actual prompt; do not summarize or modify the code unless "
+								"asked. A greeting or general question should receive a normal response."
+								f"\n\n```python\n{target_text}\n```"
+							),
+						}
+					)
+			messages_history = self._ask_messages + [{"role": "user", "content": prompt}]
+			if self.output.GetLastPosition():
+				self.output.AppendText("\n\n")
+			self.output.AppendText(f"User: {prompt}\nAssistant: ")
+		else:
+			self.output.SetValue(_("Building code change...\n"))
+		self._stop_event = threading.Event()
+		self._busy = True
+		self.run_button.Disable()
+		self.clear_prompt_button.Disable()
+		self.stop_button.Enable()
+		self.model_choice.Disable()
+		self.refresh_models_button.Disable()
+		worker = threading.Thread(
+			target=self._run_request,
+			args=(adapter, prompt, target_text, mode, self._stop_event, messages_history),
+			daemon=True,
+		)
+		worker.start()
+
+	def _run_request(self, adapter, prompt, code, mode, stop_event, messages_history):
+		try:
+			system_prompt = ""
+			if mode == 0:
+				full_prompt = prompt
+			else:
+				full_prompt = adapter.modify_model_prompt(code, prompt)
+			result = adapter.generate_output(
+				full_prompt,
+				system_prompt=system_prompt,
+				messages_history=messages_history,
+				on_token=lambda token: wx.CallAfter(self._append_output, token),
+				stop_event=stop_event,
+			)
+			if mode == 1 and result:
+				result = adapter.parse_codeblock_marker(result)
+			wx.CallAfter(
+				self._finish_request,
+				result,
+				None,
+				mode,
+				stop_event.is_set(),
+				messages_history,
+			)
+		except Exception as error:
+			wx.CallAfter(
+				self._finish_request,
+				None,
+				error,
+				mode,
+				stop_event.is_set(),
+				messages_history,
+			)
+
+	def _append_output(self, text):
+		self.output.AppendText(text)
+		self.output.ShowPosition(self.output.GetLastPosition())
+
+	def _finish_request(self, result, error, mode, cancelled, messages_history):
+		self._busy = False
+		self.run_button.Enable(True)
+		self.clear_prompt_button.Enable(bool(self.prompt_input.GetValue()))
+		self.stop_button.Disable()
+		self.model_choice.Enable()
+		self.refresh_models_button.Enable()
+		if cancelled:
+			self.output.AppendText(_("\n\nRequest stopped; no code changes were applied."))
+		elif error is not None:
+			self.output.AppendText(_(f"\n\nRequest failed: {error}"))  # noqa: INT001
+		elif mode == 1 and result:
+			page = self._target_page
+			current_text = (
+				page.GetText()
+				if self._whole_document
+				else page.GetTextRange(self._target_start, self._target_end)
+			)
+			if current_text != self._target_text:
+				self.output.AppendText(
+					_("\n\nThe code changed while the request was running; the result was not applied.")
+				)
+				return
+			page.BeginUndoAction()
+			try:
+				page.SetTargetStart(self._target_start)
+				page.SetTargetEnd(self._target_end)
+				page.ReplaceTarget(result)
+			finally:
+				page.EndUndoAction()
+			self.output.AppendText(_("\n\nBuild applied to the code editor."))
+		elif mode == 0:
+			self._ask_messages = messages_history + [{"role": "assistant", "content": result or ""}]
+			self.output.AppendText("\n")
+
+	def _on_stop(self, event):
+		if self._busy and self._stop_event is not None:
+			self._stop_event.set()
+			self.stop_button.Disable()
+			self.output.AppendText(_("\n\nStop requested..."))
+
+
 ###------------------------------------------------------------
 class Base:
 	"""Editor Base class"""
@@ -1654,7 +2010,15 @@ class Base:
 		view = wx.Menu()
 
 		showStatusBar = wx.MenuItem(view, wx.NewIdRef(), _("&Statusbar"), _("Show statusBar"))
+		self.ai_assistant_item = wx.MenuItem(
+			view,
+			wx.NewIdRef(),
+			_("AI Assistant Panel"),
+			_("Show or hide the AI assistant panel"),
+			wx.ITEM_CHECK,
+		)
 		view.Append(showStatusBar)
+		view.Append(self.ai_assistant_item)
 
 		### ------------------------------------------------------------------
 
@@ -1684,12 +2048,35 @@ class Base:
 		self.Bind(wx.EVT_MENU, self.nb.OnCommentUnComment, id=uncomment.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnDelete, id=delete.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnSelectAll, id=select.GetId())
+		self.Bind(wx.EVT_MENU, self.ToggleAIAssistantPanel, id=self.ai_assistant_item.GetId())
 		self.Bind(wx.EVT_MENU, self.ToggleStatusBar, id=showStatusBar.GetId())
 		self.Bind(wx.EVT_MENU, self.OnAbout, id=about.GetId())
 		self.Bind(wx.EVT_FIND, self.OnFind)
 		self.Bind(wx.EVT_FIND_NEXT, self.OnFind)
 
 		return menubar
+
+	def ToggleAIAssistantPanel(self, event):
+		panel = getattr(self, "ai_assistant_panel", None)
+		splitter = getattr(self, "editor_splitter", None)
+		if panel is None or splitter is None:
+			return
+		if splitter.IsSplit():
+			splitter.Unsplit(panel)
+			panel.Hide()
+		else:
+			panel._update_model_controls()
+			panel.Show()
+			splitter.SetMinimumPaneSize(100)
+			splitter.SetSashGravity(0.72)
+			height = splitter.GetClientSize().height
+			sash_position = max(120, height - 260)
+			if not splitter.SplitHorizontally(self.nb, panel, sash_position):
+				panel.Hide()
+		self.ai_assistant_item.Check(splitter.IsSplit())
+		self.Layout()
+		if panel.IsShown():
+			panel.prompt_input.SetFocus()
 
 	def CreateTB(self, tb=None):
 		"""Create tool-bar."""
@@ -2249,7 +2636,14 @@ class EditorPanel(Base, wx.Panel):
 		sizer = wx.BoxSizer(wx.VERTICAL)
 
 		### create notebook
-		self.nb = EditionNotebook(self, wx.NewIdRef(), style=wx.CLIP_CHILDREN)
+		self.editor_splitter = wx.SplitterWindow(
+			self, wx.NewIdRef(), style=wx.SP_LIVE_UPDATE | wx.SP_3DSASH
+		)
+		self.nb = EditionNotebook(self.editor_splitter, wx.NewIdRef(), style=wx.CLIP_CHILDREN)
+		self.nb.parent = self
+		self.ai_assistant_panel = AIEditorAssistantPanel(self.editor_splitter, editor_host=self)
+		self.ai_assistant_panel.Hide()
+		self.editor_splitter.Initialize(self.nb)
 		### create juste for the bind of action (save,...) of the toolbar - Warning it must stay here !
 		self.menuBar = self.CreateMenu()
 		### create toolbar
@@ -2259,13 +2653,15 @@ class EditorPanel(Base, wx.Panel):
 
 		### add toolbar and notebook
 		sizer.Add(self.toolbar, 0, wx.ALL | wx.ALIGN_LEFT | wx.EXPAND)
-		sizer.Add(self.nb, 1, wx.EXPAND)
+		sizer.Add(self.editor_splitter, 1, wx.EXPAND)
 
 		### set sizer and layout of panel
 		self.SetSizer(sizer)
 		self.SetAutoLayout(True)
 
 		Base.__init__(self, parent, id, title)
+		if getattr(builtins, "PARAMS_IA", {}).get("SHOW_AI_PANEL_ON_STARTUP", False):
+			wx.CallAfter(self.ToggleAIAssistantPanel, None)
 
 
 ###------------------------------------------------------------
@@ -2292,7 +2688,14 @@ class EditorFrame(Base, wx.Frame):
 		)
 
 		### Create notebook
-		self.nb = EditionNotebook(self, wx.NewIdRef(), style=wx.CLIP_CHILDREN)
+		self.editor_splitter = wx.SplitterWindow(
+			self, wx.NewIdRef(), style=wx.SP_LIVE_UPDATE | wx.SP_3DSASH
+		)
+		self.nb = EditionNotebook(self.editor_splitter, wx.NewIdRef(), style=wx.CLIP_CHILDREN)
+		self.nb.parent = self
+		self.ai_assistant_panel = AIEditorAssistantPanel(self.editor_splitter, editor_host=self)
+		self.ai_assistant_panel.Hide()
+		self.editor_splitter.Initialize(self.nb)
 
 		### create menu, toolbar and statusbar for the frame
 		self.menuBar = self.CreateMenu()
@@ -2302,6 +2705,9 @@ class EditorFrame(Base, wx.Frame):
 		### create and set the tool bar
 		self.toolbar = self.CreateTB(self.CreateToolBar(wx.TB_HORIZONTAL | wx.NO_BORDER))
 		self.SetToolBar(self.toolbar)
+		sizer = wx.BoxSizer(wx.VERTICAL)
+		sizer.Add(self.editor_splitter, 1, wx.EXPAND)
+		self.SetSizer(sizer)
 
 		### binding
 		self.Bind(wx.EVT_CLOSE, self.QuitApplication)
@@ -2311,6 +2717,8 @@ class EditorFrame(Base, wx.Frame):
 		### just for windows
 		e = wx.SizeEvent(self.GetSize())
 		self.ProcessEvent(e)
+		if getattr(builtins, "PARAMS_IA", {}).get("SHOW_AI_PANEL_ON_STARTUP", False):
+			wx.CallAfter(self.ToggleAIAssistantPanel, None)
 
 
 class BlockBase:

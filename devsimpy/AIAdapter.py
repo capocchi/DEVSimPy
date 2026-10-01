@@ -375,7 +375,10 @@ class AdapterFactory:
 					return None
 					# raise ValueError(_("API key is required for ChatGPT."))
 				else:
-					AdapterFactory._instance = ChatGPTDevsAdapter(parent=parent, api_key=api_key)
+					model_name = params.get("CHATGPT_MODEL", "gpt-4.1-nano")
+					AdapterFactory._instance = ChatGPTDevsAdapter(
+						parent=parent, api_key=api_key, model_name=model_name
+					)
 
 			# Validation pour Ollama
 			elif selected_ia == "Ollama":
@@ -429,16 +432,26 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 	Adaptateur spécifique pour ChatGPT, utilisant GPT-4 pour générer des modèles DEVS.
 	"""
 
-	def __init__(self, api_key=None, parent=None):
+	def __init__(self, api_key=None, parent=None, model_name="gpt-4.1-nano"):
 		super().__init__()
 		# if not api_key:
 		# raise ValueError(_("API key is required for ChatGPT."))
 		self.api_key = api_key
+		self.model_name = model_name
 		self.wxparent = parent
 		from openai import OpenAI
 
 		self.api_client = OpenAI(api_key=self.api_key)  # Instancie le client API ici
 		logging.info(_("ChatGPTDevsAdapter initialized with provided API key."))  # noqa: LOG015
+
+	def get_available_models(self):
+		"""Return chat-capable OpenAI model IDs available to this account."""
+		prefixes = ("gpt-", "o1", "o3", "o4")
+		return [
+			model.id
+			for model in self.api_client.models.list().data
+			if model.id.startswith(prefixes)
+		]
 
 	def generate_model_json(self, prompt, on_token=None, stop_event=None):
 		"""Generate a json representing an atomic model based on user's natural language description.
@@ -454,7 +467,7 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 				+ json.dumps(AtomicModel.model_json_schema())
 			)
 			completion = self.api_client.chat.completions.create(
-				model="gpt-4.1-nano",
+				model=self.model_name,
 				messages=[
 					{"role": "system", "content": system_prompt},
 					{"role": "user", "content": prompt},
@@ -502,7 +515,7 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 
 			# Envoi de la requête à l'API
 			response = self.api_client.chat.completions.create(
-				model="gpt-4.1-nano",
+				model=self.model_name,
 				messages=messages_history
 				if messages_history
 				else [
@@ -585,7 +598,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 				logging.info(_("The Ollama server is already running."))  # noqa: LOG015
 
 			# Obtenir la liste des modèles téléchargés localement
-			self.local_model = self._get_models()
+			self.local_model = self.get_available_models()
 
 			# Téléchargement du modèle spécifié
 			self._ensure_model_downloaded()
@@ -690,7 +703,8 @@ class OllamaDevsAdapter(DevsAIAdapter):
 		logging.info("Starting the Ollama server...")  # noqa: LOG015
 		self._start_server()  # Start it again
 
-	def _get_models(self):
+	@staticmethod
+	def get_available_models():
 		# Commande pour lister les modèles disponibles localement
 		cmd = ["ollama", "list"]
 

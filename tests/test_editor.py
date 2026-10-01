@@ -7,6 +7,7 @@ Usage:
 
 from tempfile import gettempdir  
 import os
+import builtins
 
 from ApplicationController import TestApp
 
@@ -28,6 +29,18 @@ frame2 = GetEditor(None, -1, 'Test', file_type='test')
 frame2.AddEditPage("Hello world", fn)
 frame2.AddEditPage("Hello world", fn)
 frame2.SetPosition((200, 200))
+frame2.ai_assistant_panel.mode_choice.SetSelection(1)
+frame2.ai_assistant_panel._on_mode_changed(None)
+assert builtins.PARAMS_IA["AI_EDITOR_MODE"] == 1
+frame2.ai_assistant_panel.mode_choice.SetSelection(0)
+frame2.ai_assistant_panel._on_mode_changed(None)
+assert builtins.PARAMS_IA["AI_EDITOR_MODE"] == 0
+frame2.ToggleAIAssistantPanel(None)
+assert frame2.editor_splitter.IsSplit()
+assert frame2.ai_assistant_item.IsChecked()
+frame2.ToggleAIAssistantPanel(None)
+assert not frame2.editor_splitter.IsSplit()
+assert not frame2.ai_assistant_item.IsChecked()
 app2.RunTest(frame2)
 
 # frame3 = GetEditor(None, -1, 'Test3', None, file_type='block')

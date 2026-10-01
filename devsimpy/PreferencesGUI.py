@@ -2035,6 +2035,19 @@ class AIPanel(wx.Panel):
 
 		mainSizer.Add(self.configBox, 0, wx.EXPAND | wx.ALL, 10)
 
+		editor_settings = wx.StaticBoxSizer(wx.VERTICAL, self, _("Code Editor"))
+		self.show_ai_panel_on_startup = wx.CheckBox(
+			self, label=_("Show the AI assistant panel in the code editor by default")
+		)
+		self.show_ai_panel_on_startup.SetValue(
+			bool(getattr(builtins, "PARAMS_IA", {}).get("SHOW_AI_PANEL_ON_STARTUP", False))
+		)
+		self.show_ai_panel_on_startup.SetToolTip(
+			_("Open the resizable AI assistant panel automatically when a code editor opens")
+		)
+		editor_settings.Add(self.show_ai_panel_on_startup, 0, wx.ALL, 5)
+		mainSizer.Add(editor_settings, 0, wx.EXPAND | wx.ALL, 10)
+
 		# ============================================================
 		# Section 3: Status and Testing
 		# ============================================================
@@ -2245,7 +2258,7 @@ class AIPanel(wx.Panel):
 			)
 			models = adapter.get_available_models()
 			if not models:
-				raise RuntimeError(_("No models are loaded in LM Studio."))  # noqa: TRY002
+				raise RuntimeError(_("No models are loaded in LM Studio."))
 
 			current_model = self.lmstudio_model_choice.GetValue().strip()
 			self.lmstudio_model_choice.Clear()
@@ -2268,15 +2281,19 @@ class AIPanel(wx.Panel):
 
 		# Default parameters
 		builtins.PARAMS_IA.setdefault("CHATGPT_API_KEY", "")
+		builtins.PARAMS_IA.setdefault("CHATGPT_MODEL", "gpt-4.1-nano")
 		builtins.PARAMS_IA.setdefault("OLLAMA_PORT", "11434")
 		builtins.PARAMS_IA.setdefault("OLLAMA_HOST", "localhost")
 		builtins.PARAMS_IA.setdefault("OLLAMA_MODEL", "mistral")
 		builtins.PARAMS_IA.setdefault("LMSTUDIO_BASE_URL", "http://localhost:1234/v1")
 		builtins.PARAMS_IA.setdefault("LMSTUDIO_MODEL", "")
+		builtins.PARAMS_IA.setdefault("SHOW_AI_PANEL_ON_STARTUP", False)
+		builtins.PARAMS_IA.setdefault("AI_EDITOR_MODE", 0)
 
 	def OnApply(self, evt):
 		"""Apply and save current AI settings"""
 		old_ia = getattr(builtins, "SELECTED_IA", "")
+		old_show_ai_panel = builtins.PARAMS_IA.get("SHOW_AI_PANEL_ON_STARTUP", False)
 		self.SaveAISettings()
 		new_ia = getattr(builtins, "SELECTED_IA", "")
 
@@ -2285,6 +2302,8 @@ class AIPanel(wx.Panel):
 		if old_ia != new_ia:
 			provider_name = AIPanel.AI_PROVIDERS.get(new_ia, {}).get("name", _("None"))
 			changes.append(_("AI Provider: {}").format(provider_name))
+		if old_show_ai_panel != builtins.PARAMS_IA.get("SHOW_AI_PANEL_ON_STARTUP", False):
+			changes.append(_("Code editor AI panel startup setting updated"))
 
 		# Check configuration changes
 		if new_ia == "ChatGPT":
@@ -2316,6 +2335,7 @@ class AIPanel(wx.Panel):
 		# Update selected AI
 		if getattr(builtins, "SELECTED_IA", "") != selected_key:
 			builtins.SELECTED_IA = selected_key
+		builtins.PARAMS_IA["SHOW_AI_PANEL_ON_STARTUP"] = self.show_ai_panel_on_startup.GetValue()
 
 		# Update provider-specific settings
 		if selected_key == "ChatGPT":
