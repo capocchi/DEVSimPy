@@ -1839,6 +1839,13 @@ class AIPanel(wx.Panel):
 			"icon": wx.ART_HARDDISK,
 			"requires": ["Server Port"],
 		},
+		"LM Studio": {
+			"name": "LM Studio",
+			"description": _("Local LLM running through the LM Studio server"),
+			"url": "https://lmstudio.ai/",
+			"icon": wx.ART_HARDDISK,
+			"requires": ["Server URL", "Loaded model"],
+		},
 	}
 
 	def __init__(self, parent):
@@ -1983,7 +1990,63 @@ class AIPanel(wx.Panel):
 		self.ollama_panel.SetSizer(ollama_sizer)
 		self.configBox.Add(self.ollama_panel, 0, wx.EXPAND | wx.ALL, 5)
 
+		# LM Studio Configuration
+		self.lmstudio_panel = wx.Panel(self)
+		lmstudio_sizer = wx.BoxSizer(wx.VERTICAL)
+		lmstudio_grid = wx.FlexGridSizer(2, 2, 10, 10)
+		lmstudio_grid.AddGrowableCol(1, 1)
+
+		base_url_label = wx.StaticText(self.lmstudio_panel, label=_("Server URL:"))
+		self.lmstudio_url_ctrl = wx.TextCtrl(self.lmstudio_panel)
+		self.lmstudio_url_ctrl.SetValue(
+			getattr(builtins, "PARAMS_IA", {}).get(
+				"LMSTUDIO_BASE_URL", "http://localhost:1234/v1"
+			)
+		)
+		self.lmstudio_url_ctrl.SetToolTip(
+			_("OpenAI-compatible LM Studio API URL, usually http://localhost:1234/v1")
+		)
+		lmstudio_grid.Add(base_url_label, 0, wx.ALIGN_CENTER_VERTICAL)
+		lmstudio_grid.Add(self.lmstudio_url_ctrl, 1, wx.EXPAND)
+
+		model_label = wx.StaticText(self.lmstudio_panel, label=_("Model:"))
+		model_name = getattr(builtins, "PARAMS_IA", {}).get("LMSTUDIO_MODEL", "")
+		self.lmstudio_model_choice = wx.ComboBox(
+			self.lmstudio_panel,
+			wx.NewIdRef(),
+			value=model_name,
+			choices=[model_name] if model_name else [],
+			style=wx.CB_DROPDOWN,
+		)
+		self.lmstudio_model_choice.SetToolTip(
+			_("Select a model loaded in LM Studio or enter its model ID")
+		)
+		lmstudio_grid.Add(model_label, 0, wx.ALIGN_CENTER_VERTICAL)
+		lmstudio_grid.Add(self.lmstudio_model_choice, 1, wx.EXPAND)
+
+		lmstudio_sizer.Add(lmstudio_grid, 0, wx.EXPAND | wx.ALL, 5)
+		refresh_lmstudio_btn = wx.Button(
+			self.lmstudio_panel, wx.NewIdRef(), _("Refresh Models")
+		)
+		refresh_lmstudio_btn.Bind(wx.EVT_BUTTON, self.OnRefreshLMStudioModels)
+		lmstudio_sizer.Add(refresh_lmstudio_btn, 0, wx.ALL, 5)
+		self.lmstudio_panel.SetSizer(lmstudio_sizer)
+		self.configBox.Add(self.lmstudio_panel, 0, wx.EXPAND | wx.ALL, 5)
+
 		mainSizer.Add(self.configBox, 0, wx.EXPAND | wx.ALL, 10)
+
+		editor_settings = wx.StaticBoxSizer(wx.VERTICAL, self, _("Code Editor"))
+		self.show_ai_panel_on_startup = wx.CheckBox(
+			self, label=_("Show the AI assistant panel in the code editor by default")
+		)
+		self.show_ai_panel_on_startup.SetValue(
+			bool(getattr(builtins, "PARAMS_IA", {}).get("SHOW_AI_PANEL_ON_STARTUP", False))
+		)
+		self.show_ai_panel_on_startup.SetToolTip(
+			_("Open the resizable AI assistant panel automatically when a code editor opens")
+		)
+		editor_settings.Add(self.show_ai_panel_on_startup, 0, wx.ALL, 5)
+		mainSizer.Add(editor_settings, 0, wx.EXPAND | wx.ALL, 10)
 
 		# ============================================================
 		# Section 3: Status and Testing
@@ -2051,6 +2114,7 @@ class AIPanel(wx.Panel):
 		# Show/hide configuration panels
 		self.chatgpt_panel.Show(selected_key == "ChatGPT")
 		self.ollama_panel.Show(selected_key == "Ollama")
+		self.lmstudio_panel.Show(selected_key == "LM Studio")
 
 		# Show/hide buttons
 		has_selection = bool(selected_key)
@@ -2097,6 +2161,8 @@ class AIPanel(wx.Panel):
 			)
 
 			if adapter:
+				if self.selected_ia == "LM Studio":
+					adapter.test_connection()
 				self.status_indicator.SetLabel(_("Connected"))
 				self.status_indicator.SetForegroundColour(wx.Colour(0, 128, 0))
 
@@ -2182,6 +2248,31 @@ class AIPanel(wx.Panel):
 	def OnRefreshOllamaModels(self, event):
 		self.RefreshOllamaModelList()
 
+	def OnRefreshLMStudioModels(self, event):
+		try:
+			from AIAdapter import LMStudioDevsAdapter
+
+			adapter = LMStudioDevsAdapter(
+				base_url=self.lmstudio_url_ctrl.GetValue().strip(),
+				model_name=self.lmstudio_model_choice.GetValue().strip(),
+			)
+			models = adapter.get_available_models()
+			if not models:
+				raise RuntimeError(_("No models are loaded in LM Studio."))
+
+			current_model = self.lmstudio_model_choice.GetValue().strip()
+			self.lmstudio_model_choice.Clear()
+			self.lmstudio_model_choice.AppendItems(models)
+			self.lmstudio_model_choice.SetValue(
+				current_model if current_model in models else models[0]
+			)
+		except Exception as error:
+			wx.MessageBox(
+				_(f"Could not load LM Studio models:\n{error!s}"),  # noqa: INT001
+				_("LM Studio Connection Error"),
+				wx.OK | wx.ICON_ERROR,
+			)
+
 	def load_settings(self):
 		"""Load AI settings from builtins"""
 		# Initialize builtins with AI info
@@ -2190,13 +2281,19 @@ class AIPanel(wx.Panel):
 
 		# Default parameters
 		builtins.PARAMS_IA.setdefault("CHATGPT_API_KEY", "")
+		builtins.PARAMS_IA.setdefault("CHATGPT_MODEL", "gpt-4.1-nano")
 		builtins.PARAMS_IA.setdefault("OLLAMA_PORT", "11434")
 		builtins.PARAMS_IA.setdefault("OLLAMA_HOST", "localhost")
 		builtins.PARAMS_IA.setdefault("OLLAMA_MODEL", "mistral")
+		builtins.PARAMS_IA.setdefault("LMSTUDIO_BASE_URL", "http://localhost:1234/v1")
+		builtins.PARAMS_IA.setdefault("LMSTUDIO_MODEL", "")
+		builtins.PARAMS_IA.setdefault("SHOW_AI_PANEL_ON_STARTUP", False)
+		builtins.PARAMS_IA.setdefault("AI_EDITOR_MODE", 0)
 
 	def OnApply(self, evt):
 		"""Apply and save current AI settings"""
 		old_ia = getattr(builtins, "SELECTED_IA", "")
+		old_show_ai_panel = builtins.PARAMS_IA.get("SHOW_AI_PANEL_ON_STARTUP", False)
 		self.SaveAISettings()
 		new_ia = getattr(builtins, "SELECTED_IA", "")
 
@@ -2205,12 +2302,16 @@ class AIPanel(wx.Panel):
 		if old_ia != new_ia:
 			provider_name = AIPanel.AI_PROVIDERS.get(new_ia, {}).get("name", _("None"))
 			changes.append(_("AI Provider: {}").format(provider_name))
+		if old_show_ai_panel != builtins.PARAMS_IA.get("SHOW_AI_PANEL_ON_STARTUP", False):
+			changes.append(_("Code editor AI panel startup setting updated"))
 
 		# Check configuration changes
 		if new_ia == "ChatGPT":
 			changes.append(_("ChatGPT API Key updated"))
 		elif new_ia == "Ollama":
 			changes.append(_("Ollama configuration updated"))
+		elif new_ia == "LM Studio":
+			changes.append(_("LM Studio configuration updated"))
 
 		if changes:
 			msg = _("The following AI settings have been updated:\n\n")
@@ -2234,6 +2335,7 @@ class AIPanel(wx.Panel):
 		# Update selected AI
 		if getattr(builtins, "SELECTED_IA", "") != selected_key:
 			builtins.SELECTED_IA = selected_key
+		builtins.PARAMS_IA["SHOW_AI_PANEL_ON_STARTUP"] = self.show_ai_panel_on_startup.GetValue()
 
 		# Update provider-specific settings
 		if selected_key == "ChatGPT":
@@ -2254,6 +2356,18 @@ class AIPanel(wx.Panel):
 
 			if builtins.PARAMS_IA.get("OLLAMA_MODEL") != new_model:
 				builtins.PARAMS_IA["OLLAMA_MODEL"] = new_model
+
+		elif selected_key == "LM Studio":
+			new_base_url = self.lmstudio_url_ctrl.GetValue().strip()
+			new_model = self.lmstudio_model_choice.GetValue().strip()
+			settings_changed = (
+				builtins.PARAMS_IA.get("LMSTUDIO_BASE_URL") != new_base_url
+				or builtins.PARAMS_IA.get("LMSTUDIO_MODEL") != new_model
+			)
+			builtins.PARAMS_IA["LMSTUDIO_BASE_URL"] = new_base_url
+			builtins.PARAMS_IA["LMSTUDIO_MODEL"] = new_model
+			if settings_changed:
+				AdapterFactory.reset_instance()
 
 
 ########################################################################

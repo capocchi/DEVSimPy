@@ -13,6 +13,7 @@
 """
 
 import json
+import threading
 import wx
 import os
 
@@ -49,16 +50,19 @@ class AIPrompterDialog(wx.Dialog):
 
 		# generated JSON representing a newly created model
 		self.model_json = None
+		self._generation_active = False
+		self._stop_event = threading.Event()
 
 		self.__init_ui()
+		self.Bind(wx.EVT_CLOSE, self.on_close)
 		self.Center()
 
 	def __init_ui(self):
 		"""Initialize the user interface"""
 
 		# Taille optimale
-		self.SetSize((700, 600))
-		self.SetMinSize((650, 500))
+		self.SetSize((700, 720))
+		self.SetMinSize((650, 600))
 
 		panel = wx.Panel(self)
 		panel.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOW))
@@ -76,7 +80,23 @@ class AIPrompterDialog(wx.Dialog):
 		self.code_text.SetFont(font)
 
 		code_box.Add(self.code_text, proportion=1, flag=wx.ALL | wx.EXPAND, border=5)
-		main_sizer.Add(code_box, proportion=2, flag=wx.ALL | wx.EXPAND, border=15)
+		main_sizer.Add(code_box, proportion=2, flag=wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, border=15)
+
+		# --- Section Live AI Output ---
+		trace_box = wx.StaticBoxSizer(wx.VERTICAL, panel, _("Live AI Output"))
+		self.trace_text = wx.TextCtrl(
+			panel,
+			value="",
+			style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2,
+		)
+		self.trace_text.SetFont(font)
+		trace_box.Add(self.trace_text, proportion=1, flag=wx.ALL | wx.EXPAND, border=5)
+		main_sizer.Add(
+			trace_box,
+			proportion=1,
+			flag=wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND,
+			border=15,
+		)
 
 		# --- Section Prompt ---
 		prompt_box = wx.StaticBoxSizer(wx.VERTICAL, panel, _("AI Prompt"))
@@ -123,6 +143,12 @@ class AIPrompterDialog(wx.Dialog):
 		self.send_button.SetToolTip(_("Send the prompt to AI for processing"))
 		self.send_button.Enable(False)
 		button_sizer.Add(self.send_button, flag=wx.RIGHT, border=5)
+
+		self.stop_button = wx.Button(button_panel, label=_("Stop"), size=(80, 32))
+		self.stop_button.Bind(wx.EVT_BUTTON, self.on_stop_ai)
+		self.stop_button.SetToolTip(_("Stop the current generation"))
+		self.stop_button.Enable(False)
+		button_sizer.Add(self.stop_button, flag=wx.RIGHT, border=5)
 
 		# Bouton Insert/Replace ou Apply
 		if self.editor:
@@ -221,6 +247,10 @@ class AIPrompterDialog(wx.Dialog):
 	def on_prompt_input_change(self, event):
 		"""Fonction de rappel qui s'active lorsque l'utilisateur tape dans le champ de prompt."""
 
+		if self._generation_active:
+			self.send_button.Enable(False)
+			return
+
 		input_text = self.prompt_input.GetValue().strip()
 
 		# Activer/désactiver les boutons selon le texte d'entrée
@@ -263,51 +293,112 @@ class AIPrompterDialog(wx.Dialog):
 		self.Close()
 
 	def on_send_ai(self, event):
-		# Désactiver le bouton pendant le traitement
+		if self._generation_active:
+			return
+
+		prompt = self.prompt_input.GetValue()
+		code = self.code_text.GetValue()
+		self._generation_active = True
+		self._stop_event.clear()
 		self.send_button.Enable(False)
 		self.send_button.SetLabel(_("Processing..."))
+		self.stop_button.Enable(True)
+		self.insert_button.Enable(False)
+		self.cancel_button.Enable(False)
+		if hasattr(self, "download_json_button"):
+			self.download_json_button.Enable(False)
+		self.trace_text.SetValue(_("Starting request...\n"))
 
-		# Forcer le rafraîchissement de l'interface
-		wx.SafeYield()
+		self._generation_thread = threading.Thread(
+			target=self._generate_in_background,
+			args=(prompt, code),
+			daemon=True,
+		)
+		self._generation_thread.start()
 
+	def on_stop_ai(self, event):
+		if not self._generation_active or self._stop_event.is_set():
+			return
+		self._stop_event.set()
+		self.stop_button.Enable(False)
+		self.trace_text.AppendText(_("\nStop requested; waiting for the current response chunk...\n"))
+
+	def _generate_in_background(self, prompt, code):
+		model_json = None
+		stop_event = self._stop_event
 		try:
-			# Récupération du prompt et du code sélectionné
-			prompt = self.prompt_input.GetValue()
-			code = self.code_text.GetValue()
-
-			# Appel à l'IA via la méthode modify_model_part_prompt
+			on_token = lambda token: wx.CallAfter(self._append_trace, token)
 			if not self.editor:
-				self.model_json = self.adapter.generate_model_json(prompt)
-				modified_code = self.adapter.generate_model_code(self.model_json)
+				wx.CallAfter(self._append_trace, _("\nGenerating model specification...\n"))
+				model_json = self.adapter.generate_model_json(
+					prompt, on_token=on_token, stop_event=stop_event
+				)
+				if stop_event.is_set():
+					wx.CallAfter(self._finish_generation, None, None, None, True)
+					return
+				if not isinstance(model_json, dict):
+					raise RuntimeError(str(model_json))
+				wx.CallAfter(self._append_trace, _("\nGenerating model code...\n"))
+				modified_code = self.adapter.generate_model_code(
+					model_json, on_token=on_token, stop_event=stop_event
+				)
 			else:
 				full_prompt = self.adapter.modify_model_part_prompt(code, prompt)
-				modified_code = self.adapter.generate_output(full_prompt)
-
-			# Mise à jour de la zone de texte avec le code modifié
-			if modified_code:
-				self.code_text.SetValue(modified_code)
-				self.insert_button.Enable(True)
-				# Activate download json button if json created
-				if self.model_json:
-					self.download_json_button.Enable(True)
-			else:
-				wx.MessageBox(
-					_("No code was generated. Please try again with a different prompt."),
-					_("No Result"),
-					wx.OK | wx.ICON_WARNING,
+				wx.CallAfter(self._append_trace, _("\nGenerating code...\n"))
+				modified_code = self.adapter.generate_output(
+					full_prompt, on_token=on_token, stop_event=stop_event
 				)
+			if stop_event.is_set():
+				wx.CallAfter(self._finish_generation, None, None, None, True)
+			else:
+				wx.CallAfter(self._finish_generation, modified_code, model_json, None)
+		except Exception as error:
+			if stop_event.is_set():
+				wx.CallAfter(self._finish_generation, None, None, None, True)
+			else:
+				wx.CallAfter(self._finish_generation, None, model_json, error)
 
-		except Exception as e:
+	def _append_trace(self, text):
+		self.trace_text.AppendText(text)
+		self.trace_text.ShowPosition(self.trace_text.GetLastPosition())
+
+	def _finish_generation(self, modified_code, model_json, error, cancelled=False):
+		self._generation_active = False
+		self.send_button.SetLabel(_("Send to AI"))
+		self.send_button.Enable(bool(self.prompt_input.GetValue().strip()))
+		self.stop_button.Enable(False)
+		self.cancel_button.Enable(True)
+
+		if cancelled:
+			self.trace_text.AppendText(_("\nGeneration stopped. Partial output was not applied.\n"))
+		elif error is not None:
+			self.trace_text.AppendText(_("\nGeneration failed.\n"))
 			wx.MessageBox(
-				_("An error occurred while processing your request:\n{}").format(str(e)),
+				_("An error occurred while processing your request:\n{}").format(str(error)),
 				_("Error"),
 				wx.OK | wx.ICON_ERROR,
 			)
+		elif modified_code:
+			self.code_text.SetValue(modified_code)
+			self.insert_button.Enable(True)
+			if model_json is not None:
+				self.model_json = model_json
+				if hasattr(self, "download_json_button"):
+					self.download_json_button.Enable(True)
+			self.trace_text.AppendText(_("\nGeneration complete.\n"))
+		else:
+			self.trace_text.AppendText(_("\nNo code was generated.\n"))
+			wx.MessageBox(
+				_("No code was generated. Please try again with a different prompt."),
+				_("No Result"),
+				wx.OK | wx.ICON_WARNING,
+			)
 
-		finally:
-			# Réactiver le bouton
-			self.send_button.Enable(True)
-			self.send_button.SetLabel(_("Send to AI"))
+	def on_close(self, event):
+		if self._generation_active and event.CanVeto():
+			event.Veto()
+			return
+		event.Skip()
 
 	def on_download_json(self, event):
 		dlg = wx.FileDialog(

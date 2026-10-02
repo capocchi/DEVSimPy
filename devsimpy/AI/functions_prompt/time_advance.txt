@@ -1,10 +1,5 @@
-**Time Advance (`timeAdvance`):**
-   - Controls time advancement in the simulation by returning `self.getSigma()` for the time until the next transition.
+Generate only the atomic `timeAdvance(self)` method requested.
 
-**Example:**
-def timeAdvance(self):
-	''' DEVS Time Advance function '''
-	return self.getSigma()
+Return `self.getSigma()`. Sigma is the relative delay until the model's next internal event, not an absolute simulation timestamp. The current sigma is set by initPhase in __init__, holdIn, passivate, or passivateIn. INFINITY means the model is passive. Do not modify state or emit messages in timeAdvance.
 
-## Steps
-1. Unless the 'description' and 'parameters' fields are specified, you can just return the provided example.
+For a recurring generator, initPhase schedules the first period and intTransition schedules each subsequent period with holdIn. timeAdvance only reports that already-scheduled sigma; it does not itself create recurring events.

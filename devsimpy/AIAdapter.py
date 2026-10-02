@@ -46,10 +46,11 @@ import os
 import sys
 import urllib.request
 import gettext
+import pathlib
+
 from typing import Literal
 from pydantic import BaseModel
 
-from Decorators import BuzyCursorNotification
 from Decorators import cond_decorator
 from Decorators import ProgressNotification
 from Utilities import check_internet
@@ -60,6 +61,7 @@ _ = gettext.gettext
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
 ERR_MSG = _("Error while generating output")
+AI_DIR = pathlib.Path(__file__).resolve().parent / "AI"
 
 ##########################################################
 ### Atomic Model JSON STRUCTURE
@@ -116,7 +118,7 @@ class DevsAIAdapter(ABC):
 	def __init__(self, parent=None):
 		logging.info("DevsAIAdapter initialized.")  # noqa: LOG015
 		self.base_prompt = self._load_base_prompt(
-			os.path.join(os.getcwd(), "AI", "DEVS_Explanation.txt")
+			AI_DIR / "DEVS_Explanation.txt"
 		)
 
 	def _load_base_prompt(self, file_path):
@@ -221,13 +223,16 @@ class DevsAIAdapter(ABC):
 		"""
 		pass  # noqa: PIE790
 
-	def generate_model_code(self, model_json=None):
+	def generate_model_code(self, model_json=None, on_token=None, stop_event=None):
 		"""Generates code for an atomic model function by function, using a JSON representation of the atomic model. Use the chat history to simulate a conversation between the llm and the user.
 
 		The functions are : init (class init), intTransition, extTransition, outputFunction and timeAdvance()
 		"""
 		system_prompt = f"""You are an expert in DEVS modeling. You need to generate code for different functions of an atomic model.
 		All the information needed is in the json. The fields 'input_ports' and 'output_ports' refer to the number of ports.
+
+		Follow the DEVSimPy API and simulator contract below:
+		{self.base_prompt}
 
 		Use the 'specification' dictionary for basic informations on the model.
 		The user will tell you which function to generate, and will give you indications to follow. Only output code for the function asked, without any textual explanations.
@@ -253,8 +258,12 @@ class DevsAIAdapter(ABC):
 
 		# generates a response for every function
 		for function_name in json_fields_functions:
+			if stop_event is not None and stop_event.is_set():
+				break
+			if on_token is not None:
+				on_token(f"\n[{function_name}]\n")
 			function_guidelines = self._load_base_prompt(
-				os.path.join(os.getcwd(), "AI", "functions_prompt", f"{function_name}.txt")
+				AI_DIR / "functions_prompt" / f"{function_name}.txt"
 			)
 			user_prompt = f"""Generate code for the {function_name} function.
 			Use the following guidelines :
@@ -263,7 +272,9 @@ class DevsAIAdapter(ABC):
 			"""
 
 			messages_history.append({"role": "user", "content": user_prompt})
-			response = self.generate_output("", "", messages_history)
+			response = self.generate_output(
+				"", "", messages_history, on_token=on_token, stop_event=stop_event
+			)
 
 			# handle indentation and codeblock markers
 			response = self.parse_codeblock_marker(response)
@@ -273,12 +284,14 @@ class DevsAIAdapter(ABC):
 			messages_history.append({"role": "assistant", "content": response})
 
 			model_code += f"{response}\n"
+			if stop_event is not None and stop_event.is_set():
+				break
 		# check indentation in code before return
 		model_code = model_code.replace("    ", "\t")
 		return model_code
 
 	@abstractmethod
-	def generate_model_json(self, prompt):
+	def generate_model_json(self, prompt, on_token=None, stop_event=None):
 		"""Abstract method used to generate a json representing an atomic model. The json describes the model specifications (states, properties) and its behaviors.
 		Json generated with llm using structured outputs.
 
@@ -354,8 +367,9 @@ class AdapterFactory:
 		if AdapterFactory._instance is None:
 			# Récupère les paramètres d'API et de port de PARAMS_IA
 
-			api_key = params.get("CHATGPT_API_KEY") if params else None
-			port = params.get("OLLAMA_PORT") if params else None
+			params = params or {}
+			api_key = params.get("CHATGPT_API_KEY")
+			port = params.get("OLLAMA_PORT")
 
 			# Validation pour ChatGPT
 			if selected_ia == "ChatGPT":
@@ -364,7 +378,10 @@ class AdapterFactory:
 					return None
 					# raise ValueError(_("API key is required for ChatGPT."))
 				else:
-					AdapterFactory._instance = ChatGPTDevsAdapter(parent=parent, api_key=api_key)
+					model_name = params.get("CHATGPT_MODEL", "gpt-4.1-nano")
+					AdapterFactory._instance = ChatGPTDevsAdapter(
+						parent=parent, api_key=api_key, model_name=model_name
+					)
 
 			# Validation pour Ollama
 			elif selected_ia == "Ollama":
@@ -379,6 +396,15 @@ class AdapterFactory:
 					AdapterFactory._instance = OllamaDevsAdapter(
 						parent=parent, port=port, model_name=model_name
 					)
+			elif selected_ia == "LM Studio":
+				base_url = params.get("LMSTUDIO_BASE_URL", "http://localhost:1234/v1")
+				model_name = params.get("LMSTUDIO_MODEL", "")
+				if not model_name:
+					AdapterFactory._show_error(_("Select an LM Studio model first."))
+					return None
+				AdapterFactory._instance = LMStudioDevsAdapter(
+					base_url=base_url, model_name=model_name, parent=parent
+				)
 			else:
 				AdapterFactory._show_error(_("No AI selected or unknown AI."))
 				# raise ValueError(_("No AI selected or unknown AI."))
@@ -409,37 +435,66 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 	Adaptateur spécifique pour ChatGPT, utilisant GPT-4 pour générer des modèles DEVS.
 	"""
 
-	def __init__(self, api_key=None, parent=None):
+	def __init__(self, api_key=None, parent=None, model_name="gpt-4.1-nano"):
 		super().__init__()
 		# if not api_key:
 		# raise ValueError(_("API key is required for ChatGPT."))
 		self.api_key = api_key
+		self.model_name = model_name
 		self.wxparent = parent
 		from openai import OpenAI
 
 		self.api_client = OpenAI(api_key=self.api_key)  # Instancie le client API ici
 		logging.info(_("ChatGPTDevsAdapter initialized with provided API key."))  # noqa: LOG015
 
-	def generate_model_json(self, prompt):
+	def get_available_models(self):
+		"""Return chat-capable OpenAI model IDs available to this account."""
+		prefixes = ("gpt-", "o1", "o3", "o4")
+		return [
+			model.id
+			for model in self.api_client.models.list().data
+			if model.id.startswith(prefixes)
+		]
+
+	def generate_model_json(self, prompt, on_token=None, stop_event=None):
 		"""Generate a json representing an atomic model based on user's natural language description.
 		Use openai chat API with structured output.
 		Handle response to return the json as dict
 		"""
 		system_prompt = self._load_base_prompt(
-			os.path.join(os.getcwd(), "AI", "json_gen_prompt.txt")
+			AI_DIR / "json_gen_prompt.txt"
 		)
 		try:
-			completion = self.api_client.beta.chat.completions.parse(
-				model="gpt-4.1-nano",
+			system_prompt += (
+				"\nReturn a single JSON object conforming to this schema:\n"
+				+ json.dumps(AtomicModel.model_json_schema())
+			)
+			completion = self.api_client.chat.completions.create(
+				model=self.model_name,
 				messages=[
 					{"role": "system", "content": system_prompt},
 					{"role": "user", "content": prompt},
 				],
-				response_format=AtomicModel,
+				response_format={"type": "json_object"},
+				stream=on_token is not None or stop_event is not None,
 			)
-			response = completion.choices[0].message
-			if not response.refusal:
-				return response.parsed.model_dump()
+			if on_token is not None or stop_event is not None:
+				content_parts = []
+				for chunk in completion:
+					if stop_event is not None and stop_event.is_set():
+						completion.close()
+						break
+					if not chunk.choices:
+						continue
+					content = chunk.choices[0].delta.content
+					if content:
+						content_parts.append(content)
+						if on_token is not None:
+							on_token(content)
+				content = "".join(content_parts)
+			else:
+				content = completion.choices[0].message.content
+			return AtomicModel.model_validate_json(content).model_dump()
 		except ValueError as ve:
 			logging.exception(_("Validation error"))  # noqa: LOG015
 			return _(f"Validation error: {ve}")  # noqa: INT001
@@ -449,8 +504,9 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 			logging.exception(ERR_MSG)  # noqa: LOG015
 			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
 
-	@BuzyCursorNotification
-	def generate_output(self, prompt="", system_prompt="", messages_history=None):
+	def generate_output(
+		self, prompt="", system_prompt="", messages_history=None, on_token=None, stop_event=None
+	):
 		"""
 		Génère une sortie en utilisant l'API ChatGPT basée sur le prompt donné (génération unique) ou un historique de conversation.
 
@@ -462,14 +518,29 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 
 			# Envoi de la requête à l'API
 			response = self.api_client.chat.completions.create(
-				model="gpt-4.1-nano",
+				model=self.model_name,
 				messages=messages_history
 				if messages_history
 				else [
 					{"role": "system", "content": system_prompt},
 					{"role": "user", "content": prompt},
 				],
+				stream=on_token is not None or stop_event is not None,
 			)
+			if on_token is not None or stop_event is not None:
+				content_parts = []
+				for chunk in response:
+					if stop_event is not None and stop_event.is_set():
+						response.close()
+						break
+					if not chunk.choices:
+						continue
+					content = chunk.choices[0].delta.content
+					if content:
+						content_parts.append(content)
+						if on_token is not None:
+							on_token(content)
+				return "".join(content_parts)
 
 			# Validation de la réponse
 			if not hasattr(response, "choices") or not response.choices:
@@ -530,7 +601,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 				logging.info(_("The Ollama server is already running."))  # noqa: LOG015
 
 			# Obtenir la liste des modèles téléchargés localement
-			self.local_model = self._get_models()
+			self.local_model = self.get_available_models()
 
 			# Téléchargement du modèle spécifié
 			self._ensure_model_downloaded()
@@ -635,7 +706,8 @@ class OllamaDevsAdapter(DevsAIAdapter):
 		logging.info("Starting the Ollama server...")  # noqa: LOG015
 		self._start_server()  # Start it again
 
-	def _get_models(self):
+	@staticmethod
+	def get_available_models():
 		# Commande pour lister les modèles disponibles localement
 		cmd = ["ollama", "list"]
 
@@ -704,7 +776,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 				wx.CallAfter(wx.MessageBox, message, _("Information"), wx.ICON_INFORMATION)
 				logging.info(message)  # noqa: LOG015
 
-	def generate_model_json(self, prompt):
+	def generate_model_json(self, prompt, on_token=None, stop_event=None):
 		"""Generate a json representing an atomic model based on user's natural language description.
 		Use Ollama's API with structured output.
 		Handle response to return the json as dict
@@ -714,7 +786,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 			self._start_server()
 		try:
 			system_prompt = self._load_base_prompt(
-				os.path.join(os.getcwd(), "AI", "json_gen_prompt.txt")
+					AI_DIR / "json_gen_prompt.txt"
 			)
 			# Send the prompt to the Ollama server
 			# Sends the conversation history (if it exists) or the prompt
@@ -725,14 +797,31 @@ class OllamaDevsAdapter(DevsAIAdapter):
 					{"role": "user", "content": prompt},
 				],
 				format=AtomicModel.model_json_schema(),
+				stream=on_token is not None or stop_event is not None,
 			)
-			return json.loads(response.message.content)
+			if on_token is not None or stop_event is not None:
+				content_parts = []
+				for chunk in response:
+					if stop_event is not None and stop_event.is_set():
+						response.close()
+						break
+					content = chunk["message"]["content"]
+					if content:
+						content_parts.append(content)
+						if on_token is not None:
+							on_token(content)
+				content = "".join(content_parts)
+			else:
+				content = response["message"]["content"]
+			return json.loads(content)
 		except Exception as e:
 			logging.exception(ERR_MSG)  # noqa: LOG015
 			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
 
-	@BuzyCursorNotification
-	def generate_output(self, prompt, system_prompt="", messages_history=None):
+
+	def generate_output(
+		self, prompt, system_prompt="", messages_history=None, on_token=None, stop_event=None
+	):
 		"""
 		Génère une sortie en utilisant l'API Ollama basée sur le prompt donné.
 		Vérifie d'abord si le serveur est en cours d'exécution, et le démarre si nécessaire.
@@ -753,8 +842,121 @@ class OllamaDevsAdapter(DevsAIAdapter):
 					{"role": "system", "content": system_prompt},
 					{"role": "user", "content": prompt},
 				],
+				stream=on_token is not None or stop_event is not None,
 			)
+			if on_token is not None or stop_event is not None:
+				content_parts = []
+				for chunk in response:
+					if stop_event is not None and stop_event.is_set():
+						response.close()
+						break
+					content = chunk["message"]["content"]
+					if content:
+						content_parts.append(content)
+						if on_token is not None:
+							on_token(content)
+				return "".join(content_parts)
 			return response["message"]["content"]
 		except Exception as e:
 			logging.exception(ERR_MSG)  # noqa: LOG015
 			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
+
+
+class LMStudioDevsAdapter(DevsAIAdapter):
+	"""Adapter for LM Studio's OpenAI-compatible local server."""
+
+	def __init__(self, base_url="http://localhost:1234/v1", model_name="", parent=None):
+		super().__init__(parent)
+		from openai import OpenAI
+
+		self.base_url = base_url.rstrip("/")
+		self.model_name = model_name.strip()
+		self.wxparent = parent
+		self.api_client = OpenAI(base_url=self.base_url, api_key="lm-studio")
+
+	def get_available_models(self):
+		"""Return the model IDs currently served by LM Studio."""
+		return [model.id for model in self.api_client.models.list().data]
+
+	def test_connection(self):
+		"""Verify that LM Studio is reachable and the selected model is served."""
+		models = self.get_available_models()
+		if not models:
+			raise RuntimeError("LM Studio is reachable, but no model is loaded.")
+		if self.model_name not in models:
+			raise RuntimeError(
+				f"Model '{self.model_name}' is not available. Loaded models: {', '.join(models)}"
+			)
+		return True
+
+	def generate_model_json(self, prompt, on_token=None, stop_event=None):
+		system_prompt = self._load_base_prompt(AI_DIR / "json_gen_prompt.txt")
+		system_prompt += (
+			"\nReturn a single JSON object conforming to this schema:\n"
+			+ json.dumps(AtomicModel.model_json_schema())
+		)
+		try:
+			response = self.api_client.chat.completions.create(
+				model=self.model_name,
+				messages=[
+					{"role": "system", "content": system_prompt},
+					{"role": "user", "content": prompt},
+				],
+				response_format={"type": "json_object"},
+				stream=on_token is not None or stop_event is not None,
+			)
+			if on_token is not None or stop_event is not None:
+				content_parts = []
+				for chunk in response:
+					if stop_event is not None and stop_event.is_set():
+						response.close()
+						break
+					if not chunk.choices:
+						continue
+					content = chunk.choices[0].delta.content
+					if content:
+						content_parts.append(content)
+						if on_token is not None:
+							on_token(content)
+				content = "".join(content_parts)
+			else:
+				content = response.choices[0].message.content
+			return AtomicModel.model_validate_json(content).model_dump()
+		except Exception as error:
+			logging.exception(ERR_MSG)  # noqa: LOG015
+			return _(f"An error occurred while generating the output: {error}")  # noqa: INT001
+
+	def generate_output(
+		self, prompt="", system_prompt="", messages_history=None, on_token=None, stop_event=None
+	):
+		try:
+			if not prompt and not messages_history:
+				raise ValueError("Prompt cannot be empty")
+			response = self.api_client.chat.completions.create(
+				model=self.model_name,
+				messages=messages_history
+				if messages_history
+				else [
+					{"role": "system", "content": system_prompt},
+					{"role": "user", "content": prompt},
+				],
+				stream=on_token is not None or stop_event is not None,
+			)
+			if on_token is not None or stop_event is not None:
+				content_parts = []
+				for chunk in response:
+					if stop_event is not None and stop_event.is_set():
+						response.close()
+						break
+					if not chunk.choices:
+						continue
+					content = chunk.choices[0].delta.content
+					if content:
+						content_parts.append(content)
+						if on_token is not None:
+							on_token(content)
+				return "".join(content_parts)
+			return response.choices[0].message.content
+		except Exception as error:
+			logging.exception(ERR_MSG)  # noqa: LOG015
+			return _(f"An error occurred while generating the output: {error}")  # noqa: INT001
