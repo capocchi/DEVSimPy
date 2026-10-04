@@ -16,87 +16,109 @@
 <!-- | **Docs**  | ![Docs](https://img.shields.io/readthedocs/domdf-wxpython-tools/latest?logo=read-the-docs) [![Docs Check](https://github.com/domdfcoding/domdf_wxpython_tools/workflows/Docs%20Check/badge.svg)](https://github.com/domdfcoding/domdf_wxpython_tools/actions?query=workflow%3A%22Docs+Check%22) | -->
 
 ## What is DEVSimPy?
-DEVSimPy is an open-source framework (GPL v3) designed for **modeling and simulating discrete event systems (DEVS)** with a graphical user interface. Developed in Python with [wxPython](http://www.wxpython.org), it simplifies interaction with **PyDEVS** and **PyPDEVS** models.
 
-### Key Features 🚀
-| Feature               | Description |
-|----------------------|-------------|
-| **Graphical Modeling** | Design, save, and export DEVS models easily. |
-| **Simulation & Analysis** | Run, suspend, and analyze simulations in real-time. |
-| **Code Editing** | Modify DEVS models on the fly. |
-| **Model Libraries** | Import/export libraries for domain-specific applications. |
-| **Command-Line Execution** | Run simulations via CLI with `devsimpy-nogui.py`. |
-| **Plugin System** | Extend functionality with custom plugins. |
-| **YAML Export** | Generate YAML models for [DEVSimPy-mob](https://github.com/capocchi/DEVSimPy_mob). |
-| **REST API** | Enable remote simulation execution via [DEVSimPy-REST](https://github.com/capocchi/DEVSimPy_rest). |
+> A Python-based GUI framework for designing, simulating, and analyzing **Discrete Event Systems (DEVS)** models.
 
----
+**DEVSimPy** (Discrete Event System Simulation in Python) is a free, open-source framework (**GPL v3 license**) for **modeling, designing, and simulating discrete event systems (DEVS)** with an intuitive graphical user interface. Built in **Python** using **[wxPython](http://www.wxpython.org)**, DEVSimPy serves as the bridge between human-friendly visual modeling and powerful DEVS simulation engines like **PyDEVS** and **PyPDEVS**.
 
-## Installation
-### Requirements
-- **Python 3.10+**
-- **wxPython 4.0+**
-- **SciPy & NumPy** (for spectrum analysis, optional)
+### What is DEVS?
 
-### From PIP
+**DEVS** (Discrete Event System Specification) is a formal framework for modeling complex systems where state changes occur at discrete time points. It's widely used in:
+
+- **Healthcare**: Patient flow, hospital operations
+- **Manufacturing**: Production lines, supply chains
+- **Transportation**: Traffic networks, logistics
+- **Computer Science**: Networks, distributed systems
+
+### Why DEVSimPy Exists
+
+Traditional DEVS tools have a steep learning curve, lack visual feedback, and offer limited accessibility. DEVSimPy changes this by:
+
+- **Visual Modeling**: Transform abstract DEVS notation into intuitive graphical representations
+- **Real-Time Analysis**: Monitor system behavior as simulations unfold
+- **Interactive Workflow**: See immediate results of modeling choices
+- **Python Power**: Leverage Python's simplicity while maintaining rigorous mathematical foundations
+
+
+### Who Is It For?
+
+- **Researchers** who need to compare multiple parameter configurations
+- **Educators** teaching discrete event systems and system dynamics  
+- **Engineers** modeling complex systems (healthcare, logistics, manufacturing)
+- **Students** learning DEVS concepts through visual tools
+
+### Key Features
+
+| Feature | What It Enables |
+|---------|-----------------|
+| **Graphical Canvas** | Drag-and-drop design of DEVS models with real-time visualization |
+| **Simulation Control** | Start, pause, resume simulations with speed adjustment |
+| **Live Metrics Panel** | Watch system states, timers, and events during execution |
+| **Model Export** | Generate YAML files for multi-agent extensions (DEVSimPy-mob) |
+| **Plugin System** | Extend functionality with custom modules |
+| **CLI Execution** | Run simulations via command line (`devsimpy-nogui.py`) |
+| **AI Model Generation** | Auto-generate DEVS models from text descriptions |
+| **Kafka Integration** | Connect to streaming frameworks for distributed simulation |
+| **DEVS Standard Compliant** | Full OMG-DEVS compatibility for tool interoperability |
+
+### Ecosystem & Extensions
+
+DEVSimPy is part of a growing DEVS ecosystem:
+- **[DEVSimPy-mob](https://github.com/capocchi/DEVSimPy_mob)** - Multi-agent extensions via YAML export
+- **[DEVSimPy-rest](https://github.com/capocchi/DEVSimPy_rest)** - REST API for remote simulation execution
+- **[Plugin System](./plugins/)** - Extend functionality with custom modules
+
+### Installation Quick Start
+
+#### From PyPI (Recommended for Users)
 ```sh
-$ pip install devsimpy
-```
-and to start:
-```sh
-$ devsimpy
+pip install devsimpy
+devsimpy
 ```
 
-### From Repo (for dev)
+#### From Source (For Developers)
 ```sh
-$ git clone --recurse-submodules -b version-5.1 --depth=1 https://github.com/capocchi/DEVSimPy.git
-$ git fetch --unshallow
-$ pip install -r requirements.txt
-```
-and to start:
-```sh
-$ python devsimpy.py
-```
-or for macOS user:
-```sh
-$ pythonw devsimpy.py  # Required due to wxPython dependencies
+git clone --recurse-submodules -b version-5.1 --depth=1 https://github.com/capocchi/DEVSimPy.git
+git fetch --unshallow
+pip install -r requirements.txt
+python devsimpy.py
 ```
 
-### Alternative Installation Methods
+#### Alternative Installation Methods
 - **Conda Environment**: Use the [`conda_devsimpy_env.yml`](https://github.com/capocchi/DEVSimPy-site/raw/gh-pages/conda_devsimpy_env.yml) file.
 - **Portable Version**: Use [Portable Python](http://portablepython.com) with [PyScripter](https://sourceforge.net/projects/pyscripter/).
 - **Virtual Machine**: Download a preconfigured **XUbuntu 19.10 VM** with DEVSimPy [here](https://mycore.core-cloud.net/index.php/s/2EHfgPwJk6HIEHH) (Login: `devsimpy-user/devsimpy`).
 
----
+> **Note**: Python 3.10+ and wxPython 4.0+ are required for core functionality. SciPy & NumPy are optional for advanced spectrum analysis features.
 
-## Command-Line Usage
-Execute DEVSimPy models without the GUI:
+### 🔧 Command-Line Usage (No GUI)
+
+Execute DEVSimPy models without the GUI interface:
+
 ```sh
-$ python devsimpy-nogui.py test.dsp -sim 10 -kernel pdevs
-```
-or 
-```sh
-$ python devsimpy.py --nogui test.dsp -sim 10 -kernel pdevs
-```
-For PyDEVS kernel:
-```sh
-$ python devsimpy-nogui.py test.dsp -kernel PyDEVS 10
-```
-Check CLI options:
-```sh
-$ python devsimpy-nogui.py -h
+# Run with PyDEVS kernel
+python devsimpy-nogui.py test.dsp -sim 10 -kernel pdevs
+
+# Or use explicit kernel name
+python devsimpy-nogui.py test.dsp -kernel PyDEVS 10
+
+# For Python script entry point
+python devsimpy.py --nogui test.dsp -sim 10 -kernel pdevs
+
+# Check all options
+python devsimpy-nogui.py -h
 ```
 
----
+> **Tip**: Use `.dsp` files as input (DEVS model format). Replace `test.dsp` with your model filename.
 
-## Documentation 📖
+## 📖 Documentation
 - **[DEVSimPy User Guide v2.8 (French)](http://portailweb.universita.corsica/stockage_public/portail/baaaaaes/files/DEVSimPy_guide_utilisateur.pdf)**
 - **[S. Toma Ph.D. Thesis (English)](https://hal.archives-ouvertes.fr/tel-01141844/document)** *(Winner of the 2014 DEVS PhD Dissertation Award)*
 - **[Technical Report (Polish)](http://portailweb.universita.corsica/stockage_public/portail/baaaaaes/files/report_Cezary.pdf)**
 
 ---
 
-## Citing DEVSimPy 📌
+## Citing DEVSimPy
 If you use DEVSimPy in your research, cite it using:
 ```bibtex
 @misc{capocchi2019devsimpy,
@@ -122,14 +144,23 @@ If you use DEVSimPy in your research, cite it using:
 
 ---
 
-## Videos & Resources 🎥
-- **[YouTube](https://www.youtube.com/results?search_query=devsimpy)**
-- **[Personal Website](https://capocchi-l.universita.corsica/)**
+## Videos & Resources
 
-For extensions, see **[this repository](https://github.com/jscott-thompson/DEVSimPy)**.
+- **[YouTube](https://www.youtube.com/results?search_query=devsimpy)** - Tutorials and demonstrations
+- **[Personal Website](https://capocchi-l.universita.corsica/)** - Project information and news
+
+**Extensions & Related Projects:**
+- **[DEVSimPy-mob](https://github.com/capocchi/DEVSimPy_mob)** - Multi-agent extensions
+- **[DEVSimPy-rest](https://github.com/capocchi/DEVSimPy_rest)** - REST API server
+- **[Legacy Extensions](https://github.com/jscott-thompson/DEVSimPy)** - Community contributions
 
 ---
 
-## Contributions & Feedback 💡
+## Contributions & Feedback
+
 We welcome **contributions and feedback**! Feel free to submit issues, pull requests, or join discussions to help improve DEVSimPy. 🚀
+
+---
+
+*Welcome to the DEVSimPy community!*
 
