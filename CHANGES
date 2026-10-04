@@ -1,3 +1,10 @@
+v6.2 -- AI Code Generation Enhancements
+  * Implement strict class naming preservation rule during AI code generation
+    (class names must match graphical component labels exactly - see CLASSES-NAMING.md)
+  * Add comprehensive documentation in memory-bank/CLASSES-NAMING.md
+
+v6.1 -- Undo/Redo
+
 v6.1 -- Undo/Redo
   * Add an Edit menu with Undo (Ctrl+Z) and Redo (Ctrl+Y) items
     (devsimpy/Menu.py) wired to the canvas history.

@@ -43,6 +43,7 @@
 - [ ] Multi-window workspace support (designated "future feature")
 - [ ] AI Sessions management
 - [ ] System Entity Strucutre integration
+- [ ] IA agent in charge to manage code, analyse simulation output of atomic model with persistente memory 
 
 ---
 
@@ -145,6 +146,11 @@ if TYPE_CHECKING:
 - #123: Canvas rendering flickers on Windows with multiple monitors
 - #127: Simulation timer drifts over long runs (>1 hour)
 - #135: Plugin hot-reload doesn't preserve state
+### Q4 2026 Goals
+
+- **Release DEVSimPy v6.2** with Full AI Agent code generation capabilities
+  - Implement Class Naming Preservation Rule: Never change class names from graphical DEVS model components during AI code generation (see [`memory-bank/CLASSES-NAMING.md`](./memory-bank/CLASSES-NAMING.md))
+  - Rule applies ONLY to `DomainBehavior`/`DomainStructure` subclasses (DEVS models), NOT wxPython GUI components
 
 ---
 
@@ -153,6 +159,11 @@ if TYPE_CHECKING:
 ### Q4 2026 Goals
 
 - Release DEVSimPy v5.2 with Full AI Agent code generation compabilty
+
+  152 | ### Q4 2026 Goals
+153 | 
+154 | - Release DEVSimPy v5.2 with Full AI Agent code generation compabilty
+155 | - **Implement Class Naming Preservation Rule**: Never change class names from graphical components during AI code generation (see `CLASSES-NAMING.md`)
 
 ---
 

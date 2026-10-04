@@ -1840,12 +1840,20 @@ class AIEditorAssistantPanel(wx.Panel):
 		self.output.ShowPosition(self.output.GetLastPosition())
 
 	def _finish_request(self, result, error, mode, cancelled, messages_history):
-		self._busy = False
-		self.run_button.Enable(True)
-		self.clear_prompt_button.Enable(bool(self.prompt_input.GetValue()))
-		self.stop_button.Disable()
-		self.model_choice.Enable()
-		self.refresh_models_button.Enable()
+		# Check if the panel is still valid before updating controls
+		if not self.IsShown():
+			return  # Panel has been destroyed or hidden; skip button updates
+		
+		try:
+			self._busy = False
+			self.run_button.Enable(True)
+			self.clear_prompt_button.Enable(bool(self.prompt_input.GetValue()))
+			self.stop_button.Disable()
+			self.model_choice.Enable()
+			self.refresh_models_button.Enable()
+		except Exception as e:
+			# Silently ignore errors when updating controls - the window may be closing
+			pass
 		if cancelled:
 			self.output.AppendText(_("\n\nRequest stopped; no code changes were applied."))
 		elif error is not None:
