@@ -861,7 +861,11 @@ class OllamaDevsAdapter(DevsAIAdapter):
 			logging.exception(ERR_MSG)  # noqa: LOG015
 			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
 
-
+##########################################################
+###
+### LM Studio
+###
+##########################################################
 class LMStudioDevsAdapter(DevsAIAdapter):
 	"""Adapter for LM Studio's OpenAI-compatible local server."""
 
