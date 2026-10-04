@@ -93,7 +93,6 @@ $RECYCLE.BIN/
 local.properties
 *.pfx
 *.publishsettings
-.clinerules/local/
 
 #################
 # OpenCode
