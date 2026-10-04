@@ -153,7 +153,7 @@ class DropTarget(wx.DropTarget):
 						msg = _("%s model Added!") % (str(m.label)).strip()
 						Utilities.PyBuzyInfo(msg, 2)
 
-						sys.stdout.write(_("Adding DEVSimPy model: \n").strip())
+						sys.stdout.write(_("Adding DEVSimPy model: \n"))
 						sys.stdout.write(repr(m))
 
 						### DetachedFrame avoided
@@ -189,10 +189,10 @@ class DropTarget(wx.DropTarget):
 					# Set the Font dynamically
 					block.dynamicFont(wx.ClientDC(self.canvas))
 
-					sys.stdout.write(_("Adding DEVSimPy model: \n").strip())
+					sys.stdout.write(_("Adding DEVSimPy model: \n"))
 					sys.stdout.write(repr(block))
 				else:
-					sys.stdout.write(_("ERROR: DEVSimPy model not added.\n").strip())
+					sys.stdout.write(_("ERROR: DEVSimPy model not added.\n"))
 
 			return d
 

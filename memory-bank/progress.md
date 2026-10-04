@@ -1,3 +1,16 @@
+### **Completed Tasks (Q4 2025 - Oct 2026):**
+- [x] Implemented strict class naming preservation rule (DEVS models only)
+- [x] Updated `memory-bank/CLASSES-NAMING.md` with comprehensive guidelines (**217 lines**, complete documentation)
+- [x] Added warnings: "**CRITICAL**" constraint in `AGENTS.md`
+- [x] Created `memory-bank/CLASSES-NAMING.md` at root level for immediate access
+- [x] Updated `systemPatterns.md` with corrected rule scope (DEVS models only)
+- [x] Updated `activeContext.md` with v6.2 goals and correct class naming references
+
+### **Completed Tasks (Q4 2025 - Oct 2026):**
+- [x] Implemented strict class naming preservation rule (DEVS models only)
+- [x] Updated `memory-bank/CLASSES-NAMING.md` with comprehensive guidelines (**217 lines**, complete documentation)
+- [x] Added warnings: "**CRITICAL**" constraint in `AGENTS.md`
+- [x] Created `memory-bank/CLASSES-NAMING.md` at root level for immediate access
 # DEVSimPy Progress Tracker
 
 ## What Works (Achieved Goals)
@@ -152,6 +165,11 @@
 ---
 
 ## Upcoming Milestones
+
+
+### Important AI Coding Rules Implemented
+- **Class Naming Preservation Rule**: AI code generation MUST preserve the exact class name from graphical components without modification (see `CLASSES-NAMING.md`)
+- Never change, rename, or modify class names during AI code generation unless explicitly requested by user
 
 ### Q4 2026 Objectives
 

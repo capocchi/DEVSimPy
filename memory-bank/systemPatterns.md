@@ -73,6 +73,14 @@ class DevSimPyPlugin(BasePlugin):
 ### 5. Event Loop Integration
 **Challenge**: Balancing simulation timing with GUI responsiveness  
 **Solution**: Separate thread pools - main wxPython thread for UI events, background worker for simulation steps, results pushed via wx.PostEvent()
+### 5. Event Loop Integration
+**Challenge**: Balancing simulation timing with GUI responsiveness  
+**Solution**: Separate thread pools - main wxPython thread for UI events, background worker for simulation steps, results pushed via wx.PostEvent()
+
+### 6. Class Naming Preservation (AI Code Generation)
+**Rule**: When generating DEVS model code from graphical components, class names MUST match the diagram labels EXACTLY for `DomainBehavior` and `DomainStructure` subclasses (case-sensitive). **This rule applies ONLY to DEVS model classes inheriting from `DomainBehavior` (atomic models) or `DomainStructure` (coupled models)**, not to wxPython GUI components or controllers. See [`memory-bank/CLASSES-NAMING.md`](./memory-bank/CLASSES-NAMING.md) for full guidelines.  
+**Rationale**: Ensures consistency with tests, imports, IDE features, and user expectations.
+
 
 ---
 
@@ -82,6 +90,7 @@ class DevSimPyPlugin(BasePlugin):
 2. **Observer Pattern**: Any component can subscribe to simulation events
 3. **Strategy Pattern for Kernels**: Easy switching between PyDEVS and PyPDEVS backends
 4. **Factory Pattern for Component Creation**: Map of component types to creation functions
+5. **Mixins**: Mixins are used to extends functionnalities of classes
 
 ---
 

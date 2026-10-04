@@ -111,7 +111,7 @@ python devsimpy-nogui.py -h
 
 > **Tip**: Use `.dsp` files as input (DEVS model format). Replace `test.dsp` with your model filename.
 
-## 📖 Documentation
+## Documentation
 - **[DEVSimPy User Guide v2.8 (French)](http://portailweb.universita.corsica/stockage_public/portail/baaaaaes/files/DEVSimPy_guide_utilisateur.pdf)**
 - **[S. Toma Ph.D. Thesis (English)](https://hal.archives-ouvertes.fr/tel-01141844/document)** *(Winner of the 2014 DEVS PhD Dissertation Award)*
 - **[Technical Report (Polish)](http://portailweb.universita.corsica/stockage_public/portail/baaaaaes/files/report_Cezary.pdf)**
@@ -158,7 +158,7 @@ If you use DEVSimPy in your research, cite it using:
 
 ## Contributions & Feedback
 
-We welcome **contributions and feedback**! Feel free to submit issues, pull requests, or join discussions to help improve DEVSimPy. 🚀
+We welcome **contributions and feedback**! Feel free to submit issues, pull requests, or join discussions to help improve DEVSimPy.
 
 ---
 
