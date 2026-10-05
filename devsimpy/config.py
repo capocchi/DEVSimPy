@@ -145,7 +145,6 @@ def read_dev_sim_py_config_file_without_wx(path):
 				# essayer d'interpréter la valeur comme expression Python
 				config[key] = ast.literal_eval(value)
 			except Exception: 
-				# si ce n'est pas une expression Python (ex: version=5.1.1)
 				config[key] = value
 	return config
 
