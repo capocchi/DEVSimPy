@@ -1851,7 +1851,7 @@ class AIEditorAssistantPanel(wx.Panel):
 			self.stop_button.Disable()
 			self.model_choice.Enable()
 			self.refresh_models_button.Enable()
-		except Exception as e:
+		except Exception:  # noqa: S110
 			# Silently ignore errors when updating controls - the window may be closing
 			pass
 		if cancelled:
