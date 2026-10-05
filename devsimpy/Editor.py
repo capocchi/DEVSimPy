@@ -987,6 +987,11 @@ class EditionFile(CodeEditor):
 		self.SetFilename(path)
 		self.SetValue(code)
 
+	def MarkAsModified(self):
+		"""Mark the page as modified, as if the user had edited it."""
+		self.modify = True
+		self.SetSavePoint()
+
 	# NOTE: EditionFile :: __str__		=> String representation of the class
 	@classmethod
 	def __str__(cls):
@@ -1048,6 +1053,28 @@ class EditionNotebook(wx.Notebook):
 		self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.__PageChanged)
 
 		self.Show()
+
+	def MarkCurrentPageAsModified(self):
+		"""Mark the current editor page as modified."""
+		page = self.GetCurrentPage()
+
+		if page is None:
+			return
+
+		page.MarkAsModified()
+
+		if hasattr(self.parent, "toolbar"):
+			self.parent.toolbar.EnableTool(
+				self.parent.save.GetId(),
+				True,
+			)
+
+		self.parent.Notification(
+			True,
+			_(f"{os.path.basename(page.GetFilename())} modified"),  # noqa: INT001
+			"",
+			"",
+		)
 
 	# NOTE: EditionNotebook :: __str__		=> String representation of the class
 	@classmethod
@@ -1879,9 +1906,8 @@ class AIEditorAssistantPanel(wx.Panel):
 				page.SetTargetStart(self._target_start)
 				page.SetTargetEnd(self._target_end)
 				page.ReplaceTarget(result)
-				# Mark code as modified using existing mechanism (like manual editing)
-				page.EmptyUndoBuffer()
-				page.SetSavePoint()
+				### mark the page as modified exactly like a user edit
+				self.editor_host.GetNoteBook().MarkCurrentPageAsModified()
 			finally:
 				page.EndUndoAction()
 			
@@ -2533,12 +2559,8 @@ class Base:
 	def OnChar(self, event):
 		"""Handle character input"""
 
-		### enable save icon in toolbar
-		self.toolbar.EnableTool(self.save.GetId(), True)
-		### status bar notification
-		self.Notification(
-			True, _(f"{os.path.basename(self.nb.GetCurrentPage().GetFilename())} modified"), "", ""  # noqa: INT001
-		) 
+		self.nb.MarkCurrentPageAsModified()
+
 		event.Skip()
 
 	### NOTE: Editor :: OnOpenFile 			=> Event OnOpenFile
