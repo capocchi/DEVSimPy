@@ -1751,6 +1751,10 @@ class AIEditorAssistantPanel(wx.Panel):
 		self._target_end = end
 		self._target_text = target_text
 		mode = self.mode_choice.GetSelection()
+		
+		# Disable the editor while AI is generating code
+		page.SetReadOnly(True)
+		
 		messages_history = None
 		if mode == 0:
 			include_context = self.include_code_context.GetValue()
@@ -1847,6 +1851,10 @@ class AIEditorAssistantPanel(wx.Panel):
 			self.stop_button.Disable()
 			self.model_choice.Enable()
 			self.refresh_models_button.Enable()
+			
+			# Re-enable the editor after AI is done
+			if self._target_page:
+				self._target_page.SetReadOnly(False)
 		except Exception:  # noqa: S110
 			# Silently ignore errors when updating controls - the window may be closing
 			pass
@@ -1873,7 +1881,12 @@ class AIEditorAssistantPanel(wx.Panel):
 				page.ReplaceTarget(result)
 			finally:
 				page.EndUndoAction()
-			self.output.AppendText(_("\n\nBuild applied to the code editor."))
+			
+			# Notify user that code has changed
+			self.output.AppendText(
+				_("\n\nCode generated successfully! The new atomic model code has been loaded.")
+			)
+			self.output.AppendText(_("\nPlease review the changes and save if needed."))
 		elif mode == 0:
 			self._ask_messages = messages_history + [{"role": "assistant", "content": result or ""}]
 			self.output.AppendText("\n")
