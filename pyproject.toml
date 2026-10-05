@@ -48,7 +48,8 @@ maintainers = [
 ]
 readme = "README.md"
 description = "Python-Based GUI for Discrete Event system Specification (DEVS) Simulation"
-license = { text = "LICENSE" }
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
 keywords = ["Simulation", "Modeling", "Discrete Event", "DEVS", "GUI"]
 classifiers = [
   # How mature is this project? Common values are
@@ -73,7 +74,6 @@ classifiers = [
 ]
 
 [tool.setuptools]
-license-files = []
 packages = ["devsimpy"]
 
 [project.urls]

@@ -1535,7 +1535,7 @@ class AIEditorAssistantPanel(wx.Panel):
 		self._ask_messages = []
 		self._ask_context_signature = None
 
-		self.SetMinSize((-1, 100))
+		self.SetMinSize((-1, 80))
 		main_sizer = wx.BoxSizer(wx.VERTICAL)
 
 		header = wx.BoxSizer(wx.HORIZONTAL)
@@ -1879,6 +1879,9 @@ class AIEditorAssistantPanel(wx.Panel):
 				page.SetTargetStart(self._target_start)
 				page.SetTargetEnd(self._target_end)
 				page.ReplaceTarget(result)
+				# Mark code as modified using existing mechanism (like manual editing)
+				page.EmptyUndoBuffer()
+				page.SetSavePoint()
 			finally:
 				page.EndUndoAction()
 			
