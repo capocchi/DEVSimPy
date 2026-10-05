@@ -56,6 +56,8 @@ USERHOME = os.path.expanduser("~")
 
 
 def atomicCode(label):
+	# Complete template for atomic model - header ends at line 71 (after closing """)
+	# AI should insert new code AFTER the header (after line 71), not replace everything
 	code = """# -*- coding: utf-8 -*-
 
 \"\"\"
@@ -75,7 +77,14 @@ from DomainInterface import DomainBehavior
 from DomainInterface.Object import Message
 
 ### Model class ----------------------------------------------------------------
-class %s(DomainBehavior):
+class %s(DomainBehavior):""" % (  # noqa: UP031
+		label,
+		os.path.split(os.path.expanduser("~"))[-1],
+		datetime.datetime.now(),  # noqa: DTZ005
+		label,
+	)
+
+	code += """
 	''' DEVS Class for the model %s
 	'''
 
@@ -96,6 +105,8 @@ class %s(DomainBehavior):
 	def outputFnc(self):
 		''' DEVS output function.
 		'''
+		if len(self.OPorts) > 0:
+			self.poke(self.OPorts[0], Message(1, self.timeNext))
 		return {}
 
 	@transition("internal")
@@ -114,15 +125,11 @@ class %s(DomainBehavior):
 		''' Additional function which is lunched just before the end of the simulation.
 		'''
 		pass
-""" % (  # noqa: UP031
-		label,
-		os.path.split(USERHOME)[-1],
-		datetime.datetime.now(),  # noqa: DTZ005
-		label,
-		label,
-	)
 
-	### add confluent function only for PyPDEVS.
+
+### add confluent function only for PyPDEVS.
+""" % label
+
 	code += (
 		"""
 	def confTransition(self, inputs):
@@ -135,7 +142,6 @@ class %s(DomainBehavior):
 		else ""
 	)  
 
-	### Dynamic structure only for PyPDEVS
 	code += (
 		"""
 
@@ -156,6 +162,8 @@ class %s(DomainBehavior):
 
 
 def coupledCode(label):
+	# Complete template for coupled model - header ends at line 175 (after closing """)
+	# AI should insert new code AFTER the header (after line 175), not replace everything
 	code = """# -*- coding: utf-8 -*-
 
 \"\"\"
@@ -167,20 +175,25 @@ def coupledCode(label):
 -------------------------------------------------------------------------------
 \"\"\"
 
-from DomainInterface import DomainStructure
-#    ======================================================================    #
-class %s(DomainStructure):
 
-	def __init__(self):
-		DomainStructure.__init__(self)
-""" % (  # noqa: UP031
+from DomainInterface import DomainStructure
+    ======================================================================    #
+class %s(DomainStructure):""" % (  # noqa: UP031
 		label,
-		os.path.split(USERHOME)[-1],
+		os.path.split(os.path.expanduser("~"))[-1],
 		datetime.datetime.now(),  # noqa: DTZ005
 		label,
 	)
 
-	### Dynamic structure only for PyPDEVS
+	code += """
+
+	def __init__(self):
+		DomainStructure.__init__(self)
+
+
+### Dynamic structure only for PyPDEVS
+"""
+
 	code += (
 		"""
 	def modelTransition(self, state):
@@ -194,7 +207,7 @@ class %s(DomainStructure):
 		return True"""
 		if "PyPDEVS" in DEFAULT_DEVS_DIRNAME # type: ignore  # noqa: F821
 		else ""
-	) 
+	)
 
 	return code
 

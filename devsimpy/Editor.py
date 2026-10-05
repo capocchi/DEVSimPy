@@ -192,13 +192,11 @@ def GetEditor(parent, id, title="", obj=None, **kwargs):
 
 	return editor
 
-
 #################################################################
 ###
 ###		GENERAL CLASSES
 ###
 #################################################################
-
 
 class TestSearchCtrl(wx.SearchCtrl):
 	maxSearches = 5
@@ -236,7 +234,7 @@ class TestSearchCtrl(wx.SearchCtrl):
 
 	def MakeMenu(self):
 		menu = wx.Menu()
-		item = menu.Append(-1, "Recent Searches")
+		item = menu.Append(-1, _("Recent Searches"))
 		item.Enable(False)
 		for idx, txt in enumerate(self.searches):
 			if txt != "":
@@ -421,7 +419,7 @@ class PythonSTC(stc.StyledTextCtrl):
 			# Attendre qu'il soit prêt dans un thread
 			threading.Thread(target=self.wait_for_server, daemon=True).start()
 		except Exception as e:  
-			print("Erreur démarrage Ollama:", e)
+			print(_("Ollama startup error:"), e)
 
 	def wait_for_server(self, timeout=10):
 		url = f"http://localhost:{OLLAMA_PORT}/api/generate"
@@ -435,7 +433,7 @@ class PythonSTC(stc.StyledTextCtrl):
 				self.ollama_ready = True
 				print("Serveur Ollama prêt !")
 				return
-		print("Impossible de joindre le serveur Ollama")
+		print(_("Unable to connect to the Ollama server."))
 		self.ollama_ready = False
 
 	def fetch_ollama_suggestions(self, prompt, length):
@@ -457,7 +455,7 @@ class PythonSTC(stc.StyledTextCtrl):
 				# Timeout temporaire, on ignore
 				pass
 			except Exception as e:  
-				print("Erreur Ollama:", e)
+				print(_("Ollama Error:"), e)
 
 		threading.Thread(target=worker, daemon=True).start()
 
@@ -533,12 +531,10 @@ class PythonSTC(stc.StyledTextCtrl):
 
 			final_suggestions = []
 
-			print(current_word)
 			# --- CAS SPECIAL : self. ---
 			if current_word.startswith("self."):
 				prefix = current_word.split(".", 1)[1]  # ce qui est après self.
 				cls_name = self.get_current_class(pos)
-				print(cls_name, prefix, self.classes)
 				if cls_name and cls_name in self.classes:
 					candidates = self.classes[cls_name]
 					# On ne garde que ce qui commence par le préfixe
@@ -566,7 +562,7 @@ class PythonSTC(stc.StyledTextCtrl):
 		time.sleep(self.ia_delay)
 		# Si aucune frappe depuis le délai
 		if time.time() - self.last_key_time >= self.ia_delay:
-			prompt = f"Complète le code suivant Python : {current_word}\n"
+			prompt = f"Complete the following Python code: {current_word}\n"
 			self.fetch_ollama_suggestions(prompt, length)
 
 	# NOTE: PythonSTC :: __str__		=> String representation of the class
@@ -1851,7 +1847,7 @@ class AIEditorAssistantPanel(wx.Panel):
 			self.stop_button.Disable()
 			self.model_choice.Enable()
 			self.refresh_models_button.Enable()
-		except Exception as e:
+		except Exception:  # noqa: S110
 			# Silently ignore errors when updating controls - the window may be closing
 			pass
 		if cancelled:

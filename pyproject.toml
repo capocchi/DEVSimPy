@@ -30,7 +30,13 @@ dependencies = [
   "numpy",
   "pydot",
   "networkx",
-  "lxml"
+  "lxml",
+  "python-dotenv",
+  "pydantic",
+  "msgpack",
+  "paho-mqtt",
+  "kafka-python",
+  "confluent_kafka"
 ]
 requires-python = ">=3.9"
 authors = [
