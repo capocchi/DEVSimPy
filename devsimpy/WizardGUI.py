@@ -177,7 +177,7 @@ def coupledCode(label):
 
 
 from DomainInterface import DomainStructure
-    ======================================================================    #
+
 class %s(DomainStructure):""" % (  # noqa: UP031
 		label,
 		os.path.split(os.path.expanduser("~"))[-1],
@@ -190,12 +190,11 @@ class %s(DomainStructure):""" % (  # noqa: UP031
 	def __init__(self):
 		DomainStructure.__init__(self)
 
-
-### Dynamic structure only for PyPDEVS
 """
 
 	code += (
 		"""
+	### Dynamic structure only for PyPDEVS
 	def modelTransition(self, state):
 		''' modelTransition method will be called at every step
 			in simulated time on every model that transitioned
@@ -1172,6 +1171,25 @@ class ModelGeneratorWizard(Wizard):
 						### if the user change the filename before the end
 						if self.label != py_name:
 							string = string.replace(self.label, py_name)
+
+						### check that the generated code is valid python before writing it
+						### into the archive. Otherwise the model cannot be imported and
+						### the archive would keep the placeholder DEVSimPyModel.dat.
+						try:
+							compile(string, py_fn, "exec")
+						except SyntaxError as error:
+							zout.close()
+							if os.path.exists(self.model_path):
+								os.remove(self.model_path)
+							dlg = wx.MessageDialog(
+								self,
+								_("Error in the generated python code %s:\n%s")
+								% (py_fn, error),
+								_("Wizard Manager"),
+								wx.OK | wx.ICON_ERROR,
+							)
+							dlg.ShowModal()
+							return False
 
 						### write class code into the python filename
 						zout.writestr(py_fn, string)

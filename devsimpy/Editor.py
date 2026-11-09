@@ -56,6 +56,20 @@ from AIPrompterDialog import AIPrompterDialog
 
 import ReloadModule
 import ZipManager
+import sys
+import os
+
+# Import AI_SessionMixin directly to avoid circular import through Mixins/__init__.py
+_mixin_path = os.path.join(os.path.dirname(__file__), 'Mixins', 'AI_SessionMixin.py')
+if os.path.exists(_mixin_path):
+    import importlib.util
+    _spec = importlib.util.spec_from_file_location("AI_SessionMixin", _mixin_path)
+    _module = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(_module)
+    AI_SessionMixin = _module.AI_SessionMixin
+else:
+    # Fallback for development
+    from Mixins.AI_SessionMixin import AI_SessionMixin
 
 _ = wx.GetTranslation
 
@@ -987,6 +1001,11 @@ class EditionFile(CodeEditor):
 		self.SetFilename(path)
 		self.SetValue(code)
 
+	def MarkAsModified(self):
+		"""Mark the page as modified, as if the user had edited it."""
+		self.modify = True
+		self.SetSavePoint()
+
 	# NOTE: EditionFile :: __str__		=> String representation of the class
 	@classmethod
 	def __str__(cls):
@@ -1048,6 +1067,28 @@ class EditionNotebook(wx.Notebook):
 		self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.__PageChanged)
 
 		self.Show()
+
+	def MarkCurrentPageAsModified(self):
+		"""Mark the current editor page as modified."""
+		page = self.GetCurrentPage()
+
+		if page is None:
+			return
+
+		page.MarkAsModified()
+
+		if hasattr(self.parent, "toolbar"):
+			self.parent.toolbar.EnableTool(
+				self.parent.save.GetId(),
+				True,
+			)
+
+		self.parent.Notification(
+			True,
+			_(f"{os.path.basename(page.GetFilename())} modified"),  # noqa: INT001
+			"",
+			"",
+		)
 
 	# NOTE: EditionNotebook :: __str__		=> String representation of the class
 	@classmethod
@@ -1518,13 +1559,21 @@ class EditionNotebook(wx.Notebook):
 		"""Select all the text"""
 		self.GetCurrentPage().SelectAll()
 
-
-class AIEditorAssistantPanel(wx.Panel):
+class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 	"""Bottom-docked Ask/Build assistant for the active code editor."""
 
 	def __init__(self, parent, editor_host=None):
 		super().__init__(parent)
 		self.editor_host = editor_host or parent
+		
+		# Initialize AI session mixin
+		AI_SessionMixin.__init__(self)
+		
+		# Set model name from editor host if available
+		model_name = self._get_editor_model_label()
+		if model_name:
+			self.model_name = model_name
+		
 		self._busy = False
 		self._stop_event = None
 		self._target_page = None
@@ -1535,10 +1584,14 @@ class AIEditorAssistantPanel(wx.Panel):
 		self._ask_messages = []
 		self._ask_context_signature = None
 
-		self.SetMinSize((-1, 100))
+		self.SetMinSize((-1, 80))
 		main_sizer = wx.BoxSizer(wx.VERTICAL)
 
+		# ============================================================
+		# Header
+		# ============================================================
 		header = wx.BoxSizer(wx.HORIZONTAL)
+
 		self.mode_choice = wx.RadioBox(
 			self,
 			label=_("Mode"),
@@ -1547,69 +1600,228 @@ class AIEditorAssistantPanel(wx.Panel):
 			style=wx.RA_SPECIFY_COLS,
 		)
 		self.mode_choice.Bind(wx.EVT_RADIOBOX, self._on_mode_changed)
-		params = getattr(builtins, "PARAMS_IA", {})
-		self.mode_choice.SetSelection(1 if params.get("AI_EDITOR_MODE", 0) == 1 else 0)
-		header.Add(self.mode_choice, 0, wx.RIGHT | wx.EXPAND, 8)
 
-		self.prompt_input = wx.TextCtrl(
-			self, style=wx.TE_MULTILINE | wx.TE_PROCESS_ENTER, size=(-1, 55)
+		params = getattr(builtins, "PARAMS_IA", {})
+		self.mode_choice.SetSelection(
+			1 if params.get("AI_EDITOR_MODE", 0) == 1 else 0
 		)
-		self.prompt_input.SetHint(_("Ask a question or describe the code change..."))
+
+		header.Add(
+			self.mode_choice,
+			0,
+			wx.RIGHT | wx.EXPAND,
+			8,
+		)
+
+		# Prompt
+		self.prompt_input = wx.TextCtrl(
+			self,
+			style=wx.TE_MULTILINE | wx.TE_PROCESS_ENTER,
+			size=(-1, 55),
+		)
+		self.prompt_input.SetHint(
+			_("Ask a question or describe the code change...")
+		)
 		self.prompt_input.Bind(wx.EVT_TEXT, self._on_prompt_changed)
 		self.prompt_input.Bind(wx.EVT_KEY_DOWN, self._on_prompt_key_down)
-		header.Add(self.prompt_input, 1, wx.RIGHT | wx.EXPAND, 8)
-		self.clear_prompt_button = wx.Button(self, label=_("Clear"))
-		self.clear_prompt_button.Bind(wx.EVT_BUTTON, self._on_clear_prompt)
+
+		header.Add(
+			self.prompt_input,
+			1,
+			wx.RIGHT | wx.EXPAND,
+			8,
+		)
+
+		# Clear button
+		self.clear_prompt_button = wx.Button(
+			self,
+			label=_("Clear"),
+		)
+		self.clear_prompt_button.Bind(
+			wx.EVT_BUTTON,
+			self._on_clear_prompt,
+		)
 		self.clear_prompt_button.Disable()
-		header.Add(self.clear_prompt_button, 0, wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, 5)
 
-		self.run_button = wx.Button(self, label=_("Ask"))
-		self.run_button.Bind(wx.EVT_BUTTON, self._on_run)
-		header.Add(self.run_button, 0, wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, 5)
+		header.Add(
+			self.clear_prompt_button,
+			0,
+			wx.RIGHT | wx.ALIGN_CENTER_VERTICAL,
+			5,
+		)
 
-		self.stop_button = wx.Button(self, label=_("Stop"))
-		self.stop_button.Bind(wx.EVT_BUTTON, self._on_stop)
+		# Ask / Build button
+		self.run_button = wx.Button(
+			self,
+			label=_("Ask"),
+		)
+		self.run_button.Bind(
+			wx.EVT_BUTTON,
+			self._on_run,
+		)
+
+		header.Add(
+			self.run_button,
+			0,
+			wx.RIGHT | wx.ALIGN_CENTER_VERTICAL,
+			5,
+		)
+
+		# Stop button
+		self.stop_button = wx.Button(
+			self,
+			label=_("Stop"),
+		)
+		self.stop_button.Bind(
+			wx.EVT_BUTTON,
+			self._on_stop,
+		)
 		self.stop_button.Disable()
-		header.Add(self.stop_button, 0, wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, 5)
 
-		main_sizer.Add(header, 0, wx.ALL | wx.EXPAND, 8)
+		header.Add(
+			self.stop_button,
+			0,
+			wx.RIGHT | wx.ALIGN_CENTER_VERTICAL,
+			5,
+		)
 
+		# ============================================================
+		# Activity indicator
+		#
+		# The indicator is placed at the far right of the header,
+		# next to the Stop button.
+		# ============================================================
+		self.progress_indicator = wx.ActivityIndicator(
+			self,
+			wx.NewIdRef(),
+			size=(24, 24),
+		)
+		self.progress_indicator.Hide()
+
+		header.Add(
+			self.progress_indicator,
+			0,
+			wx.ALIGN_CENTER_VERTICAL | wx.RIGHT,
+			4,
+		)
+
+		main_sizer.Add(
+			header,
+			0,
+			wx.ALL | wx.EXPAND,
+			8,
+		)
+
+		# ============================================================
+		# Model selection
+		# ============================================================
 		model_row = wx.BoxSizer(wx.HORIZONTAL)
-		self.model_label = wx.StaticText(self, label=_("Model:"))
-		model_row.Add(self.model_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 8)
+
+		self.model_label = wx.StaticText(
+			self,
+			label=_("Model:"),
+		)
+
+		model_row.Add(
+			self.model_label,
+			0,
+			wx.ALIGN_CENTER_VERTICAL | wx.RIGHT,
+			8,
+		)
+
 		self.model_choice = wx.ComboBox(
 			self,
 			wx.NewIdRef(),
 			value=self._get_current_model(),
-			choices=[self._get_current_model()] if self._get_current_model() else [],
+			choices=[
+				self._get_current_model()
+			] if self._get_current_model() else [],
 			style=wx.CB_READONLY,
 		)
-		self.model_choice.Bind(wx.EVT_COMBOBOX, self._on_model_changed)
-		model_row.Add(self.model_choice, 1, wx.RIGHT | wx.EXPAND, 8)
+
+		self.model_choice.Bind(
+			wx.EVT_COMBOBOX,
+			self._on_model_changed,
+		)
+
+		model_row.Add(
+			self.model_choice,
+			1,
+			wx.RIGHT | wx.EXPAND,
+			8,
+		)
+
 		self.refresh_models_button = wx.BitmapButton(
 			self,
 			wx.NewIdRef(),
 			load_and_resize_image("db_refresh.png"),
 			size=(28, 28),
 		)
-		self.refresh_models_button.SetToolTip(_("Refresh available models"))
-		self.refresh_models_button.Bind(wx.EVT_BUTTON, self._on_refresh_models)
-		model_row.Add(self.refresh_models_button, 0)
-		main_sizer.Add(model_row, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, 8)
 
-		self.include_code_context = wx.CheckBox(self, label=_("Use active code as context"))
+		self.refresh_models_button.SetToolTip(
+			_("Refresh available models")
+		)
+
+		self.refresh_models_button.Bind(
+			wx.EVT_BUTTON,
+			self._on_refresh_models,
+		)
+
+		model_row.Add(
+			self.refresh_models_button,
+			0,
+		)
+
+		main_sizer.Add(
+			model_row,
+			0,
+			wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND,
+			8,
+		)
+
+		# ============================================================
+		# Code context
+		# ============================================================
+		self.include_code_context = wx.CheckBox(
+			self,
+			label=_("Use active code as context"),
+		)
+
 		self.include_code_context.SetValue(True)
-		main_sizer.Add(self.include_code_context, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
 
+		main_sizer.Add(
+			self.include_code_context,
+			0,
+			wx.LEFT | wx.RIGHT | wx.BOTTOM,
+			8,
+		)
+
+		# ============================================================
+		# Output
+		# ============================================================
 		self.output = wx.TextCtrl(
 			self,
 			style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2,
 			size=(-1, 110),
 		)
-		main_sizer.Add(self.output, 1, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, 8)
+
+		main_sizer.Add(
+			self.output,
+			1,
+			wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND,
+			8,
+		)
+
 		self.SetSizer(main_sizer)
+
 		self._on_mode_changed(None)
 		self._update_model_controls()
+		
+		# Load session if .amd model
+		self.on_panel_load()
+		
+		# Bind close event for auto-save
+		self.Bind(wx.EVT_WINDOW_DESTROY, self.on_panel_close)
 
 	@staticmethod
 	def _model_setting_key(provider):
@@ -1619,129 +1831,318 @@ class AIEditorAssistantPanel(wx.Panel):
 			"LM Studio": "LMSTUDIO_MODEL",
 		}.get(provider)
 
+	def _get_editor_model_label(self):
+		"""Return the label of the model edited by the host editor.
+
+		The host ``cb`` attribute is not always a canvas Block: it can also
+		be a :class:`DEVSComponent` (opened from the model properties) or a
+		plugin module. In that case the label is looked up on the attached
+		Block, falling back to the python file name.
+		"""
+		model = getattr(self.editor_host, "cb", None)
+
+		if model is None:
+			return None
+
+		label = getattr(model, "label", None)
+		if label:
+			return str(label)
+
+		get_block = getattr(model, "getBlock", None)
+		if callable(get_block):
+			try:
+				block = get_block()
+			except Exception:
+				block = None
+			label = getattr(block, "label", None)
+			if label:
+				return str(label)
+
+		python_path = getattr(model, "python_path", "") or ""
+		if python_path:
+			return os.path.splitext(os.path.basename(python_path))[0]
+
+		return None
+
 	def _get_current_model(self):
-		provider = getattr(builtins, "SELECTED_IA", "")
+		provider = getattr(
+			builtins,
+			"SELECTED_IA",
+			"",
+		)
+
 		key = self._model_setting_key(provider)
-		defaults = {"ChatGPT": "gpt-4.1-nano", "Ollama": "mistral", "LM Studio": ""}
-		return getattr(builtins, "PARAMS_IA", {}).get(key, defaults.get(provider, "")) if key else ""
+
+		defaults = {
+			"ChatGPT": "gpt-4.1-nano",
+			"Ollama": "mistral",
+			"LM Studio": "",
+		}
+
+		return (
+			getattr(
+				builtins,
+				"PARAMS_IA",
+				{},
+			).get(
+				key,
+				defaults.get(provider, ""),
+			)
+			if key
+			else ""
+		)
 
 	def _update_model_controls(self):
-		provider = getattr(builtins, "SELECTED_IA", "")
-		show_model = provider in ("ChatGPT", "Ollama", "LM Studio")
+		provider = getattr(
+			builtins,
+			"SELECTED_IA",
+			"",
+		)
+
+		show_model = provider in (
+			"ChatGPT",
+			"Ollama",
+			"LM Studio",
+		)
+
 		current_model = self._get_current_model()
+
 		self.model_choice.Clear()
+
 		if current_model:
 			self.model_choice.Append(current_model)
 			self.model_choice.SetValue(current_model)
+
+		# Update model name from editor host if available
+		new_model_name = self._get_editor_model_label()
+		new_archive = self._get_archive_path()
+
+		if new_model_name and (
+			self.model_name != new_model_name
+			or self._session_archive != new_archive
+		):
+			# Save the current conversation in the archive it belongs to
+			# (the editor host already points to the new model at this point)
+			if self.model_name and self._ask_messages and self._session_archive:
+				self.store_session(archive=self._session_archive)
+
+			# Switch to the new model and its own session
+			self.model_name = new_model_name
+			self._session_archive = new_archive
+			self._session_loaded = False
+			self._ask_messages = []
+			self._ask_context_signature = None
+			self.prompt_input.Clear()
+			self.output.Clear()
+		elif new_archive:
+			self._session_archive = new_archive
+
+		# Load the last stored session the first time the panel is shown
+		self.on_panel_load()
+
 		self.model_label.Show(show_model)
 		self.model_choice.Show(show_model)
 		self.refresh_models_button.Show(show_model)
+
 		self.Layout()
 
 	def _on_refresh_models(self, event):
-		provider = getattr(builtins, "SELECTED_IA", "")
-		params = getattr(builtins, "PARAMS_IA", {})
+		provider = getattr(
+			builtins,
+			"SELECTED_IA",
+			"",
+		)
+
+		params = getattr(
+			builtins,
+			"PARAMS_IA",
+			{},
+		)
+
 		try:
 			if provider == "ChatGPT":
 				adapter = ChatGPTDevsAdapter(
-					api_key=params.get("CHATGPT_API_KEY"), model_name=self._get_current_model()
-				)
-				models = adapter.get_available_models()
-			elif provider == "Ollama":
-				models = OllamaDevsAdapter.get_available_models()
-			elif provider == "LM Studio":
-				adapter = LMStudioDevsAdapter(
-					base_url=params.get("LMSTUDIO_BASE_URL", "http://localhost:1234/v1"),
+					api_key=params.get("CHATGPT_API_KEY"),
 					model_name=self._get_current_model(),
 				)
 				models = adapter.get_available_models()
+
+			elif provider == "Ollama":
+				models = OllamaDevsAdapter.get_available_models()
+
+			elif provider == "LM Studio":
+				adapter = LMStudioDevsAdapter(
+					base_url=params.get(
+						"LMSTUDIO_BASE_URL",
+						"http://localhost:1234/v1",
+					),
+					model_name=self._get_current_model(),
+				)
+				models = adapter.get_available_models()
+
 			else:
 				return
+
 			if not models:
-				raise RuntimeError(_("No models are available from the selected provider."))
+				raise RuntimeError(
+					_("No models are available from the selected provider.")
+				)
+
 			current_model = self._get_current_model()
+
 			self.model_choice.Clear()
 			self.model_choice.AppendItems(models)
-			self.model_choice.SetValue(current_model if current_model in models else models[0])
+
+			self.model_choice.SetValue(
+				current_model
+				if current_model in models
+				else models[0]
+			)
+
 			self._on_model_changed(None)
+
 		except Exception as error:
 			wx.MessageBox(
-				_(f"Could not refresh models:\n{error!s}"),  # noqa: INT001
+				_(f"Could not refresh models:\n{error!s}"),
 				_("Model Refresh Failed"),
 				wx.OK | wx.ICON_ERROR,
 			)
 
 	def _on_model_changed(self, event):
-		key = self._model_setting_key(getattr(builtins, "SELECTED_IA", ""))
+		key = self._model_setting_key(
+			getattr(
+				builtins,
+				"SELECTED_IA",
+				"",
+			)
+		)
+
 		if key is None:
 			return
+
 		model_name = self.model_choice.GetValue().strip()
-		params = getattr(builtins, "PARAMS_IA", {})
+
+		params = getattr(
+			builtins,
+			"PARAMS_IA",
+			{},
+		)
+
 		if params.get(key) != model_name:
 			params[key] = model_name
 			builtins.PARAMS_IA = params
+
 			AdapterFactory.reset_instance()
 			self._ask_context_signature = None
 
 	def _on_mode_changed(self, event):
 		ask_mode = self.mode_choice.GetSelection() == 0
-		params = getattr(builtins, "PARAMS_IA", {})
+
+		params = getattr(
+			builtins,
+			"PARAMS_IA",
+			{},
+		)
+
 		params["AI_EDITOR_MODE"] = 0 if ask_mode else 1
 		builtins.PARAMS_IA = params
-		self.run_button.SetLabel(_("Ask") if ask_mode else _("Build"))
+
+		self.run_button.SetLabel(
+			_("Ask") if ask_mode else _("Build")
+		)
+
 		self.include_code_context.Show(ask_mode)
+
 		self.Layout()
 
 	def _on_prompt_changed(self, event):
 		self.clear_prompt_button.Enable(
-			bool(self.prompt_input.GetValue()) and not self._busy
+			bool(self.prompt_input.GetValue())
+			and not self._busy
 		)
+
 		event.Skip()
 
 	def _on_prompt_key_down(self, event):
-		if event.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
+		if event.GetKeyCode() in (
+			wx.WXK_RETURN,
+			wx.WXK_NUMPAD_ENTER,
+		):
 			if event.ShiftDown():
 				self.prompt_input.WriteText("\n")
 			else:
 				self._on_run(event)
+
 			return
+
 		event.Skip()
 
 	def _on_clear_prompt(self, event):
 		if self._busy:
 			return
+
 		self.prompt_input.Clear()
 		self.prompt_input.SetFocus()
 
 	def _on_run(self, event):
 		if self._busy:
 			return
+
 		prompt = self.prompt_input.GetValue().strip()
+
 		if not prompt:
 			return
 
-		selected_ia = getattr(builtins, "SELECTED_IA", "")
+		selected_ia = getattr(
+			builtins,
+			"SELECTED_IA",
+			"",
+		)
+
 		if not selected_ia:
-			self.output.SetValue(_("Select an AI provider in Preferences first."))
+			self.output.SetValue(
+				_("Select an AI provider in Preferences first.")
+			)
 			return
 
 		try:
-			page = self.editor_host.GetNoteBook().GetCurrentPage()
+			page = (
+				self.editor_host
+				.GetNoteBook()
+				.GetCurrentPage()
+			)
+
 			if page is None:
-				raise RuntimeError(_("Open a code file before using the AI assistant."))
+				raise RuntimeError(
+					_("Open a code file before using the AI assistant.")
+				)
+
 			start, end = page.GetSelection()
 			start, end = min(start, end), max(start, end)
+
 			self._whole_document = start == end
+
 			if self._whole_document:
 				start, end = 0, page.GetLength()
 				target_text = page.GetText()
 			else:
-				target_text = page.GetTextRange(start, end)
+				target_text = page.GetTextRange(
+					start,
+					end,
+				)
+
 			adapter = AdapterFactory.get_adapter_instance(
-				self.editor_host, getattr(builtins, "PARAMS_IA", {})
+				self.editor_host,
+				getattr(
+					builtins,
+					"PARAMS_IA",
+					{},
+				),
 			)
+
 			if adapter is None:
 				return
+
 		except Exception as error:
 			self.output.SetValue(str(error))
 			return
@@ -1750,69 +2151,152 @@ class AIEditorAssistantPanel(wx.Panel):
 		self._target_start = start
 		self._target_end = end
 		self._target_text = target_text
+
 		mode = self.mode_choice.GetSelection()
+
+		# Disable the editor while AI is generating code
+		page.SetReadOnly(True)
+
+		# Always include base system prompt with DEVS guidelines
+		base_system_prompt = (
+			"Follow this DEVSimPy model and simulator context when relevant:\n"
+			+ adapter.base_prompt
+		)
+
 		messages_history = None
+
 		if mode == 0:
-			include_context = self.include_code_context.GetValue()
+			include_context = (
+				self.include_code_context.GetValue()
+			)
+
 			context_signature = (
 				selected_ia,
 				self._get_current_model(),
 				target_text if include_context else "",
 			)
+
 			if context_signature != self._ask_context_signature:
 				self._ask_messages = []
 				self._ask_context_signature = context_signature
+
 				self.output.Clear()
+
+				# Always add base system prompt
+				self._ask_messages.append(
+					{
+						"role": "system",
+						"content": base_system_prompt,
+					}
+				)
+
+				# Optionally add code context if enabled and available
 				if include_context and target_text:
 					self._ask_messages.append(
 						{
 							"role": "system",
 							"content": (
-								"Follow this DEVSimPy model and simulator context when relevant:\n"
-								+ adapter.base_prompt
-								+ "\n\nUse the following active source code as context. Respond naturally to "
-								"the user's actual prompt; do not summarize or modify the code unless "
-								"asked. A greeting or general question should receive a normal response."
+								"Use the following active source "
+								"code as context. Respond naturally to "
+								"the user's actual prompt; do not summarize "
+								"or modify the code unless asked. A greeting "
+								"or general question should receive a normal "
+								"response."
 								f"\n\n```python\n{target_text}\n```"
 							),
 						}
 					)
-			messages_history = self._ask_messages + [{"role": "user", "content": prompt}]
+
+			messages_history = (
+				self._ask_messages
+				+ [
+					{
+						"role": "user",
+						"content": prompt,
+					}
+				]
+			)
+
 			if self.output.GetLastPosition():
 				self.output.AppendText("\n\n")
-			self.output.AppendText(f"User: {prompt}\nAssistant: ")
+
+			self.output.AppendText(
+				f"User: {prompt}\nAssistant: "
+			)
+
 		else:
-			self.output.SetValue(_("Building code change...\n"))
+			self.output.SetValue(
+				_("Building code change...\n")
+			)
+
 		self._stop_event = threading.Event()
 		self._busy = True
+
 		self.run_button.Disable()
 		self.clear_prompt_button.Disable()
 		self.stop_button.Enable()
 		self.model_choice.Disable()
 		self.refresh_models_button.Disable()
+
+		# ------------------------------------------------------------
+		# Show activity indicator
+		# ------------------------------------------------------------
+		self.progress_indicator.Show()
+		self.progress_indicator.Start()
+
+		self.Layout()
+
 		worker = threading.Thread(
 			target=self._run_request,
-			args=(adapter, prompt, target_text, mode, self._stop_event, messages_history),
+			args=(
+				adapter,
+				prompt,
+				target_text,
+				mode,
+				self._stop_event,
+				messages_history,
+			),
 			daemon=True,
 		)
+
 		worker.start()
 
-	def _run_request(self, adapter, prompt, code, mode, stop_event, messages_history):
+	def _run_request(
+		self,
+		adapter,
+		prompt,
+		code,
+		mode,
+		stop_event,
+		messages_history,
+	):
 		try:
 			system_prompt = ""
+
 			if mode == 0:
 				full_prompt = prompt
 			else:
-				full_prompt = adapter.modify_model_prompt(code, prompt)
+				full_prompt = adapter.modify_model_prompt(
+					code,
+					prompt,
+				)
+
 			result = adapter.generate_output(
 				full_prompt,
 				system_prompt=system_prompt,
 				messages_history=messages_history,
-				on_token=lambda token: wx.CallAfter(self._append_output, token),
+				on_token=lambda token: wx.CallAfter(
+					self._append_output,
+					token,
+				),
 				stop_event=stop_event,
 			)
+
 			if mode == 1 and result:
-				result = adapter.parse_codeblock_marker(result)
+				result = adapter.parse_codeblock_marker(
+					result
+				)
+
 			wx.CallAfter(
 				self._finish_request,
 				result,
@@ -1821,6 +2305,7 @@ class AIEditorAssistantPanel(wx.Panel):
 				stop_event.is_set(),
 				messages_history,
 			)
+
 		except Exception as error:
 			wx.CallAfter(
 				self._finish_request,
@@ -1833,57 +2318,136 @@ class AIEditorAssistantPanel(wx.Panel):
 
 	def _append_output(self, text):
 		self.output.AppendText(text)
-		self.output.ShowPosition(self.output.GetLastPosition())
+		self.output.ShowPosition(
+			self.output.GetLastPosition()
+		)
 
-	def _finish_request(self, result, error, mode, cancelled, messages_history):
+	def _finish_request(
+		self,
+		result,
+		error,
+		mode,
+		cancelled,
+		messages_history,
+	):
 		# Check if the panel is still valid before updating controls
 		if not self.IsShown():
-			return  # Panel has been destroyed or hidden; skip button updates
-		
+			return
+
 		try:
 			self._busy = False
+
 			self.run_button.Enable(True)
-			self.clear_prompt_button.Enable(bool(self.prompt_input.GetValue()))
+			self.clear_prompt_button.Enable(
+				bool(self.prompt_input.GetValue())
+			)
 			self.stop_button.Disable()
 			self.model_choice.Enable()
 			self.refresh_models_button.Enable()
+
+			# --------------------------------------------------------
+			# Stop and hide activity indicator
+			# --------------------------------------------------------
+			self.progress_indicator.Stop()
+			self.progress_indicator.Hide()
+
+			self.Layout()
+
+			# Re-enable the editor after AI is done
+			if self._target_page:
+				self._target_page.SetReadOnly(False)
+
 		except Exception:  # noqa: S110
-			# Silently ignore errors when updating controls - the window may be closing
+			# Silently ignore errors when updating controls -
+			# the window may be closing
 			pass
+
 		if cancelled:
-			self.output.AppendText(_("\n\nRequest stopped; no code changes were applied."))
+			self.output.AppendText(
+				_("\n\nRequest stopped; no code changes were applied.")
+			)
+
 		elif error is not None:
-			self.output.AppendText(_(f"\n\nRequest failed: {error}"))  # noqa: INT001
+			self.output.AppendText(
+				_(f"\n\nRequest failed: {error}")
+			)
+
 		elif mode == 1 and result:
 			page = self._target_page
+
 			current_text = (
 				page.GetText()
 				if self._whole_document
-				else page.GetTextRange(self._target_start, self._target_end)
+				else page.GetTextRange(
+					self._target_start,
+					self._target_end,
+				)
 			)
+
 			if current_text != self._target_text:
 				self.output.AppendText(
-					_("\n\nThe code changed while the request was running; the result was not applied.")
+					_(
+						"\n\nThe code changed while the request "
+						"was running; the result was not applied."
+					)
 				)
 				return
+
 			page.BeginUndoAction()
+
 			try:
 				page.SetTargetStart(self._target_start)
 				page.SetTargetEnd(self._target_end)
 				page.ReplaceTarget(result)
+
+				# Mark the page as modified exactly like a user edit
+				self.editor_host.GetNoteBook().MarkCurrentPageAsModified()
+
 			finally:
 				page.EndUndoAction()
-			self.output.AppendText(_("\n\nBuild applied to the code editor."))
+
+			# Notify user that code has changed
+			self.output.AppendText(
+				_(
+					"\n\nCode generated successfully! "
+					"The new atomic model code has been loaded."
+				)
+			)
+
+			self.output.AppendText(
+				_("\nPlease review the changes and save if needed.")
+			)
+
+			# Update conversation history in Build mode as well
+			# (messages_history is None for Build requests)
+			self._ask_messages = list(messages_history or []) + [
+				{
+					"role": "assistant",
+					"content": result or "",
+				}
+			]
+
 		elif mode == 0:
-			self._ask_messages = messages_history + [{"role": "assistant", "content": result or ""}]
+			self._ask_messages = list(messages_history or []) + [
+				{
+					"role": "assistant",
+					"content": result or "",
+				}
+			]
+
 			self.output.AppendText("\n")
+			
+			# Store session after successful AI interaction
+			self.store_session()
 
 	def _on_stop(self, event):
 		if self._busy and self._stop_event is not None:
 			self._stop_event.set()
 			self.stop_button.Disable()
-			self.output.AppendText(_("\n\nStop requested..."))
 
+		self.output.AppendText(
+			_("\n\nStop requested...")
+		)
 
 ###------------------------------------------------------------
 class Base:
@@ -2023,8 +2587,15 @@ class Base:
 			_("Show or hide the AI assistant panel"),
 			wx.ITEM_CHECK,
 		)
+		self.clear_ai_sessions_item = wx.MenuItem(
+			view,
+			wx.NewIdRef(),
+			_("Clear AI Sessions"),
+			_("Delete the AI assistant sessions stored in the model file"),
+		)
 		view.Append(showStatusBar)
 		view.Append(self.ai_assistant_item)
+		view.Append(self.clear_ai_sessions_item)
 
 		### ------------------------------------------------------------------
 
@@ -2055,6 +2626,7 @@ class Base:
 		self.Bind(wx.EVT_MENU, self.nb.OnDelete, id=delete.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnSelectAll, id=select.GetId())
 		self.Bind(wx.EVT_MENU, self.ToggleAIAssistantPanel, id=self.ai_assistant_item.GetId())
+		self.Bind(wx.EVT_MENU, self.OnClearAISessions, id=self.clear_ai_sessions_item.GetId())
 		self.Bind(wx.EVT_MENU, self.ToggleStatusBar, id=showStatusBar.GetId())
 		self.Bind(wx.EVT_MENU, self.OnAbout, id=about.GetId())
 		self.Bind(wx.EVT_FIND, self.OnFind)
@@ -2070,6 +2642,9 @@ class Base:
 		if splitter.IsSplit():
 			splitter.Unsplit(panel)
 			panel.Hide()
+			# Persist the session when the panel is hidden
+			if getattr(panel, "model_name", None):
+				panel.store_session()
 		else:
 			panel._update_model_controls()
 			panel.Show()
@@ -2083,6 +2658,49 @@ class Base:
 		self.Layout()
 		if panel.IsShown():
 			panel.prompt_input.SetFocus()
+
+	def OnClearAISessions(self, event):
+		"""Delete AI assistant sessions stored in the current .amd/.cmd model."""
+		panel = getattr(self, "ai_assistant_panel", None)
+
+		if panel is None:
+			return
+
+		archive = panel._get_archive_path()
+
+		if not archive:
+			wx.MessageBox(
+				_("AI sessions can only be stored in .amd or .cmd model files."),
+				_("AI Sessions"),
+				wx.OK | wx.ICON_INFORMATION,
+			)
+			return
+
+		archive_name = os.path.basename(archive)
+
+		answer = wx.MessageBox(
+			_("Delete all AI assistant sessions stored in '%s'?") % archive_name,
+			_("AI Sessions"),
+			wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION,
+		)
+
+		if answer != wx.YES:
+			return
+
+		if panel.clear_sessions():
+			panel.reset_session_ui()
+			wx.MessageBox(
+				_("AI assistant sessions deleted from '%s'.") % archive_name,
+				_("AI Sessions"),
+				wx.OK | wx.ICON_INFORMATION,
+			)
+		else:
+			wx.MessageBox(
+				_("Unable to delete the AI assistant sessions from '%s'.")
+				% archive_name,
+				_("AI Sessions"),
+				wx.OK | wx.ICON_ERROR,
+			)
 
 	def CreateTB(self, tb=None):
 		"""Create tool-bar."""
@@ -2517,12 +3135,8 @@ class Base:
 	def OnChar(self, event):
 		"""Handle character input"""
 
-		### enable save icon in toolbar
-		self.toolbar.EnableTool(self.save.GetId(), True)
-		### status bar notification
-		self.Notification(
-			True, _(f"{os.path.basename(self.nb.GetCurrentPage().GetFilename())} modified"), "", ""  # noqa: INT001
-		) 
+		self.nb.MarkCurrentPageAsModified()
+
 		event.Skip()
 
 	### NOTE: Editor :: OnOpenFile 			=> Event OnOpenFile

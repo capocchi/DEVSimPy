@@ -178,6 +178,11 @@ class DevsAIAdapter(ABC):
 
 		Include only the modified model code. Do not include any code block markers like ```python.
 		Do not provide any explanations, only the code.
+
+		IMPORTANT: Preserve the header block at the beginning of the code (the block enclosed by 
+		'-------------------------------------------------------------------------------'). This header is used by atomic and coupled models.
+		The AI should generate new code without worrying about this header - it must include in its output
+		the header from the reference code that was used as context.
 		"""
 		logging.debug("Modification prompt created for model.")  # noqa: LOG015
 		return full_prompt
