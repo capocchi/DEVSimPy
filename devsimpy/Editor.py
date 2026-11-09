@@ -56,6 +56,20 @@ from AIPrompterDialog import AIPrompterDialog
 
 import ReloadModule
 import ZipManager
+import sys
+import os
+
+# Import AI_SessionMixin directly to avoid circular import through Mixins/__init__.py
+_mixin_path = os.path.join(os.path.dirname(__file__), 'Mixins', 'AI_SessionMixin.py')
+if os.path.exists(_mixin_path):
+    import importlib.util
+    _spec = importlib.util.spec_from_file_location("AI_SessionMixin", _mixin_path)
+    _module = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(_module)
+    AI_SessionMixin = _module.AI_SessionMixin
+else:
+    # Fallback for development
+    from Mixins.AI_SessionMixin import AI_SessionMixin
 
 _ = wx.GetTranslation
 
@@ -1545,12 +1559,21 @@ class EditionNotebook(wx.Notebook):
 		"""Select all the text"""
 		self.GetCurrentPage().SelectAll()
 
-class AIEditorAssistantPanel(wx.Panel):
+class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 	"""Bottom-docked Ask/Build assistant for the active code editor."""
 
 	def __init__(self, parent, editor_host=None):
 		super().__init__(parent)
 		self.editor_host = editor_host or parent
+		
+		# Initialize AI session mixin
+		AI_SessionMixin.__init__(self)
+		
+		# Set model name from editor host if available
+		model_name = self._get_editor_model_label()
+		if model_name:
+			self.model_name = model_name
+		
 		self._busy = False
 		self._stop_event = None
 		self._target_page = None
@@ -1793,6 +1816,12 @@ class AIEditorAssistantPanel(wx.Panel):
 
 		self._on_mode_changed(None)
 		self._update_model_controls()
+		
+		# Load session if .amd model
+		self.on_panel_load()
+		
+		# Bind close event for auto-save
+		self.Bind(wx.EVT_WINDOW_DESTROY, self.on_panel_close)
 
 	@staticmethod
 	def _model_setting_key(provider):
@@ -1801,6 +1830,39 @@ class AIEditorAssistantPanel(wx.Panel):
 			"Ollama": "OLLAMA_MODEL",
 			"LM Studio": "LMSTUDIO_MODEL",
 		}.get(provider)
+
+	def _get_editor_model_label(self):
+		"""Return the label of the model edited by the host editor.
+
+		The host ``cb`` attribute is not always a canvas Block: it can also
+		be a :class:`DEVSComponent` (opened from the model properties) or a
+		plugin module. In that case the label is looked up on the attached
+		Block, falling back to the python file name.
+		"""
+		model = getattr(self.editor_host, "cb", None)
+
+		if model is None:
+			return None
+
+		label = getattr(model, "label", None)
+		if label:
+			return str(label)
+
+		get_block = getattr(model, "getBlock", None)
+		if callable(get_block):
+			try:
+				block = get_block()
+			except Exception:
+				block = None
+			label = getattr(block, "label", None)
+			if label:
+				return str(label)
+
+		python_path = getattr(model, "python_path", "") or ""
+		if python_path:
+			return os.path.splitext(os.path.basename(python_path))[0]
+
+		return None
 
 	def _get_current_model(self):
 		provider = getattr(
@@ -1850,6 +1912,33 @@ class AIEditorAssistantPanel(wx.Panel):
 		if current_model:
 			self.model_choice.Append(current_model)
 			self.model_choice.SetValue(current_model)
+
+		# Update model name from editor host if available
+		new_model_name = self._get_editor_model_label()
+		new_archive = self._get_archive_path()
+
+		if new_model_name and (
+			self.model_name != new_model_name
+			or self._session_archive != new_archive
+		):
+			# Save the current conversation in the archive it belongs to
+			# (the editor host already points to the new model at this point)
+			if self.model_name and self._ask_messages and self._session_archive:
+				self.store_session(archive=self._session_archive)
+
+			# Switch to the new model and its own session
+			self.model_name = new_model_name
+			self._session_archive = new_archive
+			self._session_loaded = False
+			self._ask_messages = []
+			self._ask_context_signature = None
+			self.prompt_input.Clear()
+			self.output.Clear()
+		elif new_archive:
+			self._session_archive = new_archive
+
+		# Load the last stored session the first time the panel is shown
+		self.on_panel_load()
 
 		self.model_label.Show(show_model)
 		self.model_choice.Show(show_model)
@@ -2068,6 +2157,12 @@ class AIEditorAssistantPanel(wx.Panel):
 		# Disable the editor while AI is generating code
 		page.SetReadOnly(True)
 
+		# Always include base system prompt with DEVS guidelines
+		base_system_prompt = (
+			"Follow this DEVSimPy model and simulator context when relevant:\n"
+			+ adapter.base_prompt
+		)
+
 		messages_history = None
 
 		if mode == 0:
@@ -2087,15 +2182,21 @@ class AIEditorAssistantPanel(wx.Panel):
 
 				self.output.Clear()
 
+				# Always add base system prompt
+				self._ask_messages.append(
+					{
+						"role": "system",
+						"content": base_system_prompt,
+					}
+				)
+
+				# Optionally add code context if enabled and available
 				if include_context and target_text:
 					self._ask_messages.append(
 						{
 							"role": "system",
 							"content": (
-								"Follow this DEVSimPy model and simulator "
-								"context when relevant:\n"
-								+ adapter.base_prompt
-								+ "\n\nUse the following active source "
+								"Use the following active source "
 								"code as context. Respond naturally to "
 								"the user's actual prompt; do not summarize "
 								"or modify the code unless asked. A greeting "
@@ -2317,27 +2418,36 @@ class AIEditorAssistantPanel(wx.Panel):
 				_("\nPlease review the changes and save if needed.")
 			)
 
+			# Update conversation history in Build mode as well
+			# (messages_history is None for Build requests)
+			self._ask_messages = list(messages_history or []) + [
+				{
+					"role": "assistant",
+					"content": result or "",
+				}
+			]
+
 		elif mode == 0:
-			self._ask_messages = (
-				messages_history
-				+ [
-					{
-						"role": "assistant",
-						"content": result or "",
-					}
-				]
-			)
+			self._ask_messages = list(messages_history or []) + [
+				{
+					"role": "assistant",
+					"content": result or "",
+				}
+			]
 
 			self.output.AppendText("\n")
+			
+			# Store session after successful AI interaction
+			self.store_session()
 
 	def _on_stop(self, event):
 		if self._busy and self._stop_event is not None:
 			self._stop_event.set()
 			self.stop_button.Disable()
 
-			self.output.AppendText(
-				_("\n\nStop requested...")
-			)
+		self.output.AppendText(
+			_("\n\nStop requested...")
+		)
 
 ###------------------------------------------------------------
 class Base:
@@ -2477,8 +2587,15 @@ class Base:
 			_("Show or hide the AI assistant panel"),
 			wx.ITEM_CHECK,
 		)
+		self.clear_ai_sessions_item = wx.MenuItem(
+			view,
+			wx.NewIdRef(),
+			_("Clear AI Sessions"),
+			_("Delete the AI assistant sessions stored in the model file"),
+		)
 		view.Append(showStatusBar)
 		view.Append(self.ai_assistant_item)
+		view.Append(self.clear_ai_sessions_item)
 
 		### ------------------------------------------------------------------
 
@@ -2509,6 +2626,7 @@ class Base:
 		self.Bind(wx.EVT_MENU, self.nb.OnDelete, id=delete.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnSelectAll, id=select.GetId())
 		self.Bind(wx.EVT_MENU, self.ToggleAIAssistantPanel, id=self.ai_assistant_item.GetId())
+		self.Bind(wx.EVT_MENU, self.OnClearAISessions, id=self.clear_ai_sessions_item.GetId())
 		self.Bind(wx.EVT_MENU, self.ToggleStatusBar, id=showStatusBar.GetId())
 		self.Bind(wx.EVT_MENU, self.OnAbout, id=about.GetId())
 		self.Bind(wx.EVT_FIND, self.OnFind)
@@ -2524,6 +2642,9 @@ class Base:
 		if splitter.IsSplit():
 			splitter.Unsplit(panel)
 			panel.Hide()
+			# Persist the session when the panel is hidden
+			if getattr(panel, "model_name", None):
+				panel.store_session()
 		else:
 			panel._update_model_controls()
 			panel.Show()
@@ -2537,6 +2658,49 @@ class Base:
 		self.Layout()
 		if panel.IsShown():
 			panel.prompt_input.SetFocus()
+
+	def OnClearAISessions(self, event):
+		"""Delete AI assistant sessions stored in the current .amd/.cmd model."""
+		panel = getattr(self, "ai_assistant_panel", None)
+
+		if panel is None:
+			return
+
+		archive = panel._get_archive_path()
+
+		if not archive:
+			wx.MessageBox(
+				_("AI sessions can only be stored in .amd or .cmd model files."),
+				_("AI Sessions"),
+				wx.OK | wx.ICON_INFORMATION,
+			)
+			return
+
+		archive_name = os.path.basename(archive)
+
+		answer = wx.MessageBox(
+			_("Delete all AI assistant sessions stored in '%s'?") % archive_name,
+			_("AI Sessions"),
+			wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION,
+		)
+
+		if answer != wx.YES:
+			return
+
+		if panel.clear_sessions():
+			panel.reset_session_ui()
+			wx.MessageBox(
+				_("AI assistant sessions deleted from '%s'.") % archive_name,
+				_("AI Sessions"),
+				wx.OK | wx.ICON_INFORMATION,
+			)
+		else:
+			wx.MessageBox(
+				_("Unable to delete the AI assistant sessions from '%s'.")
+				% archive_name,
+				_("AI Sessions"),
+				wx.OK | wx.ICON_ERROR,
+			)
 
 	def CreateTB(self, tb=None):
 		"""Create tool-bar."""

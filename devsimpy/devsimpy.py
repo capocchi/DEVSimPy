@@ -331,6 +331,9 @@ class MainApplication(wx.Frame):
 		).MinSize(wx.Size(250, -1))
 
 		# "commit" all changes made to FrameManager (warning always before the MakeMenu)
+		# Set MAIN_WINDOW for AI session storage
+		import builtins
+		builtins.MAIN_WINDOW = self
 		self._mgr.Update()
 
 		self.MakeMenu()
