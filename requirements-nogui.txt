@@ -1,5 +1,6 @@
 ### Requirements for the DEVSimPy-nogui.py file
 PyPubSub
+tomli; python_version < "3.11"
 PyYAML
 chart_studio
 matildapeak-guesstag
