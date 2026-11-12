@@ -328,6 +328,16 @@ class AIPrompterDialog(wx.Dialog):
 		stop_event = self._stop_event
 		try:
 			on_token = lambda token: wx.CallAfter(self._append_trace, token)
+
+			if self.adapter is None:
+				raise RuntimeError(_("No AI provider is selected."))
+
+			# Provider preflight (LM Studio server up, model loaded, ...)
+			ensure_ready = getattr(self.adapter, "ensure_ready", None)
+
+			if callable(ensure_ready):
+				ensure_ready()
+
 			if not self.editor:
 				wx.CallAfter(self._append_trace, _("\nGenerating model specification...\n"))
 				model_json = self.adapter.generate_model_json(
@@ -345,8 +355,19 @@ class AIPrompterDialog(wx.Dialog):
 			else:
 				full_prompt = self.adapter.modify_model_part_prompt(code, prompt)
 				wx.CallAfter(self._append_trace, _("\nGenerating code...\n"))
+
+				get_system_prompt = getattr(
+					self.adapter, "system_prompt", None
+				)
+				system_prompt = (
+					get_system_prompt() if callable(get_system_prompt) else ""
+				)
+
 				modified_code = self.adapter.generate_output(
-					full_prompt, on_token=on_token, stop_event=stop_event
+					full_prompt,
+					system_prompt=system_prompt,
+					on_token=on_token,
+					stop_event=stop_event,
 				)
 			if stop_event.is_set():
 				wx.CallAfter(self._finish_generation, None, None, None, True)

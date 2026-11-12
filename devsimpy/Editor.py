@@ -56,8 +56,6 @@ from AIPrompterDialog import AIPrompterDialog
 
 import ReloadModule
 import ZipManager
-import sys
-import os
 
 # Import AI_SessionMixin directly to avoid circular import through Mixins/__init__.py
 _mixin_path = os.path.join(os.path.dirname(__file__), 'Mixins', 'AI_SessionMixin.py')
@@ -1562,6 +1560,12 @@ class EditionNotebook(wx.Notebook):
 class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 	"""Bottom-docked Ask/Build assistant for the active code editor."""
 
+	### Bounded Build-mode conversation sent to the LLM (user/assistant turns)
+	MAX_HISTORY_MESSAGES = 6
+
+	### Maximum characters kept per history message
+	MAX_HISTORY_MESSAGE_CHARS = 6000
+
 	def __init__(self, parent, editor_host=None):
 		super().__init__(parent)
 		self.editor_host = editor_host or parent
@@ -1583,6 +1587,8 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 		self._whole_document = False
 		self._ask_messages = []
 		self._ask_context_signature = None
+		self._build_messages = []
+		self._session_choices = []
 
 		self.SetMinSize((-1, 80))
 		main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -1780,6 +1786,100 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 		)
 
 		# ============================================================
+		# Session management (.amd / .cmd archives only)
+		# ============================================================
+		session_row = wx.BoxSizer(wx.HORIZONTAL)
+
+		self.session_label = wx.StaticText(
+			self,
+			label=_("Session:"),
+		)
+
+		session_row.Add(
+			self.session_label,
+			0,
+			wx.ALIGN_CENTER_VERTICAL | wx.RIGHT,
+			8,
+		)
+
+		self.session_choice = wx.Choice(self, wx.NewIdRef())
+
+		self.session_choice.Bind(
+			wx.EVT_CHOICE,
+			self._on_session_selected,
+		)
+
+		session_row.Add(
+			self.session_choice,
+			1,
+			wx.RIGHT | wx.EXPAND,
+			8,
+		)
+
+		self.session_new_button = wx.Button(
+			self,
+			label=_("New"),
+		)
+		self.session_new_button.SetToolTip(
+			_("Start a new AI session")
+		)
+		self.session_new_button.Bind(
+			wx.EVT_BUTTON,
+			self._on_new_session,
+		)
+
+		session_row.Add(
+			self.session_new_button,
+			0,
+			wx.RIGHT | wx.ALIGN_CENTER_VERTICAL,
+			5,
+		)
+
+		self.session_load_button = wx.Button(
+			self,
+			label=_("Load"),
+		)
+		self.session_load_button.SetToolTip(
+			_("Load the selected AI session")
+		)
+		self.session_load_button.Bind(
+			wx.EVT_BUTTON,
+			self._on_load_session,
+		)
+
+		session_row.Add(
+			self.session_load_button,
+			0,
+			wx.RIGHT | wx.ALIGN_CENTER_VERTICAL,
+			5,
+		)
+
+		self.session_delete_button = wx.Button(
+			self,
+			label=_("Delete"),
+		)
+		self.session_delete_button.SetToolTip(
+			_("Delete the selected AI session")
+		)
+		self.session_delete_button.Bind(
+			wx.EVT_BUTTON,
+			self._on_delete_session,
+		)
+
+		session_row.Add(
+			self.session_delete_button,
+			0,
+			wx.ALIGN_CENTER_VERTICAL,
+		)
+
+		main_sizer.Add(
+			session_row,
+			0,
+			wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND,
+			8,
+		)
+
+		# ============================================================
 		# Code context
 		# ============================================================
 		self.include_code_context = wx.CheckBox(
@@ -1923,14 +2023,22 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 		):
 			# Save the current conversation in the archive it belongs to
 			# (the editor host already points to the new model at this point)
-			if self.model_name and self._ask_messages and self._session_archive:
+			if (
+				self.model_name
+				and self._session_archive
+				and (self._ask_messages or self._build_messages)
+			):
 				self.store_session(archive=self._session_archive)
 
 			# Switch to the new model and its own session
 			self.model_name = new_model_name
 			self._session_archive = new_archive
 			self._session_loaded = False
+			self._active_session_id = None
+			self._session_title = None
+			self._session_created_at = None
 			self._ask_messages = []
+			self._build_messages = []
 			self._ask_context_signature = None
 			self.prompt_input.Clear()
 			self.output.Clear()
@@ -1943,6 +2051,8 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 		self.model_label.Show(show_model)
 		self.model_choice.Show(show_model)
 		self.refresh_models_button.Show(show_model)
+
+		self._refresh_session_controls()
 
 		self.Layout()
 
@@ -2003,7 +2113,7 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 
 		except Exception as error:
 			wx.MessageBox(
-				_(f"Could not refresh models:\n{error!s}"),
+				_("Could not refresh models:\n%s") % error,
 				_("Model Refresh Failed"),
 				wx.OK | wx.ICON_ERROR,
 			)
@@ -2034,6 +2144,206 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 
 			AdapterFactory.reset_instance()
 			self._ask_context_signature = None
+
+	# ================================================================
+	# Session management
+	# ================================================================
+	def _refresh_session_controls(self):
+		"""Populate the session row from the model archive."""
+		is_zip = self.is_zip_model()
+
+		for widget in (
+			self.session_label,
+			self.session_choice,
+			self.session_new_button,
+			self.session_load_button,
+			self.session_delete_button,
+		):
+			widget.Show(is_zip)
+
+		if not is_zip:
+			self.session_choice.Clear()
+			self._session_choices = []
+			self.Layout()
+			return
+
+		sessions = self.list_sessions()
+		self._session_choices = sessions
+
+		self.session_choice.Clear()
+
+		active_index = -1
+
+		for index, record in enumerate(sessions):
+			title = (
+				record.get("title")
+				or record.get("session_id")
+				or _("Untitled session")
+			)
+
+			stamp = (
+				record.get("updated_at")
+				or record.get("timestamp")
+				or ""
+			)[:19].replace("T", " ")
+
+			label = f"{title}  [{stamp}]" if stamp else title
+
+			self.session_choice.Append(label)
+
+			if record.get("session_id") == self._active_session_id:
+				active_index = index
+
+		if active_index >= 0:
+			self.session_choice.SetSelection(active_index)
+		elif sessions:
+			self.session_choice.SetSelection(0)
+
+		self.session_load_button.Enable(bool(sessions) and not self._busy)
+		self.session_delete_button.Enable(bool(sessions) and not self._busy)
+		self.session_new_button.Enable(not self._busy)
+		self.session_choice.Enable(bool(sessions) and not self._busy)
+
+		self.Layout()
+
+	def _selected_session_record(self):
+		"""Return the session metadata currently selected in the row."""
+		index = self.session_choice.GetSelection()
+
+		if 0 <= index < len(self._session_choices):
+			return self._session_choices[index]
+
+		return None
+
+	def _on_session_selected(self, event):
+		"""Enable the action buttons when a session is selected."""
+		record = self._selected_session_record()
+
+		self.session_load_button.Enable(
+			record is not None and not self._busy
+		)
+		self.session_delete_button.Enable(
+			record is not None and not self._busy
+		)
+
+		if event is not None and hasattr(event, "Skip"):
+			event.Skip()
+
+	def _on_new_session(self, event):
+		"""Start a new empty session without touching the archive yet."""
+		if self._busy:
+			return
+
+		self._save_current_session_if_needed()
+		self.create_session()
+		self._refresh_session_controls()
+
+		self.output.SetValue(
+			_("New AI session started. It will be saved with the next request.")
+		)
+
+	def _save_current_session_if_needed(self):
+		"""Persist the current conversation before replacing it."""
+		session_data = self._get_current_session()
+
+		has_content = bool(
+			session_data
+			and (
+				str(session_data.get("prompt") or "").strip()
+				or session_data.get("messages")
+				or session_data.get("build_messages")
+			)
+		)
+
+		if not has_content:
+			return False
+
+		self.ensure_active_session()
+
+		return self.store_session()
+
+	def _on_load_session(self, event):
+		"""Load the selected session into the panel."""
+		if self._busy:
+			return
+
+		record = self._selected_session_record()
+
+		if record is None:
+			return
+
+		### Keep the conversation being replaced
+		if record.get("session_id") != self._active_session_id:
+			self._save_current_session_if_needed()
+
+		session_data = self.load_session(
+			session_id=record.get("session_id")
+		)
+
+		if session_data is None:
+			wx.MessageBox(
+				_("Could not load the selected AI session."),
+				_("Session Load Failed"),
+				wx.OK | wx.ICON_ERROR,
+			)
+			return
+
+		self._restore_session_to_ui(session_data)
+		self._session_loaded = True
+		self._refresh_session_controls()
+
+		self.output.SetValue(
+			_("Session loaded: %s")
+			% (
+				self._session_title
+				or record.get("title")
+				or record.get("session_id")
+			)
+		)
+
+	def _on_delete_session(self, event):
+		"""Delete the selected session from the model archive."""
+		if self._busy:
+			return
+
+		record = self._selected_session_record()
+
+		if record is None:
+			return
+
+		title = (
+			record.get("title")
+			or record.get("session_id")
+			or _("this session")
+		)
+
+		if (
+			wx.MessageBox(
+				_("Delete the AI session '%s'?") % title,
+				_("Delete Session"),
+				wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION,
+			)
+			!= wx.YES
+		):
+			return
+
+		if not self.delete_session(record.get("session_id")):
+			wx.MessageBox(
+				_("Could not delete the selected AI session."),
+				_("Session Delete Failed"),
+				wx.OK | wx.ICON_ERROR,
+			)
+			return
+
+		### The deleted session was the one being edited: start over
+		if self._active_session_id is None:
+			self._ask_messages = []
+			self._build_messages = []
+			self._ask_context_signature = None
+
+		self._refresh_session_controls()
+
+		self.output.SetValue(_("Session deleted."))
 
 	def _on_mode_changed(self, event):
 		ask_mode = self.mode_choice.GetSelection() == 0
@@ -2237,6 +2547,10 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 		self.stop_button.Enable()
 		self.model_choice.Disable()
 		self.refresh_models_button.Disable()
+		self.session_choice.Disable()
+		self.session_new_button.Disable()
+		self.session_load_button.Disable()
+		self.session_delete_button.Disable()
 
 		# ------------------------------------------------------------
 		# Show activity indicator
@@ -2271,7 +2585,15 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 		messages_history,
 	):
 		try:
-			system_prompt = ""
+			# Provider preflight (LM Studio server up, model loaded, ...)
+			ensure_ready = getattr(adapter, "ensure_ready", None)
+
+			if callable(ensure_ready):
+				ensure_ready()
+
+			# Static DEVSimPy guidelines go to the system role; the user
+			# message carries only the changing code and request.
+			system_prompt = adapter.system_prompt()
 
 			if mode == 0:
 				full_prompt = prompt
@@ -2279,6 +2601,14 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 				full_prompt = adapter.modify_model_prompt(
 					code,
 					prompt,
+				)
+
+				# Build mode: send a bounded conversation so the model can
+				# build on previous requests and generated code.
+				messages_history = (
+					[{"role": "system", "content": system_prompt}]
+					+ self._bounded_build_history()
+					+ [{"role": "user", "content": full_prompt}]
 				)
 
 			result = adapter.generate_output(
@@ -2304,6 +2634,7 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 				mode,
 				stop_event.is_set(),
 				messages_history,
+				prompt,
 			)
 
 		except Exception as error:
@@ -2314,7 +2645,46 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 				mode,
 				stop_event.is_set(),
 				messages_history,
+				prompt,
 			)
+
+	def _bounded_build_history(self):
+		"""Return the Build-mode conversation, bounded for the request."""
+		history = []
+
+		for message in getattr(self, "_build_messages", []) or []:
+			if not isinstance(message, dict):
+				continue
+
+			role = message.get("role")
+
+			if role not in ("user", "assistant"):
+				continue
+
+			content = message.get("content")
+
+			if not isinstance(content, str):
+				continue
+
+			if len(content) > self.MAX_HISTORY_MESSAGE_CHARS:
+				content = content[: self.MAX_HISTORY_MESSAGE_CHARS] + "\n...[truncated]"
+
+			history.append({"role": role, "content": content})
+
+		return history[-self.MAX_HISTORY_MESSAGES :]
+
+	def _record_build_turn(self, user_prompt, result):
+		"""Append a completed Build request to the conversation history."""
+		if not user_prompt:
+			return
+
+		self._build_messages = (
+			self._bounded_build_history()
+			+ [
+				{"role": "user", "content": user_prompt},
+				{"role": "assistant", "content": result or ""},
+			]
+		)[-self.MAX_HISTORY_MESSAGES :]
 
 	def _append_output(self, text):
 		self.output.AppendText(text)
@@ -2329,6 +2699,7 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 		mode,
 		cancelled,
 		messages_history,
+		user_prompt=None,
 	):
 		# Check if the panel is still valid before updating controls
 		if not self.IsShown():
@@ -2367,13 +2738,38 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 				_("\n\nRequest stopped; no code changes were applied.")
 			)
 
+			self._refresh_session_controls()
+
 		elif error is not None:
 			self.output.AppendText(
-				_(f"\n\nRequest failed: {error}")
+				_("\n\nRequest failed: %s") % error
 			)
 
-		elif mode == 1 and result:
+			self._refresh_session_controls()
+
+		elif mode == 1:
+			# Never write an empty (or whitespace-only) result into the model
+			if not result or not result.strip():
+				self.output.AppendText(
+					_(
+						"\n\nNo code was generated; "
+						"the model was not modified."
+					)
+				)
+				self._refresh_session_controls()
+				return
+
 			page = self._target_page
+
+			if page is None:
+				self.output.AppendText(
+					_(
+						"\n\nNo code editor page is available; "
+						"the result was not applied."
+					)
+				)
+				self._refresh_session_controls()
+				return
 
 			current_text = (
 				page.GetText()
@@ -2391,6 +2787,7 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 						"was running; the result was not applied."
 					)
 				)
+				self._refresh_session_controls()
 				return
 
 			page.BeginUndoAction()
@@ -2418,14 +2815,13 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 				_("\nPlease review the changes and save if needed.")
 			)
 
-			# Update conversation history in Build mode as well
-			# (messages_history is None for Build requests)
-			self._ask_messages = list(messages_history or []) + [
-				{
-					"role": "assistant",
-					"content": result or "",
-				}
-			]
+			# Keep a bounded Build-mode conversation for the next request
+			self._record_build_turn(user_prompt, result)
+
+			# Persist the updated session in the model archive
+			self.ensure_active_session()
+			self.store_session()
+			self._refresh_session_controls()
 
 		elif mode == 0:
 			self._ask_messages = list(messages_history or []) + [
@@ -2438,7 +2834,9 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 			self.output.AppendText("\n")
 			
 			# Store session after successful AI interaction
+			self.ensure_active_session()
 			self.store_session()
+			self._refresh_session_controls()
 
 	def _on_stop(self, event):
 		if self._busy and self._stop_event is not None:
