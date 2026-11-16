@@ -216,6 +216,99 @@ class DevsAIAdapter(ABC):
 			+ self.base_prompt
 		)
 
+	### File text is extracted locally and sent as plain text, so every
+	### text LLM can receive it. Adapters can override this to opt out.
+	SUPPORTS_FILE_ATTACHMENTS = True
+
+	def supports_file_attachments(self):
+		"""Return True when local documents can be added to the prompt.
+
+		Attachments are converted to text by :mod:`AIFileContext` and sent as
+		part of the user message, so no multimodal model is required.
+		"""
+		return self.SUPPORTS_FILE_ATTACHMENTS
+
+	def generate_coupled_model_json(
+		self,
+		prompt,
+		catalog=None,
+		model_name=None,
+		inputs=None,
+		outputs=None,
+		previous_structure=None,
+		history=None,
+		on_token=None,
+		stop_event=None,
+	):
+		"""Generate a JSON structure describing a coupled model.
+
+		Unlike :meth:`generate_model_json`, which describes the behaviour of an
+		atomic model, the returned object describes the coupled model structure
+		(submodels and couplings). The raw answer is returned as a string; the
+		caller validates it with
+		:func:`CoupledStructure.normalize_coupled_structure`.
+
+		When ``previous_structure`` is given, the assistant updates that
+		structure instead of creating a new one. ``history`` carries the
+		previous turns of the coupled-model conversation so a reopened session
+		keeps its context.
+		"""
+		from CoupledStructure import coupled_system_prompt, coupled_user_prompt
+
+		system_prompt = coupled_system_prompt(catalog)
+		user_prompt = coupled_user_prompt(
+			prompt,
+			model_name=model_name,
+			inputs=inputs,
+			outputs=outputs,
+			previous_structure=previous_structure,
+		)
+
+		messages = self._coupled_messages(system_prompt, history, user_prompt)
+
+		return self.generate_output(
+			"" if messages else user_prompt,
+			system_prompt=system_prompt,
+			messages_history=messages,
+			on_token=on_token,
+			stop_event=stop_event,
+		)
+
+	### Maximum characters kept per conversation turn sent to the model
+	MAX_HISTORY_MESSAGE_CHARS = 20_000
+
+	def _coupled_messages(self, system_prompt, history, user_prompt):
+		"""Build the chat messages of a coupled-model request.
+
+		Returns ``None`` when there is no history, so adapters keep using the
+		single-shot system/user prompt.
+		"""
+		history = [message for message in history or [] if isinstance(message, dict)]
+
+		if not history:
+			return None
+
+		messages = [{"role": "system", "content": system_prompt}]
+
+		for message in history:
+			role = message.get("role")
+			content = message.get("content")
+
+			if role not in ("user", "assistant") or not isinstance(content, str):
+				continue
+
+			if not content.strip():
+				continue
+
+			if len(content) > self.MAX_HISTORY_MESSAGE_CHARS:
+				content = content[: self.MAX_HISTORY_MESSAGE_CHARS] + "\n...[truncated]"
+
+			messages.append({"role": role, "content": content})
+
+		messages.append({"role": "user", "content": user_prompt})
+
+		return messages
+
 	def modify_model_part_prompt(self, code, prompt):
 		"""
 		Generates a prompt to modify a specific part of an existing DEVS model.
@@ -991,39 +1084,142 @@ class LMStudioDevsAdapter(DevsAIAdapter):
 			_("An error occurred while generating the output: %s") % error
 		)
 
+	@staticmethod
+	def _is_unsupported_response_format(error):
+		"""Return True when the server rejected the requested ``response_format``.
+
+		Recent LM Studio builds only accept ``json_schema`` or ``text`` and
+		answer ``'response_format.type' must be 'json_schema' or 'text'`` when
+		``json_object`` is requested. They may also reject ``json_schema`` when
+		the loaded model has no structured-output support.
+		"""
+		message = str(error).lower()
+		return (
+			"response_format" in message
+			or "json_schema" in message
+			or "structured output" in message
+		)
+
+	@staticmethod
+	def _extract_json_text(content):
+		"""Return the JSON payload contained in an LLM answer.
+
+		When the request falls back to ``response_format={"type": "text"}`` the
+		model may wrap its answer in a Markdown code fence. Strip the fence (or
+		any surrounding prose) before validating the payload.
+		"""
+		if not content:
+			return ""
+
+		text = content.strip()
+		fence = re.match(r"^```(?:json)?\s*(.*?)\s*```$", text, re.DOTALL)
+		if fence:
+			return fence.group(1).strip()
+
+		start = text.find("{")
+		end = text.rfind("}")
+		if start != -1 and end > start:
+			return text[start : end + 1]
+
+		return text
+
+	@staticmethod
+	def _collect_completion_content(response, on_token=None, stop_event=None):
+		"""Return the full text of a streamed or non-streamed completion.
+
+		Some LM Studio models are reasoning models: the final answer is returned
+		in ``reasoning_content`` while ``content`` stays empty. Fall back to the
+		reasoning text so the answer is never silently lost.
+		"""
+
+		def _reasoning_text(message):
+			text = getattr(message, "reasoning_content", None)
+			if text:
+				return text
+			extra = getattr(message, "model_extra", None) or {}
+			return extra.get("reasoning_content")
+
+		if on_token is None and stop_event is None:
+			message = response.choices[0].message
+			return message.content or _reasoning_text(message) or ""
+
+		content_parts = []
+		reasoning_parts = []
+		for chunk in response:
+			if stop_event is not None and stop_event.is_set():
+				response.close()
+				break
+			if not chunk.choices:
+				continue
+			delta = chunk.choices[0].delta
+			content = delta.content
+			if content:
+				content_parts.append(content)
+				if on_token is not None:
+					on_token(content)
+			reasoning = _reasoning_text(delta)
+			if reasoning:
+				reasoning_parts.append(reasoning)
+				if on_token is not None and not content_parts:
+					on_token(reasoning)
+
+		return "".join(content_parts) or "".join(reasoning_parts)
+
+	def _request_json_completion(self, messages, on_token=None, stop_event=None):
+		"""Request a JSON completion, retrying with plain text when needed."""
+		schema = AtomicModel.model_json_schema()
+		response_formats = [
+			{
+				"type": "json_schema",
+				"json_schema": {
+					"name": "atomic_model",
+					"strict": True,
+					"schema": schema,
+				},
+			},
+			{"type": "text"},
+		]
+
+		stream = on_token is not None or stop_event is not None
+		last_error = None
+
+		for response_format in response_formats:
+			try:
+				response = self.api_client.chat.completions.create(
+					model=self.model_name,
+					messages=messages,
+					response_format=response_format,
+					stream=stream,
+				)
+			except Exception as error:
+				if last_error is not None or not self._is_unsupported_response_format(error):
+					raise
+				logging.warning(  # noqa: LOG015
+					"LM Studio rejected response_format %s, retrying with plain text: %s",
+					response_format.get("type"),
+					error,
+				)
+				last_error = error
+				continue
+
+			return self._collect_completion_content(response, on_token, stop_event)
+
+		raise last_error
+
 	def generate_model_json(self, prompt, on_token=None, stop_event=None):
 		system_prompt = self._load_base_prompt(AI_DIR / "json_gen_prompt.txt")
 		system_prompt += (
 			"\nReturn a single JSON object conforming to this schema:\n"
 			+ json.dumps(AtomicModel.model_json_schema())
 		)
+		messages = [
+			{"role": "system", "content": system_prompt},
+			{"role": "user", "content": prompt},
+		]
 		try:
-			response = self.api_client.chat.completions.create(
-				model=self.model_name,
-				messages=[
-					{"role": "system", "content": system_prompt},
-					{"role": "user", "content": prompt},
-				],
-				response_format={"type": "json_object"},
-				stream=on_token is not None or stop_event is not None,
-			)
-			if on_token is not None or stop_event is not None:
-				content_parts = []
-				for chunk in response:
-					if stop_event is not None and stop_event.is_set():
-						response.close()
-						break
-					if not chunk.choices:
-						continue
-					content = chunk.choices[0].delta.content
-					if content:
-						content_parts.append(content)
-						if on_token is not None:
-							on_token(content)
-				content = "".join(content_parts)
-			else:
-				content = response.choices[0].message.content
-			return AtomicModel.model_validate_json(content).model_dump()
+			content = self._request_json_completion(messages, on_token, stop_event)
+			payload = self._extract_json_text(content)
+			return AtomicModel.model_validate_json(payload).model_dump()
 		except AIRequestError:
 			raise
 		except ValueError as error:
@@ -1049,21 +1245,7 @@ class LMStudioDevsAdapter(DevsAIAdapter):
 				],
 				stream=on_token is not None or stop_event is not None,
 			)
-			if on_token is not None or stop_event is not None:
-				content_parts = []
-				for chunk in response:
-					if stop_event is not None and stop_event.is_set():
-						response.close()
-						break
-					if not chunk.choices:
-						continue
-					content = chunk.choices[0].delta.content
-					if content:
-						content_parts.append(content)
-						if on_token is not None:
-							on_token(content)
-				return "".join(content_parts)
-			return response.choices[0].message.content
+			return self._collect_completion_content(response, on_token, stop_event)
 		except AIRequestError:
 			raise
 		except ValueError as error:

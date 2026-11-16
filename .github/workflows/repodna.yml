@@ -1,0 +1,42 @@
+
+name: DEVSimPy - Repository DNA Analysis
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  repodna:
+    name: Analyze DEVSimPy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout DEVSimPy
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Analyze repository with RepoDNA
+        id: repodna
+        uses: sanskarIN/RepoDNA@v1.4.5
+        with:
+          path: .
+          profile: standard
+          fail-on: never
+          annotate: true
+          report: ${{ runner.temp }}/repodna-report
+
+      - name: Upload RepoDNA report
+        uses: actions/upload-artifact@v4
+        with:
+          name: DEVSimPy-RepoDNA-Analysis
+          path: |
+            ${{ steps.repodna.outputs.report }}
+            ${{ steps.repodna.outputs.analysis }}
+          retention-days: 30

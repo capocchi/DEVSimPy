@@ -445,6 +445,9 @@ class LibraryTree(wx.TreeCtrl):
 				model_file=gmwiz.model_path,
 			)
 			if m:
+				### build the AI-generated coupled structure before saving
+				gmwiz.apply_coupled_structure(m)
+
 				if not m.SaveFile(gmwiz.model_path):
 					dlg = wx.MessageDialog(
 						self,

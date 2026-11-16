@@ -46,6 +46,8 @@ ollama
 
 pydantic
 
+pypdf
+
 msgpack
 
 paho-mqtt

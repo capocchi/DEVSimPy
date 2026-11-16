@@ -53,6 +53,12 @@ from AIAdapter import AdapterFactory, ChatGPTDevsAdapter, LMStudioDevsAdapter, O
 from Decorators import redirectStdout
 from Utilities import path_to_module, printOnStatusBar, load_and_resize_image
 from AIPrompterDialog import AIPrompterDialog
+from AIFileContext import (
+	AIFileError,
+	compose_prompt,
+	load_attachment,
+	summarize_attachments,
+)
 
 import ReloadModule
 import ZipManager
@@ -1589,6 +1595,7 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 		self._ask_context_signature = None
 		self._build_messages = []
 		self._session_choices = []
+		self._attachments = []
 
 		self.SetMinSize((-1, 80))
 		main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -1778,6 +1785,27 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 			0,
 		)
 
+		# Reopen the coupled-model AI assistant (saved .cmd models only)
+		self.coupled_ai_button = wx.Button(
+			self,
+			label=_("Modify with AI..."),
+		)
+		self.coupled_ai_button.SetToolTip(
+			_("Reopen the AI assistant that generated this coupled model")
+		)
+		self.coupled_ai_button.Bind(
+			wx.EVT_BUTTON,
+			self._on_edit_coupled_with_ai,
+		)
+		self.coupled_ai_button.Hide()
+
+		model_row.Add(
+			self.coupled_ai_button,
+			0,
+			wx.LEFT | wx.ALIGN_CENTER_VERTICAL,
+			5,
+		)
+
 		main_sizer.Add(
 			model_row,
 			0,
@@ -1893,6 +1921,68 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 			self.include_code_context,
 			0,
 			wx.LEFT | wx.RIGHT | wx.BOTTOM,
+			8,
+		)
+
+		# ============================================================
+		# Attached files
+		# ============================================================
+		attachments_row = wx.BoxSizer(wx.HORIZONTAL)
+
+		self.attach_button = wx.Button(
+			self,
+			label=_("Attach files..."),
+		)
+		self.attach_button.SetToolTip(
+			_(
+				"Attach TXT or PDF files. Their text is extracted locally "
+				"and added to the prompt; scanned PDFs require OCR."
+			)
+		)
+		self.attach_button.Bind(
+			wx.EVT_BUTTON,
+			self._on_attach_files,
+		)
+
+		attachments_row.Add(
+			self.attach_button,
+			0,
+			wx.RIGHT | wx.ALIGN_CENTER_VERTICAL,
+			8,
+		)
+
+		self.attachments_label = wx.StaticText(
+			self,
+			label=_("No file attached."),
+		)
+
+		attachments_row.Add(
+			self.attachments_label,
+			1,
+			wx.RIGHT | wx.ALIGN_CENTER_VERTICAL,
+			8,
+		)
+
+		self.clear_attachments_button = wx.Button(
+			self,
+			label=_("Clear"),
+		)
+		self.clear_attachments_button.Bind(
+			wx.EVT_BUTTON,
+			self._on_clear_attachments,
+		)
+		self.clear_attachments_button.Disable()
+
+		attachments_row.Add(
+			self.clear_attachments_button,
+			0,
+			wx.ALIGN_CENTER_VERTICAL,
+		)
+
+		main_sizer.Add(
+			attachments_row,
+			0,
+			wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND,
 			8,
 		)
 
@@ -2040,6 +2130,7 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 			self._ask_messages = []
 			self._build_messages = []
 			self._ask_context_signature = None
+			self._attachments = []
 			self.prompt_input.Clear()
 			self.output.Clear()
 		elif new_archive:
@@ -2052,9 +2143,48 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 		self.model_choice.Show(show_model)
 		self.refresh_models_button.Show(show_model)
 
+		### reopen the coupled-model assistant (saved .cmd models with a session)
+		show_coupled_ai = False
+
+		if show_model and new_archive and self.is_cmd_model():
+			try:
+				import AICoupledSession
+
+				show_coupled_ai = bool(AICoupledSession.list_sessions(new_archive))
+			except Exception:
+				show_coupled_ai = False
+
+		self.coupled_ai_button.Show(show_coupled_ai)
+
+		self._refresh_attachments()
 		self._refresh_session_controls()
 
 		self.Layout()
+
+	def _on_edit_coupled_with_ai(self, event):
+		"""Reopen the coupled-model AI assistant of the edited model."""
+		model = self._get_model()
+
+		if model is None:
+			return
+
+		### the editor host may hold a DEVSComponent instead of the Block
+		block = model
+
+		if not hasattr(block, "GetShapeList"):
+			get_block = getattr(model, "getBlock", None)
+
+			if callable(get_block):
+				try:
+					block = get_block() or block
+				except Exception:
+					block = model
+
+		from AIPrompterDialog import edit_coupled_model_with_ai
+
+		edit_coupled_model_with_ai(block, self)
+
+		self._update_model_controls()
 
 	def _on_refresh_models(self, event):
 		provider = getattr(
@@ -2394,6 +2524,85 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 		self.prompt_input.Clear()
 		self.prompt_input.SetFocus()
 
+	def _on_attach_files(self, event):
+		"""Select TXT or PDF files whose text is added to the prompt."""
+		if self._busy:
+			return
+
+		provider = getattr(builtins, "SELECTED_IA", "")
+
+		if not provider:
+			self.output.SetValue(
+				_("Select an AI provider in Preferences first.")
+			)
+			return
+
+		wildcard = _(
+			"Text and PDF files (*.txt;*.md;*.pdf)|*.txt;*.md;*.pdf|"
+			"All files (*.*)|*.*"
+		)
+
+		dlg = wx.FileDialog(
+			self,
+			message=_("Attach files to the prompt"),
+			wildcard=wildcard,
+			style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE,
+		)
+
+		if dlg.ShowModal() != wx.ID_OK:
+			dlg.Destroy()
+			return
+
+		paths = dlg.GetPaths()
+		dlg.Destroy()
+
+		errors = []
+		known = {attachment.path for attachment in self._attachments}
+
+		with wx.BusyCursor():
+			for path in paths:
+				if os.path.abspath(path) in known:
+					continue
+
+				try:
+					attachment = load_attachment(path)
+				except AIFileError as error:
+					errors.append(str(error))
+					continue
+
+				self._attachments.append(attachment)
+				known.add(attachment.path)
+
+		self._refresh_attachments()
+
+		if errors:
+			self.output.AppendText(
+				_("\n\nCannot attach file:\n%s") % "\n".join(errors)
+			)
+
+	def _on_clear_attachments(self, event):
+		"""Remove every attached file."""
+		if self._busy:
+			return
+
+		self._attachments = []
+		self._refresh_attachments()
+
+	def _refresh_attachments(self):
+		"""Update the attachment summary and Clear button."""
+		self.attachments_label.SetLabel(
+			summarize_attachments(self._attachments)
+		)
+		self.attachments_label.SetToolTip(
+			"\n".join(
+				attachment.name for attachment in self._attachments
+			)
+		)
+		self.clear_attachments_button.Enable(
+			bool(self._attachments) and not self._busy
+		)
+		self.Layout()
+
 	def _on_run(self, event):
 		if self._busy:
 			return
@@ -2464,6 +2673,11 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 
 		mode = self.mode_choice.GetSelection()
 
+		# Attachments are added to this request only. The original prompt is
+		# kept in the conversation history so large documents are not stored
+		# in the session nor re-sent on every turn.
+		request_prompt = compose_prompt(prompt, self._attachments)
+
 		# Disable the editor while AI is generating code
 		page.SetReadOnly(True)
 
@@ -2522,13 +2736,20 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 				+ [
 					{
 						"role": "user",
-						"content": prompt,
+						"content": request_prompt,
 					}
 				]
 			)
 
 			if self.output.GetLastPosition():
 				self.output.AppendText("\n\n")
+
+			if self._attachments:
+				self.output.AppendText(
+					_("[{count} attached file(s) added to the prompt]\n").format(
+						count=len(self._attachments)
+					)
+				)
 
 			self.output.AppendText(
 				f"User: {prompt}\nAssistant: "
@@ -2551,6 +2772,8 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 		self.session_new_button.Disable()
 		self.session_load_button.Disable()
 		self.session_delete_button.Disable()
+		self.attach_button.Disable()
+		self.clear_attachments_button.Disable()
 
 		# ------------------------------------------------------------
 		# Show activity indicator
@@ -2564,12 +2787,13 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 			target=self._run_request,
 			args=(
 				adapter,
-				prompt,
+				request_prompt,
 				target_text,
 				mode,
 				self._stop_event,
 				messages_history,
 			),
+			kwargs={"history_prompt": prompt},
 			daemon=True,
 		)
 
@@ -2583,6 +2807,7 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 		mode,
 		stop_event,
 		messages_history,
+		history_prompt=None,
 	):
 		try:
 			# Provider preflight (LM Studio server up, model loaded, ...)
@@ -2635,6 +2860,7 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 				stop_event.is_set(),
 				messages_history,
 				prompt,
+				history_prompt=history_prompt,
 			)
 
 		except Exception as error:
@@ -2646,6 +2872,7 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 				stop_event.is_set(),
 				messages_history,
 				prompt,
+				history_prompt=history_prompt,
 			)
 
 	def _bounded_build_history(self):
@@ -2700,6 +2927,7 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 		cancelled,
 		messages_history,
 		user_prompt=None,
+		history_prompt=None,
 	):
 		# Check if the panel is still valid before updating controls
 		if not self.IsShown():
@@ -2715,6 +2943,10 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 			self.stop_button.Disable()
 			self.model_choice.Enable()
 			self.refresh_models_button.Enable()
+			self.attach_button.Enable()
+			self.clear_attachments_button.Enable(
+				bool(self._attachments)
+			)
 
 			# --------------------------------------------------------
 			# Stop and hide activity indicator
@@ -2816,7 +3048,9 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 			)
 
 			# Keep a bounded Build-mode conversation for the next request
-			self._record_build_turn(user_prompt, result)
+			self._record_build_turn(
+				history_prompt or user_prompt, result
+			)
 
 			# Persist the updated session in the model archive
 			self.ensure_active_session()
@@ -2824,7 +3058,21 @@ class AIEditorAssistantPanel(wx.Panel, AI_SessionMixin):
 			self._refresh_session_controls()
 
 		elif mode == 0:
-			self._ask_messages = list(messages_history or []) + [
+			stored_messages = list(messages_history or [])
+
+			# The request prompt may include attached file text; store the
+			# original prompt so documents are not persisted in the session.
+			if (
+				history_prompt is not None
+				and stored_messages
+				and stored_messages[-1].get("role") == "user"
+			):
+				stored_messages[-1] = {
+					"role": "user",
+					"content": history_prompt,
+				}
+
+			self._ask_messages = stored_messages + [
 				{
 					"role": "assistant",
 					"content": result or "",

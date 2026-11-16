@@ -16,6 +16,8 @@ import json
 import threading
 import wx
 import os
+import sys
+import builtins
 
 import gettext
 
@@ -23,10 +25,32 @@ _ = gettext.gettext
 
 from Utilities import load_and_resize_image
 
+import AICoupledSession
+
+from AIFileContext import (
+	AIFileError,
+	compose_prompt,
+	load_attachment,
+	summarize_attachments,
+)
+
 
 # Définition du dialogue personnalisé
 class AIPrompterDialog(wx.Dialog):
-	def __init__(self, parent, title=_("AI Code Editor"), code_to_replace="", adapter=None):  # noqa: B008
+	def __init__(
+		self,
+		parent,
+		title=_("AI Code Editor"),  # noqa: B008
+		code_to_replace="",
+		adapter=None,
+		model_kind="atomic",
+		model_name=None,
+		inputs=None,
+		outputs=None,
+		catalog=None,
+		archive_path=None,
+		session=None,
+	):
 		super().__init__(parent, id=wx.ID_ANY, title=title)
 
 		_icon = wx.Icon()
@@ -36,10 +60,40 @@ class AIPrompterDialog(wx.Dialog):
 		### local copy
 		self.adapter = adapter
 		self.parent = parent
+
+		### "atomic" generates a model class, "coupled" generates a structure
+		self.model_kind = model_kind or "atomic"
+		self.model_name = model_name
+		self.inputs = inputs
+		self.outputs = outputs
+		self.catalog = catalog
+
+		### archive that stores the session of a coupled model (.cmd/.amd)
+		self.archive_path = archive_path
+		self.session = dict(session or {})
+		self.session_data = None
+		self._session_id = self.session.get("session_id")
+
+		### conversation of the coupled-model assistant, restored from the
+		### archive so a reopened session keeps its context
+		self.coupled_messages = self._clean_session_messages(
+			self.session.get("messages")
+		)
+
+		### reopen the previous structure (editable) instead of an empty box
+		if (
+			self.model_kind == "coupled"
+			and not code_to_replace
+			and isinstance(self.session.get("structure"), dict)
+		):
+			code_to_replace = json.dumps(
+				self.session["structure"], indent=2, ensure_ascii=False
+			)
+
 		self.code_to_replace = code_to_replace
 
 		### editor instance
-		if parent:
+		if parent and self.model_kind != "coupled":
 			nb = parent.GetNoteBook()
 			self.editor = nb.GetCurrentPage()
 		else:
@@ -50,30 +104,51 @@ class AIPrompterDialog(wx.Dialog):
 
 		# generated JSON representing a newly created model
 		self.model_json = None
+		# validated structure of a newly created coupled model
+		self.coupled_model = None
+		# local documents whose text is added to the prompt
+		self.attachments = []
 		self._generation_active = False
 		self._stop_event = threading.Event()
+		# prompt of the request being processed (stored in the conversation)
+		self._pending_prompt = ""
 
 		self.__init_ui()
 		self.Bind(wx.EVT_CLOSE, self.on_close)
 		self.Center()
 
+		### tell the user that the previous conversation was reopened
+		if self.model_kind == "coupled" and self.coupled_messages:
+			self._append_trace(
+				_("\nSession restored ({count} message(s)).\n").format(
+					count=len(self.coupled_messages)
+				)
+			)
+
 	def __init_ui(self):
 		"""Initialize the user interface"""
 
 		# Taille optimale
-		self.SetSize((700, 720))
-		self.SetMinSize((650, 600))
+		self.SetSize((760, 820))
+		self.SetMinSize((680, 640))
 
 		panel = wx.Panel(self)
 		panel.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOW))
+		self._main_panel = panel
 
 		main_sizer = wx.BoxSizer(wx.VERTICAL)
 
 		# --- Section Generated Code ---
-		code_box = wx.StaticBoxSizer(wx.VERTICAL, panel, _("Generated Code"))
+		if self.model_kind == "coupled":
+			code_label = _("Coupled Model Structure (JSON)")
+		else:
+			code_label = _("Generated Code")
+
+		code_static = wx.StaticBox(panel, label=code_label)
+		code_box = wx.StaticBoxSizer(code_static, wx.VERTICAL)
 
 		self.code_text = wx.TextCtrl(
-			panel, value=self.code_to_replace, style=wx.TE_MULTILINE | wx.TE_RICH2
+			code_static, value=self.code_to_replace, style=wx.TE_MULTILINE | wx.TE_RICH2
 		)
 		# Police monospace pour le code
 		font = wx.Font(10, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
@@ -83,9 +158,10 @@ class AIPrompterDialog(wx.Dialog):
 		main_sizer.Add(code_box, proportion=2, flag=wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, border=15)
 
 		# --- Section Live AI Output ---
-		trace_box = wx.StaticBoxSizer(wx.VERTICAL, panel, _("Live AI Output"))
+		trace_static = wx.StaticBox(panel, label=_("Live AI Output"))
+		trace_box = wx.StaticBoxSizer(trace_static, wx.VERTICAL)
 		self.trace_text = wx.TextCtrl(
-			panel,
+			trace_static,
 			value="",
 			style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2,
 		)
@@ -99,18 +175,31 @@ class AIPrompterDialog(wx.Dialog):
 		)
 
 		# --- Section Prompt ---
-		prompt_box = wx.StaticBoxSizer(wx.VERTICAL, panel, _("AI Prompt"))
+		prompt_static = wx.StaticBox(panel, label=_("AI Prompt"))
+		prompt_box = wx.StaticBoxSizer(prompt_static, wx.VERTICAL)
 
 		# Info text
-		info_text = wx.StaticText(
-			panel, label=_("Describe what you want the AI to do with the code above:")
-		)
+		if self.model_kind == "coupled":
+			info_label = _(
+				"Describe the coupled model you want to build. The AI returns a JSON "
+				"structure (submodels and couplings) that you can edit before applying:"
+			)
+			hint_label = _(
+				"Example: Build a queue model fed by a generator and observed by a collector..."
+			)
+		else:
+			info_label = _("Describe what you want the AI to do with the code above:")
+			hint_label = _("Example: Add error handling to this function...")
+
+		info_text = wx.StaticText(prompt_static, label=info_label)
 		info_text.SetForegroundColour(wx.Colour(100, 100, 100))
 		prompt_box.Add(info_text, flag=wx.ALL, border=5)
 
-		self.prompt_input = wx.TextCtrl(panel, value="", style=wx.TE_MULTILINE | wx.TE_RICH2)
+		self.prompt_input = wx.TextCtrl(
+			prompt_static, value="", style=wx.TE_MULTILINE | wx.TE_RICH2
+		)
 		self.prompt_input.SetFont(font)
-		self.prompt_input.SetHint(_("Example: Add error handling to this function..."))
+		self.prompt_input.SetHint(hint_label)
 		prompt_box.Add(self.prompt_input, proportion=1, flag=wx.ALL | wx.EXPAND, border=5)
 
 		# Set the focus to the prompt_input field
@@ -122,6 +211,70 @@ class AIPrompterDialog(wx.Dialog):
 		main_sizer.Add(
 			prompt_box, proportion=1, flag=wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, border=15
 		)
+
+		# --- Section Attached Files ---
+		attach_static = wx.StaticBox(panel, label=_("Attached Files (optional)"))
+		attach_box = wx.StaticBoxSizer(attach_static, wx.VERTICAL)
+
+		attach_buttons = wx.BoxSizer(wx.HORIZONTAL)
+
+		self.attach_button = wx.Button(
+			attach_static, label=_("Attach files..."), size=(130, 30)
+		)
+		self.attach_button.Bind(wx.EVT_BUTTON, self.on_attach_files)
+		self.attach_button.SetToolTip(
+			_(
+				"Attach TXT or PDF files. Their text is extracted locally and "
+				"added to the prompt; scanned PDFs require OCR."
+			)
+		)
+		attach_buttons.Add(self.attach_button, flag=wx.RIGHT, border=5)
+
+		self.remove_attachment_button = wx.Button(
+			attach_static, label=_("Remove"), size=(90, 30)
+		)
+		self.remove_attachment_button.Bind(wx.EVT_BUTTON, self.on_remove_attachment)
+		self.remove_attachment_button.Enable(False)
+		attach_buttons.Add(self.remove_attachment_button, flag=wx.RIGHT, border=5)
+
+		self.clear_attachments_button = wx.Button(
+			attach_static, label=_("Clear"), size=(90, 30)
+		)
+		self.clear_attachments_button.Bind(wx.EVT_BUTTON, self.on_clear_attachments)
+		self.clear_attachments_button.Enable(False)
+		attach_buttons.Add(self.clear_attachments_button, flag=wx.RIGHT, border=10)
+
+		self.attachments_summary = wx.StaticText(
+			attach_static, label=_("No file attached.")
+		)
+		self.attachments_summary.SetForegroundColour(wx.Colour(100, 100, 100))
+		attach_buttons.Add(
+			self.attachments_summary, proportion=1, flag=wx.ALIGN_CENTER_VERTICAL
+		)
+
+		attach_box.Add(attach_buttons, flag=wx.ALL | wx.EXPAND, border=5)
+
+		### The list is always laid out (empty when nothing is attached):
+		### showing it after the first layout would leave it at position (0, 0).
+		self.attachments_list = wx.ListBox(
+			attach_static, style=wx.LB_SINGLE, size=(-1, 60)
+		)
+		self.attachments_list.Bind(wx.EVT_LISTBOX, self.on_attachment_selected)
+		attach_box.Add(
+			self.attachments_list,
+			flag=wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND,
+			border=5,
+		)
+
+		main_sizer.Add(
+			attach_box, proportion=0, flag=wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, border=15
+		)
+
+		if not self._attachments_supported():
+			self.attach_button.Disable()
+			self.attach_button.SetToolTip(
+				_("The selected AI provider does not accept attached files.")
+			)
 
 		# --- Buttons Section ---
 		button_panel = wx.Panel(panel)
@@ -171,7 +324,9 @@ class AIPrompterDialog(wx.Dialog):
 			)
 			self.download_json_button.Bind(wx.EVT_BUTTON, self.on_download_json)
 			self.download_json_button.SetToolTip(
-				_("Download the JSON corresponding to the atomic model")
+				_("Download the JSON corresponding to the coupled model structure")
+				if self.model_kind == "coupled"
+				else _("Download the JSON corresponding to the atomic model")
 			)
 			self.download_json_button.Enable(False)
 			button_sizer.Add(self.download_json_button, flag=wx.RIGHT, border=5)
@@ -208,10 +363,50 @@ class AIPrompterDialog(wx.Dialog):
 				"   • Send to AI: Process your prompt and generate code\n"
 				"   • Insert/Replace: Put the code into your editor\n"
 				"   • Cancel: Close without changes\n\n"
+				"4. Attached Files:\n"
+				"   • Use 'Attach files...' to add TXT or PDF documents\n"
+				"   • Their text is extracted locally and added to the prompt\n"
+				"   • Scanned PDFs need OCR before they can be attached\n\n"
 				"Tips:\n"
 				"• Be specific in your prompts for better results\n"
 				"• You can send multiple prompts to refine the code\n"
 				"• Review the generated code before inserting"
+			)
+		elif self.model_kind == "coupled":
+			help_text = _(
+				"AI Coupled Model Generator - Help\n\n"
+				"This tool builds a coupled model from a natural language description.\n\n"
+				"How to use:\n\n"
+				"1. Coupled Model Structure Section:\n"
+				"   • Shows the JSON structure proposed by the AI\n"
+				"   • It lists the submodels, their ports and the couplings\n"
+				"   • You can edit the JSON before applying it\n\n"
+				"2. AI Prompt Section:\n"
+				"   • Describe the structure you want to build\n"
+				"   • Examples:\n"
+				"     - 'A generator feeding a queue observed by a collector'\n"
+				"     - 'Two processors in parallel with a shared input'\n\n"
+				"3. Buttons:\n"
+				"   • Send to AI: Generate the coupled model structure\n"
+				"   • Apply: Validate the JSON and build the model\n"
+				"   • Download JSON: Save the structure as a JSON file\n"
+				"   • Cancel: Close without saving\n\n"
+				"4. Attached Files:\n"
+				"   • Use 'Attach files...' to add TXT or PDF documents\n"
+				"   • Their text is extracted locally and added to the prompt\n"
+				"   • Scanned PDFs need OCR before they can be attached\n\n"
+				"Notes:\n"
+				"• Use \"generate\": \"existing\" to reuse a library model\n"
+				"• Use \"generate\": \"behavior\" when no library model matches: "
+				"the AI writes the atomic model from its \"behavior\" description "
+				"and it is saved next to the coupled model\n"
+				"• Use \"generate\": \"stub\" to create an empty atomic model with "
+				"the declared ports\n"
+				"• Port indices start at 0\n"
+				"• The special names __input__ and __output__ reference the "
+				"coupled model's own ports\n"
+				"• A submodel that declares 0 input ports cannot receive a "
+				"connection, and a submodel with 0 output ports cannot send one"
 			)
 		else:
 			help_text = _(
@@ -232,6 +427,10 @@ class AIPrompterDialog(wx.Dialog):
 				"   • Apply: Accept the generated code\n"
 				"   • Download JSON: Save the model as JSON file\n"
 				"   • Cancel: Close without saving\n\n"
+				"4. Attached Files:\n"
+				"   • Use 'Attach files...' to add TXT or PDF documents\n"
+				"   • Their text is extracted locally and added to the prompt\n"
+				"   • Scanned PDFs need OCR before they can be attached\n\n"
 				"Tips:\n"
 				"• Describe the model behavior clearly\n"
 				"• Specify inputs, outputs, and state variables\n"
@@ -259,7 +458,276 @@ class AIPrompterDialog(wx.Dialog):
 		else:
 			self.send_button.Enable(False)
 
+	def _attachments_supported(self):
+		"""Return True when the selected adapter accepts attached files."""
+		check = getattr(self.adapter, "supports_file_attachments", None)
+
+		if callable(check):
+			try:
+				return bool(check())
+			except Exception:
+				return False
+
+		### Adapters without the capability method are assumed to accept text
+		return self.adapter is not None
+
+	def on_attach_files(self, event):
+		"""Select TXT or PDF files whose text is added to the prompt."""
+		if self._generation_active or not self._attachments_supported():
+			return
+
+		wildcard = _(
+			"Text and PDF files (*.txt;*.md;*.pdf)|*.txt;*.md;*.pdf|"
+			"All files (*.*)|*.*"
+		)
+
+		dlg = wx.FileDialog(
+			self,
+			message=_("Attach files to the prompt"),
+			wildcard=wildcard,
+			style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE,
+		)
+
+		if dlg.ShowModal() != wx.ID_OK:
+			dlg.Destroy()
+			return
+
+		paths = dlg.GetPaths()
+		dlg.Destroy()
+		self._add_attachments(paths)
+
+	def _add_attachments(self, paths):
+		"""Load ``paths`` and add the successfully read files to the prompt."""
+		errors = []
+		known = {attachment.path for attachment in self.attachments}
+
+		with wx.BusyCursor():
+			for path in paths:
+				if os.path.abspath(path) in known:
+					continue
+
+				try:
+					attachment = load_attachment(path)
+				except AIFileError as error:
+					errors.append(str(error))
+					continue
+
+				self.attachments.append(attachment)
+				known.add(attachment.path)
+
+		self._refresh_attachments()
+
+		if errors:
+			wx.MessageBox(
+				"\n".join(errors),
+				_("Cannot attach file"),
+				wx.OK | wx.ICON_WARNING,
+			)
+
+	def on_remove_attachment(self, event):
+		"""Remove the file selected in the attachment list."""
+		selection = self.attachments_list.GetSelection()
+
+		if selection == wx.NOT_FOUND or selection >= len(self.attachments):
+			return
+
+		del self.attachments[selection]
+		self._refresh_attachments()
+
+	def on_clear_attachments(self, event):
+		"""Remove every attached file."""
+		self.attachments = []
+		self._refresh_attachments()
+
+	def on_attachment_selected(self, event):
+		"""Enable the Remove button when a file is selected."""
+		self.remove_attachment_button.Enable(
+			not self._generation_active
+			and self.attachments_list.GetSelection() != wx.NOT_FOUND
+		)
+
+	def _refresh_attachments(self):
+		"""Update the attachment list, summary and button states."""
+		self.attachments_list.Clear()
+
+		for attachment in self.attachments:
+			suffix = _(" (truncated)") if attachment.truncated else ""
+			self.attachments_list.Append(
+				f"{attachment.name} - {attachment.chars:,} chars{suffix}"
+			)
+
+		has_files = bool(self.attachments)
+
+		self.remove_attachment_button.Enable(False)
+		self.clear_attachments_button.Enable(
+			has_files and not self._generation_active
+		)
+		self.attachments_summary.SetLabel(
+			summarize_attachments(self.attachments)
+		)
+		self._main_panel.Layout()
+
+	# ================================================================
+	# Coupled-model session
+	# ================================================================
+	@staticmethod
+	def _clean_session_messages(messages):
+		"""Return a bounded conversation usable as AI history."""
+		cleaned = []
+
+		for message in messages or []:
+			if not isinstance(message, dict):
+				continue
+
+			role = message.get("role")
+			content = message.get("content")
+
+			if role not in ("user", "assistant") or not isinstance(content, str):
+				continue
+
+			if content.strip():
+				cleaned.append({"role": role, "content": content})
+
+		return cleaned
+
+	@staticmethod
+	def _parse_structure(code):
+		"""Return the JSON structure written in ``code``, or None."""
+		if not str(code or "").strip():
+			return None
+
+		from CoupledStructure import parse_json_object
+
+		try:
+			data = parse_json_object(code)
+		except Exception:
+			return None
+
+		return data if isinstance(data, dict) and data else None
+
+	def _build_session_data(self):
+		"""Return the session payload of the coupled assistant."""
+		prompt = ""
+
+		for message in reversed(self.coupled_messages):
+			if message.get("role") == "user":
+				prompt = message.get("content", "")
+				break
+
+		structure = (
+			self._parse_structure(self.code_text.GetValue())
+			or self.coupled_model
+			or self.session.get("structure")
+		)
+
+		attachment_names = [
+			attachment.name for attachment in self.attachments
+		]
+
+		return AICoupledSession.build_session(
+			self.session,
+			session_id=self._session_id,
+			model_name=self.model_name or self.session.get("model_name"),
+			provider=getattr(builtins, "SELECTED_IA", "") or None,
+			ai_model=getattr(self.adapter, "model_name", "") or None,
+			structure=structure,
+			messages=self.coupled_messages,
+			prompt=prompt,
+			title=self.session.get("title"),
+			attachments=attachment_names or None,
+		)
+
+	def session_payload(self):
+		"""Return the session payload of the coupled assistant, or None."""
+		if self.model_kind != "coupled":
+			return None
+
+		return self._build_session_data()
+
+	def _store_session(self):
+		"""Persist the coupled session in the model archive, if any."""
+		if self.model_kind != "coupled" or not self.archive_path:
+			return None
+
+		session = self._build_session_data()
+
+		if not session.get("messages") and not session.get("structure"):
+			return None
+
+		session_id = AICoupledSession.save_session(
+			self.archive_path,
+			session,
+			session_id=self._session_id,
+		)
+
+		if not session_id:
+			return None
+
+		self._session_id = session_id
+		session["session_id"] = session_id
+		self.session = session
+		self.session_data = session
+
+		return session_id
+
+	def _record_coupled_turn(self, answer):
+		"""Append the request/answer pair to the coupled conversation.
+
+		The prompt is stored as typed by the user (without the text of the
+		attached documents) so the reopened session stays readable.
+		"""
+		if self.model_kind != "coupled":
+			return
+
+		prompt = (self._pending_prompt or "").strip()
+
+		if prompt and not (
+			self.coupled_messages
+			and self.coupled_messages[-1].get("role") == "user"
+			and self.coupled_messages[-1].get("content") == prompt
+		):
+			self.coupled_messages.append({"role": "user", "content": prompt})
+
+		if str(answer or "").strip():
+			self.coupled_messages.append(
+				{"role": "assistant", "content": str(answer)}
+			)
+
+		self._store_session()
+
 	def on_ok(self, event):
+		if self.model_kind == "coupled":
+			from CoupledStructure import (
+				CoupledStructureError,
+				normalize_coupled_structure,
+				parse_json_object,
+			)
+
+			try:
+				data = parse_json_object(self.code_text.GetValue())
+				structure = normalize_coupled_structure(
+					data,
+					catalog=self.catalog,
+					name=self.model_name,
+					inputs=self.inputs,
+					outputs=self.outputs,
+				)
+			except CoupledStructureError as error:
+				wx.MessageBox(
+					_("The coupled model structure is invalid:\n{}").format(str(error)),
+					_("Invalid structure"),
+					wx.OK | wx.ICON_ERROR,
+				)
+				return
+
+			### The wizard builds the python shell itself with coupledCode()
+			self.generated_code = ""
+			self.coupled_model = structure
+			self.model_json = structure
+			self._store_session()
+			self.EndModal(wx.ID_OK)
+			return
+
 		self.generated_code = self.code_text.GetValue().strip()
 
 		if self.generated_code:  # Only close if there's non-empty input
@@ -298,6 +766,7 @@ class AIPrompterDialog(wx.Dialog):
 
 		prompt = self.prompt_input.GetValue()
 		code = self.code_text.GetValue()
+		self._pending_prompt = prompt
 		self._generation_active = True
 		self._stop_event.clear()
 		self.send_button.Enable(False)
@@ -305,6 +774,9 @@ class AIPrompterDialog(wx.Dialog):
 		self.stop_button.Enable(True)
 		self.insert_button.Enable(False)
 		self.cancel_button.Enable(False)
+		self.attach_button.Enable(False)
+		self.remove_attachment_button.Enable(False)
+		self.clear_attachments_button.Enable(False)
 		if hasattr(self, "download_json_button"):
 			self.download_json_button.Enable(False)
 		self.trace_text.SetValue(_("Starting request...\n"))
@@ -338,7 +810,86 @@ class AIPrompterDialog(wx.Dialog):
 			if callable(ensure_ready):
 				ensure_ready()
 
-			if not self.editor:
+			### Add the text of attached documents to the user prompt
+			if self.attachments:
+				wx.CallAfter(
+					self._append_trace,
+					_("\nUsing {count} attached file(s): {names}\n").format(
+						count=len(self.attachments),
+						names=", ".join(
+							attachment.name for attachment in self.attachments
+						),
+					),
+				)
+				prompt = compose_prompt(prompt, self.attachments)
+
+			if self.model_kind == "coupled":
+				wx.CallAfter(
+					self._append_trace,
+					_("\nGenerating coupled model structure...\n"),
+				)
+				### when the box already holds a structure (reopened session or
+				### a previous answer), the assistant updates it instead of
+				### creating a new one
+				previous_structure = self._parse_structure(code)
+				raw_structure = self.adapter.generate_coupled_model_json(
+					prompt,
+					catalog=self.catalog,
+					model_name=self.model_name,
+					inputs=self.inputs,
+					outputs=self.outputs,
+					previous_structure=previous_structure,
+					history=list(self.coupled_messages),
+					on_token=on_token,
+					stop_event=stop_event,
+				)
+				if stop_event.is_set():
+					wx.CallAfter(self._finish_generation, None, None, None, True)
+					return
+				from CoupledStructure import (
+					CoupledStructureError,
+					normalize_coupled_structure,
+					parse_json_object,
+				)
+
+				structure = parse_json_object(raw_structure)
+
+				### Generate the atomic code of submodels that ask for it. This
+				### is what turns a described behavior into a real model instead
+				### of binding it to an unrelated catalog model.
+				structure = self._generate_coupled_submodel_code(
+					structure,
+					on_token,
+					stop_event,
+				)
+				if stop_event.is_set():
+					wx.CallAfter(self._finish_generation, None, None, None, True)
+					return
+
+				modified_code = json.dumps(structure, indent=2)
+				model_json = structure
+
+				### Check the structure right away so inconsistencies are visible
+				### in the trace panel instead of only after clicking Apply.
+				try:
+					normalize_coupled_structure(
+						structure,
+						catalog=self.catalog,
+						name=self.model_name,
+						inputs=self.inputs,
+						outputs=self.outputs,
+					)
+				except CoupledStructureError as error:
+					wx.CallAfter(
+						self._append_trace,
+						_("\nStructure check failed:\n{}\n").format(str(error)),
+					)
+				else:
+					wx.CallAfter(
+						self._append_trace,
+						_("\nStructure check passed.\n"),
+					)
+			elif not self.editor:
 				wx.CallAfter(self._append_trace, _("\nGenerating model specification...\n"))
 				model_json = self.adapter.generate_model_json(
 					prompt, on_token=on_token, stop_event=stop_event
@@ -379,6 +930,90 @@ class AIPrompterDialog(wx.Dialog):
 			else:
 				wx.CallAfter(self._finish_generation, None, model_json, error)
 
+	def _generate_coupled_submodel_code(self, structure, on_token, stop_event):
+		"""Generate the atomic code of coupled submodels that request it.
+
+		Only submodels with ``"generate": "behavior"`` and no code yet are
+		processed. The generated source is stored in ``submodel["code"]`` so
+		the wizard can materialise a real ``.amd`` next to the coupled model.
+		"""
+		from CoupledStructure import (
+			GENERATE_ALIASES,
+			generate_submodel_code,
+		)
+
+		raw_submodels = (
+			structure.get("submodels")
+			or structure.get("models")
+			or structure.get("components")
+			or []
+		)
+
+		if not isinstance(raw_submodels, list):
+			return structure
+
+		coupled_name = str(
+			structure.get("name")
+			or structure.get("label")
+			or self.model_name
+			or "CoupledModel"
+		).strip()
+
+		for position, submodel in enumerate(raw_submodels):
+			if not isinstance(submodel, dict):
+				continue
+
+			mode = str(
+				submodel.get("generate", "existing") or "existing"
+			).strip().lower()
+			mode = GENERATE_ALIASES.get(mode, mode)
+
+			if mode != "behavior":
+				continue
+
+			### a submodel that already carries code needs no generation
+			if str(submodel.get("code") or "").strip():
+				continue
+
+			label = str(submodel.get("label") or f"Model{position + 1}").strip()
+			behavior = str(
+				submodel.get("behavior")
+				or submodel.get("behaviour")
+				or submodel.get("specification")
+				or submodel.get("description")
+				or ""
+			).strip()
+
+			### without a description there is nothing to generate; the
+			### structure validation will report it to the user
+			if not behavior:
+				continue
+
+			wx.CallAfter(
+				self._append_trace,
+				_("\nGenerating atomic model '{label}'...\n").format(label=label),
+			)
+
+			code = generate_submodel_code(
+				submodel,
+				coupled_name,
+				self.adapter,
+				on_token=on_token,
+				stop_event=stop_event,
+			)
+
+			if stop_event.is_set():
+				return structure
+
+			submodel["code"] = code
+
+			wx.CallAfter(
+				self._append_trace,
+				_("\nAtomic model '{label}' generated.\n").format(label=label),
+			)
+
+		return structure
+
 	def _append_trace(self, text):
 		self.trace_text.AppendText(text)
 		self.trace_text.ShowPosition(self.trace_text.GetLastPosition())
@@ -389,6 +1024,9 @@ class AIPrompterDialog(wx.Dialog):
 		self.send_button.Enable(bool(self.prompt_input.GetValue().strip()))
 		self.stop_button.Enable(False)
 		self.cancel_button.Enable(True)
+		self.attach_button.Enable(self._attachments_supported())
+		self.remove_attachment_button.Enable(False)
+		self.clear_attachments_button.Enable(bool(self.attachments))
 
 		if cancelled:
 			self.trace_text.AppendText(_("\nGeneration stopped. Partial output was not applied.\n"))
@@ -406,6 +1044,8 @@ class AIPrompterDialog(wx.Dialog):
 				self.model_json = model_json
 				if hasattr(self, "download_json_button"):
 					self.download_json_button.Enable(True)
+			if self.model_kind == "coupled":
+				self._record_coupled_turn(modified_code)
 			self.trace_text.AppendText(_("\nGeneration complete.\n"))
 		else:
 			self.trace_text.AppendText(_("\nNo code was generated.\n"))
@@ -422,10 +1062,15 @@ class AIPrompterDialog(wx.Dialog):
 		event.Skip()
 
 	def on_download_json(self, event):
+		default_name = (
+			"coupled_model.json"
+			if self.model_kind == "coupled"
+			else "atomic_model.json"
+		)
 		dlg = wx.FileDialog(
 			self,
 			message=_("Save file as..."),
-			defaultFile="atomic_model.json",
+			defaultFile=default_name,
 			wildcard="JSON files (*.json)|*.json|All files (*.*)|*.*",
 			style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
 		)
@@ -445,3 +1090,134 @@ class AIPrompterDialog(wx.Dialog):
 				)
 
 		dlg.Destroy()
+
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# Coupled-model assistant reopening
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+
+def edit_coupled_model_with_ai(block, parent=None):
+	"""Reopen the coupled-model AI assistant stored in a model archive.
+
+	The session saved in the ``.cmd`` archive of ``block`` is loaded, the
+	coupled-model dialog is reopened with its conversation and structure, and
+	the updated structure is applied to ``block`` when the user validates it.
+
+	Args:
+		block (ContainerBlock): Coupled model to modify.
+		parent (wx.Window, optional): Parent window of the dialog.
+
+	Returns:
+		bool: True when a new structure was applied and saved.
+	"""
+	archive = str(getattr(block, "model_path", "") or "")
+
+	if not AICoupledSession.is_archive(archive):
+		wx.MessageBox(
+			_("This coupled model is not a saved model archive:\n{}").format(
+				archive or "-"
+			),
+			_("AI Coupled Model"),
+			wx.OK | wx.ICON_INFORMATION,
+		)
+		return False
+
+	session = AICoupledSession.load_latest_session(archive)
+
+	if not session:
+		wx.MessageBox(
+			_("No AI session is stored in this model:\n{}").format(archive),
+			_("AI Coupled Model"),
+			wx.OK | wx.ICON_INFORMATION,
+		)
+		return False
+
+	### generative AI must be selected in the Preferences
+	if not getattr(builtins, "SELECTED_IA", ""):
+		wx.MessageBox(
+			_("Generative AI must be selected in the Preferences."),
+			_("AI Coupled Model"),
+			wx.OK | wx.ICON_INFORMATION,
+		)
+		return False
+
+	### models available to compose the coupled model
+	try:
+		from CoupledStructure import build_model_catalog
+
+		catalog = build_model_catalog()
+	except Exception as error:
+		catalog = []
+		sys.stderr.write(f"Unable to build the model catalog: {error}\n")
+
+	from AIAdapter import AdapterFactory
+
+	adapter = AdapterFactory.get_adapter_instance(
+		parent=None,
+		params=getattr(builtins, "PARAMS_IA", {}),
+	)
+
+	model_name = session.get("model_name") or getattr(block, "label", "")
+
+	dialog = AIPrompterDialog(
+		parent,
+		_("AI Coupled Model Assistant"),
+		"",
+		adapter,
+		model_kind="coupled",
+		model_name=model_name,
+		inputs=getattr(block, "input", None),
+		outputs=getattr(block, "output", None),
+		catalog=catalog,
+		archive_path=archive,
+		session=session,
+	)
+
+	result = dialog.ShowModal()
+	structure = dialog.coupled_model
+	### the dialog stored the updated conversation in the archive
+	session = dialog.session_data or session
+	dialog.Destroy()
+
+	if result != wx.ID_OK or not structure:
+		return False
+
+	from CoupledStructure import CoupledStructureError, apply_coupled_structure
+
+	try:
+		apply_coupled_structure(block, structure)
+	except CoupledStructureError as error:
+		message = _("The coupled model structure could not be applied:\n%s") % error
+		sys.stderr.write(message + "\n")
+		wx.MessageBox(message, _("Coupled model"), wx.OK | wx.ICON_ERROR)
+		return False
+	except Exception as error:
+		message = _("Unexpected error while building the coupled model:\n%s") % error
+		sys.stderr.write(message + "\n")
+		wx.MessageBox(message, _("Coupled model"), wx.OK | wx.ICON_ERROR)
+		return False
+
+	### save the diagram (the AI session entries are preserved)
+	if not block.SaveFile(archive):
+		message = _("Error saving file %s") % os.path.basename(archive)
+		sys.stderr.write(message + "\n")
+		wx.MessageBox(message, _("Coupled model"), wx.OK | wx.ICON_ERROR)
+		return False
+
+	### store the applied structure (with the generated submodel code)
+	session["structure"] = structure
+	AICoupledSession.save_session(
+		archive,
+		session,
+		session_id=session.get("session_id"),
+	)
+
+	canvas = getattr(block, "parent", None)
+
+	if canvas is not None and hasattr(canvas, "Refresh"):
+		canvas.Refresh()
+
+	return True
