@@ -167,11 +167,31 @@ def test_history_is_bounded_and_cleaned():
 	print("OK test_history_is_bounded_and_cleaned")
 
 
+def test_structure_only_request_skips_behavior_mode():
+	"""generate_atomic_code=False asks for the structure only."""
+	adapter = RecordingAdapter()
+
+	adapter.generate_coupled_model_json(
+		"build a generator",
+		catalog=[],
+		model_name="Coupled",
+		generate_atomic_code=False,
+	)
+
+	captured = adapter.captured
+
+	assert "Atomic model code generation is disabled" in captured["system_prompt"]
+	assert "Return the structure only" in captured["prompt"]
+
+	print("OK test_structure_only_request_skips_behavior_mode")
+
+
 if __name__ == "__main__":
 	print("Running AI Coupled Adapter tests...\n")
 
 	test_history_is_sent_with_the_revision_prompt()
 	test_without_history_a_single_prompt_is_sent()
 	test_history_is_bounded_and_cleaned()
+	test_structure_only_request_skips_behavior_mode()
 
 	print("\nAll tests passed!")

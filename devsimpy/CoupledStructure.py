@@ -195,6 +195,15 @@ def generated_submodel_name(coupled_name, label):
 	return _sanitize_identifier(f"{coupled_name}_{label}", "GeneratedModel")
 
 
+def generated_submodel_class_name(label):
+	"""Return the Python class name of a generated submodel.
+
+	The class is named after the submodel label because it must be the same
+	as the name of its code block in the coupled model diagram.
+	"""
+	return _sanitize_identifier(label, "GeneratedModel")
+
+
 def _class_name_from_code(code):
 	"""Return the first top-level class declared in ``code``."""
 	try:
@@ -298,7 +307,7 @@ class {class_name}(DomainBehavior):
 def atomic_submodel_prompt(submodel, coupled_name):
 	"""Return the atomic-model prompt used to generate a submodel behavior."""
 	label = str(submodel.get("label") or "Submodel").strip()
-	class_name = generated_submodel_name(coupled_name, label)
+	class_name = generated_submodel_class_name(label)
 	inputs = _as_int(submodel.get("inputs"), 1)
 	outputs = _as_int(submodel.get("outputs"), 1)
 	behavior = str(
@@ -311,7 +320,7 @@ def atomic_submodel_prompt(submodel, coupled_name):
 	).strip()
 
 	lines = [
-		f"Create an atomic DEVSimPy model named '{class_name}'.",
+		f"Create an atomic DEVSimPy model whose Python class is '{class_name}'.",
 		f"It has {inputs} input port(s) and {outputs} output port(s).",
 	]
 
@@ -319,6 +328,14 @@ def atomic_submodel_prompt(submodel, coupled_name):
 		lines.append("")
 		lines.append("Behavior to implement:")
 		lines.append(behavior)
+
+	lines.append("")
+	lines.append(
+		f"Naming rule: the class must inherit from DomainBehavior and must be "
+		f"named exactly '{class_name}', like the code block that represents "
+		"this submodel in the coupled model diagram. Do not add a prefix or a "
+		"suffix to the class name."
+	)
 
 	lines.append("")
 	lines.append(
@@ -354,6 +371,14 @@ def generate_submodel_code(
 
 	if not isinstance(model_json, dict):
 		raise TypeError(str(model_json))
+
+	### The generated class must be named like its code block. Force the
+	### model name used by the code generator instead of trusting the LLM.
+	specifications = model_json.get("specifications")
+	if isinstance(specifications, dict):
+		specifications["model_name"] = generated_submodel_class_name(
+			submodel.get("label") or "Submodel"
+		)
 
 	code = adapter.generate_model_code(
 		model_json,
@@ -530,13 +555,73 @@ def catalog_for_prompt(catalog):
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 
-def coupled_system_prompt(catalog=None):
-	"""Return the system prompt used to generate a coupled model structure."""
+def coupled_system_prompt(catalog=None, generate_atomic_code=True):
+	"""Return the system prompt used to generate a coupled model structure.
+
+	When ``generate_atomic_code`` is False the assistant returns the structure
+	only: a submodel missing from the catalog is declared as a ``stub`` and no
+	atomic model code is generated.
+	"""
 	available = json.dumps(
 		catalog_for_prompt(catalog),
 		indent=2,
 		ensure_ascii=False,
 	)
+
+	if generate_atomic_code:
+		generate_rules = """2. Every submodel must declare how it is obtained with "generate":
+   - "existing" (default): "model" must be one of the catalog names above.
+     Use it when a catalog model already implements the requested behavior.
+   - "behavior": the submodel does not exist in the catalog but its behavior
+     is described in the request. Provide a precise "behavior" description
+     (inputs, outputs, state, timing, message content). Do not provide a
+     "model" name: the wizard generates the atomic model code from
+     "behavior".
+   - "stub": the submodel does not exist and no behavior is described.
+     The wizard creates an empty atomic model with the declared ports.
+3. Never bind a described behavior to an unrelated catalog model. When the
+   request describes what a submodel does and no catalog model does exactly
+   that, use "generate": "behavior" instead of the closest catalog model.
+   Only use "stub" when the request gives no behavior at all."""
+		generate_example = """Another mistake to avoid: the request describes a "Formatter" that converts
+tokens, but the catalog only contains an unrelated "Converter". Do not use
+"Converter"; answer with:
+  {"label": "Formatter", "generate": "behavior", "behavior": "converts ...",
+    "inputs": 1, "outputs": 1}"""
+		generate_json_example = """    {
+      "label": "Formatter1",
+      "generate": "behavior",
+      "behavior": "receives a token and changes its shape according to its color",
+      "inputs": 1,
+      "outputs": 1,
+      "x": 340,
+      "y": 80
+    }"""
+	else:
+		generate_rules = """2. Every submodel must declare how it is obtained with "generate":
+   - "existing" (default): "model" must be one of the catalog names above.
+     Use it when a catalog model already implements the requested behavior.
+   - "stub": the submodel does not exist in the catalog. The wizard creates
+     an empty atomic model with the declared ports and the user writes its
+     behavior later.
+   Atomic model code generation is disabled for this request: never use
+   "generate": "behavior".
+3. Never bind a described behavior to an unrelated catalog model. When the
+   request describes what a submodel does and no catalog model does exactly
+   that, use "generate": "stub" so an empty atomic model with the declared
+   ports is created."""
+		generate_example = """Another mistake to avoid: the request describes a "Formatter" that converts
+tokens, but the catalog only contains an unrelated "Converter". Do not use
+"Converter"; answer with:
+  {"label": "Formatter", "generate": "stub", "inputs": 1, "outputs": 1}"""
+		generate_json_example = """    {
+      "label": "Formatter1",
+      "generate": "stub",
+      "inputs": 1,
+      "outputs": 1,
+      "x": 340,
+      "y": 80
+    }"""
 
 	return f"""You are an expert in DEVS coupled models built with DEVSimPy.
 
@@ -557,22 +642,11 @@ Available models (JSON):
 Rules:
 1. Answer with a single JSON object and nothing else: no markdown, no
    explanation, no code fences.
-2. Every submodel must declare how it is obtained with "generate":
-   - "existing" (default): "model" must be one of the catalog names above.
-     Use it when a catalog model already implements the requested behavior.
-   - "behavior": the submodel does not exist in the catalog but its behavior
-     is described in the request. Provide a precise "behavior" description
-     (inputs, outputs, state, timing, message content). Do not provide a
-     "model" name: the wizard generates the atomic model code from
-     "behavior".
-   - "stub": the submodel does not exist and no behavior is described.
-     The wizard creates an empty atomic model with the declared ports.
-3. Never bind a described behavior to an unrelated catalog model. When the
-   request describes what a submodel does and no catalog model does exactly
-   that, use "generate": "behavior" instead of the closest catalog model.
-   Only use "stub" when the request gives no behavior at all.
-4. A submodel label must be unique and should describe its role
-   (for example "Generator1", "Queue1").
+{generate_rules}
+4. A submodel label must be unique, must be a valid Python identifier (no
+   spaces or punctuation) and should describe its role (for example
+   "Generator1", "Queue1"). The label of a generated submodel is also the
+   name of its atomic model class and of its code block.
 5. Port indices must stay inside the declared port counts.
 6. Never connect a submodel output to one of its own inputs.
 7. The coupled model "inputs" and "outputs" values must match the request.
@@ -592,11 +666,8 @@ Common mistake to avoid:
   {{"source": "__input__", "source_port": 0, "target": "Gen", "target_port": 0}}
 This is invalid: Gen declares no input port, so nothing can be connected to it.
 
-Another mistake to avoid: the request describes a "Formatter" that converts
-tokens, but the catalog only contains an unrelated "Converter". Do not use
-"Converter"; answer with:
-  {{"label": "Formatter", "generate": "behavior", "behavior": "converts ...",
-    "inputs": 1, "outputs": 1}}
+Another mistake to avoid:
+{generate_example}
 
 Expected JSON shape:
 {{
@@ -614,15 +685,7 @@ Expected JSON shape:
       "x": 160,
       "y": 80
     }},
-    {{
-      "label": "Formatter1",
-      "generate": "behavior",
-      "behavior": "receives a token and changes its shape according to its color",
-      "inputs": 1,
-      "outputs": 1,
-      "x": 340,
-      "y": 80
-    }}
+{generate_json_example}
   ],
   "connections": [
     {{"source": "Generator1", "source_port": 0, "target": "Formatter1", "target_port": 0}},
@@ -638,6 +701,7 @@ def coupled_user_prompt(
 	inputs=None,
 	outputs=None,
 	previous_structure=None,
+	generate_atomic_code=True,
 ):
 	"""Return the user prompt asking for a coupled model structure.
 
@@ -645,6 +709,9 @@ def coupled_user_prompt(
 	the existing structure instead of creating a new one. The complete
 	structure is still expected in the answer, so the result can be applied
 	directly without merging a diff.
+
+	When ``generate_atomic_code`` is False the assistant is told to return the
+	structure only, without describing atomic model behaviors.
 	"""
 	revision = isinstance(previous_structure, dict) and bool(previous_structure)
 
@@ -671,6 +738,15 @@ def coupled_user_prompt(
 	lines.append("")
 	lines.append("User request:")
 	lines.append(str(prompt or "").strip() or "Build a simple coupled model.")
+
+	if not generate_atomic_code:
+		lines.append("")
+		lines.append(
+			"Return the structure only: do not generate or describe the code "
+			'of the atomic models. Use "generate": "stub" for submodels that '
+			"are not in the available models, so empty atomic models with the "
+			"declared ports are created."
+		)
 
 	if revision:
 		lines.append("")
@@ -1137,20 +1213,25 @@ def _prepare_generated_submodel(submodel, base_dir, coupled_stem):
 	"""Materialise a generated submodel as ``<Coupled>_<Label>.amd``.
 
 	The archive is written next to the coupled model, with a python entry
-	named after the archive (as required by ``DumpZipFile.Load``).
+	named after the archive (as required by ``DumpZipFile.Load``). The
+	archive name is prefixed by the coupled model so generated models of
+	different coupled models do not overwrite each other, but the Python
+	class inside is named after the submodel label so it matches the name of
+	its code block in the diagram.
 
 	Returns:
 		tuple: ``(archive, python_entry, code)``.
 	"""
 	label = submodel["label"]
-	class_name = generated_submodel_name(coupled_stem, label)
-	python_entry = f"{class_name}.py"
-	archive = os.path.join(base_dir, f"{class_name}.amd")
+	class_name = generated_submodel_class_name(label)
+	archive_name = generated_submodel_name(coupled_stem, label)
+	python_entry = f"{archive_name}.py"
+	archive = os.path.join(base_dir, f"{archive_name}.amd")
 
 	code = str(submodel.get("code") or "").strip()
 
 	if code:
-		### the AI class name is replaced by the deterministic archive name
+		### the class name must match the name of the code block
 		code = _rename_class(code, _class_name_from_code(code), class_name)
 	else:
 		### no code was generated (or the user removed it): use a stub

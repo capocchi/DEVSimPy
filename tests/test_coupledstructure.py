@@ -415,6 +415,30 @@ def test_coupled_prompts():
 	print("OK test_coupled_prompts")
 
 
+def test_coupled_structure_only_prompts():
+	"""Structure-only mode forbids behavior submodels."""
+	system_prompt = cs.coupled_system_prompt(catalog(), generate_atomic_code=False)
+	user_prompt = cs.coupled_user_prompt(
+		"generator feeding a queue",
+		model_name="MyCoupled",
+		generate_atomic_code=False,
+	)
+
+	assert "Atomic model code generation is disabled for this request" in system_prompt
+	assert '"generate": "stub"' in system_prompt
+	assert "never use" in system_prompt
+	### no submodel may ask for generated code
+	assert '"generate": "behavior",\n      "behavior"' not in system_prompt
+
+	assert "Return the structure only" in user_prompt
+	assert '"generate": "stub"' in user_prompt
+
+	### the default mode still allows behavior submodels
+	assert '"generate": "behavior",\n      "behavior"' in cs.coupled_system_prompt(catalog())
+
+	print("OK test_coupled_structure_only_prompts")
+
+
 def test_coupled_revision_prompt():
 	"""Reopening a session asks for the complete updated structure."""
 	previous = {
@@ -599,6 +623,14 @@ def test_generated_submodel_name():
 	print("OK test_generated_submodel_name")
 
 
+def test_generated_submodel_class_name():
+	"""The generated class is named after its code block."""
+	assert cs.generated_submodel_class_name("Form") == "Form"
+	assert cs.generated_submodel_class_name("Form 1") == "Form_1"
+	assert cs.generated_submodel_class_name("") == "GeneratedModel"
+	print("OK test_generated_submodel_class_name")
+
+
 def test_atomic_submodel_prompt():
 	prompt = cs.atomic_submodel_prompt(
 		{
@@ -610,7 +642,11 @@ def test_atomic_submodel_prompt():
 		"CoupledAI",
 	)
 
-	assert "CoupledAI_Form" in prompt
+	assert "'Form'" in prompt
+	assert "named exactly 'Form'" in prompt
+	assert "code block" in prompt
+	assert "Do not add a prefix or a suffix" in prompt
+	assert "CoupledAI_Form" not in prompt
 	assert "converts colors into shapes" in prompt
 	assert "1 input port(s)" in prompt
 	assert "1 output port(s)" in prompt
@@ -623,14 +659,16 @@ class DummyAtomicAdapter:
 	def __init__(self):
 		self.calls = []
 		self.prompts = []
+		self.model_jsons = []
 
 	def generate_model_json(self, prompt, on_token=None, stop_event=None):
 		self.calls.append("json")
 		self.prompts.append(prompt)
-		return {"specifications": {}}
+		return {"specifications": {"model_name": "AiForm"}}
 
 	def generate_model_code(self, model_json=None, on_token=None, stop_event=None):
 		self.calls.append("code")
+		self.model_jsons.append(model_json)
 		return (
 			"from DomainInterface import DomainBehavior\n\n\n"
 			"class AiForm(DomainBehavior):\n"
@@ -650,8 +688,10 @@ def test_generate_submodel_code_uses_atomic_pipeline():
 	code = cs.generate_submodel_code(submodel, "CoupledAI", adapter)
 
 	assert adapter.calls == ["json", "code"]
-	assert "CoupledAI_Form" in adapter.prompts[0]
+	assert "'Form'" in adapter.prompts[0]
 	assert "class AiForm" in code
+	### the model name given to the code generator is the code block name
+	assert adapter.model_jsons[0]["specifications"]["model_name"] == "Form"
 	print("OK test_generate_submodel_code_uses_atomic_pipeline")
 
 
@@ -676,12 +716,13 @@ def test_prepare_generated_submodel_writes_archive():
 		assert entry == "CoupledAI_Form.py"
 		assert submodel["python_path"] == os.path.join(archive, entry)
 		assert submodel["archive"] == archive
-		assert submodel["model"] == "CoupledAI_Form"
+		### the class is named after the code block, not after the archive
+		assert submodel["model"] == "Form"
 
 		with zipfile.ZipFile(archive) as zf:
 			assert entry in zf.namelist()
 			assert "DEVSimPyModel.dat" in zf.namelist()
-			assert b"class CoupledAI_Form(DomainBehavior)" in zf.read(entry)
+			assert b"class Form(DomainBehavior)" in zf.read(entry)
 
 		compile(code, entry, "exec")
 	finally:
@@ -712,7 +753,7 @@ def test_prepare_generated_submodel_renames_ai_class():
 			submodel, temp_dir, "CoupledAI"
 		)
 
-		assert "class CoupledAI_Form(DomainBehavior)" in renamed
+		assert "class Form(DomainBehavior)" in renamed
 		assert "class AiForm" not in renamed
 		compile(renamed, entry, "exec")
 	finally:
@@ -749,6 +790,7 @@ if __name__ == "__main__":
 	test_build_catalog_from_directory()
 	test_catalog_for_prompt()
 	test_coupled_prompts()
+	test_coupled_structure_only_prompts()
 	test_coupled_revision_prompt()
 	test_normalize_generated_submodels()
 	test_normalize_behavior_requires_description()
@@ -758,6 +800,7 @@ if __name__ == "__main__":
 	test_normalize_rejects_code_without_class()
 	test_stub_atomic_code_compiles()
 	test_generated_submodel_name()
+	test_generated_submodel_class_name()
 	test_atomic_submodel_prompt()
 	test_generate_submodel_code_uses_atomic_pipeline()
 	test_prepare_generated_submodel_writes_archive()

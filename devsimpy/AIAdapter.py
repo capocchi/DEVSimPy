@@ -237,6 +237,7 @@ class DevsAIAdapter(ABC):
 		outputs=None,
 		previous_structure=None,
 		history=None,
+		generate_atomic_code=True,
 		on_token=None,
 		stop_event=None,
 	):
@@ -251,17 +252,23 @@ class DevsAIAdapter(ABC):
 		When ``previous_structure`` is given, the assistant updates that
 		structure instead of creating a new one. ``history`` carries the
 		previous turns of the coupled-model conversation so a reopened session
-		keeps its context.
+		keeps its context. Set ``generate_atomic_code`` to False to obtain the
+		structure only: the assistant then declares submodels as ``stub``
+		instead of describing atomic model behaviors.
 		"""
 		from CoupledStructure import coupled_system_prompt, coupled_user_prompt
 
-		system_prompt = coupled_system_prompt(catalog)
+		system_prompt = coupled_system_prompt(
+			catalog,
+			generate_atomic_code=generate_atomic_code,
+		)
 		user_prompt = coupled_user_prompt(
 			prompt,
 			model_name=model_name,
 			inputs=inputs,
 			outputs=outputs,
 			previous_structure=previous_structure,
+			generate_atomic_code=generate_atomic_code,
 		)
 
 		messages = self._coupled_messages(system_prompt, history, user_prompt)

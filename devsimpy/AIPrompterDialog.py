@@ -80,6 +80,9 @@ class AIPrompterDialog(wx.Dialog):
 			self.session.get("messages")
 		)
 
+		### generate the structure only (no atomic model code)
+		self.structure_only = bool(self.session.get("structure_only", False))
+
 		### reopen the previous structure (editable) instead of an empty box
 		if (
 			self.model_kind == "coupled"
@@ -194,6 +197,29 @@ class AIPrompterDialog(wx.Dialog):
 		info_text = wx.StaticText(prompt_static, label=info_label)
 		info_text.SetForegroundColour(wx.Colour(100, 100, 100))
 		prompt_box.Add(info_text, flag=wx.ALL, border=5)
+
+		### structure-only mode: no atomic model code is generated
+		self.structure_only_check = None
+
+		if self.model_kind == "coupled":
+			self.structure_only_check = wx.CheckBox(
+				prompt_static,
+				label=_("Structure only: do not generate the code of the atomic models"),
+			)
+			self.structure_only_check.SetValue(self.structure_only)
+			self.structure_only_check.SetToolTip(
+				_(
+					"Only build the coupled model structure (submodels and "
+					"couplings). Submodels that are not in the library are "
+					"created as empty atomic models; no atomic model code is "
+					"generated."
+				)
+			)
+			prompt_box.Add(
+				self.structure_only_check,
+				flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,
+				border=5,
+			)
 
 		self.prompt_input = wx.TextCtrl(
 			prompt_static, value="", style=wx.TE_MULTILINE | wx.TE_RICH2
@@ -386,12 +412,17 @@ class AIPrompterDialog(wx.Dialog):
 				"   • Examples:\n"
 				"     - 'A generator feeding a queue observed by a collector'\n"
 				"     - 'Two processors in parallel with a shared input'\n\n"
-				"3. Buttons:\n"
+				"3. Structure Only:\n"
+				"   • Check 'Structure only' to build the submodels and couplings\n"
+				"     without generating the code of the atomic models\n"
+				"   • Submodels that are not in the library are then created as\n"
+				"     empty atomic models, ready to be implemented later\n\n"
+				"4. Buttons:\n"
 				"   • Send to AI: Generate the coupled model structure\n"
 				"   • Apply: Validate the JSON and build the model\n"
 				"   • Download JSON: Save the structure as a JSON file\n"
 				"   • Cancel: Close without saving\n\n"
-				"4. Attached Files:\n"
+				"5. Attached Files:\n"
 				"   • Use 'Attach files...' to add TXT or PDF documents\n"
 				"   • Their text is extracted locally and added to the prompt\n"
 				"   • Scanned PDFs need OCR before they can be attached\n\n"
@@ -400,8 +431,12 @@ class AIPrompterDialog(wx.Dialog):
 				"• Use \"generate\": \"behavior\" when no library model matches: "
 				"the AI writes the atomic model from its \"behavior\" description "
 				"and it is saved next to the coupled model\n"
+				"• The generated class is named like its submodel label, so it "
+				"matches the name of its code block\n"
 				"• Use \"generate\": \"stub\" to create an empty atomic model with "
 				"the declared ports\n"
+				"• In structure-only mode the AI returns \"stub\" submodels "
+				"instead of \"behavior\" ones\n"
 				"• Port indices start at 0\n"
 				"• The special names __input__ and __output__ reference the "
 				"coupled model's own ports\n"
@@ -635,6 +670,7 @@ class AIPrompterDialog(wx.Dialog):
 			prompt=prompt,
 			title=self.session.get("title"),
 			attachments=attachment_names or None,
+			structure_only=self._structure_only_enabled(),
 		)
 
 	def session_payload(self):
@@ -777,6 +813,8 @@ class AIPrompterDialog(wx.Dialog):
 		self.attach_button.Enable(False)
 		self.remove_attachment_button.Enable(False)
 		self.clear_attachments_button.Enable(False)
+		if self.structure_only_check is not None:
+			self.structure_only_check.Enable(False)
 		if hasattr(self, "download_json_button"):
 			self.download_json_button.Enable(False)
 		self.trace_text.SetValue(_("Starting request...\n"))
@@ -828,6 +866,18 @@ class AIPrompterDialog(wx.Dialog):
 					self._append_trace,
 					_("\nGenerating coupled model structure...\n"),
 				)
+				### structure-only mode: no atomic model code is generated
+				structure_only = self._structure_only_enabled()
+
+				if structure_only:
+					wx.CallAfter(
+						self._append_trace,
+						_(
+							"Structure only: the code of the atomic models is "
+							"not generated.\n"
+						),
+					)
+
 				### when the box already holds a structure (reopened session or
 				### a previous answer), the assistant updates it instead of
 				### creating a new one
@@ -840,6 +890,7 @@ class AIPrompterDialog(wx.Dialog):
 					outputs=self.outputs,
 					previous_structure=previous_structure,
 					history=list(self.coupled_messages),
+					generate_atomic_code=not structure_only,
 					on_token=on_token,
 					stop_event=stop_event,
 				)
@@ -854,14 +905,21 @@ class AIPrompterDialog(wx.Dialog):
 
 				structure = parse_json_object(raw_structure)
 
-				### Generate the atomic code of submodels that ask for it. This
-				### is what turns a described behavior into a real model instead
-				### of binding it to an unrelated catalog model.
-				structure = self._generate_coupled_submodel_code(
-					structure,
-					on_token,
-					stop_event,
-				)
+				if structure_only:
+					### keep the structure only: submodels that would need
+					### generated code become empty stubs
+					structure = self._skip_coupled_submodel_code(structure)
+				else:
+					### Generate the atomic code of submodels that ask for it.
+					### This is what turns a described behavior into a real
+					### model instead of binding it to an unrelated catalog
+					### model.
+					structure = self._generate_coupled_submodel_code(
+						structure,
+						on_token,
+						stop_event,
+					)
+
 				if stop_event.is_set():
 					wx.CallAfter(self._finish_generation, None, None, None, True)
 					return
@@ -929,6 +987,63 @@ class AIPrompterDialog(wx.Dialog):
 				wx.CallAfter(self._finish_generation, None, None, None, True)
 			else:
 				wx.CallAfter(self._finish_generation, None, model_json, error)
+
+	def _structure_only_enabled(self):
+		"""Return True when the user asked for the structure only."""
+		if self.model_kind != "coupled" or self.structure_only_check is None:
+			return False
+
+		return bool(self.structure_only_check.GetValue())
+
+	def _skip_coupled_submodel_code(self, structure):
+		"""Keep the structure only: no atomic model code is generated.
+
+		Submodels that ask for a generated behavior and do not carry code yet
+		become ``stub`` submodels, so the wizard creates an empty atomic model
+		with the declared ports instead of writing one from the behavior
+		description.
+		"""
+		from CoupledStructure import GENERATE_ALIASES
+
+		raw_submodels = (
+			structure.get("submodels")
+			or structure.get("models")
+			or structure.get("components")
+			or []
+		)
+
+		if not isinstance(raw_submodels, list):
+			return structure
+
+		for position, submodel in enumerate(raw_submodels):
+			if not isinstance(submodel, dict):
+				continue
+
+			mode = str(
+				submodel.get("generate", "existing") or "existing"
+			).strip().lower()
+			mode = GENERATE_ALIASES.get(mode, mode)
+
+			if mode != "behavior":
+				continue
+
+			### submodels that already carry code keep it: only the generation
+			### of new atomic models is disabled
+			if str(submodel.get("code") or "").strip():
+				continue
+
+			label = str(submodel.get("label") or f"Model{position + 1}").strip()
+			submodel["generate"] = "stub"
+
+			wx.CallAfter(
+				self._append_trace,
+				_(
+					"\nAtomic model code generation is disabled: '{label}' "
+					"is created as an empty atomic model.\n"
+				).format(label=label),
+			)
+
+		return structure
 
 	def _generate_coupled_submodel_code(self, structure, on_token, stop_event):
 		"""Generate the atomic code of coupled submodels that request it.
@@ -1015,8 +1130,12 @@ class AIPrompterDialog(wx.Dialog):
 		return structure
 
 	def _append_trace(self, text):
-		self.trace_text.AppendText(text)
-		self.trace_text.ShowPosition(self.trace_text.GetLastPosition())
+		### the dialog may be closed while a queued trace update is pending
+		try:
+			self.trace_text.AppendText(text)
+			self.trace_text.ShowPosition(self.trace_text.GetLastPosition())
+		except RuntimeError:
+			pass
 
 	def _finish_generation(self, modified_code, model_json, error, cancelled=False):
 		self._generation_active = False
@@ -1027,6 +1146,8 @@ class AIPrompterDialog(wx.Dialog):
 		self.attach_button.Enable(self._attachments_supported())
 		self.remove_attachment_button.Enable(False)
 		self.clear_attachments_button.Enable(bool(self.attachments))
+		if self.structure_only_check is not None:
+			self.structure_only_check.Enable(True)
 
 		if cancelled:
 			self.trace_text.AppendText(_("\nGeneration stopped. Partial output was not applied.\n"))

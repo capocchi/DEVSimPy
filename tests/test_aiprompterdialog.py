@@ -103,6 +103,7 @@ coupled_session = {
         {"role": "assistant", "content": '{"name": "Coupled", "submodels": []}'},
     ],
     "structure": coupled_structure,
+    "structure_only": True,
 }
 
 coupled_frame = AIPrompterDialog(
@@ -138,6 +139,37 @@ assert payload["structure"]["name"] == "Coupled"
 assert len(payload["messages"]) == 2
 assert payload["provider"] == "Ollama"
 assert payload["ai_model"] == "mistral"
+
+# Structure-only mode: the checkbox is restored from the session and persisted
+assert coupled_frame.structure_only_check is not None
+assert coupled_frame.structure_only_check.GetValue() is True
+assert payload["structure_only"] is True
+
+coupled_frame.structure_only_check.SetValue(False)
+assert coupled_frame.session_payload()["structure_only"] is False
+coupled_frame.structure_only_check.SetValue(True)
+
+# Behavior submodels without code become empty stubs in structure-only mode
+structure_only_sample = {
+    "name": "Coupled",
+    "submodels": [
+        {"label": "Gen", "generate": "existing", "model": "Generator"},
+        {"label": "Queue", "generate": "behavior", "behavior": "FIFO queue"},
+        {
+            "label": "Sink",
+            "generate": "behavior",
+            "behavior": "sink",
+            "code": "class Sink: pass\n",
+        },
+    ],
+    "connections": [],
+}
+
+kept = coupled_frame._skip_coupled_submodel_code(structure_only_sample)
+
+assert kept["submodels"][1]["generate"] == "stub"
+assert kept["submodels"][2]["generate"] == "behavior"
+assert kept["submodels"][2]["code"] == "class Sink: pass\n"
 
 # Storing updates the archive the dialog was opened from
 assert coupled_frame._store_session() == coupled_session["session_id"]

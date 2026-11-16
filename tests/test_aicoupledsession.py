@@ -276,8 +276,28 @@ def test_build_session_normalizes_payload():
 		{"role": "assistant", "content": "world"},
 	]
 	assert session["created_at"] == session["updated_at"]
+	assert session["structure_only"] is False
 
 	print("OK test_build_session_normalizes_payload")
+
+
+def test_build_session_keeps_structure_only():
+	"""The structure-only flag is stored and preserved across updates."""
+	session = AICoupledSession.build_session(
+		{}, model_name="TestModel", structure_only=True
+	)
+
+	assert session["structure_only"] is True
+
+	updated = AICoupledSession.build_session(session, prompt="next request")
+
+	assert updated["structure_only"] is True
+
+	cleared = AICoupledSession.build_session(session, structure_only=False)
+
+	assert cleared["structure_only"] is False
+
+	print("OK test_build_session_keeps_structure_only")
 
 
 def test_build_session_keeps_attachment_names():
@@ -308,6 +328,7 @@ if __name__ == "__main__":
 	test_non_archive_rejected()
 	test_archive_entries_are_preserved()
 	test_build_session_normalizes_payload()
+	test_build_session_keeps_structure_only()
 	test_build_session_keeps_attachment_names()
 
 	print("\nAll tests passed!")

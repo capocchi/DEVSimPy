@@ -234,6 +234,7 @@ def build_session(
 	prompt=None,
 	title=None,
 	attachments=None,
+	structure_only=None,
 ):
 	"""Return a normalized session payload ready to be stored.
 
@@ -257,6 +258,13 @@ def build_session(
 			attachments
 			if attachments is not None
 			else session.get("attachments") or []
+		),
+		### True when the assistant generated the structure only, without the
+		### code of the atomic models
+		"structure_only": bool(
+			structure_only
+			if structure_only is not None
+			else session.get("structure_only", False)
 		),
 		"created_at": session.get("created_at") or now,
 		"updated_at": now,

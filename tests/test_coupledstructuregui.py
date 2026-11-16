@@ -239,7 +239,7 @@ def run_checks():
 		)
 		check(
 			"generated code class",
-			"class GeneratedAI_Gen(DomainBehavior)" in code,
+			"class Gen(DomainBehavior)" in code,
 		)
 
 		try:
