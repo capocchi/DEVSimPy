@@ -171,6 +171,56 @@ assert kept["submodels"][1]["generate"] == "stub"
 assert kept["submodels"][2]["generate"] == "behavior"
 assert kept["submodels"][2]["code"] == "class Sink: pass\n"
 
+# ----------------------------------------------------------------------
+# Graphical preview: the structure can be checked before it is applied
+# ----------------------------------------------------------------------
+assert coupled_frame.structure_notebook is not None
+assert coupled_frame.structure_notebook.GetPageCount() == 2
+assert coupled_frame.structure_notebook.GetPageText(0) == "JSON"
+assert coupled_frame.structure_notebook.GetPageText(1) == "Graphical view"
+assert coupled_frame.structure_preview is not None
+assert coupled_frame.preview_refresh_button is not None
+
+# The restored structure has no submodel: the preview reports it
+assert coupled_frame.structure_preview.GetLayout() is None
+assert "at least one submodel" in coupled_frame.structure_preview.GetMessage()
+
+preview_structure = {
+    "name": "Coupled",
+    "inputs": 1,
+    "outputs": 1,
+    "submodels": [
+        {"label": "Gen", "generate": "stub", "inputs": 0, "outputs": 1},
+        {"label": "Sink", "generate": "stub", "inputs": 1, "outputs": 1},
+    ],
+    "connections": [
+        {"source": "__input__", "source_port": 0, "target": "Sink", "target_port": 0},
+        {"source": "Gen", "source_port": 0, "target": "Sink", "target_port": 0},
+        {"source": "Sink", "source_port": 0, "target": "__output__", "target_port": 0},
+    ],
+}
+
+coupled_frame.code_text.SetValue(json.dumps(preview_structure))
+coupled_frame._refresh_structure_preview()
+
+layout = coupled_frame.structure_preview.GetLayout()
+assert layout is not None
+assert [box["label"] for box in layout["boxes"]] == ["Gen", "Sink"]
+assert len(layout["connections"]) == 3
+assert "2 submodel(s), 3 connection(s)" in (
+    coupled_frame.structure_preview_message.GetLabel()
+)
+
+# An invalid JSON is reported inside the preview instead of a diagram
+coupled_frame.code_text.SetValue("{ not json")
+coupled_frame._refresh_structure_preview()
+assert coupled_frame.structure_preview.GetLayout() is None
+assert "Preview unavailable" in coupled_frame.structure_preview.GetMessage()
+
+# Restore the session structure for the persistence assertions below
+coupled_frame.code_text.SetValue(json.dumps(coupled_structure))
+coupled_frame._refresh_structure_preview()
+
 # Storing updates the archive the dialog was opened from
 assert coupled_frame._store_session() == coupled_session["session_id"]
 

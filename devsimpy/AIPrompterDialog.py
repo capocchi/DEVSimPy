@@ -27,6 +27,8 @@ from Utilities import load_and_resize_image
 
 import AICoupledSession
 
+from CoupledStructurePreview import StructurePreviewPanel
+
 from AIFileContext import (
 	AIFileError,
 	compose_prompt,
@@ -120,6 +122,9 @@ class AIPrompterDialog(wx.Dialog):
 		self.Bind(wx.EVT_CLOSE, self.on_close)
 		self.Center()
 
+		### draw the graphical preview of a restored structure
+		self._refresh_structure_preview()
+
 		### tell the user that the previous conversation was reopened
 		if self.model_kind == "coupled" and self.coupled_messages:
 			self._append_trace(
@@ -143,21 +148,97 @@ class AIPrompterDialog(wx.Dialog):
 
 		# --- Section Generated Code ---
 		if self.model_kind == "coupled":
-			code_label = _("Coupled Model Structure (JSON)")
+			code_label = _("Coupled Model Structure")
 		else:
 			code_label = _("Generated Code")
 
 		code_static = wx.StaticBox(panel, label=code_label)
 		code_box = wx.StaticBoxSizer(code_static, wx.VERTICAL)
 
-		self.code_text = wx.TextCtrl(
-			code_static, value=self.code_to_replace, style=wx.TE_MULTILINE | wx.TE_RICH2
-		)
 		# Police monospace pour le code
 		font = wx.Font(10, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
-		self.code_text.SetFont(font)
 
-		code_box.Add(self.code_text, proportion=1, flag=wx.ALL | wx.EXPAND, border=5)
+		### Coupled structures are shown either as JSON or as a diagram.
+		self.structure_notebook = None
+		self.structure_preview = None
+		self.structure_preview_message = None
+		self.preview_refresh_button = None
+
+		if self.model_kind == "coupled":
+			self.structure_notebook = wx.Notebook(code_static)
+
+			json_page = wx.Panel(self.structure_notebook)
+			self.code_text = wx.TextCtrl(
+				json_page,
+				value=self.code_to_replace,
+				style=wx.TE_MULTILINE | wx.TE_RICH2,
+			)
+			self.code_text.SetFont(font)
+
+			json_sizer = wx.BoxSizer(wx.VERTICAL)
+			json_sizer.Add(
+				self.code_text, proportion=1, flag=wx.ALL | wx.EXPAND, border=5
+			)
+			json_page.SetSizer(json_sizer)
+
+			preview_page = wx.Panel(self.structure_notebook)
+			preview_sizer = wx.BoxSizer(wx.VERTICAL)
+
+			preview_toolbar = wx.BoxSizer(wx.HORIZONTAL)
+			self.preview_refresh_button = wx.Button(
+				preview_page, label=_("Refresh preview"), size=(140, 28)
+			)
+			self.preview_refresh_button.Bind(wx.EVT_BUTTON, self.on_refresh_preview)
+			self.preview_refresh_button.SetToolTip(
+				_("Redraw the graphical view from the current JSON structure")
+			)
+			preview_toolbar.Add(self.preview_refresh_button, flag=wx.RIGHT, border=8)
+
+			self.structure_preview_message = wx.StaticText(
+				preview_page, label=_("Preview of the structure before validation.")
+			)
+			self.structure_preview_message.SetForegroundColour(wx.Colour(100, 100, 100))
+			preview_toolbar.Add(
+				self.structure_preview_message,
+				proportion=1,
+				flag=wx.ALIGN_CENTER_VERTICAL,
+			)
+
+			preview_sizer.Add(
+				preview_toolbar, flag=wx.EXPAND | wx.ALL, border=5
+			)
+
+			self.structure_preview = StructurePreviewPanel(preview_page)
+			preview_sizer.Add(
+				self.structure_preview,
+				proportion=1,
+				flag=wx.EXPAND | wx.ALL,
+				border=5,
+			)
+			preview_page.SetSizer(preview_sizer)
+
+			self.structure_notebook.AddPage(json_page, _("JSON"))
+			self.structure_notebook.AddPage(preview_page, _("Graphical view"))
+
+			code_box.Add(
+				self.structure_notebook,
+				proportion=1,
+				flag=wx.ALL | wx.EXPAND,
+				border=5,
+			)
+
+			self.code_text.Bind(wx.EVT_TEXT, self.on_structure_text_change)
+			self.structure_notebook.Bind(
+				wx.EVT_NOTEBOOK_PAGE_CHANGED, self.on_structure_page_changed
+			)
+		else:
+			self.code_text = wx.TextCtrl(
+				code_static, value=self.code_to_replace, style=wx.TE_MULTILINE | wx.TE_RICH2
+			)
+			self.code_text.SetFont(font)
+
+			code_box.Add(self.code_text, proportion=1, flag=wx.ALL | wx.EXPAND, border=5)
+
 		main_sizer.Add(code_box, proportion=2, flag=wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, border=15)
 
 		# --- Section Live AI Output ---
@@ -404,7 +485,9 @@ class AIPrompterDialog(wx.Dialog):
 				"This tool builds a coupled model from a natural language description.\n\n"
 				"How to use:\n\n"
 				"1. Coupled Model Structure Section:\n"
-				"   • Shows the JSON structure proposed by the AI\n"
+				"   • JSON tab: shows the structure proposed by the AI\n"
+				"   • Graphical view tab: draws the submodels, their ports and\n"
+				"     the couplings, before the structure is validated\n"
 				"   • It lists the submodels, their ports and the couplings\n"
 				"   • You can edit the JSON before applying it\n\n"
 				"2. AI Prompt Section:\n"
@@ -624,6 +707,81 @@ class AIPrompterDialog(wx.Dialog):
 				cleaned.append({"role": role, "content": content})
 
 		return cleaned
+
+	def on_structure_text_change(self, event):
+		"""Refresh the graphical preview while the JSON is edited."""
+		if event is not None:
+			event.Skip()
+		self._refresh_structure_preview()
+
+	def on_structure_page_changed(self, event):
+		"""Refresh the preview when its tab is selected."""
+		if event is not None:
+			event.Skip()
+		self._refresh_structure_preview()
+
+	def on_refresh_preview(self, event):
+		"""Redraw the preview on demand."""
+		self._refresh_structure_preview()
+
+	def _set_preview_status(self, message):
+		"""Update the text shown next to the preview refresh button."""
+		if self.structure_preview_message is not None:
+			self.structure_preview_message.SetLabel(message)
+			self.structure_preview_message.GetParent().Layout()
+
+	def _refresh_structure_preview(self):
+		"""Rebuild the graphical view from the JSON currently displayed.
+
+		The structure is normalized with the same rules as the validation
+		performed by the Apply button, so the preview shows what will be
+		built.  When the JSON is incomplete or invalid, the preview panel
+		shows the validation error instead of a diagram.
+		"""
+		if self.structure_preview is None:
+			return
+
+		from CoupledStructure import (
+			CoupledStructureError,
+			normalize_coupled_structure,
+		)
+
+		text = self.code_text.GetValue()
+
+		if not text.strip():
+			self.structure_preview.SetMessage(_("No structure to display yet."))
+			self._set_preview_status(
+				_("Preview of the structure before validation.")
+			)
+			return
+
+		try:
+			data = self._parse_structure(text)
+
+			if data is None:
+				raise CoupledStructureError(_("The structure is not valid JSON."))
+
+			structure = normalize_coupled_structure(
+				data,
+				catalog=self.catalog,
+				name=self.model_name,
+				inputs=self.inputs,
+				outputs=self.outputs,
+			)
+		except Exception as error:  # noqa: BLE001
+			self.structure_preview.SetMessage(
+				_("Preview unavailable:\n{}").format(str(error))
+			)
+			self._set_preview_status(_("The structure is not valid yet."))
+			return
+
+		self.structure_preview.SetStructure(structure)
+		self._set_preview_status(
+			_("{submodels} submodel(s), {connections} connection(s).").format(
+				submodels=len(structure.get("submodels") or []),
+				connections=len(structure.get("connections") or []),
+			)
+		)
 
 	@staticmethod
 	def _parse_structure(code):
@@ -1166,6 +1324,7 @@ class AIPrompterDialog(wx.Dialog):
 				if hasattr(self, "download_json_button"):
 					self.download_json_button.Enable(True)
 			if self.model_kind == "coupled":
+				self._refresh_structure_preview()
 				self._record_coupled_turn(modified_code)
 			self.trace_text.AppendText(_("\nGeneration complete.\n"))
 		else:
