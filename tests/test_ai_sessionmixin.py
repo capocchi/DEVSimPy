@@ -285,6 +285,155 @@ def test_get_current_session():
 	print("OK test_get_current_session")
 
 
+def test_session_ids_do_not_include_model_name():
+	"""Session IDs/filenames must not embed the model name."""
+	archive, temp_dir = create_archive(".amd")
+
+	try:
+		mixin = create_mixin(archive)
+		assert mixin.store_session({"prompt": "x"}) is True
+
+		record = mixin.list_sessions()[0]
+		assert "TestModel" not in record["session_id"]
+		assert "TestModel" not in record["filename"]
+
+		names, _contents = read_archive(archive)
+		assert not [
+			name
+			for name in names
+			if name.startswith("session/") and "TestModel" in name
+		]
+
+	finally:
+		shutil.rmtree(temp_dir, ignore_errors=True)
+
+	print("OK test_session_ids_do_not_include_model_name")
+
+
+def test_store_updates_active_session_in_place():
+	"""Storing twice within one session updates a single archive entry."""
+	archive, temp_dir = create_archive(".amd")
+
+	try:
+		mixin = create_mixin(archive)
+		session_id = mixin.create_session()
+
+		first_data = {
+			"prompt": "first",
+			"messages": [{"role": "user", "content": "first"}],
+		}
+
+		assert mixin.store_session(first_data) is True
+		first = mixin.list_sessions()[0]
+		assert first["session_id"] == session_id
+		assert first["title"] == "first"
+		assert first["message_count"] == 1
+
+		time.sleep(0.01)
+
+		second_data = {
+			"prompt": "second",
+			"messages": [
+				{"role": "user", "content": "first"},
+				{"role": "assistant", "content": "ok"},
+			],
+		}
+
+		assert mixin.store_session(second_data) is True
+
+		sessions = mixin.list_sessions()
+		assert len(sessions) == 1
+
+		updated = sessions[0]
+		assert updated["session_id"] == session_id
+		assert updated["created_at"] == first["created_at"]
+		assert updated["updated_at"] >= first["updated_at"]
+		assert updated["message_count"] == 2
+		assert updated["title"] == "first"
+
+		names, contents = read_archive(archive)
+		assert names.count("session/session_index.json") == 1
+
+		session_files = [
+			name
+			for name in names
+			if name.startswith("session/")
+			and name.endswith(".json")
+			and name != "session/session_index.json"
+		]
+		assert session_files == [f"session/{session_id}.json"]
+
+		stored = json.loads(contents[f"session/{session_id}.json"])
+		assert stored["data"]["prompt"] == "second"
+
+	finally:
+		shutil.rmtree(temp_dir, ignore_errors=True)
+
+	print("OK test_store_updates_active_session_in_place")
+
+
+def test_create_and_delete_session():
+	"""Sessions can be created, titled, listed, loaded and deleted."""
+	archive, temp_dir = create_archive(".amd")
+
+	try:
+		mixin = create_mixin(archive)
+
+		first = mixin.create_session(title="Alpha")
+		assert mixin.active_session_id == first
+		assert mixin.store_session({"prompt": "a"}) is True
+
+		second = mixin.create_session(title="Beta")
+		assert second != first
+		assert mixin.store_session({"prompt": "b"}) is True
+
+		sessions = mixin.list_sessions()
+		assert len(sessions) == 2
+		assert {record["title"] for record in sessions} == {"Alpha", "Beta"}
+
+		### Load a specific session (not just the most recent one)
+		loaded = mixin.load_session(session_id=first)
+		assert loaded["prompt"] == "a"
+		assert mixin.active_session_id == first
+
+		### Delete the active session
+		assert mixin.delete_session() is True
+		assert mixin.active_session_id is None
+		assert len(mixin.list_sessions()) == 1
+		assert mixin.list_sessions()[0]["title"] == "Beta"
+
+		### Delete by id
+		assert mixin.delete_session(second) is True
+		assert mixin.list_sessions() == []
+
+	finally:
+		shutil.rmtree(temp_dir, ignore_errors=True)
+
+	print("OK test_create_and_delete_session")
+
+
+def test_duplicate_zip_entries_are_deduped():
+	"""Rewriting the archive must not keep duplicate entries (e.g. 'session/')."""
+	archive, temp_dir = create_archive(".amd")
+
+	try:
+		with zipfile.ZipFile(archive, "a", zipfile.ZIP_DEFLATED) as zf:
+			zf.writestr("session/", b"")
+			zf.writestr("session/", b"")
+
+		mixin = create_mixin(archive)
+		assert mixin.store_session({"prompt": "x"}) is True
+
+		names, _contents = read_archive(archive)
+		assert names.count("session/") <= 1
+		assert names.count("session/session_index.json") == 1
+
+	finally:
+		shutil.rmtree(temp_dir, ignore_errors=True)
+
+	print("OK test_duplicate_zip_entries_are_deduped")
+
+
 if __name__ == "__main__":
 	print("Running AI Session Mixin tests...\n")
 
@@ -296,5 +445,9 @@ if __name__ == "__main__":
 	test_store_without_model_name()
 	test_session_file_property()
 	test_get_current_session()
+	test_session_ids_do_not_include_model_name()
+	test_store_updates_active_session_in_place()
+	test_create_and_delete_session()
+	test_duplicate_zip_entries_are_deduped()
 
 	print("\nAll tests passed!")

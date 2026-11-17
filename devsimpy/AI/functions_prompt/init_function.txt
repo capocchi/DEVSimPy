@@ -10,5 +10,5 @@ DEVSimPy API:
 - Do not call initPhase from a transition method.
 - Do not create ports in an atomic CodeBlock constructor. DEVSimPy creates IPorts/OPorts from the CodeBlock's diagram metadata after construction. Explicit port creation belongs only to standalone models whose interface is not supplied by a CodeBlock.
 - Add the `Message` import only if this constructor itself needs it; output functions normally construct messages.
-- The generated class name must be a valid Python identifier derived from model_name.
+- The generated class name must be exactly `model_name` from the JSON specifications (a valid Python identifier), with no prefix or suffix. It names the code block that represents the model.
 - Add imports only when required by the described behavior. Output code only, with tabs for indentation.

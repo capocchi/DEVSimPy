@@ -2474,6 +2474,8 @@ if getattr(builtins, "GUI_FLAG", True):
 				if m:
 					### save visual model
 					if gmwiz.overwrite_flag and isinstance(m, Block):
+						### build the AI-generated coupled structure before saving
+						gmwiz.apply_coupled_structure(m)
 						if m.SaveFile(gmwiz.model_path):
 							m.last_name_saved = gmwiz.model_path
 						else:
@@ -5042,6 +5044,17 @@ class ContainerBlock(Block, Iconizable, Diagram):
 			)
 			frame.SetIcon(mainW.GetIcon())
 			frame.Show()
+
+		event.Skip()
+
+	###
+	def OnEditCoupledWithAI(self, event):
+		"""Reopen the AI assistant that generated this coupled model."""
+		from AIPrompterDialog import edit_coupled_model_with_ai
+
+		mainW = getTopLevelWindow()
+
+		edit_coupled_model_with_ai(self, mainW)
 
 		event.Skip()
 

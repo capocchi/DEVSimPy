@@ -43,4 +43,30 @@ frame = ModelGeneratorWizard(
     title='Test',
     img_filename=os.path.join(ICON_PATH, DEVSIMPY_ICON)
 )
+
+
+def _check_coupled_ai_support(wizard):
+	"""The coupled page must expose an AI button and the apply hook."""
+	import wx
+
+	buttons = []
+
+	def walk(window):
+		for child in window.GetChildren():
+			if isinstance(child, wx.Button):
+				buttons.append(child)
+			walk(child)
+
+	walk(wizard.pages[2])
+
+	labels = [button.GetLabel() for button in buttons]
+	assert "AI Prompt" in labels, labels
+	assert hasattr(wizard, "generated_coupled_model")
+	assert hasattr(wizard, "generated_coupled_session")
+	assert hasattr(wizard, "apply_coupled_structure")
+	assert wizard.apply_coupled_structure(object()) == (0, 0)
+
+
+_check_coupled_ai_support(frame)
+
 app.RunTest(frame)

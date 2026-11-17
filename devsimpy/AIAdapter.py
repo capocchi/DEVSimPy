@@ -63,6 +63,14 @@ logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %
 ERR_MSG = _("Error while generating output")
 AI_DIR = pathlib.Path(__file__).resolve().parent / "AI"
 
+
+class AIRequestError(RuntimeError):
+	"""Raised when a generative AI request fails.
+
+	Adapters must raise this exception instead of returning an error string so
+	that callers never mistake an error message for generated code.
+	"""
+
 ##########################################################
 ### Atomic Model JSON STRUCTURE
 ##########################################################
@@ -121,6 +129,15 @@ class DevsAIAdapter(ABC):
 			AI_DIR / "DEVS_Explanation.txt"
 		)
 
+	def ensure_ready(self):
+		"""Return True when the provider is ready to serve a request.
+
+		Subclasses override this method to perform a provider-specific
+		preflight check (server reachable, model loaded, ...). Adapters that
+		need no check keep this default implementation.
+		"""
+		return True
+
 	def _load_base_prompt(self, file_path):
 		"""
 		Loads the base prompt from the DEVS model explanation file.
@@ -161,6 +178,10 @@ class DevsAIAdapter(ABC):
 		"""
 		Generates a prompt to modify an existing DEVS model.
 		Takes into account the model name, the current code, and additional details.
+
+		The static DEVSimPy guidelines are sent separately as the system message
+		(see :meth:`system_prompt`), so this user message only carries the
+		changing code and request. This keeps the cached prefix stable.
 		"""
 		logging.info("Modifying model")  # noqa: LOG015
 
@@ -170,9 +191,6 @@ class DevsAIAdapter(ABC):
 		Here is the current model code:
 		{code}
 
-		Use the following DEVS model guidelines for reference:
-		{self.base_prompt}
-
 		Here are the specific details to modify the model:
 		{prompt}
 
@@ -180,12 +198,123 @@ class DevsAIAdapter(ABC):
 		Do not provide any explanations, only the code.
 
 		IMPORTANT: Preserve the header block at the beginning of the code (the block enclosed by 
-		'-------------------------------------------------------------------------------'). This header is used by atomic and coupled models.
+		'-------------------------------------------------------------------------------'). This header is used for atomic and coupled models.
 		The AI should generate new code without worrying about this header - it must include in its output
 		the header from the reference code that was used as context.
 		"""
 		logging.debug("Modification prompt created for model.")  # noqa: LOG015
 		return full_prompt
+
+	def system_prompt(self):
+		"""Return the static system message shared by all requests.
+
+		It contains the DEVSimPy model-authoring guidelines. Because it never
+		changes between requests it forms a stable, cacheable prefix.
+		"""
+		return (
+			"You are an expert in DEVS modeling.\n\n"
+			+ self.base_prompt
+		)
+
+	### File text is extracted locally and sent as plain text, so every
+	### text LLM can receive it. Adapters can override this to opt out.
+	SUPPORTS_FILE_ATTACHMENTS = True
+
+	def supports_file_attachments(self):
+		"""Return True when local documents can be added to the prompt.
+
+		Attachments are converted to text by :mod:`AIFileContext` and sent as
+		part of the user message, so no multimodal model is required.
+		"""
+		return self.SUPPORTS_FILE_ATTACHMENTS
+
+	def generate_coupled_model_json(
+		self,
+		prompt,
+		catalog=None,
+		model_name=None,
+		inputs=None,
+		outputs=None,
+		previous_structure=None,
+		history=None,
+		generate_atomic_code=True,
+		on_token=None,
+		stop_event=None,
+	):
+		"""Generate a JSON structure describing a coupled model.
+
+		Unlike :meth:`generate_model_json`, which describes the behaviour of an
+		atomic model, the returned object describes the coupled model structure
+		(submodels and couplings). The raw answer is returned as a string; the
+		caller validates it with
+		:func:`CoupledStructure.normalize_coupled_structure`.
+
+		When ``previous_structure`` is given, the assistant updates that
+		structure instead of creating a new one. ``history`` carries the
+		previous turns of the coupled-model conversation so a reopened session
+		keeps its context. Set ``generate_atomic_code`` to False to obtain the
+		structure only: the assistant then declares submodels as ``stub``
+		instead of describing atomic model behaviors.
+		"""
+		from CoupledStructure import coupled_system_prompt, coupled_user_prompt
+
+		system_prompt = coupled_system_prompt(
+			catalog,
+			generate_atomic_code=generate_atomic_code,
+		)
+		user_prompt = coupled_user_prompt(
+			prompt,
+			model_name=model_name,
+			inputs=inputs,
+			outputs=outputs,
+			previous_structure=previous_structure,
+			generate_atomic_code=generate_atomic_code,
+		)
+
+		messages = self._coupled_messages(system_prompt, history, user_prompt)
+
+		return self.generate_output(
+			"" if messages else user_prompt,
+			system_prompt=system_prompt,
+			messages_history=messages,
+			on_token=on_token,
+			stop_event=stop_event,
+		)
+
+	### Maximum characters kept per conversation turn sent to the model
+	MAX_HISTORY_MESSAGE_CHARS = 20_000
+
+	def _coupled_messages(self, system_prompt, history, user_prompt):
+		"""Build the chat messages of a coupled-model request.
+
+		Returns ``None`` when there is no history, so adapters keep using the
+		single-shot system/user prompt.
+		"""
+		history = [message for message in history or [] if isinstance(message, dict)]
+
+		if not history:
+			return None
+
+		messages = [{"role": "system", "content": system_prompt}]
+
+		for message in history:
+			role = message.get("role")
+			content = message.get("content")
+
+			if role not in ("user", "assistant") or not isinstance(content, str):
+				continue
+
+			if not content.strip():
+				continue
+
+			if len(content) > self.MAX_HISTORY_MESSAGE_CHARS:
+				content = content[: self.MAX_HISTORY_MESSAGE_CHARS] + "\n...[truncated]"
+
+			messages.append({"role": role, "content": content})
+
+		messages.append({"role": "user", "content": user_prompt})
+
+		return messages
 
 	def modify_model_part_prompt(self, code, prompt):
 		"""
@@ -199,9 +328,6 @@ class DevsAIAdapter(ABC):
 		You are an expert in DEVS modeling. You need to modify a specific part of a DEVS model.
 		Here is the current model code:
 		<{code}>
-		
-		Use the following DEVS model guidelines for reference:
-		{self.base_prompt}
 
 		Here are the specific details to modify this part of the model:
 		{prompt}
@@ -502,12 +628,12 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 			return AtomicModel.model_validate_json(content).model_dump()
 		except ValueError as ve:
 			logging.exception(_("Validation error"))  # noqa: LOG015
-			return _(f"Validation error: {ve}")  # noqa: INT001
+			raise AIRequestError(_(f"Validation error: {ve}")) from ve  # noqa: INT001
 
 		except Exception as e:
 			# Journalisation de l'erreur avec les détails de l'exception
 			logging.exception(ERR_MSG)  # noqa: LOG015
-			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
+			raise AIRequestError(_(f"An error occurred while generating the output: {e}")) from e  # noqa: INT001
 
 	def generate_output(
 		self, prompt="", system_prompt="", messages_history=None, on_token=None, stop_event=None
@@ -550,19 +676,19 @@ class ChatGPTDevsAdapter(DevsAIAdapter):
 			# Validation de la réponse
 			if not hasattr(response, "choices") or not response.choices:
 				logging.exception("No choices found in response.")  # noqa: LOG015
-				return _("No response received from the AI model.")
+				raise AIRequestError(_("No response received from the AI model."))
 
 			# Retourner le contenu du message
 			return response.choices[0].message.content
 
 		except ValueError as ve:
 			logging.exception(_("Validation error"))  # noqa: LOG015
-			return _(f"Validation error: {ve}")  # noqa: INT001
+			raise AIRequestError(_(f"Validation error: {ve}")) from ve  # noqa: INT001
 
 		except Exception as e:
 			# Journalisation de l'erreur avec les détails de l'exception
 			logging.exception(ERR_MSG)  # noqa: LOG015
-			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
+			raise AIRequestError(_(f"An error occurred while generating the output: {e}")) from e  # noqa: INT001
 
 
 ##########################################################
@@ -821,7 +947,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 			return json.loads(content)
 		except Exception as e:
 			logging.exception(ERR_MSG)  # noqa: LOG015
-			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
+			raise AIRequestError(_(f"An error occurred while generating the output: {e}")) from e  # noqa: INT001
 
 
 	def generate_output(
@@ -864,7 +990,7 @@ class OllamaDevsAdapter(DevsAIAdapter):
 			return response["message"]["content"]
 		except Exception as e:
 			logging.exception(ERR_MSG)  # noqa: LOG015
-			return _(f"An error occurred while generating the output: {e}")  # noqa: INT001
+			raise AIRequestError(_(f"An error occurred while generating the output: {e}")) from e  # noqa: INT001
 
 ##########################################################
 ###
@@ -881,7 +1007,65 @@ class LMStudioDevsAdapter(DevsAIAdapter):
 		self.base_url = base_url.rstrip("/")
 		self.model_name = model_name.strip()
 		self.wxparent = parent
-		self.api_client = OpenAI(base_url=self.base_url, api_key="lm-studio")
+		self.api_client = OpenAI(
+			base_url=self.base_url,
+			api_key="lm-studio",
+			timeout=120.0,
+			max_retries=0,
+		)
+
+	### Timeout (seconds) used by the readiness check
+	CONNECT_TIMEOUT = 1.0
+
+	def _server_address(self):
+		"""Return the (host, port) pair of the configured LM Studio server."""
+		from urllib.parse import urlparse
+
+		parsed = urlparse(self.base_url)
+		host = parsed.hostname or "localhost"
+		port = parsed.port or (443 if parsed.scheme == "https" else 80)
+
+		return host, port
+
+	def _not_reachable_message(self):
+		"""Return an actionable message when the LM Studio server is down."""
+		return _(
+			"LM Studio server is not reachable at %s. "
+			"Open LM Studio, go to Developer -> Start Server, and load a model."
+		) % self.base_url
+
+	def ensure_ready(self):
+		"""Check that LM Studio is running and serves the selected model."""
+		host, port = self._server_address()
+
+		try:
+			with socket.create_connection(
+				(host, port), timeout=self.CONNECT_TIMEOUT
+			):
+				pass
+		except OSError as error:
+			raise AIRequestError(self._not_reachable_message()) from error
+
+		try:
+			models = self.get_available_models()
+		except Exception as error:
+			raise AIRequestError(self._not_reachable_message()) from error
+
+		if not models:
+			raise AIRequestError(
+				_("LM Studio is reachable, but no model is loaded.")
+			)
+
+		if self.model_name not in models:
+			raise AIRequestError(
+				_(
+					"Model '%s' is not loaded in LM Studio. "
+					"Available models: %s"
+				)
+				% (self.model_name, ", ".join(models))
+			)
+
+		return True
 
 	def get_available_models(self):
 		"""Return the model IDs currently served by LM Studio."""
@@ -889,14 +1073,145 @@ class LMStudioDevsAdapter(DevsAIAdapter):
 
 	def test_connection(self):
 		"""Verify that LM Studio is reachable and the selected model is served."""
-		models = self.get_available_models()
-		if not models:
-			raise RuntimeError("LM Studio is reachable, but no model is loaded.")
-		if self.model_name not in models:
-			raise RuntimeError(
-				f"Model '{self.model_name}' is not available. Loaded models: {', '.join(models)}"
-			)
-		return True
+		return self.ensure_ready()
+
+	def _wrap_request_error(self, error):
+		"""Translate OpenAI client errors into actionable messages."""
+		try:
+			from openai import APIConnectionError, APITimeoutError
+
+			connection_errors = (APIConnectionError, APITimeoutError)
+		except ImportError:
+			connection_errors = ()
+
+		if connection_errors and isinstance(error, connection_errors):
+			return AIRequestError(self._not_reachable_message())
+
+		return AIRequestError(
+			_("An error occurred while generating the output: %s") % error
+		)
+
+	@staticmethod
+	def _is_unsupported_response_format(error):
+		"""Return True when the server rejected the requested ``response_format``.
+
+		Recent LM Studio builds only accept ``json_schema`` or ``text`` and
+		answer ``'response_format.type' must be 'json_schema' or 'text'`` when
+		``json_object`` is requested. They may also reject ``json_schema`` when
+		the loaded model has no structured-output support.
+		"""
+		message = str(error).lower()
+		return (
+			"response_format" in message
+			or "json_schema" in message
+			or "structured output" in message
+		)
+
+	@staticmethod
+	def _extract_json_text(content):
+		"""Return the JSON payload contained in an LLM answer.
+
+		When the request falls back to ``response_format={"type": "text"}`` the
+		model may wrap its answer in a Markdown code fence. Strip the fence (or
+		any surrounding prose) before validating the payload.
+		"""
+		if not content:
+			return ""
+
+		text = content.strip()
+		fence = re.match(r"^```(?:json)?\s*(.*?)\s*```$", text, re.DOTALL)
+		if fence:
+			return fence.group(1).strip()
+
+		start = text.find("{")
+		end = text.rfind("}")
+		if start != -1 and end > start:
+			return text[start : end + 1]
+
+		return text
+
+	@staticmethod
+	def _collect_completion_content(response, on_token=None, stop_event=None):
+		"""Return the full text of a streamed or non-streamed completion.
+
+		Some LM Studio models are reasoning models: the final answer is returned
+		in ``reasoning_content`` while ``content`` stays empty. Fall back to the
+		reasoning text so the answer is never silently lost.
+		"""
+
+		def _reasoning_text(message):
+			text = getattr(message, "reasoning_content", None)
+			if text:
+				return text
+			extra = getattr(message, "model_extra", None) or {}
+			return extra.get("reasoning_content")
+
+		if on_token is None and stop_event is None:
+			message = response.choices[0].message
+			return message.content or _reasoning_text(message) or ""
+
+		content_parts = []
+		reasoning_parts = []
+		for chunk in response:
+			if stop_event is not None and stop_event.is_set():
+				response.close()
+				break
+			if not chunk.choices:
+				continue
+			delta = chunk.choices[0].delta
+			content = delta.content
+			if content:
+				content_parts.append(content)
+				if on_token is not None:
+					on_token(content)
+			reasoning = _reasoning_text(delta)
+			if reasoning:
+				reasoning_parts.append(reasoning)
+				if on_token is not None and not content_parts:
+					on_token(reasoning)
+
+		return "".join(content_parts) or "".join(reasoning_parts)
+
+	def _request_json_completion(self, messages, on_token=None, stop_event=None):
+		"""Request a JSON completion, retrying with plain text when needed."""
+		schema = AtomicModel.model_json_schema()
+		response_formats = [
+			{
+				"type": "json_schema",
+				"json_schema": {
+					"name": "atomic_model",
+					"strict": True,
+					"schema": schema,
+				},
+			},
+			{"type": "text"},
+		]
+
+		stream = on_token is not None or stop_event is not None
+		last_error = None
+
+		for response_format in response_formats:
+			try:
+				response = self.api_client.chat.completions.create(
+					model=self.model_name,
+					messages=messages,
+					response_format=response_format,
+					stream=stream,
+				)
+			except Exception as error:
+				if last_error is not None or not self._is_unsupported_response_format(error):
+					raise
+				logging.warning(  # noqa: LOG015
+					"LM Studio rejected response_format %s, retrying with plain text: %s",
+					response_format.get("type"),
+					error,
+				)
+				last_error = error
+				continue
+
+			return self._collect_completion_content(response, on_token, stop_event)
+
+		raise last_error
 
 	def generate_model_json(self, prompt, on_token=None, stop_event=None):
 		system_prompt = self._load_base_prompt(AI_DIR / "json_gen_prompt.txt")
@@ -904,36 +1219,22 @@ class LMStudioDevsAdapter(DevsAIAdapter):
 			"\nReturn a single JSON object conforming to this schema:\n"
 			+ json.dumps(AtomicModel.model_json_schema())
 		)
+		messages = [
+			{"role": "system", "content": system_prompt},
+			{"role": "user", "content": prompt},
+		]
 		try:
-			response = self.api_client.chat.completions.create(
-				model=self.model_name,
-				messages=[
-					{"role": "system", "content": system_prompt},
-					{"role": "user", "content": prompt},
-				],
-				response_format={"type": "json_object"},
-				stream=on_token is not None or stop_event is not None,
-			)
-			if on_token is not None or stop_event is not None:
-				content_parts = []
-				for chunk in response:
-					if stop_event is not None and stop_event.is_set():
-						response.close()
-						break
-					if not chunk.choices:
-						continue
-					content = chunk.choices[0].delta.content
-					if content:
-						content_parts.append(content)
-						if on_token is not None:
-							on_token(content)
-				content = "".join(content_parts)
-			else:
-				content = response.choices[0].message.content
-			return AtomicModel.model_validate_json(content).model_dump()
+			content = self._request_json_completion(messages, on_token, stop_event)
+			payload = self._extract_json_text(content)
+			return AtomicModel.model_validate_json(payload).model_dump()
+		except AIRequestError:
+			raise
+		except ValueError as error:
+			logging.exception(_("Validation error"))  # noqa: LOG015
+			raise AIRequestError(_("Validation error: %s") % error) from error
 		except Exception as error:
 			logging.exception(ERR_MSG)  # noqa: LOG015
-			return _(f"An error occurred while generating the output: {error}")  # noqa: INT001
+			raise self._wrap_request_error(error) from error
 
 	def generate_output(
 		self, prompt="", system_prompt="", messages_history=None, on_token=None, stop_event=None
@@ -951,21 +1252,12 @@ class LMStudioDevsAdapter(DevsAIAdapter):
 				],
 				stream=on_token is not None or stop_event is not None,
 			)
-			if on_token is not None or stop_event is not None:
-				content_parts = []
-				for chunk in response:
-					if stop_event is not None and stop_event.is_set():
-						response.close()
-						break
-					if not chunk.choices:
-						continue
-					content = chunk.choices[0].delta.content
-					if content:
-						content_parts.append(content)
-						if on_token is not None:
-							on_token(content)
-				return "".join(content_parts)
-			return response.choices[0].message.content
+			return self._collect_completion_content(response, on_token, stop_event)
+		except AIRequestError:
+			raise
+		except ValueError as error:
+			logging.exception(_("Validation error"))  # noqa: LOG015
+			raise AIRequestError(_("Validation error: %s") % error) from error
 		except Exception as error:
 			logging.exception(ERR_MSG)  # noqa: LOG015
-			return _(f"An error occurred while generating the output: {error}")  # noqa: INT001
+			raise self._wrap_request_error(error) from error

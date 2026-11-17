@@ -12,6 +12,7 @@ import builtins
 from ApplicationController import TestApp
 
 from Editor import GetEditor # type: ignore
+from AIFileContext import AIFileAttachment # type: ignore
 
 # Run the test
 fn = os.path.join(os.path.realpath(gettempdir()), 'test.py')
@@ -41,6 +42,22 @@ assert frame2.ai_assistant_item.IsChecked()
 frame2.ToggleAIAssistantPanel(None)
 assert not frame2.editor_splitter.IsSplit()
 assert not frame2.ai_assistant_item.IsChecked()
+
+# File attachment UI of the AI assistant panel
+panel = frame2.ai_assistant_panel
+assert hasattr(panel, "attach_button")
+assert panel.attachments_label.GetLabel() == "No file attached."
+assert not panel.clear_attachments_button.IsEnabled()
+
+panel._attachments = [AIFileAttachment(fn, "Attached code specification")]
+panel._refresh_attachments()
+assert "1 file(s)" in panel.attachments_label.GetLabel()
+assert panel.clear_attachments_button.IsEnabled()
+
+panel._attachments = []
+panel._refresh_attachments()
+assert not panel.clear_attachments_button.IsEnabled()
+
 app2.RunTest(frame2)
 
 # frame3 = GetEditor(None, -1, 'Test3', None, file_type='block')

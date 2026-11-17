@@ -7,7 +7,7 @@
 #                    L. CAPOCCHI (capocchi@univ-corse.fr)
 #                SPE Lab - SISU Group - University of Corsica
 #                     --------------------------------
-# Version 1.2                                      last modified:  09/11/26
+# Version 1.3                                      last modified:  11/12/26
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 #
 # GENERAL NOTES AND REMARKS:
@@ -50,9 +50,11 @@ class AI_SessionMixin:
                 self.model_name = None
 
     Methods:
-        store_session(): Store current session to the model archive.
-        load_session(model_name): Load the most recent session for a model.
+        create_session(): Start a new empty session (persisted on next save).
+        store_session(): Store/update the current session in the model archive.
+        load_session(model_name, session_id): Load a session from the archive.
         list_sessions(model_name): List all sessions for a model.
+        delete_session(session_id): Delete a session.
         remove_session(session_id): Remove a specific session.
         clear_sessions(model_name): Remove all sessions for a model.
         on_panel_load(): Auto-load the last session when the panel is shown.
@@ -86,6 +88,18 @@ class AI_SessionMixin:
 
         # Archive matching the currently loaded conversation
         self._session_archive = None
+
+        # Session currently being updated in the archive (None => new session)
+        self._active_session_id = None
+
+        # Title shown for the active session
+        self._session_title = None
+
+        # True when the title was chosen explicitly (survives prompt changes)
+        self._session_title_is_custom = False
+
+        # Creation timestamp of the active session (preserved on updates)
+        self._session_created_at = None
 
     # ==================================================================
     # Model / archive resolution
@@ -214,10 +228,48 @@ class AI_SessionMixin:
     # Low level archive helpers
     # ==================================================================
     def _generate_session_id(self):
-        """Generate a unique session ID with timestamp and UUID."""
+        """Generate a unique session ID with timestamp and UUID.
+
+        The model name is intentionally left out: it is already stored in the
+        metadata record, and keeping IDs model-independent avoids leaking the
+        model name into filenames.
+        """
         timestamp = datetime.now().astimezone().strftime("%Y%m%d_%H%M%S")
         unique_id = uuid.uuid4().hex[:8]
-        return f"{self._safe_name(self.model_name)}_{timestamp}_{unique_id}"
+        return f"{timestamp}_{unique_id}"
+
+    @staticmethod
+    def _session_entry(session_id):
+        """Return the ZIP entry name of a session file."""
+        return AI_SessionMixin._zip_entry(
+            AI_SessionMixin.SESSION_DIR, f"{session_id}.json"
+        )
+
+    @staticmethod
+    def _derive_title(session_data, fallback=None):
+        """Build a short human-readable title from the session content."""
+        if isinstance(session_data, dict):
+            title = session_data.get("title")
+            if isinstance(title, str) and title.strip():
+                return title.strip()[:80]
+
+            prompt = session_data.get("prompt")
+            if isinstance(prompt, str) and prompt.strip():
+                return prompt.strip().splitlines()[0][:80]
+
+            for message in session_data.get("messages") or []:
+                if not isinstance(message, dict):
+                    continue
+
+                if message.get("role") == "user":
+                    content = message.get("content")
+                    if isinstance(content, str) and content.strip():
+                        return content.strip().splitlines()[0][:80]
+
+        if isinstance(fallback, str) and fallback.strip():
+            return fallback.strip()[:80]
+
+        return datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S")
 
     def _metadata_entries(self):
         """Return the possible metadata entry names (current + legacy)."""
@@ -262,6 +314,8 @@ class AI_SessionMixin:
         temp_archive = f"{archive}.tmp"
 
         try:
+            seen_entries = set()
+
             with (
                 zipfile.ZipFile(archive, "r") as zin,
                 zipfile.ZipFile(temp_archive, "w", zipfile.ZIP_DEFLATED) as zout,
@@ -274,9 +328,18 @@ class AI_SessionMixin:
                     if item.filename in add_entries:
                         continue
 
+                    ### Archives can contain the same name twice (e.g. 'session/')
+                    if item.filename in seen_entries:
+                        continue
+
+                    seen_entries.add(item.filename)
                     zout.writestr(item, zin.read(item.filename))
 
                 for entry_name, data in add_entries.items():
+                    if entry_name in seen_entries:
+                        continue
+
+                    seen_entries.add(entry_name)
                     zout.writestr(entry_name, data)
 
             os.replace(temp_archive, archive)
@@ -333,14 +396,21 @@ class AI_SessionMixin:
     # ==================================================================
     # Public API
     # ==================================================================
-    def store_session(self, session_data=None, archive=None):
+    def store_session(self, session_data=None, archive=None, session_id=None, title=None):
         """Store an AI assistant session in the .amd/.cmd model archive.
+
+        When the mixin has an active session (created with
+        :meth:`create_session` or restored by :meth:`load_session`), the
+        matching entry is updated in place instead of appending a new one.
 
         Args:
             session_data (dict, optional): Session data to store. If None, uses
                 self._get_current_session() to get the current session state.
             archive (str, optional): Archive to write to. Defaults to the
                 archive matching the current conversation.
+            session_id (str, optional): Session to update. Defaults to the
+                active session.
+            title (str, optional): Title override.
 
         Returns:
             bool: True if the session was stored successfully, False otherwise.
@@ -380,43 +450,109 @@ class AI_SessionMixin:
             metadata = self._get_session_metadata(archive)
             records = list(metadata.get("sessions", []))
 
-            session_id = self._generate_session_id()
-            session_filename = f"{session_id}.json"
-            session_entry = self._zip_entry(self.SESSION_DIR, session_filename)
+            ### Update the active session in place when possible
+            target_id = session_id or self._active_session_id
+            existing = None
+
+            if target_id:
+                for record in records:
+                    if record.get("session_id") == target_id:
+                        existing = record
+                        break
+
             timestamp = datetime.now().astimezone().isoformat()
+
+            if existing is not None:
+                session_id = existing.get("session_id") or target_id
+                session_filename = existing.get("filename") or f"{session_id}.json"
+                created_at = (
+                    existing.get("created_at")
+                    or existing.get("timestamp")
+                    or timestamp
+                )
+                title = (
+                    title
+                    or existing.get("title")
+                    or (
+                        self._session_title
+                        if self._session_title_is_custom
+                        else None
+                    )
+                )
+
+                ### Keep the stored title on updates
+                if not title:
+                    title = self._derive_title(session_data)
+            else:
+                session_id = target_id or self._generate_session_id()
+                session_filename = f"{session_id}.json"
+                created_at = self._session_created_at or timestamp
+                title = (
+                    title
+                    or (
+                        self._session_title
+                        if self._session_title_is_custom
+                        else None
+                    )
+                )
+
+                ### New session: derive a title from the first request
+                if not title:
+                    title = self._derive_title(session_data)
+
+            session_entry = self._zip_entry(self.SESSION_DIR, session_filename)
+
+            record = {
+                "session_id": session_id,
+                "filename": session_filename,
+                "model_name": self.model_name,
+                "title": title,
+                "timestamp": timestamp,
+                "created_at": created_at,
+                "updated_at": timestamp,
+                "message_count": len(session_data.get("messages") or []),
+            }
+
+            ### Replace the previous record (if any) then append the new one
+            records = [
+                item
+                for item in records
+                if item.get("session_id") != session_id
+            ]
+            records.append(record)
+
+            ### Keep only the last MAX_SESSIONS_PER_MODEL sessions for this model
+            model_records = [
+                item
+                for item in self._session_records(
+                    {"sessions": records}, self.model_name
+                )
+                if item.get("session_id") != session_id
+            ]
+            records_to_remove = model_records[self.MAX_SESSIONS_PER_MODEL - 1 :]
+
+            for old_record in records_to_remove:
+                if old_record in records:
+                    records.remove(old_record)
+
+            metadata["sessions"] = records
+
+            remove_entries = [
+                self._zip_entry(self.SESSION_DIR, old_record.get("filename", ""))
+                for old_record in records_to_remove
+                if old_record.get("filename")
+            ]
+            remove_entries.extend(self._metadata_entries())
 
             session_data_with_meta = {
                 "session_id": session_id,
                 "model_name": self.model_name,
+                "title": title,
+                "created_at": created_at,
+                "updated_at": timestamp,
                 "timestamp": timestamp,
                 "data": session_data,
             }
-
-            ### Keep only the last MAX_SESSIONS_PER_MODEL sessions for this model
-            model_records = self._session_records(metadata, self.model_name)
-            records_to_remove = model_records[self.MAX_SESSIONS_PER_MODEL - 1 :]
-
-            for record in records_to_remove:
-                if record in records:
-                    records.remove(record)
-
-            ### Build the new metadata index
-            records.append(
-                {
-                    "session_id": session_id,
-                    "filename": session_filename,
-                    "model_name": self.model_name,
-                    "timestamp": timestamp,
-                }
-            )
-            metadata["sessions"] = records
-
-            remove_entries = [
-                self._zip_entry(self.SESSION_DIR, record.get("filename", ""))
-                for record in records_to_remove
-                if record.get("filename")
-            ]
-            remove_entries.extend(self._metadata_entries())
 
             success = self._rewrite_archive(
                 archive,
@@ -432,6 +568,9 @@ class AI_SessionMixin:
             )
 
             if success:
+                self._session_archive = archive
+                self._session_title = title
+                self._session_title_is_custom = False
                 sys.stdout.write(
                     f"Session stored to: {archive} (session: {session_id})\n"
                 )
@@ -443,12 +582,14 @@ class AI_SessionMixin:
             sys.stderr.write(f"Error storing session: {error}\n{tb}")
             return False
 
-    def load_session(self, model_name=None):
-        """Load the most recent AI assistant session from the model archive.
+    def load_session(self, model_name=None, session_id=None):
+        """Load an AI assistant session from the model archive.
 
         Args:
             model_name (str, optional): Model name to load the session for.
                 If None, uses self.model_name.
+            session_id (str, optional): Specific session to load. When None,
+                the most recent session for the model is loaded.
 
         Returns:
             dict or None: Session data if loaded successfully, None otherwise.
@@ -474,12 +615,20 @@ class AI_SessionMixin:
             metadata = self._get_session_metadata(archive)
             model_sessions = self._session_records(metadata, target_model_name)
 
+            if session_id:
+                model_sessions = [
+                    record
+                    for record in model_sessions
+                    if session_id
+                    in (record.get("session_id"), record.get("filename"))
+                ]
+
             with zipfile.ZipFile(archive, "r") as zf:
                 names = set(zf.namelist())
 
                 if model_sessions:
-                    latest_session = model_sessions[0]
-                    session_filename = latest_session.get("filename", "")
+                    target_session = model_sessions[0]
+                    session_filename = target_session.get("filename", "")
                     session_entry = self._zip_entry(
                         self.SESSION_DIR, session_filename
                     )
@@ -500,16 +649,32 @@ class AI_SessionMixin:
                         or self.model_name
                     )
 
+                    ### Track the loaded session so later saves update it
+                    self._active_session_id = (
+                        target_session.get("session_id")
+                        or session_data.get("session_id")
+                    )
+                    self._session_title = (
+                        target_session.get("title")
+                        or session_data.get("title")
+                    )
+                    self._session_title_is_custom = bool(self._session_title)
+                    self._session_created_at = (
+                        target_session.get("created_at")
+                        or session_data.get("created_at")
+                        or target_session.get("timestamp")
+                    )
+
                     sys.stdout.write(
                         f"Session loaded from: {archive} for model: "
                         f"{self.model_name} "
-                        f"(session: {latest_session.get('session_id', '?')})\n"
+                        f"(session: {self._active_session_id or '?'})\n"
                     )
 
                     return session_data.get("data", session_data)
 
                 ### Backward compatibility: legacy '<model_name>.json' entry
-                if target_model_name:
+                if target_model_name and not session_id:
                     legacy_entry = self._legacy_entry(target_model_name)
 
                     if legacy_entry in names:
@@ -518,6 +683,7 @@ class AI_SessionMixin:
                         )
 
                         self.model_name = target_model_name
+                        self._active_session_id = None
 
                         sys.stdout.write(
                             f"Legacy session loaded from: {archive} "
@@ -558,6 +724,69 @@ class AI_SessionMixin:
         except Exception as error:
             sys.stderr.write(f"Error listing sessions: {error}\n")
             return []
+
+    @property
+    def active_session_id(self):
+        """Return the ID of the session currently being edited, if any."""
+        return self._active_session_id
+
+    def ensure_active_session(self, title=None):
+        """Create a session ID when none is active and return it.
+
+        The session is not written to the archive yet: the next
+        :meth:`store_session` call creates (or updates) its entry.
+        """
+        if not self._active_session_id:
+            self.create_session(title=title, reset_ui=False)
+
+        return self._active_session_id
+
+    def create_session(self, title=None, reset_ui=True):
+        """Start a new, empty AI assistant session.
+
+        The session is registered in memory only; it is persisted on the next
+        :meth:`store_session` call.
+
+        Args:
+            title (str, optional): Human-readable title for the session.
+            reset_ui (bool): Clear the panel conversation when True.
+
+        Returns:
+            str: The new session ID.
+        """
+        session_id = self._generate_session_id()
+
+        self._active_session_id = session_id
+        self._session_created_at = datetime.now().astimezone().isoformat()
+        self._session_title = title
+        self._session_title_is_custom = bool(title)
+
+        if reset_ui:
+            self.reset_session_ui()
+
+        return session_id
+
+    def delete_session(self, session_id=None):
+        """Delete a session and clear the active pointer when needed.
+
+        Args:
+            session_id (str, optional): Session to delete. Defaults to the
+                active session.
+
+        Returns:
+            bool: True when the session was deleted.
+        """
+        target_id = session_id or self._active_session_id
+
+        success = self.remove_session(target_id)
+
+        if success and target_id and target_id == self._active_session_id:
+            self._active_session_id = None
+            self._session_title = None
+            self._session_title_is_custom = False
+            self._session_created_at = None
+
+        return success
 
     def remove_session(self, session_id=None):
         """Remove a specific AI assistant session from the model archive.
@@ -751,7 +980,21 @@ class AI_SessionMixin:
         if self._should_auto_save():
             session_data = self._get_current_session()
 
-            if session_data:
+            ### Do not create empty sessions on close
+            has_content = bool(
+                session_data
+                and (
+                    str(session_data.get("prompt") or "").strip()
+                    or session_data.get("messages")
+                    or session_data.get("build_messages")
+                )
+            )
+
+            if session_data and has_content:
+                ### Reuse the session loaded for this archive, if any
+                if not self._active_session_id:
+                    self._restore_active_session_id()
+
                 result = self.store_session(session_data)
 
                 if result:
@@ -764,10 +1007,24 @@ class AI_SessionMixin:
 
         return result
 
+    def _restore_active_session_id(self):
+        """Adopt the most recent stored session for the current archive."""
+        try:
+            sessions = self.list_sessions()
+
+            if sessions:
+                latest = sessions[0]
+                self._active_session_id = latest.get("session_id")
+                self._session_title = latest.get("title")
+                self._session_created_at = latest.get("created_at")
+        except Exception:  # noqa: S110
+            pass
+
     def reset_session_ui(self):
         """Clear the AI panel conversation and detach the loaded session."""
         self._ask_messages = []
         self._ask_context_signature = None
+        self._build_messages = []
         self._session_loaded = True
 
         if hasattr(self, "prompt_input"):
@@ -813,14 +1070,20 @@ class AI_SessionMixin:
             ### Get conversation messages
             messages = getattr(self, "_ask_messages", [])
 
+            ### Get Build-mode conversation messages
+            build_messages = getattr(self, "_build_messages", [])
+
             ### Get context signature if present
             context_signature = getattr(self, "_ask_context_signature", None)
 
             return {
+                "session_id": getattr(self, "_active_session_id", None),
+                "title": getattr(self, "_session_title", None),
                 "mode": mode,
                 "prompt": prompt,
                 "include_context": include_context,
                 "messages": messages,
+                "build_messages": build_messages,
                 "context_signature": context_signature,
             }
 
@@ -870,6 +1133,18 @@ class AI_SessionMixin:
             messages = session_data.get("messages")
             if isinstance(messages, list):
                 self._ask_messages = messages
+
+            ### Restore Build-mode conversation messages
+            build_messages = session_data.get("build_messages")
+            if isinstance(build_messages, list):
+                self._build_messages = build_messages
+
+            ### Adopt the session identity so later saves update this entry
+            if session_data.get("session_id"):
+                self._active_session_id = session_data.get("session_id")
+
+            if session_data.get("title"):
+                self._session_title = session_data.get("title")
 
             ### Restore context signature (JSON serializes tuples as lists)
             if "context_signature" in session_data:

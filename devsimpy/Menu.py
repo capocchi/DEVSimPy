@@ -140,6 +140,7 @@ ID_PLUGINS_SHAPE = wx.NewIdRef()
 ID_PROPERTIES_SHAPE = wx.ID_PROPERTIES
 ID_EDIT_MODEL_SHAPE = wx.NewIdRef()
 ID_TESTING_SHAPE = wx.NewIdRef()
+ID_EDIT_AI_SHAPE = wx.NewIdRef()
 
 # Shape canvas popup menu identifiers
 ID_NEW_SHAPE = wx.NewIdRef()
@@ -1205,6 +1206,12 @@ class ShapePopupMenu(wx.Menu):
 		properties = wx.MenuItem(
 			self, ID_PROPERTIES_SHAPE, _("Properties"), _("Edit the attributes")
 		)
+		modifyAI = wx.MenuItem(
+			self,
+			ID_EDIT_AI_SHAPE,
+			_("Modify with AI..."),
+			_("Reopen the AI assistant that generated the coupled model"),
+		)
 
 		edit.SetBitmap(load_and_resize_image("edit.png"))
 		editModel.SetBitmap(load_and_resize_image("edit.png"))
@@ -1228,6 +1235,7 @@ class ShapePopupMenu(wx.Menu):
 		disable.SetBitmap(load_and_resize_image("no_ok.png"))
 		plugin.SetBitmap(load_and_resize_image("plugins.png"))
 		properties.SetBitmap(load_and_resize_image("properties.png"))
+		modifyAI.SetBitmap(load_and_resize_image("puce_ai.png"))
 
 		AppendItem = self.Append
 
@@ -1363,6 +1371,20 @@ class ShapePopupMenu(wx.Menu):
 				)
 
 			elif isinstance(shape, Container.ContainerBlock):
+				### reopen the AI assistant that generated this coupled model
+				try:
+					from AICoupledSession import list_sessions
+
+					has_session = bool(
+						shape.model_path and list_sessions(shape.model_path)
+					)
+				except Exception:
+					has_session = False
+
+				if has_session:
+					AppendItem(modifyAI)
+					self.AppendSeparator()
+
 				AppendMenu(self, -1, _("Export"), export_subMenu)
 				self.AppendSeparator()
 
@@ -1450,6 +1472,9 @@ class ShapePopupMenu(wx.Menu):
 			elif isinstance(shape, Container.ContainerBlock):
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnLog, id=ID_LOG_SHAPE)
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnEditor, id=ID_EDIT_SHAPE)
+				self.__canvas.Bind(
+					wx.EVT_MENU, shape.OnEditCoupledWithAI, id=ID_EDIT_AI_SHAPE
+				)
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnExport, id=ID_EXPORT_CMD_SHAPE)
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnExport, id=ID_EXPORT_XML_SHAPE)
 				self.__canvas.Bind(wx.EVT_MENU, shape.OnExport, id=ID_EXPORT_JS_SHAPE)

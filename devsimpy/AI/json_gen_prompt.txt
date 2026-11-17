@@ -16,6 +16,7 @@ Return these exact top-level keys and shapes:
 
 Rules:
 - Infer the smallest useful set of states, ports, and properties from the request. Do not invent requirements. input_port/output_port are counts, not port names.
+- `model_name` is the Python class name of the model: use the name given in the request exactly, as a valid identifier with no spaces, prefix or suffix.
 - Every state has a clear name and a time-advance meaning. `initial_state` must exactly match one entry in `states`.
 - Represent an indefinite/passive state time as the string "INFINITY". A symbolic delay should use a property name; numeric delays should remain JSON numbers.
 - `model_properties` describes instance data needed by the behavior. `var_type` is a concise Python type name and `value` is a JSON-compatible default. Do not put functions in model_properties.

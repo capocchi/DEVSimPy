@@ -33,6 +33,7 @@ dependencies = [
   "lxml",
   "python-dotenv",
   "pydantic",
+  "pypdf",
   "msgpack",
   "paho-mqtt",
   "kafka-python",
