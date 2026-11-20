@@ -211,8 +211,11 @@ sim.simulate()
 	def OnExperiment(self, event):
 		"""Generate the python code of a model and the experiment file to simulate it."""
 
+		### the event object is the underlying wx.Menu (not the Menu wrapper which
+		### stores the canvas as `parent`): the canvas is the window which has
+		### popped up this menu
 		popup_menu = event.GetEventObject()
-		canvas = popup_menu.parent
+		canvas = popup_menu.GetInvokingWindow() if isinstance(popup_menu, wx.Menu) else popup_menu
 
 		diagram = canvas.GetDiagram()
 

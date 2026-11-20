@@ -27,9 +27,15 @@
 # archive are generated).
 #
 # The SES is stored in the model archive (ses.json) next to the diagram and
-# the code, so moving the model also carries its SES. The plug-in only uses
-# the public helpers of the DEVSimPy modules; no other project file is
-# modified (except the plug-in registry that lists this module).
+# the code, so moving the model also carries its SES: it is read back when the
+# assistant is opened again on that model and re-embedded after every save.
+# The final coupled model is displayed in a graphical view (the preview of the
+# coupled-model AI assistant) and the steps of its generation are logged in a
+# dedicated tab. The folder where the archive and the atomic models are
+# written can be chosen in the assistant.
+# The plug-in only uses the public helpers of the DEVSimPy modules; no other
+# project file is modified (except the plug-in registry that lists this
+# module).
 #
 # The AI model is chosen in the SES assistant and in the coupled-model AI
 # assistant with the same chooser as the atomic-model AI assistant (the AI
@@ -67,6 +73,7 @@ if __name__ == "__main__":
 
 import wx
 
+from CoupledStructurePreview import StructurePreviewPanel
 from Utilities import load_and_resize_image
 
 from PluginManager import PluginManager
@@ -100,10 +107,30 @@ NEW_BLOCK_Y = 80
 
 ### Version of the payload stored in SES_ENTRY
 ### 2: adds the PES and the answers of the interactive pruning
-SES_PAYLOAD_VERSION = 2
+### 3: adds the output folder of the generated coupled model
+SES_PAYLOAD_VERSION = 3
+
+### State of a step of the generation log
+STEP_PENDING = "pending"
+STEP_RUNNING = "running"
+STEP_DONE = "done"
+STEP_FAILED = "failed"
+STEP_SKIPPED = "skipped"
+
+### Label and colour of each state of the generation log
+STEP_APPEARANCE = {
+	STEP_PENDING: ("Pending", (110, 110, 110)),
+	STEP_RUNNING: ("Running...", (30, 90, 180)),
+	STEP_DONE: ("Done", (30, 130, 70)),
+	STEP_FAILED: ("Failed", (170, 40, 40)),
+	STEP_SKIPPED: ("Skipped", (110, 110, 110)),
+}
 
 ### Archives that can hold an SES
 ARCHIVE_EXTENSIONS = (".amd", ".cmd")
+
+### Folder chosen in the assistant, remembered for the next new model
+_last_output_dir = ""
 
 ### Canonical marker of a multi-aspect (variable number of instances)
 MULTI_ASPECT = "1..*"
@@ -173,6 +200,18 @@ MAX_PES_SUBMODELS = 200
 
 ### Number of ontology characters sent to the AI
 MAX_ONTOLOGY_CHARS = 20000
+
+### Keys accepted by the coupled model structure of the AI for the submodels,
+### the port counts and the connections (same aliases as CoupledStructure)
+SUB_MODEL_CONTAINER_KEYS = ("submodels", "models", "components")
+SUB_MODEL_LABEL_KEYS = ("label", "name", "id")
+PORT_INPUT_KEYS = ("inputs", "input_ports", "nb_inputs")
+PORT_OUTPUT_KEYS = ("outputs", "output_ports", "nb_outputs")
+CONNECTION_CONTAINER_KEYS = ("connections", "couplings", "links")
+CONNECTION_SOURCE_KEYS = ("source", "from", "src", "output")
+CONNECTION_TARGET_KEYS = ("target", "to", "dst", "input")
+CONNECTION_SOURCE_PORT_KEYS = ("source_port", "from_port", "out_port", "port")
+CONNECTION_TARGET_PORT_KEYS = ("target_port", "to_port", "in_port", "port")
 
 ### ``PARAMS_IA`` entry holding the model of each AI provider (same keys as
 ### the Preferences and as the model chooser of the atomic-model assistant)
@@ -368,6 +407,16 @@ def _child_entities(raw, path, depth, counter, names, ancestors):
 
 	if entities is None:
 		entities = raw.get("children") or raw.get("subentities") or []
+
+	### the AI sometimes writes the single entity of an aspect with a
+	### singular key, as it does for a multiple-aspect
+	if not entities:
+		for key in ("entity", "subentity", "child", "node"):
+			value = raw.get(key)
+
+			if isinstance(value, dict):
+				entities = [value]
+				break
 
 	if not isinstance(entities, list) or not entities:
 		raise SESError(f"{path} must declare at least one entity.")
@@ -1718,6 +1767,38 @@ def pes_submodels(pes, limit=MAX_PES_SUBMODELS):
 	return submodels
 
 
+def pes_preview_structure(pes, name="", description=""):
+	"""Return a coupled structure preview of the submodels of ``pes``.
+
+	The couplings are not known before the AI proposes them: the preview
+	shows the atomic submodels fixed by the PES, so the user sees the shape
+	of the coupled model that is about to be generated.
+	"""
+	submodels = []
+
+	for entry in pes_submodels(pes):
+		submodels.append(
+			{
+				"label": entry["label"],
+				"model": entry["entity"],
+				"entity": entry["entity"],
+				"description": entry.get("description", ""),
+				"generate": "existing",
+				"inputs": 0,
+				"outputs": 0,
+			}
+		)
+
+	return {
+		"name": str(name or (pes.get("name") if isinstance(pes, dict) else "") or "CoupledModel"),
+		"description": str(description or ""),
+		"inputs": 0,
+		"outputs": 0,
+		"submodels": submodels,
+		"connections": [],
+	}
+
+
 def pes_tree_nodes(pes):
 	"""Return the nodes of the PES tree as nested dicts.
 
@@ -1911,6 +1992,10 @@ def pes_coupled_prompt(
 		"Rules:",
 		"- Declare exactly these submodel labels, with the same spelling.",
 		(
+			"- Every submodel is generated by DEVSimPy from its behavior: do not "
+			"bind it to an existing model."
+		),
+		(
 			"- Give each submodel its input/output port counts and, in "
 			"'behavior', a precise description of its DEVS behavior."
 		),
@@ -2044,6 +2129,117 @@ def merge_pes_structure(structure, submodels):
 		"submodels": merged,
 		"connections": connections,
 	}
+
+
+def restrict_to_pes(structure, submodels):
+	"""Restrict the answer of the AI to the submodels fixed by the PES.
+
+	The PES decides which atomic models exist and how they are obtained, so the
+	answer is limited to its labels before it is validated: a stray label, or a
+	submodel bound to a catalog model, would make the whole answer invalid even
+	though it is dropped by :func:`merge_pes_structure` afterwards. The
+	submodels are always generated (``generate`` is ``behavior``) and their
+	behavior defaults to the description of the entity. A submodel the AI forgot
+	is kept with one input and one output port, because the PES requires it.
+
+	``structure`` is the raw answer of the AI, modified in place and returned.
+	"""
+	if not isinstance(structure, dict):
+		return structure
+
+	from CoupledStructure import INPUT_REFERENCES, OUTPUT_REFERENCES
+
+	entries = {
+		str(entry.get("label") or "").strip().lower(): entry
+		for entry in submodels or []
+		if isinstance(entry, dict)
+	}
+
+	raw_submodels = _first_entry_value(structure, SUB_MODEL_CONTAINER_KEYS, [])
+
+	if not isinstance(raw_submodels, list):
+		raw_submodels = []
+
+	def label_of(entry):
+		return str(_first_entry_value(entry, SUB_MODEL_LABEL_KEYS, "") or "").strip()
+
+	kept = []
+	kept_labels = set()
+
+	for entry in raw_submodels:
+		if not isinstance(entry, dict):
+			continue
+
+		label = label_of(entry).lower()
+
+		if label not in entries or label in kept_labels:
+			continue
+
+		kept.append(entry)
+		kept_labels.add(label)
+
+	### a submodel the AI forgot is still created by the PES
+	for label, entry in entries.items():
+		if label in kept_labels:
+			continue
+
+		kept.append({"label": entry["label"], "inputs": 1, "outputs": 1})
+		kept_labels.add(label)
+
+	for entry in kept:
+		entry["generate"] = "behavior"
+
+		behavior = str(
+			_first_entry_value(
+				entry,
+				("behavior", "behaviour", "specification", "description"),
+				"",
+			)
+			or ""
+		).strip()
+
+		if not behavior:
+			entity = entries[label_of(entry).lower()]
+			behavior = str(entity.get("description") or "").strip() or _(
+				"Atomic model '{name}' of the pruned entity structure."
+			).format(name=entity.get("entity") or entity.get("label"))
+
+		entry["behavior"] = behavior
+
+	structure[SUB_MODEL_CONTAINER_KEYS[0]] = kept
+
+	### the couplings of a dropped submodel are dropped as well
+	connections = _first_entry_value(structure, CONNECTION_CONTAINER_KEYS, [])
+
+	if isinstance(connections, list):
+		filtered = []
+
+		for connection in connections:
+			if not isinstance(connection, dict):
+				continue
+
+			source = (
+				str(_first_entry_value(connection, CONNECTION_SOURCE_KEYS, "") or "")
+				.strip()
+				.lower()
+			)
+			target = (
+				str(_first_entry_value(connection, CONNECTION_TARGET_KEYS, "") or "")
+				.strip()
+				.lower()
+			)
+
+			if source not in INPUT_REFERENCES and source not in kept_labels:
+				continue
+
+			if target not in OUTPUT_REFERENCES and target not in kept_labels:
+				continue
+
+			filtered.append(connection)
+
+		structure[CONNECTION_CONTAINER_KEYS[0]] = filtered
+
+	return structure
 
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -2196,7 +2392,11 @@ Rules:
 3. Names must be valid Python identifiers (letters, digits and underscores, no
    spaces) and must be unique in the whole SES.
 4. Put the parts of an entity in "aspects", the replicated entity in
-   "multi_aspects", and the alternatives in "specializations".
+   "multi_aspects", and the alternatives in "specializations". An aspect or a
+   specialization is a descriptive node, not an entity: it only lists its
+   entities under "entities" (a non-empty list) and never has "aspects",
+   "multi_aspects" or "specializations" of its own. A multiple-aspect lists
+   exactly one entity under "entity".
 5. Descriptive node names are bare names: the Dec/MultiAspect/Spec suffix is
    added by the viewer, so do not write it yourself.
 6. Do not put a "multiplicity" on an aspect: use a multiple-aspect node when
@@ -2281,6 +2481,48 @@ def ses_user_prompt(prompt, ontology_text, model_name=None):
 	lines.append(str(prompt or "").strip() or "Describe a family of coupled models.")
 	lines.append("")
 	lines.append("Return only the SES JSON object described in the system message.")
+
+	return "\n".join(lines)
+
+
+def ses_repair_prompt(prompt, answer, error, model_name=None):
+	"""Return the prompt asking the AI to correct an invalid SES.
+
+	Small models frequently return an aspect without entity, or nest the
+	parts of an aspect directly: the answer and the rule it breaks are shown
+	to the model, which returns the corrected structure. The ontology is not
+	sent again: the previous answer already carries its vocabulary.
+	"""
+	lines = [
+		"The System Entity Structure you returned cannot be used:",
+		f"- {error}",
+		"",
+		"Your previous answer:",
+		"<<<SES",
+		str(answer or "").strip(),
+		"SES>>>",
+		"",
+	]
+
+	if model_name:
+		lines.append(f"The root entity is '{model_name}'.")
+		lines.append("")
+
+	lines.append("User request:")
+	lines.append(str(prompt or "").strip() or "Describe a family of coupled models.")
+	lines.append("")
+	lines.append("Correct the answer and return the whole SES again:")
+	lines.append(
+		'- every aspect and every specialization declares "entities": [ ... ] '
+		"with at least one entity;"
+	)
+	lines.append('- every multiple-aspect declares "entity": { ... } with exactly one entity;')
+	lines.append(
+		"- an entity only contains aspects, multi_aspects and specializations: an "
+		"aspect or a specialization is not an entity and has no aspects of its own."
+	)
+	lines.append("")
+	lines.append("Return only the JSON object described in the system message.")
 
 	return "\n".join(lines)
 
@@ -2599,20 +2841,190 @@ def generate_ses(
 
 	``ontology_text`` may be empty: the entity names are then derived from
 	the prompt only.
+
+	One repair round-trip is attempted when the AI returns a structure that
+	breaks the SES rules: the model is shown its answer and the error, then
+	asked for the corrected structure. Small models often omit the entities
+	of an aspect, which this recovers from without losing the whole run.
 	"""
 	if adapter is None:
 		raise SESError("No AI provider is selected.")
 
-	from CoupledStructure import parse_json_object
+	from CoupledStructure import CoupledStructureError, parse_json_object
 
-	raw = adapter.generate_output(
+	system_prompt = ses_system_prompt()
+	answer = adapter.generate_output(
 		ses_user_prompt(prompt, ontology_text, model_name=model_name),
-		system_prompt=ses_system_prompt(),
+		system_prompt=system_prompt,
 		on_token=on_token,
 		stop_event=stop_event,
 	)
 
-	return normalize_ses(parse_json_object(raw))
+	try:
+		return normalize_ses(parse_json_object(answer))
+	except (SESError, CoupledStructureError) as error:
+		first_error = error
+
+	### a stopped generation is not repaired
+	if stop_event is not None and stop_event.is_set():
+		raise SESError(str(first_error)) from first_error
+
+	answer = adapter.generate_output(
+		ses_repair_prompt(prompt, answer, first_error, model_name=model_name),
+		system_prompt=system_prompt,
+		on_token=on_token,
+		stop_event=stop_event,
+	)
+
+	try:
+		return normalize_ses(parse_json_object(answer))
+	except (SESError, CoupledStructureError) as error:
+		raise SESError(
+			_(
+				"The AI returned an invalid SES twice.\n"
+				"First error: {first}\n"
+				"Second error: {second}\n"
+				"Try again, or rephrase the request."
+			).format(first=first_error, second=error)
+		) from error
+
+
+def _first_entry_value(mapping, keys, default=None):
+	"""Return the first non-empty value of ``mapping`` among ``keys``."""
+	for key in keys:
+		if key in mapping:
+			value = mapping[key]
+
+			if value is not None and value != "":
+				return value
+
+	return default
+
+
+def _port_index(value):
+	"""Return the 0-based index of a port declared by the AI."""
+	try:
+		return max(0, int(value))
+	except (TypeError, ValueError):
+		return 0
+
+
+def _port_count(mapping, keys, default=0):
+	"""Return a declared port count, or ``default`` when it is absent."""
+	value = _first_entry_value(mapping, keys)
+
+	return default if value is None else _port_index(value)
+
+
+def _set_port_count(mapping, keys, value):
+	"""Write ``value`` in the key the AI already used, or in the canonical one."""
+	for key in keys:
+		if key in mapping:
+			mapping[key] = value
+			return
+
+	mapping[keys[0]] = value
+
+
+def grow_declared_ports(structure, inputs=None, outputs=None):
+	"""Raise the declared port counts to the ports used by the connections.
+
+	The AI frequently declares two output ports and couples the third one, or
+	declares one input port and targets the second one. The declared counts are
+	authoritative for the models that are built from the structure, so
+	``normalize_coupled_structure`` rejects the whole answer. Instead of losing
+	the couplings, the counts are raised to the highest port index really used:
+	an atomic model is created with exactly the declared ports, and the coupled
+	model receives the missing port shapes before the structure is applied.
+
+	``inputs`` and ``outputs`` are the port counts requested by the caller: they
+	are kept when the answer does not declare them, so an existing coupled model
+	never loses ports.
+
+	``structure`` is the raw answer of the AI, modified in place and returned.
+	Only the counts that a connection exceeds are raised: an untouched submodel
+	keeps the counts chosen by the AI (including zero).
+	"""
+	if not isinstance(structure, dict):
+		return structure
+
+	from CoupledStructure import INPUT_REFERENCES, OUTPUT_REFERENCES
+
+	submodels = _first_entry_value(structure, SUB_MODEL_CONTAINER_KEYS, [])
+
+	if not isinstance(submodels, list):
+		return structure
+
+	connections = _first_entry_value(structure, CONNECTION_CONTAINER_KEYS, [])
+
+	if not isinstance(connections, list):
+		return structure
+
+	### the submodels by label, as the connections reference them
+	index = {}
+
+	for position, submodel in enumerate(submodels):
+		if not isinstance(submodel, dict):
+			continue
+
+		label = str(
+			_first_entry_value(submodel, SUB_MODEL_LABEL_KEYS, f"Model{position + 1}") or ""
+		).strip()
+
+		if label:
+			index.setdefault(label.lower(), submodel)
+
+	### counts requested by the caller when the answer does not declare them
+	requested_inputs = 0 if inputs is None else _port_index(inputs)
+	requested_outputs = 0 if outputs is None else _port_index(outputs)
+
+	structure_inputs = _port_count(structure, PORT_INPUT_KEYS, requested_inputs)
+	structure_outputs = _port_count(structure, PORT_OUTPUT_KEYS, requested_outputs)
+
+	### required counts of the submodels: label -> [inputs, outputs]
+	required = {}
+
+	def require(label, input_ports=0, output_ports=0):
+		counts = required.setdefault(label, [0, 0])
+		counts[0] = max(counts[0], input_ports)
+		counts[1] = max(counts[1], output_ports)
+
+	for connection in connections:
+		if not isinstance(connection, dict):
+			continue
+
+		source = str(_first_entry_value(connection, CONNECTION_SOURCE_KEYS, "") or "").strip()
+		target = str(_first_entry_value(connection, CONNECTION_TARGET_KEYS, "") or "").strip()
+		source_port = _port_index(_first_entry_value(connection, CONNECTION_SOURCE_PORT_KEYS, 0))
+		target_port = _port_index(_first_entry_value(connection, CONNECTION_TARGET_PORT_KEYS, 0))
+
+		if source.lower() in INPUT_REFERENCES:
+			structure_inputs = max(structure_inputs, source_port + 1)
+		elif source.lower() in index:
+			require(source.lower(), output_ports=source_port + 1)
+
+		if target.lower() in OUTPUT_REFERENCES:
+			structure_outputs = max(structure_outputs, target_port + 1)
+		elif target.lower() in index:
+			require(target.lower(), input_ports=target_port + 1)
+
+	for label, (input_ports, output_ports) in required.items():
+		submodel = index[label]
+
+		### an absent count defaults to one port in normalize_coupled_structure
+		if input_ports > _port_count(submodel, PORT_INPUT_KEYS, 1):
+			_set_port_count(submodel, PORT_INPUT_KEYS, input_ports)
+
+		if output_ports > _port_count(submodel, PORT_OUTPUT_KEYS, 1):
+			_set_port_count(submodel, PORT_OUTPUT_KEYS, output_ports)
+
+	if structure_inputs > _port_count(structure, PORT_INPUT_KEYS, requested_inputs):
+		_set_port_count(structure, PORT_INPUT_KEYS, structure_inputs)
+
+	if structure_outputs > _port_count(structure, PORT_OUTPUT_KEYS, requested_outputs):
+		_set_port_count(structure, PORT_OUTPUT_KEYS, structure_outputs)
+
+	return structure
 
 
 def generate_coupled_structure(
@@ -2645,7 +3057,7 @@ def generate_coupled_structure(
 	)
 
 	return normalize_coupled_structure(
-		parse_json_object(raw),
+		grow_declared_ports(parse_json_object(raw), inputs=inputs, outputs=outputs),
 		catalog=catalog,
 		name=model_name,
 		inputs=inputs,
@@ -2701,7 +3113,11 @@ def generate_coupled_structure_from_pes(
 	)
 
 	structure = normalize_coupled_structure(
-		parse_json_object(raw),
+		grow_declared_ports(
+			restrict_to_pes(parse_json_object(raw), submodels),
+			inputs=inputs,
+			outputs=outputs,
+		),
 		catalog=catalog,
 		name=model_name,
 		inputs=inputs,
@@ -2929,6 +3345,7 @@ def build_ses_payload(
 	model_name="",
 	pes=None,
 	pruning_answers=None,
+	output_dir="",
 ):
 	"""Return the payload stored in the model archive."""
 	return {
@@ -2943,8 +3360,81 @@ def build_ses_payload(
 		"structure": structure,
 		"pes": pes,
 		"pruning_answers": pruning_answers,
+		"output_dir": str(output_dir or ""),
 		"generated_at": datetime.now().astimezone().isoformat(),
 	}
+
+
+def attach_ses_payload(block, payload):
+	"""Keep ``payload`` on ``block`` so later saves can re-embed it."""
+	if block is None or not isinstance(payload, dict):
+		return False
+
+	try:
+		block.ses_payload = payload
+	except Exception as error:
+		sys.stderr.write(f"Cannot keep the SES on the coupled model: {error}\n")
+		return False
+
+	return True
+
+
+def persist_ses_entry(block, archive):
+	"""Re-embed the SES carried by ``block`` into ``archive``.
+
+	DEVSimPy rewrites ``DEVSimPyModel.dat`` when a model is saved and keeps
+	the unknown entries of the archive, so the SES of a normal save already
+	survives. This helper covers the other case: the archive is written from
+	scratch ('Save as', new model), which drops every entry but the diagram,
+	the code and the image.
+	"""
+	payload = getattr(block, "ses_payload", None)
+
+	if not isinstance(payload, dict) or not is_model_archive(archive):
+		return False
+
+	return write_ses(archive, payload)
+
+
+### Attribute marking the patched SaveFile (prevents a double patch)
+SES_SAVE_HOOK = "_ses_generator_save_hook"
+
+
+def install_ses_persistence_hook():
+	"""Re-embed the SES after every save of a coupled model block.
+
+	The plug-in may not modify the project files: the method of the block is
+	patched at run time, once, and only for coupled model blocks.
+	"""
+	try:
+		from Container import ContainerBlock
+	except Exception as error:
+		_log(f"Coupled model persistence hook not installed: {error}")
+		return False
+
+	current = ContainerBlock.SaveFile
+
+	if getattr(current, SES_SAVE_HOOK, False):
+		return True
+
+	def save_file_with_ses(self, fileName=None):
+		"""Save the block and keep its SES in the archive."""
+		result = current(self, fileName)
+
+		if result:
+			archive = fileName or str(getattr(self, "model_path", "") or "")
+
+			try:
+				persist_ses_entry(self, archive)
+			except Exception as error:
+				sys.stderr.write(f"Cannot store the SES of '{archive}': {error}\n")
+
+		return result
+
+	setattr(save_file_with_ses, SES_SAVE_HOOK, True)
+	ContainerBlock.SaveFile = save_file_with_ses
+
+	return True
 
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -3079,13 +3569,19 @@ def _identifier(value, fallback="CoupledModel"):
 	return text
 
 
-def _model_directory(canvas=None):
+def _model_directory(canvas=None, preferred=None):
 	"""Return the directory where a new model archive must be written.
 
-	The archive is stored next to the diagram file. An unsaved diagram falls
-	back to the model library, as the model generator wizard does, then to
-	the current directory.
+	``preferred`` (the folder chosen in the assistant) wins when it exists.
+	Otherwise the archive is stored next to the diagram file. An unsaved
+	diagram falls back to the model library, as the model generator wizard
+	does, then to the current directory.
 	"""
+	preferred = str(preferred or "").strip()
+
+	if preferred and os.path.isdir(preferred):
+		return preferred
+
 	diagram = getattr(canvas, "diagram", None)
 	path = str(getattr(diagram, "last_name_saved", "") or "")
 
@@ -3101,6 +3597,56 @@ def _model_directory(canvas=None):
 		return domain
 
 	return os.getcwd()
+
+
+def _remember_output_dir(directory):
+	"""Remember the output folder of the assistant (also across sessions)."""
+	global _last_output_dir
+
+	directory = str(directory or "").strip()
+
+	if not directory or not os.path.isdir(directory):
+		return _last_output_dir
+
+	_last_output_dir = directory
+
+	try:
+		from Utilities import getTopLevelWindow
+
+		config = getattr(getTopLevelWindow(), "cfg", None)
+
+		if config is not None:
+			config.Write("ses_output_dir", directory)
+			config.Flush()
+	except Exception:  # noqa: S110
+		### the folder is only remembered for the current session
+		pass
+
+	return _last_output_dir
+
+
+def _restore_output_dir():
+	"""Return the output folder remembered by the assistant."""
+	global _last_output_dir
+
+	if _last_output_dir:
+		return _last_output_dir
+
+	try:
+		from Utilities import getTopLevelWindow
+
+		config = getattr(getTopLevelWindow(), "cfg", None)
+
+		if config is not None:
+			directory = str(config.Read("ses_output_dir") or "").strip()
+
+			if directory and os.path.isdir(directory):
+				_last_output_dir = directory
+	except Exception:  # noqa: S110
+		### no configuration: the default folder is used
+		pass
+
+	return _last_output_dir
 
 
 def unique_model_path(directory, name, extension=".cmd"):
@@ -3157,17 +3703,18 @@ def _write_model_archive(archive, python_entry, code):
 	return archive
 
 
-def create_pending_block(canvas=None, label=None):
+def create_pending_block(canvas=None, label=None, directory=None):
 	"""Return a coupled model block that is not yet in a diagram.
 
 	Nothing is written on the disk: the archive is only created once the
 	assistant has produced the coupled model (see
 	:func:`finalize_pending_block`), so cancelling the dialog leaves the
-	diagram and the model directory untouched.
+	diagram and the model directory untouched. ``directory`` is the output
+	folder chosen in the assistant.
 	"""
 	from Container import ContainerBlock
 
-	directory = _model_directory(canvas)
+	directory = _model_directory(canvas, directory)
 	archive = unique_model_path(directory, label or "CoupledModel")
 	stem = os.path.splitext(os.path.basename(archive))[0]
 
@@ -3179,6 +3726,28 @@ def create_pending_block(canvas=None, label=None):
 	block.last_name_saved = archive
 
 	return block
+
+
+def _apply_pending_directory(block, directory, name=None):
+	"""Move the archive paths of a not yet written block to ``directory``.
+
+	Nothing is written on the disk: the pending block only carries the paths
+	that :func:`finalize_pending_block` uses to create its archive, so the
+	folder can be changed until the model is generated.
+	"""
+	directory = str(directory or "").strip()
+
+	if block is None or not directory or not os.path.isdir(directory):
+		return False
+
+	stem = _identifier(name or getattr(block, "label", "") or "CoupledModel")
+	archive = unique_model_path(directory, stem)
+
+	block.model_path = archive
+	block.python_path = os.path.join(archive, f"{stem}.py")
+	block.last_name_saved = archive
+
+	return True
 
 
 def _canvas_position(canvas, block, position):
@@ -3256,6 +3825,254 @@ def finalize_pending_block(block, structure, canvas=None, position=None):
 	_refresh_canvas(block, canvas)
 
 	return submodels, connections, added_inputs, added_outputs
+
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#
+# Generation steps
+#
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+### Steps of the generation of a coupled model, in their display order
+GENERATION_STEPS = (
+	("catalog", "Collect the model catalog"),
+	("structure", "Ask the AI for the coupled structure"),
+	("code", "Generate the code of the atomic models"),
+	("merge", "Merge the structure with the PES"),
+	("apply", "Build the coupled model in the diagram"),
+	("store", "Store the SES in the model archive"),
+)
+
+### Steps of the generation of a SES
+SES_STEPS = (
+	("ses", "Ask the AI for the System Entity Structure"),
+	("ses-store", "Store the SES in the model archive"),
+)
+
+
+def generation_steps(pes=None, generate_atomic_code=True):
+	"""Return the ``(key, label)`` steps of a coupled model generation.
+
+	The merge step only exists when the model is generated from a PES, and
+	the code step is renamed when the atomic models are not generated.
+	"""
+	steps = []
+
+	for key, label in GENERATION_STEPS:
+		if key == "code" and not generate_atomic_code:
+			label = "Build the atomic models without generated code"
+		elif key == "merge" and pes is None:
+			continue
+
+		steps.append((key, label))
+
+	return steps
+
+
+def step_state_label(state):
+	"""Return the translated label of the state of a step."""
+	return _(STEP_APPEARANCE.get(state, STEP_APPEARANCE[STEP_PENDING])[0])
+
+
+def step_state_colour(state):
+	"""Return the colour of the state of a step."""
+	return STEP_APPEARANCE.get(state, STEP_APPEARANCE[STEP_PENDING])[1]
+
+
+class GenerationLog:
+	"""Coloured, ordered log of the steps of a generation.
+
+	The dialog adds the planned steps, then updates them as the generation
+	runs. Every method runs on the GUI thread: the worker threads use
+	``wx.CallAfter``.
+	"""
+
+	COLUMNS = (
+		("Step", 330),
+		("Status", 100),
+		("Details", 420),
+	)
+
+	def __init__(self, control, header=None):
+		self.control = control
+		self.header = header
+		self.rows = {}
+		self._states = {}
+		self.reset()
+
+	def reset(self):
+		"""Forget every step."""
+		self.control.DeleteAllItems()
+		self.rows = {}
+		self._states = {}
+		self._refresh_header()
+
+	def add(self, key, label, detail="", state=STEP_PENDING):
+		"""Append a step and return its row index."""
+		if key in self.rows:
+			self.update(key, state=state, detail=detail)
+			return self.rows[key]
+
+		row = self.control.InsertItem(self.control.GetItemCount(), label)
+		self.rows[key] = row
+		self._states[key] = state
+		self.control.SetItem(row, 1, step_state_label(state))
+		self.control.SetItem(row, 2, detail or "")
+		self.control.SetItemTextColour(row, wx.Colour(*step_state_colour(state)))
+		self.control.EnsureVisible(row)
+		self._refresh_header()
+
+		return row
+
+	def update(self, key, state=None, detail=None):
+		"""Change the state and/or the details of a step."""
+		row = self.rows.get(key)
+
+		if row is None:
+			return
+
+		if state is not None:
+			self._states[key] = state
+			self.control.SetItem(row, 1, step_state_label(state))
+			self.control.SetItemTextColour(row, wx.Colour(*step_state_colour(state)))
+
+		if detail is not None:
+			self.control.SetItem(row, 2, detail)
+
+		self.control.EnsureVisible(row)
+		self._refresh_header()
+
+	def running(self):
+		"""Return the keys of the steps that are still running."""
+		return [key for key, state in self._states.items() if state == STEP_RUNNING]
+
+	def state(self, key):
+		"""Return the state of a step (``STEP_PENDING`` when it is unknown)."""
+		return self._states.get(key, STEP_PENDING)
+
+	def fail_running(self, detail=""):
+		"""Mark every running step as failed."""
+		for key in self.running():
+			self.update(key, STEP_FAILED, detail or self.detail(key))
+
+	def stop_running(self, detail=""):
+		"""Mark every running step as skipped (generation stopped)."""
+		for key in self.running():
+			self.update(key, STEP_SKIPPED, detail or _("Stopped by the user."))
+
+	def finish_running(self, detail=""):
+		"""Mark every running step as done."""
+		for key in self.running():
+			self.update(key, STEP_DONE, detail or self.detail(key))
+
+	def counts(self):
+		"""Return the number of steps in each state."""
+		counts = {state: 0 for state in STEP_APPEARANCE}
+
+		for state in self._states.values():
+			counts[state] = counts.get(state, 0) + 1
+
+		return counts
+
+	def detail(self, key):
+		"""Return the details currently displayed for a step."""
+		row = self.rows.get(key)
+
+		return self.control.GetItemText(row, 2) if row is not None else ""
+
+	def _refresh_header(self):
+		if self.header is None:
+			return
+
+		total = len(self.rows)
+
+		if not total:
+			self.header.SetLabel(_("No generation has run yet."))
+			self.header.GetParent().Layout()
+			return
+
+		counts = self.counts()
+		completed = counts[STEP_DONE] + counts[STEP_SKIPPED]
+		running = self.running()
+
+		if running:
+			row = self.rows[running[-1]]
+			label = _("Step {index}/{total}: {title}...").format(
+				index=row + 1,
+				total=total,
+				title=self.control.GetItemText(row, 0),
+			)
+		elif counts[STEP_FAILED]:
+			label = _("{completed}/{total} step(s) completed, {failed} failed.").format(
+				completed=completed,
+				total=total,
+				failed=counts[STEP_FAILED],
+			)
+		else:
+			label = _("{completed}/{total} step(s) completed.").format(
+				completed=completed,
+				total=total,
+			)
+
+		self.header.SetLabel(label)
+		self.header.GetParent().Layout()
+
+
+class WrappedLabel(wx.StaticText):
+	"""Static text that wraps to the width of its parent.
+
+	A single-line ``wx.StaticText`` is clipped when its text is longer than
+	the panel that holds it. This label keeps the original text and wraps it
+	again every time its parent is resized, so the sentences of the
+	assistant stay readable.
+	"""
+
+	def __init__(self, parent, label="", colour=None, hint=600):
+		super().__init__(parent, label=label)
+
+		self._raw_text = str(label or "")
+		self._wrap_width = 0
+		### width used until the parent is laid out
+		self._hint = hint
+
+		if colour is not None:
+			self.SetForegroundColour(colour)
+
+		parent.Bind(wx.EVT_SIZE, self._on_parent_size)
+
+		self._wrap()
+
+	def SetLabel(self, label):
+		"""Set the text and wrap it to the current width."""
+		self._raw_text = str(label or "")
+		self._wrap_width = 0
+		self._wrap()
+
+	def GetLabel(self):
+		"""Return the text before wrapping."""
+		return self._raw_text
+
+	def _wrap(self):
+		parent_width = self.GetParent().GetClientSize().width - 20
+		laid_out = parent_width >= 280
+		width = parent_width if laid_out else self._hint
+
+		if width == self._wrap_width:
+			return
+
+		self._wrap_width = width
+		wx.StaticText.SetLabel(self, self._raw_text)
+
+		if self._raw_text:
+			self.Wrap(width)
+
+		### the text is wrapped again by the first size event of the parent
+		if laid_out:
+			self.GetParent().Layout()
+
+	def _on_parent_size(self, event):
+		event.Skip()
+		self._wrap()
 
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -3460,7 +4277,7 @@ class SESPruningDialog(wx.Dialog):
 		self.panel = panel
 		main_sizer = wx.BoxSizer(wx.VERTICAL)
 
-		header = wx.StaticText(
+		header = WrappedLabel(
 			panel,
 			label=_(
 				"Prune '{name}' one decision at a time. The AI asks the "
@@ -3491,7 +4308,7 @@ class SESPruningDialog(wx.Dialog):
 		pes_static = wx.StaticBox(panel, label=_("Pruned entity structure (PES)"))
 		pes_box = wx.StaticBoxSizer(pes_static, wx.VERTICAL)
 
-		self.pes_header = wx.StaticText(pes_static, label="")
+		self.pes_header = WrappedLabel(pes_static, label="")
 		self.pes_header.SetFont(
 			wx.Font(
 				wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT).GetPointSize(),
@@ -3563,19 +4380,19 @@ class SESPruningDialog(wx.Dialog):
 		)
 		question_box.Add(self.step_label, flag=wx.EXPAND | wx.ALL, border=5)
 
-		self.context_label = wx.StaticText(question_static, label="")
-		self.context_label.SetForegroundColour(wx.Colour(100, 100, 100))
+		self.context_label = WrappedLabel(
+			question_static, label="", colour=wx.Colour(100, 100, 100)
+		)
 		question_box.Add(self.context_label, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=5)
 
-		self.question_text = wx.StaticText(question_static, label="")
+		self.question_text = WrappedLabel(question_static, label="")
 		question_box.Add(
 			self.question_text,
 			flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
 			border=5,
 		)
 
-		self.hint_text = wx.StaticText(question_static, label="")
-		self.hint_text.SetForegroundColour(wx.Colour(90, 90, 90))
+		self.hint_text = WrappedLabel(question_static, label="", colour=wx.Colour(90, 90, 90))
 		question_box.Add(
 			self.hint_text,
 			flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
@@ -3592,8 +4409,7 @@ class SESPruningDialog(wx.Dialog):
 			border=5,
 		)
 
-		self.ai_label = wx.StaticText(question_static, label="")
-		self.ai_label.SetForegroundColour(wx.Colour(60, 90, 150))
+		self.ai_label = WrappedLabel(question_static, label="", colour=wx.Colour(60, 90, 150))
 		question_box.Add(
 			self.ai_label,
 			flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
@@ -4133,6 +4949,16 @@ class SESAssistantDialog(wx.Dialog):
 		self._closing = False
 		self._stop_event = threading.Event()
 		self._thread = None
+		### folder where the archive and the atomic models are written
+		archive_dir = os.path.dirname(self._archive())
+
+		if self.create or not archive_dir:
+			self.output_dir = _model_directory(canvas, _restore_output_dir())
+		else:
+			### an existing model keeps its own folder
+			self.output_dir = archive_dir
+
+		self._can_choose_output = self.create or not is_model_archive(self._archive())
 
 		self._build_ui()
 		self._restore_payload()
@@ -4181,7 +5007,7 @@ class SESAssistantDialog(wx.Dialog):
 		"""Create the widgets of the dialog."""
 		### fit the dialog on the screen: the SES tree and the JSON tabs need room
 		screen_width, screen_height = wx.DisplaySize()
-		self.SetSize((min(940, screen_width - 60), min(900, screen_height - 80)))
+		self.SetSize((min(940, screen_width - 60), min(940, screen_height - 80)))
 		self.SetMinSize((760, 560))
 
 		icon_bitmap = load_and_resize_image("coupled.png")
@@ -4205,21 +5031,44 @@ class SESAssistantDialog(wx.Dialog):
 				outputs=getattr(self.block, "output", 0),
 			)
 
-		info = wx.StaticText(panel, label=info_text)
-		main_sizer.Add(info, flag=wx.ALL, border=10)
+		info = WrappedLabel(panel, label=info_text)
+		main_sizer.Add(info, flag=wx.ALL | wx.EXPAND, border=10)
 
 		archive = self._archive()
 		archive_text = archive if not self.create else _("created with the model")
-		archive_label = wx.StaticText(
+		### a path is elided in the middle instead of being clipped
+		self.archive_label = wx.StaticText(
 			panel,
 			label=_("Archive: {path}").format(path=archive_text or _("not saved yet")),
+			style=wx.ST_ELLIPSIZE_MIDDLE,
 		)
-		archive_label.SetForegroundColour(wx.Colour(100, 100, 100))
+		self.archive_label.SetForegroundColour(wx.Colour(100, 100, 100))
 		main_sizer.Add(
-			archive_label,
-			flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,
+			self.archive_label,
+			flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
 			border=10,
 		)
+
+		### output folder of the generated model -------------------------
+		output_row = wx.BoxSizer(wx.HORIZONTAL)
+
+		self.output_label = wx.StaticText(panel, label="", style=wx.ST_ELLIPSIZE_MIDDLE)
+		output_row.Add(self.output_label, proportion=1, flag=wx.ALIGN_CENTER_VERTICAL)
+
+		self.output_button = wx.Button(panel, label=_("Change..."), size=(100, 28))
+		self.output_button.Bind(wx.EVT_BUTTON, self.on_pick_output_dir)
+		output_row.Add(
+			self.output_button,
+			flag=wx.LEFT | wx.ALIGN_CENTER_VERTICAL,
+			border=8,
+		)
+
+		main_sizer.Add(
+			output_row,
+			flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
+			border=10,
+		)
+		self._refresh_output_label()
 
 		### the AI model can be changed without leaving the assistant
 		self.model_selector = ModelSelector(panel, on_change=self.on_model_changed)
@@ -4342,10 +5191,15 @@ class SESAssistantDialog(wx.Dialog):
 			border=12,
 		)
 
-		self.status_label = wx.StaticText(ses_static, label="")
-		status_row.Add(self.status_label, proportion=1, flag=wx.ALIGN_CENTER_VERTICAL)
-
 		ses_box.Add(status_row, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=5)
+
+		### the status is a full row: its sentences are long and must wrap
+		self.status_label = WrappedLabel(ses_static, label="", colour=wx.Colour(60, 60, 60))
+		ses_box.Add(
+			self.status_label,
+			flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
+			border=5,
+		)
 
 		self.gauge = wx.Gauge(
 			ses_static,
@@ -4383,7 +5237,7 @@ class SESAssistantDialog(wx.Dialog):
 		tree_page = wx.Panel(self.notebook)
 
 		### header: counts and number of variants described by the SES
-		self.tree_header = wx.StaticText(
+		self.tree_header = WrappedLabel(
 			tree_page,
 			label=_("No SES yet: click 'Generate SES' to display the tree."),
 		)
@@ -4465,15 +5319,15 @@ class SESAssistantDialog(wx.Dialog):
 			)
 		)
 
-		tree_footer = wx.StaticText(
+		tree_footer = WrappedLabel(
 			tree_page,
 			label=_(
 				"Alternating mode: entity nodes and descriptive nodes alternate. "
 				"Pruning keeps one aspect per decision node and one alternative "
 				"per specialization."
 			),
+			colour=wx.Colour(100, 100, 100),
 		)
-		tree_footer.SetForegroundColour(wx.Colour(100, 100, 100))
 
 		tree_sizer = wx.BoxSizer(wx.VERTICAL)
 		tree_sizer.Add(
@@ -4502,7 +5356,7 @@ class SESAssistantDialog(wx.Dialog):
 
 		pes_page = wx.Panel(self.notebook)
 
-		self.pes_header = wx.StaticText(
+		self.pes_header = WrappedLabel(
 			pes_page,
 			label=_("No PES yet: click 'Prune interactively...' to answer the pruning questions."),
 		)
@@ -4544,7 +5398,7 @@ class SESAssistantDialog(wx.Dialog):
 			)
 		)
 
-		pes_footer = wx.StaticText(
+		pes_footer = WrappedLabel(
 			pes_page,
 			label=_(
 				"The PES keeps the entities and the multiple-aspects of the SES: "
@@ -4552,8 +5406,8 @@ class SESAssistantDialog(wx.Dialog):
 				"alternative becomes a child, and every leaf entity becomes an "
 				"atomic submodel of the coupled model."
 			),
+			colour=wx.Colour(100, 100, 100),
 		)
-		pes_footer.SetForegroundColour(wx.Colour(100, 100, 100))
 
 		pes_sizer = wx.BoxSizer(wx.VERTICAL)
 		pes_sizer.Add(self.pes_header, flag=wx.EXPAND | wx.ALL, border=6)
@@ -4598,10 +5452,104 @@ class SESAssistantDialog(wx.Dialog):
 		)
 		structure_page.SetSizer(structure_sizer)
 
+		### graphical view of the coupled model --------------------------
+		preview_page = wx.Panel(self.notebook)
+
+		preview_toolbar = wx.BoxSizer(wx.HORIZONTAL)
+
+		self.preview_refresh_button = wx.Button(preview_page, label=_("Refresh"), size=(100, 26))
+		self.preview_refresh_button.SetToolTip(
+			_("Redraw the graphical view of the generated coupled model.")
+		)
+		self.preview_refresh_button.Bind(wx.EVT_BUTTON, self.on_refresh_preview)
+		preview_toolbar.Add(
+			self.preview_refresh_button,
+			flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL,
+			border=8,
+		)
+
+		self.preview_message = WrappedLabel(
+			preview_page,
+			label=_("No coupled model to display yet."),
+			colour=wx.Colour(100, 100, 100),
+		)
+
+		self.structure_preview = StructurePreviewPanel(preview_page)
+
+		preview_sizer = wx.BoxSizer(wx.VERTICAL)
+		preview_sizer.Add(preview_toolbar, flag=wx.EXPAND | wx.ALL, border=5)
+		preview_sizer.Add(
+			self.preview_message,
+			flag=wx.EXPAND | wx.LEFT | wx.RIGHT,
+			border=5,
+		)
+		preview_sizer.Add(
+			self.structure_preview,
+			proportion=1,
+			flag=wx.EXPAND | wx.ALL,
+			border=5,
+		)
+		preview_page.SetSizer(preview_sizer)
+
+		### steps of the LLM-driven generation ---------------------------
+		steps_page = wx.Panel(self.notebook)
+
+		self.steps_header = wx.StaticText(steps_page, label=_("No generation has run yet."))
+		self.steps_header.SetFont(
+			wx.Font(
+				wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT).GetPointSize(),
+				wx.FONTFAMILY_DEFAULT,
+				wx.FONTSTYLE_NORMAL,
+				wx.FONTWEIGHT_BOLD,
+			)
+		)
+
+		self.steps_list = wx.ListCtrl(
+			steps_page,
+			style=wx.LC_REPORT | wx.LC_SINGLE_SEL | wx.BORDER_SIMPLE,
+		)
+
+		for index, (title, width) in enumerate(GenerationLog.COLUMNS):
+			self.steps_list.InsertColumn(index, _(title), width=width)
+
+		self.generation_log = GenerationLog(self.steps_list, header=self.steps_header)
+
+		steps_footer = WrappedLabel(
+			steps_page,
+			label=_(
+				"The steps are updated while the AI generates the model: the "
+				"catalog of the existing models, the coupled structure, the code "
+				"of the atomic models, the merge with the PES, the construction "
+				"in the diagram and the storage of the SES."
+			),
+			colour=wx.Colour(100, 100, 100),
+		)
+
+		steps_sizer = wx.BoxSizer(wx.VERTICAL)
+		steps_sizer.Add(self.steps_header, flag=wx.EXPAND | wx.ALL, border=6)
+		steps_sizer.Add(
+			self.steps_list,
+			proportion=1,
+			flag=wx.EXPAND | wx.LEFT | wx.RIGHT,
+			border=6,
+		)
+		steps_sizer.Add(steps_footer, flag=wx.EXPAND | wx.ALL, border=6)
+		steps_page.SetSizer(steps_sizer)
+
+		### the pages are compared by object in on_page_changed
+		self.json_page = json_page
+		self.tree_page = tree_page
+		self.pes_page = pes_page
+		self.structure_page = structure_page
+		self.preview_page = preview_page
+		self.steps_page = steps_page
+
 		self.notebook.AddPage(json_page, _("SES (JSON)"))
 		self.notebook.AddPage(tree_page, _("SES tree"))
 		self.notebook.AddPage(pes_page, _("PES"))
 		self.notebook.AddPage(structure_page, _("Coupled structure"))
+		self.notebook.AddPage(preview_page, _("Graphical view"))
+		self.notebook.AddPage(steps_page, _("Generation steps"))
 		self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.on_page_changed)
 
 		ses_box.Add(
@@ -4636,6 +5584,9 @@ class SESAssistantDialog(wx.Dialog):
 		panel.SetSizer(main_sizer)
 		panel.Layout()
 
+		### the empty graphical view explains what to do
+		self._refresh_preview()
+
 		self._pulse_timer = wx.Timer(self)
 		self.Bind(wx.EVT_TIMER, self.on_pulse, self._pulse_timer)
 
@@ -4650,6 +5601,75 @@ class SESAssistantDialog(wx.Dialog):
 		"""Return the name of the coupled model block."""
 		return str(getattr(self.block, "label", "") or "CoupledModel")
 
+	def _refresh_output_label(self):
+		"""Display the output folder, the archive and the state of the button."""
+		if not hasattr(self, "output_label"):
+			return
+
+		self.output_label.SetLabel(_("Output folder: {path}").format(path=self.output_dir))
+
+		if self.create:
+			path = _("{name} (created with the model)").format(
+				name=os.path.basename(self._archive()) or "CoupledModel.cmd"
+			)
+		else:
+			path = self._archive() or _("not saved yet")
+
+		self.archive_label.SetLabel(_("Archive: {path}").format(path=path))
+		self.archive_label.SetToolTip(path)
+		self.output_label.SetToolTip(self.output_dir)
+
+		### the folder can only be chosen while the archive does not exist
+		if hasattr(self, "output_button"):
+			self.output_button.SetToolTip(
+				_(
+					"Folder where the archive of the generated coupled model and "
+					"its atomic models are written."
+				)
+				if self._can_choose_output
+				else _(
+					"The model already has a location. Create a new coupled model "
+					"to choose another output folder."
+				)
+			)
+			self.output_button.Enable(self._can_choose_output and not self._busy)
+
+		self.panel.Layout()
+
+	def on_pick_output_dir(self, event):
+		"""Choose the folder where the generated model is written."""
+		if self._busy or not self._can_choose_output:
+			return
+
+		dialog = wx.DirDialog(
+			self,
+			_("Output folder of the generated coupled model"),
+			defaultPath=self.output_dir or _model_directory(self.canvas),
+			style=wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST,
+		)
+
+		try:
+			if dialog.ShowModal() != wx.ID_OK:
+				return
+
+			directory = dialog.GetPath()
+		finally:
+			dialog.Destroy()
+
+		self._set_output_dir(directory)
+
+	def _set_output_dir(self, directory):
+		"""Store the chosen folder and move the pending model into it."""
+		directory = str(directory or "").strip()
+
+		if not directory or not os.path.isdir(directory):
+			return
+
+		_remember_output_dir(directory)
+		self.output_dir = directory
+		_apply_pending_directory(self.block, self.output_dir, self._model_name())
+		self._refresh_output_label()
+
 	def _restore_payload(self):
 		"""Restore the SES previously stored in the model archive."""
 		payload = read_ses(self._archive())
@@ -4657,6 +5677,8 @@ class SESAssistantDialog(wx.Dialog):
 		if not payload:
 			return
 
+		### the payload is kept on the block so a 'Save as' keeps the SES
+		attach_ses_payload(self.block, payload)
 		self.prompt_input.SetValue(str(payload.get("prompt") or ""))
 
 		ontology = payload.get("ontology")
@@ -4695,16 +5717,27 @@ class SESAssistantDialog(wx.Dialog):
 			self._set_pes(pes, self.ses)
 			self._pruning_answers = payload.get("pruning_answers")
 
+		### the folder chosen for a model that is not created yet
+		if self._can_choose_output:
+			self._set_output_dir(payload.get("output_dir"))
+		elif os.path.dirname(self._archive()):
+			### an existing model keeps its own folder
+			self.output_dir = os.path.dirname(self._archive())
+			self._refresh_output_label()
+
+		self._refresh_preview()
+
 	def _store_payload(self, prompt=None):
 		"""Store the current SES in the model archive.
 
 		Returns:
-			str: A message describing what was stored.
+			tuple: ``(stored, message)``, where ``stored`` tells whether the
+			archive was updated.
 		"""
 		archive = self._archive()
 
 		if not is_model_archive(archive):
-			return _("SES not stored: save the model first.")
+			return False, _("SES not stored: save the model first.")
 
 		payload = build_ses_payload(
 			self.ses,
@@ -4717,12 +5750,155 @@ class SESAssistantDialog(wx.Dialog):
 			pruning_answers=(
 				self._pruning_answers if self._current_pes(self.ses) is not None else None
 			),
+			output_dir=self.output_dir,
 		)
 
 		if not write_ses(archive, payload):
-			return _("SES not stored: the model archive could not be updated.")
+			return False, _("SES not stored: the model archive could not be updated.")
 
-		return _("SES stored in {name}.").format(name=os.path.basename(archive))
+		### a later 'Save as' re-embeds the payload in the new archive
+		attach_ses_payload(self.block, payload)
+
+		return True, _("SES stored in {name}.").format(name=os.path.basename(archive))
+
+	### ------------------------------------------------------------------
+	### Graphical view of the coupled model
+	### ------------------------------------------------------------------
+	def _set_preview_status(self, message):
+		"""Update the text shown above the graphical view."""
+		self.preview_message.SetLabel(message or "")
+		self.preview_page.Layout()
+
+	def _refresh_preview(self):
+		"""Draw the generated coupled model, or the plan of the PES.
+
+		The structure is already normalized by the generation: it is drawn as
+		it will be built. Before the generation, the submodels fixed by the
+		PES are drawn without couplings, so the shape of the model is visible
+		as soon as the SES is pruned.
+		"""
+		if not hasattr(self, "structure_preview"):
+			return
+
+		if isinstance(self.structure, dict):
+			self.structure_preview.SetStructure(self.structure)
+			self._set_preview_status(
+				_("{submodels} submodel(s), {connections} connection(s).").format(
+					submodels=len(self.structure.get("submodels") or []),
+					connections=len(self.structure.get("connections") or []),
+				)
+			)
+			return
+
+		if isinstance(self.pes, dict):
+			try:
+				preview = pes_preview_structure(
+					self.pes,
+					name=self._model_name(),
+					description=str(self.ses.get("description") or "") if self.ses else "",
+				)
+			except SESError as error:
+				self.structure_preview.SetMessage(str(error))
+				self._set_preview_status(_("The PES cannot be displayed."))
+				return
+
+			self.structure_preview.SetStructure(preview)
+			self._set_preview_status(
+				_(
+					"Submodels fixed by the PES ({count}): the AI adds the ports "
+					"and the couplings when the coupled model is generated."
+				).format(count=len(preview["submodels"]))
+			)
+			return
+
+		self.structure_preview.SetMessage(
+			_(
+				"No coupled model to display yet: generate the SES, prune it and "
+				"click 'Generate coupled model'."
+			)
+		)
+		self._set_preview_status(
+			_("The graphical view shows the coupled model before it is built.")
+		)
+
+	def on_refresh_preview(self, event):
+		"""Redraw the graphical view on demand."""
+		self._refresh_preview()
+
+	### ------------------------------------------------------------------
+	### Generation steps
+	### ------------------------------------------------------------------
+	def _start_generation_log(self, steps):
+		"""Reset the log and add the planned ``(key, label)`` steps."""
+		self.generation_log.reset()
+
+		for key, label in steps:
+			self.generation_log.add(key, _(label))
+
+	def _log_step(self, key, state=None, detail=None, label=None):
+		"""Update a step of the generation log from any thread."""
+		wx.CallAfter(self._apply_log_step, key, state, detail, label)
+
+	def _apply_log_step(self, key, state=None, detail=None, label=None):
+		"""Update a step of the generation log on the GUI thread."""
+		if self._closing:
+			return
+
+		if label is not None and key not in self.generation_log.rows:
+			self.generation_log.add(key, label, detail or "", state or STEP_PENDING)
+			return
+
+		self.generation_log.update(key, state=state, detail=detail)
+
+	def _log_code_model(self, label):
+		"""Add the generation of the code of one atomic model to the log."""
+		self._apply_log_step(
+			f"code:{label}",
+			STEP_RUNNING,
+			_("Generating the source of '{label}'...").format(label=label),
+			label=_("Code of '{label}'").format(label=label),
+		)
+		self._set_status(_("Generating atomic model '{label}'...").format(label=label))
+
+	def _finish_code_models(self, errors):
+		"""Mark every atomic model code step as done, failed or skipped."""
+		failed = {str(label) for label, _error in errors or []}
+		stopped = self._stop_event.is_set()
+
+		for key in [key for key in self.generation_log.rows if key.startswith("code:")]:
+			label = key.split(":", 1)[1]
+			current = self.generation_log.state(key)
+
+			if current == STEP_DONE:
+				continue
+
+			### a stop leaves the sources that were not generated pending
+			if stopped and current != STEP_FAILED:
+				self.generation_log.update(
+					key,
+					STEP_SKIPPED,
+					_("Stopped before the source was generated."),
+				)
+				continue
+
+			state = STEP_FAILED if label in failed else STEP_DONE
+			detail = (
+				_("The source could not be generated: an empty model is used.")
+				if state == STEP_FAILED
+				else _("Source generated.")
+			)
+			self.generation_log.update(key, state, detail)
+
+	def _select_steps_page(self):
+		"""Show the generation steps while a generation runs."""
+		self._show_page(self.steps_page)
+
+	def _show_page(self, page):
+		"""Select a page of the notebook."""
+		index = self.notebook.FindPage(page)
+
+		if index != wx.NOT_FOUND:
+			self.notebook.SetSelection(index)
 
 	### ------------------------------------------------------------------
 	### Status and busy state
@@ -4741,6 +5917,7 @@ class SESAssistantDialog(wx.Dialog):
 		self.ontology_button.Enable(not busy)
 		self.ontology_clear_button.Enable(not busy and bool(self.ontology_text.strip()))
 		self.atomic_check.Enable(not busy)
+		self.output_button.Enable(not busy and self._can_choose_output)
 		self.stop_button.Enable(busy)
 
 		if getattr(self, "model_selector", None) is not None:
@@ -4871,6 +6048,13 @@ class SESAssistantDialog(wx.Dialog):
 		### a new model has no name yet: the AI chooses it from the SES
 		model_name = None if self.create else self._model_name()
 		self._stop_event.clear()
+
+		### the log of a new run starts with the SES
+		self._start_generation_log(SES_STEPS)
+		detail = _("{prompt}").format(prompt=prompt)
+		detail += _(" (with an ontology)") if ontology_text else _(" (without ontology)")
+		self._apply_log_step("ses", STEP_RUNNING, detail)
+		self._select_steps_page()
 		self._set_busy(True, _("Generating the SES..."))
 
 		def worker():
@@ -4919,19 +6103,47 @@ class SESAssistantDialog(wx.Dialog):
 			)
 		)
 
+		self._apply_log_step(
+			"ses",
+			STEP_DONE,
+			_(
+				"{entities} entity(ies), {aspects} aspect(s), {multi} "
+				"multiple-aspect(s), {spec} specialization node(s)."
+			).format(
+				entities=stats["entities"],
+				aspects=stats["aspects"],
+				multi=stats["multi_aspects"],
+				spec=stats["specializations"],
+			),
+		)
+
 		### show the tree, which is the graphical view of the SES
-		self.notebook.SetSelection(1)
+		self._show_page(self.tree_page)
 
-		stored = self._store_payload(prompt=prompt)
+		self._apply_log_step("ses-store", STEP_RUNNING)
+		stored, message = self._store_payload(prompt=prompt)
+		self._apply_log_step("ses-store", STEP_DONE if stored else STEP_SKIPPED, message)
 
-		if not stored.startswith(_("SES stored")):
-			self._set_status(f"{self.status_label.GetLabel()} {stored}")
+		if not stored:
+			self._set_status(f"{self.status_label.GetLabel()} {message}")
 
 	def _on_ses_failed(self, error):
 		"""Report a SES generation error."""
 		if self._closing:
 			return
 
+		### a stop is not an error: the running steps are only skipped
+		if self._stop_event.is_set():
+			self.generation_log.stop_running(_("Stopped by the user."))
+			self._set_busy(False, _("SES generation stopped."))
+			return
+
+		### the log keeps the reason: it tells the user what the AI broke
+		reason = " ".join(str(error).split())
+
+		self.generation_log.fail_running(
+			_("The SES could not be generated: {reason}").format(reason=reason[:200])
+		)
 		self._set_busy(False, _("SES generation failed."))
 		wx.MessageBox(
 			_("The SES could not be generated:\n{}").format(str(error)),
@@ -5099,6 +6311,7 @@ class SESAssistantDialog(wx.Dialog):
 		if page != wx.NOT_FOUND:
 			self.notebook.SetSelection(page)
 
+		self._refresh_preview()
 		self._store_payload()
 
 	def on_generate_model(self, event):
@@ -5194,13 +6407,15 @@ class SESAssistantDialog(wx.Dialog):
 
 		self.ses = ses
 		self._stop_event.clear()
+
+		### the steps of the coupled model generation are appended to the log
+		steps = generation_steps(pes=pes, generate_atomic_code=generate_atomic_code)
+		self._start_generation_log(steps)
+		self._select_steps_page()
 		self._set_busy(True, _("Generating the coupled model..."))
 
 		def progress(label):
-			wx.CallAfter(
-				self._set_status,
-				_("Generating atomic model '{label}'...").format(label=label),
-			)
+			wx.CallAfter(self._log_code_model, label)
 
 		def worker():
 			errors = []
@@ -5208,7 +6423,19 @@ class SESAssistantDialog(wx.Dialog):
 			try:
 				from CoupledStructure import build_model_catalog
 
+				self._log_step("catalog", STEP_RUNNING)
 				catalog = build_model_catalog()
+				self._log_step(
+					"catalog",
+					STEP_DONE,
+					_("{count} model(s) available.").format(count=len(catalog)),
+				)
+
+				self._log_step(
+					"structure",
+					STEP_RUNNING,
+					_("Pruning the PES.") if pes is not None else _("Pruning the SES."),
+				)
 
 				if pes is not None:
 					structure = generate_coupled_structure_from_pes(
@@ -5235,7 +6462,31 @@ class SESAssistantDialog(wx.Dialog):
 						stop_event=self._stop_event,
 					)
 
+				self._log_step(
+					"structure",
+					STEP_DONE,
+					_("{submodels} submodel(s), {connections} connection(s) proposed.").format(
+						submodels=len(structure.get("submodels") or []),
+						connections=len(structure.get("connections") or []),
+					),
+				)
+
+				if pes is not None:
+					self._log_step(
+						"merge",
+						STEP_RUNNING,
+						_("Keeping the submodels fixed by the PES."),
+					)
+					self._log_step(
+						"merge",
+						STEP_DONE,
+						_("{count} submodel(s) kept from the PES.").format(
+							count=len(pes_submodels(pes))
+						),
+					)
+
 				if generate_atomic_code:
+					self._log_step("code", STEP_RUNNING)
 					generate_missing_submodel_code(
 						structure,
 						adapter,
@@ -5245,6 +6496,11 @@ class SESAssistantDialog(wx.Dialog):
 					)
 				else:
 					downgrade_behavior_submodels(structure)
+					self._log_step(
+						"code",
+						STEP_SKIPPED,
+						_("The atomic models are built without generated code."),
+					)
 			except Exception as error:
 				wx.CallAfter(self._on_structure_failed, error)
 				return
@@ -5262,6 +6518,33 @@ class SESAssistantDialog(wx.Dialog):
 		self.structure = structure
 		self.structure_text.SetValue(json.dumps(structure, indent=2, ensure_ascii=False))
 
+		self._finish_code_models(errors)
+
+		if "code" in self.generation_log.running():
+			if self._stop_event.is_set():
+				self.generation_log.update(
+					"code",
+					STEP_SKIPPED,
+					_("Stopped by the user: the remaining models are empty."),
+				)
+			else:
+				self.generation_log.update(
+					"code",
+					STEP_DONE,
+					_("{generated} source(s) generated, {failed} failed.").format(
+						generated=len(
+							[
+								submodel
+								for submodel in structure.get("submodels") or []
+								if str(submodel.get("code") or "").strip()
+							]
+						),
+						failed=len(errors or []),
+					),
+				)
+
+		self.generation_log.update("apply", STEP_RUNNING)
+
 		created = self.create
 
 		try:
@@ -5274,11 +6557,14 @@ class SESAssistantDialog(wx.Dialog):
 				)
 				### the block now lives in the diagram: later runs update it
 				self.create = False
+				### its archive exists: moving the folder would break the model
+				self._can_choose_output = False
 			else:
 				submodels, connections, added_inputs, added_outputs = apply_structure_to_block(
 					self.block, structure, self.canvas
 				)
 		except Exception as error:
+			self.generation_log.update("apply", STEP_FAILED, str(error))
 			self._set_busy(False, _("The coupled model could not be built."))
 			wx.MessageBox(
 				_("The generated structure could not be applied to the coupled model:\n{}").format(
@@ -5290,6 +6576,17 @@ class SESAssistantDialog(wx.Dialog):
 			)
 			return
 
+		self.generation_log.update(
+			"apply",
+			STEP_DONE,
+			_("{submodels} submodel(s), {connections} connection(s) created.").format(
+				submodels=submodels,
+				connections=connections,
+			),
+		)
+
+		self._refresh_output_label()
+
 		self._set_busy(False)
 		self._set_status(
 			_(
@@ -5300,11 +6597,16 @@ class SESAssistantDialog(wx.Dialog):
 			)
 		)
 
-		stored = self._store_payload(prompt=prompt)
-		structure_page = self.notebook.FindPage(self.structure_text.GetParent())
+		stored, stored_message = self._store_payload(prompt=prompt)
+		self.generation_log.update(
+			"store",
+			STEP_DONE if stored else STEP_SKIPPED,
+			stored_message,
+		)
 
-		if structure_page != wx.NOT_FOUND:
-			self.notebook.SetSelection(structure_page)
+		### the graphical view shows what was built in the diagram
+		self._refresh_preview()
+		self._show_page(self.preview_page)
 
 		details = [
 			_("{submodels} submodel(s) and {connections} connection(s) were created.").format(
@@ -5329,12 +6631,13 @@ class SESAssistantDialog(wx.Dialog):
 				)
 			)
 
-		details.append(stored)
+		details.append(stored_message)
 
 		if created:
 			details.append(
-				_("The archive {name} was written next to the model.").format(
-					name=os.path.basename(self._archive())
+				_("The archive {name} was written in {folder}.").format(
+					name=os.path.basename(self._archive()),
+					folder=os.path.dirname(self._archive()) or self.output_dir,
 				)
 			)
 
@@ -5360,6 +6663,13 @@ class SESAssistantDialog(wx.Dialog):
 		if self._closing:
 			return
 
+		### a stop is not an error: the running steps are only skipped
+		if self._stop_event.is_set():
+			self.generation_log.stop_running(_("Stopped by the user."))
+			self._set_busy(False, _("Coupled model generation stopped."))
+			return
+
+		self.generation_log.fail_running(str(error))
 		self._set_busy(False, _("Coupled model generation failed."))
 		wx.MessageBox(
 			_("The coupled model could not be generated:\n{}").format(str(error)),
@@ -5470,12 +6780,16 @@ class SESAssistantDialog(wx.Dialog):
 		self._refresh_tree(ses)
 
 	def on_page_changed(self, event):
-		"""Refresh the tree when its tab is selected."""
+		"""Refresh the tree and the graphical view when their tab is selected."""
 		if event is not None:
 			event.Skip()
 
-		if self.notebook.GetSelection() == 1:
+		page = self.notebook.GetCurrentPage()
+
+		if page is self.tree_page:
 			self._refresh_tree_from_text()
+		elif page is self.preview_page:
+			self._refresh_preview()
 
 	### ------------------------------------------------------------------
 	### Help and closing
@@ -5520,10 +6834,19 @@ class SESAssistantDialog(wx.Dialog):
 				"fixed), otherwise the AI prunes the SES itself. The structure "
 				"replaces the content of the selected coupled model block, or "
 				"creates a new coupled model block in the diagram when the "
-				"menu was opened on its background.\n\n"
-				"7. Save the model to keep the generated diagram. The SES, "
-				"the PES and the pruning answers are stored in the model "
-				"archive (ses.json)."
+				"menu was opened on its background. The 'Generation steps' tab "
+				"follows the whole process (catalog, AI structure, atomic model "
+				"code, merge with the PES, construction, storage) and the "
+				"'Graphical view' tab draws the resulting coupled model.\n\n"
+				"7. The output folder, shown above the tabs, is the folder "
+				"where the archive of a new coupled model and its atomic "
+				"models are written. 'Change...' selects another one; it is "
+				"remembered for the next model.\n\n"
+				"8. Save the model to keep the generated diagram. The SES, the "
+				"PES, the pruning answers and the output folder are stored in "
+				"the model archive (ses.json). The SES is restored when the "
+				"assistant is opened again on that model, so it can be pruned "
+				"again, and it is re-embedded after every save."
 			),
 			_("SES Generator - Help"),
 			wx.OK | wx.ICON_INFORMATION,
@@ -5980,7 +7303,7 @@ def open_ses_assistant(block, parent=None, canvas=None, create=False, position=N
 			parent = None
 
 	if create or block is None:
-		block = create_pending_block(canvas)
+		block = create_pending_block(canvas, directory=_restore_output_dir())
 		create = True
 
 	dialog = SESAssistantDialog(
@@ -6018,6 +7341,7 @@ def Config(parent):
 	### the menu of the diagrams is patched when the plug-in is configured
 	_install_canvas_menu_hook()
 	_install_coupled_model_selector_hook()
+	install_ses_persistence_hook()
 
 	wx.MessageBox(
 		_(
@@ -6029,11 +7353,17 @@ def Config(parent):
 			"entity, aspect Dec, multiple-aspect MultiAspect, specialization "
 			"Spec) from a prompt and an optional ontology;\n"
 			"- prune it into a coupled DEVS model with the AI assistant;\n"
+			"- follow the steps of the generation and display the resulting "
+			"coupled model in a graphical view;\n"
+			"- choose the folder where the archive of a new coupled model and "
+			"its atomic models are written;\n"
 			"- fill an existing coupled model block, or create a new one in "
 			"the diagram;\n"
 			"- choose the AI model in the SES assistant and in the coupled-model "
 			"assistant (same chooser as the atomic-model assistant);\n"
-			"- store the SES in the model archive (ses.json).\n\n"
+			"- store the SES in the model archive (ses.json), restore it when "
+			"the assistant is opened again on that model and keep it after "
+			"every save.\n\n"
 			"The ontology is optional: it can be an OWL/RDF/XML, JSON, "
 			"Turtle or plain text file, and the request alone is enough "
 			"without one."
@@ -6060,6 +7390,10 @@ if not _install_canvas_menu_hook():
 
 ### the coupled-model AI assistant receives its model chooser the same way
 _install_coupled_model_selector_hook()
+
+### the SES of a coupled model is re-embedded after every save
+if not install_ses_persistence_hook():
+	_log("SES persistence hook not installed")
 
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
@@ -6201,6 +7535,115 @@ def _self_test():
 		"A",
 		"B",
 	]
+
+	### an aspect written with the singular key of a multiple-aspect is read
+	singular = normalize_ses(
+		{
+			"name": "Warehouse",
+			"aspects": [
+				{"name": "storageQueue", "entity": {"name": "Pallet", "aspects": []}},
+			],
+		}
+	)
+
+	assert [item["name"] for item in singular["aspects"][0]["entities"]] == ["Pallet"]
+
+	### an aspect without entity is still rejected (the AI repairs it)
+	empty_aspect = {"name": "Warehouse", "aspects": [{"name": "storageType"}]}
+
+	try:
+		normalize_ses(empty_aspect)
+	except SESError as error:
+		assert "must declare at least one entity" in str(error)
+	else:
+		raise AssertionError("an aspect without entity must be rejected")
+
+	### the repair prompt shows the answer and the broken rule
+	repair_prompt = ses_repair_prompt(
+		"Build a warehouse system",
+		'{"name": "Warehouse", "aspects": [{"name": "storageType"}]}',
+		"SES > aspect #1 'storageType' must declare at least one entity.",
+		model_name="Warehouse",
+	)
+
+	assert "must declare at least one entity" in repair_prompt
+	assert "storageType" in repair_prompt
+	assert "Build a warehouse system" in repair_prompt
+	assert "'Warehouse'" in repair_prompt
+	assert '"entities"' in repair_prompt
+	assert "Return only the JSON object" in repair_prompt
+
+	### the generation repairs one invalid answer
+	class RepairingAdapter:
+		"""Adapter returning an invalid SES, then the corrected one."""
+
+		def __init__(self, answers):
+			self.answers = list(answers)
+			self.prompts = []
+
+		def generate_output(self, prompt, system_prompt=None, on_token=None, stop_event=None):
+			self.prompts.append(prompt)
+			return self.answers.pop(0)
+
+	repairing = RepairingAdapter(
+		[
+			'{"name": "Warehouse", "aspects": [{"name": "storageType"}]}',
+			(
+				'{"name": "Warehouse", "aspects": [{"name": "storageType", '
+				'"entities": [{"name": "Shelf"}]}]}'
+			),
+		]
+	)
+
+	repaired = generate_ses(repairing, "Build a warehouse system")
+
+	assert repaired["name"] == "Warehouse"
+	assert repaired["aspects"][0]["entities"][0]["name"] == "Shelf"
+	assert len(repairing.prompts) == 2
+	assert "cannot be used" in repairing.prompts[1]
+
+	### two invalid answers raise a message with both errors
+	failing = RepairingAdapter(
+		[
+			'{"name": "Warehouse", "aspects": [{"name": "storageType"}]}',
+			'{"name": "Warehouse", "aspects": [{"name": "storageType"}]}',
+		]
+	)
+
+	try:
+		generate_ses(failing, "Build a warehouse system")
+	except SESError as error:
+		message = str(error)
+		assert "invalid SES twice" in message
+		assert "must declare at least one entity" in message
+	else:
+		raise AssertionError("two invalid answers must be reported")
+
+	### a stopped generation is not repaired
+	class StoppingAdapter(RepairingAdapter):
+		"""Adapter which reports the stop of the user after its answer."""
+
+		def __init__(self):
+			super().__init__(['{"name": "Warehouse", "aspects": [{"name": "storageType"}]}'])
+
+		def generate_output(self, prompt, system_prompt=None, on_token=None, stop_event=None):
+			answer = super().generate_output(prompt, system_prompt, on_token, stop_event)
+
+			if stop_event is not None:
+				stop_event.set()
+
+			return answer
+
+	stopping = StoppingAdapter()
+
+	try:
+		generate_ses(stopping, "Build a warehouse system", stop_event=threading.Event())
+	except SESError:
+		pass
+	else:
+		raise AssertionError("a stopped generation must not be repaired")
+
+	assert len(stopping.prompts) == 1
 
 	### statistics
 	stats = ses_statistics(ses)
@@ -6392,6 +7835,46 @@ def _self_test():
 	assert submodels[2]["entity"] == "Station"
 	assert submodels[2]["path"] == ["ProductionLine", "Machine", "Station"]
 
+	### the graphical view of a pruned SES shows its atomic submodels
+	preview = pes_preview_structure(pes, name="ProductionLine")
+	assert preview["name"] == "ProductionLine"
+	assert [entry["label"] for entry in preview["submodels"]] == [
+		entry["label"] for entry in submodels
+	]
+	assert preview["submodels"][0]["model"] == "AutomatedLine"
+	assert preview["connections"] == []
+	assert preview["inputs"] == 0
+	assert preview["outputs"] == 0
+
+	from CoupledStructurePreview import compute_preview_layout
+
+	preview_layout = compute_preview_layout(preview)
+	assert len(preview_layout["boxes"]) == len(submodels)
+	assert preview_layout["connections"] == []
+	assert preview_layout["width"] > 0
+	assert preview_layout["height"] > 0
+
+	### the steps of the generation follow the path of the model
+	assert [key for key, _label in generation_steps()] == [
+		"catalog",
+		"structure",
+		"code",
+		"apply",
+		"store",
+	]
+	assert [key for key, _label in generation_steps(pes=pes)] == [
+		"catalog",
+		"structure",
+		"code",
+		"merge",
+		"apply",
+		"store",
+	]
+	without_code = dict(generation_steps(pes=pes, generate_atomic_code=False))
+	assert "without generated code" in without_code["code"]
+	assert step_state_label(STEP_DONE) == STEP_APPEARANCE[STEP_DONE][0]
+	assert step_state_colour(STEP_FAILED) == STEP_APPEARANCE[STEP_FAILED][1]
+
 	pes_nodes = pes_tree_nodes(pes)
 	assert pes_nodes[0]["label"] == "ProductionLine"
 	assert [child["kind"] for child in pes_nodes[0]["children"]] == [
@@ -6530,6 +8013,224 @@ def _self_test():
 	assert "PES (JSON)" in pes_prompt
 	assert "Station1" in pes_prompt
 	assert "build it" in pes_prompt
+
+	### the declared ports are grown to the ports used by the couplings
+	### (the AI declares two outputs and couples the third one)
+	from CoupledStructure import normalize_coupled_structure
+
+	assembly = {
+		"name": "AssemblyLine",
+		"inputs": 1,
+		"outputs": 1,
+		"submodels": [
+			{
+				"label": "RobotInstance",
+				"generate": "behavior",
+				"behavior": "Welds a part.",
+				"inputs": 1,
+				"outputs": 2,
+			},
+			{
+				"label": "ConveyorInstance",
+				"generate": "behavior",
+				"behavior": "Moves a part.",
+				"inputs": 1,
+				"outputs": 1,
+			},
+		],
+		"connections": [
+			{
+				"source": "input",
+				"source_port": 0,
+				"target": "RobotInstance",
+				"target_port": 0,
+			},
+			{
+				"source": "RobotInstance",
+				"source_port": 2,
+				"target": "ConveyorInstance",
+				"target_port": 0,
+			},
+			{
+				"source": "ConveyorInstance",
+				"source_port": 0,
+				"target": "output",
+				"target_port": 1,
+			},
+		],
+	}
+
+	grown = grow_declared_ports(assembly)
+
+	assert grown is assembly
+	assert grown["submodels"][0]["outputs"] == 3
+	assert grown["submodels"][1]["outputs"] == 1
+	assert grown["inputs"] == 1
+	assert grown["outputs"] == 2
+
+	grown_structure = normalize_coupled_structure(grown)
+
+	assert grown_structure["submodels"][0]["outputs"] == 3
+	assert grown_structure["outputs"] == 2
+	assert len(grown_structure["connections"]) == 3
+
+	### an untouched submodel keeps the counts chosen by the AI
+	untouched = json.loads(
+		json.dumps(
+			{
+				"submodels": [
+					{
+						"label": "Sink",
+						"generate": "behavior",
+						"behavior": "Consumes.",
+						"inputs": 0,
+						"outputs": 0,
+					},
+					{
+						"label": "Source",
+						"generate": "behavior",
+						"behavior": "Emits.",
+						"inputs": 1,
+						"outputs": 1,
+					},
+				],
+				"connections": [
+					{
+						"source": "Source",
+						"source_port": 0,
+						"target": "output",
+						"target_port": 0,
+					}
+				],
+			}
+		)
+	)
+
+	grow_declared_ports(untouched)
+
+	assert untouched["submodels"][0]["inputs"] == 0
+	assert untouched["submodels"][0]["outputs"] == 0
+	assert untouched["submodels"][1]["outputs"] == 1
+
+	### the counts requested by the caller are kept when the answer omits them
+	requested = json.loads(
+		json.dumps(
+			{
+				"submodels": [{"label": "Gen", "generate": "behavior", "behavior": "Emits."}],
+				"connections": [
+					{"source": "Gen", "source_port": 0, "target": "output", "target_port": 0}
+				],
+			}
+		)
+	)
+
+	grow_declared_ports(requested, inputs=4, outputs=4)
+
+	assert "inputs" not in requested
+	assert "outputs" not in requested
+
+	requested_structure = normalize_coupled_structure(requested, inputs=4, outputs=4)
+
+	assert requested_structure["inputs"] == 4
+	assert requested_structure["outputs"] == 4
+
+	### the aliases of the AI answer are grown in place
+	aliases = {
+		"submodels": [
+			{"name": "Node", "generate": "behavior", "behavior": "Emits.", "nb_outputs": 1}
+		],
+		"connections": [{"from": "Node", "out_port": 1, "to": "output", "in_port": 0}],
+	}
+
+	grow_declared_ports(aliases)
+
+	assert aliases["submodels"][0]["nb_outputs"] == 2
+	assert aliases["outputs"] == 1
+
+	### the PES generation grows the ports before merging the submodels
+	class PortAdapter:
+		"""Adapter returning the coupled structure of the assembly line."""
+
+		def __init__(self, answer):
+			self.answer = json.dumps(answer)
+
+		def generate_coupled_model_json(self, prompt, **kwargs):
+			return self.answer
+
+	assembly_pes = normalize_ses(
+		{
+			"name": "AssemblyLine",
+			"aspects": [
+				{
+					"name": "floor",
+					"entities": [
+						{"name": "RobotInstance", "description": "Welds a part."},
+						{"name": "ConveyorInstance", "description": "Moves a part."},
+					],
+				}
+			],
+		}
+	)
+
+	assembly_session = PruningSession(assembly_pes)
+	assembly_decision = assembly_session.next_decision()
+
+	if assembly_decision is not None:
+		assembly_session.answer(assembly_decision["key"], 0)
+
+	built = generate_coupled_structure_from_pes(
+		PortAdapter(json.loads(json.dumps(assembly))),
+		"Build an assembly line",
+		assembly_session.pes(),
+		model_name="AssemblyLine",
+	)
+
+	assert [entry["label"] for entry in built["submodels"]] == [
+		"RobotInstance",
+		"ConveyorInstance",
+	]
+	assert built["submodels"][0]["outputs"] == 3
+	assert len(built["connections"]) == 3
+	assert built["outputs"] == 2
+
+	### the answer is restricted to the PES before it is validated: a stray
+	### submodel and a missing behavior do not invalidate the structure
+	loose = {
+		"name": "AssemblyLine",
+		"submodels": [
+			{"label": "robotinstance", "inputs": 1, "outputs": 3},
+			{"label": "Ghost", "model": "UnknownModel"},
+		],
+		"connections": [
+			{"source": "input", "target": "robotinstance"},
+			{"source": "robotinstance", "source_port": 2, "target": "Ghost"},
+			{"source": "Ghost", "target": "output"},
+		],
+	}
+
+	restricted = restrict_to_pes(loose, pes_submodels(assembly_session.pes()))
+
+	assert restricted is loose
+	assert [entry["label"] for entry in restricted["submodels"]] == [
+		"robotinstance",
+		"ConveyorInstance",
+	]
+	assert all(entry["generate"] == "behavior" for entry in restricted["submodels"])
+	assert restricted["submodels"][0]["behavior"] == "Welds a part."
+	assert restricted["submodels"][1]["behavior"] == "Moves a part."
+	assert len(restricted["connections"]) == 1
+
+	loose_structure = normalize_coupled_structure(grow_declared_ports(restricted), catalog=[])
+
+	assert [entry["label"] for entry in loose_structure["submodels"]] == [
+		"robotinstance",
+		"ConveyorInstance",
+	]
+	assert loose_structure["inputs"] == 1
+	assert loose_structure["outputs"] == 0
+
+	### the prompt of the PES says the submodels are generated
+	assert "do not bind it to an existing model" in pes_coupled_prompt("build it", pes, submodels)
 
 	### invalid SES ---------------------------------------------------
 	def error_message(data):
@@ -6751,6 +8452,7 @@ def _self_test():
 			ontology_path="ontology.owl",
 			ontology_text="Machine",
 			model_name="ProductionLine",
+			output_dir=directory,
 		)
 
 		assert write_ses(archive, payload)
@@ -6761,6 +8463,7 @@ def _self_test():
 		assert loaded["prompt"] == "Build a line"
 		assert loaded["ontology"]["path"] == "ontology.owl"
 		assert loaded["ontology"]["text"] == "Machine"
+		assert loaded["output_dir"] == directory
 		assert loaded["version"] == SES_PAYLOAD_VERSION
 
 		with zipfile.ZipFile(archive, "r") as stream:
@@ -6784,6 +8487,53 @@ def _self_test():
 
 		assert not write_ses(plain_file, payload)
 		assert read_ses(plain_file) is None
+
+		### the SES of a block survives the next save of its archive
+		class FakeBlock:
+			"""Stand-in for a coupled model block."""
+
+			ses_payload = payload
+
+		assert persist_ses_entry(FakeBlock(), archive)
+		assert read_ses(archive)["prompt"] == "Updated line"
+		assert not persist_ses_entry(object(), archive)
+		assert not persist_ses_entry(FakeBlock(), plain_file)
+
+		### the output folder of a new model is honoured
+		assert _model_directory(None, directory) == directory
+		assert os.path.isdir(_model_directory(None, os.path.join(directory, "missing")))
+
+		class FakePending:
+			"""Stand-in for a coupled model block not yet written."""
+
+			label = "CoupledModel"
+			model_path = ""
+			python_path = ""
+			last_name_saved = ""
+
+		pending = FakePending()
+
+		assert _apply_pending_directory(pending, directory, "CoupledModel")
+		assert pending.model_path == os.path.join(directory, "CoupledModel.cmd")
+		assert pending.python_path == os.path.join(pending.model_path, "CoupledModel.py")
+		assert pending.last_name_saved == pending.model_path
+		assert not _apply_pending_directory(
+			pending, os.path.join(directory, "missing"), "CoupledModel"
+		)
+		assert pending.model_path == os.path.join(directory, "CoupledModel.cmd")
+
+		### the chosen folder is remembered by the assistant
+		global _last_output_dir
+		previous_dir = _last_output_dir
+
+		try:
+			assert _remember_output_dir(directory) == directory
+			assert _restore_output_dir() == directory
+			### an empty or missing folder keeps the previous one
+			assert _remember_output_dir("") == directory
+			assert _remember_output_dir(os.path.join(directory, "missing")) == directory
+		finally:
+			_last_output_dir = previous_dir
 
 	### Code-less behavior submodels ----------------------------------
 	structure = {
